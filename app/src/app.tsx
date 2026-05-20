@@ -1,7 +1,7 @@
 import { FloatingHeader } from './components/floating-header';
 import { HomeView } from './views/home';
 import { MenuSpeedDial } from './components/menu-speed-dial';
-import { SearchOverlay } from './components/search-overlay';
+import { SearchPanel } from './components/search/search-panel';
 import { ProductSheet } from './components/product-sheet';
 
 export function App() {
@@ -13,7 +13,7 @@ export function App() {
         <HomeView />
       </main>
       <MenuSpeedDial />
-      <SearchOverlay />
+      <SearchPanel />
       <ProductSheet />
     </div>
   );
