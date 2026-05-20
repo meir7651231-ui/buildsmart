@@ -1300,215 +1300,133 @@ li {
 .sresult__kind--screen { color: #45575e; }
 
 /* =====================================================================
-   BS panel — right-edge drawer, ported from the legacy registration
-   hamburger. Slides in from the right with a backdrop scrim.
+   BS dial — falls below the BS logo on the right wall. Same style as
+   the search rail: separate circle + separate label pill, no scrim,
+   no drawer. Tap a persona to switch the active view.
    ===================================================================== */
 
-.bspanel__scrim {
+.bsdial {
   position: fixed;
-  inset: 0;
-  z-index: 80;
-  background: rgba(0, 0, 0, 0.45);
-  opacity: 0;
-  pointer-events: none;
-  border: 0;
-  width: 100%;
-  height: 100%;
-  transition: opacity 0.22s ease;
-}
-
-.bspanel__drawer {
-  position: fixed;
-  top: 0;
-  inset-inline-start: 0;
-  bottom: 0;
+  inset-inline-start: 14px;
+  top: calc(env(safe-area-inset-top) + 70px);
   z-index: 81;
-  width: min(310px, 86vw);
-  background: var(--card);
-  box-shadow: -12px 0 40px -12px rgba(0, 0, 0, 0.45);
-  transform: translateX(100%);
-  transition: transform 0.26s ease;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  align-items: flex-start;
+  gap: 10px;
+  pointer-events: none;
 }
 
-.bspanel.is-open .bspanel__scrim {
-  opacity: 1;
+.bsdial__item {
   pointer-events: auto;
+  animation: bsdial-in 0.26s cubic-bezier(0.2, 0.9, 0.3, 1.2) backwards;
 }
 
-.bspanel.is-open .bspanel__drawer {
-  transform: translateX(0);
+@keyframes bsdial-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Raise the BS logo above the scrim so it remains tappable to close */
+.bsdial__btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+}
+
+.bsdial__circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--card);
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+  transition: background 0.18s ease, transform 0.12s ease;
+}
+
+.bsdial__btn:active .bsdial__circle {
+  transform: scale(0.92);
+}
+
+.bsdial__btn.is-active .bsdial__circle {
+  background: var(--brand);
+  box-shadow: 0 6px 22px -6px rgba(31, 111, 107, 0.7);
+}
+
+.bsdial__label {
+  background: var(--card);
+  color: var(--ink);
+  padding: 6px 13px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.3);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.bsdial__btn.is-active .bsdial__label {
+  background: var(--brand);
+  color: #fff;
+}
+
+/* When BS dial is open, raise the logo above any backdrop/scrim layers */
 .float--logo.is-open {
   z-index: 85;
 }
 
-/* Header */
-.bspanel__head {
-  display: grid;
-  grid-template-columns: auto 1fr;
+/* =====================================================================
+   Persona placeholder — the manager / store / courier / worker views
+   show a stub until each persona's full UI is built out.
+   ===================================================================== */
+
+.persona-placeholder {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--space-3);
-  padding: calc(env(safe-area-inset-top) + var(--space-4)) var(--space-4) var(--space-3);
-  border-bottom: 1px solid var(--line);
-}
-
-.bspanel__brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.bspanel__brand-mark {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--brand);
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 13px;
-  letter-spacing: -0.5px;
-}
-
-.bspanel__brand-name {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 15px;
-  color: var(--ink);
-}
-
-.bspanel__back {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: var(--bg);
-  color: var(--brand);
-  display: grid;
-  place-items: center;
-}
-
-.bspanel__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--grey);
-  text-align: end;
-}
-
-/* Body */
-.bspanel__body {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--space-3) var(--space-2) var(--space-4);
-}
-
-.bslist {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.bsrow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: var(--radius-md);
-  background: var(--bg);
-  text-align: start;
-  width: 100%;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.bsrow:active {
-  transform: scale(0.99);
-}
-
-.bsrow.is-on {
-  background: var(--brand);
-  color: #fff;
-}
-
-.bsrow__icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  background: var(--card);
-  color: var(--brand);
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.2);
-}
-
-.bsrow.is-on .bsrow__icon {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
-}
-
-.bsrow__icon--text {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 16px;
-}
-
-.bsrow__text {
-  flex: 1;
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.bsrow__label {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 15px;
-  color: var(--ink);
-}
-
-.bsrow.is-on .bsrow__label {
-  color: #fff;
-}
-
-.bsrow__helper {
-  font-size: 11.5px;
-  color: var(--grey);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.bsrow.is-on .bsrow__helper {
-  color: rgba(255, 255, 255, 0.78);
-}
-
-.bsrow__chev {
-  color: var(--grey);
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.bsrow__check {
-  color: #fff;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-}
-
-/* Footer */
-.bspanel__foot {
-  border-top: 1px solid var(--line);
-  padding: var(--space-3) var(--space-4) calc(env(safe-area-inset-bottom) + var(--space-3));
-  font-size: 11px;
-  color: var(--grey);
+  min-height: 60dvh;
   text-align: center;
+  padding: var(--space-5);
+}
+
+.persona-placeholder__emoji {
+  font-size: 96px;
+  line-height: 1;
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.22));
+}
+
+.persona-placeholder__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  color: #102b34;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5);
+}
+
+.persona-placeholder__hint {
+  color: #2a3e46;
+  font-size: 14px;
+  max-width: 30ch;
+  line-height: 1.6;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.55);
+}
+
+.persona-placeholder__soon {
+  margin-top: var(--space-3);
+  padding: 7px 16px;
+  background: var(--amber);
+  color: #1a1d22;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.3px;
 }
 

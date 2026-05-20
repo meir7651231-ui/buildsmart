@@ -9,9 +9,6 @@ import {
 export type Category = CatalogCategory;
 export type Product = CatalogProduct;
 
-/* ===== Identity ===== */
-export const contractorName = signal<string>('שלמה הקבלן');
-
 /* ===== Navigation: category drill-down ===== */
 export const categoryPath = signal<string[]>([]);
 

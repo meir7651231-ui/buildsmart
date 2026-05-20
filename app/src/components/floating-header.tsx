@@ -1,5 +1,5 @@
-import { contractorName, cartCount } from '../store/app-store';
-import { toggleBs, bsOpen } from '../store/bs-store';
+import { cartCount } from '../store/app-store';
+import { toggleBs, bsOpen, personaName } from '../store/bs-store';
 
 export function FloatingHeader() {
   const count = cartCount.value;
@@ -10,7 +10,7 @@ export function FloatingHeader() {
       <button
         type="button"
         class={`float float--logo${bsActive ? ' is-open' : ''}`}
-        aria-label="BuildSmart"
+        aria-label="בחירת משתמש"
         aria-expanded={bsActive}
         onClick={toggleBs}
       >
@@ -18,7 +18,7 @@ export function FloatingHeader() {
       </button>
 
       <div class="float float--name" role="status" aria-live="polite">
-        {contractorName.value}
+        {personaName.value}
       </div>
 
       <button type="button" class="float float--cart" aria-label="עגלת רכש">
