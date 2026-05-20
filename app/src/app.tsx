@@ -7,6 +7,7 @@ import { ProductSheet } from './components/product-sheet';
 export function App() {
   return (
     <div class="screen">
+      <div class="screen__bg" aria-hidden="true" />
       <FloatingHeader />
       <main class="content">
         <HomeView />

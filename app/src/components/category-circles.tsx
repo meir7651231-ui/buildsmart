@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'preact/hooks';
 import {
   currentCircles,
   currentParentId,
@@ -8,14 +9,21 @@ import {
 import { categoryById } from '../data/categories';
 
 export function CategoryCircles() {
-  const isRoot = categoryPath.value.length === 0;
+  const path = categoryPath.value;
+  const isRoot = path.length === 0;
   const parentId = currentParentId.value;
   const parent = parentId ? categoryById(parentId) : undefined;
   const circles = currentCircles.value;
 
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = rowRef.current;
+    if (el) el.scrollLeft = 0;
+  }, [path.length]);
+
   return (
     <div class="cats">
-      <div class="cats__row" role="list">
+      <div class="cats__row" role="list" ref={rowRef}>
         {!isRoot && (
           <button
             type="button"

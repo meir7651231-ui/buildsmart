@@ -43,6 +43,32 @@ li {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  position: relative;
+}
+
+/* ===== Bathroom background ===== */
+.screen__bg {
+  position: fixed;
+  inset: -16px;
+  z-index: 0;
+  background-image: url('/bathroom-bg.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(3px) saturate(0.92);
+  transform: scale(1.06);
+  transform-origin: center;
+  pointer-events: none;
+}
+
+.screen__bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.02) 35%,
+    rgba(255, 255, 255, 0.18) 100%);
 }
 
 /* ===== Floating header (logo + name + cart) ===== */
@@ -122,6 +148,7 @@ li {
     calc(env(safe-area-inset-bottom) + 110px);
   overflow-y: auto;
   position: relative;
+  z-index: 1;
 }
 
 /* ===== Category circles ===== */
@@ -130,9 +157,18 @@ li {
 }
 
 .cats__row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--space-3) var(--space-2);
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: var(--space-2);
+  margin-inline: calc(var(--space-4) * -1);
+  padding-inline: var(--space-4);
+  scrollbar-width: none;
+}
+
+.cats__row::-webkit-scrollbar {
+  display: none;
 }
 
 .cat {
@@ -140,7 +176,9 @@ li {
   justify-items: center;
   gap: 6px;
   text-align: center;
-  min-width: 0;
+  flex: 0 0 65px;
+  width: 65px;
+  scroll-snap-align: start;
 }
 
 .cat__bubble {
