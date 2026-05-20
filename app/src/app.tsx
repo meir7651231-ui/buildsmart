@@ -1,6 +1,6 @@
 import { AppBar } from './components/app-bar';
 import { HomeView } from './views/home';
-import { MenuDrawer } from './components/menu-drawer';
+import { MenuSpeedDial } from './components/menu-speed-dial';
 import { SearchOverlay } from './components/search-overlay';
 import { ProductSheet } from './components/product-sheet';
 
@@ -11,7 +11,7 @@ export function App() {
       <main class="content">
         <HomeView />
       </main>
-      <MenuDrawer />
+      <MenuSpeedDial />
       <SearchOverlay />
       <ProductSheet />
     </div>

@@ -1,39 +1,50 @@
-import { categoryPath, currentCircles, drillInto, jumpTo, resetCategory } from '../store/app-store';
+import {
+  currentCircles,
+  currentParentId,
+  categoryPath,
+  drillInto,
+  goUp,
+} from '../store/app-store';
 import { categoryById } from '../data/categories';
 
 export function CategoryCircles() {
+  const isRoot = categoryPath.value.length === 0;
+  const parentId = currentParentId.value;
+  const parent = parentId ? categoryById(parentId) : undefined;
   const circles = currentCircles.value;
-  const path = categoryPath.value;
-  const isRoot = path.length === 0;
 
   return (
     <div class="cats">
-      {!isRoot && (
-        <div class="cats__crumbs" role="navigation" aria-label="ניווט קטגוריות">
-          <button type="button" class="crumb crumb--home" onClick={resetCategory}>
-            <span aria-hidden="true">⌂</span>
-            <span class="crumb__label">הכל</span>
-          </button>
-          {path.map((id, i) => {
-            const isLast = i === path.length - 1;
-            const cat = categoryById(id);
-            return (
-              <button
-                key={id}
-                type="button"
-                class={`crumb${isLast ? ' is-current' : ''}`}
-                onClick={() => !isLast && jumpTo(i + 1)}
-                aria-current={isLast ? 'page' : undefined}
-              >
-                <span class="crumb__sep" aria-hidden="true">/</span>
-                <span class="crumb__label">{cat?.name ?? id}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
       <div class="cats__row" role="list">
+        {!isRoot && (
+          <button
+            type="button"
+            class="cat cat--back"
+            onClick={goUp}
+            aria-label="חזרה"
+          >
+            <span class="cat__bubble cat__bubble--back" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 12h13M13 6l-6 6 6 6" />
+              </svg>
+            </span>
+            <span class="cat__name">חזור</span>
+          </button>
+        )}
+
+        {parent && (
+          <button
+            type="button"
+            class="cat cat--current"
+            onClick={goUp}
+            aria-label={`${parent.name} (פתוח)`}
+            aria-current="page"
+          >
+            <span class="cat__bubble cat__bubble--current" aria-hidden="true">{parent.emoji}</span>
+            <span class="cat__name">{parent.name}</span>
+          </button>
+        )}
+
         {circles.map((cat) => (
           <button
             key={cat.id}

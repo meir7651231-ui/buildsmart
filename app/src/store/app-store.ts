@@ -2,6 +2,9 @@ import { signal, computed } from '@preact/signals';
 import { childrenOf, type Category } from '../data/categories';
 import { productsForPath, type Product } from '../data/products';
 
+/* ===== Identity ===== */
+export const contractorName = signal<string>('שלמה הקבלן');
+
 /* ===== Navigation: category drill-down ===== */
 export const categoryPath = signal<string[]>([]);
 
@@ -11,20 +14,24 @@ export const currentCircles = computed<Category[]>(() => {
   return childrenOf(parent);
 });
 
+export const currentParentId = computed<string | null>(() => {
+  const path = categoryPath.value;
+  return path.length === 0 ? null : path[path.length - 1]!;
+});
+
 export const currentProducts = computed<Product[]>(() =>
   productsForPath(categoryPath.value, categoryPath.value.length === 0),
 );
 
 export function drillInto(categoryId: string): void {
-  const next = [...categoryPath.value, categoryId];
-  if (childrenOf(categoryId).length === 0) {
-    return;
-  }
-  categoryPath.value = next;
+  if (childrenOf(categoryId).length === 0) return;
+  categoryPath.value = [...categoryPath.value, categoryId];
 }
 
-export function jumpTo(index: number): void {
-  categoryPath.value = categoryPath.value.slice(0, index);
+export function goUp(): void {
+  const path = categoryPath.value;
+  if (path.length === 0) return;
+  categoryPath.value = path.slice(0, -1);
 }
 
 export function resetCategory(): void {
@@ -36,8 +43,8 @@ export const menuOpen = signal(false);
 export const searchOpen = signal(false);
 export const openedProductId = signal<string | null>(null);
 
-export function openMenu(): void {
-  menuOpen.value = true;
+export function toggleMenu(): void {
+  menuOpen.value = !menuOpen.value;
 }
 export function closeMenu(): void {
   menuOpen.value = false;
@@ -64,20 +71,32 @@ export const cartCount = computed(() =>
   cart.value.reduce((sum, line) => sum + line.qty, 0),
 );
 
-export function addToCart(productId: string, qty: number): void {
+export function qtyOf(productId: string): number {
+  return cart.value.find((l) => l.productId === productId)?.qty ?? 0;
+}
+
+export function setQty(productId: string, qty: number): void {
+  const clamped = Math.max(0, qty);
   const existing = cart.value.find((l) => l.productId === productId);
+  if (clamped === 0) {
+    if (existing) cart.value = cart.value.filter((l) => l.productId !== productId);
+    return;
+  }
   if (existing) {
     cart.value = cart.value.map((l) =>
-      l.productId === productId ? { ...l, qty: l.qty + qty } : l,
+      l.productId === productId ? { ...l, qty: clamped } : l,
     );
   } else {
-    cart.value = [...cart.value, { productId, qty }];
+    cart.value = [...cart.value, { productId, qty: clamped }];
   }
 }
 
-export function removeFromCart(productId: string): void {
-  cart.value = cart.value.filter((l) => l.productId !== productId);
+export function incQty(productId: string): void {
+  setQty(productId, qtyOf(productId) + 1);
+}
+export function decQty(productId: string): void {
+  setQty(productId, qtyOf(productId) - 1);
 }
 
-/* ===== Notifications (placeholder) ===== */
+/* ===== Notifications ===== */
 export const notificationCount = signal(0);

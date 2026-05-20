@@ -1,21 +1,28 @@
-import { openMenu, openSearch, cartCount } from '../store/app-store';
+import { menuOpen, toggleMenu, openSearch } from '../store/app-store';
 
 export function Fabs() {
-  const count = cartCount.value;
+  const open = menuOpen.value;
   return (
     <>
       <button
         type="button"
-        class="fab fab--menu"
-        onClick={openMenu}
-        aria-label="פתח תפריט"
+        class={`fab fab--menu${open ? ' is-open' : ''}`}
+        onClick={toggleMenu}
+        aria-label={open ? 'סגור תפריט' : 'פתח תפריט'}
+        aria-expanded={open}
       >
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <line x1="4" y1="7" x2="20" y2="7" />
-          <line x1="4" y1="12" x2="20" y2="12" />
-          <line x1="4" y1="17" x2="20" y2="17" />
-        </svg>
-        {count > 0 && <span class="fab__badge">{count}</span>}
+        {open ? (
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <line x1="6" y1="6" x2="18" y2="18" />
+            <line x1="18" y1="6" x2="6" y2="18" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="4" y1="7" x2="20" y2="7" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="17" x2="20" y2="17" />
+          </svg>
+        )}
       </button>
 
       <button

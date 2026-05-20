@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { openedProductId, closeProduct, addToCart } from '../store/app-store';
+import { openedProductId, closeProduct, setQty, qtyOf } from '../store/app-store';
 import { productById } from '../data/products';
 
 export function ProductSheet() {
@@ -12,7 +12,8 @@ export function ProductSheet() {
 
 function ProductSheetPanel({ productId }: { productId: string }) {
   const product = productById(productId)!;
-  const [qty, setQty] = useState(1);
+  const existing = qtyOf(productId);
+  const [qty, setLocalQty] = useState(existing > 0 ? existing : 1);
 
   const total = (product.price * qty).toLocaleString('he-IL', {
     minimumFractionDigits: 2,
@@ -20,7 +21,7 @@ function ProductSheetPanel({ productId }: { productId: string }) {
   });
 
   const onConfirm = () => {
-    addToCart(productId, qty);
+    setQty(productId, qty);
     closeProduct();
   };
 
@@ -45,7 +46,7 @@ function ProductSheetPanel({ productId }: { productId: string }) {
             type="button"
             class="qty__btn"
             aria-label="הפחת"
-            onClick={() => setQty((q) => Math.max(1, q - 1))}
+            onClick={() => setLocalQty((q) => Math.max(1, q - 1))}
           >
             −
           </button>
@@ -57,7 +58,7 @@ function ProductSheetPanel({ productId }: { productId: string }) {
             value={qty}
             onInput={(e) => {
               const v = parseInt((e.target as HTMLInputElement).value, 10);
-              setQty(Number.isFinite(v) && v >= 1 ? v : 1);
+              setLocalQty(Number.isFinite(v) && v >= 1 ? v : 1);
             }}
             aria-label="כמות"
           />
@@ -65,7 +66,7 @@ function ProductSheetPanel({ productId }: { productId: string }) {
             type="button"
             class="qty__btn"
             aria-label="הוסף"
-            onClick={() => setQty((q) => q + 1)}
+            onClick={() => setLocalQty((q) => q + 1)}
           >
             +
           </button>
