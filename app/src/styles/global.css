@@ -922,18 +922,18 @@ li {
   position: fixed;
   top: 0;
   inset-inline: 0;
-  bottom: 240px;
+  bottom: calc(env(safe-area-inset-bottom) + 130px);
   z-index: 76;
   overflow-y: auto;
   padding: calc(env(safe-area-inset-top) + var(--space-3)) var(--space-3) var(--space-3);
   pointer-events: auto;
 }
 
-/* === Right rail (tools + sub-menu) — stacked above the search FAB === */
+/* === Right rail (tools + sub-menu) — stacked directly above the FAB === */
 .spanel__rail {
   position: fixed;
   inset-inline-start: 14px;
-  bottom: calc(env(safe-area-inset-bottom) + 140px);
+  bottom: calc(env(safe-area-inset-bottom) + 92px);
   z-index: 81;
   display: flex;
   flex-direction: column;
@@ -1074,10 +1074,11 @@ li {
   z-index: 2;
 }
 
-/* === Scope chips — sit just above the input bar, full-width row === */
+/* === Scope chips — sit on the left side of the input row, beside FAB === */
 .scope-chips {
   position: fixed;
-  inset-inline: var(--space-3);
+  inset-inline-start: 90px;
+  inset-inline-end: 14px;
   bottom: calc(env(safe-area-inset-bottom) + 76px);
   z-index: 81;
   display: flex;
@@ -1107,11 +1108,12 @@ li {
   border-color: var(--brand-dark);
 }
 
-/* === Search input bar — fixed bottom edge === */
+/* === Search input bar — sits beside the FAB at the same bottom level === */
 .sinput {
   position: fixed;
-  inset-inline: var(--space-3);
-  bottom: calc(env(safe-area-inset-bottom) + var(--space-3));
+  inset-inline-start: 90px;
+  inset-inline-end: 14px;
+  bottom: calc(env(safe-area-inset-bottom) + 24px);
   z-index: 82;
   display: flex;
   align-items: center;
@@ -1154,9 +1156,10 @@ li {
   font-size: 14px;
 }
 
-/* When search is open, raise the search FAB above the input bar */
+/* The 5 main floating buttons NEVER move. The search FAB stays at its
+   original bottom-right slot; we just raise its z-index so the search
+   panel backdrop doesn't cover it. */
 .fab--search.is-search-open {
-  bottom: calc(env(safe-area-inset-bottom) + 78px);
   z-index: 85;
 }
 
