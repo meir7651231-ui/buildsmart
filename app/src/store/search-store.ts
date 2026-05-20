@@ -13,7 +13,12 @@ export const searchQuery = signal('');
 export const searchScope = signal<SearchScope>('all');
 export const searchSort = signal<SortMode>('default');
 
-export const toolsDialOpen = signal(false);
+export type ToolKind = 'voice' | 'barcode' | 'filters' | 'sort';
+export const activeTool = signal<ToolKind | null>(null);
+
+export function setActiveTool(t: ToolKind | null): void {
+  activeTool.value = t;
+}
 
 /* Filters — minimal MVP: price range + in-cart-only */
 export type SearchFilters = {
@@ -94,5 +99,5 @@ export function resetSearch(): void {
   searchScope.value = 'all';
   searchSort.value = 'default';
   searchFilters.value = { hasPrice: false, hasImage: false };
-  toolsDialOpen.value = false;
+  activeTool.value = null;
 }

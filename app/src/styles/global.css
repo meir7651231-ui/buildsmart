@@ -922,7 +922,7 @@ li {
   pointer-events: auto;
 }
 
-.spanel__results {
+.spanel__stage {
   position: relative;
   z-index: 1;
   flex: 1;
@@ -930,11 +930,214 @@ li {
   padding: calc(env(safe-area-inset-top) + var(--space-3)) var(--space-3) var(--space-3);
   pointer-events: auto;
   animation: spanel-results-in 0.22s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes spanel-results-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Mode: voice ===== */
+.vmode {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-3);
+}
+
+.vmode__mic {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 22px 50px -16px rgba(15, 18, 21, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease;
+  touch-action: none;
+}
+
+.vmode__mic:active {
+  transform: scale(0.95);
+}
+
+.vmode__mic.is-listening {
+  background: var(--brand);
+  color: #fff;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(31, 111, 107, 0.45),
+                          0 22px 50px -16px rgba(15, 18, 21, 0.55); }
+  50%      { box-shadow: 0 0 0 22px rgba(31, 111, 107, 0),
+                          0 22px 50px -16px rgba(15, 18, 21, 0.55); }
+}
+
+.vmode__hint {
+  text-align: center;
+  color: #f3f7fa;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.6;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  max-width: 32ch;
+}
+
+/* ===== Mode: barcode ===== */
+.bcmode {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-3);
+}
+
+.bcmode__frame {
+  position: relative;
+  width: min(90vw, 320px);
+  aspect-ratio: 4 / 3;
+  border-radius: 22px;
+  background: rgba(10, 13, 16, 0.85);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  box-shadow: 0 22px 50px -16px rgba(15, 18, 21, 0.6);
+}
+
+.bcmode__frame.is-on {
+  background: #0a0d10;
+}
+
+.bcmode__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bcmode__cam-btn {
+  position: relative;
+  z-index: 2;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--amber);
+  color: #1a1d22;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 14px 30px -10px rgba(242, 165, 22, 0.7);
+}
+
+.bcmode__cam-btn:active {
+  transform: scale(0.94);
+}
+
+.bcmode__reticle {
+  position: absolute;
+  inset: 14% 10%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
+  z-index: 2;
+}
+
+/* ===== Mode: filters / sort options ===== */
+.opts {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin: var(--space-3);
+  box-shadow: 0 18px 38px -16px rgba(15, 18, 21, 0.55);
+}
+
+.opts__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  margin-bottom: var(--space-3);
+}
+
+.opts__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px var(--space-3);
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.opts__row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--brand);
+}
+
+.opts__reset {
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--brand);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.opts__list {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.opts__radio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  text-align: start;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.opts__radio.is-on {
+  background: var(--brand);
+  color: #fff;
+}
+
+.opts__radio-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--grey);
+  flex-shrink: 0;
+}
+
+.opts__radio.is-on .opts__radio-dot {
+  border-color: #fff;
+  background: #fff;
+  box-shadow: inset 0 0 0 3px var(--brand);
 }
 
 .sresults__hint,
@@ -1117,32 +1320,28 @@ li {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3) 8px;
+  gap: 10px;
+  padding: 12px 0 10px 0;
   pointer-events: none;
 }
 
-.sdial__list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: auto;
-}
-
 .sdial__item {
+  pointer-events: auto;
   animation: dial-in 0.26s cubic-bezier(0.2, 0.9, 0.3, 1.2) backwards;
+  display: block;
 }
 
 .sdial__btn {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 0;
 }
 
 .sdial__circle {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: var(--card);
   color: var(--brand);
@@ -1150,6 +1349,7 @@ li {
   place-items: center;
   box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.35);
   flex-shrink: 0;
+  margin-inline-start: 0;
 }
 
 .sdial__btn:active .sdial__circle { transform: scale(0.92); }
@@ -1157,7 +1357,7 @@ li {
 .sdial__label {
   background: var(--card);
   color: var(--ink);
-  padding: 5px 11px;
+  padding: 6px 13px;
   border-radius: 999px;
   font-family: var(--font-display);
   font-weight: 700;
@@ -1166,30 +1366,47 @@ li {
   box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.3);
 }
 
-.sdial__sort {
-  display: grid;
-  gap: 4px;
+/* Dropped tool — sits just above the input bar when a tool is active */
+.sdrop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 var(--space-3) 10px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 999px;
   background: var(--card);
-  border-radius: var(--radius-md);
-  padding: 6px;
-  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.3);
-  align-self: flex-start;
-  pointer-events: auto;
+  box-shadow: 0 10px 22px -10px rgba(0, 0, 0, 0.35);
+  width: fit-content;
+  margin-inline-start: auto;
+  position: relative;
+  z-index: 3;
 }
 
-.sdial__sort-item {
-  text-align: start;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13px;
+.sdrop__back {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--grey);
+  display: grid;
+  place-items: center;
+}
+
+.sdrop__label {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 800;
+  font-size: 13px;
   color: var(--ink);
 }
 
-.sdial__sort-item.is-active {
+.sdrop__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   background: var(--brand);
   color: #fff;
+  display: grid;
+  place-items: center;
 }
 
 /* ===== Search input (bottom) ===== */
