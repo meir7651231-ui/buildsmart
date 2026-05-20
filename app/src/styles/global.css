@@ -293,7 +293,7 @@ li {
 }
 
 .fab--search {
-  inset-inline-end: 18px;
+  inset-inline-start: 18px;
   background: var(--amber);
   color: #1a1d22;
   box-shadow: 0 12px 28px -10px rgba(242, 165, 22, 0.6),
@@ -301,7 +301,7 @@ li {
 }
 
 .fab--menu {
-  inset-inline-start: 18px;
+  inset-inline-end: 18px;
 }
 
 .fab__badge {
