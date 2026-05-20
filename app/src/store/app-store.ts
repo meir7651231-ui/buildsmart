@@ -1,6 +1,13 @@
 import { signal, computed } from '@preact/signals';
-import { childrenOf, type Category } from '../data/categories';
-import { productsForPath, type Product } from '../data/products';
+import {
+  childrenOf,
+  type CatalogCategory,
+  productsForPath,
+  type CatalogProduct,
+} from '../data/catalog';
+
+export type Category = CatalogCategory;
+export type Product = CatalogProduct;
 
 /* ===== Identity ===== */
 export const contractorName = signal<string>('שלמה הקבלן');
@@ -20,11 +27,10 @@ export const currentParentId = computed<string | null>(() => {
 });
 
 export const currentProducts = computed<Product[]>(() =>
-  productsForPath(categoryPath.value, categoryPath.value.length === 0),
+  productsForPath(categoryPath.value),
 );
 
 export function drillInto(categoryId: string): void {
-  if (childrenOf(categoryId).length === 0) return;
   categoryPath.value = [...categoryPath.value, categoryId];
 }
 

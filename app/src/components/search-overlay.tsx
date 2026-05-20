@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'preact/hooks';
 import { searchOpen, closeSearch, openProduct } from '../store/app-store';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS } from '../data/catalog';
 
 export function SearchOverlay() {
   if (!searchOpen.value) return null;
@@ -14,11 +14,12 @@ function SearchPanel() {
     const q = query.trim();
     if (!q) return [];
     const norm = q.toLowerCase();
-    return PRODUCTS.filter(
-      (p) =>
-        p.name.toLowerCase().includes(norm) ||
-        p.supplier.toLowerCase().includes(norm),
-    ).slice(0, 30);
+    return PRODUCTS.filter((p) => {
+      if (p.name.toLowerCase().includes(norm)) return true;
+      if (p.productType?.toLowerCase().includes(norm)) return true;
+      if (p.series?.toLowerCase().includes(norm)) return true;
+      return false;
+    }).slice(0, 50);
   }, [query]);
 
   return (
@@ -39,7 +40,7 @@ function SearchPanel() {
             type="search"
             inputMode="search"
             autoFocus
-            placeholder="חיפוש מוצר או ספק..."
+            placeholder="חיפוש מוצר..."
             value={query}
             onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
           />
@@ -65,12 +66,22 @@ function SearchPanel() {
                     openProduct(p.id);
                   }}
                 >
-                  <span class="search__emoji" aria-hidden="true">{p.emoji}</span>
+                  <span class="search__emoji" aria-hidden="true">
+                    {p.image ? (
+                      <img src={p.image} alt="" loading="lazy" />
+                    ) : (
+                      p.emoji
+                    )}
+                  </span>
                   <span class="search__text">
                     <span class="search__name">{p.name}</span>
-                    <span class="search__supplier">{p.supplier}</span>
+                    {p.productType && (
+                      <span class="search__supplier">{p.productType}</span>
+                    )}
                   </span>
-                  <span class="search__price">₪{p.price}</span>
+                  {typeof p.price === 'number' && p.price > 0 && (
+                    <span class="search__price">₪{p.price}</span>
+                  )}
                 </button>
               </li>
             ))}

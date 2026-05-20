@@ -1,7 +1,24 @@
-import type { Product } from '../data/products';
+import type { Product } from '../store/app-store';
 import { openProduct, qtyOf, incQty, decQty, setQty } from '../store/app-store';
 
 type Props = { product: Product };
+
+function formatPrice(p: Product): preact.JSX.Element {
+  if (typeof p.price !== 'number') {
+    return <span class="product__price product__price--pending">מחיר לפי ספק</span>;
+  }
+  if (p.price === 0) {
+    return <span class="product__price product__price--free">כלול</span>;
+  }
+  const text = p.price.toLocaleString('he-IL', {
+    minimumFractionDigits: p.price % 1 ? 2 : 0,
+  });
+  return (
+    <span class="product__price">
+      ₪{text}
+    </span>
+  );
+}
 
 export function ProductCard({ product }: Props) {
   const qty = qtyOf(product.id);
@@ -16,17 +33,16 @@ export function ProductCard({ product }: Props) {
         aria-label={`פתח ${product.name}`}
       >
         <div class="product__image" aria-hidden="true">
-          <span>{product.emoji}</span>
+          {product.image ? (
+            <img src={product.image} alt="" loading="lazy" decoding="async" />
+          ) : (
+            <span class="product__emoji">{product.emoji}</span>
+          )}
           {inCart && <span class="product__check" aria-hidden="true">✓</span>}
         </div>
         <div class="product__body">
           <div class="product__name">{product.name}</div>
-          <div class="product__price">
-            ₪{product.price.toLocaleString('he-IL', {
-              minimumFractionDigits: product.price % 1 ? 2 : 0,
-            })}
-            <span class="product__unit">/{product.unit}</span>
-          </div>
+          {formatPrice(product)}
         </div>
       </button>
 

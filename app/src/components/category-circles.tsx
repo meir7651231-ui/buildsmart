@@ -6,7 +6,7 @@ import {
   drillInto,
   goUp,
 } from '../store/app-store';
-import { categoryById } from '../data/categories';
+import { categoryById } from '../data/catalog';
 
 export function CategoryCircles() {
   const path = categoryPath.value;

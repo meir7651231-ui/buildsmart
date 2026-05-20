@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { openedProductId, closeProduct, setQty, qtyOf } from '../store/app-store';
-import { productById } from '../data/products';
+import { productById } from '../data/catalog';
 
 export function ProductSheet() {
   const id = openedProductId.value;
@@ -15,15 +15,18 @@ function ProductSheetPanel({ productId }: { productId: string }) {
   const existing = qtyOf(productId);
   const [qty, setLocalQty] = useState(existing > 0 ? existing : 1);
 
-  const total = (product.price * qty).toLocaleString('he-IL', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-
   const onConfirm = () => {
     setQty(productId, qty);
     closeProduct();
   };
+
+  const hasPrice = typeof product.price === 'number' && product.price > 0;
+  const total = hasPrice
+    ? (product.price! * qty).toLocaleString('he-IL', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    : null;
 
   return (
     <div class="sheet" role="dialog" aria-modal="true" aria-label={product.name}>
@@ -31,15 +34,29 @@ function ProductSheetPanel({ productId }: { productId: string }) {
       <div class="sheet__panel sheet__panel--product">
         <div class="sheet__handle" aria-hidden="true" />
 
-        <div class="psheet__image" aria-hidden="true">{product.emoji}</div>
+        <div class="psheet__image" aria-hidden="true">
+          {product.image ? (
+            <img src={product.image} alt="" loading="eager" />
+          ) : (
+            <span>{product.emoji}</span>
+          )}
+        </div>
 
         <h2 class="psheet__name">{product.name}</h2>
-        <p class="psheet__supplier">ספק: {product.supplier}</p>
+        {product.productType && (
+          <p class="psheet__supplier">{product.productType}</p>
+        )}
+        {product.note && <p class="psheet__note">{product.note}</p>}
 
-        <div class="psheet__price">
-          ₪{product.price.toLocaleString('he-IL', { minimumFractionDigits: product.price % 1 ? 2 : 0 })}
-          <span class="psheet__unit">/{product.unit}</span>
-        </div>
+        {hasPrice ? (
+          <div class="psheet__price">
+            ₪{product.price!.toLocaleString('he-IL', {
+              minimumFractionDigits: product.price! % 1 ? 2 : 0,
+            })}
+          </div>
+        ) : (
+          <div class="psheet__price psheet__price--pending">מחיר לפי ספק</div>
+        )}
 
         <div class="qty">
           <button
@@ -72,7 +89,9 @@ function ProductSheetPanel({ productId }: { productId: string }) {
           </button>
         </div>
 
-        <div class="psheet__total">סה״כ: <strong>₪{total}</strong></div>
+        {total && (
+          <div class="psheet__total">סה״כ: <strong>₪{total}</strong></div>
+        )}
 
         <button type="button" class="psheet__cta" onClick={onConfirm}>
           הוסף לעגלה
