@@ -11935,7 +11935,7 @@ function renderMgrDashboard(){
   h+='<div class="md-note">בודק כל מוצר קטלוג מול "חוזה תקינות" — מוודא ששום תיקון לא שבר מוצר קיים. הרץ אחרי כל שינוי.</div>';
   h+='<div style="background:#1b8a4e;color:#fff;border-radius:8px;padding:8px 11px;'+
      'font-size:12px;font-weight:700;margin-bottom:11px;text-align:center;">'+
-     '✅ גרסה תקינה — BUILD R100 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
+     '✅ גרסה תקינה — BUILD R101 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
      '</div>';
   h+='<div id="regTestPanel">'+
      '<button class="reg-run" id="regRunBtn" type="button">▶ הרץ בדיקת רגרסיה מלאה</button>'+
@@ -19358,20 +19358,27 @@ var BSRouter=(function(){
      re-entering the router while a hashchange is already being processed. */
   var inHandle=false;
   function current(){ return (location.hash||'#home').replace(/^#/,''); }
+  /* REFACTORED: nested route parser — splits "project/PRJ-1" into
+     name="project" + params=["PRJ-1"]. Falls back to flat names. */
+  function parse(raw){
+    var parts=String(raw||'').split('/');
+    return { name:parts[0]||'home', params:parts.slice(1) };
+  }
   function handle(){
-    var name=current();
-    appStore.set({screen:name});
+    var raw=current(), route=parse(raw);
+    appStore.set({screen:route.name});
     inHandle=true;
     try{
-      if(routes[name]) safeRun('ניווט',routes[name]);
-      else if(typeof go==='function') safeRun('ניווט',function(){ go(name); });
+      if(routes[route.name]) safeRun('ניווט',function(){ routes[route.name](route.params); });
+      else if(typeof go==='function') safeRun('ניווט',function(){ go(route.name); });
     } finally { inHandle=false; }
   }
   return {
     register:function(name,fn){ routes[name]=fn; },
     navigate:function(name){ if(current()!==name) location.hash='#'+name; else handle(); },
     start:function(){ window.addEventListener('hashchange',handle); },
-    isHandling:function(){ return inHandle; }
+    isHandling:function(){ return inHandle; },
+    parse:parse
   };
 })();
 
@@ -19427,7 +19434,7 @@ function registerPWA(){
 safeRun('אתחול ארכיטקטורה',function(){
   BSRouter.start();
   registerPWA();
-  bsLog.info('[BuildSmart] architecture layer ready · storage='+
+  bsLog.info('[BuildSmart R101] architecture layer ready · storage='+
     (BSStore.available?'localStorage':'memory')+
     ' · livesync='+(BSLiveSync.connected?'on':'off'));
 });
@@ -19465,7 +19472,14 @@ var SCREEN_TO_HASH={};
   window.go=function(v){
     var r=origGo.apply(null,arguments);
     if(!BSRouter.isHandling()){
-      var desired='#'+v;
+      /* REFACTORED: nest the active project ID into the hash so the URL
+         is a real deep link, e.g. #project/PRJ-1. switchProject() also
+         calls go('project'), so this captures both flows. */
+      var hashName=v;
+      if(v==='project' && typeof activeProjectId!=='undefined' && activeProjectId){
+        hashName='project/'+activeProjectId;
+      }
+      var desired='#'+hashName;
       if(location.hash!==desired) location.hash=desired;
     }
     return r;
@@ -19474,6 +19488,16 @@ var SCREEN_TO_HASH={};
   /* Register the onboarding screens so a hash like #login drives showScreen. */
   Object.keys(ONBOARD_HASH_MAP).forEach(function(h){
     BSRouter.register(h,function(){ showScreen(ONBOARD_HASH_MAP[h]); });
+  });
+
+  /* REFACTORED: nested project route — #project/PRJ-1 switches project + opens view */
+  BSRouter.register('project',function(params){
+    var id=params&&params[0];
+    if(id && typeof PROJECTS!=='undefined'){
+      var exists=PROJECTS.some(function(p){ return p.id===id; });
+      if(exists && typeof switchProjectSilent==='function') switchProjectSilent(id);
+    }
+    if(typeof go==='function') go('project');
   });
 })();
 
@@ -20405,6 +20429,8 @@ function aiWearDetect(){
   var h='<div class="md-head"><div class="md-ic">🔧</div>'+
     '<div class="md-title">זיהוי בלאי ציוד</div>'+
     '<div class="md-sub">ניטור שעות עבודה של הציוד והתראה לפני תקלה.</div></div>';
+  /* REFACTORED: server-note banner — consistent with the other 14 ⚙️ features */
+  h+='<div class="ca-server-note">⚙️ בפרודקשן: חיישני IoT וניטור צריכת חשמל בשרת</div>';
   var gear=[
     {name:'מערבל בטון',hours:420,life:500,ic:'🛢️'},
     {name:'פטיש חשמלי',hours:180,life:600,ic:'🔨'},
