@@ -5,7 +5,7 @@
    frequently have no signal). Cache-first for the shell, network-first
    for everything else with a cache fallback.
    ===================================================================== */
-var CACHE_NAME = 'buildsmart-v101';
+var CACHE_NAME = 'buildsmart-v102';
 var APP_SHELL = [
   './index.html',
   './manifest.json'

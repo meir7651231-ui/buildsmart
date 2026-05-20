@@ -6690,13 +6690,13 @@ function renderSettings(){
     setToggle('הפחתת אנימציות','display','reduceMotion'),
   ]);
   /* --- ACCESSIBILITY (real) --- */
+  /* REFACTORED: removed the duplicate 'הגדל / הקטן טקסט' row — the old
+     'גודל טקסט' dropdown in the 🎨 תצוגה section above now provides
+     haptic+ARIA+toast via the upgraded cycleSetting(). */
   h+='<div class="set-gtitle">♿ נגישות</div><div class="set-group">'+
     '<button class="set-row" onclick="toggleHighContrast()">'+
       '<span class="set-l">☀️ מצב ניגודיות גבוהה (לשמש)</span>'+
       '<span class="set-v">'+(document.documentElement.getAttribute('data-contrast')==='high'?'פעיל':'כבוי')+'</span></button>'+
-    '<button class="set-row" onclick="cycleFontSize()">'+
-      '<span class="set-l">🔤 הגדל / הקטן טקסט</span>'+
-      '<span class="set-v">'+({small:'קטן',medium:'בינוני',large:'גדול'}[appSettings.display.textSize]||'בינוני')+'</span></button>'+
   '</div>';
   /* --- SECURITY (real) --- */
   h+='<div class="set-gtitle">🔒 אבטחה והרשאות</div><div class="set-group">'+
@@ -6762,10 +6762,17 @@ function setLink(label,val,fn){
   '</div>';
 }
 /* real toggles — change app state */
+/* REFACTORED: haptic + ARIA + audit feedback now happen here, merged from
+   the duplicate svcNotifSettings/toggleNotifSetting (removed) and from
+   cycleFontSize / svcLanguage (removed). All settings get the same UX. */
 function toggleSetting(grp,key){
   appSettings[grp][key]=!appSettings[grp][key];
   applySettings();
   renderSettings();
+  if(typeof haptic==='function') haptic('tap');
+  if(typeof ariaAnnounce==='function'){
+    ariaAnnounce(appSettings[grp][key]?'הופעל':'כובה');
+  }
 }
 function cycleSetting(grp,key,opts){
   const cur=appSettings[grp][key];
@@ -6773,6 +6780,16 @@ function cycleSetting(grp,key,opts){
   appSettings[grp][key]=opts[(i+1)%opts.length];
   applySettings();
   renderSettings();
+  if(typeof haptic==='function') haptic('tap');
+  const newVal=appSettings[grp][key];
+  const label=(SETTINGS_LABELS[key]&&SETTINGS_LABELS[key][newVal])||newVal;
+  if(typeof ariaAnnounce==='function') ariaAnnounce(label);
+  /* feedback toasts for the keys that previously had their own R100 UI */
+  if(key==='textSize' && typeof toast==='function') toast('גודל הטקסט: '+label);
+  if(key==='lang'){
+    if(typeof toast==='function') toast('השפה: '+label);
+    if(typeof auditLog==='function') auditLog('שינוי שפה',label);
+  }
 }
 /* account-level edits — gated in demo mode */
 function editAccountField(field){
@@ -6819,6 +6836,14 @@ function applySettings(){
   if(root) root.style.fontSize=sizes[appSettings.display.textSize]||'15.5px';
   /* reduce motion */
   if(root) root.setAttribute('data-reduce-motion',appSettings.display.reduceMotion?'1':'0');
+  /* REFACTORED: flip dir=rtl based on language — merged from the deleted
+     svcLanguage(), so the old region-language dropdown now also reorients
+     the layout for Hebrew/Arabic vs English. */
+  if(root && appSettings.region){
+    const lang=appSettings.region.lang;
+    const rtl=(lang==='he'||lang==='ar');
+    root.setAttribute('dir',rtl?'rtl':'ltr');
+  }
   /* default haul feeds the cart's per-store picker */
   if(typeof storeHaul!=='undefined' && appSettings.delivery.defaultHaul!=='small'){
     /* only as a default — does not override an explicit choice */
@@ -11935,7 +11960,7 @@ function renderMgrDashboard(){
   h+='<div class="md-note">בודק כל מוצר קטלוג מול "חוזה תקינות" — מוודא ששום תיקון לא שבר מוצר קיים. הרץ אחרי כל שינוי.</div>';
   h+='<div style="background:#1b8a4e;color:#fff;border-radius:8px;padding:8px 11px;'+
      'font-size:12px;font-weight:700;margin-bottom:11px;text-align:center;">'+
-     '✅ גרסה תקינה — BUILD R101 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
+     '✅ גרסה תקינה — BUILD R102 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
      '</div>';
   h+='<div id="regTestPanel">'+
      '<button class="reg-run" id="regRunBtn" type="button">▶ הרץ בדיקת רגרסיה מלאה</button>'+
@@ -12414,7 +12439,7 @@ const BUTTON_REGISTRY=[
   {fn:'completeInspection', area:'משימות', does:'מסמן ביקורת כבוצעה'},
   {fn:'siteArchive', area:'משימות', does:'ארכיון פרויקטים'},
   {fn:'toggleHighContrast', area:'הגדרות', does:'מצב ניגודיות גבוהה'},
-  {fn:'cycleFontSize', area:'הגדרות', does:'מחליף גודל טקסט'},
+  /* REFACTORED: cycleFontSize removed — merged into cycleSetting() */
   {fn:'doUndo', area:'כללי', does:'מבטל את הפעולה האחרונה'},
   {fn:'renderStorePortal', area:'ספק', does:'פורטל הספק'},
   {fn:'openCourierPortal', area:'שליח', does:'פורטל השליח'},
@@ -12486,8 +12511,8 @@ const BUTTON_REGISTRY=[
   {fn:'svcShakeReport', area:'שירות', does:'דיווח באג בניעור'},
   {fn:'toggleShakeReport', area:'שירות', does:'מפעיל דיווח ניעור'},
   {fn:'triggerBugReport', area:'שירות', does:'מדווח על באג'},
-  {fn:'svcLanguage', area:'שירות', does:'בחירת שפה'},
-  {fn:'setLanguage', area:'שירות', does:'מחליף שפה'},
+  /* REFACTORED: svcLanguage + setLanguage removed — language now uses
+     the existing 🌍 אזור ושפה dropdown via cycleSetting(). */
   {fn:'svcUnitConvert', area:'שירות', does:'המרת מידות'},
   {fn:'setUnitConv', area:'שירות', does:'בוחר המרת יחידות'},
   {fn:'runUnitConv', area:'שירות', does:'מחשב המרת מידה'},
@@ -12497,8 +12522,8 @@ const BUTTON_REGISTRY=[
   {fn:'svcCalendar', area:'שירות', does:'סנכרון יומן'},
   {fn:'svcJobBoard', area:'שירות', does:'לוח דרושים'},
   {fn:'postJob', area:'שירות', does:'מפרסם משרה'},
-  {fn:'svcNotifSettings', area:'שירות', does:'הגדרות התראות'},
-  {fn:'toggleNotifSetting', area:'שירות', does:'מחליף התראה'},
+  /* REFACTORED: svcNotifSettings + toggleNotifSetting removed —
+     notifications use the existing 🔔 התראות group via toggleSetting(). */
   {fn:'svcOnboarding', area:'שירות', does:'סיור היכרות'},
   {fn:'tourNext', area:'שירות', does:'שלב הבא בסיור'},
   {fn:'unlockSession', area:'אבטחה', does:'מבטל נעילת הפעלה'},
@@ -19434,7 +19459,7 @@ function registerPWA(){
 safeRun('אתחול ארכיטקטורה',function(){
   BSRouter.start();
   registerPWA();
-  bsLog.info('[BuildSmart R101] architecture layer ready · storage='+
+  bsLog.info('[BuildSmart R102] architecture layer ready · storage='+
     (BSStore.available?'localStorage':'memory')+
     ' · livesync='+(BSLiveSync.connected?'on':'off'));
 });
@@ -19670,19 +19695,10 @@ function hideUndo(){
 }
 
 /* ---- 47. DYNAMIC FONT SIZE ----
-   A quick in-app font-size stepper (the settings select already
-   persists it; this gives one-tap access from anywhere). */
-function cycleFontSize(){
-  var order=['small','medium','large'];
-  var cur=(appSettings&&appSettings.display)?appSettings.display.textSize:'medium';
-  var next=order[(order.indexOf(cur)+1)%order.length];
-  appSettings.display.textSize=next;
-  if(typeof applySettings==='function') applySettings();
-  var label={small:'קטן',medium:'בינוני',large:'גדול'}[next];
-  if(typeof toast==='function') toast('גודל הטקסט: '+label);
-  ariaAnnounce('גודל הטקסט שונה ל'+label);
-  haptic('tap');
-}
+   REFACTORED: cycleFontSize() removed — the haptic+ARIA+toast feedback
+   it provided was merged into the standard cycleSetting() helper, so
+   the 'גודל טקסט' dropdown in הגדרות → 🎨 תצוגה is now the single
+   source of truth and gives the same UX. */
 
 /* ---- 48. HIGH CONTRAST MODE ----
    A sunlight-readable high-contrast theme — important on an outdoor
@@ -21161,16 +21177,17 @@ var BOT_KB=[
 function openServiceHub(){
   var lang=(appSettings&&appSettings.region)?appSettings.region.lang:'he';
   var t=I18N[lang]||I18N.he;
+  /* REFACTORED: removed svcLanguage + svcNotifSettings tiles — they
+     duplicated existing settings rows. Language now lives in
+     הגדרות → 🌍 אזור ושפה, notifications in הגדרות → 🔔 התראות. */
   var items=[
     {fn:'svcHelpDesk',  ic:'🎧',t:'מוקד תמיכה',     s:'פתיחת פנייה'},
     {fn:'svcChatbot',   ic:'🤖',t:'צ׳אטבוט',         s:'מענה מיידי'},
     {fn:'svcShakeReport',ic:'📳',t:'דיווח על באג',   s:'נער לדיווח'},
-    {fn:'svcLanguage',  ic:'🌐',t:'שפה',             s:'עברית · ערבית · ועוד'},
     {fn:'svcUnitConvert',ic:'📏',t:'המרת מידות',     s:'מטרי ↔ אימפריאלי'},
     {fn:'svcQtyCalc',   ic:'🧮',t:'מחשבון כמויות',   s:'חישוב חומרים'},
     {fn:'svcCalendar',  ic:'📅',t:'סנכרון יומן',     s:'Google Calendar'},
     {fn:'svcJobBoard',  ic:'📋',t:'לוח דרושים',      s:'עובדים ומשרות'},
-    {fn:'svcNotifSettings',ic:'🔔',t:'הגדרות התראות',s:'מה לקבל ומתי'},
     {fn:'svcOnboarding',ic:'🚀',t:'סיור היכרות',     s:'הדרכה מהירה'}
   ];
   var h='<div class="md-head"><div class="md-ic">🎧</div>'+
@@ -21322,32 +21339,11 @@ function triggerBugReport(){
   if(typeof haptic==='function') haptic('warn');
 }
 
-/* ---- 94. MULTI-LANGUAGE ---- */
-function svcLanguage(){
-  var cur=(appSettings&&appSettings.region)?appSettings.region.lang:'he';
-  var h='<div class="md-head"><div class="md-ic">🌐</div>'+
-    '<div class="md-title">שפת הממשק</div>'+
-    '<div class="md-sub">בחר את שפת האפליקציה.</div></div>';
-  h+='<div class="ca-server-note">⚙️ תרגום מלא של כל המסכים מסופק בגרסה המלאה</div>';
-  h+='<div class="fin-opts">';
-  Object.keys(I18N).forEach(function(code){
-    h+='<button class="fin-opt'+(cur===code?' on':'')+'" '+
-      'onclick="setLanguage(\''+code+'\')">'+
-      '<div class="fin-opt-t">'+I18N[code].name+(cur===code?' ✓':'')+'</div></button>';
-  });
-  h+='</div>';
-  svcFeature(h);
-}
-function setLanguage(code){
-  if(!appSettings.region) appSettings.region={};
-  appSettings.region.lang=code;
-  var rtl=(code==='he'||code==='ar');
-  if(typeof document!=='undefined'&&document.documentElement)
-    document.documentElement.setAttribute('dir',rtl?'rtl':'ltr');
-  if(typeof auditLog==='function') auditLog('שינוי שפה',I18N[code].name);
-  if(typeof toast==='function') toast('השפה: '+I18N[code].name);
-  svcLanguage();
-}
+/* ---- 94. MULTI-LANGUAGE ----
+   REFACTORED: svcLanguage() and setLanguage() removed — the language
+   picker now lives in הגדרות → 🌍 אזור ושפה. The dir=rtl flip, toast
+   and audit log that lived here were merged into applySettings() and
+   cycleSetting() respectively. */
 
 /* ---- 95. UNIT CONVERSION ---- */
 var UNIT_CONV={
@@ -21469,31 +21465,11 @@ function postJob(){
   svcJobBoard();
 }
 
-/* ---- 99. NOTIFICATION SETTINGS ---- */
-function svcNotifSettings(){
-  var h='<div class="md-head"><div class="md-ic">🔔</div>'+
-    '<div class="md-title">הגדרות התראות</div>'+
-    '<div class="md-sub">בחר אילו התראות לקבל.</div></div>';
-  var rows=[
-    {key:'shipments',name:'🚚 עדכוני משלוחים'},
-    {key:'deals',name:'🎁 מבצעים והטבות'},
-    {key:'budget',name:'💰 התראות תקציב'},
-    {key:'orders',name:'📦 עדכוני הזמנות'}
-  ];
-  rows.forEach(function(r){
-    var on=appSettings.notif&&appSettings.notif[r.key];
-    h+='<button class="sec-priv-row" onclick="toggleNotifSetting(\''+r.key+'\')">'+
-      '<span>'+r.name+'</span>'+
-      '<span class="sec-toggle'+(on?' on':'')+'"><i></i></span></button>';
-  });
-  svcFeature(h);
-}
-function toggleNotifSetting(key){
-  if(!appSettings.notif) appSettings.notif={};
-  appSettings.notif[key]=!appSettings.notif[key];
-  if(typeof haptic==='function') haptic('tap');
-  svcNotifSettings();
-}
+/* ---- 99. NOTIFICATION SETTINGS ----
+   REFACTORED: svcNotifSettings() and toggleNotifSetting() removed —
+   notification toggles already live in הגדרות → 🔔 התראות. The
+   haptic feedback this version added was merged into the standard
+   toggleSetting() helper so all toggles get it. */
 
 /* ---- 100. ONBOARDING TOUR ---- */
 var tourStep=0;
