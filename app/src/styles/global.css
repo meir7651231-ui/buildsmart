@@ -996,65 +996,57 @@ li {
   align-items: flex-start;
 }
 
-/* Sub-menu row — icon flush LEFT (opposite of the dial), label to the right */
+/* Sub-menu row — same style as the parent dial: circle flush to the right
+   wall with a SEPARATE pill label to its left. Two pieces, not one chip. */
 .ssub__row {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   align-items: center;
   gap: 10px;
-  padding: 6px 14px 6px 6px;
-  background: var(--card);
-  border-radius: 999px;
-  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.3);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--ink);
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
   animation: dial-in 0.24s cubic-bezier(0.2, 0.9, 0.3, 1.2) backwards;
-  min-width: 180px;
-  max-width: 280px;
-}
-
-.ssub__row.is-on {
-  background: var(--brand);
-  color: #fff;
 }
 
 .ssub__icon {
-  width: 36px;
-  height: 36px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: var(--bg);
+  background: var(--card);
   color: var(--brand);
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.35);
+  transition: background 0.18s ease, color 0.18s ease;
 }
 
 .ssub__row.is-on .ssub__icon {
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--brand);
   color: #fff;
 }
 
 .ssub__label {
-  flex: 1;
+  background: var(--card);
+  color: var(--ink);
+  padding: 6px 13px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: end;
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.3);
+  transition: background 0.18s ease, color 0.18s ease;
 }
 
-.ssub__check {
-  min-width: 22px;
-  display: grid;
-  place-items: center;
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--amber);
-}
-
-.ssub__row.is-on .ssub__check {
+.ssub__row.is-on .ssub__label {
+  background: var(--brand);
   color: #fff;
+}
+
+.ssub__row:active .ssub__icon {
+  transform: scale(0.92);
 }
 
 /* Barcode live camera tile within sub-menu */

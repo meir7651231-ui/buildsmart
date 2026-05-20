@@ -71,9 +71,6 @@ export function SortSubmenu() {
           >
             <span class="ssub__icon">{o.icon}</span>
             <span class="ssub__label">{o.label}</span>
-            <span class={`ssub__check${on ? ' is-on' : ''}`} aria-hidden="true">
-              {on ? '●' : ''}
-            </span>
           </button>
         );
       })}
