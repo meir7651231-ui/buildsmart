@@ -3207,6 +3207,27 @@
     margin-top:10px;background:rgba(31,138,76,.12);border-radius:9px;padding:9px;margin-bottom:8px;
   }
   .adm-pill.held{background:rgba(242,165,22,.18);color:var(--amber-deep);}
+  /* split-shipment indicator — calm amber, fresh state pulses softly */
+  .adm-pill.split{background:rgba(242,165,22,.14);color:var(--amber-deep);margin-right:6px;}
+  .adm-pill.split.fresh{animation:splitPulse 1.8s ease-in-out infinite;
+    box-shadow:0 0 0 0 rgba(242,165,22,.45);}
+  @keyframes splitPulse{
+    0%{box-shadow:0 0 0 0 rgba(242,165,22,.45);}
+    70%{box-shadow:0 0 0 6px rgba(242,165,22,0);}
+    100%{box-shadow:0 0 0 0 rgba(242,165,22,0);}
+  }
+  /* picking-sheet section header — splits the line list by shipment group */
+  .sp-split-h{
+    margin:14px 0 6px;font-weight:900;color:var(--ink);font-size:13px;
+    background:rgba(242,165,22,.10);border-right:3px solid var(--amber);
+    padding:7px 10px;border-radius:6px;
+  }
+  .sp-split-h:first-child{margin-top:0;}
+  /* courier card — informational split note (non-jarring) */
+  .ch-split-note{
+    margin-top:6px;font-size:11px;font-weight:700;color:var(--amber-deep);
+    background:rgba(242,165,22,.10);padding:5px 8px;border-radius:6px;
+  }
   .so-card{cursor:pointer;}
   .so-card:active{transform:scale(.99);}
   /* ---- picking sheet ---- */
@@ -11963,7 +11984,7 @@ function renderMgrDashboard(){
   h+='<div class="md-note">בודק כל מוצר קטלוג מול "חוזה תקינות" — מוודא ששום תיקון לא שבר מוצר קיים. הרץ אחרי כל שינוי.</div>';
   h+='<div style="background:#1b8a4e;color:#fff;border-radius:8px;padding:8px 11px;'+
      'font-size:12px;font-weight:700;margin-bottom:11px;text-align:center;">'+
-     '✅ גרסה תקינה — BUILD R104 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
+     '✅ גרסה תקינה — BUILD R105 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
      '</div>';
   h+='<div id="regTestPanel">'+
      '<button class="reg-run" id="regRunBtn" type="button">▶ הרץ בדיקת רגרסיה מלאה</button>'+
@@ -17052,14 +17073,22 @@ function renderStoreOrders(){
     } else {
       btn='<div class="so-wait">🛵 ממתין לאיסוף השליח</div>';
     }
+    /* split-shipment indicator — appears only when the contractor split this
+       order; pulses softly the first time the supplier sees it. */
+    const splitPill=(o.splitInto>1)
+      ? '<span class="adm-pill split'+(o.splitNoticeNew?' fresh':'')+'">🚚×'+o.splitInto+'</span>'
+      : '';
+    const splitMeta=(o.splitInto>1)
+      ? ' · 🚚 הוכן ב-'+o.splitInto+' חבילות'
+      : '';
     h+='<div class="so-card stage-'+o.stage+'" data-sdetail="'+o.id+'">'+
       '<div class="so-top">'+
         '<span class="so-id">📦 '+o.id+'</span>'+
-        pill+
+        pill+splitPill+
       '</div>'+
       '<div class="so-who">'+(o.who||'—')+' · '+(o.site||'—')+'</div>'+
       '<div class="so-when">🕒 נדרש: '+(o.deliverWhen||'בתיאום')+'</div>'+
-      '<div class="so-meta">'+(o.items||0)+' פריטים · ₪'+(o.sum||0).toLocaleString()+' · הקש לתעודת ליקוט</div>'+
+      '<div class="so-meta">'+(o.items||0)+' פריטים · ₪'+(o.sum||0).toLocaleString()+splitMeta+' · הקש לתעודת ליקוט</div>'+
       btn+
     '</div>';
   });
@@ -17142,6 +17171,11 @@ function storeOrderDetail(id){
   /* the store opened the order — acknowledge the resolution badge */
   if(o.missingResolved){ o.missingResolved=null;
     if(typeof saveSysOrders==='function'){ try{ saveSysOrders(); }catch(e){} } }
+  /* the supplier has now seen the split — calm the pulsing badge. The split
+     itself stays visible permanently; only the "fresh" attention cue clears. */
+  if(o.splitNoticeNew){ o.splitNoticeNew=null;
+    if(typeof saveSysOrders==='function'){ try{ saveSysOrders(); }catch(e){} }
+    if(typeof renderStoreOrders==='function'){ try{ renderStoreOrders(); }catch(e){} } }
   storePickId=id;
   renderStorePick();
   document.getElementById('storePickOverlay').classList.add('show');
@@ -17176,21 +17210,27 @@ function renderStorePick(){
   } else if(missing>0){
     h+='<div class="sp-miss-alert">⚠️ '+missing+' פריטים חסרים — הקבלן עודכן</div>';
   }
+  /* split-shipment banner — surfaces the grouping at the very top of the
+     picking sheet so the picker can't miss it. The list below is already
+     grouped by shipment; this banner is the orientation. */
+  if(o.splitInto>1){
+    h+='<div class="sp-miss-alert" style="background:rgba(242,165,22,.12);color:var(--amber-deep)">'+
+       '🚚 ההזמנה מפוצלת ל-'+o.splitInto+' משלוחים — הכן כל קבוצה כחבילה נפרדת.'+
+       '</div>';
+  }
 
-  /* picking list */
-  h+='<div class="sp-list">';
-  lines.forEach((l,i)=>{
+  /* one line renderer, used by both the grouped and flat layouts */
+  function renderSpLine(l,i){
     const state=l.cancelled?'missing':l.replaced?'picked':l.picked?'picked':l.missing?'missing':'pending';
     const inf=storeItemInfo(l.name);
     const lineTotal=(inf.price!=null)?inf.price*l.qty:null;
-    /* status text for this line */
     let statusTx='';
     if(l.cancelled) statusTx=' · ✕ בוטל ע״י הקבלן';
     else if(l.replaced) statusTx=' · 🔁 הוחלף ע״י הקבלן';
     else if(l.missing && l.pendingDecision) statusTx=' · ⏳ ממתין לבחירת הקבלן';
     else if(l.missing) statusTx=' · ✕ חסר';
     else if(l.picked) statusTx=' · ✓ לוקט';
-    h+='<div class="sp-line '+state+'">'+
+    return '<div class="sp-line '+state+'">'+
       '<div class="sp-thumb">'+inf.img+'</div>'+
       '<div class="sp-line-main">'+
         '<div class="sp-line-nm">'+l.name+(l.replaced?' <span class="sp-repl">מוצר חלופי</span>':'')+'</div>'+
@@ -17210,8 +17250,26 @@ function renderStorePick(){
         '<button class="sp-lb miss'+(l.missing?' on':'')+'" onclick="storeMissLine('+i+')">חסר</button>'+
       '</div>'+
     '</div>';
-  });
-  h+='</div>';
+  }
+
+  /* picking list — grouped by shipment when the order was split, flat otherwise */
+  if(o.splitInto>1 && Array.isArray(o.splitPlan)){
+    const groups={};
+    lines.forEach((l,i)=>{
+      const g=o.splitPlan[i]||1;
+      (groups[g]=groups[g]||[]).push({l:l,i:i});
+    });
+    Object.keys(groups).sort(function(a,b){return Number(a)-Number(b);}).forEach(function(g){
+      h+='<div class="sp-split-h">📦 משלוח '+g+' — '+groups[g].length+' פריטים</div>';
+      h+='<div class="sp-list">';
+      groups[g].forEach(function(it){ h+=renderSpLine(it.l,it.i); });
+      h+='</div>';
+    });
+  } else {
+    h+='<div class="sp-list">';
+    lines.forEach((l,i)=>{ h+=renderSpLine(l,i); });
+    h+='</div>';
+  }
 
   /* action */
   if(o.stage==='new'){
@@ -17737,16 +17795,26 @@ function renderCourierList(){
     else { step=3; btn='<button type="button" class="ch-btn amber" data-advance="'+oid+'">✅ נמסר ללקוח</button>'; }
     /* the card-body opens the detail sheet; the advance button is a SEPARATE
        sibling — no stopPropagation needed, the two regions never overlap. */
+    /* split indicator — calm amber pill in the header, plus an explicit
+       note in the body so the courier can't miss that there are several
+       packages to load together. */
+    const splitPill=(o.splitInto>1)
+      ? '<span class="adm-pill split'+(o.splitNoticeNew?' fresh':'')+'">🚚×'+o.splitInto+'</span>'
+      : '';
+    const splitNote=(o.splitInto>1)
+      ? '<div class="ch-split-note">📦 '+o.splitInto+' חבילות נפרדות — אסוף את כולן ביחד</div>'
+      : '';
     h+='<div class="ch-card stage-'+o.stage+'">'+
       '<div class="ch-card-body" data-detail="'+oid+'">'+
         '<div class="ch-card-top">'+
           '<span class="ch-id">📦 '+o.id+'</span>'+
-          '<span class="adm-pill '+si.cls+'">'+si.label+'</span>'+
+          '<span class="adm-pill '+si.cls+'">'+si.label+'</span>'+splitPill+
         '</div>'+
         '<div class="ch-cust">👤 '+(o.who||'—')+'</div>'+
         '<div class="ch-addr">📍 '+(o.site||'—')+'</div>'+
         '<div class="ch-when">🕒 נדרש: '+(o.deliverWhen||'בתיאום')+'</div>'+
         '<div class="ch-haul">'+hi.ic+' '+hi.name+'</div>'+
+        splitNote+
         '<div class="deliv-track">'+
           '<div class="dt-step '+(step>=1?'on':'')+'">איסוף</div>'+
           '<div class="dt-line '+(step>=2?'on':'')+'"></div>'+
@@ -17765,6 +17833,10 @@ function renderCourierList(){
 function courierDetail(id){
   const o=SYS_ORDERS.find(x=>x.id===id);
   if(!o) return;
+  /* the courier has seen the split — calm the pulsing badge */
+  if(o.splitNoticeNew){ o.splitNoticeNew=null;
+    if(typeof saveSysOrders==='function'){ try{ saveSysOrders(); }catch(e){} }
+    if(typeof renderCourierList==='function'){ try{ renderCourierList(); }catch(e){} } }
   const si=ORDER_STAGE[o.stage]||{label:o.stage};
   let step=o.stage==='ready'?1:o.stage==='pickup'?2:3;
   let h='<div class="msd-ic">🛵</div>';
@@ -17783,6 +17855,7 @@ function courierDetail(id){
     '<div class="msd-row"><span>כתובת מסירה</span><b>'+(o.site||'—')+'</b></div>'+
     '<div class="msd-row"><span>מועד נדרש</span><b>'+(o.deliverWhen||'בתיאום')+'</b></div>'+
     '<div class="msd-row"><span>מספר פריטים</span><b>'+(o.items||0)+'</b></div>'+
+    (o.splitInto>1?'<div class="msd-row"><span>פיצול משלוח</span><b>'+o.splitInto+' חבילות נפרדות</b></div>':'')+
     '<div class="msd-row"><span>סכום ההזמנה</span><b>₪'+(o.sum||0).toLocaleString()+'</b></div>'+
   '</div>';
   /* item list if available */
@@ -18056,14 +18129,25 @@ function confirmSplitShipment(orderId){
   const groups=plan.filter(function(v,i,a){return a.indexOf(v)===i;});
   if(groups.length<2){ if(typeof toast==='function') toast('יש לשייך פריטים לפחות לשני משלוחים'); return; }
   o.splitInto=groups.length; o.splitPlan=plan.slice();
+  /* flag the split as "fresh" — drives the calm pulse on the supplier &
+     courier badges so they notice it once, then it settles. */
+  o.splitNoticeNew=true;
   if(typeof saveSysOrders==='function'){ try{ saveSysOrders(); }catch(e){} }
   if(typeof pushNotification==='function'){
     pushNotification('הזמנה '+o.id+' פוצלה ל-'+groups.length+' משלוחים',{icon:'🚚',
-      detail:{title:'פיצול משלוחים',lines:['הזמנה: '+o.id,'ההזמנה תגיע ב-'+groups.length+' משלוחים נפרדים.']}});
+      detail:{title:'פיצול משלוחים',
+        lines:['הזמנה: '+o.id,
+               'ההזמנה תגיע ב-'+groups.length+' משלוחים נפרדים.',
+               'הספק והשליח עודכנו אוטומטית — לכל משלוח תוכן חבילה נפרדת.']}});
   }
-  if(typeof toast==='function') toast('ההזמנה פוצלה ל-'+groups.length+' משלוחים ✓');
+  if(typeof toast==='function') toast('ההזמנה פוצלה ל-'+groups.length+' משלוחים · הספק והשליח עודכנו ✓');
   closeOverlayById('splitOverlay');
   if(typeof renderMyOrders==='function') renderMyOrders();
+  /* propagate the split to the store and courier screens so badges show up
+     immediately — without this, the supplier/courier only see it on next refresh. */
+  try{ if(typeof renderStoreOrders==='function') renderStoreOrders(); }catch(e){}
+  try{ if(typeof renderStorePick==='function' && storePickId===o.id) renderStorePick(); }catch(e){}
+  try{ if(typeof renderCourierList==='function') renderCourierList(); }catch(e){}
 }
 
 /* ---- 2. RMA RETURNS ---- */
@@ -19463,7 +19547,7 @@ function registerPWA(){
 safeRun('אתחול ארכיטקטורה',function(){
   BSRouter.start();
   registerPWA();
-  bsLog.info('[BuildSmart R104] architecture layer ready · storage='+
+  bsLog.info('[BuildSmart R105] architecture layer ready · storage='+
     (BSStore.available?'localStorage':'memory')+
     ' · livesync='+(BSLiveSync.connected?'on':'off'));
 });
