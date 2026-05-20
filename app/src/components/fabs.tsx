@@ -1,17 +1,18 @@
-import { menuOpen, toggleMenu, openSearch } from '../store/app-store';
+import { menuOpen, toggleMenu, searchOpen, toggleSearch } from '../store/app-store';
 
 export function Fabs() {
-  const open = menuOpen.value;
+  const menuIsOpen = menuOpen.value;
+  const searchIsOpen = searchOpen.value;
   return (
     <>
       <button
         type="button"
-        class={`fab fab--menu${open ? ' is-open' : ''}`}
+        class={`fab fab--menu${menuIsOpen ? ' is-open' : ''}`}
         onClick={toggleMenu}
-        aria-label={open ? 'סגור תפריט' : 'פתח תפריט'}
-        aria-expanded={open}
+        aria-label={menuIsOpen ? 'סגור תפריט' : 'פתח תפריט'}
+        aria-expanded={menuIsOpen}
       >
-        {open ? (
+        {menuIsOpen ? (
           <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
             <line x1="6" y1="6" x2="18" y2="18" />
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -27,9 +28,10 @@ export function Fabs() {
 
       <button
         type="button"
-        class="fab fab--search"
-        onClick={openSearch}
-        aria-label="חיפוש"
+        class={`fab fab--search${searchIsOpen ? ' is-search-open' : ''}`}
+        onClick={toggleSearch}
+        aria-label={searchIsOpen ? 'סגור חיפוש' : 'חיפוש'}
+        aria-expanded={searchIsOpen}
       >
         <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
           <circle cx="11" cy="11" r="7" />

@@ -4,9 +4,8 @@ import { searchQuery, setActiveTool } from '../../store/search-store';
 
 const LONG_PRESS_MS = 280;
 
-export function VoiceMode() {
+export function VoiceSubmenu() {
   const [listening, setListening] = useState(false);
-  const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
   const sessionRef = useRef<{ stop: () => void } | null>(null);
   const longPressTimer = useRef<number | null>(null);
@@ -24,14 +23,11 @@ export function VoiceMode() {
       return;
     }
     setError(null);
-    setTranscript('');
     setListening(true);
     const session = startVoiceRecognition({
       onTranscript: (t, isFinal) => {
-        setTranscript(t);
         searchQuery.value = t;
         if (isFinal && autoCommit && t.trim()) {
-          /* short-tap: commit and return to dial */
           stopListening();
           setActiveTool(null);
         }
@@ -48,11 +44,8 @@ export function VoiceMode() {
     sessionRef.current = session;
   };
 
-  useEffect(() => {
-    return () => stopListening();
-  }, []);
+  useEffect(() => () => stopListening(), []);
 
-  /* Short tap: toggle single-shot. Long press: listen while held. */
   const onPointerDown = (e: PointerEvent) => {
     (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
     isLongPress.current = false;
@@ -70,40 +63,31 @@ export function VoiceMode() {
     if (isLongPress.current) {
       stopListening();
     } else {
-      /* Short tap: toggle */
-      if (listening) {
-        stopListening();
-      } else {
-        startListening(true);
-      }
+      listening ? stopListening() : startListening(true);
     }
     isLongPress.current = false;
   };
 
   return (
-    <div class="vmode">
+    <div class="ssub">
       <button
         type="button"
-        class={`vmode__mic${listening ? ' is-listening' : ''}`}
-        aria-label={listening ? 'מקליט — שחרר להפסקה' : 'הקש להפעלה או החזק לדיבור ממושך'}
+        class={`ssub__row${listening ? ' is-on' : ''}`}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
+        aria-label="הקלטה — הקש פעם או החזק לדיבור ממושך"
       >
-        <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="9" y="2" width="6" height="12" rx="3" />
-          <path d="M5 11a7 7 0 0014 0M12 18v4M8 22h8" />
-        </svg>
+        <span class="ssub__icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="2" width="6" height="12" rx="3" />
+            <path d="M5 11a7 7 0 0014 0M12 18v4M8 22h8" />
+          </svg>
+        </span>
+        <span class="ssub__label">
+          {error ? error : listening ? 'מאזין... שחרר לסיום' : 'הקש להפעלה · החזק לדיבור'}
+        </span>
       </button>
-      <p class="vmode__hint">
-        {error
-          ? error
-          : listening
-            ? 'מאזין... דבר בקול ברור'
-            : transcript
-              ? '"' + transcript + '"'
-              : 'הקש פעם להפעלה   ·   החזק לדיבור ממושך'}
-      </p>
     </div>
   );
 }

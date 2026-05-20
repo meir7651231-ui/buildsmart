@@ -1,14 +1,13 @@
 import { useEffect, useRef } from 'preact/hooks';
 import { searchOpen, closeSearch } from '../../store/app-store';
 import { searchQuery, activeTool, resetSearch } from '../../store/search-store';
-import { ToolsDial } from './tools-dial';
-import { DroppedTool } from './dropped-tool';
+import { ToolsRail } from './tools-dial';
 import { ScopeChips } from './scope-chips';
 import { ResultsList } from './results-list';
-import { VoiceMode } from './voice-mode';
-import { BarcodeMode } from './barcode-mode';
-import { FiltersMode } from './filters-mode';
-import { SortPickerMode } from './sort-mode';
+import { VoiceSubmenu } from './submenu-voice';
+import { BarcodeSubmenu } from './submenu-barcode';
+import { FiltersSubmenu } from './submenu-filters';
+import { SortSubmenu } from './submenu-sort';
 
 export function SearchPanel() {
   if (!searchOpen.value) return null;
@@ -32,20 +31,25 @@ function SearchPanelInner() {
   };
 
   return (
-    <div class="spanel" role="dialog" aria-modal="true" aria-label="חיפוש">
-      <button type="button" class="spanel__backdrop" aria-label="סגור" onClick={handleClose} />
+    <>
+      <button
+        type="button"
+        class="spanel__backdrop"
+        aria-label="סגור"
+        onClick={handleClose}
+      />
 
-      <div class="spanel__stage">
-        {tool === null && <ResultsList />}
-        {tool === 'voice' && <VoiceMode />}
-        {tool === 'barcode' && <BarcodeMode />}
-        {tool === 'filters' && <FiltersMode />}
-        {tool === 'sort' && <SortPickerMode />}
+      <div class="spanel__stage">{!tool && <ResultsList />}</div>
+
+      <div class="spanel__rail">
+        {tool === 'voice' && <VoiceSubmenu />}
+        {tool === 'barcode' && <BarcodeSubmenu />}
+        {tool === 'filters' && <FiltersSubmenu />}
+        {tool === 'sort' && <SortSubmenu />}
+        <ToolsRail />
       </div>
 
-      {tool === null && <ToolsDial />}
-      {tool === null && <ScopeChips />}
-      {tool !== null && <DroppedTool tool={tool} />}
+      {!tool && <ScopeChips />}
 
       <div class="sinput">
         <span class="sinput__icon" aria-hidden="true">
@@ -76,10 +80,7 @@ function SearchPanelInner() {
             ✕
           </button>
         )}
-        <button type="button" class="sinput__close" aria-label="סגור חיפוש" onClick={handleClose}>
-          ×
-        </button>
       </div>
-    </div>
+    </>
   );
 }

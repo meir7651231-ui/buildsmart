@@ -1,4 +1,4 @@
-import { setActiveTool, type ToolKind } from '../../store/search-store';
+import { activeTool, setActiveTool, type ToolKind } from '../../store/search-store';
 
 type Tool = {
   id: ToolKind;
@@ -46,23 +46,39 @@ const TOOLS: Tool[] = [
   },
 ];
 
-export function ToolsDial() {
+export function ToolsRail() {
+  const active = activeTool.value;
+  const activeDef = active ? TOOLS.find((t) => t.id === active) : null;
+
   return (
-    <ul class="sdial" role="menu" aria-label="כלי חיפוש">
-      {TOOLS.map((t, i) => (
-        <li key={t.id} class="sdial__item" style={{ animationDelay: `${i * 30}ms` }}>
+    <div class="trail" role="menu" aria-label="כלי חיפוש">
+      {!activeDef &&
+        TOOLS.map((t, i) => (
           <button
+            key={t.id}
             type="button"
-            class="sdial__btn"
+            class="trail__btn"
             role="menuitem"
+            style={{ animationDelay: `${i * 28}ms` }}
             onClick={() => setActiveTool(t.id)}
           >
-            <span class="sdial__circle">{t.icon}</span>
-            <span class="sdial__label">{t.label}</span>
+            <span class="trail__circle">{t.icon}</span>
+            <span class="trail__label">{t.label}</span>
           </button>
-        </li>
-      ))}
-    </ul>
+        ))}
+
+      {activeDef && (
+        <button
+          type="button"
+          class="trail__btn trail__btn--active"
+          onClick={() => setActiveTool(null)}
+          aria-label={`חזרה מ-${activeDef.label}`}
+        >
+          <span class="trail__circle trail__circle--active">{activeDef.icon}</span>
+          <span class="trail__label">{activeDef.label}</span>
+        </button>
+      )}
+    </div>
   );
 }
 

@@ -61,6 +61,9 @@ export function openSearch(): void {
 export function closeSearch(): void {
   searchOpen.value = false;
 }
+export function toggleSearch(): void {
+  searchOpen.value = !searchOpen.value;
+}
 export function openProduct(id: string): void {
   openedProductId.value = id;
 }

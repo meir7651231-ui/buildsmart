@@ -1,5 +1,6 @@
 import { FloatingHeader } from './components/floating-header';
 import { HomeView } from './views/home';
+import { Fabs } from './components/fabs';
 import { MenuSpeedDial } from './components/menu-speed-dial';
 import { SearchPanel } from './components/search/search-panel';
 import { ProductSheet } from './components/product-sheet';
@@ -12,6 +13,7 @@ export function App() {
       <main class="content">
         <HomeView />
       </main>
+      <Fabs />
       <MenuSpeedDial />
       <SearchPanel />
       <ProductSheet />
