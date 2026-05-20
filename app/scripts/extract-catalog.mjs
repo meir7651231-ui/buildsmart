@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 /**
- * Reads the legacy index.html prototype, lifts the TREES constant (171
- * contractor catalog products), writes each base64 product image out to
- * public/catalog/<id>.jpg, and emits src/data/catalog.ts with the
- * de-bloated metadata plus a derived category tree.
+ * Lifts product catalog, variant tables, supplier pricing, and tool
+ * bundles from the legacy single-file prototype (../index.html) into
+ * type-safe TS modules under src/data/, and decodes embedded base64
+ * JPEGs to public/catalog/*.jpg.
  *
- * Re-run whenever the source catalog changes:
  *   node scripts/extract-catalog.mjs
  */
 import fs from 'node:fs';
@@ -16,89 +15,119 @@ const here = path.dirname(url.fileURLToPath(import.meta.url));
 const appRoot = path.resolve(here, '..');
 const legacyHtml = path.resolve(appRoot, '../index.html');
 const imagesDir = path.join(appRoot, 'public/catalog');
-const outFile = path.join(appRoot, 'src/data/catalog.ts');
+const dataDir = path.join(appRoot, 'src/data');
 
 fs.mkdirSync(imagesDir, { recursive: true });
+fs.mkdirSync(dataDir, { recursive: true });
 
 const html = fs.readFileSync(legacyHtml, 'utf8');
 const lines = html.split('\n');
 
-const startIdx = lines.findIndex((l) => l.includes('const TREES = {'));
-if (startIdx < 0) throw new Error('TREES constant not found in legacy HTML');
-
-let depth = 0;
-let endIdx = -1;
-for (let i = startIdx; i < lines.length; i++) {
-  for (const ch of lines[i]) {
-    if (ch === '{') depth++;
-    else if (ch === '}') {
-      depth--;
-      if (depth === 0) {
-        endIdx = i;
-        break;
+/** Find a `const NAME = {...};` or `const NAME = [...];` block, return its source. */
+function liftConst(name) {
+  const start = lines.findIndex((l) => l.includes(`const ${name} =`));
+  if (start < 0) throw new Error(`const ${name} not found`);
+  const openChar = lines[start].includes('= {') ? '{' : '[';
+  const closeChar = openChar === '{' ? '}' : ']';
+  let depth = 0;
+  let end = -1;
+  for (let i = start; i < lines.length; i++) {
+    for (const ch of lines[i]) {
+      if (ch === openChar) depth++;
+      else if (ch === closeChar) {
+        depth--;
+        if (depth === 0) {
+          end = i;
+          break;
+        }
       }
     }
+    if (end >= 0) break;
   }
-  if (endIdx >= 0) break;
+  if (end < 0) throw new Error(`Could not close const ${name}`);
+  return lines.slice(start, end + 1).join('\n');
 }
-if (endIdx < 0) throw new Error('Could not find matching close of TREES');
 
-const treesCode = lines.slice(startIdx, endIdx + 1).join('\n');
-const TREES = new Function(`${treesCode}; return TREES;`)();
+const treesSrc = liftConst('TREES');
+const variantsSrc = liftConst('VARIANTS');
+const storePricingSrc = liftConst('STORE_PRICING');
+const supplierStoresSrc = liftConst('SUPPLIER_STORES');
+const toolsSrc = liftConst('TOOLS');
 
-const entries = Object.entries(TREES);
+const sandbox = new Function(
+  `${treesSrc};${variantsSrc};${storePricingSrc};${supplierStoresSrc};${toolsSrc};` +
+    'return {TREES, VARIANTS, STORE_PRICING, SUPPLIER_STORES, TOOLS};',
+);
+const { TREES, VARIANTS, STORE_PRICING, SUPPLIER_STORES, TOOLS } = sandbox();
+
+/* ============================================================
+ *  Catalog products + categories + accessories
+ * ============================================================ */
+
+const slug = (s) =>
+  s
+    .replace(/[\s/]+/g, '-')
+    .replace(/["'״׳]/g, '')
+    .replace(/[^֐-׿a-zA-Z0-9-]/g, '')
+    .toLowerCase();
+
 let imagesWritten = 0;
-
-const products = entries.map(([id, raw]) => {
+const products = Object.entries(TREES).map(([id, raw]) => {
   let image;
   if (typeof raw.image === 'string' && raw.image.startsWith('data:image/jpeg;base64,')) {
     const base64 = raw.image.split(',', 2)[1];
-    const buf = Buffer.from(base64, 'base64');
-    const file = `${id}.jpg`;
-    fs.writeFileSync(path.join(imagesDir, file), buf);
-    image = `/catalog/${file}`;
+    fs.writeFileSync(path.join(imagesDir, `${id}.jpg`), Buffer.from(base64, 'base64'));
+    image = `/catalog/${id}.jpg`;
     imagesWritten++;
   }
+
+  const accessories = Array.isArray(raw.acc)
+    ? raw.acc.map((a) => ({
+        name: String(a.name ?? ''),
+        emoji: String(a.img ?? '🧩'),
+        price: typeof a.price === 'number' ? a.price : 0,
+        qty: typeof a.qty === 'number' ? a.qty : 1,
+        why: typeof a.why === 'string' ? a.why : undefined,
+        must: a.must === true,
+        ...(Array.isArray(a.sizes) ? { sizes: a.sizes } : {}),
+      }))
+    : [];
 
   const out = {
     id,
     name: String(raw.name ?? id),
     emoji: String(raw.img ?? '📦'),
-    categoryId: String(raw.cat ?? 'אחר'),
+    categoryName: String(raw.cat ?? 'אחר'),
   };
-  if (raw.secondary) out.subcategoryId = String(raw.secondary);
+  if (raw.secondary) out.subcategoryName = String(raw.secondary);
   if (raw.productType) out.productType = String(raw.productType);
   if (raw.series) out.series = String(raw.series);
   if (raw.material) out.material = String(raw.material);
   if (raw.note) out.note = String(raw.note);
   if (typeof raw.price === 'number') out.price = raw.price;
   if (image) out.image = image;
+  if (raw.catalogProduct === true) out.catalogProduct = true;
+  if (raw.accessoryProduct === true) out.accessoryProduct = true;
+  if (accessories.length) out.accessories = accessories;
   return out;
 });
-
-const categoriesMap = new Map();
-for (const p of products) {
-  if (!categoriesMap.has(p.categoryId)) {
-    categoriesMap.set(p.categoryId, new Set());
-  }
-  if (p.subcategoryId) {
-    categoriesMap.get(p.categoryId).add(p.subcategoryId);
-  }
-}
-
-const slug = (s) => {
-  return s
-    .replace(/[\s/]+/g, '-')
-    .replace(/["'״׳]/g, '')
-    .replace(/[^֐-׿a-zA-Z0-9-]/g, '')
-    .toLowerCase();
-};
 
 const categoryEmojiMap = {
   'אביזרים מכניים': '⚙️',
   'אביזרים נלווים': '🧰',
+  'ברזים וכיורים': '🚰',
+  'אסלות': '🚽',
+  'מקלחות ואמבטיות': '🚿',
+  'בנייה ומחיצות': '🧱',
+  'גמר': '🎨',
+  'אינסטלציה גסה': '🔧',
+  'חימום מים': '🔥',
+  'מטבח': '🍳',
+  'ניקוז וצנרת': '🟢',
+  'גופי תברואה': '🛁',
+  'אביזרי קצה וחיבורים': '🔩',
+  'אחר': '✨',
 };
-
 const subEmojiMap = {
   'ברזים ושסתומים': '🚰',
   'חיבורים ומחברים': '🔗',
@@ -110,32 +139,20 @@ const subEmojiMap = {
   'מיכלים וגופים סמויים': '📦',
   'חשמל וחימום': '⚡',
   'אחר': '✨',
-  'הסתעפות': '🔱',
-  'מעבר זווית': '↪️',
-  'מחבר ישר': '➖',
-  'הסתעפות מופחתת': '🪢',
-  'תושבת לאסלה תלויה': '🚽',
-  'אביזרי שירותים': '🧻',
-  'מגופים וברזים': '🔧',
-  'הלחמות והתכת חימום': '🔥',
-  'כלי עבודה': '🛠️',
 };
 
+const catMap = new Map();
+for (const p of products) {
+  if (!catMap.has(p.categoryName)) catMap.set(p.categoryName, new Set());
+  if (p.subcategoryName) catMap.get(p.categoryName).add(p.subcategoryName);
+}
 const cats = [];
-let topCount = 0;
-for (const [topName, subs] of categoriesMap.entries()) {
-  topCount++;
-  const topId = `top-${slug(topName)}` || `top-${topCount}`;
-  cats.push({
-    id: topId,
-    name: topName,
-    emoji: categoryEmojiMap[topName] ?? '📁',
-    parentId: null,
-  });
+for (const [topName, subs] of catMap.entries()) {
+  const topId = `top-${slug(topName)}`;
+  cats.push({ id: topId, name: topName, emoji: categoryEmojiMap[topName] ?? '📁', parentId: null });
   for (const subName of subs) {
-    const subId = `${topId}/${slug(subName)}`;
     cats.push({
-      id: subId,
+      id: `${topId}/${slug(subName)}`,
       name: subName,
       emoji: subEmojiMap[subName] ?? '•',
       parentId: topId,
@@ -144,24 +161,99 @@ for (const [topName, subs] of categoriesMap.entries()) {
 }
 
 for (const p of products) {
-  const topId = `top-${slug(p.categoryId)}`;
+  const topId = `top-${slug(p.categoryName)}`;
   p.categoryTopId = topId;
-  if (p.subcategoryId) {
-    p.categoryLeafId = `${topId}/${slug(p.subcategoryId)}`;
-  } else {
-    p.categoryLeafId = topId;
-  }
-  delete p.categoryId;
-  delete p.subcategoryId;
+  p.categoryLeafId = p.subcategoryName ? `${topId}/${slug(p.subcategoryName)}` : topId;
+  delete p.categoryName;
+  delete p.subcategoryName;
 }
 
-const header = `/* Auto-generated by scripts/extract-catalog.mjs — do not edit by hand.
- * Source: /home/user/buildsmart/index.html TREES constant.
+/* ============================================================
+ *  VARIANTS — size / diameter options per catalog product
+ * ============================================================ */
+
+const variants = {};
+for (const [productId, def] of Object.entries(VARIANTS)) {
+  if (!def || typeof def !== 'object') continue;
+  variants[productId] = {
+    label: typeof def.label === 'string' ? def.label : 'גרסה',
+    sku: def.sku === true,
+    opts: Array.isArray(def.opts)
+      ? def.opts.map((o) => {
+          const out = { name: String(o.name ?? '') };
+          if (o.sku) out.sku = String(o.sku);
+          if (o.unit) out.unit = String(o.unit);
+          if (o.diameter) out.diameter = String(o.diameter);
+          if (o.page) out.page = String(o.page);
+          if (typeof o.delta === 'number') out.delta = o.delta;
+          if (o.model) out.model = String(o.model);
+          return out;
+        })
+      : [],
+  };
+}
+
+/* ============================================================
+ *  SUPPLIER_STORES + STORE_PRICING
+ * ============================================================ */
+
+const suppliers = {};
+for (const [id, s] of Object.entries(SUPPLIER_STORES)) {
+  suppliers[id] = {
+    id,
+    name: String(s.name ?? id),
+    icon: String(s.icon ?? '🏪'),
+    shipping: typeof s.shipping === 'number' ? s.shipping : 0,
+    eta: String(s.eta ?? ''),
+  };
+}
+
+const storePricing = {};
+for (const [storeId, prices] of Object.entries(STORE_PRICING)) {
+  storePricing[storeId] = {};
+  for (const [sku, price] of Object.entries(prices)) {
+    storePricing[storeId][sku] = price;
+  }
+}
+
+/* ============================================================
+ *  TOOLS — required / suggested tools per job type
+ * ============================================================ */
+
+const tools = {};
+for (const [key, list] of Object.entries(TOOLS)) {
+  if (!Array.isArray(list)) continue;
+  tools[key] = list.map((t) => ({
+    name: String(t.name ?? ''),
+    emoji: String(t.img ?? '🛠️'),
+    why: typeof t.why === 'string' ? t.why : undefined,
+    price: typeof t.price === 'number' ? t.price : 0,
+  }));
+}
+
+/* ============================================================
+ *  Write output files
+ * ============================================================ */
+
+const banner = `/* Auto-generated by scripts/extract-catalog.mjs — do not edit by hand.
+ * Source: /home/user/buildsmart/index.html
  * Regenerate: node scripts/extract-catalog.mjs
  */
 `;
 
-const productType = `export type CatalogProduct = {
+const catalogTs =
+  banner +
+  `export type Accessory = {
+  name: string;
+  emoji: string;
+  price: number;
+  qty: number;
+  why?: string;
+  must: boolean;
+  sizes?: unknown[];
+};
+
+export type CatalogProduct = {
   id: string;
   name: string;
   emoji: string;
@@ -173,6 +265,9 @@ const productType = `export type CatalogProduct = {
   note?: string;
   price?: number;
   image?: string;
+  catalogProduct?: boolean;
+  accessoryProduct?: boolean;
+  accessories?: Accessory[];
 };
 
 export type CatalogCategory = {
@@ -181,14 +276,12 @@ export type CatalogCategory = {
   emoji: string;
   parentId: string | null;
 };
-`;
 
-const body =
-  header +
-  productType +
-  `\nexport const CATEGORIES: CatalogCategory[] = ${JSON.stringify(cats, null, 2)};\n\n` +
+` +
+  `export const CATEGORIES: CatalogCategory[] = ${JSON.stringify(cats, null, 2)};\n\n` +
   `export const PRODUCTS: CatalogProduct[] = ${JSON.stringify(products, null, 2)};\n` +
-  `\nexport function childrenOf(parentId: string | null): CatalogCategory[] {
+  `
+export function childrenOf(parentId: string | null): CatalogCategory[] {
   return CATEGORIES.filter((c) => c.parentId === parentId);
 }
 
@@ -208,10 +301,101 @@ export function productById(id: string): CatalogProduct | undefined {
   return PRODUCTS.find((p) => p.id === id);
 }
 `;
+fs.writeFileSync(path.join(dataDir, 'catalog.ts'), catalogTs);
 
-fs.writeFileSync(outFile, body);
+const variantsTs =
+  banner +
+  `export type VariantOption = {
+  name: string;
+  sku?: string;
+  unit?: string;
+  diameter?: string;
+  page?: string;
+  delta?: number;
+  model?: string;
+};
 
-const sizeKb = Math.round(fs.statSync(outFile).size / 1024);
-console.log(`Wrote ${products.length} products to ${outFile} (${sizeKb} KB)`);
-console.log(`Wrote ${imagesWritten} catalog images to ${imagesDir}`);
-console.log(`Categories: ${cats.filter((c) => !c.parentId).length} top, ${cats.filter((c) => c.parentId).length} sub`);
+export type VariantDef = {
+  label: string;
+  sku: boolean;
+  opts: VariantOption[];
+};
+
+export const VARIANTS: Record<string, VariantDef> = ${JSON.stringify(variants, null, 2)};
+
+export function variantsOf(productId: string): VariantDef | undefined {
+  return VARIANTS[productId];
+}
+`;
+fs.writeFileSync(path.join(dataDir, 'variants.ts'), variantsTs);
+
+const suppliersTs =
+  banner +
+  `export type Supplier = {
+  id: string;
+  name: string;
+  icon: string;
+  shipping: number;
+  eta: string;
+};
+
+export const SUPPLIERS: Record<string, Supplier> = ${JSON.stringify(suppliers, null, 2)};
+
+export const STORE_PRICING: Record<string, Record<string, number>> = ${JSON.stringify(
+    storePricing,
+    null,
+    2,
+  )};
+
+export const DEFAULT_SUPPLIER_ID = '${Object.keys(suppliers)[0] ?? ''}';
+
+export function priceFor(sku: string | undefined, supplierId: string): number | undefined {
+  if (!sku) return undefined;
+  return STORE_PRICING[supplierId]?.[sku];
+}
+
+export function cheapestSupplier(sku: string | undefined): { supplierId: string; price: number } | undefined {
+  if (!sku) return undefined;
+  let best: { supplierId: string; price: number } | undefined;
+  for (const [id, prices] of Object.entries(STORE_PRICING)) {
+    const p = prices[sku];
+    if (typeof p === 'number' && (!best || p < best.price)) {
+      best = { supplierId: id, price: p };
+    }
+  }
+  return best;
+}
+`;
+fs.writeFileSync(path.join(dataDir, 'suppliers.ts'), suppliersTs);
+
+const toolsTs =
+  banner +
+  `export type ToolItem = {
+  name: string;
+  emoji: string;
+  why?: string;
+  price: number;
+};
+
+export const TOOL_BUNDLES: Record<string, ToolItem[]> = ${JSON.stringify(tools, null, 2)};
+
+export function toolsFor(key: string): ToolItem[] {
+  return TOOL_BUNDLES[key] ?? [];
+}
+`;
+fs.writeFileSync(path.join(dataDir, 'tools.ts'), toolsTs);
+
+console.log('---');
+console.log(`Products:            ${products.length}`);
+console.log(`  with image:        ${imagesWritten}`);
+console.log(`  with accessories:  ${products.filter((p) => p.accessories?.length).length}`);
+console.log(`Categories:          ${cats.filter((c) => !c.parentId).length} top + ${cats.filter((c) => c.parentId).length} sub`);
+console.log(`Variants:            ${Object.keys(variants).length} products with size pickers`);
+console.log(`Suppliers:           ${Object.keys(suppliers).length}`);
+console.log(`STORE_PRICING SKUs:  ${Object.values(storePricing).reduce((a, s) => a + Object.keys(s).length, 0)} total across ${Object.keys(storePricing).length} stores`);
+console.log(`Tool bundles:        ${Object.keys(tools).length} keyed bundles (${Object.values(tools).reduce((a, t) => a + t.length, 0)} tool entries)`);
+const sizeKb = (p) => Math.round(fs.statSync(p).size / 1024);
+console.log('---');
+for (const f of ['catalog.ts', 'variants.ts', 'suppliers.ts', 'tools.ts']) {
+  console.log(`  ${f}: ${sizeKb(path.join(dataDir, f))} KB`);
+}
