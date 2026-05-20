@@ -1299,3 +1299,216 @@ li {
 .sresult__kind--cat    { color: #d98a00; }
 .sresult__kind--screen { color: #45575e; }
 
+/* =====================================================================
+   BS panel — right-edge drawer, ported from the legacy registration
+   hamburger. Slides in from the right with a backdrop scrim.
+   ===================================================================== */
+
+.bspanel__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.22s ease;
+}
+
+.bspanel__drawer {
+  position: fixed;
+  top: 0;
+  inset-inline-start: 0;
+  bottom: 0;
+  z-index: 81;
+  width: min(310px, 86vw);
+  background: var(--card);
+  box-shadow: -12px 0 40px -12px rgba(0, 0, 0, 0.45);
+  transform: translateX(100%);
+  transition: transform 0.26s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.bspanel.is-open .bspanel__scrim {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.bspanel.is-open .bspanel__drawer {
+  transform: translateX(0);
+}
+
+/* Raise the BS logo above the scrim so it remains tappable to close */
+.float--logo.is-open {
+  z-index: 85;
+}
+
+/* Header */
+.bspanel__head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  padding: calc(env(safe-area-inset-top) + var(--space-4)) var(--space-4) var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.bspanel__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.bspanel__brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--brand);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: -0.5px;
+}
+
+.bspanel__brand-name {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.bspanel__back {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+}
+
+.bspanel__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--grey);
+  text-align: end;
+}
+
+/* Body */
+.bspanel__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-2) var(--space-4);
+}
+
+.bslist {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.bsrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  text-align: start;
+  width: 100%;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.bsrow:active {
+  transform: scale(0.99);
+}
+
+.bsrow.is-on {
+  background: var(--brand);
+  color: #fff;
+}
+
+.bsrow__icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.2);
+}
+
+.bsrow.is-on .bsrow__icon {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.bsrow__icon--text {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.bsrow__text {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bsrow__label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.bsrow.is-on .bsrow__label {
+  color: #fff;
+}
+
+.bsrow__helper {
+  font-size: 11.5px;
+  color: var(--grey);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bsrow.is-on .bsrow__helper {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.bsrow__chev {
+  color: var(--grey);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.bsrow__check {
+  color: #fff;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+}
+
+/* Footer */
+.bspanel__foot {
+  border-top: 1px solid var(--line);
+  padding: var(--space-3) var(--space-4) calc(env(safe-area-inset-bottom) + var(--space-3));
+  font-size: 11px;
+  color: var(--grey);
+  text-align: center;
+}
+

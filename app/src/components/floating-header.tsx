@@ -1,11 +1,19 @@
 import { contractorName, cartCount } from '../store/app-store';
+import { toggleBs, bsOpen } from '../store/bs-store';
 
 export function FloatingHeader() {
   const count = cartCount.value;
+  const bsActive = bsOpen.value;
 
   return (
     <>
-      <button type="button" class="float float--logo" aria-label="BuildSmart">
+      <button
+        type="button"
+        class={`float float--logo${bsActive ? ' is-open' : ''}`}
+        aria-label="BuildSmart"
+        aria-expanded={bsActive}
+        onClick={toggleBs}
+      >
         BS
       </button>
 

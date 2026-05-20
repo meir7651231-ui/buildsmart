@@ -3,6 +3,7 @@ import { HomeView } from './views/home';
 import { Fabs } from './components/fabs';
 import { MenuSpeedDial } from './components/menu-speed-dial';
 import { SearchPanel } from './components/search/search-panel';
+import { BsPanel } from './components/bs/bs-panel';
 import { ProductSheet } from './components/product-sheet';
 
 export function App() {
@@ -16,6 +17,7 @@ export function App() {
       <Fabs />
       <MenuSpeedDial />
       <SearchPanel />
+      <BsPanel />
       <ProductSheet />
     </div>
   );
