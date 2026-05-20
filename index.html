@@ -3207,6 +3207,113 @@
     margin-top:10px;background:rgba(31,138,76,.12);border-radius:9px;padding:9px;margin-bottom:8px;
   }
   .adm-pill.held{background:rgba(242,165,22,.18);color:var(--amber-deep);}
+  /* ===== shipment planner — cart strip + planner cards + item picker ===== */
+  .ship-plan{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:rgba(31,111,107,.07);border:1px dashed rgba(31,111,107,.35);
+    border-radius:10px;padding:10px 12px;margin:12px 0;
+  }
+  .ship-plan.many{background:rgba(242,165,22,.10);border-color:rgba(242,165,22,.45);}
+  .ship-plan-l{font-size:12.5px;font-weight:800;color:var(--ink);line-height:1.5;}
+  .ship-plan-btn{
+    background:var(--brand);color:#fff;border:none;border-radius:8px;
+    padding:8px 12px;font-weight:800;font-size:12px;white-space:nowrap;cursor:pointer;
+  }
+  .ship-plan-btn:active{transform:scale(.97);}
+  .ship-warn{
+    background:rgba(192,57,43,.10);color:#a93226;border-radius:8px;
+    padding:10px 12px;margin-bottom:12px;font-size:12.5px;font-weight:800;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+  }
+  .ship-warn-btn{background:#a93226;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-weight:800;font-size:11.5px;cursor:pointer;}
+  .ship-card{
+    background:#fff;border:1px solid #e8e8ec;border-radius:12px;padding:12px;margin-bottom:12px;
+  }
+  .ship-card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .ship-card-h b{font-size:14px;color:var(--ink);}
+  .ship-card-rm{background:none;border:1px solid #d8d8dc;color:#666;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;}
+  .ship-field-l{font-size:11px;font-weight:800;color:#666;margin:8px 0 5px;}
+  .ship-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:6px;}
+  .ship-slot{
+    background:#f4f5f6;border:1px solid transparent;border-radius:8px;
+    padding:7px 6px;cursor:pointer;text-align:center;font-size:11px;
+  }
+  .ship-slot.on{background:rgba(31,111,107,.12);border-color:var(--brand);}
+  .ship-slot-d{display:block;font-weight:800;color:var(--ink);}
+  .ship-slot-w{display:block;font-size:10.5px;color:#666;margin-top:1px;}
+  .ship-select{
+    width:100%;padding:9px 10px;border-radius:8px;border:1px solid #d8d8dc;
+    background:#fff;font-size:13px;color:var(--ink);font-weight:700;
+  }
+  .ship-hauls{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+  .ship-haul{
+    background:#f4f5f6;border:1px solid transparent;border-radius:8px;
+    padding:8px 4px;cursor:pointer;font-size:11.5px;font-weight:700;color:var(--ink);
+  }
+  .ship-haul.on{background:rgba(31,111,107,.12);border-color:var(--brand);}
+  .ship-items-row{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:10px;padding-top:10px;border-top:1px dashed #e8e8ec;font-size:12.5px;
+  }
+  .ship-items-edit{background:var(--brand);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-weight:800;font-size:11.5px;cursor:pointer;}
+  .ship-items-preview{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+  .ship-chip{
+    background:#f4f5f6;border-radius:14px;padding:4px 10px;font-size:11px;
+    color:var(--ink);font-weight:700;
+  }
+  .ship-chip.more{background:rgba(31,111,107,.10);color:var(--brand);}
+  .ship-items-empty{
+    margin-top:8px;text-align:center;font-size:11.5px;color:#a93226;
+    background:rgba(192,57,43,.07);padding:8px;border-radius:8px;font-weight:700;
+  }
+  .ship-add{
+    width:100%;background:rgba(31,111,107,.08);color:var(--brand);
+    border:1px dashed var(--brand);border-radius:10px;padding:10px;
+    font-weight:800;font-size:13px;cursor:pointer;margin-bottom:10px;
+  }
+  .ship-flat{
+    width:100%;background:none;border:none;color:#666;font-size:11.5px;
+    padding:8px;cursor:pointer;margin-bottom:6px;text-decoration:underline;
+  }
+  /* item picker */
+  .ship-cat-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+  .ship-cat{
+    background:#f4f5f6;border:1px solid transparent;border-radius:14px;
+    padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;color:var(--ink);
+  }
+  .ship-cat.on{background:rgba(31,111,107,.12);border-color:var(--brand);color:var(--brand);}
+  .ship-bulk-row{display:flex;gap:6px;margin:6px 0 10px;}
+  .ship-bulk{
+    flex:1;background:#f4f5f6;border:none;border-radius:8px;padding:8px;
+    font-weight:800;font-size:11.5px;color:var(--ink);cursor:pointer;
+  }
+  .ship-pick-list{max-height:50vh;overflow:auto;margin-bottom:10px;}
+  .ship-pick{
+    display:flex;align-items:center;gap:10px;padding:9px;border-radius:8px;
+    margin-bottom:5px;background:#fff;border:1px solid #f1f2f4;cursor:pointer;
+  }
+  .ship-pick:hover{background:rgba(31,111,107,.04);}
+  .ship-pick.locked{opacity:.6;cursor:not-allowed;background:#fafafa;}
+  .ship-pick input{width:18px;height:18px;flex-shrink:0;}
+  .ship-pick-info{flex:1;}
+  .ship-pick-nm{font-size:12.5px;font-weight:700;color:var(--ink);}
+  .ship-pick-meta{font-size:11px;color:#666;margin-top:2px;}
+  .ship-locked{
+    display:inline-block;background:rgba(242,165,22,.16);color:var(--amber-deep);
+    border-radius:10px;padding:1px 7px;font-size:10px;font-weight:800;margin-right:6px;
+  }
+  .ship-empty{text-align:center;color:#999;padding:20px;font-size:12px;}
+  /* shipping-plan summary inside an order card (orders screen) */
+  .oc-ship-plan{
+    background:rgba(242,165,22,.08);border:1px solid rgba(242,165,22,.30);
+    border-radius:10px;padding:10px;margin-top:10px;
+  }
+  .oc-ship-plan-h{font-size:12px;font-weight:800;color:var(--amber-deep);margin-bottom:6px;}
+  .oc-ship-row{
+    font-size:11.5px;color:var(--ink);padding:5px 0;
+    border-bottom:1px dashed rgba(242,165,22,.25);
+  }
+  .oc-ship-row:last-child{border-bottom:none;}
   /* split-shipment indicator — calm amber, fresh state pulses softly */
   .adm-pill.split{background:rgba(242,165,22,.14);color:var(--amber-deep);margin-right:6px;}
   .adm-pill.split.fresh{animation:splitPulse 1.8s ease-in-out infinite;
@@ -3223,11 +3330,17 @@
     padding:7px 10px;border-radius:6px;
   }
   .sp-split-h:first-child{margin-top:0;}
+  .sp-split-meta{
+    margin-top:4px;font-size:11px;font-weight:700;color:var(--amber-deep);
+    line-height:1.5;
+  }
   /* courier card — informational split note (non-jarring) */
   .ch-split-note{
     margin-top:6px;font-size:11px;font-weight:700;color:var(--amber-deep);
-    background:rgba(242,165,22,.10);padding:5px 8px;border-radius:6px;
+    background:rgba(242,165,22,.10);padding:7px 9px;border-radius:6px;
+    line-height:1.6;
   }
+  .ch-split-line{margin-top:4px;font-weight:600;color:var(--ink);font-size:10.5px;}
   .so-card{cursor:pointer;}
   .so-card:active{transform:scale(.99);}
   /* ---- picking sheet ---- */
@@ -4679,6 +4792,16 @@
           <div class="sheet"><div class="grip"></div>
             <div class="sheet-body" id="splitBody"></div></div>
         </div>
+        <!-- shipment planner — used by cart (full create) and orders (edit) -->
+        <div class="overlay" id="shipPlanOverlay" onclick="if(event.target===this)closeOverlayById('shipPlanOverlay')">
+          <div class="sheet"><div class="grip"></div>
+            <div class="sheet-body" id="shipPlanBody"></div></div>
+        </div>
+        <!-- item picker for assigning cart lines to a shipment -->
+        <div class="overlay" id="shipItemsOverlay" onclick="if(event.target===this)closeOverlayById('shipItemsOverlay')">
+          <div class="sheet"><div class="grip"></div>
+            <div class="sheet-body" id="shipItemsBody"></div></div>
+        </div>
         <div class="overlay" id="rmaOverlay">
           <div class="sheet"><div class="grip"></div>
             <div class="sheet-body" id="rmaBody"></div></div>
@@ -4988,6 +5111,7 @@
               </div>
               <div class="switch" onclick="openCartSitePicker()">החלף ›</div>
             </div>
+            <div id="cartShipPlan"></div>
             <div id="cartItems"></div>
             <div id="cartEmpty" class="empty">
               <div class="big">🛒</div>
@@ -7775,11 +7899,27 @@ function orderCard(o){
         </div>`;
     }
     breakdown+='<button class="oc-dn-btn" onclick="event.stopPropagation();showDeliveryNote(\''+o.id+'\',\'app\')">📄 הצג / הדפס תעודת משלוח</button>';
-    /* REFACTORED: 'פצל משלוח' is only meaningful before the truck leaves —
-       hide it once the order is shipped or delivered. */
-    const canSplit=(stKey==='pending'||stKey==='processing');
+    /* shipping plan summary — shown only if the contractor planned a split */
+    if(Array.isArray(o.shipments) && o.shipments.length>1){
+      breakdown+='<div class="oc-ship-plan">';
+      breakdown+='<div class="oc-ship-plan-h">🚚 תכנון אספקה · '+o.shipments.length+' גלים</div>';
+      o.shipments.forEach(function(sh,si){
+        breakdown+='<div class="oc-ship-row">'+
+          '<b>משלוח '+(si+1)+'</b> · '+
+          (sh.lineIdx?sh.lineIdx.length:0)+' פריטים · '+
+          (sh.when||'בתיאום')+' · '+(sh.site||'—')+
+        '</div>';
+      });
+      breakdown+='</div>';
+    }
+    /* edit-only entry on the orders screen — still gated by status so the
+       contractor can't change the plan after the truck has already left. */
+    const canEditPlan=(stKey==='pending'||stKey==='processing');
+    const planLabel=(Array.isArray(o.shipments)&&o.shipments.length>1)
+      ? '🚚 ערוך תכנון אספקה'
+      : '🚚 פצל לכמה משלוחים';
     breakdown+='<div class="oc-ca-actions">'+
-      (canSplit ? '<button class="oc-ca-btn" onclick="event.stopPropagation();openSplitShipment(\''+o.id+'\')">🚚 פצל משלוח</button>' : '')+
+      (canEditPlan ? '<button class="oc-ca-btn" onclick="event.stopPropagation();openOrderShipPlanner(\''+o.id+'\')">'+planLabel+'</button>' : '')+
       '<button class="oc-ca-btn" onclick="event.stopPropagation();openRMA(\''+o.id+'\')">↩️ החזרה / זיכוי</button>'+
       '<button class="oc-ca-btn" onclick="event.stopPropagation();openSignature(\''+o.id+'\')">✍️ חתימת מסירה</button>'+
     '</div>';
@@ -10876,8 +11016,23 @@ function renderCart(){
   }
   const empty=document.getElementById('cartEmpty');
   const sum=document.getElementById('cartSummary');
-  if(cart.length===0){wrap.innerHTML='';sum.innerHTML='';empty.style.display='block';return;}
+  if(cart.length===0){
+    wrap.innerHTML='';sum.innerHTML='';empty.style.display='block';
+    /* clear the ship-plan strip too — and any stale split state */
+    cartShipments=null;
+    if(typeof renderCartShipPlan==='function') renderCartShipPlan();
+    return;
+  }
   empty.style.display='none';
+
+  /* drop any item from cartShipments whose cart index no longer exists
+     (line removed since the split was planned) — keeps the planner honest. */
+  if(Array.isArray(cartShipments)){
+    cartShipments.forEach(function(s){
+      s.itemIdx=(s.itemIdx||[]).filter(function(i){return i<cart.length;});
+    });
+  }
+  if(typeof renderCartShipPlan==='function') renderCartShipPlan();
 
   const co=computeCheckout();
 
@@ -11080,6 +11235,19 @@ function syncOrderToSystem(order){
     }),
     fromContractor:true                   /* marks it as a live contractor order */
   };
+  /* multi-wave delivery — carry the schedule + grouping the contractor planned
+     at checkout straight through to the supplier and courier views. */
+  if(Array.isArray(order.shipments) && order.shipments.length>1){
+    sysOrder.shipments=order.shipments.slice();
+    sysOrder.splitInto=order.shipments.length;
+    sysOrder.splitPlan=(sysOrder.lines||[]).map(function(_,i){
+      const found=sysOrder.shipments.findIndex(function(sh){
+        return (sh.lineIdx||[]).indexOf(i)>=0;
+      });
+      return found+1;
+    });
+    sysOrder.splitNoticeNew=true;
+  }
   SYS_ORDERS.unshift(sysOrder);
   if(typeof saveSysOrders==='function') saveSysOrders();
 }
@@ -11141,9 +11309,28 @@ function checkout(){
     }
   };
 
+  /* if the contractor planned a multi-wave delivery, embed the per-shipment
+     schedule (when / site / haul / item indices) onto the order so the
+     supplier and courier inherit it without a second decision point. */
+  if(Array.isArray(cartShipments) && cartShipments.length>1){
+    order.shipments=cartShipments.map(function(s,idx){
+      const slot=DELIVERY_SLOTS[s.slot||0];
+      const proj=PROJECTS.find(function(p){return p.id===s.siteId;})||PROJECTS[0];
+      return {
+        idx:idx+1,
+        lineIdx:(s.itemIdx||[]).slice(),
+        when:slot?(slot.day+' '+slot.window):'בתיאום',
+        site:proj?proj.name:'—',
+        siteAddr:proj?proj.addr:'',
+        haul:s.haul||'small'
+      };
+    });
+  }
+
   /* success handler — shared by both save paths */
   function onOrderSaved(saved){
     cart=[];
+    cartShipments=null;   /* reset the planner so the next cart starts clean */
     syncCartToProject();
     updateCartCount();
     /* BRIDGE: push the order into the system model so the supplier,
@@ -11984,7 +12171,7 @@ function renderMgrDashboard(){
   h+='<div class="md-note">בודק כל מוצר קטלוג מול "חוזה תקינות" — מוודא ששום תיקון לא שבר מוצר קיים. הרץ אחרי כל שינוי.</div>';
   h+='<div style="background:#1b8a4e;color:#fff;border-radius:8px;padding:8px 11px;'+
      'font-size:12px;font-weight:700;margin-bottom:11px;text-align:center;">'+
-     '✅ גרסה תקינה — BUILD R105 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
+     '✅ גרסה תקינה — BUILD R106 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
      '</div>';
   h+='<div id="regTestPanel">'+
      '<button class="reg-run" id="regRunBtn" type="button">▶ הרץ בדיקת רגרסיה מלאה</button>'+
@@ -17252,7 +17439,10 @@ function renderStorePick(){
     '</div>';
   }
 
-  /* picking list — grouped by shipment when the order was split, flat otherwise */
+  /* picking list — grouped by shipment when the order was split, flat otherwise.
+     When the contractor planned the split at checkout, each group carries its
+     own when/site/haul — surfaced in the section header so the picker can
+     prioritise the urgent shipments first. */
   if(o.splitInto>1 && Array.isArray(o.splitPlan)){
     const groups={};
     lines.forEach((l,i)=>{
@@ -17260,7 +17450,17 @@ function renderStorePick(){
       (groups[g]=groups[g]||[]).push({l:l,i:i});
     });
     Object.keys(groups).sort(function(a,b){return Number(a)-Number(b);}).forEach(function(g){
-      h+='<div class="sp-split-h">📦 משלוח '+g+' — '+groups[g].length+' פריטים</div>';
+      const meta=Array.isArray(o.shipments)?o.shipments[Number(g)-1]:null;
+      let metaHtml='';
+      if(meta){
+        const haulInfo=HAUL_TYPES.find(function(h){return h.id===meta.haul;})||HAUL_TYPES[0];
+        metaHtml='<div class="sp-split-meta">'+
+          '🕒 '+(meta.when||'בתיאום')+' · '+
+          '📍 '+(meta.site||'—')+' · '+
+          haulInfo.ic+' '+haulInfo.name+
+          '</div>';
+      }
+      h+='<div class="sp-split-h">📦 משלוח '+g+' — '+groups[g].length+' פריטים'+metaHtml+'</div>';
       h+='<div class="sp-list">';
       groups[g].forEach(function(it){ h+=renderSpLine(it.l,it.i); });
       h+='</div>';
@@ -17795,15 +17995,30 @@ function renderCourierList(){
     else { step=3; btn='<button type="button" class="ch-btn amber" data-advance="'+oid+'">✅ נמסר ללקוח</button>'; }
     /* the card-body opens the detail sheet; the advance button is a SEPARATE
        sibling — no stopPropagation needed, the two regions never overlap. */
-    /* split indicator — calm amber pill in the header, plus an explicit
-       note in the body so the courier can't miss that there are several
-       packages to load together. */
+    /* split indicator — calm amber pill in the header, plus a detailed
+       breakdown of each shipment's time/site/vehicle so the courier can
+       plan the route. Each shipment is its own delivery job. */
     const splitPill=(o.splitInto>1)
       ? '<span class="adm-pill split'+(o.splitNoticeNew?' fresh':'')+'">🚚×'+o.splitInto+'</span>'
       : '';
-    const splitNote=(o.splitInto>1)
-      ? '<div class="ch-split-note">📦 '+o.splitInto+' חבילות נפרדות — אסוף את כולן ביחד</div>'
-      : '';
+    let splitNote='';
+    if(o.splitInto>1){
+      if(Array.isArray(o.shipments) && o.shipments.length>1){
+        splitNote='<div class="ch-split-note"><b>📦 '+o.splitInto+' משלוחים נפרדים בהזמנה זו</b>';
+        o.shipments.forEach(function(sh,si){
+          const ht=HAUL_TYPES.find(function(x){return x.id===sh.haul;})||HAUL_TYPES[0];
+          splitNote+='<div class="ch-split-line">'+
+            '<b>משלוח '+(si+1)+':</b> '+
+            (sh.lineIdx?sh.lineIdx.length:0)+' פריטים · '+
+            (sh.when||'בתיאום')+' · '+(sh.site||'—')+' · '+
+            ht.ic+' '+ht.name+
+          '</div>';
+        });
+        splitNote+='</div>';
+      } else {
+        splitNote='<div class="ch-split-note">📦 '+o.splitInto+' חבילות נפרדות — אסוף את כולן ביחד</div>';
+      }
+    }
     h+='<div class="ch-card stage-'+o.stage+'">'+
       '<div class="ch-card-body" data-detail="'+oid+'">'+
         '<div class="ch-card-top">'+
@@ -18077,8 +18292,426 @@ function caToday(){ return new Date().toLocaleDateString('he-IL'); }
 function caEsc(s){ return String(s==null?'':s).replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
 function closeOverlayById(id){ const ov=document.getElementById(id); if(ov) ov.classList.remove('show'); }
 
-/* ---- 1. SPLIT SHIPMENTS ---- */
+/* ============================================================
+   SHIPMENT PLANNER — primary entry from cart, edit-only from orders.
+   The planner owns scheduling (when), routing (where), vehicle and
+   item-grouping in ONE place — usable for both contexts via plannerCtx.
+   ============================================================ */
+let cartShipments=null;     /* null = single-shipment cart; array = split mode */
+let plannerCtx=null;        /* 'cart' | { orderId: 'BS-1042' } */
+let shipPickerCtx=null;     /* shipment id currently being edited in item picker */
+let shipItemFilter='';      /* search filter inside item picker */
+let shipCatFilter='';       /* category filter inside item picker */
+
+/* current planner-context items + shipments accessors — abstracts cart vs order */
+function plannerItems(){
+  if(plannerCtx==='cart') return cart;
+  if(plannerCtx && plannerCtx.orderId){
+    const o=SYS_ORDERS.find(x=>x.id===plannerCtx.orderId);
+    return o ? (o.lines||[]) : [];
+  }
+  return cart;
+}
+function plannerShipments(){
+  if(plannerCtx==='cart'){
+    cartShipments=cartShipments||[];
+    return cartShipments;
+  }
+  if(plannerCtx && plannerCtx.orderId){
+    const o=SYS_ORDERS.find(x=>x.id===plannerCtx.orderId);
+    if(!o) return [];
+    o.shipments=o.shipments||[];
+    return o.shipments;
+  }
+  return [];
+}
+function setPlannerShipments(arr){
+  if(plannerCtx==='cart'){ cartShipments=arr; return; }
+  if(plannerCtx && plannerCtx.orderId){
+    const o=SYS_ORDERS.find(x=>x.id===plannerCtx.orderId);
+    if(o) o.shipments=arr;
+  }
+}
+
+function cartHasSplit(){ return Array.isArray(cartShipments) && cartShipments.length>1; }
+function ensurePlannerShipments(){
+  const ships=plannerShipments();
+  if(ships.length===0){
+    const proj=(typeof activeProject==='function')?activeProject():null;
+    let dominantHaul='small';
+    try{
+      if(typeof storeHaul!=='undefined'){
+        const rank={small:0,van:1,truck:2};
+        let best=0;
+        Object.values(storeHaul).forEach(function(h){ if((rank[h]||0)>best) best=rank[h]||0; });
+        dominantHaul=['small','van','truck'][best];
+      }
+    }catch(e){}
+    const items=plannerItems();
+    const init={id:1,
+      slot:(typeof deliverySlot!=='undefined')?(deliverySlot||0):0,
+      siteId:(proj&&proj.id)||(PROJECTS[0]&&PROJECTS[0].id),
+      haul:dominantHaul,
+      itemIdx:items.map(function(_,i){return i;})};
+    setPlannerShipments([init]);
+  }
+  return plannerShipments();
+}
+function unassignedInPlanner(){
+  const items=plannerItems();
+  const ships=plannerShipments();
+  const used={};
+  ships.forEach(function(s){ (s.itemIdx||[]).forEach(function(i){used[i]=true;}); });
+  return items.map(function(_,i){return i;}).filter(function(i){return !used[i];});
+}
+
+/* === planner entry points === */
+function openCartShipPlanner(){
+  if(!Array.isArray(cart)||cart.length===0){ if(typeof toast==='function') toast('הסל ריק'); return; }
+  plannerCtx='cart';
+  ensurePlannerShipments();
+  renderShipPlanner();
+  const ov=document.getElementById('shipPlanOverlay'); if(ov) ov.classList.add('show');
+}
+function openOrderShipPlanner(orderId){
+  const o=SYS_ORDERS.find(x=>x.id===orderId);
+  if(!o){ if(typeof toast==='function') toast('הזמנה לא נמצאה'); return; }
+  if(!Array.isArray(o.lines)||o.lines.length===0){ if(typeof toast==='function') toast('אין פריטים בהזמנה'); return; }
+  plannerCtx={orderId:orderId};
+  ensurePlannerShipments();
+  renderShipPlanner();
+  const ov=document.getElementById('shipPlanOverlay'); if(ov) ov.classList.add('show');
+}
+
+/* === planner render === */
+function renderShipPlanner(){
+  const body=document.getElementById('shipPlanBody');
+  if(!body) return;
+  const ships=plannerShipments();
+  const unassigned=unassignedInPlanner();
+  const titleScope=(plannerCtx==='cart')?'בסל':('הזמנה '+(plannerCtx.orderId||''));
+  let h='<div class="md-head"><div class="md-ic">🚚</div>'+
+    '<div class="md-title">תכנון אספקה · '+titleScope+'</div>'+
+    '<div class="md-sub">קבע מתי, לאן ובאיזה רכב יגיע כל גל. כל פריט חייב להיות בדיוק במשלוח אחד.</div></div>';
+  if(unassigned.length>0){
+    h+='<div class="ship-warn">⚠️ '+unassigned.length+' פריטים לא משויכים לאף משלוח'+
+       '<button class="ship-warn-btn" onclick="assignRemainingTo('+ships[0].id+')">צרף למשלוח 1</button></div>';
+  }
+  ships.forEach(function(s,idx){ h+=renderShipCard(s,idx); });
+  h+='<button class="ship-add" onclick="addShipment()">+ הוסף משלוח נוסף</button>';
+  if(ships.length>1){
+    h+='<button class="ship-flat" onclick="resetToSingleShipment()">בטל פיצול — חזור לאספקה אחת</button>';
+  }
+  const canSave=(unassigned.length===0);
+  h+='<button class="ca-primary"'+(canSave?'':' disabled style="opacity:.5"')+
+     ' onclick="finalizeShipPlanner()">'+
+     (canSave?'שמור תכנון':'אי אפשר לשמור — '+unassigned.length+' פריטים לא משויכים')+
+     '</button>';
+  body.innerHTML=h;
+}
+function renderShipCard(s,idx){
+  const items=plannerItems();
+  const lines=(s.itemIdx||[]).map(function(i){return items[i];}).filter(Boolean);
+  const qtySum=lines.reduce(function(a,l){return a+(l.qty||1);},0);
+  let h='<div class="ship-card">';
+  h+='<div class="ship-card-h"><b>📦 משלוח '+(idx+1)+'</b>';
+  if(plannerShipments().length>1){
+    h+='<button class="ship-card-rm" onclick="removeShipment('+s.id+')">הסר משלוח</button>';
+  }
+  h+='</div>';
+  /* slot */
+  h+='<div class="ship-field-l">מועד אספקה</div><div class="ship-slots">';
+  DELIVERY_SLOTS.forEach(function(sl,si){
+    h+='<button class="ship-slot'+(s.slot===si?' on':'')+'" onclick="setShipSlot('+s.id+','+si+')">'+
+       '<span class="ship-slot-d">'+sl.day+'</span>'+
+       '<span class="ship-slot-w">'+sl.window+'</span></button>';
+  });
+  h+='</div>';
+  /* site */
+  h+='<div class="ship-field-l">יעד</div>';
+  h+='<select class="ship-select" onchange="setShipSite('+s.id+',this.value)">';
+  PROJECTS.forEach(function(p){
+    h+='<option value="'+p.id+'"'+(s.siteId===p.id?' selected':'')+'>'+p.name+(p.addr?' · '+p.addr:'')+'</option>';
+  });
+  h+='</select>';
+  /* haul */
+  h+='<div class="ship-field-l">סוג רכב</div><div class="ship-hauls">';
+  HAUL_TYPES.forEach(function(ht){
+    h+='<button class="ship-haul'+(s.haul===ht.id?' on':'')+'" onclick="setShipHaul('+s.id+',\''+ht.id+'\')">'+
+       ht.ic+' '+ht.name+(ht.extra>0?' +₪'+ht.extra:'')+'</button>';
+  });
+  h+='</div>';
+  /* items */
+  h+='<div class="ship-items-row">';
+  h+='<span><b>'+lines.length+'</b> סוגי פריט · <b>'+qtySum+'</b> יח׳ סה״כ</span>';
+  h+='<button class="ship-items-edit" onclick="openShipItems('+s.id+')">בחר פריטים ›</button>';
+  h+='</div>';
+  if(lines.length>0){
+    h+='<div class="ship-items-preview">';
+    lines.slice(0,5).forEach(function(l){
+      const nm=(l.name||'פריט');
+      const short=nm.length>18?nm.substring(0,17)+'…':nm;
+      h+='<span class="ship-chip">'+short+' ×'+(l.qty||1)+'</span>';
+    });
+    if(lines.length>5) h+='<span class="ship-chip more">+'+(lines.length-5)+'</span>';
+    h+='</div>';
+  } else {
+    h+='<div class="ship-items-empty">אין פריטים — הקש "בחר פריטים"</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+/* === planner mutations === */
+function setShipSlot(id,si){
+  const s=plannerShipments().find(function(x){return x.id===id;}); if(!s) return;
+  s.slot=si; renderShipPlanner();
+}
+function setShipSite(id,siteId){
+  const s=plannerShipments().find(function(x){return x.id===id;}); if(!s) return;
+  s.siteId=siteId;
+}
+function setShipHaul(id,h){
+  const s=plannerShipments().find(function(x){return x.id===id;}); if(!s) return;
+  s.haul=h; renderShipPlanner();
+}
+function addShipment(){
+  const ships=plannerShipments();
+  const newId=Math.max.apply(null,ships.map(function(s){return s.id;}).concat([0]))+1;
+  const proj=(typeof activeProject==='function')?activeProject():null;
+  ships.push({id:newId,slot:0,siteId:(proj&&proj.id)||(PROJECTS[0]&&PROJECTS[0].id),haul:'small',itemIdx:[]});
+  renderShipPlanner();
+}
+function removeShipment(id){
+  const ships=plannerShipments();
+  if(ships.length<=1){ if(typeof toast==='function') toast('חייב להישאר משלוח אחד'); return; }
+  const idx=ships.findIndex(function(s){return s.id===id;});
+  if(idx<0) return;
+  const orphans=ships[idx].itemIdx||[];
+  ships.splice(idx,1);
+  /* re-attach orphans to shipment #1 to avoid silent data loss */
+  orphans.forEach(function(i){
+    if(ships[0].itemIdx.indexOf(i)<0) ships[0].itemIdx.push(i);
+  });
+  renderShipPlanner();
+}
+function assignRemainingTo(shipId){
+  const s=plannerShipments().find(function(x){return x.id===shipId;});
+  if(!s) return;
+  unassignedInPlanner().forEach(function(i){
+    if(s.itemIdx.indexOf(i)<0) s.itemIdx.push(i);
+  });
+  renderShipPlanner();
+}
+function resetToSingleShipment(){
+  if(plannerCtx==='cart'){ cartShipments=null; }
+  else if(plannerCtx && plannerCtx.orderId){
+    const o=SYS_ORDERS.find(function(x){return x.id===plannerCtx.orderId;});
+    if(o){ o.shipments=null; o.splitInto=undefined; o.splitPlan=undefined;
+      if(typeof saveSysOrders==='function'){ try{ saveSysOrders(); }catch(e){} } }
+  }
+  closeOverlayById('shipPlanOverlay');
+  if(plannerCtx==='cart' && typeof renderCart==='function') renderCart();
+  if(typeof renderMyOrders==='function') renderMyOrders();
+  if(typeof renderStoreOrders==='function'){ try{ renderStoreOrders(); }catch(e){} }
+  if(typeof renderCourierList==='function'){ try{ renderCourierList(); }catch(e){} }
+  if(typeof toast==='function') toast('תכנון הפיצול בוטל — אספקה אחת לכל ההזמנה');
+}
+function finalizeShipPlanner(){
+  const unassigned=unassignedInPlanner();
+  if(unassigned.length>0){
+    if(typeof toast==='function') toast(unassigned.length+' פריטים עדיין לא משויכים');
+    return;
+  }
+  const ships=plannerShipments();
+  if(plannerCtx==='cart'){
+    if(ships.length<=1){ cartShipments=null; }
+    closeOverlayById('shipPlanOverlay');
+    if(typeof renderCart==='function') renderCart();
+    if(typeof toast==='function') toast(ships.length>1
+      ? ('תכנון נשמר · ההזמנה תגיע ב-'+ships.length+' גלים')
+      : 'תכנון נשמר · אספקה אחת');
+  } else if(plannerCtx && plannerCtx.orderId){
+    const o=SYS_ORDERS.find(function(x){return x.id===plannerCtx.orderId;});
+    if(o){
+      o.splitInto=ships.length;
+      o.splitPlan=(o.lines||[]).map(function(_,i){
+        const found=ships.findIndex(function(sh){return (sh.itemIdx||[]).indexOf(i)>=0;});
+        return found+1;
+      });
+      o.splitNoticeNew=true;
+      if(typeof saveSysOrders==='function'){ try{ saveSysOrders(); }catch(e){} }
+      if(typeof pushNotification==='function'){
+        pushNotification('הזמנה '+o.id+' פוצלה ל-'+ships.length+' משלוחים',{icon:'🚚',
+          detail:{title:'תכנון אספקה עודכן',
+            lines:['הזמנה: '+o.id,'ההזמנה תגיע ב-'+ships.length+' משלוחים נפרדים.',
+                   'הספק והשליח קיבלו את התכנון העדכני.']}});
+      }
+    }
+    closeOverlayById('shipPlanOverlay');
+    if(typeof toast==='function') toast('תכנון אספקה עודכן · הספק והשליח עודכנו ✓');
+    if(typeof renderMyOrders==='function') renderMyOrders();
+    if(typeof renderStoreOrders==='function'){ try{ renderStoreOrders(); }catch(e){} }
+    if(typeof renderCourierList==='function'){ try{ renderCourierList(); }catch(e){} }
+  }
+}
+
+/* === item picker === */
+function openShipItems(shipId){
+  shipPickerCtx=shipId;
+  shipItemFilter='';
+  shipCatFilter='';
+  renderShipItems();
+  const ov=document.getElementById('shipItemsOverlay'); if(ov) ov.classList.add('show');
+}
+function shipCategoryOf(item){
+  /* category for picker filters: supplier name when available, else "אחר" */
+  if(!item) return 'אחר';
+  if(item.store && typeof SUPPLIER_STORES!=='undefined' && SUPPLIER_STORES[item.store]){
+    return SUPPLIER_STORES[item.store].name;
+  }
+  return 'אחר';
+}
+function renderShipItems(){
+  const body=document.getElementById('shipItemsBody');
+  if(!body) return;
+  const items=plannerItems();
+  const ship=plannerShipments().find(function(x){return x.id===shipPickerCtx;});
+  if(!ship) return;
+  /* category counts from the full item list (not the filtered one) */
+  const cats={};
+  items.forEach(function(it){ const c=shipCategoryOf(it); cats[c]=(cats[c]||0)+1; });
+  /* apply filters */
+  const q=String(shipItemFilter||'').toLowerCase();
+  const visible=items.map(function(it,i){return {it:it,i:i};}).filter(function(o){
+    if(q && (o.it.name||'').toLowerCase().indexOf(q)<0) return false;
+    if(shipCatFilter && shipCategoryOf(o.it)!==shipCatFilter) return false;
+    return true;
+  });
+  const idx=plannerShipments().findIndex(function(s){return s.id===ship.id;});
+  let h='<div class="md-head"><div class="md-ic">📦</div>'+
+    '<div class="md-title">בחר פריטים למשלוח '+(idx+1)+'</div>'+
+    '<div class="md-sub">חיפוש, סינון לפי ספק, ובחירה קבוצתית — מתאים גם להזמנות גדולות.</div></div>';
+  h+='<input class="ca-input" placeholder="🔎 חיפוש שם פריט…" '+
+     'value="'+String(shipItemFilter).replace(/"/g,'&quot;')+'" '+
+     'oninput="setShipFilter(this.value)" style="margin-bottom:6px">';
+  /* category chips */
+  h+='<div class="ship-cat-chips">';
+  h+='<button class="ship-cat'+(shipCatFilter===''?' on':'')+'" onclick="setShipCat(\'\')">הכל ('+items.length+')</button>';
+  Object.keys(cats).forEach(function(c){
+    const safe=c.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    h+='<button class="ship-cat'+(shipCatFilter===c?' on':'')+'" onclick="setShipCat(\''+safe+'\')">'+c+' ('+cats[c]+')</button>';
+  });
+  h+='</div>';
+  /* bulk actions */
+  h+='<div class="ship-bulk-row">';
+  h+='<button class="ship-bulk" onclick="shipBulkSelectVisible()">✓ בחר את כל המוצגים</button>';
+  h+='<button class="ship-bulk" onclick="shipBulkClearHere()">נקה מהמשלוח</button>';
+  h+='</div>';
+  /* list */
+  h+='<div class="ship-pick-list">';
+  visible.forEach(function(o){
+    const i=o.i, it=o.it;
+    const inThis=(ship.itemIdx||[]).indexOf(i)>=0;
+    const otherShip=plannerShipments().find(function(s){
+      return s.id!==ship.id && (s.itemIdx||[]).indexOf(i)>=0;
+    });
+    const otherIdx=otherShip?(plannerShipments().indexOf(otherShip)+1):0;
+    const locked=!!otherShip;
+    const badge=locked?(' <span class="ship-locked">במשלוח '+otherIdx+'</span>'):'';
+    h+='<label class="ship-pick'+(locked?' locked':'')+'">';
+    h+='<input type="checkbox" '+(inThis?'checked':'')+(locked?' disabled':'')+
+       ' onchange="toggleShipItem('+i+',this.checked)">';
+    h+='<div class="ship-pick-info">';
+    h+='<div class="ship-pick-nm">'+(it.name||'פריט')+badge+'</div>';
+    h+='<div class="ship-pick-meta">×'+(it.qty||1)+
+       (it.price?' · ₪'+((it.price||0)*(it.qty||1)).toLocaleString():'')+'</div>';
+    h+='</div></label>';
+  });
+  if(visible.length===0){
+    h+='<div class="ship-empty">אין פריטים תואמים לחיפוש / סינון</div>';
+  }
+  h+='</div>';
+  h+='<button class="ca-primary" onclick="closeOverlayById(\'shipItemsOverlay\');renderShipPlanner()">סיים</button>';
+  body.innerHTML=h;
+}
+function setShipFilter(v){ shipItemFilter=v; renderShipItems(); }
+function setShipCat(c){ shipCatFilter=c; renderShipItems(); }
+function toggleShipItem(itemIdx,checked){
+  const s=plannerShipments().find(function(x){return x.id===shipPickerCtx;}); if(!s) return;
+  s.itemIdx=s.itemIdx||[];
+  if(checked){
+    /* steal from any other shipment — item must live in exactly one */
+    plannerShipments().forEach(function(other){
+      if(other.id===s.id) return;
+      const k=(other.itemIdx||[]).indexOf(itemIdx);
+      if(k>=0) other.itemIdx.splice(k,1);
+    });
+    if(s.itemIdx.indexOf(itemIdx)<0) s.itemIdx.push(itemIdx);
+  } else {
+    const k=s.itemIdx.indexOf(itemIdx);
+    if(k>=0) s.itemIdx.splice(k,1);
+  }
+  renderShipItems();
+}
+function shipBulkSelectVisible(){
+  const s=plannerShipments().find(function(x){return x.id===shipPickerCtx;}); if(!s) return;
+  const q=String(shipItemFilter||'').toLowerCase();
+  plannerItems().forEach(function(it,i){
+    if(q && (it.name||'').toLowerCase().indexOf(q)<0) return;
+    if(shipCatFilter && shipCategoryOf(it)!==shipCatFilter) return;
+    /* steal from any other shipment */
+    plannerShipments().forEach(function(other){
+      if(other.id===s.id) return;
+      const k=(other.itemIdx||[]).indexOf(i);
+      if(k>=0) other.itemIdx.splice(k,1);
+    });
+    if((s.itemIdx||[]).indexOf(i)<0){ s.itemIdx=s.itemIdx||[]; s.itemIdx.push(i); }
+  });
+  renderShipItems();
+}
+function shipBulkClearHere(){
+  const s=plannerShipments().find(function(x){return x.id===shipPickerCtx;}); if(!s) return;
+  s.itemIdx=[];
+  renderShipItems();
+}
+
+/* === cart strip — single source of truth for "how will this order arrive" === */
+function renderCartShipPlan(){
+  const w=document.getElementById('cartShipPlan');
+  if(!w) return;
+  if(!Array.isArray(cart)||cart.length===0){ w.innerHTML=''; return; }
+  if(!cartHasSplit()){
+    const slot=DELIVERY_SLOTS[deliverySlot||0];
+    const proj=(typeof activeProject==='function')?activeProject():null;
+    w.innerHTML='<div class="ship-plan">'+
+      '<div class="ship-plan-l">🚚 אספקה אחת · '+
+        (slot?(slot.day+' '+slot.window):'בתיאום')+
+        (proj?(' · '+proj.name):'')+'</div>'+
+      '<button class="ship-plan-btn" onclick="openCartShipPlanner()">חלק לגלים ›</button>'+
+    '</div>';
+  } else {
+    const unassigned=unassignedInPlanner.call ? 0 : 0;
+    /* compute unassigned in cart context without switching plannerCtx */
+    const used={};
+    cartShipments.forEach(function(s){(s.itemIdx||[]).forEach(function(i){used[i]=true;});});
+    const u=cart.map(function(_,i){return i;}).filter(function(i){return !used[i];}).length;
+    w.innerHTML='<div class="ship-plan many">'+
+      '<div class="ship-plan-l">🚚 ההזמנה תגיע ב-<b>'+cartShipments.length+' גלים</b>'+
+        (u>0?(' · <span style="color:#a93226">'+u+' פריטים לא משויכים</span>'):'')+
+      '</div>'+
+      '<button class="ship-plan-btn" onclick="openCartShipPlanner()">ערוך ›</button>'+
+    '</div>';
+  }
+}
+
+/* ---- 1. SPLIT SHIPMENTS (legacy: now redirects to the planner) ---- */
 function openSplitShipment(orderId){
+  /* legacy entry preserved for the orders-screen button. The planner now
+     owns full create + edit for both cart and orders contexts. */
+  openOrderShipPlanner(orderId);
+  return;
+  /* unreachable — kept for reference in case any caller passes args */
   const o=SYS_ORDERS.find(x=>x.id===orderId);
   if(!o){ if(typeof toast==='function') toast('הזמנה לא נמצאה'); return; }
   const lines=(typeof storeOrderLines==='function')?storeOrderLines(o):(o.lines||[]);
@@ -19547,7 +20180,7 @@ function registerPWA(){
 safeRun('אתחול ארכיטקטורה',function(){
   BSRouter.start();
   registerPWA();
-  bsLog.info('[BuildSmart R105] architecture layer ready · storage='+
+  bsLog.info('[BuildSmart R106] architecture layer ready · storage='+
     (BSStore.available?'localStorage':'memory')+
     ' · livesync='+(BSLiveSync.connected?'on':'off'));
 });
