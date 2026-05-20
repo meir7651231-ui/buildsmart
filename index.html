@@ -7754,8 +7754,11 @@ function orderCard(o){
         </div>`;
     }
     breakdown+='<button class="oc-dn-btn" onclick="event.stopPropagation();showDeliveryNote(\''+o.id+'\',\'app\')">📄 הצג / הדפס תעודת משלוח</button>';
+    /* REFACTORED: 'פצל משלוח' is only meaningful before the truck leaves —
+       hide it once the order is shipped or delivered. */
+    const canSplit=(stKey==='pending'||stKey==='processing');
     breakdown+='<div class="oc-ca-actions">'+
-      '<button class="oc-ca-btn" onclick="event.stopPropagation();openSplitShipment(\''+o.id+'\')">🚚 פצל משלוח</button>'+
+      (canSplit ? '<button class="oc-ca-btn" onclick="event.stopPropagation();openSplitShipment(\''+o.id+'\')">🚚 פצל משלוח</button>' : '')+
       '<button class="oc-ca-btn" onclick="event.stopPropagation();openRMA(\''+o.id+'\')">↩️ החזרה / זיכוי</button>'+
       '<button class="oc-ca-btn" onclick="event.stopPropagation();openSignature(\''+o.id+'\')">✍️ חתימת מסירה</button>'+
     '</div>';
@@ -11960,7 +11963,7 @@ function renderMgrDashboard(){
   h+='<div class="md-note">בודק כל מוצר קטלוג מול "חוזה תקינות" — מוודא ששום תיקון לא שבר מוצר קיים. הרץ אחרי כל שינוי.</div>';
   h+='<div style="background:#1b8a4e;color:#fff;border-radius:8px;padding:8px 11px;'+
      'font-size:12px;font-weight:700;margin-bottom:11px;text-align:center;">'+
-     '✅ גרסה תקינה — BUILD R103 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
+     '✅ גרסה תקינה — BUILD R104 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
      '</div>';
   h+='<div id="regTestPanel">'+
      '<button class="reg-run" id="regRunBtn" type="button">▶ הרץ בדיקת רגרסיה מלאה</button>'+
@@ -19460,7 +19463,7 @@ function registerPWA(){
 safeRun('אתחול ארכיטקטורה',function(){
   BSRouter.start();
   registerPWA();
-  bsLog.info('[BuildSmart R103] architecture layer ready · storage='+
+  bsLog.info('[BuildSmart R104] architecture layer ready · storage='+
     (BSStore.available?'localStorage':'memory')+
     ' · livesync='+(BSLiveSync.connected?'on':'off'));
 });
