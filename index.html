@@ -19354,17 +19354,24 @@ var appStore=createStore({
    back button works and screens are deep-linkable. */
 var BSRouter=(function(){
   var routes={};
+  /* REFACTORED: inHandle guard prevents go()/showScreen() wrappers from
+     re-entering the router while a hashchange is already being processed. */
+  var inHandle=false;
   function current(){ return (location.hash||'#home').replace(/^#/,''); }
   function handle(){
     var name=current();
     appStore.set({screen:name});
-    if(routes[name]) safeRun('ניווט',routes[name]);
-    else if(typeof go==='function') safeRun('ניווט',function(){ go(name); });
+    inHandle=true;
+    try{
+      if(routes[name]) safeRun('ניווט',routes[name]);
+      else if(typeof go==='function') safeRun('ניווט',function(){ go(name); });
+    } finally { inHandle=false; }
   }
   return {
     register:function(name,fn){ routes[name]=fn; },
     navigate:function(name){ if(current()!==name) location.hash='#'+name; else handle(); },
-    start:function(){ window.addEventListener('hashchange',handle); }
+    start:function(){ window.addEventListener('hashchange',handle); },
+    isHandling:function(){ return inHandle; }
   };
 })();
 
@@ -19424,6 +19431,51 @@ safeRun('אתחול ארכיטקטורה',function(){
     (BSStore.available?'localStorage':'memory')+
     ' · livesync='+(BSLiveSync.connected?'on':'off'));
 });
+
+/* REFACTORED: connect BSRouter <-> showScreen()/go() ----------------------
+   The onboarding screens (showScreen) and the in-app tabs (go) now both
+   write the URL hash, so the browser back/forward buttons walk through
+   the user's actual screen history and screens are deep-linkable. The
+   inHandle guard on BSRouter prevents hashchange → go() → setHash loops. */
+var ONBOARD_HASH_MAP={
+  'splash':'screen-splash','welcome':'screen-welcome','login':'screen-login',
+  'profession':'screen-profession','prep':'screen-prep',
+  'manager':'screen-manager','store':'screen-store','store-login':'screen-store-login',
+  'courier':'screen-courier','worker':'screen-worker','delivery-note':'screen-delivery-note'
+};
+var SCREEN_TO_HASH={};
+(function(){ for(var h in ONBOARD_HASH_MAP){ SCREEN_TO_HASH[ONBOARD_HASH_MAP[h]]=h; } })();
+
+(function wireRouter(){
+  if(typeof window.showScreen!=='function'||typeof window.go!=='function') return;
+  var origShow=window.showScreen, origGo=window.go;
+
+  window.showScreen=function(id){
+    var r=origShow.apply(null,arguments);
+    if(!BSRouter.isHandling()){
+      var hash=SCREEN_TO_HASH[id];
+      if(hash){
+        var desired='#'+hash;
+        if(location.hash!==desired) location.hash=desired;
+      }
+    }
+    return r;
+  };
+
+  window.go=function(v){
+    var r=origGo.apply(null,arguments);
+    if(!BSRouter.isHandling()){
+      var desired='#'+v;
+      if(location.hash!==desired) location.hash=desired;
+    }
+    return r;
+  };
+
+  /* Register the onboarding screens so a hash like #login drives showScreen. */
+  Object.keys(ONBOARD_HASH_MAP).forEach(function(h){
+    BSRouter.register(h,function(){ showScreen(ONBOARD_HASH_MAP[h]); });
+  });
+})();
 
 /* =====================================================================
    CATEGORY E — UX / UI & ACCESSIBILITY (points 41-50)
