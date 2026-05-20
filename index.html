@@ -11960,7 +11960,7 @@ function renderMgrDashboard(){
   h+='<div class="md-note">בודק כל מוצר קטלוג מול "חוזה תקינות" — מוודא ששום תיקון לא שבר מוצר קיים. הרץ אחרי כל שינוי.</div>';
   h+='<div style="background:#1b8a4e;color:#fff;border-radius:8px;padding:8px 11px;'+
      'font-size:12px;font-weight:700;margin-bottom:11px;text-align:center;">'+
-     '✅ גרסה תקינה — BUILD R102 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
+     '✅ גרסה תקינה — BUILD R103 · אם אתה רואה את השורה הזו, זה הקובץ הנכון'+
      '</div>';
   h+='<div id="regTestPanel">'+
      '<button class="reg-run" id="regRunBtn" type="button">▶ הרץ בדיקת רגרסיה מלאה</button>'+
@@ -12480,7 +12480,8 @@ const BUTTON_REGISTRY=[
   {fn:'rwCoupons', area:'פרופיל', does:'קופונים לפי מיקום'},
   {fn:'rwReferral', area:'פרופיל', does:'הזמן חבר'},
   {fn:'shareReferral', area:'פרופיל', does:'משתף קוד הזמנה'},
-  {fn:'rwAchievements', area:'פרופיל', does:'הישגים'},
+  /* REFACTORED: rwAchievements removed — duplicate of the profile's
+     own achievements section (renders identityAchievements()). */
   {fn:'rwVIP', area:'פרופיל', does:'מועדון VIP'},
   {fn:'rwRedeem', area:'פרופיל', does:'מימוש הטבות'},
   {fn:'redeemReward', area:'פרופיל', does:'ממש פרס במטבעות'},
@@ -19459,7 +19460,7 @@ function registerPWA(){
 safeRun('אתחול ארכיטקטורה',function(){
   BSRouter.start();
   registerPWA();
-  bsLog.info('[BuildSmart R102] architecture layer ready · storage='+
+  bsLog.info('[BuildSmart R103] architecture layer ready · storage='+
     (BSStore.available?'localStorage':'memory')+
     ' · livesync='+(BSLiveSync.connected?'on':'off'));
 });
@@ -20555,7 +20556,8 @@ function openRewardsHub(){
     {fn:'rwGreen',      ic:'🌿',t:'תגי ירוק',       s:'בנייה בת-קיימא'},
     {fn:'rwCoupons',    ic:'📍',t:'קופונים לפי מיקום',s:'מבצעים בקרבת מקום'},
     {fn:'rwReferral',   ic:'👥',t:'הזמן חבר',       s:'+100 לכל הזמנה'},
-    {fn:'rwAchievements',ic:'🏅',t:'הישגים',        s:'התקדמות וכבוד'},
+    /* REFACTORED: rwAchievements removed — the profile screen already
+       renders the same achievements via identityAchievements(). */
     {fn:'rwVIP',        ic:'💎',t:'מועדון VIP',     s:'דרגות והטבות'},
     {fn:'rwRedeem',     ic:'🎁',t:'מימוש הטבות',    s:'החלף מטבעות בפרסים'},
   ];
@@ -20682,25 +20684,11 @@ function shareReferral(){
   if(typeof haptic==='function') haptic('tap');
 }
 
-/* ---- 77. ACHIEVEMENTS ---- */
-function rwAchievements(){
-  var s=(typeof identityStats==='function')?identityStats():{orders:0,sites:0,trees:0,autoSaved:0,spent:0};
-  var ach=(typeof identityAchievements==='function')?identityAchievements(s):[];
-  var h='<div class="md-head"><div class="md-ic">🏅</div>'+
-    '<div class="md-title">הישגים</div>'+
-    '<div class="md-sub">אבני הדרך שלך ב-BuildSmart.</div></div>';
-  var done=ach.filter(function(a){return a.on;}).length;
-  h+='<div class="fin-callout"><div class="fin-callout-l">הישגים שנפתחו</div>'+
-    '<div class="fin-callout-v">'+done+' / '+ach.length+'</div></div>';
-  ach.forEach(function(a){
-    h+='<div class="rw-badge'+(a.on?' on':'')+'">'+
-      '<div class="rw-badge-ic">'+a.ic+'</div>'+
-      '<div class="rw-badge-info"><div class="rw-badge-n">'+a.name+'</div>'+
-        '<div class="rw-badge-d">'+a.desc+'</div></div>'+
-      '<div class="rw-badge-st">'+(a.on?'✓':'🔒')+'</div></div>';
-  });
-  rwFeature(h);
-}
+/* ---- 77. ACHIEVEMENTS ----
+   REFACTORED: rwAchievements() removed — duplicated the profile's own
+   "הישגים" section (lines 6482-6492), which already shows the same
+   identityAchievements() data with the same X/Y counter. To see your
+   achievements: open the profile tab. */
 
 /* ---- 78. VIP TIERS ---- */
 function rwVIP(){
