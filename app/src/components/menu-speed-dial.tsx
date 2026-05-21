@@ -205,7 +205,7 @@ function SettingsLevel() {
           </button>
         </li>
       ))}
-      <SettingsTreeSubmenu group={group} nodes={current} />
+      <SettingsTreeSubmenu group={group} nodes={current} pathPrefix={path} />
     </>
   );
 }

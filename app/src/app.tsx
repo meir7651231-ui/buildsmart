@@ -10,6 +10,7 @@ import { StoreView } from './views/store';
 import { CourierView } from './views/courier';
 import { WorkerView } from './views/worker';
 import { activePersona } from './store/bs-store';
+import './store/app-settings';
 
 function ActiveView() {
   switch (activePersona.value) {

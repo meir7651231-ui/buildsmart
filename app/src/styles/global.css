@@ -610,6 +610,15 @@ li {
   height: 19px;
 }
 
+/* Leaf "is-on" — marks the current selection or an enabled toggle.
+ * Only the circle gets the brand tint; the label pill stays white so
+ * the row is distinguishable from a breadcrumb anchor (where BOTH the
+ * circle and the label are brand-tinted). */
+.dial__circle--on {
+  background: var(--brand);
+  color: #fff;
+}
+
 /* Danger row (reset to defaults) — keep the icon recognizable by tint. */
 .dial__item--danger .dial__circle {
   color: var(--danger, #b3261e);

@@ -13,6 +13,12 @@ import {
   pushSettingsPath,
   type SettingsGroupId,
 } from '../../store/app-store';
+import {
+  appSettings,
+  setTheme,
+  setTextSize,
+  toggleReduceMotion,
+} from '../../store/app-settings';
 
 export type SettingsRowId = SettingsGroupId | 'reset';
 
@@ -333,17 +339,64 @@ export function SettingsSubmenu() {
   );
 }
 
+/* Leaf bindings — pure name → behaviour map. The key is the full path
+ * joined by '>', e.g. 'display>גודל טקסט>בינוני'. A leaf with a binding
+ * runs `action()` on tap (the dial stays open so the user sees the
+ * effect) and shows `is-on` styling when `isActive()` returns true.
+ * Leaves without a binding fall back to the legacy behaviour (close
+ * the menu on tap). */
+type Binding = {
+  action: () => void;
+  isActive?: () => boolean;
+};
+
+export const LEAF_BINDINGS: Record<string, Binding> = {
+  'display>ערכת נושא>בהיר': {
+    action: () => setTheme('light'),
+    isActive: () => appSettings.value.display.theme === 'light',
+  },
+  'display>ערכת נושא>כהה': {
+    action: () => setTheme('dark'),
+    isActive: () => appSettings.value.display.theme === 'dark',
+  },
+  'display>גודל טקסט>קטן': {
+    action: () => setTextSize('small'),
+    isActive: () => appSettings.value.display.textSize === 'small',
+  },
+  'display>גודל טקסט>בינוני': {
+    action: () => setTextSize('medium'),
+    isActive: () => appSettings.value.display.textSize === 'medium',
+  },
+  'display>גודל טקסט>גדול': {
+    action: () => setTextSize('large'),
+    isActive: () => appSettings.value.display.textSize === 'large',
+  },
+  'display>הפחתת אנימציות': {
+    action: () => toggleReduceMotion(),
+    isActive: () => appSettings.value.display.reduceMotion,
+  },
+};
+
+function leafKey(group: SettingsGroupId, path: string[], label: string): string {
+  return [group, ...path, label].join('>');
+}
+
 /* Unified renderer for any depth below the group anchor. Given a list
- * of Nodes (the current `current` from walkSettings), it renders each
- * as a dial row. Branches push another label onto the settings path;
- * leaves close the menu. Reuses the parent group's icon throughout the
- * stack for visual cohesion. */
+ * of Nodes (the current `current` from walkSettings) and the path
+ * already drilled, it renders each node as a dial row.
+ *
+ * Branches push another label onto the settings path. Leaves with a
+ * matching LEAF_BINDINGS entry run the bound action and keep the menu
+ * open; leaves without one close the menu. Active bindings get
+ * `dial__item--leaf-on` so the current selection is visually marked. */
 export function SettingsTreeSubmenu({
   group,
   nodes,
+  pathPrefix,
 }: {
   group: SettingsGroupId;
   nodes: Node[];
+  pathPrefix: string[];
 }) {
   const parent = SETTINGS_ROWS.find((r) => r.id === group);
   if (!parent) return null;
@@ -351,31 +404,41 @@ export function SettingsTreeSubmenu({
   const handleClick = (node: Node) => {
     if (node.children && node.children.length > 0) {
       pushSettingsPath(node.label);
-    } else {
-      closeMenu();
+      return;
     }
+    const binding = LEAF_BINDINGS[leafKey(group, pathPrefix, node.label)];
+    if (binding) {
+      binding.action();
+      return;
+    }
+    closeMenu();
   };
   return (
     <>
-      {reversed.map((node, i) => (
-        <li
-          key={node.label}
-          role="none"
-          class="dial__item dial__item--sub"
-          style={{ animationDelay: `${i * 20}ms` }}
-        >
-          <button
-            type="button"
-            class="dial__btn"
-            role="menuitem"
-            onClick={() => handleClick(node)}
-            aria-label={node.label}
+      {reversed.map((node, i) => {
+        const binding = LEAF_BINDINGS[leafKey(group, pathPrefix, node.label)];
+        const on = binding?.isActive?.() ?? false;
+        return (
+          <li
+            key={node.label}
+            role="none"
+            class={`dial__item dial__item--sub${on ? ' dial__item--leaf-on' : ''}`}
+            style={{ animationDelay: `${i * 20}ms` }}
           >
-            <span class="dial__circle">{parent.icon}</span>
-            <span class="dial__label">{node.label}</span>
-          </button>
-        </li>
-      ))}
+            <button
+              type="button"
+              class="dial__btn"
+              role="menuitem"
+              onClick={() => handleClick(node)}
+              aria-label={node.label}
+              aria-pressed={binding ? on : undefined}
+            >
+              <span class={`dial__circle${on ? ' dial__circle--on' : ''}`}>{parent.icon}</span>
+              <span class="dial__label">{node.label}</span>
+            </button>
+          </li>
+        );
+      })}
     </>
   );
 }
