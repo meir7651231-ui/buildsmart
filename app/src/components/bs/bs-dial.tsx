@@ -8,12 +8,14 @@ import {
 
 type Tile = { id: Persona; label: string; emoji: string };
 
+/* @legacy index.html:4088-4113 (role-drawer "מי אתה?") — labels are
+ * the verbatim <b> text of each role-pick-btn. */
 const TILES: Tile[] = [
-  { id: 'contractor', label: 'קבלן', emoji: '👷' },
-  { id: 'manager', label: 'מנהל', emoji: '👔' },
-  { id: 'store', label: 'חנות', emoji: '🏪' },
-  { id: 'courier', label: 'שליח', emoji: '🛵' },
-  { id: 'worker', label: 'עובד', emoji: '🦺' },
+  { id: 'contractor', label: 'קבלן',         emoji: '👷' },
+  { id: 'manager',    label: 'מנהל המערכת',  emoji: '👔' },
+  { id: 'store',      label: 'חנות ספק',     emoji: '🏪' },
+  { id: 'courier',    label: 'שליח',         emoji: '🛵' },
+  { id: 'worker',     label: 'עובד',         emoji: '🦺' },
 ];
 
 export function BsDial() {
