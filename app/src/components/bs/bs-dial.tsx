@@ -110,26 +110,22 @@ const COURIER_SECTIONS: Section[] = [
 ];
 
 /* @legacy index.html:8099-8102 — renderWorker task-group headers,
- * verbatim incl. the emoji prefix:
- *   🔨 = task-group 'act' @8099
- *   ⏳ = task-group 'pend' @8101
- *   📋 = task-group 'done' @8102
- *
- * Each group drills into the 5 task statuses from `taskStatusInfo`
- * @8048-8054 (each status has verbatim ic + label):
- *   ⏳ ממתינה · 🔨 בביצוע · 📸 ממתין לאישור · ✅ אושר ✓ · ↩️ נדחה — לתקן */
-const TASK_STATUSES: Section[] = [
-  { id: 'st-pending',  emoji: '⏳', title: 'ממתינה' },
-  { id: 'st-active',   emoji: '🔨', title: 'בביצוע' },
-  { id: 'st-review',   emoji: '📸', title: 'ממתין לאישור' },
-  { id: 'st-done',     emoji: '✅', title: 'אושר ✓' },
-  { id: 'st-rejected', emoji: '↩️', title: 'נדחה — לתקן' },
-];
+ * verbatim incl. the emoji prefix. Each group drills into the
+ * specific statuses that legacy filters into it (see :8096-8098):
+ *   current   = active OR rejected
+ *   queue     = pending
+ *   submitted = review OR done
+ * Statuses come from `taskStatusInfo` @8048-8054 — ic + label verbatim. */
+const ST_PENDING  = { id: 'st-pending',  emoji: '⏳', title: 'ממתינה' };
+const ST_ACTIVE   = { id: 'st-active',   emoji: '🔨', title: 'בביצוע' };
+const ST_REVIEW   = { id: 'st-review',   emoji: '📸', title: 'ממתין לאישור' };
+const ST_DONE     = { id: 'st-done',     emoji: '✅', title: 'אושר ✓' };
+const ST_REJECTED = { id: 'st-rejected', emoji: '↩️', title: 'נדחה — לתקן' };
 
 const WORKER_SECTIONS: Section[] = [
-  { id: 'current',   emoji: '🔨', title: 'המשימה הנוכחית שלך', children: TASK_STATUSES },
-  { id: 'queue',     emoji: '⏳', title: 'הבאות בתור',         children: TASK_STATUSES },
-  { id: 'submitted', emoji: '📋', title: 'שהגשת',               children: TASK_STATUSES },
+  { id: 'current',   emoji: '🔨', title: 'המשימה הנוכחית שלך', children: [ST_ACTIVE, ST_REJECTED] },
+  { id: 'queue',     emoji: '⏳', title: 'הבאות בתור',         children: [ST_PENDING] },
+  { id: 'submitted', emoji: '📋', title: 'שהגשת',               children: [ST_REVIEW, ST_DONE] },
 ];
 
 /* @legacy index.html:4213-4216 — admTab buttons of screen-manager,
