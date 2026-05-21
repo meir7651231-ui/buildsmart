@@ -132,16 +132,22 @@ Reports through **INSP-0014**, all GO.
 - INSP-0010 `accessibility-not-in-legacy-app-settings-object` —
   permitted adaptation (legacy stored only in DOM; we persist to LS).
 - Pre-existing TypeScript errors in `vite.config.ts` + `worker.tsx` —
-  Vite ignores; not blocking. Documented in `agent-board.md`.
+  ~~Vite ignores; not blocking.~~ **Resolved as of 2026-05-21** —
+  `tsc -b --noEmit --force` returns exit 0 cleanly. Earlier reports
+  were likely stale `.tsbuildinfo` cache.
 
 ---
 
 ## Suggested next steps
 
-The interactive wiring is complete. Remaining cleanups:
-1. **Fix pre-existing TS errors** in `vite.config.ts` / `worker.tsx`
-   so `npx tsc -b --noEmit` is fully clean.
-2. **R7 regression check** — run `src/test/tests/tabs.tsx` to confirm
-   nothing in the new stores/components broke the tabs test.
-3. **Expand smoke suite** if new branches are added (currently 21
-   tests covering all wired branches).
+The interactive wiring is complete. All cleanups closed:
+- ✅ TS errors — `tsc -b --noEmit --force` exit 0.
+- ✅ R7 regression — `runRegression()` 236/236 PASS including tabs 5/5.
+- ✅ Smoke suite — 21 tests covering all wired branches.
+
+What's left depends on next priorities outside menu wiring:
+- New persona-specific views or features outside of `הגדרות`.
+- Connecting the wired info-toasts to real screens when those screens
+  become R3-compliant (e.g. audit log, device management).
+- Quantity calculator (`מחשבון כמויות`) and other tools currently
+  surface only as toasts.
