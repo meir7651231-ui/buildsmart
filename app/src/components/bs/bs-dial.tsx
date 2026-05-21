@@ -31,12 +31,44 @@ type Section = {
   children?: Section[];
 };
 
-/* @legacy index.html:4260-4263 (admTab buttons of screen-store). */
+/* @legacy index.html:4260-4263 (admTab buttons of screen-store).
+ *
+ * s-home children: 3 shStat tiles from renderStoreHome @ :17128-17132:
+ *   🔧 בהכנה  ·  📦 מוכן לאיסוף  ·  💰 מחזור פעיל
+ *
+ * s-portal children: 8 portal items from renderStorePortal @ :20762-20769
+ *   (each has ic + t args used verbatim).
+ *
+ * s-orders / s-stock stay as leaves — the legacy filter chips and
+ * summary tiles have labels but no verbatim emoji per sub-item. */
 const STORE_SECTIONS: Section[] = [
-  { id: 's-home',    emoji: '🏠', title: 'בית' },
-  { id: 's-orders',  emoji: '📥', title: 'הזמנות' },
-  { id: 's-stock',   emoji: '📦', title: 'מלאי' },
-  { id: 's-portal',  emoji: '🧰', title: 'פורטל' },
+  {
+    id: 's-home',
+    emoji: '🏠',
+    title: 'בית',
+    children: [
+      { id: 'sh-prep',    emoji: '🔧', title: 'בהכנה' },
+      { id: 'sh-ready',   emoji: '📦', title: 'מוכן לאיסוף' },
+      { id: 'sh-revenue', emoji: '💰', title: 'מחזור פעיל' },
+    ],
+  },
+  { id: 's-orders', emoji: '📥', title: 'הזמנות' },
+  { id: 's-stock',  emoji: '📦', title: 'מלאי' },
+  {
+    id: 's-portal',
+    emoji: '🧰',
+    title: 'פורטל',
+    children: [
+      { id: 'sp-ratings',  emoji: '⭐',  title: 'דירוג ספקים' },
+      { id: 'sp-sla',      emoji: '⏱️', title: 'מעקב SLA' },
+      { id: 'sp-zones',    emoji: '🗺️', title: 'אזורי הפצה' },
+      { id: 'sp-bulk',     emoji: '📉', title: 'הנחות כמות' },
+      { id: 'sp-barcode',  emoji: '🏷️', title: 'הפקת ברקודים' },
+      { id: 'sp-fleet',    emoji: '🚛', title: 'ניהול צי רכב' },
+      { id: 'sp-chat',     emoji: '💬', title: 'צ׳אט עם קבלן' },
+      { id: 'sp-autostk',  emoji: '🔄', title: 'עדכון מלאי' },
+    ],
+  },
 ];
 
 /* @legacy index.html:17991-18043 (renderCourierHome). Section titles
