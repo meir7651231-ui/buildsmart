@@ -18,6 +18,14 @@ import {
   setTheme,
   setTextSize,
   toggleReduceMotion,
+  toggleNotif,
+  setLang,
+  setUnits,
+  setCurrency,
+  setDefaultHaul,
+  toggleExpress,
+  toggleHighContrast,
+  resetSettings,
 } from '../../store/app-settings';
 
 export type SettingsRowId = SettingsGroupId | 'reset';
@@ -309,6 +317,7 @@ export function SettingsSubmenu() {
   const rows = [...SETTINGS_ROWS].reverse();
   const handleClick = (id: SettingsRowId) => {
     if (id === 'reset') {
+      resetSettings();
       closeMenu();
       return;
     }
@@ -351,6 +360,7 @@ type Binding = {
 };
 
 export const LEAF_BINDINGS: Record<string, Binding> = {
+  /* === display === */
   'display>ערכת נושא>בהיר': {
     action: () => setTheme('light'),
     isActive: () => appSettings.value.display.theme === 'light',
@@ -374,6 +384,78 @@ export const LEAF_BINDINGS: Record<string, Binding> = {
   'display>הפחתת אנימציות': {
     action: () => toggleReduceMotion(),
     isActive: () => appSettings.value.display.reduceMotion,
+  },
+
+  /* === notifications — four straight on/off toggles === */
+  'notifications>עדכוני משלוחים': {
+    action: () => toggleNotif('shipments'),
+    isActive: () => appSettings.value.notif.shipments,
+  },
+  'notifications>מבצעים והטבות': {
+    action: () => toggleNotif('deals'),
+    isActive: () => appSettings.value.notif.deals,
+  },
+  'notifications>התראות תקציב': {
+    action: () => toggleNotif('budget'),
+    isActive: () => appSettings.value.notif.budget,
+  },
+  'notifications>עדכוני הזמנות': {
+    action: () => toggleNotif('orders'),
+    isActive: () => appSettings.value.notif.orders,
+  },
+
+  /* === accessibility — single toggle === */
+  'accessibility>מצב ניגודיות גבוהה (לשמש)': {
+    action: () => toggleHighContrast(),
+    isActive: () => appSettings.value.accessibility.highContrast,
+  },
+
+  /* === region === */
+  'region>שפה>עברית': {
+    action: () => setLang('he'),
+    isActive: () => appSettings.value.region.lang === 'he',
+  },
+  'region>שפה>العربية': {
+    action: () => setLang('ar'),
+    isActive: () => appSettings.value.region.lang === 'ar',
+  },
+  'region>שפה>English': {
+    action: () => setLang('en'),
+    isActive: () => appSettings.value.region.lang === 'en',
+  },
+  'region>יחידות מידה>מטרי (מ׳, ק״ג)': {
+    action: () => setUnits('metric'),
+    isActive: () => appSettings.value.region.units === 'metric',
+  },
+  'region>יחידות מידה>אימפריאלי': {
+    action: () => setUnits('imperial'),
+    isActive: () => appSettings.value.region.units === 'imperial',
+  },
+  'region>מטבע>₪ שקל': {
+    action: () => setCurrency('ils'),
+    isActive: () => appSettings.value.region.currency === 'ils',
+  },
+  'region>מטבע>$ דולר': {
+    action: () => setCurrency('usd'),
+    isActive: () => appSettings.value.region.currency === 'usd',
+  },
+
+  /* === delivery — select + toggle (payment-method leaf needs a screen, not wired yet) === */
+  'delivery>סוג הובלה מועדף>משלוח קטן': {
+    action: () => setDefaultHaul('small'),
+    isActive: () => appSettings.value.delivery.defaultHaul === 'small',
+  },
+  'delivery>סוג הובלה מועדף>טנדר': {
+    action: () => setDefaultHaul('van'),
+    isActive: () => appSettings.value.delivery.defaultHaul === 'van',
+  },
+  'delivery>סוג הובלה מועדף>משאית': {
+    action: () => setDefaultHaul('truck'),
+    isActive: () => appSettings.value.delivery.defaultHaul === 'truck',
+  },
+  'delivery>ברירת מחדל — משלוח אקספרס': {
+    action: () => toggleExpress(),
+    isActive: () => appSettings.value.delivery.express,
   },
 };
 
