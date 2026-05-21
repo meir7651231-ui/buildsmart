@@ -1792,3 +1792,47 @@ li {
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
+/* === Sites view (placeholder — names only) =========================== */
+.sites {
+  padding: var(--space-4);
+}
+.sites__head {
+  margin-bottom: var(--space-4);
+}
+.sites__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: var(--space-1);
+}
+.sites__sub {
+  font-size: 13px;
+  color: var(--ink-2, #6c6f72);
+}
+.sites__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.sites__row {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sites__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink);
+}
+.sites__addr {
+  font-size: 13px;
+  color: var(--ink-2, #6c6f72);
+}
+

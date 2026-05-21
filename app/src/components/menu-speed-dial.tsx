@@ -13,7 +13,9 @@ import {
   setSettingsGroup,
   menuActiveSettingsPath,
   popSettingsPathTo,
+  setView,
   type MenuTab,
+  type AppView,
 } from '../store/app-store';
 import {
   SettingsSubmenu,
@@ -97,9 +99,19 @@ export function MenuSpeedDial() {
   const handleTabClick = (id: MenuTab) => {
     if (TAB_HAS_SUBMENU[id]) {
       setMenuTab(id);
-    } else {
-      closeMenu();
+      return;
     }
+    /* Only tabs whose destination view exists are wired. Catalog/cart
+     * tabs intentionally fall through to plain `closeMenu()` until
+     * their views are built — tapping them must not silently change
+     * the route to a value that renders the default HomeView. */
+    const VIEW_MAP: Partial<Record<MenuTab, AppView>> = {
+      home: 'home',
+      projects: 'sites',
+    };
+    const v = VIEW_MAP[id];
+    if (v) setView(v);
+    closeMenu();
   };
 
   return (

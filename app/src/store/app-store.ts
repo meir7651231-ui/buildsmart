@@ -9,6 +9,15 @@ import {
 export type Category = CatalogCategory;
 export type Product = CatalogProduct;
 
+/* ===== View router — @legacy index.html:6407 (go(v)). Orthogonal to
+ * persona: each persona has its own default view, but contractors can
+ * navigate between home / catalog / sites / cart via the menu tabs. */
+export type AppView = 'home' | 'catalog' | 'sites' | 'cart';
+export const currentView = signal<AppView>('home');
+export function setView(v: AppView): void {
+  currentView.value = v;
+}
+
 /* ===== Navigation: category drill-down ===== */
 export const categoryPath = signal<string[]>([]);
 
