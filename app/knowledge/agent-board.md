@@ -25,17 +25,44 @@
 
 ## 🟡 Fast Agent (Haiku / Sonnet-fast) — משימה נוכחית
 
-### סטטוס משימה פעילה
-> **[המשתמש — מלא כאן את המשימה לפני שאתה שולח לסוכן המהיר]**
->
-> לדוגמה:
-> - "בדוק את כל ה-playwright verification scripts ותדווח מה עובד"
-> - "כתוב README.md לדף הבית"
-> - "מצא את הבאג ב-[קובץ X]"
+### 🟡 משימה פעילה — TASK-001: Smoke-test לכל 26 העלים המחוברים
+
+**מטרה:** כתוב סקריפט playwright שבודק שכל 26 עלי ההגדרות שחוברו
+אכן עובדים נכון — בלי לגעת בקוד המקור כלל.
+
+**קובץ פלט:** `app/smoke-settings.mjs` (ליד package.json, לא בתוך src/)
+
+**מה הסקריפט צריך לבדוק:**
+
+| ענף | מה לוודא |
+|-----|----------|
+| תצוגה → ערכת נושא → כהה | `data-theme="dark"` על `<html>`, leaf "כהה" עם `dial__circle--on` |
+| תצוגה → גודל טקסט → גדול | `data-text-size="large"`, `body.zoom ≈ 1.1` |
+| תצוגה → הפחתת אנימציות | `data-reduce-motion="true"` אחרי toggle |
+| התראות → עדכוני משלוחים | `localStorage['bs.settings.v1'].notif.shipments = false` אחרי toggle |
+| אזור ושפה → מטבע → $ דולר | `data-currency="usd"` |
+| מידע → גרסה | toast מכיל `BuildSmart 1.0 · אב-טיפוס` |
+| מידע → יצירת קשר | toast מכיל `support@buildsmart.demo` |
+| איפוס לברירת מחדל | `data-currency="ils"`, notif.shipments=true, theme=light אחרי reset |
+
+**פרטים טכניים:**
+- Chromium: `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`
+- Import playwright: `import { chromium } from './node_modules/playwright/index.mjs'`
+- Server: הפעל `npx http-server dist -p 8123 -s` לפני הריצה (dist/ כבר קיים)
+- כל בדיקה: navigate עם `localStorage.removeItem('bs.settings.v1')` + reload
+- פלט: שורת PASS/FAIL לכל בדיקה + סיכום כולל בסוף
+
+**מה אסור לגעת בו:**
+`app/src/` · `app/knowledge/` · `CLAUDE.md` · `RULES.md`
+
+**אחרי שגמרת:**
+1. הרץ את הסקריפט ורשום את התוצאות
+2. עדכן את "מה הסוכן המהיר ביצע" בקובץ הזה עם PASS/FAIL summary
+3. Commit רק את `app/smoke-settings.mjs` + עדכון agent-board.md
 
 ### ✅ מה הסוכן המהיר כבר ביצע
-<!-- הסוכן המהיר כותב כאן אחרי כל סשן -->
-- (טרם הוקצו משימות)
+<!-- הסוכן המהיר כותב כאן אחרי כל סשב -->
+- (TASK-001 הוקצה — ממתין לביצוע)
 
 ### כללי הסוכן המהיר
 - קרא `CLAUDE.md` בשורש לפני הכל
