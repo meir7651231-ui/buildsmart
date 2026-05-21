@@ -1073,6 +1073,52 @@ export function profileAnchorIcon(label: string): preact.JSX.Element {
   return PROFILE_BRANCH_ICON[label] ?? ICON_PROFILE;
 }
 
+/* === Home dial. @legacy view-home in index.html:4416-4517.
+ * 4 leaves — the home-unique tools (fin-hub-btn + 3 promises).
+ * Each emoji+title verbatim from the legacy DOM:
+ *   🤖 בינה מלאכותית ואוטומציה  @ :4435-4439 (fin-hub-btn)
+ *   📐 סרוק תוכנית עבודה          @ :4474 (promise → go('scan'))
+ *   📦 המלאי שלי                  @ :4493 (promise → go('stock'))
+ *   📋 משימות העבודה              @ :4503 (promise → go('tasks')) */
+
+type HomeItem = { id: string; emoji: string; title: string };
+
+const HOME_LEAVES: HomeItem[] = [
+  { id: 'home-ai',    emoji: '🤖', title: 'בינה מלאכותית ואוטומציה' },
+  { id: 'home-scan',  emoji: '📐', title: 'סרוק תוכנית עבודה' },
+  { id: 'home-stock', emoji: '📦', title: 'המלאי שלי' },
+  { id: 'home-tasks', emoji: '📋', title: 'משימות העבודה' },
+];
+
+export function HomeSubmenu() {
+  const reversed = [...HOME_LEAVES].reverse();
+  return (
+    <>
+      {reversed.map((h, i) => (
+        <li
+          key={h.id}
+          role="none"
+          class="dial__item dial__item--sub"
+          style={{ animationDelay: `${i * 22}ms` }}
+        >
+          <button
+            type="button"
+            class="dial__btn"
+            role="menuitem"
+            onClick={() => showToast(`${h.title} — בבנייה`)}
+            aria-label={h.title}
+          >
+            <span class="dial__circle">
+              <span class="dial__circle-emoji">{h.emoji}</span>
+            </span>
+            <span class="dial__label">{h.title}</span>
+          </button>
+        </li>
+      ))}
+    </>
+  );
+}
+
 /* === Catalog dial. @legacy index.html:6046-6056 (CATALOG top categories).
  * 11 leaves verbatim — each `{cat, icon}` pair becomes a dial row. */
 

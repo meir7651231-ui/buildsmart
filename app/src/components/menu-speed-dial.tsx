@@ -24,6 +24,7 @@ import {
   ProjectsSubmenu,
   CatalogSubmenu,
   CartSubmenu,
+  HomeSubmenu,
   SettingsSubmenu,
   SettingsTreeSubmenu,
   SETTINGS_ROWS,
@@ -96,7 +97,7 @@ const TABS: Tab[] = [
  * drills into the 10 settings categories. The tab "הפרויקטים" opens
  * a dial of the 3 project names. */
 const TAB_HAS_SUBMENU: Record<MenuTab, boolean> = {
-  home: false,
+  home: true,
   catalog: true,
   projects: true,
   cart: true,
@@ -167,6 +168,7 @@ export function MenuSpeedDial() {
             {active === 'projects' && <ProjectsSubmenu />}
             {active === 'catalog' && <CatalogSubmenu />}
             {active === 'cart' && <CartSubmenu />}
+            {active === 'home' && <HomeSubmenu />}
           </>
         )}
       </ul>
