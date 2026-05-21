@@ -5,7 +5,7 @@
  *   npx http-server app/dist -p 8123 -s &
  *   node app/smoke-settings.mjs
  */
-import { chromium } from './app/node_modules/playwright/index.mjs';
+import { chromium } from './node_modules/playwright/index.mjs';
 
 const URL  = 'http://localhost:8123/';
 const EXE  = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
