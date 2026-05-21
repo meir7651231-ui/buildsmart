@@ -1100,7 +1100,26 @@ const HOME_LEAVES: HomeItem[] = [
   },
   { id: 'home-scan',  emoji: '📐', title: 'סרוק תוכנית עבודה' },
   { id: 'home-stock', emoji: '📦', title: 'המלאי שלי' },
-  { id: 'home-tasks', emoji: '📋', title: 'משימות העבודה' },
+  {
+    id: 'home-tasks',
+    emoji: '📋',
+    title: 'משימות העבודה',
+    /* @legacy openSiteHub items @ index.html:19858-19868 — 10 site
+     * management tools, each with ic + t verbatim. The hub itself is
+     * "ניהול אתר הבנייה" (per :5217). */
+    children: [
+      { id: 'site-gantt',     emoji: '📅',  title: 'תרשים גאנט' },
+      { id: 'site-snag',      emoji: '🔧',  title: 'רשימת ליקויים' },
+      { id: 'site-loc',       emoji: '🏢',  title: 'קומה · דירה · חדר' },
+      { id: 'site-attend',    emoji: '📍',  title: 'נוכחות GPS' },
+      { id: 'site-diary',     emoji: '📓',  title: 'יומן עבודה' },
+      { id: 'site-safety',    emoji: '🦺',  title: 'התראות בטיחות' },
+      { id: 'site-deps',      emoji: '🔗',  title: 'תלויות חומרים' },
+      { id: 'site-photos',    emoji: '📸',  title: 'צילום לפני/אחרי' },
+      { id: 'site-inspect',   emoji: '🔍',  title: 'ביקורות מפקח' },
+      { id: 'site-archive',   emoji: '🗄️', title: 'ארכיון פרויקטים' },
+    ],
+  },
 ];
 
 const homeDrillPath = _cartSignal<string[]>([]);
