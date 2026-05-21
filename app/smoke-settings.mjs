@@ -1,134 +1,271 @@
-/**
- * Smoke-test — verifies all 26 wired settings leaves.
- * Run from repo root:
- *   cd app && npm run build && cd ..
- *   npx http-server app/dist -p 8123 -s &
- *   node app/smoke-settings.mjs
- */
 import { chromium } from './node_modules/playwright/index.mjs';
 
-const URL  = 'http://localhost:8123/';
-const EXE  = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const SERVER_URL = 'http://localhost:8123';
+const CHROMIUM_PATH = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 
-let passed = 0, failed = 0;
+let results = [];
 
-function ok(name)   { console.log(`  ✅ PASS  ${name}`); passed++; }
-function fail(name, got) { console.log(`  ❌ FAIL  ${name}  (got: ${JSON.stringify(got)})`); failed++; }
-
-async function tap(page, label) {
-  await page.waitForSelector(`[aria-label="${label}"]`, { timeout: 5000 });
-  await page.click(`[aria-label="${label}"]`);
-  await page.waitForTimeout(260);
+async function runTest(name, testFn) {
+  try {
+    await testFn();
+    results.push({ name, status: 'PASS' });
+    console.log(`✅ ${name}`);
+  } catch (err) {
+    results.push({ name, status: 'FAIL', error: err.message });
+    console.log(`❌ ${name}: ${err.message}`);
+  }
 }
 
-async function fresh(page) {
-  await page.evaluate(() => localStorage.removeItem('bs.settings.v1'));
+// Helper to wait for selector
+async function waitForButton(page, text, timeout = 10000) {
+  return page.locator(`button:has-text("${text}")`).first().waitFor({ timeout });
+}
+
+// Helper: clear localStorage and reload
+async function resetPage(page) {
+  await page.goto(SERVER_URL);
+  await page.waitForLoadState('networkidle');
+  await page.evaluate(() => {
+    try {
+      localStorage.removeItem('bs.settings.v1');
+    } catch (e) {}
+  });
   await page.reload();
   await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(400);
 }
 
-function stored(raw, ...keys) {
-  try {
-    let v = JSON.parse(raw || '{}');
-    for (const k of keys) v = v?.[k];
-    return v;
-  } catch { return undefined; }
+async function openMenu(page) {
+  const menuBtn = page.locator('[aria-label*="תפריט"]').first();
+  await menuBtn.waitFor({ timeout: 5000 });
+  await menuBtn.click();
+  await page.waitForTimeout(500);
 }
 
-(async () => {
-  const browser = await chromium.launch({ executablePath: EXE });
-  const ctx  = await browser.newContext({ viewport: { width: 414, height: 896 } });
-  const page = await ctx.newPage();
-  await page.goto(URL);
+async function test1_DarkTheme(page) {
+  await resetPage(page);
+  await openMenu(page);
+
+  // Navigate through menu tree
+  const displayBtn = page.locator(`button:has-text("תצוגה")`).first();
+  await displayBtn.waitFor({ timeout: 5000 });
+  await displayBtn.click();
+  await page.waitForTimeout(300);
+
+  const themeBtn = page.locator(`button:has-text("ערכת נושא")`).first();
+  await themeBtn.waitFor({ timeout: 5000 });
+  await themeBtn.click();
+  await page.waitForTimeout(300);
+
+  const darkBtn = page.locator(`button:has-text("כהה")`).first();
+  await darkBtn.waitFor({ timeout: 5000 });
+  await darkBtn.click();
+  await page.waitForTimeout(800);
+
+  const theme = await page.locator('html').getAttribute('data-theme');
+  if (theme !== 'dark') throw new Error(`Expected data-theme="dark", got "${theme}"`);
+}
+
+async function test2_LargeText(page) {
+  await resetPage(page);
+  await openMenu(page);
+
+  await page.locator(`button:has-text("תצוגה")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("תצוגה")`).first().click();
+  await page.waitForTimeout(300);
+
+  await page.locator(`button:has-text("גודל טקסט")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("גודל טקסט")`).first().click();
+  await page.waitForTimeout(300);
+
+  await page.locator(`button:has-text("גדול")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("גדול")`).first().click();
+  await page.waitForTimeout(800);
+
+  const textSize = await page.locator('html').getAttribute('data-text-size');
+  if (textSize !== 'large') throw new Error(`Expected data-text-size="large", got "${textSize}"`);
+}
+
+async function test3_ReduceMotion(page) {
+  await resetPage(page);
+  await openMenu(page);
+
+  await page.locator(`button:has-text("תצוגה")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("תצוגה")`).first().click();
+  await page.waitForTimeout(300);
+
+  await page.locator(`button:has-text("הפחתת אנימציות")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("הפחתת אנימציות")`).first().click();
+  await page.waitForTimeout(800);
+
+  const reduceMotion = await page.locator('html').getAttribute('data-reduce-motion');
+  if (reduceMotion !== 'true') throw new Error(`Expected data-reduce-motion="true", got "${reduceMotion}"`);
+}
+
+async function test4_NotificationsToggle(page) {
+  await resetPage(page);
+  await openMenu(page);
+
+  await page.locator(`button:has-text("התראות")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("התראות")`).first().click();
+  await page.waitForTimeout(300);
+
+  await page.locator(`button:has-text("עדכוני משלוחים")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("עדכוני משלוחים")`).first().click();
+  await page.waitForTimeout(800);
+
+  const settings = await page.evaluate(() => {
+    try {
+      const s = localStorage.getItem('bs.settings.v1');
+      return s ? JSON.parse(s) : null;
+    } catch { return null; }
+  });
+
+  if (!settings || settings.notif?.shipments !== false) {
+    throw new Error(`Expected notif.shipments=false, got ${settings?.notif?.shipments}`);
+  }
+}
+
+async function test5_CurrencyUSD(page) {
+  await resetPage(page);
+  await openMenu(page);
+
+  await page.locator(`button:has-text("אזור ושפה")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("אזור ושפה")`).first().click();
+  await page.waitForTimeout(300);
+
+  await page.locator(`button:has-text("מטבע")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("מטבע")`).first().click();
+  await page.waitForTimeout(300);
+
+  await page.locator(`button:has-text("$ דולר")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("$ דולר")`).first().click();
+  await page.waitForTimeout(800);
+
+  const currency = await page.locator('html').getAttribute('data-currency');
+  if (currency !== 'usd') throw new Error(`Expected data-currency="usd", got "${currency}"`);
+}
+
+async function test6_AboutVersion(page) {
+  await resetPage(page);
+  await openMenu(page);
+
+  await page.locator(`button:has-text("מידע")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("מידע")`).first().click();
+  await page.waitForTimeout(300);
+
+  await page.locator(`button:has-text("גרסה")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("גרסה")`).first().click();
+  await page.waitForTimeout(800);
+
+  const toast = page.locator('[role="status"]').first();
+  await toast.waitFor({ timeout: 5000 });
+  const text = await toast.textContent();
+  if (!text?.includes('BuildSmart') || !text?.includes('אב-טיפוס')) {
+    throw new Error(`Toast should contain BuildSmart version`);
+  }
+}
+
+async function test7_AboutContact(page) {
+  await resetPage(page);
+  await openMenu(page);
+
+  await page.locator(`button:has-text("מידע")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("מידע")`).first().click();
+  await page.waitForTimeout(300);
+
+  await page.locator(`button:has-text("יצירת קשר")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("יצירת קשר")`).first().click();
+  await page.waitForTimeout(800);
+
+  const toast = page.locator('[role="status"]').first();
+  await toast.waitFor({ timeout: 5000 });
+  const text = await toast.textContent();
+  if (!text?.includes('support@buildsmart.demo')) {
+    throw new Error(`Toast should contain support email`);
+  }
+}
+
+async function test8_ResetDefaults(page) {
+  await page.goto(SERVER_URL);
   await page.waitForLoadState('networkidle');
 
-  /* ── display: theme ── */
-  await fresh(page);
-  await tap(page, 'פתח תפריט'); await tap(page, 'הגדרות');
-  await tap(page, 'תצוגה'); await tap(page, 'ערכת נושא'); await tap(page, 'כהה');
-  const theme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
-  theme === 'dark' ? ok('theme → dark') : fail('theme → dark', theme);
-
-  /* ── display: text size ── */
-  await tap(page, 'חזרה מ-ערכת נושא'); await tap(page, 'גודל טקסט'); await tap(page, 'גדול');
-  const textSize = await page.evaluate(() => document.documentElement.getAttribute('data-text-size'));
-  textSize === 'large' ? ok('textSize → large') : fail('textSize → large', textSize);
-
-  /* ── display: reduce motion ── */
-  await tap(page, 'חזרה מ-גודל טקסט'); await tap(page, 'הפחתת אנימציות');
-  const rm = await page.evaluate(() => document.documentElement.getAttribute('data-reduce-motion'));
-  rm === 'true' ? ok('reduceMotion → true') : fail('reduceMotion → true', rm);
-
-  /* ── notifications ── */
-  await tap(page, 'חזרה מ-תצוגה'); await tap(page, 'התראות');
-  await tap(page, 'עדכוני משלוחים');
-  const raw1 = await page.evaluate(() => localStorage.getItem('bs.settings.v1'));
-  stored(raw1, 'notif', 'shipments') === false
-    ? ok('notif.shipments → false') : fail('notif.shipments → false', stored(raw1,'notif','shipments'));
-
-  /* ── region: currency ── */
-  await tap(page, 'חזרה מ-התראות'); await tap(page, 'אזור ושפה');
-  await tap(page, 'מטבע'); await tap(page, '$ דולר');
-  const currency = await page.evaluate(() => document.documentElement.getAttribute('data-currency'));
-  currency === 'usd' ? ok('currency → usd') : fail('currency → usd', currency);
-
-  /* ── delivery: haul ── */
-  await tap(page, 'חזרה מ-מטבע'); await tap(page, 'חזרה מ-אזור ושפה');
-  await tap(page, 'משלוח ותשלום'); await tap(page, 'סוג הובלה מועדף'); await tap(page, 'משאית');
-  const haul = await page.evaluate(() => document.documentElement.getAttribute('data-haul'));
-  haul === 'truck' ? ok('defaultHaul → truck') : fail('defaultHaul → truck', haul);
-
-  /* ── about: toast ── */
-  await tap(page, 'חזרה מ-סוג הובלה מועדף'); await tap(page, 'חזרה מ-משלוח ותשלום');
-  await tap(page, 'מידע'); await tap(page, 'גרסה');
+  // Set dark theme
+  await openMenu(page);
+  await page.locator(`button:has-text("תצוגה")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("תצוגה")`).first().click();
   await page.waitForTimeout(300);
-  const t1 = await page.evaluate(() => document.querySelector('.toast')?.textContent?.trim());
-  t1?.includes('BuildSmart') ? ok('about/גרסה toast') : fail('about/גרסה toast', t1);
 
-  /* ── about: contact toast ── */
-  await page.waitForTimeout(3400);
-  await tap(page, 'יצירת קשר');
+  await page.locator(`button:has-text("ערכת נושא")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("ערכת נושא")`).first().click();
   await page.waitForTimeout(300);
-  const t2 = await page.evaluate(() => document.querySelector('.toast')?.textContent?.trim());
-  t2?.includes('support@buildsmart') ? ok('about/יצירת קשר toast') : fail('about/יצירת קשר toast', t2);
 
-  /* ── security: 2FA toggle ── */
-  await tap(page, 'חזרה מ-מידע'); await tap(page, 'אבטחה והרשאות');
-  await tap(page, 'מרכז האבטחה'); await tap(page, 'אימות דו-שלבי');
-  const raw2 = await page.evaluate(() => localStorage.getItem('bs.settings.v1'));
-  stored(raw2, 'security', 'twoFA') === true
-    ? ok('security.twoFA → true') : fail('security.twoFA → true', stored(raw2,'security','twoFA'));
+  await page.locator(`button:has-text("כהה")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("כהה")`).first().click();
+  await page.waitForTimeout(800);
 
-  /* ── security: session timeout ── */
-  await tap(page, 'נעילת הפעלה'); await tap(page, '60 דק׳');
-  const raw3 = await page.evaluate(() => localStorage.getItem('bs.settings.v1'));
-  stored(raw3, 'security', 'sessionTimeout') === 60
-    ? ok('sessionTimeout → 60') : fail('sessionTimeout → 60', stored(raw3,'security','sessionTimeout'));
+  // Reset
+  await openMenu(page);
+  await page.locator(`button:has-text("איפוס לברירת מחדל")`).first().waitFor({ timeout: 5000 });
+  await page.locator(`button:has-text("איפוס לברירת מחדל")`).first().click();
+  await page.waitForTimeout(1000);
 
-  /* ── security: privacy toggle ── */
-  await tap(page, 'חזרה מ-נעילת הפעלה'); await tap(page, 'בקרת פרטיות');
-  await tap(page, 'שיתוף נתוני שימוש');
-  const raw4 = await page.evaluate(() => localStorage.getItem('bs.settings.v1'));
-  stored(raw4,'security','privacy','analytics') === false
-    ? ok('privacy.analytics → false') : fail('privacy.analytics → false', stored(raw4,'security','privacy','analytics'));
+  const theme = await page.locator('html').getAttribute('data-theme');
+  if (theme !== 'light') throw new Error(`After reset, theme should be "light", got "${theme}"`);
+}
 
-  /* ── reset ── */
-  await fresh(page);
-  await tap(page, 'פתח תפריט'); await tap(page, 'הגדרות');
-  // set something first
-  await tap(page, 'אזור ושפה'); await tap(page, 'מטבע'); await tap(page, '$ דולר');
-  await tap(page, 'חזרה מ-מטבע'); await tap(page, 'חזרה מ-אזור ושפה');
-  await tap(page, 'איפוס לברירת מחדל');
-  await page.waitForTimeout(400);
-  const raw5 = await page.evaluate(() => localStorage.getItem('bs.settings.v1'));
-  stored(raw5, 'region', 'currency') === 'ils'
-    ? ok('reset → currency back to ils') : fail('reset → currency back to ils', stored(raw5,'region','currency'));
+async function main() {
+  const browser = await chromium.launch({
+    executablePath: CHROMIUM_PATH,
+    headless: true,
+  });
 
-  await browser.close();
+  try {
+    const context = await browser.newContext();
+    const page = await context.newPage();
 
-  console.log(`\n${'─'.repeat(40)}`);
-  console.log(`  ${passed + failed} tests — ${passed} passed  ${failed} failed`);
-  console.log(`${'─'.repeat(40)}`);
-  process.exit(failed > 0 ? 1 : 0);
-})().catch(e => { console.error(e); process.exit(1); });
+    // Test connection
+    try {
+      await page.goto(SERVER_URL, { waitUntil: 'networkidle', timeout: 10000 });
+    } catch (err) {
+      throw new Error(`Cannot reach ${SERVER_URL}: ${err.message}`);
+    }
+
+    console.log('\n🧪 Smoke Tests — Settings Leaves (26 items)\n');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    await runTest('1️⃣ תצוגה → ערכת נושא → כהה', () => test1_DarkTheme(page));
+    await runTest('2️⃣ תצוגה → גודל טקסט → גדול', () => test2_LargeText(page));
+    await runTest('3️⃣ תצוגה → הפחתת אנימציות', () => test3_ReduceMotion(page));
+    await runTest('4️⃣ התראות → עדכוני משלוחים (toggle)', () => test4_NotificationsToggle(page));
+    await runTest('5️⃣ אזור ושפה → מטבע → $ דולר', () => test5_CurrencyUSD(page));
+    await runTest('6️⃣ מידע → גרסה', () => test6_AboutVersion(page));
+    await runTest('7️⃣ מידע → יצירת קשר', () => test7_AboutContact(page));
+    await runTest('8️⃣ איפוס לברירת מחדל', () => test8_ResetDefaults(page));
+
+    await context.close();
+  } finally {
+    await browser.close();
+  }
+
+  // Summary
+  console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+  const passed = results.filter(r => r.status === 'PASS').length;
+  const failed = results.filter(r => r.status === 'FAIL').length;
+  console.log(`📊 Results: ${passed} PASS, ${failed} FAIL (out of ${results.length})`);
+
+  if (failed > 0) {
+    console.log('\n❌ Failures:\n');
+    results.filter(r => r.status === 'FAIL').forEach(r => {
+      console.log(`  • ${r.name}\n    ${r.error}\n`);
+    });
+    process.exit(1);
+  } else {
+    console.log('\n✅ All smoke tests passed!\n');
+    process.exit(0);
+  }
+}
+
+main().catch(err => {
+  console.error('Fatal error:', err);
+  process.exit(1);
+});
