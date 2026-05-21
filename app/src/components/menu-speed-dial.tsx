@@ -13,15 +13,22 @@ import {
   popSettingsPathTo,
   settingsLevel,
   exitAdvancedSettings,
+  exitProfile,
+  profilePath,
+  popProfilePathTo,
   type MenuTab,
 } from '../store/app-store';
 import {
-  ProfileSubmenu,
+  SettingsTopSubmenu,
+  ProfileTreeSubmenu,
   ProjectsSubmenu,
   SettingsSubmenu,
   SettingsTreeSubmenu,
   SETTINGS_ROWS,
   walkSettings,
+  PROFILE_TOP_ICON,
+  ADVANCED_TOP_ICON,
+  profileAnchorIcon,
 } from './menu/submenu-settings';
 
 type Tab = {
@@ -176,12 +183,51 @@ export function MenuSpeedDial() {
  * everything to return to the group's L2 view). Tapping the group
  * anchor clears the group entirely (back to the 10-row level). */
 function SettingsLevel() {
-  /* Level 1 of the settings tab = ProfileSubmenu (8 sections + a
-   * "הגדרות מתקדמות" row that enters advanced mode). */
-  if (settingsLevel.value === 'profile') return <ProfileSubmenu />;
+  const level = settingsLevel.value;
 
-  /* Advanced mode = the 10 settings categories. An anchor at the bottom
-   * lets the user pop back to the profile level. */
+  /* Level 1 — 2 items: הגדרות-פרופיל / הגדרות מתקדמות */
+  if (level === 'top') return <SettingsTopSubmenu />;
+
+  /* Level 2/3 — profile branch. profilePath=[] shows 2 sub-branches
+   * (כרטיס קבלן / דרגות הקבלן); deeper paths show 3 leaves each. */
+  if (level === 'profile') {
+    const path = profilePath.value;
+    return (
+      <>
+        <li role="none" class="dial__item dial__item--active">
+          <button
+            type="button"
+            class="dial__btn"
+            role="menuitem"
+            onClick={exitProfile}
+            aria-label="חזרה מ-הגדרות-פרופיל"
+            aria-expanded="true"
+          >
+            <span class="dial__circle dial__circle--active">{PROFILE_TOP_ICON}</span>
+            <span class="dial__label dial__label--active">הגדרות-פרופיל</span>
+          </button>
+        </li>
+        {path.map((label, i) => (
+          <li key={label} role="none" class="dial__item dial__item--active">
+            <button
+              type="button"
+              class="dial__btn"
+              role="menuitem"
+              onClick={() => popProfilePathTo(i)}
+              aria-label={`חזרה מ-${label}`}
+              aria-expanded="true"
+            >
+              <span class="dial__circle dial__circle--active">{profileAnchorIcon(label)}</span>
+              <span class="dial__label dial__label--active">{label}</span>
+            </button>
+          </li>
+        ))}
+        <ProfileTreeSubmenu />
+      </>
+    );
+  }
+
+  /* Level 2/3+ — advanced settings (the 10 categories tree). */
   const group = menuActiveSettingsGroup.value;
   if (!group) {
     return (
@@ -195,7 +241,7 @@ function SettingsLevel() {
             aria-label="חזרה מ-הגדרות מתקדמות"
             aria-expanded="true"
           >
-            <span class="dial__circle dial__circle--active">{ADVANCED_BACK_ICON}</span>
+            <span class="dial__circle dial__circle--active">{ADVANCED_TOP_ICON}</span>
             <span class="dial__label dial__label--active">הגדרות מתקדמות</span>
           </button>
         </li>
@@ -219,7 +265,7 @@ function SettingsLevel() {
           aria-label="חזרה מ-הגדרות מתקדמות"
           aria-expanded="true"
         >
-          <span class="dial__circle dial__circle--active">{ADVANCED_BACK_ICON}</span>
+          <span class="dial__circle dial__circle--active">{ADVANCED_TOP_ICON}</span>
           <span class="dial__label dial__label--active">הגדרות מתקדמות</span>
         </button>
       </li>
@@ -255,10 +301,3 @@ function SettingsLevel() {
     </>
   );
 }
-
-const ADVANCED_BACK_ICON = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.65 1.65 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.65 1.65 0 00-1.8-.3 1.65 1.65 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.65 1.65 0 00-1-1.5 1.65 1.65 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.65 1.65 0 00.3-1.8 1.65 1.65 0 00-1.5-1H3a2 2 0 010-4h.1a1.65 1.65 0 001.5-1 1.65 1.65 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.65 1.65 0 001.8.3H9a1.65 1.65 0 001-1.5V3a2 2 0 014 0v.1a1.65 1.65 0 001 1.5 1.65 1.65 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.65 1.65 0 00-.3 1.8V9a1.65 1.65 0 001.5 1H21a2 2 0 010 4h-.1a1.65 1.65 0 00-1.5 1z" />
-  </svg>
-);

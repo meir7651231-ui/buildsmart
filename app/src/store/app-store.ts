@@ -9,18 +9,37 @@ import {
 export type Category = CatalogCategory;
 export type Product = CatalogProduct;
 
-/* ===== Settings tab — inner level. R3 says the menu→הגדרות destination
- * is a dial, not a page. Level 1 shows the legacy profile sections (8
- * placeholders + "הגדרות מתקדמות"); level 2 shows the 10 settings
- * categories (the existing tree). Drilling further follows
- * menuActiveSettingsGroup + menuActiveSettingsPath. */
-export type SettingsLevelId = 'profile' | 'advanced';
-export const settingsLevel = signal<SettingsLevelId>('profile');
+/* ===== Settings tab — inner level. R3: dial-only. Level 1 has two
+ * branches: 'profile' (legacy identity content) and 'advanced' (the 10
+ * settings categories). Profile drills further into card/ranks
+ * sub-trees via `profilePath`. */
+export type SettingsLevelId = 'top' | 'profile' | 'advanced';
+export const settingsLevel = signal<SettingsLevelId>('top');
+export const profilePath = signal<string[]>([]);
+
+export function setSettingsLevel(level: SettingsLevelId): void {
+  settingsLevel.value = level;
+  if (level !== 'profile') profilePath.value = [];
+}
 export function enterAdvancedSettings(): void {
-  settingsLevel.value = 'advanced';
+  setSettingsLevel('advanced');
 }
 export function exitAdvancedSettings(): void {
-  settingsLevel.value = 'profile';
+  setSettingsLevel('top');
+}
+export function enterProfile(): void {
+  setSettingsLevel('profile');
+}
+export function exitProfile(): void {
+  setSettingsLevel('top');
+}
+export function pushProfilePath(label: string): void {
+  profilePath.value = [...profilePath.value, label];
+}
+export function popProfilePathTo(depth: number): void {
+  const cur = profilePath.value;
+  if (depth >= cur.length) return;
+  profilePath.value = cur.slice(0, depth);
 }
 
 /* ===== Navigation: category drill-down ===== */
@@ -91,7 +110,8 @@ export const editingLeafKey = signal<string | null>(null);
 export function setMenuTab(t: MenuTab | null): void {
   menuActiveTab.value = t;
   editingLeafKey.value = null;
-  settingsLevel.value = 'profile';
+  settingsLevel.value = 'top';
+  profilePath.value = [];
   if (t === null) {
     menuActiveSettingsGroup.value = null;
     menuActiveSettingsPath.value = [];
@@ -130,7 +150,8 @@ export function toggleMenu(): void {
     menuActiveSettingsGroup.value = null;
     menuActiveSettingsPath.value = [];
     editingLeafKey.value = null;
-    settingsLevel.value = 'profile';
+    settingsLevel.value = 'top';
+    profilePath.value = [];
   }
 }
 export function closeMenu(): void {
@@ -139,7 +160,8 @@ export function closeMenu(): void {
   menuActiveSettingsGroup.value = null;
   menuActiveSettingsPath.value = [];
   editingLeafKey.value = null;
-  settingsLevel.value = 'profile';
+  settingsLevel.value = 'top';
+  profilePath.value = [];
 }
 export function openSearch(): void {
   searchOpen.value = true;

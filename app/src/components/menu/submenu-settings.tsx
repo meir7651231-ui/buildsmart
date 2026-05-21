@@ -15,6 +15,9 @@ import {
   startEditingLeaf,
   stopEditingLeaf,
   enterAdvancedSettings,
+  enterProfile,
+  profilePath,
+  pushProfilePath,
   type SettingsGroupId,
 } from '../../store/app-store';
 import {
@@ -797,54 +800,73 @@ function LeafEditor({
   );
 }
 
-/* === Profile dial (level 1 of the settings tab). @legacy
- * index.html:6545-6680 (refreshIdentity). Placeholder — 8 sections from
- * the legacy as dial leaves (toast on tap) + a "הגדרות מתקדמות" leaf
- * that drills into the 10 settings categories. */
+/* === Settings tab — 3-level dial.
+ * Level 1 (TOP)     : הגדרות-פרופיל · הגדרות מתקדמות
+ * Level 2 (profile) : כרטיס קבלן · דרגות הקבלן
+ * Level 3 (card)    : אתה במצב הדגמה · המספרים שלך · סך הרכש דרך BuildSmart
+ * Level 3 (ranks)   : ההטבה שלך · הישגים · מועדון BuildSmart
+ *
+ * Labels verbatim from index.html:6545-6680 (refreshIdentity) except for
+ * "הגדרות-פרופיל" (user-authored grouping label — not in legacy). */
 
-type ProfileRow = {
-  id: string;
-  label: string;
-  icon: preact.JSX.Element;
-};
-
-const profileIcon = (path: string) => (
+const ICON_PROFILE = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-    <path d={path} />
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21a8 8 0 0116 0" />
   </svg>
 );
 
-const PROFILE_ROWS: ProfileRow[] = [
-  { id: 'hero',     label: 'כרטיס קבלן',              icon: profileIcon('M12 12a4 4 0 100-8 4 4 0 000 8zM4 21a8 8 0 0116 0') },
-  { id: 'register', label: 'אתה במצב הדגמה',          icon: profileIcon('M4 6h16v12H4zM4 10h16') },
-  { id: 'stats',    label: 'המספרים שלך',             icon: profileIcon('M4 20V10M10 20V4M16 20v-7M22 20H2') },
-  { id: 'spent',    label: 'סך הרכש דרך BuildSmart',   icon: profileIcon('M12 1v22M17 5H9a4 4 0 000 8h6a4 4 0 010 8H6') },
-  { id: 'perk',     label: 'ההטבה שלך',                icon: profileIcon('M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z') },
-  { id: 'achieve',  label: 'הישגים',                   icon: profileIcon('M7 4h10v6a5 5 0 01-10 0V4zM5 4H3v2a4 4 0 004 4M19 4h2v2a4 4 0 01-4 4M9 22h6M12 14v8') },
-  { id: 'ranks',    label: 'דרגות הקבלן',              icon: profileIcon('M5 21V9l7-5 7 5v12M9 21v-6h6v6') },
-  { id: 'hub',      label: 'מועדון BuildSmart',        icon: profileIcon('M6 8h12l-1 9H7L6 8zM9 8V5a3 3 0 016 0v3') },
-];
-
-const ADVANCED_ICON = (
+const ICON_ADVANCED = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="3" />
     <path d="M19.4 15a1.65 1.65 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.65 1.65 0 00-1.8-.3 1.65 1.65 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.65 1.65 0 00-1-1.5 1.65 1.65 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.65 1.65 0 00.3-1.8 1.65 1.65 0 00-1.5-1H3a2 2 0 010-4h.1a1.65 1.65 0 001.5-1 1.65 1.65 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.65 1.65 0 001.8.3H9a1.65 1.65 0 001-1.5V3a2 2 0 014 0v.1a1.65 1.65 0 001 1.5 1.65 1.65 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.65 1.65 0 00-.3 1.8V9a1.65 1.65 0 001.5 1H21a2 2 0 010 4h-.1a1.65 1.65 0 00-1.5 1z" />
   </svg>
 );
 
-export function ProfileSubmenu() {
-  /* Reverse so the topmost row in the visual stack reads first (the
-   * dial container uses flex-direction: column-reverse). */
-  const all: Array<ProfileRow & { advanced?: boolean }> = [
-    ...PROFILE_ROWS,
-    { id: 'advanced', label: 'הגדרות מתקדמות', icon: ADVANCED_ICON, advanced: true },
+const ICON_CARD = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="M3 10h18" />
+  </svg>
+);
+
+const ICON_RANKS = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 21V9l7-5 7 5v12M9 21v-6h6v6" />
+  </svg>
+);
+
+export const PROFILE_TREE: Node[] = [
+  {
+    label: 'כרטיס קבלן',
+    children: [
+      { label: 'אתה במצב הדגמה' },
+      { label: 'המספרים שלך' },
+      { label: 'סך הרכש דרך BuildSmart' },
+    ],
+  },
+  {
+    label: 'דרגות הקבלן',
+    children: [
+      { label: 'ההטבה שלך' },
+      { label: 'הישגים' },
+      { label: 'מועדון BuildSmart' },
+    ],
+  },
+];
+
+/* Level 1 — two branches. Tap "הגדרות-פרופיל" → enter profile;
+ * tap "הגדרות מתקדמות" → enter advanced (existing 10 categories). */
+export function SettingsTopSubmenu() {
+  const rows = [
+    { id: 'advanced', label: 'הגדרות מתקדמות', icon: ICON_ADVANCED, onClick: enterAdvancedSettings },
+    { id: 'profile',  label: 'הגדרות-פרופיל',  icon: ICON_PROFILE,  onClick: enterProfile },
   ];
-  const reversed = [...all].reverse();
   return (
     <>
-      {reversed.map((row, i) => (
+      {rows.map((r, i) => (
         <li
-          key={row.id}
+          key={r.id}
           role="none"
           class="dial__item dial__item--sub"
           style={{ animationDelay: `${i * 22}ms` }}
@@ -853,22 +875,87 @@ export function ProfileSubmenu() {
             type="button"
             class="dial__btn"
             role="menuitem"
-            onClick={() => {
-              if (row.advanced) {
-                enterAdvancedSettings();
-                return;
-              }
-              showToast(`${row.label} — בבנייה`);
-            }}
-            aria-label={row.label}
+            onClick={r.onClick}
+            aria-label={r.label}
           >
-            <span class="dial__circle">{row.icon}</span>
-            <span class="dial__label">{row.label}</span>
+            <span class="dial__circle">{r.icon}</span>
+            <span class="dial__label">{r.label}</span>
           </button>
         </li>
       ))}
     </>
   );
+}
+
+/* Walks PROFILE_TREE following the active profilePath. Branch labels
+ * push deeper; leaves show a placeholder toast. */
+function walkProfile(path: string[]): { anchors: Node[]; current: Node[] } {
+  const anchors: Node[] = [];
+  let current: Node[] = PROFILE_TREE;
+  for (const label of path) {
+    const node = current.find((n) => n.label === label);
+    if (!node || !node.children || node.children.length === 0) break;
+    anchors.push(node);
+    current = node.children;
+  }
+  return { anchors, current };
+}
+
+const PROFILE_BRANCH_ICON: Record<string, preact.JSX.Element> = {
+  'כרטיס קבלן': ICON_CARD,
+  'דרגות הקבלן': ICON_RANKS,
+};
+
+export function ProfileTreeSubmenu() {
+  const path = profilePath.value;
+  const { current } = walkProfile(path);
+  /* Reverse so the topmost row in the visual stack reads first. */
+  const reversed = [...current].reverse();
+  /* Pick an icon: deepest anchor's branch icon, or a generic profile icon. */
+  const branchIcon =
+    path.length > 0
+      ? PROFILE_BRANCH_ICON[path[0]!] ?? ICON_PROFILE
+      : ICON_PROFILE;
+  return (
+    <>
+      {reversed.map((node, i) => (
+        <li
+          key={node.label}
+          role="none"
+          class="dial__item dial__item--sub"
+          style={{ animationDelay: `${i * 20}ms` }}
+        >
+          <button
+            type="button"
+            class="dial__btn"
+            role="menuitem"
+            onClick={() => {
+              if (node.children && node.children.length > 0) {
+                pushProfilePath(node.label);
+                return;
+              }
+              showToast(`${node.label} — בבנייה`);
+            }}
+            aria-label={node.label}
+          >
+            <span class="dial__circle">
+              {path.length === 0
+                ? PROFILE_BRANCH_ICON[node.label] ?? ICON_PROFILE
+                : branchIcon}
+            </span>
+            <span class="dial__label">{node.label}</span>
+          </button>
+        </li>
+      ))}
+    </>
+  );
+}
+
+export const PROFILE_TOP_ICON = ICON_PROFILE;
+export const ADVANCED_TOP_ICON = ICON_ADVANCED;
+
+export function profileAnchorIcon(label: string): preact.JSX.Element {
+  return PROFILE_BRANCH_ICON[label] ?? ICON_PROFILE;
 }
 
 /* === Projects dial. @legacy index.html:6447-6451 + 7455 (renderProjects).
