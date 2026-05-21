@@ -22,9 +22,7 @@ const TILES: Tile[] = [
 
 type Section = { id: string; emoji: string; title: string };
 
-/* @legacy index.html:4260-4263 (admTab buttons of screen-store). L2 of
- * the BS dial when drilled into "חנות ספק". Each leaf taps a toast for
- * Phase 0; deeper functionality wired in later phases. */
+/* @legacy index.html:4260-4263 (admTab buttons of screen-store). */
 const STORE_SECTIONS: Section[] = [
   { id: 's-home',    emoji: '🏠', title: 'בית' },
   { id: 's-orders',  emoji: '📥', title: 'הזמנות' },
@@ -32,9 +30,23 @@ const STORE_SECTIONS: Section[] = [
   { id: 's-portal',  emoji: '🧰', title: 'פורטל' },
 ];
 
-/* Other personas have no sub-sections yet — drill is a no-op (toast). */
+/* @legacy index.html:17991-18043 (renderCourierHome). Section titles
+ * verbatim; emoji per section:
+ *   🛵 = HAUL_TYPES[0].ic (vehicle picker, @11951)
+ *   📦 = chStat 'לאיסוף' ic (@18033)
+ *   🚚 = chStat 'בדרך' ic (@18034) / empty-state ic (@7762)
+ *   🧰 = fin-hub-ic for "פורטל השליח" (@18039) */
+const COURIER_SECTIONS: Section[] = [
+  { id: 'vehicle', emoji: '🛵', title: 'הרכב שלי היום' },
+  { id: 'pickup',  emoji: '📦', title: 'משלוחים ממתינים לאיסוף' },
+  { id: 'active',  emoji: '🚚', title: 'משלוחים פעילים' },
+  { id: 'portal',  emoji: '🧰', title: 'פורטל השליח' },
+];
+
+/* Other personas have no sub-sections yet — drill shows back anchor only. */
 const PERSONA_SECTIONS: Partial<Record<Persona, Section[]>> = {
   store: STORE_SECTIONS,
+  courier: COURIER_SECTIONS,
 };
 
 export function BsDial() {
