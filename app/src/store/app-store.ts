@@ -46,11 +46,21 @@ export const menuOpen = signal(false);
 export const searchOpen = signal(false);
 export const openedProductId = signal<string | null>(null);
 
+/* Which top-level menu tab is "drilled into". null = show all five FABs. */
+export type MenuTab = 'home' | 'catalog' | 'projects' | 'cart' | 'settings';
+export const menuActiveTab = signal<MenuTab | null>(null);
+
+export function setMenuTab(t: MenuTab | null): void {
+  menuActiveTab.value = t;
+}
+
 export function toggleMenu(): void {
   menuOpen.value = !menuOpen.value;
+  if (!menuOpen.value) menuActiveTab.value = null;
 }
 export function closeMenu(): void {
   menuOpen.value = false;
+  menuActiveTab.value = null;
 }
 export function openSearch(): void {
   searchOpen.value = true;

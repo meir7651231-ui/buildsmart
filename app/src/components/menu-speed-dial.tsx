@@ -1,11 +1,14 @@
 /* @legacy index.html:5383-5403 (bottom tabbar — בית / קטלוג / הפרויקטים / רכש / הגדרות)
- * The five items here mirror the legacy tabbar verbatim. Each item's
- * sub-menu will be filled in one at a time in subsequent iterations.
+ * The five items here mirror the legacy tabbar verbatim. Tapping a tab
+ * with a sub-menu drills in (this commit: only 'settings'); tapping a
+ * tab without one just closes the menu. Tapping the active tab again
+ * goes back to the five-tabs view.
  */
-import { menuOpen, closeMenu } from '../store/app-store';
+import { menuOpen, closeMenu, menuActiveTab, setMenuTab, type MenuTab } from '../store/app-store';
+import { SettingsSubmenu } from './menu/submenu-settings';
 
 type Tab = {
-  id: 'home' | 'catalog' | 'projects' | 'cart' | 'settings';
+  id: MenuTab;
   label: string;
   icon: preact.JSX.Element;
 };
@@ -62,8 +65,27 @@ const TABS: Tab[] = [
   },
 ];
 
+const TAB_HAS_SUBMENU: Record<MenuTab, boolean> = {
+  home: false,
+  catalog: false,
+  projects: false,
+  cart: false,
+  settings: true,
+};
+
 export function MenuSpeedDial() {
   if (!menuOpen.value) return null;
+
+  const active = menuActiveTab.value;
+  const activeDef = active ? TABS.find((t) => t.id === active) ?? null : null;
+
+  const handleTabClick = (id: MenuTab) => {
+    if (TAB_HAS_SUBMENU[id]) {
+      setMenuTab(id);
+    } else {
+      closeMenu();
+    }
+  };
 
   return (
     <>
@@ -74,25 +96,45 @@ export function MenuSpeedDial() {
         onClick={closeMenu}
       />
       <ul class="dial" role="menu" aria-label="תפריט ראשי">
-        {TABS.map((tab, i) => (
-          <li
-            key={tab.id}
-            role="none"
-            class="dial__item"
-            style={{ animationDelay: `${i * 28}ms` }}
-          >
-            <button
-              type="button"
-              class="dial__btn"
-              role="menuitem"
-              onClick={closeMenu}
-              aria-label={tab.label}
+        {!activeDef &&
+          TABS.map((tab, i) => (
+            <li
+              key={tab.id}
+              role="none"
+              class="dial__item"
+              style={{ animationDelay: `${i * 28}ms` }}
             >
-              <span class="dial__circle">{tab.icon}</span>
-              <span class="dial__label">{tab.label}</span>
-            </button>
-          </li>
-        ))}
+              <button
+                type="button"
+                class="dial__btn"
+                role="menuitem"
+                onClick={() => handleTabClick(tab.id)}
+                aria-label={tab.label}
+              >
+                <span class="dial__circle">{tab.icon}</span>
+                <span class="dial__label">{tab.label}</span>
+              </button>
+            </li>
+          ))}
+
+        {activeDef && (
+          <>
+            <li role="none" class="dial__item dial__item--active">
+              <button
+                type="button"
+                class="dial__btn"
+                role="menuitem"
+                onClick={() => setMenuTab(null)}
+                aria-label={`חזרה מ-${activeDef.label}`}
+                aria-expanded="true"
+              >
+                <span class="dial__circle dial__circle--active">{activeDef.icon}</span>
+                <span class="dial__label dial__label--active">{activeDef.label}</span>
+              </button>
+            </li>
+            {active === 'settings' && <SettingsSubmenu />}
+          </>
+        )}
       </ul>
     </>
   );

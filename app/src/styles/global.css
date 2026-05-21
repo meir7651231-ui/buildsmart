@@ -583,6 +583,36 @@ li {
   box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.3);
 }
 
+/* Active tab (after drilling into a sub-menu) — sits at the bottom of
+ * the stack, visually marked as "selected / tap-again-to-go-back". */
+.dial__circle--active {
+  background: var(--brand);
+  color: #fff;
+}
+.dial__label--active {
+  background: var(--brand);
+  color: #fff;
+}
+
+/* Sub-menu rows — slightly smaller circles so the active parent reads
+ * as the "anchor" of the stack. Labels stay the same width/weight. */
+.dial__item--sub .dial__circle {
+  width: 42px;
+  height: 42px;
+}
+.dial__item--sub .dial__circle svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* Danger row (reset to defaults) — keep the icon recognizable by tint. */
+.dial__item--danger .dial__circle {
+  color: var(--danger, #b3261e);
+}
+.dial__item--danger .dial__label {
+  color: var(--danger, #b3261e);
+}
+
 /* ===== Generic sheet (used by product detail) ===== */
 .sheet {
   position: fixed;
