@@ -26,6 +26,12 @@ import {
   toggleExpress,
   toggleHighContrast,
   resetSettings,
+  toggleTwoFA,
+  toggleBiometric,
+  toggleLocationPerm,
+  setSessionTimeout,
+  toggleSecPrivacy,
+  type SessionTimeout,
 } from '../../store/app-settings';
 import { showToast } from '../../store/toast-store';
 
@@ -457,6 +463,100 @@ export const LEAF_BINDINGS: Record<string, Binding> = {
   'delivery>ברירת מחדל — משלוח אקספרס': {
     action: () => toggleExpress(),
     isActive: () => appSettings.value.delivery.express,
+  },
+
+  /* === security — @legacy index.html:21753-21762 (hub items) === */
+
+  /* L3 — simple toggles */
+  'security>מרכז האבטחה>אימות דו-שלבי': {
+    action: () => toggleTwoFA(),
+    isActive: () => appSettings.value.security.twoFA,
+  },
+  'security>מרכז האבטחה>כניסה ביומטרית': {
+    action: () => toggleBiometric(),
+    isActive: () => appSettings.value.security.biometric,
+  },
+  'security>מרכז האבטחה>הרשאת מיקום': {
+    action: () => toggleLocationPerm(),
+    isActive: () => appSettings.value.security.locationPerm,
+  },
+
+  /* L3 — info toasts (read-only screens in legacy) */
+  'security>מרכז האבטחה>יומן ביקורת': {
+    action: () => showToast('יומן הביקורת יוצג בגרסה המלאה'),
+  },
+  'security>מרכז האבטחה>היסטוריית כניסות': {
+    action: () => showToast('היסטוריית הכניסות תוצג בגרסה המלאה'),
+  },
+  'security>מרכז האבטחה>ניהול מכשירים': {
+    action: () => showToast('ניהול המכשירים יהיה זמין בגרסה המלאה'),
+  },
+
+  /* L4 — session timeout select — @legacy index.html:21927 (setSessionTimeout) */
+  'security>מרכז האבטחה>נעילת הפעלה>5 דק׳': {
+    action: () => setSessionTimeout(5 as SessionTimeout),
+    isActive: () => appSettings.value.security.sessionTimeout === 5,
+  },
+  'security>מרכז האבטחה>נעילת הפעלה>15 דק׳': {
+    action: () => setSessionTimeout(15 as SessionTimeout),
+    isActive: () => appSettings.value.security.sessionTimeout === 15,
+  },
+  'security>מרכז האבטחה>נעילת הפעלה>30 דק׳': {
+    action: () => setSessionTimeout(30 as SessionTimeout),
+    isActive: () => appSettings.value.security.sessionTimeout === 30,
+  },
+  'security>מרכז האבטחה>נעילת הפעלה>60 דק׳': {
+    action: () => setSessionTimeout(60 as SessionTimeout),
+    isActive: () => appSettings.value.security.sessionTimeout === 60,
+  },
+
+  /* L4 — RBAC roles info toasts — @legacy index.html:21675 (RBAC_MATRIX) */
+  'security>מרכז האבטחה>הרשאות גישה>קבלן': {
+    action: () => showToast('קבלן: הזמנות · תקציב · קטלוג · משימות · הטבות'),
+  },
+  'security>מרכז האבטחה>הרשאות גישה>מנהל מערכת': {
+    action: () => showToast('מנהל מערכת: ניהול מלא — הזמנות · קטלוג · משתמשים · דוחות'),
+  },
+  'security>מרכז האבטחה>הרשאות גישה>ספק / חנות': {
+    action: () => showToast('ספק / חנות: מילוי הזמנות · מלאי · קטלוג'),
+  },
+  'security>מרכז האבטחה>הרשאות גישה>שליח': {
+    action: () => showToast('שליח: עדכוני משלוח · אישור מסירה'),
+  },
+  'security>מרכז האבטחה>הרשאות גישה>עובד': {
+    action: () => showToast('עובד: משימות · סיום משימות'),
+  },
+
+  /* L4 — encryption indicators (read-only) — @legacy index.html:21953-21967 */
+  'security>מרכז האבטחה>הצפנת נתונים>תקשורת מוצפנת (HTTPS/TLS)': {
+    action: () => showToast('✓ תקשורת מוצפנת פעילה — HTTPS/TLS'),
+  },
+  'security>מרכז האבטחה>הצפנת נתונים>נתונים מקומיים מוגנים': {
+    action: () => showToast('✓ נתונים מקומיים מוגנים'),
+  },
+  'security>מרכז האבטחה>הצפנת נתונים>סיסמאות מאוחסנות כ-Hash': {
+    action: () => showToast('✓ סיסמאות מוגנות — מאוחסנות כ-Hash'),
+  },
+  'security>מרכז האבטחה>הצפנת נתונים>גיבוי מוצפן בענן': {
+    action: () => showToast('גיבוי מוצפן — דורש שרת בגרסה המלאה'),
+  },
+
+  /* L4 — privacy toggles — @legacy index.html:22016 (privacySettings) */
+  'security>מרכז האבטחה>בקרת פרטיות>שיתוף נתוני שימוש': {
+    action: () => toggleSecPrivacy('analytics'),
+    isActive: () => appSettings.value.security.privacy.analytics,
+  },
+  'security>מרכז האבטחה>בקרת פרטיות>שירותי מיקום': {
+    action: () => toggleSecPrivacy('location'),
+    isActive: () => appSettings.value.security.privacy.location,
+  },
+  'security>מרכז האבטחה>בקרת פרטיות>התאמת תוכן שיווקי': {
+    action: () => toggleSecPrivacy('marketing'),
+    isActive: () => appSettings.value.security.privacy.marketing,
+  },
+  'security>מרכז האבטחה>בקרת פרטיות>שליחת דוחות תקלה': {
+    action: () => toggleSecPrivacy('crashReports'),
+    isActive: () => appSettings.value.security.privacy.crashReports,
   },
 
   /* === about — @legacy index.html:6870-6876 (setLink calls) === */

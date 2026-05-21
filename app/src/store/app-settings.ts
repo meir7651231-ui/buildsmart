@@ -13,6 +13,8 @@ export type Currency = 'ils' | 'usd';
 export type HaulSize = 'small' | 'van' | 'truck';
 
 export type NotifKey = 'shipments' | 'deals' | 'budget' | 'orders';
+export type SessionTimeout = 5 | 15 | 30 | 60;
+export type PrivacyKey = 'analytics' | 'location' | 'marketing' | 'crashReports';
 
 export type AppSettings = {
   display: {
@@ -33,6 +35,13 @@ export type AppSettings = {
   accessibility: {
     highContrast: boolean;
   };
+  security: {
+    twoFA: boolean;
+    biometric: boolean;
+    locationPerm: boolean;
+    sessionTimeout: SessionTimeout;
+    privacy: Record<PrivacyKey, boolean>;
+  };
 };
 
 const DEFAULTS: AppSettings = {
@@ -41,6 +50,14 @@ const DEFAULTS: AppSettings = {
   region: { lang: 'he', units: 'metric', currency: 'ils' },
   delivery: { defaultHaul: 'small', express: false },
   accessibility: { highContrast: false },
+  /* @legacy index.html:21675 (RBAC defaults) + privacySettings at 22016 */
+  security: {
+    twoFA: false,
+    biometric: false,
+    locationPerm: false,
+    sessionTimeout: 15,
+    privacy: { analytics: true, location: true, marketing: false, crashReports: true },
+  },
 };
 
 function pick<T extends string>(v: unknown, allowed: readonly T[], fallback: T): T {
@@ -74,6 +91,20 @@ function load(): AppSettings {
         express: Boolean(p?.delivery?.express),
       },
       accessibility: { highContrast: Boolean(p?.accessibility?.highContrast) },
+      security: {
+        twoFA: Boolean(p?.security?.twoFA),
+        biometric: Boolean(p?.security?.biometric),
+        locationPerm: Boolean(p?.security?.locationPerm),
+        sessionTimeout: ([5, 15, 30, 60] as SessionTimeout[]).includes(p?.security?.sessionTimeout)
+          ? (p.security.sessionTimeout as SessionTimeout)
+          : 15,
+        privacy: {
+          analytics: p?.security?.privacy?.analytics !== false,
+          location: p?.security?.privacy?.location !== false,
+          marketing: Boolean(p?.security?.privacy?.marketing),
+          crashReports: p?.security?.privacy?.crashReports !== false,
+        },
+      },
     };
   } catch {
     return DEFAULTS;
@@ -132,6 +163,33 @@ export function toggleHighContrast(): void {
   appSettings.value = {
     ...s,
     accessibility: { ...s.accessibility, highContrast: !s.accessibility.highContrast },
+  };
+}
+
+export function toggleTwoFA(): void {
+  const s = appSettings.value;
+  appSettings.value = { ...s, security: { ...s.security, twoFA: !s.security.twoFA } };
+}
+export function toggleBiometric(): void {
+  const s = appSettings.value;
+  appSettings.value = { ...s, security: { ...s.security, biometric: !s.security.biometric } };
+}
+export function toggleLocationPerm(): void {
+  const s = appSettings.value;
+  appSettings.value = { ...s, security: { ...s.security, locationPerm: !s.security.locationPerm } };
+}
+export function setSessionTimeout(t: SessionTimeout): void {
+  const s = appSettings.value;
+  appSettings.value = { ...s, security: { ...s.security, sessionTimeout: t } };
+}
+export function toggleSecPrivacy(key: PrivacyKey): void {
+  const s = appSettings.value;
+  appSettings.value = {
+    ...s,
+    security: {
+      ...s.security,
+      privacy: { ...s.security.privacy, [key]: !s.security.privacy[key] },
+    },
   };
 }
 

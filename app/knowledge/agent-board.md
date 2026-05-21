@@ -66,12 +66,18 @@
 ב-`vite.config.ts` ו-`worker.tsx`.
 
 **פתרון (מה-Deep Agent):**
-- ה-`dist/` כבר קיים ותקין — נבנה ב-INSP-0011
+- ה-`dist/` נמצא ב-**`app/dist/`** — לא בשורש הריפו!
 - **אל תריץ `npm run build`** — זה לא חלק מהמשימה
-- הסקריפט הוא `.mjs` standalone שרץ ישירות עם Node
-- הפעל שרת: `npx http-server dist -p 8123 -s &`
-- הריץ: `node app/smoke-settings.mjs`
-- הבדיקות שכבר עברו ✓ (8/8) הן תקינות — אמת בחיות
+- **הפעל שרת כך (מהשורש):**
+  ```
+  npx http-server app/dist -p 8123 -s &
+  ```
+- **הריץ את הסקריפט:**
+  ```
+  node app/smoke-settings.mjs
+  ```
+- אם הסקריפט עדיין לא נכתב — כתוב אותו ל-`app/smoke-settings.mjs`
+  עם import: `import { chromium } from './app/node_modules/playwright/index.mjs'`
 
 **שגיאות ה-TypeScript הן pre-existing ואינן קשורות למשימה.**
 ה-Deep Agent יטפל בהן בנפרד.
