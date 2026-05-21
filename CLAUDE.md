@@ -9,10 +9,10 @@
 ## אם הגעת לכאן למשימת BuildSmart (תפריט / הגדרות)
 
 קרא בסדר הזה לפני שאתה נוגע בקוד:
-1. `app/knowledge/wip-menu-wiring.md` — מה כבר בנוי ומה נותר (26/84 עלים)
-2. `app/RULES.md` — R1–R8 (חובה)
+1. `app/knowledge/wip-menu-wiring.md` — מה כבר בנוי ומה נותר
+2. `app/RULES.md` — R1–R9 (חובה)
 3. `app/knowledge/inspector/checklist.md` — Inspector protocol
-4. הדוח האחרון: `app/knowledge/inspections/INSP-0011-*.md`
+4. הדוח האחרון: `app/knowledge/inspections/INSP-0013-*.md`
 
 **כל commit צריך:** typecheck + build + Inspector subagent + דוח INSP.
 
@@ -33,7 +33,7 @@
 
 ---
 
-## כללים קריטיים — תקציר R1–R8
+## כללים קריטיים — תקציר R1–R9
 
 | # | כלל | עיקרון |
 |---|-----|--------|
@@ -41,8 +41,9 @@
 | R3 | הגדרות = dial בלבד | אסור drawer / sheet / modal |
 | R4 | כל שורת dial = circle + label | שני elements נפרדים תמיד |
 | R6 | טקסטים עבריים = verbatim | חייב לבוא מ-index.html, לא המצאה |
-| R8 | אין המצאה | אם אתה לא רואה את זה בלגאסי, אל תוסיף |
 | R7 | regression לא נשבר | `src/test/tests/tabs.tsx` חייב לעבור |
+| R8 | אין המצאה | אם אתה לא רואה את זה בלגאסי, אל תוסיף |
+| R9 | שדות טקסט = inline input | שורת הקלדה צמודה לעלה, לא prompt/sheet/modal |
 
 ---
 
@@ -70,8 +71,8 @@ cd app && npm run build             # build
 
 ---
 
-## מה עובד כרגע (26/~84 עלים)
+## מה עובד כרגע (~65/84 עלים)
 
-✅ תצוגה · התראות · נגישות · אזור ושפה · משלוח · מידע · איפוס
+✅ תצוגה · התראות · נגישות · אזור ושפה · משלוח · מידע · איפוס · אבטחה (23/27) · שירות ותמיכה (15/17)
 
-⏳ חשבון (4) · תשלום (1) · אבטחה (27) · שירות ותמיכה (17)
+⏳ חשבון (4) · אמצעי תשלום (1) — דורשים R9 (inline input)

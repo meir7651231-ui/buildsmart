@@ -627,6 +627,28 @@ li {
   color: var(--danger, #b3261e);
 }
 
+/* R9 — inline edit input replaces .dial__label while a text leaf is in
+ * edit mode. Same pill shape, padding, font, and shadow as .dial__label;
+ * border highlights the active edit and width grows enough to type into. */
+.dial__input {
+  background: var(--card);
+  color: var(--ink);
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 2px solid var(--brand);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  width: 180px;
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.3);
+  outline: none;
+  text-align: inherit;
+}
+.dial__input::placeholder {
+  color: rgba(0, 0, 0, 0.35);
+  font-weight: 500;
+}
+
 /* ===== Generic sheet (used by product detail) ===== */
 .sheet {
   position: fixed;

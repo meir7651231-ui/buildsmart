@@ -69,8 +69,14 @@ export const menuActiveSettingsGroup = signal<SettingsGroupId | null>(null);
  * table — labels are unique within their parent in the legacy tree. */
 export const menuActiveSettingsPath = signal<string[]>([]);
 
+/* Full leaf-key currently being edited inline (R9). null = no edit
+ * active. Set when an editable leaf is tapped; cleared on save/cancel
+ * or when menu/group changes. */
+export const editingLeafKey = signal<string | null>(null);
+
 export function setMenuTab(t: MenuTab | null): void {
   menuActiveTab.value = t;
+  editingLeafKey.value = null;
   if (t === null) {
     menuActiveSettingsGroup.value = null;
     menuActiveSettingsPath.value = [];
@@ -80,16 +86,26 @@ export function setMenuTab(t: MenuTab | null): void {
 export function setSettingsGroup(g: SettingsGroupId | null): void {
   menuActiveSettingsGroup.value = g;
   menuActiveSettingsPath.value = [];
+  editingLeafKey.value = null;
 }
 
 export function pushSettingsPath(label: string): void {
   menuActiveSettingsPath.value = [...menuActiveSettingsPath.value, label];
+  editingLeafKey.value = null;
 }
 
 export function popSettingsPathTo(depth: number): void {
   const cur = menuActiveSettingsPath.value;
   if (depth >= cur.length) return;
   menuActiveSettingsPath.value = cur.slice(0, depth);
+  editingLeafKey.value = null;
+}
+
+export function startEditingLeaf(key: string): void {
+  editingLeafKey.value = key;
+}
+export function stopEditingLeaf(): void {
+  editingLeafKey.value = null;
 }
 
 export function toggleMenu(): void {
@@ -98,6 +114,7 @@ export function toggleMenu(): void {
     menuActiveTab.value = null;
     menuActiveSettingsGroup.value = null;
     menuActiveSettingsPath.value = [];
+    editingLeafKey.value = null;
   }
 }
 export function closeMenu(): void {
@@ -105,6 +122,7 @@ export function closeMenu(): void {
   menuActiveTab.value = null;
   menuActiveSettingsGroup.value = null;
   menuActiveSettingsPath.value = [];
+  editingLeafKey.value = null;
 }
 export function openSearch(): void {
   searchOpen.value = true;

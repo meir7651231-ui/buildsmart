@@ -11,6 +11,9 @@ import {
   closeMenu,
   setSettingsGroup,
   pushSettingsPath,
+  editingLeafKey,
+  startEditingLeaf,
+  stopEditingLeaf,
   type SettingsGroupId,
 } from '../../store/app-store';
 import {
@@ -33,6 +36,11 @@ import {
   toggleSecPrivacy,
   type SessionTimeout,
 } from '../../store/app-settings';
+import {
+  userProfile,
+  setProfileField,
+  type ProfileKey,
+} from '../../store/user-profile';
 import { showToast } from '../../store/toast-store';
 
 export type SettingsRowId = SettingsGroupId | 'reset';
@@ -364,9 +372,45 @@ export function SettingsSubmenu() {
 type Binding = {
   action: () => void;
   isActive?: () => boolean;
+  /* R9 — present for text-input leaves. When set, tapping the leaf
+   * opens an inline input row instead of running `action`. `action` is
+   * still required and is invoked on save (Enter or blur). */
+  input?: {
+    get: () => string;
+    set: (v: string) => void;
+    label: string;
+  };
 };
 
+/* @legacy index.html:6818-6821 (menu row labels) vs :6946-6950 (edit-dialog labels).
+ * They differ for `phone` only — menu row says 'טלפון', edit toast says 'מספר טלפון'. */
+function profileBinding(key: ProfileKey, rowLabel: string, toastLabel: string): Binding {
+  return {
+    action: () => {
+      /* never called — renderer detects `input` and opens edit mode. */
+    },
+    isActive: () => userProfile.value[key].length > 0,
+    input: {
+      get: () => userProfile.value[key],
+      set: (v: string) => {
+        setProfileField(key, v);
+        showToast(`${toastLabel} עודכן`);
+      },
+      label: rowLabel,
+    },
+  };
+}
+
 export const LEAF_BINDINGS: Record<string, Binding> = {
+  /* === account — R9 inline edit. @legacy index.html:6818-6821 + :6946-6950 === */
+  'account>שם הקבלן': profileBinding('name', 'שם הקבלן', 'שם הקבלן'),
+  'account>טלפון': profileBinding('phone', 'טלפון', 'מספר טלפון'),
+  'account>סוג עוסק': profileBinding('business', 'סוג עוסק', 'סוג עוסק'),
+  'account>תחום מקצועי': profileBinding('trade', 'תחום מקצועי', 'תחום מקצועי'),
+
+  /* === delivery>אמצעי תשלום — R9 inline edit === */
+  'delivery>אמצעי תשלום': profileBinding('payment', 'אמצעי תשלום', 'אמצעי תשלום'),
+
   /* === display === */
   'display>ערכת נושא>בהיר': {
     action: () => setTheme('light'),
@@ -651,12 +695,17 @@ export function SettingsTreeSubmenu({
   const parent = SETTINGS_ROWS.find((r) => r.id === group);
   if (!parent) return null;
   const reversed = [...nodes].reverse();
-  const handleClick = (node: Node) => {
+  const editingKey = editingLeafKey.value;
+  const handleClick = (node: Node, key: string) => {
     if (node.children && node.children.length > 0) {
       pushSettingsPath(node.label);
       return;
     }
-    const binding = LEAF_BINDINGS[leafKey(group, pathPrefix, node.label)];
+    const binding = LEAF_BINDINGS[key];
+    if (binding?.input) {
+      startEditingLeaf(key);
+      return;
+    }
     if (binding) {
       binding.action();
       return;
@@ -666,8 +715,10 @@ export function SettingsTreeSubmenu({
   return (
     <>
       {reversed.map((node, i) => {
-        const binding = LEAF_BINDINGS[leafKey(group, pathPrefix, node.label)];
+        const key = leafKey(group, pathPrefix, node.label);
+        const binding = LEAF_BINDINGS[key];
         const on = binding?.isActive?.() ?? false;
+        const isEditing = binding?.input && editingKey === key;
         return (
           <li
             key={node.label}
@@ -675,20 +726,71 @@ export function SettingsTreeSubmenu({
             class={`dial__item dial__item--sub${on ? ' dial__item--leaf-on' : ''}`}
             style={{ animationDelay: `${i * 20}ms` }}
           >
-            <button
-              type="button"
-              class="dial__btn"
-              role="menuitem"
-              onClick={() => handleClick(node)}
-              aria-label={node.label}
-              aria-pressed={binding ? on : undefined}
-            >
-              <span class={`dial__circle${on ? ' dial__circle--on' : ''}`}>{parent.icon}</span>
-              <span class="dial__label">{node.label}</span>
-            </button>
+            {isEditing ? (
+              <LeafEditor binding={binding!} icon={parent.icon} />
+            ) : (
+              <button
+                type="button"
+                class="dial__btn"
+                role="menuitem"
+                onClick={() => handleClick(node, key)}
+                aria-label={node.label}
+                aria-pressed={binding && !binding.input ? on : undefined}
+              >
+                <span class={`dial__circle${on ? ' dial__circle--on' : ''}`}>{parent.icon}</span>
+                <span class="dial__label">{node.label}</span>
+              </button>
+            )}
           </li>
         );
       })}
     </>
+  );
+}
+
+/* R9 — inline edit row. Same circle + same pill shape as the leaf,
+ * but the label pill is an <input>. Enter or blur saves; Esc cancels.
+ *
+ * The cancelled ref guards against the blur fired by the input being
+ * unmounted right after Esc — otherwise Esc would still save the typed
+ * value via onBlur. */
+function LeafEditor({
+  binding,
+  icon,
+}: {
+  binding: Binding;
+  icon: preact.JSX.Element;
+}) {
+  const { input } = binding;
+  if (!input) return null;
+  const state = { cancelled: false };
+  const commit = (raw: string) => {
+    if (state.cancelled) return;
+    const trimmed = raw.trim();
+    const prev = input.get();
+    if (trimmed !== prev) input.set(trimmed);
+    stopEditingLeaf();
+  };
+  return (
+    <div class="dial__btn" role="presentation">
+      <span class="dial__circle">{icon}</span>
+      <input
+        class="dial__input"
+        type="text"
+        autoFocus
+        defaultValue={input.get()}
+        placeholder={input.label}
+        aria-label={input.label}
+        dir="auto"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit((e.currentTarget as HTMLInputElement).value);
+          else if (e.key === 'Escape') {
+            state.cancelled = true;
+            stopEditingLeaf();
+          }
+        }}
+        onBlur={(e) => commit((e.currentTarget as HTMLInputElement).value)}
+      />
+    </div>
   );
 }
