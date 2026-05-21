@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd app && npm install",
+  "buildCommand": "cd app && npm run build",
+  "outputDirectory": "app/dist",
+  "framework": null,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/((?!assets/|.*\\.(?:js|css|ico|svg|png|jpg|jpeg|webp|woff|woff2|webmanifest|json|map)).*)", "destination": "/index.html" }
+  ]
+}
