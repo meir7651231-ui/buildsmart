@@ -1019,6 +1019,15 @@ li {
   pointer-events: none;
 }
 
+/* The inner .trail container — flex column-reverse so the 4 tool
+ * buttons rise from the FAB with the same gap as the menu dial. */
+.trail {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
 /* === Tool buttons — match .dial__btn: circle on outer wall, label inner. */
 .trail__btn {
   display: flex;
