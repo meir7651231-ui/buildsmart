@@ -7,11 +7,11 @@ This directory is the **source of truth** for how the app is built.
 |---|---|
 | `../RULES.md` | The 8 design rules (R1–R8) |
 | `inspector/` | Building Inspector protocol (replaces the old audit) |
-| `inspections/` | Inspection report archive (auto-written) |
-| (future) `legacy-map.md` | line-by-line legacy → modern mapping |
-| (future) `adr/` | Architecture Decision Records |
+| `inspections/` | Inspection report archive (immutable) |
+| `legacy-map.md` | Legacy → modern mapping by area |
+| `adr/` | Architecture Decision Records |
+| `spec.json` | Machine-readable feature spec with status |
 | (future) `contracts/` | Per-component contracts |
-| (future) `spec.json` | Machine-readable feature spec |
 
 ## The Building Inspector
 

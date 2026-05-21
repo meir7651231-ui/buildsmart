@@ -1,0 +1,284 @@
+{
+  "$schema": "./spec.schema.json",
+  "version": "0.1",
+  "lastUpdated": "2026-05-21",
+  "description": "Feature spec for BuildSmart. The legacy index.html is the source. Each feature has a status (implemented/partial/stub/missing/legacy-only) and references to legacy line ranges, rules, ADRs, and the test cards that cover it.",
+  "statusLegend": {
+    "implemented": "Feature is fully ported and works as in legacy",
+    "partial": "Some sub-features work; others do not",
+    "stub": "Placeholder UI only; no real functionality",
+    "missing": "Not yet started",
+    "legacy-only": "Exists in legacy but will not be ported (explicit decision)"
+  },
+  "features": [
+    {
+      "id": "FEAT-bs-dial",
+      "name": "BS persona switcher",
+      "personas": ["contractor", "manager", "store", "courier", "worker"],
+      "legacy": "index.html:4044-4124, 11806-11820",
+      "status": "implemented",
+      "rules": ["R1", "R3", "R4"],
+      "adrs": ["ADR-002"],
+      "testedBy": ["button:toggleBs", "behavior:toggleBs", "button:setPersona", "behavior:setPersona"]
+    },
+    {
+      "id": "FEAT-floating-header",
+      "name": "Top-row floating header (BS, name, cart)",
+      "personas": ["all"],
+      "legacy": "index.html:4071-4144 (welcome screen branding)",
+      "status": "implemented",
+      "rules": ["R1", "R8"],
+      "adrs": [],
+      "testedBy": ["tab:home"]
+    },
+    {
+      "id": "FEAT-fabs",
+      "name": "Menu and Search FABs (bottom row)",
+      "personas": ["all"],
+      "legacy": "index.html (various bottom-bar patterns)",
+      "status": "implemented",
+      "rules": ["R1", "R3", "R8"],
+      "adrs": [],
+      "testedBy": ["button:toggleMenu", "button:toggleSearch", "behavior:toggleMenu", "behavior:toggleSearch"]
+    },
+    {
+      "id": "FEAT-menu-speed-dial",
+      "name": "Left-side menu speed-dial with 6 entries",
+      "personas": ["all"],
+      "legacy": "index.html (drawer with 5 roles is the closest analog)",
+      "status": "implemented",
+      "rules": ["R2", "R3", "R4", "R8"],
+      "adrs": ["ADR-001", "ADR-002"],
+      "testedBy": ["button:toggleMenu"]
+    },
+    {
+      "id": "FEAT-catalog-grid",
+      "name": "3-column product grid with images/emoji",
+      "personas": ["contractor"],
+      "legacy": "index.html:9310-9346 renderCatalog()",
+      "status": "implemented",
+      "rules": ["R6"],
+      "testedBy": ["tab:home", "product:*"]
+    },
+    {
+      "id": "FEAT-category-drill",
+      "name": "Category circles with drill-down (back + current + subs)",
+      "personas": ["contractor"],
+      "legacy": "index.html:8901-8974",
+      "status": "implemented",
+      "rules": ["R4", "R8"],
+      "testedBy": ["button:drillInto", "button:goUp", "button:resetCategory", "behavior:drillInto"]
+    },
+    {
+      "id": "FEAT-product-detail",
+      "name": "Product detail sheet with qty stepper",
+      "personas": ["contractor"],
+      "legacy": "index.html:9546-9605 (openTree), 10251-10310 (renderAccessories)",
+      "status": "partial",
+      "rules": ["R2"],
+      "testedBy": ["button:openProduct", "button:closeProduct"],
+      "notes": "Basic sheet works. Smart product tree (accessories with 🔴/🟡 categories, store picker) not yet ported."
+    },
+    {
+      "id": "FEAT-product-tree-smart",
+      "name": "Smart product tree (required/optional accessories, store + variant picker, multi-add)",
+      "personas": ["contractor"],
+      "legacy": "index.html:9546-9605, 10251-10310, 10315-10371",
+      "status": "missing",
+      "rules": [],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-cart-icon",
+      "name": "Cart icon with badge count",
+      "personas": ["contractor"],
+      "legacy": "index.html (cart count in tabbar)",
+      "status": "implemented",
+      "rules": ["R1", "R8"],
+      "testedBy": ["dsync:core"]
+    },
+    {
+      "id": "FEAT-cart-page",
+      "name": "Cart view with line items, qty, total, checkout",
+      "personas": ["contractor"],
+      "legacy": "index.html:7700-8100 (cart rendering)",
+      "status": "missing",
+      "rules": [],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-checkout",
+      "name": "Checkout flow with project + supplier + delivery",
+      "personas": ["contractor"],
+      "legacy": "index.html (checkout functions)",
+      "status": "missing",
+      "rules": [],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-search-panel",
+      "name": "Full search panel with results, recents, scope chips",
+      "personas": ["contractor"],
+      "legacy": "index.html:8591-8870",
+      "status": "implemented",
+      "rules": ["R2", "R3", "R4", "R8"],
+      "adrs": ["ADR-001", "ADR-002"],
+      "testedBy": ["button:toggleSearch", "button:setActiveTool", "button:resetSearch", "behavior:toggleSearch"]
+    },
+    {
+      "id": "FEAT-search-voice",
+      "name": "Voice search via Web Speech API",
+      "personas": ["contractor"],
+      "legacy": "index.html:21208-21229 (demo modal only)",
+      "status": "implemented",
+      "rules": ["R3"],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-search-barcode",
+      "name": "Barcode scan via BarcodeDetector API",
+      "personas": ["contractor"],
+      "legacy": "index.html:21181-21205 (demo modal only)",
+      "status": "implemented",
+      "rules": ["R3"],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-search-filters",
+      "name": "Filters submenu (image / price)",
+      "personas": ["contractor"],
+      "legacy": "index.html (no direct equivalent — invented but documented)",
+      "status": "implemented",
+      "rules": ["R3", "R4"],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-search-sort",
+      "name": "Sort submenu (5 modes)",
+      "personas": ["contractor"],
+      "legacy": "index.html:8875-8946 (cat sort menu)",
+      "status": "implemented",
+      "rules": ["R3", "R4"],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-search-recent",
+      "name": "Recent searches persisted in localStorage",
+      "personas": ["contractor"],
+      "legacy": "(none in legacy — added per owner request)",
+      "status": "implemented",
+      "rules": [],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-bathroom-bg",
+      "name": "Sharp bathroom background with frosted-glass cards",
+      "personas": ["all"],
+      "legacy": "(not in legacy — owner-specified)",
+      "status": "implemented",
+      "rules": [],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-regression-runner",
+      "name": "In-app regression test runner (Manager view)",
+      "personas": ["manager"],
+      "legacy": "index.html:15253-15329 (runRegressionTests)",
+      "status": "implemented",
+      "rules": ["R2", "R6"],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-projects",
+      "name": "Projects list (active sites with budget/tasks)",
+      "personas": ["contractor"],
+      "legacy": "index.html (project rendering)",
+      "status": "missing",
+      "rules": [],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-orders",
+      "name": "Orders list (mine + history + tracking)",
+      "personas": ["contractor"],
+      "legacy": "index.html (renderMyOrders ~7701)",
+      "status": "missing",
+      "rules": [],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-notifications",
+      "name": "Notifications inbox",
+      "personas": ["all"],
+      "legacy": "index.html (notification components)",
+      "status": "missing",
+      "rules": [],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-profile",
+      "name": "Contractor profile (rank, achievements, settings)",
+      "personas": ["contractor"],
+      "legacy": "index.html:212-489 (identity screen)",
+      "status": "missing",
+      "rules": [],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-onboarding-welcome",
+      "name": "Welcome screen with role drawer",
+      "personas": ["all"],
+      "legacy": "index.html:4042-4145",
+      "status": "missing",
+      "rules": [],
+      "testedBy": [],
+      "notes": "Translated to BS dial (FEAT-bs-dial); the full welcome+login flow has not been built."
+    },
+    {
+      "id": "FEAT-manager-dashboard",
+      "name": "Manager dashboard with tabs (regression / orders / customers / manage)",
+      "personas": ["manager"],
+      "legacy": "index.html:4207-4238, renderMgrDashboard ~12133",
+      "status": "partial",
+      "rules": ["R2"],
+      "testedBy": ["tab:manager"],
+      "notes": "Only regression tab is built. Three other tabs (orders, customers, manage) are missing."
+    },
+    {
+      "id": "FEAT-store-login",
+      "name": "Store login with store picker",
+      "personas": ["store"],
+      "legacy": "index.html:4241-4251, renderStoreLogin ~11775",
+      "status": "stub",
+      "rules": [],
+      "testedBy": ["tab:store"]
+    },
+    {
+      "id": "FEAT-store-dashboard",
+      "name": "Store dashboard (home/orders/stock/portal)",
+      "personas": ["store"],
+      "legacy": "index.html:4254-4288",
+      "status": "missing",
+      "rules": [],
+      "testedBy": []
+    },
+    {
+      "id": "FEAT-courier-home",
+      "name": "Courier home (deliveries summary + list)",
+      "personas": ["courier"],
+      "legacy": "index.html:4291-4308, renderCourier ~17963",
+      "status": "stub",
+      "rules": [],
+      "testedBy": ["tab:courier"]
+    },
+    {
+      "id": "FEAT-worker-tasks",
+      "name": "Worker task list (picker + queue + done)",
+      "personas": ["worker"],
+      "legacy": "index.html:4321-4330, renderWorker ~11832",
+      "status": "stub",
+      "rules": [],
+      "testedBy": ["tab:worker"]
+    }
+  ]
+}
