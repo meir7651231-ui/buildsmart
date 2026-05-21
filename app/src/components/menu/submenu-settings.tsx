@@ -27,6 +27,7 @@ import {
   toggleHighContrast,
   resetSettings,
 } from '../../store/app-settings';
+import { showToast } from '../../store/toast-store';
 
 export type SettingsRowId = SettingsGroupId | 'reset';
 
@@ -456,6 +457,20 @@ export const LEAF_BINDINGS: Record<string, Binding> = {
   'delivery>ברירת מחדל — משלוח אקספרס': {
     action: () => toggleExpress(),
     isActive: () => appSettings.value.delivery.express,
+  },
+
+  /* === about — @legacy index.html:6870-6876 (setLink calls) === */
+  'about>גרסה': {
+    action: () => showToast('BuildSmart 1.0 · אב-טיפוס'),
+  },
+  'about>תנאי שימוש': {
+    action: () => showToast('תנאי השימוש — יוצגו בגרסה המלאה'),
+  },
+  'about>מדיניות פרטיות': {
+    action: () => showToast('מדיניות הפרטיות — תוצג בגרסה המלאה'),
+  },
+  'about>יצירת קשר': {
+    action: () => showToast('תמיכה — support@buildsmart.demo'),
   },
 };
 

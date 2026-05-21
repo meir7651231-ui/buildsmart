@@ -4,6 +4,7 @@ import { MenuSpeedDial } from './components/menu-speed-dial';
 import { SearchPanel } from './components/search/search-panel';
 import { BsDial } from './components/bs/bs-dial';
 import { ProductSheet } from './components/product-sheet';
+import { Toast } from './components/toast';
 import { HomeView } from './views/home';
 import { ManagerView } from './views/manager';
 import { StoreView } from './views/store';
@@ -41,6 +42,7 @@ export function App() {
       <SearchPanel />
       <BsDial />
       <ProductSheet />
+      <Toast />
     </div>
   );
 }

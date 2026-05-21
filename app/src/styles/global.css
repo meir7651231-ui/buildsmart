@@ -1743,3 +1743,30 @@ li {
   font-style: italic;
 }
 
+/* === Toast =========================================================== */
+/* Non-blocking notification that auto-dismisses. Not a modal/overlay —
+ * safe under R3. Centers above the FAB row. */
+.toast {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--bg);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 280px;
+  width: max-content;
+  text-align: center;
+  z-index: 200;
+  pointer-events: none;
+  animation: toast-in 0.22s ease;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
