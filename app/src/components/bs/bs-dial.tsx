@@ -76,12 +76,37 @@ const STORE_SECTIONS: Section[] = [
  *   🛵 = HAUL_TYPES[0].ic (vehicle picker, @11951)
  *   📦 = chStat 'לאיסוף' ic (@18033)
  *   🚚 = chStat 'בדרך' ic (@18034) / empty-state ic (@7762)
- *   🧰 = fin-hub-ic for "פורטל השליח" (@18039) */
+ *   🧰 = fin-hub-ic for "פורטל השליח" (@18039)
+ *
+ * vehicle children: 3 HAUL_TYPES @ :11951-11953 (ic + name).
+ * portal children: 6 items in openCourierPortal @ :20787-20792 (ic + t).
+ * pickup / active stay as leaves — no verbatim emoji per sub-item. */
 const COURIER_SECTIONS: Section[] = [
-  { id: 'vehicle', emoji: '🛵', title: 'הרכב שלי היום' },
-  { id: 'pickup',  emoji: '📦', title: 'משלוחים ממתינים לאיסוף' },
-  { id: 'active',  emoji: '🚚', title: 'משלוחים פעילים' },
-  { id: 'portal',  emoji: '🧰', title: 'פורטל השליח' },
+  {
+    id: 'vehicle',
+    emoji: '🛵',
+    title: 'הרכב שלי היום',
+    children: [
+      { id: 'haul-small', emoji: '🛵', title: 'משלוח קטן' },
+      { id: 'haul-van',   emoji: '🚐', title: 'טנדר' },
+      { id: 'haul-truck', emoji: '🚛', title: 'משאית' },
+    ],
+  },
+  { id: 'pickup', emoji: '📦', title: 'משלוחים ממתינים לאיסוף' },
+  { id: 'active', emoji: '🚚', title: 'משלוחים פעילים' },
+  {
+    id: 'portal',
+    emoji: '🧰',
+    title: 'פורטל השליח',
+    children: [
+      { id: 'cp-nav',    emoji: '🧭', title: 'ניווט למשלוח' },
+      { id: 'cp-fleet',  emoji: '🚛', title: 'צי רכב' },
+      { id: 'cp-sla',    emoji: '⏱️', title: 'מעקב SLA' },
+      { id: 'cp-zones',  emoji: '🗺️', title: 'אזורי הפצה' },
+      { id: 'cp-pod',    emoji: '📸', title: 'אישור מסירה' },
+      { id: 'cp-chat',   emoji: '💬', title: 'צ׳אט עם חנות' },
+    ],
+  },
 ];
 
 /* @legacy index.html:8099-8102 — renderWorker task-group headers,
