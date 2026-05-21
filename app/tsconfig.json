@@ -17,6 +17,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
+    "ignoreDeprecations": "5.0",
     "baseUrl": ".",
     "paths": {
       "react": ["./node_modules/preact/compat/"],
@@ -24,5 +25,5 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src", "vite.config.ts", "capacitor.config.ts"]
+  "include": ["src"]
 }
