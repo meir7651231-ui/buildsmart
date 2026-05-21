@@ -63,25 +63,33 @@ export type SettingsGroupId =
   | 'about';
 export const menuActiveSettingsGroup = signal<SettingsGroupId | null>(null);
 
-/* Within a settings sub-group, which row was drilled into (level 3).
- * Stored as the row's Hebrew label so we don't need a synthetic id table. */
-export const menuActiveSubRow = signal<string | null>(null);
+/* Path within a settings group's tree, by label. Empty = at the
+ * group's sub-rows (level 2). Length N means N anchors drilled beyond
+ * the group anchor. Stored by label so we don't need a synthetic id
+ * table — labels are unique within their parent in the legacy tree. */
+export const menuActiveSettingsPath = signal<string[]>([]);
 
 export function setMenuTab(t: MenuTab | null): void {
   menuActiveTab.value = t;
   if (t === null) {
     menuActiveSettingsGroup.value = null;
-    menuActiveSubRow.value = null;
+    menuActiveSettingsPath.value = [];
   }
 }
 
 export function setSettingsGroup(g: SettingsGroupId | null): void {
   menuActiveSettingsGroup.value = g;
-  menuActiveSubRow.value = null;
+  menuActiveSettingsPath.value = [];
 }
 
-export function setSubRow(label: string | null): void {
-  menuActiveSubRow.value = label;
+export function pushSettingsPath(label: string): void {
+  menuActiveSettingsPath.value = [...menuActiveSettingsPath.value, label];
+}
+
+export function popSettingsPathTo(depth: number): void {
+  const cur = menuActiveSettingsPath.value;
+  if (depth >= cur.length) return;
+  menuActiveSettingsPath.value = cur.slice(0, depth);
 }
 
 export function toggleMenu(): void {
@@ -89,14 +97,14 @@ export function toggleMenu(): void {
   if (!menuOpen.value) {
     menuActiveTab.value = null;
     menuActiveSettingsGroup.value = null;
-    menuActiveSubRow.value = null;
+    menuActiveSettingsPath.value = [];
   }
 }
 export function closeMenu(): void {
   menuOpen.value = false;
   menuActiveTab.value = null;
   menuActiveSettingsGroup.value = null;
-  menuActiveSubRow.value = null;
+  menuActiveSettingsPath.value = [];
 }
 export function openSearch(): void {
   searchOpen.value = true;

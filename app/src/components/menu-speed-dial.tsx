@@ -11,15 +11,15 @@ import {
   setMenuTab,
   menuActiveSettingsGroup,
   setSettingsGroup,
-  menuActiveSubRow,
-  setSubRow,
+  menuActiveSettingsPath,
+  popSettingsPathTo,
   type MenuTab,
 } from '../store/app-store';
 import {
   SettingsSubmenu,
-  SettingsSubSubmenu,
-  SettingsLeafSubmenu,
+  SettingsTreeSubmenu,
   SETTINGS_ROWS,
+  walkSettings,
 } from './menu/submenu-settings';
 
 type Tab = {
@@ -155,20 +155,26 @@ export function MenuSpeedDial() {
   );
 }
 
-/* When the settings tab is active, this renders one of three depths:
- *  - level 1: the 10 settings rows (no group drilled in)
- *  - level 2: settings + group anchor stacked at the bottom, with the
- *    group's sub-rows rising above
- *  - level 3: settings + group + sub-row anchors stacked at the bottom,
- *    with the grandchildren (select options or hub tiles) rising above.
- * Anchors are rendered FIRST so column-reverse places them at the
- * bottom; the deepest anchor sits just above the next-shallower one. */
+/* When the settings tab is active, walk the SETTINGS_SUB tree to the
+ * depth given by `menuActiveSettingsPath` and render:
+ *   1. the group anchor (always shown when group is set)
+ *   2. one anchor per path step (the labels already drilled into)
+ *   3. the current list of nodes as tappable rows above them
+ * All anchors are rendered before the items so that the column-reverse
+ * dial places anchors at the bottom and items rise above. The deepest
+ * anchor sits closest to the rising items.
+ *
+ * Tapping an anchor pops the path back to that level (anchors[0] pops
+ * everything to return to the group's L2 view). Tapping the group
+ * anchor clears the group entirely (back to the 10-row level). */
 function SettingsLevel() {
   const group = menuActiveSettingsGroup.value;
   if (!group) return <SettingsSubmenu />;
   const groupDef = SETTINGS_ROWS.find((r) => r.id === group);
   if (!groupDef) return <SettingsSubmenu />;
-  const subLabel = menuActiveSubRow.value;
+  const path = menuActiveSettingsPath.value;
+  const { anchors, current } = walkSettings(group, path);
+
   return (
     <>
       <li role="none" class="dial__item dial__item--active">
@@ -184,26 +190,22 @@ function SettingsLevel() {
           <span class="dial__label dial__label--active">{groupDef.label}</span>
         </button>
       </li>
-      {subLabel ? (
-        <>
-          <li role="none" class="dial__item dial__item--active">
-            <button
-              type="button"
-              class="dial__btn"
-              role="menuitem"
-              onClick={() => setSubRow(null)}
-              aria-label={`חזרה מ-${subLabel}`}
-              aria-expanded="true"
-            >
-              <span class="dial__circle dial__circle--active">{groupDef.icon}</span>
-              <span class="dial__label dial__label--active">{subLabel}</span>
-            </button>
-          </li>
-          <SettingsLeafSubmenu group={group} subLabel={subLabel} />
-        </>
-      ) : (
-        <SettingsSubSubmenu group={group} />
-      )}
+      {anchors.map((anchor, i) => (
+        <li key={anchor.label} role="none" class="dial__item dial__item--active">
+          <button
+            type="button"
+            class="dial__btn"
+            role="menuitem"
+            onClick={() => popSettingsPathTo(i)}
+            aria-label={`חזרה מ-${anchor.label}`}
+            aria-expanded="true"
+          >
+            <span class="dial__circle dial__circle--active">{groupDef.icon}</span>
+            <span class="dial__label dial__label--active">{anchor.label}</span>
+          </button>
+        </li>
+      ))}
+      <SettingsTreeSubmenu group={group} nodes={current} />
     </>
   );
 }

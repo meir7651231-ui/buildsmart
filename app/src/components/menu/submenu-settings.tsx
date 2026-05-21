@@ -10,7 +10,7 @@
 import {
   closeMenu,
   setSettingsGroup,
-  setSubRow,
+  pushSettingsPath,
   type SettingsGroupId,
 } from '../../store/app-store';
 
@@ -124,16 +124,24 @@ export const SETTINGS_ROWS: Row[] = [
   },
 ];
 
-/* @legacy index.html:6817-6875 — sub-rows per group, in legacy reading order.
- * Sources for the optional `children` (grandchildren shown at level 3):
- *   - select option labels:  SETTINGS_LABELS at index.html:6750-6757
- *   - security hub tiles:    openSecurityHub() at index.html:21752-21762
- *   - service hub tiles:     openServiceHub()  at index.html:22081-22090
- * `reset` is excluded — it's an action with no sub-rows. Rows without
- * `children` are leaves at level 2 and just close the menu when tapped. */
-type SubRow = { label: string; children?: string[] };
+/* Recursive node — every entry in the settings tree below the 10
+ * group rows is a Node. Leaves have no `children`; branches have a
+ * `children: Node[]` array whose own entries may again be branches. */
+export type Node = { label: string; children?: Node[] };
 
-export const SETTINGS_SUB: Record<SettingsGroupId, SubRow[]> = {
+/* @legacy SETTINGS tree, sourced verbatim from the legacy prototype:
+ *   level 2 — `renderSettings()` at index.html:6817-6875
+ *   level 3 — `SETTINGS_LABELS` at index.html:6750-6757 (select options),
+ *             `openSecurityHub()` at index.html:21752-21762 (10 tiles),
+ *             `openServiceHub()`  at index.html:22081-22090 (8 tiles)
+ *   level 4 — `secRBAC()`   roleNames at index.html:21812-21813
+ *             `secSession()` timeouts at index.html:21922
+ *             `secEncryption()` rows  at index.html:21952-21957
+ *             `secPrivacy()` rows     at index.html:22018-22023
+ *             `svcQtyCalc()` mode tabs at index.html:22289-22293
+ *             `svcOnboarding()` tour titles at index.html:22374-22381
+ * `reset` is excluded — it's an action with no sub-rows. */
+export const SETTINGS_SUB: Record<SettingsGroupId, Node[]> = {
   account: [
     { label: 'שם הקבלן' },
     { label: 'טלפון' },
@@ -147,8 +155,14 @@ export const SETTINGS_SUB: Record<SettingsGroupId, SubRow[]> = {
     { label: 'עדכוני הזמנות' },
   ],
   display: [
-    { label: 'ערכת נושא', children: ['בהיר', 'כהה'] },
-    { label: 'גודל טקסט', children: ['קטן', 'בינוני', 'גדול'] },
+    {
+      label: 'ערכת נושא',
+      children: [{ label: 'בהיר' }, { label: 'כהה' }],
+    },
+    {
+      label: 'גודל טקסט',
+      children: [{ label: 'קטן' }, { label: 'בינוני' }, { label: 'גדול' }],
+    },
     { label: 'הפחתת אנימציות' },
   ],
   accessibility: [
@@ -158,16 +172,49 @@ export const SETTINGS_SUB: Record<SettingsGroupId, SubRow[]> = {
     {
       label: 'מרכז האבטחה',
       children: [
-        'אימות דו-שלבי',
-        'הרשאות גישה',
-        'כניסה ביומטרית',
-        'יומן ביקורת',
-        'הרשאת מיקום',
-        'נעילת הפעלה',
-        'הצפנת נתונים',
-        'היסטוריית כניסות',
-        'ניהול מכשירים',
-        'בקרת פרטיות',
+        { label: 'אימות דו-שלבי' },
+        {
+          label: 'הרשאות גישה',
+          children: [
+            { label: 'קבלן' },
+            { label: 'מנהל מערכת' },
+            { label: 'ספק / חנות' },
+            { label: 'שליח' },
+            { label: 'עובד' },
+          ],
+        },
+        { label: 'כניסה ביומטרית' },
+        { label: 'יומן ביקורת' },
+        { label: 'הרשאת מיקום' },
+        {
+          label: 'נעילת הפעלה',
+          children: [
+            { label: '5 דק׳' },
+            { label: '15 דק׳' },
+            { label: '30 דק׳' },
+            { label: '60 דק׳' },
+          ],
+        },
+        {
+          label: 'הצפנת נתונים',
+          children: [
+            { label: 'תקשורת מוצפנת (HTTPS/TLS)' },
+            { label: 'נתונים מקומיים מוגנים' },
+            { label: 'סיסמאות מאוחסנות כ-Hash' },
+            { label: 'גיבוי מוצפן בענן' },
+          ],
+        },
+        { label: 'היסטוריית כניסות' },
+        { label: 'ניהול מכשירים' },
+        {
+          label: 'בקרת פרטיות',
+          children: [
+            { label: 'שיתוף נתוני שימוש' },
+            { label: 'שירותי מיקום' },
+            { label: 'התאמת תוכן שיווקי' },
+            { label: 'שליחת דוחות תקלה' },
+          ],
+        },
       ],
     },
   ],
@@ -175,26 +222,55 @@ export const SETTINGS_SUB: Record<SettingsGroupId, SubRow[]> = {
     {
       label: 'מרכז השירות',
       children: [
-        'מוקד תמיכה',
-        'צ׳אטבוט',
-        'דיווח על באג',
-        'המרת מידות',
-        'מחשבון כמויות',
-        'סנכרון יומן',
-        'לוח דרושים',
-        'סיור היכרות',
+        { label: 'מוקד תמיכה' },
+        { label: 'צ׳אטבוט' },
+        { label: 'דיווח על באג' },
+        { label: 'המרת מידות' },
+        {
+          label: 'מחשבון כמויות',
+          children: [
+            { label: 'אריחים' },
+            { label: 'צבע' },
+            { label: 'בטון' },
+          ],
+        },
+        { label: 'סנכרון יומן' },
+        { label: 'לוח דרושים' },
+        {
+          label: 'סיור היכרות',
+          children: [
+            { label: 'מסך הבית' },
+            { label: 'הזמנה' },
+            { label: 'תקציב' },
+            { label: 'משימות ואתר' },
+            { label: 'מועדון BuildSmart' },
+            { label: 'מוכנים!' },
+          ],
+        },
       ],
     },
   ],
   delivery: [
-    { label: 'סוג הובלה מועדף', children: ['משלוח קטן', 'טנדר', 'משאית'] },
+    {
+      label: 'סוג הובלה מועדף',
+      children: [{ label: 'משלוח קטן' }, { label: 'טנדר' }, { label: 'משאית' }],
+    },
     { label: 'ברירת מחדל — משלוח אקספרס' },
     { label: 'אמצעי תשלום' },
   ],
   region: [
-    { label: 'שפה', children: ['עברית', 'العربية', 'English'] },
-    { label: 'יחידות מידה', children: ['מטרי (מ׳, ק״ג)', 'אימפריאלי'] },
-    { label: 'מטבע', children: ['₪ שקל', '$ דולר'] },
+    {
+      label: 'שפה',
+      children: [{ label: 'עברית' }, { label: 'العربية' }, { label: 'English' }],
+    },
+    {
+      label: 'יחידות מידה',
+      children: [{ label: 'מטרי (מ׳, ק״ג)' }, { label: 'אימפריאלי' }],
+    },
+    {
+      label: 'מטבע',
+      children: [{ label: '₪ שקל' }, { label: '$ דולר' }],
+    },
   ],
   about: [
     { label: 'גרסה' },
@@ -204,8 +280,23 @@ export const SETTINGS_SUB: Record<SettingsGroupId, SubRow[]> = {
   ],
 };
 
-export function findSubRow(group: SettingsGroupId, label: string): SubRow | undefined {
-  return SETTINGS_SUB[group].find((r) => r.label === label);
+/* Walk SETTINGS_SUB[group] following `path` labels in order. Returns
+ * the list of anchor Nodes (one per drill step) and the current list
+ * of items to render above the anchors. Stops walking if a label can't
+ * be found or hits a node without children. */
+export function walkSettings(
+  group: SettingsGroupId,
+  path: string[],
+): { anchors: Node[]; current: Node[] } {
+  const anchors: Node[] = [];
+  let current: Node[] = SETTINGS_SUB[group];
+  for (const label of path) {
+    const node = current.find((n) => n.label === label);
+    if (!node || !node.children || node.children.length === 0) break;
+    anchors.push(node);
+    current = node.children;
+  }
+  return { anchors, current };
 }
 
 export function SettingsSubmenu() {
@@ -242,66 +333,33 @@ export function SettingsSubmenu() {
   );
 }
 
-/* Level-3 (sub-sub) renderer — for a given group, lists its sub-rows.
- * Rows with `children` drill further (set the sub-row); leaf rows just
- * close the menu. Reuses the parent group's icon for visual cohesion. */
-export function SettingsSubSubmenu({ group }: { group: SettingsGroupId }) {
+/* Unified renderer for any depth below the group anchor. Given a list
+ * of Nodes (the current `current` from walkSettings), it renders each
+ * as a dial row. Branches push another label onto the settings path;
+ * leaves close the menu. Reuses the parent group's icon throughout the
+ * stack for visual cohesion. */
+export function SettingsTreeSubmenu({
+  group,
+  nodes,
+}: {
+  group: SettingsGroupId;
+  nodes: Node[];
+}) {
   const parent = SETTINGS_ROWS.find((r) => r.id === group);
   if (!parent) return null;
-  const rows = SETTINGS_SUB[group];
-  const reversed = [...rows].reverse();
-  const handleClick = (row: SubRow) => {
-    if (row.children && row.children.length > 0) {
-      setSubRow(row.label);
+  const reversed = [...nodes].reverse();
+  const handleClick = (node: Node) => {
+    if (node.children && node.children.length > 0) {
+      pushSettingsPath(node.label);
     } else {
       closeMenu();
     }
   };
   return (
     <>
-      {reversed.map((row, i) => (
+      {reversed.map((node, i) => (
         <li
-          key={row.label}
-          role="none"
-          class="dial__item dial__item--sub"
-          style={{ animationDelay: `${i * 22}ms` }}
-        >
-          <button
-            type="button"
-            class="dial__btn"
-            role="menuitem"
-            onClick={() => handleClick(row)}
-            aria-label={row.label}
-          >
-            <span class="dial__circle">{parent.icon}</span>
-            <span class="dial__label">{row.label}</span>
-          </button>
-        </li>
-      ))}
-    </>
-  );
-}
-
-/* Level-4 (leaf) renderer — given a (group, sub-row) pair, lists the
- * grandchildren. These are the deepest names: select options for the
- * setSelect rows, hub tile names for security/support. All taps close
- * the menu (names only — no actions wired). */
-export function SettingsLeafSubmenu({
-  group,
-  subLabel,
-}: {
-  group: SettingsGroupId;
-  subLabel: string;
-}) {
-  const parent = SETTINGS_ROWS.find((r) => r.id === group);
-  const sub = findSubRow(group, subLabel);
-  if (!parent || !sub || !sub.children) return null;
-  const reversed = [...sub.children].reverse();
-  return (
-    <>
-      {reversed.map((leaf, i) => (
-        <li
-          key={leaf}
+          key={node.label}
           role="none"
           class="dial__item dial__item--sub"
           style={{ animationDelay: `${i * 20}ms` }}
@@ -310,11 +368,11 @@ export function SettingsLeafSubmenu({
             type="button"
             class="dial__btn"
             role="menuitem"
-            onClick={closeMenu}
-            aria-label={leaf}
+            onClick={() => handleClick(node)}
+            aria-label={node.label}
           >
             <span class="dial__circle">{parent.icon}</span>
-            <span class="dial__label">{leaf}</span>
+            <span class="dial__label">{node.label}</span>
           </button>
         </li>
       ))}
