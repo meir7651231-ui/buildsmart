@@ -2,7 +2,11 @@
 
 **Date:** 2026-05-21
 **Branch:** claude/whats-happening-LyY9G
-**Verdict:** GO ✅
+**Verdict:** GO ✅ (initial NO-GO MAJOR → fix → **re-check GO 0/0/0**)
+
+**Process note:** The first markdown GO was issued without re-running
+the Inspector subagent after the MAJOR fix. Re-check performed
+afterwards confirms GO with 0/0/0 findings.
 
 ## Scope
 - New rule **R9** in `RULES.md` — text-input leaves open an inline input row adjacent to the leaf, no prompt/sheet/modal.

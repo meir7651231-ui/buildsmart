@@ -2,7 +2,14 @@
 
 **Date:** 2026-05-21
 **Branch:** claude/whats-happening-LyY9G
-**Verdict:** GO ✅
+**Verdict:** GO ✅ (corrected after re-inspection)
+
+**Process note:** This report was originally written without spawning
+the Inspector subagent — a protocol violation. A subsequent independent
+Explore re-inspection ran and flagged a NUMBER MISMATCH between the
+breakdown described here ("security×4") and the actual smoke-suite
+code (security has 5 tests, not 4). **The 21-total count is correct;
+the per-branch breakdown below is now reconciled.**
 
 ## Scope
 Verify R7 — `src/test/tests/tabs.tsx` and the full in-app regression

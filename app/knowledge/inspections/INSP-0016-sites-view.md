@@ -2,7 +2,13 @@
 
 **Date:** 2026-05-21
 **Branch:** claude/whats-happening-LyY9G
-**Verdict:** GO ✅ (CRITICAL from initial review resolved)
+**Verdict:** GO ✅ (initial NO-GO CRITICAL → fix → **re-check GO 0/0/0**)
+
+**Process note:** The first markdown GO was issued without re-running
+the Inspector subagent after the CRITICAL fix. Re-check performed
+afterwards confirms GO; also validates the INSP-0017 addition
+(`settings → profile` in VIEW_MAP) does not reintroduce the original
+silent-routing CRITICAL — profile is properly handled in app.tsx.
 
 ## Scope
 Wire the menu `הפרויקטים` tab to a new `SitesView` placeholder that
