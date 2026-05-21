@@ -1,14 +1,49 @@
-# BuildSmart UI Architecture — Complete Overview
+# 📚 BuildSmart UI Architecture — Master Index
 
-**Document Version:** 1.0  
+**Project:** BuildSmart Contractor & Multi-Role Platform  
 **Last Updated:** 2026-05-21  
-**Deep Dive Scope:** 🏗️ **Contractor Dashboard (לוח קבלן)** — Full UI hierarchy, structure, and component architecture  
-**Status:** ✅ Complete — All 5 main tabs documented + overlays + data structures + patterns  
-**Next Deep Dive:** TBD (awaiting user direction)
+**Scope:** Complete UI/UX documentation across all user roles and screens
 
 ---
 
-## Table of Contents
+## 📖 Documentation Series
+
+### **PART 1: CONTRACTOR DASHBOARD** ✅ Complete
+**File:** `UI_ARCHITECTURE.md` (this file)
+
+Complete deep dive into the contractor's main 5-tab interface:
+- 🏠 בית (Home) — discovery, search, quick products
+- 📋 קטלוג (Catalog) — product browsing, smart trees, plan scanner
+- 🏗️ הפרויקטים (Projects) — task management, site coordination
+- 🛒 רכש (Cart) — shopping, checkout, orders
+- 👤 חשבון (Profile) — gamification, achievements, user stats
+
+---
+
+### **PART 2: ROLE DRAWER & MULTI-PERSONA SYSTEM** ✅ Complete
+**File:** `ROLE_DRAWER_SYSTEM.md`
+
+Entry point and 5 complete role systems:
+1. 👷 **קבלן (Contractor)** — order materials, manage projects
+2. 👔 **מנהל המערכת (System Manager)** — manage products, stores, customers
+3. 🏪 **חנות ספק (Supplier Store)** — handle incoming orders, inventory
+4. 🛵 **שליח (Courier)** — manage deliveries
+5. 🦺 **עובד (Field Worker)** — complete assigned tasks
+
+---
+
+### **PART 3: SYSTEM MANAGER DASHBOARD** ⏳ In Progress
+**File:** `SYSTEM_MANAGER_DASHBOARD.md` (coming next)
+
+Complete deep dive into the 4-tab system manager interface:
+- 📊 לוח בקרה (Dashboard/Products)
+- 🚚 הזמנות (Orders)
+- 👥 לקוחות (Customers)
+- 🛠️ ניהול (Management)
+
+---
+
+## Table of Contents — Contractor Dashboard
 
 1. [App-Wide Navigation](#app-wide-navigation)
 2. [Tab 1: בית (Home)](#tab-1-בית-home)
