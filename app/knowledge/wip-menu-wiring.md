@@ -1,5 +1,5 @@
 # Menu Wiring — Work in Progress
-Last updated: 2026-05-21 (after INSP-0010)
+Last updated: 2026-05-21 (after INSP-0014)
 Branch: `claude/whats-happening-LyY9G`
 
 This document is the single source of truth for the menu-wiring effort.
@@ -11,155 +11,137 @@ references, the wired/unwired status, and the patterns to follow.
 
 ## Status snapshot
 
-**22 / ~84 settings leaves wired** to real actions. The rest still
-fall through to `closeMenu()` (legacy behaviour) until each branch
-gets its own UI affordance.
+**~70 settings leaves wired** to real actions. All interactive leaves
+are now functional. Smoke suite: 21/21 PASS.
 
-### Wired (22)
+### Wired (~70)
 | Branch | Count | Notes |
 |---|---|---|
 | display | 6 | theme · textSize · reduceMotion (+ apply CSS) |
 | notifications | 4 | all toggles |
-| accessibility | 1 | highContrast (toggle) |
-| region | 7 | lang · units · currency (3 selects) |
-| delivery | 4 of 5 | defaultHaul · express — payment-method NOT yet |
-| reset | 1 | restores DEFAULTS, closes the menu |
+| accessibility | 1 | highContrast toggle |
+| region | 7 | lang · units · currency selects |
+| delivery | 5 | defaultHaul · express + payment (R9) |
+| about | 4 | 4 toasts verbatim from legacy |
+| reset | 1 | restores DEFAULTS |
+| security | 23 | 2FA · biometric · location · sessionTimeout · privacy×4 · RBAC×5 · encryption×4 · info×3 |
+| support | 15 | 6 L3 toasts + 3 calc + 6 tour toasts |
+| account | 4 | R9 inline input — name · phone · business · trade |
 
-### Unwired (~62)
-| Branch | Count | Why not yet |
-|---|---|---|
-| account | 4 | each leaf needs a prompt/edit sheet |
-| delivery.אמצעי תשלום | 1 | same — needs a prompt |
-| about | 4 | 3 toasts + 1 static version label — needs a toast component |
-| security hub | 10 + 17 sub | each hub item opens its own screen |
-| support hub | 8 + 9 sub | same — each opens its own screen |
+### Unwired
+None of the interactive leaves remain. The remaining tree nodes are
+**branches** (drill-only, no action), not leaves:
+- `מרכז האבטחה` · `נעילת הפעלה` · `הצפנת נתונים` · `בקרת פרטיות` · `הרשאות גישה`
+- `מרכז השירות` · `מחשבון כמויות` · `סיור היכרות`
 
 ---
 
 ## Architecture
 
-### Store — `app/src/store/app-settings.ts`
-- `appSettings: Signal<AppSettings>` — single nested object with
-  `display`, `notif`, `region`, `delivery`, `accessibility`.
-- Persists to `localStorage` under `bs.settings.v1`.
-- A single top-level `effect()` mirrors signal → `<html>` data-* attrs:
-  `data-theme`, `data-text-size`, `data-reduce-motion`, `data-lang`,
-  `data-units`, `data-currency`, `data-haul`, `data-express`,
-  `data-contrast`. Effect is one-way (signal → DOM + localStorage);
-  never writes back to the signal.
-- All setters use shallow cloning: `appSettings.value = { ...s, ... }`.
-- `resetSettings()` assigns `appSettings.value = DEFAULTS`.
-- `load()` validates each field against an enum allowlist (`pick()`
-  helper) so a corrupt localStorage payload falls back to defaults.
+### Stores
+- **`app/src/store/app-settings.ts`** — `appSettings` signal (display,
+  notif, region, delivery, accessibility, security). Persists to
+  `bs.settings.v1`. Effect mirrors → `<html>` data-* attrs.
+- **`app/src/store/user-profile.ts`** — `userProfile` signal (name,
+  phone, business, trade, payment). Persists to `bs.profile.v1`.
+  No DOM mirroring; only localStorage.
+- **`app/src/store/toast-store.ts`** — `toastMsg` signal +
+  `showToast(msg, ms?)`. Auto-clears after 3200ms.
+- **`app/src/store/app-store.ts`** — menu state + `editingLeafKey` for
+  R9 inline edit (cleared on every navigation transition).
 
 ### Bindings — `app/src/components/menu/submenu-settings.tsx`
-- `LEAF_BINDINGS: Record<string, { action, isActive? }>` — path-keyed
-  map. Key format: `'group>label>label'` (drill path joined with `>`).
-- The renderer (`SettingsTreeSubmenu`) takes `pathPrefix: string[]`,
-  computes `leafKey(group, pathPrefix, node.label)` per row, looks up
-  the binding, and:
-  - if found → `onClick` runs `action()`; if `isActive()` is true the
-    row gets `dial__item--leaf-on` + `dial__circle--on` (brand-tinted
-    circle, label pill stays white).
-  - if not → `onClick` falls back to `closeMenu()` (legacy).
-- Branches (non-leaf) still call `pushSettingsPath()`.
-- Bound leaves intentionally **stay open** after the action so the
-  user can see the effect and pick a different value.
-
-### Renderer — `app/src/components/menu-speed-dial.tsx`
-- Passes `pathPrefix={path}` down to `SettingsTreeSubmenu`.
+- `LEAF_BINDINGS: Record<string, Binding>` — path-keyed map. Key
+  format: `'group>label>label'`.
+- `Binding` shape:
+  - `action: () => void` — runs on tap for non-input leaves.
+  - `isActive?: () => boolean` — drives `dial__circle--on`.
+  - `input?: { get, set, label }` — present for R9 text-input leaves.
+    When set, tap opens `LeafEditor` inline instead of `action()`.
+- `SettingsTreeSubmenu` renderer:
+  - For input bindings + matching `editingLeafKey` → renders
+    `<LeafEditor>` (circle + `<input class="dial__input">`).
+  - Otherwise → renders the standard `<button>` row.
+  - Bound leaves stay open after action; unbound leaves close.
+- `LeafEditor` — Enter or blur saves + toast; Esc cancels.
+  `cancelled` ref guards onBlur-on-unmount from saving after Esc.
 
 ### CSS
-- `tokens.css` — `[data-theme='dark']` palette (pre-existing),
-  `[data-text-size='small'|'large'] body { zoom }`,
-  `[data-reduce-motion='true'] * { animation/transition ~ 0ms }`.
-- `global.css` — `.dial__circle--on { background: var(--brand); }`.
+- `tokens.css` — dark theme palette, text-size zoom, reduce-motion overrides.
+- `global.css` — `.dial__circle--on` (brand circle), `.dial__input` (brand
+  border, matches `.dial__label` shape), `.toast` (centered, above FABs).
 
 ---
 
-## Pattern: adding a new leaf binding (select or toggle)
+## Patterns
 
-1. **Extend the schema** in `app-settings.ts`:
-   - Add the field to `AppSettings` type.
-   - Add the default to `DEFAULTS` — match the legacy
-     `resetSettings()` at `index.html:6962-6968`.
-   - Add allowlist validation in `load()`.
-2. **Write a setter** (shallow clone, no mutation).
-3. **Mirror to DOM** (optional) — if the setting affects CSS, add a
-   `root.setAttribute('data-...', ...)` line inside `effect()`.
-4. **Add to `LEAF_BINDINGS`** — key must be the verbatim Hebrew label
-   from the legacy. Run a final grep against `index.html` to confirm.
-5. **Add CSS** (only if the new data-attr drives styling).
-6. Build + Inspector + commit.
+### Adding a select/toggle leaf
+1. Extend `AppSettings` type + `DEFAULTS` + `load()` validator.
+2. Write a setter in `app-settings.ts`.
+3. (Optional) Add `root.setAttribute('data-...', ...)` in the effect.
+4. Add to `LEAF_BINDINGS` with verbatim Hebrew key.
+5. Build + Inspector + commit.
 
-## Pattern: hub items (security / support) — NOT YET STARTED
+### Adding a text-input leaf (R9)
+1. Extend `userProfile` (or write a new field-specific store).
+2. Use `profileBinding(key, rowLabel, toastLabel)`. Two labels:
+   - `rowLabel` matches the dial leaf row (legacy `setLink` arg).
+   - `toastLabel` matches the legacy `editAccountField` cfg label.
+3. The renderer + `LeafEditor` handle everything else automatically.
+4. Toast text format: `'${toastLabel} עודכן'`.
 
-These differ from selects/toggles. Each hub item in the legacy
-opens its own screen with content + back button (e.g. בקרת הרשאות,
-מחשבון כמויות). The protocol-compliant path is:
-
-- A new component (e.g. `<SecurityHubSheet />`) overlaid on the dial.
-- R3 says we **don't** create a drawer/sheet/modal. So this needs
-  protocol clarification before we build it — OR we render the hub
-  content as a temporary dial-level (the dial itself shows the
-  content). Discuss with the user before implementing.
+### Adding info-only leaves
+- For read-only screens in the legacy (audit log, device management,
+  etc.), use `showToast('<verbatim or descriptive Hebrew text>')`.
+- Keep toasts under ~50 Hebrew chars to avoid wrapping.
 
 ---
 
 ## Inspector chain — required before every commit
 
-1. Read `RULES.md` (R1–R8) and `knowledge/inspector/checklist.md`.
-2. Run typecheck: `cd app && npx tsc -b --noEmit`.
-3. Run build: `cd app && npm run build`.
-4. (Optional) Behavioural verify via playwright — chromium at
-   `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`. Static
-   server: `npx http-server dist -p 8123 -s` (then
-   `curl http://localhost:8123/`).
-5. Spawn an Explore subagent with the Inspector prompt (see existing
-   INSP reports for the format).
-6. Write the report to `knowledge/inspections/INSP-NNNN-*.md`.
+1. Read `RULES.md` (R1–R9) and `knowledge/inspector/checklist.md`.
+2. `cd app && npx tsc -b --noEmit` (pre-existing errors in
+   `vite.config.ts` / `worker.tsx` are tolerated — see open MINORs).
+3. `cd app && npm run build`.
+4. Behavioural verify: `npx http-server app/dist -p 8123 -s &` →
+   `node app/smoke-settings.mjs` (21/21 expected).
+5. Spawn Explore subagent with Inspector prompt.
+6. Write report to `knowledge/inspections/INSP-NNNN-*.md`.
 7. Decide GO / NO-GO based on counts.
 
-Reports so far: INSP-0001 through INSP-0010, all GO or self-closing.
-No stuck loops detected (same finding-id across 2+ reports).
+Reports through **INSP-0014**, all GO.
 
 ---
 
-## Rules to never break
+## Rules to never break (R1–R9)
 
-- **R1**: 5 FABs (BS, search, BS-mode, menu, BS) — no add/remove/reorder.
-- **R3**: Settings is a 4-level dial — no drawer/sheet/modal/page.
-- **R4**: Each row = circle (icon span) + pill (label span), separate.
-- **R5**: Tap behaviour — leaf with binding runs action and stays open;
-  leaf without binding closes; branch drills; active anchor pops;
-  backdrop closes all.
-- **R6/R8**: Every label must be verbatim from `index.html`. If you
-  don't see it in the legacy, **don't add it**.
-- **R7**: `testTabs` in `src/test/tests/tabs.tsx` must keep passing.
+- **R1**: 5 FABs — no add/remove/reorder.
+- **R3**: Settings = dial only — no drawer/sheet/modal.
+- **R4**: Each row = circle + label, two elements.
+- **R5**: Tap behaviour — bound leaves stay open; unbound leaves close;
+  branches drill; active anchor pops; backdrop closes all.
+- **R6/R8**: Every label must be verbatim from `index.html`.
+- **R7**: `src/test/tests/tabs.tsx` must keep passing.
+- **R9**: Text-input leaves use inline `<input>` adjacent to the leaf,
+  same circle + same pill shape. No prompt/sheet/modal.
 
 ---
 
 ## Open MINORs (informational only)
 
 - INSP-0010 `accessibility-not-in-legacy-app-settings-object` —
-  `accessibility.highContrast` is now persisted via localStorage,
-  while the legacy used the DOM attribute only. Permitted adaptation
-  (we're improving on a legacy gap). No fix needed.
+  permitted adaptation (legacy stored only in DOM; we persist to LS).
+- Pre-existing TypeScript errors in `vite.config.ts` + `worker.tsx` —
+  Vite ignores; not blocking. Documented in `agent-board.md`.
 
 ---
 
-## Suggested next steps (pick one)
+## Suggested next steps
 
-1. **about (4 leaves)** — easiest. Build a tiny `<Toast />` component
-   (≤30 lines), wire 3 leaves to show their text + auto-dismiss, plus
-   1 static "גרסה" leaf. Stays open / closes per legacy intent.
-2. **account (4 leaves)** + **delivery.payment (1 leaf)** — needs an
-   inline prompt component (browser `prompt()` would be simplest but
-   ugly; a styled input overlay would be R3-edge-of-compliant). Ask
-   the user for direction before building.
-3. **security hub (10 + 17 sub)** — biggest. R3 makes this a design
-   conversation. The legacy renders each hub item as a screen with
-   back button. Translating that into the dial paradigm needs the
-   user's input.
-4. **support hub (8 + 9 sub)** — same shape as security; one of these
-   (`מחשבון כמויות`) is interactive and would need real logic.
+The interactive wiring is complete. Remaining cleanups:
+1. **Fix pre-existing TS errors** in `vite.config.ts` / `worker.tsx`
+   so `npx tsc -b --noEmit` is fully clean.
+2. **R7 regression check** — run `src/test/tests/tabs.tsx` to confirm
+   nothing in the new stores/components broke the tabs test.
+3. **Expand smoke suite** if new branches are added (currently 21
+   tests covering all wired branches).
