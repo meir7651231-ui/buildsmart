@@ -3,7 +3,14 @@ import preact from '@preact/preset-vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'node:url';
 
+/* GitHub Pages serves the app at https://<user>.github.io/buildsmart/.
+ * When building for Pages (CI sets GITHUB_PAGES=1), Vite must emit
+ * asset URLs prefixed with /buildsmart/. Local dev + Vercel keep '/'. */
+const isPages = process.env.GITHUB_PAGES === '1';
+const base = isPages ? '/buildsmart/' : '/';
+
 export default defineConfig({
+  base,
   plugins: [
     preact(),
     VitePWA({
@@ -15,8 +22,8 @@ export default defineConfig({
         description: 'מערכת ניהול רכש, תקציב ומשימות לאתרי בנייה',
         lang: 'he',
         dir: 'rtl',
-        start_url: '/',
-        scope: '/',
+        start_url: base,
+        scope: base,
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#f4f5f3',
