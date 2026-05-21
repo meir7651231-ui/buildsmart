@@ -875,7 +875,22 @@ export const PROFILE_TREE: Node[] = [
           { label: 'מחזור ₪10K' },
         ],
       },
-      { label: 'מועדון BuildSmart' },
+      {
+        label: 'מועדון BuildSmart',
+        /* @legacy openRewardsHub items @ index.html:21464-21471 — 7
+         * tiles, each ic + t verbatim. The original hub also has an
+         * rwAchievements item which the legacy itself removed (the
+         * profile screen already renders identityAchievements). */
+        children: [
+          { label: 'אתגרים חודשיים' },
+          { label: 'לוח מובילים' },
+          { label: 'תגי ירוק' },
+          { label: 'קופונים לפי מיקום' },
+          { label: 'הזמן חבר' },
+          { label: 'מועדון VIP' },
+          { label: 'מימוש הטבות' },
+        ],
+      },
     ],
   },
 ];
@@ -893,6 +908,14 @@ const PROFILE_LEAF_ICONS: Record<string, string> = {
   'דרגות הקבלן>הישגים>חובב עץ מוצרים':           '🌳',
   'דרגות הקבלן>הישגים>לא שוכח כלום':             '🧠',
   'דרגות הקבלן>הישגים>מחזור ₪10K':               '💰',
+  /* @legacy openRewardsHub @ index.html:21464-21471 — ic per item. */
+  'דרגות הקבלן>מועדון BuildSmart>אתגרים חודשיים':    '🎯',
+  'דרגות הקבלן>מועדון BuildSmart>לוח מובילים':       '🏆',
+  'דרגות הקבלן>מועדון BuildSmart>תגי ירוק':           '🌿',
+  'דרגות הקבלן>מועדון BuildSmart>קופונים לפי מיקום': '📍',
+  'דרגות הקבלן>מועדון BuildSmart>הזמן חבר':           '👥',
+  'דרגות הקבלן>מועדון BuildSmart>מועדון VIP':         '💎',
+  'דרגות הקבלן>מועדון BuildSmart>מימוש הטבות':        '🎁',
 };
 
 /* Per-leaf behaviours. Key = full path joined by '>'. Each leaf shows
