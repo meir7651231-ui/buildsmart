@@ -2,7 +2,9 @@
 
 **Document Version:** 1.0  
 **Last Updated:** 2026-05-21  
-**Scope:** Full UI hierarchy, structure, and component architecture (not implementation details)
+**Deep Dive Scope:** 🏗️ **Contractor Dashboard (לוח קבלן)** — Full UI hierarchy, structure, and component architecture  
+**Status:** ✅ Complete — All 5 main tabs documented + overlays + data structures + patterns  
+**Next Deep Dive:** TBD (awaiting user direction)
 
 ---
 
