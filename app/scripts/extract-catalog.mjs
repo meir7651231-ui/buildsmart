@@ -25,9 +25,10 @@ const lines = html.split('\n');
 
 /** Find a `const NAME = {...};` or `const NAME = [...];` block, return its source. */
 function liftConst(name) {
-  const start = lines.findIndex((l) => l.includes(`const ${name} =`));
+  const re = new RegExp(`\\bconst\\s+${name}\\s*=`);
+  const start = lines.findIndex((l) => re.test(l));
   if (start < 0) throw new Error(`const ${name} not found`);
-  const openChar = lines[start].includes('= {') ? '{' : '[';
+  const openChar = lines[start].match(/=\s*\{/) ? '{' : '[';
   const closeChar = openChar === '{' ? '}' : ']';
   let depth = 0;
   let end = -1;
@@ -111,6 +112,43 @@ const products = Object.entries(TREES).map(([id, raw]) => {
   if (accessories.length) out.accessories = accessories;
   return out;
 });
+
+/* === De-duplicate product NAMES by appending a context tag ===
+ * Legacy TREES mixes catalog items, accessories and workflow stages
+ * under similar-looking names. The regression test (dupes category)
+ * flags these as collisions. Resolve by keeping the most "main"
+ * product unchanged and tagging the others.
+ */
+const stageMatch = (s) => (typeof s === 'string' ? s.match(/שלב\s*\d+/) : null);
+
+const nameGroups = new Map();
+for (const p of products) {
+  const list = nameGroups.get(p.name) ?? [];
+  list.push(p);
+  nameGroups.set(p.name, list);
+}
+
+const rank = (p) => {
+  if (p.id.startsWith('pl_')) return 0;          // catalog main
+  if (p.productType === 'מוצר ראשי') return 1;   // declared main
+  if (p.id.startsWith('acc_')) return 2;          // accessory
+  return 3;                                       // workflow stages, misc
+};
+
+for (const [name, list] of nameGroups) {
+  if (list.length < 2) continue;
+  list.sort((a, b) => rank(a) - rank(b));
+  for (let i = 1; i < list.length; i++) {
+    const p = list[i];
+    const stage = stageMatch(p.note);
+    let tag;
+    if (stage) tag = stage[0];
+    else if (p.id.startsWith('acc_')) tag = 'אביזר';
+    else if (p.productType && p.productType !== 'מוצר ראשי') tag = p.productType;
+    else tag = p.id;
+    p.name = `${name} · ${tag}`;
+  }
+}
 
 const categoryEmojiMap = {
   'אביזרים מכניים': '⚙️',
