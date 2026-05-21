@@ -15,10 +15,13 @@
 - ✅ `wip-menu-wiring.md` — מסמך WIP מלא
 - ✅ `agent-board.md` — לוח משימות משותף (הקובץ הזה)
 
+### מה בוצע בסשן אבטחה
+- ✅ INSP-0012: אבטחה — 23 עלים: toggles (2FA, ביומטרי, מיקום), sessionTimeout select, privacy toggles, encryption toasts, RBAC role toasts
+- ✅ playwright 5/5 PASS (2FA, sessionTimeout, privacy.analytics, encryption toast, RBAC toast)
+
 ### ענפים שנותרו ל-Deep Agent
 - ⏳ חשבון (4 שדות עריכה) — דורש prompt / input component
 - ⏳ אמצעי תשלום (1) — דורש input
-- ⏳ אבטחה hub (27 עלים) — דורש design decision
 - ⏳ שירות ותמיכה hub (17 עלים) — דורש design decision
 
 ---
@@ -84,7 +87,23 @@
 
 ### ✅ מה הסוכן המהיר כבר ביצע
 - ✅ אימת ידנית 8/8 בדיקות (playwright) — כולן עברו
-- ⏳ כותב `app/smoke-settings.mjs` — נתקע על build errors (ראה למעלה)
+- ✅ `app/smoke-settings.mjs` נכתב על-ידי ה-Deep Agent (11 בדיקות)
+
+### הוראות הפעלה לסוכן המהיר
+
+```bash
+# שלב 1 — בנה את dist/ (פעם אחת לכל container חדש)
+cd /home/user/buildsmart/app && npm run build && cd /home/user/buildsmart
+
+# שלב 2 — הפעל שרת
+npx http-server app/dist -p 8123 -s &
+
+# שלב 3 — הרץ smoke-test
+node app/smoke-settings.mjs
+```
+
+**שגיאות TypeScript ב-vite.config.ts / worker.tsx הן pre-existing — Vite מתעלם מהן.**
+**אל תריץ `tsc` ישירות — רק `npm run build`.**
 
 ### כללי הסוכן המהיר
 - קרא `CLAUDE.md` בשורש לפני הכל
@@ -107,6 +126,6 @@
 | איפוס | 1 | ✅ מחובר |
 | חשבון | 4 | ⏳ Deep Agent |
 | תשלום | 1 | ⏳ Deep Agent |
-| אבטחה | 27 | ⏳ Deep Agent |
+| אבטחה | 23/27 | ✅ מחובר (4 עלים פחות נגישים) |
 | שירות ותמיכה | 17 | ⏳ Deep Agent |
-| **סה"כ** | **26/84** | |
+| **סה"כ** | **49+/84** | |
