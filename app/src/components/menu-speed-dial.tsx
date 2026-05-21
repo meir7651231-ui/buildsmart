@@ -22,6 +22,7 @@ import {
   SettingsTopSubmenu,
   ProfileTreeSubmenu,
   ProjectsSubmenu,
+  CatalogSubmenu,
   SettingsSubmenu,
   SettingsTreeSubmenu,
   SETTINGS_ROWS,
@@ -95,7 +96,7 @@ const TABS: Tab[] = [
  * a dial of the 3 project names. */
 const TAB_HAS_SUBMENU: Record<MenuTab, boolean> = {
   home: false,
-  catalog: false,
+  catalog: true,
   projects: true,
   cart: false,
   settings: true,
@@ -163,6 +164,7 @@ export function MenuSpeedDial() {
             </li>
             {active === 'settings' && <SettingsLevel />}
             {active === 'projects' && <ProjectsSubmenu />}
+            {active === 'catalog' && <CatalogSubmenu />}
           </>
         )}
       </ul>

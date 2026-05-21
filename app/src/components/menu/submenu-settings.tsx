@@ -1073,6 +1073,54 @@ export function profileAnchorIcon(label: string): preact.JSX.Element {
   return PROFILE_BRANCH_ICON[label] ?? ICON_PROFILE;
 }
 
+/* === Catalog dial. @legacy index.html:6046-6056 (CATALOG top categories).
+ * 11 leaves verbatim — each `{cat, icon}` pair becomes a dial row. */
+
+type CatalogCat = { id: string; emoji: string; title: string };
+
+const CATALOG_CATS: CatalogCat[] = [
+  { id: 'taps',       emoji: '🚰', title: 'ברזים וכיורים' },
+  { id: 'toilets',    emoji: '🚽', title: 'אסלות' },
+  { id: 'showers',    emoji: '🚿', title: 'מקלחות ואמבטיות' },
+  { id: 'heating',    emoji: '♨️', title: 'חימום מים' },
+  { id: 'kitchen',    emoji: '🍽️', title: 'מטבח' },
+  { id: 'drainage',   emoji: '🕳️', title: 'ניקוז וצנרת' },
+  { id: 'sanitary',   emoji: '🚾', title: 'גופי תברואה' },
+  { id: 'endparts',   emoji: '🔗', title: 'אביזרי קצה וחיבורים' },
+  { id: 'building',   emoji: '🧱', title: 'בנייה ומחיצות' },
+  { id: 'finishing',  emoji: '🎨', title: 'גמר' },
+  { id: 'acc',        emoji: '🧰', title: 'אביזרים נלווים' },
+];
+
+export function CatalogSubmenu() {
+  const reversed = [...CATALOG_CATS].reverse();
+  return (
+    <>
+      {reversed.map((c, i) => (
+        <li
+          key={c.id}
+          role="none"
+          class="dial__item dial__item--sub"
+          style={{ animationDelay: `${i * 18}ms` }}
+        >
+          <button
+            type="button"
+            class="dial__btn"
+            role="menuitem"
+            onClick={() => showToast(`${c.title} — בבנייה`)}
+            aria-label={c.title}
+          >
+            <span class="dial__circle">
+              <span class="dial__circle-emoji">{c.emoji}</span>
+            </span>
+            <span class="dial__label">{c.title}</span>
+          </button>
+        </li>
+      ))}
+    </>
+  );
+}
+
 /* === Projects dial. @legacy index.html:6447-6451 + 7455 (renderProjects).
  * Placeholder — 3 project names as dial leaves, toast on tap. */
 
