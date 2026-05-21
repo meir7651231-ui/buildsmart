@@ -1,9 +1,7 @@
 /* @legacy index.html:5383-5403 (bottom tabbar — בית / קטלוג / הפרויקטים / רכש / הגדרות)
- * The five items here mirror the legacy tabbar verbatim. Tapping a tab
- * with a sub-menu drills in (this commit: only 'settings'); tapping a
- * tab without one just closes the menu. Tapping the active tab again
- * goes back to the five-tabs view.
- */
+ * The five items here mirror the legacy tabbar verbatim. R2/R3: every
+ * tab destination is a dial level (never a page-swap). Tabs without a
+ * built-out destination just closeMenu() for now. */
 import {
   menuOpen,
   closeMenu,
@@ -13,11 +11,13 @@ import {
   setSettingsGroup,
   menuActiveSettingsPath,
   popSettingsPathTo,
-  setView,
+  settingsLevel,
+  exitAdvancedSettings,
   type MenuTab,
-  type AppView,
 } from '../store/app-store';
 import {
+  ProfileSubmenu,
+  ProjectsSubmenu,
   SettingsSubmenu,
   SettingsTreeSubmenu,
   SETTINGS_ROWS,
@@ -82,15 +82,16 @@ const TABS: Tab[] = [
   },
 ];
 
-/* @legacy index.html:5398-5402 — bottom tab "הגדרות" (data-tab="profile")
- * navigates to the full profile/identity page. The settings dial we built
- * is reached from inside that page via the "הגדרות מתקדמות" row. */
+/* The tab "הגדרות" opens a dial whose first level is the legacy
+ * profile/identity sections (placeholder) + "הגדרות מתקדמות" which
+ * drills into the 10 settings categories. The tab "הפרויקטים" opens
+ * a dial of the 3 project names. */
 const TAB_HAS_SUBMENU: Record<MenuTab, boolean> = {
   home: false,
   catalog: false,
-  projects: false,
+  projects: true,
   cart: false,
-  settings: false,
+  settings: true,
 };
 
 export function MenuSpeedDial() {
@@ -104,17 +105,7 @@ export function MenuSpeedDial() {
       setMenuTab(id);
       return;
     }
-    /* Only tabs whose destination view exists are wired. Catalog/cart
-     * tabs intentionally fall through to plain `closeMenu()` until
-     * their views are built — tapping them must not silently change
-     * the route to a value that renders the default HomeView. */
-    const VIEW_MAP: Partial<Record<MenuTab, AppView>> = {
-      home: 'home',
-      projects: 'sites',
-      settings: 'profile',
-    };
-    const v = VIEW_MAP[id];
-    if (v) setView(v);
+    /* Tabs without a built dial just close the menu. No page swap. */
     closeMenu();
   };
 
@@ -164,6 +155,7 @@ export function MenuSpeedDial() {
               </button>
             </li>
             {active === 'settings' && <SettingsLevel />}
+            {active === 'projects' && <ProjectsSubmenu />}
           </>
         )}
       </ul>
@@ -184,8 +176,33 @@ export function MenuSpeedDial() {
  * everything to return to the group's L2 view). Tapping the group
  * anchor clears the group entirely (back to the 10-row level). */
 function SettingsLevel() {
+  /* Level 1 of the settings tab = ProfileSubmenu (8 sections + a
+   * "הגדרות מתקדמות" row that enters advanced mode). */
+  if (settingsLevel.value === 'profile') return <ProfileSubmenu />;
+
+  /* Advanced mode = the 10 settings categories. An anchor at the bottom
+   * lets the user pop back to the profile level. */
   const group = menuActiveSettingsGroup.value;
-  if (!group) return <SettingsSubmenu />;
+  if (!group) {
+    return (
+      <>
+        <li role="none" class="dial__item dial__item--active">
+          <button
+            type="button"
+            class="dial__btn"
+            role="menuitem"
+            onClick={exitAdvancedSettings}
+            aria-label="חזרה מ-הגדרות מתקדמות"
+            aria-expanded="true"
+          >
+            <span class="dial__circle dial__circle--active">{ADVANCED_BACK_ICON}</span>
+            <span class="dial__label dial__label--active">הגדרות מתקדמות</span>
+          </button>
+        </li>
+        <SettingsSubmenu />
+      </>
+    );
+  }
   const groupDef = SETTINGS_ROWS.find((r) => r.id === group);
   if (!groupDef) return <SettingsSubmenu />;
   const path = menuActiveSettingsPath.value;
@@ -193,6 +210,19 @@ function SettingsLevel() {
 
   return (
     <>
+      <li role="none" class="dial__item dial__item--active">
+        <button
+          type="button"
+          class="dial__btn"
+          role="menuitem"
+          onClick={exitAdvancedSettings}
+          aria-label="חזרה מ-הגדרות מתקדמות"
+          aria-expanded="true"
+        >
+          <span class="dial__circle dial__circle--active">{ADVANCED_BACK_ICON}</span>
+          <span class="dial__label dial__label--active">הגדרות מתקדמות</span>
+        </button>
+      </li>
       <li role="none" class="dial__item dial__item--active">
         <button
           type="button"
@@ -225,3 +255,10 @@ function SettingsLevel() {
     </>
   );
 }
+
+const ADVANCED_BACK_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.65 1.65 0 00-1.8-.3 1.65 1.65 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.65 1.65 0 00-1-1.5 1.65 1.65 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.65 1.65 0 00.3-1.8 1.65 1.65 0 00-1.5-1H3a2 2 0 010-4h.1a1.65 1.65 0 001.5-1 1.65 1.65 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.65 1.65 0 001.8.3H9a1.65 1.65 0 001-1.5V3a2 2 0 014 0v.1a1.65 1.65 0 001 1.5 1.65 1.65 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.65 1.65 0 00-.3 1.8V9a1.65 1.65 0 001.5 1H21a2 2 0 010 4h-.1a1.65 1.65 0 00-1.5 1z" />
+  </svg>
+);

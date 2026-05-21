@@ -14,6 +14,7 @@ import {
   editingLeafKey,
   startEditingLeaf,
   stopEditingLeaf,
+  enterAdvancedSettings,
   type SettingsGroupId,
 } from '../../store/app-store';
 import {
@@ -42,6 +43,7 @@ import {
   type ProfileKey,
 } from '../../store/user-profile';
 import { showToast } from '../../store/toast-store';
+import { PROJECTS } from '../../data/projects';
 
 export type SettingsRowId = SettingsGroupId | 'reset';
 
@@ -792,5 +794,115 @@ function LeafEditor({
         onBlur={(e) => commit((e.currentTarget as HTMLInputElement).value)}
       />
     </div>
+  );
+}
+
+/* === Profile dial (level 1 of the settings tab). @legacy
+ * index.html:6545-6680 (refreshIdentity). Placeholder — 8 sections from
+ * the legacy as dial leaves (toast on tap) + a "הגדרות מתקדמות" leaf
+ * that drills into the 10 settings categories. */
+
+type ProfileRow = {
+  id: string;
+  label: string;
+  icon: preact.JSX.Element;
+};
+
+const profileIcon = (path: string) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d={path} />
+  </svg>
+);
+
+const PROFILE_ROWS: ProfileRow[] = [
+  { id: 'hero',     label: 'כרטיס קבלן',              icon: profileIcon('M12 12a4 4 0 100-8 4 4 0 000 8zM4 21a8 8 0 0116 0') },
+  { id: 'register', label: 'אתה במצב הדגמה',          icon: profileIcon('M4 6h16v12H4zM4 10h16') },
+  { id: 'stats',    label: 'המספרים שלך',             icon: profileIcon('M4 20V10M10 20V4M16 20v-7M22 20H2') },
+  { id: 'spent',    label: 'סך הרכש דרך BuildSmart',   icon: profileIcon('M12 1v22M17 5H9a4 4 0 000 8h6a4 4 0 010 8H6') },
+  { id: 'perk',     label: 'ההטבה שלך',                icon: profileIcon('M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z') },
+  { id: 'achieve',  label: 'הישגים',                   icon: profileIcon('M7 4h10v6a5 5 0 01-10 0V4zM5 4H3v2a4 4 0 004 4M19 4h2v2a4 4 0 01-4 4M9 22h6M12 14v8') },
+  { id: 'ranks',    label: 'דרגות הקבלן',              icon: profileIcon('M5 21V9l7-5 7 5v12M9 21v-6h6v6') },
+  { id: 'hub',      label: 'מועדון BuildSmart',        icon: profileIcon('M6 8h12l-1 9H7L6 8zM9 8V5a3 3 0 016 0v3') },
+];
+
+const ADVANCED_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.65 1.65 0 00-1.8-.3 1.65 1.65 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.65 1.65 0 00-1-1.5 1.65 1.65 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.65 1.65 0 00.3-1.8 1.65 1.65 0 00-1.5-1H3a2 2 0 010-4h.1a1.65 1.65 0 001.5-1 1.65 1.65 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.65 1.65 0 001.8.3H9a1.65 1.65 0 001-1.5V3a2 2 0 014 0v.1a1.65 1.65 0 001 1.5 1.65 1.65 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.65 1.65 0 00-.3 1.8V9a1.65 1.65 0 001.5 1H21a2 2 0 010 4h-.1a1.65 1.65 0 00-1.5 1z" />
+  </svg>
+);
+
+export function ProfileSubmenu() {
+  /* Reverse so the topmost row in the visual stack reads first (the
+   * dial container uses flex-direction: column-reverse). */
+  const all: Array<ProfileRow & { advanced?: boolean }> = [
+    ...PROFILE_ROWS,
+    { id: 'advanced', label: 'הגדרות מתקדמות', icon: ADVANCED_ICON, advanced: true },
+  ];
+  const reversed = [...all].reverse();
+  return (
+    <>
+      {reversed.map((row, i) => (
+        <li
+          key={row.id}
+          role="none"
+          class="dial__item dial__item--sub"
+          style={{ animationDelay: `${i * 22}ms` }}
+        >
+          <button
+            type="button"
+            class="dial__btn"
+            role="menuitem"
+            onClick={() => {
+              if (row.advanced) {
+                enterAdvancedSettings();
+                return;
+              }
+              showToast(`${row.label} — בבנייה`);
+            }}
+            aria-label={row.label}
+          >
+            <span class="dial__circle">{row.icon}</span>
+            <span class="dial__label">{row.label}</span>
+          </button>
+        </li>
+      ))}
+    </>
+  );
+}
+
+/* === Projects dial. @legacy index.html:6447-6451 + 7455 (renderProjects).
+ * Placeholder — 3 project names as dial leaves, toast on tap. */
+
+const PROJECT_ICON = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 21h18M5 21V7l7-4 7 4v14" />
+  </svg>
+);
+
+export function ProjectsSubmenu() {
+  const reversed = [...PROJECTS].reverse();
+  return (
+    <>
+      {reversed.map((p, i) => (
+        <li
+          key={p.id}
+          role="none"
+          class="dial__item dial__item--sub"
+          style={{ animationDelay: `${i * 22}ms` }}
+        >
+          <button
+            type="button"
+            class="dial__btn"
+            role="menuitem"
+            onClick={() => showToast(`${p.name} — בבנייה`)}
+            aria-label={p.name}
+          >
+            <span class="dial__circle">{PROJECT_ICON}</span>
+            <span class="dial__label">{p.name}</span>
+          </button>
+        </li>
+      ))}
+    </>
   );
 }

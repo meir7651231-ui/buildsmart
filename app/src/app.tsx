@@ -6,19 +6,16 @@ import { BsDial } from './components/bs/bs-dial';
 import { ProductSheet } from './components/product-sheet';
 import { Toast } from './components/toast';
 import { HomeView } from './views/home';
-import { SitesView } from './views/sites';
-import { ProfileView } from './views/profile';
 import { ManagerView } from './views/manager';
 import { StoreView } from './views/store';
 import { CourierView } from './views/courier';
 import { WorkerView } from './views/worker';
 import { activePersona } from './store/bs-store';
-import { currentView } from './store/app-store';
 import './store/app-settings';
 
-/* For non-contractor personas, the persona itself IS the view (each
- * has a dedicated dashboard). For contractors, the menu tabs route
- * between home / catalog / sites / cart via `currentView`. */
+/* Per R2/R3, menu-driven destinations stay in the dial (no full-window
+ * page swaps). View routing is purely persona-driven: each persona has
+ * its default view, full stop. */
 function ActiveView() {
   switch (activePersona.value) {
     case 'manager':
@@ -31,15 +28,7 @@ function ActiveView() {
       return <WorkerView />;
     case 'contractor':
     default:
-      switch (currentView.value) {
-        case 'sites':
-          return <SitesView />;
-        case 'profile':
-          return <ProfileView />;
-        case 'home':
-        default:
-          return <HomeView />;
-      }
+      return <HomeView />;
   }
 }
 

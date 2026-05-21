@@ -9,16 +9,18 @@ import {
 export type Category = CatalogCategory;
 export type Product = CatalogProduct;
 
-/* ===== View router — @legacy index.html:6407 (go(v)). Orthogonal to
- * persona: each persona has its own default view, but contractors can
- * navigate between home / catalog / sites / cart / profile via the
- * menu tabs. The legacy bottom tab labeled "הגדרות" maps to data-tab
- * "profile" — visible label is "הגדרות" per R6 verbatim, the underlying
- * page is the full profile/identity content. */
-export type AppView = 'home' | 'catalog' | 'sites' | 'cart' | 'profile';
-export const currentView = signal<AppView>('home');
-export function setView(v: AppView): void {
-  currentView.value = v;
+/* ===== Settings tab — inner level. R3 says the menu→הגדרות destination
+ * is a dial, not a page. Level 1 shows the legacy profile sections (8
+ * placeholders + "הגדרות מתקדמות"); level 2 shows the 10 settings
+ * categories (the existing tree). Drilling further follows
+ * menuActiveSettingsGroup + menuActiveSettingsPath. */
+export type SettingsLevelId = 'profile' | 'advanced';
+export const settingsLevel = signal<SettingsLevelId>('profile');
+export function enterAdvancedSettings(): void {
+  settingsLevel.value = 'advanced';
+}
+export function exitAdvancedSettings(): void {
+  settingsLevel.value = 'profile';
 }
 
 /* ===== Navigation: category drill-down ===== */
@@ -89,6 +91,7 @@ export const editingLeafKey = signal<string | null>(null);
 export function setMenuTab(t: MenuTab | null): void {
   menuActiveTab.value = t;
   editingLeafKey.value = null;
+  settingsLevel.value = 'profile';
   if (t === null) {
     menuActiveSettingsGroup.value = null;
     menuActiveSettingsPath.value = [];
@@ -120,17 +123,6 @@ export function stopEditingLeaf(): void {
   editingLeafKey.value = null;
 }
 
-/* Opens the settings dial from anywhere (e.g. profile view's
- * "הגדרות מתקדמות" row). Equivalent to: tap the menu FAB, then tap
- * the "הגדרות" tab — but as a single call. */
-export function openSettingsDial(): void {
-  menuOpen.value = true;
-  menuActiveTab.value = 'settings';
-  menuActiveSettingsGroup.value = null;
-  menuActiveSettingsPath.value = [];
-  editingLeafKey.value = null;
-}
-
 export function toggleMenu(): void {
   menuOpen.value = !menuOpen.value;
   if (!menuOpen.value) {
@@ -138,6 +130,7 @@ export function toggleMenu(): void {
     menuActiveSettingsGroup.value = null;
     menuActiveSettingsPath.value = [];
     editingLeafKey.value = null;
+    settingsLevel.value = 'profile';
   }
 }
 export function closeMenu(): void {
@@ -146,6 +139,7 @@ export function closeMenu(): void {
   menuActiveSettingsGroup.value = null;
   menuActiveSettingsPath.value = [];
   editingLeafKey.value = null;
+  settingsLevel.value = 'profile';
 }
 export function openSearch(): void {
   searchOpen.value = true;
