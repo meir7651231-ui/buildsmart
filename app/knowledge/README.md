@@ -11,6 +11,7 @@ This directory is the **source of truth** for how the app is built.
 | `legacy-map.md` | Legacy → modern mapping by area |
 | `adr/` | Architecture Decision Records |
 | `spec.json` | Machine-readable feature spec with status |
+| `reporting.md` | Hebrew summary report format — Claude must follow it |
 | (future) `contracts/` | Per-component contracts |
 
 ## The Building Inspector
