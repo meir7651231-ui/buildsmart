@@ -1121,8 +1121,30 @@ const HOME_LEAVES: HomeItem[] = [
       { id: 'ai-analytics',emoji: '📊',  title: 'Analytics חכם' },
     ],
   },
-  { id: 'home-scan',  emoji: '📐', title: 'סרוק תוכנית עבודה' },
-  { id: 'home-stock', emoji: '📦', title: 'המלאי שלי' },
+  {
+    id: 'home-scan',
+    emoji: '📐',
+    title: 'סרוק תוכנית עבודה',
+    /* @legacy PLAN_TYPES @ index.html:9659-9728 — 4 plan categories,
+     * each with icon + label verbatim. */
+    children: [
+      { id: 'plan-plumbing',  emoji: '🚿',  title: 'אינסטלציה' },
+      { id: 'plan-electric',  emoji: '⚡',  title: 'חשמל' },
+      { id: 'plan-arch',      emoji: '🏛️', title: 'אדריכלות' },
+      { id: 'plan-finish',    emoji: '🎨',  title: 'גמר' },
+    ],
+  },
+  {
+    id: 'home-stock',
+    emoji: '📦',
+    title: 'המלאי שלי',
+    /* @legacy view-stock stock-tabs @ index.html:5183-5184 —
+     * 2 stock tabs with ic + label embedded. */
+    children: [
+      { id: 'stock-warehouse', emoji: '🏬', title: 'המחסן' },
+      { id: 'stock-site',      emoji: '🏗️', title: 'האתר' },
+    ],
+  },
   {
     id: 'home-tasks',
     emoji: '📋',
