@@ -1,11 +1,25 @@
 # Menu Wiring — Work in Progress
-Last updated: 2026-05-21 (after INSP-0014)
+Last updated: 2026-05-21 (after INSP-0040)
 Branch: `claude/whats-happening-LyY9G`
 
 This document is the single source of truth for the menu-wiring effort.
 Read this BEFORE touching any settings/menu code, even if you have
 conversation context — it captures the architecture, the legacy
 references, the wired/unwired status, and the patterns to follow.
+
+## ⚠️ נקרא קודם
+
+1. `CLAUDE.md` בשורש — R2 (אין חלון) הוא absolute. ה-doc הזה מתאר את
+   ה-settings tab dial; שאר ה-dials (BS / menu) מתועדים ב-INSPs.
+2. הדוח האחרון: `app/knowledge/inspections/INSP-0040-*.md`.
+3. **DEPRECATED:** `IMPLEMENTATION_PROTOCOL.md` (מנחה לבנות views — R2 violation).
+
+ה-doc הזה מתעד את **תפריט ההגדרות** (INSP-0014 era). העבודה
+המאוחרת יותר (INSP-0025 → INSP-0040) הרחיבה ל:
+- **BS dial drill** — 5 personas, 4 מתוכן deepened
+- **Menu tabs all-dial** — בית/קטלוג/הפרויקטים/רכש/הגדרות
+- **6/6 hubs של הלגאסי** משולבים (AI · Site · Finance · Rewards · Security · Service)
+- ~200+ leaves verbatim סה"כ
 
 ---
 

@@ -6,15 +6,37 @@
 
 ---
 
-## אם הגעת לכאן למשימת BuildSmart (תפריט / הגדרות)
+## ⚠️ הכלל המוחלט — R2: אין חלון, נקודה.
+
+**שום קומפוננטה לא ממלאת את `<main class="content">` עבור פיצ׳ר חדש.**
+כל פעולה חדשה = **dial**, ולא משנה מה כתוב בלגאסי.
+
+- ❌ אסור: views חדשים שמחליפים את ה-main
+- ❌ אסור: `<section class="dashboard">` מלא מסך
+- ❌ אסור: dashboards לפי persona (Store/Courier/Worker יישארו placeholder מינימלי)
+- ✅ מותר: dial רב-רמתי דרך FAB (BS / menu / search)
+- ✅ העיקרון: כשהאב-טיפוס פותח חלון מלא — אנחנו מתרגמים אותו ל-**dial**
+
+**הפרת R2 שלוש פעמים גרמה ל-3 רברטים. אל תתחיל לקוד dashboard view לפני שאישרת מפורשות.**
+
+---
+
+## אם הגעת לכאן למשימת BuildSmart (תפריט / הגדרות / dial)
 
 קרא בסדר הזה לפני שאתה נוגע בקוד:
-1. `app/knowledge/wip-menu-wiring.md` — מה כבר בנוי ומה נותר
-2. `app/RULES.md` — R1–R9 (חובה)
+1. `app/RULES.md` — R1–R9 (R2 אבסולוטי)
+2. `app/knowledge/wip-menu-wiring.md` — מה בנוי
 3. `app/knowledge/inspector/checklist.md` — Inspector protocol
-4. הדוח האחרון: `app/knowledge/inspections/INSP-0013-*.md`
+4. הדוח האחרון: `app/knowledge/inspections/INSP-0040-*.md`
 
-**כל commit צריך:** typecheck + build + Inspector subagent + דוח INSP.
+**כל commit צריך:** typecheck + build + Inspector subagent (לפני markdown) + smoke 21/21.
+
+---
+
+## ⚠️ אסור לקרוא בתור הנחיה לעבודה
+
+- `app/knowledge/IMPLEMENTATION_PROTOCOL.md` — **DEPRECATED**. מנחה לבנות
+  dashboards כ-views, וזה הפרת R2. לקריאה היסטורית בלבד.
 
 ---
 
@@ -24,7 +46,9 @@
 
 **אל תיגע בקבצים האלה אלא אם התבקשת מפורשות:**
 - `app/src/components/menu/`
+- `app/src/components/bs/`
 - `app/src/store/app-settings.ts`
+- `app/src/store/bs-store.ts`
 - `app/src/store/toast-store.ts`
 - `app/knowledge/`
 - `app/RULES.md`
@@ -37,42 +61,61 @@
 
 | # | כלל | עיקרון |
 |---|-----|--------|
-| R1 | 5 FABs בדיוק | BS · חיפוש · BS-mode · תפריט · BS — קיים, לא לשנות |
-| R3 | הגדרות = dial בלבד | אסור drawer / sheet / modal |
-| R4 | כל שורת dial = circle + label | שני elements נפרדים תמיד |
-| R6 | טקסטים עבריים = verbatim | חייב לבוא מ-index.html, לא המצאה |
-| R7 | regression לא נשבר | `src/test/tests/tabs.tsx` חייב לעבור |
-| R8 | אין המצאה | אם אתה לא רואה את זה בלגאסי, אל תוסיף |
-| R9 | שדות טקסט = inline input | שורת הקלדה צמודה לעלה, לא prompt/sheet/modal |
+| **R1** | 5 FABs בדיוק | BS · חיפוש · BS-mode · תפריט · BS — לא לשנות |
+| **R2** | **אין חלון, נקודה** | persona views = placeholder. כל פיצ׳ר = dial |
+| **R3** | הגדרות = dial בלבד | אסור drawer / sheet / modal |
+| **R4** | כל שורת dial = circle + label | שני elements נפרדים תמיד |
+| **R6** | טקסטים עבריים = verbatim | חייב לבוא מ-index.html, לא המצאה |
+| **R7** | regression לא נשבר | `src/test/tests/tabs.tsx` חייב לעבור |
+| **R8** | אין המצאה | אם אתה לא רואה את זה בלגאסי, אל תוסיף |
+| **R9** | שדות טקסט = inline input | שורת הקלדה צמודה לעלה, לא prompt/sheet/modal |
 
 ---
 
-## Inspector chain — לפני כל commit של settings/menu
+## Inspector chain — לפני כל commit של settings/menu/dial
 
 ```bash
-cd app && npx tsc -b --noEmit      # typecheck
-cd app && npm run build             # build
-# אחר כך: spawn Explore subagent עם Inspector prompt
+cd app && npx tsc -b --noEmit       # typecheck
+cd app && npm run build              # build
+node app/smoke-settings.mjs          # 21/21 PASS חובה
+# spawn Explore subagent עם prompt פתוח (לא מצדיק)
+# המתן ל-GO לפני שכותבים markdown
 # כתוב דוח ל-app/knowledge/inspections/INSP-NNNN-*.md
-# GO = תתקדם | NO-GO = תקן קודם
 ```
 
 ---
 
-## קבצי ליבה שכדאי להכיר
+## קבצי ליבה
 
 | קובץ | תפקיד |
 |------|--------|
-| `app/src/store/app-settings.ts` | signal + persist + DOM effect |
-| `app/src/components/menu/submenu-settings.tsx` | LEAF_BINDINGS (26 כניסות) |
-| `app/src/components/menu-speed-dial.tsx` | renderer + pathPrefix |
+| `app/src/store/app-settings.ts` | settings signal + persist + DOM effect |
+| `app/src/store/bs-store.ts` | persona + BS dial drill state |
+| `app/src/store/user-profile.ts` | user profile fields (R9) |
 | `app/src/store/toast-store.ts` | toast system |
-| `app/src/styles/tokens.css` | CSS variables + dark theme |
+| `app/src/components/menu-speed-dial.tsx` | menu FAB dial — 5 tabs |
+| `app/src/components/bs/bs-dial.tsx` | BS FAB dial — 5 personas × sub-trees |
+| `app/src/components/menu/submenu-settings.tsx` | all submenu data + components |
+| `app/src/styles/tokens.css` · `global.css` | dark theme + dial styling |
 
 ---
 
-## מה עובד כרגע (~65/84 עלים)
+## מה עובד כרגע (Menu FAB · BS FAB · Settings tree — sealed)
 
-✅ תצוגה · התראות · נגישות · אזור ושפה · משלוח · מידע · איפוס · אבטחה (23/27) · שירות ותמיכה (15/17)
+**Menu FAB — 5 tabs, כולם dial:**
+- 🏠 בית → 4 כלים (📐 / 📦 / 🤖 / 📋), כל אחד עם sub-tree
+- 🔍 קטלוג → 11 קטגוריות verbatim
+- 🏗️ הפרויקטים → 3 פרויקטים + 📊 מרכז פיננסים (10 leaves)
+- 🛒 רכש → 🛒 הסל שלי + 📦 הזמנות → 6 שירותי שרשרת אספקה
+- ⚙️ הגדרות → פרופיל tree (כרטיס/דרגות + 🎮 מועדון 7 leaves) + הגדרות מתקדמות (10 קטגוריות, ~70 leaves)
 
-⏳ חשבון (4) · אמצעי תשלום (1) — דורשים R9 (inline input)
+**BS FAB — 5 personas, 4 מתוכן עם sub-trees:**
+- 👷 קבלן — (deferred — אין emoji verbatim)
+- 👔 מנהל המערכת — 4 sections (לוח בקרה 5 / הזמנות / לקוחות / ניהול 4)
+- 🏪 חנות ספק — 4 (בית 3 / הזמנות / מלאי / פורטל 8)
+- 🛵 שליח — 4 (הרכב 3 / pickup / active / פורטל 6)
+- 🦺 עובד — 3 task groups
+
+**6 מתוך 6 hubs של הלגאסי מוטמעים** (openAIHub · openSiteHub · openFinanceHub · openRewardsHub · openSecurityHub · openServiceHub).
+
+**~200+ leaves verbatim עם emoji מלגאסי.** INSP-0009 → INSP-0040, כולם GO.

@@ -1,3 +1,23 @@
+# ⛔ DEPRECATED — אל תפעל לפי המסמך הזה
+
+**סטטוס:** המסמך הזה **בוטל** ב-2026-05-21 בעקבות כלל R2 המוחלט.
+
+**הסיבה:** הוא מנחה לבנות את Store/Courier/Worker dashboards כ-views
+מלאים שממלאים את `<main class="content">`. זה **הפרת R2** (אין חלון
+מלא, נקודה). 3 ניסיונות לפעול לפי המסמך הזה נדחפו ונרברטו (INSP-0016,
+INSP-0017, INSP-0022/0023/0024).
+
+**מה כן עושים:** persona functions חיים ב-**BS dial drill**, לא ב-views.
+ראה:
+- `CLAUDE.md` בשורש — סטטוס נוכחי + R2 absolute
+- `app/RULES.md` — R2 מקור
+- `app/knowledge/inspections/INSP-0025-*.md` ואילך — BS dial drill ב-pattern הנכון
+
+המסמך נשמר רק לצורך היסטוריה (immutable per Inspector protocol).
+**אל תקרא ממנו כאל הנחיה לעבודה.**
+
+---
+
 # פרוטוקול טמעון — Store + Courier + Worker Dashboards
 **App/Src Implementation Guide**
 

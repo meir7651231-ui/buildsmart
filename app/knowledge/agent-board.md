@@ -4,88 +4,94 @@
 
 ---
 
+## ⚠️ קודם כל — קרא את R2
+
+**אין חלון, נקודה.** כל פיצ׳ר חדש = dial. ראה `CLAUDE.md` בשורש +
+`app/RULES.md` (R2).
+
+הקובץ `app/knowledge/IMPLEMENTATION_PROTOCOL.md` הוא **DEPRECATED** —
+הוא מנחה לבנות views מלאים, מה שאסור לפי R2. לא לפעול לפיו.
+
+---
+
 ## 🔵 Deep Agent (Opus / Sonnet) — מה בוצע
 
-### סשן קודם — 2026-05-21 (Settings Menu)
+### סשן 1 — Settings Menu (INSP-0009 → INSP-0014)
 - ✅ INSP-0009: תצוגה end-to-end (theme · textSize · reduceMotion)
 - ✅ INSP-0010: התראות · נגישות · אזור ושפה · משלוח · איפוס (22 עלים)
-- ✅ INSP-0011: מידע / about — 4 toasts (26 עלים)
+- ✅ INSP-0011: מידע / about — 4 toasts
 - ✅ INSP-0012: אבטחה — 23 עלים
 - ✅ INSP-0013: שירות ותמיכה — 15 עלים
-- ✅ toast system + CLAUDE.md + agent-board.md + smoke tests
+- ✅ INSP-0014: R9 inline input — חשבון (4) + אמצעי תשלום (1)
+- ✅ toast system + smoke-settings.mjs (21/21 PASS) + CLAUDE.md
+- ✅ INSP-0015: רגרסיה אחרי R9 (R7 PASS)
 
-### סשן הנוכחי — 2026-05-21 (Dashboards Deep Dives + Protocol)
-- ✅ **צלילות המלא — 6 חלקים:**
-  - `UI_ARCHITECTURE.md` — Contractor Dashboard (master index)
-  - `ROLE_DRAWER_SYSTEM.md` — 5 roles + entry system
-  - `SYSTEM_MANAGER_DASHBOARD.md` — 4-tab manager interface
-  - `STORE_DASHBOARD.md` — 4-tab supplier store (NEW)
-  - `COURIER_DASHBOARD.md` — Single-pane delivery hub (NEW)
-  - `WORKER_DASHBOARD.md` — Task management interface (NEW)
-- ✅ **IMPLEMENTATION_PROTOCOL.md** — פרוטוקול טמעון מפורט לשלוש Views החדשות
-  - Stage 1: Store Dashboard (4-tab, high complexity)
-  - Stage 2: Courier Dashboard (1-pane, medium complexity)
-  - Stage 3: Worker Dashboard (task list, medium complexity)
-  - בדיקה מפורשת (FND/FRM/WIR/FIN/OPS)
-  - Pre-commit checklist
-  - Validation criteria
+### סשן 2 — Profile + Sites Restructure (INSP-0016 → INSP-0020)
+- ❌ INSP-0016 → INSP-0017: ניסיון לבנות SitesView/ProfileView כ-`<main>` swap → **רברטו** (R2)
+- ✅ INSP-0018: revert מסודר — Profile/Sites חוזרים ל-dial drill
+- ✅ INSP-0019: עץ פרופיל 3 רמות (הגדרות-פרופיל / הגדרות מתקדמות)
+- ✅ INSP-0020: עומק פרופיל — RANKS, achievements, isActive
 
-### ענפים שנותרו ל-Deep Agent או Fast Agent
-- ⏳ **Implement Store Dashboard** (app/src/views/store.tsx + components)
-- ⏳ **Implement Courier Dashboard** (app/src/views/courier.tsx + components)
-- ⏳ **Implement Worker Dashboard** (app/src/views/worker.tsx + components)
-- ⏳ **Create smoke tests** (app/smoke-store.mjs, app/smoke-courier.mjs, app/smoke-worker.mjs)
-- ⏳ חשבון (4 שדות עריכה) — דורש R9 inline input
-- ⏳ אמצעי תשלום (1) — דורש R9 inline input
+### סשן 3 — BS Dial Persona Tree (INSP-0021 → INSP-0028)
+- ❌ ניסיון Phase-0 dashboards כ-views → **רברטו** (R2)
+- ✅ INSP-0021: BsDial labels verbatim ('מנהל המערכת', 'חנות ספק')
+- ✅ INSP-0025: BsDial multi-level drill + Store sub-sections
+- ✅ INSP-0026: Courier sub-sections (4 leaves)
+- ✅ INSP-0027: Worker sub-sections (3 leaves)
+- ✅ INSP-0028: Manager sub-sections (4 leaves)
+
+### סשן 4 — Deepening (INSP-0029 → INSP-0040)
+- ✅ INSP-0029: arbitrary-depth tree walk + Manager לוח בקרה (5)
+- ✅ INSP-0030: Manager ניהול (4)
+- ✅ INSP-0031: Store בית (3) + פורטל (8)
+- ✅ INSP-0032: Courier vehicle (3) + portal (6)
+- ✅ INSP-0033: Menu Catalog tab (11 קטגוריות)
+- ✅ INSP-0034: Menu Cart tab (2 + 6 שירותי שרשרת)
+- ✅ INSP-0035: Menu Home tab (4 כלי בית)
+- ✅ INSP-0036: Home AI hub (9 כלים)
+- ✅ INSP-0037: Home Site hub (10 כלים)
+- ✅ INSP-0038: Profile מועדון BuildSmart (7 פריטים)
+- ✅ INSP-0039: Projects Finance hub (10 כלים)
+- ✅ INSP-0040: Home scan (4) + stock (2)
+
+**סיכום:** ~200+ leaves verbatim, 6/6 hubs בלגאסי מוטמעים, אפס חלונות.
+
+### ✅ הושלמו (היו ⏳ פעם, כבר לא)
+- ✅ ~~Store Dashboard view~~ — **לא נבנה (R2)** → BS dial drill במקום
+- ✅ ~~Courier Dashboard view~~ — **לא נבנה (R2)** → BS dial drill במקום
+- ✅ ~~Worker Dashboard view~~ — **לא נבנה (R2)** → BS dial drill במקום
+- ✅ ~~Smoke tests for above~~ — לא רלוונטי (אין dashboards)
+- ✅ חשבון (4 שדות) + אמצעי תשלום (1) — INSP-0014
+
+### ⏳ אופציות פתוחות לעתיד (לא דחוף)
+- ⏳ סקציות BS dial שנדחו (אין emoji verbatim): Manager הזמנות/לקוחות,
+  Store הזמנות/מלאי, Courier pickup/active, קבלן (כל ה-tab)
+- ⏳ FAB חיפוש: לוודא שעובד
+- ⏳ FAB עגלה (top): לוודא שעובד
+- ⏳ TypeScript pre-existing errors (vite.config / worker — Vite מתעלם)
 
 ---
 
-## 🟡 Fast Agent (Haiku / Sonnet-fast) — משימה נוכחית
+## 🟡 Fast Agent (Haiku / Sonnet-fast)
 
-### ✅ TASK-001 — הושלמה ב-Deep Agent
-הסוכן המהיר ניסה לכתוב `smoke-settings.mjs` אך נתקע.
-ה-Deep Agent כתב והריץ 12/12 PASS בגרסת `aria-label` selectors.
-הסוכן המהיר דחף גרסה עם `button:has-text` selectors — אפשרי להשאיר.
+### ✅ TASK-001 — הושלמה
+הסוכן המהיר ניסה לכתוב `smoke-settings.mjs` ונתקע. ה-Deep Agent כתב
+גרסה משלו (aria-label selectors), 21/21 PASS. הסוכן המהיר דחף גרסה
+מקבילה עם `button:has-text` — שתי הגרסאות פעלו.
 
-### הוראות הפעלה לסוכן המהיר (עדכני)
+### הוראות הפעלה (אם רוצים להריץ סמוק טסט מקומית):
 ```bash
-# שלב 1 — בנה dist/ (פעם אחת לכל container חדש)
 cd /home/user/buildsmart/app && npm run build && cd /home/user/buildsmart
-
-# שלב 2 — הפעל שרת
 npx http-server app/dist -p 8123 -s &
 sleep 2
-
-# שלב 3 — הרץ smoke-test
-node app/smoke-settings.mjs
+node app/smoke-settings.mjs   # 21/21 PASS צפוי
 ```
-**שגיאות TypeScript הן pre-existing — אל תריץ `tsc`, רק `npm run build`.**
-
-### מה הסוכן המהיר ביצע
-- ✅ כתב `app/smoke-settings.mjs` (גרסה עם `button:has-text` locators)
-- ✅ הריץ builds + playwright בסביבתו
 
 ### כללי הסוכן המהיר
-- קרא `CLAUDE.md` בשורש לפני הכל
-- אל תיגע ב: `app/src/components/menu/` · `app/src/store/app-settings.ts` · `app/src/store/toast-store.ts` · `app/knowledge/`
-- אחרי שגמרת — עדכן את סעיף "מה הסוכן המהיר ביצע" בקובץ הזה
-- אם אתה לא בטוח משהו — עצור ושאל
-
----
-
-## 📋 מצב כולל — עלי הגדרות
-
-| ענף | עלים | סטטוס |
-|-----|------|--------|
-| תצוגה | 6 | ✅ מחובר |
-| התראות | 4 | ✅ מחובר |
-| נגישות | 1 | ✅ מחובר |
-| אזור ושפה | 7 | ✅ מחובר |
-| משלוח ותשלום | 4/5 | ✅ מחובר (חסר תשלום) |
-| מידע | 4 | ✅ מחובר |
-| איפוס | 1 | ✅ מחובר |
-| אבטחה | 23/27 | ✅ מחובר (4 read-only) |
-| שירות ותמיכה | 15/17 | ✅ מחובר (2 branches = drill בלבד) |
-| חשבון | 4 | ⏳ Deep Agent — דורש input UI |
-| תשלום | 1 | ⏳ Deep Agent — דורש input UI |
-| **סה"כ** | **~65/84** | |
+- קרא `CLAUDE.md` בשורש לפני הכל. **R2 אבסולוטי — אין חלון.**
+- אל תקרא את `IMPLEMENTATION_PROTOCOL.md` בתור הנחיה. הוא DEPRECATED.
+- אל תיגע ב: `app/src/components/menu/` · `app/src/components/bs/` ·
+  `app/src/store/app-settings.ts` · `app/src/store/bs-store.ts` ·
+  `app/src/store/toast-store.ts` · `app/src/store/user-profile.ts` ·
+  `app/knowledge/inspections/` · `app/RULES.md` · `CLAUDE.md`
+- אם אתה לא בטוח משהו — עצור ושאל.
