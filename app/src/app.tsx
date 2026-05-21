@@ -7,6 +7,7 @@ import { ProductSheet } from './components/product-sheet';
 import { Toast } from './components/toast';
 import { HomeView } from './views/home';
 import { SitesView } from './views/sites';
+import { ProfileView } from './views/profile';
 import { ManagerView } from './views/manager';
 import { StoreView } from './views/store';
 import { CourierView } from './views/courier';
@@ -33,6 +34,8 @@ function ActiveView() {
       switch (currentView.value) {
         case 'sites':
           return <SitesView />;
+        case 'profile':
+          return <ProfileView />;
         case 'home':
         default:
           return <HomeView />;

@@ -11,8 +11,11 @@ export type Product = CatalogProduct;
 
 /* ===== View router — @legacy index.html:6407 (go(v)). Orthogonal to
  * persona: each persona has its own default view, but contractors can
- * navigate between home / catalog / sites / cart via the menu tabs. */
-export type AppView = 'home' | 'catalog' | 'sites' | 'cart';
+ * navigate between home / catalog / sites / cart / profile via the
+ * menu tabs. The legacy bottom tab labeled "הגדרות" maps to data-tab
+ * "profile" — visible label is "הגדרות" per R6 verbatim, the underlying
+ * page is the full profile/identity content. */
+export type AppView = 'home' | 'catalog' | 'sites' | 'cart' | 'profile';
 export const currentView = signal<AppView>('home');
 export function setView(v: AppView): void {
   currentView.value = v;
@@ -114,6 +117,17 @@ export function startEditingLeaf(key: string): void {
   editingLeafKey.value = key;
 }
 export function stopEditingLeaf(): void {
+  editingLeafKey.value = null;
+}
+
+/* Opens the settings dial from anywhere (e.g. profile view's
+ * "הגדרות מתקדמות" row). Equivalent to: tap the menu FAB, then tap
+ * the "הגדרות" tab — but as a single call. */
+export function openSettingsDial(): void {
+  menuOpen.value = true;
+  menuActiveTab.value = 'settings';
+  menuActiveSettingsGroup.value = null;
+  menuActiveSettingsPath.value = [];
   editingLeafKey.value = null;
 }
 

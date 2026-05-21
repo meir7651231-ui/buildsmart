@@ -1836,3 +1836,102 @@ li {
   color: var(--ink-2, #6c6f72);
 }
 
+/* === Profile view (placeholder — section names only) ================= */
+.profile {
+  padding: var(--space-4);
+}
+.profile__head {
+  margin-bottom: var(--space-4);
+}
+.profile__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: var(--space-1);
+}
+.profile__sub {
+  font-size: 13px;
+  color: var(--ink-2, #6c6f72);
+}
+.profile__sections {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+.profile__section {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+.profile__section-t {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+}
+.profile__section-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-2, #6c6f72);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.profile__sec-h {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--ink-2, #6c6f72);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-2);
+}
+.profile__settings {
+  list-style: none;
+  margin-bottom: var(--space-5);
+}
+.profile__set-row {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.15);
+}
+.profile__set-btn {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  font-family: var(--font-display);
+}
+.profile__set-ic {
+  font-size: 18px;
+}
+.profile__set-l {
+  flex: 1;
+  text-align: start;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+}
+.profile__set-a {
+  font-size: 16px;
+  color: var(--ink-2, #6c6f72);
+}
+.profile__foot {
+  font-size: 12px;
+  color: var(--ink-2, #6c6f72);
+  text-align: center;
+  line-height: 1.5;
+}
+

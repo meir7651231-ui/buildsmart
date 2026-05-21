@@ -35,6 +35,16 @@ async function fresh(page) {
   await page.waitForTimeout(400);
 }
 
+/* The settings dial used to open directly from the bottom-tab "הגדרות".
+ * After INSP-0017 it lives behind the profile page: tab "הגדרות" now
+ * navigates to ProfileView, which has a "הגדרות מתקדמות" row that
+ * opens the dial. */
+async function openSettings(page) {
+  await tap(page, 'פתח תפריט');
+  await tap(page, 'הגדרות');
+  await tap(page, 'הגדרות מתקדמות');
+}
+
 function stored(raw, ...keys) {
   try {
     let v = JSON.parse(raw || '{}');
@@ -52,7 +62,7 @@ function stored(raw, ...keys) {
 
   /* ───────── DISPLAY ───────── */
   await fresh(page);
-  await tap(page, 'פתח תפריט'); await tap(page, 'הגדרות');
+  await openSettings(page);
   await tap(page, 'תצוגה'); await tap(page, 'ערכת נושא'); await tap(page, 'כהה');
   const theme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
   theme === 'dark' ? ok('theme → dark') : fail('theme → dark', theme);
@@ -190,7 +200,7 @@ function stored(raw, ...keys) {
 
   /* ───────── RESET ───────── */
   await fresh(page);
-  await tap(page, 'פתח תפריט'); await tap(page, 'הגדרות');
+  await openSettings(page);
   await tap(page, 'אזור ושפה'); await tap(page, 'מטבע'); await tap(page, '$ דולר');
   await tap(page, 'חזרה מ-מטבע'); await tap(page, 'חזרה מ-אזור ושפה');
   await tap(page, 'איפוס לברירת מחדל');

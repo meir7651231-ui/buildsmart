@@ -82,12 +82,15 @@ const TABS: Tab[] = [
   },
 ];
 
+/* @legacy index.html:5398-5402 — bottom tab "הגדרות" (data-tab="profile")
+ * navigates to the full profile/identity page. The settings dial we built
+ * is reached from inside that page via the "הגדרות מתקדמות" row. */
 const TAB_HAS_SUBMENU: Record<MenuTab, boolean> = {
   home: false,
   catalog: false,
   projects: false,
   cart: false,
-  settings: true,
+  settings: false,
 };
 
 export function MenuSpeedDial() {
@@ -108,6 +111,7 @@ export function MenuSpeedDial() {
     const VIEW_MAP: Partial<Record<MenuTab, AppView>> = {
       home: 'home',
       projects: 'sites',
+      settings: 'profile',
     };
     const v = VIEW_MAP[id];
     if (v) setView(v);
