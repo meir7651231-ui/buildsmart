@@ -43,10 +43,22 @@ const COURIER_SECTIONS: Section[] = [
   { id: 'portal',  emoji: '🧰', title: 'פורטל השליח' },
 ];
 
+/* @legacy index.html:8099-8102 — renderWorker task-group headers,
+ * verbatim incl. the emoji prefix:
+ *   🔨 = task-group 'act' @8099
+ *   ⏳ = task-group 'pend' @8101
+ *   📋 = task-group 'done' @8102 */
+const WORKER_SECTIONS: Section[] = [
+  { id: 'current',   emoji: '🔨', title: 'המשימה הנוכחית שלך' },
+  { id: 'queue',     emoji: '⏳', title: 'הבאות בתור' },
+  { id: 'submitted', emoji: '📋', title: 'שהגשת' },
+];
+
 /* Other personas have no sub-sections yet — drill shows back anchor only. */
 const PERSONA_SECTIONS: Partial<Record<Persona, Section[]>> = {
   store: STORE_SECTIONS,
   courier: COURIER_SECTIONS,
+  worker: WORKER_SECTIONS,
 };
 
 export function BsDial() {
