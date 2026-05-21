@@ -115,44 +115,74 @@
 
 ---
 
-# פרוטוקול הביקורת (Verification Protocol)
+# פרוטוקול מפקח בנייה (Building Inspector Protocol)
 
-לפני שאני (Claude) טוען "סיימתי" על feature, אני **חייב** להריץ ביקורת. הביקורת היא סוכן Explore עם ה-prompt למטה. אם הסוכן חוזר עם חריגה — אסור לקמט/לדחוף — חייב לתקן.
+**מחליף את פרוטוקול הביקורת הישן** (PASS/FAIL בצ'אט). המפקח עצמאי,
+מובנה לפי 5 שלבי בנייה, עם רמות חומרה וסמכות חסימה.
 
-## מתי להריץ
-- אחרי כל שינוי משמעותי ב-`app/src/`
-- לפני כל `git commit`
-- אם משנים את אחד מהקבצים הבאים: `floating-header.tsx`, `fabs.tsx`, `bs-*.tsx`, `search/*.tsx`, `menu-*.tsx`, `app.tsx`, `global.css`
+## נקודות הביקורת
 
-## תבנית prompt לסוכן (העתק כפי שהוא)
+| שלב | מתי המפקח רץ |
+|---|---|
+| **foundation** | שינוי ב-`src/store/`, `src/data/`, `src/test/types.ts` |
+| **frame** | שינוי ב-`src/components/`, `src/views/`, `src/app.tsx` |
+| **wiring** | handlers / signal mutations / effects חדשים |
+| **finish** | שינוי ב-`src/styles/` / classes / ARIA |
+| **operations** | תמיד — לפני כל `git commit` |
 
-```
-Audit the BuildSmart app at /home/user/buildsmart/app/ for compliance
-with RULES.md.
+## איך להפעיל
 
-Read /home/user/buildsmart/app/RULES.md to understand the rules.
+1. בחר shtage רלוונטי (אחד או יותר לפי ה-diff).
+2. הפעל Explore agent עם ה-prompt ב-`knowledge/inspector/prompt.md`,
+   החלף `{STAGE}` בשלב.
+3. שמור את הדוח המוחזר ל-`knowledge/inspections/INSP-NNNN-{stage}-{date}.md`.
+4. פעל לפי ה-VERDICT.
 
-Then audit the following against every rule:
-- All TSX files under src/components/
-- All TSX files under src/views/
-- src/app.tsx
-- src/styles/global.css
-- Recent diff: `git -C /home/user/buildsmart diff HEAD~1 -- app/src`
+## רמות חומרה והשלכות
 
-For each rule R1–R8, report:
-- PASS / FAIL
-- If FAIL: specific file:line + verbatim quote of the violating code
-- If FAIL: exact text of which rule clause was broken
+| חומרה | פעולה |
+|---|---|
+| **CRITICAL** | commit חסום אוטומטית. תקן או כתוב ADR. |
+| **MAJOR** | דורש אישור הבעלים. אסור להמשיך בלי. |
+| **MINOR** | מתועד בלבד. לא חוסם. |
 
-Return at the end a single line: "VERDICT: PASS" or "VERDICT: FAIL (N
-violations)".
+## זיהוי לולאות (חובה)
 
-Be strict. Half-violations count. No leniency for "it might be OK".
-```
+המפקח בודק **בכל ריצה**:
+
+### Code loops
+דפוסים ב-`knowledge/inspector/loops.md` (L-01 עד L-08):
+- `useEffect` עם setter ושדה תלות סותר
+- mutation של signal בתוך effect שמאזין לאותו signal
+- state setter ב-render body
+- `while(true)` / recursion ללא base case
+
+### Process loop (stuck-loop)
+המפקח קורא את **3 הדוחות האחרונים** מ-`knowledge/inspections/`.
+אם אותה finding ID מופיעה ב-2+ מהם:
+- הממצא מוקפץ ל-**CRITICAL**
+- מתויג `stuck-loop`
+- הדוח חוזר `VERDICT: NO-GO (stuck loop)` ומתעצר.
+- **Claude מפסיק לנסות לתקן** ופונה לבעלים להחלטה.
 
 ## מה לעשות עם הפלט
 
-- `VERDICT: PASS` → להמשיך ל-commit.
-- `VERDICT: FAIL` → לתקן כל חריגה, להריץ שוב, ורק אחרי PASS לקמט.
+| VERDICT | פעולה |
+|---|---|
+| `GO` | המשך ל-`git commit` |
+| `NO-GO` ללא stuck-loop | תקן CRITICAL/MAJOR, הרץ מחדש |
+| `NO-GO (stuck loop)` | **עצור.** דווח לבעלים. אסור ניסיון נוסף. |
 
-**אסור** ל-commit עם FAIL בלי לציין מפורשות בהודעת ה-commit איזה חוק נשבר ולמה (לכל היותר חריגה זמנית מתועדת).
+## אסור
+
+- לדחוף עם CRITICAL בלי תיקון
+- לדחוף עם MAJOR בלי אישור הבעלים מפורש
+- להריץ מחדש אחרי stuck-loop בלי הוראה מהבעלים
+- לערוך/למחוק דוחות ישנים ב-`inspections/` — הם מקור-האמת ההיסטורי
+
+## הקשר למסמכים אחרים
+
+- `knowledge/inspector/prompt.md` — ה-prompt הקבוע לסוכן (replace `{STAGE}`)
+- `knowledge/inspector/checklist.md` — כל ה-checklists לפי שלב (FND/FRM/WIR/FIN/OPS)
+- `knowledge/inspector/loops.md` — דפוסי לולאה מפורטים
+- `knowledge/inspections/` — ארכיון דוחות (immutable, ב-git)
