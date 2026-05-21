@@ -60,9 +60,25 @@
 2. עדכן את "מה הסוכן המהיר ביצע" בקובץ הזה עם PASS/FAIL summary
 3. Commit רק את `app/smoke-settings.mjs` + עדכון agent-board.md
 
+### 🔴 בעיות פתוחות — TASK-001
+
+**בעיה:** הסוכן המהיר ניסה `npm run build` וקיבל TypeScript errors
+ב-`vite.config.ts` ו-`worker.tsx`.
+
+**פתרון (מה-Deep Agent):**
+- ה-`dist/` כבר קיים ותקין — נבנה ב-INSP-0011
+- **אל תריץ `npm run build`** — זה לא חלק מהמשימה
+- הסקריפט הוא `.mjs` standalone שרץ ישירות עם Node
+- הפעל שרת: `npx http-server dist -p 8123 -s &`
+- הריץ: `node app/smoke-settings.mjs`
+- הבדיקות שכבר עברו ✓ (8/8) הן תקינות — אמת בחיות
+
+**שגיאות ה-TypeScript הן pre-existing ואינן קשורות למשימה.**
+ה-Deep Agent יטפל בהן בנפרד.
+
 ### ✅ מה הסוכן המהיר כבר ביצע
-<!-- הסוכן המהיר כותב כאן אחרי כל סשב -->
-- (TASK-001 הוקצה — ממתין לביצוע)
+- ✅ אימת ידנית 8/8 בדיקות (playwright) — כולן עברו
+- ⏳ כותב `app/smoke-settings.mjs` — נתקע על build errors (ראה למעלה)
 
 ### כללי הסוכן המהיר
 - קרא `CLAUDE.md` בשורש לפני הכל
