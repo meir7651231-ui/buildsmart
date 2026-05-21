@@ -32,14 +32,49 @@ Entry point and 5 complete role systems:
 
 ---
 
-### **PART 3: SYSTEM MANAGER DASHBOARD** ⏳ In Progress
-**File:** `SYSTEM_MANAGER_DASHBOARD.md` (coming next)
+### **PART 3: SYSTEM MANAGER DASHBOARD** ✅ Complete
+**File:** `SYSTEM_MANAGER_DASHBOARD.md`
 
 Complete deep dive into the 4-tab system manager interface:
-- 📊 לוח בקרה (Dashboard/Products)
-- 🚚 הזמנות (Orders)
-- 👥 לקוחות (Customers)
-- 🛠️ ניהול (Management)
+- 📊 לוח בקרה (Dashboard/Products) — system metrics, catalog management
+- 🚚 הזמנות (Orders) — system-wide order tracking & fulfillment
+- 👥 לקוחות (Customers) — contractor account management
+- 🛠️ ניהול (Management) — system configuration, suppliers, reports
+
+---
+
+### **PART 4: SUPPLIER STORE DASHBOARD** ✅ Complete
+**File:** `STORE_DASHBOARD.md`
+
+Complete deep dive into the supplier store 4-tab interface:
+- 🏪 Login Screen — store selection from 3 regional stores
+- 📊 Home — dashboard with alerts and quick actions
+- 📥 Orders — order fulfillment, picking sheets, split shipments
+- 📦 Stock — inventory management per store
+- 🛠️ Portal — tools grid (ratings, SLA, zones, bulk discounts, etc.)
+
+---
+
+### **PART 5: COURIER DASHBOARD** ✅ Complete
+**File:** `COURIER_DASHBOARD.md`
+
+Complete deep dive into courier delivery hub (single-pane view):
+- 🛵 Home Summary — vehicle selection, action cards, stats
+- 📦 Delivery List — active deliveries with 3-step tracker
+- 🚚 Detail Sheet — per-delivery information & actions
+- 🧰 Portal (future) — navigation, POD, fleet, SLA tools
+
+---
+
+### **PART 6: FIELD WORKER DASHBOARD** ✅ Complete
+**File:** `WORKER_DASHBOARD.md`
+
+Complete deep dive into field worker task management:
+- 👷 Worker Picker — select from 2 crew members
+- 📋 Home Summary — greeting, progress bar, stats
+- 🔨 Current Task — active work item with status
+- ⏳ Queue — pending tasks awaiting start
+- 📋 Submitted — tasks in review or completed
 
 ---
 
