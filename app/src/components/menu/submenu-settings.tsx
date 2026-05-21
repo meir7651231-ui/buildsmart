@@ -559,6 +559,59 @@ export const LEAF_BINDINGS: Record<string, Binding> = {
     isActive: () => appSettings.value.security.privacy.crashReports,
   },
 
+  /* === support — @legacy index.html:22075 (openServiceHub, 8 tiles) === */
+
+  /* L3 — info toasts (full features require server) */
+  'support>מרכז השירות>מוקד תמיכה': {
+    action: () => showToast('🎧 מוקד תמיכה — פתיחת פנייה בגרסה המלאה'),
+  },
+  'support>מרכז השירות>צ׳אטבוט': {
+    action: () => showToast('🤖 צ׳אטבוט — מענה מיידי בגרסה המלאה'),
+  },
+  'support>מרכז השירות>דיווח על באג': {
+    action: () => showToast('📳 דיווח על באג — זמין בגרסה המלאה'),
+  },
+  'support>מרכז השירות>המרת מידות': {
+    action: () => showToast('📏 המרת מידות — מטרי ↔ אימפריאלי בגרסה המלאה'),
+  },
+  'support>מרכז השירות>סנכרון יומן': {
+    action: () => showToast('📅 סנכרון Google Calendar — זמין בגרסה המלאה'),
+  },
+  'support>מרכז השירות>לוח דרושים': {
+    action: () => showToast('📋 לוח דרושים — פרסום משרות בגרסה המלאה'),
+  },
+
+  /* L4 — quantity calculator modes — @legacy index.html:22290 (svcQtyCalc tabs) */
+  'support>מרכז השירות>מחשבון כמויות>אריחים': {
+    action: () => showToast('🧮 מחשבון אריחים — זמין בגרסה המלאה'),
+  },
+  'support>מרכז השירות>מחשבון כמויות>צבע': {
+    action: () => showToast('🧮 מחשבון צבע — זמין בגרסה המלאה'),
+  },
+  'support>מרכז השירות>מחשבון כמויות>בטון': {
+    action: () => showToast('🧮 מחשבון בטון — זמין בגרסה המלאה'),
+  },
+
+  /* L4 — onboarding tour steps — @legacy index.html:22375 (TOUR_STEPS[].d) */
+  'support>מרכז השירות>סיור היכרות>מסך הבית': {
+    action: () => showToast('🏠 כאן מתחילים — חיפוש מהיר, קטגוריות, וכלי ה-AI החכמים.'),
+  },
+  'support>מרכז השירות>סיור היכרות>הזמנה': {
+    action: () => showToast('🛒 בוחרים מוצרים, מוסיפים לסל, ומאשרים — הכל מגיע ישר לאתר.'),
+  },
+  'support>מרכז השירות>סיור היכרות>תקציב': {
+    action: () => showToast('💰 מרכז הפיננסים עוקב אחרי כל שקל — תקציב, חריגות ודוחות.'),
+  },
+  'support>מרכז השירות>סיור היכרות>משימות ואתר': {
+    action: () => showToast('📋 ניהול אתר הבנייה — גאנט, ליקויים, נוכחות ובטיחות.'),
+  },
+  'support>מרכז השירות>סיור היכרות>מועדון BuildSmart': {
+    action: () => showToast('🎮 צוברים BuildCoins על כל פעולה — וממשים בהטבות.'),
+  },
+  'support>מרכז השירות>סיור היכרות>מוכנים!': {
+    action: () => showToast('🎉 זהו — אתם מכירים את BuildSmart. בהצלחה בעבודה!'),
+  },
+
   /* === about — @legacy index.html:6870-6876 (setLink calls) === */
   'about>גרסה': {
     action: () => showToast('BuildSmart 1.0 · אב-טיפוס'),
