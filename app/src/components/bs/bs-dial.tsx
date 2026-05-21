@@ -2,8 +2,11 @@ import {
   bsOpen,
   activePersona,
   bsDrillPersona,
+  bsDrillPath,
   drillIntoPersona,
   popBsDrill,
+  pushBsDrill,
+  popBsDrillPathTo,
   type Persona,
 } from '../../store/bs-store';
 import { showToast } from '../../store/toast-store';
@@ -20,7 +23,13 @@ const TILES: Tile[] = [
   { id: 'worker',     label: 'עובד',         emoji: '🦺' },
 ];
 
-type Section = { id: string; emoji: string; title: string };
+/* Section can branch (children) or be a leaf (no children). */
+type Section = {
+  id: string;
+  emoji: string;
+  title: string;
+  children?: Section[];
+};
 
 /* @legacy index.html:4260-4263 (admTab buttons of screen-store). */
 const STORE_SECTIONS: Section[] = [
@@ -59,9 +68,28 @@ const WORKER_SECTIONS: Section[] = [
  *   📊 לוח בקרה   @4213
  *   🚚 הזמנות     @4214
  *   👥 לקוחות     @4215
- *   🛠️ ניהול     @4216 */
+ *   🛠️ ניהול     @4216
+ *
+ * @legacy index.html:12160-12164 — לוח בקרה metric tiles (mdMetric calls):
+ *   🚚 הזמנות פתוחות
+ *   📦 מוצרים בקטלוג
+ *   🧰 אביזרים נלווים
+ *   ✅ זמינים כעת
+ *   🏪 חנויות פעילות
+ * Both emoji + label are verbatim from each mdMetric() call. */
 const MANAGER_SECTIONS: Section[] = [
-  { id: 'm-products',  emoji: '📊', title: 'לוח בקרה' },
+  {
+    id: 'm-products',
+    emoji: '📊',
+    title: 'לוח בקרה',
+    children: [
+      { id: 'md-open-orders',  emoji: '🚚', title: 'הזמנות פתוחות' },
+      { id: 'md-catalog',      emoji: '📦', title: 'מוצרים בקטלוג' },
+      { id: 'md-accessories',  emoji: '🧰', title: 'אביזרים נלווים' },
+      { id: 'md-available',    emoji: '✅', title: 'זמינים כעת' },
+      { id: 'md-stores',       emoji: '🏪', title: 'חנויות פעילות' },
+    ],
+  },
   { id: 'm-orders',    emoji: '🚚', title: 'הזמנות' },
   { id: 'm-customers', emoji: '👥', title: 'לקוחות' },
   { id: 'm-manage',    emoji: '🛠️', title: 'ניהול' },
@@ -74,6 +102,24 @@ const PERSONA_SECTIONS: Partial<Record<Persona, Section[]>> = {
   worker: WORKER_SECTIONS,
   manager: MANAGER_SECTIONS,
 };
+
+/* Walk the persona's section tree along the given path. Returns the
+ * list of anchor sections (one per drill step) and the items at the
+ * current depth. Stops on missing label or empty children. */
+function walkBsDrill(
+  persona: Persona,
+  path: string[],
+): { anchors: Section[]; current: Section[] } {
+  const anchors: Section[] = [];
+  let current: Section[] = PERSONA_SECTIONS[persona] ?? [];
+  for (const label of path) {
+    const node = current.find((s) => s.title === label);
+    if (!node || !node.children || node.children.length === 0) break;
+    anchors.push(node);
+    current = node.children;
+  }
+  return { anchors, current };
+}
 
 export function BsDial() {
   if (!bsOpen.value) return null;
@@ -107,9 +153,12 @@ export function BsDial() {
     );
   }
 
-  /* L2 — drilled persona's sub-sections. Top row is a back anchor. */
+  /* L2+ — walk the persona's tree. Render persona anchor + one anchor
+   * per drill step + the current items above them. */
   const tile = TILES.find((t) => t.id === drilled)!;
-  const sections = PERSONA_SECTIONS[drilled];
+  const path = bsDrillPath.value;
+  const { anchors, current } = walkBsDrill(drilled, path);
+
   return (
     <ul class="bsdial" role="menu" aria-label={tile.label}>
       <li class="bsdial__item bsdial__item--active">
@@ -125,24 +174,49 @@ export function BsDial() {
           <span class="bsdial__label">{tile.label}</span>
         </button>
       </li>
-      {sections?.map((s, i) => (
+      {anchors.map((anchor, i) => (
         <li
-          key={s.id}
-          class="bsdial__item"
-          style={{ animationDelay: `${i * 30}ms` }}
+          key={anchor.id}
+          class="bsdial__item bsdial__item--active"
         >
           <button
             type="button"
             role="menuitem"
-            class="bsdial__btn"
-            onClick={() => showToast(`${s.title} — בבנייה`)}
-            aria-label={s.title}
+            class="bsdial__btn is-active"
+            onClick={() => popBsDrillPathTo(i)}
+            aria-label={`חזרה מ-${anchor.title}`}
+            aria-expanded="true"
           >
-            <span class="bsdial__circle" aria-hidden="true">{s.emoji}</span>
-            <span class="bsdial__label">{s.title}</span>
+            <span class="bsdial__circle" aria-hidden="true">{anchor.emoji}</span>
+            <span class="bsdial__label">{anchor.title}</span>
           </button>
         </li>
       ))}
+      {current.map((s, i) => {
+        const hasChildren = !!s.children && s.children.length > 0;
+        return (
+          <li
+            key={s.id}
+            class="bsdial__item"
+            style={{ animationDelay: `${i * 30}ms` }}
+          >
+            <button
+              type="button"
+              role="menuitem"
+              class="bsdial__btn"
+              onClick={() =>
+                hasChildren
+                  ? pushBsDrill(s.title)
+                  : showToast(`${s.title} — בבנייה`)
+              }
+              aria-label={s.title}
+            >
+              <span class="bsdial__circle" aria-hidden="true">{s.emoji}</span>
+              <span class="bsdial__label">{s.title}</span>
+            </button>
+          </li>
+        );
+      })}
     </ul>
   );
 }
