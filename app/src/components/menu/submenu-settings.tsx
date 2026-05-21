@@ -1075,46 +1075,103 @@ export function profileAnchorIcon(label: string): preact.JSX.Element {
 
 /* === Home dial. @legacy view-home in index.html:4416-4517.
  * 4 leaves — the home-unique tools (fin-hub-btn + 3 promises).
- * Each emoji+title verbatim from the legacy DOM:
- *   🤖 בינה מלאכותית ואוטומציה  @ :4435-4439 (fin-hub-btn)
- *   📐 סרוק תוכנית עבודה          @ :4474 (promise → go('scan'))
- *   📦 המלאי שלי                  @ :4493 (promise → go('stock'))
- *   📋 משימות העבודה              @ :4503 (promise → go('tasks')) */
+ * 🤖 leaf drills into the 9 AI tools from openAIHub @ :21125-21133. */
 
-type HomeItem = { id: string; emoji: string; title: string };
+type HomeItem = { id: string; emoji: string; title: string; children?: HomeItem[] };
 
 const HOME_LEAVES: HomeItem[] = [
-  { id: 'home-ai',    emoji: '🤖', title: 'בינה מלאכותית ואוטומציה' },
+  {
+    id: 'home-ai',
+    emoji: '🤖',
+    title: 'בינה מלאכותית ואוטומציה',
+    /* @legacy openAIHub items @ index.html:21125-21133 — each item has
+     * ic + t, both used verbatim. */
+    children: [
+      { id: 'ai-stock',    emoji: '📦',  title: 'חיזוי מלאי' },
+      { id: 'ai-barcode',  emoji: '📷',  title: 'סורק ברקוד' },
+      { id: 'ai-voice',    emoji: '🎙️', title: 'דיבור למשימה' },
+      { id: 'ai-alt',      emoji: '💡',  title: 'חלופות זולות' },
+      { id: 'ai-plan',     emoji: '📐',  title: 'סריקת תוכניות' },
+      { id: 'ai-3way',     emoji: '🔗',  title: 'התאמה משולשת' },
+      { id: 'ai-weather',  emoji: '🌦️', title: 'אוטומציית מזג אוויר' },
+      { id: 'ai-wear',     emoji: '🔧',  title: 'זיהוי בלאי' },
+      { id: 'ai-analytics',emoji: '📊',  title: 'Analytics חכם' },
+    ],
+  },
   { id: 'home-scan',  emoji: '📐', title: 'סרוק תוכנית עבודה' },
   { id: 'home-stock', emoji: '📦', title: 'המלאי שלי' },
   { id: 'home-tasks', emoji: '📋', title: 'משימות העבודה' },
 ];
 
+const homeDrillPath = _cartSignal<string[]>([]);
+
+function walkHome(path: string[]): { anchors: HomeItem[]; current: HomeItem[] } {
+  const anchors: HomeItem[] = [];
+  let current: HomeItem[] = HOME_LEAVES;
+  for (const label of path) {
+    const node = current.find((h) => h.title === label);
+    if (!node || !node.children || node.children.length === 0) break;
+    anchors.push(node);
+    current = node.children;
+  }
+  return { anchors, current };
+}
+
 export function HomeSubmenu() {
-  const reversed = [...HOME_LEAVES].reverse();
+  const path = homeDrillPath.value;
+  const { anchors, current } = walkHome(path);
+  const reversed = [...current].reverse();
   return (
     <>
-      {reversed.map((h, i) => (
+      {anchors.map((a, i) => (
         <li
-          key={h.id}
+          key={a.id}
           role="none"
-          class="dial__item dial__item--sub"
-          style={{ animationDelay: `${i * 22}ms` }}
+          class="dial__item dial__item--active"
         >
           <button
             type="button"
             class="dial__btn"
             role="menuitem"
-            onClick={() => showToast(`${h.title} — בבנייה`)}
-            aria-label={h.title}
+            onClick={() => { homeDrillPath.value = path.slice(0, i); }}
+            aria-label={`חזרה מ-${a.title}`}
+            aria-expanded="true"
           >
-            <span class="dial__circle">
-              <span class="dial__circle-emoji">{h.emoji}</span>
+            <span class="dial__circle dial__circle--active">
+              <span class="dial__circle-emoji">{a.emoji}</span>
             </span>
-            <span class="dial__label">{h.title}</span>
+            <span class="dial__label dial__label--active">{a.title}</span>
           </button>
         </li>
       ))}
+      {reversed.map((h, i) => {
+        const hasChildren = !!h.children && h.children.length > 0;
+        return (
+          <li
+            key={h.id}
+            role="none"
+            class="dial__item dial__item--sub"
+            style={{ animationDelay: `${i * 22}ms` }}
+          >
+            <button
+              type="button"
+              class="dial__btn"
+              role="menuitem"
+              onClick={() =>
+                hasChildren
+                  ? (homeDrillPath.value = [...path, h.title])
+                  : showToast(`${h.title} — בבנייה`)
+              }
+              aria-label={h.title}
+            >
+              <span class="dial__circle">
+                <span class="dial__circle-emoji">{h.emoji}</span>
+              </span>
+              <span class="dial__label">{h.title}</span>
+            </button>
+          </li>
+        );
+      })}
     </>
   );
 }
