@@ -92,7 +92,19 @@ const MANAGER_SECTIONS: Section[] = [
   },
   { id: 'm-orders',    emoji: '🚚', title: 'הזמנות' },
   { id: 'm-customers', emoji: '👥', title: 'לקוחות' },
-  { id: 'm-manage',    emoji: '🛠️', title: 'ניהול' },
+  {
+    id: 'm-manage',
+    emoji: '🛠️',
+    title: 'ניהול',
+    /* @legacy index.html:16653-16745 — mmSection(key, ic, title, ...)
+     * calls of renderMgrManage. emoji + title verbatim from each. */
+    children: [
+      { id: 'mm-trees',    emoji: '🌳', title: 'עץ המוצרים' },
+      { id: 'mm-brands',   emoji: '🏷️', title: 'מותגים ומחירים' },
+      { id: 'mm-cats',     emoji: '🗂️', title: 'קטגוריות' },
+      { id: 'mm-settings', emoji: '⚙️', title: 'הגדרות אפליקציה' },
+    ],
+  },
 ];
 
 /* Other personas have no sub-sections yet — drill shows back anchor only. */
