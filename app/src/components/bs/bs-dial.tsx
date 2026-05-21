@@ -54,11 +54,25 @@ const WORKER_SECTIONS: Section[] = [
   { id: 'submitted', emoji: '📋', title: 'שהגשת' },
 ];
 
+/* @legacy index.html:4213-4216 — admTab buttons of screen-manager,
+ * verbatim incl. emoji prefix:
+ *   📊 לוח בקרה   @4213
+ *   🚚 הזמנות     @4214
+ *   👥 לקוחות     @4215
+ *   🛠️ ניהול     @4216 */
+const MANAGER_SECTIONS: Section[] = [
+  { id: 'm-products',  emoji: '📊', title: 'לוח בקרה' },
+  { id: 'm-orders',    emoji: '🚚', title: 'הזמנות' },
+  { id: 'm-customers', emoji: '👥', title: 'לקוחות' },
+  { id: 'm-manage',    emoji: '🛠️', title: 'ניהול' },
+];
+
 /* Other personas have no sub-sections yet — drill shows back anchor only. */
 const PERSONA_SECTIONS: Partial<Record<Persona, Section[]>> = {
   store: STORE_SECTIONS,
   courier: COURIER_SECTIONS,
   worker: WORKER_SECTIONS,
+  manager: MANAGER_SECTIONS,
 };
 
 export function BsDial() {
