@@ -610,6 +610,15 @@ li {
   height: 19px;
 }
 
+/* Emoji-as-icon inside a circle (profile stats + achievement leaves).
+ * Sized to match the SVG icons; centered by the parent grid. */
+.dial__circle-emoji {
+  font-size: 20px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
 /* Leaf "is-on" — marks the current selection or an enabled toggle.
  * Only the circle gets the brand tint; the label pill stays white so
  * the row is distinguishable from a breadcrumb anchor (where BOTH the

@@ -47,6 +47,13 @@ import {
 } from '../../store/user-profile';
 import { showToast } from '../../store/toast-store';
 import { PROJECTS } from '../../data/projects';
+import {
+  identityStats,
+  identityAchievements,
+  currentRank,
+  nextRank,
+  formatIls,
+} from '../../data/identity';
 
 export type SettingsRowId = SettingsGroupId | 'reset';
 
@@ -841,7 +848,15 @@ export const PROFILE_TREE: Node[] = [
     label: 'כרטיס קבלן',
     children: [
       { label: 'אתה במצב הדגמה' },
-      { label: 'המספרים שלך' },
+      {
+        label: 'המספרים שלך',
+        children: [
+          { label: 'הזמנות' },
+          { label: 'אתרים פעילים' },
+          { label: 'עצי מוצרים' },
+          { label: 'אביזרים שהעץ הציל' },
+        ],
+      },
       { label: 'סך הרכש דרך BuildSmart' },
     ],
   },
@@ -849,11 +864,94 @@ export const PROFILE_TREE: Node[] = [
     label: 'דרגות הקבלן',
     children: [
       { label: 'ההטבה שלך' },
-      { label: 'הישגים' },
+      {
+        label: 'הישגים',
+        children: [
+          { label: 'הזמנה ראשונה' },
+          { label: '10 הזמנות' },
+          { label: 'ריבוי אתרים' },
+          { label: 'חובב עץ מוצרים' },
+          { label: 'לא שוכח כלום' },
+          { label: 'מחזור ₪10K' },
+        ],
+      },
       { label: 'מועדון BuildSmart' },
     ],
   },
 ];
+
+/* @legacy index.html:6535-6543 (achievement ic) + 6604-6608 (statTile ic).
+ * R4 keeps emoji in the circle (icon slot), label stays plain text. */
+const PROFILE_LEAF_ICONS: Record<string, string> = {
+  'כרטיס קבלן>המספרים שלך>הזמנות':              '📦',
+  'כרטיס קבלן>המספרים שלך>אתרים פעילים':        '🏗️',
+  'כרטיס קבלן>המספרים שלך>עצי מוצרים':          '🌳',
+  'כרטיס קבלן>המספרים שלך>אביזרים שהעץ הציל':   '🧠',
+  'דרגות הקבלן>הישגים>הזמנה ראשונה':            '🚀',
+  'דרגות הקבלן>הישגים>10 הזמנות':                '📦',
+  'דרגות הקבלן>הישגים>ריבוי אתרים':             '🏗️',
+  'דרגות הקבלן>הישגים>חובב עץ מוצרים':           '🌳',
+  'דרגות הקבלן>הישגים>לא שוכח כלום':             '🧠',
+  'דרגות הקבלן>הישגים>מחזור ₪10K':               '💰',
+};
+
+/* Per-leaf behaviours. Key = full path joined by '>'. Each leaf shows
+ * a toast with real data drawn from identityStats(). Achievements
+ * leaves additionally expose isActive() so the dial circle tints
+ * brand-green when the achievement is unlocked. */
+type ProfileLeafBinding = {
+  action: () => void;
+  isActive?: () => boolean;
+};
+
+function achToast(idx: number): void {
+  const s = identityStats();
+  const a = identityAchievements(s)[idx]!;
+  showToast(`${a.ic} ${a.on ? '✓ הושג — ' : '🔒 נעול — '}${a.desc}`);
+}
+
+const PROFILE_LEAVES: Record<string, ProfileLeafBinding> = {
+  'כרטיס קבלן>אתה במצב הדגמה': {
+    action: () =>
+      showToast('אתה במצב הדגמה · הירשם כדי לשמור את הנתונים, האתרים וההזמנות שלך'),
+  },
+  'כרטיס קבלן>המספרים שלך>הזמנות': {
+    action: () => showToast(`הזמנות: ${identityStats().orders}`),
+  },
+  'כרטיס קבלן>המספרים שלך>אתרים פעילים': {
+    action: () => showToast(`אתרים פעילים: ${identityStats().sites}`),
+  },
+  'כרטיס קבלן>המספרים שלך>עצי מוצרים': {
+    action: () => showToast(`עצי מוצרים: ${identityStats().trees}`),
+  },
+  'כרטיס קבלן>המספרים שלך>אביזרים שהעץ הציל': {
+    action: () => showToast(`אביזרים שהעץ הציל: ${identityStats().autoSaved}`),
+  },
+  'כרטיס קבלן>סך הרכש דרך BuildSmart': {
+    action: () => showToast(`סך הרכש: ${formatIls(identityStats().spent)}`),
+  },
+  'דרגות הקבלן>ההטבה שלך': {
+    action: () => {
+      const s = identityStats();
+      const r = currentRank(s.orders);
+      const n = nextRank(s.orders);
+      const tail = n
+        ? ` · ${n.min - s.orders} עד ${n.ic} ${n.name}`
+        : ' · הדרגה הגבוהה ביותר';
+      showToast(`${r.ic} ${r.name} — ${r.perk}${tail}`);
+    },
+  },
+  'דרגות הקבלן>הישגים>הזמנה ראשונה':    { action: () => achToast(0), isActive: () => identityAchievements(identityStats())[0]!.on },
+  'דרגות הקבלן>הישגים>10 הזמנות':        { action: () => achToast(1), isActive: () => identityAchievements(identityStats())[1]!.on },
+  'דרגות הקבלן>הישגים>ריבוי אתרים':     { action: () => achToast(2), isActive: () => identityAchievements(identityStats())[2]!.on },
+  'דרגות הקבלן>הישגים>חובב עץ מוצרים':   { action: () => achToast(3), isActive: () => identityAchievements(identityStats())[3]!.on },
+  'דרגות הקבלן>הישגים>לא שוכח כלום':     { action: () => achToast(4), isActive: () => identityAchievements(identityStats())[4]!.on },
+  'דרגות הקבלן>הישגים>מחזור ₪10K':       { action: () => achToast(5), isActive: () => identityAchievements(identityStats())[5]!.on },
+  'דרגות הקבלן>מועדון BuildSmart': {
+    action: () =>
+      showToast('🎮 מועדון BuildSmart — BuildCoins, אתגרים, לוח מובילים והטבות'),
+  },
+};
 
 /* Level 1 — two branches. Tap "הגדרות-פרופיל" → enter profile;
  * tap "הגדרות מתקדמות" → enter advanced (existing 10 categories). */
@@ -911,42 +1009,59 @@ export function ProfileTreeSubmenu() {
   const { current } = walkProfile(path);
   /* Reverse so the topmost row in the visual stack reads first. */
   const reversed = [...current].reverse();
-  /* Pick an icon: deepest anchor's branch icon, or a generic profile icon. */
+  /* Pick an icon: branch icon if drilled in, else default. */
   const branchIcon =
     path.length > 0
       ? PROFILE_BRANCH_ICON[path[0]!] ?? ICON_PROFILE
       : ICON_PROFILE;
   return (
     <>
-      {reversed.map((node, i) => (
-        <li
-          key={node.label}
-          role="none"
-          class="dial__item dial__item--sub"
-          style={{ animationDelay: `${i * 20}ms` }}
-        >
-          <button
-            type="button"
-            class="dial__btn"
-            role="menuitem"
-            onClick={() => {
-              if (node.children && node.children.length > 0) {
-                pushProfilePath(node.label);
-                return;
-              }
-              showToast(`${node.label} — בבנייה`);
-            }}
-            aria-label={node.label}
+      {reversed.map((node, i) => {
+        const leafKey = [...path, node.label].join('>');
+        const binding = PROFILE_LEAVES[leafKey];
+        const on = binding?.isActive?.() ?? false;
+        return (
+          <li
+            key={node.label}
+            role="none"
+            class={`dial__item dial__item--sub${on ? ' dial__item--leaf-on' : ''}`}
+            style={{ animationDelay: `${i * 20}ms` }}
           >
-            <span class="dial__circle">
-              {path.length === 0
-                ? PROFILE_BRANCH_ICON[node.label] ?? ICON_PROFILE
-                : branchIcon}
-            </span>
-            <span class="dial__label">{node.label}</span>
-          </button>
-        </li>
-      ))}
+            <button
+              type="button"
+              class="dial__btn"
+              role="menuitem"
+              onClick={() => {
+                if (node.children && node.children.length > 0) {
+                  pushProfilePath(node.label);
+                  return;
+                }
+                if (binding) {
+                  binding.action();
+                  return;
+                }
+                showToast(`${node.label} — בבנייה`);
+              }}
+              aria-label={node.label}
+              aria-pressed={binding?.isActive ? on : undefined}
+            >
+              <span class={`dial__circle${on ? ' dial__circle--on' : ''}`}>
+                {(() => {
+                  /* Priority: leaf-specific emoji (stats/achievements) →
+                   * top-level branch icon → ancestor's branch icon. */
+                  const emoji = PROFILE_LEAF_ICONS[leafKey];
+                  if (emoji) return <span class="dial__circle-emoji">{emoji}</span>;
+                  if (path.length === 0) {
+                    return PROFILE_BRANCH_ICON[node.label] ?? ICON_PROFILE;
+                  }
+                  return branchIcon;
+                })()}
+              </span>
+              <span class="dial__label">{node.label}</span>
+            </button>
+          </li>
+        );
+      })}
     </>
   );
 }
