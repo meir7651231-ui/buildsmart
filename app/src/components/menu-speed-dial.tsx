@@ -11,9 +11,16 @@ import {
   setMenuTab,
   menuActiveSettingsGroup,
   setSettingsGroup,
+  menuActiveSubRow,
+  setSubRow,
   type MenuTab,
 } from '../store/app-store';
-import { SettingsSubmenu, SettingsSubSubmenu, SETTINGS_ROWS } from './menu/submenu-settings';
+import {
+  SettingsSubmenu,
+  SettingsSubSubmenu,
+  SettingsLeafSubmenu,
+  SETTINGS_ROWS,
+} from './menu/submenu-settings';
 
 type Tab = {
   id: MenuTab;
@@ -148,17 +155,20 @@ export function MenuSpeedDial() {
   );
 }
 
-/* When the settings tab is active, this renders either:
- *  - level 1: the 10 settings rows (no group drilled in), OR
- *  - level 2: a SECOND anchor (the active sub-group) followed by its
- *    sub-sub rows. Both anchors sit above the settings anchor; the group
- *    anchor is closer to the bottom (rendered FIRST so column-reverse
- *    places it just above the settings circle). */
+/* When the settings tab is active, this renders one of three depths:
+ *  - level 1: the 10 settings rows (no group drilled in)
+ *  - level 2: settings + group anchor stacked at the bottom, with the
+ *    group's sub-rows rising above
+ *  - level 3: settings + group + sub-row anchors stacked at the bottom,
+ *    with the grandchildren (select options or hub tiles) rising above.
+ * Anchors are rendered FIRST so column-reverse places them at the
+ * bottom; the deepest anchor sits just above the next-shallower one. */
 function SettingsLevel() {
   const group = menuActiveSettingsGroup.value;
   if (!group) return <SettingsSubmenu />;
   const groupDef = SETTINGS_ROWS.find((r) => r.id === group);
   if (!groupDef) return <SettingsSubmenu />;
+  const subLabel = menuActiveSubRow.value;
   return (
     <>
       <li role="none" class="dial__item dial__item--active">
@@ -174,7 +184,26 @@ function SettingsLevel() {
           <span class="dial__label dial__label--active">{groupDef.label}</span>
         </button>
       </li>
-      <SettingsSubSubmenu group={group} />
+      {subLabel ? (
+        <>
+          <li role="none" class="dial__item dial__item--active">
+            <button
+              type="button"
+              class="dial__btn"
+              role="menuitem"
+              onClick={() => setSubRow(null)}
+              aria-label={`חזרה מ-${subLabel}`}
+              aria-expanded="true"
+            >
+              <span class="dial__circle dial__circle--active">{groupDef.icon}</span>
+              <span class="dial__label dial__label--active">{subLabel}</span>
+            </button>
+          </li>
+          <SettingsLeafSubmenu group={group} subLabel={subLabel} />
+        </>
+      ) : (
+        <SettingsSubSubmenu group={group} />
+      )}
     </>
   );
 }

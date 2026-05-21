@@ -524,7 +524,12 @@ li {
   gap: var(--space-3);
   align-items: flex-end;
   pointer-events: none;
+  max-height: calc(100vh - env(safe-area-inset-bottom) - env(safe-area-inset-top) - 140px);
+  overflow-y: auto;
+  overflow-x: visible;
+  scrollbar-width: none;
 }
+.dial::-webkit-scrollbar { display: none; }
 
 .dial__item {
   pointer-events: auto;

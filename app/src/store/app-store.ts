@@ -63,13 +63,25 @@ export type SettingsGroupId =
   | 'about';
 export const menuActiveSettingsGroup = signal<SettingsGroupId | null>(null);
 
+/* Within a settings sub-group, which row was drilled into (level 3).
+ * Stored as the row's Hebrew label so we don't need a synthetic id table. */
+export const menuActiveSubRow = signal<string | null>(null);
+
 export function setMenuTab(t: MenuTab | null): void {
   menuActiveTab.value = t;
-  if (t === null) menuActiveSettingsGroup.value = null;
+  if (t === null) {
+    menuActiveSettingsGroup.value = null;
+    menuActiveSubRow.value = null;
+  }
 }
 
 export function setSettingsGroup(g: SettingsGroupId | null): void {
   menuActiveSettingsGroup.value = g;
+  menuActiveSubRow.value = null;
+}
+
+export function setSubRow(label: string | null): void {
+  menuActiveSubRow.value = label;
 }
 
 export function toggleMenu(): void {
@@ -77,12 +89,14 @@ export function toggleMenu(): void {
   if (!menuOpen.value) {
     menuActiveTab.value = null;
     menuActiveSettingsGroup.value = null;
+    menuActiveSubRow.value = null;
   }
 }
 export function closeMenu(): void {
   menuOpen.value = false;
   menuActiveTab.value = null;
   menuActiveSettingsGroup.value = null;
+  menuActiveSubRow.value = null;
 }
 export function openSearch(): void {
   searchOpen.value = true;

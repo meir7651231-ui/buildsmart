@@ -7,7 +7,12 @@
  * at the TOP of the visual stack. We reverse the data order here so the
  * stack reads top→bottom in legacy order.
  */
-import { closeMenu, setSettingsGroup, type SettingsGroupId } from '../../store/app-store';
+import {
+  closeMenu,
+  setSettingsGroup,
+  setSubRow,
+  type SettingsGroupId,
+} from '../../store/app-store';
 
 export type SettingsRowId = SettingsGroupId | 'reset';
 
@@ -120,19 +125,88 @@ export const SETTINGS_ROWS: Row[] = [
 ];
 
 /* @legacy index.html:6817-6875 — sub-rows per group, in legacy reading order.
- * Names only: leaf taps just close the menu. `reset` has no children — it's
- * a direct action, kept as a leaf in the parent list. */
-export const SETTINGS_CHILDREN: Record<SettingsGroupId, string[]> = {
-  account: ['שם הקבלן', 'טלפון', 'סוג עוסק', 'תחום מקצועי'],
-  notifications: ['עדכוני משלוחים', 'מבצעים והטבות', 'התראות תקציב', 'עדכוני הזמנות'],
-  display: ['ערכת נושא', 'גודל טקסט', 'הפחתת אנימציות'],
-  accessibility: ['מצב ניגודיות גבוהה (לשמש)'],
-  security: ['מרכז האבטחה'],
-  support: ['מרכז השירות'],
-  delivery: ['סוג הובלה מועדף', 'ברירת מחדל — משלוח אקספרס', 'אמצעי תשלום'],
-  region: ['שפה', 'יחידות מידה', 'מטבע'],
-  about: ['גרסה', 'תנאי שימוש', 'מדיניות פרטיות', 'יצירת קשר'],
+ * Sources for the optional `children` (grandchildren shown at level 3):
+ *   - select option labels:  SETTINGS_LABELS at index.html:6750-6757
+ *   - security hub tiles:    openSecurityHub() at index.html:21752-21762
+ *   - service hub tiles:     openServiceHub()  at index.html:22081-22090
+ * `reset` is excluded — it's an action with no sub-rows. Rows without
+ * `children` are leaves at level 2 and just close the menu when tapped. */
+type SubRow = { label: string; children?: string[] };
+
+export const SETTINGS_SUB: Record<SettingsGroupId, SubRow[]> = {
+  account: [
+    { label: 'שם הקבלן' },
+    { label: 'טלפון' },
+    { label: 'סוג עוסק' },
+    { label: 'תחום מקצועי' },
+  ],
+  notifications: [
+    { label: 'עדכוני משלוחים' },
+    { label: 'מבצעים והטבות' },
+    { label: 'התראות תקציב' },
+    { label: 'עדכוני הזמנות' },
+  ],
+  display: [
+    { label: 'ערכת נושא', children: ['בהיר', 'כהה'] },
+    { label: 'גודל טקסט', children: ['קטן', 'בינוני', 'גדול'] },
+    { label: 'הפחתת אנימציות' },
+  ],
+  accessibility: [
+    { label: 'מצב ניגודיות גבוהה (לשמש)' },
+  ],
+  security: [
+    {
+      label: 'מרכז האבטחה',
+      children: [
+        'אימות דו-שלבי',
+        'הרשאות גישה',
+        'כניסה ביומטרית',
+        'יומן ביקורת',
+        'הרשאת מיקום',
+        'נעילת הפעלה',
+        'הצפנת נתונים',
+        'היסטוריית כניסות',
+        'ניהול מכשירים',
+        'בקרת פרטיות',
+      ],
+    },
+  ],
+  support: [
+    {
+      label: 'מרכז השירות',
+      children: [
+        'מוקד תמיכה',
+        'צ׳אטבוט',
+        'דיווח על באג',
+        'המרת מידות',
+        'מחשבון כמויות',
+        'סנכרון יומן',
+        'לוח דרושים',
+        'סיור היכרות',
+      ],
+    },
+  ],
+  delivery: [
+    { label: 'סוג הובלה מועדף', children: ['משלוח קטן', 'טנדר', 'משאית'] },
+    { label: 'ברירת מחדל — משלוח אקספרס' },
+    { label: 'אמצעי תשלום' },
+  ],
+  region: [
+    { label: 'שפה', children: ['עברית', 'العربية', 'English'] },
+    { label: 'יחידות מידה', children: ['מטרי (מ׳, ק״ג)', 'אימפריאלי'] },
+    { label: 'מטבע', children: ['₪ שקל', '$ דולר'] },
+  ],
+  about: [
+    { label: 'גרסה' },
+    { label: 'תנאי שימוש' },
+    { label: 'מדיניות פרטיות' },
+    { label: 'יצירת קשר' },
+  ],
 };
+
+export function findSubRow(group: SettingsGroupId, label: string): SubRow | undefined {
+  return SETTINGS_SUB[group].find((r) => r.label === label);
+}
 
 export function SettingsSubmenu() {
   const rows = [...SETTINGS_ROWS].reverse();
@@ -168,19 +242,26 @@ export function SettingsSubmenu() {
   );
 }
 
-/* Level-3 (sub-sub) renderer — for a given group, lists its child rows.
- * Reuses the parent group's icon for visual cohesion (no invention: we
- * don't fabricate per-row icons that aren't in the legacy). */
+/* Level-3 (sub-sub) renderer — for a given group, lists its sub-rows.
+ * Rows with `children` drill further (set the sub-row); leaf rows just
+ * close the menu. Reuses the parent group's icon for visual cohesion. */
 export function SettingsSubSubmenu({ group }: { group: SettingsGroupId }) {
   const parent = SETTINGS_ROWS.find((r) => r.id === group);
   if (!parent) return null;
-  const labels = SETTINGS_CHILDREN[group];
-  const reversed = [...labels].reverse();
+  const rows = SETTINGS_SUB[group];
+  const reversed = [...rows].reverse();
+  const handleClick = (row: SubRow) => {
+    if (row.children && row.children.length > 0) {
+      setSubRow(row.label);
+    } else {
+      closeMenu();
+    }
+  };
   return (
     <>
-      {reversed.map((label, i) => (
+      {reversed.map((row, i) => (
         <li
-          key={label}
+          key={row.label}
           role="none"
           class="dial__item dial__item--sub"
           style={{ animationDelay: `${i * 22}ms` }}
@@ -189,11 +270,51 @@ export function SettingsSubSubmenu({ group }: { group: SettingsGroupId }) {
             type="button"
             class="dial__btn"
             role="menuitem"
-            onClick={closeMenu}
-            aria-label={label}
+            onClick={() => handleClick(row)}
+            aria-label={row.label}
           >
             <span class="dial__circle">{parent.icon}</span>
-            <span class="dial__label">{label}</span>
+            <span class="dial__label">{row.label}</span>
+          </button>
+        </li>
+      ))}
+    </>
+  );
+}
+
+/* Level-4 (leaf) renderer — given a (group, sub-row) pair, lists the
+ * grandchildren. These are the deepest names: select options for the
+ * setSelect rows, hub tile names for security/support. All taps close
+ * the menu (names only — no actions wired). */
+export function SettingsLeafSubmenu({
+  group,
+  subLabel,
+}: {
+  group: SettingsGroupId;
+  subLabel: string;
+}) {
+  const parent = SETTINGS_ROWS.find((r) => r.id === group);
+  const sub = findSubRow(group, subLabel);
+  if (!parent || !sub || !sub.children) return null;
+  const reversed = [...sub.children].reverse();
+  return (
+    <>
+      {reversed.map((leaf, i) => (
+        <li
+          key={leaf}
+          role="none"
+          class="dial__item dial__item--sub"
+          style={{ animationDelay: `${i * 20}ms` }}
+        >
+          <button
+            type="button"
+            class="dial__btn"
+            role="menuitem"
+            onClick={closeMenu}
+            aria-label={leaf}
+          >
+            <span class="dial__circle">{parent.icon}</span>
+            <span class="dial__label">{leaf}</span>
           </button>
         </li>
       ))}
