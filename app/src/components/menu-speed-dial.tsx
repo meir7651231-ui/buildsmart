@@ -4,8 +4,16 @@
  * tab without one just closes the menu. Tapping the active tab again
  * goes back to the five-tabs view.
  */
-import { menuOpen, closeMenu, menuActiveTab, setMenuTab, type MenuTab } from '../store/app-store';
-import { SettingsSubmenu } from './menu/submenu-settings';
+import {
+  menuOpen,
+  closeMenu,
+  menuActiveTab,
+  setMenuTab,
+  menuActiveSettingsGroup,
+  setSettingsGroup,
+  type MenuTab,
+} from '../store/app-store';
+import { SettingsSubmenu, SettingsSubSubmenu, SETTINGS_ROWS } from './menu/submenu-settings';
 
 type Tab = {
   id: MenuTab;
@@ -132,10 +140,41 @@ export function MenuSpeedDial() {
                 <span class="dial__label dial__label--active">{activeDef.label}</span>
               </button>
             </li>
-            {active === 'settings' && <SettingsSubmenu />}
+            {active === 'settings' && <SettingsLevel />}
           </>
         )}
       </ul>
+    </>
+  );
+}
+
+/* When the settings tab is active, this renders either:
+ *  - level 1: the 10 settings rows (no group drilled in), OR
+ *  - level 2: a SECOND anchor (the active sub-group) followed by its
+ *    sub-sub rows. Both anchors sit above the settings anchor; the group
+ *    anchor is closer to the bottom (rendered FIRST so column-reverse
+ *    places it just above the settings circle). */
+function SettingsLevel() {
+  const group = menuActiveSettingsGroup.value;
+  if (!group) return <SettingsSubmenu />;
+  const groupDef = SETTINGS_ROWS.find((r) => r.id === group);
+  if (!groupDef) return <SettingsSubmenu />;
+  return (
+    <>
+      <li role="none" class="dial__item dial__item--active">
+        <button
+          type="button"
+          class="dial__btn"
+          role="menuitem"
+          onClick={() => setSettingsGroup(null)}
+          aria-label={`חזרה מ-${groupDef.label}`}
+          aria-expanded="true"
+        >
+          <span class="dial__circle dial__circle--active">{groupDef.icon}</span>
+          <span class="dial__label dial__label--active">{groupDef.label}</span>
+        </button>
+      </li>
+      <SettingsSubSubmenu group={group} />
     </>
   );
 }

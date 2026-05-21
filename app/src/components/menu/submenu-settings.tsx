@@ -7,19 +7,9 @@
  * at the TOP of the visual stack. We reverse the data order here so the
  * stack reads top→bottom in legacy order.
  */
-import { closeMenu } from '../../store/app-store';
+import { closeMenu, setSettingsGroup, type SettingsGroupId } from '../../store/app-store';
 
-export type SettingsRowId =
-  | 'account'
-  | 'notifications'
-  | 'display'
-  | 'accessibility'
-  | 'security'
-  | 'support'
-  | 'delivery'
-  | 'region'
-  | 'about'
-  | 'reset';
+export type SettingsRowId = SettingsGroupId | 'reset';
 
 type Row = {
   id: SettingsRowId;
@@ -129,8 +119,30 @@ export const SETTINGS_ROWS: Row[] = [
   },
 ];
 
+/* @legacy index.html:6817-6875 — sub-rows per group, in legacy reading order.
+ * Names only: leaf taps just close the menu. `reset` has no children — it's
+ * a direct action, kept as a leaf in the parent list. */
+export const SETTINGS_CHILDREN: Record<SettingsGroupId, string[]> = {
+  account: ['שם הקבלן', 'טלפון', 'סוג עוסק', 'תחום מקצועי'],
+  notifications: ['עדכוני משלוחים', 'מבצעים והטבות', 'התראות תקציב', 'עדכוני הזמנות'],
+  display: ['ערכת נושא', 'גודל טקסט', 'הפחתת אנימציות'],
+  accessibility: ['מצב ניגודיות גבוהה (לשמש)'],
+  security: ['מרכז האבטחה'],
+  support: ['מרכז השירות'],
+  delivery: ['סוג הובלה מועדף', 'ברירת מחדל — משלוח אקספרס', 'אמצעי תשלום'],
+  region: ['שפה', 'יחידות מידה', 'מטבע'],
+  about: ['גרסה', 'תנאי שימוש', 'מדיניות פרטיות', 'יצירת קשר'],
+};
+
 export function SettingsSubmenu() {
   const rows = [...SETTINGS_ROWS].reverse();
+  const handleClick = (id: SettingsRowId) => {
+    if (id === 'reset') {
+      closeMenu();
+      return;
+    }
+    setSettingsGroup(id);
+  };
   return (
     <>
       {rows.map((row, i) => (
@@ -144,11 +156,44 @@ export function SettingsSubmenu() {
             type="button"
             class="dial__btn"
             role="menuitem"
-            onClick={closeMenu}
+            onClick={() => handleClick(row.id)}
             aria-label={row.label}
           >
             <span class="dial__circle">{row.icon}</span>
             <span class="dial__label">{row.label}</span>
+          </button>
+        </li>
+      ))}
+    </>
+  );
+}
+
+/* Level-3 (sub-sub) renderer — for a given group, lists its child rows.
+ * Reuses the parent group's icon for visual cohesion (no invention: we
+ * don't fabricate per-row icons that aren't in the legacy). */
+export function SettingsSubSubmenu({ group }: { group: SettingsGroupId }) {
+  const parent = SETTINGS_ROWS.find((r) => r.id === group);
+  if (!parent) return null;
+  const labels = SETTINGS_CHILDREN[group];
+  const reversed = [...labels].reverse();
+  return (
+    <>
+      {reversed.map((label, i) => (
+        <li
+          key={label}
+          role="none"
+          class="dial__item dial__item--sub"
+          style={{ animationDelay: `${i * 22}ms` }}
+        >
+          <button
+            type="button"
+            class="dial__btn"
+            role="menuitem"
+            onClick={closeMenu}
+            aria-label={label}
+          >
+            <span class="dial__circle">{parent.icon}</span>
+            <span class="dial__label">{label}</span>
           </button>
         </li>
       ))}

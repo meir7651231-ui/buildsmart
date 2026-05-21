@@ -50,17 +50,39 @@ export const openedProductId = signal<string | null>(null);
 export type MenuTab = 'home' | 'catalog' | 'projects' | 'cart' | 'settings';
 export const menuActiveTab = signal<MenuTab | null>(null);
 
+/* Within settings, which sub-group is drilled into. null = the 10-row list. */
+export type SettingsGroupId =
+  | 'account'
+  | 'notifications'
+  | 'display'
+  | 'accessibility'
+  | 'security'
+  | 'support'
+  | 'delivery'
+  | 'region'
+  | 'about';
+export const menuActiveSettingsGroup = signal<SettingsGroupId | null>(null);
+
 export function setMenuTab(t: MenuTab | null): void {
   menuActiveTab.value = t;
+  if (t === null) menuActiveSettingsGroup.value = null;
+}
+
+export function setSettingsGroup(g: SettingsGroupId | null): void {
+  menuActiveSettingsGroup.value = g;
 }
 
 export function toggleMenu(): void {
   menuOpen.value = !menuOpen.value;
-  if (!menuOpen.value) menuActiveTab.value = null;
+  if (!menuOpen.value) {
+    menuActiveTab.value = null;
+    menuActiveSettingsGroup.value = null;
+  }
 }
 export function closeMenu(): void {
   menuOpen.value = false;
   menuActiveTab.value = null;
+  menuActiveSettingsGroup.value = null;
 }
 export function openSearch(): void {
   searchOpen.value = true;
