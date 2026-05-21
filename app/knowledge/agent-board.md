@@ -6,21 +6,37 @@
 
 ## 🔵 Deep Agent (Opus / Sonnet) — מה בוצע
 
-### סשן נוכחי — 2026-05-21
-- ✅ INSP-0009: תצוגה end-to-end (theme · textSize · reduceMotion) — store + CSS + is-on
+### סשן קודם — 2026-05-21 (Settings Menu)
+- ✅ INSP-0009: תצוגה end-to-end (theme · textSize · reduceMotion)
 - ✅ INSP-0010: התראות · נגישות · אזור ושפה · משלוח · איפוס (22 עלים)
-- ✅ INSP-0011: מידע / about — 4 toasts verbatim מלגאסי (26 עלים)
-- ✅ INSP-0012: אבטחה — 23 עלים (toggles, sessionTimeout, privacy, RBAC toasts, encryption toasts)
-- ✅ INSP-0013: שירות ותמיכה — 15 עלים (6 L3 + 3 L4-calc + 6 L4-tour) — info toasts
-- ✅ toast system: `toast-store.ts` + `<Toast />` + CSS
-- ✅ `CLAUDE.md` בשורש — פרוטוקול cross-session
-- ✅ `wip-menu-wiring.md` — מסמך WIP מלא
-- ✅ `agent-board.md` — לוח משימות משותף (הקובץ הזה)
-- ✅ `app/smoke-settings.mjs` — 12 playwright smoke tests (aria-label selectors)
+- ✅ INSP-0011: מידע / about — 4 toasts (26 עלים)
+- ✅ INSP-0012: אבטחה — 23 עלים
+- ✅ INSP-0013: שירות ותמיכה — 15 עלים
+- ✅ toast system + CLAUDE.md + agent-board.md + smoke tests
 
-### ענפים שנותרו ל-Deep Agent
-- ⏳ חשבון (4 שדות עריכה) — דורש prompt / input component
-- ⏳ אמצעי תשלום (1) — דורש input
+### סשן הנוכחי — 2026-05-21 (Dashboards Deep Dives + Protocol)
+- ✅ **צלילות המלא — 6 חלקים:**
+  - `UI_ARCHITECTURE.md` — Contractor Dashboard (master index)
+  - `ROLE_DRAWER_SYSTEM.md` — 5 roles + entry system
+  - `SYSTEM_MANAGER_DASHBOARD.md` — 4-tab manager interface
+  - `STORE_DASHBOARD.md` — 4-tab supplier store (NEW)
+  - `COURIER_DASHBOARD.md` — Single-pane delivery hub (NEW)
+  - `WORKER_DASHBOARD.md` — Task management interface (NEW)
+- ✅ **IMPLEMENTATION_PROTOCOL.md** — פרוטוקול טמעון מפורט לשלוש Views החדשות
+  - Stage 1: Store Dashboard (4-tab, high complexity)
+  - Stage 2: Courier Dashboard (1-pane, medium complexity)
+  - Stage 3: Worker Dashboard (task list, medium complexity)
+  - בדיקה מפורשת (FND/FRM/WIR/FIN/OPS)
+  - Pre-commit checklist
+  - Validation criteria
+
+### ענפים שנותרו ל-Deep Agent או Fast Agent
+- ⏳ **Implement Store Dashboard** (app/src/views/store.tsx + components)
+- ⏳ **Implement Courier Dashboard** (app/src/views/courier.tsx + components)
+- ⏳ **Implement Worker Dashboard** (app/src/views/worker.tsx + components)
+- ⏳ **Create smoke tests** (app/smoke-store.mjs, app/smoke-courier.mjs, app/smoke-worker.mjs)
+- ⏳ חשבון (4 שדות עריכה) — דורש R9 inline input
+- ⏳ אמצעי תשלום (1) — דורש R9 inline input
 
 ---
 
