@@ -43,9 +43,23 @@ export const personaName = computed<string>(() => PERSONA_NAMES[activePersona.va
 
 export const bsOpen = signal(false);
 
+/* ===== BS dial drill-in. When set, the dial shows the persona's
+ * sub-sections (legacy screen → dial per R2/R3). Reset to null on
+ * close. Picking a persona at L1 drills here; it does NOT change
+ * activePersona — that stays as the user's chosen identity. */
+export const bsDrillPersona = signal<Persona | null>(null);
+
 export function toggleBs(): void {
   bsOpen.value = !bsOpen.value;
+  if (!bsOpen.value) bsDrillPersona.value = null;
 }
 export function closeBs(): void {
   bsOpen.value = false;
+  bsDrillPersona.value = null;
+}
+export function drillIntoPersona(p: Persona): void {
+  bsDrillPersona.value = p;
+}
+export function popBsDrill(): void {
+  bsDrillPersona.value = null;
 }
