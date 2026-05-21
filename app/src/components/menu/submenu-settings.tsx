@@ -1376,29 +1376,109 @@ const PROJECT_ICON = (
   </svg>
 );
 
+/* @legacy openFinanceHub items @ index.html:19489-19498 — 10 tiles,
+ * each ic + t verbatim. The hub itself is "מרכז פיננסים" (per :4609).
+ * Accessed in legacy from view-project, so we attach it under the
+ * projects tab. */
+type ProjectItem = { id: string; emoji: string; title: string; children?: ProjectItem[] };
+
+const FINANCE_HUB: ProjectItem[] = [
+  { id: 'fin-index',     emoji: '📈',  title: 'הצמדה למדד' },
+  { id: 'fin-payterms',  emoji: '🗓️', title: 'תנאי תשלום' },
+  { id: 'fin-subs',      emoji: '👷',  title: 'קבלני משנה' },
+  { id: 'fin-approvals', emoji: '✅',  title: 'אישורי רכש' },
+  { id: 'fin-thresh',    emoji: '🔔',  title: 'התראות חריגה' },
+  { id: 'fin-roi',       emoji: '📊',  title: 'ניתוח ROI' },
+  { id: 'fin-invsplit',  emoji: '🧾',  title: 'פיצול חשבוניות' },
+  { id: 'fin-penalty',   emoji: '⏰',  title: 'פיצויים וקנסות' },
+  { id: 'fin-reports',   emoji: '📄',  title: 'דוחות PDF' },
+  { id: 'fin-fx',        emoji: '💱',  title: 'רכש במט״ח' },
+];
+
+const projectsDrillPath = _cartSignal<string[]>([]);
+
+function projectItems(): ProjectItem[] {
+  const projectLeaves: ProjectItem[] = PROJECTS.map((p) => ({
+    id: p.id,
+    emoji: '🏗️',
+    title: p.name,
+  }));
+  return [
+    ...projectLeaves,
+    { id: 'fin-hub', emoji: '📊', title: 'מרכז פיננסים', children: FINANCE_HUB },
+  ];
+}
+
+function walkProjects(path: string[]): { anchors: ProjectItem[]; current: ProjectItem[] } {
+  const anchors: ProjectItem[] = [];
+  let current: ProjectItem[] = projectItems();
+  for (const label of path) {
+    const node = current.find((p) => p.title === label);
+    if (!node || !node.children || node.children.length === 0) break;
+    anchors.push(node);
+    current = node.children;
+  }
+  return { anchors, current };
+}
+
 export function ProjectsSubmenu() {
-  const reversed = [...PROJECTS].reverse();
+  const path = projectsDrillPath.value;
+  const { anchors, current } = walkProjects(path);
+  const reversed = [...current].reverse();
   return (
     <>
-      {reversed.map((p, i) => (
+      {anchors.map((a, i) => (
         <li
-          key={p.id}
+          key={a.id}
           role="none"
-          class="dial__item dial__item--sub"
-          style={{ animationDelay: `${i * 22}ms` }}
+          class="dial__item dial__item--active"
         >
           <button
             type="button"
             class="dial__btn"
             role="menuitem"
-            onClick={() => showToast(`${p.name} — בבנייה`)}
-            aria-label={p.name}
+            onClick={() => { projectsDrillPath.value = path.slice(0, i); }}
+            aria-label={`חזרה מ-${a.title}`}
+            aria-expanded="true"
           >
-            <span class="dial__circle">{PROJECT_ICON}</span>
-            <span class="dial__label">{p.name}</span>
+            <span class="dial__circle dial__circle--active">
+              <span class="dial__circle-emoji">{a.emoji}</span>
+            </span>
+            <span class="dial__label dial__label--active">{a.title}</span>
           </button>
         </li>
       ))}
+      {reversed.map((p, i) => {
+        const hasChildren = !!p.children && p.children.length > 0;
+        const usesEmoji = p.emoji !== '🏗️' || hasChildren;
+        return (
+          <li
+            key={p.id}
+            role="none"
+            class="dial__item dial__item--sub"
+            style={{ animationDelay: `${i * 22}ms` }}
+          >
+            <button
+              type="button"
+              class="dial__btn"
+              role="menuitem"
+              onClick={() =>
+                hasChildren
+                  ? (projectsDrillPath.value = [...path, p.title])
+                  : showToast(`${p.title} — בבנייה`)
+              }
+              aria-label={p.title}
+            >
+              <span class="dial__circle">
+                {usesEmoji
+                  ? <span class="dial__circle-emoji">{p.emoji}</span>
+                  : PROJECT_ICON}
+              </span>
+              <span class="dial__label">{p.title}</span>
+            </button>
+          </li>
+        );
+      })}
     </>
   );
 }
