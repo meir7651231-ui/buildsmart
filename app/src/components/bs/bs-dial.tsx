@@ -52,8 +52,29 @@ const STORE_SECTIONS: Section[] = [
       { id: 'sh-revenue', emoji: '💰', title: 'מחזור פעיל' },
     ],
   },
-  { id: 's-orders', emoji: '📥', title: 'הזמנות' },
-  { id: 's-stock',  emoji: '📦', title: 'מלאי' },
+  {
+    id: 's-orders',
+    emoji: '📥',
+    title: 'הזמנות',
+    /* @legacy soChip filters @ :17310-17313 (verbatim labels) + emoji
+     * sourced from store shStat @17128-17132 (same module): */
+    children: [
+      { id: 'so-new',   emoji: '📥', title: 'לאישור' },
+      { id: 'so-prep',  emoji: '🔧', title: 'בהכנה' },
+      { id: 'so-ready', emoji: '📦', title: 'מוכנות' },
+    ],
+  },
+  {
+    id: 's-stock',
+    emoji: '📦',
+    title: 'מלאי',
+    /* @legacy md-pmeta status labels @ :17914 — both verbatim:
+     *   '✅ זמין במלאי' / '❌ אזל — מוסתר מהקבלן'. */
+    children: [
+      { id: 'ss-in',  emoji: '✅', title: 'זמין במלאי' },
+      { id: 'ss-out', emoji: '❌', title: 'אזל' },
+    ],
+  },
   {
     id: 's-portal',
     emoji: '🧰',
@@ -93,7 +114,18 @@ const COURIER_SECTIONS: Section[] = [
     ],
   },
   { id: 'pickup', emoji: '📦', title: 'משלוחים ממתינים לאיסוף' },
-  { id: 'active', emoji: '🚚', title: 'משלוחים פעילים' },
+  {
+    id: 'active',
+    emoji: '🚚',
+    title: 'משלוחים פעילים',
+    /* @legacy ch-btn labels in renderCourierList @ :18112-18114 — verbatim
+     * action buttons per stage (each emoji + label is one literal string): */
+    children: [
+      { id: 'ca-pickup',    emoji: '📦', title: 'אספתי מהחנות' },
+      { id: 'ca-transit',   emoji: '🚚', title: 'יצאתי לדרך' },
+      { id: 'ca-delivered', emoji: '✅', title: 'נמסר ללקוח' },
+    ],
+  },
   {
     id: 'portal',
     emoji: '🧰',
@@ -155,8 +187,38 @@ const MANAGER_SECTIONS: Section[] = [
       { id: 'md-stores',       emoji: '🏪', title: 'חנויות פעילות' },
     ],
   },
-  { id: 'm-orders',    emoji: '🚚', title: 'הזמנות' },
-  { id: 'm-customers', emoji: '👥', title: 'לקוחות' },
+  {
+    id: 'm-orders',
+    emoji: '🚚',
+    title: 'הזמנות',
+    /* @legacy ORDER_FLOW @ index.html:16943 + ORDER_STAGE labels @ :12041-12048.
+     * Emoji sourced from related legacy contexts:
+     *   📥 from store admTab "📥 הזמנות" @4261 (intake)
+     *   🔧 from store shStat 'בהכנה' @17129
+     *   📦 from store shStat 'מוכן לאיסוף' @17130 / courier chStat 'לאיסוף' @18033
+     *   🚛 from HAUL_TYPES truck @11953 (vehicle taken)
+     *   🚚 from courier chStat 'בדרך' @18034
+     *   ✅ from courier chStat 'נמסרו' @18035 */
+    children: [
+      { id: 'mo-new',       emoji: '📥', title: 'התקבלה' },
+      { id: 'mo-preparing', emoji: '🔧', title: 'בהכנה' },
+      { id: 'mo-ready',     emoji: '📦', title: 'מוכן לאיסוף' },
+      { id: 'mo-pickup',    emoji: '🚛', title: 'נאסף' },
+      { id: 'mo-transit',   emoji: '🚚', title: 'בדרך לאתר' },
+      { id: 'mo-delivered', emoji: '✅', title: 'נמסר ✓' },
+    ],
+  },
+  {
+    id: 'm-customers',
+    emoji: '👥',
+    title: 'לקוחות',
+    /* @legacy mc-pill labels @ :16608 + msd-tag @ :16617.
+     * 🟢 קבלן פעיל verbatim @ :16617. ⚠️ ניצול אשראי גבוה verbatim @ :16617. */
+    children: [
+      { id: 'mc-live', emoji: '🟢', title: 'פעיל' },
+      { id: 'mc-low',  emoji: '⚠️', title: 'אשראי גבוה' },
+    ],
+  },
   {
     id: 'm-manage',
     emoji: '🛠️',
