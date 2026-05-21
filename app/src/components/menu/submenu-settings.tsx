@@ -1121,6 +1121,107 @@ export function CatalogSubmenu() {
   );
 }
 
+/* === Cart dial. @legacy index.html:5060-5061 + :5103-5104 (vs-btn switch)
+ * + :5074-5081 (ca-svc supply-chain services in view-orders).
+ *
+ * Level 1: 2 vs-btn options (🛒 הסל שלי · 📦 ההזמנות שלי).
+ *   The "ההזמנות שלי" branch drills into 6 supply-chain service tools
+ *   from the ca-svc-row buttons in view-orders. Both labels and emojis
+ *   verbatim per row. */
+
+type CartItem = { id: string; emoji: string; title: string; children?: CartItem[] };
+
+const CART_TOP: CartItem[] = [
+  { id: 'cart-mine',   emoji: '🛒', title: 'הסל שלי' },
+  {
+    id: 'cart-orders', emoji: '📦', title: 'ההזמנות שלי',
+    /* @legacy index.html:5074-5081 — ca-svc buttons in view-orders. */
+    children: [
+      { id: 'svc-rental',     emoji: '🔧', title: 'השכרת כלים' },
+      { id: 'svc-deposits',   emoji: '💰', title: 'פקדונות' },
+      { id: 'svc-return',     emoji: '↩️', title: 'החזרה חדשה' },
+      { id: 'svc-rfq',        emoji: '📨', title: 'מכרז ספקים' },
+      { id: 'svc-msds',       emoji: '🧪', title: 'גיליונות בטיחות' },
+      { id: 'svc-compare',    emoji: '📊', title: 'השוואת מחירים' },
+    ],
+  },
+];
+
+/* Active drill path within cart (just like profile/bs). */
+import { signal as _cartSignal } from '@preact/signals';
+const cartDrillPath = _cartSignal<string[]>([]);
+
+function walkCart(path: string[]): { anchors: CartItem[]; current: CartItem[] } {
+  const anchors: CartItem[] = [];
+  let current: CartItem[] = CART_TOP;
+  for (const label of path) {
+    const node = current.find((c) => c.title === label);
+    if (!node || !node.children || node.children.length === 0) break;
+    anchors.push(node);
+    current = node.children;
+  }
+  return { anchors, current };
+}
+
+export function CartSubmenu() {
+  const path = cartDrillPath.value;
+  const { anchors, current } = walkCart(path);
+  const reversed = [...current].reverse();
+  return (
+    <>
+      {anchors.map((a, i) => (
+        <li
+          key={a.id}
+          role="none"
+          class="dial__item dial__item--active"
+        >
+          <button
+            type="button"
+            class="dial__btn"
+            role="menuitem"
+            onClick={() => { cartDrillPath.value = path.slice(0, i); }}
+            aria-label={`חזרה מ-${a.title}`}
+            aria-expanded="true"
+          >
+            <span class="dial__circle dial__circle--active">
+              <span class="dial__circle-emoji">{a.emoji}</span>
+            </span>
+            <span class="dial__label dial__label--active">{a.title}</span>
+          </button>
+        </li>
+      ))}
+      {reversed.map((c, i) => {
+        const hasChildren = !!c.children && c.children.length > 0;
+        return (
+          <li
+            key={c.id}
+            role="none"
+            class="dial__item dial__item--sub"
+            style={{ animationDelay: `${i * 18}ms` }}
+          >
+            <button
+              type="button"
+              class="dial__btn"
+              role="menuitem"
+              onClick={() =>
+                hasChildren
+                  ? (cartDrillPath.value = [...path, c.title])
+                  : showToast(`${c.title} — בבנייה`)
+              }
+              aria-label={c.title}
+            >
+              <span class="dial__circle">
+                <span class="dial__circle-emoji">{c.emoji}</span>
+              </span>
+              <span class="dial__label">{c.title}</span>
+            </button>
+          </li>
+        );
+      })}
+    </>
+  );
+}
+
 /* === Projects dial. @legacy index.html:6447-6451 + 7455 (renderProjects).
  * Placeholder — 3 project names as dial leaves, toast on tap. */
 

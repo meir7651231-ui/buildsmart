@@ -23,6 +23,7 @@ import {
   ProfileTreeSubmenu,
   ProjectsSubmenu,
   CatalogSubmenu,
+  CartSubmenu,
   SettingsSubmenu,
   SettingsTreeSubmenu,
   SETTINGS_ROWS,
@@ -98,7 +99,7 @@ const TAB_HAS_SUBMENU: Record<MenuTab, boolean> = {
   home: false,
   catalog: true,
   projects: true,
-  cart: false,
+  cart: true,
   settings: true,
 };
 
@@ -165,6 +166,7 @@ export function MenuSpeedDial() {
             {active === 'settings' && <SettingsLevel />}
             {active === 'projects' && <ProjectsSubmenu />}
             {active === 'catalog' && <CatalogSubmenu />}
+            {active === 'cart' && <CartSubmenu />}
           </>
         )}
       </ul>
