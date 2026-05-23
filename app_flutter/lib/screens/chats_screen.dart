@@ -76,56 +76,10 @@ class ChatsScreen extends StatelessWidget {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _InnerHeader(),
         _QuickActionsRow(),
         _SectionLabel(label: 'אחרונות'),
         Expanded(child: _ThreadList()),
       ],
-    );
-  }
-}
-
-// ─── inner header ─────────────────────────────────────────────────────────────
-// RTL Row: first child = RIGHT, last child = LEFT
-// Target: "שיחות" on right · icons on left
-
-class _InnerHeader extends StatelessWidget {
-  const _InnerHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 10, 16, 4),
-      child: Row(
-        children: [
-          // LEFT side — icons (last in RTL row)
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.white70),
-            tooltip: 'עוד',
-            onPressed: () => showToast(context, 'תפריט — בבנייה'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.white70),
-            tooltip: 'חיפוש',
-            onPressed: () => showToast(context, 'חיפוש שיחות — בבנייה'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.photo_camera_outlined, color: Colors.white70),
-            tooltip: 'מצלמה',
-            onPressed: () => showToast(context, 'מצלמה — בבנייה'),
-          ),
-          const Spacer(),
-          // RIGHT side — title (first in RTL row = appears on right)
-          const Text(
-            'שיחות',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

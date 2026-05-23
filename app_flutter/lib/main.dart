@@ -38,6 +38,10 @@ class BuildSmartApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      builder: (context, child) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: child ?? const SizedBox(),
+      ),
       home: const HomeShell(),
     );
   }
