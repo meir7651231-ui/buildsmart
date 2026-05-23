@@ -116,6 +116,27 @@ void main() {
     expect(find.text('עובד'), findsOneWidget);
   });
 
+  testWidgets('Sort chip cycles: default → א-ת → ת-א', (t) async {
+    await t.pumpWidget(_wrap());
+    await t.pumpAndSettle();
+    expect(find.text('ברירת מחדל'), findsOneWidget);
+    await t.tap(find.text('ברירת מחדל'));
+    await t.pumpAndSettle();
+    expect(find.text('א-ת'), findsOneWidget);
+    await t.tap(find.text('א-ת'));
+    await t.pumpAndSettle();
+    expect(find.text('ת-א'), findsOneWidget);
+  });
+
+  testWidgets('Filter chip cycles: הכל → עם תמונה', (t) async {
+    await t.pumpWidget(_wrap());
+    await t.pumpAndSettle();
+    expect(find.text('הכל'), findsOneWidget);
+    await t.tap(find.text('הכל'));
+    await t.pumpAndSettle();
+    expect(find.text('עם תמונה'), findsOneWidget);
+  });
+
   testWidgets('Catalog tab shows all 11 verbatim categories', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();

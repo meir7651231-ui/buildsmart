@@ -3,6 +3,38 @@ import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// Catalog sort options — cycles on chip tap.
+enum CatalogSort { defaultSort, nameAZ, nameZA, priceUp, priceDown }
+
+/// Catalog filter options — cycles on chip tap.
+enum CatalogFilter { all, withImage, withPrice }
+
+final catalogSortProvider =
+    StateProvider<CatalogSort>((_) => CatalogSort.defaultSort);
+final catalogFilterProvider =
+    StateProvider<CatalogFilter>((_) => CatalogFilter.all);
+
+String _sortLabel(CatalogSort s) => switch (s) {
+      CatalogSort.defaultSort => 'ברירת מחדל',
+      CatalogSort.nameAZ      => 'א-ת',
+      CatalogSort.nameZA      => 'ת-א',
+      CatalogSort.priceUp     => 'מחיר ↑',
+      CatalogSort.priceDown   => 'מחיר ↓',
+    };
+
+String _filterLabel(CatalogFilter f) => switch (f) {
+      CatalogFilter.all       => 'הכל',
+      CatalogFilter.withImage => 'עם תמונה',
+      CatalogFilter.withPrice => 'עם מחיר',
+    };
+
+CatalogSort _nextSort(CatalogSort s) =>
+    CatalogSort.values[(s.index + 1) % CatalogSort.values.length];
+
+CatalogFilter _nextFilter(CatalogFilter f) =>
+    CatalogFilter.values[(f.index + 1) % CatalogFilter.values.length];
 
 // Simulated metadata — preview text, timestamp, unread badge count.
 // Ordered to match kCatalogCats (same index).
@@ -28,8 +60,83 @@ class CatalogScreen extends StatelessWidget {
     return const Column(
       children: [
         _SearchBar(),
+        _FilterChipsRow(),
         Expanded(child: _CatalogList()),
       ],
+    );
+  }
+}
+
+/// Row of filter chips — מיון · פילטרים. Each chip cycles its value on tap.
+/// Mirrors WhatsApp's search-screen chip strip.
+class _FilterChipsRow extends ConsumerWidget {
+  const _FilterChipsRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sort = ref.watch(catalogSortProvider);
+    final filter = ref.watch(catalogFilterProvider);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _Chip(
+              icon: '↕️',
+              label: _sortLabel(sort),
+              onTap: () =>
+                  ref.read(catalogSortProvider.notifier).state = _nextSort(sort),
+            ),
+            const SizedBox(width: 8),
+            _Chip(
+              icon: '⚙️',
+              label: _filterLabel(filter),
+              onTap: () => ref.read(catalogFilterProvider.notifier).state =
+                  _nextFilter(filter),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  const _Chip({required this.icon, required this.label, required this.onTap});
+
+  final String icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFF2A2A2A),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(icon, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -119,10 +119,48 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
           tooltip: 'מצלמה',
           onPressed: () => openBarcodeScanner(context),
         ),
-        IconButton(
+        PopupMenuButton<MenuTab>(
           icon: const Icon(Icons.more_vert, color: Colors.white70),
           tooltip: 'תפריט',
-          onPressed: () => _toggle(ref, OpenDial.menu),
+          color: const Color(0xFF1A1A1A),
+          position: PopupMenuPosition.under,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          onSelected: (tab) {
+            ref.read(openDialProvider.notifier).state = OpenDial.menu;
+            ref.read(menuTabProvider.notifier).state = tab;
+          },
+          itemBuilder: (_) => const [
+            PopupMenuItem<MenuTab>(
+              value: MenuTab.home,
+              child: Text(
+                'בית',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+            PopupMenuItem<MenuTab>(
+              value: MenuTab.projects,
+              child: Text(
+                'הפרויקטים',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+            PopupMenuItem<MenuTab>(
+              value: MenuTab.cart,
+              child: Text(
+                'רכש',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+            PopupMenuItem<MenuTab>(
+              value: MenuTab.settings,
+              child: Text(
+                'הגדרות',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ],
         ),
       ],
     );
