@@ -76,286 +76,9 @@ class ChatsScreen extends StatelessWidget {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _QuickActionsRow(),
-        _SectionLabel(label: 'אחרונות'),
+        _SectionLabel(),
         Expanded(child: _ThreadList()),
       ],
-    );
-  }
-}
-
-// ─── quick actions ────────────────────────────────────────────────────────────
-// RTL order (right→left): שיחה · תזמון · מועדים · מועדפים
-// In Row children: first = RIGHT → [שיחה, תזמון, מועדים, מועדפים]
-
-class _QuickActionsRow extends StatelessWidget {
-  const _QuickActionsRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _QuickAction(
-            icon: Icons.favorite_border,
-            label: 'מועדפים',
-            onTap: () => showToast(context, 'מועדפים — בבנייה'),
-          ),
-          _QuickAction(
-            icon: Icons.grid_view_rounded,
-            label: 'מועדים',
-            onTap: () => _openMoadim(context),
-          ),
-          _QuickAction(
-            icon: Icons.calendar_today_outlined,
-            label: 'תזמון',
-            onTap: () => _openTizmon(context),
-          ),
-          _QuickAction(
-            icon: Icons.phone_outlined,
-            label: 'שיחה',
-            onTap: () => _openSicha(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _openMoadim(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const _MoadimSheet(),
-    );
-  }
-
-  void _openTizmon(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const _TizmonSheet(),
-    );
-  }
-
-  void _openSicha(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const _SichaSheet(),
-    );
-  }
-}
-
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(40),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 62,
-            height: 62,
-            decoration: const BoxDecoration(
-              color: Color(0xFF2A2A2A),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: Colors.white70, size: 28),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(color: Color(0xFFAAAAAA), fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── bottom sheets ────────────────────────────────────────────────────────────
-
-class _MoadimSheet extends StatelessWidget {
-  const _MoadimSheet();
-
-  static const _items = [
-    (emoji: '📅', label: 'לוח שנה'),
-    (emoji: '🗓️', label: 'אירועים קרובים'),
-    (emoji: '🏗️', label: 'לוח עבודה'),
-    (emoji: '⏰', label: 'תזכורות'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return _SheetScaffold(
-      title: 'מועדים',
-      emoji: '📅',
-      children: _items
-          .map((e) => _SheetTile(emoji: e.emoji, label: e.label))
-          .toList(),
-    );
-  }
-}
-
-class _TizmonSheet extends StatelessWidget {
-  const _TizmonSheet();
-
-  static const _items = [
-    (emoji: '📆', label: 'תזמן פגישה'),
-    (emoji: '🚛', label: 'תזמן משלוח'),
-    (emoji: '👷', label: 'תזמן עובד'),
-    (emoji: '📋', label: 'תזמן ביקורת'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return _SheetScaffold(
-      title: 'תזמון',
-      emoji: '📆',
-      children: _items
-          .map((e) => _SheetTile(emoji: e.emoji, label: e.label))
-          .toList(),
-    );
-  }
-}
-
-class _SichaSheet extends StatelessWidget {
-  const _SichaSheet();
-
-  static const _contacts = [
-    (avatar: '👷', name: 'הקבלן הראשי'),
-    (avatar: '🏪', name: 'ספק חומרי בנייה'),
-    (avatar: '🛵', name: 'השליח'),
-    (avatar: '👔', name: 'מנהל המערכת'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return _SheetScaffold(
-      title: 'שיחה חדשה',
-      emoji: '📞',
-      children: _contacts
-          .map(
-            (c) => ListTile(
-              // RTL: leading appears on RIGHT
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF333333),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Text(c.avatar, style: const TextStyle(fontSize: 20)),
-              ),
-              title: Text(
-                c.name,
-                style: const TextStyle(color: Colors.white, fontSize: 15),
-              ),
-              trailing: const Icon(Icons.phone_outlined, color: Colors.white38),
-              onTap: () {
-                Navigator.pop(context);
-                showToast(context, 'שיחה עם ${c.name} — בבנייה');
-              },
-            ),
-          )
-          .toList(),
-    );
-  }
-}
-
-class _SheetScaffold extends StatelessWidget {
-  const _SheetScaffold({
-    required this.title,
-    required this.emoji,
-    required this.children,
-  });
-
-  final String title;
-  final String emoji;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              const Spacer(),
-              Text(
-                '$emoji $title',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...children,
-        ],
-      ),
-    );
-  }
-}
-
-class _SheetTile extends StatelessWidget {
-  const _SheetTile({required this.emoji, required this.label});
-
-  final String emoji;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Text(emoji, style: const TextStyle(fontSize: 22)),
-      title: Text(
-        label,
-        style: const TextStyle(color: Colors.white, fontSize: 15),
-      ),
-      onTap: () {
-        Navigator.pop(context);
-        showToast(context, '$label — בבנייה');
-      },
     );
   }
 }
@@ -363,13 +86,12 @@ class _SheetTile extends StatelessWidget {
 // ─── section label ────────────────────────────────────────────────────────────
 
 class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({required this.label});
-  final String label;
+  const _SectionLabel();
 
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.fromLTRB(16, 4, 16, 4),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Align(
         alignment: Alignment.centerRight,
         child: Text(
@@ -416,11 +138,12 @@ class _ThreadRow extends StatelessWidget {
         missed ? BsTokens.brand : const Color(0xFF4CAF50);
 
     return InkWell(
-      onTap: () => _openChat(context, thread),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => _ChatPage(thread: thread)),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
-          // RTL: first child = RIGHT
           children: [
             // RIGHT — avatar
             Container(
@@ -441,7 +164,7 @@ class _ThreadRow extends StatelessWidget {
             ),
             const SizedBox(width: 12),
 
-            // MIDDLE — same structure as CatalogRow / StoreRow / NotifRow
+            // MIDDLE
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,20 +212,9 @@ class _ThreadRow extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-
-            // LEFT — action icon
-            const Icon(Icons.chat_bubble_outline,
-                color: Colors.white38, size: 22),
           ],
         ),
       ),
-    );
-  }
-
-  void _openChat(BuildContext context, _Thread thread) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => _ChatPage(thread: thread)),
     );
   }
 }
@@ -702,8 +414,8 @@ class _InputBar extends StatelessWidget {
                 hintStyle: const TextStyle(color: Color(0xFF888888)),
                 filled: true,
                 fillColor: const Color(0xFF2A2A2A),
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide.none,
