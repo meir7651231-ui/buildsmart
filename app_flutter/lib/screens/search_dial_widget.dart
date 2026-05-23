@@ -1,4 +1,3 @@
-import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart';
@@ -7,8 +6,8 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Search FAB dial — 5 tools (voice · barcode · filters · sort · catalog).
-/// Ported from app/src/components/search/tools-dial.tsx + submenu-*.tsx.
+/// Search FAB dial — 4 tools (voice · barcode · filters · sort).
+/// catalog is now a main bottom-nav tab.
 /// Phase 2: tools open a sub-dial; non-functional ones toast "בבנייה".
 class SearchDialWidget extends ConsumerWidget {
   const SearchDialWidget({super.key});
@@ -34,17 +33,6 @@ class SearchDialWidget extends ConsumerWidget {
   }
 
   List<Widget> _submenu(BuildContext context, SearchTool tool) {
-    if (tool == SearchTool.catalog) {
-      return [
-        for (final c in kCatalogCats)
-          DialRow(
-            label: c.title,
-            emoji: c.emoji,
-            icon: Icons.circle,
-            onTap: () => showToast(context, '${c.title} — בבנייה'),
-          ),
-      ];
-    }
     if (tool == SearchTool.sort) {
       // @legacy submenu-sort.tsx — 5 sort options.
       const sorts = [
@@ -114,19 +102,17 @@ class SearchDialWidget extends ConsumerWidget {
   }
 
   String _label(SearchTool t) => switch (t) {
-        SearchTool.voice    => 'קולי',
-        SearchTool.barcode  => 'ברקוד',
-        SearchTool.filters  => 'פילטרים',
-        SearchTool.sort     => 'מיון',
-        SearchTool.catalog  => 'קטלוג',
+        SearchTool.voice   => 'קולי',
+        SearchTool.barcode => 'ברקוד',
+        SearchTool.filters => 'פילטרים',
+        SearchTool.sort    => 'מיון',
       };
 
   String _emoji(SearchTool t) => switch (t) {
-        SearchTool.voice    => '🎤',
-        SearchTool.barcode  => '📷',
-        SearchTool.filters  => '⚙️',
-        SearchTool.sort     => '↕️',
-        SearchTool.catalog  => '▦',
+        SearchTool.voice   => '🎤',
+        SearchTool.barcode => '📷',
+        SearchTool.filters => '⚙️',
+        SearchTool.sort    => '↕️',
       };
 }
 
@@ -136,11 +122,10 @@ class _ToolsRoot extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     const tools = [
-      (id: SearchTool.voice,   label: 'קולי',     emoji: '🎤'),
-      (id: SearchTool.barcode, label: 'ברקוד',    emoji: '📷'),
+      (id: SearchTool.voice,   label: 'קולי',    emoji: '🎤'),
+      (id: SearchTool.barcode, label: 'ברקוד',   emoji: '📷'),
       (id: SearchTool.filters, label: 'פילטרים', emoji: '⚙️'),
-      (id: SearchTool.sort,    label: 'מיון',     emoji: '↕️'),
-      (id: SearchTool.catalog, label: 'קטלוג',    emoji: '▦'),
+      (id: SearchTool.sort,    label: 'מיון',    emoji: '↕️'),
     ];
     return DialColumn(
       children: [

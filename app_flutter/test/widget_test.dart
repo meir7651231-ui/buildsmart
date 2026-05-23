@@ -11,11 +11,12 @@ Future<void> _open(WidgetTester t, String tooltip) async {
 }
 
 void main() {
-  testWidgets('Shell boots and shows brand wordmark', (t) async {
+  testWidgets('Shell boots showing brand and catalog list', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     expect(find.text('BuildSmart'), findsOneWidget);
-    expect(find.text('הקש על כפתור צף כדי להתחיל'), findsOneWidget);
+    // Catalog is the default tab — first category visible immediately.
+    expect(find.text('ברזים וכיורים'), findsOneWidget);
   });
 
   testWidgets('BS dial opens 5 personas verbatim', (t) async {
@@ -55,7 +56,7 @@ void main() {
     expect(find.text('שהגשת'), findsOneWidget);
   });
 
-  testWidgets('Menu FAB opens 4 tabs', (t) async {
+  testWidgets('Menu opens 4 tabs', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     await _open(t, 'תפריט');
@@ -84,7 +85,8 @@ void main() {
     await t.tap(find.text('הגדרות'));
     await t.pumpAndSettle();
     expect(find.text('חשבון'), findsOneWidget);
-    expect(find.text('התראות'), findsOneWidget);
+    // 'התראות' also appears as a bottom-nav label — findsAtLeastNWidgets.
+    expect(find.text('התראות'), findsAtLeastNWidgets(1));
     expect(find.text('תצוגה'), findsOneWidget);
     expect(find.text('נגישות'), findsOneWidget);
     expect(find.text('אבטחה והרשאות'), findsOneWidget);
@@ -114,7 +116,7 @@ void main() {
     expect(find.text('עובד'), findsOneWidget);
   });
 
-  testWidgets('Search FAB opens 5 tools', (t) async {
+  testWidgets('Search dial opens 4 tools', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     await _open(t, 'חיפוש');
@@ -122,21 +124,25 @@ void main() {
     expect(find.text('ברקוד'), findsOneWidget);
     expect(find.text('פילטרים'), findsOneWidget);
     expect(find.text('מיון'), findsOneWidget);
-    expect(find.text('קטלוג'), findsOneWidget);
   });
 
-  testWidgets('Search → קטלוג shows all 11 verbatim categories', (t) async {
+  testWidgets('Catalog tab shows all 11 verbatim categories', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    await _open(t, 'חיפוש');
-    await t.tap(find.text('קטלוג'));
-    await t.pumpAndSettle();
+    // Catalog is the default tab. ListView only renders visible items, so we
+    // scroll to each category to verify it exists in the data.
     const cats = [
       'ברזים וכיורים', 'אסלות', 'מקלחות ואמבטיות', 'חימום מים', 'מטבח',
       'ניקוז וצנרת', 'גופי תברואה', 'אביזרי קצה וחיבורים',
       'בנייה ומחיצות', 'גמר', 'אביזרים נלווים',
     ];
+    // Target the ListView scrollable explicitly (TextField also creates one).
+    final listView = find.descendant(
+      of: find.byType(ListView),
+      matching: find.byType(Scrollable),
+    );
     for (final c in cats) {
+      await t.scrollUntilVisible(find.text(c), 200, scrollable: listView);
       expect(find.text(c), findsOneWidget, reason: 'missing category: $c');
     }
   });

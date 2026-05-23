@@ -18,10 +18,15 @@ enum MenuTab { home, projects, cart, settings }
 
 final menuTabProvider = StateProvider<MenuTab?>((_) => null);
 
-/// Active tool within the Search FAB (null = 5-tool root).
-enum SearchTool { voice, barcode, filters, sort, catalog }
+/// Active tool within the Search FAB (null = 4-tool root).
+/// catalog is now a main bottom-nav tab, not a search tool.
+enum SearchTool { voice, barcode, filters, sort }
 
 final searchToolProvider = StateProvider<SearchTool?>((_) => null);
+
+/// Which main bottom-nav tab is active.
+/// 0 = קטלוג · 1 = שיחות · 2 = התראות · 3 = חנות
+final mainTabProvider = StateProvider<int>((_) => 0);
 
 /// Resets every drill state when the user closes the FAB rail.
 void resetAllDials(WidgetRef ref) {

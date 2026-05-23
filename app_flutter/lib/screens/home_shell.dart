@@ -1,4 +1,6 @@
+import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/bs_dial_widget.dart';
+import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/menu_dial_widget.dart';
 import 'package:buildsmart/screens/search_dial_widget.dart';
 import 'package:buildsmart/state/dial_state.dart';
@@ -6,20 +8,32 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// HomeShell — the only screen in the app per R2. The body stays
-/// minimal; every feature opens as a dial above one of the 5 FABs.
+/// WhatsApp-style shell: AppBar + 4 bottom tabs + dial overlays.
+/// Tabs: קטלוג · שיחות · התראות · חנות (RTL order: catalog on right).
 class HomeShell extends ConsumerWidget {
   const HomeShell({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final open = ref.watch(openDialProvider);
+    final tabIndex = ref.watch(mainTabProvider);
 
     return Scaffold(
+      backgroundColor: const Color(0xFF111111),
+      appBar: const _HomeAppBar(),
       body: Stack(
         children: [
-          const _ContentPlaceholder(),
+          IndexedStack(
+            index: tabIndex,
+            children: const [
+              CatalogScreen(),
+              _PlaceholderTab(title: 'שיחות',   emoji: '💬'),
+              _PlaceholderTab(title: 'התראות', emoji: '🔔'),
+              _PlaceholderTab(title: 'חנות',    emoji: '🛒'),
+            ],
+          ),
 
+          // Scrim — tapping it closes any open dial.
           if (open != OpenDial.none)
             Positioned.fill(
               child: GestureDetector(
@@ -29,106 +43,87 @@ class HomeShell extends ConsumerWidget {
               ),
             ),
 
-          // BS dial — anchored to start (right in RTL) FAB.
+          // BS dial — anchored to right (leading in RTL).
           if (open == OpenDial.bs)
             const Positioned(
               right: BsTokens.space5,
-              bottom: 96,
+              bottom: BsTokens.space5,
               child: BsDialWidget(),
             ),
-          // Search dial — anchored to second FAB from start.
+
+          // Search dial — centered.
           if (open == OpenDial.search)
             const Positioned(
-              right: 96,
-              bottom: 96,
+              left: BsTokens.space4,
+              right: BsTokens.space4,
+              bottom: BsTokens.space5,
               child: SearchDialWidget(),
             ),
-          // Menu dial — anchored to fourth FAB from start.
+
+          // Menu dial — anchored to left (trailing in RTL).
           if (open == OpenDial.menu)
             const Positioned(
-              left: 96,
-              bottom: 96,
+              left: BsTokens.space5,
+              bottom: BsTokens.space5,
               child: MenuDialWidget(),
             ),
         ],
       ),
-      bottomNavigationBar: const _FabRail(),
-    );
-  }
-}
-
-class _ContentPlaceholder extends StatelessWidget {
-  const _ContentPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'BuildSmart',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: BsTokens.brand,
-                  ),
-            ),
-            const SizedBox(height: BsTokens.space2),
-            const Text(
-              'הקש על כפתור צף כדי להתחיל',
-              style: TextStyle(color: BsTokens.mutedDark),
-            ),
-          ],
-        ),
+      bottomNavigationBar: _BottomNav(
+        currentIndex: tabIndex,
+        onTap: (i) {
+          resetAllDials(ref);
+          ref.read(mainTabProvider.notifier).state = i;
+        },
       ),
     );
   }
 }
 
-class _FabRail extends ConsumerWidget {
-  const _FabRail();
+/// AppBar — mirrors WhatsApp Business layout in RTL.
+/// Leading (right in RTL): persona/BS selector.
+/// Actions (left in RTL): barcode · search · menu.
+class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
+  const _HomeAppBar();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: BsTokens.space4,
-          vertical: BsTokens.space3,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _Fab(
-              tooltip: 'BS',
-              icon: Icons.dashboard_outlined,
-              onTap: () => _toggle(ref, OpenDial.bs),
-            ),
-            _Fab(
-              tooltip: 'חיפוש',
-              icon: Icons.search,
-              onTap: () => _toggle(ref, OpenDial.search),
-            ),
-            _Fab(
-              tooltip: 'מצב עבודה',
-              icon: Icons.workspaces_outline,
-              onTap: () => _toggle(ref, OpenDial.bsMode),
-            ),
-            _Fab(
-              tooltip: 'תפריט',
-              icon: Icons.menu,
-              onTap: () => _toggle(ref, OpenDial.menu),
-            ),
-            _Fab(
-              tooltip: 'BS',
-              icon: Icons.bolt,
-              onTap: () => _toggle(ref, OpenDial.bs),
-            ),
-          ],
+    return AppBar(
+      backgroundColor: const Color(0xFF1A1A1A),
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.person_outline, color: Colors.white70),
+        tooltip: 'BS',
+        onPressed: () => _toggle(ref, OpenDial.bs),
+      ),
+      title: const Text(
+        'BuildSmart',
+        style: TextStyle(
+          color: BsTokens.brand,
+          fontWeight: FontWeight.w800,
+          fontSize: 22,
         ),
       ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.qr_code_scanner, color: Colors.white70),
+          tooltip: 'ברקוד',
+          onPressed: () => openBarcodeScanner(context),
+        ),
+        IconButton(
+          icon: const Icon(Icons.search, color: Colors.white70),
+          tooltip: 'חיפוש',
+          onPressed: () => _toggle(ref, OpenDial.search),
+        ),
+        IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white70),
+          tooltip: 'תפריט',
+          onPressed: () => _toggle(ref, OpenDial.menu),
+        ),
+      ],
     );
   }
 
@@ -139,7 +134,6 @@ class _FabRail extends ConsumerWidget {
       return;
     }
     ref.read(openDialProvider.notifier).state = dial;
-    // Reset every drill state when switching dials.
     ref.read(activePersonaProvider.notifier).state = null;
     ref.read(bsDrillPathProvider.notifier).state = const [];
     ref.read(menuTabProvider.notifier).state = null;
@@ -147,34 +141,73 @@ class _FabRail extends ConsumerWidget {
   }
 }
 
-class _Fab extends StatelessWidget {
-  const _Fab({
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-  });
+class _BottomNav extends StatelessWidget {
+  const _BottomNav({required this.currentIndex, required this.onTap});
 
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
+  final int currentIndex;
+  final void Function(int) onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: BsTokens.brand,
-        elevation: 6,
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          child: SizedBox(
-            width: BsTokens.fabSize,
-            height: BsTokens.fabSize,
-            child: Icon(icon, color: Colors.white, size: 26),
-          ),
+    return BottomNavigationBar(
+      currentIndex: currentIndex,
+      onTap: onTap,
+      type: BottomNavigationBarType.fixed,
+      backgroundColor: const Color(0xFF1A1A1A),
+      selectedItemColor: BsTokens.brand,
+      unselectedItemColor: const Color(0xFF888888),
+      selectedFontSize: 12,
+      unselectedFontSize: 11,
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.grid_view),
+          label: 'קטלוג',
         ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.chat_bubble_outline),
+          label: 'שיחות',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.notifications_outlined),
+          label: 'התראות',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.shopping_cart_outlined),
+          label: 'חנות',
+        ),
+      ],
+    );
+  }
+}
+
+class _PlaceholderTab extends StatelessWidget {
+  const _PlaceholderTab({required this.title, required this.emoji});
+
+  final String title;
+  final String emoji;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 52)),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'בבנייה',
+            style: TextStyle(color: Color(0xFF888888), fontSize: 14),
+          ),
+        ],
       ),
     );
   }
