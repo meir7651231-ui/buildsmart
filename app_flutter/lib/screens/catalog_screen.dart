@@ -11,15 +11,18 @@ enum CatalogSort { defaultSort, nameAZ, nameZA, priceUp, priceDown }
 /// Catalog filter options — cycles on chip tap.
 enum CatalogFilter { all, withImage, withPrice }
 
-/// Catalog section tabs — selectable pills.
-enum CatalogSection { all, recent, favorites, categories }
-
 final catalogSortProvider =
     StateProvider<CatalogSort>((_) => CatalogSort.defaultSort);
 final catalogFilterProvider =
     StateProvider<CatalogFilter>((_) => CatalogFilter.all);
-final catalogSectionProvider =
-    StateProvider<CatalogSection>((_) => CatalogSection.all);
+
+/// Active section label — 'הכל' is always first and fixed.
+final catalogSectionProvider = StateProvider<String>((_) => 'הכל');
+
+/// Ordered list of user section labels (הכל is NOT stored here).
+final catalogSectionsListProvider = StateProvider<List<String>>(
+  (_) => ['חיפושים אחרונים', 'מועדפים', 'קטגוריות'],
+);
 
 String _sortLabel(CatalogSort s) => switch (s) {
       CatalogSort.defaultSort => 'ברירת מחדל',
@@ -109,26 +112,70 @@ class _FilterChipsRow extends ConsumerWidget {
   }
 }
 
-/// Horizontal pill tabs — הכל · חיפושים אחרונים · מועדפים · קטגוריות · +
-/// Non-הכל sections highlight the chip and show a toast (בבנייה).
+// Horizontal pill tabs — הכל + dynamic user sections + [+] button.
+// Short-tap activates the section.
+// Long-press on a non-הכל chip shows ניהול/מחיקה popup.
+// Plus button opens the management sheet.
 class _SectionChipsRow extends ConsumerWidget {
   const _SectionChipsRow();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final section = ref.watch(catalogSectionProvider);
+    final active   = ref.watch(catalogSectionProvider);
+    final sections = ref.watch(catalogSectionsListProvider);
 
-    void select(CatalogSection s) {
-      ref.read(catalogSectionProvider.notifier).state = s;
-      if (s != CatalogSection.all) {
-        final label = switch (s) {
-          CatalogSection.recent     => 'חיפושים אחרונים',
-          CatalogSection.favorites  => 'מועדפים',
-          CatalogSection.categories => 'קטגוריות',
-          CatalogSection.all        => '',
-        };
-        showToast(context, '$label — בבנייה');
-      }
+    void activate(String label) =>
+        ref.read(catalogSectionProvider.notifier).state = label;
+
+    void deleteSection(String label) {
+      final list = List<String>.from(ref.read(catalogSectionsListProvider))
+        ..remove(label);
+      ref.read(catalogSectionsListProvider.notifier).state = list;
+      if (active == label) activate('הכל');
+    }
+
+    Future<void> showLongPressMenu(BuildContext ctx, String label) async {
+      final w = MediaQuery.of(ctx).size.width;
+      final top = MediaQuery.of(ctx).padding.top;
+      final choice = await showMenu<String>(
+        context: ctx,
+        color: const Color(0xFF1E1E1E),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        position: RelativeRect.fromLTRB(w * 0.1, top + 140, w * 0.1, 0),
+        items: [
+          const PopupMenuItem<String>(
+            value: 'manage',
+            child: Row(
+              children: [
+                Icon(Icons.list, color: Colors.white70, size: 20),
+                SizedBox(width: 12),
+                Text(
+                  'ניהול רשימות',
+                  style: TextStyle(color: Colors.white, fontSize: 15),
+                ),
+              ],
+            ),
+          ),
+          const PopupMenuItem<String>(
+            value: 'delete',
+            child: Row(
+              children: [
+                Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                SizedBox(width: 12),
+                Text(
+                  'מחיקת רשומה',
+                  style: TextStyle(color: Colors.redAccent, fontSize: 15),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+      if (!ctx.mounted) return;
+      if (choice == 'manage') _openManageSheet(ctx, ref);
+      if (choice == 'delete') deleteSection(label);
     }
 
     return Padding(
@@ -137,31 +184,23 @@ class _SectionChipsRow extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
+            // הכל — fixed, no long-press menu
             _SectionPill(
               label: 'הכל',
-              active: section == CatalogSection.all,
-              onTap: () => select(CatalogSection.all),
+              active: active == 'הכל',
+              onTap: () => activate('הכל'),
             ),
+            for (final s in sections) ...[
+              const SizedBox(width: 8),
+              _SectionPill(
+                label: s,
+                active: active == s,
+                onTap: () => activate(s),
+                onLongPress: () => showLongPressMenu(context, s),
+              ),
+            ],
             const SizedBox(width: 8),
-            _SectionPill(
-              label: 'חיפושים אחרונים',
-              active: section == CatalogSection.recent,
-              onTap: () => select(CatalogSection.recent),
-            ),
-            const SizedBox(width: 8),
-            _SectionPill(
-              label: 'מועדפים',
-              active: section == CatalogSection.favorites,
-              onTap: () => select(CatalogSection.favorites),
-            ),
-            const SizedBox(width: 8),
-            _SectionPill(
-              label: 'קטגוריות',
-              active: section == CatalogSection.categories,
-              onTap: () => select(CatalogSection.categories),
-            ),
-            const SizedBox(width: 8),
-            _AddPill(),
+            _AddPill(onTap: () => _openManageSheet(context, ref)),
           ],
         ),
       ),
@@ -169,16 +208,252 @@ class _SectionChipsRow extends ConsumerWidget {
   }
 }
 
+void _openManageSheet(BuildContext context, WidgetRef ref) {
+  final container = ProviderScope.containerOf(context);
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xFF1A1A1A),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => UncontrolledProviderScope(
+      container: container,
+      child: const _ManageListsSheet(),
+    ),
+  );
+}
+
+class _ManageListsSheet extends ConsumerStatefulWidget {
+  const _ManageListsSheet();
+
+  @override
+  ConsumerState<_ManageListsSheet> createState() => _ManageListsSheetState();
+}
+
+class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
+  @override
+  Widget build(BuildContext context) {
+    final sections = ref.watch(catalogSectionsListProvider);
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      builder: (_, scrollCtrl) => Column(
+        children: [
+          // Handle
+          Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: const Color(0xFF444444),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // Header
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.check, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                const Text(
+                  'ניהול רשימות',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          // Reorderable list
+          Expanded(
+            child: ReorderableListView.builder(
+              scrollController: scrollCtrl,
+              padding: EdgeInsets.zero,
+              onReorder: (oldIdx, newIdx) {
+                final list = List<String>.from(sections);
+                if (newIdx > oldIdx) newIdx--;
+                final item = list.removeAt(oldIdx);
+                list.insert(newIdx, item);
+                ref.read(catalogSectionsListProvider.notifier).state = list;
+              },
+              itemCount: sections.length,
+              itemBuilder: (_, i) {
+                final s = sections[i];
+                return ListTile(
+                  key: ValueKey(s),
+                  tileColor: const Color(0xFF1A1A1A),
+                  // Leading: icon matching section
+                  leading: Icon(
+                    _sectionIcon(s),
+                    color: Colors.white70,
+                    size: 22,
+                  ),
+                  title: Text(
+                    s,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'הגדרה מראש',
+                    style: TextStyle(color: Color(0xFF888888), fontSize: 12),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Color(0xFF888888),
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          final list =
+                              List<String>.from(
+                                ref.read(catalogSectionsListProvider),
+                              )..removeAt(i);
+                          ref.read(catalogSectionsListProvider.notifier).state =
+                              list;
+                          if (ref.read(catalogSectionProvider) == s) {
+                            ref.read(catalogSectionProvider.notifier).state =
+                                'הכל';
+                          }
+                        },
+                      ),
+                      ReorderableDragStartListener(
+                        index: i,
+                        child: const Icon(
+                          Icons.drag_handle,
+                          color: Color(0xFF888888),
+                          size: 22,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          InkWell(
+            onTap: () => _showAddDialog(context),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add, color: BsTokens.brand, size: 22),
+                  SizedBox(width: 10),
+                  Text(
+                    'יצירת רשימה מותאמת אישית',
+                    style: TextStyle(
+                      color: BsTokens.brand,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+        ],
+      ),
+    );
+  }
+
+  void _showAddDialog(BuildContext ctx) {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: ctx,
+      builder: (dCtx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text(
+          'רשימה חדשה',
+          style: TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            hintText: 'שם הרשימה',
+            hintStyle: TextStyle(color: Color(0xFF888888)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF444444)),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: BsTokens.brand),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dCtx),
+            child: const Text(
+              'ביטול',
+              style: TextStyle(color: Color(0xFF888888)),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                final list =
+                    List<String>.from(ref.read(catalogSectionsListProvider))
+                      ..add(name);
+                ref.read(catalogSectionsListProvider.notifier).state = list;
+              }
+              Navigator.pop(dCtx);
+            },
+            child: const Text(
+              'הוספה',
+              style: TextStyle(color: BsTokens.brand),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+IconData _sectionIcon(String label) => switch (label) {
+      'חיפושים אחרונים' => Icons.history,
+      'מועדפים'         => Icons.favorite_border,
+      'קטגוריות'        => Icons.grid_view_outlined,
+      _                 => Icons.list_alt_outlined,
+    };
+
 class _SectionPill extends StatelessWidget {
   const _SectionPill({
     required this.label,
     required this.active,
     required this.onTap,
+    this.onLongPress,
   });
 
   final String label;
   final bool active;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -187,6 +462,7 @@ class _SectionPill extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -205,13 +481,17 @@ class _SectionPill extends StatelessWidget {
 }
 
 class _AddPill extends StatelessWidget {
+  const _AddPill({required this.onTap});
+
+  final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
     return Material(
       color: const Color(0xFF2A2A2A),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
-        onTap: () => showToast(context, 'הוספה — בבנייה'),
+        onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: const Padding(
           padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
