@@ -1,5 +1,7 @@
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/sections.dart';
+import 'package:buildsmart/screens/barcode_scanner.dart';
+import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +30,18 @@ final catalogSectionsListProvider = StateProvider<List<String>>(
 /// titles included in that list. Lists not present default to empty.
 final catalogListItemsProvider =
     StateProvider<Map<String, Set<String>>>((_) => {});
+
+/// True while the search panel is open (search bar focused / has input).
+final searchPanelOpenProvider = StateProvider<bool>((_) => false);
+
+/// Current search query text.
+final searchQueryProvider = StateProvider<String>((_) => '');
+
+/// Active search scope chip (הכל / מוצרים / קטגוריות / מסכים).
+final searchScopeProvider = StateProvider<String>((_) => 'הכל');
+
+/// Recent search queries, newest first, max 8.
+final recentSearchesProvider = StateProvider<List<String>>((_) => []);
 
 String _sortLabel(CatalogSort s) => switch (s) {
       CatalogSort.defaultSort => 'ברירת מחדל',
@@ -65,17 +79,22 @@ const _kMeta = [
   (preview: 'ערכת כלים מקצועית 120 חלקים',            time: '18.5',  badge: 0),
 ];
 
-class CatalogScreen extends StatelessWidget {
+class CatalogScreen extends ConsumerWidget {
   const CatalogScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Column(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchOpen = ref.watch(searchPanelOpenProvider);
+    return Column(
       children: [
-        _SearchBar(),
-        _FilterChipsRow(),
-        _SectionChipsRow(),
-        Expanded(child: _CatalogBody()),
+        const _SearchBar(),
+        if (searchOpen)
+          const Expanded(child: _SearchPanel())
+        else ...const [
+          _FilterChipsRow(),
+          _SectionChipsRow(),
+          Expanded(child: _CatalogBody()),
+        ],
       ],
     );
   }
@@ -894,22 +913,107 @@ class _Chip extends StatelessWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends ConsumerStatefulWidget {
   const _SearchBar();
 
   @override
+  ConsumerState<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends ConsumerState<_SearchBar> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: ref.read(searchQueryProvider));
+    _focusNode = FocusNode()..addListener(_onFocusChange);
+  }
+
+  @override
+  void dispose() {
+    _focusNode
+      ..removeListener(_onFocusChange)
+      ..dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onFocusChange() {
+    if (_focusNode.hasFocus) {
+      ref.read(searchPanelOpenProvider.notifier).state = true;
+    }
+  }
+
+  void _closePanel() {
+    _focusNode.unfocus();
+    ref.read(searchPanelOpenProvider.notifier).state = false;
+  }
+
+  void _submit(String value) {
+    final q = value.trim();
+    if (q.isEmpty) return;
+    final list = List<String>.from(ref.read(recentSearchesProvider))
+      ..remove(q)
+      ..insert(0, q);
+    if (list.length > 8) list.removeRange(8, list.length);
+    ref.read(recentSearchesProvider.notifier).state = list;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Keep external query state in sync (e.g. when a recent-search is tapped).
+    ref.listen<String>(searchQueryProvider, (_, next) {
+      if (next != _controller.text) {
+        _controller.text = next;
+        _controller.selection =
+            TextSelection.collapsed(offset: next.length);
+      }
+    });
+
+    final open = ref.watch(searchPanelOpenProvider);
+    final hasText = ref.watch(searchQueryProvider).isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
       child: TextField(
+        controller: _controller,
+        focusNode: _focusNode,
+        textInputAction: TextInputAction.search,
+        onChanged: (v) =>
+            ref.read(searchQueryProvider.notifier).state = v,
+        onSubmitted: _submit,
         decoration: InputDecoration(
-          hintText: 'חיפוש...',
-          hintStyle: const TextStyle(color: Color(0xFF888888)),
-          prefixIcon: const Icon(
-            Icons.search,
-            color: Color(0xFF888888),
-            size: 20,
-          ),
+          hintText: 'חיפוש מוצרים, קטגוריות, מסכים...',
+          hintStyle: const TextStyle(color: Color(0xFF888888), fontSize: 14),
+          prefixIcon: open
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Color(0xFF888888),
+                    size: 20,
+                  ),
+                  onPressed: _closePanel,
+                )
+              : const Icon(
+                  Icons.search,
+                  color: Color(0xFF888888),
+                  size: 20,
+                ),
+          suffixIcon: hasText
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.close,
+                    color: Color(0xFF888888),
+                    size: 18,
+                  ),
+                  onPressed: () {
+                    _controller.clear();
+                    ref.read(searchQueryProvider.notifier).state = '';
+                  },
+                )
+              : null,
           filled: true,
           fillColor: const Color(0xFF2A2A2A),
           contentPadding: const EdgeInsets.symmetric(
@@ -930,6 +1034,300 @@ class _SearchBar extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SearchPanel extends ConsumerWidget {
+  const _SearchPanel();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final query = ref.watch(searchQueryProvider);
+    return ColoredBox(
+      color: const Color(0xFF111111),
+      child: Column(
+        children: [
+          const _SearchToolsRow(),
+          const _SearchScopeRow(),
+          const Divider(height: 1, color: Color(0xFF2A2A2A)),
+          Expanded(
+            child: query.isEmpty
+                ? const _RecentSearchesList()
+                : const _SearchResultsList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SearchToolsRow extends StatelessWidget {
+  const _SearchToolsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _SearchToolButton(
+            emoji: '🎤',
+            label: 'קולי',
+            onTap: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final ok = await VoiceService.instance.listen(
+                onFinal: (t) {
+                  if (t.isNotEmpty) {
+                    messenger.showSnackBar(SnackBar(content: Text(t)));
+                  }
+                },
+              );
+              if (!ok) {
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('הדפדפן לא תומך בחיפוש קולי')),
+                );
+              }
+            },
+          ),
+          _SearchToolButton(
+            emoji: '📷',
+            label: 'ברקוד',
+            onTap: () => openBarcodeScanner(context),
+          ),
+          _SearchToolButton(
+            emoji: '⚙️',
+            label: 'פילטרים',
+            onTap: () => showToast(context, 'פילטרים — בקרוב'),
+          ),
+          _SearchToolButton(
+            emoji: '↕️',
+            label: 'מיון',
+            onTap: () => showToast(context, 'מיון — בקרוב'),
+          ),
+          _SearchToolButton(
+            emoji: '▦',
+            label: 'קטלוג',
+            onTap: () => showToast(context, 'קטלוג — בקרוב'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SearchToolButton extends StatelessWidget {
+  const _SearchToolButton({
+    required this.emoji,
+    required this.label,
+    required this.onTap,
+  });
+
+  final String emoji;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: const BoxDecoration(
+                color: Color(0xFF2A2A2A),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Text(emoji, style: const TextStyle(fontSize: 20)),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontSize: 11),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchScopeRow extends ConsumerWidget {
+  const _SearchScopeRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scope = ref.watch(searchScopeProvider);
+    const scopes = ['הכל', 'מוצרים', 'קטגוריות', 'מסכים'];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (final s in scopes) ...[
+              _SectionPill(
+                label: s,
+                active: scope == s,
+                onTap: () =>
+                    ref.read(searchScopeProvider.notifier).state = s,
+              ),
+              const SizedBox(width: 8),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecentSearchesList extends ConsumerWidget {
+  const _RecentSearchesList();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(recentSearchesProvider);
+    if (items.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 32),
+          child: Text(
+            'התחל להקליד כדי לחפש מוצרים, קטגוריות ומסכים.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xFF888888), fontSize: 14),
+          ),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'חיפושים אחרונים',
+                style: TextStyle(
+                  color: Color(0xFF888888),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              TextButton(
+                onPressed: () =>
+                    ref.read(recentSearchesProvider.notifier).state = [],
+                child: const Text(
+                  'נקה',
+                  style: TextStyle(color: BsTokens.brand, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (_, i) {
+              final q = items[i];
+              return ListTile(
+                dense: true,
+                leading: const Icon(
+                  Icons.history,
+                  color: Color(0xFF888888),
+                  size: 20,
+                ),
+                title: Text(
+                  q,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.north_west,
+                    color: Color(0xFF888888),
+                    size: 18,
+                  ),
+                  onPressed: () =>
+                      ref.read(searchQueryProvider.notifier).state = q,
+                ),
+                onTap: () =>
+                    ref.read(searchQueryProvider.notifier).state = q,
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SearchResultsList extends ConsumerWidget {
+  const _SearchResultsList();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final query = ref.watch(searchQueryProvider).toLowerCase();
+    final scope = ref.watch(searchScopeProvider);
+    // For v1, scope only affects categories vs. everything (products/screens
+    // share the same dataset since the prototype has no product-level data).
+    final filtered = kCatalogCats
+        .where((c) => c.title.toLowerCase().contains(query))
+        .toList();
+    if (filtered.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Text(
+            'לא נמצאו תוצאות עבור "$query"',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Color(0xFF888888), fontSize: 14),
+          ),
+        ),
+      );
+    }
+    return ListView.builder(
+      itemCount: filtered.length,
+      itemBuilder: (_, i) {
+        final cat = filtered[i];
+        return ListTile(
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2A2A2A),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(cat.emoji, style: const TextStyle(fontSize: 20)),
+          ),
+          title: Text(
+            cat.title,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          subtitle: Text(
+            scope,
+            style: const TextStyle(color: Color(0xFF888888), fontSize: 11),
+          ),
+          onTap: () {
+            ref.read(searchQueryProvider.notifier).state = cat.title;
+            // Persist to recents
+            final list = List<String>.from(ref.read(recentSearchesProvider))
+              ..remove(cat.title)
+              ..insert(0, cat.title);
+            if (list.length > 8) list.removeRange(8, list.length);
+            ref.read(recentSearchesProvider.notifier).state = list;
+          },
+        );
+      },
     );
   }
 }
