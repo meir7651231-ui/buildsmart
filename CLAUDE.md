@@ -6,6 +6,18 @@
 
 ---
 
+## ⚠️ שני פרויקטים מקבילים בריפו
+
+| תיקייה | סטאק | מטרה |
+|---|---|---|
+| `app/` | Preact + TypeScript + Vite + PWA | **חי**, פרוס ב-GitHub Pages. ה-reference המלא של ה-dial system. אין מחיקה. |
+| `app_flutter/` | Flutter 3.29 + Dart 3.7 + Riverpod | **בבנייה.** נטיב iOS+Android+Web — מטרה ל-launch בחנויות. |
+
+הקיים נשאר עובד עד שה-Flutter מגיע ל-feature parity ועובר QA.
+R1–R9 חלים על שני הפרויקטים במידה שווה.
+
+---
+
 ## ⚠️ הכלל המוחלט — R2: אין חלון, נקודה.
 
 **שום קומפוננטה לא ממלאת את `<main class="content">` עבור פיצ׳ר חדש.**

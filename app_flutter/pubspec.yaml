@@ -1,0 +1,37 @@
+name: buildsmart
+description: "BuildSmart — construction site procurement & task management"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  cupertino_icons: ^1.0.8
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # state management — closest spirit to @preact/signals
+  flutter_riverpod: ^2.6.1
+
+  # routing — official, supports deep links + web URLs
+  go_router: ^14.6.2
+
+  # i18n
+  intl: ^0.19.0
+
+  # persistence (settings + profile)
+  shared_preferences: ^2.3.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # strictest analyzer preset
+  very_good_analysis: ^7.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
