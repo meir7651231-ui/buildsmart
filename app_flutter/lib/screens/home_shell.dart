@@ -1,4 +1,4 @@
-import 'package:buildsmart/screens/barcode_scanner.dart';
+import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/bs_dial_widget.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/menu_dial_widget.dart';
@@ -120,7 +120,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(Icons.photo_camera_outlined, color: Colors.white70),
           tooltip: 'מצלמה',
-          onPressed: () => openBarcodeScanner(context),
+          onPressed: () => openCameraSheet(context),
         ),
         PopupMenuButton<MenuTab>(
           icon: const Icon(Icons.more_vert, color: Colors.white70),
