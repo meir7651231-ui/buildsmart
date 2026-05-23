@@ -3,6 +3,7 @@ import 'package:buildsmart/screens/bs_dial_widget.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/menu_dial_widget.dart';
 import 'package:buildsmart/screens/search_dial_widget.dart';
+import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/dial_state.dart';
@@ -29,7 +30,7 @@ class HomeShell extends ConsumerWidget {
             index: tabIndex,
             children: const [
               CatalogScreen(),
-              _PlaceholderTab(title: 'שיחות',   emoji: '💬'),
+              const ChatsScreen(),
               const NotificationsScreen(),
               const StoreScreen(),
             ],
