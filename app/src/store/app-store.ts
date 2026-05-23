@@ -79,8 +79,9 @@ export const menuOpen = signal(false);
 export const searchOpen = signal(false);
 export const openedProductId = signal<string | null>(null);
 
-/* Which top-level menu tab is "drilled into". null = show all five FABs. */
-export type MenuTab = 'home' | 'catalog' | 'projects' | 'cart' | 'settings';
+/* Which top-level menu tab is "drilled into". null = show all four FABs.
+ * (קטלוג moved to the search FAB — see src/store/search-store ToolKind.) */
+export type MenuTab = 'home' | 'projects' | 'cart' | 'settings';
 export const menuActiveTab = signal<MenuTab | null>(null);
 
 /* Within settings, which sub-group is drilled into. null = the 10-row list. */

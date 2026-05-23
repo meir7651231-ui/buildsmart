@@ -1118,6 +1118,13 @@ li {
   color: #fff;
 }
 
+.ssub__emoji {
+  font-size: 20px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
 .ssub__label {
   background: var(--card);
   color: var(--ink);

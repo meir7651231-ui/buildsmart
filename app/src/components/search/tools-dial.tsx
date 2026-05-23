@@ -44,6 +44,20 @@ const TOOLS: Tool[] = [
       </svg>
     ),
   },
+  /* Catalog moved here from the menu FAB — browsing the 11 top
+   * categories is a search-side primary action. */
+  {
+    id: 'catalog',
+    label: 'קטלוג',
+    icon: (
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </svg>
+    ),
+  },
 ];
 
 export function ToolsRail() {

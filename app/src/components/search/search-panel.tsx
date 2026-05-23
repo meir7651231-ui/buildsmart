@@ -8,6 +8,7 @@ import { VoiceSubmenu } from './submenu-voice';
 import { BarcodeSubmenu } from './submenu-barcode';
 import { FiltersSubmenu } from './submenu-filters';
 import { SortSubmenu } from './submenu-sort';
+import { CatalogSubmenu } from './submenu-catalog';
 
 export function SearchPanel() {
   if (!searchOpen.value) return null;
@@ -46,6 +47,7 @@ function SearchPanelInner() {
         {tool === 'barcode' && <BarcodeSubmenu />}
         {tool === 'filters' && <FiltersSubmenu />}
         {tool === 'sort' && <SortSubmenu />}
+        {tool === 'catalog' && <CatalogSubmenu />}
         <ToolsRail />
       </div>
 

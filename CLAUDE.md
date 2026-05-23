@@ -93,7 +93,7 @@ node app/smoke-settings.mjs          # 21/21 PASS חובה
 | `app/src/store/bs-store.ts` | persona + BS dial drill state |
 | `app/src/store/user-profile.ts` | user profile fields (R9) |
 | `app/src/store/toast-store.ts` | toast system |
-| `app/src/components/menu-speed-dial.tsx` | menu FAB dial — 5 tabs |
+| `app/src/components/menu-speed-dial.tsx` | menu FAB dial — 4 tabs |
 | `app/src/components/bs/bs-dial.tsx` | BS FAB dial — 5 personas × sub-trees |
 | `app/src/components/menu/submenu-settings.tsx` | all submenu data + components |
 | `app/src/styles/tokens.css` · `global.css` | dark theme + dial styling |
@@ -102,12 +102,14 @@ node app/smoke-settings.mjs          # 21/21 PASS חובה
 
 ## מה עובד כרגע (Menu FAB · BS FAB · Settings tree — sealed)
 
-**Menu FAB — 5 tabs, כולם dial:**
+**Menu FAB — 4 tabs, כולם dial:**
 - 🏠 בית → 4 כלים (📐 / 📦 / 🤖 / 📋), כל אחד עם sub-tree
-- 🔍 קטלוג → 11 קטגוריות verbatim
 - 🏗️ הפרויקטים → 3 פרויקטים + 📊 מרכז פיננסים (10 leaves)
 - 🛒 רכש → 🛒 הסל שלי + 📦 הזמנות → 6 שירותי שרשרת אספקה
 - ⚙️ הגדרות → פרופיל tree (כרטיס/דרגות + 🎮 מועדון 7 leaves) + הגדרות מתקדמות (10 קטגוריות, ~70 leaves)
+
+**Search FAB — 5 כלים, כולם dial:**
+- 🎤 קולי · 📷 ברקוד · ⚙️ פילטרים · ↕️ מיון · ▦ קטלוג (11 קטגוריות verbatim)
 
 **BS FAB — 5 personas, 4 מתוכן עם sub-trees:**
 - 👷 קבלן — (deferred — אין emoji verbatim)
