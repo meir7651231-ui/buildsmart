@@ -81,8 +81,8 @@ class HomeShell extends ConsumerWidget {
 }
 
 /// AppBar — mirrors WhatsApp Business layout in RTL.
-/// Leading (right in RTL): persona/BS selector.
-/// Actions (left in RTL): barcode · search · menu.
+/// Title "BuildSmart" (right in RTL) — tap to open BS/profile dial.
+/// Actions (left in RTL): camera (opens barcode) · search · more-vert (menu).
 class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const _HomeAppBar();
 
@@ -94,23 +94,29 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: const Color(0xFF1A1A1A),
       elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.person_outline, color: Colors.white70),
-        tooltip: 'BS',
-        onPressed: () => _toggle(ref, OpenDial.bs),
-      ),
-      title: const Text(
-        'BuildSmart',
-        style: TextStyle(
-          color: BsTokens.brand,
-          fontWeight: FontWeight.w800,
-          fontSize: 22,
+      automaticallyImplyLeading: false,
+      titleSpacing: BsTokens.space4,
+      title: Tooltip(
+        message: 'BS',
+        child: InkWell(
+          onTap: () => _toggle(ref, OpenDial.bs),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Text(
+              'BuildSmart',
+              style: TextStyle(
+                color: BsTokens.brand,
+                fontWeight: FontWeight.w800,
+                fontSize: 22,
+              ),
+            ),
+          ),
         ),
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.qr_code_scanner, color: Colors.white70),
-          tooltip: 'ברקוד',
+          icon: const Icon(Icons.photo_camera_outlined, color: Colors.white70),
+          tooltip: 'מצלמה',
           onPressed: () => openBarcodeScanner(context),
         ),
         IconButton(
@@ -119,7 +125,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
           onPressed: () => _toggle(ref, OpenDial.search),
         ),
         IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white70),
+          icon: const Icon(Icons.more_vert, color: Colors.white70),
           tooltip: 'תפריט',
           onPressed: () => _toggle(ref, OpenDial.menu),
         ),
