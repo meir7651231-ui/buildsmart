@@ -321,6 +321,14 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                     children: [
                       IconButton(
                         icon: const Icon(
+                          Icons.edit_outlined,
+                          color: Color(0xFF888888),
+                          size: 20,
+                        ),
+                        onPressed: () => _showEditDialog(context, i, s),
+                      ),
+                      IconButton(
+                        icon: const Icon(
                           Icons.delete_outline,
                           color: Color(0xFF888888),
                           size: 20,
@@ -426,6 +434,63 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
             },
             child: const Text(
               'הוספה',
+              style: TextStyle(color: BsTokens.brand),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext ctx, int index, String current) {
+    final controller = TextEditingController(text: current);
+    showDialog<void>(
+      context: ctx,
+      builder: (dCtx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text(
+          'עריכת רשימה',
+          style: TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            hintText: 'שם הרשימה',
+            hintStyle: TextStyle(color: Color(0xFF888888)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF444444)),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: BsTokens.brand),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dCtx),
+            child: const Text(
+              'ביטול',
+              style: TextStyle(color: Color(0xFF888888)),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty && name != current) {
+                final list = List<String>.from(
+                  ref.read(catalogSectionsListProvider),
+                )..[index] = name;
+                ref.read(catalogSectionsListProvider.notifier).state = list;
+                if (ref.read(catalogSectionProvider) == current) {
+                  ref.read(catalogSectionProvider.notifier).state = name;
+                }
+              }
+              Navigator.pop(dCtx);
+            },
+            child: const Text(
+              'שמירה',
               style: TextStyle(color: BsTokens.brand),
             ),
           ),
