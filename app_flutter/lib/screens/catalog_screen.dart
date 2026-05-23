@@ -70,7 +70,7 @@ class CatalogScreen extends StatelessWidget {
         _SearchBar(),
         _FilterChipsRow(),
         _SectionChipsRow(),
-        Expanded(child: _CatalogList()),
+        Expanded(child: _CatalogBody()),
       ],
     );
   }
@@ -640,6 +640,59 @@ class _SearchBar extends StatelessWidget {
             borderSide: const BorderSide(color: BsTokens.brand, width: 1.5),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// Body — switches between the full catalog list (הכל) and a per-section
+// empty state. The empty state reflects what was selected so the home screen
+// actually shows the chosen list rather than just highlighting the chip.
+class _CatalogBody extends ConsumerWidget {
+  const _CatalogBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(catalogSectionProvider);
+    if (active == 'הכל') return const _CatalogList();
+    final emoji = switch (active) {
+      'חיפושים אחרונים' => '🕐',
+      'מועדפים'         => '⭐',
+      'קטגוריות'        => '▦',
+      _                 => '📋',
+    };
+    return _EmptySection(emoji: emoji, label: active);
+  }
+}
+
+class _EmptySection extends StatelessWidget {
+  const _EmptySection({required this.emoji, required this.label});
+
+  final String emoji;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 56)),
+          const SizedBox(height: 16),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'אין פריטים להצגה',
+            style: TextStyle(color: Color(0xFF888888), fontSize: 14),
+          ),
+        ],
       ),
     );
   }
