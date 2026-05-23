@@ -131,8 +131,9 @@ void main() {
   testWidgets('Filter chip cycles: הכל → עם תמונה', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    expect(find.text('הכל'), findsOneWidget);
-    await t.tap(find.text('הכל'));
+    // 'הכל' appears in both the filter chip and the section chip.
+    expect(find.text('הכל'), findsAtLeastNWidgets(1));
+    await t.tap(find.text('הכל').first);
     await t.pumpAndSettle();
     expect(find.text('עם תמונה'), findsOneWidget);
   });
@@ -140,20 +141,20 @@ void main() {
   testWidgets('Catalog tab shows all 11 verbatim categories', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    // Catalog is the default tab. ListView only renders visible items, so we
-    // scroll to each category to verify it exists in the data.
+    // Catalog is the default tab. ListView only renders visible items; drag the
+    // list down until each category appears (max 15 drags × 200 px each).
     const cats = [
       'ברזים וכיורים', 'אסלות', 'מקלחות ואמבטיות', 'חימום מים', 'מטבח',
       'ניקוז וצנרת', 'גופי תברואה', 'אביזרי קצה וחיבורים',
       'בנייה ומחיצות', 'גמר', 'אביזרים נלווים',
     ];
-    // Target the ListView scrollable explicitly (TextField also creates one).
-    final listView = find.descendant(
-      of: find.byType(ListView),
-      matching: find.byType(Scrollable),
-    );
+    final listFinder = find.byKey(const Key('catalog-list'));
     for (final c in cats) {
-      await t.scrollUntilVisible(find.text(c), 200, scrollable: listView);
+      for (var i = 0; i < 15; i++) {
+        if (find.text(c).evaluate().isNotEmpty) break;
+        await t.drag(listFinder, const Offset(0, -200));
+        await t.pump(const Duration(milliseconds: 50));
+      }
       expect(find.text(c), findsOneWidget, reason: 'missing category: $c');
     }
   });

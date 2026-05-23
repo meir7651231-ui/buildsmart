@@ -11,10 +11,15 @@ enum CatalogSort { defaultSort, nameAZ, nameZA, priceUp, priceDown }
 /// Catalog filter options — cycles on chip tap.
 enum CatalogFilter { all, withImage, withPrice }
 
+/// Catalog section tabs — selectable pills.
+enum CatalogSection { all, recent, favorites, categories }
+
 final catalogSortProvider =
     StateProvider<CatalogSort>((_) => CatalogSort.defaultSort);
 final catalogFilterProvider =
     StateProvider<CatalogFilter>((_) => CatalogFilter.all);
+final catalogSectionProvider =
+    StateProvider<CatalogSection>((_) => CatalogSection.all);
 
 String _sortLabel(CatalogSort s) => switch (s) {
       CatalogSort.defaultSort => 'ברירת מחדל',
@@ -61,6 +66,7 @@ class CatalogScreen extends StatelessWidget {
       children: [
         _SearchBar(),
         _FilterChipsRow(),
+        _SectionChipsRow(),
         Expanded(child: _CatalogList()),
       ],
     );
@@ -97,6 +103,119 @@ class _FilterChipsRow extends ConsumerWidget {
                   _nextFilter(filter),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Horizontal pill tabs — הכל · חיפושים אחרונים · מועדפים · קטגוריות · +
+/// Non-הכל sections highlight the chip and show a toast (בבנייה).
+class _SectionChipsRow extends ConsumerWidget {
+  const _SectionChipsRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final section = ref.watch(catalogSectionProvider);
+
+    void select(CatalogSection s) {
+      ref.read(catalogSectionProvider.notifier).state = s;
+      if (s != CatalogSection.all) {
+        final label = switch (s) {
+          CatalogSection.recent     => 'חיפושים אחרונים',
+          CatalogSection.favorites  => 'מועדפים',
+          CatalogSection.categories => 'קטגוריות',
+          CatalogSection.all        => '',
+        };
+        showToast(context, '$label — בבנייה');
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _SectionPill(
+              label: 'הכל',
+              active: section == CatalogSection.all,
+              onTap: () => select(CatalogSection.all),
+            ),
+            const SizedBox(width: 8),
+            _SectionPill(
+              label: 'חיפושים אחרונים',
+              active: section == CatalogSection.recent,
+              onTap: () => select(CatalogSection.recent),
+            ),
+            const SizedBox(width: 8),
+            _SectionPill(
+              label: 'מועדפים',
+              active: section == CatalogSection.favorites,
+              onTap: () => select(CatalogSection.favorites),
+            ),
+            const SizedBox(width: 8),
+            _SectionPill(
+              label: 'קטגוריות',
+              active: section == CatalogSection.categories,
+              onTap: () => select(CatalogSection.categories),
+            ),
+            const SizedBox(width: 8),
+            _AddPill(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionPill extends StatelessWidget {
+  const _SectionPill({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: active ? BsTokens.brand : const Color(0xFF2A2A2A),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: active ? Colors.white : const Color(0xFFAAAAAA),
+              fontSize: 13,
+              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddPill extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFF2A2A2A),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: () => showToast(context, 'הוספה — בבנייה'),
+        borderRadius: BorderRadius.circular(20),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Icon(Icons.add, color: Color(0xFFAAAAAA), size: 18),
         ),
       ),
     );
@@ -187,6 +306,7 @@ class _CatalogList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      key: const Key('catalog-list'),
       itemCount: kCatalogCats.length,
       separatorBuilder: (_, __) => const Divider(
         height: 1,
