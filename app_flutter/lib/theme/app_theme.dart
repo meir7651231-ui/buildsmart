@@ -1,37 +1,42 @@
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 
-/// Dark theme — the Preact app is dark-only by default (R-rules don't
-/// allow theme switching for now). Light scheme is registered so the
-/// system theme toggle in iOS/Android doesn't break.
-class BsTheme {
-  BsTheme._();
+/// Theme factory. Renamed away from `BsTheme` because the settings
+/// enum already owns that identifier.
+class AppTheme {
+  AppTheme._();
 
-  static ThemeData dark() {
+  static ThemeData dark() => _build(Brightness.dark);
+  static ThemeData light() => _build(Brightness.light);
+
+  static ThemeData _build(Brightness b) {
+    final isDark = b == Brightness.dark;
     final scheme = ColorScheme.fromSeed(
       seedColor: BsTokens.brand,
-      brightness: Brightness.dark,
+      brightness: b,
       primary: BsTokens.brand,
-      surface: BsTokens.cardDark,
-    ).copyWith(
-      surfaceContainerHighest: BsTokens.cardDark,
+      surface: isDark ? BsTokens.cardDark : Colors.white,
     );
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: b,
       colorScheme: scheme,
-      scaffoldBackgroundColor: BsTokens.bgDark,
+      scaffoldBackgroundColor:
+          isDark ? BsTokens.bgDark : const Color(0xFFF5F6FA),
       fontFamily: 'Heebo',
-      textTheme: const TextTheme(
-        bodyMedium: TextStyle(color: BsTokens.inkDark, fontSize: 14),
+      textTheme: TextTheme(
+        bodyMedium: TextStyle(
+          color: isDark ? BsTokens.inkDark : Colors.black87,
+          fontSize: 14,
+        ),
         labelLarge: TextStyle(
-          color: BsTokens.inkDark,
+          color: isDark ? BsTokens.inkDark : Colors.black87,
           fontSize: 13,
           fontWeight: FontWeight.w700,
         ),
         titleMedium: TextStyle(
-          color: BsTokens.inkDark,
+          color: isDark ? BsTokens.inkDark : Colors.black87,
           fontSize: 16,
           fontWeight: FontWeight.w700,
         ),

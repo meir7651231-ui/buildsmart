@@ -21,6 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ─── Preact app (live at /buildsmart/) ──────────────────────
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -28,16 +29,38 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      - name: Install
+      - name: Install Preact deps
         working-directory: app
         run: npm ci
 
-      - name: Build
+      - name: Build Preact app
         working-directory: app
         run: npm run build
         env:
           GITHUB_PAGES: '1'
 
+      # ─── Flutter app (preview at /buildsmart/flutter/) ──────────
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.29.3'
+          cache: true
+
+      - name: Install Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Build Flutter web
+        working-directory: app_flutter
+        run: flutter build web --release --base-href "/buildsmart/flutter/"
+
+      - name: Stage Flutter under /flutter/
+        run: |
+          mkdir -p app/dist/flutter
+          cp -r app_flutter/build/web/* app/dist/flutter/
+
+      # ─── Publish combined output ────────────────────────────────
       - name: Push to gh-pages
         run: |
           cd app/dist

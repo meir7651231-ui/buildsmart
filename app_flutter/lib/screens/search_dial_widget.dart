@@ -1,4 +1,6 @@
 import 'package:buildsmart/data/catalog.dart';
+import 'package:buildsmart/screens/barcode_scanner.dart';
+import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/widgets/dial.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -78,17 +80,37 @@ class SearchDialWidget extends ConsumerWidget {
           ),
       ];
     }
-    // Voice / barcode — native plugins arrive in Phase 5.
-    return [
-      DialRow(
-        label: tool == SearchTool.voice
-            ? 'הקש להפעלה · החזק לדיבור'
-            : 'ברקוד — סריקה',
-        emoji: _emoji(tool),
-        icon: Icons.circle,
-        onTap: () => showToast(context, 'native plugin בפאזה 5'),
-      ),
-    ];
+    if (tool == SearchTool.voice) {
+      return [
+        DialRow(
+          label: 'הקש להפעלה',
+          emoji: '🎤',
+          icon: Icons.circle,
+          onTap: () async {
+            final ok = await VoiceService.instance.listen(
+              onFinal: (t) {
+                if (context.mounted && t.isNotEmpty) {
+                  showToast(context, t);
+                }
+              },
+            );
+            if (!context.mounted) return;
+            if (!ok) showToast(context, 'הדפדפן הזה לא תומך בחיפוש קולי');
+          },
+        ),
+      ];
+    }
+    if (tool == SearchTool.barcode) {
+      return [
+        DialRow(
+          label: 'פתח מצלמה',
+          emoji: '📷',
+          icon: Icons.circle,
+          onTap: () => openBarcodeScanner(context),
+        ),
+      ];
+    }
+    return const [];
   }
 
   String _label(SearchTool t) => switch (t) {

@@ -22,8 +22,17 @@ dependencies:
   # i18n
   intl: ^0.19.0
 
+  # native barcode scanner — iOS/Android + Web (limited)
+  mobile_scanner: ^5.2.3
+
+  # microphone permission (used by speech_to_text)
+  permission_handler: ^11.3.1
+
   # persistence (settings + profile)
   shared_preferences: ^2.3.4
+
+  # native speech-to-text — iOS/Android (Web falls back to Web Speech)
+  speech_to_text: ^7.0.0
 
 dev_dependencies:
   flutter_test:
