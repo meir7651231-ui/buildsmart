@@ -82,7 +82,7 @@ class HomeShell extends ConsumerWidget {
 
 /// AppBar — mirrors WhatsApp Business layout in RTL.
 /// Title "BuildSmart" (right in RTL) — tap to open BS/profile dial.
-/// Actions (left in RTL): camera (opens barcode) · search · more-vert (menu).
+/// Actions (left in RTL): camera (opens barcode) · more-vert (menu).
 class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const _HomeAppBar();
 
@@ -118,11 +118,6 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
           icon: const Icon(Icons.photo_camera_outlined, color: Colors.white70),
           tooltip: 'מצלמה',
           onPressed: () => openBarcodeScanner(context),
-        ),
-        IconButton(
-          icon: const Icon(Icons.search, color: Colors.white70),
-          tooltip: 'חיפוש',
-          onPressed: () => _toggle(ref, OpenDial.search),
         ),
         IconButton(
           icon: const Icon(Icons.more_vert, color: Colors.white70),

@@ -116,16 +116,6 @@ void main() {
     expect(find.text('עובד'), findsOneWidget);
   });
 
-  testWidgets('Search dial opens 4 tools', (t) async {
-    await t.pumpWidget(_wrap());
-    await t.pumpAndSettle();
-    await _open(t, 'חיפוש');
-    expect(find.text('קולי'), findsOneWidget);
-    expect(find.text('ברקוד'), findsOneWidget);
-    expect(find.text('פילטרים'), findsOneWidget);
-    expect(find.text('מיון'), findsOneWidget);
-  });
-
   testWidgets('Catalog tab shows all 11 verbatim categories', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
