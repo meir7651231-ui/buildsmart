@@ -441,18 +441,27 @@ class _ThreadRow extends StatelessWidget {
             ),
             const SizedBox(width: 12),
 
-            // MIDDLE — text block (aligned to right = CrossAxisAlignment.end in RTL context)
+            // MIDDLE — same structure as CatalogRow / StoreRow / NotifRow
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      // LEFT — time + arrow (last in RTL = left)
+                      Expanded(
+                        child: Text(
+                          thread.name,
+                          style: TextStyle(
+                            color: nameColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(arrowIcon, color: arrowColor, size: 14),
+                          Icon(arrowIcon, color: arrowColor, size: 13),
                           const SizedBox(width: 3),
                           Text(
                             thread.time,
@@ -465,30 +474,17 @@ class _ThreadRow extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const Spacer(),
-                      // RIGHT — name
-                      Text(
-                        thread.name,
-                        style: TextStyle(
-                          color: nameColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 3),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      '~ ${thread.subtitle}',
-                      style: const TextStyle(
-                        color: Color(0xFF888888),
-                        fontSize: 12,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  Text(
+                    '~ ${thread.subtitle}',
+                    style: const TextStyle(
+                      color: Color(0xFF888888),
+                      fontSize: 12,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
