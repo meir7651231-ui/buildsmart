@@ -76,9 +76,45 @@ class ChatsScreen extends StatelessWidget {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        _SearchBar(),
         _SectionLabel(),
         Expanded(child: _ThreadList()),
       ],
+    );
+  }
+}
+
+class _SearchBar extends StatelessWidget {
+  const _SearchBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      child: TextField(
+        textAlign: TextAlign.right,
+        textDirection: TextDirection.rtl,
+        decoration: InputDecoration(
+          hintText: 'חיפוש שיחות...',
+          hintStyle: const TextStyle(color: Color(0xFF888888)),
+          prefixIcon: const Icon(Icons.search, color: Color(0xFF888888), size: 20),
+          filled: true,
+          fillColor: const Color(0xFF2A2A2A),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: const BorderSide(color: BsTokens.brand, width: 1.5),
+          ),
+        ),
+      ),
     );
   }
 }
