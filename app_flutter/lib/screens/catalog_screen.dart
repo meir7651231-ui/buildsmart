@@ -573,13 +573,15 @@ class _ItemPickerSheet extends ConsumerStatefulWidget {
 }
 
 class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
+  late String _label;
   late Set<String> _selected;
 
   @override
   void initState() {
     super.initState();
+    _label = widget.listLabel;
     _selected = Set<String>.from(
-      ref.read(catalogListItemsProvider)[widget.listLabel] ?? <String>{},
+      ref.read(catalogListItemsProvider)[_label] ?? <String>{},
     );
   }
 
@@ -587,9 +589,72 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
     final items = Map<String, Set<String>>.from(
       ref.read(catalogListItemsProvider),
     );
-    items[widget.listLabel] = _selected;
+    items[_label] = _selected;
     ref.read(catalogListItemsProvider.notifier).state = items;
     Navigator.pop(context);
+  }
+
+  Future<void> _rename() async {
+    final controller = TextEditingController(text: _label);
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (dCtx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text(
+          'שינוי שם הרשימה',
+          style: TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            hintText: 'שם הרשימה',
+            hintStyle: TextStyle(color: Color(0xFF888888)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF444444)),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: BsTokens.brand),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dCtx),
+            child: const Text(
+              'ביטול',
+              style: TextStyle(color: Color(0xFF888888)),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dCtx, controller.text.trim()),
+            child: const Text(
+              'שמירה',
+              style: TextStyle(color: BsTokens.brand),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (newName == null || newName.isEmpty || newName == _label) return;
+
+    final list = List<String>.from(ref.read(catalogSectionsListProvider));
+    final idx = list.indexOf(_label);
+    if (idx != -1) {
+      list[idx] = newName;
+      ref.read(catalogSectionsListProvider.notifier).state = list;
+    }
+    final items =
+        Map<String, Set<String>>.from(ref.read(catalogListItemsProvider));
+    if (items.containsKey(_label)) {
+      items[newName] = items.remove(_label)!;
+      ref.read(catalogListItemsProvider.notifier).state = items;
+    }
+    if (ref.read(catalogSectionProvider) == _label) {
+      ref.read(catalogSectionProvider.notifier).state = newName;
+    }
+    setState(() => _label = newName);
   }
 
   @override
@@ -627,12 +692,33 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                     ),
                   ),
                 ),
-                Text(
-                  widget.listLabel,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+                InkWell(
+                  onTap: _rename,
+                  borderRadius: BorderRadius.circular(6),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _label,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.drive_file_rename_outline,
+                          color: Color(0xFF888888),
+                          size: 16,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 IconButton(
@@ -848,9 +934,9 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-// Body — switches between the full catalog list (הכל) and a per-section
-// empty state. The empty state reflects what was selected so the home screen
-// actually shows the chosen list rather than just highlighting the chip.
+// Body — switches between the full catalog list (הכל) and a per-section view.
+// Non-הכל sections render a header (label + edit button) above either the
+// filtered list or an empty state, so the edit affordance is always visible.
 class _CatalogBody extends ConsumerWidget {
   const _CatalogBody();
 
@@ -860,9 +946,7 @@ class _CatalogBody extends ConsumerWidget {
     if (active == 'הכל') return const _CatalogList();
 
     final selected = ref.watch(catalogListItemsProvider)[active];
-    if (selected != null && selected.isNotEmpty) {
-      return _FilteredCatalogList(selected: selected);
-    }
+    final hasItems = selected != null && selected.isNotEmpty;
 
     final emoji = switch (active) {
       'חיפושים אחרונים' => '🕐',
@@ -870,9 +954,57 @@ class _CatalogBody extends ConsumerWidget {
       'קטגוריות'        => '▦',
       _                 => '📋',
     };
-    return _EmptySection(emoji: emoji, label: active);
+
+    return Column(
+      children: [
+        _SectionHeader(label: active),
+        Expanded(
+          child: hasItems
+              ? _FilteredCatalogList(selected: selected)
+              : _EmptySection(emoji: emoji, label: active),
+        ),
+      ],
+    );
   }
 }
+
+class _SectionHeader extends ConsumerWidget {
+  const _SectionHeader({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      color: const Color(0xFF1A1A1A),
+      padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.edit_outlined,
+              color: BsTokens.brand,
+              size: 20,
+            ),
+            tooltip: 'עריכה',
+            onPressed: () => _showItemPickerSheet(context, ref, label),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 class _FilteredCatalogList extends StatelessWidget {
   const _FilteredCatalogList({required this.selected});
