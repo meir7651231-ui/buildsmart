@@ -8,13 +8,27 @@
 
 ## ⚠️ שני פרויקטים מקבילים בריפו
 
-| תיקייה | סטאק | מטרה |
+| תיקייה | סטאק | סטטוס |
 |---|---|---|
-| `app/` | Preact + TypeScript + Vite + PWA | **חי**, פרוס ב-GitHub Pages. ה-reference המלא של ה-dial system. אין מחיקה. |
-| `app_flutter/` | Flutter 3.29 + Dart 3.7 + Riverpod | **בבנייה.** נטיב iOS+Android+Web — מטרה ל-launch בחנויות. |
+| `app_flutter/` | Flutter 3.29 + Dart 3.7 + Riverpod | **🟢 פעיל לפיתוח חדש.** feature parity ל-Preact הושלמה (~270 leaves verbatim). נטיב iOS+Android+Web — מטרה ל-launch בחנויות. |
+| `app/` | Preact + TypeScript + Vite + PWA | 🟡 **חי בפרודקשן** ב-GitHub Pages. reference. תיקוני באגים בלבד עד שה-Flutter יוצב — אז cutover. |
 
-הקיים נשאר עובד עד שה-Flutter מגיע ל-feature parity ועובר QA.
-R1–R9 חלים על שני הפרויקטים במידה שווה.
+**כללי עבודה:**
+1. כל פיצ׳ר חדש = `app_flutter/` בלבד.
+2. תיקון באג ב-`app/` מותר (זה ה-live).
+3. אם הוספת string חדש ב-`app/` — להעתיק verbatim ל-`app_flutter/`.
+4. R1–R9 חלים על שני הפרויקטים.
+
+**Flutter dev loop:**
+```bash
+export PATH="/home/user/flutter/bin:$PATH"   # already extracted to /home/user/flutter
+cd app_flutter
+flutter pub get
+flutter analyze              # clean
+flutter test                 # 10/10 PASS
+flutter build web --release  # 2.0 MB main.dart.js
+flutter run -d chrome        # dev
+```
 
 ---
 
