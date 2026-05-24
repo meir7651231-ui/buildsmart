@@ -441,7 +441,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '645975',
-    nameHe: 'מאריך למחסום (סיפון',
+    nameHe: 'מאריך למחסום (סיפון)',
     nameEn: '1.25" Bottle trap extension | Outlet connection for dishwasher',
     color: 'לבן',
     qtyPack: 180,
@@ -6161,6 +6161,6 @@ LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה
   // ─── AQUATEC QONDUS — פיות לברזים / אביזרי דיור (page 18) ───────────────
   LipskeyCatalogProduct(sku: '777A5034', nameHe: 'דיור פיית מילוי עם כפתור מפאורת', nameEn: 'Dior Deluxe Fill Spout with Button', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '777A5034.jpg', brand: 'AQUATEC'),
   LipskeyCatalogProduct(sku: '77772415', nameHe: 'דיור פיה לברז נחש מהקיר כבד ארוך', nameEn: 'Dior Heavy Snake Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772415.jpg', brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77772413', nameHe: 'דיור פיה לברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772413.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '77772412', nameHe: 'דיור פיה לברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772412.jpg', brand: 'AQUATEC'),
   LipskeyCatalogProduct(sku: '77772410', nameHe: 'דיור פיה לברז פרח ארוך', nameEn: 'Dior Sink Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772410.jpg', brand: 'AQUATEC'),
 ];
