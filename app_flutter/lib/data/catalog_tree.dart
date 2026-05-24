@@ -15,6 +15,7 @@ class CatalogNode {
     this.children = const [],
     this.brandIds = const [],
     this.lipskeyCategory,
+    this.smartKey,
   });
 
   final String id;
@@ -23,6 +24,11 @@ class CatalogNode {
   final List<CatalogNode> children;
   final List<String> brandIds;
   final String? lipskeyCategory;
+
+  /// Key of the matching [SmartProduct]. When set, drilling to this leaf opens
+  /// the unified "ברז לכיור" sheet (brand picker + accessories + cart) instead
+  /// of the raw brand-products list.
+  final String? smartKey;
 
   bool get isLeaf => children.isEmpty;
 }
@@ -45,6 +51,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🕳️',
             brandIds: ['lipskey', 'plasson'],
             lipskeyCategory: 'מחסומי רצפה',
+            smartKey: 'floorDrain',
           ),
           CatalogNode(
             id: 'drainage.traps.visible',
@@ -52,6 +59,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🚰',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מחסומים (סיפונים) גלויים',
+            smartKey: 'visibleTrap',
           ),
           CatalogNode(
             id: 'drainage.traps.manifold',
@@ -59,6 +67,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔗',
             brandIds: ['lipskey', 'hagor'],
             lipskeyCategory: 'מסעפים וחיבורי אסלה',
+            smartKey: 'drainageManifold',
           ),
         ],
       ),
@@ -73,6 +82,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🏠',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מאספים וקולטים',
+            smartKey: 'roofCollector',
           ),
         ],
       ),
@@ -87,6 +97,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔩',
             brandIds: ['lipskey', 'plasson'],
             lipskeyCategory: 'מצמדים וצינורות',
+            smartKey: 'drainageFittings',
           ),
           CatalogNode(
             id: 'drainage.pipes.pvc',
@@ -94,6 +105,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '📏',
             brandIds: ['lipskey'],
             lipskeyCategory: 'צינורות',
+            smartKey: 'pvcPipe',
           ),
           CatalogNode(
             id: 'drainage.pipes.elbows',
@@ -101,6 +113,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '↩️',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ברכיים',
+            smartKey: 'drainageElbow',
           ),
           CatalogNode(
             id: 'drainage.pipes.couplings',
@@ -108,6 +121,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔌',
             brandIds: ['lipskey'],
             lipskeyCategory: 'אביזרי שקע-תקע',
+            smartKey: 'drainageFittings',
           ),
         ],
       ),
@@ -122,6 +136,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🚿',
             brandIds: ['lipskey'],
             lipskeyCategory: 'אביזרי ביוב',
+            smartKey: 'visibleTrap',
           ),
           CatalogNode(
             id: 'drainage.accessories.connect',
@@ -129,6 +144,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔗',
             brandIds: ['lipskey'],
             lipskeyCategory: 'אביזרי חיבור',
+            smartKey: 'drainageFittings',
           ),
           CatalogNode(
             id: 'drainage.accessories.tighten',
@@ -136,6 +152,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🧰',
             brandIds: ['lipskey'],
             lipskeyCategory: 'סטי הידוק וחיבורים',
+            smartKey: 'tighteningSet',
           ),
         ],
       ),
@@ -150,6 +167,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '⬜',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מכסים ורשתות',
+            smartKey: 'floorCover',
           ),
         ],
       ),
@@ -164,6 +182,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '📐',
             brandIds: ['lipskey'],
             lipskeyCategory: 'תעלות ניקוז',
+            smartKey: 'drainChannel',
           ),
         ],
       ),
@@ -178,6 +197,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🌀',
             brandIds: ['lipskey'],
             lipskeyCategory: 'סיפונים',
+            smartKey: 'otherTraps',
           ),
         ],
       ),
@@ -192,6 +212,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔗',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מחברי HDPE',
+            smartKey: 'hdpeConnector',
           ),
         ],
       ),
@@ -206,6 +227,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔧',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מחברי NTM',
+            smartKey: 'ntmConnector',
           ),
         ],
       ),
@@ -220,6 +242,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔩',
             brandIds: ['lipskey'],
             lipskeyCategory: 'חבקי תליה',
+            smartKey: 'pipeClamps',
           ),
           CatalogNode(
             id: 'drainage.clamps.omega',
@@ -227,6 +250,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔗',
             brandIds: ['lipskey'],
             lipskeyCategory: 'חבקי צינור',
+            smartKey: 'omegaClamps',
           ),
           CatalogNode(
             id: 'drainage.clamps.anchors',
@@ -234,6 +258,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '⚓',
             brandIds: ['lipskey'],
             lipskeyCategory: 'עוגנים ובנדים',
+            smartKey: 'pipeClamps',
           ),
         ],
       ),
@@ -248,6 +273,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🌧️',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ניקוז גג',
+            smartKey: 'rooftopDrain',
           ),
         ],
       ),
@@ -270,18 +296,21 @@ const List<CatalogNode> kCatalogTree = [
             title: 'ברז למטבח',
             emoji: '🍽️',
             brandIds: ['grohe', 'hamat'],
+            smartKey: 'kitchenFaucet',
           ),
           CatalogNode(
             id: 'taps.faucets.basin',
             title: 'ברז לכיור',
             emoji: '🚰',
             brandIds: ['grohe', 'hamat'],
+            smartKey: 'faucet',
           ),
           CatalogNode(
             id: 'taps.faucets.shower',
             title: 'סוללת מקלחת',
             emoji: '🚿',
             brandIds: ['grohe', 'hamat'],
+            smartKey: 'shower',
           ),
         ],
       ),
@@ -295,12 +324,14 @@ const List<CatalogNode> kCatalogTree = [
             title: 'כיור אמבטיה',
             emoji: '🪣',
             brandIds: ['hamat'],
+            smartKey: 'basin',
           ),
           CatalogNode(
             id: 'taps.sinks.kitchen',
             title: 'כיור מטבח',
             emoji: '🍳',
             brandIds: ['hamat'],
+            smartKey: 'kitchenSink',
           ),
         ],
       ),
@@ -315,6 +346,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🛁',
             brandIds: ['lipskey', 'hamat'],
             lipskeyCategory: 'אמבט ואגנית',
+            smartKey: 'bathtub',
           ),
         ],
       ),
@@ -329,6 +361,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔧',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ברזי ניל',
+            smartKey: 'shutoffValve',
           ),
           CatalogNode(
             id: 'taps.shutoffs.bucket',
@@ -336,6 +369,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🪣',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ברזי דלי',
+            smartKey: 'shutoffValve',
           ),
           CatalogNode(
             id: 'taps.shutoffs.waterpoints',
@@ -343,6 +377,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '💧',
             brandIds: ['lipskey'],
             lipskeyCategory: 'נקודות מים',
+            smartKey: 'shutoffValve',
           ),
           CatalogNode(
             id: 'taps.shutoffs.transit',
@@ -350,6 +385,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '⚙️',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ברזי מעבר',
+            smartKey: 'transitValve',
           ),
         ],
       ),
@@ -364,6 +400,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔀',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מחלקים',
+            smartKey: 'waterManifold',
           ),
           CatalogNode(
             id: 'taps.distribution.cabinets',
@@ -371,6 +408,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '📦',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ארונות מחלק',
+            smartKey: 'waterManifold',
           ),
         ],
       ),
@@ -394,6 +432,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '⭕',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מושבי אסלה',
+            smartKey: 'toiletSeat',
           ),
         ],
       ),
@@ -408,6 +447,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔺',
             brandIds: ['lipskey'],
             lipskeyCategory: 'התקנה גבוהה',
+            smartKey: 'toiletTankHigh',
           ),
           CatalogNode(
             id: 'toilets.tanks.low',
@@ -415,6 +455,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔻',
             brandIds: ['lipskey'],
             lipskeyCategory: 'התקנה נמוכה',
+            smartKey: 'toiletTankLow',
           ),
           CatalogNode(
             id: 'toilets.tanks.monoblock',
@@ -422,6 +463,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '⬜',
             brandIds: ['lipskey'],
             lipskeyCategory: 'התקנה צמודה',
+            smartKey: 'toiletTankMonoblock',
           ),
         ],
       ),
@@ -436,6 +478,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🚽',
             brandIds: ['lipskey'],
             lipskeyCategory: 'זקיף אסלה',
+            smartKey: 'toiletBend',
           ),
         ],
       ),
@@ -450,6 +493,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔧',
             brandIds: ['lipskey'],
             lipskeyCategory: 'חלקים סניטריים',
+            smartKey: 'toiletParts',
           ),
           CatalogNode(
             id: 'toilets.parts.accessories',
@@ -457,6 +501,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🧷',
             brandIds: ['lipskey'],
             lipskeyCategory: 'אביזרי אסלה',
+            smartKey: 'toiletAccessories',
           ),
           CatalogNode(
             id: 'toilets.parts.mechanisms',
@@ -464,6 +509,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '⚙️',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מונגנונים',
+            smartKey: 'toiletMechanism',
           ),
         ],
       ),
@@ -478,6 +524,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🚽',
             brandIds: ['lipskey'],
             lipskeyCategory: 'אסלות וכיורים',
+            smartKey: 'toiletUnit',
           ),
         ],
       ),
@@ -501,6 +548,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🚿',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ראשי מקלחת',
+            smartKey: 'showerHead',
           ),
         ],
       ),
@@ -515,6 +563,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🤚',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מזלפי יד',
+            smartKey: 'handSprayer',
           ),
           CatalogNode(
             id: 'showers.sprayers.flexHose',
@@ -522,6 +571,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '〰️',
             brandIds: ['lipskey'],
             lipskeyCategory: 'צינורות גמישים',
+            smartKey: 'flexHose',
           ),
           CatalogNode(
             id: 'showers.sprayers.showerHose',
@@ -529,6 +579,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🚿',
             brandIds: ['lipskey'],
             lipskeyCategory: 'צינורות מקלחת',
+            smartKey: 'showerHose',
           ),
         ],
       ),
@@ -543,6 +594,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '⤴️',
             brandIds: ['lipskey'],
             lipskeyCategory: 'זרועות דוש',
+            smartKey: 'showerArm',
           ),
           CatalogNode(
             id: 'showers.arms.accessories',
@@ -550,6 +602,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🧴',
             brandIds: ['lipskey'],
             lipskeyCategory: 'אביזרי מקלחת',
+            smartKey: 'showerAccessories',
           ),
         ],
       ),
@@ -564,6 +617,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🚿',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מערכות שטיפה',
+            smartKey: 'showerSystem',
           ),
           CatalogNode(
             id: 'showers.systems.bath',
@@ -571,6 +625,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🛁',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מערכות אמבטיה',
+            smartKey: 'bathSystem',
           ),
           CatalogNode(
             id: 'showers.systems.kits',
@@ -578,6 +633,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🎁',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ערכות רחצה',
+            smartKey: 'bathingKit',
           ),
         ],
       ),
@@ -601,6 +657,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔩',
             brandIds: ['lipskey', 'hagor'],
             lipskeyCategory: 'אביזרי תבריג',
+            smartKey: 'threadFittings',
           ),
         ],
       ),
@@ -615,6 +672,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '⚫',
             brandIds: ['lipskey', 'hagor'],
             lipskeyCategory: 'אטמים אומים ופקקים',
+            smartKey: 'sealsAndPlugs',
           ),
         ],
       ),
@@ -629,6 +687,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🟫',
             brandIds: ['lipskey'],
             lipskeyCategory: 'אביזרי נחושת',
+            smartKey: 'copperFittings',
           ),
         ],
       ),
@@ -643,6 +702,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '📊',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מכשירי לחץ',
+            smartKey: 'pressureDevices',
           ),
           CatalogNode(
             id: 'endparts.pressure.floats',
@@ -650,6 +710,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔵',
             brandIds: ['lipskey'],
             lipskeyCategory: 'מצופים',
+            smartKey: 'pressureDevices',
           ),
           CatalogNode(
             id: 'endparts.pressure.checkValves',
@@ -657,6 +718,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔄',
             brandIds: ['lipskey'],
             lipskeyCategory: 'אל חזור',
+            smartKey: 'pressureDevices',
           ),
         ],
       ),
@@ -680,6 +742,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🌿',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ציוד גן',
+            smartKey: 'gardenHose',
           ),
         ],
       ),
@@ -694,6 +757,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🚰',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ברזי גן',
+            smartKey: 'gardenTap',
           ),
           CatalogNode(
             id: 'garden.taps.ntm',
@@ -701,6 +765,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🇮🇹',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ברזים',
+            smartKey: 'gardenTap',
           ),
         ],
       ),
@@ -724,6 +789,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🔧',
             brandIds: ['lipskey'],
             lipskeyCategory: 'כלי עבודה',
+            smartKey: 'tools',
           ),
         ],
       ),
@@ -738,6 +804,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🧴',
             brandIds: ['lipskey'],
             lipskeyCategory: 'אביזרי חדר רחצה',
+            smartKey: 'bathroomFittings',
           ),
           CatalogNode(
             id: 'acc.bathroom.handles',
@@ -745,6 +812,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🤝',
             brandIds: ['lipskey'],
             lipskeyCategory: 'ידיות אחיזה',
+            smartKey: 'grabBars',
           ),
         ],
       ),
@@ -759,6 +827,7 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '🚿',
             brandIds: ['lipskey'],
             lipskeyCategory: 'דיורים ופיות',
+            smartKey: 'spoutHousings',
           ),
         ],
       ),

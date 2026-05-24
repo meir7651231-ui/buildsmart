@@ -2189,3 +2189,11 @@ List<String> get kSmartTreeCats {
 /// Returns products for a given category.
 List<SmartProduct> smartProductsForCat(String cat) =>
     kSmartProducts.where((p) => p.cat == cat).toList();
+
+/// Find a smart product by its [key] (used to link catalog-tree leaves).
+SmartProduct? smartProductByKey(String key) {
+  for (final p in kSmartProducts) {
+    if (p.key == key) return p;
+  }
+  return null;
+}

@@ -1,7 +1,9 @@
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/screens/brand_products_screen.dart';
+import 'package:buildsmart/screens/catalog_screen.dart' show openSmartProductSheet;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -134,12 +136,29 @@ class _CategoryGrid extends StatelessWidget {
         final n = nodes[i];
         return _CategoryCard(
           node: n,
-          onTap: () => Navigator.push(
-            context,
-            CatalogDrillScreen.nodeRoute(node: n, path: parentPath),
-          ),
+          onTap: () => _onNodeTap(context, n, parentPath),
         );
       },
+    );
+  }
+
+  void _onNodeTap(
+    BuildContext context,
+    CatalogNode n,
+    List<CatalogNode> parentPath,
+  ) {
+    // Leaf with a linked SmartProduct → open the unified brand-picker sheet.
+    if (n.isLeaf && n.smartKey != null) {
+      final product = smartProductByKey(n.smartKey!);
+      if (product != null) {
+        openSmartProductSheet(context, product);
+        return;
+      }
+    }
+    // Otherwise keep drilling (or show the raw brands view for a bare leaf).
+    Navigator.push(
+      context,
+      CatalogDrillScreen.nodeRoute(node: n, path: parentPath),
     );
   }
 }
@@ -151,9 +170,15 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitle = node.isLeaf
-        ? '${node.brandIds.length} מותגים'
-        : '${node.children.length} תת־קטגוריות';
+    final String subtitle;
+    if (!node.isLeaf) {
+      subtitle = '${node.children.length} תת־קטגוריות';
+    } else if (node.smartKey != null) {
+      final p = smartProductByKey(node.smartKey!);
+      subtitle = p != null ? '${p.brands.length} מותגים לבחירה' : 'בחירת מותג';
+    } else {
+      subtitle = '${node.brandIds.length} מותגים';
+    }
     return Material(
       color: const Color(0xFF1A1A1A),
       borderRadius: BorderRadius.circular(14),

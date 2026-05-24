@@ -2965,6 +2965,21 @@ class _SectionBanner extends StatelessWidget {
   }
 }
 
+/// Public entry point — opens the unified "ברז לכיור" sheet (brand picker +
+/// accessories + cart sync) for [product]. Used by the catalog drill-down so
+/// reaching a leaf opens the same rich sheet as the smart-tree.
+void openSmartProductSheet(BuildContext context, SmartProduct product) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xFF1A1A1A),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => _SmartProductSheet(product: product),
+  );
+}
+
 class _SmartProductSheet extends ConsumerStatefulWidget {
   const _SmartProductSheet({required this.product});
 
