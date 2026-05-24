@@ -6,3 +6,4 @@ scripts/__pycache__/
 scripts/*.bak
 scripts/catalog_kpi.json
 scripts/fix_log.csv
+scripts/suspects.csv

@@ -714,7 +714,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '635736',
-    nameHe: 'רשת עליונה פרנמון',
+    nameHe: 'רשת עליונה פרגמון',
     nameEn: 'Cap/Cover travertine',
     color: null,
     qtyPack: null,
@@ -1368,7 +1368,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '635737',
-    nameHe: 'מכסה עגול עליון קבוע פרנמון',
+    nameHe: 'מכסה עגול עליון קבוע פרגמון',
     nameEn: 'Top drainage cap - travertine',
     qtyPack: 120,
     qtyPallet: 5400,
@@ -1416,7 +1416,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '635735',
-    nameHe: 'רשת פנימית עגולה פרנמון',
+    nameHe: 'רשת פנימית עגולה פרגמון',
     nameEn: 'Inner drainage cover - travertine',
     qtyPack: 180,
     qtyPallet: 8100,

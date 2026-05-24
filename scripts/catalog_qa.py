@@ -335,6 +335,40 @@ def cmd_crosscheck(*pdfs):
           f"לא במקור: {unv} · חשודים: {len(sus)} {sus[:10]}")
 
 
+def cmd_suspects(*pdfs):
+    """צעדים 40-42 — תור-בדיקה: שמות בעלי חפיפה נמוכה למקור, עם ניקוד מדורג,
+    נשמר ל-scripts/suspects.csv לסקירה ויזואלית (verify)."""
+    import csv as _csv
+    import fitz
+    pages = []
+    for pdf in pdfs:
+        d = fitz.open(pdf)
+        pages += [(f"{os.path.basename(pdf)}#p{i+1}", d[i].get_text()) for i in range(len(d))]
+    hw = lambda s: set(re.findall(r"[א-ת]{2,}", s))
+    rows = []
+    for p in parse_catalog():
+        loc = next(((lbl, t) for lbl, t in pages if p["sku"] in t), None)
+        if not loc:
+            continue
+        nw = hw(p["name"])
+        if not nw:
+            continue
+        score = round(len(nw & hw(loc[1])) / len(nw), 2)
+        if score < 0.6:
+            rows.append((p["sku"], p["name"], loc[0], score))
+    rows.sort(key=lambda r: r[3])  # worst first
+    out = os.path.join(ROOT, "scripts/suspects.csv")
+    with open(out, "w", newline="", encoding="utf-8-sig") as fh:
+        w = _csv.writer(fh)
+        w.writerow(["sku", "name", "source", "score"])
+        w.writerows(rows)
+    print(f"חשודים: {len(rows)} (נשמר {out}). הגרועים:")
+    for sk, nm, srcp, sc in rows[:12]:
+        print(f"   {sc}  {sk}  {nm[:30]}  [{srcp}]")
+    print(f"\nלאימות ויזואלי: python3 scripts/catalog_qa.py verify <pdf> "
+          + " ".join(r[0] for r in rows[:5]))
+
+
 def cmd_pdfmap(pdf, *_):
     import fitz
     d = fitz.open(pdf)
@@ -477,7 +511,7 @@ CMDS = {"audit": cmd_audit, "selftest": cmd_selftest, "fix": cmd_fix,
         "export": cmd_export, "truthcheck": cmd_truthcheck, "images": cmd_images,
         "imgmatch": cmd_imgmatch, "coverage": cmd_coverage, "schema": cmd_schema,
         "truthapply": cmd_truthapply, "report": cmd_report, "diff": cmd_diff,
-        "crosscheck": cmd_crosscheck, "pdfmap": cmd_pdfmap, "verify": cmd_verify}
+        "crosscheck": cmd_crosscheck, "pdfmap": cmd_pdfmap, "verify": cmd_verify, "suspects": cmd_suspects}
 
 
 def main():
