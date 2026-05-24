@@ -2029,6 +2029,151 @@ const List<SmartProduct> kSmartProducts = [
       SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום נוסף',            must: false),
     ],
   ),
+
+  // ===== ניקוז — מחברי NTM (חיבורי PEX מקצועיים) =====
+  SmartProduct(
+    key: 'ntmConnector',
+    name: 'מחברי NTM — קווי מים PEX',
+    emoji: '🔧',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'חיבור PEX עם מקשרי NTM',
+    stages: _si,
+    brands: [
+      SmartBrand(name: 'ליפסקי — מקשר כפול NTM 25×25', tag: 'הבחירה שלנו', rec: true, sku: '77401535'),
+      SmartBrand(name: 'ליפסקי — מקשר כפול NTM 20×20', tag: 'קטן',         sku: '77401028'),
+      SmartBrand(name: 'ליפסקי — מקשר כפול NTM 32×32', tag: 'גדול',         sku: '40132444'),
+      SmartBrand(name: 'ליפסקי — מקשר מצמצם NTM 20×16', tag: 'מעבר 20→16', sku: '77401621'),
+      SmartBrand(name: 'ליפסקי — מקשר הברגה פנימית 16×1/2"', tag: 'הברגה 1/2"', sku: '77402222'),
+      SmartBrand(name: 'ליפסקי — מקשר הברגה פנימית 20×3/4"', tag: 'הברגה 3/4"', sku: '77402428'),
+    ],
+    acc: [
+      SmartAcc(name: 'מפתח NTM ייעודי',  emoji: '🔧', price: 45, why: 'להידוק נכון — חובה',  must: true),
+      SmartAcc(name: 'מקצרה לצינור',     emoji: '✂️', price: 65, why: 'לחיתוך נקי',           must: true),
+      SmartAcc(name: 'אטם דו צדדי',      emoji: '⚫', price: 8,  why: 'איטום החיבור',         must: true),
+      SmartAcc(name: 'צינור PEX',          emoji: '〰️', price: 380, why: 'הצנרת הראשית',      must: false),
+    ],
+  ),
+
+  // ===== ניקוז — חבקי תליה =====
+  SmartProduct(
+    key: 'pipeClamps',
+    name: 'חבקי תליה לצנרת',
+    emoji: '🔩',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'תליית צנרת על הקיר/תקרה',
+    stages: _si,
+    brands: [
+      SmartBrand(name: 'ליפסקי — חבק תליה 1" עם בידוד', tag: 'הבחירה שלנו', rec: true, sku: 'Z.0001032'),
+      SmartBrand(name: 'ליפסקי — חבק תליה 1/2" עם בידוד', tag: 'קטן',          sku: '77006010'),
+      SmartBrand(name: 'ליפסקי — חבק תליה 3/4" עם בידוד', tag: 'בינוני',       sku: 'Z.0001031'),
+      SmartBrand(name: 'ליפסקי — חבק תליה 3/4" בלי בידוד', tag: 'חסכוני',      sku: '77006031'),
+      SmartBrand(name: 'ליפסקי — חבק תליה 1" בלי בידוד', tag: 'גדול חסכוני', sku: '77006032'),
+      SmartBrand(name: 'ליפסקי — חבק תליה 1¼" עם בידוד', tag: 'גדול בידוד',  sku: 'Z.0001003'),
+      SmartBrand(name: 'ליפסקי — חבק תליה 1½" בלי בידוד', tag: 'תעשייתי',     sku: '77006034'),
+    ],
+    acc: [
+      SmartAcc(name: 'ברגי קיבוע לקיר', emoji: '🔩', price: 18, why: 'לקיבוע — חובה', must: true),
+      SmartAcc(name: 'דיבלים',             emoji: '⚙️', price: 14, why: 'בקירות בטון',  must: true),
+      SmartAcc(name: 'מקדח 8 מ"מ',       emoji: '🪛', price: 38, why: 'לקדיחה',         must: false),
+      SmartAcc(name: 'פלס',                  emoji: '📏', price: 32, why: 'יישור',         must: false),
+    ],
+  ),
+
+  // ===== ניקוז — חבקי אומגה =====
+  SmartProduct(
+    key: 'omegaClamps',
+    name: 'חבקי אומגה לצינורות',
+    emoji: 'Ω',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'הצמדת צינור לקיר עם חבק אומגה',
+    stages: _si,
+    brands: [
+      SmartBrand(name: 'ליפסקי — אומגה 1"',  tag: 'הבחירה שלנו', rec: true, sku: '77006082'),
+      SmartBrand(name: 'ליפסקי — אומגה 3/4"', tag: 'קטן',           sku: '77006081'),
+      SmartBrand(name: 'ליפסקי — אומגה 1¼"',  tag: 'בינוני',        sku: '77IS0001'),
+      SmartBrand(name: 'ליפסקי — אומגה 1½"',  tag: 'גדול',           sku: '77IS0002'),
+      SmartBrand(name: 'ליפסקי — אומגה 2"',    tag: 'תעשייתי',      sku: '77006085'),
+      SmartBrand(name: 'ליפסקי — אומגה 3"',    tag: 'גדול במיוחד', sku: '77006087'),
+      SmartBrand(name: 'ליפסקי — אומגה 4"',    tag: 'ראשי',           sku: '77006088'),
+    ],
+    acc: [
+      SmartAcc(name: 'ברגי קיבוע',      emoji: '🔩', price: 14, why: 'לקיבוע — חובה', must: true),
+      SmartAcc(name: 'דיבלים לבטון',    emoji: '⚙️', price: 18, why: 'לבטון',         must: true),
+      SmartAcc(name: 'מקדח 8 מ"מ',     emoji: '🪛', price: 38, why: 'לקדיחה',        must: false),
+    ],
+  ),
+
+  // ===== ברזים — מחלקים למים חמים/קרים =====
+  SmartProduct(
+    key: 'waterManifold',
+    name: 'מחלק מים — יציאות מרובות',
+    emoji: '🔀',
+    cat: 'ברזים וכיורים',
+    diagramTitle: 'התקנת מחלק מים בארון השירות',
+    stages: _sf,
+    brands: [
+      SmartBrand(name: 'ליפסקי — מחלק 1" 3 יציאות + ברז כחול', tag: 'הבחירה שלנו', rec: true, sku: '7609203B'),
+      SmartBrand(name: 'ליפסקי — מחלק 1" 2 יציאות + ברז כחול',   tag: 'קטן כחול',  sku: '7609202B'),
+      SmartBrand(name: 'ליפסקי — מחלק 1" 2 יציאות + ברז אדום',   tag: 'קטן אדום',  sku: '7609202R'),
+      SmartBrand(name: 'ליפסקי — מחלק 3/4" 2 יציאות + ברז כחול', tag: '3/4 כחול',  sku: '7608202B'),
+      SmartBrand(name: 'ליפסקי — מחלק 3/4" 2 יציאות + ברז אדום', tag: '3/4 אדום',  sku: '7609203R'),
+      SmartBrand(name: 'ליפסקי — מחלק 1" 4 יציאות ללא ברז',      tag: '4 יציאות',  sku: '76032204'),
+      SmartBrand(name: 'ליפסקי — מחלק 1" 3 יציאות ללא ברז',      tag: '3 ללא ברז', sku: '76032203'),
+    ],
+    acc: [
+      SmartAcc(name: 'ארון פח למחלק 60×60', emoji: '📦', why: 'אחסון המחלק — חובה',     must: true, sku: '77901012'),
+      SmartAcc(name: 'מקטין לחץ + שעון',     emoji: '📊', why: 'בקרת לחץ',                must: true, sku: '77772011'),
+      SmartAcc(name: 'משחרר אוויר 1/2"',      emoji: '💨', why: 'מנקה אוויר',              must: true, sku: '77004410'),
+      SmartAcc(name: 'אקווה בנד 3/4" נמוך',  emoji: '⚓', why: 'חיזוק חיבורים',           must: false, sku: '7ISR0001'),
+      SmartAcc(name: 'סרט טפלון',             emoji: '🎗️', price: 4, why: 'איטום הברגות',  must: true),
+    ],
+  ),
+
+  // ===== אביזרי קצה — מכשירי לחץ ומצופים =====
+  SmartProduct(
+    key: 'pressureDevices',
+    name: 'מכשירי לחץ, מצופים ואל-חזור',
+    emoji: '📊',
+    cat: 'אביזרי קצה וחיבורים',
+    diagramTitle: 'בקרת לחץ מים ראשית',
+    stages: _si,
+    brands: [
+      SmartBrand(name: 'ליפסקי — מקטין לחץ + שעון 3/4"', tag: 'הבחירה שלנו', rec: true, sku: '77772012'),
+      SmartBrand(name: 'ליפסקי — מקטין לחץ + שעון 1/2"', tag: 'גודל קטן',     sku: '77772011'),
+      SmartBrand(name: 'ליפסקי — שעון למקטין לחץ',          tag: 'חלף',            sku: '77773001'),
+      SmartBrand(name: 'ליפסקי — משחרר אוויר 1/2" אוטו',   tag: 'משחרר אוויר',  sku: '77004410'),
+      SmartBrand(name: 'ליפסקי — מצוף נחושת 1/2"',           tag: 'מצוף קטן',     sku: '77777481'),
+      SmartBrand(name: 'ליפסקי — מצוף נחושת 1"',             tag: 'מצוף גדול',    sku: '77777483'),
+      SmartBrand(name: 'ליפסקי — אל-חזור ביוב 110',           tag: 'אל-חזור',      sku: '777D0482'),
+      SmartBrand(name: 'ליפסקי — אל-חזור ביוב 160',           tag: 'אל-חזור גדול', sku: '777D0484'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4,  why: 'אוטם ההברגה — חובה', must: true),
+      SmartAcc(name: 'אטם דו צדדי',       emoji: '⚫', price: 12, why: 'איטום',                 must: true),
+      SmartAcc(name: 'מפתח צינורות',     emoji: '🔧', price: 39, why: 'להידוק',                must: true),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום נוסף',            must: false),
+    ],
+  ),
+
+  // ===== ניקוז — ניקוז גג =====
+  SmartProduct(
+    key: 'rooftopDrain',
+    name: 'ניקוז גג — ברכי מי גשם',
+    emoji: '🌧️',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'הזרמת מי גשם מהגג למרזב',
+    stages: _si,
+    brands: [
+      SmartBrand(name: 'ליפסקי — ברך מי גשם מגולון 4"', tag: 'הבחירה שלנו', rec: true, sku: '4502A'),
+      SmartBrand(name: 'ליפסקי — ברך מי גשם מגולון 3"', tag: 'קטן',          sku: '4501A'),
+    ],
+    acc: [
+      SmartAcc(name: 'חבק תליה 4"',         emoji: '🔩', why: 'תמיכה לקיר — חובה', must: true),
+      SmartAcc(name: 'סיליקון סניטרי',     emoji: '🧴', price: 21, why: 'איטום החיבור',       must: true),
+      SmartAcc(name: 'ברגי קיבוע ארוכים', emoji: '🔩', price: 18, why: 'לקיר חיצוני',         must: true),
+      SmartAcc(name: 'מקדח 10 מ"מ',        emoji: '🪛', price: 48, why: 'לבטון/אבן',           must: false),
+    ],
+  ),
 ];
 
 /// Returns unique categories that have smart products, preserving prototype order.
