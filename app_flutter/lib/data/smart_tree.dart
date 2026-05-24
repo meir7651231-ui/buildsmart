@@ -1555,6 +1555,190 @@ const List<SmartProduct> kSmartProducts = [
       SmartAcc(name: 'סיליקון סניטרי',       emoji: '🧴', price: 21,  why: 'איטום סופי',       must: true),
     ],
   ),
+
+  // ===== ברזים — צינורות גמישים לברז =====
+  SmartProduct(
+    key: 'flexHose',
+    name: 'צינור גמיש לברז',
+    emoji: '〰️',
+    cat: 'ברזים וכיורים',
+    diagramTitle: 'חיבור צינור גמיש בין הברז לקיר',
+    stages: _sf,
+    brands: [
+      SmartBrand(name: 'ליפסקי — זוג צינור לברז פרח 50 ס"מ', tag: 'הבחירה שלנו', rec: true, sku: '77381050'),
+      SmartBrand(name: 'ליפסקי — זוג צינור לברז פרח 40 ס"מ', tag: 'קצר',         sku: '77381040'),
+      SmartBrand(name: 'ליפסקי — זוג צינור לברז פרח 60 ס"מ', tag: 'ארוך',         sku: '77381060'),
+      SmartBrand(name: 'ליפסקי — צינור מתכת משוריין 1/2×1/2 40', tag: 'משוריין קצר', sku: '77121240'),
+      SmartBrand(name: 'ליפסקי — צינור משוריין 50 ס"מ',           tag: 'משוריין',      sku: '77121250'),
+      SmartBrand(name: 'ליפסקי — צינור משוריין 60 ס"מ',           tag: 'משוריין ארוך', sku: '77121260'),
+      SmartBrand(name: 'ליפסקי — מאריך לברז ניל 3/8×3/8 15 ס"מ',   tag: 'מאריך קצר',  sku: '77383815'),
+    ],
+    acc: [
+      SmartAcc(name: 'אטם דו צדדי 1/2"', emoji: '⚫', price: 6,  why: 'איטום החיבור — חובה', must: true),
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4, why: 'אוטם ההברגה',          must: true),
+      SmartAcc(name: 'ברז ניל 1/2"',      emoji: '🔧', price: 22, why: 'לסגירת מים',           must: false),
+      SmartAcc(name: 'מפתח צינורות',     emoji: '🔩', price: 39, why: 'להידוק',                must: false),
+    ],
+  ),
+
+  // ===== אסלות — אביזרי אסלה =====
+  SmartProduct(
+    key: 'toiletAccessories',
+    name: 'אביזרי אסלה — חיבורים ופקקים',
+    emoji: '🧷',
+    cat: 'אסלות',
+    diagramTitle: 'חיבור אסלה למיכל ולקו ביוב',
+    stages: _st,
+    brands: [
+      SmartBrand(name: 'ליפסקי — חיבור אסלה שרשורי משופר', tag: 'הבחירה שלנו', rec: true, sku: '77003223'),
+      SmartBrand(name: 'ליפסקי — אטם מנגית אקסנטר 4',      tag: 'אטם אקסנטר',  sku: '77777010'),
+      SmartBrand(name: 'ליפסקי — דיור ניפל אקסנטר 020',    tag: 'ניפל 20 מ"מ', sku: '777P1020'),
+      SmartBrand(name: 'ליפסקי — דיור ניפל אקסנטר 040',    tag: 'ניפל 40 מ"מ', sku: '777P1040'),
+      SmartBrand(name: 'ליפסקי — דיור ניפל אקסנטר 060',    tag: 'ניפל 60 מ"מ', sku: '777P1060'),
+      SmartBrand(name: 'ליפסקי — סט ניפל לאסלה סמויה',     tag: 'לאסלה תלויה', sku: '77777400'),
+      SmartBrand(name: 'ליפסקי — פקק פלסטיק 1/2" שחור',    tag: 'פקק שחור',    sku: '77777777'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4,  why: 'אוטם ההברגה — חובה', must: true),
+      SmartAcc(name: 'סיליקון סניטרי',   emoji: '🧴', price: 21, why: 'איטום סופי — חובה',  must: true),
+      SmartAcc(name: 'אטם דו צדדי',       emoji: '⚫', price: 12, why: 'איטום החיבור',         must: true),
+      SmartAcc(name: 'מפתח אלן',           emoji: '🔧', price: 18, why: 'להידוק',                must: false),
+    ],
+  ),
+
+  // ===== מקלחות — מערכות אמבטיה =====
+  SmartProduct(
+    key: 'bathSystem',
+    name: 'מערכת פינוק לאמבטיה',
+    emoji: '🛁',
+    cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'התקנת מערכת פינוק על האמבטיה',
+    stages: _sb,
+    brands: [
+      SmartBrand(name: 'ליפסקי — קונקורד מערכת פינוק מרובע',  tag: 'הבחירה שלנו', rec: true, sku: '77701200'),
+      SmartBrand(name: 'ליפסקי — טרפז שחור ראש עגול',          tag: 'שחור עגול',  sku: '77701202'),
+      SmartBrand(name: 'ליפסקי — טרפז שחור ראש מרובע',         tag: 'שחור מרובע', sku: '77701201'),
+      SmartBrand(name: 'ליפסקי — אוסלו לחורים קיימים',          tag: 'התקנה קלה',  sku: '77701116'),
+    ],
+    acc: [
+      SmartAcc(name: 'סוללה לסוללת אמבט', emoji: '🎛️', price: 320, why: 'הגוף הסמוי — חובה', must: true),
+      SmartAcc(name: 'זרוע אמבט',            emoji: '⤴️', price: 110, why: 'החלק הנראה',          must: true),
+      SmartAcc(name: 'צינור גמיש לאמבט',  emoji: '〰️', price: 58,  why: 'למזלף',                 must: true),
+      SmartAcc(name: 'מזלף יד',              emoji: '🤚', price: 120, why: 'אם לא כלול',           must: false),
+      SmartAcc(name: 'סיליקון סניטרי',     emoji: '🧴', price: 21,  why: 'איטום',                  must: true),
+    ],
+  ),
+
+  // ===== אביזרים נלווים — אביזרי חדר רחצה =====
+  SmartProduct(
+    key: 'bathroomFittings',
+    name: 'אביזרי חדר רחצה',
+    emoji: '🧴',
+    cat: 'אביזרים נלווים',
+    diagramTitle: 'התקנת מתלים ואביזרים לחדר רחצה',
+    brands: [
+      SmartBrand(name: 'ליפסקי — דיור מוט מגבת בודד',     tag: 'הבחירה שלנו', rec: true, sku: '77775283'),
+      SmartBrand(name: 'ליפסקי — דיור טבעת למגבת',        tag: 'טבעת',         sku: '77775282'),
+      SmartBrand(name: 'ליפסקי — דיור קולב בודד',          tag: 'קולב',          sku: '77775288'),
+      SmartBrand(name: 'ליפסקי — דיור סבונייה נוזלי',      tag: 'סבונייה',     sku: '77775287'),
+      SmartBrand(name: 'ליפסקי — דיור מחזיק נייר פתוח',   tag: 'נייר פתוח',  sku: '77775281'),
+      SmartBrand(name: 'ליפסקי — דיור מחזיק נייר סגור',   tag: 'נייר סגור',  sku: '77775280'),
+    ],
+    acc: [
+      SmartAcc(name: 'ברגים ודיבלים',  emoji: '🔩', price: 14, why: 'לקיבוע לקיר — חובה', must: true),
+      SmartAcc(name: 'מקדח 6 מ"מ',     emoji: '🪛', price: 28, why: 'לקדיחה בקיר',         must: false),
+      SmartAcc(name: 'פלס',              emoji: '📏', price: 32, why: 'יישור אופקי',         must: false),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום מסביב',         must: false),
+    ],
+  ),
+
+  // ===== ניקוז — סיפונים נוספים =====
+  SmartProduct(
+    key: 'otherTraps',
+    name: 'סיפונים נוספים',
+    emoji: '🌀',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'התקנת סיפון גמיש לכיור',
+    stages: _strap,
+    brands: [
+      SmartBrand(name: 'ליפסקי — סיפון 1¼" לכיור רחיצה',    tag: 'הבחירה שלנו', rec: true, sku: '77771012'),
+      SmartBrand(name: 'ליפסקי — סיפון שרשורי גמיש 1¼"',    tag: 'גמיש 1¼"',   sku: '77003220'),
+      SmartBrand(name: 'ליפסקי — סיפון שרשורי גמיש 2"',     tag: 'גמיש 2"',     sku: '77003221'),
+      SmartBrand(name: 'ליפסקי — ונטיל אמריקאי עם סיפון',   tag: 'עם ונטיל',   sku: '77771271'),
+    ],
+    acc: [
+      SmartAcc(name: 'אטם דו צדדי 32/50',  emoji: '⚫', why: 'איטום — חובה', must: true, sku: '558463'),
+      SmartAcc(name: 'סרט טפלון',           emoji: '🎗️', price: 4, why: 'אוטם ההברגה', must: true),
+      SmartAcc(name: 'סיליקון סניטרי',     emoji: '🧴', price: 21, why: 'איטום',         must: true),
+      SmartAcc(name: 'מפתח צינורות',      emoji: '🔧', price: 39, why: 'להידוק',          must: false),
+    ],
+  ),
+
+  // ===== אביזרים נלווים — דיורים ופיות =====
+  SmartProduct(
+    key: 'spoutHousings',
+    name: 'דיורים ופיות',
+    emoji: '🚿',
+    cat: 'אביזרים נלווים',
+    diagramTitle: 'הוספת פייה לברז קיים',
+    brands: [
+      SmartBrand(name: 'ליפסקי — דיור פיה לברז פרח קצר',           tag: 'הבחירה שלנו', rec: true, sku: '77772411'),
+      SmartBrand(name: 'ליפסקי — דיור פיה לברז מהקיר קצר',         tag: 'מהקיר',         sku: '77772413'),
+      SmartBrand(name: 'ליפסקי — דיור פיה לברז נחש מהקיר כבד',    tag: 'נחש כבד',     sku: '77772414'),
+      SmartBrand(name: 'ליפסקי — דיור מערכת פינוק מפוארת',         tag: 'מערכת מפוארת', sku: '77775292'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4,  why: 'אוטם ההברגה — חובה', must: true),
+      SmartAcc(name: 'אטם דו צדדי',       emoji: '⚫', price: 6,  why: 'איטום החיבור',        must: true),
+      SmartAcc(name: 'מפתח צינורות',     emoji: '🔧', price: 39, why: 'להידוק',                must: false),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום נוסף',            must: false),
+    ],
+  ),
+
+  // ===== מקלחות — זרועות דוש =====
+  SmartProduct(
+    key: 'showerArm',
+    name: 'זרוע דוש למקלחת',
+    emoji: '⤴️',
+    cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'הוספת זרוע יציבה לראש המקלחת',
+    stages: _ss,
+    brands: [
+      SmartBrand(name: 'ליפסקי — זרוע דוש 40 ס"מ מפואר',         tag: 'הבחירה שלנו', rec: true, sku: '77701191'),
+      SmartBrand(name: 'ליפסקי — זרוע דוש 30 ס"מ מפואר',         tag: 'קצרה',         sku: '77701190'),
+      SmartBrand(name: 'ליפסקי — דיור זרוע מרובע 40 ס"מ מפואר', tag: 'מרובע 40',     sku: '77701193'),
+      SmartBrand(name: 'ליפסקי — דיור זרוע מרובע 30 ס"מ מפואר', tag: 'מרובע 30',     sku: '77701192'),
+    ],
+    acc: [
+      SmartAcc(name: 'ראש מקלחת',     emoji: '🚿', price: 240, why: 'החלק הזורם — חובה', must: true),
+      SmartAcc(name: 'סרט טפלון',     emoji: '🎗️', price: 4,  why: 'איטום ההברגה',       must: true),
+      SmartAcc(name: 'מפתח צינורות', emoji: '🔧', price: 39, why: 'להידוק',                must: false),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום נוסף',          must: false),
+    ],
+  ),
+
+  // ===== מקלחות — צינורות מקלחת =====
+  SmartProduct(
+    key: 'showerHose',
+    name: 'צינור מקלחת גמיש',
+    emoji: '〰️',
+    cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'חיבור צינור גמיש בין סוללה למזלף',
+    stages: _ss,
+    brands: [
+      SmartBrand(name: 'ליפסקי — צינור ספירלה כפולה 1.5 מטר', tag: 'הבחירה שלנו', rec: true, sku: '77701155'),
+      SmartBrand(name: 'ליפסקי — צינור ספירלה כפולה 2 מטר',   tag: 'ארוך',          sku: '77701160'),
+      SmartBrand(name: 'ליפסקי — צינור ספירלה 1.5 מטר',        tag: 'ספירלה רגילה', sku: '77701113'),
+      SmartBrand(name: 'ליפסקי — צינור ספירלה 2 מטר',           tag: 'ספירלה ארוך', sku: '77701114'),
+      SmartBrand(name: 'ליפסקי — צינור משוריין לברז נשלף',     tag: 'משוריין',       sku: '77701196'),
+    ],
+    acc: [
+      SmartAcc(name: 'מזלף יד',              emoji: '🤚', price: 95, why: 'בקצה הצינור — חובה', must: true),
+      SmartAcc(name: 'מתקן תלייה למזלף',   emoji: '🔩', price: 32, why: 'להחזקה',                must: true),
+      SmartAcc(name: 'אטם דו צדדי',          emoji: '⚫', price: 6,  why: 'איטום החיבור',         must: true),
+      SmartAcc(name: 'סרט טפלון',            emoji: '🎗️', price: 4, why: 'אוטם ההברגה',           must: false),
+    ],
+  ),
 ];
 
 /// Returns unique categories that have smart products, preserving prototype order.
