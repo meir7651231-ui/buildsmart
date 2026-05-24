@@ -3,6 +3,7 @@ import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/menu_dial_widget.dart';
+import 'package:buildsmart/screens/notif_settings_screen.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/search_dial_widget.dart';
 import 'package:buildsmart/screens/store_screen.dart';
@@ -126,7 +127,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                     SizedBox(width: 4),
                     Text(
-                      'v3.3 · 24.5.26 · חיפוש ב-AppBar',
+                      'v3.4 · 24.5.26 · הגדרות התראות',
                       style: TextStyle(
                         color: Color(0xFF4CAF50),
                         fontSize: 10,
@@ -439,9 +440,7 @@ class _NotificationsMenuButton extends ConsumerWidget {
         showToast(context, 'כל ההתראות נמחקו');
       case 'notif_settings':
       case 'settings':
-        ref
-          ..read(openDialProvider.notifier).state = OpenDial.menu
-          ..read(menuTabProvider.notifier).state = MenuTab.settings;
+        Navigator.of(context).push(NotifSettingsScreen.route());
     }
   }
 }

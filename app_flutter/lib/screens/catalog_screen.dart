@@ -4,6 +4,7 @@ import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/services/voice.dart';
+import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
