@@ -106,6 +106,27 @@ class _LipskeyProductSheetState extends State<LipskeyProductSheet> {
                 ),
               ),
 
+              // Close (X) — clear & prominent, top-left
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 0, 2),
+                  child: Material(
+                    color: const Color(0xFF252B36),
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => Navigator.pop(context),
+                      child: const SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: Icon(Icons.close, color: Colors.white, size: 22),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
               // Content
               Expanded(
                 child: ListView(
