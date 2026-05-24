@@ -1,6 +1,7 @@
 import 'package:buildsmart/screens/bs_dial_widget.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
+import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chat_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/menu_dial_widget.dart';
@@ -128,7 +129,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                     SizedBox(width: 4),
                     Text(
-                      'v3.6 · 24.5.26 · הגדרות שיחות',
+                      'v3.7 · 24.5.26 · הגדרות קטלוג',
                       style: TextStyle(
                         color: Color(0xFF4CAF50),
                         fontSize: 10,
@@ -329,9 +330,7 @@ class _CatalogMenuButton extends ConsumerWidget {
       case 'favorites':
         ref.read(catalogSectionProvider.notifier).state = 'מועדפים';
       case 'settings':
-        ref
-          ..read(openDialProvider.notifier).state = OpenDial.menu
-          ..read(menuTabProvider.notifier).state = MenuTab.settings;
+        Navigator.of(context).push(CatalogSettingsScreen.route());
     }
   }
 }
