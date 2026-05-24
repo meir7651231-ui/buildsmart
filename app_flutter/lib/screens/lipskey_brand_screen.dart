@@ -1,10 +1,9 @@
-import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:flutter/material.dart';
 
-// ── Entry: main catalog categories that have Lipskey content ─────────────────
+// ── Level 1: שני מקטעים — אינסטלציה / סניטציה ───────────────────────────────
 class LipskeyBrandScreen extends StatelessWidget {
   const LipskeyBrandScreen({super.key});
 
@@ -13,52 +12,71 @@ class LipskeyBrandScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final entries = [
-      for (final cat in kCatalogCats)
-        if (kMainCatToLipskey.containsKey(cat.title)) cat,
-    ];
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFF080815),
+        backgroundColor: const Color(0xFF0D0D1A),
         body: CustomScrollView(
           slivers: [
+            SliverAppBar(
+              backgroundColor: const Color(0xFF0D0D1A),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              pinned: true,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('ליפסקי ברקן',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 17)),
+                  Text('אינסטלציה · סניטציה',
+                      style:
+                          TextStyle(color: Colors.white54, fontSize: 12)),
+                ],
+              ),
+            ),
             SliverToBoxAdapter(
-              child: _Header(totalProducts: kLipskeyCatalog.length),
+              child: _BrandHeader(
+                totalProducts: kLipskeyCatalog.length,
+                totalCats: kLipskeySections
+                    .fold(0, (s, sec) => s + sec.entries.length),
+              ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 24),
               sliver: SliverGrid(
                 delegate: SliverChildBuilderDelegate(
                   (context, i) {
-                    final cat = entries[i];
-                    final subcats = kMainCatToLipskey[cat.title]!;
-                    final count = kLipskeyCatalog
-                        .where((p) => subcats.contains(p.categoryHe))
+                    final section = kLipskeySections[i];
+                    final prodCount = kLipskeyCatalog
+                        .where((p) => section.entries
+                            .any((e) => e.name == p.categoryHe))
                         .length;
-                    return _MainCatCard(
-                      emoji: cat.emoji,
-                      title: cat.title,
-                      count: count,
-                      subcatCount: subcats.length,
+                    final catCount = section.entries.length;
+                    return _SectionCard(
+                      section: section,
+                      prodCount: prodCount,
+                      catCount: catCount,
                       onTap: () => Navigator.push(
                         context,
-                        LipskeySubCatScreen.route(
-                          mainCat: cat.title,
-                          mainEmoji: cat.emoji,
-                          subcats: subcats,
-                        ),
+                        LipskeySectionScreen.route(section: section),
                       ),
                     );
                   },
-                  childCount: entries.length,
+                  childCount: kLipskeySections.length,
                 ),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.1,
+                  childAspectRatio: 1.05,
                 ),
               ),
             ),
@@ -69,79 +87,45 @@ class LipskeyBrandScreen extends StatelessWidget {
   }
 }
 
-// ── Header ────────────────────────────────────────────────────────────────────
-class _Header extends StatelessWidget {
-  const _Header({required this.totalProducts});
+class _BrandHeader extends StatelessWidget {
+  const _BrandHeader(
+      {required this.totalProducts, required this.totalCats});
   final int totalProducts;
+  final int totalCats;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(
-          16, MediaQuery.of(context).padding.top + 16, 16, 20),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [Color(0xFF0D1B2A), Color(0xFF1A1A2E)],
+          colors: [Color(0xFF0D1B2A), Color(0xFF13132A)],
         ),
-        border: Border(
-            bottom: BorderSide(color: Color(0xFF3D5A80), width: 0.5)),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+            color: const Color(0xFF3D5A80).withOpacity(0.4), width: 0.8),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
         children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: const Icon(Icons.arrow_back,
-                    color: Colors.white70, size: 22),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('קטלוג מוצרים',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800)),
-                    Text('בחר קטגוריה',
-                        style:
-                            TextStyle(color: Colors.white54, fontSize: 12)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            children: [
-              _StatChip('📦 $totalProducts מוצרים'),
-              _StatChip(
-                  '🗂️ ${kMainCatToLipskey.length} קטגוריות'),
-              // Supplier badge — secondary info
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF3D5A80).withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF3D5A80), width: 0.6),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('🏭', style: TextStyle(fontSize: 11)),
-                    SizedBox(width: 4),
-                    Text('ליפסקי ברקן',
-                        style: TextStyle(color: Color(0xFF64FFDA), fontSize: 11)),
-                  ],
-                ),
-              ),
-            ],
+          const Text('🏭', style: TextStyle(fontSize: 22)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('ליפסקי ברקן',
+                    style: TextStyle(
+                        color: Color(0xFF64FFDA),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700)),
+                Text('$totalProducts מוצרים · $totalCats קטגוריות',
+                    style: const TextStyle(
+                        color: Colors.white54, fontSize: 11)),
+              ],
+            ),
           ),
         ],
       ),
@@ -149,40 +133,18 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _StatChip extends StatelessWidget {
-  const _StatChip(this.label);
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: const Color(0xFF3D5A80).withOpacity(0.2),
-          borderRadius: BorderRadius.circular(20),
-          border:
-              Border.all(color: const Color(0xFF3D5A80), width: 0.6),
-        ),
-        child: Text(label,
-            style:
-                const TextStyle(color: Colors.white60, fontSize: 12)),
-      );
-}
-
-// ── Main category card ────────────────────────────────────────────────────────
-class _MainCatCard extends StatelessWidget {
-  const _MainCatCard({
-    required this.emoji,
-    required this.title,
-    required this.count,
-    required this.subcatCount,
+// ── Section card (level 1) ────────────────────────────────────────────────────
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({
+    required this.section,
+    required this.prodCount,
+    required this.catCount,
     required this.onTap,
   });
 
-  final String emoji;
-  final String title;
-  final int count;
-  final int subcatCount;
+  final LipskeySection section;
+  final int prodCount;
+  final int catCount;
   final VoidCallback onTap;
 
   @override
@@ -202,18 +164,17 @@ class _MainCatCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 38)),
+            Text(section.emoji,
+                style: const TextStyle(fontSize: 38)),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
+                Text(section.name,
                     style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 15,
+                        fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        height: 1.2),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis),
+                        height: 1.2)),
                 const SizedBox(height: 5),
                 Row(
                   children: [
@@ -221,15 +182,16 @@ class _MainCatCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 7, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF3D5A80).withOpacity(0.25),
+                        color:
+                            const Color(0xFF3D5A80).withOpacity(0.25),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Text('$count מוצרים',
+                      child: Text('$prodCount מוצרים',
                           style: const TextStyle(
                               color: Color(0xFF64FFDA), fontSize: 11)),
                     ),
                     const SizedBox(width: 6),
-                    Text('$subcatCount קבוצות',
+                    Text('$catCount קטגוריות',
                         style: const TextStyle(
                             color: Colors.white38, fontSize: 10)),
                   ],
@@ -243,192 +205,167 @@ class _MainCatCard extends StatelessWidget {
   }
 }
 
-// ── Level 2: Subcategory screen ───────────────────────────────────────────────
-class LipskeySubCatScreen extends StatelessWidget {
-  const LipskeySubCatScreen({
-    super.key,
-    required this.mainCat,
-    required this.mainEmoji,
-    required this.subcats,
-  });
+// ── Level 2: קטגוריות בתוך מקטע ──────────────────────────────────────────────
+class LipskeySectionScreen extends StatelessWidget {
+  const LipskeySectionScreen({super.key, required this.section});
 
-  final String mainCat;
-  final String mainEmoji;
-  final List<String> subcats;
+  final LipskeySection section;
 
-  static Route<void> route({
-    required String mainCat,
-    required String mainEmoji,
-    required List<String> subcats,
-  }) =>
+  static Route<void> route({required LipskeySection section}) =>
       MaterialPageRoute(
-        builder: (_) => LipskeySubCatScreen(
-          mainCat: mainCat,
-          mainEmoji: mainEmoji,
-          subcats: subcats,
-        ),
+        builder: (_) => LipskeySectionScreen(section: section),
       );
 
   @override
   Widget build(BuildContext context) {
-    final entries = <_SubCatEntry>[];
-    for (final sub in subcats) {
-      final products =
-          kLipskeyCatalog.where((p) => p.categoryHe == sub).toList();
-      if (products.isEmpty) continue;
-      final emoji = products.first.categoryEmoji;
-      entries.add(_SubCatEntry(name: sub, emoji: emoji, products: products));
-    }
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFF080815),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF0D0D1A),
-          foregroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: Row(
-            children: [
-              Text(mainEmoji, style: const TextStyle(fontSize: 20)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(mainCat,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15)),
-                    Text(
-                        'ליפסקי ברקן · ${entries.length} קבוצות',
-                        style: const TextStyle(
-                            color: Colors.white54, fontSize: 11)),
-                  ],
+        backgroundColor: const Color(0xFF0D0D1A),
+        body: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              backgroundColor: const Color(0xFF0D0D1A),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              pinned: true,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${section.emoji} ${section.name}',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16)),
+                  Text(
+                      'ליפסקי ברקן · ${section.entries.length} קטגוריות',
+                      style: const TextStyle(
+                          color: Colors.white54, fontSize: 11)),
+                ],
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+              sliver: SliverGrid(
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) {
+                    final entry = section.entries[i];
+                    final products = kLipskeyCatalog
+                        .where((p) => p.categoryHe == entry.name)
+                        .toList();
+                    return _CategoryCard(
+                      entry: entry,
+                      products: products,
+                      onTap: products.isEmpty
+                          ? null
+                          : () => Navigator.push(
+                                context,
+                                LipskeyProductsScreen.route(
+                                  category: entry.name,
+                                  products: products,
+                                ),
+                              ),
+                    );
+                  },
+                  childCount: section.entries.length,
+                ),
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.05,
                 ),
               ),
-            ],
-          ),
-        ),
-        body: ListView.separated(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          itemCount: entries.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
-          itemBuilder: (context, i) =>
-              _SubCatTile(entry: entries[i]),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _SubCatEntry {
-  final String name;
-  final String emoji;
-  final List<LipskeyCatalogProduct> products;
-  const _SubCatEntry(
-      {required this.name,
-      required this.emoji,
-      required this.products});
-}
+// ── Category card (level 2) ───────────────────────────────────────────────────
+class _CategoryCard extends StatelessWidget {
+  const _CategoryCard({
+    required this.entry,
+    required this.products,
+    required this.onTap,
+  });
 
-class _SubCatTile extends StatelessWidget {
-  const _SubCatTile({required this.entry});
-  final _SubCatEntry entry;
+  final LipskeyCatEntry entry;
+  final List<LipskeyCatalogProduct> products;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final thumbs = entry.products
-        .where((p) => p.imageAsset != null)
-        .take(4)
-        .toList();
+    final isEmpty = products.isEmpty;
 
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        LipskeyProductsScreen.route(
-          category: entry.name,
-          products: entry.products,
-        ),
-      ),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF13132A),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-              color: const Color(0xFF3D5A80).withOpacity(0.35),
-              width: 0.8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
-              child: Row(
+      onTap: onTap,
+      child: Opacity(
+        opacity: isEmpty ? 0.4 : 1.0,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF13132A),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+                color: const Color(0xFF3D5A80).withOpacity(0.4),
+                width: 0.8),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(entry.emoji,
+                  style: const TextStyle(fontSize: 38)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(entry.emoji,
-                      style: const TextStyle(fontSize: 26)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(entry.name,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15)),
-                        Text(
-                            '${entry.products.length} מוצרים',
-                            style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_left,
-                      color: Colors.white38, size: 20),
+                  Text(entry.name,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 5),
+                  isEmpty
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Text('בקרוב',
+                              style: TextStyle(
+                                  color: Colors.white38,
+                                  fontSize: 11)),
+                        )
+                      : Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF3D5A80)
+                                .withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text('${products.length} מוצרים',
+                              style: const TextStyle(
+                                  color: Color(0xFF64FFDA),
+                                  fontSize: 11)),
+                        ),
                 ],
               ),
-            ),
-            if (thumbs.isNotEmpty)
-              SizedBox(
-                height: 70,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding:
-                      const EdgeInsets.fromLTRB(12, 0, 12, 10),
-                  itemCount: thumbs.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(width: 8),
-                  itemBuilder: (_, i) => ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      width: 60,
-                      height: 60,
-                      color: const Color(0xFF0D0D1A),
-                      child: Image.asset(
-                        thumbs[i].imageAsset!,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => Center(
-                          child: Text(entry.emoji,
-                              style: const TextStyle(
-                                  fontSize: 24)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            else
-              const SizedBox(height: 12),
-          ],
+            ],
+          ),
         ),
       ),
     );

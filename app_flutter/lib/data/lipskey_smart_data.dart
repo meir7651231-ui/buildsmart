@@ -32,29 +32,66 @@ class LipskeyCatStage {
   });
 }
 
-// ── Mapping: main catalog category → Lipskey subcategories ───────────────────
-// Keys must match kCatalogCats titles exactly.
-const Map<String, List<String>> kMainCatToLipskey = {
-  'ניקוז וצנרת': [
-    'מחסומים (סיפונים) גלויים',
-    'מחסומי רצפה',
-    'מאספים וקולטים',
-    'מסעפים וחיבורי אסלה',
-    'מצמדים וצינורות',
-  ],
-  'אסלות': [
-    'מושבי אסלה',
-    'מסעפים וחיבורי אסלה',
-  ],
-  'ברזים וכיורים': [
-    'אמבט ואגנית',
-  ],
-  'אביזרי קצה וחיבורים': [
-    'אביזרי תבריג',
-    'אטמים אומים ופקקים',
-    'מצמדים וצינורות',
-  ],
-};
+// ── Lipskey catalog section / category hierarchy (from PDF TOC) ──────────────
+
+class LipskeyCatEntry {
+  final String name;   // matches categoryHe in LipskeyCatalogProduct
+  final String emoji;
+  final bool hasData;  // false = extracted in future catalog update
+  const LipskeyCatEntry({
+    required this.name,
+    required this.emoji,
+    this.hasData = true,
+  });
+}
+
+class LipskeySection {
+  final String name;
+  final String emoji;
+  final String nameEn;
+  final List<LipskeyCatEntry> entries;
+  const LipskeySection({
+    required this.name,
+    required this.emoji,
+    required this.nameEn,
+    required this.entries,
+  });
+}
+
+// PDF page 3 — תוכן עניינים verbatim, two top-level sections.
+const List<LipskeySection> kLipskeySections = [
+  LipskeySection(
+    name: 'אינסטלציה',
+    emoji: '🔧',
+    nameEn: 'Plumbing',
+    entries: [
+      LipskeyCatEntry(name: 'מחסומים (סיפונים) גלויים', emoji: '🚰'),
+      LipskeyCatEntry(name: 'אמבט ואגנית',               emoji: '🛁'),
+      LipskeyCatEntry(name: 'אביזרי תבריג',              emoji: '🔩'),
+      LipskeyCatEntry(name: 'מחסומי רצפה',               emoji: '⬇️'),
+      LipskeyCatEntry(name: 'מאספים וקולטים',            emoji: '🕳️'),
+      LipskeyCatEntry(name: 'אטמים אומים ופקקים',        emoji: '🔧'),
+      LipskeyCatEntry(name: 'אביזרי שקע-תקע',            emoji: '🔌', hasData: false),
+      LipskeyCatEntry(name: 'ברכיים',                    emoji: '↩️', hasData: false),
+      LipskeyCatEntry(name: 'מסעפים וחיבורי אסלה',       emoji: '⑂'),
+      LipskeyCatEntry(name: 'זקיף אסלה',                 emoji: '🚽', hasData: false),
+      LipskeyCatEntry(name: 'מצמדים וצינורות',           emoji: '🪠'),
+      LipskeyCatEntry(name: 'צינורות',                   emoji: '📏', hasData: false),
+    ],
+  ),
+  LipskeySection(
+    name: 'סניטציה',
+    emoji: '🚽',
+    nameEn: 'Sanitary',
+    entries: [
+      LipskeyCatEntry(name: 'התקנה גבוהה',               emoji: '🔺', hasData: false),
+      LipskeyCatEntry(name: 'התקנה נמוכה',               emoji: '🔻', hasData: false),
+      LipskeyCatEntry(name: 'התקנה צמודה',               emoji: '⬜', hasData: false),
+      LipskeyCatEntry(name: 'מושבי אסלה',                emoji: '🪑'),
+      LipskeyCatEntry(name: 'חלקים סניטריים',            emoji: '🔧', hasData: false),
+    ],
+  ),
+];
 
 // ── Accessories per Lipskey category ─────────────────────────────────────────
 const Map<String, List<LipskeyCatAcc>> kLipskeyAccByCategory = {
