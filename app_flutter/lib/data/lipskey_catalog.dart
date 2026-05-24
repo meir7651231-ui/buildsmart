@@ -3896,9 +3896,9 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // מונגנונים — עמ' 21
   LipskeyCatalogProduct(
     sku: '777M1802',
-    nameHe: 'מונגנון כרמי 40 גבוהה',
+    nameHe: 'מנגנון כרמי 40 גבוהה',
     nameEn: 'Carmi Ceramic Cartridge 40mm High',
-    categoryHe: 'מונגנונים',
+    categoryHe: 'מנגנונים',
     categoryEn: 'Cartridges',
     categoryEmoji: '⚙️',
     page: 21,
@@ -3908,9 +3908,9 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '777M1807',
-    nameHe: 'מונגנון כרמי 40',
+    nameHe: 'מנגנון כרמי 40',
     nameEn: 'Carmi Ceramic Cartridge 40mm',
-    categoryHe: 'מונגנונים',
+    categoryHe: 'מנגנונים',
     categoryEn: 'Cartridges',
     categoryEmoji: '⚙️',
     page: 21,

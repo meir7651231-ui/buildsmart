@@ -1800,7 +1800,7 @@ const List<SmartProduct> kSmartProducts = [
     stages: _st,
     brands: [
       SmartBrand(
-        name: 'מונגנון כרמי 40',
+        name: 'מנגנון כרמי 40',
         tag: 'הבחירה שלנו',
         rec: true,
         sku: '777M1807',

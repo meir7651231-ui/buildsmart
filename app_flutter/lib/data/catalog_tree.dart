@@ -390,7 +390,7 @@ const List<CatalogNode> kCatalogTree = [
         children: [
           CatalogNode(
             id: 'taps.bathtub.tub',
-            title: 'אמבטיה',
+            title: 'אביק לאמבט ואגנית',
             emoji: '🛁',
             brandIds: ['lipskey'],
             lipskeyCategory: 'אמבט ואגנית',
@@ -556,7 +556,7 @@ const List<CatalogNode> kCatalogTree = [
             title: 'מנגנונים',
             emoji: '⚙️',
             brandIds: ['aquatec'],
-            lipskeyCategory: 'מונגנונים',
+            lipskeyCategory: 'מנגנונים',
             smartKey: 'toiletMechanism',
           ),
         ],
