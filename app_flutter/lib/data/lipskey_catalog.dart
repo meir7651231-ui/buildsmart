@@ -106,7 +106,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218553',
-    nameHe: 'מחסום (סיפון) נסתר 1.25" לכיור רחצה',
+    nameHe: 'מחסום (סיפון) נסתר 1.25" לכיור אמבטיה',
     nameEn: '1.25" Bottle trap for | stainless steel sink',
     color: 'לבן',
     qtyPack: 30,
@@ -132,7 +132,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '213054',
-    nameHe: 'מחסום (סיפון) 1.25" לכיור רחצה + יציאה למזגן',
+    nameHe: 'מחסום (סיפון) אמריקאי 1.25" לכיור רחצה + יציאה למזגן',
     nameEn: '1.25" Bottle trap for stainless | ateel sink, with A/C outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -145,7 +145,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116652',
-    nameHe: 'מחסום (סיפון) 2" לכיור מטבח כפול עם כניסה למדיח כלים',
+    nameHe: 'מחסום (סיפון) 2" לכיור מטבח כפול *עם אפשרות כניסה למדיח כלים/מכונת כביסה (מס. 3)',
     nameEn: '2" Bottle trap for double sink with | dishwasher/ washing machine outlet',
     color: 'לבן',
     qtyPack: 15,
@@ -158,7 +158,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116124',
-    nameHe: 'מחסום (סיפון) 2" לכיור מטבח עם כניסה למדיח כלים',
+    nameHe: 'מחסום (סיפון) 2" לכיור מטבח עם כניסה למדיח כלים/מכונת כביסה (מס. 2)',
     nameEn: '2" Bottle trap with | dishwasher/ washing machine outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -171,7 +171,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116649',
-    nameHe: 'מחסום (סיפון) 2" לכיור מטבח בודד',
+    nameHe: 'מחסום (סיפון) 2" לכיור מטבח בודד (מס. 1)',
     nameEn: '2" Bottle trap for single sink | 2" Bottle trap with',
     color: 'לבן',
     qtyPack: 20,
@@ -184,7 +184,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '171190',
-    nameHe: 'מחסום (סיפון) אמריקאי 1.5" עם יציאה למדיח כלים',
+    nameHe: 'מחסום למכונת כביסה 1.5"',
     nameEn: '1.5" Pipe trap for washing machine',
     color: 'לבן',
     qtyPack: 30,
@@ -197,7 +197,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '209448',
-    nameHe: 'מחסום (סיפון) אמריקאי בודד 1.5" מס. 8',
+    nameHe: 'מחסום (סיפון) אמריקאי מס. 8 בודד 1.5"',
     nameEn: '1.5" Pipe trap for stainless steel | sink with dishwasher outlet',
     color: 'לבן',
     qtyPack: 30,
@@ -210,7 +210,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '171189',
-    nameHe: 'מחסום (סיפון) אמריקאי 1.5" עם יציאה למדיח כלים מס. 10',
+    nameHe: 'מחסום (סיפון) אמריקאי 1.5" עם יציאה למדיח',
     nameEn: '1.5" Pipe trap for washing machine | 1.5" Pipe trap for stainless steel',
     color: 'לבן',
     qtyPack: 30,
@@ -223,7 +223,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218495',
-    nameHe: 'מחסום (סיפון) למכונת כביסה 1.5"',
+    nameHe: 'סיפון אמריקאי 1.5" עם יציאה למדיח',
     nameEn: '1.5" Pipe trap for washing machine | 1.5" Pipe trap for stainless steel',
     color: 'לבן',
     qtyPack: 20,
@@ -236,7 +236,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116127',
-    nameHe: 'מחסום (סיפון) 2" לכיור מטבח כפול עם כניסה למדיח/מכונת כביסה',
+    nameHe: 'מחסום (סיפון) 2" לכיור מטבח כפול עם כניסה למדיח כלים/מכונת כביסה (מס. 4)',
     nameEn: '2" Bottle trap for double sink with dishwasher/ | washing machine outlet',
     color: 'לבן',
     qtyPack: 15,
@@ -262,7 +262,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '217005',
-    nameHe: 'סיפון צד אמריקאי 2" עם כניסה למדיח כלים',
+    nameHe: 'סיפון צד 2" אמריקאי עם כניסה למדיח כלים',
     nameEn: '2" Side bottle trap | 2" Side bottle trap with',
     color: 'לבן',
     qtyPack: 20,
@@ -275,7 +275,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '216984',
-    nameHe: 'מחסום (סיפון) אמריקאי כפול 1.5" + כניסה למדיח כלים מס. 9',
+    nameHe: 'מחסום (סיפון) אמריקאי כפול 1.5" + כניסה / למדיח כלים (מס. 9)',
     nameEn: '1.5" Bottle trap for double, stainless | steel sink with dishwasher outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -288,7 +288,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '172349',
-    nameHe: 'מחסום (סיפון) אמריקאי בודד 2" + כניסה למדיח כלים מס. 5',
+    nameHe: 'מחסום (סיפון) אמריקאי בודד 2" + כניסה / למדיח כלים (מס. 5)',
     nameEn: '2" Bottle trap for stainless steel sink | with dishwasher outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -301,7 +301,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '209447',
-    nameHe: 'מחסום (סיפון) אמריקאי בודד 2" מס. 7',
+    nameHe: 'מחסום (סיפון) אמריקאי בודד 2" (מס. 7)',
     nameEn: '2" Bottle trap for stainless steel sink | with dishwasher outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -314,7 +314,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116144',
-    nameHe: 'מחסום (סיפון) אמריקאי כפול 2" + כניסה למדיח כלים מס. 6',
+    nameHe: 'מחסום (סיפון) אמריקאי כפול 2" + כניסה / למדיח כלים (מס. 6)',
     nameEn: '1.5" Bottle trap for double, stainless | steel sink with dishwasher outlet',
     color: 'לבן',
     qtyPack: 15,
@@ -340,7 +340,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '213057',
-    nameHe: 'סיפון צד אמריקאי 2"',
+    nameHe: 'סיפון צד 2" אמריקאי',
     nameEn: '2" Side bottle trap',
     color: 'לבן',
     qtyPack: 20,
@@ -366,7 +366,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '611045',
-    nameHe: 'פיה קומפלט למחסום למכונת כביסה',
+    nameHe: 'פיה קומפלט למכונת כביסה 1.25" (לסיפון מס. 2,4)',
     nameEn: 'Outlet connection for washing machine | Outlet connection for dishwasher',
     color: 'לבן',
     qtyPack: 250,
@@ -379,7 +379,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '193420',
-    nameHe: 'פיה קומפלט למחסום למכונת כביסה',
+    nameHe: 'פיה קומפלט למכונת כביסה 1.25" (לסיפון מס. 2,4)',
     nameEn: 'Outlet connection for washing machine | Outlet connection for dishwasher',
     color: 'לבן',
     qtyPack: 250,
@@ -392,7 +392,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '645971',
-    nameHe: 'צינור יציאה קומפלט לזרוע',
+    nameHe: 'משפך קומפלט 2"',
     nameEn: '2" Bottle trap inlet',
     color: 'לבן',
     qtyPack: null,
@@ -431,7 +431,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '178700',
-    nameHe: 'צביל לכיור אמריקאי',
+    nameHe: 'ונטיל לכיור אמריקאי',
     nameEn: 'Shower tray waste kit | Drain valve',
     color: 'לבן',
     qtyPack: 75,
@@ -444,7 +444,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '645975',
-    nameHe: 'מאריך למחסום (סיפון)',
+    nameHe: 'צינור יציאה למדיח, שקית קומפלט (מתאימה לסיפון אמריקאי בלבד)',
     nameEn: '1.25" Bottle trap extension | Outlet connection for dishwasher',
     color: 'לבן',
     qtyPack: 180,
@@ -496,7 +496,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116635',
-    nameHe: '1.5 אביק לאמבט "',
+    nameHe: 'אביק לאמבטיה 1.5"',
     nameEn: '1.5" Bath waste and overflow',
     color: null,
     qtyPack: 30,
@@ -509,7 +509,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116178',
-    nameHe: 'עם מחסום 1.5 אביק לאמבט "',
+    nameHe: 'אביק לאמבטיה 1.5" עם מחסום',
     nameEn: '1.5" Bath waste and overflow | with pipe trap',
     color: null,
     qtyPack: 20,
@@ -550,7 +550,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116207',
-    nameHe: 'ברך 45° תבריג צד אחד DN32',
+    nameHe: 'ברך 45° - תבריג צד אחד',
     nameEn: 'Band 45° - single side screw-on',
     color: null,
     qtyPack: null,
@@ -564,7 +564,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116203',
-    nameHe: 'ברך 45° תבריג צד אחד DN40',
+    nameHe: 'ברך 45° - תבריג צד אחד',
     nameEn: 'Band 45° - single side screw-on',
     color: null,
     qtyPack: null,
@@ -578,7 +578,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116205',
-    nameHe: 'ברך 45° תבריג צד אחד DN50',
+    nameHe: 'ברך 45° - תבריג צד אחד',
     nameEn: 'Band 45° - single side screw-on',
     color: null,
     qtyPack: null,
@@ -592,7 +592,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '170643',
-    nameHe: 'ברך טלסקופית 90° רב תכליתי',
+    nameHe: 'ברך 90° טלסקופית - רב תכליתי',
     nameEn: 'Telescopic bend 90° for bottle trap',
     color: null,
     qtyPack: null,
@@ -606,7 +606,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '223101',
-    nameHe: 'ברך טלסקופית 90° רב תכליתי',
+    nameHe: 'ברך 90° טלסקופית - רב תכליתי',
     nameEn: 'Telescopic bend 90° for bottle trap',
     color: null,
     qtyPack: null,
@@ -620,7 +620,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '220542',
-    nameHe: 'מחסום תיקני · פתוח גבוהה 245/50',
+    nameHe: 'מחסום תיקני 245/50 פתוח גבוהה',
     nameEn: 'Gully trap 245/50',
     color: null,
     qtyPack: 16,
@@ -633,7 +633,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '220543',
-    nameHe: 'מחסום תיקני',
+    nameHe: 'מחסום תיקני 245/50 סגור גבוהה',
     nameEn: 'Gully trap 245/50',
     color: null,
     qtyPack: 20,
@@ -646,7 +646,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218681',
-    nameHe: 'מחסום רצפה תיקני 245/50 פתוח גבוהה',
+    nameHe: 'מחסום תיקני 140/50 פתוח',
     nameEn: 'Gully trap 245/50 open high',
     color: null,
     qtyPack: null,
@@ -659,7 +659,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218722',
-    nameHe: 'מחסום רצפה תיקני 245/50 סגור גבוהה',
+    nameHe: 'מחסום תיקני 140/50 סגור למקלחת',
     nameEn: 'Gully trap 245/50 closed high',
     color: null,
     qtyPack: null,
@@ -672,7 +672,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '610911',
-    nameHe: 'מכסה/רשת לבן',
+    nameHe: 'רשת עליונה לבן',
     nameEn: 'Cap/Cover white',
     color: null,
     qtyPack: null,
@@ -685,7 +685,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '635736',
-    nameHe: 'מכסה/רשת פרגמון',
+    nameHe: 'רשת עליונה פרנמון',
     nameEn: 'Cap/Cover travertine',
     color: null,
     qtyPack: null,
@@ -698,7 +698,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '558463',
-    nameHe: 'אטם דו צדדי 32/50',
+    nameHe: 'אטם כדורי',
     nameEn: 'Double side gasket 32/50',
     color: null,
     qtyPack: null,
@@ -711,7 +711,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '220305',
-    nameHe: 'מסעף',
+    nameHe: 'מסעף 45° - תבריג כפול',
     nameEn: 'Branch',
     color: null,
     qtyPack: null,
@@ -724,7 +724,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218564',
-    nameHe: 'מסעף 110/50/50',
+    nameHe: 'מחבר כפול',
     nameEn: 'Branch 110/50/50',
     color: null,
     qtyPack: null,
@@ -737,7 +737,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218176',
-    nameHe: 'מסעף כפול 110/110/110',
+    nameHe: 'מחבר כפול',
     nameEn: 'Double Branch 110/110/110',
     color: null,
     qtyPack: null,
@@ -750,7 +750,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116558',
-    nameHe: 'מסעף 110',
+    nameHe: 'מסעף 90° - תבריג',
     nameEn: 'Branch 110',
     color: null,
     qtyPack: null,
@@ -763,7 +763,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '217533',
-    nameHe: 'ברך אסלה 75/50',
+    nameHe: 'מחבר כפול',
     nameEn: 'WC Bend 75/50',
     color: null,
     qtyPack: null,
@@ -776,7 +776,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218567',
-    nameHe: 'מצמד כפול 110',
+    nameHe: 'מצרות תבריג',
     nameEn: 'Double socket 110',
     color: null,
     qtyPack: null,
@@ -789,7 +789,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218569',
-    nameHe: 'פקק חיצוני 110',
+    nameHe: 'מחבר כפול',
     nameEn: 'External plug 110',
     color: null,
     qtyPack: null,
@@ -802,7 +802,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218460',
-    nameHe: 'מצמד קצר',
+    nameHe: 'צינור להכנסה',
     nameEn: 'Short coupler',
     color: null,
     qtyPack: null,
@@ -815,7 +815,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218560',
-    nameHe: 'מצמד 160',
+    nameHe: 'צינור הכנסה',
     nameEn: 'Coupler 160',
     color: null,
     qtyPack: null,
@@ -828,7 +828,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '220315',
-    nameHe: 'מצמד 40',
+    nameHe: 'מחבר לצינור הכנסה',
     nameEn: 'Coupler 40',
     color: null,
     qtyPack: null,
@@ -841,7 +841,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218568',
-    nameHe: 'מצמד כפול 50/40',
+    nameHe: 'מצרות תבריג',
     nameEn: 'Double socket 50/40',
     color: null,
     qtyPack: null,
@@ -854,7 +854,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '220316',
-    nameHe: 'מצמד כפול 40/32',
+    nameHe: 'מחבר כפול',
     nameEn: 'Double socket 40/32',
     color: null,
     qtyPack: null,
@@ -867,7 +867,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '194897',
-    nameHe: 'מצמד קצר 110/100',
+    nameHe: 'מחבר כפול',
     nameEn: 'Short coupler 110/100',
     color: null,
     qtyPack: null,
@@ -880,7 +880,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '220943',
-    nameHe: 'מושב אסלה תרמופלסטי',
+    nameHe: 'מושב אסלה',
     nameEn: 'Thermoplastic toilet seat',
     color: null,
     qtyPack: null,
@@ -893,7 +893,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218360',
-    nameHe: 'מושב אסלה עם ציר פלסטיק',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat - plastic hinge',
     color: null,
     qtyPack: null,
@@ -906,7 +906,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218361',
-    nameHe: 'מושב אסלה עם ציר נירוסטה',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat - stainless hinge',
     color: null,
     qtyPack: null,
@@ -919,7 +919,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '220981',
-    nameHe: 'מושב אסלה אדיר',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat Adir',
     color: null,
     qtyPack: null,
@@ -932,7 +932,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '224286',
-    nameHe: 'מושב אסלה תרמוסטי ULTRA טרמו',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat Termu Ultra thermoset',
     qtyPack: 100,
     qtyPallet: 4500,
@@ -946,7 +946,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── מושבי אסלה נוספים — page 27 ─────────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '171026',
-    nameHe: 'מושב אסלה מס.1 - לבן',
+    nameHe: 'מושב אסלה תרמופלסטי',
     nameEn: 'Toilet seat no.1 - white',
     qtyPack: 6,
     qtyPallet: 240,
@@ -959,7 +959,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '171027',
-    nameHe: 'מושב אסלה מס.1 - פרגמון',
+    nameHe: 'מושב אסלה תרמופלסטי',
     nameEn: 'Toilet seat no.1 - travertine',
     qtyPack: 6,
     qtyPallet: 240,
@@ -972,7 +972,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '171028',
-    nameHe: 'מושב אסלה מס.1 - אפור',
+    nameHe: 'מושב אסלה תרמופלסטי',
     nameEn: 'Toilet seat no.1 - grey',
     qtyPack: 6,
     qtyPallet: 240,
@@ -985,7 +985,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116700',
-    nameHe: 'מושב אסלה מס.3 - לבן',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat no.3 - white',
     qtyPack: 6,
     qtyPallet: 216,
@@ -998,7 +998,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116703',
-    nameHe: 'מושב אסלה מס.3 - פרגמון',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat no.3 - travertine',
     qtyPack: 6,
     qtyPallet: 216,
@@ -1011,7 +1011,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116709',
-    nameHe: 'מושב אסלה מס.3 - אפור',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat no.3 - grey',
     qtyPack: 6,
     qtyPallet: 216,
@@ -1024,7 +1024,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '217934',
-    nameHe: 'מושב אסלה מס.4 ציר פלסטיק - לבן',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat no.4 plastic hinge - white',
     qtyPack: 6,
     qtyPallet: 216,
@@ -1037,7 +1037,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '217935',
-    nameHe: 'מושב אסלה מס.4 ציר פלסטיק - פרגמון',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat no.4 plastic hinge - travertine',
     qtyPack: 6,
     qtyPallet: 216,
@@ -1052,7 +1052,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── מושבי אסלה — page 28 ─────────────────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '116712',
-    nameHe: 'מושב אסלה מס.5 - לבן',
+    nameHe: 'מושב אסלה תרמוסטיים',
     nameEn: 'Toilet seat no.5 - white',
     qtyPack: 6,
     qtyPallet: 216,
@@ -1065,7 +1065,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116716',
-    nameHe: 'מושב אסלה מס.5 - פרגמון',
+    nameHe: 'מושב אסלה תרמוסטיים',
     nameEn: 'Toilet seat no.5 - travertine',
     qtyPack: 6,
     qtyPallet: 216,
@@ -1078,7 +1078,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116722',
-    nameHe: 'מושב אסלה מס.5 - אפור',
+    nameHe: 'מושב אסלה תרמוסטיים',
     nameEn: 'Toilet seat no.5 - grey',
     qtyPack: 6,
     qtyPallet: 216,
@@ -1091,7 +1091,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '179046',
-    nameHe: 'מושב אסלה הרמון - לבן',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat Hermon - white',
     qtyPack: 6,
     qtyPallet: 216,
@@ -1117,7 +1117,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '187133',
-    nameHe: 'מושב אסלה טבור soft close - לבן',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat Tavor soft close - white',
     qtyPack: 6,
     qtyPallet: 216,
@@ -1143,7 +1143,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '179611',
-    nameHe: 'מושב אסלה מס.9 - לבן',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat no.9 - white',
     qtyPack: 5,
     qtyPallet: 160,
@@ -1156,7 +1156,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '179612',
-    nameHe: 'מושב אסלה מס.9 - פרגמון',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat no.9 - travertine',
     qtyPack: 5,
     qtyPallet: 160,
@@ -1182,7 +1182,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '195506',
-    nameHe: 'מושב אסלה כרמל soft close - פרגמון',
+    nameHe: 'מושב אסלה',
     nameEn: 'Toilet seat Carmel soft close - travertine',
     qtyPack: 5,
     qtyPallet: 180,
@@ -1210,7 +1210,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── מאספים וקולטים נוספים — page 16 ─────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '116148',
-    nameHe: 'קולט A 40/70 לכלה',
+    nameHe: 'קולט A 40/70 למקלחת',
     nameEn: 'Shower trap drain A 40/70',
     qtyPack: 40,
     qtyPallet: 2000,
@@ -1222,7 +1222,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '171191',
-    nameHe: 'קולט A 50/100 גבוה',
+    nameHe: 'קולט A 50/100 גבוהה',
     nameEn: 'Shower trap drain A 50/100 high',
     qtyPack: 30,
     qtyPallet: 1200,
@@ -1234,7 +1234,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116151',
-    nameHe: 'מחסום רצפה תיקני 130/40',
+    nameHe: 'מחסום רצפה -130/40 לא תקני (מערכת C) כניסות 40',
     nameEn: 'Gully trap 130/40',
     qtyPack: 25,
     qtyPallet: 500,
@@ -1260,7 +1260,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116638',
-    nameHe: 'מאסף רצפה 130/50',
+    nameHe: 'מאסף רצפה 130/50 מערכת B',
     nameEn: 'Floor collector 130/50',
     qtyPack: 25,
     qtyPallet: 500,
@@ -1273,7 +1273,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '217648',
-    nameHe: 'מאסף רצפה 130/50 נפילה פנימית',
+    nameHe: 'מערכת B נפילה 100',
     nameEn: 'Floor collector 130/50 inner',
     qtyPack: 16,
     qtyPallet: 320,
@@ -1286,7 +1286,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116640',
-    nameHe: 'מאסף רצפה 130/50 נפילה 50°',
+    nameHe: 'מאסף רצפה B נפילה 2"',
     nameEn: 'Floor collector 130/50 with vertical outlet 50°',
     qtyPack: 25,
     qtyPallet: 500,
@@ -1299,7 +1299,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116175',
-    nameHe: 'מאסף רצפה 110 נפילה 4"',
+    nameHe: 'מאסף רצפה B 110 נפילה 4"',
     nameEn: 'Floor collector 110 with vertical outlet 4"',
     qtyPack: 15,
     qtyPallet: 300,
@@ -1326,7 +1326,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '610918',
-    nameHe: 'מכסה עגול עליון קבוע - לבן',
+    nameHe: 'מכסה עגול עליון קבוע לבן',
     nameEn: 'Top drainage cap - white',
     qtyPack: 120,
     qtyPallet: 5400,
@@ -1339,7 +1339,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '635737',
-    nameHe: 'מכסה עגול עליון קבוע - פרגמון',
+    nameHe: 'מכסה עגול עליון קבוע פרנמון',
     nameEn: 'Top drainage cap - travertine',
     qtyPack: 120,
     qtyPallet: 5400,
@@ -1374,7 +1374,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '610906',
-    nameHe: 'רשת פנימית עגולה - לבן',
+    nameHe: 'רשת פנימית עגולה לבן',
     nameEn: 'Inner drainage cover - white',
     qtyPack: 180,
     qtyPallet: 8100,
@@ -1387,7 +1387,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '635735',
-    nameHe: 'רשת פנימית עגולה - פרגמון',
+    nameHe: 'רשת פנימית עגולה פרנמון',
     nameEn: 'Inner drainage cover - travertine',
     qtyPack: 180,
     qtyPallet: 8100,
@@ -1402,7 +1402,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── אטמים אומים ופקקים נוספים — page 19 ─────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '506510',
-    nameHe: 'אטם דו צדדי DN32',
+    nameHe: 'אטם דו צדדי',
     nameEn: 'Double side gasket DN32',
     categoryHe: 'אטמים אומים ופקקים',
     categoryEn: 'Gaskets, Nuts & Plugs',
@@ -1413,7 +1413,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '506522',
-    nameHe: 'אטם דו צדדי DN40',
+    nameHe: 'אטם דו צדדי',
     nameEn: 'Double side gasket DN40',
     categoryHe: 'אטמים אומים ופקקים',
     categoryEn: 'Gaskets, Nuts & Plugs',
@@ -1424,7 +1424,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '506527',
-    nameHe: 'אטם דו צדדי DN50',
+    nameHe: 'אטם דו צדדי',
     nameEn: 'Double side gasket DN50',
     categoryHe: 'אטמים אומים ופקקים',
     categoryEn: 'Gaskets, Nuts & Plugs',
@@ -1435,7 +1435,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '555703',
-    nameHe: 'אטם דו צדדי DN60',
+    nameHe: 'אטם דו צדדי',
     nameEn: 'Double side gasket DN60',
     categoryHe: 'אטמים אומים ופקקים',
     categoryEn: 'Gaskets, Nuts & Plugs',
@@ -1446,7 +1446,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '506539',
-    nameHe: 'אטם חתך שטוח DN46',
+    nameHe: 'אטם חתך שטוח',
     nameEn: 'Flat rubber gasket DN46',
     categoryHe: 'אטמים אומים ופקקים',
     categoryEn: 'Gaskets, Nuts & Plugs',
@@ -1457,7 +1457,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '506521',
-    nameHe: 'אטם חתך שטוח DN46/0',
+    nameHe: 'אטם חתך שטוח',
     nameEn: 'Flat rubber gasket DN46/0',
     categoryHe: 'אטמים אומים ופקקים',
     categoryEn: 'Gaskets, Nuts & Plugs',
@@ -1468,7 +1468,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '506537',
-    nameHe: 'אטם כדורי DN50/40',
+    nameHe: 'אטם כדורי',
     nameEn: 'Round rubber gasket DN50/40',
     qtyPack: 750,
     categoryHe: 'אטמים אומים ופקקים',
@@ -1480,7 +1480,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '506540',
-    nameHe: 'אטם כדורי DN60/50',
+    nameHe: 'אטם כדורי',
     nameEn: 'Round rubber gasket DN60/50',
     qtyPack: 750,
     categoryHe: 'אטמים אומים ופקקים',
@@ -1492,7 +1492,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218127',
-    nameHe: 'פקק למאסף ולמחסום רצפה 2.5"',
+    nameHe: 'פקק למאסף ולמחסום רצפה + אטם',
     nameEn: 'Floor trap plug 2.5"',
     qtyPack: 50,
     categoryHe: 'אטמים אומים ופקקים',
@@ -1503,7 +1503,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218126',
-    nameHe: 'פקק למאסף ולמחסום רצפה 2"',
+    nameHe: 'פקק למאסף ולמחסום רצפה + אטם',
     nameEn: 'Floor trap plug 2"',
     qtyPack: 50,
     categoryHe: 'אטמים אומים ופקקים',
@@ -1524,7 +1524,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '614783',
-    nameHe: 'פקק שטוח לתבריג 1.5"',
+    nameHe: 'פקק שטוח לתבריג 1/2"',
     nameEn: 'Flat screwing plug 1.5"',
     categoryHe: 'אטמים אומים ופקקים',
     categoryEn: 'Gaskets, Nuts & Plugs',
@@ -1534,7 +1534,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '612386',
-    nameHe: 'פקק שטוח לתבריג 2" (חוט פנים)',
+    nameHe: 'פקק שטוח לתבריג 2" טנת אפור',
     nameEn: 'Flat screwing plug 2" female',
     categoryHe: 'אטמים אומים ופקקים',
     categoryEn: 'Gaskets, Nuts & Plugs',
@@ -1544,7 +1544,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '612385',
-    nameHe: 'פקק שטוח לתבריג 2" (חוט חוץ)',
+    nameHe: 'פקק שטוח לתבריג 2" טנת לבן',
     nameEn: 'Flat screwing plug 2" male',
     categoryHe: 'אטמים אומים ופקקים',
     categoryEn: 'Gaskets, Nuts & Plugs',
@@ -1564,7 +1564,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '506525',
-    nameHe: 'אטם לכוס 2"',
+    nameHe: 'אטם דו צדדי',
     nameEn: '2" Glass gasket',
     categoryHe: 'אטמים אומים ופקקים',
     categoryEn: 'Gaskets, Nuts & Plugs',
@@ -1576,7 +1576,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── ברכיים — page 21 ─────────────────────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '116624',
-    nameHe: 'ברך 87° DN40',
+    nameHe: 'ברך 90° - תבריג כפול',
     nameEn: '87° Bend DN40',
     qtyPack: 120,
     qtyPallet: 5400,
@@ -1589,7 +1589,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116601',
-    nameHe: 'ברך 87° DN50',
+    nameHe: 'ברך 90° - תבריג כפול',
     nameEn: '87° Bend DN50',
     qtyPack: 75,
     qtyPallet: 3375,
@@ -1602,7 +1602,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116033',
-    nameHe: 'ברך 87° DN75',
+    nameHe: 'ברך 90° - תבריג כפול',
     nameEn: '87° Bend DN75',
     qtyPack: 50,
     qtyPallet: 1200,
@@ -1615,7 +1615,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '142289',
-    nameHe: 'ברך 87° DN110',
+    nameHe: 'ברך 90° - תבריג כפול',
     nameEn: '87° Bend DN110',
     qtyPack: 20,
     qtyPallet: 720,
@@ -1628,7 +1628,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116028',
-    nameHe: 'ברך 87° DN160',
+    nameHe: 'ברך 90° - תבריג כפול',
     nameEn: '87° Bend DN160',
     qtyPack: 8,
     qtyPallet: 240,
@@ -1641,7 +1641,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116031',
-    nameHe: 'ברך 87° עם ביקורת DN50',
+    nameHe: 'ברך 30° - תבריג כפול',
     nameEn: '87° Bend with outlet DN50',
     qtyPack: 60,
     qtyPallet: 2700,
@@ -1654,7 +1654,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '124843',
-    nameHe: 'ברך 87° עם ביקורת DN110 (2 כניסות)',
+    nameHe: 'ברך 30° - תבריג כפול',
     nameEn: '87° Bend with outlet DN110 (2 outlets)',
     qtyPack: 20,
     qtyPallet: 720,
@@ -1667,7 +1667,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116026',
-    nameHe: 'ברך 87° עם ביקורת DN110 (4 כניסות)',
+    nameHe: 'ברך 30° - תבריג כפול',
     nameEn: '87° Bend with outlet DN110 (4 outlets)',
     qtyPack: 20,
     qtyPallet: 720,
@@ -1680,7 +1680,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '194899',
-    nameHe: 'ברך 15° DN110',
+    nameHe: 'ברך 15° - תבריג כפול',
     nameEn: '15° Bend DN110',
     qtyPack: 24,
     categoryHe: 'ברכיים',
@@ -1692,7 +1692,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '194900',
-    nameHe: 'ברך 30° DN110',
+    nameHe: 'ברך 30° - תבריג כפול',
     nameEn: '30° Bend DN110',
     qtyPack: 24,
     categoryHe: 'ברכיים',
@@ -1704,7 +1704,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116591',
-    nameHe: 'ברך 45° DN50',
+    nameHe: 'ברך 45° - תבריג כפול',
     nameEn: '45° Bend DN50',
     qtyPack: 85,
     qtyPallet: 3825,
@@ -1717,7 +1717,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116553',
-    nameHe: 'ברך 45° DN75',
+    nameHe: 'ברך 45° - תבריג כפול',
     nameEn: '45° Bend DN75',
     qtyPack: 48,
     qtyPallet: 1920,
@@ -1730,7 +1730,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '161884',
-    nameHe: 'ברך 45° DN110',
+    nameHe: 'ברך 45° - תבריג כפול',
     nameEn: '45° Bend DN110',
     qtyPack: 20,
     qtyPallet: 1000,
@@ -1743,7 +1743,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '190297',
-    nameHe: 'ברך 45° DN110 גלגל רגיל',
+    nameHe: 'ברך 45° - תבריג כפול',
     nameEn: '45° Bend DN110 large radius',
     qtyPack: 20,
     qtyPallet: 1000,
@@ -1756,7 +1756,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116037',
-    nameHe: 'ברך 45° DN160',
+    nameHe: 'ברך 45° - תבריג כפול',
     nameEn: '45° Bend DN160',
     qtyPack: 8,
     qtyPallet: 320,
@@ -1793,7 +1793,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '211805',
-    nameHe: 'חיבור ישיר לאסלה (קצר) DN110',
+    nameHe: 'ברך WC אסלה',
     nameEn: 'Straight WC connection short DN110',
     qtyPack: 10,
     qtyPallet: 300,
@@ -1873,7 +1873,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116680',
-    nameHe: 'מצמד חיתוכי 50/40',
+    nameHe: 'מצרות תבריג',
     nameEn: 'Eccentric reducer 50/40',
     qtyPack: 100,
     qtyPallet: 4500,
@@ -1914,7 +1914,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── צינורות — page 24 ─────────────────────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '273227',
-    nameHe: 'צינור ש"ת DN40 אורך 300 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Pipe with socket DN40 L=300cm',
     qtyPack: 50,
     categoryHe: 'צינורות',
@@ -1938,7 +1938,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '221022',
-    nameHe: 'צינור ש"ת DN50 אורך 100 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Pipe with socket DN50 L=100cm',
     qtyPack: 50,
     categoryHe: 'צינורות',
@@ -1962,7 +1962,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '221085',
-    nameHe: 'צינור ש"ת DN75 אורך 50 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Pipe with socket DN75 L=50cm',
     qtyPack: 50,
     categoryHe: 'צינורות',
@@ -1986,7 +1986,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116113',
-    nameHe: 'צינור ש"ת DN110 אורך 50 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Pipe with socket DN110 L=50cm',
     qtyPack: 15,
     categoryHe: 'צינורות',
@@ -1998,7 +1998,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '219791',
-    nameHe: 'צינור ש"ת DN110 אורך 100 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Pipe with socket DN110 L=100cm',
     qtyPack: 25,
     categoryHe: 'צינורות',
@@ -2036,7 +2036,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '224169',
-    nameHe: 'צנרת PP-MD-ML SN8 DN110 אורך 100 ס"מ',
+    nameHe: 'צינור לביוב PP-MD-ML',
     nameEn: 'Pipe PP-MD-ML SN8 DN110 L=100cm',
     qtyPack: 100,
     categoryHe: 'צינורות',
@@ -2048,7 +2048,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '273216',
-    nameHe: 'צנרת SUPER BETON/SILENT DN75 אורך 300 ס"מ',
+    nameHe: 'צינור רב שכבתי שחור',
     nameEn: 'Pipe Super Beton/Silent DN75 L=300cm',
     qtyPack: 120,
     categoryHe: 'צינורות',
@@ -2060,7 +2060,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '273201',
-    nameHe: 'צנרת SUPER BETON/SILENT DN110 אורך 300 ס"מ',
+    nameHe: 'צינור רב שכבתי שחור',
     nameEn: 'Pipe Super Beton/Silent DN110 L=300cm',
     qtyPack: 80,
     categoryHe: 'צינורות',
@@ -2072,7 +2072,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '273219',
-    nameHe: 'צנרת SUPER BETON/SILENT DN160 אורך 300 ס"מ',
+    nameHe: 'צינור רב שכבתי שחור',
     nameEn: 'Pipe Super Beton/Silent DN160 L=300cm',
     qtyPack: 24,
     categoryHe: 'צינורות',
@@ -2086,7 +2086,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── התקנה גבוהה — page 26 ────────────────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '152785',
-    nameHe: 'מיכל הדחה טיטאן - לבן',
+    nameHe: 'מושבי אסלה תרמופלסטיים',
     nameEn: 'Titan dual quantity toilet tank - white',
     color: 'לבן',
     qtyPack: 60,
@@ -2098,7 +2098,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '152786',
-    nameHe: 'מיכל הדחה טיטאן - פרגמון',
+    nameHe: 'מושבי אסלה תרמופלסטיים',
     nameEn: 'Titan dual quantity toilet tank - travertine',
     color: 'פרגמון',
     qtyPack: 60,
@@ -2110,7 +2110,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '152787',
-    nameHe: 'מיכל הדחה טיטאן - אפור',
+    nameHe: 'מושבי אסלה תרמופלסטיים',
     nameEn: 'Titan dual quantity toilet tank - grey',
     color: 'אפור',
     qtyPack: 60,
@@ -2122,7 +2122,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '145629',
-    nameHe: 'מיכל הדחה יהלום - לבן',
+    nameHe: 'מושב אסלה תרמוסט',
     nameEn: 'Yahalon dual quantity toilet tank - white',
     color: 'לבן',
     qtyPack: 50,
@@ -2134,7 +2134,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '145630',
-    nameHe: 'מיכל הדחה יהלום - פרגמון',
+    nameHe: 'מושב אסלה תרמוסט',
     nameEn: 'Yahalon dual quantity toilet tank - travertine',
     color: 'פרגמון',
     qtyPack: 50,
@@ -2146,7 +2146,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '145631',
-    nameHe: 'מיכל הדחה יהלום - אפור',
+    nameHe: 'מושב אסלה תרמוסט',
     nameEn: 'Yahalon dual quantity toilet tank - grey',
     color: 'אפור',
     qtyPack: 50,
@@ -2244,7 +2244,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116795',
-    nameHe: 'מיכל הדחה טופז - פרגמון',
+    nameHe: 'התקנה נמוכה',
     nameEn: 'Topaz dual quantity toilet tank - travertine',
     color: 'פרגמון',
     qtyPack: 70,
@@ -2256,7 +2256,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116798',
-    nameHe: 'מיכל הדחה טופז - אפור',
+    nameHe: 'התקנה צמודה',
     nameEn: 'Topaz dual quantity toilet tank - grey',
     color: 'אפור',
     qtyPack: 70,
@@ -2280,7 +2280,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '154069',
-    nameHe: 'מיכל הדחה טיטאן נמוך - פרגמון',
+    nameHe: 'התקנה נמוכה',
     nameEn: 'Low Titan toilet tank - travertine',
     color: 'פרגמון',
     qtyPack: 65,
@@ -2292,7 +2292,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '154413',
-    nameHe: 'מיכל הדחה טיטאן נמוך - אפור',
+    nameHe: 'התקנה צמודה',
     nameEn: 'Low Titan toilet tank - grey',
     color: 'אפור',
     qtyPack: 65,
@@ -2306,7 +2306,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── התקנה צמודה (מונובלוק) — page 27 ────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '168525',
-    nameHe: 'מיכל הדחה כינרת מונובלוק - לבן',
+    nameHe: 'מושב אסלה',
     nameEn: 'Kinert monoblock toilet tank - white',
     color: 'לבן',
     qtyPack: 56,
@@ -2318,7 +2318,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '169604',
-    nameHe: 'מיכל הדחה כינרת מונובלוק - פרגמון',
+    nameHe: 'מושב אסלה',
     nameEn: 'Kinert monoblock toilet tank - travertine',
     color: 'פרגמון',
     qtyPack: 56,
@@ -2330,7 +2330,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '178864',
-    nameHe: 'מיכל הדחה ברקת מונובלוק - לבן',
+    nameHe: 'מושב אסלה',
     nameEn: 'Bareket monoblock toilet tank - white',
     color: 'לבן',
     categoryHe: 'התקנה צמודה',
@@ -2341,7 +2341,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '178867',
-    nameHe: 'מיכל הדחה ברקת מונובלוק - פרגמון',
+    nameHe: 'מושב אסלה',
     nameEn: 'Bareket monoblock toilet tank - travertine',
     color: 'פרגמון',
     qtyPack: 56,
@@ -2353,7 +2353,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '178870',
-    nameHe: 'מיכל הדחה ברקת מונובלוק - אפור',
+    nameHe: 'מושב אסלה',
     nameEn: 'Bareket monoblock toilet tank - grey',
     color: 'אפור',
     qtyPack: 70,
@@ -2378,7 +2378,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '686366',
-    nameHe: 'מצוף מילוי הידראולי 3/8-1/2',
+    nameHe: 'חלקים למוצרים סניטריים',
     nameEn: 'Flushing valve hydraulic 3/8-1/2',
     qtyPack: 50,
     categoryHe: 'חלקים סניטריים',
@@ -2389,7 +2389,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '642102',
-    nameHe: 'מצוף מילוי מכני',
+    nameHe: 'חלקים למוצרים סניטריים',
     nameEn: 'Flushing valve mechanical',
     qtyPack: 50,
     categoryHe: 'חלקים סניטריים',
@@ -2440,7 +2440,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── Page 12 — מסעפים עם תבריג (Screw-on Branches 45°) ──────────────────────
   LipskeyCatalogProduct(
     sku: '187463',
-    nameHe: 'מסעף 45° DN32 עם תבריג | כולל 3 אומים ו-3 אטמים',
+    nameHe: 'מסעף 45° - תבריג',
     nameEn: 'Branch 45° DN32 screw-on | Includes 3 nuts and 3 seals',
     qtyPack: 50,
     qtyPallet: 3600,
@@ -2564,7 +2564,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116684',
-    nameHe: 'מסעף 90° DN110 עם תבריג · כולל 3 אומים ו-3 אטמים',
+    nameHe: 'מסעף 90° - תבריג',
     nameEn: 'Branch 90° DN110 screw-on | Includes 3 nuts and 3 seals',
     qtyPack: 18,
     qtyPallet: 1350,
@@ -2578,7 +2578,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── מסעפים שקע-תקע 45° — p42 ─────────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '116573',
-    nameHe: 'מסעף 45° DN50/50',
+    nameHe: 'מסעף 45° - תבריג כפול',
     nameEn: '45° Branch DN50/50',
     qtyPack: 45,
     qtyPallet: 2025,
@@ -2591,7 +2591,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116056',
-    nameHe: 'מסעף 45° DN110/50',
+    nameHe: 'מסעף 45° - תבריג כפול',
     nameEn: '45° Branch DN110/50',
     qtyPack: 20,
     qtyPallet: 600,
@@ -2604,7 +2604,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116571',
-    nameHe: 'מסעף 45° DN110/110',
+    nameHe: 'מסעף 45° - תבריג כפול',
     nameEn: '45° Branch DN110/110',
     qtyPack: 9,
     qtyPallet: 360,
@@ -2632,7 +2632,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116054',
-    nameHe: 'מסעף 87° DN75/75',
+    nameHe: 'מסעף 90° - תבריג',
     nameEn: '87° Branch DN75/75',
     qtyPack: 25,
     qtyPallet: 1000,
@@ -2645,7 +2645,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116556',
-    nameHe: 'מסעף 87° DN110/110',
+    nameHe: 'מסעף 90° - תבריג',
     nameEn: '87° Branch DN110/110',
     qtyPack: 12,
     qtyPallet: 480,
@@ -2658,7 +2658,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116049',
-    nameHe: 'מסעף 87° DN160/110',
+    nameHe: 'מסעף 90° - תבריג',
     nameEn: '87° Branch DN160/110',
     qtyPack: 6,
     qtyPallet: 168,
@@ -2686,7 +2686,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── זקיף אסלה נוסף — p43 ─────────────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '145858',
-    nameHe: 'ברך אסלה לבן עם אטם',
+    nameHe: 'ברך WC אסלה',
     nameEn: 'W.C. bend with outlet - white',
     color: 'לבן',
     qtyPack: 10,
@@ -2712,7 +2712,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '121216',
-    nameHe: 'חיבור ישיר לאסלה עם ביקורת DN110',
+    nameHe: 'זקיף אסלה',
     nameEn: 'Straight WC connection with outlet DN110',
     qtyPack: 10,
     qtyPallet: 300,
@@ -2727,7 +2727,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── מחברים כפולים עם/בלי מעצור — p44 ────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '214533',
-    nameHe: 'מחבר כפול DN50 עם מעצור',
+    nameHe: 'מחבר כפול',
     nameEn: 'Double socket DN50 with stop',
     qtyPack: 100,
     qtyPallet: 4500,
@@ -2740,7 +2740,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '214534',
-    nameHe: 'מחבר כפול DN75 עם מעצור',
+    nameHe: 'מחבר כפול',
     nameEn: 'Double socket DN75 with stop',
     qtyPack: 100,
     qtyPallet: 4200,
@@ -2753,7 +2753,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '212937',
-    nameHe: 'מחבר כפול DN75',
+    nameHe: 'מחבר כפול',
     nameEn: 'Double socket DN75',
     qtyPack: 100,
     qtyPallet: 4500,
@@ -2766,7 +2766,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '124842',
-    nameHe: 'מחבר כפול DN110 עם מעצור',
+    nameHe: 'מצמד כפול',
     nameEn: 'Double socket DN110 with stop',
     qtyPack: 41,
     qtyPallet: 820,
@@ -2779,7 +2779,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116576',
-    nameHe: 'מחבר כפול DN110 ללא מעצור',
+    nameHe: 'מצרות תבריג',
     nameEn: 'Double socket DN110 without stop',
     qtyPack: 41,
     qtyPallet: 820,
@@ -2820,7 +2820,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '217674',
-    nameHe: 'מצרה DN110/75',
+    nameHe: 'מחבר כפול',
     nameEn: 'Eccentric reducer DN110/75',
     qtyPack: 32,
     qtyPallet: 1920,
@@ -2833,7 +2833,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '217531',
-    nameHe: 'מצרה DN75/50',
+    nameHe: 'מחבר כפול',
     nameEn: 'Eccentric reducer DN75/50',
     qtyPack: 90,
     qtyPallet: 4050,
@@ -2846,7 +2846,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '194898',
-    nameHe: 'מצמד ארוך לתיקון (טלסקופי) DN110/110',
+    nameHe: 'מחבר כפול',
     nameEn: 'Long socket (telescopic) DN110/110',
     qtyPack: 12,
     qtyPallet: 576,
@@ -2861,7 +2861,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── פקקים שקע-תקע DN75 + DN110 — p45 ─────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '805024',
-    nameHe: 'פקק שקע-תקע DN75',
+    nameHe: 'פקק הכנסה',
     nameEn: 'Insertion plug DN75',
     qtyPack: 25,
     qtyPallet: 1900,
@@ -2874,7 +2874,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116628',
-    nameHe: 'פקק שקע-תקע DN110',
+    nameHe: 'מחבר לצינור הכנסה',
     nameEn: 'Insertion plug DN110',
     qtyPack: 48,
     qtyPallet: 3300,
@@ -2889,7 +2889,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── צינורות חלקים (ללא שקע) — p45 ────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '116180',
-    nameHe: 'צינור חלק DN32 L=400 ס"מ',
+    nameHe: 'צינור הכנסה אפור',
     nameEn: 'Smooth pipe DN32 L=400cm',
     qtyPack: 40,
     categoryHe: 'צינורות',
@@ -2901,7 +2901,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116593',
-    nameHe: 'צינור חלק DN40 L=400 ס"מ',
+    nameHe: 'צינור הכנסה אפור',
     nameEn: 'Smooth pipe DN40 L=400cm',
     qtyPack: 40,
     categoryHe: 'צינורות',
@@ -2913,7 +2913,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '164588',
-    nameHe: 'צינור חלק DN50 L=400 ס"מ',
+    nameHe: 'צינור הכנסה אפור',
     nameEn: 'Smooth pipe DN50 L=400cm',
     qtyPack: 40,
     categoryHe: 'צינורות',
@@ -2969,7 +2969,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116071',
-    nameHe: 'צינור אפור DN40 L=400 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Grey pipe DN40 L=400cm',
     color: 'אפור',
     qtyPack: 10,
@@ -3027,7 +3027,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116078',
-    nameHe: 'צינור אפור DN50 L=400 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Grey pipe DN50 L=400cm',
     color: 'אפור',
     qtyPack: 10,
@@ -3071,7 +3071,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116091',
-    nameHe: 'צינור אפור DN75 L=300 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Grey pipe DN75 L=300cm',
     color: 'אפור',
     qtyPack: 10,
@@ -3085,7 +3085,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116093',
-    nameHe: 'צינור אפור DN75 L=400 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Grey pipe DN75 L=400cm',
     color: 'אפור',
     qtyPack: 10,
@@ -3101,7 +3101,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── צינורות אפורות DN110 — p47 ────────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '116617',
-    nameHe: 'צינור אפור DN110 L=25 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Grey pipe DN110 L=25cm',
     color: 'אפור',
     qtyPack: 4,
@@ -3114,7 +3114,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116620',
-    nameHe: 'צינור אפור DN110 L=50 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Grey pipe DN110 L=50cm',
     color: 'אפור',
     qtyPack: 20,
@@ -3142,7 +3142,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116099',
-    nameHe: 'צינור אפור DN110 L=100 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Grey pipe DN110 L=100cm',
     color: 'אפור',
     qtyPack: 10,
@@ -3156,7 +3156,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116101',
-    nameHe: 'צינור אפור DN110 L=150 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Grey pipe DN110 L=150cm',
     color: 'אפור',
     qtyPack: 10,
@@ -3170,7 +3170,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116622',
-    nameHe: 'צינור אפור DN110 L=200 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Grey pipe DN110 L=200cm',
     color: 'אפור',
     categoryHe: 'צינורות',
@@ -3182,7 +3182,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116103',
-    nameHe: 'צינור אפור DN110 L=300 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Grey pipe DN110 L=300cm',
     color: 'אפור',
     qtyPack: 10,
@@ -3196,7 +3196,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116105',
-    nameHe: 'צינור אפור DN110 L=400 ס"מ',
+    nameHe: 'צינור אפורה',
     nameEn: 'Grey pipe DN110 L=400cm',
     color: 'אפור',
     qtyPack: 10,
@@ -3212,7 +3212,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── PP-MD-ML SN4 — p48 ────────────────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '224168',
-    nameHe: 'צנרת PP-MD-ML SN4 DN110 L=300 ס"מ',
+    nameHe: 'צינור לביוב PP-MD-ML',
     nameEn: 'Pipe PP-MD-ML SN4 DN110 L=300cm',
     qtyPack: 80,
     categoryHe: 'צינורות',
@@ -3224,7 +3224,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '224170',
-    nameHe: 'צנרת PP-MD-ML SN4 DN110 L=50 ס"מ',
+    nameHe: 'צינור לביוב PP-MD-ML',
     nameEn: 'Pipe PP-MD-ML SN4 DN110 L=50cm',
     qtyPack: 240,
     categoryHe: 'צינורות',
@@ -3236,7 +3236,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '224185',
-    nameHe: 'צנרת PP-MD-ML SN4 DN160 L=300 ס"מ',
+    nameHe: 'צינור לביוב PP-MD-ML',
     nameEn: 'Pipe PP-MD-ML SN4 DN160 L=300cm',
     qtyPack: 24,
     categoryHe: 'צינורות',
@@ -3248,7 +3248,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '224186',
-    nameHe: 'צנרת PP-MD-ML SN4 DN160 L=100 ס"מ',
+    nameHe: 'צינור לביוב PP-MD-ML',
     nameEn: 'Pipe PP-MD-ML SN4 DN160 L=100cm',
     qtyPack: 24,
     categoryHe: 'צינורות',
@@ -3260,7 +3260,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '224187',
-    nameHe: 'צנרת PP-MD-ML SN4 DN160 L=50 ס"מ',
+    nameHe: 'צינור לביוב PP-MD-ML',
     nameEn: 'Pipe PP-MD-ML SN4 DN160 L=50cm',
     qtyPack: 48,
     categoryHe: 'צינורות',
@@ -3274,7 +3274,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── PP-MD-ML SN8 — p48 ────────────────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '224345',
-    nameHe: 'צנרת PP-MD-ML SN8 DN110 L=300 ס"מ',
+    nameHe: 'צינור לביוב PP-MD-ML',
     nameEn: 'Pipe PP-MD-ML SN8 DN110 L=300cm',
     qtyPack: 80,
     categoryHe: 'צינורות',
@@ -3286,7 +3286,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '224344',
-    nameHe: 'צנרת PP-MD-ML SN8 DN110 L=100 ס"מ',
+    nameHe: 'צינור לביוב PP-MD-ML',
     nameEn: 'Pipe PP-MD-ML SN8 DN110 L=100cm',
     qtyPack: 160,
     categoryHe: 'צינורות',
@@ -3298,7 +3298,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '224348',
-    nameHe: 'צנרת PP-MD-ML SN8 DN160 L=300 ס"מ',
+    nameHe: 'צינור לביוב PP-MD-ML',
     nameEn: 'Pipe PP-MD-ML SN8 DN160 L=300cm',
     qtyPack: 24,
     categoryHe: 'צינורות',
@@ -3310,7 +3310,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '224347',
-    nameHe: 'צנרת PP-MD-ML SN8 DN160 L=100 ס"מ',
+    nameHe: 'צינור לביוב PP-MD-ML',
     nameEn: 'Pipe PP-MD-ML SN8 DN160 L=100cm',
     qtyPack: 24,
     categoryHe: 'צינורות',
@@ -3322,7 +3322,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '224346',
-    nameHe: 'צנרת PP-MD-ML SN8 DN160 L=50 ס"מ',
+    nameHe: 'צינור לביוב PP-MD-ML',
     nameEn: 'Pipe PP-MD-ML SN8 DN160 L=50cm',
     qtyPack: 48,
     categoryHe: 'צינורות',
@@ -3336,7 +3336,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── SUPER BETON/SILENT נוספים — p48 ──────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '273217',
-    nameHe: 'צנרת SUPER BETON/SILENT DN75 L=100 ס"מ',
+    nameHe: 'צינור רב שכבתי שחור',
     nameEn: 'Pipe Super Beton/Silent DN75 L=100cm',
     qtyPack: 300,
     categoryHe: 'צינורות',
@@ -3348,7 +3348,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '273202',
-    nameHe: 'צנרת SUPER BETON/SILENT DN110 L=100 ס"מ',
+    nameHe: 'צינור רב שכבתי שחור',
     nameEn: 'Pipe Super Beton/Silent DN110 L=100cm',
     qtyPack: 160,
     categoryHe: 'צינורות',
@@ -3360,7 +3360,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '273203',
-    nameHe: 'צנרת SUPER BETON/SILENT DN110 L=50 ס"מ',
+    nameHe: 'צינור רב שכבתי שחור',
     nameEn: 'Pipe Super Beton/Silent DN110 L=50cm',
     qtyPack: 240,
     categoryHe: 'צינורות',
@@ -3372,7 +3372,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '273215',
-    nameHe: 'צנרת SUPER BETON/SILENT DN110 L=25 ס"מ',
+    nameHe: 'צינור רב שכבתי שחור',
     nameEn: 'Pipe Super Beton/Silent DN110 L=25cm',
     qtyPack: 480,
     categoryHe: 'צינורות',
@@ -3384,7 +3384,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '273220',
-    nameHe: 'צנרת SUPER BETON/SILENT DN160 L=100 ס"מ',
+    nameHe: 'צינור רב שכבתי שחור',
     nameEn: 'Pipe Super Beton/Silent DN160 L=100cm',
     qtyPack: 24,
     categoryHe: 'צינורות',
@@ -3396,7 +3396,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '273221',
-    nameHe: 'צנרת SUPER BETON/SILENT DN160 L=50 ס"מ',
+    nameHe: 'צינור רב שכבתי שחור',
     nameEn: 'Pipe Super Beton/Silent DN160 L=50cm',
     qtyPack: 48,
     categoryHe: 'צינורות',
@@ -3433,7 +3433,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116186',
-    nameHe: 'ברך 90° תבריג צד אחד DN40/40',
+    nameHe: 'ברך 90° - תבריג צד אחד',
     nameEn: 'Band 90° Single Side Screw-on DN40/40',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3445,7 +3445,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116191',
-    nameHe: 'ברך 90° תבריג צד אחד DN50/50',
+    nameHe: 'ברך 90° - תבריג צד אחד',
     nameEn: 'Band 90° Single Side Screw-on DN50/50',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3458,7 +3458,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ברכיים 45° תבריג כפול — page 21
   LipskeyCatalogProduct(
     sku: '116668',
-    nameHe: 'ברך 45° תבריג כפול DN32/32',
+    nameHe: 'ברך 45° - תבריג כפול',
     nameEn: 'Band 45° Double Screw-on DN32/32',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3470,7 +3470,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116199',
-    nameHe: 'ברך 45° תבריג כפול DN40/40',
+    nameHe: 'ברך 45° - תבריג כפול',
     nameEn: 'Band 45° Double Screw-on DN40/40',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3482,7 +3482,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116197',
-    nameHe: 'ברך 45° תבריג כפול DN50/40',
+    nameHe: 'ברך 45° - תבריג כפול',
     nameEn: 'Band 45° Double Screw-on DN50/40',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3494,7 +3494,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116201',
-    nameHe: 'ברך 45° תבריג כפול DN50/50',
+    nameHe: 'ברך 45° - תבריג כפול',
     nameEn: 'Band 45° Double Screw-on DN50/50',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3506,7 +3506,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116670',
-    nameHe: 'ברך 45° תבריג כפול DN75/75',
+    nameHe: 'ברך 45° - תבריג כפול',
     nameEn: 'Band 45° Double Screw-on DN75/75',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3518,7 +3518,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116666',
-    nameHe: 'ברך 45° תבריג כפול DN110/110',
+    nameHe: 'ברך 45° - תבריג כפול',
     nameEn: 'Band 45° Double Screw-on DN110/110',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3531,7 +3531,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ברכיים 90° תבריג כפול — page 21
   LipskeyCatalogProduct(
     sku: '116656',
-    nameHe: 'ברך 90° תבריג כפול DN32/32',
+    nameHe: 'ברך 90° - תבריג כפול',
     nameEn: 'Band 90° Double Screw-on DN32/32',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3543,7 +3543,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116182',
-    nameHe: 'ברך 90° תבריג כפול DN40/40',
+    nameHe: 'ברך 90° - תבריג כפול',
     nameEn: 'Band 90° Double Screw-on DN40/40',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3555,7 +3555,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '119934',
-    nameHe: 'ברך 90° תבריג כפול DN50/40',
+    nameHe: 'ברך 90° - תבריג כפול',
     nameEn: 'Band 90° Double Screw-on DN50/40',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3567,7 +3567,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116661',
-    nameHe: 'ברך 90° תבריג כפול DN50/50',
+    nameHe: 'ברך 90° - תבריג כפול',
     nameEn: 'Band 90° Double Screw-on DN50/50',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3579,7 +3579,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116663',
-    nameHe: 'ברך 90° תבריג כפול DN75/75',
+    nameHe: 'ברך 90° - תבריג כפול',
     nameEn: 'Band 90° Double Screw-on DN75/75',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3591,7 +3591,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116659',
-    nameHe: 'ברך 90° תבריג כפול DN110/110',
+    nameHe: 'ברך 90° - תבריג כפול',
     nameEn: 'Band 90° Double Screw-on DN110/110',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3604,7 +3604,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ברך 90° ש"ת לסיפון — page 21
   LipskeyCatalogProduct(
     sku: '116194',
-    nameHe: 'ברך 90° ש"ת לסיפון DN40/40',
+    nameHe: 'ברך 90° - תבריג צד אחד לסיפון',
     nameEn: 'Band 90° Screw-on to Siphon DN40/40',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3616,7 +3616,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '204127',
-    nameHe: 'ברך 90° ש"ת לסיפון DN50/50',
+    nameHe: 'ברך 90° - תבריג צד אחד לסיפון',
     nameEn: 'Band 90° Screw-on to Siphon DN50/50',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3629,7 +3629,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // מסעפים תבריג — page 22
   LipskeyCatalogProduct(
     sku: '116223',
-    nameHe: 'מסעף 45° תבריג DN40/40/40',
+    nameHe: 'מסעף 45° - תבריג',
     nameEn: 'Branch 45° Screw-on DN40/40/40',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3641,7 +3641,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116225',
-    nameHe: 'מסעף 45° תבריג DN50/40/50',
+    nameHe: 'מסעף 45° - תבריג',
     nameEn: 'Branch 45° Screw-on DN50/40/50',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3653,7 +3653,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116220',
-    nameHe: 'מסעף 45° תבריג DN50/50/50',
+    nameHe: 'מסעף 45° - תבריג',
     nameEn: 'Branch 45° Screw-on DN50/50/50',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3665,7 +3665,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116229',
-    nameHe: 'מסעף 45° ללא תבריג DN40/40/40',
+    nameHe: 'מסעף 45° - צד ללא תבריג',
     nameEn: 'Branch 45° No Screw-on Side DN40/40/40',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3677,7 +3677,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116231',
-    nameHe: 'מסעף 45° ללא תבריג DN50/40/50',
+    nameHe: 'מסעף 45° - צד ללא תבריג',
     nameEn: 'Branch 45° No Screw-on Side DN50/40/50',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3689,7 +3689,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116689',
-    nameHe: 'מסעף 90° תבריג DN40/40/40',
+    nameHe: 'מסעף 90° - תבריג',
     nameEn: 'Branch 90° Screw-on DN40/40/40',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3701,7 +3701,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116682',
-    nameHe: 'מסעף 90° תבריג DN50/40/50',
+    nameHe: 'מסעף 90° - תבריג',
     nameEn: 'Branch 90° Screw-on DN50/40/50',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3713,7 +3713,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116687',
-    nameHe: 'מסעף 90° תבריג DN50/50/50',
+    nameHe: 'מסעף 90° - תבריג',
     nameEn: 'Branch 90° Screw-on DN50/50/50',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3726,7 +3726,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // מחברים כפולים תבריג — page 23
   LipskeyCatalogProduct(
     sku: '116209',
-    nameHe: 'מחבר כפול תבריג DN32/32',
+    nameHe: 'מחבר כפול',
     nameEn: 'Double Connector Screw-on DN32/32',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3738,7 +3738,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116672',
-    nameHe: 'מחבר כפול תבריג DN40/40',
+    nameHe: 'מחבר כפול',
     nameEn: 'Double Connector Screw-on DN40/40',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3750,7 +3750,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116675',
-    nameHe: 'מחבר כפול תבריג DN50/50',
+    nameHe: 'מחבר כפול',
     nameEn: 'Double Connector Screw-on DN50/50',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3763,7 +3763,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // מצרות תבריג — page 23
   LipskeyCatalogProduct(
     sku: '116677',
-    nameHe: 'מצרות תבריג DN32/32',
+    nameHe: 'מצרות תבריג',
     nameEn: 'Screw-on Reducer DN32/32',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3775,7 +3775,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116212',
-    nameHe: 'מצרות תבריג DN50/40',
+    nameHe: 'מצרות תבריג',
     nameEn: 'Screw-on Reducer DN50/40',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3787,7 +3787,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116215',
-    nameHe: 'מצרות תבריג DN50/50',
+    nameHe: 'מצרות תבריג',
     nameEn: 'Screw-on Reducer DN50/50',
     qtyPack: null,
     categoryHe: 'אביזרי תבריג',
@@ -3800,7 +3800,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // מפתחות — page 23
   LipskeyCatalogProduct(
     sku: '610893',
-    nameHe: 'סט מפתחות לאביק',
+    nameHe: 'סט מפתחות',
     nameEn: 'Wrench Set for Avic',
     qtyPack: null,
     categoryHe: 'כלי עבודה',
@@ -3823,7 +3823,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // מחסומי קוקלום — page 27
   LipskeyCatalogProduct(
     sku: '116167',
-    nameHe: 'מחסום קוקלום פתוח DN40/155',
+    nameHe: 'מחסום קומקום פתוח',
     nameEn: 'Gully trap with slanted outlet DN40/155',
     qtyPack: 20,
     qtyPallet: 500,
@@ -3836,7 +3836,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116163',
-    nameHe: 'מחסום קוקלום פתוח DN50/175',
+    nameHe: 'מחסום קומקום פתוח',
     nameEn: 'Gully trap with slanted outlet DN50/175',
     qtyPack: 20,
     qtyPallet: 400,
@@ -3849,7 +3849,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116146',
-    nameHe: 'מחסום קוקלום סגור לקלחות DN40/155',
+    nameHe: 'מחסום קומקום סגור למקלחת',
     nameEn: 'Floor trap with slanted outlet for shower DN40/155',
     qtyPack: 30,
     qtyPallet: 600,
@@ -3862,7 +3862,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116169',
-    nameHe: 'מחסום קוקלום סגור לקלחות DN50/175',
+    nameHe: 'מחסום קומקום סגור למקלחת',
     nameEn: 'Floor trap with slanted outlet for shower DN50/175',
     qtyPack: 25,
     qtyPallet: 500,
@@ -3876,7 +3876,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // מאסף לא תקני — page 31
   LipskeyCatalogProduct(
     sku: '196687',
-    nameHe: 'מחסום רצפה לא תקני 130/40',
+    nameHe: 'מחסום רצפה -130/50 לא תקני (מערכת D) כניסות 50',
     nameEn: 'Gully trap non-standard 130/40',
     qtyPack: 25,
     qtyPallet: 500,
@@ -3890,7 +3890,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // כיסויים — page 32
   LipskeyCatalogProduct(
     sku: '661360',
-    nameHe: 'רשת עליונה לבנה',
+    nameHe: 'רשת פנימית עגולה אפור',
     nameEn: 'Top drainage cover white',
     qtyPack: 180,
     qtyPallet: 8100,
@@ -3903,7 +3903,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '610920',
-    nameHe: 'מכסה זמני - פרגמון',
+    nameHe: 'מכסה עגול עליון קבוע אפור',
     nameEn: 'Temporary drainage cap - travertine',
     color: 'פרגמון',
     categoryHe: 'מאספים וקולטים',
@@ -3915,7 +3915,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // אטם — page 36
   LipskeyCatalogProduct(
     sku: '610708',
-    nameHe: 'אטם גומי שחור לפקק',
+    nameHe: 'אטם לכוס 2"',
     nameEn: 'Black rubber gasket for plug',
     qtyPack: null,
     categoryHe: 'אטמים אומים ופקקים',
@@ -6410,4 +6410,36 @@ LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה
   LipskeyCatalogProduct(sku: '77772415', nameHe: 'דיור פיה לברז נחש מהקיר כבד ארוך', nameEn: 'Dior Heavy Snake Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772415.jpg', brand: 'AQUATEC'),
   LipskeyCatalogProduct(sku: '77772412', nameHe: 'דיור פיה לברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772412.jpg', brand: 'AQUATEC'),
   LipskeyCatalogProduct(sku: '77772410', nameHe: 'דיור פיה לברז פרח ארוך', nameEn: 'Dior Sink Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772410.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '997091', nameHe: 'ברך 90° - תבריג צד אחד', nameEn: '', categoryHe: 'אביזרי תבריג', categoryEn: '', categoryEmoji: '🔩', page: 20, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '116565', nameHe: 'מסעף 45° - תבריג כפול', nameEn: '', categoryHe: 'אביזרי תבריג', categoryEn: '', categoryEmoji: '🔩', page: 42, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '218051', nameHe: 'מצמד כפול', nameEn: '', categoryHe: 'אביזרי שקע-תקע', categoryEn: '', categoryEmoji: '🔌', page: 44, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '115581', nameHe: 'מצרות תבריג', nameEn: '', categoryHe: 'אביזרי שקע-תקע', categoryEn: '', categoryEmoji: '🔌', page: 44, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '116258', nameHe: 'מצרות תבריג', nameEn: '', categoryHe: 'אביזרי שקע-תקע', categoryEn: '', categoryEmoji: '🔌', page: 44, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '120311', nameHe: 'פקק להכנסה', nameEn: '', categoryHe: 'מצמדים וצינורות', categoryEn: '', categoryEmoji: '🔌', page: 45, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '273226', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 46, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '220278', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 46, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '221021', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 46, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '220280', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 46, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '221084', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 46, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '221415', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 46, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '219792', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 47, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '221083', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 47, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '224205', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 47, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '221414', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 47, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '221082', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 47, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '221086', nameHe: 'צינור אפורה', nameEn: '', categoryHe: 'צינורות', categoryEn: '', categoryEmoji: '📏', page: 47, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '124848', nameHe: 'התקנה גבוהה', nameEn: '', categoryHe: 'התקנה נמוכה', categoryEn: '', categoryEmoji: '🚰', page: 50, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '124850', nameHe: 'התקנה נמוכה', nameEn: '', categoryHe: 'התקנה נמוכה', categoryEn: '', categoryEmoji: '🚰', page: 51, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '124851', nameHe: 'התקנה צמודה', nameEn: '', categoryHe: 'התקנה נמוכה', categoryEn: '', categoryEmoji: '🚰', page: 52, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '178862', nameHe: 'התקנה גבוהה', nameEn: '', categoryHe: 'התקנה נמוכה', categoryEn: '', categoryEmoji: '🚰', page: 50, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '178866', nameHe: 'התקנה נמוכה', nameEn: '', categoryHe: 'התקנה נמוכה', categoryEn: '', categoryEmoji: '🚰', page: 51, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '178869', nameHe: 'התקנה צמודה', nameEn: '', categoryHe: 'התקנה נמוכה', categoryEn: '', categoryEmoji: '🚰', page: 52, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '116792', nameHe: 'התקנה גבוהה', nameEn: '', categoryHe: 'התקנה נמוכה', categoryEn: '', categoryEmoji: '🚰', page: 50, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '154068', nameHe: 'התקנה גבוהה', nameEn: '', categoryHe: 'התקנה נמוכה', categoryEn: '', categoryEmoji: '🚰', page: 50, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '179613', nameHe: 'מושב אסלה', nameEn: '', categoryHe: 'מושבי אסלה', categoryEn: '', categoryEmoji: '⭕', page: 55, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '186379', nameHe: 'מושב אסלה', nameEn: '', categoryHe: 'מושבי אסלה', categoryEn: '', categoryEmoji: '⭕', page: 55, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '187134', nameHe: 'מושב אסלה', nameEn: '', categoryHe: 'מושבי אסלה', categoryEn: '', categoryEmoji: '⭕', page: 55, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '195505', nameHe: 'מושב אסלה', nameEn: '', categoryHe: 'מושבי אסלה', categoryEn: '', categoryEmoji: '⭕', page: 55, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '197222', nameHe: 'מושב אסלה', nameEn: '', categoryHe: 'מושבי אסלה', categoryEn: '', categoryEmoji: '⭕', page: 55, imageFile: null, brand: 'ליפסקי'),
+  LipskeyCatalogProduct(sku: '186666', nameHe: 'חלקים למוצרים סניטריים', nameEn: '', categoryHe: 'חלקים סניטריים', categoryEn: '', categoryEmoji: '🔧', page: 56, imageFile: null, brand: 'ליפסקי'),
 ];
