@@ -105,13 +105,34 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
           onTap: () => _toggle(ref, OpenDial.bs),
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Text(
-              'BuildSmart',
-              style: TextStyle(
-                color: BsTokens.brand,
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'BuildSmart',
+                  style: TextStyle(
+                    color: BsTokens.brand,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 22,
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
+                    SizedBox(width: 4),
+                    Text(
+                      'v2.5 · 24.5.26',
+                      style: TextStyle(
+                        color: Color(0xFF4CAF50),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
