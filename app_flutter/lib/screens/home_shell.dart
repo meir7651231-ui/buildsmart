@@ -129,7 +129,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                     SizedBox(width: 4),
                     Text(
-                      'v3.20 · 26.5.26 · Vercel + ניווט קטלוג',
+                      'v3.20 · 26.5.26 · כל קטגוריות ליפסקי מאוכלסות',
                       style: TextStyle(
                         color: Color(0xFF4CAF50),
                         fontSize: 10,
