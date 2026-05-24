@@ -1885,6 +1885,7 @@ class _SmartProductSheet extends StatefulWidget {
 
 class _SmartProductSheetState extends State<_SmartProductSheet> {
   late int _selectedBrand;
+  int? _activeStage;
 
   @override
   void initState() {
@@ -1892,6 +1893,9 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
     _selectedBrand =
         widget.product.brands.indexWhere((b) => b.rec).clamp(0, widget.product.brands.length - 1);
   }
+
+  void _tapStage(int i) =>
+      setState(() => _activeStage = _activeStage == i ? null : i);
 
   @override
   Widget build(BuildContext context) {
@@ -1965,7 +1969,12 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               children: [
                 // Installation flow diagram
-                if (p.stages.isNotEmpty) _DiagramFlow(product: p),
+                if (p.stages.isNotEmpty)
+                  _DiagramFlow(
+                    product: p,
+                    activeStage: _activeStage,
+                    onStageTap: _tapStage,
+                  ),
                 // Brand selector
                 const Padding(
                   padding: EdgeInsets.only(top: 16, bottom: 8),
@@ -2079,7 +2088,12 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
                       ),
                     ),
                   ),
-                  ...mustItems.map((a) => _AccRow(acc: a)),
+                  ...mustItems.map((a) => _AccRow(
+                    acc: a,
+                    activeMatch: _activeStage != null
+                        ? p.stages[_activeStage!].match
+                        : null,
+                  )),
                 ],
 
                 // Optional accessories
@@ -2095,7 +2109,12 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
                       ),
                     ),
                   ),
-                  ...optItems.map((a) => _AccRow(acc: a)),
+                  ...optItems.map((a) => _AccRow(
+                    acc: a,
+                    activeMatch: _activeStage != null
+                        ? p.stages[_activeStage!].match
+                        : null,
+                  )),
                 ],
 
                 // CTA
@@ -2139,8 +2158,14 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
 // Each stage pops in 180 ms after the previous (elasticOut spring).
 
 class _DiagramFlow extends StatefulWidget {
-  const _DiagramFlow({required this.product});
+  const _DiagramFlow({
+    required this.product,
+    this.activeStage,
+    this.onStageTap,
+  });
   final SmartProduct product;
+  final int? activeStage;
+  final void Function(int)? onStageTap;
 
   @override
   State<_DiagramFlow> createState() => _DiagramFlowState();
@@ -2235,12 +2260,39 @@ class _DiagramFlowState extends State<_DiagramFlow>
                 Expanded(
                   child: ScaleTransition(
                     scale: _anims[i],
-                    child: _StageCard(stage: p.stages[i]),
+                    child: GestureDetector(
+                      onTap: () => widget.onStageTap?.call(i),
+                      child: _StageCard(
+                        stage: p.stages[i],
+                        active: widget.activeStage == i,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ],
           ),
+          // Hint line — mirrors prototype td-stage-hint
+          const SizedBox(height: 8),
+          if (widget.activeStage != null)
+            Text(
+              '⤵ האביזרים לשלב "${p.stages[widget.activeStage!].label}" — הקש שוב לביטול',
+              style: const TextStyle(
+                color: Color(0xFFF2A516),
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            )
+          else
+            const Text(
+              '💡 הקש על שלב כדי להדגיש את האביזרים שלו',
+              style: TextStyle(
+                color: Color(0x66FFFFFF),
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
         ],
       ),
     );
@@ -2248,64 +2300,100 @@ class _DiagramFlowState extends State<_DiagramFlow>
 }
 
 class _StageCard extends StatelessWidget {
-  const _StageCard({required this.stage});
+  const _StageCard({required this.stage, this.active = false});
   final SmartStage stage;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 46,
-          height: 46,
-          decoration: BoxDecoration(
-            color: stage.isFinal
-                ? const Color(0xFF1F6F6B).withAlpha(64)
-                : Colors.white.withAlpha(18),
-            border: Border.all(
-              color: stage.isFinal
-                  ? BsTokens.brand
-                  : Colors.white.withAlpha(31),
+    final isActive = active;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: isActive
+                  ? const Color(0xFFF2A516).withAlpha(50)
+                  : stage.isFinal
+                      ? const Color(0xFF1F6F6B).withAlpha(64)
+                      : Colors.white.withAlpha(18),
+              border: Border.all(
+                color: isActive
+                    ? const Color(0xFFF2A516)
+                    : stage.isFinal
+                        ? BsTokens.brand
+                        : Colors.white.withAlpha(31),
+                width: isActive ? 1.5 : 1,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: isActive
+                  ? [BoxShadow(color: const Color(0xFFF2A516).withAlpha(77), blurRadius: 8, spreadRadius: 1)]
+                  : null,
             ),
-            borderRadius: BorderRadius.circular(12),
+            alignment: Alignment.center,
+            child: Text(stage.emoji, style: const TextStyle(fontSize: 22)),
           ),
-          alignment: Alignment.center,
-          child: Text(stage.emoji, style: const TextStyle(fontSize: 22)),
-        ),
-        const SizedBox(height: 7),
-        Text(
-          stage.label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 9.5,
-            fontWeight: FontWeight.w700,
+          const SizedBox(height: 7),
+          Text(
+            stage.label,
+            style: TextStyle(
+              color: isActive ? const Color(0xFFF2A516) : Colors.white,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
           ),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          stage.sub,
-          style: const TextStyle(color: Color(0xFF8B8D8F), fontSize: 8),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            stage.sub,
+            style: const TextStyle(color: Color(0xFF8B8D8F), fontSize: 8),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _AccRow extends StatelessWidget {
-  const _AccRow({required this.acc});
+  const _AccRow({required this.acc, this.activeMatch});
 
   final SmartAcc acc;
+  /// When set, dim this row unless acc.name contains one of these substrings.
+  final List<String>? activeMatch;
+
+  bool get _isHit => activeMatch == null ||
+      activeMatch!.any((m) => acc.name.contains(m));
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
+    final hit = _isHit;
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 200),
+      opacity: activeMatch == null ? 1.0 : (hit ? 1.0 : 0.3),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: hit && activeMatch != null
+            ? BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: const Color(0xFFF2A516).withAlpha(115),
+                  width: 1.5,
+                ),
+              )
+            : null,
+        padding: hit && activeMatch != null
+            ? const EdgeInsets.all(6)
+            : EdgeInsets.zero,
+        child: Row(
         children: [
           Container(
             width: 40,
@@ -2348,6 +2436,7 @@ class _AccRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

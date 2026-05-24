@@ -7,61 +7,64 @@ class SmartStage {
     required this.label,
     required this.sub,
     this.isFinal = false,
+    this.match = const [],
   });
   final String emoji;
   final String label;
   final String sub;
   final bool isFinal;
+  /// Substrings matched against SmartAcc.name to highlight relevant accessories.
+  final List<String> match;
 }
 
 // Pre-defined stage sequences — verbatim from prototype DIAGRAMS map.
 const _sf = [
-  SmartStage(emoji: '🔩', label: 'רכיבים',      sub: 'אטמים, צינורות'),
-  SmartStage(emoji: '🔀', label: 'הזנת מים',     sub: 'PEX חם/קר'),
-  SmartStage(emoji: '🔌', label: 'חיבור גס',     sub: 'ברזי ניל'),
-  SmartStage(emoji: '✅', label: 'ברז גמור',     sub: 'מותקן', isFinal: true),
+  SmartStage(emoji: '🔩', label: 'רכיבים',      sub: 'אטמים, צינורות', match: ['אטם', 'סרט טפלון', 'צינורות חיבור']),
+  SmartStage(emoji: '🔀', label: 'הזנת מים',    sub: 'PEX חם/קר',       match: ['צינורות חיבור', 'ברזי ניל']),
+  SmartStage(emoji: '🔌', label: 'חיבור גס',    sub: 'ברזי ניל',        match: ['ברזי ניל', 'מפתח צינורות']),
+  SmartStage(emoji: '✅', label: 'ברז גמור',    sub: 'מותקן',           match: ['סיליקון', 'פקק ניקוז', 'מסנן', 'סיפון'], isFinal: true),
 ];
 const _st = [
-  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'אטם, ברגים'),
-  SmartStage(emoji: '⬜', label: 'מיכל סמוי',    sub: 'בתוך הקיר'),
-  SmartStage(emoji: '🛡️', label: 'איטום וחיבור', sub: 'לקו ביוב'),
-  SmartStage(emoji: '✅', label: 'אסלה גמורה',   sub: 'מותקנת', isFinal: true),
+  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'אטם, ברגים',   match: ['אטם', 'ברגי']),
+  SmartStage(emoji: '⬜', label: 'מיכל סמוי',    sub: 'בתוך הקיר',    match: ['מיכל הדחה', 'לחצן הדחה']),
+  SmartStage(emoji: '🛡️', label: 'איטום וחיבור', sub: 'לקו ביוב',    match: ['אטם', 'סיליקון', 'צינור חיבור']),
+  SmartStage(emoji: '✅', label: 'אסלה גמורה',   sub: 'מותקנת',       match: ['מושב', 'סיפון', 'בר��י קיבוע'], isFinal: true),
 ];
 const _ss = [
-  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'טפלון, צינור'),
-  SmartStage(emoji: '🎛️', label: 'גוף סמוי',    sub: 'בתוך הקיר'),
-  SmartStage(emoji: '🚿', label: 'זרוע + ראש',   sub: 'החלק הנראה'),
-  SmartStage(emoji: '✅', label: 'מקלחת גמורה',  sub: 'מותקנת', isFinal: true),
+  SmartStage(emoji: '🔩', label: 'רכיבים',      sub: 'טפלון, צינור',  match: ['סרט טפלון', 'צינור גמיש']),
+  SmartStage(emoji: '🎛️', label: 'גוף סמוי',   sub: 'בתוך הקיר',     match: ['גוף סמוי', 'פרופילי עיגון', 'אגנית']),
+  SmartStage(emoji: '🚿', label: 'זרוע + ראש',  sub: 'החלק הנראה',    match: ['ראש מקלחת', 'צינור גמיש', 'ידית']),
+  SmartStage(emoji: '✅', label: 'מקלחת גמורה', sub: 'מותקנת',        match: ['סיליקון', 'מדף פינתי', 'פאנל'], isFinal: true),
 ];
 const _sb = [
-  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'שסתום, צינורות'),
-  SmartStage(emoji: '🔧', label: 'הכנת הקיר',    sub: 'עיגון + חיבורים'),
-  SmartStage(emoji: '🔥', label: 'חיבור והפעלה', sub: 'בדיקת לחץ'),
-  SmartStage(emoji: '✅', label: 'דוד פעיל',     sub: 'מוכן לחימום', isFinal: true),
+  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'שסתום, צינורות', match: ['שסתום', 'צינורות חיבור', 'צנרת']),
+  SmartStage(emoji: '🔧', label: 'הכנת הקיר',    sub: 'עיגון + חיבורים', match: ['מתקן תלייה', 'מתקן עיגון']),
+  SmartStage(emoji: '🔥', label: 'חיבור והפעלה', sub: 'בדיקת לחץ',      match: ['גוף חימום', 'תרמוסטט', 'קולטים']),
+  SmartStage(emoji: '✅', label: 'דוד פעיל',     sub: 'מוכן לחימום',    match: ['אנוד', 'שסתום ביטחון'], isFinal: true),
 ];
 const _si = [
-  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'מחברים'),
-  SmartStage(emoji: '🔧', label: 'קווי ביוב',    sub: 'צינור 50'),
-  SmartStage(emoji: '🔀', label: 'קווי מים',     sub: 'PEX'),
-  SmartStage(emoji: '✅', label: 'חיבור גמור',   sub: 'בדיקה עברה', isFinal: true),
+  SmartStage(emoji: '🔩', label: 'רכיבים',     sub: 'מחברים',      match: ['ברז זוויתי', 'ברז למכונת', 'ברזי ניתוק']),
+  SmartStage(emoji: '🔧', label: 'קווי ביוב',  sub: 'צינור 50',    match: ['צינור ניקוז', 'רשת ניקוז', 'מחסום']),
+  SmartStage(emoji: '🔀', label: 'קווי מים',   sub: 'PEX',         match: ['צינור מילוי', 'צנרת', 'מד לחץ', 'מסנן']),
+  SmartStage(emoji: '✅', label: 'חיבור גמור', sub: 'בדיקה עברה', match: ['שסתום', 'מגש הצפה', 'אטם'], isFinal: true),
 ];
 const _sw = [
-  SmartStage(emoji: '🔩', label: 'חומרים',       sub: 'פריימר'),
-  SmartStage(emoji: '🛡️', label: 'חיזוק פינות', sub: 'סרט איטום'),
-  SmartStage(emoji: '🧱', label: 'יריעות איטום', sub: 'בחפיפה'),
-  SmartStage(emoji: '✅', label: 'רצפה אטומה',   sub: 'עברה בדיקה', isFinal: true),
+  SmartStage(emoji: '🔩', label: 'חומרים',       sub: 'פריימר',      match: ['פריימר', 'מדה לשיפועים']),
+  SmartStage(emoji: '🛡️', label: 'חיזוק פינות', sub: 'סרט איטום',   match: ['סרט איטום', 'רשת ניקוז']),
+  SmartStage(emoji: '🧱', label: 'יריעות איטום', sub: 'בחפיפה',      match: ['יריעות', 'מחסום רצפה']),
+  SmartStage(emoji: '✅', label: 'רצפה אטומה',   sub: 'עברה בדיקה', match: ['אטם גומי', 'מלכודת', 'צינור ניקוז'], isFinal: true),
 ];
 const _stile = [
-  SmartStage(emoji: '🔩', label: 'חומרים',       sub: 'דבק, פלסים'),
-  SmartStage(emoji: '🟫', label: 'הנחת אריחים',  sub: 'רצפה וקיר'),
-  SmartStage(emoji: '🛡️', label: 'מילוי רובה',  sub: 'עמיד מים'),
-  SmartStage(emoji: '✅', label: 'גמר מושלם',    sub: 'מוכן לכלים', isFinal: true),
+  SmartStage(emoji: '🔩', label: 'חומרים',      sub: 'דבק, פלסים',  match: ['דבק אריחים', 'פלסי ריווח']),
+  SmartStage(emoji: '🟫', label: 'הנחת אריחים', sub: 'רצפה וקיר',   match: ['אריחי']),
+  SmartStage(emoji: '🛡️', label: 'מילוי רובה', sub: 'עמיד מים',    match: ['רובה']),
+  SmartStage(emoji: '✅', label: 'גמר מושלם',   sub: 'מוכן לכלים', match: ['פרופיל סיום'], isFinal: true),
 ];
 const _sprof = [
-  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'ברגים, דיבל'),
-  SmartStage(emoji: '🧱', label: 'מסילות ופרופיל', sub: 'שלד הקיר'),
-  SmartStage(emoji: '🟦', label: 'לוחות גבס',    sub: 'חיפוי'),
-  SmartStage(emoji: '✅', label: 'מחיצה גמורה',  sub: 'מוכנה לגמר', isFinal: true),
+  SmartStage(emoji: '🔩', label: 'רכיבים',          sub: 'ברגים, דיבל', match: ['ברגי גבס', 'דיבלים']),
+  SmartStage(emoji: '🧱', label: 'מסילות ופרופיל',  sub: 'שלד הקיר',    match: ['פרופילים', 'משקוף']),
+  SmartStage(emoji: '🟦', label: 'לוחות גבס',       sub: 'חיפוי',       match: ['לוחות גבס', 'צמר סלעים']),
+  SmartStage(emoji: '✅', label: 'מחיצה גמורה',     sub: 'מוכנה לגמר', match: ['סרט בד', 'ידית', 'אטם לדלת', 'צירים'], isFinal: true),
 ];
 
 @immutable
