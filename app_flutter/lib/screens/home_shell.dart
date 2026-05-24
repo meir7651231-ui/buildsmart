@@ -421,11 +421,6 @@ class _NotificationsMenuButton extends ConsumerWidget {
           value: 'notif_settings',
           child: _MenuRow(emoji: '🔔', label: 'הגדרות התראות'),
         ),
-        PopupMenuDivider(),
-        PopupMenuItem<String>(
-          value: 'settings',
-          child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
-        ),
       ],
     );
   }
@@ -439,7 +434,6 @@ class _NotificationsMenuButton extends ConsumerWidget {
         dismissAllNotifs(ref);
         showToast(context, 'כל ההתראות נמחקו');
       case 'notif_settings':
-      case 'settings':
         Navigator.of(context).push(NotifSettingsScreen.route());
     }
   }
