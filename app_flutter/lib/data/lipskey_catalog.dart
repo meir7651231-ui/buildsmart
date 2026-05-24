@@ -547,7 +547,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116207',
-    nameHe: 'ברך 45° - תבריג צד אחד',
+    nameHe: 'ברך 45° תבריג צד אחד DN32',
     nameEn: 'Band 45° - single side screw-on',
     color: null,
     qtyPack: null,
@@ -561,7 +561,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116203',
-    nameHe: 'ברך 45° - תבריג צד אחד',
+    nameHe: 'ברך 45° תבריג צד אחד DN40',
     nameEn: 'Band 45° - single side screw-on',
     color: null,
     qtyPack: null,
@@ -574,7 +574,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116205',
-    nameHe: 'ברך 45° - תבריג צד אחד',
+    nameHe: 'ברך 45° תבריג צד אחד DN50',
     nameEn: 'Band 45° - single side screw-on',
     color: null,
     qtyPack: null,
