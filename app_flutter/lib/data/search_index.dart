@@ -66,6 +66,7 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🧱',  title: 'בנייה ומחיצות',        breadcrumb: 'קטלוג', type: SearchType.category),
   SearchEntry(emoji: '🎨',  title: 'גמר',                 breadcrumb: 'קטלוג', type: SearchType.category),
   SearchEntry(emoji: '🧰',  title: 'אביזרים נלווים',       breadcrumb: 'קטלוג', type: SearchType.category),
+  SearchEntry(emoji: '🌱',  title: 'גינון והשקיה',         breadcrumb: 'קטלוג', type: SearchType.category),
 
   // ── BS dial — personas (L1) ────────────────────────────────────────────
   SearchEntry(emoji: '👷', title: 'קבלן',         breadcrumb: 'BS', type: SearchType.persona),

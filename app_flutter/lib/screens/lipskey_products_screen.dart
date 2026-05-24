@@ -431,7 +431,23 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   }
 }
 
-// ── name split into tappable word chips (each → filtered list) ──────────────
+/// Hebrew noise words / prepositions that shouldn't be clickable search links.
+const Set<String> kSearchStopWords = {
+  'עם', 'של', 'את', 'או', 'ל', 'ה', 'ו', 'ב', 'כ', 'מ', 'על', 'אל',
+  'ללא', 'בלי', 'כמות', 'באריזה', 'במשטח', 'יח', 'יחידות',
+};
+
+/// A name word is a meaningful, tappable link only if it isn't noise:
+/// not a stop-word, length ≥ 2, and not a bare number/size token.
+bool isLinkableWord(String w) {
+  if (w.length < 2) return false;
+  if (kSearchStopWords.contains(w)) return false;
+  // pure number or size like "40", "3/4\"", "DN50" stays plain text
+  if (RegExp(r'^[\d/."×x°-]+$').hasMatch(w)) return false;
+  return true;
+}
+
+// ── name split into tappable word chips (meaningful words only) ─────────────
 class _NameWords extends StatelessWidget {
   const _NameWords({required this.name});
   final String name;
@@ -444,15 +460,25 @@ class _NameWords extends StatelessWidget {
       runSpacing: 2,
       children: [
         for (var i = 0; i < words.length; i++) ...[
-          GestureDetector(
-            onTap: () => LipskeyProductsScreen.openWordSearch(context, words[i]),
-            child: Text(words[i],
+          if (isLinkableWord(words[i]))
+            GestureDetector(
+              onTap: () =>
+                  LipskeyProductsScreen.openWordSearch(context, words[i]),
+              child: Text(words[i],
+                  style: const TextStyle(
+                      color: Color(0xFF3DD9B0),
+                      fontSize: 12,
+                      height: 1.3,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Color(0xFF2A5E52))),
+            )
+          else
+            Text(words[i],
                 style: const TextStyle(
-                    color: Color(0xFF3DD9B0), fontSize: 12, height: 1.3)),
-          ),
+                    color: Color(0xFF9AA3B2), fontSize: 12, height: 1.3)),
           if (i < words.length - 1)
-            const Text('·',
-                style: TextStyle(color: Color(0xFFFF7A18), fontSize: 12)),
+            const Text(' ',
+                style: TextStyle(fontSize: 12)),
         ],
       ],
     );

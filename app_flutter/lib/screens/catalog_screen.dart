@@ -1465,7 +1465,20 @@ class _SearchResultsList extends ConsumerWidget {
       };
     }).toList();
 
-    if (filtered.isEmpty) {
+    // Live product matches from the real catalog (name or SKU), shown in
+    // "הכל" / "מוצרים" scopes once the user has typed something.
+    final showProducts = query.trim().length >= 2 &&
+        (scope == 'הכל' || scope == 'מוצרים');
+    final products = showProducts
+        ? kLipskeyCatalog
+            .where((p) =>
+                p.nameHe.contains(query) ||
+                p.sku.toLowerCase().contains(query.toLowerCase()))
+            .take(40)
+            .toList()
+        : const <LipskeyCatalogProduct>[];
+
+    if (filtered.isEmpty && products.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -1481,8 +1494,53 @@ class _SearchResultsList extends ConsumerWidget {
     }
 
     return ListView.builder(
-      itemCount: filtered.length,
+      itemCount: filtered.length + products.length,
       itemBuilder: (_, i) {
+        // Product results come after the index entries.
+        if (i >= filtered.length) {
+          final p = products[i - filtered.length];
+          return ListTile(
+            leading: Container(
+              width: 44,
+              height: 44,
+              decoration: const BoxDecoration(
+                color: Color(0xFF2A2A2A),
+                shape: BoxShape.circle,
+              ),
+              clipBehavior: Clip.antiAlias,
+              alignment: Alignment.center,
+              child: p.imageAsset != null
+                  ? Image.asset(p.imageAsset!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Text(p.categoryEmoji,
+                          style: const TextStyle(fontSize: 20)))
+                  : Text(p.categoryEmoji, style: const TextStyle(fontSize: 20)),
+            ),
+            title: Text(p.nameHe,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                maxLines: 2, overflow: TextOverflow.ellipsis),
+            subtitle: Text('${p.categoryHe} · #${p.sku}',
+                style: const TextStyle(color: Color(0xFF666666), fontSize: 11),
+                maxLines: 1, overflow: TextOverflow.ellipsis),
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1c1409),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text('מוצר',
+                  style: TextStyle(
+                      color: Color(0xFFFF7A18), fontSize: 10,
+                      fontWeight: FontWeight.w600)),
+            ),
+            onTap: () {
+              final cat = kLipskeyCatalog
+                  .where((x) => x.categoryHe == p.categoryHe)
+                  .toList();
+              showLipskeyProductSheet(context, p, cat);
+            },
+          );
+        }
         final entry = filtered[i];
         return ListTile(
           leading: Container(
