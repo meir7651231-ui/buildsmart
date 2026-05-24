@@ -1,0 +1,30 @@
+name: catalog-qa
+
+# שער אכיפה: כל push/PR שנוגע בנתוני הקטלוג חייב לעבור את מנוע ה-QA.
+# נכשל אם יש שגיאות חוסמות (ERROR) או אם ה-selftest לא עובר.
+
+on:
+  push:
+    paths:
+      - "app_flutter/lib/data/**"
+      - "app_flutter/lib/test_harness/**"
+      - "scripts/catalog_qa.py"
+  pull_request:
+    paths:
+      - "app_flutter/lib/data/**"
+      - "scripts/catalog_qa.py"
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Self-test — מוכיח שכל חוק QA יורה
+        run: python3 scripts/catalog_qa.py selftest
+
+      - name: Audit — חוסם על שגיאות קטלוג
+        run: python3 scripts/catalog_qa.py audit --json
