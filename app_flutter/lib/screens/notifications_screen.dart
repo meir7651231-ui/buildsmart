@@ -880,7 +880,7 @@ class _NotifRow extends ConsumerWidget {
                             ),
                             child: Text(actionLabel),
                           ),
-                          const SizedBox(width: 16),
+                          const Expanded(child: SizedBox()),
                           TextButton(
                             onPressed: () {},
                             style: TextButton.styleFrom(
