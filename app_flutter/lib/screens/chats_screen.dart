@@ -699,7 +699,7 @@ class _ChatPageState extends State<_ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: const Color(0xFFECE5DD),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1A1A),
         elevation: 0,
@@ -775,6 +775,14 @@ class _ChatPageState extends State<_ChatPage> {
             icon: const Icon(Icons.more_vert, color: Colors.white70),
             onPressed: () => showToast(context, 'עוד — בבנייה'),
           ),
+          IconButton(
+            icon: const Icon(Icons.videocam_outlined, color: Colors.white70),
+            onPressed: () => showToast(context, 'שיחת וידאו — בבנייה'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.call_outlined, color: Colors.white70),
+            onPressed: () => showToast(context, 'שיחה — בבנייה'),
+          ),
         ],
       ),
       body: Column(
@@ -782,13 +790,16 @@ class _ChatPageState extends State<_ChatPage> {
           Expanded(
             child: ListView.builder(
               controller: _scroll,
-              padding: const EdgeInsets.all(12),
-              itemCount: _messages.length + (_isTyping ? 1 : 0),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+              itemCount: _messages.length + (_isTyping ? 1 : 0) + 2,
               itemBuilder: (context, i) {
-                if (_isTyping && i == _messages.length) {
+                if (i == 0) return const _PrivacyNotice();
+                if (i == 1) return const _DateChip(date: 'היום');
+                final msgIdx = i - 2;
+                if (_isTyping && msgIdx == _messages.length) {
                   return const _TypingBubble();
                 }
-                return _Bubble(msg: _messages[i]);
+                return _Bubble(msg: _messages[msgIdx]);
               },
             ),
           ),
@@ -815,16 +826,21 @@ class _Bubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const bubbleMe = Color(0xFFDCF8C6);
+    const bubbleOther = Color(0xFFFFFFFF);
+    const textColor = Color(0xFF111111);
+    const timeColor = Color(0xFF777777);
+
     return Align(
       alignment: msg.isMe ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.fromLTRB(14, 9, 14, 6),
+        margin: const EdgeInsets.symmetric(vertical: 3),
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 5),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.72,
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         decoration: BoxDecoration(
-          color: msg.isMe ? BsTokens.brand : const Color(0xFF2A2A2A),
+          color: msg.isMe ? bubbleMe : bubbleOther,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -835,6 +851,13 @@ class _Bubble extends StatelessWidget {
                 ? const Radius.circular(16)
                 : const Radius.circular(4),
           ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x18000000),
+              blurRadius: 2,
+              offset: Offset(0, 1),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -843,20 +866,25 @@ class _Bubble extends StatelessWidget {
             Text(
               msg.text,
               textAlign: TextAlign.end,
-              style: TextStyle(
-                color: msg.isMe ? Colors.white : const Color(0xFFDDDDDD),
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: textColor, fontSize: 14.5),
             ),
             const SizedBox(height: 2),
-            Text(
-              msg.time,
-              style: TextStyle(
-                color: msg.isMe
-                    ? Colors.white.withValues(alpha: 0.6)
-                    : const Color(0xFF666666),
-                fontSize: 10,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  msg.time,
+                  style: const TextStyle(color: timeColor, fontSize: 10.5),
+                ),
+                if (msg.isMe) ...[
+                  const SizedBox(width: 3),
+                  const Icon(
+                    Icons.done_all,
+                    size: 13,
+                    color: Color(0xFF4FC3F7),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
@@ -873,16 +901,23 @@ class _TypingBubble extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
+        margin: const EdgeInsets.symmetric(vertical: 3),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: const BoxDecoration(
-          color: Color(0xFF2A2A2A),
+          color: Color(0xFFFFFFFF),
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(16),
             topRight: Radius.circular(16),
             bottomLeft: Radius.circular(16),
             bottomRight: Radius.circular(4),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x18000000),
+              blurRadius: 2,
+              offset: Offset(0, 1),
+            ),
+          ],
         ),
         child: const Text(
           'מקליד...',
@@ -892,6 +927,83 @@ class _TypingBubble extends StatelessWidget {
             fontStyle: FontStyle.italic,
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ─── date chip ───────────────────────────────────────────────────────────────
+
+class _DateChip extends StatelessWidget {
+  const _DateChip({required this.date});
+  final String date;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFD9EDD3),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x14000000),
+              blurRadius: 2,
+              offset: Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Text(
+          date,
+          style: const TextStyle(
+            color: Color(0xFF4A5040),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── privacy notice ──────────────────────────────────────────────────────────
+
+class _PrivacyNotice extends StatelessWidget {
+  const _PrivacyNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 2,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Expanded(
+            child: Text(
+              '🔒 ההודעות בשיחה זו מוצפנות מקצה לקצה. רק המשתתפים יכולים לקרוא אותן.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF5C5C3A),
+                fontSize: 12.5,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -932,50 +1044,120 @@ class _InputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.send, color: BsTokens.brand),
-            onPressed: onSend,
-            tooltip: 'שלח',
-          ),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              textAlign: TextAlign.right,
-              textDirection: TextDirection.rtl,
-              onSubmitted: (_) => onSend(),
-              style: const TextStyle(color: Colors.white, fontSize: 15),
-              decoration: InputDecoration(
-                hintText: 'כתוב הודעה…',
-                hintStyle: const TextStyle(color: Color(0xFF888888)),
-                filled: true,
-                fillColor: const Color(0xFF2A2A2A),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
+      color: const Color(0xFFECE5DD),
+      padding: const EdgeInsets.fromLTRB(6, 6, 6, 10),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // Mic / Send FAB
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (_, val, __) {
+                final hasText = val.text.trim().isNotEmpty;
+                return _CircleFab(
+                  icon: hasText ? Icons.send : Icons.mic,
+                  onTap: hasText ? onSend : () {},
+                );
+              },
+            ),
+            const SizedBox(width: 6),
+            // Text field pill
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(26),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: const BorderSide(
-                    color: BsTokens.brand,
-                    width: 1.5,
-                  ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    // Camera + attachment (left side in RTL = trailing)
+                    IconButton(
+                      padding: const EdgeInsets.all(10),
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(
+                        Icons.camera_alt_outlined,
+                        color: Color(0xFF777777),
+                        size: 22,
+                      ),
+                      onPressed: () => showToast(context, 'מצלמה — בבנייה'),
+                    ),
+                    IconButton(
+                      padding: const EdgeInsets.all(10),
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(
+                        Icons.attach_file,
+                        color: Color(0xFF777777),
+                        size: 22,
+                      ),
+                      onPressed: () => showToast(context, 'צרף קובץ — בבנייה'),
+                    ),
+                    // Text input
+                    Expanded(
+                      child: TextField(
+                        controller: controller,
+                        textAlign: TextAlign.right,
+                        textDirection: TextDirection.rtl,
+                        onSubmitted: (_) => onSend(),
+                        maxLines: 5,
+                        minLines: 1,
+                        style: const TextStyle(
+                          color: Color(0xFF111111),
+                          fontSize: 15,
+                        ),
+                        decoration: const InputDecoration(
+                          hintText: 'הודעה',
+                          hintStyle: TextStyle(color: Color(0xFF999999)),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 10,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Emoji (right side in RTL = leading)
+                    IconButton(
+                      padding: const EdgeInsets.all(10),
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(
+                        Icons.emoji_emotions_outlined,
+                        color: Color(0xFF777777),
+                        size: 22,
+                      ),
+                      onPressed: () => showToast(context, 'אמוג׳י — בבנייה'),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CircleFab extends StatelessWidget {
+  const _CircleFab({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: const BoxDecoration(
+          color: Color(0xFF111111),
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: Icon(icon, color: Colors.white, size: 22),
       ),
     );
   }
