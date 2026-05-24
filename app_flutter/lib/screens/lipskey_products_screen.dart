@@ -1,5 +1,5 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/screens/lipskey_product_detail_screen.dart';
+import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:flutter/material.dart';
 
 class LipskeyProductsScreen extends StatelessWidget {
@@ -55,9 +55,10 @@ class LipskeyProductsScreen extends StatelessWidget {
           separatorBuilder: (_, __) => const SizedBox(height: 0),
           itemBuilder: (context, i) => _ProductRow(
             product: products[i],
-            onTap: () => Navigator.push(
+            onTap: () => showLipskeyProductSheet(
               context,
-              LipskeyProductDetailScreen.route(products[i]),
+              products[i],
+              products,
             ),
           ),
         ),
@@ -148,14 +149,29 @@ class _ProductRow extends StatelessWidget {
 
                     const SizedBox(height: 5),
 
-                    // מק"ט
-                    Text(
-                      '#${product.sku}',
-                      style: const TextStyle(
-                        color: Color(0xFFFFB300),
-                        fontFamily: 'monospace',
-                        fontSize: 11,
-                      ),
+                    // ספק + מק"ט
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF3D5A80).withOpacity(0.18),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                                color: const Color(0xFF3D5A80), width: 0.5),
+                          ),
+                          child: const Text('🏭 ליפסקי ברקן',
+                              style: TextStyle(
+                                  color: Color(0xFF64FFDA), fontSize: 9)),
+                        ),
+                        const SizedBox(width: 6),
+                        Text('#${product.sku}',
+                            style: const TextStyle(
+                                color: Color(0xFFFFB300),
+                                fontFamily: 'monospace',
+                                fontSize: 11)),
+                      ],
                     ),
 
                     const SizedBox(height: 6),

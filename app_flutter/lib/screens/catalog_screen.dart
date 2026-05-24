@@ -1757,7 +1757,7 @@ class _LipskeySupplierCard extends StatelessWidget {
                     ),
                     child: const Row(
                       children: [
-                        Text('כל המוצרים',
+                        Text('כל הקטגוריות',
                             style: TextStyle(color: Colors.white54, fontSize: 12)),
                         SizedBox(width: 3),
                         Icon(Icons.chevron_left, color: Colors.white38, size: 16),
