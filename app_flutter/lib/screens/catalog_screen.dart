@@ -2647,6 +2647,37 @@ class _CatalogDrillCatGrid extends ConsumerWidget {
   }
 }
 
+// ── Catalog → Lipskey category mapping ───────────────────────────────────────
+const Map<String, List<String>> _kCatalogToLipskeyCats = {
+  'ניקוז וצנרת': [
+    'מחסומים (סיפונים) גלויים',
+    'מחסומי רצפה',
+    'מאספים וקולטים',
+    'אביזרי שקע-תקע',
+    'ברכיים',
+    'מסעפים וחיבורי אסלה',
+    'מצמדים וצינורות',
+    'צינורות',
+    'אביזרי תבריג',
+  ],
+  'אסלות': [
+    'התקנה גבוהה',
+    'התקנה נמוכה',
+    'התקנה צמודה',
+    'מושבי אסלה',
+    'זקיף אסלה',
+  ],
+  'מקלחות ואמבטיות': [
+    'אמבט ואגנית',
+  ],
+  'גופי תברואה': [
+    'חלקים סניטריים',
+  ],
+  'אביזרי קצה וחיבורים': [
+    'אטמים אומים ופקקים',
+  ],
+};
+
 class _CatalogDrillProductList extends ConsumerWidget {
   const _CatalogDrillProductList({required this.cat});
 
@@ -2654,14 +2685,29 @@ class _CatalogDrillProductList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final products = smartProductsForCat(cat);
+    final smartProducts = smartProductsForCat(cat);
     final catData = kCatalogCats.firstWhere(
       (c) => c.title == cat,
       orElse: () => kCatalogCats.first,
     );
 
+    // Lipskey sub-categories for this catalog cat
+    final lipskeySubCatNames = _kCatalogToLipskeyCats[cat] ?? [];
+    final lipskeyGroups = [
+      for (final catName in lipskeySubCatNames)
+        (
+          name: catName,
+          products: kLipskeyCatalog
+              .where((p) => p.categoryHe == catName)
+              .toList(),
+        ),
+    ].where((g) => g.products.isNotEmpty).toList();
+
+    final isEmpty = smartProducts.isEmpty && lipskeyGroups.isEmpty;
+
     return Column(
       children: [
+        // Breadcrumb header
         Container(
           color: const Color(0xFF1A1A1A),
           padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
@@ -2686,7 +2732,7 @@ class _CatalogDrillProductList extends ConsumerWidget {
           ),
         ),
         const Divider(height: 1, color: Color(0xFF2A2A2A)),
-        if (products.isEmpty)
+        if (isEmpty)
           const Expanded(
             child: Center(
               child: Text('בקרוב',
@@ -2695,83 +2741,188 @@ class _CatalogDrillProductList extends ConsumerWidget {
           )
         else
           Expanded(
-            child: ListView.separated(
-              itemCount: products.length,
-              separatorBuilder: (_, __) => const Divider(
-                  height: 1, indent: 76, color: Color(0xFF2A2A2A)),
-              itemBuilder: (_, i) {
-                final p = products[i];
-                return InkWell(
-                  onTap: () => _openProductSheet(context, p),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF2A2A2A),
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(p.emoji,
-                              style: const TextStyle(fontSize: 24)),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      p.name,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
+            child: CustomScrollView(
+              slivers: [
+                // ── SmartTree section ──────────────────────────────────────
+                if (smartProducts.isNotEmpty) ...[
+                  SliverToBoxAdapter(
+                    child: _SectionBanner(
+                        emoji: '🌳', label: 'עץ חכם', color: const Color(0xFF1B2D1B)),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (_, i) {
+                        final p = smartProducts[i];
+                        return Column(
+                          children: [
+                            InkWell(
+                              onTap: () => _openSmartSheet(context, p),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 10),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF2A2A2A),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(p.emoji,
+                                          style: const TextStyle(fontSize: 24)),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(p.name,
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.w600,
+                                                    )),
+                                              ),
+                                              Text(
+                                                p.recBrand.price != null
+                                                    ? '₪${p.recBrand.price}'
+                                                    : '—',
+                                                style: const TextStyle(
+                                                    color: Color(0xFF888888),
+                                                    fontSize: 12),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            '⚡ ${p.mustCount} פריטי חובה · ${p.acc.length} סה"כ',
+                                            style: const TextStyle(
+                                                color: Color(0xFF888888),
+                                                fontSize: 13),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ),
-                                  Text(
-                                    p.recBrand.price != null
-                                        ? '₪${p.recBrand.price}'
-                                        : '—',
-                                    style: const TextStyle(
-                                      color: Color(0xFF888888),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                '⚡ ${p.mustCount} פריטי חובה · ${p.acc.length} סה"כ',
-                                style: const TextStyle(
-                                  color: Color(0xFF888888),
-                                  fontSize: 13,
+                                    const Icon(Icons.chevron_left,
+                                        color: Color(0xFF555555), size: 20),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.chevron_left,
-                            color: Color(0xFF555555), size: 20),
-                      ],
+                            ),
+                            if (i < smartProducts.length - 1)
+                              const Divider(
+                                  height: 1,
+                                  indent: 76,
+                                  color: Color(0xFF2A2A2A)),
+                          ],
+                        );
+                      },
+                      childCount: smartProducts.length,
                     ),
                   ),
-                );
-              },
+                ],
+
+                // ── Lipskey section ────────────────────────────────────────
+                if (lipskeyGroups.isNotEmpty) ...[
+                  SliverToBoxAdapter(
+                    child: _SectionBanner(
+                        emoji: '🏭',
+                        label: 'ליפסקי ברקן',
+                        color: const Color(0xFF0D1B2A)),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (_, i) {
+                        final g = lipskeyGroups[i];
+                        return Column(
+                          children: [
+                            InkWell(
+                              onTap: () => Navigator.push(
+                                context,
+                                LipskeyProductsScreen.route(
+                                  category: g.name,
+                                  products: g.products,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF0D1B2A),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: const Color(0xFF3D5A80)
+                                              .withOpacity(0.5),
+                                        ),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        g.products.first.categoryEmoji,
+                                        style:
+                                            const TextStyle(fontSize: 22),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(g.name,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                              )),
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            '${g.products.length} פריטים · ליפסקי ברקן',
+                                            style: const TextStyle(
+                                                color: Color(0xFF64FFDA),
+                                                fontSize: 12),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Icon(Icons.chevron_left,
+                                        color: Color(0xFF555555), size: 20),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (i < lipskeyGroups.length - 1)
+                              const Divider(
+                                  height: 1,
+                                  indent: 76,
+                                  color: Color(0xFF2A2A2A)),
+                          ],
+                        );
+                      },
+                      childCount: lipskeyGroups.length,
+                    ),
+                  ),
+                ],
+
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              ],
             ),
           ),
       ],
     );
   }
 
-  static void _openProductSheet(BuildContext context, SmartProduct p) {
+  static void _openSmartSheet(BuildContext context, SmartProduct p) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -2780,6 +2931,35 @@ class _CatalogDrillProductList extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => _SmartProductSheet(product: p),
+    );
+  }
+}
+
+class _SectionBanner extends StatelessWidget {
+  const _SectionBanner(
+      {required this.emoji, required this.label, required this.color});
+
+  final String emoji;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: color,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 16)),
+          const SizedBox(width: 8),
+          Text(label,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              )),
+        ],
+      ),
     );
   }
 }
