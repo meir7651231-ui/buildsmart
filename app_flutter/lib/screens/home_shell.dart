@@ -30,9 +30,9 @@ class HomeShell extends ConsumerWidget {
             index: tabIndex,
             children: const [
               CatalogScreen(),
-              const ChatsScreen(),
-              const NotificationsScreen(),
-              const StoreScreen(),
+              ChatsScreen(),
+              NotificationsScreen(),
+              StoreScreen(),
             ],
           ),
 
@@ -183,14 +183,15 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   }
 }
 
-class _BottomNav extends StatelessWidget {
+class _BottomNav extends ConsumerWidget {
   const _BottomNav({required this.currentIndex, required this.onTap});
 
   final int currentIndex;
   final void Function(int) onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount = ref.watch(notifUnreadCountProvider);
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTap,
@@ -200,22 +201,70 @@ class _BottomNav extends StatelessWidget {
       unselectedItemColor: const Color(0xFF888888),
       selectedFontSize: 12,
       unselectedFontSize: 11,
-      items: const [
-        BottomNavigationBarItem(
+      items: [
+        const BottomNavigationBarItem(
           icon: Icon(Icons.grid_view),
           label: 'קטלוג',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.chat_bubble_outline),
           label: 'שיחות',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.notifications_outlined),
+          icon: _BadgedIcon(
+            icon: Icons.notifications_outlined,
+            count: unreadCount,
+          ),
+          activeIcon: _BadgedIcon(
+            icon: Icons.notifications,
+            count: unreadCount,
+          ),
           label: 'התראות',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.shopping_cart_outlined),
           label: 'חנות',
+        ),
+      ],
+    );
+  }
+}
+
+class _BadgedIcon extends StatelessWidget {
+  const _BadgedIcon({required this.icon, required this.count});
+
+  final IconData icon;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    if (count == 0) {
+      return Icon(icon);
+    }
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Icon(icon),
+        Positioned(
+          top: -5,
+          right: -6,
+          child: Container(
+            padding: const EdgeInsets.all(2),
+            decoration: const BoxDecoration(
+              color: BsTokens.brand,
+              shape: BoxShape.circle,
+            ),
+            constraints: const BoxConstraints(minWidth: 15, minHeight: 15),
+            child: Text(
+              count > 9 ? '9+' : '$count',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 8,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       ],
     );

@@ -9,8 +9,23 @@ final notifSectionProvider =
 final notifReadIdsProvider = StateProvider<Set<String>>((_) => {});
 final notifDismissedIdsProvider = StateProvider<Set<String>>((_) => {});
 final notifSearchQueryProvider = StateProvider<String>((_) => '');
+final notifExpandedGroupsProvider = StateProvider<Set<String>>((_) => {});
 
-// ─── static data ─────────────────────────────────────────────────────────────
+// Derived provider — used by home_shell badge.
+final notifUnreadCountProvider = Provider<int>((ref) {
+  final readIds = ref.watch(notifReadIdsProvider);
+  final dismissedIds = ref.watch(notifDismissedIdsProvider);
+  return _kNotifs
+      .where(
+        (n) =>
+            n.badge > 0 &&
+            !readIds.contains(n.id) &&
+            !dismissedIds.contains(n.id),
+      )
+      .length;
+});
+
+// ─── data types ───────────────────────────────────────────────────────────────
 
 typedef _Notif = ({
   String id,
@@ -24,6 +39,14 @@ typedef _Notif = ({
   bool highPriority,
 });
 
+class _ShowMore {
+  const _ShowMore({required this.groupKey, required this.hiddenCount});
+  final String groupKey;
+  final int hiddenCount;
+}
+
+// ─── static data ─────────────────────────────────────────────────────────────
+
 const List<_Notif> _kNotifs = [
   (
     id: 'n1',
@@ -36,12 +59,35 @@ const List<_Notif> _kNotifs = [
     type: NotifSection.orders,
     highPriority: false,
   ),
+  // Three consecutive shipments in 'היום' → collapse triggers
   (
     id: 'n2',
     emoji: '🚛',
-    title: 'משלוח בדרך',
-    preview: 'משלוח #892 יגיע עד מחר 14:00',
+    title: 'משלוח #892',
+    preview: 'יגיע עד מחר 14:00',
     time: 'לפני שעה',
+    dateGroup: 'היום',
+    badge: 0,
+    type: NotifSection.shipments,
+    highPriority: false,
+  ),
+  (
+    id: 'n9',
+    emoji: '🚛',
+    title: 'משלוח #893',
+    preview: 'חבילה ממתינה לאיסוף בחנות',
+    time: 'לפני שעתיים',
+    dateGroup: 'היום',
+    badge: 1,
+    type: NotifSection.shipments,
+    highPriority: false,
+  ),
+  (
+    id: 'n10',
+    emoji: '🚛',
+    title: 'משלוח #894',
+    preview: 'מסלול עודכן — עצור בשוק עכו',
+    time: 'לפני 3 שעות',
     dateGroup: 'היום',
     badge: 0,
     type: NotifSection.shipments,
@@ -115,14 +161,20 @@ const List<_Notif> _kNotifs = [
   ),
 ];
 
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
 List<_Notif> _filtered({
   required NotifSection section,
   required Set<String> dismissedIds,
   required String query,
 }) =>
     _kNotifs.where((n) {
-      if (dismissedIds.contains(n.id)) return false;
-      if (section != NotifSection.all && n.type != section) return false;
+      if (dismissedIds.contains(n.id)) {
+        return false;
+      }
+      if (section != NotifSection.all && n.type != section) {
+        return false;
+      }
       if (query.isNotEmpty) {
         final q = query.toLowerCase();
         if (!n.title.toLowerCase().contains(q) &&
@@ -133,19 +185,49 @@ List<_Notif> _filtered({
       return true;
     }).toList();
 
-// Inserts date-group header strings before the first notification of each group.
-List<Object> _withHeaders(List<_Notif> notifs) {
+// Inserts date-group headers and collapses consecutive same-type groups of ≥3.
+List<Object> _withHeadersAndCollapse(
+  List<_Notif> notifs,
+  Set<String> expandedKeys,
+) {
   final result = <Object>[];
-  String? current;
-  for (final n in notifs) {
-    if (n.dateGroup != current) {
-      current = n.dateGroup;
-      result.add(current);
+  String? currentDateGroup;
+  var i = 0;
+  while (i < notifs.length) {
+    final n = notifs[i];
+    if (n.dateGroup != currentDateGroup) {
+      currentDateGroup = n.dateGroup;
+      result.add(currentDateGroup);
     }
-    result.add(n);
+    final groupKey = '${n.dateGroup}__${n.type.name}';
+    var j = i + 1;
+    while (j < notifs.length &&
+        notifs[j].dateGroup == n.dateGroup &&
+        notifs[j].type == n.type) {
+      j++;
+    }
+    final groupCount = j - i;
+    if (groupCount >= 3 && !expandedKeys.contains(groupKey)) {
+      result
+        ..add(notifs[i])
+        ..add(_ShowMore(groupKey: groupKey, hiddenCount: groupCount - 1));
+    } else {
+      for (var k = i; k < j; k++) {
+        result.add(notifs[k]);
+      }
+    }
+    i = j;
   }
   return result;
 }
+
+String? _actionLabel(NotifSection type) => switch (type) {
+      NotifSection.orders => 'אשר איסוף',
+      NotifSection.safety => 'טפל כעת',
+      NotifSection.budget => 'פרטים',
+      NotifSection.shipments => 'עקוב',
+      _ => null,
+    };
 
 // ─── screen ──────────────────────────────────────────────────────────────────
 
@@ -174,14 +256,10 @@ class _Header extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final readIds = ref.watch(notifReadIdsProvider);
     final dismissedIds = ref.watch(notifDismissedIdsProvider);
-    final unread = _kNotifs
-        .where(
-          (n) =>
-              n.badge > 0 &&
-              !readIds.contains(n.id) &&
-              !dismissedIds.contains(n.id),
-        )
-        .length;
+    final unread = ref.watch(notifUnreadCountProvider);
+    final hasReadNotDismissed = _kNotifs.any(
+      (n) => readIds.contains(n.id) && !dismissedIds.contains(n.id),
+    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
@@ -226,6 +304,20 @@ class _Header extends ConsumerWidget {
               },
             ),
           ],
+          if (hasReadNotDismissed)
+            IconButton(
+              icon: const Icon(
+                Icons.clear_all,
+                color: Color(0xFF888888),
+                size: 22,
+              ),
+              tooltip: 'נקה נקראו',
+              onPressed: () {
+                ref.read(notifDismissedIdsProvider.notifier).state =
+                    Set<String>.from(ref.read(notifDismissedIdsProvider))
+                      ..addAll(ref.read(notifReadIdsProvider));
+              },
+            ),
         ],
       ),
     );
@@ -416,54 +508,83 @@ class _NotifList extends ConsumerWidget {
     final section = ref.watch(notifSectionProvider);
     final dismissedIds = ref.watch(notifDismissedIdsProvider);
     final query = ref.watch(notifSearchQueryProvider);
-    final items = _withHeaders(
+    final expandedKeys = ref.watch(notifExpandedGroupsProvider);
+    final items = _withHeadersAndCollapse(
       _filtered(section: section, dismissedIds: dismissedIds, query: query),
+      expandedKeys,
     );
 
     if (items.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('🔔', style: TextStyle(fontSize: 48)),
-            SizedBox(height: 12),
-            Text(
-              'אין התראות',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+      return RefreshIndicator(
+        color: BsTokens.brand,
+        backgroundColor: const Color(0xFF1A1A1A),
+        onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
+        child: LayoutBuilder(
+          builder: (_, constraints) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: constraints.maxHeight,
+              child: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('🔔', style: TextStyle(fontSize: 48)),
+                    SizedBox(height: 12),
+                    Text(
+                      'אין התראות',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'כשיהיו עדכונים — הם יופיעו כאן',
+                      style: TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            SizedBox(height: 6),
-            Text(
-              'כשיהיו עדכונים — הם יופיעו כאן',
-              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
-            ),
-          ],
+          ),
         ),
       );
     }
 
-    return ListView.separated(
-      itemCount: items.length,
-      separatorBuilder: (_, i) {
-        final curr = items[i];
-        final next = i + 1 < items.length ? items[i + 1] : null;
-        if (curr is _Notif && next is _Notif) {
-          return const Divider(
-            height: 1,
-            indent: 76,
-            color: Color(0xFF2A2A2A),
-          );
-        }
-        return const SizedBox.shrink();
-      },
-      itemBuilder: (context, i) {
-        final item = items[i];
-        if (item is String) return _DateHeader(label: item);
-        return _DismissibleRow(notif: item as _Notif);
-      },
+    return RefreshIndicator(
+      color: BsTokens.brand,
+      backgroundColor: const Color(0xFF1A1A1A),
+      onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: items.length,
+        separatorBuilder: (_, i) {
+          final curr = items[i];
+          final next = i + 1 < items.length ? items[i + 1] : null;
+          if (curr is _Notif && next is _Notif) {
+            return const Divider(
+              height: 1,
+              indent: 76,
+              color: Color(0xFF2A2A2A),
+            );
+          }
+          return const SizedBox.shrink();
+        },
+        itemBuilder: (context, i) {
+          final item = items[i];
+          if (item is String) {
+            return _DateHeader(label: item);
+          }
+          if (item is _ShowMore) {
+            return _ShowMoreRow(showMore: item);
+          }
+          return _DismissibleRow(notif: item as _Notif);
+        },
+      ),
     );
   }
 }
@@ -484,6 +605,34 @@ class _DateHeader extends StatelessWidget {
           fontSize: 12,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+}
+
+class _ShowMoreRow extends ConsumerWidget {
+  const _ShowMoreRow({required this.showMore});
+
+  final _ShowMore showMore;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return InkWell(
+      onTap: () {
+        ref.read(notifExpandedGroupsProvider.notifier).state =
+            Set<String>.from(ref.read(notifExpandedGroupsProvider))
+              ..add(showMore.groupKey);
+      },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(76, 8, 16, 8),
+        child: Text(
+          'הצג עוד ${showMore.hiddenCount} ↓',
+          style: const TextStyle(
+            color: BsTokens.brand,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -511,9 +660,22 @@ class _DismissibleRow extends ConsumerWidget {
         ),
       ),
       onDismissed: (_) {
-        final ids = Set<String>.from(ref.read(notifDismissedIdsProvider))
-          ..add(notif.id);
-        ref.read(notifDismissedIdsProvider.notifier).state = ids;
+        final id = notif.id;
+        final notifier = ref.read(notifDismissedIdsProvider.notifier);
+        notifier.state = Set<String>.from(notifier.state)..add(id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('התראה נמחקה'),
+            backgroundColor: const Color(0xFF2A2A2A),
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: 'ביטול',
+              textColor: BsTokens.brand,
+              onPressed: () =>
+                  notifier.state = Set<String>.from(notifier.state)..remove(id),
+            ),
+          ),
+        );
       },
       child: _NotifRow(notif: notif),
     );
@@ -530,6 +692,7 @@ class _NotifRow extends ConsumerWidget {
     final readIds = ref.watch(notifReadIdsProvider);
     final isRead = readIds.contains(notif.id);
     final isUnread = notif.badge > 0 && !isRead;
+    final actionLabel = _actionLabel(notif.type);
 
     Future<void> showLongPressMenu() async {
       final box = context.findRenderObject()! as RenderBox;
@@ -576,15 +739,15 @@ class _NotifRow extends ConsumerWidget {
           ),
         ],
       );
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        return;
+      }
       if (choice == 'read') {
-        final ids = Set<String>.from(ref.read(notifReadIdsProvider))
-          ..add(notif.id);
-        ref.read(notifReadIdsProvider.notifier).state = ids;
+        ref.read(notifReadIdsProvider.notifier).state =
+            Set<String>.from(ref.read(notifReadIdsProvider))..add(notif.id);
       } else if (choice == 'delete') {
-        final ids = Set<String>.from(ref.read(notifDismissedIdsProvider))
-          ..add(notif.id);
-        ref.read(notifDismissedIdsProvider.notifier).state = ids;
+        final notifier = ref.read(notifDismissedIdsProvider.notifier);
+        notifier.state = Set<String>.from(notifier.state)..add(notif.id);
       }
     }
 
@@ -597,9 +760,8 @@ class _NotifRow extends ConsumerWidget {
     return InkWell(
       onTap: () {
         if (isUnread) {
-          final ids = Set<String>.from(ref.read(notifReadIdsProvider))
-            ..add(notif.id);
-          ref.read(notifReadIdsProvider.notifier).state = ids;
+          ref.read(notifReadIdsProvider.notifier).state =
+              Set<String>.from(ref.read(notifReadIdsProvider))..add(notif.id);
         }
       },
       onLongPress: showLongPressMenu,
@@ -700,6 +862,23 @@ class _NotifRow extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (actionLabel != null) ...[
+                      const SizedBox(height: 4),
+                      TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                          foregroundColor: BsTokens.brand,
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          textStyle: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        child: Text(actionLabel),
+                      ),
+                    ],
                   ],
                 ),
               ),
