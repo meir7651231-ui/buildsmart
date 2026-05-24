@@ -15,6 +15,12 @@ enum ChatBackupFreq { daily, weekly, monthly }
 
 enum ChatLang { he, ar, en }
 
+enum ChatLastSeen { everyone, contacts, nobody }
+
+enum ChatImageQuality { original, high, medium }
+
+enum ChatAutoDelete { disabled, days30, days90, days180 }
+
 class ChatSettings {
   const ChatSettings({
     required this.readReceipts,
@@ -31,6 +37,30 @@ class ChatSettings {
     required this.businessEndHour,
     required this.businessEndMin,
     required this.autoReplyMessage,
+    // Section 1 — Presence
+    required this.initialResponseEnabled,
+    required this.lastSeenPrivacy,
+    // Section 2 — Chat Notifications
+    required this.callRingEnabled,
+    required this.messageAlertEnabled,
+    required this.chatVibration,
+    // Section 3 — Media
+    required this.imageQuality,
+    required this.compressVideo,
+    // Section 6 — Language
+    required this.autoTranslate,
+    // Section 7 — Business
+    required this.catalogInChat,
+    required this.paymentInChat,
+    // Section 8 — Bot
+    required this.botEnabled,
+    required this.greetingEnabled,
+    required this.greetingMessage,
+    // Section 9 — Archive
+    required this.autoArchive,
+    required this.autoDeletePolicy,
+    required this.spamFilter,
+    required this.backupBeforeDelete,
   });
 
   final bool readReceipts;
@@ -48,6 +78,37 @@ class ChatSettings {
   final int businessEndMin;
   final String autoReplyMessage;
 
+  // Section 1 — Presence
+  final bool initialResponseEnabled;
+  final ChatLastSeen lastSeenPrivacy;
+
+  // Section 2 — Chat Notifications
+  final bool callRingEnabled;
+  final bool messageAlertEnabled;
+  final bool chatVibration;
+
+  // Section 3 — Media
+  final ChatImageQuality imageQuality;
+  final bool compressVideo;
+
+  // Section 6 — Language
+  final bool autoTranslate;
+
+  // Section 7 — Business
+  final bool catalogInChat;
+  final bool paymentInChat;
+
+  // Section 8 — Bot
+  final bool botEnabled;
+  final bool greetingEnabled;
+  final String greetingMessage;
+
+  // Section 9 — Archive
+  final bool autoArchive;
+  final ChatAutoDelete autoDeletePolicy;
+  final bool spamFilter;
+  final bool backupBeforeDelete;
+
   static const ChatSettings defaults = ChatSettings(
     readReceipts: true,
     typingIndicator: true,
@@ -63,6 +124,23 @@ class ChatSettings {
     businessEndHour: 18,
     businessEndMin: 0,
     autoReplyMessage: '',
+    initialResponseEnabled: false,
+    lastSeenPrivacy: ChatLastSeen.contacts,
+    callRingEnabled: true,
+    messageAlertEnabled: true,
+    chatVibration: true,
+    imageQuality: ChatImageQuality.high,
+    compressVideo: true,
+    autoTranslate: false,
+    catalogInChat: false,
+    paymentInChat: false,
+    botEnabled: false,
+    greetingEnabled: false,
+    greetingMessage: '',
+    autoArchive: false,
+    autoDeletePolicy: ChatAutoDelete.disabled,
+    spamFilter: true,
+    backupBeforeDelete: true,
   );
 
   TimeOfDay get businessStart =>
@@ -85,6 +163,23 @@ class ChatSettings {
     int? businessEndHour,
     int? businessEndMin,
     String? autoReplyMessage,
+    bool? initialResponseEnabled,
+    ChatLastSeen? lastSeenPrivacy,
+    bool? callRingEnabled,
+    bool? messageAlertEnabled,
+    bool? chatVibration,
+    ChatImageQuality? imageQuality,
+    bool? compressVideo,
+    bool? autoTranslate,
+    bool? catalogInChat,
+    bool? paymentInChat,
+    bool? botEnabled,
+    bool? greetingEnabled,
+    String? greetingMessage,
+    bool? autoArchive,
+    ChatAutoDelete? autoDeletePolicy,
+    bool? spamFilter,
+    bool? backupBeforeDelete,
   }) {
     return ChatSettings(
       readReceipts: readReceipts ?? this.readReceipts,
@@ -101,6 +196,24 @@ class ChatSettings {
       businessEndHour: businessEndHour ?? this.businessEndHour,
       businessEndMin: businessEndMin ?? this.businessEndMin,
       autoReplyMessage: autoReplyMessage ?? this.autoReplyMessage,
+      initialResponseEnabled:
+          initialResponseEnabled ?? this.initialResponseEnabled,
+      lastSeenPrivacy: lastSeenPrivacy ?? this.lastSeenPrivacy,
+      callRingEnabled: callRingEnabled ?? this.callRingEnabled,
+      messageAlertEnabled: messageAlertEnabled ?? this.messageAlertEnabled,
+      chatVibration: chatVibration ?? this.chatVibration,
+      imageQuality: imageQuality ?? this.imageQuality,
+      compressVideo: compressVideo ?? this.compressVideo,
+      autoTranslate: autoTranslate ?? this.autoTranslate,
+      catalogInChat: catalogInChat ?? this.catalogInChat,
+      paymentInChat: paymentInChat ?? this.paymentInChat,
+      botEnabled: botEnabled ?? this.botEnabled,
+      greetingEnabled: greetingEnabled ?? this.greetingEnabled,
+      greetingMessage: greetingMessage ?? this.greetingMessage,
+      autoArchive: autoArchive ?? this.autoArchive,
+      autoDeletePolicy: autoDeletePolicy ?? this.autoDeletePolicy,
+      spamFilter: spamFilter ?? this.spamFilter,
+      backupBeforeDelete: backupBeforeDelete ?? this.backupBeforeDelete,
     );
   }
 
@@ -119,18 +232,33 @@ class ChatSettings {
         'businessEndHour': businessEndHour,
         'businessEndMin': businessEndMin,
         'autoReplyMessage': autoReplyMessage,
+        'initialResponseEnabled': initialResponseEnabled,
+        'lastSeenPrivacy': lastSeenPrivacy.name,
+        'callRingEnabled': callRingEnabled,
+        'messageAlertEnabled': messageAlertEnabled,
+        'chatVibration': chatVibration,
+        'imageQuality': imageQuality.name,
+        'compressVideo': compressVideo,
+        'autoTranslate': autoTranslate,
+        'catalogInChat': catalogInChat,
+        'paymentInChat': paymentInChat,
+        'botEnabled': botEnabled,
+        'greetingEnabled': greetingEnabled,
+        'greetingMessage': greetingMessage,
+        'autoArchive': autoArchive,
+        'autoDeletePolicy': autoDeletePolicy.name,
+        'spamFilter': spamFilter,
+        'backupBeforeDelete': backupBeforeDelete,
       };
 
   // Dispatches to defaults via [_enum] / null fallbacks; awkward as a factory.
   // ignore: prefer_constructors_over_static_methods
   static ChatSettings fromJson(Map<String, dynamic> j) {
     int i(String k, int fallback) => (j[k] as num?)?.toInt() ?? fallback;
-    bool b(String k, {bool fallback = true}) =>
-        j[k] is bool ? j[k] as bool : fallback;
     return ChatSettings(
-      readReceipts: b('readReceipts'),
-      typingIndicator: b('typingIndicator'),
-      lockScreenPreview: b('lockScreenPreview'),
+      readReceipts: j['readReceipts'] != false,
+      typingIndicator: j['typingIndicator'] != false,
+      lockScreenPreview: j['lockScreenPreview'] != false,
       mediaDownload: _enum(
         j['mediaDownload'],
         ChatMediaDownload.values,
@@ -141,7 +269,7 @@ class ChatSettings {
         ChatPrivacy.values,
         ChatPrivacy.contacts,
       ),
-      backupEnabled: b('backupEnabled', fallback: false),
+      backupEnabled: j['backupEnabled'] == true,
       backupFreq: _enum(
         j['backupFreq'],
         ChatBackupFreq.values,
@@ -152,12 +280,41 @@ class ChatSettings {
         ChatLang.values,
         ChatLang.he,
       ),
-      businessHoursEnabled: b('businessHoursEnabled', fallback: false),
+      businessHoursEnabled: j['businessHoursEnabled'] == true,
       businessStartHour: i('businessStartHour', 8),
       businessStartMin: i('businessStartMin', 0),
       businessEndHour: i('businessEndHour', 18),
       businessEndMin: i('businessEndMin', 0),
       autoReplyMessage: (j['autoReplyMessage'] as String?) ?? '',
+      initialResponseEnabled: j['initialResponseEnabled'] == true,
+      lastSeenPrivacy: _enum(
+        j['lastSeenPrivacy'],
+        ChatLastSeen.values,
+        ChatLastSeen.contacts,
+      ),
+      callRingEnabled: j['callRingEnabled'] != false,
+      messageAlertEnabled: j['messageAlertEnabled'] != false,
+      chatVibration: j['chatVibration'] != false,
+      imageQuality: _enum(
+        j['imageQuality'],
+        ChatImageQuality.values,
+        ChatImageQuality.high,
+      ),
+      compressVideo: j['compressVideo'] != false,
+      autoTranslate: j['autoTranslate'] == true,
+      catalogInChat: j['catalogInChat'] == true,
+      paymentInChat: j['paymentInChat'] == true,
+      botEnabled: j['botEnabled'] == true,
+      greetingEnabled: j['greetingEnabled'] == true,
+      greetingMessage: (j['greetingMessage'] as String?) ?? '',
+      autoArchive: j['autoArchive'] == true,
+      autoDeletePolicy: _enum(
+        j['autoDeletePolicy'],
+        ChatAutoDelete.values,
+        ChatAutoDelete.disabled,
+      ),
+      spamFilter: j['spamFilter'] != false,
+      backupBeforeDelete: j['backupBeforeDelete'] != false,
     );
   }
 }

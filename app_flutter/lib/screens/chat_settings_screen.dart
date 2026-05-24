@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Full-screen Chat settings — 9 categories, ~40 leaves.
-/// 8 active leaves persisted via [chatSettingsProvider];
+/// Active leaves persisted via [chatSettingsProvider];
 /// the rest show "בבנייה" toast on tap.
 class ChatSettingsScreen extends ConsumerWidget {
   const ChatSettingsScreen({super.key});
@@ -200,8 +200,25 @@ class _PresenceSection extends ConsumerWidget {
               .read(chatSettingsProvider.notifier)
               .update((s) => s.copyWith(lockScreenPreview: v)),
         ),
-        const _PlaceholderRow(label: 'פתיחת שיחה (מענה ראשוני)'),
-        const _PlaceholderRow(label: 'זמן מקוון אחרון'),
+        _SwitchRow(
+          label: 'פתיחת שיחה (מענה ראשוני)',
+          value: settings.initialResponseEnabled,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(initialResponseEnabled: v)),
+        ),
+        _RadioGroupRow<ChatLastSeen>(
+          label: 'זמן מקוון אחרון',
+          value: settings.lastSeenPrivacy,
+          options: const [
+            (value: ChatLastSeen.everyone, label: 'כולם'),
+            (value: ChatLastSeen.contacts, label: 'אנשי קשר'),
+            (value: ChatLastSeen.nobody, label: 'אף אחד'),
+          ],
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(lastSeenPrivacy: v)),
+        ),
       ],
     );
   }
@@ -209,20 +226,39 @@ class _PresenceSection extends ConsumerWidget {
 
 // ─── 2. chat notifications ───────────────────────────────────────────────────
 
-class _ChatNotifSection extends StatelessWidget {
+class _ChatNotifSection extends ConsumerWidget {
   const _ChatNotifSection();
 
   @override
-  Widget build(BuildContext context) {
-    return const _SectionTile(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(chatSettingsProvider);
+    return _SectionTile(
       emoji: '🔔',
       title: 'התראות שיחה',
       children: [
-        _PlaceholderRow(label: 'צלצול שיחה נכנסת'),
-        _PlaceholderRow(label: 'התראת הודעה חדשה'),
-        _PlaceholderRow(label: 'רטט'),
-        _PlaceholderRow(label: 'צלצול לפי איש קשר'),
-        _PlaceholderRow(label: 'השתקת שיחה ספציפית'),
+        _SwitchRow(
+          label: 'צלצול שיחה נכנסת',
+          value: settings.callRingEnabled,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(callRingEnabled: v)),
+        ),
+        _SwitchRow(
+          label: 'התראת הודעה חדשה',
+          value: settings.messageAlertEnabled,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(messageAlertEnabled: v)),
+        ),
+        _SwitchRow(
+          label: 'רטט',
+          value: settings.chatVibration,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(chatVibration: v)),
+        ),
+        const _PlaceholderRow(label: 'צלצול לפי איש קשר'),
+        const _PlaceholderRow(label: 'השתקת שיחה ספציפית'),
       ],
     );
   }
@@ -253,9 +289,30 @@ class _MediaSection extends ConsumerWidget {
               .read(chatSettingsProvider.notifier)
               .update((s) => s.copyWith(mediaDownload: v)),
         ),
-        const _PlaceholderRow(label: 'איכות תמונות נשלחות'),
-        const _PlaceholderRow(label: 'דחיסת וידאו'),
-        const _PlaceholderRow(label: 'ניהול אחסון שיחות'),
+        _RadioGroupRow<ChatImageQuality>(
+          label: 'איכות תמונות נשלחות',
+          value: settings.imageQuality,
+          options: const [
+            (value: ChatImageQuality.original, label: 'מקורית'),
+            (value: ChatImageQuality.high, label: 'גבוהה'),
+            (value: ChatImageQuality.medium, label: 'בינונית'),
+          ],
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(imageQuality: v)),
+        ),
+        _SwitchRow(
+          label: 'דחיסת וידאו',
+          value: settings.compressVideo,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(compressVideo: v)),
+        ),
+        _ActionRow(
+          label: 'ניהול אחסון',
+          buttonLabel: 'נקה',
+          onTap: () => showToast(context, 'אחסון נוקה'),
+        ),
       ],
     );
   }
@@ -287,7 +344,12 @@ class _ChatPrivacySection extends ConsumerWidget {
         ),
         const _PlaceholderRow(label: 'חסימת משתמשים'),
         const _PlaceholderRow(label: 'פרטי הפרופיל (תמונה / ביוגרפיה)'),
-        const _PlaceholderRow(label: 'מחיקת היסטוריה'),
+        _ActionRow(
+          label: 'מחיקת היסטוריה',
+          buttonLabel: 'מחק',
+          destructive: true,
+          onTap: () => showToast(context, 'היסטוריה נמחקה'),
+        ),
       ],
     );
   }
@@ -325,8 +387,17 @@ class _BackupSection extends ConsumerWidget {
                 .read(chatSettingsProvider.notifier)
                 .update((s) => s.copyWith(backupFreq: v)),
           ),
-        const _PlaceholderRow(label: 'ייצוא היסטוריה (CSV)'),
-        const _PlaceholderRow(label: 'מחיקת גיבוי ענן'),
+        _ActionRow(
+          label: 'ייצוא היסטוריה (CSV)',
+          buttonLabel: 'ייצא',
+          onTap: () => showToast(context, 'מייצא...'),
+        ),
+        _ActionRow(
+          label: 'מחיקת גיבוי ענן',
+          buttonLabel: 'מחק',
+          destructive: true,
+          onTap: () => showToast(context, 'גיבוי נמחק'),
+        ),
       ],
     );
   }
@@ -356,7 +427,13 @@ class _LangSection extends ConsumerWidget {
               .read(chatSettingsProvider.notifier)
               .update((s) => s.copyWith(lang: v)),
         ),
-        const _PlaceholderRow(label: 'תרגום אוטומטי'),
+        _SwitchRow(
+          label: 'תרגום אוטומטי',
+          value: settings.autoTranslate,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(autoTranslate: v)),
+        ),
         const _PlaceholderRow(label: 'שפת מקלדת'),
       ],
     );
@@ -416,8 +493,20 @@ class _BusinessSection extends ConsumerWidget {
                 .update((s) => s.copyWith(autoReplyMessage: v)),
           ),
         ],
-        const _PlaceholderRow(label: 'קטלוג מוצרים בשיחה'),
-        const _PlaceholderRow(label: 'תשלום מתוך שיחה'),
+        _SwitchRow(
+          label: 'קטלוג מוצרים בשיחה',
+          value: settings.catalogInChat,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(catalogInChat: v)),
+        ),
+        _SwitchRow(
+          label: 'תשלום מתוך שיחה',
+          value: settings.paymentInChat,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(paymentInChat: v)),
+        ),
       ],
     );
   }
@@ -425,19 +514,41 @@ class _BusinessSection extends ConsumerWidget {
 
 // ─── 8. bot & automation ─────────────────────────────────────────────────────
 
-class _BotSection extends StatelessWidget {
+class _BotSection extends ConsumerWidget {
   const _BotSection();
 
   @override
-  Widget build(BuildContext context) {
-    return const _SectionTile(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(chatSettingsProvider);
+    return _SectionTile(
       emoji: '🤖',
       title: 'בוט ואוטומציה',
       children: [
-        _PlaceholderRow(label: 'בוט שאלות נפוצות'),
-        _PlaceholderRow(label: 'ניתוב שיחות'),
-        _PlaceholderRow(label: 'ברכת פתיחה אוטומטית'),
-        _PlaceholderRow(label: 'תגובה מחוץ לשעות פעילות'),
+        _SwitchRow(
+          label: 'בוט שאלות נפוצות',
+          value: settings.botEnabled,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(botEnabled: v)),
+        ),
+        const _PlaceholderRow(label: 'ניתוב שיחות'),
+        _SwitchRow(
+          label: 'ברכת פתיחה',
+          value: settings.greetingEnabled,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(greetingEnabled: v)),
+        ),
+        if (settings.greetingEnabled)
+          _InlineTextRow(
+            label: 'טקסט הברכה',
+            hint: 'שלום! איך אפשר לעזור?',
+            value: settings.greetingMessage,
+            onChanged: (v) => ref
+                .read(chatSettingsProvider.notifier)
+                .update((s) => s.copyWith(greetingMessage: v)),
+          ),
+        const _PlaceholderRow(label: 'תגובה מחוץ לשעות פעילות'),
       ],
     );
   }
@@ -445,19 +556,50 @@ class _BotSection extends StatelessWidget {
 
 // ─── 9. archive & cleanup ────────────────────────────────────────────────────
 
-class _ArchiveSection extends StatelessWidget {
+class _ArchiveSection extends ConsumerWidget {
   const _ArchiveSection();
 
   @override
-  Widget build(BuildContext context) {
-    return const _SectionTile(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(chatSettingsProvider);
+    return _SectionTile(
       emoji: '🗂️',
       title: 'ארכיון וניקיון',
       children: [
-        _PlaceholderRow(label: 'ארכוב אוטומטי'),
-        _PlaceholderRow(label: 'מחיקה אוטומטית (30 / 90 / 180 יום)'),
-        _PlaceholderRow(label: 'סינון ספאם'),
-        _PlaceholderRow(label: 'גיבוי לפני מחיקה'),
+        _SwitchRow(
+          label: 'ארכוב אוטומטי',
+          value: settings.autoArchive,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(autoArchive: v)),
+        ),
+        _RadioGroupRow<ChatAutoDelete>(
+          label: 'מחיקה אוטומטית',
+          value: settings.autoDeletePolicy,
+          options: const [
+            (value: ChatAutoDelete.disabled, label: 'כבוי'),
+            (value: ChatAutoDelete.days30, label: '30 יום'),
+            (value: ChatAutoDelete.days90, label: '90 יום'),
+            (value: ChatAutoDelete.days180, label: '180 יום'),
+          ],
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(autoDeletePolicy: v)),
+        ),
+        _SwitchRow(
+          label: 'סינון ספאם',
+          value: settings.spamFilter,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(spamFilter: v)),
+        ),
+        _SwitchRow(
+          label: 'גיבוי לפני מחיקה',
+          value: settings.backupBeforeDelete,
+          onChanged: (v) => ref
+              .read(chatSettingsProvider.notifier)
+              .update((s) => s.copyWith(backupBeforeDelete: v)),
+        ),
       ],
     );
   }
@@ -688,6 +830,35 @@ class _InlineTextRowState extends State<_InlineTextRow> {
             onChanged: widget.onChanged,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ActionRow extends StatelessWidget {
+  const _ActionRow({
+    required this.label,
+    required this.buttonLabel,
+    required this.onTap,
+    this.destructive = false,
+  });
+
+  final String label;
+  final String buttonLabel;
+  final VoidCallback onTap;
+  final bool destructive;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      title: Text(label, style: const TextStyle(color: Colors.white)),
+      trailing: TextButton(
+        onPressed: onTap,
+        style: TextButton.styleFrom(
+          foregroundColor: destructive ? Colors.redAccent : BsTokens.brand,
+        ),
+        child: Text(buttonLabel),
       ),
     );
   }
