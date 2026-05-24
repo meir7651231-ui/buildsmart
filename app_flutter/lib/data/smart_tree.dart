@@ -18,6 +18,14 @@ class SmartStage {
 }
 
 // Pre-defined stage sequences — verbatim from prototype DIAGRAMS map.
+
+// סיפון לכיור — 3 שלבים
+const _strap = [
+  SmartStage(emoji: '🔩', label: 'רכיבים',   sub: 'טפלון, מפתח',  match: ['סרט טפלון', 'מפתח צינורות']),
+  SmartStage(emoji: '🌀', label: 'הברגה',    sub: 'ידנית + הידוק', match: ['סרט טפלון', 'מפתח צינורות']),
+  SmartStage(emoji: '✅', label: 'סיפון מותקן', sub: 'בדיקת ניקוז', match: ['סיליקון סניטרי'], isFinal: true),
+];
+
 const _sf = [
   SmartStage(emoji: '🔩', label: 'רכיבים',      sub: 'אטמים, צינורות', match: ['אטם', 'סרט טפלון', 'צינורות חיבור']),
   SmartStage(emoji: '🔀', label: 'הזנת מים',    sub: 'PEX חם/קר',       match: ['צינורות חיבור', 'ברזי ניל']),
@@ -123,6 +131,38 @@ class SmartProduct {
 }
 
 const List<SmartProduct> kSmartProducts = [
+  // ===== ניקוז — סיפונים (ליפסקי ברקן — נתונים אמיתיים) =====
+  //
+  // ❗ מה שחסר במבנה הנוכחי:
+  //   • SmartBrand.price = int (חובה) — אין מחיר מחירון → מוכנס 0
+  //   • אין שדה sku ב-SmartBrand → לא ניתן לקשר למוצר בקטלוג
+  //   • אין שדה imageAsset → תמונת המוצר (217861.jpeg) לא נגישה מכאן
+  //   • SmartAcc.price = int (חובה) — אביזרי ליפסקי ללא מחיר → מוכנס 0
+  //
+  SmartProduct(
+    key: 'basinTrap',
+    name: 'סיפון לכיור רחצה',
+    emoji: '🌀',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'התקנת סיפון — מהברגה עד בדיקת ניקוז',
+    stages: _strap,
+    brands: [
+      // ← אמיתי: ליפסקי מק"ט 217861 — לבן 1¼", 20 יח' אריזה
+      SmartBrand(name: 'ליפסקי — סיפון אמריקאי 1¼" לבן', price: 0, tag: 'מחיר לפי ספק', rec: true),
+      // ← אמיתי: ליפסקי מק"ט 213055 — עם יציאה למזגן
+      SmartBrand(name: 'ליפסקי — סיפון + יציאה מזגן 1¼"', price: 0, tag: 'עם יציאה למזגן'),
+      // ← אמיתי: ליפסקי מק"ט 218553 — גרסה נוספת
+      SmartBrand(name: 'ליפסקי — סיפון גרסה ב׳', price: 0, tag: 'גרסה חלופית'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון', emoji: '🎗️', price: 4, why: 'אוטם את ההברגה — חובה', must: true),
+      SmartAcc(name: 'מפתח צינורות', emoji: '🔧', price: 39, why: 'להידוק הסיפון בכוח מספיק', must: true),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום בין הסיפון למשטח הכיור', must: false),
+      // ← אמיתי: ליפסקי מק"ט 558463 — אטם דו צדדי 32/50
+      SmartAcc(name: 'אטם דו צדדי 32/50 (ליפסקי 558463)', emoji: '⚫', price: 0, why: 'מונע נזילה בחיבור', must: true),
+    ],
+  ),
+
   // ===== ברזים וכיורים =====
   SmartProduct(
     key: 'faucet',
