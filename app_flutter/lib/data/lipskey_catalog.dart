@@ -3667,6 +3667,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Spouts & Extensions',
     categoryEmoji: '🚿',
     page: 19,
+    imageFile: '777A5033.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3677,6 +3678,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Spouts & Extensions',
     categoryEmoji: '🚿',
     page: 19,
+    imageFile: '77772414.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3687,6 +3689,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Spouts & Extensions',
     categoryEmoji: '🚿',
     page: 19,
+    imageFile: '77772413.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3697,6 +3700,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Spouts & Extensions',
     categoryEmoji: '🚿',
     page: 19,
+    imageFile: '77772411.jpg',
     brand: 'AQUATEC',
   ),
   // סטים וצינורות — עמ' 20
@@ -3708,6 +3712,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Clamp Sets & Connections',
     categoryEmoji: '🔩',
     page: 20,
+    imageFile: '77772604.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3718,6 +3723,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Clamp Sets & Connections',
     categoryEmoji: '🔩',
     page: 20,
+    imageFile: '77772605.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3729,6 +3735,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🪛',
     page: 20,
     dims: {'L (cm)': '40'},
+    imageFile: '77381040.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3740,6 +3747,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🪛',
     page: 20,
     dims: {'L (cm)': '50'},
+    imageFile: '77381040.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3751,6 +3759,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🪛',
     page: 20,
     dims: {'L (cm)': '60'},
+    imageFile: '77381040.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3762,6 +3771,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🪛',
     page: 20,
     dims: {'L (cm)': '40', 'thread': '1/2×1/2'},
+    imageFile: '77121240.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3773,6 +3783,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🪛',
     page: 20,
     dims: {'L (cm)': '50', 'thread': '1/2×1/2'},
+    imageFile: '77121240.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3784,6 +3795,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🪛',
     page: 20,
     dims: {'L (cm)': '60', 'thread': '1/2×1/2'},
+    imageFile: '77121240.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3795,6 +3807,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🪛',
     page: 20,
     dims: {'L (cm)': '15', 'thread': '3/8×3/8'},
+    imageFile: '77383815.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3806,6 +3819,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🪛',
     page: 20,
     dims: {'L (cm)': '20', 'thread': '3/8×3/8'},
+    imageFile: '77383815.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3817,6 +3831,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🪛',
     page: 20,
     dims: {'L (cm)': '25', 'thread': '3/8×3/8'},
+    imageFile: '77383815.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3828,6 +3843,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🪛',
     page: 20,
     dims: {'L (cm)': '30', 'thread': '3/8×3/8'},
+    imageFile: '77383815.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3839,6 +3855,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🪛',
     page: 20,
     dims: {'L (cm)': '40', 'thread': '3/8×3/8'},
+    imageFile: '77383815.jpg',
     brand: 'AQUATEC',
   ),
   // מונגנונים — עמ' 21
@@ -3851,6 +3868,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⚙️',
     page: 21,
     dims: {'mm': '40'},
+    imageFile: '777M1802.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3862,6 +3880,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⚙️',
     page: 21,
     dims: {'mm': '40'},
+    imageFile: '777M1802.jpg',
     brand: 'AQUATEC',
   ),
   // סטי אביזרי רחצה — עמ' 24
@@ -3874,6 +3893,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Sets',
     categoryEmoji: '🚿',
     page: 24,
+    imageFile: '778582.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3885,6 +3905,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Sets',
     categoryEmoji: '🚿',
     page: 24,
+    imageFile: '778581.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3896,6 +3917,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Sets',
     categoryEmoji: '🚿',
     page: 24,
+    imageFile: '778580.jpg',
     brand: 'AQUATEC',
   ),
   // מערכות אמבטיה שחור — עמ' 26
@@ -3908,6 +3930,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bath Systems',
     categoryEmoji: '🚿',
     page: 26,
+    imageFile: '77701117.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3919,6 +3942,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bath Systems',
     categoryEmoji: '🚿',
     page: 26,
+    imageFile: '77701202.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3930,6 +3954,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bath Systems',
     categoryEmoji: '🚿',
     page: 26,
+    imageFile: '77701201.jpg',
     brand: 'AQUATEC',
   ),
   // קונקורד — עמ' 27
@@ -3941,6 +3966,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bath Systems',
     categoryEmoji: '🚿',
     page: 27,
+    imageFile: '77701100.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3951,6 +3977,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bath Systems',
     categoryEmoji: '🚿',
     page: 27,
+    imageFile: '77701200.jpg',
     brand: 'AQUATEC',
   ),
   // מערכות נוספות — עמ' 28
@@ -3962,6 +3989,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bath Systems',
     categoryEmoji: '🚿',
     page: 28,
+    imageFile: '77701111.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3972,6 +4000,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Spouts & Extensions',
     categoryEmoji: '🚿',
     page: 28,
+    imageFile: '77775292.jpg',
     brand: 'AQUATEC',
   ),
   // עמ' 29
@@ -3983,6 +4012,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bath Systems',
     categoryEmoji: '🚿',
     page: 29,
+    imageFile: '77701110.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -3993,6 +4023,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bath Systems',
     categoryEmoji: '🚿',
     page: 29,
+    imageFile: '77701115.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4003,6 +4034,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bath Systems',
     categoryEmoji: '🚿',
     page: 29,
+    imageFile: '77701116.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4015,6 +4047,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 30,
+    imageFile: '7777708G.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4025,6 +4058,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 30,
+    imageFile: '7777707B.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4035,6 +4069,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 30,
+    imageFile: '7777708B.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4045,6 +4080,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 30,
+    imageFile: '7777710C.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4055,6 +4091,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 31,
+    imageFile: '7777711C.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4065,6 +4102,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 31,
+    imageFile: '7777707C.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4075,6 +4113,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 31,
+    imageFile: '7777708C.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4087,6 +4126,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 32,
+    imageFile: '77701204.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4097,6 +4137,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 32,
+    imageFile: '77701205.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4107,6 +4148,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 32,
+    imageFile: '77701135.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4117,6 +4159,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 32,
+    imageFile: '77701125.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4127,6 +4170,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Hoses',
     categoryEmoji: '🚿',
     page: 32,
+    imageFile: '77701155.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4137,6 +4181,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Hoses',
     categoryEmoji: '🚿',
     page: 32,
+    imageFile: '77701155.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4149,6 +4194,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 33,
+    imageFile: '77701140.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4159,6 +4205,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 33,
+    imageFile: '77701203.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4169,6 +4216,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 33,
+    imageFile: '77701195.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4179,6 +4227,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 33,
+    imageFile: '77701130.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4189,6 +4238,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Hoses',
     categoryEmoji: '🚿',
     page: 33,
+    imageFile: '77701196.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4199,6 +4249,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 33,
+    imageFile: '77701150.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4211,6 +4262,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 34,
+    imageFile: '77701179.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4221,6 +4273,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 34,
+    imageFile: '77701179.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4231,6 +4284,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 34,
+    imageFile: '77701197.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4241,6 +4295,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 34,
+    imageFile: '77701197.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4251,6 +4306,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Handshowers',
     categoryEmoji: '🚿',
     page: 34,
+    imageFile: '77701177.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4261,6 +4317,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Hoses',
     categoryEmoji: '🚿',
     page: 34,
+    imageFile: '77701113.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4271,6 +4328,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Hoses',
     categoryEmoji: '🚿',
     page: 34,
+    imageFile: '77701113.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4283,6 +4341,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 35,
+    imageFile: '77701199.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4293,6 +4352,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 35,
+    imageFile: '77701170.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4303,6 +4363,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 35,
+    imageFile: '77701165.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4313,6 +4374,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Heads',
     categoryEmoji: '🚿',
     page: 35,
+    imageFile: '77701166.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4325,6 +4387,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Accessories',
     categoryEmoji: '🚿',
     page: 36,
+    imageFile: '77701175.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4335,6 +4398,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Accessories',
     categoryEmoji: '🚿',
     page: 36,
+    imageFile: '77701180.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4345,6 +4409,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Accessories',
     categoryEmoji: '🚿',
     page: 36,
+    imageFile: '77701172.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4355,6 +4420,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Accessories',
     categoryEmoji: '🚿',
     page: 36,
+    imageFile: '77701185.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4367,6 +4433,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Arms',
     categoryEmoji: '🚿',
     page: 37,
+    imageFile: '77701189.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4377,6 +4444,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Arms',
     categoryEmoji: '🚿',
     page: 37,
+    imageFile: '77701189.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4387,6 +4455,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Arms',
     categoryEmoji: '🚿',
     page: 37,
+    imageFile: '77701189.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4397,6 +4466,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Arms',
     categoryEmoji: '🚿',
     page: 37,
+    imageFile: '77701192.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4407,6 +4477,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Shower Arms',
     categoryEmoji: '🚿',
     page: 37,
+    imageFile: '77701192.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4419,6 +4490,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bidet Sprayer Systems',
     categoryEmoji: '🚿',
     page: 40,
+    imageFile: '77777089.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4429,6 +4501,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bidet Sprayer Systems',
     categoryEmoji: '🚿',
     page: 40,
+    imageFile: '77777087.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4439,6 +4512,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bidet Sprayer Systems',
     categoryEmoji: '🚿',
     page: 40,
+    imageFile: '77777088.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4449,6 +4523,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bidet Sprayer Systems',
     categoryEmoji: '🚿',
     page: 40,
+    imageFile: '77777086.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4461,6 +4536,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bidet Sprayer Systems',
     categoryEmoji: '🚿',
     page: 41,
+    imageFile: '77110174.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4471,6 +4547,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bidet Sprayer Systems',
     categoryEmoji: '🚿',
     page: 41,
+    imageFile: '77110177.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4481,6 +4558,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bidet Sprayer Systems',
     categoryEmoji: '🚿',
     page: 41,
+    imageFile: '77110164.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4491,6 +4569,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bidet Sprayer Systems',
     categoryEmoji: '🚿',
     page: 41,
+    imageFile: '77110166.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4501,6 +4580,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bidet Sprayer Systems',
     categoryEmoji: '🚿',
     page: 41,
+    imageFile: '77110154.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4511,6 +4591,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bidet Sprayer Systems',
     categoryEmoji: '🚿',
     page: 41,
+    imageFile: '77110155.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4523,6 +4604,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Water Points',
     categoryEmoji: '🔧',
     page: 42,
+    imageFile: '77775150.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4533,6 +4615,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Water Points',
     categoryEmoji: '🔧',
     page: 42,
+    imageFile: '77775350.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4543,6 +4626,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Water Points',
     categoryEmoji: '🔧',
     page: 42,
+    imageFile: '77775295.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4553,6 +4637,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Water Points',
     categoryEmoji: '🔧',
     page: 42,
+    imageFile: '77775253.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4563,6 +4648,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Water Points',
     categoryEmoji: '🔧',
     page: 42,
+    imageFile: '77775250.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4573,6 +4659,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Water Points',
     categoryEmoji: '🔧',
     page: 42,
+    imageFile: '77775251.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4583,6 +4670,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Water Points',
     categoryEmoji: '🔧',
     page: 42,
+    imageFile: '77775293.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4593,6 +4681,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Water Points',
     categoryEmoji: '🔧',
     page: 42,
+    imageFile: '77775294.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4605,6 +4694,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 43,
+    imageFile: '77775256.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4615,6 +4705,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 43,
+    imageFile: '77775257.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4625,6 +4716,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 43,
+    imageFile: '77775255.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4635,6 +4727,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 43,
+    imageFile: '77775259.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4645,6 +4738,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 43,
+    imageFile: '77775258.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4655,6 +4749,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 43,
+    imageFile: '77775254.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4667,6 +4762,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Water Points',
     categoryEmoji: '🔧',
     page: 44,
+    imageFile: '77775297.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4677,6 +4773,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Water Points',
     categoryEmoji: '🔧',
     page: 44,
+    imageFile: '77775252.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4687,6 +4784,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 44,
+    imageFile: '77775269.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4697,6 +4795,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 44,
+    imageFile: '77775269.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4707,6 +4806,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 44,
+    imageFile: '77775262.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4717,6 +4817,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 44,
+    imageFile: '77775262.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4727,6 +4828,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 44,
+    imageFile: '77775261.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4737,6 +4839,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 44,
+    imageFile: '77775265.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4749,6 +4852,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 45,
+    imageFile: '77775296.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4759,6 +4863,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 45,
+    imageFile: '77775260.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4769,6 +4874,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bucket Taps',
     categoryEmoji: '🔧',
     page: 45,
+    imageFile: '79255054.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4779,6 +4885,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bucket Taps',
     categoryEmoji: '🔧',
     page: 45,
+    imageFile: '7777208C.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4789,6 +4896,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bucket Taps',
     categoryEmoji: '🔧',
     page: 45,
+    imageFile: '77777108.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4799,6 +4907,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bucket Taps',
     categoryEmoji: '🔧',
     page: 45,
+    imageFile: '77777109.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4809,6 +4918,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bucket Taps',
     categoryEmoji: '🔧',
     page: 45,
+    imageFile: '77777110.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4821,6 +4931,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 46,
+    imageFile: '77777120.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4831,6 +4942,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 46,
+    imageFile: '77777120A.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4841,6 +4953,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 46,
+    imageFile: '77777283.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4851,6 +4964,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Nile Valves',
     categoryEmoji: '🔧',
     page: 46,
+    imageFile: '77777284.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4861,6 +4975,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Grab Bars',
     categoryEmoji: '🔧',
     page: 46,
+    imageFile: '77775289.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4871,6 +4986,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Grab Bars',
     categoryEmoji: '🔧',
     page: 46,
+    imageFile: '77775289.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4881,6 +4997,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Grab Bars',
     categoryEmoji: '🔧',
     page: 46,
+    imageFile: '77775289.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4893,6 +5010,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bathroom Accessories',
     categoryEmoji: '🛁',
     page: 47,
+    imageFile: '77775284.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4903,6 +5021,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bathroom Accessories',
     categoryEmoji: '🛁',
     page: 47,
+    imageFile: '77775283.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4913,6 +5032,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bathroom Accessories',
     categoryEmoji: '🛁',
     page: 47,
+    imageFile: '77775282.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4923,6 +5043,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bathroom Accessories',
     categoryEmoji: '🛁',
     page: 47,
+    imageFile: '77775288.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4935,6 +5056,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bathroom Accessories',
     categoryEmoji: '🛁',
     page: 48,
+    imageFile: '77775285.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4945,6 +5067,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bathroom Accessories',
     categoryEmoji: '🛁',
     page: 48,
+    imageFile: '77775287.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4955,6 +5078,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bathroom Accessories',
     categoryEmoji: '🛁',
     page: 48,
+    imageFile: '77775281.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4965,6 +5089,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Bathroom Accessories',
     categoryEmoji: '🛁',
     page: 48,
+    imageFile: '77775280.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -4977,6 +5102,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilets & Basins',
     categoryEmoji: '🚽',
     page: 52,
+    imageFile: '77771006.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4987,6 +5113,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilets & Basins',
     categoryEmoji: '🚽',
     page: 52,
+    imageFile: '77771010.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -4997,6 +5124,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilets & Basins',
     categoryEmoji: '🚽',
     page: 52,
+    imageFile: '77771008.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -5009,6 +5137,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🚽',
     page: 53,
+    imageFile: '77777011.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5019,6 +5148,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🚽',
     page: 53,
+    imageFile: '77003223.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5029,6 +5159,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🚽',
     page: 53,
+    imageFile: '77777010.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5039,6 +5170,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🚽',
     page: 53,
+    imageFile: '777P1020.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5049,6 +5181,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🚽',
     page: 53,
+    imageFile: '777P1020.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5059,6 +5192,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🚽',
     page: 53,
+    imageFile: '777P1020.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -5071,6 +5205,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Traps',
     categoryEmoji: '🔧',
     page: 54,
+    imageFile: '77771610.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5081,6 +5216,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Traps',
     categoryEmoji: '🔧',
     page: 54,
+    imageFile: '77771012.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5091,6 +5227,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Traps',
     categoryEmoji: '🔧',
     page: 54,
+    imageFile: '77003220.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5101,6 +5238,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Traps',
     categoryEmoji: '🔧',
     page: 54,
+    imageFile: '77003220.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5111,6 +5249,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Traps',
     categoryEmoji: '🔧',
     page: 54,
+    imageFile: '77771271.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -5123,6 +5262,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Traps',
     categoryEmoji: '🔧',
     page: 55,
+    imageFile: '77771040.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5133,6 +5273,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🔧',
     page: 55,
+    imageFile: '77777777.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5143,6 +5284,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🔧',
     page: 55,
+    imageFile: '77777400.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5153,6 +5295,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Connection Accessories',
     categoryEmoji: '🔧',
     page: 55,
+    imageFile: '77772606.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -5165,6 +5308,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🔧',
     page: 56,
+    imageFile: '77000903.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5175,6 +5319,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🔧',
     page: 56,
+    imageFile: '77000905.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5185,6 +5330,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Accessories',
     categoryEmoji: '🔧',
     page: 56,
+    imageFile: '77777041.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -5197,6 +5343,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Channel Drains',
     categoryEmoji: '🚿',
     page: 58,
+    imageFile: '77575305.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5207,6 +5354,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Channel Drains',
     categoryEmoji: '🚿',
     page: 58,
+    imageFile: '77575305.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5217,6 +5365,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Channel Drains',
     categoryEmoji: '🚿',
     page: 58,
+    imageFile: '77575305.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5227,6 +5376,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Channel Drains',
     categoryEmoji: '🚿',
     page: 58,
+    imageFile: '77575305.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5237,6 +5387,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Channel Drains',
     categoryEmoji: '🚿',
     page: 58,
+    imageFile: '77575305.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5247,6 +5398,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Channel Drains',
     categoryEmoji: '🚿',
     page: 58,
+    imageFile: '77575305.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5257,6 +5409,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Channel Drains',
     categoryEmoji: '🚿',
     page: 58,
+    imageFile: '77575328.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5267,6 +5420,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Channel Drains',
     categoryEmoji: '🚿',
     page: 58,
+    imageFile: '77575328.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5277,6 +5431,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Channel Drains',
     categoryEmoji: '🚿',
     page: 58,
+    imageFile: '77575328.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5287,6 +5442,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Channel Drains',
     categoryEmoji: '🚿',
     page: 58,
+    imageFile: '77575328.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -5299,6 +5455,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 60,
+    imageFile: '777Z3069.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5309,6 +5466,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 60,
+    imageFile: '777Z3068.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5319,6 +5477,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 60,
+    imageFile: '77Z2081C.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5329,6 +5488,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 60,
+    imageFile: '77Z2079C.jpg',
     brand: 'AQUATEC',
   ),
 
@@ -5341,6 +5501,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '777Z3079.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5351,6 +5512,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '777Z3079A.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5361,6 +5523,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '777Z3079.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5371,6 +5534,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '777Z3079A.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5381,6 +5545,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '777Z3081.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5391,6 +5556,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '777Z309A.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5401,6 +5567,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '777Z3081.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5411,6 +5578,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '777Z309A.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5421,6 +5589,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '777Z3078.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5431,6 +5600,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '77Z3078A.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5441,6 +5611,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '777Z3078.jpg',
     brand: 'AQUATEC',
   ),
   LipskeyCatalogProduct(
@@ -5451,300 +5622,301 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drain Covers & Grates',
     categoryEmoji: '🔧',
     page: 61,
+    imageFile: '77Z3078A.jpg',
     brand: 'AQUATEC',
   ),
 
   // ─── AQUATEC — מכסים ורשתות עגולים ניקל/נחושת (page 62) ──────────────────
-  LipskeyCatalogProduct(sku: '777Z3080', nameHe: 'מכסה ניקל עגול 4"', nameEn: 'Nickel Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77Z3080A', nameHe: 'מכסה נחושת עגול 4"', nameEn: 'Brass Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '777Z3063', nameHe: 'מכסה ניקל מונח עגול 4"', nameEn: 'Nickel Flat Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '777Z3067', nameHe: 'מכסה נחושת מונח עגול 4"', nameEn: 'Brass Flat Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77003023', nameHe: 'רשת ניקל מרובעת 6"', nameEn: 'Nickel Square Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77Z3399A', nameHe: 'רשת ניקל מרובעת 8"', nameEn: 'Nickel Square Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77Z3399B', nameHe: 'רשת נחושת מרובעת 6"', nameEn: 'Brass Square Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '777Z3399', nameHe: 'רשת נחושת מרובעת 8"', nameEn: 'Brass Square Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77003022', nameHe: 'מכסה ניקל מרובע 6"', nameEn: 'Nickel Square Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77Z3398A', nameHe: 'מכסה ניקל מרובע 8"', nameEn: 'Nickel Square Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77Z3398B', nameHe: 'מכסה נחושת מרובע 6"', nameEn: 'Brass Square Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '777Z3398', nameHe: 'מכסה נחושת מרובע 8"', nameEn: 'Brass Square Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '777Z3080', nameHe: 'מכסה ניקל עגול 4"', nameEn: 'Nickel Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '777Z3080.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77Z3080A', nameHe: 'מכסה נחושת עגול 4"', nameEn: 'Brass Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77Z3080A.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '777Z3063', nameHe: 'מכסה ניקל מונח עגול 4"', nameEn: 'Nickel Flat Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '777Z3080.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '777Z3067', nameHe: 'מכסה נחושת מונח עגול 4"', nameEn: 'Brass Flat Round Cover 4"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77Z3080A.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77003023', nameHe: 'רשת ניקל מרובעת 6"', nameEn: 'Nickel Square Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77003023.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77Z3399A', nameHe: 'רשת ניקל מרובעת 8"', nameEn: 'Nickel Square Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77003023.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77Z3399B', nameHe: 'רשת נחושת מרובעת 6"', nameEn: 'Brass Square Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77Z3399B.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '777Z3399', nameHe: 'רשת נחושת מרובעת 8"', nameEn: 'Brass Square Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77Z3399B.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77003022', nameHe: 'מכסה ניקל מרובע 6"', nameEn: 'Nickel Square Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77003022.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77Z3398A', nameHe: 'מכסה ניקל מרובע 8"', nameEn: 'Nickel Square Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77003022.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77Z3398B', nameHe: 'מכסה נחושת מרובע 6"', nameEn: 'Brass Square Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77Z3398B.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '777Z3398', nameHe: 'מכסה נחושת מרובע 8"', nameEn: 'Brass Square Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 62, imageFile: '77Z3398B.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — רשתות/מכסים 6"/8" עגולים (page 63) ────────────────────────
-  LipskeyCatalogProduct(sku: '77003025', nameHe: 'רשת ניקל עגול 6"', nameEn: 'Nickel Round Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77Z3401A', nameHe: 'רשת ניקל עגול 8"', nameEn: 'Nickel Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77Z3401B', nameHe: 'רשת נחושת עגול 6"', nameEn: 'Brass Round Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '777Z3401', nameHe: 'רשת נחושת עגול 8"', nameEn: 'Brass Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77003024', nameHe: 'מכסה ניקל עגול 6"', nameEn: 'Nickel Round Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77Z3400A', nameHe: 'מכסה ניקל עגול 8"', nameEn: 'Nickel Round Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77Z3400B', nameHe: 'מכסה נחושת עגול 6"', nameEn: 'Brass Round Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '777Z3400', nameHe: 'מכסה נחושת עגול 8"', nameEn: 'Brass Round Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '777Z3402', nameHe: 'רשת גלי מונחת עגול 8"', nameEn: 'Wavy Flat Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77003025', nameHe: 'רשת ניקל עגול 6"', nameEn: 'Nickel Round Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003025.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77Z3401A', nameHe: 'רשת ניקל עגול 8"', nameEn: 'Nickel Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003025.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77Z3401B', nameHe: 'רשת נחושת עגול 6"', nameEn: 'Brass Round Grate 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3401B.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '777Z3401', nameHe: 'רשת נחושת עגול 8"', nameEn: 'Brass Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3401B.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77003024', nameHe: 'מכסה ניקל עגול 6"', nameEn: 'Nickel Round Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003024.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77Z3400A', nameHe: 'מכסה ניקל עגול 8"', nameEn: 'Nickel Round Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77003024.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77Z3400B', nameHe: 'מכסה נחושת עגול 6"', nameEn: 'Brass Round Cover 6"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3400B.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '777Z3400', nameHe: 'מכסה נחושת עגול 8"', nameEn: 'Brass Round Cover 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '77Z3400B.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '777Z3402', nameHe: 'רשת גלי מונחת עגול 8"', nameEn: 'Wavy Flat Round Grate 8"', categoryHe: 'מכסים ורשתות', categoryEn: 'Drain Covers & Grates', categoryEmoji: '🔧', page: 63, imageFile: '777Z3402.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — ברזי מעבר כדוריים (page 64) ────────────────────────────────
-  LipskeyCatalogProduct(sku: '77777311', nameHe: 'ברז מעבר כדורי ח.פ 1/2"', nameEn: 'Ball Valve M×F 1/2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777312', nameHe: 'ברז מעבר כדורי ח.פ 3/4"', nameEn: 'Ball Valve M×F 3/4"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777313', nameHe: 'ברז מעבר כדורי ח.פ 1"', nameEn: 'Ball Valve M×F 1"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777314', nameHe: 'ברז מעבר כדורי ח.פ 11/4"', nameEn: 'Ball Valve M×F 1¼"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777315', nameHe: 'ברז מעבר כדורי ח.פ 11/2"', nameEn: 'Ball Valve M×F 1½"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777316', nameHe: 'ברז מעבר כדורי ח.פ 2"', nameEn: 'Ball Valve M×F 2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777201', nameHe: 'ברז מעבר כדורי פ.פ 1/2"', nameEn: 'Ball Valve F×F 1/2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777202', nameHe: 'ברז מעבר כדורי פ.פ 3/4"', nameEn: 'Ball Valve F×F 3/4"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777203', nameHe: 'ברז מעבר כדורי פ.פ 1"', nameEn: 'Ball Valve F×F 1"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777204', nameHe: 'ברז מעבר כדורי פ.פ 11/4"', nameEn: 'Ball Valve F×F 1¼"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777205', nameHe: 'ברז מעבר כדורי פ.פ 11/2"', nameEn: 'Ball Valve F×F 1½"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777206', nameHe: 'ברז מעבר כדורי פ.פ 2"', nameEn: 'Ball Valve F×F 2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777341', nameHe: 'ברז גן 1/2" כבד', nameEn: 'Heavy Garden Tap 1/2"', categoryHe: 'ברזי גן', categoryEn: 'Garden Taps', categoryEmoji: '🌿', page: 64, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777345', nameHe: 'ברז גן 3/4" כבד', nameEn: 'Heavy Garden Tap 3/4"', categoryHe: 'ברזי גן', categoryEn: 'Garden Taps', categoryEmoji: '🌿', page: 64, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777311', nameHe: 'ברז מעבר כדורי ח.פ 1/2"', nameEn: 'Ball Valve M×F 1/2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777311.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777312', nameHe: 'ברז מעבר כדורי ח.פ 3/4"', nameEn: 'Ball Valve M×F 3/4"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777311.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777313', nameHe: 'ברז מעבר כדורי ח.פ 1"', nameEn: 'Ball Valve M×F 1"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777311.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777314', nameHe: 'ברז מעבר כדורי ח.פ 11/4"', nameEn: 'Ball Valve M×F 1¼"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777311.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777315', nameHe: 'ברז מעבר כדורי ח.פ 11/2"', nameEn: 'Ball Valve M×F 1½"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777311.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777316', nameHe: 'ברז מעבר כדורי ח.פ 2"', nameEn: 'Ball Valve M×F 2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777311.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777201', nameHe: 'ברז מעבר כדורי פ.פ 1/2"', nameEn: 'Ball Valve F×F 1/2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777201.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777202', nameHe: 'ברז מעבר כדורי פ.פ 3/4"', nameEn: 'Ball Valve F×F 3/4"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777201.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777203', nameHe: 'ברז מעבר כדורי פ.פ 1"', nameEn: 'Ball Valve F×F 1"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777201.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777204', nameHe: 'ברז מעבר כדורי פ.פ 11/4"', nameEn: 'Ball Valve F×F 1¼"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777201.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777205', nameHe: 'ברז מעבר כדורי פ.פ 11/2"', nameEn: 'Ball Valve F×F 1½"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777201.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777206', nameHe: 'ברז מעבר כדורי פ.פ 2"', nameEn: 'Ball Valve F×F 2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 64, imageFile: '77777201.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777341', nameHe: 'ברז גן 1/2" כבד', nameEn: 'Heavy Garden Tap 1/2"', categoryHe: 'ברזי גן', categoryEn: 'Garden Taps', categoryEmoji: '🌿', page: 64, imageFile: '77777341.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777345', nameHe: 'ברז גן 3/4" כבד', nameEn: 'Heavy Garden Tap 3/4"', categoryHe: 'ברזי גן', categoryEn: 'Garden Taps', categoryEmoji: '🌿', page: 64, imageFile: '77777345.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — ברזי טי, אלכסוני, מעבר+מסנן/רקורד (page 65) ──────────────
-  LipskeyCatalogProduct(sku: '77777293', nameHe: 'ברז טי 1"', nameEn: 'Gate Valve 1"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777296', nameHe: 'ברז טי 2"', nameEn: 'Gate Valve 2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777392', nameHe: 'ברז אלכסוני 3/4"', nameEn: 'Globe Valve 3/4"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77003128', nameHe: 'ברז אלכסוני 1"', nameEn: 'Globe Valve 1"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777396', nameHe: 'ברז אלכסוני 2"', nameEn: 'Globe Valve 2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777212', nameHe: 'ברז מעבר כדורי + מסנן פ.פ 3/4"', nameEn: 'Ball Valve + Strainer F×F 3/4"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777302', nameHe: 'ברז מעבר כדורי + רקורד 3/4"', nameEn: 'Ball Valve + Union 3/4"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777303', nameHe: 'ברז מעבר כדורי + רקורד 1"', nameEn: 'Ball Valve + Union 1"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777293', nameHe: 'ברז טי 1"', nameEn: 'Gate Valve 1"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, imageFile: '77777296.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777296', nameHe: 'ברז טי 2"', nameEn: 'Gate Valve 2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, imageFile: '77777296.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777392', nameHe: 'ברז אלכסוני 3/4"', nameEn: 'Globe Valve 3/4"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, imageFile: '77777392.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77003128', nameHe: 'ברז אלכסוני 1"', nameEn: 'Globe Valve 1"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, imageFile: '77777392.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777396', nameHe: 'ברז אלכסוני 2"', nameEn: 'Globe Valve 2"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, imageFile: '77777392.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777212', nameHe: 'ברז מעבר כדורי + מסנן פ.פ 3/4"', nameEn: 'Ball Valve + Strainer F×F 3/4"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, imageFile: '77777212.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777302', nameHe: 'ברז מעבר כדורי + רקורד 3/4"', nameEn: 'Ball Valve + Union 3/4"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, imageFile: '77777302.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777303', nameHe: 'ברז מעבר כדורי + רקורד 1"', nameEn: 'Ball Valve + Union 1"', categoryHe: 'ברזי מעבר', categoryEn: 'Ball Valves', categoryEmoji: '🔧', page: 65, imageFile: '77777302.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — אביזרי נחושת: ניפלים, כפות, מופות, פקקים (page 66) ─────────
-  LipskeyCatalogProduct(sku: '77777641', nameHe: 'ניפל כפול נחושת ארוך 1/2"', nameEn: 'Long Double Nipple Brass 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777642', nameHe: 'ניפל כפול נחושת ארוך 3/4"', nameEn: 'Long Double Nipple Brass 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777643', nameHe: 'ניפל כפול נחושת ארוך 1"', nameEn: 'Long Double Nipple Brass 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777101', nameHe: 'כפה נחושת 1/2"', nameEn: 'Brass Cap 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777102', nameHe: 'כפה נחושת 3/4"', nameEn: 'Brass Cap 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777103', nameHe: 'כפה נחושת 1"', nameEn: 'Brass Cap 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777104', nameHe: 'מופה נחושת 1/2"', nameEn: 'Brass Socket 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777105', nameHe: 'מופה נחושת 3/4"', nameEn: 'Brass Socket 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777106', nameHe: 'מופה נחושת 1"', nameEn: 'Brass Socket 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '7778071', nameHe: 'פקק למחלק נחושת 1/2"', nameEn: 'Brass Distributor Plug 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777641', nameHe: 'ניפל כפול נחושת ארוך 1/2"', nameEn: 'Long Double Nipple Brass 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, imageFile: '77777641.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777642', nameHe: 'ניפל כפול נחושת ארוך 3/4"', nameEn: 'Long Double Nipple Brass 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, imageFile: '77777641.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777643', nameHe: 'ניפל כפול נחושת ארוך 1"', nameEn: 'Long Double Nipple Brass 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, imageFile: '77777641.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777101', nameHe: 'כפה נחושת 1/2"', nameEn: 'Brass Cap 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, imageFile: '77777101.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777102', nameHe: 'כפה נחושת 3/4"', nameEn: 'Brass Cap 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, imageFile: '77777101.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777103', nameHe: 'כפה נחושת 1"', nameEn: 'Brass Cap 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, imageFile: '77777101.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777104', nameHe: 'מופה נחושת 1/2"', nameEn: 'Brass Socket 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, imageFile: '77777104.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777105', nameHe: 'מופה נחושת 3/4"', nameEn: 'Brass Socket 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, imageFile: '77777104.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777106', nameHe: 'מופה נחושת 1"', nameEn: 'Brass Socket 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, imageFile: '77777104.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '7778071', nameHe: 'פקק למחלק נחושת 1/2"', nameEn: 'Brass Distributor Plug 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 66, imageFile: '7778071.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — פקקים, רקורדים, בושינגים (page 67) ────────────────────────
-  LipskeyCatalogProduct(sku: '77778071', nameHe: 'פקק נחושת 1/2"', nameEn: 'Brass Plug 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77778072', nameHe: 'פקק נחושת 3/4"', nameEn: 'Brass Plug 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77778073', nameHe: 'פקק נחושת 1"', nameEn: 'Brass Plug 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777632', nameHe: 'רקורד קונוס נחושת 3/4"', nameEn: 'Brass Cone Union 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777630', nameHe: 'רקורד לשעון מים + ניפל 1/2"', nameEn: 'Water Meter Union + Nipple 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777631', nameHe: 'רקורד לשעון מים + ניפל 3/4"', nameEn: 'Water Meter Union + Nipple 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777635', nameHe: 'רקורד לשעון מים + ניפל 1"', nameEn: 'Water Meter Union + Nipple 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777633', nameHe: 'רקורד לשעון מים + ניפל 11/2"', nameEn: 'Water Meter Union + Nipple 1½"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777634', nameHe: 'רקורד לשעון מים + ניפל 2"', nameEn: 'Water Meter Union + Nipple 2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777661', nameHe: 'בושינג נחושת 3/4" × 1/2"', nameEn: 'Brass Bushing 3/4"×1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777663', nameHe: 'בושינג נחושת 1" × 1/2"', nameEn: 'Brass Bushing 1"×1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777662', nameHe: 'בושינג נחושת 1" × 3/4"', nameEn: 'Brass Bushing 1"×3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77778071', nameHe: 'פקק נחושת 1/2"', nameEn: 'Brass Plug 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77778071.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77778072', nameHe: 'פקק נחושת 3/4"', nameEn: 'Brass Plug 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77778072.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77778073', nameHe: 'פקק נחושת 1"', nameEn: 'Brass Plug 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77778073.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777632', nameHe: 'רקורד קונוס נחושת 3/4"', nameEn: 'Brass Cone Union 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77777632.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777630', nameHe: 'רקורד לשעון מים + ניפל 1/2"', nameEn: 'Water Meter Union + Nipple 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77777630.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777631', nameHe: 'רקורד לשעון מים + ניפל 3/4"', nameEn: 'Water Meter Union + Nipple 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77777630.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777635', nameHe: 'רקורד לשעון מים + ניפל 1"', nameEn: 'Water Meter Union + Nipple 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77777630.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777633', nameHe: 'רקורד לשעון מים + ניפל 11/2"', nameEn: 'Water Meter Union + Nipple 1½"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77777630.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777634', nameHe: 'רקורד לשעון מים + ניפל 2"', nameEn: 'Water Meter Union + Nipple 2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77777630.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777661', nameHe: 'בושינג נחושת 3/4" × 1/2"', nameEn: 'Brass Bushing 3/4"×1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77777661.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777663', nameHe: 'בושינג נחושת 1" × 1/2"', nameEn: 'Brass Bushing 1"×1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77777661.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777662', nameHe: 'בושינג נחושת 1" × 3/4"', nameEn: 'Brass Bushing 1"×3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 67, imageFile: '77777661.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — מאריכים, אל-חוזרים (page 68) ─────────────────────────────
-  LipskeyCatalogProduct(sku: '77777701', nameHe: 'מאריך נחושת כבד תקני 10 מ"מ', nameEn: 'Heavy Brass Extension 10mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777702', nameHe: 'מאריך נחושת כבד תקני 15 מ"מ', nameEn: 'Heavy Brass Extension 15mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777703', nameHe: 'מאריך נחושת כבד תקני 20 מ"מ', nameEn: 'Heavy Brass Extension 20mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777704', nameHe: 'מאריך נחושת כבד תקני 25 מ"מ', nameEn: 'Heavy Brass Extension 25mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777705', nameHe: 'מאריך נחושת כבד תקני 30 מ"מ', nameEn: 'Heavy Brass Extension 30mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777706', nameHe: 'מאריך נחושת כבד תקני 40 מ"מ', nameEn: 'Heavy Brass Extension 40mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777707', nameHe: 'מאריך נחושת כבד תקני 50 מ"מ', nameEn: 'Heavy Brass Extension 50mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777755', nameHe: 'מאריך חרוט ניקל 20 ס"מ', nameEn: 'Tapered Nickel Extension 20cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777756', nameHe: 'מאריך חרוט ניקל 25 ס"מ', nameEn: 'Tapered Nickel Extension 25cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777708', nameHe: 'מאריך חרוט ניקל 30 ס"מ', nameEn: 'Tapered Nickel Extension 30cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777709', nameHe: 'מאריך חרוט ניקל 40 ס"מ', nameEn: 'Tapered Nickel Extension 40cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777710', nameHe: 'מאריך חרוט ניקל 50 ס"מ', nameEn: 'Tapered Nickel Extension 50cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777100', nameHe: 'מאריך חרוט ניקל 100 ס"מ', nameEn: 'Tapered Nickel Extension 100cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77004401', nameHe: 'אל חוזר כלפה 1/2"', nameEn: 'Flap Check Valve 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77004402', nameHe: 'אל חוזר כלפה 3/4"', nameEn: 'Flap Check Valve 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77004403', nameHe: 'אל חוזר כלפה 1"', nameEn: 'Flap Check Valve 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77004404', nameHe: 'אל חוזר כלפה 11/4"', nameEn: 'Flap Check Valve 1¼"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77004405', nameHe: 'אל חוזר כלפה 11/2"', nameEn: 'Flap Check Valve 1½"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77004406', nameHe: 'אל חוזר כלפה 2"', nameEn: 'Flap Check Valve 2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77004407', nameHe: 'אל חוזר כלפה 21/2"', nameEn: 'Flap Check Valve 2½"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77004408', nameHe: 'אל חוזר כלפה 3"', nameEn: 'Flap Check Valve 3"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77004416', nameHe: 'אלחוזר אלכסוני 1" עם מסנן', nameEn: 'Angle Check Valve 1" with Strainer', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777701', nameHe: 'מאריך נחושת כבד תקני 10 מ"מ', nameEn: 'Heavy Brass Extension 10mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777701.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777702', nameHe: 'מאריך נחושת כבד תקני 15 מ"מ', nameEn: 'Heavy Brass Extension 15mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777701.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777703', nameHe: 'מאריך נחושת כבד תקני 20 מ"מ', nameEn: 'Heavy Brass Extension 20mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777701.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777704', nameHe: 'מאריך נחושת כבד תקני 25 מ"מ', nameEn: 'Heavy Brass Extension 25mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777701.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777705', nameHe: 'מאריך נחושת כבד תקני 30 מ"מ', nameEn: 'Heavy Brass Extension 30mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777701.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777706', nameHe: 'מאריך נחושת כבד תקני 40 מ"מ', nameEn: 'Heavy Brass Extension 40mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777701.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777707', nameHe: 'מאריך נחושת כבד תקני 50 מ"מ', nameEn: 'Heavy Brass Extension 50mm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777701.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777755', nameHe: 'מאריך חרוט ניקל 20 ס"מ', nameEn: 'Tapered Nickel Extension 20cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777756', nameHe: 'מאריך חרוט ניקל 25 ס"מ', nameEn: 'Tapered Nickel Extension 25cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777708', nameHe: 'מאריך חרוט ניקל 30 ס"מ', nameEn: 'Tapered Nickel Extension 30cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777709', nameHe: 'מאריך חרוט ניקל 40 ס"מ', nameEn: 'Tapered Nickel Extension 40cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777710', nameHe: 'מאריך חרוט ניקל 50 ס"מ', nameEn: 'Tapered Nickel Extension 50cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777100', nameHe: 'מאריך חרוט ניקל 100 ס"מ', nameEn: 'Tapered Nickel Extension 100cm', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77777755.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77004401', nameHe: 'אל חוזר כלפה 1/2"', nameEn: 'Flap Check Valve 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004401.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77004402', nameHe: 'אל חוזר כלפה 3/4"', nameEn: 'Flap Check Valve 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004401.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77004403', nameHe: 'אל חוזר כלפה 1"', nameEn: 'Flap Check Valve 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004401.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77004404', nameHe: 'אל חוזר כלפה 11/4"', nameEn: 'Flap Check Valve 1¼"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004401.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77004405', nameHe: 'אל חוזר כלפה 11/2"', nameEn: 'Flap Check Valve 1½"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004401.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77004406', nameHe: 'אל חוזר כלפה 2"', nameEn: 'Flap Check Valve 2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004401.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77004407', nameHe: 'אל חוזר כלפה 21/2"', nameEn: 'Flap Check Valve 2½"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004401.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77004408', nameHe: 'אל חוזר כלפה 3"', nameEn: 'Flap Check Valve 3"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004401.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77004416', nameHe: 'אלחוזר אלכסוני 1" עם מסנן', nameEn: 'Angle Check Valve 1" with Strainer', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 68, imageFile: '77004416.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — אל-חוזרים קפיציים, מחברים טלסקופיים, טי, זוויות (page 69) ──
-  LipskeyCatalogProduct(sku: '77777471', nameHe: 'אל חוזר קפיצי 1/2"', nameEn: 'Spring Check Valve 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777472', nameHe: 'אל חוזר קפיצי 3/4"', nameEn: 'Spring Check Valve 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777473', nameHe: 'אל חוזר קפיצי 1"', nameEn: 'Spring Check Valve 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777474', nameHe: 'אל חוזר קפיצי 11/4"', nameEn: 'Spring Check Valve 1¼"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777475', nameHe: 'אל חוזר קפיצי 11/2"', nameEn: 'Spring Check Valve 1½"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777476', nameHe: 'אל חוזר קפיצי 2"', nameEn: 'Spring Check Valve 2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77001190', nameHe: 'מחבר טלסקופי יחיד 1/2"', nameEn: 'Single Telescopic Connector 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77001192', nameHe: 'מחבר טלסקופי יחיד 3/4"', nameEn: 'Single Telescopic Connector 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77001194', nameHe: 'מחבר טלסקופי יחיד 1"', nameEn: 'Single Telescopic Connector 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77001191', nameHe: 'מחבר טלסקופי כפול 1/2"', nameEn: 'Double Telescopic Connector 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77001193', nameHe: 'מחבר טלסקופי כפול 3/4"', nameEn: 'Double Telescopic Connector 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777671', nameHe: 'טי נחושת 1/2"', nameEn: 'Brass Tee 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777672', nameHe: 'טי נחושת 3/4"', nameEn: 'Brass Tee 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777673', nameHe: 'טי נחושת 1"', nameEn: 'Brass Tee 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777677', nameHe: 'זווית נחושת פ.פ 1/2"', nameEn: 'Brass Elbow F×F 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777678', nameHe: 'זווית נחושת פ.פ 3/4"', nameEn: 'Brass Elbow F×F 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777679', nameHe: 'זווית נחושת פ.פ 1"', nameEn: 'Brass Elbow F×F 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777471', nameHe: 'אל חוזר קפיצי 1/2"', nameEn: 'Spring Check Valve 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777471.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777472', nameHe: 'אל חוזר קפיצי 3/4"', nameEn: 'Spring Check Valve 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777471.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777473', nameHe: 'אל חוזר קפיצי 1"', nameEn: 'Spring Check Valve 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777471.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777474', nameHe: 'אל חוזר קפיצי 11/4"', nameEn: 'Spring Check Valve 1¼"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777471.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777475', nameHe: 'אל חוזר קפיצי 11/2"', nameEn: 'Spring Check Valve 1½"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777471.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777476', nameHe: 'אל חוזר קפיצי 2"', nameEn: 'Spring Check Valve 2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777471.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77001190', nameHe: 'מחבר טלסקופי יחיד 1/2"', nameEn: 'Single Telescopic Connector 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77001190.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77001192', nameHe: 'מחבר טלסקופי יחיד 3/4"', nameEn: 'Single Telescopic Connector 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77001190.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77001194', nameHe: 'מחבר טלסקופי יחיד 1"', nameEn: 'Single Telescopic Connector 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77001190.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77001191', nameHe: 'מחבר טלסקופי כפול 1/2"', nameEn: 'Double Telescopic Connector 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77001190.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77001193', nameHe: 'מחבר טלסקופי כפול 3/4"', nameEn: 'Double Telescopic Connector 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77001190.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777671', nameHe: 'טי נחושת 1/2"', nameEn: 'Brass Tee 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777671.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777672', nameHe: 'טי נחושת 3/4"', nameEn: 'Brass Tee 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777671.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777673', nameHe: 'טי נחושת 1"', nameEn: 'Brass Tee 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777671.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777677', nameHe: 'זווית נחושת פ.פ 1/2"', nameEn: 'Brass Elbow F×F 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777677.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777678', nameHe: 'זווית נחושת פ.פ 3/4"', nameEn: 'Brass Elbow F×F 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777677.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777679', nameHe: 'זווית נחושת פ.פ 1"', nameEn: 'Brass Elbow F×F 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 69, imageFile: '77777677.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — זוויות ח.פ, ריקורד, מעברים, רוזטות (page 70) ─────────────
-  LipskeyCatalogProduct(sku: '77777683', nameHe: 'זווית נחושת ח.פ 1/2"', nameEn: 'Brass Elbow M×F 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777684', nameHe: 'זווית נחושת ח.פ 3/4"', nameEn: 'Brass Elbow M×F 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777685', nameHe: 'זווית נחושת ח.פ 1"', nameEn: 'Brass Elbow M×F 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777612', nameHe: 'זווית נחושת + ריקורד 3/4"', nameEn: 'Brass Elbow + Union 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77777613', nameHe: 'זווית נחושת + ריקורד 1"', nameEn: 'Brass Elbow + Union 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '8315', nameHe: 'מעבר ניקל 1/2" × 3/4"', nameEn: 'Nickel Adapter 1/2"×3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '8315B', nameHe: 'מעבר ניקל למיכל הדחה 1/2" × 3/8"', nameEn: 'Nickel Adapter for Cistern 1/2"×3/8"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77780751', nameHe: 'מעבר ניקל למיכל הדחה 1/2" × 3/8" (מורחב)', nameEn: 'Nickel Adapter for Cistern 1/2"×3/8" Extended', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77770003', nameHe: 'רוזטה 1/2" שטוחה רחבה', nameEn: 'Wide Flat Rosette 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77770004', nameHe: 'רוזטה 1/2" שטוחה', nameEn: 'Flat Rosette 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777683', nameHe: 'זווית נחושת ח.פ 1/2"', nameEn: 'Brass Elbow M×F 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, imageFile: '77777683.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777684', nameHe: 'זווית נחושת ח.פ 3/4"', nameEn: 'Brass Elbow M×F 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, imageFile: '77777683.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777685', nameHe: 'זווית נחושת ח.פ 1"', nameEn: 'Brass Elbow M×F 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, imageFile: '77777683.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777612', nameHe: 'זווית נחושת + ריקורד 3/4"', nameEn: 'Brass Elbow + Union 3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, imageFile: '77777612.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77777613', nameHe: 'זווית נחושת + ריקורד 1"', nameEn: 'Brass Elbow + Union 1"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, imageFile: '77777612.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '8315', nameHe: 'מעבר ניקל 1/2" × 3/4"', nameEn: 'Nickel Adapter 1/2"×3/4"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, imageFile: '8315.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '8315B', nameHe: 'מעבר ניקל למיכל הדחה 1/2" × 3/8"', nameEn: 'Nickel Adapter for Cistern 1/2"×3/8"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, imageFile: '8315B.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '77780751', nameHe: 'מעבר ניקל למיכל הדחה 1/2" × 3/8" (מורחב)', nameEn: 'Nickel Adapter for Cistern 1/2"×3/8" Extended', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, imageFile: '77780751.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77770003', nameHe: 'רוזטה 1/2" שטוחה רחבה', nameEn: 'Wide Flat Rosette 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, imageFile: '77770003.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77770004', nameHe: 'רוזטה 1/2" שטוחה', nameEn: 'Flat Rosette 1/2"', categoryHe: 'אביזרי נחושת', categoryEn: 'Brass Fittings', categoryEmoji: '🔧', page: 70, imageFile: '77770003.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — צינורות גן (page 72) ──────────────────────────────────────
-  LipskeyCatalogProduct(sku: '10361315', nameHe: 'צינור גן Ø1/2" 15 מ\'', nameEn: 'Garden Hose Ø1/2" 15m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '10361320', nameHe: 'צינור גן Ø1/2" 20 מ\'', nameEn: 'Garden Hose Ø1/2" 20m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '10361325', nameHe: 'צינור גן Ø1/2" 25 מ\'', nameEn: 'Garden Hose Ø1/2" 25m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '10361330', nameHe: 'צינור גן Ø1/2" 30 מ\'', nameEn: 'Garden Hose Ø1/2" 30m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '10361350', nameHe: 'צינור גן Ø1/2" 50 מ\'', nameEn: 'Garden Hose Ø1/2" 50m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '10361425', nameHe: 'צינור גן Ø3/4" 25 מ\'', nameEn: 'Garden Hose Ø3/4" 25m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '10361426', nameHe: 'צינור גן Ø3/4" 50 מ\'', nameEn: 'Garden Hose Ø3/4" 50m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '10361315', nameHe: 'צינור גן Ø1/2" 15 מ\'', nameEn: 'Garden Hose Ø1/2" 15m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, imageFile: '10361315.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '10361320', nameHe: 'צינור גן Ø1/2" 20 מ\'', nameEn: 'Garden Hose Ø1/2" 20m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, imageFile: '10361315.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '10361325', nameHe: 'צינור גן Ø1/2" 25 מ\'', nameEn: 'Garden Hose Ø1/2" 25m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, imageFile: '10361315.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '10361330', nameHe: 'צינור גן Ø1/2" 30 מ\'', nameEn: 'Garden Hose Ø1/2" 30m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, imageFile: '10361315.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '10361350', nameHe: 'צינור גן Ø1/2" 50 מ\'', nameEn: 'Garden Hose Ø1/2" 50m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, imageFile: '10361315.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '10361425', nameHe: 'צינור גן Ø3/4" 25 מ\'', nameEn: 'Garden Hose Ø3/4" 25m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, imageFile: '10361315.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '10361426', nameHe: 'צינור גן Ø3/4" 50 מ\'', nameEn: 'Garden Hose Ø3/4" 50m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 72, imageFile: '10361315.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — אקדחים ואביזרי גן (page 73) ────────────────────────────────
-  LipskeyCatalogProduct(sku: '77000026', nameHe: 'אקדח מים לגינה פליז', nameEn: 'Brass Garden Water Gun', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 73, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77000027', nameHe: 'אקדח מים לגינה פלסטיק', nameEn: 'Plastic Garden Water Gun', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 73, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77000022', nameHe: 'מפצל לצינור גן פליז', nameEn: 'Brass Garden Hose Splitter', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 73, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77000030', nameHe: 'צינור קפיצי 15 מטר לגן', nameEn: 'Coiled Garden Hose 15m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 73, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77000026', nameHe: 'אקדח מים לגינה פליז', nameEn: 'Brass Garden Water Gun', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 73, imageFile: '77000026.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77000027', nameHe: 'אקדח מים לגינה פלסטיק', nameEn: 'Plastic Garden Water Gun', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 73, imageFile: '77000027.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77000022', nameHe: 'מפצל לצינור גן פליז', nameEn: 'Brass Garden Hose Splitter', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 73, imageFile: '77000022.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77000030', nameHe: 'צינור קפיצי 15 מטר לגן', nameEn: 'Coiled Garden Hose 15m', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 73, imageFile: '77000030.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — אקדחי אצבע ומחברים (page 74) ──────────────────────────────
-  LipskeyCatalogProduct(sku: '77980000', nameHe: 'אקדח אצבע עם 4 חלקים לגינה', nameEn: 'Finger Spray Gun with 4 Parts', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77980001', nameHe: 'אקדח אצבע', nameEn: 'Finger Spray Gun', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77000010', nameHe: 'מחבר מוהיר 1/2"', nameEn: 'Quick Connector 1/2"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77000011', nameHe: 'מחבר מוהיר 3/4"', nameEn: 'Quick Connector 3/4"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77000012', nameHe: 'רקורד לברז גן 1"-3/4"', nameEn: 'Garden Tap Union 1"-3/4"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77000013', nameHe: 'מחבר תיקון 1/2"', nameEn: 'Repair Connector 1/2"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77000024', nameHe: 'מחבר תיקון 3/4"', nameEn: 'Repair Connector 3/4"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77980000', nameHe: 'אקדח אצבע עם 4 חלקים לגינה', nameEn: 'Finger Spray Gun with 4 Parts', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77980000.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77980001', nameHe: 'אקדח אצבע', nameEn: 'Finger Spray Gun', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77980001.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77000010', nameHe: 'מחבר מוהיר 1/2"', nameEn: 'Quick Connector 1/2"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000010.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77000011', nameHe: 'מחבר מוהיר 3/4"', nameEn: 'Quick Connector 3/4"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000010.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77000012', nameHe: 'רקורד לברז גן 1"-3/4"', nameEn: 'Garden Tap Union 1"-3/4"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000012.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77000013', nameHe: 'מחבר תיקון 1/2"', nameEn: 'Repair Connector 1/2"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000013.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '77000024', nameHe: 'מחבר תיקון 3/4"', nameEn: 'Repair Connector 3/4"', categoryHe: 'ציוד גן', categoryEn: 'Garden Equipment', categoryEmoji: '🌿', page: 74, imageFile: '77000013.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — מחברי HDPE: מצמד ישר (page 75) ────────────────────────────
-  LipskeyCatalogProduct(sku: '9101601610', nameHe: 'מצמד HDPE 16×16', nameEn: 'HDPE Coupler 16×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102002004', nameHe: 'מצמד HDPE 16×20', nameEn: 'HDPE Coupler 16×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102002010', nameHe: 'מצמד HDPE 20×20', nameEn: 'HDPE Coupler 20×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '910250080', nameHe: 'מצמד HDPE 20×25', nameEn: 'HDPE Coupler 20×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102502510', nameHe: 'מצמד HDPE 25×25', nameEn: 'HDPE Coupler 25×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103202580', nameHe: 'מצמד HDPE 32×25', nameEn: 'HDPE Coupler 32×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104002580', nameHe: 'מצמד HDPE 40×25', nameEn: 'HDPE Coupler 40×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103203210', nameHe: 'מצמד HDPE 32×32', nameEn: 'HDPE Coupler 32×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104003280', nameHe: 'מצמד HDPE 32×40', nameEn: 'HDPE Coupler 32×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104004010', nameHe: 'מצמד HDPE 40×40', nameEn: 'HDPE Coupler 40×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105005010', nameHe: 'מצמד HDPE 50×50', nameEn: 'HDPE Coupler 50×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106306310', nameHe: 'מצמד HDPE 63×63', nameEn: 'HDPE Coupler 63×63', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101601610', nameHe: 'מצמד HDPE 16×16', nameEn: 'HDPE Coupler 16×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102002004', nameHe: 'מצמד HDPE 16×20', nameEn: 'HDPE Coupler 16×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102002010', nameHe: 'מצמד HDPE 20×20', nameEn: 'HDPE Coupler 20×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '910250080', nameHe: 'מצמד HDPE 20×25', nameEn: 'HDPE Coupler 20×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102502510', nameHe: 'מצמד HDPE 25×25', nameEn: 'HDPE Coupler 25×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103202580', nameHe: 'מצמד HDPE 32×25', nameEn: 'HDPE Coupler 32×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104002580', nameHe: 'מצמד HDPE 40×25', nameEn: 'HDPE Coupler 40×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103203210', nameHe: 'מצמד HDPE 32×32', nameEn: 'HDPE Coupler 32×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104003280', nameHe: 'מצמד HDPE 32×40', nameEn: 'HDPE Coupler 32×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104004010', nameHe: 'מצמד HDPE 40×40', nameEn: 'HDPE Coupler 40×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105005010', nameHe: 'מצמד HDPE 50×50', nameEn: 'HDPE Coupler 50×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106306310', nameHe: 'מצמד HDPE 63×63', nameEn: 'HDPE Coupler 63×63', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601610.jpg', brand: 'AQUATEC'),
 
   // מצמד הברגה חיצונית (Male Thread)
-  LipskeyCatalogProduct(sku: '9101601211', nameHe: 'מצמד HDPE הברגה חיצונית 16×1/2"', nameEn: 'HDPE Male Thread Coupler 16×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9101603411', nameHe: 'מצמד HDPE הברגה חיצונית 16×3/4"', nameEn: 'HDPE Male Thread Coupler 16×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102001211', nameHe: 'מצמד HDPE הברגה חיצונית 20×1/2"', nameEn: 'HDPE Male Thread Coupler 20×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102003411', nameHe: 'מצמד HDPE הברגה חיצונית 20×3/4"', nameEn: 'HDPE Male Thread Coupler 20×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102010011', nameHe: 'מצמד HDPE הברגה חיצונית 20×1"', nameEn: 'HDPE Male Thread Coupler 20×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102501211', nameHe: 'מצמד HDPE הברגה חיצונית 25×1/2"', nameEn: 'HDPE Male Thread Coupler 25×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102503411', nameHe: 'מצמד HDPE הברגה חיצונית 25×3/4"', nameEn: 'HDPE Male Thread Coupler 25×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102510011', nameHe: 'מצמד HDPE הברגה חיצונית 25×1"', nameEn: 'HDPE Male Thread Coupler 25×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103201211', nameHe: 'מצמד HDPE הברגה חיצונית 32×1/2"', nameEn: 'HDPE Male Thread Coupler 32×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103203411', nameHe: 'מצמד HDPE הברגה חיצונית 32×3/4"', nameEn: 'HDPE Male Thread Coupler 32×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103210011', nameHe: 'מצמד HDPE הברגה חיצונית 32×1"', nameEn: 'HDPE Male Thread Coupler 32×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103211211', nameHe: 'מצמד HDPE הברגה חיצונית 32×11/2"', nameEn: 'HDPE Male Thread Coupler 32×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103211411', nameHe: 'מצמד HDPE הברגה חיצונית 32×11/4"', nameEn: 'HDPE Male Thread Coupler 32×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104010011', nameHe: 'מצמד HDPE הברגה חיצונית 40×1"', nameEn: 'HDPE Male Thread Coupler 40×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011211', nameHe: 'מצמד HDPE הברגה חיצונית 40×11/2"', nameEn: 'HDPE Male Thread Coupler 40×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011411', nameHe: 'מצמד HDPE הברגה חיצונית 40×11/4"', nameEn: 'HDPE Male Thread Coupler 40×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104020011', nameHe: 'מצמד HDPE הברגה חיצונית 40×2"', nameEn: 'HDPE Male Thread Coupler 40×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105010011', nameHe: 'מצמד HDPE הברגה חיצונית 50×1"', nameEn: 'HDPE Male Thread Coupler 50×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105011211', nameHe: 'מצמד HDPE הברגה חיצונית 50×11/2"', nameEn: 'HDPE Male Thread Coupler 50×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105011411', nameHe: 'מצמד HDPE הברגה חיצונית 50×11/4"', nameEn: 'HDPE Male Thread Coupler 50×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105020011', nameHe: 'מצמד HDPE הברגה חיצונית 50×2"', nameEn: 'HDPE Male Thread Coupler 50×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106311211', nameHe: 'מצמד HDPE הברגה חיצונית 63×11/2"', nameEn: 'HDPE Male Thread Coupler 63×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106320011', nameHe: 'מצמד HDPE הברגה חיצונית 63×2"', nameEn: 'HDPE Male Thread Coupler 63×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106321211', nameHe: 'מצמד HDPE הברגה חיצונית 63×21/2"', nameEn: 'HDPE Male Thread Coupler 63×2½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101601211', nameHe: 'מצמד HDPE הברגה חיצונית 16×1/2"', nameEn: 'HDPE Male Thread Coupler 16×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101603411', nameHe: 'מצמד HDPE הברגה חיצונית 16×3/4"', nameEn: 'HDPE Male Thread Coupler 16×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102001211', nameHe: 'מצמד HDPE הברגה חיצונית 20×1/2"', nameEn: 'HDPE Male Thread Coupler 20×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102003411', nameHe: 'מצמד HDPE הברגה חיצונית 20×3/4"', nameEn: 'HDPE Male Thread Coupler 20×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102010011', nameHe: 'מצמד HDPE הברגה חיצונית 20×1"', nameEn: 'HDPE Male Thread Coupler 20×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102501211', nameHe: 'מצמד HDPE הברגה חיצונית 25×1/2"', nameEn: 'HDPE Male Thread Coupler 25×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102503411', nameHe: 'מצמד HDPE הברגה חיצונית 25×3/4"', nameEn: 'HDPE Male Thread Coupler 25×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102510011', nameHe: 'מצמד HDPE הברגה חיצונית 25×1"', nameEn: 'HDPE Male Thread Coupler 25×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103201211', nameHe: 'מצמד HDPE הברגה חיצונית 32×1/2"', nameEn: 'HDPE Male Thread Coupler 32×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103203411', nameHe: 'מצמד HDPE הברגה חיצונית 32×3/4"', nameEn: 'HDPE Male Thread Coupler 32×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103210011', nameHe: 'מצמד HDPE הברגה חיצונית 32×1"', nameEn: 'HDPE Male Thread Coupler 32×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103211211', nameHe: 'מצמד HDPE הברגה חיצונית 32×11/2"', nameEn: 'HDPE Male Thread Coupler 32×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103211411', nameHe: 'מצמד HDPE הברגה חיצונית 32×11/4"', nameEn: 'HDPE Male Thread Coupler 32×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104010011', nameHe: 'מצמד HDPE הברגה חיצונית 40×1"', nameEn: 'HDPE Male Thread Coupler 40×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011211', nameHe: 'מצמד HDPE הברגה חיצונית 40×11/2"', nameEn: 'HDPE Male Thread Coupler 40×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011411', nameHe: 'מצמד HDPE הברגה חיצונית 40×11/4"', nameEn: 'HDPE Male Thread Coupler 40×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104020011', nameHe: 'מצמד HDPE הברגה חיצונית 40×2"', nameEn: 'HDPE Male Thread Coupler 40×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105010011', nameHe: 'מצמד HDPE הברגה חיצונית 50×1"', nameEn: 'HDPE Male Thread Coupler 50×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105011211', nameHe: 'מצמד HDPE הברגה חיצונית 50×11/2"', nameEn: 'HDPE Male Thread Coupler 50×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105011411', nameHe: 'מצמד HDPE הברגה חיצונית 50×11/4"', nameEn: 'HDPE Male Thread Coupler 50×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105020011', nameHe: 'מצמד HDPE הברגה חיצונית 50×2"', nameEn: 'HDPE Male Thread Coupler 50×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106311211', nameHe: 'מצמד HDPE הברגה חיצונית 63×11/2"', nameEn: 'HDPE Male Thread Coupler 63×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106320011', nameHe: 'מצמד HDPE הברגה חיצונית 63×2"', nameEn: 'HDPE Male Thread Coupler 63×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106321211', nameHe: 'מצמד HDPE הברגה חיצונית 63×21/2"', nameEn: 'HDPE Male Thread Coupler 63×2½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 75, imageFile: '9101601211.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — מצמד הברגה פנימית (page 76) ────────────────────────────────
-  LipskeyCatalogProduct(sku: '9101601210', nameHe: 'מצמד HDPE הברגה פנימית 16×1/2"', nameEn: 'HDPE Female Thread Coupler 16×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9101603410', nameHe: 'מצמד HDPE הברגה פנימית 16×3/4"', nameEn: 'HDPE Female Thread Coupler 16×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102001210', nameHe: 'מצמד HDPE הברגה פנימית 20×1/2"', nameEn: 'HDPE Female Thread Coupler 20×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102003410', nameHe: 'מצמד HDPE הברגה פנימית 20×3/4"', nameEn: 'HDPE Female Thread Coupler 20×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102501210', nameHe: 'מצמד HDPE הברגה פנימית 25×1/2"', nameEn: 'HDPE Female Thread Coupler 25×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102503410', nameHe: 'מצמד HDPE הברגה פנימית 25×3/4"', nameEn: 'HDPE Female Thread Coupler 25×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102510010', nameHe: 'מצמד HDPE הברגה פנימית 25×1"', nameEn: 'HDPE Female Thread Coupler 25×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103203410', nameHe: 'מצמד HDPE הברגה פנימית 32×3/4"', nameEn: 'HDPE Female Thread Coupler 32×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103210010', nameHe: 'מצמד HDPE הברגה פנימית 32×1"', nameEn: 'HDPE Female Thread Coupler 32×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103211210', nameHe: 'מצמד HDPE הברגה פנימית 32×11/2"', nameEn: 'HDPE Female Thread Coupler 32×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104010010', nameHe: 'מצמד HDPE הברגה פנימית 40×1"', nameEn: 'HDPE Female Thread Coupler 40×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011210', nameHe: 'מצמד HDPE הברגה פנימית 40×11/2"', nameEn: 'HDPE Female Thread Coupler 40×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011410', nameHe: 'מצמד HDPE הברגה פנימית 40×11/4"', nameEn: 'HDPE Female Thread Coupler 40×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105011210', nameHe: 'מצמד HDPE הברגה פנימית 50×11/2"', nameEn: 'HDPE Female Thread Coupler 50×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105011410', nameHe: 'מצמד HDPE הברגה פנימית 50×11/4"', nameEn: 'HDPE Female Thread Coupler 50×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105020010', nameHe: 'מצמד HDPE הברגה פנימית 50×2"', nameEn: 'HDPE Female Thread Coupler 50×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106311210', nameHe: 'מצמד HDPE הברגה פנימית 63×11/2"', nameEn: 'HDPE Female Thread Coupler 63×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106320010', nameHe: 'מצמד HDPE הברגה פנימית 63×2"', nameEn: 'HDPE Female Thread Coupler 63×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106321210', nameHe: 'מצמד HDPE הברגה פנימית 63×21/2"', nameEn: 'HDPE Female Thread Coupler 63×2½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101601210', nameHe: 'מצמד HDPE הברגה פנימית 16×1/2"', nameEn: 'HDPE Female Thread Coupler 16×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101603410', nameHe: 'מצמד HDPE הברגה פנימית 16×3/4"', nameEn: 'HDPE Female Thread Coupler 16×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102001210', nameHe: 'מצמד HDPE הברגה פנימית 20×1/2"', nameEn: 'HDPE Female Thread Coupler 20×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102003410', nameHe: 'מצמד HDPE הברגה פנימית 20×3/4"', nameEn: 'HDPE Female Thread Coupler 20×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102501210', nameHe: 'מצמד HDPE הברגה פנימית 25×1/2"', nameEn: 'HDPE Female Thread Coupler 25×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102503410', nameHe: 'מצמד HDPE הברגה פנימית 25×3/4"', nameEn: 'HDPE Female Thread Coupler 25×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102510010', nameHe: 'מצמד HDPE הברגה פנימית 25×1"', nameEn: 'HDPE Female Thread Coupler 25×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103203410', nameHe: 'מצמד HDPE הברגה פנימית 32×3/4"', nameEn: 'HDPE Female Thread Coupler 32×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103210010', nameHe: 'מצמד HDPE הברגה פנימית 32×1"', nameEn: 'HDPE Female Thread Coupler 32×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103211210', nameHe: 'מצמד HDPE הברגה פנימית 32×11/2"', nameEn: 'HDPE Female Thread Coupler 32×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104010010', nameHe: 'מצמד HDPE הברגה פנימית 40×1"', nameEn: 'HDPE Female Thread Coupler 40×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011210', nameHe: 'מצמד HDPE הברגה פנימית 40×11/2"', nameEn: 'HDPE Female Thread Coupler 40×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011410', nameHe: 'מצמד HDPE הברגה פנימית 40×11/4"', nameEn: 'HDPE Female Thread Coupler 40×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105011210', nameHe: 'מצמד HDPE הברגה פנימית 50×11/2"', nameEn: 'HDPE Female Thread Coupler 50×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105011410', nameHe: 'מצמד HDPE הברגה פנימית 50×11/4"', nameEn: 'HDPE Female Thread Coupler 50×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105020010', nameHe: 'מצמד HDPE הברגה פנימית 50×2"', nameEn: 'HDPE Female Thread Coupler 50×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106311210', nameHe: 'מצמד HDPE הברגה פנימית 63×11/2"', nameEn: 'HDPE Female Thread Coupler 63×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106320010', nameHe: 'מצמד HDPE הברגה פנימית 63×2"', nameEn: 'HDPE Female Thread Coupler 63×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106321210', nameHe: 'מצמד HDPE הברגה פנימית 63×21/2"', nameEn: 'HDPE Female Thread Coupler 63×2½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601210.jpg', brand: 'AQUATEC'),
 
   // זווית הברגה חיצונית (Male Elbow)
-  LipskeyCatalogProduct(sku: '9101601231', nameHe: 'זווית HDPE הברגה חיצונית 16×1/2"', nameEn: 'HDPE Male Thread Elbow 16×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9101603431', nameHe: 'זווית HDPE הברגה חיצונית 16×3/4"', nameEn: 'HDPE Male Thread Elbow 16×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102001231', nameHe: 'זווית HDPE הברגה חיצונית 20×1/2"', nameEn: 'HDPE Male Thread Elbow 20×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102003431', nameHe: 'זווית HDPE הברגה חיצונית 20×3/4"', nameEn: 'HDPE Male Thread Elbow 20×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102501231', nameHe: 'זווית HDPE הברגה חיצונית 25×1/2"', nameEn: 'HDPE Male Thread Elbow 25×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102503431', nameHe: 'זווית HDPE הברגה חיצונית 25×3/4"', nameEn: 'HDPE Male Thread Elbow 25×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102510031', nameHe: 'זווית HDPE הברגה חיצונית 25×1"', nameEn: 'HDPE Male Thread Elbow 25×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103203431', nameHe: 'זווית HDPE הברגה חיצונית 32×3/4"', nameEn: 'HDPE Male Thread Elbow 32×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103210031', nameHe: 'זווית HDPE הברגה חיצונית 32×1"', nameEn: 'HDPE Male Thread Elbow 32×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011231', nameHe: 'זווית HDPE הברגה חיצונית 40×11/2"', nameEn: 'HDPE Male Thread Elbow 40×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011431', nameHe: 'זווית HDPE הברגה חיצונית 40×11/4"', nameEn: 'HDPE Male Thread Elbow 40×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105011231', nameHe: 'זווית HDPE הברגה חיצונית 50×11/2"', nameEn: 'HDPE Male Thread Elbow 50×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105020031', nameHe: 'זווית HDPE הברגה חיצונית 50×2"', nameEn: 'HDPE Male Thread Elbow 50×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106320031', nameHe: 'זווית HDPE הברגה חיצונית 63×2"', nameEn: 'HDPE Male Thread Elbow 63×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101601231', nameHe: 'זווית HDPE הברגה חיצונית 16×1/2"', nameEn: 'HDPE Male Thread Elbow 16×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101603431', nameHe: 'זווית HDPE הברגה חיצונית 16×3/4"', nameEn: 'HDPE Male Thread Elbow 16×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102001231', nameHe: 'זווית HDPE הברגה חיצונית 20×1/2"', nameEn: 'HDPE Male Thread Elbow 20×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102003431', nameHe: 'זווית HDPE הברגה חיצונית 20×3/4"', nameEn: 'HDPE Male Thread Elbow 20×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102501231', nameHe: 'זווית HDPE הברגה חיצונית 25×1/2"', nameEn: 'HDPE Male Thread Elbow 25×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102503431', nameHe: 'זווית HDPE הברגה חיצונית 25×3/4"', nameEn: 'HDPE Male Thread Elbow 25×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102510031', nameHe: 'זווית HDPE הברגה חיצונית 25×1"', nameEn: 'HDPE Male Thread Elbow 25×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103203431', nameHe: 'זווית HDPE הברגה חיצונית 32×3/4"', nameEn: 'HDPE Male Thread Elbow 32×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103210031', nameHe: 'זווית HDPE הברגה חיצונית 32×1"', nameEn: 'HDPE Male Thread Elbow 32×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011231', nameHe: 'זווית HDPE הברגה חיצונית 40×11/2"', nameEn: 'HDPE Male Thread Elbow 40×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011431', nameHe: 'זווית HDPE הברגה חיצונית 40×11/4"', nameEn: 'HDPE Male Thread Elbow 40×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105011231', nameHe: 'זווית HDPE הברגה חיצונית 50×11/2"', nameEn: 'HDPE Male Thread Elbow 50×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105020031', nameHe: 'זווית HDPE הברגה חיצונית 50×2"', nameEn: 'HDPE Male Thread Elbow 50×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106320031', nameHe: 'זווית HDPE הברגה חיצונית 63×2"', nameEn: 'HDPE Male Thread Elbow 63×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 76, imageFile: '9101601231.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — זווית הברגה פנימית + הסתעפויות דו-כיווניות (page 77) ────────
-  LipskeyCatalogProduct(sku: '9101601232', nameHe: 'זווית HDPE הברגה פנימית 16×1/2"', nameEn: 'HDPE Female Thread Elbow 16×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102001230', nameHe: 'זווית HDPE הברגה פנימית 20×1/2"', nameEn: 'HDPE Female Thread Elbow 20×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102003430', nameHe: 'זווית HDPE הברגה פנימית 20×3/4"', nameEn: 'HDPE Female Thread Elbow 20×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102501230', nameHe: 'זווית HDPE הברגה פנימית 25×1/2"', nameEn: 'HDPE Female Thread Elbow 25×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102503430', nameHe: 'זווית HDPE הברגה פנימית 25×3/4"', nameEn: 'HDPE Female Thread Elbow 25×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102510030', nameHe: 'זווית HDPE הברגה פנימית 25×1"', nameEn: 'HDPE Female Thread Elbow 25×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103203430', nameHe: 'זווית HDPE הברגה פנימית 32×3/4"', nameEn: 'HDPE Female Thread Elbow 32×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103210030', nameHe: 'זווית HDPE הברגה פנימית 32×1"', nameEn: 'HDPE Female Thread Elbow 32×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011230', nameHe: 'זווית HDPE הברגה פנימית 40×11/2"', nameEn: 'HDPE Female Thread Elbow 40×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011430', nameHe: 'זווית HDPE הברגה פנימית 40×11/4"', nameEn: 'HDPE Female Thread Elbow 40×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105011230', nameHe: 'זווית HDPE הברגה פנימית 50×11/2"', nameEn: 'HDPE Female Thread Elbow 50×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105020030', nameHe: 'זווית HDPE הברגה פנימית 50×2"', nameEn: 'HDPE Female Thread Elbow 50×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106320030', nameHe: 'זווית HDPE הברגה פנימית 63×2"', nameEn: 'HDPE Female Thread Elbow 63×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101601232', nameHe: 'זווית HDPE הברגה פנימית 16×1/2"', nameEn: 'HDPE Female Thread Elbow 16×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102001230', nameHe: 'זווית HDPE הברגה פנימית 20×1/2"', nameEn: 'HDPE Female Thread Elbow 20×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102003430', nameHe: 'זווית HDPE הברגה פנימית 20×3/4"', nameEn: 'HDPE Female Thread Elbow 20×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102501230', nameHe: 'זווית HDPE הברגה פנימית 25×1/2"', nameEn: 'HDPE Female Thread Elbow 25×1/2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102503430', nameHe: 'זווית HDPE הברגה פנימית 25×3/4"', nameEn: 'HDPE Female Thread Elbow 25×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102510030', nameHe: 'זווית HDPE הברגה פנימית 25×1"', nameEn: 'HDPE Female Thread Elbow 25×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103203430', nameHe: 'זווית HDPE הברגה פנימית 32×3/4"', nameEn: 'HDPE Female Thread Elbow 32×3/4"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103210030', nameHe: 'זווית HDPE הברגה פנימית 32×1"', nameEn: 'HDPE Female Thread Elbow 32×1"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011230', nameHe: 'זווית HDPE הברגה פנימית 40×11/2"', nameEn: 'HDPE Female Thread Elbow 40×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011430', nameHe: 'זווית HDPE הברגה פנימית 40×11/4"', nameEn: 'HDPE Female Thread Elbow 40×1¼"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105011230', nameHe: 'זווית HDPE הברגה פנימית 50×11/2"', nameEn: 'HDPE Female Thread Elbow 50×1½"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105020030', nameHe: 'זווית HDPE הברגה פנימית 50×2"', nameEn: 'HDPE Female Thread Elbow 50×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106320030', nameHe: 'זווית HDPE הברגה פנימית 63×2"', nameEn: 'HDPE Female Thread Elbow 63×2"', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601232.jpg', brand: 'AQUATEC'),
 
   // הסתעפות דו כיווני (Equal Tee)
-  LipskeyCatalogProduct(sku: '9101601640', nameHe: 'הסתעפות HDPE דו כיווני 16×16×16', nameEn: 'HDPE Equal Tee 16×16×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102002040', nameHe: 'הסתעפות HDPE דו כיווני 20×20×20', nameEn: 'HDPE Equal Tee 20×20×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102502540', nameHe: 'הסתעפות HDPE דו כיווני 25×25×25', nameEn: 'HDPE Equal Tee 25×25×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103203240', nameHe: 'הסתעפות HDPE דו כיווני 32×32×32', nameEn: 'HDPE Equal Tee 32×32×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104003240', nameHe: 'הסתעפות HDPE דו כיווני 40×32×40', nameEn: 'HDPE Reducing Tee 40×32×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104004040', nameHe: 'הסתעפות HDPE דו כיווני 40×40×40', nameEn: 'HDPE Equal Tee 40×40×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105005040', nameHe: 'הסתעפות HDPE דו כיווני 50×50×50', nameEn: 'HDPE Equal Tee 50×50×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106306340', nameHe: 'הסתעפות HDPE דו כיווני 63×63×63', nameEn: 'HDPE Equal Tee 63×63×63', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102001242', nameHe: 'הסתעפות HDPE דו כיווני 20×16×20', nameEn: 'HDPE Reducing Tee 20×16×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101601640', nameHe: 'הסתעפות HDPE דו כיווני 16×16×16', nameEn: 'HDPE Equal Tee 16×16×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601640.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102002040', nameHe: 'הסתעפות HDPE דו כיווני 20×20×20', nameEn: 'HDPE Equal Tee 20×20×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601640.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102502540', nameHe: 'הסתעפות HDPE דו כיווני 25×25×25', nameEn: 'HDPE Equal Tee 25×25×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601640.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103203240', nameHe: 'הסתעפות HDPE דו כיווני 32×32×32', nameEn: 'HDPE Equal Tee 32×32×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601640.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104003240', nameHe: 'הסתעפות HDPE דו כיווני 40×32×40', nameEn: 'HDPE Reducing Tee 40×32×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601640.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104004040', nameHe: 'הסתעפות HDPE דו כיווני 40×40×40', nameEn: 'HDPE Equal Tee 40×40×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601640.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105005040', nameHe: 'הסתעפות HDPE דו כיווני 50×50×50', nameEn: 'HDPE Equal Tee 50×50×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601640.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106306340', nameHe: 'הסתעפות HDPE דו כיווני 63×63×63', nameEn: 'HDPE Equal Tee 63×63×63', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601640.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102001242', nameHe: 'הסתעפות HDPE דו כיווני 20×16×20', nameEn: 'HDPE Reducing Tee 20×16×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 77, imageFile: '9101601640.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC — הסתעפויות הברגה חיצונית/פנימית (page 78) ──────────────────
-  LipskeyCatalogProduct(sku: '9101601241', nameHe: 'הסתעפות HDPE הברגה חיצונית 16×1/2×16', nameEn: 'HDPE Male Tee 16×1/2"×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9101603441', nameHe: 'הסתעפות HDPE הברגה חיצונית 16×3/4×16', nameEn: 'HDPE Male Tee 16×3/4"×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102001241', nameHe: 'הסתעפות HDPE הברגה חיצונית 20×1/2×20', nameEn: 'HDPE Male Tee 20×1/2"×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102003441', nameHe: 'הסתעפות HDPE הברגה חיצונית 20×3/4×20', nameEn: 'HDPE Male Tee 20×3/4"×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102501241', nameHe: 'הסתעפות HDPE הברגה חיצונית 25×1/2×25', nameEn: 'HDPE Male Tee 25×1/2"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102503441', nameHe: 'הסתעפות HDPE הברגה חיצונית 25×3/4×25', nameEn: 'HDPE Male Tee 25×3/4"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102510041', nameHe: 'הסתעפות HDPE הברגה חיצונית 25×1×25', nameEn: 'HDPE Male Tee 25×1"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103201241', nameHe: 'הסתעפות HDPE הברגה חיצונית 32×1/2×32', nameEn: 'HDPE Male Tee 32×1/2"×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103203441', nameHe: 'הסתעפות HDPE הברגה חיצונית 32×3/4×32', nameEn: 'HDPE Male Tee 32×3/4"×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103210041', nameHe: 'הסתעפות HDPE הברגה חיצונית 32×1×32', nameEn: 'HDPE Male Tee 32×1"×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011241', nameHe: 'הסתעפות HDPE הברגה חיצונית 40×1×40', nameEn: 'HDPE Male Tee 40×1"×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011441', nameHe: 'הסתעפות HDPE הברגה חיצונית 40×11/4×40', nameEn: 'HDPE Male Tee 40×1¼"×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105011241', nameHe: 'הסתעפות HDPE הברגה חיצונית 50×1×50', nameEn: 'HDPE Male Tee 50×1"×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105020041', nameHe: 'הסתעפות HDPE הברגה חיצונית 50×2×50', nameEn: 'HDPE Male Tee 50×2"×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106320041', nameHe: 'הסתעפות HDPE הברגה חיצונית 63×2×63', nameEn: 'HDPE Male Tee 63×2"×63', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101601241', nameHe: 'הסתעפות HDPE הברגה חיצונית 16×1/2×16', nameEn: 'HDPE Male Tee 16×1/2"×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101603441', nameHe: 'הסתעפות HDPE הברגה חיצונית 16×3/4×16', nameEn: 'HDPE Male Tee 16×3/4"×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102001241', nameHe: 'הסתעפות HDPE הברגה חיצונית 20×1/2×20', nameEn: 'HDPE Male Tee 20×1/2"×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102003441', nameHe: 'הסתעפות HDPE הברגה חיצונית 20×3/4×20', nameEn: 'HDPE Male Tee 20×3/4"×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102501241', nameHe: 'הסתעפות HDPE הברגה חיצונית 25×1/2×25', nameEn: 'HDPE Male Tee 25×1/2"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102503441', nameHe: 'הסתעפות HDPE הברגה חיצונית 25×3/4×25', nameEn: 'HDPE Male Tee 25×3/4"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102510041', nameHe: 'הסתעפות HDPE הברגה חיצונית 25×1×25', nameEn: 'HDPE Male Tee 25×1"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103201241', nameHe: 'הסתעפות HDPE הברגה חיצונית 32×1/2×32', nameEn: 'HDPE Male Tee 32×1/2"×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103203441', nameHe: 'הסתעפות HDPE הברגה חיצונית 32×3/4×32', nameEn: 'HDPE Male Tee 32×3/4"×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103210041', nameHe: 'הסתעפות HDPE הברגה חיצונית 32×1×32', nameEn: 'HDPE Male Tee 32×1"×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011241', nameHe: 'הסתעפות HDPE הברגה חיצונית 40×1×40', nameEn: 'HDPE Male Tee 40×1"×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011441', nameHe: 'הסתעפות HDPE הברגה חיצונית 40×11/4×40', nameEn: 'HDPE Male Tee 40×1¼"×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105011241', nameHe: 'הסתעפות HDPE הברגה חיצונית 50×1×50', nameEn: 'HDPE Male Tee 50×1"×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105020041', nameHe: 'הסתעפות HDPE הברגה חיצונית 50×2×50', nameEn: 'HDPE Male Tee 50×2"×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106320041', nameHe: 'הסתעפות HDPE הברגה חיצונית 63×2×63', nameEn: 'HDPE Male Tee 63×2"×63', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601241.jpg', brand: 'AQUATEC'),
 
   // הסתעפות הברגה פנימית (Female Tee)
-  LipskeyCatalogProduct(sku: '9101601240', nameHe: 'הסתעפות HDPE הברגה פנימית 16×1/2×16', nameEn: 'HDPE Female Tee 16×1/2"×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '910603440', nameHe: 'הסתעפות HDPE הברגה פנימית 16×3/4×16', nameEn: 'HDPE Female Tee 16×3/4"×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102001240', nameHe: 'הסתעפות HDPE הברגה פנימית 20×1/2×20', nameEn: 'HDPE Female Tee 20×1/2"×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102003440', nameHe: 'הסתעפות HDPE הברגה פנימית 20×3/4×20', nameEn: 'HDPE Female Tee 20×3/4"×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102501240', nameHe: 'הסתעפות HDPE הברגה פנימית 25×1/2×25', nameEn: 'HDPE Female Tee 25×1/2"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102503440', nameHe: 'הסתעפות HDPE הברגה פנימית 25×3/4×25', nameEn: 'HDPE Female Tee 25×3/4"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9102510040', nameHe: 'הסתעפות HDPE הברגה פנימית 25×1×25', nameEn: 'HDPE Female Tee 25×1"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103203440', nameHe: 'הסתעפות HDPE הברגה פנימית 32×3/4×32', nameEn: 'HDPE Female Tee 32×3/4"×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9103210040', nameHe: 'הסתעפות HDPE הברגה פנימית 32×1×32', nameEn: 'HDPE Female Tee 32×1"×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011240', nameHe: 'הסתעפות HDPE הברגה פנימית 40×11/2×40', nameEn: 'HDPE Female Tee 40×1½"×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9104011440', nameHe: 'הסתעפות HDPE הברגה פנימית 40×11/4×40', nameEn: 'HDPE Female Tee 40×1¼"×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105011240', nameHe: 'הסתעפות HDPE הברגה פנימית 50×11/2×50', nameEn: 'HDPE Female Tee 50×1½"×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9105020040', nameHe: 'הסתעפות HDPE הברגה פנימית 50×2×50', nameEn: 'HDPE Female Tee 50×2"×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה פנימית 63×2×63', nameEn: 'HDPE Female Tee 63×2"×63', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9101601240', nameHe: 'הסתעפות HDPE הברגה פנימית 16×1/2×16', nameEn: 'HDPE Female Tee 16×1/2"×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '910603440', nameHe: 'הסתעפות HDPE הברגה פנימית 16×3/4×16', nameEn: 'HDPE Female Tee 16×3/4"×16', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102001240', nameHe: 'הסתעפות HDPE הברגה פנימית 20×1/2×20', nameEn: 'HDPE Female Tee 20×1/2"×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102003440', nameHe: 'הסתעפות HDPE הברגה פנימית 20×3/4×20', nameEn: 'HDPE Female Tee 20×3/4"×20', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102501240', nameHe: 'הסתעפות HDPE הברגה פנימית 25×1/2×25', nameEn: 'HDPE Female Tee 25×1/2"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102503440', nameHe: 'הסתעפות HDPE הברגה פנימית 25×3/4×25', nameEn: 'HDPE Female Tee 25×3/4"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9102510040', nameHe: 'הסתעפות HDPE הברגה פנימית 25×1×25', nameEn: 'HDPE Female Tee 25×1"×25', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103203440', nameHe: 'הסתעפות HDPE הברגה פנימית 32×3/4×32', nameEn: 'HDPE Female Tee 32×3/4"×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9103210040', nameHe: 'הסתעפות HDPE הברגה פנימית 32×1×32', nameEn: 'HDPE Female Tee 32×1"×32', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011240', nameHe: 'הסתעפות HDPE הברגה פנימית 40×11/2×40', nameEn: 'HDPE Female Tee 40×1½"×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9104011440', nameHe: 'הסתעפות HDPE הברגה פנימית 40×11/4×40', nameEn: 'HDPE Female Tee 40×1¼"×40', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105011240', nameHe: 'הסתעפות HDPE הברגה פנימית 50×11/2×50', nameEn: 'HDPE Female Tee 50×1½"×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9105020040', nameHe: 'הסתעפות HDPE הברגה פנימית 50×2×50', nameEn: 'HDPE Female Tee 50×2"×50', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
+LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה פנימית 63×2×63', nameEn: 'HDPE Female Tee 63×2"×63', categoryHe: 'מחברי HDPE', categoryEn: 'HDPE Fittings', categoryEmoji: '🔧', page: 78, imageFile: '9101601240.jpg', brand: 'AQUATEC'),
 
   // ─── AQUATEC NTM — מקשרים (page 82) ─────────────────────────────────────
   LipskeyCatalogProduct(sku: '77401622', nameHe: 'מקשר כפול NTM 16×16', nameEn: 'NTM Double Coupler 16×16', categoryHe: 'מחברי NTM', categoryEn: 'NTM Fittings', categoryEmoji: '🔧', page: 82, imageFile: '77401622.jpg', brand: 'AQUATEC'),
