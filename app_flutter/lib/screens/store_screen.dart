@@ -575,76 +575,19 @@ class _StoreRow extends StatelessWidget {
   }
 }
 
-// ─── services grid ────────────────────────────────────────────────────────────
+// ─── services list ────────────────────────────────────────────────────────────
 
 class _ServicesGrid extends StatelessWidget {
   const _ServicesGrid();
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.5,
+    return ListView.separated(
+      itemCount: _kServiceItems.length,
+      separatorBuilder: (_, __) => const Divider(
+        height: 1, indent: 76, color: Color(0xFF2A2A2A),
       ),
-      itemCount: _kServices.length,
-      itemBuilder: (context, i) => _ServiceCard(service: _kServices[i]),
-    );
-  }
-}
-
-class _ServiceCard extends StatelessWidget {
-  const _ServiceCard({required this.service});
-  final _Service service;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => showToast(context, '${service.title} — בבנייה'),
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFF2A2A2A)),
-        ),
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(service.emoji, style: const TextStyle(fontSize: 28)),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  service.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  service.sub,
-                  style: const TextStyle(
-                    color: Color(0xFF888888),
-                    fontSize: 12,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+      itemBuilder: (context, i) => _StoreRow(item: _kServiceItems[i]),
     );
   }
 }
@@ -657,93 +600,99 @@ class _OrdersList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
       itemCount: _kOrders.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (context, i) => _OrderCard(order: _kOrders[i]),
+      separatorBuilder: (_, __) => const Divider(
+        height: 1, indent: 76, color: Color(0xFF2A2A2A),
+      ),
+      itemBuilder: (context, i) => _OrderRow(order: _kOrders[i]),
     );
   }
 }
 
-class _OrderCard extends StatelessWidget {
-  const _OrderCard({required this.order});
+class _OrderRow extends StatelessWidget {
+  const _OrderRow({required this.order});
   final _Order order;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => showToast(context, 'הזמנה ${order.id} — בבנייה'),
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFF2A2A2A)),
-        ),
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    order.id,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: order.stageColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: order.stageColor.withValues(alpha: 0.4)),
-                  ),
-                  child: Text(
-                    order.stageLabel,
-                    style: TextStyle(
-                      color: order.stageColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+            Container(
+              width: 50,
+              height: 50,
+              decoration: const BoxDecoration(
+                color: Color(0xFF2A2A2A),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: const Text('📦', style: TextStyle(fontSize: 24)),
             ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Icon(Icons.inventory_2_outlined,
-                    color: Color(0xFF888888), size: 16),
-                const SizedBox(width: 6),
-                Text(order.items,
-                    style: const TextStyle(
-                        color: Color(0xFF888888), fontSize: 13)),
-                const Spacer(),
-                Text(
-                  order.total,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          order.id,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        order.time,
+                        style: const TextStyle(
+                          color: Color(0xFF888888),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(Icons.access_time_outlined,
-                    color: Color(0xFF888888), size: 14),
-                const SizedBox(width: 6),
-                Text(order.time,
-                    style: const TextStyle(
-                        color: Color(0xFF888888), fontSize: 12)),
-              ],
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${order.items} · ${order.total}',
+                          style: const TextStyle(
+                            color: Color(0xFF888888),
+                            fontSize: 13,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: order.stageColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                              color: order.stageColor.withValues(alpha: 0.4)),
+                        ),
+                        child: Text(
+                          order.stageLabel,
+                          style: TextStyle(
+                            color: order.stageColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
