@@ -2277,16 +2277,32 @@ class _SmartProductSheet extends StatefulWidget {
 class _SmartProductSheetState extends State<_SmartProductSheet> {
   late int _selectedBrand;
   int? _activeStage;
+  late Map<int, bool> _accSelected;
+  late Map<int, int> _accQty;
 
   @override
   void initState() {
     super.initState();
-    _selectedBrand =
-        widget.product.brands.indexWhere((b) => b.rec).clamp(0, widget.product.brands.length - 1);
+    _selectedBrand = widget.product.brands
+        .indexWhere((b) => b.rec)
+        .clamp(0, widget.product.brands.length - 1);
+    final acc = widget.product.acc;
+    _accSelected = {for (var i = 0; i < acc.length; i++) i: acc[i].must};
+    _accQty = {for (var i = 0; i < acc.length; i++) i: 1};
   }
 
   void _tapStage(int i) =>
       setState(() => _activeStage = _activeStage == i ? null : i);
+
+  int get _total {
+    final brand = widget.product.brands[_selectedBrand];
+    var t = brand.price;
+    final acc = widget.product.acc;
+    for (var i = 0; i < acc.length; i++) {
+      if (_accSelected[i] ?? false) t += acc[i].price * (_accQty[i] ?? 1);
+    }
+    return t;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2479,12 +2495,19 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
                       ),
                     ),
                   ),
-                  ...mustItems.map((a) => _AccRow(
-                    acc: a,
-                    activeMatch: _activeStage != null
-                        ? p.stages[_activeStage!].match
-                        : null,
-                  )),
+                  ...List.generate(mustItems.length, (i) {
+                    final a = mustItems[i];
+                    final gi = p.acc.indexOf(a);
+                    return _AccRow(
+                      acc: a,
+                      selected: true,
+                      qty: _accQty[gi] ?? 1,
+                      onQtyChanged: (q) => setState(() => _accQty[gi] = q),
+                      activeMatch: _activeStage != null
+                          ? p.stages[_activeStage!].match
+                          : null,
+                    );
+                  }),
                 ],
 
                 // Optional accessories
@@ -2500,12 +2523,21 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
                       ),
                     ),
                   ),
-                  ...optItems.map((a) => _AccRow(
-                    acc: a,
-                    activeMatch: _activeStage != null
-                        ? p.stages[_activeStage!].match
-                        : null,
-                  )),
+                  ...List.generate(optItems.length, (i) {
+                    final a = optItems[i];
+                    final gi = p.acc.indexOf(a);
+                    return _AccRow(
+                      acc: a,
+                      selected: _accSelected[gi] ?? false,
+                      qty: _accQty[gi] ?? 1,
+                      onToggle: (v) =>
+                          setState(() => _accSelected[gi] = v),
+                      onQtyChanged: (q) => setState(() => _accQty[gi] = q),
+                      activeMatch: _activeStage != null
+                          ? p.stages[_activeStage!].match
+                          : null,
+                    );
+                  }),
                 ],
 
                 // CTA
@@ -2525,7 +2557,7 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
                           '${p.name} · ${brand.name} הוסף לסל 🛒');
                     },
                     child: Text(
-                      'הוסף לסל · ₪${brand.price}',
+                      'הוסף לסל · ₪$_total',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,
@@ -2754,18 +2786,29 @@ class _StageCard extends StatelessWidget {
 }
 
 class _AccRow extends StatelessWidget {
-  const _AccRow({required this.acc, this.activeMatch});
+  const _AccRow({
+    required this.acc,
+    required this.selected,
+    required this.qty,
+    required this.onQtyChanged,
+    this.onToggle,
+    this.activeMatch,
+  });
 
   final SmartAcc acc;
-  /// When set, dim this row unless acc.name contains one of these substrings.
+  final bool selected;
+  final int qty;
+  final ValueChanged<bool>? onToggle; // null = must item (always on)
+  final ValueChanged<int> onQtyChanged;
   final List<String>? activeMatch;
 
-  bool get _isHit => activeMatch == null ||
-      activeMatch!.any((m) => acc.name.contains(m));
+  bool get _isHit =>
+      activeMatch == null || activeMatch!.any((m) => acc.name.contains(m));
 
   @override
   Widget build(BuildContext context) {
     final hit = _isHit;
+    final isMust = onToggle == null;
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
       opacity: activeMatch == null ? 1.0 : (hit ? 1.0 : 0.3),
@@ -2785,49 +2828,146 @@ class _AccRow extends StatelessWidget {
             ? const EdgeInsets.all(6)
             : EdgeInsets.zero,
         child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              color: Color(0xFF252525),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Text(acc.emoji, style: const TextStyle(fontSize: 18)),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  acc.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+          children: [
+            // Checkbox / lock
+            GestureDetector(
+              onTap: isMust ? null : () => onToggle!(!selected),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? BsTokens.brand
+                      : const Color(0xFF333333),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: selected
+                        ? BsTokens.brand
+                        : const Color(0xFF555555),
                   ),
                 ),
+                child: Icon(
+                  isMust
+                      ? Icons.lock_outline
+                      : (selected ? Icons.check : null),
+                  color: Colors.white,
+                  size: 13,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            // Emoji
+            Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: Color(0xFF252525),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Text(acc.emoji, style: const TextStyle(fontSize: 16)),
+            ),
+            const SizedBox(width: 10),
+            // Name + why
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    acc.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    acc.why,
+                    style: const TextStyle(
+                      color: Color(0xFF888888),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Price + mini stepper
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
                 Text(
-                  acc.why,
-                  style: const TextStyle(
-                    color: Color(0xFF888888),
-                    fontSize: 12,
+                  '₪${acc.price * qty}',
+                  style: TextStyle(
+                    color: selected
+                        ? BsTokens.brand
+                        : const Color(0xFF666666),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E1E),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _MiniQtyBtn(
+                        icon: Icons.remove,
+                        onTap: qty > 1
+                            ? () => onQtyChanged(qty - 1)
+                            : null,
+                      ),
+                      SizedBox(
+                        width: 22,
+                        child: Text(
+                          '$qty',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      _MiniQtyBtn(
+                        icon: Icons.add,
+                        onTap: () => onQtyChanged(qty + 1),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-          Text(
-            '₪${acc.price}',
-            style: const TextStyle(
-              color: Color(0xFF888888),
-              fontSize: 13,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _MiniQtyBtn extends StatelessWidget {
+  const _MiniQtyBtn({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+        child: Icon(
+          icon,
+          size: 12,
+          color: onTap != null
+              ? Colors.white70
+              : const Color(0xFF444444),
+        ),
       ),
     );
   }
