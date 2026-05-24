@@ -84,23 +84,127 @@ const _kMeta = [
   (preview: 'ערכת כלים מקצועית 120 חלקים',            time: '18.5',  badge: 0),
 ];
 
-class CatalogScreen extends ConsumerWidget {
+class CatalogScreen extends ConsumerStatefulWidget {
   const CatalogScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CatalogScreen> createState() => _CatalogScreenState();
+}
+
+class _CatalogScreenState extends ConsumerState<CatalogScreen> {
+  final _scrollCtrl = ScrollController();
+  bool _headerVisible = true;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
+
+  bool _handleScrollNotification(ScrollNotification n) {
+    if (n is ScrollUpdateNotification && n.depth == 0) {
+      final delta = n.scrollDelta ?? 0;
+      final pixels = n.metrics.pixels;
+      if (delta > 6 && _headerVisible && pixels > 50) {
+        setState(() => _headerVisible = false);
+      } else if (delta < -6 && !_headerVisible) {
+        setState(() => _headerVisible = true);
+      } else if (pixels <= 2 && !_headerVisible) {
+        setState(() => _headerVisible = true);
+      }
+    }
+    return false;
+  }
+
+  void _showHeader() {
+    setState(() => _headerVisible = true);
+    if (_scrollCtrl.hasClients) {
+      _scrollCtrl.animateTo(
+        0,
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Force header visible whenever search panel opens.
+    ref.listen<bool>(searchPanelOpenProvider, (_, open) {
+      if (open && !_headerVisible) setState(() => _headerVisible = true);
+    });
+
     final searchOpen = ref.watch(searchPanelOpenProvider);
+    final showFull = _headerVisible || searchOpen;
+
     return Column(
       children: [
-        const _SearchBar(),
+        // Top area: full header or mini search pill.
+        ClipRect(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: showFull
+                ? const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [_SearchBar()],
+                  )
+                : _MiniSearchPill(onTap: _showHeader),
+          ),
+        ),
         if (searchOpen)
           const Expanded(child: _SearchPanel())
-        else ...const [
-          _FilterChipsRow(),
-          _SectionChipsRow(),
-          Expanded(child: _CatalogBody()),
+        else ...[
+          // Filter + section chips animate alongside the search bar.
+          ClipRect(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeInOut,
+              alignment: Alignment.topCenter,
+              child: showFull
+                  ? const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [_FilterChipsRow(), _SectionChipsRow()],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ),
+          Expanded(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: _handleScrollNotification,
+              child: _CatalogBody(scrollCtrl: _scrollCtrl),
+            ),
+          ),
         ],
       ],
+    );
+  }
+}
+
+class _MiniSearchPill extends StatelessWidget {
+  const _MiniSearchPill({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+        height: 36,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        alignment: Alignment.center,
+        child: const Icon(Icons.search, color: Color(0xFF888888), size: 18),
+      ),
     );
   }
 }
@@ -1424,12 +1528,13 @@ class _SearchResultsList extends ConsumerWidget {
 // Non-הכל sections render a header (label + edit button) above either the
 // filtered list or an empty state, so the edit affordance is always visible.
 class _CatalogBody extends ConsumerWidget {
-  const _CatalogBody();
+  const _CatalogBody({this.scrollCtrl});
+  final ScrollController? scrollCtrl;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(catalogSectionProvider);
-    if (active == 'הכל') return const _CatalogList();
+    if (active == 'הכל') return _CatalogList(scrollCtrl: scrollCtrl);
 
     // Smart tree section gets its own dedicated view
     if (active == 'עץ חכם') return const _SmartTreeSection();
@@ -1561,11 +1666,13 @@ class _EmptySection extends StatelessWidget {
 }
 
 class _CatalogList extends StatelessWidget {
-  const _CatalogList();
+  const _CatalogList({this.scrollCtrl});
+  final ScrollController? scrollCtrl;
 
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      controller: scrollCtrl,
       key: const Key('catalog-list'),
       itemCount: kCatalogCats.length,
       separatorBuilder: (_, __) => const Divider(
