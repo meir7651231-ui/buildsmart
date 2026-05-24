@@ -219,6 +219,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
     page: 6,
+    imageFile: '171189.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '218495',
@@ -374,6 +375,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
     page: 8,
+    imageFile: '611045.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '193420',
@@ -438,6 +440,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
     page: 8,
+    imageFile: '178700.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '645975',
@@ -571,6 +574,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 11,
     dims: {'dn': null},
+    imageFile: '116203.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116205',
@@ -584,6 +588,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 11,
     dims: {'dn': null},
+    imageFile: '116205.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '170643',
@@ -689,6 +694,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 17,
+    imageFile: '635736.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '558463',
@@ -740,6 +746,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches & WC Conn.',
     categoryEmoji: '⑂',
     page: 22,
+    imageFile: '218176.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116558',
@@ -765,6 +772,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches & WC Conn.',
     categoryEmoji: '⑂',
     page: 22,
+    imageFile: '217533.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '218567',
@@ -803,6 +811,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Couplers & Pipes',
     categoryEmoji: '🪠',
     page: 23,
+    imageFile: '218460.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '218560',
@@ -815,6 +824,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Couplers & Pipes',
     categoryEmoji: '🪠',
     page: 23,
+    imageFile: '218560.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '220315',
@@ -853,6 +863,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Couplers & Pipes',
     categoryEmoji: '🪠',
     page: 23,
+    imageFile: '220316.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '194897',
@@ -904,6 +915,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 27,
+    imageFile: '218361.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '220981',
@@ -943,6 +955,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 27,
+    imageFile: '171026.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '171027',
@@ -955,6 +968,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 27,
+    imageFile: '171027.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '171028',
@@ -967,6 +981,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 27,
+    imageFile: '171028.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116700',
@@ -979,6 +994,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 27,
+    imageFile: '116700.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116703',
@@ -991,6 +1007,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 27,
+    imageFile: '116703.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116709',
@@ -1003,6 +1020,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 27,
+    imageFile: '116709.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '217934',
@@ -1015,6 +1033,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 27,
+    imageFile: '217934.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '217935',
@@ -1027,6 +1046,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 27,
+    imageFile: '217935.jpeg',
   ),
 
   // ── מושבי אסלה — page 28 ─────────────────────────────────────────────────────
@@ -1041,6 +1061,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '116712.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116716',
@@ -1053,6 +1074,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '116716.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116722',
@@ -1065,6 +1087,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '116722.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '179046',
@@ -1077,6 +1100,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '179046.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '179370',
@@ -1089,6 +1113,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '179370.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '187133',
@@ -1101,6 +1126,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '187133.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '197134',
@@ -1113,6 +1139,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '197134.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '179611',
@@ -1125,6 +1152,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '179611.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '179612',
@@ -1137,6 +1165,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '179612.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '195425',
@@ -1149,6 +1178,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '195425.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '195506',
@@ -1161,6 +1191,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '195506.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '107222',
@@ -1173,6 +1204,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Toilet Seats',
     categoryEmoji: '🚽',
     page: 28,
+    imageFile: '107222.jpeg',
   ),
 
   // ── מאספים וקולטים נוספים — page 16 ─────────────────────────────────────────
@@ -1186,6 +1218,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 16,
+    imageFile: '116148.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '171191',
@@ -1197,6 +1230,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 16,
+    imageFile: '171191.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116151',
@@ -1209,6 +1243,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🕳️',
     page: 16,
     dims: {'DN': '130/40'},
+    imageFile: '116151.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '196587',
@@ -1221,6 +1256,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🕳️',
     page: 16,
     dims: {'DN': '130/50'},
+    imageFile: '196587.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116638',
@@ -1233,6 +1269,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🕳️',
     page: 16,
     dims: {'DN': '130/50'},
+    imageFile: '116638.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '217648',
@@ -1245,6 +1282,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🕳️',
     page: 16,
     dims: {'DN': '130/50'},
+    imageFile: '217648.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116640',
@@ -1257,6 +1295,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🕳️',
     page: 16,
     dims: {'DN': '130/50'},
+    imageFile: '116640.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116175',
@@ -1269,6 +1308,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🕳️',
     page: 16,
     dims: {'DN': '110'},
+    imageFile: '116175.jpeg',
   ),
 
   // ── מאספים וקולטים — כיסויים ומגבהות page 17 ────────────────────────────────
@@ -1282,6 +1322,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 17,
+    imageFile: '122974.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '610918',
@@ -1294,6 +1335,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 17,
+    imageFile: '610918.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '635737',
@@ -1306,6 +1348,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 17,
+    imageFile: '635737.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '610921',
@@ -1315,6 +1358,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 17,
+    imageFile: '610921.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '610933',
@@ -1326,6 +1370,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 17,
+    imageFile: '610933.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '610906',
@@ -1338,6 +1383,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 17,
+    imageFile: '610906.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '635735',
@@ -1350,6 +1396,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 17,
+    imageFile: '635735.jpeg',
   ),
 
   // ── אטמים אומים ופקקים נוספים — page 19 ─────────────────────────────────────
@@ -1362,6 +1409,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔧',
     page: 19,
     dims: {'DN': '32'},
+    imageFile: '506510.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '506522',
@@ -1372,6 +1420,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔧',
     page: 19,
     dims: {'DN': '40'},
+    imageFile: '506522.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '506527',
@@ -1382,6 +1431,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔧',
     page: 19,
     dims: {'DN': '50'},
+    imageFile: '506527.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '555703',
@@ -1392,6 +1442,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔧',
     page: 19,
     dims: {'DN': '60'},
+    imageFile: '555703.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '506539',
@@ -1402,6 +1453,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔧',
     page: 19,
     dims: {'DN': '46'},
+    imageFile: '506539.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '506521',
@@ -1412,6 +1464,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔧',
     page: 19,
     dims: {'DN': '46'},
+    imageFile: '506521.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '506537',
@@ -1423,6 +1476,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔧',
     page: 19,
     dims: {'DN': '50/40'},
+    imageFile: '506537.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '506540',
@@ -1434,6 +1488,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔧',
     page: 19,
     dims: {'DN': '60/50'},
+    imageFile: '506540.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '218127',
@@ -1444,6 +1499,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Gaskets, Nuts & Plugs',
     categoryEmoji: '🔧',
     page: 19,
+    imageFile: '218127.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '218126',
@@ -1454,6 +1510,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Gaskets, Nuts & Plugs',
     categoryEmoji: '🔧',
     page: 19,
+    imageFile: '218126.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '611051',
@@ -1463,6 +1520,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Gaskets, Nuts & Plugs',
     categoryEmoji: '🔧',
     page: 19,
+    imageFile: '611051.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '614783',
@@ -1472,6 +1530,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Gaskets, Nuts & Plugs',
     categoryEmoji: '🔧',
     page: 19,
+    imageFile: '614783.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '612386',
@@ -1481,6 +1540,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Gaskets, Nuts & Plugs',
     categoryEmoji: '🔧',
     page: 19,
+    imageFile: '612386.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '612385',
@@ -1490,6 +1550,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Gaskets, Nuts & Plugs',
     categoryEmoji: '🔧',
     page: 19,
+    imageFile: '612385.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '610706',
@@ -1499,6 +1560,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Gaskets, Nuts & Plugs',
     categoryEmoji: '🔧',
     page: 19,
+    imageFile: '610706.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '506525',
@@ -1508,6 +1570,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Gaskets, Nuts & Plugs',
     categoryEmoji: '🔧',
     page: 19,
+    imageFile: '506525.jpeg',
   ),
 
   // ── ברכיים — page 21 ─────────────────────────────────────────────────────────
@@ -1522,6 +1585,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '40'},
+    imageFile: '116624.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116601',
@@ -1534,6 +1598,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '50'},
+    imageFile: '116601.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116033',
@@ -1546,6 +1611,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '75'},
+    imageFile: '116033.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '142289',
@@ -1558,6 +1624,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '110'},
+    imageFile: '142289.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116028',
@@ -1570,6 +1637,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '160'},
+    imageFile: '116028.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116031',
@@ -1582,6 +1650,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '50'},
+    imageFile: '116031.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '124843',
@@ -1594,6 +1663,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '110'},
+    imageFile: '124843.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116026',
@@ -1606,6 +1676,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '110'},
+    imageFile: '116026.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '194899',
@@ -1617,6 +1688,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '110'},
+    imageFile: '194899.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '194900',
@@ -1628,6 +1700,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '110'},
+    imageFile: '194900.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116591',
@@ -1640,6 +1713,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '50'},
+    imageFile: '116591.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116553',
@@ -1652,6 +1726,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '75'},
+    imageFile: '116553.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '161884',
@@ -1664,6 +1739,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '110'},
+    imageFile: '161884.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '190297',
@@ -1676,6 +1752,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '110'},
+    imageFile: '190297.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116037',
@@ -1688,6 +1765,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '↩️',
     page: 21,
     dims: {'DN': '160'},
+    imageFile: '116037.jpeg',
   ),
 
   // ── זקיף אסלה — page 22 ──────────────────────────────────────────────────────
@@ -1701,6 +1779,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🚽',
     page: 22,
     dims: {'DN': '110/50'},
+    imageFile: '140958.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '140870',
@@ -1710,6 +1789,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'WC Connection',
     categoryEmoji: '🚽',
     page: 22,
+    imageFile: '140870.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '211805',
@@ -1722,6 +1802,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🚽',
     page: 22,
     dims: {'DN': '110'},
+    imageFile: '211805.jpeg',
   ),
 
   // ── אביזרי שקע-תקע — pages 23 ────────────────────────────────────────────────
@@ -1736,6 +1817,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '110'},
+    imageFile: '120011.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '124533',
@@ -1748,6 +1830,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '50'},
+    imageFile: '124533.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '196762',
@@ -1760,6 +1843,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '75'},
+    imageFile: '196762.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '196575',
@@ -1772,6 +1856,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '110'},
+    imageFile: '196575.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '198517',
@@ -1784,6 +1869,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '40/32'},
+    imageFile: '198517.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116680',
@@ -1796,6 +1882,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '50/40'},
+    imageFile: '116680.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '119215',
@@ -1808,6 +1895,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '75/50'},
+    imageFile: '119215.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '194058',
@@ -1820,6 +1908,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '110/133'},
+    imageFile: '194058.jpeg',
   ),
 
   // ── צינורות — page 24 ─────────────────────────────────────────────────────────
@@ -1833,6 +1922,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '40', 'L (cm)': '300'},
+    imageFile: '273227.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116009',
@@ -1844,6 +1934,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '40', 'L (cm)': '200'},
+    imageFile: '116009.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '221022',
@@ -1855,6 +1946,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '50', 'L (cm)': '100'},
+    imageFile: '221022.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116074',
@@ -1866,6 +1958,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '50', 'L (cm)': '200'},
+    imageFile: '116074.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '221085',
@@ -1877,6 +1970,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '75', 'L (cm)': '50'},
+    imageFile: '221085.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116001',
@@ -1888,6 +1982,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '75', 'L (cm)': '200'},
+    imageFile: '116001.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116113',
@@ -1899,6 +1994,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '110', 'L (cm)': '50'},
+    imageFile: '116113.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '219791',
@@ -1910,6 +2006,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '110', 'L (cm)': '100'},
+    imageFile: '219791.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116155',
@@ -1921,6 +2018,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '110', 'L (cm)': '200'},
+    imageFile: '116155.jpeg',
   ),
 
   // ── צינורות PP-MD-ML — page 25 ───────────────────────────────────────────────
@@ -1934,6 +2032,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '110', 'L (cm)': '300', 'SN': '8'},
+    imageFile: '224156.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '224169',
@@ -1945,6 +2044,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '110', 'L (cm)': '100', 'SN': '8'},
+    imageFile: '224169.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '273216',
@@ -1968,6 +2068,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '110', 'L (cm)': '300'},
+    imageFile: '273201.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '273219',
@@ -1979,6 +2080,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '160', 'L (cm)': '300'},
+    imageFile: '273219.jpeg',
   ),
 
   // ── התקנה גבוהה — page 26 ────────────────────────────────────────────────────
@@ -1992,6 +2094,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'High Installation',
     categoryEmoji: '🔺',
     page: 26,
+    imageFile: '152785.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '152786',
@@ -2003,6 +2106,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'High Installation',
     categoryEmoji: '🔺',
     page: 26,
+    imageFile: '152786.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '152787',
@@ -2014,6 +2118,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'High Installation',
     categoryEmoji: '🔺',
     page: 26,
+    imageFile: '152787.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '145629',
@@ -2025,6 +2130,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'High Installation',
     categoryEmoji: '🔺',
     page: 26,
+    imageFile: '145629.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '145630',
@@ -2036,6 +2142,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'High Installation',
     categoryEmoji: '🔺',
     page: 26,
+    imageFile: '145630.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '145631',
@@ -2047,6 +2154,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'High Installation',
     categoryEmoji: '🔺',
     page: 26,
+    imageFile: '145631.jpeg',
   ),
 
   // ── התקנה נמוכה — page 26 ────────────────────────────────────────────────────
@@ -2060,6 +2168,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '124040.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '124050',
@@ -2071,6 +2180,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '124050.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '124051',
@@ -2082,6 +2192,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '124051.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '170862',
@@ -2093,6 +2204,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '170862.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '170866',
@@ -2104,6 +2216,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '170866.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '170869',
@@ -2115,6 +2228,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '170869.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116752',
@@ -2126,6 +2240,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '116752.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116795',
@@ -2137,6 +2252,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '116795.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116798',
@@ -2148,6 +2264,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '116798.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '154058',
@@ -2159,6 +2276,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '154058.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '154069',
@@ -2170,6 +2288,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '154069.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '154413',
@@ -2181,6 +2300,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Low Installation',
     categoryEmoji: '🔻',
     page: 26,
+    imageFile: '154413.jpeg',
   ),
 
   // ── התקנה צמודה (מונובלוק) — page 27 ────────────────────────────────────────
@@ -2194,6 +2314,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Monoblock',
     categoryEmoji: '⬜',
     page: 27,
+    imageFile: '168525.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '169604',
@@ -2205,6 +2326,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Monoblock',
     categoryEmoji: '⬜',
     page: 27,
+    imageFile: '169604.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '178864',
@@ -2215,6 +2337,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Monoblock',
     categoryEmoji: '⬜',
     page: 27,
+    imageFile: '178864.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '178867',
@@ -2226,6 +2349,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Monoblock',
     categoryEmoji: '⬜',
     page: 27,
+    imageFile: '178867.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '178870',
@@ -2237,6 +2361,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Monoblock',
     categoryEmoji: '⬜',
     page: 27,
+    imageFile: '178870.jpeg',
   ),
 
   // ── חלקים סניטריים — page 29 ─────────────────────────────────────────────────
@@ -2249,6 +2374,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Sanitary Parts',
     categoryEmoji: '🔧',
     page: 29,
+    imageFile: '186466.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '686366',
@@ -2259,6 +2385,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Sanitary Parts',
     categoryEmoji: '🔧',
     page: 29,
+    imageFile: '686366.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '642102',
@@ -2269,6 +2396,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Sanitary Parts',
     categoryEmoji: '🔧',
     page: 29,
+    imageFile: '642102.jpeg',
   ),
 
   // ── Page 12 — מחברים (Connectors) ───────────────────────────────────────────
@@ -2282,6 +2410,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Screw-on Accessories',
     categoryEmoji: '🔩',
     page: 12,
+    imageFile: '196206.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '196172',
@@ -2293,6 +2422,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Screw-on Accessories',
     categoryEmoji: '🔩',
     page: 12,
+    imageFile: '196172.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '196175',
@@ -2304,6 +2434,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Screw-on Accessories',
     categoryEmoji: '🔩',
     page: 12,
+    imageFile: '196175.jpeg',
   ),
 
   // ── Page 12 — מסעפים עם תבריג (Screw-on Branches 45°) ──────────────────────
@@ -2317,6 +2448,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches',
     categoryEmoji: '⑂',
     page: 12,
+    imageFile: '187463.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '118221',
@@ -2328,6 +2460,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches',
     categoryEmoji: '⑂',
     page: 12,
+    imageFile: '118221.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '118222',
@@ -2339,6 +2472,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches',
     categoryEmoji: '⑂',
     page: 12,
+    imageFile: '118222.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '118219',
@@ -2350,6 +2484,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches',
     categoryEmoji: '⑂',
     page: 12,
+    imageFile: '118219.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '118220',
@@ -2361,6 +2496,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches',
     categoryEmoji: '⑂',
     page: 12,
+    imageFile: '118220.jpeg',
   ),
 
   // ── Page 12 — מסעפים ללא תבריג (Branches 45° one side without screw-on) ─────
@@ -2374,6 +2510,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches',
     categoryEmoji: '⑂',
     page: 12,
+    imageFile: '192291.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '192271',
@@ -2385,6 +2522,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches',
     categoryEmoji: '⑂',
     page: 12,
+    imageFile: '192271.jpeg',
   ),
 
   // ── Page 12 — מסעפים 90° עם תבריג (Branches 90°) ───────────────────────────
@@ -2398,6 +2536,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches',
     categoryEmoji: '⑂',
     page: 12,
+    imageFile: '110689.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '110682',
@@ -2409,6 +2548,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches',
     categoryEmoji: '⑂',
     page: 12,
+    imageFile: '110682.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '110681',
@@ -2420,6 +2560,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches',
     categoryEmoji: '⑂',
     page: 12,
+    imageFile: '110681.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116684',
@@ -2431,6 +2572,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Branches',
     categoryEmoji: '⑂',
     page: 12,
+    imageFile: '116684.jpeg',
   ),
 
   // ── מסעפים שקע-תקע 45° — p42 ─────────────────────────────────────────────
@@ -2445,6 +2587,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⑂',
     page: 22,
     dims: {'DN': '50/50'},
+    imageFile: '116573.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116056',
@@ -2457,6 +2600,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⑂',
     page: 22,
     dims: {'DN': '110/50'},
+    imageFile: '116056.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116571',
@@ -2469,6 +2613,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⑂',
     page: 22,
     dims: {'DN': '110/110'},
+    imageFile: '116571.jpeg',
   ),
 
   // ── מסעפים שקע-תקע 87° — p42 ─────────────────────────────────────────────
@@ -2483,6 +2628,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⑂',
     page: 22,
     dims: {'DN': '50/50'},
+    imageFile: '116569.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116054',
@@ -2495,6 +2641,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⑂',
     page: 22,
     dims: {'DN': '75/75'},
+    imageFile: '116054.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116556',
@@ -2507,6 +2654,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⑂',
     page: 22,
     dims: {'DN': '110/110'},
+    imageFile: '116556.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116049',
@@ -2519,6 +2667,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⑂',
     page: 22,
     dims: {'DN': '160/110'},
+    imageFile: '116049.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116051',
@@ -2531,6 +2680,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⑂',
     page: 22,
     dims: {'DN': '160/160'},
+    imageFile: '116051.jpeg',
   ),
 
   // ── זקיף אסלה נוסף — p43 ─────────────────────────────────────────────────
@@ -2545,6 +2695,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'WC Connection',
     categoryEmoji: '🚽',
     page: 22,
+    imageFile: '145858.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '164873',
@@ -2557,6 +2708,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'WC Connection',
     categoryEmoji: '🚽',
     page: 22,
+    imageFile: '164873.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '121216',
@@ -2569,6 +2721,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🚽',
     page: 22,
     dims: {'DN': '110'},
+    imageFile: '121216.jpeg',
   ),
 
   // ── מחברים כפולים עם/בלי מעצור — p44 ────────────────────────────────────
@@ -2583,6 +2736,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '50'},
+    imageFile: '214533.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '214534',
@@ -2595,6 +2749,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '75'},
+    imageFile: '214534.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '212937',
@@ -2607,6 +2762,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '75'},
+    imageFile: '212937.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '124842',
@@ -2619,6 +2775,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '110'},
+    imageFile: '124842.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116576',
@@ -2631,6 +2788,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '110'},
+    imageFile: '116576.jpeg',
   ),
 
   // ── מצרות — p44 ──────────────────────────────────────────────────────────
@@ -2645,6 +2803,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '110/50'},
+    imageFile: '116581.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116058',
@@ -2657,6 +2816,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '160/110'},
+    imageFile: '116058.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '217674',
@@ -2669,6 +2829,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '110/75'},
+    imageFile: '217674.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '217531',
@@ -2681,6 +2842,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '75/50'},
+    imageFile: '217531.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '194898',
@@ -2693,6 +2855,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '110/110'},
+    imageFile: '194898.jpeg',
   ),
 
   // ── פקקים שקע-תקע DN75 + DN110 — p45 ─────────────────────────────────────
@@ -2707,6 +2870,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '75'},
+    imageFile: '805024.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116628',
@@ -2719,6 +2883,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔌',
     page: 23,
     dims: {'DN': '110'},
+    imageFile: '116628.jpeg',
   ),
 
   // ── צינורות חלקים (ללא שקע) — p45 ────────────────────────────────────────
@@ -2732,6 +2897,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '32', 'L (cm)': '400'},
+    imageFile: '116180.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116593',
@@ -2743,6 +2909,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '40', 'L (cm)': '400'},
+    imageFile: '116593.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '164588',
@@ -2754,6 +2921,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '50', 'L (cm)': '400'},
+    imageFile: '164588.jpeg',
   ),
 
   // ── צינורות אפורות DN40 — p47 ─────────────────────────────────────────────
@@ -2769,6 +2937,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '40', 'L (cm)': '50'},
+    imageFile: '116603.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116606',
@@ -2782,6 +2951,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '40', 'L (cm)': '100'},
+    imageFile: '116606.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116069',
@@ -2795,6 +2965,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '40', 'L (cm)': '300'},
+    imageFile: '116069.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116071',
@@ -2808,6 +2979,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '40', 'L (cm)': '400'},
+    imageFile: '116071.jpeg',
   ),
 
   // ── צינורות אפורות DN50 — p47 ─────────────────────────────────────────────
@@ -2823,6 +2995,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '50', 'L (cm)': '50'},
+    imageFile: '116610.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '119967',
@@ -2836,6 +3009,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '50', 'L (cm)': '100'},
+    imageFile: '119967.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116076',
@@ -2849,6 +3023,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '50', 'L (cm)': '300'},
+    imageFile: '116076.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116078',
@@ -2862,6 +3037,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '50', 'L (cm)': '400'},
+    imageFile: '116078.jpeg',
   ),
 
   // ── צינורות אפורות DN75 — p47 ─────────────────────────────────────────────
@@ -2877,6 +3053,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '75', 'L (cm)': '50'},
+    imageFile: '116612.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116084',
@@ -2890,6 +3067,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '75', 'L (cm)': '100'},
+    imageFile: '116084.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116091',
@@ -2903,6 +3081,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '75', 'L (cm)': '300'},
+    imageFile: '116091.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116093',
@@ -2916,6 +3095,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '75', 'L (cm)': '400'},
+    imageFile: '116093.jpeg',
   ),
 
   // ── צינורות אפורות DN110 — p47 ────────────────────────────────────────────
@@ -2930,6 +3110,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '110', 'L (cm)': '25'},
+    imageFile: '116617.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116620',
@@ -2943,6 +3124,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '110', 'L (cm)': '50'},
+    imageFile: '116620.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116096',
@@ -2956,6 +3138,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '110', 'L (cm)': '75'},
+    imageFile: '116096.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116099',
@@ -2969,6 +3152,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '110', 'L (cm)': '100'},
+    imageFile: '116099.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116101',
@@ -2982,6 +3166,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '110', 'L (cm)': '150'},
+    imageFile: '116101.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116622',
@@ -2993,6 +3178,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '110', 'L (cm)': '200'},
+    imageFile: '116622.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116103',
@@ -3006,6 +3192,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '110', 'L (cm)': '300'},
+    imageFile: '116103.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116105',
@@ -3019,6 +3206,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 24,
     dims: {'DN': '110', 'L (cm)': '400'},
+    imageFile: '116105.jpeg',
   ),
 
   // ── PP-MD-ML SN4 — p48 ────────────────────────────────────────────────────
@@ -3032,6 +3220,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '110', 'L (cm)': '300', 'SN': '4'},
+    imageFile: '224168.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '224170',
@@ -3043,6 +3232,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '110', 'L (cm)': '50', 'SN': '4'},
+    imageFile: '224170.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '224185',
@@ -3054,6 +3244,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '160', 'L (cm)': '300', 'SN': '4'},
+    imageFile: '224185.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '224186',
@@ -3065,6 +3256,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '160', 'L (cm)': '100', 'SN': '4'},
+    imageFile: '224186.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '224187',
@@ -3076,6 +3268,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '160', 'L (cm)': '50', 'SN': '4'},
+    imageFile: '224187.jpeg',
   ),
 
   // ── PP-MD-ML SN8 — p48 ────────────────────────────────────────────────────
@@ -3089,6 +3282,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '110', 'L (cm)': '300', 'SN': '8'},
+    imageFile: '224345.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '224344',
@@ -3100,6 +3294,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '110', 'L (cm)': '100', 'SN': '8'},
+    imageFile: '224344.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '224348',
@@ -3111,6 +3306,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '160', 'L (cm)': '300', 'SN': '8'},
+    imageFile: '224348.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '224347',
@@ -3122,6 +3318,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '160', 'L (cm)': '100', 'SN': '8'},
+    imageFile: '224347.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '224346',
@@ -3133,6 +3330,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '160', 'L (cm)': '50', 'SN': '8'},
+    imageFile: '224346.jpeg',
   ),
 
   // ── SUPER BETON/SILENT נוספים — p48 ──────────────────────────────────────
@@ -3146,6 +3344,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '75', 'L (cm)': '100'},
+    imageFile: '273217.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '273202',
@@ -3157,6 +3356,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '110', 'L (cm)': '100'},
+    imageFile: '273202.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '273203',
@@ -3168,6 +3368,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '110', 'L (cm)': '50'},
+    imageFile: '273203.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '273215',
@@ -3179,6 +3380,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '110', 'L (cm)': '25'},
+    imageFile: '273215.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '273220',
@@ -3190,6 +3392,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '160', 'L (cm)': '100'},
+    imageFile: '273220.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '273221',
@@ -3201,6 +3404,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '📏',
     page: 25,
     dims: {'DN': '160', 'L (cm)': '50'},
+    imageFile: '273221.jpeg',
   ),
   // משפך — page 15
   LipskeyCatalogProduct(
@@ -3212,6 +3416,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Drainage Accessories',
     categoryEmoji: '🚿',
     page: 15,
+    imageFile: '273089.jpeg',
   ),
   // ברכיים 90° תבריג צד אחד — page 20
   LipskeyCatalogProduct(
@@ -3224,6 +3429,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 20,
     dims: {'DN': '32'},
+    imageFile: '197091.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116186',
@@ -3235,6 +3441,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 20,
     dims: {'DN': '40'},
+    imageFile: '116186.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116191',
@@ -3246,6 +3453,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 20,
     dims: {'DN': '50'},
+    imageFile: '116191.jpeg',
   ),
   // ברכיים 45° תבריג כפול — page 21
   LipskeyCatalogProduct(
@@ -3258,6 +3466,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '32'},
+    imageFile: '116668.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116199',
@@ -3269,6 +3478,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '40'},
+    imageFile: '116199.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116197',
@@ -3280,6 +3490,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '50'},
+    imageFile: '116197.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116201',
@@ -3291,6 +3502,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '50'},
+    imageFile: '116201.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116670',
@@ -3302,6 +3514,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '75'},
+    imageFile: '116670.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116666',
@@ -3313,6 +3526,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '110'},
+    imageFile: '116666.jpeg',
   ),
   // ברכיים 90° תבריג כפול — page 21
   LipskeyCatalogProduct(
@@ -3325,6 +3539,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '32'},
+    imageFile: '116656.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116182',
@@ -3336,6 +3551,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '40'},
+    imageFile: '116182.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '119934',
@@ -3347,6 +3563,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '50'},
+    imageFile: '119934.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116661',
@@ -3358,6 +3575,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '50'},
+    imageFile: '116661.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116663',
@@ -3369,6 +3587,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '75'},
+    imageFile: '116663.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116659',
@@ -3380,6 +3599,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '110'},
+    imageFile: '116659.jpeg',
   ),
   // ברך 90° ש"ת לסיפון — page 21
   LipskeyCatalogProduct(
@@ -3392,6 +3612,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '40'},
+    imageFile: '116194.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '204127',
@@ -3403,6 +3624,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 21,
     dims: {'DN': '50'},
+    imageFile: '204127.jpeg',
   ),
   // מסעפים תבריג — page 22
   LipskeyCatalogProduct(
@@ -3415,6 +3637,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 22,
     dims: {'DN': '40'},
+    imageFile: '116223.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116225',
@@ -3426,6 +3649,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 22,
     dims: {'DN': '50'},
+    imageFile: '116225.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116220',
@@ -3437,6 +3661,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 22,
     dims: {'DN': '50'},
+    imageFile: '116220.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116229',
@@ -3448,6 +3673,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 22,
     dims: {'DN': '40'},
+    imageFile: '116229.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116231',
@@ -3459,6 +3685,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 22,
     dims: {'DN': '50'},
+    imageFile: '116231.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116689',
@@ -3470,6 +3697,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 22,
     dims: {'DN': '40'},
+    imageFile: '116689.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116682',
@@ -3481,6 +3709,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 22,
     dims: {'DN': '50'},
+    imageFile: '116682.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116687',
@@ -3492,6 +3721,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 22,
     dims: {'DN': '50'},
+    imageFile: '116687.jpeg',
   ),
   // מחברים כפולים תבריג — page 23
   LipskeyCatalogProduct(
@@ -3504,6 +3734,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 23,
     dims: {'DN': '32'},
+    imageFile: '116209.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116672',
@@ -3515,6 +3746,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 23,
     dims: {'DN': '40'},
+    imageFile: '116672.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116675',
@@ -3526,6 +3758,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 23,
     dims: {'DN': '50'},
+    imageFile: '116675.jpeg',
   ),
   // מצרות תבריג — page 23
   LipskeyCatalogProduct(
@@ -3538,6 +3771,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 23,
     dims: {'DN': '32'},
+    imageFile: '116677.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116212',
@@ -3549,6 +3783,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 23,
     dims: {'DN': '50'},
+    imageFile: '116212.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116215',
@@ -3560,6 +3795,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔩',
     page: 23,
     dims: {'DN': '50'},
+    imageFile: '116215.jpeg',
   ),
   // מפתחות — page 23
   LipskeyCatalogProduct(
@@ -3571,6 +3807,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Tools',
     categoryEmoji: '🔧',
     page: 23,
+    imageFile: '610893.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '610758',
@@ -3581,6 +3818,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Tools',
     categoryEmoji: '🔧',
     page: 23,
+    imageFile: '610758.jpeg',
   ),
   // מחסומי קוקלום — page 27
   LipskeyCatalogProduct(
@@ -3594,6 +3832,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⬇️',
     page: 14,
     dims: {'DN': '40'},
+    imageFile: '116167.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116163',
@@ -3606,6 +3845,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⬇️',
     page: 14,
     dims: {'DN': '50'},
+    imageFile: '116163.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116146',
@@ -3618,6 +3858,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⬇️',
     page: 14,
     dims: {'DN': '40'},
+    imageFile: '116146.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '116169',
@@ -3630,6 +3871,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '⬇️',
     page: 14,
     dims: {'DN': '50'},
+    imageFile: '116169.jpeg',
   ),
   // מאסף לא תקני — page 31
   LipskeyCatalogProduct(
@@ -3643,6 +3885,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🕳️',
     page: 16,
     dims: {'DN': '130/40'},
+    imageFile: '196687.jpeg',
   ),
   // כיסויים — page 32
   LipskeyCatalogProduct(
@@ -3656,6 +3899,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 17,
+    imageFile: '661360.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '610920',
@@ -3666,6 +3910,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Collectors & Drains',
     categoryEmoji: '🕳️',
     page: 17,
+    imageFile: '610920.jpeg',
   ),
   // אטם — page 36
   LipskeyCatalogProduct(
@@ -3677,6 +3922,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Gaskets, Nuts & Plugs',
     categoryEmoji: '🔧',
     page: 19,
+    imageFile: '610708.jpeg',
   ),
   // ונטיל — page 14
   LipskeyCatalogProduct(
@@ -3690,6 +3936,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
     page: 8,
+    imageFile: '187700.jpeg',
   ),
 
   // ── AQUATEC / QONDUS ─────────────────────────────────────────────────────
