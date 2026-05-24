@@ -2092,7 +2092,7 @@ class _FeaturedProductCardState extends ConsumerState<_FeaturedProductCard> {
                                 productName: widget.product.name,
                                 productEmoji: widget.product.emoji,
                                 brandName: rec.name,
-                                brandPrice: rec.price,
+                                brandPrice: rec.price ?? 0,
                                 productQty: _qty,
                                 accessories: const [],
                               ),
@@ -2111,7 +2111,9 @@ class _FeaturedProductCardState extends ConsumerState<_FeaturedProductCard> {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          'הוסף לסל · ₪${rec.price * _qty}',
+                          rec.price != null
+                              ? 'הוסף לסל · ₪${rec.price! * _qty}'
+                              : 'הוסף לסל · לפי ספק',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -2529,10 +2531,12 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
 
   int get _total {
     final brand = widget.product.brands[_selectedBrand];
-    var t = brand.price;
+    var t = brand.price ?? 0;
     final acc = widget.product.acc;
     for (var i = 0; i < acc.length; i++) {
-      if (_accSelected[i] ?? false) t += acc[i].price * (_accQty[i] ?? 1);
+      if (_accSelected[i] ?? false) {
+        t += (acc[i].price ?? 0) * (_accQty[i] ?? 1);
+      }
     }
     return t;
   }
@@ -2808,7 +2812,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             SmartCartAcc(
                               name: p.acc[i].name,
                               emoji: p.acc[i].emoji,
-                              price: p.acc[i].price,
+                              price: p.acc[i].price ?? 0,
                               qty: _accQty[i] ?? 1,
                             ),
                       ];
@@ -2818,7 +2822,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               productName: p.name,
                               productEmoji: p.emoji,
                               brandName: brand.name,
-                              brandPrice: brand.price,
+                              brandPrice: brand.price ?? 0,
                               productQty: 1,
                               accessories: selectedAcc,
                             ),
@@ -3215,7 +3219,9 @@ class _AccRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '₪${acc.price * qty}',
+                  acc.price != null
+                      ? '₪${acc.price! * qty}'
+                      : 'לפי ספק',
                   style: TextStyle(
                     color: selected
                         ? BsTokens.brand
