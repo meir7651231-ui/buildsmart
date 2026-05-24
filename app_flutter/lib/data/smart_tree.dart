@@ -1373,6 +1373,188 @@ const List<SmartProduct> kSmartProducts = [
       SmartAcc(name: 'סיליקון סניטרי',         emoji: '🧴', price: 21, why: 'איטום סופי', must: true),
     ],
   ),
+
+  // ===== ברזים — ברזי ניל וניתוק =====
+  SmartProduct(
+    key: 'shutoffValve',
+    name: 'ברז ניל / ניתוק',
+    emoji: '🔧',
+    cat: 'ברזים וכיורים',
+    diagramTitle: 'התקנת ברז ניל — סגירת מים נקודתית',
+    stages: _sf,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — רותם ברז ניל פתיחה קלה 1/2"×1/2"',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '77775268',
+      ),
+      SmartBrand(name: 'ליפסקי — רותם ברז ניל 1/2"×3/8"',         tag: 'גודל מעבר',    sku: '77775269'),
+      SmartBrand(name: 'ליפסקי — דיור ברז ניל כפול 1/2"×1/2"',     tag: 'כפול',          sku: '77775255'),
+      SmartBrand(name: 'ליפסקי — דיור ברז ניל כפול 1/2"×3/8"',     tag: 'כפול מעבר',  sku: '77775259'),
+      SmartBrand(name: 'ליפסקי — דיור ברז 3/4" + יציאה למדיח+מטהר', tag: 'משולש',         sku: '77775257'),
+      SmartBrand(name: 'ליפסקי — דיור ברז כביסה מיני',              tag: 'למכונה',       sku: '77775254'),
+      SmartBrand(name: 'ליפסקי — דיור ברז אחורי למדיח',             tag: 'אחורי למדיח', sku: '77775258'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4, why: 'אוטם את ההברגה — חובה', must: true),
+      SmartAcc(name: 'אטם דו צדדי',       emoji: '⚫', price: 8, why: 'איטום החיבור',           must: true),
+      SmartAcc(name: 'מפתח צינורות',     emoji: '🔧', price: 39, why: 'להידוק',                  must: true),
+      SmartAcc(name: 'צינור גמיש 1/2"', emoji: '〰️', price: 28, why: 'אם צריך להאריך',          must: false),
+    ],
+  ),
+
+  // ===== מקלחות — ראשי מקלחת ייעודי =====
+  SmartProduct(
+    key: 'showerHead',
+    name: 'ראשי מקלחת',
+    emoji: '🚿',
+    cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'התקנת ראש מקלחת קבוע',
+    stages: _ss,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — דיור ראש מקלחת ניקל עגול 250 מ"מ',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '7777708C',
+      ),
+      SmartBrand(name: 'ליפסקי — דיור ראש מקלחת ניקל עגול 200 מ"מ',     tag: 'קטן יותר',  sku: '7777707C'),
+      SmartBrand(name: 'ליפסקי — דיור ראש מט שחור עגול 250 מ"מ',          tag: 'שחור מט',  sku: '7777708B'),
+      SmartBrand(name: 'ליפסקי — דיור ראש מט שחור עגול 200 מ"מ',          tag: 'שחור קטן', sku: '7777707B'),
+      SmartBrand(name: 'ליפסקי — דיור ראש ניקל מרובע 250 מ"מ',             tag: 'מרובע גדול', sku: '7777711C'),
+      SmartBrand(name: 'ליפסקי — דיור ראש ניקל מרובע 200 מ"מ',             tag: 'מרובע קטן',  sku: '7777710C'),
+      SmartBrand(name: 'ליפסקי — פלורה ראש דוש 5 מצבים',                    tag: '5 מצבים',     sku: '77701170'),
+    ],
+    acc: [
+      SmartAcc(name: 'זרוע למקלחת',     emoji: '⤴️', price: 95,  why: 'מחזיק את הראש — חובה', must: true),
+      SmartAcc(name: 'סרט טפלון',       emoji: '🎗️', price: 4,  why: 'איטום ההברגה — חובה',  must: true),
+      SmartAcc(name: 'מפתח צינורות',   emoji: '🔧', price: 39, why: 'להידוק',                  must: false),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום נוסף',              must: false),
+      SmartAcc(name: 'צינור גמיש למקלחת', emoji: '〰️', price: 48, why: 'אם רוצים גם מזלף יד', must: false),
+    ],
+  ),
+
+  // ===== מקלחות — מזלפי יד =====
+  SmartProduct(
+    key: 'handSprayer',
+    name: 'מזלף יד (מקלחת ידנית)',
+    emoji: '🤚',
+    cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'התקנת מזלף יד עם צינור גמיש',
+    stages: _ss,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — תבור מזלף קומפלט',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '77701125',
+      ),
+      SmartBrand(name: 'ליפסקי — קורל מזלף קומפלט 3 מצבים',     tag: '3 מצבים',     sku: '77701135'),
+      SmartBrand(name: 'ליפסקי — רותם מזלף קומפלט זהב מוברש', tag: 'זהב מוברש',   sku: '77701205'),
+      SmartBrand(name: 'ליפסקי — רותם מקלח יד שחור 3 מצבים',  tag: 'שחור 3 מצבים', sku: '77701203'),
+      SmartBrand(name: 'ליפסקי — תבור מקלח יד',                    tag: 'בסיסי',         sku: '77701130'),
+      SmartBrand(name: 'ליפסקי — הדר מקלח יד 5 מצבים',           tag: '5 מצבים',     sku: '77701150'),
+      SmartBrand(name: 'ליפסקי — מזלף לברז נשלף',                  tag: 'לברז נשלף',    sku: '77701195'),
+    ],
+    acc: [
+      SmartAcc(name: 'צינור גמיש למקלחת', emoji: '〰️', price: 48, why: 'מחבר את המזלף — חובה', must: true),
+      SmartAcc(name: 'מתקן תלייה',         emoji: '🔩', price: 32, why: 'להחזקה כשלא בשימוש',    must: true),
+      SmartAcc(name: 'אטם דו צדדי',         emoji: '⚫', price: 6,  why: 'איטום החיבור',             must: true),
+      SmartAcc(name: 'סרט טפלון',           emoji: '🎗️', price: 4, why: 'איטום ההברגה',             must: false),
+    ],
+  ),
+
+  // ===== מקלחות — מערכות שטיפה ופינוק =====
+  SmartProduct(
+    key: 'showerSystem',
+    name: 'מערכת שטיפה / פינוק',
+    emoji: '✨',
+    cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'התקנת מערכת מקלחת מורכבת (סוללה + ראש + מזלף)',
+    stages: _ss,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — מלודי מערכת שטיפה ניקל מפוארת',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '77777086',
+      ),
+      SmartBrand(name: 'ליפסקי — מלודי מערכת שטיפה זהב מפוארת', tag: 'גרסת זהב',    sku: '77777087'),
+      SmartBrand(name: 'ליפסקי — גרנדה מערכת שטיפה ניקל מפוארת', tag: 'דגם גרנדה',    sku: '77777088'),
+      SmartBrand(name: 'ליפסקי — דיור דולפין פלוס ניקל',           tag: 'דולפין ניקל', sku: '77110166'),
+      SmartBrand(name: 'ליפסקי — דיור דולפין פלוס שחור',           tag: 'דולפין שחור', sku: '77110177'),
+      SmartBrand(name: 'ליפסקי — דיור ראש מתיזן ניקל',              tag: 'מתיזן',         sku: '77110164'),
+    ],
+    acc: [
+      SmartAcc(name: 'סוללה לסוללת מקלחת',  emoji: '🎛️', price: 280, why: 'הגוף הסמוי — חובה', must: true),
+      SmartAcc(name: 'זרוע + ראש מקלחת',     emoji: '⤴️', price: 220, why: 'החלק הנראה',         must: true),
+      SmartAcc(name: 'צינור גמיש למקלחת',    emoji: '〰️', price: 48,  why: 'למזלף',                must: true),
+      SmartAcc(name: 'מתקן תלייה למזלף',     emoji: '🔩', price: 32,  why: 'להחזקה',              must: false),
+      SmartAcc(name: 'סיליקון סניטרי',        emoji: '🧴', price: 21,  why: 'איטום סופי',          must: true),
+    ],
+  ),
+
+  // ===== ניקוז — מכסים ורשתות לרצפה =====
+  SmartProduct(
+    key: 'floorCover',
+    name: 'מכסים ורשתות לרצפה',
+    emoji: '⬜',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'בחירת מכסה/רשת למאסף רצפה',
+    stages: _si,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — מכסה ניקל מרובע 4"',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '777Z3081',
+      ),
+      SmartBrand(name: 'ליפסקי — רשת ניקל מרובעת 4"',           tag: 'רשת ניקל',    sku: '777Z3060'),
+      SmartBrand(name: 'ליפסקי — רשת נחושת מרובעת 4"',          tag: 'נחושת',         sku: '777Z3079A'),
+      SmartBrand(name: 'ליפסקי — רשת נחושת מונחת מרובעת 4"',   tag: 'נחושת מונחת', sku: '777Z3064'),
+      SmartBrand(name: 'ליפסקי — רשת שחור מונח מרובע 4"',         tag: 'שחור',          sku: '777Z3068'),
+      SmartBrand(name: 'ליפסקי — מכסה ניקל מרובע + אטם HDPE',     tag: 'עם אטם',       sku: '77Z2081C'),
+      SmartBrand(name: 'ליפסקי — רשת ניקל מרובעת + אטם HDPE',     tag: 'רשת עם אטם', sku: '77Z2079C'),
+    ],
+    acc: [
+      SmartAcc(name: 'מאסף רצפה 130/50', emoji: '🟦', why: 'הבסיס — חובה',     must: true, sku: '116638'),
+      SmartAcc(name: 'אטם דו צדדי',       emoji: '⚫', price: 12, why: 'איטום',  must: true),
+      SmartAcc(name: 'סיליקון סניטרי',   emoji: '🧴', price: 21, why: 'איטום עליון', must: true),
+      SmartAcc(name: 'רשת פנימית עגולה', emoji: '🕸️', why: 'סינון',                must: false, sku: '610906'),
+    ],
+  ),
+
+  // ===== ניקוז — תעלות ניקוז למקלחת =====
+  SmartProduct(
+    key: 'drainChannel',
+    name: 'תעלת ניקוז למקלחת',
+    emoji: '📐',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'התקנת תעלת ניקוז ארוכה',
+    stages: _sw,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — סיגמא פלוס תעלת ניקוז 60 ס"מ',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '77575320',
+      ),
+      SmartBrand(name: 'ליפסקי — סיגמא פלוס תעלה 40 ס"מ',          tag: 'קצרה',        sku: '77575310'),
+      SmartBrand(name: 'ליפסקי — סיגמא פלוס תעלה 50 ס"מ',          tag: 'בינונית',    sku: '77575315'),
+      SmartBrand(name: 'ליפסקי — סיגמא פלוס תעלה 70 ס"מ',          tag: 'ארוכה',       sku: '77575325'),
+      SmartBrand(name: 'ליפסקי — סיגמא פלוס תעלה 90 ס"מ',          tag: 'ארוכה במיוחד', sku: '77575335'),
+      SmartBrand(name: 'ליפסקי — תעלה מנירוסטה מלוי עצמי 40',     tag: 'נירוסטה 40',  sku: '77575328'),
+      SmartBrand(name: 'ליפסקי — תעלה מנירוסטה מלוי עצמי 60',     tag: 'נירוסטה 60',  sku: '77575327'),
+    ],
+    acc: [
+      SmartAcc(name: 'מחסום רצפה 130/50',    emoji: '🟦', why: 'הניקוז שמתחת — חובה', must: true, sku: '116638'),
+      SmartAcc(name: 'יריעת איטום',           emoji: '🛡️', price: 320, why: 'איטום הרצפה',    must: true),
+      SmartAcc(name: 'סרט איטום לפינות',    emoji: '🧵', price: 36,  why: 'חיזוק תורפה',     must: true),
+      SmartAcc(name: 'דבק אריחים גמיש',     emoji: '🪣', price: 420, why: 'הדבקת האריחים',  must: true),
+      SmartAcc(name: 'סיליקון סניטרי',       emoji: '🧴', price: 21,  why: 'איטום סופי',       must: true),
+    ],
+  ),
 ];
 
 /// Returns unique categories that have smart products, preserving prototype order.
