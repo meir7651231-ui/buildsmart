@@ -1,16 +1,18 @@
 import 'package:flutter/foundation.dart';
 
-enum TestCategory { buttons, tabs, products, behavior, dsync, dupes }
+enum TestCategory { buttons, tabs, products, behavior, dsync, dupes, sections, settings }
 
 extension TestCategoryX on TestCategory {
   String get id => name;
   String get he => switch (this) {
-        TestCategory.buttons   => 'כפתורים',
-        TestCategory.tabs      => 'טאבים',
-        TestCategory.products  => 'מוצרים',
-        TestCategory.behavior  => 'התנהגות',
-        TestCategory.dsync     => 'סנכרון',
-        TestCategory.dupes     => 'זהויות',
+        TestCategory.buttons  => 'כפתורים',
+        TestCategory.tabs     => 'טאבים',
+        TestCategory.products => 'מוצרים',
+        TestCategory.behavior => 'התנהגות',
+        TestCategory.dsync    => 'סנכרון',
+        TestCategory.dupes    => 'זהויות',
+        TestCategory.sections => 'עצים',
+        TestCategory.settings => 'הגדרות',
       };
 }
 

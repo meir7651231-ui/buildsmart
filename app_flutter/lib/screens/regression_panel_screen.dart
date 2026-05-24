@@ -147,12 +147,14 @@ class _FilterRow extends ConsumerWidget {
 
   static const _filters = <({String id, String label})>[
     (id: 'all',      label: 'הכל'),
-    (id: 'buttons',  label: 'כפתורים'),
-    (id: 'tabs',     label: 'טאבים'),
-    (id: 'products', label: 'מוצרים'),
-    (id: 'behavior', label: 'התנהגות'),
     (id: 'dsync',    label: 'סנכרון'),
     (id: 'dupes',    label: 'זהויות'),
+    (id: 'sections', label: 'עצים'),
+    (id: 'settings', label: 'הגדרות'),
+    (id: 'tabs',     label: 'טאבים'),
+    (id: 'buttons',  label: 'כפתורים'),
+    (id: 'behavior', label: 'התנהגות'),
+    (id: 'products', label: 'מוצרים'),
   ];
 
   @override

@@ -4,6 +4,8 @@ import 'package:buildsmart/test_harness/tests/buttons.dart';
 import 'package:buildsmart/test_harness/tests/dsync.dart';
 import 'package:buildsmart/test_harness/tests/dupes.dart';
 import 'package:buildsmart/test_harness/tests/products.dart';
+import 'package:buildsmart/test_harness/tests/sections.dart';
+import 'package:buildsmart/test_harness/tests/settings.dart';
 import 'package:buildsmart/test_harness/tests/tabs.dart';
 import 'package:buildsmart/test_harness/types.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,6 +41,12 @@ Future<void> runRegression(WidgetRef ref) async {
     await _yieldToUi();
 
     results.addAll(testDupes());
+    await _yieldToUi();
+
+    results.addAll(testSections());
+    await _yieldToUi();
+
+    results.addAll(testSettings(ref));
   } on Object catch (e, st) {
     results.add(
       TestResult(
