@@ -5897,4 +5897,63 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(sku: '77004410', nameHe: 'משחרר אוויר 1/2" אוטומטי', nameEn: 'Automatic Air Vent 1/2"', categoryHe: 'מכשירי לחץ', categoryEn: 'Pressure Devices', categoryEmoji: '📊', page: 93, imageFile: '77004410.jpg', brand: 'AQUATEC'),
   LipskeyCatalogProduct(sku: '77772011', nameHe: 'מקטין לחץ + שעון לחץ 1/2"', nameEn: 'Pressure Reducer + Gauge 1/2"', categoryHe: 'מכשירי לחץ', categoryEn: 'Pressure Devices', categoryEmoji: '📊', page: 93, imageFile: '77772011.jpg', brand: 'AQUATEC'),
   LipskeyCatalogProduct(sku: '77772012', nameHe: 'מקטין לחץ + שעון לחץ 3/4"', nameEn: 'Pressure Reducer + Gauge 3/4"', categoryHe: 'מכשירי לחץ', categoryEn: 'Pressure Devices', categoryEmoji: '📊', page: 93, imageFile: '77772011.jpg', brand: 'AQUATEC'),
+
+  // ─── AQUATEC QONDUS — סדרת קיסר (pages 6-7) ─────────────────────────────
+  LipskeyCatalogProduct(sku: '779096G', nameHe: 'קיסר ברז נשלף למטבח זהב מוברש', nameEn: 'Kaiser Pull-Out Kitchen Faucet Brushed Gold', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 6, imageFile: '779096G.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '779096B', nameHe: 'קיסר ברז נשלף למטבח שחור מט', nameEn: 'Kaiser Pull-Out Kitchen Faucet Matte Black', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 6, imageFile: '779096B.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '779096C', nameHe: 'קיסר ברז נשלף למטבח ניקל', nameEn: 'Kaiser Pull-Out Kitchen Faucet Nickel', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 7, imageFile: '779096C.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '779096S', nameHe: 'קיסר ברז נשלף למטבח ניקל מוברש', nameEn: 'Kaiser Pull-Out Kitchen Faucet Brushed Nickel', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 7, imageFile: '779096S.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '779096F', nameHe: 'קיסר ברז נשלף למטבח גרפיטי', nameEn: 'Kaiser Pull-Out Kitchen Faucet Graphite', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 7, imageFile: '779096F.jpg', brand: 'AQUATEC'),
+
+  // ─── AQUATEC QONDUS — סדרת דיור (pages 10-11) ────────────────────────────
+  LipskeyCatalogProduct(sku: '777M2203', nameHe: 'דיור ברז פרח ברבור קצר', nameEn: 'Dior Swan Neck Faucet Short', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 10, imageFile: '777M2203.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M2204', nameHe: 'דיור ברז פרח ברבור ארוך', nameEn: 'Dior Swan Neck Faucet Long', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 10, imageFile: '777M2204.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M2206', nameHe: 'דיור ברז מהקיר קצר', nameEn: 'Dior Wall Faucet Short', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 10, imageFile: '777M2206.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M2207', nameHe: 'דיור ברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Long', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 10, imageFile: '777M2207.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M2201', nameHe: 'דיור ברז אמבטיה עם מזלף', nameEn: 'Dior Bath Faucet with Handshower', categoryHe: 'ברזי אמבטיה', categoryEn: 'Bath Faucets', categoryEmoji: '🛁', page: 11, imageFile: '777M2201.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M2208', nameHe: 'דיור ברז מקלחת עם מזלף', nameEn: 'Dior Shower Faucet with Handshower', categoryHe: 'ברזי מקלחת', categoryEn: 'Shower Faucets', categoryEmoji: '🚿', page: 11, imageFile: '777M2208.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M2216', nameHe: 'דיור ברז מהקיר קצר פיית נחש', nameEn: 'Dior Wall Faucet Short Snake Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 11, imageFile: '777M2216.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M2217', nameHe: 'דיור ברז מהקיר ארוך פיית נחש', nameEn: 'Dior Wall Faucet Long Snake Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 11, imageFile: '777M2217.jpg', brand: 'AQUATEC'),
+
+  // ─── AQUATEC QONDUS — סדרת איביזה (pages 12-14) ─────────────────────────
+  LipskeyCatalogProduct(sku: '777M1803', nameHe: 'איביזה ברז פרח ברבור קצר', nameEn: 'Ibiza Swan Neck Faucet Short', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 12, imageFile: '777M1803.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M1804', nameHe: 'איביזה ברז פרח ברבור ארוך', nameEn: 'Ibiza Swan Neck Faucet Long', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 12, imageFile: '777M1804.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M1716', nameHe: 'איביזה ברז מהקיר פיה קצרה', nameEn: 'Ibiza Wall Faucet Short Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 12, imageFile: '777M1716.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M1717', nameHe: 'איביזה ברז מהקיר פיה ארוכה', nameEn: 'Ibiza Wall Faucet Long Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 12, imageFile: '777M1717.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M2162', nameHe: 'איביזה ברז פרח שטוח קצר', nameEn: 'Ibiza Flat Spout Faucet Short', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 12, imageFile: '777M2162.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M2168', nameHe: 'איביזה ברז פרח שטוח ארוך', nameEn: 'Ibiza Flat Spout Faucet Long', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 13, imageFile: '777M2168.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M1801', nameHe: 'איביזה ברז אמבטיה', nameEn: 'Ibiza Bath Faucet', categoryHe: 'ברזי אמבטיה', categoryEn: 'Bath Faucets', categoryEmoji: '🛁', page: 13, imageFile: '777M1801.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M1808', nameHe: 'איביזה ברז מקלחת', nameEn: 'Ibiza Shower Faucet', categoryHe: 'ברזי מקלחת', categoryEn: 'Shower Faucets', categoryEmoji: '🚿', page: 13, imageFile: '777M1808.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '7772364D', nameHe: 'איביזה סוללה מהקיר פיה קשת יצוקה', nameEn: 'Ibiza Wall-Mount Cast Arc Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 14, imageFile: '7772364D.jpg', brand: 'AQUATEC'),
+
+  // ─── AQUATEC QONDUS — סדרת ויגה + דיור ידית מקס (page 13) ───────────────
+  LipskeyCatalogProduct(sku: '777M1114', nameHe: 'ויגה סוללה פיה עליונה ידית מקס', nameEn: 'Vega Top Spout Max Handle', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 13, imageFile: '777M1114.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M2414', nameHe: 'דיור ברז מהקיר ידית מקס פיה ארוכה', nameEn: 'Dior Wall Faucet Max Handle Long Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 13, imageFile: '777M2414.jpg', brand: 'AQUATEC'),
+
+  // ─── AQUATEC QONDUS — סדרת בתא (pages 14, 17) ────────────────────────────
+  LipskeyCatalogProduct(sku: '77777114', nameHe: 'בתא ברז פרח מים ידית צד', nameEn: 'Bata Cold Water Faucet Side Handle', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 14, imageFile: '77777114.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '7777113A', nameHe: 'בתא ברז פרח מים קרים 45 ידית צד', nameEn: 'Bata Cold Water Faucet 45° Side Handle', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 14, imageFile: '7777113A.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '7777111A', nameHe: 'בתא ברז מהקיר מים קרים', nameEn: 'Bata Wall Cold Water Faucet', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 14, imageFile: '7777111A.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '7777112Y', nameHe: 'בתא ברז מהקיר מים קרים ידית צד', nameEn: 'Bata Wall Cold Water Faucet Side Handle', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 17, imageFile: '7777112Y.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '77777112', nameHe: 'בתא ברז מהקיר מים קרים פיה 45', nameEn: 'Bata Wall Cold Water Faucet 45° Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 17, imageFile: '77777112.jpg', brand: 'AQUATEC'),
+
+  // ─── AQUATEC QONDUS — סדרת פולו + גליל (page 15) ────────────────────────
+  LipskeyCatalogProduct(sku: '7777343K', nameHe: 'פולו ברז פרח למטבח פיה קצרה מלבנית', nameEn: 'Polo Kitchen Faucet Short Rectangular Spout', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 15, imageFile: '7777343K.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '77777343', nameHe: 'פולו ברז פרח למטבח פיה ארוכה מלבנית', nameEn: 'Polo Kitchen Faucet Long Rectangular Spout', categoryHe: 'ברזי מטבח', categoryEn: 'Kitchen Faucets', categoryEmoji: '🚿', page: 15, imageFile: '77777343.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '777M1122', nameHe: 'גליל ברז פרח גבוה לכיור מונח פיה קבועה', nameEn: 'Galil Tall Vessel Faucet Fixed Spout', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 15, imageFile: '777M1122.jpg', brand: 'AQUATEC'),
+
+  // ─── AQUATEC QONDUS — סדרת לונה + נוגה (page 16) ────────────────────────
+  LipskeyCatalogProduct(sku: '7777557K', nameHe: 'לונה ברז פרח קצר מפואר', nameEn: 'Luna Short Deluxe Faucet', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 16, imageFile: '7777557K.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '77777557', nameHe: 'לונה ברז פרח ארוך מפואר', nameEn: 'Luna Long Deluxe Faucet', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 16, imageFile: '77777557.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '7777106A', nameHe: 'נוגה סוללה מהקיר פיה קשת קצר', nameEn: 'Noga Wall-Mount Short Arc Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 16, imageFile: '7777106A.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '7777107A', nameHe: 'נוגה סוללה מהקיר פיה קשת ארוך', nameEn: 'Noga Wall-Mount Long Arc Spout', categoryHe: 'ברזי קיר', categoryEn: 'Wall Faucets', categoryEmoji: '🚿', page: 16, imageFile: '7777107A.jpg', brand: 'AQUATEC'),
+
+  // ─── AQUATEC QONDUS — סדרת דלתא (page 17) ────────────────────────────────
+  LipskeyCatalogProduct(sku: '77777335', nameHe: 'דלתא ברז פרח פיה עגולה', nameEn: 'Delta Faucet Round Spout', categoryHe: 'ברזי כיור', categoryEn: 'Sink Faucets', categoryEmoji: '🚿', page: 17, imageFile: '77777335.jpg', brand: 'AQUATEC'),
+
+  // ─── AQUATEC QONDUS — פיות לברזים / אביזרי דיור (page 18) ───────────────
+  LipskeyCatalogProduct(sku: '777A5034', nameHe: 'דיור פיית מילוי עם כפתור מפאורת', nameEn: 'Dior Deluxe Fill Spout with Button', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '777A5034.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '77772415', nameHe: 'דיור פיה לברז נחש מהקיר כבד ארוך', nameEn: 'Dior Heavy Snake Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772415.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '77772413', nameHe: 'דיור פיה לברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772413.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '77772410', nameHe: 'דיור פיה לברז פרח ארוך', nameEn: 'Dior Sink Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772410.jpg', brand: 'AQUATEC'),
 ];
