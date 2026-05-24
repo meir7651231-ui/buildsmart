@@ -1,8 +1,11 @@
 import 'package:buildsmart/data/catalog.dart';
+import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
+import 'package:buildsmart/screens/lipskey_brand_screen.dart';
+import 'package:buildsmart/screens/lipskey_product_detail_screen.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -1680,21 +1683,201 @@ class _CatalogList extends StatelessWidget {
     return ListView.separated(
       controller: scrollCtrl,
       key: const Key('catalog-list'),
-      itemCount: kCatalogCats.length + 1,
-      separatorBuilder: (_, i) => i == 0
+      itemCount: kCatalogCats.length + 2,
+      separatorBuilder: (_, i) => i < 1
           ? const SizedBox(height: 4)
           : const Divider(height: 1, indent: 76, color: Color(0xFF2A2A2A)),
       itemBuilder: (context, i) {
-        if (i == 0) {
-          return _FeaturedProductCard(product: kSmartProducts.first);
-        }
+        if (i == 0) return const _LipskeySupplierCard();
+        if (i == 1) return _FeaturedProductCard(product: kSmartProducts.first);
         return _CatalogRow(
-          cat: kCatalogCats[i - 1],
-          meta: _kMeta[i - 1],
+          cat: kCatalogCats[i - 2],
+          meta: _kMeta[i - 2],
         );
       },
     );
   }
+}
+
+// ── Lipskey supplier card — pinned at top of catalog list ────────────────────
+class _LipskeySupplierCard extends StatelessWidget {
+  const _LipskeySupplierCard();
+
+  // SKU 217861 — סיפון אמריקאי 1¼" לבן — our showcase product
+  static final LipskeyCatalogProduct _showcase =
+      kLipskeyCatalog.firstWhere((p) => p.sku == '217861');
+
+  @override
+  Widget build(BuildContext context) {
+    final p = _showcase;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [Color(0xFF0D1B2A), Color(0xFF1A1A2E)],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF3D5A80), width: 0.8),
+        ),
+        child: Column(
+          children: [
+            // ── header: supplier badge + "כל המוצרים" ────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3D5A80).withOpacity(0.25),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: const Color(0xFF3D5A80), width: 0.7),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('🏭', style: TextStyle(fontSize: 13)),
+                        SizedBox(width: 4),
+                        Text('ליפסקי ברקן',
+                            style: TextStyle(
+                                color: Color(0xFF64FFDA),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      LipskeyBrandScreen.route(),
+                    ),
+                    child: const Row(
+                      children: [
+                        Text('כל המוצרים',
+                            style: TextStyle(color: Colors.white54, fontSize: 12)),
+                        SizedBox(width: 3),
+                        Icon(Icons.chevron_left, color: Colors.white38, size: 16),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Divider(height: 1, color: Color(0xFF3D5A80), indent: 14, endIndent: 14),
+
+            // ── showcase product row ─────────────────────────
+            GestureDetector(
+              onTap: () => Navigator.push(context, LipskeyProductDetailScreen.route(p)),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    // תמונה
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF080815),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: p.imageAsset != null
+                          ? Image.asset(p.imageAsset!, fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) =>
+                                  Center(child: Text(p.categoryEmoji,
+                                      style: const TextStyle(fontSize: 32))))
+                          : Center(child: Text(p.categoryEmoji,
+                              style: const TextStyle(fontSize: 32))),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // שם + פרטים
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(p.nameHe,
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 13,
+                                        height: 1.3),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF3D5A80).withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                      color: const Color(0xFF3D5A80), width: 0.7),
+                                ),
+                                child: const Text('פרטים',
+                                    style: TextStyle(
+                                        color: Color(0xFF64FFDA),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          Text('#${p.sku}',
+                              style: const TextStyle(
+                                  color: Color(0xFFFFB300),
+                                  fontFamily: 'monospace',
+                                  fontSize: 11)),
+                          const SizedBox(height: 5),
+                          Wrap(
+                            spacing: 6,
+                            children: [
+                              if (p.color != null)
+                                _InfoChip('🎨 ${p.color!}'),
+                              if (p.qtyPack != null)
+                                _InfoChip('📦 ${p.qtyPack}'),
+                              if (p.qtyPallet != null)
+                                _InfoChip('🏗️ ${p.qtyPallet}'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip(this.label);
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.07),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(label,
+            style: const TextStyle(color: Colors.white54, fontSize: 11)),
+      );
 }
 
 // ── Featured product card — shown at top of main catalog list ────────────────
