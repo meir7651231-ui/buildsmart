@@ -1679,15 +1679,207 @@ class _CatalogList extends StatelessWidget {
     return ListView.separated(
       controller: scrollCtrl,
       key: const Key('catalog-list'),
-      itemCount: kCatalogCats.length,
-      separatorBuilder: (_, __) => const Divider(
-        height: 1,
-        indent: 76,
-        color: Color(0xFF2A2A2A),
+      itemCount: kCatalogCats.length + 1,
+      separatorBuilder: (_, i) => i == 0
+          ? const SizedBox(height: 4)
+          : const Divider(height: 1, indent: 76, color: Color(0xFF2A2A2A)),
+      itemBuilder: (context, i) {
+        if (i == 0) {
+          return _FeaturedProductCard(product: kSmartProducts.first);
+        }
+        return _CatalogRow(
+          cat: kCatalogCats[i - 1],
+          meta: _kMeta[i - 1],
+        );
+      },
+    );
+  }
+}
+
+// ── Featured product card — shown at top of main catalog list ────────────────
+class _FeaturedProductCard extends StatelessWidget {
+  const _FeaturedProductCard({required this.product});
+  final SmartProduct product;
+
+  @override
+  Widget build(BuildContext context) {
+    final rec = product.recBrand;
+    final optCount = product.acc.length - product.mustCount;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: InkWell(
+        onTap: () => _SmartTreeProductList._openProductSheet(context, product),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF1C2B2A), Color(0xFF1A1A2E)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Color.fromARGB(90, 31, 111, 107),
+              width: 1,
+            ),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: BsTokens.brand.withAlpha(30),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      product.emoji,
+                      style: const TextStyle(fontSize: 26),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: BsTokens.brand,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                'מומלץ',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'מוצר היום',
+                              style: TextStyle(
+                                color: Color(0xFF888888),
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          product.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          product.cat,
+                          style: const TextStyle(
+                            color: Color(0xFF888888),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '₪${rec.price}',
+                        style: const TextStyle(
+                          color: BsTokens.brand,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const Text(
+                        'ממותג מומלץ',
+                        style: TextStyle(
+                          color: Color(0xFF666666),
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  _FeaturePill(
+                    emoji: '⚡',
+                    label: '${product.mustCount} חובה',
+                  ),
+                  const SizedBox(width: 8),
+                  _FeaturePill(
+                    emoji: '💡',
+                    label: '$optCount אופציונלי',
+                  ),
+                  const SizedBox(width: 8),
+                  _FeaturePill(
+                    emoji: '🏷️',
+                    label: '${product.brands.length} מותגים',
+                  ),
+                  const Spacer(),
+                  const Text(
+                    'לפרטים ←',
+                    style: TextStyle(
+                      color: BsTokens.brand,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
-      itemBuilder: (context, i) => _CatalogRow(
-        cat: kCatalogCats[i],
-        meta: _kMeta[i],
+    );
+  }
+}
+
+class _FeaturePill extends StatelessWidget {
+  const _FeaturePill({required this.emoji, required this.label});
+  final String emoji;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF252525),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 11)),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFFAAAAAA),
+              fontSize: 11,
+            ),
+          ),
+        ],
       ),
     );
   }
