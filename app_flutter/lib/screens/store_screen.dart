@@ -481,15 +481,16 @@ class _AllList extends StatelessWidget {
 }
 
 class _StoreRow extends StatelessWidget {
-  const _StoreRow({required this.item});
+  const _StoreRow({required this.item, this.onTap});
 
   final _Meta item;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final hasBadge = item.badge > 0;
     return InkWell(
-      onTap: () => showToast(context, '${item.title} — בבנייה'),
+      onTap: onTap ?? () => showToast(context, '${item.title} — בבנייה'),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
@@ -580,6 +581,17 @@ class _StoreRow extends StatelessWidget {
 class _ServicesGrid extends StatelessWidget {
   const _ServicesGrid();
 
+  static void _openSheet(BuildContext context, int i) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A1A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _ServiceSheet(index: i),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
@@ -587,7 +599,120 @@ class _ServicesGrid extends StatelessWidget {
       separatorBuilder: (_, __) => const Divider(
         height: 1, indent: 76, color: Color(0xFF2A2A2A),
       ),
-      itemBuilder: (context, i) => _StoreRow(item: _kServiceItems[i]),
+      itemBuilder: (context, i) => _StoreRow(
+        item: _kServiceItems[i],
+        onTap: () => _openSheet(context, i),
+      ),
+    );
+  }
+}
+
+// ─── service sheet ────────────────────────────────────────────────────────────
+
+const _kServiceSheets = [
+  // 🔧 השכרת כלים
+  [
+    (emoji: '🔨', label: 'מקדחה', sub: 'מושכרת עד 30.5'),
+    (emoji: '🪚', label: 'משור חשמלי', sub: 'מושכר עד 28.5'),
+    (emoji: '➕', label: 'הוסף כלי', sub: ''),
+  ],
+  // 💰 פקדונות
+  [
+    (emoji: '💳', label: 'פיקדון #123', sub: '₪350 · פעיל'),
+    (emoji: '↩️', label: 'בקשת החזר', sub: ''),
+  ],
+  // ↩️ החזרה חדשה
+  [
+    (emoji: '📋', label: 'בקשה #567', sub: 'ממתינה לאישור'),
+    (emoji: '📦', label: 'פריטים להחזרה', sub: '3 יחידות'),
+    (emoji: '🚛', label: 'תיאום איסוף', sub: ''),
+  ],
+  // 📨 מכרז ספקים
+  [
+    (emoji: '🏪', label: 'ספק A', sub: '₪4,200 · הצעה חדשה'),
+    (emoji: '🏪', label: 'ספק B', sub: '₪3,980 · הצעה חדשה'),
+    (emoji: '🏪', label: 'ספק C', sub: '₪4,500 · הצעה חדשה'),
+  ],
+  // 🧪 גיליונות בטיחות
+  [
+    (emoji: '📄', label: 'ברזל 12mm', sub: 'עודכן 20.5'),
+    (emoji: '📄', label: 'צבע אפוקסי', sub: 'עודכן 18.5'),
+    (emoji: '📄', label: 'דבק אפוקסי', sub: 'עודכן 15.5'),
+    (emoji: '📄', label: 'ממס ניקוי', sub: 'עודכן 12.5'),
+    (emoji: '📄', label: 'בטון יצוק', sub: 'עודכן 10.5'),
+  ],
+  // 📊 השוואת מחירים
+  [
+    (emoji: '🏪', label: 'רוט', sub: 'ברזל 12mm · ₪4.20'),
+    (emoji: '🏪', label: 'מ.א. שלמה', sub: 'ברזל 12mm · ₪3.85'),
+    (emoji: '🏪', label: 'אחים כהן', sub: 'ברזל 12mm · ₪4.10'),
+    (emoji: '🏪', label: 'בני ברק מבנים', sub: 'ברזל 12mm · ₪3.95'),
+  ],
+];
+
+class _ServiceSheet extends StatelessWidget {
+  const _ServiceSheet({required this.index});
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final svc = _kServices[index];
+    final rows = _kServiceSheets[index];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 36, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '${svc.emoji} ${svc.title}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              svc.sub,
+              style: const TextStyle(color: Color(0xFF888888), fontSize: 13),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          ...rows.map(
+            (r) => ListTile(
+              leading: Text(r.emoji, style: const TextStyle(fontSize: 22)),
+              title: Text(r.label,
+                  style: const TextStyle(color: Colors.white, fontSize: 15)),
+              subtitle: r.sub.isEmpty
+                  ? null
+                  : Text(r.sub,
+                      style: const TextStyle(
+                          color: Color(0xFF888888), fontSize: 12)),
+              onTap: () {
+                Navigator.pop(context);
+                showToast(context, '${r.label} — בבנייה');
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
