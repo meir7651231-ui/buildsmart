@@ -476,7 +476,7 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '📊', title: 'גודל תמונות',                   breadcrumb: 'הגדרות קטלוג › תצוגה ומיון',      type: SearchType.setting),
   SearchEntry(emoji: '💰', title: 'מחירים ומטבע',                  breadcrumb: 'הגדרות קטלוג',                     type: SearchType.setting),
   SearchEntry(emoji: '💰', title: 'הצג מחירים כולל מע"מ',           breadcrumb: 'הגדרות קטלוג › מחירים ומטבע',     type: SearchType.setting),
-  SearchEntry(emoji: '💰', title: 'מטבע (₪/$/ €)',                  breadcrumb: 'הגדרות קטלוג › מחירים ומטבע',     type: SearchType.setting),
+  SearchEntry(emoji: '💰', title: 'מטבע (₪/\$/ €)',                  breadcrumb: 'הגדרות קטלוג › מחירים ומטבע',     type: SearchType.setting),
   SearchEntry(emoji: '💰', title: 'הצגת מחיר ליחידה',              breadcrumb: 'הגדרות קטלוג › מחירים ומטבע',     type: SearchType.setting),
   SearchEntry(emoji: '💰', title: 'השוואת מחירים בין ספקים',        breadcrumb: 'הגדרות קטלוג › מחירים ומטבע',     type: SearchType.setting),
   SearchEntry(emoji: '❤️', title: 'מועדפים ורשימות',               breadcrumb: 'הגדרות קטלוג',                     type: SearchType.setting),
