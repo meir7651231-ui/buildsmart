@@ -41,6 +41,10 @@ class LipskeyCatalogProduct {
     return 'assets/lipskey/pages/page_$p.jpg';
   }
 
+  /// Connection sizes (DN ends) of this product — the single source of truth
+  /// for the compatibility engine. Reused by the sheet and the regression test.
+  List<String> get connectionSizes => lipskeyConnectionSizes(nameHe);
+
   /// A type-specific glyph derived from the product name, so image-less
   /// products are still distinguishable at a glance (instead of every item
   /// in a category showing the same category emoji).
@@ -75,6 +79,31 @@ class LipskeyCatalogProduct {
     if (has('דיור') || has('פיה')) return '🚰';
     return categoryEmoji; // fallback to category glyph
   }
+}
+
+final _dnTok = RegExp(r'DN\s?(\d+)|(\d+)/(\d+)|(\d+)["׳״]|\b(32|40|50|60|75|90|110|130|160|200)\b');
+
+/// Atomic DN connection sizes from a product name (e.g. "75/50" → [75,50],
+/// "DN50" → [50]). Dimension-context only; ignores pack qty / length.
+List<String> lipskeyConnectionSizes(String name) {
+  final out = <String>{};
+  for (final raw in name.split(RegExp(r'\s+'))) {
+    final w = raw.trim();
+    final up = w.toUpperCase();
+    if (up.startsWith('DN') && RegExp(r'\d').hasMatch(w)) {
+      for (final part in up.replaceAll(RegExp(r'[^0-9/]'), '').split('/')) {
+        if (part.length >= 2) out.add(part);
+      }
+    } else if (RegExp(r'^\d').hasMatch(w) && w.contains('/')) {
+      for (final part in w.replaceAll('"', '').split('/')) {
+        if (part.length >= 2 && RegExp(r'^\d+$').hasMatch(part)) out.add(part);
+      }
+    } else if (w.contains('"') && RegExp(r'\d').hasMatch(w)) {
+      final t = w.replaceAll('"', '');
+      if (t.length >= 2) out.add(t);
+    }
+  }
+  return out.toList();
 }
 
 const List<LipskeyCatalogProduct> kLipskeyCatalog = [
@@ -6408,7 +6437,7 @@ LipskeyCatalogProduct(sku: '9106320040', nameHe: 'הסתעפות HDPE הברגה
   // ─── AQUATEC QONDUS — פיות לברזים / אביזרי דיור (page 18) ───────────────
   LipskeyCatalogProduct(sku: '777A5034', nameHe: 'דיור פיית מילוי עם כפתור מפאורת', nameEn: 'Dior Deluxe Fill Spout with Button', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '777A5034.jpg', brand: 'AQUATEC'),
   LipskeyCatalogProduct(sku: '77772415', nameHe: 'דיור פיה לברז נחש מהקיר כבד ארוך', nameEn: 'Dior Heavy Snake Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772415.jpg', brand: 'AQUATEC'),
-  LipskeyCatalogProduct(sku: '77772412', nameHe: 'דיור פיה לברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772412.jpg', brand: 'AQUATEC'),
+  LipskeyCatalogProduct(sku: '77772412', nameHe: 'דיור פיה לברז מהקיר ארוך', nameEn: 'Dior Wall Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: null, brand: 'AQUATEC'),
   LipskeyCatalogProduct(sku: '77772410', nameHe: 'דיור פיה לברז פרח ארוך', nameEn: 'Dior Sink Faucet Spout Long', categoryHe: 'אביזרי ברזים', categoryEn: 'Faucet Accessories', categoryEmoji: '🔧', page: 18, imageFile: '77772410.jpg', brand: 'AQUATEC'),
   LipskeyCatalogProduct(sku: '997091', nameHe: 'ברך 90° - תבריג צד אחד', nameEn: '', categoryHe: 'אביזרי תבריג', categoryEn: '', categoryEmoji: '🔩', page: 20, imageFile: null, brand: 'ליפסקי'),
   LipskeyCatalogProduct(sku: '116565', nameHe: 'מסעף 45° - תבריג כפול', nameEn: '', categoryHe: 'אביזרי תבריג', categoryEn: '', categoryEmoji: '🔩', page: 42, imageFile: null, brand: 'ליפסקי'),

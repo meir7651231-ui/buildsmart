@@ -124,6 +124,43 @@ List<TestResult> testCatalog() {
     checks: soft,
   ));
 
+  // ── מנוע התאימות — רגרסיה (צעדים 65–66) ───────────────────────────────────
+  final compat = <TestCheck>[];
+  // reducer with two ends
+  final reducer = products.firstWhere(
+    (p) => lipskeyConnectionSizes(p.nameHe).length >= 2,
+    orElse: () => products.first,
+  );
+  compat.add(TestCheck(
+    name: 'מוצר-מעבר מזוהה עם ≥2 קצוות',
+    pass: reducer.connectionSizes.length >= 2,
+    got: '${reducer.sku}: ${reducer.connectionSizes}',
+  ));
+  // a DN50 product finds compatible cross-category parts
+  bool fitsDN50(LipskeyCatalogProduct p) => p.connectionSizes.contains('50');
+  final dn50 = products.where(fitsDN50).toList();
+  final cats50 = dn50.map((p) => p.categoryHe).toSet();
+  compat.add(TestCheck(
+    name: 'DN50 מתפרס על כמה קטגוריות (תאימות חוצה)',
+    pass: cats50.length >= 3,
+    expected: '≥3 קטגוריות',
+    got: '${cats50.length} קטגוריות · ${dn50.length} חלקים',
+  ));
+  // packaging/length numbers must NOT be read as sizes
+  compat.add(TestCheck(
+    name: 'כמות/אורך אינם נקראים כמידה',
+    pass: lipskeyConnectionSizes('צינור אורך 200 ס"מ 20 כמות באריזה').isEmpty,
+    detail: '${lipskeyConnectionSizes('צינור אורך 200 ס"מ 20 כמות באריזה')}',
+  ));
+
+  results.add(TestResult(
+    id: 'catalog:compat',
+    category: TestCategory.catalog,
+    label: 'מנוע תאימות — מה מתחבר למה',
+    area: 'תאימות',
+    checks: compat,
+  ));
+
   return results;
 }
 

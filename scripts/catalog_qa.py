@@ -284,6 +284,11 @@ def cmd_truthcheck(*_):
           f"⚠️ עודף-app: {len(miss)} · ⚠️ חסר-app: {len(only)}")
     for sk, a, b in nd[:15]:
         print(f"   {sk}: app='{a[:35]}' src='{b[:35]}'")
+    # brand diff (step 34)
+    bd = [p["sku"] for p in products if p["sku"] in ref
+          and ref[p["sku"]].get("brand") and p["brand"] != ref[p["sku"]]["brand"]]
+    if bd:
+        print(f"❌ מותג שונה: {len(bd)} {bd[:8]}")
 
 
 def cmd_crosscheck(*pdfs):
@@ -327,8 +332,21 @@ def cmd_verify(pdf, *skus):
             print(f"page {i+1} → {png} ({[s for s in want if s in t]})")
 
 
+def cmd_images(*_):
+    """צעד 37 — אימות שלכל imageFile קיים קובץ בפועל ב-assets."""
+    adir = os.path.join(ROOT, "app_flutter/assets/lipskey/products")
+    have = set(os.listdir(adir)) if os.path.isdir(adir) else set()
+    src = open(CATALOG, encoding="utf-8").read()
+    refs = re.findall(r"imageFile:\s*'([^']+)'", src)
+    missing = sorted({f for f in refs if f not in have})
+    print(f"imageFile מוגדרים: {len(refs)} · קבצים בתיקייה: {len(have)}")
+    print(f"❌ imageFile בלי קובץ: {len(missing)} {missing[:10]}")
+    orphan = sorted(have - set(refs))
+    print(f"ℹ️ קבצים ללא הפניה (יתומים): {len(orphan)} {orphan[:6]}")
+
+
 CMDS = {"audit": cmd_audit, "selftest": cmd_selftest, "fix": cmd_fix,
-        "export": cmd_export, "truthcheck": cmd_truthcheck,
+        "export": cmd_export, "truthcheck": cmd_truthcheck, "images": cmd_images,
         "crosscheck": cmd_crosscheck, "pdfmap": cmd_pdfmap, "verify": cmd_verify}
 
 
