@@ -123,7 +123,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                     SizedBox(width: 4),
                     Text(
-                      'v2.5 · 24.5.26',
+                      'v2.6 · 24.5.26 · עץ חכם',
                       style: TextStyle(
                         color: Color(0xFF4CAF50),
                         fontSize: 10,
