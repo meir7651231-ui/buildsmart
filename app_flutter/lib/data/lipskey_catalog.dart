@@ -80,7 +80,7 @@ class LipskeyCatalogProduct {
 const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '217861',
-    nameHe: '1.25" מחסום (סיפון) אמריקאי · לכיור רחצה',
+    nameHe: 'מחסום (סיפון) אמריקאי 1.25" לכיור רחצה',
     nameEn: '1.25" Bottle trap for | stainless ateel sink',
     color: 'לבן',
     qtyPack: 20,
@@ -93,7 +93,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '213055',
-    nameHe: '1.25" מחסום (סיפון) אמריקאי · יציאה למזגן+ לכיור רחצה',
+    nameHe: 'מחסום (סיפון) אמריקאי 1.25" לכיור רחצה + יציאה למזגן',
     nameEn: '1.25" Bottle trap for stainless | ateel sink, with A/C outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -106,7 +106,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218553',
-    nameHe: 'מחסום (סיפון) נסתר לכיור',
+    nameHe: 'מחסום (סיפון) נסתר 1.25" לכיור רחצה',
     nameEn: '1.25" Bottle trap for | stainless steel sink',
     color: 'לבן',
     qtyPack: 30,
@@ -119,7 +119,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116632',
-    nameHe: 'לכיור רחצה 1.25" )מחסום (סיפון · לכיור 1.25" מחסום (סיפון) גמיש',
+    nameHe: 'מחסום (סיפון) 1.25" לכיור רחצה',
     nameEn: '1.25" Bottle trap',
     color: 'לבן',
     qtyPack: 50,
@@ -132,7 +132,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '213054',
-    nameHe: '1.25" מחסום (סיפון) אמריקאי · יציאה למזגן+ לכיור רחצה · + לכיור רחצה 1.25" )מחסום (סיפון',
+    nameHe: 'מחסום (סיפון) 1.25" לכיור רחצה + יציאה למזגן',
     nameEn: '1.25" Bottle trap for stainless | ateel sink, with A/C outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -145,7 +145,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116652',
-    nameHe: 'לכיור מטבח כפול 2" )מחסום (סיפון',
+    nameHe: 'מחסום (סיפון) 2" לכיור מטבח כפול עם כניסה למדיח כלים',
     nameEn: '2" Bottle trap for double sink with | dishwasher/ washing machine outlet',
     color: 'לבן',
     qtyPack: 15,
@@ -158,7 +158,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116124',
-    nameHe: 'לכיור מטבח 2" )מחסום (סיפון',
+    nameHe: 'מחסום (סיפון) 2" לכיור מטבח עם כניסה למדיח כלים',
     nameEn: '2" Bottle trap with | dishwasher/ washing machine outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -171,7 +171,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116649',
-    nameHe: 'לכיור 2 מחסום (סיפון) " · 1 .מטבח בודד (מס · לכיור מטבח 2" )מחסום (סיפון',
+    nameHe: 'מחסום (סיפון) 2" לכיור מטבח בודד',
     nameEn: '2" Bottle trap for single sink | 2" Bottle trap with',
     color: 'לבן',
     qtyPack: 20,
@@ -184,7 +184,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '171190',
-    nameHe: '1.5 מחסום למכונת כביסה " · 1.5 מחסום אמריקאי " · 10 סיפון מס׳',
+    nameHe: 'מחסום (סיפון) אמריקאי 1.5" עם יציאה למדיח כלים',
     nameEn: '1.5" Pipe trap for washing machine',
     color: 'לבן',
     qtyPack: 30,
@@ -197,7 +197,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '209448',
-    nameHe: '8 .מחסום (סיפון) אמריקאי מס',
+    nameHe: 'מחסום (סיפון) אמריקאי בודד 1.5" מס. 8',
     nameEn: '1.5" Pipe trap for stainless steel | sink with dishwasher outlet',
     color: 'לבן',
     qtyPack: 30,
@@ -210,7 +210,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '171189',
-    nameHe: '1.5 מחסום למכונת כביסה " · 10 סיפון מס׳',
+    nameHe: 'מחסום (סיפון) אמריקאי 1.5" עם יציאה למדיח כלים מס. 10',
     nameEn: '1.5" Pipe trap for washing machine | 1.5" Pipe trap for stainless steel',
     color: 'לבן',
     qtyPack: 30,
@@ -222,7 +222,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '218495',
-    nameHe: '1.5 מחסום למכונת כביסה "',
+    nameHe: 'מחסום (סיפון) למכונת כביסה 1.5"',
     nameEn: '1.5" Pipe trap for washing machine | 1.5" Pipe trap for stainless steel',
     color: 'לבן',
     qtyPack: 20,
@@ -235,7 +235,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116127',
-    nameHe: 'לכיור מטבח כפול עם כניסה 2" )מחסום (סיפון · 4 .למדיח כלים/מכונת כביסה (מס',
+    nameHe: 'מחסום (סיפון) 2" לכיור מטבח כפול עם כניסה למדיח/מכונת כביסה',
     nameEn: '2" Bottle trap for double sink with dishwasher/ | washing machine outlet',
     color: 'לבן',
     qtyPack: 15,
@@ -248,7 +248,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '213056',
-    nameHe: '2" סיפון צד · אמריקאי 2" סיפון צד',
+    nameHe: 'סיפון צד 2"',
     nameEn: '2" Side bottle trap',
     color: 'לבן',
     qtyPack: 20,
@@ -261,7 +261,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '217005',
-    nameHe: '2" סיפון צד · אמריקאי 2" סיפון צד · עם כניסה למדיח כלים',
+    nameHe: 'סיפון צד אמריקאי 2" עם כניסה למדיח כלים',
     nameEn: '2" Side bottle trap | 2" Side bottle trap with',
     color: 'לבן',
     qtyPack: 20,
@@ -274,7 +274,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '216984',
-    nameHe: 'מחסום (סיפון) אמריקאי כפול · 9 . כניסה / למדיח כלים (מס+ 1.5"',
+    nameHe: 'מחסום (סיפון) אמריקאי כפול 1.5" + כניסה למדיח כלים מס. 9',
     nameEn: '1.5" Bottle trap for double, stainless | steel sink with dishwasher outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -287,7 +287,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '172349',
-    nameHe: 'מחסום (סיפון) אמריקאי בודד · 5 . כניסה / למדיח כלים (מס+ 2"',
+    nameHe: 'מחסום (סיפון) אמריקאי בודד 2" + כניסה למדיח כלים מס. 5',
     nameEn: '2" Bottle trap for stainless steel sink | with dishwasher outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -300,7 +300,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '209447',
-    nameHe: 'מחסום (סיפון) אמריקאי · 7 . (מס 2" בודד · מחסום (סיפון) אמריקאי בודד',
+    nameHe: 'מחסום (סיפון) אמריקאי בודד 2" מס. 7',
     nameEn: '2" Bottle trap for stainless steel sink | with dishwasher outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -313,7 +313,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116144',
-    nameHe: 'מחסום (סיפון) אמריקאי כפול',
+    nameHe: 'מחסום (סיפון) אמריקאי כפול 2" + כניסה למדיח כלים מס. 6',
     nameEn: '1.5" Bottle trap for double, stainless | steel sink with dishwasher outlet',
     color: 'לבן',
     qtyPack: 15,
@@ -326,7 +326,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '217004',
-    nameHe: 'אמריקאי 2" סיפון צד · עם כניסה למדיח כלים · עם כניסה 2" סיפון צד',
+    nameHe: 'סיפון צד 2" עם כניסה למדיח כלים',
     nameEn: '2" Side bottle trap with | dishwasher outlet',
     color: 'לבן',
     qtyPack: 20,
@@ -339,7 +339,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '213057',
-    nameHe: 'אמריקאי 2" סיפון צד',
+    nameHe: 'סיפון צד אמריקאי 2"',
     nameEn: '2" Side bottle trap',
     color: 'לבן',
     qtyPack: 20,
@@ -352,7 +352,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '610949',
-    nameHe: 'מאריך למחסום (סיפון · לבן 1.25" · בבודדים',
+    nameHe: 'מאריך למחסום (סיפון) 1.25" לבן',
     nameEn: '1.25" Bottle trap extension',
     color: 'לבן',
     qtyPack: 180,
@@ -365,7 +365,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '611045',
-    nameHe: 'מק" ט פיה קומפלט',
+    nameHe: 'פיה קומפלט למחסום למכונת כביסה',
     nameEn: 'Outlet connection for washing machine | Outlet connection for dishwasher',
     color: 'לבן',
     qtyPack: 250,
@@ -377,7 +377,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '193420',
-    nameHe: 'פיה קומפלט למחסום (סיפון)',
+    nameHe: 'פיה קומפלט למחסום למכונת כביסה',
     nameEn: 'Outlet connection for washing machine | Outlet connection for dishwasher',
     color: 'לבן',
     qtyPack: 250,
@@ -390,7 +390,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '645971',
-    nameHe: 'עם יציאה 2 משפך קומפלט לסיפון אמריקאי "273089 · ללא יציאה 2 משפך קומפלט לסיפון אמריקאי "217675 · 1.5 שקית קומפלט למחסום אמריקאי "217675',
+    nameHe: 'צינור יציאה קומפלט לזרוע',
     nameEn: '2" Bottle trap inlet',
     color: 'לבן',
     qtyPack: null,
@@ -403,7 +403,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '217675',
-    nameHe: 'עם יציאה 2 משפך קומפלט לסיפון אמריקאי "273089 · ללא יציאה 2 משפך קומפלט לסיפון אמריקאי "217675 · 1.5 שקית קומפלט למחסום אמריקאי "217675',
+    nameHe: 'משפך קומפלט 2"',
     nameEn: '2" Bottle trap inlet',
     color: 'לבן',
     qtyPack: null,
@@ -416,7 +416,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '172033',
-    nameHe: '1.5" זרוע קומפלט לאגנית',
+    nameHe: 'זרוע קומפלט לאגנית 1.5"',
     nameEn: 'Shower tray waste kit | Drain valve',
     color: 'לבן',
     qtyPack: 20,
@@ -429,7 +429,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '178700',
-    nameHe: 'מק" ט פיה קומפלט',
+    nameHe: 'צביל לכיור אמריקאי',
     nameEn: 'Shower tray waste kit | Drain valve',
     color: 'לבן',
     qtyPack: 75,
@@ -454,7 +454,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '615301',
-    nameHe: '4 .מאריך למחסום מס',
+    nameHe: 'מאריך למחסום מס. 4',
     nameEn: '2" Bottle trap extension',
     color: 'לבן',
     qtyPack: 115,
@@ -467,7 +467,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '612812',
-    nameHe: 'בבודדים · 2 מאריך למחסום " · 1.25 משפך קומפלט "',
+    nameHe: 'מאריך למחסום 2"',
     nameEn: '2" Bottle trap extension | 1.25" Bottle trap inlet',
     color: 'לבן',
     qtyPack: 115,
@@ -480,7 +480,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   ),
   LipskeyCatalogProduct(
     sku: '116233',
-    nameHe: 'עם יציאה 2 משפך קומפלט לסיפון אמריקאי "273089 · ללא יציאה 2 משפך קומפלט לסיפון אמריקאי "217675 · 1.5 שקית קומפלט למחסום אמריקאי "217675',
+    nameHe: 'משפך קומפלט 1.25"',
     nameEn: '1.25" Bottle trap inlet | 2" Bottle trap inlet',
     color: 'לבן',
     qtyPack: null,
@@ -3205,7 +3205,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // משפך — page 15
   LipskeyCatalogProduct(
     sku: '273089',
-    nameHe: 'משפך קומפלט לסיפון אמריקאי 2" עם יציאה',
+    nameHe: 'משפך קומפלט לסיפון אמריקאי 2"',
     nameEn: 'Complete Funnel for 2" American Siphon with Outlet',
     qtyPack: null,
     categoryHe: 'אביזרי ביוב',
