@@ -129,7 +129,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                     SizedBox(width: 4),
                     Text(
-                      'v3.30 · 24.5.26 · צלילה מאוחדת — 903 מוצרים · 76 כרטיסים',
+                      'v3.31 · 24.5.26 · AQUATEC 601 · ליפסקי 255 · 76 כרטיסים',
                       style: TextStyle(
                         color: Color(0xFF4CAF50),
                         fontSize: 10,

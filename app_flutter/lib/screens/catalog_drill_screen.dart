@@ -291,11 +291,13 @@ class _BrandCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // For Lipskey + matching category — count real products from kLipskeyCatalog.
-    final realCount = brand.id == 'lipskey' && node.lipskeyCategory != null
-        ? kLipskeyCatalog
-            .where((p) => p.categoryHe == node.lipskeyCategory)
-            .length
-        : 0;
+    final realCount =
+        (brand.id == 'lipskey' || brand.id == 'aquatec') &&
+                node.lipskeyCategory != null
+            ? kLipskeyCatalog
+                .where((p) => p.categoryHe == node.lipskeyCategory)
+                .length
+            : 0;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Material(

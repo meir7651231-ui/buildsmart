@@ -22,12 +22,15 @@ class BrandProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // For Lipskey, pull real products that match the leaf's lipskeyCategory.
-    final lipskeyProducts = brand.id == 'lipskey' && node.lipskeyCategory != null
-        ? kLipskeyCatalog
-            .where((p) => p.categoryHe == node.lipskeyCategory)
-            .toList()
-        : <LipskeyCatalogProduct>[];
+    // Lipskey & AQUATEC products both live in kLipskeyCatalog (the scraped
+    // distributor PDF) — pull those matching the leaf's category.
+    final lipskeyProducts =
+        (brand.id == 'lipskey' || brand.id == 'aquatec') &&
+                node.lipskeyCategory != null
+            ? kLipskeyCatalog
+                .where((p) => p.categoryHe == node.lipskeyCategory)
+                .toList()
+            : <LipskeyCatalogProduct>[];
 
     return Scaffold(
       backgroundColor: const Color(0xFF111111),

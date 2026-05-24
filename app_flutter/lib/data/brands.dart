@@ -24,12 +24,20 @@ class Brand {
 /// Others are placeholders for the drill-down UX.
 const List<Brand> kBrands = [
   Brand(
+    id: 'aquatec',
+    name: 'AQUATEC',
+    emoji: '💧',
+    color: 0xFF2C7BE5,
+    tagline: 'ברזים, מקלחות וצנרת מים',
+    productCount: 601,
+  ),
+  Brand(
     id: 'lipskey',
     name: 'ליפסקי ברקן',
     emoji: '🏭',
     color: 0xFF3D5A80,
-    tagline: 'אינסטלציה וסניטציה',
-    productCount: 66,
+    tagline: 'ניקוז, סיפונים ואסלות',
+    productCount: 255,
   ),
   Brand(
     id: 'plasson',
