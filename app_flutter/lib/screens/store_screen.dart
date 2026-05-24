@@ -735,7 +735,7 @@ class _ServiceSheet extends StatelessWidget {
 
 typedef _OrderItem = ({String name, String qty, String price});
 
-const Map<String, List<_OrderItem>> _kOrderItems = {
+const Map<String, List<_OrderItem>> _kOrderDetails = {
   'BS-1234': [
     (name: 'ברזל 12mm', qty: '200 יח\'', price: '₪840'),
     (name: 'בטון B30', qty: '5 מ"ק', price: '₪2,200'),
@@ -885,7 +885,7 @@ class _OrderSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = _kOrderItems[order.id] ?? [];
+    final items = _kOrderDetails[order.id] ?? [];
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       child: Column(
@@ -986,5 +986,4 @@ class _OrderSheet extends StatelessWidget {
       ),
     );
   }
-}
 }
