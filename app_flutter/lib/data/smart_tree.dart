@@ -1133,6 +1133,119 @@ const List<SmartProduct> kSmartProducts = [
       SmartAcc(name: 'סכין יפנית',         emoji: '🔪', price: 12, why: 'לקצירה ופירוק',  must: false),
     ],
   ),
+
+  // ===== ניקוז — פיצול 'צינורות' ל-3 סוגים (אפור / רב-שכבתי / SILENT) =====
+  SmartProduct(
+    key: 'pvcPipeGray',
+    name: 'צינור אפור — ניקוז ראשי',
+    emoji: '⚫',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'הנחת קו ניקוז ראשי (אפור)',
+    stages: _si,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — צינור אפור DN110 L=200',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '116622',
+      ),
+      SmartBrand(name: 'ליפסקי — צינור אפור DN110 L=100', tag: 'קצר',          sku: '116099'),
+      SmartBrand(name: 'ליפסקי — צינור אפור DN110 L=300', tag: 'ארוך',          sku: '116103'),
+      SmartBrand(name: 'ליפסקי — צינור אפור DN75 L=100',  tag: 'בינוני קצר',   sku: '116084'),
+      SmartBrand(name: 'ליפסקי — צינור אפור DN75 L=300',  tag: 'בינוני ארוך', sku: '116091'),
+      SmartBrand(name: 'ליפסקי — צינור אפור DN50 L=100',  tag: 'קטן',           sku: '119967'),
+      SmartBrand(name: 'ליפסקי — צינור אפור DN40 L=100',  tag: 'קטן במיוחד', sku: '116606'),
+    ],
+    acc: [
+      SmartAcc(name: 'מצמד חיתוכי',   emoji: '🔌', why: 'לחיבור — חובה',     must: true, sku: '116680'),
+      SmartAcc(name: 'ברך 87° DN110',  emoji: '↩️', why: 'לשינוי כיוון',       must: true, sku: '142289'),
+      SmartAcc(name: 'אטם דו צדדי DN50', emoji: '⚫', why: 'איטום החיבור',    must: true, sku: '506527'),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום משלים', must: true),
+      SmartAcc(name: 'משור לצינור',   emoji: '🪚', price: 35, why: 'לחיתוך באורך', must: false),
+    ],
+  ),
+  SmartProduct(
+    key: 'pvcPipeMultilayer',
+    name: 'צנרת רב-שכבתית PP-MD-ML',
+    emoji: '🪀',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'הנחת צנרת רב-שכבתית — לקיר/רצפה',
+    stages: _si,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — PP-MD-ML SN8 DN110 L=100',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '224169',
+      ),
+      SmartBrand(name: 'ליפסקי — PP-MD-ML SN8 DN110 L=100 (חזק)', tag: 'גרסת SN8 חזקה', sku: '224344'),
+      SmartBrand(name: 'ליפסקי — PP-MD-ML SN4 DN110 L=50',         tag: 'קצר',            sku: '224170'),
+      SmartBrand(name: 'ליפסקי — PP-MD-ML SN4 DN160 L=50',         tag: 'גדול קצר',      sku: '224187'),
+      SmartBrand(name: 'ליפסקי — PP-MD-ML SN4 DN160 L=100',        tag: 'גדול בינוני',  sku: '224186'),
+      SmartBrand(name: 'ליפסקי — PP-MD-ML SN4 DN160 L=300',        tag: 'גדול ארוך',    sku: '224185'),
+    ],
+    acc: [
+      SmartAcc(name: 'מצמד חיתוכי לרב-שכבתי', emoji: '🔌', why: 'חיבור מיוחד — חובה', must: true),
+      SmartAcc(name: 'אטם דו צדדי DN50', emoji: '⚫', why: 'איטום',         must: true, sku: '506527'),
+      SmartAcc(name: 'סיליקון סניטרי',   emoji: '🧴', price: 21, why: 'איטום משלים', must: true),
+      SmartAcc(name: 'משור לצינור',     emoji: '🪚', price: 35, why: 'לחיתוך',      must: false),
+    ],
+  ),
+  SmartProduct(
+    key: 'pvcPipeSilent',
+    name: 'צנרת SILENT — ניקוז שקט',
+    emoji: '🤫',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'הנחת צנרת SILENT — מגורים שקטים',
+    stages: _si,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — SILENT DN110 L=300',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '273201',
+      ),
+      SmartBrand(name: 'ליפסקי — SILENT DN110 L=100', tag: 'בינוני',          sku: '273202'),
+      SmartBrand(name: 'ליפסקי — SILENT DN110 L=50',  tag: 'קצר',              sku: '273203'),
+      SmartBrand(name: 'ליפסקי — SILENT DN110 L=25',  tag: 'קצר במיוחד',    sku: '273215'),
+      SmartBrand(name: 'ליפסקי — SILENT DN75 L=300',  tag: 'בינוני ארוך',    sku: '273216'),
+      SmartBrand(name: 'ליפסקי — SILENT DN160 L=300', tag: 'גדול ארוך',      sku: '273219'),
+    ],
+    acc: [
+      SmartAcc(name: 'מצמד שקט',       emoji: '🔌', why: 'חיבור שקט — חובה',     must: true),
+      SmartAcc(name: 'אטם דו צדדי',     emoji: '⚫', why: 'איטום החיבור',        must: true, sku: '506527'),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום משלים',  must: true),
+      SmartAcc(name: 'ברך 87° DN110',  emoji: '↩️', why: 'לשינוי כיוון',           must: false, sku: '142289'),
+      SmartAcc(name: 'חומר בידוד',      emoji: '🧵', price: 45, why: 'להגברת השקט',  must: false),
+    ],
+  ),
+
+  // ===== אסלות — מושב soft-close פרימיום =====
+  SmartProduct(
+    key: 'toiletSeatSoftClose',
+    name: 'מושב אסלה Soft-Close',
+    emoji: '⭕',
+    cat: 'אסלות',
+    diagramTitle: 'התקנת מושב soft-close',
+    stages: _st,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — מושב טבור soft-close לבן',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '187133',
+      ),
+      SmartBrand(name: 'ליפסקי — מושב טבור soft-close פרגמון', tag: 'גוון פרגמון',   sku: '197134'),
+      SmartBrand(name: 'ליפסקי — מושב כרמל soft-close לבן',   tag: 'דגם כרמל לבן', sku: '195425'),
+      SmartBrand(name: 'ליפסקי — מושב כרמל soft-close פרגמון', tag: 'כרמל פרגמון',  sku: '195506'),
+    ],
+    acc: [
+      SmartAcc(name: 'ברגי קיבוע למושב', emoji: '🔩', price: 14, why: 'מחזיק את המושב — חובה', must: true),
+      SmartAcc(name: 'אומים לקיבוע',       emoji: '⚙️', price: 8,  why: 'משלים את ההברגה',     must: true),
+      SmartAcc(name: 'אטם לקיבוע',          emoji: '⚫', price: 10, why: 'בולם רעידות',            must: false),
+      SmartAcc(name: 'מפתח אלן',             emoji: '🔧', price: 18, why: 'להידוק הברגים',         must: false),
+    ],
+  ),
 ];
 
 /// Returns unique categories that have smart products, preserving prototype order.
