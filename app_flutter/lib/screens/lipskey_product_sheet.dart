@@ -25,6 +25,55 @@ void showLipskeyProductSheet(
   );
 }
 
+/// Fullscreen pinch/zoom viewer for a product image or spec page.
+void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
+  showDialog<void>(
+    context: context,
+    barrierColor: Colors.black.withOpacity(0.92),
+    builder: (_) => Stack(
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: InteractiveViewer(
+            minScale: 0.8,
+            maxScale: 5,
+            child: Center(
+              child: Image.asset(asset,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Text(emoji,
+                      style: const TextStyle(fontSize: 96))),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 40,
+          left: 16,
+          child: Material(
+            color: Colors.white24,
+            shape: const CircleBorder(),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () => Navigator.pop(context),
+              child: const SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: Icon(Icons.close, color: Colors.white)),
+            ),
+          ),
+        ),
+        const Positioned(
+          bottom: 36,
+          left: 0,
+          right: 0,
+          child: Text('צבוט להגדלה · הקש לסגירה',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white54, fontSize: 12)),
+        ),
+      ],
+    ),
+  );
+}
+
 class LipskeyProductSheet extends ConsumerStatefulWidget {
   const LipskeyProductSheet({
     super.key,
@@ -819,9 +868,21 @@ class _HeroImageState extends State<_HeroImage>
                 ? Transform(
                     alignment: Alignment.center,
                     transform: Matrix4.rotationY(pi),
-                    child: _SpecSide(product: p, onTap: _flip),
+                    child: _SpecSide(
+                      product: p,
+                      onFlip: _flip,
+                      onZoom: () => _openFullscreenAsset(
+                          context, p.specImageAsset, p.categoryEmoji),
+                    ),
                   )
-                : _ProductSide(product: p, onTap: _flip),
+                : _ProductSide(
+                    product: p,
+                    onFlip: _flip,
+                    onZoom: () => _openFullscreenAsset(
+                        context,
+                        p.imageAsset ?? p.specImageAsset,
+                        p.categoryEmoji),
+                  ),
           );
         },
       ),
@@ -832,15 +893,17 @@ class _HeroImageState extends State<_HeroImage>
 class _ProductSide extends StatelessWidget {
   const _ProductSide({
     required this.product,
-    required this.onTap,
+    required this.onFlip,
+    required this.onZoom,
   });
   final LipskeyCatalogProduct product;
-  final VoidCallback onTap;
+  final VoidCallback onFlip;
+  final VoidCallback onZoom;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: onZoom, // tap image → fullscreen zoom
       child: Container(
         color: const Color(0xFF080815),
         child: Stack(
@@ -866,29 +929,38 @@ class _ProductSide extends StatelessWidget {
                     style: const TextStyle(fontSize: 72)),
               ),
             ),
+            // zoom hint (top-right)
+            const Positioned(
+              top: 10,
+              right: 10,
+              child: _ZoomHint(),
+            ),
             // "פרטים / מפרט" button — flips to the spec page
             Positioned(
               bottom: 10,
               left: 10,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF7A18),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.description_outlined,
-                        color: Color(0xFF1A1200), size: 14),
-                    SizedBox(width: 5),
-                    Text('פרטים / מפרט',
-                        style: TextStyle(
-                            color: Color(0xFF1A1200),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800)),
-                  ],
+              child: GestureDetector(
+                onTap: onFlip,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF7A18),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.description_outlined,
+                          color: Color(0xFF1A1200), size: 14),
+                      SizedBox(width: 5),
+                      Text('פרטים / מפרט',
+                          style: TextStyle(
+                              color: Color(0xFF1A1200),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800)),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -899,15 +971,45 @@ class _ProductSide extends StatelessWidget {
   }
 }
 
+class _ZoomHint extends StatelessWidget {
+  const _ZoomHint();
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.black54,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white24),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.zoom_in, color: Colors.white70, size: 14),
+            SizedBox(width: 4),
+            Text('הגדלה',
+                style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600)),
+          ],
+        ),
+      );
+}
+
 class _SpecSide extends StatelessWidget {
-  const _SpecSide({required this.product, required this.onTap});
+  const _SpecSide({
+    required this.product,
+    required this.onFlip,
+    required this.onZoom,
+  });
   final LipskeyCatalogProduct product;
-  final VoidCallback onTap;
+  final VoidCallback onFlip;
+  final VoidCallback onZoom;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: onZoom, // tap spec → fullscreen zoom
       child: Container(
         color: Colors.white,
         child: Stack(
@@ -921,29 +1023,34 @@ class _SpecSide extends StatelessWidget {
                     style: const TextStyle(fontSize: 72)),
               ),
             ),
-            // Back hint
+            // zoom hint
+            const Positioned(top: 10, right: 10, child: _ZoomHint()),
+            // back-to-product button
             Positioned(
               bottom: 10,
-              right: 10,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.flip, color: Colors.white70, size: 12),
-                    SizedBox(width: 4),
-                    Text('חזור',
-                        style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500)),
-                  ],
+              left: 10,
+              child: GestureDetector(
+                onTap: onFlip,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF7A18),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.image_outlined,
+                          color: Color(0xFF1A1200), size: 14),
+                      SizedBox(width: 5),
+                      Text('חזרה למוצר',
+                          style: TextStyle(
+                              color: Color(0xFF1A1200),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800)),
+                    ],
+                  ),
                 ),
               ),
             ),
