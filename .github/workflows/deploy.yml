@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - claude/whats-happening-LyY9G
   workflow_dispatch:
 
 permissions:
