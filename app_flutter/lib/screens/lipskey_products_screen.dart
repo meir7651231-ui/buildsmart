@@ -304,23 +304,58 @@ class _ProductThumb extends StatelessWidget {
         child: Image.asset(
           asset,
           fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => Center(
-            child: Text(product.categoryEmoji,
-                style: const TextStyle(fontSize: 36)),
-          ),
+          errorBuilder: (_, __, ___) => _SpecFallback(product: product),
         ),
       );
     }
+    // No product photo — show the catalog spec page crop
+    return _SpecFallback(product: product);
+  }
+}
+
+class _SpecFallback extends StatelessWidget {
+  const _SpecFallback({required this.product});
+  final LipskeyCatalogProduct product;
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       width: 90,
       height: 110,
-      child: Center(
-        child: Text(product.categoryEmoji,
-            style: const TextStyle(fontSize: 36)),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            product.specImageAsset,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Center(
+              child: Text(product.categoryEmoji,
+                  style: const TextStyle(fontSize: 36)),
+            ),
+          ),
+          // Subtle overlay so the SKU badge reads on any background
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              color: Colors.black54,
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Text(
+                product.sku,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
-}
 
 class _SpecThumb extends StatelessWidget {
   const _SpecThumb({required this.product});

@@ -450,16 +450,14 @@ class _ProductSide extends StatelessWidget {
                 ),
               ),
             ),
-            if (product.imageAsset != null)
-              Image.asset(
-                product.imageAsset!,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => Text(product.categoryEmoji,
+            Image.asset(
+              product.imageAsset ?? product.specImageAsset,
+              fit: product.imageAsset != null ? BoxFit.contain : BoxFit.cover,
+              errorBuilder: (_, __, ___) => Center(
+                child: Text(product.categoryEmoji,
                     style: const TextStyle(fontSize: 72)),
-              )
-            else
-              Text(product.categoryEmoji,
-                  style: const TextStyle(fontSize: 72)),
+              ),
+            ),
             // Flip hint badge
             Positioned(
               bottom: 10,
@@ -626,16 +624,13 @@ class _VariantSelector extends StatelessWidget {
                   SizedBox(
                     width: 48,
                     height: 48,
-                    child: p.imageAsset != null
-                        ? Image.asset(p.imageAsset!,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => Text(
-                                p.categoryEmoji,
-                                style: const TextStyle(fontSize: 24),
-                                textAlign: TextAlign.center))
-                        : Text(p.categoryEmoji,
+                    child: Image.asset(
+                        p.imageAsset ?? p.specImageAsset,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Text(
+                            p.categoryEmoji,
                             style: const TextStyle(fontSize: 24),
-                            textAlign: TextAlign.center),
+                            textAlign: TextAlign.center)),
                   ),
                   const SizedBox(height: 4),
                   Padding(
