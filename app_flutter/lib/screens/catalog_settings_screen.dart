@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Full-screen Catalog settings — 9 categories, ~40 leaves.
-/// 9 active leaves persisted via [catalogSettingsProvider];
-/// the rest show "בבנייה" toast on tap.
+/// All 22 new fields persisted via [catalogSettingsProvider].
 class CatalogSettingsScreen extends ConsumerWidget {
   const CatalogSettingsScreen({super.key});
 
@@ -104,9 +103,27 @@ class _SearchSection extends ConsumerWidget {
               .read(catalogSettingsProvider.notifier)
               .update((s) => s.copyWith(searchHistoryEnabled: v)),
         ),
-        const _PlaceholderRow(label: 'סינון מהיר בשורת חיפוש'),
-        const _PlaceholderRow(label: 'רדיוס חיפוש גיאוגרפי'),
-        const _PlaceholderRow(label: 'ניקוי היסטוריה'),
+        _SwitchRow(
+          label: 'סינון מהיר בשורת חיפוש',
+          value: settings.quickFilterBar,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(quickFilterBar: v)),
+        ),
+        _NumberRow(
+          label: 'רדיוס חיפוש',
+          value: settings.searchRadius,
+          min: 5,
+          max: 500,
+          suffix: 'ק"מ',
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(searchRadius: v)),
+        ),
+        _ActionRow(
+          label: 'ניקוי היסטוריה',
+          onTap: () => showToast(context, 'ההיסטוריה נוקתה'),
+        ),
       ],
     );
   }
@@ -148,8 +165,28 @@ class _DisplaySection extends ConsumerWidget {
               .read(catalogSettingsProvider.notifier)
               .update((s) => s.copyWith(sortDefault: v)),
         ),
-        const _PlaceholderRow(label: 'מספר עמודות בתצוגת רשת'),
-        const _PlaceholderRow(label: 'גודל תמונות'),
+        _NumberRow(
+          label: 'עמודות בתצוגת רשת',
+          value: settings.gridColumns,
+          min: 1,
+          max: 4,
+          suffix: '',
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(gridColumns: v)),
+        ),
+        _RadioGroupRow<CatalogImageSize>(
+          label: 'גודל תמונות',
+          value: settings.imageSize,
+          options: const [
+            (value: CatalogImageSize.small, label: 'קטן'),
+            (value: CatalogImageSize.medium, label: 'בינוני'),
+            (value: CatalogImageSize.large, label: 'גדול'),
+          ],
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(imageSize: v)),
+        ),
       ],
     );
   }
@@ -186,8 +223,20 @@ class _PricesSection extends ConsumerWidget {
               .read(catalogSettingsProvider.notifier)
               .update((s) => s.copyWith(currency: v)),
         ),
-        const _PlaceholderRow(label: 'הצגת מחיר ליחידה'),
-        const _PlaceholderRow(label: 'השוואת מחירים בין ספקים'),
+        _SwitchRow(
+          label: 'הצגת מחיר ליחידה',
+          value: settings.showUnitPrice,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(showUnitPrice: v)),
+        ),
+        _SwitchRow(
+          label: 'השוואת מחירים בין ספקים',
+          value: settings.priceComparison,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(priceComparison: v)),
+        ),
       ],
     );
   }
@@ -195,20 +244,39 @@ class _PricesSection extends ConsumerWidget {
 
 // ─── 4. favorites & lists ────────────────────────────────────────────────────
 
-class _FavoritesSection extends StatelessWidget {
+class _FavoritesSection extends ConsumerWidget {
   const _FavoritesSection();
 
   @override
-  Widget build(BuildContext context) {
-    return const _SectionTile(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(catalogSettingsProvider);
+    return _SectionTile(
       emoji: '❤️',
       title: 'מועדפים ורשימות',
       children: [
-        _PlaceholderRow(label: 'סנכרון מועדפים בין מכשירים'),
-        _PlaceholderRow(label: 'רשימות קנייה לפי פרויקט'),
-        _PlaceholderRow(label: 'שיתוף רשימה עם צוות'),
-        _PlaceholderRow(label: 'יבוא / ייצוא רשימה'),
-        _PlaceholderRow(label: 'התראה על שינוי מחיר במועדפים'),
+        _SwitchRow(
+          label: 'סנכרון מועדפים בין מכשירים',
+          value: settings.syncFavorites,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(syncFavorites: v)),
+        ),
+        _SwitchRow(
+          label: 'רשימות קנייה לפי פרויקט',
+          value: settings.listsPerProject,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(listsPerProject: v)),
+        ),
+        const _PlaceholderRow(label: 'שיתוף רשימה עם צוות'),
+        const _PlaceholderRow(label: 'יבוא / ייצוא רשימה'),
+        _SwitchRow(
+          label: 'התראה על שינוי מחיר במועדפים',
+          value: settings.priceChangeAlert,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(priceChangeAlert: v)),
+        ),
       ],
     );
   }
@@ -240,8 +308,20 @@ class _CatalogNotifSection extends ConsumerWidget {
               .read(catalogSettingsProvider.notifier)
               .update((s) => s.copyWith(notifBackInStock: v)),
         ),
-        const _PlaceholderRow(label: 'מלאי נמוך'),
-        const _PlaceholderRow(label: 'מוצרים חדשים בקטגוריה'),
+        _SwitchRow(
+          label: 'מלאי נמוך',
+          value: settings.notifLowStock,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(notifLowStock: v)),
+        ),
+        _SwitchRow(
+          label: 'מוצרים חדשים בקטגוריה',
+          value: settings.notifNewProducts,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(notifNewProducts: v)),
+        ),
       ],
     );
   }
@@ -271,7 +351,17 @@ class _UnitsSection extends ConsumerWidget {
               .update((s) => s.copyWith(unit: v)),
         ),
         const _PlaceholderRow(label: 'פורמט מידות בכרטיס מוצר'),
-        const _PlaceholderRow(label: 'הצגה עשרונית / שברי'),
+        _RadioGroupRow<CatalogDecimalFormat>(
+          label: 'פורמט הצגה',
+          value: settings.decimalFormat,
+          options: const [
+            (value: CatalogDecimalFormat.decimal, label: 'עשרוני (1.5)'),
+            (value: CatalogDecimalFormat.fraction, label: 'שברי (1½)'),
+          ],
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(decimalFormat: v)),
+        ),
       ],
     );
   }
@@ -279,20 +369,48 @@ class _UnitsSection extends ConsumerWidget {
 
 // ─── 7. preferred suppliers ──────────────────────────────────────────────────
 
-class _SuppliersSection extends StatelessWidget {
+class _SuppliersSection extends ConsumerWidget {
   const _SuppliersSection();
 
   @override
-  Widget build(BuildContext context) {
-    return const _SectionTile(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(catalogSettingsProvider);
+    return _SectionTile(
       emoji: '🏪',
       title: 'ספקים מועדפים',
       children: [
-        _PlaceholderRow(label: 'ספקים מסומנים כמועדפים'),
-        _PlaceholderRow(label: 'ספקים חסומים'),
-        _PlaceholderRow(label: 'מרחק מקסימלי מהאתר'),
-        _PlaceholderRow(label: 'דירוג מינימלי לתצוגה'),
-        _PlaceholderRow(label: 'ספקים מקומיים בלבד'),
+        const _PlaceholderRow(label: 'ספקים מסומנים כמועדפים'),
+        const _PlaceholderRow(label: 'ספקים חסומים'),
+        _NumberRow(
+          label: 'מרחק מקסימלי',
+          value: settings.maxDistance,
+          min: 5,
+          max: 500,
+          suffix: 'ק"מ',
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(maxDistance: v)),
+        ),
+        _RadioGroupRow<CatalogMinRating>(
+          label: 'דירוג מינימלי',
+          value: settings.minRating,
+          options: const [
+            (value: CatalogMinRating.any, label: 'ללא הגבלה'),
+            (value: CatalogMinRating.three, label: '3+ כוכבים'),
+            (value: CatalogMinRating.four, label: '4+ כוכבים'),
+            (value: CatalogMinRating.five, label: '5 כוכבים'),
+          ],
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(minRating: v)),
+        ),
+        _SwitchRow(
+          label: 'ספקים מקומיים בלבד',
+          value: settings.localSuppliersOnly,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(localSuppliersOnly: v)),
+        ),
       ],
     );
   }
@@ -317,9 +435,27 @@ class _AiSection extends ConsumerWidget {
               .read(catalogSettingsProvider.notifier)
               .update((s) => s.copyWith(aiRecommendations: v)),
         ),
-        const _PlaceholderRow(label: 'התאמה לפי היסטוריית הזמנות'),
-        const _PlaceholderRow(label: 'סינון לפי פרויקט פעיל'),
-        const _PlaceholderRow(label: 'חלופות זולות אוטומטיות'),
+        _SwitchRow(
+          label: 'התאמה לפי היסטוריית הזמנות',
+          value: settings.historyBased,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(historyBased: v)),
+        ),
+        _SwitchRow(
+          label: 'סינון לפי פרויקט פעיל',
+          value: settings.activeProjectFilter,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(activeProjectFilter: v)),
+        ),
+        _SwitchRow(
+          label: 'חלופות זולות אוטומטיות',
+          value: settings.cheapAlternatives,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(cheapAlternatives: v)),
+        ),
       ],
     );
   }
@@ -327,19 +463,49 @@ class _AiSection extends ConsumerWidget {
 
 // ─── 9. interface & accessibility ────────────────────────────────────────────
 
-class _AccessibilitySection extends StatelessWidget {
+class _AccessibilitySection extends ConsumerWidget {
   const _AccessibilitySection();
 
   @override
-  Widget build(BuildContext context) {
-    return const _SectionTile(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(catalogSettingsProvider);
+    return _SectionTile(
       emoji: '📱',
       title: 'ממשק ונגישות',
       children: [
-        _PlaceholderRow(label: 'מצב קומפקטי (כרטיסים קטנים)'),
-        _PlaceholderRow(label: 'גודל טקסט'),
-        _PlaceholderRow(label: 'ניגודיות גבוהה'),
-        _PlaceholderRow(label: 'הנפשות מופחתות'),
+        _SwitchRow(
+          label: 'מצב קומפקטי (כרטיסים קטנים)',
+          value: settings.compactMode,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(compactMode: v)),
+        ),
+        _RadioGroupRow<CatalogTextSize>(
+          label: 'גודל טקסט',
+          value: settings.textSize,
+          options: const [
+            (value: CatalogTextSize.small, label: 'קטן'),
+            (value: CatalogTextSize.medium, label: 'בינוני'),
+            (value: CatalogTextSize.large, label: 'גדול'),
+          ],
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(textSize: v)),
+        ),
+        _SwitchRow(
+          label: 'ניגודיות גבוהה',
+          value: settings.highContrast,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(highContrast: v)),
+        ),
+        _SwitchRow(
+          label: 'הנפשות מופחתות',
+          value: settings.reducedMotion,
+          onChanged: (v) => ref
+              .read(catalogSettingsProvider.notifier)
+              .update((s) => s.copyWith(reducedMotion: v)),
+        ),
       ],
     );
   }
@@ -468,6 +634,64 @@ class _PlaceholderRow extends StatelessWidget {
         style: TextStyle(color: Color(0xFF666666), fontSize: 12),
       ),
       onTap: () => showToast(context, '$label — בבנייה'),
+    );
+  }
+}
+
+class _NumberRow extends StatelessWidget {
+  const _NumberRow({
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.suffix,
+    required this.onChanged,
+  });
+
+  final String label;
+  final int value;
+  final int min;
+  final int max;
+  final String suffix;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      title: Text(label, style: const TextStyle(color: Colors.white)),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.remove, color: Colors.white70, size: 20),
+            onPressed: value > min ? () => onChanged(value - 1) : null,
+          ),
+          Text(
+            suffix.isEmpty ? '$value' : '$value $suffix',
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.white70, size: 20),
+            onPressed: value < max ? () => onChanged(value + 1) : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionRow extends StatelessWidget {
+  const _ActionRow({required this.label, required this.onTap});
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      title: Text(label, style: const TextStyle(color: BsTokens.brand)),
+      onTap: onTap,
     );
   }
 }
