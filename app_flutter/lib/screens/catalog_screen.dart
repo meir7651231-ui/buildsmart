@@ -1,9 +1,11 @@
 import 'package:buildsmart/data/catalog.dart';
+import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
+import 'package:buildsmart/screens/catalog_drill_screen.dart';
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/services/voice.dart';
@@ -2159,6 +2161,13 @@ class _QtyBtn extends StatelessWidget {
   }
 }
 
+CatalogNode? _findCatalogTreeNodeByTitle(String title) {
+  for (final n in kCatalogTree) {
+    if (n.title == title) return n;
+  }
+  return null;
+}
+
 class _CatalogRow extends StatelessWidget {
   const _CatalogRow({required this.cat, required this.meta});
 
@@ -2169,7 +2178,17 @@ class _CatalogRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasBadge = meta.badge > 0;
     return InkWell(
-      onTap: () => showToast(context, '${cat.title} — בבנייה'),
+      onTap: () {
+        final node = _findCatalogTreeNodeByTitle(cat.title);
+        if (node != null) {
+          Navigator.push(
+            context,
+            CatalogDrillScreen.nodeRoute(node: node, path: const []),
+          );
+        } else {
+          showToast(context, '${cat.title} — בבנייה');
+        }
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
