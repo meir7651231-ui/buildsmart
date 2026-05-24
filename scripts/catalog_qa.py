@@ -184,6 +184,53 @@ def cmd_pdfmap(pdf):
             print(f"page {i+1}: {skus}")
 
 
+def cmd_crosscheck(*pdfs):
+    """Semantic check: every product's name vs the source PDF text near its SKU.
+    Pass ALL source PDFs. Reports coverage + names that don't match the source."""
+    import fitz
+    if not pdfs:
+        print("usage: crosscheck <pdf1> [pdf2 ...]")
+        return
+    # global sku -> (pdf, page, page-text)
+    pages = []  # (label, text)
+    for pdf in pdfs:
+        doc = fitz.open(pdf)
+        for i in range(len(doc)):
+            pages.append((f"{os.path.basename(pdf)}#p{i+1}", doc[i].get_text()))
+
+    def hwords(s):
+        return set(re.findall(r"[א-ת]{2,}", s))
+
+    products = parse_catalog()
+    checked = 0
+    suspects = []
+    unverifiable = 0
+    for p in products:
+        loc = next((t for lbl, t in pages if p["sku"] in t), None)
+        if loc is None:
+            unverifiable += 1
+            continue
+        checked += 1
+        nw = hwords(p["name"])
+        if not nw:
+            suspects.append((p["sku"], p["name"], p["category"], 0.0))
+            continue
+        ratio = len(nw & hwords(loc)) / len(nw)
+        if ratio < 0.5:
+            suspects.append((p["sku"], p["name"], p["category"], round(ratio, 2)))
+
+    print(f"מוצרים סה\"כ: {len(products)}")
+    print(f"ניתנים לאימות מול ה-PDFs: {checked}  "
+          f"({checked*100//max(1,len(products))}%)")
+    print(f"לא נמצאו במקור (צריך PDF נוסף): {unverifiable}")
+    print(f"חשודים (חפיפה <50% למקור): {len(suspects)}\n")
+    for sku, nm, cat, r in suspects[:40]:
+        print(f"  {sku} (חפיפה {r}) [{cat}]: {nm[:45]}")
+    if unverifiable:
+        print(f"\n⚠️ {unverifiable} מוצרים לא נבדקו — ספק את ה-PDFs החסרים "
+              f"(AQUATEC וכו') לכיסוי מלא.")
+
+
 def cmd_verify(pdf, *skus):
     import fitz
     doc = fitz.open(pdf)
@@ -210,6 +257,8 @@ def main():
         cmd_export(*rest or ["catalog_qa.csv"])
     elif cmd == "pdfmap":
         cmd_pdfmap(*rest)
+    elif cmd == "crosscheck":
+        cmd_crosscheck(*rest)
     elif cmd == "verify":
         cmd_verify(*rest)
     else:
