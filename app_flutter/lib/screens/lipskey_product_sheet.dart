@@ -2,9 +2,10 @@ import 'dart:math';
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
-import 'package:buildsmart/screens/lipskey_product_detail_screen.dart';
+import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Opens a SmartProduct-style bottom sheet for a Lipskey product.
 /// [categoryProducts] = all products in the same Lipskey category (for brand variants).
@@ -24,7 +25,7 @@ void showLipskeyProductSheet(
   );
 }
 
-class LipskeyProductSheet extends StatefulWidget {
+class LipskeyProductSheet extends ConsumerStatefulWidget {
   const LipskeyProductSheet({
     super.key,
     required this.product,
@@ -35,13 +36,54 @@ class LipskeyProductSheet extends StatefulWidget {
   final List<LipskeyCatalogProduct> categoryProducts;
 
   @override
-  State<LipskeyProductSheet> createState() => _LipskeyProductSheetState();
+  ConsumerState<LipskeyProductSheet> createState() =>
+      _LipskeyProductSheetState();
 }
 
-class _LipskeyProductSheetState extends State<LipskeyProductSheet> {
+enum _Unit { single, pack, pallet }
+
+class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   late int _selectedIdx;
   int? _activeStage;
   late Map<int, bool> _accSelected;
+  int _qty = 1;
+  _Unit _unit = _Unit.single;
+
+  int get _unitMult => switch (_unit) {
+        _Unit.single => 1,
+        _Unit.pack => _current.qtyPack ?? 1,
+        _Unit.pallet => _current.qtyPallet ?? 1,
+      };
+
+  void _addToCart() {
+    final p = _current;
+    final accs = <SmartCartAcc>[];
+    for (var i = 0; i < _accs.length; i++) {
+      if (_accSelected[i] == true) {
+        accs.add(SmartCartAcc(
+          name: _accs[i].name,
+          emoji: _accs[i].emoji,
+          price: _accs[i].price ?? 0,
+          qty: 1,
+        ));
+      }
+    }
+    ref.read(smartCartProvider.notifier).add(SmartCartLine(
+          productKey: 'lip:${p.sku}',
+          productName: p.nameHe,
+          productEmoji: p.categoryEmoji,
+          brandName: p.brand,
+          brandPrice: 0,
+          productQty: _qty * _unitMult,
+          accessories: accs,
+        ));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('נוסף לסל ✓'),
+      duration: Duration(seconds: 1),
+      behavior: SnackBarBehavior.floating,
+    ));
+    Navigator.pop(context);
+  }
 
   List<LipskeyCatAcc> get _accs =>
       kLipskeyAccByCategory[_current.categoryHe] ?? [];
@@ -133,18 +175,8 @@ class _LipskeyProductSheetState extends State<LipskeyProductSheet> {
                   controller: scrollCtrl,
                   padding: const EdgeInsets.fromLTRB(0, 0, 0, 32),
                   children: [
-                    // ── Hero image ──────────────────────────────────────
-                    _HeroImage(
-                      product: p,
-                      screenH: screenH,
-                      onOpen360: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          LipskeyProductDetailScreen.route(p),
-                        );
-                      },
-                    ),
+                    // ── Hero image (tap = flip to spec) ─────────────────
+                    _HeroImage(product: p, screenH: screenH),
 
                     const SizedBox(height: 16),
 
@@ -299,15 +331,41 @@ class _LipskeyProductSheetState extends State<LipskeyProductSheet> {
                       const SizedBox(height: 16),
                     ],
 
-                    // ── Total & CTA ─────────────────────────────────────
+                    // ── Qty + unit toggle + add to cart ─────────────────
                     Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         children: [
+                          Row(
+                            children: [
+                              _QtyStepper(
+                                qty: _qty,
+                                onChanged: (v) =>
+                                    setState(() => _qty = max(1, v)),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _UnitToggle(
+                                  unit: _unit,
+                                  hasPack: p.qtyPack != null,
+                                  hasPallet: p.qtyPallet != null,
+                                  onChanged: (u) => setState(() => _unit = u),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (_unit != _Unit.single)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Text(
+                                'סה"כ ${_qty * _unitMult} יחידות',
+                                style: const TextStyle(
+                                    color: Color(0xFF9AA3B2), fontSize: 12),
+                              ),
+                            ),
                           if (_accTotal > 0)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.only(top: 10),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -318,41 +376,70 @@ class _LipskeyProductSheetState extends State<LipskeyProductSheet> {
                                           fontSize: 13)),
                                   Text('+ ₪$_accTotal',
                                       style: const TextStyle(
-                                          color: Color(0xFF64FFDA),
+                                          color: Color(0xFF3DD9B0),
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600)),
                                 ],
                               ),
                             ),
+                          const SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,
                             child: FilledButton.icon(
                               style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFF1976D2),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 14),
+                                backgroundColor: const Color(0xFFFF7A18),
+                                foregroundColor: const Color(0xFF1A1200),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 15),
                                 shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(12)),
+                                    borderRadius: BorderRadius.circular(14)),
                               ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                                Navigator.push(
-                                  context,
-                                  LipskeyProductDetailScreen.route(p),
-                                );
-                              },
-                              icon: const Icon(Icons.view_in_ar,
-                                  size: 18),
-                              label: const Text('פתח מוצר 360°',
+                              onPressed: _addToCart,
+                              icon: const Icon(Icons.shopping_cart, size: 19),
+                              label: const Text('הוסף לסל',
                                   style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700)),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800)),
                             ),
                           ),
                         ],
                       ),
                     ),
+
+                    // ── Related / similar products ──────────────────────
+                    ...(() {
+                      final related = widget.categoryProducts
+                          .where((x) => x.sku != p.sku)
+                          .take(8)
+                          .toList();
+                      if (related.isEmpty) return <Widget>[];
+                      return <Widget>[
+                        const SizedBox(height: 16),
+                        const _Divider(),
+                        const SizedBox(height: 16),
+                        _SectionTitle(emoji: '🔗', title: 'מוצרים נלווים / דומים'),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 132,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20),
+                            itemCount: related.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 10),
+                            itemBuilder: (_, i) => _RelatedCard(
+                              product: related[i],
+                              onTap: () {
+                                final idx = widget.categoryProducts
+                                    .indexOf(related[i]);
+                                if (idx >= 0) _selectVariant(idx);
+                              },
+                            ),
+                          ),
+                        ),
+                      ];
+                    })(),
                   ],
                 ),
               ),
@@ -364,17 +451,166 @@ class _LipskeyProductSheetState extends State<LipskeyProductSheet> {
   }
 }
 
+// ── qty stepper ─────────────────────────────────────────────────────────────
+class _QtyStepper extends StatelessWidget {
+  const _QtyStepper({required this.qty, required this.onChanged});
+  final int qty;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget b(String s, VoidCallback t) => InkWell(
+          onTap: t,
+          child: SizedBox(
+              width: 38,
+              height: 44,
+              child: Center(
+                  child: Text(s,
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 20)))),
+        );
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF10141B),
+        border: Border.all(color: const Color(0xFFFF7A18)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          b('−', () => onChanged(qty - 1)),
+          SizedBox(
+              width: 34,
+              child: Center(
+                  child: Text('$qty',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800)))),
+          b('+', () => onChanged(qty + 1)),
+        ],
+      ),
+    );
+  }
+}
+
+// ── unit toggle: בודד / ארגז / משטח ──────────────────────────────────────────
+class _UnitToggle extends StatelessWidget {
+  const _UnitToggle({
+    required this.unit,
+    required this.hasPack,
+    required this.hasPallet,
+    required this.onChanged,
+  });
+  final _Unit unit;
+  final bool hasPack;
+  final bool hasPallet;
+  final ValueChanged<_Unit> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget opt(String label, _Unit u, bool enabled) {
+      final sel = unit == u;
+      return Expanded(
+        child: InkWell(
+          onTap: enabled ? () => onChanged(u) : null,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 11),
+            color: sel ? const Color(0xFFFF7A18) : Colors.transparent,
+            alignment: Alignment.center,
+            child: Text(label,
+                style: TextStyle(
+                    fontSize: 12,
+                    color: sel
+                        ? const Color(0xFF1A1200)
+                        : (enabled
+                            ? const Color(0xFF9AA3B2)
+                            : const Color(0xFF44495A)),
+                    fontWeight: sel ? FontWeight.w800 : FontWeight.w500)),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFF252B36)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        children: [
+          opt('בודד', _Unit.single, true),
+          opt('ארגז', _Unit.pack, hasPack),
+          opt('משטח', _Unit.pallet, hasPallet),
+        ],
+      ),
+    );
+  }
+}
+
+// ── related product mini-card ────────────────────────────────────────────────
+class _RelatedCard extends StatelessWidget {
+  const _RelatedCard({required this.product, required this.onTap});
+  final LipskeyCatalogProduct product;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 112,
+        padding: const EdgeInsets.all(9),
+        decoration: BoxDecoration(
+          color: const Color(0xFF181D26),
+          border: Border.all(color: const Color(0xFF252B36)),
+          borderRadius: BorderRadius.circular(13),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: 56,
+              child: product.imageAsset != null
+                  ? Image.asset(product.imageAsset!,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Center(
+                          child: Text(product.categoryEmoji,
+                              style: const TextStyle(fontSize: 28))))
+                  : Center(
+                      child: Text(product.categoryEmoji,
+                          style: const TextStyle(fontSize: 28))),
+            ),
+            const SizedBox(height: 5),
+            Text(product.nameHe,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    color: Colors.white, fontSize: 11, height: 1.25)),
+            const SizedBox(height: 3),
+            Text('#${product.sku}',
+                style: const TextStyle(
+                    color: Color(0xFF9AA3B2),
+                    fontSize: 9,
+                    fontFamily: 'monospace')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ── Hero flip card ────────────────────────────────────────────────────────────
 class _HeroImage extends StatefulWidget {
   const _HeroImage({
     required this.product,
     required this.screenH,
-    required this.onOpen360,
   });
 
   final LipskeyCatalogProduct product;
   final double screenH;
-  final VoidCallback onOpen360;
 
   @override
   State<_HeroImage> createState() => _HeroImageState();
@@ -431,8 +667,7 @@ class _HeroImageState extends State<_HeroImage>
                     transform: Matrix4.rotationY(pi),
                     child: _SpecSide(product: p, onTap: _flip),
                   )
-                : _ProductSide(
-                    product: p, onTap: _flip, onOpen360: widget.onOpen360),
+                : _ProductSide(product: p, onTap: _flip),
           );
         },
       ),
@@ -444,11 +679,9 @@ class _ProductSide extends StatelessWidget {
   const _ProductSide({
     required this.product,
     required this.onTap,
-    required this.onOpen360,
   });
   final LipskeyCatalogProduct product;
   final VoidCallback onTap;
-  final VoidCallback onOpen360;
 
   @override
   Widget build(BuildContext context) {
@@ -479,61 +712,29 @@ class _ProductSide extends StatelessWidget {
                     style: const TextStyle(fontSize: 72)),
               ),
             ),
-            // Flip hint badge
+            // "פרטים / מפרט" button — flips to the spec page
             Positioned(
               bottom: 10,
-              right: 10,
+              left: 10,
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                 decoration: BoxDecoration(
-                  color: Colors.black54,
+                  color: const Color(0xFFFF7A18),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                      color: Colors.white24),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.flip, color: Colors.white54, size: 12),
-                    SizedBox(width: 4),
-                    Text('מפרט',
+                    Icon(Icons.description_outlined,
+                        color: Color(0xFF1A1200), size: 14),
+                    SizedBox(width: 5),
+                    Text('פרטים / מפרט',
                         style: TextStyle(
-                            color: Colors.white54,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500)),
+                            color: Color(0xFF1A1200),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800)),
                   ],
-                ),
-              ),
-            ),
-            // 360° badge
-            Positioned(
-              bottom: 10,
-              left: 10,
-              child: GestureDetector(
-                onTap: onOpen360,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                        color: const Color(0xFF64FFDA).withOpacity(0.6)),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.view_in_ar,
-                          color: Color(0xFF64FFDA), size: 14),
-                      SizedBox(width: 4),
-                      Text('360° סיבוב',
-                          style: TextStyle(
-                              color: Color(0xFF64FFDA),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600)),
-                    ],
-                  ),
                 ),
               ),
             ),
