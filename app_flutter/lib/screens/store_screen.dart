@@ -70,18 +70,59 @@ const _kCartTotal = '₪1,340';
 
 // ─── screen ──────────────────────────────────────────────────────────────────
 
-class StoreScreen extends StatelessWidget {
+class StoreScreen extends ConsumerStatefulWidget {
   const StoreScreen({super.key});
 
   @override
+  ConsumerState<StoreScreen> createState() => _StoreScreenState();
+}
+
+class _StoreScreenState extends ConsumerState<StoreScreen> {
+  bool _headerVisible = true;
+
+  bool _handleScroll(ScrollNotification n) {
+    if (n is ScrollUpdateNotification && n.depth == 0) {
+      final delta = n.scrollDelta ?? 0;
+      final px = n.metrics.pixels;
+      if (delta > 6 && _headerVisible && px > 50) {
+        setState(() => _headerVisible = false);
+      } else if (delta < -6 && !_headerVisible) {
+        setState(() => _headerVisible = true);
+      } else if (px <= 2 && !_headerVisible) {
+        setState(() => _headerVisible = true);
+      }
+    }
+    return false;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
-        _SearchBar(),
-        _SectionChipsRow(),
-        _SummaryRow(),
-        _QuickActionsRow(),
-        Expanded(child: _StoreList()),
+        ClipRect(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: _headerVisible
+                ? const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _SearchBar(),
+                      _SectionChipsRow(),
+                      _SummaryRow(),
+                      _QuickActionsRow(),
+                    ],
+                  )
+                : _MiniPill(onTap: () => setState(() => _headerVisible = true)),
+          ),
+        ),
+        Expanded(
+          child: NotificationListener<ScrollNotification>(
+            onNotification: _handleScroll,
+            child: const _StoreList(),
+          ),
+        ),
       ],
     );
   }
@@ -1111,6 +1152,30 @@ class _ServiceSheet extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── mini pill ───────────────────────────────────────────────────────────────
+
+class _MiniPill extends StatelessWidget {
+  const _MiniPill({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+        height: 36,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        alignment: Alignment.center,
+        child: const Icon(Icons.search, color: Color(0xFF888888), size: 18),
       ),
     );
   }

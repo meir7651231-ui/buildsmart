@@ -112,17 +112,55 @@ const List<_Thread> _kThreads = [
 
 // ─── screen ──────────────────────────────────────────────────────────────────
 
-class ChatsScreen extends StatelessWidget {
+class ChatsScreen extends ConsumerStatefulWidget {
   const ChatsScreen({super.key});
 
   @override
+  ConsumerState<ChatsScreen> createState() => _ChatsScreenState();
+}
+
+class _ChatsScreenState extends ConsumerState<ChatsScreen> {
+  bool _headerVisible = true;
+
+  bool _handleScroll(ScrollNotification n) {
+    if (n is ScrollUpdateNotification && n.depth == 0) {
+      final delta = n.scrollDelta ?? 0;
+      final px = n.metrics.pixels;
+      if (delta > 6 && _headerVisible && px > 50) {
+        setState(() => _headerVisible = false);
+      } else if (delta < -6 && !_headerVisible) {
+        setState(() => _headerVisible = true);
+      } else if (px <= 2 && !_headerVisible) {
+        setState(() => _headerVisible = true);
+      }
+    }
+    return false;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SearchBar(),
-        _FilterChipsRow(),
-        Expanded(child: _ThreadList()),
+        ClipRect(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: _headerVisible
+                ? const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [_SearchBar(), _FilterChipsRow()],
+                  )
+                : _MiniPill(onTap: () => setState(() => _headerVisible = true)),
+          ),
+        ),
+        Expanded(
+          child: NotificationListener<ScrollNotification>(
+            onNotification: _handleScroll,
+            child: const _ThreadList(),
+          ),
+        ),
       ],
     );
   }
@@ -844,6 +882,30 @@ class _TypingBubble extends StatelessWidget {
             fontStyle: FontStyle.italic,
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ─── mini pill ────────────────────────────────────────────────────────────────
+
+class _MiniPill extends StatelessWidget {
+  const _MiniPill({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+        height: 36,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        alignment: Alignment.center,
+        child: const Icon(Icons.search, color: Color(0xFF888888), size: 18),
       ),
     );
   }

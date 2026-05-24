@@ -243,17 +243,54 @@ String? _actionLabel(NotifSection type) => switch (type) {
 
 // ─── screen ──────────────────────────────────────────────────────────────────
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
+  ConsumerState<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
+  bool _headerVisible = true;
+
+  bool _handleScroll(ScrollNotification n) {
+    if (n is ScrollUpdateNotification && n.depth == 0) {
+      final delta = n.scrollDelta ?? 0;
+      final px = n.metrics.pixels;
+      if (delta > 6 && _headerVisible && px > 50) {
+        setState(() => _headerVisible = false);
+      } else if (delta < -6 && !_headerVisible) {
+        setState(() => _headerVisible = true);
+      } else if (px <= 2 && !_headerVisible) {
+        setState(() => _headerVisible = true);
+      }
+    }
+    return false;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
-        _Header(),
-        _NotifSearchBar(),
-        _SectionChipsRow(),
-        Expanded(child: _NotifList()),
+        ClipRect(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: _headerVisible
+                ? const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [_Header(), _NotifSearchBar(), _SectionChipsRow()],
+                  )
+                : _MiniPill(onTap: () => setState(() => _headerVisible = true)),
+          ),
+        ),
+        Expanded(
+          child: NotificationListener<ScrollNotification>(
+            onNotification: _handleScroll,
+            child: const _NotifList(),
+          ),
+        ),
       ],
     );
   }
@@ -690,6 +727,28 @@ class _DismissibleRow extends ConsumerWidget {
         );
       },
       child: _NotifRow(notif: notif),
+    );
+  }
+}
+
+class _MiniPill extends StatelessWidget {
+  const _MiniPill({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+        height: 36,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        alignment: Alignment.center,
+        child: const Icon(Icons.search, color: Color(0xFF888888), size: 18),
+      ),
     );
   }
 }
