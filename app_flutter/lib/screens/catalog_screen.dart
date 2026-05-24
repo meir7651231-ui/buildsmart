@@ -55,6 +55,9 @@ final recentSearchesProvider = StateProvider<List<String>>((_) => []);
 /// Currently selected category in the smart tree section. Null = show categories.
 final smartTreeCatProvider = StateProvider<String?>((_) => null);
 
+/// Currently selected category in the "קטגוריות" drill. Null = show all 11 cats.
+final catalogDrillCatProvider = StateProvider<String?>((_) => null);
+
 String _sortLabel(CatalogSort s) => switch (s) {
       CatalogSort.defaultSort => 'ברירת מחדל',
       CatalogSort.nameAZ      => 'א-ת',
@@ -1550,6 +1553,9 @@ class _CatalogBody extends ConsumerWidget {
     // Smart tree section gets its own dedicated view
     if (active == 'עץ חכם') return const _SmartTreeSection();
 
+    // Categories drill-down
+    if (active == 'קטגוריות') return const _CatalogDrillSection();
+
     final selected = ref.watch(catalogListItemsProvider)[active];
     final hasItems = selected != null && selected.isNotEmpty;
 
@@ -2506,6 +2512,261 @@ class _SmartTreeProductList extends ConsumerWidget {
             },
           ),
         ),
+      ],
+    );
+  }
+
+  static void _openProductSheet(BuildContext context, SmartProduct p) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF1A1A1A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _SmartProductSheet(product: p),
+    );
+  }
+}
+
+// ── Catalog Drill Section ─────────────────────────────────────────────────────
+// Level 1: 11 kCatalogCats grid → Level 2: smartProductsForCat() list → sheet.
+
+class _CatalogDrillSection extends ConsumerWidget {
+  const _CatalogDrillSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedCat = ref.watch(catalogDrillCatProvider);
+    if (selectedCat == null) return const _CatalogDrillCatGrid();
+    return _CatalogDrillProductList(cat: selectedCat);
+  }
+}
+
+class _CatalogDrillCatGrid extends ConsumerWidget {
+  const _CatalogDrillCatGrid();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        Container(
+          color: const Color(0xFF1A1A1A),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: const Row(
+            children: [
+              Text('▦', style: TextStyle(fontSize: 20)),
+              SizedBox(width: 10),
+              Text(
+                'קטגוריות — בחר תחום',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1, color: Color(0xFF2A2A2A)),
+        Expanded(
+          child: GridView.builder(
+            padding: const EdgeInsets.all(12),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.3,
+            ),
+            itemCount: kCatalogCats.length,
+            itemBuilder: (context, i) {
+              final cat = kCatalogCats[i];
+              final count = smartProductsForCat(cat.title).length;
+              return GestureDetector(
+                onTap: () =>
+                    ref.read(catalogDrillCatProvider.notifier).state = cat.title,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E2E),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                        color: const Color(0xFF3A3A4A), width: 0.8),
+                  ),
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(cat.emoji,
+                          style: const TextStyle(fontSize: 32)),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            cat.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              height: 1.2,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: count > 0
+                                  ? const Color(0xFF3D5A80).withOpacity(0.25)
+                                  : Colors.white.withOpacity(0.06),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              count > 0 ? '$count פריטים' : 'בקרוב',
+                              style: TextStyle(
+                                color: count > 0
+                                    ? const Color(0xFF64FFDA)
+                                    : Colors.white38,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CatalogDrillProductList extends ConsumerWidget {
+  const _CatalogDrillProductList({required this.cat});
+
+  final String cat;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final products = smartProductsForCat(cat);
+    final catData = kCatalogCats.firstWhere(
+      (c) => c.title == cat,
+      orElse: () => kCatalogCats.first,
+    );
+
+    return Column(
+      children: [
+        Container(
+          color: const Color(0xFF1A1A1A),
+          padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios,
+                    color: BsTokens.brand, size: 18),
+                onPressed: () =>
+                    ref.read(catalogDrillCatProvider.notifier).state = null,
+              ),
+              Text('${catData.emoji} ', style: const TextStyle(fontSize: 16)),
+              Text(
+                cat,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1, color: Color(0xFF2A2A2A)),
+        if (products.isEmpty)
+          const Expanded(
+            child: Center(
+              child: Text('בקרוב',
+                  style: TextStyle(color: Colors.white38, fontSize: 16)),
+            ),
+          )
+        else
+          Expanded(
+            child: ListView.separated(
+              itemCount: products.length,
+              separatorBuilder: (_, __) => const Divider(
+                  height: 1, indent: 76, color: Color(0xFF2A2A2A)),
+              itemBuilder: (_, i) {
+                final p = products[i];
+                return InkWell(
+                  onTap: () => _openProductSheet(context, p),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF2A2A2A),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(p.emoji,
+                              style: const TextStyle(fontSize: 24)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      p.name,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    p.recBrand.price != null
+                                        ? '₪${p.recBrand.price}'
+                                        : '—',
+                                    style: const TextStyle(
+                                      color: Color(0xFF888888),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                '⚡ ${p.mustCount} פריטי חובה · ${p.acc.length} סה"כ',
+                                style: const TextStyle(
+                                  color: Color(0xFF888888),
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_left,
+                            color: Color(0xFF555555), size: 20),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
       ],
     );
   }
