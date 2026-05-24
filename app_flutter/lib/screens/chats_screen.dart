@@ -1,3 +1,4 @@
+import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -122,16 +123,22 @@ class ChatsScreen extends ConsumerStatefulWidget {
 class _ChatsScreenState extends ConsumerState<ChatsScreen> {
   bool _headerVisible = true;
 
+  void _setHeaderVisible(bool v) {
+    if (_headerVisible == v) return;
+    setState(() => _headerVisible = v);
+    ref.read(tabHeaderHiddenProvider.notifier).state = !v;
+  }
+
   bool _handleScroll(ScrollNotification n) {
     if (n is ScrollUpdateNotification && n.depth == 0) {
       final delta = n.scrollDelta ?? 0;
       final px = n.metrics.pixels;
       if (delta > 6 && _headerVisible && px > 50) {
-        setState(() => _headerVisible = false);
+        _setHeaderVisible(false);
       } else if (delta < -6 && !_headerVisible) {
-        setState(() => _headerVisible = true);
+        _setHeaderVisible(true);
       } else if (px <= 2 && !_headerVisible) {
-        setState(() => _headerVisible = true);
+        _setHeaderVisible(true);
       }
     }
     return false;
@@ -139,6 +146,9 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<bool>(tabHeaderHiddenProvider, (_, hidden) {
+      if (!hidden && !_headerVisible) _setHeaderVisible(true);
+    });
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -152,7 +162,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [_SearchBar(), _FilterChipsRow()],
                   )
-                : _MiniPill(onTap: () => setState(() => _headerVisible = true)),
+                : const SizedBox.shrink(),
           ),
         ),
         Expanded(

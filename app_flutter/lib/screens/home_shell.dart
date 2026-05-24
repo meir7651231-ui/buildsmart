@@ -126,7 +126,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                     SizedBox(width: 4),
                     Text(
-                      'v3.2 · 24.5.26 · גלילה + הגדרות',
+                      'v3.3 · 24.5.26 · חיפוש ב-AppBar',
                       style: TextStyle(
                         color: Color(0xFF4CAF50),
                         fontSize: 10,
@@ -141,6 +141,15 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
+        // Search icon — appears when the active tab's header is scrolled away.
+        if (ref.watch(tabHeaderHiddenProvider))
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.white70),
+            tooltip: 'חיפוש',
+            onPressed: () {
+              ref.read(tabHeaderHiddenProvider.notifier).state = false;
+            },
+          ),
         IconButton(
           icon: const Icon(Icons.photo_camera_outlined, color: Colors.white70),
           tooltip: 'מצלמה',

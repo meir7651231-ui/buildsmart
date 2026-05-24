@@ -106,37 +106,43 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     super.dispose();
   }
 
+  void _setHeaderVisible(bool v) {
+    if (_headerVisible == v) return;
+    setState(() => _headerVisible = v);
+    ref.read(tabHeaderHiddenProvider.notifier).state = !v;
+  }
+
   bool _handleScrollNotification(ScrollNotification n) {
     if (n is ScrollUpdateNotification && n.depth == 0) {
       final delta = n.scrollDelta ?? 0;
       final pixels = n.metrics.pixels;
       if (delta > 6 && _headerVisible && pixels > 50) {
-        setState(() => _headerVisible = false);
+        _setHeaderVisible(false);
       } else if (delta < -6 && !_headerVisible) {
-        setState(() => _headerVisible = true);
+        _setHeaderVisible(true);
       } else if (pixels <= 2 && !_headerVisible) {
-        setState(() => _headerVisible = true);
+        _setHeaderVisible(true);
       }
     }
     return false;
-  }
-
-  void _showHeader() {
-    setState(() => _headerVisible = true);
-    if (_scrollCtrl.hasClients) {
-      _scrollCtrl.animateTo(
-        0,
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeOut,
-      );
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     // Force header visible whenever search panel opens.
     ref.listen<bool>(searchPanelOpenProvider, (_, open) {
-      if (open && !_headerVisible) setState(() => _headerVisible = true);
+      if (open) _setHeaderVisible(true);
+    });
+    // AppBar search icon tapped → restore header + scroll to top.
+    ref.listen<bool>(tabHeaderHiddenProvider, (_, hidden) {
+      if (!hidden && !_headerVisible) {
+        _setHeaderVisible(true);
+        if (_scrollCtrl.hasClients) {
+          _scrollCtrl.animateTo(0,
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeOut);
+        }
+      }
     });
 
     final searchOpen = ref.watch(searchPanelOpenProvider);
@@ -144,7 +150,6 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
 
     return Column(
       children: [
-        // Top area: full header or mini search pill.
         ClipRect(
           child: AnimatedSize(
             duration: const Duration(milliseconds: 220),
@@ -155,13 +160,12 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [_SearchBar()],
                   )
-                : _MiniSearchPill(onTap: _showHeader),
+                : const SizedBox.shrink(),
           ),
         ),
         if (searchOpen)
           const Expanded(child: _SearchPanel())
         else ...[
-          // Filter + section chips animate alongside the search bar.
           ClipRect(
             child: AnimatedSize(
               duration: const Duration(milliseconds: 220),
