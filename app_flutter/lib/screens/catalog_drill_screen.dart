@@ -4,6 +4,7 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/screens/brand_products_screen.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show openSmartProductSheet;
+import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -147,15 +148,35 @@ class _CategoryGrid extends StatelessWidget {
     CatalogNode n,
     List<CatalogNode> parentPath,
   ) {
-    // Leaf with a linked SmartProduct → open the unified brand-picker sheet.
-    if (n.isLeaf && n.smartKey != null) {
-      final product = smartProductByKey(n.smartKey!);
-      if (product != null) {
-        openSmartProductSheet(context, product);
-        return;
+    if (n.isLeaf) {
+      // Leaf with real catalog products → open the product list. Each product
+      // opens the full card (image · ספק · מפרט · ברקוד · אביזרים · הוסף לסל).
+      if (n.lipskeyCategory != null) {
+        final products = kLipskeyCatalog
+            .where((p) => p.categoryHe == n.lipskeyCategory)
+            .toList();
+        if (products.isNotEmpty) {
+          Navigator.push(
+            context,
+            LipskeyProductsScreen.route(
+              category: n.title,
+              products: products,
+            ),
+          );
+          return;
+        }
+      }
+      // No real SKUs (e.g. grohe/hamat placeholder) → fall back to the
+      // smart-product brand-picker sheet so the leaf still does something.
+      if (n.smartKey != null) {
+        final product = smartProductByKey(n.smartKey!);
+        if (product != null) {
+          openSmartProductSheet(context, product);
+          return;
+        }
       }
     }
-    // Otherwise keep drilling (or show the raw brands view for a bare leaf).
+    // Internal node → keep drilling.
     Navigator.push(
       context,
       CatalogDrillScreen.nodeRoute(node: n, path: parentPath),
@@ -173,9 +194,14 @@ class _CategoryCard extends StatelessWidget {
     final String subtitle;
     if (!node.isLeaf) {
       subtitle = '${node.children.length} תת־קטגוריות';
+    } else if (node.lipskeyCategory != null) {
+      final count = kLipskeyCatalog
+          .where((p) => p.categoryHe == node.lipskeyCategory)
+          .length;
+      subtitle = '$count מוצרים';
     } else if (node.smartKey != null) {
       final p = smartProductByKey(node.smartKey!);
-      subtitle = p != null ? '${p.brands.length} מותגים לבחירה' : 'בחירת מותג';
+      subtitle = p != null ? '${p.brands.length} דגמים' : 'דגמים';
     } else {
       subtitle = '${node.brandIds.length} מותגים';
     }
