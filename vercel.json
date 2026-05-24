@@ -1,11 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd app && npm install",
-  "buildCommand": "cd app && npm run build",
-  "outputDirectory": "app/dist",
+  "buildCommand": "bash scripts/vercel-build.sh",
+  "outputDirectory": "app_flutter/build/web",
   "framework": null,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/((?!assets/|.*\\.(?:js|css|ico|svg|png|jpg|jpeg|webp|woff|woff2|webmanifest|json|map)).*)", "destination": "/index.html" }
+    {
+      "source": "/((?!assets/|canvaskit/|icons/|.*\\.(?:js|css|ico|svg|png|jpg|jpeg|webp|woff|woff2|webmanifest|wasm|json|map|ttf|otf|html)).*)",
+      "destination": "/index.html"
+    }
   ]
 }
