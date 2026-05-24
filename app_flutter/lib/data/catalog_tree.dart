@@ -111,6 +111,20 @@ const List<CatalogNode> kCatalogTree = [
           ),
         ],
       ),
+      CatalogNode(
+        id: 'drainage.accessories',
+        title: 'אביזרי ביוב נוספים',
+        emoji: '🚿',
+        children: [
+          CatalogNode(
+            id: 'drainage.accessories.funnel',
+            title: 'משפכים ואביזרים',
+            emoji: '🚿',
+            brandIds: ['lipskey'],
+            lipskeyCategory: 'אביזרי ביוב',
+          ),
+        ],
+      ),
     ],
   ),
 
@@ -291,6 +305,29 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '⚫',
             brandIds: ['lipskey', 'hagor'],
             lipskeyCategory: 'אטמים אומים ופקקים',
+          ),
+        ],
+      ),
+    ],
+  ),
+
+  // ── אביזרים נלווים ───────────────────────────────────────────────────────
+  CatalogNode(
+    id: 'acc',
+    title: 'אביזרים נלווים',
+    emoji: '🧰',
+    children: [
+      CatalogNode(
+        id: 'acc.tools',
+        title: 'כלי עבודה',
+        emoji: '🔧',
+        children: [
+          CatalogNode(
+            id: 'acc.tools.wrench',
+            title: 'מפתחות וכלי הברגה',
+            emoji: '🔧',
+            brandIds: ['lipskey'],
+            lipskeyCategory: 'כלי עבודה',
           ),
         ],
       ),

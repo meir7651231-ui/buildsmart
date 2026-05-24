@@ -653,7 +653,7 @@ const List<SmartProduct> kSmartProducts = [
       SmartBrand(
         name: 'ליפסקי — צינור DN110 200 ס"מ',
         tag: 'יציאה ראשית',
-        sku: '116111',
+        sku: '116155',
       ),
     ],
     acc: [
@@ -1104,6 +1104,33 @@ const List<SmartProduct> kSmartProducts = [
       SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום משלים', must: true),
       SmartAcc(name: 'מפתח צינורות', emoji: '🔧', price: 39, why: 'להידוק נכון', must: false),
       SmartAcc(name: 'דבק PVC', emoji: '🪣', price: 28, why: 'לאיטום חזק יותר', must: false),
+    ],
+  ),
+
+  // ===== אביזרים נלווים — כלי עבודה =====
+  SmartProduct(
+    key: 'tools',
+    name: 'כלי עבודה',
+    emoji: '🔧',
+    cat: 'אביזרים נלווים',
+    diagramTitle: 'כלים בסיסיים להתקנה',
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — מפתח לאביק',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '610758',
+      ),
+      SmartBrand(name: 'מפתח צינורות 12"',  tag: 'חזק וגדול'),
+      SmartBrand(name: 'מפתח צינורות 14"',  tag: 'גדול במיוחד'),
+      SmartBrand(name: 'מפתח שוודי',          tag: 'מתכוונן'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4,  why: 'אוטם את ההברגה', must: true),
+      SmartAcc(name: 'סיליקון סניטרי',   emoji: '🧴', price: 21, why: 'איטום כללי',     must: true),
+      SmartAcc(name: 'דבק PVC',            emoji: '🪣', price: 28, why: 'לאיטום חזק',     must: false),
+      SmartAcc(name: 'משור לצינור',        emoji: '🪚', price: 35, why: 'לחיתוך צינורות', must: false),
+      SmartAcc(name: 'סכין יפנית',         emoji: '🔪', price: 12, why: 'לקצירה ופירוק',  must: false),
     ],
   ),
 ];
