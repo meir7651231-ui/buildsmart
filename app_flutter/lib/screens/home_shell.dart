@@ -1,6 +1,7 @@
 import 'package:buildsmart/screens/bs_dial_widget.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
+import 'package:buildsmart/screens/chat_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/menu_dial_widget.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
@@ -127,7 +128,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                     SizedBox(width: 4),
                     Text(
-                      'v3.5 · 24.5.26 · התראות + השתקה',
+                      'v3.6 · 24.5.26 · הגדרות שיחות',
                       style: TextStyle(
                         color: Color(0xFF4CAF50),
                         fontSize: 10,
@@ -387,9 +388,7 @@ class _ChatsMenuButton extends ConsumerWidget {
       case 'mute_all':
         showToast(context, 'השתק הכל — בבנייה');
       case 'settings':
-        ref
-          ..read(openDialProvider.notifier).state = OpenDial.menu
-          ..read(menuTabProvider.notifier).state = MenuTab.settings;
+        Navigator.of(context).push(ChatSettingsScreen.route());
     }
   }
 }
