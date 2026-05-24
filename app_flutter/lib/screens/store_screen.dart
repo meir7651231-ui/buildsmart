@@ -648,7 +648,8 @@ class _AllList extends ConsumerWidget {
           onTap: svcIdx != null
               ? () => _ServicesGrid._openSheet(context, svcIdx)
               : item.emoji == '🛒'
-                  ? () => _showCartSheet(context)
+                  ? () => ref.read(storeSectionProvider.notifier).state =
+                        StoreSection.cart
                   : item.emoji == '📦'
                       ? () => ref.read(storeSectionProvider.notifier).state =
                             StoreSection.orders
