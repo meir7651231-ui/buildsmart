@@ -1,3 +1,5 @@
+import 'package:buildsmart/data/brands.dart';
+import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/screens/catalog_screen.dart'
     show searchQueryProvider, smartTreeCatProvider;
@@ -157,6 +159,93 @@ List<TestResult> testBehavior(WidgetRef ref) {
           pass: ref.read(smartTreeCatProvider) == null,
         ));
         ref.read(smartTreeCatProvider.notifier).state = before;
+        return checks;
+      },
+    ),
+    _runOne(
+      id: 'behavior:catalog-tree',
+      label: 'CatalogTree — allLeaves + brandById lookup',
+      run: () {
+        final checks = <TestCheck>[];
+        final leaves = allLeaves();
+        checks.add(TestCheck(
+          name: 'allLeaves() מחזיר >0',
+          pass: leaves.isNotEmpty,
+          got: '${leaves.length}',
+        ));
+        // Every brand in every leaf is resolvable via brandById
+        var badRefs = 0;
+        for (final l in leaves) {
+          for (final bid in l.brandIds) {
+            if (brandById(bid) == null) badRefs++;
+          }
+        }
+        checks.add(TestCheck(
+          name: 'כל brandId בעלים ניתן ל-lookup',
+          pass: badRefs == 0,
+          expected: '0',
+          got: '$badRefs',
+        ));
+        // findCatalogNode round-trip on first leaf
+        if (leaves.isNotEmpty) {
+          final first = leaves.first;
+          final found = findCatalogNode(first.id);
+          checks.add(TestCheck(
+            name: 'findCatalogNode("${first.id}") מחזיר node',
+            pass: found?.id == first.id,
+            expected: first.id,
+            got: found?.id ?? 'null',
+          ));
+        }
+        return checks;
+      },
+    ),
+    _runOne(
+      id: 'behavior:smart-cart-accessories',
+      label: 'smartCart — total עם accessories מרובים',
+      run: () {
+        final checks = <TestCheck>[];
+        final before = List<SmartCartLine>.from(ref.read(smartCartProvider));
+        final notifier = ref.read(smartCartProvider.notifier)..clear();
+        // Line with multiple accessories
+        const line = SmartCartLine(
+          productKey: '__rt_acc__',
+          productName: 'בדיקה רב-אביזרים',
+          productEmoji: '🧪',
+          brandName: 'מותג',
+          brandPrice: 200,
+          productQty: 1,
+          accessories: [
+            SmartCartAcc(name: 'אטם', emoji: '⚫', price: 10, qty: 2),
+            SmartCartAcc(name: 'ברגים', emoji: '🔩', price: 5, qty: 4),
+            SmartCartAcc(name: 'חיבור', emoji: '🔗', price: 30, qty: 1),
+          ],
+        );
+        notifier.add(line);
+        final added = ref.read(smartCartProvider).first;
+        // total = 200*1 + 10*2 + 5*4 + 30*1 = 200 + 20 + 20 + 30 = 270
+        checks.add(TestCheck(
+          name: 'total עם 3 אביזרים = 270',
+          pass: added.total == 270,
+          expected: '270',
+          got: '${added.total}',
+        ));
+        checks.add(TestCheck(
+          name: 'accessories.length == 3',
+          pass: added.accessories.length == 3,
+          expected: '3',
+          got: '${added.accessories.length}',
+        ));
+        notifier.clear();
+        for (final l in before) {
+          notifier.add(l);
+        }
+        checks.add(TestCheck(
+          name: 'שחזור מספר השורות',
+          pass: ref.read(smartCartProvider).length == before.length,
+          expected: '${before.length}',
+          got: '${ref.read(smartCartProvider).length}',
+        ));
         return checks;
       },
     ),

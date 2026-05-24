@@ -1,4 +1,6 @@
+import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/catalog.dart';
+import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/test_harness/types.dart';
 
@@ -73,6 +75,58 @@ List<TestResult> testDupes() {
     pass: accDupes.isEmpty,
     expected: '0 מוצרים פגומים',
     got: accDupes.isEmpty ? '0' : '${accDupes.length}: ${accDupes.take(3).join(", ")}',
+  ));
+
+  // ── kBrands uniqueness ────────────────────────────────────────────────────
+  final brandIds = kBrands.map((b) => b.id).toList();
+  final brandIdSet = brandIds.toSet();
+  checks.add(TestCheck(
+    name: 'אין כפילות ב-id של kBrands',
+    pass: brandIdSet.length == brandIds.length,
+    expected: '${brandIds.length}',
+    got: '${brandIdSet.length}',
+  ));
+
+  final brandNames = kBrands.map((b) => b.name).toList();
+  final brandNameSet = brandNames.toSet();
+  checks.add(TestCheck(
+    name: 'אין כפילות ב-name של kBrands',
+    pass: brandNameSet.length == brandNames.length,
+    expected: '${brandNames.length}',
+    got: '${brandNameSet.length}',
+  ));
+
+  // ── kCatalogTree node id uniqueness ──────────────────────────────────────
+  final nodeIds = <String>[];
+  void walkTree(CatalogNode n) {
+    nodeIds.add(n.id);
+    for (final c in n.children) {
+      walkTree(c);
+    }
+  }
+  for (final n in kCatalogTree) {
+    walkTree(n);
+  }
+  final nodeIdSet = nodeIds.toSet();
+  checks.add(TestCheck(
+    name: 'אין כפילות ב-id של nodes בעץ הקטלוג',
+    pass: nodeIdSet.length == nodeIds.length,
+    expected: '${nodeIds.length}',
+    got: '${nodeIdSet.length}',
+  ));
+
+  // ── kCatalogTree leaf lipskeyCategory uniqueness ─────────────────────────
+  final leaves = allLeaves();
+  final lipskeyCategories = <String>[];
+  for (final l in leaves) {
+    if (l.lipskeyCategory != null) lipskeyCategories.add(l.lipskeyCategory!);
+  }
+  final lipskeyCatSet = lipskeyCategories.toSet();
+  checks.add(TestCheck(
+    name: 'אין כפילות ב-lipskeyCategory בין עלים',
+    pass: lipskeyCatSet.length == lipskeyCategories.length,
+    expected: '${lipskeyCategories.length}',
+    got: '${lipskeyCatSet.length}',
   ));
 
   return [

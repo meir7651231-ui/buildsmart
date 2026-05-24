@@ -1,4 +1,5 @@
-import 'package:buildsmart/screens/catalog_screen.dart' show catalogSectionProvider;
+import 'package:buildsmart/screens/catalog_screen.dart'
+    show catalogDrillCatProvider, catalogSectionProvider;
 import 'package:buildsmart/screens/store_screen.dart' show StoreSection, storeSectionProvider;
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/test_harness/types.dart';
@@ -102,6 +103,32 @@ List<TestResult> testTabs(WidgetRef ref) {
           ));
         }
         ref.read(catalogSectionProvider.notifier).state = before;
+        return checks;
+      },
+    ),
+    _runOne(
+      id: 'tabs:catalogDrillCat',
+      label: 'catalogDrillCat — drill לקטגוריה ושחזור',
+      area: 'קטלוג',
+      run: () {
+        final checks = <TestCheck>[];
+        final before = ref.read(catalogDrillCatProvider);
+        const testCat = 'ניקוז וצנרת';
+        ref.read(catalogDrillCatProvider.notifier).state = testCat;
+        checks.add(TestCheck(
+          name: 'drill ל-"$testCat" נשמר',
+          pass: ref.read(catalogDrillCatProvider) == testCat,
+          expected: testCat,
+          got: ref.read(catalogDrillCatProvider) ?? 'null',
+        ));
+        ref.read(catalogDrillCatProvider.notifier).state = null;
+        checks.add(TestCheck(
+          name: 'pop לשורש (null)',
+          pass: ref.read(catalogDrillCatProvider) == null,
+          expected: 'null',
+          got: '${ref.read(catalogDrillCatProvider)}',
+        ));
+        ref.read(catalogDrillCatProvider.notifier).state = before;
         return checks;
       },
     ),

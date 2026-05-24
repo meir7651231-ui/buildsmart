@@ -356,6 +356,7 @@ class _SpecFallback extends StatelessWidget {
       ),
     );
   }
+}
 
 class _SpecThumb extends StatelessWidget {
   const _SpecThumb({required this.product});
