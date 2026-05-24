@@ -1697,19 +1697,25 @@ class _CatalogList extends StatelessWidget {
 }
 
 // ── Featured product card — shown at top of main catalog list ────────────────
-class _FeaturedProductCard extends StatelessWidget {
+class _FeaturedProductCard extends StatefulWidget {
   const _FeaturedProductCard({required this.product});
   final SmartProduct product;
 
   @override
+  State<_FeaturedProductCard> createState() => _FeaturedProductCardState();
+}
+
+class _FeaturedProductCardState extends State<_FeaturedProductCard> {
+  int _qty = 1;
+
+  @override
   Widget build(BuildContext context) {
-    final rec = product.recBrand;
-    final optCount = product.acc.length - product.mustCount;
+    final rec = widget.product.recBrand;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: InkWell(
-        onTap: () => _SmartTreeProductList._openProductSheet(context, product),
-        borderRadius: BorderRadius.circular(16),
+      child: GestureDetector(
+        onTap: () =>
+            _SmartTreeProductList._openProductSheet(context, widget.product),
         child: Container(
           decoration: BoxDecoration(
             gradient: const LinearGradient(
@@ -1727,6 +1733,7 @@ class _FeaturedProductCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ── Header row ──
               Row(
                 children: [
                   Container(
@@ -1738,7 +1745,7 @@ class _FeaturedProductCard extends StatelessWidget {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      product.emoji,
+                      widget.product.emoji,
                       style: const TextStyle(fontSize: 26),
                     ),
                   ),
@@ -1779,7 +1786,7 @@ class _FeaturedProductCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          product.name,
+                          widget.product.name,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -1787,7 +1794,7 @@ class _FeaturedProductCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          product.cat,
+                          widget.product.cat,
                           style: const TextStyle(
                             color: Color(0xFF888888),
                             fontSize: 13,
@@ -1818,30 +1825,68 @@ class _FeaturedProductCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
+              // ── Qty stepper + Add to cart ──
               Row(
                 children: [
-                  _FeaturePill(
-                    emoji: '⚡',
-                    label: '${product.mustCount} חובה',
+                  // Stepper
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF252525),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _QtyBtn(
+                          icon: Icons.remove,
+                          onTap: _qty > 1
+                              ? () => setState(() => _qty--)
+                              : null,
+                        ),
+                        SizedBox(
+                          width: 36,
+                          child: Text(
+                            '$_qty',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        _QtyBtn(
+                          icon: Icons.add,
+                          onTap: () => setState(() => _qty++),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  _FeaturePill(
-                    emoji: '💡',
-                    label: '$optCount אופציונלי',
-                  ),
-                  const SizedBox(width: 8),
-                  _FeaturePill(
-                    emoji: '🏷️',
-                    label: '${product.brands.length} מותגים',
-                  ),
-                  const Spacer(),
-                  const Text(
-                    'לפרטים ←',
-                    style: TextStyle(
-                      color: BsTokens.brand,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                  const SizedBox(width: 10),
+                  // Add to cart button
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => showToast(
+                        context,
+                        '${widget.product.name} × $_qty הוסף לסל 🛒',
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                        decoration: BoxDecoration(
+                          color: BsTokens.brand,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'הוסף לסל · ₪${rec.price * _qty}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -1854,32 +1899,22 @@ class _FeaturedProductCard extends StatelessWidget {
   }
 }
 
-class _FeaturePill extends StatelessWidget {
-  const _FeaturePill({required this.emoji, required this.label});
-  final String emoji;
-  final String label;
+class _QtyBtn extends StatelessWidget {
+  const _QtyBtn({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFF252525),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 11)),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Color(0xFFAAAAAA),
-              fontSize: 11,
-            ),
-          ),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Icon(
+          icon,
+          size: 16,
+          color: onTap != null ? Colors.white : const Color(0xFF555555),
+        ),
       ),
     );
   }
