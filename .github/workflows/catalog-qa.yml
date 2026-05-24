@@ -1,18 +1,11 @@
 name: catalog-qa
 
-# שער אכיפה: כל push/PR שנוגע בנתוני הקטלוג חייב לעבור את מנוע ה-QA.
-# נכשל אם יש שגיאות חוסמות (ERROR) או אם ה-selftest לא עובר.
-
+# שער אכיפה: כל push/PR שנוגע בנתוני הקטלוג עובר מנוע QA + analyze.
 on:
   push:
-    paths:
-      - "app_flutter/lib/data/**"
-      - "app_flutter/lib/test_harness/**"
-      - "scripts/catalog_qa.py"
+    paths: ["app_flutter/lib/data/**", "app_flutter/lib/test_harness/**", "scripts/catalog_qa.py"]
   pull_request:
-    paths:
-      - "app_flutter/lib/data/**"
-      - "scripts/catalog_qa.py"
+    paths: ["app_flutter/lib/data/**", "scripts/catalog_qa.py"]
 
 jobs:
   qa:
@@ -20,11 +13,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+        with: { python-version: "3.12" }
 
       - name: Self-test — מוכיח שכל חוק QA יורה
         run: python3 scripts/catalog_qa.py selftest
 
-      - name: Audit — חוסם על שגיאות קטלוג
-        run: python3 scripts/catalog_qa.py audit --json
+      - name: Audit — חוסם על שגיאות
+        run: python3 scripts/catalog_qa.py audit --json | tee catalog_qa.json
+
+      - name: WARN ceiling — חוסם על הצטברות חוב-איכות (צעד 51)
+        run: |
+          W=$(python3 scripts/catalog_qa.py audit --json | python3 -c "import sys,json;d=json.load(sys.stdin);print(sum(d['by_rule'].get('WARN',{}).values()))")
+          echo "WARN=$W (תקרה 60)"; test "$W" -le 60
+
+      - name: Coverage report (צעד 39)
+        run: python3 scripts/catalog_qa.py coverage
+
+      - name: Upload QA report artifact (צעד 49)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: catalog-qa-report, path: catalog_qa.json }
+
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { flutter-version: "3.29.3" }
+      - name: flutter analyze (צעד 53)
+        working-directory: app_flutter
+        run: flutter pub get && flutter analyze

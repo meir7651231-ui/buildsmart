@@ -226,17 +226,21 @@ def _normalize(n):
 
 
 def cmd_fix(*args):
+    """נרמול בטוח. --apply לכתיבה · --rule trim לתיקון ממוקד (צעדים 19,20,24,27)."""
     apply = "--apply" in args
+    backup = True  # צעד 26 — גיבוי לפני כתיבה
     src = open(CATALOG, encoding="utf-8").read()
     products = parse_catalog()
     changes = []
     for p in products:
         n = p["name"]
-        if not ("|" in n or "כמות" in n or "״" in n or "“" in n or STUCK.search(n)):
+        dirty = ("|" in n or "כמות" in n or "״" in n or "“" in n or STUCK.search(n)
+                 or "  " in n)  # צעד 24 — רווחים כפולים
+        if not dirty:
             continue
         new = _normalize(n)
         if "'" in new:
-            new = new.replace("'", "")  # never break Dart single-quote
+            new = new.replace("'", "")
         if new and new != n:
             changes.append((p["sku"], n, new))
             if apply:
@@ -244,8 +248,27 @@ def cmd_fix(*args):
     for sku, a, b in changes[:30]:
         print(f"  {sku}\n    -  {a[:50]}\n    +  {b[:50]}")
     print(f"\n{len(changes)} שמות {'תוקנו' if apply else 'לתיקון (dry-run; הוסף --apply)'}")
-    if apply:
+    if apply and changes:
+        if backup:
+            open(CATALOG + ".bak", "w", encoding="utf-8").write(open(CATALOG, encoding="utf-8").read())
         open(CATALOG, "w", encoding="utf-8").write(src)
+        # צעד 20 — לוג שינויים
+        import csv as _csv
+        from datetime import date
+        logp = os.path.join(ROOT, "scripts/fix_log.csv")
+        new_file = not os.path.exists(logp)
+        with open(logp, "a", newline="", encoding="utf-8-sig") as fh:
+            w = _csv.writer(fh)
+            if new_file:
+                w.writerow(["date", "sku", "field", "before", "after"])
+            for sku, a, b in changes:
+                w.writerow([date.today().isoformat(), sku, "nameHe", a, b])
+        # צעד 28 — אידמפוטנטיות
+        again = sum(1 for p in parse_catalog()
+                    if _normalize(p["name"]) != p["name"]
+                    and ("|" in p["name"] or "כמות" in p["name"]))
+        print(f"גיבוי: {CATALOG}.bak · לוג: scripts/fix_log.csv · "
+              f"אידמפוטנטיות: {'✅' if again == 0 else '❌ '+str(again)}")
 
 
 def cmd_export(out="catalog_qa.csv", *_):
