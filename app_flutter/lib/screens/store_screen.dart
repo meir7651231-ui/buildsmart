@@ -731,6 +731,36 @@ class _ServiceSheet extends StatelessWidget {
   }
 }
 
+// ─── order items data ─────────────────────────────────────────────────────────
+
+typedef _OrderItem = ({String name, String qty, String price});
+
+const Map<String, List<_OrderItem>> _kOrderItems = {
+  'BS-1234': [
+    (name: 'ברזל 12mm', qty: '200 יח\'', price: '₪840'),
+    (name: 'בטון B30', qty: '5 מ"ק', price: '₪2,200'),
+    (name: 'קורות עץ', qty: '30 יח\'', price: '₪1,380'),
+    (name: 'ברגים 10cm', qty: '500 יח\'', price: '₪1,000'),
+  ],
+  'BS-1221': [
+    (name: 'צבע לבן', qty: '20 ל\'', price: '₪640'),
+    (name: 'מברשות צבע', qty: '10 יח\'', price: '₪350'),
+    (name: 'סיר בלויד', qty: '5 יח\'', price: '₪900'),
+  ],
+  'BS-1198': [
+    (name: 'מסמרים 8cm', qty: '1000 יח\'', price: '₪420'),
+    (name: 'כוכביות', qty: '200 יח\'', price: '₪210'),
+  ],
+  'BS-1171': [
+    (name: 'אריחים 60x60', qty: '80 יח\'', price: '₪1,600'),
+    (name: 'דבק אריחים', qty: '10 שק\'', price: '₪640'),
+  ],
+  'BS-1155': [
+    (name: 'נורות לד', qty: '10 יח\'', price: '₪180'),
+    (name: 'שקע חשמל', qty: '5 יח\'', price: '₪130'),
+  ],
+};
+
 // ─── orders list ──────────────────────────────────────────────────────────────
 
 class _OrdersList extends StatelessWidget {
@@ -755,7 +785,14 @@ class _OrderRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => showToast(context, 'הזמנה ${order.id} — בבנייה'),
+      onTap: () => showModalBottomSheet(
+        context: context,
+        backgroundColor: const Color(0xFF1A1A1A),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (_) => _OrderSheet(order: order),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
@@ -838,4 +875,116 @@ class _OrderRow extends StatelessWidget {
       ),
     );
   }
+}
+
+// ─── order sheet ──────────────────────────────────────────────────────────────
+
+class _OrderSheet extends StatelessWidget {
+  const _OrderSheet({required this.order});
+  final _Order order;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = _kOrderItems[order.id] ?? [];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 36, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'הזמנה ${order.id}',
+                  style: const TextStyle(
+                    color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: order.stageColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: order.stageColor.withValues(alpha: 0.4)),
+                ),
+                child: Text(
+                  order.stageLabel,
+                  style: TextStyle(
+                    color: order.stageColor, fontSize: 12, fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${order.items} · ${order.total} · ${order.time}',
+            style: const TextStyle(color: Color(0xFF888888), fontSize: 13),
+          ),
+          const SizedBox(height: 12),
+          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          ...items.map((item) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                const Text('📦', style: TextStyle(fontSize: 18)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(item.name,
+                      style: const TextStyle(color: Colors.white, fontSize: 14)),
+                ),
+                Text(item.qty,
+                    style: const TextStyle(color: Color(0xFF888888), fontSize: 13)),
+                const SizedBox(width: 12),
+                Text(item.price,
+                    style: const TextStyle(
+                      color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600,
+                    )),
+              ],
+            ),
+          )),
+          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('סה"כ',
+                  style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+              Text(order.total,
+                  style: const TextStyle(
+                    color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800,
+                  )),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2A2A2A),
+              foregroundColor: Colors.white70,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              showToast(context, 'מעקב הזמנה ${order.id} — בבנייה');
+            },
+            child: const Text('מעקב הזמנה 🚛', style: TextStyle(fontSize: 15)),
+          ),
+        ],
+      ),
+    );
+  }
+}
 }

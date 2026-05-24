@@ -12,6 +12,7 @@ type SheetId = 'moadim' | 'tizmon' | 'sicha' | null;
 type ServiceIdx = number | null;
 const openSheet = signal<SheetId>(null);
 const openService = signal<ServiceIdx>(null);
+const openOrder = signal<string | null>(null);
 
 // ─── data ─────────────────────────────────────────────────────────────────────
 
@@ -78,9 +79,17 @@ function StoreRow({ emoji, title, sub, time, badge }: { emoji: string; title: st
   );
 }
 
+const orderItems: Record<string, { name: string; qty: string; price: string }[]> = {
+  'BS-1234': [{ name: 'ברזל 12mm', qty: "200 יח'", price: '₪840' }, { name: 'בטון B30', qty: "5 מ\"ק", price: '₪2,200' }, { name: 'קורות עץ', qty: "30 יח'", price: '₪1,380' }, { name: "ברגים 10cm", qty: "500 יח'", price: '₪1,000' }],
+  'BS-1221': [{ name: 'צבע לבן', qty: "20 ל'", price: '₪640' }, { name: 'מברשות צבע', qty: "10 יח'", price: '₪350' }, { name: 'סיר בלויד', qty: "5 יח'", price: '₪900' }],
+  'BS-1198': [{ name: 'מסמרים 8cm', qty: "1000 יח'", price: '₪420' }, { name: 'כוכביות', qty: "200 יח'", price: '₪210' }],
+  'BS-1171': [{ name: 'אריחים 60x60', qty: "80 יח'", price: '₪1,600' }, { name: 'דבק אריחים', qty: "10 שק'", price: '₪640' }],
+  'BS-1155': [{ name: 'נורות לד', qty: "10 יח'", price: '₪180' }, { name: 'שקע חשמל', qty: "5 יח'", price: '₪130' }],
+};
+
 function OrderRow({ order }: { order: typeof orders[0] }) {
   return (
-    <button type="button" class="store-row" onClick={() => showToast(`הזמנה ${order.id} — בבנייה`)}>
+    <button type="button" class="store-row" onClick={() => { openOrder.value = order.id; }}>
       <span class="store-row__avatar">📦</span>
       <span class="store-row__body">
         <span class="store-row__top">
@@ -164,6 +173,36 @@ function SichaSheet() {
   );
 }
 
+function OrderSheet({ orderId }: { orderId: string }) {
+  const order = orders.find((o) => o.id === orderId)!;
+  const items = orderItems[orderId] ?? [];
+  return (
+    <SheetWrap title={`הזמנה ${order.id}`} emoji="📦" onClose={() => { openOrder.value = null; }}>
+      <div class="order-sheet__status-row">
+        <span class="store-row__pill" style={`color:${order.color};border-color:${order.color}40;background:${order.color}22`}>{order.stageLabel}</span>
+        <span class="store-sheet__sub">{order.items} · {order.total} · {order.time}</span>
+      </div>
+      <hr class="store-sheet__hr" />
+      {items.map((item) => (
+        <div class="order-sheet__item">
+          <span>📦</span>
+          <span class="order-sheet__item-name">{item.name}</span>
+          <span class="store-sheet__row-sub">{item.qty}</span>
+          <span class="order-sheet__item-price">{item.price}</span>
+        </div>
+      ))}
+      <hr class="store-sheet__hr" />
+      <div class="order-sheet__total">
+        <span>סה"כ</span>
+        <span>{order.total}</span>
+      </div>
+      <button type="button" class="order-sheet__cta" onClick={() => { openOrder.value = null; showToast(`מעקב הזמנה ${order.id} — בבנייה`); }}>
+        מעקב הזמנה 🚛
+      </button>
+    </SheetWrap>
+  );
+}
+
 function ServiceSheet({ idx }: { idx: number }) {
   const svc = services[idx];
   const rows = serviceSheets[idx];
@@ -190,6 +229,7 @@ export function StoreView() {
   const section = activeSection.value;
   const sheet = openSheet.value;
   const svcIdx = openService.value;
+  const orderId = openOrder.value;
 
   const chips: { id: Section; label: string }[] = [
     { id: 'all',      label: 'הכל' },
@@ -256,6 +296,7 @@ export function StoreView() {
       {sheet === 'tizmon'  && <TizmonSheet />}
       {sheet === 'sicha'   && <SichaSheet />}
       {svcIdx !== null     && <ServiceSheet idx={svcIdx} />}
+      {orderId !== null    && <OrderSheet orderId={orderId} />}
     </div>
   );
 }
