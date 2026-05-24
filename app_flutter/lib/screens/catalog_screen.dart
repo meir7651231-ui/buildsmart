@@ -1,4 +1,5 @@
 import 'package:buildsmart/data/catalog.dart';
+import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/services/voice.dart';
@@ -1275,13 +1276,21 @@ class _SearchResultsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final query = ref.watch(searchQueryProvider).toLowerCase();
+    final query = ref.watch(searchQueryProvider);
     final scope = ref.watch(searchScopeProvider);
-    // For v1, scope only affects categories vs. everything (products/screens
-    // share the same dataset since the prototype has no product-level data).
-    final filtered = kCatalogCats
-        .where((c) => c.title.toLowerCase().contains(query))
-        .toList();
+
+    final filtered = kSearchIndex.where((e) {
+      if (!e.matches(query)) return false;
+      return switch (scope) {
+        'מוצרים'   => e.type == SearchType.category,
+        'קטגוריות' => e.type == SearchType.setting || e.type == SearchType.menu,
+        'מסכים'    => e.type == SearchType.screen ||
+            e.type == SearchType.persona ||
+            e.type == SearchType.action,
+        _ => true,
+      };
+    }).toList();
+
     if (filtered.isEmpty) {
       return Center(
         child: Padding(
@@ -1294,10 +1303,11 @@ class _SearchResultsList extends ConsumerWidget {
         ),
       );
     }
+
     return ListView.builder(
       itemCount: filtered.length,
       itemBuilder: (_, i) {
-        final cat = filtered[i];
+        final entry = filtered[i];
         return ListTile(
           leading: Container(
             width: 44,
@@ -1307,22 +1317,43 @@ class _SearchResultsList extends ConsumerWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: Text(cat.emoji, style: const TextStyle(fontSize: 20)),
+            child: Text(entry.emoji, style: const TextStyle(fontSize: 20)),
           ),
           title: Text(
-            cat.title,
+            entry.title,
             style: const TextStyle(color: Colors.white, fontSize: 14),
           ),
-          subtitle: Text(
-            scope,
-            style: const TextStyle(color: Color(0xFF888888), fontSize: 11),
+          subtitle: entry.breadcrumb.isNotEmpty
+              ? Text(
+                  entry.breadcrumb,
+                  style: const TextStyle(
+                    color: Color(0xFF666666),
+                    fontSize: 11,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                )
+              : null,
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2A2A2A),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              entry.typeLabel,
+              style: const TextStyle(
+                color: Color(0xFF888888),
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
           onTap: () {
-            ref.read(searchQueryProvider.notifier).state = cat.title;
-            // Persist to recents
+            ref.read(searchQueryProvider.notifier).state = entry.title;
             final list = List<String>.from(ref.read(recentSearchesProvider))
-              ..remove(cat.title)
-              ..insert(0, cat.title);
+              ..remove(entry.title)
+              ..insert(0, entry.title);
             if (list.length > 8) list.removeRange(8, list.length);
             ref.read(recentSearchesProvider.notifier).state = list;
           },
