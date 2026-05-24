@@ -55,6 +55,53 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
         _Unit.pallet => _current.qtyPallet ?? 1,
       };
 
+  /// Normalised DN-size set used for *matching* compatibility. Only sizes in
+  /// a real dimension context — DN-prefixed, ratios (50/40), inch fractions —
+  /// so packaging quantities ("75 כמות באריזה") and lengths ("200 ס"מ") are
+  /// NOT treated as sizes.
+  Set<String> _sizeSet(String name) {
+    final out = <String>{};
+    void addParts(String token) {
+      out.add(token);
+      for (final part in token.split('/')) {
+        if (part.length >= 2 && RegExp(r'^\d+$').hasMatch(part)) out.add(part);
+      }
+    }
+
+    for (final raw in name.split(RegExp(r'\s+'))) {
+      final w = raw.trim();
+      final up = w.toUpperCase();
+      if (up.startsWith('DN') && RegExp(r'\d').hasMatch(w)) {
+        addParts(up.replaceAll(RegExp(r'[^0-9/]'), ''));
+      } else if (RegExp(r'^\d').hasMatch(w) && w.contains('/')) {
+        addParts(w.replaceAll('"', '')); // 50/40 · 130/50 · 3/4
+      } else if (w.contains('"') && RegExp(r'\d').hasMatch(w)) {
+        out.add(w.replaceAll('"', '')); // 1.25 · 1¼
+      }
+      // bare numbers are intentionally ignored (ambiguous with qty/length)
+    }
+    return out.where((s) => s.length >= 2).toSet();
+  }
+
+  /// Readable size tokens for the section subtitle.
+  List<String> _sizeTokens(String name) => _sizeSet(name).toList();
+
+  /// Other-category products that share at least one DN size → "what
+  /// connects to what". The whole point of the app.
+  List<LipskeyCatalogProduct> _compatibleBySize(LipskeyCatalogProduct p) {
+    final mine = _sizeSet(p.nameHe);
+    if (mine.isEmpty) return const [];
+    final seen = <String>{p.sku};
+    final out = <LipskeyCatalogProduct>[];
+    for (final q in kLipskeyCatalog) {
+      if (q.categoryHe == p.categoryHe) continue; // cross-category only
+      if (!seen.add(q.sku)) continue;
+      if (_sizeSet(q.nameHe).intersection(mine).isNotEmpty) out.add(q);
+      if (out.length >= 14) break;
+    }
+    return out;
+  }
+
   void _addToCart() {
     final p = _current;
     final accs = <SmartCartAcc>[];
@@ -406,7 +453,49 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                       ),
                     ),
 
-                    // ── Related / similar products ──────────────────────
+                    // ── 🔧 מתחבר לפי מידה — תאימות אוטומטית ──────────────
+                    ...(() {
+                      final compat = _compatibleBySize(p);
+                      if (compat.isEmpty) return <Widget>[];
+                      final sizes = _sizeTokens(p.nameHe).join(' · ');
+                      return <Widget>[
+                        const SizedBox(height: 16),
+                        const _Divider(),
+                        const SizedBox(height: 16),
+                        _SectionTitle(
+                          emoji: '🔧',
+                          title: 'מתחבר לפי מידה',
+                          subtitle: sizes.isNotEmpty
+                              ? '$sizes · ${compat.length} חלקים תואמים'
+                              : '${compat.length} חלקים תואמים',
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 132,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20),
+                            itemCount: compat.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 10),
+                            itemBuilder: (_, i) => _RelatedCard(
+                              product: compat[i],
+                              onTap: () => showLipskeyProductSheet(
+                                context,
+                                compat[i],
+                                kLipskeyCatalog
+                                    .where((x) =>
+                                        x.categoryHe == compat[i].categoryHe)
+                                    .toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ];
+                    })(),
+
+                    // ── Related / similar products (same category) ──────
                     ...(() {
                       final related = widget.categoryProducts
                           .where((x) => x.sku != p.sku)
