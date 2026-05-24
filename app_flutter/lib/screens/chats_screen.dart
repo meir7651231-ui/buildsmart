@@ -354,7 +354,7 @@ class _ThreadList extends ConsumerWidget {
     return ListView.separated(
       itemCount: threads.length,
       separatorBuilder: (_, __) =>
-          const Divider(height: 1, color: Color(0xFF222222)),
+          const Divider(height: 1, indent: 76, color: Color(0xFF2A2A2A)),
       itemBuilder: (context, i) => _DismissibleThread(thread: threads[i]),
     );
   }
@@ -538,21 +538,17 @@ class _ThreadRow extends StatelessWidget {
                       if (isUnread) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
                             color: BsTokens.brand,
-                            shape: BoxShape.circle,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          constraints: const BoxConstraints(
-                            minWidth: 20,
-                            minHeight: 20,
-                          ),
-                          alignment: Alignment.center,
                           child: Text(
                             '${thread.unread}',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 11,
+                              fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
                           ),

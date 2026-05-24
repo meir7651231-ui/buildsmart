@@ -783,51 +783,24 @@ class _NotifRow extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: avatarBg,
-                      shape: BoxShape.circle,
-                      border: notif.highPriority
-                          ? Border.all(
-                              color: Colors.redAccent.withValues(alpha: 0.6),
-                              width: 2,
-                            )
-                          : null,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      notif.emoji,
-                      style: const TextStyle(fontSize: 24),
-                    ),
-                  ),
-                  if (isUnread)
-                    Positioned(
-                      top: -2,
-                      left: -2,
-                      child: Container(
-                        width: 16,
-                        height: 16,
-                        decoration: const BoxDecoration(
-                          color: BsTokens.brand,
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${notif.badge}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: avatarBg,
+                  shape: BoxShape.circle,
+                  border: notif.highPriority
+                      ? Border.all(
+                          color: Colors.redAccent.withValues(alpha: 0.6),
+                          width: 2,
+                        )
+                      : null,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  notif.emoji,
+                  style: const TextStyle(fontSize: 24),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -900,6 +873,25 @@ class _NotifRow extends ConsumerWidget {
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                 ),
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (isUnread) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: BsTokens.brand,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              '${notif.badge}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
