@@ -27,7 +27,7 @@ const allItems = [
   { emoji: '📊', title: 'השוואת מחירים',   sub: '4 ספקים עדכנו מחירים',           time: '19.5',  badge: 2 },
 ];
 
-const cartItems = [allItems[0]];
+const cartItems = allItems.slice(0, 1);
 
 const orders = [
   { id: 'BS-1234', items: '12 פריטים', total: '₪5,420', stageLabel: 'בדרך 🚛',    time: '24.5, 14:00', color: '#4CAF50' },
@@ -206,6 +206,7 @@ function OrderSheet({ orderId }: { orderId: string }) {
 function ServiceSheet({ idx }: { idx: number }) {
   const svc = services[idx];
   const rows = serviceSheets[idx];
+  if (!svc || !rows) return null;
   return (
     <SheetWrap title={svc.title} emoji={svc.emoji} onClose={() => { openService.value = null; }}>
       <p class="store-sheet__sub">{svc.sub}</p>
