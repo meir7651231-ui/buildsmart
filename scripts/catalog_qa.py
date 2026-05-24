@@ -333,20 +333,127 @@ def cmd_verify(pdf, *skus):
 
 
 def cmd_images(*_):
-    """צעד 37 — אימות שלכל imageFile קיים קובץ בפועל ב-assets."""
     adir = os.path.join(ROOT, "app_flutter/assets/lipskey/products")
     have = set(os.listdir(adir)) if os.path.isdir(adir) else set()
     src = open(CATALOG, encoding="utf-8").read()
     refs = re.findall(r"imageFile:\s*'([^']+)'", src)
     missing = sorted({f for f in refs if f not in have})
-    print(f"imageFile מוגדרים: {len(refs)} · קבצים בתיקייה: {len(have)}")
+    print(f"imageFile מוגדרים: {len(refs)} · קבצים: {len(have)}")
     print(f"❌ imageFile בלי קובץ: {len(missing)} {missing[:10]}")
     orphan = sorted(have - set(refs))
-    print(f"ℹ️ קבצים ללא הפניה (יתומים): {len(orphan)} {orphan[:6]}")
+    print(f"ℹ️ קבצים יתומים: {len(orphan)} {orphan[:6]}")
+
+
+def cmd_imgmatch(*_):
+    """צעד 38 — אימות התאמת תמונה↔מק"ט (שם הקובץ מתחיל ב-sku)."""
+    src = open(CATALOG, encoding="utf-8").read()
+    bad = []
+    for m in re.finditer(r"sku:\s*'([^']+)'[^)]*?imageFile:\s*'([^']+)'", src, re.DOTALL):
+        sku, img = m.group(1), m.group(2)
+        if not img.split(".")[0] == sku:
+            bad.append((sku, img))
+    print(f"❌ תמונה שלא תואמת מק\"ט: {len(bad)}")
+    for sku, img in bad[:12]:
+        print(f"   {sku} ↔ {img}")
+
+
+def cmd_coverage(*_):
+    """צעד 39 — דוח כיסוי מפולח לפי מותג/קטגוריה."""
+    products = parse_catalog()
+    by_brand = defaultdict(lambda: [0, 0, 0])  # total, with-image, with-size
+    for p in products:
+        b = by_brand[p["brand"]]
+        b[0] += 1
+        b[1] += 1 if p["image"] else 0
+        b[2] += 1 if SIZE.search(p["name"]) else 0
+    print("מותג        סה\"כ   תמונה    גודל")
+    for brand, (t, i, s) in sorted(by_brand.items(), key=lambda x: -x[1][0]):
+        print(f"{brand:<10} {t:>6} {i*100//t:>7}% {s*100//t:>7}%")
+
+
+def cmd_schema(*_):
+    """צעד 30 — ולידציה של source_truth.json מול הסכמה."""
+    if not os.path.exists(TRUTH):
+        print(f"אין {TRUTH}"); return
+    ref = json.load(open(TRUTH, encoding="utf-8"))
+    req = {"sku": str, "nameHe": str, "categoryHe": str}
+    bad = []
+    seen = set()
+    for i, r in enumerate(ref):
+        for f, ty in req.items():
+            if f not in r or not isinstance(r[f], ty) or not str(r.get(f, "")).strip():
+                bad.append((i, r.get("sku", "?"), f))
+        if "sizes" in r and not isinstance(r["sizes"], list):
+            bad.append((i, r.get("sku", "?"), "sizes!=list"))
+        if r.get("sku") in seen:
+            bad.append((i, r["sku"], "dup-sku"))
+        seen.add(r.get("sku"))
+    print(f"רשומות: {len(ref)} · ❌ הפרות סכמה: {len(bad)}")
+    for i, sk, f in bad[:15]:
+        print(f"   #{i} {sk}: {f}")
+
+
+def cmd_truthapply(*args):
+    """צעד 36 — תיקון אוטומטי של שמות מ-source_truth (dry-run; --apply לכתיבה)."""
+    if not os.path.exists(TRUTH):
+        print(f"אין {TRUTH}"); return
+    apply = "--apply" in args
+    ref = {r["sku"]: r for r in json.load(open(TRUTH, encoding="utf-8"))}
+    src = open(CATALOG, encoding="utf-8").read()
+    parts = re.split(r"(LipskeyCatalogProduct\()", src)
+    res = parts[0]; changes = []
+    for k in range(1, len(parts), 2):
+        body = parts[k + 1]
+        skm = re.search(r"sku:\s*'([^']+)'", body)
+        if skm and skm.group(1) in ref:
+            want = ref[skm.group(1)]["nameHe"]
+            cur = re.search(r"nameHe:\s*(['\"])(.*?)\1(?=,)", body, re.DOTALL)
+            if cur and cur.group(2) != want:
+                changes.append((skm.group(1), cur.group(2), want))
+                if apply:
+                    nm = "'" + want.replace("\\", "").replace("'", "\\'") + "'"
+                    body = re.sub(r"nameHe:\s*(['\"]).*?\1(?=,)", f"nameHe: {nm}", body, 1, re.DOTALL)
+        res += parts[k] + body
+    for sk, a, b in changes[:20]:
+        print(f"   {sk}: '{a[:30]}' → '{b[:30]}'")
+    print(f"\n{len(changes)} שמות {'תוקנו' if apply else 'לתיקון (--apply ליישום)'}")
+    if apply:
+        open(CATALOG, "w", encoding="utf-8").write(res)
+
+
+def cmd_report(*_):
+    """צעדים 93,96 — KPI איכות + export JSON ל-stakeholders."""
+    products = parse_catalog()
+    n = len(products)
+    img = sum(1 for p in products if p["image"])
+    sz = sum(1 for p in products if SIZE.search(p["name"]))
+    findings = run_rules(products, tree_categories())
+    errs = sum(1 for f in findings if f["severity"] == ERROR)
+    kpi = {"products": n, "errors": errs,
+           "image_pct": img * 100 // n, "size_pct": sz * 100 // n,
+           "categories": len({p["category"] for p in products})}
+    out = os.path.join(ROOT, "scripts/catalog_kpi.json")
+    json.dump(kpi, open(out, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    print(json.dumps(kpi, ensure_ascii=False, indent=2))
+    print(f"נכתב {out}")
+
+
+def cmd_diff(old, new):
+    """צעד 94 — דוח 'מה השתנה' בין שני קבצי-קטלוג (snapshots)."""
+    a = {p["sku"]: p["name"] for p in parse_catalog(old)}
+    b = {p["sku"]: p["name"] for p in parse_catalog(new)}
+    added = set(b) - set(a); removed = set(a) - set(b)
+    changed = [s for s in a if s in b and a[s] != b[s]]
+    print(f"➕ נוספו: {len(added)} · ➖ הוסרו: {len(removed)} · ✏️ שונו: {len(changed)}")
+
+
+CMDS_EXTRA = True
 
 
 CMDS = {"audit": cmd_audit, "selftest": cmd_selftest, "fix": cmd_fix,
         "export": cmd_export, "truthcheck": cmd_truthcheck, "images": cmd_images,
+        "imgmatch": cmd_imgmatch, "coverage": cmd_coverage, "schema": cmd_schema,
+        "truthapply": cmd_truthapply, "report": cmd_report, "diff": cmd_diff,
         "crosscheck": cmd_crosscheck, "pdfmap": cmd_pdfmap, "verify": cmd_verify}
 
 
