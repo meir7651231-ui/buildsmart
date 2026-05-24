@@ -2174,6 +2174,136 @@ const List<SmartProduct> kSmartProducts = [
       SmartAcc(name: 'מקדח 10 מ"מ',        emoji: '🪛', price: 48, why: 'לבטון/אבן',           must: false),
     ],
   ),
+
+  // ===== ברזים — ברזי כיור AQUATEC =====
+  SmartProduct(
+    key: 'aquaBasinTap',
+    name: 'ברז לכיור — AQUATEC',
+    emoji: '🚰',
+    cat: 'ברזים וכיורים',
+    diagramTitle: 'התקנת ברז פרח לכיור רחצה',
+    stages: _sf,
+    brands: [
+      SmartBrand(name: 'דיור ברז פרח ברבור ארוך',      tag: 'הבחירה שלנו', rec: true, sku: '777M2204'),
+      SmartBrand(name: 'איביזה ברז פרח ברבור ארוך',   tag: 'איביזה',        sku: '777M1804'),
+      SmartBrand(name: 'איביזה ברז פרח שטוח קצר',     tag: 'שטוח קצר',     sku: '777M2162'),
+      SmartBrand(name: 'איביזה ברז פרח שטוח ארוך',    tag: 'שטוח ארוך',   sku: '777M2168'),
+      SmartBrand(name: 'גליל ברז פרח גבוה לכיור מונח', tag: 'גבוה למונח', sku: '777M1122'),
+      SmartBrand(name: 'בתא ברז מים קרים ידית צד',     tag: 'מים קרים',     sku: '7777113A'),
+    ],
+    acc: [
+      SmartAcc(name: 'צינור גמיש 1/2"', emoji: '〰️', price: 28, why: 'חיבור למים — חובה', must: true),
+      SmartAcc(name: 'ברז ניל 1/2"',     emoji: '🔧', price: 22, why: 'לסגירת מים — חובה', must: true),
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4, why: 'אוטם ההברגה',        must: true),
+      SmartAcc(name: 'סיפון לכיור',       emoji: '🌀', why: 'ניקוז הכיור',  must: false, sku: '217861'),
+    ],
+  ),
+
+  // ===== ברזים — ברזי קיר =====
+  SmartProduct(
+    key: 'wallTap',
+    name: 'ברז מהקיר',
+    emoji: '🧱',
+    cat: 'ברזים וכיורים',
+    diagramTitle: 'התקנת ברז קיר עם פיה',
+    stages: _sf,
+    brands: [
+      SmartBrand(name: 'דיור ברז מהקיר ארוך',          tag: 'הבחירה שלנו', rec: true, sku: '777M2207'),
+      SmartBrand(name: 'דיור ברז מהקיר קצר',           tag: 'קצר',           sku: '777M2206'),
+      SmartBrand(name: 'דיור ברז מהקיר ארוך פיית נחש', tag: 'פיית נחש',    sku: '777M2217'),
+      SmartBrand(name: 'דיור ברז מהקיר קצר פיית נחש',  tag: 'נחש קצר',     sku: '777M2216'),
+      SmartBrand(name: 'איביזה ברז מהקיר פיה ארוכה',   tag: 'איביזה ארוך', sku: '777M1717'),
+      SmartBrand(name: 'איביזה ברז מהקיר פיה קצרה',    tag: 'איביזה קצר',  sku: '777M1716'),
+    ],
+    acc: [
+      SmartAcc(name: 'אקסצנטרים לקיר', emoji: '⚙️', price: 38, why: 'חיבור לצנרת בקיר — חובה', must: true),
+      SmartAcc(name: 'רוזטות כיסוי',    emoji: '⭕', price: 18, why: 'גמר אסתטי',                must: true),
+      SmartAcc(name: 'סרט טפלון',       emoji: '🎗️', price: 4, why: 'אוטם ההברגה',              must: true),
+      SmartAcc(name: 'פיה לברז',         emoji: '🚿', why: 'אם רוצים פיה אחרת', must: false, sku: '77772410'),
+    ],
+  ),
+
+  // ===== ברזים — ברזי מטבח AQUATEC =====
+  SmartProduct(
+    key: 'aquaKitchenTap',
+    name: 'ברז למטבח — AQUATEC',
+    emoji: '🍽️',
+    cat: 'ברזים וכיורים',
+    diagramTitle: 'התקנת ברז מטבח נשלף',
+    stages: _sf,
+    brands: [
+      SmartBrand(name: 'קיסר ברז נשלף ניקל',          tag: 'הבחירה שלנו', rec: true, sku: '779096C'),
+      SmartBrand(name: 'קיסר ברז נשלף ניקל מוברש',   tag: 'ניקל מוברש',  sku: '779096S'),
+      SmartBrand(name: 'קיסר ברז נשלף שחור מט',       tag: 'שחור מט',     sku: '779096B'),
+      SmartBrand(name: 'קיסר ברז נשלף גרפיטי',         tag: 'גרפיטי',       sku: '779096F'),
+      SmartBrand(name: 'פולו ברז פרח פיה מלבנית',     tag: 'פולו',          sku: '77777343'),
+    ],
+    acc: [
+      SmartAcc(name: 'צינור גמיש 1/2"', emoji: '〰️', price: 28, why: 'חיבור למים — חובה', must: true),
+      SmartAcc(name: 'ברז ניל כפול',     emoji: '🔧', price: 45, why: 'חם+קר — חובה',     must: true),
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4, why: 'אוטם ההברגה',        must: true),
+      SmartAcc(name: 'מסנן מים',          emoji: '💧', price: 95, why: 'סינון מי שתייה',    must: false),
+    ],
+  ),
+
+  // ===== מקלחות — ברז אמבטיה AQUATEC =====
+  SmartProduct(
+    key: 'aquaBathTap',
+    name: 'ברז אמבטיה — AQUATEC',
+    emoji: '🛁',
+    cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'התקנת סוללת אמבטיה עם מזלף',
+    stages: _sb,
+    brands: [
+      SmartBrand(name: 'דיור ברז אמבטיה עם מזלף', tag: 'הבחירה שלנו', rec: true, sku: '777M2201'),
+      SmartBrand(name: 'איביזה ברז אמבטיה',        tag: 'איביזה',        sku: '777M1801'),
+    ],
+    acc: [
+      SmartAcc(name: 'אקסצנטרים לקיר', emoji: '⚙️', price: 38, why: 'חיבור לצנרת — חובה', must: true),
+      SmartAcc(name: 'צינור גמיש למזלף', emoji: '〰️', price: 48, why: 'למזלף — חובה',     must: true),
+      SmartAcc(name: 'מזלף יד',           emoji: '🤚', price: 120, why: 'אם לא כלול',       must: false),
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4, why: 'אוטם ההברגה',        must: true),
+    ],
+  ),
+
+  // ===== מקלחות — ברז מקלחת AQUATEC =====
+  SmartProduct(
+    key: 'aquaShowerTap',
+    name: 'ברז מקלחת — AQUATEC',
+    emoji: '🚿',
+    cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'התקנת סוללת מקלחת',
+    stages: _ss,
+    brands: [
+      SmartBrand(name: 'דיור ברז מקלחת עם מזלף', tag: 'הבחירה שלנו', rec: true, sku: '777M2208'),
+      SmartBrand(name: 'איביזה ברז מקלחת',        tag: 'איביזה',        sku: '777M1808'),
+    ],
+    acc: [
+      SmartAcc(name: 'אקסצנטרים לקיר', emoji: '⚙️', price: 38, why: 'חיבור לצנרת — חובה', must: true),
+      SmartAcc(name: 'זרוע + ראש מקלחת', emoji: '⤴️', price: 220, why: 'החלק העליון',     must: true),
+      SmartAcc(name: 'צינור גמיש למזלף', emoji: '〰️', price: 48, why: 'למזלף',             must: true),
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4, why: 'אוטם ההברגה',        must: true),
+    ],
+  ),
+
+  // ===== ברזים — אביזרי ברזים (פיות) =====
+  SmartProduct(
+    key: 'tapAccessories',
+    name: 'אביזרי ברזים — פיות',
+    emoji: '🔧',
+    cat: 'ברזים וכיורים',
+    diagramTitle: 'החלפת פיה לברז קיים',
+    brands: [
+      SmartBrand(name: 'דיור פיה לברז פרח ארוך',         tag: 'הבחירה שלנו', rec: true, sku: '77772410'),
+      SmartBrand(name: 'דיור פיה לברז מהקיר ארוך',       tag: 'מהקיר',        sku: '77772413'),
+      SmartBrand(name: 'דיור פיה לברז נחש מהקיר ארוך',   tag: 'פיית נחש',    sku: '77772415'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון',   emoji: '🎗️', price: 4,  why: 'אוטם ההברגה — חובה', must: true),
+      SmartAcc(name: 'אטם דו צדדי', emoji: '⚫', price: 6,  why: 'איטום החיבור',        must: true),
+      SmartAcc(name: 'מפתח אלן',     emoji: '🔧', price: 18, why: 'להידוק',                must: false),
+    ],
+  ),
 ];
 
 /// Returns unique categories that have smart products, preserving prototype order.
