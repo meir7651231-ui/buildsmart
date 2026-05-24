@@ -649,7 +649,10 @@ class _AllList extends ConsumerWidget {
               ? () => _ServicesGrid._openSheet(context, svcIdx)
               : item.emoji == '🛒'
                   ? () => _showCartSheet(context)
-                  : null,
+                  : item.emoji == '📦'
+                      ? () => ref.read(storeSectionProvider.notifier).state =
+                            StoreSection.orders
+                      : null,
         );
       },
     );
