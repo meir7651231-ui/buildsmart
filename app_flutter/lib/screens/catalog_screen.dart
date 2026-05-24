@@ -2287,7 +2287,7 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
         .indexWhere((b) => b.rec)
         .clamp(0, widget.product.brands.length - 1);
     final acc = widget.product.acc;
-    _accSelected = {for (var i = 0; i < acc.length; i++) i: acc[i].must};
+    _accSelected = {for (var i = 0; i < acc.length; i++) i: false};
     _accQty = {for (var i = 0; i < acc.length; i++) i: 1};
   }
 
@@ -2500,8 +2500,10 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
                     final gi = p.acc.indexOf(a);
                     return _AccRow(
                       acc: a,
-                      selected: true,
+                      selected: _accSelected[gi] ?? false,
                       qty: _accQty[gi] ?? 1,
+                      onToggle: (v) =>
+                          setState(() => _accSelected[gi] = v),
                       onQtyChanged: (q) => setState(() => _accQty[gi] = q),
                       activeMatch: _activeStage != null
                           ? p.stages[_activeStage!].match
@@ -2808,7 +2810,6 @@ class _AccRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hit = _isHit;
-    final isMust = onToggle == null;
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
       opacity: activeMatch == null ? 1.0 : (hit ? 1.0 : 0.3),
@@ -2831,7 +2832,7 @@ class _AccRow extends StatelessWidget {
           children: [
             // Checkbox / lock
             GestureDetector(
-              onTap: isMust ? null : () => onToggle!(!selected),
+              onTap: () => onToggle?.call(!selected),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 width: 24,
@@ -2847,13 +2848,9 @@ class _AccRow extends StatelessWidget {
                         : const Color(0xFF555555),
                   ),
                 ),
-                child: Icon(
-                  isMust
-                      ? Icons.lock_outline
-                      : (selected ? Icons.check : null),
-                  color: Colors.white,
-                  size: 13,
-                ),
+                child: selected
+                    ? const Icon(Icons.check, color: Colors.white, size: 13)
+                    : null,
               ),
             ),
             const SizedBox(width: 10),
