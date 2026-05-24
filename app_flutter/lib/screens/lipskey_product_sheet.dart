@@ -150,18 +150,35 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   /// Readable size tokens for the section subtitle.
   List<String> _sizeTokens(String name) => _connectionSizes(name);
 
-  /// For one connection size — every other-category part that fits it.
+  /// Material of a product, inferred from name/category (צעד 62).
+  static String _material(LipskeyCatalogProduct p) {
+    final n = p.nameHe + p.categoryHe;
+    if (n.contains('נחושת')) return 'copper';
+    if (n.contains('HDPE')) return 'hdpe';
+    if (n.contains('PP') || n.contains('רב שכבתי')) return 'pp';
+    if (n.contains('NTM') || n.contains('PEX')) return 'pex';
+    return 'pvc'; // default drainage
+  }
+
+  /// For one connection size — every other-category part that fits it,
+  /// מדורג: אותו חומר תחילה (צעדים 62–63).
   List<LipskeyCatalogProduct> _partsForSize(
       LipskeyCatalogProduct p, String size) {
+    final mat = _material(p);
     final seen = <String>{p.sku};
-    final out = <LipskeyCatalogProduct>[];
+    final all = <LipskeyCatalogProduct>[];
     for (final q in kLipskeyCatalog) {
       if (q.categoryHe == p.categoryHe) continue; // cross-category only
       if (!seen.add(q.sku)) continue;
-      if (_sizeSet(q.nameHe).contains(size)) out.add(q);
-      if (out.length >= 12) break;
+      if (_sizeSet(q.nameHe).contains(size)) all.add(q);
     }
-    return out;
+    // ranking: same material first, then by category name for stability
+    all.sort((a, b) {
+      final am = _material(a) == mat ? 0 : 1;
+      final bm = _material(b) == mat ? 0 : 1;
+      return am != bm ? am - bm : a.categoryHe.compareTo(b.categoryHe);
+    });
+    return all.take(12).toList();
   }
 
   /// Per-side connection groups: [(sizeLabel, fitting parts), ...].
