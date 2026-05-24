@@ -1964,6 +1964,8 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
               controller: scrollCtrl,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               children: [
+                // Installation flow diagram
+                if (p.stages.isNotEmpty) _DiagramFlow(product: p),
                 // Brand selector
                 const Padding(
                   padding: EdgeInsets.only(top: 16, bottom: 8),
@@ -2128,6 +2130,168 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Installation diagram with staggered pop-in animation ─────────────────
+// Mirrors the prototype's tdiagram — gradient card, 4 stages, amber title dot.
+// Each stage pops in 180 ms after the previous (elasticOut spring).
+
+class _DiagramFlow extends StatefulWidget {
+  const _DiagramFlow({required this.product});
+  final SmartProduct product;
+
+  @override
+  State<_DiagramFlow> createState() => _DiagramFlowState();
+}
+
+class _DiagramFlowState extends State<_DiagramFlow>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final List<Animation<double>> _anims;
+
+  @override
+  void initState() {
+    super.initState();
+    final n = widget.product.stages.length;
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 300 + n * 180),
+    );
+    _anims = List.generate(n, (i) {
+      final start = i * 0.18;
+      final end = (start + 0.55).clamp(0.0, 1.0);
+      return CurvedAnimation(
+        parent: _ctrl,
+        curve: Interval(start, end, curve: Curves.elasticOut),
+      );
+    });
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.product;
+    if (p.stages.isEmpty) return const SizedBox.shrink();
+    return Container(
+      margin: const EdgeInsets.only(top: 16, bottom: 4),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A1D22), Color(0xFF2C3036)],
+        ),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF2A516),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  p.diagramTitle,
+                  style: const TextStyle(
+                    color: Color(0xFF9B9DA0),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var i = 0; i < p.stages.length; i++) ...[
+                if (i > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 14),
+                    child: Icon(
+                      Icons.chevron_left,
+                      color: BsTokens.brand,
+                      size: 14,
+                    ),
+                  ),
+                Expanded(
+                  child: ScaleTransition(
+                    scale: _anims[i],
+                    child: _StageCard(stage: p.stages[i]),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StageCard extends StatelessWidget {
+  const _StageCard({required this.stage});
+  final SmartStage stage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color: stage.isFinal
+                ? const Color(0xFF1F6F6B).withAlpha(64)
+                : Colors.white.withAlpha(18),
+            border: Border.all(
+              color: stage.isFinal
+                  ? BsTokens.brand
+                  : Colors.white.withAlpha(31),
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.center,
+          child: Text(stage.emoji, style: const TextStyle(fontSize: 22)),
+        ),
+        const SizedBox(height: 7),
+        Text(
+          stage.label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 9.5,
+            fontWeight: FontWeight.w700,
+          ),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          stage.sub,
+          style: const TextStyle(color: Color(0xFF8B8D8F), fontSize: 8),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+        ),
+      ],
     );
   }
 }

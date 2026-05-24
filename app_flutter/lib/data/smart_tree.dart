@@ -1,6 +1,70 @@
 import 'package:flutter/foundation.dart';
 
 @immutable
+class SmartStage {
+  const SmartStage({
+    required this.emoji,
+    required this.label,
+    required this.sub,
+    this.isFinal = false,
+  });
+  final String emoji;
+  final String label;
+  final String sub;
+  final bool isFinal;
+}
+
+// Pre-defined stage sequences — verbatim from prototype DIAGRAMS map.
+const _sf = [
+  SmartStage(emoji: '🔩', label: 'רכיבים',      sub: 'אטמים, צינורות'),
+  SmartStage(emoji: '🔀', label: 'הזנת מים',     sub: 'PEX חם/קר'),
+  SmartStage(emoji: '🔌', label: 'חיבור גס',     sub: 'ברזי ניל'),
+  SmartStage(emoji: '✅', label: 'ברז גמור',     sub: 'מותקן', isFinal: true),
+];
+const _st = [
+  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'אטם, ברגים'),
+  SmartStage(emoji: '⬜', label: 'מיכל סמוי',    sub: 'בתוך הקיר'),
+  SmartStage(emoji: '🛡️', label: 'איטום וחיבור', sub: 'לקו ביוב'),
+  SmartStage(emoji: '✅', label: 'אסלה גמורה',   sub: 'מותקנת', isFinal: true),
+];
+const _ss = [
+  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'טפלון, צינור'),
+  SmartStage(emoji: '🎛️', label: 'גוף סמוי',    sub: 'בתוך הקיר'),
+  SmartStage(emoji: '🚿', label: 'זרוע + ראש',   sub: 'החלק הנראה'),
+  SmartStage(emoji: '✅', label: 'מקלחת גמורה',  sub: 'מותקנת', isFinal: true),
+];
+const _sb = [
+  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'שסתום, צינורות'),
+  SmartStage(emoji: '🔧', label: 'הכנת הקיר',    sub: 'עיגון + חיבורים'),
+  SmartStage(emoji: '🔥', label: 'חיבור והפעלה', sub: 'בדיקת לחץ'),
+  SmartStage(emoji: '✅', label: 'דוד פעיל',     sub: 'מוכן לחימום', isFinal: true),
+];
+const _si = [
+  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'מחברים'),
+  SmartStage(emoji: '🔧', label: 'קווי ביוב',    sub: 'צינור 50'),
+  SmartStage(emoji: '🔀', label: 'קווי מים',     sub: 'PEX'),
+  SmartStage(emoji: '✅', label: 'חיבור גמור',   sub: 'בדיקה עברה', isFinal: true),
+];
+const _sw = [
+  SmartStage(emoji: '🔩', label: 'חומרים',       sub: 'פריימר'),
+  SmartStage(emoji: '🛡️', label: 'חיזוק פינות', sub: 'סרט איטום'),
+  SmartStage(emoji: '🧱', label: 'יריעות איטום', sub: 'בחפיפה'),
+  SmartStage(emoji: '✅', label: 'רצפה אטומה',   sub: 'עברה בדיקה', isFinal: true),
+];
+const _stile = [
+  SmartStage(emoji: '🔩', label: 'חומרים',       sub: 'דבק, פלסים'),
+  SmartStage(emoji: '🟫', label: 'הנחת אריחים',  sub: 'רצפה וקיר'),
+  SmartStage(emoji: '🛡️', label: 'מילוי רובה',  sub: 'עמיד מים'),
+  SmartStage(emoji: '✅', label: 'גמר מושלם',    sub: 'מוכן לכלים', isFinal: true),
+];
+const _sprof = [
+  SmartStage(emoji: '🔩', label: 'רכיבים',       sub: 'ברגים, דיבל'),
+  SmartStage(emoji: '🧱', label: 'מסילות ופרופיל', sub: 'שלד הקיר'),
+  SmartStage(emoji: '🟦', label: 'לוחות גבס',    sub: 'חיפוי'),
+  SmartStage(emoji: '✅', label: 'מחיצה גמורה',  sub: 'מוכנה לגמר', isFinal: true),
+];
+
+@immutable
 class SmartBrand {
   const SmartBrand({
     required this.name,
@@ -39,13 +103,17 @@ class SmartProduct {
     required this.cat,
     required this.brands,
     required this.acc,
+    this.diagramTitle = '',
+    this.stages = const [],
   });
   final String key;
   final String name;
   final String emoji;
-  final String cat; // matches kCatalogCats title
+  final String cat;
   final List<SmartBrand> brands;
   final List<SmartAcc> acc;
+  final String diagramTitle;
+  final List<SmartStage> stages;
 
   int get mustCount => acc.where((a) => a.must).length;
   SmartBrand get recBrand => brands.firstWhere((b) => b.rec, orElse: () => brands.first);
@@ -58,6 +126,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'ברז לכיור',
     emoji: '🚰',
     cat: 'ברזים וכיורים',
+    diagramTitle: 'תהליך התקנת ברז — מהזנה עד קצה',
+    stages: _sf,
     brands: [
       SmartBrand(name: 'מותג סטנדרט', price: 189, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'מותג כלכלי', price: 139, tag: 'הכי משתלם'),
@@ -78,6 +148,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'ברז למטבח',
     emoji: '🚰',
     cat: 'ברזים וכיורים',
+    diagramTitle: 'תהליך התקנת ברז למטבח',
+    stages: _sf,
     brands: [
       SmartBrand(name: 'מותג סטנדרט', price: 289, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'מותג כלכלי', price: 199, tag: 'הכי משתלם'),
@@ -96,6 +168,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'כיור אמבטיה',
     emoji: '🪣',
     cat: 'ברזים וכיורים',
+    diagramTitle: 'תהליך התקנת כיור אמבטיה',
+    stages: _sf,
     brands: [
       SmartBrand(name: 'כיור מונח סטנדרט', price: 340, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'כיור כלכלי', price: 230, tag: 'הכי משתלם'),
@@ -114,6 +188,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'אסלה תלויה',
     emoji: '🚽',
     cat: 'אסלות',
+    diagramTitle: 'תהליך התקנת אסלה תלויה',
+    stages: _st,
     brands: [
       SmartBrand(name: 'מותג סטנדרט', price: 740, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'מותג כלכלי', price: 560, tag: 'הכי משתלם'),
@@ -133,6 +209,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'אסלה רגילה (עומדת)',
     emoji: '🚽',
     cat: 'אסלות',
+    diagramTitle: 'תהליך התקנת אסלה עומדת',
+    stages: _st,
     brands: [
       SmartBrand(name: 'מותג סטנדרט', price: 520, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'מותג כלכלי', price: 390, tag: 'הכי משתלם'),
@@ -152,6 +230,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'סוללת מקלחת',
     emoji: '🚿',
     cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'תהליך התקנת סוללת מקלחת',
+    stages: _ss,
     brands: [
       SmartBrand(name: 'מותג סטנדרט', price: 520, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'מותג כלכלי', price: 380, tag: 'הכי משתלם'),
@@ -171,6 +251,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'אמבטיה',
     emoji: '🛁',
     cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'תהליך התקנת אמבטיה',
+    stages: _ss,
     brands: [
       SmartBrand(name: 'אמבטיה אקרילית', price: 890, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'אמבטיה כלכלית', price: 620, tag: 'הכי משתלם'),
@@ -190,6 +272,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'דוד חשמל',
     emoji: '♨️',
     cat: 'חימום מים',
+    diagramTitle: 'תהליך התקנת דוד חשמל',
+    stages: _sb,
     brands: [
       SmartBrand(name: 'מותג סטנדרט', price: 780, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'מותג כלכלי', price: 560, tag: 'הכי משתלם'),
@@ -209,6 +293,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'מערכת דוד שמש',
     emoji: '☀️',
     cat: 'חימום מים',
+    diagramTitle: 'תהליך התקנת דוד שמש',
+    stages: _sb,
     brands: [
       SmartBrand(name: 'מערכת סטנדרט 150 ליטר', price: 2400, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'מערכת כלכלית', price: 1850, tag: 'הכי משתלם'),
@@ -228,6 +314,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'כיור מטבח',
     emoji: '🍽️',
     cat: 'מטבח',
+    diagramTitle: 'תהליך התקנת כיור מטבח',
+    stages: _sf,
     brands: [
       SmartBrand(name: 'נירוסטה — סטנדרט', price: 420, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'נירוסטה — כלכלי', price: 290, tag: 'הכי משתלם'),
@@ -245,6 +333,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'נקודת מים למדיח',
     emoji: '💧',
     cat: 'מטבח',
+    diagramTitle: 'תהליך חיבור מדיח כלים',
+    stages: _si,
     brands: [
       SmartBrand(name: 'ערכת חיבור סטנדרט', price: 140, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'ערכת חיבור כלכלית', price: 95, tag: 'הכי משתלם'),
@@ -261,6 +351,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'נקודת מכונת כביסה',
     emoji: '🧺',
     cat: 'מטבח',
+    diagramTitle: 'תהליך חיבור מכונת כביסה',
+    stages: _si,
     brands: [
       SmartBrand(name: 'ערכת חיבור סטנדרט', price: 130, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'ערכת חיבור כלכלית', price: 88, tag: 'הכי משתלם'),
@@ -278,6 +370,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'מחסום רצפה',
     emoji: '🕳️',
     cat: 'ניקוז וצנרת',
+    diagramTitle: 'תהליך התקנת מחסום רצפה',
+    stages: _sw,
     brands: [
       SmartBrand(name: 'מחסום סטנדרט', price: 54, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'מחסום כלכלי', price: 34, tag: 'הכי משתלם'),
@@ -295,6 +389,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'וסת לחץ מים',
     emoji: '⚙️',
     cat: 'ניקוז וצנרת',
+    diagramTitle: 'תהליך התקנת וסת לחץ מים',
+    stages: _si,
     brands: [
       SmartBrand(name: 'וסת סטנדרט', price: 185, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'וסת כלכלי', price: 120, tag: 'הכי משתלם'),
@@ -312,6 +408,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'מקלחון (פינת מקלחת)',
     emoji: '🛗',
     cat: 'גופי תברואה',
+    diagramTitle: 'תהליך התקנת מקלחון',
+    stages: _ss,
     brands: [
       SmartBrand(name: 'מקלחון זכוכית — סטנדרט', price: 980, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'מקלחון כלכלי', price: 640, tag: 'הכי משתלם'),
@@ -329,6 +427,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'בידה',
     emoji: '🚾',
     cat: 'גופי תברואה',
+    diagramTitle: 'תהליך התקנת בידה',
+    stages: _st,
     brands: [
       SmartBrand(name: 'בידה תלויה — סטנדרט', price: 560, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'בידה כלכלית', price: 390, tag: 'הכי משתלם'),
@@ -347,6 +447,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'קיר גבס',
     emoji: '🧱',
     cat: 'בנייה ומחיצות',
+    diagramTitle: 'תהליך הרכבת מחיצת גבס',
+    stages: _sprof,
     brands: [
       SmartBrand(name: 'גבס סטנדרט', price: 240, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'גבס כלכלי', price: 185, tag: 'הכי משתלם'),
@@ -366,6 +468,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'דלת לשירותים',
     emoji: '🚪',
     cat: 'בנייה ומחיצות',
+    diagramTitle: 'תהליך התקנת דלת לשירותים',
+    stages: _sprof,
     brands: [
       SmartBrand(name: 'דלת סטנדרט', price: 480, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'דלת כלכלית', price: 340, tag: 'הכי משתלם'),
@@ -384,6 +488,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'ריצוף וחיפוי',
     emoji: '🟫',
     cat: 'גמר',
+    diagramTitle: 'תהליך הנחת ריצוף וחיפוי',
+    stages: _stile,
     brands: [
       SmartBrand(name: 'קרמיקה סטנדרט', price: 680, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'קרמיקה כלכלית', price: 480, tag: 'הכי משתלם'),
@@ -403,6 +509,8 @@ const List<SmartProduct> kSmartProducts = [
     name: 'איטום הרצפה',
     emoji: '🛡️',
     cat: 'גמר',
+    diagramTitle: 'תהליך איטום הרצפה',
+    stages: _sw,
     brands: [
       SmartBrand(name: 'מערכת איטום סטנדרט', price: 280, tag: 'הבחירה שלנו', rec: true),
       SmartBrand(name: 'מערכת כלכלית', price: 190, tag: 'הכי משתלם'),
