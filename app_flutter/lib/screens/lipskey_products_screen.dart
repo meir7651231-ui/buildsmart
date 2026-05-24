@@ -437,17 +437,27 @@ const Set<String> kSearchStopWords = {
   'ללא', 'בלי', 'כמות', 'באריזה', 'במשטח', 'יח', 'יחידות',
 };
 
-/// A name word is a meaningful, tappable link only if it isn't noise:
-/// not a stop-word, length ≥ 2, and not a bare number/size token.
+/// Size / dimension token — these define compatibility ("what connects to
+/// what"), so they ARE clickable (find every part of the same size).
+/// Examples: DN50 · 3/4" · 1¼" · 110 · 130/50 · 50/40.
+bool isSizeToken(String w) {
+  if (RegExp(r'^DN', caseSensitive: false).hasMatch(w)) return true;
+  // numbers, fractions, ratios, inch marks, with optional × / - separators
+  return RegExp(r'^[\d]+([./×x\-"׳״⅛¼½¾⅜⅝⅞]+[\d"׳״]*)*[\"׳״]?$')
+          .hasMatch(w) &&
+      RegExp(r'\d').hasMatch(w);
+}
+
+/// A plain word is a meaningful tappable link if it isn't a stop-word and
+/// has length ≥ 2 (sizes are handled separately by [isSizeToken]).
 bool isLinkableWord(String w) {
   if (w.length < 2) return false;
   if (kSearchStopWords.contains(w)) return false;
-  // pure number or size like "40", "3/4\"", "DN50" stays plain text
-  if (RegExp(r'^[\d/."×x°-]+$').hasMatch(w)) return false;
+  if (isSizeToken(w)) return false; // styled as a size chip instead
   return true;
 }
 
-// ── name split into tappable word chips (meaningful words only) ─────────────
+// ── name split into tappable chips: words (teal) + sizes (orange) ───────────
 class _NameWords extends StatelessWidget {
   const _NameWords({required this.name});
   final String name;
@@ -456,15 +466,34 @@ class _NameWords extends StatelessWidget {
   Widget build(BuildContext context) {
     final words = name.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
     return Wrap(
-      spacing: 2,
-      runSpacing: 2,
+      spacing: 4,
+      runSpacing: 3,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        for (var i = 0; i < words.length; i++) ...[
-          if (isLinkableWord(words[i]))
+        for (final w in words)
+          if (isSizeToken(w))
+            // size / dimension — compatibility link (orange chip)
             GestureDetector(
-              onTap: () =>
-                  LipskeyProductsScreen.openWordSearch(context, words[i]),
-              child: Text(words[i],
+              onTap: () => LipskeyProductsScreen.openWordSearch(context, w),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(
+                  color: const Color(0x22FF7A18),
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: const Color(0x55FF7A18)),
+                ),
+                child: Text('📐 $w',
+                    style: const TextStyle(
+                        color: Color(0xFFFF9D4D),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600)),
+              ),
+            )
+          else if (isLinkableWord(w))
+            GestureDetector(
+              onTap: () => LipskeyProductsScreen.openWordSearch(context, w),
+              child: Text(w,
                   style: const TextStyle(
                       color: Color(0xFF3DD9B0),
                       fontSize: 12,
@@ -473,13 +502,9 @@ class _NameWords extends StatelessWidget {
                       decorationColor: Color(0xFF2A5E52))),
             )
           else
-            Text(words[i],
+            Text(w,
                 style: const TextStyle(
                     color: Color(0xFF9AA3B2), fontSize: 12, height: 1.3)),
-          if (i < words.length - 1)
-            const Text(' ',
-                style: TextStyle(fontSize: 12)),
-        ],
       ],
     );
   }
