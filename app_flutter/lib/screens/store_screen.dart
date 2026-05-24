@@ -462,6 +462,11 @@ class _StoreList extends ConsumerWidget {
 
 // ─── all / cart list ──────────────────────────────────────────────────────────
 
+// maps service emoji → index in _kServices (for sheet lookup)
+const _kServiceByEmoji = {
+  '🔧': 0, '💰': 1, '↩️': 2, '📨': 3, '🧪': 4, '📊': 5,
+};
+
 class _AllList extends StatelessWidget {
   const _AllList({required this.section});
   final StoreSection section;
@@ -475,7 +480,16 @@ class _AllList extends StatelessWidget {
       separatorBuilder: (_, __) => const Divider(
         height: 1, indent: 76, color: Color(0xFF2A2A2A),
       ),
-      itemBuilder: (context, i) => _StoreRow(item: items[i]),
+      itemBuilder: (context, i) {
+        final item = items[i];
+        final svcIdx = _kServiceByEmoji[item.emoji];
+        return _StoreRow(
+          item: item,
+          onTap: svcIdx != null
+              ? () => _ServicesGrid._openSheet(context, svcIdx)
+              : null,
+        );
+      },
     );
   }
 }

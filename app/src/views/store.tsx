@@ -45,6 +45,10 @@ const services = [
   { emoji: '📊', title: 'השוואת מחירים',  sub: '4 ספקים עודכנו' },
 ];
 
+const serviceEmojiMap: Record<string, number> = {
+  '🔧': 0, '💰': 1, '↩️': 2, '📨': 3, '🧪': 4, '📊': 5,
+};
+
 const serviceSheets = [
   [{ emoji: '🔨', label: 'מקדחה', sub: 'מושכרת עד 30.5' }, { emoji: '🪚', label: 'משור חשמלי', sub: 'מושכר עד 28.5' }, { emoji: '➕', label: 'הוסף כלי', sub: '' }],
   [{ emoji: '💳', label: 'פיקדון #123', sub: '₪350 · פעיל' }, { emoji: '↩️', label: 'בקשת החזר', sub: '' }],
@@ -238,9 +242,12 @@ export function StoreView() {
         ) : section === 'orders' ? (
           orders.map((o, i) => <OrderRow key={i} order={o} />)
         ) : (
-          (section === 'cart' ? cartItems : allItems).map((item, i) => (
-            <StoreRow key={i} {...item} />
-          ))
+          (section === 'cart' ? cartItems : allItems).map((item, i) => {
+            const svcIdx = serviceEmojiMap[item.emoji];
+            return svcIdx !== undefined
+              ? <ServiceRow key={i} svc={{ emoji: item.emoji, title: item.title, sub: item.sub }} idx={svcIdx} />
+              : <StoreRow key={i} {...item} />;
+          })
         )}
       </div>
 
