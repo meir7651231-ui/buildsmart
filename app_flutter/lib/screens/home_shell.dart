@@ -1,13 +1,14 @@
-import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/bs_dial_widget.dart';
+import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
-import 'package:buildsmart/screens/menu_dial_widget.dart';
-import 'package:buildsmart/screens/search_dial_widget.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
+import 'package:buildsmart/screens/menu_dial_widget.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
+import 'package:buildsmart/screens/search_dial_widget.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -94,6 +95,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final tabIndex = ref.watch(mainTabProvider);
     return AppBar(
       backgroundColor: const Color(0xFF1A1A1A),
       elevation: 0,
@@ -143,49 +145,10 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
           tooltip: 'מצלמה',
           onPressed: () => openCameraSheet(context),
         ),
-        PopupMenuButton<MenuTab>(
-          icon: const Icon(Icons.more_vert, color: Colors.white70),
-          tooltip: 'תפריט',
-          color: const Color(0xFF1A1A1A),
-          position: PopupMenuPosition.under,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          onSelected: (tab) {
-            ref.read(openDialProvider.notifier).state = OpenDial.menu;
-            ref.read(menuTabProvider.notifier).state = tab;
-          },
-          itemBuilder: (_) => const [
-            PopupMenuItem<MenuTab>(
-              value: MenuTab.home,
-              child: Text(
-                'בית',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-            PopupMenuItem<MenuTab>(
-              value: MenuTab.projects,
-              child: Text(
-                'הפרויקטים',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-            PopupMenuItem<MenuTab>(
-              value: MenuTab.cart,
-              child: Text(
-                'רכש',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-            PopupMenuItem<MenuTab>(
-              value: MenuTab.settings,
-              child: Text(
-                'הגדרות',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-          ],
-        ),
+        if (tabIndex == 0)
+          const _CatalogMenuButton()
+        else
+          const _GlobalMenuButton(),
       ],
     );
   }
@@ -292,32 +255,202 @@ class _BadgedIcon extends StatelessWidget {
   }
 }
 
-class _PlaceholderTab extends StatelessWidget {
-  const _PlaceholderTab({required this.title, required this.emoji});
+// ─── catalog 3-dot menu ───────────────────────────────────────────────────────
 
-  final String title;
+class _CatalogMenuButton extends ConsumerWidget {
+  const _CatalogMenuButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert, color: Colors.white70),
+      tooltip: 'תפריט',
+      color: const Color(0xFF1A1A1A),
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      onSelected: (value) => _onSelected(context, ref, value),
+      itemBuilder: (_) => const [
+        PopupMenuItem<String>(
+          value: 'scan_plan',
+          child: _MenuRow(emoji: '📐', label: 'סרוק תוכנית עבודה'),
+        ),
+        PopupMenuItem<String>(
+          value: 'alternatives',
+          child: _MenuRow(emoji: '💡', label: 'חלופות זולות'),
+        ),
+        PopupMenuItem<String>(
+          value: 'price_compare',
+          child: _MenuRow(emoji: '📊', label: 'השוואת מחירים'),
+        ),
+        PopupMenuItem<String>(
+          value: 'favorites',
+          child: _MenuRow(emoji: '❤️', label: 'מועדפים'),
+        ),
+        PopupMenuDivider(),
+        PopupMenuItem<String>(
+          value: 'settings',
+          child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
+        ),
+      ],
+    );
+  }
+
+  void _onSelected(BuildContext context, WidgetRef ref, String value) {
+    switch (value) {
+      case 'scan_plan':
+        showModalBottomSheet<void>(
+          context: context,
+          backgroundColor: const Color(0xFF1A1A1A),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (_) => const _ScanPlanSheet(),
+        );
+      case 'alternatives':
+        showToast(context, 'חלופות זולות — בבנייה');
+      case 'price_compare':
+        showToast(context, 'השוואת מחירים — בבנייה');
+      case 'favorites':
+        ref.read(catalogSectionProvider.notifier).state = 'מועדפים';
+      case 'settings':
+        ref
+          ..read(openDialProvider.notifier).state = OpenDial.menu
+          ..read(menuTabProvider.notifier).state = MenuTab.settings;
+    }
+  }
+}
+
+// ─── global 3-dot menu (non-catalog tabs) ────────────────────────────────────
+
+class _GlobalMenuButton extends ConsumerWidget {
+  const _GlobalMenuButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PopupMenuButton<MenuTab>(
+      icon: const Icon(Icons.more_vert, color: Colors.white70),
+      tooltip: 'תפריט',
+      color: const Color(0xFF1A1A1A),
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      onSelected: (tab) {
+        ref
+          ..read(openDialProvider.notifier).state = OpenDial.menu
+          ..read(menuTabProvider.notifier).state = tab;
+      },
+      itemBuilder: (_) => const [
+        PopupMenuItem<MenuTab>(
+          value: MenuTab.home,
+          child: _MenuRow(emoji: '🏠', label: 'בית'),
+        ),
+        PopupMenuItem<MenuTab>(
+          value: MenuTab.projects,
+          child: _MenuRow(emoji: '🏗️', label: 'הפרויקטים'),
+        ),
+        PopupMenuItem<MenuTab>(
+          value: MenuTab.cart,
+          child: _MenuRow(emoji: '🛒', label: 'רכש'),
+        ),
+        PopupMenuDivider(),
+        PopupMenuItem<MenuTab>(
+          value: MenuTab.settings,
+          child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── shared menu row ──────────────────────────────────────────────────────────
+
+class _MenuRow extends StatelessWidget {
+  const _MenuRow({required this.emoji, required this.label});
   final String emoji;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Row(
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 18)),
+        const SizedBox(width: 12),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white, fontSize: 15),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── scan plan sheet ──────────────────────────────────────────────────────────
+
+class _ScanPlanSheet extends StatelessWidget {
+  const _ScanPlanSheet();
+
+  static const _plans = [
+    (emoji: '🚿', label: 'אינסטלציה'),
+    (emoji: '⚡', label: 'חשמל'),
+    (emoji: '🏛️', label: 'אדריכלות'),
+    (emoji: '🎨', label: 'גמר'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 52)),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'בבנייה',
-            style: TextStyle(color: Color(0xFF888888), fontSize: 14),
+          const SizedBox(height: 16),
+          const Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '📐 סרוק תוכנית עבודה',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'בחר סוג תוכנית לסריקה',
+              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          ..._plans.map(
+            (p) => ListTile(
+              leading: Text(p.emoji, style: const TextStyle(fontSize: 24)),
+              title: Text(
+                p.label,
+                style: const TextStyle(color: Colors.white, fontSize: 15),
+              ),
+              trailing: const Icon(
+                Icons.chevron_left,
+                color: Color(0xFF888888),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                showToast(context, '${p.label} — בבנייה');
+              },
+            ),
           ),
         ],
       ),
