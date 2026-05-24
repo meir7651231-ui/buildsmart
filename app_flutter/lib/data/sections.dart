@@ -189,10 +189,11 @@ const List<Section> kManagerSections = [
     emoji: '🛠️',
     title: 'ניהול',
     children: [
-      Section(id: 'mm-trees',    emoji: '🌳', title: 'עץ המוצרים'),
-      Section(id: 'mm-brands',   emoji: '🏷️', title: 'מותגים ומחירים'),
-      Section(id: 'mm-cats',     emoji: '🗂️', title: 'קטגוריות'),
-      Section(id: 'mm-settings', emoji: '⚙️', title: 'הגדרות אפליקציה'),
+      Section(id: 'mm-trees',      emoji: '🌳', title: 'עץ המוצרים'),
+      Section(id: 'mm-brands',     emoji: '🏷️', title: 'מותגים ומחירים'),
+      Section(id: 'mm-cats',       emoji: '🗂️', title: 'קטגוריות'),
+      Section(id: 'mm-settings',   emoji: '⚙️', title: 'הגדרות אפליקציה'),
+      Section(id: 'mm-regression', emoji: '🔬', title: 'בדיקות רגרסיה'),
     ],
   ),
 ];

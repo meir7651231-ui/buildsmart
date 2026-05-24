@@ -1,5 +1,6 @@
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/data/sections.dart';
+import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/widgets/dial.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -71,6 +72,9 @@ class BsDialWidget extends ConsumerWidget {
                   ...path,
                   s.title,
                 ];
+              } else if (s.id == 'mm-regression') {
+                ref.read(openDialProvider.notifier).state = OpenDial.none;
+                Navigator.of(context).push(RegressionPanelScreen.route());
               } else {
                 showToast(context, '${s.title} — בבנייה');
               }
