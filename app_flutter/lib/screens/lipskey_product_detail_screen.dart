@@ -1,560 +1,430 @@
 import 'dart:math';
+import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:buildsmart/data/lipskey_catalog.dart';
 
 class LipskeyProductDetailScreen extends StatefulWidget {
   final LipskeyCatalogProduct product;
+
   const LipskeyProductDetailScreen({super.key, required this.product});
 
+  static Route<void> route(LipskeyCatalogProduct product) =>
+      MaterialPageRoute(builder: (_) => LipskeyProductDetailScreen(product: product));
+
   @override
-  State<LipskeyProductDetailScreen> createState() =>
-      _LipskeyProductDetailScreenState();
+  State<LipskeyProductDetailScreen> createState() => _LipskeyProductDetailScreenState();
 }
 
 class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
     with TickerProviderStateMixin {
-  late final AnimationController _splitController;
-  late final AnimationController _shimmerController;
-  late final AnimationController _flipController;
+  // ── 360° rotation ─────────────────────────────────────────────────────────
+  double _rotY = 0.0;
+  double _rotX = 0.0;
+  double _scale = 1.0;
+  double _baseScale = 1.0;
 
-  late final Animation<double> _topSlide;
-  late final Animation<double> _bottomSlide;
-  late final Animation<double> _shimmerOpacity;
-  late final Animation<double> _flipAngle;
+  late AnimationController _inertiaCtrl;
+  late Animation<double> _inertiaAnim;
 
-  final TransformationController _transformController =
-      TransformationController();
+  // spec panel
+  late AnimationController _specCtrl;
+  late Animation<double> _specAnim;
+  bool _specOpen = false;
 
-  double _splitRatio = 0.55;
-  double _rotationAngle = 0.0;
+  // entrance
+  late AnimationController _fadeCtrl;
+
+  LipskeyCatalogProduct get p => widget.product;
 
   @override
   void initState() {
     super.initState();
-
-    _splitController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
-
-    _shimmerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-
-    _flipController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-
-    _topSlide = Tween<double>(begin: 0, end: -0.45).animate(
-      CurvedAnimation(parent: _splitController, curve: Curves.easeOutQuart),
-    );
-
-    _bottomSlide = Tween<double>(begin: 0, end: 0.45).animate(
-      CurvedAnimation(parent: _splitController, curve: Curves.easeOutQuart),
-    );
-
-    _shimmerOpacity = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _shimmerController, curve: Curves.easeIn),
-    );
-
-    _flipAngle = Tween<double>(begin: 0, end: pi).animate(
-      CurvedAnimation(parent: _flipController, curve: Curves.easeInOut),
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _splitController.forward();
-      await Future.delayed(const Duration(milliseconds: 200));
-      _shimmerController.forward();
-    });
+    _inertiaCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _specCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _specAnim = CurvedAnimation(parent: _specCtrl, curve: Curves.easeOutCubic);
+    _fadeCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _fadeCtrl.forward());
   }
 
   @override
   void dispose() {
-    _splitController.dispose();
-    _shimmerController.dispose();
-    _flipController.dispose();
-    _transformController.dispose();
+    _inertiaCtrl.dispose();
+    _specCtrl.dispose();
+    _fadeCtrl.dispose();
     super.dispose();
   }
 
-  void _rotateImage() {
-    _rotationAngle += pi / 2;
-    final center = _transformController.value.getTranslation();
-    final rotation = Matrix4.identity()
-      ..translate(center.x, center.y)
-      ..rotateZ(pi / 2)
-      ..translate(-center.x, -center.y);
-    _transformController.value = rotation * _transformController.value;
+  // ── gesture ───────────────────────────────────────────────────────────────
+  void _onPanStart(DragStartDetails _) => _inertiaCtrl.stop();
+
+  void _onPanUpdate(DragUpdateDetails d) {
+    setState(() {
+      _rotY += d.delta.dx * 0.01;
+      _rotX = (_rotX - d.delta.dy * 0.01).clamp(-pi / 3, pi / 3);
+    });
   }
 
-  void _resetTransform() {
-    _rotationAngle = 0.0;
-    _transformController.value = Matrix4.identity();
+  void _onPanEnd(DragEndDetails d) {
+    final vel = d.velocity.pixelsPerSecond.dx * 0.0002;
+    final target = _rotY + vel * 8;
+    _inertiaAnim = Tween<double>(begin: _rotY, end: target)
+        .animate(CurvedAnimation(parent: _inertiaCtrl, curve: Curves.decelerate));
+    _inertiaCtrl.addListener(() => setState(() => _rotY = _inertiaAnim.value));
+    _inertiaCtrl.forward(from: 0);
   }
 
-  void _triggerFlip() {
-    if (_flipController.isAnimating) return;
-    if (_flipController.value > 0.5) {
-      _flipController.reverse();
-    } else {
-      _flipController.forward();
-    }
+  void _onScaleStart(ScaleStartDetails _) => _baseScale = _scale;
+
+  void _onScaleUpdate(ScaleUpdateDetails d) {
+    setState(() {
+      _scale = (_baseScale * d.scale).clamp(0.4, 5.0);
+      _rotY += d.focalPointDelta.dx * 0.008;
+      _rotX = (_rotX - d.focalPointDelta.dy * 0.008).clamp(-pi / 3, pi / 3);
+    });
   }
 
-  Color _colorFromLabel(String label) => switch (label) {
-        'לבן' => Colors.white,
-        'שחור' => Colors.black,
-        'אפור' => Colors.grey,
-        'פרגמון' => const Color(0xFFBFA78A),
-        _ => Colors.blueGrey,
-      };
-
-  String _assetPath() {
-    final padded = widget.product.page.toString().padLeft(2, '0');
-    return 'assets/lipskey/pages/page_$padded.jpg';
+  void _toggleSpec() {
+    setState(() => _specOpen = !_specOpen);
+    _specOpen ? _specCtrl.forward() : _specCtrl.reverse();
   }
 
+  void _resetView() => setState(() { _rotY = 0; _rotX = 0; _scale = 1.0; });
+
+  // ── build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF080815),
         extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: Text(
-            widget.product.nameHe,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.flip, color: Colors.white),
-              onPressed: _triggerFlip,
+        appBar: _appBar(context),
+        body: FadeTransition(
+          opacity: _fadeCtrl,
+          child: Stack(children: [
+            // radial glow background
+            Positioned.fill(child: _buildGlow()),
+
+            // 360 viewer — fills screen
+            Positioned.fill(child: _build360Viewer()),
+
+            // hint strip at top (fades after first drag)
+            Positioned(
+              top: 100, left: 0, right: 0,
+              child: _buildHint(),
             ),
-          ],
-        ),
-        body: AnimatedBuilder(
-          animation: _flipAngle,
-          builder: (context, _) {
-            final angle = _flipAngle.value;
-            final isFront = angle < pi / 2;
-            return Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, 0.001)
-                ..rotateY(angle),
-              child: isFront ? _buildFrontBody() : _buildBackBody(angle),
-            );
-          },
+
+            // spec panel slides from bottom
+            Positioned(
+              left: 0, right: 0, bottom: 0,
+              child: AnimatedBuilder(
+                animation: _specAnim,
+                builder: (_, __) => _buildSpecPanel(),
+              ),
+            ),
+
+            // control buttons — right side
+            Positioned(
+              right: 16,
+              bottom: _specOpen ? _kSpecHeight + 16 : 100,
+              child: _buildControls(),
+            ),
+          ]),
         ),
       ),
     );
   }
 
-  Widget _buildFrontBody() {
-    return AnimatedBuilder(
-      animation: _splitController,
-      builder: (context, _) {
-        return LayoutBuilder(builder: (context, constraints) {
-          final h = constraints.maxHeight;
-          final topH = h * _splitRatio;
-          final bottomH = h - topH;
-          final topOffset = _topSlide.value * h;
-          final bottomOffset = _bottomSlide.value * h;
+  AppBar _appBar(BuildContext context) => AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(p.nameHe,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+            overflow: TextOverflow.ellipsis),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.info_outline,
+                color: _specOpen ? const Color(0xFF64FFDA) : Colors.white60),
+            onPressed: _toggleSpec,
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white60),
+            onPressed: _resetView,
+          ),
+        ],
+      );
 
-          return Stack(
-            children: [
-              // Top panel
-              Positioned(
-                top: topOffset,
-                left: 0,
-                right: 0,
-                height: topH,
-                child: _buildTopPanel(),
-              ),
-              // Bottom panel
-              Positioned(
-                top: topH + bottomOffset,
-                left: 0,
-                right: 0,
-                height: bottomH,
-                child: _buildBottomPanel(),
-              ),
-              // Shimmer crack glow
-              AnimatedBuilder(
-                animation: _shimmerOpacity,
-                builder: (context, _) => Positioned(
-                  top: topH + topOffset - 2,
-                  left: 0,
-                  right: 0,
-                  height: 4,
-                  child: Opacity(
-                    opacity: _shimmerOpacity.value,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.transparent,
-                            Colors.white54,
-                            Colors.white,
-                            Colors.white54,
-                            Colors.transparent,
-                          ],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.white30,
-                            blurRadius: 8,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              // Draggable divider
-              Positioned(
-                top: topH + topOffset - 12,
-                left: 0,
-                right: 0,
-                height: 24,
-                child: _buildDivider(h),
-              ),
+  // ── glow ──────────────────────────────────────────────────────────────────
+  Widget _buildGlow() => Container(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment.center,
+            radius: 0.7,
+            colors: [
+              const Color(0xFF3D5A80).withOpacity(0.25),
+              Colors.transparent,
             ],
-          );
-        });
-      },
+          ),
+        ),
+      );
+
+  // ── hint ──────────────────────────────────────────────────────────────────
+  Widget _buildHint() => const Center(
+        child: Text(
+          '← גרור לסיבוב · צבוט להגדלה →',
+          style: TextStyle(color: Colors.white24, fontSize: 12, letterSpacing: 0.3),
+        ),
+      );
+
+  // ── 360° viewer ───────────────────────────────────────────────────────────
+  Widget _build360Viewer() {
+    return GestureDetector(
+      onPanStart: _onPanStart,
+      onPanUpdate: _onPanUpdate,
+      onPanEnd: _onPanEnd,
+      onScaleStart: _onScaleStart,
+      onScaleUpdate: _onScaleUpdate,
+      child: Container(
+        color: Colors.transparent,
+        alignment: Alignment.center,
+        child: Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.0008) // perspective
+            ..rotateY(_rotY)
+            ..rotateX(_rotX)
+            ..scale(_scale),
+          child: _buildFaceSwitch(),
+        ),
+      ),
     );
   }
 
-  Widget _buildTopPanel() {
-    return Stack(
+  // front vs back face
+  Widget _buildFaceSwitch() {
+    final norm = _rotY % (2 * pi);
+    final absNorm = norm < 0 ? norm + 2 * pi : norm;
+    final showBack = absNorm > pi / 2 && absNorm < 3 * pi / 2;
+
+    if (showBack) {
+      return Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.identity()..rotateY(pi), // counter-rotate so text reads correctly
+        child: _buildBackFace(),
+      );
+    }
+    return _buildFrontFace();
+  }
+
+  Widget _buildFrontFace() {
+    final asset = p.imageAsset;
+    if (asset == null) return _emojiCard(p.categoryEmoji);
+
+    return Container(
+      width: 280,
+      height: 280,
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF64FFDA).withOpacity(0.18),
+            blurRadius: 50,
+            spreadRadius: 8,
+          ),
+        ],
+      ),
+      child: Image.asset(
+        asset,
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => _emojiCard(p.categoryEmoji),
+      ),
+    );
+  }
+
+  Widget _buildBackFace() => Container(
+        width: 280,
+        height: 280,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A2E),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFF3D5A80)),
+          boxShadow: [
+            BoxShadow(color: const Color(0xFF3D5A80).withOpacity(0.3), blurRadius: 30),
+          ],
+        ),
+        padding: const EdgeInsets.all(20),
+        child: _buildSpecContent(compact: true),
+      );
+
+  Widget _emojiCard(String emoji) => Container(
+        width: 240,
+        height: 240,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A2E),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Center(child: Text(emoji, style: const TextStyle(fontSize: 80))),
+      );
+
+  // ── controls ──────────────────────────────────────────────────────────────
+  Widget _buildControls() => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _Btn(icon: Icons.add, onTap: () => setState(() => _scale = (_scale + 0.4).clamp(0.4, 5.0))),
+          const SizedBox(height: 8),
+          _Btn(icon: Icons.remove, onTap: () => setState(() => _scale = (_scale - 0.4).clamp(0.4, 5.0))),
+          const SizedBox(height: 8),
+          _Btn(icon: Icons.rotate_right, onTap: () => setState(() => _rotY += pi / 6)),
+          const SizedBox(height: 8),
+          _Btn(icon: Icons.rotate_left, onTap: () => setState(() => _rotY -= pi / 6)),
+        ],
+      );
+
+  // ── spec panel ────────────────────────────────────────────────────────────
+  static const double _kSpecHeight = 300;
+
+  Widget _buildSpecPanel() {
+    final h = _kSpecHeight * _specAnim.value;
+    if (h < 2) return const SizedBox.shrink();
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: Container(
+        height: h,
+        decoration: const BoxDecoration(
+          color: Color(0xFF13132A),
+          border: Border(top: BorderSide(color: Color(0xFF3D5A80))),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          child: _buildSpecContent(compact: false),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpecContent({required bool compact}) {
+    final ts = compact ? 0.8 : 1.0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Positioned.fill(
-          child: InteractiveViewer(
-            transformationController: _transformController,
-            boundaryMargin: const EdgeInsets.all(double.infinity),
-            minScale: 0.5,
-            maxScale: 6.0,
-            child: Image.asset(
-              _assetPath(),
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Center(
-                child: Icon(Icons.broken_image, color: Colors.white30, size: 64),
+        if (!compact)
+          Center(
+            child: Container(
+              width: 36, height: 3,
+              margin: const EdgeInsets.only(bottom: 14),
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
+
+        // SKU — tappable to copy
+        GestureDetector(
+          onTap: () {
+            Clipboard.setData(ClipboardData(text: p.sku));
+            if (!compact) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('מק"ט הועתק'),
+                  duration: Duration(seconds: 1),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          },
+          child: Text('#${p.sku}',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                color: const Color(0xFFFFB300),
+                fontSize: 13 * ts,
+                fontWeight: FontWeight.w700,
+              )),
         ),
-        // Reset button (bottom-left of top panel)
-        Positioned(
-          bottom: 8,
-          left: 8,
-          child: _ImageActionButton(
-            icon: Icons.center_focus_strong,
-            onTap: _resetTransform,
+
+        SizedBox(height: compact ? 4 : 8),
+
+        // Category
+        Row(children: [
+          Text(p.categoryEmoji, style: TextStyle(fontSize: 16 * ts)),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(p.categoryHe,
+                style: TextStyle(color: Colors.white60, fontSize: 12 * ts)),
           ),
-        ),
-        // Rotation button (bottom-right of top panel)
-        Positioned(
-          bottom: 8,
-          right: 8,
-          child: _ImageActionButton(
-            icon: Icons.rotate_90_degrees_cw,
-            onTap: _rotateImage,
-          ),
-        ),
+        ]),
+
+        SizedBox(height: compact ? 3 : 6),
+
+        // Name
+        Text(p.nameHe,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14 * ts,
+              fontWeight: FontWeight.w700,
+            )),
+        if (p.nameEn.isNotEmpty)
+          Text(p.nameEn,
+              style: TextStyle(
+                color: Colors.white38,
+                fontSize: 11 * ts,
+                fontStyle: FontStyle.italic,
+              )),
+
+        if (!compact) ...[
+          const SizedBox(height: 14),
+          const Divider(color: Colors.white12, height: 1),
+          const SizedBox(height: 10),
+
+          if (p.color != null) _row('🎨', 'צבע', p.color!),
+          if (p.qtyPack != null) _row('📦', 'כמות באריזה', '${p.qtyPack}'),
+          if (p.qtyPallet != null) _row('🏗️', 'כמות במשטח', '${p.qtyPallet}'),
+          if (p.dims != null)
+            for (final e in p.dims!.entries)
+              if (e.value != null) _row('📐', e.key, '${e.value}'),
+
+          const SizedBox(height: 12),
+          Text('עמוד ${p.page} · קטלוג ליפסקי ברקן 2024',
+              style: const TextStyle(color: Colors.white24, fontSize: 11)),
+        ],
       ],
     );
   }
 
-  Widget _buildDivider(double screenH) {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onVerticalDragUpdate: (details) {
-        setState(() {
-          _splitRatio =
-              (_splitRatio + details.delta.dy / screenH).clamp(0.25, 0.80);
-        });
-      },
-      child: Container(
-        height: 24,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              Colors.transparent,
-              Color(0x33FFFFFF),
-              Colors.transparent,
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(color: Colors.white24, blurRadius: 12),
-          ],
-        ),
-        child: const Center(
-          child: Icon(Icons.drag_handle, color: Colors.white60, size: 20),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomPanel() {
-    final p = widget.product;
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF1A1A2E),
-        border: Border(
-          top: BorderSide(color: Color(0xFF3D5A80), width: 1),
-        ),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // SKU — amber monospace, copyable
-            GestureDetector(
-              onTap: () {
-                Clipboard.setData(ClipboardData(text: p.sku));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('SKU הועתק'),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
-              },
-              child: Text(
-                '#${p.sku}',
-                style: const TextStyle(
-                  fontFamily: 'monospace',
-                  color: Colors.amber,
-                  fontSize: 13,
-                  letterSpacing: 1.2,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Category
-            Text(
-              '${p.categoryEmoji}  ${p.categoryHe}',
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-            Text(
-              p.categoryEn,
-              style: const TextStyle(color: Colors.white38, fontSize: 12),
-            ),
-            const SizedBox(height: 10),
-            // Hebrew name
-            Text(
-              p.nameHe,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            // English name
-            Text(
-              p.nameEn,
-              style: const TextStyle(
-                color: Color(0x8AFFFFFF),
-                fontSize: 13,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Color chip
-            if (p.color != null) ...[
-              Row(
-                children: [
-                  Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: _colorFromLabel(p.color!),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white30),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    p.color!,
-                    style: const TextStyle(color: Colors.white70, fontSize: 13),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-            ],
-            // Qty per pack
-            if (p.qtyPack != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text(
-                  '📦 ${p.qtyPack} יחידות באריזה',
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
-                ),
-              ),
-            // Qty per pallet
-            if (p.qtyPallet != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text(
-                  '🏗️ ${p.qtyPallet} יחידות במשטח',
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
-                ),
-              ),
-            // Dims
-            if (p.dims != null && p.dims!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text(
-                  '📐 ${p.dims!.entries.map((e) => '${e.key}: ${e.value}').join(', ')}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
-                ),
-              ),
-            const SizedBox(height: 12),
-            // Page reference
-            Text(
-              'עמוד ${p.page} בקטלוג',
-              style: const TextStyle(color: Colors.white30, fontSize: 11),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBackBody(double angle) {
-    // Mirror the back face so text reads correctly
-    final p = widget.product;
-    return Transform(
-      alignment: Alignment.center,
-      transform: Matrix4.identity()..rotateY(pi),
-      child: Container(
-        color: const Color(0xFF0D0D1A),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 24),
-                Text(
-                  p.categoryEmoji,
-                  style: const TextStyle(fontSize: 48),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  p.nameHe,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  p.nameEn,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 16,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                _BackSpecRow(label: 'SKU', value: '#${p.sku}'),
-                _BackSpecRow(label: 'קטגוריה', value: '${p.categoryEmoji} ${p.categoryHe}'),
-                _BackSpecRow(label: 'Category', value: p.categoryEn),
-                if (p.color != null) _BackSpecRow(label: 'צבע', value: p.color!),
-                if (p.qtyPack != null)
-                  _BackSpecRow(label: 'יחידות באריזה', value: '${p.qtyPack}'),
-                if (p.qtyPallet != null)
-                  _BackSpecRow(label: 'יחידות במשטח', value: '${p.qtyPallet}'),
-                if (p.dims != null && p.dims!.isNotEmpty)
-                  _BackSpecRow(
-                    label: 'מידות',
-                    value: p.dims!.entries.map((e) => '${e.key}: ${e.value}').join('\n'),
-                  ),
-                _BackSpecRow(label: 'עמוד בקטלוג', value: '${p.page}'),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _row(String emoji, String label, String value) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(children: [
+          Text(emoji, style: const TextStyle(fontSize: 15)),
+          const SizedBox(width: 8),
+          Text(label, style: const TextStyle(color: Colors.white54, fontSize: 13)),
+          const Spacer(),
+          Text(value, style: const TextStyle(color: Colors.white, fontSize: 13)),
+        ]),
+      );
 }
 
-class _ImageActionButton extends StatelessWidget {
+// ── small round button ────────────────────────────────────────────────────────
+class _Btn extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
-  const _ImageActionButton({required this.icon, required this.onTap});
+  const _Btn({required this.icon, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: Colors.black54,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white24),
+  Widget build(BuildContext context) => GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: Colors.black45,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white24),
+          ),
+          child: Icon(icon, color: Colors.white70, size: 20),
         ),
-        child: Icon(icon, color: Colors.white70, size: 20),
-      ),
-    );
-  }
-}
-
-class _BackSpecRow extends StatelessWidget {
-  final String label;
-  final String value;
-  const _BackSpecRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: const TextStyle(color: Colors.white38, fontSize: 14),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+      );
 }
