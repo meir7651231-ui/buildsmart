@@ -2025,7 +2025,7 @@ class _FeaturedProductCardState extends ConsumerState<_FeaturedProductCard> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '₪${rec.price}',
+                        rec.price != null ? '₪${rec.price}' : 'מחיר לפי ספק',
                         style: const TextStyle(
                           color: BsTokens.brand,
                           fontSize: 20,
@@ -2456,7 +2456,7 @@ class _SmartTreeProductList extends ConsumerWidget {
                                   ),
                                 ),
                                 Text(
-                                  '₪${p.recBrand.price}',
+                                  p.recBrand.price != null ? '₪${p.recBrand.price}' : '—',
                                   style: const TextStyle(
                                     color: Color(0xFF888888),
                                     fontSize: 12,
@@ -2719,7 +2719,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             ),
                           ),
                           Text(
-                            '₪${b.price}',
+                            b.price != null ? '₪${b.price}' : 'לפי ספק',
                             style: TextStyle(
                               color: selected
                                   ? BsTokens.brand
