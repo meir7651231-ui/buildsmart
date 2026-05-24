@@ -32,7 +32,7 @@ class LipskeyCatalogProduct {
 
   String? get imageAsset => imageFile == null
       ? null
-      : 'assets/lipskey/products/\$imageFile';
+      : 'assets/lipskey/products/$imageFile';
 }
 
 const List<LipskeyCatalogProduct> kLipskeyCatalog = [
