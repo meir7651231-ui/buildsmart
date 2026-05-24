@@ -853,51 +853,47 @@ class _NotifRow extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 3),
-                    Text(
-                      notif.preview,
-                      style: const TextStyle(
-                        color: Color(0xFF888888),
-                        fontSize: 13,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (actionLabel != null) ...[
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          TextButton(
-                            onPressed: () {},
-                            style: TextButton.styleFrom(
-                              foregroundColor: BsTokens.brand,
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              textStyle: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            notif.preview,
+                            style: const TextStyle(
+                              color: Color(0xFF888888),
+                              fontSize: 13,
                             ),
-                            child: Text(actionLabel),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const Expanded(child: SizedBox()),
-                          TextButton(
-                            onPressed: () {},
-                            style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF888888),
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              textStyle: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
+                        ),
+                        if (actionLabel != null) ...[
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: BsTokens.brand.withValues(alpha: 0.7),
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                actionLabel,
+                                style: const TextStyle(
+                                  color: BsTokens.brand,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                            child: const Text('בצע'),
                           ),
                         ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ],
                 ),
               ),
