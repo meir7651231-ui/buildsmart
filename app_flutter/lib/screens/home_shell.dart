@@ -147,8 +147,12 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
         ),
         if (tabIndex == 0)
           const _CatalogMenuButton()
+        else if (tabIndex == 1)
+          const _ChatsMenuButton()
+        else if (tabIndex == 2)
+          const _NotificationsMenuButton()
         else
-          const _GlobalMenuButton(),
+          const _StoreMenuButton(),
       ],
     );
   }
@@ -320,44 +324,167 @@ class _CatalogMenuButton extends ConsumerWidget {
   }
 }
 
-// ─── global 3-dot menu (non-catalog tabs) ────────────────────────────────────
+// ─── chats 3-dot menu ────────────────────────────────────────────────────────
 
-class _GlobalMenuButton extends ConsumerWidget {
-  const _GlobalMenuButton();
+class _ChatsMenuButton extends ConsumerWidget {
+  const _ChatsMenuButton();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return PopupMenuButton<MenuTab>(
+    return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert, color: Colors.white70),
       tooltip: 'תפריט',
       color: const Color(0xFF1A1A1A),
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      onSelected: (tab) {
-        ref
-          ..read(openDialProvider.notifier).state = OpenDial.menu
-          ..read(menuTabProvider.notifier).state = tab;
-      },
+      onSelected: (value) => _onSelected(context, ref, value),
       itemBuilder: (_) => const [
-        PopupMenuItem<MenuTab>(
-          value: MenuTab.home,
-          child: _MenuRow(emoji: '🏠', label: 'בית'),
+        PopupMenuItem<String>(
+          value: 'new_chat',
+          child: _MenuRow(emoji: '✏️', label: 'שיחה חדשה'),
         ),
-        PopupMenuItem<MenuTab>(
-          value: MenuTab.projects,
-          child: _MenuRow(emoji: '🏗️', label: 'הפרויקטים'),
+        PopupMenuItem<String>(
+          value: 'archive',
+          child: _MenuRow(emoji: '🗂️', label: 'ארכיון שיחות'),
         ),
-        PopupMenuItem<MenuTab>(
-          value: MenuTab.cart,
-          child: _MenuRow(emoji: '🛒', label: 'רכש'),
+        PopupMenuItem<String>(
+          value: 'mute_all',
+          child: _MenuRow(emoji: '🔇', label: 'השתק הכל'),
         ),
         PopupMenuDivider(),
-        PopupMenuItem<MenuTab>(
-          value: MenuTab.settings,
+        PopupMenuItem<String>(
+          value: 'settings',
           child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
         ),
       ],
     );
+  }
+
+  void _onSelected(BuildContext context, WidgetRef ref, String value) {
+    switch (value) {
+      case 'new_chat':
+        showModalBottomSheet<void>(
+          context: context,
+          backgroundColor: const Color(0xFF1A1A1A),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (_) => const _NewChatSheet(),
+        );
+      case 'archive':
+        showToast(context, 'ארכיון שיחות — בבנייה');
+      case 'mute_all':
+        showToast(context, 'השתק הכל — בבנייה');
+      case 'settings':
+        ref
+          ..read(openDialProvider.notifier).state = OpenDial.menu
+          ..read(menuTabProvider.notifier).state = MenuTab.settings;
+    }
+  }
+}
+
+// ─── notifications 3-dot menu ────────────────────────────────────────────────
+
+class _NotificationsMenuButton extends ConsumerWidget {
+  const _NotificationsMenuButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert, color: Colors.white70),
+      tooltip: 'תפריט',
+      color: const Color(0xFF1A1A1A),
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      onSelected: (value) => _onSelected(context, ref, value),
+      itemBuilder: (_) => const [
+        PopupMenuItem<String>(
+          value: 'mark_all_read',
+          child: _MenuRow(emoji: '✅', label: 'סמן הכל כנקרא'),
+        ),
+        PopupMenuItem<String>(
+          value: 'clear_all',
+          child: _MenuRow(emoji: '🗑️', label: 'נקה הכל'),
+        ),
+        PopupMenuItem<String>(
+          value: 'notif_settings',
+          child: _MenuRow(emoji: '🔔', label: 'הגדרות התראות'),
+        ),
+        PopupMenuDivider(),
+        PopupMenuItem<String>(
+          value: 'settings',
+          child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
+        ),
+      ],
+    );
+  }
+
+  void _onSelected(BuildContext context, WidgetRef ref, String value) {
+    switch (value) {
+      case 'mark_all_read':
+        markAllNotifsRead(ref);
+        showToast(context, 'כל ההתראות סומנו כנקרא');
+      case 'clear_all':
+        dismissAllNotifs(ref);
+        showToast(context, 'כל ההתראות נמחקו');
+      case 'notif_settings':
+      case 'settings':
+        ref
+          ..read(openDialProvider.notifier).state = OpenDial.menu
+          ..read(menuTabProvider.notifier).state = MenuTab.settings;
+    }
+  }
+}
+
+// ─── store 3-dot menu ────────────────────────────────────────────────────────
+
+class _StoreMenuButton extends ConsumerWidget {
+  const _StoreMenuButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert, color: Colors.white70),
+      tooltip: 'תפריט',
+      color: const Color(0xFF1A1A1A),
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      onSelected: (value) => _onSelected(context, ref, value),
+      itemBuilder: (_) => const [
+        PopupMenuItem<String>(
+          value: 'cart',
+          child: _MenuRow(emoji: '🛒', label: 'הסל שלי'),
+        ),
+        PopupMenuItem<String>(
+          value: 'orders',
+          child: _MenuRow(emoji: '📦', label: 'הזמנות'),
+        ),
+        PopupMenuItem<String>(
+          value: 'services',
+          child: _MenuRow(emoji: '🔧', label: 'שירותים'),
+        ),
+        PopupMenuDivider(),
+        PopupMenuItem<String>(
+          value: 'settings',
+          child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
+        ),
+      ],
+    );
+  }
+
+  void _onSelected(BuildContext context, WidgetRef ref, String value) {
+    switch (value) {
+      case 'cart':
+        ref.read(storeSectionProvider.notifier).state = StoreSection.cart;
+      case 'orders':
+        ref.read(storeSectionProvider.notifier).state = StoreSection.orders;
+      case 'services':
+        ref.read(storeSectionProvider.notifier).state = StoreSection.services;
+      case 'settings':
+        ref
+          ..read(openDialProvider.notifier).state = OpenDial.menu
+          ..read(menuTabProvider.notifier).state = MenuTab.settings;
+    }
   }
 }
 
@@ -449,6 +576,82 @@ class _ScanPlanSheet extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 showToast(context, '${p.label} — בבנייה');
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── new chat sheet ───────────────────────────────────────────────────────────
+
+class _NewChatSheet extends StatelessWidget {
+  const _NewChatSheet();
+
+  static const _contacts = [
+    (emoji: '👷', label: 'קבלן'),
+    (emoji: '🏪', label: 'ספק'),
+    (emoji: '🛵', label: 'שליח'),
+    (emoji: '🦺', label: 'עובד'),
+    (emoji: '💬', label: 'תמיכה'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '✏️ שיחה חדשה',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'בחר סוג איש קשר',
+              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          ..._contacts.map(
+            (c) => ListTile(
+              leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
+              title: Text(
+                c.label,
+                style: const TextStyle(color: Colors.white, fontSize: 15),
+              ),
+              trailing: const Icon(
+                Icons.chevron_left,
+                color: Color(0xFF888888),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                showToast(context, '${c.label} — בבנייה');
               },
             ),
           ),

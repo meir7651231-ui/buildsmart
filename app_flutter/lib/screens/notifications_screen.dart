@@ -161,6 +161,18 @@ const List<_Notif> _kNotifs = [
   ),
 ];
 
+/// Marks every notification as read. Called from AppBar 3-dot menu.
+void markAllNotifsRead(WidgetRef ref) {
+  ref.read(notifReadIdsProvider.notifier).state =
+      _kNotifs.map((n) => n.id).toSet();
+}
+
+/// Dismisses every notification. Called from AppBar 3-dot menu.
+void dismissAllNotifs(WidgetRef ref) {
+  ref.read(notifDismissedIdsProvider.notifier).state =
+      _kNotifs.map((n) => n.id).toSet();
+}
+
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 List<_Notif> _filtered({
