@@ -6,6 +6,7 @@ import 'package:buildsmart/screens/menu_dial_widget.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/search_dial_widget.dart';
 import 'package:buildsmart/screens/store_screen.dart';
+import 'package:buildsmart/screens/store_settings_screen.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -481,9 +482,7 @@ class _StoreMenuButton extends ConsumerWidget {
       case 'services':
         ref.read(storeSectionProvider.notifier).state = StoreSection.services;
       case 'settings':
-        ref
-          ..read(openDialProvider.notifier).state = OpenDial.menu
-          ..read(menuTabProvider.notifier).state = MenuTab.settings;
+        Navigator.of(context).push(StoreSettingsScreen.route());
     }
   }
 }
