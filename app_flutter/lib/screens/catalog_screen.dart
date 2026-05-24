@@ -1,6 +1,7 @@
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
+import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -24,7 +25,7 @@ final catalogSectionProvider = StateProvider<String>((_) => 'הכל');
 
 /// Ordered list of user section labels (הכל is NOT stored here).
 final catalogSectionsListProvider = StateProvider<List<String>>(
-  (_) => ['חיפושים אחרונים', 'מועדפים', 'קטגוריות'],
+  (_) => ['חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם'],
 );
 
 /// Per-list catalog items: map of section-label → set of catalog category
@@ -43,6 +44,9 @@ final searchScopeProvider = StateProvider<String>((_) => 'הכל');
 
 /// Recent search queries, newest first, max 8.
 final recentSearchesProvider = StateProvider<List<String>>((_) => []);
+
+/// Currently selected category in the smart tree section. Null = show categories.
+final smartTreeCatProvider = StateProvider<String?>((_) => null);
 
 String _sortLabel(CatalogSort s) => switch (s) {
       CatalogSort.defaultSort => 'ברירת מחדל',
@@ -813,6 +817,7 @@ IconData _sectionIcon(String label) => switch (label) {
       'חיפושים אחרונים' => Icons.history,
       'מועדפים'         => Icons.favorite_border,
       'קטגוריות'        => Icons.grid_view_outlined,
+      'עץ חכם'          => Icons.account_tree_outlined,
       _                 => Icons.list_alt_outlined,
     };
 
@@ -1374,6 +1379,9 @@ class _CatalogBody extends ConsumerWidget {
     final active = ref.watch(catalogSectionProvider);
     if (active == 'הכל') return const _CatalogList();
 
+    // Smart tree section gets its own dedicated view
+    if (active == 'עץ חכם') return const _SmartTreeSection();
+
     final selected = ref.watch(catalogListItemsProvider)[active];
     final hasItems = selected != null && selected.isNotEmpty;
 
@@ -1615,6 +1623,567 @@ class _CatalogRow extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Smart Tree Section ────────────────────────────────────────────────────
+// Two levels: category list → product list within a category.
+// Tapping a product opens a bottom sheet (brands + accessories).
+
+class _SmartTreeSection extends ConsumerWidget {
+  const _SmartTreeSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedCat = ref.watch(smartTreeCatProvider);
+
+    if (selectedCat == null) {
+      return const _SmartTreeCatList();
+    }
+    return _SmartTreeProductList(cat: selectedCat);
+  }
+}
+
+class _SmartTreeCatList extends ConsumerWidget {
+  const _SmartTreeCatList();
+
+  static const _catEmojis = <String, String>{
+    'ברזים וכיורים':         '🚰',
+    'אסלות':                 '🚽',
+    'מקלחות ואמבטיות':       '🚿',
+    'חימום מים':             '♨️',
+    'מטבח':                  '🍽️',
+    'ניקוז וצנרת':           '🕳️',
+    'גופי תברואה':           '🚾',
+    'בנייה ומחיצות':         '🧱',
+    'גמר':                   '🎨',
+    'אביזרי קצה וחיבורים':   '🔗',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cats = kSmartTreeCats;
+    return Column(
+      children: [
+        // Header
+        Container(
+          color: const Color(0xFF1A1A1A),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: const Row(
+            children: [
+              Text('🌳', style: TextStyle(fontSize: 20)),
+              SizedBox(width: 10),
+              Text(
+                'עץ חכם — בחר קטגוריה',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1, color: Color(0xFF2A2A2A)),
+        Expanded(
+          child: ListView.separated(
+            itemCount: cats.length,
+            separatorBuilder: (_, __) =>
+                const Divider(height: 1, indent: 76, color: Color(0xFF2A2A2A)),
+            itemBuilder: (_, i) {
+              final cat = cats[i];
+              final count = smartProductsForCat(cat).length;
+              final emoji = _catEmojis[cat] ?? '📦';
+              return InkWell(
+                onTap: () =>
+                    ref.read(smartTreeCatProvider.notifier).state = cat,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2A2A2A),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(emoji,
+                            style: const TextStyle(fontSize: 24)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              cat,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '$count מוצרים בעץ',
+                              style: const TextStyle(
+                                color: Color(0xFF888888),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_left,
+                          color: Color(0xFF555555), size: 20),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SmartTreeProductList extends ConsumerWidget {
+  const _SmartTreeProductList({required this.cat});
+
+  final String cat;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final products = smartProductsForCat(cat);
+    return Column(
+      children: [
+        // Breadcrumb header with back button
+        Container(
+          color: const Color(0xFF1A1A1A),
+          padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios,
+                    color: BsTokens.brand, size: 18),
+                onPressed: () =>
+                    ref.read(smartTreeCatProvider.notifier).state = null,
+              ),
+              const Text('🌳 ', style: TextStyle(fontSize: 16)),
+              Text(
+                cat,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1, color: Color(0xFF2A2A2A)),
+        Expanded(
+          child: ListView.separated(
+            itemCount: products.length,
+            separatorBuilder: (_, __) => const Divider(
+                height: 1, indent: 76, color: Color(0xFF2A2A2A)),
+            itemBuilder: (_, i) {
+              final p = products[i];
+              return InkWell(
+                onTap: () => _openProductSheet(context, p),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2A2A2A),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(p.emoji,
+                            style: const TextStyle(fontSize: 24)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    p.name,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  '₪${p.recBrand.price}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '⚡ ${p.mustCount} פריטי חובה · ${p.acc.length} סה"כ',
+                              style: const TextStyle(
+                                color: Color(0xFF888888),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  static void _openProductSheet(BuildContext context, SmartProduct p) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF1A1A1A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _SmartProductSheet(product: p),
+    );
+  }
+}
+
+class _SmartProductSheet extends StatefulWidget {
+  const _SmartProductSheet({required this.product});
+
+  final SmartProduct product;
+
+  @override
+  State<_SmartProductSheet> createState() => _SmartProductSheetState();
+}
+
+class _SmartProductSheetState extends State<_SmartProductSheet> {
+  late int _selectedBrand;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedBrand =
+        widget.product.brands.indexWhere((b) => b.rec).clamp(0, widget.product.brands.length - 1);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.product;
+    final brand = p.brands[_selectedBrand];
+    final mustItems = p.acc.where((a) => a.must).toList();
+    final optItems = p.acc.where((a) => !a.must).toList();
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.75,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      builder: (_, scrollCtrl) => Column(
+        children: [
+          // Handle
+          Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 4),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: const Color(0xFF444444),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // Product header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF2A2A2A),
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(p.emoji, style: const TextStyle(fontSize: 28)),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        p.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        p.cat,
+                        style: const TextStyle(
+                          color: Color(0xFF888888),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFF2A2A2A)),
+          Expanded(
+            child: ListView(
+              controller: scrollCtrl,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              children: [
+                // Brand selector
+                const Padding(
+                  padding: EdgeInsets.only(top: 16, bottom: 8),
+                  child: Text(
+                    'בחר מותג',
+                    style: TextStyle(
+                      color: Color(0xFF888888),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                ...List.generate(p.brands.length, (i) {
+                  final b = p.brands[i];
+                  final selected = i == _selectedBrand;
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedBrand = i),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? BsTokens.brand.withAlpha(30)
+                            : const Color(0xFF252525),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: selected
+                              ? BsTokens.brand
+                              : const Color(0xFF333333),
+                          width: selected ? 1.5 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      b.name,
+                                      style: TextStyle(
+                                        color: selected
+                                            ? Colors.white
+                                            : const Color(0xFFCCCCCC),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    if (b.rec) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: BsTokens.brand,
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                        ),
+                                        child: const Text(
+                                          'מומלץ',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  b.tag,
+                                  style: const TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            '₪${b.price}',
+                            style: TextStyle(
+                              color: selected
+                                  ? BsTokens.brand
+                                  : const Color(0xFF888888),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+
+                // Must accessories
+                if (mustItems.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.only(top: 16, bottom: 8),
+                    child: Text(
+                      '⚡ פריטי חובה',
+                      style: TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  ...mustItems.map((a) => _AccRow(acc: a)),
+                ],
+
+                // Optional accessories
+                if (optItems.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.only(top: 16, bottom: 8),
+                    child: Text(
+                      '💡 פריטים אופציונליים',
+                      style: TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  ...optItems.map((a) => _AccRow(acc: a)),
+                ],
+
+                // CTA
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: BsTokens.brand,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      showToast(context,
+                          '${p.name} · ${brand.name} הוסף לסל 🛒');
+                    },
+                    child: Text(
+                      'הוסף לסל · ₪${brand.price}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccRow extends StatelessWidget {
+  const _AccRow({required this.acc});
+
+  final SmartAcc acc;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: const BoxDecoration(
+              color: Color(0xFF252525),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(acc.emoji, style: const TextStyle(fontSize: 18)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  acc.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  acc.why,
+                  style: const TextStyle(
+                    color: Color(0xFF888888),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '₪${acc.price}',
+            style: const TextStyle(
+              color: Color(0xFF888888),
+              fontSize: 13,
+            ),
+          ),
+        ],
       ),
     );
   }
