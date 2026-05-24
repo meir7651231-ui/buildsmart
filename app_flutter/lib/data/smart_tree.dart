@@ -1246,6 +1246,133 @@ const List<SmartProduct> kSmartProducts = [
       SmartAcc(name: 'מפתח אלן',             emoji: '🔧', price: 18, why: 'להידוק הברגים',         must: false),
     ],
   ),
+
+  // ===== ניקוז — סיפון מטבח (פיצול ייעודי) =====
+  SmartProduct(
+    key: 'kitchenDrain',
+    name: 'סיפון לכיור מטבח',
+    emoji: '🍽️',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'התקנת סיפון מטבח — עם כניסה למדיח',
+    stages: _strap,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — סיפון 2" לכיור מטבח בודד',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '116124',
+      ),
+      SmartBrand(
+        name: 'ליפסקי — סיפון 2" לכיור מטבח כפול',
+        tag: 'מטבח כפול',
+        sku: '116652',
+      ),
+      SmartBrand(
+        name: 'ליפסקי — סיפון 2" כפול עם כניסה למדיח',
+        tag: 'עם כניסה למדיח',
+        sku: '116127',
+      ),
+      SmartBrand(
+        name: 'ליפסקי — סיפון 2" בודד מס׳ 1',
+        tag: 'גרסה משופרת',
+        sku: '116649',
+      ),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון',          emoji: '🎗️', price: 4,  why: 'אוטם הברגה — חובה', must: true),
+      SmartAcc(name: 'אטם דו צדדי DN50',   emoji: '⚫', why: 'מונע נזילות — חובה',           must: true, sku: '506527'),
+      SmartAcc(name: 'סיליקון סניטרי',    emoji: '🧴', price: 21, why: 'איטום בין הסיפון לקיר', must: true),
+      SmartAcc(name: 'צינור גמיש למדיח', emoji: '〰️', price: 28, why: 'אם יש מדיח כלים',     must: false),
+      SmartAcc(name: 'מפתח צינורות',      emoji: '🔧', price: 39, why: 'להידוק',                must: false),
+    ],
+  ),
+
+  // ===== ניקוז — סיפון מכונת כביסה =====
+  SmartProduct(
+    key: 'washingMachineDrain',
+    name: 'סיפון למכונת כביסה',
+    emoji: '🧺',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'התקנת סיפון למכונת כביסה',
+    stages: _strap,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — מחסום 1½" למכונת כביסה',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '171190',
+      ),
+      SmartBrand(name: 'ליפסקי — מחסום 1½" למכ. כביסה (20 ארז.)', tag: 'אריזה גדולה', sku: '171189'),
+      SmartBrand(name: 'ליפסקי — מחסום 1½" למכ. כביסה (פרימיום)', tag: 'דגם מורחב',   sku: '218495'),
+    ],
+    acc: [
+      SmartAcc(name: 'צינור גמיש למכונה',  emoji: '〰️', price: 32, why: 'מחבר את הניקוז — חובה', must: true),
+      SmartAcc(name: 'אטם דו צדדי 32/50',   emoji: '⚫', why: 'מונע נזילות',                       must: true, sku: '558463'),
+      SmartAcc(name: 'סרט טפלון',           emoji: '🎗️', price: 4, why: 'איטום ההברגה',             must: true),
+      SmartAcc(name: 'סיליקון סניטרי',     emoji: '🧴', price: 21, why: 'איטום חיצוני',            must: false),
+      SmartAcc(name: 'מתקן תלייה לצינור', emoji: '🔩', price: 14, why: 'לקיבוע הצינור',            must: false),
+    ],
+  ),
+
+  // ===== אביזרי קצה — ברכיים תבריג ייעודי =====
+  SmartProduct(
+    key: 'threadElbows',
+    name: 'ברכיים תבריג — לכל גודל',
+    emoji: '↪️',
+    cat: 'אביזרי קצה וחיבורים',
+    diagramTitle: 'חיבור ברך תבריג',
+    stages: _si,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — ברך 90° תבריג כפול DN50/50',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '116661',
+      ),
+      SmartBrand(name: 'ליפסקי — ברך 90° תבריג צד אחד DN50',   tag: 'צד אחד',        sku: '116191'),
+      SmartBrand(name: 'ליפסקי — ברך 90° תבריג צד אחד DN40',   tag: 'קטן צד אחד',   sku: '116186'),
+      SmartBrand(name: 'ליפסקי — ברך 90° תבריג כפול DN40/40',  tag: 'קטן כפול',     sku: '116182'),
+      SmartBrand(name: 'ליפסקי — ברך 90° תבריג כפול DN50/40',  tag: 'מעבר 50→40', sku: '119934'),
+      SmartBrand(name: 'ליפסקי — ברך 90° תבריג כפול DN75/75',  tag: 'בינוני',        sku: '116663'),
+      SmartBrand(name: 'ליפסקי — ברך 90° תבריג כפול DN110',    tag: 'יציאה ראשית',  sku: '116659'),
+      SmartBrand(name: 'ליפסקי — ברך 90° ש"ת לסיפון DN50/50',   tag: 'לסיפון',         sku: '204127'),
+    ],
+    acc: [
+      SmartAcc(name: 'אטם דו צדדי DN50', emoji: '⚫', why: 'אוטם — חובה',     must: true, sku: '506527'),
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4, why: 'איטום ההברגה', must: true),
+      SmartAcc(name: 'מפתח צינורות',     emoji: '🔧', price: 39, why: 'להידוק',       must: true),
+      SmartAcc(name: 'סיליקון סניטרי',   emoji: '🧴', price: 21, why: 'איטום משלים', must: false),
+    ],
+  ),
+
+  // ===== ניקוז — מאסף רצפה ייעודי (פיצול מ'מאספים') =====
+  SmartProduct(
+    key: 'floorCollector',
+    name: 'מאסף רצפה — מקלחת/חצר',
+    emoji: '🟦',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'התקנת מאסף רצפה מתחת לרצפה',
+    stages: _sw,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — מאסף רצפה 130/50',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '116638',
+      ),
+      SmartBrand(name: 'ליפסקי — מאסף 130/50 נפילה פנימית',  tag: 'נפילה ישרה',  sku: '217648'),
+      SmartBrand(name: 'ליפסקי — מאסף 130/50 נפילה 50°',      tag: 'בזווית',      sku: '116640'),
+      SmartBrand(name: 'ליפסקי — מאסף 110 נפילה 4"',          tag: 'גדול',         sku: '116175'),
+    ],
+    acc: [
+      SmartAcc(name: 'מכסה/רשת לבן',          emoji: '⬜', why: 'גמר עליון — חובה', must: true,  sku: '610911'),
+      SmartAcc(name: 'רשת פנימית עגולה',       emoji: '🕸️', why: 'סינון פנימי',      must: true,  sku: '610906'),
+      SmartAcc(name: 'מכסה עגול עליון קבוע',  emoji: '🔘', why: 'נראות מוקפדת',     must: false, sku: '610918'),
+      SmartAcc(name: 'מכסה זמני',               emoji: '🚧', why: 'הגנה בזמן עבודה', must: false, sku: '610921'),
+      SmartAcc(name: 'רשת שרוול עגולה',         emoji: '🕷️', why: 'מסנן שיער',         must: false, sku: '610933'),
+      SmartAcc(name: 'סיליקון סניטרי',         emoji: '🧴', price: 21, why: 'איטום סופי', must: true),
+    ],
+  ),
 ];
 
 /// Returns unique categories that have smart products, preserving prototype order.
