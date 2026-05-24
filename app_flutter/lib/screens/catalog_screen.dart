@@ -8,6 +8,7 @@ import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/catalog_drill_screen.dart';
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
+import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
