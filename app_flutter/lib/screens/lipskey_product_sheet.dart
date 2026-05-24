@@ -196,7 +196,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     ref.read(smartCartProvider.notifier).add(SmartCartLine(
           productKey: 'lip:${p.sku}',
           productName: p.nameHe,
-          productEmoji: p.categoryEmoji,
+          productEmoji: p.typeEmoji,
           brandName: p.brand,
           brandPrice: 0,
           productQty: _qty * _unitMult,
@@ -780,10 +780,10 @@ class _RelatedCard extends StatelessWidget {
                   ? Image.asset(product.imageAsset!,
                       fit: BoxFit.contain,
                       errorBuilder: (_, __, ___) => Center(
-                          child: Text(product.categoryEmoji,
+                          child: Text(product.typeEmoji,
                               style: const TextStyle(fontSize: 28))))
                   : Center(
-                      child: Text(product.categoryEmoji,
+                      child: Text(product.typeEmoji,
                           style: const TextStyle(fontSize: 28))),
             ),
             const SizedBox(height: 5),
@@ -872,7 +872,7 @@ class _HeroImageState extends State<_HeroImage>
                       product: p,
                       onFlip: _flip,
                       onZoom: () => _openFullscreenAsset(
-                          context, p.specImageAsset, p.categoryEmoji),
+                          context, p.specImageAsset, p.typeEmoji),
                     ),
                   )
                 : _ProductSide(
@@ -881,7 +881,7 @@ class _HeroImageState extends State<_HeroImage>
                     onZoom: () => _openFullscreenAsset(
                         context,
                         p.imageAsset ?? p.specImageAsset,
-                        p.categoryEmoji),
+                        p.typeEmoji),
                   ),
           );
         },
@@ -925,7 +925,7 @@ class _ProductSide extends StatelessWidget {
               product.imageAsset ?? product.specImageAsset,
               fit: product.imageAsset != null ? BoxFit.contain : BoxFit.cover,
               errorBuilder: (_, __, ___) => Center(
-                child: Text(product.categoryEmoji,
+                child: Text(product.typeEmoji,
                     style: const TextStyle(fontSize: 72)),
               ),
             ),
@@ -1019,7 +1019,7 @@ class _SpecSide extends StatelessWidget {
               product.specImageAsset,
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) => Center(
-                child: Text(product.categoryEmoji,
+                child: Text(product.typeEmoji,
                     style: const TextStyle(fontSize: 72)),
               ),
             ),
@@ -1111,7 +1111,7 @@ class _VariantSelector extends StatelessWidget {
                         p.imageAsset ?? p.specImageAsset,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Text(
-                            p.categoryEmoji,
+                            p.typeEmoji,
                             style: const TextStyle(fontSize: 24),
                             textAlign: TextAlign.center)),
                   ),

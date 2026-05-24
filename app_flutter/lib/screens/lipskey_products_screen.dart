@@ -119,7 +119,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     ref.read(smartCartProvider.notifier).add(SmartCartLine(
           productKey: 'lip:${p.sku}',
           productName: p.nameHe,
-          productEmoji: p.categoryEmoji,
+          productEmoji: p.typeEmoji,
           brandName: p.brand,
           brandPrice: 0,
           productQty: _qty * _unitMult,
@@ -193,9 +193,9 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                     ? Image.asset(p.imageAsset!,
                         height: 84,
                         fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => Text(p.categoryEmoji,
+                        errorBuilder: (_, __, ___) => Text(p.typeEmoji,
                             style: const TextStyle(fontSize: 36)))
-                    : Text(p.categoryEmoji,
+                    : Text(p.typeEmoji,
                         style: const TextStyle(fontSize: 36)),
               ),
               if (_inCart)

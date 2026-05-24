@@ -40,6 +40,41 @@ class LipskeyCatalogProduct {
     final p = page.toString().padLeft(2, '0');
     return 'assets/lipskey/pages/page_$p.jpg';
   }
+
+  /// A type-specific glyph derived from the product name, so image-less
+  /// products are still distinguishable at a glance (instead of every item
+  /// in a category showing the same category emoji).
+  String get typeEmoji {
+    final n = nameHe;
+    bool has(String s) => n.contains(s);
+    if (has('ניפל') || has('רקורד') || has('בושינג')) return '🔩';
+    if (has('מצמד') || has('מחבר') || has('מופה')) return '🔌';
+    if (has('צינור') || has('צנרת')) return '📏';
+    if (has('ברך') || has('זווית')) return '↩️';
+    if (has('מסעף') || has('הסתעפות')) return '🔱';
+    if (has('מכסה') || has('רשת')) return '⬜';
+    if (has('מיכל הדחה') || has('מיכל')) return '🚰';
+    if (has('מושב')) return '⭕';
+    if (has('מחסום') || has('מאסף') || has('סיפון') || has('קולט')) return '🕳️';
+    if (has('אטם') || has('פקק') || has('אום')) return '⚫';
+    if (has('מאריך')) return '➕';
+    if (has('אל חזור')) return '🔄';
+    if (has('חבק') || has('אומגה') || has('עוגן') || has('בנד')) return '🪝';
+    if (has('מזלף') || has('מקלח')) return '🚿';
+    if (has('ראש')) return '🚿';
+    if (has('זרוע')) return '⤴️';
+    if (has('מחלק')) return '🔀';
+    if (has('ארון')) return '📦';
+    if (has('ידית') || has('מוט') || has('קולב') || has('מחזיק') || has('סבונייה'))
+      return '🧴';
+    if (has('ברז')) return '🚰';
+    if (has('אביק')) return '🛁';
+    if (has('תעלה')) return '📐';
+    if (has('מצוף')) return '🔵';
+    if (has('שעון') || has('מקטין') || has('משחרר')) return '📊';
+    if (has('דיור') || has('פיה')) return '🚰';
+    return categoryEmoji; // fallback to category glyph
+  }
 }
 
 const List<LipskeyCatalogProduct> kLipskeyCatalog = [
