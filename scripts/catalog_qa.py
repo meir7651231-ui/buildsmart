@@ -184,6 +184,48 @@ def cmd_pdfmap(pdf):
             print(f"page {i+1}: {skus}")
 
 
+TRUTH = os.path.join(ROOT, "scripts/source_truth.json")
+
+
+def cmd_truthcheck(truth=TRUTH):
+    """Compare the live catalog against the authoritative source_truth.json
+    (produced from ALL source PDFs). Reports per-SKU diffs in name / category
+    / size — 100% coverage, the real correctness gate."""
+    import json
+    if not os.path.exists(truth):
+        print(f"❌ אין {truth}\n   הסוכן השני צריך לייצר אותו מ-4 ה-PDFs.")
+        print("   פורמט: [{{sku,nameHe,nameEn,categoryHe,brand,sizes,page,pdf,imageFile}}]")
+        return
+    ref = {r["sku"]: r for r in json.load(open(truth, encoding="utf-8"))}
+    products = parse_catalog()
+    name_diff, cat_diff, missing_ref, only_ref = [], [], [], []
+    live_skus = set()
+    for p in products:
+        live_skus.add(p["sku"])
+        r = ref.get(p["sku"])
+        if not r:
+            missing_ref.append(p["sku"])
+            continue
+        if p["name"].strip() != r.get("nameHe", "").strip():
+            name_diff.append((p["sku"], p["name"], r.get("nameHe", "")))
+        if p["category"] != r.get("categoryHe", ""):
+            cat_diff.append((p["sku"], p["category"], r.get("categoryHe", "")))
+    only_ref = [s for s in ref if s not in live_skus]
+
+    print(f"מוצרים באפליקציה: {len(products)} · במקור: {len(ref)}")
+    print(f"כיסוי אימות: {len(live_skus & set(ref))*100//max(1,len(products))}%")
+    print(f"❌ שם שונה מהמקור: {len(name_diff)}")
+    for sk, a, b in name_diff[:20]:
+        print(f"   {sk}\n      app:    {a[:50]}\n      source: {b[:50]}")
+    print(f"❌ קטגוריה שונה: {len(cat_diff)}")
+    for sk, a, b in cat_diff[:20]:
+        print(f"   {sk}: app='{a}' source='{b}'")
+    print(f"⚠️ באפליקציה אך לא במקור: {len(missing_ref)} {missing_ref[:8]}")
+    print(f"⚠️ במקור אך חסר באפליקציה: {len(only_ref)} {only_ref[:8]}")
+    ok = not (name_diff or cat_diff or missing_ref or only_ref)
+    print("\n✅ הקטלוג תואם למקור" if ok else "\n❌ יש פערים מול המקור — תקן")
+
+
 def cmd_crosscheck(*pdfs):
     """Semantic check: every product's name vs the source PDF text near its SKU.
     Pass ALL source PDFs. Reports coverage + names that don't match the source."""
@@ -259,6 +301,8 @@ def main():
         cmd_pdfmap(*rest)
     elif cmd == "crosscheck":
         cmd_crosscheck(*rest)
+    elif cmd == "truthcheck":
+        cmd_truthcheck(*rest)
     elif cmd == "verify":
         cmd_verify(*rest)
     else:

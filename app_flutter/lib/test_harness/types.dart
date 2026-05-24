@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-enum TestCategory { buttons, tabs, products, behavior, dsync, dupes, sections, settings }
+enum TestCategory { buttons, tabs, products, behavior, dsync, dupes, sections, settings, catalog }
 
 extension TestCategoryX on TestCategory {
   String get id => name;
@@ -13,6 +13,7 @@ extension TestCategoryX on TestCategory {
         TestCategory.dupes    => 'זהויות',
         TestCategory.sections => 'עצים',
         TestCategory.settings => 'הגדרות',
+        TestCategory.catalog  => 'קטלוג',
       };
 }
 
