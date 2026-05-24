@@ -83,24 +83,53 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     return out.where((s) => s.length >= 2).toSet();
   }
 
-  /// Readable size tokens for the section subtitle.
-  List<String> _sizeTokens(String name) => _sizeSet(name).toList();
+  /// The distinct *connection ends* of a product — the atomic DN/inch sizes.
+  /// A reducer "75/50" has two ends (75, 50); "DN50" has one (50).
+  List<String> _connectionSizes(String name) {
+    final set = _sizeSet(name);
+    // atomic = numeric parts + inch tokens (drop the compound strings like 75/50)
+    final atomic = set.where((s) => !s.contains('/')).toList();
+    // preserve a stable, human order: larger DN first
+    atomic.sort((a, b) {
+      final na = int.tryParse(a), nb = int.tryParse(b);
+      if (na != null && nb != null) return nb.compareTo(na);
+      return a.compareTo(b);
+    });
+    return atomic;
+  }
 
-  /// Other-category products that share at least one DN size → "what
-  /// connects to what". The whole point of the app.
-  List<LipskeyCatalogProduct> _compatibleBySize(LipskeyCatalogProduct p) {
-    final mine = _sizeSet(p.nameHe);
-    if (mine.isEmpty) return const [];
+  /// Readable size tokens for the section subtitle.
+  List<String> _sizeTokens(String name) => _connectionSizes(name);
+
+  /// For one connection size — every other-category part that fits it.
+  List<LipskeyCatalogProduct> _partsForSize(
+      LipskeyCatalogProduct p, String size) {
     final seen = <String>{p.sku};
     final out = <LipskeyCatalogProduct>[];
     for (final q in kLipskeyCatalog) {
       if (q.categoryHe == p.categoryHe) continue; // cross-category only
       if (!seen.add(q.sku)) continue;
-      if (_sizeSet(q.nameHe).intersection(mine).isNotEmpty) out.add(q);
-      if (out.length >= 14) break;
+      if (_sizeSet(q.nameHe).contains(size)) out.add(q);
+      if (out.length >= 12) break;
     }
     return out;
   }
+
+  /// Per-side connection groups: [(sizeLabel, fitting parts), ...].
+  List<({String size, List<LipskeyCatalogProduct> parts})> _connectionGroups(
+      LipskeyCatalogProduct p) {
+    final sizes = _connectionSizes(p.nameHe);
+    final groups = <({String size, List<LipskeyCatalogProduct> parts})>[];
+    for (final s in sizes) {
+      final parts = _partsForSize(p, s);
+      if (parts.isNotEmpty) groups.add((size: s, parts: parts));
+    }
+    return groups;
+  }
+
+  /// Inch sizes show as e.g. 1.25" ; plain DN numbers as DN50.
+  String _sizeLabel(String s) =>
+      RegExp(r'^\d+$').hasMatch(s) ? 'DN$s' : '$s"';
 
   void _addToCart() {
     final p = _current;
@@ -453,46 +482,82 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                       ),
                     ),
 
-                    // ── 🔧 מתחבר לפי מידה — תאימות אוטומטית ──────────────
+                    // ── 🔧 חיבורים תואמים — לפי צד/מידה ──────────────────
                     ...(() {
-                      final compat = _compatibleBySize(p);
-                      if (compat.isEmpty) return <Widget>[];
-                      final sizes = _sizeTokens(p.nameHe).join(' · ');
-                      return <Widget>[
+                      final groups = _connectionGroups(p);
+                      if (groups.isEmpty) return <Widget>[];
+                      final multi = groups.length > 1;
+                      final w = <Widget>[
                         const SizedBox(height: 16),
                         const _Divider(),
                         const SizedBox(height: 16),
                         _SectionTitle(
                           emoji: '🔧',
-                          title: 'מתחבר לפי מידה',
-                          subtitle: sizes.isNotEmpty
-                              ? '$sizes · ${compat.length} חלקים תואמים'
-                              : '${compat.length} חלקים תואמים',
+                          title: 'חיבורים תואמים',
+                          subtitle: multi
+                              ? '${groups.length} צדדים — מה מתחבר לכל מידה'
+                              : 'מה מתחבר ל-${_sizeLabel(groups.first.size)}',
                         ),
-                        const SizedBox(height: 10),
-                        SizedBox(
+                        const SizedBox(height: 6),
+                      ];
+                      for (var gi = 0; gi < groups.length; gi++) {
+                        final g = groups[gi];
+                        w.add(Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(20, 8, 20, 6),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 9, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0x22FF7A18),
+                                  borderRadius: BorderRadius.circular(7),
+                                  border: Border.all(
+                                      color: const Color(0x55FF7A18)),
+                                ),
+                                child: Text(
+                                  multi
+                                      ? '📐 צד ${gi + 1}: ${_sizeLabel(g.size)}'
+                                      : '📐 ${_sizeLabel(g.size)}',
+                                  style: const TextStyle(
+                                      color: Color(0xFFFF9D4D),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text('${g.parts.length} חלקים',
+                                  style: const TextStyle(
+                                      color: Color(0xFF9AA3B2),
+                                      fontSize: 11)),
+                            ],
+                          ),
+                        ));
+                        w.add(SizedBox(
                           height: 132,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 20),
-                            itemCount: compat.length,
+                            itemCount: g.parts.length,
                             separatorBuilder: (_, __) =>
                                 const SizedBox(width: 10),
                             itemBuilder: (_, i) => _RelatedCard(
-                              product: compat[i],
+                              product: g.parts[i],
                               onTap: () => showLipskeyProductSheet(
                                 context,
-                                compat[i],
+                                g.parts[i],
                                 kLipskeyCatalog
                                     .where((x) =>
-                                        x.categoryHe == compat[i].categoryHe)
+                                        x.categoryHe == g.parts[i].categoryHe)
                                     .toList(),
                               ),
                             ),
                           ),
-                        ),
-                      ];
+                        ));
+                      }
+                      return w;
                     })(),
 
                     // ── Related / similar products (same category) ──────
