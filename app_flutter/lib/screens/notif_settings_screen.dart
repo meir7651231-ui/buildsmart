@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Full-screen Notification settings — 9 categories, ~40 leaves.
-/// 8 active leaves persisted via [notifSettingsProvider];
-/// the rest show "בבנייה" toast on tap.
+/// Most leaves are persisted via [notifSettingsProvider];
+/// OS-level quick actions show "בבנייה" toast on tap.
 class NotifSettingsScreen extends ConsumerWidget {
   const NotifSettingsScreen({super.key});
 
@@ -265,8 +265,20 @@ class _ChannelsSection extends ConsumerWidget {
               .read(notifSettingsProvider.notifier)
               .update((s) => s.copyWith(emailEnabled: v)),
         ),
-        const _PlaceholderRow(label: 'SMS'),
-        const _PlaceholderRow(label: 'WhatsApp'),
+        _SwitchRow(
+          label: 'SMS',
+          value: settings.smsEnabled,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(smsEnabled: v)),
+        ),
+        _SwitchRow(
+          label: 'WhatsApp',
+          value: settings.whatsappEnabled,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(whatsappEnabled: v)),
+        ),
       ],
     );
   }
@@ -305,12 +317,48 @@ class _TypesSection extends ConsumerWidget {
               .read(notifSettingsProvider.notifier)
               .update((s) => s.copyWith(typePriceDrops: v)),
         ),
-        const _PlaceholderRow(label: 'מבצעים'),
-        const _PlaceholderRow(label: 'הצעות ספקים'),
-        const _PlaceholderRow(label: 'חזר למלאי'),
-        const _PlaceholderRow(label: 'תזכורות'),
-        const _PlaceholderRow(label: 'שיחות חדשות'),
-        const _PlaceholderRow(label: 'עדכוני פרויקטים'),
+        _SwitchRow(
+          label: 'מבצעים',
+          value: settings.typeDeals,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(typeDeals: v)),
+        ),
+        _SwitchRow(
+          label: 'הצעות ספקים',
+          value: settings.typeSupplierOffers,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(typeSupplierOffers: v)),
+        ),
+        _SwitchRow(
+          label: 'חזר למלאי',
+          value: settings.typeBackInStock,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(typeBackInStock: v)),
+        ),
+        _SwitchRow(
+          label: 'תזכורות',
+          value: settings.typeReminders,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(typeReminders: v)),
+        ),
+        _SwitchRow(
+          label: 'שיחות חדשות',
+          value: settings.typeNewChats,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(typeNewChats: v)),
+        ),
+        _SwitchRow(
+          label: 'עדכוני פרויקטים',
+          value: settings.typeProjectUpdates,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(typeProjectUpdates: v)),
+        ),
       ],
     );
   }
@@ -361,9 +409,27 @@ class _QuietHoursSection extends ConsumerWidget {
             },
           ),
         ],
-        const _PlaceholderRow(label: 'ימי שבת/חג'),
-        const _PlaceholderRow(label: 'תוך פגישות'),
-        const _PlaceholderRow(label: 'מצב נהיגה'),
+        _SwitchRow(
+          label: 'ימי שבת/חג',
+          value: settings.quietOnShabbat,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(quietOnShabbat: v)),
+        ),
+        _SwitchRow(
+          label: 'תוך פגישות',
+          value: settings.quietInMeetings,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(quietInMeetings: v)),
+        ),
+        _SwitchRow(
+          label: 'מצב נהיגה',
+          value: settings.quietWhileDriving,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(quietWhileDriving: v)),
+        ),
       ],
     );
   }
@@ -371,19 +437,38 @@ class _QuietHoursSection extends ConsumerWidget {
 
 // ─── 4. sound & vibration ────────────────────────────────────────────────────
 
-class _SoundSection extends StatelessWidget {
+class _SoundSection extends ConsumerWidget {
   const _SoundSection();
 
   @override
-  Widget build(BuildContext context) {
-    return const _SectionTile(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(notifSettingsProvider);
+    return _SectionTile(
       emoji: '🔊',
       title: 'צליל ורטט',
       children: [
-        _PlaceholderRow(label: 'צליל ברירת מחדל'),
-        _PlaceholderRow(label: 'רטט'),
-        _PlaceholderRow(label: 'צלילים לפי סוג'),
-        _PlaceholderRow(label: 'LED (אנדרואיד)'),
+        _SwitchRow(
+          label: 'צליל מופעל',
+          value: settings.soundEnabled,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(soundEnabled: v)),
+        ),
+        _SwitchRow(
+          label: 'רטט',
+          value: settings.vibrationEnabled,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(vibrationEnabled: v)),
+        ),
+        _SwitchRow(
+          label: 'צלילים שונים לפי סוג',
+          value: settings.soundPerType,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(soundPerType: v)),
+        ),
+        const _PlaceholderRow(label: 'LED (אנדרואיד)'),
       ],
     );
   }
@@ -391,19 +476,30 @@ class _SoundSection extends StatelessWidget {
 
 // ─── 5. importance & filtering ───────────────────────────────────────────────
 
-class _ImportanceSection extends StatelessWidget {
+class _ImportanceSection extends ConsumerWidget {
   const _ImportanceSection();
 
   @override
-  Widget build(BuildContext context) {
-    return const _SectionTile(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(notifSettingsProvider);
+    return _SectionTile(
       emoji: '🎯',
       title: 'חשיבות וסינון',
       children: [
-        _PlaceholderRow(label: 'כל ההתראות'),
-        _PlaceholderRow(label: 'חשובות בלבד'),
-        _PlaceholderRow(label: "דחייה (1ש' / 4ש' / יום)"),
-        _PlaceholderRow(label: 'חסימת שולח'),
+        _RadioGroupRow<NotifImportance>(
+          label: 'רמת חשיבות',
+          value: settings.importanceFilter,
+          options: const [
+            (value: NotifImportance.all, label: 'הכל'),
+            (value: NotifImportance.important, label: 'חשובות בלבד'),
+            (value: NotifImportance.critical, label: 'קריטיות בלבד'),
+          ],
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(importanceFilter: v)),
+        ),
+        const _PlaceholderRow(label: "דחייה (1ש' / 4ש' / יום)"),
+        const _PlaceholderRow(label: 'חסימת שולח'),
       ],
     );
   }
@@ -411,20 +507,51 @@ class _ImportanceSection extends StatelessWidget {
 
 // ─── 6. per persona ──────────────────────────────────────────────────────────
 
-class _PersonaSection extends StatelessWidget {
+class _PersonaSection extends ConsumerWidget {
   const _PersonaSection();
 
   @override
-  Widget build(BuildContext context) {
-    return const _SectionTile(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(notifSettingsProvider);
+    return _SectionTile(
       emoji: '👤',
       title: 'לפי תפקיד',
       children: [
-        _PlaceholderRow(label: '👷 קבלן — התראות פרויקט'),
-        _PlaceholderRow(label: '🏪 חנות — הזמנות + מלאי'),
-        _PlaceholderRow(label: '🛵 שליח — pickup + active'),
-        _PlaceholderRow(label: '🦺 עובד — משימות'),
-        _PlaceholderRow(label: '👔 מנהל מערכת — דשבורד'),
+        _SwitchRow(
+          label: '👷 קבלן — התראות פרויקט',
+          value: settings.personaContractor,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(personaContractor: v)),
+        ),
+        _SwitchRow(
+          label: '🏪 חנות — הזמנות + מלאי',
+          value: settings.personaStore,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(personaStore: v)),
+        ),
+        _SwitchRow(
+          label: '🛵 שליח — pickup + active',
+          value: settings.personaCourier,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(personaCourier: v)),
+        ),
+        _SwitchRow(
+          label: '🦺 עובד — משימות',
+          value: settings.personaWorker,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(personaWorker: v)),
+        ),
+        _SwitchRow(
+          label: '👔 מנהל מערכת — דשבורד',
+          value: settings.personaAdmin,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(personaAdmin: v)),
+        ),
       ],
     );
   }
@@ -462,10 +589,60 @@ class _SummariesSection extends ConsumerWidget {
                   );
             },
           ),
-        const _PlaceholderRow(label: 'דוח בוקר (07:00)'),
-        const _PlaceholderRow(label: 'סיכום ערב (18:00)'),
-        const _PlaceholderRow(label: 'שבועי (ראשון 09:00)'),
-        const _PlaceholderRow(label: 'חודשי'),
+        _SwitchRow(
+          label: 'דוח בוקר',
+          value: settings.morningReport,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(morningReport: v)),
+        ),
+        if (settings.morningReport)
+          _TimeRow(
+            label: 'שעת דוח בוקר',
+            time: settings.morningReportTime,
+            onChanged: (t) {
+              ref.read(notifSettingsProvider.notifier).update(
+                    (s) => s.copyWith(
+                      morningReportHour: t.hour,
+                      morningReportMin: t.minute,
+                    ),
+                  );
+            },
+          ),
+        _SwitchRow(
+          label: 'סיכום ערב',
+          value: settings.eveningSummary,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(eveningSummary: v)),
+        ),
+        if (settings.eveningSummary)
+          _TimeRow(
+            label: 'שעת סיכום ערב',
+            time: settings.eveningSummaryTime,
+            onChanged: (t) {
+              ref.read(notifSettingsProvider.notifier).update(
+                    (s) => s.copyWith(
+                      eveningSummaryHour: t.hour,
+                      eveningSummaryMin: t.minute,
+                    ),
+                  );
+            },
+          ),
+        _SwitchRow(
+          label: 'סיכום שבועי (ראשון)',
+          value: settings.weeklySummary,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(weeklySummary: v)),
+        ),
+        _SwitchRow(
+          label: 'סיכום חודשי',
+          value: settings.monthlySummary,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(monthlySummary: v)),
+        ),
       ],
     );
   }
@@ -495,8 +672,20 @@ class _LockScreenSection extends ConsumerWidget {
               .read(notifSettingsProvider.notifier)
               .update((s) => s.copyWith(lockScreen: v)),
         ),
-        const _PlaceholderRow(label: 'אישור ביומטרי לפתיחה'),
-        const _PlaceholderRow(label: 'אל תעבר לשעון/רכב'),
+        _SwitchRow(
+          label: 'אישור ביומטרי לפתיחה',
+          value: settings.biometricToOpen,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(biometricToOpen: v)),
+        ),
+        _SwitchRow(
+          label: 'אל תעבר לשעון/רכב',
+          value: settings.dontForwardToWatch,
+          onChanged: (v) => ref
+              .read(notifSettingsProvider.notifier)
+              .update((s) => s.copyWith(dontForwardToWatch: v)),
+        ),
       ],
     );
   }

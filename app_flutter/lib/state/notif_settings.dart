@@ -9,6 +9,8 @@ const String _kStorageKey = 'bs.notif-settings.v1';
 
 enum NotifLockScreen { full, senderOnly, hidden }
 
+enum NotifImportance { all, important, critical }
+
 class NotifSettings {
   const NotifSettings({
     required this.pushEnabled,
@@ -26,6 +28,44 @@ class NotifSettings {
     required this.dailySummaryMin,
     required this.lockScreen,
     required this.snoozeUntilMs,
+    // Section 1 — Channels
+    required this.smsEnabled,
+    required this.whatsappEnabled,
+    // Section 2 — Types
+    required this.typeDeals,
+    required this.typeSupplierOffers,
+    required this.typeBackInStock,
+    required this.typeReminders,
+    required this.typeNewChats,
+    required this.typeProjectUpdates,
+    // Section 3 — Quiet Hours
+    required this.quietOnShabbat,
+    required this.quietInMeetings,
+    required this.quietWhileDriving,
+    // Section 4 — Sound
+    required this.soundEnabled,
+    required this.vibrationEnabled,
+    required this.soundPerType,
+    // Section 5 — Importance
+    required this.importanceFilter,
+    // Section 6 — Persona
+    required this.personaContractor,
+    required this.personaStore,
+    required this.personaCourier,
+    required this.personaWorker,
+    required this.personaAdmin,
+    // Section 7 — Summaries
+    required this.morningReport,
+    required this.morningReportHour,
+    required this.morningReportMin,
+    required this.eveningSummary,
+    required this.eveningSummaryHour,
+    required this.eveningSummaryMin,
+    required this.weeklySummary,
+    required this.monthlySummary,
+    // Section 8 — Lock Screen
+    required this.biometricToOpen,
+    required this.dontForwardToWatch,
   });
 
   final bool pushEnabled;
@@ -44,6 +84,52 @@ class NotifSettings {
   final NotifLockScreen lockScreen;
   final int snoozeUntilMs;
 
+  // Section 1 — Channels
+  final bool smsEnabled;
+  final bool whatsappEnabled;
+
+  // Section 2 — Types
+  final bool typeDeals;
+  final bool typeSupplierOffers;
+  final bool typeBackInStock;
+  final bool typeReminders;
+  final bool typeNewChats;
+  final bool typeProjectUpdates;
+
+  // Section 3 — Quiet Hours
+  final bool quietOnShabbat;
+  final bool quietInMeetings;
+  final bool quietWhileDriving;
+
+  // Section 4 — Sound
+  final bool soundEnabled;
+  final bool vibrationEnabled;
+  final bool soundPerType;
+
+  // Section 5 — Importance
+  final NotifImportance importanceFilter;
+
+  // Section 6 — Persona
+  final bool personaContractor;
+  final bool personaStore;
+  final bool personaCourier;
+  final bool personaWorker;
+  final bool personaAdmin;
+
+  // Section 7 — Summaries
+  final bool morningReport;
+  final int morningReportHour;
+  final int morningReportMin;
+  final bool eveningSummary;
+  final int eveningSummaryHour;
+  final int eveningSummaryMin;
+  final bool weeklySummary;
+  final bool monthlySummary;
+
+  // Section 8 — Lock Screen
+  final bool biometricToOpen;
+  final bool dontForwardToWatch;
+
   static const NotifSettings defaults = NotifSettings(
     pushEnabled: true,
     emailEnabled: true,
@@ -60,6 +146,44 @@ class NotifSettings {
     dailySummaryMin: 0,
     lockScreen: NotifLockScreen.full,
     snoozeUntilMs: 0,
+    // Section 1
+    smsEnabled: false,
+    whatsappEnabled: false,
+    // Section 2
+    typeDeals: true,
+    typeSupplierOffers: true,
+    typeBackInStock: true,
+    typeReminders: true,
+    typeNewChats: true,
+    typeProjectUpdates: true,
+    // Section 3
+    quietOnShabbat: false,
+    quietInMeetings: false,
+    quietWhileDriving: false,
+    // Section 4
+    soundEnabled: true,
+    vibrationEnabled: true,
+    soundPerType: false,
+    // Section 5
+    importanceFilter: NotifImportance.all,
+    // Section 6
+    personaContractor: true,
+    personaStore: true,
+    personaCourier: true,
+    personaWorker: true,
+    personaAdmin: true,
+    // Section 7
+    morningReport: false,
+    morningReportHour: 7,
+    morningReportMin: 0,
+    eveningSummary: false,
+    eveningSummaryHour: 18,
+    eveningSummaryMin: 0,
+    weeklySummary: false,
+    monthlySummary: false,
+    // Section 8
+    biometricToOpen: false,
+    dontForwardToWatch: false,
   );
 
   TimeOfDay get quietStart =>
@@ -68,6 +192,10 @@ class NotifSettings {
       TimeOfDay(hour: quietEndHour, minute: quietEndMin);
   TimeOfDay get dailySummaryTime =>
       TimeOfDay(hour: dailySummaryHour, minute: dailySummaryMin);
+  TimeOfDay get morningReportTime =>
+      TimeOfDay(hour: morningReportHour, minute: morningReportMin);
+  TimeOfDay get eveningSummaryTime =>
+      TimeOfDay(hour: eveningSummaryHour, minute: eveningSummaryMin);
 
   bool get isSnoozedNow =>
       snoozeUntilMs > DateTime.now().millisecondsSinceEpoch;
@@ -88,6 +216,44 @@ class NotifSettings {
     int? dailySummaryMin,
     NotifLockScreen? lockScreen,
     int? snoozeUntilMs,
+    // Section 1
+    bool? smsEnabled,
+    bool? whatsappEnabled,
+    // Section 2
+    bool? typeDeals,
+    bool? typeSupplierOffers,
+    bool? typeBackInStock,
+    bool? typeReminders,
+    bool? typeNewChats,
+    bool? typeProjectUpdates,
+    // Section 3
+    bool? quietOnShabbat,
+    bool? quietInMeetings,
+    bool? quietWhileDriving,
+    // Section 4
+    bool? soundEnabled,
+    bool? vibrationEnabled,
+    bool? soundPerType,
+    // Section 5
+    NotifImportance? importanceFilter,
+    // Section 6
+    bool? personaContractor,
+    bool? personaStore,
+    bool? personaCourier,
+    bool? personaWorker,
+    bool? personaAdmin,
+    // Section 7
+    bool? morningReport,
+    int? morningReportHour,
+    int? morningReportMin,
+    bool? eveningSummary,
+    int? eveningSummaryHour,
+    int? eveningSummaryMin,
+    bool? weeklySummary,
+    bool? monthlySummary,
+    // Section 8
+    bool? biometricToOpen,
+    bool? dontForwardToWatch,
   }) {
     return NotifSettings(
       pushEnabled: pushEnabled ?? this.pushEnabled,
@@ -105,6 +271,36 @@ class NotifSettings {
       dailySummaryMin: dailySummaryMin ?? this.dailySummaryMin,
       lockScreen: lockScreen ?? this.lockScreen,
       snoozeUntilMs: snoozeUntilMs ?? this.snoozeUntilMs,
+      smsEnabled: smsEnabled ?? this.smsEnabled,
+      whatsappEnabled: whatsappEnabled ?? this.whatsappEnabled,
+      typeDeals: typeDeals ?? this.typeDeals,
+      typeSupplierOffers: typeSupplierOffers ?? this.typeSupplierOffers,
+      typeBackInStock: typeBackInStock ?? this.typeBackInStock,
+      typeReminders: typeReminders ?? this.typeReminders,
+      typeNewChats: typeNewChats ?? this.typeNewChats,
+      typeProjectUpdates: typeProjectUpdates ?? this.typeProjectUpdates,
+      quietOnShabbat: quietOnShabbat ?? this.quietOnShabbat,
+      quietInMeetings: quietInMeetings ?? this.quietInMeetings,
+      quietWhileDriving: quietWhileDriving ?? this.quietWhileDriving,
+      soundEnabled: soundEnabled ?? this.soundEnabled,
+      vibrationEnabled: vibrationEnabled ?? this.vibrationEnabled,
+      soundPerType: soundPerType ?? this.soundPerType,
+      importanceFilter: importanceFilter ?? this.importanceFilter,
+      personaContractor: personaContractor ?? this.personaContractor,
+      personaStore: personaStore ?? this.personaStore,
+      personaCourier: personaCourier ?? this.personaCourier,
+      personaWorker: personaWorker ?? this.personaWorker,
+      personaAdmin: personaAdmin ?? this.personaAdmin,
+      morningReport: morningReport ?? this.morningReport,
+      morningReportHour: morningReportHour ?? this.morningReportHour,
+      morningReportMin: morningReportMin ?? this.morningReportMin,
+      eveningSummary: eveningSummary ?? this.eveningSummary,
+      eveningSummaryHour: eveningSummaryHour ?? this.eveningSummaryHour,
+      eveningSummaryMin: eveningSummaryMin ?? this.eveningSummaryMin,
+      weeklySummary: weeklySummary ?? this.weeklySummary,
+      monthlySummary: monthlySummary ?? this.monthlySummary,
+      biometricToOpen: biometricToOpen ?? this.biometricToOpen,
+      dontForwardToWatch: dontForwardToWatch ?? this.dontForwardToWatch,
     );
   }
 
@@ -124,6 +320,44 @@ class NotifSettings {
         'dailySummaryMin': dailySummaryMin,
         'lockScreen': lockScreen.name,
         'snoozeUntilMs': snoozeUntilMs,
+        // Section 1
+        'smsEnabled': smsEnabled,
+        'whatsappEnabled': whatsappEnabled,
+        // Section 2
+        'typeDeals': typeDeals,
+        'typeSupplierOffers': typeSupplierOffers,
+        'typeBackInStock': typeBackInStock,
+        'typeReminders': typeReminders,
+        'typeNewChats': typeNewChats,
+        'typeProjectUpdates': typeProjectUpdates,
+        // Section 3
+        'quietOnShabbat': quietOnShabbat,
+        'quietInMeetings': quietInMeetings,
+        'quietWhileDriving': quietWhileDriving,
+        // Section 4
+        'soundEnabled': soundEnabled,
+        'vibrationEnabled': vibrationEnabled,
+        'soundPerType': soundPerType,
+        // Section 5
+        'importanceFilter': importanceFilter.name,
+        // Section 6
+        'personaContractor': personaContractor,
+        'personaStore': personaStore,
+        'personaCourier': personaCourier,
+        'personaWorker': personaWorker,
+        'personaAdmin': personaAdmin,
+        // Section 7
+        'morningReport': morningReport,
+        'morningReportHour': morningReportHour,
+        'morningReportMin': morningReportMin,
+        'eveningSummary': eveningSummary,
+        'eveningSummaryHour': eveningSummaryHour,
+        'eveningSummaryMin': eveningSummaryMin,
+        'weeklySummary': weeklySummary,
+        'monthlySummary': monthlySummary,
+        // Section 8
+        'biometricToOpen': biometricToOpen,
+        'dontForwardToWatch': dontForwardToWatch,
       };
 
   // Dispatches to defaults via [_enum] / null fallbacks; awkward as a factory.
@@ -131,20 +365,22 @@ class NotifSettings {
   static NotifSettings fromJson(Map<String, dynamic> j) {
     int i(String k, int fallback) =>
         (j[k] as num?)?.toInt() ?? fallback;
-    bool b(String k, {bool fallback = true}) =>
-        j[k] is bool ? j[k] as bool : fallback;
+    // bTrue: field defaults to true → missing key → true
+    // bFalse: field defaults to false → missing key → false
+    bool bTrue(String k) => j[k] != false;
+    bool bFalse(String k) => j[k] == true;
     return NotifSettings(
-      pushEnabled: b('pushEnabled'),
-      emailEnabled: b('emailEnabled'),
-      typeOrders: b('typeOrders'),
-      typeShipments: b('typeShipments'),
-      typePriceDrops: b('typePriceDrops'),
-      quietHoursEnabled: b('quietHoursEnabled', fallback: false),
+      pushEnabled: bTrue('pushEnabled'),
+      emailEnabled: bTrue('emailEnabled'),
+      typeOrders: bTrue('typeOrders'),
+      typeShipments: bTrue('typeShipments'),
+      typePriceDrops: bTrue('typePriceDrops'),
+      quietHoursEnabled: bFalse('quietHoursEnabled'),
       quietStartHour: i('quietStartHour', 22),
       quietStartMin: i('quietStartMin', 0),
       quietEndHour: i('quietEndHour', 7),
       quietEndMin: i('quietEndMin', 0),
-      dailySummary: b('dailySummary', fallback: false),
+      dailySummary: bFalse('dailySummary'),
       dailySummaryHour: i('dailySummaryHour', 8),
       dailySummaryMin: i('dailySummaryMin', 0),
       lockScreen: _enum(
@@ -153,6 +389,48 @@ class NotifSettings {
         NotifLockScreen.full,
       ),
       snoozeUntilMs: i('snoozeUntilMs', 0),
+      // Section 1 — false defaults
+      smsEnabled: bFalse('smsEnabled'),
+      whatsappEnabled: bFalse('whatsappEnabled'),
+      // Section 2 — true defaults
+      typeDeals: bTrue('typeDeals'),
+      typeSupplierOffers: bTrue('typeSupplierOffers'),
+      typeBackInStock: bTrue('typeBackInStock'),
+      typeReminders: bTrue('typeReminders'),
+      typeNewChats: bTrue('typeNewChats'),
+      typeProjectUpdates: bTrue('typeProjectUpdates'),
+      // Section 3 — false defaults
+      quietOnShabbat: bFalse('quietOnShabbat'),
+      quietInMeetings: bFalse('quietInMeetings'),
+      quietWhileDriving: bFalse('quietWhileDriving'),
+      // Section 4 — soundEnabled/vibrationEnabled true, soundPerType false
+      soundEnabled: bTrue('soundEnabled'),
+      vibrationEnabled: bTrue('vibrationEnabled'),
+      soundPerType: bFalse('soundPerType'),
+      // Section 5
+      importanceFilter: _enum(
+        j['importanceFilter'],
+        NotifImportance.values,
+        NotifImportance.all,
+      ),
+      // Section 6 — true defaults
+      personaContractor: bTrue('personaContractor'),
+      personaStore: bTrue('personaStore'),
+      personaCourier: bTrue('personaCourier'),
+      personaWorker: bTrue('personaWorker'),
+      personaAdmin: bTrue('personaAdmin'),
+      // Section 7 — false defaults for booleans
+      morningReport: bFalse('morningReport'),
+      morningReportHour: i('morningReportHour', 7),
+      morningReportMin: i('morningReportMin', 0),
+      eveningSummary: bFalse('eveningSummary'),
+      eveningSummaryHour: i('eveningSummaryHour', 18),
+      eveningSummaryMin: i('eveningSummaryMin', 0),
+      weeklySummary: bFalse('weeklySummary'),
+      monthlySummary: bFalse('monthlySummary'),
+      // Section 8 — false defaults
+      biometricToOpen: bFalse('biometricToOpen'),
+      dontForwardToWatch: bFalse('dontForwardToWatch'),
     );
   }
 }
