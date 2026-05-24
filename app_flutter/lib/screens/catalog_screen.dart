@@ -5,7 +5,7 @@ import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
-import 'package:buildsmart/screens/lipskey_product_detail_screen.dart';
+import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -1772,7 +1772,12 @@ class _LipskeySupplierCard extends StatelessWidget {
 
             // ── showcase product row ─────────────────────────
             GestureDetector(
-              onTap: () => Navigator.push(context, LipskeyProductDetailScreen.route(p)),
+              onTap: () {
+                final catProducts = kLipskeyCatalog
+                    .where((x) => x.categoryHe == p.categoryHe)
+                    .toList();
+                showLipskeyProductSheet(context, p, catProducts);
+              },
               child: Padding(
                 padding: const EdgeInsets.all(14),
                 child: Row(
