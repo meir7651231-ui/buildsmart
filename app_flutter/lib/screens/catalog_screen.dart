@@ -5,6 +5,7 @@ import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -1697,15 +1698,16 @@ class _CatalogList extends StatelessWidget {
 }
 
 // ── Featured product card — shown at top of main catalog list ────────────────
-class _FeaturedProductCard extends StatefulWidget {
+class _FeaturedProductCard extends ConsumerStatefulWidget {
   const _FeaturedProductCard({required this.product});
   final SmartProduct product;
 
   @override
-  State<_FeaturedProductCard> createState() => _FeaturedProductCardState();
+  ConsumerState<_FeaturedProductCard> createState() =>
+      _FeaturedProductCardState();
 }
 
-class _FeaturedProductCardState extends State<_FeaturedProductCard> {
+class _FeaturedProductCardState extends ConsumerState<_FeaturedProductCard> {
   int _qty = 1;
   bool _added = false;
 
@@ -1901,10 +1903,21 @@ class _FeaturedProductCardState extends State<_FeaturedProductCard> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
+                        ref.read(smartCartProvider.notifier).add(
+                              SmartCartLine(
+                                productKey: widget.product.key,
+                                productName: widget.product.name,
+                                productEmoji: widget.product.emoji,
+                                brandName: rec.name,
+                                brandPrice: rec.price,
+                                productQty: _qty,
+                                accessories: const [],
+                              ),
+                            );
                         setState(() => _added = true);
                         showToast(
                           context,
-                          '${widget.product.name} × $_qty הוסף לסל 🛒',
+                          '${widget.product.name} × $_qty נוסף לסל 🛒',
                         );
                       },
                       child: Container(
@@ -2301,16 +2314,17 @@ class _SmartTreeProductList extends ConsumerWidget {
   }
 }
 
-class _SmartProductSheet extends StatefulWidget {
+class _SmartProductSheet extends ConsumerStatefulWidget {
   const _SmartProductSheet({required this.product});
 
   final SmartProduct product;
 
   @override
-  State<_SmartProductSheet> createState() => _SmartProductSheetState();
+  ConsumerState<_SmartProductSheet> createState() =>
+      _SmartProductSheetState();
 }
 
-class _SmartProductSheetState extends State<_SmartProductSheet> {
+class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   late int _selectedBrand;
   int? _activeStage;
   late Map<int, bool> _accSelected;
@@ -2354,15 +2368,30 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
       maxChildSize: 0.95,
       builder: (_, scrollCtrl) => Column(
         children: [
-          // Handle
-          Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 4),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: const Color(0xFF444444),
-              borderRadius: BorderRadius.circular(2),
-            ),
+          // Header with handle + close (X)
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF444444),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Positioned(
+                top: 4,
+                left: 4,
+                child: IconButton(
+                  icon: const Icon(Icons.close,
+                      color: Colors.white70, size: 22),
+                  onPressed: () => Navigator.pop(context),
+                  tooltip: 'סגור',
+                ),
+              ),
+            ],
           ),
           // Product header
           Padding(
@@ -2590,9 +2619,30 @@ class _SmartProductSheetState extends State<_SmartProductSheet> {
                           borderRadius: BorderRadius.circular(12)),
                     ),
                     onPressed: () {
+                      final selectedAcc = <SmartCartAcc>[
+                        for (var i = 0; i < p.acc.length; i++)
+                          if (_accSelected[i] ?? false)
+                            SmartCartAcc(
+                              name: p.acc[i].name,
+                              emoji: p.acc[i].emoji,
+                              price: p.acc[i].price,
+                              qty: _accQty[i] ?? 1,
+                            ),
+                      ];
+                      ref.read(smartCartProvider.notifier).add(
+                            SmartCartLine(
+                              productKey: p.key,
+                              productName: p.name,
+                              productEmoji: p.emoji,
+                              brandName: brand.name,
+                              brandPrice: brand.price,
+                              productQty: 1,
+                              accessories: selectedAcc,
+                            ),
+                          );
                       Navigator.pop(context);
                       showToast(context,
-                          '${p.name} · ${brand.name} הוסף לסל 🛒');
+                          '${p.name} · ${brand.name} (+${selectedAcc.length} אביזרים) נוסף לסל 🛒');
                     },
                     child: Text(
                       'הוסף לסל · ₪$_total',
@@ -2940,13 +2990,31 @@ class _AccRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    acc.name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          acc.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => _showAccInfo(context, acc),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 2),
+                          child: Icon(
+                            Icons.info_outline,
+                            color: BsTokens.brand,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   Text(
                     acc.why,
@@ -3037,4 +3105,136 @@ class _MiniQtyBtn extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showAccInfo(BuildContext context, SmartAcc acc) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => Dialog(
+      backgroundColor: const Color(0xFF1A1A1A),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 360),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF252525),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(acc.emoji,
+                        style: const TextStyle(fontSize: 28)),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          acc.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: acc.must
+                                ? const Color(0xFFF2A516).withAlpha(50)
+                                : const Color(0xFF333333),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            acc.must ? '⚡ פריט חובה' : '💡 אופציונלי',
+                            style: TextStyle(
+                              color: acc.must
+                                  ? const Color(0xFFF2A516)
+                                  : const Color(0xFFAAAAAA),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'למה צריך:',
+                style: TextStyle(
+                  color: Color(0xFF888888),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                acc.why,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: BsTokens.brand.withAlpha(25),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    const Text(
+                      'מחיר ליחידה:',
+                      style: TextStyle(
+                        color: Color(0xFFAAAAAA),
+                        fontSize: 13,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '₪${acc.price}',
+                      style: const TextStyle(
+                        color: BsTokens.brand,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text(
+                    'סגור',
+                    style: TextStyle(color: BsTokens.brand, fontSize: 14),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }

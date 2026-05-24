@@ -1,4 +1,5 @@
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -1069,6 +1070,7 @@ class _CartViewState extends ConsumerState<_CartView> {
     final delivery = ref.watch(cartDeliveryProvider);
     final project = ref.watch(cartProjectProvider);
     final payment = ref.watch(cartPaymentProvider);
+    final smartLines = ref.watch(smartCartProvider);
 
     final grouped = <String, List<_CItem>>{};
     for (final item in _kCItems) {
@@ -1078,6 +1080,9 @@ class _CartViewState extends ConsumerState<_CartView> {
     var subtotal = 0;
     for (final item in _kCItems) {
       subtotal += item.unitPrice * (qtys[item.id] ?? 0);
+    }
+    for (final line in smartLines) {
+      subtotal += line.total;
     }
     final vat = (subtotal * 0.18).round();
     final deliveryFee = switch (delivery) {
@@ -1092,6 +1097,12 @@ class _CartViewState extends ConsumerState<_CartView> {
       children: [
         _ProjectSelector(selected: project),
         const SizedBox(height: 12),
+        if (smartLines.isNotEmpty) ...[
+          const _SupplierHeader(name: '🛠️ מוצרים חכמים'),
+          for (var i = 0; i < smartLines.length; i++)
+            _SmartCartRow(line: smartLines[i], index: i),
+          const SizedBox(height: 4),
+        ],
         for (final entry in grouped.entries) ...[
           _SupplierHeader(name: entry.key),
           for (final item in entry.value)
@@ -1204,6 +1215,120 @@ class _ProjectChip extends StatelessWidget {
             fontWeight: active ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ─── smart cart row (from product sheet) ─────────────────────────────────────
+
+class _SmartCartRow extends ConsumerWidget {
+  const _SmartCartRow({required this.line, required this.index});
+  final SmartCartLine line;
+  final int index;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: BsTokens.brand.withAlpha(60),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: BsTokens.brand.withAlpha(30),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: Text(line.productEmoji,
+                    style: const TextStyle(fontSize: 22)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${line.productName} × ${line.productQty}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      line.brandName,
+                      style: const TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '₪${line.total}',
+                style: const TextStyle(
+                  color: BsTokens.brand,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close,
+                    color: Color(0xFF666666), size: 18),
+                onPressed: () =>
+                    ref.read(smartCartProvider.notifier).remove(index),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
+          if (line.accessories.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            const Divider(height: 1, color: Color(0xFF2A2A2A)),
+            const SizedBox(height: 6),
+            for (final a in line.accessories)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  children: [
+                    Text(a.emoji, style: const TextStyle(fontSize: 14)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${a.name} × ${a.qty}',
+                        style: const TextStyle(
+                          color: Color(0xFFAAAAAA),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '₪${a.price * a.qty}',
+                      style: const TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ],
       ),
     );
   }
