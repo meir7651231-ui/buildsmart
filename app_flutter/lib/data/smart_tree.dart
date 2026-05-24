@@ -79,14 +79,18 @@ const _sprof = [
 class SmartBrand {
   const SmartBrand({
     required this.name,
-    required this.price,
     required this.tag,
+    this.price,
     this.rec = false,
+    this.sku,
+    this.imageAsset,
   });
   final String name;
-  final int price;
   final String tag;
+  final int? price;       // null = מחיר לפי ספק
   final bool rec;
+  final String? sku;      // מק"ט ספק — מקשר ל-kLipskeyCatalog
+  final String? imageAsset;
 }
 
 @immutable
@@ -94,15 +98,17 @@ class SmartAcc {
   const SmartAcc({
     required this.name,
     required this.emoji,
-    required this.price,
     required this.why,
     required this.must,
+    this.price,
+    this.sku,
   });
   final String name;
   final String emoji;
-  final int price;
+  final int? price;       // null = מחיר לפי ספק
   final String why;
   final bool must;
+  final String? sku;      // מק"ט ספק — מקשר ל-kLipskeyCatalog
 }
 
 @immutable
@@ -131,14 +137,7 @@ class SmartProduct {
 }
 
 const List<SmartProduct> kSmartProducts = [
-  // ===== ניקוז — סיפונים (ליפסקי ברקן — נתונים אמיתיים) =====
-  //
-  // ❗ מה שחסר במבנה הנוכחי:
-  //   • SmartBrand.price = int (חובה) — אין מחיר מחירון → מוכנס 0
-  //   • אין שדה sku ב-SmartBrand → לא ניתן לקשר למוצר בקטלוג
-  //   • אין שדה imageAsset → תמונת המוצר (217861.jpeg) לא נגישה מכאן
-  //   • SmartAcc.price = int (חובה) — אביזרי ליפסקי ללא מחיר → מוכנס 0
-  //
+  // ===== ניקוז — סיפונים =====
   SmartProduct(
     key: 'basinTrap',
     name: 'סיפון לכיור רחצה',
@@ -147,19 +146,37 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'התקנת סיפון — מהברגה עד בדיקת ניקוז',
     stages: _strap,
     brands: [
-      // ← אמיתי: ליפסקי מק"ט 217861 — לבן 1¼", 20 יח' אריזה
-      SmartBrand(name: 'ליפסקי — סיפון אמריקאי 1¼" לבן', price: 0, tag: 'מחיר לפי ספק', rec: true),
-      // ← אמיתי: ליפסקי מק"ט 213055 — עם יציאה למזגן
-      SmartBrand(name: 'ליפסקי — סיפון + יציאה מזגן 1¼"', price: 0, tag: 'עם יציאה למזגן'),
-      // ← אמיתי: ליפסקי מק"ט 218553 — גרסה נוספת
-      SmartBrand(name: 'ליפסקי — סיפון גרסה ב׳', price: 0, tag: 'גרסה חלופית'),
+      SmartBrand(
+        name: 'ליפסקי — סיפון אמריקאי 1¼" לבן',
+        tag: 'מחיר לפי ספק',
+        rec: true,
+        sku: '217861',
+        imageAsset: 'assets/lipskey/products/217861.jpeg',
+      ),
+      SmartBrand(
+        name: 'ליפסקי — סיפון 1¼" + יציאה למזגן',
+        tag: 'עם יציאה למזגן',
+        sku: '213055',
+        imageAsset: 'assets/lipskey/products/213055.jpeg',
+      ),
+      SmartBrand(
+        name: 'ליפסקי — סיפון בקבוק 1¼" כרום',
+        tag: 'גרסה חלופית',
+        sku: '218553',
+        imageAsset: 'assets/lipskey/products/218553.jpeg',
+      ),
     ],
     acc: [
       SmartAcc(name: 'סרט טפלון', emoji: '🎗️', price: 4, why: 'אוטם את ההברגה — חובה', must: true),
-      SmartAcc(name: 'מפתח צינורות', emoji: '🔧', price: 39, why: 'להידוק הסיפון בכוח מספיק', must: true),
-      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום בין הסיפון למשטח הכיור', must: false),
-      // ← אמיתי: ליפסקי מק"ט 558463 — אטם דו צדדי 32/50
-      SmartAcc(name: 'אטם דו צדדי 32/50 (ליפסקי 558463)', emoji: '⚫', price: 0, why: 'מונע נזילה בחיבור', must: true),
+      SmartAcc(name: 'מפתח צינורות', emoji: '🔧', price: 39, why: 'להידוק הסיפון', must: true),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום בין הסיפון למשטח', must: false),
+      SmartAcc(
+        name: 'אטם דו צדדי 32/50',
+        emoji: '⚫',
+        why: 'מונע נזילה בחיבור — חובה',
+        must: true,
+        sku: '558463',
+      ),
     ],
   ),
 
@@ -172,9 +189,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת ברז — מהזנה עד קצה',
     stages: _sf,
     brands: [
-      SmartBrand(name: 'מותג סטנדרט', price: 189, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'מותג כלכלי', price: 139, tag: 'הכי משתלם'),
-      SmartBrand(name: 'מותג פרימיום', price: 329, tag: 'איכות גבוהה'),
+      SmartBrand(name: 'מותג סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'מותג כלכלי', tag: 'הכי משתלם'),
+      SmartBrand(name: 'מותג פרימיום', tag: 'איכות גבוהה'),
     ],
     acc: [
       SmartAcc(name: 'צינורות חיבור גמישים', emoji: '🌀', price: 28, why: 'מחבר את הברז למים', must: true),
@@ -194,9 +211,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת ברז למטבח',
     stages: _sf,
     brands: [
-      SmartBrand(name: 'מותג סטנדרט', price: 289, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'מותג כלכלי', price: 199, tag: 'הכי משתלם'),
-      SmartBrand(name: 'מותג פרימיום — שליפה', price: 540, tag: 'ראש נשלף'),
+      SmartBrand(name: 'מותג סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'מותג כלכלי', tag: 'הכי משתלם'),
+      SmartBrand(name: 'מותג פרימיום — שליפה', tag: 'ראש נשלף'),
     ],
     acc: [
       SmartAcc(name: 'צינורות חיבור גמישים', emoji: '🌀', price: 32, why: 'מחבר את הברז למים', must: true),
@@ -214,12 +231,12 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת כיור אמבטיה',
     stages: _sf,
     brands: [
-      SmartBrand(name: 'כיור מונח סטנדרט', price: 340, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'כיור כלכלי', price: 230, tag: 'הכי משתלם'),
-      SmartBrand(name: 'כיור שיש פרימיום', price: 790, tag: 'איכות גבוהה'),
+      SmartBrand(name: 'כיור מונח סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'כיור כלכלי', tag: 'הכי משתלם'),
+      SmartBrand(name: 'כיור שיש פרימיום', tag: 'איכות גבוהה'),
     ],
     acc: [
-      SmartAcc(name: 'סיפון לכיור', emoji: '🌀', price: 46, why: 'ניקוז הכיור — חובה', must: true),
+      SmartAcc(name: 'סיפון לכיור', emoji: '🌀', why: 'ניקוז הכיור — חובה', must: true, sku: '217861'),
       SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'אוטם בין הכיור לקיר', must: true),
       SmartAcc(name: 'ברגי תלייה לכיור', emoji: '🔩', price: 14, why: 'אם הכיור תלוי על הקיר', must: false),
       SmartAcc(name: 'רגל תמיכה לכיור', emoji: '🦵', price: 120, why: 'אם הכיור עם רגל', must: false),
@@ -234,16 +251,22 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת אסלה תלויה',
     stages: _st,
     brands: [
-      SmartBrand(name: 'מותג סטנדרט', price: 740, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'מותג כלכלי', price: 560, tag: 'הכי משתלם'),
-      SmartBrand(name: 'מותג פרימיום — Soft Close', price: 1240, tag: 'איכות גבוהה'),
+      SmartBrand(name: 'מותג סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'מותג כלכלי', tag: 'הכי משתלם'),
+      SmartBrand(name: 'מותג פרימיום — Soft Close', tag: 'איכות גבוהה'),
     ],
     acc: [
       SmartAcc(name: 'מיכל הדחה סמוי', emoji: '⬜', price: 430, why: 'הבסיס למערכת — חובה', must: true),
       SmartAcc(name: 'אטם לאסלה', emoji: '⚫', price: 18, why: 'מונע ריחות ונזילות', must: true),
       SmartAcc(name: 'ברגי קיבוע', emoji: '🔩', price: 9, why: 'מחזיק את האסלה', must: true),
       SmartAcc(name: 'לחצן הדחה', emoji: '⏹️', price: 65, why: 'הכפתור של ההדחה', must: true),
-      SmartAcc(name: 'מושב אסלה', emoji: '⭕', price: 89, why: 'אם לא מגיע עם האסלה', must: false),
+      SmartAcc(
+        name: 'מושב אסלה תרמופלסטי',
+        emoji: '⭕',
+        why: 'אם לא מגיע עם האסלה',
+        must: false,
+        sku: '220943',
+      ),
       SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום בסיס האסלה לרצפה', must: false),
     ],
   ),
@@ -255,15 +278,21 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת אסלה עומדת',
     stages: _st,
     brands: [
-      SmartBrand(name: 'מותג סטנדרט', price: 520, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'מותג כלכלי', price: 390, tag: 'הכי משתלם'),
-      SmartBrand(name: 'מותג פרימיום', price: 880, tag: 'איכות גבוהה'),
+      SmartBrand(name: 'מותג סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'מותג כלכלי', tag: 'הכי משתלם'),
+      SmartBrand(name: 'מותג פרימיום', tag: 'איכות גבוהה'),
     ],
     acc: [
       SmartAcc(name: 'מיכל הדחה', emoji: '⬜', price: 180, why: 'מיכל עליון — חובה', must: true),
       SmartAcc(name: 'אטם שעווה לאסלה', emoji: '⚫', price: 22, why: 'איטום מול קו הביוב', must: true),
       SmartAcc(name: 'ברגי רצפה', emoji: '🔩', price: 12, why: 'מקבע את האסלה לרצפה', must: true),
-      SmartAcc(name: 'מושב אסלה', emoji: '⭕', price: 75, why: 'אם לא מגיע עם האסלה', must: false),
+      SmartAcc(
+        name: 'מושב אסלה תרמופלסטי',
+        emoji: '⭕',
+        why: 'אם לא מגיע עם האסלה',
+        must: false,
+        sku: '220943',
+      ),
       SmartAcc(name: 'צינור חיבור למיכל', emoji: '🌀', price: 24, why: 'אם לא כלול בערכה', must: false),
     ],
   ),
@@ -276,9 +305,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת סוללת מקלחת',
     stages: _ss,
     brands: [
-      SmartBrand(name: 'מותג סטנדרט', price: 520, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'מותג כלכלי', price: 380, tag: 'הכי משתלם'),
-      SmartBrand(name: 'מותג פרימיום — תרמוסטטי', price: 890, tag: 'איכות גבוהה'),
+      SmartBrand(name: 'מותג סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'מותג כלכלי', tag: 'הכי משתלם'),
+      SmartBrand(name: 'מותג פרימיום — תרמוסטטי', tag: 'איכות גבוהה'),
     ],
     acc: [
       SmartAcc(name: 'גוף סמוי לסוללה', emoji: '⬛', price: 240, why: 'נכנס לקיר — חובה', must: true),
@@ -297,13 +326,13 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת אמבטיה',
     stages: _ss,
     brands: [
-      SmartBrand(name: 'אמבטיה אקרילית', price: 890, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'אמבטיה כלכלית', price: 620, tag: 'הכי משתלם'),
-      SmartBrand(name: 'אמבטיה יצוקה פרימיום', price: 1850, tag: 'איכות גבוהה'),
+      SmartBrand(name: 'אמבטיה אקרילית', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'אמבטיה כלכלית', tag: 'הכי משתלם'),
+      SmartBrand(name: 'אמבטיה יצוקה פרימיום', tag: 'איכות גבוהה'),
     ],
     acc: [
       SmartAcc(name: 'סוללת מילוי לאמבטיה', emoji: '🚰', price: 320, why: 'הברז של האמבטיה', must: true),
-      SmartAcc(name: 'סיפון לאמבטיה', emoji: '🌀', price: 78, why: 'ניקוז — חובה', must: true),
+      SmartAcc(name: 'סיפון לאמבטיה', emoji: '🌀', why: 'ניקוז — חובה', must: true, sku: '116178'),
       SmartAcc(name: 'רגליות תמיכה', emoji: '🦵', price: 90, why: 'מייצב את האמבטיה', must: true),
       SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום מול הקיר', must: true),
       SmartAcc(name: 'פאנל חזית לאמבטיה', emoji: '⬜', price: 240, why: 'אם האמבטיה חשופה', must: false),
@@ -318,9 +347,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת דוד חשמל',
     stages: _sb,
     brands: [
-      SmartBrand(name: 'מותג סטנדרט', price: 780, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'מותג כלכלי', price: 560, tag: 'הכי משתלם'),
-      SmartBrand(name: 'מותג פרימיום — חסכוני', price: 1340, tag: 'בידוד מוגבר'),
+      SmartBrand(name: 'מותג סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'מותג כלכלי', tag: 'הכי משתלם'),
+      SmartBrand(name: 'מותג פרימיום — חסכוני', tag: 'בידוד מוגבר'),
     ],
     acc: [
       SmartAcc(name: 'גוף חימום', emoji: '🔥', price: 120, why: 'מחמם את המים — חובה', must: true),
@@ -339,9 +368,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת דוד שמש',
     stages: _sb,
     brands: [
-      SmartBrand(name: 'מערכת סטנדרט 150 ליטר', price: 2400, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'מערכת כלכלית', price: 1850, tag: 'הכי משתלם'),
-      SmartBrand(name: 'מערכת פרימיום 200 ליטר', price: 3650, tag: 'למשפחה גדולה'),
+      SmartBrand(name: 'מערכת סטנדרט 150 ליטר', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'מערכת כלכלית', tag: 'הכי משתלם'),
+      SmartBrand(name: 'מערכת פרימיום 200 ליטר', tag: 'למשפחה גדולה'),
     ],
     acc: [
       SmartAcc(name: 'קולטים סולאריים', emoji: '🟦', price: 680, why: 'אוספים את חום השמש — חובה', must: true),
@@ -360,9 +389,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת כיור מטבח',
     stages: _sf,
     brands: [
-      SmartBrand(name: 'נירוסטה — סטנדרט', price: 420, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'נירוסטה — כלכלי', price: 290, tag: 'הכי משתלם'),
-      SmartBrand(name: 'גרניט — פרימיום', price: 980, tag: 'איכות גבוהה'),
+      SmartBrand(name: 'נירוסטה — סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'נירוסטה — כלכלי', tag: 'הכי משתלם'),
+      SmartBrand(name: 'גרניט — פרימיום', tag: 'איכות גבוהה'),
     ],
     acc: [
       SmartAcc(name: 'סיפון כפול למטבח', emoji: '🌀', price: 68, why: 'ניקוז הכיור — חובה', must: true),
@@ -379,8 +408,8 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך חיבור מדיח כלים',
     stages: _si,
     brands: [
-      SmartBrand(name: 'ערכת חיבור סטנדרט', price: 140, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'ערכת חיבור כלכלית', price: 95, tag: 'הכי משתלם'),
+      SmartBrand(name: 'ערכת חיבור סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'ערכת חיבור כלכלית', tag: 'הכי משתלם'),
     ],
     acc: [
       SmartAcc(name: 'ברז זוויתי למדיח', emoji: '🔧', price: 32, why: 'נקודת ניתוק המים — חובה', must: true),
@@ -397,8 +426,8 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך חיבור מכונת כביסה',
     stages: _si,
     brands: [
-      SmartBrand(name: 'ערכת חיבור סטנדרט', price: 130, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'ערכת חיבור כלכלית', price: 88, tag: 'הכי משתלם'),
+      SmartBrand(name: 'ערכת חיבור סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'ערכת חיבור כלכלית', tag: 'הכי משתלם'),
     ],
     acc: [
       SmartAcc(name: 'ברז למכונת כביסה 3/4"', emoji: '🔧', price: 38, why: 'נקודת ניתוק — חובה', must: true),
@@ -416,12 +445,40 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת מחסום רצפה',
     stages: _sw,
     brands: [
-      SmartBrand(name: 'מחסום סטנדרט', price: 54, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'מחסום כלכלי', price: 34, tag: 'הכי משתלם'),
-      SmartBrand(name: 'מחסום נירוסטה — פרימיום', price: 165, tag: 'עיצובי ועמיד'),
+      SmartBrand(
+        name: 'ליפסקי — מחסום 245/50 פתוח גבוהה',
+        tag: 'מחיר לפי ספק',
+        rec: true,
+        sku: '218681',
+        imageAsset: 'assets/lipskey/products/218681.jpeg',
+      ),
+      SmartBrand(
+        name: 'ליפסקי — מחסום 245/50 סגור גבוהה',
+        tag: 'סגור',
+        sku: '218722',
+        imageAsset: 'assets/lipskey/products/218722.jpeg',
+      ),
+      SmartBrand(
+        name: 'ליפסקי — מחסום 245/50 פתוח',
+        tag: 'גובה רגיל',
+        sku: '220542',
+        imageAsset: 'assets/lipskey/products/220542.jpeg',
+      ),
+      SmartBrand(
+        name: 'ליפסקי — מחסום 245/50 סגור',
+        tag: 'גובה רגיל סגור',
+        sku: '220543',
+        imageAsset: 'assets/lipskey/products/220543.jpeg',
+      ),
     ],
     acc: [
-      SmartAcc(name: 'רשת ניקוז', emoji: '⚙️', price: 22, why: 'מכסה המחסום — חובה', must: true),
+      SmartAcc(
+        name: 'מכסה/רשת למחסום',
+        emoji: '⚙️',
+        why: 'מכסה המחסום — חובה',
+        must: true,
+        sku: '610911',
+      ),
       SmartAcc(name: 'אטם גומי', emoji: '⚫', price: 8, why: 'מונע ריחות וחדירת מים', must: true),
       SmartAcc(name: 'צינור ניקוז 50 מ"מ', emoji: '🌀', price: 32, why: 'מחבר לקו הביוב', must: true),
       SmartAcc(name: 'מלכודת ריח (סיפון)', emoji: '🌀', price: 38, why: 'חוסם ריחות ביוב — מומלץ', must: false),
@@ -435,9 +492,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת וסת לחץ מים',
     stages: _si,
     brands: [
-      SmartBrand(name: 'וסת סטנדרט', price: 185, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'וסת כלכלי', price: 120, tag: 'הכי משתלם'),
-      SmartBrand(name: 'וסת פרימיום עם מד', price: 320, tag: 'עם שעון לחץ'),
+      SmartBrand(name: 'וסת סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'וסת כלכלי', tag: 'הכי משתלם'),
+      SmartBrand(name: 'וסת פרימיום עם מד', tag: 'עם שעון לחץ'),
     ],
     acc: [
       SmartAcc(name: 'מד לחץ', emoji: '🌡️', price: 48, why: 'מציג את לחץ המים', must: true),
@@ -454,9 +511,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת מקלחון',
     stages: _ss,
     brands: [
-      SmartBrand(name: 'מקלחון זכוכית — סטנדרט', price: 980, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'מקלחון כלכלי', price: 640, tag: 'הכי משתלם'),
-      SmartBrand(name: 'מקלחון ללא מסגרת — פרימיום', price: 1980, tag: 'עיצוב נקי'),
+      SmartBrand(name: 'מקלחון זכוכית — סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'מקלחון כלכלי', tag: 'הכי משתלם'),
+      SmartBrand(name: 'מקלחון ללא מסגרת — פרימיום', tag: 'עיצוב נקי'),
     ],
     acc: [
       SmartAcc(name: 'פרופילי עיגון לקיר', emoji: '➖', price: 120, why: 'מקבעים את המקלחון — חובה', must: true),
@@ -473,13 +530,13 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת בידה',
     stages: _st,
     brands: [
-      SmartBrand(name: 'בידה תלויה — סטנדרט', price: 560, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'בידה כלכלית', price: 390, tag: 'הכי משתלם'),
-      SmartBrand(name: 'בידה פרימיום', price: 1120, tag: 'איכות גבוהה'),
+      SmartBrand(name: 'בידה תלויה — סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'בידה כלכלית', tag: 'הכי משתלם'),
+      SmartBrand(name: 'בידה פרימיום', tag: 'איכות גבוהה'),
     ],
     acc: [
       SmartAcc(name: 'סוללת בידה', emoji: '🚰', price: 240, why: 'הברז של הבידה — חובה', must: true),
-      SmartAcc(name: 'סיפון לבידה', emoji: '🌀', price: 46, why: 'ניקוז — חובה', must: true),
+      SmartAcc(name: 'סיפון לבידה', emoji: '🌀', why: 'ניקוז — חובה', must: true, sku: '217861'),
       SmartAcc(name: 'ברגי קיבוע', emoji: '🔩', price: 14, why: 'מעגנים את הבידה', must: true),
       SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום מול הקיר', must: false),
     ],
@@ -493,9 +550,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך הרכבת מחיצת גבס',
     stages: _sprof,
     brands: [
-      SmartBrand(name: 'גבס סטנדרט', price: 240, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'גבס כלכלי', price: 185, tag: 'הכי משתלם'),
-      SmartBrand(name: 'גבס עמיד-לחות', price: 340, tag: 'מומלץ לחדר רטוב'),
+      SmartBrand(name: 'גבס סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'גבס כלכלי', tag: 'הכי משתלם'),
+      SmartBrand(name: 'גבס עמיד-לחות', tag: 'מומלץ לחדר רטוב'),
     ],
     acc: [
       SmartAcc(name: 'פרופילים + מסילות', emoji: '⬜', price: 120, why: 'השלד של הקיר', must: true),
@@ -514,9 +571,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך התקנת דלת לשירותים',
     stages: _sprof,
     brands: [
-      SmartBrand(name: 'דלת סטנדרט', price: 480, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'דלת כלכלית', price: 340, tag: 'הכי משתלם'),
-      SmartBrand(name: 'דלת עמידת-לחות', price: 720, tag: 'מומלץ לחדר רטוב'),
+      SmartBrand(name: 'דלת סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'דלת כלכלית', tag: 'הכי משתלם'),
+      SmartBrand(name: 'דלת עמידת-לחות', tag: 'מומלץ לחדר רטוב'),
     ],
     acc: [
       SmartAcc(name: 'משקוף', emoji: '🟫', price: 160, why: 'המסגרת של הדלת — חובה', must: true),
@@ -534,9 +591,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך הנחת ריצוף וחיפוי',
     stages: _stile,
     brands: [
-      SmartBrand(name: 'קרמיקה סטנדרט', price: 680, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'קרמיקה כלכלית', price: 480, tag: 'הכי משתלם'),
-      SmartBrand(name: 'פורצלן פרימיום', price: 1200, tag: 'איכות גבוהה'),
+      SmartBrand(name: 'קרמיקה סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'קרמיקה כלכלית', tag: 'הכי משתלם'),
+      SmartBrand(name: 'פורצלן פרימיום', tag: 'איכות גבוהה'),
     ],
     acc: [
       SmartAcc(name: 'אריחי רצפה', emoji: '⬜', price: 680, why: 'ריצוף הרצפה', must: true),
@@ -555,9 +612,9 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'תהליך איטום הרצפה',
     stages: _sw,
     brands: [
-      SmartBrand(name: 'מערכת איטום סטנדרט', price: 280, tag: 'הבחירה שלנו', rec: true),
-      SmartBrand(name: 'מערכת כלכלית', price: 190, tag: 'הכי משתלם'),
-      SmartBrand(name: 'מערכת פרימיום', price: 450, tag: 'בידוד כפול'),
+      SmartBrand(name: 'מערכת איטום סטנדרט', tag: 'הבחירה שלנו', rec: true),
+      SmartBrand(name: 'מערכת כלכלית', tag: 'הכי משתלם'),
+      SmartBrand(name: 'מערכת פרימיום', tag: 'בידוד כפול'),
     ],
     acc: [
       SmartAcc(name: 'יריעות איטום', emoji: '⬛', price: 280, why: 'מגן מפני מים — חובה', must: true),
