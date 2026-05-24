@@ -978,66 +978,113 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
       }
     });
 
-    final open = ref.watch(searchPanelOpenProvider);
-    final hasText = ref.watch(searchQueryProvider).isNotEmpty;
+    final open     = ref.watch(searchPanelOpenProvider);
+    final hasText  = ref.watch(searchQueryProvider).isNotEmpty;
+    final scope    = ref.watch(searchScopeProvider);
+    final hasScope = scope != 'הכל';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-      child: TextField(
-        controller: _controller,
-        focusNode: _focusNode,
-        textInputAction: TextInputAction.search,
-        onChanged: (v) =>
-            ref.read(searchQueryProvider.notifier).state = v,
-        onSubmitted: _submit,
-        decoration: InputDecoration(
-          hintText: 'חיפוש מוצרים, קטגוריות, מסכים...',
-          hintStyle: const TextStyle(color: Color(0xFF888888), fontSize: 14),
-          prefixIcon: open
-              ? IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: Color(0xFF888888),
-                    size: 20,
-                  ),
-                  onPressed: _closePanel,
-                )
-              : const Icon(
-                  Icons.search,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(24),
+          border: open
+              ? Border.all(color: BsTokens.brand, width: 1.5)
+              : null,
+        ),
+        child: Row(
+          children: [
+            // Leading: back arrow when panel open, search icon otherwise.
+            if (open)
+              IconButton(
+                icon: const Icon(
+                  Icons.arrow_back,
                   color: Color(0xFF888888),
                   size: 20,
                 ),
-          suffixIcon: hasText
-              ? IconButton(
-                  icon: const Icon(
-                    Icons.close,
+                onPressed: _closePanel,
+              )
+            else
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Icon(Icons.search, color: Color(0xFF888888), size: 20),
+              ),
+
+            // Scope token chip — shown when a non-הכל scope is active.
+            if (hasScope) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: BsTokens.brand,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      scope,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () =>
+                          ref.read(searchScopeProvider.notifier).state = 'הכל',
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+            ],
+
+            // Text input — expands to fill remaining width.
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                textInputAction: TextInputAction.search,
+                onChanged: (v) =>
+                    ref.read(searchQueryProvider.notifier).state = v,
+                onSubmitted: _submit,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: hasScope
+                      ? 'חפש $scope...'
+                      : 'חיפוש מוצרים, קטגוריות, מסכים...',
+                  hintStyle: const TextStyle(
                     color: Color(0xFF888888),
-                    size: 18,
+                    fontSize: 14,
                   ),
-                  onPressed: () {
-                    _controller.clear();
-                    ref.read(searchQueryProvider.notifier).state = '';
-                  },
-                )
-              : null,
-          filled: true,
-          fillColor: const Color(0xFF2A2A2A),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 8,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: const BorderSide(color: BsTokens.brand, width: 1.5),
-          ),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+
+            // Clear button — shown when there is text.
+            if (hasText)
+              IconButton(
+                icon: const Icon(
+                  Icons.close,
+                  color: Color(0xFF888888),
+                  size: 18,
+                ),
+                onPressed: () {
+                  _controller.clear();
+                  ref.read(searchQueryProvider.notifier).state = '';
+                },
+              ),
+          ],
         ),
       ),
     );
@@ -1049,7 +1096,9 @@ class _SearchPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final query = ref.watch(searchQueryProvider);
+    final query    = ref.watch(searchQueryProvider);
+    final scope    = ref.watch(searchScopeProvider);
+    final showResults = query.isNotEmpty || scope != 'הכל';
     return ColoredBox(
       color: const Color(0xFF111111),
       child: Column(
@@ -1058,9 +1107,9 @@ class _SearchPanel extends ConsumerWidget {
           const _SearchScopeRow(),
           const Divider(height: 1, color: Color(0xFF2A2A2A)),
           Expanded(
-            child: query.isEmpty
-                ? const _RecentSearchesList()
-                : const _SearchResultsList(),
+            child: showResults
+                ? const _SearchResultsList()
+                : const _RecentSearchesList(),
           ),
         ],
       ),
@@ -1285,7 +1334,8 @@ class _SearchResultsList extends ConsumerWidget {
     final scope = ref.watch(searchScopeProvider);
 
     final filtered = kSearchIndex.where((e) {
-      if (!e.matches(query)) return false;
+      // When query is empty, skip text matching — show all items in scope.
+      if (query.isNotEmpty && !e.matches(query)) return false;
       return switch (scope) {
         'מוצרים'   => e.type == SearchType.category,
         'קטגוריות' => e.type == SearchType.setting || e.type == SearchType.menu,
@@ -1301,7 +1351,9 @@ class _SearchResultsList extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Text(
-            'לא נמצאו תוצאות עבור "$query"',
+            query.isNotEmpty
+                ? 'לא נמצאו תוצאות עבור "$query"'
+                : 'אין תוצאות ב$scope',
             textAlign: TextAlign.center,
             style: const TextStyle(color: Color(0xFF888888), fontSize: 14),
           ),
