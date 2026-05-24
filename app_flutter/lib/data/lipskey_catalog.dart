@@ -3641,4 +3641,17 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryEmoji: '🔧',
     page: 19,
   ),
+  // ונטיל — page 14
+  LipskeyCatalogProduct(
+    sku: '187700',
+    nameHe: 'ונטיל לכיור אמריקאי',
+    nameEn: 'Drain valve for American sink',
+    color: 'לבן',
+    qtyPack: 75,
+    qtyPallet: 1875,
+    categoryHe: 'מחסומים (סיפונים) גלויים',
+    categoryEn: 'Visible Traps',
+    categoryEmoji: '🚰',
+    page: 8,
+  ),
 ];
