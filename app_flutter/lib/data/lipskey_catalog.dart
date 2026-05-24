@@ -33,6 +33,11 @@ class LipskeyCatalogProduct {
   String? get imageAsset => imageFile == null
       ? null
       : 'assets/lipskey/products/$imageFile';
+
+  String get specImageAsset {
+    final p = page.toString().padLeft(2, '0');
+    return 'assets/lipskey/pages/page_$p.jpg';
+  }
 }
 
 const List<LipskeyCatalogProduct> kLipskeyCatalog = [

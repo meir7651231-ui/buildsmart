@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/screens/lipskey_product_detail_screen.dart';
@@ -341,8 +343,8 @@ class _LipskeyProductSheetState extends State<LipskeyProductSheet> {
   }
 }
 
-// ── Hero image ────────────────────────────────────────────────────────────────
-class _HeroImage extends StatelessWidget {
+// ── Hero flip card ────────────────────────────────────────────────────────────
+class _HeroImage extends StatefulWidget {
   const _HeroImage({
     required this.product,
     required this.screenH,
@@ -354,17 +356,88 @@ class _HeroImage extends StatelessWidget {
   final VoidCallback onOpen360;
 
   @override
+  State<_HeroImage> createState() => _HeroImageState();
+}
+
+class _HeroImageState extends State<_HeroImage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+  bool _showSpec = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 420));
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _flip() {
+    if (_showSpec) {
+      _ctrl.reverse();
+    } else {
+      _ctrl.forward();
+    }
+    setState(() => _showSpec = !_showSpec);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.product;
+    return SizedBox(
+      height: widget.screenH * 0.30,
+      width: double.infinity,
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (_, __) {
+          final angle = _anim.value * pi;
+          final showingSpec = angle > pi / 2;
+          return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..rotateY(angle),
+            child: showingSpec
+                ? Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.rotationY(pi),
+                    child: _SpecSide(product: p, onTap: _flip),
+                  )
+                : _ProductSide(
+                    product: p, onTap: _flip, onOpen360: widget.onOpen360),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ProductSide extends StatelessWidget {
+  const _ProductSide({
+    required this.product,
+    required this.onTap,
+    required this.onOpen360,
+  });
+  final LipskeyCatalogProduct product;
+  final VoidCallback onTap;
+  final VoidCallback onOpen360;
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onOpen360,
+      onTap: onTap,
       child: Container(
-        height: screenH * 0.28,
-        width: double.infinity,
         color: const Color(0xFF080815),
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Radial glow
             Container(
               decoration: BoxDecoration(
                 gradient: RadialGradient(
@@ -377,7 +450,6 @@ class _HeroImage extends StatelessWidget {
                 ),
               ),
             ),
-            // Product image
             if (product.imageAsset != null)
               Image.asset(
                 product.imageAsset!,
@@ -388,30 +460,115 @@ class _HeroImage extends StatelessWidget {
             else
               Text(product.categoryEmoji,
                   style: const TextStyle(fontSize: 72)),
-            // 360° badge
+            // Flip hint badge
             Positioned(
               bottom: 10,
-              left: 10,
+              right: 10,
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                      color: const Color(0xFF64FFDA).withOpacity(0.6)),
+                      color: Colors.white24),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.view_in_ar,
-                        color: Color(0xFF64FFDA), size: 14),
+                    Icon(Icons.flip, color: Colors.white54, size: 12),
                     SizedBox(width: 4),
-                    Text('360° סיבוב',
+                    Text('מפרט',
                         style: TextStyle(
-                            color: Color(0xFF64FFDA),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600)),
+                            color: Colors.white54,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500)),
+                  ],
+                ),
+              ),
+            ),
+            // 360° badge
+            Positioned(
+              bottom: 10,
+              left: 10,
+              child: GestureDetector(
+                onTap: onOpen360,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                        color: const Color(0xFF64FFDA).withOpacity(0.6)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.view_in_ar,
+                          color: Color(0xFF64FFDA), size: 14),
+                      SizedBox(width: 4),
+                      Text('360° סיבוב',
+                          style: TextStyle(
+                              color: Color(0xFF64FFDA),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SpecSide extends StatelessWidget {
+  const _SpecSide({required this.product, required this.onTap});
+  final LipskeyCatalogProduct product;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        color: Colors.white,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              product.specImageAsset,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Center(
+                child: Text(product.categoryEmoji,
+                    style: const TextStyle(fontSize: 72)),
+              ),
+            ),
+            // Back hint
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white24),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.flip, color: Colors.white70, size: 12),
+                    SizedBox(width: 4),
+                    Text('חזור',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500)),
                   ],
                 ),
               ),

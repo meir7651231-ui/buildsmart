@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:flutter/material.dart';
@@ -222,9 +224,74 @@ class _Chip extends StatelessWidget {
       );
 }
 
-class _LeadingImage extends StatelessWidget {
+class _LeadingImage extends StatefulWidget {
   const _LeadingImage({required this.product});
+  final LipskeyCatalogProduct product;
 
+  @override
+  State<_LeadingImage> createState() => _LeadingImageState();
+}
+
+class _LeadingImageState extends State<_LeadingImage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+  bool _showSpec = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 380));
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _flip() {
+    if (_showSpec) {
+      _ctrl.reverse();
+    } else {
+      _ctrl.forward();
+    }
+    setState(() => _showSpec = !_showSpec);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.product;
+    return GestureDetector(
+      onTap: _flip,
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (_, __) {
+          final angle = _anim.value * pi;
+          final showingSpec = angle > pi / 2;
+          return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..rotateY(angle),
+            child: showingSpec
+                ? Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.rotationY(pi),
+                    child: _SpecThumb(product: p),
+                  )
+                : _ProductThumb(product: p),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ProductThumb extends StatelessWidget {
+  const _ProductThumb({required this.product});
   final LipskeyCatalogProduct product;
 
   @override
@@ -232,33 +299,45 @@ class _LeadingImage extends StatelessWidget {
     final asset = product.imageAsset;
     if (asset != null) {
       return SizedBox(
-        width: 64,
-        height: 64,
+        width: 90,
+        height: 110,
         child: Image.asset(
           asset,
-          width: 64,
-          height: 64,
           fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => _EmojiBox(emoji: product.categoryEmoji),
+          errorBuilder: (_, __, ___) => Center(
+            child: Text(product.categoryEmoji,
+                style: const TextStyle(fontSize: 36)),
+          ),
         ),
       );
     }
-    return _EmojiBox(emoji: product.categoryEmoji);
+    return SizedBox(
+      width: 90,
+      height: 110,
+      child: Center(
+        child: Text(product.categoryEmoji,
+            style: const TextStyle(fontSize: 36)),
+      ),
+    );
   }
 }
 
-class _EmojiBox extends StatelessWidget {
-  const _EmojiBox({required this.emoji});
-
-  final String emoji;
+class _SpecThumb extends StatelessWidget {
+  const _SpecThumb({required this.product});
+  final LipskeyCatalogProduct product;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 64,
-      height: 64,
-      child: Center(
-        child: Text(emoji, style: const TextStyle(fontSize: 40)),
+      width: 90,
+      height: 110,
+      child: Image.asset(
+        product.specImageAsset,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Center(
+          child: Text(product.categoryEmoji,
+              style: const TextStyle(fontSize: 36)),
+        ),
       ),
     );
   }
