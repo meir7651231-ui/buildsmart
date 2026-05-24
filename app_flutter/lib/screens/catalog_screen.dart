@@ -1707,6 +1707,7 @@ class _FeaturedProductCard extends StatefulWidget {
 
 class _FeaturedProductCardState extends State<_FeaturedProductCard> {
   int _qty = 1;
+  bool _added = false;
 
   @override
   Widget build(BuildContext context) {
@@ -1736,17 +1737,49 @@ class _FeaturedProductCardState extends State<_FeaturedProductCard> {
               // ── Header row ──
               Row(
                 children: [
-                  Container(
+                  SizedBox(
                     width: 52,
                     height: 52,
-                    decoration: BoxDecoration(
-                      color: BsTokens.brand.withAlpha(30),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      widget.product.emoji,
-                      style: const TextStyle(fontSize: 26),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: BsTokens.brand.withAlpha(30),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            widget.product.emoji,
+                            style: const TextStyle(fontSize: 26),
+                          ),
+                        ),
+                        if (_added)
+                          Positioned(
+                            right: -4,
+                            bottom: -4,
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF22C55E),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: const Color(0xFF1A1A1A),
+                                  width: 2,
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1867,10 +1900,13 @@ class _FeaturedProductCardState extends State<_FeaturedProductCard> {
                   // Add to cart button
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => showToast(
-                        context,
-                        '${widget.product.name} × $_qty הוסף לסל 🛒',
-                      ),
+                      onTap: () {
+                        setState(() => _added = true);
+                        showToast(
+                          context,
+                          '${widget.product.name} × $_qty הוסף לסל 🛒',
+                        );
+                      },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 11),
                         decoration: BoxDecoration(
@@ -2854,16 +2890,49 @@ class _AccRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            // Emoji
-            Container(
+            // Emoji + selected badge
+            SizedBox(
               width: 36,
               height: 36,
-              decoration: const BoxDecoration(
-                color: Color(0xFF252525),
-                shape: BoxShape.circle,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF252525),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child:
+                        Text(acc.emoji, style: const TextStyle(fontSize: 16)),
+                  ),
+                  if (selected)
+                    Positioned(
+                      right: -2,
+                      bottom: -2,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF22C55E),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFF1A1A1A),
+                            width: 1.5,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 10,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              alignment: Alignment.center,
-              child: Text(acc.emoji, style: const TextStyle(fontSize: 16)),
             ),
             const SizedBox(width: 10),
             // Name + why
