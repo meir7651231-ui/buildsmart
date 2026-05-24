@@ -1739,6 +1739,296 @@ const List<SmartProduct> kSmartProducts = [
       SmartAcc(name: 'סרט טפלון',            emoji: '🎗️', price: 4, why: 'אוטם ההברגה',           must: false),
     ],
   ),
+
+  // ===== מקלחות — ערכות רחצה =====
+  SmartProduct(
+    key: 'bathingKit',
+    name: 'ערכת אביזרי רחצה',
+    emoji: '🎁',
+    cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'התקנת ערכת אביזרים מלאה לחדר רחצה',
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — אקווה סט 5 חלקים ניקל',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '778580',
+      ),
+      SmartBrand(name: 'ליפסקי — אקווה סט 5 חלקים שחור מט', tag: 'שחור מט', sku: '778581'),
+    ],
+    acc: [
+      SmartAcc(name: 'ברגים ודיבלים',  emoji: '🔩', price: 14, why: 'לקיבוע — חובה',     must: true),
+      SmartAcc(name: 'מקדח 6 מ"מ',     emoji: '🪛', price: 28, why: 'לקדיחה בקיר',         must: true),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום',               must: false),
+      SmartAcc(name: 'פלס',              emoji: '📏', price: 32, why: 'יישור',               must: false),
+    ],
+  ),
+
+  // ===== אסלות — יחידות אסלה+כיור מלאות =====
+  SmartProduct(
+    key: 'toiletUnit',
+    name: 'אסלה קומפלט (יחידה מלאה)',
+    emoji: '🚽',
+    cat: 'אסלות',
+    diagramTitle: 'התקנת אסלה קומפלט עם מיכל ומושב',
+    stages: _st,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — פיטרה מונבלוק קומפלט + מושב הידראולי לבן',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '77771010',
+      ),
+      SmartBrand(name: 'ליפסקי — פיטרה אסלה P לבן', tag: 'גרסה רגילה', sku: '77771008'),
+    ],
+    acc: [
+      SmartAcc(name: 'ברגי קיבוע לאסלה', emoji: '🔩', price: 18, why: 'לרצפה — חובה',     must: true),
+      SmartAcc(name: 'אטם בין מיכל לאסלה', emoji: '⚫', price: 24, why: 'איטום — חובה', must: true),
+      SmartAcc(name: 'זקיף אסלה',          emoji: '🚽', why: 'חיבור לקו ביוב', must: true, sku: '140870'),
+      SmartAcc(name: 'מצוף מילוי',         emoji: '🔧', why: 'בקרת מילוי',     must: true, sku: '686366'),
+      SmartAcc(name: 'סיליקון סניטרי',    emoji: '🧴', price: 21, why: 'איטום סופי',       must: true),
+    ],
+  ),
+
+  // ===== אסלות — מנגנונים =====
+  SmartProduct(
+    key: 'toiletMechanism',
+    name: 'מנגנונים לאסלה',
+    emoji: '⚙️',
+    cat: 'אסלות',
+    diagramTitle: 'החלפת מנגנון פנימי במיכל הדחה',
+    stages: _st,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — מונגנון כרמי 40',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '777M1807',
+      ),
+    ],
+    acc: [
+      SmartAcc(name: 'אטם לחיבור מים',   emoji: '⚫', price: 12, why: 'מונע נזילות — חובה', must: true),
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4,  why: 'אוטם ההברגה',         must: true),
+      SmartAcc(name: 'ברז זוויתי 1/2"',  emoji: '🔧', price: 22, why: 'לסגירת מים בתיקון',  must: true),
+      SmartAcc(name: 'מצוף מילוי',         emoji: '🔧', why: 'אם צריך להחליף', must: false, sku: '686366'),
+    ],
+  ),
+
+  // ===== גופי תברואה — ידיות אחיזה לנכים =====
+  SmartProduct(
+    key: 'grabBars',
+    name: 'ידיות אחיזה לנכים',
+    emoji: '🤝',
+    cat: 'אביזרים נלווים',
+    diagramTitle: 'התקנת ידית אחיזה בטיחותית',
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — דיור ידית אחיזה 40 ס"מ',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '77775290',
+      ),
+      SmartBrand(name: 'ליפסקי — דיור ידית אחיזה 30 ס"מ', tag: 'קצרה',   sku: '77775289'),
+      SmartBrand(name: 'ליפסקי — דיור ידית אחיזה 60 ס"מ', tag: 'ארוכה',  sku: '77775291'),
+    ],
+    acc: [
+      SmartAcc(name: 'ברגי קיבוע חזקים', emoji: '🔩', price: 24, why: 'אחיזה לקיר — חובה', must: true),
+      SmartAcc(name: 'דיבלים לבטון',     emoji: '⚙️', price: 18, why: 'לקירות בטון',         must: true),
+      SmartAcc(name: 'מקדח 8 מ"מ',       emoji: '🪛', price: 38, why: 'לקדיחה בבטון',       must: false),
+      SmartAcc(name: 'סיליקון סניטרי',   emoji: '🧴', price: 21, why: 'איטום',                must: false),
+    ],
+  ),
+
+  // ===== מקלחות — אביזרי מקלחת =====
+  SmartProduct(
+    key: 'showerAccessories',
+    name: 'אביזרי מקלחת קטנים',
+    emoji: '🛠️',
+    cat: 'מקלחות ואמבטיות',
+    diagramTitle: 'הוספת אביזרים זוטרים למקלחת קיימת',
+    stages: _ss,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — מעדן זרימה קצר ניקל מתכוונן',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '77701180',
+      ),
+      SmartBrand(name: 'ליפסקי — סעף דו כיווני כרום', tag: 'מפצל',          sku: '77701172'),
+      SmartBrand(name: 'ליפסקי — מתלה מתכוונן',        tag: 'מתלה גובה',    sku: '77701185'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4,  why: 'אוטם ההברגה — חובה', must: true),
+      SmartAcc(name: 'אטם דו צדדי',       emoji: '⚫', price: 6,  why: 'איטום החיבור',         must: true),
+      SmartAcc(name: 'מפתח אלן',           emoji: '🔧', price: 18, why: 'להידוק',                must: false),
+    ],
+  ),
+
+  // ===== ברזים — סטי הידוק וחיבורים =====
+  SmartProduct(
+    key: 'tighteningSet',
+    name: 'סט הידוק לברזים',
+    emoji: '🧰',
+    cat: 'ברזים וכיורים',
+    diagramTitle: 'הידוק ברז עם רוזטה ושטומים',
+    stages: _sf,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — סט הידוק לברז פרח בורג אחד',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '77772605',
+      ),
+      SmartBrand(name: 'ליפסקי — למד+רוזטה ושתומים לסוללה', tag: 'לסוללה', sku: '77772606'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4,  why: 'אוטם ההברגה — חובה', must: true),
+      SmartAcc(name: 'מפתח אלן',           emoji: '🔧', price: 18, why: 'להידוק — חובה',         must: true),
+      SmartAcc(name: 'מפתח צינורות',     emoji: '🔩', price: 39, why: 'להידוק חזק יותר',       must: false),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום נוסף',            must: false),
+    ],
+  ),
+
+  // ===== ניקוז — מחברי HDPE (פלסטיק מקצועי) =====
+  SmartProduct(
+    key: 'hdpeConnector',
+    name: 'מחברי HDPE — פלסטיק מקצועי',
+    emoji: '🔗',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'חיבור HDPE עם מצמד אלקטרופוזיה',
+    stages: _si,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — מצמד HDPE 25×25',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '9102502510',
+      ),
+      SmartBrand(name: 'ליפסקי — מצמד HDPE 20×20', tag: 'קטן',           sku: '9102002010'),
+      SmartBrand(name: 'ליפסקי — מצמד HDPE 20×25', tag: 'מעבר 20→25',   sku: '910250080'),
+      SmartBrand(name: 'ליפסקי — מצמד HDPE 16×20', tag: 'הקטן ביותר', sku: '9102002004'),
+      SmartBrand(name: 'ליפסקי — מצמד HDPE 32×25', tag: 'מעבר 32→25',   sku: '9103202580'),
+      SmartBrand(name: 'ליפסקי — מצמד HDPE 40×25', tag: 'מעבר 40→25',   sku: '9104002580'),
+    ],
+    acc: [
+      SmartAcc(name: 'מכונת אלקטרופוזיה', emoji: '⚡', why: 'להלחמת המצמד — חובה', must: true),
+      SmartAcc(name: 'מקצועיסט HDPE',     emoji: '👷', why: 'התקנה מומלצת',         must: true),
+      SmartAcc(name: 'משור לצינור',       emoji: '🪚', price: 35, why: 'לחיתוך באורך', must: false),
+      SmartAcc(name: 'מד מרחק',              emoji: '📏', price: 38, why: 'למידה מדויקת', must: false),
+    ],
+  ),
+
+  // ===== אביזרי קצה — אביזרי נחושת =====
+  SmartProduct(
+    key: 'copperFittings',
+    name: 'אביזרי נחושת לקווי מים',
+    emoji: '🟫',
+    cat: 'אביזרי קצה וחיבורים',
+    diagramTitle: 'חיבור צנרת נחושת בהלחמה',
+    stages: _si,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — ניפל כפול נחושת ארוך 1"',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '77777643',
+      ),
+      SmartBrand(name: 'ליפסקי — ניפל כפול נחושת ארוך 3/4"', tag: 'גודל בינוני',  sku: '77777642'),
+      SmartBrand(name: 'ליפסקי — כפה נחושת 1/2"',              tag: 'כפה קטנה',     sku: '77777101'),
+      SmartBrand(name: 'ליפסקי — כפה נחושת 3/4"',              tag: 'כפה בינונית', sku: '77777102'),
+      SmartBrand(name: 'ליפסקי — כפה נחושת 1"',                 tag: 'כפה גדולה',   sku: '77777103'),
+      SmartBrand(name: 'ליפסקי — מופה נחושת 1/2"',              tag: 'מופה קטנה',    sku: '77777104'),
+    ],
+    acc: [
+      SmartAcc(name: 'בורה ללחימת נחושת', emoji: '🔥', why: 'להלחמה — חובה',     must: true),
+      SmartAcc(name: 'פלקס לנחושת',         emoji: '🧪', price: 28, why: 'הכנת השטח — חובה', must: true),
+      SmartAcc(name: 'סיכת הלחמה',          emoji: '🪡', price: 18, why: 'חומר ההלחמה',         must: true),
+      SmartAcc(name: 'מקצרה לנחושת',        emoji: '✂️', price: 95, why: 'לחיתוך נקי',          must: false),
+      SmartAcc(name: 'משחזת',                  emoji: '🪨', price: 32, why: 'להכנת השטח',          must: false),
+    ],
+  ),
+
+  // ===== ברזים — ברזי מעבר כדוריים =====
+  SmartProduct(
+    key: 'transitValve',
+    name: 'ברז מעבר כדורי',
+    emoji: '⚙️',
+    cat: 'ברזים וכיורים',
+    diagramTitle: 'התקנת ברז מעבר על קו המים הראשי',
+    stages: _sf,
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — ברז מעבר כדורי ח.פ 3/4"',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '77777312',
+      ),
+      SmartBrand(name: 'ליפסקי — ברז כדורי 1"',     tag: 'גדול',         sku: '77777313'),
+      SmartBrand(name: 'ליפסקי — ברז כדורי 1¼"',   tag: 'גדול יותר',   sku: '77777314'),
+      SmartBrand(name: 'ליפסקי — ברז כדורי 1½"',   tag: 'תעשייתי',     sku: '77777315'),
+      SmartBrand(name: 'ליפסקי — ברז כדורי 2"',     tag: 'ראשי',          sku: '77777316'),
+      SmartBrand(name: 'ליפסקי — ברז כדורי פ.פ 1/2"', tag: 'קטן פ.פ',  sku: '77777201'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4,  why: 'אוטם ההברגה — חובה', must: true),
+      SmartAcc(name: 'אטם דו צדדי',       emoji: '⚫', price: 12, why: 'איטום החיבור',         must: true),
+      SmartAcc(name: 'מפתח צינורות',     emoji: '🔧', price: 39, why: 'להידוק',                must: true),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום נוסף',            must: false),
+    ],
+  ),
+
+  // ===== גינון והשקיה — ציוד גן =====
+  SmartProduct(
+    key: 'gardenHose',
+    name: 'צינור גן להשקיה',
+    emoji: '🌿',
+    cat: 'גינון והשקיה',
+    diagramTitle: 'הזנת מים לגינה',
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — צינור גן ½" 25 מטר',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '10361325',
+      ),
+      SmartBrand(name: 'ליפסקי — צינור גן ½" 20 מטר',  tag: 'קצר',     sku: '10361320'),
+      SmartBrand(name: 'ליפסקי — צינור גן ½" 30 מטר',  tag: 'בינוני',  sku: '10361330'),
+      SmartBrand(name: 'ליפסקי — צינור גן ½" 50 מטר',  tag: 'ארוך',     sku: '10361350'),
+      SmartBrand(name: 'ליפסקי — צינור גן ¾" 25 מטר',  tag: 'גדול קצר', sku: '10361425'),
+      SmartBrand(name: 'ליפסקי — צינור גן ¾" 50 מטר',  tag: 'גדול ארוך', sku: '10361426'),
+    ],
+    acc: [
+      SmartAcc(name: 'ברז גן 3/4" כבד',  emoji: '🚰', why: 'לחיבור לקיר — חובה', must: true, sku: '77777345'),
+      SmartAcc(name: 'מצמד לצינור גן',   emoji: '🔗', price: 18, why: 'חיבור לברז',         must: true),
+      SmartAcc(name: 'ראש מתיז',           emoji: '🚿', price: 32, why: 'להשקיה רחבה',         must: false),
+      SmartAcc(name: 'גלגלת לצינור',     emoji: '🔄', price: 240, why: 'אחסון מסודר',         must: false),
+    ],
+  ),
+
+  // ===== גינון והשקיה — ברזי גן =====
+  SmartProduct(
+    key: 'gardenTap',
+    name: 'ברז גן כבד',
+    emoji: '🚰',
+    cat: 'גינון והשקיה',
+    diagramTitle: 'התקנת ברז גן חיצוני',
+    brands: [
+      SmartBrand(
+        name: 'ליפסקי — ברז גן ¾" כבד',
+        tag: 'הבחירה שלנו',
+        rec: true,
+        sku: '77777345',
+      ),
+      SmartBrand(name: 'ליפסקי — ברז גן ½" כבד', tag: 'קטן', sku: '77777341'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4,  why: 'אוטם ההברגה — חובה', must: true),
+      SmartAcc(name: 'אטם דו צדדי',       emoji: '⚫', price: 12, why: 'איטום',                 must: true),
+      SmartAcc(name: 'מפתח צינורות',     emoji: '🔧', price: 39, why: 'להידוק',                must: true),
+      SmartAcc(name: 'מצמד לצינור גן',   emoji: '🔗', price: 18, why: 'לחיבור לצינור',        must: false),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום נוסף',            must: false),
+    ],
+  ),
 ];
 
 /// Returns unique categories that have smart products, preserving prototype order.

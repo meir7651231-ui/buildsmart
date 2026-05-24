@@ -181,6 +181,20 @@ const List<CatalogNode> kCatalogTree = [
           ),
         ],
       ),
+      CatalogNode(
+        id: 'drainage.hdpe',
+        title: 'מחברי HDPE (פלסטיק מקצועי)',
+        emoji: '🔗',
+        children: [
+          CatalogNode(
+            id: 'drainage.hdpe.all',
+            title: 'מחברי HDPE — כל הגדלים',
+            emoji: '🔗',
+            brandIds: ['lipskey'],
+            lipskeyCategory: 'מחברי HDPE',
+          ),
+        ],
+      ),
     ],
   ),
 
@@ -273,6 +287,13 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '💧',
             brandIds: ['lipskey'],
             lipskeyCategory: 'נקודות מים',
+          ),
+          CatalogNode(
+            id: 'taps.shutoffs.transit',
+            title: 'ברזי מעבר כדוריים',
+            emoji: '⚙️',
+            brandIds: ['lipskey'],
+            lipskeyCategory: 'ברזי מעבר',
           ),
         ],
       ),
@@ -517,6 +538,57 @@ const List<CatalogNode> kCatalogTree = [
             emoji: '⚫',
             brandIds: ['lipskey', 'hagor'],
             lipskeyCategory: 'אטמים אומים ופקקים',
+          ),
+        ],
+      ),
+      CatalogNode(
+        id: 'endparts.copper',
+        title: 'אביזרי נחושת',
+        emoji: '🟫',
+        children: [
+          CatalogNode(
+            id: 'endparts.copper.all',
+            title: 'אביזרי נחושת — כל הסוגים',
+            emoji: '🟫',
+            brandIds: ['lipskey'],
+            lipskeyCategory: 'אביזרי נחושת',
+          ),
+        ],
+      ),
+    ],
+  ),
+
+  // ── גינון והשקיה (חדש) ───────────────────────────────────────────────────
+  CatalogNode(
+    id: 'garden',
+    title: 'גינון והשקיה',
+    emoji: '🌱',
+    children: [
+      CatalogNode(
+        id: 'garden.equipment',
+        title: 'ציוד גן',
+        emoji: '🌿',
+        children: [
+          CatalogNode(
+            id: 'garden.equipment.all',
+            title: 'צינורות וציוד גן',
+            emoji: '🌿',
+            brandIds: ['lipskey'],
+            lipskeyCategory: 'ציוד גן',
+          ),
+        ],
+      ),
+      CatalogNode(
+        id: 'garden.taps',
+        title: 'ברזי גן',
+        emoji: '🚰',
+        children: [
+          CatalogNode(
+            id: 'garden.taps.all',
+            title: 'ברזי גן כבדים',
+            emoji: '🚰',
+            brandIds: ['lipskey'],
+            lipskeyCategory: 'ברזי גן',
           ),
         ],
       ),

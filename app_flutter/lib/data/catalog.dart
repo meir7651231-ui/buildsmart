@@ -14,4 +14,5 @@ const List<Section> kCatalogCats = [
   Section(id: 'building',  emoji: '🧱',  title: 'בנייה ומחיצות'),
   Section(id: 'finishing', emoji: '🎨',  title: 'גמר'),
   Section(id: 'acc',       emoji: '🧰',  title: 'אביזרים נלווים'),
+  Section(id: 'garden',    emoji: '🌱',  title: 'גינון והשקיה'),
 ];
