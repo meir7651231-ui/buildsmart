@@ -393,7 +393,58 @@ class _Pill extends StatelessWidget {
   }
 }
 
-// ─── list ─────────────────────────────────────────────────────────────────────
+// ─── orders data ─────────────────────────────────────────────────────────────
+
+typedef _Order = ({
+  String id,
+  String items,
+  String total,
+  String stage,
+  String stageLabel,
+  String time,
+  Color stageColor,
+});
+
+const List<_Order> _kOrders = [
+  (
+    id: 'BS-1234', items: '12 פריטים', total: '₪5,420',
+    stage: 'transit',    stageLabel: 'בדרך 🚛',
+    time: '24.5, 14:00', stageColor: Color(0xFF4CAF50),
+  ),
+  (
+    id: 'BS-1221', items: '5 פריטים',  total: '₪1,890',
+    stage: 'ready',      stageLabel: 'מוכן 📦',
+    time: '24.5, 09:30', stageColor: Color(0xFF2196F3),
+  ),
+  (
+    id: 'BS-1198', items: '3 פריטים',  total: '₪630',
+    stage: 'preparing',  stageLabel: 'בהכנה 🔧',
+    time: '23.5',        stageColor: Color(0xFFFF9800),
+  ),
+  (
+    id: 'BS-1171', items: '8 פריטים',  total: '₪2,240',
+    stage: 'delivered',  stageLabel: 'הסתיימה ✓',
+    time: '21.5',        stageColor: Color(0xFF888888),
+  ),
+  (
+    id: 'BS-1155', items: '2 פריטים',  total: '₪310',
+    stage: 'delivered',  stageLabel: 'הסתיימה ✓',
+    time: '19.5',        stageColor: Color(0xFF888888),
+  ),
+];
+
+// ─── services data ────────────────────────────────────────────────────────────
+
+typedef _Service = ({String emoji, String title, String sub});
+
+const List<_Service> _kServices = [
+  (emoji: '🔧', title: 'השכרת כלים',     sub: '2 כלים פעילים'),
+  (emoji: '💰', title: 'פקדונות',         sub: 'פיקדון ₪350'),
+  (emoji: '↩️', title: 'החזרה חדשה',     sub: 'בקשה #567'),
+  (emoji: '📨', title: 'מכרז ספקים',     sub: '3 הצעות חדשות'),
+  (emoji: '🧪', title: 'גיליונות בטיחות', sub: '5 גיליונות'),
+  (emoji: '📊', title: 'השוואת מחירים',  sub: '4 ספקים עודכנו'),
+];
 
 class _StoreList extends ConsumerWidget {
   const _StoreList();
@@ -401,15 +452,28 @@ class _StoreList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final section = ref.watch(storeSectionProvider);
-    final items = _itemsForSection(section);
+    return switch (section) {
+      StoreSection.services => const _ServicesGrid(),
+      StoreSection.orders   => const _OrdersList(),
+      _                     => _AllList(section: section),
+    };
+  }
+}
 
+// ─── all / cart list ──────────────────────────────────────────────────────────
+
+class _AllList extends StatelessWidget {
+  const _AllList({required this.section});
+  final StoreSection section;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = _itemsForSection(section);
     return ListView.separated(
       key: ValueKey(section),
       itemCount: items.length,
       separatorBuilder: (_, __) => const Divider(
-        height: 1,
-        indent: 76,
-        color: Color(0xFF2A2A2A),
+        height: 1, indent: 76, color: Color(0xFF2A2A2A),
       ),
       itemBuilder: (context, i) => _StoreRow(item: items[i]),
     );
@@ -503,6 +567,183 @@ class _StoreRow extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── services grid ────────────────────────────────────────────────────────────
+
+class _ServicesGrid extends StatelessWidget {
+  const _ServicesGrid();
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 1.5,
+      ),
+      itemCount: _kServices.length,
+      itemBuilder: (context, i) => _ServiceCard(service: _kServices[i]),
+    );
+  }
+}
+
+class _ServiceCard extends StatelessWidget {
+  const _ServiceCard({required this.service});
+  final _Service service;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => showToast(context, '${service.title} — בבנייה'),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF2A2A2A)),
+        ),
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(service.emoji, style: const TextStyle(fontSize: 28)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  service.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  service.sub,
+                  style: const TextStyle(
+                    color: Color(0xFF888888),
+                    fontSize: 12,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── orders list ──────────────────────────────────────────────────────────────
+
+class _OrdersList extends StatelessWidget {
+  const _OrdersList();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+      itemCount: _kOrders.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (context, i) => _OrderCard(order: _kOrders[i]),
+    );
+  }
+}
+
+class _OrderCard extends StatelessWidget {
+  const _OrderCard({required this.order});
+  final _Order order;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => showToast(context, 'הזמנה ${order.id} — בבנייה'),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF2A2A2A)),
+        ),
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    order.id,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: order.stageColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: order.stageColor.withValues(alpha: 0.4)),
+                  ),
+                  child: Text(
+                    order.stageLabel,
+                    style: TextStyle(
+                      color: order.stageColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(Icons.inventory_2_outlined,
+                    color: Color(0xFF888888), size: 16),
+                const SizedBox(width: 6),
+                Text(order.items,
+                    style: const TextStyle(
+                        color: Color(0xFF888888), fontSize: 13)),
+                const Spacer(),
+                Text(
+                  order.total,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.access_time_outlined,
+                    color: Color(0xFF888888), size: 14),
+                const SizedBox(width: 6),
+                Text(order.time,
+                    style: const TextStyle(
+                        color: Color(0xFF888888), fontSize: 12)),
+              ],
             ),
           ],
         ),
