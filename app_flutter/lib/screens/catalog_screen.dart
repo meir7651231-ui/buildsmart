@@ -10,6 +10,7 @@ import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/services/voice.dart';
+import 'package:buildsmart/screens/compat_screen.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -34,7 +35,7 @@ final catalogSectionProvider = StateProvider<String>((_) => 'הכל');
 
 /// Ordered list of user section labels (הכל is NOT stored here).
 final catalogSectionsListProvider = StateProvider<List<String>>(
-  (_) => ['חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם'],
+  (_) => ['תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם'],
 );
 
 /// Per-list catalog items: map of section-label → set of catalog category
@@ -938,6 +939,7 @@ IconData _sectionIcon(String label) => switch (label) {
       'מועדפים'         => Icons.favorite_border,
       'קטגוריות'        => Icons.grid_view_outlined,
       'עץ חכם'          => Icons.account_tree_outlined,
+      'תאימות'          => Icons.compare_arrows_outlined,
       _                 => Icons.list_alt_outlined,
     };
 
@@ -1613,6 +1615,7 @@ class _CatalogBody extends ConsumerWidget {
     if (active == 'קטגוריות') return const _CatalogDrillSection();
     if (active == 'מועדפים') return const _FavoritesSection();
     if (active == 'חיפושים אחרונים') return const _RecentSearchesSection();
+    if (active == 'תאימות') return const CompatScreen();
 
     final selected = ref.watch(catalogListItemsProvider)[active];
     final hasItems = selected != null && selected.isNotEmpty;
