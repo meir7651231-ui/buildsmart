@@ -2506,42 +2506,45 @@ class _TreeDrill extends ConsumerWidget {
           .where((p) => p.categoryHe == current.lipskeyCategory)
           .toList();
       final filtered = _applyFacets(base, facetGroups, facetSel);
-      final group = facetGroups[facetSel.length];
-      final options = [
-        for (final f in group)
-          (facet: f, count: filtered.where((p) => _matchesFacet(p, group, f)).length),
-      ].where((o) => o.count > 0).toList();
 
-      void chooseFacet(ProductFacet f) {
-        final sel = [...facetSel, f.label];
-        if (sel.length >= facetGroups.length) {
-          final prods = _applyFacets(base, facetGroups, sel);
-          Navigator.push(
-            context,
-            LipskeyProductsScreen.route(
-              category: '${current.title} · ${sel.join(' · ')}',
-              products: prods,
+      if (facetSel.length >= facetGroups.length) {
+        // All facets chosen → product list embedded in the tab (top + bottom
+        // rows stay fixed; only the list scrolls).
+        body = filtered.isEmpty
+            ? const Center(
+                child: Text('אין מוצרים',
+                    style: TextStyle(color: Color(0xFF888888), fontSize: 14)),
+              )
+            : LipskeyProductsList(products: filtered);
+      } else {
+        final group = facetGroups[facetSel.length];
+        final options = [
+          for (final f in group)
+            (
+              facet: f,
+              count: filtered.where((p) => _matchesFacet(p, group, f)).length
             ),
-          );
-        } else {
-          ref.read(catalogFacetProvider.notifier).state = sel;
-        }
-      }
+        ].where((o) => o.count > 0).toList();
 
-      body = options.isEmpty
-          ? const Center(
-              child: Text('אין מוצרים',
-                  style: TextStyle(color: Color(0xFF888888), fontSize: 14)),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
-              itemCount: options.length,
-              itemBuilder: (_, i) => _FacetRow(
-                label: options[i].facet.label,
-                count: options[i].count,
-                onTap: () => chooseFacet(options[i].facet),
-              ),
-            );
+        void chooseFacet(ProductFacet f) =>
+            ref.read(catalogFacetProvider.notifier).state =
+                [...facetSel, f.label];
+
+        body = options.isEmpty
+            ? const Center(
+                child: Text('אין מוצרים',
+                    style: TextStyle(color: Color(0xFF888888), fontSize: 14)),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+                itemCount: options.length,
+                itemBuilder: (_, i) => _FacetRow(
+                  label: options[i].facet.label,
+                  count: options[i].count,
+                  onTap: () => chooseFacet(options[i].facet),
+                ),
+              );
+      }
     } else if (current.children.isEmpty) {
       // Childless node = category without tree data → designed "coming soon".
       body = _TreeComingSoon(node: current);

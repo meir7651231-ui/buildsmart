@@ -73,14 +73,27 @@ class LipskeyProductsScreen extends StatelessWidget {
             ],
           ),
         ),
-        body: ListView.builder(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
-          itemCount: products.length,
-          itemBuilder: (_, i) => _ProductRow(
-            product: products[i],
-            categoryProducts: products,
-          ),
-        ),
+        body: LipskeyProductsList(products: products),
+      ),
+    );
+  }
+}
+
+/// The product list body on its own, so it can be embedded in the catalog tab
+/// (keeping the app bar and bottom nav fixed) instead of a full-screen route.
+class LipskeyProductsList extends StatelessWidget {
+  const LipskeyProductsList({super.key, required this.products});
+
+  final List<LipskeyCatalogProduct> products;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+      itemCount: products.length,
+      itemBuilder: (_, i) => _ProductRow(
+        product: products[i],
+        categoryProducts: products,
       ),
     );
   }
