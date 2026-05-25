@@ -14,6 +14,22 @@ def test_normalize_strips_packaging():
 def test_normalize_no_word_break():
     assert 'מחסום' in q._normalize('1.5מחסום')
 
+def test_dup_name_differentiator_by_color():
+    # שני מוצרים עם שם זהה אך גוון שונה → מסומן כבר-בידול, לא ככפילות-בעיה
+    base = dict(sku='', name='ברז לבן', nameEn='', category='ברזים',
+                page='1', image=True, brand='ליפסקי', color='')
+    a = dict(base, sku='A', color='לבן'); b = dict(base, sku='B', color='שחור')
+    rules = {x['rule'] for x in q.run_rules([a, b], {'ברזים'})}
+    assert 'dup_name_differentiator' in rules
+    assert 'dup_name_unresolved' not in rules
+
+def test_dup_name_unresolved_when_identical():
+    base = dict(sku='', name='ברז זהה', nameEn='', category='ברזים',
+                page='1', image=True, brand='ליפסקי', color='לבן')
+    a = dict(base, sku='A'); b = dict(base, sku='B')
+    rules = {x['rule'] for x in q.run_rules([a, b], {'ברזים'})}
+    assert 'dup_name_unresolved' in rules
+
 if __name__ == '__main__':
     import sys
     fns=[v for k,v in globals().items() if k.startswith('test_')]
