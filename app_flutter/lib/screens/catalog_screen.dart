@@ -2022,8 +2022,8 @@ class _OverviewBlock extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   color: Color(0xFF1A1A1A),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const Spacer(),
@@ -2046,7 +2046,7 @@ class _OverviewBlock extends StatelessWidget {
         ),
         ...children,
         if (!isLast)
-          const Divider(height: 16, thickness: 8, color: Color(0xFFF0F1F4)),
+          const Divider(height: 1, thickness: 1, color: BsTokens.brand),
       ],
     );
   }
