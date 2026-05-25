@@ -208,11 +208,31 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   /// Per-side connection groups: [(sizeLabel, fitting parts), ...].
   List<({String size, List<LipskeyCatalogProduct> parts})> _connectionGroups(
       LipskeyCatalogProduct p) {
-    final sizes = _connectionSizes(p.nameHe);
+    // צעד 68: a manual size override wins over name extraction.
+    final sizes = kLipskeyConnectionSizeOverride[p.sku] ?? _connectionSizes(p.nameHe);
     final groups = <({String size, List<LipskeyCatalogProduct> parts})>[];
     for (final s in sizes) {
       final parts = _partsForSize(p, s);
       if (parts.isNotEmpty) groups.add((size: s, parts: parts));
+    }
+    // צעד 68: prepend confirmed manual pairings the size match missed.
+    final overrideSkus = kLipskeyCompatPairOverride[p.sku] ?? const [];
+    if (overrideSkus.isNotEmpty) {
+      final extra = kLipskeyCatalog
+          .where((q) => overrideSkus.contains(q.sku))
+          .toList();
+      if (extra.isNotEmpty) {
+        if (groups.isEmpty) {
+          groups.add((size: 'תואם', parts: extra));
+        } else {
+          final first = groups.first;
+          final merged = [
+            ...extra,
+            ...first.parts.where((q) => !overrideSkus.contains(q.sku)),
+          ];
+          groups[0] = (size: first.size, parts: merged);
+        }
+      }
     }
     return groups;
   }

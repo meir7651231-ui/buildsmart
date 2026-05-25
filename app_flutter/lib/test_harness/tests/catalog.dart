@@ -187,6 +187,28 @@ List<TestResult> testCatalog() {
     name: 'זיהוי שיטת-חיבור (תבריג/דבק/אלקטרו) — צעד 61',
     pass: methodOk,
   ));
+  // צעד 68: size-override wins over name extraction
+  compat.add(TestCheck(
+    name: 'override-מידה גובר על חילוץ-שם (צעד 68)',
+    pass: () {
+      const override = {'_zz': ['50']};
+      final fromOverride =
+          override['_zz'] ?? lipskeyConnectionSizes('מוצר בלי מידה');
+      return fromOverride.contains('50');
+    }(),
+  ));
+  // כל ה-override-ים מצביעים על מק"טים קיימים (אין יתום)
+  final allSkus = {for (final p in kLipskeyCatalog) p.sku};
+  final orphanOverride = [
+    ...kLipskeyConnectionSizeOverride.keys,
+    ...kLipskeyCompatPairOverride.keys,
+    ...kLipskeyCompatPairOverride.values.expand((v) => v),
+  ].where((s) => !allSkus.contains(s)).toList();
+  compat.add(TestCheck(
+    name: 'טבלת-override ללא מק"ט יתום (צעד 68)',
+    pass: orphanOverride.isEmpty,
+    got: orphanOverride.isEmpty ? 'נקי' : '${orphanOverride.length} יתומים',
+  ));
 
   results.add(TestResult(
     id: 'catalog:compat',

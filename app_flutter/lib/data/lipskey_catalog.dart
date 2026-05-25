@@ -43,7 +43,10 @@ class LipskeyCatalogProduct {
 
   /// Connection sizes (DN ends) of this product — the single source of truth
   /// for the compatibility engine. Reused by the sheet and the regression test.
-  List<String> get connectionSizes => lipskeyConnectionSizes(nameHe);
+  /// A manual override (צעד 68) wins when the name can't be parsed correctly
+  /// (e.g. size only on the spec image, or an irregular name).
+  List<String> get connectionSizes =>
+      kLipskeyConnectionSizeOverride[sku] ?? lipskeyConnectionSizes(nameHe);
 
   /// Connection gender inferred from the name (צעד 60): 'male' (זכר/חיצוני),
   /// 'female' (נקבה/פנימי), or null when the name doesn't say. A threaded male
@@ -201,6 +204,22 @@ List<String> lipskeyConnectionSizes(String name) {
   }
   return out.toList();
 }
+
+/// Manual compatibility overrides (צעד 68) — for the exceptions the
+/// name-based size engine can't catch. **Verified additions only** (R8): do not
+/// invent connections; add a SKU here only after confirming against the source.
+///
+/// [kLipskeyConnectionSizeOverride]: SKU → its true connection sizes, used when
+/// the name yields wrong/empty sizes. Wins over name extraction.
+const Map<String, List<String>> kLipskeyConnectionSizeOverride = {
+  // '116074': ['50'],  // example: size only printed on the spec image
+};
+
+/// SKU → extra compatible SKUs the cross-category size match misses (e.g. an
+/// adapter that fits a non-standard mate). Merged into the per-side groups.
+const Map<String, List<String>> kLipskeyCompatPairOverride = {
+  // '217861': ['116632'],  // example: confirmed pairing not seen by sizes
+};
 
 /// Known manufacturer/model tokens within Lipskey-distributed product names.
 const List<String> kLipskeyModels = [
