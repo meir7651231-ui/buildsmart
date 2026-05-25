@@ -495,7 +495,7 @@ class _QuickAction extends StatelessWidget {
                   child: Text(
                     badge.toString(),
                     style: const TextStyle(
-                      color: 0xFFFFFFFF,
+                      color: Color(0xFFFFFFFF),
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -594,7 +594,7 @@ class _SichaSheet extends StatelessWidget {
                 child: Text(c.avatar, style: const TextStyle(fontSize: 20)),
               ),
               title: Text(c.name,
-                  style: const TextStyle(color: 0xFFFFFFFF, fontSize: 15)),
+                  style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 15)),
               trailing:
                   const Icon(Icons.phone_outlined, color: Colors.white38),
               onTap: () {
@@ -643,7 +643,7 @@ class _SheetScaffold extends StatelessWidget {
             child: Text(
               '$emoji $title',
               style: const TextStyle(
-                color: 0xFFFFFFFF,
+                color: Color(0xFFFFFFFF),
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -672,7 +672,7 @@ class _SheetTile extends StatelessWidget {
     return ListTile(
       leading: Text(emoji, style: const TextStyle(fontSize: 22)),
       title:
-          Text(label, style: const TextStyle(color: 0xFFFFFFFF, fontSize: 15)),
+          Text(label, style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 15)),
       onTap: onTap ?? () {
         Navigator.pop(context);
         showToast(context, '$label — בבנייה');
@@ -893,7 +893,7 @@ class _StoreRow extends StatelessWidget {
                         child: Text(
                           item.title,
                           style: const TextStyle(
-                            color: 0xFFFFFFFF,
+                            color: Color(0xFFFFFFFF),
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -937,7 +937,7 @@ class _StoreRow extends StatelessWidget {
                           child: Text(
                             '${item.badge}',
                             style: const TextStyle(
-                              color: 0xFFFFFFFF,
+                              color: Color(0xFFFFFFFF),
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
@@ -1022,7 +1022,7 @@ class _CartSheet extends StatelessWidget {
             child: Text(
               '🛒 הסל שלי',
               style: TextStyle(
-                color: 0xFFFFFFFF,
+                color: Color(0xFFFFFFFF),
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -1041,7 +1041,7 @@ class _CartSheet extends StatelessWidget {
                     child: Text(
                       item.name,
                       style:
-                          const TextStyle(color: 0xFFFFFFFF, fontSize: 14),
+                          const TextStyle(color: Color(0xFFFFFFFF), fontSize: 14),
                     ),
                   ),
                   Text(
@@ -1055,7 +1055,7 @@ class _CartSheet extends StatelessWidget {
                   Text(
                     item.price,
                     style: const TextStyle(
-                      color: 0xFFFFFFFF,
+                      color: Color(0xFFFFFFFF),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1072,7 +1072,7 @@ class _CartSheet extends StatelessWidget {
               Text(
                 'סה"כ',
                 style: TextStyle(
-                  color: 0xFFFFFFFF,
+                  color: Color(0xFFFFFFFF),
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1080,7 +1080,7 @@ class _CartSheet extends StatelessWidget {
               Text(
                 _kCartTotal,
                 style: TextStyle(
-                  color: 0xFFFFFFFF,
+                  color: Color(0xFFFFFFFF),
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                 ),
@@ -1091,7 +1091,7 @@ class _CartSheet extends StatelessWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: BsTokens.brand,
-              foregroundColor: 0xFFFFFFFF,
+              foregroundColor: Color(0xFFFFFFFF),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1329,7 +1329,7 @@ class _SmartCartRow extends ConsumerWidget {
                     Text(
                       '${line.productName} × ${line.productQty}',
                       style: const TextStyle(
-                        color: 0xFFFFFFFF,
+                        color: Color(0xFFFFFFFF),
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1415,7 +1415,7 @@ class _SupplierHeader extends StatelessWidget {
           Text(
             '🏪 $name',
             style: const TextStyle(
-              color: 0xFFFFFFFF,
+              color: Color(0xFFFFFFFF),
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -1473,7 +1473,7 @@ class _CartItemRow extends ConsumerWidget {
                     Text(
                       item.name,
                       style: const TextStyle(
-                        color: 0xFFFFFFFF,
+                        color: Color(0xFFFFFFFF),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1518,7 +1518,7 @@ class _CartItemRow extends ConsumerWidget {
                       child: Text(
                         '$qty',
                         style: const TextStyle(
-                          color: 0xFFFFFFFF,
+                          color: Color(0xFFFFFFFF),
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -1536,7 +1536,7 @@ class _CartItemRow extends ConsumerWidget {
               Text(
                 _price(lineTotal),
                 style: const TextStyle(
-                  color: 0xFFFFFFFF,
+                  color: Color(0xFFFFFFFF),
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1640,7 +1640,7 @@ class _DeliveryCard extends StatelessWidget {
             Text(
               option.label,
               style: TextStyle(
-                color: active ? BsTokens.brand : 0xFFFFFFFF,
+                color: active ? BsTokens.brand : Color(0xFFFFFFFF),
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
@@ -1679,7 +1679,7 @@ class _NotesField extends StatelessWidget {
         const SizedBox(height: 6),
         TextField(
           controller: controller,
-          style: const TextStyle(color: 0xFFFFFFFF, fontSize: 13),
+          style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 13),
           cursorColor: BsTokens.brand,
           maxLines: 2,
           decoration: InputDecoration(
@@ -1761,7 +1761,7 @@ class _SummaryLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = bold
         ? const TextStyle(
-            color: 0xFFFFFFFF,
+            color: Color(0xFFFFFFFF),
             fontSize: 15,
             fontWeight: FontWeight.w800,
           )
@@ -1867,7 +1867,7 @@ class _CheckoutButton extends ConsumerWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: BsTokens.brand,
-        foregroundColor: 0xFFFFFFFF,
+        foregroundColor: Color(0xFFFFFFFF),
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1937,7 +1937,7 @@ class _CheckoutSheet extends ConsumerWidget {
             const Text(
               'סיכום הזמנה',
               style: TextStyle(
-                color: 0xFFFFFFFF,
+                color: Color(0xFFFFFFFF),
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -1959,7 +1959,7 @@ class _CheckoutSheet extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text(
                     project,
-                    style: const TextStyle(color: 0xFFFFFFFF, fontSize: 14),
+                    style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 14),
                   ),
                   const SizedBox(height: 12),
                   const Divider(color: Color(0xFFFFFFFF), height: 1),
@@ -1974,7 +1974,7 @@ class _CheckoutSheet extends ConsumerWidget {
                       Text(
                         deliveryLabel,
                         style:
-                            const TextStyle(color: 0xFFFFFFFF, fontSize: 13),
+                            const TextStyle(color: Color(0xFFFFFFFF), fontSize: 13),
                       ),
                     ],
                   ),
@@ -1989,7 +1989,7 @@ class _CheckoutSheet extends ConsumerWidget {
                       Text(
                         paymentLabel,
                         style:
-                            const TextStyle(color: 0xFFFFFFFF, fontSize: 13),
+                            const TextStyle(color: Color(0xFFFFFFFF), fontSize: 13),
                       ),
                     ],
                   ),
@@ -2002,7 +2002,7 @@ class _CheckoutSheet extends ConsumerWidget {
                       const Text(
                         'סה"כ לתשלום',
                         style: TextStyle(
-                          color: 0xFFFFFFFF,
+                          color: Color(0xFFFFFFFF),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -2010,7 +2010,7 @@ class _CheckoutSheet extends ConsumerWidget {
                       Text(
                         _price(total),
                         style: const TextStyle(
-                          color: 0xFFFFFFFF,
+                          color: Color(0xFFFFFFFF),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -2024,7 +2024,7 @@ class _CheckoutSheet extends ConsumerWidget {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: BsTokens.brand,
-                foregroundColor: 0xFFFFFFFF,
+                foregroundColor: Color(0xFFFFFFFF),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -2288,7 +2288,7 @@ class _ServiceSheet extends StatelessWidget {
             child: Text(
               '${svc.emoji} ${svc.title}',
               style: const TextStyle(
-                color: 0xFFFFFFFF,
+                color: Color(0xFFFFFFFF),
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -2311,7 +2311,7 @@ class _ServiceSheet extends StatelessWidget {
                   Text(r.emoji, style: const TextStyle(fontSize: 22)),
               title: Text(r.label,
                   style:
-                      const TextStyle(color: 0xFFFFFFFF, fontSize: 15)),
+                      const TextStyle(color: Color(0xFFFFFFFF), fontSize: 15)),
               subtitle: r.sub.isEmpty
                   ? null
                   : Text(
@@ -2473,7 +2473,7 @@ class _OrderRow extends StatelessWidget {
                         child: Text(
                           order.id,
                           style: const TextStyle(
-                            color: 0xFFFFFFFF,
+                            color: Color(0xFFFFFFFF),
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -2595,7 +2595,7 @@ class _OrderSheet extends StatelessWidget {
                 child: Text(
                   'הזמנה ${order.id}',
                   style: const TextStyle(
-                    color: 0xFFFFFFFF,
+                    color: Color(0xFFFFFFFF),
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
@@ -2641,7 +2641,7 @@ class _OrderSheet extends StatelessWidget {
                     child: Text(
                       item.name,
                       style: const TextStyle(
-                        color: 0xFFFFFFFF,
+                        color: Color(0xFFFFFFFF),
                         fontSize: 14,
                       ),
                     ),
@@ -2657,7 +2657,7 @@ class _OrderSheet extends StatelessWidget {
                   Text(
                     item.price,
                     style: const TextStyle(
-                      color: 0xFFFFFFFF,
+                      color: Color(0xFFFFFFFF),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -2674,7 +2674,7 @@ class _OrderSheet extends StatelessWidget {
               const Text(
                 'סה"כ',
                 style: TextStyle(
-                  color: 0xFFFFFFFF,
+                  color: Color(0xFFFFFFFF),
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -2682,7 +2682,7 @@ class _OrderSheet extends StatelessWidget {
               Text(
                 order.total,
                 style: const TextStyle(
-                  color: 0xFFFFFFFF,
+                  color: Color(0xFFFFFFFF),
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                 ),
