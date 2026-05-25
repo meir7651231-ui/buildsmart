@@ -1858,12 +1858,12 @@ class _PaymentChip extends StatelessWidget {
 
 // ─── checkout button ──────────────────────────────────────────────────────────
 
-class _CheckoutButton extends StatelessWidget {
+class _CheckoutButton extends ConsumerWidget {
   const _CheckoutButton({required this.total});
   final int total;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: BsTokens.brand,
@@ -1872,10 +1872,176 @@ class _CheckoutButton extends StatelessWidget {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         padding: const EdgeInsets.symmetric(vertical: 16),
       ),
-      onPressed: () => showToast(context, 'מעבר לתשלום — בבנייה'),
+      onPressed: () => _showCheckoutSheet(context, ref),
       child: Text(
         'הזמן עכשיו · ${_price(total)} →',
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+
+  void _showCheckoutSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF1A1A1A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _CheckoutSheet(total: total),
+    );
+  }
+}
+
+// ─── checkout sheet ───────────────────────────────────────────────────────────
+
+class _CheckoutSheet extends ConsumerWidget {
+  const _CheckoutSheet({required this.total});
+  final int total;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final delivery = ref.watch(cartDeliveryProvider);
+    final payment = ref.watch(cartPaymentProvider);
+    final project = ref.watch(cartProjectProvider);
+
+    final deliveryLabel =
+        _kDeliveryOptions.firstWhere((d) => d.method == delivery).label;
+    final paymentLabel = _kPaymentOptions
+        .firstWhere((p) => p.method == payment)
+        .label;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        top: 20,
+        left: 16,
+        right: 16,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'סיכום הזמנה',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF2A2A2A),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'פרויקט',
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    project,
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(color: Color(0xFF1A1A1A), height: 1),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '📦 משלוח',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      Text(
+                        deliveryLabel,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '💳 תשלום',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      Text(
+                        paymentLabel,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(color: Color(0xFF1A1A1A), height: 1),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'סה"כ לתשלום',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        _price(total),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: BsTokens.brand,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                showToast(context, 'הזמנה #${DateTime.now().second} אושרה! 🎉');
+              },
+              child: const Text(
+                'אישור הזמנה',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
