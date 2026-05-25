@@ -24,6 +24,9 @@ else
   curl -fsSL "$FLUTTER_CDN" | tar xJ -C "$(dirname "$FLUTTER_HOME")"
 fi
 
+# Git safe.directory — needed when Flutter is extracted as root on Vercel.
+git config --global --add safe.directory "$FLUTTER_HOME" 2>/dev/null || true
+
 export PATH="$FLUTTER_HOME/bin:$PATH"
 flutter --version
 
