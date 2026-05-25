@@ -142,6 +142,10 @@ final compatSizeProvider    = StateProvider<String>((_) => 'הכל');
 final compatMethodProvider  = StateProvider<String>((_) => 'הכל');
 final compatSearchProvider  = StateProvider<String>((_) => '');
 
+// ── plumbing chain state ──────────────────────────────────────────────────────
+
+final chainProvider = StateProvider<List<LipskeyCatalogProduct>>((_) => []);
+
 // ── compatibility logic ───────────────────────────────────────────────────────
 
 bool canConnect(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
@@ -216,17 +220,17 @@ class CompatScreen extends ConsumerWidget {
   const CompatScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Material resets DefaultTextStyle to dark on a light surface,
-    // so Text widgets without explicit color render readable (not white-on-white).
-    return const Material(
+    final chain = ref.watch(chainProvider);
+    return Material(
       color: _bg,
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Column(children: [
-          _SearchBar(),
-          _Filters(),
-          _StatsRow(),
-          Expanded(child: _List()),
+          const _SearchBar(),
+          const _Filters(),
+          const _StatsRow(),
+          const Expanded(child: _List()),
+          if (chain.isNotEmpty) _ChainBar(chain: chain),
         ]),
       ),
     );
@@ -519,18 +523,19 @@ void _showSheet(BuildContext ctx, LipskeyCatalogProduct anchor,
   );
 }
 
-class CompatSheet extends StatefulWidget {
+class CompatSheet extends ConsumerStatefulWidget {
   const CompatSheet({super.key, required this.anchor, required this.matches});
   final LipskeyCatalogProduct anchor;
   final List<LipskeyCatalogProduct> matches;
 
   @override
-  State<CompatSheet> createState() => _CompatSheetState();
+  ConsumerState<CompatSheet> createState() => _CompatSheetState();
 }
 
-class _CompatSheetState extends State<CompatSheet>
+class _CompatSheetState extends ConsumerState<CompatSheet>
     with SingleTickerProviderStateMixin {
   LipskeyCatalogProduct? _connecting;
+  bool _showActions = false;
   late final AnimationController _ctrl;
   late final Animation<double> _slideAnim;
   late final Animation<double> _fadeAnim;
@@ -556,18 +561,31 @@ class _CompatSheetState extends State<CompatSheet>
     super.dispose();
   }
 
-  void _connect(LipskeyCatalogProduct p, BuildContext ctx) {
-    setState(() => _connecting = p);
+  void _connect(LipskeyCatalogProduct p) {
+    setState(() { _connecting = p; _showActions = false; });
     _ctrl.forward().then((_) async {
-      await Future.delayed(const Duration(milliseconds: 350));
+      await Future.delayed(const Duration(milliseconds: 300));
       if (!mounted) return;
-      Navigator.pop(context);
-      showLipskeyProductSheet(
-        ctx,
-        p,
-        kLipskeyCatalog.where((x) => x.categoryHe == p.categoryHe).toList(),
-      );
+      setState(() => _showActions = true);
     });
+  }
+
+  void _addToChain(LipskeyCatalogProduct p) {
+    final chain = ref.read(chainProvider);
+    final updated = [...chain];
+    if (updated.isEmpty) updated.add(widget.anchor);
+    if (!updated.any((x) => x.sku == p.sku)) updated.add(p);
+    ref.read(chainProvider.notifier).state = updated;
+    Navigator.pop(context);
+  }
+
+  void _openDetails(LipskeyCatalogProduct p, BuildContext ctx) {
+    Navigator.pop(context);
+    showLipskeyProductSheet(
+      ctx,
+      p,
+      kLipskeyCatalog.where((x) => x.categoryHe == p.categoryHe).toList(),
+    );
   }
 
   @override
@@ -678,7 +696,7 @@ class _CompatSheetState extends State<CompatSheet>
                     itemBuilder: (ctx2, i) {
                       final p = matches[i];
                       return InkWell(
-                        onTap: () => _connect(p, ctx2),
+                        onTap: () => _connect(p),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 10),
@@ -743,62 +761,386 @@ class _CompatSheetState extends State<CompatSheet>
             // ── connection animation overlay ──────────────────────────────────
             if (_connecting != null)
               Positioned.fill(
-                child: IgnorePointer(
-                  child: AnimatedBuilder(
-                    animation: _ctrl,
-                    builder: (_, __) => ColoredBox(
-                      color: Colors.white.withOpacity(_fadeAnim.value * 0.85),
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Anchor piece (static at top)
-                            SizedBox(
-                              width: 50,
-                              height: 50,
-                              child: ClipPath(
-                                clipper: const _PuzzleClipper(notchBottom: true),
-                                child: Container(
-                                  color: _surface,
-                                  alignment: Alignment.center,
-                                  child: Text(anchor.typeEmoji,
-                                      style: const TextStyle(fontSize: 24)),
-                                ),
+                child: Builder(builder: (ctx2) => AnimatedBuilder(
+                  animation: _ctrl,
+                  builder: (_, __) => ColoredBox(
+                    color: Colors.white.withOpacity(_fadeAnim.value * 0.85),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 50, height: 50,
+                            child: ClipPath(
+                              clipper: const _PuzzleClipper(notchBottom: true),
+                              child: Container(
+                                color: _surface,
+                                alignment: Alignment.center,
+                                child: Text(anchor.typeEmoji,
+                                    style: const TextStyle(fontSize: 24)),
                               ),
                             ),
-                            // "connected" indicator (fades in after slide)
-                            if (_ctrl.value > 0.7)
-                              Container(
-                                margin: const EdgeInsets.symmetric(vertical: 2),
-                                width: 2,
-                                height: 16,
-                                color: const Color(0xFF059669),
-                              ),
-                            // Compatible piece slides UP to connect
-                            Transform.translate(
-                              offset: Offset(0, _slideAnim.value),
-                              child: _puzzleBox(_connecting!, tabTop: true),
+                          ),
+                          if (_ctrl.value > 0.7)
+                            Container(
+                              margin: const EdgeInsets.symmetric(vertical: 2),
+                              width: 2, height: 16,
+                              color: const Color(0xFF059669),
                             ),
-                            const SizedBox(height: 12),
-                            if (_ctrl.value > 0.75)
-                              const Text(
-                                'מחובר! ✓',
-                                style: TextStyle(
-                                  color: Color(0xFF059669),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                          Transform.translate(
+                            offset: Offset(0, _slideAnim.value),
+                            child: _puzzleBox(_connecting!, tabTop: true),
+                          ),
+                          const SizedBox(height: 12),
+                          if (_ctrl.value > 0.75)
+                            const Text(
+                              'מחובר! ✓',
+                              style: TextStyle(
+                                color: Color(0xFF059669),
+                                fontSize: 16, fontWeight: FontWeight.w700,
                               ),
+                            ),
+                          // Action buttons after animation completes
+                          if (_showActions) ...[
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: _brand,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10)),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 10),
+                                  ),
+                                  icon: const Text('🔗',
+                                      style: TextStyle(fontSize: 14)),
+                                  label: const Text('הוסף לשרשרת',
+                                      style: TextStyle(fontSize: 13,
+                                          fontWeight: FontWeight.w700)),
+                                  onPressed: () => _addToChain(_connecting!),
+                                ),
+                                const SizedBox(width: 10),
+                                OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: _title,
+                                    side: const BorderSide(color: _divider),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10)),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 10),
+                                  ),
+                                  onPressed: () => _openDetails(_connecting!, ctx2),
+                                  child: const Text('פרטים',
+                                      style: TextStyle(fontSize: 13)),
+                                ),
+                              ],
+                            ),
                           ],
-                        ),
+                        ],
                       ),
                     ),
                   ),
-                ),
+                )),
               ),
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── chain bar ─────────────────────────────────────────────────────────────────
+
+class _ChainBar extends ConsumerWidget {
+  const _ChainBar({required this.chain});
+  final List<LipskeyCatalogProduct> chain;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return GestureDetector(
+      onTap: () => _showChainSheet(context, chain, ref),
+      child: Container(
+        color: _brand,
+        padding: EdgeInsets.fromLTRB(
+            16, 10, 16, 10 + MediaQuery.of(context).padding.bottom),
+        child: Row(children: [
+          const Text('🔗', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: 10),
+          Expanded(child: Text(
+            'שרשרת: ${chain.length} פריטים — לחץ לצפייה',
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w700),
+          )),
+          const Icon(Icons.chevron_left, color: Colors.white),
+        ]),
+      ),
+    );
+  }
+}
+
+void _showChainSheet(BuildContext ctx, List<LipskeyCatalogProduct> chain,
+    WidgetRef ref) {
+  showModalBottomSheet<void>(
+    context: ctx,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => ChainBuilderSheet(chain: chain, ref: ref),
+  );
+}
+
+// ── chain builder sheet ───────────────────────────────────────────────────────
+
+class ChainBuilderSheet extends StatelessWidget {
+  const ChainBuilderSheet({super.key, required this.chain, required this.ref});
+  final List<LipskeyCatalogProduct> chain;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.55,
+        minChildSize: 0.35,
+        maxChildSize: 0.85,
+        builder: (_, ctrl) => Container(
+          decoration: const BoxDecoration(
+            color: _bg,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(children: [
+            // handle
+            Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 6),
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                  color: _divider,
+                  borderRadius: BorderRadius.circular(2)),
+            ),
+            // header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: Row(children: [
+                const Text('🔗', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text('בונה קו אינסטלציה',
+                      style: TextStyle(
+                          color: _title,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800)),
+                ),
+                TextButton(
+                  onPressed: () {
+                    ref.read(chainProvider.notifier).state = [];
+                    Navigator.pop(context);
+                  },
+                  child: const Text('נקה',
+                      style: TextStyle(color: _sub, fontSize: 13)),
+                ),
+              ]),
+            ),
+            const Divider(height: 1, color: _divider),
+
+            // ── chain visualization ───────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (int i = 0; i < chain.length; i++) ...[
+                      _ChainNode(product: chain[i], index: i),
+                      if (i < chain.length - 1)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Row(children: [
+                            Container(width: 12, height: 3,
+                                color: const Color(0xFF059669)),
+                            const Icon(Icons.arrow_back_ios,
+                                size: 14, color: Color(0xFF059669)),
+                          ]),
+                        ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+
+            const Divider(height: 1, color: _divider),
+
+            // ── product list in chain ─────────────────────────────────────────
+            Expanded(child: ListView.separated(
+              controller: ctrl,
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              itemCount: chain.length,
+              separatorBuilder: (_, __) =>
+                  const Divider(height: 1, indent: 72, color: _divider),
+              itemBuilder: (_, i) {
+                final p = chain[i];
+                final isFirst = i == 0;
+                final isLast = i == chain.length - 1;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 10),
+                  child: Row(children: [
+                    // step indicator
+                    Container(
+                      width: 28, height: 28,
+                      decoration: BoxDecoration(
+                        color: i == 0 ? _brand : const Color(0xFF059669),
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text('${i + 1}',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700)),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(p.nameHe,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                color: _title,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 2),
+                        Row(children: [
+                          if (p.connectionGender != null)
+                            Text(_gLbl(p.connectionGender),
+                                style: TextStyle(
+                                    color: _gColor(p.connectionGender),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600)),
+                          if (p.connectionSizes.isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            Text(
+                              p.connectionSizes.map((s) => 'DN$s').join(' · '),
+                              style: const TextStyle(
+                                  color: _sub, fontSize: 11)),
+                          ],
+                        ]),
+                        // compatibility check with next product
+                        if (!isLast) _CompatCheck(
+                          a: chain[i], b: chain[i + 1]),
+                      ],
+                    )),
+                    // remove button
+                    if (!isFirst)
+                      GestureDetector(
+                        onTap: () {
+                          final updated = [...chain]..removeAt(i);
+                          ref.read(chainProvider.notifier).state = updated;
+                          Navigator.pop(context);
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.all(4),
+                          child: Icon(Icons.close, size: 18, color: _sub),
+                        ),
+                      ),
+                  ]),
+                );
+              },
+            )),
+
+            SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChainNode extends StatelessWidget {
+  const _ChainNode({required this.product, required this.index});
+  final LipskeyCatalogProduct product;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 68,
+      child: Column(children: [
+        Stack(alignment: Alignment.topRight, children: [
+          SizedBox(
+            width: 50, height: 50,
+            child: ClipPath(
+              clipper: _PuzzleClipper(
+                notchBottom: index % 2 == 0,
+                tabTop: index % 2 == 1,
+              ),
+              child: Container(
+                color: index == 0 ? _brand.withOpacity(0.15) : _surface,
+                alignment: Alignment.center,
+                child: Text(product.typeEmoji,
+                    style: const TextStyle(fontSize: 22)),
+              ),
+            ),
+          ),
+          Container(
+            width: 16, height: 16,
+            decoration: BoxDecoration(
+              color: index == 0 ? _brand : const Color(0xFF059669),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text('${index + 1}',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800)),
+          ),
+        ]),
+        const SizedBox(height: 4),
+        Text(
+          product.nameHe,
+          maxLines: 2,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(color: _title, fontSize: 9,
+              fontWeight: FontWeight.w500),
+        ),
+      ]),
+    );
+  }
+}
+
+class _CompatCheck extends StatelessWidget {
+  const _CompatCheck({required this.a, required this.b});
+  final LipskeyCatalogProduct a, b;
+
+  @override
+  Widget build(BuildContext context) {
+    final ok = canConnect(a, b);
+    return Padding(
+      padding: const EdgeInsets.only(top: 3),
+      child: Row(children: [
+        Icon(ok ? Icons.check_circle : Icons.error,
+            size: 12,
+            color: ok ? const Color(0xFF059669) : Colors.red),
+        const SizedBox(width: 4),
+        Text(
+          ok ? 'חיבור תקין ✓' : 'אזהרה: חיבור לא מאומת',
+          style: TextStyle(
+            color: ok ? const Color(0xFF059669) : Colors.red,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ]),
     );
   }
 }
