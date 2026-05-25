@@ -4258,7 +4258,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   late Map<int, bool> _accSelected;
   late Map<int, int> _accQty;
 
-  bool _brandOpen = true;
+  bool _brandOpen = false;
   bool _typeOpen = false;
   bool _sizeOpen = false;
   String? _selType;
