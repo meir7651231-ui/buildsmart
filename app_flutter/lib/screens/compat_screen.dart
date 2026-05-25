@@ -241,6 +241,19 @@ String connectionFailReason(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   return 'אין נקודת חיבור משותפת';
 }
 
+// Returns the shared DN string if the two products connect via a pipe segment,
+// null if they connect directly (thread-to-thread) or are incompatible.
+String? pipeConnectionDn(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
+  final vA = kVerifiedSpecs[a.sku], vB = kVerifiedSpecs[b.sku];
+  if (vA == null || vB == null) return null;
+  for (final eA in vA.ends) {
+    for (final eB in vB.ends) {
+      if (eA.pipeSharedWith(eB)) return eA.size;
+    }
+  }
+  return null;
+}
+
 List<LipskeyCatalogProduct> compatibleWith(LipskeyCatalogProduct anchor) =>
     kLipskeyCatalog.where((p) => canConnect(anchor, p)).toList()
       ..sort((a, b) => (a.categoryHe == anchor.categoryHe ? 0 : 1)
@@ -846,11 +859,10 @@ class _CompatSheetState extends ConsumerState<CompatSheet>
                                       color: _sub, fontSize: 12)),
                               ],
                             )),
-                            // direct "add to chain" button — fits tail = orange, else grey
+                            // 🔗 button: orange = fits tail, grey = already in chain or incompatible
                             Builder(builder: (btnCtx) {
-                              final fits = chainTail == null
-                                  ? true
-                                  : canConnect(chainTail, p);
+                              final inChain = chain.any((x) => x.sku == p.sku);
+                              final fits = !inChain && (chainTail == null || canConnect(chainTail, p));
                               return GestureDetector(
                                 onTap: () => _addToChain(p, btnCtx),
                                 child: Opacity(
@@ -862,8 +874,9 @@ class _CompatSheetState extends ConsumerState<CompatSheet>
                                       shape: BoxShape.circle,
                                     ),
                                     alignment: Alignment.center,
-                                    child: const Icon(Icons.link,
-                                        size: 16, color: Colors.white),
+                                    child: Icon(
+                                      inChain ? Icons.check : Icons.link,
+                                      size: 16, color: Colors.white),
                                   ),
                                 ),
                               );
@@ -1025,7 +1038,7 @@ class ChainBuilderSheet extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
         expand: false,
-        initialChildSize: 0.55,
+        initialChildSize: (0.40 + chain.length * 0.1).clamp(0.55, 0.92),
         minChildSize: 0.35,
         maxChildSize: 0.85,
         builder: (_, ctrl) => Container(
@@ -1080,13 +1093,16 @@ class ChainBuilderSheet extends StatelessWidget {
                       _ChainNode(product: chain[i], index: i),
                       if (i < chain.length - 1)
                         Padding(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: Row(children: [
-                            Container(width: 12, height: 3,
-                                color: const Color(0xFF059669)),
-                            const Icon(Icons.arrow_back_ios,
-                                size: 14, color: Color(0xFF059669)),
-                          ]),
+                          padding: const EdgeInsets.only(top: 15),
+                          child: pipeConnectionDn(chain[i], chain[i + 1]) != null
+                              ? _PipeConnector(
+                                  dn: pipeConnectionDn(chain[i], chain[i + 1])!)
+                              : Row(children: [
+                                  Container(width: 10, height: 3,
+                                      color: const Color(0xFF059669)),
+                                  const Icon(Icons.arrow_back_ios,
+                                      size: 12, color: Color(0xFF059669)),
+                                ]),
                         ),
                     ],
                   ],
@@ -1152,9 +1168,16 @@ class ChainBuilderSheet extends StatelessWidget {
                                   color: _sub, fontSize: 11)),
                           ],
                         ]),
-                        // compatibility check with next product
-                        if (!isLast) _CompatCheck(
-                          a: chain[i], b: chain[i + 1]),
+                        // compatibility check + pipe segment with next product
+                        if (!isLast) ...[
+                          _CompatCheck(a: chain[i], b: chain[i + 1]),
+                          Builder(builder: (ctx) {
+                            final dn = pipeConnectionDn(chain[i], chain[i + 1]);
+                            return dn != null
+                                ? _PipeSegment(dn: dn)
+                                : const SizedBox.shrink();
+                          }),
+                        ],
                       ],
                     )),
                     // remove button
@@ -1179,6 +1202,78 @@ class ChainBuilderSheet extends StatelessWidget {
           ]),
         ),
       ),
+    );
+  }
+}
+
+// Pipe connector shown between puzzle pieces in the horizontal row
+class _PipeConnector extends StatelessWidget {
+  const _PipeConnector({required this.dn});
+  final String dn;
+
+  @override
+  Widget build(BuildContext context) {
+    const pipeBlue = Color(0xFF1976D2);
+    const pipeBg   = Color(0xFFE3F2FD);
+    const pipeLine = Color(0xFF90CAF9);
+    return SizedBox(
+      width: 54,
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Container(height: 5, decoration: BoxDecoration(
+          color: pipeLine, borderRadius: BorderRadius.circular(3))),
+        const SizedBox(height: 2),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+          decoration: BoxDecoration(
+            color: pipeBg,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: pipeLine),
+          ),
+          child: Text('DN$dn',
+              style: const TextStyle(fontSize: 9, color: pipeBlue,
+                  fontWeight: FontWeight.w700)),
+        ),
+        const SizedBox(height: 2),
+        Container(height: 5, decoration: BoxDecoration(
+          color: pipeLine, borderRadius: BorderRadius.circular(3))),
+      ]),
+    );
+  }
+}
+
+// Pipe segment row shown in the list between two compression-connected fittings
+class _PipeSegment extends StatelessWidget {
+  const _PipeSegment({required this.dn});
+  final String dn;
+
+  @override
+  Widget build(BuildContext context) {
+    const pipeBlue = Color(0xFF1565C0);
+    const pipeBg   = Color(0xFFE3F2FD);
+    const pipeLine = Color(0xFF90CAF9);
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, bottom: 2),
+      child: Row(children: [
+        Expanded(child: Container(height: 2,
+            decoration: BoxDecoration(color: pipeLine,
+                borderRadius: BorderRadius.circular(1)))),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: pipeBg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: pipeLine),
+          ),
+          child: Text('צינור HDPE DN$dn',
+              style: const TextStyle(fontSize: 10, color: pipeBlue,
+                  fontWeight: FontWeight.w600)),
+        ),
+        const SizedBox(width: 8),
+        Expanded(child: Container(height: 2,
+            decoration: BoxDecoration(color: pipeLine,
+                borderRadius: BorderRadius.circular(1)))),
+      ]),
     );
   }
 }
