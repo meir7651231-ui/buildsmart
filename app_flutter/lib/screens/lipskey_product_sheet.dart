@@ -217,6 +217,40 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     return groups;
   }
 
+  /// Installation kit (צעד 64): the single best-ranked mate for each
+  /// connection side — the minimal parts list to complete every joint of this
+  /// product. De-duped by SKU so a part shared across sides appears once.
+  List<LipskeyCatalogProduct> _installKit(LipskeyCatalogProduct p) {
+    final kit = <LipskeyCatalogProduct>[];
+    final seen = <String>{};
+    for (final g in _connectionGroups(p)) {
+      if (g.parts.isEmpty) continue;
+      final top = g.parts.first; // rank #1 (same method/material, opp. gender)
+      if (seen.add(top.sku)) kit.add(top);
+    }
+    return kit;
+  }
+
+  void _addKitToCart(List<LipskeyCatalogProduct> kit) {
+    final notifier = ref.read(smartCartProvider.notifier);
+    for (final part in kit) {
+      notifier.add(SmartCartLine(
+        productKey: 'lip:${part.sku}',
+        productName: part.nameHe,
+        productEmoji: part.typeEmoji,
+        brandName: part.brand,
+        brandPrice: 0,
+        productQty: 1,
+        accessories: const [],
+      ));
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('נוספו ${kit.length} חלקי ערכת-התקנה לסל ✓'),
+      duration: const Duration(seconds: 1),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
   /// Inch sizes show as e.g. 1.25" ; plain DN numbers as DN50.
   String _sizeLabel(String s) =>
       RegExp(r'^\d+$').hasMatch(s) ? 'DN$s' : '$s"';
@@ -592,6 +626,58 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                         ),
                         const SizedBox(height: 6),
                       ];
+                      // ── ערכת-התקנה: המתאם המומלץ לכל צד, בלחיצה אחת ──────
+                      final kit = _installKit(p);
+                      if (kit.length >= 2) {
+                        w.add(Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0x143DD9B0),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0x553DD9B0)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Text('🧩', style: TextStyle(fontSize: 20)),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('ערכת התקנה מומלצת',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700)),
+                                      Text(
+                                          '${kit.length} חלקים — מתאם לכל צד חיבור',
+                                          style: const TextStyle(
+                                              color: Color(0xFF9AA3B2),
+                                              fontSize: 11)),
+                                    ],
+                                  ),
+                                ),
+                                FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFF3DD9B0),
+                                    foregroundColor: const Color(0xFF06251C),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 8),
+                                  ),
+                                  onPressed: () => _addKitToCart(kit),
+                                  child: const Text('+ ערכה',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 13)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ));
+                      }
                       for (var gi = 0; gi < groups.length; gi++) {
                         final g = groups[gi];
                         w.add(Padding(
