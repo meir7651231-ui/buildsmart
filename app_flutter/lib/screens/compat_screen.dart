@@ -5,12 +5,12 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// ── colors — light theme ──────────────────────────────────────────────────────
-const _bg       = Colors.white;
-const _surface  = Color(0xFFF5F6F8);   // chip / avatar bg
-const _divider  = Color(0xFFEEEFF2);
-const _title    = Color(0xFF111827);
-const _sub      = Color(0xFF6B7280);
+// ── colors — exact match to _CatalogRow in catalog_screen.dart ───────────────
+const _bg       = Color(0xFFFFFFFF);
+const _surface  = Color(0xFFF5F5F5);   // avatar circle bg, search bar, chips
+const _divider  = Color(0xFFF5F5F5);   // same as catalog divider
+const _title    = Color(0xFF1A1A1A);   // exact match: TextStyle(color: Color(0xFF1A1A1A))
+const _sub      = Color(0xFF888888);   // exact match: TextStyle(color: Color(0xFF888888))
 const _brand    = BsTokens.brand;      // orange
 
 // ── filter state ─────────────────────────────────────────────────────────────
@@ -84,7 +84,9 @@ class CompatScreen extends ConsumerWidget {
   const CompatScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const ColoredBox(
+    // Material resets DefaultTextStyle to dark on a light surface,
+    // so Text widgets without explicit color render readable (not white-on-white).
+    return const Material(
       color: _bg,
       child: Directionality(
         textDirection: TextDirection.rtl,
@@ -119,7 +121,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
       child: Container(
         height: 40,
         decoration: BoxDecoration(
-          color: _surface,
+          color: const Color(0xFFE7E7EA),  // matches catalog search bar
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(children: [
