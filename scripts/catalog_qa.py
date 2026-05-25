@@ -54,14 +54,43 @@ def _field(body, name):
     return m.group(2) if m else ""
 
 
+def _split_products(src):
+    """Paren-balanced split of every LipskeyCatalogProduct(...) body. Robust to
+    field ordering, nested maps (dims) and comments — unlike a lookahead regex,
+    which silently merged ~111 entries (115 products went unaudited)."""
+    bodies, marker = [], "LipskeyCatalogProduct("
+    i = 0
+    while True:
+        i = src.find(marker, i)
+        if i == -1:
+            break
+        j = i + len(marker)
+        depth, in_str, quote = 1, False, ""
+        while j < len(src) and depth:
+            c = src[j]
+            if in_str:
+                if c == quote and src[j - 1] != "\\":
+                    in_str = False
+            elif c in "'\"":
+                in_str, quote = True, c
+            elif c == "(":
+                depth += 1
+            elif c == ")":
+                depth -= 1
+            j += 1
+        bodies.append(src[i + len(marker):j - 1])
+        i = j
+    return bodies
+
+
 def parse_catalog(path=CATALOG):
     src = open(path, encoding="utf-8").read()
+    # drop the class definition body so only the data list is parsed
+    list_start = src.find("kLipskeyCatalog = [")
+    if list_start != -1:
+        src = src[list_start:]
     out = []
-    for m in re.finditer(
-        r"LipskeyCatalogProduct\((.*?)\),\s*(?=LipskeyCatalogProduct|\];)",
-        src, re.DOTALL,
-    ):
-        b = m.group(1)
+    for b in _split_products(src):
         out.append({
             "sku": _field(b, "sku"), "name": _field(b, "nameHe"),
             "nameEn": _field(b, "nameEn"), "category": _field(b, "categoryHe"),
@@ -132,7 +161,9 @@ def run_rules(products, tcats):
     by_sku = {p["sku"]: p for p in products}
     for (cat, n), sks in name_in_cat.items():
         if len(sks) > 1:
-            add("duplicate_name", WARN, sks[0], f"[{cat}] '{n[:25]}' ×{len(sks)}")
+            # שם-כפול לבדו אינו שגיאה (וריאציות לגיטימיות, gotcha #5) → INFO.
+            # ה-WARN האמיתי הוא dup_name_unresolved (אין מבדיל גוון/מידה).
+            add("duplicate_name", INFO, sks[0], f"[{cat}] '{n[:25]}' ×{len(sks)}")
             # צעד 25: identical-name group — propose the attribute that already
             # distinguishes them (color / size) so the differentiator is real,
             # not invented. Only flag as unresolvable when nothing separates them.

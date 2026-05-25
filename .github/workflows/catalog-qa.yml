@@ -55,3 +55,7 @@ jobs:
             echo "❌ נמצאו שגיאות קומפילציה"; exit 1
           fi
           echo "✅ אין errors"
+
+      - name: Catalog regression headless (צעד 54)
+        working-directory: app_flutter
+        run: flutter test test/catalog_regression_test.dart

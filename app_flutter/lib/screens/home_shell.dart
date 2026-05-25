@@ -500,9 +500,12 @@ class _MenuRow extends StatelessWidget {
       children: [
         Text(emoji, style: const TextStyle(fontSize: 18)),
         const SizedBox(width: 12),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white, fontSize: 15),
+        Flexible(
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white, fontSize: 15),
+          ),
         ),
       ],
     );

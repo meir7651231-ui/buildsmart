@@ -2595,7 +2595,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── Page 12 — מחברים (Connectors) ───────────────────────────────────────────
   LipskeyCatalogProduct(
     sku: '196206',
-    nameHe: 'מחבר כפול DN32 | כולל 2 אומים ו-2 אטמים',
+    nameHe: 'מחבר כפול DN32 · כולל 2 אומים ו-2 אטמים',
     nameEn: 'Double socket DN32 Includes 2 nuts and 2 seals',
     qtyPack: 100,
     qtyPallet: 4500,
@@ -2695,7 +2695,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── Page 12 — מסעפים ללא תבריג (Branches 45° one side without screw-on) ─────
   LipskeyCatalogProduct(
     sku: '192291',
-    nameHe: 'מסעף 45° DN75 — צד ללא תבריג | כולל 2 אומים ו-2 אטמים',
+    nameHe: 'מסעף 45° DN75 — צד ללא תבריג · כולל 2 אומים ו-2 אטמים',
     nameEn: 'Branch 45° DN75 one side without screw-on 2 nuts and 2 seals',
     qtyPack: 30,
     qtyPallet: 1350,
@@ -2721,7 +2721,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   // ── Page 12 — מסעפים 90° עם תבריג (Branches 90°) ───────────────────────────
   LipskeyCatalogProduct(
     sku: '110689',
-    nameHe: 'מסעף 90° DN32 עם תבריג | כולל 3 אומים ו-3 אטמים',
+    nameHe: 'מסעף 90° DN32 עם תבריג · כולל 3 אומים ו-3 אטמים',
     nameEn: 'Branch 90° DN32 screw-on Includes 3 nuts and 3 seals',
     qtyPack: 18,
     qtyPallet: 3600,
@@ -4125,7 +4125,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     color: 'לבן',
     qtyPack: 75,
     qtyPallet: 1875,
-    categoryHe: 'מחסומים (סיפונים) גלויים',
+    categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
     page: 8,
