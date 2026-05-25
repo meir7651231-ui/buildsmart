@@ -99,6 +99,22 @@ class LipskeyProductsList extends StatelessWidget {
   }
 }
 
+/// A single product card, for embedding products beneath the drill rows.
+class LipskeyProductCard extends StatelessWidget {
+  const LipskeyProductCard({
+    super.key,
+    required this.product,
+    required this.products,
+  });
+
+  final LipskeyCatalogProduct product;
+  final List<LipskeyCatalogProduct> products;
+
+  @override
+  Widget build(BuildContext context) =>
+      _ProductRow(product: product, categoryProducts: products);
+}
+
 // ───────────────────────────────────────────────────────────────────────────
 class _ProductRow extends ConsumerStatefulWidget {
   const _ProductRow({required this.product, required this.categoryProducts});

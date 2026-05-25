@@ -95,6 +95,21 @@ bool _matchesFacet(
       .any((f) => p.nameHe.contains(f.keyword!));
 }
 
+/// All lipskey products under [node]'s subtree (the set shrinks as you drill).
+List<LipskeyCatalogProduct> _subtreeProducts(CatalogNode node) {
+  final cats = <String>{};
+  void walk(CatalogNode n) {
+    if (n.lipskeyCategory != null) cats.add(n.lipskeyCategory!);
+    for (final c in n.children) {
+      walk(c);
+    }
+  }
+
+  walk(node);
+  if (cats.isEmpty) return const [];
+  return kLipskeyCatalog.where((p) => cats.contains(p.categoryHe)).toList();
+}
+
 /// Apply the first [sel].length facet groups to [base].
 List<LipskeyCatalogProduct> _applyFacets(
   List<LipskeyCatalogProduct> base,
@@ -2499,78 +2514,85 @@ class _TreeDrill extends ConsumerWidget {
       crumbs.add((label: facetSel[j], onTap: last ? null : () => jumpToFacet(j)));
     }
 
-    Widget body;
+    // Drill rows shown on top; the relevant products are listed below them and
+    // shrink as the drill narrows.
+    var rowWidgets = <Widget>[];
+    var products = <LipskeyCatalogProduct>[];
+    Widget? special;
+
     if (facetGroups != null) {
-      // Facet drill: split the leaf's products by the next facet group.
       final base = kLipskeyCatalog
           .where((p) => p.categoryHe == current.lipskeyCategory)
           .toList();
-      final filtered = _applyFacets(base, facetGroups, facetSel);
-
-      if (facetSel.length >= facetGroups.length) {
-        // All facets chosen → product list embedded in the tab (top + bottom
-        // rows stay fixed; only the list scrolls).
-        body = filtered.isEmpty
-            ? const Center(
-                child: Text('אין מוצרים',
-                    style: TextStyle(color: Color(0xFF888888), fontSize: 14)),
-              )
-            : LipskeyProductsList(products: filtered);
-      } else {
+      products = _applyFacets(base, facetGroups, facetSel);
+      if (facetSel.length < facetGroups.length) {
         final group = facetGroups[facetSel.length];
         final options = [
           for (final f in group)
             (
               facet: f,
-              count: filtered.where((p) => _matchesFacet(p, group, f)).length
+              count: products.where((p) => _matchesFacet(p, group, f)).length
             ),
         ].where((o) => o.count > 0).toList();
-
-        void chooseFacet(ProductFacet f) =>
-            ref.read(catalogFacetProvider.notifier).state =
-                [...facetSel, f.label];
-
-        body = options.isEmpty
-            ? const Center(
-                child: Text('אין מוצרים',
-                    style: TextStyle(color: Color(0xFF888888), fontSize: 14)),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
-                itemCount: options.length,
-                itemBuilder: (_, i) => _FacetRow(
-                  label: options[i].facet.label,
-                  count: options[i].count,
-                  onTap: () => chooseFacet(options[i].facet),
-                ),
-              );
+        rowWidgets = [
+          for (final o in options)
+            _FacetRow(
+              label: o.facet.label,
+              count: o.count,
+              onTap: () => ref.read(catalogFacetProvider.notifier).state =
+                  [...facetSel, o.facet.label],
+            ),
+        ];
       }
     } else if (current.children.isEmpty) {
-      // Childless node = category without tree data → designed "coming soon".
-      body = _TreeComingSoon(node: current);
+      special = _TreeComingSoon(node: current);
     } else {
-      // Query empty → direct children. Otherwise → every descendant of the
-      // current node whose title matches (search scoped to the drill).
       final rows = query.isEmpty
           ? current.children
           : _searchSubtree(current, query);
-      body = rows.isEmpty
-          ? Center(
-              child: Text(
-                'לא נמצאו תוצאות עבור "$query"',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF888888), fontSize: 14),
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
-              itemCount: rows.length,
-              itemBuilder: (_, i) => _TreeCatRow(
-                node: rows[i],
-                onTap: () => openNode(rows[i]),
-              ),
-            );
+      rowWidgets = [
+        for (final n in rows)
+          _TreeCatRow(node: n, onTap: () => openNode(n)),
+      ];
+      products = _subtreeProducts(current);
+      if (query.isNotEmpty) {
+        products =
+            products.where((p) => p.nameHe.contains(query)).toList();
+      }
+      if (rows.isEmpty && products.isEmpty) {
+        special = Center(
+          child: Text(
+            'לא נמצאו תוצאות עבור "$query"',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Color(0xFF888888), fontSize: 14),
+          ),
+        );
+      }
     }
+
+    final body = special ??
+        CustomScrollView(
+          slivers: [
+            if (rowWidgets.isNotEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(rowWidgets),
+                ),
+              ),
+            if (products.isNotEmpty) ...[
+              SliverToBoxAdapter(child: _ProductsHeader(count: products.length)),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (_, i) => LipskeyProductCard(
+                      product: products[i], products: products),
+                  childCount: products.length,
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            ],
+          ],
+        );
 
     return Column(
       children: [
@@ -2661,6 +2683,47 @@ class _FacetRow extends StatelessWidget {
   }
 }
 
+
+// Header above the products listed beneath the drill rows.
+class _ProductsHeader extends StatelessWidget {
+  const _ProductsHeader({required this.count});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Row(
+        children: [
+          Text(
+            'מוצרים',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+            decoration: BoxDecoration(
+              color: BsTokens.brand.withAlpha(30),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '$count',
+              style: const TextStyle(
+                color: BsTokens.brand,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 // Designed "coming soon" body for main categories that have no tree data yet.
 class _TreeComingSoon extends StatelessWidget {
