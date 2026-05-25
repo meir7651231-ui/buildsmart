@@ -156,6 +156,47 @@ List<LipskeyCatalogProduct> _applyFacets(
   return out;
 }
 
+/// Meaningful words of a product name — drops sizes/numbers, punctuation and
+/// very short tokens, so facets split by real characterizing words.
+List<String> _facetTokens(String name) {
+  final cleaned = name.replaceAll(RegExp('[()"׳\'*.,/+\\-־–—]'), ' ');
+  return cleaned
+      .split(RegExp(r'\s+'))
+      .map((w) => w.trim())
+      .where((w) =>
+          w.length >= 2 &&
+          !w.contains('"') &&
+          !w.contains('″') &&
+          !RegExp(r'[0-9]').hasMatch(w))
+      .toList();
+}
+
+/// Auto-derived facet options for a leaf without curated facets. Splits by the
+/// most *primary* characterizing word — the first word in each product's name
+/// that isn't shared by the whole set (and isn't already chosen) — rather than
+/// by whichever word is most frequent.
+List<({String label, int count})> _autoFacetOptions(
+    List<LipskeyCatalogProduct> products, List<String> chosen) {
+  if (products.length <= 1) return const [];
+  final tokens = products.map((p) => _facetTokens(p.nameHe)).toList();
+  final shared = tokens.first.toSet();
+  for (final t in tokens.skip(1)) {
+    shared.retainAll(t.toSet());
+  }
+  final counts = <String, int>{};
+  for (final toks in tokens) {
+    for (final w in toks) {
+      if (shared.contains(w) || chosen.contains(w)) continue;
+      counts[w] = (counts[w] ?? 0) + 1; // first distinguishing word wins
+      break;
+    }
+  }
+  if (counts.length < 2) return const [];
+  final entries = counts.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
+  return [for (final e in entries) (label: e.key, count: e.value)];
+}
+
 String _sortLabel(CatalogSort s) => switch (s) {
       CatalogSort.defaultSort => 'ברירת מחדל',
       CatalogSort.nameAZ      => 'א-ת',
@@ -2456,11 +2497,11 @@ class _TreeDrill extends ConsumerWidget {
     final query = ref.watch(catalogTreeQueryProvider).trim();
     final facetSel = ref.watch(catalogFacetProvider);
 
-    // A leaf that maps to a faceted lipskey category drills by product facets
-    // (e.g. תיקני/קומקום → למקלחת/כללי → פתוח/סגור) before the product list.
-    final facetGroups = current.isLeaf && current.lipskeyCategory != null
-        ? kProductFacets[current.lipskeyCategory]
-        : null;
+    // A leaf that maps to a lipskey category with products drills by facets
+    // (curated where defined, else auto-derived) before the product list.
+    final leafCat = current.isLeaf ? current.lipskeyCategory : null;
+    final isProductLeaf = leafCat != null &&
+        kLipskeyCatalog.any((p) => p.categoryHe == leafCat);
 
     void resetQuery() =>
         ref.read(catalogTreeQueryProvider.notifier).state = '';
@@ -2500,26 +2541,13 @@ class _TreeDrill extends ConsumerWidget {
 
     void openNode(CatalogNode n) {
       if (n.isLeaf) {
-        // Faceted leaf → enter facet drill instead of opening products.
+        // Leaf with products → drill in-tab (facets + product list below).
         if (n.lipskeyCategory != null &&
-            kProductFacets.containsKey(n.lipskeyCategory)) {
+            kLipskeyCatalog.any((p) => p.categoryHe == n.lipskeyCategory)) {
           resetQuery();
           resetFacets();
           ref.read(catalogTreePathProvider.notifier).state = [...path, n];
           return;
-        }
-        if (n.lipskeyCategory != null) {
-          final products = kLipskeyCatalog
-              .where((p) => p.categoryHe == n.lipskeyCategory)
-              .toList();
-          if (products.isNotEmpty) {
-            Navigator.push(
-              context,
-              LipskeyProductsScreen.route(
-                  category: n.title, products: products),
-            );
-            return;
-          }
         }
         if (n.smartKey != null) {
           final product = smartProductByKey(n.smartKey!);
@@ -2550,30 +2578,39 @@ class _TreeDrill extends ConsumerWidget {
     var products = <LipskeyCatalogProduct>[];
     Widget? special;
 
-    if (facetGroups != null) {
-      final base = kLipskeyCatalog
-          .where((p) => p.categoryHe == current.lipskeyCategory)
-          .toList();
-      products = _applyFacets(base, facetGroups, facetSel);
-      if (facetSel.length < facetGroups.length) {
-        final group = facetGroups[facetSel.length];
-        final options = [
-          for (final f in group)
-            (
-              facet: f,
-              count: products.where((p) => _matchesFacet(p, group, f)).length
-            ),
-        ].where((o) => o.count > 0).toList();
-        rowWidgets = [
-          for (final o in options)
-            _FacetRow(
-              label: o.facet.label,
-              count: o.count,
-              onTap: () => ref.read(catalogFacetProvider.notifier).state =
-                  [...facetSel, o.facet.label],
-            ),
-        ];
+    if (isProductLeaf) {
+      final base =
+          kLipskeyCatalog.where((p) => p.categoryHe == leafCat).toList();
+      final curated = kProductFacets[leafCat];
+      var options = <({String label, int count})>[];
+      if (curated != null) {
+        products = _applyFacets(base, curated, facetSel);
+        if (facetSel.length < curated.length) {
+          final group = curated[facetSel.length];
+          options = [
+            for (final f in group)
+              (
+                label: f.label,
+                count: products.where((p) => _matchesFacet(p, group, f)).length
+              ),
+          ].where((o) => o.count > 0).toList();
+        }
+      } else {
+        // Auto facets: filter by chosen words, split by next primary word.
+        products = base
+            .where((p) => facetSel.every((w) => p.nameHe.contains(w)))
+            .toList();
+        options = _autoFacetOptions(products, facetSel);
       }
+      rowWidgets = [
+        for (final o in options)
+          _FacetRow(
+            label: o.label,
+            count: o.count,
+            onTap: () => ref.read(catalogFacetProvider.notifier).state =
+                [...facetSel, o.label],
+          ),
+      ];
     } else if (current.children.isEmpty) {
       special = _TreeComingSoon(node: current);
     } else {
