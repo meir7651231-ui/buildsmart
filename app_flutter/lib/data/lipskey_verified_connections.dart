@@ -5,15 +5,23 @@
 //
 // Connection end semantics:
 //   hdpeCompression  — compression ring that grabs an HDPE pipe (sized by DN mm)
+//   pexPress         — press/crimp sleeve that grabs a PEX pipe (sized by OD mm)
+//   copperPress      — press/compression joint on copper tube (sized by OD mm)
 //   bspMale          — external BSP thread (sized by inch string, e.g. '1/2"')
 //   bspFemale        — internal BSP thread (same size notation)
 //
 // Compatibility rules:
 //   • bspMale(X) ⟺ bspFemale(X)  — direct thread-to-thread joint
+//   • pexPress(X) ⟺ pexPress(X)  — fitting accepts the PEX pipe of that OD
+//   • copperPress(X) ⟺ copperPress(X) — fitting accepts the copper tube
 //   • hdpeCompression(X) ⟷ hdpeCompression(X) — pipe-bridged (same pipe DN)
 //   Two products are compatible if ANY end of A mates with ANY end of B.
+//
+// Material / temperature: each spec carries maxTempC so the engine can reject
+// a product whose material can't survive the line's operating temperature
+// (e.g. HDPE caps at ~40°C continuous and must never serve 80°C hot water).
 
-enum EndType { hdpeCompression, bspMale, bspFemale }
+enum EndType { hdpeCompression, pexPress, copperPress, bspMale, bspFemale }
 
 class ConnectorEnd {
   final EndType type;
@@ -22,8 +30,12 @@ class ConnectorEnd {
   const ConnectorEnd(this.type, this.size);
 
   bool directMatesWith(ConnectorEnd other) {
+    // BSP thread: male ⟺ female of the same size.
     if (type == EndType.bspMale && other.type == EndType.bspFemale && size == other.size) return true;
     if (type == EndType.bspFemale && other.type == EndType.bspMale && size == other.size) return true;
+    // PEX / copper press: a fitting end accepts a pipe/fitting of the same OD.
+    if (type == EndType.pexPress && other.type == EndType.pexPress && size == other.size) return true;
+    if (type == EndType.copperPress && other.type == EndType.copperPress && size == other.size) return true;
     return false;
   }
 
@@ -39,11 +51,16 @@ class VerifiedSpec {
   final String material;
   final String? pressureRating;
 
+  /// Maximum continuous service temperature (°C). Defaults to 40 — the safe
+  /// cap for HDPE — so every legacy cold-water spec is correct without edits.
+  final double maxTempC;
+
   const VerifiedSpec({
     required this.sku,
     required this.ends,
     required this.material,
     this.pressureRating,
+    this.maxTempC = 40,
   });
 
   bool compatibleWith(VerifiedSpec other) {
@@ -54,14 +71,23 @@ class VerifiedSpec {
     }
     return false;
   }
+
+  /// True when this product's material can serve a line at [tempC].
+  bool suitableForTemp(double tempC) => tempC <= maxTempC;
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-const _hdpe = 'HDPE';
-const _pn16 = 'PN16';
+const _hdpe   = 'HDPE';
+const _pex    = 'PEX';
+const _copper = 'נחושת';
+const _brass  = 'פליז';
+const _steel  = 'פלדה';
+const _pn16   = 'PN16';
 
 ConnectorEnd _c(String dn)    => ConnectorEnd(EndType.hdpeCompression, dn);
+ConnectorEnd _px(String od)   => ConnectorEnd(EndType.pexPress,        od);
+ConnectorEnd _cu(String od)   => ConnectorEnd(EndType.copperPress,     od);
 ConnectorEnd _bm(String inch) => ConnectorEnd(EndType.bspMale,         inch);
 ConnectorEnd _bf(String inch) => ConnectorEnd(EndType.bspFemale,       inch);
 
@@ -268,4 +294,56 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
       ends: [_c('63'), _c('63'), _c('63')]),
   '9102001242': VerifiedSpec(sku: '9102001242', material: _hdpe, pressureRating: _pn16,
       ends: [_c('20'), _c('16'), _c('20')]),
+
+  // ════════════════════════════════════════════════════════════════════════
+  // HOT-WATER + RECIRCULATION FAMILY (PEX / copper / brass — rated ≥80°C)
+  // ════════════════════════════════════════════════════════════════════════
+
+  // ── brass interface / isolation (pump side) ────────────────────────────────
+  'HW-PUMP-25': VerifiedSpec(sku: 'HW-PUMP-25', material: _brass, pressureRating: 'PN10',
+      maxTempC: 110, ends: [_bm('1"')]),
+  'HW-UNION-1': VerifiedSpec(sku: 'HW-UNION-1', material: _brass, pressureRating: 'PN16',
+      maxTempC: 110, ends: [_bf('1"'), _bm('1"')]),
+  'HW-BALL-1': VerifiedSpec(sku: 'HW-BALL-1', material: _brass, pressureRating: 'PN16',
+      maxTempC: 110, ends: [_bf('1"'), _bf('1"')]),
+
+  // ── brass → PEX transition + PEX run ────────────────────────────────────────
+  'HW-ADP-1-PEX20': VerifiedSpec(sku: 'HW-ADP-1-PEX20', material: _brass, pressureRating: 'PN16',
+      maxTempC: 95, ends: [_bm('1"'), _px('20')]),
+  'HW-PEX-20': VerifiedSpec(sku: 'HW-PEX-20', material: _pex, pressureRating: 'PN10',
+      maxTempC: 95, ends: [_px('20'), _px('20')]),
+  'HW-PEX-RED-20-16': VerifiedSpec(sku: 'HW-PEX-RED-20-16', material: _pex, pressureRating: 'PN10',
+      maxTempC: 95, ends: [_px('20'), _px('16')]),
+  'HW-PEX-16': VerifiedSpec(sku: 'HW-PEX-16', material: _pex, pressureRating: 'PN10',
+      maxTempC: 95, ends: [_px('16'), _px('16')]),
+
+  // ── PEX → copper transition + copper run ────────────────────────────────────
+  'HW-ADP-PEX16-CU15': VerifiedSpec(sku: 'HW-ADP-PEX16-CU15', material: _brass, pressureRating: 'PN16',
+      maxTempC: 110, ends: [_px('16'), _cu('15')]),
+  'HW-CU-15': VerifiedSpec(sku: 'HW-CU-15', material: _copper, pressureRating: 'PN16',
+      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
+  'HW-BALL-15': VerifiedSpec(sku: 'HW-BALL-15', material: _brass, pressureRating: 'PN16',
+      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
+
+  // ── manifold + shower outlet ────────────────────────────────────────────────
+  'HW-MANIFOLD-3': VerifiedSpec(sku: 'HW-MANIFOLD-3', material: _brass, pressureRating: 'PN16',
+      maxTempC: 110, ends: [_cu('15'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  'HW-SHOWER-ARM': VerifiedSpec(sku: 'HW-SHOWER-ARM', material: _brass, pressureRating: 'PN16',
+      maxTempC: 110, ends: [_bm('1/2"'), _bf('1/2"')]),
+  'HW-SHOWER-HEAD': VerifiedSpec(sku: 'HW-SHOWER-HEAD', material: _brass, pressureRating: 'PN10',
+      maxTempC: 80, ends: [_bm('1/2"')]),
+
+  // ── recirculation loop ──────────────────────────────────────────────────────
+  'HW-TEE-RECIRC': VerifiedSpec(sku: 'HW-TEE-RECIRC', material: _copper, pressureRating: 'PN16',
+      maxTempC: 110, ends: [_cu('15'), _cu('15'), _cu('15')]),
+  'HW-CHECK-15': VerifiedSpec(sku: 'HW-CHECK-15', material: _brass, pressureRating: 'PN16',
+      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
+  'HW-BALANCE-15': VerifiedSpec(sku: 'HW-BALANCE-15', material: _brass, pressureRating: 'PN16',
+      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
+
+  // ── safety (closed hot loop) ────────────────────────────────────────────────
+  'HW-PRV-34': VerifiedSpec(sku: 'HW-PRV-34', material: _brass, pressureRating: 'PN10',
+      maxTempC: 110, ends: [_bm('3/4"')]),
+  'HW-EXPVESSEL': VerifiedSpec(sku: 'HW-EXPVESSEL', material: _steel, pressureRating: 'PN10',
+      maxTempC: 99, ends: [_bm('3/4"')]),
 };

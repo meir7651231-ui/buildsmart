@@ -1,4 +1,5 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -146,6 +147,25 @@ final compatSearchProvider  = StateProvider<String>((_) => '');
 
 final chainProvider = StateProvider<List<LipskeyCatalogProduct>>((_) => []);
 
+// Operating temperature of the line being built (°C). Drives the material
+// suitability check — at 80°C, HDPE (capped ~40°C) is flagged unsuitable.
+final lineMaxTempProvider = StateProvider<int>((_) => 20);
+
+// ── material / temperature helpers ──────────────────────────────────────────────
+
+/// Max service temperature of a product, or null if unknown (no verified spec).
+double? productMaxTempC(LipskeyCatalogProduct p) => kVerifiedSpecs[p.sku]?.maxTempC;
+
+/// Material label of a product (HDPE / PEX / נחושת / פליז …), or null.
+String? productMaterial(LipskeyCatalogProduct p) => kVerifiedSpecs[p.sku]?.material;
+
+/// True when the product's material can serve a line at [tempC]. Unknown → true
+/// (don't flag the 400+ legacy catalogue items that carry no verified spec).
+bool productSuitableForTemp(LipskeyCatalogProduct p, int tempC) {
+  final t = productMaxTempC(p);
+  return t == null || tempC <= t;
+}
+
 // ── compatibility logic ───────────────────────────────────────────────────────
 
 bool canConnect(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
@@ -176,44 +196,44 @@ String connectionFailReason(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
 
   if (vA != null && vB != null) {
     // Both have verified specs — explain which ends are present and why none match.
-    final comprA = vA.ends.where((e) => e.type == EndType.hdpeCompression).map((e) => e.size).toSet();
-    final comprB = vB.ends.where((e) => e.type == EndType.hdpeCompression).map((e) => e.size).toSet();
-    final bsmA   = vA.ends.where((e) => e.type == EndType.bspMale).map((e) => e.size).toSet();
-    final bsmB   = vB.ends.where((e) => e.type == EndType.bspMale).map((e) => e.size).toSet();
-    final bsfA   = vA.ends.where((e) => e.type == EndType.bspFemale).map((e) => e.size).toSet();
-    final bsfB   = vB.ends.where((e) => e.type == EndType.bspFemale).map((e) => e.size).toSet();
+    Set<String> sizes(VerifiedSpec s, EndType t) =>
+        s.ends.where((e) => e.type == t).map((e) => e.size).toSet();
+    final comprA = sizes(vA, EndType.hdpeCompression), comprB = sizes(vB, EndType.hdpeCompression);
+    final pexA   = sizes(vA, EndType.pexPress),        pexB   = sizes(vB, EndType.pexPress);
+    final cuA    = sizes(vA, EndType.copperPress),     cuB    = sizes(vB, EndType.copperPress);
+    final bsmA   = sizes(vA, EndType.bspMale),         bsmB   = sizes(vB, EndType.bspMale);
+    final bsfA   = sizes(vA, EndType.bspFemale),       bsfB   = sizes(vB, EndType.bspFemale);
 
-    // Compression ends exist on both but different sizes
-    if (comprA.isNotEmpty && comprB.isNotEmpty) {
-      final shared = comprA.intersection(comprB);
-      if (shared.isEmpty) return 'גודל שונה: DN${comprA.first} ↔ DN${comprB.first}';
+    // Same press family, different size
+    if (comprA.isNotEmpty && comprB.isNotEmpty && comprA.intersection(comprB).isEmpty) {
+      return 'גודל שונה: DN${comprA.first} ↔ DN${comprB.first}';
     }
-
-    // Thread conflict: both male or both female
-    if (bsmA.isNotEmpty && bsmB.isNotEmpty) {
-      final shared = bsmA.intersection(bsmB);
-      if (shared.isNotEmpty) return 'שני קצוות זכר ${shared.first}" — אין חיבור';
+    if (pexA.isNotEmpty && pexB.isNotEmpty && pexA.intersection(pexB).isEmpty) {
+      return 'גודל PEX שונה: ${pexA.first} ↔ ${pexB.first}';
     }
-    if (bsfA.isNotEmpty && bsfB.isNotEmpty) {
-      final shared = bsfA.intersection(bsfB);
-      if (shared.isNotEmpty) return 'שני קצוות נקבה ${shared.first}" — אין חיבור';
+    if (cuA.isNotEmpty && cuB.isNotEmpty && cuA.intersection(cuB).isEmpty) {
+      return 'גודל נחושת שונה: DN${cuA.first} ↔ DN${cuB.first}';
     }
 
-    // Thread size mismatch
-    if (bsmA.isNotEmpty && bsfB.isNotEmpty) {
-      if (bsmA.intersection(bsfB).isEmpty) return 'גודל תבריג שונה: ${bsmA.first}" ↔ ${bsfB.first}"';
+    // Thread conflict: both male or both female (same size)
+    if (bsmA.intersection(bsmB).isNotEmpty) {
+      return 'שני קצוות זכר ${bsmA.intersection(bsmB).first}" — אין חיבור';
     }
-    if (bsfA.isNotEmpty && bsmB.isNotEmpty) {
-      if (bsfA.intersection(bsmB).isEmpty) return 'גודל תבריג שונה: ${bsfA.first}" ↔ ${bsmB.first}"';
+    if (bsfA.intersection(bsfB).isNotEmpty) {
+      return 'שני קצוות נקבה ${bsfA.intersection(bsfB).first}" — אין חיבור';
     }
 
-    // One has only compression, other has only thread
-    if (comprA.isNotEmpty && comprB.isEmpty && bsmA.isEmpty && bsfA.isEmpty) {
-      return 'חיבור לחיצה vs תבריג — אין מתאם';
+    // Thread size mismatch (male↔female but different size)
+    if (bsmA.isNotEmpty && bsfB.isNotEmpty && bsmA.intersection(bsfB).isEmpty) {
+      return 'גודל תבריג שונה: ${bsmA.first}" ↔ ${bsfB.first}"';
     }
-    if (comprB.isNotEmpty && comprA.isEmpty && bsmB.isEmpty && bsfB.isEmpty) {
-      return 'חיבור לחיצה vs תבריג — אין מתאם';
+    if (bsfA.isNotEmpty && bsmB.isNotEmpty && bsfA.intersection(bsmB).isEmpty) {
+      return 'גודל תבריג שונה: ${bsfA.first}" ↔ ${bsmB.first}"';
     }
+
+    // Different material families with no shared end → needs a transition adapter
+    final matA = vA.material, matB = vB.material;
+    if (matA != matB) return 'נדרש מתאם מעבר: $matA ↔ $matB';
 
     return 'אין נקודת חיבור משותפת';
   }
@@ -255,7 +275,7 @@ String? pipeConnectionDn(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
 }
 
 List<LipskeyCatalogProduct> compatibleWith(LipskeyCatalogProduct anchor) =>
-    kLipskeyCatalog.where((p) => canConnect(anchor, p)).toList()
+    kCompatCatalog.where((p) => canConnect(anchor, p)).toList()
       ..sort((a, b) => (a.categoryHe == anchor.categoryHe ? 0 : 1)
           .compareTo(b.categoryHe == anchor.categoryHe ? 0 : 1));
 
@@ -264,7 +284,7 @@ List<LipskeyCatalogProduct> _filtered(WidgetRef ref) {
   final s = ref.watch(compatSizeProvider);
   final m = ref.watch(compatMethodProvider);
   final q = ref.watch(compatSearchProvider).trim().toLowerCase();
-  return kLipskeyCatalog.where((p) {
+  return kCompatCatalog.where((p) {
     if (g == 'זכר'    && p.connectionGender  != 'male')          return false;
     if (g == 'נקבה'   && p.connectionGender  != 'female')        return false;
     if (s != 'הכל'   && !p.connectionSizes.contains(s))          return false;
@@ -993,7 +1013,7 @@ class _ChainBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => _showChainSheet(context, chain, ref),
+      onTap: () => _showChainSheet(context),
       child: Container(
         color: _brand,
         padding: EdgeInsets.fromLTRB(
@@ -1015,32 +1035,31 @@ class _ChainBar extends ConsumerWidget {
   }
 }
 
-void _showChainSheet(BuildContext ctx, List<LipskeyCatalogProduct> chain,
-    WidgetRef ref) {
+void _showChainSheet(BuildContext ctx) {
   showModalBottomSheet<void>(
     context: ctx,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => ChainBuilderSheet(chain: chain, ref: ref),
+    builder: (_) => const ChainBuilderSheet(),
   );
 }
 
 // ── chain builder sheet ───────────────────────────────────────────────────────
 
-class ChainBuilderSheet extends StatelessWidget {
-  const ChainBuilderSheet({super.key, required this.chain, required this.ref});
-  final List<LipskeyCatalogProduct> chain;
-  final WidgetRef ref;
+class ChainBuilderSheet extends ConsumerWidget {
+  const ChainBuilderSheet({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final chain = ref.watch(chainProvider);
+    final lineTemp = ref.watch(lineMaxTempProvider);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
         expand: false,
-        initialChildSize: (0.40 + chain.length * 0.1).clamp(0.55, 0.92),
+        initialChildSize: (0.45 + chain.length * 0.08).clamp(0.6, 0.92),
         minChildSize: 0.35,
-        maxChildSize: 0.85,
+        maxChildSize: 0.92,
         builder: (_, ctrl) => Container(
           decoration: const BoxDecoration(
             color: _bg,
@@ -1080,9 +1099,40 @@ class ChainBuilderSheet extends StatelessWidget {
             ),
             const Divider(height: 1, color: _divider),
 
+            // ── line operating temperature selector ────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(children: [
+                const Text('🌡️ טמפ׳ הקו:',
+                    style: TextStyle(color: _sub, fontSize: 12,
+                        fontWeight: FontWeight.w600)),
+                const SizedBox(width: 8),
+                for (final t in [20, 60, 80]) ...[
+                  GestureDetector(
+                    onTap: () =>
+                        ref.read(lineMaxTempProvider.notifier).state = t,
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: lineTemp == t ? _brand : _surface,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text('$t°C',
+                          style: TextStyle(
+                              color: lineTemp == t ? Colors.white : _sub,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ],
+              ]),
+            ),
+
             // ── chain visualization ───────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -1167,7 +1217,19 @@ class ChainBuilderSheet extends StatelessWidget {
                               style: const TextStyle(
                                   color: _sub, fontSize: 11)),
                           ],
+                          if (productMaterial(p) != null) ...[
+                            const SizedBox(width: 6),
+                            Text('· ${productMaterial(p)}',
+                                style: const TextStyle(
+                                    color: _sub, fontSize: 11)),
+                          ],
                         ]),
+                        // material / temperature suitability for the line
+                        if (!productSuitableForTemp(p, lineTemp))
+                          _TempWarn(
+                              maxTemp: productMaxTempC(p)!.round(),
+                              lineTemp: lineTemp,
+                              material: productMaterial(p) ?? ''),
                         // compatibility check + pipe segment with next product
                         if (!isLast) ...[
                           _CompatCheck(a: chain[i], b: chain[i + 1]),
@@ -1202,6 +1264,31 @@ class ChainBuilderSheet extends StatelessWidget {
           ]),
         ),
       ),
+    );
+  }
+}
+
+// Material/temperature warning when a product can't serve the line temperature
+class _TempWarn extends StatelessWidget {
+  const _TempWarn(
+      {required this.maxTemp, required this.lineTemp, required this.material});
+  final int maxTemp, lineTemp;
+  final String material;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 3),
+      child: Row(children: [
+        const Icon(Icons.local_fire_department, size: 12, color: Colors.red),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            '$material לא מתאים ל-$lineTemp°C (מקס׳ $maxTemp°C)',
+            style: const TextStyle(
+                color: Colors.red, fontSize: 10, fontWeight: FontWeight.w700)),
+        ),
+      ]),
     );
   }
 }
