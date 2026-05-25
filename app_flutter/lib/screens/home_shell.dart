@@ -87,7 +87,7 @@ class HomeShell extends ConsumerWidget {
       ),
       floatingActionButton:
           open == OpenDial.none ? const _CartFab() : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
@@ -108,21 +108,21 @@ class _CartFab extends ConsumerWidget {
         resetAllDials(ref);
         ref.read(mainTabProvider.notifier).state = 3;
       },
-      backgroundColor: Colors.white,
-      foregroundColor: BsTokens.brand,
+      backgroundColor: BsTokens.brand,
+      foregroundColor: Colors.white,
       elevation: 4,
       shape: const CircleBorder(
-        side: BorderSide(color: BsTokens.brand, width: 2),
+        side: BorderSide(color: Colors.white, width: 2),
       ),
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
-          const Icon(Icons.shopping_cart, color: BsTokens.brand, size: 26),
-          // White plus sitting on the cart basket.
+          const Icon(Icons.shopping_cart, color: Colors.white, size: 26),
+          // Orange plus sitting on the cart basket.
           const Positioned(
             top: 7,
-            child: Icon(Icons.add, color: Colors.white, size: 12),
+            child: Icon(Icons.add, color: BsTokens.brand, size: 12),
           ),
           if (count > 0)
             Positioned(
@@ -133,15 +133,15 @@ class _CartFab extends ConsumerWidget {
                     const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                 constraints: const BoxConstraints(minWidth: 18),
                 decoration: BoxDecoration(
-                  color: BsTokens.brand,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white, width: 1.5),
+                  border: Border.all(color: BsTokens.brand, width: 1.5),
                 ),
                 child: Text(
                   '$count',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: BsTokens.brand,
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                   ),
