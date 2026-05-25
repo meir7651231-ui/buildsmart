@@ -2381,6 +2381,13 @@ class _TreeDrill extends ConsumerWidget {
       ref.read(catalogTreePathProvider.notifier).state = const [];
     }
 
+    // Jump back to an ancestor level via its breadcrumb chip.
+    void jumpTo(int index) {
+      resetQuery();
+      ref.read(catalogTreePathProvider.notifier).state =
+          path.sublist(0, index + 1);
+    }
+
     void openNode(CatalogNode n) {
       if (n.isLeaf) {
         if (n.lipskeyCategory != null) {
@@ -2419,9 +2426,10 @@ class _TreeDrill extends ConsumerWidget {
       children: [
         _TreeDrillBar(
           key: ValueKey(current.id),
-          title: current.title,
+          path: path,
           onBack: goBack,
           onCancel: cancel,
+          onJumpTo: jumpTo,
         ),
         Expanded(
           child: comingSoon
@@ -2528,20 +2536,23 @@ List<CatalogNode> _searchSubtree(CatalogNode node, String query) {
   return out;
 }
 
-// Fixed drill bar that doubles as a scoped search field: back-one-level +
-// the current category as a pressed orange chip (X cancels the drill) + a
-// text field that searches inside the current category's subtree.
+// Fixed drill bar that doubles as a scoped search field: back-one-level + a
+// breadcrumb of the drill path (ancestors are outline chips that jump back to
+// their level, the current level is a pressed orange chip whose X cancels the
+// drill) + a text field that searches inside the current category's subtree.
 class _TreeDrillBar extends ConsumerStatefulWidget {
   const _TreeDrillBar({
     super.key,
-    required this.title,
+    required this.path,
     required this.onBack,
     required this.onCancel,
+    required this.onJumpTo,
   });
 
-  final String title;
+  final List<CatalogNode> path;
   final VoidCallback onBack;
   final VoidCallback onCancel;
+  final void Function(int index) onJumpTo;
 
   @override
   ConsumerState<_TreeDrillBar> createState() => _TreeDrillBarState();
@@ -2561,6 +2572,58 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Widget _crumb(int i) {
+    final node = widget.path[i];
+    final active = i == widget.path.length - 1;
+    if (active) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+        decoration: BoxDecoration(
+          color: BsTokens.brand,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              node.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(width: 6),
+            GestureDetector(
+              onTap: widget.onCancel,
+              child: const Icon(Icons.close, color: Colors.white, size: 16),
+            ),
+          ],
+        ),
+      );
+    }
+    return GestureDetector(
+      onTap: () => widget.onJumpTo(i),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: const Border.fromBorderSide(
+            BorderSide(color: Color(0xFFC8C8CE), width: 1),
+          ),
+        ),
+        child: Text(
+          node.title,
+          style: const TextStyle(
+            color: Color(0xFF6E6E73),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -2591,43 +2654,30 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
             tooltip: 'חזרה',
             onPressed: widget.onBack,
           ),
-          // Current category as a pressed chip with X to cancel the drill.
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 150),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
-              decoration: BoxDecoration(
-                color: BsTokens.brand,
-                borderRadius: BorderRadius.circular(18),
-              ),
+          // Breadcrumb of the drill path — ancestors first (scrolls if long).
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Flexible(
-                    child: Text(
-                      widget.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                  for (var i = 0; i < widget.path.length; i++) ...[
+                    if (i > 0)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 2),
+                        child: Icon(Icons.chevron_left,
+                            color: Color(0xFF999999), size: 16),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  GestureDetector(
-                    onTap: widget.onCancel,
-                    child: const Icon(Icons.close,
-                        color: Colors.white, size: 16),
-                  ),
+                    _crumb(i),
+                  ],
                 ],
               ),
             ),
           ),
-          const SizedBox(width: 6),
-          // Scoped search field.
-          Expanded(
+          const SizedBox(width: 4),
+          // Scoped search field (compact).
+          SizedBox(
+            width: 92,
             child: TextField(
               controller: _controller,
               textInputAction: TextInputAction.search,
@@ -2635,7 +2685,7 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
                   ref.read(catalogTreeQueryProvider.notifier).state = v,
               style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
               decoration: const InputDecoration(
-                hintText: 'חיפוש בקטגוריה...',
+                hintText: 'חיפוש',
                 hintStyle: TextStyle(color: Color(0xFF888888), fontSize: 14),
                 border: InputBorder.none,
                 isDense: true,
