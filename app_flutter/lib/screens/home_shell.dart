@@ -86,7 +86,7 @@ class HomeShell extends ConsumerWidget {
         },
       ),
       floatingActionButton:
-          (open == OpenDial.none && tabIndex != 3) ? const _CartFab() : null,
+          open == OpenDial.none ? const _CartFab() : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
@@ -102,44 +102,54 @@ class _CartFab extends ConsumerWidget {
     final lines = ref.watch(smartCartProvider);
     final count = lines.fold<int>(0, (sum, l) => sum + l.productQty);
 
+    // 3-layer design: white circle + orange border, orange cart, white plus.
     return FloatingActionButton(
       onPressed: () {
         resetAllDials(ref);
         ref.read(mainTabProvider.notifier).state = 3;
       },
-      backgroundColor: BsTokens.brand,
-      foregroundColor: Colors.white,
-      child: lines.isEmpty
-          ? const Icon(Icons.add)
-          : Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: [
-                const Icon(Icons.shopping_cart),
-                Positioned(
-                  top: -8,
-                  right: -10,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                    constraints: const BoxConstraints(minWidth: 18),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: BsTokens.brand, width: 1.5),
-                    ),
-                    child: Text(
-                      '$count',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: BsTokens.brand,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
+      backgroundColor: Colors.white,
+      foregroundColor: BsTokens.brand,
+      elevation: 4,
+      shape: const CircleBorder(
+        side: BorderSide(color: BsTokens.brand, width: 2),
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          const Icon(Icons.shopping_cart, color: BsTokens.brand, size: 26),
+          // White plus sitting on the cart basket.
+          const Positioned(
+            top: 7,
+            child: Icon(Icons.add, color: Colors.white, size: 12),
+          ),
+          if (count > 0)
+            Positioned(
+              top: -10,
+              right: -12,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                constraints: const BoxConstraints(minWidth: 18),
+                decoration: BoxDecoration(
+                  color: BsTokens.brand,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                child: Text(
+                  '$count',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-              ],
+              ),
             ),
+        ],
+      ),
     );
   }
 }
