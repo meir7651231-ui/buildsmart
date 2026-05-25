@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// WhatsApp-style shell: AppBar + 4 bottom tabs + dial overlays.
-/// Tabs: קטלוג · שיחות · התראות · חנות (RTL order: catalog on right).
 class HomeShell extends ConsumerWidget {
   const HomeShell({super.key});
 
@@ -40,8 +39,6 @@ class HomeShell extends ConsumerWidget {
               StoreScreen(),
             ],
           ),
-
-          // Scrim — tapping it closes any open dial.
           if (open != OpenDial.none)
             Positioned.fill(
               child: GestureDetector(
@@ -50,16 +47,12 @@ class HomeShell extends ConsumerWidget {
                 child: Container(color: Colors.black.withValues(alpha: 0.45)),
               ),
             ),
-
-          // BS dial — anchored to right (leading in RTL).
           if (open == OpenDial.bs)
             const Positioned(
               right: BsTokens.space5,
               bottom: BsTokens.space5,
               child: BsDialWidget(),
             ),
-
-          // Search dial — centered.
           if (open == OpenDial.search)
             const Positioned(
               left: BsTokens.space4,
@@ -67,8 +60,6 @@ class HomeShell extends ConsumerWidget {
               bottom: BsTokens.space5,
               child: SearchDialWidget(),
             ),
-
-          // Menu dial — anchored to left (trailing in RTL).
           if (open == OpenDial.menu)
             const Positioned(
               left: BsTokens.space5,
@@ -88,9 +79,6 @@ class HomeShell extends ConsumerWidget {
   }
 }
 
-/// AppBar — mirrors WhatsApp Business layout in RTL.
-/// Title "BuildSmart" (right in RTL) — tap to open BS/profile dial.
-/// Actions (left in RTL): camera (opens barcode) · more-vert (menu).
 class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const _HomeAppBar();
 
@@ -129,7 +117,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                     SizedBox(width: 4),
                     Text(
-                      'v3.34 · 24.5.26 · תאימות חכמה — מה מתחבר למה',
+                      'v3.44 · 25.5.26 · תאימות חכמה — מה מתחבר למה',
                       style: TextStyle(
                         color: Color(0xFF4CAF50),
                         fontSize: 10,
@@ -144,7 +132,6 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
-        // Search icon — appears when the active tab's header is scrolled away.
         if (ref.watch(tabHeaderHiddenProvider))
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white70),
@@ -203,29 +190,14 @@ class _BottomNav extends ConsumerWidget {
       selectedFontSize: 12,
       unselectedFontSize: 11,
       items: [
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.grid_view),
-          label: 'קטלוג',
-        ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline),
-          label: 'שיחות',
-        ),
+        const BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'קטלוג'),
+        const BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'שיחות'),
         BottomNavigationBarItem(
-          icon: _BadgedIcon(
-            icon: Icons.notifications_outlined,
-            count: unreadCount,
-          ),
-          activeIcon: _BadgedIcon(
-            icon: Icons.notifications,
-            count: unreadCount,
-          ),
+          icon: _BadgedIcon(icon: Icons.notifications_outlined, count: unreadCount),
+          activeIcon: _BadgedIcon(icon: Icons.notifications, count: unreadCount),
           label: 'התראות',
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart_outlined),
-          label: 'חנות',
-        ),
+        const BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_outlined), label: 'חנות'),
       ],
     );
   }
@@ -233,15 +205,12 @@ class _BottomNav extends ConsumerWidget {
 
 class _BadgedIcon extends StatelessWidget {
   const _BadgedIcon({required this.icon, required this.count});
-
   final IconData icon;
   final int count;
 
   @override
   Widget build(BuildContext context) {
-    if (count == 0) {
-      return Icon(icon);
-    }
+    if (count == 0) return Icon(icon);
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -251,18 +220,11 @@ class _BadgedIcon extends StatelessWidget {
           right: -6,
           child: Container(
             padding: const EdgeInsets.all(2),
-            decoration: const BoxDecoration(
-              color: BsTokens.brand,
-              shape: BoxShape.circle,
-            ),
+            decoration: const BoxDecoration(color: BsTokens.brand, shape: BoxShape.circle),
             constraints: const BoxConstraints(minWidth: 15, minHeight: 15),
             child: Text(
               count > 9 ? '9+' : '$count',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 8,
-                fontWeight: FontWeight.w700,
-              ),
+              style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w700),
               textAlign: TextAlign.center,
             ),
           ),
@@ -272,11 +234,8 @@ class _BadgedIcon extends StatelessWidget {
   }
 }
 
-// ─── catalog 3-dot menu ───────────────────────────────────────────────────────
-
 class _CatalogMenuButton extends ConsumerWidget {
   const _CatalogMenuButton();
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<String>(
@@ -287,59 +246,28 @@ class _CatalogMenuButton extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
       itemBuilder: (_) => const [
-        PopupMenuItem<String>(
-          value: 'scan_plan',
-          child: _MenuRow(emoji: '📐', label: 'סרוק תוכנית עבודה'),
-        ),
-        PopupMenuItem<String>(
-          value: 'alternatives',
-          child: _MenuRow(emoji: '💡', label: 'חלופות זולות'),
-        ),
-        PopupMenuItem<String>(
-          value: 'price_compare',
-          child: _MenuRow(emoji: '📊', label: 'השוואת מחירים'),
-        ),
-        PopupMenuItem<String>(
-          value: 'favorites',
-          child: _MenuRow(emoji: '❤️', label: 'מועדפים'),
-        ),
+        PopupMenuItem<String>(value: 'scan_plan', child: _MenuRow(emoji: '📐', label: 'סרוק תוכנית עבודה')),
+        PopupMenuItem<String>(value: 'alternatives', child: _MenuRow(emoji: '💡', label: 'חלופות זולות')),
+        PopupMenuItem<String>(value: 'price_compare', child: _MenuRow(emoji: '📊', label: 'השוואת מחירים')),
+        PopupMenuItem<String>(value: 'favorites', child: _MenuRow(emoji: '❤️', label: 'מועדפים')),
         PopupMenuDivider(),
-        PopupMenuItem<String>(
-          value: 'settings',
-          child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
-        ),
+        PopupMenuItem<String>(value: 'settings', child: _MenuRow(emoji: '⚙️', label: 'הגדרות')),
       ],
     );
   }
-
   void _onSelected(BuildContext context, WidgetRef ref, String value) {
     switch (value) {
-      case 'scan_plan':
-        showModalBottomSheet<void>(
-          context: context,
-          backgroundColor: const Color(0xFF1A1A1A),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          builder: (_) => const _ScanPlanSheet(),
-        );
-      case 'alternatives':
-        showToast(context, 'חלופות זולות — בבנייה');
-      case 'price_compare':
-        showToast(context, 'השוואת מחירים — בבנייה');
-      case 'favorites':
-        ref.read(catalogSectionProvider.notifier).state = 'מועדפים';
-      case 'settings':
-        Navigator.of(context).push(CatalogSettingsScreen.route());
+      case 'scan_plan': showModalBottomSheet<void>(context: context, backgroundColor: const Color(0xFF1A1A1A), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))), builder: (_) => const _ScanPlanSheet());
+      case 'alternatives': showToast(context, 'חלופות זולות — בבנייה');
+      case 'price_compare': showToast(context, 'השוואת מחירים — בבנייה');
+      case 'favorites': ref.read(catalogSectionProvider.notifier).state = 'מועדפים';
+      case 'settings': Navigator.of(context).push(CatalogSettingsScreen.route());
     }
   }
 }
-
-// ─── chats 3-dot menu ────────────────────────────────────────────────────────
 
 class _ChatsMenuButton extends ConsumerWidget {
   const _ChatsMenuButton();
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<String>(
@@ -350,53 +278,26 @@ class _ChatsMenuButton extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
       itemBuilder: (_) => const [
-        PopupMenuItem<String>(
-          value: 'new_chat',
-          child: _MenuRow(emoji: '✏️', label: 'שיחה חדשה'),
-        ),
-        PopupMenuItem<String>(
-          value: 'archive',
-          child: _MenuRow(emoji: '🗂️', label: 'ארכיון שיחות'),
-        ),
-        PopupMenuItem<String>(
-          value: 'mute_all',
-          child: _MenuRow(emoji: '🔇', label: 'השתק הכל'),
-        ),
+        PopupMenuItem<String>(value: 'new_chat', child: _MenuRow(emoji: '✏️', label: 'שיחה חדשה')),
+        PopupMenuItem<String>(value: 'archive', child: _MenuRow(emoji: '🗂️', label: 'ארכיון שיחות')),
+        PopupMenuItem<String>(value: 'mute_all', child: _MenuRow(emoji: '🔇', label: 'השתק הכל')),
         PopupMenuDivider(),
-        PopupMenuItem<String>(
-          value: 'settings',
-          child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
-        ),
+        PopupMenuItem<String>(value: 'settings', child: _MenuRow(emoji: '⚙️', label: 'הגדרות')),
       ],
     );
   }
-
   void _onSelected(BuildContext context, WidgetRef ref, String value) {
     switch (value) {
-      case 'new_chat':
-        showModalBottomSheet<void>(
-          context: context,
-          backgroundColor: const Color(0xFF1A1A1A),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          builder: (_) => const _NewChatSheet(),
-        );
-      case 'archive':
-        showToast(context, 'ארכיון שיחות — בבנייה');
-      case 'mute_all':
-        showToast(context, 'השתק הכל — בבנייה');
-      case 'settings':
-        Navigator.of(context).push(ChatSettingsScreen.route());
+      case 'new_chat': showModalBottomSheet<void>(context: context, backgroundColor: const Color(0xFF1A1A1A), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))), builder: (_) => const _NewChatSheet());
+      case 'archive': showToast(context, 'ארכיון שיחות — בבנייה');
+      case 'mute_all': showToast(context, 'השתק הכל — בבנייה');
+      case 'settings': Navigator.of(context).push(ChatSettingsScreen.route());
     }
   }
 }
-
-// ─── notifications 3-dot menu ────────────────────────────────────────────────
 
 class _NotificationsMenuButton extends ConsumerWidget {
   const _NotificationsMenuButton();
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<String>(
@@ -407,41 +308,23 @@ class _NotificationsMenuButton extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
       itemBuilder: (_) => const [
-        PopupMenuItem<String>(
-          value: 'mark_all_read',
-          child: _MenuRow(emoji: '✅', label: 'סמן הכל כנקרא'),
-        ),
-        PopupMenuItem<String>(
-          value: 'clear_all',
-          child: _MenuRow(emoji: '🗑️', label: 'נקה הכל'),
-        ),
-        PopupMenuItem<String>(
-          value: 'notif_settings',
-          child: _MenuRow(emoji: '🔔', label: 'הגדרות התראות'),
-        ),
+        PopupMenuItem<String>(value: 'mark_all_read', child: _MenuRow(emoji: '✅', label: 'סמן הכל כנקרא')),
+        PopupMenuItem<String>(value: 'clear_all', child: _MenuRow(emoji: '🗑️', label: 'נקה הכל')),
+        PopupMenuItem<String>(value: 'notif_settings', child: _MenuRow(emoji: '🔔', label: 'הגדרות התראות')),
       ],
     );
   }
-
   void _onSelected(BuildContext context, WidgetRef ref, String value) {
     switch (value) {
-      case 'mark_all_read':
-        markAllNotifsRead(ref);
-        showToast(context, 'כל ההתראות סומנו כנקרא');
-      case 'clear_all':
-        dismissAllNotifs(ref);
-        showToast(context, 'כל ההתראות נמחקו');
-      case 'notif_settings':
-        Navigator.of(context).push(NotifSettingsScreen.route());
+      case 'mark_all_read': markAllNotifsRead(ref); showToast(context, 'כל ההתראות סומנו כנקרא');
+      case 'clear_all': dismissAllNotifs(ref); showToast(context, 'כל ההתראות נמחקו');
+      case 'notif_settings': Navigator.of(context).push(NotifSettingsScreen.route());
     }
   }
 }
-
-// ─── store 3-dot menu ────────────────────────────────────────────────────────
 
 class _StoreMenuButton extends ConsumerWidget {
   const _StoreMenuButton();
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<String>(
@@ -452,75 +335,48 @@ class _StoreMenuButton extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
       itemBuilder: (_) => const [
-        PopupMenuItem<String>(
-          value: 'cart',
-          child: _MenuRow(emoji: '🛒', label: 'הסל שלי'),
-        ),
-        PopupMenuItem<String>(
-          value: 'orders',
-          child: _MenuRow(emoji: '📦', label: 'הזמנות'),
-        ),
-        PopupMenuItem<String>(
-          value: 'services',
-          child: _MenuRow(emoji: '🔧', label: 'שירותים'),
-        ),
+        PopupMenuItem<String>(value: 'cart', child: _MenuRow(emoji: '🛒', label: 'הסל שלי')),
+        PopupMenuItem<String>(value: 'orders', child: _MenuRow(emoji: '📦', label: 'הזמנות')),
+        PopupMenuItem<String>(value: 'services', child: _MenuRow(emoji: '🔧', label: 'שירותים')),
         PopupMenuDivider(),
-        PopupMenuItem<String>(
-          value: 'settings',
-          child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
-        ),
+        PopupMenuItem<String>(value: 'settings', child: _MenuRow(emoji: '⚙️', label: 'הגדרות')),
       ],
     );
   }
-
   void _onSelected(BuildContext context, WidgetRef ref, String value) {
     switch (value) {
-      case 'cart':
-        ref.read(storeSectionProvider.notifier).state = StoreSection.cart;
-      case 'orders':
-        ref.read(storeSectionProvider.notifier).state = StoreSection.orders;
-      case 'services':
-        ref.read(storeSectionProvider.notifier).state = StoreSection.services;
-      case 'settings':
-        Navigator.of(context).push(StoreSettingsScreen.route());
+      case 'cart': ref.read(storeSectionProvider.notifier).state = StoreSection.cart;
+      case 'orders': ref.read(storeSectionProvider.notifier).state = StoreSection.orders;
+      case 'services': ref.read(storeSectionProvider.notifier).state = StoreSection.services;
+      case 'settings': Navigator.of(context).push(StoreSettingsScreen.route());
     }
   }
 }
-
-// ─── shared menu row ──────────────────────────────────────────────────────────
 
 class _MenuRow extends StatelessWidget {
   const _MenuRow({required this.emoji, required this.label});
   final String emoji;
   final String label;
-
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Text(emoji, style: const TextStyle(fontSize: 18)),
         const SizedBox(width: 12),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white, fontSize: 15),
-        ),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 15)),
       ],
     );
   }
 }
 
-// ─── scan plan sheet ──────────────────────────────────────────────────────────
-
 class _ScanPlanSheet extends StatelessWidget {
   const _ScanPlanSheet();
-
   static const _plans = [
-    (emoji: '🚿', label: 'אינסטלציה'),
+    (emoji: '🚵', label: 'אינסטלציה'),
     (emoji: '⚡', label: 'חשמל'),
-    (emoji: '🏛️', label: 'אדריכלות'),
+    (emoji: '🏙️', label: 'אדריכלות'),
     (emoji: '🎨', label: 'גמר'),
   ];
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -529,66 +385,27 @@ class _ScanPlanSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+          Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)))),
           const SizedBox(height: 16),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              '📐 סרוק תוכנית עבודה',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
+          const Align(alignment: Alignment.centerRight, child: Text('📐 סרוק תוכנית עבודה', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700))),
           const SizedBox(height: 4),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              'בחר סוג תוכנית לסריקה',
-              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
-            ),
-          ),
+          const Align(alignment: Alignment.centerRight, child: Text('בחר סוג תוכנית לסריקה', style: TextStyle(color: Color(0xFF888888), fontSize: 13))),
           const SizedBox(height: 12),
           const Divider(color: Color(0xFF2A2A2A), height: 1),
-          ..._plans.map(
-            (p) => ListTile(
-              leading: Text(p.emoji, style: const TextStyle(fontSize: 24)),
-              title: Text(
-                p.label,
-                style: const TextStyle(color: Colors.white, fontSize: 15),
-              ),
-              trailing: const Icon(
-                Icons.chevron_left,
-                color: Color(0xFF888888),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                showToast(context, '${p.label} — בבנייה');
-              },
-            ),
-          ),
+          ..._plans.map((p) => ListTile(
+            leading: Text(p.emoji, style: const TextStyle(fontSize: 24)),
+            title: Text(p.label, style: const TextStyle(color: Colors.white, fontSize: 15)),
+            trailing: const Icon(Icons.chevron_left, color: Color(0xFF888888)),
+            onTap: () { Navigator.pop(context); showToast(context, '${p.label} — בבנייה'); },
+          )),
         ],
       ),
     );
   }
 }
 
-// ─── new chat sheet ───────────────────────────────────────────────────────────
-
 class _NewChatSheet extends StatelessWidget {
   const _NewChatSheet();
-
   static const _contacts = [
     (emoji: '👷', label: 'קבלן'),
     (emoji: '🏪', label: 'ספק'),
@@ -596,7 +413,6 @@ class _NewChatSheet extends StatelessWidget {
     (emoji: '🦺', label: 'עובד'),
     (emoji: '💬', label: 'תמיכה'),
   ];
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -605,55 +421,19 @@ class _NewChatSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+          Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)))),
           const SizedBox(height: 16),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              '✏️ שיחה חדשה',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
+          const Align(alignment: Alignment.centerRight, child: Text('✏️ שיחה חדשה', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700))),
           const SizedBox(height: 4),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              'בחר סוג איש קשר',
-              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
-            ),
-          ),
+          const Align(alignment: Alignment.centerRight, child: Text('בחר סוג איש קשר', style: TextStyle(color: Color(0xFF888888), fontSize: 13))),
           const SizedBox(height: 12),
           const Divider(color: Color(0xFF2A2A2A), height: 1),
-          ..._contacts.map(
-            (c) => ListTile(
-              leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
-              title: Text(
-                c.label,
-                style: const TextStyle(color: Colors.white, fontSize: 15),
-              ),
-              trailing: const Icon(
-                Icons.chevron_left,
-                color: Color(0xFF888888),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                showToast(context, '${c.label} — בבנייה');
-              },
-            ),
-          ),
+          ..._contacts.map((c) => ListTile(
+            leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
+            title: Text(c.label, style: const TextStyle(color: Colors.white, fontSize: 15)),
+            trailing: const Icon(Icons.chevron_left, color: Color(0xFF888888)),
+            onTap: () { Navigator.pop(context); showToast(context, '${c.label} — בבנייה'); },
+          )),
         ],
       ),
     );
