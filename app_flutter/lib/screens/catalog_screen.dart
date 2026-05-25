@@ -920,8 +920,13 @@ class _SectionPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
-      borderRadius: BorderRadius.circular(20),
+      color: active ? BsTokens.brand : Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: active
+            ? BorderSide.none
+            : const BorderSide(color: Color(0xFFC8C8CE), width: 1),
+      ),
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -931,7 +936,7 @@ class _SectionPill extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: active ? Colors.white : const Color(0xFFAAAAAA),
+              color: active ? Colors.white : const Color(0xFF6E6E73),
               fontSize: 13,
               fontWeight: active ? FontWeight.w600 : FontWeight.w400,
             ),
@@ -950,14 +955,17 @@ class _AddPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFFF5F5F5),
-      borderRadius: BorderRadius.circular(20),
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: Color(0xFFC8C8CE), width: 1),
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: const Padding(
           padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Icon(Icons.add, color: Color(0xFFAAAAAA), size: 18),
+          child: Icon(Icons.add, color: Color(0xFF6E6E73), size: 18),
         ),
       ),
     );
