@@ -3296,7 +3296,7 @@ class _SmartTreeCatList extends ConsumerWidget {
               Text(
                 'עץ חכם — בחר קטגוריה',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF1A1A1A),
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -3341,7 +3341,7 @@ class _SmartTreeCatList extends ConsumerWidget {
                             Text(
                               cat,
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: Color(0xFF1A1A1A),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -3397,7 +3397,7 @@ class _SmartTreeProductList extends ConsumerWidget {
               Text(
                 cat,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF1A1A1A),
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -3442,7 +3442,7 @@ class _SmartTreeProductList extends ConsumerWidget {
                                   child: Text(
                                     p.name,
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: Color(0xFF1A1A1A),
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                     ),
