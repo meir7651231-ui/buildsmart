@@ -152,6 +152,41 @@ List<TestResult> testCatalog() {
     pass: lipskeyConnectionSizes('צינור אורך 200 ס"מ 20 כמות באריזה').isEmpty,
     detail: '${lipskeyConnectionSizes('צינור אורך 200 ס"מ 20 כמות באריזה')}',
   ));
+  // צעד 60: gender detection — זכר→male, נקבה→female, both→null
+  final genderOk = const LipskeyCatalogProduct(
+            sku: '_', nameHe: 'ניפל זכר 1"', nameEn: '', categoryHe: '',
+            categoryEn: '', categoryEmoji: '', page: 0)
+          .connectionGender ==
+      'male' &&
+      const LipskeyCatalogProduct(
+            sku: '_', nameHe: 'מופה נקבה 1"', nameEn: '', categoryHe: '',
+            categoryEn: '', categoryEmoji: '', page: 0)
+          .connectionGender ==
+      'female' &&
+      const LipskeyCatalogProduct(
+            sku: '_', nameHe: 'מעבר זכר/נקבה 1"', nameEn: '', categoryHe: '',
+            categoryEn: '', categoryEmoji: '', page: 0)
+          .connectionGender ==
+      null;
+  compat.add(TestCheck(
+    name: 'זיהוי מין-חיבור (זכר/נקבה/דו-צדדי) — צעד 60',
+    pass: genderOk,
+  ));
+  // צעד 61: method detection — אלקטרו→electrofusion, דבק→glue, "→thread
+  final methodOk = const LipskeyCatalogProduct(
+            sku: '_', nameHe: 'מצמד אלקטרופוזיה DN50', nameEn: '',
+            categoryHe: '', categoryEn: '', categoryEmoji: '', page: 0)
+          .connectionMethod ==
+      'electrofusion' &&
+      const LipskeyCatalogProduct(
+            sku: '_', nameHe: 'זווית להדבקה 50', nameEn: '', categoryHe: '',
+            categoryEn: '', categoryEmoji: '', page: 0)
+          .connectionMethod ==
+      'glue';
+  compat.add(TestCheck(
+    name: 'זיהוי שיטת-חיבור (תבריג/דבק/אלקטרו) — צעד 61',
+    pass: methodOk,
+  ));
 
   results.add(TestResult(
     id: 'catalog:compat',

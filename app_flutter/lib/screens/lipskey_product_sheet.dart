@@ -165,18 +165,42 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   List<LipskeyCatalogProduct> _partsForSize(
       LipskeyCatalogProduct p, String size) {
     final mat = _material(p);
+    final gender = p.connectionGender; // 'male' wants 'female' and vice-versa
+    final method = p.connectionMethod;
     final seen = <String>{p.sku};
     final all = <LipskeyCatalogProduct>[];
     for (final q in kLipskeyCatalog) {
       if (q.categoryHe == p.categoryHe) continue; // cross-category only
       if (!seen.add(q.sku)) continue;
-      if (_sizeSet(q.nameHe).contains(size)) all.add(q);
+      if (!_sizeSet(q.nameHe).contains(size)) continue;
+      // צעד 60: a gendered end never mates with the same gender — drop it.
+      if (gender != null &&
+          q.connectionGender != null &&
+          q.connectionGender == gender) {
+        continue;
+      }
+      all.add(q);
     }
-    // ranking: same material first, then by category name for stability
+    // ranking (צעדים 61–63): same connection-method first, then same material,
+    // then opposite gender (the true mate), then category name for stability.
+    int methodRank(LipskeyCatalogProduct x) =>
+        method == null || x.connectionMethod == null
+            ? 1
+            : (x.connectionMethod == method ? 0 : 2);
+    int genderRank(LipskeyCatalogProduct x) => gender != null &&
+            x.connectionGender != null &&
+            x.connectionGender != gender
+        ? 0
+        : 1;
     all.sort((a, b) {
+      final cmp = methodRank(a).compareTo(methodRank(b));
+      if (cmp != 0) return cmp;
       final am = _material(a) == mat ? 0 : 1;
       final bm = _material(b) == mat ? 0 : 1;
-      return am != bm ? am - bm : a.categoryHe.compareTo(b.categoryHe);
+      if (am != bm) return am - bm;
+      final g = genderRank(a).compareTo(genderRank(b));
+      if (g != 0) return g;
+      return a.categoryHe.compareTo(b.categoryHe);
     });
     return all.take(12).toList();
   }

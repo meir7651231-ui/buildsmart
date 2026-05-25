@@ -45,6 +45,34 @@ class LipskeyCatalogProduct {
   /// for the compatibility engine. Reused by the sheet and the regression test.
   List<String> get connectionSizes => lipskeyConnectionSizes(nameHe);
 
+  /// Connection gender inferred from the name (צעד 60): 'male' (זכר/חיצוני),
+  /// 'female' (נקבה/פנימי), or null when the name doesn't say. A threaded male
+  /// end only mates with a female end — the engine uses this to avoid pairing
+  /// two males (or two females) together.
+  String? get connectionGender {
+    final n = nameHe;
+    final male = n.contains('זכר') || n.contains('חיצוני');
+    final female = n.contains('נקבה') || n.contains('פנימי');
+    if (male && !female) return 'male';
+    if (female && !male) return 'female';
+    return null; // unspecified or both-ended (e.g. זכר/נקבה)
+  }
+
+  /// Connection method inferred from the name (צעד 61): 'thread' (תבריג),
+  /// 'glue' (הדבקה/דבק), 'electrofusion' (אלקטרו/חשמלי), or null. Parts only
+  /// mate when they share a method, so the engine ranks same-method first.
+  String? get connectionMethod {
+    final n = nameHe;
+    if (n.contains('אלקטרו') || n.contains('חשמלי')) return 'electrofusion';
+    if (n.contains('הדבקה') || n.contains('דבק') || n.contains('הלחמה')) {
+      return 'glue';
+    }
+    if (n.contains('תבריג') || n.contains('הברגה') || n.contains('"')) {
+      return 'thread';
+    }
+    return null;
+  }
+
   /// Brand/model token if the name starts with a known manufacturer (צעד 73).
   String? get brandModel {
     for (final b in kLipskeyModels) {
