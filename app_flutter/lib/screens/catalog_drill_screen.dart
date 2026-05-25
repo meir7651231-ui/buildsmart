@@ -37,10 +37,10 @@ class CatalogDrillScreen extends StatelessWidget {
     final children = isRoot ? kCatalogTree : node!.children;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
-        foregroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1A1A1A),
         elevation: 0,
         title: Text(
           title,
@@ -92,7 +92,7 @@ class _Breadcrumb extends StatelessWidget {
                 parts[i],
                 style: TextStyle(
                   color: i == parts.length - 1
-                      ? Colors.white
+                      ? const Color(0xFF1A1A1A)
                       : const Color(0xFF888888),
                   fontSize: 12,
                   fontWeight: i == parts.length - 1
@@ -216,9 +216,16 @@ class _CategoryCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: BsTokens.brand.withAlpha(40),
-              width: 0.5,
+              color: const Color(0xFFE6E6EC),
+              width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +238,7 @@ class _CategoryCard extends StatelessWidget {
                   Text(
                     node.title,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF1A1A1A),
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       height: 1.2,
@@ -365,7 +372,7 @@ class _BrandCard extends StatelessWidget {
                       Text(
                         brand.name,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF1A1A1A),
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
