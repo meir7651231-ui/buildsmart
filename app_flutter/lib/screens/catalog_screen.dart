@@ -4158,7 +4158,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF444444),
+                  color: Colors.black12,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -4197,7 +4197,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       Text(
                         p.name,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF1A1A1A),
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
@@ -4252,12 +4252,12 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       decoration: BoxDecoration(
                         color: selected
                             ? BsTokens.brand.withAlpha(30)
-                            : const Color(0xFF252525),
+                            : const Color(0xFFF5F5F5),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: selected
                               ? BsTokens.brand
-                              : const Color(0xFF333333),
+                              : const Color(0xFFE0E0E0),
                           width: selected ? 1.5 : 1,
                         ),
                       ),
@@ -4271,10 +4271,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   children: [
                                     Text(
                                       b.name,
-                                      style: TextStyle(
-                                        color: selected
-                                            ? Colors.white
-                                            : const Color(0xFFCCCCCC),
+                                      style: const TextStyle(
+                                        color: Color(0xFF1A1A1A),
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -4501,12 +4499,9 @@ class _DiagramFlowState extends State<_DiagramFlow>
       margin: const EdgeInsets.only(top: 16, bottom: 4),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1A1D22), Color(0xFF2C3036)],
-        ),
+        color: const Color(0xFFF5F6FA),
         borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color(0xFFE6E6EC)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -4580,7 +4575,7 @@ class _DiagramFlowState extends State<_DiagramFlow>
             const Text(
               '💡 הקש על שלב כדי להדגיש את האביזרים שלו',
               style: TextStyle(
-                color: Color(0x66FFFFFF),
+                color: Color(0xFF888888),
                 fontSize: 10,
               ),
               textAlign: TextAlign.center,
@@ -4612,14 +4607,14 @@ class _StageCard extends StatelessWidget {
               color: isActive
                   ? const Color(0xFFF2A516).withAlpha(50)
                   : stage.isFinal
-                      ? const Color(0xFF1F6F6B).withAlpha(64)
-                      : Colors.white.withAlpha(18),
+                      ? const Color(0xFF1F6F6B).withAlpha(40)
+                      : Colors.black.withAlpha(8),
               border: Border.all(
                 color: isActive
                     ? const Color(0xFFF2A516)
                     : stage.isFinal
                         ? BsTokens.brand
-                        : Colors.white.withAlpha(31),
+                        : Colors.black.withAlpha(28),
                 width: isActive ? 1.5 : 1,
               ),
               borderRadius: BorderRadius.circular(12),
@@ -4634,7 +4629,7 @@ class _StageCard extends StatelessWidget {
           Text(
             stage.label,
             style: TextStyle(
-              color: isActive ? const Color(0xFFF2A516) : Colors.white,
+              color: isActive ? const Color(0xFFF2A516) : const Color(0xFF1A1A1A),
               fontSize: 9.5,
               fontWeight: FontWeight.w700,
             ),
@@ -4707,12 +4702,12 @@ class _AccRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: selected
                       ? BsTokens.brand
-                      : const Color(0xFF333333),
+                      : const Color(0xFFEDEDED),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
                     color: selected
                         ? BsTokens.brand
-                        : const Color(0xFF555555),
+                        : const Color(0xFFC8C8CE),
                   ),
                 ),
                 child: selected
@@ -4732,7 +4727,7 @@ class _AccRow extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF252525),
+                      color: Color(0xFFF5F5F5),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -4777,7 +4772,7 @@ class _AccRow extends StatelessWidget {
                         child: Text(
                           acc.name,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF1A1A1A),
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -4827,7 +4822,7 @@ class _AccRow extends StatelessWidget {
                 const SizedBox(height: 4),
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E1E),
+                    color: const Color(0xFFF0F0F3),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -4845,7 +4840,7 @@ class _AccRow extends StatelessWidget {
                           '$qty',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF1A1A1A),
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
@@ -4910,7 +4905,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                     width: 56,
                     height: 56,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF252525),
+                      color: Color(0xFFF5F5F5),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -4925,7 +4920,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                         Text(
                           acc.name,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF1A1A1A),
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
                           ),
@@ -4937,15 +4932,15 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                           decoration: BoxDecoration(
                             color: acc.must
                                 ? const Color(0xFFF2A516).withAlpha(50)
-                                : const Color(0xFF333333),
+                                : const Color(0xFFEDEDED),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             acc.must ? '⚡ פריט חובה' : '💡 אופציונלי',
                             style: TextStyle(
                               color: acc.must
-                                  ? const Color(0xFFF2A516)
-                                  : const Color(0xFFAAAAAA),
+                                  ? const Color(0xFFB57B00)
+                                  : const Color(0xFF666666),
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
@@ -4969,7 +4964,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
               Text(
                 acc.why,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF1A1A1A),
                   fontSize: 14,
                   height: 1.4,
                 ),
@@ -4987,7 +4982,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                     const Text(
                       'מחיר ליחידה:',
                       style: TextStyle(
-                        color: Color(0xFFAAAAAA),
+                        color: Color(0xFF666666),
                         fontSize: 13,
                       ),
                     ),
