@@ -48,3 +48,15 @@ flutter:
   assets:
     - assets/lipskey/products/
     - assets/lipskey/pages/
+
+  fonts:
+    - family: Heebo
+      fonts:
+        - asset: assets/fonts/Heebo-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Heebo-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Heebo-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Heebo-ExtraBold.ttf
+          weight: 800

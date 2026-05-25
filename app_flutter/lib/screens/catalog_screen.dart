@@ -1618,7 +1618,7 @@ class _SectionHeader extends ConsumerWidget {
             child: Text(
               label,
               style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFF1A1A1A),
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -2244,7 +2244,7 @@ class _CatalogRow extends StatelessWidget {
                         child: Text(
                           cat.title,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF1A1A1A),
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),

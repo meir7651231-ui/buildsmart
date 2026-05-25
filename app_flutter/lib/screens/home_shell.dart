@@ -27,7 +27,7 @@ class HomeShell extends ConsumerWidget {
     final tabIndex = ref.watch(mainTabProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const _HomeAppBar(),
       body: Stack(
         children: [
