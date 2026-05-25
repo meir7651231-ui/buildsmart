@@ -45,6 +45,22 @@ class LipskeyCatalogProduct {
   /// for the compatibility engine. Reused by the sheet and the regression test.
   List<String> get connectionSizes => lipskeyConnectionSizes(nameHe);
 
+  /// Brand/model token if the name starts with a known manufacturer (צעד 73).
+  String? get brandModel {
+    for (final b in kLipskeyModels) {
+      if (nameHe.contains(b)) return b;
+    }
+    return null;
+  }
+
+  /// Colour / finish variant inferred from the name (צעד 75).
+  String? get colorVariant {
+    for (final c in kLipskeyColors) {
+      if (nameHe.contains(c)) return c;
+    }
+    return color; // fall back to the structured field
+  }
+
   /// A type-specific glyph derived from the product name, so image-less
   /// products are still distinguishable at a glance (instead of every item
   /// in a category showing the same category emoji).
@@ -104,6 +120,32 @@ List<String> lipskeyConnectionSizes(String name) {
     }
   }
   return out.toList();
+}
+
+/// Known manufacturer/model tokens within Lipskey-distributed product names.
+const List<String> kLipskeyModels = [
+  'קיסר', 'דיור', 'פיטרה', 'רותם', 'תבור', 'קורל', 'הדר', 'פלורה', 'מלודי',
+  'גרנדה', 'דולפין', 'טרפז', 'קונקורד', 'אוסלו', 'כרמל', 'אדיר', 'הרמון',
+  'ספיר', 'ברקת', 'יהלום', 'טיטאן', 'טופז', 'כינרת', 'אקווה', 'איביזה',
+  'גליל', 'בתא', 'פולו', 'סיגמא',
+];
+
+const List<String> kLipskeyColors = [
+  'לבן', 'שחור מט', 'שחור', 'פרגמון', 'אפור', 'ניקל מוברש', 'ניקל',
+  'גרפיטי', 'זהב מוברש', 'זהב', 'נחושת', 'כרום',
+];
+
+/// Inverted index word→SKUs for fast search (צעד 72). Built lazily once.
+Map<String, List<String>>? _wordIndex;
+Map<String, List<String>> lipskeyWordIndex() {
+  if (_wordIndex != null) return _wordIndex!;
+  final idx = <String, List<String>>{};
+  for (final p in kLipskeyCatalog) {
+    for (final w in p.nameHe.split(RegExp(r'\s+'))) {
+      if (w.length >= 2) (idx[w] ??= []).add(p.sku);
+    }
+  }
+  return _wordIndex = idx;
 }
 
 const List<LipskeyCatalogProduct> kLipskeyCatalog = [

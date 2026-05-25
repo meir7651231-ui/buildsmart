@@ -161,6 +161,34 @@ List<TestResult> testCatalog() {
     checks: compat,
   ));
 
+  // ── מודל מובנה — getters (צעדים 72,73,75) ────────────────────────────────
+  final model = <TestCheck>[];
+  final branded = products.where((p) => p.brandModel != null).length;
+  model.add(TestCheck(
+    name: 'זיהוי מותג-דגם מהשם (brandModel)',
+    pass: branded > 50,
+    got: '$branded מוצרים עם מותג מזוהה',
+  ));
+  final colored = products.where((p) => p.colorVariant != null).length;
+  model.add(TestCheck(
+    name: 'זיהוי גוון/גימור (colorVariant)',
+    pass: colored > 50,
+    got: '$colored מוצרים עם גוון',
+  ));
+  final idx = lipskeyWordIndex();
+  model.add(TestCheck(
+    name: 'אינדקס-היפוך מילה→מוצרים נבנה',
+    pass: idx.isNotEmpty && (idx['ברז']?.isNotEmpty ?? false),
+    got: '${idx.length} מילים',
+  ));
+  results.add(TestResult(
+    id: 'catalog:model',
+    category: TestCategory.catalog,
+    label: 'מודל מובנה (מותג/גוון/אינדקס)',
+    area: 'מודל',
+    checks: model,
+  ));
+
   return results;
 }
 
