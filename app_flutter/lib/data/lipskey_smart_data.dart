@@ -317,3 +317,19 @@ const Map<String, List<LipskeyCatStage>> kLipskeyStagesByCategory = {
         desc: 'הפעל הדחה — בדוק פעולה תקינה', isFinal: true),
   ],
 };
+
+// ── Per-product (SKU) overrides — צעד 78 ─────────────────────────────────────
+// Explicit product↔accessories / product↔stages links that win over the
+// category default. Empty by default; add a SKU only when a specific product
+// needs its own accessory/stage set (verified — R8). Resolved via
+// [lipskeyAccFor] / [lipskeyStagesFor].
+const Map<String, List<LipskeyCatAcc>> kLipskeyAccBySku = {};
+const Map<String, List<LipskeyCatStage>> kLipskeyStagesBySku = {};
+
+/// Accessories for a product: SKU-level override → category default → empty.
+List<LipskeyCatAcc> lipskeyAccFor(String sku, String categoryHe) =>
+    kLipskeyAccBySku[sku] ?? kLipskeyAccByCategory[categoryHe] ?? const [];
+
+/// Installation stages for a product: SKU-level override → category → empty.
+List<LipskeyCatStage> lipskeyStagesFor(String sku, String categoryHe) =>
+    kLipskeyStagesBySku[sku] ?? kLipskeyStagesByCategory[categoryHe] ?? const [];

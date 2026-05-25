@@ -136,6 +136,20 @@ class SmartProduct {
   SmartBrand get recBrand => brands.firstWhere((b) => b.rec, orElse: () => brands.first);
 }
 
+/// Reverse link (צעד 77): supplier SKU → the SmartProduct that lists it as a
+/// brand option. Built lazily once. Makes the product→SmartProduct relation
+/// explicit instead of inferring it only through the catalog-tree leaf's
+/// `smartKey`. Returns null when a catalog product has no smart counterpart.
+Map<String, SmartProduct>? _smartBySku;
+SmartProduct? smartProductForSku(String sku) {
+  final idx = _smartBySku ??= {
+    for (final sp in kSmartProducts)
+      for (final b in sp.brands)
+        if (b.sku != null) b.sku!: sp,
+  };
+  return idx[sku];
+}
+
 const List<SmartProduct> kSmartProducts = [
   // ===== ניקוז — סיפונים =====
   SmartProduct(

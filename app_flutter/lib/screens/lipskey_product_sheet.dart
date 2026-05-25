@@ -305,10 +305,11 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     Navigator.pop(context);
   }
 
+  // צעד 78: per-product (SKU) link with category fallback.
   List<LipskeyCatAcc> get _accs =>
-      kLipskeyAccByCategory[_current.categoryHe] ?? [];
+      lipskeyAccFor(_current.sku, _current.categoryHe);
   List<LipskeyCatStage> get _stages =>
-      kLipskeyStagesByCategory[_current.categoryHe] ?? [];
+      lipskeyStagesFor(_current.sku, _current.categoryHe);
   LipskeyCatalogProduct get _current =>
       widget.categoryProducts[_selectedIdx];
 

@@ -1,5 +1,7 @@
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/lipskey_smart_data.dart';
+import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/test_harness/types.dart';
 
 /// Catalog data-integrity — same checks as scripts/catalog_qa.py `audit`,
@@ -263,6 +265,46 @@ List<TestResult> testCatalog() {
       return r.type == products.first.productType &&
           r.brand == products.first.brandModel &&
           r.variant == products.first.colorVariant;
+    }(),
+  ));
+  // צעד 77 — קישור מפורש מוצר↔SmartProduct (דו-כיווני עקבי)
+  final linked = products.where((p) => smartProductForSku(p.sku) != null)
+      .length;
+  model.add(TestCheck(
+    name: 'קישור מוצר↔SmartProduct (smartProductForSku) — צעד 77',
+    pass: linked > 0 &&
+        smartProductForSku('217861') != null &&
+        smartProductForSku('___none___') == null,
+    got: '$linked מוצרים מקושרים ל-SmartProduct',
+  ));
+  // כל SKU שמופיע ב-SmartProduct.brands קיים בקטלוג (אין קישור יתום)
+  final brandSkus = {
+    for (final sp in kSmartProducts)
+      for (final b in sp.brands)
+        if (b.sku != null) b.sku!,
+  };
+  final catalogSkus = {for (final p in products) p.sku};
+  final orphanLinks =
+      brandSkus.where((s) => !catalogSkus.contains(s)).toList();
+  model.add(TestCheck(
+    name: 'אין קישור-SmartProduct יתום (מק"ט לא בקטלוג) — צעד 77',
+    pass: orphanLinks.isEmpty,
+    got: orphanLinks.isEmpty ? 'נקי' : '${orphanLinks.length} יתומים',
+  ));
+  // צעד 78 — resolver לפי SKU עם נפילה-לקטגוריה
+  model.add(TestCheck(
+    name: 'lipskeyAccFor/StagesFor נופל לקטגוריה — צעד 78',
+    pass: () {
+      final p = products.firstWhere(
+        (x) => kLipskeyAccByCategory.containsKey(x.categoryHe),
+        orElse: () => products.first,
+      );
+      final acc = lipskeyAccFor(p.sku, p.categoryHe);
+      return acc.length ==
+          (kLipskeyAccBySku[p.sku] ??
+                  kLipskeyAccByCategory[p.categoryHe] ??
+                  const [])
+              .length;
     }(),
   ));
   results.add(TestResult(
