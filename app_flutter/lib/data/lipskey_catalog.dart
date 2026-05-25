@@ -45,6 +45,34 @@ class LipskeyCatalogProduct {
   /// for the compatibility engine. Reused by the sheet and the regression test.
   List<String> get connectionSizes => lipskeyConnectionSizes(nameHe);
 
+  /// Connection gender inferred from the name (צעד 60): 'male' (זכר/חיצוני),
+  /// 'female' (נקבה/פנימי), or null when the name doesn't say. A threaded male
+  /// end only mates with a female end — the engine uses this to avoid pairing
+  /// two males (or two females) together.
+  String? get connectionGender {
+    final n = nameHe;
+    final male = n.contains('זכר') || n.contains('חיצוני');
+    final female = n.contains('נקבה') || n.contains('פנימי');
+    if (male && !female) return 'male';
+    if (female && !male) return 'female';
+    return null; // unspecified or both-ended (e.g. זכר/נקבה)
+  }
+
+  /// Connection method inferred from the name (צעד 61): 'thread' (תבריג),
+  /// 'glue' (הדבקה/דבק), 'electrofusion' (אלקטרו/חשמלי), or null. Parts only
+  /// mate when they share a method, so the engine ranks same-method first.
+  String? get connectionMethod {
+    final n = nameHe;
+    if (n.contains('אלקטרו') || n.contains('חשמלי')) return 'electrofusion';
+    if (n.contains('הדבקה') || n.contains('דבק') || n.contains('הלחמה')) {
+      return 'glue';
+    }
+    if (n.contains('תבריג') || n.contains('הברגה') || n.contains('"')) {
+      return 'thread';
+    }
+    return null;
+  }
+
   /// Brand/model token if the name starts with a known manufacturer (צעד 73).
   String? get brandModel {
     for (final b in kLipskeyModels) {
@@ -60,6 +88,45 @@ class LipskeyCatalogProduct {
     }
     return color; // fall back to the structured field
   }
+
+  /// Product type — the leading kind-noun (מחסום / ברך / מצמד …). Hebrew names
+  /// lead with the type, so the first matching token wins (צעד 69).
+  String? get productType {
+    for (final t in kLipskeyTypes) {
+      if (nameHe.contains(t)) return t;
+    }
+    return null;
+  }
+
+  /// Subtype qualifier — adjective that narrows the type (אמריקאי / נסתר /
+  /// כפול …), excluding gender which the engine handles separately (צעד 69).
+  String? get productSubtype {
+    for (final s in kLipskeySubtypes) {
+      if (nameHe.contains(s)) return s;
+    }
+    return null;
+  }
+
+  /// Decomposition of the name into {type, subtype, brand, variant} (צעד 69).
+  /// brand→[brandModel], variant→[colorVariant] reuse the existing getters so
+  /// there is one source of truth per facet.
+  ({String? type, String? subtype, String? brand, String? variant})
+      get parsedName => (
+            type: productType,
+            subtype: productSubtype,
+            brand: brandModel,
+            variant: colorVariant,
+          );
+
+  /// Structured sale-units: בודד=1, ארגז=qtyPack, משטח=qtyPallet (צעד 76).
+  Map<String, int> get saleUnits => {
+        'בודד': 1,
+        if (qtyPack != null) 'ארגז': qtyPack!,
+        if (qtyPallet != null) 'משטח': qtyPallet!,
+      };
+
+  /// Stable id across catalog editions — brand-namespaced SKU (צעד 79).
+  String get uid => '${brand == 'AQUATEC' ? 'aq' : 'lp'}:$sku';
 
   /// A type-specific glyph derived from the product name, so image-less
   /// products are still distinguishable at a glance (instead of every item
@@ -99,12 +166,23 @@ class LipskeyCatalogProduct {
 
 final _dnTok = RegExp(r'DN\s?(\d+)|(\d+)/(\d+)|(\d+)["׳״]|\b(32|40|50|60|75|90|110|130|160|200)\b');
 
+/// Normalise unicode inch fractions so the size engine recognises them
+/// (צעד 22): 1¼ → 1.25 · 1½ → 1.5 · 2½ → 2.5 · ¾ → 0.75 ...
+String _expandInchFractions(String w) => w
+    .replaceAll('¼', '.25')
+    .replaceAll('½', '.5')
+    .replaceAll('¾', '.75')
+    .replaceAll('⅛', '.125')
+    .replaceAll('⅜', '.375')
+    .replaceAll('⅝', '.625')
+    .replaceAll('⅞', '.875');
+
 /// Atomic DN connection sizes from a product name (e.g. "75/50" → [75,50],
 /// "DN50" → [50]). Dimension-context only; ignores pack qty / length.
 List<String> lipskeyConnectionSizes(String name) {
   final out = <String>{};
   for (final raw in name.split(RegExp(r'\s+'))) {
-    final w = raw.trim();
+    var w = _expandInchFractions(raw.trim());
     final up = w.toUpperCase();
     if (up.startsWith('DN') && RegExp(r'\d').hasMatch(w)) {
       for (final part in up.replaceAll(RegExp(r'[^0-9/]'), '').split('/')) {
@@ -117,6 +195,8 @@ List<String> lipskeyConnectionSizes(String name) {
     } else if (w.contains('"') && RegExp(r'\d').hasMatch(w)) {
       final t = w.replaceAll('"', '');
       if (t.length >= 2) out.add(t);
+    } else if (RegExp(r'^\d*\.\d+$').hasMatch(w)) {
+      out.add(w); // inch decimal from a fraction (1.25 · 1.5 · 2.5)
     }
   }
   return out.toList();
@@ -128,6 +208,29 @@ const List<String> kLipskeyModels = [
   'גרנדה', 'דולפין', 'טרפז', 'קונקורד', 'אוסלו', 'כרמל', 'אדיר', 'הרמון',
   'ספיר', 'ברקת', 'יהלום', 'טיטאן', 'טופז', 'כינרת', 'אקווה', 'איביזה',
   'גליל', 'בתא', 'פולו', 'סיגמא',
+];
+
+/// Canonical product-type nouns, ordered most-specific first so multi-word
+/// types ("מיכל הדחה") win over their prefix ("מיכל"). Used by [productType].
+const List<String> kLipskeyTypes = [
+  'מיכל הדחה', 'ראש מקלחת', 'אל חזור', 'מחסום', 'סיפון', 'מאסף', 'קולט',
+  'מסעף', 'הסתעפות', 'מצמד', 'מחבר', 'מופה', 'ניפל', 'רקורד', 'בושינג',
+  'ברך', 'זווית', 'צינור', 'צנרת', 'מכסה', 'רשת', 'מושב', 'אטם', 'פקק',
+  'אום', 'מאריך', 'חבק', 'אומגה', 'עוגן', 'מזלף', 'מקלח', 'זרוע', 'מחלק',
+  'ארון', 'ידית', 'מוט', 'קולב', 'מחזיק', 'סבונייה', 'ברז', 'אביק', 'תעלה',
+  'מצוף', 'שעון', 'מקטין', 'משחרר', 'דוד', 'פיה', 'מסנן', 'משפך', 'ונטיל',
+  'כובע', 'הגבהה', 'מערכת', 'מצרות', 'גרונג', 'רוזטה', 'פלנגה', 'תפס',
+  'דרך', 'גמיש', 'שרשרת', 'וסת', 'ברז גן', 'מצרה', 'מנגנון', 'זקיף', 'סט',
+  'זקף',
+];
+
+/// Subtype qualifiers — adjectives that narrow a type. Gender (זכר/נקבה) is
+/// intentionally excluded; the compatibility engine owns it. Used by
+/// [productSubtype].
+const List<String> kLipskeySubtypes = [
+  'אמריקאי', 'נסתר', 'גלוי', 'כפול', 'יחיד', 'מתכוונן', 'גמיש', 'קשיח',
+  'מרובע', 'עגול', 'פינתי', 'קיר', 'רצפה', 'נירוסטה', 'תחתון', 'עליון',
+  'אנכי', 'אופקי', 'משולב', 'מוגבה', 'נמוך',
 ];
 
 const List<String> kLipskeyColors = [

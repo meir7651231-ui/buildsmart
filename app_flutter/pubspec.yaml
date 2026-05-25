@@ -19,8 +19,8 @@ dependencies:
   # routing — official, supports deep links + web URLs
   go_router: ^14.6.2
 
-  # i18n
-  intl: ^0.20.2
+  # i18n — לא בשימוש ישיר; `any` נפתר על שני ה-SDK pins (0.19 ב-3.29 / 0.20 ב-3.44)
+  intl: any
 
   # native barcode scanner — iOS/Android + Web (limited)
   mobile_scanner: ^5.2.3

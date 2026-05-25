@@ -1,3 +1,4 @@
+import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -388,11 +389,28 @@ class _Pill extends StatelessWidget {
 
 // ─── quick actions ────────────────────────────────────────────────────────────
 
-class _QuickActionsRow extends StatelessWidget {
+class _QuickActionsRow extends ConsumerWidget {
   const _QuickActionsRow();
 
+  void _showSheet(BuildContext context, Widget sheet) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A1A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => sheet,
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favorites = ref.watch(storeFavoritesProvider);
+    final allItems = _kAllItems;
+    final favItems = allItems
+        .where((item) => favorites.contains(item.emoji))
+        .toList();
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
@@ -401,7 +419,17 @@ class _QuickActionsRow extends StatelessWidget {
           _QuickAction(
             icon: Icons.favorite_border,
             label: 'מועדפים',
-            onTap: () => showToast(context, 'מועדפים — בבנייה'),
+            badge: favItems.length,
+            onTap: () {
+              if (favItems.isEmpty) {
+                showToast(context, 'אין פריטים מועדפים');
+                return;
+              }
+              _showSheet(
+                context,
+                _FavoritesSheet(items: favItems),
+              );
+            },
           ),
           _QuickAction(
             icon: Icons.grid_view_rounded,
@@ -422,17 +450,6 @@ class _QuickActionsRow extends StatelessWidget {
       ),
     );
   }
-
-  void _showSheet(BuildContext context, Widget sheet) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => sheet,
-    );
-  }
 }
 
 class _QuickAction extends StatelessWidget {
@@ -440,11 +457,13 @@ class _QuickAction extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.badge = 0,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final int badge;
 
   @override
   Widget build(BuildContext context) {
@@ -454,14 +473,35 @@ class _QuickAction extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 62,
-            height: 62,
-            decoration: const BoxDecoration(
-              color: Color(0xFF2A2A2A),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: Colors.white70, size: 28),
+          Stack(
+            alignment: Alignment.topRight,
+            children: [
+              Container(
+                width: 62,
+                height: 62,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF2A2A2A),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: Colors.white70, size: 28),
+              ),
+              if (badge > 0)
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    badge.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 6),
           Text(label,
@@ -473,6 +513,27 @@ class _QuickAction extends StatelessWidget {
 }
 
 // ─── bottom sheets ────────────────────────────────────────────────────────────
+
+class _FavoritesSheet extends ConsumerWidget {
+  const _FavoritesSheet({required this.items});
+
+  final List<_Meta> items;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _SheetScaffold(
+      title: 'מועדפים',
+      emoji: '❤️',
+      children: items
+          .map((item) => _SheetTile(
+                emoji: item.emoji,
+                label: item.title,
+                onTap: () => Navigator.pop(context),
+              ))
+          .toList(),
+    );
+  }
+}
 
 class _MoadimSheet extends StatelessWidget {
   const _MoadimSheet();
@@ -597,9 +658,14 @@ class _SheetScaffold extends StatelessWidget {
 }
 
 class _SheetTile extends StatelessWidget {
-  const _SheetTile({required this.emoji, required this.label});
+  const _SheetTile({
+    required this.emoji,
+    required this.label,
+    this.onTap,
+  });
   final String emoji;
   final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -607,7 +673,7 @@ class _SheetTile extends StatelessWidget {
       leading: Text(emoji, style: const TextStyle(fontSize: 22)),
       title:
           Text(label, style: const TextStyle(color: Colors.white, fontSize: 15)),
-      onTap: () {
+      onTap: onTap ?? () {
         Navigator.pop(context);
         showToast(context, '$label — בבנייה');
       },
@@ -1792,12 +1858,12 @@ class _PaymentChip extends StatelessWidget {
 
 // ─── checkout button ──────────────────────────────────────────────────────────
 
-class _CheckoutButton extends StatelessWidget {
+class _CheckoutButton extends ConsumerWidget {
   const _CheckoutButton({required this.total});
   final int total;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: BsTokens.brand,
@@ -1806,10 +1872,176 @@ class _CheckoutButton extends StatelessWidget {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         padding: const EdgeInsets.symmetric(vertical: 16),
       ),
-      onPressed: () => showToast(context, 'מעבר לתשלום — בבנייה'),
+      onPressed: () => _showCheckoutSheet(context, ref),
       child: Text(
         'הזמן עכשיו · ${_price(total)} →',
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+
+  void _showCheckoutSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF1A1A1A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _CheckoutSheet(total: total),
+    );
+  }
+}
+
+// ─── checkout sheet ───────────────────────────────────────────────────────────
+
+class _CheckoutSheet extends ConsumerWidget {
+  const _CheckoutSheet({required this.total});
+  final int total;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final delivery = ref.watch(cartDeliveryProvider);
+    final payment = ref.watch(cartPaymentProvider);
+    final project = ref.watch(cartProjectProvider);
+
+    final deliveryLabel =
+        _kDeliveryOptions.firstWhere((d) => d.method == delivery).label;
+    final paymentLabel = _kPaymentOptions
+        .firstWhere((p) => p.method == payment)
+        .label;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        top: 20,
+        left: 16,
+        right: 16,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'סיכום הזמנה',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF2A2A2A),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'פרויקט',
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    project,
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(color: Color(0xFF1A1A1A), height: 1),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '📦 משלוח',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      Text(
+                        deliveryLabel,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '💳 תשלום',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      Text(
+                        paymentLabel,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(color: Color(0xFF1A1A1A), height: 1),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'סה"כ לתשלום',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        _price(total),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: BsTokens.brand,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                showToast(context, 'הזמנה #${DateTime.now().second} אושרה! 🎉');
+              },
+              child: const Text(
+                'אישור הזמנה',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
@@ -1817,28 +2049,97 @@ class _CheckoutButton extends StatelessWidget {
 
 // ─── cart actions row ─────────────────────────────────────────────────────────
 
-class _CartActionsRow extends StatelessWidget {
+class _CartActionsRow extends ConsumerWidget {
   const _CartActionsRow();
 
+  static void _showSaveDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A1A),
+        title: const Text(
+          'שמור סל כרשימה',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: TextField(
+          controller: controller,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: 'שם הרשימה',
+            hintStyle: const TextStyle(color: Color(0xFF666666)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.white24),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('ביטול', style: TextStyle(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: () {
+              if (controller.text.trim().isEmpty) {
+                showToast(context, 'שם הרשימה לא יכול להיות ריק');
+                return;
+              }
+              final items = _kCartItemDetails
+                  .map((item) => (
+                        emoji: item.emoji,
+                        name: item.name,
+                        qty: int.tryParse(item.qty.split(' ')[0]) ?? 0,
+                        price: item.price,
+                      ))
+                  .toList();
+              ref
+                  .read(cartListsProvider.notifier)
+                  .saveCart(controller.text.trim(), items);
+              Navigator.pop(context);
+              showToast(context, 'הרשימה נשמרה בהצלחה');
+            },
+            child: const Text('שמור', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         TextButton.icon(
-          onPressed: () => showToast(context, 'שמור כרשימה — בבנייה'),
+          onPressed: () => _showSaveDialog(context, ref),
           icon: const Icon(Icons.bookmark_border, size: 16),
           label: const Text('שמור'),
           style: TextButton.styleFrom(foregroundColor: Colors.white54),
         ),
         TextButton.icon(
-          onPressed: () => showToast(context, 'שיתוף — בבנייה'),
+          onPressed: () {
+            final items = _kCartItemDetails
+                .map((item) =>
+                    '${item.emoji} ${item.name} × ${item.qty} = ${item.price}')
+                .join('\n');
+            showToast(
+              context,
+              'סל שותף:\n$items',
+              duration: const Duration(seconds: 3),
+            );
+          },
           icon: const Icon(Icons.share_outlined, size: 16),
           label: const Text('שתף'),
           style: TextButton.styleFrom(foregroundColor: Colors.white54),
         ),
         TextButton.icon(
-          onPressed: () => showToast(context, 'נקה סל — בבנייה'),
+          onPressed: () {
+            ref.read(cartQtysProvider.notifier).state = const {};
+            showToast(context, 'הסל נוקה');
+          },
           icon: const Icon(Icons.delete_outline, size: 16),
           label: const Text('נקה'),
           style: TextButton.styleFrom(

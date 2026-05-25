@@ -67,6 +67,7 @@ def parse_catalog(path=CATALOG):
             "nameEn": _field(b, "nameEn"), "category": _field(b, "categoryHe"),
             "page": _field(b, "page"), "image": bool(re.search(r"imageFile:\s*'", b)),
             "brand": _field(b, "brand") or "ליפסקי",
+            "color": _field(b, "color"),
         })
     return out
 
@@ -128,9 +129,23 @@ def run_rules(products, tcats):
     for sku, c in seen_sku.items():
         if c > 1:
             add("duplicate_sku", ERROR, sku, f"×{c}")
+    by_sku = {p["sku"]: p for p in products}
     for (cat, n), sks in name_in_cat.items():
         if len(sks) > 1:
             add("duplicate_name", WARN, sks[0], f"[{cat}] '{n[:25]}' ×{len(sks)}")
+            # צעד 25: identical-name group — propose the attribute that already
+            # distinguishes them (color / size) so the differentiator is real,
+            # not invented. Only flag as unresolvable when nothing separates them.
+            colors = {by_sku[s].get("color", "") for s in sks}
+            sizes = {tuple(sorted(SIZE.findall(by_sku[s]["name"]))) for s in sks}
+            if len(colors) > 1:
+                add("dup_name_differentiator", INFO, sks[0],
+                    f"בידול לפי גוון: {sorted(c for c in colors if c)}")
+            elif len(sizes) > 1:
+                add("dup_name_differentiator", INFO, sks[0], "בידול לפי מידה בשם")
+            else:
+                add("dup_name_unresolved", WARN, sks[0],
+                    f"כפילות-שם ללא מבדיל (גוון/מידה זהים) — {sks}")
     return f
 
 

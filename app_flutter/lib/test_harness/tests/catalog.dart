@@ -152,6 +152,41 @@ List<TestResult> testCatalog() {
     pass: lipskeyConnectionSizes('צינור אורך 200 ס"מ 20 כמות באריזה').isEmpty,
     detail: '${lipskeyConnectionSizes('צינור אורך 200 ס"מ 20 כמות באריזה')}',
   ));
+  // צעד 60: gender detection — זכר→male, נקבה→female, both→null
+  final genderOk = const LipskeyCatalogProduct(
+            sku: '_', nameHe: 'ניפל זכר 1"', nameEn: '', categoryHe: '',
+            categoryEn: '', categoryEmoji: '', page: 0)
+          .connectionGender ==
+      'male' &&
+      const LipskeyCatalogProduct(
+            sku: '_', nameHe: 'מופה נקבה 1"', nameEn: '', categoryHe: '',
+            categoryEn: '', categoryEmoji: '', page: 0)
+          .connectionGender ==
+      'female' &&
+      const LipskeyCatalogProduct(
+            sku: '_', nameHe: 'מעבר זכר/נקבה 1"', nameEn: '', categoryHe: '',
+            categoryEn: '', categoryEmoji: '', page: 0)
+          .connectionGender ==
+      null;
+  compat.add(TestCheck(
+    name: 'זיהוי מין-חיבור (זכר/נקבה/דו-צדדי) — צעד 60',
+    pass: genderOk,
+  ));
+  // צעד 61: method detection — אלקטרו→electrofusion, דבק→glue, "→thread
+  final methodOk = const LipskeyCatalogProduct(
+            sku: '_', nameHe: 'מצמד אלקטרופוזיה DN50', nameEn: '',
+            categoryHe: '', categoryEn: '', categoryEmoji: '', page: 0)
+          .connectionMethod ==
+      'electrofusion' &&
+      const LipskeyCatalogProduct(
+            sku: '_', nameHe: 'זווית להדבקה 50', nameEn: '', categoryHe: '',
+            categoryEn: '', categoryEmoji: '', page: 0)
+          .connectionMethod ==
+      'glue';
+  compat.add(TestCheck(
+    name: 'זיהוי שיטת-חיבור (תבריג/דבק/אלקטרו) — צעד 61',
+    pass: methodOk,
+  ));
 
   results.add(TestResult(
     id: 'catalog:compat',
@@ -180,6 +215,33 @@ List<TestResult> testCatalog() {
     name: 'אינדקס-היפוך מילה→מוצרים נבנה',
     pass: idx.isNotEmpty && (idx['ברז']?.isNotEmpty ?? false),
     got: '${idx.length} מילים',
+  ));
+  // צעדים 76,79 — יחידות-מכירה ומזהה יציב
+  model.add(TestCheck(
+    name: 'uid ייחודי לכל מוצר (מותג:מק"ט)',
+    pass: products.map((p) => p.uid).toSet().length == products.length,
+    got: '${products.map((p) => p.uid).toSet().length}/${products.length}',
+  ));
+  model.add(TestCheck(
+    name: 'saleUnits כולל לפחות "בודד"',
+    pass: products.every((p) => p.saleUnits.containsKey('בודד')),
+  ));
+  // צעדים 69–71 — מנתח שם מובנה {type, subtype, brand, variant}
+  final typed = products.where((p) => p.productType != null).length;
+  model.add(TestCheck(
+    name: 'מנתח-שם מזהה סוג ל-≥80% מהמוצרים (productType)',
+    pass: typed >= (products.length * 0.8).floor(),
+    expected: '≥${(products.length * 0.8).floor()}',
+    got: '$typed/${products.length}',
+  ));
+  model.add(TestCheck(
+    name: 'parsedName מחזיר רשומה עם 4 פאות',
+    pass: () {
+      final r = products.first.parsedName;
+      return r.type == products.first.productType &&
+          r.brand == products.first.brandModel &&
+          r.variant == products.first.colorVariant;
+    }(),
   ));
   results.add(TestResult(
     id: 'catalog:model',

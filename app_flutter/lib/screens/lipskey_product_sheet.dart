@@ -165,18 +165,42 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   List<LipskeyCatalogProduct> _partsForSize(
       LipskeyCatalogProduct p, String size) {
     final mat = _material(p);
+    final gender = p.connectionGender; // 'male' wants 'female' and vice-versa
+    final method = p.connectionMethod;
     final seen = <String>{p.sku};
     final all = <LipskeyCatalogProduct>[];
     for (final q in kLipskeyCatalog) {
       if (q.categoryHe == p.categoryHe) continue; // cross-category only
       if (!seen.add(q.sku)) continue;
-      if (_sizeSet(q.nameHe).contains(size)) all.add(q);
+      if (!_sizeSet(q.nameHe).contains(size)) continue;
+      // צעד 60: a gendered end never mates with the same gender — drop it.
+      if (gender != null &&
+          q.connectionGender != null &&
+          q.connectionGender == gender) {
+        continue;
+      }
+      all.add(q);
     }
-    // ranking: same material first, then by category name for stability
+    // ranking (צעדים 61–63): same connection-method first, then same material,
+    // then opposite gender (the true mate), then category name for stability.
+    int methodRank(LipskeyCatalogProduct x) =>
+        method == null || x.connectionMethod == null
+            ? 1
+            : (x.connectionMethod == method ? 0 : 2);
+    int genderRank(LipskeyCatalogProduct x) => gender != null &&
+            x.connectionGender != null &&
+            x.connectionGender != gender
+        ? 0
+        : 1;
     all.sort((a, b) {
+      final cmp = methodRank(a).compareTo(methodRank(b));
+      if (cmp != 0) return cmp;
       final am = _material(a) == mat ? 0 : 1;
       final bm = _material(b) == mat ? 0 : 1;
-      return am != bm ? am - bm : a.categoryHe.compareTo(b.categoryHe);
+      if (am != bm) return am - bm;
+      final g = genderRank(a).compareTo(genderRank(b));
+      if (g != 0) return g;
+      return a.categoryHe.compareTo(b.categoryHe);
     });
     return all.take(12).toList();
   }
@@ -191,6 +215,40 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
       if (parts.isNotEmpty) groups.add((size: s, parts: parts));
     }
     return groups;
+  }
+
+  /// Installation kit (צעד 64): the single best-ranked mate for each
+  /// connection side — the minimal parts list to complete every joint of this
+  /// product. De-duped by SKU so a part shared across sides appears once.
+  List<LipskeyCatalogProduct> _installKit(LipskeyCatalogProduct p) {
+    final kit = <LipskeyCatalogProduct>[];
+    final seen = <String>{};
+    for (final g in _connectionGroups(p)) {
+      if (g.parts.isEmpty) continue;
+      final top = g.parts.first; // rank #1 (same method/material, opp. gender)
+      if (seen.add(top.sku)) kit.add(top);
+    }
+    return kit;
+  }
+
+  void _addKitToCart(List<LipskeyCatalogProduct> kit) {
+    final notifier = ref.read(smartCartProvider.notifier);
+    for (final part in kit) {
+      notifier.add(SmartCartLine(
+        productKey: 'lip:${part.sku}',
+        productName: part.nameHe,
+        productEmoji: part.typeEmoji,
+        brandName: part.brand,
+        brandPrice: 0,
+        productQty: 1,
+        accessories: const [],
+      ));
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('נוספו ${kit.length} חלקי ערכת-התקנה לסל ✓'),
+      duration: const Duration(seconds: 1),
+      behavior: SnackBarBehavior.floating,
+    ));
   }
 
   /// Inch sizes show as e.g. 1.25" ; plain DN numbers as DN50.
@@ -372,6 +430,8 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                     fontSize: 12,
                                     fontStyle: FontStyle.italic)),
                           ],
+                          const SizedBox(height: 8),
+                          _StructuredChips(parsed: p.parsedName),
                         ],
                       ),
                     ),
@@ -566,6 +626,58 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                         ),
                         const SizedBox(height: 6),
                       ];
+                      // ── ערכת-התקנה: המתאם המומלץ לכל צד, בלחיצה אחת ──────
+                      final kit = _installKit(p);
+                      if (kit.length >= 2) {
+                        w.add(Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0x143DD9B0),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0x553DD9B0)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Text('🧩', style: TextStyle(fontSize: 20)),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('ערכת התקנה מומלצת',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700)),
+                                      Text(
+                                          '${kit.length} חלקים — מתאם לכל צד חיבור',
+                                          style: const TextStyle(
+                                              color: Color(0xFF9AA3B2),
+                                              fontSize: 11)),
+                                    ],
+                                  ),
+                                ),
+                                FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFF3DD9B0),
+                                    foregroundColor: const Color(0xFF06251C),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 8),
+                                  ),
+                                  onPressed: () => _addKitToCart(kit),
+                                  child: const Text('+ ערכה',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 13)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ));
+                      }
                       for (var gi = 0; gi < groups.length; gi++) {
                         final g = groups[gi];
                         w.add(Padding(
@@ -1419,3 +1531,57 @@ Widget _SpecRow(String emoji, String label, String value) => Padding(
         ],
       ),
     );
+
+/// Structured decomposition of the name (צעד 71): סוג · תת-סוג · מותג · גוון.
+/// Each facet is a labelled chip; absent facets are omitted, so a bare name
+/// shows nothing rather than empty placeholders.
+class _StructuredChips extends StatelessWidget {
+  const _StructuredChips({required this.parsed});
+
+  final ({String? type, String? subtype, String? brand, String? variant})
+      parsed;
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = <({String label, String value, Color color})>[
+      if (parsed.type != null)
+        (label: 'סוג', value: parsed.type!, color: const Color(0xFF3DD9B0)),
+      if (parsed.subtype != null)
+        (label: 'תת-סוג', value: parsed.subtype!, color: const Color(0xFF7FD0FF)),
+      if (parsed.brand != null)
+        (label: 'דגם', value: parsed.brand!, color: const Color(0xFFFF9D4D)),
+      if (parsed.variant != null)
+        (label: 'גוון', value: parsed.variant!, color: const Color(0xFFC9A7FF)),
+    ];
+    if (chips.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        for (final c in chips)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: c.color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(7),
+              border: Border.all(color: c.color.withValues(alpha: 0.35)),
+            ),
+            child: RichText(
+              text: TextSpan(children: [
+                TextSpan(
+                    text: '${c.label} ',
+                    style: const TextStyle(
+                        color: Colors.white38, fontSize: 10)),
+                TextSpan(
+                    text: c.value,
+                    style: TextStyle(
+                        color: c.color,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700)),
+              ]),
+            ),
+          ),
+      ],
+    );
+  }
+}

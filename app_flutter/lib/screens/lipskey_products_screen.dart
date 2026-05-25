@@ -30,11 +30,15 @@ class LipskeyProductsScreen extends StatelessWidget {
       );
 
   /// Open a filtered list of every catalog product whose name contains [word].
+  /// Uses the inverted word-index for exact-word hits (O(1)), with a substring
+  /// fallback for partial tokens (צעד 87).
   static void openWordSearch(BuildContext context, String word) {
     final w = word.trim();
     if (w.isEmpty) return;
-    final hits =
-        kLipskeyCatalog.where((p) => p.nameHe.contains(w)).toList();
+    final indexed = (lipskeyWordIndex()[w] ?? const <String>[]).toSet();
+    final hits = indexed.isNotEmpty
+        ? kLipskeyCatalog.where((p) => indexed.contains(p.sku)).toList()
+        : kLipskeyCatalog.where((p) => p.nameHe.contains(w)).toList();
     if (hits.isEmpty) return;
     Navigator.push(
       context,

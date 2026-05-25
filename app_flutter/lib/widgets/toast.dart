@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 
 /// Toast helper — equivalent of app/src/store/toast-store.ts showToast().
 /// Brief, bottom-of-screen notification that fades on its own.
-void showToast(BuildContext context, String message) {
+void showToast(BuildContext context, String message,
+    {Duration duration = const Duration(seconds: 2)}) {
   final messenger = ScaffoldMessenger.maybeOf(context);
   if (messenger == null) return;
   messenger
@@ -21,7 +22,7 @@ void showToast(BuildContext context, String message) {
         ),
         backgroundColor: BsTokens.cardDark,
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
+        duration: duration,
         margin: const EdgeInsets.fromLTRB(24, 0, 24, 96),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
