@@ -3417,103 +3417,147 @@ class _SmartTreeProductList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final products = smartProductsForCat(cat);
+    void back() => ref.read(smartTreeCatProvider.notifier).state = null;
+    const green = Color(0xFF22C55E);
     return Column(
       children: [
-        // Breadcrumb header with back button
+        // Drill bar — back + green active category chip with X.
         Container(
-          color: const Color(0xFFFFFFFF),
-          padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
+          margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          height: 48,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE7E7EA),
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back_ios,
-                    color: BsTokens.brand, size: 18),
-                onPressed: () =>
-                    ref.read(smartTreeCatProvider.notifier).state = null,
+                icon: const Icon(Icons.arrow_back,
+                    color: Color(0xFF555555), size: 20),
+                tooltip: 'חזרה',
+                onPressed: back,
               ),
-              const Text('🌳 ', style: TextStyle(fontSize: 16)),
-              Text(
-                cat,
-                style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+                    decoration: BoxDecoration(
+                      color: green,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('🌳 ', style: TextStyle(fontSize: 13)),
+                        Flexible(
+                          child: Text(
+                            cat,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        GestureDetector(
+                          onTap: back,
+                          child: const Icon(Icons.close,
+                              color: Colors.white, size: 16),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
         ),
-        const Divider(height: 1, color: Color(0xFFF5F5F5)),
         Expanded(
-          child: ListView.separated(
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
             itemCount: products.length,
-            separatorBuilder: (_, __) => const Divider(
-                height: 1, indent: 76, color: Color(0xFFF5F5F5)),
             itemBuilder: (_, i) {
               final p = products[i];
-              return InkWell(
-                onTap: () => _openProductSheet(context, p),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 10),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF5F5F5),
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(p.emoji,
-                            style: const TextStyle(fontSize: 24)),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              p.name,
-                              style: const TextStyle(
-                                color: Color(0xFF1A1A1A),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              p.recBrand.price != null
-                                  ? '₪${p.recBrand.price}'
-                                  : 'מחיר לפי ספק',
-                              style: const TextStyle(
-                                color: Color(0xFF888888),
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // חובה / סה"כ counts as colored badges at the end.
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
+              final desc = p.acc.map((a) => a.name).join(' · ');
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: green, width: 1),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _openProductSheet(context, p),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
+                      child: Row(
                         children: [
-                          _CountBadge(
-                            label: 'חובה',
-                            count: p.mustCount,
-                            color: const Color(0xFFE53935),
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF5F5F5),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(p.emoji,
+                                style: const TextStyle(fontSize: 24)),
                           ),
-                          const SizedBox(height: 4),
-                          _CountBadge(
-                            label: 'סה"כ',
-                            count: p.acc.length,
-                            color: const Color(0xFF22C55E),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  p.name,
+                                  style: const TextStyle(
+                                    color: Color(0xFF1A1A1A),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  desc.isEmpty ? p.cat : desc,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _CountBadge(
+                                label: 'חובה',
+                                count: p.mustCount,
+                                color: const Color(0xFFE53935),
+                              ),
+                              const SizedBox(height: 4),
+                              _CountBadge(
+                                label: 'סה"כ',
+                                count: p.acc.length,
+                                color: green,
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );
