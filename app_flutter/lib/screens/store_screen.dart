@@ -1,3 +1,4 @@
+import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -1817,16 +1818,72 @@ class _CheckoutButton extends StatelessWidget {
 
 // ─── cart actions row ─────────────────────────────────────────────────────────
 
-class _CartActionsRow extends StatelessWidget {
+class _CartActionsRow extends ConsumerWidget {
   const _CartActionsRow();
 
+  static void _showSaveDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A1A),
+        title: const Text(
+          'שמור סל כרשימה',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: TextField(
+          controller: controller,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: 'שם הרשימה',
+            hintStyle: const TextStyle(color: Color(0xFF666666)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.white24),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('ביטול', style: TextStyle(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: () {
+              if (controller.text.trim().isEmpty) {
+                showToast(context, 'שם הרשימה לא יכול להיות ריק');
+                return;
+              }
+              final items = _kCartItemDetails
+                  .map((item) => (
+                        emoji: item.emoji,
+                        name: item.name,
+                        qty: int.tryParse(item.qty.split(' ')[0]) ?? 0,
+                        price: item.price,
+                      ))
+                  .toList();
+              ref
+                  .read(cartListsProvider.notifier)
+                  .saveCart(controller.text.trim(), items);
+              Navigator.pop(context);
+              showToast(context, 'הרשימה נשמרה בהצלחה');
+            },
+            child: const Text('שמור', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         TextButton.icon(
-          onPressed: () => showToast(context, 'שמור כרשימה — בבנייה'),
+          onPressed: () => _showSaveDialog(context, ref),
           icon: const Icon(Icons.bookmark_border, size: 16),
           label: const Text('שמור'),
           style: TextButton.styleFrom(foregroundColor: Colors.white54),
