@@ -33,11 +33,11 @@ class BsTokens {
   static const Color brand = Color(0xFFFF7A18);
   static const Color brandDark = Color(0xFFE85F00);
 
-  // Dark theme colors (ported from --bg/--card/--ink).
-  static const Color bgDark = Color(0xFF0E1116);
-  static const Color cardDark = Color(0xFF181D26);
-  static const Color inkDark = Color(0xFFF1F3F8);
-  static const Color mutedDark = Color(0xFF9AA3B2);
+  // Light theme colors.
+  static const Color bgLight = Color(0xFFFAFAFA);
+  static const Color cardLight = Color(0xFFFFFFFF);
+  static const Color inkLight = Color(0xFF1A1A1A);
+  static const Color mutedLight = Color(0xFF666666);
 
   // Shadow used for dial circles + label pills.
   static const List<BoxShadow> circleShadow = [
