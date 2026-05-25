@@ -1,4 +1,5 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -146,18 +147,19 @@ final compatSearchProvider  = StateProvider<String>((_) => '');
 bool canConnect(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   if (a.sku == b.sku) return false;
 
-  // Must share at least one DN size
+  // Prefer verified specs — 100% accurate physical data.
+  final vA = kVerifiedSpecs[a.sku], vB = kVerifiedSpecs[b.sku];
+  if (vA != null && vB != null) return vA.compatibleWith(vB);
+
+  // Fallback: name-inference (less reliable, no verified data for this pair).
   final sA = a.connectionSizes.toSet();
   final sB = b.connectionSizes.toSet();
   if (sA.isEmpty || sB.isEmpty || sA.intersection(sB).isEmpty) return false;
 
-  // Both must have a defined gender AND be opposite (male↔female).
-  // If either is unknown we can't confirm a physical connection.
   final gA = a.connectionGender, gB = b.connectionGender;
   if (gA == null || gB == null) return false;
   if (gA == gB) return false;
 
-  // If both have a connection method it must match (thread↔thread, etc.)
   final mA = a.connectionMethod, mB = b.connectionMethod;
   if (mA != null && mB != null && mA != mB) return false;
 
