@@ -20,7 +20,6 @@ dependencies:
   go_router: ^14.6.2
 
   # i18n
-  intl: ^0.20.2
 
   # native barcode scanner — iOS/Android + Web (limited)
   mobile_scanner: ^5.2.3

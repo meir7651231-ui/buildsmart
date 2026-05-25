@@ -961,3 +961,23 @@ List<CatalogNode> allLeaves() {
   }
   return out;
 }
+
+/// Explicit taxonomy — the title path root→…→leaf for a Lipskey category
+/// (צעד 74). Used for breadcrumbs/navigation context. Empty if not found.
+List<String> categoryPathFor(String lipskeyCategory) {
+  List<String>? search(CatalogNode n, List<String> trail) {
+    final here = [...trail, n.title];
+    if (n.lipskeyCategory == lipskeyCategory) return here;
+    for (final c in n.children) {
+      final hit = search(c, here);
+      if (hit != null) return hit;
+    }
+    return null;
+  }
+
+  for (final n in kCatalogTree) {
+    final hit = search(n, const []);
+    if (hit != null) return hit;
+  }
+  return const [];
+}
