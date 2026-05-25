@@ -30,6 +30,25 @@ def test_dup_name_unresolved_when_identical():
     rules = {x['rule'] for x in q.run_rules([a, b], {'ברזים'})}
     assert 'dup_name_unresolved' in rules
 
+# ── צעד 89 — צינור-ייבוא-אצווה ────────────────────────────────────────────────
+import catalog_import as imp
+
+def test_import_strips_packaging():
+    assert imp.normalize_name('מחסום | 20 כמות באריזה') == 'מחסום'
+
+def test_import_dart_escapes_apostrophe():
+    # גרש בודד חייב לברוח כדי לא לשבור קומפילציית Dart
+    assert imp.dart_str("ג'קוזי") == r"'ג\'קוזי'"
+
+def test_import_digit_letter_boundary():
+    assert imp.normalize_name('1.5מחסום') == '1.5 מחסום'
+
+def test_import_validate_catches_dup_and_missing():
+    rows = [dict(sku='1', nameHe='a'), dict(sku='1', nameHe='b'),
+            dict(sku='', nameHe='c')]
+    errs = imp.validate(rows)
+    assert any('כפול' in e for e in errs) and any('חסר' in e for e in errs)
+
 if __name__ == '__main__':
     import sys
     fns=[v for k,v in globals().items() if k.startswith('test_')]
