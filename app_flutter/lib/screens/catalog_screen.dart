@@ -68,6 +68,49 @@ final catalogTreePathProvider =
 /// Search query within the current drill level (scoped to its subtree).
 final catalogTreeQueryProvider = StateProvider<String>((_) => '');
 
+/// Selected facet labels (in order) while drilling inside a faceted leaf.
+final catalogFacetProvider = StateProvider<List<String>>((_) => const []);
+
+/// One facet option: a [label] chip and the [keyword] that must appear in the
+/// product name. A null [keyword] means "none of the other keywords in the
+/// group" (e.g. כללי = not-למקלחת).
+typedef ProductFacet = ({String label, String? keyword});
+
+/// Ordered facet groups per lipskey leaf category. Drilling a faceted leaf
+/// splits its products by these groups before showing the product list.
+const Map<String, List<List<ProductFacet>>> kProductFacets = {
+  'מחסומי רצפה': [
+    [(label: 'תיקני', keyword: 'תיקני'), (label: 'קומקום', keyword: 'קומקום')],
+    [(label: 'למקלחת', keyword: 'למקלחת'), (label: 'כללי', keyword: null)],
+    [(label: 'פתוח', keyword: 'פתוח'), (label: 'סגור', keyword: 'סגור')],
+  ],
+};
+
+bool _matchesFacet(
+    LipskeyCatalogProduct p, List<ProductFacet> group, ProductFacet chosen) {
+  if (chosen.keyword != null) return p.nameHe.contains(chosen.keyword!);
+  // null keyword = matches none of the other keywords in the group.
+  return !group
+      .where((f) => f.keyword != null)
+      .any((f) => p.nameHe.contains(f.keyword!));
+}
+
+/// Apply the first [sel].length facet groups to [base].
+List<LipskeyCatalogProduct> _applyFacets(
+  List<LipskeyCatalogProduct> base,
+  List<List<ProductFacet>> groups,
+  List<String> sel,
+) {
+  var out = base;
+  for (var i = 0; i < sel.length && i < groups.length; i++) {
+    final group = groups[i];
+    final chosen = group.firstWhere((f) => f.label == sel[i],
+        orElse: () => group.first);
+    out = out.where((p) => _matchesFacet(p, group, chosen)).toList();
+  }
+  return out;
+}
+
 String _sortLabel(CatalogSort s) => switch (s) {
       CatalogSort.defaultSort => 'ברירת מחדל',
       CatalogSort.nameAZ      => 'א-ת',
@@ -2366,30 +2409,60 @@ class _TreeDrill extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final current = path.last;
     final query = ref.watch(catalogTreeQueryProvider).trim();
+    final facetSel = ref.watch(catalogFacetProvider);
+
+    // A leaf that maps to a faceted lipskey category drills by product facets
+    // (e.g. תיקני/קומקום → למקלחת/כללי → פתוח/סגור) before the product list.
+    final facetGroups = current.isLeaf && current.lipskeyCategory != null
+        ? kProductFacets[current.lipskeyCategory]
+        : null;
 
     void resetQuery() =>
         ref.read(catalogTreeQueryProvider.notifier).state = '';
+    void resetFacets() =>
+        ref.read(catalogFacetProvider.notifier).state = const [];
 
     void goBack() {
       resetQuery();
-      ref.read(catalogTreePathProvider.notifier).state = [...path]
-        ..removeLast();
+      if (facetSel.isNotEmpty) {
+        ref.read(catalogFacetProvider.notifier).state = [...facetSel]
+          ..removeLast();
+      } else {
+        resetFacets();
+        ref.read(catalogTreePathProvider.notifier).state = [...path]
+          ..removeLast();
+      }
     }
 
     void cancel() {
       resetQuery();
+      resetFacets();
       ref.read(catalogTreePathProvider.notifier).state = const [];
     }
 
-    // Jump back to an ancestor level via its breadcrumb chip.
-    void jumpTo(int index) {
+    // Jump back to an ancestor tree level via its breadcrumb chip.
+    void jumpToTree(int index) {
       resetQuery();
+      resetFacets();
       ref.read(catalogTreePathProvider.notifier).state =
           path.sublist(0, index + 1);
     }
 
+    // Jump back to an earlier facet level via its breadcrumb chip.
+    void jumpToFacet(int index) =>
+        ref.read(catalogFacetProvider.notifier).state =
+            facetSel.sublist(0, index);
+
     void openNode(CatalogNode n) {
       if (n.isLeaf) {
+        // Faceted leaf → enter facet drill instead of opening products.
+        if (n.lipskeyCategory != null &&
+            kProductFacets.containsKey(n.lipskeyCategory)) {
+          resetQuery();
+          resetFacets();
+          ref.read(catalogTreePathProvider.notifier).state = [...path, n];
+          return;
+        }
         if (n.lipskeyCategory != null) {
           final products = kLipskeyCatalog
               .where((p) => p.categoryHe == n.lipskeyCategory)
@@ -2410,52 +2483,181 @@ class _TreeDrill extends ConsumerWidget {
         return;
       }
       resetQuery();
+      resetFacets();
       ref.read(catalogTreePathProvider.notifier).state = [...path, n];
     }
 
-    // Childless node = category without tree data → designed "coming soon".
-    final comingSoon = current.children.isEmpty;
+    // Unified breadcrumb: tree chips followed by facet chips. The last entry
+    // is the active (pressed) chip; the rest jump back to their level on tap.
+    final crumbs = <({String label, VoidCallback? onTap})>[];
+    for (var i = 0; i < path.length; i++) {
+      final last = i == path.length - 1 && facetSel.isEmpty;
+      crumbs.add((label: path[i].title, onTap: last ? null : () => jumpToTree(i)));
+    }
+    for (var j = 0; j < facetSel.length; j++) {
+      final last = j == facetSel.length - 1;
+      crumbs.add((label: facetSel[j], onTap: last ? null : () => jumpToFacet(j)));
+    }
 
-    // Query empty → direct children. Otherwise → every descendant of the
-    // current node whose title matches (search scoped to the drill).
-    final rows = query.isEmpty
-        ? current.children
-        : _searchSubtree(current, query);
+    Widget body;
+    if (facetGroups != null) {
+      // Facet drill: split the leaf's products by the next facet group.
+      final base = kLipskeyCatalog
+          .where((p) => p.categoryHe == current.lipskeyCategory)
+          .toList();
+      final filtered = _applyFacets(base, facetGroups, facetSel);
+      final group = facetGroups[facetSel.length];
+      final options = [
+        for (final f in group)
+          (facet: f, count: filtered.where((p) => _matchesFacet(p, group, f)).length),
+      ].where((o) => o.count > 0).toList();
+
+      void chooseFacet(ProductFacet f) {
+        final sel = [...facetSel, f.label];
+        if (sel.length >= facetGroups.length) {
+          final prods = _applyFacets(base, facetGroups, sel);
+          Navigator.push(
+            context,
+            LipskeyProductsScreen.route(
+              category: '${current.title} · ${sel.join(' · ')}',
+              products: prods,
+            ),
+          );
+        } else {
+          ref.read(catalogFacetProvider.notifier).state = sel;
+        }
+      }
+
+      body = options.isEmpty
+          ? const Center(
+              child: Text('אין מוצרים',
+                  style: TextStyle(color: Color(0xFF888888), fontSize: 14)),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+              itemCount: options.length,
+              itemBuilder: (_, i) => _FacetRow(
+                label: options[i].facet.label,
+                count: options[i].count,
+                onTap: () => chooseFacet(options[i].facet),
+              ),
+            );
+    } else if (current.children.isEmpty) {
+      // Childless node = category without tree data → designed "coming soon".
+      body = _TreeComingSoon(node: current);
+    } else {
+      // Query empty → direct children. Otherwise → every descendant of the
+      // current node whose title matches (search scoped to the drill).
+      final rows = query.isEmpty
+          ? current.children
+          : _searchSubtree(current, query);
+      body = rows.isEmpty
+          ? Center(
+              child: Text(
+                'לא נמצאו תוצאות עבור "$query"',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Color(0xFF888888), fontSize: 14),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+              itemCount: rows.length,
+              itemBuilder: (_, i) => _TreeCatRow(
+                node: rows[i],
+                onTap: () => openNode(rows[i]),
+              ),
+            );
+    }
 
     return Column(
       children: [
         _TreeDrillBar(
-          key: ValueKey(current.id),
-          path: path,
+          key: ValueKey('${current.id}.${facetSel.length}'),
+          crumbs: crumbs,
           onBack: goBack,
           onCancel: cancel,
-          onJumpTo: jumpTo,
         ),
-        Expanded(
-          child: comingSoon
-              ? _TreeComingSoon(node: current)
-              : rows.isEmpty
-                  ? Center(
-                      child: Text(
-                        'לא נמצאו תוצאות עבור "$query"',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            color: Color(0xFF888888), fontSize: 14),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
-                      itemCount: rows.length,
-                      itemBuilder: (_, i) => _TreeCatRow(
-                        node: rows[i],
-                        onTap: () => openNode(rows[i]),
-                      ),
-                    ),
-        ),
+        Expanded(child: body),
       ],
     );
   }
 }
+
+// Bordered row for a product facet option (label + product-count badge).
+class _FacetRow extends StatelessWidget {
+  const _FacetRow({
+    required this.label,
+    required this.count,
+    required this.onTap,
+  });
+  final String label;
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: BsTokens.brand, width: 1),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        '$count מוצרים',
+                        style: const TextStyle(
+                            color: Color(0xFF888888), fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: BsTokens.brand,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$count',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 
 // Designed "coming soon" body for main categories that have no tree data yet.
 class _TreeComingSoon extends StatelessWidget {
@@ -2543,16 +2745,16 @@ List<CatalogNode> _searchSubtree(CatalogNode node, String query) {
 class _TreeDrillBar extends ConsumerStatefulWidget {
   const _TreeDrillBar({
     super.key,
-    required this.path,
+    required this.crumbs,
     required this.onBack,
     required this.onCancel,
-    required this.onJumpTo,
   });
 
-  final List<CatalogNode> path;
+  /// Breadcrumb chips. The last entry is the active (pressed) chip; entries
+  /// with a non-null [onTap] jump back to that level.
+  final List<({String label, VoidCallback? onTap})> crumbs;
   final VoidCallback onBack;
   final VoidCallback onCancel;
-  final void Function(int index) onJumpTo;
 
   @override
   ConsumerState<_TreeDrillBar> createState() => _TreeDrillBarState();
@@ -2574,9 +2776,11 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
     super.dispose();
   }
 
-  // Active chip: pressed orange, title ellipsizes so the X stays visible.
-  Widget _crumb(int i, bool active) {
-    final node = widget.path[i];
+  // Active chip (onTap == null): pressed orange with X. Others: outline chip
+  // that jumps back to its level. Each title is capped + ellipsized so a long
+  // name never dominates; the row scrolls horizontally for deep paths.
+  Widget _crumb(({String label, VoidCallback? onTap}) crumb) {
+    final active = crumb.onTap == null;
     if (active) {
       return Container(
         padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
@@ -2587,9 +2791,10 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 130),
               child: Text(
-                node.title,
+                crumb.label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -2609,7 +2814,7 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
       );
     }
     return GestureDetector(
-      onTap: () => widget.onJumpTo(i),
+      onTap: crumb.onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
@@ -2618,14 +2823,17 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
             BorderSide(color: Color(0xFFC8C8CE), width: 1),
           ),
         ),
-        child: Text(
-          node.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: Color(0xFF6E6E73),
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 130),
+          child: Text(
+            crumb.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF6E6E73),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),
@@ -2662,19 +2870,26 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
           ),
           // Breadcrumb of the drill path — every chip flexes/ellipsizes so the
           // active chip's X is always visible (no clipping, no scroll).
+          // Breadcrumb scrolls horizontally; reverse keeps the active chip (and
+          // its X) in view by default, with older ancestors reachable by swipe.
           Expanded(
-            child: Row(
-              children: [
-                for (var i = 0; i < widget.path.length; i++) ...[
-                  if (i > 0)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 2),
-                      child: Icon(Icons.chevron_left,
-                          color: Color(0xFF999999), size: 16),
-                    ),
-                  Flexible(child: _crumb(i, i == widget.path.length - 1)),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              reverse: true,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var i = 0; i < widget.crumbs.length; i++) ...[
+                    if (i > 0)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 2),
+                        child: Icon(Icons.chevron_left,
+                            color: Color(0xFF999999), size: 16),
+                      ),
+                    _crumb(widget.crumbs[i]),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
           const SizedBox(width: 4),
