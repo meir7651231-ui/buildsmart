@@ -53,12 +53,30 @@ jobs:
 
       - name: Build Flutter web
         working-directory: app_flutter
-        run: flutter build web --release --base-href "/buildsmart/flutter/"
+        run: flutter build web --release --pwa-strategy=offline-first --base-href "/buildsmart/flutter/"
 
       - name: Stage Flutter under /flutter/
         run: |
           mkdir -p app/dist/flutter
           cp -r app_flutter/build/web/* app/dist/flutter/
+
+      # ─── APK (offline Android) ──────────────────────────────────
+      - name: Setup Java (required for Android build)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build Android APK
+        working-directory: app_flutter
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: buildsmart-apk
+          path: app_flutter/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          retention-days: 30
 
       # ─── Publish combined output ────────────────────────────────
       - name: Push to gh-pages

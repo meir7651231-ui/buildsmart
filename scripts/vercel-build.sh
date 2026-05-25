@@ -32,7 +32,7 @@ echo ""
 echo "🏗️  Building Flutter web ..."
 cd app_flutter
 flutter pub get
-flutter build web --release
+flutter build web --release --pwa-strategy=offline-first
 
 echo ""
 echo "✅ Output: app_flutter/build/web"
