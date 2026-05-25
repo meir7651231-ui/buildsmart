@@ -48,25 +48,26 @@ class LipskeyProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0E1116),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF0E1116),
-          foregroundColor: Colors.white,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          foregroundColor: cs.onSurface,
           elevation: 0,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(category,
-                  style: const TextStyle(
-                      color: Colors.white,
+                  style: TextStyle(
+                      color: cs.onSurface,
                       fontWeight: FontWeight.w800,
                       fontSize: 16)),
               Text('${products.length} מוצרים',
-                  style:
-                      const TextStyle(color: Color(0xFF9AA3B2), fontSize: 12)),
+                  style: TextStyle(
+                      color: cs.onSurface.withOpacity(0.5), fontSize: 12)),
             ],
           ),
         ),
@@ -103,8 +104,8 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
 
   static const _brand = Color(0xFFFF7A18);
   static const _teal = Color(0xFF3DD9B0);
-  static const _muted = Color(0xFF9AA3B2);
-  static const _line = Color(0xFF252B36);
+  Color get _muted => Theme.of(context).colorScheme.onSurface.withOpacity(0.45);
+  Color get _line => Theme.of(context).colorScheme.outline.withOpacity(0.2);
 
   LipskeyCatalogProduct get p => widget.product;
 
@@ -161,7 +162,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       constraints: const BoxConstraints(minHeight: 138),
       decoration: BoxDecoration(
-        color: const Color(0xFF181D26),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: _open ? _brand : _line),
       ),
@@ -191,7 +192,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             fit: StackFit.expand,
             children: [
               Container(
-                color: const Color(0xFF10141B),
+                color: Theme.of(context).colorScheme.surfaceContainerLow,
                 alignment: Alignment.center,
                 child: p.imageAsset != null
                     ? Image.asset(p.imageAsset!,
@@ -240,14 +241,14 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
               children: [
                 Expanded(
                   child: Text(p.categoryHe,
-                      style: const TextStyle(
-                          color: Colors.white,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
                           height: 1.2)),
                 ),
                 const SizedBox(width: 8),
-                const Text('מחיר לפי ספק',
+                Text('מחיר לפי ספק',
                     style: TextStyle(
                         color: _muted,
                         fontSize: 11,
@@ -265,8 +266,9 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                     p.brand == 'AQUATEC'
                         ? '💧 AQUATEC'
                         : '🏭 ${p.brand}',
-                    style: const TextStyle(
-                        color: Color(0xFF7FD0FF), fontSize: 10)),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
+                        fontSize: 10)),
                 const SizedBox(width: 10),
                 GestureDetector(
                   onTap: () {
@@ -278,7 +280,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                     ));
                   },
                   child: Text('#${p.sku}',
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: _muted,
                           fontSize: 10,
                           fontFamily: 'monospace')),
@@ -296,7 +298,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     return Container(
       width: 100,
       padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 8),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(right: BorderSide(color: _line)),
       ),
       child: Column(
@@ -320,14 +322,14 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                   height: 18,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF3A4151)),
+                    border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.4)),
                   ),
                   alignment: Alignment.center,
-                  child: const Text('ⓘ',
+                  child: Text('ⓘ',
                       style: TextStyle(color: _muted, fontSize: 10)),
                 ),
                 const SizedBox(width: 4),
-                const Text('פרטים',
+                Text('פרטים',
                     style: TextStyle(color: _muted, fontSize: 10)),
               ],
             ),
@@ -405,12 +407,14 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             height: 30,
             child: Center(
                 child: Text(s,
-                    style: const TextStyle(color: Colors.white, fontSize: 17))),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 17))),
           ),
         );
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF10141B),
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         border: Border.all(color: _brand),
         borderRadius: BorderRadius.circular(10),
       ),
@@ -423,8 +427,8 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             width: 30,
             child: Center(
                 child: Text('$_qty',
-                    style: const TextStyle(
-                        color: Colors.white,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w800,
                         fontSize: 14))),
           ),
@@ -507,8 +511,10 @@ class _NameWords extends StatelessWidget {
             )
           else
             Text(w,
-                style: const TextStyle(
-                    color: Color(0xFF9AA3B2), fontSize: 12, height: 1.3)),
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    fontSize: 12,
+                    height: 1.3)),
       ],
     );
   }

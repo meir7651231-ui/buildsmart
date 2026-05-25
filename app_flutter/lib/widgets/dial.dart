@@ -28,7 +28,7 @@ class DialRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bg = active ? BsTokens.brand : BsTokens.cardDark;
+    final bg = active ? BsTokens.brand : theme.colorScheme.surface;
     final fg = active ? Colors.white : BsTokens.brand;
 
     return Semantics(
@@ -76,7 +76,7 @@ class DialRow extends StatelessWidget {
                 child: Text(
                   label,
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: active ? Colors.white : BsTokens.inkDark,
+                    color: active ? Colors.white : theme.colorScheme.onSurface,
                   ),
                 ),
               ),
