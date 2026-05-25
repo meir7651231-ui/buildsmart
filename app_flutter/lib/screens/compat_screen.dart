@@ -14,8 +14,8 @@ const _brand    = BsTokens.brand;      // orange
 
 // ── puzzle clipper ────────────────────────────────────────────────────────────
 
-const double _d = 9.0;   // depth of tab / notch
-const double _s = 22.0;  // span width of tab / notch
+const double _d = 14.0;  // depth of tab / notch
+const double _s = 28.0;  // span width of tab / notch
 const double _r = 5.0;   // corner radius
 
 class _PuzzleClipper extends CustomClipper<Path> {
