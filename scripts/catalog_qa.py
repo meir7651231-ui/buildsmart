@@ -226,16 +226,27 @@ def _normalize(n):
 
 
 def cmd_fix(*args):
-    """נרמול בטוח. --apply לכתיבה · --rule trim לתיקון ממוקד (צעדים 19,20,24,27)."""
+    """נרמול בטוח. --apply לכתיבה · --rule <name> לתיקון ממוקד (צעדים 19,20,24,27)."""
     apply = "--apply" in args
     backup = True  # צעד 26 — גיבוי לפני כתיבה
+    # צעד 27 — תיקון ממוקד: --rule packaging|gershayim|stuck|spaces
+    rule = next((a.split("=")[1] for a in args if a.startswith("--rule=")), None)
+    triggers = {
+        "packaging": lambda n: "|" in n or "כמות" in n,
+        "gershayim": lambda n: "״" in n or "“" in n,
+        "stuck": lambda n: bool(STUCK.search(n)),
+        "spaces": lambda n: "  " in n,
+    }
     src = open(CATALOG, encoding="utf-8").read()
     products = parse_catalog()
     changes = []
     for p in products:
         n = p["name"]
-        dirty = ("|" in n or "כמות" in n or "״" in n or "“" in n or STUCK.search(n)
-                 or "  " in n)  # צעד 24 — רווחים כפולים
+        if rule:
+            dirty = triggers.get(rule, lambda _: False)(n)
+        else:
+            dirty = ("|" in n or "כמות" in n or "״" in n or "“" in n
+                     or STUCK.search(n) or "  " in n)  # צעד 24
         if not dirty:
             continue
         new = _normalize(n)
