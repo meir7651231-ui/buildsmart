@@ -100,7 +100,6 @@ class _CartFab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lines = ref.watch(smartCartProvider);
-    if (lines.isEmpty) return const SizedBox.shrink();
     final count = lines.fold<int>(0, (sum, l) => sum + l.productQty);
 
     return FloatingActionButton(
@@ -110,35 +109,37 @@ class _CartFab extends ConsumerWidget {
       },
       backgroundColor: BsTokens.brand,
       foregroundColor: Colors.white,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          const Icon(Icons.shopping_cart),
-          Positioned(
-            top: -8,
-            right: -10,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-              constraints: const BoxConstraints(minWidth: 18),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: BsTokens.brand, width: 1.5),
-              ),
-              child: Text(
-                '$count',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: BsTokens.brand,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
+      child: lines.isEmpty
+          ? const Icon(Icons.add)
+          : Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                const Icon(Icons.shopping_cart),
+                Positioned(
+                  top: -8,
+                  right: -10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                    constraints: const BoxConstraints(minWidth: 18),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: BsTokens.brand, width: 1.5),
+                    ),
+                    child: Text(
+                      '$count',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: BsTokens.brand,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
