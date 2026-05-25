@@ -5,26 +5,31 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// ── colors — light theme ──────────────────────────────────────────────────────
+const _bg       = Colors.white;
+const _surface  = Color(0xFFF5F6F8);   // chip / avatar bg
+const _divider  = Color(0xFFEEEFF2);
+const _title    = Color(0xFF111827);
+const _sub      = Color(0xFF6B7280);
+const _brand    = BsTokens.brand;      // orange
+
 // ── filter state ─────────────────────────────────────────────────────────────
 
-final compatGenderProvider = StateProvider<String>((_) => 'הכל');
-final compatSizeProvider = StateProvider<String>((_) => 'הכל');
-final compatMethodProvider = StateProvider<String>((_) => 'הכל');
-final compatSearchProvider = StateProvider<String>((_) => '');
+final compatGenderProvider  = StateProvider<String>((_) => 'הכל');
+final compatSizeProvider    = StateProvider<String>((_) => 'הכל');
+final compatMethodProvider  = StateProvider<String>((_) => 'הכל');
+final compatSearchProvider  = StateProvider<String>((_) => '');
 
 // ── compatibility logic ───────────────────────────────────────────────────────
 
 bool canConnect(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   if (a.sku == b.sku) return false;
-  final sizesA = a.connectionSizes.toSet();
-  final sizesB = b.connectionSizes.toSet();
-  if (sizesA.isEmpty || sizesB.isEmpty) return false;
-  if (sizesA.intersection(sizesB).isEmpty) return false;
-  final gA = a.connectionGender;
-  final gB = b.connectionGender;
+  final sA = a.connectionSizes.toSet();
+  final sB = b.connectionSizes.toSet();
+  if (sA.isEmpty || sB.isEmpty || sA.intersection(sB).isEmpty) return false;
+  final gA = a.connectionGender, gB = b.connectionGender;
   if (gA != null && gB != null && gA == gB) return false;
-  final mA = a.connectionMethod;
-  final mB = b.connectionMethod;
+  final mA = a.connectionMethod, mB = b.connectionMethod;
   if (mA != null && mB != null && mA != mB) return false;
   return true;
 }
@@ -34,20 +39,19 @@ List<LipskeyCatalogProduct> compatibleWith(LipskeyCatalogProduct anchor) =>
       ..sort((a, b) => (a.categoryHe == anchor.categoryHe ? 0 : 1)
           .compareTo(b.categoryHe == anchor.categoryHe ? 0 : 1));
 
-List<LipskeyCatalogProduct> _filteredProducts(WidgetRef ref) {
-  final gender = ref.watch(compatGenderProvider);
-  final size = ref.watch(compatSizeProvider);
-  final method = ref.watch(compatMethodProvider);
+List<LipskeyCatalogProduct> _filtered(WidgetRef ref) {
+  final g = ref.watch(compatGenderProvider);
+  final s = ref.watch(compatSizeProvider);
+  final m = ref.watch(compatMethodProvider);
   final q = ref.watch(compatSearchProvider).trim().toLowerCase();
   return kLipskeyCatalog.where((p) {
-    if (gender == 'זכר' && p.connectionGender != 'male') return false;
-    if (gender == 'נקבה' && p.connectionGender != 'female') return false;
-    if (size != 'הכל' && !p.connectionSizes.contains(size)) return false;
-    if (method == 'תבריג' && p.connectionMethod != 'thread') return false;
-    if (method == 'הדבקה' && p.connectionMethod != 'glue') return false;
-    if (method == 'אלקטרו' && p.connectionMethod != 'electrofusion') return false;
-    if (q.isNotEmpty &&
-        !p.nameHe.toLowerCase().contains(q) &&
+    if (g == 'זכר'    && p.connectionGender  != 'male')          return false;
+    if (g == 'נקבה'   && p.connectionGender  != 'female')        return false;
+    if (s != 'הכל'   && !p.connectionSizes.contains(s))          return false;
+    if (m == 'תבריג'  && p.connectionMethod  != 'thread')        return false;
+    if (m == 'הדבקה'  && p.connectionMethod  != 'glue')          return false;
+    if (m == 'אלקטרו' && p.connectionMethod  != 'electrofusion') return false;
+    if (q.isNotEmpty  && !p.nameHe.toLowerCase().contains(q) &&
         !p.brand.toLowerCase().contains(q)) return false;
     return true;
   }).toList();
@@ -55,62 +59,57 @@ List<LipskeyCatalogProduct> _filteredProducts(WidgetRef ref) {
 
 // ── label helpers ─────────────────────────────────────────────────────────────
 
-String _genderLabel(String? g) => switch (g) {
-      'male' => '♂ זכר',
-      'female' => '♀ נקבה',
-      _ => '⟷',
-    };
+String _gLbl(String? g) => switch (g) {
+  'male'   => '♂ זכר',
+  'female' => '♀ נקבה',
+  _        => '⟷',
+};
 
-Color _genderColor(String? g) => switch (g) {
-      'male' => const Color(0xFF5B9CF6),
-      'female' => const Color(0xFFFF7EB6),
-      _ => const Color(0xFF9AA3B2),
-    };
+Color _gColor(String? g) => switch (g) {
+  'male'   => const Color(0xFF3B82F6),
+  'female' => const Color(0xFFEC4899),
+  _        => _sub,
+};
 
-String _methodLabel(String? m) => switch (m) {
-      'thread' => '🔩 תבריג',
-      'glue' => '💧 הדבקה',
-      'electrofusion' => '⚡ אלקטרו',
-      _ => '',
-    };
+String _mLbl(String? m) => switch (m) {
+  'thread'        => '🔩 תבריג',
+  'glue'          => '💧 הדבקה',
+  'electrofusion' => '⚡ אלקטרו',
+  _               => '',
+};
 
 // ── main widget ───────────────────────────────────────────────────────────────
 
 class CompatScreen extends ConsumerWidget {
   const CompatScreen({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Directionality(
-      textDirection: TextDirection.rtl,
-      child: Column(
-        children: [
-          _CompatSearchBar(),
-          _CompatFilters(),
-          _CompatDivider(),
-          Expanded(child: _CompatList()),
-        ],
+    return const ColoredBox(
+      color: _bg,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(children: [
+          _SearchBar(),
+          _Filters(),
+          _StatsRow(),
+          Expanded(child: _List()),
+        ]),
       ),
     );
   }
 }
 
-// ── search bar — same style as catalog search bar ────────────────────────────
+// ── search bar ────────────────────────────────────────────────────────────────
 
-class _CompatSearchBar extends ConsumerStatefulWidget {
-  const _CompatSearchBar();
+class _SearchBar extends ConsumerStatefulWidget {
+  const _SearchBar();
   @override
-  ConsumerState<_CompatSearchBar> createState() => _CompatSearchBarState();
+  ConsumerState<_SearchBar> createState() => _SearchBarState();
 }
 
-class _CompatSearchBarState extends ConsumerState<_CompatSearchBar> {
+class _SearchBarState extends ConsumerState<_SearchBar> {
   final _ctrl = TextEditingController();
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
+  @override void dispose() { _ctrl.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
@@ -120,373 +119,272 @@ class _CompatSearchBarState extends ConsumerState<_CompatSearchBar> {
       child: Container(
         height: 40,
         decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
+          color: _surface,
           borderRadius: BorderRadius.circular(24),
         ),
-        child: Row(
-          children: [
-            const SizedBox(width: 12),
-            const Icon(Icons.search, color: Color(0xFF888888), size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: _ctrl,
-                textDirection: TextDirection.rtl,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'חפש מוצר לתאימות...',
-                  hintStyle: TextStyle(color: Color(0xFF888888), fontSize: 14),
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                onChanged: (v) =>
-                    ref.read(compatSearchProvider.notifier).state = v,
+        child: Row(children: [
+          const SizedBox(width: 12),
+          const Icon(Icons.search, color: _sub, size: 18),
+          const SizedBox(width: 8),
+          Expanded(child: TextField(
+            controller: _ctrl,
+            textDirection: TextDirection.rtl,
+            style: const TextStyle(color: _title, fontSize: 14),
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              hintText: 'חפש מוצר לתאימות...',
+              hintStyle: TextStyle(color: _sub, fontSize: 14),
+              isDense: true, contentPadding: EdgeInsets.zero,
+            ),
+            onChanged: (v) =>
+                ref.read(compatSearchProvider.notifier).state = v,
+          )),
+          if (hasText)
+            GestureDetector(
+              onTap: () {
+                _ctrl.clear();
+                ref.read(compatSearchProvider.notifier).state = '';
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: Icon(Icons.close, color: _sub, size: 16),
               ),
             ),
-            if (hasText)
-              GestureDetector(
-                onTap: () {
-                  _ctrl.clear();
-                  ref.read(compatSearchProvider.notifier).state = '';
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Icon(Icons.close, color: Color(0xFF888888), size: 16),
-                ),
-              ),
-          ],
-        ),
+        ]),
       ),
     );
   }
 }
 
-// ── filter chips — same style as _FilterChipsRow ────────────────────────────
+// ── filter chips ──────────────────────────────────────────────────────────────
 
-class _CompatFilters extends ConsumerWidget {
-  const _CompatFilters();
-
+class _Filters extends ConsumerWidget {
+  const _Filters();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gender = ref.watch(compatGenderProvider);
-    final size = ref.watch(compatSizeProvider);
-    final method = ref.watch(compatMethodProvider);
-    final anyActive = gender != 'הכל' || size != 'הכל' || method != 'הכל';
+    final gender  = ref.watch(compatGenderProvider);
+    final size    = ref.watch(compatSizeProvider);
+    final method  = ref.watch(compatMethodProvider);
+    final anyOn   = gender != 'הכל' || size != 'הכל' || method != 'הכל';
 
-    void setGender(String v) => ref.read(compatGenderProvider.notifier).state =
-        gender == v ? 'הכל' : v;
-    void setSize(String v) => ref.read(compatSizeProvider.notifier).state =
-        size == v ? 'הכל' : v;
-    void setMethod(String v) => ref.read(compatMethodProvider.notifier).state =
-        method == v ? 'הכל' : v;
+    void setG(String v) => ref.read(compatGenderProvider.notifier).state  = gender == v ? 'הכל' : v;
+    void setS(String v) => ref.read(compatSizeProvider.notifier).state    = size   == v ? 'הכל' : v;
+    void setM(String v) => ref.read(compatMethodProvider.notifier).state  = method == v ? 'הכל' : v;
 
-    Widget chip(String label, bool active, VoidCallback onTap, {Color? color}) {
-      final c = color ?? BsTokens.brand;
+    Widget chip(String lbl, bool on, VoidCallback fn, {Color? c}) {
+      final col = c ?? _brand;
       return GestureDetector(
-        onTap: onTap,
+        onTap: fn,
         child: Container(
           margin: const EdgeInsets.only(left: 6),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: active ? c.withOpacity(0.15) : Colors.transparent,
+            color: on ? col.withOpacity(0.1) : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: active ? c : const Color(0xFF3A3A3A),
-              width: active ? 1.5 : 1,
-            ),
+            border: Border.all(color: on ? col : const Color(0xFFD1D5DB), width: on ? 1.5 : 1),
           ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: active ? c : const Color(0xFF888888),
-              fontSize: 12,
-              fontWeight: active ? FontWeight.w700 : FontWeight.w400,
-            ),
-          ),
+          child: Text(lbl,
+              style: TextStyle(
+                color: on ? col : _sub,
+                fontSize: 12,
+                fontWeight: on ? FontWeight.w700 : FontWeight.w400)),
         ),
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
-          child: Row(
-            children: [
-              chip('♂ זכר', gender == 'זכר', () => setGender('זכר'),
-                  color: const Color(0xFF5B9CF6)),
-              chip('♀ נקבה', gender == 'נקבה', () => setGender('נקבה'),
-                  color: const Color(0xFFFF7EB6)),
-              chip('🔩 תבריג', method == 'תבריג', () => setMethod('תבריג')),
-              chip('💧 הדבקה', method == 'הדבקה', () => setMethod('הדבקה')),
-              chip('⚡ אלקטרו', method == 'אלקטרו', () => setMethod('אלקטרו')),
-              if (anyActive) ...[
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: () {
-                    ref.read(compatGenderProvider.notifier).state = 'הכל';
-                    ref.read(compatSizeProvider.notifier).state = 'הכל';
-                    ref.read(compatMethodProvider.notifier).state = 'הכל';
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 6),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFF666666)),
-                    ),
-                    child: const Text('✕ איפוס',
-                        style: TextStyle(
-                            color: Color(0xFF888888),
-                            fontSize: 12)),
-                  ),
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+        child: Row(children: [
+          chip('♂ זכר',    gender == 'זכר',    () => setG('זכר'),    c: const Color(0xFF3B82F6)),
+          chip('♀ נקבה',   gender == 'נקבה',   () => setG('נקבה'),   c: const Color(0xFFEC4899)),
+          chip('🔩 תבריג', method == 'תבריג',  () => setM('תבריג')),
+          chip('💧 הדבקה', method == 'הדבקה',  () => setM('הדבקה')),
+          chip('⚡ אלקטרו',method == 'אלקטרו', () => setM('אלקטרו')),
+          if (anyOn) ...[
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () {
+                ref.read(compatGenderProvider.notifier).state = 'הכל';
+                ref.read(compatSizeProvider.notifier).state   = 'הכל';
+                ref.read(compatMethodProvider.notifier).state = 'הכל';
+              },
+              child: Container(
+                margin: const EdgeInsets.only(left: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFD1D5DB)),
                 ),
-              ],
-            ],
-          ),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
-          child: Row(
-            children: [
-              for (final s in [
-                '25', '32', '40', '50', '63', '75', '90', '110', '160'
-              ])
-                chip(s, size == s, () => setSize(s),
-                    color: BsTokens.brand),
-            ],
-          ),
-        ),
-      ],
+                child: const Text('✕ איפוס',
+                    style: TextStyle(color: _sub, fontSize: 12)),
+              ),
+            ),
+          ],
+        ]),
+      ),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
+        child: Row(children: [
+          for (final s in ['25','32','40','50','63','75','90','110','160'])
+            chip(s, size == s, () => setS(s)),
+        ]),
+      ),
+    ]);
+  }
+}
+
+// ── stats row ─────────────────────────────────────────────────────────────────
+
+class _StatsRow extends ConsumerWidget {
+  const _StatsRow();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final count  = _filtered(ref).length;
+    final anyOn  = ref.watch(compatGenderProvider) != 'הכל' ||
+                   ref.watch(compatSizeProvider)   != 'הכל' ||
+                   ref.watch(compatMethodProvider) != 'הכל';
+    return Container(
+      color: _surface,
+      padding: const EdgeInsets.fromLTRB(16, 5, 16, 5),
+      child: Row(children: [
+        Text('$count מוצרים',
+            style: const TextStyle(color: _sub, fontSize: 12)),
+        if (anyOn) ...[
+          const SizedBox(width: 6),
+          const Text('·', style: TextStyle(color: _sub, fontSize: 12)),
+          const SizedBox(width: 6),
+          Text('מסונן', style: TextStyle(
+              color: _brand, fontSize: 12, fontWeight: FontWeight.w600)),
+        ],
+        const Spacer(),
+        const Text('הקש ⇄ לתאימות',
+            style: TextStyle(color: _sub, fontSize: 11)),
+      ]),
     );
   }
 }
 
-class _CompatDivider extends ConsumerWidget {
-  const _CompatDivider();
+// ── list ──────────────────────────────────────────────────────────────────────
 
+class _List extends ConsumerWidget {
+  const _List();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final products = _filteredProducts(ref);
-    final gender = ref.watch(compatGenderProvider);
-    final size = ref.watch(compatSizeProvider);
-    final method = ref.watch(compatMethodProvider);
-    final anyFilter = gender != 'הכל' || size != 'הכל' || method != 'הכל';
-    return Container(
-      color: const Color(0xFF1A1A1A),
-      padding: const EdgeInsets.fromLTRB(16, 5, 16, 5),
-      child: Row(
-        children: [
-          Text('${products.length} מוצרים',
-              style: const TextStyle(
-                  color: Color(0xFF888888), fontSize: 12)),
-          if (anyFilter) ...[
-            const SizedBox(width: 6),
-            const Text('·',
-                style: TextStyle(color: Color(0xFF555555), fontSize: 12)),
-            const SizedBox(width: 6),
-            Text('מסונן',
-                style: TextStyle(
-                    color: BsTokens.brand,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600)),
-          ],
-          const Spacer(),
-          const Text('הקש ⇄ לתאימות',
-              style: TextStyle(color: Color(0xFF444444), fontSize: 11)),
-        ],
+    final products = _filtered(ref);
+    if (products.isEmpty) {
+      return const Center(child: Text('אין מוצרים תואמים לסינון',
+          style: TextStyle(color: _sub, fontSize: 14)));
+    }
+    return ColoredBox(
+      color: _bg,
+      child: ListView.separated(
+        key: const Key('compat-list'),
+        itemCount: products.length,
+        separatorBuilder: (_, __) =>
+            const Divider(height: 1, indent: 76, color: _divider),
+        itemBuilder: (_, i) => _Row(product: products[i]),
       ),
     );
   }
 }
 
-// ── list — same layout as _CatalogList ───────────────────────────────────────
+// ── row — mirrors _CatalogRow with light palette ──────────────────────────────
 
-class _CompatList extends ConsumerWidget {
-  const _CompatList();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final products = _filteredProducts(ref);
-    if (products.isEmpty) {
-      return const Center(
-        child: Text('אין מוצרים תואמים לסינון הנוכחי',
-            style: TextStyle(color: Color(0xFF888888), fontSize: 14)),
-      );
-    }
-    return ListView.separated(
-      key: const Key('compat-list'),
-      itemCount: products.length,
-      separatorBuilder: (_, __) =>
-          const Divider(height: 1, indent: 76, color: Color(0xFF2A2A2A)),
-      itemBuilder: (_, i) => _CompatRow(product: products[i]),
-    );
-  }
-}
-
-// ── row — mirrors _CatalogRow exactly ────────────────────────────────────────
-
-class _CompatRow extends ConsumerWidget {
-  const _CompatRow({required this.product});
+class _Row extends ConsumerWidget {
+  const _Row({required this.product});
   final LipskeyCatalogProduct product;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isFav = ref.watch(productFavoritesProvider).contains(product.sku);
+    final isFav   = ref.watch(productFavoritesProvider).contains(product.sku);
     final matches = compatibleWith(product);
-    final gender = product.connectionGender;
-    final sizes = product.connectionSizes;
-    final method = product.connectionMethod;
+    final gender  = product.connectionGender;
+    final sizes   = product.connectionSizes;
+    final method  = product.connectionMethod;
 
-    // preview line: gender + sizes + method
-    final parts = <String>[
-      if (gender != null) _genderLabel(gender),
+    final previewParts = <String>[
       if (sizes.isNotEmpty) sizes.map((s) => 'DN$s').join(' · '),
-      if (method != null) _methodLabel(method),
+      if (method != null) _mLbl(method),
     ];
-    final preview = parts.isEmpty ? 'אין נתוני חיבור' : parts.join('  ');
-
-    // badge = number of compatible products
-    final hasBadge = matches.isNotEmpty;
+    final preview = previewParts.isEmpty ? 'אין נתוני חיבור' : previewParts.join('  ');
 
     return InkWell(
-      onTap: () => _showCompatSheet(context, product, matches),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(
-          children: [
-            // avatar circle — same as _CatalogRow
+      onTap: () => _showSheet(context, product, matches),
+      child: ColoredBox(
+        color: _bg,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(children: [
+            // avatar circle
             Container(
-              width: 50,
-              height: 50,
-              decoration: const BoxDecoration(
-                color: Color(0xFF2A2A2A),
-                shape: BoxShape.circle,
-              ),
+              width: 50, height: 50,
+              decoration: const BoxDecoration(color: _surface, shape: BoxShape.circle),
               alignment: Alignment.center,
               child: product.imageAsset != null
-                  ? ClipOval(
-                      child: Image.asset(
-                        product.imageAsset!,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Text(
-                          product.typeEmoji,
-                          style: const TextStyle(fontSize: 24),
-                        ),
-                      ),
-                    )
-                  : Text(product.typeEmoji,
-                      style: const TextStyle(fontSize: 24)),
+                  ? ClipOval(child: Image.asset(product.imageAsset!,
+                      width: 50, height: 50, fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          Text(product.typeEmoji, style: const TextStyle(fontSize: 24))))
+                  : Text(product.typeEmoji, style: const TextStyle(fontSize: 24)),
             ),
             const SizedBox(width: 12),
-            // text content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          product.nameHe,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      // gender tag instead of time
-                      if (gender != null)
-                        Text(
-                          _genderLabel(gender),
-                          style: TextStyle(
-                            color: _genderColor(gender),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                    ],
+            // text
+            Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  Expanded(child: Text(product.nameHe,
+                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: _title, fontSize: 15, fontWeight: FontWeight.w600))),
+                  if (gender != null)
+                    Text(_gLbl(gender),
+                        style: TextStyle(color: _gColor(gender),
+                            fontSize: 12, fontWeight: FontWeight.w600)),
+                ]),
+                const SizedBox(height: 3),
+                Row(children: [
+                  Expanded(child: Text(preview, maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: _sub, fontSize: 13))),
+                  // compat badge
+                  GestureDetector(
+                    onTap: () => _showSheet(context, product, matches),
+                    child: matches.isNotEmpty
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF059669).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: const Color(0xFF059669).withOpacity(0.4)),
+                            ),
+                            child: Text('⇄ ${matches.length}',
+                                style: const TextStyle(
+                                    color: Color(0xFF059669), fontSize: 12,
+                                    fontWeight: FontWeight.w700)))
+                        : Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: _divider),
+                            ),
+                            child: const Text('⊘',
+                                style: TextStyle(color: _sub, fontSize: 12))),
                   ),
-                  const SizedBox(height: 3),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          preview,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Color(0xFF888888),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                      // compat badge — same style as catalog badge
-                      GestureDetector(
-                        onTap: () =>
-                            _showCompatSheet(context, product, matches),
-                        child: hasBadge
-                            ? Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF3DD9B0),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  '⇄ ${matches.length}',
-                                  style: const TextStyle(
-                                    color: Color(0xFF06251C),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              )
-                            : Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 2),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: const Color(0xFF3A3A3A)),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Text(
-                                  '⊘',
-                                  style: TextStyle(
-                                      color: Color(0xFF555555),
-                                      fontSize: 12),
-                                ),
-                              ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                ]),
+              ],
+            )),
             const SizedBox(width: 8),
-            // fav button on right edge
+            // fav
             GestureDetector(
-              onTap: () =>
-                  ref.read(productFavoritesProvider.notifier).toggle(product.sku),
-              child: Icon(
-                isFav ? Icons.favorite : Icons.favorite_border,
-                size: 20,
-                color: isFav
-                    ? const Color(0xFFFF4D6D)
-                    : const Color(0xFF3A3A3A),
-              ),
+              onTap: () => ref.read(productFavoritesProvider.notifier).toggle(product.sku),
+              child: Icon(isFav ? Icons.favorite : Icons.favorite_border,
+                  size: 20, color: isFav ? const Color(0xFFEF4444) : _divider),
             ),
-          ],
+          ]),
         ),
       ),
     );
@@ -495,13 +393,10 @@ class _CompatRow extends ConsumerWidget {
 
 // ── compat sheet ──────────────────────────────────────────────────────────────
 
-void _showCompatSheet(
-  BuildContext context,
-  LipskeyCatalogProduct anchor,
-  List<LipskeyCatalogProduct> matches,
-) {
+void _showSheet(BuildContext ctx, LipskeyCatalogProduct anchor,
+    List<LipskeyCatalogProduct> matches) {
   showModalBottomSheet<void>(
-    context: context,
+    context: ctx,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (_) => CompatSheet(anchor: anchor, matches: matches),
@@ -509,8 +404,7 @@ void _showCompatSheet(
 }
 
 class CompatSheet extends ConsumerWidget {
-  const CompatSheet(
-      {super.key, required this.anchor, required this.matches});
+  const CompatSheet({super.key, required this.anchor, required this.matches});
   final LipskeyCatalogProduct anchor;
   final List<LipskeyCatalogProduct> matches;
 
@@ -525,237 +419,139 @@ class CompatSheet extends ConsumerWidget {
         maxChildSize: 0.92,
         builder: (_, ctrl) => Container(
           decoration: const BoxDecoration(
-            color: Color(0xFF141920),
+            color: _bg,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          child: Column(
-            children: [
-              // handle
-              Container(
-                margin: const EdgeInsets.only(top: 10, bottom: 6),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF3A4151),
-                  borderRadius: BorderRadius.circular(2),
+          child: Column(children: [
+            // handle
+            Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 6),
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: _divider, borderRadius: BorderRadius.circular(2)),
+            ),
+            // header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: Row(children: [
+                Container(
+                  width: 44, height: 44,
+                  decoration: const BoxDecoration(color: _surface, shape: BoxShape.circle),
+                  alignment: Alignment.center,
+                  child: Text(anchor.typeEmoji, style: const TextStyle(fontSize: 22)),
                 ),
-              ),
-              // header
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                child: Row(
+                const SizedBox(width: 12),
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF2A2A2A),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(anchor.typeEmoji,
-                          style: const TextStyle(fontSize: 22)),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('מה מתחבר ל...',
-                              style: TextStyle(
-                                  color: Color(0xFF9AA3B2), fontSize: 11)),
-                          Text(anchor.nameHe,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700)),
-                        ],
-                      ),
-                    ),
-                    // gender tag
-                    if (anchor.connectionGender != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: _genderColor(anchor.connectionGender)
-                              .withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                              color: _genderColor(anchor.connectionGender)
-                                  .withOpacity(0.5)),
-                        ),
-                        child: Text(
-                          _genderLabel(anchor.connectionGender),
-                          style: TextStyle(
-                            color: _genderColor(anchor.connectionGender),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
+                    const Text('מה מתחבר ל...',
+                        style: TextStyle(color: _sub, fontSize: 11)),
+                    Text(anchor.nameHe, maxLines: 1, overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: _title, fontSize: 14, fontWeight: FontWeight.w700)),
                   ],
-                ),
-              ),
-              const Divider(height: 1, color: Color(0xFF252B36)),
-              // count
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                child: Row(
-                  children: [
-                    Text(
-                      matches.isEmpty
-                          ? 'לא נמצאו מוצרים תואמים'
-                          : '${matches.length} מוצרים תואמים',
-                      style: TextStyle(
-                        color: matches.isEmpty
-                            ? const Color(0xFF9AA3B2)
-                            : const Color(0xFF3DD9B0),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
+                )),
+                if (anchor.connectionGender != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: _gColor(anchor.connectionGender).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: _gColor(anchor.connectionGender).withOpacity(0.4)),
                     ),
-                  ],
-                ),
-              ),
-              if (matches.isEmpty)
-                const Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('⊘',
-                            style: TextStyle(
-                                fontSize: 48, color: Color(0xFF3A4151))),
-                        SizedBox(height: 12),
-                        Text('אין מוצרים בקטלוג שמתחברים לפריט זה',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Color(0xFF9AA3B2), fontSize: 13)),
-                      ],
-                    ),
+                    child: Text(_gLbl(anchor.connectionGender),
+                        style: TextStyle(
+                            color: _gColor(anchor.connectionGender),
+                            fontSize: 12, fontWeight: FontWeight.w700)),
                   ),
-                )
-              else
-                Expanded(
-                  child: ListView.separated(
-                    controller: ctrl,
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    itemCount: matches.length,
-                    separatorBuilder: (_, __) => const Divider(
-                        height: 1, indent: 76, color: Color(0xFF2A2A2A)),
-                    itemBuilder: (ctx, i) {
-                      final p = matches[i];
-                      final isFav = ref
-                          .watch(productFavoritesProvider)
-                          .contains(p.sku);
-                      final g = p.connectionGender;
-                      return InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                          showLipskeyProductSheet(
-                            ctx,
-                            p,
-                            kLipskeyCatalog
-                                .where(
-                                    (x) => x.categoryHe == p.categoryHe)
-                                .toList(),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 10),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF2A2A2A),
-                                  shape: BoxShape.circle,
-                                ),
-                                alignment: Alignment.center,
-                                child: p.imageAsset != null
-                                    ? ClipOval(
-                                        child: Image.asset(p.imageAsset!,
-                                            width: 44,
-                                            height: 44,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) =>
-                                                Text(p.typeEmoji,
-                                                    style: const TextStyle(
-                                                        fontSize: 22))))
-                                    : Text(p.typeEmoji,
-                                        style: const TextStyle(
-                                            fontSize: 22)),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(p.nameHe,
-                                              maxLines: 1,
-                                              overflow:
-                                                  TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 14,
-                                                  fontWeight:
-                                                      FontWeight.w600)),
-                                        ),
-                                        if (g != null)
-                                          Text(_genderLabel(g),
-                                              style: TextStyle(
-                                                  color: _genderColor(g),
-                                                  fontSize: 11,
-                                                  fontWeight:
-                                                      FontWeight.w600)),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      p.connectionSizes
-                                          .map((s) => 'DN$s')
-                                          .join(' · '),
-                                      style: const TextStyle(
-                                          color: Color(0xFF888888),
-                                          fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () => ref
-                                    .read(productFavoritesProvider.notifier)
-                                    .toggle(p.sku),
-                                child: Icon(
-                                  isFav
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
-                                  size: 20,
-                                  color: isFav
-                                      ? const Color(0xFFFF4D6D)
-                                      : const Color(0xFF3A3A3A),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+              ]),
+            ),
+            const Divider(height: 1, color: _divider),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Row(children: [
+                Text(
+                  matches.isEmpty ? 'לא נמצאו מוצרים תואמים' : '${matches.length} מוצרים תואמים',
+                  style: TextStyle(
+                    color: matches.isEmpty ? _sub : const Color(0xFF059669),
+                    fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+              ]),
+            ),
+            if (matches.isEmpty)
+              const Expanded(child: Center(child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('⊘', style: TextStyle(fontSize: 48, color: _divider)),
+                  SizedBox(height: 12),
+                  Text('אין מוצרים בקטלוג שמתחברים לפריט זה',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: _sub, fontSize: 13)),
+                ],
+              )))
+            else
+              Expanded(child: ListView.separated(
+                controller: ctrl,
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                itemCount: matches.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(height: 1, indent: 72, color: _divider),
+                itemBuilder: (ctx2, i) {
+                  final p = matches[i];
+                  final isFav = ref.watch(productFavoritesProvider).contains(p.sku);
+                  return InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                      showLipskeyProductSheet(ctx2, p,
+                          kLipskeyCatalog.where((x) => x.categoryHe == p.categoryHe).toList());
                     },
-                  ),
-                ),
-              SizedBox(
-                  height: MediaQuery.of(context).padding.bottom + 8),
-            ],
-          ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      child: Row(children: [
+                        Container(
+                          width: 44, height: 44,
+                          decoration: const BoxDecoration(color: _surface, shape: BoxShape.circle),
+                          alignment: Alignment.center,
+                          child: p.imageAsset != null
+                              ? ClipOval(child: Image.asset(p.imageAsset!,
+                                  width: 44, height: 44, fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      Text(p.typeEmoji, style: const TextStyle(fontSize: 20))))
+                              : Text(p.typeEmoji, style: const TextStyle(fontSize: 20)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              Expanded(child: Text(p.nameHe,
+                                  maxLines: 1, overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      color: _title, fontSize: 14, fontWeight: FontWeight.w600))),
+                              if (p.connectionGender != null)
+                                Text(_gLbl(p.connectionGender),
+                                    style: TextStyle(
+                                        color: _gColor(p.connectionGender),
+                                        fontSize: 11, fontWeight: FontWeight.w600)),
+                            ]),
+                            const SizedBox(height: 2),
+                            Text(p.connectionSizes.map((s) => 'DN$s').join(' · '),
+                                style: const TextStyle(color: _sub, fontSize: 12)),
+                          ],
+                        )),
+                        GestureDetector(
+                          onTap: () => ref.read(productFavoritesProvider.notifier).toggle(p.sku),
+                          child: Icon(isFav ? Icons.favorite : Icons.favorite_border,
+                              size: 20,
+                              color: isFav ? const Color(0xFFEF4444) : _divider),
+                        ),
+                      ]),
+                    ),
+                  );
+                },
+              )),
+            SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+          ]),
         ),
       ),
     );
