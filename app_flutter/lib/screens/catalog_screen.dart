@@ -2574,9 +2574,9 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
     super.dispose();
   }
 
-  Widget _crumb(int i) {
+  // Active chip: pressed orange, title ellipsizes so the X stays visible.
+  Widget _crumb(int i, bool active) {
     final node = widget.path[i];
-    final active = i == widget.path.length - 1;
     if (active) {
       return Container(
         padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
@@ -2587,12 +2587,16 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              node.title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+            Flexible(
+              child: Text(
+                node.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
             const SizedBox(width: 6),
@@ -2616,6 +2620,8 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
         ),
         child: Text(
           node.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: Color(0xFF6E6E73),
             fontSize: 13,
@@ -2654,24 +2660,21 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
             tooltip: 'חזרה',
             onPressed: widget.onBack,
           ),
-          // Breadcrumb of the drill path — ancestors first (scrolls if long).
+          // Breadcrumb of the drill path — every chip flexes/ellipsizes so the
+          // active chip's X is always visible (no clipping, no scroll).
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (var i = 0; i < widget.path.length; i++) ...[
-                    if (i > 0)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 2),
-                        child: Icon(Icons.chevron_left,
-                            color: Color(0xFF999999), size: 16),
-                      ),
-                    _crumb(i),
-                  ],
+            child: Row(
+              children: [
+                for (var i = 0; i < widget.path.length; i++) ...[
+                  if (i > 0)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 2),
+                      child: Icon(Icons.chevron_left,
+                          color: Color(0xFF999999), size: 16),
+                    ),
+                  Flexible(child: _crumb(i, i == widget.path.length - 1)),
                 ],
-              ),
+              ],
             ),
           ),
           const SizedBox(width: 4),
