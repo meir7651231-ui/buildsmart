@@ -9,8 +9,8 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 
 /// Recursive drill screen — renders a single level of the catalog tree.
-/// If [node] has children → show child grid (drill deeper on tap).
-/// If [node] is a leaf → show its brand grid (open BrandProductsScreen).
+/// If [node] has children → show child list (drill deeper on tap).
+/// If [node] is a leaf → show its brand list (open BrandProductsScreen).
 /// [rootNodes] = top-level entry (when [node] is null).
 class CatalogDrillScreen extends StatelessWidget {
   const CatalogDrillScreen({super.key, this.node, this.path = const []});
@@ -38,69 +38,19 @@ class CatalogDrillScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
-        foregroundColor: const Color(0xFF1A1A1A),
-        elevation: 0,
-        title: Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
-        bottom: path.isEmpty
-            ? null
-            : PreferredSize(
-                preferredSize: const Size.fromHeight(32),
-                child: _Breadcrumb(path: path, current: node!.title),
-              ),
-      ),
-      body: !isRoot && node!.isLeaf
-          ? _BrandsView(node: node!)
-          : _CategoryGrid(
-              nodes: children,
-              parentPath: isRoot ? const [] : [...path, node!],
-            ),
-    );
-  }
-}
-
-// ── Breadcrumb at the top ─────────────────────────────────────────────────
-class _Breadcrumb extends StatelessWidget {
-  const _Breadcrumb({required this.path, required this.current});
-  final List<CatalogNode> path;
-  final String current;
-
-  @override
-  Widget build(BuildContext context) {
-    final parts = [...path.map((n) => n.title), current];
-    return Container(
-      color: const Color(0xFFFFFFFF),
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      alignment: AlignmentDirectional.centerStart,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        reverse: true,
-        child: Row(
+      body: SafeArea(
+        bottom: false,
+        child: Column(
           children: [
-            for (var i = 0; i < parts.length; i++) ...[
-              if (i > 0)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6),
-                  child: Icon(Icons.chevron_left,
-                      color: Color(0xFF666666), size: 14),
-                ),
-              Text(
-                parts[i],
-                style: TextStyle(
-                  color: i == parts.length - 1
-                      ? const Color(0xFF1A1A1A)
-                      : const Color(0xFF888888),
-                  fontSize: 12,
-                  fontWeight: i == parts.length - 1
-                      ? FontWeight.w700
-                      : FontWeight.w400,
-                ),
-              ),
-            ],
+            _DrillBar(title: title),
+            Expanded(
+              child: !isRoot && node!.isLeaf
+                  ? _BrandsView(node: node!)
+                  : _CategoryList(
+                      nodes: children,
+                      parentPath: isRoot ? const [] : [...path, node!],
+                    ),
+            ),
           ],
         ),
       ),
@@ -108,9 +58,76 @@ class _Breadcrumb extends StatelessWidget {
   }
 }
 
-// ── Category grid (internal nodes) ────────────────────────────────────────
-class _CategoryGrid extends StatelessWidget {
-  const _CategoryGrid({required this.nodes, required this.parentPath});
+// ── Fixed top drill bar — search-pill look, but a navigation control ───────
+// Back button (one level up) + the current category as a pressed orange chip
+// with an X that cancels the whole drill (pops back to the catalog).
+class _DrillBar extends StatelessWidget {
+  const _DrillBar({required this.title});
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      height: 48,
+      decoration: BoxDecoration(
+        color: const Color(0xFFE7E7EA),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back,
+                color: Color(0xFF555555), size: 20),
+            tooltip: 'חזרה',
+            onPressed: () => Navigator.maybePop(context),
+          ),
+          Expanded(
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+                decoration: BoxDecoration(
+                  color: BsTokens.brand,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () =>
+                          Navigator.of(context).popUntil((r) => r.isFirst),
+                      child: const Icon(Icons.close,
+                          color: Colors.white, size: 16),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Category list (internal nodes) — rows styled like the main catalog ─────
+class _CategoryList extends StatelessWidget {
+  const _CategoryList({required this.nodes, required this.parentPath});
   final List<CatalogNode> nodes;
   final List<CatalogNode> parentPath;
 
@@ -124,18 +141,12 @@ class _CategoryGrid extends StatelessWidget {
         ),
       );
     }
-    return GridView.builder(
-      padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1.1,
-      ),
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
       itemCount: nodes.length,
       itemBuilder: (_, i) {
         final n = nodes[i];
-        return _CategoryCard(
+        return _CategoryRow(
           node: n,
           onTap: () => _onNodeTap(context, n, parentPath),
         );
@@ -184,8 +195,8 @@ class _CategoryGrid extends StatelessWidget {
   }
 }
 
-class _CategoryCard extends StatelessWidget {
-  const _CategoryCard({required this.node, required this.onTap});
+class _CategoryRow extends StatelessWidget {
+  const _CategoryRow({required this.node, required this.onTap});
   final CatalogNode node;
   final VoidCallback onTap;
 
@@ -205,67 +216,71 @@ class _CategoryCard extends StatelessWidget {
     } else {
       subtitle = '${node.brandIds.length} מותגים';
     }
-    return Material(
-      color: const Color(0xFFFFFFFF),
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFFE6E6EC),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(node.emoji, style: const TextStyle(fontSize: 36)),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    node.title,
-                    style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      height: 1.2,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+        border: Border.all(color: BsTokens.brand, width: 1),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF5F5F5),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 7, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: BsTokens.brand.withAlpha(30),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      subtitle,
-                      style: const TextStyle(
-                        color: BsTokens.brand,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
+                  alignment: Alignment.center,
+                  child: Text(node.emoji, style: const TextStyle(fontSize: 24)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        node.title,
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: BsTokens.brand.withAlpha(30),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          subtitle,
+                          style: const TextStyle(
+                            color: BsTokens.brand,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
+                ),
+                const Icon(Icons.chevron_left,
+                    color: Color(0xFFB0B0B8), size: 22),
+              ],
+            ),
           ),
         ),
       ),
