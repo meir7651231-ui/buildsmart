@@ -65,6 +65,9 @@ final catalogDrillCatProvider = StateProvider<String?>((_) => null);
 final catalogTreePathProvider =
     StateProvider<List<CatalogNode>>((_) => const []);
 
+/// Search query within the current drill level (scoped to its subtree).
+final catalogTreeQueryProvider = StateProvider<String>((_) => '');
+
 String _sortLabel(CatalogSort s) => switch (s) {
       CatalogSort.defaultSort => 'ברירת מחדל',
       CatalogSort.nameAZ      => 'א-ת',
@@ -2358,12 +2361,21 @@ class _TreeDrill extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final current = path.last;
-    final children = current.children;
+    final query = ref.watch(catalogTreeQueryProvider).trim();
 
-    void goBack() => ref.read(catalogTreePathProvider.notifier).state =
-        [...path]..removeLast();
-    void cancel() =>
-        ref.read(catalogTreePathProvider.notifier).state = const [];
+    void resetQuery() =>
+        ref.read(catalogTreeQueryProvider.notifier).state = '';
+
+    void goBack() {
+      resetQuery();
+      ref.read(catalogTreePathProvider.notifier).state = [...path]
+        ..removeLast();
+    }
+
+    void cancel() {
+      resetQuery();
+      ref.read(catalogTreePathProvider.notifier).state = const [];
+    }
 
     void openNode(CatalogNode n) {
       if (n.isLeaf) {
@@ -2386,26 +2398,42 @@ class _TreeDrill extends ConsumerWidget {
         }
         return;
       }
+      resetQuery();
       ref.read(catalogTreePathProvider.notifier).state = [...path, n];
     }
 
+    // Query empty → direct children. Otherwise → every descendant of the
+    // current node whose title matches (search scoped to the drill).
+    final rows = query.isEmpty
+        ? current.children
+        : _searchSubtree(current, query);
+
     return Column(
       children: [
-        _TreeDrillBar(title: current.title, onBack: goBack, onCancel: cancel),
+        _TreeDrillBar(
+          key: ValueKey(current.id),
+          title: current.title,
+          onBack: goBack,
+          onCancel: cancel,
+        ),
         Expanded(
-          child: children.isEmpty
-              ? const Center(
+          child: rows.isEmpty
+              ? Center(
                   child: Text(
-                    'אין קטגוריות',
-                    style: TextStyle(color: Color(0xFF888888), fontSize: 14),
+                    query.isEmpty
+                        ? 'אין קטגוריות'
+                        : 'לא נמצאו תוצאות עבור "$query"',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        color: Color(0xFF888888), fontSize: 14),
                   ),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
-                  itemCount: children.length,
+                  itemCount: rows.length,
                   itemBuilder: (_, i) => _TreeCatRow(
-                    node: children[i],
-                    onTap: () => openNode(children[i]),
+                    node: rows[i],
+                    onTap: () => openNode(rows[i]),
                   ),
                 ),
         ),
@@ -2414,8 +2442,27 @@ class _TreeDrill extends ConsumerWidget {
   }
 }
 
-class _TreeDrillBar extends StatelessWidget {
+/// All descendants of [node] whose title contains [query] (case-insensitive).
+List<CatalogNode> _searchSubtree(CatalogNode node, String query) {
+  final q = query.toLowerCase();
+  final out = <CatalogNode>[];
+  void walk(CatalogNode n) {
+    for (final c in n.children) {
+      if (c.title.toLowerCase().contains(q)) out.add(c);
+      walk(c);
+    }
+  }
+
+  walk(node);
+  return out;
+}
+
+// Fixed drill bar that doubles as a scoped search field: back-one-level +
+// the current category as a pressed orange chip (X cancels the drill) + a
+// text field that searches inside the current category's subtree.
+class _TreeDrillBar extends ConsumerStatefulWidget {
   const _TreeDrillBar({
+    super.key,
     required this.title,
     required this.onBack,
     required this.onCancel,
@@ -2426,7 +2473,37 @@ class _TreeDrillBar extends StatelessWidget {
   final VoidCallback onCancel;
 
   @override
+  ConsumerState<_TreeDrillBar> createState() => _TreeDrillBarState();
+}
+
+class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        TextEditingController(text: ref.read(catalogTreeQueryProvider));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Keep the field in sync when the query is cleared externally (navigation).
+    ref.listen<String>(catalogTreeQueryProvider, (_, next) {
+      if (next != _controller.text) {
+        _controller.text = next;
+        _controller.selection =
+            TextSelection.collapsed(offset: next.length);
+      }
+    });
+    final hasText = ref.watch(catalogTreeQueryProvider).isNotEmpty;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -2441,43 +2518,67 @@ class _TreeDrillBar extends StatelessWidget {
             icon: const Icon(Icons.arrow_back,
                 color: Color(0xFF555555), size: 20),
             tooltip: 'חזרה',
-            onPressed: onBack,
+            onPressed: widget.onBack,
           ),
-          Expanded(
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
-                decoration: BoxDecoration(
-                  color: BsTokens.brand,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
+          // Current category as a pressed chip with X to cancel the drill.
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 150),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+              decoration: BoxDecoration(
+                color: BsTokens.brand,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      widget.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    GestureDetector(
-                      onTap: onCancel,
-                      child: const Icon(Icons.close,
-                          color: Colors.white, size: 16),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 6),
+                  GestureDetector(
+                    onTap: widget.onCancel,
+                    child: const Icon(Icons.close,
+                        color: Colors.white, size: 16),
+                  ),
+                ],
               ),
             ),
           ),
+          const SizedBox(width: 6),
+          // Scoped search field.
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              textInputAction: TextInputAction.search,
+              onChanged: (v) =>
+                  ref.read(catalogTreeQueryProvider.notifier).state = v,
+              style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+              decoration: const InputDecoration(
+                hintText: 'חיפוש בקטגוריה...',
+                hintStyle: TextStyle(color: Color(0xFF888888), fontSize: 14),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+          if (hasText)
+            IconButton(
+              icon: const Icon(Icons.close, color: Color(0xFF888888), size: 18),
+              tooltip: 'נקה',
+              onPressed: () =>
+                  ref.read(catalogTreeQueryProvider.notifier).state = '',
+            ),
         ],
       ),
     );
