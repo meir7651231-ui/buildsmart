@@ -1714,16 +1714,16 @@ class _CatalogList extends StatelessWidget {
     return ListView.separated(
       controller: scrollCtrl,
       key: const Key('catalog-list'),
-      itemCount: kCatalogCats.length + 2,
-      separatorBuilder: (_, i) => i < 1
-          ? const SizedBox(height: 4)
-          : const Divider(height: 1, indent: 76, color: Color(0xFF2A2A2A)),
+      itemCount: kCatalogCats.length,
+      separatorBuilder: (_, __) => const Divider(
+        height: 1,
+        indent: 76,
+        color: Color(0xFF2A2A2A),
+      ),
       itemBuilder: (context, i) {
-        if (i == 0) return const _LipskeySupplierCard();
-        if (i == 1) return _FeaturedProductCard(product: kSmartProducts.first);
         return _CatalogRow(
-          cat: kCatalogCats[i - 2],
-          meta: _kMeta[i - 2],
+          cat: kCatalogCats[i],
+          meta: _kMeta[i],
         );
       },
     );
