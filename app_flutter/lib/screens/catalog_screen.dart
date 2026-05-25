@@ -3324,26 +3324,6 @@ class _SmartTreeCatList extends ConsumerWidget {
     final cats = kSmartTreeCats;
     return Column(
       children: [
-        // Header
-        Container(
-          color: const Color(0xFFFFFFFF),
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: const Row(
-            children: [
-              Text('🌳', style: TextStyle(fontSize: 20)),
-              SizedBox(width: 10),
-              Text(
-                'עץ חכם — בחר קטגוריה',
-                style: TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const Divider(height: 1, color: Color(0xFFF5F5F5)),
         Expanded(
           child: ListView.separated(
             itemCount: cats.length,
@@ -3351,7 +3331,9 @@ class _SmartTreeCatList extends ConsumerWidget {
                 const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
             itemBuilder: (_, i) {
               final cat = cats[i];
-              final count = smartProductsForCat(cat).length;
+              final prods = smartProductsForCat(cat);
+              final count = prods.length;
+              final desc = prods.map((p) => p.name).join(' · ');
               final emoji = _catEmojis[cat] ?? '📦';
               return InkWell(
                 onTap: () =>
@@ -3387,7 +3369,9 @@ class _SmartTreeCatList extends ConsumerWidget {
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              '$count מוצרים בעץ',
+                              desc.isEmpty ? '$count מוצרים בעץ' : desc,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 color: Color(0xFF888888),
                                 fontSize: 13,
@@ -3396,8 +3380,23 @@ class _SmartTreeCatList extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      const Icon(Icons.chevron_left,
-                          color: Color(0xFF555555), size: 20),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: BsTokens.brand,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '$count',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

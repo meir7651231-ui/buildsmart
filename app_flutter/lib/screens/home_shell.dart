@@ -175,13 +175,13 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
         message: 'BS',
         child: InkWell(
           onTap: () => _toggle(ref, OpenDial.bs),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                const Text(
                   'BuildSmart',
                   style: TextStyle(
                     color: BsTokens.brand,
@@ -189,21 +189,25 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     fontSize: 22,
                   ),
                 ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
-                    SizedBox(width: 4),
-                    Text(
-                      'v3.46 · 25.5.26 · קטלוג צלילה + facets',
-                      style: TextStyle(
-                        color: Color(0xFF4CAF50),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
+                if (tabIndex == 0 &&
+                    ref.watch(catalogSectionProvider) == 'עץ חכם')
+                  const _PulsingStatus(text: 'עץ חכם הופעל')
+                else
+                  const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
+                      SizedBox(width: 4),
+                      Text(
+                        'v3.46 · 25.5.26 · קטלוג צלילה + facets',
+                        style: TextStyle(
+                          color: Color(0xFF4CAF50),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -721,6 +725,54 @@ class _NewChatSheet extends StatelessWidget {
                 Navigator.pop(context);
                 showToast(context, '${c.label} — בבנייה');
               },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Pulsing green status shown in the app-bar logo area (e.g. when the
+/// "עץ חכם" section is active).
+class _PulsingStatus extends StatefulWidget {
+  const _PulsingStatus({required this.text});
+  final String text;
+
+  @override
+  State<_PulsingStatus> createState() => _PulsingStatusState();
+}
+
+class _PulsingStatusState extends State<_PulsingStatus>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 850),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0.35, end: 1).animate(
+        CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.circle, color: Color(0xFF22C55E), size: 7),
+          const SizedBox(width: 4),
+          Text(
+            widget.text,
+            style: const TextStyle(
+              color: Color(0xFF22C55E),
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
