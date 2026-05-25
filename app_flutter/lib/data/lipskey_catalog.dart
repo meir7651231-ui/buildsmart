@@ -109,12 +109,23 @@ class LipskeyCatalogProduct {
 
 final _dnTok = RegExp(r'DN\s?(\d+)|(\d+)/(\d+)|(\d+)["׳״]|\b(32|40|50|60|75|90|110|130|160|200)\b');
 
+/// Normalise unicode inch fractions so the size engine recognises them
+/// (צעד 22): 1¼ → 1.25 · 1½ → 1.5 · 2½ → 2.5 · ¾ → 0.75 ...
+String _expandInchFractions(String w) => w
+    .replaceAll('¼', '.25')
+    .replaceAll('½', '.5')
+    .replaceAll('¾', '.75')
+    .replaceAll('⅛', '.125')
+    .replaceAll('⅜', '.375')
+    .replaceAll('⅝', '.625')
+    .replaceAll('⅞', '.875');
+
 /// Atomic DN connection sizes from a product name (e.g. "75/50" → [75,50],
 /// "DN50" → [50]). Dimension-context only; ignores pack qty / length.
 List<String> lipskeyConnectionSizes(String name) {
   final out = <String>{};
   for (final raw in name.split(RegExp(r'\s+'))) {
-    final w = raw.trim();
+    var w = _expandInchFractions(raw.trim());
     final up = w.toUpperCase();
     if (up.startsWith('DN') && RegExp(r'\d').hasMatch(w)) {
       for (final part in up.replaceAll(RegExp(r'[^0-9/]'), '').split('/')) {
@@ -127,6 +138,8 @@ List<String> lipskeyConnectionSizes(String name) {
     } else if (w.contains('"') && RegExp(r'\d').hasMatch(w)) {
       final t = w.replaceAll('"', '');
       if (t.length >= 2) out.add(t);
+    } else if (RegExp(r'^\d*\.\d+$').hasMatch(w)) {
+      out.add(w); // inch decimal from a fraction (1.25 · 1.5 · 2.5)
     }
   }
   return out.toList();
