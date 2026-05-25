@@ -57,6 +57,7 @@ class LipskeyProductsScreen extends StatelessWidget {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           foregroundColor: cs.onSurface,
           elevation: 0,
+          scrolledUnderElevation: 2,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -72,7 +73,7 @@ class LipskeyProductsScreen extends StatelessWidget {
           ),
         ),
         body: ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
           itemCount: products.length,
           itemBuilder: (_, i) => _ProductRow(
             product: products[i],
@@ -158,13 +159,27 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       constraints: const BoxConstraints(minHeight: 138),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _open ? _brand : _line),
+        border: Border.all(
+          color: _open ? _brand : _line,
+          width: _open ? 1.5 : 0.8,
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.07),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                  spreadRadius: 0,
+                ),
+              ],
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -192,7 +207,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             fit: StackFit.expand,
             children: [
               Container(
-                color: Theme.of(context).colorScheme.surfaceContainerLow,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 alignment: Alignment.center,
                 child: p.imageAsset != null
                     ? Image.asset(p.imageAsset!,
