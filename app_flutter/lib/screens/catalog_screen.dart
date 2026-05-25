@@ -2015,9 +2015,10 @@ class _OverviewBlock extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 8, 4),
+          padding: const EdgeInsets.fromLTRB(0, 14, 16, 4),
           child: Row(
             children: [
+              const SizedBox(width: 16),
               Text(
                 title,
                 style: const TextStyle(
@@ -2029,6 +2030,11 @@ class _OverviewBlock extends StatelessWidget {
               const Spacer(),
               TextButton(
                 onPressed: onShowAll,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
