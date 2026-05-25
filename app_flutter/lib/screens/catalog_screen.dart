@@ -4761,7 +4761,6 @@ class _FavProductRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isFav = ref.watch(productFavoritesProvider).contains(product.sku);
     return ListTile(
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -4780,15 +4779,6 @@ class _FavProductRow extends ConsumerWidget {
               color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
       subtitle: Text(product.brand,
           style: const TextStyle(color: Color(0xFF9AA3B2), fontSize: 11)),
-      trailing: GestureDetector(
-        onTap: () =>
-            ref.read(productFavoritesProvider.notifier).toggle(product.sku),
-        child: Icon(
-          isFav ? Icons.favorite : Icons.favorite_border,
-          size: 20,
-          color: isFav ? const Color(0xFFFF4D6D) : const Color(0xFF3A4151),
-        ),
-      ),
       onTap: () => showLipskeyProductSheet(context, product,
           kLipskeyCatalog.where((p) => p.categoryHe == product.categoryHe).toList()),
     );

@@ -1,6 +1,5 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
-import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -301,7 +300,6 @@ class _Row extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isFav   = ref.watch(productFavoritesProvider).contains(product.sku);
     final matches = compatibleWith(product);
     final gender  = product.connectionGender;
     final sizes   = product.connectionSizes;
@@ -379,13 +377,6 @@ class _Row extends ConsumerWidget {
                 ]),
               ],
             )),
-            const SizedBox(width: 8),
-            // fav
-            GestureDetector(
-              onTap: () => ref.read(productFavoritesProvider.notifier).toggle(product.sku),
-              child: Icon(isFav ? Icons.favorite : Icons.favorite_border,
-                  size: 20, color: isFav ? const Color(0xFFEF4444) : _divider),
-            ),
           ]),
         ),
       ),
@@ -500,7 +491,6 @@ class CompatSheet extends ConsumerWidget {
                     const Divider(height: 1, indent: 72, color: _divider),
                 itemBuilder: (ctx2, i) {
                   final p = matches[i];
-                  final isFav = ref.watch(productFavoritesProvider).contains(p.sku);
                   return InkWell(
                     onTap: () {
                       Navigator.pop(context);
@@ -541,12 +531,6 @@ class CompatSheet extends ConsumerWidget {
                                 style: const TextStyle(color: _sub, fontSize: 12)),
                           ],
                         )),
-                        GestureDetector(
-                          onTap: () => ref.read(productFavoritesProvider.notifier).toggle(p.sku),
-                          child: Icon(isFav ? Icons.favorite : Icons.favorite_border,
-                              size: 20,
-                              color: isFav ? const Color(0xFFEF4444) : _divider),
-                        ),
                       ]),
                     ),
                   );
