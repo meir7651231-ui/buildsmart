@@ -11,6 +11,7 @@ import 'package:buildsmart/screens/search_dial_widget.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/screens/store_settings_screen.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -83,6 +84,60 @@ class HomeShell extends ConsumerWidget {
           resetAllDials(ref);
           ref.read(mainTabProvider.notifier).state = i;
         },
+      ),
+      floatingActionButton:
+          (open == OpenDial.none && tabIndex != 3) ? const _CartFab() : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+    );
+  }
+}
+
+/// Floating cart button — visible whenever the cart has items (and no dial is
+/// open and we're not already on the store tab). Tapping jumps to the store.
+class _CartFab extends ConsumerWidget {
+  const _CartFab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lines = ref.watch(smartCartProvider);
+    if (lines.isEmpty) return const SizedBox.shrink();
+    final count = lines.fold<int>(0, (sum, l) => sum + l.productQty);
+
+    return FloatingActionButton(
+      onPressed: () {
+        resetAllDials(ref);
+        ref.read(mainTabProvider.notifier).state = 3;
+      },
+      backgroundColor: BsTokens.brand,
+      foregroundColor: Colors.white,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          const Icon(Icons.shopping_cart),
+          Positioned(
+            top: -8,
+            right: -10,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              constraints: const BoxConstraints(minWidth: 18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: BsTokens.brand, width: 1.5),
+              ),
+              child: Text(
+                '$count',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: BsTokens.brand,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
