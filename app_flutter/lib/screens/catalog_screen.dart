@@ -71,6 +71,36 @@ final catalogTreeQueryProvider = StateProvider<String>((_) => '');
 /// Selected facet labels (in order) while drilling inside a faceted leaf.
 final catalogFacetProvider = StateProvider<List<String>>((_) => const []);
 
+/// Sort order for the products listed beneath the drill rows.
+enum ProductSort { byOrder, nameAZ, nameZA, sku }
+
+String _productSortLabel(ProductSort s) => switch (s) {
+      ProductSort.byOrder => 'ברירת מחדל',
+      ProductSort.nameAZ => 'שם א-ת',
+      ProductSort.nameZA => 'שם ת-א',
+      ProductSort.sku => 'מק"ט',
+    };
+
+final catalogProductSortProvider =
+    StateProvider<ProductSort>((_) => ProductSort.byOrder);
+
+List<LipskeyCatalogProduct> _sortProducts(
+    List<LipskeyCatalogProduct> list, ProductSort s) {
+  if (s == ProductSort.byOrder) return list;
+  final out = [...list];
+  switch (s) {
+    case ProductSort.nameAZ:
+      out.sort((a, b) => a.nameHe.compareTo(b.nameHe));
+    case ProductSort.nameZA:
+      out.sort((a, b) => b.nameHe.compareTo(a.nameHe));
+    case ProductSort.sku:
+      out.sort((a, b) => a.sku.compareTo(b.sku));
+    case ProductSort.byOrder:
+      break;
+  }
+  return out;
+}
+
 /// One facet option: a [label] chip and the [keyword] that must appear in the
 /// product name. A null [keyword] means "none of the other keywords in the
 /// group" (e.g. כללי = not-למקלחת).
@@ -2570,6 +2600,8 @@ class _TreeDrill extends ConsumerWidget {
       }
     }
 
+    products = _sortProducts(products, ref.watch(catalogProductSortProvider));
+
     final body = special ??
         CustomScrollView(
           slivers: [
@@ -2685,12 +2717,13 @@ class _FacetRow extends StatelessWidget {
 
 
 // Header above the products listed beneath the drill rows.
-class _ProductsHeader extends StatelessWidget {
+class _ProductsHeader extends ConsumerWidget {
   const _ProductsHeader({required this.count});
   final int count;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sort = ref.watch(catalogProductSortProvider);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
@@ -2716,6 +2749,67 @@ class _ProductsHeader extends StatelessWidget {
                 color: BsTokens.brand,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const Spacer(),
+          // Sort-by button on the opposite side of the header.
+          PopupMenuButton<ProductSort>(
+            tooltip: 'מיון לפי',
+            color: Colors.white,
+            position: PopupMenuPosition.under,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            onSelected: (s) =>
+                ref.read(catalogProductSortProvider.notifier).state = s,
+            itemBuilder: (_) => [
+              for (final s in ProductSort.values)
+                PopupMenuItem<ProductSort>(
+                  value: s,
+                  child: Row(
+                    children: [
+                      Icon(
+                        s == sort ? Icons.check : Icons.swap_vert,
+                        size: 18,
+                        color: s == sort
+                            ? BsTokens.brand
+                            : const Color(0xFF888888),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        _productSortLabel(s),
+                        style: TextStyle(
+                          color: const Color(0xFF1A1A1A),
+                          fontSize: 14,
+                          fontWeight:
+                              s == sort ? FontWeight.w700 : FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: BsTokens.brand, width: 1),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.swap_vert, size: 16, color: BsTokens.brand),
+                  const SizedBox(width: 4),
+                  Text(
+                    'מיון לפי',
+                    style: const TextStyle(
+                      color: BsTokens.brand,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
