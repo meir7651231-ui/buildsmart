@@ -396,6 +396,8 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                     fontSize: 12,
                                     fontStyle: FontStyle.italic)),
                           ],
+                          const SizedBox(height: 8),
+                          _StructuredChips(parsed: p.parsedName),
                         ],
                       ),
                     ),
@@ -1443,3 +1445,57 @@ Widget _SpecRow(String emoji, String label, String value) => Padding(
         ],
       ),
     );
+
+/// Structured decomposition of the name (צעד 71): סוג · תת-סוג · מותג · גוון.
+/// Each facet is a labelled chip; absent facets are omitted, so a bare name
+/// shows nothing rather than empty placeholders.
+class _StructuredChips extends StatelessWidget {
+  const _StructuredChips({required this.parsed});
+
+  final ({String? type, String? subtype, String? brand, String? variant})
+      parsed;
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = <({String label, String value, Color color})>[
+      if (parsed.type != null)
+        (label: 'סוג', value: parsed.type!, color: const Color(0xFF3DD9B0)),
+      if (parsed.subtype != null)
+        (label: 'תת-סוג', value: parsed.subtype!, color: const Color(0xFF7FD0FF)),
+      if (parsed.brand != null)
+        (label: 'דגם', value: parsed.brand!, color: const Color(0xFFFF9D4D)),
+      if (parsed.variant != null)
+        (label: 'גוון', value: parsed.variant!, color: const Color(0xFFC9A7FF)),
+    ];
+    if (chips.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        for (final c in chips)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: c.color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(7),
+              border: Border.all(color: c.color.withValues(alpha: 0.35)),
+            ),
+            child: RichText(
+              text: TextSpan(children: [
+                TextSpan(
+                    text: '${c.label} ',
+                    style: const TextStyle(
+                        color: Colors.white38, fontSize: 10)),
+                TextSpan(
+                    text: c.value,
+                    style: TextStyle(
+                        color: c.color,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700)),
+              ]),
+            ),
+          ),
+      ],
+    );
+  }
+}

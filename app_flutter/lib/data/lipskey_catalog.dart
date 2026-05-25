@@ -89,6 +89,35 @@ class LipskeyCatalogProduct {
     return color; // fall back to the structured field
   }
 
+  /// Product type — the leading kind-noun (מחסום / ברך / מצמד …). Hebrew names
+  /// lead with the type, so the first matching token wins (צעד 69).
+  String? get productType {
+    for (final t in kLipskeyTypes) {
+      if (nameHe.contains(t)) return t;
+    }
+    return null;
+  }
+
+  /// Subtype qualifier — adjective that narrows the type (אמריקאי / נסתר /
+  /// כפול …), excluding gender which the engine handles separately (צעד 69).
+  String? get productSubtype {
+    for (final s in kLipskeySubtypes) {
+      if (nameHe.contains(s)) return s;
+    }
+    return null;
+  }
+
+  /// Decomposition of the name into {type, subtype, brand, variant} (צעד 69).
+  /// brand→[brandModel], variant→[colorVariant] reuse the existing getters so
+  /// there is one source of truth per facet.
+  ({String? type, String? subtype, String? brand, String? variant})
+      get parsedName => (
+            type: productType,
+            subtype: productSubtype,
+            brand: brandModel,
+            variant: colorVariant,
+          );
+
   /// Structured sale-units: בודד=1, ארגז=qtyPack, משטח=qtyPallet (צעד 76).
   Map<String, int> get saleUnits => {
         'בודד': 1,
@@ -179,6 +208,29 @@ const List<String> kLipskeyModels = [
   'גרנדה', 'דולפין', 'טרפז', 'קונקורד', 'אוסלו', 'כרמל', 'אדיר', 'הרמון',
   'ספיר', 'ברקת', 'יהלום', 'טיטאן', 'טופז', 'כינרת', 'אקווה', 'איביזה',
   'גליל', 'בתא', 'פולו', 'סיגמא',
+];
+
+/// Canonical product-type nouns, ordered most-specific first so multi-word
+/// types ("מיכל הדחה") win over their prefix ("מיכל"). Used by [productType].
+const List<String> kLipskeyTypes = [
+  'מיכל הדחה', 'ראש מקלחת', 'אל חזור', 'מחסום', 'סיפון', 'מאסף', 'קולט',
+  'מסעף', 'הסתעפות', 'מצמד', 'מחבר', 'מופה', 'ניפל', 'רקורד', 'בושינג',
+  'ברך', 'זווית', 'צינור', 'צנרת', 'מכסה', 'רשת', 'מושב', 'אטם', 'פקק',
+  'אום', 'מאריך', 'חבק', 'אומגה', 'עוגן', 'מזלף', 'מקלח', 'זרוע', 'מחלק',
+  'ארון', 'ידית', 'מוט', 'קולב', 'מחזיק', 'סבונייה', 'ברז', 'אביק', 'תעלה',
+  'מצוף', 'שעון', 'מקטין', 'משחרר', 'דוד', 'פיה', 'מסנן', 'משפך', 'ונטיל',
+  'כובע', 'הגבהה', 'מערכת', 'מצרות', 'גרונג', 'רוזטה', 'פלנגה', 'תפס',
+  'דרך', 'גמיש', 'שרשרת', 'וסת', 'ברז גן', 'מצרה', 'מנגנון', 'זקיף', 'סט',
+  'זקף',
+];
+
+/// Subtype qualifiers — adjectives that narrow a type. Gender (זכר/נקבה) is
+/// intentionally excluded; the compatibility engine owns it. Used by
+/// [productSubtype].
+const List<String> kLipskeySubtypes = [
+  'אמריקאי', 'נסתר', 'גלוי', 'כפול', 'יחיד', 'מתכוונן', 'גמיש', 'קשיח',
+  'מרובע', 'עגול', 'פינתי', 'קיר', 'רצפה', 'נירוסטה', 'תחתון', 'עליון',
+  'אנכי', 'אופקי', 'משולב', 'מוגבה', 'נמוך',
 ];
 
 const List<String> kLipskeyColors = [

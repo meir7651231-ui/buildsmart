@@ -226,6 +226,23 @@ List<TestResult> testCatalog() {
     name: 'saleUnits כולל לפחות "בודד"',
     pass: products.every((p) => p.saleUnits.containsKey('בודד')),
   ));
+  // צעדים 69–71 — מנתח שם מובנה {type, subtype, brand, variant}
+  final typed = products.where((p) => p.productType != null).length;
+  model.add(TestCheck(
+    name: 'מנתח-שם מזהה סוג ל-≥80% מהמוצרים (productType)',
+    pass: typed >= (products.length * 0.8).floor(),
+    expected: '≥${(products.length * 0.8).floor()}',
+    got: '$typed/${products.length}',
+  ));
+  model.add(TestCheck(
+    name: 'parsedName מחזיר רשומה עם 4 פאות',
+    pass: () {
+      final r = products.first.parsedName;
+      return r.type == products.first.productType &&
+          r.brand == products.first.brandModel &&
+          r.variant == products.first.colorVariant;
+    }(),
+  ));
   results.add(TestResult(
     id: 'catalog:model',
     category: TestCategory.catalog,
