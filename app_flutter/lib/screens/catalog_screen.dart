@@ -57,6 +57,9 @@ final recentSearchesProvider = StateProvider<List<String>>((_) => []);
 /// Currently selected category in the smart tree section. Null = show categories.
 final smartTreeCatProvider = StateProvider<String?>((_) => null);
 
+/// Search query within the active smart-tree category's product list.
+final smartTreeQueryProvider = StateProvider<String>((_) => '');
+
 /// Currently selected category in the "קטגוריות" drill. Null = show all 11 cats.
 final catalogDrillCatProvider = StateProvider<String?>((_) => null);
 
@@ -294,6 +297,15 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     final treePath = ref.watch(catalogTreePathProvider);
     if (treePath.isNotEmpty) {
       return _TreeDrill(path: treePath);
+    }
+
+    // Smart-tree product list — the green drill bar (with its own search)
+    // takes over, hiding the search bar and section chips.
+    if (ref.watch(catalogSectionProvider) == 'עץ חכם') {
+      final smartCat = ref.watch(smartTreeCatProvider);
+      if (smartCat != null) {
+        return _SmartTreeProductList(cat: smartCat);
+      }
     }
 
     // Force header visible whenever search panel opens.
@@ -3132,14 +3144,12 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
             tooltip: 'חזרה',
             onPressed: widget.onBack,
           ),
-          // Breadcrumb of the drill path — every chip flexes/ellipsizes so the
-          // active chip's X is always visible (no clipping, no scroll).
-          // Breadcrumb scrolls horizontally; reverse keeps the active chip (and
-          // its X) in view by default, with older ancestors reachable by swipe.
+          // Breadcrumb of the drill path — root first on the right, deeper
+          // levels to the left (natural RTL order); scrolls if it overflows.
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              reverse: true,
+              reverse: false,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -3409,16 +3419,56 @@ class _SmartTreeCatList extends ConsumerWidget {
   }
 }
 
-class _SmartTreeProductList extends ConsumerWidget {
+class _SmartTreeProductList extends ConsumerStatefulWidget {
   const _SmartTreeProductList({required this.cat});
 
   final String cat;
 
+  static void _openProductSheet(BuildContext context, SmartProduct p) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFFFFFFF),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _SmartProductSheet(product: p),
+    );
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final products = smartProductsForCat(cat);
-    void back() => ref.read(smartTreeCatProvider.notifier).state = null;
+  ConsumerState<_SmartTreeProductList> createState() =>
+      _SmartTreeProductListState();
+}
+
+class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
+  late final TextEditingController _searchCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchCtrl = TextEditingController(text: ref.read(smartTreeQueryProvider));
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _back() {
+    ref.read(smartTreeQueryProvider.notifier).state = '';
+    ref.read(smartTreeCatProvider.notifier).state = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     const green = Color(0xFF22C55E);
+    final query = ref.watch(smartTreeQueryProvider).trim();
+    final all = smartProductsForCat(widget.cat);
+    final products = query.isEmpty
+        ? all
+        : all.where((p) => p.name.contains(query)).toList();
     return Column(
       children: [
         // Drill bar — back + green active category chip with X.
@@ -3436,41 +3486,55 @@ class _SmartTreeProductList extends ConsumerWidget {
                 icon: const Icon(Icons.arrow_back,
                     color: Color(0xFF555555), size: 20),
                 tooltip: 'חזרה',
-                onPressed: back,
+                onPressed: _back,
               ),
-              Expanded(
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
-                    decoration: BoxDecoration(
-                      color: green,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('🌳 ', style: TextStyle(fontSize: 13)),
-                        Flexible(
-                          child: Text(
-                            cat,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ),
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+                  decoration: BoxDecoration(
+                    color: green,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('🌳 ', style: TextStyle(fontSize: 13)),
+                      Flexible(
+                        child: Text(
+                          widget.cat,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        GestureDetector(
-                          onTap: back,
-                          child: const Icon(Icons.close,
-                              color: Colors.white, size: 16),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 6),
+                      GestureDetector(
+                        onTap: _back,
+                        child: const Icon(Icons.close,
+                            color: Colors.white, size: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: TextField(
+                  controller: _searchCtrl,
+                  textInputAction: TextInputAction.search,
+                  onChanged: (v) =>
+                      ref.read(smartTreeQueryProvider.notifier).state = v,
+                  style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+                  decoration: const InputDecoration(
+                    hintText: 'חיפוש',
+                    hintStyle: TextStyle(color: Color(0xFF888888), fontSize: 14),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
@@ -3478,7 +3542,16 @@ class _SmartTreeProductList extends ConsumerWidget {
           ),
         ),
         Expanded(
-          child: ListView.builder(
+          child: products.isEmpty
+              ? Center(
+                  child: Text(
+                    'לא נמצאו תוצאות עבור "$query"',
+                    textAlign: TextAlign.center,
+                    style:
+                        const TextStyle(color: Color(0xFF888888), fontSize: 14),
+                  ),
+                )
+              : ListView.builder(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
             itemCount: products.length,
             itemBuilder: (_, i) {
@@ -3495,7 +3568,8 @@ class _SmartTreeProductList extends ConsumerWidget {
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () => _openProductSheet(context, p),
+                    onTap: () =>
+                        _SmartTreeProductList._openProductSheet(context, p),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 12),
@@ -3565,18 +3639,6 @@ class _SmartTreeProductList extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-
-  static void _openProductSheet(BuildContext context, SmartProduct p) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFFFFFFFF),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => _SmartProductSheet(product: p),
     );
   }
 }
