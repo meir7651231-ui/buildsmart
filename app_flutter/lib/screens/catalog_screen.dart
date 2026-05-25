@@ -2225,12 +2225,16 @@ class _CatalogRow extends ConsumerWidget {
     final hasBadge = meta.badge > 0;
     return InkWell(
       onTap: () {
-        final node = _findCatalogTreeNodeByTitle(cat.title);
-        if (node != null) {
-          ref.read(catalogTreePathProvider.notifier).state = [node];
-        } else {
-          showToast(context, '${cat.title} — בבנייה');
-        }
+        // Categories without tree data drill into a designed "coming soon"
+        // screen via a childless placeholder node, so the experience stays
+        // consistent across every main category.
+        final node = _findCatalogTreeNodeByTitle(cat.title) ??
+            CatalogNode(
+              id: 'placeholder.${cat.title}',
+              title: cat.title,
+              emoji: cat.emoji,
+            );
+        ref.read(catalogTreePathProvider.notifier).state = [node];
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -2402,6 +2406,9 @@ class _TreeDrill extends ConsumerWidget {
       ref.read(catalogTreePathProvider.notifier).state = [...path, n];
     }
 
+    // Childless node = category without tree data → designed "coming soon".
+    final comingSoon = current.children.isEmpty;
+
     // Query empty → direct children. Otherwise → every descendant of the
     // current node whose title matches (search scoped to the drill).
     final rows = query.isEmpty
@@ -2417,27 +2424,91 @@ class _TreeDrill extends ConsumerWidget {
           onCancel: cancel,
         ),
         Expanded(
-          child: rows.isEmpty
-              ? Center(
-                  child: Text(
-                    query.isEmpty
-                        ? 'אין קטגוריות'
-                        : 'לא נמצאו תוצאות עבור "$query"',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        color: Color(0xFF888888), fontSize: 14),
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
-                  itemCount: rows.length,
-                  itemBuilder: (_, i) => _TreeCatRow(
-                    node: rows[i],
-                    onTap: () => openNode(rows[i]),
-                  ),
-                ),
+          child: comingSoon
+              ? _TreeComingSoon(node: current)
+              : rows.isEmpty
+                  ? Center(
+                      child: Text(
+                        'לא נמצאו תוצאות עבור "$query"',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            color: Color(0xFF888888), fontSize: 14),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+                      itemCount: rows.length,
+                      itemBuilder: (_, i) => _TreeCatRow(
+                        node: rows[i],
+                        onTap: () => openNode(rows[i]),
+                      ),
+                    ),
         ),
       ],
+    );
+  }
+}
+
+// Designed "coming soon" body for main categories that have no tree data yet.
+class _TreeComingSoon extends StatelessWidget {
+  const _TreeComingSoon({required this.node});
+  final CatalogNode node;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: BsTokens.brand.withAlpha(20),
+                shape: BoxShape.circle,
+                border: Border.all(color: BsTokens.brand, width: 1.5),
+              ),
+              alignment: Alignment.center,
+              child: Text(node.emoji, style: const TextStyle(fontSize: 44)),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              node.title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF1A1A1A),
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: BsTokens.brand,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Text(
+                'בקרוב',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'הקטגוריה הזו בבנייה — תת-קטגוריות ומוצרים יתווספו בקרוב.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
