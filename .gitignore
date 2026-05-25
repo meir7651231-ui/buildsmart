@@ -7,3 +7,8 @@ scripts/*.bak
 scripts/catalog_kpi.json
 scripts/fix_log.csv
 scripts/suspects.csv
+node_modules/
+package.json
+package-lock.json
+*.mjs
+calibrate.mjs
