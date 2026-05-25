@@ -101,7 +101,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tabIndex = ref.watch(mainTabProvider);
     return AppBar(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFFFFFFFF),
       elevation: 0,
       automaticallyImplyLeading: false,
       titleSpacing: BsTokens.space4,
@@ -147,14 +147,14 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
         // Search icon — appears when the active tab's header is scrolled away.
         if (ref.watch(tabHeaderHiddenProvider))
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.white70),
+            icon: const Icon(Icons.search, color: Colors.black54),
             tooltip: 'חיפוש',
             onPressed: () {
               ref.read(tabHeaderHiddenProvider.notifier).state = false;
             },
           ),
         IconButton(
-          icon: const Icon(Icons.photo_camera_outlined, color: Colors.white70),
+          icon: const Icon(Icons.photo_camera_outlined, color: Colors.black54),
           tooltip: 'מצלמה',
           onPressed: () => openCameraSheet(context),
         ),
@@ -197,7 +197,7 @@ class _BottomNav extends ConsumerWidget {
       currentIndex: currentIndex,
       onTap: onTap,
       type: BottomNavigationBarType.fixed,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFFFFFFFF),
       selectedItemColor: BsTokens.brand,
       unselectedItemColor: const Color(0xFF888888),
       selectedFontSize: 12,
@@ -280,9 +280,9 @@ class _CatalogMenuButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert, color: Colors.white70),
+      icon: const Icon(Icons.more_vert, color: Colors.black54),
       tooltip: 'תפריט',
-      color: const Color(0xFF1A1A1A),
+      color: const Color(0xFFFFFFFF),
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
@@ -317,7 +317,7 @@ class _CatalogMenuButton extends ConsumerWidget {
       case 'scan_plan':
         showModalBottomSheet<void>(
           context: context,
-          backgroundColor: const Color(0xFF1A1A1A),
+          backgroundColor: const Color(0xFFFFFFFF),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
@@ -343,9 +343,9 @@ class _ChatsMenuButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert, color: Colors.white70),
+      icon: const Icon(Icons.more_vert, color: Colors.black54),
       tooltip: 'תפריט',
-      color: const Color(0xFF1A1A1A),
+      color: const Color(0xFFFFFFFF),
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
@@ -376,7 +376,7 @@ class _ChatsMenuButton extends ConsumerWidget {
       case 'new_chat':
         showModalBottomSheet<void>(
           context: context,
-          backgroundColor: const Color(0xFF1A1A1A),
+          backgroundColor: const Color(0xFFFFFFFF),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
@@ -400,9 +400,9 @@ class _NotificationsMenuButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert, color: Colors.white70),
+      icon: const Icon(Icons.more_vert, color: Colors.black54),
       tooltip: 'תפריט',
-      color: const Color(0xFF1A1A1A),
+      color: const Color(0xFFFFFFFF),
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
@@ -445,9 +445,9 @@ class _StoreMenuButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert, color: Colors.white70),
+      icon: const Icon(Icons.more_vert, color: Colors.black54),
       tooltip: 'תפריט',
-      color: const Color(0xFF1A1A1A),
+      color: const Color(0xFFFFFFFF),
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
@@ -534,7 +534,7 @@ class _ScanPlanSheet extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Colors.black12,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -560,7 +560,7 @@ class _ScanPlanSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const Divider(color: Color(0xFFF5F5F5), height: 1),
           ..._plans.map(
             (p) => ListTile(
               leading: Text(p.emoji, style: const TextStyle(fontSize: 24)),
@@ -610,7 +610,7 @@ class _NewChatSheet extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Colors.black12,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -636,7 +636,7 @@ class _NewChatSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const Divider(color: Color(0xFFF5F5F5), height: 1),
           ..._contacts.map(
             (c) => ListTile(
               leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),

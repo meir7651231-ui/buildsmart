@@ -18,17 +18,17 @@ class CatalogSettingsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF111111),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         title: const Text(
           'הגדרות קטלוג',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
         ),
-        iconTheme: const IconThemeData(color: Colors.white70),
+        iconTheme: const IconThemeData(color: Colors.black54),
         actions: [
           IconButton(
             tooltip: 'איפוס לברירת מחדל',
-            icon: const Icon(Icons.restart_alt, color: Colors.white70),
+            icon: const Icon(Icons.restart_alt, color: Colors.black54),
             onPressed: () => _confirmReset(context, ref),
           ),
         ],
@@ -55,14 +55,14 @@ class CatalogSettingsScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFFFFFFFF),
         title: const Text(
           'איפוס הגדרות?',
           style: TextStyle(color: Colors.white),
         ),
         content: const Text(
           'כל הגדרות הקטלוג יוחזרו לברירת המחדל.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Colors.black54),
         ),
         actions: [
           TextButton(
@@ -529,7 +529,7 @@ class _SectionTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Theme(
@@ -537,8 +537,8 @@ class _SectionTile extends StatelessWidget {
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 16),
           childrenPadding: const EdgeInsets.only(bottom: 8),
-          iconColor: Colors.white70,
-          collapsedIconColor: Colors.white70,
+          iconColor: Colors.black54,
+          collapsedIconColor: Colors.black54,
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
           title: Text(
             title,
@@ -600,7 +600,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             label,
-            style: const TextStyle(color: Colors.white70, fontSize: 13),
+            style: const TextStyle(color: Colors.black54, fontSize: 13),
           ),
         ),
         ...options.map(
@@ -664,15 +664,15 @@ class _NumberRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: const Icon(Icons.remove, color: Colors.white70, size: 20),
+            icon: const Icon(Icons.remove, color: Colors.black54, size: 20),
             onPressed: value > min ? () => onChanged(value - 1) : null,
           ),
           Text(
             suffix.isEmpty ? '$value' : '$value $suffix',
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
+            style: const TextStyle(color: Colors.black54, fontSize: 14),
           ),
           IconButton(
-            icon: const Icon(Icons.add, color: Colors.white70, size: 20),
+            icon: const Icon(Icons.add, color: Colors.black54, size: 20),
             onPressed: value < max ? () => onChanged(value + 1) : null,
           ),
         ],

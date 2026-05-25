@@ -94,14 +94,14 @@ class _SupplierTile extends StatelessWidget {
                   Text(
                     subtitle,
                     style: const TextStyle(
-                      color: Colors.white54,
+                      color: Colors.black38,
                       fontSize: 12,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_left, color: Colors.white54, size: 22),
+            const Icon(Icons.chevron_left, color: Colors.black38, size: 22),
           ],
         ),
       ),

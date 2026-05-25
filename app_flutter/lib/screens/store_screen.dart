@@ -287,7 +287,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
                   },
                 ),
           filled: true,
-          fillColor: const Color(0xFF2A2A2A),
+          fillColor: const Color(0xFFF5F5F5),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           border: OutlineInputBorder(
@@ -366,7 +366,7 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active ? BsTokens.brand : const Color(0xFF2A2A2A),
+      color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -395,7 +395,7 @@ class _QuickActionsRow extends ConsumerWidget {
   void _showSheet(BuildContext context, Widget sheet) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFFFFFFFF),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -480,10 +480,10 @@ class _QuickAction extends StatelessWidget {
                 width: 62,
                 height: 62,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF2A2A2A),
+                  color: Color(0xFFF5F5F5),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: Colors.white70, size: 28),
+                child: Icon(icon, color: Colors.black54, size: 28),
               ),
               if (badge > 0)
                 Container(
@@ -495,7 +495,7 @@ class _QuickAction extends StatelessWidget {
                   child: Text(
                     badge.toString(),
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: 0xFFFFFFFF,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -594,7 +594,7 @@ class _SichaSheet extends StatelessWidget {
                 child: Text(c.avatar, style: const TextStyle(fontSize: 20)),
               ),
               title: Text(c.name,
-                  style: const TextStyle(color: Colors.white, fontSize: 15)),
+                  style: const TextStyle(color: 0xFFFFFFFF, fontSize: 15)),
               trailing:
                   const Icon(Icons.phone_outlined, color: Colors.white38),
               onTap: () {
@@ -632,7 +632,7 @@ class _SheetScaffold extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Colors.black12,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -643,7 +643,7 @@ class _SheetScaffold extends StatelessWidget {
             child: Text(
               '$emoji $title',
               style: const TextStyle(
-                color: Colors.white,
+                color: 0xFFFFFFFF,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -672,7 +672,7 @@ class _SheetTile extends StatelessWidget {
     return ListTile(
       leading: Text(emoji, style: const TextStyle(fontSize: 22)),
       title:
-          Text(label, style: const TextStyle(color: Colors.white, fontSize: 15)),
+          Text(label, style: const TextStyle(color: 0xFFFFFFFF, fontSize: 15)),
       onTap: onTap ?? () {
         Navigator.pop(context);
         showToast(context, '$label — בבנייה');
@@ -699,7 +699,7 @@ class _StoreListState extends ConsumerState<_StoreList> {
     final section = ref.watch(storeSectionProvider);
     return RefreshIndicator(
       color: BsTokens.brand,
-      backgroundColor: const Color(0xFF2A2A2A),
+      backgroundColor: const Color(0xFFF5F5F5),
       onRefresh: _onRefresh,
       child: switch (section) {
         StoreSection.services => const _ServicesGrid(),
@@ -748,7 +748,7 @@ class _AllList extends ConsumerWidget {
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 76,
-        color: Color(0xFF2A2A2A),
+        color: Color(0xFFF5F5F5),
       ),
       itemBuilder: (context, i) {
         final item = items[i];
@@ -785,7 +785,7 @@ class _AllList extends ConsumerWidget {
   void _showCartSheet(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFFFFFFFF),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -819,7 +819,7 @@ class _DismissibleStoreRow extends StatelessWidget {
         onFavToggle();
         return false;
       },
-      background: const ColoredBox(color: Color(0xFF1A1A1A)),
+      background: const ColoredBox(color: Color(0xFFFFFFFF)),
       secondaryBackground: ColoredBox(
         color: Colors.pink.withValues(alpha: 0.15),
         child: Align(
@@ -863,7 +863,7 @@ class _StoreRow extends StatelessWidget {
                   width: 50,
                   height: 50,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF2A2A2A),
+                    color: Color(0xFFF5F5F5),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -893,7 +893,7 @@ class _StoreRow extends StatelessWidget {
                         child: Text(
                           item.title,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: 0xFFFFFFFF,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -937,7 +937,7 @@ class _StoreRow extends StatelessWidget {
                           child: Text(
                             '${item.badge}',
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: 0xFFFFFFFF,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
@@ -1011,7 +1011,7 @@ class _CartSheet extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Colors.black12,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1022,14 +1022,14 @@ class _CartSheet extends StatelessWidget {
             child: Text(
               '🛒 הסל שלי',
               style: TextStyle(
-                color: Colors.white,
+                color: 0xFFFFFFFF,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
           const SizedBox(height: 12),
-          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const Divider(color: Color(0xFFF5F5F5), height: 1),
           ..._kCartItemDetails.map(
             (item) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -1041,7 +1041,7 @@ class _CartSheet extends StatelessWidget {
                     child: Text(
                       item.name,
                       style:
-                          const TextStyle(color: Colors.white, fontSize: 14),
+                          const TextStyle(color: 0xFFFFFFFF, fontSize: 14),
                     ),
                   ),
                   Text(
@@ -1055,7 +1055,7 @@ class _CartSheet extends StatelessWidget {
                   Text(
                     item.price,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: 0xFFFFFFFF,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1064,7 +1064,7 @@ class _CartSheet extends StatelessWidget {
               ),
             ),
           ),
-          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const Divider(color: Color(0xFFF5F5F5), height: 1),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1072,7 +1072,7 @@ class _CartSheet extends StatelessWidget {
               Text(
                 'סה"כ',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: 0xFFFFFFFF,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1080,7 +1080,7 @@ class _CartSheet extends StatelessWidget {
               Text(
                 _kCartTotal,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: 0xFFFFFFFF,
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                 ),
@@ -1091,7 +1091,7 @@ class _CartSheet extends StatelessWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: BsTokens.brand,
-              foregroundColor: Colors.white,
+              foregroundColor: 0xFFFFFFFF,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1210,7 +1210,7 @@ class _ProjectSelector extends ConsumerWidget {
       children: [
         const Text(
           '🏗️ שיוך לפרויקט',
-          style: TextStyle(color: Colors.white70, fontSize: 12),
+          style: TextStyle(color: Colors.black54, fontSize: 12),
         ),
         const SizedBox(height: 6),
         SingleChildScrollView(
@@ -1234,7 +1234,7 @@ class _ProjectSelector extends ConsumerWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2A2A2A),
+                    color: const Color(0xFFF5F5F5),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: const Color(0xFF444444)),
                   ),
@@ -1270,7 +1270,7 @@ class _ProjectChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? BsTokens.brand : const Color(0xFF2A2A2A),
+          color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -1299,7 +1299,7 @@ class _SmartCartRow extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 6),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: BsTokens.brand.withAlpha(60),
@@ -1329,7 +1329,7 @@ class _SmartCartRow extends ConsumerWidget {
                     Text(
                       '${line.productName} × ${line.productQty}',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: 0xFFFFFFFF,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1365,7 +1365,7 @@ class _SmartCartRow extends ConsumerWidget {
           ),
           if (line.accessories.isNotEmpty) ...[
             const SizedBox(height: 8),
-            const Divider(height: 1, color: Color(0xFF2A2A2A)),
+            const Divider(height: 1, color: Color(0xFFF5F5F5)),
             const SizedBox(height: 6),
             for (final a in line.accessories)
               Padding(
@@ -1415,7 +1415,7 @@ class _SupplierHeader extends StatelessWidget {
           Text(
             '🏪 $name',
             style: const TextStyle(
-              color: Colors.white,
+              color: 0xFFFFFFFF,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -1456,7 +1456,7 @@ class _CartItemRow extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -1473,7 +1473,7 @@ class _CartItemRow extends ConsumerWidget {
                     Text(
                       item.name,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: 0xFFFFFFFF,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1503,7 +1503,7 @@ class _CartItemRow extends ConsumerWidget {
               const Spacer(),
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2A2A2A),
+                  color: const Color(0xFFF5F5F5),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -1518,7 +1518,7 @@ class _CartItemRow extends ConsumerWidget {
                       child: Text(
                         '$qty',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: 0xFFFFFFFF,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -1536,7 +1536,7 @@ class _CartItemRow extends ConsumerWidget {
               Text(
                 _price(lineTotal),
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: 0xFFFFFFFF,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1584,7 +1584,7 @@ class _DeliverySelector extends ConsumerWidget {
       children: [
         const Text(
           '🚚 אפשרויות משלוח',
-          style: TextStyle(color: Colors.white70, fontSize: 12),
+          style: TextStyle(color: Colors.black54, fontSize: 12),
         ),
         const SizedBox(height: 8),
         Row(
@@ -1627,7 +1627,7 @@ class _DeliveryCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: active
               ? BsTokens.brand.withValues(alpha: 0.12)
-              : const Color(0xFF1A1A1A),
+              : const Color(0xFFFFFFFF),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: active ? BsTokens.brand : const Color(0xFF333333),
@@ -1640,7 +1640,7 @@ class _DeliveryCard extends StatelessWidget {
             Text(
               option.label,
               style: TextStyle(
-                color: active ? BsTokens.brand : Colors.white,
+                color: active ? BsTokens.brand : 0xFFFFFFFF,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
@@ -1674,19 +1674,19 @@ class _NotesField extends StatelessWidget {
       children: [
         const Text(
           '📝 הערות לשליח',
-          style: TextStyle(color: Colors.white70, fontSize: 12),
+          style: TextStyle(color: Colors.black54, fontSize: 12),
         ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
-          style: const TextStyle(color: Colors.white, fontSize: 13),
+          style: const TextStyle(color: 0xFFFFFFFF, fontSize: 13),
           cursorColor: BsTokens.brand,
           maxLines: 2,
           decoration: InputDecoration(
             hintText: 'קומה / כניסה / שם האתר / הוראות לנהג...',
             hintStyle: const TextStyle(color: Color(0xFF666666)),
             filled: true,
-            fillColor: const Color(0xFF1A1A1A),
+            fillColor: const Color(0xFFFFFFFF),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide.none,
@@ -1721,7 +1721,7 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(14),
@@ -1737,7 +1737,7 @@ class _SummaryCard extends StatelessWidget {
           ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 10),
-            child: Divider(color: Color(0xFF2A2A2A), height: 1),
+            child: Divider(color: Color(0xFFF5F5F5), height: 1),
           ),
           _SummaryLine(label: 'סה"כ לתשלום', value: _price(total), bold: true),
         ],
@@ -1761,7 +1761,7 @@ class _SummaryLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = bold
         ? const TextStyle(
-            color: Colors.white,
+            color: 0xFFFFFFFF,
             fontSize: 15,
             fontWeight: FontWeight.w800,
           )
@@ -1789,7 +1789,7 @@ class _PaymentSelector extends ConsumerWidget {
       children: [
         const Text(
           '💳 אמצעי תשלום',
-          style: TextStyle(color: Colors.white70, fontSize: 12),
+          style: TextStyle(color: Colors.black54, fontSize: 12),
         ),
         const SizedBox(height: 8),
         SingleChildScrollView(
@@ -1832,7 +1832,7 @@ class _PaymentChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: active ? BsTokens.brand : const Color(0xFF2A2A2A),
+          color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(20),
           border: active ? null : Border.all(color: const Color(0xFF444444)),
         ),
@@ -1867,7 +1867,7 @@ class _CheckoutButton extends ConsumerWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: BsTokens.brand,
-        foregroundColor: Colors.white,
+        foregroundColor: 0xFFFFFFFF,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1884,7 +1884,7 @@ class _CheckoutButton extends ConsumerWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFFFFFFFF),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1928,7 +1928,7 @@ class _CheckoutSheet extends ConsumerWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white24,
+                  color: Colors.black12,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1937,7 +1937,7 @@ class _CheckoutSheet extends ConsumerWidget {
             const Text(
               'סיכום הזמנה',
               style: TextStyle(
-                color: Colors.white,
+                color: 0xFFFFFFFF,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -1945,7 +1945,7 @@ class _CheckoutSheet extends ConsumerWidget {
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF2A2A2A),
+                color: const Color(0xFFF5F5F5),
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(14),
@@ -1954,27 +1954,27 @@ class _CheckoutSheet extends ConsumerWidget {
                 children: [
                   const Text(
                     'פרויקט',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    style: TextStyle(color: Colors.black54, fontSize: 12),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     project,
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    style: const TextStyle(color: 0xFFFFFFFF, fontSize: 14),
                   ),
                   const SizedBox(height: 12),
-                  const Divider(color: Color(0xFF1A1A1A), height: 1),
+                  const Divider(color: Color(0xFFFFFFFF), height: 1),
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         '📦 משלוח',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                        style: TextStyle(color: Colors.black54, fontSize: 12),
                       ),
                       Text(
                         deliveryLabel,
                         style:
-                            const TextStyle(color: Colors.white, fontSize: 13),
+                            const TextStyle(color: 0xFFFFFFFF, fontSize: 13),
                       ),
                     ],
                   ),
@@ -1984,17 +1984,17 @@ class _CheckoutSheet extends ConsumerWidget {
                     children: [
                       const Text(
                         '💳 תשלום',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                        style: TextStyle(color: Colors.black54, fontSize: 12),
                       ),
                       Text(
                         paymentLabel,
                         style:
-                            const TextStyle(color: Colors.white, fontSize: 13),
+                            const TextStyle(color: 0xFFFFFFFF, fontSize: 13),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  const Divider(color: Color(0xFF1A1A1A), height: 1),
+                  const Divider(color: Color(0xFFFFFFFF), height: 1),
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2002,7 +2002,7 @@ class _CheckoutSheet extends ConsumerWidget {
                       const Text(
                         'סה"כ לתשלום',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: 0xFFFFFFFF,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -2010,7 +2010,7 @@ class _CheckoutSheet extends ConsumerWidget {
                       Text(
                         _price(total),
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: 0xFFFFFFFF,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -2024,7 +2024,7 @@ class _CheckoutSheet extends ConsumerWidget {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: BsTokens.brand,
-                foregroundColor: Colors.white,
+                foregroundColor: 0xFFFFFFFF,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -2057,7 +2057,7 @@ class _CartActionsRow extends ConsumerWidget {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFFFFFFFF),
         title: const Text(
           'שמור סל כרשימה',
           style: TextStyle(color: Colors.white),
@@ -2069,7 +2069,7 @@ class _CartActionsRow extends ConsumerWidget {
             hintText: 'שם הרשימה',
             hintStyle: const TextStyle(color: Color(0xFF666666)),
             enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.white24),
+              borderSide: BorderSide(color: Colors.black12),
             ),
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.blue),
@@ -2079,7 +2079,7 @@ class _CartActionsRow extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('ביטול', style: TextStyle(color: Colors.white54)),
+            child: const Text('ביטול', style: TextStyle(color: Colors.black38)),
           ),
           TextButton(
             onPressed: () {
@@ -2117,7 +2117,7 @@ class _CartActionsRow extends ConsumerWidget {
           onPressed: () => _showSaveDialog(context, ref),
           icon: const Icon(Icons.bookmark_border, size: 16),
           label: const Text('שמור'),
-          style: TextButton.styleFrom(foregroundColor: Colors.white54),
+          style: TextButton.styleFrom(foregroundColor: Colors.black38),
         ),
         TextButton.icon(
           onPressed: () {
@@ -2133,7 +2133,7 @@ class _CartActionsRow extends ConsumerWidget {
           },
           icon: const Icon(Icons.share_outlined, size: 16),
           label: const Text('שתף'),
-          style: TextButton.styleFrom(foregroundColor: Colors.white54),
+          style: TextButton.styleFrom(foregroundColor: Colors.black38),
         ),
         TextButton.icon(
           onPressed: () {
@@ -2159,7 +2159,7 @@ class _ServicesGrid extends ConsumerWidget {
   static void _openSheet(BuildContext context, int i) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFFFFFFFF),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -2190,7 +2190,7 @@ class _ServicesGrid extends ConsumerWidget {
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 76,
-        color: Color(0xFF2A2A2A),
+        color: Color(0xFFF5F5F5),
       ),
       itemBuilder: (context, i) {
         final idx = _kServiceByEmoji[services[i].emoji] ?? i;
@@ -2277,7 +2277,7 @@ class _ServiceSheet extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Colors.black12,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -2288,7 +2288,7 @@ class _ServiceSheet extends StatelessWidget {
             child: Text(
               '${svc.emoji} ${svc.title}',
               style: const TextStyle(
-                color: Colors.white,
+                color: 0xFFFFFFFF,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -2304,14 +2304,14 @@ class _ServiceSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const Divider(color: Color(0xFFF5F5F5), height: 1),
           ...rows.map(
             (r) => ListTile(
               leading:
                   Text(r.emoji, style: const TextStyle(fontSize: 22)),
               title: Text(r.label,
                   style:
-                      const TextStyle(color: Colors.white, fontSize: 15)),
+                      const TextStyle(color: 0xFFFFFFFF, fontSize: 15)),
               subtitle: r.sub.isEmpty
                   ? null
                   : Text(
@@ -2347,7 +2347,7 @@ class _MiniPill extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
         height: 36,
         decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
+          color: const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(18),
         ),
         alignment: Alignment.center,
@@ -2426,7 +2426,7 @@ class _OrdersList extends ConsumerWidget {
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 76,
-        color: Color(0xFF2A2A2A),
+        color: Color(0xFFF5F5F5),
       ),
       itemBuilder: (context, i) => _OrderRow(order: orders[i]),
     );
@@ -2442,7 +2442,7 @@ class _OrderRow extends StatelessWidget {
     return InkWell(
       onTap: () => showModalBottomSheet<void>(
         context: context,
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFFFFFFFF),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
@@ -2456,7 +2456,7 @@ class _OrderRow extends StatelessWidget {
               width: 50,
               height: 50,
               decoration: const BoxDecoration(
-                color: Color(0xFF2A2A2A),
+                color: Color(0xFFF5F5F5),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
@@ -2473,7 +2473,7 @@ class _OrderRow extends StatelessWidget {
                         child: Text(
                           order.id,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: 0xFFFFFFFF,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -2583,7 +2583,7 @@ class _OrderSheet extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Colors.black12,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -2595,7 +2595,7 @@ class _OrderSheet extends StatelessWidget {
                 child: Text(
                   'הזמנה ${order.id}',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: 0xFFFFFFFF,
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
@@ -2629,7 +2629,7 @@ class _OrderSheet extends StatelessWidget {
                 const TextStyle(color: Color(0xFF888888), fontSize: 13),
           ),
           const SizedBox(height: 12),
-          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const Divider(color: Color(0xFFF5F5F5), height: 1),
           ...items.map(
             (item) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -2641,7 +2641,7 @@ class _OrderSheet extends StatelessWidget {
                     child: Text(
                       item.name,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: 0xFFFFFFFF,
                         fontSize: 14,
                       ),
                     ),
@@ -2657,7 +2657,7 @@ class _OrderSheet extends StatelessWidget {
                   Text(
                     item.price,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: 0xFFFFFFFF,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -2666,7 +2666,7 @@ class _OrderSheet extends StatelessWidget {
               ),
             ),
           ),
-          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const Divider(color: Color(0xFFF5F5F5), height: 1),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2674,7 +2674,7 @@ class _OrderSheet extends StatelessWidget {
               const Text(
                 'סה"כ',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: 0xFFFFFFFF,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -2682,7 +2682,7 @@ class _OrderSheet extends StatelessWidget {
               Text(
                 order.total,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: 0xFFFFFFFF,
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                 ),
@@ -2692,8 +2692,8 @@ class _OrderSheet extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2A2A2A),
-              foregroundColor: Colors.white70,
+              backgroundColor: const Color(0xFFF5F5F5),
+              foregroundColor: Colors.black54,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

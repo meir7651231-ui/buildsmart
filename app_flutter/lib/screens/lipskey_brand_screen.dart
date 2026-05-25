@@ -37,7 +37,7 @@ class LipskeyBrandScreen extends StatelessWidget {
                           fontSize: 17)),
                   Text('אינסטלציה · סניטציה',
                       style:
-                          TextStyle(color: Colors.white54, fontSize: 12)),
+                          TextStyle(color: Colors.black38, fontSize: 12)),
                 ],
               ),
             ),
@@ -123,7 +123,7 @@ class _BrandHeader extends StatelessWidget {
                         fontWeight: FontWeight.w700)),
                 Text('$totalProducts מוצרים · $totalCats קטגוריות',
                     style: const TextStyle(
-                        color: Colors.white54, fontSize: 11)),
+                        color: Colors.black38, fontSize: 11)),
               ],
             ),
           ),
@@ -244,7 +244,7 @@ class LipskeySectionScreen extends StatelessWidget {
                   Text(
                       'ליפסקי ברקן · ${section.entries.length} קטגוריות',
                       style: const TextStyle(
-                          color: Colors.white54, fontSize: 11)),
+                          color: Colors.black38, fontSize: 11)),
                 ],
               ),
             ),

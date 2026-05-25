@@ -49,7 +49,7 @@ void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
           top: 40,
           left: 16,
           child: Material(
-            color: Colors.white24,
+            color: Colors.black12,
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
@@ -67,7 +67,7 @@ void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
           right: 0,
           child: Text('צבוט להגדלה · הקש לסגירה',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white54, fontSize: 12)),
+              style: TextStyle(color: Colors.black38, fontSize: 12)),
         ),
       ],
     ),
@@ -364,7 +364,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                 width: 38,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white24,
+                  color: Colors.black12,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -414,7 +414,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                               const SizedBox(width: 6),
                               Text(p.categoryHe,
                                   style: const TextStyle(
-                                      color: Colors.white54, fontSize: 12)),
+                                      color: Colors.black38, fontSize: 12)),
                               const Spacer(),
                               GestureDetector(
                                 onTap: () {
@@ -595,7 +595,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                 children: [
                                   const Text('אביזרים נבחרים:',
                                       style: TextStyle(
-                                          color: Colors.white54,
+                                          color: Colors.black38,
                                           fontSize: 13)),
                                   Text('+ ₪$_accTotal',
                                       style: const TextStyle(
@@ -1129,16 +1129,16 @@ class _ZoomHint extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.black54,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white24),
+          border: Border.all(color: Colors.black12),
         ),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.zoom_in, color: Colors.white70, size: 14),
+            Icon(Icons.zoom_in, color: Colors.black54, size: 14),
             SizedBox(width: 4),
             Text('הגדלה',
                 style: TextStyle(
-                    color: Colors.white70,
+                    color: Colors.black54,
                     fontSize: 10,
                     fontWeight: FontWeight.w600)),
           ],
@@ -1386,7 +1386,7 @@ class _AccRow extends StatelessWidget {
                         : Icons.add_circle_outline,
                     color: selected
                         ? const Color(0xFF64FFDA)
-                        : Colors.white24,
+                        : Colors.black12,
                     size: 20,
                   ),
                 ],
@@ -1475,7 +1475,7 @@ class _StageRow extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(stage.desc,
                           style: const TextStyle(
-                              color: Colors.white54, fontSize: 12)),
+                              color: Colors.black38, fontSize: 12)),
                     ],
                   ],
                 ),
@@ -1544,7 +1544,7 @@ Widget _SpecRow(String emoji, String label, String value) => Padding(
           const SizedBox(width: 8),
           Text(label,
               style: const TextStyle(
-                  color: Colors.white54, fontSize: 13)),
+                  color: Colors.black38, fontSize: 13)),
           const Spacer(),
           Text(value,
               style: const TextStyle(

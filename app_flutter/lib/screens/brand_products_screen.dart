@@ -35,7 +35,7 @@ class BrandProductsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF111111),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFFFFFFFF),
         foregroundColor: Colors.white,
         elevation: 0,
         title: Row(
@@ -71,7 +71,7 @@ class _LipskeyList extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: products.length,
       separatorBuilder: (_, __) =>
-          const Divider(color: Color(0xFF2A2A2A), height: 1, indent: 16),
+          const Divider(color: Color(0xFFF5F5F5), height: 1, indent: 16),
       itemBuilder: (_, i) {
         final p = products[i];
         return InkWell(
@@ -128,7 +128,7 @@ class _LipskeyList extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2A2A2A),
+                              color: const Color(0xFFF5F5F5),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(

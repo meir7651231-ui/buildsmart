@@ -19,17 +19,17 @@ class NotifSettingsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF111111),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         title: const Text(
           'הגדרות התראות',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
         ),
-        iconTheme: const IconThemeData(color: Colors.white70),
+        iconTheme: const IconThemeData(color: Colors.black54),
         actions: [
           IconButton(
             tooltip: 'איפוס לברירת מחדל',
-            icon: const Icon(Icons.restart_alt, color: Colors.white70),
+            icon: const Icon(Icons.restart_alt, color: Colors.black54),
             onPressed: () => _confirmReset(context, ref),
           ),
         ],
@@ -57,14 +57,14 @@ class NotifSettingsScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFFFFFFFF),
         title: const Text(
           'איפוס הגדרות?',
           style: TextStyle(color: Colors.white),
         ),
         content: const Text(
           'כל הגדרות ההתראות יוחזרו לברירת המחדל.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Colors.black54),
         ),
         actions: [
           TextButton(
@@ -104,7 +104,7 @@ class _SnoozeBanner extends ConsumerWidget {
       decoration: BoxDecoration(
         color: snoozed
             ? const Color(0xFF3A2A0F)
-            : const Color(0xFF1A1A1A),
+            : const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: snoozed ? Colors.orange : Colors.transparent,
@@ -153,7 +153,7 @@ class _SnoozeBanner extends ConsumerWidget {
               ),
               Icon(
                 snoozed ? Icons.close : Icons.chevron_left,
-                color: Colors.white54,
+                color: Colors.black38,
               ),
             ],
           ),
@@ -165,7 +165,7 @@ class _SnoozeBanner extends ConsumerWidget {
   Future<void> _showSnoozeMenu(BuildContext context, WidgetRef ref) async {
     final picked = await showModalBottomSheet<int>(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFFFFFFFF),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -201,7 +201,7 @@ class _SnoozeSheet extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Colors.black12,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -219,7 +219,7 @@ class _SnoozeSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const Divider(color: Color(0xFFF5F5F5), height: 1),
           ..._options.map(
             (o) => ListTile(
               title: Text(
@@ -729,7 +729,7 @@ class _SectionTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Theme(
@@ -737,8 +737,8 @@ class _SectionTile extends StatelessWidget {
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 16),
           childrenPadding: const EdgeInsets.only(bottom: 8),
-          iconColor: Colors.white70,
-          collapsedIconColor: Colors.white70,
+          iconColor: Colors.black54,
+          collapsedIconColor: Colors.black54,
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
           title: Text(
             title,
@@ -800,7 +800,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             label,
-            style: const TextStyle(color: Colors.white70, fontSize: 13),
+            style: const TextStyle(color: Colors.black54, fontSize: 13),
           ),
         ),
         ...options.map(
@@ -855,7 +855,7 @@ class _TimeRow extends StatelessWidget {
             data: ThemeData.dark().copyWith(
               colorScheme: const ColorScheme.dark(
                 primary: BsTokens.brand,
-                surface: Color(0xFF1A1A1A),
+                surface: Color(0xFFFFFFFF),
               ),
             ),
             child: child!,

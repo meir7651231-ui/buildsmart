@@ -214,7 +214,7 @@ class _MiniSearchPill extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
         height: 36,
         decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
+          color: const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(18),
         ),
         alignment: Alignment.center,
@@ -261,7 +261,7 @@ class _SectionChipsRow extends ConsumerWidget {
             value: 'manage',
             child: Row(
               children: [
-                Icon(Icons.list, color: Colors.white70, size: 20),
+                Icon(Icons.list, color: Colors.black54, size: 20),
                 SizedBox(width: 12),
                 Text(
                   'ניהול רשימות',
@@ -276,7 +276,7 @@ class _SectionChipsRow extends ConsumerWidget {
               children: [
                 Icon(
                   Icons.drive_file_rename_outline,
-                  color: Colors.white70,
+                  color: Colors.black54,
                   size: 20,
                 ),
                 SizedBox(width: 12),
@@ -347,7 +347,7 @@ void _openManageSheet(BuildContext context, WidgetRef ref) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: const Color(0xFF1A1A1A),
+    backgroundColor: const Color(0xFFFFFFFF),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -413,7 +413,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
               ],
             ),
           ),
-          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const Divider(color: Color(0xFFF5F5F5), height: 1),
           // Reorderable list
           Expanded(
             child: ReorderableListView.builder(
@@ -431,11 +431,11 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                 final s = sections[i];
                 return ListTile(
                   key: ValueKey(s),
-                  tileColor: const Color(0xFF1A1A1A),
+                  tileColor: const Color(0xFFFFFFFF),
                   // Leading: icon matching section
                   leading: Icon(
                     _sectionIcon(s),
-                    color: Colors.white70,
+                    color: Colors.black54,
                     size: 22,
                   ),
                   title: Text(
@@ -494,7 +494,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
               },
             ),
           ),
-          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const Divider(color: Color(0xFFF5F5F5), height: 1),
           InkWell(
             onTap: () => _showAddDialog(context),
             child: const Padding(
@@ -659,7 +659,7 @@ void _showItemPickerSheet(
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: const Color(0xFF1A1A1A),
+    backgroundColor: const Color(0xFFFFFFFF),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -845,7 +845,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
               ),
             ),
           ),
-          const Divider(color: Color(0xFF2A2A2A), height: 1),
+          const Divider(color: Color(0xFFF5F5F5), height: 1),
           Expanded(
             child: ListView.builder(
               controller: scrollCtrl,
@@ -865,7 +865,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                   controlAffinity: ListTileControlAffinity.leading,
                   activeColor: BsTokens.brand,
                   checkColor: Colors.white,
-                  tileColor: const Color(0xFF1A1A1A),
+                  tileColor: const Color(0xFFFFFFFF),
                   title: Row(
                     children: [
                       Text(
@@ -920,7 +920,7 @@ class _SectionPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active ? BsTokens.brand : const Color(0xFF2A2A2A),
+      color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -950,7 +950,7 @@ class _AddPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF2A2A2A),
+      color: const Color(0xFFF5F5F5),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -974,7 +974,7 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF2A2A2A),
+      color: const Color(0xFFF5F5F5),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -1070,7 +1070,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
+          color: const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(24),
           border: open
               ? Border.all(color: BsTokens.brand, width: 1.5)
@@ -1188,7 +1188,7 @@ class _SearchPanel extends ConsumerWidget {
         children: [
           const _SearchToolsRow(),
           const _SearchScopeRow(),
-          const Divider(height: 1, color: Color(0xFF2A2A2A)),
+          const Divider(height: 1, color: Color(0xFFF5F5F5)),
           Expanded(
             child: showResults
                 ? const _SearchResultsList()
@@ -1280,7 +1280,7 @@ class _SearchToolButton extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: const BoxDecoration(
-                color: Color(0xFF2A2A2A),
+                color: Color(0xFFF5F5F5),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
@@ -1289,7 +1289,7 @@ class _SearchToolButton extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(color: Colors.white70, fontSize: 11),
+              style: const TextStyle(color: Colors.black54, fontSize: 11),
             ),
           ],
         ),
@@ -1468,7 +1468,7 @@ class _SearchResultsList extends ConsumerWidget {
               width: 44,
               height: 44,
               decoration: const BoxDecoration(
-                color: Color(0xFF2A2A2A),
+                color: Color(0xFFF5F5F5),
                 shape: BoxShape.circle,
               ),
               clipBehavior: Clip.antiAlias,
@@ -1511,7 +1511,7 @@ class _SearchResultsList extends ConsumerWidget {
             width: 44,
             height: 44,
             decoration: const BoxDecoration(
-              color: Color(0xFF2A2A2A),
+              color: Color(0xFFF5F5F5),
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
@@ -1535,7 +1535,7 @@ class _SearchResultsList extends ConsumerWidget {
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
             decoration: BoxDecoration(
-              color: const Color(0xFF2A2A2A),
+              color: const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -1610,7 +1610,7 @@ class _SectionHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: const Color(0xFFFFFFFF),
       padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
       child: Row(
         children: [
@@ -1658,7 +1658,7 @@ class _FilteredCatalogList extends StatelessWidget {
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 76,
-        color: Color(0xFF2A2A2A),
+        color: Color(0xFFF5F5F5),
       ),
       itemBuilder: (_, i) {
         final idx = indices[i];
@@ -1718,7 +1718,7 @@ class _CatalogList extends StatelessWidget {
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 76,
-        color: Color(0xFF2A2A2A),
+        color: Color(0xFFF5F5F5),
       ),
       itemBuilder: (context, i) {
         return _CatalogRow(
@@ -1789,7 +1789,7 @@ class _LipskeySupplierCard extends StatelessWidget {
                     child: const Row(
                       children: [
                         Text('כל הקטגוריות',
-                            style: TextStyle(color: Colors.white54, fontSize: 12)),
+                            style: TextStyle(color: Colors.black38, fontSize: 12)),
                         SizedBox(width: 3),
                         Icon(Icons.chevron_left, color: Colors.white38, size: 16),
                       ],
@@ -1912,7 +1912,7 @@ class _InfoChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
         ),
         child: Text(label,
-            style: const TextStyle(color: Colors.white54, fontSize: 11)),
+            style: const TextStyle(color: Colors.black38, fontSize: 11)),
       );
 }
 
@@ -1988,7 +1988,7 @@ class _FeaturedProductCardState extends ConsumerState<_FeaturedProductCard> {
                                 color: const Color(0xFF22C55E),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: const Color(0xFF1A1A1A),
+                                  color: const Color(0xFFFFFFFF),
                                   width: 2,
                                 ),
                               ),
@@ -2227,7 +2227,7 @@ class _CatalogRow extends StatelessWidget {
               width: 50,
               height: 50,
               decoration: const BoxDecoration(
-                color: Color(0xFF2A2A2A),
+                color: Color(0xFFF5F5F5),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
@@ -2347,7 +2347,7 @@ class _SmartTreeCatList extends ConsumerWidget {
       children: [
         // Header
         Container(
-          color: const Color(0xFF1A1A1A),
+          color: const Color(0xFFFFFFFF),
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: const Row(
             children: [
@@ -2364,12 +2364,12 @@ class _SmartTreeCatList extends ConsumerWidget {
             ],
           ),
         ),
-        const Divider(height: 1, color: Color(0xFF2A2A2A)),
+        const Divider(height: 1, color: Color(0xFFF5F5F5)),
         Expanded(
           child: ListView.separated(
             itemCount: cats.length,
             separatorBuilder: (_, __) =>
-                const Divider(height: 1, indent: 76, color: Color(0xFF2A2A2A)),
+                const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
             itemBuilder: (_, i) {
               final cat = cats[i];
               final count = smartProductsForCat(cat).length;
@@ -2386,7 +2386,7 @@ class _SmartTreeCatList extends ConsumerWidget {
                         width: 50,
                         height: 50,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF2A2A2A),
+                          color: Color(0xFFF5F5F5),
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
@@ -2443,7 +2443,7 @@ class _SmartTreeProductList extends ConsumerWidget {
       children: [
         // Breadcrumb header with back button
         Container(
-          color: const Color(0xFF1A1A1A),
+          color: const Color(0xFFFFFFFF),
           padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
           child: Row(
             children: [
@@ -2465,12 +2465,12 @@ class _SmartTreeProductList extends ConsumerWidget {
             ],
           ),
         ),
-        const Divider(height: 1, color: Color(0xFF2A2A2A)),
+        const Divider(height: 1, color: Color(0xFFF5F5F5)),
         Expanded(
           child: ListView.separated(
             itemCount: products.length,
             separatorBuilder: (_, __) => const Divider(
-                height: 1, indent: 76, color: Color(0xFF2A2A2A)),
+                height: 1, indent: 76, color: Color(0xFFF5F5F5)),
             itemBuilder: (_, i) {
               final p = products[i];
               return InkWell(
@@ -2484,7 +2484,7 @@ class _SmartTreeProductList extends ConsumerWidget {
                         width: 50,
                         height: 50,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF2A2A2A),
+                          color: Color(0xFFF5F5F5),
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
@@ -2543,7 +2543,7 @@ class _SmartTreeProductList extends ConsumerWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFFFFFFFF),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -2574,7 +2574,7 @@ class _CatalogDrillCatGrid extends ConsumerWidget {
     return Column(
       children: [
         Container(
-          color: const Color(0xFF1A1A1A),
+          color: const Color(0xFFFFFFFF),
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: const Row(
             children: [
@@ -2591,7 +2591,7 @@ class _CatalogDrillCatGrid extends ConsumerWidget {
             ],
           ),
         ),
-        const Divider(height: 1, color: Color(0xFF2A2A2A)),
+        const Divider(height: 1, color: Color(0xFFF5F5F5)),
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(12),
@@ -2732,7 +2732,7 @@ class _CatalogDrillProductList extends ConsumerWidget {
       children: [
         // Breadcrumb header
         Container(
-          color: const Color(0xFF1A1A1A),
+          color: const Color(0xFFFFFFFF),
           padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
           child: Row(
             children: [
@@ -2754,7 +2754,7 @@ class _CatalogDrillProductList extends ConsumerWidget {
             ],
           ),
         ),
-        const Divider(height: 1, color: Color(0xFF2A2A2A)),
+        const Divider(height: 1, color: Color(0xFFF5F5F5)),
         if (isEmpty)
           const Expanded(
             child: Center(
@@ -2789,7 +2789,7 @@ class _CatalogDrillProductList extends ConsumerWidget {
                                       width: 50,
                                       height: 50,
                                       decoration: const BoxDecoration(
-                                        color: Color(0xFF2A2A2A),
+                                        color: Color(0xFFF5F5F5),
                                         shape: BoxShape.circle,
                                       ),
                                       alignment: Alignment.center,
@@ -2842,7 +2842,7 @@ class _CatalogDrillProductList extends ConsumerWidget {
                               const Divider(
                                   height: 1,
                                   indent: 76,
-                                  color: Color(0xFF2A2A2A)),
+                                  color: Color(0xFFF5F5F5)),
                           ],
                         );
                       },
@@ -2928,7 +2928,7 @@ class _CatalogDrillProductList extends ConsumerWidget {
                               const Divider(
                                   height: 1,
                                   indent: 76,
-                                  color: Color(0xFF2A2A2A)),
+                                  color: Color(0xFFF5F5F5)),
                           ],
                         );
                       },
@@ -2949,7 +2949,7 @@ class _CatalogDrillProductList extends ConsumerWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFFFFFFFF),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -2977,7 +2977,7 @@ class _SectionBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Text(label,
               style: const TextStyle(
-                color: Colors.white70,
+                color: Colors.black54,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               )),
@@ -2994,7 +2994,7 @@ void openSmartProductSheet(BuildContext context, SmartProduct product) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: const Color(0xFF1A1A1A),
+    backgroundColor: const Color(0xFFFFFFFF),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -3076,7 +3076,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                 left: 4,
                 child: IconButton(
                   icon: const Icon(Icons.close,
-                      color: Colors.white70, size: 22),
+                      color: Colors.black54, size: 22),
                   onPressed: () => Navigator.pop(context),
                   tooltip: 'סגור',
                 ),
@@ -3092,7 +3092,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                   width: 56,
                   height: 56,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF2A2A2A),
+                    color: Color(0xFFF5F5F5),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -3124,7 +3124,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFF2A2A2A)),
+          const Divider(height: 1, color: Color(0xFFF5F5F5)),
           Expanded(
             child: ListView(
               controller: scrollCtrl,
@@ -3659,7 +3659,7 @@ class _AccRow extends StatelessWidget {
                           color: const Color(0xFF22C55E),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFF1A1A1A),
+                            color: const Color(0xFFFFFFFF),
                             width: 1.5,
                           ),
                         ),
@@ -3791,7 +3791,7 @@ class _MiniQtyBtn extends StatelessWidget {
           icon,
           size: 12,
           color: onTap != null
-              ? Colors.white70
+              ? Colors.black54
               : const Color(0xFF444444),
         ),
       ),
@@ -3803,7 +3803,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
   showDialog<void>(
     context: context,
     builder: (ctx) => Dialog(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFFFFFFFF),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 360),

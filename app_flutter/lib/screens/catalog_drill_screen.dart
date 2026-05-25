@@ -39,7 +39,7 @@ class CatalogDrillScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF111111),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFFFFFFFF),
         foregroundColor: Colors.white,
         elevation: 0,
         title: Text(
@@ -73,7 +73,7 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     final parts = [...path.map((n) => n.title), current];
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: const Color(0xFFFFFFFF),
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       alignment: AlignmentDirectional.centerStart,
       child: SingleChildScrollView(
@@ -206,7 +206,7 @@ class _CategoryCard extends StatelessWidget {
       subtitle = '${node.brandIds.length} מותגים';
     }
     return Material(
-      color: const Color(0xFF1A1A1A),
+      color: const Color(0xFFFFFFFF),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -327,7 +327,7 @@ class _BrandCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: const Color(0xFF1A1A1A),
+        color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: () => Navigator.push(

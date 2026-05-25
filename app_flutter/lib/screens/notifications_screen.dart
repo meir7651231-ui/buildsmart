@@ -439,7 +439,7 @@ class _NotifSearchBarState extends ConsumerState<_NotifSearchBar> {
                 )
               : null,
           filled: true,
-          fillColor: const Color(0xFF2A2A2A),
+          fillColor: const Color(0xFFF5F5F5),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 8,
@@ -536,7 +536,7 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active ? BsTokens.brand : const Color(0xFF2A2A2A),
+      color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -576,7 +576,7 @@ class _NotifList extends ConsumerWidget {
     if (items.isEmpty) {
       return RefreshIndicator(
         color: BsTokens.brand,
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFFFFFFFF),
         onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
         child: LayoutBuilder(
           builder: (_, constraints) => SingleChildScrollView(
@@ -616,7 +616,7 @@ class _NotifList extends ConsumerWidget {
 
     return RefreshIndicator(
       color: BsTokens.brand,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFFFFFFFF),
       onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -628,7 +628,7 @@ class _NotifList extends ConsumerWidget {
             return const Divider(
               height: 1,
               indent: 76,
-              color: Color(0xFF2A2A2A),
+              color: Color(0xFFF5F5F5),
             );
           }
           return const SizedBox.shrink();
@@ -725,7 +725,7 @@ class _DismissibleRow extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('התראה נמחקה'),
-            backgroundColor: const Color(0xFF2A2A2A),
+            backgroundColor: const Color(0xFFF5F5F5),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'ביטול',
@@ -753,7 +753,7 @@ class _MiniPill extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
         height: 36,
         decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
+          color: const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(18),
         ),
         alignment: Alignment.center,
@@ -796,7 +796,7 @@ class _NotifRow extends ConsumerWidget {
               value: 'read',
               child: Row(
                 children: [
-                  Icon(Icons.done, color: Colors.white70, size: 20),
+                  Icon(Icons.done, color: Colors.black54, size: 20),
                   SizedBox(width: 12),
                   Text(
                     'סמן כנקרא',
@@ -836,7 +836,7 @@ class _NotifRow extends ConsumerWidget {
         ? const Color(0xFF3D1515)
         : isUnread
             ? BsTokens.brand.withValues(alpha: 0.15)
-            : const Color(0xFF2A2A2A);
+            : const Color(0xFFF5F5F5);
 
     return InkWell(
       onTap: () {

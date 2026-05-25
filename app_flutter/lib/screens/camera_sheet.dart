@@ -93,7 +93,7 @@ class _CameraScreenState extends State<CameraScreen> {
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.flash_off, color: Colors.white70, size: 24),
+                    icon: const Icon(Icons.flash_off, color: Colors.black54, size: 24),
                     onPressed: () => showToast(context, 'פלאש — בבנייה'),
                   ),
                 ],
@@ -207,7 +207,7 @@ class _CameraScreenState extends State<CameraScreen> {
                                     Text(
                                       m.label,
                                       style: TextStyle(
-                                        color: sel ? Colors.white : Colors.white70,
+                                        color: sel ? Colors.white : Colors.black54,
                                         fontSize: 13,
                                         fontWeight: sel
                                             ? FontWeight.w700
@@ -260,7 +260,7 @@ class _GalleryThumb extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: Colors.white54, size: 26),
+              Icon(icon, color: Colors.black38, size: 26),
               const SizedBox(height: 4),
               Text(label,
                   style: const TextStyle(color: Colors.white38, fontSize: 9)),
@@ -333,7 +333,7 @@ class _ModeFrame extends StatelessWidget {
         Container(
           width: 260, height: 200,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.white54, width: 1.5),
+            border: Border.all(color: Colors.black38, width: 1.5),
             borderRadius: BorderRadius.circular(12),
           ),
           alignment: Alignment.center,

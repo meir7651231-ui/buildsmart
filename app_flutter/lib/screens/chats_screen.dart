@@ -233,7 +233,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
                 )
               : null,
           filled: true,
-          fillColor: const Color(0xFF2A2A2A),
+          fillColor: const Color(0xFFF5F5F5),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 8,
@@ -318,7 +318,7 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active ? BsTokens.brand : const Color(0xFF2A2A2A),
+      color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -402,7 +402,7 @@ class _ThreadList extends ConsumerWidget {
     return ListView.separated(
       itemCount: threads.length,
       separatorBuilder: (_, __) =>
-          const Divider(height: 1, indent: 76, color: Color(0xFF2A2A2A)),
+          const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
       itemBuilder: (context, i) => _DismissibleThread(thread: threads[i]),
     );
   }
@@ -421,14 +421,14 @@ class _DismissibleThread extends ConsumerWidget {
       key: ValueKey(thread.id),
       direction: DismissDirection.endToStart,
       background: const ColoredBox(
-        color: Color(0xFF2A2A2A),
+        color: Color(0xFFF5F5F5),
         child: Align(
           alignment: AlignmentDirectional.centerStart,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
             child: Icon(
               Icons.archive_outlined,
-              color: Colors.white70,
+              color: Colors.black54,
               size: 26,
             ),
           ),
@@ -441,7 +441,7 @@ class _DismissibleThread extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('שיחה הועברה לארכיון'),
-            backgroundColor: const Color(0xFF2A2A2A),
+            backgroundColor: const Color(0xFFF5F5F5),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'ביטול',
@@ -492,7 +492,7 @@ class _ThreadRow extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: thread.isBot
                         ? BsTokens.brand.withValues(alpha: 0.15)
-                        : const Color(0xFF2A2A2A),
+                        : const Color(0xFFF5F5F5),
                     shape: BoxShape.circle,
                     border: missed
                         ? Border.all(color: BsTokens.brand, width: 1.5)
@@ -701,11 +701,11 @@ class _ChatPageState extends State<_ChatPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFECE5DD),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         titleSpacing: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white70),
+          icon: const Icon(Icons.arrow_back, color: Colors.black54),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -716,7 +716,7 @@ class _ChatPageState extends State<_ChatPage> {
                   width: 36,
                   height: 36,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF2A2A2A),
+                    color: Color(0xFFF5F5F5),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -736,7 +736,7 @@ class _ChatPageState extends State<_ChatPage> {
                         color: const Color(0xFF4CAF50),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFF1A1A1A),
+                          color: const Color(0xFFFFFFFF),
                           width: 1.5,
                         ),
                       ),
@@ -772,15 +772,15 @@ class _ChatPageState extends State<_ChatPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.white70),
+            icon: const Icon(Icons.more_vert, color: Colors.black54),
             onPressed: () => showToast(context, 'עוד — בבנייה'),
           ),
           IconButton(
-            icon: const Icon(Icons.videocam_outlined, color: Colors.white70),
+            icon: const Icon(Icons.videocam_outlined, color: Colors.black54),
             onPressed: () => showToast(context, 'שיחת וידאו — בבנייה'),
           ),
           IconButton(
-            icon: const Icon(Icons.call_outlined, color: Colors.white70),
+            icon: const Icon(Icons.call_outlined, color: Colors.black54),
             onPressed: () => showToast(context, 'שיחה — בבנייה'),
           ),
         ],
@@ -1023,7 +1023,7 @@ class _MiniPill extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
         height: 36,
         decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
+          color: const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(18),
         ),
         alignment: Alignment.center,

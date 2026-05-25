@@ -23,7 +23,7 @@ class RegressionPanelScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF111111),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFFFFFFFF),
         foregroundColor: Colors.white,
         title: const Text(
           '🔬 מרכז בדיקות רגרסיה',
@@ -103,7 +103,7 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: ok
@@ -188,7 +188,7 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active ? BsTokens.brand : const Color(0xFF2A2A2A),
+      color: active ? BsTokens.brand : const Color(0xFFF5F5F5),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -221,7 +221,7 @@ class _ResultCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: ok
@@ -232,13 +232,13 @@ class _ResultCard extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(
           dividerColor: Colors.transparent,
-          unselectedWidgetColor: Colors.white70,
+          unselectedWidgetColor: Colors.black54,
         ),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 12),
           childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-          iconColor: Colors.white70,
-          collapsedIconColor: Colors.white54,
+          iconColor: Colors.black54,
+          collapsedIconColor: Colors.black38,
           initiallyExpanded: !ok,
           title: Row(
             children: [
@@ -268,7 +268,7 @@ class _ResultCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2A2A2A),
+                    color: const Color(0xFFF5F5F5),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(

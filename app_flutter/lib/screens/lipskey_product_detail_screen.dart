@@ -176,7 +176,7 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
   Widget _buildHint() => const Center(
         child: Text(
           '← גרור לסיבוב · צבוט להגדלה →',
-          style: TextStyle(color: Colors.white24, fontSize: 12, letterSpacing: 0.3),
+          style: TextStyle(color: Colors.black12, fontSize: 12, letterSpacing: 0.3),
         ),
       );
 
@@ -317,7 +317,7 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
               width: 36, height: 3,
               margin: const EdgeInsets.only(bottom: 14),
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Colors.black12,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -389,7 +389,7 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
 
           const SizedBox(height: 12),
           Text('עמוד ${p.page} · קטלוג ליפסקי ברקן 2024',
-              style: const TextStyle(color: Colors.white24, fontSize: 11)),
+              style: const TextStyle(color: Colors.black12, fontSize: 11)),
         ],
       ],
     );
@@ -400,7 +400,7 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
         child: Row(children: [
           Text(emoji, style: const TextStyle(fontSize: 15)),
           const SizedBox(width: 8),
-          Text(label, style: const TextStyle(color: Colors.white54, fontSize: 13)),
+          Text(label, style: const TextStyle(color: Colors.black38, fontSize: 13)),
           const Spacer(),
           Text(value, style: const TextStyle(color: Colors.white, fontSize: 13)),
         ]),
@@ -422,9 +422,9 @@ class _Btn extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.black45,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white24),
+            border: Border.all(color: Colors.black12),
           ),
-          child: Icon(icon, color: Colors.white70, size: 20),
+          child: Icon(icon, color: Colors.black54, size: 20),
         ),
       );
 }
