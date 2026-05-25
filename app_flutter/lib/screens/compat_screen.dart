@@ -166,6 +166,52 @@ bool productSuitableForTemp(LipskeyCatalogProduct p, int tempC) {
   return t == null || tempC <= t;
 }
 
+// ── line compliance / completeness ──────────────────────────────────────────────
+
+class LineCheck {
+  const LineCheck(this.label, this.satisfied, this.why);
+  final String label;   // required component
+  final bool satisfied; // present in the chain?
+  final String why;     // why it's required
+}
+
+/// Detects the safety/durability components a hot line requires and whether the
+/// current chain includes them — turning expert review into an automatic gate.
+List<LineCheck> lineComplianceChecklist(
+    List<LipskeyCatalogProduct> chain, int tempC) {
+  final skus = chain.map((p) => p.sku).toSet();
+  final mats = chain.map(productMaterial).whereType<String>().toSet();
+  bool has(Set<String> ok) => skus.any(ok.contains);
+
+  final hot        = tempC >= 60;
+  final hasPex     = mats.contains('PEX');
+  final recirc     = skus.contains('HW-PUMP-25') || skus.contains('HW-TEE-RECIRC');
+  final dissimilar = mats.contains('נחושת') && mats.contains('פלדה');
+
+  return [
+    LineCheck('ברז ניתוק לתחזוקה', has({'HW-BALL-1', 'HW-BALL-15'}), 'כל קו בלחץ'),
+    if (recirc) ...[
+      LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}), 'לולאת recirculation'),
+      LineCheck('שסתום מאזן / TRV', has({'HW-BALANCE-15'}), 'איזון הלולאה'),
+      LineCheck('מפוח אוויר', has({'HW-AIRVENT'}), 'פליטת אוויר בלולאה'),
+    ],
+    if (dissimilar)
+      LineCheck('רקורד דיאלקטרי', has({'HW-DIELECTRIC-15'}), 'הפרדה גלוונית נחושת↔פלדה'),
+    if (hasPex)
+      LineCheck('מפצה התפשטות', has({'HW-EXP-COMP-20'}), 'PEX מתרחב בחום'),
+    if (hot)
+      LineCheck('שסתום פורק לחץ (PRV)', has({'HW-PRV-34'}), 'מערכת חמה סגורה'),
+  ];
+}
+
+/// Site-installation reminders (not series line-items — wrap / support / seal).
+List<String> lineInstallReminders(int tempC) => [
+      if (tempC >= 60) 'בידוד תרמי על כל הקו',
+      'חבקים/תמיכה + שיפוע לקטע אופקי ארוך',
+      'איטום: טבעות Press / O-ring / PTFE',
+      'נקודת בדיקה/גישה לתחזוקה',
+    ];
+
 // ── compatibility logic ───────────────────────────────────────────────────────
 
 bool canConnect(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
@@ -1162,108 +1208,204 @@ class ChainBuilderSheet extends ConsumerWidget {
 
             const Divider(height: 1, color: _divider),
 
-            // ── product list in chain ─────────────────────────────────────────
-            Expanded(child: ListView.separated(
+            // ── product list + compliance checklist (single scroll) ────────────
+            Expanded(child: ListView(
               controller: ctrl,
               padding: const EdgeInsets.symmetric(vertical: 4),
-              itemCount: chain.length,
-              separatorBuilder: (_, __) =>
-                  const Divider(height: 1, indent: 72, color: _divider),
-              itemBuilder: (_, i) {
-                final p = chain[i];
-                final isFirst = i == 0;
-                final isLast = i == chain.length - 1;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 10),
-                  child: Row(children: [
-                    // step indicator
-                    Container(
-                      width: 28, height: 28,
-                      decoration: BoxDecoration(
-                        color: i == 0 ? _brand : const Color(0xFF059669),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text('${i + 1}',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700)),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(p.nameHe,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                color: _title,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 2),
-                        Row(children: [
-                          if (p.connectionGender != null)
-                            Text(_gLbl(p.connectionGender),
-                                style: TextStyle(
-                                    color: _gColor(p.connectionGender),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600)),
-                          if (p.connectionSizes.isNotEmpty) ...[
-                            const SizedBox(width: 6),
-                            Text(
-                              p.connectionSizes.map((s) => 'DN$s').join(' · '),
-                              style: const TextStyle(
-                                  color: _sub, fontSize: 11)),
-                          ],
-                          if (productMaterial(p) != null) ...[
-                            const SizedBox(width: 6),
-                            Text('· ${productMaterial(p)}',
-                                style: const TextStyle(
-                                    color: _sub, fontSize: 11)),
-                          ],
-                        ]),
-                        // material / temperature suitability for the line
-                        if (!productSuitableForTemp(p, lineTemp))
-                          _TempWarn(
-                              maxTemp: productMaxTempC(p)!.round(),
-                              lineTemp: lineTemp,
-                              material: productMaterial(p) ?? ''),
-                        // compatibility check + pipe segment with next product
-                        if (!isLast) ...[
-                          _CompatCheck(a: chain[i], b: chain[i + 1]),
-                          Builder(builder: (ctx) {
-                            final dn = pipeConnectionDn(chain[i], chain[i + 1]);
-                            return dn != null
-                                ? _PipeSegment(dn: dn)
-                                : const SizedBox.shrink();
-                          }),
-                        ],
-                      ],
-                    )),
-                    // remove button
-                    if (!isFirst)
-                      GestureDetector(
-                        onTap: () {
-                          final updated = [...chain]..removeAt(i);
-                          ref.read(chainProvider.notifier).state = updated;
-                          Navigator.pop(context);
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.all(4),
-                          child: Icon(Icons.close, size: 18, color: _sub),
-                        ),
-                      ),
-                  ]),
-                );
-              },
+              children: [
+                for (int i = 0; i < chain.length; i++) ...[
+                  if (i > 0) const Divider(height: 1, indent: 72, color: _divider),
+                  _ChainListItem(
+                    product: chain[i],
+                    index: i,
+                    isLast: i == chain.length - 1,
+                    next: i < chain.length - 1 ? chain[i + 1] : null,
+                    lineTemp: lineTemp,
+                    onRemove: i == 0
+                        ? null
+                        : () {
+                            ref.read(chainProvider.notifier).state =
+                                [...chain]..removeAt(i);
+                            Navigator.pop(context);
+                          },
+                  ),
+                ],
+                if (chain.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _ComplianceChecklist(
+                    checks: lineComplianceChecklist(chain, lineTemp),
+                    reminders: lineInstallReminders(lineTemp),
+                  ),
+                ],
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+              ],
             )),
-
-            SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
           ]),
         ),
       ),
+    );
+  }
+}
+
+// One row of the chain product list
+class _ChainListItem extends StatelessWidget {
+  const _ChainListItem({
+    required this.product,
+    required this.index,
+    required this.isLast,
+    required this.next,
+    required this.lineTemp,
+    required this.onRemove,
+  });
+  final LipskeyCatalogProduct product;
+  final int index;
+  final bool isLast;
+  final LipskeyCatalogProduct? next;
+  final int lineTemp;
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = product;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(children: [
+        Container(
+          width: 28, height: 28,
+          decoration: BoxDecoration(
+            color: index == 0 ? _brand : const Color(0xFF059669),
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: Text('${index + 1}',
+              style: const TextStyle(
+                  color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(p.nameHe,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    color: _title, fontSize: 14, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 2),
+            Row(children: [
+              if (p.connectionGender != null)
+                Text(_gLbl(p.connectionGender),
+                    style: TextStyle(
+                        color: _gColor(p.connectionGender),
+                        fontSize: 11, fontWeight: FontWeight.w600)),
+              if (p.connectionSizes.isNotEmpty) ...[
+                const SizedBox(width: 6),
+                Text(p.connectionSizes.map((s) => 'DN$s').join(' · '),
+                    style: const TextStyle(color: _sub, fontSize: 11)),
+              ],
+              if (productMaterial(p) != null) ...[
+                const SizedBox(width: 6),
+                Text('· ${productMaterial(p)}',
+                    style: const TextStyle(color: _sub, fontSize: 11)),
+              ],
+            ]),
+            if (!productSuitableForTemp(p, lineTemp))
+              _TempWarn(
+                  maxTemp: productMaxTempC(p)!.round(),
+                  lineTemp: lineTemp,
+                  material: productMaterial(p) ?? ''),
+            if (!isLast && next != null) ...[
+              _CompatCheck(a: p, b: next!),
+              if (pipeConnectionDn(p, next!) != null)
+                _PipeSegment(dn: pipeConnectionDn(p, next!)!),
+            ],
+          ],
+        )),
+        if (onRemove != null)
+          GestureDetector(
+            onTap: onRemove,
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(Icons.close, size: 18, color: _sub),
+            ),
+          ),
+      ]),
+    );
+  }
+}
+
+// Auto compliance / completeness checklist for the built line
+class _ComplianceChecklist extends StatelessWidget {
+  const _ComplianceChecklist({required this.checks, required this.reminders});
+  final List<LineCheck> checks;
+  final List<String> reminders;
+
+  @override
+  Widget build(BuildContext context) {
+    final missing = checks.where((c) => !c.satisfied).length;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F7F9),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+            color: missing == 0 ? const Color(0xFF059669) : Colors.red.shade300),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(missing == 0 ? Icons.verified : Icons.warning_amber_rounded,
+              size: 16,
+              color: missing == 0 ? const Color(0xFF059669) : Colors.red),
+          const SizedBox(width: 6),
+          Text(
+            missing == 0
+                ? 'בדיקת תקינות: הקו שלם ✓'
+                : 'בדיקת תקינות: חסרים $missing רכיבים',
+            style: TextStyle(
+                color: missing == 0 ? const Color(0xFF059669) : Colors.red,
+                fontSize: 13, fontWeight: FontWeight.w800),
+          ),
+        ]),
+        const SizedBox(height: 8),
+        for (final c in checks)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(children: [
+              Icon(c.satisfied ? Icons.check_circle : Icons.cancel,
+                  size: 14,
+                  color: c.satisfied ? const Color(0xFF059669) : Colors.red),
+              const SizedBox(width: 6),
+              Text(c.label,
+                  style: TextStyle(
+                      color: c.satisfied ? _title : Colors.red,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      decoration: c.satisfied ? null : null)),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text('· ${c.why}',
+                    style: const TextStyle(color: _sub, fontSize: 10)),
+              ),
+            ]),
+          ),
+        const SizedBox(height: 4),
+        const Divider(height: 12, color: _divider),
+        const Text('דרישות התקנה (לאימות בשטח):',
+            style: TextStyle(
+                color: _sub, fontSize: 11, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        for (final r in reminders)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: Row(children: [
+              const Icon(Icons.info_outline, size: 12, color: _sub),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(r, style: const TextStyle(color: _sub, fontSize: 11)),
+              ),
+            ]),
+          ),
+      ]),
     );
   }
 }

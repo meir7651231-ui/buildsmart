@@ -342,8 +342,18 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
       maxTempC: 110, ends: [_cu('15'), _cu('15')]),
 
   // ── safety (closed hot loop) ────────────────────────────────────────────────
+  // PRV mounts on the DN15 safety tee (modelled inline on the loop).
   'HW-PRV-34': VerifiedSpec(sku: 'HW-PRV-34', material: _brass, pressureRating: 'PN10',
-      maxTempC: 110, ends: [_bm('3/4"')]),
+      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
   'HW-EXPVESSEL': VerifiedSpec(sku: 'HW-EXPVESSEL', material: _steel, pressureRating: 'PN10',
-      maxTempC: 99, ends: [_bm('3/4"')]),
+      maxTempC: 99, ends: [_cu('15')]),
+  // Automatic float vent — terminal device on the DN15 loop tee.
+  'HW-AIRVENT': VerifiedSpec(sku: 'HW-AIRVENT', material: _brass, pressureRating: 'PN10',
+      maxTempC: 110, ends: [_cu('15')]),
+
+  // ── galvanic isolation + thermal expansion ──────────────────────────────────
+  'HW-DIELECTRIC-15': VerifiedSpec(sku: 'HW-DIELECTRIC-15', material: _brass, pressureRating: 'PN16',
+      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
+  'HW-EXP-COMP-20': VerifiedSpec(sku: 'HW-EXP-COMP-20', material: _pex, pressureRating: 'PN10',
+      maxTempC: 95, ends: [_px('20'), _px('20')]),
 };
