@@ -1750,7 +1750,7 @@ class _CatalogBody extends ConsumerWidget {
     final active = ref.watch(catalogSectionProvider);
     if (active == 'הכל') return _AllOverview(scrollCtrl: scrollCtrl);
     if (active == 'עץ חכם') return const _SmartTreeSection();
-    if (active == 'קטגוריות') return const _CatalogDrillSection();
+    if (active == 'קטגוריות') return const _CatalogList();
     if (active == 'מועדפים') return const _FavoritesSection();
     if (active == 'חיפושים אחרונים') return const _RecentSearchesSection();
     if (active == 'תאימות') return const CompatScreen();
