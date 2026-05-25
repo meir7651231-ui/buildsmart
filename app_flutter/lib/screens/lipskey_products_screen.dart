@@ -236,7 +236,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             fit: StackFit.expand,
             children: [
               Container(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: Colors.white,
                 alignment: Alignment.center,
                 child: p.imageAsset != null
                     ? Image.asset(p.imageAsset!,
