@@ -2332,6 +2332,22 @@ int _treeNodeCount(CatalogNode node) {
   return node.brandIds.length;
 }
 
+/// Secondary-line description — child names for a branch, or the
+/// product/model/brand summary for a leaf.
+String _treeNodeDesc(CatalogNode node) {
+  if (!node.isLeaf) {
+    return node.children.map((c) => c.title).join(' · ');
+  }
+  if (node.lipskeyCategory != null) {
+    return '${_treeNodeCount(node)} מוצרים · ליפסקי ברקן';
+  }
+  if (node.smartKey != null) {
+    final p = smartProductByKey(node.smartKey!);
+    return p != null ? '${p.brands.length} דגמים זמינים' : 'דגמים';
+  }
+  return '${node.brandIds.length} מותגים';
+}
+
 class _TreeDrill extends ConsumerWidget {
   const _TreeDrill({required this.path});
   final List<CatalogNode> path;
@@ -2473,6 +2489,7 @@ class _TreeCatRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final count = _treeNodeCount(node);
+    final desc = _treeNodeDesc(node);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -2486,7 +2503,7 @@ class _TreeCatRow extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               children: [
                 Container(
@@ -2501,34 +2518,57 @@ class _TreeCatRow extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    node.title,
-                    style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        node.title,
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              desc,
+                              style: const TextStyle(
+                                color: Color(0xFF888888),
+                                fontSize: 13,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (count > 0) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: BsTokens.brand,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '$count',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                if (count > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: BsTokens.brand,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      '$count',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
