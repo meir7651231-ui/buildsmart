@@ -197,6 +197,17 @@ List<({String label, int count})> _autoFacetOptions(
   return [for (final e in entries) (label: e.key, count: e.value)];
 }
 
+/// Description for a facet row — a preview of the next characterizing words in
+/// the group, falling back to sample product names.
+String _facetDesc(List<LipskeyCatalogProduct> matching) {
+  if (matching.isEmpty) return '';
+  final next = _autoFacetOptions(matching, const []);
+  if (next.isNotEmpty) {
+    return next.map((e) => e.label).take(6).join(' · ');
+  }
+  return matching.map((p) => p.nameHe).take(2).join(' · ');
+}
+
 String _sortLabel(CatalogSort s) => switch (s) {
       CatalogSort.defaultSort => 'ברירת מחדל',
       CatalogSort.nameAZ      => 'א-ת',
@@ -2582,30 +2593,43 @@ class _TreeDrill extends ConsumerWidget {
       final base =
           kLipskeyCatalog.where((p) => p.categoryHe == leafCat).toList();
       final curated = kProductFacets[leafCat];
-      var options = <({String label, int count})>[];
+      final options = <({String label, String desc, int count})>[];
       if (curated != null) {
         products = _applyFacets(base, curated, facetSel);
         if (facetSel.length < curated.length) {
           final group = curated[facetSel.length];
-          options = [
-            for (final f in group)
-              (
+          for (final f in group) {
+            final matching =
+                products.where((p) => _matchesFacet(p, group, f)).toList();
+            if (matching.isNotEmpty) {
+              options.add((
                 label: f.label,
-                count: products.where((p) => _matchesFacet(p, group, f)).length
-              ),
-          ].where((o) => o.count > 0).toList();
+                desc: _facetDesc(matching),
+                count: matching.length,
+              ));
+            }
+          }
         }
       } else {
         // Auto facets: filter by chosen words, split by next primary word.
         products = base
             .where((p) => facetSel.every((w) => p.nameHe.contains(w)))
             .toList();
-        options = _autoFacetOptions(products, facetSel);
+        for (final o in _autoFacetOptions(products, facetSel)) {
+          final matching =
+              products.where((p) => p.nameHe.contains(o.label)).toList();
+          options.add((
+            label: o.label,
+            desc: _facetDesc(matching),
+            count: o.count,
+          ));
+        }
       }
       rowWidgets = [
         for (final o in options)
           _FacetRow(
             label: o.label,
+            desc: o.desc,
             count: o.count,
             onTap: () => ref.read(catalogFacetProvider.notifier).state =
                 [...facetSel, o.label],
@@ -2677,14 +2701,16 @@ class _TreeDrill extends ConsumerWidget {
   }
 }
 
-// Bordered row for a product facet option (label + product-count badge).
+// Bordered row for a product facet option (label + description + count badge).
 class _FacetRow extends StatelessWidget {
   const _FacetRow({
     required this.label,
+    required this.desc,
     required this.count,
     required this.onTap,
   });
   final String label;
+  final String desc;
   final int count;
   final VoidCallback onTap;
 
@@ -2720,7 +2746,9 @@ class _FacetRow extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        '$count מוצרים',
+                        desc.isEmpty ? '$count מוצרים' : desc,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                             color: Color(0xFF888888), fontSize: 13),
                       ),
