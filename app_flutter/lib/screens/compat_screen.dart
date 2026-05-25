@@ -846,11 +846,10 @@ class _CompatSheetState extends ConsumerState<CompatSheet>
                                       color: _sub, fontSize: 12)),
                               ],
                             )),
-                            // direct "add to chain" button — fits tail = orange, else grey
+                            // 🔗 button: orange = fits tail, grey = already in chain or incompatible
                             Builder(builder: (btnCtx) {
-                              final fits = chainTail == null
-                                  ? true
-                                  : canConnect(chainTail, p);
+                              final inChain = chain.any((x) => x.sku == p.sku);
+                              final fits = !inChain && (chainTail == null || canConnect(chainTail, p));
                               return GestureDetector(
                                 onTap: () => _addToChain(p, btnCtx),
                                 child: Opacity(
@@ -862,8 +861,9 @@ class _CompatSheetState extends ConsumerState<CompatSheet>
                                       shape: BoxShape.circle,
                                     ),
                                     alignment: Alignment.center,
-                                    child: const Icon(Icons.link,
-                                        size: 16, color: Colors.white),
+                                    child: Icon(
+                                      inChain ? Icons.check : Icons.link,
+                                      size: 16, color: Colors.white),
                                   ),
                                 ),
                               );
@@ -1025,7 +1025,7 @@ class ChainBuilderSheet extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
         expand: false,
-        initialChildSize: 0.55,
+        initialChildSize: (0.35 + chain.length * 0.1).clamp(0.55, 0.85),
         minChildSize: 0.35,
         maxChildSize: 0.85,
         builder: (_, ctrl) => Container(
