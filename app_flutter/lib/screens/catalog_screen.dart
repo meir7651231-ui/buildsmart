@@ -1070,7 +1070,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
+          color: const Color(0xFFE7E7EA),
           borderRadius: BorderRadius.circular(24),
           border: open
               ? Border.all(color: BsTokens.brand, width: 1.5)
@@ -1138,7 +1138,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
                 onChanged: (v) =>
                     ref.read(searchQueryProvider.notifier).state = v,
                 onSubmitted: _submit,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
                 decoration: InputDecoration(
                   hintText: hasScope
                       ? 'חפש $scope...'
