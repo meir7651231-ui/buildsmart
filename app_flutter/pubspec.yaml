@@ -48,3 +48,9 @@ flutter:
   assets:
     - assets/lipskey/products/
     - assets/lipskey/pages/
+    - assets/fonts/
+
+  fonts:
+    - family: Heebo
+      fonts:
+        - asset: assets/fonts/Heebo.ttf
