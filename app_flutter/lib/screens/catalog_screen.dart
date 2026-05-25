@@ -11,6 +11,7 @@ import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -1608,22 +1609,13 @@ class _CatalogBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(catalogSectionProvider);
     if (active == 'הכל') return _CatalogList(scrollCtrl: scrollCtrl);
-
-    // Smart tree section gets its own dedicated view
     if (active == 'עץ חכם') return const _SmartTreeSection();
-
-    // Categories drill-down
     if (active == 'קטגוריות') return const _CatalogDrillSection();
+    if (active == 'מועדפים') return const _FavoritesSection();
+    if (active == 'חיפושים אחרונים') return const _RecentSearchesSection();
 
     final selected = ref.watch(catalogListItemsProvider)[active];
     final hasItems = selected != null && selected.isNotEmpty;
-
-    final emoji = switch (active) {
-      'חיפושים אחרונים' => '🕐',
-      'מועדפים'         => '⭐',
-      'קטגוריות'        => '▦',
-      _                 => '📋',
-    };
 
     return Column(
       children: [
@@ -1631,7 +1623,7 @@ class _CatalogBody extends ConsumerWidget {
         Expanded(
           child: hasItems
               ? _FilteredCatalogList(selected: selected)
-              : _EmptySection(emoji: emoji, label: active),
+              : _EmptySection(emoji: '📋', label: active),
         ),
       ],
     );
@@ -3965,4 +3957,156 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
       ),
     ),
   );
+}
+
+// ── מועדפים section ──────────────────────────────────────────────────────────
+
+class _FavoritesSection extends ConsumerWidget {
+  const _FavoritesSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favSkus = ref.watch(productFavoritesProvider);
+    if (favSkus.isEmpty) {
+      return const _EmptySection(emoji: '⭐', label: 'מועדפים');
+    }
+    final products =
+        kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).toList();
+    return Column(
+      children: [
+        Container(
+          color: const Color(0xFF1A1A1A),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Row(
+            children: [
+              const Text('⭐',
+                  style: TextStyle(fontSize: 14)),
+              const SizedBox(width: 8),
+              Text('${products.length} מועדפים',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700)),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            itemCount: products.length,
+            itemBuilder: (_, i) => _FavProductRow(product: products[i]),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FavProductRow extends ConsumerWidget {
+  const _FavProductRow({required this.product});
+  final LipskeyCatalogProduct product;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isFav = ref.watch(productFavoritesProvider).contains(product.sku);
+    return ListTile(
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      leading: product.imageAsset != null
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(product.imageAsset!,
+                  width: 48, height: 48, fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Text(product.typeEmoji,
+                      style: const TextStyle(fontSize: 30))),
+            )
+          : Text(product.typeEmoji,
+              style: const TextStyle(fontSize: 30)),
+      title: Text(product.nameHe,
+          style: const TextStyle(
+              color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+      subtitle: Text(product.brand,
+          style: const TextStyle(color: Color(0xFF9AA3B2), fontSize: 11)),
+      trailing: GestureDetector(
+        onTap: () =>
+            ref.read(productFavoritesProvider.notifier).toggle(product.sku),
+        child: Icon(
+          isFav ? Icons.favorite : Icons.favorite_border,
+          size: 20,
+          color: isFav ? const Color(0xFFFF4D6D) : const Color(0xFF3A4151),
+        ),
+      ),
+      onTap: () => showLipskeyProductSheet(context, product,
+          kLipskeyCatalog.where((p) => p.categoryHe == product.categoryHe).toList()),
+    );
+  }
+}
+
+// ── חיפושים אחרונים section ───────────────────────────────────────────────────
+
+class _RecentSearchesSection extends ConsumerWidget {
+  const _RecentSearchesSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(recentSearchesProvider);
+    if (items.isEmpty) {
+      return const _EmptySection(emoji: '🕐', label: 'חיפושים אחרונים');
+    }
+    return Column(
+      children: [
+        Container(
+          color: const Color(0xFF1A1A1A),
+          padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('${items.length} חיפושים אחרונים',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700)),
+              TextButton(
+                onPressed: () =>
+                    ref.read(recentSearchesProvider.notifier).state = [],
+                child: const Text('נקה הכל',
+                    style:
+                        TextStyle(color: BsTokens.brand, fontSize: 13)),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.separated(
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const Divider(
+                height: 1, indent: 56, color: Color(0xFF2A2A2A)),
+            itemBuilder: (_, i) {
+              final q = items[i];
+              return ListTile(
+                leading: const Icon(Icons.history,
+                    color: Color(0xFF9AA3B2), size: 20),
+                title: Text(q,
+                    style: const TextStyle(
+                        color: Colors.white, fontSize: 14)),
+                trailing: IconButton(
+                  icon: const Icon(Icons.close,
+                      color: Color(0xFF9AA3B2), size: 18),
+                  onPressed: () {
+                    final list =
+                        List<String>.from(ref.read(recentSearchesProvider))
+                          ..remove(q);
+                    ref.read(recentSearchesProvider.notifier).state =
+                        list;
+                  },
+                ),
+                onTap: () =>
+                    LipskeyProductsScreen.openWordSearch(context, q),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }

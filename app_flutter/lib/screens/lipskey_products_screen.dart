@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
+import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -309,28 +310,35 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
           ),
           // middle zone
           _open ? _stepper() : _plusBtn(),
-          // bottom zone — details (opens sheet)
-          GestureDetector(
-            onTap: _openSheet,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 18,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF3A4151)),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text('ⓘ',
-                      style: TextStyle(color: _muted, fontSize: 10)),
+          // bottom zone — details + favorite
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: _openSheet,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFF3A4151)),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text('ⓘ',
+                          style: TextStyle(color: _muted, fontSize: 10)),
+                    ),
+                    const SizedBox(width: 4),
+                    const Text('פרטים',
+                        style: TextStyle(color: _muted, fontSize: 10)),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                const Text('פרטים',
-                    style: TextStyle(color: _muted, fontSize: 10)),
-              ],
-            ),
+              ),
+              const SizedBox(height: 6),
+              _FavBtn(sku: p.sku),
+            ],
           ),
         ],
       ),
@@ -430,6 +438,24 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
           ),
           btn('+', () => setState(() => _qty++)),
         ],
+      ),
+    );
+  }
+}
+
+class _FavBtn extends ConsumerWidget {
+  const _FavBtn({required this.sku});
+  final String sku;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isFav = ref.watch(productFavoritesProvider).contains(sku);
+    return GestureDetector(
+      onTap: () => ref.read(productFavoritesProvider.notifier).toggle(sku),
+      child: Icon(
+        isFav ? Icons.favorite : Icons.favorite_border,
+        size: 18,
+        color: isFav ? const Color(0xFFFF4D6D) : const Color(0xFF3A4151),
       ),
     );
   }
