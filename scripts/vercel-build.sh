@@ -4,19 +4,26 @@
 # app_flutter/build/web (referenced by vercel.json `outputDirectory`).
 set -euo pipefail
 
-FLUTTER_VERSION="3.29.3"
+FLUTTER_VERSION="3.44.0"
 FLUTTER_HOME="$HOME/flutter"
 
 echo "=== BuildSmart · Vercel build ==="
 echo "Flutter target: $FLUTTER_VERSION"
 
 # Install Flutter (Vercel caches $HOME between builds when possible).
-if [ ! -x "$FLUTTER_HOME/bin/flutter" ]; then
-  echo "📥 Cloning Flutter $FLUTTER_VERSION ..."
+# Re-clone if cached version doesn't match the target version.
+CACHED_VERSION=""
+if [ -x "$FLUTTER_HOME/bin/flutter" ]; then
+  CACHED_VERSION=$("$FLUTTER_HOME/bin/flutter" --version 2>/dev/null | grep -oP 'Flutter \K[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)
+fi
+
+if [ "$CACHED_VERSION" = "$FLUTTER_VERSION" ]; then
+  echo "✅ Flutter cache hit at $FLUTTER_HOME ($CACHED_VERSION)"
+else
+  echo "📥 Cloning Flutter $FLUTTER_VERSION (cached: ${CACHED_VERSION:-none}) ..."
+  rm -rf "$FLUTTER_HOME"
   git clone --depth 1 --branch "$FLUTTER_VERSION" \
     https://github.com/flutter/flutter.git "$FLUTTER_HOME"
-else
-  echo "✅ Flutter cache hit at $FLUTTER_HOME"
 fi
 export PATH="$FLUTTER_HOME/bin:$PATH"
 flutter --version
