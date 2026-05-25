@@ -39,6 +39,13 @@ class BsTokens {
   static const Color inkLight = Color(0xFF1A1A1A);
   static const Color mutedLight = Color(0xFF666666);
 
+  // Dark theme colors — still used by AppTheme.dark(), dial & toast. Restored
+  // after the light-mode transition removed them while consumers still ref them.
+  static const Color bgDark = Color(0xFF0E1116);
+  static const Color cardDark = Color(0xFF181D26);
+  static const Color inkDark = Color(0xFFF1F3F8);
+  static const Color mutedDark = Color(0xFF9AA3B2);
+
   // Shadow used for dial circles + label pills.
   static const List<BoxShadow> circleShadow = [
     BoxShadow(
