@@ -185,7 +185,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               child: showFull
                   ? const Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: [_FilterChipsRow(), _SectionChipsRow()],
+                      children: [_SectionChipsRow()],
                     )
                   : const SizedBox.shrink(),
             ),
@@ -219,42 +219,6 @@ class _MiniSearchPill extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: const Icon(Icons.search, color: Color(0xFF888888), size: 18),
-      ),
-    );
-  }
-}
-
-/// Row of filter chips — מיון · פילטרים. Each chip cycles its value on tap.
-/// Mirrors WhatsApp's search-screen chip strip.
-class _FilterChipsRow extends ConsumerWidget {
-  const _FilterChipsRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final sort = ref.watch(catalogSortProvider);
-    final filter = ref.watch(catalogFilterProvider);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _Chip(
-              icon: '↕️',
-              label: _sortLabel(sort),
-              onTap: () =>
-                  ref.read(catalogSortProvider.notifier).state = _nextSort(sort),
-            ),
-            const SizedBox(width: 8),
-            _Chip(
-              icon: '⚙️',
-              label: _filterLabel(filter),
-              onTap: () => ref.read(catalogFilterProvider.notifier).state =
-                  _nextFilter(filter),
-            ),
-          ],
-        ),
       ),
     );
   }
