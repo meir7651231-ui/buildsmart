@@ -4501,6 +4501,17 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                     activeStage: _activeStage,
                     onStageTap: _tapStage,
                   ),
+                // Tapping a stage pops its matching accessories as chips.
+                if (_activeStage != null)
+                  _ExplodeChips(
+                    key: ValueKey(_activeStage),
+                    items: [
+                      for (final a in p.acc)
+                        if (p.stages[_activeStage!].match
+                            .any((m) => a.name.contains(m)))
+                          a,
+                    ],
+                  ),
                 // ── Selectors: מותג / סוג / מידה (collapsible) ──
                 _SheetSection(
                   title: 'בחר מותג',
@@ -4653,6 +4664,89 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// Matching accessories that "explode" in as chips when a stage is tapped.
+class _ExplodeChips extends StatefulWidget {
+  const _ExplodeChips({super.key, required this.items});
+  final List<SmartAcc> items;
+
+  @override
+  State<_ExplodeChips> createState() => _ExplodeChipsState();
+}
+
+class _ExplodeChipsState extends State<_ExplodeChips>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late List<Animation<double>> _anims;
+
+  @override
+  void initState() {
+    super.initState();
+    final n = widget.items.length;
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 250 + n * 70),
+    );
+    _anims = List.generate(n, (i) {
+      final start = (i * 0.12).clamp(0.0, 0.7);
+      return CurvedAnimation(
+        parent: _ctrl,
+        curve: Interval(start, (start + 0.5).clamp(0.0, 1.0),
+            curve: Curves.elasticOut),
+      );
+    });
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (var i = 0; i < widget.items.length; i++)
+            ScaleTransition(
+              scale: _anims[i],
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: BsTokens.brand.withAlpha(28),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: BsTokens.brand, width: 1),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(widget.items[i].emoji,
+                        style: const TextStyle(fontSize: 14)),
+                    const SizedBox(width: 5),
+                    Text(
+                      widget.items[i].name,
+                      style: const TextStyle(
+                        color: BsTokens.brand,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
