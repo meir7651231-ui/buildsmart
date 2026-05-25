@@ -181,6 +181,16 @@ List<TestResult> testCatalog() {
     pass: idx.isNotEmpty && (idx['ברז']?.isNotEmpty ?? false),
     got: '${idx.length} מילים',
   ));
+  // צעדים 76,79 — יחידות-מכירה ומזהה יציב
+  model.add(TestCheck(
+    name: 'uid ייחודי לכל מוצר (מותג:מק"ט)',
+    pass: products.map((p) => p.uid).toSet().length == products.length,
+    got: '${products.map((p) => p.uid).toSet().length}/${products.length}',
+  ));
+  model.add(TestCheck(
+    name: 'saleUnits כולל לפחות "בודד"',
+    pass: products.every((p) => p.saleUnits.containsKey('בודד')),
+  ));
   results.add(TestResult(
     id: 'catalog:model',
     category: TestCategory.catalog,

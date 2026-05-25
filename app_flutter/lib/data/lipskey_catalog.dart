@@ -61,6 +61,16 @@ class LipskeyCatalogProduct {
     return color; // fall back to the structured field
   }
 
+  /// Structured sale-units: בודד=1, ארגז=qtyPack, משטח=qtyPallet (צעד 76).
+  Map<String, int> get saleUnits => {
+        'בודד': 1,
+        if (qtyPack != null) 'ארגז': qtyPack!,
+        if (qtyPallet != null) 'משטח': qtyPallet!,
+      };
+
+  /// Stable id across catalog editions — brand-namespaced SKU (צעד 79).
+  String get uid => '${brand == 'AQUATEC' ? 'aq' : 'lp'}:$sku';
+
   /// A type-specific glyph derived from the product name, so image-less
   /// products are still distinguishable at a glance (instead of every item
   /// in a category showing the same category emoji).
