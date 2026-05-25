@@ -110,7 +110,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '217861',
     nameHe: 'מחסום (סיפון) אמריקאי 1.25" לכיור רחצה',
-    nameEn: '1.25" Bottle trap for | stainless ateel sink',
+    nameEn: '1.25" Bottle trap for stainless ateel sink',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 2250,
@@ -123,7 +123,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '213055',
     nameHe: 'מחסום (סיפון) אמריקאי 1.25" לכיור רחצה + יציאה למזגן',
-    nameEn: '1.25" Bottle trap for stainless | ateel sink, with A/C outlet',
+    nameEn: '1.25" Bottle trap for stainless ateel sink, with A/C outlet',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 2250,
@@ -136,7 +136,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '218553',
     nameHe: 'מחסום (סיפון) נסתר 1.25" לכיור אמבטיה',
-    nameEn: '1.25" Bottle trap for | stainless steel sink',
+    nameEn: '1.25" Bottle trap for stainless steel sink',
     color: 'לבן',
     qtyPack: 30,
     qtyPallet: 800,
@@ -162,7 +162,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '213054',
     nameHe: 'מחסום (סיפון) אמריקאי 1.25" לכיור רחצה + יציאה למזגן',
-    nameEn: '1.25" Bottle trap for stainless | ateel sink, with A/C outlet',
+    nameEn: '1.25" Bottle trap for stainless ateel sink, with A/C outlet',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 2250,
@@ -175,7 +175,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '116652',
     nameHe: 'מחסום (סיפון) 2" לכיור מטבח כפול *עם אפשרות כניסה למדיח כלים/מכונת כביסה (מס. 3)',
-    nameEn: '2" Bottle trap for double sink with | dishwasher/ washing machine outlet',
+    nameEn: '2" Bottle trap for double sink with dishwasher/ washing machine outlet',
     color: 'לבן',
     qtyPack: 15,
     qtyPallet: 300,
@@ -188,7 +188,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '116124',
     nameHe: 'מחסום (סיפון) 2" לכיור מטבח עם כניסה למדיח כלים/מכונת כביסה (מס. 2)',
-    nameEn: '2" Bottle trap with | dishwasher/ washing machine outlet',
+    nameEn: '2" Bottle trap with dishwasher/ washing machine outlet',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 400,
@@ -201,7 +201,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '116649',
     nameHe: 'מחסום (סיפון) 2" לכיור מטבח בודד (מס. 1)',
-    nameEn: '2" Bottle trap for single sink | 2" Bottle trap with',
+    nameEn: '2" Bottle trap for single sink 2" Bottle trap with',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 400,
@@ -227,7 +227,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '209448',
     nameHe: 'מחסום (סיפון) אמריקאי מס. 8 בודד 1.5"',
-    nameEn: '1.5" Pipe trap for stainless steel | sink with dishwasher outlet',
+    nameEn: '1.5" Pipe trap for stainless steel sink with dishwasher outlet',
     color: 'לבן',
     qtyPack: 30,
     qtyPallet: 600,
@@ -240,7 +240,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '171189',
     nameHe: 'מחסום (סיפון) אמריקאי 1.5" עם יציאה למדיח',
-    nameEn: '1.5" Pipe trap for washing machine | 1.5" Pipe trap for stainless steel',
+    nameEn: '1.5" Pipe trap for washing machine 1.5" Pipe trap for stainless steel',
     color: 'לבן',
     qtyPack: 30,
     qtyPallet: 600,
@@ -253,7 +253,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '218495',
     nameHe: 'סיפון אמריקאי 1.5" עם יציאה למדיח',
-    nameEn: '1.5" Pipe trap for washing machine | 1.5" Pipe trap for stainless steel',
+    nameEn: '1.5" Pipe trap for washing machine 1.5" Pipe trap for stainless steel',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 600,
@@ -266,7 +266,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '116127',
     nameHe: 'מחסום (סיפון) 2" לכיור מטבח כפול עם כניסה למדיח כלים/מכונת כביסה (מס. 4)',
-    nameEn: '2" Bottle trap for double sink with dishwasher/ | washing machine outlet',
+    nameEn: '2" Bottle trap for double sink with dishwasher/ washing machine outlet',
     color: 'לבן',
     qtyPack: 15,
     qtyPallet: 300,
@@ -292,7 +292,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '217005',
     nameHe: 'סיפון צד 2" אמריקאי עם כניסה למדיח כלים',
-    nameEn: '2" Side bottle trap | 2" Side bottle trap with',
+    nameEn: '2" Side bottle trap 2" Side bottle trap with',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 400,
@@ -305,7 +305,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '216984',
     nameHe: 'מחסום (סיפון) אמריקאי כפול 1.5" + כניסה / למדיח כלים (מס. 9)',
-    nameEn: '1.5" Bottle trap for double, stainless | steel sink with dishwasher outlet',
+    nameEn: '1.5" Bottle trap for double, stainless steel sink with dishwasher outlet',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 400,
@@ -318,7 +318,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '172349',
     nameHe: 'מחסום (סיפון) אמריקאי בודד 2" + כניסה / למדיח כלים (מס. 5)',
-    nameEn: '2" Bottle trap for stainless steel sink | with dishwasher outlet',
+    nameEn: '2" Bottle trap for stainless steel sink with dishwasher outlet',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 400,
@@ -331,7 +331,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '209447',
     nameHe: 'מחסום (סיפון) אמריקאי בודד 2" (מס. 7)',
-    nameEn: '2" Bottle trap for stainless steel sink | with dishwasher outlet',
+    nameEn: '2" Bottle trap for stainless steel sink with dishwasher outlet',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 400,
@@ -344,7 +344,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '116144',
     nameHe: 'מחסום (סיפון) אמריקאי כפול 2" + כניסה / למדיח כלים (מס. 6)',
-    nameEn: '1.5" Bottle trap for double, stainless | steel sink with dishwasher outlet',
+    nameEn: '1.5" Bottle trap for double, stainless steel sink with dishwasher outlet',
     color: 'לבן',
     qtyPack: 15,
     qtyPallet: 300,
@@ -357,7 +357,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '217004',
     nameHe: 'סיפון צד 2" עם כניסה למדיח כלים',
-    nameEn: '2" Side bottle trap with | dishwasher outlet',
+    nameEn: '2" Side bottle trap with dishwasher outlet',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 400,
@@ -396,7 +396,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '611045',
     nameHe: 'פיה קומפלט למכונת כביסה 1.25" (לסיפון מס. 2,4)',
-    nameEn: 'Outlet connection for washing machine | Outlet connection for dishwasher',
+    nameEn: 'Outlet connection for washing machine Outlet connection for dishwasher',
     color: 'לבן',
     qtyPack: 250,
     qtyPallet: 1875,
@@ -409,7 +409,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '193420',
     nameHe: 'פיה קומפלט למכונת כביסה 1.25" (לסיפון מס. 2,4)',
-    nameEn: 'Outlet connection for washing machine | Outlet connection for dishwasher',
+    nameEn: 'Outlet connection for washing machine Outlet connection for dishwasher',
     color: 'לבן',
     qtyPack: 250,
     qtyPallet: 1875,
@@ -448,7 +448,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '172033',
     nameHe: 'זרוע קומפלט לאגנית 1.5"',
-    nameEn: 'Shower tray waste kit | Drain valve',
+    nameEn: 'Shower tray waste kit Drain valve',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 1800,
@@ -461,7 +461,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '178700',
     nameHe: 'ונטיל לכיור אמריקאי',
-    nameEn: 'Shower tray waste kit | Drain valve',
+    nameEn: 'Shower tray waste kit Drain valve',
     color: 'לבן',
     qtyPack: 75,
     qtyPallet: 1875,
@@ -474,7 +474,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '645975',
     nameHe: 'צינור יציאה למדיח, שקית קומפלט (מתאימה לסיפון אמריקאי בלבד)',
-    nameEn: '1.25" Bottle trap extension | Outlet connection for dishwasher',
+    nameEn: '1.25" Bottle trap extension Outlet connection for dishwasher',
     color: 'לבן',
     qtyPack: 180,
     qtyPallet: 8100,
@@ -500,7 +500,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '612812',
     nameHe: 'מאריך למחסום 2"',
-    nameEn: '2" Bottle trap extension | 1.25" Bottle trap inlet',
+    nameEn: '2" Bottle trap extension 1.25" Bottle trap inlet',
     color: 'לבן',
     qtyPack: 115,
     qtyPallet: 5175,
@@ -513,7 +513,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '116233',
     nameHe: 'משפך קומפלט 1.25"',
-    nameEn: '1.25" Bottle trap inlet | 2" Bottle trap inlet',
+    nameEn: '1.25" Bottle trap inlet 2" Bottle trap inlet',
     color: 'לבן',
     qtyPack: null,
     qtyPallet: null,
@@ -539,7 +539,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '116178',
     nameHe: 'אביק לאמבטיה 1.5" עם מחסום',
-    nameEn: '1.5" Bath waste and overflow | with pipe trap',
+    nameEn: '1.5" Bath waste and overflow with pipe trap',
     color: null,
     qtyPack: 20,
     qtyPallet: 400,
@@ -2432,7 +2432,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '196206',
     nameHe: 'מחבר כפול DN32 | כולל 2 אומים ו-2 אטמים',
-    nameEn: 'Double socket DN32 | Includes 2 nuts and 2 seals',
+    nameEn: 'Double socket DN32 Includes 2 nuts and 2 seals',
     qtyPack: 100,
     qtyPallet: 4500,
     categoryHe: 'אביזרי תבריג',
@@ -2444,7 +2444,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '196172',
     nameHe: 'מחבר כפול DN40 · כולל 2 אומים ו-2 אטמים',
-    nameEn: 'Double socket DN40 | Includes 2 nuts and 2 seals',
+    nameEn: 'Double socket DN40 Includes 2 nuts and 2 seals',
     qtyPack: 80,
     qtyPallet: 3600,
     categoryHe: 'אביזרי תבריג',
@@ -2456,7 +2456,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '196175',
     nameHe: 'מחבר כפול DN50 · כולל 2 אומים ו-2 אטמים',
-    nameEn: 'Double socket DN50 | Includes 2 nuts and 2 seals',
+    nameEn: 'Double socket DN50 Includes 2 nuts and 2 seals',
     qtyPack: 50,
     qtyPallet: 2250,
     categoryHe: 'אביזרי תבריג',
@@ -2470,7 +2470,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '187463',
     nameHe: 'מסעף 45° - תבריג',
-    nameEn: 'Branch 45° DN32 screw-on | Includes 3 nuts and 3 seals',
+    nameEn: 'Branch 45° DN32 screw-on Includes 3 nuts and 3 seals',
     qtyPack: 50,
     qtyPallet: 3600,
     categoryHe: 'מסעפים וחיבורי אסלה',
@@ -2482,7 +2482,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '118221',
     nameHe: 'מסעף 45° DN40 עם תבריג · כולל 3 אומים ו-3 אטמים',
-    nameEn: 'Branch 45° DN40 screw-on | Includes 3 nuts and 3 seals',
+    nameEn: 'Branch 45° DN40 screw-on Includes 3 nuts and 3 seals',
     qtyPack: 30,
     qtyPallet: 1950,
     categoryHe: 'מסעפים וחיבורי אסלה',
@@ -2494,7 +2494,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '118222',
     nameHe: 'מסעף 45° DN50 עם תבריג · כולל 3 אומים ו-3 אטמים',
-    nameEn: 'Branch 45° DN50 screw-on | Includes 3 nuts and 3 seals',
+    nameEn: 'Branch 45° DN50 screw-on Includes 3 nuts and 3 seals',
     qtyPack: 18,
     qtyPallet: 1950,
     categoryHe: 'מסעפים וחיבורי אסלה',
@@ -2506,7 +2506,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '118219',
     nameHe: 'מסעף 45° DN75 עם תבריג · כולל 3 אומים ו-3 אטמים',
-    nameEn: 'Branch 45° DN75 screw-on | Includes 3 nuts and 3 seals',
+    nameEn: 'Branch 45° DN75 screw-on Includes 3 nuts and 3 seals',
     qtyPack: 18,
     qtyPallet: 1950,
     categoryHe: 'מסעפים וחיבורי אסלה',
@@ -2518,7 +2518,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '118220',
     nameHe: 'מסעף 45° DN110 עם תבריג · כולל 3 אומים ו-3 אטמים',
-    nameEn: 'Branch 45° DN110 screw-on | Includes 3 nuts and 3 seals',
+    nameEn: 'Branch 45° DN110 screw-on Includes 3 nuts and 3 seals',
     qtyPack: 18,
     qtyPallet: 1950,
     categoryHe: 'מסעפים וחיבורי אסלה',
@@ -2532,7 +2532,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '192291',
     nameHe: 'מסעף 45° DN75 — צד ללא תבריג | כולל 2 אומים ו-2 אטמים',
-    nameEn: 'Branch 45° DN75 one side without screw-on | 2 nuts and 2 seals',
+    nameEn: 'Branch 45° DN75 one side without screw-on 2 nuts and 2 seals',
     qtyPack: 30,
     qtyPallet: 1350,
     categoryHe: 'מסעפים וחיבורי אסלה',
@@ -2544,7 +2544,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '192271',
     nameHe: 'מסעף 45° DN110 — צד ללא תבריג · כולל 2 אומים ו-2 אטמים',
-    nameEn: 'Branch 45° DN110 one side without screw-on | 2 nuts and 2 seals',
+    nameEn: 'Branch 45° DN110 one side without screw-on 2 nuts and 2 seals',
     qtyPack: 18,
     qtyPallet: 1350,
     categoryHe: 'מסעפים וחיבורי אסלה',
@@ -2558,7 +2558,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '110689',
     nameHe: 'מסעף 90° DN32 עם תבריג | כולל 3 אומים ו-3 אטמים',
-    nameEn: 'Branch 90° DN32 screw-on | Includes 3 nuts and 3 seals',
+    nameEn: 'Branch 90° DN32 screw-on Includes 3 nuts and 3 seals',
     qtyPack: 18,
     qtyPallet: 3600,
     categoryHe: 'מסעפים וחיבורי אסלה',
@@ -2570,7 +2570,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '110682',
     nameHe: 'מסעף 90° DN50 עם תבריג · כולל 3 אומים ו-3 אטמים',
-    nameEn: 'Branch 90° DN50 screw-on | Includes 3 nuts and 3 seals',
+    nameEn: 'Branch 90° DN50 screw-on Includes 3 nuts and 3 seals',
     qtyPack: 18,
     qtyPallet: 2250,
     categoryHe: 'מסעפים וחיבורי אסלה',
@@ -2582,7 +2582,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '110681',
     nameHe: 'מסעף 90° DN75 עם תבריג · כולל 3 אומים ו-3 אטמים',
-    nameEn: 'Branch 90° DN75 screw-on | Includes 3 nuts and 3 seals',
+    nameEn: 'Branch 90° DN75 screw-on Includes 3 nuts and 3 seals',
     qtyPack: 18,
     qtyPallet: 2250,
     categoryHe: 'מסעפים וחיבורי אסלה',
@@ -2594,7 +2594,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
   LipskeyCatalogProduct(
     sku: '116684',
     nameHe: 'מסעף 90° - תבריג',
-    nameEn: 'Branch 90° DN110 screw-on | Includes 3 nuts and 3 seals',
+    nameEn: 'Branch 90° DN110 screw-on Includes 3 nuts and 3 seals',
     qtyPack: 18,
     qtyPallet: 1350,
     categoryHe: 'מסעפים וחיבורי אסלה',

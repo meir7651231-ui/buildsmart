@@ -34,6 +34,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with: { name: catalog-qa-report, path: catalog_qa.json }
 
+      - name: Snapshot source_truth (צעד 44)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: source-truth-snapshot, path: scripts/source_truth.json }
+
   analyze:
     runs-on: ubuntu-latest
     steps:
