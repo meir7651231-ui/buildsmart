@@ -2781,6 +2781,37 @@ class _FacetRow extends StatelessWidget {
 }
 
 
+// Small colored pill: a label with its count at the end (e.g. "חובה 3").
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+  final String label;
+  final int count;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        '$label $count',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
 // Header above the products listed beneath the drill rows.
 class _ProductsHeader extends ConsumerWidget {
   const _ProductsHeader({required this.count});
@@ -3436,30 +3467,19 @@ class _SmartTreeProductList extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    p.name,
-                                    style: const TextStyle(
-                                      color: Color(0xFF1A1A1A),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  p.recBrand.price != null ? '₪${p.recBrand.price}' : '—',
-                                  style: const TextStyle(
-                                    color: Color(0xFF888888),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              p.name,
+                              style: const TextStyle(
+                                color: Color(0xFF1A1A1A),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              '⚡ ${p.mustCount} פריטי חובה · ${p.acc.length} סה"כ',
+                              p.recBrand.price != null
+                                  ? '₪${p.recBrand.price}'
+                                  : 'מחיר לפי ספק',
                               style: const TextStyle(
                                 color: Color(0xFF888888),
                                 fontSize: 13,
@@ -3467,6 +3487,24 @@ class _SmartTreeProductList extends ConsumerWidget {
                             ),
                           ],
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      // חובה / סה"כ counts as colored badges at the end.
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _CountBadge(
+                            label: 'חובה',
+                            count: p.mustCount,
+                            color: const Color(0xFFE53935),
+                          ),
+                          const SizedBox(height: 4),
+                          _CountBadge(
+                            label: 'סה"כ',
+                            count: p.acc.length,
+                            color: const Color(0xFF22C55E),
+                          ),
+                        ],
                       ),
                     ],
                   ),
