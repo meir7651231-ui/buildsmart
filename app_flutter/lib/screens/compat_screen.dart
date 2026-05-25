@@ -12,6 +12,128 @@ const _title    = Color(0xFF1A1A1A);   // exact match: TextStyle(color: Color(0x
 const _sub      = Color(0xFF888888);   // exact match: TextStyle(color: Color(0xFF888888))
 const _brand    = BsTokens.brand;      // orange
 
+// ── puzzle clipper ────────────────────────────────────────────────────────────
+
+const double _d = 9.0;   // depth of tab / notch
+const double _s = 22.0;  // span width of tab / notch
+const double _r = 5.0;   // corner radius
+
+class _PuzzleClipper extends CustomClipper<Path> {
+  const _PuzzleClipper({this.notchBottom = false, this.tabTop = false});
+  final bool notchBottom;
+  final bool tabTop;
+
+  @override
+  Path getClip(Size size) {
+    final w = size.width;
+    final h = size.height;
+    final mw = w / 2;
+
+    final path = Path();
+
+    // ── Top-left rounded corner ───────────────────────────────────────────────
+    path.moveTo(_r, 0);
+
+    if (tabTop) {
+      // Left segment of top edge → tab start
+      path.lineTo(mw - _s / 2, 0);
+      // Tab: convex bump going DOWN (stays inside bounds)
+      path.cubicTo(
+        mw - _s / 2, _d,
+        mw - _s / 6, _d,
+        mw, _d,
+      );
+      path.cubicTo(
+        mw + _s / 6, _d,
+        mw + _s / 2, _d,
+        mw + _s / 2, 0,
+      );
+      // Right segment of top edge → top-right corner
+      path.lineTo(w - _r, 0);
+    } else {
+      path.lineTo(w - _r, 0);
+    }
+
+    // ── Top-right rounded corner ──────────────────────────────────────────────
+    path.quadraticBezierTo(w, 0, w, _r);
+
+    // ── Right edge ────────────────────────────────────────────────────────────
+    path.lineTo(w, h - _r);
+
+    // ── Bottom-right rounded corner ───────────────────────────────────────────
+    path.quadraticBezierTo(w, h, w - _r, h);
+
+    if (notchBottom) {
+      // Right segment of bottom edge → notch start (path goes right→left)
+      path.lineTo(mw + _s / 2, h);
+      // Notch: concave — curves UP inward
+      path.cubicTo(
+        mw + _s / 2, h - _d,
+        mw + _s / 6, h - _d,
+        mw, h - _d,
+      );
+      path.cubicTo(
+        mw - _s / 6, h - _d,
+        mw - _s / 2, h - _d,
+        mw - _s / 2, h,
+      );
+      // Left segment of bottom edge → bottom-left corner
+      path.lineTo(_r, h);
+    } else {
+      path.lineTo(_r, h);
+    }
+
+    // ── Bottom-left rounded corner ────────────────────────────────────────────
+    path.quadraticBezierTo(0, h, 0, h - _r);
+
+    // ── Left edge ─────────────────────────────────────────────────────────────
+    path.lineTo(0, _r);
+
+    // ── Top-left rounded corner ───────────────────────────────────────────────
+    path.quadraticBezierTo(0, 0, _r, 0);
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(_PuzzleClipper old) =>
+      old.notchBottom != notchBottom || old.tabTop != tabTop;
+}
+
+// ── puzzle box helper ─────────────────────────────────────────────────────────
+
+Widget _puzzleBox(
+  LipskeyCatalogProduct p, {
+  bool notchBottom = false,
+  bool tabTop = false,
+}) {
+  Widget child;
+  if (p.imageAsset != null) {
+    child = Image.asset(
+      p.imageAsset!,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) =>
+          Text(p.typeEmoji, style: const TextStyle(fontSize: 24)),
+    );
+  } else {
+    child = Text(p.typeEmoji, style: const TextStyle(fontSize: 24));
+  }
+
+  return SizedBox(
+    width: 50,
+    height: 50,
+    child: ClipPath(
+      clipper: _PuzzleClipper(notchBottom: notchBottom, tabTop: tabTop),
+      child: Container(
+        color: _surface,
+        alignment: Alignment.center,
+        child: child,
+      ),
+    ),
+  );
+}
+
 // ── filter state ─────────────────────────────────────────────────────────────
 
 final compatGenderProvider  = StateProvider<String>((_) => 'הכל');
@@ -327,18 +449,8 @@ class _Row extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(children: [
-            // avatar circle
-            Container(
-              width: 50, height: 50,
-              decoration: const BoxDecoration(color: _surface, shape: BoxShape.circle),
-              alignment: Alignment.center,
-              child: product.imageAsset != null
-                  ? ClipOval(child: Image.asset(product.imageAsset!,
-                      width: 50, height: 50, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          Text(product.typeEmoji, style: const TextStyle(fontSize: 24))))
-                  : Text(product.typeEmoji, style: const TextStyle(fontSize: 24)),
-            ),
+            // puzzle piece avatar — notch on bottom
+            _puzzleBox(product, notchBottom: true),
             const SizedBox(width: 12),
             // text
             Expanded(child: Column(
@@ -405,13 +517,62 @@ void _showSheet(BuildContext ctx, LipskeyCatalogProduct anchor,
   );
 }
 
-class CompatSheet extends ConsumerWidget {
+class CompatSheet extends StatefulWidget {
   const CompatSheet({super.key, required this.anchor, required this.matches});
   final LipskeyCatalogProduct anchor;
   final List<LipskeyCatalogProduct> matches;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  State<CompatSheet> createState() => _CompatSheetState();
+}
+
+class _CompatSheetState extends State<CompatSheet>
+    with SingleTickerProviderStateMixin {
+  LipskeyCatalogProduct? _connecting;
+  late final AnimationController _ctrl;
+  late final Animation<double> _slideAnim;
+  late final Animation<double> _fadeAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      duration: const Duration(milliseconds: 550),
+      vsync: this,
+    );
+    _slideAnim = Tween<double>(begin: 90, end: 0).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.elasticOut),
+    );
+    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0, 0.4)),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _connect(LipskeyCatalogProduct p, BuildContext ctx) {
+    setState(() => _connecting = p);
+    _ctrl.forward().then((_) async {
+      await Future.delayed(const Duration(milliseconds: 350));
+      if (!mounted) return;
+      Navigator.pop(context);
+      showLipskeyProductSheet(
+        ctx,
+        p,
+        kLipskeyCatalog.where((x) => x.categoryHe == p.categoryHe).toList(),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final anchor = widget.anchor;
+    final matches = widget.matches;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
@@ -419,134 +580,221 @@ class CompatSheet extends ConsumerWidget {
         initialChildSize: 0.65,
         minChildSize: 0.4,
         maxChildSize: 0.92,
-        builder: (_, ctrl) => Container(
-          decoration: const BoxDecoration(
-            color: _bg,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(children: [
-            // handle
+        builder: (_, ctrl) => Stack(
+          children: [
+            // ── sheet content ─────────────────────────────────────────────────
             Container(
-              margin: const EdgeInsets.only(top: 10, bottom: 6),
-              width: 40, height: 4,
-              decoration: BoxDecoration(
-                color: _divider, borderRadius: BorderRadius.circular(2)),
-            ),
-            // header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-              child: Row(children: [
+              decoration: const BoxDecoration(
+                color: _bg,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(children: [
+                // handle
                 Container(
-                  width: 44, height: 44,
-                  decoration: const BoxDecoration(color: _surface, shape: BoxShape.circle),
-                  alignment: Alignment.center,
-                  child: Text(anchor.typeEmoji, style: const TextStyle(fontSize: 22)),
+                  margin: const EdgeInsets.only(top: 10, bottom: 6),
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: _divider, borderRadius: BorderRadius.circular(2)),
                 ),
-                const SizedBox(width: 12),
-                Expanded(child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('מה מתחבר ל...',
-                        style: TextStyle(color: _sub, fontSize: 11)),
-                    Text(anchor.nameHe, maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            color: _title, fontSize: 14, fontWeight: FontWeight.w700)),
-                  ],
-                )),
-                if (anchor.connectionGender != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: _gColor(anchor.connectionGender).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: _gColor(anchor.connectionGender).withOpacity(0.4)),
-                    ),
-                    child: Text(_gLbl(anchor.connectionGender),
-                        style: TextStyle(
-                            color: _gColor(anchor.connectionGender),
-                            fontSize: 12, fontWeight: FontWeight.w700)),
-                  ),
-              ]),
-            ),
-            const Divider(height: 1, color: _divider),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: Row(children: [
-                Text(
-                  matches.isEmpty ? 'לא נמצאו מוצרים תואמים' : '${matches.length} מוצרים תואמים',
-                  style: TextStyle(
-                    color: matches.isEmpty ? _sub : const Color(0xFF059669),
-                    fontSize: 13, fontWeight: FontWeight.w600),
-                ),
-              ]),
-            ),
-            if (matches.isEmpty)
-              const Expanded(child: Center(child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('⊘', style: TextStyle(fontSize: 48, color: _divider)),
-                  SizedBox(height: 12),
-                  Text('אין מוצרים בקטלוג שמתחברים לפריט זה',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: _sub, fontSize: 13)),
-                ],
-              )))
-            else
-              Expanded(child: ListView.separated(
-                controller: ctrl,
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                itemCount: matches.length,
-                separatorBuilder: (_, __) =>
-                    const Divider(height: 1, indent: 72, color: _divider),
-                itemBuilder: (ctx2, i) {
-                  final p = matches[i];
-                  return InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                      showLipskeyProductSheet(ctx2, p,
-                          kLipskeyCatalog.where((x) => x.categoryHe == p.categoryHe).toList());
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      child: Row(children: [
-                        Container(
-                          width: 44, height: 44,
-                          decoration: const BoxDecoration(color: _surface, shape: BoxShape.circle),
+                // header
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                  child: Row(children: [
+                    // anchor puzzle piece — notch bottom, 44×44
+                    SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: ClipPath(
+                        clipper: const _PuzzleClipper(notchBottom: true),
+                        child: Container(
+                          color: _surface,
                           alignment: Alignment.center,
-                          child: p.imageAsset != null
-                              ? ClipOval(child: Image.asset(p.imageAsset!,
-                                  width: 44, height: 44, fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
-                                      Text(p.typeEmoji, style: const TextStyle(fontSize: 20))))
-                              : Text(p.typeEmoji, style: const TextStyle(fontSize: 20)),
+                          child: Text(anchor.typeEmoji,
+                              style: const TextStyle(fontSize: 22)),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(children: [
-                              Expanded(child: Text(p.nameHe,
-                                  maxLines: 1, overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                      color: _title, fontSize: 14, fontWeight: FontWeight.w600))),
-                              if (p.connectionGender != null)
-                                Text(_gLbl(p.connectionGender),
-                                    style: TextStyle(
-                                        color: _gColor(p.connectionGender),
-                                        fontSize: 11, fontWeight: FontWeight.w600)),
-                            ]),
-                            const SizedBox(height: 2),
-                            Text(p.connectionSizes.map((s) => 'DN$s').join(' · '),
-                                style: const TextStyle(color: _sub, fontSize: 12)),
-                          ],
-                        )),
-                      ]),
+                      ),
                     ),
-                  );
-                },
-              )),
-            SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
-          ]),
+                    const SizedBox(width: 12),
+                    Expanded(child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('מה מתחבר ל...',
+                            style: TextStyle(color: _sub, fontSize: 11)),
+                        Text(anchor.nameHe, maxLines: 1, overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                color: _title, fontSize: 14, fontWeight: FontWeight.w700)),
+                      ],
+                    )),
+                    if (anchor.connectionGender != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: _gColor(anchor.connectionGender).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                              color: _gColor(anchor.connectionGender).withOpacity(0.4)),
+                        ),
+                        child: Text(_gLbl(anchor.connectionGender),
+                            style: TextStyle(
+                                color: _gColor(anchor.connectionGender),
+                                fontSize: 12, fontWeight: FontWeight.w700)),
+                      ),
+                  ]),
+                ),
+                const Divider(height: 1, color: _divider),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                  child: Row(children: [
+                    Text(
+                      matches.isEmpty
+                          ? 'לא נמצאו מוצרים תואמים'
+                          : '${matches.length} מוצרים תואמים',
+                      style: TextStyle(
+                        color: matches.isEmpty ? _sub : const Color(0xFF059669),
+                        fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                  ]),
+                ),
+                if (matches.isEmpty)
+                  const Expanded(child: Center(child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('⊘', style: TextStyle(fontSize: 48, color: _divider)),
+                      SizedBox(height: 12),
+                      Text('אין מוצרים בקטלוג שמתחברים לפריט זה',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: _sub, fontSize: 13)),
+                    ],
+                  )))
+                else
+                  Expanded(child: ListView.separated(
+                    controller: ctrl,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    itemCount: matches.length,
+                    separatorBuilder: (_, __) =>
+                        const Divider(height: 1, indent: 72, color: _divider),
+                    itemBuilder: (ctx2, i) {
+                      final p = matches[i];
+                      return InkWell(
+                        onTap: () => _connect(p, ctx2),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          child: Row(children: [
+                            // compatible piece — tab top, 44×44
+                            SizedBox(
+                              width: 44,
+                              height: 44,
+                              child: ClipPath(
+                                clipper: const _PuzzleClipper(tabTop: true),
+                                child: Container(
+                                  color: _surface,
+                                  alignment: Alignment.center,
+                                  child: p.imageAsset != null
+                                      ? Image.asset(p.imageAsset!,
+                                          width: 44, height: 44,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) =>
+                                              Text(p.typeEmoji,
+                                                  style: const TextStyle(
+                                                      fontSize: 20)))
+                                      : Text(p.typeEmoji,
+                                          style: const TextStyle(fontSize: 20)),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(children: [
+                                  Expanded(child: Text(p.nameHe,
+                                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          color: _title, fontSize: 14,
+                                          fontWeight: FontWeight.w600))),
+                                  if (p.connectionGender != null)
+                                    Text(_gLbl(p.connectionGender),
+                                        style: TextStyle(
+                                            color: _gColor(p.connectionGender),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600)),
+                                ]),
+                                const SizedBox(height: 2),
+                                Text(
+                                  p.connectionSizes
+                                      .map((s) => 'DN$s')
+                                      .join(' · '),
+                                  style: const TextStyle(
+                                      color: _sub, fontSize: 12)),
+                              ],
+                            )),
+                          ]),
+                        ),
+                      );
+                    },
+                  )),
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+              ]),
+            ),
+
+            // ── connection animation overlay ──────────────────────────────────
+            if (_connecting != null)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: AnimatedBuilder(
+                    animation: _ctrl,
+                    builder: (_, __) => ColoredBox(
+                      color: Colors.white.withOpacity(_fadeAnim.value * 0.85),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Anchor piece (static at top)
+                            SizedBox(
+                              width: 50,
+                              height: 50,
+                              child: ClipPath(
+                                clipper: const _PuzzleClipper(notchBottom: true),
+                                child: Container(
+                                  color: _surface,
+                                  alignment: Alignment.center,
+                                  child: Text(anchor.typeEmoji,
+                                      style: const TextStyle(fontSize: 24)),
+                                ),
+                              ),
+                            ),
+                            // "connected" indicator (fades in after slide)
+                            if (_ctrl.value > 0.7)
+                              Container(
+                                margin: const EdgeInsets.symmetric(vertical: 2),
+                                width: 2,
+                                height: 16,
+                                color: const Color(0xFF059669),
+                              ),
+                            // Compatible piece slides UP to connect
+                            Transform.translate(
+                              offset: Offset(0, _slideAnim.value),
+                              child: _puzzleBox(_connecting!, tabTop: true),
+                            ),
+                            const SizedBox(height: 12),
+                            if (_ctrl.value > 0.75)
+                              const Text(
+                                'מחובר! ✓',
+                                style: TextStyle(
+                                  color: Color(0xFF059669),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
