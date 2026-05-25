@@ -186,6 +186,14 @@ List<String> lipskeyConnectionSizes(String name) {
   final out = <String>{};
   for (final raw in name.split(RegExp(r'\s+'))) {
     var w = _expandInchFractions(raw.trim());
+
+    // N×M / NxM format (HDPE compression fittings: pipe-size × thread-size).
+    // e.g. "16×1/2"" → pipe DN=16, thread side irrelevant for size matching.
+    final crossMatch = RegExp(r'^(\d{2,})[×x]').firstMatch(w);
+    if (crossMatch != null) {
+      out.add(crossMatch.group(1)!);
+      continue;
+    }
     final up = w.toUpperCase();
     if (up.startsWith('DN') && RegExp(r'\d').hasMatch(w)) {
       for (final part in up.replaceAll(RegExp(r'[^0-9/]'), '').split('/')) {

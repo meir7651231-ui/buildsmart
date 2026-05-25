@@ -23,13 +23,22 @@ final compatSearchProvider  = StateProvider<String>((_) => '');
 
 bool canConnect(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   if (a.sku == b.sku) return false;
+
+  // Must share at least one DN size
   final sA = a.connectionSizes.toSet();
   final sB = b.connectionSizes.toSet();
   if (sA.isEmpty || sB.isEmpty || sA.intersection(sB).isEmpty) return false;
+
+  // Both must have a defined gender AND be opposite (male↔female).
+  // If either is unknown we can't confirm a physical connection.
   final gA = a.connectionGender, gB = b.connectionGender;
-  if (gA != null && gB != null && gA == gB) return false;
+  if (gA == null || gB == null) return false;
+  if (gA == gB) return false;
+
+  // If both have a connection method it must match (thread↔thread, etc.)
   final mA = a.connectionMethod, mB = b.connectionMethod;
   if (mA != null && mB != null && mA != mB) return false;
+
   return true;
 }
 
