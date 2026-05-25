@@ -749,6 +749,20 @@ class _CompatSheetState extends ConsumerState<CompatSheet>
                                       color: _sub, fontSize: 12)),
                               ],
                             )),
+                            // direct "add to chain" button — outside the overlay
+                            GestureDetector(
+                              onTap: () => _addToChain(p),
+                              child: Container(
+                                width: 32, height: 32,
+                                decoration: BoxDecoration(
+                                  color: _brand,
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: Alignment.center,
+                                child: const Icon(Icons.link,
+                                    size: 16, color: Colors.white),
+                              ),
+                            ),
                           ]),
                         ),
                       );
