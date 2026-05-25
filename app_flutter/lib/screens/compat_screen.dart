@@ -641,12 +641,36 @@ class _CompatSheetState extends ConsumerState<CompatSheet>
     });
   }
 
-  void _addToChain(LipskeyCatalogProduct p) {
+  void _addToChain(LipskeyCatalogProduct p, BuildContext ctx) {
     final chain = ref.read(chainProvider);
-    final updated = [...chain];
-    if (updated.isEmpty) updated.add(widget.anchor);
-    if (!updated.any((x) => x.sku == p.sku)) updated.add(p);
-    ref.read(chainProvider.notifier).state = updated;
+
+    // First addition: add anchor then the tapped match (guaranteed compatible).
+    if (chain.isEmpty) {
+      ref.read(chainProvider.notifier).state = [widget.anchor, p];
+      Navigator.pop(context);
+      return;
+    }
+
+    // Skip duplicates silently.
+    if (chain.any((x) => x.sku == p.sku)) {
+      Navigator.pop(context);
+      return;
+    }
+
+    // Enforce: new piece must connect to the current tail.
+    final tail = chain.last;
+    if (!canConnect(tail, p)) {
+      final reason = connectionFailReason(tail, p);
+      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+        content: Text('לא ניתן לחבר — $reason',
+            textDirection: TextDirection.rtl),
+        backgroundColor: Colors.red.shade700,
+        duration: const Duration(seconds: 3),
+      ));
+      return; // keep sheet open so user can pick another product
+    }
+
+    ref.read(chainProvider.notifier).state = [...chain, p];
     Navigator.pop(context);
   }
 
@@ -663,6 +687,8 @@ class _CompatSheetState extends ConsumerState<CompatSheet>
   Widget build(BuildContext context) {
     final anchor = widget.anchor;
     final matches = widget.matches;
+    final chain = ref.watch(chainProvider);
+    final chainTail = chain.isEmpty ? null : chain.last;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -820,20 +846,28 @@ class _CompatSheetState extends ConsumerState<CompatSheet>
                                       color: _sub, fontSize: 12)),
                               ],
                             )),
-                            // direct "add to chain" button — outside the overlay
-                            GestureDetector(
-                              onTap: () => _addToChain(p),
-                              child: Container(
-                                width: 32, height: 32,
-                                decoration: BoxDecoration(
-                                  color: _brand,
-                                  shape: BoxShape.circle,
+                            // direct "add to chain" button — fits tail = orange, else grey
+                            Builder(builder: (btnCtx) {
+                              final fits = chainTail == null
+                                  ? true
+                                  : canConnect(chainTail, p);
+                              return GestureDetector(
+                                onTap: () => _addToChain(p, btnCtx),
+                                child: Opacity(
+                                  opacity: fits ? 1.0 : 0.35,
+                                  child: Container(
+                                    width: 32, height: 32,
+                                    decoration: BoxDecoration(
+                                      color: fits ? _brand : Colors.grey,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: const Icon(Icons.link,
+                                        size: 16, color: Colors.white),
+                                  ),
                                 ),
-                                alignment: Alignment.center,
-                                child: const Icon(Icons.link,
-                                    size: 16, color: Colors.white),
-                              ),
-                            ),
+                              );
+                            }),
                           ]),
                         ),
                       );
@@ -905,7 +939,7 @@ class _CompatSheetState extends ConsumerState<CompatSheet>
                                   label: const Text('הוסף לשרשרת',
                                       style: TextStyle(fontSize: 13,
                                           fontWeight: FontWeight.w700)),
-                                  onPressed: () => _addToChain(_connecting!),
+                                  onPressed: () => _addToChain(_connecting!, context),
                                 ),
                                 const SizedBox(width: 10),
                                 OutlinedButton(
