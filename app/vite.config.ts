@@ -47,7 +47,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         runtimeCaching: [
           {
-            urlPattern: ({ request }) => request.destination === 'document',
+            urlPattern: ({ request }: { request: Request }) => request.destination === 'document',
             handler: 'NetworkFirst',
             options: {
               cacheName: 'bs-html',
@@ -55,7 +55,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: ({ request }) =>
+            urlPattern: ({ request }: { request: Request }) =>
               request.destination === 'script' ||
               request.destination === 'style' ||
               request.destination === 'font',
@@ -63,7 +63,7 @@ export default defineConfig({
             options: { cacheName: 'bs-assets' },
           },
           {
-            urlPattern: ({ request }) => request.destination === 'image',
+            urlPattern: ({ request }: { request: Request }) => request.destination === 'image',
             handler: 'CacheFirst',
             options: {
               cacheName: 'bs-images',

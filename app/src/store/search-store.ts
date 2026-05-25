@@ -13,7 +13,7 @@ export const searchQuery = signal('');
 export const searchScope = signal<SearchScope>('all');
 export const searchSort = signal<SortMode>('default');
 
-export type ToolKind = 'voice' | 'barcode' | 'filters' | 'sort';
+export type ToolKind = 'voice' | 'barcode' | 'filters' | 'sort' | 'catalog';
 export const activeTool = signal<ToolKind | null>(null);
 
 export function setActiveTool(t: ToolKind | null): void {

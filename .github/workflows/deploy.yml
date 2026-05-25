@@ -3,26 +3,25 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - claude/whats-happening-LyY9G
       - main
+      - claude/whats-happening-LyY9G
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ─── Preact app (live at /buildsmart/) ──────────────────────
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -30,31 +29,46 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      - name: Install
+      - name: Install Preact deps
         working-directory: app
         run: npm ci
 
-      - name: Build
+      - name: Build Preact app
         working-directory: app
         run: npm run build
         env:
           GITHUB_PAGES: '1'
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      # ─── Flutter app (preview at /buildsmart/flutter/) ──────────
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          path: app/dist
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Install Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Build Flutter web
+        working-directory: app_flutter
+        run: flutter build web --release --base-href "/buildsmart/flutter/"
+
+      - name: Stage Flutter under /flutter/
+        run: |
+          mkdir -p app/dist/flutter
+          cp -r app_flutter/build/web/* app/dist/flutter/
+
+      # ─── Publish combined output ────────────────────────────────
+      - name: Push to gh-pages
+        run: |
+          cd app/dist
+          touch .nojekyll
+          git init -q
+          git config user.email "bot@buildsmart"
+          git config user.name "BuildSmart CI"
+          git checkout -q -b gh-pages
+          git add -A
+          git commit -q -m "deploy: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages

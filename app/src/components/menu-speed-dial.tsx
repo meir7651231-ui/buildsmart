@@ -1,7 +1,8 @@
 /* @legacy index.html:5383-5403 (bottom tabbar — בית / קטלוג / הפרויקטים / רכש / הגדרות)
- * The five items here mirror the legacy tabbar verbatim. R2/R3: every
- * tab destination is a dial level (never a page-swap). Tabs without a
- * built-out destination just closeMenu() for now. */
+ * Originally 5 tabs verbatim from the legacy tabbar. קטלוג was moved
+ * to the search FAB (it's a search-side primary action), leaving the
+ * menu FAB with 4 tabs. R2/R3: every tab destination is a dial level
+ * (never a page-swap). */
 import {
   menuOpen,
   closeMenu,
@@ -22,7 +23,6 @@ import {
   SettingsTopSubmenu,
   ProfileTreeSubmenu,
   ProjectsSubmenu,
-  CatalogSubmenu,
   CartSubmenu,
   HomeSubmenu,
   SettingsSubmenu,
@@ -47,16 +47,6 @@ const TABS: Tab[] = [
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 11l9-8 9 8v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-9z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'catalog',
-    label: 'קטלוג',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
-        <circle cx="11" cy="11" r="7" />
-        <path d="M21 21l-4.5-4.5" />
       </svg>
     ),
   },
@@ -98,7 +88,6 @@ const TABS: Tab[] = [
  * a dial of the 3 project names. */
 const TAB_HAS_SUBMENU: Record<MenuTab, boolean> = {
   home: true,
-  catalog: true,
   projects: true,
   cart: true,
   settings: true,
@@ -166,7 +155,6 @@ export function MenuSpeedDial() {
             </li>
             {active === 'settings' && <SettingsLevel />}
             {active === 'projects' && <ProjectsSubmenu />}
-            {active === 'catalog' && <CatalogSubmenu />}
             {active === 'cart' && <CartSubmenu />}
             {active === 'home' && <HomeSubmenu />}
           </>

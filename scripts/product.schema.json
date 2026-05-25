@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "BuildSmart LipskeyCatalogProduct",
+  "description": "סכמה רשמית למוצר בקטלוג — לשימוש כלים חיצוניים ואימות source_truth (צעד 80).",
+  "type": "object",
+  "required": ["sku", "nameHe", "categoryHe"],
+  "additionalProperties": true,
+  "properties": {
+    "sku":        { "type": "string", "minLength": 1, "description": "מק\"ט ייחודי (אלפאנומרי)" },
+    "nameHe":     { "type": "string", "minLength": 2, "description": "שם עברי נקי" },
+    "nameEn":     { "type": "string" },
+    "categoryHe": { "type": "string", "minLength": 1 },
+    "brand":      { "type": "string", "enum": ["AQUATEC", "ליפסקי", "פלסון", "חגור", "גרוהה", "חמת"] },
+    "sizes":      { "type": "array", "items": { "type": "string" }, "description": "מידות חיבור DN" },
+    "page":       { "type": "integer", "minimum": 0 },
+    "pdf":        { "type": "string" },
+    "imageFile":  { "type": ["string", "null"] }
+  }
+}

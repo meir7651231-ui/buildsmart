@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# צעד 48 — pre-commit: חוסם commit אם יש שגיאות קטלוג. התקנה:
+#   ln -sf ../../scripts/hooks/pre-commit .git/hooks/pre-commit
+if git diff --cached --name-only | grep -q "app_flutter/lib/data/"; then
+  python3 scripts/catalog_qa.py audit --json >/dev/null || {
+    echo "❌ catalog audit נכשל — תקן שגיאות לפני commit"; exit 1; }
+fi
