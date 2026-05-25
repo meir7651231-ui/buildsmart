@@ -2489,7 +2489,15 @@ String _treeNodeDesc(CatalogNode node) {
     return node.children.map((c) => c.title).join(' · ');
   }
   if (node.lipskeyCategory != null) {
-    return '${_treeNodeCount(node)} מוצרים · ליפסקי ברקן';
+    // Preview of what's inside (characterizing words / sample names) rather
+    // than a bare product count.
+    final prods = kLipskeyCatalog
+        .where((p) => p.categoryHe == node.lipskeyCategory)
+        .toList();
+    final preview = _facetDesc(prods);
+    return preview.isNotEmpty
+        ? preview
+        : '${_treeNodeCount(node)} מוצרים · ליפסקי ברקן';
   }
   if (node.smartKey != null) {
     final p = smartProductByKey(node.smartKey!);
