@@ -170,6 +170,77 @@ bool canConnect(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   return true;
 }
 
+// Returns a Hebrew explanation of WHY two products cannot connect.
+String connectionFailReason(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
+  final vA = kVerifiedSpecs[a.sku], vB = kVerifiedSpecs[b.sku];
+
+  if (vA != null && vB != null) {
+    // Both have verified specs — explain which ends are present and why none match.
+    final comprA = vA.ends.where((e) => e.type == EndType.hdpeCompression).map((e) => e.size).toSet();
+    final comprB = vB.ends.where((e) => e.type == EndType.hdpeCompression).map((e) => e.size).toSet();
+    final bsmA   = vA.ends.where((e) => e.type == EndType.bspMale).map((e) => e.size).toSet();
+    final bsmB   = vB.ends.where((e) => e.type == EndType.bspMale).map((e) => e.size).toSet();
+    final bsfA   = vA.ends.where((e) => e.type == EndType.bspFemale).map((e) => e.size).toSet();
+    final bsfB   = vB.ends.where((e) => e.type == EndType.bspFemale).map((e) => e.size).toSet();
+
+    // Compression ends exist on both but different sizes
+    if (comprA.isNotEmpty && comprB.isNotEmpty) {
+      final shared = comprA.intersection(comprB);
+      if (shared.isEmpty) return 'גודל שונה: DN${comprA.first} ↔ DN${comprB.first}';
+    }
+
+    // Thread conflict: both male or both female
+    if (bsmA.isNotEmpty && bsmB.isNotEmpty) {
+      final shared = bsmA.intersection(bsmB);
+      if (shared.isNotEmpty) return 'שני קצוות זכר ${shared.first}" — אין חיבור';
+    }
+    if (bsfA.isNotEmpty && bsfB.isNotEmpty) {
+      final shared = bsfA.intersection(bsfB);
+      if (shared.isNotEmpty) return 'שני קצוות נקבה ${shared.first}" — אין חיבור';
+    }
+
+    // Thread size mismatch
+    if (bsmA.isNotEmpty && bsfB.isNotEmpty) {
+      if (bsmA.intersection(bsfB).isEmpty) return 'גודל תבריג שונה: ${bsmA.first}" ↔ ${bsfB.first}"';
+    }
+    if (bsfA.isNotEmpty && bsmB.isNotEmpty) {
+      if (bsfA.intersection(bsmB).isEmpty) return 'גודל תבריג שונה: ${bsfA.first}" ↔ ${bsmB.first}"';
+    }
+
+    // One has only compression, other has only thread
+    if (comprA.isNotEmpty && comprB.isEmpty && bsmA.isEmpty && bsfA.isEmpty) {
+      return 'חיבור לחיצה vs תבריג — אין מתאם';
+    }
+    if (comprB.isNotEmpty && comprA.isEmpty && bsmB.isEmpty && bsfB.isEmpty) {
+      return 'חיבור לחיצה vs תבריג — אין מתאם';
+    }
+
+    return 'אין נקודת חיבור משותפת';
+  }
+
+  // Fallback: name-inference failure reasons
+  final sA = a.connectionSizes.toSet();
+  final sB = b.connectionSizes.toSet();
+  if (sA.isEmpty || sB.isEmpty) return 'גודל חיבור לא ידוע';
+  if (sA.intersection(sB).isEmpty) return 'גודל שונה: ${sA.first} ↔ ${sB.first}';
+
+  final gA = a.connectionGender, gB = b.connectionGender;
+  if (gA == null || gB == null) return 'מין חיבור לא ידוע';
+  if (gA == gB) {
+    final label = gA == 'male' ? 'זכר' : 'נקבה';
+    return 'שני קצוות $label — אין חיבור';
+  }
+
+  final mA = a.connectionMethod, mB = b.connectionMethod;
+  if (mA != null && mB != null && mA != mB) {
+    final lA = mA == 'thread' ? 'תבריג' : mA == 'glue' ? 'הדבקה' : 'אלקטרו';
+    final lB = mB == 'thread' ? 'תבריג' : mB == 'glue' ? 'הדבקה' : 'אלקטרו';
+    return 'שיטה שונה: $lA ↔ $lB';
+  }
+
+  return 'אין נקודת חיבור משותפת';
+}
+
 List<LipskeyCatalogProduct> compatibleWith(LipskeyCatalogProduct anchor) =>
     kLipskeyCatalog.where((p) => canConnect(anchor, p)).toList()
       ..sort((a, b) => (a.categoryHe == anchor.categoryHe ? 0 : 1)
@@ -1139,20 +1210,31 @@ class _CompatCheck extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ok = canConnect(a, b);
+    if (ok) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 3),
+        child: Row(children: [
+          const Icon(Icons.check_circle, size: 12, color: Color(0xFF059669)),
+          const SizedBox(width: 4),
+          const Text('חיבור תקין ✓',
+              style: TextStyle(color: Color(0xFF059669), fontSize: 10, fontWeight: FontWeight.w600)),
+        ]),
+      );
+    }
+    final reason = connectionFailReason(a, b);
     return Padding(
       padding: const EdgeInsets.only(top: 3),
-      child: Row(children: [
-        Icon(ok ? Icons.check_circle : Icons.error,
-            size: 12,
-            color: ok ? const Color(0xFF059669) : Colors.red),
-        const SizedBox(width: 4),
-        Text(
-          ok ? 'חיבור תקין ✓' : 'אזהרה: חיבור לא מאומת',
-          style: TextStyle(
-            color: ok ? const Color(0xFF059669) : Colors.red,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-          ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const Icon(Icons.error, size: 12, color: Colors.red),
+          const SizedBox(width: 4),
+          const Text('חיבור לא תקין',
+              style: TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.w600)),
+        ]),
+        Padding(
+          padding: const EdgeInsets.only(right: 16, top: 2),
+          child: Text(reason,
+              style: const TextStyle(color: Colors.red, fontSize: 9)),
         ),
       ]),
     );
