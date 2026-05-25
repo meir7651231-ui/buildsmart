@@ -530,6 +530,46 @@ def cmd_diff(old, new):
     print(f"➕ נוספו: {len(added)} · ➖ הוסרו: {len(removed)} · ✏️ שונו: {len(changed)}")
 
 
+def _dedup_sig(name):
+    """חתימת מוצר לדדופ: (core ללא מידות, מידות ממוינות)."""
+    n = _normalize(name)
+    sizes = tuple(sorted(set(SIZE.findall(n))))
+    core = re.sub(r"\s+", " ", SIZE.sub("", n)).strip()
+    return (core, sizes)
+
+
+def crossdedup_groups(products):
+    """צעד 82 — קבוצות חוצות-מותג: שם-מנורמל+מידות זהים תחת ≥2 מותגים."""
+    groups = defaultdict(list)
+    for p in products:
+        groups[_dedup_sig(p["name"])].append(p)
+    hits = []
+    for (core, sizes), ps in groups.items():
+        brands = {p["brand"] for p in ps}
+        if len(brands) >= 2 and core:
+            hits.append((core, sizes, ps, brands))
+    hits.sort(key=lambda h: -len(h[2]))
+    return hits
+
+
+def cmd_crossdedup(*_):
+    """צעד 82 — דדופ חוצה-מותג: אותו מוצר פיזי עם מק"ט שונה אצל מותגים שונים.
+    אות-זיהוי: שם-מנורמל זהה (או סוג+מידות זהים) תחת ≥2 מותגים שונים."""
+    hits = crossdedup_groups(parse_catalog())
+    print("=" * 58)
+    print(f"  דדופ חוצה-מותג — {len(hits)} קבוצות-מועמדות")
+    print("=" * 58)
+    for core, sizes, ps, brands in hits[:40]:
+        sz = "/".join(sizes) if sizes else "—"
+        print(f"\n  «{core[:34]}» [{sz}]  · {len(ps)} מק\"טים · {len(brands)} מותגים")
+        for p in ps:
+            print(f"     {p['brand']:<8} {p['sku']:<10} {p['name'][:40]}")
+    print("\n" + "-" * 58)
+    print(f"  סה\"כ {sum(len(h[2]) for h in hits)} מוצרים ב-{len(hits)} קבוצות חוצות-מותג.")
+    print("  ℹ️ מועמדים בלבד — אַחֵד מק\"טים רק לאחר אימות ויזואלי (R8).")
+    return len(hits)
+
+
 CMDS_EXTRA = True
 
 
@@ -537,7 +577,8 @@ CMDS = {"audit": cmd_audit, "selftest": cmd_selftest, "fix": cmd_fix,
         "export": cmd_export, "truthcheck": cmd_truthcheck, "images": cmd_images,
         "imgmatch": cmd_imgmatch, "coverage": cmd_coverage, "schema": cmd_schema,
         "truthapply": cmd_truthapply, "report": cmd_report, "diff": cmd_diff,
-        "crosscheck": cmd_crosscheck, "pdfmap": cmd_pdfmap, "verify": cmd_verify, "suspects": cmd_suspects}
+        "crosscheck": cmd_crosscheck, "pdfmap": cmd_pdfmap, "verify": cmd_verify,
+        "suspects": cmd_suspects, "crossdedup": cmd_crossdedup}
 
 
 def main():

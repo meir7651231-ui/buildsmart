@@ -49,6 +49,22 @@ def test_import_validate_catches_dup_and_missing():
     errs = imp.validate(rows)
     assert any('כפול' in e for e in errs) and any('חסר' in e for e in errs)
 
+# ── צעד 82 — דדופ חוצה-מותג ───────────────────────────────────────────────────
+def test_crossdedup_detects_cross_brand_pair():
+    prods = [
+        dict(sku='A1', name='ברך DN50', category='ברכיים', brand='ליפסקי'),
+        dict(sku='B1', name='ברך DN50', category='ברכיים', brand='פלסון'),
+    ]
+    hits = q.crossdedup_groups(prods)
+    assert len(hits) == 1 and len(hits[0][2]) == 2
+
+def test_crossdedup_ignores_same_brand():
+    prods = [
+        dict(sku='A1', name='ברך DN50', category='ברכיים', brand='ליפסקי'),
+        dict(sku='A2', name='ברך DN50', category='ברכיים', brand='ליפסקי'),
+    ]
+    assert q.crossdedup_groups(prods) == []
+
 if __name__ == '__main__':
     import sys
     fns=[v for k,v in globals().items() if k.startswith('test_')]
