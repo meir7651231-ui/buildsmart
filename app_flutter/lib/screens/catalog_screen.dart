@@ -1748,7 +1748,7 @@ class _CatalogBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(catalogSectionProvider);
-    if (active == 'הכל') return _CatalogList(scrollCtrl: scrollCtrl);
+    if (active == 'הכל') return _AllOverview(scrollCtrl: scrollCtrl);
     if (active == 'עץ חכם') return const _SmartTreeSection();
     if (active == 'קטגוריות') return const _CatalogDrillSection();
     if (active == 'מועדפים') return const _FavoritesSection();
@@ -1897,6 +1897,206 @@ class _CatalogList extends StatelessWidget {
       },
     );
   }
+}
+
+// ── "הכל" overview — a preview block per section ─────────────────────────────
+class _AllOverview extends ConsumerWidget {
+  const _AllOverview({this.scrollCtrl});
+  final ScrollController? scrollCtrl;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    void go(String s) =>
+        ref.read(catalogSectionProvider.notifier).state = s;
+
+    final recents = ref.watch(recentSearchesProvider);
+    final favSkus = ref.watch(productFavoritesProvider);
+    final favProducts =
+        kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).take(3).toList();
+
+    return ListView(
+      controller: scrollCtrl,
+      key: const Key('catalog-list'),
+      padding: const EdgeInsets.only(bottom: 24),
+      children: [
+        // קטגוריות
+        _OverviewBlock(
+          title: 'קטגוריות',
+          onShowAll: () => go('קטגוריות'),
+          children: [
+            for (var i = 0; i < kCatalogCats.length && i < 4; i++)
+              _CatalogRow(cat: kCatalogCats[i], meta: _kMeta[i]),
+          ],
+        ),
+        // חיפושים אחרונים
+        _OverviewBlock(
+          title: 'חיפושים אחרונים',
+          onShowAll: () => go('חיפושים אחרונים'),
+          children: recents.isEmpty
+              ? const [_OverviewEmpty('אין חיפושים אחרונים')]
+              : [
+                  for (final q in recents.take(3))
+                    _OverviewRow(
+                      icon: Icons.history,
+                      label: q,
+                      onTap: () {
+                        ref.read(searchQueryProvider.notifier).state = q;
+                        ref.read(searchPanelOpenProvider.notifier).state = true;
+                      },
+                    ),
+                ],
+        ),
+        // תאימות
+        _OverviewBlock(
+          title: 'תאימות',
+          onShowAll: () => go('תאימות'),
+          children: [
+            _OverviewRow(
+              icon: Icons.compare_arrows_outlined,
+              label: 'מנוע התאימות — מה מתחבר למה',
+              onTap: () => go('תאימות'),
+            ),
+          ],
+        ),
+        // מועדפים
+        _OverviewBlock(
+          title: 'מועדפים',
+          onShowAll: () => go('מועדפים'),
+          children: favProducts.isEmpty
+              ? const [_OverviewEmpty('אין מועדפים עדיין')]
+              : [
+                  for (final p in favProducts)
+                    _OverviewRow(
+                      icon: Icons.favorite,
+                      label: p.nameHe,
+                      onTap: () => go('מועדפים'),
+                    ),
+                ],
+        ),
+        // עץ חכם
+        _OverviewBlock(
+          title: 'עץ חכם',
+          onShowAll: () => go('עץ חכם'),
+          isLast: true,
+          children: [
+            for (var i = 0; i < kSmartTreeCats.length && i < 4; i++)
+              _OverviewRow(
+                icon: Icons.account_tree_outlined,
+                label:
+                    '${kSmartTreeCats[i]} · ${smartProductsForCat(kSmartTreeCats[i]).length} מוצרים',
+                onTap: () {
+                  ref.read(smartTreeCatProvider.notifier).state =
+                      kSmartTreeCats[i];
+                  go('עץ חכם');
+                },
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _OverviewBlock extends StatelessWidget {
+  const _OverviewBlock({
+    required this.title,
+    required this.onShowAll,
+    required this.children,
+    this.isLast = false,
+  });
+  final String title;
+  final VoidCallback onShowAll;
+  final List<Widget> children;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 8, 4),
+          child: Row(
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Color(0xFF1A1A1A),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: onShowAll,
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('הצג הכל',
+                        style: TextStyle(
+                            color: BsTokens.brand,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600)),
+                    Icon(Icons.chevron_left, color: BsTokens.brand, size: 18),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        ...children,
+        if (!isLast)
+          const Divider(height: 16, thickness: 8, color: Color(0xFFF0F1F4)),
+      ],
+    );
+  }
+}
+
+class _OverviewRow extends StatelessWidget {
+  const _OverviewRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        child: Row(
+          children: [
+            Icon(icon, color: BsTokens.brand, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+              ),
+            ),
+            const Icon(Icons.chevron_left, color: Color(0xFFB0B0B8), size: 18),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OverviewEmpty extends StatelessWidget {
+  const _OverviewEmpty(this.text);
+  final String text;
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
+        child: Text(text,
+            style: const TextStyle(color: Color(0xFF888888), fontSize: 13)),
+      );
 }
 
 // ── Lipskey supplier card — pinned at top of catalog list ────────────────────
