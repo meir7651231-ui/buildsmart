@@ -5,7 +5,6 @@ import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
-import 'package:buildsmart/screens/catalog_drill_screen.dart';
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
@@ -58,6 +57,11 @@ final smartTreeCatProvider = StateProvider<String?>((_) => null);
 
 /// Currently selected category in the "קטגוריות" drill. Null = show all 11 cats.
 final catalogDrillCatProvider = StateProvider<String?>((_) => null);
+
+/// In-tab catalog-tree drill stack (kCatalogTree). Empty = not drilling.
+/// Kept inside the catalog tab so the app bar and bottom nav stay fixed.
+final catalogTreePathProvider =
+    StateProvider<List<CatalogNode>>((_) => const []);
 
 String _sortLabel(CatalogSort s) => switch (s) {
       CatalogSort.defaultSort => 'ברירת מחדל',
@@ -140,6 +144,13 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // In-tab catalog-tree drill — replaces the search bar with a drill bar and
+    // the list with bordered rows, while the app bar and bottom nav stay fixed.
+    final treePath = ref.watch(catalogTreePathProvider);
+    if (treePath.isNotEmpty) {
+      return _TreeDrill(path: treePath);
+    }
+
     // Force header visible whenever search panel opens.
     ref.listen<bool>(searchPanelOpenProvider, (_, open) {
       if (open) _setHeaderVisible(true);
@@ -2205,23 +2216,20 @@ CatalogNode? _findCatalogTreeNodeByTitle(String title) {
   return null;
 }
 
-class _CatalogRow extends StatelessWidget {
+class _CatalogRow extends ConsumerWidget {
   const _CatalogRow({required this.cat, required this.meta});
 
   final Section cat;
   final ({String preview, String time, int badge}) meta;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final hasBadge = meta.badge > 0;
     return InkWell(
       onTap: () {
         final node = _findCatalogTreeNodeByTitle(cat.title);
         if (node != null) {
-          Navigator.push(
-            context,
-            CatalogDrillScreen.nodeRoute(node: node, path: const []),
-          );
+          ref.read(catalogTreePathProvider.notifier).state = [node];
         } else {
           showToast(context, '${cat.title} — בבנייה');
         }
@@ -2308,6 +2316,230 @@ class _CatalogRow extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── In-tab catalog tree drill ─────────────────────────────────────────────
+// Renders inside the catalog tab so the app bar (top) and the bottom nav
+// (bottom) stay fixed; only the rows scroll. A fixed drill bar replaces the
+// search bar: back-one-level + the current category as a pressed orange chip
+// with an X that cancels the whole drill.
+int _treeNodeCount(CatalogNode node) {
+  if (!node.isLeaf) return node.children.length;
+  if (node.lipskeyCategory != null) {
+    return kLipskeyCatalog
+        .where((p) => p.categoryHe == node.lipskeyCategory)
+        .length;
+  }
+  if (node.smartKey != null) {
+    return smartProductByKey(node.smartKey!)?.brands.length ?? 0;
+  }
+  return node.brandIds.length;
+}
+
+class _TreeDrill extends ConsumerWidget {
+  const _TreeDrill({required this.path});
+  final List<CatalogNode> path;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current = path.last;
+    final children = current.children;
+
+    void goBack() => ref.read(catalogTreePathProvider.notifier).state =
+        [...path]..removeLast();
+    void cancel() =>
+        ref.read(catalogTreePathProvider.notifier).state = const [];
+
+    void openNode(CatalogNode n) {
+      if (n.isLeaf) {
+        if (n.lipskeyCategory != null) {
+          final products = kLipskeyCatalog
+              .where((p) => p.categoryHe == n.lipskeyCategory)
+              .toList();
+          if (products.isNotEmpty) {
+            Navigator.push(
+              context,
+              LipskeyProductsScreen.route(
+                  category: n.title, products: products),
+            );
+            return;
+          }
+        }
+        if (n.smartKey != null) {
+          final product = smartProductByKey(n.smartKey!);
+          if (product != null) openSmartProductSheet(context, product);
+        }
+        return;
+      }
+      ref.read(catalogTreePathProvider.notifier).state = [...path, n];
+    }
+
+    return Column(
+      children: [
+        _TreeDrillBar(title: current.title, onBack: goBack, onCancel: cancel),
+        Expanded(
+          child: children.isEmpty
+              ? const Center(
+                  child: Text(
+                    'אין קטגוריות',
+                    style: TextStyle(color: Color(0xFF888888), fontSize: 14),
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+                  itemCount: children.length,
+                  itemBuilder: (_, i) => _TreeCatRow(
+                    node: children[i],
+                    onTap: () => openNode(children[i]),
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TreeDrillBar extends StatelessWidget {
+  const _TreeDrillBar({
+    required this.title,
+    required this.onBack,
+    required this.onCancel,
+  });
+
+  final String title;
+  final VoidCallback onBack;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      height: 48,
+      decoration: BoxDecoration(
+        color: const Color(0xFFE7E7EA),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back,
+                color: Color(0xFF555555), size: 20),
+            tooltip: 'חזרה',
+            onPressed: onBack,
+          ),
+          Expanded(
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+                decoration: BoxDecoration(
+                  color: BsTokens.brand,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: onCancel,
+                      child: const Icon(Icons.close,
+                          color: Colors.white, size: 16),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TreeCatRow extends StatelessWidget {
+  const _TreeCatRow({required this.node, required this.onTap});
+  final CatalogNode node;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final count = _treeNodeCount(node);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: BsTokens.brand, width: 1),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF5F5F5),
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(node.emoji, style: const TextStyle(fontSize: 24)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    node.title,
+                    style: const TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (count > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: BsTokens.brand,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
