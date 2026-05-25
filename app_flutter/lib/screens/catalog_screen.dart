@@ -1924,7 +1924,7 @@ class _AllOverview extends ConsumerWidget {
           title: 'קטגוריות',
           onShowAll: () => go('קטגוריות'),
           children: [
-            for (var i = 0; i < kCatalogCats.length && i < 4; i++)
+            for (var i = 0; i < kCatalogCats.length && i < 3; i++)
               _CatalogRow(cat: kCatalogCats[i], meta: _kMeta[i]),
           ],
         ),
@@ -1979,7 +1979,7 @@ class _AllOverview extends ConsumerWidget {
           onShowAll: () => go('עץ חכם'),
           isLast: true,
           children: [
-            for (var i = 0; i < kSmartTreeCats.length && i < 4; i++)
+            for (var i = 0; i < kSmartTreeCats.length && i < 3; i++)
               _OverviewRow(
                 icon: Icons.account_tree_outlined,
                 label:
