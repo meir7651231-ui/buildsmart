@@ -45,6 +45,9 @@ void main() {
       expect(cartBelowMinimum(100, s(min: 100)), isFalse); // equal is allowed
       expect(cartBelowMinimum(99, s(min: 100)), isTrue);
       expect(cartBelowMinimum(50, s(min: 0)), isFalse); // 0 disables
+      // min==0 must fully disable the gate even for a negative subtotal —
+      // pins the `minOrderAmount > 0` guard (not `>= 0`).
+      expect(cartBelowMinimum(-1, s(min: 0)), isFalse);
     });
     test('large-order confirm fires at the threshold (>= not >)', () {
       expect(cartNeedsLargeConfirm(100, s(big: 100)), isTrue); // equal triggers
