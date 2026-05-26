@@ -21,7 +21,7 @@
 // a product whose material can't survive the line's operating temperature
 // (e.g. HDPE caps at ~40°C continuous and must never serve 80°C hot water).
 
-enum EndType { hdpeCompression, pexPress, copperPress, bspMale, bspFemale }
+enum EndType { hdpeCompression, pexPress, copperPress, bspMale, bspFemale, drainOpening }
 
 class ConnectorEnd {
   final EndType type;
@@ -36,6 +36,8 @@ class ConnectorEnd {
     // PEX / copper press: a fitting end accepts a pipe/fitting of the same OD.
     if (type == EndType.pexPress && other.type == EndType.pexPress && size == other.size) return true;
     if (type == EndType.copperPress && other.type == EndType.copperPress && size == other.size) return true;
+    // Drain opening: cover/grate snaps onto a floor drain of the same nominal opening size.
+    if (type == EndType.drainOpening && other.type == EndType.drainOpening && size == other.size) return true;
     return false;
   }
 
@@ -96,6 +98,7 @@ ConnectorEnd _px(String od)   => ConnectorEnd(EndType.pexPress,        od);
 ConnectorEnd _cu(String od)   => ConnectorEnd(EndType.copperPress,     od);
 ConnectorEnd _bm(String inch) => ConnectorEnd(EndType.bspMale,         inch);
 ConnectorEnd _bf(String inch) => ConnectorEnd(EndType.bspFemale,       inch);
+ConnectorEnd _do(String inch) => ConnectorEnd(EndType.drainOpening,    inch);
 
 // ── verified specs map ────────────────────────────────────────────────────────
 
@@ -965,11 +968,15 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '273089': VerifiedSpec(sku: '273089', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
 
   // ── מאספי רצפה ───────────────────────────────────────────────────────────
-  '116148': VerifiedSpec(sku: '116148', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
-  '171191': VerifiedSpec(sku: '171191', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '116151': VerifiedSpec(sku: '116151', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
-  '116638': VerifiedSpec(sku: '116638', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '217648': VerifiedSpec(sku: '217648', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  // pipe-outlet + drain-opening (cover fits on top)
+  '116148': VerifiedSpec(sku: '116148', material: 'PVC', maxTempC: 50, ends: [_c('40'), _do('4"')]),
+  '171191': VerifiedSpec(sku: '171191', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('4"')]),
+  '116151': VerifiedSpec(sku: '116151', material: 'PVC', maxTempC: 50, ends: [_c('40'), _do('4"')]),
+  '116638': VerifiedSpec(sku: '116638', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('6"')]),
+  '217648': VerifiedSpec(sku: '217648', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('6"')]),
+  '196587': VerifiedSpec(sku: '196587', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('6"')]),
+  '116640': VerifiedSpec(sku: '116640', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('6"')]),
+  '116175': VerifiedSpec(sku: '116175', material: 'PVC', maxTempC: 50, ends: [_c('110'), _do('8"')]),
   '116640': VerifiedSpec(sku: '116640', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '116175': VerifiedSpec(sku: '116175', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
   '196687': VerifiedSpec(sku: '196687', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
@@ -1144,4 +1151,30 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '777D0481': VerifiedSpec(sku: '777D0481', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
   '777D0482': VerifiedSpec(sku: '777D0482', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
   '777D0484': VerifiedSpec(sku: '777D0484', material: 'PVC', maxTempC: 50, ends: [_c('160'), _c('160')]),
+
+  // ── מכסים ורשתות (Drain Covers & Grilles — drainOpening) ──────────────────
+  // 4" covers
+  '777Z3080': VerifiedSpec(sku: '777Z3080', material: _stainless, maxTempC: 90, ends: [_do('4"')]),
+  '77Z3080A': VerifiedSpec(sku: '77Z3080A', material: _brass,     maxTempC: 90, ends: [_do('4"')]),
+  '777Z3063': VerifiedSpec(sku: '777Z3063', material: _stainless, maxTempC: 90, ends: [_do('4"')]),
+  '777Z3067': VerifiedSpec(sku: '777Z3067', material: _brass,     maxTempC: 90, ends: [_do('4"')]),
+  // 6" covers
+  '77003023': VerifiedSpec(sku: '77003023', material: _stainless, maxTempC: 90, ends: [_do('6"')]),
+  '77Z3399B': VerifiedSpec(sku: '77Z3399B', material: _brass,     maxTempC: 90, ends: [_do('6"')]),
+  '77003022': VerifiedSpec(sku: '77003022', material: _stainless, maxTempC: 90, ends: [_do('6"')]),
+  '77Z3398B': VerifiedSpec(sku: '77Z3398B', material: _brass,     maxTempC: 90, ends: [_do('6"')]),
+  '77003025': VerifiedSpec(sku: '77003025', material: _stainless, maxTempC: 90, ends: [_do('6"')]),
+  '77Z3401B': VerifiedSpec(sku: '77Z3401B', material: _brass,     maxTempC: 90, ends: [_do('6"')]),
+  '77003024': VerifiedSpec(sku: '77003024', material: _stainless, maxTempC: 90, ends: [_do('6"')]),
+  '77Z3400B': VerifiedSpec(sku: '77Z3400B', material: _brass,     maxTempC: 90, ends: [_do('6"')]),
+  // 8" covers
+  '77Z3399A': VerifiedSpec(sku: '77Z3399A', material: _stainless, maxTempC: 90, ends: [_do('8"')]),
+  '777Z3399': VerifiedSpec(sku: '777Z3399', material: _brass,     maxTempC: 90, ends: [_do('8"')]),
+  '77Z3398A': VerifiedSpec(sku: '77Z3398A', material: _stainless, maxTempC: 90, ends: [_do('8"')]),
+  '777Z3398': VerifiedSpec(sku: '777Z3398', material: _brass,     maxTempC: 90, ends: [_do('8"')]),
+  '77Z3401A': VerifiedSpec(sku: '77Z3401A', material: _stainless, maxTempC: 90, ends: [_do('8"')]),
+  '777Z3401': VerifiedSpec(sku: '777Z3401', material: _brass,     maxTempC: 90, ends: [_do('8"')]),
+  '77Z3400A': VerifiedSpec(sku: '77Z3400A', material: _stainless, maxTempC: 90, ends: [_do('8"')]),
+  '777Z3400': VerifiedSpec(sku: '777Z3400', material: _brass,     maxTempC: 90, ends: [_do('8"')]),
+  '777Z3402': VerifiedSpec(sku: '777Z3402', material: _brass,     maxTempC: 90, ends: [_do('8"')]),
 };
