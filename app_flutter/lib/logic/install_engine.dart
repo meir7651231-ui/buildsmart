@@ -149,6 +149,18 @@ List<LineCheck> lineComplianceChecklist(
       LineCheck('TMTV anti-scald (הגנת משתמש)',
           has({'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20', 'HW-TMTV-15'}),
           'מגביל T≤45°C ביציאה — anti-scald', severity: CheckSeverity.critical),
+    if (hasCommercialPump && hasManifoldOrShower)
+      LineCheck('שסתום מאזן לכל ענף (Balancing Valve)',
+          has({'HW-BALANCE-25', 'HW-BALANCE-20', 'HW-BALANCE-15'}),
+          'מאזן לחץ בין ענפים במערכת מסחרית', severity: CheckSeverity.warning),
+    if (hasCommercialPump && hot)
+      LineCheck('bypass תרמי למניעת Legionella (EN 806)',
+          has({'HW-DISINFECT'}),
+          'פסטור 70°C/3 דקות אחת לשבוע', severity: CheckSeverity.critical),
+    if (recirc)
+      LineCheck('נקודת דיגום (Legionella sampling)',
+          has({'HW-SAMPLE'}),
+          'נדרש לבדיקות מים תקתיות', severity: CheckSeverity.warning),
     if (hot)
       LineCheck('בידוד תרמי', acc('HW-INSUL'),
           'הפסדי חום + סכנת כוויות', severity: CheckSeverity.warning),
@@ -666,6 +678,21 @@ InstallationPlan buildTreeInstallation(
     if (tmtv != null) {
       for (var bi = 0; bi < branchTargets.length; bi++) {
         add(tmtv, zone: _branchLabel(bi));
+      }
+    }
+  }
+
+  // Auto-add pre-set balancing valve per branch for commercial pump systems.
+  // Ensures each branch receives its design flow at different resistance.
+  final trunkSkus = items.map((p) => p.sku).toSet();
+  if (trunkSkus.contains('HW-PUMP-40') && branchTargets.isNotEmpty) {
+    LipskeyCatalogProduct? bal;
+    for (final p in kCompatCatalog) {
+      if (p.sku == 'HW-BALANCE-20') { bal = p; break; }
+    }
+    if (bal != null) {
+      for (var bi = 0; bi < branchTargets.length; bi++) {
+        add(bal, zone: _branchLabel(bi));
       }
     }
   }

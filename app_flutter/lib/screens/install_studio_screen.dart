@@ -824,10 +824,11 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
   }
 
   // Returns BOM rows — sectioned by zone (trunk/branches) when available,
-  // flat otherwise. Accessories not assigned to any zone appear at the bottom.
+  // or under a single "קו ראשי" header for linear installs.
   List<Widget> _buildBomRows(InstallationPlan plan, Set<String> anchorSkus) {
     if (plan.zones.isEmpty) {
       return [
+        _zoneHeader('קו ראשי', count: plan.items.length),
         for (var i = 0; i < plan.items.length; i++)
           _bomRow(plan.items[i], i + 1,
               anchorSkus.contains(plan.items[i].sku),

@@ -201,7 +201,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                       SizedBox(width: 4),
                       Text(
-                        'v3.74 · 26.5.26 · BOM לפי אזורים + TMTV אוטומטי',
+                        'v3.76 · 26.5.26 · Legionella + Balancing + קו ראשי',
                         style: TextStyle(
                           color: Color(0xFF4CAF50),
                           fontSize: 10,
