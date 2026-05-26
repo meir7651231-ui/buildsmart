@@ -26,18 +26,21 @@ final cartQtysProvider = StateProvider<Map<String, int>>(
   (_) => const {'blk': 150, 'pls': 5, 'blt': 80, 'bm': 10},
 );
 // Initial delivery/payment honor the store-settings defaults (read once).
+// Pure mappings (regression-tested in test/gaps_test.dart).
+CartDelivery cartDeliveryFor(bool selfPickupDefault) =>
+    selfPickupDefault ? CartDelivery.pickup : CartDelivery.standard;
+CartPaymentMethod cartPaymentFor(StorePayment p) => switch (p) {
+      StorePayment.bit => CartPaymentMethod.bit,
+      StorePayment.supplierCredit => CartPaymentMethod.supplierCredit,
+      StorePayment.card || StorePayment.applePay => CartPaymentMethod.card,
+    };
+
 final cartDeliveryProvider = StateProvider<CartDelivery>(
-  (ref) => ref.read(storeSettingsProvider).selfPickupDefault
-      ? CartDelivery.pickup
-      : CartDelivery.standard,
+  (ref) => cartDeliveryFor(ref.read(storeSettingsProvider).selfPickupDefault),
 );
 final cartProjectProvider = StateProvider<String>((_) => 'בית דוד 3');
 final cartPaymentProvider = StateProvider<CartPaymentMethod>(
-  (ref) => switch (ref.read(storeSettingsProvider).defaultPayment) {
-    StorePayment.bit => CartPaymentMethod.bit,
-    StorePayment.supplierCredit => CartPaymentMethod.supplierCredit,
-    StorePayment.card || StorePayment.applePay => CartPaymentMethod.card,
-  },
+  (ref) => cartPaymentFor(ref.read(storeSettingsProvider).defaultPayment),
 );
 
 // ─── static data ─────────────────────────────────────────────────────────────
