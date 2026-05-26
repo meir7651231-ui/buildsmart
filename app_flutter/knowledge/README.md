@@ -52,10 +52,12 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 ## Enforcement (the protocol has teeth)
 `test/knowledge_protocol_test.dart` runs inside `flutter test` and **fails the
 suite** when the protocol is violated:
-- a screen regresses to a dark scaffold (`backgroundColor: const Color(0xFF111111)`);
+- a screen regresses to a **dark surface** — `backgroundColor: Color(0xFF111111)`,
+  `BsTokens.bgDark`, **or** a `ColoredBox`/`Container`/`DecoratedBox` filled with
+  `0xFF111111` (text-colour use of `0xFF111111` stays allowed);
 - a wired pure-helper (`cartVat`, `notifPasses`, `qtyForKey`, …) is removed/renamed;
 - a knowledge doc or the `WIRING.md` contract drifts from the code.
-This is verified to bite (injecting a dark scaffold turns it red).
+This is verified to bite (re-injecting the dark search-panel fill turns it red).
 
 ## Status legend (used across these docs)
 ✅ wired (real effect) · 🚧 בבנייה (placeholder) · ⛔ blocked (needs data/server/telephony)

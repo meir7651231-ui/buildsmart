@@ -32,7 +32,7 @@
 
 **מצב רגיל** (Column):
 1. **שורת חיפוש** (`_SearchBar`) — נסתרת בגלילה למטה (מעל 50px), חוזרת בגלילה למעלה או בפתיחת פאנל. רקע `#E7E7EA`, רדיוס 24. אייקון חיפוש / חץ חזרה; chip scope (כשנבחר scope ≠ 'הכל') עם X; שדה טקסט; כפתור X לניקוי.
-2. אם הפאנל פתוח → `_SearchPanel` (רקע `#111111`) ממלא את הגוף: `_SearchToolsRow` (5 כלים), `_SearchScopeRow` (4 chips), Divider, ואז `_SearchResultsList` (אם יש query או scope) או `_RecentSearchesList`.
+2. אם הפאנל פתוח → `_SearchPanel` (רקע **light** `BsTokens.cardLight` = לבן; תוקן מ-`#111111` הכהה שהיה רגרסיית light-mode) ממלא את הגוף: `_SearchToolsRow` (5 כלים), `_SearchScopeRow` (4 chips), Divider, ואז `_SearchResultsList` (אם יש query או scope) או `_RecentSearchesList`.
 3. אחרת:
    - **שורת section chips** (`_SectionChipsRow`) — pill `'הכל'` קבוע + pills דינמיים מ-`catalogSectionsListProvider` + כפתור `[+]`. גם נסתרת בגלילה.
    - **גוף** (`_CatalogBody`) לפי ה-section הפעיל:

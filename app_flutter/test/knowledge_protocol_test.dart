@@ -12,18 +12,26 @@ void main() {
   String read(String p) => File(p).readAsStringSync();
 
   group('protocol · light-mode guard', () {
-    test('no screen uses the dark scaffold background (0xFF111111)', () {
+    // A near-black fill used as a *surface* (ColoredBox / Container /
+    // DecoratedBox), not as a text colour. `0xFF111111` as a TextStyle colour is
+    // legitimate (e.g. ink on light chat bubbles), so we only flag fills.
+    final darkFill = RegExp(
+      r'(ColoredBox|Container|DecoratedBox)\(\s*color:\s*(const\s+)?'
+      r'Color\(0xFF111111\)',
+    );
+    test('no screen uses a dark surface (0xFF111111 / bgDark)', () {
       final offenders = <String>[];
       for (final f in Directory('lib/screens').listSync().whereType<File>()) {
         if (!f.path.endsWith('.dart')) continue;
         final s = f.readAsStringSync();
         if (s.contains('backgroundColor: const Color(0xFF111111)') ||
-            s.contains('backgroundColor: BsTokens.bgDark')) {
+            s.contains('backgroundColor: BsTokens.bgDark') ||
+            darkFill.hasMatch(s)) {
           offenders.add(f.path);
         }
       }
       expect(offenders, isEmpty,
-          reason: 'dark scaffold reintroduced in: $offenders');
+          reason: 'dark surface reintroduced in: $offenders');
     });
   });
 
