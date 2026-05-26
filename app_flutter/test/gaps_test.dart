@@ -2,7 +2,9 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/store_settings.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Closes the 18 coverage gaps found by mutation testing: cart math, checkout
@@ -135,5 +137,68 @@ void main() {
     test('max distance default is 100', () => expect(d.maxDistance, 100));
     test('min rating default is any',
         () => expect(d.minRating, CatalogMinRating.any));
+    test('image size default is medium',
+        () => expect(d.imageSize, CatalogImageSize.medium));
+    test('search history default on', () => expect(d.searchHistoryEnabled, isTrue));
+    test('compact mode default off', () => expect(d.compactMode, isFalse));
+  });
+
+  group('cart line total + remove', () {
+    test('line total = brand*qty + sum(acc.price*acc.qty)', () {
+      const line = SmartCartLine(
+        productKey: 'k',
+        productName: 'p',
+        productEmoji: '',
+        brandName: 'b',
+        brandPrice: 10,
+        productQty: 3,
+        accessories: [SmartCartAcc(name: 'a', emoji: '', price: 5, qty: 2)],
+      );
+      expect(line.total, 10 * 3 + 5 * 2); // 40
+    });
+    test('remove(index) drops exactly that line, keeps the others', () {
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      SmartCartLine ln(String k) => SmartCartLine(
+            productKey: k,
+            productName: k,
+            productEmoji: '',
+            brandName: 'b',
+            brandPrice: 0,
+            productQty: 1,
+            accessories: const [],
+          );
+      final n = c.read(smartCartProvider.notifier)
+        ..add(ln('a'))
+        ..add(ln('b'))
+        ..add(ln('c'));
+      n.remove(1);
+      expect(
+        c.read(smartCartProvider).map((l) => l.productKey).toList(),
+        ['a', 'c'],
+      );
+    });
+  });
+
+  group('store payment / delivery mapping', () {
+    test('payment maps every StorePayment value', () {
+      expect(cartPaymentFor(StorePayment.bit), CartPaymentMethod.bit);
+      expect(cartPaymentFor(StorePayment.supplierCredit),
+          CartPaymentMethod.supplierCredit);
+      expect(cartPaymentFor(StorePayment.card), CartPaymentMethod.card);
+      expect(cartPaymentFor(StorePayment.applePay), CartPaymentMethod.card);
+    });
+    test('delivery maps self-pickup flag', () {
+      expect(cartDeliveryFor(true), CartDelivery.pickup);
+      expect(cartDeliveryFor(false), CartDelivery.standard);
+    });
+  });
+
+  group('notification date grouping', () {
+    test('new header only when the date group changes', () {
+      expect(isNewDateGroup(null, 'היום'), isTrue);
+      expect(isNewDateGroup('היום', 'היום'), isFalse);
+      expect(isNewDateGroup('היום', 'אתמול'), isTrue);
+    });
   });
 }

@@ -231,6 +231,9 @@ List<_Notif> _filtered({
         .toList();
 
 // Inserts date-group headers and collapses consecutive same-type groups of ≥3.
+/// A date header is inserted whenever the group changes from the previous row.
+bool isNewDateGroup(String? current, String next) => next != current;
+
 List<Object> _withHeadersAndCollapse(
   List<_Notif> notifs,
   Set<String> expandedKeys,
@@ -240,7 +243,7 @@ List<Object> _withHeadersAndCollapse(
   var i = 0;
   while (i < notifs.length) {
     final n = notifs[i];
-    if (n.dateGroup != currentDateGroup) {
+    if (isNewDateGroup(currentDateGroup, n.dateGroup)) {
       currentDateGroup = n.dateGroup;
       result.add(currentDateGroup);
     }
