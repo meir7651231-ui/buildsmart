@@ -17,13 +17,14 @@ class ChatSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         title: const Text(
           'הגדרות שיחות',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          style:
+              TextStyle(color: Color(0xFF1A1A1A), fontWeight: FontWeight.w700),
         ),
         iconTheme: const IconThemeData(color: Colors.black54),
         actions: [
@@ -60,7 +61,7 @@ class ChatSettingsScreen extends ConsumerWidget {
         backgroundColor: const Color(0xFFFFFFFF),
         title: const Text(
           'איפוס הגדרות?',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF1A1A1A)),
         ),
         content: const Text(
           'כל הגדרות השיחות יוחזרו לברירת המחדל.',
@@ -117,7 +118,7 @@ class _QuickReplyBanner extends StatelessWidget {
               const Text(
                 'תשובות מהירות',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF1A1A1A),
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
                 ),
@@ -146,14 +147,14 @@ class _QuickReplyBanner extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF222222),
+                      color: const Color(0xFFF2F3F5),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF333333)),
+                      border: Border.all(color: const Color(0xFFE0E0E0)),
                     ),
                     child: Text(
                       t,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Color(0xFF1A1A1A),
                         fontSize: 12,
                       ),
                     ),
@@ -637,7 +638,7 @@ class _SectionTile extends StatelessWidget {
           title: Text(
             title,
             style: const TextStyle(
-              color: Colors.white,
+              color: Color(0xFF1A1A1A),
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
@@ -664,7 +665,7 @@ class _SwitchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -700,7 +701,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
         ...options.map(
           (o) => RadioListTile<T>(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            title: Text(o.label, style: const TextStyle(color: Colors.white)),
+            title: Text(o.label, style: const TextStyle(color: Color(0xFF1A1A1A))),
             value: o.value,
             groupValue: value,
             activeColor: BsTokens.brand,
@@ -732,7 +733,7 @@ class _TimeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       trailing: Text(
         _formatted,
         style: const TextStyle(
@@ -746,8 +747,8 @@ class _TimeRow extends StatelessWidget {
           context: context,
           initialTime: time,
           builder: (ctx, child) => Theme(
-            data: ThemeData.dark().copyWith(
-              colorScheme: const ColorScheme.dark(
+            data: ThemeData.light().copyWith(
+              colorScheme: const ColorScheme.light(
                 primary: BsTokens.brand,
                 surface: Color(0xFFFFFFFF),
               ),
@@ -810,14 +811,14 @@ class _InlineTextRowState extends State<_InlineTextRow> {
           const SizedBox(height: 6),
           TextField(
             controller: _ctrl,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Color(0xFF1A1A1A)),
             cursorColor: BsTokens.brand,
             maxLines: 2,
             decoration: InputDecoration(
               hintText: widget.hint,
-              hintStyle: const TextStyle(color: Color(0xFF666666)),
+              hintStyle: const TextStyle(color: Color(0xFF999999)),
               filled: true,
-              fillColor: const Color(0xFF222222),
+              fillColor: const Color(0xFFF2F3F5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
@@ -852,7 +853,7 @@ class _ActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       trailing: TextButton(
         onPressed: onTap,
         style: TextButton.styleFrom(
@@ -872,7 +873,7 @@ class _PlaceholderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       trailing: const Text(
         'בבנייה',
         style: TextStyle(color: Color(0xFF666666), fontSize: 12),
