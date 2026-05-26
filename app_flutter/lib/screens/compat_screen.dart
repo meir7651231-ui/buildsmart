@@ -489,6 +489,60 @@ List<LipskeyCatalogProduct>? findShortestPath(
   return null;
 }
 
+/// One gap between two anchors in a built installation.
+class InstallationGap {
+  const InstallationGap(this.from, this.to);
+  final LipskeyCatalogProduct from;
+  final LipskeyCatalogProduct to;
+}
+
+/// Result of auto-completing an installation from ordered anchor products.
+class InstallationPlan {
+  const InstallationPlan(this.items, this.gaps);
+
+  /// The full ordered component list (anchors + auto-filled connectors).
+  final List<LipskeyCatalogProduct> items;
+
+  /// Anchor pairs the engine could not connect within the catalog.
+  final List<InstallationGap> gaps;
+
+  bool get isComplete => gaps.isEmpty;
+}
+
+/// Auto-complete a full installation from an ordered list of anchor products
+/// (the fixtures + endpoints the installer cares about). Between every pair of
+/// consecutive anchors the engine fills in the connector path, so the result is
+/// a complete bill-of-materials ready to order. Each segment stays within one
+/// system; a supply↔drainage transition only happens at a fixture anchor the
+/// installer placed (e.g. a toilet between the supply line and the soil pipe).
+InstallationPlan buildInstallation(
+  List<LipskeyCatalogProduct> anchors, {
+  int maxDepthPerSegment = 6,
+  int tempC = 20,
+}) {
+  if (anchors.isEmpty) return const InstallationPlan([], []);
+  final items = <LipskeyCatalogProduct>[anchors.first];
+  final gaps = <InstallationGap>[];
+  final seen = <String>{anchors.first.sku};
+
+  for (var i = 0; i < anchors.length - 1; i++) {
+    final a = anchors[i], b = anchors[i + 1];
+    final seg = findShortestPath(a, b,
+        maxDepth: maxDepthPerSegment, tempC: tempC);
+    if (seg == null) {
+      // No connector path — record the gap and continue from the next anchor.
+      gaps.add(InstallationGap(a, b));
+      if (seen.add(b.sku)) items.add(b);
+      continue;
+    }
+    // seg = [a, ...connectors..., b]; a is already in items, so skip it.
+    for (final p in seg.skip(1)) {
+      if (seen.add(p.sku)) items.add(p);
+    }
+  }
+  return InstallationPlan(items, gaps);
+}
+
 List<LipskeyCatalogProduct> _filtered(WidgetRef ref) {
   final g    = ref.watch(compatGenderProvider);
   final s    = ref.watch(compatSizeProvider);
