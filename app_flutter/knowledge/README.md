@@ -10,7 +10,8 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 |---|---|
 | `README.md` (this) | the protocol + index |
 | `TARGET.md` | **prototype & target** — `index.html` prototype, parity goal, cutover, store launch |
-| `SPEC.md` | **full functional spec** — every screen/element/flow/state + status |
+| `SPEC.md` | **spec map** — condensed every-screen/element/flow/status overview |
+| `spec/` | **full אפיון** — formal per-screen specs (10 sections each); `spec/README.md` is the index |
 | `STATUS.md` | current state snapshot — screens, features, wiring counts, version |
 | `ARCHITECTURE.md` | structure: screens / state / data / widgets, navigation, theming |
 | `TESTING.md` | the verification protocol — harness, `flutter test`, mutation testing |

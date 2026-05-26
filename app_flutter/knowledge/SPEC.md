@@ -1,8 +1,13 @@
 # Functional Spec — app_flutter (אפיון מלא)
 
-Complete characterization of every screen, element, flow, state, and its wiring
-status. Grounded in source (R8 — no invention). Status: ✅ wired · 🚧 placeholder
-· ⛔ blocked. Wiring details live in `../WIRING.md`; this is the behavioral map.
+Condensed map of every screen, element, flow, state, and its wiring status.
+Grounded in source (R8 — no invention). Status: ✅ wired · 🚧 placeholder ·
+⛔ blocked. Wiring details live in `../WIRING.md`; this is the behavioral map.
+
+> **For the FULL formal אפיון** (per-screen: purpose, every element, flows,
+> states, business rules with exact constants, and Given/When/Then acceptance
+> criteria) see **`spec/`** (`spec/README.md` is the index). This file is the
+> bird's-eye overview; `spec/` is the detailed specification.
 
 ---
 
