@@ -13,6 +13,7 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ── palette ───────────────────────────────────────────────────────────────────
 const _void0 = Color(0xFF0A0E1A); // deep background
@@ -35,7 +36,7 @@ Color _systemColor(LipskeyCatalogProduct p) {
 /// Compact engineering spec line: material · sizes · pressure-rating.
 String _specLine(LipskeyCatalogProduct p) {
   final s = kVerifiedSpecs[p.sku];
-  if (s == null) return p.sku;
+  if (s == null) return p.categoryHe;
   final ends = s.ends.map((e) => e.size).toSet().join('×');
   final parts = <String>[s.material, if (ends.isNotEmpty) ends];
   if (s.pressureRating != null) parts.add(s.pressureRating!);
@@ -96,6 +97,7 @@ const _kCats = [
        'אביזרי ביוב', 'ניקוז גג', 'כיסויים', 'מכסים ורשתות'}),
   _PickerCategory('🔥', 'מים חמים', {'מים חמים ו-recirculation'}),
   _PickerCategory('🌿', 'גן', {'ברזי גן', 'ציוד גן', 'ברזי אמבטיה'}),
+  _PickerCategory('🔀', 'מחלק (כמה ברזים)', {'מחלקים'}),
   _PickerCategory('🔧', 'חיבורים', null), // null = catch-all
 ];
 
@@ -157,6 +159,33 @@ String _simpleWhy(String why) {
   return map[why] ?? why;
 }
 
+// One-line description of what a product does — for non-technical users in the picker.
+String _productHint(LipskeyCatalogProduct p) {
+  final cat = p.categoryHe;
+  if (cat.contains('מחלק')) return 'מפצל לכמה ברזים במקביל';
+  if (cat.contains('מקלחת') || cat.contains('דוש') || cat.contains('זרוע')) return 'לאמבטיה ומקלחת';
+  if (cat.contains('כיור') || cat.contains('מטבח')) return 'ברז לכיור / מטבח';
+  if (cat.contains('אסלה') || cat.contains('שירותים')) return 'לאסלה ושטיפה';
+  if (cat.contains('ניקוז') || cat.contains('ביוב') || cat.contains('מאסף') || cat.contains('תעלה')) {
+    return 'מוציא מים לניקוז';
+  }
+  if (cat.contains('מים חמים') || cat.contains('recirculation')) return 'לקו מים חמים';
+  if (cat.contains('גן') || cat.contains('גינה') || cat.contains('השקי')) return 'לגינה והשקיה';
+  if (cat.contains('משאבה') || cat.contains('pump')) return 'מגביר לחץ מים';
+  if (cat.contains('מסנן') || cat.contains('פילטר')) return 'מסנן חלקיקים בצינור';
+  if (cat.contains('שסתום') || cat.contains('PRV')) return 'שסתום בטיחות לחץ';
+  if (cat.contains('צינור') || cat.contains('פוליאתילן') || cat.contains('נחושת')) return 'צינור חיבור';
+  if (cat.contains('ברז') || cat.contains('ברזים')) return 'פותח/סוגר את המים';
+  switch (flowRole(p)) {
+    case FlowRole.connector:
+      return 'מחבר בין שני חלקים';
+    case FlowRole.fixture:
+      return 'נקודת קצה של הקו';
+    case FlowRole.accessory:
+      return 'אביזר לקו';
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 class InstallStudioScreen extends ConsumerStatefulWidget {
   const InstallStudioScreen({super.key});
@@ -170,7 +199,27 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       AnimationController(vsync: this, duration: const Duration(seconds: 3))
         ..repeat();
 
-  bool _loop = false; // closed recirculation ring
+  bool _loop = false;
+  bool _showTutorial = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstVisit();
+  }
+
+  Future<void> _checkFirstVisit() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool('installStudioSeen') ?? false) && mounted) {
+      setState(() => _showTutorial = true);
+    }
+  }
+
+  void _dismissTutorial() {
+    SharedPreferences.getInstance()
+        .then((p) => p.setBool('installStudioSeen', true));
+    setState(() => _showTutorial = false);
+  }
 
   @override
   void dispose() {
@@ -195,16 +244,25 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             ),
           ),
           child: SafeArea(
-            child: AnimatedBuilder(
-              animation: _flow,
-              builder: (_, __) => CustomPaint(
-                painter: _BlueprintPainter(_flow.value),
-                child: Column(children: [
-                  _header(chain, temp),
-                  Expanded(child: _canvas(chain)),
-                  _dock(chain, temp),
-                ]),
-              ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                AnimatedBuilder(
+                  animation: _flow,
+                  builder: (_, __) => CustomPaint(
+                    painter: _BlueprintPainter(_flow.value),
+                    child: Column(children: [
+                      _header(chain, temp),
+                      Expanded(child: _canvas(chain, temp)),
+                      _dock(chain, temp),
+                    ]),
+                  ),
+                ),
+                if (_showTutorial)
+                  Positioned.fill(
+                    child: _TutorialOverlay(onDismiss: _dismissTutorial),
+                  ),
+              ],
             ),
           ),
         ),
@@ -266,11 +324,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       label = 'קר';
     }
     return GestureDetector(
-      onTap: () {
-        const opts = [20, 60, 80];
-        final next = opts[(opts.indexOf(temp) + 1) % opts.length];
-        ref.read(lineMaxTempProvider.notifier).state = next;
-      },
+      onTap: () => _showTempPicker(context, temp),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
@@ -293,9 +347,84 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     );
   }
 
+  void _showTempPicker(BuildContext context, int current) {
+    final opts = [
+      (20, '❄️ קר', 'ברז, כיור, שירותים, גינה', _supply),
+      (60, '🔥 חם', 'דוד שמש, דוד חשמלי, מחמם מיידי', const Color(0xFFF97316)),
+      (80, '🌡️ חם מאוד', 'מערכת ישנה או מסחרית, 80° ומעלה', const Color(0xFFEF4444)),
+    ];
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: _void1,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border(top: BorderSide(color: _supply, width: 2)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('סוג הקו — מה טמפרטורת המים?',
+                  style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 4),
+              const Text('הטמפרטורה קובעת אילו פריטי בטיחות נדרשים',
+                  style: TextStyle(color: _mute, fontSize: 12)),
+              const SizedBox(height: 16),
+              ...opts.map((opt) {
+                final (val, emoji, desc, col) = opt;
+                final selected = current == val;
+                return GestureDetector(
+                  onTap: () {
+                    ref.read(lineMaxTempProvider.notifier).state = val;
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: selected ? col.withOpacity(0.16) : _panel,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                          color: selected ? col : _mute.withOpacity(0.3),
+                          width: selected ? 2 : 1),
+                    ),
+                    child: Row(children: [
+                      Text(emoji, style: const TextStyle(fontSize: 24)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(emoji.substring(emoji.indexOf(' ') + 1),
+                                style: TextStyle(
+                                    color: selected ? col : _ink,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800)),
+                            Text(desc,
+                                style: const TextStyle(color: _mute, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      if (selected) Icon(Icons.check_circle, color: col, size: 20),
+                    ]),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // ── the flow canvas — nodes wired by animated pipes ─────────────────────────
-  Widget _canvas(List<LipskeyCatalogProduct> chain) {
-    if (chain.isEmpty) return _emptyState();
+  Widget _canvas(List<LipskeyCatalogProduct> chain, int temp) {
+    if (chain.isEmpty) return _emptyState(temp);
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       itemCount: chain.length,
@@ -321,31 +450,88 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     );
   }
 
-  Widget _emptyState() {
-    return Center(
+  Widget _emptyState(int temp) {
+    // Quick-start scenarios — each maps to a _kCats index.
+    const scenarios = [
+      ('🚰', 'ברז / כיור', 0),
+      ('🚿', 'מקלחת / אמבטיה', 1),
+      ('🪠', 'שירותים', 2),
+      ('🔥', 'מים חמים', 3),
+      ('🌿', 'גינה', 4),
+      ('🔀', 'מחלק — כמה ברזים', 5),
+    ];
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Container(
-          width: 96, height: 96,
+          width: 80, height: 80,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: _supply.withOpacity(0.3), width: 2),
             boxShadow: [BoxShadow(color: _supply.withOpacity(0.15), blurRadius: 40)],
           ),
           alignment: Alignment.center,
-          child: Icon(Icons.plumbing,
-              color: _supply.withOpacity(0.8), size: 40),
+          child: Icon(Icons.plumbing, color: _supply.withOpacity(0.8), size: 36),
+        ),
+        const SizedBox(height: 16),
+        const Text('מה אתה רוצה לחבר?',
+            style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 6),
+        const Text(
+          'בחר קטגוריה ↓ ואנחנו נבנה את הרשימה אוטומטית',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: _mute, fontSize: 13, height: 1.5),
         ),
         const SizedBox(height: 20),
-        const Text('בנה קו אינסטלציה',
-            style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w800)),
-        const SizedBox(height: 8),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 48),
-          child: Text(
-            'בחר את נקודות-הקצה של הקו (ברז, אסלה, דוד) — המערכת תחבר הכל אוטומטית ותיצור רשימת קנייה מוכנה.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: _mute, fontSize: 13, height: 1.5),
+        // 2×2 scenario grid
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 1.3,
           ),
+          itemCount: scenarios.length,
+          itemBuilder: (_, i) {
+            final (emoji, label, catIdx) = scenarios[i];
+            return GestureDetector(
+              onTap: () => _openPicker(temp, initialCat: _kCats[catIdx]),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _panel,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: _supply.withOpacity(0.3)),
+                  boxShadow: [BoxShadow(color: _supply.withOpacity(0.07), blurRadius: 10)],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(emoji, style: const TextStyle(fontSize: 24)),
+                    const SizedBox(height: 6),
+                    Flexible(
+                      child: Text(label,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              color: _ink,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800)),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 14),
+        const Text(
+          'לא מוצא? לחץ ➕ למטה לחיפוש חופשי',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: _mute, fontSize: 11),
         ),
       ]),
     );
@@ -397,9 +583,9 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
           ),
           const SizedBox(height: 8),
           const Text(
-            'נדרש לפחות מוצר נוסף כדי לבנות את הקו',
+            'חיבור צינור צריך 2 נקודות — כניסה + יציאה.\nהוסף את הנקודה השנייה (ברז, אסלה, דוד…)',
             textAlign: TextAlign.center,
-            style: TextStyle(color: _mute, fontSize: 12),
+            style: TextStyle(color: _mute, fontSize: 12, height: 1.4),
           ),
         ] else ...[
           // State C: 2+ items — full controls
@@ -416,7 +602,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
               flex: 2,
               child: _glowButton(
                 icon: Icons.bolt,
-                label: '⚡ השלם התקנה',
+                label: '⚡ צור רשימת קנייה',
                 enabled: true,
                 onTap: () => _assemble(chain, temp),
               ),
@@ -550,8 +736,6 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   // ── actions ──────────────────────────────────────────────────────────────────
   void _assemble(List<LipskeyCatalogProduct> chain, int temp) {
     final acc = ref.read(lineAccessoriesProvider);
-    // A manifold mid-chain with items after it → branched (tree) installation:
-    // [feed … manifold] is the trunk, everything after are parallel branches.
     final mi = chain.indexWhere((p) => manifoldOutlets(p) > 0);
     final isTree = mi >= 0 && mi < chain.length - 1;
     final InstallationPlan plan;
@@ -567,6 +751,16 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       plan = buildInstallation([...chain],
           tempC: temp, accessories: acc, loop: _loop, autoCompliance: true);
     }
+    final criticalCount = plan.criticalOpen(temp, acc);
+    if (criticalCount > 0) {
+      _showCriticalWarning(plan, chain, branches, outlets, temp, acc, criticalCount);
+    } else {
+      _showBomSheet(plan, chain, branches, outlets);
+    }
+  }
+
+  void _showBomSheet(InstallationPlan plan, List<LipskeyCatalogProduct> chain,
+      int branches, int outlets) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -580,12 +774,102 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     );
   }
 
-  void _openPicker(int temp) {
+  void _showCriticalWarning(
+      InstallationPlan plan,
+      List<LipskeyCatalogProduct> chain,
+      int branches,
+      int outlets,
+      int temp,
+      Set<String> acc,
+      int criticalCount) {
+    final critItems = plan
+        .compliance(temp, acc)
+        .where((c) => !c.satisfied && c.severity == CheckSeverity.critical)
+        .toList();
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: _void1,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: Row(children: [
+            const Icon(Icons.warning_amber_rounded,
+                color: Color(0xFFEF4444), size: 22),
+            const SizedBox(width: 8),
+            Text('$criticalCount בעיות בטיחות בקו',
+                style: const TextStyle(
+                    color: Color(0xFFEF4444),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900)),
+          ]),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('הפריטים הבאים חסרים וחשובים לבטיחות:',
+                  style: TextStyle(color: _mute, fontSize: 13)),
+              const SizedBox(height: 12),
+              ...critItems.map((c) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('🔴', style: TextStyle(fontSize: 14)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(_simpleLabel(c.label),
+                                  style: const TextStyle(
+                                      color: _ink,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700)),
+                              Text(_simpleWhy(c.why),
+                                  style: const TextStyle(
+                                      color: _mute,
+                                      fontSize: 11,
+                                      height: 1.3)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('חזור לתכנון',
+                  style: TextStyle(color: _mute, fontSize: 13)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEF4444),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _showBomSheet(plan, chain, branches, outlets);
+              },
+              child: const Text('הצג רשימה בכל זאת',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openPicker(int temp, {_PickerCategory? initialCat}) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ProductPicker(lineTemp: temp),
+      builder: (_) => _ProductPicker(lineTemp: temp, initialCat: initialCat),
     );
   }
 }
@@ -821,6 +1105,62 @@ class _BomSheet extends ConsumerStatefulWidget {
 class _BomSheetState extends ConsumerState<_BomSheet> {
   // Per-pipe length in metres (pipes are sold by length, not by piece).
   final Map<String, double> _meters = {};
+  // User-defined display names for zone headers (e.g. "ענף א" → "מטבח").
+  final Map<String, String> _zoneAliases = {};
+
+  String _zoneDisplayLabel(String key) => _zoneAliases[key] ?? key;
+
+  void _renameZone(String key) {
+    final ctrl = TextEditingController(text: _zoneDisplayLabel(key));
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: _void1,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('שנה שם לאזור',
+              style: TextStyle(color: _ink, fontSize: 15, fontWeight: FontWeight.w800)),
+          content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            style: const TextStyle(color: _ink),
+            textDirection: TextDirection.rtl,
+            decoration: InputDecoration(
+              hintText: 'למשל: מטבח, שירותים, גינה…',
+              hintStyle: const TextStyle(color: _mute),
+              filled: true,
+              fillColor: _panel,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('ביטול', style: TextStyle(color: _mute)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: _accent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
+              onPressed: () {
+                final name = ctrl.text.trim();
+                if (name.isNotEmpty) setState(() => _zoneAliases[key] = name);
+                Navigator.pop(ctx);
+              },
+              child: const Text('שמור', style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   double _metersOf(String sku) => _meters[sku] ?? 2.0;
 
   double get _totalMeters => widget.plan.items
@@ -927,11 +1267,38 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
             const Divider(height: 1, color: Color(0xFF243049)),
             Expanded(
               child: ListView(controller: ctrl, children: [
+                // Auto-compliance banner — shown when safety items were auto-inserted
+                Builder(builder: (_) {
+                  final autoAdded = plan.items
+                      .where((p) => !anchorSkus.contains(p.sku))
+                      .length;
+                  if (autoAdded == 0) return const SizedBox.shrink();
+                  return Container(
+                    margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A2A1A),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _accent.withOpacity(0.4)),
+                    ),
+                    child: Row(children: [
+                      const Text('✅', style: TextStyle(fontSize: 18)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'הוספנו $autoAdded פריטי בטיחות חובה — הם כבר ברשימה',
+                          style: const TextStyle(
+                              color: _accent, fontSize: 12, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ]),
+                  );
+                }),
                 ..._buildBomRows(plan, anchorSkus),
                 if (plan.gaps.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.fromLTRB(18, 12, 18, 4),
-                    child: Text('⚠️ חיבורים שחסרים בקטלוג',
+                    child: Text('⚠️ חסרים חיבורים — הקו לא שלם',
                         style: TextStyle(
                             color: _drain,
                             fontSize: 13,
@@ -958,7 +1325,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                     child: Row(children: [
-                      const Text('בדיקת תקינות הקו',
+                      const Text('בטיחות ותקינות',
                           style: TextStyle(
                               color: _ink,
                               fontSize: 13,
@@ -977,6 +1344,40 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                   ),
                   for (final ch in checklist) _checkRow(ch),
                 ],
+                // "מה הצעד הבא" — post-BOM guidance card
+                Container(
+                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: _accent.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: _accent.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('💡', style: TextStyle(fontSize: 20)),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('מה הצעד הבא?',
+                                style: TextStyle(
+                                    color: _accent,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800)),
+                            SizedBox(height: 4),
+                            Text(
+                              'לחץ "📋 שלח לאינסטלטור" כדי להעתיק ולשלוח ב-WhatsApp,\nאו "הוסף לעגלה" להזמנה ישירה.',
+                              style: TextStyle(color: _mute, fontSize: 11, height: 1.4),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 10),
               ]),
             ),
@@ -999,7 +1400,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                         children: [
                           Icon(Icons.copy_all, color: _mute, size: 16),
                           SizedBox(width: 6),
-                          Text('העתק רשימה',
+                          Text('📋 שלח לאינסטלטור',
                               style: TextStyle(
                                   color: _ink,
                                   fontSize: 13,
@@ -1074,7 +1475,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     if (plan.zones.isNotEmpty) {
       final bySkU = {for (final p in plan.items) p.sku: p};
       for (final entry in plan.zones.entries) {
-        buf.writeln('▸ ${entry.key}');
+        buf.writeln('▸ ${_zoneDisplayLabel(entry.key)}');
         for (final sku in entry.value) {
           final p = bySkU[sku];
           if (p == null) continue;
@@ -1090,7 +1491,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     buf.writeln('──────────────────────────');
     buf.writeln('סה"כ: ${plan.items.length} פריטים · ${plan.totalPieces} יחידות');
     Clipboard.setData(ClipboardData(text: buf.toString()));
-    showToast(context, '📋 רשימה הועתקה ללוח');
+    showToast(context, '📋 הועתק — שתף ב-WhatsApp עם האינסטלטור שלך');
   }
 
   // Returns BOM rows — sectioned by zone (trunk/branches) when available,
@@ -1127,38 +1528,51 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     return result;
   }
 
-  Widget _zoneHeader(String label, {int count = 0}) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 2),
-        child: Row(children: [
+  Widget _zoneHeader(String key, {int count = 0}) {
+    final display = _zoneDisplayLabel(key);
+    final isRenameable = key.startsWith('ענף') || key == 'גזע';
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 2),
+      child: Row(children: [
+        Container(
+          width: 4, height: 16,
+          decoration: BoxDecoration(
+            color: _supply, borderRadius: BorderRadius.circular(2)),
+        ),
+        const SizedBox(width: 8),
+        GestureDetector(
+          onTap: isRenameable ? () => _renameZone(key) : null,
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Text(display,
+                style: const TextStyle(
+                    color: _supply,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6)),
+            if (isRenameable) ...[
+              const SizedBox(width: 4),
+              const Icon(Icons.edit, color: _mute, size: 11),
+            ],
+          ]),
+        ),
+        if (count > 0) ...[
+          const SizedBox(width: 6),
           Container(
-            width: 4, height: 16,
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
             decoration: BoxDecoration(
-              color: _supply, borderRadius: BorderRadius.circular(2)),
-          ),
-          const SizedBox(width: 8),
-          Text(label,
-              style: const TextStyle(
-                  color: _supply,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.6)),
-          if (count > 0) ...[
-            const SizedBox(width: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-              decoration: BoxDecoration(
-                color: _supply.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text('$count פריטים',
-                  style: const TextStyle(color: _supply, fontSize: 9,
-                      fontWeight: FontWeight.w700)),
+              color: _supply.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(6),
             ),
-          ],
-          const SizedBox(width: 8),
-          Expanded(child: Container(height: 1, color: _supply.withOpacity(0.2))),
-        ]),
-      );
+            child: Text('$count פריטים',
+                style: const TextStyle(color: _supply, fontSize: 9,
+                    fontWeight: FontWeight.w700)),
+          ),
+        ],
+        const SizedBox(width: 8),
+        Expanded(child: Container(height: 1, color: _supply.withOpacity(0.2))),
+      ]),
+    );
+  }
 
   // Severity badge — only shown when count > 0.
   Widget _severityBadge(String label, int count, Color c) {
@@ -1313,15 +1727,16 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
 
 // ── dark product picker ────────────────────────────────────────────────────────
 class _ProductPicker extends ConsumerStatefulWidget {
-  const _ProductPicker({required this.lineTemp});
+  const _ProductPicker({required this.lineTemp, this.initialCat});
   final int lineTemp;
+  final _PickerCategory? initialCat;
   @override
   ConsumerState<_ProductPicker> createState() => _ProductPickerState();
 }
 
 class _ProductPickerState extends ConsumerState<_ProductPicker> {
   String _q = '';
-  _PickerCategory? _cat;
+  late _PickerCategory? _cat = widget.initialCat;
 
   List<LipskeyCatalogProduct> _filtered() {
     final q = _q.trim();
@@ -1510,24 +1925,23 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
             style: TextStyle(color: _mute, fontSize: 14)),
       );
     }
+    final chain = ref.watch(chainProvider);
     return ListView.builder(
       controller: ctrl,
       itemCount: items.length,
       itemBuilder: (_, i) {
         final p = items[i];
         final c = _systemColor(p);
+        final inChain = chain.any((cp) => cp.sku == p.sku);
         return InkWell(
           onTap: () {
-            ref.read(chainProvider.notifier).state = [
-              ...ref.read(chainProvider),
-              p,
-            ];
+            ref.read(chainProvider.notifier).state = [...chain, p];
             Navigator.pop(context);
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(children: [
-              // Product image or color dot fallback
+              // Product image or color fallback
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: p.imageAsset != null
@@ -1552,13 +1966,33 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
                           fontSize: 13,
                           fontWeight: FontWeight.w600)),
                   const SizedBox(height: 3),
-                  Text(p.categoryHe,
-                      style: const TextStyle(color: _mute, fontSize: 11)),
+                  Row(children: [
+                    Expanded(
+                      child: Text(_productHint(p),
+                          style: const TextStyle(color: _mute, fontSize: 11)),
+                    ),
+                    if (inChain) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: _accent.withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text('✓ כבר נוסף',
+                            style: TextStyle(
+                                color: _accent,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800)),
+                      ),
+                    ],
+                  ]),
                 ]),
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
                   color: c.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(10),
@@ -1567,7 +2001,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
                 child: Text('הוסף',
                     style: TextStyle(
                         color: c,
-                        fontSize: 12,
+                        fontSize: 13,
                         fontWeight: FontWeight.w800)),
               ),
             ]),
@@ -1585,5 +2019,104 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
           border: Border.all(color: c.withOpacity(0.3)),
         ),
         child: Icon(Icons.plumbing, color: c.withOpacity(0.6), size: 26),
+      );
+}
+
+// ── first-time tutorial overlay ───────────────────────────────────────────────
+class _TutorialOverlay extends StatelessWidget {
+  const _TutorialOverlay({required this.onDismiss});
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Container(
+        color: _void0.withOpacity(0.93),
+        alignment: Alignment.center,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 70, height: 70,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(colors: [_supply, _fixture]),
+                  boxShadow: [BoxShadow(color: _supply.withOpacity(0.4), blurRadius: 20)],
+                ),
+                child: const Icon(Icons.plumbing, color: Colors.white, size: 32),
+              ),
+              const SizedBox(height: 20),
+              const Text('ברוכים הבאים לסטודיו התקנות',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: _ink, fontSize: 20, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 6),
+              const Text('3 צעדים לרשימת קנייה מוכנה',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: _mute, fontSize: 13)),
+              const SizedBox(height: 32),
+              _step('1️⃣', 'בחר מה אתה מחבר',
+                  'ברז, מקלחת, שירותים, גינה — לחץ על הקטגוריה הנכונה'),
+              _step('2️⃣', 'הוסף 2 נקודות לפחות',
+                  'כניסה + יציאה — המערכת ממלאת חיבורים אוטומטית'),
+              _step('3️⃣', 'קבל רשימת קנייה',
+                  'שלח לאינסטלטור ב-WhatsApp, או הוסף ישירות לעגלה'),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _accent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  onPressed: onDismiss,
+                  child: const Text('הבנתי — בוא נתחיל!',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: onDismiss,
+                child: const Text('דלג',
+                    style: TextStyle(color: _mute, fontSize: 12)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _step(String emoji, String title, String desc) => Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 26)),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          color: _ink, fontSize: 14, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 3),
+                  Text(desc,
+                      style: const TextStyle(
+                          color: _mute, fontSize: 12, height: 1.4)),
+                ],
+              ),
+            ),
+          ],
+        ),
       );
 }
