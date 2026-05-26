@@ -151,6 +151,10 @@ final chainProvider = StateProvider<List<LipskeyCatalogProduct>>((_) => []);
 // suitability check — at 80°C, HDPE (capped ~40°C) is flagged unsuitable.
 final lineMaxTempProvider = StateProvider<int>((_) => 20);
 
+// Installation accessories confirmed for the line (insulation / clips / seal).
+// Tracked separately from the series chain since they wrap/support, not flow.
+final lineAccessoriesProvider = StateProvider<Set<String>>((_) => {});
+
 // ── material / temperature helpers ──────────────────────────────────────────────
 
 /// Max service temperature of a product, or null if unknown (no verified spec).
@@ -175,40 +179,72 @@ class LineCheck {
   final String why;     // why it's required
 }
 
+/// The physical join method between two mating products, derived from end types
+/// — so each transition states exactly how it's connected (Press / PTFE / …).
+String connectionMethodLabel(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
+  final vA = kVerifiedSpecs[a.sku], vB = kVerifiedSpecs[b.sku];
+  if (vA == null || vB == null) return '';
+  for (final eA in vA.ends) {
+    for (final eB in vB.ends) {
+      if (eA.directMatesWith(eB)) {
+        switch (eA.type) {
+          case EndType.pexPress:    return 'Press / טבעת כיווץ';
+          case EndType.copperPress: return 'Press / O-ring';
+          case EndType.bspMale:
+          case EndType.bspFemale:   return 'תבריג + PTFE';
+          case EndType.hdpeCompression: return 'אום הידוק';
+        }
+      }
+      if (eA.pipeSharedWith(eB)) return 'אום הידוק (compression)';
+    }
+  }
+  return '';
+}
+
 /// Detects the safety/durability components a hot line requires and whether the
 /// current chain includes them — turning expert review into an automatic gate.
 List<LineCheck> lineComplianceChecklist(
-    List<LipskeyCatalogProduct> chain, int tempC) {
+    List<LipskeyCatalogProduct> chain, int tempC, Set<String> accessories) {
   final skus = chain.map((p) => p.sku).toSet();
   final mats = chain.map(productMaterial).whereType<String>().toSet();
   bool has(Set<String> ok) => skus.any(ok.contains);
+  bool acc(String s) => accessories.contains(s);
 
-  final hot        = tempC >= 60;
-  final hasPex     = mats.contains('PEX');
-  final recirc     = skus.contains('HW-PUMP-25') || skus.contains('HW-TEE-RECIRC');
-  final dissimilar = mats.contains('נחושת') && mats.contains('פלדה');
+  final hot    = tempC >= 60;
+  final hasPex = mats.contains('PEX');
+  final recirc = skus.contains('HW-PUMP-25') || skus.contains('HW-TEE-RECIRC');
+  // Galvanic risk: copper joined to ANY other metal (brass/steel) — conservative.
+  final metals = mats.where((m) => m == 'נחושת' || m == 'פליז' || m == 'פלדה');
+  final dissimilar = mats.contains('נחושת') && metals.toSet().length >= 2;
+  final isolationCount =
+      chain.where((p) => p.sku == 'HW-BALL-1' || p.sku == 'HW-BALL-15').length;
 
   return [
-    LineCheck('ברז ניתוק לתחזוקה', has({'HW-BALL-1', 'HW-BALL-15'}), 'כל קו בלחץ'),
+    LineCheck(
+        recirc ? 'ברז ניתוק ×2 (משאבה + מניפולד)' : 'ברז ניתוק לתחזוקה',
+        recirc ? isolationCount >= 2 : isolationCount >= 1,
+        'בידוד אזורי לתחזוקה'),
     if (recirc) ...[
-      LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}), 'לולאת recirculation'),
+      LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}), 'מונע זרימה הפוכה בלולאה'),
       LineCheck('שסתום מאזן / TRV', has({'HW-BALANCE-15'}), 'איזון הלולאה'),
       LineCheck('מפוח אוויר', has({'HW-AIRVENT'}), 'פליטת אוויר בלולאה'),
     ],
     if (dissimilar)
-      LineCheck('רקורד דיאלקטרי', has({'HW-DIELECTRIC-15'}), 'הפרדה גלוונית נחושת↔פלדה'),
+      LineCheck('רקורד דיאלקטרי', has({'HW-DIELECTRIC-15'}), 'הפרדה גלוונית בין מתכות'),
     if (hasPex)
-      LineCheck('מפצה התפשטות', has({'HW-EXP-COMP-20'}), 'PEX מתרחב בחום'),
+      LineCheck('מפצה התפשטות PEX', has({'HW-EXP-COMP-20'}), 'PEX מתרחב בחום'),
     if (hot)
       LineCheck('שסתום פורק לחץ (PRV)', has({'HW-PRV-34'}), 'מערכת חמה סגורה'),
+    if (hot)
+      LineCheck('בידוד תרמי', acc('HW-INSUL'), 'הפסדי חום + סכנת כוויות'),
+    LineCheck('חבקים/תמיכת צנרת', acc('HW-CLIP'), 'קיבוע ושיפוע'),
+    LineCheck('איטום (Press/PTFE/O-ring)', acc('HW-SEALANT'), 'אטימות כל מעבר'),
   ];
 }
 
-/// Site-installation reminders (not series line-items — wrap / support / seal).
-List<String> lineInstallReminders(int tempC) => [
-      if (tempC >= 60) 'בידוד תרמי על כל הקו',
-      'חבקים/תמיכה + שיפוע לקטע אופקי ארוך',
-      'איטום: טבעות Press / O-ring / PTFE',
+/// Site reminders that remain advisory (not auto-trackable line-items).
+List<String> lineInstallReminders() => const [
+      'שיפוע לקטע אופקי ארוך',
       'נקודת בדיקה/גישה לתחזוקה',
     ];
 
@@ -1099,6 +1135,7 @@ class ChainBuilderSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final chain = ref.watch(chainProvider);
     final lineTemp = ref.watch(lineMaxTempProvider);
+    final accessories = ref.watch(lineAccessoriesProvider);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
@@ -1176,6 +1213,45 @@ class ChainBuilderSheet extends ConsumerWidget {
               ]),
             ),
 
+            // ── installation accessories (insulation / clips / sealing) ─────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(children: [
+                const Text('🧰 אביזרים:',
+                    style: TextStyle(color: _sub, fontSize: 12,
+                        fontWeight: FontWeight.w600)),
+                const SizedBox(width: 8),
+                for (final a in const [
+                  ('HW-INSUL', 'בידוד'),
+                  ('HW-CLIP', 'חבקים'),
+                  ('HW-SEALANT', 'איטום'),
+                ])
+                  GestureDetector(
+                    onTap: () {
+                      final s = {...accessories};
+                      s.contains(a.$1) ? s.remove(a.$1) : s.add(a.$1);
+                      ref.read(lineAccessoriesProvider.notifier).state = s;
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: accessories.contains(a.$1)
+                            ? const Color(0xFF059669) : _surface,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                          '${accessories.contains(a.$1) ? '✓ ' : ''}${a.$2}',
+                          style: TextStyle(
+                              color: accessories.contains(a.$1)
+                                  ? Colors.white : _sub,
+                              fontSize: 12, fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+              ]),
+            ),
+
             // ── chain visualization ───────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1233,8 +1309,8 @@ class ChainBuilderSheet extends ConsumerWidget {
                 if (chain.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _ComplianceChecklist(
-                    checks: lineComplianceChecklist(chain, lineTemp),
-                    reminders: lineInstallReminders(lineTemp),
+                    checks: lineComplianceChecklist(chain, lineTemp, accessories),
+                    reminders: lineInstallReminders(),
                   ),
                 ],
                 SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
@@ -1569,6 +1645,7 @@ class _CompatCheck extends StatelessWidget {
   Widget build(BuildContext context) {
     final ok = canConnect(a, b);
     if (ok) {
+      final method = connectionMethodLabel(a, b);
       return Padding(
         padding: const EdgeInsets.only(top: 3),
         child: Row(children: [
@@ -1576,6 +1653,11 @@ class _CompatCheck extends StatelessWidget {
           const SizedBox(width: 4),
           const Text('חיבור תקין ✓',
               style: TextStyle(color: Color(0xFF059669), fontSize: 10, fontWeight: FontWeight.w600)),
+          if (method.isNotEmpty) ...[
+            const SizedBox(width: 4),
+            Text('· $method',
+                style: const TextStyle(color: _sub, fontSize: 10)),
+          ],
         ]),
       );
     }
