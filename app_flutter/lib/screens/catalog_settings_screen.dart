@@ -1,6 +1,5 @@
-import 'package:buildsmart/screens/catalog_screen.dart'
-    show recentSearchesProvider;
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -132,7 +131,7 @@ class _SearchSection extends ConsumerWidget {
         _ActionRow(
           label: 'ניקוי היסטוריה',
           onTap: () {
-            ref.read(recentSearchesProvider.notifier).state = const [];
+            ref.read(recentSearchesProvider.notifier).clear();
             showToast(context, 'ההיסטוריה נוקתה');
           },
         ),

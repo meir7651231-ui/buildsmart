@@ -131,7 +131,8 @@
 - **שמירה ל-SharedPreferences:**
   - `catalogSettingsProvider` ⇐ מפתח `'bs.catalog-settings.v1'` (JSON, persist בכל `update`).
   - `productFavoritesProvider` ⇐ מפתח `'bs.product-favorites.v1'` (StringList).
-- **In-memory בלבד (לא נשמר, אובד ב-restart):** `recentSearchesProvider`, `catalogSectionsListProvider`, `catalogListItemsProvider`, `catalogSectionProvider`, מצבי הדריל (`catalogTreePathProvider`/`catalogFacetProvider`/`smartTreeCatProvider`/`catalogProductSortProvider`).
+  - `recentSearchesProvider` ⇐ מפתח `'bs.recent-searches.v1'` (StringList; `RecentSearchesNotifier`, לוגיקת ה-add/cap בפונקציה טהורה `addRecentSearch`).
+- **In-memory בלבד (לא נשמר, אובד ב-restart):** `catalogSectionsListProvider`, `catalogListItemsProvider`, `catalogSectionProvider`, מצבי הדריל (`catalogTreePathProvider`/`catalogFacetProvider`/`smartTreeCatProvider`/`catalogProductSortProvider`).
 
 ## 8. תלות בהגדרות (`catalogSettingsProvider`)
 
@@ -168,4 +169,4 @@
 - **"בקרוב":** כל קטגוריה ראשית ללא דאטת עץ ⇐ `_TreeComingSoon`; ב-`_CatalogDrillCatGrid` קטגוריות ללא smart-products ⇐ תג `'בקרוב'`. 🚧.
 - **אי-עקביות מספרית:** הערות הקוד מציינות "11 קטגוריות" בעוד `kCatalogCats` ו-`kSearchIndex` מכילים בפועל **12** (נוספו `אביזרים נלווים` + `גינון והשקיה`).
 - **`_kMeta` סימולטיבי:** preview/time/badge ב-`_CatalogRow` הם דאטה מדומה קבועה (12 רשומות), לא חיה.
-- **חיפושים אחרונים — אובדן מצב:** in-memory בלבד למרות שקיימת ההגדרה `searchHistoryEnabled`; לא נשמר ל-SharedPreferences.
+- ~~**חיפושים אחרונים — אובדן מצב**~~ ✅ **טופל (v3.78)**: `recentSearchesProvider` נשמר כעת ל-SharedPreferences (`bs.recent-searches.v1`) עם helper טהור `addRecentSearch` (dedup + cap 8). הגייט `searchHistoryEnabled` עדיין שולט בהקלטה.
