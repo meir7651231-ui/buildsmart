@@ -19,7 +19,10 @@ Three layers verify the app. Run all before every commit.
   overflow for long product names — now fixed via a `Flexible` name.) It also
   includes a **catalog-wide sweep**: one product per distinct category (all 69),
   the product sheet fully scrolled, asserting no overflow/render error for any
-  category's layout.
+  category's layout. Plus a **HARD sweep** over all **935** products at the
+  app's largest text scale (1.15) on a narrow 340×680 phone — which exposed 92
+  horizontal Row overflows (accessory name, section title, category header,
+  size badge), all fixed with `Flexible`/ellipsis.
 - domain: `pathfinder_test`, `catalog_bfs_test`, `bfs_demo_test`,
   `install_builder_test`, `manifold_test`, `deep_audit_test`, etc.
 

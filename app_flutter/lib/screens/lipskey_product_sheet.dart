@@ -412,9 +412,13 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                               Text(p.categoryEmoji,
                                   style: const TextStyle(fontSize: 16)),
                               const SizedBox(width: 6),
-                              Text(p.categoryHe,
-                                  style: const TextStyle(
-                                      color: Colors.black38, fontSize: 12)),
+                              Flexible(
+                                child: Text(p.categoryHe,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: Colors.black38, fontSize: 12)),
+                              ),
                               const Spacer(),
                               GestureDetector(
                                 onTap: () {
@@ -706,30 +710,38 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                               const EdgeInsets.fromLTRB(20, 8, 20, 6),
                           child: Row(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 9, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: const Color(0x22FF7A18),
-                                  borderRadius: BorderRadius.circular(7),
-                                  border: Border.all(
-                                      color: const Color(0x55FF7A18)),
-                                ),
-                                child: Text(
-                                  multi
-                                      ? '📐 צד ${gi + 1}: ${_sizeLabel(g.size)}'
-                                      : '📐 ${_sizeLabel(g.size)}',
-                                  style: const TextStyle(
-                                      color: Color(0xFFFF9D4D),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700),
+                              Flexible(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 9, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0x22FF7A18),
+                                    borderRadius: BorderRadius.circular(7),
+                                    border: Border.all(
+                                        color: const Color(0x55FF7A18)),
+                                  ),
+                                  child: Text(
+                                    multi
+                                        ? '📐 צד ${gi + 1}: ${_sizeLabel(g.size)}'
+                                        : '📐 ${_sizeLabel(g.size)}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: Color(0xFFFF9D4D),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text('${g.parts.length} חלקים',
-                                  style: const TextStyle(
-                                      color: Color(0xFF9AA3B2),
-                                      fontSize: 11)),
+                              Flexible(
+                                child: Text('${g.parts.length} חלקים',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: Color(0xFF9AA3B2),
+                                        fontSize: 11)),
+                              ),
                             ],
                           ),
                         ));
@@ -1335,11 +1347,15 @@ class _AccRow extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(acc.name,
-                            style: const TextStyle(
-                                color: Color(0xFF1A1A1A),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600)),
+                        Flexible(
+                          child: Text(acc.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  color: Color(0xFF1A1A1A),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600)),
+                        ),
                         const SizedBox(width: 6),
                         if (acc.must)
                           Container(
@@ -1514,16 +1530,24 @@ class _SectionTitle extends StatelessWidget {
             Text(emoji,
                 style: const TextStyle(fontSize: 16)),
             const SizedBox(width: 8),
-            Text(title,
-                style: const TextStyle(
-                    color: Color(0xFF1A1A1A),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700)),
+            Flexible(
+              child: Text(title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700)),
+            ),
             if (subtitle != null) ...[
               const SizedBox(width: 8),
-              Text(subtitle!,
-                  style: const TextStyle(
-                      color: Color(0xFF888888), fontSize: 11)),
+              Flexible(
+                child: Text(subtitle!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        color: Color(0xFF888888), fontSize: 11)),
+              ),
             ],
           ],
         ),

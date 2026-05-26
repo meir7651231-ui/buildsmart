@@ -182,4 +182,53 @@ void main() {
     expect(bad, isEmpty,
         reason: 'product sheets with render errors:\n${bad.join('\n')}');
   });
+
+  // ── HARD sweep ──────────────────────────────────────────────────────────
+  // Every one of the 935 products, under the app's largest text scale (1.15 =
+  // "טקסט גדול") on a narrow small-phone (340×680) — the real stress that
+  // breaks fixed-height layouts. Fully scrolled; asserts no overflow anywhere.
+  testWidgets('HARD · all 935 sheets render at large text + narrow phone',
+      (t) async {
+    await t.binding.setSurfaceSize(const Size(340, 680));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+
+    final bad = <String>[];
+    for (final p in kLipskeyCatalog) {
+      final cat =
+          kLipskeyCatalog.where((x) => x.categoryHe == p.categoryHe).toList();
+      await t.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Builder(
+              builder: (ctx) => MediaQuery(
+                data: MediaQuery.of(ctx)
+                    .copyWith(textScaler: const TextScaler.linear(1.15)),
+                child: Scaffold(
+                  body:
+                      LipskeyProductSheet(product: p, categoryProducts: cat),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      String? err = t.takeException()?.toString();
+      final scroll = find.byType(Scrollable);
+      if (scroll.evaluate().isNotEmpty) {
+        for (var i = 0; i < 8 && err == null; i++) {
+          await t.drag(scroll.first, const Offset(0, -400));
+          await t.pump();
+          err = t.takeException()?.toString();
+        }
+      }
+      if (err != null) {
+        bad.add('${p.categoryHe} #${p.sku}: ${err.split('\n').first}');
+      }
+    }
+
+    expect(bad, isEmpty,
+        reason: '${bad.length}/935 sheets overflow under large text + narrow '
+            'width:\n${bad.take(25).join('\n')}');
+  });
 }
