@@ -353,7 +353,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
         expand: false,
         builder: (_, scrollCtrl) => Container(
           decoration: const BoxDecoration(
-            color: Color(0xFF13132A),
+            color: Color(0xFFF5F6FA),
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
@@ -375,7 +375,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 0, 0, 2),
                   child: Material(
-                    color: const Color(0xFF252B36),
+                    color: const Color(0xFFF5F5F5),
                     shape: const CircleBorder(),
                     child: InkWell(
                       customBorder: const CircleBorder(),
@@ -383,7 +383,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                       child: const SizedBox(
                         width: 36,
                         height: 36,
-                        child: Icon(Icons.close, color: Colors.white, size: 22),
+                        child: Icon(Icons.close, color: Color(0xFF1A1A1A), size: 22),
                       ),
                     ),
                   ),
@@ -439,7 +439,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                           const SizedBox(height: 6),
                           Text(p.nameHe,
                               style: const TextStyle(
-                                  color: Colors.white,
+                                  color: Color(0xFF1A1A1A),
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
                                   height: 1.3)),
@@ -447,7 +447,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                             const SizedBox(height: 2),
                             Text(p.nameEn,
                                 style: const TextStyle(
-                                    color: Colors.white38,
+                                    color: Color(0xFF888888),
                                     fontSize: 12,
                                     fontStyle: FontStyle.italic)),
                           ],
@@ -670,7 +670,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                     children: [
                                       const Text('ערכת התקנה מומלצת',
                                           style: TextStyle(
-                                              color: Colors.white,
+                                              color: Color(0xFF1A1A1A),
                                               fontSize: 13,
                                               fontWeight: FontWeight.w700)),
                                       Text(
@@ -820,11 +820,11 @@ class _QtyStepper extends StatelessWidget {
               child: Center(
                   child: Text(s,
                       style: const TextStyle(
-                          color: Colors.white, fontSize: 20)))),
+                          color: Color(0xFF1A1A1A), fontSize: 20)))),
         );
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF10141B),
+        color: const Color(0xFFFFFFFF),
         border: Border.all(color: const Color(0xFFFF7A18)),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -838,7 +838,7 @@ class _QtyStepper extends StatelessWidget {
               child: Center(
                   child: Text('$qty',
                       style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF1A1A1A),
                           fontSize: 17,
                           fontWeight: FontWeight.w800)))),
           b('+', () => onChanged(qty + 1)),
@@ -888,7 +888,7 @@ class _UnitToggle extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFF252B36)),
+        border: Border.all(color: const Color(0xFFEEEEEE)),
         borderRadius: BorderRadius.circular(12),
       ),
       clipBehavior: Clip.antiAlias,
@@ -917,8 +917,8 @@ class _RelatedCard extends StatelessWidget {
         width: 112,
         padding: const EdgeInsets.all(9),
         decoration: BoxDecoration(
-          color: const Color(0xFF181D26),
-          border: Border.all(color: const Color(0xFF252B36)),
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(color: const Color(0xFFEEEEEE)),
           borderRadius: BorderRadius.circular(13),
         ),
         child: Column(
@@ -941,7 +941,7 @@ class _RelatedCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                    color: Colors.white, fontSize: 11, height: 1.25)),
+                    color: Color(0xFF1A1A1A), fontSize: 11, height: 1.25)),
             const SizedBox(height: 3),
             Text('#${product.sku}',
                 style: const TextStyle(
@@ -1055,7 +1055,7 @@ class _ProductSide extends StatelessWidget {
     return GestureDetector(
       onTap: onZoom, // tap image → fullscreen zoom
       child: Container(
-        color: const Color(0xFF080815),
+        color: const Color(0xFFF5F6FA),
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -1242,7 +1242,7 @@ class _VariantSelector extends StatelessWidget {
               decoration: BoxDecoration(
                 color: selected
                     ? const Color(0xFF3D5A80).withOpacity(0.3)
-                    : const Color(0xFF0D0D1A),
+                    : const Color(0xFFFFFFFF),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: selected
@@ -1272,7 +1272,7 @@ class _VariantSelector extends StatelessWidget {
                         style: TextStyle(
                             color: selected
                                 ? const Color(0xFF64FFDA)
-                                : Colors.white38,
+                                : const Color(0xFF888888),
                             fontSize: 9,
                             fontFamily: 'monospace'),
                         textAlign: TextAlign.center,
@@ -1313,12 +1313,12 @@ class _AccRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected
                 ? const Color(0xFF3D5A80).withOpacity(0.2)
-                : const Color(0xFF0D0D1A),
+                : const Color(0xFFFFFFFF),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: selected
                   ? const Color(0xFF64FFDA).withOpacity(0.5)
-                  : Colors.white12,
+                  : const Color(0xFFEEEEEE),
               width: 0.8,
             ),
           ),
@@ -1335,7 +1335,7 @@ class _AccRow extends StatelessWidget {
                       children: [
                         Text(acc.name,
                             style: const TextStyle(
-                                color: Colors.white,
+                                color: Color(0xFF1A1A1A),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600)),
                         const SizedBox(width: 6),
@@ -1362,7 +1362,7 @@ class _AccRow extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(acc.why,
                         style: const TextStyle(
-                            color: Colors.white38, fontSize: 11)),
+                            color: Color(0xFF888888), fontSize: 11)),
                   ],
                 ),
               ),
@@ -1378,7 +1378,7 @@ class _AccRow extends StatelessWidget {
                   else
                     const Text('—',
                         style: TextStyle(
-                            color: Colors.white38, fontSize: 13)),
+                            color: Color(0xFF888888), fontSize: 13)),
                   const SizedBox(height: 4),
                   Icon(
                     selected
@@ -1427,14 +1427,14 @@ class _StageRow extends StatelessWidget {
                 ? (stage.isFinal
                     ? const Color(0xFF22C55E).withOpacity(0.12)
                     : const Color(0xFF3D5A80).withOpacity(0.2))
-                : const Color(0xFF0D0D1A),
+                : const Color(0xFFFFFFFF),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isActive
                   ? (stage.isFinal
                       ? const Color(0xFF22C55E).withOpacity(0.6)
                       : const Color(0xFF64FFDA).withOpacity(0.5))
-                  : Colors.white12,
+                  : const Color(0xFFEEEEEE),
               width: 0.8,
             ),
           ),
@@ -1468,7 +1468,7 @@ class _StageRow extends StatelessWidget {
                   children: [
                     Text(stage.label,
                         style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF1A1A1A),
                             fontSize: 13,
                             fontWeight: FontWeight.w600)),
                     if (isActive && stage.desc.isNotEmpty) ...[
@@ -1484,7 +1484,7 @@ class _StageRow extends StatelessWidget {
                 isActive
                     ? Icons.keyboard_arrow_up
                     : Icons.keyboard_arrow_down,
-                color: Colors.white38,
+                color: const Color(0xFF888888),
                 size: 18,
               ),
             ],
@@ -1514,14 +1514,14 @@ class _SectionTitle extends StatelessWidget {
             const SizedBox(width: 8),
             Text(title,
                 style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF1A1A1A),
                     fontSize: 14,
                     fontWeight: FontWeight.w700)),
             if (subtitle != null) ...[
               const SizedBox(width: 8),
               Text(subtitle!,
                   style: const TextStyle(
-                      color: Colors.white38, fontSize: 11)),
+                      color: Color(0xFF888888), fontSize: 11)),
             ],
           ],
         ),
@@ -1533,7 +1533,7 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Divider(
-      height: 1, color: Colors.white10, indent: 20, endIndent: 20);
+      height: 1, color: Color(0xFFEEEEEE), indent: 20, endIndent: 20);
 }
 
 Widget _SpecRow(String emoji, String label, String value) => Padding(
@@ -1548,7 +1548,7 @@ Widget _SpecRow(String emoji, String label, String value) => Padding(
           const Spacer(),
           Text(value,
               style: const TextStyle(
-                  color: Colors.white, fontSize: 13)),
+                  color: Color(0xFF1A1A1A), fontSize: 13)),
         ],
       ),
     );
@@ -1592,7 +1592,7 @@ class _StructuredChips extends StatelessWidget {
                 TextSpan(
                     text: '${c.label} ',
                     style: const TextStyle(
-                        color: Colors.white38, fontSize: 10)),
+                        color: Color(0xFF888888), fontSize: 10)),
                 TextSpan(
                     text: c.value,
                     style: TextStyle(

@@ -565,19 +565,19 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.check, color: Colors.white),
+                  icon: const Icon(Icons.check, color: Color(0xFF888888)),
                   onPressed: () => Navigator.pop(context),
                 ),
                 const Text(
                   'ניהול רשימות',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF1A1A1A),
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
+                  icon: const Icon(Icons.close, color: Color(0xFF888888)),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -611,7 +611,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                   title: Text(
                     s,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF1A1A1A),
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -983,7 +983,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                         Text(
                           _label,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF1A1A1A),
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
                           ),
@@ -999,7 +999,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
+                  icon: const Icon(Icons.close, color: Color(0xFF888888)),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -1047,7 +1047,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                         child: Text(
                           cat.title,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF1A1A1A),
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                           ),
@@ -1168,7 +1168,7 @@ class _Chip extends StatelessWidget {
               Text(
                 label,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF1A1A1A),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1567,7 +1567,7 @@ class _RecentSearchesList extends ConsumerWidget {
                 ),
                 title: Text(
                   q,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
                 ),
                 trailing: IconButton(
                   icon: const Icon(
@@ -1662,7 +1662,7 @@ class _SearchResultsList extends ConsumerWidget {
                   : Text(p.categoryEmoji, style: const TextStyle(fontSize: 20)),
             ),
             title: Text(p.nameHe,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
                 maxLines: 2, overflow: TextOverflow.ellipsis),
             subtitle: Text('${p.categoryHe} · #${p.sku}',
                 style: const TextStyle(color: Color(0xFF666666), fontSize: 11),
@@ -1700,7 +1700,7 @@ class _SearchResultsList extends ConsumerWidget {
           ),
           title: Text(
             entry.title,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
           ),
           subtitle: entry.breadcrumb.isNotEmpty
               ? Text(
@@ -1859,7 +1859,7 @@ class _EmptySection extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              color: Colors.white,
+              color: Color(0xFF1A1A1A),
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
@@ -3934,7 +3934,7 @@ class _CatalogDrillCatGrid extends ConsumerWidget {
               Text(
                 'קטגוריות — בחר תחום',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF1A1A1A),
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -4097,7 +4097,7 @@ class _CatalogDrillProductList extends ConsumerWidget {
               Text(
                 cat,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF1A1A1A),
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -4110,7 +4110,7 @@ class _CatalogDrillProductList extends ConsumerWidget {
           const Expanded(
             child: Center(
               child: Text('בקרוב',
-                  style: TextStyle(color: Colors.white38, fontSize: 16)),
+                  style: TextStyle(color: Color(0xFF999999), fontSize: 16)),
             ),
           )
         else
@@ -4158,7 +4158,7 @@ class _CatalogDrillProductList extends ConsumerWidget {
                                               Expanded(
                                                 child: Text(p.name,
                                                     style: const TextStyle(
-                                                      color: Colors.white,
+                                                      color: Color(0xFF1A1A1A),
                                                       fontSize: 15,
                                                       fontWeight: FontWeight.w600,
                                                     )),
@@ -4255,7 +4255,7 @@ class _CatalogDrillProductList extends ConsumerWidget {
                                         children: [
                                           Text(g.name,
                                               style: const TextStyle(
-                                                color: Colors.white,
+                                                color: Color(0xFF1A1A1A),
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w600,
                                               )),
@@ -5659,7 +5659,7 @@ class _FavProductRow extends ConsumerWidget {
               style: const TextStyle(fontSize: 30)),
       title: Text(product.nameHe,
           style: const TextStyle(
-              color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+              color: Color(0xFF1A1A1A), fontSize: 13, fontWeight: FontWeight.w600)),
       subtitle: Text(product.brand,
           style: const TextStyle(color: Color(0xFF9AA3B2), fontSize: 11)),
       onTap: () => showLipskeyProductSheet(context, product,
@@ -5714,7 +5714,7 @@ class _RecentSearchesSection extends ConsumerWidget {
                     color: Color(0xFF9AA3B2), size: 20),
                 title: Text(q,
                     style: const TextStyle(
-                        color: Colors.white, fontSize: 14)),
+                        color: Color(0xFF1A1A1A), fontSize: 14)),
                 trailing: IconButton(
                   icon: const Icon(Icons.close,
                       color: Color(0xFF9AA3B2), size: 18),

@@ -15,12 +15,12 @@ class LipskeyBrandScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0D0D1A),
+        backgroundColor: const Color(0xFFF5F6FA),
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
-              backgroundColor: const Color(0xFF0D0D1A),
-              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFFFFFFFF),
+              foregroundColor: const Color(0xFF1A1A1A),
               elevation: 0,
               pinned: true,
               leading: IconButton(
@@ -32,7 +32,7 @@ class LipskeyBrandScreen extends StatelessWidget {
                 children: const [
                   Text('ליפסקי ברקן',
                       style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF1A1A1A),
                           fontWeight: FontWeight.bold,
                           fontSize: 17)),
                   Text('אינסטלציה · סניטציה',
@@ -153,10 +153,10 @@ class _SectionCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF13132A),
+          color: const Color(0xFFFFFFFF),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-              color: const Color(0xFF3D5A80).withOpacity(0.4),
+              color: const Color(0xFFEEEEEE),
               width: 0.8),
         ),
         padding: const EdgeInsets.all(16),
@@ -171,7 +171,7 @@ class _SectionCard extends StatelessWidget {
               children: [
                 Text(section.name,
                     style: const TextStyle(
-                        color: Colors.white,
+                        color: Color(0xFF1A1A1A),
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         height: 1.2)),
@@ -193,7 +193,7 @@ class _SectionCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text('$catCount קטגוריות',
                         style: const TextStyle(
-                            color: Colors.white38, fontSize: 10)),
+                            color: Color(0xFF888888), fontSize: 10)),
                   ],
                 ),
               ],
@@ -221,12 +221,12 @@ class LipskeySectionScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0D0D1A),
+        backgroundColor: const Color(0xFFF5F6FA),
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
-              backgroundColor: const Color(0xFF0D0D1A),
-              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFFFFFFFF),
+              foregroundColor: const Color(0xFF1A1A1A),
               elevation: 0,
               pinned: true,
               leading: IconButton(
@@ -311,10 +311,10 @@ class _CategoryCard extends StatelessWidget {
         opacity: isEmpty ? 0.4 : 1.0,
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF13132A),
+            color: const Color(0xFFFFFFFF),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-                color: const Color(0xFF3D5A80).withOpacity(0.4),
+                color: const Color(0xFFEEEEEE),
                 width: 0.8),
           ),
           padding: const EdgeInsets.all(16),
@@ -329,7 +329,7 @@ class _CategoryCard extends StatelessWidget {
                 children: [
                   Text(entry.name,
                       style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF1A1A1A),
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           height: 1.2),
@@ -341,25 +341,24 @@ class _CategoryCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.06),
+                            color: const Color(0xFFF5F5F5),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Text('בקרוב',
                               style: TextStyle(
-                                  color: Colors.white38,
+                                  color: Color(0xFF888888),
                                   fontSize: 11)),
                         )
                       : Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF3D5A80)
-                                .withOpacity(0.25),
+                            color: const Color(0xFFFFE8D6),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text('${products.length} מוצרים',
                               style: const TextStyle(
-                                  color: Color(0xFF64FFDA),
+                                  color: Color(0xFFFF7A18),
                                   fontSize: 11)),
                         ),
                 ],
