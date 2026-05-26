@@ -285,14 +285,20 @@ List<String> lineInstallReminders() => const [
 // copper/PEX) and drainage (gravity HDPE/PVC) only meet *inside* a fixture, so a
 // valid path's products must all share at least one common system.
 
+// NOTE: 'אביזרי תבריג' (threaded fittings) is intentionally NOT here — it mixes
+// brass supply nipples/bushings with PVC drainage branches, so it is classified
+// per-SKU by its actual ends (see productSystems fallback).
 const _supplyCats = {
-  'אביזרי נחושת', 'מחברי NTM', 'אביזרי תבריג', 'ברזי מעבר', 'ברזי ניל',
+  'אביזרי נחושת', 'מחברי NTM', 'ברזי מעבר', 'ברזי ניל',
   'ברזי קיר', 'ברזי כיור', 'ברזי מטבח', 'ברזי גן', 'ברזי אמבטיה', 'ברזי מקלחת',
-  'ברזי דלי', 'ציוד גן', 'צינורות גמישים', 'צינורות מקלחת',
-  'זרועות דוש', 'מזלפי יד', 'ראשי מקלחת', 'מחלקים', 'נקודות מים', 'אל חזור',
-  'מכשירי לחץ', 'אביזרי ברזים', 'אביזרי מקלחת', 'מנגנונים', 'ארונות מחלק',
+  'ברזי דלי', 'ציוד גן', 'צינורות מקלחת',
+  'זרועות דוש', 'מזלפי יד', 'ראשי מקלחת', 'מחלקים', 'נקודות מים',
+  'מכשירי לחץ', 'אביזרי ברזים', 'אביזרי מקלחת', 'מנגנונים',
   'מערכות שטיפה',
 };
+// NOTE: 'צינורות גמישים' (braided supply hoses + spiral drain hoses) and
+// 'אל חזור' (brass supply check valves + sewage backflow valves) are mixed
+// categories — classified per-SKU by their ends, like 'אביזרי תבריג'.
 const _drainCats = {
   'מחברי HDPE', 'אביזרי שקע-תקע', 'צינורות אפורות', 'צינורות PP', 'ברכיים',
   'מסעפים וחיבורי אסלה', 'זקיף אסלה', 'מחסומים גלויים', 'מחסומי רצפה',
@@ -306,7 +312,7 @@ const _fixtureCats = {
 };
 const _structuralCats = {
   'חבקי תליה', 'חבקי צינור', 'עוגנים ובנדים', 'כלי עבודה', 'מצופים',
-  'ידיות אחיזה',
+  'ידיות אחיזה', 'ארונות מחלק',
 };
 
 const _allSystems = {WaterSystem.supply, WaterSystem.drainage};
@@ -483,9 +489,12 @@ List<LipskeyCatalogProduct>? findShortestPath(
   // would have to cross supply↔drainage, which only happens inside a fixture.
   final sysFrom = productSystems(from);
   final sysTo = productSystems(to);
-  if (canConnect(from, to) && sysFrom.intersection(sysTo).isNotEmpty) {
-    return [from, to];
-  }
+  // Fast reject: the running system intersection starts at sysFrom and can only
+  // shrink, so reaching `to` requires sysFrom ∩ sysTo ≠ ∅. If they share no
+  // system (e.g. a supply faucet and a drainage pipe), no path can exist —
+  // return immediately instead of exhausting the whole reachable subgraph.
+  if (sysFrom.intersection(sysTo).isEmpty) return null;
+  if (canConnect(from, to)) return [from, to];
 
   // Least-cost search (Dijkstra). Cost = 10·(parts) + (material transitions),
   // so the result is always a shortest-part path (no regression on hop counts),
@@ -536,7 +545,7 @@ const _fittingCats = {
   'פקקים וצינורות', 'זקיף אסלה',
 };
 
-bool _isFitting(LipskeyCatalogProduct p) => _fittingCats.contains(p.categoryHe);
+bool isFitting(LipskeyCatalogProduct p) => _fittingCats.contains(p.categoryHe);
 
 /// Edge cost for the path search. Primary term (10·parts) keeps the result a
 /// fewest-parts path. A large penalty steers gap-filling through real fittings
@@ -548,7 +557,7 @@ int _edgeCost(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   final ma = kVerifiedSpecs[a.sku]?.material;
   final mb = kVerifiedSpecs[b.sku]?.material;
   final transition = (ma != null && mb != null && ma != mb) ? 1 : 0;
-  final deviceFiller = _isFitting(b) ? 0 : 50;
+  final deviceFiller = isFitting(b) ? 0 : 50;
   return 10 + deviceFiller + transition;
 }
 
