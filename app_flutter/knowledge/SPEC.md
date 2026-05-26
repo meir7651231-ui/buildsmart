@@ -6,6 +6,10 @@ status. Grounded in source (R8 — no invention). Status: ✅ wired · 🚧 plac
 
 ---
 
+> **Target context**: this app is the launch target that mirrors the prototype
+> (`/index.html`) — see `TARGET.md` for the prototype/parity/cutover goal. The
+> spec below is the current Flutter realization of that target.
+
 ## 1. App model
 - **Platform**: Flutter, RTL Hebrew, light theme. Entry `main.dart` →
   `MaterialApp` (global `textScaler` from catalog `textSize`, `highContrast`

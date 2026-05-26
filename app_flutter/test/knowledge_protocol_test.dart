@@ -67,6 +67,7 @@ void main() {
     test('all knowledge docs exist and are non-trivial', () {
       for (final p in const [
         'knowledge/README.md',
+        'knowledge/TARGET.md',
         'knowledge/SPEC.md',
         'knowledge/STATUS.md',
         'knowledge/ARCHITECTURE.md',
