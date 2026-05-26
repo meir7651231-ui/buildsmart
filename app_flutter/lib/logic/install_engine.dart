@@ -8,6 +8,14 @@ import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// ── O(1) catalog lookup ──────────────────────────────────────────────────────
+// Built once on first use; avoids repeated O(n) scans across kCompatCatalog.
+Map<String, LipskeyCatalogProduct>? _skuCache;
+LipskeyCatalogProduct? _skuOf(String sku) {
+  _skuCache ??= {for (final p in kCompatCatalog) p.sku: p};
+  return _skuCache![sku];
+}
+
 final compatGenderProvider  = StateProvider<String>((_) => 'הכל');
 final compatSizeProvider    = StateProvider<String>((_) => 'הכל');
 final compatMethodProvider  = StateProvider<String>((_) => 'הכל');
@@ -133,10 +141,11 @@ List<LineCheck> lineComplianceChecklist(
     if (hot)
       LineCheck('שסתום פורק לחץ (PRV)', has({'HW-PRV-34'}),
           'מערכת חמה סגורה', severity: CheckSeverity.critical),
-    LineCheck('כלי התפשטות (Bladder Tank)',
-        has({'HW-BTANK-35', 'HW-BTANK-18', 'HW-EXPVESSEL'}),
-        'ממברנת EPDM מפרידה N₂ ממים',
-        severity: CheckSeverity.critical),
+    if (hot)
+      LineCheck('כלי התפשטות (Bladder Tank)',
+          has({'HW-BTANK-35', 'HW-BTANK-18', 'HW-EXPVESSEL'}),
+          'ממברנת EPDM מפרידה N₂ ממים — חובה בכל קו חם סגור',
+          severity: CheckSeverity.critical),
     if (hasCommercialPump) ...[
       LineCheck('מסנן Y (הגנת משאבה)',
           has({'HW-YSTR-40', 'HW-YSTR-32', 'HW-YSTR-15'}),
@@ -514,10 +523,20 @@ class InstallationPlan {
   bool get isComplete => gaps.isEmpty;
 
   /// Total number of physical pieces to order.
-  int get totalPieces =>
-      quantities.values.fold(0, (sum, q) => sum + q);
+  int get totalPieces => quantities.values.fold(0, (sum, q) => sum + q);
 
   int qtyOf(String sku) => quantities[sku] ?? 1;
+
+  /// Compliance checklist for this plan at the given operating temperature.
+  /// Delegates to [lineComplianceChecklist] so callers never need to re-pass items.
+  List<LineCheck> compliance(int tempC, [Set<String> accessories = const {}]) =>
+      lineComplianceChecklist(items, tempC, accessories);
+
+  /// Number of unsatisfied critical checks (safety gate count).
+  int criticalOpen(int tempC, [Set<String> accessories = const {}]) =>
+      compliance(tempC, accessories)
+          .where((c) => !c.satisfied && c.severity == CheckSeverity.critical)
+          .length;
 }
 
 /// Auto-include safety-critical items that every hot/mixed-metal line must have
@@ -527,19 +546,11 @@ class InstallationPlan {
 void _autoAddCompliance(
     List<LipskeyCatalogProduct> items, Map<String, int> qty, int tempC) {
   final skus = qty.keys.toSet();
-  final mats =
-      items.map(productMaterial).whereType<String>().toSet();
-
-  LipskeyCatalogProduct? _find(String sku) {
-    for (final p in kCompatCatalog) {
-      if (p.sku == sku) return p;
-    }
-    return null;
-  }
+  final mats = items.map(productMaterial).whereType<String>().toSet();
 
   void addIfMissing(Set<String> alternatives, String preferred) {
     if (alternatives.any(skus.contains)) return;
-    final p = _find(preferred);
+    final p = _skuOf(preferred);
     if (p == null) return;
     items.add(p);
     qty[preferred] = 1;
@@ -647,7 +658,14 @@ InstallationPlan buildInstallation(
     }
   }
   if (autoCompliance && items.isNotEmpty) _autoAddCompliance(items, qty, tempC);
-  return InstallationPlan(items, gaps, qty);
+
+  // Tag all items under a single "קו ראשי" zone so callers get a consistent
+  // zones map regardless of topology (tree vs. linear).
+  final zones = items.isEmpty
+      ? const <String, List<String>>{}
+      : {'קו ראשי': items.map((p) => p.sku).toList()};
+
+  return InstallationPlan(items, gaps, qty, zones: zones);
 }
 
 // ── manifold / tree topology ───────────────────────────────────────────────────
@@ -707,12 +725,16 @@ InstallationPlan buildTreeInstallation(
   }
 
   // each branch: manifold → target, zone = "ענף א/ב/…"
+  // Track which zone labels were actually routed so TMTV/balance counts
+  // match real branches, not the raw branchTargets list.
   final root = manifold ?? (branchTargets.isNotEmpty ? branchTargets.first : null);
+  final builtZones = <String>[];
   for (var bi = 0; bi < branchTargets.length; bi++) {
     final t = branchTargets[bi];
     if (root == null) break;
     if (t.sku == root.sku) continue;
     final zl = _branchLabel(bi);
+    builtZones.add(zl);
     final seg = findShortestPath(root, t,
         maxDepth: maxDepthPerSegment, tempC: tempC);
     if (seg == null) {
@@ -726,30 +748,23 @@ InstallationPlan buildTreeInstallation(
   }
 
   // Auto-add TMTV anti-scald per branch for hot lines (tempC ≥ 60).
-  // One DN15 TMTV at each manifold outlet limits outlet T ≤ 45°C.
-  if (manifold != null && tempC >= 60 && branchTargets.isNotEmpty) {
-    LipskeyCatalogProduct? tmtv;
-    for (final p in kCompatCatalog) {
-      if (p.sku == 'HW-TMTV-15') { tmtv = p; break; }
-    }
+  // One per actual routed branch — skipped targets don't get a valve.
+  if (manifold != null && tempC >= 60 && builtZones.isNotEmpty) {
+    final tmtv = _skuOf('HW-TMTV-15');
     if (tmtv != null) {
-      for (var bi = 0; bi < branchTargets.length; bi++) {
-        add(tmtv, zone: _branchLabel(bi));
+      for (final zl in builtZones) {
+        add(tmtv, zone: zl);
       }
     }
   }
 
   // Auto-add pre-set balancing valve per branch for commercial pump systems.
-  // Ensures each branch receives its design flow at different resistance.
   final trunkSkus = items.map((p) => p.sku).toSet();
-  if (trunkSkus.contains('HW-PUMP-40') && branchTargets.isNotEmpty) {
-    LipskeyCatalogProduct? bal;
-    for (final p in kCompatCatalog) {
-      if (p.sku == 'HW-BALANCE-20') { bal = p; break; }
-    }
+  if (trunkSkus.contains('HW-PUMP-40') && builtZones.isNotEmpty) {
+    final bal = _skuOf('HW-BALANCE-20');
     if (bal != null) {
-      for (var bi = 0; bi < branchTargets.length; bi++) {
-        add(bal, zone: _branchLabel(bi));
+      for (final zl in builtZones) {
+        add(bal, zone: zl);
       }
     }
   }
