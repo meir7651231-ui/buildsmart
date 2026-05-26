@@ -13,6 +13,7 @@ import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/product_favorites.dart';
+import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -59,8 +60,7 @@ final searchQueryProvider = StateProvider<String>((_) => '');
 /// Active search scope chip (הכל / מוצרים / קטגוריות / מסכים).
 final searchScopeProvider = StateProvider<String>((_) => 'הכל');
 
-/// Recent search queries, newest first, max 8.
-final recentSearchesProvider = StateProvider<List<String>>((_) => []);
+// recentSearchesProvider lives in state/recent_searches.dart (persisted).
 
 /// Currently selected category in the smart tree section. Null = show categories.
 final smartTreeCatProvider = StateProvider<String?>((_) => null);
@@ -1231,11 +1231,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
     if (q.isEmpty) return;
     // Honour the "שמור היסטוריית חיפוש" setting.
     if (!ref.read(catalogSettingsProvider).searchHistoryEnabled) return;
-    final list = List<String>.from(ref.read(recentSearchesProvider))
-      ..remove(q)
-      ..insert(0, q);
-    if (list.length > 8) list.removeRange(8, list.length);
-    ref.read(recentSearchesProvider.notifier).state = list;
+    ref.read(recentSearchesProvider.notifier).add(q);
   }
 
   @override
@@ -1551,7 +1547,7 @@ class _RecentSearchesList extends ConsumerWidget {
               ),
               TextButton(
                 onPressed: () =>
-                    ref.read(recentSearchesProvider.notifier).state = [],
+                    ref.read(recentSearchesProvider.notifier).clear(),
                 child: const Text(
                   'נקה',
                   style: TextStyle(color: BsTokens.brand, fontSize: 13),
@@ -1738,11 +1734,7 @@ class _SearchResultsList extends ConsumerWidget {
           onTap: () {
             ref.read(searchQueryProvider.notifier).state = entry.title;
             if (!ref.read(catalogSettingsProvider).searchHistoryEnabled) return;
-            final list = List<String>.from(ref.read(recentSearchesProvider))
-              ..remove(entry.title)
-              ..insert(0, entry.title);
-            if (list.length > 8) list.removeRange(8, list.length);
-            ref.read(recentSearchesProvider.notifier).state = list;
+            ref.read(recentSearchesProvider.notifier).add(entry.title);
           },
         );
       },
@@ -5701,7 +5693,7 @@ class _RecentSearchesSection extends ConsumerWidget {
                       fontWeight: FontWeight.w700)),
               TextButton(
                 onPressed: () =>
-                    ref.read(recentSearchesProvider.notifier).state = [],
+                    ref.read(recentSearchesProvider.notifier).clear(),
                 child: const Text('נקה הכל',
                     style:
                         TextStyle(color: BsTokens.brand, fontSize: 13)),
@@ -5725,13 +5717,8 @@ class _RecentSearchesSection extends ConsumerWidget {
                 trailing: IconButton(
                   icon: const Icon(Icons.close,
                       color: Color(0xFF9AA3B2), size: 18),
-                  onPressed: () {
-                    final list =
-                        List<String>.from(ref.read(recentSearchesProvider))
-                          ..remove(q);
-                    ref.read(recentSearchesProvider.notifier).state =
-                        list;
-                  },
+                  onPressed: () =>
+                      ref.read(recentSearchesProvider.notifier).remove(q),
                 ),
                 onTap: () =>
                     LipskeyProductsScreen.openWordSearch(context, q),

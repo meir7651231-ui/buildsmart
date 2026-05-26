@@ -5,6 +5,7 @@ import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/notif_settings.dart';
+import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/store_settings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -223,6 +224,30 @@ void main() {
       expect(showOnlinePresence(ChatLastSeen.everyone), isTrue);
       expect(showOnlinePresence(ChatLastSeen.contacts), isTrue);
       expect(showOnlinePresence(ChatLastSeen.nobody), isFalse);
+    });
+  });
+
+  group('recent searches', () {
+    test('newest first, de-duplicated (moves existing to front)', () {
+      expect(addRecentSearch(const ['ברז', 'אסלה'], 'אסלה'),
+          ['אסלה', 'ברז']);
+    });
+    test('blank/whitespace query is ignored and trimmed on insert', () {
+      expect(addRecentSearch(const ['ברז'], '   '), ['ברז']);
+      expect(addRecentSearch(const ['ברז'], '  אסלה  '), ['אסלה', 'ברז']);
+    });
+    test('capped to kMaxRecentSearches (8), dropping the oldest', () {
+      final base =
+          List<String>.generate(8, (i) => 'q$i'); // q0..q7, q0 newest
+      final next = addRecentSearch(base, 'new');
+      expect(next.length, kMaxRecentSearches);
+      expect(next.first, 'new');
+      expect(next.contains('q7'), isFalse); // oldest dropped
+    });
+    test('pure — does not mutate the input list', () {
+      final input = ['ברז'];
+      addRecentSearch(input, 'אסלה');
+      expect(input, ['ברז']);
     });
   });
 }

@@ -14,7 +14,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 
 | Setting | Behavior | Status |
 |---|---|---|
-| שמור היסטוריית חיפוש | gates recording recent searches | ✅ |
+| שמור היסטוריית חיפוש | gates recording recent searches; recents persist across launches via `recentSearchesProvider` (`addRecentSearch`, key `bs.recent-searches.v1`) | ✅ |
 | סרגל מיון מהיר במוצרים | shows/hides the "מיון לפי" control | ✅ |
 | גודל תמונות | product image size (small/med/large) | ✅ |
 | מצב קומפקטי | product row height/margins | ✅ |
