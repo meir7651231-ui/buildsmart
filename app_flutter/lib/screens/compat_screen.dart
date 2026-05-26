@@ -328,6 +328,28 @@ Set<WaterSystem> productSystems(LipskeyCatalogProduct p) {
 bool _shareSystem(LipskeyCatalogProduct a, LipskeyCatalogProduct b) =>
     productSystems(a).intersection(productSystems(b)).isNotEmpty;
 
+/// A product's role in a flow path.
+/// * connector — pipes, fittings, nipples, adapters, valves, gaskets: flow
+///   passes through them, so they may be auto-inserted as mid-line connectors.
+/// * fixture — toilets, sinks, bathing systems: terminal devices that may only
+///   sit at a line endpoint (an anchor), never as a pass-through connector.
+/// * accessory — hangers, clamps, anchors, tools, seats, grab bars: not part of
+///   the flow path at all, never a connector.
+enum FlowRole { connector, fixture, accessory }
+
+FlowRole flowRole(LipskeyCatalogProduct p) {
+  final c = p.categoryHe;
+  if (_structuralCats.contains(c)) return FlowRole.accessory;
+  if (_fixtureCats.contains(c)) return FlowRole.fixture;
+  return FlowRole.connector;
+}
+
+/// True when a product may be AUTO-INSERTED as a mid-line connector: it must be
+/// a real flow connector (not a fixture or accessory) AND have verified
+/// geometry (no loose name-inference matches in an auto-built bill of materials).
+bool _usableConnector(LipskeyCatalogProduct p) =>
+    flowRole(p) == FlowRole.connector && kVerifiedSpecs[p.sku] != null;
+
 bool canConnect(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   if (a.sku == b.sku) return false;
 
@@ -477,6 +499,9 @@ List<LipskeyCatalogProduct>? findShortestPath(
     for (final next in compatibleWith(tail, tempC: tempC)) {
       if (visited.contains(next.sku)) continue;
       visited.add(next.sku);
+      // Auto-inserted connectors must be real flow connectors with verified
+      // geometry — never accessories (hangers/clamps) or unverified loose matches.
+      if (!_usableConnector(next)) continue;
       final sysNext = sysAcc.intersection(productSystems(next));
       if (sysNext.isEmpty) continue; // would cross systems — reject
       final newPath = [...path, next];
