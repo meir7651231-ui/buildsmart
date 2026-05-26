@@ -57,6 +57,19 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>> {
     ];
   }
 
+  /// Total quantity across all lines sharing [productKey].
+  int qtyForKey(String productKey) => state
+      .where((l) => l.productKey == productKey)
+      .fold(0, (sum, l) => sum + l.productQty);
+
+  /// Quick-add stepper: collapse all lines for [line.productKey] into the
+  /// single [line]. A line with productQty <= 0 removes the product entirely.
+  void setQtyForKey(SmartCartLine line) {
+    final others =
+        state.where((l) => l.productKey != line.productKey).toList();
+    state = line.productQty > 0 ? [...others, line] : others;
+  }
+
   void clear() => state = const [];
 }
 

@@ -118,7 +118,7 @@ class CatalogSettings {
 
   static const CatalogSettings defaults = CatalogSettings(
     searchHistoryEnabled: true,
-    viewMode: CatalogViewMode.grid,
+    viewMode: CatalogViewMode.list,
     sortDefault: CatalogSort.relevance,
     showVat: true,
     currency: CatalogCurrency.ils,

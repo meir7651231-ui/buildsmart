@@ -107,7 +107,7 @@ class _SearchSection extends ConsumerWidget {
               .update((s) => s.copyWith(searchHistoryEnabled: v)),
         ),
         _SwitchRow(
-          label: 'סינון מהיר בשורת חיפוש',
+          label: 'סרגל מיון מהיר במוצרים',
           value: settings.quickFilterBar,
           onChanged: (v) => ref
               .read(catalogSettingsProvider.notifier)
@@ -119,6 +119,7 @@ class _SearchSection extends ConsumerWidget {
           min: 5,
           max: 500,
           suffix: 'ק"מ',
+          step: 25,
           onChanged: (v) => ref
               .read(catalogSettingsProvider.notifier)
               .update((s) => s.copyWith(searchRadius: v)),
@@ -393,6 +394,7 @@ class _SuppliersSection extends ConsumerWidget {
           min: 5,
           max: 500,
           suffix: 'ק"מ',
+          step: 25,
           onChanged: (v) => ref
               .read(catalogSettingsProvider.notifier)
               .update((s) => s.copyWith(maxDistance: v)),
@@ -487,7 +489,7 @@ class _AccessibilitySection extends ConsumerWidget {
               .update((s) => s.copyWith(compactMode: v)),
         ),
         _RadioGroupRow<CatalogTextSize>(
-          label: 'גודל טקסט',
+          label: 'גודל טקסט (כל האפליקציה)',
           value: settings.textSize,
           options: const [
             (value: CatalogTextSize.small, label: 'קטן'),
@@ -499,14 +501,14 @@ class _AccessibilitySection extends ConsumerWidget {
               .update((s) => s.copyWith(textSize: v)),
         ),
         _SwitchRow(
-          label: 'ניגודיות גבוהה',
+          label: 'ניגודיות גבוהה (כל האפליקציה)',
           value: settings.highContrast,
           onChanged: (v) => ref
               .read(catalogSettingsProvider.notifier)
               .update((s) => s.copyWith(highContrast: v)),
         ),
         _SwitchRow(
-          label: 'הנפשות מופחתות',
+          label: 'הנפשות מופחתות (כל האפליקציה)',
           value: settings.reducedMotion,
           onChanged: (v) => ref
               .read(catalogSettingsProvider.notifier)
@@ -529,6 +531,9 @@ class _SectionTile extends StatelessWidget {
   final String emoji;
   final String title;
   final List<Widget> children;
+
+  // Count only functional rows — exclude "בבנייה" placeholders.
+  int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
 
   @override
   Widget build(BuildContext context) {
@@ -558,7 +563,7 @@ class _SectionTile extends StatelessWidget {
                   ),
                 ),
               ),
-              if (children.isNotEmpty) ...[
+              if (_activeCount > 0) ...[
                 const SizedBox(width: 8),
                 Container(
                   padding:
@@ -568,7 +573,7 @@ class _SectionTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    '${children.length}',
+                    '$_activeCount',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -678,6 +683,7 @@ class _NumberRow extends StatelessWidget {
     required this.max,
     required this.suffix,
     required this.onChanged,
+    this.step = 1,
   });
 
   final String label;
@@ -685,6 +691,7 @@ class _NumberRow extends StatelessWidget {
   final int min;
   final int max;
   final String suffix;
+  final int step;
   final ValueChanged<int> onChanged;
 
   @override
@@ -697,7 +704,9 @@ class _NumberRow extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.remove, color: Colors.black54, size: 20),
-            onPressed: value > min ? () => onChanged(value - 1) : null,
+            onPressed: value > min
+                ? () => onChanged((value - step).clamp(min, max))
+                : null,
           ),
           Text(
             suffix.isEmpty ? '$value' : '$value $suffix',
@@ -705,7 +714,9 @@ class _NumberRow extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.add, color: Colors.black54, size: 20),
-            onPressed: value < max ? () => onChanged(value + 1) : null,
+            onPressed: value < max
+                ? () => onChanged((value + step).clamp(min, max))
+                : null,
           ),
         ],
       ),

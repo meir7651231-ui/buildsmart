@@ -81,13 +81,31 @@ class LipskeyProductsScreen extends StatelessWidget {
 
 /// The product list body on its own, so it can be embedded in the catalog tab
 /// (keeping the app bar and bottom nav fixed) instead of a full-screen route.
-class LipskeyProductsList extends StatelessWidget {
+/// Honors the catalog `viewMode` (list ↔ grid) and `gridColumns` settings.
+class LipskeyProductsList extends ConsumerWidget {
   const LipskeyProductsList({super.key, required this.products});
 
   final List<LipskeyCatalogProduct> products;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(catalogSettingsProvider);
+    if (settings.viewMode == CatalogViewMode.grid) {
+      return GridView.builder(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: settings.gridColumns.clamp(1, 4),
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 0.66,
+        ),
+        itemCount: products.length,
+        itemBuilder: (_, i) => LipskeyProductGridCard(
+          product: products[i],
+          products: products,
+        ),
+      );
+    }
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
       itemCount: products.length,
@@ -100,7 +118,8 @@ class LipskeyProductsList extends StatelessWidget {
 }
 
 /// A single product card, for embedding products beneath the drill rows.
-class LipskeyProductCard extends StatelessWidget {
+/// Switches between the rich row and the compact grid cell per `viewMode`.
+class LipskeyProductCard extends ConsumerWidget {
   const LipskeyProductCard({
     super.key,
     required this.product,
@@ -111,8 +130,230 @@ class LipskeyProductCard extends StatelessWidget {
   final List<LipskeyCatalogProduct> products;
 
   @override
-  Widget build(BuildContext context) =>
-      _ProductRow(product: product, categoryProducts: products);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final grid = ref.watch(catalogSettingsProvider).viewMode ==
+        CatalogViewMode.grid;
+    return grid
+        ? LipskeyProductGridCard(product: product, products: products)
+        : _ProductRow(product: product, categoryProducts: products);
+  }
+}
+
+/// Compact vertical grid card — mirrors the legacy Preact `.product` card:
+/// square image (✓ when in cart) · name (2 lines) · price · add/stepper bar.
+class LipskeyProductGridCard extends ConsumerWidget {
+  const LipskeyProductGridCard({
+    super.key,
+    required this.product,
+    required this.products,
+  });
+
+  final LipskeyCatalogProduct product;
+  final List<LipskeyCatalogProduct> products;
+
+  static const _brand = Color(0xFFFF7A18);
+  static const _ok = Color(0xFF1F8A4C);
+
+  String get _key => 'lip:${product.sku}';
+
+  SmartCartLine _line(int qty) => SmartCartLine(
+        productKey: _key,
+        productName: product.nameHe,
+        productEmoji: product.typeEmoji,
+        brandName: product.brand,
+        brandPrice: 0,
+        productQty: qty,
+        accessories: const [],
+      );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final cart = ref.watch(smartCartProvider.notifier);
+    final qty = ref.watch(smartCartProvider
+        .select((lines) => lines
+            .where((l) => l.productKey == _key)
+            .fold<int>(0, (s, l) => s + l.productQty)));
+    final inCart = qty > 0;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: inCart ? _ok : cs.outline.withOpacity(0.2),
+          width: inCart ? 1.4 : 0.8,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // image (tap = sheet) + ✓ in-cart badge
+          Expanded(
+            child: GestureDetector(
+              onTap: () => showLipskeyProductSheet(context, product, products),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    color: Colors.white,
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(6),
+                    child: product.imageAsset != null
+                        ? Image.asset(product.imageAsset!,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Text(product.typeEmoji,
+                                style: const TextStyle(fontSize: 40)))
+                        : Text(product.typeEmoji,
+                            style: const TextStyle(fontSize: 40)),
+                  ),
+                  if (inCart)
+                    const Positioned(
+                      top: 6,
+                      right: 6,
+                      child: CircleAvatar(
+                        radius: 11,
+                        backgroundColor: _ok,
+                        child: Text('✓',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900)),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          // name + price (tap = sheet)
+          GestureDetector(
+            onTap: () => showLipskeyProductSheet(context, product, products),
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 32,
+                    child: Text(
+                      product.nameHe,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: cs.onSurface,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        height: 1.25,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    'מחיר לפי ספק',
+                    style: TextStyle(
+                      color: Color(0xFF45575E),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // stepper / add bar
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(color: cs.outline.withOpacity(0.15)),
+              ),
+            ),
+            child: inCart
+                ? Row(
+                    children: [
+                      _StepBtn(
+                        icon: Icons.remove,
+                        filled: false,
+                        onTap: () => cart.setQtyForKey(_line(qty - 1)),
+                      ),
+                      Expanded(
+                        child: Text(
+                          '$qty',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: cs.onSurface,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      _StepBtn(
+                        icon: Icons.add,
+                        filled: true,
+                        onTap: () => cart.setQtyForKey(_line(qty + 1)),
+                      ),
+                    ],
+                  )
+                : GestureDetector(
+                    onTap: () => cart.setQtyForKey(_line(1)),
+                    child: Container(
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: _brand,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add, color: Colors.white, size: 16),
+                          SizedBox(width: 4),
+                          Text(
+                            'לעגלה',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StepBtn extends StatelessWidget {
+  const _StepBtn({required this.icon, required this.filled, required this.onTap});
+  final IconData icon;
+  final bool filled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    const brand = Color(0xFFFF7A18);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          color: filled ? brand : Theme.of(context).colorScheme.surface,
+          shape: BoxShape.circle,
+          border: filled ? null : Border.all(color: brand, width: 1.2),
+        ),
+        child: Icon(icon,
+            color: filled ? Colors.white : brand, size: 18),
+      ),
+    );
+  }
 }
 
 // ───────────────────────────────────────────────────────────────────────────
