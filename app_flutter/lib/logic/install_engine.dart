@@ -490,6 +490,7 @@ InstallationPlan buildInstallation(
   int maxDepthPerSegment = 6,
   int tempC = 20,
   Set<String> accessories = const {},
+  bool loop = false,
 }) {
   if (anchors.isEmpty) return const InstallationPlan([], [], {});
   final items = <LipskeyCatalogProduct>[];
@@ -514,6 +515,21 @@ InstallationPlan buildInstallation(
     // seg = [a, ...connectors..., b]; a is the shared joint already counted.
     for (final p in seg.skip(1)) {
       add(p);
+    }
+  }
+
+  // Closed loop (e.g. a hot-water recirculation ring): connect the last anchor
+  // back to the first. Both endpoints already exist in the BOM, so only the
+  // return-leg connectors are added.
+  if (loop && anchors.length >= 2) {
+    final back = findShortestPath(anchors.last, anchors.first,
+        maxDepth: maxDepthPerSegment, tempC: tempC);
+    if (back == null) {
+      gaps.add(InstallationGap(anchors.last, anchors.first));
+    } else {
+      for (final p in back.sublist(1, back.length - 1)) {
+        add(p); // skip both endpoints (already counted)
+      }
     }
   }
 
