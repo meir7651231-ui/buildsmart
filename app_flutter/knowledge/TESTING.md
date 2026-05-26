@@ -16,7 +16,10 @@ Three layers verify the app. Run all before every commit.
   products** across categories: catalog search → product sheet → add-to-cart →
   cart FAB → store cart (stepper + summary) → checkout → confirmation, asserting
   UI **and** providers at every stage. (This suite caught a real `_RelatedCard`
-  overflow for long product names — now fixed via a `Flexible` name.)
+  overflow for long product names — now fixed via a `Flexible` name.) It also
+  includes a **catalog-wide sweep**: one product per distinct category (all 69),
+  the product sheet fully scrolled, asserting no overflow/render error for any
+  category's layout.
 - domain: `pathfinder_test`, `catalog_bfs_test`, `bfs_demo_test`,
   `install_builder_test`, `manifold_test`, `deep_audit_test`, etc.
 

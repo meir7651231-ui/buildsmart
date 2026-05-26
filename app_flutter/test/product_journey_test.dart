@@ -1,5 +1,7 @@
+import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/main.dart';
 import 'package:buildsmart/screens/home_shell.dart';
+import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
@@ -136,4 +138,48 @@ void main() {
       await runJourney(t, c.$1, c.$2);
     });
   }
+
+  // ── catalog-wide sheet render sweep ─────────────────────────────────────
+  // One product per distinct category (all 69), fully scrolled, asserting the
+  // product sheet renders with no overflow/render error for any category's
+  // layout. (This is what catches _RelatedCard-style overflows broadly.)
+  testWidgets('every category product sheet renders without overflow',
+      (t) async {
+    final seen = <String>{};
+    final perCategory = [
+      for (final p in kLipskeyCatalog)
+        if (seen.add(p.categoryHe)) p,
+    ];
+
+    final bad = <String>[];
+    for (final p in perCategory) {
+      final cat =
+          kLipskeyCatalog.where((x) => x.categoryHe == p.categoryHe).toList();
+      await t.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: LipskeyProductSheet(product: p, categoryProducts: cat),
+            ),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      String? err = t.takeException()?.toString();
+
+      // Scroll the whole sheet so every (lazy) section is laid out.
+      final scroll = find.byType(Scrollable);
+      if (scroll.evaluate().isNotEmpty) {
+        for (var i = 0; i < 10 && err == null; i++) {
+          await t.drag(scroll.first, const Offset(0, -350));
+          await t.pump();
+          err = t.takeException()?.toString();
+        }
+      }
+      if (err != null) bad.add('${p.categoryHe} (#${p.sku}): $err');
+    }
+
+    expect(bad, isEmpty,
+        reason: 'product sheets with render errors:\n${bad.join('\n')}');
+  });
 }
