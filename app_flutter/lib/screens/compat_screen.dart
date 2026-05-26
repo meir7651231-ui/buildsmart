@@ -557,6 +557,12 @@ const _fittingCats = {
 
 bool isFitting(LipskeyCatalogProduct p) => _fittingCats.contains(p.categoryHe);
 
+const _pipeCats = {
+  'צינורות אפורות', 'צינורות PP', 'צינורות', 'צינורות רב שכבתי',
+  'צינורות גמישים', 'צינורות מקלחת',
+};
+bool _isPipe(LipskeyCatalogProduct p) => _pipeCats.contains(p.categoryHe);
+
 /// Edge cost for the path search. Primary term (10·parts) keeps the result a
 /// fewest-parts path. A large penalty steers gap-filling through real fittings
 /// instead of functional devices (no manifold/shower-arm used as a "connector").
@@ -611,6 +617,7 @@ InstallationPlan buildInstallation(
   List<LipskeyCatalogProduct> anchors, {
   int maxDepthPerSegment = 6,
   int tempC = 20,
+  Set<String> accessories = const {},
 }) {
   if (anchors.isEmpty) return const InstallationPlan([], [], {});
   final items = <LipskeyCatalogProduct>[];
@@ -635,6 +642,24 @@ InstallationPlan buildInstallation(
     // seg = [a, ...connectors..., b]; a is the shared joint already counted.
     for (final p in seg.skip(1)) {
       add(p);
+    }
+  }
+
+  // Auto-include the toggled installation accessories with sensible quantities:
+  // clamps + insulation per pipe segment, one roll of thread sealant per line.
+  if (accessories.isNotEmpty && items.isNotEmpty) {
+    final pipeUnits = items
+        .where(_isPipe)
+        .fold<int>(0, (s, p) => s + (qty[p.sku] ?? 1));
+    for (final accSku in accessories) {
+      LipskeyCatalogProduct? prod;
+      for (final p in kCompatCatalog) {
+        if (p.sku == accSku) { prod = p; break; }
+      }
+      if (prod == null) continue;
+      final n = accSku == 'HW-SEALANT' ? 1 : (pipeUnits > 0 ? pipeUnits : 1);
+      items.add(prod);
+      qty[accSku] = n;
     }
   }
   return InstallationPlan(items, gaps, qty);
@@ -1666,7 +1691,8 @@ class ChainBuilderSheet extends ConsumerWidget {
                     child: GestureDetector(
                       onTap: () {
                         final anchors = [...chain];
-                        final plan = buildInstallation(anchors, tempC: lineTemp);
+                        final plan = buildInstallation(anchors,
+                            tempC: lineTemp, accessories: accessories);
                         showModalBottomSheet<void>(
                           context: context,
                           isScrollControlled: true,
@@ -2228,7 +2254,8 @@ class _InstallationResultSheet extends ConsumerWidget {
             Text(p.nameHe,
                 style: const TextStyle(
                     color: _title, fontSize: 13, fontWeight: FontWeight.w600)),
-            Text('${isAnchor ? '★ עוגן' : 'מחבר'} · $sys · ${p.sku}',
+            Text(
+                '${isAnchor ? '★ עוגן' : flowRole(p) == FlowRole.accessory ? '🧰 אביזר' : 'מחבר'} · $sys · ${p.sku}',
                 style: const TextStyle(color: _sub, fontSize: 11)),
           ]),
         ),
