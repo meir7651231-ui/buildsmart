@@ -1077,6 +1077,8 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
 
   // ── אביזרי שקע-תקע (Push-fit Drain Couplings) ─────────────────────────────
   '218051':  VerifiedSpec(sku: '218051',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  // מצמד ארוך (טלסקופי) DN110 — מחבר שני קצוות צינור ניקוז DN110.
+  '194058':  VerifiedSpec(sku: '194058',  material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
   '115581':  VerifiedSpec(sku: '115581',  material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
   '116258':  VerifiedSpec(sku: '116258',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
 
