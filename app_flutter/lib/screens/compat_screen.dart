@@ -1339,6 +1339,49 @@ class ChainBuilderSheet extends ConsumerWidget {
                           },
                   ),
                 ],
+                // ── add next product button ──────────────────────────────
+                const Divider(height: 1, color: _divider),
+                InkWell(
+                  onTap: () {
+                    final tail = chain.isEmpty ? null : chain.last;
+                    final suggestions = tail == null
+                        ? kCompatCatalog
+                            .where((p) => productSuitableForTemp(p, lineTemp))
+                            .toList()
+                        : compatibleWith(tail, tempC: lineTemp);
+                    showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => _AddPickerSheet(
+                        suggestions: suggestions,
+                        lineTemp: lineTemp,
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    child: Row(children: [
+                      Container(
+                        width: 32, height: 32,
+                        decoration: BoxDecoration(
+                          color: _brand, shape: BoxShape.circle),
+                        child: const Icon(Icons.add,
+                            color: Colors.white, size: 18),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        chain.isEmpty
+                            ? 'הוסף פריט ראשון לקו'
+                            : 'הוסף פריט מתחבר לקצה',
+                        style: const TextStyle(
+                            color: _brand, fontSize: 14,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ]),
+                  ),
+                ),
                 if (chain.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _ComplianceChecklist(
@@ -1729,6 +1772,190 @@ class _CompatCheck extends StatelessWidget {
               style: const TextStyle(color: Colors.red, fontSize: 9)),
         ),
       ]),
+    );
+  }
+}
+
+// ── Add-to-chain picker sheet ─────────────────────────────────────────────────
+// Shows products compatible with the current chain tail (or all temp-suitable
+// products when the chain is empty). Tapping a row appends it to the chain.
+
+class _AddPickerSheet extends ConsumerStatefulWidget {
+  const _AddPickerSheet({
+    required this.suggestions,
+    required this.lineTemp,
+  });
+  final List<LipskeyCatalogProduct> suggestions;
+  final int lineTemp;
+
+  @override
+  ConsumerState<_AddPickerSheet> createState() => _AddPickerSheetState();
+}
+
+class _AddPickerSheetState extends ConsumerState<_AddPickerSheet> {
+  String _q = '';
+
+  List<LipskeyCatalogProduct> get _filtered {
+    final q = _q.trim().toLowerCase();
+    if (q.isEmpty) return widget.suggestions;
+    return widget.suggestions.where((p) =>
+        p.nameHe.toLowerCase().contains(q) ||
+        p.categoryHe.toLowerCase().contains(q) ||
+        p.brand.toLowerCase().contains(q)).toList();
+  }
+
+  void _add(LipskeyCatalogProduct p) {
+    final chain = ref.read(chainProvider);
+    ref.read(chainProvider.notifier).state = [...chain, p];
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final items = _filtered;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.75,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (_, ctrl) => Container(
+          decoration: const BoxDecoration(
+            color: _bg,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(children: [
+            Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 6),
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                  color: _divider, borderRadius: BorderRadius.circular(2)),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: Row(children: [
+                const Text('➕', style: TextStyle(fontSize: 18)),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text('בחר פריט להוספה',
+                      style: TextStyle(color: _title, fontSize: 16,
+                          fontWeight: FontWeight.w700)),
+                ),
+                Text('${items.length} פריטים',
+                    style: const TextStyle(color: _sub, fontSize: 12)),
+              ]),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: TextField(
+                autofocus: false,
+                textDirection: TextDirection.rtl,
+                decoration: InputDecoration(
+                  hintText: 'חיפוש...',
+                  hintTextDirection: TextDirection.rtl,
+                  prefixIcon: const Icon(Icons.search, size: 18),
+                  isDense: true,
+                  filled: true,
+                  fillColor: _surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 10),
+                ),
+                onChanged: (v) => setState(() => _q = v),
+              ),
+            ),
+            const Divider(height: 1, color: _divider),
+            if (items.isEmpty)
+              Expanded(
+                child: Center(
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    const Text('⊘',
+                        style: TextStyle(fontSize: 40, color: _divider)),
+                    const SizedBox(height: 8),
+                    const Text('אין פריטים תואמים',
+                        style: TextStyle(color: _sub, fontSize: 13)),
+                  ]),
+                ),
+              )
+            else
+              Expanded(child: ListView.separated(
+                controller: ctrl,
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                itemCount: items.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(height: 1, indent: 72, color: _divider),
+                itemBuilder: (_, i) {
+                  final p = items[i];
+                  final spec = kVerifiedSpecs[p.sku];
+                  return InkWell(
+                    onTap: () => _add(p),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      child: Row(children: [
+                        Container(
+                          width: 44, height: 44,
+                          decoration: BoxDecoration(
+                            color: _surface,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(p.typeEmoji,
+                              style: const TextStyle(fontSize: 22)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(p.nameHe, maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: _title, fontSize: 14,
+                                    fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 2),
+                            Row(children: [
+                              if (spec?.pressureRating != null)
+                                Text(spec!.pressureRating!,
+                                    style: const TextStyle(
+                                        color: Color(0xFF0284C7),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500)),
+                              if (spec?.pexType != null) ...[
+                                const SizedBox(width: 6),
+                                Text('· ${spec!.pexType!}',
+                                    style: const TextStyle(
+                                        color: Color(0xFF7C3AED),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500)),
+                              ],
+                              if (spec?.pressureRating == null &&
+                                  spec?.pexType == null)
+                                Text(p.categoryHe,
+                                    style: const TextStyle(
+                                        color: _sub, fontSize: 11)),
+                            ]),
+                          ],
+                        )),
+                        Container(
+                          width: 32, height: 32,
+                          decoration: BoxDecoration(
+                            color: _brand, shape: BoxShape.circle),
+                          child: const Icon(Icons.add,
+                              size: 16, color: Colors.white),
+                        ),
+                      ]),
+                    ),
+                  );
+                },
+              )),
+            SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+          ]),
+        ),
+      ),
     );
   }
 }
