@@ -431,6 +431,10 @@ const _pipeCats = {
 };
 bool _isPipe(LipskeyCatalogProduct p) => _pipeCats.contains(p.categoryHe);
 
+/// Public: true when a product is sold by length (a pipe), so the BOM should
+/// carry meters rather than a unit count.
+bool isPipe(LipskeyCatalogProduct p) => _isPipe(p);
+
 /// Edge cost for the path search. Primary term (10·parts) keeps the result a
 /// fewest-parts path. A large penalty steers gap-filling through real fittings
 /// instead of functional devices (no manifold/shower-arm used as a "connector").

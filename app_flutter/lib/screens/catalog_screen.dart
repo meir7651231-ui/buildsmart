@@ -19,6 +19,13 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Opens the Install Studio as an immersive full-screen route (above the shell).
+void _openStudio(BuildContext context) {
+  Navigator.of(context, rootNavigator: true).push(
+    MaterialPageRoute(builder: (_) => const InstallStudioScreen()),
+  );
+}
+
 /// Catalog sort options — cycles on chip tap.
 enum CatalogSort { defaultSort, nameAZ, nameZA, priceUp, priceDown }
 
@@ -1957,12 +1964,12 @@ class _AllOverview extends ConsumerWidget {
         _OverviewBlock(
           title: 'תאימות',
           count: kLipskeyCatalog.length,
-          onShowAll: () => go('תאימות'),
+          onShowAll: () => _openStudio(context),
           children: [
             _OverviewRow(
               icon: Icons.compare_arrows_outlined,
-              label: 'מנוע התאימות — מה מתחבר למה',
-              onTap: () => go('תאימות'),
+              label: 'סטודיו התקנות — תכנן · חבר · הזמן',
+              onTap: () => _openStudio(context),
             ),
           ],
         ),

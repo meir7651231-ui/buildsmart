@@ -8,6 +8,8 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/logic/install_engine.dart';
+import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -66,23 +68,28 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     final temp = ref.watch(lineMaxTempProvider);
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(0, -0.4),
-            radius: 1.3,
-            colors: [_void1, _void0],
+      child: Scaffold(
+        backgroundColor: _void0,
+        body: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(0, -0.4),
+              radius: 1.3,
+              colors: [_void1, _void0],
+            ),
           ),
-        ),
-        child: AnimatedBuilder(
-          animation: _flow,
-          builder: (_, __) => CustomPaint(
-            painter: _BlueprintPainter(_flow.value),
-            child: Column(children: [
-              _header(chain, temp),
-              Expanded(child: _canvas(chain)),
-              _dock(chain, temp),
-            ]),
+          child: SafeArea(
+            child: AnimatedBuilder(
+              animation: _flow,
+              builder: (_, __) => CustomPaint(
+                painter: _BlueprintPainter(_flow.value),
+                child: Column(children: [
+                  _header(chain, temp),
+                  Expanded(child: _canvas(chain)),
+                  _dock(chain, temp),
+                ]),
+              ),
+            ),
           ),
         ),
       ),
@@ -92,8 +99,16 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   // ── header: title + live system legend ──────────────────────────────────────
   Widget _header(List<LipskeyCatalogProduct> chain, int temp) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 6),
+      padding: const EdgeInsets.fromLTRB(14, 12, 18, 6),
       child: Row(children: [
+        if (Navigator.canPop(context))
+          GestureDetector(
+            onTap: () => Navigator.maybePop(context),
+            child: const Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: Icon(Icons.arrow_forward, color: _ink, size: 22),
+            ),
+          ),
         Container(
           width: 34, height: 34,
           decoration: BoxDecoration(
@@ -515,7 +530,7 @@ class _BlueprintPainter extends CustomPainter {
 }
 
 // ── bill-of-materials sheet (dark) ─────────────────────────────────────────────
-class _BomSheet extends ConsumerWidget {
+class _BomSheet extends ConsumerStatefulWidget {
   const _BomSheet(
       {required this.plan,
       required this.anchorSkus,
@@ -527,7 +542,24 @@ class _BomSheet extends ConsumerWidget {
   final int outlets; // manifold outlet count, for over-capacity warning
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_BomSheet> createState() => _BomSheetState();
+}
+
+class _BomSheetState extends ConsumerState<_BomSheet> {
+  // Per-pipe length in metres (pipes are sold by length, not by piece).
+  final Map<String, double> _meters = {};
+  double _metersOf(String sku) => _meters[sku] ?? 2.0;
+
+  double get _totalMeters => widget.plan.items
+      .where(isPipe)
+      .fold(0.0, (s, p) => s + _metersOf(p.sku));
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = widget.plan;
+    final anchorSkus = widget.anchorSkus;
+    final branches = widget.branches;
+    final outlets = widget.outlets;
     final ok = plan.isComplete;
     final overCapacity = branches > 0 && outlets > 0 && branches > outlets;
     return Directionality(
@@ -567,6 +599,7 @@ class _BomSheet extends ConsumerWidget {
                               fontWeight: FontWeight.w900)),
                       Text(
                           '${plan.items.length} סוגים · ${plan.totalPieces} יחידות'
+                          '${_totalMeters > 0 ? ' · ${_totalMeters.toStringAsFixed(1)} מ׳ צנרת' : ''}'
                           '${branches > 0 ? ' · ⑂ $branches ענפים' : ''}',
                           style: const TextStyle(color: _mute, fontSize: 12)),
                       if (overCapacity)
@@ -609,34 +642,85 @@ class _BomSheet extends ConsumerWidget {
             Padding(
               padding: EdgeInsets.fromLTRB(
                   14, 10, 14, 12 + MediaQuery.of(context).padding.bottom),
-              child: GestureDetector(
-                onTap: () {
-                  ref.read(chainProvider.notifier).state = plan.items;
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  decoration: BoxDecoration(
-                    gradient:
-                        const LinearGradient(colors: [_accent, Color(0xFF059669)]),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(color: _accent.withOpacity(0.4), blurRadius: 16)
-                    ],
+              child: Row(children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      ref.read(chainProvider.notifier).state = plan.items;
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: _panel,
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(color: _mute.withOpacity(0.4)),
+                      ),
+                      child: const Text('החל על הקו',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: _ink,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700)),
+                    ),
                   ),
-                  child: Text('החל על הקו (${plan.totalPieces} יחידות)',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900)),
                 ),
-              ),
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 2,
+                  child: GestureDetector(
+                    onTap: () => _addToCart(context, ref),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                            colors: [_accent, Color(0xFF059669)]),
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(color: _accent.withOpacity(0.4), blurRadius: 16)
+                        ],
+                      ),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.add_shopping_cart,
+                                color: Colors.white, size: 18),
+                            const SizedBox(width: 8),
+                            Text('הוסף ${plan.items.length} לעגלה',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w900)),
+                          ]),
+                    ),
+                  ),
+                ),
+              ]),
             ),
           ]),
         ),
       ),
     );
+  }
+
+  // Adds every BOM line to the cart with its quantity (pipes by ceil(metres)).
+  void _addToCart(BuildContext context, WidgetRef ref) {
+    final cart = ref.read(smartCartProvider.notifier);
+    for (final p in widget.plan.items) {
+      final qty =
+          isPipe(p) ? _metersOf(p.sku).ceil() : widget.plan.qtyOf(p.sku);
+      cart.add(SmartCartLine(
+        productKey: p.sku,
+        productName: p.nameHe,
+        productEmoji: p.typeEmoji,
+        brandName: p.categoryHe,
+        brandPrice: 0,
+        productQty: qty,
+        accessories: const [],
+      ));
+    }
+    Navigator.pop(context);
+    showToast(context, 'נוסף לעגלה: ${widget.plan.items.length} פריטים');
   }
 
   Widget _bomRow(LipskeyCatalogProduct p, int n, bool anchor, int qty) {
@@ -664,17 +748,55 @@ class _BomSheet extends ConsumerWidget {
                 style: const TextStyle(color: _mute, fontSize: 11)),
           ]),
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-              color: _panel, borderRadius: BorderRadius.circular(10)),
-          child: Text('× $qty',
-              style: const TextStyle(
-                  color: _ink, fontSize: 13, fontWeight: FontWeight.w900)),
-        ),
+        if (isPipe(p)) _metersStepper(p.sku) else _qtyBadge(qty),
       ]),
     );
   }
+
+  Widget _qtyBadge(int qty) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+            color: _panel, borderRadius: BorderRadius.circular(10)),
+        child: Text('× $qty',
+            style: const TextStyle(
+                color: _ink, fontSize: 13, fontWeight: FontWeight.w900)),
+      );
+
+  // metres control for pipe products (sold by length)
+  Widget _metersStepper(String sku) {
+    final m = _metersOf(sku);
+    return Container(
+      decoration: BoxDecoration(
+          color: _panel,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _supply.withOpacity(0.4))),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        _stepBtn(Icons.remove, () {
+          setState(() => _meters[sku] = (m - 0.5).clamp(0.5, 999));
+        }),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: Text('${m.toStringAsFixed(1)} מ׳',
+              style: const TextStyle(
+                  color: _supply, fontSize: 13, fontWeight: FontWeight.w900)),
+        ),
+        _stepBtn(Icons.add, () {
+          setState(() => _meters[sku] = (m + 0.5).clamp(0.5, 999));
+        }),
+      ]),
+    );
+  }
+
+  Widget _stepBtn(IconData ic, VoidCallback onTap) => GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 24, height: 24,
+          decoration: BoxDecoration(
+              color: _void1, borderRadius: BorderRadius.circular(8)),
+          child: Icon(ic, color: _ink, size: 15),
+        ),
+      );
 }
 
 // ── dark product picker ────────────────────────────────────────────────────────
