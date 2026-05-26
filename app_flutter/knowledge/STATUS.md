@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v3.70` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v3.79` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — overview blocks (categories / recent / compat / favorites / smart-tree),
@@ -34,9 +34,18 @@ AI recommendations · system notifications (push/email/sms/quiet-hours/summaries
 sound/lock-screen) · media/backup/telephony (video/call/camera/attach) ·
 addresses/invoices/warranty/biometric. All need data, a server, or device APIs.
 
+## Install Studio (v3.79 — BOM quality upgrade)
+- **Progressive dock** — 3-state UX: empty / 1-item / 2+ items (D-013)
+- **Zone-aware BOM** — "גזע" + "ענף א/ב/ג…" section headers with item counts
+- **TMTV auto-per-branch** — one thermostatic mixing valve per hot branch, qty = branch count
+- **Auto-compliance** — PRV + BladderTank + isolation ball valve auto-inserted for hot lines
+- **Severity checklist** — 🔴 critical / 🟡 warning / 🔵 info; "N קריטי פתוח" badge in BomSheet
+- **Gap hints** — each missing connection shows a suggested adapter to search
+- **Temperature pill** — human labels (קר / חם / חם מאוד) with color coding
+
 ## Tests
-~127 checks across `test/`; in-app harness; mutation testing at **50/50** on
-domain logic. `flutter analyze` clean of errors; `flutter test` green.
+~50 domain tests across `test/` (install_builder×10 + manifold×10 + loop×10 +
+zone_tmtv×10 + auto_compliance×10). `flutter analyze` clean; `flutter test` green.
 
 ## Known placeholders (🚧)
 Chats conversation header (video/call/more) and input bar
