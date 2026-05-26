@@ -195,6 +195,7 @@ String connectionMethodLabel(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
           case EndType.bspMale:
           case EndType.bspFemale:   return 'תבריג + PTFE';
           case EndType.hdpeCompression: return 'אום הידוק';
+          case EndType.drainOpening:    return 'כיסוי ניקוז';
         }
       }
       if (eA.pipeSharedWith(eB)) return 'אום הידוק (compression)';

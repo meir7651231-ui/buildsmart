@@ -21,7 +21,7 @@
 // a product whose material can't survive the line's operating temperature
 // (e.g. HDPE caps at ~40°C continuous and must never serve 80°C hot water).
 
-enum EndType { hdpeCompression, pexPress, copperPress, bspMale, bspFemale }
+enum EndType { hdpeCompression, pexPress, copperPress, bspMale, bspFemale, drainOpening }
 
 class ConnectorEnd {
   final EndType type;
@@ -36,6 +36,8 @@ class ConnectorEnd {
     // PEX / copper press: a fitting end accepts a pipe/fitting of the same OD.
     if (type == EndType.pexPress && other.type == EndType.pexPress && size == other.size) return true;
     if (type == EndType.copperPress && other.type == EndType.copperPress && size == other.size) return true;
+    // Drain opening: cover/grate snaps onto a floor drain of the same nominal opening size.
+    if (type == EndType.drainOpening && other.type == EndType.drainOpening && size == other.size) return true;
     return false;
   }
 
@@ -96,6 +98,7 @@ ConnectorEnd _px(String od)   => ConnectorEnd(EndType.pexPress,        od);
 ConnectorEnd _cu(String od)   => ConnectorEnd(EndType.copperPress,     od);
 ConnectorEnd _bm(String inch) => ConnectorEnd(EndType.bspMale,         inch);
 ConnectorEnd _bf(String inch) => ConnectorEnd(EndType.bspFemale,       inch);
+ConnectorEnd _do(String inch) => ConnectorEnd(EndType.drainOpening,    inch);
 
 // ── verified specs map ────────────────────────────────────────────────────────
 
@@ -965,11 +968,15 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '273089': VerifiedSpec(sku: '273089', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
 
   // ── מאספי רצפה ───────────────────────────────────────────────────────────
-  '116148': VerifiedSpec(sku: '116148', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
-  '171191': VerifiedSpec(sku: '171191', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '116151': VerifiedSpec(sku: '116151', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
-  '116638': VerifiedSpec(sku: '116638', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '217648': VerifiedSpec(sku: '217648', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  // pipe-outlet + drain-opening (cover fits on top)
+  '116148': VerifiedSpec(sku: '116148', material: 'PVC', maxTempC: 50, ends: [_c('40'), _do('4"')]),
+  '171191': VerifiedSpec(sku: '171191', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('4"')]),
+  '116151': VerifiedSpec(sku: '116151', material: 'PVC', maxTempC: 50, ends: [_c('40'), _do('4"')]),
+  '116638': VerifiedSpec(sku: '116638', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('6"')]),
+  '217648': VerifiedSpec(sku: '217648', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('6"')]),
+  '196587': VerifiedSpec(sku: '196587', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('6"')]),
+  '116640': VerifiedSpec(sku: '116640', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('6"')]),
+  '116175': VerifiedSpec(sku: '116175', material: 'PVC', maxTempC: 50, ends: [_c('110'), _do('8"')]),
   '116640': VerifiedSpec(sku: '116640', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '116175': VerifiedSpec(sku: '116175', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
   '196687': VerifiedSpec(sku: '196687', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
@@ -1043,4 +1050,131 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '77575327': VerifiedSpec(sku: '77575327', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '77575329': VerifiedSpec(sku: '77575329', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '77575330': VerifiedSpec(sku: '77575330', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+
+  // ── אביזרי תבריג (Threaded Drain Fittings) ─────────────────────────────────
+  '997091':  VerifiedSpec(sku: '997091',  material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
+  '116565':  VerifiedSpec(sku: '116565',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
+
+  // ── אביזרי שקע-תקע (Push-fit Drain Couplings) ─────────────────────────────
+  '218051':  VerifiedSpec(sku: '218051',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '115581':  VerifiedSpec(sku: '115581',  material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
+  '116258':  VerifiedSpec(sku: '116258',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+
+  // ── פקקים וצינורות (Drain Plugs) ──────────────────────────────────────────
+  '120311':  VerifiedSpec(sku: '120311',  material: 'PVC', maxTempC: 50, ends: [_c('40')]),
+
+  // ── מחלקים (Manifolds — brass supply) ─────────────────────────────────────
+  '76032202': VerifiedSpec(sku: '76032202', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"')]),
+  '76032203': VerifiedSpec(sku: '76032203', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  '76032204': VerifiedSpec(sku: '76032204', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  '7608202B': VerifiedSpec(sku: '7608202B', material: _brass, maxTempC: 90,
+      ends: [_bf('3/4"'), _bf('1/2"'), _bf('1/2"')]),
+  '7609202B': VerifiedSpec(sku: '7609202B', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"')]),
+  '7609202R': VerifiedSpec(sku: '7609202R', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"')]),
+  '7609203B': VerifiedSpec(sku: '7609203B', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  '7609203R': VerifiedSpec(sku: '7609203R', material: _brass, maxTempC: 90,
+      ends: [_bf('3/4"'), _bf('1/2"'), _bf('1/2"')]),
+  '77603202': VerifiedSpec(sku: '77603202', material: _brass, maxTempC: 90,
+      ends: [_bf('3/4"'), _bf('1/2"'), _bf('1/2"')]),
+  '77603203': VerifiedSpec(sku: '77603203', material: _brass, maxTempC: 90,
+      ends: [_bf('3/4"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  '77603204': VerifiedSpec(sku: '77603204', material: _brass, maxTempC: 90,
+      ends: [_bf('3/4"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+
+  // ── ראשי מקלחת (Shower Heads — BSP F inlet) ───────────────────────────────
+  '7777708G': VerifiedSpec(sku: '7777708G', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777707B': VerifiedSpec(sku: '7777707B', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777708B': VerifiedSpec(sku: '7777708B', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777710C': VerifiedSpec(sku: '7777710C', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777711C': VerifiedSpec(sku: '7777711C', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777707C': VerifiedSpec(sku: '7777707C', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777708C': VerifiedSpec(sku: '7777708C', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701199': VerifiedSpec(sku: '77701199', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701170': VerifiedSpec(sku: '77701170', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701165': VerifiedSpec(sku: '77701165', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701166': VerifiedSpec(sku: '77701166', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+
+  // ── זרועות דוש (Shower Arms — BSP M×M) ───────────────────────────────────
+  '77701189': VerifiedSpec(sku: '77701189', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
+  '77701190': VerifiedSpec(sku: '77701190', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
+  '77701191': VerifiedSpec(sku: '77701191', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
+  '77701192': VerifiedSpec(sku: '77701192', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
+  '77701193': VerifiedSpec(sku: '77701193', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
+
+  // ── מזלפי יד (Hand Sprayers — BSP F inlet) ────────────────────────────────
+  '77701204': VerifiedSpec(sku: '77701204', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701205': VerifiedSpec(sku: '77701205', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701135': VerifiedSpec(sku: '77701135', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701125': VerifiedSpec(sku: '77701125', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701140': VerifiedSpec(sku: '77701140', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701203': VerifiedSpec(sku: '77701203', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701195': VerifiedSpec(sku: '77701195', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701130': VerifiedSpec(sku: '77701130', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701150': VerifiedSpec(sku: '77701150', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701179': VerifiedSpec(sku: '77701179', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701112': VerifiedSpec(sku: '77701112', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701197': VerifiedSpec(sku: '77701197', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701198': VerifiedSpec(sku: '77701198', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701177': VerifiedSpec(sku: '77701177', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+
+  // ── צינורות מקלחת (Shower Hoses — F×F) ────────────────────────────────────
+  '77701155': VerifiedSpec(sku: '77701155', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77701160': VerifiedSpec(sku: '77701160', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77701196': VerifiedSpec(sku: '77701196', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77701113': VerifiedSpec(sku: '77701113', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77701114': VerifiedSpec(sku: '77701114', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+
+  // ── צינורות גמישים (Flexible Supply Hoses) ────────────────────────────────
+  '77381040': VerifiedSpec(sku: '77381040', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77381050': VerifiedSpec(sku: '77381050', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77381060': VerifiedSpec(sku: '77381060', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77121240': VerifiedSpec(sku: '77121240', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77121250': VerifiedSpec(sku: '77121250', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77121260': VerifiedSpec(sku: '77121260', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77383815': VerifiedSpec(sku: '77383815', material: _brass, maxTempC: 90, ends: [_bf('3/8"'), _bf('3/8"')]),
+  '77383820': VerifiedSpec(sku: '77383820', material: _brass, maxTempC: 90, ends: [_bf('3/8"'), _bf('3/8"')]),
+  '77383825': VerifiedSpec(sku: '77383825', material: _brass, maxTempC: 90, ends: [_bf('3/8"'), _bf('3/8"')]),
+  '77383830': VerifiedSpec(sku: '77383830', material: _brass, maxTempC: 90, ends: [_bf('3/8"'), _bf('3/8"')]),
+  '77383840': VerifiedSpec(sku: '77383840', material: _brass, maxTempC: 90, ends: [_bf('3/8"'), _bf('3/8"')]),
+  // Flexible drain/jacuzzi pipes
+  '1053232':  VerifiedSpec(sku: '1053232',  material: 'PVC', maxTempC: 50, ends: [_c('32'), _c('32')]),
+  '1054040':  VerifiedSpec(sku: '1054040',  material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
+  '1054050':  VerifiedSpec(sku: '1054050',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+
+  // ── אל חזור ביוב (Drain Backflow Preventers) ──────────────────────────────
+  '777D0481': VerifiedSpec(sku: '777D0481', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
+  '777D0482': VerifiedSpec(sku: '777D0482', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
+  '777D0484': VerifiedSpec(sku: '777D0484', material: 'PVC', maxTempC: 50, ends: [_c('160'), _c('160')]),
+
+  // ── מכסים ורשתות (Drain Covers & Grilles — drainOpening) ──────────────────
+  // 4" covers
+  '777Z3080': VerifiedSpec(sku: '777Z3080', material: _stainless, maxTempC: 90, ends: [_do('4"')]),
+  '77Z3080A': VerifiedSpec(sku: '77Z3080A', material: _brass,     maxTempC: 90, ends: [_do('4"')]),
+  '777Z3063': VerifiedSpec(sku: '777Z3063', material: _stainless, maxTempC: 90, ends: [_do('4"')]),
+  '777Z3067': VerifiedSpec(sku: '777Z3067', material: _brass,     maxTempC: 90, ends: [_do('4"')]),
+  // 6" covers
+  '77003023': VerifiedSpec(sku: '77003023', material: _stainless, maxTempC: 90, ends: [_do('6"')]),
+  '77Z3399B': VerifiedSpec(sku: '77Z3399B', material: _brass,     maxTempC: 90, ends: [_do('6"')]),
+  '77003022': VerifiedSpec(sku: '77003022', material: _stainless, maxTempC: 90, ends: [_do('6"')]),
+  '77Z3398B': VerifiedSpec(sku: '77Z3398B', material: _brass,     maxTempC: 90, ends: [_do('6"')]),
+  '77003025': VerifiedSpec(sku: '77003025', material: _stainless, maxTempC: 90, ends: [_do('6"')]),
+  '77Z3401B': VerifiedSpec(sku: '77Z3401B', material: _brass,     maxTempC: 90, ends: [_do('6"')]),
+  '77003024': VerifiedSpec(sku: '77003024', material: _stainless, maxTempC: 90, ends: [_do('6"')]),
+  '77Z3400B': VerifiedSpec(sku: '77Z3400B', material: _brass,     maxTempC: 90, ends: [_do('6"')]),
+  // 8" covers
+  '77Z3399A': VerifiedSpec(sku: '77Z3399A', material: _stainless, maxTempC: 90, ends: [_do('8"')]),
+  '777Z3399': VerifiedSpec(sku: '777Z3399', material: _brass,     maxTempC: 90, ends: [_do('8"')]),
+  '77Z3398A': VerifiedSpec(sku: '77Z3398A', material: _stainless, maxTempC: 90, ends: [_do('8"')]),
+  '777Z3398': VerifiedSpec(sku: '777Z3398', material: _brass,     maxTempC: 90, ends: [_do('8"')]),
+  '77Z3401A': VerifiedSpec(sku: '77Z3401A', material: _stainless, maxTempC: 90, ends: [_do('8"')]),
+  '777Z3401': VerifiedSpec(sku: '777Z3401', material: _brass,     maxTempC: 90, ends: [_do('8"')]),
+  '77Z3400A': VerifiedSpec(sku: '77Z3400A', material: _stainless, maxTempC: 90, ends: [_do('8"')]),
+  '777Z3400': VerifiedSpec(sku: '777Z3400', material: _brass,     maxTempC: 90, ends: [_do('8"')]),
+  '777Z3402': VerifiedSpec(sku: '777Z3402', material: _brass,     maxTempC: 90, ends: [_do('8"')]),
 };
