@@ -177,6 +177,15 @@ void dismissAllNotifs(WidgetRef ref) {
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
+/// Notification categories hidden by the user's per-type toggles in settings.
+/// (orders/shipments/deals/price-drops → orders/shipments/deals/budget).
+Set<NotifSection> notifMutedSections(NotifSettings ns) => <NotifSection>{
+      if (!ns.typeOrders) NotifSection.orders,
+      if (!ns.typeShipments) NotifSection.shipments,
+      if (!ns.typeDeals) NotifSection.deals,
+      if (!ns.typePriceDrops) NotifSection.budget,
+    };
+
 List<_Notif> _filtered({
   required NotifSection section,
   required Set<String> dismissedIds,
@@ -575,12 +584,7 @@ class _NotifList extends ConsumerWidget {
     final expandedKeys = ref.watch(notifExpandedGroupsProvider);
     final ns = ref.watch(notifSettingsProvider);
     // Per-type toggles from notification settings hide muted categories.
-    final mutedTypes = <NotifSection>{
-      if (!ns.typeOrders) NotifSection.orders,
-      if (!ns.typeShipments) NotifSection.shipments,
-      if (!ns.typeDeals) NotifSection.deals,
-      if (!ns.typePriceDrops) NotifSection.budget,
-    };
+    final mutedTypes = notifMutedSections(ns);
     final items = _withHeadersAndCollapse(
       _filtered(
         section: section,
