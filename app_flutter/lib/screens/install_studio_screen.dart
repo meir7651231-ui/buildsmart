@@ -313,8 +313,23 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
 
   // ── actions ──────────────────────────────────────────────────────────────────
   void _assemble(List<LipskeyCatalogProduct> chain, int temp) {
-    final plan = buildInstallation([...chain],
-        tempC: temp, accessories: ref.read(lineAccessoriesProvider));
+    final acc = ref.read(lineAccessoriesProvider);
+    // A manifold mid-chain with items after it → branched (tree) installation:
+    // [feed … manifold] is the trunk, everything after are parallel branches.
+    final mi = chain.indexWhere((p) => manifoldOutlets(p) > 0);
+    final isTree = mi >= 0 && mi < chain.length - 1;
+    final InstallationPlan plan;
+    int branches = 0, outlets = 0;
+    if (isTree) {
+      final trunk = chain.sublist(0, mi + 1);
+      final branchTargets = chain.sublist(mi + 1);
+      branches = branchTargets.length;
+      outlets = manifoldOutlets(chain[mi]);
+      plan = buildTreeInstallation(trunk, branchTargets,
+          tempC: temp, accessories: acc);
+    } else {
+      plan = buildInstallation([...chain], tempC: temp, accessories: acc);
+    }
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -322,6 +337,8 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       builder: (_) => _BomSheet(
         plan: plan,
         anchorSkus: {for (final a in chain) a.sku},
+        branches: branches,
+        outlets: outlets,
       ),
     );
   }
@@ -499,13 +516,20 @@ class _BlueprintPainter extends CustomPainter {
 
 // ── bill-of-materials sheet (dark) ─────────────────────────────────────────────
 class _BomSheet extends ConsumerWidget {
-  const _BomSheet({required this.plan, required this.anchorSkus});
+  const _BomSheet(
+      {required this.plan,
+      required this.anchorSkus,
+      this.branches = 0,
+      this.outlets = 0});
   final InstallationPlan plan;
   final Set<String> anchorSkus;
+  final int branches; // >0 when this is a branched (manifold) installation
+  final int outlets; // manifold outlet count, for over-capacity warning
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ok = plan.isComplete;
+    final overCapacity = branches > 0 && outlets > 0 && branches > outlets;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
@@ -541,8 +565,16 @@ class _BomSheet extends ConsumerWidget {
                               color: ok ? _ink : _drain,
                               fontSize: 17,
                               fontWeight: FontWeight.w900)),
-                      Text('${plan.items.length} סוגים · ${plan.totalPieces} יחידות',
+                      Text(
+                          '${plan.items.length} סוגים · ${plan.totalPieces} יחידות'
+                          '${branches > 0 ? ' · ⑂ $branches ענפים' : ''}',
                           style: const TextStyle(color: _mute, fontSize: 12)),
+                      if (overCapacity)
+                        Text('⚠️ $branches ענפים על מחלק $outlets-יציאות',
+                            style: const TextStyle(
+                                color: _drain,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ),

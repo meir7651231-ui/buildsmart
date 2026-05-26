@@ -532,3 +532,87 @@ InstallationPlan buildInstallation(
   }
   return InstallationPlan(items, gaps, qty);
 }
+
+// ── manifold / tree topology ───────────────────────────────────────────────────
+
+/// How many identical outlets a manifold-type product exposes (e.g. a
+/// "מחלק 1\" 4 יציאות" has four ½" outlets). 0 when the product isn't a manifold.
+int manifoldOutlets(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null || spec.ends.length < 3) return 0;
+  final counts = <String, int>{};
+  for (final e in spec.ends) {
+    counts[e.size] = (counts[e.size] ?? 0) + 1;
+  }
+  final maxc = counts.values.fold(0, (a, b) => a > b ? a : b);
+  return maxc >= 2 ? maxc : 0;
+}
+
+/// A branched (tree) installation: one trunk (feed → manifold) plus N parallel
+/// branches off the manifold, one per target. Returns a single merged
+/// bill-of-materials — quantities are summed across the trunk and every branch,
+/// so four identical branch nipples show as × 4. Gaps list any branch or trunk
+/// segment the catalog can't connect.
+InstallationPlan buildTreeInstallation(
+  List<LipskeyCatalogProduct> trunk,
+  List<LipskeyCatalogProduct> branchTargets, {
+  int maxDepthPerSegment = 6,
+  int tempC = 20,
+  Set<String> accessories = const {},
+}) {
+  final items = <LipskeyCatalogProduct>[];
+  final qty = <String, int>{};
+  final gaps = <InstallationGap>[];
+  void add(LipskeyCatalogProduct p) {
+    if (!qty.containsKey(p.sku)) items.add(p);
+    qty[p.sku] = (qty[p.sku] ?? 0) + 1;
+  }
+
+  // trunk: feed → … → manifold (linear)
+  LipskeyCatalogProduct? manifold;
+  if (trunk.isNotEmpty) {
+    final tp = buildInstallation(trunk,
+        maxDepthPerSegment: maxDepthPerSegment, tempC: tempC);
+    for (final p in tp.items) {
+      for (var k = 0; k < tp.qtyOf(p.sku); k++) {
+        add(p);
+      }
+    }
+    gaps.addAll(tp.gaps);
+    manifold = trunk.last;
+  }
+
+  // each branch: manifold → target (manifold already counted in the trunk)
+  final root = manifold ?? (branchTargets.isNotEmpty ? branchTargets.first : null);
+  for (final t in branchTargets) {
+    if (root == null) break;
+    if (t.sku == root.sku) continue;
+    final seg = findShortestPath(root, t,
+        maxDepth: maxDepthPerSegment, tempC: tempC);
+    if (seg == null) {
+      gaps.add(InstallationGap(root, t));
+      add(t);
+      continue;
+    }
+    for (final p in seg.skip(1)) {
+      add(p); // skip the shared manifold root
+    }
+  }
+
+  // accessories: clamps + insulation per pipe unit, one sealant roll per line.
+  if (accessories.isNotEmpty && items.isNotEmpty) {
+    final pipeUnits =
+        items.where(_isPipe).fold<int>(0, (s, p) => s + (qty[p.sku] ?? 1));
+    for (final accSku in accessories) {
+      LipskeyCatalogProduct? prod;
+      for (final p in kCompatCatalog) {
+        if (p.sku == accSku) { prod = p; break; }
+      }
+      if (prod == null) continue;
+      final n = accSku == 'HW-SEALANT' ? 1 : (pipeUnits > 0 ? pipeUnits : 1);
+      items.add(prod);
+      qty[accSku] = n;
+    }
+  }
+  return InstallationPlan(items, gaps, qty);
+}
