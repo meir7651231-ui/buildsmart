@@ -491,9 +491,12 @@ int _edgeCost(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
 
 /// One gap between two anchors in a built installation.
 class InstallationGap {
-  const InstallationGap(this.from, this.to);
+  InstallationGap(this.from, this.to)
+      : why = connectionFailReason(from, to);
   final LipskeyCatalogProduct from;
   final LipskeyCatalogProduct to;
+  /// Hebrew explanation of why the connection could not be made.
+  final String why;
 }
 
 /// Branch letter labels for Hebrew zone display (א, ב, ג, …).
@@ -504,7 +507,8 @@ String _branchLabel(int i) =>
 /// Result of auto-completing an installation from ordered anchor products.
 class InstallationPlan {
   const InstallationPlan(this.items, this.gaps, this.quantities,
-      {this.zones = const <String, List<String>>{}});
+      {this.zones = const <String, List<String>>{},
+       this.warnings = const <String>[]});
 
   /// Distinct components in first-appearance order (anchors + connectors).
   final List<LipskeyCatalogProduct> items;
@@ -516,9 +520,14 @@ class InstallationPlan {
   /// across two joints counts twice) — turns the list into a shopping list.
   final Map<String, int> quantities;
 
-  /// Zone label → ordered SKUs in that zone. Non-empty only for tree
-  /// (manifold) installations — used to render a sectioned BOM by zone.
+  /// Zone label → ordered SKUs in that zone.
+  /// Always non-empty after build: linear plans carry 'קו ראשי', tree plans
+  /// carry 'גזע' + 'ענף א/ב/…' + optionally 'בטיחות' (auto-compliance items).
   final Map<String, List<String>> zones;
+
+  /// Engineering warnings that are not hard gaps — e.g. manifold outlet
+  /// count exceeded. Advisory; the plan is still usable.
+  final List<String> warnings;
 
   bool get isComplete => gaps.isEmpty;
 
@@ -700,6 +709,7 @@ InstallationPlan buildTreeInstallation(
   final qty = <String, int>{};
   final gaps = <InstallationGap>[];
   final zones = <String, List<String>>{};
+  final engineWarnings = <String>[];
 
   void add(LipskeyCatalogProduct p, {String? zone}) {
     if (!qty.containsKey(p.sku)) items.add(p);
@@ -722,6 +732,16 @@ InstallationPlan buildTreeInstallation(
     }
     gaps.addAll(tp.gaps);
     manifold = trunk.last;
+  }
+
+  // Warn when branch count exceeds the manifold's physical outlet count.
+  if (manifold != null) {
+    final outlets = manifoldOutlets(manifold);
+    if (outlets > 0 && branchTargets.length > outlets) {
+      engineWarnings.add(
+          'המחלק "${manifold.nameHe}" תומך ב-$outlets יציאות — '
+          'הוגדרו ${branchTargets.length} ענפים. נדרש מחלק עם יותר יציאות.');
+    }
   }
 
   // each branch: manifold → target, zone = "ענף א/ב/…"
@@ -774,16 +794,25 @@ InstallationPlan buildTreeInstallation(
     final pipeUnits =
         items.where(_isPipe).fold<int>(0, (s, p) => s + (qty[p.sku] ?? 1));
     for (final accSku in accessories) {
-      LipskeyCatalogProduct? prod;
-      for (final p in kCompatCatalog) {
-        if (p.sku == accSku) { prod = p; break; }
-      }
+      final prod = _skuOf(accSku);
       if (prod == null) continue;
       final n = accSku == 'HW-SEALANT' ? 1 : (pipeUnits > 0 ? pipeUnits : 1);
       items.add(prod);
       qty[accSku] = n;
     }
   }
-  if (autoCompliance && items.isNotEmpty) _autoAddCompliance(items, qty, tempC);
-  return InstallationPlan(items, gaps, qty, zones: zones);
+
+  // Auto-compliance: track which SKUs are new after the call so they can be
+  // assigned to the "בטיחות" zone rather than appearing outside all zones.
+  if (autoCompliance && items.isNotEmpty) {
+    final skusBefore = qty.keys.toSet();
+    _autoAddCompliance(items, qty, tempC);
+    final added = qty.keys.toSet().difference(skusBefore);
+    if (added.isNotEmpty) {
+      zones['בטיחות'] = added.toList();
+    }
+  }
+
+  return InstallationPlan(items, gaps, qty,
+      zones: zones, warnings: engineWarnings);
 }
