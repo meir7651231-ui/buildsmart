@@ -217,9 +217,17 @@ List<LineCheck> lineComplianceChecklist(
   final metals = mats.where((m) => m == 'נחושת' || m == 'פליז' || m == 'פלדה');
   final dissimilar = mats.contains('נחושת') && metals.toSet().length >= 2;
   final isolationCount = chain.where((p) =>
-      p.sku == 'HW-BALL-INLET-1' ||
-      p.sku == 'HW-BALL-1' ||
-      p.sku == 'HW-BALL-15').length;
+      p.sku == 'HW-BALL-INLET-1'  || p.sku == 'HW-BALL-INLET-40' ||
+      p.sku == 'HW-BALL-1'        || p.sku == 'HW-BALL-15'        ||
+      p.sku == 'HW-BALL-40'       || p.sku == 'HW-BALL-32'        ||
+      p.sku == 'HW-BALL-CU-40'    || p.sku == 'HW-BALL-CU-32'     ||
+      p.sku == 'HW-BALL-CU-25'    || p.sku == 'HW-BALL-CU-20').length;
+
+  final hasCommercialPump = skus.contains('HW-PUMP-40');
+  final hasManifoldOrShower = has({
+    'HW-MANIFOLD-3', 'HW-MANIFOLD-4', 'HW-MANIFOLD-6',
+    'HW-SHOWER-HEAD', 'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20', 'HW-TMTV-15',
+  });
 
   return [
     LineCheck(
@@ -239,6 +247,21 @@ List<LineCheck> lineComplianceChecklist(
       LineCheck('מפצה התפשטות PEX', has({'HW-EXP-COMP-20'}), 'PEX מתרחב בחום'),
     if (hot)
       LineCheck('שסתום פורק לחץ (PRV)', has({'HW-PRV-34'}), 'מערכת חמה סגורה'),
+    LineCheck('כלי התפשטות (Bladder Tank)',
+        has({'HW-BTANK-35', 'HW-BTANK-18', 'HW-EXPVESSEL'}),
+        'ממברנת EPDM מפרידה N₂ ממים'),
+    if (hasCommercialPump) ...[
+      LineCheck('מסנן Y (הגנת משאבה)',
+          has({'HW-YSTR-40', 'HW-YSTR-32', 'HW-YSTR-15'}),
+          'מונע חלקיקים מלפגוע במשאבה'),
+      LineCheck('מחבר גמיש (ספיגת רעידות)',
+          has({'HW-FLEX-40', 'HW-FLEX-32'}),
+          'מבודד רעידות המשאבה מהצנרת'),
+    ],
+    if (hasManifoldOrShower)
+      LineCheck('TMTV anti-scald (הגנת משתמש)',
+          has({'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20', 'HW-TMTV-15'}),
+          'מגביל T≤45°C ביציאה — anti-scald'),
     if (hot)
       LineCheck('בידוד תרמי', acc('HW-INSUL'), 'הפסדי חום + סכנת כוויות'),
     LineCheck('חבקים/תמיכת צנרת', acc('HW-CLIP'), 'קיבוע ושיפוע'),
