@@ -619,6 +619,9 @@ class _SectionTile extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
+  // Count only functional rows — exclude "בבנייה" placeholders.
+  int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -635,6 +638,22 @@ class _SectionTile extends StatelessWidget {
           iconColor: Colors.black54,
           collapsedIconColor: Colors.black54,
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
+          // Count badge replaces the default expand chevron.
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: BsTokens.brand,
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Text(
+              '$_activeCount',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
           title: Text(
             title,
             style: const TextStyle(
