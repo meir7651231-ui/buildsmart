@@ -16,13 +16,14 @@ class CatalogSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         title: const Text(
           'הגדרות קטלוג',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          style: TextStyle(
+              color: Color(0xFF1A1A1A), fontWeight: FontWeight.w700),
         ),
         iconTheme: const IconThemeData(color: Colors.black54),
         actions: [
@@ -58,7 +59,7 @@ class CatalogSettingsScreen extends ConsumerWidget {
         backgroundColor: const Color(0xFFFFFFFF),
         title: const Text(
           'איפוס הגדרות?',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF1A1A1A)),
         ),
         content: const Text(
           'כל הגדרות הקטלוג יוחזרו לברירת המחדל.',
@@ -543,7 +544,7 @@ class _SectionTile extends StatelessWidget {
           title: Text(
             title,
             style: const TextStyle(
-              color: Colors.white,
+              color: Color(0xFF1A1A1A),
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
@@ -570,7 +571,7 @@ class _SwitchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -606,7 +607,8 @@ class _RadioGroupRow<T> extends StatelessWidget {
         ...options.map(
           (o) => RadioListTile<T>(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            title: Text(o.label, style: const TextStyle(color: Colors.white)),
+            title: Text(o.label,
+                style: const TextStyle(color: Color(0xFF1A1A1A))),
             value: o.value,
             groupValue: value,
             activeColor: BsTokens.brand,
@@ -628,7 +630,7 @@ class _PlaceholderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       trailing: const Text(
         'בבנייה',
         style: TextStyle(color: Color(0xFF666666), fontSize: 12),
@@ -659,7 +661,7 @@ class _NumberRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
