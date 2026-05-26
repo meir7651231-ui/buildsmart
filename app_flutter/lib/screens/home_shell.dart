@@ -200,12 +200,16 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     children: [
                       Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                       SizedBox(width: 4),
-                      Text(
-                        'v3.96 · 26.5.26 · חיווט כלי החיפוש בקטלוג (מיון·סינון·קטלוג)',
-                        style: TextStyle(
-                          color: Color(0xFF4CAF50),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
+                      Flexible(
+                        child: Text(
+                          'v3.96 · 26.5.26 · חיווט כלי החיפוש בקטלוג',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Color(0xFF4CAF50),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ],
