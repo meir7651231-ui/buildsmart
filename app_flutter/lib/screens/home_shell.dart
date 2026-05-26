@@ -86,8 +86,9 @@ class HomeShell extends ConsumerWidget {
           ref.read(mainTabProvider.notifier).state = i;
         },
       ),
-      floatingActionButton:
-          open == OpenDial.none ? const _CartFab() : null,
+      floatingActionButton: (open == OpenDial.none && tabIndex != 3)
+          ? const _CartFab()
+          : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
@@ -200,7 +201,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                       SizedBox(width: 4),
                       Text(
-                        'v3.63 · 26.5.26 · חיווט הגדרות חנות',
+                        'v3.64 · 26.5.26 · light mode התראות + סל',
                         style: TextStyle(
                           color: Color(0xFF4CAF50),
                           fontSize: 10,

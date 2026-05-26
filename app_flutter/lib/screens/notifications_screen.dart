@@ -333,7 +333,7 @@ class _Header extends ConsumerWidget {
             child: Text(
               'התראות',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF1A1A1A),
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
@@ -610,7 +610,7 @@ class _NotifList extends ConsumerWidget {
                     Text(
                       'אין התראות',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Color(0xFF1A1A1A),
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -818,7 +818,7 @@ class _NotifRow extends ConsumerWidget {
                   SizedBox(width: 12),
                   Text(
                     'סמן כנקרא',
-                    style: TextStyle(color: Colors.white, fontSize: 15),
+                    style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
                   ),
                 ],
               ),
@@ -902,7 +902,7 @@ class _NotifRow extends ConsumerWidget {
                             style: TextStyle(
                               color: notif.highPriority
                                   ? Colors.redAccent
-                                  : Colors.white,
+                                  : const Color(0xFF1A1A1A),
                               fontSize: 16,
                               fontWeight: isUnread
                                   ? FontWeight.w700
