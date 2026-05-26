@@ -343,7 +343,21 @@ bool _shareSystem(LipskeyCatalogProduct a, LipskeyCatalogProduct b) =>
 ///   the flow path at all, never a connector.
 enum FlowRole { connector, fixture, accessory }
 
+/// Individual non-flow products that live inside otherwise-flow categories
+/// (e.g. thermal insulation under hot-water, a hanger under shower accessories,
+/// a garden spray gun under garden equipment). Each name confirms it carries no
+/// flow connection, so it must never be treated as a connector.
+const _accessorySkus = {
+  'HW-INSUL', 'HW-CLIP', 'HW-SEALANT',          // בידוד / חבק / איטום PTFE
+  '77000026', '77000027', '77980000', '77980001', // אקדחי מים/אצבע לגינה (קצה)
+  '77701185',                                    // מתלה מתכוונן
+  '77772604', '77772605',                        // סטי הידוק לברז פרח
+  '777M1802', '777M1807',                        // מנגנוני הדחה (פנים-קבועה)
+  '777A5034', '77772410', '77772412', '77772415', // דיורי פיה (קצה)
+};
+
 FlowRole flowRole(LipskeyCatalogProduct p) {
+  if (_accessorySkus.contains(p.sku)) return FlowRole.accessory;
   final c = p.categoryHe;
   if (_structuralCats.contains(c)) return FlowRole.accessory;
   if (_fixtureCats.contains(c)) return FlowRole.fixture;
