@@ -42,11 +42,19 @@ bool productSuitableForTemp(LipskeyCatalogProduct p, int tempC) {
 
 // ── line compliance / completeness ──────────────────────────────────────────────
 
+/// Severity of a compliance check failure.
+/// critical → safety/code risk (PRV, ball valve, anti-scald)
+/// warning  → durability/performance risk (insulation, galvanic, PEX expansion)
+/// info     → good practice (clamps, sealant)
+enum CheckSeverity { critical, warning, info }
+
 class LineCheck {
-  const LineCheck(this.label, this.satisfied, this.why);
-  final String label;   // required component
-  final bool satisfied; // present in the chain?
-  final String why;     // why it's required
+  const LineCheck(this.label, this.satisfied, this.why,
+      {this.severity = CheckSeverity.warning});
+  final String label;
+  final bool satisfied;
+  final String why;
+  final CheckSeverity severity;
 }
 
 /// The physical join method between two mating products, derived from end types
@@ -106,37 +114,60 @@ List<LineCheck> lineComplianceChecklist(
             ? 'ברז ניתוק ×3 (כניסת דוד + אחרי משאבה + מניפולד)'
             : 'ברז ניתוק לתחזוקה',
         recirc ? isolationCount >= 3 : isolationCount >= 1,
-        'בידוד אזורי לתחזוקה'),
+        'בידוד אזורי לתחזוקה',
+        severity: CheckSeverity.critical),
     if (recirc) ...[
-      LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}), 'מונע זרימה הפוכה בלולאה'),
-      LineCheck('שסתום מאזן / TRV', has({'HW-BALANCE-15'}), 'איזון הלולאה'),
-      LineCheck('מפוח אוויר', has({'HW-AIRVENT'}), 'פליטת אוויר בלולאה'),
+      LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}),
+          'מונע זרימה הפוכה בלולאה', severity: CheckSeverity.critical),
+      LineCheck('שסתום מאזן / TRV', has({'HW-BALANCE-15'}),
+          'איזון הלולאה', severity: CheckSeverity.critical),
+      LineCheck('מפוח אוויר', has({'HW-AIRVENT'}),
+          'פליטת אוויר בלולאה', severity: CheckSeverity.warning),
     ],
     if (dissimilar)
-      LineCheck('רקורד דיאלקטרי', has({'HW-DIELECTRIC-15'}), 'הפרדה גלוונית בין מתכות'),
+      LineCheck('רקורד דיאלקטרי', has({'HW-DIELECTRIC-15'}),
+          'הפרדה גלוונית בין מתכות', severity: CheckSeverity.critical),
     if (hasPex)
-      LineCheck('מפצה התפשטות PEX', has({'HW-EXP-COMP-20'}), 'PEX מתרחב בחום'),
+      LineCheck('מפצה התפשטות PEX', has({'HW-EXP-COMP-20'}),
+          'PEX מתרחב בחום', severity: CheckSeverity.warning),
     if (hot)
-      LineCheck('שסתום פורק לחץ (PRV)', has({'HW-PRV-34'}), 'מערכת חמה סגורה'),
+      LineCheck('שסתום פורק לחץ (PRV)', has({'HW-PRV-34'}),
+          'מערכת חמה סגורה', severity: CheckSeverity.critical),
     LineCheck('כלי התפשטות (Bladder Tank)',
         has({'HW-BTANK-35', 'HW-BTANK-18', 'HW-EXPVESSEL'}),
-        'ממברנת EPDM מפרידה N₂ ממים'),
+        'ממברנת EPDM מפרידה N₂ ממים',
+        severity: CheckSeverity.critical),
     if (hasCommercialPump) ...[
       LineCheck('מסנן Y (הגנת משאבה)',
           has({'HW-YSTR-40', 'HW-YSTR-32', 'HW-YSTR-15'}),
-          'מונע חלקיקים מלפגוע במשאבה'),
+          'מונע חלקיקים מלפגוע במשאבה', severity: CheckSeverity.warning),
       LineCheck('מחבר גמיש (ספיגת רעידות)',
           has({'HW-FLEX-40', 'HW-FLEX-32'}),
-          'מבודד רעידות המשאבה מהצנרת'),
+          'מבודד רעידות המשאבה מהצנרת', severity: CheckSeverity.warning),
     ],
     if (hasManifoldOrShower)
       LineCheck('TMTV anti-scald (הגנת משתמש)',
           has({'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20', 'HW-TMTV-15'}),
-          'מגביל T≤45°C ביציאה — anti-scald'),
+          'מגביל T≤45°C ביציאה — anti-scald', severity: CheckSeverity.critical),
+    if (hasCommercialPump && hasManifoldOrShower)
+      LineCheck('שסתום מאזן לכל ענף (Balancing Valve)',
+          has({'HW-BALANCE-25', 'HW-BALANCE-20', 'HW-BALANCE-15'}),
+          'מאזן לחץ בין ענפים במערכת מסחרית', severity: CheckSeverity.warning),
+    if (hasCommercialPump && hot)
+      LineCheck('bypass תרמי למניעת Legionella (EN 806)',
+          has({'HW-DISINFECT'}),
+          'פסטור 70°C/3 דקות אחת לשבוע', severity: CheckSeverity.critical),
+    if (recirc)
+      LineCheck('נקודת דיגום (Legionella sampling)',
+          has({'HW-SAMPLE'}),
+          'נדרש לבדיקות מים תקתיות', severity: CheckSeverity.warning),
     if (hot)
-      LineCheck('בידוד תרמי', acc('HW-INSUL'), 'הפסדי חום + סכנת כוויות'),
-    LineCheck('חבקים/תמיכת צנרת', acc('HW-CLIP'), 'קיבוע ושיפוע'),
-    LineCheck('איטום (Press/PTFE/O-ring)', acc('HW-SEALANT'), 'אטימות כל מעבר'),
+      LineCheck('בידוד תרמי', acc('HW-INSUL'),
+          'הפסדי חום + סכנת כוויות', severity: CheckSeverity.warning),
+    LineCheck('חבקים/תמיכת צנרת', acc('HW-CLIP'),
+        'קיבוע ושיפוע', severity: CheckSeverity.info),
+    LineCheck('איטום (Press/PTFE/O-ring)', acc('HW-SEALANT'),
+        'אטימות כל מעבר', severity: CheckSeverity.info),
   ];
 }
 
@@ -456,9 +487,15 @@ class InstallationGap {
   final LipskeyCatalogProduct to;
 }
 
+/// Branch letter labels for Hebrew zone display (א, ב, ג, …).
+const _branchLetters = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י'];
+String _branchLabel(int i) =>
+    'ענף ${i < _branchLetters.length ? _branchLetters[i] : (i + 1).toString()}';
+
 /// Result of auto-completing an installation from ordered anchor products.
 class InstallationPlan {
-  const InstallationPlan(this.items, this.gaps, this.quantities);
+  const InstallationPlan(this.items, this.gaps, this.quantities,
+      {this.zones = const <String, List<String>>{}});
 
   /// Distinct components in first-appearance order (anchors + connectors).
   final List<LipskeyCatalogProduct> items;
@@ -469,6 +506,10 @@ class InstallationPlan {
   /// How many physical units of each SKU the line needs (a connector reused
   /// across two joints counts twice) — turns the list into a shopping list.
   final Map<String, int> quantities;
+
+  /// Zone label → ordered SKUs in that zone. Non-empty only for tree
+  /// (manifold) installations — used to render a sectioned BOM by zone.
+  final Map<String, List<String>> zones;
 
   bool get isComplete => gaps.isEmpty;
 
@@ -569,10 +610,10 @@ int manifoldOutlets(LipskeyCatalogProduct p) {
 }
 
 /// A branched (tree) installation: one trunk (feed → manifold) plus N parallel
-/// branches off the manifold, one per target. Returns a single merged
-/// bill-of-materials — quantities are summed across the trunk and every branch,
-/// so four identical branch nipples show as × 4. Gaps list any branch or trunk
-/// segment the catalog can't connect.
+/// branches off the manifold, one per target. Returns a zone-tagged
+/// bill-of-materials — trunk items in "גזע", each branch in "ענף א/ב/…".
+/// When [tempC] ≥ 60 and a manifold is detected, one TMTV anti-scald valve
+/// (HW-TMTV-15) is auto-added to every branch for hot-water compliance.
 InstallationPlan buildTreeInstallation(
   List<LipskeyCatalogProduct> trunk,
   List<LipskeyCatalogProduct> branchTargets, {
@@ -583,39 +624,76 @@ InstallationPlan buildTreeInstallation(
   final items = <LipskeyCatalogProduct>[];
   final qty = <String, int>{};
   final gaps = <InstallationGap>[];
-  void add(LipskeyCatalogProduct p) {
+  final zones = <String, List<String>>{};
+
+  void add(LipskeyCatalogProduct p, {String? zone}) {
     if (!qty.containsKey(p.sku)) items.add(p);
     qty[p.sku] = (qty[p.sku] ?? 0) + 1;
+    if (zone != null) {
+      final zl = zones.putIfAbsent(zone, () => []);
+      if (!zl.contains(p.sku)) zl.add(p.sku);
+    }
   }
 
-  // trunk: feed → … → manifold (linear)
+  // trunk: feed → … → manifold (linear), zone = "גזע"
   LipskeyCatalogProduct? manifold;
   if (trunk.isNotEmpty) {
     final tp = buildInstallation(trunk,
         maxDepthPerSegment: maxDepthPerSegment, tempC: tempC);
     for (final p in tp.items) {
       for (var k = 0; k < tp.qtyOf(p.sku); k++) {
-        add(p);
+        add(p, zone: 'גזע');
       }
     }
     gaps.addAll(tp.gaps);
     manifold = trunk.last;
   }
 
-  // each branch: manifold → target (manifold already counted in the trunk)
+  // each branch: manifold → target, zone = "ענף א/ב/…"
   final root = manifold ?? (branchTargets.isNotEmpty ? branchTargets.first : null);
-  for (final t in branchTargets) {
+  for (var bi = 0; bi < branchTargets.length; bi++) {
+    final t = branchTargets[bi];
     if (root == null) break;
     if (t.sku == root.sku) continue;
+    final zl = _branchLabel(bi);
     final seg = findShortestPath(root, t,
         maxDepth: maxDepthPerSegment, tempC: tempC);
     if (seg == null) {
       gaps.add(InstallationGap(root, t));
-      add(t);
+      add(t, zone: zl);
       continue;
     }
     for (final p in seg.skip(1)) {
-      add(p); // skip the shared manifold root
+      add(p, zone: zl);
+    }
+  }
+
+  // Auto-add TMTV anti-scald per branch for hot lines (tempC ≥ 60).
+  // One DN15 TMTV at each manifold outlet limits outlet T ≤ 45°C.
+  if (manifold != null && tempC >= 60 && branchTargets.isNotEmpty) {
+    LipskeyCatalogProduct? tmtv;
+    for (final p in kCompatCatalog) {
+      if (p.sku == 'HW-TMTV-15') { tmtv = p; break; }
+    }
+    if (tmtv != null) {
+      for (var bi = 0; bi < branchTargets.length; bi++) {
+        add(tmtv, zone: _branchLabel(bi));
+      }
+    }
+  }
+
+  // Auto-add pre-set balancing valve per branch for commercial pump systems.
+  // Ensures each branch receives its design flow at different resistance.
+  final trunkSkus = items.map((p) => p.sku).toSet();
+  if (trunkSkus.contains('HW-PUMP-40') && branchTargets.isNotEmpty) {
+    LipskeyCatalogProduct? bal;
+    for (final p in kCompatCatalog) {
+      if (p.sku == 'HW-BALANCE-20') { bal = p; break; }
+    }
+    if (bal != null) {
+      for (var bi = 0; bi < branchTargets.length; bi++) {
+        add(bal, zone: _branchLabel(bi));
+      }
     }
   }
 
@@ -634,5 +712,5 @@ InstallationPlan buildTreeInstallation(
       qty[accSku] = n;
     }
   }
-  return InstallationPlan(items, gaps, qty);
+  return InstallationPlan(items, gaps, qty, zones: zones);
 }
