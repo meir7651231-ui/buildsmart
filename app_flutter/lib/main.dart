@@ -1,5 +1,6 @@
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/state/app_settings.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -15,6 +16,11 @@ class BuildSmartApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(appSettingsProvider);
+    final textScale = switch (ref.watch(catalogSettingsProvider).textSize) {
+      CatalogTextSize.small => 0.9,
+      CatalogTextSize.medium => 1.0,
+      CatalogTextSize.large => 1.15,
+    };
     final locale = switch (settings.lang) {
       BsLang.he => const Locale('he', 'IL'),
       BsLang.ar => const Locale('ar'),
@@ -38,9 +44,13 @@ class BuildSmartApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      builder: (context, child) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: child ?? const SizedBox(),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context)
+            .copyWith(textScaler: TextScaler.linear(textScale)),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: child ?? const SizedBox(),
+        ),
       ),
       home: const HomeShell(),
     );

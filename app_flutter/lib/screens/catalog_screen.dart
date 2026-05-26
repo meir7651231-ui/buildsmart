@@ -10,6 +10,7 @@ import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/compat_screen.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -1221,6 +1222,8 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
   void _submit(String value) {
     final q = value.trim();
     if (q.isEmpty) return;
+    // Honour the "שמור היסטוריית חיפוש" setting.
+    if (!ref.read(catalogSettingsProvider).searchHistoryEnabled) return;
     final list = List<String>.from(ref.read(recentSearchesProvider))
       ..remove(q)
       ..insert(0, q);
@@ -1727,6 +1730,7 @@ class _SearchResultsList extends ConsumerWidget {
           ),
           onTap: () {
             ref.read(searchQueryProvider.notifier).state = entry.title;
+            if (!ref.read(catalogSettingsProvider).searchHistoryEnabled) return;
             final list = List<String>.from(ref.read(recentSearchesProvider))
               ..remove(entry.title)
               ..insert(0, entry.title);
