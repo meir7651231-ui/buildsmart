@@ -489,9 +489,12 @@ List<LipskeyCatalogProduct>? findShortestPath(
   // would have to cross supply↔drainage, which only happens inside a fixture.
   final sysFrom = productSystems(from);
   final sysTo = productSystems(to);
-  if (canConnect(from, to) && sysFrom.intersection(sysTo).isNotEmpty) {
-    return [from, to];
-  }
+  // Fast reject: the running system intersection starts at sysFrom and can only
+  // shrink, so reaching `to` requires sysFrom ∩ sysTo ≠ ∅. If they share no
+  // system (e.g. a supply faucet and a drainage pipe), no path can exist —
+  // return immediately instead of exhausting the whole reachable subgraph.
+  if (sysFrom.intersection(sysTo).isEmpty) return null;
+  if (canConnect(from, to)) return [from, to];
 
   // Least-cost search (Dijkstra). Cost = 10·(parts) + (material transitions),
   // so the result is always a shortest-part path (no regression on hop counts),
