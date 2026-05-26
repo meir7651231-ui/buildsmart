@@ -1,6 +1,7 @@
 import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/state/store_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -24,11 +25,20 @@ enum CartPaymentMethod { card, bit, supplierCredit }
 final cartQtysProvider = StateProvider<Map<String, int>>(
   (_) => const {'blk': 150, 'pls': 5, 'blt': 80, 'bm': 10},
 );
-final cartDeliveryProvider =
-    StateProvider<CartDelivery>((_) => CartDelivery.standard);
+// Initial delivery/payment honor the store-settings defaults (read once).
+final cartDeliveryProvider = StateProvider<CartDelivery>(
+  (ref) => ref.read(storeSettingsProvider).selfPickupDefault
+      ? CartDelivery.pickup
+      : CartDelivery.standard,
+);
 final cartProjectProvider = StateProvider<String>((_) => 'בית דוד 3');
-final cartPaymentProvider =
-    StateProvider<CartPaymentMethod>((_) => CartPaymentMethod.card);
+final cartPaymentProvider = StateProvider<CartPaymentMethod>(
+  (ref) => switch (ref.read(storeSettingsProvider).defaultPayment) {
+    StorePayment.bit => CartPaymentMethod.bit,
+    StorePayment.supplierCredit => CartPaymentMethod.supplierCredit,
+    StorePayment.card || StorePayment.applePay => CartPaymentMethod.card,
+  },
+);
 
 // ─── static data ─────────────────────────────────────────────────────────────
 
@@ -1150,13 +1160,21 @@ class _CartViewState extends ConsumerState<_CartView> {
     for (final line in smartLines) {
       subtotal += line.total;
     }
-    final vat = (subtotal * 0.18).round();
+    final vatInclusive = ref.watch(
+      storeSettingsProvider.select((s) => s.vatInclusive),
+    );
+    // Inclusive: VAT is already embedded in the prices (shown for info only).
+    // Exclusive: VAT is added on top of the subtotal.
+    final vat = vatInclusive
+        ? subtotal - (subtotal / 1.18).round()
+        : (subtotal * 0.18).round();
     final deliveryFee = switch (delivery) {
       CartDelivery.express  => 120,
       CartDelivery.standard => 45,
       CartDelivery.pickup   => 0,
     };
-    final total = subtotal + vat + deliveryFee;
+    final total =
+        vatInclusive ? subtotal + deliveryFee : subtotal + vat + deliveryFee;
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1184,11 +1202,12 @@ class _CartViewState extends ConsumerState<_CartView> {
           vat: vat,
           deliveryFee: deliveryFee,
           total: total,
+          vatInclusive: vatInclusive,
         ),
         const SizedBox(height: 12),
         _PaymentSelector(selected: payment),
         const SizedBox(height: 16),
-        _CheckoutButton(total: total),
+        _CheckoutButton(subtotal: subtotal, total: total),
         const SizedBox(height: 4),
         const _CartActionsRow(),
         const SizedBox(height: 24),
@@ -1710,12 +1729,14 @@ class _SummaryCard extends StatelessWidget {
     required this.vat,
     required this.deliveryFee,
     required this.total,
+    required this.vatInclusive,
   });
 
   final int subtotal;
   final int vat;
   final int deliveryFee;
   final int total;
+  final bool vatInclusive;
 
   @override
   Widget build(BuildContext context) {
@@ -1729,7 +1750,10 @@ class _SummaryCard extends StatelessWidget {
         children: [
           _SummaryLine(label: 'סכום ביניים', value: _price(subtotal)),
           const SizedBox(height: 6),
-          _SummaryLine(label: 'מע"מ 18%', value: _price(vat)),
+          _SummaryLine(
+            label: vatInclusive ? 'כולל מע"מ 18%' : 'מע"מ 18%',
+            value: _price(vat),
+          ),
           const SizedBox(height: 6),
           _SummaryLine(
             label: 'משלוח',
@@ -1761,7 +1785,7 @@ class _SummaryLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = bold
         ? const TextStyle(
-            color: Color(0xFFFFFFFF),
+            color: Color(0xFF1A1A1A),
             fontSize: 15,
             fontWeight: FontWeight.w800,
           )
@@ -1859,7 +1883,8 @@ class _PaymentChip extends StatelessWidget {
 // ─── checkout button ──────────────────────────────────────────────────────────
 
 class _CheckoutButton extends ConsumerWidget {
-  const _CheckoutButton({required this.total});
+  const _CheckoutButton({required this.subtotal, required this.total});
+  final int subtotal;
   final int total;
 
   @override
@@ -1872,12 +1897,50 @@ class _CheckoutButton extends ConsumerWidget {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         padding: const EdgeInsets.symmetric(vertical: 16),
       ),
-      onPressed: () => _showCheckoutSheet(context, ref),
+      onPressed: () => _checkout(context, ref),
       child: Text(
         'הזמן עכשיו · ${_price(total)} →',
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
       ),
     );
+  }
+
+  Future<void> _checkout(BuildContext context, WidgetRef ref) async {
+    final s = ref.read(storeSettingsProvider);
+    // Minimum-order gate.
+    if (s.minOrderAmount > 0 && subtotal < s.minOrderAmount) {
+      showToast(context, 'מינימום להזמנה: ${_price(s.minOrderAmount)}');
+      return;
+    }
+    // Large-order confirmation.
+    if (s.confirmLargeOrder && total >= s.largeOrderThreshold) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: const Color(0xFFFFFFFF),
+          title: const Text('אישור הזמנה גדולה',
+              style: TextStyle(color: Color(0xFF1A1A1A))),
+          content: Text(
+            'סכום ההזמנה ${_price(total)} חורג מהסף שהגדרת '
+            '(${_price(s.largeOrderThreshold)}). להמשיך?',
+            style: const TextStyle(color: Colors.black54),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('ביטול'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+              child: const Text('אשר והמשך'),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !context.mounted) return;
+    }
+    _showCheckoutSheet(context, ref);
   }
 
   void _showCheckoutSheet(BuildContext context, WidgetRef ref) {
