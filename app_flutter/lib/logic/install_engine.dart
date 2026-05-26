@@ -520,18 +520,73 @@ class InstallationPlan {
   int qtyOf(String sku) => quantities[sku] ?? 1;
 }
 
+/// Auto-include safety-critical items that every hot/mixed-metal line must have
+/// but that are never auto-inserted as path connectors (they sit at fixed points:
+/// PRV on boiler outlet, expansion vessel on cold feed, dielectric at transition).
+/// Only adds an item if none of its functional equivalents are already present.
+void _autoAddCompliance(
+    List<LipskeyCatalogProduct> items, Map<String, int> qty, int tempC) {
+  final skus = qty.keys.toSet();
+  final mats =
+      items.map(productMaterial).whereType<String>().toSet();
+
+  LipskeyCatalogProduct? _find(String sku) {
+    for (final p in kCompatCatalog) {
+      if (p.sku == sku) return p;
+    }
+    return null;
+  }
+
+  void addIfMissing(Set<String> alternatives, String preferred) {
+    if (alternatives.any(skus.contains)) return;
+    final p = _find(preferred);
+    if (p == null) return;
+    items.add(p);
+    qty[preferred] = 1;
+    skus.add(preferred);
+  }
+
+  if (tempC >= 60) {
+    // Pressure relief valve — every closed hot system.
+    addIfMissing({'HW-PRV-34'}, 'HW-PRV-34');
+    // Expansion vessel — absorbs thermal expansion so PRV never lifts.
+    addIfMissing({'HW-BTANK-35', 'HW-BTANK-18', 'HW-EXPVESSEL'}, 'HW-BTANK-35');
+    // Isolation ball valve — minimum one for maintenance shut-off.
+    addIfMissing({
+      'HW-BALL-INLET-1', 'HW-BALL-INLET-40',
+      'HW-BALL-1', 'HW-BALL-15', 'HW-BALL-40', 'HW-BALL-32',
+      'HW-BALL-CU-40', 'HW-BALL-CU-32', 'HW-BALL-CU-25', 'HW-BALL-CU-20',
+    }, 'HW-BALL-1');
+  }
+
+  // Dielectric union when copper meets brass or steel.
+  final metals = mats
+      .where((m) => m == 'נחושת' || m == 'פליז' || m == 'פלדה')
+      .toSet();
+  if (mats.contains('נחושת') && metals.length >= 2) {
+    addIfMissing({
+      'HW-DIELECTRIC-15', 'HW-DIELECTRIC-20',
+      'HW-DIELECTRIC-25', 'HW-DIELECTRIC-32', 'HW-DIELECTRIC-40',
+    }, 'HW-DIELECTRIC-15');
+  }
+}
+
 /// Auto-complete a full installation from an ordered list of anchor products
 /// (the fixtures + endpoints the installer cares about). Between every pair of
 /// consecutive anchors the engine fills in the connector path, so the result is
 /// a complete bill-of-materials ready to order. Each segment stays within one
 /// system; a supply↔drainage transition only happens at a fixture anchor the
 /// installer placed (e.g. a toilet between the supply line and the soil pipe).
+/// When [autoCompliance] is true the engine also appends safety-critical items
+/// (PRV, expansion vessel, ball valve, dielectric) that are required by code
+/// but not part of the physical connection path.
 InstallationPlan buildInstallation(
   List<LipskeyCatalogProduct> anchors, {
   int maxDepthPerSegment = 6,
   int tempC = 20,
   Set<String> accessories = const {},
   bool loop = false,
+  bool autoCompliance = false,
 }) {
   if (anchors.isEmpty) return const InstallationPlan([], [], {});
   final items = <LipskeyCatalogProduct>[];
@@ -591,6 +646,7 @@ InstallationPlan buildInstallation(
       qty[accSku] = n;
     }
   }
+  if (autoCompliance && items.isNotEmpty) _autoAddCompliance(items, qty, tempC);
   return InstallationPlan(items, gaps, qty);
 }
 
@@ -620,6 +676,7 @@ InstallationPlan buildTreeInstallation(
   int maxDepthPerSegment = 6,
   int tempC = 20,
   Set<String> accessories = const {},
+  bool autoCompliance = false,
 }) {
   final items = <LipskeyCatalogProduct>[];
   final qty = <String, int>{};
@@ -712,5 +769,6 @@ InstallationPlan buildTreeInstallation(
       qty[accSku] = n;
     }
   }
+  if (autoCompliance && items.isNotEmpty) _autoAddCompliance(items, qty, tempC);
   return InstallationPlan(items, gaps, qty, zones: zones);
 }

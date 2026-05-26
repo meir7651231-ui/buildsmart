@@ -53,6 +53,25 @@ String _roleLabel(LipskeyCatalogProduct p, bool anchor) {
   }
 }
 
+/// Suggests what kind of adapter/reducer to look for to bridge a gap.
+String _gapHint(InstallationGap g) {
+  final vA = kVerifiedSpecs[g.from.sku], vB = kVerifiedSpecs[g.to.sku];
+  if (vA == null || vB == null) {
+    return 'חפש מתאם בין ${g.from.categoryHe} ל-${g.to.categoryHe}';
+  }
+  final sizesA = vA.ends.map((e) => e.size).toSet();
+  final sizesB = vB.ends.map((e) => e.size).toSet();
+  final typesA = vA.ends.map((e) => e.type.name).toSet();
+  final typesB = vB.ends.map((e) => e.type.name).toSet();
+  if (sizesA.isNotEmpty && sizesB.isNotEmpty && sizesA.intersection(sizesB).isEmpty) {
+    return 'נדרש מתאם/בושינג ${sizesA.first}↔${sizesB.first} — חפש "מתאם" בקטלוג';
+  }
+  if (typesA.isNotEmpty && typesB.isNotEmpty && typesA.intersection(typesB).isEmpty) {
+    return 'שיטת חיבור שונה — חפש אדפטר ${typesA.first}↔${typesB.first}';
+  }
+  return 'אין נתיב מאומת — הוסף מוצר ביניים ידנית';
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 class InstallStudioScreen extends ConsumerStatefulWidget {
   const InstallStudioScreen({super.key});
@@ -377,10 +396,10 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       branches = branchTargets.length;
       outlets = manifoldOutlets(chain[mi]);
       plan = buildTreeInstallation(trunk, branchTargets,
-          tempC: temp, accessories: acc);
+          tempC: temp, accessories: acc, autoCompliance: true);
     } else {
       plan = buildInstallation([...chain],
-          tempC: temp, accessories: acc, loop: _loop);
+          tempC: temp, accessories: acc, loop: _loop, autoCompliance: true);
     }
     showModalBottomSheet<void>(
       context: context,
@@ -640,6 +659,8 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
         plan.items,
         ref.read(lineMaxTempProvider),
         ref.read(lineAccessoriesProvider));
+    final checkPassed = checklist.where((c) => c.satisfied).length;
+    final checkCritical = checklist.where((c) => !c.satisfied && c.severity == CheckSeverity.critical).length;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
@@ -681,6 +702,37 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                           '${branches > 0 ? ' · ⑂ $branches ענפים' : ''}'
                           '${plan.zones.isNotEmpty ? ' · ${plan.zones.length} אזורים' : ''}',
                           style: const TextStyle(color: _mute, fontSize: 12)),
+                      if (checklist.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Row(children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: checkCritical == 0
+                                    ? _accent.withOpacity(0.18)
+                                    : const Color(0xFFEF4444).withOpacity(0.18),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '$checkPassed/${checklist.length} ✓',
+                                style: TextStyle(
+                                  color: checkCritical == 0 ? _accent : const Color(0xFFEF4444),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                            if (checkCritical > 0) ...[
+                              const SizedBox(width: 6),
+                              Text('$checkCritical קריטי פתוח',
+                                  style: const TextStyle(
+                                      color: Color(0xFFEF4444),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700)),
+                            ],
+                          ]),
+                        ),
                       if (overCapacity)
                         Text('⚠️ $branches ענפים על מחלק $outlets-יציאות',
                             style: const TextStyle(
@@ -707,9 +759,18 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                   ),
                   for (final g in plan.gaps)
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(18, 2, 18, 2),
-                      child: Text('✗ ${g.from.nameHe} ↮ ${g.to.nameHe}',
-                          style: const TextStyle(color: _mute, fontSize: 12)),
+                      padding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('✗ ${g.from.nameHe} ↮ ${g.to.nameHe}',
+                              style: const TextStyle(color: _drain, fontSize: 12,
+                                  fontWeight: FontWeight.w600)),
+                          Text(_gapHint(g),
+                              style: const TextStyle(color: _mute, fontSize: 11,
+                                  height: 1.4)),
+                        ],
+                      ),
                     ),
                 ],
                 if (checklist.isNotEmpty) ...[
