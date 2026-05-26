@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  static ThemeData dark() => _build(Brightness.dark);
-  static ThemeData light() => _build(Brightness.light);
+  static ThemeData dark({bool highContrast = false}) =>
+      _build(Brightness.dark, highContrast: highContrast);
+  static ThemeData light({bool highContrast = false}) =>
+      _build(Brightness.light, highContrast: highContrast);
 
-  static ThemeData _build(Brightness b) {
+  static ThemeData _build(Brightness b, {bool highContrast = false}) {
     final isDark = b == Brightness.dark;
     final scheme = ColorScheme.fromSeed(
       seedColor: BsTokens.brand,
@@ -17,6 +19,10 @@ class AppTheme {
       primary: BsTokens.brand,
       surface: isDark ? BsTokens.cardDark : Colors.white,
     );
+    // High contrast pushes body text to pure black/white and darkens dividers.
+    final Color ink = highContrast
+        ? (isDark ? Colors.white : Colors.black)
+        : (isDark ? BsTokens.inkDark : Colors.black87);
 
     return ThemeData(
       useMaterial3: true,
@@ -25,18 +31,22 @@ class AppTheme {
       scaffoldBackgroundColor:
           isDark ? BsTokens.bgDark : const Color(0xFFF5F6FA),
       fontFamily: 'Heebo',
+      dividerColor: highContrast
+          ? (isDark ? Colors.white70 : Colors.black54)
+          : null,
       textTheme: TextTheme(
         bodyMedium: TextStyle(
-          color: isDark ? BsTokens.inkDark : Colors.black87,
+          color: ink,
           fontSize: 14,
+          fontWeight: highContrast ? FontWeight.w600 : null,
         ),
         labelLarge: TextStyle(
-          color: isDark ? BsTokens.inkDark : Colors.black87,
+          color: ink,
           fontSize: 13,
           fontWeight: FontWeight.w700,
         ),
         titleMedium: TextStyle(
-          color: isDark ? BsTokens.inkDark : Colors.black87,
+          color: ink,
           fontSize: 16,
           fontWeight: FontWeight.w700,
         ),

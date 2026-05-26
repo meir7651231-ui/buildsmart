@@ -3107,6 +3107,7 @@ class _ProductsHeader extends ConsumerWidget {
           ),
           const Spacer(),
           // Sort-by button on the opposite side of the header.
+          if (ref.watch(catalogSettingsProvider).quickFilterBar)
           PopupMenuButton<ProductSort>(
             tooltip: 'מיון לפי',
             color: Colors.white,

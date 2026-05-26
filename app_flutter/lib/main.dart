@@ -16,11 +16,13 @@ class BuildSmartApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(appSettingsProvider);
-    final textScale = switch (ref.watch(catalogSettingsProvider).textSize) {
+    final catalogSettings = ref.watch(catalogSettingsProvider);
+    final textScale = switch (catalogSettings.textSize) {
       CatalogTextSize.small => 0.9,
       CatalogTextSize.medium => 1.0,
       CatalogTextSize.large => 1.15,
     };
+    final highContrast = catalogSettings.highContrast;
     final locale = switch (settings.lang) {
       BsLang.he => const Locale('he', 'IL'),
       BsLang.ar => const Locale('ar'),
@@ -29,8 +31,8 @@ class BuildSmartApp extends ConsumerWidget {
     return MaterialApp(
       title: 'BuildSmart',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: AppTheme.light(highContrast: highContrast),
+      darkTheme: AppTheme.dark(highContrast: highContrast),
       themeMode:
           settings.theme == BsTheme.dark ? ThemeMode.dark : ThemeMode.light,
       locale: locale,
