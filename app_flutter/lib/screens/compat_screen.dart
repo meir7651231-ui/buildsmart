@@ -487,31 +487,69 @@ List<LipskeyCatalogProduct>? findShortestPath(
     return [from, to];
   }
 
-  // queue entries carry the path + the systems shared by all nodes so far.
-  final queue = Queue<(List<LipskeyCatalogProduct>, Set<WaterSystem>)>();
-  queue.add(([from], sysFrom));
-  final visited = <String>{from.sku, to.sku};
+  // Least-cost search (Dijkstra). Cost = 10·(parts) + (material transitions),
+  // so the result is always a shortest-part path (no regression on hop counts),
+  // and among equal-length paths the one with the fewest material changes wins —
+  // e.g. an all-copper reduction is preferred over copper→brass→copper.
+  final buckets =
+      SplayTreeMap<int, List<(List<LipskeyCatalogProduct>, Set<WaterSystem>)>>();
+  buckets[0] = [([from], sysFrom)];
+  final bestCost = <String, int>{from.sku: 0};
 
-  while (queue.isNotEmpty) {
-    final (path, sysAcc) = queue.removeFirst();
-    if (path.length >= maxDepth) continue;
+  while (buckets.isNotEmpty) {
+    final cost = buckets.firstKey()!;
+    final bucket = buckets[cost]!;
+    final (path, sysAcc) = bucket.removeLast();
+    if (bucket.isEmpty) buckets.remove(cost);
+
     final tail = path.last;
+    if (tail.sku == to.sku) return path; // popped goal at minimum cost
+    if (cost > (bestCost[tail.sku] ?? 1 << 30)) continue; // stale entry
+    if (path.length > maxDepth) continue;
+
     for (final next in compatibleWith(tail, tempC: tempC)) {
-      if (visited.contains(next.sku)) continue;
-      visited.add(next.sku);
+      final isTarget = next.sku == to.sku;
       // Auto-inserted connectors must be real flow connectors with verified
       // geometry — never accessories (hangers/clamps) or unverified loose matches.
-      if (!_usableConnector(next)) continue;
+      if (!isTarget && !_usableConnector(next)) continue;
       final sysNext = sysAcc.intersection(productSystems(next));
       if (sysNext.isEmpty) continue; // would cross systems — reject
-      final newPath = [...path, next];
-      if (canConnect(next, to) && sysNext.intersection(sysTo).isNotEmpty) {
-        return [...newPath, to];
-      }
-      queue.add((newPath, sysNext));
+      if (isTarget && sysNext.intersection(sysTo).isEmpty) continue;
+      final newCost = cost + _edgeCost(tail, next);
+      if (newCost >= (bestCost[next.sku] ?? 1 << 30)) continue;
+      bestCost[next.sku] = newCost;
+      buckets.putIfAbsent(newCost, () => []).add(([...path, next], sysNext));
     }
   }
   return null;
+}
+
+/// Pure connector/adapter categories — nipples, bushings, couplers, elbows,
+/// gaskets, pipe segments. These are the parts a plumber adds *only* to bridge a
+/// gap, so they're the right things to auto-insert. Functional devices (valves,
+/// manifolds, shower arms, pumps) are NOT here: they belong in a line only when
+/// the installer explicitly anchors them, never as filler.
+const _fittingCats = {
+  'אביזרי נחושת', 'אביזרי תבריג', 'מחברי HDPE', 'מחברי NTM', 'אביזרי שקע-תקע',
+  'ברכיים', 'מסעפים וחיבורי אסלה', 'אטמים ופקקים', 'מצמדים וצינורות', 'צינורות',
+  'צינורות אפורות', 'צינורות PP', 'אביזרי חיבור', 'סטי הידוק וחיבורים',
+  'פקקים וצינורות', 'זקיף אסלה',
+};
+
+bool _isFitting(LipskeyCatalogProduct p) => _fittingCats.contains(p.categoryHe);
+
+/// Edge cost for the path search. Primary term (10·parts) keeps the result a
+/// fewest-parts path. A large penalty steers gap-filling through real fittings
+/// instead of functional devices (no manifold/shower-arm used as a "connector").
+/// A small material-transition term breaks remaining ties toward one material
+/// family. The penalty on the final edge into a device target is constant across
+/// all paths, so it never distorts which path is chosen.
+int _edgeCost(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
+  final ma = kVerifiedSpecs[a.sku]?.material;
+  final mb = kVerifiedSpecs[b.sku]?.material;
+  final transition = (ma != null && mb != null && ma != mb) ? 1 : 0;
+  final deviceFiller = _isFitting(b) ? 0 : 50;
+  return 10 + deviceFiller + transition;
 }
 
 /// One gap between two anchors in a built installation.
