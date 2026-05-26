@@ -1310,6 +1310,56 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '4502A': VerifiedSpec(sku: '4502A', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
   '4501A': VerifiedSpec(sku: '4501A', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
 
+  // ── כיסויים (drain cover accessories) ────────────────────────────────────
+  '610911': VerifiedSpec(sku: '610911', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
+  '635736': VerifiedSpec(sku: '635736', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
+  '122974': VerifiedSpec(sku: '122974', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '610918': VerifiedSpec(sku: '610918', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
+  '635737': VerifiedSpec(sku: '635737', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
+  '610921': VerifiedSpec(sku: '610921', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
+  '610933': VerifiedSpec(sku: '610933', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
+  '610906': VerifiedSpec(sku: '610906', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
+  '635735': VerifiedSpec(sku: '635735', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
+  '661360': VerifiedSpec(sku: '661360', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
+  '610920': VerifiedSpec(sku: '610920', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
+
+  // ── עוגנים ובנדים — manifold bends ───────────────────────────────────────
+  '7ISR0002': VerifiedSpec(sku: '7ISR0002', material: _brass, maxTempC: 90, ends: [_bf('3/4"'), _bf('3/4"')]),
+  '4000':     VerifiedSpec(sku: '4000',     material: _brass, maxTempC: 90, ends: [_bf('1"'),   _bf('1"')]),
+  '7ISR0001': VerifiedSpec(sku: '7ISR0001', material: _brass, maxTempC: 90, ends: [_bf('3/4"'), _bf('3/4"')]),
+  '4003':     VerifiedSpec(sku: '4003',     material: _brass, maxTempC: 90, ends: [_bf('1"'),   _bf('1"')]),
+
+  // ── ציוד גן (garden hoses and connectors) ────────────────────────────────
+  '10361315': VerifiedSpec(sku: '10361315', material: 'PVC', maxTempC: 40, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '10361320': VerifiedSpec(sku: '10361320', material: 'PVC', maxTempC: 40, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '10361325': VerifiedSpec(sku: '10361325', material: 'PVC', maxTempC: 40, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '10361330': VerifiedSpec(sku: '10361330', material: 'PVC', maxTempC: 40, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '10361350': VerifiedSpec(sku: '10361350', material: 'PVC', maxTempC: 40, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '10361425': VerifiedSpec(sku: '10361425', material: 'PVC', maxTempC: 40, ends: [_bf('3/4"'), _bf('3/4"')]),
+  '10361426': VerifiedSpec(sku: '10361426', material: 'PVC', maxTempC: 40, ends: [_bf('3/4"'), _bf('3/4"')]),
+  '77000022': VerifiedSpec(sku: '77000022', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  '77000030': VerifiedSpec(sku: '77000030', material: 'PVC', maxTempC: 40, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77000010': VerifiedSpec(sku: '77000010', material: _brass, maxTempC: 90, ends: [_bm('1/2"')]),
+  '77000011': VerifiedSpec(sku: '77000011', material: _brass, maxTempC: 90, ends: [_bm('3/4"')]),
+  '77000012': VerifiedSpec(sku: '77000012', material: _brass, maxTempC: 90, ends: [_bm('1"'), _bf('3/4"')]),
+  '77000013': VerifiedSpec(sku: '77000013', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77000024': VerifiedSpec(sku: '77000024', material: _brass, maxTempC: 90, ends: [_bf('3/4"'), _bf('3/4"')]),
+
+  // ── ערכות רחצה (complete shower sets) ────────────────────────────────────
+  '778582': VerifiedSpec(sku: '778582', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '778581': VerifiedSpec(sku: '778581', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '778580': VerifiedSpec(sku: '778580', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+
+  // ── אביזרי חיבור / חלקים סניטריים ────────────────────────────────────────
+  '77772606': VerifiedSpec(sku: '77772606', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '686366':   VerifiedSpec(sku: '686366',   material: _brass, maxTempC: 90, ends: [_bf('3/8"'), _bf('1/2"')]),
+  '642102':   VerifiedSpec(sku: '642102',   material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+
+  // ── צינורות גמישים קטנים (small flexible pipes) ──────────────────────────
+  '10411001': VerifiedSpec(sku: '10411001', material: 'PVC', maxTempC: 40, ends: [_px('13'), _px('13')]),
+  '10411003': VerifiedSpec(sku: '10411003', material: 'PVC', maxTempC: 40, ends: [_px('13'), _px('13')]),
+  '9899':     VerifiedSpec(sku: '9899',     material: 'PVC', maxTempC: 40, ends: [_c('16'), _c('16')]),
+
   // ── אל חזור ביוב (Drain Backflow Preventers) ──────────────────────────────
   '777D0481': VerifiedSpec(sku: '777D0481', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
   '777D0482': VerifiedSpec(sku: '777D0482', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
