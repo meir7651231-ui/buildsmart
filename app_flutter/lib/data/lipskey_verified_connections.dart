@@ -1310,6 +1310,11 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '4502A': VerifiedSpec(sku: '4502A', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
   '4501A': VerifiedSpec(sku: '4501A', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
 
+  // ── אסלות וכיורים (toilets — supply ½" + drain DN110) ────────────────────
+  '77771006': VerifiedSpec(sku: '77771006', material: 'ceramic', maxTempC: 90, ends: [_bf('1/2"'), _c('110')]),
+  '77771010': VerifiedSpec(sku: '77771010', material: 'ceramic', maxTempC: 90, ends: [_bf('1/2"'), _c('110')]),
+  '77771008': VerifiedSpec(sku: '77771008', material: 'ceramic', maxTempC: 90, ends: [_bf('1/2"'), _c('110')]),
+
   // ── כיסויים (drain cover accessories) ────────────────────────────────────
   '610911': VerifiedSpec(sku: '610911', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
   '635736': VerifiedSpec(sku: '635736', material: 'PVC', maxTempC: 50, ends: [_do('4"')]),
