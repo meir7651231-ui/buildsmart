@@ -202,7 +202,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v3.98 · 26.5.26 · חיווט קטלוג + יישור + כתיבה חופשית',
+                          'v3.99 · 26.5.26 · חיווט search + menu dials',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -220,15 +220,17 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
-        // Search icon — appears when the active tab's header is scrolled away.
-        if (ref.watch(tabHeaderHiddenProvider))
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black54),
-            tooltip: 'חיפוש',
-            onPressed: () {
+        // Search icon — always visible; also scrolls header back when hidden.
+        IconButton(
+          icon: const Icon(Icons.search, color: Colors.black54),
+          tooltip: 'חיפוש',
+          onPressed: () {
+            if (ref.read(tabHeaderHiddenProvider)) {
               ref.read(tabHeaderHiddenProvider.notifier).state = false;
-            },
-          ),
+            }
+            _toggle(ref, OpenDial.search);
+          },
+        ),
         IconButton(
           icon: const Icon(Icons.photo_camera_outlined, color: Colors.black54),
           tooltip: 'מצלמה',
@@ -242,6 +244,12 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
           const _NotificationsMenuButton()
         else
           const _StoreMenuButton(),
+        // Menu dial trigger — global navigation (בית · הפרויקטים · רכש · הגדרות).
+        IconButton(
+          icon: const Icon(Icons.menu, color: Colors.black54),
+          tooltip: 'תפריט',
+          onPressed: () => _toggle(ref, OpenDial.menu),
+        ),
       ],
     );
   }
