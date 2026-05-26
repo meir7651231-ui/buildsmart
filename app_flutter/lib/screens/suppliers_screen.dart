@@ -12,14 +12,17 @@ class SuppliersScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0D0D1A),
+        backgroundColor: const Color(0xFFF5F6FA),
         appBar: AppBar(
-          backgroundColor: const Color(0xFF0D0D1A),
-          foregroundColor: Colors.white,
+          backgroundColor: const Color(0xFFFFFFFF),
+          foregroundColor: const Color(0xFF1A1A1A),
           elevation: 0,
           title: const Text(
             'ספקים ומותגים',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Color(0xFF1A1A1A),
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         body: ListView(
@@ -58,10 +61,10 @@ class _SupplierTile extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: const Color(0xFFFFFFFF),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: const Color(0xFF3D5A80).withOpacity(0.5),
+            color: const Color(0xFFEEEEEE),
             width: 0.5,
           ),
         ),
@@ -71,7 +74,7 @@ class _SupplierTile extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: const BoxDecoration(
-                color: Color(0xFF13132A),
+                color: Color(0xFFF5F5F5),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
@@ -85,7 +88,7 @@ class _SupplierTile extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF1A1A1A),
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),

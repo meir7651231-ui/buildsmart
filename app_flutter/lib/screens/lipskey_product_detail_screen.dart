@@ -96,7 +96,7 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFF080815),
+        backgroundColor: const Color(0xFFF5F6FA),
         extendBodyBehindAppBar: true,
         appBar: _appBar(context),
         body: FadeTransition(
@@ -139,20 +139,20 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A1A)),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(p.nameHe,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
             overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(
             icon: Icon(Icons.info_outline,
-                color: _specOpen ? const Color(0xFF64FFDA) : Colors.white60),
+                color: _specOpen ? const Color(0xFF64FFDA) : const Color(0xFF888888)),
             onPressed: _toggleSpec,
           ),
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white60),
+            icon: const Icon(Icons.refresh, color: Color(0xFF888888)),
             onPressed: _resetView,
           ),
         ],
@@ -248,9 +248,9 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
         width: 280,
         height: 280,
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: const Color(0xFFFFFFFF),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFF3D5A80)),
+          border: Border.all(color: const Color(0xFFEEEEEE)),
           boxShadow: [
             BoxShadow(color: const Color(0xFF3D5A80).withOpacity(0.3), blurRadius: 30),
           ],
@@ -263,7 +263,7 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
         width: 240,
         height: 240,
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: const Color(0xFFFFFFFF),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Center(child: Text(emoji, style: const TextStyle(fontSize: 80))),
@@ -294,8 +294,8 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
       child: Container(
         height: h,
         decoration: const BoxDecoration(
-          color: Color(0xFF13132A),
-          border: Border(top: BorderSide(color: Color(0xFF3D5A80))),
+          color: Color(0xFFFFFFFF),
+          border: Border(top: BorderSide(color: Color(0xFFEEEEEE))),
         ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
@@ -354,7 +354,7 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
           const SizedBox(width: 6),
           Expanded(
             child: Text(p.categoryHe,
-                style: TextStyle(color: Colors.white60, fontSize: 12 * ts)),
+                style: TextStyle(color: const Color(0xFF888888), fontSize: 12 * ts)),
           ),
         ]),
 
@@ -363,21 +363,21 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
         // Name
         Text(p.nameHe,
             style: TextStyle(
-              color: Colors.white,
+              color: const Color(0xFF1A1A1A),
               fontSize: 14 * ts,
               fontWeight: FontWeight.w700,
             )),
         if (p.nameEn.isNotEmpty)
           Text(p.nameEn,
               style: TextStyle(
-                color: Colors.white38,
+                color: const Color(0xFF888888),
                 fontSize: 11 * ts,
                 fontStyle: FontStyle.italic,
               )),
 
         if (!compact) ...[
           const SizedBox(height: 14),
-          const Divider(color: Colors.white12, height: 1),
+          const Divider(color: Color(0xFFEEEEEE), height: 1),
           const SizedBox(height: 10),
 
           if (p.color != null) _row('🎨', 'צבע', p.color!),
@@ -402,7 +402,7 @@ class _LipskeyProductDetailScreenState extends State<LipskeyProductDetailScreen>
           const SizedBox(width: 8),
           Text(label, style: const TextStyle(color: Colors.black38, fontSize: 13)),
           const Spacer(),
-          Text(value, style: const TextStyle(color: Colors.white, fontSize: 13)),
+          Text(value, style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 13)),
         ]),
       );
 }
