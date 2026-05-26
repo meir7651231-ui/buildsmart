@@ -10,6 +10,7 @@ import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/search_dial_widget.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/screens/store_settings_screen.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -199,7 +200,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                       SizedBox(width: 4),
                       Text(
-                        'v3.48 · 26.5.26 · מסך הכל + badges',
+                        'v3.49 · 26.5.26 · הגדרות פעילות',
                         style: TextStyle(
                           color: Color(0xFF4CAF50),
                           fontSize: 10,
@@ -735,20 +736,30 @@ class _NewChatSheet extends StatelessWidget {
 
 /// Pulsing green status shown in the app-bar logo area (e.g. when the
 /// "עץ חכם" section is active).
-class _PulsingStatus extends StatefulWidget {
+class _PulsingStatus extends ConsumerStatefulWidget {
   const _PulsingStatus({required this.text});
   final String text;
 
   @override
-  State<_PulsingStatus> createState() => _PulsingStatusState();
+  ConsumerState<_PulsingStatus> createState() => _PulsingStatusState();
 }
 
-class _PulsingStatusState extends State<_PulsingStatus>
+class _PulsingStatusState extends ConsumerState<_PulsingStatus>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 850),
-  )..repeat(reverse: true);
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (ref.read(catalogSettingsProvider).reducedMotion) {
+      _ctrl.value = 1;
+    } else {
+      _ctrl.repeat(reverse: true);
+    }
+  }
 
   @override
   void dispose() {

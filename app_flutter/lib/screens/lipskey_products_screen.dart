@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -189,9 +190,10 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final compact = ref.watch(catalogSettingsProvider).compactMode;
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      constraints: const BoxConstraints(minHeight: 138),
+      margin: EdgeInsets.symmetric(horizontal: 12, vertical: compact ? 3 : 6),
+      constraints: BoxConstraints(minHeight: compact ? 104 : 138),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
@@ -225,13 +227,24 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
 
   // ── image (tap = fullscreen) + ✓ in-cart badge ───────────────────────────
   Widget _image() {
+    final sz = ref.watch(catalogSettingsProvider).imageSize;
+    final w = switch (sz) {
+      CatalogImageSize.small => 64.0,
+      CatalogImageSize.medium => 88.0,
+      CatalogImageSize.large => 112.0,
+    };
+    final h = switch (sz) {
+      CatalogImageSize.small => 60.0,
+      CatalogImageSize.medium => 84.0,
+      CatalogImageSize.large => 106.0,
+    };
     return GestureDetector(
       onTap: _openImage,
       child: ClipRRect(
         borderRadius:
             const BorderRadius.horizontal(right: Radius.circular(14)),
         child: SizedBox(
-          width: 88,
+          width: w,
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -240,7 +253,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                 alignment: Alignment.center,
                 child: p.imageAsset != null
                     ? Image.asset(p.imageAsset!,
-                        height: 84,
+                        height: h,
                         fit: BoxFit.contain,
                         errorBuilder: (_, __, ___) => Text(p.typeEmoji,
                             style: const TextStyle(fontSize: 36)))

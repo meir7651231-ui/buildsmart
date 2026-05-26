@@ -4908,15 +4908,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
 }
 
 // Matching accessories that "explode" in as chips when a stage is tapped.
-class _ExplodeChips extends StatefulWidget {
+class _ExplodeChips extends ConsumerStatefulWidget {
   const _ExplodeChips({super.key, required this.items});
   final List<SmartAcc> items;
 
   @override
-  State<_ExplodeChips> createState() => _ExplodeChipsState();
+  ConsumerState<_ExplodeChips> createState() => _ExplodeChipsState();
 }
 
-class _ExplodeChipsState extends State<_ExplodeChips>
+class _ExplodeChipsState extends ConsumerState<_ExplodeChips>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late List<Animation<double>> _anims;
@@ -4937,7 +4937,11 @@ class _ExplodeChipsState extends State<_ExplodeChips>
             curve: Curves.elasticOut),
       );
     });
-    _ctrl.forward();
+    if (ref.read(catalogSettingsProvider).reducedMotion) {
+      _ctrl.value = 1;
+    } else {
+      _ctrl.forward();
+    }
   }
 
   @override
@@ -4994,7 +4998,7 @@ class _ExplodeChipsState extends State<_ExplodeChips>
 // Mirrors the prototype's tdiagram — gradient card, 4 stages, amber title dot.
 // Each stage pops in 180 ms after the previous (elasticOut spring).
 
-class _DiagramFlow extends StatefulWidget {
+class _DiagramFlow extends ConsumerStatefulWidget {
   const _DiagramFlow({
     required this.product,
     this.activeStage,
@@ -5005,10 +5009,10 @@ class _DiagramFlow extends StatefulWidget {
   final void Function(int)? onStageTap;
 
   @override
-  State<_DiagramFlow> createState() => _DiagramFlowState();
+  ConsumerState<_DiagramFlow> createState() => _DiagramFlowState();
 }
 
-class _DiagramFlowState extends State<_DiagramFlow>
+class _DiagramFlowState extends ConsumerState<_DiagramFlow>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final List<Animation<double>> _anims;
@@ -5029,7 +5033,11 @@ class _DiagramFlowState extends State<_DiagramFlow>
         curve: Interval(start, end, curve: Curves.elasticOut),
       );
     });
-    _ctrl.forward();
+    if (ref.read(catalogSettingsProvider).reducedMotion) {
+      _ctrl.value = 1;
+    } else {
+      _ctrl.forward();
+    }
   }
 
   @override
