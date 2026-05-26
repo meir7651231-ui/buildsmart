@@ -8,6 +8,8 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/logic/install_engine.dart';
+import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -66,23 +68,28 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     final temp = ref.watch(lineMaxTempProvider);
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(0, -0.4),
-            radius: 1.3,
-            colors: [_void1, _void0],
+      child: Scaffold(
+        backgroundColor: _void0,
+        body: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(0, -0.4),
+              radius: 1.3,
+              colors: [_void1, _void0],
+            ),
           ),
-        ),
-        child: AnimatedBuilder(
-          animation: _flow,
-          builder: (_, __) => CustomPaint(
-            painter: _BlueprintPainter(_flow.value),
-            child: Column(children: [
-              _header(chain, temp),
-              Expanded(child: _canvas(chain)),
-              _dock(chain, temp),
-            ]),
+          child: SafeArea(
+            child: AnimatedBuilder(
+              animation: _flow,
+              builder: (_, __) => CustomPaint(
+                painter: _BlueprintPainter(_flow.value),
+                child: Column(children: [
+                  _header(chain, temp),
+                  Expanded(child: _canvas(chain)),
+                  _dock(chain, temp),
+                ]),
+              ),
+            ),
           ),
         ),
       ),
@@ -92,8 +99,16 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   // ── header: title + live system legend ──────────────────────────────────────
   Widget _header(List<LipskeyCatalogProduct> chain, int temp) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 6),
+      padding: const EdgeInsets.fromLTRB(14, 12, 18, 6),
       child: Row(children: [
+        if (Navigator.canPop(context))
+          GestureDetector(
+            onTap: () => Navigator.maybePop(context),
+            child: const Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: Icon(Icons.arrow_forward, color: _ink, size: 22),
+            ),
+          ),
         Container(
           width: 34, height: 34,
           decoration: BoxDecoration(
@@ -627,34 +642,85 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
             Padding(
               padding: EdgeInsets.fromLTRB(
                   14, 10, 14, 12 + MediaQuery.of(context).padding.bottom),
-              child: GestureDetector(
-                onTap: () {
-                  ref.read(chainProvider.notifier).state = plan.items;
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  decoration: BoxDecoration(
-                    gradient:
-                        const LinearGradient(colors: [_accent, Color(0xFF059669)]),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(color: _accent.withOpacity(0.4), blurRadius: 16)
-                    ],
+              child: Row(children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      ref.read(chainProvider.notifier).state = plan.items;
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: _panel,
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(color: _mute.withOpacity(0.4)),
+                      ),
+                      child: const Text('החל על הקו',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: _ink,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700)),
+                    ),
                   ),
-                  child: Text('החל על הקו (${plan.totalPieces} יחידות)',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900)),
                 ),
-              ),
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 2,
+                  child: GestureDetector(
+                    onTap: () => _addToCart(context, ref),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                            colors: [_accent, Color(0xFF059669)]),
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(color: _accent.withOpacity(0.4), blurRadius: 16)
+                        ],
+                      ),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.add_shopping_cart,
+                                color: Colors.white, size: 18),
+                            const SizedBox(width: 8),
+                            Text('הוסף ${plan.items.length} לעגלה',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w900)),
+                          ]),
+                    ),
+                  ),
+                ),
+              ]),
             ),
           ]),
         ),
       ),
     );
+  }
+
+  // Adds every BOM line to the cart with its quantity (pipes by ceil(metres)).
+  void _addToCart(BuildContext context, WidgetRef ref) {
+    final cart = ref.read(smartCartProvider.notifier);
+    for (final p in widget.plan.items) {
+      final qty =
+          isPipe(p) ? _metersOf(p.sku).ceil() : widget.plan.qtyOf(p.sku);
+      cart.add(SmartCartLine(
+        productKey: p.sku,
+        productName: p.nameHe,
+        productEmoji: p.typeEmoji,
+        brandName: p.categoryHe,
+        brandPrice: 0,
+        productQty: qty,
+        accessories: const [],
+      ));
+    }
+    Navigator.pop(context);
+    showToast(context, 'נוסף לעגלה: ${widget.plan.items.length} פריטים');
   }
 
   Widget _bomRow(LipskeyCatalogProduct p, int n, bool anchor, int qty) {
