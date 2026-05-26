@@ -580,15 +580,25 @@ class InstallationGap {
 
 /// Result of auto-completing an installation from ordered anchor products.
 class InstallationPlan {
-  const InstallationPlan(this.items, this.gaps);
+  const InstallationPlan(this.items, this.gaps, this.quantities);
 
-  /// The full ordered component list (anchors + auto-filled connectors).
+  /// Distinct components in first-appearance order (anchors + connectors).
   final List<LipskeyCatalogProduct> items;
 
   /// Anchor pairs the engine could not connect within the catalog.
   final List<InstallationGap> gaps;
 
+  /// How many physical units of each SKU the line needs (a connector reused
+  /// across two joints counts twice) — turns the list into a shopping list.
+  final Map<String, int> quantities;
+
   bool get isComplete => gaps.isEmpty;
+
+  /// Total number of physical pieces to order.
+  int get totalPieces =>
+      quantities.values.fold(0, (sum, q) => sum + q);
+
+  int qtyOf(String sku) => quantities[sku] ?? 1;
 }
 
 /// Auto-complete a full installation from an ordered list of anchor products
@@ -602,11 +612,16 @@ InstallationPlan buildInstallation(
   int maxDepthPerSegment = 6,
   int tempC = 20,
 }) {
-  if (anchors.isEmpty) return const InstallationPlan([], []);
-  final items = <LipskeyCatalogProduct>[anchors.first];
+  if (anchors.isEmpty) return const InstallationPlan([], [], {});
+  final items = <LipskeyCatalogProduct>[];
+  final qty = <String, int>{};
   final gaps = <InstallationGap>[];
-  final seen = <String>{anchors.first.sku};
+  void add(LipskeyCatalogProduct p) {
+    if (!qty.containsKey(p.sku)) items.add(p); // first appearance → display order
+    qty[p.sku] = (qty[p.sku] ?? 0) + 1; // every physical occurrence
+  }
 
+  add(anchors.first);
   for (var i = 0; i < anchors.length - 1; i++) {
     final a = anchors[i], b = anchors[i + 1];
     final seg = findShortestPath(a, b,
@@ -614,15 +629,15 @@ InstallationPlan buildInstallation(
     if (seg == null) {
       // No connector path — record the gap and continue from the next anchor.
       gaps.add(InstallationGap(a, b));
-      if (seen.add(b.sku)) items.add(b);
+      add(b);
       continue;
     }
-    // seg = [a, ...connectors..., b]; a is already in items, so skip it.
+    // seg = [a, ...connectors..., b]; a is the shared joint already counted.
     for (final p in seg.skip(1)) {
-      if (seen.add(p.sku)) items.add(p);
+      add(p);
     }
   }
-  return InstallationPlan(items, gaps);
+  return InstallationPlan(items, gaps, qty);
 }
 
 List<LipskeyCatalogProduct> _filtered(WidgetRef ref) {
@@ -2123,11 +2138,11 @@ class _InstallationResultSheet extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     complete
-                        ? 'התקנה שלמה — ${plan.items.length} פריטים'
-                        : 'חסרים ${plan.gaps.length} חיבורים — ${plan.items.length} פריטים',
+                        ? 'התקנה שלמה — ${plan.items.length} סוגים · ${plan.totalPieces} יח׳'
+                        : 'חסרים ${plan.gaps.length} חיבורים — ${plan.items.length} סוגים · ${plan.totalPieces} יח׳',
                     style: TextStyle(
                         color: complete ? _title : const Color(0xFFEA580C),
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w800),
                   ),
                 ),
@@ -2138,7 +2153,8 @@ class _InstallationResultSheet extends ConsumerWidget {
               child: ListView(controller: ctrl, children: [
                 for (var i = 0; i < plan.items.length; i++)
                   _bomRow(plan.items[i], i + 1,
-                      isAnchor: anchorSkus.contains(plan.items[i].sku)),
+                      isAnchor: anchorSkus.contains(plan.items[i].sku),
+                      qty: plan.qtyOf(plan.items[i].sku)),
                 if (plan.gaps.isNotEmpty) ...[
                   const Divider(height: 1, color: _divider),
                   Padding(
@@ -2187,7 +2203,8 @@ class _InstallationResultSheet extends ConsumerWidget {
     );
   }
 
-  Widget _bomRow(LipskeyCatalogProduct p, int n, {required bool isAnchor}) {
+  Widget _bomRow(LipskeyCatalogProduct p, int n,
+      {required bool isAnchor, required int qty}) {
     final sys = productSystems(p)
         .map((s) => s == WaterSystem.supply ? 'אספקה' : 'ניקוז')
         .join('+');
@@ -2214,6 +2231,15 @@ class _InstallationResultSheet extends ConsumerWidget {
             Text('${isAnchor ? '★ עוגן' : 'מחבר'} · $sys · ${p.sku}',
                 style: const TextStyle(color: _sub, fontSize: 11)),
           ]),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+          decoration: BoxDecoration(
+              color: _surface, borderRadius: BorderRadius.circular(10)),
+          child: Text('× $qty',
+              style: const TextStyle(
+                  color: _title, fontSize: 13, fontWeight: FontWeight.w800)),
         ),
       ]),
     );
