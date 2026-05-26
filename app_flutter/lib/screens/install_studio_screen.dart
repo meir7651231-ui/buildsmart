@@ -11,6 +11,7 @@ import 'package:buildsmart/logic/install_engine.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ── palette ───────────────────────────────────────────────────────────────────
@@ -70,6 +71,90 @@ String _gapHint(InstallationGap g) {
     return 'שיטת חיבור שונה — חפש אדפטר ${typesA.first}↔${typesB.first}';
   }
   return 'אין נתיב מאומת — הוסף מוצר ביניים ידנית';
+}
+
+// ── picker categories ─────────────────────────────────────────────────────────
+class _PickerCategory {
+  const _PickerCategory(this.emoji, this.label, this.cats);
+  final String emoji;
+  final String label;
+  final Set<String>? cats; // null = everything else (catch-all)
+}
+
+const _kCats = [
+  _PickerCategory('🚰', 'ברז / כיור',
+      {'ברזי כיור', 'ברזי מטבח', 'ברזי מעבר', 'ברזי קיר', 'ברזי ניל',
+       'נקודות מים', 'ברזים', 'אביזרי ברזים', 'ברזי דלי', 'דיורים ופיות'}),
+  _PickerCategory('🚿', 'מקלחת / אמבטיה',
+      {'ברזי מקלחת', 'ראשי מקלחת', 'זרועות דוש', 'מזלפי יד',
+       'ברזי אמבטיה', 'ערכות רחצה', 'מערכות אמבטיה',
+       'אביזרי מקלחת', 'אביזרי חדר רחצה', 'צינורות מקלחת'}),
+  _PickerCategory('🪠', 'אסלה / ניקוז',
+      {'אסלות וכיורים', 'מושבי אסלה', 'אביזרי אסלה', 'זקיף אסלה',
+       'מסעפים וחיבורי אסלה', 'מחסומי רצפה', 'מחסומים גלויים',
+       'מאספי רצפה', 'מאספים וקולטים', 'סיפונים', 'תעלות ניקוז',
+       'אביזרי ביוב', 'ניקוז גג', 'כיסויים', 'מכסים ורשתות'}),
+  _PickerCategory('🔥', 'מים חמים', {'מים חמים ו-recirculation'}),
+  _PickerCategory('🌿', 'גן', {'ברזי גן', 'ציוד גן', 'ברזי אמבטיה'}),
+  _PickerCategory('🔧', 'חיבורים', null), // null = catch-all
+];
+
+bool _inCategory(_PickerCategory cat, LipskeyCatalogProduct p) {
+  if (cat.cats == null) {
+    // catch-all: belongs here if NOT in any named category
+    return !_kCats
+        .where((c) => c.cats != null)
+        .any((c) => c.cats!.contains(p.categoryHe));
+  }
+  return cat.cats!.contains(p.categoryHe);
+}
+
+// ── plain-language compliance labels ─────────────────────────────────────────
+// Maps engine-level technical labels to user-facing Hebrew without jargon.
+String _simpleLabel(String label) {
+  if (label.startsWith('ברז ניתוק ×3')) return '3 ברזי ניתוק (כניסה + משאבה + מניפולד)';
+  if (label.startsWith('ברז ניתוק')) return 'ברז ניתוק לתחזוקה';
+  if (label.contains('אל-חזור')) return 'מניעת זרימה הפוכה';
+  if (label.contains('מאזן / TRV')) return 'איזון לולאת המים החמים';
+  if (label.contains('מפוח')) return 'פיזור בועות אוויר';
+  if (label.contains('דיאלקטרי')) return 'מגן חלודה (מתכות שונות)';
+  if (label.contains('PEX')) return 'פיצוי התפשטות לצינור PEX';
+  if (label.contains('PRV') || label.contains('פורק לחץ')) return 'שסתום בטיחות לחץ';
+  if (label.contains('Bladder') || label.contains('כלי התפשטות')) return 'מיכל פיצוי התפשטות מים';
+  if (label.contains('מסנן')) return 'מסנן להגנת המשאבה';
+  if (label.contains('גמיש')) return 'בולם רעידות המשאבה';
+  if (label.contains('TMTV') || label.contains('anti-scald')) return 'מגן כוויות בכל ברז';
+  if (label.contains('מאזן לכל ענף') || label.contains('Balancing')) return 'איזון לחץ בין ענפים';
+  if (label.contains('Legionella') && label.contains('bypass')) return 'מניעת חיידק לגיונלה';
+  if (label.contains('דיגום') || label.contains('sampling')) return 'נקודת בדיקת מים';
+  if (label.contains('בידוד תרמי')) return 'בידוד חום על הצנרת';
+  if (label.contains('חבקים')) return 'חבקים וקיבוע צנרת';
+  if (label.contains('איטום')) return 'איטום חיבורים';
+  return label;
+}
+
+String _simpleWhy(String why) {
+  const map = {
+    'בידוד אזורי לתחזוקה': 'מאפשר לסגור חלק אחד מהקו לתחזוקה',
+    'מונע זרימה הפוכה בלולאה': 'מונע מים מלזרום לאחור',
+    'איזון הלולאה': 'שהמים יזרמו אחיד בכל הלולאה',
+    'פליטת אוויר בלולאה': 'מוציא בועות אוויר שגורמות לרעש ואי-נוחות',
+    'הפרדה גלוונית בין מתכות': 'מונע חלודה כשמתכות שונות נוגעות זו בזו',
+    'PEX מתרחב בחום': 'צינור PEX גדל בחום — נדרש מפצה למניעת עיוות',
+    'מערכת חמה סגורה': 'ללא שסתום — לחץ החום עלול לפוצץ את הצנרת',
+    'ממברנת EPDM מפרידה N₂ ממים — חובה בכל קו חם סגור':
+        'בולם את ההתפשטות של המים החמים בתוך הצנרת',
+    'מונע חלקיקים מלפגוע במשאבה': 'שומר על המשאבה מנקיונית ומאריך חייה',
+    'מבודד רעידות המשאבה מהצנרת': 'מונע רעש ורטט בצנרת מהמשאבה',
+    'מגביל T≤45°C ביציאה — anti-scald': 'מגביל חום ל-45°C למניעת כוויות',
+    'מאזן לחץ בין ענפים במערכת מסחרית': 'שכל ברז יקבל לחץ שווה',
+    'פסטור 70°C/3 דקות אחת לשבוע': 'הורג חיידק הלגיונלה בטמפרטורה גבוהה',
+    'נדרש לבדיקות מים תקתיות': 'לבדיקות חובה על איכות המים',
+    'הפסדי חום + סכנת כוויות': 'מונע קירור מהיר ומגן מפני כוויות מגע',
+    'קיבוע ושיפוע': 'מחזיק הצנרת ומאפשר ניקוז תקין',
+    'אטימות כל מעבר': 'חיבורים ללא איטום — דולפים',
+  };
+  return map[why] ?? why;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -891,10 +976,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
               child: Row(children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: () {
-                      ref.read(chainProvider.notifier).state = plan.items;
-                      Navigator.pop(context);
-                    },
+                    onTap: () => _copyBom(context, plan),
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
@@ -902,12 +984,18 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                         borderRadius: BorderRadius.circular(15),
                         border: Border.all(color: _mute.withOpacity(0.4)),
                       ),
-                      child: const Text('עדכן תצוגה',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: _ink,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700)),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.copy_all, color: _mute, size: 16),
+                          SizedBox(width: 6),
+                          Text('העתק רשימה',
+                              style: TextStyle(
+                                  color: _ink,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700)),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -967,6 +1055,32 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     }
     Navigator.pop(context);
     showToast(context, 'נוסף לעגלה: ${widget.plan.items.length} פריטים');
+  }
+
+  void _copyBom(BuildContext context, InstallationPlan plan) {
+    final buf = StringBuffer();
+    buf.writeln('רשימת קנייה — BuildSmart 🔧');
+    buf.writeln('──────────────────────────');
+    if (plan.zones.isNotEmpty) {
+      final bySkU = {for (final p in plan.items) p.sku: p};
+      for (final entry in plan.zones.entries) {
+        buf.writeln('▸ ${entry.key}');
+        for (final sku in entry.value) {
+          final p = bySkU[sku];
+          if (p == null) continue;
+          final qty = plan.qtyOf(sku);
+          buf.writeln('  • ${p.nameHe}  ×$qty');
+        }
+      }
+    } else {
+      for (final p in plan.items) {
+        buf.writeln('• ${p.nameHe}  ×${plan.qtyOf(p.sku)}');
+      }
+    }
+    buf.writeln('──────────────────────────');
+    buf.writeln('סה"כ: ${plan.items.length} פריטים · ${plan.totalPieces} יחידות');
+    Clipboard.setData(ClipboardData(text: buf.toString()));
+    showToast(context, '📋 רשימה הועתקה ללוח');
   }
 
   // Returns BOM rows — sectioned by zone (trunk/branches) when available,
@@ -1070,6 +1184,8 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
           icon = Icons.info_outline;
       }
     }
+    final displayLabel = _simpleLabel(ch.label);
+    final displayWhy = _simpleWhy(ch.why);
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1080,13 +1196,13 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
         const SizedBox(width: 8),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(ch.label,
+            Text(displayLabel,
                 style: TextStyle(
                     color: ch.satisfied ? _ink : iconColor,
                     fontSize: 12,
                     fontWeight: FontWeight.w700)),
             if (!ch.satisfied)
-              Text(ch.why,
+              Text(displayWhy,
                   style: const TextStyle(color: _mute, fontSize: 10, height: 1.3)),
           ]),
         ),
@@ -1098,7 +1214,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              ch.severity == CheckSeverity.critical ? 'קריטי' : 'אזהרה',
+              ch.severity == CheckSeverity.critical ? '🔴 חסר' : '⚠️ מומלץ',
               style: TextStyle(
                   color: iconColor, fontSize: 9, fontWeight: FontWeight.w900),
             ),
@@ -1195,19 +1311,23 @@ class _ProductPicker extends ConsumerStatefulWidget {
 
 class _ProductPickerState extends ConsumerState<_ProductPicker> {
   String _q = '';
+  _PickerCategory? _cat;
+
+  List<LipskeyCatalogProduct> _filtered() {
+    final q = _q.trim();
+    return kCompatCatalog.where((p) {
+      if (!productSuitableForTemp(p, widget.lineTemp)) return false;
+      if (_cat != null && !_inCategory(_cat!, p)) return false;
+      if (q.isEmpty) return true;
+      return p.nameHe.contains(q) ||
+          p.categoryHe.contains(q) ||
+          p.sku.contains(q);
+    }).take(120).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final q = _q.trim();
-    final items = kCompatCatalog
-        .where((p) =>
-            productSuitableForTemp(p, widget.lineTemp) &&
-            (q.isEmpty ||
-                p.nameHe.contains(q) ||
-                p.categoryHe.contains(q) ||
-                p.sku.contains(q)))
-        .take(120)
-        .toList();
+    final showGrid = _q.trim().isEmpty && _cat == null;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
@@ -1228,66 +1348,232 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
               decoration: BoxDecoration(
                   color: _mute, borderRadius: BorderRadius.circular(2)),
             ),
+            // Search bar + optional back-to-categories chip
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
-              child: TextField(
-                autofocus: false,
-                style: const TextStyle(color: _ink),
-                textDirection: TextDirection.rtl,
-                onChanged: (v) => setState(() => _q = v),
-                decoration: InputDecoration(
-                  hintText: 'חפש מוצר להוספה…',
-                  hintStyle: const TextStyle(color: _mute),
-                  prefixIcon: const Icon(Icons.search, color: _mute, size: 20),
-                  filled: true,
-                  fillColor: _panel,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(children: [
+                if (_cat != null) ...[
+                  GestureDetector(
+                    onTap: () => setState(() { _cat = null; _q = ''; }),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 9),
+                      margin: const EdgeInsets.only(left: 8),
+                      decoration: BoxDecoration(
+                        color: _panel,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _supply.withOpacity(0.4)),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Text(_cat!.emoji, style: const TextStyle(fontSize: 16)),
+                        const SizedBox(width: 4),
+                        Text(_cat!.label,
+                            style: const TextStyle(
+                                color: _supply, fontSize: 12,
+                                fontWeight: FontWeight.w700)),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.close, color: _mute, size: 14),
+                      ]),
+                    ),
+                  ),
+                ],
+                Expanded(
+                  child: TextField(
+                    autofocus: false,
+                    style: const TextStyle(color: _ink),
+                    textDirection: TextDirection.rtl,
+                    onChanged: (v) => setState(() => _q = v),
+                    decoration: InputDecoration(
+                      hintText: _cat == null
+                          ? 'חפש בכל המוצרים…'
+                          : 'חפש ב${_cat!.label}…',
+                      hintStyle: const TextStyle(color: _mute),
+                      prefixIcon: const Icon(Icons.search, color: _mute, size: 20),
+                      filled: true,
+                      fillColor: _panel,
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ]),
             ),
             Expanded(
-              child: ListView.builder(
-                controller: ctrl,
-                itemCount: items.length,
-                itemBuilder: (_, i) {
-                  final p = items[i];
-                  final c = _systemColor(p);
-                  return ListTile(
-                    onTap: () {
-                      ref.read(chainProvider.notifier).state = [
-                        ...ref.read(chainProvider),
-                        p,
-                      ];
-                      Navigator.pop(context);
-                    },
-                    leading: Container(
-                      width: 12, height: 12,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: c,
-                          boxShadow: [
-                            BoxShadow(color: c.withOpacity(0.6), blurRadius: 6)
-                          ]),
-                    ),
-                    title: Text(p.nameHe,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            color: _ink, fontSize: 13, fontWeight: FontWeight.w600)),
-                    subtitle: Text('${p.categoryHe} · ${p.sku}',
-                        style: const TextStyle(color: _mute, fontSize: 11)),
-                  );
-                },
-              ),
+              child: showGrid
+                  ? _categoryGrid()
+                  : _productList(ctrl),
             ),
           ]),
         ),
       ),
     );
   }
+
+  // 2×3 grid of category buttons
+  Widget _categoryGrid() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: Text('מה אתה מחפש?',
+                style: TextStyle(
+                    color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+          ),
+          Expanded(
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 2.4,
+              ),
+              itemCount: _kCats.length,
+              itemBuilder: (_, i) {
+                final cat = _kCats[i];
+                final count = kCompatCatalog
+                    .where((p) =>
+                        productSuitableForTemp(p, widget.lineTemp) &&
+                        _inCategory(cat, p))
+                    .length;
+                return GestureDetector(
+                  onTap: () => setState(() => _cat = cat),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: _panel,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: _supply.withOpacity(0.25)),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    child: Row(children: [
+                      Text(cat.emoji,
+                          style: const TextStyle(fontSize: 26)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(cat.label,
+                                style: const TextStyle(
+                                    color: _ink,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800)),
+                            Text('$count מוצרים',
+                                style: const TextStyle(
+                                    color: _mute, fontSize: 10)),
+                          ],
+                        ),
+                      ),
+                    ]),
+                  ),
+                );
+              },
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
+              'או חפש ישירות בשדה החיפוש למעלה',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: _mute, fontSize: 11),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _productList(ScrollController ctrl) {
+    final items = _filtered();
+    if (items.isEmpty) {
+      return const Center(
+        child: Text('לא נמצאו מוצרים',
+            style: TextStyle(color: _mute, fontSize: 14)),
+      );
+    }
+    return ListView.builder(
+      controller: ctrl,
+      itemCount: items.length,
+      itemBuilder: (_, i) {
+        final p = items[i];
+        final c = _systemColor(p);
+        return InkWell(
+          onTap: () {
+            ref.read(chainProvider.notifier).state = [
+              ...ref.read(chainProvider),
+              p,
+            ];
+            Navigator.pop(context);
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(children: [
+              // Product image or color dot fallback
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: p.imageAsset != null
+                    ? Image.asset(
+                        p.imageAsset!,
+                        width: 56, height: 56,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _imgFallback(c),
+                      )
+                    : _imgFallback(c),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Text(p.nameHe,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: _ink,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 3),
+                  Text(p.categoryHe,
+                      style: const TextStyle(color: _mute, fontSize: 11)),
+                ]),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: c.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: c.withOpacity(0.5)),
+                ),
+                child: Text('הוסף',
+                    style: TextStyle(
+                        color: c,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800)),
+              ),
+            ]),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _imgFallback(Color c) => Container(
+        width: 56, height: 56,
+        decoration: BoxDecoration(
+          color: c.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: c.withOpacity(0.3)),
+        ),
+        child: Icon(Icons.plumbing, color: c.withOpacity(0.6), size: 26),
+      );
 }
