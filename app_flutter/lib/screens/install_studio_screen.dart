@@ -1070,7 +1070,7 @@ class _NodeRow extends StatelessWidget {
                 _chip(_roleLabel(product, true), c),
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Text(_specLine(product),
+                  child: Text(_productHint(product),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(color: _mute, fontSize: 11)),
@@ -1791,7 +1791,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
             Text(p.nameHe,
                 style: const TextStyle(
                     color: _ink, fontSize: 13, fontWeight: FontWeight.w600)),
-            Text('${_roleLabel(p, anchor)} · ${_specLine(p)}',
+            Text('${_roleLabel(p, anchor)} · ${_productHint(p)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: _mute, fontSize: 11)),
