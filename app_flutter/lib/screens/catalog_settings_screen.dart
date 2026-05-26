@@ -11,9 +11,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class CatalogSettingsScreen extends ConsumerWidget {
   const CatalogSettingsScreen({super.key});
 
-  static Route<void> route() => MaterialPageRoute<void>(
-        builder: (_) => const CatalogSettingsScreen(),
-      );
+  static Route<void> route() =>
+      MaterialPageRoute<void>(builder: (_) => const CatalogSettingsScreen());
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,7 +24,9 @@ class CatalogSettingsScreen extends ConsumerWidget {
         title: const Text(
           'הגדרות קטלוג',
           style: TextStyle(
-              color: Color(0xFF1A1A1A), fontWeight: FontWeight.w700),
+            color: Color(0xFF1A1A1A),
+            fontWeight: FontWeight.w700,
+          ),
         ),
         iconTheme: const IconThemeData(color: Colors.black54),
         actions: [
@@ -57,28 +58,29 @@ class CatalogSettingsScreen extends ConsumerWidget {
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: const Text(
-          'איפוס הגדרות?',
-          style: TextStyle(color: Color(0xFF1A1A1A)),
-        ),
-        content: const Text(
-          'כל הגדרות הקטלוג יוחזרו לברירת המחדל.',
-          style: TextStyle(color: Colors.black54),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('ביטול'),
+      builder:
+          (ctx) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF),
+            title: const Text(
+              'איפוס הגדרות?',
+              style: TextStyle(color: Color(0xFF1A1A1A)),
+            ),
+            content: const Text(
+              'כל הגדרות הקטלוג יוחזרו לברירת המחדל.',
+              style: TextStyle(color: Colors.black54),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('ביטול'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+                child: const Text('אפס'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-            child: const Text('אפס'),
-          ),
-        ],
-      ),
     );
     if ((ok ?? false) && context.mounted) {
       await ref.read(catalogSettingsProvider.notifier).reset();
@@ -102,16 +104,18 @@ class _SearchSection extends ConsumerWidget {
         _SwitchRow(
           label: 'שמור היסטוריית חיפוש',
           value: settings.searchHistoryEnabled,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(searchHistoryEnabled: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(searchHistoryEnabled: v)),
         ),
         _SwitchRow(
           label: 'סרגל מיון מהיר במוצרים',
           value: settings.quickFilterBar,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(quickFilterBar: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(quickFilterBar: v)),
         ),
         _NumberRow(
           label: 'רדיוס חיפוש',
@@ -120,9 +124,10 @@ class _SearchSection extends ConsumerWidget {
           max: 500,
           suffix: 'ק"מ',
           step: 25,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(searchRadius: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(searchRadius: v)),
         ),
         _ActionRow(
           label: 'ניקוי היסטוריה',
@@ -155,9 +160,10 @@ class _DisplaySection extends ConsumerWidget {
             (value: CatalogViewMode.grid, label: 'רשת (Grid)'),
             (value: CatalogViewMode.list, label: 'רשימה (List)'),
           ],
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(viewMode: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(viewMode: v)),
         ),
         _RadioGroupRow<CatalogSort>(
           label: 'מיון ברירת מחדל',
@@ -168,9 +174,10 @@ class _DisplaySection extends ConsumerWidget {
             (value: CatalogSort.rating, label: 'דירוג גבוה'),
             (value: CatalogSort.newest, label: 'חדש ביותר'),
           ],
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(sortDefault: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(sortDefault: v)),
         ),
         _NumberRow(
           label: 'עמודות בתצוגת רשת',
@@ -178,9 +185,10 @@ class _DisplaySection extends ConsumerWidget {
           min: 1,
           max: 4,
           suffix: '',
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(gridColumns: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(gridColumns: v)),
         ),
         _RadioGroupRow<CatalogImageSize>(
           label: 'גודל תמונות',
@@ -190,9 +198,10 @@ class _DisplaySection extends ConsumerWidget {
             (value: CatalogImageSize.medium, label: 'בינוני'),
             (value: CatalogImageSize.large, label: 'גדול'),
           ],
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(imageSize: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(imageSize: v)),
         ),
       ],
     );
@@ -214,9 +223,10 @@ class _PricesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'הצג מחירים כולל מע"מ',
           value: settings.showVat,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(showVat: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(showVat: v)),
         ),
         _RadioGroupRow<CatalogCurrency>(
           label: 'מטבע',
@@ -226,23 +236,26 @@ class _PricesSection extends ConsumerWidget {
             (value: CatalogCurrency.usd, label: '\$ דולר'),
             (value: CatalogCurrency.eur, label: '€ יורו'),
           ],
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(currency: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(currency: v)),
         ),
         _SwitchRow(
           label: 'הצגת מחיר ליחידה',
           value: settings.showUnitPrice,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(showUnitPrice: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(showUnitPrice: v)),
         ),
         _SwitchRow(
           label: 'השוואת מחירים בין ספקים',
           value: settings.priceComparison,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(priceComparison: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(priceComparison: v)),
         ),
       ],
     );
@@ -264,25 +277,28 @@ class _FavoritesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'סנכרון מועדפים בין מכשירים',
           value: settings.syncFavorites,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(syncFavorites: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(syncFavorites: v)),
         ),
         _SwitchRow(
           label: 'רשימות קנייה לפי פרויקט',
           value: settings.listsPerProject,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(listsPerProject: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(listsPerProject: v)),
         ),
         const _PlaceholderRow(label: 'שיתוף רשימה עם צוות'),
         const _PlaceholderRow(label: 'יבוא / ייצוא רשימה'),
         _SwitchRow(
           label: 'התראה על שינוי מחיר במועדפים',
           value: settings.priceChangeAlert,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(priceChangeAlert: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(priceChangeAlert: v)),
         ),
       ],
     );
@@ -304,30 +320,34 @@ class _CatalogNotifSection extends ConsumerWidget {
         _SwitchRow(
           label: 'ירידת מחיר במועדפים',
           value: settings.notifPriceDrop,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(notifPriceDrop: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(notifPriceDrop: v)),
         ),
         _SwitchRow(
           label: 'חזר למלאי',
           value: settings.notifBackInStock,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(notifBackInStock: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(notifBackInStock: v)),
         ),
         _SwitchRow(
           label: 'מלאי נמוך',
           value: settings.notifLowStock,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(notifLowStock: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(notifLowStock: v)),
         ),
         _SwitchRow(
           label: 'מוצרים חדשים בקטגוריה',
           value: settings.notifNewProducts,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(notifNewProducts: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(notifNewProducts: v)),
         ),
       ],
     );
@@ -353,9 +373,10 @@ class _UnitsSection extends ConsumerWidget {
             (value: CatalogUnit.metric, label: 'מטרי (ס"מ / ק"ג)'),
             (value: CatalogUnit.imperial, label: "אימפריאלי (אינץ' / לב')"),
           ],
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(unit: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(unit: v)),
         ),
         const _PlaceholderRow(label: 'פורמט מידות בכרטיס מוצר'),
         _RadioGroupRow<CatalogDecimalFormat>(
@@ -365,9 +386,10 @@ class _UnitsSection extends ConsumerWidget {
             (value: CatalogDecimalFormat.decimal, label: 'עשרוני (1.5)'),
             (value: CatalogDecimalFormat.fraction, label: 'שברי (1½)'),
           ],
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(decimalFormat: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(decimalFormat: v)),
         ),
       ],
     );
@@ -395,9 +417,10 @@ class _SuppliersSection extends ConsumerWidget {
           max: 500,
           suffix: 'ק"מ',
           step: 25,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(maxDistance: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(maxDistance: v)),
         ),
         _RadioGroupRow<CatalogMinRating>(
           label: 'דירוג מינימלי',
@@ -408,16 +431,18 @@ class _SuppliersSection extends ConsumerWidget {
             (value: CatalogMinRating.four, label: '4+ כוכבים'),
             (value: CatalogMinRating.five, label: '5 כוכבים'),
           ],
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(minRating: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(minRating: v)),
         ),
         _SwitchRow(
           label: 'ספקים מקומיים בלבד',
           value: settings.localSuppliersOnly,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(localSuppliersOnly: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(localSuppliersOnly: v)),
         ),
       ],
     );
@@ -439,30 +464,34 @@ class _AiSection extends ConsumerWidget {
         _SwitchRow(
           label: 'המלצות מבוססות AI',
           value: settings.aiRecommendations,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(aiRecommendations: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(aiRecommendations: v)),
         ),
         _SwitchRow(
           label: 'התאמה לפי היסטוריית הזמנות',
           value: settings.historyBased,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(historyBased: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(historyBased: v)),
         ),
         _SwitchRow(
           label: 'סינון לפי פרויקט פעיל',
           value: settings.activeProjectFilter,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(activeProjectFilter: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(activeProjectFilter: v)),
         ),
         _SwitchRow(
           label: 'חלופות זולות אוטומטיות',
           value: settings.cheapAlternatives,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(cheapAlternatives: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(cheapAlternatives: v)),
         ),
       ],
     );
@@ -484,9 +513,10 @@ class _AccessibilitySection extends ConsumerWidget {
         _SwitchRow(
           label: 'מצב קומפקטי (כרטיסים קטנים)',
           value: settings.compactMode,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(compactMode: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(compactMode: v)),
         ),
         _RadioGroupRow<CatalogTextSize>(
           label: 'גודל טקסט (כל האפליקציה)',
@@ -496,23 +526,26 @@ class _AccessibilitySection extends ConsumerWidget {
             (value: CatalogTextSize.medium, label: 'בינוני'),
             (value: CatalogTextSize.large, label: 'גדול'),
           ],
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(textSize: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(textSize: v)),
         ),
         _SwitchRow(
           label: 'ניגודיות גבוהה (כל האפליקציה)',
           value: settings.highContrast,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(highContrast: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(highContrast: v)),
         ),
         _SwitchRow(
           label: 'הנפשות מופחתות (כל האפליקציה)',
           value: settings.reducedMotion,
-          onChanged: (v) => ref
-              .read(catalogSettingsProvider.notifier)
-              .update((s) => s.copyWith(reducedMotion: v)),
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(reducedMotion: v)),
         ),
       ],
     );
@@ -552,21 +585,27 @@ class _SectionTile extends StatelessWidget {
           collapsedIconColor: Colors.black54,
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
           // Count badge replaces the default expand chevron.
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: BsTokens.brand,
-              borderRadius: BorderRadius.circular(11),
-            ),
-            child: Text(
-              '$_activeCount',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
+          trailing:
+              _activeCount == 0
+                  ? null
+                  : Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: BsTokens.brand,
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Text(
+                      '$_activeCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
           title: Text(
             title,
             style: const TextStyle(
@@ -633,8 +672,10 @@ class _RadioGroupRow<T> extends StatelessWidget {
         ...options.map(
           (o) => RadioListTile<T>(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            title: Text(o.label,
-                style: const TextStyle(color: Color(0xFF1A1A1A))),
+            title: Text(
+              o.label,
+              style: const TextStyle(color: Color(0xFF1A1A1A)),
+            ),
             value: o.value,
             groupValue: value,
             activeColor: BsTokens.brand,
@@ -695,9 +736,10 @@ class _NumberRow extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.remove, color: Colors.black54, size: 20),
-            onPressed: value > min
-                ? () => onChanged((value - step).clamp(min, max))
-                : null,
+            onPressed:
+                value > min
+                    ? () => onChanged((value - step).clamp(min, max))
+                    : null,
           ),
           Text(
             suffix.isEmpty ? '$value' : '$value $suffix',
@@ -705,9 +747,10 @@ class _NumberRow extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.add, color: Colors.black54, size: 20),
-            onPressed: value < max
-                ? () => onChanged((value + step).clamp(min, max))
-                : null,
+            onPressed:
+                value < max
+                    ? () => onChanged((value + step).clamp(min, max))
+                    : null,
           ),
         ],
       ),

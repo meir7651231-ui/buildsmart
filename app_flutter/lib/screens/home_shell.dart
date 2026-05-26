@@ -200,7 +200,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                       SizedBox(width: 4),
                       Text(
-                        'v3.61 · 26.5.26 · התראות+חנות light + פילטר',
+                        'v3.62 · 26.5.26 · badge מוסתר ב-0',
                         style: TextStyle(
                           color: Color(0xFF4CAF50),
                           fontSize: 10,

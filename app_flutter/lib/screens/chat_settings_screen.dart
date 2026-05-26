@@ -10,9 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class ChatSettingsScreen extends ConsumerWidget {
   const ChatSettingsScreen({super.key});
 
-  static Route<void> route() => MaterialPageRoute<void>(
-        builder: (_) => const ChatSettingsScreen(),
-      );
+  static Route<void> route() =>
+      MaterialPageRoute<void>(builder: (_) => const ChatSettingsScreen());
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,8 +22,10 @@ class ChatSettingsScreen extends ConsumerWidget {
         elevation: 0,
         title: const Text(
           'הגדרות שיחות',
-          style:
-              TextStyle(color: Color(0xFF1A1A1A), fontWeight: FontWeight.w700),
+          style: TextStyle(
+            color: Color(0xFF1A1A1A),
+            fontWeight: FontWeight.w700,
+          ),
         ),
         iconTheme: const IconThemeData(color: Colors.black54),
         actions: [
@@ -57,28 +58,29 @@ class ChatSettingsScreen extends ConsumerWidget {
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: const Text(
-          'איפוס הגדרות?',
-          style: TextStyle(color: Color(0xFF1A1A1A)),
-        ),
-        content: const Text(
-          'כל הגדרות השיחות יוחזרו לברירת המחדל.',
-          style: TextStyle(color: Colors.black54),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('ביטול'),
+      builder:
+          (ctx) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF),
+            title: const Text(
+              'איפוס הגדרות?',
+              style: TextStyle(color: Color(0xFF1A1A1A)),
+            ),
+            content: const Text(
+              'כל הגדרות השיחות יוחזרו לברירת המחדל.',
+              style: TextStyle(color: Colors.black54),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('ביטול'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+                child: const Text('אפס'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-            child: const Text('אפס'),
-          ),
-        ],
-      ),
     );
     if ((ok ?? false) && context.mounted) {
       await ref.read(chatSettingsProvider.notifier).reset();
@@ -183,30 +185,34 @@ class _PresenceSection extends ConsumerWidget {
         _SwitchRow(
           label: 'אישורי קריאה',
           value: settings.readReceipts,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(readReceipts: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(readReceipts: v)),
         ),
         _SwitchRow(
           label: 'חיווי הקלדה',
           value: settings.typingIndicator,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(typingIndicator: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(typingIndicator: v)),
         ),
         _SwitchRow(
           label: 'תצוגה מקדימה בנעילה',
           value: settings.lockScreenPreview,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(lockScreenPreview: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(lockScreenPreview: v)),
         ),
         _SwitchRow(
           label: 'פתיחת שיחה (מענה ראשוני)',
           value: settings.initialResponseEnabled,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(initialResponseEnabled: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(initialResponseEnabled: v)),
         ),
         _RadioGroupRow<ChatLastSeen>(
           label: 'זמן מקוון אחרון',
@@ -216,9 +222,10 @@ class _PresenceSection extends ConsumerWidget {
             (value: ChatLastSeen.contacts, label: 'אנשי קשר'),
             (value: ChatLastSeen.nobody, label: 'אף אחד'),
           ],
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(lastSeenPrivacy: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(lastSeenPrivacy: v)),
         ),
       ],
     );
@@ -240,23 +247,26 @@ class _ChatNotifSection extends ConsumerWidget {
         _SwitchRow(
           label: 'צלצול שיחה נכנסת',
           value: settings.callRingEnabled,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(callRingEnabled: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(callRingEnabled: v)),
         ),
         _SwitchRow(
           label: 'התראת הודעה חדשה',
           value: settings.messageAlertEnabled,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(messageAlertEnabled: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(messageAlertEnabled: v)),
         ),
         _SwitchRow(
           label: 'רטט',
           value: settings.chatVibration,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(chatVibration: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(chatVibration: v)),
         ),
         const _PlaceholderRow(label: 'צלצול לפי איש קשר'),
         const _PlaceholderRow(label: 'השתקת שיחה ספציפית'),
@@ -286,9 +296,10 @@ class _MediaSection extends ConsumerWidget {
             (value: ChatMediaDownload.both, label: 'תמיד'),
             (value: ChatMediaDownload.never, label: 'אף פעם'),
           ],
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(mediaDownload: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(mediaDownload: v)),
         ),
         _RadioGroupRow<ChatImageQuality>(
           label: 'איכות תמונות נשלחות',
@@ -298,16 +309,18 @@ class _MediaSection extends ConsumerWidget {
             (value: ChatImageQuality.high, label: 'גבוהה'),
             (value: ChatImageQuality.medium, label: 'בינונית'),
           ],
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(imageQuality: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(imageQuality: v)),
         ),
         _SwitchRow(
           label: 'דחיסת וידאו',
           value: settings.compressVideo,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(compressVideo: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(compressVideo: v)),
         ),
         _ActionRow(
           label: 'ניהול אחסון',
@@ -339,9 +352,10 @@ class _ChatPrivacySection extends ConsumerWidget {
             (value: ChatPrivacy.contacts, label: 'אנשי קשר בלבד'),
             (value: ChatPrivacy.saved, label: 'שמורים בלבד'),
           ],
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(chatPrivacy: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(chatPrivacy: v)),
         ),
         const _PlaceholderRow(label: 'חסימת משתמשים'),
         const _PlaceholderRow(label: 'פרטי הפרופיל (תמונה / ביוגרפיה)'),
@@ -371,9 +385,10 @@ class _BackupSection extends ConsumerWidget {
         _SwitchRow(
           label: 'גיבוי לענן',
           value: settings.backupEnabled,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(backupEnabled: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(backupEnabled: v)),
         ),
         if (settings.backupEnabled)
           _RadioGroupRow<ChatBackupFreq>(
@@ -384,9 +399,10 @@ class _BackupSection extends ConsumerWidget {
               (value: ChatBackupFreq.weekly, label: 'שבועי'),
               (value: ChatBackupFreq.monthly, label: 'חודשי'),
             ],
-            onChanged: (v) => ref
-                .read(chatSettingsProvider.notifier)
-                .update((s) => s.copyWith(backupFreq: v)),
+            onChanged:
+                (v) => ref
+                    .read(chatSettingsProvider.notifier)
+                    .update((s) => s.copyWith(backupFreq: v)),
           ),
         _ActionRow(
           label: 'ייצוא היסטוריה (CSV)',
@@ -424,16 +440,18 @@ class _LangSection extends ConsumerWidget {
             (value: ChatLang.ar, label: 'ערבית'),
             (value: ChatLang.en, label: 'אנגלית'),
           ],
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(lang: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(lang: v)),
         ),
         _SwitchRow(
           label: 'תרגום אוטומטי',
           value: settings.autoTranslate,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(autoTranslate: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(autoTranslate: v)),
         ),
         const _PlaceholderRow(label: 'שפת מקלדת'),
       ],
@@ -456,16 +474,19 @@ class _BusinessSection extends ConsumerWidget {
         _SwitchRow(
           label: 'שעות פעילות עסקית',
           value: settings.businessHoursEnabled,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(businessHoursEnabled: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(businessHoursEnabled: v)),
         ),
         if (settings.businessHoursEnabled) ...[
           _TimeRow(
             label: 'פתיחה',
             time: settings.businessStart,
             onChanged: (t) {
-              ref.read(chatSettingsProvider.notifier).update(
+              ref
+                  .read(chatSettingsProvider.notifier)
+                  .update(
                     (s) => s.copyWith(
                       businessStartHour: t.hour,
                       businessStartMin: t.minute,
@@ -477,7 +498,9 @@ class _BusinessSection extends ConsumerWidget {
             label: 'סגירה',
             time: settings.businessEnd,
             onChanged: (t) {
-              ref.read(chatSettingsProvider.notifier).update(
+              ref
+                  .read(chatSettingsProvider.notifier)
+                  .update(
                     (s) => s.copyWith(
                       businessEndHour: t.hour,
                       businessEndMin: t.minute,
@@ -489,24 +512,27 @@ class _BusinessSection extends ConsumerWidget {
             label: 'הודעת מחוץ לשעות',
             hint: 'אנחנו סגורים, נחזור אליך בשעות הפעילות...',
             value: settings.autoReplyMessage,
-            onChanged: (v) => ref
-                .read(chatSettingsProvider.notifier)
-                .update((s) => s.copyWith(autoReplyMessage: v)),
+            onChanged:
+                (v) => ref
+                    .read(chatSettingsProvider.notifier)
+                    .update((s) => s.copyWith(autoReplyMessage: v)),
           ),
         ],
         _SwitchRow(
           label: 'קטלוג מוצרים בשיחה',
           value: settings.catalogInChat,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(catalogInChat: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(catalogInChat: v)),
         ),
         _SwitchRow(
           label: 'תשלום מתוך שיחה',
           value: settings.paymentInChat,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(paymentInChat: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(paymentInChat: v)),
         ),
       ],
     );
@@ -528,26 +554,29 @@ class _BotSection extends ConsumerWidget {
         _SwitchRow(
           label: 'בוט שאלות נפוצות',
           value: settings.botEnabled,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(botEnabled: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(botEnabled: v)),
         ),
         const _PlaceholderRow(label: 'ניתוב שיחות'),
         _SwitchRow(
           label: 'ברכת פתיחה',
           value: settings.greetingEnabled,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(greetingEnabled: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(greetingEnabled: v)),
         ),
         if (settings.greetingEnabled)
           _InlineTextRow(
             label: 'טקסט הברכה',
             hint: 'שלום! איך אפשר לעזור?',
             value: settings.greetingMessage,
-            onChanged: (v) => ref
-                .read(chatSettingsProvider.notifier)
-                .update((s) => s.copyWith(greetingMessage: v)),
+            onChanged:
+                (v) => ref
+                    .read(chatSettingsProvider.notifier)
+                    .update((s) => s.copyWith(greetingMessage: v)),
           ),
         const _PlaceholderRow(label: 'תגובה מחוץ לשעות פעילות'),
       ],
@@ -570,9 +599,10 @@ class _ArchiveSection extends ConsumerWidget {
         _SwitchRow(
           label: 'ארכוב אוטומטי',
           value: settings.autoArchive,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(autoArchive: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(autoArchive: v)),
         ),
         _RadioGroupRow<ChatAutoDelete>(
           label: 'מחיקה אוטומטית',
@@ -583,23 +613,26 @@ class _ArchiveSection extends ConsumerWidget {
             (value: ChatAutoDelete.days90, label: '90 יום'),
             (value: ChatAutoDelete.days180, label: '180 יום'),
           ],
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(autoDeletePolicy: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(autoDeletePolicy: v)),
         ),
         _SwitchRow(
           label: 'סינון ספאם',
           value: settings.spamFilter,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(spamFilter: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(spamFilter: v)),
         ),
         _SwitchRow(
           label: 'גיבוי לפני מחיקה',
           value: settings.backupBeforeDelete,
-          onChanged: (v) => ref
-              .read(chatSettingsProvider.notifier)
-              .update((s) => s.copyWith(backupBeforeDelete: v)),
+          onChanged:
+              (v) => ref
+                  .read(chatSettingsProvider.notifier)
+                  .update((s) => s.copyWith(backupBeforeDelete: v)),
         ),
       ],
     );
@@ -639,21 +672,27 @@ class _SectionTile extends StatelessWidget {
           collapsedIconColor: Colors.black54,
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
           // Count badge replaces the default expand chevron.
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: BsTokens.brand,
-              borderRadius: BorderRadius.circular(11),
-            ),
-            child: Text(
-              '$_activeCount',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
+          trailing:
+              _activeCount == 0
+                  ? null
+                  : Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: BsTokens.brand,
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Text(
+                      '$_activeCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
           title: Text(
             title,
             style: const TextStyle(
@@ -720,7 +759,10 @@ class _RadioGroupRow<T> extends StatelessWidget {
         ...options.map(
           (o) => RadioListTile<T>(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            title: Text(o.label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+            title: Text(
+              o.label,
+              style: const TextStyle(color: Color(0xFF1A1A1A)),
+            ),
             value: o.value,
             groupValue: value,
             activeColor: BsTokens.brand,
@@ -765,15 +807,16 @@ class _TimeRow extends StatelessWidget {
         final picked = await showTimePicker(
           context: context,
           initialTime: time,
-          builder: (ctx, child) => Theme(
-            data: ThemeData.light().copyWith(
-              colorScheme: const ColorScheme.light(
-                primary: BsTokens.brand,
-                surface: Color(0xFFFFFFFF),
+          builder:
+              (ctx, child) => Theme(
+                data: ThemeData.light().copyWith(
+                  colorScheme: const ColorScheme.light(
+                    primary: BsTokens.brand,
+                    surface: Color(0xFFFFFFFF),
+                  ),
+                ),
+                child: child!,
               ),
-            ),
-            child: child!,
-          ),
         );
         if (picked != null) onChanged(picked);
       },
@@ -799,8 +842,9 @@ class _InlineTextRow extends StatefulWidget {
 }
 
 class _InlineTextRowState extends State<_InlineTextRow> {
-  late final TextEditingController _ctrl =
-      TextEditingController(text: widget.value);
+  late final TextEditingController _ctrl = TextEditingController(
+    text: widget.value,
+  );
 
   @override
   void didUpdateWidget(covariant _InlineTextRow old) {
