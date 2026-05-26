@@ -1,7 +1,10 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/chat_settings.dart';
+import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/store_settings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -202,6 +205,24 @@ void main() {
       expect(isNewDateGroup(null, 'היום'), isTrue);
       expect(isNewDateGroup('היום', 'היום'), isFalse);
       expect(isNewDateGroup('היום', 'אתמול'), isTrue);
+    });
+  });
+
+  group('notification importance filter', () {
+    test('"all" keeps both priorities; else only high-priority', () {
+      expect(passesImportance(NotifImportance.all, false), isTrue);
+      expect(passesImportance(NotifImportance.all, true), isTrue);
+      expect(passesImportance(NotifImportance.important, false), isFalse);
+      expect(passesImportance(NotifImportance.important, true), isTrue);
+      expect(passesImportance(NotifImportance.critical, false), isFalse);
+    });
+  });
+
+  group('chat online-presence privacy', () {
+    test('presence hidden only when last-seen is "nobody"', () {
+      expect(showOnlinePresence(ChatLastSeen.everyone), isTrue);
+      expect(showOnlinePresence(ChatLastSeen.contacts), isTrue);
+      expect(showOnlinePresence(ChatLastSeen.nobody), isFalse);
     });
   });
 }
