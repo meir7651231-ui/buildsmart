@@ -1043,4 +1043,105 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '77575327': VerifiedSpec(sku: '77575327', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '77575329': VerifiedSpec(sku: '77575329', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '77575330': VerifiedSpec(sku: '77575330', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+
+  // ── אביזרי תבריג (Threaded Drain Fittings) ─────────────────────────────────
+  '997091':  VerifiedSpec(sku: '997091',  material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
+  '116565':  VerifiedSpec(sku: '116565',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
+
+  // ── אביזרי שקע-תקע (Push-fit Drain Couplings) ─────────────────────────────
+  '218051':  VerifiedSpec(sku: '218051',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '115581':  VerifiedSpec(sku: '115581',  material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
+  '116258':  VerifiedSpec(sku: '116258',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+
+  // ── פקקים וצינורות (Drain Plugs) ──────────────────────────────────────────
+  '120311':  VerifiedSpec(sku: '120311',  material: 'PVC', maxTempC: 50, ends: [_c('40')]),
+
+  // ── מחלקים (Manifolds — brass supply) ─────────────────────────────────────
+  '76032202': VerifiedSpec(sku: '76032202', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"')]),
+  '76032203': VerifiedSpec(sku: '76032203', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  '76032204': VerifiedSpec(sku: '76032204', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  '7608202B': VerifiedSpec(sku: '7608202B', material: _brass, maxTempC: 90,
+      ends: [_bf('3/4"'), _bf('1/2"'), _bf('1/2"')]),
+  '7609202B': VerifiedSpec(sku: '7609202B', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"')]),
+  '7609202R': VerifiedSpec(sku: '7609202R', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"')]),
+  '7609203B': VerifiedSpec(sku: '7609203B', material: _brass, maxTempC: 90,
+      ends: [_bf('1"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  '7609203R': VerifiedSpec(sku: '7609203R', material: _brass, maxTempC: 90,
+      ends: [_bf('3/4"'), _bf('1/2"'), _bf('1/2"')]),
+  '77603202': VerifiedSpec(sku: '77603202', material: _brass, maxTempC: 90,
+      ends: [_bf('3/4"'), _bf('1/2"'), _bf('1/2"')]),
+  '77603203': VerifiedSpec(sku: '77603203', material: _brass, maxTempC: 90,
+      ends: [_bf('3/4"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  '77603204': VerifiedSpec(sku: '77603204', material: _brass, maxTempC: 90,
+      ends: [_bf('3/4"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+
+  // ── ראשי מקלחת (Shower Heads — BSP F inlet) ───────────────────────────────
+  '7777708G': VerifiedSpec(sku: '7777708G', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777707B': VerifiedSpec(sku: '7777707B', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777708B': VerifiedSpec(sku: '7777708B', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777710C': VerifiedSpec(sku: '7777710C', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777711C': VerifiedSpec(sku: '7777711C', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777707C': VerifiedSpec(sku: '7777707C', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '7777708C': VerifiedSpec(sku: '7777708C', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701199': VerifiedSpec(sku: '77701199', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701170': VerifiedSpec(sku: '77701170', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701165': VerifiedSpec(sku: '77701165', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701166': VerifiedSpec(sku: '77701166', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+
+  // ── זרועות דוש (Shower Arms — BSP M×M) ───────────────────────────────────
+  '77701189': VerifiedSpec(sku: '77701189', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
+  '77701190': VerifiedSpec(sku: '77701190', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
+  '77701191': VerifiedSpec(sku: '77701191', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
+  '77701192': VerifiedSpec(sku: '77701192', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
+  '77701193': VerifiedSpec(sku: '77701193', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
+
+  // ── מזלפי יד (Hand Sprayers — BSP F inlet) ────────────────────────────────
+  '77701204': VerifiedSpec(sku: '77701204', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701205': VerifiedSpec(sku: '77701205', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701135': VerifiedSpec(sku: '77701135', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701125': VerifiedSpec(sku: '77701125', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701140': VerifiedSpec(sku: '77701140', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701203': VerifiedSpec(sku: '77701203', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701195': VerifiedSpec(sku: '77701195', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701130': VerifiedSpec(sku: '77701130', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701150': VerifiedSpec(sku: '77701150', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701179': VerifiedSpec(sku: '77701179', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701112': VerifiedSpec(sku: '77701112', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701197': VerifiedSpec(sku: '77701197', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701198': VerifiedSpec(sku: '77701198', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+  '77701177': VerifiedSpec(sku: '77701177', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
+
+  // ── צינורות מקלחת (Shower Hoses — F×F) ────────────────────────────────────
+  '77701155': VerifiedSpec(sku: '77701155', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77701160': VerifiedSpec(sku: '77701160', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77701196': VerifiedSpec(sku: '77701196', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77701113': VerifiedSpec(sku: '77701113', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77701114': VerifiedSpec(sku: '77701114', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+
+  // ── צינורות גמישים (Flexible Supply Hoses) ────────────────────────────────
+  '77381040': VerifiedSpec(sku: '77381040', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77381050': VerifiedSpec(sku: '77381050', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77381060': VerifiedSpec(sku: '77381060', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77121240': VerifiedSpec(sku: '77121240', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77121250': VerifiedSpec(sku: '77121250', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77121260': VerifiedSpec(sku: '77121260', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
+  '77383815': VerifiedSpec(sku: '77383815', material: _brass, maxTempC: 90, ends: [_bf('3/8"'), _bf('3/8"')]),
+  '77383820': VerifiedSpec(sku: '77383820', material: _brass, maxTempC: 90, ends: [_bf('3/8"'), _bf('3/8"')]),
+  '77383825': VerifiedSpec(sku: '77383825', material: _brass, maxTempC: 90, ends: [_bf('3/8"'), _bf('3/8"')]),
+  '77383830': VerifiedSpec(sku: '77383830', material: _brass, maxTempC: 90, ends: [_bf('3/8"'), _bf('3/8"')]),
+  '77383840': VerifiedSpec(sku: '77383840', material: _brass, maxTempC: 90, ends: [_bf('3/8"'), _bf('3/8"')]),
+  // Flexible drain/jacuzzi pipes
+  '1053232':  VerifiedSpec(sku: '1053232',  material: 'PVC', maxTempC: 50, ends: [_c('32'), _c('32')]),
+  '1054040':  VerifiedSpec(sku: '1054040',  material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
+  '1054050':  VerifiedSpec(sku: '1054050',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+
+  // ── אל חזור ביוב (Drain Backflow Preventers) ──────────────────────────────
+  '777D0481': VerifiedSpec(sku: '777D0481', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
+  '777D0482': VerifiedSpec(sku: '777D0482', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
+  '777D0484': VerifiedSpec(sku: '777D0484', material: 'PVC', maxTempC: 50, ends: [_c('160'), _c('160')]),
 };
