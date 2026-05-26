@@ -28,9 +28,10 @@ LipskeyCatalogProduct _hw(String sku, String nameHe, String nameEn) =>
 
 final List<LipskeyCatalogProduct> kHotWaterCatalog = [
   // pump side (brass interface + isolation)
-  _hw('HW-PUMP-25',        'משאבת recirculation (יציאה 1")', 'Recirculation pump 1" outlet'),
-  _hw('HW-UNION-1',        'רקורד פליז 1" (ניתוק לתחזוקה)',  'Brass union 1" (serviceable)'),
-  _hw('HW-BALL-1',         'ברז כדורי 1"',                    'Ball valve 1"'),
+  _hw('HW-PUMP-25',        'משאבת recirculation (יציאה 1")',      'Recirculation pump 1" outlet'),
+  _hw('HW-BALL-INLET-1',   'ברז כדורי 1" (כניסת דוד/משאבה)',     'Ball valve 1" (boiler/pump inlet)'),
+  _hw('HW-UNION-1',        'רקורד פליז 1" (ניתוק לתחזוקה)',       'Brass union 1" (serviceable)'),
+  _hw('HW-BALL-1',         'ברז כדורי 1"',                         'Ball valve 1"'),
   // brass → PEX transition + PEX run
   _hw('HW-ADP-1-PEX20',    'מצמד מעבר פליז 1"×PEX 20',        'Brass adapter 1"×PEX 20'),
   _hw('HW-PEX-20',         'צינור PEX 20×2.8 (מים חמים)',     'PEX pipe 20×2.8 (hot water)'),
