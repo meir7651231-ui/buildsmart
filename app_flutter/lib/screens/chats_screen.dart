@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ─── enums ────────────────────────────────────────────────────────────────────
 
@@ -17,7 +20,44 @@ enum _ChatFilter { all, agents, suppliers, bot }
 final _chatSearchQueryProvider = StateProvider<String>((_) => '');
 final _chatFilterProvider =
     StateProvider<_ChatFilter>((_) => _ChatFilter.all);
-final _chatArchivedIdsProvider = StateProvider<Set<String>>((_) => {});
+
+const String _kArchiveKey = 'bs.chat-archived.v1';
+
+class _ChatArchivedNotifier extends StateNotifier<Set<String>> {
+  _ChatArchivedNotifier() : super(const {}) {
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_kArchiveKey);
+      if (list != null) state = list.toSet();
+    } on Object catch (_) {/* keep empty */}
+  }
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_kArchiveKey, state.toList());
+    } on Object catch (_) {/* best-effort */}
+  }
+
+  void archive(String id) {
+    state = {...state, id};
+    unawaited(_persist());
+  }
+
+  void restore(String id) {
+    state = {...state}..remove(id);
+    unawaited(_persist());
+  }
+}
+
+final chatArchivedIdsProvider =
+    StateNotifierProvider<_ChatArchivedNotifier, Set<String>>(
+  (_) => _ChatArchivedNotifier(),
+);
 
 // ─── data ─────────────────────────────────────────────────────────────────────
 
@@ -348,7 +388,7 @@ class _ThreadList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(_chatSearchQueryProvider);
     final filter = ref.watch(_chatFilterProvider);
-    final archivedIds = ref.watch(_chatArchivedIdsProvider);
+    final archivedIds = ref.watch(chatArchivedIdsProvider);
 
     final threads = _kThreads.where((t) {
       if (archivedIds.contains(t.id)) {
@@ -436,8 +476,8 @@ class _DismissibleThread extends ConsumerWidget {
       ),
       onDismissed: (_) {
         final id = thread.id;
-        final notifier = ref.read(_chatArchivedIdsProvider.notifier);
-        notifier.state = Set<String>.from(notifier.state)..add(id);
+        final notifier = ref.read(chatArchivedIdsProvider.notifier);
+        notifier.archive(id);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('שיחה הועברה לארכיון'),
@@ -446,9 +486,7 @@ class _DismissibleThread extends ConsumerWidget {
             action: SnackBarAction(
               label: 'ביטול',
               textColor: BsTokens.brand,
-              onPressed: () =>
-                  notifier.state =
-                      Set<String>.from(notifier.state)..remove(id),
+              onPressed: () => notifier.restore(id),
             ),
           ),
         );
@@ -1054,11 +1092,13 @@ class _InputBar extends StatelessWidget {
             // Mic / Send FAB
             ValueListenableBuilder<TextEditingValue>(
               valueListenable: controller,
-              builder: (_, val, __) {
+              builder: (ctx, val, __) {
                 final hasText = val.text.trim().isNotEmpty;
                 return _CircleFab(
                   icon: hasText ? Icons.send : Icons.mic,
-                  onTap: hasText ? onSend : () {},
+                  onTap: hasText
+                      ? onSend
+                      : () => showToast(ctx, 'הקלטת קול — בבנייה'),
                 );
               },
             ),
@@ -1158,6 +1198,123 @@ class _CircleFab extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: Icon(icon, color: Colors.white, size: 22),
+      ),
+    );
+  }
+}
+
+// ─── archive screen ────────────────────────────────────────────────────────────
+
+class ChatsArchiveScreen extends ConsumerWidget {
+  const ChatsArchiveScreen({super.key});
+
+  static Route<void> route() =>
+      MaterialPageRoute<void>(builder: (_) => const ChatsArchiveScreen());
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final archivedIds = ref.watch(chatArchivedIdsProvider);
+    final archived =
+        _kThreads.where((t) => archivedIds.contains(t.id)).toList();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F6FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        titleSpacing: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black54),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'ארכיון שיחות',
+          style: TextStyle(
+            color: Color(0xFF1A1A1A),
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      body: archived.isEmpty
+          ? const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.archive_outlined,
+                      size: 48, color: Color(0xFFBBBBBB)),
+                  SizedBox(height: 12),
+                  Text(
+                    'אין שיחות בארכיון',
+                    style: TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'החלק שיחה שמאלה כדי לארכב אותה',
+                    style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+                  ),
+                ],
+              ),
+            )
+          : ListView.separated(
+              itemCount: archived.length,
+              separatorBuilder: (_, __) => const Divider(
+                  height: 1, indent: 76, color: Color(0xFFEEEEEE)),
+              itemBuilder: (_, i) => _ArchivedRow(thread: archived[i]),
+            ),
+    );
+  }
+}
+
+class _ArchivedRow extends ConsumerWidget {
+  const _ArchivedRow({required this.thread});
+
+  final _Thread thread;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      leading: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: thread.isBot
+              ? BsTokens.brand.withValues(alpha: 0.15)
+              : const Color(0xFFF5F5F5),
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: Text(thread.avatar, style: const TextStyle(fontSize: 24)),
+      ),
+      title: Text(
+        thread.name,
+        style: const TextStyle(
+          color: Color(0xFF1A1A1A),
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      subtitle: Text(
+        thread.subtitle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(color: Color(0xFF888888), fontSize: 12),
+      ),
+      trailing: IconButton(
+        tooltip: 'שחזר מהארכיון',
+        icon: const Icon(Icons.unarchive_outlined, color: BsTokens.brand),
+        onPressed: () {
+          ref.read(chatArchivedIdsProvider.notifier).restore(thread.id);
+          showToast(context, 'השיחה שוחזרה');
+        },
+      ),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => _ChatPage(thread: thread)),
       ),
     );
   }
