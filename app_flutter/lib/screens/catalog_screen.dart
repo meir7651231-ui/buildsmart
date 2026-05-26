@@ -245,6 +245,7 @@ const _kMeta = [
   (preview: 'לבנה בטון 25×25×15 – מבצע שבוע',        time: '19.5',  badge: 0),
   (preview: 'צבע לבן 15L · 2 מותגים',                 time: '18.5',  badge: 0),
   (preview: 'ערכת כלים מקצועית 120 חלקים',            time: '18.5',  badge: 0),
+  (preview: 'מערכת השקיה · טפטפות + מחברים',          time: '17.5',  badge: 0),
 ];
 
 class CatalogScreen extends ConsumerStatefulWidget {
@@ -1922,6 +1923,7 @@ class _AllOverview extends ConsumerWidget {
         // קטגוריות
         _OverviewBlock(
           title: 'קטגוריות',
+          count: kCatalogCats.length,
           onShowAll: () => go('קטגוריות'),
           children: [
             for (var i = 0; i < kCatalogCats.length && i < 3; i++)
@@ -1931,6 +1933,7 @@ class _AllOverview extends ConsumerWidget {
         // חיפושים אחרונים
         _OverviewBlock(
           title: 'חיפושים אחרונים',
+          count: recents.length,
           onShowAll: () => go('חיפושים אחרונים'),
           children: recents.isEmpty
               ? const [_OverviewEmpty('אין חיפושים אחרונים')]
@@ -1949,6 +1952,7 @@ class _AllOverview extends ConsumerWidget {
         // תאימות
         _OverviewBlock(
           title: 'תאימות',
+          count: kLipskeyCatalog.length,
           onShowAll: () => go('תאימות'),
           children: [
             _OverviewRow(
@@ -1961,6 +1965,7 @@ class _AllOverview extends ConsumerWidget {
         // מועדפים
         _OverviewBlock(
           title: 'מועדפים',
+          count: favSkus.length,
           onShowAll: () => go('מועדפים'),
           children: favProducts.isEmpty
               ? const [_OverviewEmpty('אין מועדפים עדיין')]
@@ -1976,6 +1981,7 @@ class _AllOverview extends ConsumerWidget {
         // עץ חכם
         _OverviewBlock(
           title: 'עץ חכם',
+          count: kSmartTreeCats.length,
           onShowAll: () => go('עץ חכם'),
           isLast: true,
           children: [
@@ -2002,9 +2008,11 @@ class _OverviewBlock extends StatelessWidget {
     required this.title,
     required this.onShowAll,
     required this.children,
+    this.count = 0,
     this.isLast = false,
   });
   final String title;
+  final int count;
   final VoidCallback onShowAll;
   final List<Widget> children;
   final bool isLast;
@@ -2027,6 +2035,25 @@ class _OverviewBlock extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              if (count > 0) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: BsTokens.brand,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$count',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
               const Spacer(),
               TextButton(
                 onPressed: onShowAll,
