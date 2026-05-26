@@ -1,5 +1,6 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
+import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -248,6 +249,24 @@ void main() {
       final input = ['ברז'];
       addRecentSearch(input, 'אסלה');
       expect(input, ['ברז']);
+    });
+  });
+
+  group('grid-card image size', () {
+    test('exact padding + emoji per size', () {
+      expect(gridCardImageMetrics(CatalogImageSize.small),
+          (pad: 14.0, emoji: 30.0));
+      expect(gridCardImageMetrics(CatalogImageSize.medium),
+          (pad: 6.0, emoji: 40.0));
+      expect(gridCardImageMetrics(CatalogImageSize.large),
+          (pad: 0.0, emoji: 52.0));
+    });
+    test('larger size ⇒ less padding (bigger image) + bigger emoji', () {
+      final s = gridCardImageMetrics(CatalogImageSize.small);
+      final m = gridCardImageMetrics(CatalogImageSize.medium);
+      final l = gridCardImageMetrics(CatalogImageSize.large);
+      expect(s.pad > m.pad && m.pad > l.pad, isTrue);
+      expect(s.emoji < m.emoji && m.emoji < l.emoji, isTrue);
     });
   });
 }

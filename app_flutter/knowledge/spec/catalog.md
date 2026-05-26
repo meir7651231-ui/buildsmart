@@ -143,7 +143,9 @@
 | `viewMode` (`grid`/`list`) | קובע אם מוצרי הדריל מוצגים כ-`SliverGrid` (`LipskeyProductGridCard`) או `SliverList` (`LipskeyProductCard`). |
 | `gridColumns` | מספר העמודות בתצוגת grid, עם `clamp(1,4)`. |
 | `reducedMotion` | אם `true` — `_ExplodeChips` ו-`_DiagramFlow` קופצים מיד (`_ctrl.value = 1`) במקום אנימציה. |
-| `imageSize`, `compactMode`, `highContrast`, `textSize` | **אינם נצרכים** ב-`catalog_screen.dart` (ראו §10). |
+| `imageSize` | ✅ נצרך בכרטיסי המוצר: שורת רשימה (`_ProductRow`, רוחב/גובה עמודת התמונה) ו-כרטיס רשת (`LipskeyProductGridCard` דרך `gridCardImageMetrics` — padding התמונה + גודל אמוji). |
+| `compactMode` | ✅ נצרך: `_ProductRow` (margin/minHeight) ו-כרטיס רשת (גובה תיבת השם + paddings). |
+| `highContrast`, `textSize` | אפקט **app-wide** (theme + `textScaler` ב-`main`), לא ספציפי למסך. |
 
 ## 9. קריטריוני קבלה (Acceptance)
 
@@ -165,7 +167,7 @@
 - **קומפוננטות שאינן מחווטות ל-body הנוכחי:** `_LipskeySupplierCard`, `_FeaturedProductCard`, `_CatalogDrillSection`/`_CatalogDrillCatGrid`/`_CatalogDrillProductList` מוגדרות בקובץ אך אינן נקראות מ-`_CatalogBody`/`_AllOverview` (קוד שמור לתצוגות עתידיות / dead-ish). ⛔/🚧.
 - **state לא בשימוש:** `catalogSortProvider`, `catalogFilterProvider`, ו-enums `CatalogSort`/`CatalogFilter` המקומיים (וגם `_sortLabel`/`_filterLabel`/`_nextSort`/`_nextFilter`) — לא נצרכים. שים לב לכפילות שם: יש `CatalogSort` נפרד גם ב-`catalog_settings.dart`.
 - **כלי חיפוש placeholder:** ⚙️ פילטרים / ↕️ מיון / ▦ קטלוג מציגים toast `'… — בקרוב'` בלבד. 🚧.
-- **הגדרות לא ממומשות במסך:** `imageSize`, `compactMode`, `highContrast`, `textSize` מוגדרות ב-`CatalogSettings` אך אינן משפיעות על `catalog_screen.dart`. 🚧.
+- ~~**הגדרות לא ממומשות במסך**~~ ✅ **טופל**: `imageSize`/`compactMode` נצרכים כעת גם בכרטיס הרשת (`gridCardImageMetrics` + paddings קומפקטיים), בנוסף לשורת הרשימה שכבר תמכה. `highContrast`/`textSize` הם אפקט app-wide (לא ספציפי למסך).
 - **"בקרוב":** כל קטגוריה ראשית ללא דאטת עץ ⇐ `_TreeComingSoon`; ב-`_CatalogDrillCatGrid` קטגוריות ללא smart-products ⇐ תג `'בקרוב'`. 🚧.
 - **אי-עקביות מספרית:** הערות הקוד מציינות "11 קטגוריות" בעוד `kCatalogCats` ו-`kSearchIndex` מכילים בפועל **12** (נוספו `אביזרים נלווים` + `גינון והשקיה`).
 - **`_kMeta` סימולטיבי:** preview/time/badge ב-`_CatalogRow` הם דאטה מדומה קבועה (12 רשומות), לא חיה.

@@ -139,6 +139,15 @@ class LipskeyProductCard extends ConsumerWidget {
   }
 }
 
+/// Pure: grid-card image inner padding + fallback-emoji size per
+/// [CatalogImageSize]. Larger size ⇒ less padding (bigger image) + bigger emoji.
+({double pad, double emoji}) gridCardImageMetrics(CatalogImageSize size) =>
+    switch (size) {
+      CatalogImageSize.small => (pad: 14, emoji: 30),
+      CatalogImageSize.medium => (pad: 6, emoji: 40),
+      CatalogImageSize.large => (pad: 0, emoji: 52),
+    };
+
 /// Compact vertical grid card — mirrors the legacy Preact `.product` card:
 /// square image (✓ when in cart) · name (2 lines) · price · add/stepper bar.
 class LipskeyProductGridCard extends ConsumerWidget {
@@ -175,6 +184,9 @@ class LipskeyProductGridCard extends ConsumerWidget {
             .where((l) => l.productKey == _key)
             .fold<int>(0, (s, l) => s + l.productQty)));
     final inCart = qty > 0;
+    final settings = ref.watch(catalogSettingsProvider);
+    final compact = settings.compactMode;
+    final img = gridCardImageMetrics(settings.imageSize);
 
     return Container(
       decoration: BoxDecoration(
@@ -199,14 +211,14 @@ class LipskeyProductGridCard extends ConsumerWidget {
                   Container(
                     color: Colors.white,
                     alignment: Alignment.center,
-                    padding: const EdgeInsets.all(6),
+                    padding: EdgeInsets.all(img.pad),
                     child: product.imageAsset != null
                         ? Image.asset(product.imageAsset!,
                             fit: BoxFit.contain,
                             errorBuilder: (_, __, ___) => Text(product.typeEmoji,
-                                style: const TextStyle(fontSize: 40)))
+                                style: TextStyle(fontSize: img.emoji)))
                         : Text(product.typeEmoji,
-                            style: const TextStyle(fontSize: 40)),
+                            style: TextStyle(fontSize: img.emoji)),
                   ),
                   if (inCart)
                     const Positioned(
@@ -231,13 +243,13 @@ class LipskeyProductGridCard extends ConsumerWidget {
             onTap: () => showLipskeyProductSheet(context, product, products),
             behavior: HitTestBehavior.opaque,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
+              padding: EdgeInsets.fromLTRB(8, compact ? 3 : 6, 8, compact ? 2 : 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(
-                    height: 32,
+                    height: compact ? 26 : 32,
                     child: Text(
                       product.nameHe,
                       maxLines: 2,
@@ -265,7 +277,7 @@ class LipskeyProductGridCard extends ConsumerWidget {
           ),
           // stepper / add bar
           Container(
-            padding: const EdgeInsets.all(6),
+            padding: EdgeInsets.all(compact ? 4 : 6),
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(color: cs.outline.withOpacity(0.15)),

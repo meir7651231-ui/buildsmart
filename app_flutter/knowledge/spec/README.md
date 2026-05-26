@@ -44,10 +44,10 @@
 
 ## הערות תיאום בין-מסכי (discrepancies שנמצאו מול `../SPEC.md`/`../WIRING.md`)
 האפיון לעיל הוא המקור המדויק; כשמצאנו פער מול המסמכים הישנים, האמת היא הקוד:
-- **`imageSize` / `compactMode` / `highContrast` / `textSize`** — מופיעים כ"מחווטים"
-  ב-`settings.md`, אך `catalog.md` מצא שאין להם אפקט **בתוך מסך הקטלוג**;
-  `highContrast`/`textSize` הם אפקט **app-wide** (theme + `textScaler` ב-`main`),
-  ואילו `imageSize`/`compactMode` לא נצרכים בגוף הקטלוג הנוכחי.
+- **`imageSize` / `compactMode`** — ✅ טופל: נצרכים כעת בכרטיסי המוצר של הקטלוג
+  בשני המצבים — שורת רשימה (`_ProductRow`) וכרטיס רשת (`gridCardImageMetrics`).
+  **`highContrast` / `textSize`** הם אפקט **app-wide** (theme + `textScaler` ב-`main`),
+  לא ספציפיים למסך הקטלוג.
 - **חיפושים אחרונים** — ✅ טופל (v3.78): נשמר ל-SharedPreferences (`bs.recent-searches.v1`, helper `addRecentSearch`). הגייט `searchHistoryEnabled` שולט בהקלטה.
 - **`catalogSortProvider` / `catalogFilterProvider`** והאנומים שלהם — מוגדרים אך
   לא בשימוש; קוד "מת-למחצה" (גם `_LipskeySupplierCard`, `_FeaturedProductCard`,
