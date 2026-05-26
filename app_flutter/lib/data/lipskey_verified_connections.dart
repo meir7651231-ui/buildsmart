@@ -51,6 +51,10 @@ class VerifiedSpec {
   final String material;
   final String? pressureRating;
 
+  /// PEX sub-type + connection method for PEX products (e.g. 'PEX-B · Crimp').
+  /// Null for non-PEX products.
+  final String? pexType;
+
   /// Maximum continuous service temperature (°C). Defaults to 40 — the safe
   /// cap for HDPE — so every legacy cold-water spec is correct without edits.
   final double maxTempC;
@@ -60,6 +64,7 @@ class VerifiedSpec {
     required this.ends,
     required this.material,
     this.pressureRating,
+    this.pexType,
     this.maxTempC = 40,
   });
 
@@ -300,60 +305,87 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   // ════════════════════════════════════════════════════════════════════════
 
   // ── brass interface / isolation (pump side) ────────────────────────────────
-  'HW-PUMP-25': VerifiedSpec(sku: 'HW-PUMP-25', material: _brass, pressureRating: 'PN10',
-      maxTempC: 110, ends: [_bm('1"')]),
-  'HW-UNION-1': VerifiedSpec(sku: 'HW-UNION-1', material: _brass, pressureRating: 'PN16',
-      maxTempC: 110, ends: [_bf('1"'), _bm('1"')]),
-  'HW-BALL-1': VerifiedSpec(sku: 'HW-BALL-1', material: _brass, pressureRating: 'PN16',
-      maxTempC: 110, ends: [_bf('1"'), _bf('1"')]),
+  // Pump modelled as through-device: BSP-female inlet + BSP-male outlet.
+  'HW-PUMP-25': VerifiedSpec(sku: 'HW-PUMP-25', material: _brass,
+      pressureRating: '10 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1"'), _bm('1"')]),
+  // Inlet-side ball valve (boiler outlet / pump suction) — male × female 1".
+  'HW-BALL-INLET-1': VerifiedSpec(sku: 'HW-BALL-INLET-1', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bm('1"'), _bf('1"')]),
+  'HW-UNION-1': VerifiedSpec(sku: 'HW-UNION-1', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1"'), _bm('1"')]),
+  'HW-BALL-1': VerifiedSpec(sku: 'HW-BALL-1', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1"'), _bf('1"')]),
 
   // ── brass → PEX transition + PEX run ────────────────────────────────────────
-  'HW-ADP-1-PEX20': VerifiedSpec(sku: 'HW-ADP-1-PEX20', material: _brass, pressureRating: 'PN16',
-      maxTempC: 95, ends: [_bm('1"'), _px('20')]),
-  'HW-PEX-20': VerifiedSpec(sku: 'HW-PEX-20', material: _pex, pressureRating: 'PN10',
-      maxTempC: 95, ends: [_px('20'), _px('20')]),
-  'HW-PEX-RED-20-16': VerifiedSpec(sku: 'HW-PEX-RED-20-16', material: _pex, pressureRating: 'PN10',
-      maxTempC: 95, ends: [_px('20'), _px('16')]),
-  'HW-PEX-16': VerifiedSpec(sku: 'HW-PEX-16', material: _pex, pressureRating: 'PN10',
-      maxTempC: 95, ends: [_px('16'), _px('16')]),
+  // PEX-B pipe: EN 15875 max 10 bar @ 80°C continuous service.
+  'HW-ADP-1-PEX20': VerifiedSpec(sku: 'HW-ADP-1-PEX20', material: _brass,
+      pressureRating: '10 bar @ 80°C', maxTempC: 95,
+      ends: [_bm('1"'), _px('20')]),
+  'HW-PEX-20': VerifiedSpec(sku: 'HW-PEX-20', material: _pex,
+      pressureRating: '10 bar @ 80°C', pexType: 'PEX-B · Crimp/Press', maxTempC: 95,
+      ends: [_px('20'), _px('20')]),
+  'HW-PEX-RED-20-16': VerifiedSpec(sku: 'HW-PEX-RED-20-16', material: _pex,
+      pressureRating: '10 bar @ 80°C', pexType: 'PEX-B · Crimp/Press', maxTempC: 95,
+      ends: [_px('20'), _px('16')]),
+  'HW-PEX-16': VerifiedSpec(sku: 'HW-PEX-16', material: _pex,
+      pressureRating: '10 bar @ 80°C', pexType: 'PEX-B · Crimp/Press', maxTempC: 95,
+      ends: [_px('16'), _px('16')]),
 
   // ── PEX → copper transition + copper run ────────────────────────────────────
-  'HW-ADP-PEX16-CU15': VerifiedSpec(sku: 'HW-ADP-PEX16-CU15', material: _brass, pressureRating: 'PN16',
-      maxTempC: 110, ends: [_px('16'), _cu('15')]),
-  'HW-CU-15': VerifiedSpec(sku: 'HW-CU-15', material: _copper, pressureRating: 'PN16',
-      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
-  'HW-BALL-15': VerifiedSpec(sku: 'HW-BALL-15', material: _brass, pressureRating: 'PN16',
-      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
+  // Copper press: EN 1254-2 max 16 bar @ 110°C.
+  'HW-ADP-PEX16-CU15': VerifiedSpec(sku: 'HW-ADP-PEX16-CU15', material: _brass,
+      pressureRating: '10 bar @ 80°C', pexType: 'PEX-B', maxTempC: 110,
+      ends: [_px('16'), _cu('15')]),
+  'HW-CU-15': VerifiedSpec(sku: 'HW-CU-15', material: _copper,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('15'), _cu('15')]),
+  'HW-BALL-15': VerifiedSpec(sku: 'HW-BALL-15', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('15'), _cu('15')]),
 
   // ── manifold + shower outlet ────────────────────────────────────────────────
-  'HW-MANIFOLD-3': VerifiedSpec(sku: 'HW-MANIFOLD-3', material: _brass, pressureRating: 'PN16',
-      maxTempC: 110, ends: [_cu('15'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
-  'HW-SHOWER-ARM': VerifiedSpec(sku: 'HW-SHOWER-ARM', material: _brass, pressureRating: 'PN16',
-      maxTempC: 110, ends: [_bm('1/2"'), _bf('1/2"')]),
-  'HW-SHOWER-HEAD': VerifiedSpec(sku: 'HW-SHOWER-HEAD', material: _brass, pressureRating: 'PN10',
-      maxTempC: 80, ends: [_bm('1/2"')]),
+  'HW-MANIFOLD-3': VerifiedSpec(sku: 'HW-MANIFOLD-3', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('15'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  'HW-SHOWER-ARM': VerifiedSpec(sku: 'HW-SHOWER-ARM', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bm('1/2"'), _bf('1/2"')]),
+  'HW-SHOWER-HEAD': VerifiedSpec(sku: 'HW-SHOWER-HEAD', material: _brass,
+      pressureRating: '10 bar @ 80°C', maxTempC: 80,
+      ends: [_bm('1/2"')]),
 
   // ── recirculation loop ──────────────────────────────────────────────────────
-  'HW-TEE-RECIRC': VerifiedSpec(sku: 'HW-TEE-RECIRC', material: _copper, pressureRating: 'PN16',
-      maxTempC: 110, ends: [_cu('15'), _cu('15'), _cu('15')]),
-  'HW-CHECK-15': VerifiedSpec(sku: 'HW-CHECK-15', material: _brass, pressureRating: 'PN16',
-      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
-  'HW-BALANCE-15': VerifiedSpec(sku: 'HW-BALANCE-15', material: _brass, pressureRating: 'PN16',
-      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
+  'HW-TEE-RECIRC': VerifiedSpec(sku: 'HW-TEE-RECIRC', material: _copper,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('15'), _cu('15'), _cu('15')]),
+  'HW-CHECK-15': VerifiedSpec(sku: 'HW-CHECK-15', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('15'), _cu('15')]),
+  'HW-BALANCE-15': VerifiedSpec(sku: 'HW-BALANCE-15', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('15'), _cu('15')]),
 
   // ── safety (closed hot loop) ────────────────────────────────────────────────
-  // PRV mounts on the DN15 safety tee (modelled inline on the loop).
-  'HW-PRV-34': VerifiedSpec(sku: 'HW-PRV-34', material: _brass, pressureRating: 'PN10',
-      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
-  'HW-EXPVESSEL': VerifiedSpec(sku: 'HW-EXPVESSEL', material: _steel, pressureRating: 'PN10',
-      maxTempC: 99, ends: [_cu('15')]),
+  'HW-PRV-34': VerifiedSpec(sku: 'HW-PRV-34', material: _brass,
+      pressureRating: 'set 7 bar (body 10 bar)', maxTempC: 110,
+      ends: [_cu('15'), _cu('15')]),
+  'HW-EXPVESSEL': VerifiedSpec(sku: 'HW-EXPVESSEL', material: _steel,
+      pressureRating: '10 bar @ 99°C', maxTempC: 99,
+      ends: [_cu('15')]),
   // Automatic float vent — terminal device on the DN15 loop tee.
-  'HW-AIRVENT': VerifiedSpec(sku: 'HW-AIRVENT', material: _brass, pressureRating: 'PN10',
-      maxTempC: 110, ends: [_cu('15')]),
+  'HW-AIRVENT': VerifiedSpec(sku: 'HW-AIRVENT', material: _brass,
+      pressureRating: '10 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('15')]),
 
   // ── galvanic isolation + thermal expansion ──────────────────────────────────
-  'HW-DIELECTRIC-15': VerifiedSpec(sku: 'HW-DIELECTRIC-15', material: _brass, pressureRating: 'PN16',
-      maxTempC: 110, ends: [_cu('15'), _cu('15')]),
-  'HW-EXP-COMP-20': VerifiedSpec(sku: 'HW-EXP-COMP-20', material: _pex, pressureRating: 'PN10',
-      maxTempC: 95, ends: [_px('20'), _px('20')]),
+  'HW-DIELECTRIC-15': VerifiedSpec(sku: 'HW-DIELECTRIC-15', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('15'), _cu('15')]),
+  'HW-EXP-COMP-20': VerifiedSpec(sku: 'HW-EXP-COMP-20', material: _pex,
+      pressureRating: '10 bar @ 80°C', pexType: 'PEX-B · Crimp/Press', maxTempC: 95,
+      ends: [_px('20'), _px('20')]),
 };

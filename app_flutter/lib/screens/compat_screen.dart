@@ -216,13 +216,17 @@ List<LineCheck> lineComplianceChecklist(
   // Galvanic risk: copper joined to ANY other metal (brass/steel) — conservative.
   final metals = mats.where((m) => m == 'נחושת' || m == 'פליז' || m == 'פלדה');
   final dissimilar = mats.contains('נחושת') && metals.toSet().length >= 2;
-  final isolationCount =
-      chain.where((p) => p.sku == 'HW-BALL-1' || p.sku == 'HW-BALL-15').length;
+  final isolationCount = chain.where((p) =>
+      p.sku == 'HW-BALL-INLET-1' ||
+      p.sku == 'HW-BALL-1' ||
+      p.sku == 'HW-BALL-15').length;
 
   return [
     LineCheck(
-        recirc ? 'ברז ניתוק ×2 (משאבה + מניפולד)' : 'ברז ניתוק לתחזוקה',
-        recirc ? isolationCount >= 2 : isolationCount >= 1,
+        recirc
+            ? 'ברז ניתוק ×3 (כניסת דוד + אחרי משאבה + מניפולד)'
+            : 'ברז ניתוק לתחזוקה',
+        recirc ? isolationCount >= 3 : isolationCount >= 1,
         'בידוד אזורי לתחזוקה'),
     if (recirc) ...[
       LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}), 'מונע זרימה הפוכה בלולאה'),
@@ -1384,6 +1388,25 @@ class _ChainListItem extends StatelessWidget {
                     style: const TextStyle(color: _sub, fontSize: 11)),
               ],
             ]),
+            if (kVerifiedSpecs[p.sku]?.pressureRating != null ||
+                kVerifiedSpecs[p.sku]?.pexType != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Row(children: [
+                  if (kVerifiedSpecs[p.sku]?.pressureRating != null)
+                    Text(kVerifiedSpecs[p.sku]!.pressureRating!,
+                        style: const TextStyle(
+                            color: Color(0xFF0284C7), fontSize: 10,
+                            fontWeight: FontWeight.w500)),
+                  if (kVerifiedSpecs[p.sku]?.pexType != null) ...[
+                    const SizedBox(width: 6),
+                    Text('· ${kVerifiedSpecs[p.sku]!.pexType!}',
+                        style: const TextStyle(
+                            color: Color(0xFF7C3AED), fontSize: 10,
+                            fontWeight: FontWeight.w500)),
+                  ],
+                ]),
+              ),
             if (!productSuitableForTemp(p, lineTemp))
               _TempWarn(
                   maxTemp: productMaxTempC(p)!.round(),
