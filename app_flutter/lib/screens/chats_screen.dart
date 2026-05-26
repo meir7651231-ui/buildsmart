@@ -654,6 +654,31 @@ class _ThreadRow extends StatelessWidget {
 
 // ─── chat page ────────────────────────────────────────────────────────────────
 
+/// Opens a fresh, empty conversation with a new contact (from "שיחה חדשה").
+void openNewChatWith(
+  BuildContext context, {
+  required String emoji,
+  required String name,
+}) {
+  final now = DateTime.now();
+  final thread = (
+    id: 'new-${now.microsecondsSinceEpoch}',
+    avatar: emoji,
+    name: name,
+    subtitle: '',
+    time:
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
+    direction: _Direction.outgoing,
+    isBot: false,
+    unread: 0,
+    isOnline: true,
+    category: _ThreadCategory.agent,
+  );
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(builder: (_) => _ChatPage(thread: thread)),
+  );
+}
+
 class _ChatPage extends StatefulWidget {
   const _ChatPage({required this.thread});
 
@@ -680,11 +705,14 @@ class _ChatPageState extends State<_ChatPage> {
   @override
   void initState() {
     super.initState();
-    _messages.add((
-      text: widget.thread.subtitle,
-      isMe: false,
-      time: widget.thread.time,
-    ),);
+    // A brand-new chat starts empty; existing threads seed the last message.
+    if (widget.thread.subtitle.isNotEmpty) {
+      _messages.add((
+        text: widget.thread.subtitle,
+        isMe: false,
+        time: widget.thread.time,
+      ),);
+    }
   }
 
   String _nowTime() {
