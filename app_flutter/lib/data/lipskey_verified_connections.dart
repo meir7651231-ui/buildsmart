@@ -1565,13 +1565,27 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '77701180': VerifiedSpec(sku: '77701180', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
   '77701172': VerifiedSpec(sku: '77701172', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
 
-  // ── אטמים ופקקים — BSP plugs (seals/gaskets skipped) ─────────────────────
+  // ── אטמים ופקקים — BSP plugs ──────────────────────────────────────────────
   '611051': VerifiedSpec(sku: '611051', material: _brass, maxTempC: 90, ends: [_bf('1-1/4"')]),
   '614783': VerifiedSpec(sku: '614783', material: _brass, maxTempC: 90, ends: [_bf('1/2"')]),
   '612386': VerifiedSpec(sku: '612386', material: 'PVC', maxTempC: 50, ends: [_bf('2"')]),
   '612385': VerifiedSpec(sku: '612385', material: 'PVC', maxTempC: 50, ends: [_bf('2"')]),
   '218127': VerifiedSpec(sku: '218127', material: 'PVC', maxTempC: 50, ends: [_c('50')]),
   '218126': VerifiedSpec(sku: '218126', material: 'PVC', maxTempC: 50, ends: [_c('40')]),
+
+  // ── אטמי גומי לניקוז — rubber gaskets (flow-path nodes, required for HDPE joints) ──
+  // אטם דו צדדי — double-side coupler gasket (same DN both ends)
+  '506510': VerifiedSpec(sku: '506510', material: 'rubber', maxTempC: 60, ends: [_c('32'), _c('32')]),
+  '506522': VerifiedSpec(sku: '506522', material: 'rubber', maxTempC: 60, ends: [_c('40'), _c('40')]),
+  '506527': VerifiedSpec(sku: '506527', material: 'rubber', maxTempC: 60, ends: [_c('50'), _c('50')]),
+  '555703': VerifiedSpec(sku: '555703', material: 'rubber', maxTempC: 60, ends: [_c('60'), _c('60')]),
+  '506525': VerifiedSpec(sku: '506525', material: 'rubber', maxTempC: 60, ends: [_c('50'), _c('50')]),
+  // אטם כדורי — reducing gasket (connects different DNs)
+  '558463': VerifiedSpec(sku: '558463', material: 'rubber', maxTempC: 60, ends: [_c('32'), _c('50')]),
+  '506537': VerifiedSpec(sku: '506537', material: 'rubber', maxTempC: 60, ends: [_c('40'), _c('50')]),
+  '506540': VerifiedSpec(sku: '506540', material: 'rubber', maxTempC: 60, ends: [_c('50'), _c('60')]),
+  // אטם מנגית אקסנטר — eccentric toilet pan seal DN110
+  '77777010': VerifiedSpec(sku: '77777010', material: 'rubber', maxTempC: 60, ends: [_c('110'), _c('110')]),
 
   // ── מכסים ורשתות (Drain Covers & Grilles — drainOpening) ──────────────────
   // remaining 4" covers
