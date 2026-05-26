@@ -9,6 +9,7 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 | File | What it holds |
 |---|---|
 | `README.md` (this) | the protocol + index |
+| `SPEC.md` | **full functional spec** — every screen/element/flow/state + status |
 | `STATUS.md` | current state snapshot — screens, features, wiring counts, version |
 | `ARCHITECTURE.md` | structure: screens / state / data / widgets, navigation, theming |
 | `TESTING.md` | the verification protocol — harness, `flutter test`, mutation testing |
