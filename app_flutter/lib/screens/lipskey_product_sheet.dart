@@ -937,11 +937,13 @@ class _RelatedCard extends StatelessWidget {
                           style: const TextStyle(fontSize: 28))),
             ),
             const SizedBox(height: 5),
-            Text(product.nameHe,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    color: Color(0xFF1A1A1A), fontSize: 11, height: 1.25)),
+            Flexible(
+              child: Text(product.nameHe,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: Color(0xFF1A1A1A), fontSize: 11, height: 1.25)),
+            ),
             const SizedBox(height: 3),
             Text('#${product.sku}',
                 style: const TextStyle(
