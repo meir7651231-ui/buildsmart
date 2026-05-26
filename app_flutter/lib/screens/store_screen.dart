@@ -1200,11 +1200,15 @@ class _CartViewState extends ConsumerState<_CartView> {
     final deliveryFee = deliveryFeeFor(delivery);
     final total = cartTotal(subtotal, deliveryFee, vatInclusive: vatInclusive);
 
+    final saveToProject =
+        ref.watch(storeSettingsProvider.select((s) => s.saveCartToProject));
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       children: [
-        _ProjectSelector(selected: project),
-        const SizedBox(height: 12),
+        if (saveToProject) ...[
+          _ProjectSelector(selected: project),
+          const SizedBox(height: 12),
+        ],
         if (smartLines.isNotEmpty) ...[
           const _SupplierHeader(name: '🛠️ מוצרים חכמים'),
           for (var i = 0; i < smartLines.length; i++)

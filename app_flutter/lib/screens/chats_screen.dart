@@ -19,6 +19,9 @@ enum _ChatFilter { all, agents, suppliers, bot }
 
 // ─── providers ────────────────────────────────────────────────────────────────
 
+/// "זמן מקוון אחרון" privacy: online presence is shown unless set to nobody.
+bool showOnlinePresence(ChatLastSeen p) => p != ChatLastSeen.nobody;
+
 final _chatSearchQueryProvider = StateProvider<String>((_) => '');
 final _chatFilterProvider =
     StateProvider<_ChatFilter>((_) => _ChatFilter.all);
@@ -558,6 +561,8 @@ class _ThreadRow extends ConsumerWidget {
     final missed = thread.direction == _Direction.missed;
     final isUnread = thread.unread > 0;
     final muted = ref.watch(chatMutedIdsProvider).contains(thread.id);
+    final showOnline = thread.isOnline &&
+        showOnlinePresence(ref.watch(chatSettingsProvider).lastSeenPrivacy);
     final nameColor = missed ? BsTokens.brand : const Color(0xFF1A1A1A);
     final arrowIcon = thread.direction == _Direction.outgoing
         ? Icons.north_east_rounded
@@ -593,7 +598,7 @@ class _ThreadRow extends ConsumerWidget {
                     style: const TextStyle(fontSize: 24),
                   ),
                 ),
-                if (thread.isOnline)
+                if (showOnline)
                   Positioned(
                     bottom: 2,
                     right: 2,
@@ -838,6 +843,8 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final showOnline = widget.thread.isOnline &&
+        showOnlinePresence(ref.watch(chatSettingsProvider).lastSeenPrivacy);
     return Scaffold(
       backgroundColor: const Color(0xFFECE5DD),
       appBar: AppBar(
@@ -865,7 +872,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                     style: const TextStyle(fontSize: 18),
                   ),
                 ),
-                if (widget.thread.isOnline)
+                if (showOnline)
                   Positioned(
                     bottom: 1,
                     right: 1,
@@ -897,7 +904,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  if (widget.thread.isOnline)
+                  if (showOnline)
                     const Text(
                       'פעיל כעת',
                       style: TextStyle(

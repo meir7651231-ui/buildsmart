@@ -36,6 +36,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 | אישורי קריאה | sent ticks blue ✓✓ vs grey ✓ | ✅ |
 | רטט (chatVibration) | haptic on send | ✅ |
 | ברכת פתיחה | seeds a greeting in a fresh chat | ✅ |
+| זמן מקוון אחרון (lastSeenPrivacy) | nobody → hides "פעיל כעת" + online dot (`showOnlinePresence`) | ✅ |
 | מדיה/גיבוי/שפה/שעות-עסקיות/פרטיות/lock-preview/auto-archive/spam | — | ⛔ media/server |
 
 ## Chats screen (`chats_screen.dart`)
@@ -57,6 +58,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 | Setting | Behavior | Status |
 |---|---|---|
 | סוגי התראות: הזמנות/משלוחים/מבצעים/ירידות-מחיר | hide that category from the list (`notifMutedSections`) | ✅ |
+| חשיבות (importanceFilter) | important/critical → only high-priority rows (`passesImportance`) | ✅ |
 | snooze banner | mutes notifications temporarily | ✅ |
 | push/email/sms/whatsapp · שעות-שקט · סיכומים · צליל/רטט · lock-screen · לפי-תפקיד | — | ⛔ no notif engine |
 
@@ -70,6 +72,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 | minOrderAmount | blocks checkout below the minimum | ✅ |
 | confirmLargeOrder + largeOrderThreshold | confirm dialog at checkout | ✅ |
 | cart stepper (+ / − / לעגלה) | `qtyForKey` / `setQtyForKey` | ✅ |
+| saveCartToProject | show/hide the cart project selector | ✅ |
 | כתובות/חשבוניות/ספקים/השכרה/אחריות/ביומטרי/אשראי-יומי | — | ⛔ server/data |
 
 ## Compatibility / line builder (`compat_screen.dart`)

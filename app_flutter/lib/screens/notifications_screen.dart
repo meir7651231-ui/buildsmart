@@ -212,14 +212,21 @@ bool notifPasses({
   return true;
 }
 
+/// Importance filter: "all" keeps everything; otherwise only high-priority rows.
+bool passesImportance(NotifImportance filter, bool highPriority) =>
+    filter == NotifImportance.all || highPriority;
+
 List<_Notif> _filtered({
   required NotifSection section,
   required Set<String> dismissedIds,
   required String query,
   required Set<NotifSection> mutedTypes,
+  required NotifImportance importance,
 }) =>
     _kNotifs
-        .where((n) => notifPasses(
+        .where((n) =>
+            passesImportance(importance, n.highPriority) &&
+            notifPasses(
               type: n.type,
               title: n.title,
               preview: n.preview,
@@ -612,6 +619,7 @@ class _NotifList extends ConsumerWidget {
         dismissedIds: dismissedIds,
         query: query,
         mutedTypes: mutedTypes,
+        importance: ns.importanceFilter,
       ),
       expandedKeys,
     );
