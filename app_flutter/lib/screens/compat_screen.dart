@@ -291,9 +291,12 @@ bool canConnect(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   final sB = b.connectionSizes.toSet();
   if (sA.isEmpty || sB.isEmpty || sA.intersection(sB).isEmpty) return false;
 
+  // Block only when BOTH ends have explicit, conflicting genders (both male or
+  // both female). If either side is unspecified (e.g. a plain pipe or a tap
+  // whose inlet gender isn't stated in the Hebrew name) we allow the match —
+  // the size overlap is the primary guard.
   final gA = a.connectionGender, gB = b.connectionGender;
-  if (gA == null || gB == null) return false;
-  if (gA == gB) return false;
+  if (gA != null && gB != null && gA == gB) return false;
 
   final mA = a.connectionMethod, mB = b.connectionMethod;
   if (mA != null && mB != null && mA != mB) return false;

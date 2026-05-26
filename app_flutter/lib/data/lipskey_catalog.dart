@@ -45,8 +45,19 @@ class LipskeyCatalogProduct {
   /// for the compatibility engine. Reused by the sheet and the regression test.
   /// A manual override (צעד 68) wins when the name can't be parsed correctly
   /// (e.g. size only on the spec image, or an irregular name).
-  List<String> get connectionSizes =>
-      kLipskeyConnectionSizeOverride[sku] ?? lipskeyConnectionSizes(nameHe);
+  /// Falls back in order: override → name → dims['DN'] → category default.
+  List<String> get connectionSizes {
+    final fromOverride = kLipskeyConnectionSizeOverride[sku];
+    if (fromOverride != null) return fromOverride;
+    final fromName = lipskeyConnectionSizes(nameHe);
+    if (fromName.isNotEmpty) return fromName;
+    // dims['DN'] — e.g. {'DN': '75', 'L (cm)': '300'} → ['75']
+    final dimsdn = dims?['DN'];
+    if (dimsdn is String && dimsdn.isNotEmpty) return [dimsdn];
+    if (dimsdn is int) return [dimsdn.toString()];
+    // Category-level default — standard supply connection for tap families
+    return kCategoryDefaultSizes[categoryHe] ?? const [];
+  }
 
   /// Connection gender inferred from the name (צעד 60): 'male' (זכר/חיצוני),
   /// 'female' (נקבה/פנימי), or null when the name doesn't say. A threaded male
@@ -227,6 +238,29 @@ const Map<String, List<String>> kLipskeyConnectionSizeOverride = {
 /// adapter that fits a non-standard mate). Merged into the per-side groups.
 const Map<String, List<String>> kLipskeyCompatPairOverride = {
   // '217861': ['116632'],  // example: confirmed pairing not seen by sizes
+};
+
+/// Category-level default connection sizes for product families that don't
+/// encode size in their Hebrew name (e.g. faucets whose inlet is always ½" BSP).
+/// Only used when both name-parsing and dims['DN'] yield nothing.
+const Map<String, List<String>> kCategoryDefaultSizes = {
+  // Tap families — standard ½" BSP supply connection
+  'ברזי כיור':    ['.5'],
+  'ברזי מטבח':   ['.5'],
+  'ברזי קיר':    ['.5'],
+  'ברזי מקלחת':  ['.5'],
+  'ברזי אמבטיה': ['.5'],
+  'ברזי גן':     ['.5'],
+  'ברזי ניל':    ['.5'],
+  'ברזי דלי':    ['.5'],
+  'ברזי מעבר':   ['.5'],
+  'ברזים':       ['.5'],
+  // Shower/bath accessories — ½" BSP standard
+  'ראשי מקלחת':  ['.5'],
+  'זרועות דוש':  ['.5'],
+  'אביזרי מקלחת':['.5'],
+  // Sanitary fixtures connect via ½" supply + drain
+  'נקודות מים':  ['.5'],
 };
 
 /// Known manufacturer/model tokens within Lipskey-distributed product names.
