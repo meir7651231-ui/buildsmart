@@ -456,9 +456,15 @@ class InstallationGap {
   final LipskeyCatalogProduct to;
 }
 
+/// Branch letter labels for Hebrew zone display (א, ב, ג, …).
+const _branchLetters = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י'];
+String _branchLabel(int i) =>
+    'ענף ${i < _branchLetters.length ? _branchLetters[i] : (i + 1).toString()}';
+
 /// Result of auto-completing an installation from ordered anchor products.
 class InstallationPlan {
-  const InstallationPlan(this.items, this.gaps, this.quantities);
+  const InstallationPlan(this.items, this.gaps, this.quantities,
+      {this.zones = const <String, List<String>>{}});
 
   /// Distinct components in first-appearance order (anchors + connectors).
   final List<LipskeyCatalogProduct> items;
@@ -469,6 +475,10 @@ class InstallationPlan {
   /// How many physical units of each SKU the line needs (a connector reused
   /// across two joints counts twice) — turns the list into a shopping list.
   final Map<String, int> quantities;
+
+  /// Zone label → ordered SKUs in that zone. Non-empty only for tree
+  /// (manifold) installations — used to render a sectioned BOM by zone.
+  final Map<String, List<String>> zones;
 
   bool get isComplete => gaps.isEmpty;
 
@@ -569,10 +579,10 @@ int manifoldOutlets(LipskeyCatalogProduct p) {
 }
 
 /// A branched (tree) installation: one trunk (feed → manifold) plus N parallel
-/// branches off the manifold, one per target. Returns a single merged
-/// bill-of-materials — quantities are summed across the trunk and every branch,
-/// so four identical branch nipples show as × 4. Gaps list any branch or trunk
-/// segment the catalog can't connect.
+/// branches off the manifold, one per target. Returns a zone-tagged
+/// bill-of-materials — trunk items in "גזע", each branch in "ענף א/ב/…".
+/// When [tempC] ≥ 60 and a manifold is detected, one TMTV anti-scald valve
+/// (HW-TMTV-15) is auto-added to every branch for hot-water compliance.
 InstallationPlan buildTreeInstallation(
   List<LipskeyCatalogProduct> trunk,
   List<LipskeyCatalogProduct> branchTargets, {
@@ -583,39 +593,61 @@ InstallationPlan buildTreeInstallation(
   final items = <LipskeyCatalogProduct>[];
   final qty = <String, int>{};
   final gaps = <InstallationGap>[];
-  void add(LipskeyCatalogProduct p) {
+  final zones = <String, List<String>>{};
+
+  void add(LipskeyCatalogProduct p, {String? zone}) {
     if (!qty.containsKey(p.sku)) items.add(p);
     qty[p.sku] = (qty[p.sku] ?? 0) + 1;
+    if (zone != null) {
+      final zl = zones.putIfAbsent(zone, () => []);
+      if (!zl.contains(p.sku)) zl.add(p.sku);
+    }
   }
 
-  // trunk: feed → … → manifold (linear)
+  // trunk: feed → … → manifold (linear), zone = "גזע"
   LipskeyCatalogProduct? manifold;
   if (trunk.isNotEmpty) {
     final tp = buildInstallation(trunk,
         maxDepthPerSegment: maxDepthPerSegment, tempC: tempC);
     for (final p in tp.items) {
       for (var k = 0; k < tp.qtyOf(p.sku); k++) {
-        add(p);
+        add(p, zone: 'גזע');
       }
     }
     gaps.addAll(tp.gaps);
     manifold = trunk.last;
   }
 
-  // each branch: manifold → target (manifold already counted in the trunk)
+  // each branch: manifold → target, zone = "ענף א/ב/…"
   final root = manifold ?? (branchTargets.isNotEmpty ? branchTargets.first : null);
-  for (final t in branchTargets) {
+  for (var bi = 0; bi < branchTargets.length; bi++) {
+    final t = branchTargets[bi];
     if (root == null) break;
     if (t.sku == root.sku) continue;
+    final zl = _branchLabel(bi);
     final seg = findShortestPath(root, t,
         maxDepth: maxDepthPerSegment, tempC: tempC);
     if (seg == null) {
       gaps.add(InstallationGap(root, t));
-      add(t);
+      add(t, zone: zl);
       continue;
     }
     for (final p in seg.skip(1)) {
-      add(p); // skip the shared manifold root
+      add(p, zone: zl);
+    }
+  }
+
+  // Auto-add TMTV anti-scald per branch for hot lines (tempC ≥ 60).
+  // One DN15 TMTV at each manifold outlet limits outlet T ≤ 45°C.
+  if (manifold != null && tempC >= 60 && branchTargets.isNotEmpty) {
+    LipskeyCatalogProduct? tmtv;
+    for (final p in kCompatCatalog) {
+      if (p.sku == 'HW-TMTV-15') { tmtv = p; break; }
+    }
+    if (tmtv != null) {
+      for (var bi = 0; bi < branchTargets.length; bi++) {
+        add(tmtv, zone: _branchLabel(bi));
+      }
     }
   }
 
@@ -634,5 +666,5 @@ InstallationPlan buildTreeInstallation(
       qty[accSku] = n;
     }
   }
-  return InstallationPlan(items, gaps, qty);
+  return InstallationPlan(items, gaps, qty, zones: zones);
 }

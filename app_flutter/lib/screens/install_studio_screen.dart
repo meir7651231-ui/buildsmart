@@ -678,7 +678,8 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                       Text(
                           '${plan.items.length} סוגים · ${plan.totalPieces} יחידות'
                           '${_totalMeters > 0 ? ' · ${_totalMeters.toStringAsFixed(1)} מ׳ צנרת' : ''}'
-                          '${branches > 0 ? ' · ⑂ $branches ענפים' : ''}',
+                          '${branches > 0 ? ' · ⑂ $branches ענפים' : ''}'
+                          '${plan.zones.isNotEmpty ? ' · ${plan.zones.length} אזורים' : ''}',
                           style: const TextStyle(color: _mute, fontSize: 12)),
                       if (overCapacity)
                         Text('⚠️ $branches ענפים על מחלק $outlets-יציאות',
@@ -694,10 +695,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
             const Divider(height: 1, color: Color(0xFF243049)),
             Expanded(
               child: ListView(controller: ctrl, children: [
-                for (var i = 0; i < plan.items.length; i++)
-                  _bomRow(plan.items[i], i + 1,
-                      anchorSkus.contains(plan.items[i].sku),
-                      plan.qtyOf(plan.items[i].sku)),
+                ..._buildBomRows(plan, anchorSkus),
                 if (plan.gaps.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.fromLTRB(18, 12, 18, 4),
@@ -827,6 +825,62 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     Navigator.pop(context);
     showToast(context, 'נוסף לעגלה: ${widget.plan.items.length} פריטים');
   }
+
+  // Returns BOM rows — sectioned by zone (trunk/branches) when available,
+  // flat otherwise. Accessories not assigned to any zone appear at the bottom.
+  List<Widget> _buildBomRows(InstallationPlan plan, Set<String> anchorSkus) {
+    if (plan.zones.isEmpty) {
+      return [
+        for (var i = 0; i < plan.items.length; i++)
+          _bomRow(plan.items[i], i + 1,
+              anchorSkus.contains(plan.items[i].sku),
+              plan.qtyOf(plan.items[i].sku)),
+      ];
+    }
+    final bySkU = {for (final p in plan.items) p.sku: p};
+    final zonedSkus = <String>{};
+    final result = <Widget>[];
+    int n = 1;
+    for (final entry in plan.zones.entries) {
+      result.add(_zoneHeader(entry.key));
+      for (final sku in entry.value) {
+        final p = bySkU[sku];
+        if (p == null) continue;
+        zonedSkus.add(sku);
+        result.add(_bomRow(p, n++, anchorSkus.contains(sku), plan.qtyOf(sku)));
+      }
+    }
+    final unzoned = plan.items.where((p) => !zonedSkus.contains(p.sku)).toList();
+    if (unzoned.isNotEmpty) {
+      result.add(_zoneHeader('אביזרים'));
+      for (final p in unzoned) {
+        result.add(_bomRow(p, n++, anchorSkus.contains(p.sku), plan.qtyOf(p.sku)));
+      }
+    }
+    return result;
+  }
+
+  Widget _zoneHeader(String label) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 2),
+        child: Row(children: [
+          Container(
+            width: 4, height: 16,
+            decoration: BoxDecoration(
+              color: _supply, borderRadius: BorderRadius.circular(2)),
+          ),
+          const SizedBox(width: 8),
+          Text(label,
+              style: const TextStyle(
+                  color: _supply,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.6)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Container(height: 1, color: _supply.withOpacity(0.2)),
+          ),
+        ]),
+      );
 
   Widget _bomRow(LipskeyCatalogProduct p, int n, bool anchor, int qty) {
     final c = _systemColor(p);
