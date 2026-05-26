@@ -75,14 +75,14 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 | saveCartToProject | show/hide the cart project selector | ✅ |
 | כתובות/חשבוניות/ספקים/השכרה/אחריות/ביומטרי/אשראי-יומי | — | ⛔ server/data |
 
-## Compatibility / line builder (`compat_screen.dart`)
+## Install Studio (`install_studio_screen.dart` → `logic/install_engine.dart`)
 
 | Button | Behavior | Status |
 |---|---|---|
-| בחר מוצר / הוסף מוצר | set/append a chain anchor from the catalog | ✅ |
-| הרץ קו אוטומטית | BFS/Dijkstra from the tail to a chosen target | ✅ |
-| **השלם התקנה** | `buildInstallation` fills connectors between every chain anchor → full BOM sheet + gaps; "החל על השרשרת" applies it | ✅ |
-| טמפ׳ הקו / אביזרים | line temperature + insulation/clips/sealing toggles | ✅ |
+| הוסף מוצר | append a chain anchor from the dark catalog picker | ✅ |
+| **השלם התקנה** | linear `buildInstallation`, or `buildTreeInstallation` when a manifold is mid-chain (trunk → branches); dark BOM sheet with quantities, ⑂ branch count + outlet warning, gaps; "החל על הקו" applies it | ✅ |
+| מטראז׳ צינור (− / +) | per-pipe length in metres; header totals "X מ׳ צנרת" | ✅ |
+| טמפ׳ הקו | cycles 20/60/80°C (material suitability) | ✅ |
 
 ---
 
