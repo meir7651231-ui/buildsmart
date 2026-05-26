@@ -13,6 +13,7 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ── palette ───────────────────────────────────────────────────────────────────
 const _void0 = Color(0xFF0A0E1A); // deep background
@@ -96,6 +97,7 @@ const _kCats = [
        'אביזרי ביוב', 'ניקוז גג', 'כיסויים', 'מכסים ורשתות'}),
   _PickerCategory('🔥', 'מים חמים', {'מים חמים ו-recirculation'}),
   _PickerCategory('🌿', 'גן', {'ברזי גן', 'ציוד גן', 'ברזי אמבטיה'}),
+  _PickerCategory('🔀', 'מחלק (כמה ברזים)', {'מחלקים'}),
   _PickerCategory('🔧', 'חיבורים', null), // null = catch-all
 ];
 
@@ -157,6 +159,33 @@ String _simpleWhy(String why) {
   return map[why] ?? why;
 }
 
+// One-line description of what a product does — for non-technical users in the picker.
+String _productHint(LipskeyCatalogProduct p) {
+  final cat = p.categoryHe;
+  if (cat.contains('מחלק')) return 'מפצל לכמה ברזים במקביל';
+  if (cat.contains('מקלחת') || cat.contains('דוש') || cat.contains('זרוע')) return 'לאמבטיה ומקלחת';
+  if (cat.contains('כיור') || cat.contains('מטבח')) return 'ברז לכיור / מטבח';
+  if (cat.contains('אסלה') || cat.contains('שירותים')) return 'לאסלה ושטיפה';
+  if (cat.contains('ניקוז') || cat.contains('ביוב') || cat.contains('מאסף') || cat.contains('תעלה')) {
+    return 'מוציא מים לניקוז';
+  }
+  if (cat.contains('מים חמים') || cat.contains('recirculation')) return 'לקו מים חמים';
+  if (cat.contains('גן') || cat.contains('גינה') || cat.contains('השקי')) return 'לגינה והשקיה';
+  if (cat.contains('משאבה') || cat.contains('pump')) return 'מגביר לחץ מים';
+  if (cat.contains('מסנן') || cat.contains('פילטר')) return 'מסנן חלקיקים בצינור';
+  if (cat.contains('שסתום') || cat.contains('PRV')) return 'שסתום בטיחות לחץ';
+  if (cat.contains('צינור') || cat.contains('פוליאתילן') || cat.contains('נחושת')) return 'צינור חיבור';
+  if (cat.contains('ברז') || cat.contains('ברזים')) return 'פותח/סוגר את המים';
+  switch (flowRole(p)) {
+    case FlowRole.connector:
+      return 'מחבר בין שני חלקים';
+    case FlowRole.fixture:
+      return 'נקודת קצה של הקו';
+    case FlowRole.accessory:
+      return 'אביזר לקו';
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 class InstallStudioScreen extends ConsumerStatefulWidget {
   const InstallStudioScreen({super.key});
@@ -170,7 +199,27 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       AnimationController(vsync: this, duration: const Duration(seconds: 3))
         ..repeat();
 
-  bool _loop = false; // closed recirculation ring
+  bool _loop = false;
+  bool _showTutorial = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstVisit();
+  }
+
+  Future<void> _checkFirstVisit() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool('installStudioSeen') ?? false) && mounted) {
+      setState(() => _showTutorial = true);
+    }
+  }
+
+  void _dismissTutorial() {
+    SharedPreferences.getInstance()
+        .then((p) => p.setBool('installStudioSeen', true));
+    setState(() => _showTutorial = false);
+  }
 
   @override
   void dispose() {
@@ -195,16 +244,25 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             ),
           ),
           child: SafeArea(
-            child: AnimatedBuilder(
-              animation: _flow,
-              builder: (_, __) => CustomPaint(
-                painter: _BlueprintPainter(_flow.value),
-                child: Column(children: [
-                  _header(chain, temp),
-                  Expanded(child: _canvas(chain, temp)),
-                  _dock(chain, temp),
-                ]),
-              ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                AnimatedBuilder(
+                  animation: _flow,
+                  builder: (_, __) => CustomPaint(
+                    painter: _BlueprintPainter(_flow.value),
+                    child: Column(children: [
+                      _header(chain, temp),
+                      Expanded(child: _canvas(chain, temp)),
+                      _dock(chain, temp),
+                    ]),
+                  ),
+                ),
+                if (_showTutorial)
+                  Positioned.fill(
+                    child: _TutorialOverlay(onDismiss: _dismissTutorial),
+                  ),
+              ],
             ),
           ),
         ),
@@ -393,12 +451,14 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   }
 
   Widget _emptyState(int temp) {
-    // Quick-start scenarios — each maps to a picker category.
+    // Quick-start scenarios — each maps to a _kCats index.
     const scenarios = [
       ('🚰', 'ברז / כיור', 0),
       ('🚿', 'מקלחת / אמבטיה', 1),
       ('🪠', 'שירותים', 2),
+      ('🔥', 'מים חמים', 3),
       ('🌿', 'גינה', 4),
+      ('🔀', 'מחלק — כמה ברזים', 5),
     ];
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
@@ -428,10 +488,10 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
+            crossAxisCount: 3,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            childAspectRatio: 2.2,
+            childAspectRatio: 1.3,
           ),
           itemCount: scenarios.length,
           itemBuilder: (_, i) {
@@ -441,18 +501,20 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
               child: Container(
                 decoration: BoxDecoration(
                   color: _panel,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: _supply.withOpacity(0.3)),
-                  boxShadow: [BoxShadow(color: _supply.withOpacity(0.07), blurRadius: 12)],
+                  boxShadow: [BoxShadow(color: _supply.withOpacity(0.07), blurRadius: 10)],
                 ),
-                child: Row(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(emoji, style: const TextStyle(fontSize: 26)),
-                    const SizedBox(width: 8),
+                    Text(emoji, style: const TextStyle(fontSize: 24)),
+                    const SizedBox(height: 6),
                     Text(label,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
                         style: const TextStyle(
-                            color: _ink, fontSize: 13, fontWeight: FontWeight.w800)),
+                            color: _ink, fontSize: 11, fontWeight: FontWeight.w800)),
                   ],
                 ),
               ),
@@ -1722,8 +1784,10 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
                           fontWeight: FontWeight.w600)),
                   const SizedBox(height: 3),
                   Row(children: [
-                    Text(p.categoryHe,
-                        style: const TextStyle(color: _mute, fontSize: 11)),
+                    Expanded(
+                      child: Text(_productHint(p),
+                          style: const TextStyle(color: _mute, fontSize: 11)),
+                    ),
                     if (inChain) ...[
                       const SizedBox(width: 6),
                       Container(
@@ -1772,5 +1836,104 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
           border: Border.all(color: c.withOpacity(0.3)),
         ),
         child: Icon(Icons.plumbing, color: c.withOpacity(0.6), size: 26),
+      );
+}
+
+// ── first-time tutorial overlay ───────────────────────────────────────────────
+class _TutorialOverlay extends StatelessWidget {
+  const _TutorialOverlay({required this.onDismiss});
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Container(
+        color: _void0.withOpacity(0.93),
+        alignment: Alignment.center,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 70, height: 70,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(colors: [_supply, _fixture]),
+                  boxShadow: [BoxShadow(color: _supply.withOpacity(0.4), blurRadius: 20)],
+                ),
+                child: const Icon(Icons.plumbing, color: Colors.white, size: 32),
+              ),
+              const SizedBox(height: 20),
+              const Text('ברוכים הבאים לסטודיו התקנות',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: _ink, fontSize: 20, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 6),
+              const Text('3 צעדים לרשימת קנייה מוכנה',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: _mute, fontSize: 13)),
+              const SizedBox(height: 32),
+              _step('1️⃣', 'בחר מה אתה מחבר',
+                  'ברז, מקלחת, שירותים, גינה — לחץ על הקטגוריה הנכונה'),
+              _step('2️⃣', 'הוסף 2 נקודות לפחות',
+                  'כניסה + יציאה — המערכת ממלאת חיבורים אוטומטית'),
+              _step('3️⃣', 'קבל רשימת קנייה',
+                  'שלח לאינסטלטור ב-WhatsApp, או הוסף ישירות לעגלה'),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _accent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  onPressed: onDismiss,
+                  child: const Text('הבנתי — בוא נתחיל!',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: onDismiss,
+                child: const Text('דלג',
+                    style: TextStyle(color: _mute, fontSize: 12)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _step(String emoji, String title, String desc) => Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 26)),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          color: _ink, fontSize: 14, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 3),
+                  Text(desc,
+                      style: const TextStyle(
+                          color: _mute, fontSize: 12, height: 1.4)),
+                ],
+              ),
+            ),
+          ],
+        ),
       );
 }
