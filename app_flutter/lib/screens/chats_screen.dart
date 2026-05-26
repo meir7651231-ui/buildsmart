@@ -59,6 +59,54 @@ final chatArchivedIdsProvider =
   (_) => _ChatArchivedNotifier(),
 );
 
+const String _kMuteKey = 'bs.chat-muted.v1';
+
+class _ChatMutedNotifier extends StateNotifier<Set<String>> {
+  _ChatMutedNotifier() : super(const {}) {
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_kMuteKey);
+      if (list != null) state = list.toSet();
+    } on Object catch (_) {/* keep empty */}
+  }
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_kMuteKey, state.toList());
+    } on Object catch (_) {/* best-effort */}
+  }
+
+  void setAll(Set<String> ids) {
+    state = ids;
+    unawaited(_persist());
+  }
+}
+
+final chatMutedIdsProvider =
+    StateNotifierProvider<_ChatMutedNotifier, Set<String>>(
+  (_) => _ChatMutedNotifier(),
+);
+
+/// All thread ids — used by "השתק הכל".
+Set<String> get _allThreadIds => {for (final t in _kThreads) t.id};
+
+/// True when every conversation is muted.
+bool allChatsMuted(WidgetRef ref) {
+  final muted = ref.read(chatMutedIdsProvider);
+  return _allThreadIds.every(muted.contains);
+}
+
+/// "השתק הכל" toggle: mute all when not all muted, otherwise unmute all.
+void toggleMuteAllChats(WidgetRef ref) {
+  final notifier = ref.read(chatMutedIdsProvider.notifier);
+  notifier.setAll(allChatsMuted(ref) ? <String>{} : _allThreadIds);
+}
+
 // ─── data ─────────────────────────────────────────────────────────────────────
 
 typedef _Thread = ({
@@ -498,15 +546,16 @@ class _DismissibleThread extends ConsumerWidget {
 
 // ─── thread row ───────────────────────────────────────────────────────────────
 
-class _ThreadRow extends StatelessWidget {
+class _ThreadRow extends ConsumerWidget {
   const _ThreadRow({required this.thread});
 
   final _Thread thread;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final missed = thread.direction == _Direction.missed;
     final isUnread = thread.unread > 0;
+    final muted = ref.watch(chatMutedIdsProvider).contains(thread.id);
     final nameColor = missed ? BsTokens.brand : const Color(0xFF1A1A1A);
     final arrowIcon = thread.direction == _Direction.outgoing
         ? Icons.north_east_rounded
@@ -584,6 +633,11 @@ class _ThreadRow extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          if (muted) ...[
+                            const Icon(Icons.notifications_off,
+                                color: Color(0xFF999999), size: 14),
+                            const SizedBox(width: 4),
+                          ],
                           Icon(arrowIcon, color: arrowColor, size: 13),
                           const SizedBox(width: 3),
                           Text(
@@ -627,7 +681,9 @@ class _ThreadRow extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: BsTokens.brand,
+                            color: muted
+                                ? const Color(0xFFBDBDBD)
+                                : BsTokens.brand,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(

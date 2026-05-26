@@ -200,7 +200,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                       SizedBox(width: 4),
                       Text(
-                        'v3.56 · 26.5.26 · שיחה חדשה פעילה',
+                        'v3.57 · 26.5.26 · השתקת שיחות',
                         style: TextStyle(
                           color: Color(0xFF4CAF50),
                           fontSize: 10,
@@ -420,25 +420,31 @@ class _ChatsMenuButton extends ConsumerWidget {
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
-      itemBuilder: (_) => const [
-        PopupMenuItem<String>(
-          value: 'new_chat',
-          child: _MenuRow(emoji: '✏️', label: 'שיחה חדשה'),
-        ),
-        PopupMenuItem<String>(
-          value: 'archive',
-          child: _MenuRow(emoji: '🗂️', label: 'ארכיון שיחות'),
-        ),
-        PopupMenuItem<String>(
-          value: 'mute_all',
-          child: _MenuRow(emoji: '🔇', label: 'השתק הכל'),
-        ),
-        PopupMenuDivider(),
-        PopupMenuItem<String>(
-          value: 'settings',
-          child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
-        ),
-      ],
+      itemBuilder: (_) {
+        final allMuted = allChatsMuted(ref);
+        return [
+          const PopupMenuItem<String>(
+            value: 'new_chat',
+            child: _MenuRow(emoji: '✏️', label: 'שיחה חדשה'),
+          ),
+          const PopupMenuItem<String>(
+            value: 'archive',
+            child: _MenuRow(emoji: '🗂️', label: 'ארכיון שיחות'),
+          ),
+          PopupMenuItem<String>(
+            value: 'mute_all',
+            child: _MenuRow(
+              emoji: allMuted ? '🔔' : '🔇',
+              label: allMuted ? 'בטל השתקת הכל' : 'השתק הכל',
+            ),
+          ),
+          const PopupMenuDivider(),
+          const PopupMenuItem<String>(
+            value: 'settings',
+            child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
+          ),
+        ];
+      },
     );
   }
 
@@ -456,7 +462,12 @@ class _ChatsMenuButton extends ConsumerWidget {
       case 'archive':
         Navigator.of(context).push(ChatsArchiveScreen.route());
       case 'mute_all':
-        showToast(context, 'השתק הכל — בבנייה');
+        final wasAllMuted = allChatsMuted(ref);
+        toggleMuteAllChats(ref);
+        showToast(
+          context,
+          wasAllMuted ? 'ההשתקה בוטלה' : 'כל השיחות הושתקו',
+        );
       case 'settings':
         Navigator.of(context).push(ChatSettingsScreen.route());
     }
