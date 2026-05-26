@@ -11,9 +11,8 @@ LipskeyCatalogProduct? _f(String sku) {
 void _build(String desc, List<String> skus) {
   final anchors = [for (final s in skus) _f(s)].whereType<LipskeyCatalogProduct>().toList();
   if (anchors.length != skus.length) { print('?? $desc — SKU חסר'); return; }
-  final plan = buildInstallation(anchors, maxDepthPerSegment: 6, tempC: 20);
+  final plan = buildInstallation(anchors, maxDepthPerSegment: 7, tempC: 20);
   print('\n🔧 $desc');
-  print('   עוגנים: ${anchors.map((a)=>"${a.nameHe}[${a.sku}]").join("  →  ")}');
   print('   ── BOM (${plan.items.length} פריטים) ──');
   for (var i = 0; i < plan.items.length; i++) {
     final p = plan.items[i];
@@ -22,14 +21,15 @@ void _build(String desc, List<String> skus) {
     print('   ${(i+1).toString().padLeft(2)}. $star  ${p.nameHe} [${p.sku}]  ($sys)');
   }
   if (plan.gaps.isNotEmpty) {
-    print('   ⚠️ פערים:'); for (final g in plan.gaps) print('      ✗ ${g.from.nameHe} ↮ ${g.to.nameHe}');
+    print('   ⚠️ פערים (חסר חיבור):'); for (final g in plan.gaps) print('      ✗ ${g.from.nameHe} ↮ ${g.to.nameHe}');
   } else { print('   ✅ הקו שלם — בלי שחסר בורג'); }
 }
 
 void main() {
-  test('שירותים מעוגנים', () {
-    // צינור אספקה (NTM32) → ברז קיסר → אסלה → צינור ניקוז (בור)
-    _build('צינור אספקה → קיסר → אסלה → בור ניקוז',
-        ['40032104', '779096G', '77771006', '116113']);
+  test('שירותים — צינור הזנה גדול', () {
+    _build('ברז הזנה 2" → קיסר → אסלה → בור ניקוז',
+        ['77777316', '779096G', '77771006', '116113']);
+    _build('ברז הזנה 1" → קיסר → אסלה → בור ניקוז',
+        ['77777313', '779096G', '77771006', '116113']);
   });
 }
