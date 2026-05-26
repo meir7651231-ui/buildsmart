@@ -35,7 +35,7 @@ Color _systemColor(LipskeyCatalogProduct p) {
 /// Compact engineering spec line: material · sizes · pressure-rating.
 String _specLine(LipskeyCatalogProduct p) {
   final s = kVerifiedSpecs[p.sku];
-  if (s == null) return p.sku;
+  if (s == null) return p.categoryHe;
   final ends = s.ends.map((e) => e.size).toSet().join('×');
   final parts = <String>[s.material, if (ends.isNotEmpty) ends];
   if (s.pressureRating != null) parts.add(s.pressureRating!);
@@ -201,7 +201,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                 painter: _BlueprintPainter(_flow.value),
                 child: Column(children: [
                   _header(chain, temp),
-                  Expanded(child: _canvas(chain)),
+                  Expanded(child: _canvas(chain, temp)),
                   _dock(chain, temp),
                 ]),
               ),
@@ -266,11 +266,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       label = 'קר';
     }
     return GestureDetector(
-      onTap: () {
-        const opts = [20, 60, 80];
-        final next = opts[(opts.indexOf(temp) + 1) % opts.length];
-        ref.read(lineMaxTempProvider.notifier).state = next;
-      },
+      onTap: () => _showTempPicker(context, temp),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
@@ -293,9 +289,84 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     );
   }
 
+  void _showTempPicker(BuildContext context, int current) {
+    final opts = [
+      (20, '❄️ קר', 'ברז, כיור, שירותים, גינה', _supply),
+      (60, '🔥 חם', 'דוד שמש, דוד חשמלי, מחמם מיידי', const Color(0xFFF97316)),
+      (80, '🌡️ חם מאוד', 'מערכת ישנה או מסחרית, 80° ומעלה', const Color(0xFFEF4444)),
+    ];
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: _void1,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border(top: BorderSide(color: _supply, width: 2)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('סוג הקו — מה טמפרטורת המים?',
+                  style: TextStyle(color: _ink, fontSize: 16, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 4),
+              const Text('הטמפרטורה קובעת אילו פריטי בטיחות נדרשים',
+                  style: TextStyle(color: _mute, fontSize: 12)),
+              const SizedBox(height: 16),
+              ...opts.map((opt) {
+                final (val, emoji, desc, col) = opt;
+                final selected = current == val;
+                return GestureDetector(
+                  onTap: () {
+                    ref.read(lineMaxTempProvider.notifier).state = val;
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: selected ? col.withOpacity(0.16) : _panel,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                          color: selected ? col : _mute.withOpacity(0.3),
+                          width: selected ? 2 : 1),
+                    ),
+                    child: Row(children: [
+                      Text(emoji, style: const TextStyle(fontSize: 24)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(emoji.substring(emoji.indexOf(' ') + 1),
+                                style: TextStyle(
+                                    color: selected ? col : _ink,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800)),
+                            Text(desc,
+                                style: const TextStyle(color: _mute, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      if (selected) Icon(Icons.check_circle, color: col, size: 20),
+                    ]),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // ── the flow canvas — nodes wired by animated pipes ─────────────────────────
-  Widget _canvas(List<LipskeyCatalogProduct> chain) {
-    if (chain.isEmpty) return _emptyState();
+  Widget _canvas(List<LipskeyCatalogProduct> chain, int temp) {
+    if (chain.isEmpty) return _emptyState(temp);
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       itemCount: chain.length,
@@ -321,31 +392,78 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     );
   }
 
-  Widget _emptyState() {
-    return Center(
+  Widget _emptyState(int temp) {
+    // Quick-start scenarios — each maps to a picker category.
+    const scenarios = [
+      ('🚰', 'ברז / כיור', 0),
+      ('🚿', 'מקלחת / אמבטיה', 1),
+      ('🪠', 'שירותים', 2),
+      ('🌿', 'גינה', 4),
+    ];
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Container(
-          width: 96, height: 96,
+          width: 80, height: 80,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: _supply.withOpacity(0.3), width: 2),
             boxShadow: [BoxShadow(color: _supply.withOpacity(0.15), blurRadius: 40)],
           ),
           alignment: Alignment.center,
-          child: Icon(Icons.plumbing,
-              color: _supply.withOpacity(0.8), size: 40),
+          child: Icon(Icons.plumbing, color: _supply.withOpacity(0.8), size: 36),
+        ),
+        const SizedBox(height: 16),
+        const Text('מה אתה רוצה לחבר?',
+            style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 6),
+        const Text(
+          'בחר קטגוריה ↓ ואנחנו נבנה את הרשימה אוטומטית',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: _mute, fontSize: 13, height: 1.5),
         ),
         const SizedBox(height: 20),
-        const Text('בנה קו אינסטלציה',
-            style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w800)),
-        const SizedBox(height: 8),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 48),
-          child: Text(
-            'בחר את נקודות-הקצה של הקו (ברז, אסלה, דוד) — המערכת תחבר הכל אוטומטית ותיצור רשימת קנייה מוכנה.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: _mute, fontSize: 13, height: 1.5),
+        // 2×2 scenario grid
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 2.2,
           ),
+          itemCount: scenarios.length,
+          itemBuilder: (_, i) {
+            final (emoji, label, catIdx) = scenarios[i];
+            return GestureDetector(
+              onTap: () => _openPicker(temp, initialCat: _kCats[catIdx]),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _panel,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: _supply.withOpacity(0.3)),
+                  boxShadow: [BoxShadow(color: _supply.withOpacity(0.07), blurRadius: 12)],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(emoji, style: const TextStyle(fontSize: 26)),
+                    const SizedBox(width: 8),
+                    Text(label,
+                        style: const TextStyle(
+                            color: _ink, fontSize: 13, fontWeight: FontWeight.w800)),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 14),
+        const Text(
+          'לא מוצא? לחץ ➕ למטה לחיפוש חופשי',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: _mute, fontSize: 11),
         ),
       ]),
     );
@@ -394,9 +512,9 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
           ),
           const SizedBox(height: 8),
           const Text(
-            'נדרש לפחות מוצר נוסף כדי לבנות את הקו',
+            'חיבור צינור צריך 2 נקודות — כניסה + יציאה.\nהוסף את הנקודה השנייה (ברז, אסלה, דוד…)',
             textAlign: TextAlign.center,
-            style: TextStyle(color: _mute, fontSize: 12),
+            style: TextStyle(color: _mute, fontSize: 12, height: 1.4),
           ),
         ] else ...[
           // State C: 2+ items — full controls
@@ -413,7 +531,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
               flex: 2,
               child: _glowButton(
                 icon: Icons.bolt,
-                label: '⚡ השלם התקנה',
+                label: '⚡ צור רשימת קנייה',
                 enabled: true,
                 onTap: () => _assemble(chain, temp),
               ),
@@ -570,12 +688,12 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     );
   }
 
-  void _openPicker(int temp) {
+  void _openPicker(int temp, {_PickerCategory? initialCat}) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ProductPicker(lineTemp: temp),
+      builder: (_) => _ProductPicker(lineTemp: temp, initialCat: initialCat),
     );
   }
 }
@@ -917,11 +1035,38 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
             const Divider(height: 1, color: Color(0xFF243049)),
             Expanded(
               child: ListView(controller: ctrl, children: [
+                // Auto-compliance banner — shown when safety items were auto-inserted
+                Builder(builder: (_) {
+                  final autoAdded = plan.items
+                      .where((p) => !anchorSkus.contains(p.sku))
+                      .length;
+                  if (autoAdded == 0) return const SizedBox.shrink();
+                  return Container(
+                    margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A2A1A),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _accent.withOpacity(0.4)),
+                    ),
+                    child: Row(children: [
+                      const Text('✅', style: TextStyle(fontSize: 18)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'הוספנו $autoAdded פריטי בטיחות חובה — הם כבר ברשימה',
+                          style: const TextStyle(
+                              color: _accent, fontSize: 12, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ]),
+                  );
+                }),
                 ..._buildBomRows(plan, anchorSkus),
                 if (plan.gaps.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.fromLTRB(18, 12, 18, 4),
-                    child: Text('⚠️ חיבורים שחסרים בקטלוג',
+                    child: Text('⚠️ חסרים חיבורים — הקו לא שלם',
                         style: TextStyle(
                             color: _drain,
                             fontSize: 13,
@@ -948,7 +1093,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                     child: Row(children: [
-                      const Text('בדיקת תקינות הקו',
+                      const Text('בטיחות ותקינות',
                           style: TextStyle(
                               color: _ink,
                               fontSize: 13,
@@ -967,6 +1112,40 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                   ),
                   for (final ch in checklist) _checkRow(ch),
                 ],
+                // "מה הצעד הבא" — post-BOM guidance card
+                Container(
+                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: _accent.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: _accent.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('💡', style: TextStyle(fontSize: 20)),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('מה הצעד הבא?',
+                                style: TextStyle(
+                                    color: _accent,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800)),
+                            SizedBox(height: 4),
+                            Text(
+                              'לחץ "📋 שלח לאינסטלטור" כדי להעתיק ולשלוח ב-WhatsApp,\nאו "הוסף לעגלה" להזמנה ישירה.',
+                              style: TextStyle(color: _mute, fontSize: 11, height: 1.4),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 10),
               ]),
             ),
@@ -989,7 +1168,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                         children: [
                           Icon(Icons.copy_all, color: _mute, size: 16),
                           SizedBox(width: 6),
-                          Text('העתק רשימה',
+                          Text('📋 שלח לאינסטלטור',
                               style: TextStyle(
                                   color: _ink,
                                   fontSize: 13,
@@ -1080,7 +1259,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     buf.writeln('──────────────────────────');
     buf.writeln('סה"כ: ${plan.items.length} פריטים · ${plan.totalPieces} יחידות');
     Clipboard.setData(ClipboardData(text: buf.toString()));
-    showToast(context, '📋 רשימה הועתקה ללוח');
+    showToast(context, '📋 הועתק — שתף ב-WhatsApp עם האינסטלטור שלך');
   }
 
   // Returns BOM rows — sectioned by zone (trunk/branches) when available,
@@ -1303,15 +1482,16 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
 
 // ── dark product picker ────────────────────────────────────────────────────────
 class _ProductPicker extends ConsumerStatefulWidget {
-  const _ProductPicker({required this.lineTemp});
+  const _ProductPicker({required this.lineTemp, this.initialCat});
   final int lineTemp;
+  final _PickerCategory? initialCat;
   @override
   ConsumerState<_ProductPicker> createState() => _ProductPickerState();
 }
 
 class _ProductPickerState extends ConsumerState<_ProductPicker> {
   String _q = '';
-  _PickerCategory? _cat;
+  late _PickerCategory? _cat = widget.initialCat;
 
   List<LipskeyCatalogProduct> _filtered() {
     final q = _q.trim();
@@ -1500,24 +1680,23 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
             style: TextStyle(color: _mute, fontSize: 14)),
       );
     }
+    final chain = ref.watch(chainProvider);
     return ListView.builder(
       controller: ctrl,
       itemCount: items.length,
       itemBuilder: (_, i) {
         final p = items[i];
         final c = _systemColor(p);
+        final inChain = chain.any((cp) => cp.sku == p.sku);
         return InkWell(
           onTap: () {
-            ref.read(chainProvider.notifier).state = [
-              ...ref.read(chainProvider),
-              p,
-            ];
+            ref.read(chainProvider.notifier).state = [...chain, p];
             Navigator.pop(context);
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(children: [
-              // Product image or color dot fallback
+              // Product image or color fallback
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: p.imageAsset != null
@@ -1542,13 +1721,31 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
                           fontSize: 13,
                           fontWeight: FontWeight.w600)),
                   const SizedBox(height: 3),
-                  Text(p.categoryHe,
-                      style: const TextStyle(color: _mute, fontSize: 11)),
+                  Row(children: [
+                    Text(p.categoryHe,
+                        style: const TextStyle(color: _mute, fontSize: 11)),
+                    if (inChain) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: _accent.withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text('✓ כבר נוסף',
+                            style: TextStyle(
+                                color: _accent,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800)),
+                      ),
+                    ],
+                  ]),
                 ]),
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
                   color: c.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(10),
@@ -1557,7 +1754,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
                 child: Text('הוסף',
                     style: TextStyle(
                         color: c,
-                        fontSize: 12,
+                        fontSize: 13,
                         fontWeight: FontWeight.w800)),
               ),
             ]),
