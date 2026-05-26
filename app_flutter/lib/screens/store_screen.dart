@@ -483,37 +483,44 @@ class _QuickActionsRow extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _QuickAction(
-            icon: Icons.favorite_border,
-            label: 'מועדפים',
-            badge: favItems.length,
-            onTap: () {
-              if (favItems.isEmpty) {
-                showToast(context, 'אין פריטים מועדפים');
-                return;
-              }
-              _showSheet(
-                context,
-                _FavoritesSheet(items: favItems),
-              );
-            },
+          Expanded(
+            child: _QuickAction(
+              icon: Icons.favorite_border,
+              label: 'מועדפים',
+              badge: favItems.length,
+              onTap: () {
+                if (favItems.isEmpty) {
+                  showToast(context, 'אין פריטים מועדפים');
+                  return;
+                }
+                _showSheet(
+                  context,
+                  _FavoritesSheet(items: favItems),
+                );
+              },
+            ),
           ),
-          _QuickAction(
-            icon: Icons.grid_view_rounded,
-            label: 'מועדים',
-            onTap: () => _showSheet(context, const _MoadimSheet()),
+          Expanded(
+            child: _QuickAction(
+              icon: Icons.grid_view_rounded,
+              label: 'מועדים',
+              onTap: () => _showSheet(context, const _MoadimSheet()),
+            ),
           ),
-          _QuickAction(
-            icon: Icons.calendar_today_outlined,
-            label: 'תזמון',
-            onTap: () => _showSheet(context, const _TizmonSheet()),
+          Expanded(
+            child: _QuickAction(
+              icon: Icons.calendar_today_outlined,
+              label: 'תזמון',
+              onTap: () => _showSheet(context, const _TizmonSheet()),
+            ),
           ),
-          _QuickAction(
-            icon: Icons.phone_outlined,
-            label: 'שיחה',
-            onTap: () => _showSheet(context, const _SichaSheet()),
+          Expanded(
+            child: _QuickAction(
+              icon: Icons.phone_outlined,
+              label: 'שיחה',
+              onTap: () => _showSheet(context, const _SichaSheet()),
+            ),
           ),
         ],
       ),
@@ -574,6 +581,9 @@ class _QuickAction extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: const TextStyle(color: Color(0xFFAAAAAA), fontSize: 12)),
         ],
       ),

@@ -374,13 +374,16 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             ),
           ),
           const SizedBox(height: 10),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            _hintChip('🔵 הזנה', _supply),
-            const SizedBox(width: 8),
-            _hintChip('🟣 ברז / קבועה', _fixture),
-            const SizedBox(width: 8),
-            _hintChip('🟡 ניקוז', _drain),
-          ]),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _hintChip('🔵 הזנה', _supply),
+              _hintChip('🟣 ברז / קבועה', _fixture),
+              _hintChip('🟡 ניקוז', _drain),
+            ],
+          ),
         ] else if (chain.length == 1) ...[
           // State B: single item — nudge to add a second product
           SizedBox(
@@ -525,12 +528,19 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                 ? [BoxShadow(color: _accent.withOpacity(0.45), blurRadius: 18)]
                 : null,
           ),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          child: Row(mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(icon, color: Colors.white, size: 19),
             const SizedBox(width: 8),
-            Text(label,
-                style: const TextStyle(
-                    color: Colors.white, fontSize: 15, fontWeight: FontWeight.w900)),
+            Flexible(
+              child: Text(label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900)),
+            ),
           ]),
         ),
       ),

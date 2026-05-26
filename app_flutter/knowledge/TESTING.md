@@ -12,6 +12,11 @@ Three layers verify the app. Run all before every commit.
 - `edge_cases_test.dart` — 30 adversarial edge cases.
 - `catalog_regression_test.dart` — runs the in-app `testCatalog()` harness.
 - `widget_test.dart` — shell boot, dial drills, overview/categories.
+- `robustness_test.dart` — **20 robustness checks**: every major screen rendered
+  under stress (large text 1.15 / extra-large 1.3, narrow 340 / tiny 300 widths)
+  plus shell tab/section/dial states. Caught real horizontal-Row overflows in
+  catalog, store (quick actions), chat settings, and install studio — all fixed
+  with `Flexible`/`Wrap`/ellipsis.
 - `product_journey_test.dart` — **end-to-end purchase journey** for **10 real
   products** across categories: catalog search → product sheet → add-to-cart →
   cart FAB → store cart (stepper + summary) → checkout → confirmation, asserting

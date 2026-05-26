@@ -2030,12 +2030,16 @@ class _OverviewBlock extends StatelessWidget {
           child: Row(
             children: [
               const SizedBox(width: 16),
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+              Flexible(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               if (count > 0) ...[

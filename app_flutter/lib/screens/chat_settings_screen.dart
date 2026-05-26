@@ -117,12 +117,16 @@ class _QuickReplyBanner extends StatelessWidget {
             children: [
               const Text('⚡', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
-              const Text(
-                'תשובות מהירות',
-                style: TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
+              const Flexible(
+                child: Text(
+                  'תשובות מהירות',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
                 ),
               ),
               const Spacer(),
