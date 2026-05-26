@@ -9,7 +9,7 @@ import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/services/voice.dart';
-import 'package:buildsmart/screens/compat_screen.dart';
+import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/product_favorites.dart';
@@ -1758,7 +1758,7 @@ class _CatalogBody extends ConsumerWidget {
     if (active == 'קטגוריות') return const _CatalogList();
     if (active == 'מועדפים') return const _FavoritesSection();
     if (active == 'חיפושים אחרונים') return const _RecentSearchesSection();
-    if (active == 'תאימות') return const CompatScreen();
+    if (active == 'תאימות') return const InstallStudioScreen();
 
     final selected = ref.watch(catalogListItemsProvider)[active];
     final hasItems = selected != null && selected.isNotEmpty;

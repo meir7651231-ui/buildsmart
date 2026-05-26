@@ -1,6 +1,6 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
-import 'package:buildsmart/screens/compat_screen.dart';
+import 'package:buildsmart/logic/install_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 LipskeyCatalogProduct? _find(String sku) {
