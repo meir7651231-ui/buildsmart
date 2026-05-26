@@ -168,6 +168,18 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   }
 
   Widget _tempPill(int temp) {
+    final Color borderColor;
+    final String label;
+    if (temp >= 80) {
+      borderColor = const Color(0xFFEF4444); // red
+      label = 'חם מאוד';
+    } else if (temp >= 60) {
+      borderColor = const Color(0xFFF97316); // orange
+      label = 'חם';
+    } else {
+      borderColor = _supply; // blue/cyan
+      label = 'קר';
+    }
     return GestureDetector(
       onTap: () {
         const opts = [20, 60, 80];
@@ -179,14 +191,18 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         decoration: BoxDecoration(
           color: _panel,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: _supply.withOpacity(0.4)),
+          border: Border.all(color: borderColor),
         ),
         child: Row(children: [
-          const Icon(Icons.thermostat, color: _supply, size: 14),
+          Icon(Icons.thermostat, color: borderColor, size: 14),
+          const SizedBox(width: 4),
+          Text(label,
+              style: TextStyle(
+                  color: borderColor, fontSize: 12, fontWeight: FontWeight.w800)),
           const SizedBox(width: 4),
           Text('$temp°C',
               style: const TextStyle(
-                  color: _ink, fontSize: 12, fontWeight: FontWeight.w800)),
+                  color: _mute, fontSize: 10, fontWeight: FontWeight.w600)),
         ]),
       ),
     );
@@ -231,7 +247,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             boxShadow: [BoxShadow(color: _supply.withOpacity(0.15), blurRadius: 40)],
           ),
           alignment: Alignment.center,
-          child: Icon(Icons.account_tree_outlined,
+          child: Icon(Icons.plumbing,
               color: _supply.withOpacity(0.8), size: 40),
         ),
         const SizedBox(height: 20),
@@ -241,7 +257,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 48),
           child: Text(
-            'הוסף מוצרי-קצה — הזנה, קבועה, ניקוז — והמנוע יחבר ביניהם אוטומטית לרשימת-קנייה שלמה.',
+            'בחר את נקודות-הקצה של הקו (ברז, אסלה, דוד) — המערכת תחבר הכל אוטומטית ותיצור רשימת קנייה מוכנה.',
             textAlign: TextAlign.center,
             style: TextStyle(color: _mute, fontSize: 13, height: 1.5),
           ),
@@ -250,7 +266,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     );
   }
 
-  // ── bottom dock: legend + actions ───────────────────────────────────────────
+  // ── bottom dock: progressive 3-state layout ──────────────────────────────────
   Widget _dock(List<LipskeyCatalogProduct> chain, int temp) {
     return Container(
       decoration: const BoxDecoration(
@@ -261,70 +277,125 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       padding: EdgeInsets.fromLTRB(
           16, 14, 16, 14 + MediaQuery.of(context).padding.bottom),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Row(children: [
-          _legendDot(_supply, 'אספקה'),
-          _legendDot(_drain, 'ניקוז'),
-          _legendDot(_fixture, 'קבועה'),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => setState(() => _loop = !_loop),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: _loop ? _fixture.withOpacity(0.2) : _void1,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                    color: _loop ? _fixture : _mute.withOpacity(0.3)),
-              ),
-              child: Row(children: [
-                Icon(Icons.loop,
-                    color: _loop ? _fixture : _mute, size: 14),
-                const SizedBox(width: 4),
-                Text('לולאה',
-                    style: TextStyle(
-                        color: _loop ? _fixture : _mute,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700)),
-              ]),
-            ),
-          ),
-        ]),
-        const SizedBox(height: 12),
-        Row(children: [
-          Expanded(
-            child: _ghostButton(
+        if (chain.isEmpty) ...[
+          // State A: empty chain — prominent first-product CTA
+          SizedBox(
+            width: double.infinity,
+            child: _glowButton(
               icon: Icons.add,
-              label: 'הוסף מוצר',
+              label: '➕ הוסף מוצר ראשון',
+              enabled: true,
               onTap: () => _openPicker(temp),
             ),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            flex: 2,
+          const SizedBox(height: 10),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            _hintChip('🔵 הזנה', _supply),
+            const SizedBox(width: 8),
+            _hintChip('🟣 ברז / קבועה', _fixture),
+            const SizedBox(width: 8),
+            _hintChip('🟡 ניקוז', _drain),
+          ]),
+        ] else if (chain.length == 1) ...[
+          // State B: single item — nudge to add a second product
+          SizedBox(
+            width: double.infinity,
             child: _glowButton(
-              icon: Icons.bolt,
-              label: 'השלם התקנה',
-              enabled: chain.length >= 2,
-              onTap: () => _assemble(chain, temp),
+              icon: Icons.add,
+              label: '➕ הוסף עוד מוצר',
+              enabled: true,
+              onTap: () => _openPicker(temp),
             ),
           ),
-        ]),
+          const SizedBox(height: 8),
+          const Text(
+            'נדרש לפחות מוצר נוסף כדי לבנות את הקו',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: _mute, fontSize: 12),
+          ),
+        ] else ...[
+          // State C: 2+ items — full controls
+          Row(children: [
+            Expanded(
+              child: _ghostButton(
+                icon: Icons.add,
+                label: '➕ הוסף',
+                onTap: () => _openPicker(temp),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              flex: 2,
+              child: _glowButton(
+                icon: Icons.bolt,
+                label: '⚡ השלם התקנה',
+                enabled: true,
+                onTap: () => _assemble(chain, temp),
+              ),
+            ),
+          ]),
+          if (temp > 20) ...[
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+                onTap: () => setState(() => _loop = !_loop),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: _loop ? _fixture.withOpacity(0.2) : _void1,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                        color: _loop ? _fixture : _mute.withOpacity(0.3)),
+                  ),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(Icons.loop,
+                        color: _loop ? _fixture : _mute, size: 14),
+                    const SizedBox(width: 4),
+                    Text('מחזור מים חמים',
+                        style: TextStyle(
+                            color: _loop ? _fixture : _mute,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700)),
+                  ]),
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Row(children: [
+            _legendDot(_supply, 'אספקה'),
+            _legendDot(_drain, 'ניקוז'),
+            _legendDot(_fixture, 'קבועה'),
+          ]),
+        ],
       ]),
     );
   }
+
+  Widget _hintChip(String label, Color c) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: c.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: c.withOpacity(0.4)),
+        ),
+        child: Text(label,
+            style: TextStyle(color: c, fontSize: 11, fontWeight: FontWeight.w700)),
+      );
 
   Widget _legendDot(Color c, String label) => Padding(
         padding: const EdgeInsets.only(left: 14),
         child: Row(children: [
           Container(
-            width: 9, height: 9,
+            width: 8, height: 8,
             decoration: BoxDecoration(
               shape: BoxShape.circle, color: c,
               boxShadow: [BoxShadow(color: c.withOpacity(0.7), blurRadius: 7)],
             ),
           ),
           const SizedBox(width: 5),
-          Text(label, style: const TextStyle(color: _mute, fontSize: 11)),
+          Text(label, style: const TextStyle(color: _mute, fontSize: 10)),
         ]),
       );
 
@@ -458,6 +529,20 @@ class _NodeRow extends StatelessWidget {
           boxShadow: [BoxShadow(color: c.withOpacity(0.18), blurRadius: 20)],
         ),
         child: Row(children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 8, height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: c,
+                  boxShadow: [BoxShadow(color: c.withOpacity(0.7), blurRadius: 5)],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 8),
           Container(
             width: 46, height: 46,
             decoration: BoxDecoration(
@@ -817,7 +902,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                         borderRadius: BorderRadius.circular(15),
                         border: Border.all(color: _mute.withOpacity(0.4)),
                       ),
-                      child: const Text('החל על הקו',
+                      child: const Text('עדכן תצוגה',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               color: _ink,
