@@ -17,13 +17,13 @@ class NotifSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         title: const Text(
           'הגדרות התראות',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          style: TextStyle(color: Color(0xFF1A1A1A), fontWeight: FontWeight.w700),
         ),
         iconTheme: const IconThemeData(color: Colors.black54),
         actions: [
@@ -60,7 +60,7 @@ class NotifSettingsScreen extends ConsumerWidget {
         backgroundColor: const Color(0xFFFFFFFF),
         title: const Text(
           'איפוס הגדרות?',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF1A1A1A)),
         ),
         content: const Text(
           'כל הגדרות ההתראות יוחזרו לברירת המחדל.',
@@ -137,7 +137,7 @@ class _SnoozeBanner extends ConsumerWidget {
                           ? 'התראות מושתקות עד $untilLabel'
                           : '🔇 השתק התראות זמנית',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Color(0xFF1A1A1A),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -212,7 +212,7 @@ class _SnoozeSheet extends StatelessWidget {
             child: Text(
               '🔇 השתק התראות',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF1A1A1A),
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -224,7 +224,7 @@ class _SnoozeSheet extends StatelessWidget {
             (o) => ListTile(
               title: Text(
                 o.label,
-                style: const TextStyle(color: Colors.white, fontSize: 15),
+                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
               ),
               trailing: const Icon(
                 Icons.chevron_left,
@@ -724,6 +724,9 @@ class _SectionTile extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
+  // Count only functional rows — exclude "בבנייה" placeholders.
+  int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -740,10 +743,26 @@ class _SectionTile extends StatelessWidget {
           iconColor: Colors.black54,
           collapsedIconColor: Colors.black54,
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
+          // Count badge replaces the default expand chevron.
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: BsTokens.brand,
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Text(
+              '$_activeCount',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
           title: Text(
             title,
             style: const TextStyle(
-              color: Colors.white,
+              color: Color(0xFF1A1A1A),
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
@@ -770,7 +789,7 @@ class _SwitchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -806,7 +825,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
         ...options.map(
           (o) => RadioListTile<T>(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            title: Text(o.label, style: const TextStyle(color: Colors.white)),
+            title: Text(o.label, style: const TextStyle(color: Color(0xFF1A1A1A))),
             value: o.value,
             groupValue: value,
             activeColor: BsTokens.brand,
@@ -838,7 +857,7 @@ class _TimeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       trailing: Text(
         _formatted,
         style: const TextStyle(
@@ -852,8 +871,8 @@ class _TimeRow extends StatelessWidget {
           context: context,
           initialTime: time,
           builder: (ctx, child) => Theme(
-            data: ThemeData.dark().copyWith(
-              colorScheme: const ColorScheme.dark(
+            data: ThemeData.light().copyWith(
+              colorScheme: const ColorScheme.light(
                 primary: BsTokens.brand,
                 surface: Color(0xFFFFFFFF),
               ),
@@ -875,7 +894,7 @@ class _PlaceholderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       trailing: const Text(
         'בבנייה',
         style: TextStyle(color: Color(0xFF666666), fontSize: 12),

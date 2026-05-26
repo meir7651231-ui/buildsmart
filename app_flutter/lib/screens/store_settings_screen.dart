@@ -17,13 +17,13 @@ class StoreSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         title: const Text(
           'הגדרות חנות',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          style: TextStyle(color: Color(0xFF1A1A1A), fontWeight: FontWeight.w700),
         ),
         iconTheme: const IconThemeData(color: Colors.black54),
         actions: [
@@ -59,7 +59,7 @@ class StoreSettingsScreen extends ConsumerWidget {
         backgroundColor: const Color(0xFFFFFFFF),
         title: const Text(
           'איפוס הגדרות?',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF1A1A1A)),
         ),
         content: const Text(
           'כל הגדרות החנות יוחזרו לברירת המחדל.',
@@ -575,6 +575,9 @@ class _SectionTile extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
+  // Count only functional rows — exclude "בבנייה" placeholders.
+  int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -591,10 +594,26 @@ class _SectionTile extends StatelessWidget {
           iconColor: Colors.black54,
           collapsedIconColor: Colors.black54,
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
+          // Count badge replaces the default expand chevron.
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: BsTokens.brand,
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Text(
+              '$_activeCount',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
           title: Text(
             title,
             style: const TextStyle(
-              color: Colors.white,
+              color: Color(0xFF1A1A1A),
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
@@ -621,7 +640,7 @@ class _SwitchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -657,7 +676,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
         ...options.map(
           (o) => RadioListTile<T>(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            title: Text(o.label, style: const TextStyle(color: Colors.white)),
+            title: Text(o.label, style: const TextStyle(color: Color(0xFF1A1A1A))),
             value: o.value,
             groupValue: value,
             activeColor: BsTokens.brand,
@@ -720,13 +739,13 @@ class _InlineTextRowState extends State<_InlineTextRow> {
           const SizedBox(height: 6),
           TextField(
             controller: _ctrl,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Color(0xFF1A1A1A)),
             cursorColor: BsTokens.brand,
             decoration: InputDecoration(
               hintText: widget.hint,
               hintStyle: const TextStyle(color: Color(0xFF666666)),
               filled: true,
-              fillColor: const Color(0xFF222222),
+              fillColor: const Color(0xFFF2F3F5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
@@ -787,21 +806,21 @@ class _NumberRowState extends State<_NumberRow> {
           Expanded(
             child: Text(
               widget.label,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
             ),
           ),
           SizedBox(
             width: 100,
             child: TextField(
               controller: _ctrl,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Color(0xFF1A1A1A)),
               cursorColor: BsTokens.brand,
               textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFF222222),
+                fillColor: const Color(0xFFF2F3F5),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -828,7 +847,7 @@ class _PlaceholderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       trailing: const Text(
         'בבנייה',
         style: TextStyle(color: Color(0xFF666666), fontSize: 12),
@@ -853,7 +872,7 @@ class _ActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Colors.white)),
+      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
       trailing: TextButton(
         onPressed: onTap,
         style: TextButton.styleFrom(foregroundColor: Colors.redAccent),

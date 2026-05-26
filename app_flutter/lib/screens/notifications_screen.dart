@@ -1,4 +1,5 @@
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -180,9 +181,13 @@ List<_Notif> _filtered({
   required NotifSection section,
   required Set<String> dismissedIds,
   required String query,
+  required Set<NotifSection> mutedTypes,
 }) =>
     _kNotifs.where((n) {
       if (dismissedIds.contains(n.id)) {
+        return false;
+      }
+      if (mutedTypes.contains(n.type)) {
         return false;
       }
       if (section != NotifSection.all && n.type != section) {
@@ -568,8 +573,21 @@ class _NotifList extends ConsumerWidget {
     final dismissedIds = ref.watch(notifDismissedIdsProvider);
     final query = ref.watch(notifSearchQueryProvider);
     final expandedKeys = ref.watch(notifExpandedGroupsProvider);
+    final ns = ref.watch(notifSettingsProvider);
+    // Per-type toggles from notification settings hide muted categories.
+    final mutedTypes = <NotifSection>{
+      if (!ns.typeOrders) NotifSection.orders,
+      if (!ns.typeShipments) NotifSection.shipments,
+      if (!ns.typeDeals) NotifSection.deals,
+      if (!ns.typePriceDrops) NotifSection.budget,
+    };
     final items = _withHeadersAndCollapse(
-      _filtered(section: section, dismissedIds: dismissedIds, query: query),
+      _filtered(
+        section: section,
+        dismissedIds: dismissedIds,
+        query: query,
+        mutedTypes: mutedTypes,
+      ),
       expandedKeys,
     );
 
