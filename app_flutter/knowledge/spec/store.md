@@ -78,9 +78,9 @@
 | Pill `'🛒 הסל'` | chip | קבוע | tap ⇐ `StoreSection.cart` | ✅ |
 | Pill `'📦 הזמנות'` | chip | קבוע | tap ⇐ `StoreSection.orders` | ✅ |
 | Pill `'🔧 שירותים'` | chip | קבוע | tap ⇐ `StoreSection.services` | ✅ |
-| Summary chip `'🛒 3 פריטים בסל'` | label | קבוע hard-coded | — (לא אינטראקטיבי) | 🚧 |
-| Summary chip `'📦 2 הזמנות פתוחות'` | label | קבוע | — | 🚧 |
-| Summary chip `'📨 3 הצעות ספקים'` | label | קבוע | — | 🚧 |
+| Summary chip `'🛒 N פריטים בסל'` | label | **נגזר**: `cartItemCount(cartQtys, smartLines)` | מתעדכן עם הסל | ✅ |
+| Summary chip `'📦 N הזמנות פתוחות'` | label | **נגזר**: `_kOrders.where(isOrderOpen)` (stage≠delivered) | — | ✅ |
+| Summary chip `'📨 N הצעות ספקים'` | label | **נגזר** מ-badge של שורת "מכרז ספקים" (`_kSupplierOffersCount`) | — | ✅ (מקור-יחיד, נתון mock) |
 | QuickAction `'מועדפים'` | כפתור+badge | `storeFavoritesProvider` | tap ⇐ אם ריק toast `'אין פריטים מועדפים'`; אחרת sheet `_FavoritesSheet` | ✅ |
 | QuickAction `'מועדים'` | כפתור | קבוע | tap ⇐ `_MoadimSheet` (לוח שנה / אירועים קרובים / לוח עבודה / תזכורות) | 🚧 (פריטים → toast "בבנייה") |
 | QuickAction `'תזמון'` | כפתור | קבוע | tap ⇐ `_TizmonSheet` (תזמן פגישה/משלוח/עובד/ביקורת) | 🚧 |
@@ -281,7 +281,7 @@ subtotal = Σ (item.unitPrice × qtys[item.id]) על _kCItems  +  Σ line.total 
 
 ## 10. פערים ידועים
 
-- **Summary chips קבועים** (`'🛒 3 פריטים בסל'` וכו') — לא נגזרים ממצב הסל/ההזמנות האמיתי; hard-coded.
+- ~~**Summary chips קבועים**~~ ✅ **טופל**: הצ'יפים נגזרים כעת ממצב אמיתי — `cartItemCount` (סל), `isOrderOpen` (הזמנות פתוחות = 3, תוקן מהערך השגוי 2), והצעות הספקים ממקור-יחיד עם שורת "מכרז ספקים" (נתון mock סטטי, אך ללא כפילות).
 - **`_CheckoutSheet` "אישור הזמנה"** — mock בלבד: מציג toast עם `DateTime.now().second` כמספר הזמנה, **אינו** מנקה את הסל ואינו יוצר רשומת הזמנה.
 - **הזמנות ושירותים** — נתונים קבועים (`_kOrders`, `_kServiceSheets`); ה-sheets שלהם מובילים ברובם ל-toast `'… — בבנייה'`. "מעקב הזמנה 🚛" — בבנייה.
 - **`_NotesField` (הערות לשליח)** — הטקסט אינו נשמר ואינו נשלח ל-checkout.

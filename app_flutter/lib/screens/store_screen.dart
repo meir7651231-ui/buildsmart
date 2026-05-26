@@ -159,6 +159,17 @@ int cartTotal(int subtotal, int deliveryFee, {required bool vatInclusive}) =>
         ? subtotal + deliveryFee
         : subtotal + cartVat(subtotal, vatInclusive: false) + deliveryFee;
 
+/// Number of distinct line items currently in the cart: fixed items with a
+/// positive quantity plus every smart-cart line.
+int cartItemCount(Map<String, int> qtys, List<SmartCartLine> smartLines) =>
+    qtys.values.where((q) => q > 0).length + smartLines.length;
+
+/// Order stage that means the order is finished (no longer "open").
+const String kDeliveredStage = 'delivered';
+
+/// An order is "open" until it has been delivered.
+bool isOrderOpen(String stage) => stage != kDeliveredStage;
+
 /// Checkout is blocked when a positive minimum is set and the subtotal is below it.
 bool cartBelowMinimum(int subtotal, StoreSettings s) =>
     s.minOrderAmount > 0 && subtotal < s.minOrderAmount;
@@ -238,26 +249,43 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
 
 // ─── summary row ─────────────────────────────────────────────────────────────
 
-class _SummaryRow extends StatelessWidget {
+class _SummaryRow extends ConsumerWidget {
   const _SummaryRow();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cartCount = cartItemCount(
+      ref.watch(cartQtysProvider),
+      ref.watch(smartCartProvider),
+    );
+    final openOrders = _kOrders.where((o) => isOrderOpen(o.stage)).length;
+    final offers = _kSupplierOffersCount;
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: Row(
-        children: const [
-          _SummaryChip(label: '🛒 3 פריטים בסל',    color: BsTokens.brand),
-          SizedBox(width: 8),
-          _SummaryChip(label: '📦 2 הזמנות פתוחות', color: Color(0xFF4CAF50)),
-          SizedBox(width: 8),
-          _SummaryChip(label: '📨 3 הצעות ספקים',   color: Color(0xFFFF9800)),
+        children: [
+          _SummaryChip(
+              label: '🛒 $cartCount פריטים בסל', color: BsTokens.brand),
+          const SizedBox(width: 8),
+          _SummaryChip(
+              label: '📦 $openOrders הזמנות פתוחות',
+              color: const Color(0xFF4CAF50)),
+          const SizedBox(width: 8),
+          _SummaryChip(
+              label: '📨 $offers הצעות ספקים',
+              color: const Color(0xFFFF9800)),
         ],
       ),
     );
   }
 }
+
+/// Open supplier-tender offers — single-sourced from the "מכרז ספקים" row badge
+/// so the chip and the list row never drift.
+final int _kSupplierOffersCount =
+    _kAllItems.firstWhere((m) => m.title == 'מכרז ספקים').badge;
 
 class _SummaryChip extends StatelessWidget {
   const _SummaryChip({required this.label, required this.color});

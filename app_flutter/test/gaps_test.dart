@@ -252,6 +252,33 @@ void main() {
     });
   });
 
+  group('store summary chips (derived)', () {
+    test('cart item count = positive fixed items + smart lines', () {
+      expect(cartItemCount(const {'blk': 150, 'pls': 5, 'blt': 80, 'bm': 10},
+          const []), 4);
+      expect(cartItemCount(const {'blk': 0, 'pls': 5}, const []), 1);
+      expect(cartItemCount(const {}, const []), 0);
+    });
+    test('cart item count adds smart-cart lines', () {
+      final line = SmartCartLine(
+        productKey: 'k',
+        productName: 'p',
+        productEmoji: '🔧',
+        brandName: 'b',
+        brandPrice: 10,
+        productQty: 2,
+        accessories: const [],
+      );
+      expect(cartItemCount(const {'blk': 5}, [line]), 2);
+    });
+    test('an order is open until delivered', () {
+      expect(isOrderOpen('transit'), isTrue);
+      expect(isOrderOpen('ready'), isTrue);
+      expect(isOrderOpen('preparing'), isTrue);
+      expect(isOrderOpen(kDeliveredStage), isFalse);
+    });
+  });
+
   group('grid-card image size', () {
     test('exact padding + emoji per size', () {
       expect(gridCardImageMetrics(CatalogImageSize.small),

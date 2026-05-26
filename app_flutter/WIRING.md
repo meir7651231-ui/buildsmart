@@ -73,6 +73,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 | confirmLargeOrder + largeOrderThreshold | confirm dialog at checkout | ✅ |
 | cart stepper (+ / − / לעגלה) | `qtyForKey` / `setQtyForKey` | ✅ |
 | saveCartToProject | show/hide the cart project selector | ✅ |
+| summary chips (פריטים בסל / הזמנות פתוחות / הצעות ספקים) | derived live: `cartItemCount` (cart+smart lines), `isOrderOpen` over `_kOrders`, offers single-sourced from the מכרז ספקים row badge | ✅ |
 | כתובות/חשבוניות/ספקים/השכרה/אחריות/ביומטרי/אשראי-יומי | — | ⛔ server/data |
 
 ## Install Studio (`install_studio_screen.dart` → `logic/install_engine.dart`)
