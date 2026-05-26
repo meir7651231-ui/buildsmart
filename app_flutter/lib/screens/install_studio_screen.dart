@@ -714,30 +714,27 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                 ],
                 if (checklist.isNotEmpty) ...[
                   const Divider(height: 18, color: Color(0xFF243049)),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(18, 0, 18, 6),
-                    child: Text('בדיקת תקינות הקו',
-                        style: TextStyle(
-                            color: _ink,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800)),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Row(children: [
+                      const Text('בדיקת תקינות הקו',
+                          style: TextStyle(
+                              color: _ink,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800)),
+                      const SizedBox(width: 8),
+                      _severityBadge('קריטי',
+                          checklist.where((c) =>
+                              !c.satisfied && c.severity == CheckSeverity.critical).length,
+                          const Color(0xFFEF4444)),
+                      const SizedBox(width: 4),
+                      _severityBadge('אזהרה',
+                          checklist.where((c) =>
+                              !c.satisfied && c.severity == CheckSeverity.warning).length,
+                          _drain),
+                    ]),
                   ),
-                  for (final ch in checklist)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(18, 3, 18, 3),
-                      child: Row(children: [
-                        Icon(ch.satisfied ? Icons.check_circle : Icons.cancel,
-                            color: ch.satisfied ? _accent : _drain, size: 16),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(ch.label,
-                              style: TextStyle(
-                                  color: ch.satisfied ? _ink : _drain,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600)),
-                        ),
-                      ]),
-                    ),
+                  for (final ch in checklist) _checkRow(ch),
                 ],
                 const SizedBox(height: 10),
               ]),
@@ -842,17 +839,16 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     final result = <Widget>[];
     int n = 1;
     for (final entry in plan.zones.entries) {
-      result.add(_zoneHeader(entry.key));
-      for (final sku in entry.value) {
-        final p = bySkU[sku];
-        if (p == null) continue;
-        zonedSkus.add(sku);
-        result.add(_bomRow(p, n++, anchorSkus.contains(sku), plan.qtyOf(sku)));
+      final zoneItems = entry.value.map((s) => bySkU[s]).whereType<LipskeyCatalogProduct>().toList();
+      result.add(_zoneHeader(entry.key, count: zoneItems.length));
+      for (final p in zoneItems) {
+        zonedSkus.add(p.sku);
+        result.add(_bomRow(p, n++, anchorSkus.contains(p.sku), plan.qtyOf(p.sku)));
       }
     }
     final unzoned = plan.items.where((p) => !zonedSkus.contains(p.sku)).toList();
     if (unzoned.isNotEmpty) {
-      result.add(_zoneHeader('אביזרים'));
+      result.add(_zoneHeader('אביזרים', count: unzoned.length));
       for (final p in unzoned) {
         result.add(_bomRow(p, n++, anchorSkus.contains(p.sku), plan.qtyOf(p.sku)));
       }
@@ -860,7 +856,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     return result;
   }
 
-  Widget _zoneHeader(String label) => Padding(
+  Widget _zoneHeader(String label, {int count = 0}) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 2),
         child: Row(children: [
           Container(
@@ -875,12 +871,94 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.6)),
+          if (count > 0) ...[
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+              decoration: BoxDecoration(
+                color: _supply.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text('$count פריטים',
+                  style: const TextStyle(color: _supply, fontSize: 9,
+                      fontWeight: FontWeight.w700)),
+            ),
+          ],
           const SizedBox(width: 8),
-          Expanded(
-            child: Container(height: 1, color: _supply.withOpacity(0.2)),
-          ),
+          Expanded(child: Container(height: 1, color: _supply.withOpacity(0.2))),
         ]),
       );
+
+  // Severity badge — only shown when count > 0.
+  Widget _severityBadge(String label, int count, Color c) {
+    if (count == 0) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: c.withOpacity(0.18),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: c.withOpacity(0.5)),
+      ),
+      child: Text('$count $label',
+          style: TextStyle(color: c, fontSize: 10, fontWeight: FontWeight.w800)),
+    );
+  }
+
+  Widget _checkRow(LineCheck ch) {
+    final Color iconColor;
+    final IconData icon;
+    if (ch.satisfied) {
+      iconColor = _accent;
+      icon = Icons.check_circle;
+    } else {
+      switch (ch.severity) {
+        case CheckSeverity.critical:
+          iconColor = const Color(0xFFEF4444);
+          icon = Icons.cancel;
+        case CheckSeverity.warning:
+          iconColor = _drain;
+          icon = Icons.warning_amber_rounded;
+        case CheckSeverity.info:
+          iconColor = _mute;
+          icon = Icons.info_outline;
+      }
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 1),
+          child: Icon(icon, color: iconColor, size: 16),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(ch.label,
+                style: TextStyle(
+                    color: ch.satisfied ? _ink : iconColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700)),
+            if (!ch.satisfied)
+              Text(ch.why,
+                  style: const TextStyle(color: _mute, fontSize: 10, height: 1.3)),
+          ]),
+        ),
+        if (!ch.satisfied && ch.severity != CheckSeverity.info)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+            decoration: BoxDecoration(
+              color: iconColor.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              ch.severity == CheckSeverity.critical ? 'קריטי' : 'אזהרה',
+              style: TextStyle(
+                  color: iconColor, fontSize: 9, fontWeight: FontWeight.w900),
+            ),
+          ),
+      ]),
+    );
+  }
 
   Widget _bomRow(LipskeyCatalogProduct p, int n, bool anchor, int qty) {
     final c = _systemColor(p);

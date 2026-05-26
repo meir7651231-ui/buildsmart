@@ -42,11 +42,19 @@ bool productSuitableForTemp(LipskeyCatalogProduct p, int tempC) {
 
 // ── line compliance / completeness ──────────────────────────────────────────────
 
+/// Severity of a compliance check failure.
+/// critical → safety/code risk (PRV, ball valve, anti-scald)
+/// warning  → durability/performance risk (insulation, galvanic, PEX expansion)
+/// info     → good practice (clamps, sealant)
+enum CheckSeverity { critical, warning, info }
+
 class LineCheck {
-  const LineCheck(this.label, this.satisfied, this.why);
-  final String label;   // required component
-  final bool satisfied; // present in the chain?
-  final String why;     // why it's required
+  const LineCheck(this.label, this.satisfied, this.why,
+      {this.severity = CheckSeverity.warning});
+  final String label;
+  final bool satisfied;
+  final String why;
+  final CheckSeverity severity;
 }
 
 /// The physical join method between two mating products, derived from end types
@@ -106,37 +114,48 @@ List<LineCheck> lineComplianceChecklist(
             ? 'ברז ניתוק ×3 (כניסת דוד + אחרי משאבה + מניפולד)'
             : 'ברז ניתוק לתחזוקה',
         recirc ? isolationCount >= 3 : isolationCount >= 1,
-        'בידוד אזורי לתחזוקה'),
+        'בידוד אזורי לתחזוקה',
+        severity: CheckSeverity.critical),
     if (recirc) ...[
-      LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}), 'מונע זרימה הפוכה בלולאה'),
-      LineCheck('שסתום מאזן / TRV', has({'HW-BALANCE-15'}), 'איזון הלולאה'),
-      LineCheck('מפוח אוויר', has({'HW-AIRVENT'}), 'פליטת אוויר בלולאה'),
+      LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}),
+          'מונע זרימה הפוכה בלולאה', severity: CheckSeverity.critical),
+      LineCheck('שסתום מאזן / TRV', has({'HW-BALANCE-15'}),
+          'איזון הלולאה', severity: CheckSeverity.critical),
+      LineCheck('מפוח אוויר', has({'HW-AIRVENT'}),
+          'פליטת אוויר בלולאה', severity: CheckSeverity.warning),
     ],
     if (dissimilar)
-      LineCheck('רקורד דיאלקטרי', has({'HW-DIELECTRIC-15'}), 'הפרדה גלוונית בין מתכות'),
+      LineCheck('רקורד דיאלקטרי', has({'HW-DIELECTRIC-15'}),
+          'הפרדה גלוונית בין מתכות', severity: CheckSeverity.critical),
     if (hasPex)
-      LineCheck('מפצה התפשטות PEX', has({'HW-EXP-COMP-20'}), 'PEX מתרחב בחום'),
+      LineCheck('מפצה התפשטות PEX', has({'HW-EXP-COMP-20'}),
+          'PEX מתרחב בחום', severity: CheckSeverity.warning),
     if (hot)
-      LineCheck('שסתום פורק לחץ (PRV)', has({'HW-PRV-34'}), 'מערכת חמה סגורה'),
+      LineCheck('שסתום פורק לחץ (PRV)', has({'HW-PRV-34'}),
+          'מערכת חמה סגורה', severity: CheckSeverity.critical),
     LineCheck('כלי התפשטות (Bladder Tank)',
         has({'HW-BTANK-35', 'HW-BTANK-18', 'HW-EXPVESSEL'}),
-        'ממברנת EPDM מפרידה N₂ ממים'),
+        'ממברנת EPDM מפרידה N₂ ממים',
+        severity: CheckSeverity.critical),
     if (hasCommercialPump) ...[
       LineCheck('מסנן Y (הגנת משאבה)',
           has({'HW-YSTR-40', 'HW-YSTR-32', 'HW-YSTR-15'}),
-          'מונע חלקיקים מלפגוע במשאבה'),
+          'מונע חלקיקים מלפגוע במשאבה', severity: CheckSeverity.warning),
       LineCheck('מחבר גמיש (ספיגת רעידות)',
           has({'HW-FLEX-40', 'HW-FLEX-32'}),
-          'מבודד רעידות המשאבה מהצנרת'),
+          'מבודד רעידות המשאבה מהצנרת', severity: CheckSeverity.warning),
     ],
     if (hasManifoldOrShower)
       LineCheck('TMTV anti-scald (הגנת משתמש)',
           has({'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20', 'HW-TMTV-15'}),
-          'מגביל T≤45°C ביציאה — anti-scald'),
+          'מגביל T≤45°C ביציאה — anti-scald', severity: CheckSeverity.critical),
     if (hot)
-      LineCheck('בידוד תרמי', acc('HW-INSUL'), 'הפסדי חום + סכנת כוויות'),
-    LineCheck('חבקים/תמיכת צנרת', acc('HW-CLIP'), 'קיבוע ושיפוע'),
-    LineCheck('איטום (Press/PTFE/O-ring)', acc('HW-SEALANT'), 'אטימות כל מעבר'),
+      LineCheck('בידוד תרמי', acc('HW-INSUL'),
+          'הפסדי חום + סכנת כוויות', severity: CheckSeverity.warning),
+    LineCheck('חבקים/תמיכת צנרת', acc('HW-CLIP'),
+        'קיבוע ושיפוע', severity: CheckSeverity.info),
+    LineCheck('איטום (Press/PTFE/O-ring)', acc('HW-SEALANT'),
+        'אטימות כל מעבר', severity: CheckSeverity.info),
   ];
 }
 
