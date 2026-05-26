@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -735,16 +737,16 @@ void openNewChatWith(
   );
 }
 
-class _ChatPage extends StatefulWidget {
+class _ChatPage extends ConsumerStatefulWidget {
   const _ChatPage({required this.thread});
 
   final _Thread thread;
 
   @override
-  State<_ChatPage> createState() => _ChatPageState();
+  ConsumerState<_ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<_ChatPage> {
+class _ChatPageState extends ConsumerState<_ChatPage> {
   final _controller = TextEditingController();
   final _scroll = ScrollController();
   final List<_Message> _messages = [];
@@ -767,6 +769,13 @@ class _ChatPageState extends State<_ChatPage> {
         text: widget.thread.subtitle,
         isMe: false,
         time: widget.thread.time,
+      ),);
+    } else if (ref.read(chatSettingsProvider).greetingEnabled) {
+      // Greeting message for a fresh, empty conversation.
+      _messages.add((
+        text: 'שלום! 👋 איך אפשר לעזור?',
+        isMe: false,
+        time: _nowTime(),
       ),);
     }
   }
@@ -795,12 +804,21 @@ class _ChatPageState extends State<_ChatPage> {
     if (text.isEmpty) {
       return;
     }
+    final settings = ref.read(chatSettingsProvider);
+    if (settings.chatVibration) {
+      HapticFeedback.lightImpact();
+    }
+    final showTyping = settings.botEnabled && settings.typingIndicator;
     setState(() {
       _messages.add((text: text, isMe: true, time: _nowTime()));
       _controller.clear();
-      _isTyping = true;
+      _isTyping = showTyping;
     });
     _scrollToBottom();
+    // Auto-reply only when the chatbot is enabled.
+    if (!settings.botEnabled) {
+      return;
+    }
     Future.delayed(const Duration(milliseconds: 900), () {
       if (!mounted) {
         return;
@@ -941,13 +959,16 @@ class _ChatPageState extends State<_ChatPage> {
 
 // ─── bubbles ──────────────────────────────────────────────────────────────────
 
-class _Bubble extends StatelessWidget {
+class _Bubble extends ConsumerWidget {
   const _Bubble({required this.msg});
 
   final _Message msg;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final readReceipts = ref.watch(
+      chatSettingsProvider.select((s) => s.readReceipts),
+    );
     const bubbleMe = Color(0xFFDCF8C6);
     const bubbleOther = Color(0xFFFFFFFF);
     const textColor = Color(0xFF111111);
@@ -1000,10 +1021,13 @@ class _Bubble extends StatelessWidget {
                 ),
                 if (msg.isMe) ...[
                   const SizedBox(width: 3),
-                  const Icon(
-                    Icons.done_all,
+                  // Read receipts: blue double-check when on, grey single when off.
+                  Icon(
+                    readReceipts ? Icons.done_all : Icons.done,
                     size: 13,
-                    color: Color(0xFF4FC3F7),
+                    color: readReceipts
+                        ? const Color(0xFF4FC3F7)
+                        : const Color(0xFF999999),
                   ),
                 ],
               ],
