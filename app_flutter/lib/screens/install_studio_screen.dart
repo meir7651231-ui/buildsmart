@@ -515,7 +515,7 @@ class _BlueprintPainter extends CustomPainter {
 }
 
 // ── bill-of-materials sheet (dark) ─────────────────────────────────────────────
-class _BomSheet extends ConsumerWidget {
+class _BomSheet extends ConsumerStatefulWidget {
   const _BomSheet(
       {required this.plan,
       required this.anchorSkus,
@@ -527,7 +527,24 @@ class _BomSheet extends ConsumerWidget {
   final int outlets; // manifold outlet count, for over-capacity warning
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_BomSheet> createState() => _BomSheetState();
+}
+
+class _BomSheetState extends ConsumerState<_BomSheet> {
+  // Per-pipe length in metres (pipes are sold by length, not by piece).
+  final Map<String, double> _meters = {};
+  double _metersOf(String sku) => _meters[sku] ?? 2.0;
+
+  double get _totalMeters => widget.plan.items
+      .where(isPipe)
+      .fold(0.0, (s, p) => s + _metersOf(p.sku));
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = widget.plan;
+    final anchorSkus = widget.anchorSkus;
+    final branches = widget.branches;
+    final outlets = widget.outlets;
     final ok = plan.isComplete;
     final overCapacity = branches > 0 && outlets > 0 && branches > outlets;
     return Directionality(
@@ -567,6 +584,7 @@ class _BomSheet extends ConsumerWidget {
                               fontWeight: FontWeight.w900)),
                       Text(
                           '${plan.items.length} סוגים · ${plan.totalPieces} יחידות'
+                          '${_totalMeters > 0 ? ' · ${_totalMeters.toStringAsFixed(1)} מ׳ צנרת' : ''}'
                           '${branches > 0 ? ' · ⑂ $branches ענפים' : ''}',
                           style: const TextStyle(color: _mute, fontSize: 12)),
                       if (overCapacity)
@@ -664,17 +682,55 @@ class _BomSheet extends ConsumerWidget {
                 style: const TextStyle(color: _mute, fontSize: 11)),
           ]),
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-              color: _panel, borderRadius: BorderRadius.circular(10)),
-          child: Text('× $qty',
-              style: const TextStyle(
-                  color: _ink, fontSize: 13, fontWeight: FontWeight.w900)),
-        ),
+        if (isPipe(p)) _metersStepper(p.sku) else _qtyBadge(qty),
       ]),
     );
   }
+
+  Widget _qtyBadge(int qty) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+            color: _panel, borderRadius: BorderRadius.circular(10)),
+        child: Text('× $qty',
+            style: const TextStyle(
+                color: _ink, fontSize: 13, fontWeight: FontWeight.w900)),
+      );
+
+  // metres control for pipe products (sold by length)
+  Widget _metersStepper(String sku) {
+    final m = _metersOf(sku);
+    return Container(
+      decoration: BoxDecoration(
+          color: _panel,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _supply.withOpacity(0.4))),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        _stepBtn(Icons.remove, () {
+          setState(() => _meters[sku] = (m - 0.5).clamp(0.5, 999));
+        }),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: Text('${m.toStringAsFixed(1)} מ׳',
+              style: const TextStyle(
+                  color: _supply, fontSize: 13, fontWeight: FontWeight.w900)),
+        ),
+        _stepBtn(Icons.add, () {
+          setState(() => _meters[sku] = (m + 0.5).clamp(0.5, 999));
+        }),
+      ]),
+    );
+  }
+
+  Widget _stepBtn(IconData ic, VoidCallback onTap) => GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 24, height: 24,
+          decoration: BoxDecoration(
+              color: _void1, borderRadius: BorderRadius.circular(8)),
+          child: Icon(ic, color: _ink, size: 15),
+        ),
+      );
 }
 
 // ── dark product picker ────────────────────────────────────────────────────────
