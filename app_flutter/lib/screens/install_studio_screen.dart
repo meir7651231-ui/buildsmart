@@ -201,6 +201,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
 
   bool _loop = false;
   bool _showTutorial = false;
+  final TextEditingController _describeCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -224,7 +225,79 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   @override
   void dispose() {
     _flow.dispose();
+    _describeCtrl.dispose();
     super.dispose();
+  }
+
+  // Free-text → products. Splits on comma/newline, matches each phrase to the
+  // best catalog product by token overlap, and drops the matches onto the
+  // canvas for review (user then taps "⚡ צור רשימת קנייה").
+  LipskeyCatalogProduct? _bestProductMatch(String phrase, int temp) {
+    final words = phrase
+        .toLowerCase()
+        .split(RegExp(r'[\s,]+'))
+        .where((w) => w.length >= 2)
+        .toList();
+    if (words.isEmpty) return null;
+    LipskeyCatalogProduct? best;
+    var bestScore = 0;
+    for (final p in kCompatCatalog) {
+      if (!productSuitableForTemp(p, temp)) continue;
+      final name = p.nameHe.toLowerCase();
+      final cat = p.categoryHe.toLowerCase();
+      var score = 0;
+      for (final w in words) {
+        // A name hit is a stronger signal than a category hit; longer words
+        // weigh more. Prevents "אסלה" matching the "…חיבורי אסלה" category
+        // over an actual toilet whose name contains the word.
+        if (name.contains(w)) {
+          score += w.length * 2;
+        } else if (cat.contains(w)) {
+          score += w.length;
+        }
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        best = p;
+      }
+    }
+    return bestScore > 0 ? best : null;
+  }
+
+  void _buildFromText(String text, int temp) {
+    final phrases = text
+        .split(RegExp(r'[\n,]+'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    if (phrases.isEmpty) return;
+    final matched = <LipskeyCatalogProduct>[];
+    final misses = <String>[];
+    for (final ph in phrases) {
+      final m = _bestProductMatch(ph, temp);
+      if (m == null) {
+        misses.add(ph);
+      } else if (!matched.any((x) => x.sku == m.sku)) {
+        matched.add(m);
+      }
+    }
+    if (matched.isNotEmpty) {
+      final cur = ref.read(chainProvider);
+      ref.read(chainProvider.notifier).state = [...cur, ...matched];
+    }
+    _describeCtrl.clear();
+    FocusScope.of(context).unfocus();
+    final msg = matched.isEmpty
+        ? 'לא זוהו מוצרים — נסה מילה אחרת (למשל: "ברז קיסר", "אסלה", "מחסום")'
+        : 'זוהו: ${matched.map((p) => p.nameHe).join("، ")}'
+            '${misses.isEmpty ? "" : "\nלא זוהה: ${misses.join("، ")}"}'
+            '\nבדוק את הקו ולחץ ⚡ צור רשימת קנייה';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg, textDirection: TextDirection.rtl),
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   @override
@@ -478,11 +551,61 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w800)),
         const SizedBox(height: 6),
         const Text(
-          'בחר קטגוריה ↓ ואנחנו נבנה את הרשימה אוטומטית',
+          'כתוב במילים מה צריך — או בחר קטגוריה',
           textAlign: TextAlign.center,
           style: TextStyle(color: _mute, fontSize: 13, height: 1.5),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+        // Free-text "describe your line" box
+        Container(
+          decoration: BoxDecoration(
+            color: _panel,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: _supply.withOpacity(0.4)),
+          ),
+          padding: const EdgeInsets.fromLTRB(12, 2, 6, 2),
+          child: Row(children: [
+            Expanded(
+              child: TextField(
+                controller: _describeCtrl,
+                style: const TextStyle(color: _ink, fontSize: 13),
+                textDirection: TextDirection.rtl,
+                minLines: 1,
+                maxLines: 3,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (v) => _buildFromText(v, temp),
+                decoration: const InputDecoration(
+                  isCollapsed: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 12),
+                  border: InputBorder.none,
+                  hintText: 'למשל: ברז קיסר למטבח, צינור, אסלה',
+                  hintStyle: TextStyle(color: _mute, fontSize: 12),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () => _buildFromText(_describeCtrl.text, temp),
+              child: Container(
+                margin: const EdgeInsets.all(5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                decoration: BoxDecoration(
+                  color: _supply,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text('בנה',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800)),
+              ),
+            ),
+          ]),
+        ),
+        const SizedBox(height: 16),
+        const Text('— או בחר קטגוריה —',
+            style: TextStyle(color: _mute, fontSize: 11)),
+        const SizedBox(height: 14),
         // 2×2 scenario grid
         GridView.builder(
           shrinkWrap: true,
