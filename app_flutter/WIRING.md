@@ -27,6 +27,17 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 | מחירים/מע"מ/מטבע/מחיר-יחידה/השוואה | — | ⛔ no price data |
 | דירוג/מרחק/ספקים מקומיים · AI×4 · יחידות/עשרוני · מיון-ברירת-מחדל · רדיוס | — | ⛔ no data/engine |
 
+## Catalog search panel tools (`catalog_screen.dart` · `_SearchToolsRow`)
+
+| Tool | Behavior | Status |
+|---|---|---|
+| 🎤 קולי | `VoiceService.listen` (browser speech) | ✅ |
+| 📷 ברקוד | `openBarcodeScanner` | ✅ |
+| ⚙️ פילטרים | sheet → `searchImageOnlyProvider`; live results filtered by `filterByImage` (הכל / עם תמונה בלבד) | ✅ |
+| ↕️ מיון | sheet → `catalogProductSortProvider` (`_sortProducts`): ברירת מחדל / שם א-ת / שם ת-א / מק"ט, applied to live results | ✅ |
+| ▦ קטלוג | closes the panel + jumps to the קטגוריות section | ✅ |
+| filter "עם מחיר" / price sort | — | ⛔ no price data |
+
 ## Chat settings (`chat_settings_screen.dart` → `chat_settings.dart`)
 
 | Setting | Behavior | Status |

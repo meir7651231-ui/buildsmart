@@ -1,4 +1,5 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
@@ -276,6 +277,23 @@ void main() {
       expect(isOrderOpen('ready'), isTrue);
       expect(isOrderOpen('preparing'), isTrue);
       expect(isOrderOpen(kDeliveredStage), isFalse);
+    });
+  });
+
+  group('search image filter (⚙️ פילטרים)', () {
+    const withImg = LipskeyCatalogProduct(
+      sku: 'A', nameHe: 'עם', nameEn: 'with', categoryHe: 'c',
+      categoryEn: 'c', categoryEmoji: '🔧', page: 1, imageFile: 'a.jpg',
+    );
+    const noImg = LipskeyCatalogProduct(
+      sku: 'B', nameHe: 'בלי', nameEn: 'without', categoryHe: 'c',
+      categoryEn: 'c', categoryEmoji: '🔧', page: 1,
+    );
+    test('imageOnly=false returns the list unchanged', () {
+      expect(filterByImage(const [withImg, noImg], false), [withImg, noImg]);
+    });
+    test('imageOnly=true keeps only products with an image', () {
+      expect(filterByImage(const [withImg, noImg], true), [withImg]);
     });
   });
 

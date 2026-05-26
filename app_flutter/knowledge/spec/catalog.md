@@ -14,7 +14,8 @@
   - `catalogDrillCatProvider` — דריל ב"קטגוריות" (קומפוננטה `_CatalogDrillSection` קיימת אך לא מחווטת ל-body; ראו §10).
   - `catalogTreePathProvider` (`List<CatalogNode>`), `catalogTreeQueryProvider`, `catalogFacetProvider` (`List<String>`) — מחסנית הדריל בעץ הקטלוג בתוך ה-tab.
   - `catalogProductSortProvider` (`ProductSort`, ברירת מחדל `byOrder`) — מיון רשימת המוצרים.
-  - `catalogSortProvider` / `catalogFilterProvider` — enums `CatalogSort`/`CatalogFilter` מוגדרים אך **אינם נצרכים בקוד** (dead state; ראו §10).
+  - `searchImageOnlyProvider` (`bool`) — דגל הסינון "עם תמונה" של כלי ⚙️ פילטרים בפאנל.
+  - (הוסרו ה-enums/providers המתים `CatalogSort`/`CatalogFilter` — ראו §10.)
   - חיצוניים: `catalogSettingsProvider` (`lib/state/catalog_settings.dart`), `productFavoritesProvider` (`lib/state/product_favorites.dart`), `smartCartProvider` (`lib/state/smart_cart.dart`), `tabHeaderHiddenProvider` (`lib/state/dial_state.dart`).
 - **מקורות דאטה:** `kCatalogCats` (`lib/data/catalog.dart`), `kLipskeyCatalog` (`lib/data/lipskey_catalog.dart`), `kCatalogTree` (`lib/data/catalog_tree.dart`), `kSmartProducts`/`kSmartTreeCats`/`smartProductsForCat` (`lib/data/smart_tree.dart`), `kSearchIndex` (`lib/data/search_index.dart`).
 
@@ -54,9 +55,9 @@
 | חץ חזרה (פאנל פתוח) | IconButton | — | ⇐ `_closePanel` | ✅ |
 | כלי 🎤 קולי | כפתור עגול | — | ⇐ `VoiceService.instance.listen`; כישלון ⇐ SnackBar `'הדפדפן לא תומך בחיפוש קולי'` | ✅ |
 | כלי 📷 ברקוד | כפתור עגול | — | ⇐ `openBarcodeScanner` | ✅ |
-| כלי ⚙️ פילטרים | כפתור עגול | — | ⇐ toast `'פילטרים — בקרוב'` | 🚧 |
-| כלי ↕️ מיון | כפתור עגול | — | ⇐ toast `'מיון — בקרוב'` | 🚧 |
-| כלי ▦ קטלוג | כפתור עגול | — | ⇐ toast `'קטלוג — בקרוב'` | 🚧 |
+| כלי ⚙️ פילטרים | כפתור עגול | — | ⇐ sheet "הכל / עם תמונה בלבד" → `searchImageOnlyProvider` (`filterByImage` על התוצאות החיות) | ✅ |
+| כלי ↕️ מיון | כפתור עגול | — | ⇐ sheet ProductSort (ברירת מחדל/שם א-ת/שם ת-א/מק"ט) → `catalogProductSortProvider` (`_sortProducts` על התוצאות) | ✅ |
+| כלי ▦ קטלוג | כפתור עגול | — | ⇐ סוגר את הפאנל + קופץ למקטע 'קטגוריות' | ✅ |
 | chips scope | pills | `['הכל','מוצרים','קטגוריות','מסכים']` | ⇐ `searchScopeProvider` | ✅ |
 | רשימת חיפושים אחרונים (פאנל) | ListView | `recentSearchesProvider` | tap/↖ ⇐ `searchQueryProvider`; `'נקה'` ⇐ מאפס | ✅ |
 | ריק (פאנל recents) | Text | `'התחל להקליד כדי לחפש מוצרים, קטגוריות ומסכים.'` | — | ✅ |
@@ -165,8 +166,8 @@
 ## 10. פערים ידועים
 
 - **קומפוננטות שאינן מחווטות ל-body הנוכחי:** `_LipskeySupplierCard`, `_FeaturedProductCard`, `_CatalogDrillSection`/`_CatalogDrillCatGrid`/`_CatalogDrillProductList` מוגדרות בקובץ אך אינן נקראות מ-`_CatalogBody`/`_AllOverview` (קוד שמור לתצוגות עתידיות / dead-ish). ⛔/🚧.
-- **state לא בשימוש:** `catalogSortProvider`, `catalogFilterProvider`, ו-enums `CatalogSort`/`CatalogFilter` המקומיים (וגם `_sortLabel`/`_filterLabel`/`_nextSort`/`_nextFilter`) — לא נצרכים. שים לב לכפילות שם: יש `CatalogSort` נפרד גם ב-`catalog_settings.dart`.
-- **כלי חיפוש placeholder:** ⚙️ פילטרים / ↕️ מיון / ▦ קטלוג מציגים toast `'… — בקרוב'` בלבד. 🚧.
+- ~~**state לא בשימוש**~~ ✅ **הוסר**: ה-enums/providers המתים `CatalogSort`/`CatalogFilter` + `_sortLabel`/`_filterLabel`/`_nextSort`/`_nextFilter` נמחקו (גם כדי לפתור את כפילות השם מול `catalog_settings.dart`). המיון/סינון של הפאנל משתמשים כעת ב-`ProductSort`/`_sortProducts` + `searchImageOnlyProvider`/`filterByImage`.
+- ~~**כלי חיפוש placeholder**~~ ✅ **טופל**: ⚙️ פילטרים (סינון "עם תמונה" דרך `filterByImage`), ↕️ מיון (`_sortProducts` דרך `catalogProductSortProvider`), ▦ קטלוג (קפיצה למקטע קטגוריות) — מחווטים על תוצאות החיפוש החיות. (סינון/מיון לפי מחיר נותר ⛔ — אין דאטת מחיר.) הוסרו גם enums/providers מתים `CatalogSort`/`CatalogFilter` + `_sortLabel`/`_filterLabel`/`_nextSort`/`_nextFilter` (פתר גם את התנגשות השם עם `catalog_settings.dart`).
 - ~~**הגדרות לא ממומשות במסך**~~ ✅ **טופל**: `imageSize`/`compactMode` נצרכים כעת גם בכרטיס הרשת (`gridCardImageMetrics` + paddings קומפקטיים), בנוסף לשורת הרשימה שכבר תמכה. `highContrast`/`textSize` הם אפקט app-wide (לא ספציפי למסך).
 - **"בקרוב":** כל קטגוריה ראשית ללא דאטת עץ ⇐ `_TreeComingSoon`; ב-`_CatalogDrillCatGrid` קטגוריות ללא smart-products ⇐ תג `'בקרוב'`. 🚧.
 - **אי-עקביות מספרית:** הערות הקוד מציינות "11 קטגוריות" בעוד `kCatalogCats` ו-`kSearchIndex` מכילים בפועל **12** (נוספו `אביזרים נלווים` + `גינון והשקיה`).

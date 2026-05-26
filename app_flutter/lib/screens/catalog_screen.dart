@@ -27,17 +27,6 @@ void _openStudio(BuildContext context) {
   );
 }
 
-/// Catalog sort options — cycles on chip tap.
-enum CatalogSort { defaultSort, nameAZ, nameZA, priceUp, priceDown }
-
-/// Catalog filter options — cycles on chip tap.
-enum CatalogFilter { all, withImage, withPrice }
-
-final catalogSortProvider =
-    StateProvider<CatalogSort>((_) => CatalogSort.defaultSort);
-final catalogFilterProvider =
-    StateProvider<CatalogFilter>((_) => CatalogFilter.all);
-
 /// Active section label — 'הכל' is always first and fixed.
 final catalogSectionProvider = StateProvider<String>((_) => 'הכל');
 
@@ -59,6 +48,10 @@ final searchQueryProvider = StateProvider<String>((_) => '');
 
 /// Active search scope chip (הכל / מוצרים / קטגוריות / מסכים).
 final searchScopeProvider = StateProvider<String>((_) => 'הכל');
+
+/// When true, the search-panel results show only products that have an image
+/// (the ⚙️ פילטרים tool · "עם תמונה").
+final searchImageOnlyProvider = StateProvider<bool>((_) => false);
 
 // recentSearchesProvider lives in state/recent_searches.dart (persisted).
 
@@ -94,6 +87,13 @@ String _productSortLabel(ProductSort s) => switch (s) {
 
 final catalogProductSortProvider =
     StateProvider<ProductSort>((_) => ProductSort.byOrder);
+
+/// Pure: keep only products that have an image when [imageOnly] is set.
+List<LipskeyCatalogProduct> filterByImage(
+    List<LipskeyCatalogProduct> list, bool imageOnly) {
+  if (!imageOnly) return list;
+  return list.where((p) => p.imageAsset != null).toList();
+}
 
 List<LipskeyCatalogProduct> _sortProducts(
     List<LipskeyCatalogProduct> list, ProductSort s) {
@@ -218,26 +218,6 @@ String _facetDesc(List<LipskeyCatalogProduct> matching) {
   }
   return matching.map((p) => p.nameHe).take(2).join(' · ');
 }
-
-String _sortLabel(CatalogSort s) => switch (s) {
-      CatalogSort.defaultSort => 'ברירת מחדל',
-      CatalogSort.nameAZ      => 'א-ת',
-      CatalogSort.nameZA      => 'ת-א',
-      CatalogSort.priceUp     => 'מחיר ↑',
-      CatalogSort.priceDown   => 'מחיר ↓',
-    };
-
-String _filterLabel(CatalogFilter f) => switch (f) {
-      CatalogFilter.all       => 'הכל',
-      CatalogFilter.withImage => 'עם תמונה',
-      CatalogFilter.withPrice => 'עם מחיר',
-    };
-
-CatalogSort _nextSort(CatalogSort s) =>
-    CatalogSort.values[(s.index + 1) % CatalogSort.values.length];
-
-CatalogFilter _nextFilter(CatalogFilter f) =>
-    CatalogFilter.values[(f.index + 1) % CatalogFilter.values.length];
 
 // Simulated metadata — preview text, timestamp, unread badge count.
 // Ordered to match kCatalogCats (same index).
@@ -1384,11 +1364,79 @@ class _SearchPanel extends ConsumerWidget {
   }
 }
 
-class _SearchToolsRow extends StatelessWidget {
+class _SearchToolsRow extends ConsumerWidget {
   const _SearchToolsRow();
 
+  static const _sheetShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+  );
+
+  // ↕️ מיון — pick a sort for the live product results.
+  void _openSortSheet(BuildContext context, WidgetRef ref) {
+    final current = ref.read(catalogProductSortProvider);
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: _sheetShape,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const _SheetTitle('מיון מוצרים'),
+            for (final s in ProductSort.values)
+              ListTile(
+                leading: Icon(
+                  s == current ? Icons.check : Icons.swap_vert,
+                  color:
+                      s == current ? BsTokens.brand : const Color(0xFF888888),
+                ),
+                title: Text(_productSortLabel(s),
+                    style: const TextStyle(color: Color(0xFF1A1A1A))),
+                onTap: () {
+                  ref.read(catalogProductSortProvider.notifier).state = s;
+                  Navigator.pop(context);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ⚙️ פילטרים — filter the live product results.
+  void _openFilterSheet(BuildContext context, WidgetRef ref) {
+    final imageOnly = ref.read(searchImageOnlyProvider);
+    Widget opt(String label, bool value) => ListTile(
+          leading: Icon(
+            value == imageOnly ? Icons.check : Icons.radio_button_unchecked,
+            color:
+                value == imageOnly ? BsTokens.brand : const Color(0xFF888888),
+          ),
+          title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+          onTap: () {
+            ref.read(searchImageOnlyProvider.notifier).state = value;
+            Navigator.pop(context);
+          },
+        );
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: _sheetShape,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const _SheetTitle('סינון תוצאות'),
+            opt('הכל', false),
+            opt('עם תמונה בלבד', true),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
       child: Row(
@@ -1421,22 +1469,44 @@ class _SearchToolsRow extends StatelessWidget {
           _SearchToolButton(
             emoji: '⚙️',
             label: 'פילטרים',
-            onTap: () => showToast(context, 'פילטרים — בקרוב'),
+            onTap: () => _openFilterSheet(context, ref),
           ),
           _SearchToolButton(
             emoji: '↕️',
             label: 'מיון',
-            onTap: () => showToast(context, 'מיון — בקרוב'),
+            onTap: () => _openSortSheet(context, ref),
           ),
           _SearchToolButton(
             emoji: '▦',
             label: 'קטלוג',
-            onTap: () => showToast(context, 'קטלוג — בקרוב'),
+            onTap: () {
+              ref.read(searchPanelOpenProvider.notifier).state = false;
+              ref.read(catalogSectionProvider.notifier).state = 'קטגוריות';
+            },
           ),
         ],
       ),
     );
   }
+}
+
+/// Small right-aligned title row for the search tool bottom-sheets.
+class _SheetTitle extends StatelessWidget {
+  const _SheetTitle(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Text(text,
+              style: const TextStyle(
+                  color: Color(0xFF1A1A1A),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700)),
+        ),
+      );
 }
 
 class _SearchToolButton extends StatelessWidget {
@@ -1617,13 +1687,22 @@ class _SearchResultsList extends ConsumerWidget {
     // "הכל" / "מוצרים" scopes once the user has typed something.
     final showProducts = query.trim().length >= 2 &&
         (scope == 'הכל' || scope == 'מוצרים');
+    // Apply the ⚙️ image filter and ↕️ sort (from the search-panel tools)
+    // before capping to 40 results.
+    final imageOnly = ref.watch(searchImageOnlyProvider);
+    final sort = ref.watch(catalogProductSortProvider);
     final products = showProducts
-        ? kLipskeyCatalog
-            .where((p) =>
-                p.nameHe.contains(query) ||
-                p.sku.toLowerCase().contains(query.toLowerCase()))
-            .take(40)
-            .toList()
+        ? _sortProducts(
+            filterByImage(
+              kLipskeyCatalog
+                  .where((p) =>
+                      p.nameHe.contains(query) ||
+                      p.sku.toLowerCase().contains(query.toLowerCase()))
+                  .toList(),
+              imageOnly,
+            ),
+            sort,
+          ).take(40).toList()
         : const <LipskeyCatalogProduct>[];
 
     if (filtered.isEmpty && products.isEmpty) {

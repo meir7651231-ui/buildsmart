@@ -49,9 +49,9 @@
   **`highContrast` / `textSize`** הם אפקט **app-wide** (theme + `textScaler` ב-`main`),
   לא ספציפיים למסך הקטלוג.
 - **חיפושים אחרונים** — ✅ טופל (v3.78): נשמר ל-SharedPreferences (`bs.recent-searches.v1`, helper `addRecentSearch`). הגייט `searchHistoryEnabled` שולט בהקלטה.
-- **`catalogSortProvider` / `catalogFilterProvider`** והאנומים שלהם — מוגדרים אך
-  לא בשימוש; קוד "מת-למחצה" (גם `_LipskeySupplierCard`, `_FeaturedProductCard`,
-  `_CatalogDrillSection`).
+- ~~**`catalogSortProvider` / `catalogFilterProvider`**~~ ✅ הוסרו; כלי הפאנל
+  (⚙️ פילטרים / ↕️ מיון / ▦ קטלוג) חוּוטו לאפקט אמיתי. נותר קוד "מת-למחצה":
+  `_LipskeySupplierCard`, `_FeaturedProductCard`, `_CatalogDrillSection`.
 - **באנר snooze** — חי בפועל ב-`notif_settings_screen.dart`, לא במסך ההתראות.
 - **dials**: רק ה-BS dial מופעל מ-UI (tap על ה-wordmark); `OpenDial.search`/`menu`
   מרונדרים אך לא נקבעים בשום מקום, ו-`bsMode` לא מומש.
