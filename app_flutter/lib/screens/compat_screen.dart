@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
@@ -390,6 +392,37 @@ List<LipskeyCatalogProduct> compatibleWith(
         .toList()
       ..sort((a, b) => (a.categoryHe == anchor.categoryHe ? 0 : 1)
           .compareTo(b.categoryHe == anchor.categoryHe ? 0 : 1));
+
+/// BFS shortest path from [from] to [to] through the compatibility graph.
+/// Returns null when no path exists within [maxDepth] hops.
+/// tempC filters out materials unsuitable for the line temperature.
+List<LipskeyCatalogProduct>? findShortestPath(
+  LipskeyCatalogProduct from,
+  LipskeyCatalogProduct to, {
+  int maxDepth = 6,
+  int tempC = 20,
+}) {
+  if (from.sku == to.sku) return [from];
+  if (canConnect(from, to)) return [from, to];
+
+  final queue = Queue<List<LipskeyCatalogProduct>>();
+  queue.add([from]);
+  final visited = <String>{from.sku, to.sku};
+
+  while (queue.isNotEmpty) {
+    final path = queue.removeFirst();
+    if (path.length >= maxDepth) continue;
+    final tail = path.last;
+    for (final next in compatibleWith(tail, tempC: tempC)) {
+      if (visited.contains(next.sku)) continue;
+      final newPath = [...path, next];
+      if (canConnect(next, to)) return [...newPath, to];
+      visited.add(next.sku);
+      queue.add(newPath);
+    }
+  }
+  return null;
+}
 
 List<LipskeyCatalogProduct> _filtered(WidgetRef ref) {
   final g    = ref.watch(compatGenderProvider);
@@ -1339,6 +1372,90 @@ class ChainBuilderSheet extends ConsumerWidget {
                           },
                   ),
                 ],
+                // ── add next product button ──────────────────────────────
+                const Divider(height: 1, color: _divider),
+                InkWell(
+                  onTap: () {
+                    final tail = chain.isEmpty ? null : chain.last;
+                    final suggestions = tail == null
+                        ? kCompatCatalog
+                            .where((p) => productSuitableForTemp(p, lineTemp))
+                            .toList()
+                        : compatibleWith(tail, tempC: lineTemp);
+                    showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => _AddPickerSheet(
+                        suggestions: suggestions,
+                        lineTemp: lineTemp,
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    child: Row(children: [
+                      Container(
+                        width: 32, height: 32,
+                        decoration: BoxDecoration(
+                          color: _brand, shape: BoxShape.circle),
+                        child: const Icon(Icons.add,
+                            color: Colors.white, size: 18),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        chain.isEmpty
+                            ? 'הוסף פריט ראשון לקו'
+                            : 'הוסף פריט מתחבר לקצה',
+                        style: const TextStyle(
+                            color: _brand, fontSize: 14,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ]),
+                  ),
+                ),
+                // ── find path button ─────────────────────────────────────
+                const Divider(height: 1, color: _divider),
+                InkWell(
+                  onTap: () {
+                    final tail = chain.isEmpty ? null : chain.last;
+                    showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => _FindPathSheet(
+                        from: tail,
+                        lineTemp: lineTemp,
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    child: Row(children: [
+                      Container(
+                        width: 32, height: 32,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7C3AED),
+                          shape: BoxShape.circle),
+                        child: const Icon(Icons.route,
+                            color: Colors.white, size: 18),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text('מצא נתיב אוטומטי לפריט',
+                            style: TextStyle(
+                                color: Color(0xFF7C3AED), fontSize: 14,
+                                fontWeight: FontWeight.w700)),
+                      ),
+                      const Text('BFS',
+                          style: TextStyle(
+                              color: Color(0xFF7C3AED), fontSize: 10,
+                              fontWeight: FontWeight.w600)),
+                    ]),
+                  ),
+                ),
                 if (chain.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _ComplianceChecklist(
@@ -1731,4 +1848,581 @@ class _CompatCheck extends StatelessWidget {
       ]),
     );
   }
+}
+
+// ── Add-to-chain picker sheet ─────────────────────────────────────────────────
+// Shows products compatible with the current chain tail (or all temp-suitable
+// products when the chain is empty). Tapping a row appends it to the chain.
+
+class _AddPickerSheet extends ConsumerStatefulWidget {
+  const _AddPickerSheet({
+    required this.suggestions,
+    required this.lineTemp,
+  });
+  final List<LipskeyCatalogProduct> suggestions;
+  final int lineTemp;
+
+  @override
+  ConsumerState<_AddPickerSheet> createState() => _AddPickerSheetState();
+}
+
+class _AddPickerSheetState extends ConsumerState<_AddPickerSheet> {
+  String _q = '';
+
+  List<LipskeyCatalogProduct> get _filtered {
+    final q = _q.trim().toLowerCase();
+    if (q.isEmpty) return widget.suggestions;
+    return widget.suggestions.where((p) =>
+        p.nameHe.toLowerCase().contains(q) ||
+        p.categoryHe.toLowerCase().contains(q) ||
+        p.brand.toLowerCase().contains(q)).toList();
+  }
+
+  void _add(LipskeyCatalogProduct p) {
+    final chain = ref.read(chainProvider);
+    ref.read(chainProvider.notifier).state = [...chain, p];
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final items = _filtered;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.75,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (_, ctrl) => Container(
+          decoration: const BoxDecoration(
+            color: _bg,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(children: [
+            Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 6),
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                  color: _divider, borderRadius: BorderRadius.circular(2)),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: Row(children: [
+                const Text('➕', style: TextStyle(fontSize: 18)),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text('בחר פריט להוספה',
+                      style: TextStyle(color: _title, fontSize: 16,
+                          fontWeight: FontWeight.w700)),
+                ),
+                Text('${items.length} פריטים',
+                    style: const TextStyle(color: _sub, fontSize: 12)),
+              ]),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: TextField(
+                autofocus: false,
+                textDirection: TextDirection.rtl,
+                decoration: InputDecoration(
+                  hintText: 'חיפוש...',
+                  hintTextDirection: TextDirection.rtl,
+                  prefixIcon: const Icon(Icons.search, size: 18),
+                  isDense: true,
+                  filled: true,
+                  fillColor: _surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 10),
+                ),
+                onChanged: (v) => setState(() => _q = v),
+              ),
+            ),
+            const Divider(height: 1, color: _divider),
+            if (items.isEmpty)
+              Expanded(
+                child: Center(
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    const Text('⊘',
+                        style: TextStyle(fontSize: 40, color: _divider)),
+                    const SizedBox(height: 8),
+                    const Text('אין פריטים תואמים',
+                        style: TextStyle(color: _sub, fontSize: 13)),
+                  ]),
+                ),
+              )
+            else
+              Expanded(child: ListView.separated(
+                controller: ctrl,
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                itemCount: items.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(height: 1, indent: 72, color: _divider),
+                itemBuilder: (_, i) {
+                  final p = items[i];
+                  final spec = kVerifiedSpecs[p.sku];
+                  return InkWell(
+                    onTap: () => _add(p),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      child: Row(children: [
+                        Container(
+                          width: 44, height: 44,
+                          decoration: BoxDecoration(
+                            color: _surface,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(p.typeEmoji,
+                              style: const TextStyle(fontSize: 22)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(p.nameHe, maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: _title, fontSize: 14,
+                                    fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 2),
+                            Row(children: [
+                              if (spec?.pressureRating != null)
+                                Text(spec!.pressureRating!,
+                                    style: const TextStyle(
+                                        color: Color(0xFF0284C7),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500)),
+                              if (spec?.pexType != null) ...[
+                                const SizedBox(width: 6),
+                                Text('· ${spec!.pexType!}',
+                                    style: const TextStyle(
+                                        color: Color(0xFF7C3AED),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500)),
+                              ],
+                              if (spec?.pressureRating == null &&
+                                  spec?.pexType == null)
+                                Text(p.categoryHe,
+                                    style: const TextStyle(
+                                        color: _sub, fontSize: 11)),
+                            ]),
+                          ],
+                        )),
+                        Container(
+                          width: 32, height: 32,
+                          decoration: BoxDecoration(
+                            color: _brand, shape: BoxShape.circle),
+                          child: const Icon(Icons.add,
+                              size: 16, color: Colors.white),
+                        ),
+                      ]),
+                    ),
+                  );
+                },
+              )),
+            SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Find-path sheet ───────────────────────────────────────────────────────────
+// Two-step UX:
+//   Step 1 — pick the TARGET product (all temp-suitable products, searchable)
+//   Step 2 — show BFS result: found path OR "no path"
+//            "הוסף לשרשרת" appends the full path to the chain
+
+enum _FindPathStep { pickTarget, showResult }
+
+class _FindPathSheet extends ConsumerStatefulWidget {
+  const _FindPathSheet({this.from, required this.lineTemp});
+  final LipskeyCatalogProduct? from;
+  final int lineTemp;
+
+  @override
+  ConsumerState<_FindPathSheet> createState() => _FindPathSheetState();
+}
+
+class _FindPathSheetState extends ConsumerState<_FindPathSheet> {
+  _FindPathStep _step = _FindPathStep.pickTarget;
+  String _q = '';
+  LipskeyCatalogProduct? _target;
+  List<LipskeyCatalogProduct>? _path;
+  bool _searching = false;
+
+  List<LipskeyCatalogProduct> get _candidates {
+    final q = _q.trim().toLowerCase();
+    final all = kCompatCatalog
+        .where((p) => productSuitableForTemp(p, widget.lineTemp))
+        .toList();
+    if (q.isEmpty) return all;
+    return all.where((p) =>
+        p.nameHe.toLowerCase().contains(q) ||
+        p.categoryHe.toLowerCase().contains(q)).toList();
+  }
+
+  Future<void> _runBFS(LipskeyCatalogProduct target) async {
+    setState(() { _searching = true; _target = target; });
+    // Run in microtask so UI updates first
+    await Future.microtask(() {
+      final from = widget.from;
+      final path = from == null
+          ? [target]
+          : findShortestPath(from, target, maxDepth: 7, tempC: widget.lineTemp);
+      setState(() { _path = path; _step = _FindPathStep.showResult; _searching = false; });
+    });
+  }
+
+  void _addAllToChain() {
+    if (_path == null) return;
+    final chain = ref.read(chainProvider);
+    final existing = {for (final p in chain) p.sku};
+    // If chain already ends with from, skip it to avoid duplicates
+    final toAdd = chain.isNotEmpty && _path!.first.sku == chain.last.sku
+        ? _path!.skip(1).toList()
+        : _path!;
+    ref.read(chainProvider.notifier).state = [
+      ...chain,
+      ...toAdd.where((p) => !existing.contains(p.sku)),
+    ];
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: _step == _FindPathStep.showResult ? 0.6 : 0.80,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (_, ctrl) => Container(
+          decoration: const BoxDecoration(
+            color: _bg,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: _step == _FindPathStep.pickTarget
+              ? _buildPickTarget(ctrl)
+              : _buildResult(ctrl),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPickTarget(ScrollController ctrl) {
+    final items = _candidates;
+    return Column(children: [
+      _handle(),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+        child: Row(children: [
+          Container(
+            width: 28, height: 28,
+            decoration: const BoxDecoration(
+              color: Color(0xFF7C3AED), shape: BoxShape.circle),
+            child: const Icon(Icons.route, color: Colors.white, size: 16),
+          ),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text('בחר פריט יעד — אני אמצא את הנתיב',
+                style: TextStyle(color: _title, fontSize: 15,
+                    fontWeight: FontWeight.w700)),
+          ),
+          Text('${items.length}', style: const TextStyle(color: _sub, fontSize: 12)),
+        ]),
+      ),
+      if (widget.from != null)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Row(children: [
+            const Text('מתחיל מ:', style: TextStyle(color: _sub, fontSize: 12)),
+            const SizedBox(width: 6),
+            Flexible(child: Text(widget.from!.nameHe,
+                maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: _title, fontSize: 12,
+                    fontWeight: FontWeight.w600))),
+          ]),
+        ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        child: TextField(
+          autofocus: false,
+          textDirection: TextDirection.rtl,
+          decoration: InputDecoration(
+            hintText: 'חיפוש פריט יעד...',
+            hintTextDirection: TextDirection.rtl,
+            prefixIcon: const Icon(Icons.search, size: 18),
+            isDense: true,
+            filled: true,
+            fillColor: _surface,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          ),
+          onChanged: (v) => setState(() => _q = v),
+        ),
+      ),
+      const Divider(height: 1, color: _divider),
+      if (_searching)
+        const Expanded(child: Center(child: CircularProgressIndicator()))
+      else if (items.isEmpty)
+        const Expanded(child: Center(
+          child: Text('אין תוצאות', style: TextStyle(color: _sub))))
+      else
+        Expanded(child: ListView.separated(
+          controller: ctrl,
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          itemCount: items.length,
+          separatorBuilder: (_, __) =>
+              const Divider(height: 1, indent: 72, color: _divider),
+          itemBuilder: (_, i) {
+            final p = items[i];
+            return InkWell(
+              onTap: () => _runBFS(p),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 10),
+                child: Row(children: [
+                  Container(
+                    width: 44, height: 44,
+                    decoration: BoxDecoration(
+                      color: _surface,
+                      borderRadius: BorderRadius.circular(8)),
+                    alignment: Alignment.center,
+                    child: Text(p.typeEmoji,
+                        style: const TextStyle(fontSize: 22)),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(p.nameHe, maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              color: _title, fontSize: 14,
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 2),
+                      Row(children: [
+                        if (kVerifiedSpecs[p.sku]?.pressureRating != null)
+                          Text(kVerifiedSpecs[p.sku]!.pressureRating!,
+                              style: const TextStyle(
+                                  color: Color(0xFF0284C7), fontSize: 10,
+                                  fontWeight: FontWeight.w500))
+                        else
+                          Text(p.categoryHe,
+                              style: const TextStyle(
+                                  color: _sub, fontSize: 11)),
+                      ]),
+                    ],
+                  )),
+                  const Icon(Icons.chevron_left,
+                      color: Color(0xFF7C3AED), size: 20),
+                ]),
+              ),
+            );
+          },
+        )),
+      SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
+    ]);
+  }
+
+  Widget _buildResult(ScrollController ctrl) {
+    final path = _path;
+    final found = path != null;
+    return Column(children: [
+      _handle(),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+        child: Row(children: [
+          Icon(found ? Icons.check_circle : Icons.cancel,
+              color: found ? const Color(0xFF059669) : Colors.red, size: 22),
+          const SizedBox(width: 10),
+          Expanded(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                found
+                    ? 'נמצא נתיב — ${path.length} פריטים'
+                    : 'לא נמצא נתיב עד 7 שלבים',
+                style: TextStyle(
+                    color: found ? _title : Colors.red,
+                    fontSize: 15, fontWeight: FontWeight.w700),
+              ),
+              if (_target != null)
+                Text('יעד: ${_target!.nameHe}',
+                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: _sub, fontSize: 12)),
+            ],
+          )),
+          TextButton(
+            onPressed: () =>
+                setState(() { _step = _FindPathStep.pickTarget; _path = null; }),
+            child: const Text('← חזור'),
+          ),
+        ]),
+      ),
+      if (!found)
+        const Expanded(child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              'אין מחבר ישיר בין שני הפריטים בקטלוג הנוכחי.\nנסה פריטים עם גודל או שיטת חיבור קרובה יותר.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: _sub, fontSize: 13),
+            ),
+          ),
+        ))
+      else ...[
+        const Divider(height: 1, color: _divider),
+        Expanded(child: ListView.separated(
+          controller: ctrl,
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          itemCount: path.length,
+          separatorBuilder: (_, __) => Padding(
+            padding: const EdgeInsets.only(right: 52),
+            child: Row(children: [
+              const SizedBox(width: 52),
+              Container(width: 3, height: 18, color: const Color(0xFF059669)),
+            ]),
+          ),
+          itemBuilder: (_, i) {
+            final p = path[i];
+            final spec = kVerifiedSpecs[p.sku];
+            final isFirst = i == 0;
+            final isLast  = i == path.length - 1;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(children: [
+                Stack(alignment: Alignment.center, children: [
+                  Container(
+                    width: 44, height: 44,
+                    decoration: BoxDecoration(
+                      color: isFirst
+                          ? const Color(0xFF0284C7).withOpacity(0.1)
+                          : isLast
+                              ? const Color(0xFF7C3AED).withOpacity(0.1)
+                              : _surface,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isFirst
+                            ? const Color(0xFF0284C7)
+                            : isLast
+                                ? const Color(0xFF7C3AED)
+                                : Colors.transparent,
+                        width: isFirst || isLast ? 1.5 : 0,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(p.typeEmoji,
+                        style: const TextStyle(fontSize: 22)),
+                  ),
+                  Positioned(
+                    bottom: -1, right: -1,
+                    child: Container(
+                      width: 16, height: 16,
+                      decoration: BoxDecoration(
+                        color: isFirst
+                            ? const Color(0xFF0284C7)
+                            : isLast
+                                ? const Color(0xFF7C3AED)
+                                : const Color(0xFF059669),
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text('${i + 1}',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 9,
+                              fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ]),
+                const SizedBox(width: 12),
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      if (isFirst)
+                        const Padding(
+                          padding: EdgeInsets.only(left: 4),
+                          child: Text('התחלה',
+                              style: TextStyle(
+                                  color: Color(0xFF0284C7), fontSize: 9,
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                      if (isLast)
+                        const Padding(
+                          padding: EdgeInsets.only(left: 4),
+                          child: Text('יעד',
+                              style: TextStyle(
+                                  color: Color(0xFF7C3AED), fontSize: 9,
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                    ]),
+                    Text(p.nameHe, maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: _title, fontSize: 13,
+                            fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    if (spec?.pressureRating != null)
+                      Text(spec!.pressureRating!,
+                          style: const TextStyle(
+                              color: Color(0xFF0284C7), fontSize: 10,
+                              fontWeight: FontWeight.w500)),
+                    if (i < path.length - 1)
+                      Text(
+                        connectionMethodLabel(p, path[i + 1]),
+                        style: const TextStyle(
+                            color: Color(0xFF059669), fontSize: 10,
+                            fontWeight: FontWeight.w500),
+                      ),
+                  ],
+                )),
+              ]),
+            );
+          },
+        )),
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+              16, 8, 16, MediaQuery.of(context).padding.bottom + 12),
+          child: SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF7C3AED),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              icon: const Icon(Icons.playlist_add, color: Colors.white),
+              label: Text('הוסף ${path.length} פריטים לשרשרת',
+                  style: const TextStyle(
+                      color: Colors.white, fontSize: 14,
+                      fontWeight: FontWeight.w700)),
+              onPressed: _addAllToChain,
+            ),
+          ),
+        ),
+      ],
+    ]);
+  }
+
+  Widget _handle() => Container(
+        margin: const EdgeInsets.only(top: 10, bottom: 6),
+        width: 40, height: 4,
+        decoration: BoxDecoration(
+            color: _divider, borderRadius: BorderRadius.circular(2)),
+      );
 }

@@ -200,7 +200,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                       SizedBox(width: 4),
                       Text(
-                        'v3.54 · 26.5.26 · תצוגת רשת + תיקוני הגדרות',
+                        'v3.55 · 26.5.26 · תצוגת רשת + BFS',
                         style: TextStyle(
                           color: Color(0xFF4CAF50),
                           fontSize: 10,
