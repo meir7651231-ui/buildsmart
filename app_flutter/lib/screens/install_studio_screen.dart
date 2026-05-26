@@ -31,6 +31,16 @@ Color _systemColor(LipskeyCatalogProduct p) {
   return s.contains(WaterSystem.drainage) ? _drain : _supply;
 }
 
+/// Compact engineering spec line: material · sizes · pressure-rating.
+String _specLine(LipskeyCatalogProduct p) {
+  final s = kVerifiedSpecs[p.sku];
+  if (s == null) return p.sku;
+  final ends = s.ends.map((e) => e.size).toSet().join('×');
+  final parts = <String>[s.material, if (ends.isNotEmpty) ends];
+  if (s.pressureRating != null) parts.add(s.pressureRating!);
+  return parts.join(' · ');
+}
+
 String _roleLabel(LipskeyCatalogProduct p, bool anchor) {
   if (anchor) return 'עוגן';
   switch (flowRole(p)) {
@@ -55,6 +65,8 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   late final AnimationController _flow =
       AnimationController(vsync: this, duration: const Duration(seconds: 3))
         ..repeat();
+
+  bool _loop = false; // closed recirculation ring
 
   @override
   void dispose() {
@@ -170,12 +182,16 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       itemBuilder: (_, i) {
         final p = chain[i];
         final last = i == chain.length - 1;
+        final connectsToNext =
+            last ? true : canConnect(p, chain[i + 1]);
         return _NodeRow(
           product: p,
           index: i,
           isLast: last,
           flow: _flow.value,
           nextColor: last ? null : _systemColor(chain[i + 1]),
+          methodToNext: last ? '' : connectionMethodLabel(p, chain[i + 1]),
+          connectsToNext: connectsToNext,
           onRemove: () {
             final c = [...chain]..removeAt(i);
             ref.read(chainProvider.notifier).state = c;
@@ -231,8 +247,28 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
           _legendDot(_drain, 'ניקוז'),
           _legendDot(_fixture, 'קבועה'),
           const Spacer(),
-          Text('${chain.length} עוגנים',
-              style: const TextStyle(color: _mute, fontSize: 12)),
+          GestureDetector(
+            onTap: () => setState(() => _loop = !_loop),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: _loop ? _fixture.withOpacity(0.2) : _void1,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                    color: _loop ? _fixture : _mute.withOpacity(0.3)),
+              ),
+              child: Row(children: [
+                Icon(Icons.loop,
+                    color: _loop ? _fixture : _mute, size: 14),
+                const SizedBox(width: 4),
+                Text('לולאה',
+                    style: TextStyle(
+                        color: _loop ? _fixture : _mute,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700)),
+              ]),
+            ),
+          ),
         ]),
         const SizedBox(height: 12),
         Row(children: [
@@ -343,7 +379,8 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       plan = buildTreeInstallation(trunk, branchTargets,
           tempC: temp, accessories: acc);
     } else {
-      plan = buildInstallation([...chain], tempC: temp, accessories: acc);
+      plan = buildInstallation([...chain],
+          tempC: temp, accessories: acc, loop: _loop);
     }
     showModalBottomSheet<void>(
       context: context,
@@ -376,6 +413,8 @@ class _NodeRow extends StatelessWidget {
     required this.isLast,
     required this.flow,
     required this.nextColor,
+    required this.methodToNext,
+    required this.connectsToNext,
     required this.onRemove,
   });
   final LipskeyCatalogProduct product;
@@ -383,6 +422,8 @@ class _NodeRow extends StatelessWidget {
   final bool isLast;
   final double flow;
   final Color? nextColor;
+  final String methodToNext; // join method to the next node
+  final bool connectsToNext; // false → broken joint (red)
   final VoidCallback onRemove;
 
   @override
@@ -422,8 +463,12 @@ class _NodeRow extends StatelessWidget {
               Row(children: [
                 _chip(_roleLabel(product, true), c),
                 const SizedBox(width: 6),
-                Text(product.sku,
-                    style: const TextStyle(color: _mute, fontSize: 11)),
+                Expanded(
+                  child: Text(_specLine(product),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: _mute, fontSize: 11)),
+                ),
               ]),
             ]),
           ),
@@ -433,7 +478,13 @@ class _NodeRow extends StatelessWidget {
           ),
         ]),
       ),
-      if (!isLast) _PipeLink(from: c, to: nextColor ?? c, flow: flow),
+      if (!isLast)
+        _PipeLink(
+            from: c,
+            to: nextColor ?? c,
+            flow: flow,
+            method: methodToNext,
+            broken: !connectsToNext),
     ]);
   }
 
@@ -448,22 +499,45 @@ class _NodeRow extends StatelessWidget {
       );
 }
 
-// animated energy pipe between two nodes
+// animated energy pipe between two nodes, with a join-method / status label
 class _PipeLink extends StatelessWidget {
-  const _PipeLink({required this.from, required this.to, required this.flow});
+  const _PipeLink(
+      {required this.from,
+      required this.to,
+      required this.flow,
+      required this.method,
+      required this.broken});
   final Color from;
   final Color to;
   final double flow;
+  final String method;
+  final bool broken;
   @override
   Widget build(BuildContext context) {
+    final c = broken ? const Color(0xFFEF4444) : _accent;
     return SizedBox(
-      height: 34,
-      child: Center(
-        child: CustomPaint(
-          size: const Size(4, 34),
-          painter: _PipePainter(from, to, flow),
+      height: 30,
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(
+          width: 4, height: 30,
+          child: CustomPaint(
+            painter: _PipePainter(broken ? c : from, broken ? c : to, flow),
+          ),
         ),
-      ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+              color: c.withOpacity(0.14),
+              borderRadius: BorderRadius.circular(8)),
+          child: Text(
+              broken
+                  ? '⚠ אין חיבור'
+                  : (method.isEmpty ? '✓ מחובר' : '✓ $method'),
+              style: TextStyle(
+                  color: c, fontSize: 10, fontWeight: FontWeight.w700)),
+        ),
+      ]),
     );
   }
 }
@@ -562,6 +636,10 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     final outlets = widget.outlets;
     final ok = plan.isComplete;
     final overCapacity = branches > 0 && outlets > 0 && branches > outlets;
+    final checklist = lineComplianceChecklist(
+        plan.items,
+        ref.read(lineMaxTempProvider),
+        ref.read(lineAccessoriesProvider));
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
@@ -634,6 +712,33 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                       padding: const EdgeInsets.fromLTRB(18, 2, 18, 2),
                       child: Text('✗ ${g.from.nameHe} ↮ ${g.to.nameHe}',
                           style: const TextStyle(color: _mute, fontSize: 12)),
+                    ),
+                ],
+                if (checklist.isNotEmpty) ...[
+                  const Divider(height: 18, color: Color(0xFF243049)),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(18, 0, 18, 6),
+                    child: Text('בדיקת תקינות הקו',
+                        style: TextStyle(
+                            color: _ink,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800)),
+                  ),
+                  for (final ch in checklist)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 3, 18, 3),
+                      child: Row(children: [
+                        Icon(ch.satisfied ? Icons.check_circle : Icons.cancel,
+                            color: ch.satisfied ? _accent : _drain, size: 16),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(ch.label,
+                              style: TextStyle(
+                                  color: ch.satisfied ? _ink : _drain,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600)),
+                        ),
+                      ]),
                     ),
                 ],
                 const SizedBox(height: 10),
@@ -744,7 +849,9 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
             Text(p.nameHe,
                 style: const TextStyle(
                     color: _ink, fontSize: 13, fontWeight: FontWeight.w600)),
-            Text('${_roleLabel(p, anchor)} · ${p.sku}',
+            Text('${_roleLabel(p, anchor)} · ${_specLine(p)}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: _mute, fontSize: 11)),
           ]),
         ),
