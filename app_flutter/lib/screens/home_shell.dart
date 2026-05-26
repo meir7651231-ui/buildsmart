@@ -574,7 +574,7 @@ class _MenuRow extends StatelessWidget {
           child: Text(
             label,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white, fontSize: 15),
+            style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
           ),
         ),
       ],
@@ -618,7 +618,7 @@ class _ScanPlanSheet extends StatelessWidget {
             child: Text(
               '📐 סרוק תוכנית עבודה',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF1A1A1A),
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -639,7 +639,7 @@ class _ScanPlanSheet extends StatelessWidget {
               leading: Text(p.emoji, style: const TextStyle(fontSize: 24)),
               title: Text(
                 p.label,
-                style: const TextStyle(color: Colors.white, fontSize: 15),
+                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
               ),
               trailing: const Icon(
                 Icons.chevron_left,
@@ -694,7 +694,7 @@ class _NewChatSheet extends StatelessWidget {
             child: Text(
               '✏️ שיחה חדשה',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF1A1A1A),
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -715,7 +715,7 @@ class _NewChatSheet extends StatelessWidget {
               leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
               title: Text(
                 c.label,
-                style: const TextStyle(color: Colors.white, fontSize: 15),
+                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
               ),
               trailing: const Icon(
                 Icons.chevron_left,
