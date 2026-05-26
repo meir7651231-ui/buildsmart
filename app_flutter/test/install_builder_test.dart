@@ -11,30 +11,25 @@ LipskeyCatalogProduct? _f(String sku) {
 void _build(String desc, List<String> skus) {
   final anchors = [for (final s in skus) _f(s)].whereType<LipskeyCatalogProduct>().toList();
   if (anchors.length != skus.length) { print('?? $desc — SKU חסר'); return; }
-  final plan = buildInstallation(anchors, maxDepthPerSegment: 6, tempC: 20);
+  final plan = buildInstallation(anchors, maxDepthPerSegment: 7, tempC: 20);
   print('\n🔧 $desc');
-  print('   עוגנים: ${anchors.map((a)=>a.nameHe).join(" | ")}');
-  print('   ── BOM שלם (${plan.items.length} פריטים) ──');
+  print('   ── BOM (${plan.items.length} פריטים) ──');
   for (var i = 0; i < plan.items.length; i++) {
     final p = plan.items[i];
-    final isAnchor = skus.contains(p.sku);
-    print('   ${(i+1).toString().padLeft(2)}. ${isAnchor ? "★" : " "} ${p.nameHe} [${p.sku}]');
+    final sys = productSystems(p).map((s)=>s.name=='supply'?'אספקה':'ניקוז').join('+');
+    final star = skus.contains(p.sku) ? '★ עוגן' : '  מחבר';
+    print('   ${(i+1).toString().padLeft(2)}. $star  ${p.nameHe} [${p.sku}]  ($sys)');
   }
   if (plan.gaps.isNotEmpty) {
-    print('   ⚠️ פערים לא מחוברים:');
-    for (final g in plan.gaps) print('      ✗ ${g.from.nameHe} ↮ ${g.to.nameHe}');
-  } else {
-    print('   ✅ הקו שלם — בלי שחסר בורג');
-  }
+    print('   ⚠️ פערים (חסר חיבור):'); for (final g in plan.gaps) print('      ✗ ${g.from.nameHe} ↮ ${g.to.nameHe}');
+  } else { print('   ✅ הקו שלם — בלי שחסר בורג'); }
 }
 
 void main() {
-  test('בניית התקנה מעוגנים', () {
-    // התקנת אסלה: אספקה (ברז מעבר) → אסלה (קבועה) → צינור ניקוז 110
-    _build('שירותים — אסלה מלאה', ['77777311', '77771006', '116113']);
-    // התקנת כיור: ברז כיור → קבועה → ניקוז
-    _build('כיור עם ברז', ['77777114', '77771006', '116113']);
-    // אספקה בלבד — ברז גן ¾" → ברז כיור ½"
-    _build('קו אספקה: ברז גן → ברז כיור', ['77777345', '77777114']);
+  test('שירותים — צינור הזנה גדול', () {
+    _build('ברז הזנה 2" → קיסר → אסלה → בור ניקוז',
+        ['77777316', '779096G', '77771006', '116113']);
+    _build('ברז הזנה 1" → קיסר → אסלה → בור ניקוז',
+        ['77777313', '779096G', '77771006', '116113']);
   });
 }
