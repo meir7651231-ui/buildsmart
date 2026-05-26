@@ -330,10 +330,6 @@ Set<WaterSystem> productSystems(LipskeyCatalogProduct p) {
   return (ends == null || ends.isEmpty) ? _allSystems : ends;
 }
 
-/// True when the two products can co-exist in one line (share a system).
-bool _shareSystem(LipskeyCatalogProduct a, LipskeyCatalogProduct b) =>
-    productSystems(a).intersection(productSystems(b)).isNotEmpty;
-
 /// A product's role in a flow path.
 /// * connector — pipes, fittings, nipples, adapters, valves, gaskets: flow
 ///   passes through them, so they may be auto-inserted as mid-line connectors.
@@ -1648,6 +1644,47 @@ class ChainBuilderSheet extends ConsumerWidget {
                     )),
                   ]),
                 ),
+                // ── complete-installation: fill connectors between all anchors ──
+                if (chain.length >= 2)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+                    child: GestureDetector(
+                      onTap: () {
+                        final anchors = [...chain];
+                        final plan = buildInstallation(anchors, tempC: lineTemp);
+                        showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => _InstallationResultSheet(
+                            plan: plan,
+                            anchorSkus: {for (final a in anchors) a.sku},
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                              colors: [Color(0xFF059669), Color(0xFF047857)]),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.auto_awesome_motion,
+                                  color: Colors.white, size: 18),
+                              SizedBox(width: 8),
+                              Text('השלם התקנה — מלא את כל החיבורים',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800)),
+                            ]),
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 4),
                 if (chain.isNotEmpty) ...[
                   const SizedBox(height: 8),
@@ -2037,6 +2074,146 @@ class _CompatCheck extends StatelessWidget {
           padding: const EdgeInsets.only(right: 16, top: 2),
           child: Text(reason,
               style: const TextStyle(color: Colors.red, fontSize: 9)),
+        ),
+      ]),
+    );
+  }
+}
+
+// ── complete-installation result sheet ────────────────────────────────────────
+// Shows the full bill-of-materials produced by buildInstallation: the anchors
+// the installer picked plus every auto-filled connector, in order, with any
+// unconnectable gaps. "החל על השרשרת" replaces the working chain with the BOM.
+class _InstallationResultSheet extends ConsumerWidget {
+  const _InstallationResultSheet({required this.plan, required this.anchorSkus});
+  final InstallationPlan plan;
+  final Set<String> anchorSkus;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final complete = plan.isComplete;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (_, ctrl) => Container(
+          decoration: const BoxDecoration(
+            color: _bg,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(children: [
+            Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 6),
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                  color: _divider, borderRadius: BorderRadius.circular(2)),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+              child: Row(children: [
+                Icon(complete ? Icons.check_circle : Icons.warning_amber_rounded,
+                    color: complete
+                        ? const Color(0xFF059669)
+                        : const Color(0xFFEA580C),
+                    size: 22),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    complete
+                        ? 'התקנה שלמה — ${plan.items.length} פריטים'
+                        : 'חסרים ${plan.gaps.length} חיבורים — ${plan.items.length} פריטים',
+                    style: TextStyle(
+                        color: complete ? _title : const Color(0xFFEA580C),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ]),
+            ),
+            const Divider(height: 1, color: _divider),
+            Expanded(
+              child: ListView(controller: ctrl, children: [
+                for (var i = 0; i < plan.items.length; i++)
+                  _bomRow(plan.items[i], i + 1,
+                      isAnchor: anchorSkus.contains(plan.items[i].sku)),
+                if (plan.gaps.isNotEmpty) ...[
+                  const Divider(height: 1, color: _divider),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                    child: Text('⚠️ חיבורים חסרים בקטלוג:',
+                        style: TextStyle(
+                            color: const Color(0xFFEA580C),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700)),
+                  ),
+                  for (final g in plan.gaps)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
+                      child: Text('✗ ${g.from.nameHe} ↮ ${g.to.nameHe}',
+                          style: const TextStyle(color: _sub, fontSize: 12)),
+                    ),
+                ],
+                const SizedBox(height: 8),
+              ]),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                  12, 8, 12, 12 + MediaQuery.of(context).padding.bottom),
+              child: GestureDetector(
+                onTap: () {
+                  ref.read(chainProvider.notifier).state = plan.items;
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  decoration: BoxDecoration(
+                      color: _brand, borderRadius: BorderRadius.circular(14)),
+                  child: Text('החל על השרשרת (${plan.items.length} פריטים)',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800)),
+                ),
+              ),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  Widget _bomRow(LipskeyCatalogProduct p, int n, {required bool isAnchor}) {
+    final sys = productSystems(p)
+        .map((s) => s == WaterSystem.supply ? 'אספקה' : 'ניקוז')
+        .join('+');
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+      child: Row(children: [
+        Container(
+          width: 26, height: 26,
+          decoration: BoxDecoration(
+            color: isAnchor ? _brand : const Color(0xFF059669),
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: Text('$n',
+              style: const TextStyle(
+                  color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(p.nameHe,
+                style: const TextStyle(
+                    color: _title, fontSize: 13, fontWeight: FontWeight.w600)),
+            Text('${isAnchor ? '★ עוגן' : 'מחבר'} · $sys · ${p.sku}',
+                style: const TextStyle(color: _sub, fontSize: 11)),
+          ]),
         ),
       ]),
     );

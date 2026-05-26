@@ -72,6 +72,15 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 | cart stepper (+ / − / לעגלה) | `qtyForKey` / `setQtyForKey` | ✅ |
 | כתובות/חשבוניות/ספקים/השכרה/אחריות/ביומטרי/אשראי-יומי | — | ⛔ server/data |
 
+## Compatibility / line builder (`compat_screen.dart`)
+
+| Button | Behavior | Status |
+|---|---|---|
+| בחר מוצר / הוסף מוצר | set/append a chain anchor from the catalog | ✅ |
+| הרץ קו אוטומטית | BFS/Dijkstra from the tail to a chosen target | ✅ |
+| **השלם התקנה** | `buildInstallation` fills connectors between every chain anchor → full BOM sheet + gaps; "החל על השרשרת" applies it | ✅ |
+| טמפ׳ הקו / אביזרים | line temperature + insulation/clips/sealing toggles | ✅ |
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)
