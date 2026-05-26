@@ -33,16 +33,6 @@ Color _systemColor(LipskeyCatalogProduct p) {
   return s.contains(WaterSystem.drainage) ? _drain : _supply;
 }
 
-/// Compact engineering spec line: material · sizes · pressure-rating.
-String _specLine(LipskeyCatalogProduct p) {
-  final s = kVerifiedSpecs[p.sku];
-  if (s == null) return p.categoryHe;
-  final ends = s.ends.map((e) => e.size).toSet().join('×');
-  final parts = <String>[s.material, if (ends.isNotEmpty) ends];
-  if (s.pressureRating != null) parts.add(s.pressureRating!);
-  return parts.join(' · ');
-}
-
 String _roleLabel(LipskeyCatalogProduct p, bool anchor) {
   if (anchor) return 'עוגן';
   switch (flowRole(p)) {
