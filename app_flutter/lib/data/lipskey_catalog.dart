@@ -300,13 +300,17 @@ const List<String> kLipskeyColors = [
 ];
 
 /// Inverted index word→SKUs for fast search (צעד 72). Built lazily once.
+/// Minimum token length that gets indexed (1-char tokens are skipped as noise).
+const int kIndexMinWordLen = 2;
+bool indexableWord(String w) => w.length >= kIndexMinWordLen;
+
 Map<String, List<String>>? _wordIndex;
 Map<String, List<String>> lipskeyWordIndex() {
   if (_wordIndex != null) return _wordIndex!;
   final idx = <String, List<String>>{};
   for (final p in kLipskeyCatalog) {
     for (final w in p.nameHe.split(RegExp(r'\s+'))) {
-      if (w.length >= 2) (idx[w] ??= []).add(p.sku);
+      if (indexableWord(w)) (idx[w] ??= []).add(p.sku);
     }
   }
   return _wordIndex = idx;

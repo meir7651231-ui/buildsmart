@@ -186,31 +186,49 @@ Set<NotifSection> notifMutedSections(NotifSettings ns) => <NotifSection>{
       if (!ns.typePriceDrops) NotifSection.budget,
     };
 
+/// Consecutive same-type runs of this length (or more) collapse behind "הצג עוד".
+const int kNotifCollapseRunMin = 3;
+bool shouldCollapseNotifRun(int runLength) => runLength >= kNotifCollapseRunMin;
+
+/// Pure row-visibility predicate (regression-tested in test/gaps_test.dart).
+bool notifPasses({
+  required NotifSection type,
+  required String title,
+  required String preview,
+  required bool dismissed,
+  required NotifSection section,
+  required String query,
+  required Set<NotifSection> muted,
+}) {
+  if (dismissed) return false;
+  if (muted.contains(type)) return false;
+  if (section != NotifSection.all && type != section) return false;
+  if (query.isNotEmpty) {
+    final q = query.toLowerCase();
+    if (!title.toLowerCase().contains(q) && !preview.toLowerCase().contains(q)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 List<_Notif> _filtered({
   required NotifSection section,
   required Set<String> dismissedIds,
   required String query,
   required Set<NotifSection> mutedTypes,
 }) =>
-    _kNotifs.where((n) {
-      if (dismissedIds.contains(n.id)) {
-        return false;
-      }
-      if (mutedTypes.contains(n.type)) {
-        return false;
-      }
-      if (section != NotifSection.all && n.type != section) {
-        return false;
-      }
-      if (query.isNotEmpty) {
-        final q = query.toLowerCase();
-        if (!n.title.toLowerCase().contains(q) &&
-            !n.preview.toLowerCase().contains(q)) {
-          return false;
-        }
-      }
-      return true;
-    }).toList();
+    _kNotifs
+        .where((n) => notifPasses(
+              type: n.type,
+              title: n.title,
+              preview: n.preview,
+              dismissed: dismissedIds.contains(n.id),
+              section: section,
+              query: query,
+              muted: mutedTypes,
+            ))
+        .toList();
 
 // Inserts date-group headers and collapses consecutive same-type groups of ≥3.
 List<Object> _withHeadersAndCollapse(
@@ -234,7 +252,7 @@ List<Object> _withHeadersAndCollapse(
       j++;
     }
     final groupCount = j - i;
-    if (groupCount >= 3 && !expandedKeys.contains(groupKey)) {
+    if (shouldCollapseNotifRun(groupCount) && !expandedKeys.contains(groupKey)) {
       result
         ..add(notifs[i])
         ..add(_ShowMore(groupKey: groupKey, hiddenCount: groupCount - 1));

@@ -136,6 +136,34 @@ String _price(int n) {
   return '₪${n ~/ 1000},${(n % 1000).toString().padLeft(3, '0')}';
 }
 
+// ─── cart math (pure, regression-tested in test/gaps_test.dart) ───────────────
+
+int deliveryFeeFor(CartDelivery d) => switch (d) {
+      CartDelivery.express => 120,
+      CartDelivery.standard => 45,
+      CartDelivery.pickup => 0,
+    };
+
+/// VAT amount for a subtotal. When [vatInclusive] the VAT is already embedded
+/// in the prices (so it's the 18% portion of the gross); otherwise it's 18%
+/// added on top.
+int cartVat(int subtotal, {required bool vatInclusive}) => vatInclusive
+    ? subtotal - (subtotal / 1.18).round()
+    : (subtotal * 0.18).round();
+
+int cartTotal(int subtotal, int deliveryFee, {required bool vatInclusive}) =>
+    vatInclusive
+        ? subtotal + deliveryFee
+        : subtotal + cartVat(subtotal, vatInclusive: false) + deliveryFee;
+
+/// Checkout is blocked when a positive minimum is set and the subtotal is below it.
+bool cartBelowMinimum(int subtotal, StoreSettings s) =>
+    s.minOrderAmount > 0 && subtotal < s.minOrderAmount;
+
+/// Checkout asks for confirmation when the total reaches the large-order threshold.
+bool cartNeedsLargeConfirm(int total, StoreSettings s) =>
+    s.confirmLargeOrder && total >= s.largeOrderThreshold;
+
 // ─── screen ──────────────────────────────────────────────────────────────────
 
 class StoreScreen extends ConsumerStatefulWidget {
@@ -1165,16 +1193,9 @@ class _CartViewState extends ConsumerState<_CartView> {
     );
     // Inclusive: VAT is already embedded in the prices (shown for info only).
     // Exclusive: VAT is added on top of the subtotal.
-    final vat = vatInclusive
-        ? subtotal - (subtotal / 1.18).round()
-        : (subtotal * 0.18).round();
-    final deliveryFee = switch (delivery) {
-      CartDelivery.express  => 120,
-      CartDelivery.standard => 45,
-      CartDelivery.pickup   => 0,
-    };
-    final total =
-        vatInclusive ? subtotal + deliveryFee : subtotal + vat + deliveryFee;
+    final vat = cartVat(subtotal, vatInclusive: vatInclusive);
+    final deliveryFee = deliveryFeeFor(delivery);
+    final total = cartTotal(subtotal, deliveryFee, vatInclusive: vatInclusive);
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1910,12 +1931,12 @@ class _CheckoutButton extends ConsumerWidget {
   Future<void> _checkout(BuildContext context, WidgetRef ref) async {
     final s = ref.read(storeSettingsProvider);
     // Minimum-order gate.
-    if (s.minOrderAmount > 0 && subtotal < s.minOrderAmount) {
+    if (cartBelowMinimum(subtotal, s)) {
       showToast(context, 'מינימום להזמנה: ${_price(s.minOrderAmount)}');
       return;
     }
     // Large-order confirmation.
-    if (s.confirmLargeOrder && total >= s.largeOrderThreshold) {
+    if (cartNeedsLargeConfirm(total, s)) {
       final ok = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
