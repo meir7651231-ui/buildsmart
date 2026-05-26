@@ -502,7 +502,6 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
           isLast: last,
           flow: _flow.value,
           nextColor: last ? null : _systemColor(chain[i + 1]),
-          methodToNext: last ? '' : connectionMethodLabel(p, chain[i + 1]),
           connectsToNext: connectsToNext,
           onRemove: () {
             final c = [...chain]..removeAt(i);
@@ -995,7 +994,6 @@ class _NodeRow extends StatelessWidget {
     required this.isLast,
     required this.flow,
     required this.nextColor,
-    required this.methodToNext,
     required this.connectsToNext,
     required this.onRemove,
   });
@@ -1004,7 +1002,6 @@ class _NodeRow extends StatelessWidget {
   final bool isLast;
   final double flow;
   final Color? nextColor;
-  final String methodToNext; // join method to the next node
   final bool connectsToNext; // false → broken joint (red)
   final VoidCallback onRemove;
 
@@ -1056,16 +1053,10 @@ class _NodeRow extends StatelessWidget {
                   style: const TextStyle(
                       color: _ink, fontSize: 14, fontWeight: FontWeight.w700)),
               const SizedBox(height: 3),
-              Row(children: [
-                _chip(_roleLabel(product, true), c),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(_productHint(product),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: _mute, fontSize: 11)),
-                ),
-              ]),
+              Text(_productHint(product),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: _mute, fontSize: 11)),
             ]),
           ),
           GestureDetector(
@@ -1079,20 +1070,9 @@ class _NodeRow extends StatelessWidget {
             from: c,
             to: nextColor ?? c,
             flow: flow,
-            method: methodToNext,
             broken: !connectsToNext),
     ]);
   }
-
-  Widget _chip(String t, Color c) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(
-            color: c.withOpacity(0.18),
-            borderRadius: BorderRadius.circular(8)),
-        child: Text(t,
-            style: TextStyle(
-                color: c, fontSize: 10, fontWeight: FontWeight.w800)),
-      );
 }
 
 // animated energy pipe between two nodes, with a join-method / status label
@@ -1101,12 +1081,10 @@ class _PipeLink extends StatelessWidget {
       {required this.from,
       required this.to,
       required this.flow,
-      required this.method,
       required this.broken});
   final Color from;
   final Color to;
   final double flow;
-  final String method;
   final bool broken;
   @override
   Widget build(BuildContext context) {
@@ -1127,9 +1105,7 @@ class _PipeLink extends StatelessWidget {
               color: c.withOpacity(0.14),
               borderRadius: BorderRadius.circular(8)),
           child: Text(
-              broken
-                  ? '⚠ אין חיבור'
-                  : (method.isEmpty ? '✓ מחובר' : '✓ $method'),
+              broken ? '⚠ אין חיבור' : '✓ מחובר',
               style: TextStyle(
                   color: c, fontSize: 10, fontWeight: FontWeight.w700)),
         ),
