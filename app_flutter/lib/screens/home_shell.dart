@@ -201,7 +201,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                       SizedBox(width: 4),
                       Text(
-                        'v3.83 · 26.5.26 · פאנל חיפוש בהיר + אינדקס',
+                        'v3.84 · 26.5.26 · בדיקת מסע מוצר מקצה-לקצה',
                         style: TextStyle(
                           color: Color(0xFF4CAF50),
                           fontSize: 10,

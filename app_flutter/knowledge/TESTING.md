@@ -12,6 +12,10 @@ Three layers verify the app. Run all before every commit.
 - `edge_cases_test.dart` — 30 adversarial edge cases.
 - `catalog_regression_test.dart` — runs the in-app `testCatalog()` harness.
 - `widget_test.dart` — shell boot, dial drills, overview/categories.
+- `product_journey_test.dart` — **end-to-end purchase journey** for a real
+  product (SKU 217861): catalog search → product sheet → add-to-cart → cart FAB
+  → store cart (stepper + summary) → checkout → confirmation, asserting UI **and**
+  providers at every stage.
 - domain: `pathfinder_test`, `catalog_bfs_test`, `bfs_demo_test`,
   `install_builder_test`, `manifold_test`, `deep_audit_test`, etc.
 
