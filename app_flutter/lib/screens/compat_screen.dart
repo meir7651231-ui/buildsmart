@@ -1376,90 +1376,78 @@ class ChainBuilderSheet extends ConsumerWidget {
                           },
                   ),
                 ],
-                // ── add next product button ──────────────────────────────
+                // ── 3 action buttons ─────────────────────────────────────
                 const Divider(height: 1, color: _divider),
-                InkWell(
-                  onTap: () {
-                    final tail = chain.isEmpty ? null : chain.last;
-                    final suggestions = tail == null
-                        ? kCompatCatalog
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+                  child: Row(children: [
+                    // ① בחר מוצר — פותח את כל הקטלוג, מוסיף כפריט ראשון
+                    Expanded(child: _ActionButton(
+                      icon: Icons.search,
+                      label: 'בחר מוצר',
+                      color: const Color(0xFF0284C7),
+                      onTap: () {
+                        final all = kCompatCatalog
                             .where((p) => productSuitableForTemp(p, lineTemp))
-                            .toList()
-                        : compatibleWith(tail, tempC: lineTemp);
-                    showModalBottomSheet<void>(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => _AddPickerSheet(
-                        suggestions: suggestions,
-                        lineTemp: lineTemp,
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
-                    child: Row(children: [
-                      Container(
-                        width: 32, height: 32,
-                        decoration: BoxDecoration(
-                          color: _brand, shape: BoxShape.circle),
-                        child: const Icon(Icons.add,
-                            color: Colors.white, size: 18),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        chain.isEmpty
-                            ? 'הוסף פריט ראשון לקו'
-                            : 'הוסף פריט מתחבר לקצה',
-                        style: const TextStyle(
-                            color: _brand, fontSize: 14,
-                            fontWeight: FontWeight.w700),
-                      ),
-                    ]),
-                  ),
+                            .toList();
+                        showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => _AddPickerSheet(
+                            suggestions: all,
+                            lineTemp: lineTemp,
+                            replaceChain: true,
+                          ),
+                        );
+                      },
+                    )),
+                    const SizedBox(width: 8),
+                    // ② הוסף מוצר — מוסיף פריט תואם לזנב הקיים
+                    Expanded(child: _ActionButton(
+                      icon: Icons.add,
+                      label: 'הוסף מוצר',
+                      color: _brand,
+                      onTap: () {
+                        final tail = chain.isEmpty ? null : chain.last;
+                        final suggestions = tail == null
+                            ? kCompatCatalog
+                                .where((p) => productSuitableForTemp(p, lineTemp))
+                                .toList()
+                            : compatibleWith(tail, tempC: lineTemp);
+                        showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => _AddPickerSheet(
+                            suggestions: suggestions,
+                            lineTemp: lineTemp,
+                          ),
+                        );
+                      },
+                    )),
+                    const SizedBox(width: 8),
+                    // ③ הרץ קו אוטומטית — BFS מהזנב לפריט יעד
+                    Expanded(child: _ActionButton(
+                      icon: Icons.auto_fix_high,
+                      label: 'הרץ קו\nאוטומטית',
+                      color: const Color(0xFF7C3AED),
+                      onTap: () {
+                        final tail = chain.isEmpty ? null : chain.last;
+                        showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => _FindPathSheet(
+                            from: tail,
+                            lineTemp: lineTemp,
+                          ),
+                        );
+                      },
+                    )),
+                  ]),
                 ),
-                // ── find path button ─────────────────────────────────────
-                const Divider(height: 1, color: _divider),
-                InkWell(
-                  onTap: () {
-                    final tail = chain.isEmpty ? null : chain.last;
-                    showModalBottomSheet<void>(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => _FindPathSheet(
-                        from: tail,
-                        lineTemp: lineTemp,
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
-                    child: Row(children: [
-                      Container(
-                        width: 32, height: 32,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF7C3AED),
-                          shape: BoxShape.circle),
-                        child: const Icon(Icons.route,
-                            color: Colors.white, size: 18),
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Text('מצא נתיב אוטומטי לפריט',
-                            style: TextStyle(
-                                color: Color(0xFF7C3AED), fontSize: 14,
-                                fontWeight: FontWeight.w700)),
-                      ),
-                      const Text('BFS',
-                          style: TextStyle(
-                              color: Color(0xFF7C3AED), fontSize: 10,
-                              fontWeight: FontWeight.w600)),
-                    ]),
-                  ),
-                ),
+                const SizedBox(height: 4),
                 if (chain.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _ComplianceChecklist(
@@ -1854,6 +1842,51 @@ class _CompatCheck extends StatelessWidget {
   }
 }
 
+// ── Shared action button for the 3-button strip ───────────────────────────────
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withOpacity(0.30), width: 1.5),
+        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(
+            width: 36, height: 36,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            alignment: Alignment.center,
+            child: Icon(icon, color: Colors.white, size: 18),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: color, fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
 // ── Add-to-chain picker sheet ─────────────────────────────────────────────────
 // Shows products compatible with the current chain tail (or all temp-suitable
 // products when the chain is empty). Tapping a row appends it to the chain.
@@ -1862,9 +1895,11 @@ class _AddPickerSheet extends ConsumerStatefulWidget {
   const _AddPickerSheet({
     required this.suggestions,
     required this.lineTemp,
+    this.replaceChain = false,
   });
   final List<LipskeyCatalogProduct> suggestions;
   final int lineTemp;
+  final bool replaceChain;
 
   @override
   ConsumerState<_AddPickerSheet> createState() => _AddPickerSheetState();
@@ -1884,7 +1919,8 @@ class _AddPickerSheetState extends ConsumerState<_AddPickerSheet> {
 
   void _add(LipskeyCatalogProduct p) {
     final chain = ref.read(chainProvider);
-    ref.read(chainProvider.notifier).state = [...chain, p];
+    ref.read(chainProvider.notifier).state =
+        widget.replaceChain ? [p] : [...chain, p];
     Navigator.pop(context);
   }
 
@@ -1913,12 +1949,14 @@ class _AddPickerSheetState extends ConsumerState<_AddPickerSheet> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
               child: Row(children: [
-                const Text('➕', style: TextStyle(fontSize: 18)),
+                Text(widget.replaceChain ? '🔍' : '➕',
+                    style: const TextStyle(fontSize: 18)),
                 const SizedBox(width: 8),
-                const Expanded(
-                  child: Text('בחר פריט להוספה',
-                      style: TextStyle(color: _title, fontSize: 16,
-                          fontWeight: FontWeight.w700)),
+                Expanded(
+                  child: Text(
+                    widget.replaceChain ? 'בחר מוצר התחלה' : 'הוסף מוצר לקו',
+                    style: const TextStyle(color: _title, fontSize: 16,
+                        fontWeight: FontWeight.w700)),
                 ),
                 Text('${items.length} פריטים',
                     style: const TextStyle(color: _sub, fontSize: 12)),
