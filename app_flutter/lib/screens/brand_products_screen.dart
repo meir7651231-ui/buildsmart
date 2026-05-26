@@ -33,10 +33,10 @@ class BrandProductsScreen extends StatelessWidget {
             : <LipskeyCatalogProduct>[];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
-        foregroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1A1A1A),
         elevation: 0,
         title: Row(
           children: [
@@ -71,7 +71,7 @@ class _LipskeyList extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: products.length,
       separatorBuilder: (_, __) =>
-          const Divider(color: Color(0xFFF5F5F5), height: 1, indent: 16),
+          const Divider(color: Color(0xFFE5E5E5), height: 1, indent: 16),
       itemBuilder: (_, i) {
         final p = products[i];
         return InkWell(
@@ -87,7 +87,7 @@ class _LipskeyList extends StatelessWidget {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF252525),
+                    color: const Color(0xFFF5F5F5),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   clipBehavior: Clip.antiAlias,
@@ -113,7 +113,7 @@ class _LipskeyList extends StatelessWidget {
                       Text(
                         p.nameHe,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF1A1A1A),
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                           height: 1.3,
@@ -185,7 +185,7 @@ class _Placeholder extends StatelessWidget {
             Text(
               brand.name,
               style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFF1A1A1A),
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),

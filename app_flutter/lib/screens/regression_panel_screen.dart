@@ -21,10 +21,10 @@ class RegressionPanelScreen extends ConsumerWidget {
     final results = ref.watch(filteredResultsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFFFF),
-        foregroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1A1A1A),
         title: const Text(
           '🔬 מרכז בדיקות רגרסיה',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
@@ -257,7 +257,7 @@ class _ResultCard extends StatelessWidget {
                 child: Text(
                   result.label,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF1A1A1A),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -330,7 +330,7 @@ class _CheckRow extends StatelessWidget {
                 Text(
                   check.name,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF1A1A1A),
                     fontSize: 12,
                   ),
                 ),
