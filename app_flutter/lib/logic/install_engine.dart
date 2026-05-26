@@ -591,6 +591,29 @@ void _autoAddCompliance(
   }
 }
 
+/// When the verified BFS finds no path, scan the fitting/connector catalog for a
+/// single product that bridges [from] → [to] using name-inference matching.
+/// Prefers verified-spec products; returns null only when no fitting bridges the gap.
+LipskeyCatalogProduct? _findBridge(
+    LipskeyCatalogProduct from,
+    LipskeyCatalogProduct to,
+    int tempC) {
+  LipskeyCatalogProduct? best;
+  bool bestVerified = false;
+  for (final p in kCompatCatalog) {
+    if (!isFitting(p)) continue;
+    if (!productSuitableForTemp(p, tempC)) continue;
+    if (!canConnect(from, p) || !canConnect(p, to)) continue;
+    final isVerified = kVerifiedSpecs[p.sku] != null;
+    if (best == null || (!bestVerified && isVerified)) {
+      best = p;
+      bestVerified = isVerified;
+      if (bestVerified) break; // first verified hit wins
+    }
+  }
+  return best;
+}
+
 /// Auto-complete a full installation from an ordered list of anchor products
 /// (the fixtures + endpoints the installer cares about). Between every pair of
 /// consecutive anchors the engine fills in the connector path, so the result is
@@ -623,9 +646,16 @@ InstallationPlan buildInstallation(
     final seg = findShortestPath(a, b,
         maxDepth: maxDepthPerSegment, tempC: tempC);
     if (seg == null) {
-      // No connector path — record the gap and continue from the next anchor.
-      gaps.add(InstallationGap(a, b));
-      add(b);
+      // Verified BFS failed — try a single-product bridge via name-inference.
+      final bridge = _findBridge(a, b, tempC);
+      if (bridge != null) {
+        add(bridge);
+        add(b);
+      } else {
+        // No bridge found — record the gap and continue from the next anchor.
+        gaps.add(InstallationGap(a, b));
+        add(b);
+      }
       continue;
     }
     // seg = [a, ...connectors..., b]; a is the shared joint already counted.
@@ -641,7 +671,12 @@ InstallationPlan buildInstallation(
     final back = findShortestPath(anchors.last, anchors.first,
         maxDepth: maxDepthPerSegment, tempC: tempC);
     if (back == null) {
-      gaps.add(InstallationGap(anchors.last, anchors.first));
+      final bridge = _findBridge(anchors.last, anchors.first, tempC);
+      if (bridge != null) {
+        add(bridge);
+      } else {
+        gaps.add(InstallationGap(anchors.last, anchors.first));
+      }
     } else {
       for (final p in back.sublist(1, back.length - 1)) {
         add(p); // skip both endpoints (already counted)
@@ -758,8 +793,14 @@ InstallationPlan buildTreeInstallation(
     final seg = findShortestPath(root, t,
         maxDepth: maxDepthPerSegment, tempC: tempC);
     if (seg == null) {
-      gaps.add(InstallationGap(root, t));
-      add(t, zone: zl);
+      final bridge = _findBridge(root, t, tempC);
+      if (bridge != null) {
+        add(bridge, zone: zl);
+        add(t, zone: zl);
+      } else {
+        gaps.add(InstallationGap(root, t));
+        add(t, zone: zl);
+      }
       continue;
     }
     for (final p in seg.skip(1)) {
