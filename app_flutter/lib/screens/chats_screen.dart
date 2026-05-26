@@ -384,7 +384,7 @@ class _ThreadList extends ConsumerWidget {
             Text(
               'אין שיחות',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF1A1A1A),
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -469,7 +469,7 @@ class _ThreadRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final missed = thread.direction == _Direction.missed;
     final isUnread = thread.unread > 0;
-    final nameColor = missed ? BsTokens.brand : Colors.white;
+    final nameColor = missed ? BsTokens.brand : const Color(0xFF1A1A1A);
     final arrowIcon = thread.direction == _Direction.outgoing
         ? Icons.north_east_rounded
         : Icons.south_west_rounded;
@@ -515,7 +515,7 @@ class _ThreadRow extends StatelessWidget {
                         color: const Color(0xFF4CAF50),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFF111111),
+                          color: Colors.white,
                           width: 2,
                         ),
                       ),
@@ -572,7 +572,7 @@ class _ThreadRow extends StatelessWidget {
                           thread.subtitle,
                           style: TextStyle(
                             color: isUnread
-                                ? const Color(0xFFCCCCCC)
+                                ? const Color(0xFF444444)
                                 : const Color(0xFF888888),
                             fontSize: 12,
                             fontWeight: isUnread
@@ -752,7 +752,7 @@ class _ChatPageState extends State<_ChatPage> {
                   Text(
                     widget.thread.name,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF1A1A1A),
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -1153,7 +1153,7 @@ class _CircleFab extends StatelessWidget {
         width: 48,
         height: 48,
         decoration: const BoxDecoration(
-          color: Color(0xFF111111),
+          color: BsTokens.brand,
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
