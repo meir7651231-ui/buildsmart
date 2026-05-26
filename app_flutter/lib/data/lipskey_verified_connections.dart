@@ -88,6 +88,7 @@ const _pex    = 'PEX';
 const _copper = 'נחושת';
 const _brass  = 'פליז';
 const _steel  = 'פלדה';
+const _stainless = 'נירוסטה';
 const _pn16   = 'PN16';
 
 ConnectorEnd _c(String dn)    => ConnectorEnd(EndType.hdpeCompression, dn);
@@ -388,4 +389,217 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   'HW-EXP-COMP-20': VerifiedSpec(sku: 'HW-EXP-COMP-20', material: _pex,
       pressureRating: '10 bar @ 80°C', pexType: 'PEX-B · Crimp/Press', maxTempC: 95,
       ends: [_px('20'), _px('20')]),
+
+  // ════════════════════════════════════════════════════════════════════════
+  // ── commercial / larger DN (pump island + multi-floor distribution) ────
+
+  // Y-strainers (pump protection)
+  'HW-YSTR-40': VerifiedSpec(sku: 'HW-YSTR-40', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1-1/2"'), _bm('1-1/2"')]),
+  'HW-YSTR-32': VerifiedSpec(sku: 'HW-YSTR-32', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1-1/4"'), _bm('1-1/4"')]),
+  'HW-YSTR-15': VerifiedSpec(sku: 'HW-YSTR-15', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1/2"'), _bm('1/2"')]),
+
+  // Flexible connectors (vibration isolation)
+  'HW-FLEX-40': VerifiedSpec(sku: 'HW-FLEX-40', material: _stainless,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1-1/2"'), _bm('1-1/2"')]),
+  'HW-FLEX-32': VerifiedSpec(sku: 'HW-FLEX-32', material: _stainless,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1-1/4"'), _bm('1-1/4"')]),
+
+  // Commercial VSP pump DN40
+  'HW-PUMP-40': VerifiedSpec(sku: 'HW-PUMP-40', material: _brass,
+      pressureRating: '10 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1-1/2"'), _bm('1-1/2"')]),
+
+  // Ball valves — BSP threaded (pump island)
+  'HW-BALL-INLET-40': VerifiedSpec(sku: 'HW-BALL-INLET-40', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bm('1-1/2"'), _bf('1-1/2"')]),
+  'HW-BALL-40': VerifiedSpec(sku: 'HW-BALL-40', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1-1/2"'), _bf('1-1/2"')]),
+  'HW-BALL-32': VerifiedSpec(sku: 'HW-BALL-32', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1-1/4"'), _bf('1-1/4"')]),
+
+  // Ball valves — copper press (inline distribution)
+  'HW-BALL-CU-40': VerifiedSpec(sku: 'HW-BALL-CU-40', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('40'), _cu('40')]),
+  'HW-BALL-CU-32': VerifiedSpec(sku: 'HW-BALL-CU-32', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('32'), _cu('32')]),
+  'HW-BALL-CU-25': VerifiedSpec(sku: 'HW-BALL-CU-25', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('25'), _cu('25')]),
+  'HW-BALL-CU-20': VerifiedSpec(sku: 'HW-BALL-CU-20', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('20'), _cu('20')]),
+
+  // Check valves (backflow) — BSP
+  'HW-CHECK-40': VerifiedSpec(sku: 'HW-CHECK-40', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1-1/2"'), _bm('1-1/2"')]),
+  'HW-CHECK-32': VerifiedSpec(sku: 'HW-CHECK-32', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bf('1-1/4"'), _bm('1-1/4"')]),
+  // Check valve — copper press
+  'HW-CHECK-CU-20': VerifiedSpec(sku: 'HW-CHECK-CU-20', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('20'), _cu('20')]),
+
+  // Bladder expansion tanks (diaphragm, EPDM membrane)
+  'HW-BTANK-35': VerifiedSpec(sku: 'HW-BTANK-35', material: _steel,
+      pressureRating: 'PN16 · N₂ 2.5 bar', maxTempC: 99,
+      ends: [_bm('3/4"')]),
+  'HW-BTANK-18': VerifiedSpec(sku: 'HW-BTANK-18', material: _steel,
+      pressureRating: 'PN16 · N₂ 2.5 bar', maxTempC: 99,
+      ends: [_bm('3/4"')]),
+
+  // Instrumentation (terminal devices)
+  'HW-GAUGE': VerifiedSpec(sku: 'HW-GAUGE', material: _brass,
+      pressureRating: '0–10 bar gauge', maxTempC: 110,
+      ends: [_bm('1/4"')]),
+  'HW-DRAIN-12': VerifiedSpec(sku: 'HW-DRAIN-12', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bm('1/2"')]),
+  'HW-PT1000': VerifiedSpec(sku: 'HW-PT1000', material: _stainless,
+      pressureRating: '0–120°C sensor', maxTempC: 120,
+      ends: [_bm('1/2"')]),
+
+  // Adapters: BSP ↔ copper DN40
+  'HW-ADP-BSP112-CU40': VerifiedSpec(sku: 'HW-ADP-BSP112-CU40', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bm('1-1/2"'), _cu('40')]),
+  'HW-ADP-CU40-BSP112': VerifiedSpec(sku: 'HW-ADP-CU40-BSP112', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('40'), _bf('1-1/2"')]),
+
+  // Copper pipes (larger DN)
+  'HW-CU-40': VerifiedSpec(sku: 'HW-CU-40', material: _copper,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('40'), _cu('40')]),
+  'HW-CU-32': VerifiedSpec(sku: 'HW-CU-32', material: _copper,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('32'), _cu('32')]),
+  'HW-CU-25': VerifiedSpec(sku: 'HW-CU-25', material: _copper,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('25'), _cu('25')]),
+  'HW-CU-20': VerifiedSpec(sku: 'HW-CU-20', material: _copper,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('20'), _cu('20')]),
+
+  // Copper reducing couplers
+  'HW-RED-CU-40-32': VerifiedSpec(sku: 'HW-RED-CU-40-32', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('40'), _cu('32')]),
+  'HW-RED-CU-32-25': VerifiedSpec(sku: 'HW-RED-CU-32-25', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('32'), _cu('25')]),
+  'HW-RED-CU-25-20': VerifiedSpec(sku: 'HW-RED-CU-25-20', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('25'), _cu('20')]),
+  'HW-RED-CU-20-15': VerifiedSpec(sku: 'HW-RED-CU-20-15', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('20'), _cu('15')]),
+
+  // Dielectric unions — larger DN
+  'HW-DIELECTRIC-40': VerifiedSpec(sku: 'HW-DIELECTRIC-40', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('40'), _cu('40')]),
+  'HW-DIELECTRIC-32': VerifiedSpec(sku: 'HW-DIELECTRIC-32', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('32'), _cu('32')]),
+  'HW-DIELECTRIC-25': VerifiedSpec(sku: 'HW-DIELECTRIC-25', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('25'), _cu('25')]),
+  'HW-DIELECTRIC-20': VerifiedSpec(sku: 'HW-DIELECTRIC-20', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('20'), _cu('20')]),
+
+  // Expansion bellows (stainless, thermal expansion compensation)
+  'HW-BELLOWS-40': VerifiedSpec(sku: 'HW-BELLOWS-40', material: _stainless,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('40'), _cu('40')]),
+  'HW-BELLOWS-32': VerifiedSpec(sku: 'HW-BELLOWS-32', material: _stainless,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('32'), _cu('32')]),
+  'HW-BELLOWS-25': VerifiedSpec(sku: 'HW-BELLOWS-25', material: _stainless,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('25'), _cu('25')]),
+  'HW-BELLOWS-20': VerifiedSpec(sku: 'HW-BELLOWS-20', material: _stainless,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('20'), _cu('20')]),
+
+  // Thermostatic Mixing Valves — TMTV anti-scald (modelled as pass-through)
+  'HW-TMTV-32': VerifiedSpec(sku: 'HW-TMTV-32', material: _brass,
+      pressureRating: '10 bar @ 80°C', maxTempC: 80,
+      ends: [_cu('32'), _cu('32')]),
+  'HW-TMTV-25': VerifiedSpec(sku: 'HW-TMTV-25', material: _brass,
+      pressureRating: '10 bar @ 80°C', maxTempC: 80,
+      ends: [_cu('25'), _cu('25')]),
+  'HW-TMTV-20': VerifiedSpec(sku: 'HW-TMTV-20', material: _brass,
+      pressureRating: '10 bar @ 80°C', maxTempC: 80,
+      ends: [_cu('20'), _cu('20')]),
+  'HW-TMTV-15': VerifiedSpec(sku: 'HW-TMTV-15', material: _brass,
+      pressureRating: '10 bar @ 80°C', maxTempC: 80,
+      ends: [_cu('15'), _cu('15')]),
+
+  // Pre-set balancing valves (hydraulic balance per floor riser)
+  'HW-BALANCE-25': VerifiedSpec(sku: 'HW-BALANCE-25', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('25'), _cu('25')]),
+  'HW-BALANCE-20': VerifiedSpec(sku: 'HW-BALANCE-20', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('20'), _cu('20')]),
+
+  // Copper tees (recirculation takeoffs per floor)
+  'HW-TEE-CU-25': VerifiedSpec(sku: 'HW-TEE-CU-25', material: _copper,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('25'), _cu('25'), _cu('25')]),
+  'HW-TEE-CU-20': VerifiedSpec(sku: 'HW-TEE-CU-20', material: _copper,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('20'), _cu('20'), _cu('20')]),
+
+  // Manifolds — 4 and 6 outlets (DN20 copper press inlet, ½" BSP F outlets)
+  'HW-MANIFOLD-4': VerifiedSpec(sku: 'HW-MANIFOLD-4', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('20'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+  'HW-MANIFOLD-6': VerifiedSpec(sku: 'HW-MANIFOLD-6', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('20'), _bf('1/2"'), _bf('1/2"'), _bf('1/2"'),
+             _bf('1/2"'), _bf('1/2"'), _bf('1/2"')]),
+
+  // PEX-B 25×3.5 (commercial kitchen / floor 1)
+  'HW-PEX-25': VerifiedSpec(sku: 'HW-PEX-25', material: _pex,
+      pressureRating: '10 bar @ 80°C', pexType: 'PEX-B · Crimp/Press', maxTempC: 95,
+      ends: [_px('25'), _px('25')]),
+  'HW-PEX-RED-25-20': VerifiedSpec(sku: 'HW-PEX-RED-25-20', material: _pex,
+      pressureRating: '10 bar @ 80°C', pexType: 'PEX-B · Crimp/Press', maxTempC: 95,
+      ends: [_px('25'), _px('20')]),
+  'HW-ADP-112-PEX25': VerifiedSpec(sku: 'HW-ADP-112-PEX25', material: _brass,
+      pressureRating: '10 bar @ 80°C', pexType: 'PEX-B', maxTempC: 95,
+      ends: [_bm('1-1/2"'), _px('25')]),
+  'HW-ADP-PEX25-CU25': VerifiedSpec(sku: 'HW-ADP-PEX25-CU25', material: _brass,
+      pressureRating: '10 bar @ 80°C', pexType: 'PEX-B', maxTempC: 95,
+      ends: [_px('25'), _cu('25')]),
+  'HW-ADP-PEX25-CU20': VerifiedSpec(sku: 'HW-ADP-PEX25-CU20', material: _brass,
+      pressureRating: '10 bar @ 80°C', pexType: 'PEX-B', maxTempC: 95,
+      ends: [_px('25'), _cu('20')]),
+
+  // Thermal disinfection bypass (3-way actuated, anti-Legionella pasteurization)
+  'HW-DISINFECT': VerifiedSpec(sku: 'HW-DISINFECT', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_cu('25'), _cu('25')]),
+
+  // Legionella sampling port ¼" BSP (terminal)
+  'HW-SAMPLE': VerifiedSpec(sku: 'HW-SAMPLE', material: _brass,
+      pressureRating: '16 bar @ 110°C', maxTempC: 110,
+      ends: [_bm('1/4"')]),
 };
