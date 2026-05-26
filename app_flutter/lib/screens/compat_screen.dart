@@ -285,8 +285,11 @@ List<String> lineInstallReminders() => const [
 // copper/PEX) and drainage (gravity HDPE/PVC) only meet *inside* a fixture, so a
 // valid path's products must all share at least one common system.
 
+// NOTE: 'אביזרי תבריג' (threaded fittings) is intentionally NOT here — it mixes
+// brass supply nipples/bushings with PVC drainage branches, so it is classified
+// per-SKU by its actual ends (see productSystems fallback).
 const _supplyCats = {
-  'אביזרי נחושת', 'מחברי NTM', 'אביזרי תבריג', 'ברזי מעבר', 'ברזי ניל',
+  'אביזרי נחושת', 'מחברי NTM', 'ברזי מעבר', 'ברזי ניל',
   'ברזי קיר', 'ברזי כיור', 'ברזי מטבח', 'ברזי גן', 'ברזי אמבטיה', 'ברזי מקלחת',
   'ברזי דלי', 'ציוד גן', 'צינורות גמישים', 'צינורות מקלחת',
   'זרועות דוש', 'מזלפי יד', 'ראשי מקלחת', 'מחלקים', 'נקודות מים', 'אל חזור',
@@ -536,7 +539,7 @@ const _fittingCats = {
   'פקקים וצינורות', 'זקיף אסלה',
 };
 
-bool _isFitting(LipskeyCatalogProduct p) => _fittingCats.contains(p.categoryHe);
+bool isFitting(LipskeyCatalogProduct p) => _fittingCats.contains(p.categoryHe);
 
 /// Edge cost for the path search. Primary term (10·parts) keeps the result a
 /// fewest-parts path. A large penalty steers gap-filling through real fittings
@@ -548,7 +551,7 @@ int _edgeCost(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   final ma = kVerifiedSpecs[a.sku]?.material;
   final mb = kVerifiedSpecs[b.sku]?.material;
   final transition = (ma != null && mb != null && ma != mb) ? 1 : 0;
-  final deviceFiller = _isFitting(b) ? 0 : 50;
+  final deviceFiller = isFitting(b) ? 0 : 50;
   return 10 + deviceFiller + transition;
 }
 
