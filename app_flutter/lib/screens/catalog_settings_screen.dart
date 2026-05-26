@@ -541,13 +541,38 @@ class _SectionTile extends StatelessWidget {
           iconColor: Colors.black54,
           collapsedIconColor: Colors.black54,
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
-          title: Text(
-            title,
-            style: const TextStyle(
-              color: Color(0xFF1A1A1A),
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
+          title: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              if (children.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: BsTokens.brand,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '${children.length}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
           children: children,
         ),
