@@ -201,7 +201,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
                       SizedBox(width: 4),
                       Text(
-                        'v3.91 · 26.5.26 · tutorial + hints מוצרים + מחלק quick-start',
+                        'v3.92 · 26.5.26 · שמות ענפים + אזהרת בטיחות לפני BOM',
                         style: TextStyle(
                           color: Color(0xFF4CAF50),
                           fontSize: 10,

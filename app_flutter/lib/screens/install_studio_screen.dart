@@ -720,8 +720,6 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   // ── actions ──────────────────────────────────────────────────────────────────
   void _assemble(List<LipskeyCatalogProduct> chain, int temp) {
     final acc = ref.read(lineAccessoriesProvider);
-    // A manifold mid-chain with items after it → branched (tree) installation:
-    // [feed … manifold] is the trunk, everything after are parallel branches.
     final mi = chain.indexWhere((p) => manifoldOutlets(p) > 0);
     final isTree = mi >= 0 && mi < chain.length - 1;
     final InstallationPlan plan;
@@ -737,6 +735,16 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       plan = buildInstallation([...chain],
           tempC: temp, accessories: acc, loop: _loop, autoCompliance: true);
     }
+    final criticalCount = plan.criticalOpen(temp, acc);
+    if (criticalCount > 0) {
+      _showCriticalWarning(plan, chain, branches, outlets, temp, acc, criticalCount);
+    } else {
+      _showBomSheet(plan, chain, branches, outlets);
+    }
+  }
+
+  void _showBomSheet(InstallationPlan plan, List<LipskeyCatalogProduct> chain,
+      int branches, int outlets) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -746,6 +754,96 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         anchorSkus: {for (final a in chain) a.sku},
         branches: branches,
         outlets: outlets,
+      ),
+    );
+  }
+
+  void _showCriticalWarning(
+      InstallationPlan plan,
+      List<LipskeyCatalogProduct> chain,
+      int branches,
+      int outlets,
+      int temp,
+      Set<String> acc,
+      int criticalCount) {
+    final critItems = plan
+        .compliance(temp, acc)
+        .where((c) => !c.satisfied && c.severity == CheckSeverity.critical)
+        .toList();
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: _void1,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: Row(children: [
+            const Icon(Icons.warning_amber_rounded,
+                color: Color(0xFFEF4444), size: 22),
+            const SizedBox(width: 8),
+            Text('$criticalCount בעיות בטיחות בקו',
+                style: const TextStyle(
+                    color: Color(0xFFEF4444),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900)),
+          ]),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('הפריטים הבאים חסרים וחשובים לבטיחות:',
+                  style: TextStyle(color: _mute, fontSize: 13)),
+              const SizedBox(height: 12),
+              ...critItems.map((c) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('🔴', style: TextStyle(fontSize: 14)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(_simpleLabel(c.label),
+                                  style: const TextStyle(
+                                      color: _ink,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700)),
+                              Text(_simpleWhy(c.why),
+                                  style: const TextStyle(
+                                      color: _mute,
+                                      fontSize: 11,
+                                      height: 1.3)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('חזור לתכנון',
+                  style: TextStyle(color: _mute, fontSize: 13)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEF4444),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _showBomSheet(plan, chain, branches, outlets);
+              },
+              child: const Text('הצג רשימה בכל זאת',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -991,6 +1089,62 @@ class _BomSheet extends ConsumerStatefulWidget {
 class _BomSheetState extends ConsumerState<_BomSheet> {
   // Per-pipe length in metres (pipes are sold by length, not by piece).
   final Map<String, double> _meters = {};
+  // User-defined display names for zone headers (e.g. "ענף א" → "מטבח").
+  final Map<String, String> _zoneAliases = {};
+
+  String _zoneDisplayLabel(String key) => _zoneAliases[key] ?? key;
+
+  void _renameZone(String key) {
+    final ctrl = TextEditingController(text: _zoneDisplayLabel(key));
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: _void1,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('שנה שם לאזור',
+              style: TextStyle(color: _ink, fontSize: 15, fontWeight: FontWeight.w800)),
+          content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            style: const TextStyle(color: _ink),
+            textDirection: TextDirection.rtl,
+            decoration: InputDecoration(
+              hintText: 'למשל: מטבח, שירותים, גינה…',
+              hintStyle: const TextStyle(color: _mute),
+              filled: true,
+              fillColor: _panel,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('ביטול', style: TextStyle(color: _mute)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: _accent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
+              onPressed: () {
+                final name = ctrl.text.trim();
+                if (name.isNotEmpty) setState(() => _zoneAliases[key] = name);
+                Navigator.pop(ctx);
+              },
+              child: const Text('שמור', style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   double _metersOf(String sku) => _meters[sku] ?? 2.0;
 
   double get _totalMeters => widget.plan.items
@@ -1305,7 +1459,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     if (plan.zones.isNotEmpty) {
       final bySkU = {for (final p in plan.items) p.sku: p};
       for (final entry in plan.zones.entries) {
-        buf.writeln('▸ ${entry.key}');
+        buf.writeln('▸ ${_zoneDisplayLabel(entry.key)}');
         for (final sku in entry.value) {
           final p = bySkU[sku];
           if (p == null) continue;
@@ -1358,38 +1512,51 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     return result;
   }
 
-  Widget _zoneHeader(String label, {int count = 0}) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 2),
-        child: Row(children: [
+  Widget _zoneHeader(String key, {int count = 0}) {
+    final display = _zoneDisplayLabel(key);
+    final isRenameable = key.startsWith('ענף') || key == 'גזע';
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 2),
+      child: Row(children: [
+        Container(
+          width: 4, height: 16,
+          decoration: BoxDecoration(
+            color: _supply, borderRadius: BorderRadius.circular(2)),
+        ),
+        const SizedBox(width: 8),
+        GestureDetector(
+          onTap: isRenameable ? () => _renameZone(key) : null,
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Text(display,
+                style: const TextStyle(
+                    color: _supply,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6)),
+            if (isRenameable) ...[
+              const SizedBox(width: 4),
+              const Icon(Icons.edit, color: _mute, size: 11),
+            ],
+          ]),
+        ),
+        if (count > 0) ...[
+          const SizedBox(width: 6),
           Container(
-            width: 4, height: 16,
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
             decoration: BoxDecoration(
-              color: _supply, borderRadius: BorderRadius.circular(2)),
-          ),
-          const SizedBox(width: 8),
-          Text(label,
-              style: const TextStyle(
-                  color: _supply,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.6)),
-          if (count > 0) ...[
-            const SizedBox(width: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-              decoration: BoxDecoration(
-                color: _supply.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text('$count פריטים',
-                  style: const TextStyle(color: _supply, fontSize: 9,
-                      fontWeight: FontWeight.w700)),
+              color: _supply.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(6),
             ),
-          ],
-          const SizedBox(width: 8),
-          Expanded(child: Container(height: 1, color: _supply.withOpacity(0.2))),
-        ]),
-      );
+            child: Text('$count פריטים',
+                style: const TextStyle(color: _supply, fontSize: 9,
+                    fontWeight: FontWeight.w700)),
+          ),
+        ],
+        const SizedBox(width: 8),
+        Expanded(child: Container(height: 1, color: _supply.withOpacity(0.2))),
+      ]),
+    );
+  }
 
   // Severity badge — only shown when count > 0.
   Widget _severityBadge(String label, int count, Color c) {
