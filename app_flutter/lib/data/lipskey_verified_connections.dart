@@ -997,12 +997,7 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '196587': VerifiedSpec(sku: '196587', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('6"')]),
   '116640': VerifiedSpec(sku: '116640', material: 'PVC', maxTempC: 50, ends: [_c('50'), _do('6"')]),
   '116175': VerifiedSpec(sku: '116175', material: 'PVC', maxTempC: 50, ends: [_c('110'), _do('8"')]),
-  '116640': VerifiedSpec(sku: '116640', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '116175': VerifiedSpec(sku: '116175', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
   '196687': VerifiedSpec(sku: '196687', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-
-  // ── מאספים וקולטים ────────────────────────────────────────────────────────
-  '196587': VerifiedSpec(sku: '196587', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
 
   // ── מחסומי רצפה ──────────────────────────────────────────────────────────
   '220542': VerifiedSpec(sku: '220542', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
@@ -1262,6 +1257,7 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '218568': VerifiedSpec(sku: '218568', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '220316': VerifiedSpec(sku: '220316', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '194897': VerifiedSpec(sku: '194897', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '194898': VerifiedSpec(sku: '194898', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
 
   // ── פקקים וצינורות נוספים ────────────────────────────────────────────────
   '218460': VerifiedSpec(sku: '218460', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
@@ -1285,27 +1281,6 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '116612': VerifiedSpec(sku: '116612', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
   '116084': VerifiedSpec(sku: '116084', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
   '116096': VerifiedSpec(sku: '116096', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
-
-  // ── צינורות אפורות AQUATEC (with known DN) ────────────────────────────────
-  '273227': VerifiedSpec(sku: '273227', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
-  '221022': VerifiedSpec(sku: '221022', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '221085': VerifiedSpec(sku: '221085', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
-  '116113': VerifiedSpec(sku: '116113', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
-  '219791': VerifiedSpec(sku: '219791', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
-  '116180': VerifiedSpec(sku: '116180', material: 'PVC', maxTempC: 50, ends: [_c('32'), _c('32')]),
-  '116593': VerifiedSpec(sku: '116593', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
-  '164588': VerifiedSpec(sku: '164588', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '116071': VerifiedSpec(sku: '116071', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
-  '116078': VerifiedSpec(sku: '116078', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '116091': VerifiedSpec(sku: '116091', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
-  '116093': VerifiedSpec(sku: '116093', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
-  '116617': VerifiedSpec(sku: '116617', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
-  '116620': VerifiedSpec(sku: '116620', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
-  '116099': VerifiedSpec(sku: '116099', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
-  '116101': VerifiedSpec(sku: '116101', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
-  '116622': VerifiedSpec(sku: '116622', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
-  '116103': VerifiedSpec(sku: '116103', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
-  '116105': VerifiedSpec(sku: '116105', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
   // ליפסקי gray pipes (page 46=DN50, page 47=DN75 — inferred from page context)
   '273226': VerifiedSpec(sku: '273226', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '220278': VerifiedSpec(sku: '220278', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
