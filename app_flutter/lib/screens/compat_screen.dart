@@ -383,23 +383,28 @@ String? pipeConnectionDn(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   return null;
 }
 
-List<LipskeyCatalogProduct> compatibleWith(LipskeyCatalogProduct anchor) =>
-    kCompatCatalog.where((p) => canConnect(anchor, p)).toList()
+List<LipskeyCatalogProduct> compatibleWith(
+    LipskeyCatalogProduct anchor, {int tempC = 20}) =>
+    kCompatCatalog
+        .where((p) => canConnect(anchor, p) && productSuitableForTemp(p, tempC))
+        .toList()
       ..sort((a, b) => (a.categoryHe == anchor.categoryHe ? 0 : 1)
           .compareTo(b.categoryHe == anchor.categoryHe ? 0 : 1));
 
 List<LipskeyCatalogProduct> _filtered(WidgetRef ref) {
-  final g = ref.watch(compatGenderProvider);
-  final s = ref.watch(compatSizeProvider);
-  final m = ref.watch(compatMethodProvider);
-  final q = ref.watch(compatSearchProvider).trim().toLowerCase();
+  final g    = ref.watch(compatGenderProvider);
+  final s    = ref.watch(compatSizeProvider);
+  final m    = ref.watch(compatMethodProvider);
+  final q    = ref.watch(compatSearchProvider).trim().toLowerCase();
+  final temp = ref.watch(lineMaxTempProvider);
   return kCompatCatalog.where((p) {
-    if (g == 'זכר'    && p.connectionGender  != 'male')          return false;
-    if (g == 'נקבה'   && p.connectionGender  != 'female')        return false;
-    if (s != 'הכל'   && !p.connectionSizes.contains(s))          return false;
-    if (m == 'תבריג'  && p.connectionMethod  != 'thread')        return false;
-    if (m == 'הדבקה'  && p.connectionMethod  != 'glue')          return false;
-    if (m == 'אלקטרו' && p.connectionMethod  != 'electrofusion') return false;
+    if (!productSuitableForTemp(p, temp))                          return false;
+    if (g == 'זכר'    && p.connectionGender  != 'male')           return false;
+    if (g == 'נקבה'   && p.connectionGender  != 'female')         return false;
+    if (s != 'הכל'   && !p.connectionSizes.contains(s))           return false;
+    if (m == 'תבריג'  && p.connectionMethod  != 'thread')         return false;
+    if (m == 'הדבקה'  && p.connectionMethod  != 'glue')           return false;
+    if (m == 'אלקטרו' && p.connectionMethod  != 'electrofusion')  return false;
     if (q.isNotEmpty  && !p.nameHe.toLowerCase().contains(q) &&
         !p.brand.toLowerCase().contains(q)) return false;
     return true;
@@ -650,7 +655,8 @@ class _Row extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final matches = compatibleWith(product);
+    final lineTemp = ref.watch(lineMaxTempProvider);
+    final matches = compatibleWith(product, tempC: lineTemp);
     final gender  = product.connectionGender;
     final sizes   = product.connectionSizes;
     final method  = product.connectionMethod;
