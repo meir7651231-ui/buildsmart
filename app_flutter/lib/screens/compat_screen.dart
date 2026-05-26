@@ -280,6 +280,54 @@ List<String> lineInstallReminders() => const [
 
 // ── compatibility logic ───────────────────────────────────────────────────────
 
+// ── plumbing-system classification (engineering logic) ────────────────────────
+// A built line must stay within ONE physical system. Supply (pressurised brass/
+// copper/PEX) and drainage (gravity HDPE/PVC) only meet *inside* a fixture, so a
+// valid path's products must all share at least one common system.
+
+const _supplyCats = {
+  'אביזרי נחושת', 'מחברי NTM', 'אביזרי תבריג', 'ברזי מעבר', 'ברזי ניל',
+  'ברזי קיר', 'ברזי כיור', 'ברזי מטבח', 'ברזי גן', 'ברזי אמבטיה', 'ברזי מקלחת',
+  'ברזי דלי', 'ציוד גן', 'צינורות גמישים', 'צינורות מקלחת',
+  'זרועות דוש', 'מזלפי יד', 'ראשי מקלחת', 'מחלקים', 'נקודות מים', 'אל חזור',
+  'מכשירי לחץ', 'אביזרי ברזים', 'אביזרי מקלחת', 'מנגנונים', 'ארונות מחלק',
+  'מערכות שטיפה',
+};
+const _drainCats = {
+  'מחברי HDPE', 'אביזרי שקע-תקע', 'צינורות אפורות', 'צינורות PP', 'ברכיים',
+  'מסעפים וחיבורי אסלה', 'זקיף אסלה', 'מחסומים גלויים', 'מחסומי רצפה',
+  'מאספי רצפה', 'מאספים וקולטים', 'תעלות ניקוז', 'סיפונים', 'מכסים ורשתות',
+  'כיסויים', 'ניקוז גג', 'אביזרי ביוב',
+};
+const _fixtureCats = {
+  'אסלות וכיורים', 'מושבי אסלה', 'אביזרי אסלה', 'מערכות אמבטיה', 'ערכות רחצה',
+  'חלקים סניטריים', 'אביזרי חדר רחצה', 'התקנה נמוכה', 'התקנה גבוהה',
+  'התקנה צמודה', 'דיורים ופיות',
+};
+const _structuralCats = {
+  'חבקי תליה', 'חבקי צינור', 'עוגנים ובנדים', 'כלי עבודה', 'מצופים',
+  'ידיות אחיזה',
+};
+
+const _allSystems = {WaterSystem.supply, WaterSystem.drainage};
+
+/// The plumbing systems a product belongs to, by engineering logic:
+/// clear categories pin one system; fixtures + structural span both; ambiguous
+/// categories fall back to the actual connector ends (per-SKU, by context).
+Set<WaterSystem> productSystems(LipskeyCatalogProduct p) {
+  final c = p.categoryHe;
+  if (_supplyCats.contains(c)) return {WaterSystem.supply};
+  if (_drainCats.contains(c)) return {WaterSystem.drainage};
+  if (_fixtureCats.contains(c) || _structuralCats.contains(c)) return _allSystems;
+  // Ambiguous category → split by context using the product's own ends.
+  final ends = kVerifiedSpecs[p.sku]?.endSystems;
+  return (ends == null || ends.isEmpty) ? _allSystems : ends;
+}
+
+/// True when the two products can co-exist in one line (share a system).
+bool _shareSystem(LipskeyCatalogProduct a, LipskeyCatalogProduct b) =>
+    productSystems(a).intersection(productSystems(b)).isNotEmpty;
+
 bool canConnect(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   if (a.sku == b.sku) return false;
 
@@ -407,22 +455,35 @@ List<LipskeyCatalogProduct>? findShortestPath(
   int tempC = 20,
 }) {
   if (from.sku == to.sku) return [from];
-  if (canConnect(from, to)) return [from, to];
 
-  final queue = Queue<List<LipskeyCatalogProduct>>();
-  queue.add([from]);
+  // The whole line must stay within one plumbing system. Track the running
+  // intersection of every product's systems; an empty intersection = the line
+  // would have to cross supply↔drainage, which only happens inside a fixture.
+  final sysFrom = productSystems(from);
+  final sysTo = productSystems(to);
+  if (canConnect(from, to) && sysFrom.intersection(sysTo).isNotEmpty) {
+    return [from, to];
+  }
+
+  // queue entries carry the path + the systems shared by all nodes so far.
+  final queue = Queue<(List<LipskeyCatalogProduct>, Set<WaterSystem>)>();
+  queue.add(([from], sysFrom));
   final visited = <String>{from.sku, to.sku};
 
   while (queue.isNotEmpty) {
-    final path = queue.removeFirst();
+    final (path, sysAcc) = queue.removeFirst();
     if (path.length >= maxDepth) continue;
     final tail = path.last;
     for (final next in compatibleWith(tail, tempC: tempC)) {
       if (visited.contains(next.sku)) continue;
-      final newPath = [...path, next];
-      if (canConnect(next, to)) return [...newPath, to];
       visited.add(next.sku);
-      queue.add(newPath);
+      final sysNext = sysAcc.intersection(productSystems(next));
+      if (sysNext.isEmpty) continue; // would cross systems — reject
+      final newPath = [...path, next];
+      if (canConnect(next, to) && sysNext.intersection(sysTo).isNotEmpty) {
+        return [...newPath, to];
+      }
+      queue.add((newPath, sysNext));
     }
   }
   return null;

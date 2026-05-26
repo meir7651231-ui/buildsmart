@@ -23,6 +23,12 @@
 
 enum EndType { hdpeCompression, pexPress, copperPress, bspMale, bspFemale, drainOpening }
 
+/// The plumbing system an end belongs to. Pressure water-supply lines (threaded
+/// brass, PEX, copper press) and gravity drainage lines (HDPE push-fit, drain
+/// openings) are physically separate — they only ever meet *inside* a fixture
+/// (toilet, sink). A line must stay within one system.
+enum WaterSystem { supply, drainage }
+
 class ConnectorEnd {
   final EndType type;
   final String size;
@@ -45,6 +51,16 @@ class ConnectorEnd {
       type == EndType.hdpeCompression &&
       other.type == EndType.hdpeCompression &&
       size == other.size;
+
+  /// Which plumbing system this end belongs to.
+  WaterSystem get system => switch (type) {
+        EndType.hdpeCompression || EndType.drainOpening => WaterSystem.drainage,
+        EndType.bspMale ||
+        EndType.bspFemale ||
+        EndType.pexPress ||
+        EndType.copperPress =>
+          WaterSystem.supply,
+      };
 }
 
 class VerifiedSpec {
@@ -81,6 +97,10 @@ class VerifiedSpec {
 
   /// True when this product's material can serve a line at [tempC].
   bool suitableForTemp(double tempC) => tempC <= maxTempC;
+
+  /// The set of plumbing systems this product's ends touch (geometric fallback,
+  /// used for products whose category does not pin a single system).
+  Set<WaterSystem> get endSystems => {for (final e in ends) e.system};
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
