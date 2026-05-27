@@ -127,6 +127,8 @@ class _CartFab extends ConsumerWidget {
 
     void openCart() {
       resetAllDials(ref);
+      // Land on the store's "הסל" filter so only cart items show.
+      ref.read(storeSectionProvider.notifier).state = StoreSection.cart;
       ref.read(mainTabProvider.notifier).state = 3;
     }
 
