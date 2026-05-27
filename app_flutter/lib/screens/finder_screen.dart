@@ -91,17 +91,30 @@ const Map<String, List<FinderSub>> kFinderSubs = {
     FinderSub('אביזרים', {'אביזרי ברזים'}),
     FinderSub('פיות', {'דיורים ופיות'}),
   ],
+  // household-common first (floor drains / traps / siphons), technical last
   'ניקוז': [
-    FinderSub('מכסים ורשתות', {'מכסים ורשתות'}),
-    FinderSub('מחסומים גלויים', {'מחסומים גלויים'}),
-    FinderSub('מסעפים', {'מסעפים וחיבורי אסלה'}),
-    FinderSub('כיסויים', {'כיסויים'}),
-    FinderSub('תעלות ניקוז', {'תעלות ניקוז'}),
     FinderSub('מחסומי רצפה', {'מחסומי רצפה', 'מאספים וקולטים'}), // folds a stray floor drain
-    FinderSub('מאספי רצפה', {'מאספי רצפה'}),
-    FinderSub('זקיף אסלה', {'זקיף אסלה'}),
+    FinderSub('מחסומים גלויים', {'מחסומים גלויים'}),
     FinderSub('סיפונים', {'סיפונים', 'אביזרי ביוב'}), // folds a lone siphon funnel
+    FinderSub('תעלות ניקוז', {'תעלות ניקוז'}),
+    FinderSub('מכסים ורשתות', {'מכסים ורשתות'}),
+    FinderSub('כיסויים', {'כיסויים'}),
+    FinderSub('מאספי רצפה', {'מאספי רצפה'}),
+    FinderSub('מסעפים', {'מסעפים וחיבורי אסלה'}),
+    FinderSub('זקיף אסלה', {'זקיף אסלה'}),
     FinderSub('ניקוז גג', {'ניקוז גג'}),
+  ],
+  // showerheads/hand-showers first, accessories and grab bars last
+  'מקלחת ואמבטיה': [
+    FinderSub('ראשי מקלחת', {'ראשי מקלחת'}),
+    FinderSub('מזלפי יד', {'מזלפי יד'}),
+    FinderSub('מערכות שטיפה', {'מערכות שטיפה'}),
+    FinderSub('מערכות אמבטיה', {'מערכות אמבטיה'}),
+    FinderSub('ערכות רחצה', {'ערכות רחצה'}),
+    FinderSub('זרועות דוש', {'זרועות דוש'}),
+    FinderSub('אביזרי מקלחת', {'אביזרי מקלחת'}),
+    FinderSub('אביזרי חדר רחצה', {'אביזרי חדר רחצה'}),
+    FinderSub('ידיות אחיזה', {'ידיות אחיזה'}),
   ],
   // consumer items first, technical installation-height types last
   'אסלות': [
