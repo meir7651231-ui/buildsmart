@@ -95,7 +95,7 @@ enum _Unit { single, pack, pallet }
 class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   late int _selectedIdx;
   LipskeyCatalogProduct? _chipOverride;
-  AttrKind? _openChipKind;
+  String? _openPickerKey; // 'type' | 'subtype' | 'model' | 'color'
   int? _activeStage;
   late Map<int, bool> _accSelected;
   int _qty = 1;
@@ -330,7 +330,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
     setState(() {
       _selectedIdx = i;
       _chipOverride = null;
-      _openChipKind = null;
+      _openPickerKey = null;
       _accSelected = {for (var j = 0; j < _accs.length; j++) j: false};
       _activeStage = null;
     });
@@ -339,7 +339,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   void _switchByChip(LipskeyCatalogProduct q) {
     setState(() {
       _chipOverride = q;
-      _openChipKind = null;
+      _openPickerKey = null;
       _accSelected = {for (var j = 0; j < _accs.length; j++) j: false};
       _activeStage = null;
     });
@@ -472,10 +472,10 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                           const SizedBox(height: 8),
                           _InteractiveChips(
                             product: p,
-                            openKind: _openChipKind,
-                            onChipTap: (kind) => setState(() {
-                              _openChipKind =
-                                  _openChipKind == kind ? null : kind;
+                            openPickerKey: _openPickerKey,
+                            onChipTap: (key) => setState(() {
+                              _openPickerKey =
+                                  _openPickerKey == key ? null : key;
                             }),
                             onVariantSelect: _switchByChip,
                           ),
@@ -1601,44 +1601,24 @@ Widget _SpecRow(String emoji, String label, String value) => Padding(
       ),
     );
 
-/// Interactive attribute chips (צעד 71+): orange border = has siblings (tappable).
-/// Tapping opens an inline picker row to switch to a sibling product.
+/// Interactive attribute chips (צעד 71+).
+/// סוג: shows compound type ("ברז נשלף"), tappable if >1 type in category.
+/// דגם: shows model name, tappable if >1 model in category.
+/// גוון/תת-סוג: frame-based sibling detection (color uses colorVariant).
 class _InteractiveChips extends StatelessWidget {
   const _InteractiveChips({
     required this.product,
-    required this.openKind,
+    required this.openPickerKey,
     required this.onChipTap,
     required this.onVariantSelect,
   });
 
   final LipskeyCatalogProduct product;
-  final AttrKind? openKind;
-  final void Function(AttrKind) onChipTap;
+  final String? openPickerKey; // 'type' | 'subtype' | 'model' | 'color'
+  final void Function(String key) onChipTap;
   final void Function(LipskeyCatalogProduct) onVariantSelect;
 
-  static bool _hasSiblings(LipskeyCatalogProduct p, AttrKind kind) {
-    if (kind == AttrKind.color) return _hasSiblingsColor(p);
-    final myVal = variantValue(p, kind);
-    if (myVal.isEmpty) return false;
-    final frame = p.nameHe
-        .split(RegExp(r'\s+'))
-        .where((w) => kindOf(w) != kind)
-        .join(' ');
-    return kLipskeyCatalog.any((q) =>
-        q.categoryHe == p.categoryHe &&
-        q.sku != p.sku &&
-        variantValue(q, kind) != myVal &&
-        variantValue(q, kind).isNotEmpty &&
-        q.nameHe
-                .split(RegExp(r'\s+'))
-                .where((w) => kindOf(w) != kind)
-                .join(' ') ==
-            frame);
-  }
-
-  // Modifier words that appear as second word in compound colors (e.g. "זהב מוברש").
-  // kindOf() doesn't recognize them as color, so they must be stripped separately
-  // from the frame to allow cross-modifier matching ("שחור מט" ↔ "ניקל" ↔ "זהב מוברש").
+  // ── Color helpers ────────────────────────────────────────────────────────
   static const _colorModifiers = {'מוברש', 'מט'};
 
   static String _colorFrame(LipskeyCatalogProduct p) => p.nameHe
@@ -1646,24 +1626,29 @@ class _InteractiveChips extends StatelessWidget {
       .where((w) => kindOf(w) != AttrKind.color && !_colorModifiers.contains(w))
       .join(' ');
 
-  static bool _hasSiblingsColor(LipskeyCatalogProduct p) {
-    final myVal = p.colorVariant;
-    if (myVal == null || myVal.isEmpty) return false;
+  static List<LipskeyCatalogProduct> _siblingsColor(LipskeyCatalogProduct p) {
     final frame = _colorFrame(p);
-    return kLipskeyCatalog.any((q) {
-      final qv = q.colorVariant;
-      return q.categoryHe == p.categoryHe &&
-          q.sku != p.sku &&
-          qv != null &&
-          qv.isNotEmpty &&
-          qv != myVal &&
-          _colorFrame(q) == frame;
+    final seen = <String>{};
+    final all = <LipskeyCatalogProduct>[];
+    for (final q in kLipskeyCatalog) {
+      if (q.categoryHe != p.categoryHe) continue;
+      final v = q.colorVariant;
+      if (v == null || v.isEmpty) continue;
+      if (_colorFrame(q) != frame) continue;
+      if (seen.add(v)) all.add(q);
+    }
+    all.sort((a, b) {
+      if (a.sku == p.sku) return -1;
+      if (b.sku == p.sku) return 1;
+      return (a.colorVariant ?? '').compareTo(b.colorVariant ?? '');
     });
+    return all;
   }
 
-  static List<LipskeyCatalogProduct> _siblings(
-      LipskeyCatalogProduct p, AttrKind kind) {
-    if (kind == AttrKind.color) return _siblingsColor(p);
+  // ── Subtype helpers (frame-based) ────────────────────────────────────────
+  static List<LipskeyCatalogProduct> _siblingsSubtype(
+      LipskeyCatalogProduct p) {
+    const kind = AttrKind.subtype;
     final frame = p.nameHe
         .split(RegExp(r'\s+'))
         .where((w) => kindOf(w) != kind)
@@ -1689,59 +1674,207 @@ class _InteractiveChips extends StatelessWidget {
     return all;
   }
 
-  static List<LipskeyCatalogProduct> _siblingsColor(LipskeyCatalogProduct p) {
-    final frame = _colorFrame(p);
-    final seen = <String>{};
-    final all = <LipskeyCatalogProduct>[];
-    for (final q in kLipskeyCatalog) {
-      if (q.categoryHe != p.categoryHe) continue;
-      final v = q.colorVariant;
-      if (v == null || v.isEmpty) continue;
-      if (_colorFrame(q) != frame) continue;
-      if (seen.add(v)) all.add(q);
+  // ── Compound-type helpers ────────────────────────────────────────────────
+  // "ברז נשלף" = type word + immediately next unclassified non-prep word.
+  static String _compoundType(LipskeyCatalogProduct p) {
+    final typeWord = p.productType;
+    if (typeWord == null || typeWord.isEmpty) return '';
+    final words = p.nameHe.split(RegExp(r'\s+'));
+    final typeWords = typeWord.split(RegExp(r'\s+'));
+    int typeEnd = -1;
+    for (int i = 0; i <= words.length - typeWords.length; i++) {
+      bool match = true;
+      for (int j = 0; j < typeWords.length; j++) {
+        if (words[i + j] != typeWords[j]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) {
+        typeEnd = i + typeWords.length;
+        break;
+      }
     }
-    all.sort((a, b) {
-      if (a.sku == p.sku) return -1;
-      if (b.sku == p.sku) return 1;
-      return (a.colorVariant ?? '').compareTo(b.colorVariant ?? '');
-    });
-    return all;
+    if (typeEnd < 0 || typeEnd >= words.length) return typeWord;
+    final next = words[typeEnd];
+    if (kindOf(next) != null) return typeWord;
+    if (_colorModifiers.contains(next)) return typeWord;
+    // Skip preposition-prefix words (ל/ב + noun > 2 chars)
+    if (next.length > 2 &&
+        (next.startsWith('ל') || next.startsWith('ב'))) return typeWord;
+    return '$typeWord $next';
+  }
+
+  static List<String> _typesInCategory(LipskeyCatalogProduct p) {
+    final cat = p.categoryHe;
+    final current = _compoundType(p);
+    final seen = <String>{};
+    final result = <String>[];
+    if (current.isNotEmpty) {
+      seen.add(current);
+      result.add(current);
+    }
+    for (final q in kLipskeyCatalog) {
+      if (q.categoryHe != cat) continue;
+      final ct = _compoundType(q);
+      if (ct.isEmpty) continue;
+      if (seen.add(ct)) result.add(ct);
+    }
+    return result;
+  }
+
+  static LipskeyCatalogProduct _bestForType(
+      LipskeyCatalogProduct current, String targetCompound) {
+    final cat = current.categoryHe;
+    final currentModel = current.brandModel;
+    final currentColor = current.colorVariant;
+    final candidates = kLipskeyCatalog
+        .where((q) => q.categoryHe == cat && _compoundType(q) == targetCompound)
+        .toList();
+    if (candidates.isEmpty) return current;
+    return candidates.firstWhere(
+      (q) => q.brandModel == currentModel && q.colorVariant == currentColor,
+      orElse: () => candidates.firstWhere(
+        (q) => q.brandModel == currentModel,
+        orElse: () => candidates.first,
+      ),
+    );
+  }
+
+  // ── Model helpers (category-wide) ────────────────────────────────────────
+  static List<String> _modelsInCategory(LipskeyCatalogProduct p) {
+    final cat = p.categoryHe;
+    final currentModel = p.brandModel;
+    final seen = <String>{};
+    final result = <String>[];
+    if (currentModel != null && currentModel.isNotEmpty) {
+      seen.add(currentModel);
+      result.add(currentModel);
+    }
+    for (final q in kLipskeyCatalog) {
+      if (q.categoryHe != cat) continue;
+      final m = q.brandModel;
+      if (m == null || m.isEmpty) continue;
+      if (seen.add(m)) result.add(m);
+    }
+    return result;
+  }
+
+  static LipskeyCatalogProduct _bestForModel(
+      LipskeyCatalogProduct current, String targetModel) {
+    final cat = current.categoryHe;
+    final currentCompound = _compoundType(current);
+    final currentColor = current.colorVariant;
+    final candidates = kLipskeyCatalog
+        .where((q) => q.categoryHe == cat && q.brandModel == targetModel)
+        .toList();
+    if (candidates.isEmpty) return current;
+    return candidates.firstWhere(
+      (q) =>
+          _compoundType(q) == currentCompound &&
+          q.colorVariant == currentColor,
+      orElse: () => candidates.firstWhere(
+        (q) => _compoundType(q) == currentCompound,
+        orElse: () => candidates.first,
+      ),
+    );
+  }
+
+  // ── Unified sibling check & picker options ───────────────────────────────
+  static bool _hasSiblings(LipskeyCatalogProduct p, String key) {
+    switch (key) {
+      case 'type':
+        return _typesInCategory(p).length > 1;
+      case 'model':
+        return _modelsInCategory(p).length > 1;
+      case 'color':
+        final myVal = p.colorVariant;
+        if (myVal == null || myVal.isEmpty) return false;
+        final frame = _colorFrame(p);
+        return kLipskeyCatalog.any((q) {
+          final qv = q.colorVariant;
+          return q.categoryHe == p.categoryHe &&
+              q.sku != p.sku &&
+              qv != null &&
+              qv.isNotEmpty &&
+              qv != myVal &&
+              _colorFrame(q) == frame;
+        });
+      case 'subtype':
+        return _siblingsSubtype(p).length > 1;
+      default:
+        return false;
+    }
+  }
+
+  // Returns (display label, target product) for each picker option.
+  static List<(String, LipskeyCatalogProduct)> _pickerOptions(
+      LipskeyCatalogProduct p, String key) {
+    switch (key) {
+      case 'type':
+        return _typesInCategory(p).map((compound) {
+          // Show just the qualifier word ("נשלף"), not the full compound ("ברז נשלף")
+          final label =
+              compound.contains(' ') ? compound.split(' ').last : compound;
+          return (label, _bestForType(p, compound));
+        }).toList();
+      case 'model':
+        return _modelsInCategory(p)
+            .map((m) => (m, _bestForModel(p, m)))
+            .toList();
+      case 'color':
+        return _siblingsColor(p)
+            .map((q) => (q.colorVariant ?? '', q))
+            .toList();
+      case 'subtype':
+        return _siblingsSubtype(p)
+            .map((q) => (variantValue(q, AttrKind.subtype), q))
+            .toList();
+      default:
+        return [];
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final parsed = product.parsedName;
-    final entries = <({String label, String value, Color color, AttrKind? kind})>[
+    final compound = _compoundType(product);
+
+    final entries = <({String label, String value, Color color, String key})>[
       if (parsed.type != null)
         (
           label: 'סוג',
-          value: parsed.type!,
+          value: compound.isNotEmpty ? compound : parsed.type!,
           color: const Color(0xFF3DD9B0),
-          kind: null,
+          key: 'type',
         ),
       if (parsed.subtype != null)
         (
           label: 'תת-סוג',
           value: parsed.subtype!,
           color: const Color(0xFF7FD0FF),
-          kind: AttrKind.subtype,
+          key: 'subtype',
         ),
       if (parsed.brand != null)
         (
           label: 'דגם',
           value: parsed.brand!,
           color: const Color(0xFFFF9D4D),
-          kind: AttrKind.model,
+          key: 'model',
         ),
       if (parsed.variant != null)
         (
           label: 'גוון',
           value: parsed.variant!,
           color: const Color(0xFFC9A7FF),
-          kind: AttrKind.color,
+          key: 'color',
         ),
     ];
     if (entries.isEmpty) return const SizedBox.shrink();
+
+    final activeOptions = openPickerKey != null
+        ? _pickerOptions(product, openPickerKey!)
+        : <(String, LipskeyCatalogProduct)>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1751,12 +1884,11 @@ class _InteractiveChips extends StatelessWidget {
           runSpacing: 6,
           children: [for (final c in entries) _buildChip(c)],
         ),
-        if (openKind != null) ...[
+        if (openPickerKey != null && activeOptions.isNotEmpty) ...[
           const SizedBox(height: 8),
           _ChipPickerRow(
-            product: product,
-            kind: openKind!,
-            siblings: _siblings(product, openKind!),
+            options: activeOptions,
+            currentSku: product.sku,
             onSelect: onVariantSelect,
           ),
         ],
@@ -1764,13 +1896,15 @@ class _InteractiveChips extends StatelessWidget {
     );
   }
 
-  Widget _buildChip(
-      ({String label, String value, Color color, AttrKind? kind}) c) {
-    final tappable = c.kind != null && _hasSiblings(product, c.kind!);
+  Widget _buildChip(({String label, String value, Color color, String key}) c) {
+    final tappable = _hasSiblings(product, c.key);
+    final isOpen = openPickerKey == c.key;
     final chip = Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: c.color.withValues(alpha: 0.12),
+        color: isOpen
+            ? c.color.withValues(alpha: 0.22)
+            : c.color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(7),
         border: Border.all(
           color: tappable
@@ -1794,34 +1928,32 @@ class _InteractiveChips extends StatelessWidget {
             ),
           ),
           if (tappable)
-            const TextSpan(
-              text: ' ›',
-              style: TextStyle(color: Color(0xFFFF9D4D), fontSize: 10),
+            TextSpan(
+              text: isOpen ? ' ×' : ' ›',
+              style: const TextStyle(color: Color(0xFFFF9D4D), fontSize: 10),
             ),
         ]),
       ),
     );
     if (!tappable) return chip;
-    return GestureDetector(onTap: () => onChipTap(c.kind!), child: chip);
+    return GestureDetector(onTap: () => onChipTap(c.key), child: chip);
   }
 }
 
 class _ChipPickerRow extends StatelessWidget {
   const _ChipPickerRow({
-    required this.product,
-    required this.kind,
-    required this.siblings,
+    required this.options,
+    required this.currentSku,
     required this.onSelect,
   });
 
-  final LipskeyCatalogProduct product;
-  final AttrKind kind;
-  final List<LipskeyCatalogProduct> siblings;
+  final List<(String, LipskeyCatalogProduct)> options;
+  final String currentSku;
   final void Function(LipskeyCatalogProduct) onSelect;
 
   @override
   Widget build(BuildContext context) {
-    if (siblings.isEmpty) return const SizedBox.shrink();
+    if (options.isEmpty) return const SizedBox.shrink();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(8),
@@ -1835,13 +1967,11 @@ class _ChipPickerRow extends StatelessWidget {
         spacing: 6,
         runSpacing: 6,
         children: [
-          for (final q in siblings)
+          for (final opt in options)
             _PickerOption(
-              value: kind == AttrKind.color
-                  ? (q.colorVariant ?? '')
-                  : variantValue(q, kind),
-              isSelected: q.sku == product.sku,
-              onTap: () => onSelect(q),
+              value: opt.$1,
+              isSelected: opt.$2.sku == currentSku,
+              onTap: () => onSelect(opt.$2),
             ),
         ],
       ),
