@@ -3040,36 +3040,10 @@ class _TreeDrill extends ConsumerWidget {
               ),
             if (products.isNotEmpty) ...[
               SliverToBoxAdapter(child: _ProductsHeader(count: products.length)),
-              if (ref.watch(catalogSettingsProvider).viewMode ==
-                  CatalogViewMode.grid)
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
-                  sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: ref
-                          .watch(catalogSettingsProvider)
-                          .gridColumns
-                          .clamp(1, 4),
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 0.66,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (_, i) => LipskeyProductGridCard(
-                          product: products[i], products: products),
-                      childCount: products.length,
-                    ),
-                  ),
-                )
-              else
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (_, i) => LipskeyProductCard(
-                        product: products[i], products: products),
-                    childCount: products.length,
-                  ),
-                ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              SliverFillRemaining(
+                hasScrollBody: true,
+                child: LipskeyProductsList(products: products),
+              ),
             ],
           ],
         );

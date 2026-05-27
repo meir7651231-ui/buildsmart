@@ -119,14 +119,14 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
     // Pre-compute family → all products in widget.products with that key.
     final byFamily = <String, List<LipskeyCatalogProduct>>{};
     for (final p in widget.products) {
-      byFamily.putIfAbsent(productCanonicalKey(p), () => []).add(p);
+      byFamily.putIfAbsent(productListDedupeKey(p), () => []).add(p);
     }
     final seenFamily = <String>{};
     final seenSku = <String>{};
     for (final orig in widget.products) {
       final cur = _displayed(orig);
       if (seenSku.contains(cur.sku)) continue;
-      final family = productCanonicalKey(cur);
+      final family = productListDedupeKey(cur);
       if (seenFamily.contains(family)) continue;
       seenSku.add(cur.sku);
       seenFamily.add(family);
@@ -1052,6 +1052,29 @@ String _stripWordsOfKind(String name, AttrKind kind) {
       .where((w) => w.isNotEmpty && _attrKindFor(w) != kind)
       .join(' ')
       .trim();
+}
+
+/// All individual words that appear in any attribute-value entry (including
+/// sub-words of multi-word entries such as "מוברש" from "ניקל מוברש").
+/// Used by [productListDedupeKey] so that "שחור מט" and "שחור" collapse to the
+/// same frame (both "מט" and "שחור" are stripped).
+final _kAttrWordSet = <String>{
+  for (final v in [...kLipskeyColors, ...kLipskeyModels, ...kLipskeySubtypes])
+    ...v.split(RegExp(r'\s+')).where((w) => w.length >= 2),
+};
+
+/// Deduplication key for the product list view.  Two products get the same key
+/// when they are variants of each other (same product, different attribute
+/// values such as colour/size/model).
+///
+/// Intentionally does NOT include catalog page, pack qty or pallet qty —
+/// variant products are sometimes printed on different catalogue pages.
+String productListDedupeKey(LipskeyCatalogProduct p) {
+  final stripped = p.nameHe
+      .split(RegExp(r'\s+'))
+      .where((w) => w.isNotEmpty && !isSizeToken(w) && !_kAttrWordSet.contains(w))
+      .join(' ');
+  return '${p.brand}||${p.categoryHe}||$stripped';
 }
 
 /// Find products in the same category that share the same frame as [p] (after

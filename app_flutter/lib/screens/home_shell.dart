@@ -202,7 +202,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.02 · 27.5.26 · cycling מאפיינים בכרטיס עצמאי',
+                          'v4.03 · 27.5.26 · כרטיס אחד לוריאנטים',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
