@@ -18,6 +18,10 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Cart line indices whose recent-add chat bubble the user dismissed (via its
+/// X). Cleared whenever the cart shrinks so later adds surface fresh bubbles.
+final cartBubbleDismissedProvider = StateProvider<Set<int>>((_) => {});
+
 /// WhatsApp-style shell: AppBar + 4 bottom tabs + dial overlays.
 /// Tabs: קטלוג · שיחות · התראות · חנות (RTL order: catalog on right).
 class HomeShell extends ConsumerWidget {
@@ -103,13 +107,33 @@ class _CartFab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final lines = ref.watch(smartCartProvider);
     final count = lines.fold<int>(0, (sum, l) => sum + l.productQty);
+    final dismissed = ref.watch(cartBubbleDismissedProvider);
+
+    // Clear dismissals when the cart shrinks (indices would otherwise drift),
+    // so a later add surfaces fresh bubbles. Side-effect via listen.
+    ref.listen<List<SmartCartLine>>(smartCartProvider, (prev, next) {
+      if (prev != null && next.length < prev.length) {
+        ref.read(cartBubbleDismissedProvider.notifier).state = {};
+      }
+    });
+
+    // Last two added (chronological: older on top, newest nearest the FAB),
+    // minus any the user closed.
+    final n = lines.length;
+    final recentIdx = [
+      for (var i = n - 2 < 0 ? 0 : n - 2; i < n; i++)
+        if (!dismissed.contains(i)) i,
+    ];
+
+    void openCart() {
+      resetAllDials(ref);
+      ref.read(mainTabProvider.notifier).state = 3;
+    }
 
     // 3-layer design: white circle + orange border, orange cart, white plus.
-    return FloatingActionButton(
-      onPressed: () {
-        resetAllDials(ref);
-        ref.read(mainTabProvider.notifier).state = 3;
-      },
+    final fab = FloatingActionButton(
+      heroTag: 'cart-fab',
+      onPressed: openCart,
       backgroundColor: BsTokens.brand,
       foregroundColor: Colors.white,
       elevation: 4,
@@ -152,6 +176,169 @@ class _CartFab extends ConsumerWidget {
             ),
         ],
       ),
+    );
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        for (final i in recentIdx) ...[
+          _CartChatBubble(
+            line: lines[i],
+            onTap: () => openCartLineProductSheet(context, lines[i]),
+            onClose: () => ref.read(cartBubbleDismissedProvider.notifier).state =
+                {...dismissed, i},
+          ),
+          const SizedBox(height: 8),
+        ],
+        const SizedBox(height: 2),
+        fab,
+      ],
+    );
+  }
+}
+
+/// A single recent-add product styled as a chat bubble above the cart FAB.
+/// Tapping the bubble re-opens that product's detail sheet for editing
+/// (everything but the name); the small circular X dismisses just this bubble.
+/// Inline floating message — no full window/modal (R2).
+class _CartChatBubble extends StatelessWidget {
+  const _CartChatBubble({
+    required this.line,
+    required this.onTap,
+    required this.onClose,
+  });
+
+  final SmartCartLine line;
+  final VoidCallback onTap;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final d = cartLineDisplay(line);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        InkWell(
+          onTap: onTap,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+            bottomRight: Radius.circular(16),
+            bottomLeft: Radius.circular(4),
+          ),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 250),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              // Chat-bubble shape: tail-corner (bottom-left, toward the FAB)
+              // squared off, the rest rounded.
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+                bottomLeft: Radius.circular(4),
+              ),
+              border: Border.all(color: BsTokens.brand.withValues(alpha: 0.25)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.16),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(line.productEmoji, style: const TextStyle(fontSize: 16)),
+                const SizedBox(width: 7),
+                // Main name + product-type description (two compact lines).
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        d.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          height: 1.1,
+                        ),
+                      ),
+                      if (d.attrs.isNotEmpty)
+                        Text(
+                          d.attrs,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFF888888),
+                            fontSize: 10.5,
+                            height: 1.2,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Price + quantity.
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '₪${line.total}',
+                      style: const TextStyle(
+                        color: BsTokens.brand,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        height: 1.1,
+                      ),
+                    ),
+                    Text(
+                      '×${line.productQty}',
+                      style: const TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 10.5,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.edit_outlined,
+                    size: 13, color: Colors.black38),
+              ],
+            ),
+          ),
+        ),
+        // Close X — small circle floating at the top-start corner.
+        PositionedDirectional(
+          top: -7,
+          start: -7,
+          child: Material(
+            color: Colors.white,
+            shape: const CircleBorder(
+              side: BorderSide(color: Color(0x22000000)),
+            ),
+            elevation: 2,
+            child: InkWell(
+              onTap: onClose,
+              customBorder: const CircleBorder(),
+              child: const SizedBox(
+                width: 20,
+                height: 20,
+                child: Icon(Icons.close, size: 13, color: Colors.black54),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -202,7 +389,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.00 · 27.5.26 · וריאנטים + סטודיו: שפה פשוטה',
+                          'v4.12 · 27.5.26 · מאתר: בחר סוג+גודל בלי לדעת קטלוג',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

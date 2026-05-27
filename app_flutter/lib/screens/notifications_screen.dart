@@ -1,6 +1,7 @@
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -974,7 +975,15 @@ class _NotifRow extends ConsumerWidget {
                         if (actionLabel != null) ...[
                           const SizedBox(width: 8),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              if (isUnread) {
+                                ref.read(notifReadIdsProvider.notifier).state =
+                                    Set<String>.from(
+                                      ref.read(notifReadIdsProvider),
+                                    )..add(notif.id);
+                              }
+                              showToast(context, '$actionLabel — בבנייה');
+                            },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,

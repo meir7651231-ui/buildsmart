@@ -15,7 +15,7 @@ void main() {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     expect(find.text('BuildSmart'), findsOneWidget);
-    // Default catalog tab = the "הכל" overview; first category preview visible.
+    // Default catalog tab = the full "קטגוריות" list; first category visible.
     expect(find.text('ברזים וכיורים'), findsAtLeastNWidgets(1));
   });
 
@@ -59,21 +59,28 @@ void main() {
   testWidgets('"הכל" overview shows a preview block per section', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    // Section headers in the overview (also appear as chips → at least one).
+    // 'הכל' is no longer the default landing — open it via its chip.
+    await t.tap(find.text('הכל').first);
+    await t.pumpAndSettle();
+    // Section labels are present (they also appear as chips → at least one).
     expect(find.text('חיפושים אחרונים'), findsAtLeastNWidgets(1));
     expect(find.text('תאימות'), findsAtLeastNWidgets(1));
     expect(find.text('מועדפים'), findsAtLeastNWidgets(1));
     expect(find.text('עץ חכם'), findsAtLeastNWidgets(1));
-    // Every block exposes a "הצג הכל" link.
-    expect(find.text('הצג הכל'), findsAtLeastNWidgets(3));
+    // Categories block is fully expanded (no "הצג הכל"); the preview blocks for
+    // the other sections sit below it, so scroll down until their links show.
+    final list = find.byKey(const Key('catalog-list'));
+    for (var i = 0; i < 20 && find.text('הצג הכל').evaluate().isEmpty; i++) {
+      await t.drag(list, const Offset(0, -250));
+      await t.pump(const Duration(milliseconds: 50));
+    }
+    expect(find.text('הצג הכל'), findsAtLeastNWidgets(1));
   });
 
   testWidgets('קטגוריות section shows all 11 verbatim categories', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    // Open the full קטגוריות section via the first block's "הצג הכל".
-    await t.tap(find.text('הצג הכל').first);
-    await t.pumpAndSettle();
+    // 'קטגוריות' is the default landing — the full list is already shown.
     const cats = [
       'ברזים וכיורים', 'אסלות', 'מקלחות ואמבטיות', 'חימום מים', 'מטבח',
       'ניקוז וצנרת', 'גופי תברואה', 'אביזרי קצה וחיבורים',

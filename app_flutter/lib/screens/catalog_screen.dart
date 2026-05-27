@@ -9,6 +9,7 @@ import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
+import 'package:buildsmart/screens/finder_screen.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -29,11 +30,12 @@ void _openStudio(BuildContext context) {
 }
 
 /// Active section label — 'הכל' is always first and fixed.
-final catalogSectionProvider = StateProvider<String>((_) => 'הכל');
+/// Default landing is the full category list rather than the 'הכל' preview.
+final catalogSectionProvider = StateProvider<String>((_) => 'קטגוריות');
 
 /// Ordered list of user section labels (הכל is NOT stored here).
 final catalogSectionsListProvider = StateProvider<List<String>>(
-  (_) => ['תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
+  (_) => ['מאתר', 'תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
 );
 
 /// Per-list catalog items: map of section-label → set of catalog category
@@ -61,6 +63,66 @@ final smartTreeCatProvider = StateProvider<String?>((_) => null);
 
 /// Search query within the active smart-tree category's product list.
 final smartTreeQueryProvider = StateProvider<String>((_) => '');
+
+/// Re-opens the product detail sheet for a cart line so it can be edited
+/// (brand / quantity / accessories — everything but the name). Resolves the
+/// line back to its source product: 'lip:<sku>' → Lipskey catalog product,
+/// otherwise a smart-tree [SmartProduct] by key.
+void openCartLineProductSheet(BuildContext context, SmartCartLine line) {
+  final key = line.productKey;
+  if (key.startsWith('lip:')) {
+    final sku = key.substring(4);
+    final i = kLipskeyCatalog.indexWhere((p) => p.sku == sku);
+    if (i >= 0) {
+      final product = kLipskeyCatalog[i];
+      final siblings = kLipskeyCatalog
+          .where((p) => p.categoryHe == product.categoryHe)
+          .toList();
+      showLipskeyProductSheet(context, product, siblings);
+      return;
+    }
+  }
+  final s = kSmartProducts.indexWhere((p) => p.key == key);
+  if (s >= 0) {
+    _SmartTreeProductList._openProductSheet(context, kSmartProducts[s]);
+  }
+}
+
+/// Compact display for a cart line in the recent-add bubble: a short product
+/// name (the type noun + qualifier, e.g. "ברז כפול") with its distinguishing
+/// attributes below (brand model · colour · supplier). Falls back to the full
+/// product name when it can't be decomposed.
+({String name, String attrs}) cartLineDisplay(SmartCartLine line) {
+  if (line.productKey.startsWith('lip:')) {
+    final sku = line.productKey.substring(4);
+    final i = kLipskeyCatalog.indexWhere((p) => p.sku == sku);
+    if (i >= 0) {
+      final p = kLipskeyCatalog[i];
+      final type = p.productType;
+      String name;
+      if (type != null) {
+        name = [type, if (p.productSubtype != null) p.productSubtype!].join(' ');
+      } else {
+        // No recognised type — fall back to the full name, minus the brand /
+        // colour tokens (they live in the attrs line) to keep it shorter.
+        name = p.nameHe;
+        if (p.brandModel != null) name = name.replaceFirst(p.brandModel!, '');
+        final cv = p.colorVariant;
+        if (cv != null) name = name.replaceAll(cv, '');
+        name = name.replaceAll(RegExp(r'\s+'), ' ').trim();
+        if (name.isEmpty) name = p.nameHe;
+      }
+      final attrs = <String>{
+        if (p.brandModel != null) p.brandModel!,
+        if (p.colorVariant != null) p.colorVariant!,
+        if (line.brandName.isNotEmpty) line.brandName,
+      }.join(' · ');
+      return (name: name, attrs: attrs);
+    }
+  }
+  return (name: line.productName, attrs: line.brandName);
+}
+
 
 /// Currently selected category in the "קטגוריות" drill. Null = show all 11 cats.
 final catalogDrillCatProvider = StateProvider<String?>((_) => null);
@@ -1055,6 +1117,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
 }
 
 IconData _sectionIcon(String label) => switch (label) {
+      'מאתר'            => Icons.travel_explore,
       'חיפושים אחרונים' => Icons.history,
       'מועדפים'         => Icons.favorite_border,
       'קטגוריות'        => Icons.grid_view_outlined,
@@ -1833,6 +1896,7 @@ class _CatalogBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(catalogSectionProvider);
     if (active == 'הכל') return _AllOverview(scrollCtrl: scrollCtrl);
+    if (active == 'מאתר') return const FinderScreen();
     if (active == 'עץ חכם') return const _SmartTreeSection();
     if (active == 'קטגוריות') return const _CatalogList();
     if (active == 'מועדפים') return const _FavoritesSection();
@@ -2004,13 +2068,12 @@ class _AllOverview extends ConsumerWidget {
       key: const Key('catalog-list'),
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        // קטגוריות
+        // קטגוריות — full list inline (no preview cap, no "הצג הכל").
         _OverviewBlock(
           title: 'קטגוריות',
           count: kCatalogCats.length,
-          onShowAll: () => go('קטגוריות'),
           children: [
-            for (var i = 0; i < kCatalogCats.length && i < 3; i++)
+            for (var i = 0; i < kCatalogCats.length; i++)
               _CatalogRow(cat: kCatalogCats[i], meta: _kMeta[i]),
           ],
         ),
@@ -2082,6 +2145,8 @@ class _AllOverview extends ConsumerWidget {
               ),
           ],
         ),
+        // ספק מוביל — כרטיס תצוגה של ליפסקי ברקן (קטלוג חיצוני)
+        const _LipskeySupplierCard(),
       ],
     );
   }
@@ -2090,14 +2155,14 @@ class _AllOverview extends ConsumerWidget {
 class _OverviewBlock extends StatelessWidget {
   const _OverviewBlock({
     required this.title,
-    required this.onShowAll,
     required this.children,
+    this.onShowAll,
     this.count = 0,
     this.isLast = false,
   });
   final String title;
   final int count;
-  final VoidCallback onShowAll;
+  final VoidCallback? onShowAll;
   final List<Widget> children;
   final bool isLast;
 
@@ -2150,25 +2215,26 @@ class _OverviewBlock extends StatelessWidget {
                   ],
                 ),
               ),
-              TextButton(
-                onPressed: onShowAll,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              if (onShowAll != null)
+                TextButton(
+                  onPressed: onShowAll,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('הצג הכל',
+                          style: TextStyle(
+                              color: BsTokens.brand,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600)),
+                      Icon(Icons.chevron_left, color: BsTokens.brand, size: 18),
+                    ],
+                  ),
                 ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('הצג הכל',
-                        style: TextStyle(
-                            color: BsTokens.brand,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600)),
-                    Icon(Icons.chevron_left, color: BsTokens.brand, size: 18),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -2256,40 +2322,54 @@ class _LipskeySupplierCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF3D5A80).withOpacity(0.25),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFF3D5A80), width: 0.7),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('🏭', style: TextStyle(fontSize: 13)),
-                        SizedBox(width: 4),
-                        Text('ליפסקי ברקן',
-                            style: TextStyle(
-                                color: Color(0xFF64FFDA),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600)),
-                      ],
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF3D5A80).withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFF3D5A80), width: 0.7),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('🏭', style: TextStyle(fontSize: 13)),
+                          SizedBox(width: 4),
+                          Flexible(
+                            child: Text('ליפסקי ברקן',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: Color(0xFF64FFDA),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600)),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      LipskeyBrandScreen.route(),
-                    ),
-                    child: const Row(
-                      children: [
-                        Text('כל הקטגוריות',
-                            style: TextStyle(color: Colors.black38, fontSize: 12)),
-                        SizedBox(width: 3),
-                        Icon(Icons.chevron_left, color: Colors.white38, size: 16),
-                      ],
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        LipskeyBrandScreen.route(),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text('כל הקטגוריות',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(color: Colors.black38, fontSize: 12)),
+                          ),
+                          SizedBox(width: 3),
+                          Icon(Icons.chevron_left, color: Colors.white38, size: 16),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -2867,18 +2947,6 @@ class _TreeDrill extends ConsumerWidget {
     void resetFacets() =>
         ref.read(catalogFacetProvider.notifier).state = const [];
 
-    void goBack() {
-      resetQuery();
-      if (facetSel.isNotEmpty) {
-        ref.read(catalogFacetProvider.notifier).state = [...facetSel]
-          ..removeLast();
-      } else {
-        resetFacets();
-        ref.read(catalogTreePathProvider.notifier).state = [...path]
-          ..removeLast();
-      }
-    }
-
     void cancel() {
       resetQuery();
       resetFacets();
@@ -3023,36 +3091,10 @@ class _TreeDrill extends ConsumerWidget {
               ),
             if (products.isNotEmpty) ...[
               SliverToBoxAdapter(child: _ProductsHeader(count: products.length)),
-              if (ref.watch(catalogSettingsProvider).viewMode ==
-                  CatalogViewMode.grid)
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
-                  sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: ref
-                          .watch(catalogSettingsProvider)
-                          .gridColumns
-                          .clamp(1, 4),
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 0.66,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (_, i) => LipskeyProductGridCard(
-                          product: products[i], products: products),
-                      childCount: products.length,
-                    ),
-                  ),
-                )
-              else
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (_, i) => LipskeyProductCard(
-                        product: products[i], products: products),
-                    childCount: products.length,
-                  ),
-                ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              SliverFillRemaining(
+                hasScrollBody: true,
+                child: LipskeyProductsList(products: products),
+              ),
             ],
           ],
         );
@@ -3062,7 +3104,7 @@ class _TreeDrill extends ConsumerWidget {
         _TreeDrillBar(
           key: ValueKey('${current.id}.${facetSel.length}'),
           crumbs: crumbs,
-          onBack: goBack,
+          onBack: cancel,
           onCancel: cancel,
         ),
         Expanded(child: body),
@@ -3685,6 +3727,8 @@ class _SmartTreeCatList extends ConsumerWidget {
     final cats = kSmartTreeCats;
     return Column(
       children: [
+        // מוצר היום — כרטיס מוצר חכם מומלץ (קטלוג פנימי)
+        _FeaturedProductCard(product: kSmartProducts.first),
         Expanded(
           child: ListView.separated(
             itemCount: cats.length,

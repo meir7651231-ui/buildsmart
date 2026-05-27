@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/data/variant_families.dart' show productCanonicalKey;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -119,14 +118,14 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
     // Pre-compute family → all products in widget.products with that key.
     final byFamily = <String, List<LipskeyCatalogProduct>>{};
     for (final p in widget.products) {
-      byFamily.putIfAbsent(productCanonicalKey(p), () => []).add(p);
+      byFamily.putIfAbsent(productListDedupeKey(p), () => []).add(p);
     }
     final seenFamily = <String>{};
     final seenSku = <String>{};
     for (final orig in widget.products) {
       final cur = _displayed(orig);
       if (seenSku.contains(cur.sku)) continue;
-      final family = productCanonicalKey(cur);
+      final family = productListDedupeKey(cur);
       if (seenFamily.contains(family)) continue;
       seenSku.add(cur.sku);
       seenFamily.add(family);
@@ -453,26 +452,106 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   bool _open = false;
   int _qty = 1;
   _Unit _unit = _Unit.single;
+  /// Local cycle state for standalone cards (when no onCycle parent callback).
+  LipskeyCatalogProduct? _localProduct;
+  /// Inline attribute picker state — non-null when picker is open.
+  AttrKind? _pickerKind;
+  List<LipskeyCatalogProduct>? _pickerSiblings;
 
   static const _brand = Color(0xFFFF7A18);
   static const _teal = Color(0xFF3DD9B0);
   Color get _muted => Theme.of(context).colorScheme.onSurface.withOpacity(0.45);
   Color get _line => Theme.of(context).colorScheme.outline.withOpacity(0.2);
 
-  /// Currently-displayed product — passed in by the parent list.
-  LipskeyCatalogProduct get p => widget.product;
+  /// Currently-displayed product — uses local state for standalone cards.
+  LipskeyCatalogProduct get p => _localProduct ?? widget.product;
 
-  /// Cycle to the next sibling that differs only in [word] of [kind].
-  /// Reports the new product up to the parent; the parent owns the swap state.
+  @override
+  void didUpdateWidget(_ProductRow old) {
+    super.didUpdateWidget(old);
+    if (old.product.sku != widget.product.sku) {
+      _localProduct = null;
+      _pickerKind = null;
+      _pickerSiblings = null;
+    }
+  }
+
+  /// The attribute value(s) of [product] for the given [kind].
+  /// color    → base color only (modifier is a separate colorMod chip).
+  /// colorMod → modifier word or "רגיל".
+  /// others   → longest-match entry from the relevant list.
+  String _attrVal(LipskeyCatalogProduct product, AttrKind kind) {
+    if (kind == AttrKind.color) return _baseColor(product);
+    if (kind == AttrKind.colorMod) return _colorModifier(product) ?? 'רגיל';
+    final words = product.nameHe.split(RegExp(r'\s+'));
+    final entries = switch (kind) {
+      AttrKind.model => kLipskeyModels,
+      AttrKind.subtype => kLipskeySubtypes,
+      _ => const <String>[],
+    };
+    final sorted = [...entries]..sort((a, b) => b.length.compareTo(a.length));
+    for (final entry in sorted) {
+      if (entry.split(RegExp(r'\s+')).every(words.contains)) return entry;
+    }
+    return words.where((w) => _attrKindFor(w) == kind).join(' ');
+  }
+
+  /// Base color word of [product] — color sub-words that are NOT modifiers.
+  String _baseColor(LipskeyCatalogProduct product) => product.nameHe
+      .split(RegExp(r'\s+'))
+      .where((w) => _kColorWords.contains(w) && !_kColorModifiers.contains(w))
+      .join(' ');
+
+  /// Finish modifier word ("מוברש", "מט") of [product], or null.
+  String? _colorModifier(LipskeyCatalogProduct product) {
+    final w = product.nameHe
+        .split(RegExp(r'\s+'))
+        .firstWhere((w) => _kColorModifiers.contains(w), orElse: () => '');
+    return w.isEmpty ? null : w;
+  }
+
+  /// Navigate to the sibling with [base] color, keeping the current modifier
+  /// when possible; falls back to any sibling with that base.
+  void _selectBase(List<LipskeyCatalogProduct> siblings, String base) {
+    final curMod = _colorModifier(p);
+    final next = siblings.firstWhere(
+      (s) => _baseColor(s) == base && _colorModifier(s) == curMod,
+      orElse: () => siblings.firstWhere(
+        (s) => _baseColor(s) == base,
+        orElse: () => p,
+      ),
+    );
+    _selectFromPicker(next);
+  }
+
   void _cycleAttr(String word, AttrKind kind) {
-    final cb = widget.onCycle;
-    if (cb == null) return;
     final siblings = findAttrSiblings(p, word, kind);
     if (siblings.length <= 1) return;
-    final idx = siblings.indexWhere((q) => q.sku == p.sku);
-    final next = siblings[(idx < 0 ? 0 : (idx + 1) % siblings.length)];
-    if (next.sku == p.sku) return;
-    cb(next);
+    setState(() {
+      if (_pickerKind == kind) {
+        _pickerKind = null;
+        _pickerSiblings = null;
+      } else {
+        _pickerKind = kind;
+        _pickerSiblings = siblings;
+      }
+    });
+  }
+
+  void _selectFromPicker(LipskeyCatalogProduct next) {
+    final cb = widget.onCycle;
+    setState(() {
+      _pickerKind = null;
+      _pickerSiblings = null;
+      if (next.sku != p.sku) {
+        if (cb != null) {
+          // parent list owns the state — close and report
+        } else {
+          _localProduct = next;
+        }
+      }
+    });
+    if (next.sku != p.sku && cb != null) cb(next);
   }
 
   int get _unitMult => switch (_unit) {
@@ -486,28 +565,41 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     return ref.watch(smartCartProvider).any((l) => l.productKey == key);
   }
 
+  SmartCartLine _cartLine(int qty) => SmartCartLine(
+        productKey: 'lip:${p.sku}',
+        productName: p.nameHe,
+        productEmoji: p.typeEmoji,
+        brandName: p.brand,
+        brandPrice: 0,
+        productQty: qty,
+        accessories: const [],
+      );
+
   void _addToCart() {
-    ref.read(smartCartProvider.notifier).add(SmartCartLine(
-          productKey: 'lip:${p.sku}',
-          productName: p.nameHe,
-          productEmoji: p.typeEmoji,
-          brandName: p.brand,
-          brandPrice: 0,
-          productQty: _qty * _unitMult,
-          accessories: const [],
-        ));
+    ref.read(smartCartProvider.notifier).add(_cartLine(_qty * _unitMult));
+  }
+
+  /// Cancel the selection — clears every line of this product and collapses
+  /// the card back to its unselected (+) state.
+  void _removeFromCart() {
+    ref.read(smartCartProvider.notifier).setQtyForKey(_cartLine(0));
+    setState(() => _open = false);
   }
 
   /// Cycle to the next product in the canonical family (handles identical-name
   /// duplicates as well as attribute variants).
   void _cycleFamily() {
-    final cb = widget.onCycle;
     final sibs = widget.familySiblings;
-    if (cb == null || sibs.length < 2) return;
+    if (sibs.length < 2) return;
     final idx = sibs.indexWhere((q) => q.sku == p.sku);
     final next = sibs[(idx < 0 ? 0 : (idx + 1) % sibs.length)];
     if (next.sku == p.sku) return;
-    cb(next);
+    final cb = widget.onCycle;
+    if (cb != null) {
+      cb(next);
+    } else {
+      setState(() => _localProduct = next);
+    }
   }
 
   void _openSheet() =>
@@ -538,15 +630,21 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final compact = ref.watch(catalogSettingsProvider).compactMode;
+    // Selected = product is in the cart → render the whole card as "pressed".
+    final selected = _inCart;
+    final highlight = selected || _open;
+    final surface = Theme.of(context).colorScheme.surface;
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 12, vertical: compact ? 3 : 6),
       constraints: BoxConstraints(minHeight: compact ? 104 : 138),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: selected
+            ? Color.alphaBlend(_brand.withOpacity(0.07), surface)
+            : surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: _open ? _brand : _line,
-          width: _open ? 1.5 : 0.8,
+          color: highlight ? _brand : _line,
+          width: highlight ? 1.5 : 0.8,
         ),
         boxShadow: isDark
             ? null
@@ -559,18 +657,135 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                 ),
               ],
       ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _image(),
-            Expanded(child: _body()),
-            _side(),
-          ],
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _image(),
+                Expanded(child: _body()),
+                _side(),
+              ],
+            ),
+          ),
+          if (_pickerKind != null && _pickerSiblings != null)
+            _attrPicker(),
+        ],
       ),
     );
   }
+
+  Widget _attrPicker() {
+    final siblings = _pickerSiblings!;
+    final kind = _pickerKind!;
+
+    // Color picker: deduplicate by base color, navigate with modifier-preservation.
+    if (kind == AttrKind.color) {
+      final bases = <String>[];
+      final seenBases = <String>{};
+      for (final s in siblings) {
+        final b = _baseColor(s);
+        if (b.isNotEmpty && seenBases.add(b)) bases.add(b);
+      }
+      return _pickerShell(children: [
+        _pickerLabel('בחר צבע:'),
+        const SizedBox(height: 6),
+        _pickerRow(
+          items: bases,
+          label: (b) => b,
+          isSelected: (b) => b == _baseColor(p),
+          onTap: (b) => _selectBase(siblings, b),
+        ),
+      ]);
+    }
+
+    final label = switch (kind) {
+      AttrKind.size => 'מידה',
+      AttrKind.colorMod => 'גימור',
+      AttrKind.model => 'דגם',
+      AttrKind.subtype => 'סוג',
+      AttrKind.color => 'צבע',
+    };
+    return _pickerShell(children: [
+      _pickerLabel('בחר $label:'),
+      const SizedBox(height: 6),
+      _pickerRow(
+        items: siblings,
+        label: (s) {
+          final v = _attrVal(s, kind);
+          return v.isEmpty ? s.sku : v;
+        },
+        isSelected: (s) => s.sku == p.sku,
+        onTap: _selectFromPicker,
+      ),
+    ]);
+  }
+
+  Widget _pickerShell({required List<Widget> children}) => Container(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: _line, width: 0.8)),
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(14)),
+        ),
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: children,
+        ),
+      );
+
+  Widget _pickerLabel(String text) => Text(
+        text,
+        style: TextStyle(color: _muted, fontSize: 11, fontWeight: FontWeight.w600),
+      );
+
+  Widget _pickerRow<T>({
+    required List<T> items,
+    required String Function(T) label,
+    required bool Function(T) isSelected,
+    required void Function(T) onTap,
+  }) =>
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (final item in items)
+              GestureDetector(
+                onTap: () => onTap(item),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  margin: const EdgeInsets.only(left: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isSelected(item)
+                        ? _brand.withOpacity(0.12)
+                        : Theme.of(context).colorScheme.onSurface.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected(item)
+                          ? _brand
+                          : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                      width: isSelected(item) ? 1.5 : 1.0,
+                    ),
+                  ),
+                  child: Text(
+                    label(item),
+                    style: TextStyle(
+                      color: isSelected(item)
+                          ? _brand
+                          : Theme.of(context).colorScheme.onSurface,
+                      fontSize: 12,
+                      fontWeight: isSelected(item) ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
 
   // ── image (tap = fullscreen) + ✓ in-cart badge ───────────────────────────
   Widget _image() {
@@ -608,17 +823,21 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                         style: const TextStyle(fontSize: 36)),
               ),
               if (_inCart)
-                const Positioned(
+                Positioned(
                   top: 6,
                   right: 6,
-                  child: CircleAvatar(
-                    radius: 12,
-                    backgroundColor: _teal,
-                    child: Text('✓',
-                        style: TextStyle(
-                            color: Color(0xFF06251C),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900)),
+                  // Tap the badge to cancel the selection (remove from cart).
+                  child: GestureDetector(
+                    onTap: _removeFromCart,
+                    child: const CircleAvatar(
+                      radius: 12,
+                      backgroundColor: _teal,
+                      child: Text('✓',
+                          style: TextStyle(
+                              color: Color(0xFF06251C),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900)),
+                    ),
                   ),
                 ),
             ],
@@ -661,7 +880,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             ),
             const SizedBox(height: 4),
             // line 2: name words as tappable chips — any attribute chip cycles
-            _NameWords(product: p, onAttrTap: _cycleAttr),
+            _NameWords(product: p, onAttrTap: _cycleAttr, openKind: _pickerKind),
             const SizedBox(height: 8),
             // brand + sku
             Row(
@@ -701,7 +920,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                         border: Border.all(color: const Color(0x55FF7A18)),
                       ),
                       child: Text(
-                        '↻ ${(widget.familySiblings.indexWhere((q) => q.sku == p.sku) + 1)}/${widget.familySiblings.length}',
+                        '${(widget.familySiblings.indexWhere((q) => q.sku == p.sku) + 1)} מתוך ${widget.familySiblings.length}',
                         style: const TextStyle(
                           color: Color(0xFFCC6614),
                           fontWeight: FontWeight.w700,
@@ -897,11 +1116,14 @@ bool isLinkableWord(String w) {
 }
 
 /// Kinds of attributes that are cyclable variants on a product card.
-enum AttrKind { size, color, model, subtype }
+/// [colorMod] is the finish/modifier word of a compound colour (e.g. "מוברש"
+/// from "ניקל מוברש") — shown as a separate chip from the base colour.
+enum AttrKind { size, color, colorMod, model, subtype }
 
 /// Detect which attribute kind a word belongs to (or null for none).
 AttrKind? _attrKindFor(String word) {
   if (isSizeToken(word)) return AttrKind.size;
+  if (_kColorModifiers.contains(word)) return AttrKind.colorMod;
   if (kLipskeyColors.contains(word)) return AttrKind.color;
   if (kLipskeyModels.contains(word)) return AttrKind.model;
   if (kLipskeySubtypes.contains(word)) return AttrKind.subtype;
@@ -912,23 +1134,76 @@ AttrKind? _attrKindFor(String word) {
 String _attrEmoji(AttrKind k) => switch (k) {
       AttrKind.size => '📐',
       AttrKind.color => '🎨',
+      AttrKind.colorMod => '✨',
       AttrKind.model => '🏷',
       AttrKind.subtype => '📋',
     };
 
 /// Drop every word that belongs to [kind] from a name. What remains is the
 /// "frame" — the part of the name that should match between siblings.
+/// Uses per-kind sub-word sets so that modifier words like "מוברש" (part of
+/// "זהב מוברש" or "ניקל מוברש") are also stripped, giving consistent frames.
 String _stripWordsOfKind(String name, AttrKind kind) {
+  final Set<String> wordSet = switch (kind) {
+    AttrKind.color => _kColorWords,  // strip ALL color sub-words (incl. modifiers)
+    AttrKind.colorMod => _kColorModifiers,  // strip only modifier words, keep base color
+    AttrKind.model => _kModelWords,
+    AttrKind.subtype => _kSubtypeWords,
+    AttrKind.size => const {},
+  };
   return name
       .split(RegExp(r'\s+'))
-      .where((w) => w.isNotEmpty && _attrKindFor(w) != kind)
+      .where((w) => w.isNotEmpty && (kind == AttrKind.size ? !isSizeToken(w) : !wordSet.contains(w)))
       .join(' ')
       .trim();
+}
+
+/// All individual words that appear in any attribute-value entry (including
+/// sub-words of multi-word entries such as "מוברש" from "ניקל מוברש").
+/// Used by [productListDedupeKey] so that "שחור מט" and "שחור" collapse to the
+/// same frame (both "מט" and "שחור" are stripped).
+final _kAttrWordSet = <String>{
+  for (final v in [...kLipskeyColors, ...kLipskeyModels, ...kLipskeySubtypes])
+    ...v.split(RegExp(r'\s+')).where((w) => w.length >= 2),
+};
+
+// Per-kind sub-word sets — used by _stripWordsOfKind to strip ALL sub-words
+// of a multi-word entry (e.g. "מוברש" from "ניקל מוברש") so that frames
+// match across all color variants of a product family.
+final _kColorWords = <String>{
+  for (final v in kLipskeyColors) ...v.split(RegExp(r'\s+')).where((w) => w.length >= 2),
+};
+
+/// Finish/modifier words that appear as the second word in compound color entries.
+/// These are treated as a separate dimension from the base color.
+const _kColorModifiers = {'מוברש', 'מט'};
+final _kModelWords = <String>{
+  for (final v in kLipskeyModels) ...v.split(RegExp(r'\s+')).where((w) => w.length >= 2),
+};
+final _kSubtypeWords = <String>{
+  for (final v in kLipskeySubtypes) ...v.split(RegExp(r'\s+')).where((w) => w.length >= 2),
+};
+
+/// Deduplication key for the product list view.  Two products get the same key
+/// when they are variants of each other (same product, different attribute
+/// values such as colour/size/model).
+///
+/// Intentionally does NOT include catalog page, pack qty or pallet qty —
+/// variant products are sometimes printed on different catalogue pages.
+String productListDedupeKey(LipskeyCatalogProduct p) {
+  final stripped = p.nameHe
+      .split(RegExp(r'\s+'))
+      .where((w) => w.isNotEmpty && !isSizeToken(w) && !_kAttrWordSet.contains(w))
+      .join(' ');
+  return '${p.brand}||${p.categoryHe}||$stripped';
 }
 
 /// Find products in the same category that share the same frame as [p] (after
 /// stripping all words of [kind]) and have at least one word of [kind] in their
 /// name. These are the siblings that the chip should cycle through.
+///
+/// For [AttrKind.colorMod] the "plain" sibling (no modifier) is also included
+/// so that e.g. "ניקל מוברש" and "ניקל" appear together in the finish picker.
 List<LipskeyCatalogProduct> findAttrSiblings(
   LipskeyCatalogProduct p,
   String word,
@@ -939,6 +1214,8 @@ List<LipskeyCatalogProduct> findAttrSiblings(
   return kLipskeyCatalog.where((q) {
     if (q.categoryHe != p.categoryHe) return false;
     if (_stripWordsOfKind(q.nameHe, kind) != pFrame) return false;
+    // colorMod: frame match is enough (includes the plain variant with no modifier)
+    if (kind == AttrKind.colorMod) return true;
     return q.nameHe
         .split(RegExp(r'\s+'))
         .any((w) => _attrKindFor(w) == kind);
@@ -947,11 +1224,13 @@ List<LipskeyCatalogProduct> findAttrSiblings(
 
 // ── name split into tappable chips: attribute chips (orange) + words (teal) ─
 class _NameWords extends StatelessWidget {
-  const _NameWords({required this.product, this.onAttrTap});
+  const _NameWords({required this.product, this.onAttrTap, this.openKind});
   final LipskeyCatalogProduct product;
   /// Tap handler for any attribute chip. Receives the clicked word and its
   /// kind so the card can cycle to the next sibling for that attribute.
   final void Function(String word, AttrKind kind)? onAttrTap;
+  /// The attribute kind whose picker is currently open — that chip gets orange styling.
+  final AttrKind? openKind;
 
   @override
   Widget build(BuildContext context) {
@@ -968,6 +1247,7 @@ class _NameWords extends StatelessWidget {
               kind: _attrKindFor(w)!,
               product: product,
               onTap: onAttrTap,
+              isOpen: openKind == _attrKindFor(w),
             )
           else if (isLinkableWord(w))
             GestureDetector(
@@ -991,38 +1271,82 @@ class _NameWords extends StatelessWidget {
   }
 }
 
-/// One attribute chip in the product name. Looks like the size chip already
-/// did; tap cycles through siblings that differ only in this attribute. When
-/// only one variant exists, the chip stays but the cycle arrow is hidden.
+/// One attribute chip in the product name.
+/// • Has siblings → orange border; shows `word · N` where N = picker option count.
+/// • No siblings  → gray border; shows just `word`.
+/// Tapping an orange chip opens the inline picker for that dimension.
 class _AttrChip extends StatelessWidget {
   const _AttrChip({
     required this.word,
     required this.kind,
     required this.product,
     required this.onTap,
+    this.isOpen = false,
   });
   final String word;
   final AttrKind kind;
   final LipskeyCatalogProduct product;
   final void Function(String word, AttrKind kind)? onTap;
+  final bool isOpen;
+
+  static const _orange = Color(0xFFFF7A18);
+
+  /// Number of choices shown in the picker for [kind].
+  /// Color picker deduplicates by base colour, so count distinct bases.
+  int _pickerCount(List<LipskeyCatalogProduct> siblings) {
+    if (kind == AttrKind.color) {
+      return siblings
+          .map((s) => s.nameHe
+              .split(RegExp(r'\s+'))
+              .where((w) => _kColorWords.contains(w) && !_kColorModifiers.contains(w))
+              .join(' '))
+          .where((b) => b.isNotEmpty)
+          .toSet()
+          .length;
+    }
+    return siblings.length;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final hasSiblings =
-        onTap != null && findAttrSiblings(product, word, kind).length > 1;
+    final siblings =
+        onTap != null ? findAttrSiblings(product, word, kind) : <LipskeyCatalogProduct>[];
+    final count = _pickerCount(siblings);
+    final hasSiblings = count > 1;
+
+    final Color bgColor;
+    final Color borderColor;
+    final Color textColor;
+    if (isOpen) {
+      bgColor = const Color(0x33FF7A18);
+      borderColor = _orange.withOpacity(0.75);
+      textColor = _orange;
+    } else if (hasSiblings) {
+      bgColor = const Color(0x10888888);   // gray fill, orange border
+      borderColor = const Color(0xAAFF7A18);
+      textColor = _orange;
+    } else {
+      bgColor = const Color(0x10888888);
+      borderColor = const Color(0x30888888);
+      textColor = const Color(0xFF909090);
+    }
     return GestureDetector(
       onTap: hasSiblings ? () => onTap!(word, kind) : null,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
         decoration: BoxDecoration(
-          color: const Color(0x22FF7A18),
+          color: bgColor,
           borderRadius: BorderRadius.circular(5),
-          border: Border.all(color: const Color(0x55FF7A18)),
+          border: Border.all(
+            color: borderColor,
+            width: hasSiblings ? 1.2 : 0.9,
+          ),
         ),
         child: Text(
-          hasSiblings ? '${_attrEmoji(kind)} $word ⟳' : '${_attrEmoji(kind)} $word',
-          style: const TextStyle(
-            color: Color(0xFFFF9D4D),
+          word,
+          style: TextStyle(
+            color: textColor,
             fontSize: 11,
             fontWeight: FontWeight.w600,
           ),
