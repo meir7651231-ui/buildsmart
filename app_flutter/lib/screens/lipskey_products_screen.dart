@@ -1321,35 +1321,17 @@ String _getCompoundType(LipskeyCatalogProduct p) {
   return '';
 }
 
-/// Frame-based type siblings: products in the same category with the same
-/// frame (name minus compound-type words) but a different compound type.
-/// Returns one representative per distinct compound type.
+/// Type siblings: one representative per distinct compound type in the same
+/// category. Type is the top-level dimension — no frame restriction needed.
 List<LipskeyCatalogProduct> findTypeSiblings(LipskeyCatalogProduct p) {
   final compound = _getCompoundType(p);
   if (compound.isEmpty) return [p];
-  bool _isAttrWord(String w) =>
-      _attrKindFor(w) != null ||
-      _kColorModifiers.contains(w) ||
-      kLipskeyTypes.contains(w);
-
-  final ctWords = compound.split(RegExp(r'\s+')).toSet();
-  final frame = p.nameHe
-      .split(RegExp(r'\s+'))
-      .where((w) => w.isNotEmpty && !ctWords.contains(w) && !_isAttrWord(w))
-      .join(' ');
-  if (frame.length < 2) return [p];
   final byCompound = <String, LipskeyCatalogProduct>{};
   byCompound[compound] = p;
   for (final q in kLipskeyCatalog) {
     if (q.categoryHe != p.categoryHe) continue;
     final qc = _getCompoundType(q);
     if (qc.isEmpty) continue;
-    final qWords = qc.split(RegExp(r'\s+')).toSet();
-    final qFrame = q.nameHe
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty && !qWords.contains(w) && !_isAttrWord(w))
-        .join(' ');
-    if (qFrame != frame) continue;
     if (!byCompound.containsKey(qc)) byCompound[qc] = q;
   }
   if (byCompound.length <= 1) return [p];
