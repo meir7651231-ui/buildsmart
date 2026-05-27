@@ -285,6 +285,9 @@ const List<String> kLipskeyModels = [
   'גרנדה', 'דולפין', 'טרפז', 'קונקורד', 'אוסלו', 'כרמל', 'אדיר', 'הרמון',
   'ספיר', 'ברקת', 'יהלום', 'טיטאן', 'טופז', 'כינרת', 'אקווה', 'איביזה',
   'גליל', 'בתא', 'פולו', 'סיגמא',
+  // AQUATEC shower & bath models not previously listed
+  'גל', 'הוואי', 'כנרת', 'תמר', 'לונה', 'נוגה', 'ויגה', 'אלפא', 'דלתא',
+  'טולדו', 'טיטוניק', "אנג'ל", 'גאלרי',
 ];
 
 /// Canonical product-type nouns, ordered most-specific first so multi-word

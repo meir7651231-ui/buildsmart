@@ -540,61 +540,11 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             style: TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w800)),
         const SizedBox(height: 6),
         const Text(
-          'כתוב במילים מה צריך — או בחר קטגוריה',
+          'בחר מה אתה מתקין:',
           textAlign: TextAlign.center,
           style: TextStyle(color: _mute, fontSize: 13, height: 1.5),
         ),
         const SizedBox(height: 16),
-        // Free-text "describe your line" box
-        Container(
-          decoration: BoxDecoration(
-            color: _panel,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: _supply.withOpacity(0.4)),
-          ),
-          padding: const EdgeInsets.fromLTRB(12, 2, 6, 2),
-          child: Row(children: [
-            Expanded(
-              child: TextField(
-                controller: _describeCtrl,
-                style: const TextStyle(color: _ink, fontSize: 13),
-                textDirection: TextDirection.rtl,
-                minLines: 1,
-                maxLines: 3,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (v) => _buildFromText(v, temp),
-                decoration: const InputDecoration(
-                  isCollapsed: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 12),
-                  border: InputBorder.none,
-                  hintText: 'למשל: ברז קיסר למטבח, צינור, אסלה',
-                  hintStyle: TextStyle(color: _mute, fontSize: 12),
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: () => _buildFromText(_describeCtrl.text, temp),
-              child: Container(
-                margin: const EdgeInsets.all(5),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                decoration: BoxDecoration(
-                  color: _supply,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Text('בנה',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800)),
-              ),
-            ),
-          ]),
-        ),
-        const SizedBox(height: 16),
-        const Text('— או בחר קטגוריה —',
-            style: TextStyle(color: _mute, fontSize: 11)),
-        const SizedBox(height: 14),
         // 2×2 scenario grid
         GridView.builder(
           shrinkWrap: true,
@@ -639,11 +589,55 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             );
           },
         ),
-        const SizedBox(height: 14),
-        const Text(
-          'לא מוצא? לחץ ➕ למטה לחיפוש חופשי',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: _mute, fontSize: 11),
+        const SizedBox(height: 16),
+        const Text('— או כתוב במילים —',
+            style: TextStyle(color: _mute, fontSize: 11)),
+        const SizedBox(height: 12),
+        // Free-text "describe your line" box — secondary path.
+        Container(
+          decoration: BoxDecoration(
+            color: _panel,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: _supply.withOpacity(0.4)),
+          ),
+          padding: const EdgeInsets.fromLTRB(12, 2, 6, 2),
+          child: Row(children: [
+            Expanded(
+              child: TextField(
+                controller: _describeCtrl,
+                style: const TextStyle(color: _ink, fontSize: 13),
+                textDirection: TextDirection.rtl,
+                minLines: 1,
+                maxLines: 3,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (v) => _buildFromText(v, temp),
+                decoration: const InputDecoration(
+                  isCollapsed: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 12),
+                  border: InputBorder.none,
+                  hintText: 'למשל: ברז קיסר למטבח, צינור, אסלה',
+                  hintStyle: TextStyle(color: _mute, fontSize: 12),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () => _buildFromText(_describeCtrl.text, temp),
+              child: Container(
+                margin: const EdgeInsets.all(5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                decoration: BoxDecoration(
+                  color: _supply,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text('בנה',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800)),
+              ),
+            ),
+          ]),
         ),
       ]),
     );
@@ -746,6 +740,12 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                   ]),
                 ),
               ),
+            ),
+            const SizedBox(height: 4),
+            const Align(
+              alignment: Alignment.centerRight,
+              child: Text('מים חמים מיד, בלי להמתין שיתחממו',
+                  style: TextStyle(color: _mute, fontSize: 10)),
             ),
           ],
           const SizedBox(height: 8),
