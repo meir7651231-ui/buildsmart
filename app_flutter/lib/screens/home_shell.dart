@@ -391,7 +391,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.21 · 27.5.26 · מאתר: תת-סוגים נקיים לברזים (סוף לכפילות)',
+                          'v4.22 · 27.5.26 · חיפוש מוצרים: קטגוריה + מילים + נרדפות',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

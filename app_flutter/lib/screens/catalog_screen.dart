@@ -49,6 +49,40 @@ final searchPanelOpenProvider = StateProvider<bool>((_) => false);
 /// Current search query text.
 final searchQueryProvider = StateProvider<String>((_) => '');
 
+/// Everyday → catalogue-term aliases so a layperson finds a product without
+/// knowing the plumber's word for it. Values are tokens also tried against the
+/// product haystack — all real catalogue vocabulary (search aliasing, not new
+/// data: R8 untouched).
+const Map<String, List<String>> kSearchSynonyms = {
+  'שירותים': ['אסלה', 'אסלות'],
+  'אסלה': ['אסלה', 'מושב'],
+  'ניקוז': ['ניקוז', 'מחסום', 'סיפון', 'מאסף', 'תעלת'],
+  'מקלחת': ['מקלחת', 'דוש', 'מזלף'],
+  'אמבטיה': ['אמבט', 'רחצה'],
+  'גינה': ['גן', 'גינון', 'השקיה'],
+  'צנרת': ['צינור'],
+  'חיבור': ['מחבר', 'מצמד'],
+};
+
+/// Forgiving product match for the search bar: a non-technical user types plain
+/// words ("ברז מטבח", "ניקוז", "שירותים") and the app does the finding — without
+/// them knowing the catalogue's term. Matches across name + category + SKU,
+/// word-by-word (order-independent, each word may land in any field), expanding
+/// everyday words via [kSearchSynonyms].
+bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery) {
+  final q = rawQuery.trim().toLowerCase();
+  if (q.isEmpty) return false;
+  final hay = '${p.nameHe} ${p.categoryHe} ${p.sku}'.toLowerCase();
+  if (hay.contains(q)) return true; // fast path: exact phrase or SKU
+  final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
+  if (tokens.isEmpty) return false;
+  return tokens.every((t) {
+    if (hay.contains(t)) return true;
+    final alts = kSearchSynonyms[t];
+    return alts != null && alts.any((a) => hay.contains(a.toLowerCase()));
+  });
+}
+
 /// Active search scope chip (הכל / מוצרים / קטגוריות / מסכים).
 final searchScopeProvider = StateProvider<String>((_) => 'הכל');
 
@@ -1759,9 +1793,7 @@ class _SearchResultsList extends ConsumerWidget {
         ? _sortProducts(
             filterByImage(
               kLipskeyCatalog
-                  .where((p) =>
-                      p.nameHe.contains(query) ||
-                      p.sku.toLowerCase().contains(query.toLowerCase()))
+                  .where((p) => catalogProductMatchesQuery(p, query))
                   .toList(),
               imageOnly,
             ),
