@@ -582,7 +582,9 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   }
 
   void _cycleAttr(String word, AttrKind kind) {
-    final siblings = findAttrSiblings(p, word, kind);
+    final siblings = kind == AttrKind.type
+        ? findTypeSiblings(p)
+        : findAttrSiblings(p, word, kind);
     if (siblings.length <= 1) return;
     setState(() {
       if (_pickerKind == kind) {
@@ -758,12 +760,29 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       ]);
     }
 
+    if (kind == AttrKind.type) {
+      return _pickerShell(children: [
+        _pickerLabel('בחר סוג:'),
+        const SizedBox(height: 6),
+        _pickerRow(
+          items: siblings,
+          label: (s) {
+            final ct = _getCompoundType(s);
+            return ct.isEmpty ? s.sku : ct;
+          },
+          isSelected: (s) => s.sku == p.sku,
+          onTap: _selectFromPicker,
+        ),
+      ]);
+    }
+
     final label = switch (kind) {
       AttrKind.size => 'מידה',
       AttrKind.colorMod => 'גימור',
       AttrKind.model => 'דגם',
       AttrKind.subtype => 'סוג',
       AttrKind.color => 'צבע',
+      AttrKind.type => 'סוג',
     };
     return _pickerShell(children: [
       _pickerLabel('בחר $label:'),
@@ -1179,7 +1198,7 @@ bool isLinkableWord(String w) {
 /// Kinds of attributes that are cyclable variants on a product card.
 /// [colorMod] is the finish/modifier word of a compound colour (e.g. "מוברש"
 /// from "ניקל מוברש") — shown as a separate chip from the base colour.
-enum AttrKind { size, color, colorMod, model, subtype }
+enum AttrKind { size, color, colorMod, model, subtype, type }
 
 /// Detect which attribute kind a word belongs to (or null for none).
 AttrKind? _attrKindFor(String word) {
@@ -1198,6 +1217,7 @@ String _attrEmoji(AttrKind k) => switch (k) {
       AttrKind.colorMod => '✨',
       AttrKind.model => '🏷',
       AttrKind.subtype => '📋',
+      AttrKind.type => '🔧',
     };
 
 /// Drop every word that belongs to [kind] from a name. What remains is the
@@ -1211,6 +1231,7 @@ String _stripWordsOfKind(String name, AttrKind kind) {
     AttrKind.model => _kModelWords,
     AttrKind.subtype => _kSubtypeWords,
     AttrKind.size => const {},
+    AttrKind.type => <String>{for (final v in kLipskeyTypes) v},
   };
   return name
       .split(RegExp(r'\s+'))
@@ -1283,6 +1304,53 @@ List<LipskeyCatalogProduct> findAttrSiblings(
   }).toList();
 }
 
+/// Compound type of a product: the type word plus the immediately following
+/// unclassified non-preposition word (e.g. "ברז" + "נשלף" → "ברז נשלף").
+String _getCompoundType(LipskeyCatalogProduct p) {
+  final words = p.nameHe.split(RegExp(r'\s+'));
+  for (final typeWord in kLipskeyTypes) {
+    final idx = words.indexOf(typeWord);
+    if (idx < 0) continue;
+    if (idx + 1 >= words.length) return typeWord;
+    final next = words[idx + 1];
+    if (_attrKindFor(next) != null) return typeWord;
+    if (_kColorModifiers.contains(next)) return typeWord;
+    if (next.length > 2 && (next.startsWith('ל') || next.startsWith('ב'))) return typeWord;
+    return '$typeWord $next';
+  }
+  return '';
+}
+
+/// Frame-based type siblings: products in the same category with the same
+/// frame (name minus compound-type words) but a different compound type.
+/// Returns one representative per distinct compound type.
+List<LipskeyCatalogProduct> findTypeSiblings(LipskeyCatalogProduct p) {
+  final compound = _getCompoundType(p);
+  if (compound.isEmpty) return [p];
+  final ctWords = compound.split(RegExp(r'\s+')).toSet();
+  final frame = p.nameHe
+      .split(RegExp(r'\s+'))
+      .where((w) => w.isNotEmpty && !ctWords.contains(w))
+      .join(' ');
+  if (frame.length < 2) return [p];
+  final byCompound = <String, LipskeyCatalogProduct>{};
+  byCompound[compound] = p;
+  for (final q in kLipskeyCatalog) {
+    if (q.categoryHe != p.categoryHe) continue;
+    final qc = _getCompoundType(q);
+    if (qc.isEmpty) continue;
+    final qWords = qc.split(RegExp(r'\s+')).toSet();
+    final qFrame = q.nameHe
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty && !qWords.contains(w))
+        .join(' ');
+    if (qFrame != frame) continue;
+    if (!byCompound.containsKey(qc)) byCompound[qc] = q;
+  }
+  if (byCompound.length <= 1) return [p];
+  return byCompound.values.toList();
+}
+
 // ── name split into tappable chips: attribute chips (orange) + words (teal) ─
 class _NameWords extends StatelessWidget {
   const _NameWords({required this.product, this.onAttrTap, this.openKind});
@@ -1296,6 +1364,11 @@ class _NameWords extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final words = product.nameHe.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    // Compound type words for this product (e.g. {"ברז", "נשלף"})
+    final compound = _getCompoundType(product);
+    final typeWords = compound.isNotEmpty
+        ? compound.split(RegExp(r'\s+')).toSet()
+        : <String>{};
     return Wrap(
       spacing: 4,
       runSpacing: 3,
@@ -1310,6 +1383,14 @@ class _NameWords extends StatelessWidget {
               onTap: onAttrTap,
               isOpen: openKind == _attrKindFor(w),
             )
+          else if (typeWords.contains(w))
+            _AttrChip(
+              word: w,
+              kind: AttrKind.type,
+              product: product,
+              onTap: onAttrTap,
+              isOpen: openKind == AttrKind.type,
+            )
           else if (isLinkableWord(w))
             GestureDetector(
               onTap: () => LipskeyProductsScreen.openWordSearch(context, w),
@@ -1319,7 +1400,7 @@ class _NameWords extends StatelessWidget {
                       fontSize: 12,
                       height: 1.3,
                       decoration: TextDecoration.underline,
-                      decorationColor: Color(0xFF2A5E52))),
+                      decorationColor: Color(0x552A5E52))),
             )
           else
             Text(w,
@@ -1370,8 +1451,11 @@ class _AttrChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final siblings =
-        onTap != null ? findAttrSiblings(product, word, kind) : <LipskeyCatalogProduct>[];
+    final siblings = onTap != null
+        ? (kind == AttrKind.type
+            ? findTypeSiblings(product)
+            : findAttrSiblings(product, word, kind))
+        : <LipskeyCatalogProduct>[];
     final count = _pickerCount(siblings);
     final hasSiblings = count > 1;
 
