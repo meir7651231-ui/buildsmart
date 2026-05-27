@@ -115,7 +115,7 @@ List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
 /// Readable size tokens found in product names (1/2" · 3/4" · DN40 · 16×20 ·
 /// 50 מ"מ). Catches inch/fraction, DN, cross-sizes, and Hebrew "מ"מ" (mm).
 final RegExp _sizeRe = RegExp(
-    r'DN ?\d+|\d+ ?[מס]["״]מ|\d+°|\d+\.\d+(?:/\d+)?["׳]|\d+(?:/\d+)?×\d+(?:/\d+)?|\d+(?:/\d+)?["׳]|\d+/\d+');
+    r'DN ?\d+|\d+ ?[מס]["״]מ|\d+°|\d+\.\d+(?:/\d+)?["׳]|\d*[¼½¾⅛⅜⅝⅞]["׳]|\d+(?:/\d+)?×\d+(?:/\d+)?|\d+(?:/\d+)?["׳]|\d+/\d+');
 
 /// Confusing compound/decimal inch notations folded to one clean fraction
 /// glyph, so "11/4"" and "1.25"" don't show as two chips for the same 1¼".
@@ -211,11 +211,14 @@ List<String> _narrowOptions(List<LipskeyCatalogProduct> pool, String? subtype) {
         curated.where((k) => pool.any((p) => p.nameHe.contains(k))).toList();
     if (matching.length > 1) return matching;
   }
+  // Each axis must actually split the pool (>1 option); a lone chip can't
+  // narrow anything, so fall through to the next axis (or show no bar).
   final sizes = _sizesIn(pool);
-  if (sizes.isNotEmpty) return sizes;
+  if (sizes.length > 1) return sizes;
   final colors = _colorOptions(pool);
-  if (colors.isNotEmpty) return colors;
-  return _wordOptions(pool);
+  if (colors.length > 1) return colors;
+  final words = _wordOptions(pool);
+  return words.length > 1 ? words : const [];
 }
 
 class FinderScreen extends ConsumerStatefulWidget {
