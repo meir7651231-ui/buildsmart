@@ -67,7 +67,7 @@ List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
 /// Readable size tokens found in product names (1/2" · 3/4" · DN40 · 16×20 ·
 /// 50 מ"מ). Catches inch/fraction, DN, cross-sizes, and Hebrew "מ"מ" (mm).
 final RegExp _sizeRe = RegExp(
-    r'DN ?\d+|\d+ ?מ["״]מ|\d+(?:/\d+)?(?:×\d+(?:/\d+)?)?["׳]|\d+×\d+|\d+/\d+');
+    r'DN ?\d+|\d+ ?[מס]["״]מ|\d+°|\d+(?:/\d+)?(?:×\d+(?:/\d+)?)?["׳]|\d+×\d+|\d+/\d+');
 
 /// Size labels a product carries — readable tokens from the name, or (when the
 /// name has none, e.g. gray pipes) derived from dims (DN + length in metres).
@@ -99,6 +99,40 @@ List<String> _sizesIn(List<LipskeyCatalogProduct> ps) {
   return set.toList()..sort((a, b) => a.compareTo(b));
 }
 
+/// Characterizing-word chips for sub-types with no size axis (e.g. toilet seats
+/// differ by model/shape, not size). The first distinguishing word per name —
+/// same idea as the catalog's auto-facets.
+List<String> _wordOptions(List<LipskeyCatalogProduct> pool) {
+  if (pool.length <= 1) return const [];
+  List<String> toks(String name) => name
+      .split(RegExp(r'[\s()"׳/×,.+-]+'))
+      .where((w) => w.length >= 2 && !RegExp(r'\d').hasMatch(w))
+      .toList();
+  final lists = [for (final p in pool) toks(p.nameHe)];
+  final shared = lists.first.toSet();
+  for (final t in lists.skip(1)) {
+    shared.retainAll(t.toSet());
+  }
+  final counts = <String, int>{};
+  for (final t in lists) {
+    for (final w in t) {
+      if (shared.contains(w)) continue;
+      counts[w] = (counts[w] ?? 0) + 1;
+      break; // first distinguishing word wins
+    }
+  }
+  final entries = counts.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
+  return [for (final e in entries.take(12)) e.key];
+}
+
+/// The "narrow by" chips for a pool: sizes when products are size-differentiated,
+/// else characterizing words (model/shape) for size-less sub-types.
+List<String> _narrowOptions(List<LipskeyCatalogProduct> pool) {
+  final sizes = _sizesIn(pool);
+  return sizes.isNotEmpty ? sizes : _wordOptions(pool);
+}
+
 class FinderScreen extends ConsumerStatefulWidget {
   const FinderScreen({super.key});
   @override
@@ -119,10 +153,14 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     final pool = _sub == null
         ? base
         : base.where((p) => p.categoryHe == _sub).toList();
-    final sizes = _sizesIn(pool);
+    final sizes = _narrowOptions(pool);
     final results = _size == null
         ? pool
-        : pool.where((p) => _productSizes(p).contains(_size!)).toList();
+        : pool
+            .where((p) =>
+                _productSizes(p).contains(_size!) ||
+                p.nameHe.contains(_size!))
+            .toList();
 
     return Column(
       children: [
