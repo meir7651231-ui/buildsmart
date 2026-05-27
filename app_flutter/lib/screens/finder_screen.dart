@@ -117,13 +117,21 @@ List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
 final RegExp _sizeRe = RegExp(
     r'DN ?\d+|\d+ ?[מס]["״]מ|\d+°|\d+\.\d+(?:/\d+)?["׳]|\d+(?:/\d+)?×\d+(?:/\d+)?|\d+(?:/\d+)?["׳]|\d+/\d+');
 
+/// Confusing compound/decimal inch notations folded to one clean fraction
+/// glyph, so "11/4"" and "1.25"" don't show as two chips for the same 1¼".
+const Map<String, String> _kInchPretty = {
+  '1.25"': '1¼"', '11/4"': '1¼"',
+  '1.5"': '1½"', '11/2"': '1½"',
+  '21/2"': '2½"',
+};
+
 /// Size labels a product carries — readable tokens from the name, or (when the
 /// name has none, e.g. gray pipes) derived from dims (DN + length in metres).
 Set<String> _productSizes(LipskeyCatalogProduct p) {
   final fromName = <String>{};
   for (final m in _sizeRe.allMatches(p.nameHe)) {
     final v = m.group(0)!.trim();
-    if (v.length <= 12) fromName.add(v);
+    if (v.length <= 12) fromName.add(_kInchPretty[v] ?? v);
   }
   if (fromName.isNotEmpty) return fromName;
   final d = p.dims;
@@ -179,6 +187,8 @@ List<String> _wordOptions(List<LipskeyCatalogProduct> pool) {
 const Map<String, List<String>> kFinderFacets = {
   'מכסים ורשתות': ['מכסה', 'רשת', 'עגול', 'מרובע', 'ניקל', 'נחושת', 'שחור'],
   'מחסומים גלויים': ['אמריקאי', 'נסתר', 'לכיור', 'למדיח', 'כביסה', 'מטבח'],
+  // floor drains read off plain words, not opaque "245/50" DN codes
+  'מחסומי רצפה': ['פתוח', 'סגור', 'למקלחת', 'קומקום'],
 };
 
 /// Distinct product colours in the pool (≥2) — narrows identical-name items

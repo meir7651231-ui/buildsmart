@@ -51,7 +51,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 |---|---|---|
 | type groups | `kFinderGroups` — 6 plain-language groups + אחר catch-all; groups are pairwise disjoint and every catalog product is reachable | ✅ |
 | sub-types | curated `kFinderSubs` (ברזים · ניקוז) cover every group category that has products, with unique labels and no 1-item junk chips; other groups auto-derive sub-types from `categoryHe`, merged by cleaned label | ✅ |
-| narrow chips | `_narrowOptions`: curated facets (`kFinderFacets`) → sizes (`_sizeRe` — incl. decimal/compound inch + cross sizes) → colours → distinguishing words | ✅ |
+| narrow chips | `_narrowOptions`: curated facets (`kFinderFacets` — incl. floor-drain open/closed/shower words instead of opaque DN codes) → sizes (`_sizeRe`; confusing inch forms folded to clean fractions, e.g. 11/4"·1.25" → 1¼") → colours → distinguishing words | ✅ |
 | results | render through the shared `LipskeyProductsList` (variant dedup + quantity wheel) | ✅ |
 
 ## Chat settings (`chat_settings_screen.dart` → `chat_settings.dart`)
