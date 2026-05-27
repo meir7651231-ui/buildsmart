@@ -391,7 +391,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.14 · 27.5.26 · מאתר: צ׳יפי גודל מ-dims (צינורות)',
+                          'v4.15 · 27.5.26 · מאתר: ציר תת-סוג (צמצום קבוצה)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
