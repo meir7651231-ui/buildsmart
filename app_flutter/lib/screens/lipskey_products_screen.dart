@@ -1321,11 +1321,24 @@ List<LipskeyCatalogProduct> findAttrSiblings(
   }).toList();
 }
 
-/// Compound type of a product: the type word plus the immediately following
-/// unclassified non-preposition word (e.g. "ברז" + "נשלף" → "ברז נשלף").
+/// Compound type of a product.
+/// Multi-word kLipskeyTypes entries (e.g. "מוט מגבת") are matched first via
+/// substring. Single-word entries follow the "type + next unclassified word"
+/// heuristic (e.g. "ברז" + "נשלף" → "ברז נשלף").
 String _getCompoundType(LipskeyCatalogProduct p) {
-  final words = p.nameHe.split(RegExp(r'\s+'));
+  final name = p.nameHe;
+  final words = name.split(RegExp(r'\s+'));
+
+  // Multi-word types — longest match first.
+  final multiWord = kLipskeyTypes.where((t) => t.contains(' ')).toList()
+    ..sort((a, b) => b.length.compareTo(a.length));
+  for (final t in multiWord) {
+    if (name.contains(t)) return t;
+  }
+
+  // Single-word types + optional trailing qualifier.
   for (final typeWord in kLipskeyTypes) {
+    if (typeWord.contains(' ')) continue;
     final idx = words.indexOf(typeWord);
     if (idx < 0) continue;
     if (idx + 1 >= words.length) return typeWord;
@@ -1379,21 +1392,21 @@ class _NameWords extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         for (final w in words)
-          if (_attrKindFor(w) != null)
-            _AttrChip(
-              word: w,
-              kind: _attrKindFor(w)!,
-              product: product,
-              onTap: onAttrTap,
-              isOpen: openKind == _attrKindFor(w),
-            )
-          else if (typeWords.contains(w))
+          if (typeWords.contains(w))
             _AttrChip(
               word: w,
               kind: AttrKind.type,
               product: product,
               onTap: onAttrTap,
               isOpen: openKind == AttrKind.type,
+            )
+          else if (_attrKindFor(w) != null)
+            _AttrChip(
+              word: w,
+              kind: _attrKindFor(w)!,
+              product: product,
+              onTap: onAttrTap,
+              isOpen: openKind == _attrKindFor(w),
             )
           else if (isLinkableWord(w))
             GestureDetector(

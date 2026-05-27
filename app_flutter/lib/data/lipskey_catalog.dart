@@ -304,6 +304,8 @@ const List<String> kLipskeyTypes = [
   'זקף',
   // Added (catch products that previously had no productType):
   'מקשר', 'כפה', 'טי',
+  // Multi-word compound types (matched as substring before single-word search):
+  'מוט מגבת', 'מערכת אמבטיה', 'מחזיק מגבת',
 ];
 
 /// Subtype qualifiers — adjectives that narrow a type. Gender (זכר/נקבה) is
