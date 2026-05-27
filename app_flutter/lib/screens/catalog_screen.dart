@@ -2005,13 +2005,12 @@ class _AllOverview extends ConsumerWidget {
       key: const Key('catalog-list'),
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        // קטגוריות
+        // קטגוריות — full list inline (no preview cap, no "הצג הכל").
         _OverviewBlock(
           title: 'קטגוריות',
           count: kCatalogCats.length,
-          onShowAll: () => go('קטגוריות'),
           children: [
-            for (var i = 0; i < kCatalogCats.length && i < 3; i++)
+            for (var i = 0; i < kCatalogCats.length; i++)
               _CatalogRow(cat: kCatalogCats[i], meta: _kMeta[i]),
           ],
         ),
@@ -2093,14 +2092,14 @@ class _AllOverview extends ConsumerWidget {
 class _OverviewBlock extends StatelessWidget {
   const _OverviewBlock({
     required this.title,
-    required this.onShowAll,
     required this.children,
+    this.onShowAll,
     this.count = 0,
     this.isLast = false,
   });
   final String title;
   final int count;
-  final VoidCallback onShowAll;
+  final VoidCallback? onShowAll;
   final List<Widget> children;
   final bool isLast;
 
@@ -2153,25 +2152,26 @@ class _OverviewBlock extends StatelessWidget {
                   ],
                 ),
               ),
-              TextButton(
-                onPressed: onShowAll,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              if (onShowAll != null)
+                TextButton(
+                  onPressed: onShowAll,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('הצג הכל',
+                          style: TextStyle(
+                              color: BsTokens.brand,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600)),
+                      Icon(Icons.chevron_left, color: BsTokens.brand, size: 18),
+                    ],
+                  ),
                 ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('הצג הכל',
-                        style: TextStyle(
-                            color: BsTokens.brand,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600)),
-                    Icon(Icons.chevron_left, color: BsTokens.brand, size: 18),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
