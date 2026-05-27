@@ -103,13 +103,18 @@ class _CartFab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final lines = ref.watch(smartCartProvider);
     final count = lines.fold<int>(0, (sum, l) => sum + l.productQty);
+    // Most-recent first: add() appends, so the cart's tail is the latest.
+    final recent = lines.reversed.take(2).toList();
+
+    void openCart() {
+      resetAllDials(ref);
+      ref.read(mainTabProvider.notifier).state = 3;
+    }
 
     // 3-layer design: white circle + orange border, orange cart, white plus.
-    return FloatingActionButton(
-      onPressed: () {
-        resetAllDials(ref);
-        ref.read(mainTabProvider.notifier).state = 3;
-      },
+    final fab = FloatingActionButton(
+      heroTag: 'cart-fab',
+      onPressed: openCart,
       backgroundColor: BsTokens.brand,
       foregroundColor: Colors.white,
       elevation: 4,
@@ -151,6 +156,84 @@ class _CartFab extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (recent.isNotEmpty) ...[
+          _CartRecentBubble(recent: recent, onTap: openCart),
+          const SizedBox(height: 10),
+        ],
+        fab,
+      ],
+    );
+  }
+}
+
+/// Small message bubble above the cart FAB listing the last (up to two)
+/// products added to the cart. Inline preview only — no window/modal (R2).
+class _CartRecentBubble extends StatelessWidget {
+  const _CartRecentBubble({required this.recent, required this.onTap});
+
+  final List<SmartCartLine> recent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      elevation: 3,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 240),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final l in recent)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      children: [
+                        Text(l.productEmoji,
+                            style: const TextStyle(fontSize: 15)),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            l.productName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFF1A1A1A),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '×${l.productQty}',
+                          style: const TextStyle(
+                            color: BsTokens.brand,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
