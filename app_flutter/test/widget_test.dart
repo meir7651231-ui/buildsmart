@@ -15,7 +15,7 @@ void main() {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     expect(find.text('BuildSmart'), findsOneWidget);
-    // Default catalog tab = the "הכל" overview; first category preview visible.
+    // Default catalog tab = the full "קטגוריות" list; first category visible.
     expect(find.text('ברזים וכיורים'), findsAtLeastNWidgets(1));
   });
 
@@ -59,6 +59,9 @@ void main() {
   testWidgets('"הכל" overview shows a preview block per section', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
+    // 'הכל' is no longer the default landing — open it via its chip.
+    await t.tap(find.text('הכל').first);
+    await t.pumpAndSettle();
     // Section headers in the overview (also appear as chips → at least one).
     expect(find.text('חיפושים אחרונים'), findsAtLeastNWidgets(1));
     expect(find.text('תאימות'), findsAtLeastNWidgets(1));
@@ -71,9 +74,7 @@ void main() {
   testWidgets('קטגוריות section shows all 11 verbatim categories', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    // Open the full קטגוריות section via the first block's "הצג הכל".
-    await t.tap(find.text('הצג הכל').first);
-    await t.pumpAndSettle();
+    // 'קטגוריות' is the default landing — the full list is already shown.
     const cats = [
       'ברזים וכיורים', 'אסלות', 'מקלחות ואמבטיות', 'חימום מים', 'מטבח',
       'ניקוז וצנרת', 'גופי תברואה', 'אביזרי קצה וחיבורים',
