@@ -199,10 +199,26 @@ List<String> lipskeyConnectionSizes(String name) {
     var w = _expandInchFractions(raw.trim());
 
     // N×M / NxM format (HDPE compression fittings: pipe-size × thread-size).
-    // e.g. "16×1/2"" → pipe DN=16, thread side irrelevant for size matching.
-    final crossMatch = RegExp(r'^(\d{2,})[×x]').firstMatch(w);
+    // e.g. "16×1/2"" → both sides: [16, .5]. Without this, the ½" end is
+    // invisible and canConnect / size-overlap checks miss the thread side.
+    final crossMatch = RegExp(r'^(\d{1,3})[×x](.+)$').firstMatch(w);
     if (crossMatch != null) {
       out.add(crossMatch.group(1)!);
+      // Also extract the right-hand side — may be "1/2"", "3/4"", "16", etc.
+      // so we strip quotes, expand Unicode fractions, then parse.
+      var rhs = crossMatch.group(2)!.replaceAll('"', '').replaceAll("'", '').trim();
+      rhs = _expandInchFractions(rhs);
+      // ASCII fraction like "1/2" or "3/4" → decimal
+      final asciiMatch = RegExp(r'^(\d+)/(\d+)$').firstMatch(rhs);
+      if (asciiMatch != null) {
+        final num = int.tryParse(asciiMatch.group(1)!) ?? 0;
+        final den = int.tryParse(asciiMatch.group(2)!) ?? 1;
+        if (den != 0) {
+          // Match the "0.5" → ".5" convention used by _expandInchFractions
+          rhs = (num / den).toString().replaceFirst(RegExp(r'^0(?=\.)'), '');
+        }
+      }
+      if (RegExp(r'^\d*\.?\d+$').hasMatch(rhs) && rhs.isNotEmpty) out.add(rhs);
       continue;
     }
     final up = w.toUpperCase();
