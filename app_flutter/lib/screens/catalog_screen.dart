@@ -2082,6 +2082,8 @@ class _AllOverview extends ConsumerWidget {
               ),
           ],
         ),
+        // ספק מוביל — כרטיס תצוגה של ליפסקי ברקן (קטלוג חיצוני)
+        const _LipskeySupplierCard(),
       ],
     );
   }
@@ -2256,40 +2258,54 @@ class _LipskeySupplierCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF3D5A80).withOpacity(0.25),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFF3D5A80), width: 0.7),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('🏭', style: TextStyle(fontSize: 13)),
-                        SizedBox(width: 4),
-                        Text('ליפסקי ברקן',
-                            style: TextStyle(
-                                color: Color(0xFF64FFDA),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600)),
-                      ],
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF3D5A80).withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFF3D5A80), width: 0.7),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('🏭', style: TextStyle(fontSize: 13)),
+                          SizedBox(width: 4),
+                          Flexible(
+                            child: Text('ליפסקי ברקן',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: Color(0xFF64FFDA),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600)),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      LipskeyBrandScreen.route(),
-                    ),
-                    child: const Row(
-                      children: [
-                        Text('כל הקטגוריות',
-                            style: TextStyle(color: Colors.black38, fontSize: 12)),
-                        SizedBox(width: 3),
-                        Icon(Icons.chevron_left, color: Colors.white38, size: 16),
-                      ],
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        LipskeyBrandScreen.route(),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text('כל הקטגוריות',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(color: Colors.black38, fontSize: 12)),
+                          ),
+                          SizedBox(width: 3),
+                          Icon(Icons.chevron_left, color: Colors.white38, size: 16),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -3685,6 +3701,8 @@ class _SmartTreeCatList extends ConsumerWidget {
     final cats = kSmartTreeCats;
     return Column(
       children: [
+        // מוצר היום — כרטיס מוצר חכם מומלץ (קטלוג פנימי)
+        _FeaturedProductCard(product: kSmartProducts.first),
         Expanded(
           child: ListView.separated(
             itemCount: cats.length,
