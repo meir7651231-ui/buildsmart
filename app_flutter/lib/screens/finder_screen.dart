@@ -127,6 +127,35 @@ const Map<String, List<FinderSub>> kFinderSubs = {
     FinderSub('התקנה גבוהה', {'התקנה גבוהה'}),
     FinderSub('התקנה צמודה', {'התקנה צמודה'}),
   ],
+  // recognisable fitting families first, niche/single types last
+  'מחברים וחיבורים': [
+    FinderSub('תבריג', {'אביזרי תבריג'}),
+    FinderSub('ברכיים', {'ברכיים'}),
+    FinderSub('נחושת', {'אביזרי נחושת'}),
+    FinderSub('HDPE', {'מחברי HDPE'}),
+    FinderSub('NTM', {'מחברי NTM'}),
+    FinderSub('שקע-תקע', {'אביזרי שקע-תקע'}),
+    FinderSub('מצמדים', {'מצמדים וצינורות'}),
+    FinderSub('אטמים ופקקים', {'אטמים ופקקים'}),
+    FinderSub('אל חזור', {'אל חזור'}),
+    FinderSub('פקקים וצינורות', {'פקקים וצינורות'}),
+    FinderSub('סטי הידוק', {'סטי הידוק וחיבורים'}),
+    FinderSub('חיבור', {'אביזרי חיבור'}),
+  ],
+  'חבקים ותלייה': [
+    FinderSub('חבקי צינור', {'חבקי צינור'}),
+    FinderSub('חבקי תליה', {'חבקי תליה'}),
+    FinderSub('עוגנים ובנדים', {'עוגנים ובנדים'}),
+  ],
+  // flexible/shower hoses first (most consumer-relatable), rigid systems last
+  'צינורות': [
+    FinderSub('צינורות גמישים', {'צינורות גמישים'}),
+    FinderSub('צינורות מקלחת', {'צינורות מקלחת'}),
+    FinderSub('צינורות אפורות', {'צינורות אפורות'}),
+    FinderSub('צינורות', {'צינורות'}),
+    FinderSub('צינורות PP', {'צינורות PP'}),
+    FinderSub('צינורות רב שכבתי', {'צינורות רב שכבתי'}),
+  ],
 };
 
 final Set<String> _claimedCats = {for (final g in kFinderGroups) ...g.cats};
