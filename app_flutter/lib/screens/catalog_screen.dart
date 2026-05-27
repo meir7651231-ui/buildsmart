@@ -87,6 +87,41 @@ void openCartLineProductSheet(BuildContext context, SmartCartLine line) {
   }
 }
 
+/// Compact display for a cart line in the recent-add bubble: a short product
+/// name (the type noun + qualifier, e.g. "ברז כפול") with its distinguishing
+/// attributes below (brand model · colour · supplier). Falls back to the full
+/// product name when it can't be decomposed.
+({String name, String attrs}) cartLineDisplay(SmartCartLine line) {
+  if (line.productKey.startsWith('lip:')) {
+    final sku = line.productKey.substring(4);
+    final i = kLipskeyCatalog.indexWhere((p) => p.sku == sku);
+    if (i >= 0) {
+      final p = kLipskeyCatalog[i];
+      final type = p.productType;
+      String name;
+      if (type != null) {
+        name = [type, if (p.productSubtype != null) p.productSubtype!].join(' ');
+      } else {
+        // No recognised type — fall back to the full name, minus the brand /
+        // colour tokens (they live in the attrs line) to keep it shorter.
+        name = p.nameHe;
+        if (p.brandModel != null) name = name.replaceFirst(p.brandModel!, '');
+        final cv = p.colorVariant;
+        if (cv != null) name = name.replaceAll(cv, '');
+        name = name.replaceAll(RegExp(r'\s+'), ' ').trim();
+        if (name.isEmpty) name = p.nameHe;
+      }
+      final attrs = <String>{
+        if (p.brandModel != null) p.brandModel!,
+        if (p.colorVariant != null) p.colorVariant!,
+        if (line.brandName.isNotEmpty) line.brandName,
+      }.join(' · ');
+      return (name: name, attrs: attrs);
+    }
+  }
+  return (name: line.productName, attrs: line.brandName);
+}
+
 
 /// Currently selected category in the "קטגוריות" drill. Null = show all 11 cats.
 final catalogDrillCatProvider = StateProvider<String?>((_) => null);

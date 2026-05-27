@@ -215,6 +215,7 @@ class _CartChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final d = cartLineDisplay(line);
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -260,7 +261,7 @@ class _CartChatBubble extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        line.productName,
+                        d.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -270,16 +271,17 @@ class _CartChatBubble extends StatelessWidget {
                           height: 1.1,
                         ),
                       ),
-                      Text(
-                        line.brandName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(0xFF888888),
-                          fontSize: 10.5,
-                          height: 1.2,
+                      if (d.attrs.isNotEmpty)
+                        Text(
+                          d.attrs,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFF888888),
+                            fontSize: 10.5,
+                            height: 1.2,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
