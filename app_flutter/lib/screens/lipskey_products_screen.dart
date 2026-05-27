@@ -920,7 +920,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                         border: Border.all(color: const Color(0x55FF7A18)),
                       ),
                       child: Text(
-                        '↻ ${(widget.familySiblings.indexWhere((q) => q.sku == p.sku) + 1)}/${widget.familySiblings.length}',
+                        '${(widget.familySiblings.indexWhere((q) => q.sku == p.sku) + 1)} מתוך ${widget.familySiblings.length}',
                         style: const TextStyle(
                           color: Color(0xFFCC6614),
                           fontWeight: FontWeight.w700,
@@ -1322,8 +1322,8 @@ class _AttrChip extends StatelessWidget {
       borderColor = _orange.withOpacity(0.75);
       textColor = _orange;
     } else if (hasSiblings) {
-      bgColor = const Color(0x12FF7A18);
-      borderColor = const Color(0x66FF7A18);
+      bgColor = const Color(0x10888888);   // gray fill, orange border
+      borderColor = const Color(0xAAFF7A18);
       textColor = _orange;
     } else {
       bgColor = const Color(0x10888888);
@@ -1344,7 +1344,7 @@ class _AttrChip extends StatelessWidget {
           ),
         ),
         child: Text(
-          hasSiblings ? '$word · $count' : word,
+          word,
           style: TextStyle(
             color: textColor,
             fontSize: 11,
