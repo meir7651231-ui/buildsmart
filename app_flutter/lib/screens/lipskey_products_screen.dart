@@ -565,16 +565,25 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     return ref.watch(smartCartProvider).any((l) => l.productKey == key);
   }
 
+  SmartCartLine _cartLine(int qty) => SmartCartLine(
+        productKey: 'lip:${p.sku}',
+        productName: p.nameHe,
+        productEmoji: p.typeEmoji,
+        brandName: p.brand,
+        brandPrice: 0,
+        productQty: qty,
+        accessories: const [],
+      );
+
   void _addToCart() {
-    ref.read(smartCartProvider.notifier).add(SmartCartLine(
-          productKey: 'lip:${p.sku}',
-          productName: p.nameHe,
-          productEmoji: p.typeEmoji,
-          brandName: p.brand,
-          brandPrice: 0,
-          productQty: _qty * _unitMult,
-          accessories: const [],
-        ));
+    ref.read(smartCartProvider.notifier).add(_cartLine(_qty * _unitMult));
+  }
+
+  /// Cancel the selection — clears every line of this product and collapses
+  /// the card back to its unselected (+) state.
+  void _removeFromCart() {
+    ref.read(smartCartProvider.notifier).setQtyForKey(_cartLine(0));
+    setState(() => _open = false);
   }
 
   /// Cycle to the next product in the canonical family (handles identical-name
@@ -621,15 +630,21 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final compact = ref.watch(catalogSettingsProvider).compactMode;
+    // Selected = product is in the cart → render the whole card as "pressed".
+    final selected = _inCart;
+    final highlight = selected || _open;
+    final surface = Theme.of(context).colorScheme.surface;
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 12, vertical: compact ? 3 : 6),
       constraints: BoxConstraints(minHeight: compact ? 104 : 138),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: selected
+            ? Color.alphaBlend(_brand.withOpacity(0.07), surface)
+            : surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: _open ? _brand : _line,
-          width: _open ? 1.5 : 0.8,
+          color: highlight ? _brand : _line,
+          width: highlight ? 1.5 : 0.8,
         ),
         boxShadow: isDark
             ? null
@@ -808,17 +823,21 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                         style: const TextStyle(fontSize: 36)),
               ),
               if (_inCart)
-                const Positioned(
+                Positioned(
                   top: 6,
                   right: 6,
-                  child: CircleAvatar(
-                    radius: 12,
-                    backgroundColor: _teal,
-                    child: Text('✓',
-                        style: TextStyle(
-                            color: Color(0xFF06251C),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900)),
+                  // Tap the badge to cancel the selection (remove from cart).
+                  child: GestureDetector(
+                    onTap: _removeFromCart,
+                    child: const CircleAvatar(
+                      radius: 12,
+                      backgroundColor: _teal,
+                      child: Text('✓',
+                          style: TextStyle(
+                              color: Color(0xFF06251C),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900)),
+                    ),
                   ),
                 ),
             ],
