@@ -16,6 +16,18 @@ LipskeyCatalogProduct? _skuOf(String sku) {
   return _skuCache![sku];
 }
 
+// Temperature (°C) at/above which a line counts as "hot" and triggers the
+// hot-water safety items (PRV, expansion vessel, TMTV, …).
+const _kHotThresholdC = 60;
+
+// Isolation ball valves — any one of these satisfies the maintenance
+// shut-off requirement (used by the checklist and auto-compliance alike).
+const _kIsolationValveSkus = {
+  'HW-BALL-INLET-1', 'HW-BALL-INLET-40',
+  'HW-BALL-1', 'HW-BALL-15', 'HW-BALL-40', 'HW-BALL-32',
+  'HW-BALL-CU-40', 'HW-BALL-CU-32', 'HW-BALL-CU-25', 'HW-BALL-CU-20',
+};
+
 final compatGenderProvider  = StateProvider<String>((_) => 'הכל');
 final compatSizeProvider    = StateProvider<String>((_) => 'הכל');
 final compatMethodProvider  = StateProvider<String>((_) => 'הכל');
@@ -97,18 +109,14 @@ List<LineCheck> lineComplianceChecklist(
   bool has(Set<String> ok) => skus.any(ok.contains);
   bool acc(String s) => accessories.contains(s);
 
-  final hot    = tempC >= 60;
+  final hot    = tempC >= _kHotThresholdC;
   final hasPex = mats.contains('PEX');
   final recirc = skus.contains('HW-PUMP-25') || skus.contains('HW-TEE-RECIRC');
   // Galvanic risk: copper joined to ANY other metal (brass/steel) — conservative.
   final metals = mats.where((m) => m == 'נחושת' || m == 'פליז' || m == 'פלדה');
   final dissimilar = mats.contains('נחושת') && metals.toSet().length >= 2;
-  final isolationCount = chain.where((p) =>
-      p.sku == 'HW-BALL-INLET-1'  || p.sku == 'HW-BALL-INLET-40' ||
-      p.sku == 'HW-BALL-1'        || p.sku == 'HW-BALL-15'        ||
-      p.sku == 'HW-BALL-40'       || p.sku == 'HW-BALL-32'        ||
-      p.sku == 'HW-BALL-CU-40'    || p.sku == 'HW-BALL-CU-32'     ||
-      p.sku == 'HW-BALL-CU-25'    || p.sku == 'HW-BALL-CU-20').length;
+  final isolationCount =
+      chain.where((p) => _kIsolationValveSkus.contains(p.sku)).length;
 
   final hasCommercialPump = skus.contains('HW-PUMP-40');
   final hasManifoldOrShower = has({
@@ -261,7 +269,8 @@ const _accessorySkus = {
 };
 
 FlowRole flowRole(LipskeyCatalogProduct p) {
-  if (_accessorySkus.contains(p.sku)) return FlowRole.accessory;
+  if (_accessorySkus.contains(p.sku) ||
+      kHotWaterAccessorySkus.contains(p.sku)) return FlowRole.accessory;
   final c = p.categoryHe;
   if (_structuralCats.contains(c)) return FlowRole.accessory;
   if (_fixtureCats.contains(c)) return FlowRole.fixture;
@@ -383,13 +392,16 @@ String? pipeConnectionDn(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   return null;
 }
 
+// Memoized: the result depends only on (anchor.sku, tempC) because the catalog
+// is const, so this avoids a full O(N) catalog scan on every BFS expansion.
+final _compatCache = <String, List<LipskeyCatalogProduct>>{};
 List<LipskeyCatalogProduct> compatibleWith(
-    LipskeyCatalogProduct anchor, {int tempC = 20}) =>
-    kCompatCatalog
+        LipskeyCatalogProduct anchor, {int tempC = 20}) =>
+    _compatCache.putIfAbsent('${anchor.sku}|$tempC', () => kCompatCatalog
         .where((p) => canConnect(anchor, p) && productSuitableForTemp(p, tempC))
         .toList()
       ..sort((a, b) => (a.categoryHe == anchor.categoryHe ? 0 : 1)
-          .compareTo(b.categoryHe == anchor.categoryHe ? 0 : 1));
+          .compareTo(b.categoryHe == anchor.categoryHe ? 0 : 1)));
 
 /// BFS shortest path from [from] to [to] through the compatibility graph.
 /// Returns null when no path exists within [maxDepth] hops.
@@ -566,17 +578,13 @@ void _autoAddCompliance(
     skus.add(preferred);
   }
 
-  if (tempC >= 60) {
+  if (tempC >= _kHotThresholdC) {
     // Pressure relief valve — every closed hot system.
     addIfMissing({'HW-PRV-34'}, 'HW-PRV-34');
     // Expansion vessel — absorbs thermal expansion so PRV never lifts.
     addIfMissing({'HW-BTANK-35', 'HW-BTANK-18', 'HW-EXPVESSEL'}, 'HW-BTANK-35');
     // Isolation ball valve — minimum one for maintenance shut-off.
-    addIfMissing({
-      'HW-BALL-INLET-1', 'HW-BALL-INLET-40',
-      'HW-BALL-1', 'HW-BALL-15', 'HW-BALL-40', 'HW-BALL-32',
-      'HW-BALL-CU-40', 'HW-BALL-CU-32', 'HW-BALL-CU-25', 'HW-BALL-CU-20',
-    }, 'HW-BALL-1');
+    addIfMissing(_kIsolationValveSkus, 'HW-BALL-1');
   }
 
   // Dielectric union when copper meets brass or steel.
@@ -784,11 +792,12 @@ InstallationPlan buildTreeInstallation(
   // match real branches, not the raw branchTargets list.
   final root = manifold ?? (branchTargets.isNotEmpty ? branchTargets.first : null);
   final builtZones = <String>[];
+  var routed = 0; // labels actually-routed branches (skips don't burn a letter)
   for (var bi = 0; bi < branchTargets.length; bi++) {
     final t = branchTargets[bi];
     if (root == null) break;
     if (t.sku == root.sku) continue;
-    final zl = _branchLabel(bi);
+    final zl = _branchLabel(routed++);
     builtZones.add(zl);
     final seg = findShortestPath(root, t,
         maxDepth: maxDepthPerSegment, tempC: tempC);
@@ -810,7 +819,7 @@ InstallationPlan buildTreeInstallation(
 
   // Auto-add TMTV anti-scald per branch for hot lines (tempC ≥ 60).
   // One per actual routed branch — skipped targets don't get a valve.
-  if (manifold != null && tempC >= 60 && builtZones.isNotEmpty) {
+  if (manifold != null && tempC >= _kHotThresholdC && builtZones.isNotEmpty) {
     final tmtv = _skuOf('HW-TMTV-15');
     if (tmtv != null) {
       for (final zl in builtZones) {

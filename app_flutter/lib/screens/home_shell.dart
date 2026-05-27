@@ -202,7 +202,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v3.99 · 26.5.26 · חיווט כפתור פעולה בהתראות',
+                          'v4.00 · 27.5.26 · וריאנטים + סטודיו: שפה פשוטה',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

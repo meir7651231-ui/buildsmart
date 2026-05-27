@@ -4,10 +4,11 @@ import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
+import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
-import 'package:buildsmart/screens/lipskey_products_screen.dart';
+import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -32,7 +33,7 @@ final catalogSectionProvider = StateProvider<String>((_) => 'הכל');
 
 /// Ordered list of user section labels (הכל is NOT stored here).
 final catalogSectionsListProvider = StateProvider<List<String>>(
-  (_) => ['תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם'],
+  (_) => ['תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
 );
 
 /// Per-list catalog items: map of section-label → set of catalog category
@@ -1837,6 +1838,7 @@ class _CatalogBody extends ConsumerWidget {
     if (active == 'מועדפים') return const _FavoritesSection();
     if (active == 'חיפושים אחרונים') return const _RecentSearchesSection();
     if (active == 'תאימות') return const InstallStudioScreen();
+    if (active == 'וריאנטים') return const _VariantsSection();
 
     final selected = ref.watch(catalogListItemsProvider)[active];
     final hasItems = selected != null && selected.isNotEmpty;
@@ -5816,6 +5818,774 @@ class _RecentSearchesSection extends ConsumerWidget {
             },
           ),
         ),
+      ],
+    );
+  }
+}
+
+// ─── Variants section ───────────────────────────────────────────────────────
+final variantsKindFilterProvider = StateProvider<AttrKind?>((_) => null);
+final variantsValueFilterProvider = StateProvider<Set<String>>((_) => <String>{});
+final variantsSizePatternProvider = StateProvider<Set<String>>((_) => <String>{});
+final variantsSizeDiameterProvider = StateProvider<Set<String>>((_) => <String>{});
+final variantsSizeSystemProvider = StateProvider<Set<String>>((_) => <String>{});
+final variantsSizeGenderProvider = StateProvider<Set<String>>((_) => <String>{});
+final variantsValuesExpandedProvider = StateProvider<bool>((_) => false);
+final variantsActiveFamilyProvider = StateProvider<VariantFamily?>((_) => null);
+
+/// 4th-level: which sub-group is open under קוטר / מבנה (null = none).
+final variantsActiveSubGroupProvider = StateProvider<String?>((_) => null);
+
+// pattern → structural pattern (A/A×A/A×B×A...) — was מבנה, NOW labelled סוג
+// diameter → combined diameter + length atoms — labelled קוטר/אורך
+// system → product type (זווית/טי/מאסף/מצמד...) — was סוג, NOW labelled מבנה
+// gender → stays מין
+enum SizeSortAxis { pattern, diameter, system, gender }
+const Map<SizeSortAxis, String> kSizeSortLabel = {
+  SizeSortAxis.system: 'מבנה',
+  SizeSortAxis.pattern: 'סוג',
+  SizeSortAxis.diameter: 'קוטר/אורך',
+  SizeSortAxis.gender: 'מין',
+};
+final variantsSizeSortAxisProvider =
+    StateProvider<SizeSortAxis>((_) => SizeSortAxis.pattern);
+
+bool sizePassesFacets(String value, {
+  required Set<String> patterns,
+  required Set<String> diameters,
+  required Set<String> systems,
+}) {
+  if (patterns.isNotEmpty && !patterns.contains(sizeStructurePattern(value))) return false;
+  if (diameters.isNotEmpty && !sizeDiameterAtoms(value).any(diameters.contains)) return false;
+  if (systems.isNotEmpty && !systems.contains(sizeSystem(value))) return false;
+  return true;
+}
+
+class _VariantsSection extends ConsumerWidget {
+  const _VariantsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(variantsActiveFamilyProvider);
+    if (active != null) return _VariantFamilyView(family: active);
+    final kindFilter = ref.watch(variantsKindFilterProvider);
+    final valueFilter = ref.watch(variantsValueFilterProvider);
+    final sizePatterns = ref.watch(variantsSizePatternProvider);
+    final sizeDiameters = ref.watch(variantsSizeDiameterProvider);
+    final sizeSystems = ref.watch(variantsSizeSystemProvider);
+    final sizeGenders = ref.watch(variantsSizeGenderProvider);
+    var families = familiesByKind(kindFilter);
+    if (kindFilter != null && valueFilter.isNotEmpty) {
+      families = families
+          .where((f) => f.products.any((p) => valueFilter.contains(variantValue(p, kindFilter))))
+          .toList();
+    }
+    if (kindFilter == AttrKind.size &&
+        (sizePatterns.isNotEmpty || sizeDiameters.isNotEmpty || sizeSystems.isNotEmpty || sizeGenders.isNotEmpty)) {
+      // Decompose composite diameter selections "MATERIAL|ATOM"
+      final plainDiameters = <String>{};
+      final materialDiameters = <String, Set<String>>{};
+      for (final v in sizeDiameters) {
+        final idx = v.indexOf('|');
+        if (idx > 0) {
+          final mat = v.substring(0, idx);
+          final atom = v.substring(idx + 1);
+          materialDiameters.putIfAbsent(mat, () => <String>{}).add(atom);
+        } else {
+          plainDiameters.add(v);
+        }
+      }
+      families = families.where((f) => f.products.any((p) {
+        // pattern + system facets
+        final v = variantValue(p, AttrKind.size);
+        if (sizePatterns.isNotEmpty && !sizePatterns.contains(sizeStructurePattern(v))) return false;
+        if (sizeSystems.isNotEmpty &&
+            !sizeSystems.contains(p.productType ?? '(לא מסווג)')) return false;
+        if (sizeGenders.isNotEmpty && !sizeGenders.contains(genderPattern(p.nameHe))) return false;
+        // Diameter filter — either plain atoms OR material-scoped atoms
+        if (plainDiameters.isNotEmpty || materialDiameters.isNotEmpty) {
+          final atoms = sizeDiameterAtoms(v);
+          final mat = productMaterial(p);
+          final plainOk = plainDiameters.isNotEmpty && atoms.any(plainDiameters.contains);
+          final matOk = materialDiameters[mat] != null &&
+              atoms.any(materialDiameters[mat]!.contains);
+          if (!plainOk && !matOk) return false;
+        }
+        return true;
+      })).toList();
+    }
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        Container(
+          color: cs.surface,
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            reverse: true,
+            child: Row(
+              children: [
+                for (final k in AttrKind.values) ...[
+                  _KindChip(kind: k, label: '${kAttrKindEmoji[k]} ${kAttrKindLabel[k]}', count: familiesByKind(k).length),
+                  const SizedBox(width: 6),
+                ],
+              ],
+            ),
+          ),
+        ),
+        // Size sort axis row — always visible when size selected (3rd level)
+        if (kindFilter == AttrKind.size)
+          Container(
+            color: cs.surface,
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            width: double.infinity,
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: const _SizeSortAxisRow(),
+            ),
+          ),
+        // Values (4th level) — only visible when explicitly expanded
+        if (kindFilter != null && ref.watch(variantsValuesExpandedProvider))
+          Container(
+            color: cs.surface,
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            width: double.infinity,
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (kindFilter == AttrKind.size) const _ActiveSizeFacetRow(),
+                  if (kindFilter != AttrKind.size)
+                    for (final group in valueSubGroupsForKind(kindFilter)) ...[
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 0,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          for (int i = 0; i < group.length; i++) ...[
+                            if (i > 0)
+                              const Padding(padding: EdgeInsets.symmetric(horizontal: 4),
+                                  child: Text('—', style: TextStyle(color: Color(0xFF8A8A8A), fontWeight: FontWeight.w700, fontSize: 13))),
+                            _ValueChip(value: group[i].$1, label: group[i].$1, count: group[i].$2),
+                          ],
+                        ],
+                      ),
+                    ],
+                ],
+              ),
+            ),
+          ),
+        Container(
+          color: cs.onSurface.withOpacity(0.04),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          width: double.infinity,
+          child: Text('${families.length} משפחות וריאנטים',
+              textAlign: TextAlign.right,
+              style: TextStyle(color: cs.onSurface.withOpacity(0.6), fontSize: 12, fontWeight: FontWeight.w600)),
+        ),
+        Expanded(
+          child: families.isEmpty
+              ? const Center(child: Text('אין משפחות וריאנטים'))
+              : ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  itemCount: families.length,
+                  separatorBuilder: (_, __) => Divider(height: 1, color: cs.outline.withOpacity(0.15)),
+                  itemBuilder: (_, i) => _FamilyRow(family: families[i]),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _KindChip extends ConsumerWidget {
+  const _KindChip({required this.kind, required this.label, required this.count});
+  final AttrKind? kind;
+  final String label;
+  final int count;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = ref.watch(variantsKindFilterProvider) == kind;
+    return InkWell(
+      onTap: () {
+        final wasActive = ref.read(variantsKindFilterProvider.notifier).state == kind;
+        if (wasActive) {
+          final exp = ref.read(variantsValuesExpandedProvider.notifier);
+          exp.state = !exp.state;
+          return;
+        }
+        ref.read(variantsKindFilterProvider.notifier).state = kind;
+        ref.read(variantsValueFilterProvider.notifier).state = <String>{};
+        ref.read(variantsSizePatternProvider.notifier).state = <String>{};
+        ref.read(variantsSizeDiameterProvider.notifier).state = <String>{};
+        ref.read(variantsSizeSystemProvider.notifier).state = <String>{};
+        ref.read(variantsSizeGenderProvider.notifier).state = <String>{};
+        ref.read(variantsValuesExpandedProvider.notifier).state = false;
+      },
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFFFF7A18) : Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: selected ? const Color(0xFFFF7A18) : Theme.of(context).colorScheme.outline.withOpacity(0.35), width: 1.2),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label, style: TextStyle(color: selected ? Colors.white : Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w700, fontSize: 13)),
+            const SizedBox(width: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+              decoration: BoxDecoration(color: selected ? Colors.white.withOpacity(0.25) : const Color(0x14FF7A18), borderRadius: BorderRadius.circular(10)),
+              child: Text('$count', style: TextStyle(color: selected ? Colors.white : const Color(0xFFCC6614), fontWeight: FontWeight.w700, fontSize: 11)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SizeSortAxisRow extends ConsumerWidget {
+  const _SizeSortAxisRow();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(variantsSizeSortAxisProvider);
+    final cs = Theme.of(context).colorScheme;
+    return Wrap(
+      spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Padding(padding: const EdgeInsets.only(left: 2, right: 2), child: Text('מיון לפי:', style: TextStyle(color: cs.onSurface.withOpacity(0.7), fontWeight: FontWeight.w700, fontSize: 12))),
+        for (final axis in SizeSortAxis.values)
+          _AxisChip(
+            label: kSizeSortLabel[axis]!,
+            isSelected: active == axis,
+            onTap: () {
+              final wasActive = active == axis;
+              ref.read(variantsSizeSortAxisProvider.notifier).state = axis;
+              ref.read(variantsActiveSubGroupProvider.notifier).state = null;
+              final exp = ref.read(variantsValuesExpandedProvider.notifier);
+              exp.state = wasActive ? !exp.state : true;
+            },
+          ),
+      ],
+    );
+  }
+}
+
+class _AxisChip extends StatelessWidget {
+  const _AxisChip({required this.label, required this.isSelected, required this.onTap});
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFF7A18) : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: isSelected ? const Color(0xFFFF7A18) : cs.outline.withOpacity(0.35), width: 1.2),
+        ),
+        child: Text(label, style: TextStyle(color: isSelected ? Colors.white : cs.onSurface, fontWeight: FontWeight.w700, fontSize: 12)),
+      ),
+    );
+  }
+}
+
+class _ActiveSizeFacetRow extends ConsumerWidget {
+  const _ActiveSizeFacetRow();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final axis = ref.watch(variantsSizeSortAxisProvider);
+    switch (axis) {
+      case SizeSortAxis.pattern:
+        return _SubGroupBrowser(
+          subGroups: _patternSubGroups(),
+          subGroupLabel: _patternOutletLabel,
+          provider: variantsSizePatternProvider,
+        );
+      case SizeSortAxis.diameter:
+        return _MaterialDiameterBrowser();
+      case SizeSortAxis.system:
+        return _SizeFacetRow(label: '', items: _systemCounts(), provider: variantsSizeSystemProvider);
+      case SizeSortAxis.gender:
+        return _SizeFacetRow(label: '', items: _genderCounts(), provider: variantsSizeGenderProvider);
+    }
+  }
+}
+
+/// Two-level browser for קוטר: top row shows materials (HDPE/נחושת/PVC/...),
+/// click a material to see only the diameter atoms used by products of that
+/// material.
+class _MaterialDiameterBrowser extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(variantsActiveSubGroupProvider);
+    final selected = ref.watch(variantsSizeDiameterProvider);
+
+    // Build material → (atom → count) for products in size families.
+    final perMat = <String, Map<String, int>>{};
+    for (final fam in familiesByKind(AttrKind.size)) {
+      for (final p in fam.products) {
+        final mat = productMaterial(p);
+        final byAtom = perMat.putIfAbsent(mat, () => <String, int>{});
+        for (final a in sizeDiameterAtoms(variantValue(p, AttrKind.size))) {
+          byAtom[a] = (byAtom[a] ?? 0) + 1;
+        }
+      }
+    }
+    final materials = perMat.entries.toList()
+      ..sort((a, b) {
+        final ta = a.value.values.fold<int>(0, (s, v) => s + v);
+        final tb = b.value.values.fold<int>(0, (s, v) => s + v);
+        return tb.compareTo(ta);
+      });
+
+    void toggleAtom(String material, String a) {
+      final key = '$material|$a';
+      final next = {...selected};
+      if (next.contains(key)) {
+        next.remove(key);
+      } else {
+        next.add(key);
+      }
+      ref.read(variantsSizeDiameterProvider.notifier).state = next;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Top row: material buttons
+        Wrap(
+          spacing: 6,
+          runSpacing: 4,
+          children: [
+            for (final m in materials)
+              _AxisChip(
+                label: '${m.key}  ${m.value.values.fold<int>(0, (s, v) => s + v)}',
+                isSelected: active == m.key,
+                onTap: () => ref
+                    .read(variantsActiveSubGroupProvider.notifier)
+                    .state = active == m.key ? null : m.key,
+              ),
+          ],
+        ),
+        // Below: diameter atoms for the active material
+        if (active != null && perMat[active] != null) ...[
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 0,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              for (int i = 0; i < (perMat[active]!.entries.toList()
+                  ..sort((a, b) => _diameterSortKey(a.key).compareTo(_diameterSortKey(b.key)))).length; i++) ...[
+                if (i > 0)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 3),
+                    child: Text('—',
+                        style: TextStyle(
+                            color: Color(0xFF8A8A8A),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12)),
+                  ),
+                () {
+                  final sorted = perMat[active]!.entries.toList()
+                    ..sort((a, b) =>
+                        _diameterSortKey(a.key).compareTo(_diameterSortKey(b.key)));
+                  final e = sorted[i];
+                  final key = '$active|${e.key}';
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: _FacetChip(
+                      label: e.key,
+                      count: e.value,
+                      isSelected: selected.contains(key),
+                      onTap: () => toggleAtom(active, e.key),
+                    ),
+                  );
+                }(),
+              ],
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Maps a pattern value to its outlet-group label for the 4th level.
+String _patternOutletLabel(String pattern) {
+  switch (_patternOutlets(pattern)) {
+    case 1: return '1 יציאה';
+    case 2: return '2 יציאות';
+    case 3: return '3 יציאות';
+    default: return 'אחר';
+  }
+}
+
+/// Two-level browser: sub-group buttons first; click a sub-group to see its
+/// values inline. Used for קוטר (תבריג/HDPE/DN) and מבנה (1/2/3 outlets).
+class _SubGroupBrowser extends ConsumerWidget {
+  const _SubGroupBrowser({
+    required this.subGroups,
+    required this.subGroupLabel,
+    required this.provider,
+  });
+  final List<List<(String value, int count)>> subGroups;
+  /// Called with one of the values in the group to derive the group's label.
+  final String Function(String) subGroupLabel;
+  final StateProvider<Set<String>> provider;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(variantsActiveSubGroupProvider);
+    final selected = ref.watch(provider);
+    final cs = Theme.of(context).colorScheme;
+    void toggleValue(String v) {
+      final next = {...selected};
+      if (next.contains(v)) {
+        next.remove(v);
+      } else {
+        next.add(v);
+      }
+      ref.read(provider.notifier).state = next;
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Row of sub-group buttons (4th level chips)
+        Wrap(
+          spacing: 6,
+          runSpacing: 4,
+          children: [
+            for (final group in subGroups)
+              () {
+                if (group.isEmpty) return const SizedBox.shrink();
+                final label = subGroupLabel(group.first.$1);
+                final total = group.fold<int>(0, (s, e) => s + e.$2);
+                final isActive = active == label;
+                return _AxisChip(
+                  label: '$label  $total',
+                  isSelected: isActive,
+                  onTap: () => ref.read(variantsActiveSubGroupProvider.notifier).state =
+                      isActive ? null : label,
+                );
+              }(),
+          ],
+        ),
+        // Values of the active sub-group (5th level, hidden until sub-group chosen)
+        if (active != null)
+          ...subGroups.where((g) => g.isNotEmpty && subGroupLabel(g.first.$1) == active).map(
+            (group) => Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Wrap(
+                spacing: 0,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  for (int i = 0; i < group.length; i++) ...[
+                    if (i > 0)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 3),
+                        child: Text('—', style: TextStyle(color: Color(0xFF8A8A8A), fontWeight: FontWeight.w700, fontSize: 12)),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: _FacetChip(
+                        label: group[i].$1,
+                        count: group[i].$2,
+                        isSelected: selected.contains(group[i].$1),
+                        onTap: () => toggleValue(group[i].$1),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+List<(String value, int count)> _patternCounts() {
+  final freq = <String, int>{};
+  for (final fam in familiesByKind(AttrKind.size)) {
+    for (final p in fam.products) {
+      final v = variantValue(p, AttrKind.size);
+      if (v.isEmpty) continue;
+      final k = sizeStructurePattern(v);
+      freq[k] = (freq[k] ?? 0) + 1;
+    }
+  }
+  final out = freq.entries.map((e) => (e.key, e.value)).toList()..sort((a, b) => b.$2.compareTo(a.$2));
+  return out;
+}
+
+List<(String value, int count)> _diameterCounts() {
+  final freq = <String, int>{};
+  for (final fam in familiesByKind(AttrKind.size)) {
+    for (final p in fam.products) {
+      final v = variantValue(p, AttrKind.size);
+      if (v.isEmpty) continue;
+      for (final a in sizeDiameterAtoms(v)) {
+        freq[a] = (freq[a] ?? 0) + 1;
+      }
+    }
+  }
+  final out = freq.entries.map((e) => (e.key, e.value)).toList()..sort((a, b) => b.$2.compareTo(a.$2));
+  return out;
+}
+
+/// Counts of distinct PRODUCT TYPES in size families. Used under axis "מבנה"
+/// (renamed) so the user sees זווית/טי/מאסף/... instead of the old system.
+List<(String value, int count)> _systemCounts() {
+  final freq = <String, int>{};
+  for (final fam in familiesByKind(AttrKind.size)) {
+    final t = fam.products.first.productType ?? '(לא מסווג)';
+    freq[t] = (freq[t] ?? 0) + fam.products.length;
+  }
+  final out = freq.entries.map((e) => (e.key, e.value)).toList()..sort((a, b) => b.$2.compareTo(a.$2));
+  return out;
+}
+
+List<(String value, int count)> _genderCounts() {
+  final freq = <String, int>{};
+  for (final fam in familiesByKind(AttrKind.size)) {
+    for (final p in fam.products) {
+      final k = genderPattern(p.nameHe);
+      freq[k] = (freq[k] ?? 0) + 1;
+    }
+  }
+  const order = ['ז.ז', 'נ.נ', 'ז.נ', 'ז', 'נ', '—'];
+  final out = <(String, int)>[];
+  for (final k in order) { if (freq[k] != null) out.add((k, freq[k]!)); }
+  return out;
+}
+
+int _patternOutlets(String p) {
+  if (p == '1') return 1;
+  if (p == 'A×A' || p == 'A×B') return 2;
+  if (p.startsWith('A×A×') || p.startsWith('A×B×')) return 3;
+  return 9;
+}
+
+List<List<(String value, int count)>> _patternSubGroups() {
+  final all = _patternCounts();
+  final by = <int, List<(String, int)>>{};
+  for (final e in all) { by.putIfAbsent(_patternOutlets(e.$1), () => []).add(e); }
+  final keys = by.keys.toList()..sort();
+  return [for (final k in keys) by[k]!];
+}
+
+String _diameterBucket(String atom) {
+  if (atom.contains('"') || atom.contains('/')) return 'תבריג';
+  if (atom.startsWith('DN')) return 'DN';
+  final n = int.tryParse(atom);
+  if (n != null) {
+    if (n >= 16 && n <= 63) return 'HDPE';
+    if (n >= 75) return 'DN';
+  }
+  return 'אחר';
+}
+
+double _diameterSortKey(String atom) {
+  final m = RegExp(r'\d+(?:\.\d+)?').firstMatch(atom);
+  if (m == null) return 9999;
+  return double.tryParse(m.group(0)!) ?? 9999;
+}
+
+List<List<(String value, int count)>> _diameterSubGroups() {
+  final all = _diameterCounts();
+  final by = <String, List<(String, int)>>{};
+  for (final e in all) { by.putIfAbsent(_diameterBucket(e.$1), () => []).add(e); }
+  for (final list in by.values) { list.sort((a, b) => _diameterSortKey(a.$1).compareTo(_diameterSortKey(b.$1))); }
+  const order = ['תבריג', 'HDPE', 'DN', 'אחר'];
+  return [for (final k in order) if (by[k] != null) by[k]!];
+}
+
+class _SizeFacetRow extends ConsumerWidget {
+  const _SizeFacetRow({required this.label, required this.items, required this.provider, this.subGroups});
+  final String label;
+  final List<(String value, int count)> items;
+  final StateProvider<Set<String>> provider;
+  final List<List<(String value, int count)>>? subGroups;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = ref.watch(provider);
+    final cs = Theme.of(context).colorScheme;
+    void toggle(String v) {
+      final next = {...selected};
+      if (next.contains(v)) { next.remove(v); } else { next.add(v); }
+      ref.read(provider.notifier).state = next;
+    }
+    final groups = subGroups ?? [items];
+    return Wrap(
+      spacing: 0, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        if (label.isNotEmpty)
+          Padding(padding: const EdgeInsets.only(left: 2, right: 2), child: Text('$label:', style: TextStyle(color: cs.onSurface.withOpacity(0.7), fontWeight: FontWeight.w700, fontSize: 12))),
+        for (int gi = 0; gi < groups.length; gi++) ...[
+          if (gi > 0)
+            const Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: Text('|', style: TextStyle(color: Color(0xFFBBBBBB), fontWeight: FontWeight.w700, fontSize: 12))),
+          for (int i = 0; i < groups[gi].length; i++) ...[
+            if (i > 0)
+              const Padding(padding: EdgeInsets.symmetric(horizontal: 3), child: Text('—', style: TextStyle(color: Color(0xFF8A8A8A), fontWeight: FontWeight.w700, fontSize: 12))),
+            Padding(padding: const EdgeInsets.only(right: 4), child: _FacetChip(label: groups[gi][i].$1, count: groups[gi][i].$2, isSelected: selected.contains(groups[gi][i].$1), onTap: () => toggle(groups[gi][i].$1))),
+          ],
+        ],
+      ],
+    );
+  }
+}
+
+class _FacetChip extends StatelessWidget {
+  const _FacetChip({required this.label, required this.count, required this.isSelected, required this.onTap});
+  final String label;
+  final int count;
+  final bool isSelected;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0x22FF7A18) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? const Color(0xFFFF7A18) : cs.outline.withOpacity(0.25), width: 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label, style: TextStyle(color: isSelected ? const Color(0xFFCC6614) : cs.onSurface.withOpacity(0.8), fontWeight: FontWeight.w600, fontSize: 11)),
+            const SizedBox(width: 3),
+            Text('$count', style: TextStyle(color: cs.onSurface.withOpacity(0.45), fontWeight: FontWeight.w600, fontSize: 9)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ValueChip extends ConsumerWidget {
+  const _ValueChip({required this.value, required this.label, required this.count});
+  final String? value;
+  final String label;
+  final int count;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final filter = ref.watch(variantsValueFilterProvider);
+    final selected = value == null ? filter.isEmpty : filter.contains(value);
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: () {
+        final n = ref.read(variantsValueFilterProvider.notifier);
+        if (value == null) { n.state = <String>{}; return; }
+        final next = {...filter};
+        if (next.contains(value)) { next.remove(value); } else { next.add(value!); }
+        n.state = next;
+      },
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0x22FF7A18) : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: selected ? const Color(0xFFFF7A18) : cs.outline.withOpacity(0.25), width: 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label, style: TextStyle(color: selected ? const Color(0xFFCC6614) : cs.onSurface.withOpacity(0.8), fontWeight: FontWeight.w600, fontSize: 12)),
+            const SizedBox(width: 4),
+            Text('$count', style: TextStyle(color: cs.onSurface.withOpacity(0.45), fontWeight: FontWeight.w600, fontSize: 10)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FamilyRow extends ConsumerWidget {
+  const _FamilyRow({required this.family});
+  final VariantFamily family;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: () => ref.read(variantsActiveFamilyProvider.notifier).state = family,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: const Color(0x22FF7A18), borderRadius: BorderRadius.circular(10)),
+              child: Text('${family.count}', style: const TextStyle(color: Color(0xFFCC6614), fontWeight: FontWeight.w800, fontSize: 12)),
+            ),
+            const Spacer(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${family.emoji}  ${family.frame}', style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w700, fontSize: 14)),
+                const SizedBox(height: 2),
+                Text('${family.categoryHe} · ${family.brand}', style: TextStyle(color: cs.onSurface.withOpacity(0.55), fontSize: 11)),
+              ],
+            ),
+            const SizedBox(width: 6),
+            Icon(Icons.chevron_left, size: 18, color: cs.onSurface.withOpacity(0.4)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VariantFamilyView extends ConsumerWidget {
+  const _VariantFamilyView({required this.family});
+  final VariantFamily family;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        Container(
+          color: cs.surface,
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+          child: Row(
+            children: [
+              InkWell(
+                onTap: () => ref.read(variantsActiveFamilyProvider.notifier).state = null,
+                child: const Padding(padding: EdgeInsets.all(4), child: Icon(Icons.arrow_forward, size: 20)),
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: Text('${family.emoji}  ${family.frame}', textAlign: TextAlign.right, style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800, fontSize: 15))),
+            ],
+          ),
+        ),
+        Container(
+          color: cs.onSurface.withOpacity(0.04),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          width: double.infinity,
+          child: Text('${family.count} וריאנטים · ${kAttrKindLabel[family.kind]} שונה · [${family.categoryHe} / ${family.brand}]',
+              textAlign: TextAlign.right,
+              style: TextStyle(color: cs.onSurface.withOpacity(0.6), fontSize: 12, fontWeight: FontWeight.w600)),
+        ),
+        Expanded(child: LipskeyProductsList(products: family.products)),
       ],
     );
   }
