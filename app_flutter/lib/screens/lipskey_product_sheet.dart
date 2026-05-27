@@ -1602,9 +1602,8 @@ Widget _SpecRow(String emoji, String label, String value) => Padding(
     );
 
 /// Interactive attribute chips (צעד 71+).
-/// סוג: shows compound type ("ברז נשלף"), tappable if >1 type in category.
-/// דגם: shows model name, tappable if >1 model in category.
-/// גוון/תת-סוג: frame-based sibling detection (color uses colorVariant).
+/// All four chip kinds use frame-based sibling detection:
+/// orange border = has same-frame siblings with a different attribute value.
 class _InteractiveChips extends StatelessWidget {
   const _InteractiveChips({
     required this.product,
@@ -1705,88 +1704,77 @@ class _InteractiveChips extends StatelessWidget {
     return '$typeWord $next';
   }
 
-  static List<String> _typesInCategory(LipskeyCatalogProduct p) {
-    final cat = p.categoryHe;
-    final current = _compoundType(p);
-    final seen = <String>{};
-    final result = <String>[];
-    if (current.isNotEmpty) {
-      seen.add(current);
-      result.add(current);
-    }
+  // ── Type helpers (frame-based) ───────────────────────────────────────────
+  static List<LipskeyCatalogProduct> _siblingsType(LipskeyCatalogProduct p) {
+    final compound = _compoundType(p);
+    if (compound.isEmpty) return [];
+    final compoundWords = compound.split(RegExp(r'\s+'));
+    final frame = p.nameHe
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty && !compoundWords.contains(w))
+        .join(' ');
+    if (frame.length < 3) return [];
+    final byCompound = <String, LipskeyCatalogProduct>{};
+    byCompound[compound] = p;
     for (final q in kLipskeyCatalog) {
-      if (q.categoryHe != cat) continue;
-      final ct = _compoundType(q);
-      if (ct.isEmpty) continue;
-      if (seen.add(ct)) result.add(ct);
+      if (q.categoryHe != p.categoryHe) continue;
+      final qc = _compoundType(q);
+      if (qc.isEmpty) continue;
+      final qWords = qc.split(RegExp(r'\s+'));
+      final qFrame = q.nameHe
+          .split(RegExp(r'\s+'))
+          .where((w) => w.isNotEmpty && !qWords.contains(w))
+          .join(' ');
+      if (qFrame != frame) continue;
+      if (!byCompound.containsKey(qc)) byCompound[qc] = q;
     }
-    return result;
+    if (byCompound.length <= 1) return [];
+    return byCompound.values.toList()
+      ..sort((a, b) {
+        if (a.sku == p.sku) return -1;
+        if (b.sku == p.sku) return 1;
+        return _compoundType(a).compareTo(_compoundType(b));
+      });
   }
 
-  static LipskeyCatalogProduct _bestForType(
-      LipskeyCatalogProduct current, String targetCompound) {
-    final cat = current.categoryHe;
-    final currentModel = current.brandModel;
-    final currentColor = current.colorVariant;
-    final candidates = kLipskeyCatalog
-        .where((q) => q.categoryHe == cat && _compoundType(q) == targetCompound)
-        .toList();
-    if (candidates.isEmpty) return current;
-    return candidates.firstWhere(
-      (q) => q.brandModel == currentModel && q.colorVariant == currentColor,
-      orElse: () => candidates.firstWhere(
-        (q) => q.brandModel == currentModel,
-        orElse: () => candidates.first,
-      ),
-    );
-  }
-
-  // ── Model helpers (category-wide) ────────────────────────────────────────
-  static List<String> _modelsInCategory(LipskeyCatalogProduct p) {
-    final cat = p.categoryHe;
-    final currentModel = p.brandModel;
-    final seen = <String>{};
-    final result = <String>[];
-    if (currentModel != null && currentModel.isNotEmpty) {
-      seen.add(currentModel);
-      result.add(currentModel);
-    }
+  // ── Model helpers (frame-based) ──────────────────────────────────────────
+  static List<LipskeyCatalogProduct> _siblingsModel(LipskeyCatalogProduct p) {
+    final model = p.brandModel;
+    if (model == null || model.isEmpty) return [];
+    final frame = p.nameHe
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty && kindOf(w) != AttrKind.model)
+        .join(' ');
+    if (frame.length < 3) return [];
+    final byModel = <String, LipskeyCatalogProduct>{};
+    byModel[model] = p;
     for (final q in kLipskeyCatalog) {
-      if (q.categoryHe != cat) continue;
+      if (q.categoryHe != p.categoryHe) continue;
       final m = q.brandModel;
       if (m == null || m.isEmpty) continue;
-      if (seen.add(m)) result.add(m);
+      final qFrame = q.nameHe
+          .split(RegExp(r'\s+'))
+          .where((w) => w.isNotEmpty && kindOf(w) != AttrKind.model)
+          .join(' ');
+      if (qFrame != frame) continue;
+      if (!byModel.containsKey(m)) byModel[m] = q;
     }
-    return result;
-  }
-
-  static LipskeyCatalogProduct _bestForModel(
-      LipskeyCatalogProduct current, String targetModel) {
-    final cat = current.categoryHe;
-    final currentCompound = _compoundType(current);
-    final currentColor = current.colorVariant;
-    final candidates = kLipskeyCatalog
-        .where((q) => q.categoryHe == cat && q.brandModel == targetModel)
-        .toList();
-    if (candidates.isEmpty) return current;
-    return candidates.firstWhere(
-      (q) =>
-          _compoundType(q) == currentCompound &&
-          q.colorVariant == currentColor,
-      orElse: () => candidates.firstWhere(
-        (q) => _compoundType(q) == currentCompound,
-        orElse: () => candidates.first,
-      ),
-    );
+    if (byModel.length <= 1) return [];
+    return byModel.values.toList()
+      ..sort((a, b) {
+        if (a.sku == p.sku) return -1;
+        if (b.sku == p.sku) return 1;
+        return (a.brandModel ?? '').compareTo(b.brandModel ?? '');
+      });
   }
 
   // ── Unified sibling check & picker options ───────────────────────────────
   static bool _hasSiblings(LipskeyCatalogProduct p, String key) {
     switch (key) {
       case 'type':
-        return _typesInCategory(p).length > 1;
+        return _siblingsType(p).isNotEmpty;
       case 'model':
-        return _modelsInCategory(p).length > 1;
+        return _siblingsModel(p).isNotEmpty;
       case 'color':
         final myVal = p.colorVariant;
         if (myVal == null || myVal.isEmpty) return false;
@@ -1812,15 +1800,14 @@ class _InteractiveChips extends StatelessWidget {
       LipskeyCatalogProduct p, String key) {
     switch (key) {
       case 'type':
-        return _typesInCategory(p).map((compound) {
-          // Show just the qualifier word ("נשלף"), not the full compound ("ברז נשלף")
-          final label =
-              compound.contains(' ') ? compound.split(' ').last : compound;
-          return (label, _bestForType(p, compound));
+        return _siblingsType(p).map((q) {
+          final ct = _compoundType(q);
+          final label = ct.contains(' ') ? ct.split(' ').last : ct;
+          return (label, q);
         }).toList();
       case 'model':
-        return _modelsInCategory(p)
-            .map((m) => (m, _bestForModel(p, m)))
+        return _siblingsModel(p)
+            .map((q) => (q.brandModel ?? '', q))
             .toList();
       case 'color':
         return _siblingsColor(p)
