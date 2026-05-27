@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/variant_families.dart' show productCanonicalKey;
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -82,14 +83,62 @@ class LipskeyProductsScreen extends StatelessWidget {
 /// The product list body on its own, so it can be embedded in the catalog tab
 /// (keeping the app bar and bottom nav fixed) instead of a full-screen route.
 /// Honors the catalog `viewMode` (list ↔ grid) and `gridColumns` settings.
-class LipskeyProductsList extends ConsumerWidget {
+class LipskeyProductsList extends ConsumerStatefulWidget {
   const LipskeyProductsList({super.key, required this.products});
 
   final List<LipskeyCatalogProduct> products;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LipskeyProductsList> createState() =>
+      _LipskeyProductsListState();
+}
+
+class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
+  /// Per-slot override: originalSku → currentlyDisplayedSku.
+  /// A slot ends up showing kLipskeyCatalog[currentSku] instead of the
+  /// product it was created with.
+  final Map<String, String> _swap = {};
+
+  LipskeyCatalogProduct _displayed(LipskeyCatalogProduct orig) {
+    final cur = _swap[orig.sku];
+    if (cur == null || cur == orig.sku) return orig;
+    return kLipskeyCatalog.firstWhere(
+      (q) => q.sku == cur,
+      orElse: () => orig,
+    );
+  }
+
+  /// Build the visible slot list. Each slot has: (origSku, displayedProduct,
+  /// allFamilySiblings). All canonical-family siblings collapse into ONE slot
+  /// — the card uses [familySiblings] to render a "↻ X" cycle button so the
+  /// user can switch between any of them (size/color/model/subtype variants
+  /// AND pure SKU duplicates with identical names).
+  List<(String origSku, LipskeyCatalogProduct shown, List<LipskeyCatalogProduct> siblings)>
+      _visibleSlots() {
+    final shown = <(String, LipskeyCatalogProduct, List<LipskeyCatalogProduct>)>[];
+    // Pre-compute family → all products in widget.products with that key.
+    final byFamily = <String, List<LipskeyCatalogProduct>>{};
+    for (final p in widget.products) {
+      byFamily.putIfAbsent(productCanonicalKey(p), () => []).add(p);
+    }
+    final seenFamily = <String>{};
+    final seenSku = <String>{};
+    for (final orig in widget.products) {
+      final cur = _displayed(orig);
+      if (seenSku.contains(cur.sku)) continue;
+      final family = productCanonicalKey(cur);
+      if (seenFamily.contains(family)) continue;
+      seenSku.add(cur.sku);
+      seenFamily.add(family);
+      shown.add((orig.sku, cur, byFamily[family] ?? const []));
+    }
+    return shown;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final settings = ref.watch(catalogSettingsProvider);
+    final slots = _visibleSlots();
     if (settings.viewMode == CatalogViewMode.grid) {
       return GridView.builder(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
@@ -99,20 +148,27 @@ class LipskeyProductsList extends ConsumerWidget {
           crossAxisSpacing: 10,
           childAspectRatio: 0.66,
         ),
-        itemCount: products.length,
+        itemCount: slots.length,
         itemBuilder: (_, i) => LipskeyProductGridCard(
-          product: products[i],
-          products: products,
+          key: ValueKey(slots[i].$1),
+          product: slots[i].$2,
+          products: widget.products,
         ),
       );
     }
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
-      itemCount: products.length,
-      itemBuilder: (_, i) => _ProductRow(
-        product: products[i],
-        categoryProducts: products,
-      ),
+      itemCount: slots.length,
+      itemBuilder: (_, i) {
+        final (origSku, shown, siblings) = slots[i];
+        return _ProductRow(
+          key: ValueKey(origSku),
+          product: shown,
+          categoryProducts: widget.products,
+          familySiblings: siblings,
+          onCycle: (next) => setState(() => _swap[origSku] = next.sku),
+        );
+      },
     );
   }
 }
@@ -370,10 +426,22 @@ class _StepBtn extends StatelessWidget {
 
 // ───────────────────────────────────────────────────────────────────────────
 class _ProductRow extends ConsumerStatefulWidget {
-  const _ProductRow({required this.product, required this.categoryProducts});
+  const _ProductRow({
+    super.key,
+    required this.product,
+    required this.categoryProducts,
+    this.familySiblings = const [],
+    this.onCycle,
+  });
 
   final LipskeyCatalogProduct product;
   final List<LipskeyCatalogProduct> categoryProducts;
+  /// Every product in the same canonical-family (collapsed into this row).
+  /// When length > 1 the card shows a ↻ button to cycle through them.
+  final List<LipskeyCatalogProduct> familySiblings;
+  /// Called when the user taps an attribute chip and cycles to a new sibling.
+  /// The parent should update its swap state so the displayed product changes.
+  final void Function(LipskeyCatalogProduct next)? onCycle;
 
   @override
   ConsumerState<_ProductRow> createState() => _ProductRowState();
@@ -391,7 +459,21 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   Color get _muted => Theme.of(context).colorScheme.onSurface.withOpacity(0.45);
   Color get _line => Theme.of(context).colorScheme.outline.withOpacity(0.2);
 
+  /// Currently-displayed product — passed in by the parent list.
   LipskeyCatalogProduct get p => widget.product;
+
+  /// Cycle to the next sibling that differs only in [word] of [kind].
+  /// Reports the new product up to the parent; the parent owns the swap state.
+  void _cycleAttr(String word, AttrKind kind) {
+    final cb = widget.onCycle;
+    if (cb == null) return;
+    final siblings = findAttrSiblings(p, word, kind);
+    if (siblings.length <= 1) return;
+    final idx = siblings.indexWhere((q) => q.sku == p.sku);
+    final next = siblings[(idx < 0 ? 0 : (idx + 1) % siblings.length)];
+    if (next.sku == p.sku) return;
+    cb(next);
+  }
 
   int get _unitMult => switch (_unit) {
         _Unit.single => 1,
@@ -414,6 +496,18 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
           productQty: _qty * _unitMult,
           accessories: const [],
         ));
+  }
+
+  /// Cycle to the next product in the canonical family (handles identical-name
+  /// duplicates as well as attribute variants).
+  void _cycleFamily() {
+    final cb = widget.onCycle;
+    final sibs = widget.familySiblings;
+    if (cb == null || sibs.length < 2) return;
+    final idx = sibs.indexWhere((q) => q.sku == p.sku);
+    final next = sibs[(idx < 0 ? 0 : (idx + 1) % sibs.length)];
+    if (next.sku == p.sku) return;
+    cb(next);
   }
 
   void _openSheet() =>
@@ -566,8 +660,8 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
               ],
             ),
             const SizedBox(height: 4),
-            // line 2: name words as tappable chips
-            _NameWords(name: p.nameHe),
+            // line 2: name words as tappable chips — any attribute chip cycles
+            _NameWords(product: p, onAttrTap: _cycleAttr),
             const SizedBox(height: 8),
             // brand + sku
             Row(
@@ -595,6 +689,28 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                           fontSize: 10,
                           fontFamily: 'monospace')),
                 ),
+                if (widget.familySiblings.length > 1) ...[
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: _cycleFamily,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0x22FF7A18),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0x55FF7A18)),
+                      ),
+                      child: Text(
+                        '↻ ${(widget.familySiblings.indexWhere((q) => q.sku == p.sku) + 1)}/${widget.familySiblings.length}',
+                        style: const TextStyle(
+                          color: Color(0xFFCC6614),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ],
@@ -780,38 +896,78 @@ bool isLinkableWord(String w) {
   return true;
 }
 
-// ── name split into tappable chips: words (teal) + sizes (orange) ───────────
+/// Kinds of attributes that are cyclable variants on a product card.
+enum AttrKind { size, color, model, subtype }
+
+/// Detect which attribute kind a word belongs to (or null for none).
+AttrKind? _attrKindFor(String word) {
+  if (isSizeToken(word)) return AttrKind.size;
+  if (kLipskeyColors.contains(word)) return AttrKind.color;
+  if (kLipskeyModels.contains(word)) return AttrKind.model;
+  if (kLipskeySubtypes.contains(word)) return AttrKind.subtype;
+  return null;
+}
+
+/// Emoji marker per attribute kind (shown on the chip).
+String _attrEmoji(AttrKind k) => switch (k) {
+      AttrKind.size => '📐',
+      AttrKind.color => '🎨',
+      AttrKind.model => '🏷',
+      AttrKind.subtype => '📋',
+    };
+
+/// Drop every word that belongs to [kind] from a name. What remains is the
+/// "frame" — the part of the name that should match between siblings.
+String _stripWordsOfKind(String name, AttrKind kind) {
+  return name
+      .split(RegExp(r'\s+'))
+      .where((w) => w.isNotEmpty && _attrKindFor(w) != kind)
+      .join(' ')
+      .trim();
+}
+
+/// Find products in the same category that share the same frame as [p] (after
+/// stripping all words of [kind]) and have at least one word of [kind] in their
+/// name. These are the siblings that the chip should cycle through.
+List<LipskeyCatalogProduct> findAttrSiblings(
+  LipskeyCatalogProduct p,
+  String word,
+  AttrKind kind,
+) {
+  final pFrame = _stripWordsOfKind(p.nameHe, kind);
+  if (pFrame.length < 2) return [p];
+  return kLipskeyCatalog.where((q) {
+    if (q.categoryHe != p.categoryHe) return false;
+    if (_stripWordsOfKind(q.nameHe, kind) != pFrame) return false;
+    return q.nameHe
+        .split(RegExp(r'\s+'))
+        .any((w) => _attrKindFor(w) == kind);
+  }).toList();
+}
+
+// ── name split into tappable chips: attribute chips (orange) + words (teal) ─
 class _NameWords extends StatelessWidget {
-  const _NameWords({required this.name});
-  final String name;
+  const _NameWords({required this.product, this.onAttrTap});
+  final LipskeyCatalogProduct product;
+  /// Tap handler for any attribute chip. Receives the clicked word and its
+  /// kind so the card can cycle to the next sibling for that attribute.
+  final void Function(String word, AttrKind kind)? onAttrTap;
 
   @override
   Widget build(BuildContext context) {
-    final words = name.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final words = product.nameHe.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
     return Wrap(
       spacing: 4,
       runSpacing: 3,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         for (final w in words)
-          if (isSizeToken(w))
-            // size / dimension — compatibility link (orange chip)
-            GestureDetector(
-              onTap: () => LipskeyProductsScreen.openWordSearch(context, w),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                decoration: BoxDecoration(
-                  color: const Color(0x22FF7A18),
-                  borderRadius: BorderRadius.circular(5),
-                  border: Border.all(color: const Color(0x55FF7A18)),
-                ),
-                child: Text('📐 $w',
-                    style: const TextStyle(
-                        color: Color(0xFFFF9D4D),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600)),
-              ),
+          if (_attrKindFor(w) != null)
+            _AttrChip(
+              word: w,
+              kind: _attrKindFor(w)!,
+              product: product,
+              onTap: onAttrTap,
             )
           else if (isLinkableWord(w))
             GestureDetector(
@@ -834,3 +990,85 @@ class _NameWords extends StatelessWidget {
     );
   }
 }
+
+/// One attribute chip in the product name. Looks like the size chip already
+/// did; tap cycles through siblings that differ only in this attribute. When
+/// only one variant exists, the chip stays but the cycle arrow is hidden.
+class _AttrChip extends StatelessWidget {
+  const _AttrChip({
+    required this.word,
+    required this.kind,
+    required this.product,
+    required this.onTap,
+  });
+  final String word;
+  final AttrKind kind;
+  final LipskeyCatalogProduct product;
+  final void Function(String word, AttrKind kind)? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasSiblings =
+        onTap != null && findAttrSiblings(product, word, kind).length > 1;
+    return GestureDetector(
+      onTap: hasSiblings ? () => onTap!(word, kind) : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+        decoration: BoxDecoration(
+          color: const Color(0x22FF7A18),
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(color: const Color(0x55FF7A18)),
+        ),
+        child: Text(
+          hasSiblings ? '${_attrEmoji(kind)} $word ⟳' : '${_attrEmoji(kind)} $word',
+          style: const TextStyle(
+            color: Color(0xFFFF9D4D),
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Strip size tokens from a product name to get its "base name" (the model
+/// without dimensions). Used to find sibling products at different sizes.
+String _stripSizeTokens(String name) {
+  return name
+      .split(RegExp(r'\s+'))
+      .where((w) => w.isNotEmpty && !isSizeToken(w))
+      .join(' ')
+      .trim();
+}
+
+/// Same-model siblings at different sizes. Two products are siblings when they
+/// share the same category and the same name with size tokens removed.
+/// Returns [p] alone when [p] has no size token (so we don't invent siblings
+/// out of unrelated same-named products).
+List<LipskeyCatalogProduct> findSizeSiblings(LipskeyCatalogProduct p) {
+  final base = _stripSizeTokens(p.nameHe);
+  if (base.length < 3) return [p];
+  if (base == p.nameHe) return [p]; // no size token in name → no variants
+  return kLipskeyCatalog
+      .where((q) => q.categoryHe == p.categoryHe && _stripSizeTokens(q.nameHe) == base)
+      .toList();
+}
+
+/// Pick the first size token from a product name as a short label.
+String _sizeLabel(LipskeyCatalogProduct p) {
+  final sizeWords = p.nameHe
+      .split(RegExp(r'\s+'))
+      .where(isSizeToken)
+      .toList();
+  return sizeWords.isEmpty ? p.sku : sizeWords.join(' ');
+}
+
+/// First numeric value in a size label (e.g. "1/2\"" → 1, "DN50" → 50). Used
+/// to sort size siblings in an intuitive order.
+double _firstSizeNum(String s) {
+  final m = RegExp(r'\d+(?:\.\d+)?').firstMatch(s);
+  if (m == null) return 0;
+  return double.tryParse(m.group(0)!) ?? 0;
+}
+
