@@ -849,17 +849,17 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
 
   // ── body: card-tap = sheet · name words tappable · price · brand · sku ────
   Widget _body() {
-    return GestureDetector(
-      onTap: _openSheet,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // line 1: category type + price
-            Row(
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // line 1: category type + price — tapping this row opens the sheet
+          GestureDetector(
+            onTap: _openSheet,
+            behavior: HitTestBehavior.opaque,
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
@@ -878,12 +878,13 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                         fontWeight: FontWeight.w500)),
               ],
             ),
-            const SizedBox(height: 4),
-            // line 2: name words as tappable chips — any attribute chip cycles
-            _NameWords(product: p, onAttrTap: _cycleAttr, openKind: _pickerKind),
-            const SizedBox(height: 8),
-            // brand + sku
-            Row(
+          ),
+          const SizedBox(height: 4),
+          // line 2: name words as tappable chips — any attribute chip cycles
+          _NameWords(product: p, onAttrTap: _cycleAttr, openKind: _pickerKind),
+          const SizedBox(height: 8),
+          // brand + sku
+          Row(
               children: [
                 Text(
                     p.brand == 'AQUATEC'
@@ -920,7 +921,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                         border: Border.all(color: const Color(0x55FF7A18)),
                       ),
                       child: Text(
-                        '${(widget.familySiblings.indexWhere((q) => q.sku == p.sku) + 1)} מתוך ${widget.familySiblings.length}',
+                        '${(widget.familySiblings.indexWhere((q) => q.sku == p.sku) + 1)}/${widget.familySiblings.length}',
                         style: const TextStyle(
                           color: Color(0xFFCC6614),
                           fontWeight: FontWeight.w700,
@@ -934,8 +935,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   // ── side column: closed(+middle/details bottom) · open(units/qty/details) ─
