@@ -126,11 +126,38 @@ List<String> _wordOptions(List<LipskeyCatalogProduct> pool) {
   return [for (final e in entries.take(12)) e.key];
 }
 
-/// The "narrow by" chips for a pool: sizes when products are size-differentiated,
-/// else characterizing words (model/shape) for size-less sub-types.
-List<String> _narrowOptions(List<LipskeyCatalogProduct> pool) {
+/// Curated narrow chips for sub-types that resist auto size/word detection —
+/// keyword splits a non-technical user understands (cover/grate, round/square…).
+const Map<String, List<String>> kFinderFacets = {
+  'מכסים ורשתות': ['מכסה', 'רשת', 'עגול', 'מרובע', 'ניקל', 'נחושת', 'שחור'],
+  'מחסומים גלויים': ['אמריקאי', 'נסתר', 'לכיור', 'למדיח', 'כביסה', 'מטבח'],
+};
+
+/// Distinct product colours in the pool (≥2) — narrows identical-name items
+/// that differ only by colour (e.g. toilet seats: לבן/פרגמון/אפור).
+List<String> _colorOptions(List<LipskeyCatalogProduct> pool) {
+  final cols = <String>{};
+  for (final p in pool) {
+    final c = p.color;
+    if (c != null && c.trim().isNotEmpty) cols.add(c);
+  }
+  return cols.length > 1 ? (cols.toList()..sort()) : const [];
+}
+
+/// "Narrow by" chips for a pool, best axis first: curated facets → sizes →
+/// colours → characterizing words.
+List<String> _narrowOptions(List<LipskeyCatalogProduct> pool, String? subtype) {
+  final curated = subtype == null ? null : kFinderFacets[subtype];
+  if (curated != null) {
+    final matching =
+        curated.where((k) => pool.any((p) => p.nameHe.contains(k))).toList();
+    if (matching.length > 1) return matching;
+  }
   final sizes = _sizesIn(pool);
-  return sizes.isNotEmpty ? sizes : _wordOptions(pool);
+  if (sizes.isNotEmpty) return sizes;
+  final colors = _colorOptions(pool);
+  if (colors.isNotEmpty) return colors;
+  return _wordOptions(pool);
 }
 
 class FinderScreen extends ConsumerStatefulWidget {
@@ -153,13 +180,14 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     final pool = _sub == null
         ? base
         : base.where((p) => p.categoryHe == _sub).toList();
-    final sizes = _narrowOptions(pool);
+    final sizes = _narrowOptions(pool, _sub);
     final results = _size == null
         ? pool
         : pool
             .where((p) =>
                 _productSizes(p).contains(_size!) ||
-                p.nameHe.contains(_size!))
+                p.nameHe.contains(_size!) ||
+                p.color == _size)
             .toList();
 
     return Column(
