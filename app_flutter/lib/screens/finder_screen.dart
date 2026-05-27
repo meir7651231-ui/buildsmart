@@ -259,23 +259,27 @@ List<String> _colorOptions(List<LipskeyCatalogProduct> pool) {
   return cols.length > 1 ? (cols.toList()..sort()) : const [];
 }
 
-/// "Narrow by" chips for a pool, best axis first: curated facets → sizes →
-/// colours → characterizing words.
-List<String> _narrowOptions(List<LipskeyCatalogProduct> pool, String? subtype) {
+/// "Narrow by" axis for a pool, best first: curated facets → sizes → colours →
+/// characterizing words. Returns a Hebrew axis label (for the chip-row hint)
+/// plus the chips; empty when nothing splits the pool.
+({String label, List<String> chips}) _narrowAxis(
+    List<LipskeyCatalogProduct> pool, String? subtype) {
   final curated = subtype == null ? null : kFinderFacets[subtype];
   if (curated != null) {
     final matching =
         curated.where((k) => pool.any((p) => p.nameHe.contains(k))).toList();
-    if (matching.length > 1) return matching;
+    if (matching.length > 1) return (label: 'אפשרות', chips: matching);
   }
   // Each axis must actually split the pool (>1 option); a lone chip can't
   // narrow anything, so fall through to the next axis (or show no bar).
   final sizes = _sizesIn(pool);
-  if (sizes.length > 1) return sizes;
+  if (sizes.length > 1) return (label: 'גודל', chips: sizes);
   final colors = _colorOptions(pool);
-  if (colors.length > 1) return colors;
+  if (colors.length > 1) return (label: 'צבע', chips: colors);
   final words = _wordOptions(pool);
-  return words.length > 1 ? words : const [];
+  return words.length > 1
+      ? (label: 'דגם', chips: words)
+      : (label: '', chips: const <String>[]);
 }
 
 class FinderScreen extends ConsumerStatefulWidget {
@@ -305,7 +309,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     final pool = sel == null
         ? base
         : base.where((p) => sel!.cats.contains(p.categoryHe)).toList();
-    final sizes = _narrowOptions(pool, _sub);
+    final narrow = _narrowAxis(pool, _sub);
     final results = _size == null
         ? pool
         : pool
@@ -314,12 +318,15 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                 p.nameHe.contains(_size!) ||
                 p.color == _size)
             .toList();
+    // Count of cards the user will actually see (variants collapse to one).
+    final shown = results.map(productListDedupeKey).toSet().length;
 
     return Column(
       children: [
         _header(),
         if (subs.length > 1) _subBar(subs),
-        if (sizes.isNotEmpty) _sizeBar(sizes),
+        if (narrow.chips.isNotEmpty) _sizeBar(narrow.label, narrow.chips),
+        if (results.isNotEmpty) _countStrip(shown),
         Expanded(
           child: results.isEmpty
               ? const Center(
@@ -328,6 +335,18 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
               : LipskeyProductsList(products: results),
         ),
       ],
+    );
+  }
+
+  // Small reassurance line above the list: how many products matched.
+  Widget _countStrip(int n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Text('נמצאו $n מוצרים',
+            style: const TextStyle(color: _mute, fontSize: 12)),
+      ),
     );
   }
 
@@ -450,49 +469,55 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     return cat;
   }
 
-  Widget _subBar(List<FinderSub> subs) {
-    return Container(
-      height: 46,
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: _surface)),
-      ),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        children: [
-          _chip('הכל', _sub == null,
-              () => setState(() {
-                    _sub = null;
-                    _size = null;
-                  })),
-          for (final s in subs)
-            _chip(s.label, _sub == s.label,
-                () => setState(() {
-                      _sub = s.label;
-                      _size = null;
-                    })),
-        ],
-      ),
-    );
-  }
-
-  // ── step 2: size chips — catalog chip style ──────────────────────────────
-  Widget _sizeBar(List<String> sizes) {
+  // A labeled chip row: a fixed leading hint (e.g. "סוג"/"גודל") so a layman
+  // knows what each row narrows by, then the horizontally-scrolling chips.
+  Widget _chipRow(String hint, List<Widget> chips) {
     return Container(
       height: 48,
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: _surface)),
       ),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        children: [
-          _chip('הכל', _size == null, () => setState(() => _size = null)),
-          for (final s in sizes)
-            _chip(s, _size == s, () => setState(() => _size = s)),
-        ],
-      ),
+      child: Row(children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 14, left: 2),
+          child: Text(hint,
+              style: const TextStyle(
+                  color: _mute, fontSize: 12, fontWeight: FontWeight.w700)),
+        ),
+        Expanded(
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(vertical: 7),
+            children: chips,
+          ),
+        ),
+      ]),
     );
+  }
+
+  Widget _subBar(List<FinderSub> subs) {
+    return _chipRow('סוג', [
+      _chip('הכל', _sub == null,
+          () => setState(() {
+                _sub = null;
+                _size = null;
+              })),
+      for (final s in subs)
+        _chip(s.label, _sub == s.label,
+            () => setState(() {
+                  _sub = s.label;
+                  _size = null;
+                })),
+    ]);
+  }
+
+  // ── step 2: narrow chips (size/colour/option) — catalog chip style ───────
+  Widget _sizeBar(String hint, List<String> chips) {
+    return _chipRow(hint.isEmpty ? 'גודל' : hint, [
+      _chip('הכל', _size == null, () => setState(() => _size = null)),
+      for (final s in chips)
+        _chip(s, _size == s, () => setState(() => _size = s)),
+    ]);
   }
 
   Widget _chip(String label, bool active, VoidCallback onTap) {
