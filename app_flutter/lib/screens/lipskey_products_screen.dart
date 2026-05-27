@@ -1225,15 +1225,26 @@ String _attrEmoji(AttrKind k) => switch (k) {
 /// Uses per-kind sub-word sets so that modifier words like "מוברש" (part of
 /// "זהב מוברש" or "ניקל מוברש") are also stripped, giving consistent frames.
 String _stripWordsOfKind(String name, AttrKind kind) {
+  var result = name;
+  // Strip multi-word subtype/color entries first (e.g. "דו כיווני", "ניקל מוברש").
+  if (kind == AttrKind.subtype) {
+    for (final s in kLipskeySubtypes) {
+      if (s.contains(' ')) result = result.replaceAll(s, ' ');
+    }
+  } else if (kind == AttrKind.color) {
+    for (final c in kLipskeyColors) {
+      if (c.contains(' ')) result = result.replaceAll(c, ' ');
+    }
+  }
   final Set<String> wordSet = switch (kind) {
-    AttrKind.color => _kColorWords,  // strip ALL color sub-words (incl. modifiers)
-    AttrKind.colorMod => _kColorModifiers,  // strip only modifier words, keep base color
+    AttrKind.color => _kColorWords,
+    AttrKind.colorMod => _kColorModifiers,
     AttrKind.model => _kModelWords,
     AttrKind.subtype => _kSubtypeWords,
     AttrKind.size => const {},
     AttrKind.type => <String>{for (final v in kLipskeyTypes) v},
   };
-  return name
+  return result
       .split(RegExp(r'\s+'))
       .where((w) => w.isNotEmpty && (kind == AttrKind.size ? !isSizeToken(w) : !wordSet.contains(w)))
       .join(' ')
@@ -1381,51 +1392,90 @@ class _NameWords extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final words = product.nameHe.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
-    // Compound type words for this product (e.g. {"ברז", "נשלף"})
     final compound = _getCompoundType(product);
     final typeWords = compound.isNotEmpty
         ? compound.split(RegExp(r'\s+')).toSet()
         : <String>{};
+
+    // Multi-word subtypes for two-word chip detection (e.g. "דו כיווני").
+    final multiSubtypes = kLipskeySubtypes.where((s) => s.contains(' ')).toSet();
+
+    final chips = <Widget>[];
+    bool compoundEmitted = false;
+    int i = 0;
+
+    while (i < words.length) {
+      final w = words[i];
+
+      // ── Compound type — emit ONCE as a single chip ──────────────────────
+      if (typeWords.contains(w)) {
+        if (!compoundEmitted && compound.isNotEmpty) {
+          compoundEmitted = true;
+          chips.add(_AttrChip(
+            word: compound,
+            kind: AttrKind.type,
+            product: product,
+            onTap: onAttrTap,
+            isOpen: openKind == AttrKind.type,
+          ));
+        }
+        // Skip all words that belong to this compound.
+        i++;
+        continue;
+      }
+
+      // ── Two-word subtype (e.g. "דו כיווני") ──────────────────────────────
+      if (i + 1 < words.length) {
+        final two = '$w ${words[i + 1]}';
+        if (multiSubtypes.contains(two)) {
+          chips.add(_AttrChip(
+            word: two,
+            kind: AttrKind.subtype,
+            product: product,
+            onTap: onAttrTap,
+            isOpen: openKind == AttrKind.subtype,
+          ));
+          i += 2;
+          continue;
+        }
+      }
+
+      // ── Single-word attribute chip ───────────────────────────────────────
+      final kind = _attrKindFor(w);
+      if (kind != null) {
+        chips.add(_AttrChip(
+          word: w,
+          kind: kind,
+          product: product,
+          onTap: onAttrTap,
+          isOpen: openKind == kind,
+        ));
+      } else if (isLinkableWord(w)) {
+        chips.add(GestureDetector(
+          onTap: () => LipskeyProductsScreen.openWordSearch(context, w),
+          child: Text(w,
+              style: const TextStyle(
+                  color: Color(0xFF3DD9B0),
+                  fontSize: 12,
+                  height: 1.3,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Color(0x552A5E52))),
+        ));
+      } else {
+        chips.add(Text(w,
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                fontSize: 12,
+                height: 1.3)));
+      }
+      i++;
+    }
+
     return Wrap(
       spacing: 4,
       runSpacing: 3,
       crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        for (final w in words)
-          if (typeWords.contains(w))
-            _AttrChip(
-              word: w,
-              kind: AttrKind.type,
-              product: product,
-              onTap: onAttrTap,
-              isOpen: openKind == AttrKind.type,
-            )
-          else if (_attrKindFor(w) != null)
-            _AttrChip(
-              word: w,
-              kind: _attrKindFor(w)!,
-              product: product,
-              onTap: onAttrTap,
-              isOpen: openKind == _attrKindFor(w),
-            )
-          else if (isLinkableWord(w))
-            GestureDetector(
-              onTap: () => LipskeyProductsScreen.openWordSearch(context, w),
-              child: Text(w,
-                  style: const TextStyle(
-                      color: Color(0xFF3DD9B0),
-                      fontSize: 12,
-                      height: 1.3,
-                      decoration: TextDecoration.underline,
-                      decorationColor: Color(0x552A5E52))),
-            )
-          else
-            Text(w,
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                    fontSize: 12,
-                    height: 1.3)),
-      ],
+      children: chips,
     );
   }
 }
