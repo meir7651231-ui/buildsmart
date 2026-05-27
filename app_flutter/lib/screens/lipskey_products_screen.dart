@@ -347,13 +347,17 @@ class LipskeyProductGridCard extends ConsumerWidget {
                         onTap: () => cart.setQtyForKey(_line(qty - 1)),
                       ),
                       Expanded(
-                        child: Text(
-                          '$qty',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: cs.onSurface,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
+                        child: GestureDetector(
+                          onTap: () => showQtyWheel(context, qty,
+                              (n) => cart.setQtyForKey(_line(n))),
+                          child: Text(
+                            '$qty',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: cs.onSurface,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                       ),
@@ -424,6 +428,59 @@ class _StepBtn extends StatelessWidget {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
+/// Wheel quantity picker — tap the number to set ANY quantity in one spin
+/// instead of tapping +/− N times. [onPick] receives the chosen 1–99.
+void showQtyWheel(BuildContext context, int current, void Function(int) onPick) {
+  var sel = current < 1 ? 1 : (current > 99 ? 99 : current);
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setSheet) => SizedBox(
+        height: 280,
+        child: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(14),
+              child: Text('בחר כמות',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+            ),
+            Expanded(
+              child: ListWheelScrollView.useDelegate(
+                itemExtent: 44,
+                perspective: 0.004,
+                physics: const FixedExtentScrollPhysics(),
+                controller: FixedExtentScrollController(initialItem: sel - 1),
+                onSelectedItemChanged: (i) => setSheet(() => sel = i + 1),
+                childDelegate: ListWheelChildBuilderDelegate(
+                  childCount: 99,
+                  builder: (_, i) => Center(
+                    child: Text('${i + 1}',
+                        style: const TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.w700)),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    onPick(sel);
+                    Navigator.pop(ctx);
+                  },
+                  child: Text('אישור — $sel'),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 class _ProductRow extends ConsumerStatefulWidget {
   const _ProductRow({
     super.key,
@@ -1072,14 +1129,18 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
         mainAxisSize: MainAxisSize.min,
         children: [
           btn('−', () => setState(() => _qty = max(1, _qty - 1))),
-          SizedBox(
-            width: 30,
-            child: Center(
-                child: Text('$_qty',
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14))),
+          GestureDetector(
+            onTap: () =>
+                showQtyWheel(context, _qty, (n) => setState(() => _qty = n)),
+            child: SizedBox(
+              width: 34,
+              child: Center(
+                  child: Text('$_qty',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14))),
+            ),
           ),
           btn('+', () => setState(() => _qty++)),
         ],
