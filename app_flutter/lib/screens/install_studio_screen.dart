@@ -741,6 +741,12 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                 ),
               ),
             ),
+            const SizedBox(height: 4),
+            const Align(
+              alignment: Alignment.centerRight,
+              child: Text('מים חמים מיד, בלי להמתין שיתחממו',
+                  style: TextStyle(color: _mute, fontSize: 10)),
+            ),
           ],
           const SizedBox(height: 8),
           Row(children: [
