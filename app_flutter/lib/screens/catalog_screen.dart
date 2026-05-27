@@ -63,6 +63,31 @@ final smartTreeCatProvider = StateProvider<String?>((_) => null);
 /// Search query within the active smart-tree category's product list.
 final smartTreeQueryProvider = StateProvider<String>((_) => '');
 
+/// Re-opens the product detail sheet for a cart line so it can be edited
+/// (brand / quantity / accessories — everything but the name). Resolves the
+/// line back to its source product: 'lip:<sku>' → Lipskey catalog product,
+/// otherwise a smart-tree [SmartProduct] by key.
+void openCartLineProductSheet(BuildContext context, SmartCartLine line) {
+  final key = line.productKey;
+  if (key.startsWith('lip:')) {
+    final sku = key.substring(4);
+    final i = kLipskeyCatalog.indexWhere((p) => p.sku == sku);
+    if (i >= 0) {
+      final product = kLipskeyCatalog[i];
+      final siblings = kLipskeyCatalog
+          .where((p) => p.categoryHe == product.categoryHe)
+          .toList();
+      showLipskeyProductSheet(context, product, siblings);
+      return;
+    }
+  }
+  final s = kSmartProducts.indexWhere((p) => p.key == key);
+  if (s >= 0) {
+    _SmartTreeProductList._openProductSheet(context, kSmartProducts[s]);
+  }
+}
+
+
 /// Currently selected category in the "קטגוריות" drill. Null = show all 11 cats.
 final catalogDrillCatProvider = StateProvider<String?>((_) => null);
 

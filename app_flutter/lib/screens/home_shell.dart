@@ -18,6 +18,11 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Cart length at which the recent-products bubble was last dismissed (via its
+/// X). The bubble re-appears once the cart grows past this — i.e. on the next
+/// add. Reset down when items are removed so a later add re-triggers it.
+final cartBubbleSeenLenProvider = StateProvider<int>((_) => 0);
+
 /// WhatsApp-style shell: AppBar + 4 bottom tabs + dial overlays.
 /// Tabs: קטלוג · שיחות · התראות · חנות (RTL order: catalog on right).
 class HomeShell extends ConsumerWidget {
@@ -106,6 +111,16 @@ class _CartFab extends ConsumerWidget {
     // Most-recent first: add() appends, so the cart's tail is the latest.
     final recent = lines.reversed.take(2).toList();
 
+    // Reset the dismiss threshold when items are removed, so a later add
+    // re-shows the bubble. (Side-effect via listen, not a build-time write.)
+    ref.listen<List<SmartCartLine>>(smartCartProvider, (prev, next) {
+      if (next.length < ref.read(cartBubbleSeenLenProvider)) {
+        ref.read(cartBubbleSeenLenProvider.notifier).state = next.length;
+      }
+    });
+    final showBubble =
+        recent.isNotEmpty && lines.length > ref.watch(cartBubbleSeenLenProvider);
+
     void openCart() {
       resetAllDials(ref);
       ref.read(mainTabProvider.notifier).state = 3;
@@ -163,9 +178,13 @@ class _CartFab extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (recent.isNotEmpty) ...[
-          _CartRecentBubble(recent: recent, onTap: openCart),
-          const SizedBox(height: 10),
+        if (showBubble) ...[
+          _CartRecentBubble(
+            recent: recent,
+            onClose: () => ref.read(cartBubbleSeenLenProvider.notifier).state =
+                lines.length,
+          ),
+          const SizedBox(height: 12),
         ],
         fab,
       ],
@@ -173,34 +192,47 @@ class _CartFab extends ConsumerWidget {
   }
 }
 
-/// Small message bubble above the cart FAB listing the last (up to two)
-/// products added to the cart. Inline preview only — no window/modal (R2).
+/// Floating-notification bubble above the cart FAB listing the last (up to
+/// two) products added. Each row is tappable → re-opens that product's detail
+/// sheet for editing (everything but the name). A small X dismisses it.
+/// Inline floating message — no full window/modal (R2).
 class _CartRecentBubble extends StatelessWidget {
-  const _CartRecentBubble({required this.recent, required this.onTap});
+  const _CartRecentBubble({required this.recent, required this.onClose});
 
   final List<SmartCartLine> recent;
-  final VoidCallback onTap;
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      elevation: 3,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 240),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (final l in recent)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          constraints: const BoxConstraints(maxWidth: 250),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: BsTokens.brand.withValues(alpha: 0.25)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.18),
+                blurRadius: 14,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final l in recent)
+                InkWell(
+                  onTap: () => openCartLineProductSheet(context, l),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 5, horizontal: 4),
                     child: Row(
                       children: [
                         Text(l.productEmoji,
@@ -227,14 +259,38 @@ class _CartRecentBubble extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.edit_outlined,
+                            size: 14, color: Colors.black38),
                       ],
                     ),
                   ),
-              ],
+                ),
+            ],
+          ),
+        ),
+        // Close X — floats at the top-start corner (right in RTL).
+        PositionedDirectional(
+          top: -8,
+          start: -8,
+          child: Material(
+            color: Colors.white,
+            shape: const CircleBorder(
+              side: BorderSide(color: Color(0x22000000)),
+            ),
+            elevation: 2,
+            child: InkWell(
+              onTap: onClose,
+              customBorder: const CircleBorder(),
+              child: const SizedBox(
+                width: 24,
+                height: 24,
+                child: Icon(Icons.close, size: 15, color: Colors.black54),
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
