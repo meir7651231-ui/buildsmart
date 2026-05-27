@@ -2944,18 +2944,6 @@ class _TreeDrill extends ConsumerWidget {
     void resetFacets() =>
         ref.read(catalogFacetProvider.notifier).state = const [];
 
-    void goBack() {
-      resetQuery();
-      if (facetSel.isNotEmpty) {
-        ref.read(catalogFacetProvider.notifier).state = [...facetSel]
-          ..removeLast();
-      } else {
-        resetFacets();
-        ref.read(catalogTreePathProvider.notifier).state = [...path]
-          ..removeLast();
-      }
-    }
-
     void cancel() {
       resetQuery();
       resetFacets();
@@ -3113,7 +3101,7 @@ class _TreeDrill extends ConsumerWidget {
         _TreeDrillBar(
           key: ValueKey('${current.id}.${facetSel.length}'),
           crumbs: crumbs,
-          onBack: goBack,
+          onBack: cancel,
           onCancel: cancel,
         ),
         Expanded(child: body),
