@@ -1271,9 +1271,10 @@ class _NameWords extends StatelessWidget {
   }
 }
 
-/// One attribute chip in the product name. Gray by default; turns orange when
-/// its picker is open (isOpen=true). Tap opens the inline picker (if siblings
-/// exist); a second tap on the same chip closes it.
+/// One attribute chip in the product name.
+/// • Has siblings → orange border; shows `word · N` where N = picker option count.
+/// • No siblings  → gray border; shows just `word`.
+/// Tapping an orange chip opens the inline picker for that dimension.
 class _AttrChip extends StatelessWidget {
   const _AttrChip({
     required this.word,
@@ -1288,13 +1289,47 @@ class _AttrChip extends StatelessWidget {
   final void Function(String word, AttrKind kind)? onTap;
   final bool isOpen;
 
+  static const _orange = Color(0xFFFF7A18);
+
+  /// Number of choices shown in the picker for [kind].
+  /// Color picker deduplicates by base colour, so count distinct bases.
+  int _pickerCount(List<LipskeyCatalogProduct> siblings) {
+    if (kind == AttrKind.color) {
+      return siblings
+          .map((s) => s.nameHe
+              .split(RegExp(r'\s+'))
+              .where((w) => _kColorWords.contains(w) && !_kColorModifiers.contains(w))
+              .join(' '))
+          .where((b) => b.isNotEmpty)
+          .toSet()
+          .length;
+    }
+    return siblings.length;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hasSiblings =
-        onTap != null && findAttrSiblings(product, word, kind).length > 1;
-    final bgColor = isOpen ? const Color(0x22FF7A18) : const Color(0x10888888);
-    final borderColor = isOpen ? const Color(0x55FF7A18) : const Color(0x30888888);
-    final textColor = isOpen ? const Color(0xFFFF9D4D) : const Color(0xFF909090);
+    final siblings =
+        onTap != null ? findAttrSiblings(product, word, kind) : <LipskeyCatalogProduct>[];
+    final count = _pickerCount(siblings);
+    final hasSiblings = count > 1;
+
+    final Color bgColor;
+    final Color borderColor;
+    final Color textColor;
+    if (isOpen) {
+      bgColor = const Color(0x33FF7A18);
+      borderColor = _orange.withOpacity(0.75);
+      textColor = _orange;
+    } else if (hasSiblings) {
+      bgColor = const Color(0x12FF7A18);
+      borderColor = const Color(0x66FF7A18);
+      textColor = _orange;
+    } else {
+      bgColor = const Color(0x10888888);
+      borderColor = const Color(0x30888888);
+      textColor = const Color(0xFF909090);
+    }
     return GestureDetector(
       onTap: hasSiblings ? () => onTap!(word, kind) : null,
       child: AnimatedContainer(
@@ -1303,10 +1338,13 @@ class _AttrChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(5),
-          border: Border.all(color: borderColor),
+          border: Border.all(
+            color: borderColor,
+            width: hasSiblings ? 1.2 : 0.9,
+          ),
         ),
         child: Text(
-          hasSiblings ? '${_attrEmoji(kind)} $word ⟳' : '${_attrEmoji(kind)} $word',
+          hasSiblings ? '$word · $count' : word,
           style: TextStyle(
             color: textColor,
             fontSize: 11,
