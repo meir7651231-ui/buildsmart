@@ -18,10 +18,9 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Cart length at which the recent-products bubble was last dismissed (via its
-/// X). The bubble re-appears once the cart grows past this — i.e. on the next
-/// add. Reset down when items are removed so a later add re-triggers it.
-final cartBubbleSeenLenProvider = StateProvider<int>((_) => 0);
+/// Cart line indices whose recent-add chat bubble the user dismissed (via its
+/// X). Cleared whenever the cart shrinks so later adds surface fresh bubbles.
+final cartBubbleDismissedProvider = StateProvider<Set<int>>((_) => {});
 
 /// WhatsApp-style shell: AppBar + 4 bottom tabs + dial overlays.
 /// Tabs: קטלוג · שיחות · התראות · חנות (RTL order: catalog on right).
@@ -108,18 +107,23 @@ class _CartFab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final lines = ref.watch(smartCartProvider);
     final count = lines.fold<int>(0, (sum, l) => sum + l.productQty);
-    // Most-recent first: add() appends, so the cart's tail is the latest.
-    final recent = lines.reversed.take(2).toList();
+    final dismissed = ref.watch(cartBubbleDismissedProvider);
 
-    // Reset the dismiss threshold when items are removed, so a later add
-    // re-shows the bubble. (Side-effect via listen, not a build-time write.)
+    // Clear dismissals when the cart shrinks (indices would otherwise drift),
+    // so a later add surfaces fresh bubbles. Side-effect via listen.
     ref.listen<List<SmartCartLine>>(smartCartProvider, (prev, next) {
-      if (next.length < ref.read(cartBubbleSeenLenProvider)) {
-        ref.read(cartBubbleSeenLenProvider.notifier).state = next.length;
+      if (prev != null && next.length < prev.length) {
+        ref.read(cartBubbleDismissedProvider.notifier).state = {};
       }
     });
-    final showBubble =
-        recent.isNotEmpty && lines.length > ref.watch(cartBubbleSeenLenProvider);
+
+    // Last two added (chronological: older on top, newest nearest the FAB),
+    // minus any the user closed.
+    final n = lines.length;
+    final recentIdx = [
+      for (var i = n - 2 < 0 ? 0 : n - 2; i < n; i++)
+        if (!dismissed.contains(i)) i,
+    ];
 
     void openCart() {
       resetAllDials(ref);
@@ -178,28 +182,35 @@ class _CartFab extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (showBubble) ...[
-          _CartRecentBubble(
-            recent: recent,
-            onClose: () => ref.read(cartBubbleSeenLenProvider.notifier).state =
-                lines.length,
+        for (final i in recentIdx) ...[
+          _CartChatBubble(
+            line: lines[i],
+            onTap: () => openCartLineProductSheet(context, lines[i]),
+            onClose: () => ref.read(cartBubbleDismissedProvider.notifier).state =
+                {...dismissed, i},
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
         ],
+        const SizedBox(height: 2),
         fab,
       ],
     );
   }
 }
 
-/// Floating-notification bubble above the cart FAB listing the last (up to
-/// two) products added. Each row is tappable → re-opens that product's detail
-/// sheet for editing (everything but the name). A small X dismisses it.
+/// A single recent-add product styled as a chat bubble above the cart FAB.
+/// Tapping the bubble re-opens that product's detail sheet for editing
+/// (everything but the name); the small circular X dismisses just this bubble.
 /// Inline floating message — no full window/modal (R2).
-class _CartRecentBubble extends StatelessWidget {
-  const _CartRecentBubble({required this.recent, required this.onClose});
+class _CartChatBubble extends StatelessWidget {
+  const _CartChatBubble({
+    required this.line,
+    required this.onTap,
+    required this.onClose,
+  });
 
-  final List<SmartCartLine> recent;
+  final SmartCartLine line;
+  final VoidCallback onTap;
   final VoidCallback onClose;
 
   @override
@@ -207,108 +218,107 @@ class _CartRecentBubble extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Container(
-          constraints: const BoxConstraints(maxWidth: 250),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: BsTokens.brand.withValues(alpha: 0.25)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.18),
-                blurRadius: 14,
-                offset: const Offset(0, 5),
-              ),
-            ],
+        InkWell(
+          onTap: onTap,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+            bottomRight: Radius.circular(16),
+            bottomLeft: Radius.circular(4),
           ),
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final l in recent)
-                InkWell(
-                  onTap: () => openCartLineProductSheet(context, l),
-                  borderRadius: BorderRadius.circular(10),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(l.productEmoji,
-                            style: const TextStyle(fontSize: 16)),
-                        const SizedBox(width: 7),
-                        // Main name + product-type description (two compact
-                        // lines, each clipped to one line).
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l.productName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Color(0xFF1A1A1A),
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.1,
-                                ),
-                              ),
-                              Text(
-                                l.brandName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Color(0xFF888888),
-                                  fontSize: 10.5,
-                                  height: 1.2,
-                                ),
-                              ),
-                            ],
-                          ),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 250),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              // Chat-bubble shape: tail-corner (bottom-left, toward the FAB)
+              // squared off, the rest rounded.
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+                bottomLeft: Radius.circular(4),
+              ),
+              border: Border.all(color: BsTokens.brand.withValues(alpha: 0.25)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.16),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(line.productEmoji, style: const TextStyle(fontSize: 16)),
+                const SizedBox(width: 7),
+                // Main name + product-type description (two compact lines).
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        line.productName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          height: 1.1,
                         ),
-                        const SizedBox(width: 8),
-                        // Price + quantity.
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '₪${l.total}',
-                              style: const TextStyle(
-                                color: BsTokens.brand,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                height: 1.1,
-                              ),
-                            ),
-                            Text(
-                              '×${l.productQty}',
-                              style: const TextStyle(
-                                color: Color(0xFF888888),
-                                fontSize: 10.5,
-                                height: 1.2,
-                              ),
-                            ),
-                          ],
+                      ),
+                      Text(
+                        line.brandName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF888888),
+                          fontSize: 10.5,
+                          height: 1.2,
                         ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.edit_outlined,
-                            size: 13, color: Colors.black38),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-            ],
+                const SizedBox(width: 8),
+                // Price + quantity.
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '₪${line.total}',
+                      style: const TextStyle(
+                        color: BsTokens.brand,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        height: 1.1,
+                      ),
+                    ),
+                    Text(
+                      '×${line.productQty}',
+                      style: const TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 10.5,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.edit_outlined,
+                    size: 13, color: Colors.black38),
+              ],
+            ),
           ),
         ),
-        // Close X — floats at the top-start corner (right in RTL).
+        // Close X — small circle floating at the top-start corner.
         PositionedDirectional(
-          top: -8,
-          start: -8,
+          top: -7,
+          start: -7,
           child: Material(
             color: Colors.white,
             shape: const CircleBorder(
@@ -319,9 +329,9 @@ class _CartRecentBubble extends StatelessWidget {
               onTap: onClose,
               customBorder: const CircleBorder(),
               child: const SizedBox(
-                width: 24,
-                height: 24,
-                child: Icon(Icons.close, size: 15, color: Colors.black54),
+                width: 20,
+                height: 20,
+                child: Icon(Icons.close, size: 13, color: Colors.black54),
               ),
             ),
           ),
