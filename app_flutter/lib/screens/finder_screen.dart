@@ -68,13 +68,32 @@ List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
 final RegExp _sizeRe =
     RegExp(r'DN ?\d+|\d+(?:/\d+)?(?:×\d+(?:/\d+)?)?["׳]|\d+×\d+|\d+/\d+');
 
+/// Size labels a product carries — readable tokens from the name, or (when the
+/// name has none, e.g. gray pipes) derived from dims (DN + length in metres).
+Set<String> _productSizes(LipskeyCatalogProduct p) {
+  final fromName = <String>{};
+  for (final m in _sizeRe.allMatches(p.nameHe)) {
+    final v = m.group(0)!.trim();
+    if (v.length <= 12) fromName.add(v);
+  }
+  if (fromName.isNotEmpty) return fromName;
+  final d = p.dims;
+  if (d == null) return const {};
+  final out = <String>{};
+  final dn = (d['DN'] ?? d['dn'] ?? d['mm'])?.toString();
+  if (dn != null && dn.trim().isNotEmpty) out.add('DN$dn');
+  final cm = double.tryParse(d['L (cm)']?.toString() ?? '');
+  if (cm != null) {
+    final m = cm / 100;
+    out.add('${m == m.roundToDouble() ? m.toInt() : m} מ׳');
+  }
+  return out;
+}
+
 List<String> _sizesIn(List<LipskeyCatalogProduct> ps) {
   final set = <String>{};
   for (final p in ps) {
-    for (final m in _sizeRe.allMatches(p.nameHe)) {
-      final s = m.group(0)!.trim();
-      if (s.length <= 12) set.add(s);
-    }
+    set.addAll(_productSizes(p));
   }
   return set.toList()..sort((a, b) => a.compareTo(b));
 }
@@ -97,7 +116,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     final sizes = _sizesIn(base);
     final results = _size == null
         ? base
-        : base.where((p) => p.nameHe.contains(_size!)).toList();
+        : base.where((p) => _productSizes(p).contains(_size!)).toList();
 
     return Column(
       children: [
