@@ -53,6 +53,36 @@ const List<FinderGroup> kFinderGroups = [
   FinderGroup('🔧', 'אחר', {}), // catch-all
 ];
 
+/// A curated sub-type within a finder group: a plain label + the real
+/// `categoryHe` values it covers. Lets us merge catalog misfiles (e.g. the lone
+/// "ברזים" garden tap belongs under "גן") and drop jargon-y 1-item categories,
+/// instead of dumping raw plumber categories on a non-technical user.
+class FinderSub {
+  const FinderSub(this.label, this.cats);
+  final String label;
+  final Set<String> cats;
+}
+
+/// Curated sub-types per group label. Groups without an entry fall back to the
+/// auto path (real categories, merged by cleaned label). Labels are verbatim
+/// tokens of real catalog categories — no invented Hebrew (R6/R8).
+const Map<String, List<FinderSub>> kFinderSubs = {
+  'ברזים': [
+    FinderSub('כיור', {'ברזי כיור'}),
+    FinderSub('מטבח', {'ברזי מטבח'}),
+    FinderSub('אמבטיה', {'ברזי אמבטיה'}),
+    FinderSub('מקלחת', {'ברזי מקלחת'}),
+    FinderSub('קיר', {'ברזי קיר'}),
+    FinderSub('גן', {'ברזי גן', 'ברזים'}), // folds the lone misfiled garden tap
+    FinderSub('מעבר', {'ברזי מעבר'}),
+    FinderSub('ניל', {'ברזי ניל'}),
+    FinderSub('דלי', {'ברזי דלי'}),
+    FinderSub('מחלקים', {'מחלקים'}),
+    FinderSub('נקודות מים', {'נקודות מים'}),
+    FinderSub('אביזרים', {'אביזרי ברזים'}),
+  ],
+};
+
 final Set<String> _claimedCats = {for (final g in kFinderGroups) ...g.cats};
 
 List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
@@ -176,10 +206,17 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     if (_group == null) return _typeList();
 
     final base = _productsForGroup(_group!);
-    final subs = _subTypes(base);
-    final pool = _sub == null
+    final subs = _subsFor(base);
+    FinderSub? sel;
+    for (final s in subs) {
+      if (s.label == _sub) {
+        sel = s;
+        break;
+      }
+    }
+    final pool = sel == null
         ? base
-        : base.where((p) => p.categoryHe == _sub).toList();
+        : base.where((p) => sel!.cats.contains(p.categoryHe)).toList();
     final sizes = _narrowOptions(pool, _sub);
     final results = _size == null
         ? pool
@@ -293,14 +330,29 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     );
   }
 
-  // ── step 1b: sub-type chips — the categories within the group ────────────
-  List<String> _subTypes(List<LipskeyCatalogProduct> base) {
+  // ── step 1b: sub-type chips ──────────────────────────────────────────────
+  // Curated sub-types when the group defines them; otherwise the real
+  // categories, merged by cleaned label so two categories never show as
+  // duplicate chips (e.g. "אביזרי ברזים" + "ברזים" → one "ברזים").
+  List<FinderSub> _subsFor(List<LipskeyCatalogProduct> base) {
+    final present = <String>{for (final p in base) p.categoryHe};
+    final curated = kFinderSubs[_group!.label];
+    if (curated != null) {
+      return [
+        for (final s in curated)
+          if (s.cats.any(present.contains)) s,
+      ];
+    }
+    final cats = <String, Set<String>>{};
     final counts = <String, int>{};
     for (final p in base) {
-      counts[p.categoryHe] = (counts[p.categoryHe] ?? 0) + 1;
+      final l = _cleanSub(p.categoryHe);
+      (cats[l] ??= <String>{}).add(p.categoryHe);
+      counts[l] = (counts[l] ?? 0) + 1;
     }
-    return counts.keys.toList()
+    final labels = cats.keys.toList()
       ..sort((a, b) => counts[b]!.compareTo(counts[a]!));
+    return [for (final l in labels) FinderSub(l, cats[l]!)];
   }
 
   String _cleanSub(String cat) {
@@ -310,7 +362,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     return cat;
   }
 
-  Widget _subBar(List<String> subs) {
+  Widget _subBar(List<FinderSub> subs) {
     return Container(
       height: 46,
       decoration: const BoxDecoration(
@@ -325,10 +377,10 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                     _sub = null;
                     _size = null;
                   })),
-          for (final c in subs)
-            _chip(_cleanSub(c), _sub == c,
+          for (final s in subs)
+            _chip(s.label, _sub == s.label,
                 () => setState(() {
-                      _sub = c;
+                      _sub = s.label;
                       _size = null;
                     })),
         ],
