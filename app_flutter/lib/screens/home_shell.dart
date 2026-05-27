@@ -389,7 +389,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.06 · 27.5.26 · ציפי צבע + גימור נפרדים',
+                          'v4.07 · 27.5.26 · סטודיו: מסך פתיחה — בחירה ויזואלית',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
