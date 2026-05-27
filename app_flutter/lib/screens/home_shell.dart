@@ -391,7 +391,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.19 · 27.5.26 · מאתר: ס"מ/מעלות + ציר דגם (צמצום רחב)',
+                          'v4.20 · 27.5.26 · מאתר: facets + ציר צבע (91% ≤17)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
