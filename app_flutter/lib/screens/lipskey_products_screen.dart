@@ -1280,23 +1280,40 @@ String productListDedupeKey(LipskeyCatalogProduct p) {
   return '${p.brand}||${p.categoryHe}||$stripped';
 }
 
-/// Find products in the same category that share the same frame as [p] (after
-/// stripping all words of [kind]) and have at least one word of [kind] in their
-/// name. These are the siblings that the chip should cycle through.
+/// Find sibling products for a given attribute kind.
 ///
-/// For [AttrKind.colorMod] the "plain" sibling (no modifier) is also included
-/// so that e.g. "ניקל מוברש" and "ניקל" appear together in the finish picker.
+/// Model is top-level (chip 1): any product in the same category with a
+/// different model word qualifies — no frame matching needed.
+///
+/// Color / colorMod / subtype / size are frame-based (chip 2+): the frame
+/// (name minus words of [kind]) must match so that only same-type/same-model
+/// variants appear in the picker.
 List<LipskeyCatalogProduct> findAttrSiblings(
   LipskeyCatalogProduct p,
   String word,
   AttrKind kind,
 ) {
+  if (kind == AttrKind.model) {
+    // Category-wide: one representative per distinct model word.
+    final seen = <String>{};
+    final result = <LipskeyCatalogProduct>[];
+    for (final q in kLipskeyCatalog) {
+      if (q.categoryHe != p.categoryHe) continue;
+      final modelWord = q.nameHe
+          .split(RegExp(r'\s+'))
+          .firstWhere((w) => _attrKindFor(w) == AttrKind.model,
+              orElse: () => '');
+      if (modelWord.isEmpty) continue;
+      if (seen.add(modelWord)) result.add(q);
+    }
+    return result.length <= 1 ? [p] : result;
+  }
+
   final pFrame = _stripWordsOfKind(p.nameHe, kind);
   if (pFrame.length < 2) return [p];
   return kLipskeyCatalog.where((q) {
     if (q.categoryHe != p.categoryHe) return false;
     if (_stripWordsOfKind(q.nameHe, kind) != pFrame) return false;
-    // colorMod: frame match is enough (includes the plain variant with no modifier)
     if (kind == AttrKind.colorMod) return true;
     return q.nameHe
         .split(RegExp(r'\s+'))
