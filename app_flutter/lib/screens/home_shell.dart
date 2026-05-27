@@ -391,7 +391,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.24 · 27.5.26 · מאתר: ניקוז נקי + תיקון misfiles',
+                          'v4.25 · 27.5.26 · קטלוג: סיווג מתוקן לסיפון ולמחסום רצפה',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
