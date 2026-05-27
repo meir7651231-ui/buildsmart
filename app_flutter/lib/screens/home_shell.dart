@@ -391,7 +391,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.36 · 27.5.26 · דגם = כל הקטגוריה (כתום אם יש בן דוד)',
+                          'v4.37 · 27.5.26 · מאתר: סדר קבוצות לפי חשיבות + אסלות מסודר',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
