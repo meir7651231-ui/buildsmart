@@ -478,10 +478,22 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   }
 
   /// The attribute value(s) of [product] for the given [kind].
-  String _attrVal(LipskeyCatalogProduct product, AttrKind kind) => product.nameHe
-      .split(RegExp(r'\s+'))
-      .where((w) => _attrKindFor(w) == kind)
-      .join(' ');
+  /// Matches the longest entry from the attribute list so that "ניקל מוברש"
+  /// is returned instead of just "ניקל" when both words are present.
+  String _attrVal(LipskeyCatalogProduct product, AttrKind kind) {
+    final words = product.nameHe.split(RegExp(r'\s+'));
+    final entries = switch (kind) {
+      AttrKind.color => kLipskeyColors,
+      AttrKind.model => kLipskeyModels,
+      AttrKind.subtype => kLipskeySubtypes,
+      AttrKind.size => const <String>[],
+    };
+    final sorted = [...entries]..sort((a, b) => b.length.compareTo(a.length));
+    for (final entry in sorted) {
+      if (entry.split(RegExp(r'\s+')).every(words.contains)) return entry;
+    }
+    return words.where((w) => _attrKindFor(w) == kind).join(' ');
+  }
 
   void _cycleAttr(String word, AttrKind kind) {
     final siblings = findAttrSiblings(p, word, kind);
@@ -789,7 +801,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             ),
             const SizedBox(height: 4),
             // line 2: name words as tappable chips — any attribute chip cycles
-            _NameWords(product: p, onAttrTap: _cycleAttr),
+            _NameWords(product: p, onAttrTap: _cycleAttr, openKind: _pickerKind),
             const SizedBox(height: 8),
             // brand + sku
             Row(
@@ -1046,10 +1058,18 @@ String _attrEmoji(AttrKind k) => switch (k) {
 
 /// Drop every word that belongs to [kind] from a name. What remains is the
 /// "frame" — the part of the name that should match between siblings.
+/// Uses per-kind sub-word sets so that modifier words like "מוברש" (part of
+/// "זהב מוברש" or "ניקל מוברש") are also stripped, giving consistent frames.
 String _stripWordsOfKind(String name, AttrKind kind) {
+  final Set<String> wordSet = switch (kind) {
+    AttrKind.color => _kColorWords,
+    AttrKind.model => _kModelWords,
+    AttrKind.subtype => _kSubtypeWords,
+    AttrKind.size => const {},
+  };
   return name
       .split(RegExp(r'\s+'))
-      .where((w) => w.isNotEmpty && _attrKindFor(w) != kind)
+      .where((w) => w.isNotEmpty && (kind == AttrKind.size ? !isSizeToken(w) : !wordSet.contains(w)))
       .join(' ')
       .trim();
 }
@@ -1061,6 +1081,19 @@ String _stripWordsOfKind(String name, AttrKind kind) {
 final _kAttrWordSet = <String>{
   for (final v in [...kLipskeyColors, ...kLipskeyModels, ...kLipskeySubtypes])
     ...v.split(RegExp(r'\s+')).where((w) => w.length >= 2),
+};
+
+// Per-kind sub-word sets — used by _stripWordsOfKind to strip ALL sub-words
+// of a multi-word entry (e.g. "מוברש" from "ניקל מוברש") so that frames
+// match across all color variants of a product family.
+final _kColorWords = <String>{
+  for (final v in kLipskeyColors) ...v.split(RegExp(r'\s+')).where((w) => w.length >= 2),
+};
+final _kModelWords = <String>{
+  for (final v in kLipskeyModels) ...v.split(RegExp(r'\s+')).where((w) => w.length >= 2),
+};
+final _kSubtypeWords = <String>{
+  for (final v in kLipskeySubtypes) ...v.split(RegExp(r'\s+')).where((w) => w.length >= 2),
 };
 
 /// Deduplication key for the product list view.  Two products get the same key
@@ -1098,11 +1131,13 @@ List<LipskeyCatalogProduct> findAttrSiblings(
 
 // ── name split into tappable chips: attribute chips (orange) + words (teal) ─
 class _NameWords extends StatelessWidget {
-  const _NameWords({required this.product, this.onAttrTap});
+  const _NameWords({required this.product, this.onAttrTap, this.openKind});
   final LipskeyCatalogProduct product;
   /// Tap handler for any attribute chip. Receives the clicked word and its
   /// kind so the card can cycle to the next sibling for that attribute.
   final void Function(String word, AttrKind kind)? onAttrTap;
+  /// The attribute kind whose picker is currently open — that chip gets orange styling.
+  final AttrKind? openKind;
 
   @override
   Widget build(BuildContext context) {
@@ -1119,6 +1154,7 @@ class _NameWords extends StatelessWidget {
               kind: _attrKindFor(w)!,
               product: product,
               onTap: onAttrTap,
+              isOpen: openKind == _attrKindFor(w),
             )
           else if (isLinkableWord(w))
             GestureDetector(
@@ -1142,38 +1178,44 @@ class _NameWords extends StatelessWidget {
   }
 }
 
-/// One attribute chip in the product name. Looks like the size chip already
-/// did; tap cycles through siblings that differ only in this attribute. When
-/// only one variant exists, the chip stays but the cycle arrow is hidden.
+/// One attribute chip in the product name. Gray by default; turns orange when
+/// its picker is open (isOpen=true). Tap opens the inline picker (if siblings
+/// exist); a second tap on the same chip closes it.
 class _AttrChip extends StatelessWidget {
   const _AttrChip({
     required this.word,
     required this.kind,
     required this.product,
     required this.onTap,
+    this.isOpen = false,
   });
   final String word;
   final AttrKind kind;
   final LipskeyCatalogProduct product;
   final void Function(String word, AttrKind kind)? onTap;
+  final bool isOpen;
 
   @override
   Widget build(BuildContext context) {
     final hasSiblings =
         onTap != null && findAttrSiblings(product, word, kind).length > 1;
+    final bgColor = isOpen ? const Color(0x22FF7A18) : const Color(0x10888888);
+    final borderColor = isOpen ? const Color(0x55FF7A18) : const Color(0x30888888);
+    final textColor = isOpen ? const Color(0xFFFF9D4D) : const Color(0xFF909090);
     return GestureDetector(
       onTap: hasSiblings ? () => onTap!(word, kind) : null,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
         decoration: BoxDecoration(
-          color: const Color(0x22FF7A18),
+          color: bgColor,
           borderRadius: BorderRadius.circular(5),
-          border: Border.all(color: const Color(0x55FF7A18)),
+          border: Border.all(color: borderColor),
         ),
         child: Text(
           hasSiblings ? '${_attrEmoji(kind)} $word ⟳' : '${_attrEmoji(kind)} $word',
-          style: const TextStyle(
-            color: Color(0xFFFF9D4D),
+          style: TextStyle(
+            color: textColor,
             fontSize: 11,
             fontWeight: FontWeight.w600,
           ),

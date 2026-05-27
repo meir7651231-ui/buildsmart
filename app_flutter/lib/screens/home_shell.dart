@@ -285,7 +285,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.04 · 27.5.26 · פולו + קצרה/ארוכה dedup',
+                          'v4.05 · 27.5.26 · בורר צבע + כל הוריאנטים',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
