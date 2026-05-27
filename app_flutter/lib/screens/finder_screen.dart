@@ -357,7 +357,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
       itemCount: kFinderGroups.length,
       separatorBuilder: (_, __) => const Divider(
         height: 1,
-        indent: 76,
+        indent: 82,
         color: _surface,
       ),
       itemBuilder: (_, i) {
@@ -370,15 +370,15 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
             _size = null;
           }),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(children: [
               Container(
-                width: 50,
-                height: 50,
+                width: 54,
+                height: 54,
                 decoration: const BoxDecoration(
                     color: _surface, shape: BoxShape.circle),
                 alignment: Alignment.center,
-                child: Text(g.emoji, style: const TextStyle(fontSize: 24)),
+                child: Text(g.emoji, style: const TextStyle(fontSize: 26)),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -388,7 +388,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                     Text(g.label,
                         style: const TextStyle(
                             color: _ink,
-                            fontSize: 16,
+                            fontSize: 17,
                             fontWeight: FontWeight.w600)),
                     const SizedBox(height: 3),
                     Text('$count מוצרים',
@@ -404,15 +404,24 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     );
   }
 
-  // ── selected-type header (back to types) — drill-bar style ───────────────
+  // ── selected-type header — breadcrumb + back ONE level (size→sub→types) ──
   Widget _header() {
+    final crumbs = <String>[
+      _group!.label,
+      if (_sub != null) _sub!,
+      if (_size != null) _size!,
+    ];
     return Material(
       color: Colors.white,
       child: InkWell(
         onTap: () => setState(() {
-          _group = null;
-          _sub = null;
-          _size = null;
+          if (_size != null) {
+            _size = null;
+          } else if (_sub != null) {
+            _sub = null;
+          } else {
+            _group = null;
+          }
         }),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -428,9 +437,13 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
               child: Text(_group!.emoji, style: const TextStyle(fontSize: 18)),
             ),
             const SizedBox(width: 10),
-            Text(_group!.label,
-                style: const TextStyle(
-                    color: _ink, fontSize: 16, fontWeight: FontWeight.w700)),
+            Expanded(
+              child: Text(crumbs.join('  ›  '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: _ink, fontSize: 16, fontWeight: FontWeight.w700)),
+            ),
           ]),
         ),
       ),
