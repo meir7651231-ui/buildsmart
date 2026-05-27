@@ -453,26 +453,35 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   bool _open = false;
   int _qty = 1;
   _Unit _unit = _Unit.single;
+  /// Local cycle state for standalone cards (when no onCycle parent callback).
+  LipskeyCatalogProduct? _localProduct;
 
   static const _brand = Color(0xFFFF7A18);
   static const _teal = Color(0xFF3DD9B0);
   Color get _muted => Theme.of(context).colorScheme.onSurface.withOpacity(0.45);
   Color get _line => Theme.of(context).colorScheme.outline.withOpacity(0.2);
 
-  /// Currently-displayed product — passed in by the parent list.
-  LipskeyCatalogProduct get p => widget.product;
+  /// Currently-displayed product — uses local state for standalone cards.
+  LipskeyCatalogProduct get p => _localProduct ?? widget.product;
 
-  /// Cycle to the next sibling that differs only in [word] of [kind].
-  /// Reports the new product up to the parent; the parent owns the swap state.
+  @override
+  void didUpdateWidget(_ProductRow old) {
+    super.didUpdateWidget(old);
+    if (old.product.sku != widget.product.sku) _localProduct = null;
+  }
+
   void _cycleAttr(String word, AttrKind kind) {
-    final cb = widget.onCycle;
-    if (cb == null) return;
     final siblings = findAttrSiblings(p, word, kind);
     if (siblings.length <= 1) return;
     final idx = siblings.indexWhere((q) => q.sku == p.sku);
     final next = siblings[(idx < 0 ? 0 : (idx + 1) % siblings.length)];
     if (next.sku == p.sku) return;
-    cb(next);
+    final cb = widget.onCycle;
+    if (cb != null) {
+      cb(next);
+    } else {
+      setState(() => _localProduct = next);
+    }
   }
 
   int get _unitMult => switch (_unit) {
@@ -501,13 +510,17 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   /// Cycle to the next product in the canonical family (handles identical-name
   /// duplicates as well as attribute variants).
   void _cycleFamily() {
-    final cb = widget.onCycle;
     final sibs = widget.familySiblings;
-    if (cb == null || sibs.length < 2) return;
+    if (sibs.length < 2) return;
     final idx = sibs.indexWhere((q) => q.sku == p.sku);
     final next = sibs[(idx < 0 ? 0 : (idx + 1) % sibs.length)];
     if (next.sku == p.sku) return;
-    cb(next);
+    final cb = widget.onCycle;
+    if (cb != null) {
+      cb(next);
+    } else {
+      setState(() => _localProduct = next);
+    }
   }
 
   void _openSheet() =>
