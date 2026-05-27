@@ -1832,7 +1832,7 @@ class _InteractiveChips extends StatelessWidget {
         (
           label: 'סוג',
           value: compound.isNotEmpty ? compound : parsed.type!,
-          color: const Color(0xFF3DD9B0),
+          color: const Color(0xFFFF9D4D),
           key: 'type',
         ),
       if (parsed.subtype != null)
