@@ -54,7 +54,9 @@ final searchQueryProvider = StateProvider<String>((_) => '');
 /// product haystack — all real catalogue vocabulary (search aliasing, not new
 /// data: R8 untouched).
 const Map<String, List<String>> kSearchSynonyms = {
-  'שירותים': ['אסלה', 'אסלות'],
+  // precise toilet-fixture tokens — NOT bare "אסלה", which also lives in
+  // connector categories (מסעפים וחיבורי אסלה / זקיף אסלה) and over-matched.
+  'שירותים': ['מושב', 'אסלות וכיורים', 'אביזרי אסלה'],
   'אסלה': ['אסלה', 'מושב'],
   'ניקוז': ['ניקוז', 'מחסום', 'סיפון', 'מאסף', 'תעלת'],
   'מקלחת': ['מקלחת', 'דוש', 'מזלף'],
@@ -92,6 +94,39 @@ bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery,
   }
 
   return requireAll ? tokens.every(hit) : tokens.any(hit);
+}
+
+/// Relevance score for ranking search results (higher = better): a name match
+/// beats a category-only match beats a synonym/colour match, so the product the
+/// user actually meant surfaces first (e.g. a toilet seat above a toilet-branch
+/// connector for "שירותים"). Used as the default sort when a query is present.
+int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
+  final q = _normForSearch(rawQuery.trim());
+  if (q.isEmpty) return 0;
+  final name = _normForSearch(p.nameHe);
+  final cat = _normForSearch(p.categoryHe);
+  final color = _normForSearch(p.color ?? '');
+  var score = 0;
+  if (name.contains(q)) score += 100; // whole query in the name
+  for (final t in q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty)) {
+    if (name.contains(t)) {
+      score += 20;
+    } else if (cat.contains(t)) {
+      score += 8;
+    } else if (color.contains(t)) {
+      score += 6;
+    } else {
+      final alts = kSearchSynonyms[t];
+      if (alts != null) {
+        if (alts.any((a) => name.contains(_normForSearch(a)))) {
+          score += 12;
+        } else if (alts.any((a) => cat.contains(_normForSearch(a)))) {
+          score += 4;
+        }
+      }
+    }
+  }
+  return score;
 }
 
 /// Active search scope chip (הכל / מוצרים / קטגוריות / מסכים).
@@ -1813,10 +1848,16 @@ class _SearchResultsList extends ConsumerWidget {
           .toList();
     }
 
+    // Default order ranks by relevance (best match first); an explicit
+    // ↕️ sort (name/SKU) overrides it.
+    List<LipskeyCatalogProduct> orderProducts(List<LipskeyCatalogProduct> ps) {
+      if (sort != ProductSort.byOrder) return _sortProducts(ps, sort);
+      return [...ps]..sort(
+          (a, b) => searchRelevance(b, query).compareTo(searchRelevance(a, query)));
+    }
+
     final products = showProducts
-        ? _sortProducts(filterByImage(matchProducts(), imageOnly), sort)
-            .take(40)
-            .toList()
+        ? orderProducts(filterByImage(matchProducts(), imageOnly)).take(40).toList()
         : const <LipskeyCatalogProduct>[];
 
     if (filtered.isEmpty && products.isEmpty) {

@@ -203,5 +203,19 @@ void main() {
       final p = kLipskeyCatalog.firstWhere((p) => (p.color ?? '').isNotEmpty);
       expect(catalogProductMatchesQuery(p, p.color!), isTrue);
     });
+
+    test('שירותים is precise — does not match toilet-branch connectors', () {
+      final connector =
+          kLipskeyCatalog.firstWhere((p) => p.categoryHe == 'מסעפים וחיבורי אסלה');
+      expect(catalogProductMatchesQuery(connector, 'שירותים'), isFalse);
+      final seat = kLipskeyCatalog.firstWhere((p) => p.categoryHe == 'מושבי אסלה');
+      expect(catalogProductMatchesQuery(seat, 'שירותים'), isTrue);
+    });
+
+    test('relevance ranks a name match above a synonym match', () {
+      final seat = kLipskeyCatalog.firstWhere((p) => p.nameHe.contains('מושב'));
+      expect(searchRelevance(seat, 'מושב'),
+          greaterThan(searchRelevance(seat, 'שירותים')));
+    });
   });
 }
