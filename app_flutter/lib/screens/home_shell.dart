@@ -127,6 +127,8 @@ class _CartFab extends ConsumerWidget {
 
     void openCart() {
       resetAllDials(ref);
+      // Land on the store's "הסל" filter so only cart items show.
+      ref.read(storeSectionProvider.notifier).state = StoreSection.cart;
       ref.read(mainTabProvider.notifier).state = 3;
     }
 
@@ -389,7 +391,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.12 · 27.5.26 · מאתר: בחר סוג+גודל בלי לדעת קטלוג',
+                          'v4.13 · 27.5.26 · מאתר: עיצוב תואם-קטלוג (שורות+ציפים)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
