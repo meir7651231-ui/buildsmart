@@ -1,15 +1,17 @@
-// "מאתר" — a non-technical product finder. Instead of navigating the plumber
-// taxonomy, the user answers the two questions a layman CAN answer:
-//   1. מה זה? (a plain-language type tile — not "אביזרי נחושת"/"מחברי HDPE")
-//   2. איזה גודל? (a size chip read straight off their list)
-// then taps a result to add it (with the existing card's variant picker + cart).
-// Renders results through the shared LipskeyProductsList so cards behave exactly
-// like the rest of the catalog (variant families, add-to-cart).
+// "מאתר" — a non-technical product finder, built in the existing catalog's
+// design language (WhatsApp-style rows + chips). The user answers the two
+// questions a layman can answer: מה זה (a plain-language type — not the plumber
+// taxonomy) and איזה גודל (a size read off their list). Results render through
+// the shared LipskeyProductsList so cards behave like the rest of the catalog.
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+const _ink = Color(0xFF1A1A1A);
+const _mute = Color(0xFF888888);
+const _surface = Color(0xFFF5F5F5);
 
 /// A plain-language product group: a layman label + the plumber `categoryHe`
 /// values it maps to. Empty [cats] marks the catch-all ("אחר").
@@ -51,10 +53,7 @@ const List<FinderGroup> kFinderGroups = [
   FinderGroup('🔧', 'אחר', {}), // catch-all
 ];
 
-/// Every category claimed by a non-catch-all group.
-final Set<String> _claimedCats = {
-  for (final g in kFinderGroups) ...g.cats,
-};
+final Set<String> _claimedCats = {for (final g in kFinderGroups) ...g.cats};
 
 List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
   if (g.cats.isEmpty) {
@@ -65,9 +64,9 @@ List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
   return kLipskeyCatalog.where((p) => g.cats.contains(p.categoryHe)).toList();
 }
 
-/// Readable size tokens found in product names (1/2" · 3/4" · DN40 · 16×20 · 2").
-final RegExp _sizeRe = RegExp(
-    r'DN ?\d+|\d+(?:/\d+)?(?:×\d+(?:/\d+)?)?["׳]|\d+×\d+|\d+/\d+');
+/// Readable size tokens found in product names (1/2" · 3/4" · DN40 · 16×20).
+final RegExp _sizeRe =
+    RegExp(r'DN ?\d+|\d+(?:/\d+)?(?:×\d+(?:/\d+)?)?["׳]|\d+×\d+|\d+/\d+');
 
 List<String> _sizesIn(List<LipskeyCatalogProduct> ps) {
   final set = <String>{};
@@ -77,8 +76,7 @@ List<String> _sizesIn(List<LipskeyCatalogProduct> ps) {
       if (s.length <= 12) set.add(s);
     }
   }
-  final list = set.toList()..sort((a, b) => a.compareTo(b));
-  return list;
+  return set.toList()..sort((a, b) => a.compareTo(b));
 }
 
 class FinderScreen extends ConsumerStatefulWidget {
@@ -93,7 +91,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_group == null) return _groupGrid();
+    if (_group == null) return _typeList();
 
     final base = _productsForGroup(_group!);
     final sizes = _sizesIn(base);
@@ -103,126 +101,114 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
 
     return Column(
       children: [
-        _groupBar(),
-        if (sizes.isNotEmpty) _sizeChips(sizes),
+        _header(),
+        if (sizes.isNotEmpty) _sizeBar(sizes),
         Expanded(
           child: results.isEmpty
               ? const Center(
                   child: Text('לא נמצאו מוצרים',
-                      style: TextStyle(color: Color(0xFF888888))))
+                      style: TextStyle(color: _mute)))
               : LipskeyProductsList(products: results),
         ),
       ],
     );
   }
 
-  // ── step 1: "מה אתה צריך?" — plain type tiles ────────────────────────────
-  Widget _groupGrid() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text('מה אתה צריך?',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 4),
-          const Text('בחר סוג — ואז גודל. בלי לדעת איפה זה בקטלוג.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
-          const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.7,
-            ),
-            itemCount: kFinderGroups.length,
-            itemBuilder: (_, i) {
-              final g = kFinderGroups[i];
-              final count = _productsForGroup(g).length;
-              return GestureDetector(
-                onTap: () => setState(() {
-                  _group = g;
-                  _size = null;
-                }),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: BsTokens.brand.withOpacity(0.3)),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(g.emoji, style: const TextStyle(fontSize: 30)),
-                      const SizedBox(height: 6),
-                      Text(g.label,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w800)),
-                      Text('$count מוצרים',
-                          style: const TextStyle(
-                              fontSize: 11, color: Color(0xFF888888))),
-                    ],
-                  ),
+  // ── step 1: type rows — same WhatsApp-style row as _CatalogList ──────────
+  Widget _typeList() {
+    return ListView.separated(
+      key: const Key('catalog-list'),
+      itemCount: kFinderGroups.length,
+      separatorBuilder: (_, __) => const Divider(
+        height: 1,
+        indent: 76,
+        color: _surface,
+      ),
+      itemBuilder: (_, i) {
+        final g = kFinderGroups[i];
+        final count = _productsForGroup(g).length;
+        return InkWell(
+          onTap: () => setState(() {
+            _group = g;
+            _size = null;
+          }),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: const BoxDecoration(
+                    color: _surface, shape: BoxShape.circle),
+                alignment: Alignment.center,
+                child: Text(g.emoji, style: const TextStyle(fontSize: 24)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(g.label,
+                        style: const TextStyle(
+                            color: _ink,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 3),
+                    Text('$count מוצרים',
+                        style: const TextStyle(color: _mute, fontSize: 13)),
+                  ],
                 ),
-              );
-            },
+              ),
+              const Icon(Icons.chevron_left, color: _mute),
+            ]),
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  // ── selected-type header (back to types) — drill-bar style ───────────────
+  Widget _header() {
+    return Material(
+      color: Colors.white,
+      child: InkWell(
+        onTap: () => setState(() {
+          _group = null;
+          _size = null;
+        }),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(children: [
+            const Icon(Icons.chevron_right, color: _mute),
+            const SizedBox(width: 6),
+            Container(
+              width: 38,
+              height: 38,
+              decoration:
+                  const BoxDecoration(color: _surface, shape: BoxShape.circle),
+              alignment: Alignment.center,
+              child: Text(_group!.emoji, style: const TextStyle(fontSize: 18)),
+            ),
+            const SizedBox(width: 10),
+            Text(_group!.label,
+                style: const TextStyle(
+                    color: _ink, fontSize: 16, fontWeight: FontWeight.w700)),
+          ]),
+        ),
       ),
     );
   }
 
-  // ── selected-group bar (with back to types) ─────────────────────────────
-  Widget _groupBar() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
-      child: Row(children: [
-        GestureDetector(
-          onTap: () => setState(() {
-            _group = null;
-            _size = null;
-          }),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: BsTokens.brand,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Text(_group!.emoji, style: const TextStyle(fontSize: 16)),
-              const SizedBox(width: 6),
-              Text(_group!.label,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800)),
-              const SizedBox(width: 6),
-              const Icon(Icons.close, color: Colors.white, size: 16),
-            ]),
-          ),
-        ),
-        const SizedBox(width: 10),
-        const Expanded(
-          child: Text('בחר גודל:',
-              style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
-        ),
-      ]),
-    );
-  }
-
-  // ── step 2: size chips ───────────────────────────────────────────────────
-  Widget _sizeChips(List<String> sizes) {
-    return SizedBox(
-      height: 44,
+  // ── step 2: size chips — catalog chip style ──────────────────────────────
+  Widget _sizeBar(List<String> sizes) {
+    return Container(
+      height: 48,
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: _surface)),
+      ),
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         children: [
           _chip('הכל', _size == null, () => setState(() => _size = null)),
           for (final s in sizes)
@@ -241,16 +227,14 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
-            color: active ? BsTokens.brand : Theme.of(context).colorScheme.surface,
+            color: active ? BsTokens.brand : _surface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-                color: active ? BsTokens.brand : const Color(0x33888888)),
           ),
           child: Text(label,
               style: TextStyle(
-                  color: active ? Colors.white : null,
+                  color: active ? Colors.white : _ink,
                   fontSize: 13,
-                  fontWeight: FontWeight.w700)),
+                  fontWeight: FontWeight.w600)),
         ),
       ),
     );
