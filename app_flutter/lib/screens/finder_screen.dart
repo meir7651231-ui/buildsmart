@@ -106,6 +106,7 @@ class FinderScreen extends ConsumerStatefulWidget {
 
 class _FinderScreenState extends ConsumerState<FinderScreen> {
   FinderGroup? _group;
+  String? _sub;
   String? _size;
 
   @override
@@ -113,14 +114,19 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     if (_group == null) return _typeList();
 
     final base = _productsForGroup(_group!);
-    final sizes = _sizesIn(base);
-    final results = _size == null
+    final subs = _subTypes(base);
+    final pool = _sub == null
         ? base
-        : base.where((p) => _productSizes(p).contains(_size!)).toList();
+        : base.where((p) => p.categoryHe == _sub).toList();
+    final sizes = _sizesIn(pool);
+    final results = _size == null
+        ? pool
+        : pool.where((p) => _productSizes(p).contains(_size!)).toList();
 
     return Column(
       children: [
         _header(),
+        if (subs.length > 1) _subBar(subs),
         if (sizes.isNotEmpty) _sizeBar(sizes),
         Expanded(
           child: results.isEmpty
@@ -149,6 +155,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         return InkWell(
           onTap: () => setState(() {
             _group = g;
+            _sub = null;
             _size = null;
           }),
           child: Padding(
@@ -193,6 +200,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
       child: InkWell(
         onTap: () => setState(() {
           _group = null;
+          _sub = null;
           _size = null;
         }),
         child: Padding(
@@ -214,6 +222,49 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                     color: _ink, fontSize: 16, fontWeight: FontWeight.w700)),
           ]),
         ),
+      ),
+    );
+  }
+
+  // ── step 1b: sub-type chips — the categories within the group ────────────
+  List<String> _subTypes(List<LipskeyCatalogProduct> base) {
+    final counts = <String, int>{};
+    for (final p in base) {
+      counts[p.categoryHe] = (counts[p.categoryHe] ?? 0) + 1;
+    }
+    return counts.keys.toList()
+      ..sort((a, b) => counts[b]!.compareTo(counts[a]!));
+  }
+
+  String _cleanSub(String cat) {
+    for (final pre in const ['ברזי ', 'אביזרי ', 'מחברי ']) {
+      if (cat.startsWith(pre)) return cat.substring(pre.length);
+    }
+    return cat;
+  }
+
+  Widget _subBar(List<String> subs) {
+    return Container(
+      height: 46,
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: _surface)),
+      ),
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        children: [
+          _chip('הכל', _sub == null,
+              () => setState(() {
+                    _sub = null;
+                    _size = null;
+                  })),
+          for (final c in subs)
+            _chip(_cleanSub(c), _sub == c,
+                () => setState(() {
+                      _sub = c;
+                      _size = null;
+                    })),
+        ],
       ),
     );
   }
