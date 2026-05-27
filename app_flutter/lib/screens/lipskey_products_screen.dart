@@ -455,6 +455,9 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   _Unit _unit = _Unit.single;
   /// Local cycle state for standalone cards (when no onCycle parent callback).
   LipskeyCatalogProduct? _localProduct;
+  /// Inline attribute picker state — non-null when picker is open.
+  AttrKind? _pickerKind;
+  List<LipskeyCatalogProduct>? _pickerSiblings;
 
   static const _brand = Color(0xFFFF7A18);
   static const _teal = Color(0xFF3DD9B0);
@@ -467,21 +470,47 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   @override
   void didUpdateWidget(_ProductRow old) {
     super.didUpdateWidget(old);
-    if (old.product.sku != widget.product.sku) _localProduct = null;
+    if (old.product.sku != widget.product.sku) {
+      _localProduct = null;
+      _pickerKind = null;
+      _pickerSiblings = null;
+    }
   }
+
+  /// The attribute value(s) of [product] for the given [kind].
+  String _attrVal(LipskeyCatalogProduct product, AttrKind kind) => product.nameHe
+      .split(RegExp(r'\s+'))
+      .where((w) => _attrKindFor(w) == kind)
+      .join(' ');
 
   void _cycleAttr(String word, AttrKind kind) {
     final siblings = findAttrSiblings(p, word, kind);
     if (siblings.length <= 1) return;
-    final idx = siblings.indexWhere((q) => q.sku == p.sku);
-    final next = siblings[(idx < 0 ? 0 : (idx + 1) % siblings.length)];
-    if (next.sku == p.sku) return;
+    setState(() {
+      if (_pickerKind == kind) {
+        _pickerKind = null;
+        _pickerSiblings = null;
+      } else {
+        _pickerKind = kind;
+        _pickerSiblings = siblings;
+      }
+    });
+  }
+
+  void _selectFromPicker(LipskeyCatalogProduct next) {
     final cb = widget.onCycle;
-    if (cb != null) {
-      cb(next);
-    } else {
-      setState(() => _localProduct = next);
-    }
+    setState(() {
+      _pickerKind = null;
+      _pickerSiblings = null;
+      if (next.sku != p.sku) {
+        if (cb != null) {
+          // parent list owns the state — close and report
+        } else {
+          _localProduct = next;
+        }
+      }
+    });
+    if (next.sku != p.sku && cb != null) cb(next);
   }
 
   int get _unitMult => switch (_unit) {
@@ -572,15 +601,101 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                 ),
               ],
       ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _image(),
-            Expanded(child: _body()),
-            _side(),
-          ],
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _image(),
+                Expanded(child: _body()),
+                _side(),
+              ],
+            ),
+          ),
+          if (_pickerKind != null && _pickerSiblings != null)
+            _attrPicker(),
+        ],
+      ),
+    );
+  }
+
+  Widget _attrPicker() {
+    final siblings = _pickerSiblings!;
+    final kind = _pickerKind!;
+    final label = switch (kind) {
+      AttrKind.size => 'מידה',
+      AttrKind.color => 'צבע',
+      AttrKind.model => 'דגם',
+      AttrKind.subtype => 'סוג',
+    };
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: _line, width: 0.8)),
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(14)),
+      ),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('בחר $label:',
+              style: TextStyle(
+                  color: _muted, fontSize: 11, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final sibling in siblings) ...[
+                  GestureDetector(
+                    onTap: () => _selectFromPicker(sibling),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      margin: const EdgeInsets.only(left: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: sibling.sku == p.sku
+                            ? _brand.withOpacity(0.12)
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: sibling.sku == p.sku
+                              ? _brand
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .outline
+                                  .withOpacity(0.3),
+                          width: sibling.sku == p.sku ? 1.5 : 1.0,
+                        ),
+                      ),
+                      child: Text(
+                        _attrVal(sibling, kind).isEmpty
+                            ? sibling.sku
+                            : _attrVal(sibling, kind),
+                        style: TextStyle(
+                          color: sibling.sku == p.sku
+                              ? _brand
+                              : Theme.of(context).colorScheme.onSurface,
+                          fontSize: 12,
+                          fontWeight: sibling.sku == p.sku
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
