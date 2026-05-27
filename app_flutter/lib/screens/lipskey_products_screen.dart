@@ -1327,10 +1327,15 @@ String _getCompoundType(LipskeyCatalogProduct p) {
 List<LipskeyCatalogProduct> findTypeSiblings(LipskeyCatalogProduct p) {
   final compound = _getCompoundType(p);
   if (compound.isEmpty) return [p];
+  bool _isAttrWord(String w) =>
+      _attrKindFor(w) != null ||
+      _kColorModifiers.contains(w) ||
+      kLipskeyTypes.contains(w);
+
   final ctWords = compound.split(RegExp(r'\s+')).toSet();
   final frame = p.nameHe
       .split(RegExp(r'\s+'))
-      .where((w) => w.isNotEmpty && !ctWords.contains(w))
+      .where((w) => w.isNotEmpty && !ctWords.contains(w) && !_isAttrWord(w))
       .join(' ');
   if (frame.length < 2) return [p];
   final byCompound = <String, LipskeyCatalogProduct>{};
@@ -1342,7 +1347,7 @@ List<LipskeyCatalogProduct> findTypeSiblings(LipskeyCatalogProduct p) {
     final qWords = qc.split(RegExp(r'\s+')).toSet();
     final qFrame = q.nameHe
         .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty && !qWords.contains(w))
+        .where((w) => w.isNotEmpty && !qWords.contains(w) && !_isAttrWord(w))
         .join(' ');
     if (qFrame != frame) continue;
     if (!byCompound.containsKey(qc)) byCompound[qc] = q;
