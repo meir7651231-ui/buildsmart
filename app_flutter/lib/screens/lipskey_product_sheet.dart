@@ -1617,6 +1617,7 @@ class _InteractiveChips extends StatelessWidget {
   final void Function(LipskeyCatalogProduct) onVariantSelect;
 
   static bool _hasSiblings(LipskeyCatalogProduct p, AttrKind kind) {
+    if (kind == AttrKind.color) return _hasSiblingsColor(p);
     final myVal = variantValue(p, kind);
     if (myVal.isEmpty) return false;
     final frame = p.nameHe
@@ -1635,8 +1636,34 @@ class _InteractiveChips extends StatelessWidget {
             frame);
   }
 
+  // Modifier words that appear as second word in compound colors (e.g. "זהב מוברש").
+  // kindOf() doesn't recognize them as color, so they must be stripped separately
+  // from the frame to allow cross-modifier matching ("שחור מט" ↔ "ניקל" ↔ "זהב מוברש").
+  static const _colorModifiers = {'מוברש', 'מט'};
+
+  static String _colorFrame(LipskeyCatalogProduct p) => p.nameHe
+      .split(RegExp(r'\s+'))
+      .where((w) => kindOf(w) != AttrKind.color && !_colorModifiers.contains(w))
+      .join(' ');
+
+  static bool _hasSiblingsColor(LipskeyCatalogProduct p) {
+    final myVal = p.colorVariant;
+    if (myVal == null || myVal.isEmpty) return false;
+    final frame = _colorFrame(p);
+    return kLipskeyCatalog.any((q) {
+      final qv = q.colorVariant;
+      return q.categoryHe == p.categoryHe &&
+          q.sku != p.sku &&
+          qv != null &&
+          qv.isNotEmpty &&
+          qv != myVal &&
+          _colorFrame(q) == frame;
+    });
+  }
+
   static List<LipskeyCatalogProduct> _siblings(
       LipskeyCatalogProduct p, AttrKind kind) {
+    if (kind == AttrKind.color) return _siblingsColor(p);
     final frame = p.nameHe
         .split(RegExp(r'\s+'))
         .where((w) => kindOf(w) != kind)
@@ -1658,6 +1685,25 @@ class _InteractiveChips extends StatelessWidget {
       if (a.sku == p.sku) return -1;
       if (b.sku == p.sku) return 1;
       return variantValue(a, kind).compareTo(variantValue(b, kind));
+    });
+    return all;
+  }
+
+  static List<LipskeyCatalogProduct> _siblingsColor(LipskeyCatalogProduct p) {
+    final frame = _colorFrame(p);
+    final seen = <String>{};
+    final all = <LipskeyCatalogProduct>[];
+    for (final q in kLipskeyCatalog) {
+      if (q.categoryHe != p.categoryHe) continue;
+      final v = q.colorVariant;
+      if (v == null || v.isEmpty) continue;
+      if (_colorFrame(q) != frame) continue;
+      if (seen.add(v)) all.add(q);
+    }
+    all.sort((a, b) {
+      if (a.sku == p.sku) return -1;
+      if (b.sku == p.sku) return 1;
+      return (a.colorVariant ?? '').compareTo(b.colorVariant ?? '');
     });
     return all;
   }
@@ -1791,7 +1837,9 @@ class _ChipPickerRow extends StatelessWidget {
         children: [
           for (final q in siblings)
             _PickerOption(
-              value: variantValue(q, kind),
+              value: kind == AttrKind.color
+                  ? (q.colorVariant ?? '')
+                  : variantValue(q, kind),
               isSelected: q.sku == product.sku,
               onTap: () => onSelect(q),
             ),
