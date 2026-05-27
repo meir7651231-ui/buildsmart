@@ -234,34 +234,70 @@ class _CartRecentBubble extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(vertical: 5, horizontal: 4),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(l.productEmoji,
-                            style: const TextStyle(fontSize: 15)),
-                        const SizedBox(width: 6),
-                        Flexible(
-                          child: Text(
-                            l.productName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Color(0xFF1A1A1A),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: const TextStyle(fontSize: 16)),
+                        const SizedBox(width: 7),
+                        // Main name + product-type description (two compact
+                        // lines, each clipped to one line).
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l.productName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xFF1A1A1A),
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.1,
+                                ),
+                              ),
+                              Text(
+                                l.brandName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xFF888888),
+                                  fontSize: 10.5,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '×${l.productQty}',
-                          style: const TextStyle(
-                            color: BsTokens.brand,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        const SizedBox(width: 8),
+                        // Price + quantity.
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '₪${l.total}',
+                              style: const TextStyle(
+                                color: BsTokens.brand,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                height: 1.1,
+                              ),
+                            ),
+                            Text(
+                              '×${l.productQty}',
+                              style: const TextStyle(
+                                color: Color(0xFF888888),
+                                fontSize: 10.5,
+                                height: 1.2,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(width: 4),
                         const Icon(Icons.edit_outlined,
-                            size: 14, color: Colors.black38),
+                            size: 13, color: Colors.black38),
                       ],
                     ),
                   ),
