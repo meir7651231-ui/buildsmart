@@ -109,7 +109,7 @@ List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
 /// Readable size tokens found in product names (1/2" · 3/4" · DN40 · 16×20 ·
 /// 50 מ"מ). Catches inch/fraction, DN, cross-sizes, and Hebrew "מ"מ" (mm).
 final RegExp _sizeRe = RegExp(
-    r'DN ?\d+|\d+ ?[מס]["״]מ|\d+°|\d+(?:/\d+)?(?:×\d+(?:/\d+)?)?["׳]|\d+×\d+|\d+/\d+');
+    r'DN ?\d+|\d+ ?[מס]["״]מ|\d+°|\d+\.\d+(?:/\d+)?["׳]|\d+(?:/\d+)?×\d+(?:/\d+)?|\d+(?:/\d+)?["׳]|\d+/\d+');
 
 /// Size labels a product carries — readable tokens from the name, or (when the
 /// name has none, e.g. gray pipes) derived from dims (DN + length in metres).

@@ -64,23 +64,34 @@ const Map<String, List<String>> kSearchSynonyms = {
   'חיבור': ['מחבר', 'מצמד'],
 };
 
+/// Normalises a search string: lowercases and folds Hebrew gershayim/geresh
+/// (״ ׳) to the ASCII marks (" ') that product names actually use, so a
+/// Hebrew-keyboard query like `1/2״` still matches a `1/2"` product.
+String _normForSearch(String s) =>
+    s.toLowerCase().replaceAll('״', '"').replaceAll('׳', "'");
+
 /// Forgiving product match for the search bar: a non-technical user types plain
 /// words ("ברז מטבח", "ניקוז", "שירותים") and the app does the finding — without
-/// them knowing the catalogue's term. Matches across name + category + SKU,
-/// word-by-word (order-independent, each word may land in any field), expanding
-/// everyday words via [kSearchSynonyms].
-bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery) {
-  final q = rawQuery.trim().toLowerCase();
+/// them knowing the catalogue's term. Matches across name + category + SKU +
+/// colour, word-by-word (order-independent, each word may land in any field),
+/// expanding everyday words via [kSearchSynonyms]. With [requireAll] = false the
+/// caller can fall back to matching ANY word, so a query never dead-ends.
+bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery,
+    {bool requireAll = true}) {
+  final q = _normForSearch(rawQuery.trim());
   if (q.isEmpty) return false;
-  final hay = '${p.nameHe} ${p.categoryHe} ${p.sku}'.toLowerCase();
+  final hay =
+      _normForSearch('${p.nameHe} ${p.categoryHe} ${p.sku} ${p.color ?? ''}');
   if (hay.contains(q)) return true; // fast path: exact phrase or SKU
   final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
   if (tokens.isEmpty) return false;
-  return tokens.every((t) {
+  bool hit(String t) {
     if (hay.contains(t)) return true;
     final alts = kSearchSynonyms[t];
-    return alts != null && alts.any((a) => hay.contains(a.toLowerCase()));
-  });
+    return alts != null && alts.any((a) => hay.contains(_normForSearch(a)));
+  }
+
+  return requireAll ? tokens.every(hit) : tokens.any(hit);
 }
 
 /// Active search scope chip (הכל / מוצרים / קטגוריות / מסכים).
@@ -1789,16 +1800,23 @@ class _SearchResultsList extends ConsumerWidget {
     // before capping to 40 results.
     final imageOnly = ref.watch(searchImageOnlyProvider);
     final sort = ref.watch(catalogProductSortProvider);
+    // AND-match first; if a reasonable query finds nothing (e.g. a stray word
+    // the catalogue doesn't use), fall back to matching ANY word so the user
+    // never hits a dead end.
+    List<LipskeyCatalogProduct> matchProducts() {
+      final and = kLipskeyCatalog
+          .where((p) => catalogProductMatchesQuery(p, query))
+          .toList();
+      if (and.isNotEmpty) return and;
+      return kLipskeyCatalog
+          .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
+          .toList();
+    }
+
     final products = showProducts
-        ? _sortProducts(
-            filterByImage(
-              kLipskeyCatalog
-                  .where((p) => catalogProductMatchesQuery(p, query))
-                  .toList(),
-              imageOnly,
-            ),
-            sort,
-          ).take(40).toList()
+        ? _sortProducts(filterByImage(matchProducts(), imageOnly), sort)
+            .take(40)
+            .toList()
         : const <LipskeyCatalogProduct>[];
 
     if (filtered.isEmpty && products.isEmpty) {
