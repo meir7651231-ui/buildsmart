@@ -35,7 +35,7 @@
 | אלמנט | אינטראקציה ⇐ תוצאה | סטטוס |
 |---|---|---|
 | Wordmark `BuildSmart` (title, ימין ב-RTL; `BsTokens.brand`, w800, 22) + Tooltip `BS` | tap (`_toggle(ref, OpenDial.bs)`) ⇐ פותח/סוגר את BS dial. `_toggle` מאפס persona/drill/menuTab/searchTool | פעיל |
-| שורת status מתחת ל-wordmark | מצב A: בלשונית קטלוג עם `catalogSectionProvider == 'עץ חכם'` ⇐ `_PulsingStatus(text:'עץ חכם הופעל')` (נקודה ירוקה פועמת `0xFF22C55E`, מכבדת `reducedMotion`). מצב B (אחרת): נקודה ירוקה `0xFF4CAF50` + הטקסט: `v3.73 · 26.5.26 · מידע-עשיר + לולאת recirculation` | פעיל |
+| שורת status מתחת ל-wordmark | מצב A: בלשונית קטלוג עם `catalogSectionProvider == 'עץ חכם'` ⇐ `_PulsingStatus(text:'עץ חכם הופעל')` (נקודה ירוקה פועמת `0xFF22C55E`, מכבדת `reducedMotion`). מצב B (אחרת): נקודה ירוקה `0xFF4CAF50` + הטקסט: `לייבל הגרסה הנוכחי (vX.YY · DD.M.YY · «תיאור») מ-home_shell.dart` | פעיל |
 | אייקון חיפוש `Icons.search` (action) | מוצג רק כש-`tabHeaderHiddenProvider==true`; tooltip `חיפוש`. tap ⇐ מאפס `tabHeaderHiddenProvider=false` (מחזיר את ה-header של הלשונית) | פעיל |
 | אייקון מצלמה `Icons.photo_camera_outlined` (action) | tooltip `מצלמה`. tap ⇐ `openCameraSheet(context)` | פעיל |
 | תפריט ⋮ per-tab (`Icons.more_vert`) | משתנה לפי `tabIndex` — ראה 1.4 | פעיל |
@@ -217,7 +217,7 @@ L1 = 4 לשוניות (`menuTabProvider`). כל לשונית פותחת עץ sec
 
 1. `MaterialApp` נטען RTL, theme בהיר כברירת מחדל, textScaler גלובלי מגיב ל-`catalogSettings.textSize` (0.9/1.0/1.15).
 2. 4 לשוניות bottom-nav (`קטלוג`/`שיחות`/`התראות`/`חנות`) ב-`IndexedStack`; החלפת לשונית מאפסת dials.
-3. AppBar: wordmark `BuildSmart` פותח/סוגר BS dial; שורת status מציגה `v3.73 · 26.5.26 · מידע-עשיר + לולאת recirculation` (או `עץ חכם הופעל` בקטלוג + עץ חכם); מצלמה ⇐ camera sheet; ⋮ per-tab מציג את הפריטים הנכונים לכל לשונית verbatim.
+3. AppBar: wordmark `BuildSmart` פותח/סוגר BS dial; שורת status מציגה `לייבל הגרסה הנוכחי (vX.YY · DD.M.YY · «תיאור») מ-home_shell.dart` (או `עץ חכם הופעל` בקטלוג + עץ חכם); מצלמה ⇐ camera sheet; ⋮ per-tab מציג את הפריטים הנכונים לכל לשונית verbatim.
 4. badge התראות מציג `9+` כש->9; badge עגלה מציג `count`.
 5. Cart FAB מוסתר בלשונית חנות ובכל זמן ש-dial פתוח; tap קופץ לחנות.
 6. dial אחד פתוח בלבד; scrim שחור-45% סוגר את כל ה-dials ב-tap.

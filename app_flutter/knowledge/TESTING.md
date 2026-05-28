@@ -3,7 +3,7 @@
 Three layers verify the app. Run all before every commit.
 
 ## 1. `flutter test` (the regression suite)
-`test/` holds ~127 checks across 16 files. Key files:
+`test/` holds **52 test files** (hundreds of checks). Key files:
 - `gaps_test.dart` — pure-logic contract checks (cart math, checkout gates,
   notif predicate/grouping/importance, index tokenizer, chat presence,
   catalog defaults). Mirrors `../WIRING.md`.
