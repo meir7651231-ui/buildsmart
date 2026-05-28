@@ -6,6 +6,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Store section tabs.
 enum StoreSection { all, cart, orders, services }
@@ -13,8 +14,41 @@ enum StoreSection { all, cart, orders, services }
 final storeSectionProvider =
     StateProvider<StoreSection>((_) => StoreSection.all);
 final storeSearchQueryProvider = StateProvider<String>((_) => '');
+/// Favorited store-hub rows (by title). Persisted to SharedPreferences so the
+/// ⭐ set survives restarts.
+class StoreFavoritesNotifier extends StateNotifier<Set<String>> {
+  StoreFavoritesNotifier() : super(const {}) {
+    _load();
+  }
+  static const _prefsKey = 'bs.store-favorites.v1';
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_prefsKey);
+      if (list != null) state = list.toSet();
+    } catch (_) {}
+  }
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefsKey, state.toList());
+    } catch (_) {}
+  }
+
+  void toggle(String key) {
+    state = state.contains(key)
+        ? (Set<String>.of(state)..remove(key))
+        : (Set<String>.of(state)..add(key));
+    _persist();
+  }
+}
+
 final storeFavoritesProvider =
-    StateProvider<Set<String>>((_) => const {});
+    StateNotifierProvider<StoreFavoritesNotifier, Set<String>>(
+  (_) => StoreFavoritesNotifier(),
+);
 
 // ─── cart state ──────────────────────────────────────────────────────────────
 
@@ -474,7 +508,7 @@ class _QuickActionsRow extends ConsumerWidget {
     final favorites = ref.watch(storeFavoritesProvider);
     final allItems = _kAllItems;
     final favItems = allItems
-        .where((item) => favorites.contains(item.emoji))
+        .where((item) => favorites.contains(item.title))
         .toList();
 
     return Padding(
@@ -850,14 +884,7 @@ class _AllList extends ConsumerWidget {
           item: item,
           isFav: isFav,
           onFavToggle: () {
-            final notifier = ref.read(storeFavoritesProvider.notifier);
-            final current = Set<String>.from(notifier.state);
-            if (isFav) {
-              current.remove(item.title);
-            } else {
-              current.add(item.title);
-            }
-            notifier.state = current;
+            ref.read(storeFavoritesProvider.notifier).toggle(item.title);
           },
           onTap: svcIdx != null
               ? () => _ServicesGrid._openSheet(context, svcIdx)
@@ -2878,27 +2905,89 @@ class _OrderSheet extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF5F5F5),
-              foregroundColor: Colors.black54,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          const SizedBox(height: 20),
+          const Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '🚛 מעקב הזמנה',
+              style: TextStyle(
+                color: Color(0xFF1A1A1A),
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
               ),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              showToast(context, 'מעקב הזמנה ${order.id} — בבנייה');
-            },
-            child: const Text(
-              'מעקב הזמנה 🚛',
-              style: TextStyle(fontSize: 15),
             ),
           ),
+          const SizedBox(height: 14),
+          _OrderTimeline(stage: order.stage),
         ],
       ),
+    );
+  }
+}
+
+/// Real order-status timeline driven by [_Order.stage]: every stage up to and
+/// including the current one is marked done; later stages stay pending.
+class _OrderTimeline extends StatelessWidget {
+  const _OrderTimeline({required this.stage});
+  final String stage;
+
+  static const _steps = <(String, String, IconData)>[
+    ('preparing', 'בהכנה', Icons.build_outlined),
+    ('ready', 'מוכן', Icons.inventory_2_outlined),
+    ('transit', 'בדרך', Icons.local_shipping_outlined),
+    ('delivered', 'נמסר', Icons.check_circle_outline),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final found = _steps.indexWhere((s) => s.$1 == stage);
+    final cur = found < 0 ? 0 : found;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < _steps.length; i++) ...[
+          if (i > 0)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Container(
+                  height: 2,
+                  color: i <= cur
+                      ? BsTokens.brand
+                      : const Color(0xFFE0E0E0),
+                ),
+              ),
+            ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: i <= cur ? BsTokens.brand : const Color(0xFFEDEDED),
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  _steps[i].$3,
+                  size: 18,
+                  color: i <= cur ? Colors.white : Colors.black38,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                _steps[i].$2,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: i <= cur ? const Color(0xFF1A1A1A) : Colors.black38,
+                  fontWeight: i == cur ? FontWeight.w800 : FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }
