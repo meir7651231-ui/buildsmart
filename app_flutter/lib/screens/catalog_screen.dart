@@ -552,7 +552,7 @@ class _SectionChipsRow extends ConsumerWidget {
       final top = MediaQuery.of(ctx).padding.top;
       final choice = await showMenu<String>(
         context: ctx,
-        color: const Color(0xFF1E1E1E),
+        color: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -566,7 +566,7 @@ class _SectionChipsRow extends ConsumerWidget {
                 SizedBox(width: 12),
                 Text(
                   'ניהול רשימות',
-                  style: TextStyle(color: Colors.white, fontSize: 15),
+                  style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
                 ),
               ],
             ),
@@ -583,7 +583,7 @@ class _SectionChipsRow extends ConsumerWidget {
                 SizedBox(width: 12),
                 Text(
                   'שינוי שם',
-                  style: TextStyle(color: Colors.white, fontSize: 15),
+                  style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
                 ),
               ],
             ),
@@ -684,7 +684,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: const Color(0xFF444444),
+              color: const Color(0xFFCCCCCC),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -828,20 +828,20 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
     showDialog<void>(
       context: ctx,
       builder: (dCtx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: Colors.white,
         title: const Text(
           'רשימה חדשה',
-          style: TextStyle(color: Colors.white, fontSize: 16),
+          style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
         ),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Color(0xFF1A1A1A)),
           decoration: const InputDecoration(
             hintText: 'שם הרשימה',
             hintStyle: TextStyle(color: Color(0xFF888888)),
             enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF444444)),
+              borderSide: BorderSide(color: Color(0xFFCCCCCC)),
             ),
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: BsTokens.brand),
@@ -889,20 +889,20 @@ void _showRenameDialog(
   showDialog<void>(
     context: ctx,
     builder: (dCtx) => AlertDialog(
-      backgroundColor: const Color(0xFF1E1E1E),
+      backgroundColor: Colors.white,
       title: const Text(
         'שינוי שם הרשימה',
-        style: TextStyle(color: Colors.white, fontSize: 16),
+        style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
       ),
       content: TextField(
         controller: controller,
         autofocus: true,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(color: Color(0xFF1A1A1A)),
         decoration: const InputDecoration(
           hintText: 'שם הרשימה',
           hintStyle: TextStyle(color: Color(0xFF888888)),
           enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFF444444)),
+            borderSide: BorderSide(color: Color(0xFFCCCCCC)),
           ),
           focusedBorder: UnderlineInputBorder(
             borderSide: BorderSide(color: BsTokens.brand),
@@ -1007,20 +1007,20 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
     final newName = await showDialog<String>(
       context: context,
       builder: (dCtx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: Colors.white,
         title: const Text(
           'שינוי שם הרשימה',
-          style: TextStyle(color: Colors.white, fontSize: 16),
+          style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
         ),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Color(0xFF1A1A1A)),
           decoration: const InputDecoration(
             hintText: 'שם הרשימה',
             hintStyle: TextStyle(color: Color(0xFF888888)),
             enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF444444)),
+              borderSide: BorderSide(color: Color(0xFFCCCCCC)),
             ),
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: BsTokens.brand),
@@ -1079,7 +1079,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: const Color(0xFF444444),
+              color: const Color(0xFFCCCCCC),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -5683,7 +5683,7 @@ class _MiniQtyBtn extends StatelessWidget {
           size: 12,
           color: onTap != null
               ? Colors.black54
-              : const Color(0xFF444444),
+              : const Color(0xFFCCCCCC),
         ),
       ),
     );
@@ -5933,7 +5933,7 @@ class _RecentSearchesSection extends ConsumerWidget {
           child: ListView.separated(
             itemCount: items.length,
             separatorBuilder: (_, __) => const Divider(
-                height: 1, indent: 56, color: Color(0xFF2A2A2A)),
+                height: 1, indent: 56, color: Color(0xFFEEEEEE)),
             itemBuilder: (_, i) {
               final q = items[i];
               return ListTile(

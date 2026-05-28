@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v4.69` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v4.71` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — opens on **בית (finder home)** as the default landing: layman
@@ -46,6 +46,11 @@ addresses/invoices/warranty/biometric. All need data, a server, or device APIs.
   `#1A1A1A` ink, brand-orange primary action, green "all-good"), so they no longer
   break the otherwise-light app. Role colors kept (blue supply / amber drain /
   violet fixture), tuned for contrast on light.
+- **Consistent navigation (v4.70)** — studio bottom-sheets (picker / BOM /
+  projects) now carry the app's standard close-X (`_SheetClose`, like the product
+  sheet); the audit screen uses a custom RTL header instead of a Material AppBar;
+  and the catalog's list-management dialogs + popup menu were flipped from dark to
+  light. No consumer-facing dark surfaces remain.
 - **Progressive dock** — 3-state UX: empty / 1-item / 2+ items (D-013)
 - **Zone-aware BOM** — "גזע" + "ענף א/ב/ג…" section headers with item counts
 - **TMTV auto-per-branch** — one thermostatic mixing valve per hot branch, qty = branch count
