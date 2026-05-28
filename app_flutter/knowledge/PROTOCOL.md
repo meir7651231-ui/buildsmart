@@ -7,6 +7,17 @@
 
 ---
 
+## שני כללי-העל (לפני הכל)
+
+> **כלל 1 — R2:** שום פיצ׳ר לא ממלא את המסך. הכל dial.
+> **כלל 2 — בידוד:** לעולם לא בונים פיצ׳ר חדש על קוד קיים.
+> בונים בצד → מאמתים 100% → ורק אז מחברים.
+
+**כלל 2 הוא חדש ועליון.** הפרת R2 גרמה ל-3 reverts.
+הפרת כלל 2 גורמת לבאגים שלא נתפסים עד לאחר חיבור — קשה יותר לתקן.
+
+---
+
 ## עיקרון-הבסיס (למה צריך פרוטוקול)
 
 > *"הכשלות לא הגיעו ממחסור בידע — הגיעו ממחסור בתהליך."*
@@ -455,6 +466,224 @@ grep -n "המחרוזת" /home/user/buildsmart/index.html
 # FND-07 — הרצת בדיקה ספציפית
 flutter test test/[domain]_helper_test.dart -v
 ```
+
+---
+
+# חלק 15 — כלל 2: בנייה מבודדת (Build-in-Isolation)
+
+> **"לעולם לא בונים פיצ׳ר חדש על קוד קיים — בונים בצד, מאמתים 100%, ורק אז מחברים."**
+
+## מבנה תיקיות — הכלל
+
+```
+lib/
+  features/          ← כל פיצ׳ר חדש מתחיל כאן
+    [feature_name]/
+      model.dart     ← data classes, enums
+      helper.dart    ← pure functions (ללא UI, ללא BuildContext)
+      widget.dart    ← ה-dial widget עצמו
+  screens/           ← קוד קיים — לא נוגעים בו עד אחרי אימות
+  
+test/
+  helpers/           ← infrastructure לבדיקות
+  features/          ← בדיקות מבודדות לכל feature
+    [feature_name]_test.dart
+```
+
+## כלל-יבוא מחמיר
+
+`lib/features/X/` מותר לייבא רק:
+```dart
+✅ package:buildsmart/data/      (נתוני קטלוג, mock)
+✅ package:buildsmart/state/     (providers קיימים)
+✅ package:buildsmart/theme/     (tokens, colors)
+✅ package:buildsmart/widgets/   (DialRow, DialColumn)
+❌ package:buildsmart/screens/   (אסור — קוד קיים)
+```
+
+## זרימת בנייה — כלל 2
+
+```
+[1] צור   lib/features/[name]/model.dart    → data classes בלבד
+[2] צור   lib/features/[name]/helper.dart   → pure functions
+[3] בדוק  test/features/[name]_test.dart    → 100% pass ב-ISOLATION
+[4] צור   lib/features/[name]/widget.dart   → dial widget
+[5] בדוק  flutter test test/features/[name]_test.dart → עובר
+[6] אמת   assertNoScreenImports(path)       → אין תלות בקוד ישן
+[7] חבר   → מוסיף import ל-shell/menu רק עכשיו
+[8] בדוק  flutter test (הכל) → עדיין עובר
+[9] commit
+```
+
+**שלב [7] מגיע רק אחרי [1]–[6] ירוקים לגמרי.**
+
+## כיצד יוצרים feature חדש
+
+```bash
+bash scripts/new_feature.sh [feature_name]
+# יוצר: lib/features/[name]/{model,helper,widget}.dart
+# יוצר: test/features/[name]_test.dart עם template
+# מדפיס: isolation checklist
+```
+
+## Integration Checklist (לפני חיבור ל-shell)
+
+```
+[ ] flutter test test/features/[name]_test.dart → 0 failures
+[ ] assertNoScreenImports → אין import ל-screens/
+[ ] כל helper = pure function (אין BuildContext, אין ref)
+[ ] כל מחרוזת עברית = [L#] מוצין
+[ ] dial widget = DialRow + DialColumn (לא Scaffold חדש)
+[ ] flutter analyze → 0 errors
+```
+
+---
+
+## נספח: פקודות-הריצה הסטנדרטיות
+
+```bash
+# OPS — לפני כל commit
+export PATH="/home/user/flutter/bin:$PATH"
+cd /home/user/buildsmart/app_flutter
+
+flutter analyze                          # OPS-01: אפס issues
+flutter test                             # OPS-03: אפס failures
+flutter test test/features/[name]_test.dart -v  # feature בודדת
+flutter build web --release              # OPS-02: build נקי
+
+# VRB — לאימות מחרוזת
+grep -n "המחרוזת" /home/user/buildsmart/index.html
+
+# כלל 2 — בדיקת isolation
+bash scripts/check_isolation.sh lib/features/[name]/
+```
+
+---
+
+---
+
+# חלק 15 — כלל 2: בנייה מבודדת (Isolation-First)
+
+> **כלל 2 (חדש — מוחלט):** פיצ׳רים חדשים אף פעם לא נבנים על גבי קוד קיים.
+> הם נבנים בבידוד מלא תחת `lib/features/[name]/`, מאומתים 100%,
+> ואז ורק אז מחוברים ל-shell.
+
+---
+
+## 15.1 · עיקרון הבידוד
+
+```
+lib/features/[feature_name]/
+    model.dart   — enums + data classes — Dart טהור (ללא Flutter/Riverpod)
+    helper.dart  — לוגיקה טהורה (ללא BuildContext, ללא ref, ללא side-effects)
+    widget.dart  — dial widget בלבד (DialColumn + DialRow)
+
+test/features/[feature_name]_test.dart  — unit + widget tests
+```
+
+**הפיצ׳ר לא נגע ב-shell עד שהבדיקות ב-`test/features/` כולן ירוקות.**
+
+---
+
+## 15.2 · Imports מותרים בתוך lib/features/
+
+| מותר | אסור |
+|---|---|
+| `lib/data/` | `lib/screens/` — **מפר כלל 2** |
+| `lib/state/` | כל `Scaffold` חדש |
+| `lib/theme/` | `showDialog` |
+| `lib/widgets/` | `showModalBottomSheet` |
+| `package:flutter/material.dart` | `Navigator.push` |
+| `package:flutter_riverpod/flutter_riverpod.dart` | |
+
+**`IsolationValidator.assertNoScreenImports(path)` מאמת זאת אוטומטית.**
+
+---
+
+## 15.3 · סדר בנייה (חייב להיות בסדר זה)
+
+```
+1. model.dart         — הגדר enums + data classes
+2. helper.dart        — לוגיקה טהורה
+3. test (unit)        — flutter test test/features/[name]_test.dart
+4. widget.dart        — dial widget בלבד
+5. test (widget)      — pumpDial + expectDialLeaf
+6. connect            — חבר ל-home_shell / FAB trigger
+7. WIRING.md          — עדכן ✅ / ⛔
+```
+
+**הפוך את הסדר = bug שמגיע אחר כך.**
+
+---
+
+## 15.4 · Checklist לפני חיבור ל-shell
+
+- [ ] `flutter analyze` — 0 issues ב-`lib/features/[name]/`
+- [ ] `flutter test test/features/[name]_test.dart` — 0 failures
+- [ ] אין `import.*screens/` בשום קובץ תחת `lib/features/[name]/`
+- [ ] אין `showDialog` / `showModalBottomSheet` / `Navigator.push` / `Scaffold` חדש
+- [ ] כל מחרוזת עברית מתועדת `// [L####]` ב-verbatim source comment
+- [ ] שורה ב-WIRING.md עם status `🚧`
+- [ ] אחרי חיבור: `flutter test` — כל ה-suite ירוק
+- [ ] אחרי חיבור: עדכן WIRING.md ל-`✅` או `⛔`
+
+---
+
+## 15.5 · כלים (test helpers)
+
+| Helper | קובץ | מטרה |
+|---|---|---|
+| `DialTestHelper` | `test/helpers/dial_test_helper.dart` | pumpDial + expectDialLeaf + expectNoFullScreen |
+| `StateMachineFixture` | `test/helpers/state_machine_fixture.dart` | exhaustive state×action matrix |
+| `WiringContractHelper` | `test/helpers/wiring_contract_helper.dart` | אימות חוזי WIRING.md |
+| `IsolationValidator` | `test/helpers/isolation_validator.dart` | assertNoScreenImports + assertNoFullScreenPatterns |
+| `FeatureIsolationTestBase` | `test/helpers/feature_isolation_test_base.dart` | base class שמריץ את כל הבדיקות המבניות |
+
+---
+
+## 15.6 · scaffold חדש (new_feature.sh)
+
+```bash
+# מ-app_flutter/:
+./scripts/new_feature.sh order_track
+```
+
+יוצר:
+```
+lib/features/order_track/model.dart
+lib/features/order_track/helper.dart
+lib/features/order_track/widget.dart
+test/features/order_track_test.dart
+```
+
+ומדפיס את checklist הבידוד.
+
+---
+
+## 15.7 · דוגמה מחייבת
+
+```
+lib/features/order_track/
+    model.dart    — OrderStage enum, OrderAction enum
+    helper.dart   — transition(order, action, role) → OrderTransitionResult
+    widget.dart   — OrderTrackDial (DialColumn + DialRow leaves)
+
+test/features/order_track_test.dart
+    — _OrderTrackIsolationTest extends FeatureIsolationTestBase
+    — group('helper') → all 30 state×role transitions
+    — group('widget') → pumpDial, expectDialLeaf('הזמנות פתוחות') [L11970]
+    — group('wiring') → WiringContractHelper.expectWired(...)
+```
+
+---
+
+## 15.8 · הפרות שנרשמו
+
+| תאריך | פיצ׳ר | הפרה | תוצאה |
+|---|---|---|---|
+| — | — | — | — |
+
+*(טבלה ריקה — לכתוב כאן כל הפרה עתידית של כלל 2)*
 
 ---
 

@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 // Verify the K-shortest-paths feature returns multiple distinct chains.
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/logic/install_engine.dart';

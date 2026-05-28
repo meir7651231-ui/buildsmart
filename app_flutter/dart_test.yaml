@@ -1,0 +1,37 @@
+# dart_test.yaml — test runner configuration for BuildSmart Flutter app
+#
+# See: https://pub.dev/packages/test#configuration
+
+# Reporter: compact gives one-line-per-test in CI, expanded in dev.
+# Override on command line: flutter test --reporter=expanded
+reporter: compact
+
+# Timeout: most tests are pure-unit and should be fast.
+# Widget tests are allowed 30 s; adjust per-test with @Timeout if needed.
+timeout: 30s
+
+# Tag definitions — use in test files with @Tags(['tag'])
+tags:
+  # Pure unit tests with no Flutter widget pumping.
+  unit:
+    timeout: 10s
+
+  # Widget tests that pump DialRow/DialColumn — slightly more headroom.
+  widget:
+    timeout: 30s
+
+  # Integration / smoke tests (full feature connect verification).
+  integration:
+    timeout: 60s
+
+  # Tests that exercise state machine transitions exhaustively.
+  state_machine:
+    timeout: 10s
+
+  # Tests that verify WIRING.md contracts.
+  wiring:
+    timeout: 10s
+
+  # Tests that verify isolation pattern (IsolationValidator).
+  isolation:
+    timeout: 10s

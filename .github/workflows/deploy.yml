@@ -51,6 +51,14 @@ jobs:
         working-directory: app_flutter
         run: flutter pub get
 
+      - name: Flutter analyze (GATE — blocks on any error)
+        working-directory: app_flutter
+        run: flutter analyze
+
+      - name: Flutter test (GATE — blocks on any failure)
+        working-directory: app_flutter
+        run: flutter test --reporter=compact
+
       - name: Build Flutter web
         working-directory: app_flutter
         run: flutter build web --release --base-href "/buildsmart/flutter/"

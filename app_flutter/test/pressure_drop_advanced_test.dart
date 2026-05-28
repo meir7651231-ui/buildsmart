@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 // Verify the upgraded pressure-drop math: Reynolds-aware friction factor
 // (replaces the old f=0.025 constant) and static-head correction (ρgh).
 import 'package:buildsmart/data/lipskey_catalog.dart';
