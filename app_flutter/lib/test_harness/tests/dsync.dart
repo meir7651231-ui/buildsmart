@@ -3,6 +3,7 @@ import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/personas.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/test_harness/types.dart';
 
@@ -203,7 +204,8 @@ TestResult _brandsAndTreeChecks() {
     got: '$badLipskey',
   );
 
-  final lipskeyCategoryNames = kLipskeyCatalog.map((p) => p.categoryHe).toSet();
+  final lipskeyCategoryNames =
+      kCatalogProducts.map((p) => p.categoryHe).toSet();
   final leavesWithLipskey = leaves.where((l) => l.lipskeyCategory != null).toList();
   final unmatchedLeaves = leavesWithLipskey
       .where((l) => !lipskeyCategoryNames.contains(l.lipskeyCategory))

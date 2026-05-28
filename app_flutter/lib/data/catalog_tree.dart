@@ -923,6 +923,113 @@ const List<CatalogNode> kCatalogTree = [
       ),
     ],
   ),
+
+  // ── צנרת PPR · פולירול / הלירומה ───────────────────────────────────────────
+  CatalogNode(
+    id: 'ppr',
+    title: 'צנרת PPR (פולירול)',
+    emoji: '🔵',
+    children: [
+      CatalogNode(
+        id: 'ppr.pipes',
+        title: 'צינורות',
+        emoji: '🟦',
+        children: [
+          CatalogNode(
+            id: 'ppr.pipes.supply',
+            title: 'צינורות אספקת מים',
+            emoji: '🔵',
+            brandIds: ['polyroll'],
+            lipskeyCategory: 'צינורות PPR אספקת מים',
+          ),
+          CatalogNode(
+            id: 'ppr.pipes.fiber',
+            title: 'צינורות פייזר',
+            emoji: '🟦',
+            brandIds: ['polyroll'],
+            lipskeyCategory: 'צינורות PPR פייזר',
+          ),
+        ],
+      ),
+      CatalogNode(
+        id: 'ppr.fittings',
+        title: 'אביזרי ריתוך',
+        emoji: '🔧',
+        children: [
+          CatalogNode(
+            id: 'ppr.fittings.elbows',
+            title: 'ברכיים',
+            emoji: '↪️',
+            brandIds: ['polyroll'],
+            lipskeyCategory: 'ברכיים PPR',
+          ),
+          CatalogNode(
+            id: 'ppr.fittings.tees',
+            title: 'מסעפים',
+            emoji: '🔱',
+            brandIds: ['polyroll'],
+            lipskeyCategory: 'מסעפים PPR',
+          ),
+          CatalogNode(
+            id: 'ppr.fittings.couplers',
+            title: 'מצמדים',
+            emoji: '🔗',
+            brandIds: ['polyroll'],
+            lipskeyCategory: 'מצמדים PPR',
+          ),
+          CatalogNode(
+            id: 'ppr.fittings.adapters',
+            title: 'מתאמים',
+            emoji: '🔩',
+            brandIds: ['polyroll'],
+            lipskeyCategory: 'מתאמים PPR',
+          ),
+          CatalogNode(
+            id: 'ppr.fittings.saddles',
+            title: 'רוכבים',
+            emoji: '🪢',
+            brandIds: ['polyroll'],
+            lipskeyCategory: 'רוכבים PPR',
+          ),
+          CatalogNode(
+            id: 'ppr.fittings.plugs',
+            title: 'פקקים',
+            emoji: '🔘',
+            brandIds: ['polyroll'],
+            lipskeyCategory: 'פקקים PPR',
+          ),
+          CatalogNode(
+            id: 'ppr.fittings.omega',
+            title: 'אומגה',
+            emoji: '🛟',
+            brandIds: ['polyroll'],
+            lipskeyCategory: 'אומגה PPR',
+          ),
+          CatalogNode(
+            id: 'ppr.fittings.collars',
+            title: 'צווארונים ואוגנים',
+            emoji: '⭕',
+            brandIds: ['polyroll'],
+            lipskeyCategory: 'צווארונים ואוגנים PPR',
+          ),
+        ],
+      ),
+      CatalogNode(
+        id: 'ppr.valves',
+        title: 'ברזים',
+        emoji: '🚰',
+        brandIds: ['polyroll'],
+        lipskeyCategory: 'ברזים PPR',
+      ),
+      CatalogNode(
+        id: 'ppr.electrofusion',
+        title: 'ריתוך חשמלי',
+        emoji: '⚡',
+        brandIds: ['polyroll'],
+        lipskeyCategory: 'אביזרי ריתוך חשמלי PPR',
+      ),
+    ],
+  ),
 ];
 
 /// Find a node by id, walking the whole tree.

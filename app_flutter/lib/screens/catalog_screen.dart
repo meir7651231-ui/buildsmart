@@ -1,6 +1,7 @@
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
@@ -292,7 +293,7 @@ List<LipskeyCatalogProduct> _subtreeProducts(CatalogNode node) {
 
   walk(node);
   if (cats.isEmpty) return const [];
-  return kLipskeyCatalog.where((p) => cats.contains(p.categoryHe)).toList();
+  return kCatalogProducts.where((p) => cats.contains(p.categoryHe)).toList();
 }
 
 /// Apply the first [sel].length facet groups to [base].
@@ -2984,7 +2985,7 @@ class _CatalogRow extends ConsumerWidget {
 int _treeNodeCount(CatalogNode node) {
   if (!node.isLeaf) return node.children.length;
   if (node.lipskeyCategory != null) {
-    return kLipskeyCatalog
+    return kCatalogProducts
         .where((p) => p.categoryHe == node.lipskeyCategory)
         .length;
   }
@@ -3003,7 +3004,7 @@ String _treeNodeDesc(CatalogNode node) {
   if (node.lipskeyCategory != null) {
     // Preview of what's inside (characterizing words / sample names) rather
     // than a bare product count.
-    final prods = kLipskeyCatalog
+    final prods = kCatalogProducts
         .where((p) => p.categoryHe == node.lipskeyCategory)
         .toList();
     final preview = _facetDesc(prods);
@@ -3032,7 +3033,7 @@ class _TreeDrill extends ConsumerWidget {
     // (curated where defined, else auto-derived) before the product list.
     final leafCat = current.isLeaf ? current.lipskeyCategory : null;
     final isProductLeaf = leafCat != null &&
-        kLipskeyCatalog.any((p) => p.categoryHe == leafCat);
+        kCatalogProducts.any((p) => p.categoryHe == leafCat);
 
     void resetQuery() =>
         ref.read(catalogTreeQueryProvider.notifier).state = '';
@@ -3062,7 +3063,7 @@ class _TreeDrill extends ConsumerWidget {
       if (n.isLeaf) {
         // Leaf with products → drill in-tab (facets + product list below).
         if (n.lipskeyCategory != null &&
-            kLipskeyCatalog.any((p) => p.categoryHe == n.lipskeyCategory)) {
+            kCatalogProducts.any((p) => p.categoryHe == n.lipskeyCategory)) {
           resetQuery();
           resetFacets();
           ref.read(catalogTreePathProvider.notifier).state = [...path, n];
@@ -3099,7 +3100,7 @@ class _TreeDrill extends ConsumerWidget {
 
     if (isProductLeaf) {
       final base =
-          kLipskeyCatalog.where((p) => p.categoryHe == leafCat).toList();
+          kCatalogProducts.where((p) => p.categoryHe == leafCat).toList();
       final curated = kProductFacets[leafCat];
       final options = <({String label, String desc, int count})>[];
       if (curated != null) {

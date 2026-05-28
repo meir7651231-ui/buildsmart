@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.77 · 28.5.26 · תיקון 16 טסטים אדומים: ListTile חשוף (ColoredBox→Material בחיפוש, Container→Card בהגדרות)',
+                          'v4.78 · 28.5.26 · תשתית הטמעה: קטגוריית "צנרת PPR (פולירול)" + 12 תת-קטגוריות, מוכנה למילוי 779 פריטים',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

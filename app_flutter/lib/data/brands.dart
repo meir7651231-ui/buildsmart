@@ -67,6 +67,14 @@ const List<Brand> kBrands = [
     color: 0xFF3D8C5A,
     tagline: 'ברזים ומקלחות',
   ),
+  Brand(
+    id: 'polyroll',
+    name: 'פולירול',
+    emoji: '🔵',
+    color: 0xFF1565C0,
+    tagline: 'מערכות צנרת PPR — מים ומיזוג אוויר',
+    productCount: 779,
+  ),
 ];
 
 Brand? brandById(String id) {
