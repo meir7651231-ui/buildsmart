@@ -8,6 +8,7 @@ import 'package:buildsmart/screens/finder_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/store_settings.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 SmartCartLine _line(int qty) => SmartCartLine(
@@ -177,6 +178,22 @@ void main() {
       final p = kLipskeyCatalog.first;
       final plan = buildInstallation([p]);
       expect(plan.items.map((x) => x.sku), contains(p.sku));
+    });
+  });
+
+  // ── finder home (בית) ───────────────────────────────────────────────────────
+  group('HARD · finder home (בית)', () {
+    test('home (בית) is the default catalog landing', () {
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      expect(c.read(catalogSectionProvider), 'בית');
+      expect(c.read(catalogSectionsListProvider).first, 'בית');
+    });
+
+    test('every finder group carries a non-empty description', () {
+      for (final g in kFinderGroups) {
+        expect(g.desc.trim(), isNotEmpty, reason: g.label);
+      }
     });
   });
 }
