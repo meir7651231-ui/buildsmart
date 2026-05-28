@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.68 · 28.5.26 · "תכנון חיבור" (היה תאימות) — שם ידידותי + תרגום ז׳רגון הבטיחות',
+                          'v4.69 · 28.5.26 · "תכנון חיבור" + אודיט הומרו לעיצוב הבהיר-כתום של האפליקציה',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

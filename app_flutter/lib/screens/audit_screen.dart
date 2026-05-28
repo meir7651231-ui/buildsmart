@@ -144,12 +144,12 @@ class _AuditScreenState extends State<AuditScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0A0E1A),
+        backgroundColor: const Color(0xFFFAFAFA),
         appBar: AppBar(
-          backgroundColor: const Color(0xFF111827),
+          backgroundColor: const Color(0xFFFFFFFF),
           title: const Text('אודיט תרחישים',
               style: TextStyle(
-                  color: Color(0xFFF1F5F9),
+                  color: Color(0xFF1A1A1A),
                   fontSize: 16,
                   fontWeight: FontWeight.w800)),
           actions: [
@@ -162,7 +162,7 @@ class _AuditScreenState extends State<AuditScreen> {
                         horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: allOk
-                          ? const Color(0xFF22C55E).withOpacity(0.2)
+                          ? const Color(0xFF15803D).withOpacity(0.2)
                           : const Color(0xFFEF4444).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -170,7 +170,7 @@ class _AuditScreenState extends State<AuditScreen> {
                       '${_results.where((r) => r.ok).length}/${_results.length}',
                       style: TextStyle(
                           color: allOk
-                              ? const Color(0xFF22C55E)
+                              ? const Color(0xFF15803D)
                               : const Color(0xFFEF4444),
                           fontWeight: FontWeight.w800,
                           fontSize: 13),
@@ -190,8 +190,8 @@ class _AuditScreenState extends State<AuditScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _running ? null : _run,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF22D3EE),
-                    foregroundColor: const Color(0xFF06251C),
+                    backgroundColor: const Color(0xFFFF7A18),
+                    foregroundColor: const Color(0xFFFFFFFF),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
@@ -222,12 +222,12 @@ class _AuditScreenState extends State<AuditScreen> {
   }
 
   Widget _buildRow(_ScenarioResult r) {
-    final color = r.ok ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
+    final color = r.ok ? const Color(0xFF15803D) : const Color(0xFFEF4444);
     final overBudget = r.dropBar > 1.0;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF161D2E),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withOpacity(0.4)),
       ),
@@ -241,7 +241,7 @@ class _AuditScreenState extends State<AuditScreen> {
             Expanded(
               child: Text(r.title,
                   style: const TextStyle(
-                      color: Color(0xFFF1F5F9),
+                      color: Color(0xFF1A1A1A),
                       fontSize: 13,
                       fontWeight: FontWeight.w700)),
             ),
@@ -263,32 +263,32 @@ class _AuditScreenState extends State<AuditScreen> {
           const SizedBox(height: 6),
           Row(children: [
             const Icon(Icons.inventory_2_outlined,
-                color: Color(0xFF7C8AA5), size: 13),
+                color: Color(0xFF888888), size: 13),
             const SizedBox(width: 4),
             Text('${r.itemCount} פריטים',
                 style: const TextStyle(
-                    color: Color(0xFF7C8AA5), fontSize: 11)),
+                    color: Color(0xFF888888), fontSize: 11)),
             const SizedBox(width: 14),
             Icon(Icons.water_drop_outlined,
                 color: overBudget
-                    ? const Color(0xFFFBBF24)
-                    : const Color(0xFF7C8AA5),
+                    ? const Color(0xFFB45309)
+                    : const Color(0xFF888888),
                 size: 13),
             const SizedBox(width: 4),
             Text('ΔP ${r.dropBar.toStringAsFixed(2)} בר',
                 style: TextStyle(
                     color: overBudget
-                        ? const Color(0xFFFBBF24)
-                        : const Color(0xFF7C8AA5),
+                        ? const Color(0xFFB45309)
+                        : const Color(0xFF888888),
                     fontSize: 11,
                     fontFamily: 'monospace')),
             const SizedBox(width: 14),
             const Icon(Icons.straighten,
-                color: Color(0xFF7C8AA5), size: 13),
+                color: Color(0xFF888888), size: 13),
             const SizedBox(width: 4),
             Text('⌀${r.minBoreMm.toStringAsFixed(0)}mm',
                 style: const TextStyle(
-                    color: Color(0xFF7C8AA5),
+                    color: Color(0xFF888888),
                     fontSize: 11,
                     fontFamily: 'monospace')),
             if (r.criticalOpen > 0) ...[
@@ -319,13 +319,13 @@ class _AuditScreenState extends State<AuditScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF22D3EE).withOpacity(0.10),
+                      color: const Color(0xFFFF7A18).withOpacity(0.10),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       '${p.typeEmoji} ${p.productType ?? "?"}',
                       style: const TextStyle(
-                          color: Color(0xFF22D3EE),
+                          color: Color(0xFFFF7A18),
                           fontSize: 9,
                           fontWeight: FontWeight.w700),
                     ),
@@ -333,7 +333,7 @@ class _AuditScreenState extends State<AuditScreen> {
                 if (r.items.length > 8)
                   Text('+${r.items.length - 8}',
                       style: const TextStyle(
-                          color: Color(0xFF7C8AA5),
+                          color: Color(0xFF888888),
                           fontSize: 10,
                           fontWeight: FontWeight.w700)),
               ],

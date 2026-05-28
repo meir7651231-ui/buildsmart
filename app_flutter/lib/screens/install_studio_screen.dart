@@ -23,16 +23,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ── palette ───────────────────────────────────────────────────────────────────
-const _void0 = Color(0xFF0A0E1A); // deep background
-const _void1 = Color(0xFF111827);
-const _panel = Color(0xFF161D2E);
-const _grid = Color(0x14_38BDF8);
-const _ink = Color(0xFFF1F5F9);
-const _mute = Color(0xFF7C8AA5);
-const _supply = Color(0xFF22D3EE); // cyan — water supply
-const _drain = Color(0xFFFBBF24); // amber — drainage
-const _fixture = Color(0xFFA78BFA); // violet — fixtures (the bridge)
-const _accent = Color(0xFF34D399); // emerald — assemble action
+// Light theme — matches the rest of the BuildSmart app (light + orange brand).
+const _void0 = Color(0xFFFAFAFA); // app background
+const _void1 = Color(0xFFFFFFFF); // dialogs / sheets
+const _panel = Color(0xFFFFFFFF); // cards / tiles
+const _grid = Color(0x0F1A1A1A); // very faint neutral blueprint grid
+const _ink = Color(0xFF1A1A1A); // primary text
+const _mute = Color(0xFF888888); // secondary text
+const _supply = Color(0xFF0284C7); // blue — water supply
+const _drain = Color(0xFFD97706); // amber — drainage
+const _fixture = Color(0xFF7C3AED); // violet — fixtures (the bridge)
+const _accent = Color(0xFFFF7A18); // brand orange — primary action
+const _ok = Color(0xFF16A34A); // green — success / "all good"
 
 Color _systemColor(LipskeyCatalogProduct p) {
   final s = productSystems(p);
@@ -643,7 +645,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       decoration: const BoxDecoration(
         color: _panel,
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-        boxShadow: [BoxShadow(color: Colors.black54, blurRadius: 24)],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 24)],
       ),
       padding: EdgeInsets.fromLTRB(
           16, 14, 16, 14 + MediaQuery.of(context).padding.bottom),
@@ -842,7 +844,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [_accent, Color(0xFF059669)]),
+            gradient: const LinearGradient(colors: [_accent, Color(0xFFE85F00)]),
             borderRadius: BorderRadius.circular(15),
             boxShadow: enabled
                 ? [BoxShadow(color: _accent.withOpacity(0.45), blurRadius: 18)]
@@ -1131,7 +1133,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                               fontWeight: FontWeight.w900)),
                     ]),
                   ),
-                  const Divider(height: 1, color: Color(0xFF243049)),
+                  const Divider(height: 1, color: Color(0xFFEEEEEE)),
                   Expanded(
                     child: projects.isEmpty
                         ? const Center(
@@ -1149,7 +1151,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                             itemCount: projects.length,
                             separatorBuilder: (_, __) => const Divider(
                                 height: 1,
-                                color: Color(0xFF243049),
+                                color: Color(0xFFEEEEEE),
                                 indent: 16,
                                 endIndent: 16),
                             itemBuilder: (_, i) {
@@ -1430,7 +1432,7 @@ class _PipePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final x = size.width / 2;
     final track = Paint()
-      ..color = Colors.white.withOpacity(0.08)
+      ..color = Colors.black.withOpacity(0.08)
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(Offset(x, 0), Offset(x, size.height), track);
@@ -1582,8 +1584,8 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     final accentColor = isSwap
         ? const Color(0xFFFB923C)
         : isAdd
-            ? const Color(0xFF22C55E)
-            : const Color(0xFFFBBF24);
+            ? const Color(0xFF15803D)
+            : const Color(0xFFB45309);
     final icon = isSwap
         ? Icons.swap_horiz
         : isAdd
@@ -1716,7 +1718,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
               padding: const EdgeInsets.fromLTRB(18, 4, 18, 12),
               child: Row(children: [
                 Icon(ok ? Icons.verified : Icons.warning_amber_rounded,
-                    color: ok ? _accent : _drain, size: 24),
+                    color: ok ? _ok : _drain, size: 24),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -1748,7 +1750,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                               child: Text(
                                 '$checkPassed/${checklist.length} ✓',
                                 style: TextStyle(
-                                  color: checkCritical == 0 ? _accent : const Color(0xFFEF4444),
+                                  color: checkCritical == 0 ? _ok : const Color(0xFFEF4444),
                                   fontSize: 11,
                                   fontWeight: FontWeight.w900,
                                 ),
@@ -1775,7 +1777,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                 ),
               ]),
             ),
-            const Divider(height: 1, color: Color(0xFF243049)),
+            const Divider(height: 1, color: Color(0xFFEEEEEE)),
             Expanded(
               child: ListView(controller: ctrl, children: [
                 // ── Auto-fix banner — tells the user what was changed ──
@@ -1784,21 +1786,21 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F2E1A),
+                      color: const Color(0xFFE8F5E9),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                          color: const Color(0xFF22C55E).withOpacity(0.5)),
+                          color: const Color(0xFF15803D).withOpacity(0.5)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Row(children: [
                           Icon(Icons.auto_fix_high,
-                              color: Color(0xFF22C55E), size: 16),
+                              color: Color(0xFF15803D), size: 16),
                           SizedBox(width: 6),
                           Text('המערכת תיקנה אוטומטית:',
                               style: TextStyle(
-                                  color: Color(0xFF22C55E),
+                                  color: Color(0xFF15803D),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800)),
                         ]),
@@ -1834,7 +1836,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                   }),
                   const Divider(
                       height: 1,
-                      color: Color(0xFF243049),
+                      color: Color(0xFFEEEEEE),
                       indent: 16,
                       endIndent: 16),
                 ],
@@ -1856,7 +1858,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E2E),
+                      color: const Color(0xFFF5F5F5),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: _accent.withOpacity(0.4)),
                     ),
@@ -1915,7 +1917,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1A2A1A),
+                      color: const Color(0xFFE8F5E9),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: _accent.withOpacity(0.4)),
                     ),
@@ -1945,7 +1947,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F1F2A),
+                      color: const Color(0xFFE3F2FD),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: _supply.withOpacity(0.35)),
                     ),
@@ -1968,7 +1970,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                             : '${pr.itemCount} יחידות',
                         style: TextStyle(
                             color: pr.lowConfidence
-                                ? const Color(0xFFFBBF24)
+                                ? const Color(0xFFB45309)
                                 : _mute,
                             fontSize: 10,
                             fontFamily: 'monospace'),
@@ -2034,7 +2036,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2A0E0E),
+                      color: const Color(0xFFFDECEC),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: warn.withOpacity(0.5)),
                     ),
@@ -2062,7 +2064,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                             child: Text(
                               '• ${p.nameHe} — עד ${productMaxTempC(p)?.toStringAsFixed(0) ?? "?"}°C',
                               style: const TextStyle(
-                                  color: Color(0xFFFCA5A5), fontSize: 11),
+                                  color: Color(0xFFC62828), fontSize: 11),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -2071,7 +2073,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                         const Text(
                           'החלף לחומר עמיד-חום: PEX / נחושת / פליז.',
                           style: TextStyle(
-                              color: Color(0xFFFCA5A5),
+                              color: Color(0xFFC62828),
                               fontSize: 11,
                               fontWeight: FontWeight.w600),
                         ),
@@ -2090,14 +2092,14 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                   );
                   final ok = pd.dropBar <= 1.0 && pd.warnings.isEmpty;
                   final color =
-                      ok ? const Color(0xFF22C55E) : const Color(0xFFF59E0B);
+                      ok ? const Color(0xFF15803D) : const Color(0xFFF59E0B);
                   return Container(
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: ok
-                          ? const Color(0xFF0E2A1A)
-                          : const Color(0xFF2A1F0E),
+                          ? const Color(0xFFE8F5E9)
+                          : const Color(0xFFFFF8E1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: color.withOpacity(0.5)),
                     ),
@@ -2130,7 +2132,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                           Text(
                             'צוואר-בקבוק: ${pd.bottleneck!.nameHe} (#${pd.bottleneck!.sku})',
                             style: const TextStyle(
-                                color: Color(0xFFFBBF24),
+                                color: Color(0xFFB45309),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600),
                             maxLines: 2,
@@ -2154,7 +2156,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1A1E2A),
+                      color: const Color(0xFFF5F5F5),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: _mute.withOpacity(0.35)),
                     ),
@@ -2263,7 +2265,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     ),
                 ],
                 if (checklist.isNotEmpty) ...[
-                  const Divider(height: 18, color: Color(0xFF243049)),
+                  const Divider(height: 18, color: Color(0xFFEEEEEE)),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                     child: Row(children: [
@@ -2361,7 +2363,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                            colors: [_accent, Color(0xFF059669)]),
+                            colors: [_accent, Color(0xFFE85F00)]),
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(color: _accent.withOpacity(0.4), blurRadius: 16)
