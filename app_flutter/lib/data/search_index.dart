@@ -49,6 +49,7 @@ const List<SearchEntry> kSearchIndex = [
 
   // ── Secondary reachable screens ────────────────────────────────────────
   SearchEntry(emoji: '🔧', title: 'סטודיו התקנות',     breadcrumb: 'קטלוג › תאימות', type: SearchType.screen),
+  SearchEntry(emoji: '🧭', title: 'מאתר',              breadcrumb: 'קטלוג',          type: SearchType.screen),
   SearchEntry(emoji: '🏷️', title: 'ספקים ומותגים',     breadcrumb: 'קטלוג',          type: SearchType.screen),
   SearchEntry(emoji: '🔬', title: 'מרכז בדיקות רגרסיה', breadcrumb: 'BS',             type: SearchType.screen),
 

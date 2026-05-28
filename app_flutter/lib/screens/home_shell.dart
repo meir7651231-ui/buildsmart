@@ -391,7 +391,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.49 · 28.5.26 · attr: NTM/PP-MD-ML/HDPE→model, פ.פ/ח.פ/פרח/ראש/נשלף/לחץ→subtype',
+                          'v4.50 · 28.5.26 · attr: NTM/PP-MD-ML/HDPE→model, פ.פ/ח.פ/פרח/ראש/נשלף/לחץ→subtype',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

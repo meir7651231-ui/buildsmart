@@ -4,7 +4,8 @@ _Version label: `v3.79` (see `home_shell.dart`). Update on each user-visible cha
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — overview blocks (categories / recent / compat / favorites / smart-tree),
-  in-tab drill, grid↔list product view, smart-tree, search panel.
+  in-tab drill, grid↔list product view, smart-tree, **מאתר (finder)** — layman
+  group→sub→narrow with relevance-ranked forgiving search, search panel.
 - **שיחות** — thread list, conversation, archive screen, new-chat, mute-all.
 - **התראות** — grouped list with per-type + importance filtering, snooze.
 - **חנות** — sections all/cart/orders/services, full cart + checkout.
