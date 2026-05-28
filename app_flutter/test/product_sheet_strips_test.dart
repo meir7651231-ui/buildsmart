@@ -82,15 +82,23 @@ void main() {
         reason: 'variants strip must be tappable');
 
     // ── Tap the variants strip: it should scroll-trigger (no throw).
+    // The strips sit lower in the scrollable sheet, so bring each into view
+    // before tapping (its center is otherwise clipped off-screen).
+    await tester.ensureVisible(find.text('דומים:').first);
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.text('דומים:').first);
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 400));
 
     // ── Tap the compat strip.
+    await tester.ensureVisible(find.text('מוצרים תואמים:').first);
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.text('מוצרים תואמים:').first);
     await tester.pump(const Duration(milliseconds: 400));
 
     // ── Tap the kit strip.
+    await tester.ensureVisible(find.text('ערכת התקנה:').first);
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.text('ערכת התקנה:').first);
     await tester.pump(const Duration(milliseconds: 400));
 

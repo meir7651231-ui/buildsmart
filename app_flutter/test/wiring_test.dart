@@ -187,8 +187,11 @@ void main() {
     });
 
     test('everyday synonym maps to the catalogue term (שירותים → אסלה)', () {
-      final p = kLipskeyCatalog.firstWhere(
-          (p) => p.nameHe.contains('אסלה') || p.categoryHe.contains('אסלה'));
+      // Pick an actual toilet fixture (a seat), not the first substring match:
+      // the first 'אסלה' product is a branch CONNECTOR, which the precision
+      // contract below intentionally excludes from 'שירותים'.
+      final p =
+          kLipskeyCatalog.firstWhere((p) => p.categoryHe == 'מושבי אסלה');
       expect(catalogProductMatchesQuery(p, 'שירותים'), isTrue);
     });
 
