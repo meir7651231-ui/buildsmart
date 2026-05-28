@@ -30,8 +30,8 @@ List<TestResult> testFinder() {
   results.add(TestResult(
     id: 'finder:groups',
     category: TestCategory.catalog,
-    label: 'מאתר — קבוצות',
-    area: 'מאתר',
+    label: 'בית — קבוצות',
+    area: 'בית',
     checks: [
       TestCheck(
         name: 'קבוצות זרות (אין קטגוריה בשתי קבוצות)',
@@ -43,6 +43,16 @@ List<TestResult> testFinder() {
       TestCheck(
         name: 'קיימת קבוצת "אחר" (catch-all)',
         pass: kFinderGroups.any((g) => g.cats.isEmpty),
+      ),
+      TestCheck(
+        name: 'לכל קבוצה יש תיאור (desc)',
+        pass: kFinderGroups.every((g) => g.desc.trim().isNotEmpty),
+        expected: '${kFinderGroups.length}',
+        got: '${kFinderGroups.where((g) => g.desc.trim().isNotEmpty).length}',
+        detail: kFinderGroups
+            .where((g) => g.desc.trim().isEmpty)
+            .map((g) => g.label)
+            .join(' · '),
       ),
     ],
   ));
@@ -68,8 +78,8 @@ List<TestResult> testFinder() {
   results.add(TestResult(
     id: 'finder:subs',
     category: TestCategory.catalog,
-    label: 'מאתר — תת-סוגים מנוהלים',
-    area: 'מאתר',
+    label: 'בית — תת-סוגים מנוהלים',
+    area: 'בית',
     checks: [
       TestCheck(
         name: 'מכסים כל קטגוריה עם מוצרים (אין יתום)',
@@ -129,7 +139,7 @@ List<TestResult> testFinder() {
     id: 'finder:search',
     category: TestCategory.catalog,
     label: 'חיפוש מוצרים סלחני',
-    area: 'מאתר',
+    area: 'בית',
     checks: searchChecks,
   ));
 

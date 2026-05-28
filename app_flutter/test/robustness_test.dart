@@ -168,13 +168,13 @@ void main() {
       'הכל',
       'קטגוריות',
       'חיפושים אחרונים',
-      'תאימות',
+      'תכנון חיבור',
       'מועדפים',
       'עץ חכם',
     ]) {
       c.read(catalogSectionProvider.notifier).state = s;
-      // 'תאימות' embeds the install studio, which animates forever — bounded
-      // pump instead of pumpAndSettle.
+      // 'תכנון חיבור' embeds the install studio, which animates forever —
+      // bounded pump instead of pumpAndSettle.
       for (var i = 0; i < 5; i++) {
         await t.pump(const Duration(milliseconds: 120));
       }

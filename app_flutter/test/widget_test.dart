@@ -11,12 +11,12 @@ Future<void> _open(WidgetTester t, String tooltip) async {
 }
 
 void main() {
-  testWidgets('Shell boots showing brand and catalog overview', (t) async {
+  testWidgets('Shell boots showing brand and finder landing', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     expect(find.text('BuildSmart'), findsOneWidget);
-    // Default catalog tab = the full "קטגוריות" list; first category visible.
-    expect(find.text('ברזים וכיורים'), findsAtLeastNWidgets(1));
+    // Default catalog tab now lands on 'בית' (finder home); its group rows show.
+    expect(find.text('ברזים'), findsAtLeastNWidgets(1));
   });
 
   testWidgets('BS dial opens 5 personas verbatim', (t) async {
@@ -64,7 +64,7 @@ void main() {
     await t.pumpAndSettle();
     // Section labels are present (they also appear as chips → at least one).
     expect(find.text('חיפושים אחרונים'), findsAtLeastNWidgets(1));
-    expect(find.text('תאימות'), findsAtLeastNWidgets(1));
+    expect(find.text('תכנון חיבור'), findsAtLeastNWidgets(1));
     expect(find.text('מועדפים'), findsAtLeastNWidgets(1));
     expect(find.text('עץ חכם'), findsAtLeastNWidgets(1));
     // Categories block is fully expanded (no "הצג הכל"); the preview blocks for
@@ -80,7 +80,12 @@ void main() {
   testWidgets('קטגוריות section shows all 11 verbatim categories', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    // 'קטגוריות' is the default landing — the full list is already shown.
+    // 'בית' is now the default landing — open the 'קטגוריות' section first.
+    final catChip = find.text('קטגוריות').first;
+    await t.ensureVisible(catChip);
+    await t.pumpAndSettle();
+    await t.tap(catChip);
+    await t.pumpAndSettle();
     const cats = [
       'ברזים וכיורים', 'אסלות', 'מקלחות ואמבטיות', 'חימום מים', 'מטבח',
       'ניקוז וצנרת', 'גופי תברואה', 'אביזרי קצה וחיבורים',

@@ -6,8 +6,8 @@
 - **מיקום בניווט:** ה-tab הראשון (אינדקס 0) ב-`IndexedStack` של `lib/screens/home_shell.dart` (שורה 36–39). זהו ה-tab שמוצג בעת פתיחת האפליקציה, ומגיעים אליו דרך ה-bottom nav.
 - **כפתור הגדרות:** ב-app bar של ה-shell יש `_CatalogMenuButton` שפותח את `CatalogSettingsScreen.route()`.
 - **providers מרכזיים שהמסך צורך (מוגדרים בראש הקובץ, ברובם `StateProvider` in-memory):**
-  - `catalogSectionProvider` (`String`, ברירת מחדל `'הכל'`) — ה-section הפעיל.
-  - `catalogSectionsListProvider` (`List<String>`, ברירת מחדל `['מאתר', 'תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים']`) — רשימת ה-sections (לא כולל `'הכל'`).
+  - `catalogSectionProvider` (`String`, ברירת מחדל `'בית'`) — ה-section הפעיל. נחיתת ברירת המחדל של האפליקציה = מסך הבית (ה-finder), המסלול הכי לא-טכני למוצר.
+  - `catalogSectionsListProvider` (`List<String>`, ברירת מחדל `['בית', 'תכנון חיבור', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים']`) — רשימת ה-sections (לא כולל `'הכל'`). `'תכנון חיבור'` = ה-Install Studio (שם ידידותי ללא-טכני במקום "תאימות").
   - `catalogListItemsProvider` (`Map<String, Set<String>>`) — אילו כותרות קטגוריה משויכות לכל רשימה מותאמת.
   - `searchPanelOpenProvider`, `searchQueryProvider`, `searchScopeProvider` (`'הכל'`), `recentSearchesProvider` (`List<String>`, מקס' 8) — מצב פאנל החיפוש.
   - `smartTreeCatProvider` / `smartTreeQueryProvider` — דריל בעץ החכם.
@@ -38,12 +38,12 @@
    - **שורת section chips** (`_SectionChipsRow`) — pill `'הכל'` קבוע + pills דינמיים מ-`catalogSectionsListProvider` + כפתור `[+]`. גם נסתרת בגלילה.
    - **גוף** (`_CatalogBody`) לפי ה-section הפעיל:
      - `'הכל'` → `_AllOverview`: בלוקי תצוגה מקדימה ("הצג הכל") עבור קטגוריות / חיפושים אחרונים / תאימות / מועדפים / עץ חכם.
-     - `'מאתר'` → `FinderScreen` (מוטמע; ראו `spec/catalog-secondary.md` §מאתר).
+     - `'בית'` → `FinderScreen` (מוטמע, נחיתת ברירת המחדל; ראו `spec/catalog-secondary.md` §בית).
      - `'עץ חכם'` → `_SmartTreeSection` (רשימת קטגוריות → רשימת מוצרים).
      - `'קטגוריות'` → `_CatalogList` (12 שורות `_CatalogRow`).
      - `'מועדפים'` → `_FavoritesSection`.
      - `'חיפושים אחרונים'` → `_RecentSearchesSection`.
-     - `'תאימות'` → `InstallStudioScreen` (מוטמע).
+     - `'תכנון חיבור'` → `InstallStudioScreen` (מוטמע; היה "תאימות").
      - `'וריאנטים'` → `_VariantsSection`.
      - section מותאם אחר → `_SectionHeader` (כותרת + ✏️) ומתחת `_FilteredCatalogList` או `_EmptySection`.
 

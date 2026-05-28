@@ -77,6 +77,12 @@ class VerifiedSpec {
   /// cap for HDPE — so every legacy cold-water spec is correct without edits.
   final double maxTempC;
 
+  /// Per-SKU system classification for the rare product whose end *geometry*
+  /// disagrees with its plumbing role — e.g. a bottle trap whose 1¼" threads
+  /// read as "supply" but functionally belong to the drainage line. When set,
+  /// [endSystems] returns exactly this instead of deriving from the ends.
+  final WaterSystem? systemOverride;
+
   const VerifiedSpec({
     required this.sku,
     required this.ends,
@@ -84,12 +90,24 @@ class VerifiedSpec {
     this.pressureRating,
     this.pexType,
     this.maxTempC = 40,
+    this.systemOverride,
   });
 
   bool compatibleWith(VerifiedSpec other) {
     for (final eA in ends) {
       for (final eB in other.ends) {
-        if (eA.directMatesWith(eB) || eA.pipeSharedWith(eB)) return true;
+        // Direct thread / press / drain joint — material-independent (a brass
+        // male thread really does screw into a PEX-adapter's BSP female).
+        if (eA.directMatesWith(eB)) return true;
+        // Compression-on-compression of the same nominal DN — require
+        // material compatibility (see [_materialsCompatible]). The
+        // EndType.hdpeCompression enum is overloaded for any push-fit socket
+        // across materials, so without this guard an HDPE-PN16 pressure
+        // fitting would falsely match a PVC drainage pipe.
+        if (eA.pipeSharedWith(eB) &&
+            _materialsCompatible(material, other.material)) {
+          return true;
+        }
       }
     }
     return false;
@@ -99,8 +117,43 @@ class VerifiedSpec {
   bool suitableForTemp(double tempC) => tempC <= maxTempC;
 
   /// The set of plumbing systems this product's ends touch (geometric fallback,
-  /// used for products whose category does not pin a single system).
-  Set<WaterSystem> get endSystems => {for (final e in ends) e.system};
+  /// used for products whose category does not pin a single system). The
+  /// EndType.hdpeCompression enum is overloaded across materials, so for that
+  /// end-type we resolve the system from the spec's material:
+  ///   • HDPE / PEX → supply (PN16 pressure plumbing)
+  ///   • PVC / PP / multi-layer / ceramic / rubber → drainage
+  /// All other end types (threads, presses, drain openings) keep their static
+  /// per-EndType mapping in [ConnectorEnd.system].
+  Set<WaterSystem> get endSystems {
+    if (systemOverride != null) return {systemOverride!};
+    final out = <WaterSystem>{};
+    const supplyMaterials = {'HDPE', 'PEX', 'נחושת', 'פליז', 'פלדה', 'נירוסטה'};
+    for (final e in ends) {
+      if (e.type == EndType.hdpeCompression) {
+        out.add(supplyMaterials.contains(material)
+            ? WaterSystem.supply
+            : WaterSystem.drainage);
+      } else {
+        out.add(e.system);
+      }
+    }
+    return out;
+  }
+}
+
+/// Whether two compression-end products of the same nominal DN can really
+/// share a pipe joint. Pressure-rated materials (HDPE/PEX/copper/brass) need
+/// an exact material match because each material's compression fitting is
+/// engineered for a specific pipe OD/wall. The drainage family (PVC/PP/
+/// multi-layer/ceramic) interoperates: bell-and-spigot DN-standard sockets
+/// accept any drainage pipe of the matching DN.
+bool _materialsCompatible(String a, String b) {
+  if (a == b) return true;
+  // 'rubber' = manchette / eccentric drainage seals whose whole purpose is to
+  // join a fixture or pipe to a DN-matched drainage pipe, so they interoperate
+  // with the rest of the drainage family.
+  const drainage = {'PVC', 'PP', 'רב-שכבתי', 'ceramic', 'rubber'};
+  return drainage.contains(a) && drainage.contains(b);
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -119,6 +172,49 @@ ConnectorEnd _cu(String od)   => ConnectorEnd(EndType.copperPress,     od);
 ConnectorEnd _bm(String inch) => ConnectorEnd(EndType.bspMale,         inch);
 ConnectorEnd _bf(String inch) => ConnectorEnd(EndType.bspFemale,       inch);
 ConnectorEnd _do(String inch) => ConnectorEnd(EndType.drainOpening,    inch);
+
+// ── intentionally non-connector products ──────────────────────────────────────
+// Coverage is measured over real flow-connectors. These categories/SKUs are
+// deliberately left WITHOUT a VerifiedSpec because they don't join the pipe
+// network — so there is nothing to mate. The connector-coverage gate
+// (test/compat_coverage_test.dart) uses these to require 100% coverage of
+// everything else, while never tempting us to fabricate a spec (which would
+// risk false matches) for an accessory.
+
+/// Catalog categories where NO product is a flow-connector (seats, clamps,
+/// brackets, enclosures, tools, cistern mechanisms, spout housings, faucet
+/// aerators, tap-fixing sets).
+const Set<String> kNonConnectorCategories = {
+  'מושבי אסלה',         // toilet seats
+  'חבקי תליה',          // hanging clamps
+  'חבקי צינור',         // pipe clamps (omega)
+  'אביזרי חדר רחצה',    // bathroom accessories (bars, hooks, soap dishes)
+  'דיורים ופיות',       // spout housings / aerator bodies
+  'אביזרי ברזים',       // faucet accessories (aerators, small parts)
+  'ארונות מחלק',        // manifold cabinets / enclosures
+  'ידיות אחיזה',        // grab bars
+  'מנגנונים',           // cistern flush mechanisms
+  'סטי הידוק וחיבורים', // tap-fixing sets (bolts / brackets)
+  'כלי עבודה',          // tools
+};
+
+/// Individual non-connector products that live INSIDE otherwise-connector
+/// categories (a gasket among real plugs, a spray-gun among garden taps, a
+/// bolt-set among toilet parts). Exempt from the coverage gate by SKU.
+const Set<String> kSpecExemptSkus = {
+  // אביזרי אסלה — mounting hardware (bolt sets / seat bolts)
+  '77000903', '77000905', '77777041',
+  // עוגנים ובנדים — fixing flanges (Aqua-flange), support not flow
+  '77MK0002', '77SK0002', '77MK0001', '77SK0001',
+  // ציוד גן — hose-end spray guns (attach to a hose, not the catalog network)
+  '77000026', '77000027', '77980000', '77980001',
+  // אטמים ופקקים — flat gaskets + a non-standard 2 3/8" plug
+  '506539', '506521', '610706', '610708',
+  // חלקים סניטריים — universal repair kit + generic spare parts
+  '186466', '186666',
+  // אביזרי מקלחת — adjustable holder (bracket)
+  '77701185',
+};
 
 // ── verified specs map ────────────────────────────────────────────────────────
 
@@ -1471,7 +1567,9 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '77775263': VerifiedSpec(sku: '77775263', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
   '77775261': VerifiedSpec(sku: '77775261', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('3/8"')]),
   '77775265': VerifiedSpec(sku: '77775265', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('3/4"'), _bf('3/4"')]),
-  '77775296': VerifiedSpec(sku: '77775296', material: _brass, maxTempC: 90, ends: [_bf('1-1/4"'), _bf('1-1/4"')]),
+  // Nickel bottle trap: 1¼" threads read as "supply" geometrically but it's a
+  // basin-waste (drainage) fitting — pin the system so the scan agrees.
+  '77775296': VerifiedSpec(sku: '77775296', material: _brass, maxTempC: 90, ends: [_bf('1-1/4"'), _bf('1-1/4"')], systemOverride: WaterSystem.drainage),
   '77775260': VerifiedSpec(sku: '77775260', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('3/4"')]),
   '77777120': VerifiedSpec(sku: '77777120',  material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
   '77777120A': VerifiedSpec(sku: '77777120A', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('3/8"')]),

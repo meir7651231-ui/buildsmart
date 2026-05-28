@@ -2,7 +2,11 @@ import 'dart:math';
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
+import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -100,6 +104,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   late Map<int, bool> _accSelected;
   int _qty = 1;
   _Unit _unit = _Unit.single;
+
 
   int get _unitMult => switch (_unit) {
         _Unit.single => 1,
@@ -479,6 +484,24 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                             }),
                             onVariantSelect: _switchByChip,
                           ),
+                          if (widget.categoryProducts.length > 1)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 6),
+                              child: Text(
+                                  '💡 צ׳יפ כתום ▾ — הקש להחלפת גודל/צבע/דגם',
+                                  style: TextStyle(
+                                      color: Color(0xFF888888), fontSize: 11)),
+                            ),
+                          const SizedBox(height: 12),
+                          // ── מאתר · תאימות · ערכת התקנה · דומים ────────
+                          _QuickInfoStrips(
+                            product: p,
+                            onPickProduct: (q) {
+                              // jump to the sibling/related product right
+                              // inside this same sheet, without closing it
+                              _switchByChip(q);
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -487,43 +510,12 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                     const _Divider(),
                     const SizedBox(height: 16),
 
-                    // ── Variant selector ────────────────────────────────
-                    if (widget.categoryProducts.length > 1) ...[
-                      _SectionTitle(
-                        emoji: '🔀',
-                        title: 'בחר גרסה',
-                        subtitle: '${widget.categoryProducts.length} אפשרויות',
-                      ),
-                      const SizedBox(height: 10),
-                      _VariantSelector(
-                        products: widget.categoryProducts,
-                        selectedIdx: _selectedIdx,
-                        onSelect: _selectVariant,
-                      ),
-                      const SizedBox(height: 16),
-                      const _Divider(),
-                      const SizedBox(height: 16),
-                    ],
+                    // ── (Removed: "🔀 בחר גרסה" — duplicated by the
+                    //   🔄 דומים strip's expandable carousel; variant
+                    //   switching now happens via the strip panel.)
 
-                    // ── Accessories ─────────────────────────────────────
-                    if (_accs.isNotEmpty) ...[
-                      _SectionTitle(
-                        emoji: '🧰',
-                        title: 'אביזרים נדרשים',
-                        subtitle:
-                            '${_accs.where((a) => a.must).length} חובה · ${_accs.where((a) => !a.must).length} אופציונלי',
-                      ),
-                      const SizedBox(height: 10),
-                      ..._accs.asMap().entries.map((e) => _AccRow(
-                            acc: e.value,
-                            selected: _accSelected[e.key] ?? false,
-                            onToggle: (v) =>
-                                setState(() => _accSelected[e.key] = v),
-                          )),
-                      const SizedBox(height: 16),
-                      const _Divider(),
-                      const SizedBox(height: 16),
-                    ],
+                    // ── (Removed: standalone "🧰 אביזרים נדרשים" — fully
+                    //   absorbed into the 📦 ערכת התקנה strip panel.)
 
                     // ── Installation stages ─────────────────────────────
                     if (_stages.isNotEmpty) ...[
@@ -551,7 +543,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                         p.qtyPack != null ||
                         p.qtyPallet != null ||
                         p.dims != null) ...[
-                      _SectionTitle(emoji: '📐', title: 'מפרט'),
+                      _SectionTitle(emoji: '📐', title: 'פרטי מוצר'),
                       const SizedBox(height: 10),
                       Padding(
                         padding:
@@ -580,80 +572,8 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                       const SizedBox(height: 16),
                     ],
 
-                    // ── Qty + unit toggle + add to cart ─────────────────
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              _QtyStepper(
-                                qty: _qty,
-                                onChanged: (v) =>
-                                    setState(() => _qty = max(1, v)),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _UnitToggle(
-                                  unit: _unit,
-                                  hasPack: p.qtyPack != null,
-                                  hasPallet: p.qtyPallet != null,
-                                  onChanged: (u) => setState(() => _unit = u),
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (_unit != _Unit.single)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Text(
-                                'סה"כ ${_qty * _unitMult} יחידות',
-                                style: const TextStyle(
-                                    color: Color(0xFF9AA3B2), fontSize: 12),
-                              ),
-                            ),
-                          if (_accTotal > 0)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('אביזרים נבחרים:',
-                                      style: TextStyle(
-                                          color: Colors.black38,
-                                          fontSize: 13)),
-                                  Text('+ ₪$_accTotal',
-                                      style: const TextStyle(
-                                          color: Color(0xFF3DD9B0),
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600)),
-                                ],
-                              ),
-                            ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton.icon(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFFFF7A18),
-                                foregroundColor: const Color(0xFF1A1200),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14)),
-                              ),
-                              onPressed: _addToCart,
-                              icon: const Icon(Icons.shopping_cart, size: 19),
-                              label: const Text('הוסף לסל',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // (purchase bar — qty/unit/add-to-cart — pinned as a
+                    //  footer below the scroll so the CTA is always reachable)
 
                     // ── 🔧 חיבורים תואמים — לפי צד/מידה ──────────────────
                     ...(() {
@@ -793,40 +713,84 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                       return w;
                     })(),
 
-                    // ── Related / similar products (same category) ──────
-                    ...(() {
-                      final related = widget.categoryProducts
-                          .where((x) => x.sku != p.sku)
-                          .take(8)
-                          .toList();
-                      if (related.isEmpty) return <Widget>[];
-                      return <Widget>[
-                        const SizedBox(height: 16),
-                        const _Divider(),
-                        const SizedBox(height: 16),
-                        _SectionTitle(emoji: '🔗', title: 'מוצרים נלווים / דומים'),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          height: 132,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20),
-                            itemCount: related.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(width: 10),
-                            itemBuilder: (_, i) => _RelatedCard(
-                              product: related[i],
-                              onTap: () {
-                                final idx = widget.categoryProducts
-                                    .indexOf(related[i]);
-                                if (idx >= 0) _selectVariant(idx);
-                              },
-                            ),
+                    // ── (Removed: "🔗 מוצרים נלווים / דומים" — duplicated
+                    //   the 🔄 דומים strip's carousel and the 🤝 compat
+                    //   strip's panel. Users now access related products
+                    //   through the top strips, in a more focused way.)
+                  ],
+                ),
+              ),
+              // Pinned purchase bar — qty/unit/add-to-cart always reachable.
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF5F6FA),
+                  border: Border(top: BorderSide(color: Color(0x14000000))),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        _QtyStepper(
+                          qty: _qty,
+                          onChanged: (v) => setState(() => _qty = max(1, v)),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _UnitToggle(
+                            unit: _unit,
+                            hasPack: p.qtyPack != null,
+                            hasPallet: p.qtyPallet != null,
+                            onChanged: (u) => setState(() => _unit = u),
                           ),
                         ),
-                      ];
-                    })(),
+                      ],
+                    ),
+                    if (_unit != _Unit.single)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          'סה"כ ${_qty * _unitMult} יחידות',
+                          style: const TextStyle(
+                              color: Color(0xFF9AA3B2), fontSize: 12),
+                        ),
+                      ),
+                    if (_accTotal > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('אביזרים נבחרים:',
+                                style: TextStyle(
+                                    color: Colors.black38, fontSize: 13)),
+                            Text('+ ₪$_accTotal',
+                                style: const TextStyle(
+                                    color: Color(0xFF3DD9B0),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF7A18),
+                          foregroundColor: const Color(0xFF1A1200),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
+                        ),
+                        onPressed: _addToCart,
+                        icon: const Icon(Icons.shopping_cart, size: 19),
+                        label: const Text('הוסף לסל',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w800)),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1600,6 +1564,740 @@ Widget _SpecRow(String emoji, String label, String value) => Padding(
         ],
       ),
     );
+
+/// Four expandable info strips for the product sheet — מאתר · תאימות ·
+/// ערכת התקנה · דומים. Each strip stays compact by default and pulls its
+/// payload INTO the card when the user taps it (no navigation, no snackbars,
+/// no scrolling) — the data is rendered right below the row. Only one strip
+/// is open at a time; tapping the open strip closes it.
+class _QuickInfoStrips extends StatefulWidget {
+  const _QuickInfoStrips({
+    required this.product,
+    required this.onPickProduct,
+  });
+
+  final LipskeyCatalogProduct product;
+
+  /// Called when the user picks a product from any of the expanded panels.
+  /// The product sheet swaps the displayed product to the picked one without
+  /// closing the sheet — same UX as the existing brand-variant chips.
+  final void Function(LipskeyCatalogProduct) onPickProduct;
+
+  @override
+  State<_QuickInfoStrips> createState() => _QuickInfoStripsState();
+}
+
+enum _StripKind { finder, compat, kit, variants, compliance, spec, price }
+
+/// One-line summary of a unified install-kit (smart-tree + auto-derived
+/// tools): "3 חובה · 2 אופציה · 4 כלים", omitting any zero segment.
+String _formatKitSummary(({int must, int optional, int tools}) k) {
+  final parts = <String>[];
+  if (k.must > 0) parts.add('${k.must} חובה');
+  if (k.optional > 0) parts.add('${k.optional} אופציה');
+  if (k.tools > 0) parts.add('${k.tools} כלים');
+  return parts.join(' · ');
+}
+
+/// Compact spec one-liner for the strip header (the expanded panel shows
+/// the full breakdown): "פליז · 90°C · ½""
+String _formatSpecValue(
+    ({
+      String material,
+      String? pressureRating,
+      double maxTempC,
+      String waterSystem,
+      String endsSummary,
+      double? minBoreMm,
+    }) s) {
+  final parts = <String>[s.material, '${s.maxTempC.toStringAsFixed(0)}°C'];
+  if (s.pressureRating != null) parts.add(s.pressureRating!);
+  return parts.join(' · ');
+}
+
+class _QuickInfoStripsState extends State<_QuickInfoStrips> {
+  _StripKind? _open;
+
+  @override
+  void didUpdateWidget(covariant _QuickInfoStrips oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // When the parent swaps to a different product, collapse any open panel
+    // so the user always sees the four strips of the new product first.
+    if (oldWidget.product.sku != widget.product.sku) {
+      _open = null;
+    }
+  }
+
+  void _toggle(_StripKind k) =>
+      setState(() => _open = _open == k ? null : k);
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.product;
+    final finder = finderGroupFor(p);
+    final compat = compatibleProductsCount(p);
+    final kit = installKitFor(p);
+    final famCount = variantSiblingsCountFor(p);
+
+    final rows = <_StripDef>[
+      if (finder != null)
+        _StripDef(
+          kind: _StripKind.finder,
+          emoji: finder.emoji,
+          label: 'נמצא ב',
+          value: finder.label,
+          tint: const Color(0xFF3DD9B0),
+        ),
+      if (compat > 0)
+        _StripDef(
+          kind: _StripKind.compat,
+          emoji: '🤝',
+          label: 'מוצרים תואמים',
+          value: '$compat מוצרים',
+          tint: const Color(0xFF7FD0FF),
+        ),
+      if (kit != null)
+        _StripDef(
+          kind: _StripKind.kit,
+          emoji: '📦',
+          label: 'ערכת התקנה',
+          value: _formatKitSummary(kit),
+          tint: const Color(0xFFFF9D4D),
+        ),
+      if (famCount > 1)
+        _StripDef(
+          kind: _StripKind.variants,
+          emoji: '🔄',
+          label: 'דומים',
+          value: '$famCount וריאנטים',
+          tint: const Color(0xFFC9A7FF),
+        ),
+      // ── New strips: compliance · engineering spec · price ─────────
+      if (complianceTriggersFor(p).isNotEmpty)
+        _StripDef(
+          kind: _StripKind.compliance,
+          emoji: '🛡',
+          label: 'תקינות',
+          value: '${complianceTriggersFor(p).length} דרישות',
+          tint: const Color(0xFFEF4444),
+        ),
+      if (engineeringSpecFor(p) != null)
+        _StripDef(
+          kind: _StripKind.spec,
+          emoji: '📊',
+          label: 'מפרט הנדסי',
+          value: _formatSpecValue(engineeringSpecFor(p)!),
+          tint: const Color(0xFF8B5CF6),
+        ),
+      if (priceFor(p) != null)
+        _StripDef(
+          kind: _StripKind.price,
+          emoji: '💰',
+          label: 'מחיר משוער',
+          value: '~₪${priceFor(p)}',
+          tint: const Color(0xFF22C55E),
+        ),
+    ];
+    if (rows.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEEEEEE)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (int i = 0; i < rows.length; i++) ...[
+            _StripRow(
+              def: rows[i],
+              open: _open == rows[i].kind,
+              onTap: () => _toggle(rows[i].kind),
+            ),
+            if (_open == rows[i].kind)
+              _StripPanel(
+                kind: rows[i].kind,
+                product: p,
+                tint: rows[i].tint,
+                onPickProduct: widget.onPickProduct,
+              ),
+            if (i < rows.length - 1)
+              const Divider(
+                height: 1,
+                thickness: 0.7,
+                color: Color(0xFFF1F1F1),
+                indent: 12,
+                endIndent: 12,
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _StripDef {
+  const _StripDef({
+    required this.kind,
+    required this.emoji,
+    required this.label,
+    required this.value,
+    required this.tint,
+  });
+  final _StripKind kind;
+  final String emoji;
+  final String label;
+  final String value;
+  final Color tint;
+}
+
+class _StripRow extends StatefulWidget {
+  const _StripRow({
+    required this.def,
+    required this.open,
+    required this.onTap,
+  });
+  final _StripDef def;
+  final bool open;
+  final VoidCallback onTap;
+
+  @override
+  State<_StripRow> createState() => _StripRowState();
+}
+
+class _StripRowState extends State<_StripRow> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final d = widget.def;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: widget.onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        color: widget.open
+            ? d.tint.withValues(alpha: 0.12)
+            : (_pressed
+                ? d.tint.withValues(alpha: 0.18)
+                : Colors.transparent),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        child: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: d.tint.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              alignment: Alignment.center,
+              child: Text(d.emoji, style: const TextStyle(fontSize: 15)),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              '${d.label}:',
+              style: const TextStyle(
+                color: Color(0xFF888888),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                d.value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFF1A1A1A),
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            AnimatedRotation(
+              turns: widget.open ? 0.25 : 0,
+              duration: const Duration(milliseconds: 150),
+              child:
+                  Icon(Icons.chevron_left, size: 16, color: d.tint),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The data payload that opens beneath a strip when it's tapped. Each kind
+/// pulls its content from the matching helper (related_info.dart / smart-tree
+/// / variant-families) and renders it as a compact horizontal carousel of
+/// mini cards, or — for ערכת התקנה — a vertical list of accessory rows.
+class _StripPanel extends StatelessWidget {
+  const _StripPanel({
+    required this.kind,
+    required this.product,
+    required this.tint,
+    required this.onPickProduct,
+  });
+
+  final _StripKind kind;
+  final LipskeyCatalogProduct product;
+  final Color tint;
+  final void Function(LipskeyCatalogProduct) onPickProduct;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(10, 4, 10, 10),
+      color: tint.withValues(alpha: 0.05),
+      child: switch (kind) {
+        _StripKind.finder => _buildFinder(),
+        _StripKind.compat => _buildCompat(),
+        _StripKind.kit => _buildKit(),
+        _StripKind.variants => _buildVariants(),
+        _StripKind.compliance => _buildCompliance(),
+        _StripKind.spec => _buildSpec(),
+        _StripKind.price => _buildPrice(),
+      },
+    );
+  }
+
+  // ── מאתר: other products in the same layman finder group ──────────────────
+  Widget _buildFinder() {
+    final f = finderGroupFor(product);
+    if (f == null) {
+      return const _EmptyHint('אין קבוצה');
+    }
+    // We re-use the existing _kFinderGroups indirectly: a product belongs to
+    // the same finder group when its layman label matches. So pull every
+    // product whose finderGroupFor() has the same label.
+    final peers = kLipskeyCatalog
+        .where((q) =>
+            q.sku != product.sku && finderGroupFor(q)?.label == f.label)
+        .take(20)
+        .toList();
+    if (peers.isEmpty) return const _EmptyHint('אין מוצרים אחרים בקבוצה');
+    return _miniCarousel(peers);
+  }
+
+  // ── תאימות: only products that BOTH mate with the source AND add at least
+  // one new connection option. Filters out trivial duplicates (e.g. another
+  // HDPE 32×25 coupling that just shares the same pipe size without giving
+  // any new endpoint), so the carousel shows truly completing parts.
+  Widget _buildCompat() {
+    if (kVerifiedSpecs[product.sku] == null) {
+      return const _EmptyHint('אין מפרט תואם');
+    }
+    final hits = compatibleProductsFor(product).take(20).toList();
+    if (hits.isEmpty) {
+      return const _EmptyHint('לא נמצאו מוצרים שמשלימים את הקצוות');
+    }
+    return _miniCarousel(hits,
+        labelFor: (q) => connectionExplainHe(product, q));
+  }
+
+  // ── ערכת התקנה: smart-tree accessories + auto-derived install tools ─────
+  // Two data sources merged into one view:
+  //  1. smart-tree (smartProductForSku): manually-curated product-specific
+  //     accessories (gaskets, silicone, brand-specific parts)
+  //  2. install_kit (recommendedKitForProduct): tools and sealants derived
+  //     automatically from the product's actual connector ends — wrenches
+  //     sized to the BSP threads, compression-nut wrench for HDPE ends, etc.
+  Widget _buildKit() {
+    final sp = smartProductForSku(product.sku);
+    final tools = recommendedKitForProduct(product);
+    if ((sp == null || sp.acc.isEmpty) && tools.isEmpty) {
+      return const _EmptyHint('אין רשימת ערכת התקנה');
+    }
+
+    final must = sp?.acc.where((a) => a.must).toList() ?? const [];
+    final opt = sp?.acc.where((a) => !a.must).toList() ?? const [];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (must.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
+            child: Text('חובה (עץ חכם)',
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                    color: Color(0xFFCC6614),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700)),
+          ),
+          for (final a in must) _accRow(a, true),
+        ],
+        if (opt.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.fromLTRB(4, 8, 4, 4),
+            child: Text('אופציונלי (עץ חכם)',
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                    color: Color(0xFF888888),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700)),
+          ),
+          for (final a in opt) _accRow(a, false),
+        ],
+        if (tools.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.fromLTRB(4, 8, 4, 4),
+            child: Text('כלים ואיטומים (אוטומטי)',
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                    color: Color(0xFF7FD0FF),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700)),
+          ),
+          for (final k in tools) _kitRow(k),
+        ],
+      ],
+    );
+  }
+
+  Widget _kitRow(KitItem k) {
+    final tagColor = switch (k.kind) {
+      KitKind.tool => const Color(0xFF7FD0FF),
+      KitKind.sealant => const Color(0xFF3DD9B0),
+      KitKind.safety => const Color(0xFFEF4444),
+    };
+    final tagLabel = switch (k.kind) {
+      KitKind.tool => 'כלי',
+      KitKind.sealant => 'איטום',
+      KitKind.safety => 'בטיחות',
+    };
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+            decoration: BoxDecoration(
+              color: tagColor.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(tagLabel,
+                style: TextStyle(
+                    color: tagColor,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700)),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(k.label,
+                    style: const TextStyle(
+                        color: Color(0xFF1A1A1A),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600)),
+                Text(k.reason,
+                    style: const TextStyle(
+                        color: Color(0xFF888888), fontSize: 10)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _accRow(SmartAcc a, bool must) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+      child: Row(
+        children: [
+          Text(a.emoji, style: const TextStyle(fontSize: 14)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(a.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600)),
+          ),
+          if (must)
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF6B35).withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Text('חובה',
+                  style: TextStyle(
+                      color: Color(0xFFCC4A14),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // ── דומים: variant siblings (same canonical family, different attribute) ──
+  Widget _buildVariants() {
+    final siblings = variantSiblingsOf(product)
+        .where((q) => q.sku != product.sku)
+        .take(20)
+        .toList();
+    if (siblings.isEmpty) return const _EmptyHint('אין וריאנטים נוספים');
+    return _miniCarousel(siblings);
+  }
+
+  // ── תקינות: what compliance items this product triggers ────────────────
+  Widget _buildCompliance() {
+    final triggers = complianceTriggersFor(product);
+    if (triggers.isEmpty) return const _EmptyHint('אין דרישות תקינות מיוחדות');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final t in triggers)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 5, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444).withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text('חובה',
+                      style: TextStyle(
+                          color: Color(0xFFEF4444),
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800)),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t.label,
+                          style: const TextStyle(
+                              color: Color(0xFF1A1A1A),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700)),
+                      Text(t.reason,
+                          style: const TextStyle(
+                              color: Color(0xFF888888),
+                              fontSize: 10,
+                              height: 1.3)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  // ── מפרט הנדסי: material · pressure · temp · system · ends · bore ─────
+  Widget _buildSpec() {
+    final s = engineeringSpecFor(product);
+    if (s == null) return const _EmptyHint('אין מפרט הנדסי מאומת');
+    Widget row(String label, String value) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+          child: Row(
+            children: [
+              Text('$label:',
+                  style: const TextStyle(
+                      color: Color(0xFF888888),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600)),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(value,
+                    textAlign: TextAlign.left,
+                    style: const TextStyle(
+                        color: Color(0xFF1A1A1A),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'monospace')),
+              ),
+            ],
+          ),
+        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        row('חומר', s.material),
+        if (s.pressureRating != null) row('דירוג לחץ', s.pressureRating!),
+        row('טמפ\' מקס\'', '${s.maxTempC.toStringAsFixed(0)}°C'),
+        row('מערכת', s.waterSystem),
+        if (s.minBoreMm != null)
+          row('קוטר פנימי קטן', '${s.minBoreMm!.toStringAsFixed(0)} mm'),
+        row('קצוות חיבור', s.endsSummary),
+      ],
+    );
+  }
+
+  // ── מחיר: category-level ballpark with disclaimer ───────────────────────
+  Widget _buildPrice() {
+    final price = priceFor(product);
+    if (price == null) {
+      return const _EmptyHint('אין הערכת מחיר לקטגוריה זו');
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+          child: Row(
+            children: [
+              const Text('~₪',
+                  style: TextStyle(
+                      color: Color(0xFF22C55E),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900)),
+              Text('$price',
+                  style: const TextStyle(
+                      color: Color(0xFF22C55E),
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900)),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFBBF24).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text('הערכה',
+                    style: TextStyle(
+                        color: Color(0xFFCC9114),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800)),
+              ),
+            ],
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+              'הערכה לפי קטגוריה — מחיר אמיתי תלוי בספק, מותג ומידה ספציפית.',
+              style: TextStyle(
+                  color: Color(0xFF888888), fontSize: 10, height: 1.4)),
+        ),
+      ],
+    );
+  }
+
+  /// Horizontal product strip. When [labelFor] is supplied and returns a
+  /// non-empty string for an item, a small teal "🔗 …" chip is rendered under
+  /// the name explaining HOW that product connects (used by the תאימות strip).
+  Widget _miniCarousel(List<LipskeyCatalogProduct> items,
+      {String Function(LipskeyCatalogProduct)? labelFor}) {
+    final hasLabels = labelFor != null;
+    return SizedBox(
+      height: hasLabels ? 146 : 124,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+        itemCount: items.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (_, i) {
+          final q = items[i];
+          final label = labelFor?.call(q) ?? '';
+          return GestureDetector(
+            onTap: () => onPickProduct(q),
+            child: Container(
+              width: 100,
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFFEEEEEE)),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 44,
+                    child: q.imageAsset != null
+                        ? Image.asset(q.imageAsset!,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Center(
+                                child: Text(q.typeEmoji,
+                                    style: const TextStyle(fontSize: 24))))
+                        : Center(
+                            child: Text(q.typeEmoji,
+                                style: const TextStyle(fontSize: 24))),
+                  ),
+                  const SizedBox(height: 3),
+                  Expanded(
+                    child: Text(q.nameHe,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: Color(0xFF1A1A1A),
+                            fontSize: 10,
+                            height: 1.2)),
+                  ),
+                  if (label.isNotEmpty) ...[
+                    const SizedBox(height: 3),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE6F4F1),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text('🔗 $label',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                              color: Color(0xFF0F766E),
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w700)),
+                    ),
+                    const SizedBox(height: 2),
+                  ],
+                  Text('#${q.sku}',
+                      style: const TextStyle(
+                          color: Color(0xFF9AA3B2),
+                          fontSize: 8,
+                          fontFamily: 'monospace')),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _EmptyHint extends StatelessWidget {
+  const _EmptyHint(this.text);
+  final String text;
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(4, 4, 4, 6),
+        child: Text(text,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+                color: Color(0xFF9AA3B2),
+                fontSize: 11,
+                fontStyle: FontStyle.italic)),
+      );
+}
 
 /// Interactive attribute chips (צעד 71+).
 /// All four chip kinds use frame-based sibling detection:

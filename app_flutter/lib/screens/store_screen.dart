@@ -6,6 +6,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Store section tabs.
 enum StoreSection { all, cart, orders, services }
@@ -13,8 +14,41 @@ enum StoreSection { all, cart, orders, services }
 final storeSectionProvider =
     StateProvider<StoreSection>((_) => StoreSection.all);
 final storeSearchQueryProvider = StateProvider<String>((_) => '');
+/// Favorited store-hub rows (by title). Persisted to SharedPreferences so the
+/// ⭐ set survives restarts.
+class StoreFavoritesNotifier extends StateNotifier<Set<String>> {
+  StoreFavoritesNotifier() : super(const {}) {
+    _load();
+  }
+  static const _prefsKey = 'bs.store-favorites.v1';
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_prefsKey);
+      if (list != null) state = list.toSet();
+    } catch (_) {}
+  }
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefsKey, state.toList());
+    } catch (_) {}
+  }
+
+  void toggle(String key) {
+    state = state.contains(key)
+        ? (Set<String>.of(state)..remove(key))
+        : (Set<String>.of(state)..add(key));
+    _persist();
+  }
+}
+
 final storeFavoritesProvider =
-    StateProvider<Set<String>>((_) => const {});
+    StateNotifierProvider<StoreFavoritesNotifier, Set<String>>(
+  (_) => StoreFavoritesNotifier(),
+);
 
 // ─── cart state ──────────────────────────────────────────────────────────────
 
@@ -23,7 +57,7 @@ enum CartDelivery { express, standard, pickup }
 enum CartPaymentMethod { card, bit, supplierCredit }
 
 final cartQtysProvider = StateProvider<Map<String, int>>(
-  (_) => const {'blk': 150, 'pls': 5, 'blt': 80, 'bm': 10},
+  (_) => const {},
 );
 // Initial delivery/payment honor the store-settings defaults (read once).
 // Pure mappings (regression-tested in test/gaps_test.dart).
@@ -42,6 +76,8 @@ final cartProjectProvider = StateProvider<String>((_) => 'בית דוד 3');
 final cartPaymentProvider = StateProvider<CartPaymentMethod>(
   (ref) => cartPaymentFor(ref.read(storeSettingsProvider).defaultPayment),
 );
+/// Free-text delivery note carried into the confirmed order.
+final cartNotesProvider = StateProvider<String>((_) => '');
 
 // ─── static data ─────────────────────────────────────────────────────────────
 
@@ -90,14 +126,6 @@ List<_Meta> _itemsForSection(StoreSection s) => switch (s) {
 
 // ─── cart data ────────────────────────────────────────────────────────────────
 
-typedef _CartItem = ({String emoji, String name, String qty, String price});
-
-const List<_CartItem> _kCartItemDetails = [
-  (emoji: '🪨', name: 'בלוקים 20x20', qty: "200 יח'", price: '₪680'),
-  (emoji: '🔩', name: 'ברגים 8cm',    qty: "500 יח'", price: '₪210'),
-  (emoji: '🪵', name: 'קורות עץ 3m',  qty: "10 יח'",  price: '₪450'),
-];
-const _kCartTotal = '₪1,340';
 
 // ─── cart items ──────────────────────────────────────────────────────────────
 
@@ -110,14 +138,15 @@ typedef _CItem = ({
   int unitPrice,
 });
 
-const List<_CItem> _kCItems = [
-  (id: 'blk', emoji: '🪨', name: "בלוקים 20×20",   supplier: "מרינוביץ'",  unit: "יח'", unitPrice: 4),
-  (id: 'pls', emoji: '🪣', name: 'שפכטל 20 ק"ג',  supplier: "מרינוביץ'",  unit: "שק'", unitPrice: 42),
-  (id: 'blt', emoji: '🔩', name: 'ברגי אנקר M12',  supplier: 'פריגו',       unit: "יח'", unitPrice: 3),
-  (id: 'bm',  emoji: '🪵', name: "קורות עץ 3מ'",   supplier: 'פריגו',       unit: "יח'", unitPrice: 45),
-];
+// Real cart is driven entirely by smartCartProvider (products the user added).
+// No injected demo items.
+const List<_CItem> _kCItems = [];
 
 const _kProjects = ['בית דוד 3', 'מגדל עזריאלי', 'ללא פרויקט'];
+
+/// Live project list — seeded from [_kProjects]; the user can add more.
+final storeProjectsProvider =
+    StateProvider<List<String>>((_) => List.of(_kProjects));
 
 typedef _DOption = ({CartDelivery method, String emoji, String label, int fee});
 typedef _POption = ({CartPaymentMethod method, String emoji, String label});
@@ -159,10 +188,11 @@ int cartTotal(int subtotal, int deliveryFee, {required bool vatInclusive}) =>
         ? subtotal + deliveryFee
         : subtotal + cartVat(subtotal, vatInclusive: false) + deliveryFee;
 
-/// Number of distinct line items currently in the cart: fixed items with a
-/// positive quantity plus every smart-cart line.
+/// Total number of units in the cart: summed fixed-item quantities plus the
+/// quantity of every smart-cart line (so 3× of one product counts as 3).
 int cartItemCount(Map<String, int> qtys, List<SmartCartLine> smartLines) =>
-    qtys.values.where((q) => q > 0).length + smartLines.length;
+    qtys.values.where((q) => q > 0).fold<int>(0, (s, q) => s + q) +
+    smartLines.fold<int>(0, (s, l) => s + l.productQty);
 
 /// Order stage that means the order is finished (no longer "open").
 const String kDeliveredStage = 'delivered';
@@ -258,7 +288,8 @@ class _SummaryRow extends ConsumerWidget {
       ref.watch(cartQtysProvider),
       ref.watch(smartCartProvider),
     );
-    final openOrders = _kOrders.where((o) => isOrderOpen(o.stage)).length;
+    final openOrders =
+        ref.watch(storeOrdersProvider).where((o) => isOrderOpen(o.stage)).length;
     final offers = _kSupplierOffersCount;
 
     return SingleChildScrollView(
@@ -477,7 +508,7 @@ class _QuickActionsRow extends ConsumerWidget {
     final favorites = ref.watch(storeFavoritesProvider);
     final allItems = _kAllItems;
     final favItems = allItems
-        .where((item) => favorites.contains(item.emoji))
+        .where((item) => favorites.contains(item.title))
         .toList();
 
     return Padding(
@@ -805,7 +836,22 @@ class _AllList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(storeSearchQueryProvider).trim().toLowerCase();
     final favorites = ref.watch(storeFavoritesProvider);
-    final allItems = _itemsForSection(section);
+    final cartCount = cartItemCount(
+      ref.watch(cartQtysProvider),
+      ref.watch(smartCartProvider),
+    );
+    // Reflect the real cart count on the "הסל שלי" hub row.
+    final allItems = _itemsForSection(section)
+        .map((m) => m.emoji == '🛒'
+            ? (
+                emoji: m.emoji,
+                title: m.title,
+                preview: '$cartCount פריטים ממתינים לסיכום',
+                time: m.time,
+                badge: cartCount,
+              )
+            : m)
+        .toList();
     final items = query.isEmpty
         ? allItems
         : allItems
@@ -838,14 +884,7 @@ class _AllList extends ConsumerWidget {
           item: item,
           isFav: isFav,
           onFavToggle: () {
-            final notifier = ref.read(storeFavoritesProvider.notifier);
-            final current = Set<String>.from(notifier.state);
-            if (isFav) {
-              current.remove(item.title);
-            } else {
-              current.add(item.title);
-            }
-            notifier.state = current;
+            ref.read(storeFavoritesProvider.notifier).toggle(item.title);
           },
           onTap: svcIdx != null
               ? () => _ServicesGrid._openSheet(context, svcIdx)
@@ -861,16 +900,6 @@ class _AllList extends ConsumerWidget {
     );
   }
 
-  void _showCartSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: const Color(0xFFFFFFFF),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const _CartSheet(),
-    );
-  }
 }
 
 // ─── swipe-to-favorite ────────────────────────────────────────────────────────
@@ -1074,122 +1103,6 @@ class _EmptyState extends StatelessWidget {
 
 // ─── cart sheet ──────────────────────────────────────────────────────────────
 
-class _CartSheet extends StatelessWidget {
-  const _CartSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              '🛒 הסל שלי',
-              style: TextStyle(
-                color: Color(0xFF1A1A1A),
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Divider(color: Color(0xFFF5F5F5), height: 1),
-          ..._kCartItemDetails.map(
-            (item) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                children: [
-                  Text(item.emoji, style: const TextStyle(fontSize: 20)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      item.name,
-                      style:
-                          const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
-                    ),
-                  ),
-                  Text(
-                    item.qty,
-                    style: const TextStyle(
-                      color: Color(0xFF888888),
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    item.price,
-                    style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const Divider(color: Color(0xFFF5F5F5), height: 1),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text(
-                'סה"כ',
-                style: TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                _kCartTotal,
-                style: TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: BsTokens.brand,
-              foregroundColor: Color(0xFFFFFFFF),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              showToast(context, 'מעבר לתשלום — בבנייה');
-            },
-            child: const Text(
-              'מעבר לתשלום →',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ─── cart view ────────────────────────────────────────────────────────────────
 
@@ -1202,6 +1115,15 @@ class _CartView extends ConsumerStatefulWidget {
 
 class _CartViewState extends ConsumerState<_CartView> {
   final _notesCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _notesCtrl.text = ref.read(cartNotesProvider);
+    _notesCtrl.addListener(
+      () => ref.read(cartNotesProvider.notifier).state = _notesCtrl.text,
+    );
+  }
 
   @override
   void dispose() {
@@ -1240,6 +1162,30 @@ class _CartViewState extends ConsumerState<_CartView> {
 
     final saveToProject =
         ref.watch(storeSettingsProvider.select((s) => s.saveCartToProject));
+
+    if (smartLines.isEmpty && grouped.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Text('🛒', style: TextStyle(fontSize: 52)),
+              SizedBox(height: 12),
+              Text('הסל ריק',
+                  style: TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700)),
+              SizedBox(height: 4),
+              Text('הוסיפו מוצרים מהקטלוג',
+                  style: TextStyle(color: Color(0xFF888888), fontSize: 13)),
+            ],
+          ),
+        ),
+      );
+    }
+
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       children: [
@@ -1302,7 +1248,7 @@ class _ProjectSelector extends ConsumerWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              for (final p in _kProjects) ...[
+              for (final p in ref.watch(storeProjectsProvider)) ...[
                 _ProjectChip(
                   label: p,
                   active: p == selected,
@@ -1312,7 +1258,7 @@ class _ProjectSelector extends ConsumerWidget {
                 const SizedBox(width: 8),
               ],
               GestureDetector(
-                onTap: () => showToast(context, 'הוספת פרויקט — בבנייה'),
+                onTap: () => _addProjectDialog(context, ref),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -1333,6 +1279,44 @@ class _ProjectSelector extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  static void _addProjectDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFFFFFFFF),
+        title: const Text('הוספת פרויקט',
+            style: TextStyle(color: Color(0xFF1A1A1A))),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: const TextStyle(color: Color(0xFF1A1A1A)),
+          decoration: const InputDecoration(hintText: 'שם הפרויקט'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('ביטול', style: TextStyle(color: Colors.black38)),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isEmpty) return;
+              final notifier = ref.read(storeProjectsProvider.notifier);
+              if (!notifier.state.contains(name)) {
+                notifier.state = [...notifier.state, name];
+              }
+              ref.read(cartProjectProvider.notifier).state = name;
+              Navigator.pop(ctx);
+            },
+            style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+            child: const Text('הוסף'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1429,6 +1413,17 @@ class _SmartCartRow extends ConsumerWidget {
                   ],
                 ),
               ),
+              // Quantity stepper — adjust the real cart line.
+              _SmartQtyStepper(
+                qty: line.productQty,
+                onMinus: () => ref
+                    .read(smartCartProvider.notifier)
+                    .setLineQty(index, line.productQty - 1),
+                onPlus: () => ref
+                    .read(smartCartProvider.notifier)
+                    .setLineQty(index, line.productQty + 1),
+              ),
+              const SizedBox(width: 8),
               Text(
                 '₪${line.total}',
                 style: const TextStyle(
@@ -1479,6 +1474,57 @@ class _SmartCartRow extends ConsumerWidget {
                 ),
               ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Compact −/qty/+ stepper for a smart-cart row.
+class _SmartQtyStepper extends StatelessWidget {
+  const _SmartQtyStepper({
+    required this.qty,
+    required this.onMinus,
+    required this.onPlus,
+  });
+
+  final int qty;
+  final VoidCallback onMinus;
+  final VoidCallback onPlus;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget btn(IconData icon, VoidCallback onTap) => InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Padding(
+            padding: const EdgeInsets.all(2),
+            child: Icon(icon, size: 18, color: BsTokens.brand),
+          ),
+        );
+    return Container(
+      decoration: BoxDecoration(
+        color: BsTokens.brand.withAlpha(20),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          btn(Icons.remove, onMinus),
+          SizedBox(
+            width: 22,
+            child: Text(
+              '$qty',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF1A1A1A),
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          btn(Icons.add, onPlus),
         ],
       ),
     );
@@ -2162,8 +2208,31 @@ class _CheckoutSheet extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               onPressed: () {
+                final orderNo = DateTime.now().millisecondsSinceEpoch % 100000;
+                final itemCount = cartItemCount(
+                  ref.read(cartQtysProvider),
+                  ref.read(smartCartProvider),
+                );
+                // Real effect: record a new open order...
+                final newOrder = (
+                  id: 'BS-$orderNo',
+                  items: '$itemCount פריטים',
+                  total: _price(total),
+                  stage: 'preparing',
+                  stageLabel: 'בהכנה 🔧',
+                  time: 'עכשיו',
+                  stageColor: const Color(0xFFFF9800),
+                );
+                ref.read(storeOrdersProvider.notifier).state = [
+                  newOrder,
+                  ...ref.read(storeOrdersProvider),
+                ];
+                // ...and empty the cart + notes.
+                ref.read(smartCartProvider.notifier).clear();
+                ref.read(cartQtysProvider.notifier).state = const {};
+                ref.read(cartNotesProvider.notifier).state = '';
                 Navigator.pop(context);
-                showToast(context, 'הזמנה #${DateTime.now().second} אושרה! 🎉');
+                showToast(context, 'הזמנה #$orderNo אושרה! 🎉');
               },
               child: const Text(
                 'אישור הזמנה',
@@ -2218,12 +2287,17 @@ class _CartActionsRow extends ConsumerWidget {
                 showToast(context, 'שם הרשימה לא יכול להיות ריק');
                 return;
               }
-              final items = _kCartItemDetails
-                  .map((item) => (
-                        emoji: item.emoji,
-                        name: item.name,
-                        qty: int.tryParse(item.qty.split(' ')[0]) ?? 0,
-                        price: item.price,
+              final lines = ref.read(smartCartProvider);
+              if (lines.isEmpty) {
+                showToast(context, 'הסל ריק');
+                return;
+              }
+              final items = lines
+                  .map((l) => (
+                        emoji: l.productEmoji,
+                        name: l.productName,
+                        qty: l.productQty,
+                        price: '₪${l.total}',
                       ))
                   .toList();
               ref
@@ -2252,9 +2326,14 @@ class _CartActionsRow extends ConsumerWidget {
         ),
         TextButton.icon(
           onPressed: () {
-            final items = _kCartItemDetails
-                .map((item) =>
-                    '${item.emoji} ${item.name} × ${item.qty} = ${item.price}')
+            final lines = ref.read(smartCartProvider);
+            if (lines.isEmpty) {
+              showToast(context, 'הסל ריק');
+              return;
+            }
+            final items = lines
+                .map((l) =>
+                    '${l.productEmoji} ${l.productName} × ${l.productQty} = ₪${l.total}')
                 .join('\n');
             showToast(
               context,
@@ -2268,6 +2347,7 @@ class _CartActionsRow extends ConsumerWidget {
         ),
         TextButton.icon(
           onPressed: () {
+            ref.read(smartCartProvider.notifier).clear();
             ref.read(cartQtysProvider.notifier).state = const {};
             showToast(context, 'הסל נוקה');
           },
@@ -2528,6 +2608,10 @@ const List<_Order> _kOrders = [
   ),
 ];
 
+/// Live orders — seeded from [_kOrders]; confirming checkout prepends a new one.
+final storeOrdersProvider =
+    StateProvider<List<_Order>>((_) => List.of(_kOrders));
+
 // ─── orders list ──────────────────────────────────────────────────────────────
 
 class _OrdersList extends ConsumerWidget {
@@ -2536,9 +2620,10 @@ class _OrdersList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(storeSearchQueryProvider).trim().toLowerCase();
+    final allOrders = ref.watch(storeOrdersProvider);
     final orders = query.isEmpty
-        ? _kOrders
-        : _kOrders
+        ? allOrders
+        : allOrders
             .where(
               (o) =>
                   o.id.toLowerCase().contains(query) ||
@@ -2820,27 +2905,89 @@ class _OrderSheet extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF5F5F5),
-              foregroundColor: Colors.black54,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          const SizedBox(height: 20),
+          const Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '🚛 מעקב הזמנה',
+              style: TextStyle(
+                color: Color(0xFF1A1A1A),
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
               ),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              showToast(context, 'מעקב הזמנה ${order.id} — בבנייה');
-            },
-            child: const Text(
-              'מעקב הזמנה 🚛',
-              style: TextStyle(fontSize: 15),
             ),
           ),
+          const SizedBox(height: 14),
+          _OrderTimeline(stage: order.stage),
         ],
       ),
+    );
+  }
+}
+
+/// Real order-status timeline driven by [_Order.stage]: every stage up to and
+/// including the current one is marked done; later stages stay pending.
+class _OrderTimeline extends StatelessWidget {
+  const _OrderTimeline({required this.stage});
+  final String stage;
+
+  static const _steps = <(String, String, IconData)>[
+    ('preparing', 'בהכנה', Icons.build_outlined),
+    ('ready', 'מוכן', Icons.inventory_2_outlined),
+    ('transit', 'בדרך', Icons.local_shipping_outlined),
+    ('delivered', 'נמסר', Icons.check_circle_outline),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final found = _steps.indexWhere((s) => s.$1 == stage);
+    final cur = found < 0 ? 0 : found;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < _steps.length; i++) ...[
+          if (i > 0)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Container(
+                  height: 2,
+                  color: i <= cur
+                      ? BsTokens.brand
+                      : const Color(0xFFE0E0E0),
+                ),
+              ),
+            ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: i <= cur ? BsTokens.brand : const Color(0xFFEDEDED),
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  _steps[i].$3,
+                  size: 18,
+                  color: i <= cur ? Colors.white : Colors.black38,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                _steps[i].$2,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: i <= cur ? const Color(0xFF1A1A1A) : Colors.black38,
+                  fontWeight: i == cur ? FontWeight.w800 : FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }

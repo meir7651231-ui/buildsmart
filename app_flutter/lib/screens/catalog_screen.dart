@@ -30,12 +30,13 @@ void _openStudio(BuildContext context) {
 }
 
 /// Active section label — 'הכל' is always first and fixed.
-/// Default landing is the full category list rather than the 'הכל' preview.
-final catalogSectionProvider = StateProvider<String>((_) => 'קטגוריות');
+/// Default landing is the בית (finder home) — the least-technical path to a
+/// product (group → sub → add, 2–3 taps), so the app opens straight on it.
+final catalogSectionProvider = StateProvider<String>((_) => 'בית');
 
 /// Ordered list of user section labels (הכל is NOT stored here).
 final catalogSectionsListProvider = StateProvider<List<String>>(
-  (_) => ['מאתר', 'תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
+  (_) => ['בית', 'תכנון חיבור', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
 );
 
 /// Per-list catalog items: map of section-label → set of catalog category
@@ -1197,12 +1198,12 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
 }
 
 IconData _sectionIcon(String label) => switch (label) {
-      'מאתר'            => Icons.travel_explore,
+      'בית'             => Icons.home_outlined,
       'חיפושים אחרונים' => Icons.history,
       'מועדפים'         => Icons.favorite_border,
       'קטגוריות'        => Icons.grid_view_outlined,
       'עץ חכם'          => Icons.account_tree_outlined,
-      'תאימות'          => Icons.compare_arrows_outlined,
+      'תכנון חיבור'     => Icons.handyman_outlined,
       _                 => Icons.list_alt_outlined,
     };
 
@@ -1987,12 +1988,12 @@ class _CatalogBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(catalogSectionProvider);
     if (active == 'הכל') return _AllOverview(scrollCtrl: scrollCtrl);
-    if (active == 'מאתר') return const FinderScreen();
+    if (active == 'בית') return const FinderScreen();
     if (active == 'עץ חכם') return const _SmartTreeSection();
     if (active == 'קטגוריות') return const _CatalogList();
     if (active == 'מועדפים') return const _FavoritesSection();
     if (active == 'חיפושים אחרונים') return const _RecentSearchesSection();
-    if (active == 'תאימות') return const InstallStudioScreen();
+    if (active == 'תכנון חיבור') return const InstallStudioScreen();
     if (active == 'וריאנטים') return const _VariantsSection();
 
     final selected = ref.watch(catalogListItemsProvider)[active];
@@ -2189,13 +2190,13 @@ class _AllOverview extends ConsumerWidget {
         ),
         // תאימות
         _OverviewBlock(
-          title: 'תאימות',
+          title: 'תכנון חיבור',
           count: kLipskeyCatalog.length,
           onShowAll: () => _openStudio(context),
           children: [
             _OverviewRow(
-              icon: Icons.compare_arrows_outlined,
-              label: 'סטודיו התקנות — תכנן · חבר · הזמן',
+              icon: Icons.handyman_outlined,
+              label: 'תכנון חיבור — בחר מה לחבר ונכין רשימת קנייה',
               onTap: () => _openStudio(context),
             ),
           ],

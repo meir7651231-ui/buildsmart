@@ -48,10 +48,18 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🛒', title: 'חנות',   breadcrumb: '',  type: SearchType.screen),
 
   // ── Secondary reachable screens ────────────────────────────────────────
-  SearchEntry(emoji: '🔧', title: 'סטודיו התקנות',     breadcrumb: 'קטלוג › תאימות', type: SearchType.screen),
-  SearchEntry(emoji: '🧭', title: 'מאתר',              breadcrumb: 'קטלוג',          type: SearchType.screen),
-  SearchEntry(emoji: '🏷️', title: 'ספקים ומותגים',     breadcrumb: 'קטלוג',          type: SearchType.screen),
-  SearchEntry(emoji: '🔬', title: 'מרכז בדיקות רגרסיה', breadcrumb: 'BS',             type: SearchType.screen),
+  SearchEntry(emoji: '🔧', title: 'סטודיו התקנות',     breadcrumb: 'קטלוג › תאימות',         type: SearchType.screen),
+  SearchEntry(emoji: '🧪', title: 'אודיט תרחישים',     breadcrumb: 'קטלוג › תאימות › סטודיו', type: SearchType.screen),
+  SearchEntry(emoji: '💾', title: 'פרויקטים שמורים',   breadcrumb: 'קטלוג › תאימות › סטודיו', type: SearchType.screen),
+  SearchEntry(emoji: '🏠', title: 'בית',               breadcrumb: 'קטלוג',                  type: SearchType.screen),
+  SearchEntry(emoji: '🏷️', title: 'ספקים ומותגים',     breadcrumb: 'קטלוג',                  type: SearchType.screen),
+  SearchEntry(emoji: '🔬', title: 'מרכז בדיקות רגרסיה', breadcrumb: 'BS',                     type: SearchType.screen),
+
+  // ── Store / cart screens ───────────────────────────────────────────────
+  SearchEntry(emoji: '🛒', title: 'הסל שלי',      breadcrumb: 'חנות',        type: SearchType.screen),
+  SearchEntry(emoji: '📦', title: 'ההזמנות שלי',  breadcrumb: 'חנות',        type: SearchType.screen),
+  SearchEntry(emoji: '🔧', title: 'שירותים',      breadcrumb: 'חנות',        type: SearchType.screen),
+  SearchEntry(emoji: '🧾', title: 'סיכום הזמנה',  breadcrumb: 'חנות › הסל',  type: SearchType.action),
 
   // ── Search tools ───────────────────────────────────────────────────────
   SearchEntry(emoji: '🎤', title: 'חיפוש קולי', breadcrumb: 'חיפוש', type: SearchType.action),
@@ -73,6 +81,13 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🎨',  title: 'גמר',                 breadcrumb: 'קטלוג', type: SearchType.category),
   SearchEntry(emoji: '🧰',  title: 'אביזרים נלווים',       breadcrumb: 'קטלוג', type: SearchType.category),
   SearchEntry(emoji: '🌱',  title: 'גינון והשקיה',         breadcrumb: 'קטלוג', type: SearchType.category),
+
+  // ── Catalog sections (sortable / smart views) ──────────────────────────
+  SearchEntry(emoji: '🔄',  title: 'וריאנטים',             breadcrumb: 'קטלוג', type: SearchType.menu),
+  SearchEntry(emoji: '⭐',  title: 'מועדפים',              breadcrumb: 'קטלוג', type: SearchType.menu),
+  SearchEntry(emoji: '🌳',  title: 'עץ חכם',               breadcrumb: 'קטלוג', type: SearchType.menu),
+  SearchEntry(emoji: '🛠',  title: 'תכנון חיבור',          breadcrumb: 'קטלוג', type: SearchType.menu),
+  SearchEntry(emoji: '🕐',  title: 'חיפושים אחרונים',      breadcrumb: 'קטלוג', type: SearchType.menu),
 
   // ── BS dial — personas (L1) ────────────────────────────────────────────
   SearchEntry(emoji: '👷', title: 'קבלן',         breadcrumb: 'BS', type: SearchType.persona),

@@ -115,14 +115,33 @@ List<LineCheck> lineComplianceChecklist(
   // Galvanic risk: copper joined to ANY other metal (brass/steel) — conservative.
   final metals = mats.where((m) => m == 'נחושת' || m == 'פליז' || m == 'פלדה');
   final dissimilar = mats.contains('נחושת') && metals.toSet().length >= 2;
-  final isolationCount =
-      chain.where((p) => _kIsolationValveSkus.contains(p.sku)).length;
+  // Count BOTH synthetic and real catalog ball valves as shutoffs.
+  final isolationCount = chain
+      .where((p) =>
+          _kIsolationValveSkus.contains(p.sku) ||
+          ((p.productType == 'ברז' || p.productType == 'ברז גן') &&
+              (p.categoryHe == 'ברזי מעבר' ||
+                  p.categoryHe == 'ברזי ניל' ||
+                  p.categoryHe == 'ברזי דלי')))
+      .length;
 
   final hasCommercialPump = skus.contains('HW-PUMP-40');
+  // Recognise BOTH synthetic hot-water SKUs AND real catalog products by
+  // type/category — a "מחלק" (distribution manifold) or shower head from
+  // the regular Lipskey catalog also needs TMTV anti-scald in a hot line.
   final hasManifoldOrShower = has({
-    'HW-MANIFOLD-3', 'HW-MANIFOLD-4', 'HW-MANIFOLD-6',
-    'HW-SHOWER-HEAD', 'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20', 'HW-TMTV-15',
-  });
+        'HW-MANIFOLD-3', 'HW-MANIFOLD-4', 'HW-MANIFOLD-6',
+        'HW-SHOWER-HEAD',
+        'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20', 'HW-TMTV-15',
+      }) ||
+      chain.any((p) =>
+          p.productType == 'מחלק' ||
+          p.productType == 'ראש מקלחת' ||
+          p.productType == 'מקלח' ||
+          p.categoryHe == 'מחלקים' ||
+          p.categoryHe == 'ראשי מקלחת' ||
+          p.categoryHe == 'מערכות אמבטיה' ||
+          p.categoryHe == 'ערכות רחצה');
 
   return [
     LineCheck(
@@ -163,19 +182,20 @@ List<LineCheck> lineComplianceChecklist(
           'מבודד רעידות המשאבה מהצנרת', severity: CheckSeverity.warning),
     ],
     if (hasManifoldOrShower)
-      LineCheck('TMTV anti-scald (הגנת משתמש)',
+      LineCheck('ברז ערבוב נגד כוויה (TMTV)',
           has({'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20', 'HW-TMTV-15'}),
-          'מגביל T≤45°C ביציאה — anti-scald', severity: CheckSeverity.critical),
+          'מגביל את המים ל-45°C ביציאה כדי למנוע כוויה',
+          severity: CheckSeverity.critical),
     if (hasCommercialPump && hasManifoldOrShower)
       LineCheck('שסתום מאזן לכל ענף (Balancing Valve)',
           has({'HW-BALANCE-25', 'HW-BALANCE-20', 'HW-BALANCE-15'}),
           'מאזן לחץ בין ענפים במערכת מסחרית', severity: CheckSeverity.warning),
     if (hasCommercialPump && hot)
-      LineCheck('bypass תרמי למניעת Legionella (EN 806)',
+      LineCheck('מעקף חום נגד חיידק לגיונלה (EN 806)',
           has({'HW-DISINFECT'}),
           'פסטור 70°C/3 דקות אחת לשבוע', severity: CheckSeverity.critical),
     if (recirc)
-      LineCheck('נקודת דיגום (Legionella sampling)',
+      LineCheck('נקודת דגימת מים (לגיונלה)',
           has({'HW-SAMPLE'}),
           'נדרש לבדיקות מים תקתיות', severity: CheckSeverity.warning),
     if (hot)
@@ -183,7 +203,7 @@ List<LineCheck> lineComplianceChecklist(
           'הפסדי חום + סכנת כוויות', severity: CheckSeverity.warning),
     LineCheck('חבקים/תמיכת צנרת', acc('HW-CLIP'),
         'קיבוע ושיפוע', severity: CheckSeverity.info),
-    LineCheck('איטום (Press/PTFE/O-ring)', acc('HW-SEALANT'),
+    LineCheck('איטום מעברים (Press/PTFE/O-ring)', acc('HW-SEALANT'),
         'אטימות כל מעבר', severity: CheckSeverity.info),
   ];
 }
@@ -205,7 +225,7 @@ List<String> lineInstallReminders() => const [
 // brass supply nipples/bushings with PVC drainage branches, so it is classified
 // per-SKU by its actual ends (see productSystems fallback).
 const _supplyCats = {
-  'אביזרי נחושת', 'מחברי NTM', 'ברזי מעבר', 'ברזי ניל',
+  'אביזרי נחושת', 'מחברי NTM', 'מחברי HDPE', 'ברזי מעבר', 'ברזי ניל',
   'ברזי קיר', 'ברזי כיור', 'ברזי מטבח', 'ברזי גן', 'ברזי אמבטיה', 'ברזי מקלחת',
   'ברזי דלי', 'ציוד גן', 'צינורות מקלחת',
   'זרועות דוש', 'מזלפי יד', 'ראשי מקלחת', 'מחלקים', 'נקודות מים',
@@ -215,8 +235,14 @@ const _supplyCats = {
 // NOTE: 'צינורות גמישים' (braided supply hoses + spiral drain hoses) and
 // 'אל חזור' (brass supply check valves + sewage backflow valves) are mixed
 // categories — classified per-SKU by their ends, like 'אביזרי תבריג'.
+//
+// 'מחברי HDPE' is SUPPLY — these are HDPE PN16 pressure fittings for
+// potable water lines, NOT drainage. The EndType.hdpeCompression enum is
+// overloaded for any push-fit socket, so the WaterSystem of a single end is
+// now resolved against the parent spec's material in [VerifiedSpec.endSystems]
+// (see lipskey_verified_connections.dart).
 const _drainCats = {
-  'מחברי HDPE', 'אביזרי שקע-תקע', 'צינורות אפורות', 'צינורות PP', 'ברכיים',
+  'אביזרי שקע-תקע', 'צינורות אפורות', 'צינורות PP', 'ברכיים',
   'מסעפים וחיבורי אסלה', 'זקיף אסלה', 'מחסומים גלויים', 'מחסומי רצפה',
   'מאספי רצפה', 'מאספים וקולטים', 'תעלות ניקוז', 'סיפונים', 'מכסים ורשתות',
   'כיסויים', 'ניקוז גג', 'אביזרי ביוב',
@@ -403,6 +429,111 @@ List<LipskeyCatalogProduct> compatibleWith(
       ..sort((a, b) => (a.categoryHe == anchor.categoryHe ? 0 : 1)
           .compareTo(b.categoryHe == anchor.categoryHe ? 0 : 1)));
 
+/// Up to [k] alternative paths from [from] to [to], ordered by cost.
+/// Each returned path is distinct from the others (no path is a prefix or
+/// duplicate of another). When fewer than [k] viable paths exist, returns
+/// what was found. Useful for offering the plumber 2–3 installation options
+/// instead of a single forced choice.
+List<List<LipskeyCatalogProduct>> findAlternativePaths(
+  LipskeyCatalogProduct from,
+  LipskeyCatalogProduct to, {
+  int k = 3,
+  int maxDepth = 6,
+  int tempC = 20,
+}) {
+  if (k <= 0) return const [];
+  final results = <List<LipskeyCatalogProduct>>[];
+  final first = findShortestPath(from, to, maxDepth: maxDepth, tempC: tempC);
+  if (first == null) return const [];
+  results.add(first);
+
+  // Yen-style: for each edge in the current best path, find the shortest
+  // path that avoids using that specific (prev → next) edge, then keep the
+  // top k by cost. Each "blocked edge" is a (sku_a, sku_b) pair.
+  final blocked = <(String, String)>{};
+  while (results.length < k) {
+    var bestCandidate = <LipskeyCatalogProduct>[];
+    int bestCost = 1 << 30;
+    final lastPath = results.last;
+    for (var i = 0; i < lastPath.length - 1; i++) {
+      final edge = (lastPath[i].sku, lastPath[i + 1].sku);
+      if (blocked.contains(edge)) continue;
+      blocked.add(edge);
+      final p = _findShortestPathExcluding(from, to,
+          maxDepth: maxDepth, tempC: tempC, blocked: blocked);
+      blocked.remove(edge);
+      if (p == null) continue;
+      // skip duplicates
+      if (results.any((r) =>
+          r.length == p.length &&
+          List.generate(r.length, (i) => r[i].sku == p[i].sku)
+              .every((b) => b))) continue;
+      final c = _pathCost(p);
+      if (c < bestCost) {
+        bestCost = c;
+        bestCandidate = p;
+      }
+    }
+    if (bestCandidate.isEmpty) break;
+    results.add(bestCandidate);
+  }
+  return results;
+}
+
+int _pathCost(List<LipskeyCatalogProduct> path) {
+  var c = 0;
+  for (var i = 0; i < path.length - 1; i++) {
+    c += _edgeCost(path[i], path[i + 1]);
+  }
+  return c;
+}
+
+/// Same algorithm as [findShortestPath] but with a set of blocked directed
+/// edges (sku→sku). Used by [findAlternativePaths] to generate Yen-style
+/// alternatives.
+List<LipskeyCatalogProduct>? _findShortestPathExcluding(
+  LipskeyCatalogProduct from,
+  LipskeyCatalogProduct to, {
+  required int maxDepth,
+  required int tempC,
+  required Set<(String, String)> blocked,
+}) {
+  if (from.sku == to.sku) return [from];
+  final sysFrom = productSystems(from);
+  final sysTo = productSystems(to);
+  if (sysFrom.intersection(sysTo).isEmpty) return null;
+  if (canConnect(from, to) && !blocked.contains((from.sku, to.sku))) {
+    return [from, to];
+  }
+  final buckets =
+      SplayTreeMap<int, List<(List<LipskeyCatalogProduct>, Set<WaterSystem>)>>();
+  buckets[0] = [([from], sysFrom)];
+  final bestCost = <String, int>{from.sku: 0};
+  while (buckets.isNotEmpty) {
+    final cost = buckets.firstKey()!;
+    final bucket = buckets[cost]!;
+    final (path, sysAcc) = bucket.removeLast();
+    if (bucket.isEmpty) buckets.remove(cost);
+    final tail = path.last;
+    if (tail.sku == to.sku) return path;
+    if (cost > (bestCost[tail.sku] ?? 1 << 30)) continue;
+    if (path.length > maxDepth) continue;
+    for (final next in compatibleWith(tail, tempC: tempC)) {
+      if (blocked.contains((tail.sku, next.sku))) continue;
+      final isTarget = next.sku == to.sku;
+      if (!isTarget && !_usableConnector(next)) continue;
+      final sysNext = sysAcc.intersection(productSystems(next));
+      if (sysNext.isEmpty) continue;
+      if (isTarget && sysNext.intersection(sysTo).isEmpty) continue;
+      final newCost = cost + _edgeCost(tail, next);
+      if (newCost >= (bestCost[next.sku] ?? 1 << 30)) continue;
+      bestCost[next.sku] = newCost;
+      buckets.putIfAbsent(newCost, () => []).add(([...path, next], sysNext));
+    }
+  }
+  return null;
+}
+
 /// BFS shortest path from [from] to [to] through the compatibility graph.
 /// Returns null when no path exists within [maxDepth] hops.
 /// tempC filters out materials unsuitable for the line temperature.
@@ -489,16 +620,99 @@ bool isPipe(LipskeyCatalogProduct p) => _isPipe(p);
 
 /// Edge cost for the path search. Primary term (10·parts) keeps the result a
 /// fewest-parts path. A large penalty steers gap-filling through real fittings
-/// instead of functional devices (no manifold/shower-arm used as a "connector").
-/// A small material-transition term breaks remaining ties toward one material
-/// family. The penalty on the final edge into a device target is constant across
-/// all paths, so it never distorts which path is chosen.
+/// instead of functional devices. Beyond that, two material-aware refinements
+/// break ties toward installations a plumber would actually pick:
+///
+///   1. Material-transition penalty is weighted by FAMILY. Staying in the
+///      same material (HDPE↔HDPE) is free; a drainage-family hop (PVC↔PP)
+///      pays 1; a cross-family hop (brass↔HDPE) pays 4 — those are the
+///      transitions a real installation tries to avoid because each one needs
+///      a special adapter and a sealing detail (PTFE, hemp, dielectric…).
+///
+///   2. Direct-mate bonus. When two products attach via thread/press
+///      (no pipe between them), the connection is "clean": no extra pipe to
+///      buy, no clamp to torque. Pipe-bridged connections (compression on
+///      compression of the same DN, where a pipe slides between the two)
+///      incur an extra +2 cost so the search prefers thread-rich chains
+///      whenever both options exist.
+const _drainageFamily = {'PVC', 'PP', 'רב-שכבתי', 'ceramic'};
+
+/// Smallest connector-bore on [p], in millimetres. Returns null when no end
+/// has a parseable size (rare). Used by the edge cost so the BFS naturally
+/// prefers paths through wider components — bottleneck-free by construction.
+double? _minBoreMmOf(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return null;
+  double? min;
+  for (final e in spec.ends) {
+    double? mm;
+    switch (e.type) {
+      case EndType.hdpeCompression:
+      case EndType.pexPress:
+      case EndType.copperPress:
+      case EndType.drainOpening:
+        mm = double.tryParse(e.size);
+      case EndType.bspMale:
+      case EndType.bspFemale:
+        const inchToMm = {
+          '1/4': 8, '3/8': 10, '1/2': 15, '3/4': 20,
+          '1': 25, '1-1/4': 32, '1-1/2': 40, '2': 50, '2-1/2': 65,
+        };
+        final v = inchToMm[e.size.replaceAll('"', '').trim()];
+        mm = v?.toDouble();
+    }
+    if (mm == null) continue;
+    if (min == null || mm < min) min = mm;
+  }
+  return min;
+}
+
 int _edgeCost(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
-  final ma = kVerifiedSpecs[a.sku]?.material;
-  final mb = kVerifiedSpecs[b.sku]?.material;
-  final transition = (ma != null && mb != null && ma != mb) ? 1 : 0;
+  final sa = kVerifiedSpecs[a.sku];
+  final sb = kVerifiedSpecs[b.sku];
+  final ma = sa?.material;
+  final mb = sb?.material;
+
+  int transition;
+  if (ma == null || mb == null || ma == mb) {
+    transition = 0;
+  } else if (_drainageFamily.contains(ma) && _drainageFamily.contains(mb)) {
+    transition = 1; // PVC↔PP↔multi-layer↔ceramic — common drainage transition
+  } else {
+    transition = 4; // brass↔HDPE, copper↔PEX — needs adapter + sealant choice
+  }
+
+  // Direct-mate detection: any thread/press end pair that mates without a
+  // pipe between the two. When neither pair direct-mates the connection is
+  // pipe-bridged and we add a small penalty so the search prefers cleaner
+  // joints when both options are available.
+  var pipeBridge = 2; // assume bridged until proven direct
+  if (sa != null && sb != null) {
+    outer:
+    for (final eA in sa.ends) {
+      for (final eB in sb.ends) {
+        if (eA.directMatesWith(eB)) {
+          pipeBridge = 0;
+          break outer;
+        }
+      }
+    }
+  } else {
+    pipeBridge = 0; // unverified products fall back to the legacy cost
+  }
+
+  // Bore-aware penalty — under 15 mm gets penalised so the BFS naturally
+  // builds wider chains instead of needing a post-build "swap the
+  // bottleneck" step. The penalty caps at 10 cost units so it never
+  // outweighs the deviceFiller (50) or transition-family (4) terms but
+  // does break ties between two otherwise-equal candidates.
+  final bore = _minBoreMmOf(b);
+  final boreCost = bore == null || bore >= 15
+      ? 0
+      : (15 - bore).round().clamp(0, 10);
+
   final deviceFiller = isFitting(b) ? 0 : 50;
-  return 10 + deviceFiller + transition;
+  return 10 + deviceFiller + transition + pipeBridge + boreCost;
 }
 
 /// One gap between two anchors in a built installation.
@@ -560,31 +774,120 @@ class InstallationPlan {
           .length;
 }
 
-/// Auto-include safety-critical items that every hot/mixed-metal line must have
-/// but that are never auto-inserted as path connectors (they sit at fixed points:
-/// PRV on boiler outlet, expansion vessel on cold feed, dielectric at transition).
-/// Only adds an item if none of its functional equivalents are already present.
-void _autoAddCompliance(
-    List<LipskeyCatalogProduct> items, Map<String, int> qty, int tempC) {
+/// Auto-include EVERY safety-critical compliance item the line needs, in its
+/// canonical position. The goal: zero critical items missing after build.
+/// Items are INSERTED into the chain at the right spot (not appended to the
+/// end), and the [accessories] Set is mutated with the tool-grade items
+/// (insulation, clips, sealant) that the checklist asks the user to confirm.
+///
+/// Triggers covered:
+///   • hot line  → ball valve, Bladder Tank, PRV, TMTV (if manifold/shower),
+///                  thermal insulation
+///   • recirculation loop → 2 extra ball valves (3 total), check valve,
+///                          balancing valve, air vent
+///   • commercial pump (HW-PUMP-40) → Y-strainer, flex coupling,
+///                                     Legionella bypass (if hot)
+///   • dissimilar metals (copper + brass/steel) → dielectric union at seam
+///   • always → clips/support, sealant
+void _autoAddCompliance(List<LipskeyCatalogProduct> items,
+    Map<String, int> qty, int tempC,
+    {bool loop = false, Set<String>? accessories}) {
   final skus = qty.keys.toSet();
   final mats = items.map(productMaterial).whereType<String>().toSet();
+  final hot = tempC >= _kHotThresholdC;
+  final hasCommercialPump = skus.contains('HW-PUMP-40');
+  // Detect manifolds & shower heads from BOTH synthetic hot-water SKUs
+  // AND real Lipskey catalog products (by productType/category).
+  final hasManifoldOrShower = skus.intersection({
+        'HW-MANIFOLD-3', 'HW-MANIFOLD-4', 'HW-MANIFOLD-6',
+        'HW-SHOWER-HEAD', 'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20',
+        'HW-TMTV-15',
+      }).isNotEmpty ||
+      items.any((p) =>
+          p.productType == 'מחלק' ||
+          p.productType == 'ראש מקלחת' ||
+          p.productType == 'מקלח' ||
+          p.categoryHe == 'מחלקים' ||
+          p.categoryHe == 'ראשי מקלחת' ||
+          p.categoryHe == 'מערכות אמבטיה' ||
+          p.categoryHe == 'ערכות רחצה');
 
-  void addIfMissing(Set<String> alternatives, String preferred) {
+  void insertAt(int position, Set<String> alternatives, String preferred) {
     if (alternatives.any(skus.contains)) return;
     final p = _skuOf(preferred);
     if (p == null) return;
-    items.add(p);
+    final clamped = position.clamp(1, items.length - 1).toInt();
+    items.insert(clamped, p);
     qty[preferred] = 1;
     skus.add(preferred);
   }
 
-  if (tempC >= _kHotThresholdC) {
-    // Pressure relief valve — every closed hot system.
-    addIfMissing({'HW-PRV-34'}, 'HW-PRV-34');
-    // Expansion vessel — absorbs thermal expansion so PRV never lifts.
-    addIfMissing({'HW-BTANK-35', 'HW-BTANK-18', 'HW-EXPVESSEL'}, 'HW-BTANK-35');
-    // Isolation ball valve — minimum one for maintenance shut-off.
-    addIfMissing(_kIsolationValveSkus, 'HW-BALL-1');
+  // Count current isolation valves — synthetic HW-BALL-* AND real catalog
+  // ball valves (productType 'ברז' or 'ברז מעבר' in supply categories).
+  bool isShutoff(LipskeyCatalogProduct p) =>
+      _kIsolationValveSkus.contains(p.sku) ||
+      ((p.productType == 'ברז' || p.productType == 'ברז גן') &&
+          (p.categoryHe == 'ברזי מעבר' ||
+              p.categoryHe == 'ברזי ניל' ||
+              p.categoryHe == 'ברזי דלי'));
+  int isolations() => items.where(isShutoff).length;
+
+  // Isolation ball valve is required on EVERY line (cold too) for
+  // maintenance shut-off. Insert only if no shutoff is already present.
+  if (isolations() == 0) {
+    insertAt(1, _kIsolationValveSkus, 'HW-BALL-1');
+  }
+
+  if (hot) {
+    // 2. Expansion vessel — slot 2 (cold feed, before heat source).
+    insertAt(2, {'HW-BTANK-35', 'HW-BTANK-18', 'HW-EXPVESSEL'},
+        'HW-BTANK-35');
+    // 3. PRV — second-to-last (near heated outlet).
+    insertAt(items.length - 1, {'HW-PRV-34'}, 'HW-PRV-34');
+    // 4. TMTV anti-scald when a manifold or shower head is present.
+    if (hasManifoldOrShower) {
+      insertAt(items.length - 1,
+          {'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20', 'HW-TMTV-15'},
+          'HW-TMTV-15');
+    }
+  }
+
+  // Recirculation loop adds critical + warning extras.
+  if (loop) {
+    // 2 more isolation valves so total ≥ 3.
+    while (isolations() < 3) {
+      final p = _skuOf('HW-BALL-1');
+      if (p == null) break;
+      items.insert(items.length - 1, p);
+      qty['HW-BALL-1'] = (qty['HW-BALL-1'] ?? 0) + 1;
+    }
+    insertAt(items.length - 1, {'HW-CHECK-15'}, 'HW-CHECK-15');
+    insertAt(items.length - 1, {'HW-BALANCE-15'}, 'HW-BALANCE-15');
+    insertAt(items.length - 1, {'HW-AIRVENT'}, 'HW-AIRVENT');
+    // Legionella sampling point (warning) — recirc lines are tested.
+    insertAt(items.length - 1, {'HW-SAMPLE'}, 'HW-SAMPLE');
+  }
+
+  // PEX expansion compensator (warning) — PEX expands when heated.
+  final hasPex = items.any((p) =>
+      kVerifiedSpecs[p.sku]?.material == 'PEX' ||
+      (p.categoryHe == 'מחברי NTM'));
+  if (hot && hasPex) {
+    insertAt(items.length - 1, {'HW-EXP-COMP-20'}, 'HW-EXP-COMP-20');
+  }
+
+  // Commercial pump triggers extra protection.
+  if (hasCommercialPump) {
+    insertAt(items.length - 1,
+        {'HW-YSTR-40', 'HW-YSTR-32', 'HW-YSTR-15'}, 'HW-YSTR-32');
+    insertAt(items.length - 1, {'HW-FLEX-40', 'HW-FLEX-32'}, 'HW-FLEX-32');
+    if (hot) insertAt(items.length - 1, {'HW-DISINFECT'}, 'HW-DISINFECT');
+    // Balance valve per branch (warning) — only when manifold present too.
+    if (hasManifoldOrShower) {
+      insertAt(items.length - 1,
+          {'HW-BALANCE-25', 'HW-BALANCE-20', 'HW-BALANCE-15'},
+          'HW-BALANCE-25');
+    }
   }
 
   // Dielectric union when copper meets brass or steel.
@@ -592,10 +895,29 @@ void _autoAddCompliance(
       .where((m) => m == 'נחושת' || m == 'פליז' || m == 'פלדה')
       .toSet();
   if (mats.contains('נחושת') && metals.length >= 2) {
-    addIfMissing({
-      'HW-DIELECTRIC-15', 'HW-DIELECTRIC-20',
-      'HW-DIELECTRIC-25', 'HW-DIELECTRIC-32', 'HW-DIELECTRIC-40',
-    }, 'HW-DIELECTRIC-15');
+    var seamPos = items.length - 1;
+    for (var i = 0; i < items.length - 1; i++) {
+      if (productMaterial(items[i]) != productMaterial(items[i + 1])) {
+        seamPos = i + 1;
+        break;
+      }
+    }
+    insertAt(
+        seamPos,
+        {
+          'HW-DIELECTRIC-15', 'HW-DIELECTRIC-20', 'HW-DIELECTRIC-25',
+          'HW-DIELECTRIC-32', 'HW-DIELECTRIC-40',
+        },
+        'HW-DIELECTRIC-15');
+  }
+
+  // ── Accessories — tool-grade items the checklist asks the user to
+  // confirm (insulation, clips, sealant). Auto-set them so the checklist
+  // is fully satisfied without manual ticking.
+  if (accessories != null) {
+    accessories.add('HW-CLIP');     // always — every line needs supports
+    accessories.add('HW-SEALANT');  // always — every joint needs sealant
+    if (hot) accessories.add('HW-INSUL'); // hot lines need insulation
   }
 }
 
@@ -709,7 +1031,9 @@ InstallationPlan buildInstallation(
       qty[accSku] = n;
     }
   }
-  if (autoCompliance && items.isNotEmpty) _autoAddCompliance(items, qty, tempC);
+  if (autoCompliance && items.isNotEmpty) {
+    _autoAddCompliance(items, qty, tempC, loop: loop);
+  }
 
   // Tag all items under a single "קו ראשי" zone so callers get a consistent
   // zones map regardless of topology (tree vs. linear).

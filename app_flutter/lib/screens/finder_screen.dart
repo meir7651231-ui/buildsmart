@@ -13,13 +13,20 @@ const _ink = Color(0xFF1A1A1A);
 const _mute = Color(0xFF888888);
 const _surface = Color(0xFFF5F5F5);
 
-/// A plain-language product group: a layman label + the plumber `categoryHe`
-/// values it maps to. Empty [cats] marks the catch-all ("אחר").
+/// Dismiss flag for the one-time "orange chip = tap to change" hint shown above
+/// the finder results (the product cards' chip colours have no legend of their
+/// own). Session-scoped; the X hides it for the rest of the session.
+final finderChipTipDismissedProvider = StateProvider<bool>((_) => false);
+
+/// A plain-language product group: a layman label + a one-line plain-Hebrew
+/// description + the plumber `categoryHe` values it maps to. Empty [cats] marks
+/// the catch-all ("אחר").
 class FinderGroup {
-  const FinderGroup(this.emoji, this.label, this.cats);
+  const FinderGroup(this.emoji, this.label, this.cats, {this.desc = ''});
   final String emoji;
   final String label;
   final Set<String> cats;
+  final String desc;
 }
 
 // Ordered for a non-technical user: the consumer fixtures everyone recognises
@@ -31,35 +38,35 @@ const List<FinderGroup> kFinderGroups = [
     'ברזי כיור', 'ברזי מטבח', 'ברזי אמבטיה', 'ברזי מקלחת', 'ברזי קיר',
     'ברזי ניל', 'ברזי מעבר', 'ברזי דלי', 'ברזי גן', 'ברזים',
     'מחלקים', 'נקודות מים', 'אביזרי ברזים', 'דיורים ופיות',
-  }),
+  }, desc: 'ברזים לכיור, מטבח, אמבטיה, מקלחת וגינה'),
   FinderGroup('🚽', 'אסלות', {
     'אסלות וכיורים', 'מושבי אסלה', 'אביזרי אסלה', 'מנגנונים',
     'חלקים סניטריים', 'התקנה גבוהה', 'התקנה נמוכה', 'התקנה צמודה',
-  }),
+  }, desc: 'אסלות, מושבים, מנגנוני הדחה ואביזרים'),
   FinderGroup('🚿', 'מקלחת ואמבטיה', {
     'ראשי מקלחת', 'מזלפי יד', 'זרועות דוש', 'אביזרי מקלחת',
     'מערכות אמבטיה', 'ערכות רחצה', 'מערכות שטיפה',
     'אביזרי חדר רחצה', 'ידיות אחיזה',
-  }),
+  }, desc: 'ראשי מקלחת, מזלפים, מערכות אמבטיה וידיות אחיזה'),
   FinderGroup('🕳️', 'ניקוז', {
     'תעלות ניקוז', 'מחסומי רצפה', 'מחסומים גלויים', 'מאספי רצפה',
     'מאספים וקולטים', 'סיפונים', 'כיסויים', 'מכסים ורשתות', 'ניקוז גג',
     'אביזרי ביוב', 'מסעפים וחיבורי אסלה', 'זקיף אסלה',
-  }),
+  }, desc: 'מחסומי רצפה, סיפונים, תעלות ניקוז ומכסים'),
   FinderGroup('📏', 'צינורות', {
     'צינורות אפורות', 'צינורות', 'צינורות PP', 'צינורות רב שכבתי',
     'צינורות גמישים', 'צינורות מקלחת',
-  }),
-  FinderGroup('🌱', 'גינה', {'ציוד גן'}),
+  }, desc: 'צינורות מים, ביוב, גמישים ורב-שכבתיים'),
+  FinderGroup('🌱', 'גינה', {'ציוד גן'}, desc: 'ציוד גינה והשקיה'),
   FinderGroup('🔗', 'מחברים וחיבורים', {
     'אביזרי נחושת', 'מחברי HDPE', 'מחברי NTM', 'אביזרי תבריג',
     'אביזרי שקע-תקע', 'ברכיים', 'מצמדים וצינורות', 'אטמים ופקקים',
     'אל חזור', 'אביזרי חיבור', 'סטי הידוק וחיבורים', 'פקקים וצינורות',
-  }),
+  }, desc: 'מחברים, ברכיים, מצמדים ואביזרי תבריג'),
   FinderGroup('🔩', 'חבקים ותלייה', {
     'חבקי תליה', 'חבקי צינור', 'עוגנים ובנדים',
-  }),
-  FinderGroup('🔧', 'אחר', {}), // catch-all
+  }, desc: 'חבקים, תליות ועוגנים לצנרת'),
+  FinderGroup('🔧', 'אחר', {}, desc: 'כל שאר המוצרים בקטלוג'), // catch-all
 ];
 
 /// A curated sub-type within a finder group: a plain label + the real
@@ -327,6 +334,9 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         if (subs.length > 1) _subBar(subs),
         if (narrow.chips.isNotEmpty) _sizeBar(narrow.label, narrow.chips),
         if (results.isNotEmpty) _countStrip(shown),
+        if (results.isNotEmpty &&
+            !ref.watch(finderChipTipDismissedProvider))
+          _chipTip(),
         Expanded(
           child: results.isEmpty
               ? const Center(
@@ -335,6 +345,32 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
               : LipskeyProductsList(products: results),
         ),
       ],
+    );
+  }
+
+  // One-time hint explaining the orange chips on the product cards below
+  // (their colour code has no legend of its own). Dismissible via the X.
+  Widget _chipTip() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4E8),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(children: [
+        const Text('💡', style: TextStyle(fontSize: 13)),
+        const SizedBox(width: 6),
+        const Expanded(
+          child: Text('צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע',
+              style: TextStyle(color: _ink, fontSize: 12)),
+        ),
+        GestureDetector(
+          onTap: () =>
+              ref.read(finderChipTipDismissedProvider.notifier).state = true,
+          child: const Icon(Icons.close, size: 16, color: _mute),
+        ),
+      ]),
     );
   }
 
@@ -391,11 +427,36 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                             fontSize: 17,
                             fontWeight: FontWeight.w600)),
                     const SizedBox(height: 3),
-                    Text('$count מוצרים',
-                        style: const TextStyle(color: _mute, fontSize: 13)),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(g.desc,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  color: _mute, fontSize: 13)),
+                        ),
+                        const SizedBox(width: 8),
+                        // Count pill — same idiom as the קטלוג category badge.
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: BsTokens.brand,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text('$count',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               const Icon(Icons.chevron_left, color: _mute),
             ]),
           ),

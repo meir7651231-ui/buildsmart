@@ -7,8 +7,15 @@ import 'dart:math' as math;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/logic/install_engine.dart';
+import 'package:buildsmart/logic/install_kit.dart';
+import 'package:buildsmart/logic/pressure_drop.dart';
+import 'package:buildsmart/logic/price_estimate.dart';
+import 'package:buildsmart/screens/audit_screen.dart';
+import 'package:buildsmart/state/saved_projects.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/widgets/chain_diagram.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,24 +52,11 @@ String _roleLabel(LipskeyCatalogProduct p, bool anchor) {
   }
 }
 
-/// Suggests what kind of adapter/reducer to look for to bridge a gap.
-String _gapHint(InstallationGap g) {
-  final vA = kVerifiedSpecs[g.from.sku], vB = kVerifiedSpecs[g.to.sku];
-  if (vA == null || vB == null) {
-    return 'חפש מתאם בין ${g.from.categoryHe} ל-${g.to.categoryHe}';
-  }
-  final sizesA = vA.ends.map((e) => e.size).toSet();
-  final sizesB = vB.ends.map((e) => e.size).toSet();
-  final typesA = vA.ends.map((e) => e.type.name).toSet();
-  final typesB = vB.ends.map((e) => e.type.name).toSet();
-  if (sizesA.isNotEmpty && sizesB.isNotEmpty && sizesA.intersection(sizesB).isEmpty) {
-    return 'נדרש מתאם/בושינג ${sizesA.first}↔${sizesB.first} — חפש "מתאם" בקטלוג';
-  }
-  if (typesA.isNotEmpty && typesB.isNotEmpty && typesA.intersection(typesB).isEmpty) {
-    return 'שיטת חיבור שונה — חפש אדפטר ${typesA.first}↔${typesB.first}';
-  }
-  return 'אין נתיב מאומת — הוסף מוצר ביניים ידנית';
-}
+/// Suggests how to bridge a gap. Delegates to the shared, unit-tested
+/// [gapAdviceHe] (related_info.dart), which distinguishes a cross-system gap
+/// (supply↔drainage — needs a fixture, not an adapter) from a same-system
+/// mismatch (names the two unmet ends).
+String _gapHint(InstallationGap g) => gapAdviceHe(g.from, g.to);
 
 // ── picker categories ─────────────────────────────────────────────────────────
 class _PickerCategory {
@@ -361,10 +355,10 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         const SizedBox(width: 10),
         const Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('סטודיו התקנות',
+            Text('תכנון חיבור',
                 style: TextStyle(
                     color: _ink, fontSize: 18, fontWeight: FontWeight.w900)),
-            Text('תכנן · חבר · הזמן',
+            Text('בחר מה לחבר · נכין רשימת קנייה',
                 style: TextStyle(color: _mute, fontSize: 11, letterSpacing: 1)),
           ]),
         ),
@@ -714,6 +708,34 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
               ),
             ),
           ]),
+          const SizedBox(height: 8),
+          Row(children: [
+            Expanded(
+              child: _ghostButton(
+                icon: Icons.save_outlined,
+                label: '💾 שמור פרויקט',
+                onTap: () => _saveProject(chain, temp),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _ghostButton(
+                icon: Icons.folder_open_outlined,
+                label: '📂 פרויקטים',
+                onTap: _openProjects,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _ghostButton(
+                icon: Icons.science_outlined,
+                label: '🧪 אודיט',
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                        builder: (_) => const AuditScreen())),
+              ),
+            ),
+          ]),
           if (temp > 20) ...[
             const SizedBox(height: 10),
             Align(
@@ -846,28 +868,50 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   }
 
   // ── actions ──────────────────────────────────────────────────────────────────
+  /// Auto-fix descriptions from the most recent assembly (e.g. "swapped 1/2"
+  /// bushing for 3/4""). Passed to [_BomSheet] so the user sees what the
+  /// engine corrected on their behalf, without being asked.
+  List<String> _autoFixes = const [];
+
   void _assemble(List<LipskeyCatalogProduct> chain, int temp) {
-    final acc = ref.read(lineAccessoriesProvider);
-    final mi = chain.indexWhere((p) => manifoldOutlets(p) > 0);
-    final isTree = mi >= 0 && mi < chain.length - 1;
+    // Auto-tick the tool-grade accessory checklist items the line requires:
+    // every line needs clips + sealant; hot lines also need thermal insulation.
+    // Without this the compliance checklist would always show those items
+    // as un-ticked, even though they're standard installation practice.
+    final acc = {...ref.read(lineAccessoriesProvider)};
+    acc..add('HW-CLIP')..add('HW-SEALANT');
+    if (temp >= 60) acc.add('HW-INSUL');
+    ref.read(lineAccessoriesProvider.notifier).state = acc;
+
+    // ── AUTO-FIX flow problems BEFORE building the plan ──────────────────
+    // The engine fixes obvious bottlenecks (swap the narrow part for a wider
+    // sibling) and adds a booster pump when ΔP exceeds 1 bar. The user sees
+    // the corrected chain, not a list of "you should…" warnings.
+    final fixed = autoFlowFix(chain,
+        pipeLengthMeters: 5.0, flowRateLPS: 0.3, verticalRiseMeters: 0.0);
+    final fixedChain = fixed.chain;
+    _autoFixes = fixed.changes;
+
+    final mi = fixedChain.indexWhere((p) => manifoldOutlets(p) > 0);
+    final isTree = mi >= 0 && mi < fixedChain.length - 1;
     final InstallationPlan plan;
     int branches = 0, outlets = 0;
     if (isTree) {
-      final trunk = chain.sublist(0, mi + 1);
-      final branchTargets = chain.sublist(mi + 1);
+      final trunk = fixedChain.sublist(0, mi + 1);
+      final branchTargets = fixedChain.sublist(mi + 1);
       branches = branchTargets.length;
-      outlets = manifoldOutlets(chain[mi]);
+      outlets = manifoldOutlets(fixedChain[mi]);
       plan = buildTreeInstallation(trunk, branchTargets,
           tempC: temp, accessories: acc, autoCompliance: true);
     } else {
-      plan = buildInstallation([...chain],
+      plan = buildInstallation([...fixedChain],
           tempC: temp, accessories: acc, loop: _loop, autoCompliance: true);
     }
     final criticalCount = plan.criticalOpen(temp, acc);
     if (criticalCount > 0) {
-      _showCriticalWarning(plan, chain, branches, outlets, temp, acc, criticalCount);
+      _showCriticalWarning(plan, fixedChain, branches, outlets, temp, acc, criticalCount);
     } else {
-      _showBomSheet(plan, chain, branches, outlets);
+      _showBomSheet(plan, fixedChain, branches, outlets);
     }
   }
 
@@ -882,6 +926,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         anchorSkus: {for (final a in chain) a.sku},
         branches: branches,
         outlets: outlets,
+        autoFixes: _autoFixes,
       ),
     );
   }
@@ -974,6 +1019,269 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         ),
       ),
     );
+  }
+
+  /// Persist the current chain (+ temperature + accessories) as a named
+  /// project the user can reopen later. Shows a name prompt then writes via
+  /// the [savedProjectsProvider] notifier.
+  Future<void> _saveProject(
+      List<LipskeyCatalogProduct> chain, int temp) async {
+    if (chain.isEmpty) return;
+    final ctrl = TextEditingController(
+        text: '${chain.first.nameHe} → ${chain.last.nameHe}'.substring(
+            0, ('${chain.first.nameHe} → ${chain.last.nameHe}').length.clamp(0, 40)));
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: _void1,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('שמור פרויקט',
+              style: TextStyle(
+                  color: _ink, fontSize: 15, fontWeight: FontWeight.w800)),
+          content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            style: const TextStyle(color: _ink),
+            textDirection: TextDirection.rtl,
+            decoration: InputDecoration(
+              hintText: 'שם הפרויקט (למשל: מטבח דירת 12)',
+              hintStyle: const TextStyle(color: _mute),
+              filled: true,
+              fillColor: _panel,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('ביטול', style: TextStyle(color: _mute)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _accent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+              child: const Text('שמור',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (name == null || name.isEmpty) return;
+    await ref.read(savedProjectsProvider.notifier).save(
+          name: name,
+          anchorSkus: chain.map((p) => p.sku).toList(),
+          tempC: temp,
+          accessories: ref.read(lineAccessoriesProvider),
+        );
+    if (mounted) showToast(context, '💾 הפרויקט "$name" נשמר');
+  }
+
+  /// Show the list of saved projects, with load / rename / delete actions.
+  void _openProjects() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Consumer(builder: (ctx, ref, _) {
+          final projects = ref.watch(savedProjectsProvider);
+          return DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            minChildSize: 0.4,
+            maxChildSize: 0.95,
+            expand: false,
+            builder: (_, sc) => Container(
+              decoration: const BoxDecoration(
+                color: _void1,
+                borderRadius:
+                    BorderRadius.vertical(top: Radius.circular(24)),
+                border: Border(top: BorderSide(color: _accent, width: 2)),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 10, bottom: 8),
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color: _mute,
+                        borderRadius: BorderRadius.circular(2)),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                    child: Row(children: [
+                      Icon(Icons.folder_open, color: _accent, size: 22),
+                      SizedBox(width: 10),
+                      Text('הפרויקטים שלי',
+                          style: TextStyle(
+                              color: _ink,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w900)),
+                    ]),
+                  ),
+                  const Divider(height: 1, color: Color(0xFF243049)),
+                  Expanded(
+                    child: projects.isEmpty
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20),
+                              child: Text(
+                                  'אין עדיין פרויקטים שמורים.\nבנה קו ולחץ "💾 שמור פרויקט".',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: _mute, fontSize: 13)),
+                            ),
+                          )
+                        : ListView.separated(
+                            controller: sc,
+                            itemCount: projects.length,
+                            separatorBuilder: (_, __) => const Divider(
+                                height: 1,
+                                color: Color(0xFF243049),
+                                indent: 16,
+                                endIndent: 16),
+                            itemBuilder: (_, i) {
+                              final p = projects[i];
+                              return ListTile(
+                                title: Text(p.name,
+                                    style: const TextStyle(
+                                        color: _ink,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700)),
+                                subtitle: Text(
+                                  '${p.anchorSkus.length} פריטים · '
+                                  '${p.tempC}°C · '
+                                  '${_formatDate(p.savedAt)}',
+                                  style: const TextStyle(
+                                      color: _mute, fontSize: 11),
+                                ),
+                                trailing: PopupMenuButton<String>(
+                                  icon: const Icon(Icons.more_vert,
+                                      color: _mute),
+                                  color: _panel,
+                                  itemBuilder: (_) => [
+                                    const PopupMenuItem(
+                                        value: 'rename',
+                                        child: Text('שנה שם',
+                                            style: TextStyle(color: _ink))),
+                                    const PopupMenuItem(
+                                        value: 'delete',
+                                        child: Text('מחק',
+                                            style: TextStyle(
+                                                color: Color(0xFFEF4444)))),
+                                  ],
+                                  onSelected: (v) async {
+                                    if (v == 'delete') {
+                                      await ref
+                                          .read(savedProjectsProvider.notifier)
+                                          .remove(p.id);
+                                    } else if (v == 'rename') {
+                                      Navigator.pop(ctx);
+                                      _renameProject(p);
+                                    }
+                                  },
+                                ),
+                                onTap: () {
+                                  _loadProject(p);
+                                  Navigator.pop(ctx);
+                                },
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  void _loadProject(SavedProject p) {
+    final found = <LipskeyCatalogProduct>[];
+    for (final sku in p.anchorSkus) {
+      final hits = kLipskeyCatalog.where((q) => q.sku == sku);
+      if (hits.isNotEmpty) found.add(hits.first);
+    }
+    if (found.isEmpty) {
+      showToast(context, '⚠️ הפרויקט ריק או שמוצריו לא נמצאים בקטלוג');
+      return;
+    }
+    ref.read(chainProvider.notifier).state = found;
+    ref.read(lineMaxTempProvider.notifier).state = p.tempC;
+    ref.read(lineAccessoriesProvider.notifier).state = p.accessories;
+    showToast(context, '📂 נפתח: ${p.name}');
+  }
+
+  void _renameProject(SavedProject p) async {
+    final ctrl = TextEditingController(text: p.name);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: _void1,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('שנה שם לפרויקט',
+              style: TextStyle(
+                  color: _ink, fontSize: 15, fontWeight: FontWeight.w800)),
+          content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            style: const TextStyle(color: _ink),
+            textDirection: TextDirection.rtl,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: _panel,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('ביטול',
+                    style: TextStyle(color: _mute))),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: _accent,
+                  foregroundColor: Colors.white),
+              onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+              child: const Text('שמור',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (name != null && name.isNotEmpty) {
+      await ref.read(savedProjectsProvider.notifier).rename(p.id, name);
+    }
+  }
+
+  String _formatDate(DateTime d) {
+    final now = DateTime.now();
+    final diff = now.difference(d);
+    if (diff.inMinutes < 60) return 'לפני ${diff.inMinutes} דקות';
+    if (diff.inHours < 24) return 'לפני ${diff.inHours} שעות';
+    if (diff.inDays < 7) return 'לפני ${diff.inDays} ימים';
+    return '${d.day}/${d.month}/${d.year}';
   }
 
   void _openPicker(int temp, {_PickerCategory? initialCat}) {
@@ -1181,11 +1489,16 @@ class _BomSheet extends ConsumerStatefulWidget {
       {required this.plan,
       required this.anchorSkus,
       this.branches = 0,
-      this.outlets = 0});
+      this.outlets = 0,
+      this.autoFixes = const []});
   final InstallationPlan plan;
   final Set<String> anchorSkus;
   final int branches; // >0 when this is a branched (manifold) installation
   final int outlets; // manifold outlet count, for over-capacity warning
+  /// Human-readable list of fixes the engine applied automatically before
+  /// building this plan (e.g. "swapped 1/2" bushing for 3/4""). Shown in the
+  /// header banner so the user understands what the system did for them.
+  final List<String> autoFixes;
 
   @override
   ConsumerState<_BomSheet> createState() => _BomSheetState();
@@ -1196,6 +1509,9 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
   final Map<String, double> _meters = {};
   // User-defined display names for zone headers (e.g. "ענף א" → "מטבח").
   final Map<String, String> _zoneAliases = {};
+  // Vertical rise from inlet to outlet (m). Used by the pressure-drop math
+  // to account for static head ρgh — every metre of climb costs ≈ 0.1 bar.
+  double _verticalRise = 0.0;
 
   String _zoneDisplayLabel(String key) => _zoneAliases[key] ?? key;
 
@@ -1255,6 +1571,112 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
   double get _totalMeters => widget.plan.items
       .where(isPipe)
       .fold(0.0, (s, p) => s + _metersOf(p.sku));
+
+  /// Render a flow-suggestion as an actionable card — problem + fix + a
+  /// one-tap "החלף"/"הוסף" button that mutates [chainProvider] in place.
+  Widget _suggestionCard(FlowSuggestion s) {
+    final isSwap =
+        s.actionKind == SuggestionKind.swap && s.replaceProduct != null;
+    final isAdd =
+        s.actionKind == SuggestionKind.add && s.addProductSku != null;
+    final accentColor = isSwap
+        ? const Color(0xFFFB923C)
+        : isAdd
+            ? const Color(0xFF22C55E)
+            : const Color(0xFFFBBF24);
+    final icon = isSwap
+        ? Icons.swap_horiz
+        : isAdd
+            ? Icons.add_circle
+            : Icons.lightbulb_outline;
+    return Container(
+      margin: const EdgeInsets.only(top: 6),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: accentColor.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: accentColor.withOpacity(0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Icon(icon, color: accentColor, size: 14),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(s.problem,
+                  style: TextStyle(
+                      color: accentColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700)),
+            ),
+          ]),
+          const SizedBox(height: 4),
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const SizedBox(width: 20),
+            Expanded(
+              child: Text('→ ${s.solution}',
+                  style: const TextStyle(
+                      color: _ink, fontSize: 11, height: 1.35)),
+            ),
+            if (isSwap || isAdd) ...[
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _applySuggestion(s),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: accentColor,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(isSwap ? 'החלף' : 'הוסף',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800)),
+                ),
+              ),
+            ],
+          ]),
+        ],
+      ),
+    );
+  }
+
+  void _applySuggestion(FlowSuggestion s) {
+    final chain = [...ref.read(chainProvider)];
+    if (s.actionKind == SuggestionKind.swap && s.replaceProduct != null) {
+      final wider = widerSiblingOf(s.replaceProduct!);
+      if (wider == null) {
+        showToast(context, 'לא נמצא מוצר רחב יותר במאגר');
+        return;
+      }
+      final i =
+          chain.indexWhere((p) => p.sku == s.replaceProduct!.sku);
+      if (i < 0) {
+        showToast(context,
+            'הצוואר-בקבוק נוסף אוטומטית — לחץ "צור רשימת קנייה" לבנייה מחדש');
+        return;
+      }
+      chain[i] = wider;
+      ref.read(chainProvider.notifier).state = chain;
+      Navigator.pop(context);
+      showToast(
+          context, '✅ "${wider.nameHe}" הוחלף — לחץ "צור רשימת קנייה" לבנייה מחדש');
+    } else if (s.actionKind == SuggestionKind.add &&
+        s.addProductSku != null) {
+      final hits = kLipskeyCatalog.where((p) => p.sku == s.addProductSku);
+      if (hits.isEmpty) {
+        showToast(context, 'המוצר המומלץ אינו זמין במאגר');
+        return;
+      }
+      chain.add(hits.first);
+      ref.read(chainProvider.notifier).state = chain;
+      Navigator.pop(context);
+      showToast(context, '✅ "${hits.first.nameHe}" נוסף לקו');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1356,6 +1778,133 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
             const Divider(height: 1, color: Color(0xFF243049)),
             Expanded(
               child: ListView(controller: ctrl, children: [
+                // ── Auto-fix banner — tells the user what was changed ──
+                if (widget.autoFixes.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F2E1A),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: const Color(0xFF22C55E).withOpacity(0.5)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(children: [
+                          Icon(Icons.auto_fix_high,
+                              color: Color(0xFF22C55E), size: 16),
+                          SizedBox(width: 6),
+                          Text('המערכת תיקנה אוטומטית:',
+                              style: TextStyle(
+                                  color: Color(0xFF22C55E),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800)),
+                        ]),
+                        const SizedBox(height: 4),
+                        for (final c in widget.autoFixes)
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(top: 2, right: 22),
+                            child: Text(c,
+                                style: const TextStyle(
+                                    color: _ink, fontSize: 11, height: 1.4)),
+                          ),
+                      ],
+                    ),
+                  ),
+                // ── Chain diagram — visual flow of the installation ───────
+                if (plan.items.length >= 2) ...[
+                  const SizedBox(height: 8),
+                  Builder(builder: (_) {
+                    final pd = estimatePressureDrop(
+                      plan.items,
+                      pipeLengthMeters:
+                          _totalMeters > 0 ? _totalMeters : 5.0,
+                      flowRateLPS: 0.3,
+                      verticalRiseMeters: _verticalRise,
+                    );
+                    return ChainDiagram(
+                      chain: plan.items,
+                      bottleneckSku: pd.dropBar > 1.0
+                          ? pd.bottleneck?.sku
+                          : null,
+                    );
+                  }),
+                  const Divider(
+                      height: 1,
+                      color: Color(0xFF243049),
+                      indent: 16,
+                      endIndent: 16),
+                ],
+                // ── Alternative paths — shown only for simple A→B chains ──
+                Builder(builder: (_) {
+                  if (anchorSkus.length != 2 || branches > 0) {
+                    return const SizedBox.shrink();
+                  }
+                  // Reconstruct the two endpoints from anchors.
+                  final anchors = plan.items
+                      .where((p) => anchorSkus.contains(p.sku))
+                      .toList();
+                  if (anchors.length != 2) return const SizedBox.shrink();
+                  final alts = findAlternativePaths(anchors[0], anchors[1],
+                      k: 3, maxDepth: 8,
+                      tempC: ref.read(lineMaxTempProvider));
+                  if (alts.length < 2) return const SizedBox.shrink();
+                  return Container(
+                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E2E),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _accent.withOpacity(0.4)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          const Icon(Icons.alt_route,
+                              color: _accent, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'מסלולים חלופיים: ${alts.length} אפשרויות',
+                            style: const TextStyle(
+                                color: _accent,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800),
+                          ),
+                        ]),
+                        const SizedBox(height: 8),
+                        for (var ai = 0; ai < alts.length; ai++) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              'אפשרות ${ai + 1}: ${alts[ai].length} חלקים',
+                              style: const TextStyle(
+                                  color: _ink,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          for (final p in alts[ai].skip(1).take(alts[ai].length - 2))
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(12, 2, 0, 0),
+                              child: Text(
+                                '· ${p.nameHe}',
+                                style: const TextStyle(
+                                    color: _mute,
+                                    fontSize: 11,
+                                    height: 1.3),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
+                      ],
+                    ),
+                  );
+                }),
                 // Auto-compliance banner — shown when safety items were auto-inserted
                 Builder(builder: (_) {
                   final autoAdded = plan.items
@@ -1381,6 +1930,310 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                         ),
                       ),
                     ]),
+                  );
+                }),
+                // ── Price estimate (ballpark budget) ───────────────────
+                Builder(builder: (_) {
+                  // Expand by quantity for a unit-count total
+                  final expanded = <LipskeyCatalogProduct>[];
+                  for (final p in plan.items) {
+                    final q = plan.qtyOf(p.sku);
+                    for (var i = 0; i < q; i++) expanded.add(p);
+                  }
+                  final pr = estimatePrice(expanded);
+                  return Container(
+                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F1F2A),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _supply.withOpacity(0.35)),
+                    ),
+                    child: Row(children: [
+                      const Icon(Icons.attach_money,
+                          color: _supply, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'הערכת תקציב: ~₪${pr.totalILS}',
+                          style: const TextStyle(
+                              color: _supply,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      Text(
+                        pr.lowConfidence
+                            ? 'דיוק נמוך'
+                            : '${pr.itemCount} יחידות',
+                        style: TextStyle(
+                            color: pr.lowConfidence
+                                ? const Color(0xFFFBBF24)
+                                : _mute,
+                            fontSize: 10,
+                            fontFamily: 'monospace'),
+                      ),
+                    ]),
+                  );
+                }),
+                // ── Vertical-rise input (feeds the pressure-drop math) ─
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                  child: Row(children: [
+                    const Icon(Icons.arrow_upward, color: _mute, size: 14),
+                    const SizedBox(width: 6),
+                    const Text('עלייה אנכית:',
+                        style: TextStyle(color: _mute, fontSize: 11)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderThemeData(
+                          activeTrackColor: _supply,
+                          inactiveTrackColor: _supply.withOpacity(0.25),
+                          thumbColor: _supply,
+                          overlayColor: _supply.withOpacity(0.1),
+                          trackHeight: 3,
+                        ),
+                        child: Slider(
+                          value: _verticalRise.clamp(0, 30),
+                          min: 0,
+                          max: 30,
+                          divisions: 30,
+                          onChanged: (v) =>
+                              setState(() => _verticalRise = v),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 50,
+                      child: Text(
+                        '${_verticalRise.toStringAsFixed(0)} מ׳',
+                        textAlign: TextAlign.left,
+                        style: const TextStyle(
+                            color: _ink,
+                            fontSize: 11,
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ]),
+                ),
+                // ── Temperature suitability (heat-rating guard) ─────────
+                // The engine already routes AROUND temp-unsuitable materials,
+                // but a user-picked anchor (e.g. an HDPE fitting, capped ~40°C)
+                // can still sit on a hot line. Flag it so they swap to a
+                // heat-resistant material instead of shipping a line that melts.
+                Builder(builder: (_) {
+                  final temp = ref.read(lineMaxTempProvider);
+                  final unfit = plan.items
+                      .where((p) => !productSuitableForTemp(p, temp))
+                      .toList();
+                  if (unfit.isEmpty) return const SizedBox.shrink();
+                  const warn = Color(0xFFEF4444);
+                  return Container(
+                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A0E0E),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: warn.withOpacity(0.5)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          const Icon(Icons.local_fire_department,
+                              color: warn, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'קו חם ($temp°C): ${unfit.length} מוצרים אינם עומדים בחום',
+                              style: const TextStyle(
+                                  color: warn,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                        ]),
+                        const SizedBox(height: 6),
+                        for (final p in unfit.take(6))
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 2),
+                            child: Text(
+                              '• ${p.nameHe} — עד ${productMaxTempC(p)?.toStringAsFixed(0) ?? "?"}°C',
+                              style: const TextStyle(
+                                  color: Color(0xFFFCA5A5), fontSize: 11),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'החלף לחומר עמיד-חום: PEX / נחושת / פליז.',
+                          style: TextStyle(
+                              color: Color(0xFFFCA5A5),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                // ── Pressure-drop estimate ─────────────────────────────
+                Builder(builder: (_) {
+                  final pd = estimatePressureDrop(
+                    plan.items,
+                    pipeLengthMeters:
+                        _totalMeters > 0 ? _totalMeters : 5.0,
+                    flowRateLPS: 0.3,
+                    verticalRiseMeters: _verticalRise,
+                  );
+                  final ok = pd.dropBar <= 1.0 && pd.warnings.isEmpty;
+                  final color =
+                      ok ? const Color(0xFF22C55E) : const Color(0xFFF59E0B);
+                  return Container(
+                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: ok
+                          ? const Color(0xFF0E2A1A)
+                          : const Color(0xFF2A1F0E),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: color.withOpacity(0.5)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          Icon(ok ? Icons.water_drop : Icons.warning_amber,
+                              color: color, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'ירידת לחץ צפויה: ${pd.dropBar.toStringAsFixed(2)} בר',
+                              style: TextStyle(
+                                  color: color,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                          Text(
+                            'K=${pd.totalK.toStringAsFixed(1)} · ⌀${pd.minBoreMm.toStringAsFixed(0)}mm · ${pd.frictionMetres.toStringAsFixed(0)}m',
+                            style: const TextStyle(
+                                color: _mute,
+                                fontSize: 10,
+                                fontFamily: 'monospace'),
+                          ),
+                        ]),
+                        if (pd.bottleneck != null && !ok) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'צוואר-בקבוק: ${pd.bottleneck!.nameHe} (#${pd.bottleneck!.sku})',
+                            style: const TextStyle(
+                                color: Color(0xFFFBBF24),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        // Actionable suggestions — each problem paired with
+                        // a concrete fix (swap product / add product).
+                        for (final s in pd.suggestions
+                            .where((s) => s.actionKind != SuggestionKind.ok))
+                          _suggestionCard(s),
+                      ],
+                    ),
+                  );
+                }),
+                // ── Installation kit (tools & sealants for this chain) ──
+                Builder(builder: (_) {
+                  final kit = recommendedKitFor(plan.items);
+                  if (kit.isEmpty) return const SizedBox.shrink();
+                  return Container(
+                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1E2A),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _mute.withOpacity(0.35)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          const Icon(Icons.build_circle_outlined,
+                              color: _supply, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'כלים ואיטומים לקו: ${kit.length} פריטים',
+                            style: const TextStyle(
+                                color: _supply,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800),
+                          ),
+                        ]),
+                        const SizedBox(height: 6),
+                        for (final k in kit)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 5, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color: switch (k.kind) {
+                                      KitKind.tool =>
+                                        _supply.withOpacity(0.18),
+                                      KitKind.sealant =>
+                                        _accent.withOpacity(0.18),
+                                      KitKind.safety =>
+                                        const Color(0xFFEF4444).withOpacity(0.18),
+                                    },
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    switch (k.kind) {
+                                      KitKind.tool => 'כלי',
+                                      KitKind.sealant => 'איטום',
+                                      KitKind.safety => 'בטיחות',
+                                    },
+                                    style: TextStyle(
+                                      color: switch (k.kind) {
+                                        KitKind.tool => _supply,
+                                        KitKind.sealant => _accent,
+                                        KitKind.safety =>
+                                          const Color(0xFFEF4444),
+                                      },
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(k.label,
+                                          style: const TextStyle(
+                                              color: _ink,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600)),
+                                      Text(k.reason,
+                                          style: const TextStyle(
+                                              color: _mute, fontSize: 10)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
                   );
                 }),
                 ..._buildBomRows(plan, anchorSkus),
@@ -1561,6 +2414,8 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     final buf = StringBuffer();
     buf.writeln('רשימת קנייה — BuildSmart 🔧');
     buf.writeln('──────────────────────────');
+
+    // ── BOM grouped by zone or flat list ──────────────────────────────────
     if (plan.zones.isNotEmpty) {
       final bySkU = {for (final p in plan.items) p.sku: p};
       for (final entry in plan.zones.entries) {
@@ -1578,7 +2433,81 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
       }
     }
     buf.writeln('──────────────────────────');
-    buf.writeln('סה"כ: ${plan.items.length} פריטים · ${plan.totalPieces} יחידות');
+    buf.writeln(
+        'סה"כ: ${plan.items.length} פריטים · ${plan.totalPieces} יחידות');
+
+    // ── ASCII chain diagram ───────────────────────────────────────────────
+    // Vertical layout so it stays readable on a narrow WhatsApp screen.
+    if (plan.items.length >= 2) {
+      buf.writeln('');
+      buf.writeln('🔗 מבנה הקו:');
+      // Each product + the joint method to the next (same wording as the
+      // carousel / chain diagram), so the installer reads exactly how to join.
+      buf.writeln(lineStructureText(plan.items));
+    }
+
+    // ── Price estimate ────────────────────────────────────────────────────
+    final expandedForPrice = <LipskeyCatalogProduct>[];
+    for (final p in plan.items) {
+      final q = plan.qtyOf(p.sku);
+      for (var i = 0; i < q; i++) expandedForPrice.add(p);
+    }
+    final pr = estimatePrice(expandedForPrice);
+    buf.writeln('💵 הערכת תקציב: ~₪${pr.totalILS}'
+        '${pr.lowConfidence ? " (דיוק נמוך)" : ""}');
+
+    // ── Pressure-drop summary ─────────────────────────────────────────────
+    final pd = estimatePressureDrop(
+      plan.items,
+      pipeLengthMeters: _totalMeters > 0 ? _totalMeters : 5.0,
+      flowRateLPS: 0.3,
+    );
+    buf.writeln('');
+    buf.writeln('💧 ירידת לחץ: ${pd.dropBar.toStringAsFixed(2)} בר');
+    buf.writeln(
+        '   K=${pd.totalK.toStringAsFixed(1)} · ⌀${pd.minBoreMm.toStringAsFixed(0)}mm · ${pd.frictionMetres.toStringAsFixed(0)}m');
+    if (pd.bottleneck != null && pd.dropBar > 1.0) {
+      buf.writeln('   צוואר-בקבוק: ${pd.bottleneck!.nameHe}');
+    }
+    for (final w in pd.warnings) {
+      buf.writeln('   ⚠️ $w');
+    }
+
+    // ── Tools & sealants kit ──────────────────────────────────────────────
+    final kit = recommendedKitFor(plan.items);
+    if (kit.isNotEmpty) {
+      buf.writeln('');
+      buf.writeln('🔧 כלים ואיטומים (${kit.length}):');
+      for (final k in kit) {
+        final tag = switch (k.kind) {
+          KitKind.tool => '🛠',
+          KitKind.sealant => '🧪',
+          KitKind.safety => '⚠️',
+        };
+        buf.writeln('   $tag ${k.label}');
+      }
+    }
+
+    // ── Compliance summary ────────────────────────────────────────────────
+    final checks = lineComplianceChecklist(
+        plan.items,
+        ref.read(lineMaxTempProvider),
+        ref.read(lineAccessoriesProvider));
+    final missing = checks
+        .where((c) => !c.satisfied && c.severity == CheckSeverity.critical)
+        .toList();
+    if (missing.isNotEmpty) {
+      buf.writeln('');
+      buf.writeln('🚨 חוסרים קריטיים לבטיחות:');
+      for (final c in missing) {
+        buf.writeln('   • ${c.label}');
+      }
+    }
+
+    buf.writeln('');
+    buf.writeln('━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    buf.writeln('נוצר ע"י BuildSmart');
+
     Clipboard.setData(ClipboardData(text: buf.toString()));
     showToast(context, '📋 הועתק — שתף ב-WhatsApp עם האינסטלטור שלך');
   }
