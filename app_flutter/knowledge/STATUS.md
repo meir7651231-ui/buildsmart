@@ -96,13 +96,17 @@ the product list card and the product detail sheet.
 - **install_kit / product_sheet_strips / compat_coverage** — kit derivation + card strips + coverage
 - **catalog_health / catalog_regression / robustness** — catalog data integrity
 - **wiring / knowledge_protocol** — search synonyms + finder grouping + protocol "teeth"
+- **cart_bulk_order / cart_stress** — real cart: 20-product order + 50 hard
+  scenarios + mutation edge cases (units · subtotal · VAT · delivery · total)
 
 **In-app full-regression button** (`🔬 מרכז בדיקות רגרסיה`, the
 `▶ הרץ בדיקת רגרסיה מלאה` action): the harness in `lib/test_harness/` mirrors
 these guarantees so any device can self-test. Modules: dsync · tabs · buttons ·
 products · behavior · dupes · sections · settings · catalog · finder · **מנוע**
 (`tests/engine.dart` — compat validity, no fitting↔fitting, chain build,
-auto-compliance, ΔP, install-kit). Filterable by the `מנוע` pill.
+auto-compliance, ΔP, install-kit) · **סל** (`tests/cart.dart` — unit count
+not line count, line+accessory totals, VAT/delivery/total, JSON persistence
+round-trip). Filterable by the `מנוע` / `סל` pills.
 
 `flutter analyze` clean; `flutter test` green (pre-existing failures in
 `category_scan_test` and `wiring_test` are catalog-data issues, not code bugs).

@@ -33,9 +33,12 @@ Three layers verify the app. Run all before every commit.
 
 ## 2. In-app regression harness (`lib/test_harness/`)
 `runRegression(ref)` runs modules: dsync · tabs · buttons · products ·
-behavior · dupes · sections · settings · catalog. Surfaced in
-`regression_panel_screen.dart` (reachable from the BS dial). All counts are
-computed **dynamically** from `kLipskeyCatalog` — no hard-coded totals.
+behavior · dupes · sections · settings · catalog · finder · engine · **cart**
+(`tests/cart.dart` — unit count, line+accessory totals, VAT/delivery/total,
+JSON persistence; pure checks only so it never touches the live persisted
+cart). Surfaced in `regression_panel_screen.dart` (reachable from the BS dial).
+All counts are computed **dynamically** from `kLipskeyCatalog` — no hard-coded
+totals.
 
 ## 3. Mutation testing (the teeth check)
 Inject a deliberate bug into logic, run `flutter test`, confirm a test goes

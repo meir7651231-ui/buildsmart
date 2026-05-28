@@ -55,6 +55,12 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🏷️', title: 'ספקים ומותגים',     breadcrumb: 'קטלוג',                  type: SearchType.screen),
   SearchEntry(emoji: '🔬', title: 'מרכז בדיקות רגרסיה', breadcrumb: 'BS',                     type: SearchType.screen),
 
+  // ── Store / cart screens ───────────────────────────────────────────────
+  SearchEntry(emoji: '🛒', title: 'הסל שלי',      breadcrumb: 'חנות',        type: SearchType.screen),
+  SearchEntry(emoji: '📦', title: 'ההזמנות שלי',  breadcrumb: 'חנות',        type: SearchType.screen),
+  SearchEntry(emoji: '🔧', title: 'שירותים',      breadcrumb: 'חנות',        type: SearchType.screen),
+  SearchEntry(emoji: '🧾', title: 'סיכום הזמנה',  breadcrumb: 'חנות › הסל',  type: SearchType.action),
+
   // ── Search tools ───────────────────────────────────────────────────────
   SearchEntry(emoji: '🎤', title: 'חיפוש קולי', breadcrumb: 'חיפוש', type: SearchType.action),
   SearchEntry(emoji: '📷', title: 'סורק ברקוד',  breadcrumb: 'חיפוש', type: SearchType.action),
