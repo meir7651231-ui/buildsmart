@@ -13,6 +13,11 @@ const _ink = Color(0xFF1A1A1A);
 const _mute = Color(0xFF888888);
 const _surface = Color(0xFFF5F5F5);
 
+/// Dismiss flag for the one-time "orange chip = tap to change" hint shown above
+/// the finder results (the product cards' chip colours have no legend of their
+/// own). Session-scoped; the X hides it for the rest of the session.
+final finderChipTipDismissedProvider = StateProvider<bool>((_) => false);
+
 /// A plain-language product group: a layman label + the plumber `categoryHe`
 /// values it maps to. Empty [cats] marks the catch-all ("אחר").
 class FinderGroup {
@@ -327,6 +332,9 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         if (subs.length > 1) _subBar(subs),
         if (narrow.chips.isNotEmpty) _sizeBar(narrow.label, narrow.chips),
         if (results.isNotEmpty) _countStrip(shown),
+        if (results.isNotEmpty &&
+            !ref.watch(finderChipTipDismissedProvider))
+          _chipTip(),
         Expanded(
           child: results.isEmpty
               ? const Center(
@@ -335,6 +343,32 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
               : LipskeyProductsList(products: results),
         ),
       ],
+    );
+  }
+
+  // One-time hint explaining the orange chips on the product cards below
+  // (their colour code has no legend of its own). Dismissible via the X.
+  Widget _chipTip() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4E8),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(children: [
+        const Text('💡', style: TextStyle(fontSize: 13)),
+        const SizedBox(width: 6),
+        const Expanded(
+          child: Text('צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע',
+              style: TextStyle(color: _ink, fontSize: 12)),
+        ),
+        GestureDetector(
+          onTap: () =>
+              ref.read(finderChipTipDismissedProvider.notifier).state = true,
+          child: const Icon(Icons.close, size: 16, color: _mute),
+        ),
+      ]),
     );
   }
 
