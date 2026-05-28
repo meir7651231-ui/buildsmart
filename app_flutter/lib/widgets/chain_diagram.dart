@@ -9,6 +9,7 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/data/related_info.dart';
 import 'package:flutter/material.dart';
 
 class ChainDiagram extends StatelessWidget {
@@ -93,50 +94,29 @@ class _ChainPainter extends CustomPainter {
     return _materialColors[mat] ?? _defaultColor;
   }
 
-  /// Returns (label, color) for the connection between two adjacent products.
-  /// Inspects their ends and picks the first joint that mates.
+  /// Returns (label, color) for the connection between two adjacent products,
+  /// using the SHARED [connectionJoint] / [jointLabelHe] helpers so the wording
+  /// matches the product-card תאימות carousel exactly. Synthetic safety items
+  /// (HW-* compliance parts) have no verified spec → neutral edge, no label.
   ({String label, Color color}) _edgeStyle(
       LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
-    final sa = kVerifiedSpecs[a.sku];
-    final sb = kVerifiedSpecs[b.sku];
-    if (sa == null || sb == null) {
-      return (label: '?', color: _defaultColor);
+    final label = chainEdgeLabelHe(a, b);
+    final j = connectionJoint(a, b);
+    final Color color;
+    if (j != null) {
+      color = switch (j.type) {
+        EndType.bspMale || EndType.bspFemale => const Color(0xFFEAB308),
+        EndType.pexPress => const Color(0xFFFB923C),
+        EndType.copperPress => const Color(0xFFEA580C),
+        EndType.hdpeCompression => const Color(0xFF22D3EE),
+        EndType.drainOpening => _defaultColor,
+      };
+    } else if (label.isNotEmpty) {
+      color = const Color(0xFF22D3EE); // engine implicit-pipe bridge
+    } else {
+      color = _defaultColor;
     }
-    for (final eA in sa.ends) {
-      for (final eB in sb.ends) {
-        if (eA.directMatesWith(eB)) {
-          switch (eA.type) {
-            case EndType.bspMale:
-            case EndType.bspFemale:
-              return (
-                label: 'הברגה ${eA.size}',
-                color: const Color(0xFFEAB308)
-              );
-            case EndType.pexPress:
-              return (
-                label: 'PEX ${eA.size}',
-                color: const Color(0xFFFB923C)
-              );
-            case EndType.copperPress:
-              return (
-                label: 'נחושת ${eA.size}',
-                color: const Color(0xFFEA580C)
-              );
-            case EndType.drainOpening:
-              return (label: 'פתח DN${eA.size}', color: _defaultColor);
-            default:
-              break;
-          }
-        }
-        if (eA.pipeSharedWith(eB)) {
-          return (
-            label: 'צינור DN${eA.size}',
-            color: const Color(0xFF22D3EE)
-          );
-        }
-      }
-    }
-    return (label: '?', color: _defaultColor);
+    return (label: label, color: color);
   }
 
   @override
@@ -171,21 +151,23 @@ class _ChainPainter extends CustomPainter {
           ..lineTo(arrowX + 3, centerY + 4)
           ..close();
         canvas.drawPath(arrowPath, Paint()..color = style.color);
-        // Edge label centered above
-        final tp = TextPainter(
-          text: TextSpan(
-            text: style.label,
-            style: TextStyle(
-              color: style.color,
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
+        // Edge label centered above (skip for unlabeled synthetic items)
+        if (style.label.isNotEmpty) {
+          final tp = TextPainter(
+            text: TextSpan(
+              text: style.label,
+              style: TextStyle(
+                color: style.color,
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          textDirection: TextDirection.rtl,
-        )..layout(maxWidth: gap + 12);
-        tp.paint(
-            canvas,
-            Offset(arrowX - tp.width / 2, centerY - tp.height - 8));
+            textDirection: TextDirection.rtl,
+          )..layout(maxWidth: gap + 12);
+          tp.paint(
+              canvas,
+              Offset(arrowX - tp.width / 2, centerY - tp.height - 8));
+        }
       }
 
       // Node — coloured ring + emoji
