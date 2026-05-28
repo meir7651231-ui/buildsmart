@@ -56,6 +56,16 @@ const List<_FinderGroup> _kFinderGroups = [
   return null;
 }
 
+// ─── כיסוי מחברים (connector-coverage classification) ───────────────────────
+/// True when [p] is a flow-connector that SHOULD carry a [VerifiedSpec] — i.e.
+/// it physically joins the pipe network. Accessories / supports / tools (see
+/// [kNonConnectorCategories] and [kSpecExemptSkus]) return false, so the
+/// coverage gate can demand 100% of *real* connectors without fabricating
+/// specs for parts that don't connect.
+bool needsConnectionSpec(LipskeyCatalogProduct p) =>
+    !kNonConnectorCategories.contains(p.categoryHe) &&
+    !kSpecExemptSkus.contains(p.sku);
+
 // ─── תאימות (compatibility engine count) ───────────────────────────────────
 /// True if [p] is a pipe-product (gets gripped by a compression fitting) as
 /// opposed to a fitting (which grips a pipe). Reading the DB literally, both

@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.60 · 28.5.26 · ניקוי קוד מת: סל-דמו (checkout האמיתי כבר עובד)',
+                          'v4.61 · 28.5.26 · תאימות: תוויות "למה מתחבר" + שער כיסוי מחברים 100%',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

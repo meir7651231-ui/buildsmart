@@ -98,6 +98,29 @@ List<TestResult> testEngine() {
     ));
   }
 
+  // ── 1b. כיסוי מחברים — 100% מהמחברים האמיתיים יש להם מפרט ────────────────
+  {
+    final connectors = kLipskeyCatalog.where(needsConnectionSpec).toList();
+    final missing =
+        connectors.where((p) => !kVerifiedSpecs.containsKey(p.sku)).toList();
+    results.add(TestResult(
+      id: 'engine:connector-coverage',
+      category: TestCategory.engine,
+      label: 'כיסוי מחברים — לכל מחבר זרימה יש מפרט מאומת',
+      area: 'כיסוי',
+      checks: [
+        TestCheck(
+          name: 'כיסוי 100% (${connectors.length - missing.length}/'
+              '${connectors.length} מחברים אמיתיים)',
+          pass: missing.isEmpty,
+          expected: '0 חסרים',
+          got: '${missing.length} חסרים',
+          detail: missing.take(3).map((p) => '${p.sku}:${p.categoryHe}').join(' · '),
+        ),
+      ],
+    ));
+  }
+
   // ── 2. תאימות — מצמד לא מתחבר למצמד ──────────────────────────────────────
   // The classic false-positive: a coupling (fitting) listed as connecting to
   // another coupling. Both are fittings with compression ends, so neither a
