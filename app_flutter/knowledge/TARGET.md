@@ -24,14 +24,19 @@ What we're building toward, and how it relates to the prototype. This is the
    production; the prototype/Preact stay as content reference.
 4. **Launch** in the iOS / Android / Web stores.
 
-## Parity status (current)
-- CLAUDE.md records **feature-parity to Preact "completed" (~270 leaves verbatim)**;
-  inspections INSP-0009→INSP-0040 all GO.
-- Ported & live in Flutter: 4 tabs, 3 FAB dials (BS 5 personas, search 5 tools,
-  menu 4 tabs), 6/6 legacy hubs, ~200+ verbatim leaves, settings trees.
-- **Deferred / divergent**: contractor persona deep-tree (no verbatim emoji);
-  some conversation/media buttons remain 🚧 (need device APIs absent in the
-  prototype too).
+## Parity status (current) — measured map in `PARITY.md` + `port/COVERAGE.md`
+- **Label parity high; functional parity partial.** ~200+ verbatim dial leaves
+  exist (`sections.dart`/`menu_trees.dart`/`settings_tree.dart`), but most are
+  placeholder toasts ("בבנייה"), and the **menu + search dials are built yet not
+  wired to any trigger** — only the BS dial opens (AppBar wordmark). Shell is a
+  4-tab bottom-nav + cart-FAB, not the 5-FAB row of R1 (see `spec/shell-and-dials.md` §7).
+- **Flutter goes *deeper* than the prototype** on two axes: the real ~935-SKU
+  Lipskey catalog, and the install-studio + BOM/compatibility engine (no prototype
+  equivalent).
+- **Absent / stub (the ~85% to port — see `PARITY.md`)**: contractor card / ranks /
+  rewards; projects / sites / budget / finance / tasks; the B2B flows (RFQ / RMA /
+  rental / deposits / MSDS / gov-XML / signature); the 4 persona apps (dial labels
+  only); onboarding / RBAC. Some media/telephony buttons are ⛔ (device APIs).
 
 ## Where Flutter intentionally goes *beyond* the prototype
 These are wrapper/quality improvements, not content changes — content stays verbatim:
