@@ -45,9 +45,9 @@ abstract final class IsolationValidator {
             '${hits.join('\n')}',
       );
     }
-    // Scaffold only flagged when used as a constructor (new feature screen)
+    // Scaffold flagged whenever the constructor is called in any position
     final scaffoldHits = lines
-        .where((l) => l.trimLeft().startsWith('Scaffold(') || l.contains('= Scaffold('))
+        .where((l) => l.contains('Scaffold('))
         .toList();
     expect(
       scaffoldHits,
@@ -81,12 +81,36 @@ abstract final class IsolationValidator {
   // ── internals ──────────────────────────────────────────────────────────────
 
   /// Returns non-empty, non-comment lines from [filePath].
+  /// Strips both // single-line and /* */ block comments.
   static List<String> _codeLines(String filePath) {
     final file = File(filePath);
     expect(file.existsSync(), isTrue, reason: 'File not found: $filePath');
-    return file
-        .readAsLinesSync()
-        .where((l) => l.trim().isNotEmpty && !l.trimLeft().startsWith('//'))
-        .toList();
+    final result = <String>[];
+    var inBlock = false;
+    for (final line in file.readAsLinesSync()) {
+      var l = line;
+      if (inBlock) {
+        final end = l.indexOf('*/');
+        if (end == -1) continue; // whole line inside block comment
+        l = l.substring(end + 2);
+        inBlock = false;
+      }
+      // strip inline /* ... */ spans (may be multiple per line)
+      while (l.contains('/*')) {
+        final start = l.indexOf('/*');
+        final end = l.indexOf('*/', start);
+        if (end == -1) {
+          l = l.substring(0, start);
+          inBlock = true;
+          break;
+        }
+        l = l.substring(0, start) + l.substring(end + 2);
+      }
+      // strip // comment suffix
+      final slashIdx = l.indexOf('//');
+      if (slashIdx != -1) l = l.substring(0, slashIdx);
+      if (l.trim().isNotEmpty) result.add(l);
+    }
+    return result;
   }
 }

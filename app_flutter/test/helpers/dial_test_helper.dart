@@ -16,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// Wraps [child] in ProviderScope + MaterialApp + RTL for isolated dial tests.
 Widget dialTestShell(Widget child) => ProviderScope(
       child: MaterialApp(
+        locale: const Locale('he'),
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(body: Center(child: child)),
