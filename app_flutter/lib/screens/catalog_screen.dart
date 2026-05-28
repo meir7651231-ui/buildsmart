@@ -1203,7 +1203,7 @@ IconData _sectionIcon(String label) => switch (label) {
       'מועדפים'         => Icons.favorite_border,
       'קטגוריות'        => Icons.grid_view_outlined,
       'עץ חכם'          => Icons.account_tree_outlined,
-      'תכנון חיבור'     => Icons.handyman_outlined,
+      'תכנון חיבור'     => Icons.handyman,
       _                 => Icons.list_alt_outlined,
     };
 
@@ -2195,7 +2195,7 @@ class _AllOverview extends ConsumerWidget {
           onShowAll: () => _openStudio(context),
           children: [
             _OverviewRow(
-              icon: Icons.handyman_outlined,
+              icon: Icons.handyman,
               label: 'תכנון חיבור — בחר מה לחבר ונכין רשימת קנייה',
               onTap: () => _openStudio(context),
             ),
