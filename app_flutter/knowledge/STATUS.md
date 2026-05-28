@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v4.59` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v4.61` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — overview blocks (categories / recent / compat / favorites / smart-tree),
@@ -50,6 +50,14 @@ addresses/invoices/warranty/biometric. All need data, a server, or device APIs.
   `directMatesWith` (thread/press/drain) or a `pipeSharedWith` compression
   socket — the latter counts only when EXACTLY ONE side is a pipe and the
   materials are family-compatible. So a coupling never "connects" to a coupling.
+- **Connector coverage = 100% (gated)** — the headline 86% is diluted by
+  accessories. `needsConnectionSpec()` excludes `kNonConnectorCategories`
+  (seats/clamps/brackets/tools/mechanisms…) + `kSpecExemptSkus` (gaskets,
+  bolt-sets, spray-guns); over real flow-connectors coverage is 808/808.
+  `compat_coverage_test` turns red if a NEW connector ships without a spec.
+- **"Why it matches" labels** — `connectionExplainHe()` shows the exact joint
+  per carousel item (תבריג ½″ / אום הידוק DN32 / Press PEX 16), so matches are
+  verifiable by eye. Invariant: every compat hit has a non-empty label.
 - **Bore-aware routing** — `findShortestPath` / `findAlternativePaths` (Yen
   K-shortest) in `install_engine.dart`; `_edgeCost` weights family transitions,
   rewards direct mates and penalises narrow bores → BFS builds wide chains.

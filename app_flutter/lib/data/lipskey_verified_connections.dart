@@ -162,6 +162,49 @@ ConnectorEnd _bm(String inch) => ConnectorEnd(EndType.bspMale,         inch);
 ConnectorEnd _bf(String inch) => ConnectorEnd(EndType.bspFemale,       inch);
 ConnectorEnd _do(String inch) => ConnectorEnd(EndType.drainOpening,    inch);
 
+// ── intentionally non-connector products ──────────────────────────────────────
+// Coverage is measured over real flow-connectors. These categories/SKUs are
+// deliberately left WITHOUT a VerifiedSpec because they don't join the pipe
+// network — so there is nothing to mate. The connector-coverage gate
+// (test/compat_coverage_test.dart) uses these to require 100% coverage of
+// everything else, while never tempting us to fabricate a spec (which would
+// risk false matches) for an accessory.
+
+/// Catalog categories where NO product is a flow-connector (seats, clamps,
+/// brackets, enclosures, tools, cistern mechanisms, spout housings, faucet
+/// aerators, tap-fixing sets).
+const Set<String> kNonConnectorCategories = {
+  'מושבי אסלה',         // toilet seats
+  'חבקי תליה',          // hanging clamps
+  'חבקי צינור',         // pipe clamps (omega)
+  'אביזרי חדר רחצה',    // bathroom accessories (bars, hooks, soap dishes)
+  'דיורים ופיות',       // spout housings / aerator bodies
+  'אביזרי ברזים',       // faucet accessories (aerators, small parts)
+  'ארונות מחלק',        // manifold cabinets / enclosures
+  'ידיות אחיזה',        // grab bars
+  'מנגנונים',           // cistern flush mechanisms
+  'סטי הידוק וחיבורים', // tap-fixing sets (bolts / brackets)
+  'כלי עבודה',          // tools
+};
+
+/// Individual non-connector products that live INSIDE otherwise-connector
+/// categories (a gasket among real plugs, a spray-gun among garden taps, a
+/// bolt-set among toilet parts). Exempt from the coverage gate by SKU.
+const Set<String> kSpecExemptSkus = {
+  // אביזרי אסלה — mounting hardware (bolt sets / seat bolts)
+  '77000903', '77000905', '77777041',
+  // עוגנים ובנדים — fixing flanges (Aqua-flange), support not flow
+  '77MK0002', '77SK0002', '77MK0001', '77SK0001',
+  // ציוד גן — hose-end spray guns (attach to a hose, not the catalog network)
+  '77000026', '77000027', '77980000', '77980001',
+  // אטמים ופקקים — flat gaskets + a non-standard 2 3/8" plug
+  '506539', '506521', '610706', '610708',
+  // חלקים סניטריים — universal repair kit + generic spare parts
+  '186466', '186666',
+  // אביזרי מקלחת — adjustable holder (bracket)
+  '77701185',
+};
+
 // ── verified specs map ────────────────────────────────────────────────────────
 
 final Map<String, VerifiedSpec> kVerifiedSpecs = {
