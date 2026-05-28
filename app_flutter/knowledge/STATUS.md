@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v4.72` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v4.76` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — opens on **בית (finder home)** as the default landing: layman
@@ -64,6 +64,15 @@ addresses/invoices/warranty/biometric. All need data, a server, or device APIs.
 - **Joint-method BOM** — `lineStructureText()`: the "מבנה הקו" block in the
   installer/WhatsApp export states the joint per item (תבריג ½″ / אום הידוק DN32)
   via the shared `chainEdgeLabelHe`.
+- **Safety placed in its physical spot (v4.76)** — auto-compliance no longer
+  piles items at the list end: TMTV is inserted immediately at the manifold/
+  shower it protects, and the hot-source group (shutoff · expansion vessel ·
+  PRV) clusters at the inlet. Dielectric stays at the metal seam. So the chain
+  reads correctly one-after-another with each in-line item where it belongs.
+- **ΔP bottleneck fix (v4.76)** — `estimatePressureDrop` excludes off-line side
+  branches (¼″ Legionella sampling tap, air vent, expansion tank) from the
+  bore/K calc; they were wrongly read as the in-line bottleneck (bogus ~4.8 bar
+  on a recirc line). Guarded by `pressure_drop_offline_test`.
 - **Temperature pill** — human labels (קר / חם / חם מאוד) with color coding;
   engine regression has a temperature-routing module (hot line excludes
   low-temp materials).
