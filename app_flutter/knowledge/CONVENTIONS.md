@@ -28,8 +28,10 @@ no notification engine, no media/telephony, no server). Keep `../WIRING.md`
 and `gaps_test.dart`/`wiring_test.dart` in sync.
 
 ## Inherited shell rules (from `app/RULES.md`, still honored)
-- **R1**: 5 FABs, fixed roles. **R2**: no full-screen persona views — every
-  feature is a dial/tab. **R6/R8**: Hebrew strings verbatim; never invent.
+- **R1**: 5 FABs (the *rule*; the Flutter shell currently realizes a 4-tab
+  bottom-nav + cart-FAB, with only the BS dial wired — see `spec/shell-and-dials.md`
+  §7). **R2**: no full-screen persona views — every feature is a dial/tab.
+  **R6/R8**: Hebrew strings verbatim; never invent.
 
 ## Commit / branch / version
 - Branch `claude/whats-happening-LyY9G`; no push to main without approval.

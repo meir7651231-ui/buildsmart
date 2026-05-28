@@ -139,7 +139,7 @@ Grounded in source (R8 — no invention). Status: ✅ wired · 🚧 placeholder 
 ## 8. Cross-cutting
 - **Theme**: light (`0xFFF5F6FA`/white/`0xFF1A1A1A`/brand orange); high-contrast
   + text-scale are app-wide.
-- **Verification**: `flutter test` (~170 checks) + in-app harness + mutation
+- **Verification**: `flutter test` (52 test files) + in-app harness (12 suites) + mutation
   testing (domain logic 50/50) + the protocol enforcement test.
 - **Known gaps**: media/telephony/notification-engine/pricing/AI are ⛔ (no
   backend); a few chat/conversation buttons are 🚧.

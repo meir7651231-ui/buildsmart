@@ -98,7 +98,12 @@ flutter run -d chrome        # dev
 
 ---
 
-## Inspector chain — לפני כל commit של settings/menu/dial
+## Inspector chain — לפני כל commit של settings/menu/dial (Preact `app/` בלבד)
+
+> ⚠️ זו זרימת ה-**Preact** (`app/`). לעבודת **Flutter** (`app_flutter/`, הפעיל לפיתוח):
+> `flutter analyze` (0 errors) + `flutter test` (כולל `knowledge_protocol_test`) +
+> עדכון `app_flutter/WIRING.md`. הידע ל-port: `app_flutter/knowledge/PARITY.md` +
+> `app_flutter/knowledge/port/` (proto/ + preact/). ראה `app_flutter/knowledge/README.md`.
 
 ```bash
 cd app && npx tsc -b --noEmit       # typecheck
