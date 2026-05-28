@@ -780,7 +780,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       AttrKind.size => 'מידה',
       AttrKind.colorMod => 'גימור',
       AttrKind.model => 'דגם',
-      AttrKind.subtype => 'סוג',
+      AttrKind.subtype => 'תת-סוג',
       AttrKind.color => 'צבע',
       AttrKind.type => 'סוג',
     };
@@ -1546,7 +1546,7 @@ class _AttrChip extends StatelessWidget {
       onTap: hasSiblings ? () => onTap!(word, kind) : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(5),
@@ -1555,13 +1555,24 @@ class _AttrChip extends StatelessWidget {
             width: hasSiblings ? 1.2 : 0.9,
           ),
         ),
-        child: Text(
-          word,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
+        // Editable chips (have siblings) carry a ▾ cue so a layman sees they
+        // can be tapped to change that dimension.
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              word,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (hasSiblings) ...[
+              const SizedBox(width: 1),
+              Icon(Icons.expand_more, size: 13, color: textColor),
+            ],
+          ],
         ),
       ),
     );

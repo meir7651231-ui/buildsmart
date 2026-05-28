@@ -391,7 +391,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.51 · 28.5.26 · מאתר: רמז צ׳יפים כתומים + סקירת כרטיס מוצר',
+                          'v4.52 · 28.5.26 · כרטיס מוצר: ▾ לצ׳יפ ניתן-להחלפה, תת-סוג, טקסט גדול',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
