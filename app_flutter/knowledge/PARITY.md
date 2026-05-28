@@ -129,5 +129,5 @@
 ---
 
 # קישורים
-`TARGET.md` (החזון/parity) · `SPEC.md`+`spec/` (מצב Flutter נוכחי) · `../WIRING.md` (חוזה) ·
-`app/RULES.md` (R1–R9) · `/index.html` (מקור התוכן verbatim) · `app/src/` (מימוש dial להעתקה).
+**ידע-מקור מפורט:** `port/prototype.md` (ה"מה" — `/index.html`) · `port/preact.md` (ה"איך" — `app/src/`) · `port/README.md` (אינדקס + מסמכי-תחום).
+**מסגרת:** `TARGET.md` (החזון/parity) · `SPEC.md`+`spec/` (מצב Flutter נוכחי) · `../WIRING.md` (חוזה) · `app/RULES.md` (R1–R9).
