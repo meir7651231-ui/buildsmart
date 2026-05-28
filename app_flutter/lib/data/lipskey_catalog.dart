@@ -290,6 +290,8 @@ const List<String> kLipskeyModels = [
   'טולדו', 'טיטוניק', "אנג'ל", 'גאלרי',
   // שם מותג (soft-close seat brand)
   'טבור',
+  // קודי חומר / מותג צינורות
+  'NTM', 'PP-MD-ML', 'HDPE',
 ];
 
 /// Canonical product-type nouns, ordered most-specific first so multi-word
@@ -375,6 +377,8 @@ const List<String> kLipskeySubtypes = [
   'חדש', 'שני', 'קיימים', 'אביזרי', 'למוצרים', 'מי', 'אויר',
   'לבנה', 'שרוול', 'גלילית', 'גנדלים', 'שקית',
   'אפשרות', 'מכונת',
+  // חיבור / סגנון
+  'פ.פ', 'ח.פ', 'פרח', 'ראש', 'נשלף', 'לחץ',
   // צירופים דו-מילוניים — subtype compounds
   'הברגה חיצונית', 'הברגה פנימית',
   'תבריג כפול', 'תבריג צד',
