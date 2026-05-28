@@ -1170,28 +1170,33 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
 
 
 /// Hebrew noise words / prepositions that shouldn't be clickable search links.
+/// Bare measurement units belong here too: "ס\"מ" / "מ\"מ" / "מ׳" detach from
+/// their number on whitespace-split and would otherwise float as green junk.
 const Set<String> kSearchStopWords = {
   'עם', 'של', 'את', 'או', 'ל', 'ה', 'ו', 'ב', 'כ', 'מ', 'על', 'אל',
   'ללא', 'בלי', 'כמות', 'באריזה', 'במשטח', 'יח', 'יחידות',
+  'ס"מ', 'מ"מ', 'מ׳', 'מס.',
 };
 
 /// Size / dimension token — these define compatibility ("what connects to
 /// what"), so they ARE clickable (find every part of the same size).
-/// Examples: DN50 · 3/4" · 1¼" · 110 · 130/50 · 50/40.
+/// Examples: DN50 · 3/4" · 1¼" · 110 · 130/50 · 50/40 · 45° · 90°.
 bool isSizeToken(String w) {
   if (RegExp(r'^DN', caseSensitive: false).hasMatch(w)) return true;
-  // numbers, fractions, ratios, inch marks, with optional × / - separators
-  return RegExp(r'^[\d]+([./×x\-"׳״⅛¼½¾⅜⅝⅞]+[\d"׳״]*)*[\"׳״]?$')
+  // numbers, fractions, ratios, inch marks, degrees, with × / - separators
+  return RegExp(r'^[\d]+([./×x\-"׳״⅛¼½¾⅜⅝⅞°]+[\d"׳״°]*)*[\"׳״°]?$')
           .hasMatch(w) &&
       RegExp(r'\d').hasMatch(w);
 }
 
-/// A plain word is a meaningful tappable link if it isn't a stop-word and
-/// has length ≥ 2 (sizes are handled separately by [isSizeToken]).
+/// A plain word is a meaningful tappable link if it isn't a stop-word, has
+/// length ≥ 2, and isn't a number-bearing spec fragment (sizes are handled by
+/// [isSizeToken]; other digit tokens like "2,4)" / "ו-3" / "L=50" are noise).
 bool isLinkableWord(String w) {
   if (w.length < 2) return false;
   if (kSearchStopWords.contains(w)) return false;
   if (isSizeToken(w)) return false; // styled as a size chip instead
+  if (RegExp(r'\d').hasMatch(w)) return false; // non-size digit fragment, not a link
   return true;
 }
 
@@ -1391,7 +1396,13 @@ class _NameWords extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final words = product.nameHe.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    // Strip wrapping punctuation so "(סיפון)" → "סיפון" instead of a green
+    // pill carrying the parens; drop fragments that become empty.
+    final words = product.nameHe
+        .split(RegExp(r'\s+'))
+        .map((w) => w.replaceAll(RegExp(r'^[(\[*,]+|[)\]*,]+$'), ''))
+        .where((w) => w.isNotEmpty)
+        .toList();
     final compound = _getCompoundType(product);
     final typeWords = compound.isNotEmpty
         ? compound.split(RegExp(r'\s+')).toSet()
