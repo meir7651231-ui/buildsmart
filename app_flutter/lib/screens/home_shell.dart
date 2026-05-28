@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.62 · 28.5.26 · 18 בדיקות קשות: כסף/שערים/קטלוג/חיפוש/מנוע',
+                          'v4.63 · 28.5.26 · סטודיו: תוויות חיבור אחידות בתרשים השרשרת',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

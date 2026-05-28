@@ -173,51 +173,82 @@ List<LipskeyCatalogProduct> compatibleProductsFor(LipskeyCatalogProduct p) {
   return out;
 }
 
-/// A short Hebrew label explaining HOW [otherP] physically connects to
-/// [sourceP] — the exact mating joint (e.g. "תבריג ½″", "אום הידוק DN32",
-/// "Press PEX 16") — so the user can verify each carousel match by eye.
-/// Returns '' when there is no real joint (mirrors [_reallyMates]).
-/// Prefers the strongest joint: a direct mate (thread / press / drain) over a
-/// compression-socket share (a pipe sliding into a fitting's nut).
-String connectionExplainHe(
-    LipskeyCatalogProduct sourceP, LipskeyCatalogProduct otherP) {
-  final s = kVerifiedSpecs[sourceP.sku];
-  final o = kVerifiedSpecs[otherP.sku];
-  if (s == null || o == null) return '';
+/// The matched joint between [a] and [b] as structured data — the STRONGEST
+/// joint (a direct thread/press/drain mate is preferred over a compression-
+/// socket share). Returns null when they don't really mate (mirrors
+/// [_reallyMates]). This is the single source of truth shared by the תאימות
+/// carousel ([connectionExplainHe]) and the install-studio chain diagram
+/// (`ChainDiagram`), so the same joint always reads the same everywhere.
+({EndType type, String size})? connectionJoint(
+    LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
+  final s = kVerifiedSpecs[a.sku];
+  final o = kVerifiedSpecs[b.sku];
+  if (s == null || o == null) return null;
 
   // Pass 1 — direct joints (thread / press / drain). Material-independent.
   for (final eA in s.ends) {
     for (final eB in o.ends) {
-      if (eA.directMatesWith(eB)) return _directJoinLabel(eA);
+      if (eA.directMatesWith(eB)) return (type: eA.type, size: eA.size);
     }
   }
 
   // Pass 2 — compression socket: the pipe slides into the fitting's nut. Counts
   // only when EXACTLY one side is a pipe AND the materials are compatible.
-  final srcIsPipe = _isPipeProduct(sourceP);
-  final otherIsPipe = _isPipeProduct(otherP);
-  if (srcIsPipe != otherIsPipe) {
+  final aPipe = _isPipeProduct(a), bPipe = _isPipeProduct(b);
+  if (aPipe != bPipe) {
     const drainage = {'PVC', 'PP', 'רב-שכבתי', 'ceramic'};
     final ok = s.material == o.material ||
         (drainage.contains(s.material) && drainage.contains(o.material));
     if (ok) {
       for (final eA in s.ends) {
         for (final eB in o.ends) {
-          if (eA.pipeSharedWith(eB)) return 'אום הידוק DN${eA.size}';
+          if (eA.pipeSharedWith(eB)) return (type: eA.type, size: eA.size);
         }
+      }
+    }
+  }
+  return null;
+}
+
+/// Canonical short Hebrew label for a joint kind + size — the SAME wording used
+/// by the carousel and the chain diagram (e.g. "תבריג ½″", "אום הידוק DN32",
+/// "Press PEX 16", "ניקוז ⌀110").
+String jointLabelHe(EndType type, String size) => switch (type) {
+      EndType.bspMale || EndType.bspFemale => 'תבריג $size',
+      EndType.pexPress => 'Press PEX $size',
+      EndType.copperPress => 'Press נחושת $size',
+      EndType.hdpeCompression => 'אום הידוק DN$size',
+      EndType.drainOpening => 'ניקוז ⌀$size',
+    };
+
+/// A short Hebrew label explaining HOW [otherP] physically connects to
+/// [sourceP] — the exact mating joint — so the user can verify each carousel
+/// match by eye. Returns '' when there is no real joint.
+String connectionExplainHe(
+    LipskeyCatalogProduct sourceP, LipskeyCatalogProduct otherP) {
+  final j = connectionJoint(sourceP, otherP);
+  return j == null ? '' : jointLabelHe(j.type, j.size);
+}
+
+/// Label for an edge between two engine-placed neighbours in the install-studio
+/// chain diagram. Direct/compression joints reuse [jointLabelHe] (so the
+/// wording matches the carousel exactly); an engine "implicit pipe" bridge
+/// between two fittings (same compression DN, neither is a pipe) reads
+/// "צינור DN…" — because physically a pipe of that DN spans the joint. Returns
+/// '' when there is no spec to read (e.g. a synthetic HW-* safety part).
+String chainEdgeLabelHe(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
+  final j = connectionJoint(a, b);
+  if (j != null) return jointLabelHe(j.type, j.size);
+  final sa = kVerifiedSpecs[a.sku], sb = kVerifiedSpecs[b.sku];
+  if (sa != null && sb != null) {
+    for (final eA in sa.ends) {
+      for (final eB in sb.ends) {
+        if (eA.pipeSharedWith(eB)) return 'צינור DN${eA.size}';
       }
     }
   }
   return '';
 }
-
-String _directJoinLabel(ConnectorEnd e) => switch (e.type) {
-      EndType.bspMale || EndType.bspFemale => 'תבריג ${e.size}',
-      EndType.pexPress => 'Press PEX ${e.size}',
-      EndType.copperPress => 'Press נחושת ${e.size}',
-      EndType.hdpeCompression => 'אום הידוק DN${e.size}',
-      EndType.drainOpening => 'ניקוז ⌀${e.size}',
-    };
 
 // ─── ערכת התקנה (smart-tree accessories + auto-derived install tools) ─────
 /// A unified install-kit summary for [p]. Two sources merged:

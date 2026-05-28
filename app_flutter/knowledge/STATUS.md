@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v4.61` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v4.63` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — overview blocks (categories / recent / compat / favorites / smart-tree),
@@ -58,6 +58,11 @@ addresses/invoices/warranty/biometric. All need data, a server, or device APIs.
 - **"Why it matches" labels** — `connectionExplainHe()` shows the exact joint
   per carousel item (תבריג ½″ / אום הידוק DN32 / Press PEX 16), so matches are
   verifiable by eye. Invariant: every compat hit has a non-empty label.
+- **One joint vocabulary** — `connectionJoint()` + `jointLabelHe()` are the
+  single source of truth; the carousel and the install-studio `ChainDiagram`
+  now read the SAME wording for the same joint (`chainEdgeLabelHe` adds only the
+  "צינור DN…" implicit-pipe bridge between two fittings). Guarded by
+  `connection_joint_test`.
 - **Bore-aware routing** — `findShortestPath` / `findAlternativePaths` (Yen
   K-shortest) in `install_engine.dart`; `_edgeCost` weights family transitions,
   rewards direct mates and penalises narrow bores → BFS builds wide chains.
