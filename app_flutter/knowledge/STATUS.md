@@ -1,11 +1,13 @@
 # Status snapshot — app_flutter
 
-_Version label: `v4.63` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v4.66` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
-- **קטלוג** — overview blocks (categories / recent / compat / favorites / smart-tree),
-  in-tab drill, grid↔list product view, smart-tree, **מאתר (finder)** — layman
-  group→sub→narrow with relevance-ranked forgiving search, search panel.
+- **קטלוג** — opens on **בית (finder home)** as the default landing: layman
+  group→sub→narrow with relevance-ranked forgiving search. Each group row shows a
+  plain-Hebrew description + product-count badge (same idiom as the category rows).
+  Other sections: overview blocks (categories / recent / compat / favorites /
+  smart-tree), in-tab drill, grid↔list product view, smart-tree, search panel.
 - **שיחות** — thread list, conversation, archive screen, new-chat, mute-all.
 - **התראות** — grouped list with per-type + importance filtering, snooze.
 - **חנות** — sections all/cart/orders/services, full cart + checkout.

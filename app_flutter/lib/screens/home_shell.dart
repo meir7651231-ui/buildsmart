@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.65 · 28.5.26 · מסך הבית: שם "בית" + תיאור ומספר מוצרים לכל קבוצה',
+                          'v4.66 · 28.5.26 · סנכרון בית: אינדקס חיפוש · רגרסיה (desc + נחיתת ברירת מחדל) · ידע',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
