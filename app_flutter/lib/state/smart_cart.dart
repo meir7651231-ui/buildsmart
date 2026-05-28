@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @immutable
 class SmartCartAcc {
@@ -13,6 +16,16 @@ class SmartCartAcc {
   final String emoji;
   final int price;
   final int qty;
+
+  Map<String, dynamic> toJson() =>
+      {'name': name, 'emoji': emoji, 'price': price, 'qty': qty};
+
+  factory SmartCartAcc.fromJson(Map<String, dynamic> j) => SmartCartAcc(
+        name: j['name'] as String,
+        emoji: j['emoji'] as String,
+        price: (j['price'] as num).toInt(),
+        qty: (j['qty'] as num).toInt(),
+      );
 }
 
 @immutable
@@ -41,10 +54,67 @@ class SmartCartLine {
     }
     return t;
   }
+
+  Map<String, dynamic> toJson() => {
+        'productKey': productKey,
+        'productName': productName,
+        'productEmoji': productEmoji,
+        'brandName': brandName,
+        'brandPrice': brandPrice,
+        'productQty': productQty,
+        'accessories': accessories.map((a) => a.toJson()).toList(),
+      };
+
+  factory SmartCartLine.fromJson(Map<String, dynamic> j) => SmartCartLine(
+        productKey: j['productKey'] as String,
+        productName: j['productName'] as String,
+        productEmoji: j['productEmoji'] as String,
+        brandName: j['brandName'] as String,
+        brandPrice: (j['brandPrice'] as num).toInt(),
+        productQty: (j['productQty'] as num).toInt(),
+        accessories: (j['accessories'] as List<dynamic>)
+            .map((e) => SmartCartAcc.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
 }
 
 class SmartCartNotifier extends StateNotifier<List<SmartCartLine>> {
-  SmartCartNotifier() : super(const []);
+  SmartCartNotifier() : super(const []) {
+    _load();
+  }
+
+  static const _prefsKey = 'bs.smart-cart.v1';
+
+  // Persist the cart on every change so it survives app restarts.
+  @override
+  set state(List<SmartCartLine> value) {
+    super.state = value;
+    _persist();
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_prefsKey);
+      if (raw == null || raw.isEmpty) return;
+      final list = (jsonDecode(raw) as List<dynamic>)
+          .map((e) => SmartCartLine.fromJson(e as Map<String, dynamic>))
+          .toList();
+      super.state = list; // bypass re-persisting the value we just loaded
+    } catch (_) {
+      // Corrupt/old payload — ignore and start empty.
+    }
+  }
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _prefsKey,
+        jsonEncode(state.map((l) => l.toJson()).toList()),
+      );
+    } catch (_) {}
+  }
 
   void add(SmartCartLine line) {
     state = [...state, line];

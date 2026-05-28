@@ -42,6 +42,8 @@ final cartProjectProvider = StateProvider<String>((_) => 'בית דוד 3');
 final cartPaymentProvider = StateProvider<CartPaymentMethod>(
   (ref) => cartPaymentFor(ref.read(storeSettingsProvider).defaultPayment),
 );
+/// Free-text delivery note carried into the confirmed order.
+final cartNotesProvider = StateProvider<String>((_) => '');
 
 // ─── static data ─────────────────────────────────────────────────────────────
 
@@ -115,6 +117,10 @@ typedef _CItem = ({
 const List<_CItem> _kCItems = [];
 
 const _kProjects = ['בית דוד 3', 'מגדל עזריאלי', 'ללא פרויקט'];
+
+/// Live project list — seeded from [_kProjects]; the user can add more.
+final storeProjectsProvider =
+    StateProvider<List<String>>((_) => List.of(_kProjects));
 
 typedef _DOption = ({CartDelivery method, String emoji, String label, int fee});
 typedef _POption = ({CartPaymentMethod method, String emoji, String label});
@@ -255,7 +261,8 @@ class _SummaryRow extends ConsumerWidget {
       ref.watch(cartQtysProvider),
       ref.watch(smartCartProvider),
     );
-    final openOrders = _kOrders.where((o) => isOrderOpen(o.stage)).length;
+    final openOrders =
+        ref.watch(storeOrdersProvider).where((o) => isOrderOpen(o.stage)).length;
     final offers = _kSupplierOffersCount;
 
     return SingleChildScrollView(
@@ -802,7 +809,22 @@ class _AllList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(storeSearchQueryProvider).trim().toLowerCase();
     final favorites = ref.watch(storeFavoritesProvider);
-    final allItems = _itemsForSection(section);
+    final cartCount = cartItemCount(
+      ref.watch(cartQtysProvider),
+      ref.watch(smartCartProvider),
+    );
+    // Reflect the real cart count on the "הסל שלי" hub row.
+    final allItems = _itemsForSection(section)
+        .map((m) => m.emoji == '🛒'
+            ? (
+                emoji: m.emoji,
+                title: m.title,
+                preview: '$cartCount פריטים ממתינים לסיכום',
+                time: m.time,
+                badge: cartCount,
+              )
+            : m)
+        .toList();
     final items = query.isEmpty
         ? allItems
         : allItems
@@ -1201,6 +1223,15 @@ class _CartViewState extends ConsumerState<_CartView> {
   final _notesCtrl = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _notesCtrl.text = ref.read(cartNotesProvider);
+    _notesCtrl.addListener(
+      () => ref.read(cartNotesProvider.notifier).state = _notesCtrl.text,
+    );
+  }
+
+  @override
   void dispose() {
     _notesCtrl.dispose();
     super.dispose();
@@ -1323,7 +1354,7 @@ class _ProjectSelector extends ConsumerWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              for (final p in _kProjects) ...[
+              for (final p in ref.watch(storeProjectsProvider)) ...[
                 _ProjectChip(
                   label: p,
                   active: p == selected,
@@ -1333,7 +1364,7 @@ class _ProjectSelector extends ConsumerWidget {
                 const SizedBox(width: 8),
               ],
               GestureDetector(
-                onTap: () => showToast(context, 'הוספת פרויקט — בבנייה'),
+                onTap: () => _addProjectDialog(context, ref),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -1354,6 +1385,44 @@ class _ProjectSelector extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  static void _addProjectDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFFFFFFFF),
+        title: const Text('הוספת פרויקט',
+            style: TextStyle(color: Color(0xFF1A1A1A))),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: const TextStyle(color: Color(0xFF1A1A1A)),
+          decoration: const InputDecoration(hintText: 'שם הפרויקט'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('ביטול', style: TextStyle(color: Colors.black38)),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isEmpty) return;
+              final notifier = ref.read(storeProjectsProvider.notifier);
+              if (!notifier.state.contains(name)) {
+                notifier.state = [...notifier.state, name];
+              }
+              ref.read(cartProjectProvider.notifier).state = name;
+              Navigator.pop(ctx);
+            },
+            style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+            child: const Text('הוסף'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -2246,9 +2315,28 @@ class _CheckoutSheet extends ConsumerWidget {
               ),
               onPressed: () {
                 final orderNo = DateTime.now().millisecondsSinceEpoch % 100000;
-                // Real effect: empty the cart on a confirmed order.
+                final itemCount = cartItemCount(
+                  ref.read(cartQtysProvider),
+                  ref.read(smartCartProvider),
+                );
+                // Real effect: record a new open order...
+                final newOrder = (
+                  id: 'BS-$orderNo',
+                  items: '$itemCount פריטים',
+                  total: _price(total),
+                  stage: 'preparing',
+                  stageLabel: 'בהכנה 🔧',
+                  time: 'עכשיו',
+                  stageColor: const Color(0xFFFF9800),
+                );
+                ref.read(storeOrdersProvider.notifier).state = [
+                  newOrder,
+                  ...ref.read(storeOrdersProvider),
+                ];
+                // ...and empty the cart + notes.
                 ref.read(smartCartProvider.notifier).clear();
                 ref.read(cartQtysProvider.notifier).state = const {};
+                ref.read(cartNotesProvider.notifier).state = '';
                 Navigator.pop(context);
                 showToast(context, 'הזמנה #$orderNo אושרה! 🎉');
               },
@@ -2305,12 +2393,17 @@ class _CartActionsRow extends ConsumerWidget {
                 showToast(context, 'שם הרשימה לא יכול להיות ריק');
                 return;
               }
-              final items = _kCartItemDetails
-                  .map((item) => (
-                        emoji: item.emoji,
-                        name: item.name,
-                        qty: int.tryParse(item.qty.split(' ')[0]) ?? 0,
-                        price: item.price,
+              final lines = ref.read(smartCartProvider);
+              if (lines.isEmpty) {
+                showToast(context, 'הסל ריק');
+                return;
+              }
+              final items = lines
+                  .map((l) => (
+                        emoji: l.productEmoji,
+                        name: l.productName,
+                        qty: l.productQty,
+                        price: '₪${l.total}',
                       ))
                   .toList();
               ref
@@ -2339,9 +2432,14 @@ class _CartActionsRow extends ConsumerWidget {
         ),
         TextButton.icon(
           onPressed: () {
-            final items = _kCartItemDetails
-                .map((item) =>
-                    '${item.emoji} ${item.name} × ${item.qty} = ${item.price}')
+            final lines = ref.read(smartCartProvider);
+            if (lines.isEmpty) {
+              showToast(context, 'הסל ריק');
+              return;
+            }
+            final items = lines
+                .map((l) =>
+                    '${l.productEmoji} ${l.productName} × ${l.productQty} = ₪${l.total}')
                 .join('\n');
             showToast(
               context,
@@ -2355,6 +2453,7 @@ class _CartActionsRow extends ConsumerWidget {
         ),
         TextButton.icon(
           onPressed: () {
+            ref.read(smartCartProvider.notifier).clear();
             ref.read(cartQtysProvider.notifier).state = const {};
             showToast(context, 'הסל נוקה');
           },
@@ -2615,6 +2714,10 @@ const List<_Order> _kOrders = [
   ),
 ];
 
+/// Live orders — seeded from [_kOrders]; confirming checkout prepends a new one.
+final storeOrdersProvider =
+    StateProvider<List<_Order>>((_) => List.of(_kOrders));
+
 // ─── orders list ──────────────────────────────────────────────────────────────
 
 class _OrdersList extends ConsumerWidget {
@@ -2623,9 +2726,10 @@ class _OrdersList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(storeSearchQueryProvider).trim().toLowerCase();
+    final allOrders = ref.watch(storeOrdersProvider);
     final orders = query.isEmpty
-        ? _kOrders
-        : _kOrders
+        ? allOrders
+        : allOrders
             .where(
               (o) =>
                   o.id.toLowerCase().contains(query) ||
