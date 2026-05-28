@@ -60,6 +60,14 @@ bool productSuitableForTemp(LipskeyCatalogProduct p, int tempC) {
   return t == null || tempC <= t;
 }
 
+/// True when the line carries PRESSURISED SUPPLY water, so supply-side
+/// compliance (isolation ball valve, PRV, expansion vessel, TMTV …) applies.
+/// A pure gravity DRAINAGE line (floor traps + drainage pipe) is NOT supply —
+/// it must never receive a supply ball valve, which can't even physically
+/// connect to a drain trap. Decided by the products' actual end-systems.
+bool lineIsSupply(List<LipskeyCatalogProduct> items) => items.any(
+    (p) => kVerifiedSpecs[p.sku]?.endSystems.contains(WaterSystem.supply) ?? false);
+
 // ── line compliance / completeness ──────────────────────────────────────────────
 
 /// Severity of a compliance check failure.
@@ -143,14 +151,19 @@ List<LineCheck> lineComplianceChecklist(
           p.categoryHe == 'מערכות אמבטיה' ||
           p.categoryHe == 'ערכות רחצה');
 
+  // Supply-side compliance only applies to a pressurised supply line — a
+  // gravity drainage line (traps + drain pipe) doesn't take an isolation valve.
+  final isSupply = lineIsSupply(chain);
+
   return [
-    LineCheck(
-        recirc
-            ? 'ברז ניתוק ×3 (כניסת דוד + אחרי משאבה + מניפולד)'
-            : 'ברז ניתוק לתחזוקה',
-        recirc ? isolationCount >= 3 : isolationCount >= 1,
-        'בידוד אזורי לתחזוקה',
-        severity: CheckSeverity.critical),
+    if (isSupply)
+      LineCheck(
+          recirc
+              ? 'ברז ניתוק ×3 (כניסת דוד + אחרי משאבה + מניפולד)'
+              : 'ברז ניתוק לתחזוקה',
+          recirc ? isolationCount >= 3 : isolationCount >= 1,
+          'בידוד אזורי לתחזוקה',
+          severity: CheckSeverity.critical),
     if (recirc) ...[
       LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}),
           'מונע זרימה הפוכה בלולאה', severity: CheckSeverity.critical),
@@ -832,13 +845,15 @@ void _autoAddCompliance(List<LipskeyCatalogProduct> items,
               p.categoryHe == 'ברזי דלי'));
   int isolations() => items.where(isShutoff).length;
 
-  // Isolation ball valve is required on EVERY line (cold too) for
-  // maintenance shut-off. Insert only if no shutoff is already present.
-  if (isolations() == 0) {
+  // Isolation ball valve is required on every SUPPLY line (cold too) for
+  // maintenance shut-off — but NOT on a gravity drainage line (a supply ball
+  // valve can't connect to a drain trap). Insert only if none present.
+  final isSupply = lineIsSupply(items);
+  if (isSupply && isolations() == 0) {
     insertAt(1, _kIsolationValveSkus, 'HW-BALL-1');
   }
 
-  if (hot) {
+  if (isSupply && hot) {
     // Hot-source protection group sits TOGETHER at the inlet (the boiler side):
     //   slot 1 = isolation shutoff · slot 2 = expansion vessel · slot 3 = PRV.
     // 2. Expansion vessel — slot 2 (cold feed, before heat source).
@@ -961,6 +976,145 @@ LipskeyCatalogProduct? _findBridge(
   return best;
 }
 
+// ── chain materialization — make every joint a real direct connection ────────
+// A compression joint between two FITTINGS (neither is a pipe) is the one place
+// the chain is not "directly" connected — physically a length of pipe spans it.
+// [materializeChain] inserts that pipe explicitly (a real catalog drainage pipe,
+// or a synthetic "cut-to-length" supply pipe), turning fitting↔fitting into
+// fitting↔pipe↔fitting where BOTH joints are real direct compression joints.
+
+bool _isPipeProductE(LipskeyCatalogProduct p) {
+  final t = p.productType ?? '';
+  return t == 'צינור' || t == 'צנרת' || t == 'גמיש' || t == 'מאריך';
+}
+
+const _kDrainageFamily = {'PVC', 'PP', 'רב-שכבתי', 'ceramic'};
+
+/// A real catalog pipe whose compression end matches [dn] and whose material is
+/// compatible with [mats]. Null when no catalog pipe fits (e.g. supply lines —
+/// HDPE/PEX pipe is bought by the metre, not stocked as a SKU).
+LipskeyCatalogProduct? _realPipeOf(String dn, Set<String> mats) {
+  for (final p in kCompatCatalog) {
+    if (!_isPipeProductE(p)) continue;
+    final s = kVerifiedSpecs[p.sku];
+    if (s == null) continue;
+    final m = s.material;
+    final compat = mats.contains(m) ||
+        (_kDrainageFamily.contains(m) && mats.any(_kDrainageFamily.contains));
+    if (!compat) continue;
+    if (s.ends.any((e) => e.type == EndType.hdpeCompression && e.size == dn)) {
+      return p;
+    }
+  }
+  return null;
+}
+
+final Map<String, LipskeyCatalogProduct> _syntheticPipeCache = {};
+
+/// A synthetic "cut-to-length" pipe (for supply materials with no catalog SKU).
+/// Its spec is registered in [kVerifiedSpecs] so the compat/label helpers see it.
+LipskeyCatalogProduct _syntheticPipe(String material, String dn) {
+  final sku = 'PIPE-$material-$dn';
+  return _syntheticPipeCache.putIfAbsent(sku, () {
+    kVerifiedSpecs.putIfAbsent(
+        sku,
+        () => VerifiedSpec(
+              sku: sku,
+              material: material,
+              ends: [
+                ConnectorEnd(EndType.hdpeCompression, dn),
+                ConnectorEnd(EndType.hdpeCompression, dn),
+              ],
+              maxTempC: material == 'HDPE' ? 40 : 95,
+            ));
+    return LipskeyCatalogProduct(
+      sku: sku,
+      nameHe: 'צינור $material DN$dn (לפי מטר)',
+      nameEn: '$material pipe DN$dn (cut to length)',
+      categoryHe: 'צינורות',
+      categoryEn: 'Pipes',
+      categoryEmoji: '📏',
+      page: 0,
+      brand: 'AQUATEC',
+    );
+  });
+}
+
+/// A connecting coupling (non-pipe fitting) that joins two pipes of [dn] in a
+/// compatible material — physically, two pipe ends can't butt together; a
+/// coupling/socket goes between them. Prefers a straight coupling (two same-DN
+/// ends); falls back to any compatible fitting with such an end.
+LipskeyCatalogProduct? _couplingFor(String dn, Set<String> mats) {
+  LipskeyCatalogProduct? fallback;
+  for (final p in kCompatCatalog) {
+    if (_isPipeProductE(p)) continue;
+    final s = kVerifiedSpecs[p.sku];
+    if (s == null) continue;
+    final m = s.material;
+    final compat = mats.contains(m) ||
+        (_kDrainageFamily.contains(m) && mats.any(_kDrainageFamily.contains));
+    if (!compat) continue;
+    final dnEnds = s.ends
+        .where((e) => e.type == EndType.hdpeCompression && e.size == dn)
+        .length;
+    if (dnEnds >= 2) return p; // straight coupling — ideal
+    if (dnEnds >= 1) fallback ??= p;
+  }
+  return fallback;
+}
+
+/// The component that physically spans the joint between [a] and [b]:
+///   • two fittings sharing a compression DN  → the PIPE that bridges them;
+///   • two PIPES sharing a compression DN      → the COUPLING that joins them;
+///   • a pipe meeting a fitting (pipe-into-fitting) or a direct thread/press
+///     mate → null (the joint is already a real direct connection).
+LipskeyCatalogProduct? _pipeBetween(
+    LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
+  final sa = kVerifiedSpecs[a.sku], sb = kVerifiedSpecs[b.sku];
+  if (sa == null || sb == null) return null;
+  // A direct thread/press/drain mate needs nothing between.
+  for (final ea in sa.ends) {
+    for (final eb in sb.ends) {
+      if (ea.directMatesWith(eb)) return null;
+    }
+  }
+  final aPipe = _isPipeProductE(a), bPipe = _isPipeProductE(b);
+  for (final ea in sa.ends) {
+    for (final eb in sb.ends) {
+      if (ea.pipeSharedWith(eb)) {
+        if (aPipe && bPipe) {
+          // pipe ↔ pipe → a coupling joins them.
+          return _couplingFor(ea.size, {sa.material, sb.material});
+        }
+        if (!aPipe && !bPipe) {
+          // fitting ↔ fitting → a pipe spans them.
+          return _realPipeOf(ea.size, {sa.material, sb.material}) ??
+              _syntheticPipe(sa.material, ea.size);
+        }
+        // pipe ↔ fitting → already a direct pipe-into-fitting joint.
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+/// Expand [chain] into a fully explicit, 100%-direct sequence: insert the actual
+/// pipe segment at every fitting↔fitting compression joint. After this, every
+/// adjacent pair is a real direct joint (thread / press / pipe-into-fitting).
+/// Items that don't share a compression DN (e.g. a branch device on a tee) are
+/// left untouched — they keep their single connection.
+List<LipskeyCatalogProduct> materializeChain(List<LipskeyCatalogProduct> chain) {
+  if (chain.length < 2) return List.of(chain);
+  final out = <LipskeyCatalogProduct>[chain.first];
+  for (var i = 0; i < chain.length - 1; i++) {
+    final pipe = _pipeBetween(chain[i], chain[i + 1]);
+    if (pipe != null) out.add(pipe);
+    out.add(chain[i + 1]);
+  }
+  return out;
+}
+
 /// Auto-complete a full installation from an ordered list of anchor products
 /// (the fixtures + endpoints the installer cares about). Between every pair of
 /// consecutive anchors the engine fills in the connector path, so the result is
@@ -1028,6 +1182,33 @@ InstallationPlan buildInstallation(
       for (final p in back.sublist(1, back.length - 1)) {
         add(p); // skip both endpoints (already counted)
       }
+    }
+  }
+
+  // Materialize the flow path: insert the explicit pipe segment at every
+  // fitting↔fitting compression joint, so the BOM is physically COMPLETE (the
+  // pipe that bridges two compression fittings is a real line-item, not an
+  // implicit "they share a DN" abstraction) and every link is a direct joint.
+  // Distinct-items + qty invariant preserved: each pipe SKU appears once in
+  // [items], its qty = the number of joints it bridges.
+  if (items.length >= 2) {
+    final expanded = materializeChain(items);
+    if (expanded.length != items.length) {
+      final pipeQty = <String, int>{};
+      for (final p in expanded) {
+        if (!qty.containsKey(p.sku)) {
+          pipeQty[p.sku] = (pipeQty[p.sku] ?? 0) + 1;
+        }
+      }
+      final seen = <String>{};
+      final rebuilt = <LipskeyCatalogProduct>[];
+      for (final p in expanded) {
+        if (seen.add(p.sku)) rebuilt.add(p);
+      }
+      items
+        ..clear()
+        ..addAll(rebuilt);
+      pipeQty.forEach((sku, n) => qty[sku] = n);
     }
   }
 

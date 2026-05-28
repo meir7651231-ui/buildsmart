@@ -1848,15 +1848,28 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                 if (plan.items.length >= 2) ...[
                   const SizedBox(height: 8),
                   Builder(builder: (_) {
+                    // Show the FLOW LINE, fully materialized: explicit pipe
+                    // segments are inserted at every compression joint so each
+                    // link is a real direct connection (thread / press /
+                    // pipe-into-fitting). Bolt-on safety stays in the checklist
+                    // below — it's not part of the linear flow.
+                    final temp = ref.read(lineMaxTempProvider);
+                    final anchorList = plan.items
+                        .where((p) => anchorSkus.contains(p.sku))
+                        .toList();
+                    final chain = (branches == 0 && anchorList.length >= 2)
+                        ? materializeChain(
+                            buildInstallation(anchorList, tempC: temp).items)
+                        : materializeChain(plan.items);
                     final pd = estimatePressureDrop(
-                      plan.items,
+                      chain,
                       pipeLengthMeters:
                           _totalMeters > 0 ? _totalMeters : 5.0,
                       flowRateLPS: 0.3,
                       verticalRiseMeters: _verticalRise,
                     );
                     return ChainDiagram(
-                      chain: plan.items,
+                      chain: chain,
                       bottleneckSku: pd.dropBar > 1.0
                           ? pd.bottleneck?.sku
                           : null,
