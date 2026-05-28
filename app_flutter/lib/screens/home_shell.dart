@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.73 · 28.5.26 · תיקון build: צל ה-dock const (withOpacity→Color const) — flutter build web ירוק',
+                          'v4.74 · 28.5.26 · כרטיס מוצר: דדופ צ׳יפים כפולים (לחץ/יציאה/+ הופיעו פעמיים)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
