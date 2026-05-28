@@ -91,6 +91,16 @@ double? _boreMeters(ConnectorEnd e) {
   return null;
 }
 
+/// Auto-inserted safety parts that branch OFF the line (a side test-tap, a top
+/// air vent, a side expansion tank) rather than carrying the through-flow in
+/// series. They must NOT count toward the line's bottleneck bore or its K-sum:
+/// a ¼" Legionella sampling port is a test tap, not the pipe's narrowest point.
+const _kOffLineSkus = {
+  'HW-SAMPLE', // Legionella sampling port ¼" (side tap)
+  'HW-AIRVENT', // automatic air vent (top port)
+  'HW-BTANK-35', 'HW-BTANK-18', 'HW-EXPVESSEL', // expansion tanks (side)
+};
+
 /// The smallest bore (m) found across [p]'s ends — pressure drop scales with
 /// the narrowest point.
 double? _minBoreOf(LipskeyCatalogProduct p) {
@@ -341,17 +351,22 @@ PressureDropResult estimatePressureDrop(
   double flowRateLPS = 0.3,
   double verticalRiseMeters = 0.0,
 }) {
-  // Sum K across the chain (skip endpoints — they're not pass-through).
+  // Sum K across the chain (skip endpoints and OFF-LINE side branches —
+  // a sampling tap / air vent / expansion tank doesn't sit in the flow path).
   var totalK = 0.0;
   for (final p in chain) {
+    if (_kOffLineSkus.contains(p.sku)) continue;
     totalK += _kForType(p.productType);
   }
 
-  // The narrowest bore in the chain — this dominates the loss. We also
-  // remember which product owns that bore so the UI can name the bottleneck.
+  // The narrowest IN-LINE bore — this dominates the loss. Off-line side
+  // branches (the ¼" Legionella tap especially) are excluded so they can't
+  // masquerade as the bottleneck. We remember which product owns the bore so
+  // the UI can name the real bottleneck.
   double? minBore;
   LipskeyCatalogProduct? bottleneck;
   for (final p in chain) {
+    if (_kOffLineSkus.contains(p.sku)) continue;
     final b = _minBoreOf(p);
     if (b == null) continue;
     if (minBore == null || b < minBore) {

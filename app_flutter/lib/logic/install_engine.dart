@@ -839,14 +839,31 @@ void _autoAddCompliance(List<LipskeyCatalogProduct> items,
   }
 
   if (hot) {
+    // Hot-source protection group sits TOGETHER at the inlet (the boiler side):
+    //   slot 1 = isolation shutoff · slot 2 = expansion vessel · slot 3 = PRV.
     // 2. Expansion vessel — slot 2 (cold feed, before heat source).
     insertAt(2, {'HW-BTANK-35', 'HW-BTANK-18', 'HW-EXPVESSEL'},
         'HW-BTANK-35');
-    // 3. PRV — second-to-last (near heated outlet).
-    insertAt(items.length - 1, {'HW-PRV-34'}, 'HW-PRV-34');
-    // 4. TMTV anti-scald when a manifold or shower head is present.
+    // 3. PRV — right after the expansion vessel, at the source (a relief valve
+    //    protects the closed system at the heater, NOT down at the outlet).
+    insertAt(3, {'HW-PRV-34'}, 'HW-PRV-34');
+    // 4. TMTV anti-scald when a manifold or shower head is present. It must sit
+    //    immediately UPSTREAM of the manifold/shower it protects, so the
+    //    anti-scald limit applies to that outlet's feed — not be dumped at the
+    //    end of the list. We find the landmark and insert just before it.
     if (hasManifoldOrShower) {
-      insertAt(items.length - 1,
+      final landmark = items.indexWhere((p) =>
+          p.productType == 'מחלק' ||
+          p.productType == 'ראש מקלחת' ||
+          p.productType == 'מקלח' ||
+          p.categoryHe == 'מחלקים' ||
+          p.categoryHe == 'ראשי מקלחת' ||
+          p.categoryHe == 'מערכות אמבטיה' ||
+          p.categoryHe == 'ערכות רחצה' ||
+          const {'HW-MANIFOLD-3', 'HW-MANIFOLD-4', 'HW-MANIFOLD-6',
+                  'HW-SHOWER-HEAD'}
+              .contains(p.sku));
+      insertAt(landmark >= 0 ? landmark : items.length - 1,
           {'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20', 'HW-TMTV-15'},
           'HW-TMTV-15');
     }
