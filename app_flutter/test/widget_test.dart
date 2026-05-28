@@ -11,12 +11,12 @@ Future<void> _open(WidgetTester t, String tooltip) async {
 }
 
 void main() {
-  testWidgets('Shell boots showing brand and catalog overview', (t) async {
+  testWidgets('Shell boots showing brand and finder landing', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     expect(find.text('BuildSmart'), findsOneWidget);
-    // Default catalog tab = the full "קטגוריות" list; first category visible.
-    expect(find.text('ברזים וכיורים'), findsAtLeastNWidgets(1));
+    // Default catalog tab now lands on the מאתר (finder); its group rows show.
+    expect(find.text('ברזים'), findsAtLeastNWidgets(1));
   });
 
   testWidgets('BS dial opens 5 personas verbatim', (t) async {
@@ -80,7 +80,12 @@ void main() {
   testWidgets('קטגוריות section shows all 11 verbatim categories', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    // 'קטגוריות' is the default landing — the full list is already shown.
+    // 'מאתר' is now the default landing — open the 'קטגוריות' section first.
+    final catChip = find.text('קטגוריות').first;
+    await t.ensureVisible(catChip);
+    await t.pumpAndSettle();
+    await t.tap(catChip);
+    await t.pumpAndSettle();
     const cats = [
       'ברזים וכיורים', 'אסלות', 'מקלחות ואמבטיות', 'חימום מים', 'מטבח',
       'ניקוז וצנרת', 'גופי תברואה', 'אביזרי קצה וחיבורים',

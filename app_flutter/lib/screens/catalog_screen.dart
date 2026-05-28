@@ -30,8 +30,9 @@ void _openStudio(BuildContext context) {
 }
 
 /// Active section label — 'הכל' is always first and fixed.
-/// Default landing is the full category list rather than the 'הכל' preview.
-final catalogSectionProvider = StateProvider<String>((_) => 'קטגוריות');
+/// Default landing is the מאתר (finder) — the least-technical path to a product
+/// (group → sub → add, 2–3 taps), so the app opens straight on it.
+final catalogSectionProvider = StateProvider<String>((_) => 'מאתר');
 
 /// Ordered list of user section labels (הכל is NOT stored here).
 final catalogSectionsListProvider = StateProvider<List<String>>(
