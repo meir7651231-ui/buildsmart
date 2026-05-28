@@ -49,6 +49,7 @@ flutter:
     - assets/lipskey/products/
     - assets/lipskey/pages/
     - assets/polyroll/pages/
+    - assets/polyroll/products/
     - assets/fonts/
 
   fonts:

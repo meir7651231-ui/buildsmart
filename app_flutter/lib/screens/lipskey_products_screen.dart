@@ -783,6 +783,9 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       AttrKind.subtype => 'תת-סוג',
       AttrKind.color => 'צבע',
       AttrKind.type => 'סוג',
+      AttrKind.material => 'חומר',
+      AttrKind.pressure => 'לחץ',
+      AttrKind.sdr => 'SDR',
     };
     // Dedupe by the displayed value so the same value isn't listed more than
     // once (e.g. 3 sibling products that all read "דו כיווני" → one option).
@@ -1211,11 +1214,20 @@ bool isLinkableWord(String w) {
 /// Kinds of attributes that are cyclable variants on a product card.
 /// [colorMod] is the finish/modifier word of a compound colour (e.g. "מוברש"
 /// from "ניקל מוברש") — shown as a separate chip from the base colour.
-enum AttrKind { size, color, colorMod, model, subtype, type }
+enum AttrKind { size, color, colorMod, model, subtype, type, material, pressure, sdr }
+
+/// PPR material grades — a critical chip for pipe systems (what the part is
+/// made of). Shown as a 🧪 chip distinct from colour/model.
+// PPR-only grades — NOT נחושת/פליז/PP (those are existing Lipskey color/subtype
+// words; reclassifying them would change Lipskey chips).
+const _kPprMaterials = {'PPR', 'PPRCT'};
 
 /// Detect which attribute kind a word belongs to (or null for none).
 AttrKind? _attrKindFor(String word) {
   if (isSizeToken(word)) return AttrKind.size;
+  if (_kPprMaterials.contains(word)) return AttrKind.material;
+  if (RegExp(r'^PN\d').hasMatch(word)) return AttrKind.pressure;
+  if (RegExp(r'^SDR', caseSensitive: false).hasMatch(word)) return AttrKind.sdr;
   if (_kColorModifiers.contains(word)) return AttrKind.colorMod;
   if (kLipskeyColors.contains(word)) return AttrKind.color;
   if (kLipskeyModels.contains(word)) return AttrKind.model;
@@ -1231,6 +1243,9 @@ String _attrEmoji(AttrKind k) => switch (k) {
       AttrKind.model => '🏷',
       AttrKind.subtype => '📋',
       AttrKind.type => '🔧',
+      AttrKind.material => '🧪',
+      AttrKind.pressure => '🔵',
+      AttrKind.sdr => '📊',
     };
 
 /// Drop every word that belongs to [kind] from a name. What remains is the
@@ -1256,10 +1271,19 @@ String _stripWordsOfKind(String name, AttrKind kind) {
     AttrKind.subtype => _kSubtypeWords,
     AttrKind.size => const {},
     AttrKind.type => <String>{for (final v in kLipskeyTypes) v},
+    AttrKind.material => _kPprMaterials,
+    AttrKind.pressure => const {},
+    AttrKind.sdr => const {},
   };
   return result
       .split(RegExp(r'\s+'))
-      .where((w) => w.isNotEmpty && (kind == AttrKind.size ? !isSizeToken(w) : !wordSet.contains(w)))
+      .where((w) =>
+          w.isNotEmpty &&
+          (kind == AttrKind.size
+              ? !isSizeToken(w)
+              : (kind == AttrKind.pressure || kind == AttrKind.sdr)
+                  ? _attrKindFor(w) != kind
+                  : !wordSet.contains(w)))
       .join(' ')
       .trim();
 }

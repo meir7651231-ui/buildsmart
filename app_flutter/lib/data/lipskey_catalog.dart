@@ -34,7 +34,7 @@ class LipskeyCatalogProduct {
 
   String? get imageAsset => imageFile == null
       ? null
-      : 'assets/lipskey/products/$imageFile';
+      : 'assets/${brand == 'פולירול' ? 'polyroll' : 'lipskey'}/products/$imageFile';
 
   String get specImageAsset {
     final p = page.toString().padLeft(2, '0');
