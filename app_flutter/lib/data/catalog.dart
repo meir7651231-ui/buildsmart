@@ -15,4 +15,7 @@ const List<Section> kCatalogCats = [
   Section(id: 'finishing', emoji: '🎨',  title: 'גמר'),
   Section(id: 'acc',       emoji: '🧰',  title: 'אביזרים נלווים'),
   Section(id: 'garden',    emoji: '🌱',  title: 'גינון והשקיה'),
+  // Not in the legacy list — new supplier branch. Title MUST match the
+  // kCatalogTree node so _findCatalogTreeNodeByTitle links it to the drill.
+  Section(id: 'ppr',       emoji: '🔵',  title: 'צנרת PPR (פולירול)'),
 ];

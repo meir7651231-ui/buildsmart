@@ -4,10 +4,12 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:buildsmart/data/brands.dart';
+import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/screens/finder_screen.dart';
 
 CatalogNode _pprRoot() => kCatalogTree.firstWhere((n) => n.id == 'ppr');
 
@@ -84,6 +86,24 @@ void main() {
     print('\nצינורות אספקת מים — מידות שהמנוע זיהה: $sizes\n');
     expect(sizes.length, greaterThan(1),
         reason: 'size variant picker needs ≥2 distinct sizes');
+  });
+
+  test('PPR · REACHABLE in the UI (categories list + finder group)', () {
+    final treeTitle = _pprRoot().title;
+    // "קטגוריות" view: _CatalogList rows come from kCatalogCats and link to the
+    // tree node by title — without a matching Section the branch is orphaned.
+    expect(kCatalogCats.any((s) => s.title == treeTitle), isTrue,
+        reason: 'no kCatalogCats Section titled "$treeTitle" → PPR unreachable '
+            'from the "קטגוריות" view');
+    // "בית" (FinderScreen): one group must cover exactly the 12 PPR categories.
+    final pprGroups = kFinderGroups.where((g) =>
+        g.cats.length == kPprCategories.length &&
+        kPprCategories.every(g.cats.contains));
+    expect(pprGroups.length, 1,
+        reason: 'FinderScreen needs exactly one PPR group covering all 12 '
+            'PPR categories → else PPR is missing/mis-grouped in "בית"');
+    print('\nreachable: קטגוריות ✓ (Section "$treeTitle")  ·  '
+        'בית ✓ (group "${pprGroups.first.label}")\n');
   });
 
   test('PPR · unified catalog = Lipskey + Polyroll', () {

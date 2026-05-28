@@ -379,6 +379,7 @@ const _kMeta = [
   (preview: 'צבע לבן 15L · 2 מותגים',                 time: '18.5',  badge: 0),
   (preview: 'ערכת כלים מקצועית 120 חלקים',            time: '18.5',  badge: 0),
   (preview: 'מערכת השקיה · טפטפות + מחברים',          time: '17.5',  badge: 0),
+  (preview: 'צנרת PPR · 12 תת-קטגוריות',              time: 'חדש',   badge: 50),
 ];
 
 class CatalogScreen extends ConsumerStatefulWidget {

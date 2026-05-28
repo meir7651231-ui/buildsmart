@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.78 · 28.5.26 · תשתית הטמעה: קטגוריית "צנרת PPR (פולירול)" + 12 תת-קטגוריות, מוכנה למילוי 779 פריטים',
+                          'v4.79 · 28.5.26 · PPR גלוי עכשיו בקטלוג — קבוצה ב"בית" + קטגוריה ב"קטגוריות" (היה רק בדאטה)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

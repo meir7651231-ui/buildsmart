@@ -4,6 +4,7 @@
 // taxonomy) and איזה גודל (a size read off their list). Results render through
 // the shared LipskeyProductsList so cards behave like the rest of the catalog.
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -66,6 +67,11 @@ const List<FinderGroup> kFinderGroups = [
   FinderGroup('🔩', 'חבקים ותלייה', {
     'חבקי תליה', 'חבקי צינור', 'עוגנים ובנדים',
   }, desc: 'חבקים, תליות ועוגנים לצנרת'),
+  FinderGroup('🔵', 'צנרת PPR', {
+    'צינורות PPR אספקת מים', 'צינורות PPR פייזר', 'ברכיים PPR', 'מסעפים PPR',
+    'מצמדים PPR', 'מתאמים PPR', 'רוכבים PPR', 'פקקים PPR', 'אומגה PPR',
+    'ברזים PPR', 'צווארונים ואוגנים PPR', 'אביזרי ריתוך חשמלי PPR',
+  }, desc: 'מערכת צנרת PPR לאספקת מים ומיזוג — פולירול'),
   FinderGroup('🔧', 'אחר', {}, desc: 'כל שאר המוצרים בקטלוג'), // catch-all
 ];
 
@@ -169,11 +175,11 @@ final Set<String> _claimedCats = {for (final g in kFinderGroups) ...g.cats};
 
 List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
   if (g.cats.isEmpty) {
-    return kLipskeyCatalog
+    return kCatalogProducts
         .where((p) => !_claimedCats.contains(p.categoryHe))
         .toList();
   }
-  return kLipskeyCatalog.where((p) => g.cats.contains(p.categoryHe)).toList();
+  return kCatalogProducts.where((p) => g.cats.contains(p.categoryHe)).toList();
 }
 
 /// Readable size tokens found in product names (1/2" · 3/4" · DN40 · 16×20 ·
