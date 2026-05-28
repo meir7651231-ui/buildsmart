@@ -784,16 +784,24 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       AttrKind.color => 'צבע',
       AttrKind.type => 'סוג',
     };
+    // Dedupe by the displayed value so the same value isn't listed more than
+    // once (e.g. 3 sibling products that all read "דו כיווני" → one option).
+    final byVal = <String, LipskeyCatalogProduct>{};
+    for (final s in siblings) {
+      final v = _attrVal(s, kind);
+      byVal.putIfAbsent(v.isEmpty ? s.sku : v, () => s);
+    }
+    final unique = byVal.values.toList();
     return _pickerShell(children: [
       _pickerLabel('בחר $label:'),
       const SizedBox(height: 6),
       _pickerRow(
-        items: siblings,
+        items: unique,
         label: (s) {
           final v = _attrVal(s, kind);
           return v.isEmpty ? s.sku : v;
         },
-        isSelected: (s) => s.sku == p.sku,
+        isSelected: (s) => _attrVal(s, kind) == _attrVal(p, kind),
         onTap: _selectFromPicker,
       ),
     ]);
@@ -1412,6 +1420,7 @@ class _NameWords extends StatelessWidget {
     final multiSubtypes = kLipskeySubtypes.where((s) => s.contains(' ')).toSet();
 
     final chips = <Widget>[];
+    final seen = <String>{}; // dedupe repeated chips (e.g. "לחץ"/"יציאה"/"+")
     bool compoundEmitted = false;
     int i = 0;
 
@@ -1439,13 +1448,15 @@ class _NameWords extends StatelessWidget {
       if (i + 1 < words.length) {
         final two = '$w ${words[i + 1]}';
         if (multiSubtypes.contains(two)) {
-          chips.add(_AttrChip(
-            word: two,
-            kind: AttrKind.subtype,
-            product: product,
-            onTap: onAttrTap,
-            isOpen: openKind == AttrKind.subtype,
-          ));
+          if (seen.add(two)) {
+            chips.add(_AttrChip(
+              word: two,
+              kind: AttrKind.subtype,
+              product: product,
+              onTap: onAttrTap,
+              isOpen: openKind == AttrKind.subtype,
+            ));
+          }
           i += 2;
           continue;
         }
@@ -1453,6 +1464,10 @@ class _NameWords extends StatelessWidget {
 
       // ── Single-word attribute chip ───────────────────────────────────────
       final kind = _attrKindFor(w);
+      if (!seen.add(w)) {
+        i++; // already shown this chip on this card — skip the duplicate
+        continue;
+      }
       if (kind != null) {
         chips.add(_AttrChip(
           word: w,
