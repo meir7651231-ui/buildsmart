@@ -35,6 +35,8 @@
 | `preact/02-data-stores-history.md` | נתונים(catalog/variants/suppliers/tools/identity) · 7 stores · R1–R9 verbatim · ADRs · 43 ביקורות |
 | `preact/03-persona-dashboards.md` | **ידע מ-`app/knowledge/`** — spec 4 אפליקציות-התפקיד (חנות/שליח/עובד/מנהל): מסכים/זרימות/state machines (PARITY G) |
 | `preact/04-ui-architecture-role-system.md` | **ידע מ-`app/knowledge/`** — ארכיטקטורת-UI + dial pattern + role-drawer (5 personas/RBAC/enterRole) + legacy→Preact map (PARITY A/G/F) |
+| `preact/05-build-history-and-process.md` | **ידע מ-`app/knowledge/`** — כל 43 הביקורות (INSP-0001→0044) + פרוטוקול-המפקח (checklist/loops/reporting) + ADRs + IMPLEMENTATION_PROTOCOL (deprecated) |
+| `proto/08-remaining-functions.md` | כל ~100 פונקציות הפרוטוטייפ הנותרות + self-test fixtures → כיסוי פונקציות 100% |
 
 ## שיטה (לכל מסמך-תחום מפורט תחת PARITY)
 מקור (proto [L#] + Preact file:line) → סטטוס Flutter (✅/🟡/🔌/❌/⛔) → מבנה-dial להטמעה →
