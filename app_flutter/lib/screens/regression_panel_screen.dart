@@ -35,7 +35,7 @@ class RegressionPanelScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           const Text(
-            'בודק קטלוג · chips · מאתר · state · ניווט · wiring',
+            'בודק קטלוג · chips · מאתר · מנוע תאימות/התקנה · state · ניווט · wiring',
             style: TextStyle(color: Color(0xFF888888), fontSize: 13),
           ),
           const SizedBox(height: 16),
@@ -156,6 +156,7 @@ class _FilterRow extends ConsumerWidget {
     (id: 'buttons',  label: 'כפתורים'),
     (id: 'behavior', label: 'התנהגות'),
     (id: 'products', label: 'מוצרים'),
+    (id: 'engine',   label: 'מנוע'),
   ];
 
   @override
