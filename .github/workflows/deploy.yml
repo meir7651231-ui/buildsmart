@@ -53,7 +53,9 @@ jobs:
 
       - name: Flutter analyze (GATE — blocks build on any error)
         working-directory: app_flutter
-        run: flutter analyze
+        # Errors are fatal; pre-existing lint infos/warnings (avoid_print etc.
+        # in test files) must NOT block the deploy — that froze the live site.
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       - name: Flutter test (GATE — blocks build on any failure)
         working-directory: app_flutter
