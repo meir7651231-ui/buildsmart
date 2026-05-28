@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.71 · 28.5.26 · סנכרון "תכנון חיבור": אינדקס חיפוש · כותרות מסך · ידע',
+                          'v4.72 · 28.5.26 · תיקון build: אייקון "תכנון חיבור" (handyman) — flutter build web נכשל',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
