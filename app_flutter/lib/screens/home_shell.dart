@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.70 · 28.5.26 · ניווט עקבי: X-סגירה בדפי הסטודיו · כותרת אודיט · דיאלוגים בהירים',
+                          'v4.71 · 28.5.26 · סנכרון "תכנון חיבור": אינדקס חיפוש · כותרות מסך · ידע',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

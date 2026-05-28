@@ -3099,7 +3099,7 @@ class _TutorialOverlay extends StatelessWidget {
                 child: const Icon(Icons.plumbing, color: Colors.white, size: 32),
               ),
               const SizedBox(height: 20),
-              const Text('ברוכים הבאים לסטודיו התקנות',
+              const Text('ברוכים הבאים לתכנון חיבור',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       color: _ink, fontSize: 20, fontWeight: FontWeight.w900)),

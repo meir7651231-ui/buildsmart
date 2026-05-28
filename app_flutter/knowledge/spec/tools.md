@@ -13,16 +13,16 @@
 
 ---
 
-## 1. סטודיו התקנות (`lib/screens/install_studio_screen.dart` + `lib/logic/install_engine.dart`)
+## 1. תכנון חיבור — סטודיו התקנות (`lib/screens/install_studio_screen.dart` + `lib/logic/install_engine.dart`)
 
 ### 1. מזהה ומיקום (איך מגיעים אליו)
 - מחלקה: `InstallStudioScreen extends ConsumerStatefulWidget`.
 - שתי דרכי-כניסה (שתיהן מאותו widget):
   1. **מסך מלא** מעל ה-shell — `_openStudio(context)` ב-`lib/screens/catalog_screen.dart:23` קורא
      `Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => const InstallStudioScreen()))`.
-  2. **בתוך סקשן הקטלוג** — `catalog_screen.dart:1768`: כאשר `catalogSectionProvider == 'תאימות'`
+  2. **בתוך סקשן הקטלוג** — `catalog_screen.dart`: כאשר `catalogSectionProvider == 'תכנון חיבור'`
      מוצג `const InstallStudioScreen()` כתוכן הסקשן.
-- כותרת המסך: **'סטודיו התקנות'** · תת-כותרת: **'תכנן · חבר · הזמן'**.
+- כותרת המסך: **'תכנון חיבור'** · תת-כותרת: **'בחר מה לחבר · נכין רשימת קנייה'**. (שם ידידותי ללא-טכני; היה "סטודיו התקנות"/"תאימות".)
 - חץ-חזרה (`Icons.arrow_forward`) מוצג רק כש-`Navigator.canPop(context)` (כלומר רק במצב מסך-מלא).
 
 ### 2. מטרה
@@ -31,22 +31,22 @@
 כולל זיהוי פערים, בדיקת תקינות הקו, ותמיכה בטופולוגיית עץ (מחלק) ולולאה סגורה (recirculation).
 
 ### 3. מבנה ופריסה
-- `Directionality(rtl)` → `Scaffold` רקע `_void0` (כהה) עם `RadialGradient`, מעל `_BlueprintPainter`
-  (גריד blueprint דק + scanline נע).
+- `Directionality(rtl)` → `Scaffold` רקע `_void0` (בהיר — תואם לעיצוב האפליקציה) עם `RadialGradient`,
+  מעל `_BlueprintPainter` (גריד עדין כמעט-שקוף + scanline נע). דפי המשנה נסגרים ב-`_SheetClose` (X בסגנון כרטיס המוצר).
 - שלושה אזורים אנכיים (`Column`):
   1. **Header** (`_header`): אייקון hub זוהר · כותרת + תת-כותרת · **גלולת טמפרטורה** (`_tempPill`).
   2. **Canvas** (`_canvas`, `Expanded`): `ListView.builder` של `_NodeRow` — צומת לכל מוצר + צינור מונפש לבא אחריו;
      או `_emptyState` כשהרשימה ריקה.
   3. **Dock** תחתון (`_dock`): מקרא צבעים · מתג **'לולאה'** · כפתור **'הוסף מוצר'** · כפתור **'השלם התקנה'**.
-- צבעי מערכת: אספקה = ציאן (`_supply`), ניקוז = ענבר (`_drain`), קבועה/גשר = סגול (`_fixture`), פעולת assemble = אמרלד (`_accent`).
+- צבעי מערכת (ערכה בהירה): אספקה = כחול (`_supply`), ניקוז = ענבר (`_drain`), קבועה/גשר = סגול (`_fixture`), פעולת assemble = כתום מותג (`_accent`), "הכל תקין" = ירוק (`_ok`).
 
 ### 4. טבלת אלמנטים
 
 | אלמנט | סוג | תוכן/מקור | אינטראקציה ⇐ תוצאה | סטטוס |
 |---|---|---|---|---|
 | חץ חזרה | GestureDetector + Icon | `Icons.arrow_forward` | tap ⇐ `Navigator.maybePop` (רק אם `canPop`) | ✅ |
-| כותרת | Text | 'סטודיו התקנות' | — | ✅ |
-| תת-כותרת | Text | 'תכנן · חבר · הזמן' | — | ✅ |
+| כותרת | Text | 'תכנון חיבור' | — | ✅ |
+| תת-כותרת | Text | 'בחר מה לחבר · נכין רשימת קנייה' | — | ✅ |
 | גלולת טמפרטורה | GestureDetector | `'$temp°C'` + `Icons.thermostat` | tap ⇐ מחזורית 20 → 60 → 80 ב-`lineMaxTempProvider` | ✅ |
 | מצב ריק | Column | 'בנה קו אינסטלציה' + הסבר | — | ✅ |
 | צומת מוצר (`_NodeRow`) | Container | מספר סידורי · `product.nameHe` (≤2 שורות) · chip תפקיד · `_specLine` | tap על × ⇐ הסרה מ-`chainProvider` | ✅ |
