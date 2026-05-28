@@ -1617,15 +1617,15 @@ class _InteractiveChips extends StatelessWidget {
   final void Function(String key) onChipTap;
   final void Function(LipskeyCatalogProduct) onVariantSelect;
 
-  // ── Color helpers ────────────────────────────────────────────────────────
   static const _colorModifiers = {'מוברש', 'מט'};
 
+  // ── צבע: frame-based (אותו סוג, צבע שונה) ───────────────────────────────
   static String _colorFrame(LipskeyCatalogProduct p) => p.nameHe
       .split(RegExp(r'\s+'))
       .where((w) => kindOf(w) != AttrKind.color && !_colorModifiers.contains(w))
       .join(' ');
 
-  static List<LipskeyCatalogProduct> _siblingsColor(LipskeyCatalogProduct p) {
+  static List<LipskeyCatalogProduct> _variantsColor(LipskeyCatalogProduct p) {
     final frame = _colorFrame(p);
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
@@ -1644,8 +1644,8 @@ class _InteractiveChips extends StatelessWidget {
     return all;
   }
 
-  // ── Subtype helpers (frame-based) ────────────────────────────────────────
-  static List<LipskeyCatalogProduct> _siblingsSubtype(
+  // ── תת-סוג: frame-based (אותו סוג, תת-סוג שונה) ─────────────────────────
+  static List<LipskeyCatalogProduct> _variantsSubtype(
       LipskeyCatalogProduct p) {
     const kind = AttrKind.subtype;
     final frame = p.nameHe
@@ -1673,94 +1673,66 @@ class _InteractiveChips extends StatelessWidget {
     return all;
   }
 
-  // ── Compound-type helpers ────────────────────────────────────────────────
-  // "ברז נשלף" = type word + immediately next unclassified non-prep word.
-  static String _compoundType(LipskeyCatalogProduct p) {
-    final typeWord = p.productType;
-    if (typeWord == null || typeWord.isEmpty) return '';
-    final words = p.nameHe.split(RegExp(r'\s+'));
-    final typeWords = typeWord.split(RegExp(r'\s+'));
-    int typeEnd = -1;
-    for (int i = 0; i <= words.length - typeWords.length; i++) {
-      bool match = true;
-      for (int j = 0; j < typeWords.length; j++) {
-        if (words[i + j] != typeWords[j]) {
-          match = false;
-          break;
-        }
-      }
-      if (match) {
-        typeEnd = i + typeWords.length;
-        break;
-      }
+  // ── סוג מורכב: multi-word types first, then type+qualifier ──────────────
+  static String _resolveCompoundType(LipskeyCatalogProduct p) {
+    final name = p.nameHe;
+    final words = name.split(RegExp(r'\s+'));
+
+    // Multi-word types matched as substring (longest first).
+    final multiWord = kLipskeyTypes.where((t) => t.contains(' ')).toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    for (final t in multiWord) {
+      if (name.contains(t)) return t;
     }
-    if (typeEnd < 0 || typeEnd >= words.length) return typeWord;
-    final next = words[typeEnd];
-    if (kindOf(next) != null) return typeWord;
-    if (_colorModifiers.contains(next)) return typeWord;
-    // Skip preposition-prefix words (ל/ב + noun > 2 chars)
-    if (next.length > 2 &&
-        (next.startsWith('ל') || next.startsWith('ב'))) return typeWord;
-    return '$typeWord $next';
+
+    // Single-word type + optional trailing qualifier.
+    for (final typeWord in kLipskeyTypes) {
+      if (typeWord.contains(' ')) continue;
+      final idx = words.indexOf(typeWord);
+      if (idx < 0) continue;
+      if (idx + 1 >= words.length) return typeWord;
+      final next = words[idx + 1];
+      if (kindOf(next) != null) return typeWord;
+      if (_colorModifiers.contains(next)) return typeWord;
+      if (next.length > 2 &&
+          (next.startsWith('ל') || next.startsWith('ב'))) return typeWord;
+      return '$typeWord $next';
+    }
+    return '';
   }
 
-  // ── Type helpers (frame-based) ───────────────────────────────────────────
-  static List<LipskeyCatalogProduct> _siblingsType(LipskeyCatalogProduct p) {
-    final compound = _compoundType(p);
+  // ── סוג: category-wide (כל הסוגים בקטגוריה, כמו findTypeSiblings) ────────
+  static List<LipskeyCatalogProduct> _variantsType(LipskeyCatalogProduct p) {
+    final compound = _resolveCompoundType(p);
     if (compound.isEmpty) return [];
-    final compoundWords = compound.split(RegExp(r'\s+'));
-    final frame = p.nameHe
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty && !compoundWords.contains(w))
-        .join(' ');
-    if (frame.length < 3) return [];
-    final byCompound = <String, LipskeyCatalogProduct>{};
-    byCompound[compound] = p;
+    final byCompound = <String, LipskeyCatalogProduct>{compound: p};
     for (final q in kLipskeyCatalog) {
       if (q.categoryHe != p.categoryHe) continue;
-      final qc = _compoundType(q);
-      if (qc.isEmpty) continue;
-      final qWords = qc.split(RegExp(r'\s+'));
-      final qFrame = q.nameHe
-          .split(RegExp(r'\s+'))
-          .where((w) => w.isNotEmpty && !qWords.contains(w))
-          .join(' ');
-      if (qFrame != frame) continue;
-      if (!byCompound.containsKey(qc)) byCompound[qc] = q;
+      final qc = _resolveCompoundType(q);
+      if (qc.isEmpty || byCompound.containsKey(qc)) continue;
+      byCompound[qc] = q;
     }
     if (byCompound.length <= 1) return [];
     return byCompound.values.toList()
       ..sort((a, b) {
         if (a.sku == p.sku) return -1;
         if (b.sku == p.sku) return 1;
-        return _compoundType(a).compareTo(_compoundType(b));
+        return _resolveCompoundType(a).compareTo(_resolveCompoundType(b));
       });
   }
 
-  // ── Model helpers (frame-based) ──────────────────────────────────────────
-  static List<LipskeyCatalogProduct> _siblingsModel(LipskeyCatalogProduct p) {
-    final model = p.brandModel;
-    if (model == null || model.isEmpty) return [];
-    final frame = p.nameHe
-        .split(RegExp(r'\s+'))
-        .where((w) => w.isNotEmpty && kindOf(w) != AttrKind.model)
-        .join(' ');
-    if (frame.length < 3) return [];
-    final byModel = <String, LipskeyCatalogProduct>{};
-    byModel[model] = p;
+  // ── דגם: category-wide (כל הדגמים בקטגוריה, כמו findAttrSiblings(model)) ─
+  static List<LipskeyCatalogProduct> _variantsModel(LipskeyCatalogProduct p) {
+    final seen = <String>{};
+    final all = <LipskeyCatalogProduct>[];
     for (final q in kLipskeyCatalog) {
       if (q.categoryHe != p.categoryHe) continue;
       final m = q.brandModel;
       if (m == null || m.isEmpty) continue;
-      final qFrame = q.nameHe
-          .split(RegExp(r'\s+'))
-          .where((w) => w.isNotEmpty && kindOf(w) != AttrKind.model)
-          .join(' ');
-      if (qFrame != frame) continue;
-      if (!byModel.containsKey(m)) byModel[m] = q;
+      if (seen.add(m)) all.add(q);
     }
-    if (byModel.length <= 1) return [];
-    return byModel.values.toList()
+    if (all.length <= 1) return [];
+    return all
       ..sort((a, b) {
         if (a.sku == p.sku) return -1;
         if (b.sku == p.sku) return 1;
@@ -1772,9 +1744,9 @@ class _InteractiveChips extends StatelessWidget {
   static bool _hasSiblings(LipskeyCatalogProduct p, String key) {
     switch (key) {
       case 'type':
-        return _siblingsType(p).isNotEmpty;
+        return _variantsType(p).isNotEmpty;
       case 'model':
-        return _siblingsModel(p).isNotEmpty;
+        return _variantsModel(p).isNotEmpty;
       case 'color':
         final myVal = p.colorVariant;
         if (myVal == null || myVal.isEmpty) return false;
@@ -1789,7 +1761,7 @@ class _InteractiveChips extends StatelessWidget {
               _colorFrame(q) == frame;
         });
       case 'subtype':
-        return _siblingsSubtype(p).length > 1;
+        return _variantsSubtype(p).length > 1;
       default:
         return false;
     }
@@ -1800,21 +1772,21 @@ class _InteractiveChips extends StatelessWidget {
       LipskeyCatalogProduct p, String key) {
     switch (key) {
       case 'type':
-        return _siblingsType(p).map((q) {
-          final ct = _compoundType(q);
+        return _variantsType(p).map((q) {
+          final ct = _resolveCompoundType(q);
           final label = ct.contains(' ') ? ct.split(' ').last : ct;
           return (label, q);
         }).toList();
       case 'model':
-        return _siblingsModel(p)
+        return _variantsModel(p)
             .map((q) => (q.brandModel ?? '', q))
             .toList();
       case 'color':
-        return _siblingsColor(p)
+        return _variantsColor(p)
             .map((q) => (q.colorVariant ?? '', q))
             .toList();
       case 'subtype':
-        return _siblingsSubtype(p)
+        return _variantsSubtype(p)
             .map((q) => (variantValue(q, AttrKind.subtype), q))
             .toList();
       default:
@@ -1825,7 +1797,7 @@ class _InteractiveChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final parsed = product.parsedName;
-    final compound = _compoundType(product);
+    final compound = _resolveCompoundType(product);
 
     final entries = <({String label, String value, Color color, String key})>[
       if (parsed.type != null)
