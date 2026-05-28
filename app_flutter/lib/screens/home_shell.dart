@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.82 · 28.5.26 · PPR: התמונה מתהפכת לתרשים-המימדים (עמודי פולירול, specImageAsset מודע-מותג)',
+                          'v4.83 · 28.5.26 · PPR שלב 2: +302 פריטי Heliroma (סה״כ 595) + 56 עמודי-תרשים בצד-האחורי',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
