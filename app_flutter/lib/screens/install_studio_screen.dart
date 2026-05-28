@@ -36,6 +36,32 @@ const _fixture = Color(0xFF7C3AED); // violet — fixtures (the bridge)
 const _accent = Color(0xFFFF7A18); // brand orange — primary action
 const _ok = Color(0xFF16A34A); // green — success / "all good"
 
+// Close (X) for the studio bottom-sheets — matches the app's product-sheet
+// close: a circular grey button with a dark X, top-left under the drag handle.
+class _SheetClose extends StatelessWidget {
+  const _SheetClose();
+  @override
+  Widget build(BuildContext context) => Align(
+        alignment: Alignment.centerLeft,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 0, 2),
+          child: Material(
+            color: const Color(0xFFF5F5F5),
+            shape: const CircleBorder(),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () => Navigator.pop(context),
+              child: const SizedBox(
+                width: 36,
+                height: 36,
+                child: Icon(Icons.close, color: _ink, size: 22),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
 Color _systemColor(LipskeyCatalogProduct p) {
   final s = productSystems(p);
   if (s.length > 1) return _fixture;
@@ -1121,6 +1147,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                         color: _mute,
                         borderRadius: BorderRadius.circular(2)),
                   ),
+                  const _SheetClose(),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                     child: Row(children: [
@@ -1714,6 +1741,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
               decoration: BoxDecoration(
                   color: _mute, borderRadius: BorderRadius.circular(2)),
             ),
+            const _SheetClose(),
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 4, 18, 12),
               child: Row(children: [
@@ -2793,6 +2821,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
               decoration: BoxDecoration(
                   color: _mute, borderRadius: BorderRadius.circular(2)),
             ),
+            const _SheetClose(),
             // Search bar + optional back-to-categories chip
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),

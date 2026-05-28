@@ -145,45 +145,51 @@ class _AuditScreenState extends State<AuditScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: const Color(0xFFFAFAFA),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFFFFFFFF),
-          title: const Text('אודיט תרחישים',
-              style: TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800)),
-          actions: [
-            if (_results.isNotEmpty)
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Custom header — consistent with the app (no Material AppBar).
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: allOk
-                          ? const Color(0xFF15803D).withOpacity(0.2)
-                          : const Color(0xFFEF4444).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '${_results.where((r) => r.ok).length}/${_results.length}',
-                      style: TextStyle(
-                          color: allOk
-                              ? const Color(0xFF15803D)
-                              : const Color(0xFFEF4444),
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13),
+                padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
+                child: Row(children: [
+                  GestureDetector(
+                    onTap: () => Navigator.maybePop(context),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Icon(Icons.arrow_forward,
+                          color: Color(0xFF1A1A1A), size: 22),
                     ),
                   ),
-                ),
+                  const Text('אודיט תרחישים',
+                      style: TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800)),
+                  const Spacer(),
+                  if (_results.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: allOk
+                            ? const Color(0xFF15803D).withOpacity(0.2)
+                            : const Color(0xFFEF4444).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${_results.where((r) => r.ok).length}/${_results.length}',
+                        style: TextStyle(
+                            color: allOk
+                                ? const Color(0xFF15803D)
+                                : const Color(0xFFEF4444),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13),
+                      ),
+                    ),
+                ]),
               ),
-          ],
-        ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
+              Padding(
+                padding: const EdgeInsets.all(16),
               child: SizedBox(
                 width: double.infinity,
                 height: 46,
@@ -216,6 +222,7 @@ class _AuditScreenState extends State<AuditScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
