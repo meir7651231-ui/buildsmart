@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.84 · 28.5.26 · PPR שלב 3 — הקטלוג שלם: 686 פריטים (מיזוג/PPRCT/תותב/DN + ריתוך-חשמלי תוקן), 74 עמודי-תרשים',
+                          'v4.85 · 28.5.26 · PPR — סגירת פערים: כל 774 הפריטים מהקטלוג (מידות גדולות 160-250/אוגנים/EF שדולגו) הוטמעו',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
