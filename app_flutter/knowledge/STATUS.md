@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v3.79` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v4.50` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — overview blocks (categories / recent / compat / favorites / smart-tree),
@@ -44,9 +44,30 @@ addresses/invoices/warranty/biometric. All need data, a server, or device APIs.
 - **Gap hints** — each missing connection shows a suggested adapter to search
 - **Temperature pill** — human labels (קר / חם / חם מאוד) with color coding
 
+## Catalog chip system (v4.48–v4.50)
+Product name words are parsed into colored chips in the product list and sheet:
+- **Type chip** (purple) — from `kLipskeyTypes` (e.g. ברז, זווית, מסעף, פיית, כפה)
+- **Model chip** (blue-grey) — from `kLipskeyModels` (e.g. קיסר, NTM, HDPE, PP-MD-ML)
+- **Color chip** (pink) — from `kLipskeyColors`
+- **Subtype chip** (teal) — from `kLipskeySubtypes` (e.g. כפול, פ.פ, ח.פ, פרח, ראש, נשלף)
+- **Size chip** (amber) — numeric/DN tokens
+- **Green linkable words** — remaining words; tap searches by that word
+
+Variant pickers (type/model/color/subtype) expand inline on chip tap in both
+the product list card and the product detail sheet.
+
 ## Tests
-~50 domain tests across `test/` (install_builder×10 + manifold×10 + loop×10 +
-zone_tmtv×10 + auto_compliance×10). `flutter analyze` clean; `flutter test` green.
+27 test files across `test/`. Key suites:
+- **chip_structure** — chip type assignment + sibling pickers (31 checks)
+- **dedup** — variant dedup + attrWordSet (27 checks)
+- **product_journey** — 8 specific products + all 935 sheets render (49 checks)
+- **widget** — shell boots + section previews
+- **install_builder / manifold / loop / zone_tmtv / auto_compliance** — BOM engine (50 checks)
+- **catalog_health / catalog_regression / robustness** — catalog data integrity
+- **wiring** — search synonyms + finder grouping
+
+`flutter analyze` clean; `flutter test` green (pre-existing failures in
+`category_scan_test` and `wiring_test` are catalog-data issues, not code bugs).
 
 ## Known placeholders (🚧)
 Chats conversation header (video/call/more) and input bar
