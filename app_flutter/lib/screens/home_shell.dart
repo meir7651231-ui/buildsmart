@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.74 · 28.5.26 · כרטיס מוצר: דדופ צ׳יפים כפולים (לחץ/יציאה/+ הופיעו פעמיים)',
+                          'v4.75 · 28.5.26 · בורר הצ׳יפ: דדופ ערכים כפולים (תבריג כפול הופיע 6×, PP-MD-ML 11×)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
