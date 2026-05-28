@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v4.68` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v4.69` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — opens on **בית (finder home)** as the default landing: layman
@@ -41,6 +41,11 @@ addresses/invoices/warranty/biometric. All need data, a server, or device APIs.
 - **Entry = "תכנון חיבור"** — the catalog section chip (renamed from "תאימות" for
   a non-technical name); screen header + empty state speak plain Hebrew, and
   safety-checklist acronyms carry a plain gloss (e.g. "ברז ערבוב נגד כוויה (TMTV)").
+- **Light theme (v4.69)** — the studio + audit screen were re-skinned from the
+  dark "blueprint" look to the app's light + orange-brand language (white cards,
+  `#1A1A1A` ink, brand-orange primary action, green "all-good"), so they no longer
+  break the otherwise-light app. Role colors kept (blue supply / amber drain /
+  violet fixture), tuned for contrast on light.
 - **Progressive dock** — 3-state UX: empty / 1-item / 2+ items (D-013)
 - **Zone-aware BOM** — "גזע" + "ענף א/ב/ג…" section headers with item counts
 - **TMTV auto-per-branch** — one thermostatic mixing valve per hot branch, qty = branch count
