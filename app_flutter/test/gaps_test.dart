@@ -254,13 +254,13 @@ void main() {
   });
 
   group('store summary chips (derived)', () {
-    test('cart item count = positive fixed items + smart lines', () {
+    test('cart item count = summed quantities (units), not line count', () {
       expect(cartItemCount(const {'blk': 150, 'pls': 5, 'blt': 80, 'bm': 10},
-          const []), 4);
-      expect(cartItemCount(const {'blk': 0, 'pls': 5}, const []), 1);
+          const []), 245);
+      expect(cartItemCount(const {'blk': 0, 'pls': 5}, const []), 5);
       expect(cartItemCount(const {}, const []), 0);
     });
-    test('cart item count adds smart-cart lines', () {
+    test('cart item count adds smart-cart line quantities', () {
       final line = SmartCartLine(
         productKey: 'k',
         productName: 'p',
@@ -270,7 +270,7 @@ void main() {
         productQty: 2,
         accessories: const [],
       );
-      expect(cartItemCount(const {'blk': 5}, [line]), 2);
+      expect(cartItemCount(const {'blk': 5}, [line]), 7); // 5 units + 2 units
     });
     test('an order is open until delivered', () {
       expect(isOrderOpen('transit'), isTrue);

@@ -162,10 +162,11 @@ int cartTotal(int subtotal, int deliveryFee, {required bool vatInclusive}) =>
         ? subtotal + deliveryFee
         : subtotal + cartVat(subtotal, vatInclusive: false) + deliveryFee;
 
-/// Number of distinct line items currently in the cart: fixed items with a
-/// positive quantity plus every smart-cart line.
+/// Total number of units in the cart: summed fixed-item quantities plus the
+/// quantity of every smart-cart line (so 3× of one product counts as 3).
 int cartItemCount(Map<String, int> qtys, List<SmartCartLine> smartLines) =>
-    qtys.values.where((q) => q > 0).length + smartLines.length;
+    qtys.values.where((q) => q > 0).fold<int>(0, (s, q) => s + q) +
+    smartLines.fold<int>(0, (s, l) => s + l.productQty);
 
 /// Order stage that means the order is finished (no longer "open").
 const String kDeliveredStage = 'delivered';

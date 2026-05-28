@@ -47,7 +47,7 @@ void main() {
 
     final lines = c.read(smartCartProvider);
     final subtotal = lines.fold<int>(0, (s, l) => s + l.total);
-    final count = cartItemCount(const {}, lines); // distinct lines (by design)
+    final count = cartItemCount(const {}, lines); // now total units
     final totalUnits = lines.fold<int>(0, (s, l) => s + l.productQty);
     final deliveryFee = deliveryFeeFor(CartDelivery.standard);
     final vat = cartVat(subtotal, vatInclusive: false);
@@ -63,7 +63,7 @@ void main() {
     }
     print('──────────────────────────────────────────────────────────');
     print('שורות שונות:        ${lines.length}');
-    print('"פריטים" (badge):   $count   ← סופר שורות, לא יחידות');
+    print('"פריטים" (badge):   $count   ← עכשיו סופר יחידות');
     print('סך יחידות בפועל:    $totalUnits');
     print('סכום ביניים:        ${price(subtotal)}');
     print('מע"מ 18%:           ${price(vat)}');
@@ -73,8 +73,8 @@ void main() {
     print('════════════════════════════════════════════════════════════\n');
 
     expect(lines.length, 20);
-    expect(count, 20); // cartItemCount = distinct lines (documented behaviour)
-    expect(totalUnits, 210); // 1+2+…+20 — the real unit count
+    expect(count, 210); // cartItemCount now sums units: 1+2+…+20
+    expect(totalUnits, 210);
     expect(subtotal, 0, reason: 'catalog items carry no price (מחיר לפי ספק)');
     expect(total, deliveryFee, reason: 'only the delivery fee is chargeable');
   });
