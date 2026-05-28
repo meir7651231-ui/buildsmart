@@ -582,7 +582,9 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   }
 
   void _cycleAttr(String word, AttrKind kind) {
-    final siblings = findAttrSiblings(p, word, kind);
+    final siblings = kind == AttrKind.type
+        ? findTypeSiblings(p)
+        : findAttrSiblings(p, word, kind);
     if (siblings.length <= 1) return;
     setState(() {
       if (_pickerKind == kind) {
@@ -758,12 +760,29 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       ]);
     }
 
+    if (kind == AttrKind.type) {
+      return _pickerShell(children: [
+        _pickerLabel('בחר סוג:'),
+        const SizedBox(height: 6),
+        _pickerRow(
+          items: siblings,
+          label: (s) {
+            final ct = _getCompoundType(s);
+            return ct.isEmpty ? s.sku : ct;
+          },
+          isSelected: (s) => s.sku == p.sku,
+          onTap: _selectFromPicker,
+        ),
+      ]);
+    }
+
     final label = switch (kind) {
       AttrKind.size => 'מידה',
       AttrKind.colorMod => 'גימור',
       AttrKind.model => 'דגם',
-      AttrKind.subtype => 'סוג',
+      AttrKind.subtype => 'תת-סוג',
       AttrKind.color => 'צבע',
+      AttrKind.type => 'סוג',
     };
     return _pickerShell(children: [
       _pickerLabel('בחר $label:'),
@@ -1151,35 +1170,40 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
 
 
 /// Hebrew noise words / prepositions that shouldn't be clickable search links.
+/// Bare measurement units belong here too: "ס\"מ" / "מ\"מ" / "מ׳" detach from
+/// their number on whitespace-split and would otherwise float as green junk.
 const Set<String> kSearchStopWords = {
   'עם', 'של', 'את', 'או', 'ל', 'ה', 'ו', 'ב', 'כ', 'מ', 'על', 'אל',
   'ללא', 'בלי', 'כמות', 'באריזה', 'במשטח', 'יח', 'יחידות',
+  'ס"מ', 'מ"מ', 'מ׳', 'מס.',
 };
 
 /// Size / dimension token — these define compatibility ("what connects to
 /// what"), so they ARE clickable (find every part of the same size).
-/// Examples: DN50 · 3/4" · 1¼" · 110 · 130/50 · 50/40.
+/// Examples: DN50 · 3/4" · 1¼" · 110 · 130/50 · 50/40 · 45° · 90°.
 bool isSizeToken(String w) {
   if (RegExp(r'^DN', caseSensitive: false).hasMatch(w)) return true;
-  // numbers, fractions, ratios, inch marks, with optional × / - separators
-  return RegExp(r'^[\d]+([./×x\-"׳״⅛¼½¾⅜⅝⅞]+[\d"׳״]*)*[\"׳״]?$')
+  // numbers, fractions, ratios, inch marks, degrees, with × / - separators
+  return RegExp(r'^[\d]+([./×x\-"׳״⅛¼½¾⅜⅝⅞°]+[\d"׳״°]*)*[\"׳״°]?$')
           .hasMatch(w) &&
       RegExp(r'\d').hasMatch(w);
 }
 
-/// A plain word is a meaningful tappable link if it isn't a stop-word and
-/// has length ≥ 2 (sizes are handled separately by [isSizeToken]).
+/// A plain word is a meaningful tappable link if it isn't a stop-word, has
+/// length ≥ 2, and isn't a number-bearing spec fragment (sizes are handled by
+/// [isSizeToken]; other digit tokens like "2,4)" / "ו-3" / "L=50" are noise).
 bool isLinkableWord(String w) {
   if (w.length < 2) return false;
   if (kSearchStopWords.contains(w)) return false;
   if (isSizeToken(w)) return false; // styled as a size chip instead
+  if (RegExp(r'\d').hasMatch(w)) return false; // non-size digit fragment, not a link
   return true;
 }
 
 /// Kinds of attributes that are cyclable variants on a product card.
 /// [colorMod] is the finish/modifier word of a compound colour (e.g. "מוברש"
 /// from "ניקל מוברש") — shown as a separate chip from the base colour.
-enum AttrKind { size, color, colorMod, model, subtype }
+enum AttrKind { size, color, colorMod, model, subtype, type }
 
 /// Detect which attribute kind a word belongs to (or null for none).
 AttrKind? _attrKindFor(String word) {
@@ -1198,6 +1222,7 @@ String _attrEmoji(AttrKind k) => switch (k) {
       AttrKind.colorMod => '✨',
       AttrKind.model => '🏷',
       AttrKind.subtype => '📋',
+      AttrKind.type => '🔧',
     };
 
 /// Drop every word that belongs to [kind] from a name. What remains is the
@@ -1205,14 +1230,26 @@ String _attrEmoji(AttrKind k) => switch (k) {
 /// Uses per-kind sub-word sets so that modifier words like "מוברש" (part of
 /// "זהב מוברש" or "ניקל מוברש") are also stripped, giving consistent frames.
 String _stripWordsOfKind(String name, AttrKind kind) {
+  var result = name;
+  // Strip multi-word subtype/color entries first (e.g. "דו כיווני", "ניקל מוברש").
+  if (kind == AttrKind.subtype) {
+    for (final s in kLipskeySubtypes) {
+      if (s.contains(' ')) result = result.replaceAll(s, ' ');
+    }
+  } else if (kind == AttrKind.color) {
+    for (final c in kLipskeyColors) {
+      if (c.contains(' ')) result = result.replaceAll(c, ' ');
+    }
+  }
   final Set<String> wordSet = switch (kind) {
-    AttrKind.color => _kColorWords,  // strip ALL color sub-words (incl. modifiers)
-    AttrKind.colorMod => _kColorModifiers,  // strip only modifier words, keep base color
+    AttrKind.color => _kColorWords,
+    AttrKind.colorMod => _kColorModifiers,
     AttrKind.model => _kModelWords,
     AttrKind.subtype => _kSubtypeWords,
     AttrKind.size => const {},
+    AttrKind.type => <String>{for (final v in kLipskeyTypes) v},
   };
-  return name
+  return result
       .split(RegExp(r'\s+'))
       .where((w) => w.isNotEmpty && (kind == AttrKind.size ? !isSizeToken(w) : !wordSet.contains(w)))
       .join(' ')
@@ -1259,28 +1296,92 @@ String productListDedupeKey(LipskeyCatalogProduct p) {
   return '${p.brand}||${p.categoryHe}||$stripped';
 }
 
-/// Find products in the same category that share the same frame as [p] (after
-/// stripping all words of [kind]) and have at least one word of [kind] in their
-/// name. These are the siblings that the chip should cycle through.
+/// Find sibling products for a given attribute kind.
 ///
-/// For [AttrKind.colorMod] the "plain" sibling (no modifier) is also included
-/// so that e.g. "ניקל מוברש" and "ניקל" appear together in the finish picker.
+/// Model is top-level (chip 1): any product in the same category with a
+/// different model word qualifies — no frame matching needed.
+///
+/// Color / colorMod / subtype / size are frame-based (chip 2+): the frame
+/// (name minus words of [kind]) must match so that only same-type/same-model
+/// variants appear in the picker.
 List<LipskeyCatalogProduct> findAttrSiblings(
   LipskeyCatalogProduct p,
   String word,
   AttrKind kind,
 ) {
+  if (kind == AttrKind.model) {
+    // Category-wide: one representative per distinct model word.
+    final seen = <String>{};
+    final result = <LipskeyCatalogProduct>[];
+    for (final q in kLipskeyCatalog) {
+      if (q.categoryHe != p.categoryHe) continue;
+      final modelWord = q.nameHe
+          .split(RegExp(r'\s+'))
+          .firstWhere((w) => _attrKindFor(w) == AttrKind.model,
+              orElse: () => '');
+      if (modelWord.isEmpty) continue;
+      if (seen.add(modelWord)) result.add(q);
+    }
+    return result.length <= 1 ? [p] : result;
+  }
+
   final pFrame = _stripWordsOfKind(p.nameHe, kind);
   if (pFrame.length < 2) return [p];
   return kLipskeyCatalog.where((q) {
     if (q.categoryHe != p.categoryHe) return false;
     if (_stripWordsOfKind(q.nameHe, kind) != pFrame) return false;
-    // colorMod: frame match is enough (includes the plain variant with no modifier)
     if (kind == AttrKind.colorMod) return true;
     return q.nameHe
         .split(RegExp(r'\s+'))
         .any((w) => _attrKindFor(w) == kind);
   }).toList();
+}
+
+/// Compound type of a product.
+/// Multi-word kLipskeyTypes entries (e.g. "מוט מגבת") are matched first via
+/// substring. Single-word entries follow the "type + next unclassified word"
+/// heuristic (e.g. "ברז" + "נשלף" → "ברז נשלף").
+String _getCompoundType(LipskeyCatalogProduct p) {
+  final name = p.nameHe;
+  final words = name.split(RegExp(r'\s+'));
+
+  // Multi-word types — longest match first.
+  final multiWord = kLipskeyTypes.where((t) => t.contains(' ')).toList()
+    ..sort((a, b) => b.length.compareTo(a.length));
+  for (final t in multiWord) {
+    if (name.contains(t)) return t;
+  }
+
+  // Single-word types + optional trailing qualifier.
+  for (final typeWord in kLipskeyTypes) {
+    if (typeWord.contains(' ')) continue;
+    final idx = words.indexOf(typeWord);
+    if (idx < 0) continue;
+    if (idx + 1 >= words.length) return typeWord;
+    final next = words[idx + 1];
+    if (_attrKindFor(next) != null) return typeWord;
+    if (_kColorModifiers.contains(next)) return typeWord;
+    if (next.length > 2 && (next.startsWith('ל') || next.startsWith('ב'))) return typeWord;
+    return '$typeWord $next';
+  }
+  return '';
+}
+
+/// Type siblings: one representative per distinct compound type in the same
+/// category. Type is the top-level dimension — no frame restriction needed.
+List<LipskeyCatalogProduct> findTypeSiblings(LipskeyCatalogProduct p) {
+  final compound = _getCompoundType(p);
+  if (compound.isEmpty) return [p];
+  final byCompound = <String, LipskeyCatalogProduct>{};
+  byCompound[compound] = p;
+  for (final q in kLipskeyCatalog) {
+    if (q.categoryHe != p.categoryHe) continue;
+    final qc = _getCompoundType(q);
+    if (qc.isEmpty) continue;
+    if (!byCompound.containsKey(qc)) byCompound[qc] = q;
+  }
+  if (byCompound.length <= 1) return [p];
+  return byCompound.values.toList();
 }
 
 // ── name split into tappable chips: attribute chips (orange) + words (teal) ─
@@ -1295,39 +1396,97 @@ class _NameWords extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final words = product.nameHe.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    // Strip wrapping punctuation so "(סיפון)" → "סיפון" instead of a green
+    // pill carrying the parens; drop fragments that become empty.
+    final words = product.nameHe
+        .split(RegExp(r'\s+'))
+        .map((w) => w.replaceAll(RegExp(r'^[(\[*,]+|[)\]*,]+$'), ''))
+        .where((w) => w.isNotEmpty)
+        .toList();
+    final compound = _getCompoundType(product);
+    final typeWords = compound.isNotEmpty
+        ? compound.split(RegExp(r'\s+')).toSet()
+        : <String>{};
+
+    // Multi-word subtypes for two-word chip detection (e.g. "דו כיווני").
+    final multiSubtypes = kLipskeySubtypes.where((s) => s.contains(' ')).toSet();
+
+    final chips = <Widget>[];
+    bool compoundEmitted = false;
+    int i = 0;
+
+    while (i < words.length) {
+      final w = words[i];
+
+      // ── Compound type — emit ONCE as a single chip ──────────────────────
+      if (typeWords.contains(w)) {
+        if (!compoundEmitted && compound.isNotEmpty) {
+          compoundEmitted = true;
+          chips.add(_AttrChip(
+            word: compound,
+            kind: AttrKind.type,
+            product: product,
+            onTap: onAttrTap,
+            isOpen: openKind == AttrKind.type,
+          ));
+        }
+        // Skip all words that belong to this compound.
+        i++;
+        continue;
+      }
+
+      // ── Two-word subtype (e.g. "דו כיווני") ──────────────────────────────
+      if (i + 1 < words.length) {
+        final two = '$w ${words[i + 1]}';
+        if (multiSubtypes.contains(two)) {
+          chips.add(_AttrChip(
+            word: two,
+            kind: AttrKind.subtype,
+            product: product,
+            onTap: onAttrTap,
+            isOpen: openKind == AttrKind.subtype,
+          ));
+          i += 2;
+          continue;
+        }
+      }
+
+      // ── Single-word attribute chip ───────────────────────────────────────
+      final kind = _attrKindFor(w);
+      if (kind != null) {
+        chips.add(_AttrChip(
+          word: w,
+          kind: kind,
+          product: product,
+          onTap: onAttrTap,
+          isOpen: openKind == kind,
+        ));
+      } else if (isLinkableWord(w)) {
+        chips.add(GestureDetector(
+          onTap: () => LipskeyProductsScreen.openWordSearch(context, w),
+          child: Text(w,
+              style: const TextStyle(
+                  color: Color(0xFF3DD9B0),
+                  fontSize: 12,
+                  height: 1.3,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Color(0x552A5E52))),
+        ));
+      } else {
+        chips.add(Text(w,
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                fontSize: 12,
+                height: 1.3)));
+      }
+      i++;
+    }
+
     return Wrap(
       spacing: 4,
       runSpacing: 3,
       crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        for (final w in words)
-          if (_attrKindFor(w) != null)
-            _AttrChip(
-              word: w,
-              kind: _attrKindFor(w)!,
-              product: product,
-              onTap: onAttrTap,
-              isOpen: openKind == _attrKindFor(w),
-            )
-          else if (isLinkableWord(w))
-            GestureDetector(
-              onTap: () => LipskeyProductsScreen.openWordSearch(context, w),
-              child: Text(w,
-                  style: const TextStyle(
-                      color: Color(0xFF3DD9B0),
-                      fontSize: 12,
-                      height: 1.3,
-                      decoration: TextDecoration.underline,
-                      decorationColor: Color(0xFF2A5E52))),
-            )
-          else
-            Text(w,
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                    fontSize: 12,
-                    height: 1.3)),
-      ],
+      children: chips,
     );
   }
 }
@@ -1370,8 +1529,11 @@ class _AttrChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final siblings =
-        onTap != null ? findAttrSiblings(product, word, kind) : <LipskeyCatalogProduct>[];
+    final siblings = onTap != null
+        ? (kind == AttrKind.type
+            ? findTypeSiblings(product)
+            : findAttrSiblings(product, word, kind))
+        : <LipskeyCatalogProduct>[];
     final count = _pickerCount(siblings);
     final hasSiblings = count > 1;
 
@@ -1395,7 +1557,7 @@ class _AttrChip extends StatelessWidget {
       onTap: hasSiblings ? () => onTap!(word, kind) : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(5),
@@ -1404,13 +1566,24 @@ class _AttrChip extends StatelessWidget {
             width: hasSiblings ? 1.2 : 0.9,
           ),
         ),
-        child: Text(
-          word,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
+        // Editable chips (have siblings) carry a ▾ cue so a layman sees they
+        // can be tapped to change that dimension.
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              word,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (hasSiblings) ...[
+              const SizedBox(width: 1),
+              Icon(Icons.expand_more, size: 13, color: textColor),
+            ],
+          ],
         ),
       ),
     );

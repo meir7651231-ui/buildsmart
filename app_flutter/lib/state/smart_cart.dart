@@ -57,6 +57,31 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>> {
     ];
   }
 
+  /// Set the quantity of the line at [index]; removes it when [qty] <= 0.
+  void setLineQty(int index, int qty) {
+    if (index < 0 || index >= state.length) return;
+    if (qty <= 0) {
+      remove(index);
+      return;
+    }
+    final l = state[index];
+    state = [
+      for (var i = 0; i < state.length; i++)
+        if (i == index)
+          SmartCartLine(
+            productKey: l.productKey,
+            productName: l.productName,
+            productEmoji: l.productEmoji,
+            brandName: l.brandName,
+            brandPrice: l.brandPrice,
+            productQty: qty,
+            accessories: l.accessories,
+          )
+        else
+          state[i],
+    ];
+  }
+
   /// Total quantity across all lines sharing [productKey].
   int qtyForKey(String productKey) => state
       .where((l) => l.productKey == productKey)

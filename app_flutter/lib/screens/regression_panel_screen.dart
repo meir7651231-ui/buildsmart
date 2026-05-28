@@ -35,7 +35,7 @@ class RegressionPanelScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           const Text(
-            'בודק את הקטלוג, ה-state, וה-views של המערכת',
+            'בודק קטלוג · chips · מאתר · state · ניווט · wiring',
             style: TextStyle(color: Color(0xFF888888), fontSize: 13),
           ),
           const SizedBox(height: 16),

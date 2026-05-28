@@ -49,6 +49,86 @@ final searchPanelOpenProvider = StateProvider<bool>((_) => false);
 /// Current search query text.
 final searchQueryProvider = StateProvider<String>((_) => '');
 
+/// Everyday → catalogue-term aliases so a layperson finds a product without
+/// knowing the plumber's word for it. Values are tokens also tried against the
+/// product haystack — all real catalogue vocabulary (search aliasing, not new
+/// data: R8 untouched).
+const Map<String, List<String>> kSearchSynonyms = {
+  // precise toilet-fixture tokens — NOT bare "אסלה", which also lives in
+  // connector categories (מסעפים וחיבורי אסלה / זקיף אסלה) and over-matched.
+  'שירותים': ['מושב', 'אסלות וכיורים', 'אביזרי אסלה'],
+  'אסלה': ['אסלה', 'מושב'],
+  'ניקוז': ['ניקוז', 'מחסום', 'סיפון', 'מאסף', 'תעלת'],
+  'מקלחת': ['מקלחת', 'דוש', 'מזלף'],
+  'אמבטיה': ['אמבט', 'רחצה'],
+  'גינה': ['גן', 'גינון', 'השקיה'],
+  'צנרת': ['צינור'],
+  'חיבור': ['מחבר', 'מצמד'],
+};
+
+/// Normalises a search string: lowercases and folds Hebrew gershayim/geresh
+/// (״ ׳) to the ASCII marks (" ') that product names actually use, so a
+/// Hebrew-keyboard query like `1/2״` still matches a `1/2"` product.
+String _normForSearch(String s) =>
+    s.toLowerCase().replaceAll('״', '"').replaceAll('׳', "'");
+
+/// Forgiving product match for the search bar: a non-technical user types plain
+/// words ("ברז מטבח", "ניקוז", "שירותים") and the app does the finding — without
+/// them knowing the catalogue's term. Matches across name + category + SKU +
+/// colour, word-by-word (order-independent, each word may land in any field),
+/// expanding everyday words via [kSearchSynonyms]. With [requireAll] = false the
+/// caller can fall back to matching ANY word, so a query never dead-ends.
+bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery,
+    {bool requireAll = true}) {
+  final q = _normForSearch(rawQuery.trim());
+  if (q.isEmpty) return false;
+  final hay =
+      _normForSearch('${p.nameHe} ${p.categoryHe} ${p.sku} ${p.color ?? ''}');
+  if (hay.contains(q)) return true; // fast path: exact phrase or SKU
+  final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
+  if (tokens.isEmpty) return false;
+  bool hit(String t) {
+    if (hay.contains(t)) return true;
+    final alts = kSearchSynonyms[t];
+    return alts != null && alts.any((a) => hay.contains(_normForSearch(a)));
+  }
+
+  return requireAll ? tokens.every(hit) : tokens.any(hit);
+}
+
+/// Relevance score for ranking search results (higher = better): a name match
+/// beats a category-only match beats a synonym/colour match, so the product the
+/// user actually meant surfaces first (e.g. a toilet seat above a toilet-branch
+/// connector for "שירותים"). Used as the default sort when a query is present.
+int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
+  final q = _normForSearch(rawQuery.trim());
+  if (q.isEmpty) return 0;
+  final name = _normForSearch(p.nameHe);
+  final cat = _normForSearch(p.categoryHe);
+  final color = _normForSearch(p.color ?? '');
+  var score = 0;
+  if (name.contains(q)) score += 100; // whole query in the name
+  for (final t in q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty)) {
+    if (name.contains(t)) {
+      score += 20;
+    } else if (cat.contains(t)) {
+      score += 8;
+    } else if (color.contains(t)) {
+      score += 6;
+    } else {
+      final alts = kSearchSynonyms[t];
+      if (alts != null) {
+        if (alts.any((a) => name.contains(_normForSearch(a)))) {
+          score += 12;
+        } else if (alts.any((a) => cat.contains(_normForSearch(a)))) {
+          score += 4;
+        }
+      }
+    }
+  }
+  return score;
+}
+
 /// Active search scope chip (הכל / מוצרים / קטגוריות / מסכים).
 final searchScopeProvider = StateProvider<String>((_) => 'הכל');
 
@@ -1755,18 +1835,29 @@ class _SearchResultsList extends ConsumerWidget {
     // before capping to 40 results.
     final imageOnly = ref.watch(searchImageOnlyProvider);
     final sort = ref.watch(catalogProductSortProvider);
+    // AND-match first; if a reasonable query finds nothing (e.g. a stray word
+    // the catalogue doesn't use), fall back to matching ANY word so the user
+    // never hits a dead end.
+    List<LipskeyCatalogProduct> matchProducts() {
+      final and = kLipskeyCatalog
+          .where((p) => catalogProductMatchesQuery(p, query))
+          .toList();
+      if (and.isNotEmpty) return and;
+      return kLipskeyCatalog
+          .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
+          .toList();
+    }
+
+    // Default order ranks by relevance (best match first); an explicit
+    // ↕️ sort (name/SKU) overrides it.
+    List<LipskeyCatalogProduct> orderProducts(List<LipskeyCatalogProduct> ps) {
+      if (sort != ProductSort.byOrder) return _sortProducts(ps, sort);
+      return [...ps]..sort(
+          (a, b) => searchRelevance(b, query).compareTo(searchRelevance(a, query)));
+    }
+
     final products = showProducts
-        ? _sortProducts(
-            filterByImage(
-              kLipskeyCatalog
-                  .where((p) =>
-                      p.nameHe.contains(query) ||
-                      p.sku.toLowerCase().contains(query.toLowerCase()))
-                  .toList(),
-              imageOnly,
-            ),
-            sort,
-          ).take(40).toList()
+        ? orderProducts(filterByImage(matchProducts(), imageOnly)).take(40).toList()
         : const <LipskeyCatalogProduct>[];
 
     if (filtered.isEmpty && products.isEmpty) {

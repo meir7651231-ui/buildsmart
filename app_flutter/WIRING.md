@@ -38,6 +38,22 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 | ▦ קטלוג | closes the panel + jumps to the קטגוריות section | ✅ |
 | filter "עם מחיר" / price sort | — | ⛔ no price data |
 
+## Catalog search — product matching (`catalog_screen.dart` · `catalogProductMatchesQuery`)
+
+| Behavior | Detail | Status |
+|---|---|---|
+| forgiving product search | matches across name + category + SKU + colour, word-by-word (order-independent); folds Hebrew gershayim/geresh (״ ׳ → " ') so a Hebrew-keyboard size query matches; expands everyday words via `kSearchSynonyms` (kept precise — e.g. שירותים → toilet fixtures only, not branch connectors); AND-match with a graceful any-word fallback (`requireAll:false`) so a reasonable query never dead-ends | ✅ |
+| relevance ranking | default order sorts results by `searchRelevance` (name match > category-only > synonym/colour), so the product the user meant surfaces first; an explicit ↕️ sort overrides it | ✅ |
+
+## Catalog מאתר finder (`finder_screen.dart`)
+
+| Behavior | Detail | Status |
+|---|---|---|
+| type groups | `kFinderGroups` — 6 plain-language groups + אחר catch-all; groups are pairwise disjoint and every catalog product is reachable | ✅ |
+| sub-types | curated `kFinderSubs` (ברזים · ניקוז) cover every group category that has products, with unique labels and no 1-item junk chips; other groups auto-derive sub-types from `categoryHe`, merged by cleaned label | ✅ |
+| narrow chips | `_narrowOptions`: curated facets (`kFinderFacets` — incl. floor-drain open/closed/shower words instead of opaque DN codes) → sizes (`_sizeRe`; confusing inch forms folded to clean fractions, e.g. 11/4"·1.25" → 1¼") → colours → distinguishing words | ✅ |
+| results | render through the shared `LipskeyProductsList` (variant dedup + quantity wheel) | ✅ |
+
 ## Chat settings (`chat_settings_screen.dart` → `chat_settings.dart`)
 
 | Setting | Behavior | Status |
@@ -103,6 +119,11 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 - store `cartPaymentProvider` / `cartDeliveryProvider` defaults from store settings
 - `notifMutedSections` mapping (all-on → none; per-type off → matching section)
 - chat mute notifier (`setAll`) and archive notifier (`archive`/`restore`)
+- finder grouping: groups disjoint, אחר catch-all + no blank category, curated
+  `kFinderSubs` cover every group category w/ products, unique labels, cats ⊆ group
+- `catalogProductMatchesQuery`: category-word match, synonym expansion,
+  `requireAll:false` graceful superset, colour searchable, שירותים precision
+  (no connector match), `searchRelevance` ranks name-match above synonym-match
 
 UI-only effects (theme/contrast/text-scale, grid layout, VAT display, image size)
 are documented above but exercised through their underlying providers/helpers

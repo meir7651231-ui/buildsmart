@@ -132,7 +132,8 @@ class _CartFab extends ConsumerWidget {
       ref.read(mainTabProvider.notifier).state = 3;
     }
 
-    // 3-layer design: white circle + orange border, orange cart, white plus.
+    // White cart on the orange FAB + a count badge. (Removed the decorative
+    // "+", which read as "add to cart" rather than "open cart".)
     final fab = FloatingActionButton(
       heroTag: 'cart-fab',
       onPressed: openCart,
@@ -147,11 +148,6 @@ class _CartFab extends ConsumerWidget {
         alignment: Alignment.center,
         children: [
           const Icon(Icons.shopping_cart, color: Colors.white, size: 26),
-          // Orange plus sitting on the cart basket.
-          const Positioned(
-            top: 7,
-            child: Icon(Icons.add, color: BsTokens.brand, size: 12),
-          ),
           if (count > 0)
             Positioned(
               top: -10,
@@ -391,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.37 · 28.5.26 · כרטיס מוצר נקי — 4 כפילויות הוסרו',
+                          'v4.55 · 28.5.26 · מנוע תכנון + כרטיס נקי + אודיט (מיזוג)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
