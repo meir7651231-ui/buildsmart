@@ -77,6 +77,12 @@ class VerifiedSpec {
   /// cap for HDPE — so every legacy cold-water spec is correct without edits.
   final double maxTempC;
 
+  /// Per-SKU system classification for the rare product whose end *geometry*
+  /// disagrees with its plumbing role — e.g. a bottle trap whose 1¼" threads
+  /// read as "supply" but functionally belong to the drainage line. When set,
+  /// [endSystems] returns exactly this instead of deriving from the ends.
+  final WaterSystem? systemOverride;
+
   const VerifiedSpec({
     required this.sku,
     required this.ends,
@@ -84,6 +90,7 @@ class VerifiedSpec {
     this.pressureRating,
     this.pexType,
     this.maxTempC = 40,
+    this.systemOverride,
   });
 
   bool compatibleWith(VerifiedSpec other) {
@@ -118,6 +125,7 @@ class VerifiedSpec {
   /// All other end types (threads, presses, drain openings) keep their static
   /// per-EndType mapping in [ConnectorEnd.system].
   Set<WaterSystem> get endSystems {
+    if (systemOverride != null) return {systemOverride!};
     final out = <WaterSystem>{};
     const supplyMaterials = {'HDPE', 'PEX', 'נחושת', 'פליז', 'פלדה', 'נירוסטה'};
     for (final e in ends) {
@@ -141,7 +149,10 @@ class VerifiedSpec {
 /// accept any drainage pipe of the matching DN.
 bool _materialsCompatible(String a, String b) {
   if (a == b) return true;
-  const drainage = {'PVC', 'PP', 'רב-שכבתי', 'ceramic'};
+  // 'rubber' = manchette / eccentric drainage seals whose whole purpose is to
+  // join a fixture or pipe to a DN-matched drainage pipe, so they interoperate
+  // with the rest of the drainage family.
+  const drainage = {'PVC', 'PP', 'רב-שכבתי', 'ceramic', 'rubber'};
   return drainage.contains(a) && drainage.contains(b);
 }
 
@@ -1556,7 +1567,9 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '77775263': VerifiedSpec(sku: '77775263', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
   '77775261': VerifiedSpec(sku: '77775261', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('3/8"')]),
   '77775265': VerifiedSpec(sku: '77775265', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('3/4"'), _bf('3/4"')]),
-  '77775296': VerifiedSpec(sku: '77775296', material: _brass, maxTempC: 90, ends: [_bf('1-1/4"'), _bf('1-1/4"')]),
+  // Nickel bottle trap: 1¼" threads read as "supply" geometrically but it's a
+  // basin-waste (drainage) fitting — pin the system so the scan agrees.
+  '77775296': VerifiedSpec(sku: '77775296', material: _brass, maxTempC: 90, ends: [_bf('1-1/4"'), _bf('1-1/4"')], systemOverride: WaterSystem.drainage),
   '77775260': VerifiedSpec(sku: '77775260', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('3/4"')]),
   '77777120': VerifiedSpec(sku: '77777120',  material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('1/2"')]),
   '77777120A': VerifiedSpec(sku: '77777120A', material: _brass, maxTempC: 90, ends: [_bf('1/2"'), _bf('3/8"')]),
