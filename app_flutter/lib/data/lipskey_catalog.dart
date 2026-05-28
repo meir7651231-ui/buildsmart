@@ -308,6 +308,8 @@ const List<String> kLipskeyTypes = [
   'זקף',
   // Added (catch products that previously had no productType):
   'מקשר', 'כפה', 'טי', 'פיית',
+  // PPR (Polyroll) types not already covered above:
+  'מתאם', 'רוכב', 'צווארון', 'סעפת', 'שרוול',
   // Multi-word compound types (matched as substring before single-word search):
   'מוט מגבת', 'מערכת אמבטיה', 'מחזיק מגבת',
   'מושב אסלה', 'חבק תליה', 'מחבר כפול', 'מקשר הברגה',
@@ -387,6 +389,8 @@ const List<String> kLipskeySubtypes = [
   'תעלת ניקוז', 'ניקוז למקלחת',
   'רב שכבתי', 'כבד תקני',
   'למחסום רצפה', 'כניסה למדיח', 'לברז ניל',
+  // PPR (Polyroll) connection / subtype terms:
+  'לריתוך', 'מחוזק', 'פייזר', 'משושה',
 ];
 
 const List<String> kLipskeyColors = [
