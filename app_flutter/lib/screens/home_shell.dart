@@ -391,7 +391,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.47 · 27.5.26 · compound chips: ברז מעבר / הברגה חיצונית / מושב אסלה',
+                          'v4.48 · 28.5.26 · fix: טבור→model, פיית→type, sheet variant refs',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
