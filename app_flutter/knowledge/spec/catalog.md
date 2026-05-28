@@ -7,7 +7,7 @@
 - **כפתור הגדרות:** ב-app bar של ה-shell יש `_CatalogMenuButton` שפותח את `CatalogSettingsScreen.route()`.
 - **providers מרכזיים שהמסך צורך (מוגדרים בראש הקובץ, ברובם `StateProvider` in-memory):**
   - `catalogSectionProvider` (`String`, ברירת מחדל `'בית'`) — ה-section הפעיל. נחיתת ברירת המחדל של האפליקציה = מסך הבית (ה-finder), המסלול הכי לא-טכני למוצר.
-  - `catalogSectionsListProvider` (`List<String>`, ברירת מחדל `['בית', 'תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים']`) — רשימת ה-sections (לא כולל `'הכל'`).
+  - `catalogSectionsListProvider` (`List<String>`, ברירת מחדל `['בית', 'תכנון חיבור', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים']`) — רשימת ה-sections (לא כולל `'הכל'`). `'תכנון חיבור'` = ה-Install Studio (שם ידידותי ללא-טכני במקום "תאימות").
   - `catalogListItemsProvider` (`Map<String, Set<String>>`) — אילו כותרות קטגוריה משויכות לכל רשימה מותאמת.
   - `searchPanelOpenProvider`, `searchQueryProvider`, `searchScopeProvider` (`'הכל'`), `recentSearchesProvider` (`List<String>`, מקס' 8) — מצב פאנל החיפוש.
   - `smartTreeCatProvider` / `smartTreeQueryProvider` — דריל בעץ החכם.
@@ -43,7 +43,7 @@
      - `'קטגוריות'` → `_CatalogList` (12 שורות `_CatalogRow`).
      - `'מועדפים'` → `_FavoritesSection`.
      - `'חיפושים אחרונים'` → `_RecentSearchesSection`.
-     - `'תאימות'` → `InstallStudioScreen` (מוטמע).
+     - `'תכנון חיבור'` → `InstallStudioScreen` (מוטמע; היה "תאימות").
      - `'וריאנטים'` → `_VariantsSection`.
      - section מותאם אחר → `_SectionHeader` (כותרת + ✏️) ומתחת `_FilteredCatalogList` או `_EmptySection`.
 

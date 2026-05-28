@@ -182,19 +182,20 @@ List<LineCheck> lineComplianceChecklist(
           'מבודד רעידות המשאבה מהצנרת', severity: CheckSeverity.warning),
     ],
     if (hasManifoldOrShower)
-      LineCheck('TMTV anti-scald (הגנת משתמש)',
+      LineCheck('ברז ערבוב נגד כוויה (TMTV)',
           has({'HW-TMTV-32', 'HW-TMTV-25', 'HW-TMTV-20', 'HW-TMTV-15'}),
-          'מגביל T≤45°C ביציאה — anti-scald', severity: CheckSeverity.critical),
+          'מגביל את המים ל-45°C ביציאה כדי למנוע כוויה',
+          severity: CheckSeverity.critical),
     if (hasCommercialPump && hasManifoldOrShower)
       LineCheck('שסתום מאזן לכל ענף (Balancing Valve)',
           has({'HW-BALANCE-25', 'HW-BALANCE-20', 'HW-BALANCE-15'}),
           'מאזן לחץ בין ענפים במערכת מסחרית', severity: CheckSeverity.warning),
     if (hasCommercialPump && hot)
-      LineCheck('bypass תרמי למניעת Legionella (EN 806)',
+      LineCheck('מעקף חום נגד חיידק לגיונלה (EN 806)',
           has({'HW-DISINFECT'}),
           'פסטור 70°C/3 דקות אחת לשבוע', severity: CheckSeverity.critical),
     if (recirc)
-      LineCheck('נקודת דיגום (Legionella sampling)',
+      LineCheck('נקודת דגימת מים (לגיונלה)',
           has({'HW-SAMPLE'}),
           'נדרש לבדיקות מים תקתיות', severity: CheckSeverity.warning),
     if (hot)
@@ -202,7 +203,7 @@ List<LineCheck> lineComplianceChecklist(
           'הפסדי חום + סכנת כוויות', severity: CheckSeverity.warning),
     LineCheck('חבקים/תמיכת צנרת', acc('HW-CLIP'),
         'קיבוע ושיפוע', severity: CheckSeverity.info),
-    LineCheck('איטום (Press/PTFE/O-ring)', acc('HW-SEALANT'),
+    LineCheck('איטום מעברים (Press/PTFE/O-ring)', acc('HW-SEALANT'),
         'אטימות כל מעבר', severity: CheckSeverity.info),
   ];
 }

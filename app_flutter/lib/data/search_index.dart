@@ -86,7 +86,7 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🔄',  title: 'וריאנטים',             breadcrumb: 'קטלוג', type: SearchType.menu),
   SearchEntry(emoji: '⭐',  title: 'מועדפים',              breadcrumb: 'קטלוג', type: SearchType.menu),
   SearchEntry(emoji: '🌳',  title: 'עץ חכם',               breadcrumb: 'קטלוג', type: SearchType.menu),
-  SearchEntry(emoji: '🛠',  title: 'תאימות',               breadcrumb: 'קטלוג', type: SearchType.menu),
+  SearchEntry(emoji: '🛠',  title: 'תכנון חיבור',          breadcrumb: 'קטלוג', type: SearchType.menu),
   SearchEntry(emoji: '🕐',  title: 'חיפושים אחרונים',      breadcrumb: 'קטלוג', type: SearchType.menu),
 
   // ── BS dial — personas (L1) ────────────────────────────────────────────

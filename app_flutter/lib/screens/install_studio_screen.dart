@@ -355,10 +355,10 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         const SizedBox(width: 10),
         const Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('סטודיו התקנות',
+            Text('תכנון חיבור',
                 style: TextStyle(
                     color: _ink, fontSize: 18, fontWeight: FontWeight.w900)),
-            Text('תכנן · חבר · הזמן',
+            Text('בחר מה לחבר · נכין רשימת קנייה',
                 style: TextStyle(color: _mute, fontSize: 11, letterSpacing: 1)),
           ]),
         ),

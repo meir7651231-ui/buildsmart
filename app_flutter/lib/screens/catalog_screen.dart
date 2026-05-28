@@ -36,7 +36,7 @@ final catalogSectionProvider = StateProvider<String>((_) => 'בית');
 
 /// Ordered list of user section labels (הכל is NOT stored here).
 final catalogSectionsListProvider = StateProvider<List<String>>(
-  (_) => ['בית', 'תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
+  (_) => ['בית', 'תכנון חיבור', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
 );
 
 /// Per-list catalog items: map of section-label → set of catalog category
@@ -1203,7 +1203,7 @@ IconData _sectionIcon(String label) => switch (label) {
       'מועדפים'         => Icons.favorite_border,
       'קטגוריות'        => Icons.grid_view_outlined,
       'עץ חכם'          => Icons.account_tree_outlined,
-      'תאימות'          => Icons.compare_arrows_outlined,
+      'תכנון חיבור'     => Icons.handyman_outlined,
       _                 => Icons.list_alt_outlined,
     };
 
@@ -1993,7 +1993,7 @@ class _CatalogBody extends ConsumerWidget {
     if (active == 'קטגוריות') return const _CatalogList();
     if (active == 'מועדפים') return const _FavoritesSection();
     if (active == 'חיפושים אחרונים') return const _RecentSearchesSection();
-    if (active == 'תאימות') return const InstallStudioScreen();
+    if (active == 'תכנון חיבור') return const InstallStudioScreen();
     if (active == 'וריאנטים') return const _VariantsSection();
 
     final selected = ref.watch(catalogListItemsProvider)[active];
@@ -2190,13 +2190,13 @@ class _AllOverview extends ConsumerWidget {
         ),
         // תאימות
         _OverviewBlock(
-          title: 'תאימות',
+          title: 'תכנון חיבור',
           count: kLipskeyCatalog.length,
           onShowAll: () => _openStudio(context),
           children: [
             _OverviewRow(
-              icon: Icons.compare_arrows_outlined,
-              label: 'סטודיו התקנות — תכנן · חבר · הזמן',
+              icon: Icons.handyman_outlined,
+              label: 'תכנון חיבור — בחר מה לחבר ונכין רשימת קנייה',
               onTap: () => _openStudio(context),
             ),
           ],

@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v4.67` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v4.68` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — opens on **בית (finder home)** as the default landing: layman
@@ -38,6 +38,9 @@ sound/lock-screen) · media/backup/telephony (video/call/camera/attach) ·
 addresses/invoices/warranty/biometric. All need data, a server, or device APIs.
 
 ## Install Studio (v3.79 — BOM quality upgrade)
+- **Entry = "תכנון חיבור"** — the catalog section chip (renamed from "תאימות" for
+  a non-technical name); screen header + empty state speak plain Hebrew, and
+  safety-checklist acronyms carry a plain gloss (e.g. "ברז ערבוב נגד כוויה (TMTV)").
 - **Progressive dock** — 3-state UX: empty / 1-item / 2+ items (D-013)
 - **Zone-aware BOM** — "גזע" + "ענף א/ב/ג…" section headers with item counts
 - **TMTV auto-per-branch** — one thermostatic mixing valve per hot branch, qty = branch count

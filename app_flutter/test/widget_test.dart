@@ -64,7 +64,7 @@ void main() {
     await t.pumpAndSettle();
     // Section labels are present (they also appear as chips → at least one).
     expect(find.text('חיפושים אחרונים'), findsAtLeastNWidgets(1));
-    expect(find.text('תאימות'), findsAtLeastNWidgets(1));
+    expect(find.text('תכנון חיבור'), findsAtLeastNWidgets(1));
     expect(find.text('מועדפים'), findsAtLeastNWidgets(1));
     expect(find.text('עץ חכם'), findsAtLeastNWidgets(1));
     // Categories block is fully expanded (no "הצג הכל"); the preview blocks for

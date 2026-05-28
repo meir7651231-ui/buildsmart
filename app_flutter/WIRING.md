@@ -106,6 +106,10 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 
 ## Install Studio (`install_studio_screen.dart` → `logic/install_engine.dart`)
 
+Entry: the catalog section chip **`'תכנון חיבור'`** (renamed from "תאימות" — a
+self-explanatory name for non-technical users). Safety-checklist labels carry a
+plain-Hebrew gloss with the technical term in parens (e.g. "ברז ערבוב נגד כוויה (TMTV)").
+
 | Button | Behavior | Status |
 |---|---|---|
 | הוסף מוצר | append a chain anchor from the dark catalog picker | ✅ |
