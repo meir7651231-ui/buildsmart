@@ -30,13 +30,13 @@ void _openStudio(BuildContext context) {
 }
 
 /// Active section label — 'הכל' is always first and fixed.
-/// Default landing is the מאתר (finder) — the least-technical path to a product
-/// (group → sub → add, 2–3 taps), so the app opens straight on it.
-final catalogSectionProvider = StateProvider<String>((_) => 'מאתר');
+/// Default landing is the בית (finder home) — the least-technical path to a
+/// product (group → sub → add, 2–3 taps), so the app opens straight on it.
+final catalogSectionProvider = StateProvider<String>((_) => 'בית');
 
 /// Ordered list of user section labels (הכל is NOT stored here).
 final catalogSectionsListProvider = StateProvider<List<String>>(
-  (_) => ['מאתר', 'תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
+  (_) => ['בית', 'תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
 );
 
 /// Per-list catalog items: map of section-label → set of catalog category
@@ -1198,7 +1198,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
 }
 
 IconData _sectionIcon(String label) => switch (label) {
-      'מאתר'            => Icons.travel_explore,
+      'בית'             => Icons.home_outlined,
       'חיפושים אחרונים' => Icons.history,
       'מועדפים'         => Icons.favorite_border,
       'קטגוריות'        => Icons.grid_view_outlined,
@@ -1988,7 +1988,7 @@ class _CatalogBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(catalogSectionProvider);
     if (active == 'הכל') return _AllOverview(scrollCtrl: scrollCtrl);
-    if (active == 'מאתר') return const FinderScreen();
+    if (active == 'בית') return const FinderScreen();
     if (active == 'עץ חכם') return const _SmartTreeSection();
     if (active == 'קטגוריות') return const _CatalogList();
     if (active == 'מועדפים') return const _FavoritesSection();

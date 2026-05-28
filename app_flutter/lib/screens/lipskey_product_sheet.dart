@@ -1872,7 +1872,7 @@ class _StripPanel extends StatelessWidget {
   Widget _buildFinder() {
     final f = finderGroupFor(product);
     if (f == null) {
-      return const _EmptyHint('אין קבוצת מאתר');
+      return const _EmptyHint('אין קבוצה');
     }
     // We re-use the existing _kFinderGroups indirectly: a product belongs to
     // the same finder group when its layman label matches. So pull every
