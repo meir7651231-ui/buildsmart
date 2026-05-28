@@ -166,7 +166,7 @@
 
 ### 3. מבנה ופריסה
 - `Scaffold` רקע `0xFFF5F6FA`, `AppBar` לבן (תמה בהירה). גוף = `ListView` עם padding 16.
-- תיאור עליון: **'בודק את הקטלוג, ה-state, וה-views של המערכת'**.
+- תיאור עליון: **'בודק קטלוג · chips · מאתר · מנוע תאימות/התקנה · state · ניווט · wiring'**.
 - `_RunButton` — כפתור הרצה רחב-מלא.
 - לאחר ריצה (`status == done`): `_SummaryCard` → `_FilterRow` (שבב לכל קטגוריה) → רשימת `_ResultCard`
   (כל אחד `ExpansionTile` עם `_CheckRow`-ים).
@@ -176,10 +176,10 @@
 | אלמנט | סוג | תוכן/מקור | אינטראקציה ⇐ תוצאה | סטטוס |
 |---|---|---|---|---|
 | כותרת AppBar | Text | '🔬 מרכז בדיקות רגרסיה' | — | ✅ |
-| תיאור | Text | 'בודק את הקטלוג, ה-state, וה-views של המערכת' | — | ✅ |
+| תיאור | Text | 'בודק קטלוג · chips · מאתר · מנוע תאימות/התקנה · state · ניווט · wiring' | — | ✅ |
 | כפתור הרצה (`_RunButton`) | FilledButton | idle: '▶ הרץ בדיקת רגרסיה מלאה' · running: '⏳ מריץ את הבדיקות... רגע' · done: '↻ הרץ שוב' | tap ⇐ `runRegression(ref)` (מושבת בזמן ריצה) | ✅ |
 | כרטיס סיכום (`_SummaryCard`) | Container | תקין: '✅ כל הבדיקות עברו (passed/total)' · כשל: '❌ נמצאו N כשלים' + פירוק לפי קטגוריה | — | ✅ |
-| שורת סינון (`_FilterRow`) | שבבי `_Pill` | 'הכל' · 'קטלוג' · 'סנכרון' · 'זהויות' · 'עצים' · 'הגדרות' · 'טאבים' · 'כפתורים' · 'התנהגות' · 'מוצרים' | tap ⇐ `regressionFilterProvider = id` | ✅ |
+| שורת סינון (`_FilterRow`) | שבבי `_Pill` | 'הכל' · 'קטלוג' · 'סנכרון' · 'זהויות' · 'עצים' · 'הגדרות' · 'טאבים' · 'כפתורים' · 'התנהגות' · 'מוצרים' · 'מנוע' | tap ⇐ `regressionFilterProvider = id` | ✅ |
 | כרטיס תוצאה (`_ResultCard`) | ExpansionTile | '✓'/'✗' · `result.label` · badge `area` · `'${pass}/${total}'` | tap ⇐ הרחבה (`initiallyExpanded: !ok`) | ✅ |
 | שורת בדיקה (`_CheckRow`) | Row | '✓'/'✗' · `check.name` · `check.detail` · בכשל: 'ציפיתי: … · קיבלתי: …' | — | ✅ |
 
@@ -205,6 +205,10 @@
 | sections · עצים | `tests/sections.dart` | '🏪 kStoreSections — מבנה עץ חנות ספק' · '🛵 kCourierSections — מבנה עץ שליח' · '🦺 kWorkerSections — מבנה עץ עובד' · '👔 kManagerSections — מבנה עץ מנהל' · 'kPersonaSections — מיפוי דמויות → עצים' · 'walkBsDrill — ניווט בעץ BS' · 'kHomeTree · kCartTree · kFinanceHub' · 'Section ids — אין כפילות בכל עץ' |
 | settings · הגדרות | `tests/settings.dart` | 'kSettingsGroups — 10 קבוצות הגדרות' · 'walkSettings — ניווט בעץ הגדרות' · 'AppSettings.defaults — ערכי ברירת מחדל' · 'AppSettings.copyWith — round-trip' · 'appSettingsProvider — קריאה מה-state' |
 | catalog · קטלוג | `tests/catalog.dart` | 'תקינות נתוני הקטלוג (N מוצרים)' · 'כיסוי ושלמות (לא חוסם)' · 'מנוע תאימות — מה מתחבר למה' · 'מודל מובנה (מותג/גוון/אינדקס)' |
+| engine · מנוע | `tests/engine.dart` | מנוע תאימות/התקנה — חיבורים מאומתים · BOM · pathfinding |
+| cart · עגלה | `tests/cart.dart` | יחידות · סכומי שורה+אביזרים · מע"מ/משלוח/סה"כ · persistence JSON |
+
+(הערה: `tests/finder.dart` רץ גם הוא, מדווח תחת קטגוריה קיימת — אין `finder` ב-`TestCategory`. סה"כ 12 קבצי-סוויטה, 11 קטגוריות ב-`TestCategory`.)
 
 - כל `TestResult` מחזיק `checks` (`TestCheck`: name · pass · expected? · got? · detail?). `allPass` = כל הבדיקות עברו; `failedCount` = מספר הכושלות.
 - אם הריצה קורסת ⇒ נוסף `TestResult` 'הריצה קרסה' (קטגוריה dsync) עם הצ'ק 'הריצה הסתיימה בלי לקרוס' = false + stack trace ב-`detail`.
