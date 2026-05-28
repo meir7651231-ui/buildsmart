@@ -391,7 +391,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.18 · 27.5.26 · גיליון מוצר: ציפים אינטראקטיביים (גוון/דגם/תת-סוג)',
+                          'v4.37 · 28.5.26 · כרטיס מוצר נקי — 4 כפילויות הוסרו',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

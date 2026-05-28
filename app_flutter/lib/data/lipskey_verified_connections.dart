@@ -89,7 +89,18 @@ class VerifiedSpec {
   bool compatibleWith(VerifiedSpec other) {
     for (final eA in ends) {
       for (final eB in other.ends) {
-        if (eA.directMatesWith(eB) || eA.pipeSharedWith(eB)) return true;
+        // Direct thread / press / drain joint — material-independent (a brass
+        // male thread really does screw into a PEX-adapter's BSP female).
+        if (eA.directMatesWith(eB)) return true;
+        // Compression-on-compression of the same nominal DN — require
+        // material compatibility (see [_materialsCompatible]). The
+        // EndType.hdpeCompression enum is overloaded for any push-fit socket
+        // across materials, so without this guard an HDPE-PN16 pressure
+        // fitting would falsely match a PVC drainage pipe.
+        if (eA.pipeSharedWith(eB) &&
+            _materialsCompatible(material, other.material)) {
+          return true;
+        }
       }
     }
     return false;
@@ -99,8 +110,39 @@ class VerifiedSpec {
   bool suitableForTemp(double tempC) => tempC <= maxTempC;
 
   /// The set of plumbing systems this product's ends touch (geometric fallback,
-  /// used for products whose category does not pin a single system).
-  Set<WaterSystem> get endSystems => {for (final e in ends) e.system};
+  /// used for products whose category does not pin a single system). The
+  /// EndType.hdpeCompression enum is overloaded across materials, so for that
+  /// end-type we resolve the system from the spec's material:
+  ///   • HDPE / PEX → supply (PN16 pressure plumbing)
+  ///   • PVC / PP / multi-layer / ceramic / rubber → drainage
+  /// All other end types (threads, presses, drain openings) keep their static
+  /// per-EndType mapping in [ConnectorEnd.system].
+  Set<WaterSystem> get endSystems {
+    final out = <WaterSystem>{};
+    const supplyMaterials = {'HDPE', 'PEX', 'נחושת', 'פליז', 'פלדה', 'נירוסטה'};
+    for (final e in ends) {
+      if (e.type == EndType.hdpeCompression) {
+        out.add(supplyMaterials.contains(material)
+            ? WaterSystem.supply
+            : WaterSystem.drainage);
+      } else {
+        out.add(e.system);
+      }
+    }
+    return out;
+  }
+}
+
+/// Whether two compression-end products of the same nominal DN can really
+/// share a pipe joint. Pressure-rated materials (HDPE/PEX/copper/brass) need
+/// an exact material match because each material's compression fitting is
+/// engineered for a specific pipe OD/wall. The drainage family (PVC/PP/
+/// multi-layer/ceramic) interoperates: bell-and-spigot DN-standard sockets
+/// accept any drainage pipe of the matching DN.
+bool _materialsCompatible(String a, String b) {
+  if (a == b) return true;
+  const drainage = {'PVC', 'PP', 'רב-שכבתי', 'ceramic'};
+  return drainage.contains(a) && drainage.contains(b);
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
