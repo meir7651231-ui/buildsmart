@@ -38,7 +38,10 @@ class LipskeyCatalogProduct {
 
   String get specImageAsset {
     final p = page.toString().padLeft(2, '0');
-    return 'assets/lipskey/pages/page_$p.jpg';
+    // Polyroll products flip to their own catalog page (where the dimension
+    // diagram defining d/z/l/A/B… lives); everything else is Lipskey.
+    final dir = brand == 'פולירול' ? 'polyroll' : 'lipskey';
+    return 'assets/$dir/pages/page_$p.jpg';
   }
 
   /// Connection sizes (DN ends) of this product — the single source of truth

@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.81 · 28.5.26 · PPR שלב 1: 293 פריטי Aquatherm אמיתיים מהקטלוג (שם→צ׳יפים · dims→מפרט פר-משפחה)',
+                          'v4.82 · 28.5.26 · PPR: התמונה מתהפכת לתרשים-המימדים (עמודי פולירול, specImageAsset מודע-מותג)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
