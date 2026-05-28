@@ -21,6 +21,12 @@
 | `proto/04-contractor-projects-tasks.md` | בית · פרויקטים/אתרים · תקציב · מרכז-פיננסים(10) · site-hub(10) · משימות · smart-project · סריקה · מלאי |
 | `proto/05-profile-hubs-settings-rbac.md` | כרטיס-קבלן · RANKS · הישגים · מועדון · AI/service hubs · הגדרות+applySettings · RBAC_MATRIX · i18n |
 | `proto/06-personas-engine-selftest.md` | מנוע-SYS_ORDERS · 4 personas (חנות/שליח/עובד/מנהל) · BUTTON_REGISTRY(350) self-test |
+| `proto/07-chat-notifications.md` | צ'אט (peer + chatbot BOT_KB) · התראות (pushNotification) · הצעות-חיפוש · דיאגרמות |
+
+### חוצה-מערכת
+| קובץ | תחום |
+|---|---|
+| `design-system.md` | **מערכת-עיצוב** — צבעים/טיפוגרפיה/spacing/אנימציות (פרוטוטייפ `<style>` + Preact `tokens.css`/`global.css`) מול theme של Flutter. ⚠️ מותג teal `#1f6f6b` במקור מול orange ב-Flutter; look של זכוכית-מוטשטשת חסר |
 
 ### `preact/` — האפליקציה הקודמת `app/src/` (ה"איך תורגם ל-dial")
 | קובץ | תחום |
