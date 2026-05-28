@@ -10,6 +10,7 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 |---|---|
 | `README.md` (this) | the protocol + index |
 | `TARGET.md` | **prototype & target** — `index.html` prototype, parity goal, cutover, store launch |
+| `PARITY.md` | **port map** — full inventory of all prototype + Preact knowledge, current Flutter status, and the dial-form implementation plan, phased. The source of truth for the parity effort. |
 | `SPEC.md` | **spec map** — condensed every-screen/element/flow/status overview |
 | `spec/` | **full אפיון** — formal per-screen specs (10 sections each); `spec/README.md` is the index |
 | `STATUS.md` | current state snapshot — screens, features, wiring counts, version |
