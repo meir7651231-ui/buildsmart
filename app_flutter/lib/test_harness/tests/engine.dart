@@ -336,5 +336,47 @@ List<TestResult> testEngine() {
     ));
   }
 
+  // ── 7. ניתוב טמפרטורה — קו חם פוסל חומרים לא-עמידי-חום ───────────────────
+  // The engine routes only through materials that survive the line temp
+  // (compatibleWith filters by productSuitableForTemp). Prove the filter has
+  // real effect: an HDPE anchor (capped 40°C) offers low-temp neighbours on a
+  // cold line, but a 60°C line excludes every unsuitable one.
+  {
+    final checks = <TestCheck>[];
+    final hdpe =
+        specced.where((p) => kVerifiedSpecs[p.sku]?.material == 'HDPE');
+    if (hdpe.isEmpty) {
+      checks.add(const TestCheck(
+          name: 'לא נמצא מוצר HDPE לבדיקה (דילוג)', pass: true));
+    } else {
+      final a = hdpe.first;
+      final cold = compatibleWith(a, tempC: 20);
+      final hot = compatibleWith(a, tempC: 60);
+      final coldLowTemp =
+          cold.where((p) => !productSuitableForTemp(p, 60)).length;
+      final hotUnfit =
+          hot.where((p) => !productSuitableForTemp(p, 60)).toList();
+      checks.add(TestCheck(
+        name: 'קו קר (20°C) כולל חומרים לא-עמידי-חום ($coldLowTemp)',
+        pass: coldLowTemp > 0,
+        got: '$coldLowTemp',
+      ));
+      checks.add(TestCheck(
+        name: 'קו חם (60°C) פוסל את כל הלא-עמידים',
+        pass: hotUnfit.isEmpty,
+        expected: '0',
+        got: '${hotUnfit.length}',
+        detail: hotUnfit.take(3).map((p) => p.sku).join(' · '),
+      ));
+    }
+    results.add(TestResult(
+      id: 'engine:temp-routing',
+      category: TestCategory.engine,
+      label: 'ניתוב טמפרטורה — קו חם פוסל חומר לא-עמיד',
+      area: 'טמפרטורה',
+      checks: checks,
+    ));
+  }
+
   return results;
 }

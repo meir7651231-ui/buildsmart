@@ -250,6 +250,63 @@ String chainEdgeLabelHe(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   return '';
 }
 
+/// Plain-text "structure of the line" for the installer's BOM / WhatsApp
+/// export: each product on its own row with the joint method to the next one,
+/// using the same wording as the carousel and chain diagram. e.g.
+///   ┌─ 🚰 ברז כיור
+///   │  🔗 תבריג ½″
+///   ├─ 🔩 ניפל
+///   │  🔗 אום הידוק DN32
+///   └─ 📏 צינור
+/// Returns '' for a chain shorter than 2 items.
+String lineStructureText(List<LipskeyCatalogProduct> items) {
+  if (items.length < 2) return '';
+  final b = StringBuffer();
+  for (var i = 0; i < items.length; i++) {
+    final p = items[i];
+    final marker =
+        i == 0 ? '┌─' : (i == items.length - 1 ? '└─' : '├─');
+    b.writeln('  $marker ${p.typeEmoji} ${p.nameHe}');
+    if (i < items.length - 1) {
+      final how = chainEdgeLabelHe(p, items[i + 1]);
+      b.writeln(how.isEmpty ? '  │' : '  │  🔗 $how');
+    }
+  }
+  return b.toString().trimRight();
+}
+
+/// All distinct end-labels of a spec, joined (e.g. "תבריג ½″, אום הידוק DN32").
+String _endsLabel(VerifiedSpec s) =>
+    s.ends.map((e) => jointLabelHe(e.type, e.size)).toSet().join(', ');
+
+/// Actionable advice for a gap the engine couldn't bridge between [from] and
+/// [to]. Crucially distinguishes:
+///   • a CROSS-SYSTEM gap (supply ↔ drainage) — no adapter can join these; they
+///     meet only through a fixture (toilet/sink), so don't send the user
+///     hunting for an adapter that doesn't exist.
+///   • a SAME-SYSTEM mismatch — name the two unmet ends so the user knows
+///     exactly which transition fitting to fetch.
+String gapAdviceHe(LipskeyCatalogProduct from, LipskeyCatalogProduct to) {
+  final a = kVerifiedSpecs[from.sku], b = kVerifiedSpecs[to.sku];
+  if (a == null || b == null) {
+    return 'חפש מתאם בין ${from.categoryHe} ל-${to.categoryHe}';
+  }
+  final sysA = a.endSystems, sysB = b.endSystems;
+  bool only(Set<WaterSystem> s, WaterSystem w) => s.length == 1 && s.contains(w);
+  final crossSystem =
+      (only(sysA, WaterSystem.supply) && only(sysB, WaterSystem.drainage)) ||
+          (only(sysA, WaterSystem.drainage) && only(sysB, WaterSystem.supply));
+  if (crossSystem) {
+    return 'צד הזנה מול צד ניקוז — לא מתחברים ישירות; '
+        'חבר דרך קבוע (אסלה / כיור)';
+  }
+  final ea = _endsLabel(a), eb = _endsLabel(b);
+  if (ea.isNotEmpty && eb.isNotEmpty) {
+    return 'נדרש מתאם — צד 1: $ea · צד 2: $eb';
+  }
+  return 'אין נתיב מאומת — הוסף מתאם ביניים ידנית';
+}
+
 // ─── ערכת התקנה (smart-tree accessories + auto-derived install tools) ─────
 /// A unified install-kit summary for [p]. Two sources merged:
 ///   • [must]/[optional] — manually-curated accessories from the smart-tree

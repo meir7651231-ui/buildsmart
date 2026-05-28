@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/logic/install_engine.dart';
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/logic/pressure_drop.dart';
@@ -51,24 +52,11 @@ String _roleLabel(LipskeyCatalogProduct p, bool anchor) {
   }
 }
 
-/// Suggests what kind of adapter/reducer to look for to bridge a gap.
-String _gapHint(InstallationGap g) {
-  final vA = kVerifiedSpecs[g.from.sku], vB = kVerifiedSpecs[g.to.sku];
-  if (vA == null || vB == null) {
-    return 'חפש מתאם בין ${g.from.categoryHe} ל-${g.to.categoryHe}';
-  }
-  final sizesA = vA.ends.map((e) => e.size).toSet();
-  final sizesB = vB.ends.map((e) => e.size).toSet();
-  final typesA = vA.ends.map((e) => e.type.name).toSet();
-  final typesB = vB.ends.map((e) => e.type.name).toSet();
-  if (sizesA.isNotEmpty && sizesB.isNotEmpty && sizesA.intersection(sizesB).isEmpty) {
-    return 'נדרש מתאם/בושינג ${sizesA.first}↔${sizesB.first} — חפש "מתאם" בקטלוג';
-  }
-  if (typesA.isNotEmpty && typesB.isNotEmpty && typesA.intersection(typesB).isEmpty) {
-    return 'שיטת חיבור שונה — חפש אדפטר ${typesA.first}↔${typesB.first}';
-  }
-  return 'אין נתיב מאומת — הוסף מוצר ביניים ידנית';
-}
+/// Suggests how to bridge a gap. Delegates to the shared, unit-tested
+/// [gapAdviceHe] (related_info.dart), which distinguishes a cross-system gap
+/// (supply↔drainage — needs a fixture, not an adapter) from a same-system
+/// mismatch (names the two unmet ends).
+String _gapHint(InstallationGap g) => gapAdviceHe(g.from, g.to);
 
 // ── picker categories ─────────────────────────────────────────────────────────
 class _PickerCategory {
@@ -743,7 +731,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                 icon: Icons.science_outlined,
                 label: '🧪 אודיט',
                 onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
+                    MaterialPageRoute<void>(
                         builder: (_) => const AuditScreen())),
               ),
             ),
@@ -2030,6 +2018,67 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     ),
                   ]),
                 ),
+                // ── Temperature suitability (heat-rating guard) ─────────
+                // The engine already routes AROUND temp-unsuitable materials,
+                // but a user-picked anchor (e.g. an HDPE fitting, capped ~40°C)
+                // can still sit on a hot line. Flag it so they swap to a
+                // heat-resistant material instead of shipping a line that melts.
+                Builder(builder: (_) {
+                  final temp = ref.read(lineMaxTempProvider);
+                  final unfit = plan.items
+                      .where((p) => !productSuitableForTemp(p, temp))
+                      .toList();
+                  if (unfit.isEmpty) return const SizedBox.shrink();
+                  const warn = Color(0xFFEF4444);
+                  return Container(
+                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A0E0E),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: warn.withOpacity(0.5)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          const Icon(Icons.local_fire_department,
+                              color: warn, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'קו חם ($temp°C): ${unfit.length} מוצרים אינם עומדים בחום',
+                              style: const TextStyle(
+                                  color: warn,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                        ]),
+                        const SizedBox(height: 6),
+                        for (final p in unfit.take(6))
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 2),
+                            child: Text(
+                              '• ${p.nameHe} — עד ${productMaxTempC(p)?.toStringAsFixed(0) ?? "?"}°C',
+                              style: const TextStyle(
+                                  color: Color(0xFFFCA5A5), fontSize: 11),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'החלף לחומר עמיד-חום: PEX / נחושת / פליז.',
+                          style: TextStyle(
+                              color: Color(0xFFFCA5A5),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
                 // ── Pressure-drop estimate ─────────────────────────────
                 Builder(builder: (_) {
                   final pd = estimatePressureDrop(
@@ -2392,16 +2441,9 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     if (plan.items.length >= 2) {
       buf.writeln('');
       buf.writeln('🔗 מבנה הקו:');
-      for (var i = 0; i < plan.items.length; i++) {
-        final p = plan.items[i];
-        final marker = i == 0
-            ? '┌─'
-            : i == plan.items.length - 1
-                ? '└─'
-                : '├─';
-        buf.writeln('  $marker ${p.typeEmoji} ${p.nameHe}');
-        if (i < plan.items.length - 1) buf.writeln('  │');
-      }
+      // Each product + the joint method to the next (same wording as the
+      // carousel / chain diagram), so the installer reads exactly how to join.
+      buf.writeln(lineStructureText(plan.items));
     }
 
     // ── Price estimate ────────────────────────────────────────────────────
