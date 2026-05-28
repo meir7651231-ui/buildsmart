@@ -15,7 +15,7 @@ void main() {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     expect(find.text('BuildSmart'), findsOneWidget);
-    // Default catalog tab now lands on the מאתר (finder); its group rows show.
+    // Default catalog tab now lands on 'בית' (finder home); its group rows show.
     expect(find.text('ברזים'), findsAtLeastNWidgets(1));
   });
 
@@ -80,7 +80,7 @@ void main() {
   testWidgets('קטגוריות section shows all 11 verbatim categories', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    // 'מאתר' is now the default landing — open the 'קטגוריות' section first.
+    // 'בית' is now the default landing — open the 'קטגוריות' section first.
     final catChip = find.text('קטגוריות').first;
     await t.ensureVisible(catChip);
     await t.pumpAndSettle();

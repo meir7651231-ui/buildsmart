@@ -31,7 +31,7 @@ List<TestResult> testFinder() {
     id: 'finder:groups',
     category: TestCategory.catalog,
     label: 'מאתר — קבוצות',
-    area: 'מאתר',
+    area: 'בית',
     checks: [
       TestCheck(
         name: 'קבוצות זרות (אין קטגוריה בשתי קבוצות)',
@@ -69,7 +69,7 @@ List<TestResult> testFinder() {
     id: 'finder:subs',
     category: TestCategory.catalog,
     label: 'מאתר — תת-סוגים מנוהלים',
-    area: 'מאתר',
+    area: 'בית',
     checks: [
       TestCheck(
         name: 'מכסים כל קטגוריה עם מוצרים (אין יתום)',
@@ -129,7 +129,7 @@ List<TestResult> testFinder() {
     id: 'finder:search',
     category: TestCategory.catalog,
     label: 'חיפוש מוצרים סלחני',
-    area: 'מאתר',
+    area: 'בית',
     checks: searchChecks,
   ));
 
