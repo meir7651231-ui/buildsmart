@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
+import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -93,6 +94,8 @@ enum _Unit { single, pack, pallet }
 
 class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   late int _selectedIdx;
+  LipskeyCatalogProduct? _chipOverride;
+  String? _openPickerKey; // 'type' | 'subtype' | 'model' | 'color'
   int? _activeStage;
   late Map<int, bool> _accSelected;
   int _qty = 1;
@@ -311,7 +314,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   List<LipskeyCatStage> get _stages =>
       lipskeyStagesFor(_current.sku, _current.categoryHe);
   LipskeyCatalogProduct get _current =>
-      widget.categoryProducts[_selectedIdx];
+      _chipOverride ?? widget.categoryProducts[_selectedIdx];
 
   @override
   void initState() {
@@ -326,6 +329,17 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
   void _selectVariant(int i) {
     setState(() {
       _selectedIdx = i;
+      _chipOverride = null;
+      _openPickerKey = null;
+      _accSelected = {for (var j = 0; j < _accs.length; j++) j: false};
+      _activeStage = null;
+    });
+  }
+
+  void _switchByChip(LipskeyCatalogProduct q) {
+    setState(() {
+      _chipOverride = q;
+      _openPickerKey = null;
       _accSelected = {for (var j = 0; j < _accs.length; j++) j: false};
       _activeStage = null;
     });
@@ -456,7 +470,15 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                     fontStyle: FontStyle.italic)),
                           ],
                           const SizedBox(height: 8),
-                          _StructuredChips(parsed: p.parsedName),
+                          _InteractiveChips(
+                            product: p,
+                            openPickerKey: _openPickerKey,
+                            onChipTap: (key) => setState(() {
+                              _openPickerKey =
+                                  _openPickerKey == key ? null : key;
+                            }),
+                            onVariantSelect: _switchByChip,
+                          ),
                         ],
                       ),
                     ),
@@ -1579,56 +1601,381 @@ Widget _SpecRow(String emoji, String label, String value) => Padding(
       ),
     );
 
-/// Structured decomposition of the name (צעד 71): סוג · תת-סוג · מותג · גוון.
-/// Each facet is a labelled chip; absent facets are omitted, so a bare name
-/// shows nothing rather than empty placeholders.
-class _StructuredChips extends StatelessWidget {
-  const _StructuredChips({required this.parsed});
+/// Interactive attribute chips (צעד 71+).
+/// All four chip kinds use frame-based sibling detection:
+/// orange border = has same-frame siblings with a different attribute value.
+class _InteractiveChips extends StatelessWidget {
+  const _InteractiveChips({
+    required this.product,
+    required this.openPickerKey,
+    required this.onChipTap,
+    required this.onVariantSelect,
+  });
 
-  final ({String? type, String? subtype, String? brand, String? variant})
-      parsed;
+  final LipskeyCatalogProduct product;
+  final String? openPickerKey; // 'type' | 'subtype' | 'model' | 'color'
+  final void Function(String key) onChipTap;
+  final void Function(LipskeyCatalogProduct) onVariantSelect;
+
+  static const _colorModifiers = {'מוברש', 'מט'};
+
+  // ── צבע: frame-based (אותו סוג, צבע שונה) ───────────────────────────────
+  static String _colorFrame(LipskeyCatalogProduct p) => p.nameHe
+      .split(RegExp(r'\s+'))
+      .where((w) => kindOf(w) != AttrKind.color && !_colorModifiers.contains(w))
+      .join(' ');
+
+  static List<LipskeyCatalogProduct> _variantsColor(LipskeyCatalogProduct p) {
+    final frame = _colorFrame(p);
+    final seen = <String>{};
+    final all = <LipskeyCatalogProduct>[];
+    for (final q in kLipskeyCatalog) {
+      if (q.categoryHe != p.categoryHe) continue;
+      final v = q.colorVariant;
+      if (v == null || v.isEmpty) continue;
+      if (_colorFrame(q) != frame) continue;
+      if (seen.add(v)) all.add(q);
+    }
+    all.sort((a, b) {
+      if (a.sku == p.sku) return -1;
+      if (b.sku == p.sku) return 1;
+      return (a.colorVariant ?? '').compareTo(b.colorVariant ?? '');
+    });
+    return all;
+  }
+
+  // ── תת-סוג: frame-based (אותו סוג, תת-סוג שונה) ─────────────────────────
+  static List<LipskeyCatalogProduct> _variantsSubtype(
+      LipskeyCatalogProduct p) {
+    const kind = AttrKind.subtype;
+    final frame = p.nameHe
+        .split(RegExp(r'\s+'))
+        .where((w) => kindOf(w) != kind)
+        .join(' ');
+    final seen = <String>{};
+    final all = <LipskeyCatalogProduct>[];
+    for (final q in kLipskeyCatalog) {
+      if (q.categoryHe != p.categoryHe) continue;
+      final v = variantValue(q, kind);
+      if (v.isEmpty) continue;
+      if (q.nameHe
+              .split(RegExp(r'\s+'))
+              .where((w) => kindOf(w) != kind)
+              .join(' ') !=
+          frame) continue;
+      if (seen.add(v)) all.add(q);
+    }
+    all.sort((a, b) {
+      if (a.sku == p.sku) return -1;
+      if (b.sku == p.sku) return 1;
+      return variantValue(a, kind).compareTo(variantValue(b, kind));
+    });
+    return all;
+  }
+
+  // ── סוג מורכב: multi-word types first, then type+qualifier ──────────────
+  static String _resolveCompoundType(LipskeyCatalogProduct p) {
+    final name = p.nameHe;
+    final words = name.split(RegExp(r'\s+'));
+
+    // Multi-word types matched as substring (longest first).
+    final multiWord = kLipskeyTypes.where((t) => t.contains(' ')).toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    for (final t in multiWord) {
+      if (name.contains(t)) return t;
+    }
+
+    // Single-word type + optional trailing qualifier.
+    for (final typeWord in kLipskeyTypes) {
+      if (typeWord.contains(' ')) continue;
+      final idx = words.indexOf(typeWord);
+      if (idx < 0) continue;
+      if (idx + 1 >= words.length) return typeWord;
+      final next = words[idx + 1];
+      if (kindOf(next) != null) return typeWord;
+      if (_colorModifiers.contains(next)) return typeWord;
+      if (next.length > 2 &&
+          (next.startsWith('ל') || next.startsWith('ב'))) return typeWord;
+      return '$typeWord $next';
+    }
+    return '';
+  }
+
+  // ── סוג: category-wide (כל הסוגים בקטגוריה, כמו findTypeSiblings) ────────
+  static List<LipskeyCatalogProduct> _variantsType(LipskeyCatalogProduct p) {
+    final compound = _resolveCompoundType(p);
+    if (compound.isEmpty) return [];
+    final byCompound = <String, LipskeyCatalogProduct>{compound: p};
+    for (final q in kLipskeyCatalog) {
+      if (q.categoryHe != p.categoryHe) continue;
+      final qc = _resolveCompoundType(q);
+      if (qc.isEmpty || byCompound.containsKey(qc)) continue;
+      byCompound[qc] = q;
+    }
+    if (byCompound.length <= 1) return [];
+    return byCompound.values.toList()
+      ..sort((a, b) {
+        if (a.sku == p.sku) return -1;
+        if (b.sku == p.sku) return 1;
+        return _resolveCompoundType(a).compareTo(_resolveCompoundType(b));
+      });
+  }
+
+  // ── דגם: category-wide (כל הדגמים בקטגוריה, כמו findAttrSiblings(model)) ─
+  static List<LipskeyCatalogProduct> _variantsModel(LipskeyCatalogProduct p) {
+    final seen = <String>{};
+    final all = <LipskeyCatalogProduct>[];
+    for (final q in kLipskeyCatalog) {
+      if (q.categoryHe != p.categoryHe) continue;
+      final m = q.brandModel;
+      if (m == null || m.isEmpty) continue;
+      if (seen.add(m)) all.add(q);
+    }
+    if (all.length <= 1) return [];
+    return all
+      ..sort((a, b) {
+        if (a.sku == p.sku) return -1;
+        if (b.sku == p.sku) return 1;
+        return (a.brandModel ?? '').compareTo(b.brandModel ?? '');
+      });
+  }
+
+  // ── Unified sibling check & picker options ───────────────────────────────
+  static bool _hasSiblings(LipskeyCatalogProduct p, String key) {
+    switch (key) {
+      case 'type':
+        return _variantsType(p).isNotEmpty;
+      case 'model':
+        return _variantsModel(p).isNotEmpty;
+      case 'color':
+        final myVal = p.colorVariant;
+        if (myVal == null || myVal.isEmpty) return false;
+        final frame = _colorFrame(p);
+        return kLipskeyCatalog.any((q) {
+          final qv = q.colorVariant;
+          return q.categoryHe == p.categoryHe &&
+              q.sku != p.sku &&
+              qv != null &&
+              qv.isNotEmpty &&
+              qv != myVal &&
+              _colorFrame(q) == frame;
+        });
+      case 'subtype':
+        return _variantsSubtype(p).length > 1;
+      default:
+        return false;
+    }
+  }
+
+  // Returns (display label, target product) for each picker option.
+  static List<(String, LipskeyCatalogProduct)> _pickerOptions(
+      LipskeyCatalogProduct p, String key) {
+    switch (key) {
+      case 'type':
+        return _variantsType(p).map((q) {
+          final ct = _resolveCompoundType(q);
+          final label = ct.contains(' ') ? ct.split(' ').last : ct;
+          return (label, q);
+        }).toList();
+      case 'model':
+        return _variantsModel(p)
+            .map((q) => (q.brandModel ?? '', q))
+            .toList();
+      case 'color':
+        return _variantsColor(p)
+            .map((q) => (q.colorVariant ?? '', q))
+            .toList();
+      case 'subtype':
+        return _variantsSubtype(p)
+            .map((q) => (variantValue(q, AttrKind.subtype), q))
+            .toList();
+      default:
+        return [];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final chips = <({String label, String value, Color color})>[
+    final parsed = product.parsedName;
+    final compound = _resolveCompoundType(product);
+
+    final entries = <({String label, String value, Color color, String key})>[
       if (parsed.type != null)
-        (label: 'סוג', value: parsed.type!, color: const Color(0xFF3DD9B0)),
+        (
+          label: 'סוג',
+          value: compound.isNotEmpty ? compound : parsed.type!,
+          color: const Color(0xFFFF9D4D),
+          key: 'type',
+        ),
       if (parsed.subtype != null)
-        (label: 'תת-סוג', value: parsed.subtype!, color: const Color(0xFF7FD0FF)),
+        (
+          label: 'תת-סוג',
+          value: parsed.subtype!,
+          color: const Color(0xFF7FD0FF),
+          key: 'subtype',
+        ),
       if (parsed.brand != null)
-        (label: 'דגם', value: parsed.brand!, color: const Color(0xFFFF9D4D)),
+        (
+          label: 'דגם',
+          value: parsed.brand!,
+          color: const Color(0xFFFF9D4D),
+          key: 'model',
+        ),
       if (parsed.variant != null)
-        (label: 'גוון', value: parsed.variant!, color: const Color(0xFFC9A7FF)),
+        (
+          label: 'גוון',
+          value: parsed.variant!,
+          color: const Color(0xFFC9A7FF),
+          key: 'color',
+        ),
     ];
-    if (chips.isEmpty) return const SizedBox.shrink();
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
+    if (entries.isEmpty) return const SizedBox.shrink();
+
+    final activeOptions = openPickerKey != null
+        ? _pickerOptions(product, openPickerKey!)
+        : <(String, LipskeyCatalogProduct)>[];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final c in chips)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: c.color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(7),
-              border: Border.all(color: c.color.withValues(alpha: 0.35)),
-            ),
-            child: RichText(
-              text: TextSpan(children: [
-                TextSpan(
-                    text: '${c.label} ',
-                    style: const TextStyle(
-                        color: Color(0xFF888888), fontSize: 10)),
-                TextSpan(
-                    text: c.value,
-                    style: TextStyle(
-                        color: c.color,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700)),
-              ]),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [for (final c in entries) _buildChip(c)],
+        ),
+        if (openPickerKey != null && activeOptions.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          _ChipPickerRow(
+            options: activeOptions,
+            currentSku: product.sku,
+            onSelect: onVariantSelect,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildChip(({String label, String value, Color color, String key}) c) {
+    final tappable = _hasSiblings(product, c.key);
+    final isOpen = openPickerKey == c.key;
+    final chip = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isOpen
+            ? c.color.withValues(alpha: 0.22)
+            : c.color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(7),
+        border: Border.all(
+          color: tappable
+              ? const Color(0xFFFF9D4D)
+              : c.color.withValues(alpha: 0.35),
+          width: tappable ? 1.5 : 1.0,
+        ),
+      ),
+      child: RichText(
+        text: TextSpan(children: [
+          TextSpan(
+            text: '${c.label} ',
+            style: const TextStyle(color: Color(0xFF888888), fontSize: 10),
+          ),
+          TextSpan(
+            text: c.value,
+            style: TextStyle(
+              color: c.color,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
             ),
           ),
-      ],
+          if (tappable)
+            TextSpan(
+              text: isOpen ? ' ×' : ' ›',
+              style: const TextStyle(color: Color(0xFFFF9D4D), fontSize: 10),
+            ),
+        ]),
+      ),
+    );
+    if (!tappable) return chip;
+    return GestureDetector(onTap: () => onChipTap(c.key), child: chip);
+  }
+}
+
+class _ChipPickerRow extends StatelessWidget {
+  const _ChipPickerRow({
+    required this.options,
+    required this.currentSku,
+    required this.onSelect,
+  });
+
+  final List<(String, LipskeyCatalogProduct)> options;
+  final String currentSku;
+  final void Function(LipskeyCatalogProduct) onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    if (options.isEmpty) return const SizedBox.shrink();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+            color: const Color(0xFFFF9D4D).withValues(alpha: 0.4)),
+      ),
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          for (final opt in options)
+            _PickerOption(
+              value: opt.$1,
+              isSelected: opt.$2.sku == currentSku,
+              onTap: () => onSelect(opt.$2),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PickerOption extends StatelessWidget {
+  const _PickerOption({
+    required this.value,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String value;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFFFF9D4D).withValues(alpha: 0.2)
+              : const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color:
+                isSelected ? const Color(0xFFFF9D4D) : const Color(0xFF444444),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        child: Text(
+          value,
+          style: TextStyle(
+            color:
+                isSelected ? const Color(0xFFFF9D4D) : const Color(0xFFCCCCCC),
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+          ),
+        ),
+      ),
     );
   }
 }

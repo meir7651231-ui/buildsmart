@@ -7,7 +7,7 @@
 - **כפתור הגדרות:** ב-app bar של ה-shell יש `_CatalogMenuButton` שפותח את `CatalogSettingsScreen.route()`.
 - **providers מרכזיים שהמסך צורך (מוגדרים בראש הקובץ, ברובם `StateProvider` in-memory):**
   - `catalogSectionProvider` (`String`, ברירת מחדל `'הכל'`) — ה-section הפעיל.
-  - `catalogSectionsListProvider` (`List<String>`, ברירת מחדל `['תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם']`) — רשימת ה-sections (לא כולל `'הכל'`).
+  - `catalogSectionsListProvider` (`List<String>`, ברירת מחדל `['מאתר', 'תאימות', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים']`) — רשימת ה-sections (לא כולל `'הכל'`).
   - `catalogListItemsProvider` (`Map<String, Set<String>>`) — אילו כותרות קטגוריה משויכות לכל רשימה מותאמת.
   - `searchPanelOpenProvider`, `searchQueryProvider`, `searchScopeProvider` (`'הכל'`), `recentSearchesProvider` (`List<String>`, מקס' 8) — מצב פאנל החיפוש.
   - `smartTreeCatProvider` / `smartTreeQueryProvider` — דריל בעץ החכם.
@@ -38,11 +38,13 @@
    - **שורת section chips** (`_SectionChipsRow`) — pill `'הכל'` קבוע + pills דינמיים מ-`catalogSectionsListProvider` + כפתור `[+]`. גם נסתרת בגלילה.
    - **גוף** (`_CatalogBody`) לפי ה-section הפעיל:
      - `'הכל'` → `_AllOverview`: בלוקי תצוגה מקדימה ("הצג הכל") עבור קטגוריות / חיפושים אחרונים / תאימות / מועדפים / עץ חכם.
+     - `'מאתר'` → `FinderScreen` (מוטמע; ראו `spec/catalog-secondary.md` §מאתר).
      - `'עץ חכם'` → `_SmartTreeSection` (רשימת קטגוריות → רשימת מוצרים).
      - `'קטגוריות'` → `_CatalogList` (12 שורות `_CatalogRow`).
      - `'מועדפים'` → `_FavoritesSection`.
      - `'חיפושים אחרונים'` → `_RecentSearchesSection`.
      - `'תאימות'` → `InstallStudioScreen` (מוטמע).
+     - `'וריאנטים'` → `_VariantsSection`.
      - section מותאם אחר → `_SectionHeader` (כותרת + ✏️) ומתחת `_FilteredCatalogList` או `_EmptySection`.
 
 ## 4. טבלת אלמנטים
@@ -106,7 +108,7 @@
 ## 6. חוקים עסקיים ולוגיקה
 
 - **אינדקס מילים:** `kIndexMinWordLen = 2`; `indexableWord(w) => w.length >= 2` (`lib/data/lipskey_catalog.dart:304-305`). `lipskeyWordIndex()` בונה inverted index lazy ומדלג על טוקנים באורך 1.
-- **טריגר תוצאות מוצר חיות:** מוצגות רק כש-`query.trim().length >= 2` וה-scope הוא `'הכל'`/`'מוצרים'`; match על `nameHe.contains(query)` או `sku` (case-insensitive); תקרה `take(40)`.
+- **תוצאות מוצר חיות (חיפוש סלחני):** מוצגות כש-`query.trim().length >= 2` וה-scope `'הכל'`/`'מוצרים'`. ההתאמה דרך `catalogProductMatchesQuery(p, query, {requireAll})`: מנרמל גרשיים/מרכאות עבריות (״ ׳ → `"` `'`), `contains` על שם+קטגוריה+מק"ט+צבע, מילה-מילה (כל מילה עשויה ליפול בכל שדה), עם הרחבת מילים נרדפות `kSearchSynonyms` (למשל שירותים→מושב/אסלות וכיורים — מדויק, לא מחברי-אסלה). ב-call-site: התאמת AND קודם, ואם ריקה — נפילה רכה ל-`requireAll:false` (מילה כלשהי) כדי שלא יתקבל מסך ריק. **דירוג רלוונטיות** (`searchRelevance`): כש-`sort==byOrder` ממיינים לפי ניקוד — התאמת שם (100/20) > קטגוריה (8) > צבע (6) > נרדפת (12/4), כך שהמוצר המבוקש עולה ראשון; מיון ↕️ מפורש גובר. תקרה `take(40)`.
 - **scope mapping ב-`_SearchResultsList`:** `'מוצרים'`→`category`; `'קטגוריות'`→`setting`/`menu`; `'מסכים'`→`screen`/`persona`/`action`; `'הכל'`→הכל. `SearchEntry.matches` עושה `contains` על title+breadcrumb (ללא סף אורך משלו).
 - **recents:** מקס' 8 (`if (list.length > 8) list.removeRange(8, list.length)`), newest-first, dedup (remove+insert(0)). נשמר רק אם `searchHistoryEnabled`.
 - **`_facetTokens`:** מסיר סוגריים/מרכאות/פיסוק, מפצל ב-whitespace, ומשאיר רק מילים `length >= 2` שאינן מכילות `"`/`″` ואינן מכילות ספרה — כדי לפצל facets לפי מילים מאפיינות בלבד.
