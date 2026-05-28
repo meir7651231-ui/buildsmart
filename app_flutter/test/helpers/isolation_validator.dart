@@ -14,7 +14,7 @@ abstract final class IsolationValidator {
   static void assertNoScreenImports(String filePath) {
     final lines = _codeLines(filePath);
     final violations = lines
-        .where((l) => l.contains('import') && l.contains('screens/'))
+        .where((l) => l.trimLeft().startsWith('import ') && l.contains('screens/'))
         .toList();
     expect(
       violations,
@@ -27,28 +27,33 @@ abstract final class IsolationValidator {
 
   /// Reads [filePath] and fails if it contains R2-violating patterns:
   /// showDialog · showModalBottomSheet · Navigator.push · new Scaffold.
+  /// String literal contents are stripped before scanning to avoid false positives.
   static void assertNoR2Patterns(String filePath) {
-    final lines = _codeLines(filePath);
-    const banned = [
-      'showDialog',
-      'showModalBottomSheet',
-      'Navigator.push',
-      'Navigator.pushNamed',
+    // Strip string literal contents so patterns inside strings don't fire.
+    final lines = _codeLines(filePath).map(_stripStrings).toList();
+
+    // Patterns are matched as whole call-sites (word boundary + optional space + '(')
+    // to avoid matching identifiers that contain the pattern as a substring.
+    const bannedPatterns = [
+      r'\bshowDialog\s*\(',
+      r'\bshowModalBottomSheet\s*\(',
+      r'\bNavigator\.push\s*\(',
+      r'\bNavigator\.pushNamed\s*\(',
     ];
-    for (final pattern in banned) {
-      final hits = lines.where((l) => l.contains(pattern)).toList();
+    for (final pattern in bannedPatterns) {
+      final re = RegExp(pattern);
+      final hits = lines.where(re.hasMatch).toList();
       expect(
         hits,
         isEmpty,
         reason:
-            'R2 violation — $filePath contains "$pattern":\n'
+            'R2 violation — $filePath contains "${pattern.replaceAll(r'\b', '').replaceAll(r'\s*', '')}": \n'
             '${hits.join('\n')}',
       );
     }
-    // Scaffold flagged whenever the constructor is called in any position
-    final scaffoldHits = lines
-        .where((l) => l.contains('Scaffold('))
-        .toList();
+    // Scaffold: word boundary ensures we don't match 'myScaffold(' etc.
+    final scaffoldRe = RegExp(r'\bScaffold\s*\(');
+    final scaffoldHits = lines.where(scaffoldRe.hasMatch).toList();
     expect(
       scaffoldHits,
       isEmpty,
@@ -79,6 +84,13 @@ abstract final class IsolationValidator {
   }
 
   // ── internals ──────────────────────────────────────────────────────────────
+
+  /// Replaces single- and double-quoted string literal contents with empty
+  /// placeholders. Handles backslash-escaped characters inside strings.
+  /// Used before R2 pattern scanning to avoid false positives in string literals.
+  static String _stripStrings(String line) => line
+      .replaceAll(RegExp(r"'[^'\\]*(?:\\.[^'\\]*)*'"), "''")
+      .replaceAll(RegExp(r'"[^"\\]*(?:\\.[^"\\]*)*"'), '""');
 
   /// Returns non-empty, non-comment lines from [filePath].
   /// Strips both // single-line and /* */ block comments.

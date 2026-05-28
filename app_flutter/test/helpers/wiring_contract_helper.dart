@@ -53,25 +53,18 @@ abstract final class WiringContractHelper {
     );
   }
 
-  /// Asserts that [value] is not null and not empty (for String/List).
+  /// Asserts that [value] is not null and not empty (String/List/Set/Map).
   static void expectNonEmpty(String behavior, dynamic value) {
     expect(
       value,
       isNotNull,
       reason: 'WIRING ✅ "$behavior" — value is null',
     );
-    if (value is String) {
+    if (value is String || value is Iterable || value is Map) {
       expect(
         value,
         isNotEmpty,
-        reason: 'WIRING ✅ "$behavior" — string is empty',
-      );
-    }
-    if (value is List) {
-      expect(
-        value,
-        isNotEmpty,
-        reason: 'WIRING ✅ "$behavior" — list is empty',
+        reason: 'WIRING ✅ "$behavior" — collection is empty',
       );
     }
   }
