@@ -48,10 +48,12 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🛒', title: 'חנות',   breadcrumb: '',  type: SearchType.screen),
 
   // ── Secondary reachable screens ────────────────────────────────────────
-  SearchEntry(emoji: '🔧', title: 'סטודיו התקנות',     breadcrumb: 'קטלוג › תאימות', type: SearchType.screen),
-  SearchEntry(emoji: '🧭', title: 'מאתר',              breadcrumb: 'קטלוג',          type: SearchType.screen),
-  SearchEntry(emoji: '🏷️', title: 'ספקים ומותגים',     breadcrumb: 'קטלוג',          type: SearchType.screen),
-  SearchEntry(emoji: '🔬', title: 'מרכז בדיקות רגרסיה', breadcrumb: 'BS',             type: SearchType.screen),
+  SearchEntry(emoji: '🔧', title: 'סטודיו התקנות',     breadcrumb: 'קטלוג › תאימות',         type: SearchType.screen),
+  SearchEntry(emoji: '🧪', title: 'אודיט תרחישים',     breadcrumb: 'קטלוג › תאימות › סטודיו', type: SearchType.screen),
+  SearchEntry(emoji: '💾', title: 'פרויקטים שמורים',   breadcrumb: 'קטלוג › תאימות › סטודיו', type: SearchType.screen),
+  SearchEntry(emoji: '🧭', title: 'מאתר',              breadcrumb: 'קטלוג',                  type: SearchType.screen),
+  SearchEntry(emoji: '🏷️', title: 'ספקים ומותגים',     breadcrumb: 'קטלוג',                  type: SearchType.screen),
+  SearchEntry(emoji: '🔬', title: 'מרכז בדיקות רגרסיה', breadcrumb: 'BS',                     type: SearchType.screen),
 
   // ── Search tools ───────────────────────────────────────────────────────
   SearchEntry(emoji: '🎤', title: 'חיפוש קולי', breadcrumb: 'חיפוש', type: SearchType.action),

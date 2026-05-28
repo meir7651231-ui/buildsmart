@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v4.50` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v4.59` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — overview blocks (categories / recent / compat / favorites / smart-tree),
@@ -44,6 +44,33 @@ addresses/invoices/warranty/biometric. All need data, a server, or device APIs.
 - **Gap hints** — each missing connection shows a suggested adapter to search
 - **Temperature pill** — human labels (קר / חם / חם מאוד) with color coding
 
+## Compatibility & install engine (v4.55–v4.59 — correct-by-construction)
+- **Verified-spec graph** — `lipskey_verified_connections.dart`: 808/935 SKUs
+  carry a `VerifiedSpec` (ends + material + system). A real joint is either a
+  `directMatesWith` (thread/press/drain) or a `pipeSharedWith` compression
+  socket — the latter counts only when EXACTLY ONE side is a pipe and the
+  materials are family-compatible. So a coupling never "connects" to a coupling.
+- **Bore-aware routing** — `findShortestPath` / `findAlternativePaths` (Yen
+  K-shortest) in `install_engine.dart`; `_edgeCost` weights family transitions,
+  rewards direct mates and penalises narrow bores → BFS builds wide chains.
+- **Full auto-compliance** — `_autoAddCompliance` inserts every safety item at
+  its canonical chain position (shutoff, Bladder, PRV, TMTV, dielectric union,
+  PEX expansion, recirc valves, pump strainer/flex). Goal: 0 critical open by
+  construction, across all 14 checks (critical + warning + info).
+- **Pressure-drop physics** — `pressure_drop.dart`: Darcy–Weisbach with
+  Reynolds-aware friction, static head, per-fitting K-values, ת"י 1205 drainage
+  slope. Returns ΔP, min bore, bottleneck + flow-fix suggestions.
+- **Install kit** — `install_kit.dart` / `installKitFor` derives wrenches /
+  crimpers / sealants from a product's actual ends.
+- **Saved projects** — `state/saved_projects.dart` (SharedPreferences) +
+  Install-Studio save/load/rename; **audit screen** runs 20 random scenarios live.
+
+## Product card — info strips (v4.55)
+The internal product sheet (`lipskey_product_sheet.dart`) renders the cloud chip
+system PLUS seven inline-expand strips that pull data INTO the card (no nav):
+מאתר · תאימות · ערכת התקנה · וריאנטים · תקינות · מפרט הנדסי · מחיר. Helpers in
+`data/related_info.dart`.
+
 ## Catalog chip system (v4.48–v4.50)
 Product name words are parsed into colored chips in the product list and sheet:
 - **Type chip** (purple) — from `kLipskeyTypes` (e.g. ברז, זווית, מסעף, פיית, כפה)
@@ -57,14 +84,25 @@ Variant pickers (type/model/color/subtype) expand inline on chip tap in both
 the product list card and the product detail sheet.
 
 ## Tests
-27 test files across `test/`. Key suites:
+40+ test files across `test/`. Key suites:
 - **chip_structure** — chip type assignment + sibling pickers (31 checks)
 - **dedup** — variant dedup + attrWordSet (27 checks)
 - **product_journey** — 8 specific products + all 935 sheets render (49 checks)
 - **widget** — shell boots + section previews
 - **install_builder / manifold / loop / zone_tmtv / auto_compliance** — BOM engine (50 checks)
+- **compat_50_samples / dn_pipe_gaps / find_all_four** — compatibility correctness (0 false mates)
+- **pressure_drop(_advanced) / alt_paths / long_chain** — routing + ΔP physics
+- **full_compliance_audit / ten_scenarios_audit** — 0 critical open across scenarios
+- **install_kit / product_sheet_strips / compat_coverage** — kit derivation + card strips + coverage
 - **catalog_health / catalog_regression / robustness** — catalog data integrity
-- **wiring** — search synonyms + finder grouping
+- **wiring / knowledge_protocol** — search synonyms + finder grouping + protocol "teeth"
+
+**In-app full-regression button** (`🔬 מרכז בדיקות רגרסיה`, the
+`▶ הרץ בדיקת רגרסיה מלאה` action): the harness in `lib/test_harness/` mirrors
+these guarantees so any device can self-test. Modules: dsync · tabs · buttons ·
+products · behavior · dupes · sections · settings · catalog · finder · **מנוע**
+(`tests/engine.dart` — compat validity, no fitting↔fitting, chain build,
+auto-compliance, ΔP, install-kit). Filterable by the `מנוע` pill.
 
 `flutter analyze` clean; `flutter test` green (pre-existing failures in
 `category_scan_test` and `wiring_test` are catalog-data issues, not code bugs).

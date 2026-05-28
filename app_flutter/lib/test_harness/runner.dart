@@ -4,6 +4,7 @@ import 'package:buildsmart/test_harness/tests/buttons.dart';
 import 'package:buildsmart/test_harness/tests/catalog.dart';
 import 'package:buildsmart/test_harness/tests/dsync.dart';
 import 'package:buildsmart/test_harness/tests/dupes.dart';
+import 'package:buildsmart/test_harness/tests/engine.dart';
 import 'package:buildsmart/test_harness/tests/finder.dart';
 import 'package:buildsmart/test_harness/tests/products.dart';
 import 'package:buildsmart/test_harness/tests/sections.dart';
@@ -55,6 +56,9 @@ Future<void> runRegression(WidgetRef ref) async {
     await _yieldToUi();
 
     results.addAll(testFinder());
+    await _yieldToUi();
+
+    results.addAll(testEngine());
   } on Object catch (e, st) {
     results.add(
       TestResult(
