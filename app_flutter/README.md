@@ -6,14 +6,19 @@ running — this folder is the long-term native target.
 
 ## Status
 
-**Phase 0 — shell.**
-- 5-FAB rail at the bottom (BS · Search · BS-mode · Menu · BS)
-- BS dial opens 5 personas verbatim (קבלן · מנהל המערכת · חנות ספק · שליח · עובד)
-- Menu dial opens 4 tabs (בית · הפרויקטים · רכש · הגדרות)
-- Hebrew RTL by default (`locale: he-IL`)
-- Dark Material 3 theme with brand orange + dial tokens ported from
-  `../app/src/styles/tokens.css`
-- 3/3 widget tests passing · web build 2.0 MB main.dart.js
+**Active development — ~v4.71.** Light-mode, RTL, store-launch target.
+- 4-tab bottom-nav (קטלוג · שיחות · התראות · חנות) + a floating cart FAB. The BS
+  dial opens via the AppBar wordmark (5 personas); the **Menu + Search dials are
+  built but not yet wired to a trigger** (see `knowledge/spec/shell-and-dials.md` §7).
+- Real catalog: ~935 Lipskey products + forgiving search + finder + variants +
+  smart-tree + product sheet with attribute chips.
+- **Install Studio + BOM/compatibility engine** (verified-spec graph, Dijkstra
+  routing, safety checklist) — deeper than the prototype.
+- Cart + checkout, chats, notifications, 4 settings screens (persisted).
+- Hebrew RTL (`locale: he-IL`); **light** theme (`AppTheme.light`, brand orange).
+- 52 test files + in-app regression harness (12 suites); `flutter analyze` clean;
+  `main.dart.js` ≈ 4.8 MB.
+- Port roadmap to full prototype + Preact parity: **`knowledge/PARITY.md`**.
 
 ## Stack
 
@@ -33,7 +38,8 @@ The whole point of rewriting is to keep the **architecture** that
 took INSP-0009 → INSP-0044 to crystallise. See `../app/RULES.md` and
 `../CLAUDE.md` for the canonical R1-R9. In summary:
 
-1. **R1** — exactly 5 FABs, never more, never less.
+1. **R1** — 5 FABs is the *rule*; the current shell realizes a 4-tab + cart-FAB
+   variant (only the BS dial wired) — see `knowledge/spec/shell-and-dials.md` §7.
 2. **R2** — אין חלון, נקודה. No new feature replaces the body —
    everything opens as a dial.
 3. **R3** — settings = dial only, never sheets/modals.
@@ -60,11 +66,13 @@ flutter build web --release     # production bundle in build/web/
 
 ## Roadmap
 
-- [x] Phase 0 — 5-FAB shell, dial primitive, BS persona tiles, Menu tab tiles
-- [ ] Phase 1 — BS persona drills (sections + status leaves)
-- [ ] Phase 2 — Search FAB (voice, barcode, filters, sort, catalog)
-- [ ] Phase 3 — Menu drills (home / projects / cart / settings tree)
-- [ ] Phase 4 — Persistence (shared_preferences ↔ Preact `bs.settings.v1`)
-- [ ] Phase 5 — Native APIs (camera/barcode plugin, push notifications)
-- [ ] Phase 6 — Backend wire (when API exists)
-- [ ] Phase 7 — Store releases (App Store + Play)
+- [x] Shell + dial primitive + BS persona tiles + Menu/Search/Settings trees
+- [x] BS persona drills (sections + status leaves)
+- [x] Catalog (935 products, search, finder, variants, smart-tree, product sheet)
+- [x] Install Studio + BOM/compatibility engine
+- [x] Cart + checkout, chats, notifications, 4 settings screens + persistence
+- [ ] Wire the Menu + Search dials to triggers; fill the contractor persona
+- [ ] Port the ~85% gap (profile/ranks/rewards, projects/finance/tasks, B2B
+      flows, the 4 persona apps, onboarding/RBAC) — see `knowledge/PARITY.md`
+- [ ] Native: camera/barcode done; push/media pending
+- [ ] Backend wire (when API exists) · Store releases (App Store + Play)

@@ -105,4 +105,8 @@
 100. ⬜ להגיע ל"אפס שגיאות מאומת" — 100% crosscheck ירוק על כל מוצר בקטלוג, מאומת מול המקור.
 
 ---
-**בוצע: 1–18, 29, 31–35, 37, 45–46, 56–57, 65–66, 97 (≈34/100).** המשך: גל 5 (58–64) → גל 3 (truthapply 36) → גל 6.
+**בוצע: 85/100 ✅ · פתוחים: 15 ⬜.** הנותרים (לפי הסימונים בגוף): OCR fallback (43) ·
+auto-PR-comment (52) · branch-protection (55) · precompute-compat (67) ·
+sharding/merge (81/83) · file-split/lazy-load/pagination (85/86/88) ·
+versioning/snapshots (90/92) · in-app dashboard (91) · regression-alert (95) ·
+multi-PDF source_truth (99) · 100% crosscheck (100).
