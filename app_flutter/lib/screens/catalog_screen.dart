@@ -1491,7 +1491,7 @@ class _SearchPanel extends ConsumerWidget {
     final query    = ref.watch(searchQueryProvider);
     final scope    = ref.watch(searchScopeProvider);
     final showResults = query.isNotEmpty || scope != 'הכל';
-    return ColoredBox(
+    return Material(
       color: BsTokens.cardLight,
       child: Column(
         children: [
