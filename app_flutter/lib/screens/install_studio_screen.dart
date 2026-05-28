@@ -671,7 +671,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       decoration: const BoxDecoration(
         color: _panel,
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 24)],
+        boxShadow: [BoxShadow(color: Color(0x1F000000), blurRadius: 24)],
       ),
       padding: EdgeInsets.fromLTRB(
           16, 14, 16, 14 + MediaQuery.of(context).padding.bottom),
