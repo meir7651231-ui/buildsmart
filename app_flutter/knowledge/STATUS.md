@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v4.66` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v4.67` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — opens on **בית (finder home)** as the default landing: layman
@@ -43,8 +43,17 @@ addresses/invoices/warranty/biometric. All need data, a server, or device APIs.
 - **TMTV auto-per-branch** — one thermostatic mixing valve per hot branch, qty = branch count
 - **Auto-compliance** — PRV + BladderTank + isolation ball valve auto-inserted for hot lines
 - **Severity checklist** — 🔴 critical / 🟡 warning / 🔵 info; "N קריטי פתוח" badge in BomSheet
-- **Gap hints** — each missing connection shows a suggested adapter to search
-- **Temperature pill** — human labels (קר / חם / חם מאוד) with color coding
+- **Gap advice** — `gapAdviceHe()`: a supply↔drainage gap says "connect via a
+  fixture" (no adapter exists); a same-system gap names the two unmet ends.
+- **Heat-rating banner** — flags any plan item whose material can't survive the
+  line temp (e.g. an HDPE anchor on a 60°C line); the engine already routes
+  around unsuitable materials, this catches the user-picked anchor.
+- **Joint-method BOM** — `lineStructureText()`: the "מבנה הקו" block in the
+  installer/WhatsApp export states the joint per item (תבריג ½″ / אום הידוק DN32)
+  via the shared `chainEdgeLabelHe`.
+- **Temperature pill** — human labels (קר / חם / חם מאוד) with color coding;
+  engine regression has a temperature-routing module (hot line excludes
+  low-temp materials).
 
 ## Compatibility & install engine (v4.55–v4.59 — correct-by-construction)
 - **Verified-spec graph** — `lipskey_verified_connections.dart`: 808/935 SKUs
