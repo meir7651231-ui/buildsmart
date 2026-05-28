@@ -163,6 +163,52 @@ List<LipskeyCatalogProduct> compatibleProductsFor(LipskeyCatalogProduct p) {
   return out;
 }
 
+/// A short Hebrew label explaining HOW [otherP] physically connects to
+/// [sourceP] — the exact mating joint (e.g. "תבריג ½″", "אום הידוק DN32",
+/// "Press PEX 16") — so the user can verify each carousel match by eye.
+/// Returns '' when there is no real joint (mirrors [_reallyMates]).
+/// Prefers the strongest joint: a direct mate (thread / press / drain) over a
+/// compression-socket share (a pipe sliding into a fitting's nut).
+String connectionExplainHe(
+    LipskeyCatalogProduct sourceP, LipskeyCatalogProduct otherP) {
+  final s = kVerifiedSpecs[sourceP.sku];
+  final o = kVerifiedSpecs[otherP.sku];
+  if (s == null || o == null) return '';
+
+  // Pass 1 — direct joints (thread / press / drain). Material-independent.
+  for (final eA in s.ends) {
+    for (final eB in o.ends) {
+      if (eA.directMatesWith(eB)) return _directJoinLabel(eA);
+    }
+  }
+
+  // Pass 2 — compression socket: the pipe slides into the fitting's nut. Counts
+  // only when EXACTLY one side is a pipe AND the materials are compatible.
+  final srcIsPipe = _isPipeProduct(sourceP);
+  final otherIsPipe = _isPipeProduct(otherP);
+  if (srcIsPipe != otherIsPipe) {
+    const drainage = {'PVC', 'PP', 'רב-שכבתי', 'ceramic'};
+    final ok = s.material == o.material ||
+        (drainage.contains(s.material) && drainage.contains(o.material));
+    if (ok) {
+      for (final eA in s.ends) {
+        for (final eB in o.ends) {
+          if (eA.pipeSharedWith(eB)) return 'אום הידוק DN${eA.size}';
+        }
+      }
+    }
+  }
+  return '';
+}
+
+String _directJoinLabel(ConnectorEnd e) => switch (e.type) {
+      EndType.bspMale || EndType.bspFemale => 'תבריג ${e.size}',
+      EndType.pexPress => 'Press PEX ${e.size}',
+      EndType.copperPress => 'Press נחושת ${e.size}',
+      EndType.hdpeCompression => 'אום הידוק DN${e.size}',
+      EndType.drainOpening => 'ניקוז ⌀${e.size}',
+    };
+
 // ─── ערכת התקנה (smart-tree accessories + auto-derived install tools) ─────
 /// A unified install-kit summary for [p]. Two sources merged:
 ///   • [must]/[optional] — manually-curated accessories from the smart-tree

@@ -58,15 +58,19 @@ List<TestResult> testEngine() {
     }
     var totalHits = 0;
     var invalid = 0;
+    var noLabel = 0;
     final firstBad = <String>[];
+    final firstBlank = <String>[];
     for (final src in samples) {
       for (final h in compatibleProductsFor(src)) {
         totalHits++;
         if (!reallyMates(src, h)) {
           invalid++;
-          if (firstBad.length < 3) {
-            firstBad.add('${src.sku}↔${h.sku}');
-          }
+          if (firstBad.length < 3) firstBad.add('${src.sku}↔${h.sku}');
+        }
+        if (connectionExplainHe(src, h).isEmpty) {
+          noLabel++;
+          if (firstBlank.length < 3) firstBlank.add('${src.sku}↔${h.sku}');
         }
       }
     }
@@ -82,6 +86,13 @@ List<TestResult> testEngine() {
           expected: '0',
           got: '$invalid',
           detail: firstBad.join(' · '),
+        ),
+        TestCheck(
+          name: 'לכל חיבור יש תווית "למה זה מתחבר"',
+          pass: noLabel == 0,
+          expected: '0',
+          got: '$noLabel',
+          detail: firstBlank.join(' · '),
         ),
       ],
     ));
