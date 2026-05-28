@@ -1,7 +1,7 @@
 // Smoke-test for the 4 informational strips on the internal product sheet
 // (lipskey_product_sheet.dart). Verifies that:
 //   1. The strips render visibly when the product has any of the 4 axes.
-//   2. Tapping a strip triggers its callback (InkWell wiring works).
+//   2. Tapping a strip triggers its callback (GestureDetector wiring works).
 //   3. The variants-strip and accessories-strip taps cause the sheet to
 //      scroll their target section into view via GlobalKey + ensureVisible.
 //
@@ -62,22 +62,24 @@ void main() {
     expect(find.text('דומים:'), findsOneWidget,
         reason: 'variants strip should be rendered');
 
-    // ── Each strip is inside an InkWell (proves it's clickable, not text).
-    Finder stripInkWell(String label) {
+    // ── Each strip is inside a GestureDetector (proves it's clickable, not
+    // text). The rows use GestureDetector + AnimatedContainer for inline-expand
+    // tap feedback rather than InkWell ripple.
+    Finder stripTappable(String label) {
       return find.ancestor(
         of: find.text(label),
-        matching: find.byType(InkWell),
+        matching: find.byType(GestureDetector),
       );
     }
 
-    expect(stripInkWell('נמצא ב:'), findsWidgets,
-        reason: 'finder strip must wrap an InkWell');
-    expect(stripInkWell('מוצרים תואמים:'), findsWidgets,
-        reason: 'compat strip must wrap an InkWell');
-    expect(stripInkWell('ערכת התקנה:'), findsWidgets,
-        reason: 'kit strip must wrap an InkWell');
-    expect(stripInkWell('דומים:'), findsWidgets,
-        reason: 'variants strip must wrap an InkWell');
+    expect(stripTappable('נמצא ב:'), findsWidgets,
+        reason: 'finder strip must be tappable');
+    expect(stripTappable('מוצרים תואמים:'), findsWidgets,
+        reason: 'compat strip must be tappable');
+    expect(stripTappable('ערכת התקנה:'), findsWidgets,
+        reason: 'kit strip must be tappable');
+    expect(stripTappable('דומים:'), findsWidgets,
+        reason: 'variants strip must be tappable');
 
     // ── Tap the variants strip: it should scroll-trigger (no throw).
     await tester.tap(find.text('דומים:').first);

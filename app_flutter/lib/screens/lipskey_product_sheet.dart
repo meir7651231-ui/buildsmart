@@ -1898,7 +1898,8 @@ class _StripPanel extends StatelessWidget {
     if (hits.isEmpty) {
       return const _EmptyHint('לא נמצאו מוצרים שמשלימים את הקצוות');
     }
-    return _miniCarousel(hits);
+    return _miniCarousel(hits,
+        labelFor: (q) => connectionExplainHe(product, q));
   }
 
   // ── ערכת התקנה: smart-tree accessories + auto-derived install tools ─────
@@ -2197,9 +2198,14 @@ class _StripPanel extends StatelessWidget {
     );
   }
 
-  Widget _miniCarousel(List<LipskeyCatalogProduct> items) {
+  /// Horizontal product strip. When [labelFor] is supplied and returns a
+  /// non-empty string for an item, a small teal "🔗 …" chip is rendered under
+  /// the name explaining HOW that product connects (used by the תאימות strip).
+  Widget _miniCarousel(List<LipskeyCatalogProduct> items,
+      {String Function(LipskeyCatalogProduct)? labelFor}) {
+    final hasLabels = labelFor != null;
     return SizedBox(
-      height: 124,
+      height: hasLabels ? 146 : 124,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
@@ -2207,6 +2213,7 @@ class _StripPanel extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
           final q = items[i];
+          final label = labelFor?.call(q) ?? '';
           return GestureDetector(
             onTap: () => onPickProduct(q),
             child: Container(
@@ -2242,6 +2249,26 @@ class _StripPanel extends StatelessWidget {
                             fontSize: 10,
                             height: 1.2)),
                   ),
+                  if (label.isNotEmpty) ...[
+                    const SizedBox(height: 3),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE6F4F1),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text('🔗 $label',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                              color: Color(0xFF0F766E),
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w700)),
+                    ),
+                    const SizedBox(height: 2),
+                  ],
                   Text('#${q.sku}',
                       style: const TextStyle(
                           color: Color(0xFF9AA3B2),
