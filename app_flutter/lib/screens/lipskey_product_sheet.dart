@@ -484,6 +484,14 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                             }),
                             onVariantSelect: _switchByChip,
                           ),
+                          if (widget.categoryProducts.length > 1)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 6),
+                              child: Text(
+                                  '💡 צ׳יפ כתום ▾ — הקש להחלפת גודל/צבע/דגם',
+                                  style: TextStyle(
+                                      color: Color(0xFF888888), fontSize: 11)),
+                            ),
                           const SizedBox(height: 12),
                           // ── מאתר · תאימות · ערכת התקנה · דומים ────────
                           _QuickInfoStrips(
@@ -564,80 +572,8 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                       const SizedBox(height: 16),
                     ],
 
-                    // ── Qty + unit toggle + add to cart ─────────────────
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              _QtyStepper(
-                                qty: _qty,
-                                onChanged: (v) =>
-                                    setState(() => _qty = max(1, v)),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _UnitToggle(
-                                  unit: _unit,
-                                  hasPack: p.qtyPack != null,
-                                  hasPallet: p.qtyPallet != null,
-                                  onChanged: (u) => setState(() => _unit = u),
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (_unit != _Unit.single)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Text(
-                                'סה"כ ${_qty * _unitMult} יחידות',
-                                style: const TextStyle(
-                                    color: Color(0xFF9AA3B2), fontSize: 12),
-                              ),
-                            ),
-                          if (_accTotal > 0)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('אביזרים נבחרים:',
-                                      style: TextStyle(
-                                          color: Colors.black38,
-                                          fontSize: 13)),
-                                  Text('+ ₪$_accTotal',
-                                      style: const TextStyle(
-                                          color: Color(0xFF3DD9B0),
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600)),
-                                ],
-                              ),
-                            ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton.icon(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFFFF7A18),
-                                foregroundColor: const Color(0xFF1A1200),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14)),
-                              ),
-                              onPressed: _addToCart,
-                              icon: const Icon(Icons.shopping_cart, size: 19),
-                              label: const Text('הוסף לסל',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // (purchase bar — qty/unit/add-to-cart — pinned as a
+                    //  footer below the scroll so the CTA is always reachable)
 
                     // ── 🔧 חיבורים תואמים — לפי צד/מידה ──────────────────
                     ...(() {
@@ -781,6 +717,80 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                     //   the 🔄 דומים strip's carousel and the 🤝 compat
                     //   strip's panel. Users now access related products
                     //   through the top strips, in a more focused way.)
+                  ],
+                ),
+              ),
+              // Pinned purchase bar — qty/unit/add-to-cart always reachable.
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF5F6FA),
+                  border: Border(top: BorderSide(color: Color(0x14000000))),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        _QtyStepper(
+                          qty: _qty,
+                          onChanged: (v) => setState(() => _qty = max(1, v)),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _UnitToggle(
+                            unit: _unit,
+                            hasPack: p.qtyPack != null,
+                            hasPallet: p.qtyPallet != null,
+                            onChanged: (u) => setState(() => _unit = u),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_unit != _Unit.single)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          'סה"כ ${_qty * _unitMult} יחידות',
+                          style: const TextStyle(
+                              color: Color(0xFF9AA3B2), fontSize: 12),
+                        ),
+                      ),
+                    if (_accTotal > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('אביזרים נבחרים:',
+                                style: TextStyle(
+                                    color: Colors.black38, fontSize: 13)),
+                            Text('+ ₪$_accTotal',
+                                style: const TextStyle(
+                                    color: Color(0xFF3DD9B0),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF7A18),
+                          foregroundColor: const Color(0xFF1A1200),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
+                        ),
+                        onPressed: _addToCart,
+                        icon: const Icon(Icons.shopping_cart, size: 19),
+                        label: const Text('הוסף לסל',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w800)),
+                      ),
+                    ),
                   ],
                 ),
               ),
