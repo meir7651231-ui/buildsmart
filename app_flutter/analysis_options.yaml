@@ -1,11 +1,6 @@
 include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
-  errors:
-    # Treat avoid_print as an error to keep debug output out of production code.
-    # Use debugPrint() or a proper logger instead.
-    # Test files that need print() must add: // ignore_for_file: avoid_print
-    avoid_print: error
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"

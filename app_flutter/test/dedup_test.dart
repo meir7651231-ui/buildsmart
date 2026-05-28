@@ -1,4 +1,3 @@
-// ignore_for_file: avoid_print
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
