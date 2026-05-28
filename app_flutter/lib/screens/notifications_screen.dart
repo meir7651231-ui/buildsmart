@@ -4,13 +4,59 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum NotifSection { all, shipments, orders, safety, budget, deals }
 
+/// A string-id set persisted to SharedPreferences — used for the read /
+/// dismissed notification ids so they (and the unread badge) survive restarts.
+class PersistedIdSet extends StateNotifier<Set<String>> {
+  PersistedIdSet(this._prefsKey) : super(const {}) {
+    _load();
+  }
+  final String _prefsKey;
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_prefsKey);
+      if (list != null) state = list.toSet();
+    } catch (_) {}
+  }
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefsKey, state.toList());
+    } catch (_) {}
+  }
+
+  void set(Set<String> value) {
+    state = value;
+    _persist();
+  }
+
+  void add(String id) {
+    state = {...state, id};
+    _persist();
+  }
+
+  void remove(String id) {
+    state = {...state}..remove(id);
+    _persist();
+  }
+}
+
 final notifSectionProvider =
     StateProvider<NotifSection>((_) => NotifSection.all);
-final notifReadIdsProvider = StateProvider<Set<String>>((_) => {});
-final notifDismissedIdsProvider = StateProvider<Set<String>>((_) => {});
+final notifReadIdsProvider =
+    StateNotifierProvider<PersistedIdSet, Set<String>>(
+  (_) => PersistedIdSet('bs.notif-read.v1'),
+);
+final notifDismissedIdsProvider =
+    StateNotifierProvider<PersistedIdSet, Set<String>>(
+  (_) => PersistedIdSet('bs.notif-dismissed.v1'),
+);
 final notifSearchQueryProvider = StateProvider<String>((_) => '');
 final notifExpandedGroupsProvider = StateProvider<Set<String>>((_) => {});
 
@@ -166,14 +212,14 @@ const List<_Notif> _kNotifs = [
 
 /// Marks every notification as read. Called from AppBar 3-dot menu.
 void markAllNotifsRead(WidgetRef ref) {
-  ref.read(notifReadIdsProvider.notifier).state =
-      _kNotifs.map((n) => n.id).toSet();
+  ref.read(notifReadIdsProvider.notifier).set(
+      _kNotifs.map((n) => n.id).toSet());
 }
 
 /// Dismisses every notification. Called from AppBar 3-dot menu.
 void dismissAllNotifs(WidgetRef ref) {
-  ref.read(notifDismissedIdsProvider.notifier).state =
-      _kNotifs.map((n) => n.id).toSet();
+  ref.read(notifDismissedIdsProvider.notifier).set(
+      _kNotifs.map((n) => n.id).toSet());
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -401,8 +447,8 @@ class _Header extends ConsumerWidget {
               ),
               tooltip: 'סמן הכל כנקרא',
               onPressed: () {
-                ref.read(notifReadIdsProvider.notifier).state =
-                    _kNotifs.map((n) => n.id).toSet();
+                ref.read(notifReadIdsProvider.notifier).set(
+                    _kNotifs.map((n) => n.id).toSet());
               },
             ),
           ],
@@ -415,9 +461,9 @@ class _Header extends ConsumerWidget {
               ),
               tooltip: 'נקה נקראו',
               onPressed: () {
-                ref.read(notifDismissedIdsProvider.notifier).state =
+                ref.read(notifDismissedIdsProvider.notifier).set(
                     Set<String>.from(ref.read(notifDismissedIdsProvider))
-                      ..addAll(ref.read(notifReadIdsProvider));
+                      ..addAll(ref.read(notifReadIdsProvider)));
               },
             ),
         ],
@@ -773,7 +819,7 @@ class _DismissibleRow extends ConsumerWidget {
       onDismissed: (_) {
         final id = notif.id;
         final notifier = ref.read(notifDismissedIdsProvider.notifier);
-        notifier.state = Set<String>.from(notifier.state)..add(id);
+        notifier.add(id);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('התראה נמחקה'),
@@ -782,8 +828,7 @@ class _DismissibleRow extends ConsumerWidget {
             action: SnackBarAction(
               label: 'ביטול',
               textColor: BsTokens.brand,
-              onPressed: () =>
-                  notifier.state = Set<String>.from(notifier.state)..remove(id),
+              onPressed: () => notifier.remove(id),
             ),
           ),
         );
@@ -876,11 +921,9 @@ class _NotifRow extends ConsumerWidget {
         return;
       }
       if (choice == 'read') {
-        ref.read(notifReadIdsProvider.notifier).state =
-            Set<String>.from(ref.read(notifReadIdsProvider))..add(notif.id);
+        ref.read(notifReadIdsProvider.notifier).add(notif.id);
       } else if (choice == 'delete') {
-        final notifier = ref.read(notifDismissedIdsProvider.notifier);
-        notifier.state = Set<String>.from(notifier.state)..add(notif.id);
+        ref.read(notifDismissedIdsProvider.notifier).add(notif.id);
       }
     }
 
@@ -893,8 +936,7 @@ class _NotifRow extends ConsumerWidget {
     return InkWell(
       onTap: () {
         if (isUnread) {
-          ref.read(notifReadIdsProvider.notifier).state =
-              Set<String>.from(ref.read(notifReadIdsProvider))..add(notif.id);
+          ref.read(notifReadIdsProvider.notifier).add(notif.id);
         }
       },
       onLongPress: showLongPressMenu,
@@ -977,10 +1019,9 @@ class _NotifRow extends ConsumerWidget {
                           GestureDetector(
                             onTap: () {
                               if (isUnread) {
-                                ref.read(notifReadIdsProvider.notifier).state =
-                                    Set<String>.from(
-                                      ref.read(notifReadIdsProvider),
-                                    )..add(notif.id);
+                                ref
+                                    .read(notifReadIdsProvider.notifier)
+                                    .add(notif.id);
                               }
                               showToast(context, '$actionLabel — בבנייה');
                             },
