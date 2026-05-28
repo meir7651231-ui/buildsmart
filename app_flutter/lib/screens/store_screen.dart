@@ -92,14 +92,6 @@ List<_Meta> _itemsForSection(StoreSection s) => switch (s) {
 
 // ─── cart data ────────────────────────────────────────────────────────────────
 
-typedef _CartItem = ({String emoji, String name, String qty, String price});
-
-const List<_CartItem> _kCartItemDetails = [
-  (emoji: '🪨', name: 'בלוקים 20x20', qty: "200 יח'", price: '₪680'),
-  (emoji: '🔩', name: 'ברגים 8cm',    qty: "500 יח'", price: '₪210'),
-  (emoji: '🪵', name: 'קורות עץ 3m',  qty: "10 יח'",  price: '₪450'),
-];
-const _kCartTotal = '₪1,340';
 
 // ─── cart items ──────────────────────────────────────────────────────────────
 
@@ -881,16 +873,6 @@ class _AllList extends ConsumerWidget {
     );
   }
 
-  void _showCartSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: const Color(0xFFFFFFFF),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const _CartSheet(),
-    );
-  }
 }
 
 // ─── swipe-to-favorite ────────────────────────────────────────────────────────
@@ -1094,122 +1076,6 @@ class _EmptyState extends StatelessWidget {
 
 // ─── cart sheet ──────────────────────────────────────────────────────────────
 
-class _CartSheet extends StatelessWidget {
-  const _CartSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              '🛒 הסל שלי',
-              style: TextStyle(
-                color: Color(0xFF1A1A1A),
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Divider(color: Color(0xFFF5F5F5), height: 1),
-          ..._kCartItemDetails.map(
-            (item) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                children: [
-                  Text(item.emoji, style: const TextStyle(fontSize: 20)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      item.name,
-                      style:
-                          const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
-                    ),
-                  ),
-                  Text(
-                    item.qty,
-                    style: const TextStyle(
-                      color: Color(0xFF888888),
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    item.price,
-                    style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const Divider(color: Color(0xFFF5F5F5), height: 1),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text(
-                'סה"כ',
-                style: TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                _kCartTotal,
-                style: TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: BsTokens.brand,
-              foregroundColor: Color(0xFFFFFFFF),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              showToast(context, 'מעבר לתשלום — בבנייה');
-            },
-            child: const Text(
-              'מעבר לתשלום →',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ─── cart view ────────────────────────────────────────────────────────────────
 
