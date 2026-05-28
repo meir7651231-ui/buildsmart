@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.54 · 28.5.26 · כפתור הסל הצף: הסרת ה-+ המבלבל',
+                          'v4.55 · 28.5.26 · מנוע תכנון + כרטיס נקי + אודיט (מיזוג)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
