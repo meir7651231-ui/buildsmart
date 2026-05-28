@@ -23,7 +23,7 @@ enum CartDelivery { express, standard, pickup }
 enum CartPaymentMethod { card, bit, supplierCredit }
 
 final cartQtysProvider = StateProvider<Map<String, int>>(
-  (_) => const {'blk': 150, 'pls': 5, 'blt': 80, 'bm': 10},
+  (_) => const {},
 );
 // Initial delivery/payment honor the store-settings defaults (read once).
 // Pure mappings (regression-tested in test/gaps_test.dart).
@@ -110,12 +110,9 @@ typedef _CItem = ({
   int unitPrice,
 });
 
-const List<_CItem> _kCItems = [
-  (id: 'blk', emoji: '🪨', name: "בלוקים 20×20",   supplier: "מרינוביץ'",  unit: "יח'", unitPrice: 4),
-  (id: 'pls', emoji: '🪣', name: 'שפכטל 20 ק"ג',  supplier: "מרינוביץ'",  unit: "שק'", unitPrice: 42),
-  (id: 'blt', emoji: '🔩', name: 'ברגי אנקר M12',  supplier: 'פריגו',       unit: "יח'", unitPrice: 3),
-  (id: 'bm',  emoji: '🪵', name: "קורות עץ 3מ'",   supplier: 'פריגו',       unit: "יח'", unitPrice: 45),
-];
+// Real cart is driven entirely by smartCartProvider (products the user added).
+// No injected demo items.
+const List<_CItem> _kCItems = [];
 
 const _kProjects = ['בית דוד 3', 'מגדל עזריאלי', 'ללא פרויקט'];
 
@@ -1240,6 +1237,30 @@ class _CartViewState extends ConsumerState<_CartView> {
 
     final saveToProject =
         ref.watch(storeSettingsProvider.select((s) => s.saveCartToProject));
+
+    if (smartLines.isEmpty && grouped.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Text('🛒', style: TextStyle(fontSize: 52)),
+              SizedBox(height: 12),
+              Text('הסל ריק',
+                  style: TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700)),
+              SizedBox(height: 4),
+              Text('הוסיפו מוצרים מהקטלוג',
+                  style: TextStyle(color: Color(0xFF888888), fontSize: 13)),
+            ],
+          ),
+        ),
+      );
+    }
+
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       children: [
@@ -1429,6 +1450,17 @@ class _SmartCartRow extends ConsumerWidget {
                   ],
                 ),
               ),
+              // Quantity stepper — adjust the real cart line.
+              _SmartQtyStepper(
+                qty: line.productQty,
+                onMinus: () => ref
+                    .read(smartCartProvider.notifier)
+                    .setLineQty(index, line.productQty - 1),
+                onPlus: () => ref
+                    .read(smartCartProvider.notifier)
+                    .setLineQty(index, line.productQty + 1),
+              ),
+              const SizedBox(width: 8),
               Text(
                 '₪${line.total}',
                 style: const TextStyle(
@@ -1479,6 +1511,57 @@ class _SmartCartRow extends ConsumerWidget {
                 ),
               ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Compact −/qty/+ stepper for a smart-cart row.
+class _SmartQtyStepper extends StatelessWidget {
+  const _SmartQtyStepper({
+    required this.qty,
+    required this.onMinus,
+    required this.onPlus,
+  });
+
+  final int qty;
+  final VoidCallback onMinus;
+  final VoidCallback onPlus;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget btn(IconData icon, VoidCallback onTap) => InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Padding(
+            padding: const EdgeInsets.all(2),
+            child: Icon(icon, size: 18, color: BsTokens.brand),
+          ),
+        );
+    return Container(
+      decoration: BoxDecoration(
+        color: BsTokens.brand.withAlpha(20),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          btn(Icons.remove, onMinus),
+          SizedBox(
+            width: 22,
+            child: Text(
+              '$qty',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF1A1A1A),
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          btn(Icons.add, onPlus),
         ],
       ),
     );
@@ -2162,8 +2245,12 @@ class _CheckoutSheet extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               onPressed: () {
+                final orderNo = DateTime.now().millisecondsSinceEpoch % 100000;
+                // Real effect: empty the cart on a confirmed order.
+                ref.read(smartCartProvider.notifier).clear();
+                ref.read(cartQtysProvider.notifier).state = const {};
                 Navigator.pop(context);
-                showToast(context, 'הזמנה #${DateTime.now().second} אושרה! 🎉');
+                showToast(context, 'הזמנה #$orderNo אושרה! 🎉');
               },
               child: const Text(
                 'אישור הזמנה',

@@ -91,11 +91,11 @@ void main() {
         )
         .first;
 
-    // 7 · the + stepper raises a fixed-item quantity
-    final before = containerOf(t)
-        .read(cartQtysProvider)
-        .values
-        .fold<int>(0, (s, q) => s + q);
+    // 7 · the + stepper raises the (real) cart-line quantity
+    int smartQty() => containerOf(t)
+        .read(smartCartProvider)
+        .fold<int>(0, (s, l) => s + l.productQty);
+    final before = smartQty();
     await t.scrollUntilVisible(find.byIcon(Icons.add).first, 120,
         scrollable: cartScroll);
     await t.pumpAndSettle();
@@ -112,10 +112,7 @@ void main() {
     }
     await t.tap(adds.at(best));
     await t.pumpAndSettle();
-    final after = containerOf(t)
-        .read(cartQtysProvider)
-        .values
-        .fold<int>(0, (s, q) => s + q);
+    final after = smartQty();
     expect(after, before + 1, reason: 'stepper + did not raise quantity');
 
     // 8 · checkout
