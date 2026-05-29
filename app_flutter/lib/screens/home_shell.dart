@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.13 · 29.5.26 · SmartProduct: הצעת מחיר לכל הפרויקט (📋) + הוספה לפרויקט + שכפול ל-3 חדרים',
+                          'v5.14 · 29.5.26 · SmartProduct: תבניות פרויקט (🧩 אמבטיה/מטבח) + הצעת מחיר לפרויקט + הוספה לפרויקט',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

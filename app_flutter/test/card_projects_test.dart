@@ -2,6 +2,7 @@
 import 'package:buildsmart/state/card_projects.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:buildsmart/data/smart_tree.dart';
 
 ProjectItem _item(String project, String loc, {int qty = 1}) => ProjectItem(
       project: project,
@@ -65,6 +66,36 @@ void main() {
       n.add(_item('B', 'm'));
       n.removeProject('A');
       expect(n.projects, {'B'});
+    });
+  });
+
+  group('projectTemplates (step 80)', () {
+    test('every template resolves to real, distinct SmartProducts', () {
+      final templates = projectTemplates();
+      expect(templates, isNotEmpty);
+      final allKeys = {for (final sp in kSmartProducts) sp.key};
+      for (final t in templates) {
+        expect(t.products, isNotEmpty, reason: t.name);
+        // distinct keys, all real
+        final keys = t.products.map((p) => p.key).toList();
+        expect(keys.toSet().length, keys.length, reason: '${t.name} dup');
+        for (final k in keys) {
+          expect(allKeys, contains(k));
+        }
+      }
+    });
+
+    test('the bathroom template covers several roles', () {
+      final bath = projectTemplates().firstWhere((t) => t.name.contains('אמבטיה'));
+      expect(bath.products.length, greaterThanOrEqualTo(3));
+    });
+
+    test('applyTemplate adds all template products to the project', () {
+      SharedPreferences.setMockInitialValues({});
+      final n = CardProjectsNotifier();
+      final bath = projectTemplates().firstWhere((t) => t.name.contains('אמבטיה'));
+      n.applyTemplate('דירה 1', bath.name, bath.products);
+      expect(n.forProject('דירה 1').length, bath.products.length);
     });
   });
 

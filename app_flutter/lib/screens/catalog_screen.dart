@@ -5328,6 +5328,50 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   ),
                                 ],
                               ),
+                              // Roadmap step 80 — ready project templates.
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: [
+                                    const Text('תבניות:',
+                                        style: TextStyle(
+                                            color: Color(0xFF94A3B8),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600)),
+                                    for (final t in projectTemplates())
+                                      GestureDetector(
+                                        onTap: () {
+                                          notifier.applyTemplate(
+                                              proj, t.name, t.products);
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(SnackBar(
+                                                  content: Text(
+                                                      'הוחלה תבנית "${t.name}" (${t.products.length} פריטים)'),
+                                                  duration: const Duration(
+                                                      seconds: 2)));
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 9, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFDF4FF),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                                color: const Color(0xFFF0ABFC)),
+                                          ),
+                                          child: Text('🧩 ${t.name}',
+                                              style: const TextStyle(
+                                                  color: Color(0xFF86198F),
+                                                  fontSize: 10.5,
+                                                  fontWeight: FontWeight.w700)),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
                               if (units > 0)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 4),

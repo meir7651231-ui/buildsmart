@@ -174,7 +174,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 77. ⬜ Team sharing: chat/notes on a chosen product.
 78. ⬜ Sync with the Gantt/tasks.
 79. ⬜ Unified procurement report (PDF) for the whole project.
-80. ⬜ Ready project templates ("standard bathroom" = a product set).
+80. ✅ Ready project templates — `projectTemplates` (אמבטיה/מטבח סטנדרטי, one real
+   SmartProduct per role, no over-pull) + `applyTemplate`; "🧩 תבניות" chips add
+   the whole set to the project. Guard: `card_projects_test`.
 
 ## Phase 9 · Quality, performance, accessibility (81–90)
 81. ✅ Comprehensive card-data integrity test (every SmartProduct × brand:

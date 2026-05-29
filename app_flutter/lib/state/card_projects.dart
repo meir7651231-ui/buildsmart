@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/data/smart_tree.dart';
 
 /// A product assigned to a project location from the SmartProduct card.
 /// Roadmap steps 71 (add to project), 72 (duplicate to many points),
@@ -90,6 +91,47 @@ String projectQuoteText(String project, List<ProjectItem> items) {
   return lines.join('\n');
 }
 
+// ─── תבניות פרויקט (Roadmap step 80) ────────────────────────────────────────
+// A template = a named set of roles; each role is matched to ONE real
+// SmartProduct by a distinctive name token (first match), so a template never
+// over-pulls. Grounded in real catalog products (no invented items).
+const _kProjectTemplates = <({String name, List<String> keywords})>[
+  (
+    name: 'אמבטיה סטנדרטית',
+    keywords: [
+      'ברז אמבטיה',
+      'ראש מקלחת',
+      'אסלה',
+      'מחסום רצפה',
+      'סיפון לכיור',
+    ],
+  ),
+  (
+    name: 'מטבח סטנדרטי',
+    keywords: ['ברז למטבח', 'סיפון כפול למטבח', 'מחסום 2" כפול למטבח'],
+  ),
+];
+
+/// The ready project templates, each resolved to its real SmartProducts
+/// (one per role, deduped). Roadmap step 80.
+List<({String name, List<SmartProduct> products})> projectTemplates() {
+  final out = <({String name, List<SmartProduct> products})>[];
+  for (final t in _kProjectTemplates) {
+    final products = <SmartProduct>[];
+    final seen = <String>{};
+    for (final kw in t.keywords) {
+      for (final sp in kSmartProducts) {
+        if (sp.name.contains(kw) && seen.add(sp.key)) {
+          products.add(sp);
+          break;
+        }
+      }
+    }
+    out.add((name: t.name, products: products));
+  }
+  return out;
+}
+
 class CardProjectsNotifier extends StateNotifier<List<ProjectItem>> {
   CardProjectsNotifier() : super(const []) {
     _load();
@@ -130,6 +172,26 @@ class CardProjectsNotifier extends StateNotifier<List<ProjectItem>> {
               brandName: template.brandName,
               sku: template.sku,
               qty: template.qty));
+    }
+    state = next;
+    _persist();
+  }
+
+  /// Step 80 — add all of a template's products (at their recommended brand)
+  /// to [project] under [location].
+  void applyTemplate(
+      String project, String location, List<SmartProduct> products) {
+    var next = state;
+    for (final sp in products) {
+      final b = sp.recBrand;
+      next = projectItemsAfterAdd(
+          next,
+          ProjectItem(
+              project: project,
+              location: location,
+              productKey: sp.key,
+              brandName: b.name,
+              sku: b.sku ?? ''));
     }
     state = next;
     _persist();
