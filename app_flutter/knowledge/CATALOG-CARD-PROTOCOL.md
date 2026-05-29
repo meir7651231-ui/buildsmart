@@ -231,3 +231,28 @@ flutter test               # כל הסְוויטה + golden snapshots
 **מה כבר אוטומטי (לא צריך עבודה פר-מוצר):** כל 9 הכרטיסים, הציפים, תוכנית-הריתוך
 לפי הקוטר (`_kPprWeldPlan[dn]`), בורר היצרן, ספירת הווריאנטים — נגזרים מ-`dims`
 ומהפונקציות המשותפות. מוצר חדש באותה משפחה = מילוי `dims` + תמונות, וזהו.
+
+---
+
+## 10. העלאה / סנכרון (push) — מה שנתקעתי בו
+
+הענף `claude/whats-happening-LyY9G` **משותף** (סשנים אחרים דוחפים אליו) — push ראשון
+נדחה ב-`non-fast-forward` ("fetch first"). הזרימה הבטוחה:
+
+```bash
+git fetch origin <branch>
+git rev-list --left-right --count HEAD...origin/<branch>   # כמה אני ahead/behind
+# לראות חפיפת-קבצים (איפה יהיו קונפליקטים) לפני מיזוג:
+comm -12 <(git diff --name-only <merge-base> origin/<branch> | sort) \
+         <(git diff --name-only <merge-base> HEAD | sort)
+git pull --no-rebase origin <branch> --no-edit    # ← אין pull.rebase מוגדר; חובה לציין
+# לפתור קונפליקטים → git add → git commit --no-edit → flutter analyze+test → git push -u
+```
+
+**קונפליקט חוזר:** שורת-הגרסה ב-`home_shell.dart` — כל סשן מעלה אותה, אז כמעט תמיד
+תתנגש. לפתור ל**גרסה משולבת** שמזכירה את שתי העבודות (לא לאבד את של הסשן השני).
+
+**מה לא לדחוף (CI שובר deploy):** ה-deploy מריץ `flutter test`, ו-**golden tests
+תלויי-סביבה** (font rendering שונה ב-CI → mismatch). לכן את `ref_card_golden_test.dart`
++ `ref_*.png` + `test/failures/` **לא** מקמטים — הם כלי-סקירה מקומי בלבד. טסטים
+פונקציונליים (find.text/taps, כמו `card_interactions_test`) — בטוחים ל-CI.
