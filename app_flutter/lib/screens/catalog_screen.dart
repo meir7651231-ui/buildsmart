@@ -14,6 +14,7 @@ import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
 import 'package:buildsmart/screens/finder_screen.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
+import 'package:buildsmart/state/card_detail_mode.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
@@ -4662,16 +4663,46 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                   final finder = finderGroupFor(prod);
                   final kit = installKitFor(prod);
                   final variants = variantSiblingsCountFor(prod);
+                  // Roadmap step 95 — expert/simple depth toggle (persisted).
+                  final expert =
+                      ref.watch(cardDetailModeProvider) == CardDetailMode.expert;
                   return Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('📦 נתוני קטלוג',
-                            style: TextStyle(
-                                color: Color(0xFF888888),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600)),
+                        Row(
+                          children: [
+                            const Text('📦 נתוני קטלוג',
+                                style: TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600)),
+                            const Spacer(),
+                            GestureDetector(
+                              onTap: () => ref
+                                  .read(cardDetailModeProvider.notifier)
+                                  .toggle(),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: expert
+                                      ? BsTokens.brand.withAlpha(28)
+                                      : const Color(0xFFEEEEEE),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(expert ? 'מצב מורחב ▾' : 'מצב פשוט ▸',
+                                    style: TextStyle(
+                                        color: expert
+                                            ? BsTokens.brand
+                                            : const Color(0xFF777777),
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700)),
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 4),
                         // Roadmap step 59 — one-line card summary.
                         Text(smartCardSummaryHe(p, brand),
@@ -4687,18 +4718,18 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           catRow('טמפ׳ מרבית',
                               '${spec.maxTempC.toStringAsFixed(0)}°C'),
                           catRow('מערכת', spec.waterSystem),
-                          if (spec.endsSummary.isNotEmpty)
+                          if (expert && spec.endsSummary.isNotEmpty)
                             catRow('קצוות', spec.endsSummary),
-                          if (spec.minBoreMm != null)
+                          if (expert && spec.minBoreMm != null)
                             catRow('קוטר מינ׳',
                                 '${spec.minBoreMm!.toStringAsFixed(0)}mm'),
                         ],
-                        if (finder != null)
+                        if (expert && finder != null)
                           catRow('מאתר', '${finder.emoji} ${finder.label}'),
-                        if (kit != null)
+                        if (expert && kit != null)
                           catRow('ערכת התקנה',
                               '${kit.must} חובה · ${kit.optional} אופ׳ · ${kit.tools} כלים'),
-                        if (variants > 1)
+                        if (expert && variants > 1)
                           catRow('וריאנטים', '$variants גרסאות'),
                         if (price != null) catRow('מחיר משוער', '~₪$price'),
                         // Roadmap step 45 — cheaper standard-comparable brand.
@@ -4759,7 +4790,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           color: Color(0xFFB45309),
                                           fontSize: 11)),
                                 ),
-                                if (complianceWhyHe(t.label) != null)
+                                if (expert && complianceWhyHe(t.label) != null)
                                   Padding(
                                     padding: const EdgeInsets.only(
                                         top: 1, right: 14),
@@ -4776,7 +4807,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           );
                         }),
                         // Roadmap step 12 — relevant Israeli standards (ת"י).
-                        Builder(builder: (_) {
+                        if (expert)
+                          Builder(builder: (_) {
                           final stds = israeliStandardsFor(prod);
                           if (stds.isEmpty) return const SizedBox.shrink();
                           return Column(
@@ -4802,7 +4834,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           );
                         }),
                         // Roadmap step 33 — required tools (derived from ends).
-                        Builder(builder: (_) {
+                        if (expert)
+                          Builder(builder: (_) {
                           final tools = installToolsFor(prod);
                           if (tools.isEmpty) return const SizedBox.shrink();
                           return Padding(
@@ -4811,7 +4844,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           );
                         }),
                         // Roadmap step 63 — variant family ("גרסאות נוספות").
-                        Builder(builder: (_) {
+                        if (expert)
+                          Builder(builder: (_) {
                           final fam = variantSiblingsOf(prod)
                               .where((q) => q.sku != prod.sku)
                               .toList();
@@ -4839,7 +4873,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           );
                         }),
                         // Roadmap step 16 — "when to pick which" brand guide.
-                        Builder(builder: (_) {
+                        if (expert)
+                          Builder(builder: (_) {
                           final guide = brandDecisionGuide(p);
                           if (guide.length < 2) return const SizedBox.shrink();
                           return Column(
@@ -4865,7 +4900,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           );
                         }),
                         // Roadmap step 66 — recently-viewed history.
-                        Builder(builder: (_) {
+                        if (expert)
+                          Builder(builder: (_) {
                           final recent = ref
                               .watch(recentlyViewedProvider)
                               .where((s) => s != prod.sku)

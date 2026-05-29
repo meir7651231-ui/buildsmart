@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.93 · 29.5.26 · SmartProduct: "למה זה חשוב" לכל דרישת תקינות + בדיקת תקינות-נתונים מקיפה לכרטיס',
+                          'v4.94 · 29.5.26 · SmartProduct: מצב מורחב/פשוט (נשמר) + "למה זה חשוב" לתקינות + בדיקת נתונים מקיפה',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

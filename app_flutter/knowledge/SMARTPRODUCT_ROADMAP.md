@@ -144,7 +144,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 92. ⬜ Built-in A/B experiments on the card layout.
 93. ⬜ User ratings + real user photos ("here's how it looks at my place").
 94. ⬜ Manufacturer integration (official datasheets) via API.
-95. ⬜ Expert mode vs simple mode (toggle that changes depth).
+95. ✅ Expert vs simple mode — persisted `cardDetailModeProvider`; "מצב מורחב/פשוט"
+   chip in the 📦 header gates standards/tools/bore/kit/variants/brand-guide/
+   recently-viewed/compliance-why. Guard: `card_detail_mode_test`.
 96. ⬜ Home-screen widget ("reorder my last line").
 97. ⬜ Contractor inventory integration ("I have 3 in stock").
 98. ⬜ Export the chosen config to CAD/BIM.
