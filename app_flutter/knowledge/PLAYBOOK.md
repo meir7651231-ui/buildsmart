@@ -83,6 +83,11 @@ Format per entry:
   5. `git push`; verify `git rev-list --left-right --count HEAD...@{u}` → `0 0`.
 - **Why:** separating the version bump avoids the recurring version-line merge conflict; the feature files rarely overlap the other session's (cart/chips) files.
 
+### Clean push when the ONLY overlap is the version label — use `-X theirs`
+- **Problem:** I'd committed 20 commits each bumping `home_shell.dart`'s version line; the other session also bumped it. A plain rebase conflicts at *every* version-bump commit (~16 stops).
+- **Fix:** verified (via `git diff $BASE @{u} -- home_shell.dart`) that the remote's ONLY change there was the version line, then `git -c core.editor=true rebase -X theirs origin/<branch>`. `-X theirs` during a rebase = "prefer the commits being replayed (mine)", so every version-line conflict auto-resolves to my (higher, monotonic) label while the other session's *non-conflicting* changes in every other file are still merged. Re-ran analyze + **full suite on the rebased tree BEFORE pushing** (a textually-clean rebase onto their data-layer migration can still be semantically broken). Then push → `0 0`; `git merge-base --is-ancestor HEAD @{u}` confirms nothing lost.
+- **Why:** safe *only* after confirming the overlap is the throwaway version line; never blind-`-X theirs` when real logic overlaps. Beat the fast-moving branch by pushing immediately after rebase, then verifying the suite post-push.
+
 ### Version label drift
 - **Problem:** `home_shell.dart` and `knowledge/STATUS.md` show different versions.
 - **Fix:** bump both in the same commit; resolve any collision by going one higher (monotonic).

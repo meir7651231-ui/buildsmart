@@ -6,6 +6,22 @@ it connects · how to install · what it costs · who sells it*.
 
 Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
+## 📌 Handoff — where we are (v5.14, ~46%: 32 ✅ + 14 🟦)
+Saved for the next run. Pick up here:
+- **Group A (still buildable locally, no deps) — do these next:**
+  76 config-versioning · 25 auto safety-kit (engine-grounded) · 46 add-whole-line-to-cart ·
+  74 full project BOM dialog (currently just a counter) · 89 regression-gate meta-test ·
+  82 mutation tests on price/selection · 85 accessibility (Semantics) · 57 profession-aware depth.
+- **Group B (finish the 🟦 partials):** 2,7,9,15,20,24,26,29,30,48,56,65,68 — see each step's note.
+- **Group C (needs infra/pkg/backend/assets — needs user decision):** 13,17,18,32,36,37,39,40,
+  41,43,44,49,50,53,54,55,60,69,70,79,83,84,86,88,90,91,92,93,94,96,97,98.
+- **Group D (risky / shared-subsystem / big refactor):** 1 (merge sheets — user said don't touch
+  catalog card), 10 (A/B flag), 61 (search index), 64 (modal→tab nav), 99/100 (meta).
+- Cadence reminder: full suite ~5 steps · local commit ~20 ops · live demo ~10 ops · **no push w/o approval**.
+- Prototype (`/index.html`) has NONE of these card features (only base leaves: אביזרים-נלווים/ספק/
+  מחיר/מותג/מק"ט/התקנה) — the SmartProduct "brain" is a Flutter-only evolution; content is grounded
+  in `kSmartProducts`/`kCatalogProducts`, only UI labels are new.
+
 ## Phase 1 · Unification & foundation (1–10)
 1. ⬜ Merge the two duplicate product sheets (`_SmartProductSheet` ↔ `showLipskeyProductSheet`).
 2. 🟦 `SmartProduct` linked to the **unified** catalog by SKU — bridge + contract
