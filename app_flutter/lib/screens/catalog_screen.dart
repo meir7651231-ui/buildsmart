@@ -5340,6 +5340,40 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600)),
                                 ),
+                              // Roadmap step 75 — customer quote for the project.
+                              if (units > 0)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Clipboard.setData(ClipboardData(
+                                          text: projectQuoteText(
+                                              proj, inProj)));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              content: Text(
+                                                  'הצעת מחיר לפרויקט הועתקה'),
+                                              duration: Duration(seconds: 2)));
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 7),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFECFDF5),
+                                        borderRadius:
+                                            BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color: const Color(0xFFA7F3D0)),
+                                      ),
+                                      child: const Text(
+                                          '📋 הצעת מחיר לפרויקט',
+                                          style: TextStyle(
+                                              color: Color(0xFF047857),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700)),
+                                    ),
+                                  ),
+                                ),
                             ],
                           );
                         }),

@@ -167,7 +167,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 74. 🟦 Cumulative project view — running "📋 בפרויקט: N יחידות · M מיקומים" from
    `cardProjectsProvider`. (Full materialized project BOM dialog pending.)
    Guard: `card_projects_test`.
-75. ⬜ Customer quote straight from the choices.
+75. ✅ Customer quote for the whole project — `projectQuoteText` aggregates each
+   assigned item (location/brand/qty + est. price) into a copyable quote
+   ("📋 הצעת מחיר לפרויקט"). Guard: `card_projects_test`.
 76. ⬜ Config versioning (compare alternatives for the project).
 77. ⬜ Team sharing: chat/notes on a chosen product.
 78. ⬜ Sync with the Gantt/tasks.

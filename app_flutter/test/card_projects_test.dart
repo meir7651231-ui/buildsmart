@@ -67,4 +67,25 @@ void main() {
       expect(n.projects, {'B'});
     });
   });
+
+  group('projectQuoteText (step 75)', () {
+    test('lists each item with its location/brand/qty + a total + footer', () {
+      final items = [
+        _item('דירה 4', 'מטבח', qty: 2),
+        _item('דירה 4', 'אמבטיה'),
+      ];
+      final q = projectQuoteText('דירה 4', items);
+      expect(q, contains('פרויקט "דירה 4"'));
+      expect(q, contains('מטבח'));
+      expect(q, contains('אמבטיה'));
+      expect(q, contains('×2'));
+      expect(q, contains('סה"כ משוער'));
+      expect(q, contains('BuildSmart'));
+    });
+
+    test('empty project → just header + zero total', () {
+      final q = projectQuoteText('ריק', const []);
+      expect(q, contains('סה"כ משוער: ~₪0'));
+    });
+  });
 }
