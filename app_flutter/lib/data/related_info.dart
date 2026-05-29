@@ -70,6 +70,10 @@ Map<String, LipskeyCatalogProduct> get _skuIndex =>
     // resolves regardless of which catalog the product lives in.
     _skuToProduct ??= {for (final p in kCatalogProducts) p.sku: p};
 
+/// The unified catalog product with this [sku], or null when unknown.
+LipskeyCatalogProduct? catalogProductForSku(String? sku) =>
+    sku == null ? null : _skuIndex[sku];
+
 /// The catalog product a [brand] points at, or null when it has no SKU / the
 /// SKU isn't in the catalog.
 LipskeyCatalogProduct? catalogProductForBrand(SmartBrand brand) =>

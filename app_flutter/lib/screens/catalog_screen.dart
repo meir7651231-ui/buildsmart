@@ -19,6 +19,7 @@ import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
+import 'package:buildsmart/state/recently_viewed.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -4441,6 +4442,14 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
     final acc = widget.product.acc;
     _accSelected = {for (var i = 0; i < acc.length; i++) i: false};
     _accQty = {for (var i = 0; i < acc.length; i++) i: 1};
+    // Roadmap step 66 — record this product as recently-viewed (post-frame so
+    // we don't mutate a provider during the initial build).
+    final sku = widget.product.recBrand.sku;
+    if (sku != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.read(recentlyViewedProvider.notifier).touch(sku);
+      });
+    }
   }
 
   void _tapStage(int i) =>
@@ -4839,6 +4848,42 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           color: Color(0xFF666666),
                                           fontSize: 11)),
                                 ),
+                            ],
+                          );
+                        }),
+                        // Roadmap step 66 — recently-viewed history.
+                        Builder(builder: (_) {
+                          final recent = ref
+                              .watch(recentlyViewedProvider)
+                              .where((s) => s != prod.sku)
+                              .take(5)
+                              .toList();
+                          if (recent.isEmpty) return const SizedBox.shrink();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 6),
+                              const Text('נצפו לאחרונה',
+                                  style: TextStyle(
+                                      color: Color(0xFF888888),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600)),
+                              for (final sku in recent)
+                                Builder(builder: (_) {
+                                  final rp = catalogProductForSku(sku);
+                                  if (rp == null) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text('🕘 ${rp.nameHe}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF888888),
+                                            fontSize: 11)),
+                                  );
+                                }),
                             ],
                           );
                         }),

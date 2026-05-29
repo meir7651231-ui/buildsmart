@@ -102,7 +102,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    via `variantSiblingsOf`. (Upgrade/cheaper-alternative still ⬜.)
 64. ⬜ Health navigation: from the card straight to the relevant finder/category.
 65. ⬜ Quick in-brand filter (type/size/material/price) — extend existing.
-66. ⬜ "Recently viewed" history.
+66. ✅ "Recently viewed" history — persisted `recentlyViewedProvider`
+   (move-to-front + dedupe + cap-20), recorded on card open, shown as
+   "נצפו לאחרונה". Guard: `recently_viewed_test`.
 67. ⬜ Discovery tags ("new", "best-seller", "pro-recommended").
 68. ⬜ Deep-link per product (share a link that opens the card).
 69. ⬜ QR on the physical product → opens the card.
