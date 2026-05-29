@@ -57,7 +57,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    this product, autoCompliance, 60°C) → BOM dialog (qty × name + gap count).
    Engine call path guarded by `build_line_bom_test`. (Live canvas-tap on the
    dialog button is unreliable — see PLAYBOOK §G — so verified by unit test.)
-23. ⬜ Materialized chain diagram inline (explicit pipes/couplings).
+23. ✅ Materialized chain inline — when a line is in progress (cart), show the
+   engine's materialized sequence (incl. inserted pipes/couplings) as an RTL
+   arrow chain via `chainArrowText`. Guard: `chain_arrow_test`.
 24. 🟦 System (supply/drainage) safety note + min-bore inline via
    `systemSafetyNoteHe` (gravity-drainage / upstream-shutoff) + the bore row.
    (Line-level ΔP still ⬜ — needs a built line.) Guard: `install_effort_test`.

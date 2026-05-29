@@ -5170,6 +5170,26 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         fontWeight: FontWeight.w600)),
                               );
                             }),
+                          // Roadmap step 23 — inline materialized chain when a
+                          // line is in progress (cart not empty).
+                          Builder(builder: (_) {
+                            final line = _resolveCartProducts();
+                            if (line.isEmpty) return const SizedBox.shrink();
+                            final plan = buildInstallation([...line, prod],
+                                tempC: 60);
+                            final text = chainArrowText(plan.items);
+                            if (text.isEmpty) return const SizedBox.shrink();
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text('🔗 שרשרת: $text',
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      color: Color(0xFF475569),
+                                      fontSize: 10.5,
+                                      height: 1.3)),
+                            );
+                          }),
                           // Roadmap step 22 — "build my line" → materialized BOM.
                           const SizedBox(height: 8),
                           GestureDetector(

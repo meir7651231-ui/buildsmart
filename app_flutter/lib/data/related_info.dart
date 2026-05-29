@@ -1089,6 +1089,13 @@ List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
   );
 }
 
+// ─── שרשרת מומחשת (Roadmap step 23) ─────────────────────────────────────────
+/// Format a materialized line (the engine's `plan.items`, which already include
+/// the inserted pipes/couplings/safety) as a glanceable RTL arrow sequence,
+/// e.g. "מחסום ← צינור ← מצמד". Pure formatting; empty list → ''.
+String chainArrowText(List<LipskeyCatalogProduct> items) =>
+    items.map((p) => p.nameHe).join(' ← ');
+
 // ─── הקו שלך עד כה (Roadmap step 28) ────────────────────────────────────────
 /// How the [current] product fits a line already in progress. Given the catalog
 /// products already chosen ([lineProducts]), returns how many of them [current]
