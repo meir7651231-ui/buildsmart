@@ -142,6 +142,24 @@ List<TestResult> testCatalog() {
     detail:
         pprMisTool.take(3).map((p) => '${p.sku}: ${p.categoryHe}').join(' · '),
   ));
+  // PPR↔PPRCT consistency: the material in the name must match dims['חומר'].
+  // Caught the PPRCT faser (pp.86-87, mfr code …FCT/FRCT) named "PPR".
+  bool _isPprct(String s) => s.contains('PPRCT');
+  final pprMatMismatch = kPolyrollCatalog.where((p) {
+    final mat = p.dims?['חומר'] as String?;
+    if (mat == null) return false;
+    return _isPprct(p.nameHe) != _isPprct(mat);
+  }).toList();
+  pprHard.add(TestCheck(
+    name: 'PPR · חומר בשם תואם ל-dims[חומר] (PPR↔PPRCT)',
+    pass: pprMatMismatch.isEmpty,
+    expected: '0',
+    got: '${pprMatMismatch.length}',
+    detail: pprMatMismatch
+        .take(3)
+        .map((p) => '${p.sku}: ${p.nameHe}')
+        .join(' · '),
+  ));
   results.add(TestResult(
     id: 'catalog:hard-ppr',
     category: TestCategory.catalog,
