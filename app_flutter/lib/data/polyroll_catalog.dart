@@ -48,119 +48,69 @@ const Map<String, String> _kPprCategoryImage = {
   kPprSaddles: 'ppr_saddle.jpg',
 };
 
-/// Per-page product photos, extracted verbatim from the catalog PDF (one or
-/// more per page — pages 18–92, scene/section photos excluded). Each PPR page
-/// is a narrow product range, so a page photo is effectively a per-variant
-/// image. Multi-photo pages are disambiguated by `_pprPagePhoto` (protocol §17).
-const Map<int, List<String>> _kPprPagePhotos = {
-  18: ['ppr_p18_a.jpg', 'ppr_p18_b.jpg'],
-  19: ['ppr_p19_a.jpg', 'ppr_p19_b.jpg'],
-  20: ['ppr_p20_a.jpg', 'ppr_p20_b.jpg', 'ppr_p20_c.jpg'],
-  21: ['ppr_p21_a.jpg'],
-  22: ['ppr_p22_a.jpg', 'ppr_p22_b.jpg', 'ppr_p22_c.jpg'],
-  23: ['ppr_p23_a.jpg'],
-  24: ['ppr_p24_a.jpg'],
-  25: ['ppr_p25_a.jpg', 'ppr_p25_b.jpg', 'ppr_p25_c.jpg'],
-  26: ['ppr_p26_a.jpg', 'ppr_p26_b.jpg'],
-  27: ['ppr_p27_a.jpg', 'ppr_p27_b.jpg'],
-  28: ['ppr_p28_a.jpg', 'ppr_p28_b.jpg'],
-  29: ['ppr_p29_a.jpg', 'ppr_p29_b.jpg', 'ppr_p29_c.jpg'],
-  30: ['ppr_p30_a.jpg', 'ppr_p30_b.jpg', 'ppr_p30_c.jpg'],
-  31: ['ppr_p31_a.jpg', 'ppr_p31_b.jpg', 'ppr_p31_c.jpg'],
-  32: ['ppr_p32_a.jpg', 'ppr_p32_b.jpg'],
-  34: ['ppr_p34_a.jpg', 'ppr_p34_b.jpg', 'ppr_p34_c.jpg'],
-  35: ['ppr_p35_a.jpg', 'ppr_p35_b.jpg'],
-  36: ['ppr_p36_a.jpg'],
-  37: ['ppr_p37_a.jpg'],
-  38: ['ppr_p38_a.jpg'],
-  39: ['ppr_p39_a.jpg'],
-  40: ['ppr_p40_a.jpg'],
-  41: ['ppr_p41_a.jpg'],
-  42: ['ppr_p42_a.jpg'],
-  43: ['ppr_p43_a.jpg'],
-  44: ['ppr_p44_a.jpg'],
-  45: ['ppr_p45_a.jpg'],
-  46: ['ppr_p46_a.jpg'],
-  47: ['ppr_p47_a.jpg'],
-  48: ['ppr_p48_a.jpg'],
-  49: ['ppr_p49_a.jpg'],
-  50: ['ppr_p50_a.jpg'],
-  51: ['ppr_p51_a.jpg'],
-  52: ['ppr_p52_a.jpg'],
-  53: ['ppr_p53_a.jpg'],
-  54: ['ppr_p54_a.jpg'],
-  55: ['ppr_p55_a.jpg'],
-  56: ['ppr_p56_a.jpg'],
-  57: ['ppr_p57_a.jpg'],
-  58: ['ppr_p58_a.jpg'],
-  59: ['ppr_p59_a.jpg'],
-  60: ['ppr_p60_a.jpg'],
-  61: ['ppr_p61_a.jpg'],
-  62: ['ppr_p62_a.jpg'],
-  63: ['ppr_p63_a.jpg'],
-  64: ['ppr_p64_a.jpg'],
-  65: ['ppr_p65_a.jpg'],
-  66: ['ppr_p66_a.jpg'],
-  67: ['ppr_p67_a.jpg'],
-  68: ['ppr_p68_a.jpg'],
-  69: ['ppr_p69_a.jpg'],
-  70: ['ppr_p70_a.jpg'],
-  71: ['ppr_p71_a.jpg'],
-  72: ['ppr_p72_a.jpg', 'ppr_p72_b.jpg'],
-  73: ['ppr_p73_a.jpg', 'ppr_p73_b.jpg'],
-  74: ['ppr_p74_a.jpg', 'ppr_p74_b.jpg'],
-  77: ['ppr_p77_a.jpg'],
-  80: ['ppr_p80_a.jpg'],
-  86: ['ppr_p86_a.jpg'],
-  87: ['ppr_p87_b.jpg'],
-  90: ['ppr_p90_a.jpg', 'ppr_p90_b.jpg', 'ppr_p90_c.jpg', 'ppr_p90_d.jpg'],
-  91: ['ppr_p91_a.jpg', 'ppr_p91_b.jpg', 'ppr_p91_c.jpg'],
-  92: ['ppr_p92_a.jpg', 'ppr_p92_b.jpg', 'ppr_p92_c.jpg'],
-  // page 33 (EF-sleeve + collar + plug, 4 photos) is intentionally omitted —
-  // too ambiguous to map, so those products use the generic sub-type image.
+/// Single-photo (or uniform multi-photo) pages → the product photo to use,
+/// extracted verbatim from the catalog PDF. Pages that mix sub-types are
+/// handled by `_pprPagePhoto`'s switch; pages with no usable photo (33,
+/// 81–85 — table-only) return null and fall back to a generic image. (§17)
+const Map<int, String> _kPprPagePhoto = {
+  21: 'ppr_p21_a.jpg', 23: 'ppr_p23_a.jpg', 24: 'ppr_p24_a.jpg',
+  25: 'ppr_p25_a.jpg', 26: 'ppr_p26_a.jpg', 27: 'ppr_p27_a.jpg',
+  28: 'ppr_p28_a.jpg', 32: 'ppr_p32_a.jpg', 34: 'ppr_p34_a.jpg',
+  36: 'ppr_p36_a.jpg', 37: 'ppr_p37_a.jpg', 38: 'ppr_p38_a.jpg',
+  39: 'ppr_p39_a.jpg', 40: 'ppr_p40_a.jpg', 41: 'ppr_p41_a.jpg',
+  42: 'ppr_p42_a.jpg', 43: 'ppr_p43_a.jpg', 44: 'ppr_p44_a.jpg',
+  45: 'ppr_p45_a.jpg', 46: 'ppr_p46_a.jpg', 47: 'ppr_p47_a.jpg',
+  48: 'ppr_p48_a.jpg', 49: 'ppr_p49_a.jpg', 50: 'ppr_p50_a.jpg',
+  51: 'ppr_p51_a.jpg', 52: 'ppr_p52_a.jpg', 53: 'ppr_p53_a.jpg',
+  54: 'ppr_p54_a.jpg', 55: 'ppr_p55_a.jpg', 56: 'ppr_p56_a.jpg',
+  57: 'ppr_p57_a.jpg', 58: 'ppr_p58_a.jpg', 59: 'ppr_p59_a.jpg',
+  60: 'ppr_p60_a.jpg', 61: 'ppr_p61_a.jpg', 62: 'ppr_p62_a.jpg',
+  63: 'ppr_p63_a.jpg', 64: 'ppr_p64_a.jpg', 65: 'ppr_p65_a.jpg',
+  66: 'ppr_p66_a.jpg', 67: 'ppr_p67_a.jpg', 68: 'ppr_p68_a.jpg',
+  69: 'ppr_p69_a.jpg', 70: 'ppr_p70_a.jpg', 71: 'ppr_p71_a.jpg',
+  72: 'ppr_p72_a.jpg', 80: 'ppr_p80_a.jpg', 86: 'ppr_p86_a.jpg',
+  87: 'ppr_p87_b.jpg',
 };
 
-/// Pick the photo for [page] that matches [nameHe]. On the handful of pages
-/// that mix sub-types the index is chosen by keyword; otherwise the first
-/// (primary) photo is used. Returns null when the page has no extracted photo.
+String _pp(int page, String suffix) => 'ppr_p${page}_$suffix.jpg';
+
+/// The product photo for [page] matching [nameHe]. Pages that mix sub-types
+/// pick the matching photo by name keyword; single-photo pages use the map
+/// above. Returns null when the page has no usable photo (→ generic fallback).
 String? _pprPagePhoto(int page, String nameHe) {
-  final photos = _kPprPagePhotos[page];
-  if (photos == null || photos.isEmpty) return null;
-  var i = 0;
   switch (page) {
     case 18: // אספקת מים (a) · פייזר (b)
-      i = nameHe.contains('פייזר') ? 1 : 0;
+      return _pp(18, nameHe.contains('פייזר') ? 'b' : 'a');
     case 19: // ברך 45° (a) · 90° (b)
-      i = nameHe.contains('90') ? 1 : 0;
+      return _pp(19, nameHe.contains('90') ? 'b' : 'a');
     case 20: // ברך 45° (a) · 90° (b) · מסעף (c)
-      i = nameHe.contains('מסעף') ? 2 : (nameHe.contains('90') ? 1 : 0);
+      return _pp(20,
+          nameHe.contains('מסעף') ? 'c' : (nameHe.contains('90') ? 'b' : 'a'));
     case 22: // מצמד (a) · אומגה (b) · פקק (c)
-      i = nameHe.contains('אומגה') ? 1 : (nameHe.contains('פקק') ? 2 : 0);
+      return _pp(22,
+          nameHe.contains('אומגה') ? 'b' : (nameHe.contains('פקק') ? 'c' : 'a'));
     case 29: // מתאם משושה (a) · רוכב משושה (c)
-      i = nameHe.contains('רוכב') ? 2 : 0;
+      return _pp(29, nameHe.contains('רוכב') ? 'c' : 'a');
     case 30: // בין אוגנים (a) · סמוי (b)
-      i = nameHe.contains('סמוי') ? 1 : 0;
+      return _pp(30, nameHe.contains('סמוי') ? 'b' : 'a');
     case 31: // מעבר (a) · אלכסוני (c)
-      i = nameHe.contains('אלכסוני') ? 2 : 0;
+      return _pp(31, nameHe.contains('אלכסוני') ? 'c' : 'a');
     case 73: // מסעף חשמלי (a) · מצמד חשמלי (b)
-      i = nameHe.contains('מצמד') ? 1 : 0;
+      return _pp(73, nameHe.contains('מצמד') ? 'b' : 'a');
     case 74: // מצמד חשמלי (a) · אומגה (b)
-      i = nameHe.contains('אומגה') ? 1 : 0;
-    case 90: // מזוודת (a) · פלטת (b) · מכונה קלה (c) · מכונה שולחני (d)
-      if (nameHe.contains('פלטת')) {
-        i = 1;
-      } else if (nameHe.contains('שולחני')) {
-        i = 3;
-      } else if (nameHe.contains('מכונת')) {
-        i = 2;
-      }
+      return _pp(74, nameHe.contains('אומגה') ? 'b' : 'a');
+    case 90: // מזוודת (a) · פלטת (b) · מכונה קלה (c) · שולחני (d)
+      if (nameHe.contains('פלטת')) return _pp(90, 'b');
+      if (nameHe.contains('שולחני')) return _pp(90, 'd');
+      if (nameHe.contains('מכונת')) return _pp(90, 'c');
+      return _pp(90, 'a');
     case 91: // מברגה (a) · תותב (b) · מקדח (c)
-      i = nameHe.contains('מקדח') ? 2 : (nameHe.contains('תותב') ? 1 : 0);
+      return _pp(91,
+          nameHe.contains('מקדח') ? 'c' : (nameHe.contains('תותב') ? 'b' : 'a'));
     case 92: // תותב רוכב (a) · תיקון חורים (c)
-      i = nameHe.contains('חורים') ? 2 : 0;
+      return _pp(92, nameHe.contains('חורים') ? 'c' : 'a');
   }
-  if (i >= photos.length) i = 0;
-  return photos[i];
+  return _kPprPagePhoto[page];
 }
 
 /// Per-sub-type product image: the page photo wins (each page is a narrow

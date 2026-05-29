@@ -26,6 +26,23 @@ void main() {
         reason: 'broken Polyroll asset paths:\n${missing.join('\n')}');
   });
 
+  // No orphan product photos: every ppr_pNN_* file we ship must be referenced
+  // by at least one product. Catches dead weight left after re-mapping (§16).
+  test('no orphan Polyroll page photos on disk', () {
+    final used = <String>{};
+    for (final p in kPolyrollCatalog) {
+      final a = p.imageAsset;
+      if (a != null) used.add(a.split('/').last);
+    }
+    final onDisk = Directory('assets/polyroll/products')
+        .listSync()
+        .map((e) => e.path.split('/').last)
+        .where((f) => RegExp(r'^ppr_p\d+_[a-z]\.jpg$').hasMatch(f))
+        .toSet();
+    final orphans = onDisk.difference(used).toList()..sort();
+    expect(orphans, isEmpty, reason: 'unused photos:\n${orphans.join('\n')}');
+  });
+
   // Locks the _pprSpecFor wiring: a sub-type keyword must map to its own
   // diagram. Guards the "PPR/PPRCT-style confusion" bug class for spec images.
   group('PPR sub-type → correct spec diagram', () {
