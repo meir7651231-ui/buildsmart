@@ -19,7 +19,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    307 with SKU · 252 of those with a verified spec. Guard: `smartproduct_contract_test`.
 6. ✅ "📦 נתוני קטלוג" section in the smart card injects the catalog's spec /
    compat / price for the selected brand's SKU (via the bridge).
-7. ⬜ Unified state (single provider for brand/acc/qty selection) with persist.
+7. 🟦 Persisted selection — `cardSelectionProvider` remembers the last brand per
+   product (`productKey→brandName`); restored in `initState`, saved on tap.
+   (acc/qty persistence still ⬜.) Guard: `card_selection_test`.
 8. ⬜ Golden tests for the unified card across every category.
 9. 🟦 Cleared safe analyze warnings in `catalog_screen.dart` (unused
    `lipskey_brand_screen` import + unused `cs` local). Remaining dead widgets

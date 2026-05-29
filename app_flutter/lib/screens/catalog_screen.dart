@@ -17,6 +17,7 @@ import 'package:buildsmart/screens/finder_screen.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/card_detail_mode.dart';
+import 'package:buildsmart/state/card_selection.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
@@ -4362,7 +4363,13 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
     final b = widget.product.brands[i];
     final selected = i == _selectedBrand;
     return GestureDetector(
-      onTap: () => setState(() => _selectedBrand = i),
+      onTap: () {
+        setState(() => _selectedBrand = i);
+        // Roadmap step 7 — remember this brand choice for the product.
+        ref
+            .read(cardSelectionProvider.notifier)
+            .setBrand(widget.product.key, b.name);
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -4444,6 +4451,13 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
     _selectedBrand = widget.product.brands
         .indexWhere((b) => b.rec)
         .clamp(0, widget.product.brands.length - 1);
+    // Roadmap step 7 — restore the user's last brand choice for this product.
+    final savedBrand = ref.read(cardSelectionProvider)[widget.product.key];
+    if (savedBrand != null) {
+      final si =
+          widget.product.brands.indexWhere((b) => b.name == savedBrand);
+      if (si >= 0) _selectedBrand = si;
+    }
     final acc = widget.product.acc;
     _accSelected = {for (var i = 0; i < acc.length; i++) i: false};
     _accQty = {for (var i = 0; i < acc.length; i++) i: 1};
