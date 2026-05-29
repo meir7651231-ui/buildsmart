@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
@@ -2445,7 +2446,7 @@ class _InteractiveChips extends StatelessWidget {
     final frame = _colorFrame(p);
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kLipskeyCatalog) {
+    for (final q in kCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final v = q.colorVariant;
       if (v == null || v.isEmpty) continue;
@@ -2470,7 +2471,7 @@ class _InteractiveChips extends StatelessWidget {
         .join(' ');
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kLipskeyCatalog) {
+    for (final q in kCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final v = variantValue(q, kind);
       if (v.isEmpty) continue;
@@ -2522,7 +2523,7 @@ class _InteractiveChips extends StatelessWidget {
     final compound = _resolveCompoundType(p);
     if (compound.isEmpty) return [];
     final byCompound = <String, LipskeyCatalogProduct>{compound: p};
-    for (final q in kLipskeyCatalog) {
+    for (final q in kCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final qc = _resolveCompoundType(q);
       if (qc.isEmpty || byCompound.containsKey(qc)) continue;
@@ -2541,7 +2542,7 @@ class _InteractiveChips extends StatelessWidget {
   static List<LipskeyCatalogProduct> _variantsModel(LipskeyCatalogProduct p) {
     final seen = <String>{};
     final all = <LipskeyCatalogProduct>[];
-    for (final q in kLipskeyCatalog) {
+    for (final q in kCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final m = q.brandModel;
       if (m == null || m.isEmpty) continue;
@@ -2556,6 +2557,39 @@ class _InteractiveChips extends StatelessWidget {
       });
   }
 
+  // ── מידה: frame-based (אותו מוצר, מידה שונה) — חוצה-מותג ─────────────────
+  static double _firstSizeNum(String s) =>
+      double.tryParse(RegExp(r'\d+(?:\.\d+)?').firstMatch(s)?.group(0) ?? '') ??
+      0;
+
+  static List<LipskeyCatalogProduct> _variantsSize(LipskeyCatalogProduct p) {
+    const kind = AttrKind.size;
+    final frame = p.nameHe
+        .split(RegExp(r'\s+'))
+        .where((w) => kindOf(w) != kind)
+        .join(' ');
+    final seen = <String>{};
+    final all = <LipskeyCatalogProduct>[];
+    for (final q in kCatalogProducts) {
+      if (q.categoryHe != p.categoryHe) continue;
+      final v = variantValue(q, kind);
+      if (v.isEmpty) continue;
+      if (q.nameHe
+              .split(RegExp(r'\s+'))
+              .where((w) => kindOf(w) != kind)
+              .join(' ') !=
+          frame) continue;
+      if (seen.add(v)) all.add(q);
+    }
+    all.sort((a, b) {
+      if (a.sku == p.sku) return -1;
+      if (b.sku == p.sku) return 1;
+      return _firstSizeNum(variantValue(a, kind))
+          .compareTo(_firstSizeNum(variantValue(b, kind)));
+    });
+    return all;
+  }
+
   // ── Unified sibling check & picker options ───────────────────────────────
   static bool _hasSiblings(LipskeyCatalogProduct p, String key) {
     switch (key) {
@@ -2567,7 +2601,7 @@ class _InteractiveChips extends StatelessWidget {
         final myVal = p.colorVariant;
         if (myVal == null || myVal.isEmpty) return false;
         final frame = _colorFrame(p);
-        return kLipskeyCatalog.any((q) {
+        return kCatalogProducts.any((q) {
           final qv = q.colorVariant;
           return q.categoryHe == p.categoryHe &&
               q.sku != p.sku &&
@@ -2578,6 +2612,8 @@ class _InteractiveChips extends StatelessWidget {
         });
       case 'subtype':
         return _variantsSubtype(p).length > 1;
+      case 'size':
+        return _variantsSize(p).length > 1;
       default:
         return false;
     }
@@ -2604,6 +2640,10 @@ class _InteractiveChips extends StatelessWidget {
       case 'subtype':
         return _variantsSubtype(p)
             .map((q) => (variantValue(q, AttrKind.subtype), q))
+            .toList();
+      case 'size':
+        return _variantsSize(p)
+            .map((q) => (variantValue(q, AttrKind.size), q))
             .toList();
       default:
         return [];

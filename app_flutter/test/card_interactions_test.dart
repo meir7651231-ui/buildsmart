@@ -43,6 +43,24 @@ Widget _external(LipskeyCatalogProduct p) => ProviderScope(
       ),
     );
 
+// The LIVE list path: LipskeyProductsList owns the swap state, so a chip pick
+// must flow through onCycle → _swap → _displayed (kCatalogProducts) to actually
+// change the rendered product. Standalone LipskeyProductCard uses _localProduct
+// instead and does NOT exercise this path.
+Widget _list(List<LipskeyCatalogProduct> products) => ProviderScope(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(fontFamily: 'Heebo', useMaterial3: true),
+        home: Scaffold(
+          backgroundColor: Colors.white,
+          body: Directionality(
+            textDirection: TextDirection.rtl,
+            child: LipskeyProductsList(products: products),
+          ),
+        ),
+      ),
+    );
+
 Widget _sheet() => ProviderScope(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -108,6 +126,48 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text('PPRCT'), findsWidgets); // chip now reads PPRCT
       expect(find.text('בחר חומר:'), findsNothing); // picker closed
+    });
+  });
+
+  // Regression for the live bug: in the LIST the chip pick reported through
+  // onCycle, but _displayed looked the swap up in kLipskeyCatalog (no Polyroll),
+  // so it fell back to the original and nothing changed. These assert on the
+  // rendered #sku so they only pass when the product TRULY switches.
+  group('external LIST — chip pick switches the rendered product', () {
+    // PPRCT (#6091602200) is the only PPRCT product, so its presence in the row
+    // is unambiguous proof the swap reached _displayed.
+    testWidgets('material PPR → PPRCT swaps the rendered row to PPRCT', (t) async {
+      await t.binding.setSurfaceSize(const Size(520, 900));
+      await t.pumpWidget(_list(_fam));
+      await t.pumpAndSettle();
+      // Family collapses to one row, initially a PPR variant (not PPRCT).
+      expect(find.textContaining('#6091602200'), findsNothing);
+      // Tap the material chip → picker → choose PPRCT.
+      await t.tap(find.text('PPR'));
+      await t.pumpAndSettle();
+      expect(find.text('בחר חומר:'), findsOneWidget);
+      await t.tap(find.text('PPRCT').last);
+      await t.pumpAndSettle();
+      // The rendered product MUST now be the PPRCT twin.
+      expect(find.textContaining('#6091602200'), findsOneWidget);
+    });
+
+    testWidgets('size 20 → 32 changes the rendered size chip', (t) async {
+      await t.binding.setSurfaceSize(const Size(520, 900));
+      await t.pumpWidget(_list(_fam));
+      await t.pumpAndSettle();
+      expect(find.text('20×2.8'), findsOneWidget); // current size chip
+      await t.tap(find.text('20×2.8'));
+      await t.pumpAndSettle();
+      expect(find.text('בחר מידה:'), findsOneWidget);
+      // Picker is a horizontal scroller — make sure the option is on-screen.
+      await t.ensureVisible(find.text('32×4.4').last);
+      await t.pumpAndSettle();
+      await t.tap(find.text('32×4.4').last);
+      await t.pumpAndSettle();
+      // The row now reads the 32 size — the 20 variant is gone.
+      expect(find.text('20×2.8'), findsNothing);
+      expect(find.text('32×4.4'), findsOneWidget);
     });
   });
 

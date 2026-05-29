@@ -278,3 +278,50 @@ mcp__github__list_commits(sha:'gh-pages')  →  הודעה "deploy: <timestamp>"
 ```
 אם ה-timestamp אחרי ה-push שלך → ה-CI עבר והאתר עלה. אם ישן → עדיין רץ/נכשל.
 (האפליקציה היא SPA — WebFetch לא יראה את מספר-הגרסה כי הוא מרונדר ב-JS בזמן ריצה.)
+
+---
+
+## 11. החלפת-מוצר (switching) — שתי מערכות הציפים חייבות להיות brand-aware
+
+באג שהתגלה ב-app החי: ציפים של PPR **לא החליפו** את המוצר, והרשימה הציגה PPRCT.
+שלושה מקורות — כולם חיפשו ב-`kLipskeyCatalog` (בלי PPR):
+
+1. **`_displayed`** (lipskey_products_screen.dart) — מתרגם swap-sku למוצר; חיפש ב-Lipskey
+   → swap ל-PPR נפל ל-`orElse` (חזר למקור, "לא עובד"). **תיקון: `kCatalogProducts`.**
+2. **`productListDedupeKey`** — לא הפשיט material → PPR ו-PPRCT קיבלו frame שונה →
+   הופיעו כשתי שורות (המשתמש ראה "PPRCT"). **תיקון: להפשיט גם `_kPprMaterials`** —
+   material הוא ממד-וריאנט כמו מידה; הצינור מופיע פעם אחת (PPR) + בורר-חומר.
+3. **`_InteractiveChips._variants*`** (lipskey_product_sheet.dart) — חיפשו `kLipskeyCatalog`
+   + לא היה case ל-`'size'`. **תיקון: `kCatalogProducts` + `_variantsSize` + case 'size'
+   ב-`_hasSiblings`/`_pickerOptions`.**
+
+**כלל:** כל קוד שמחפש siblings/variants/swaps של מוצר חייב לרוץ על **`kCatalogProducts`**
+(האיחוד), לא `kLipskeyCatalog`. יש **שתי** מערכות-ציפים נפרדות (חיצוני: `AttrKind`/`findAttrSiblings`;
+פנימי: `_InteractiveChips`) — לתקן את **שתיהן**.
+
+## 12. אימות-החלפה: לבדוק את ה-**נתיב החי**, לא standalone
+
+הבאג שנשאר אחרי §11: בחיצוני ההחלפה עדיין לא עבדה — והטסט "עבר". הסיבה — הטסט
+בנה `LipskeyProductCard(product, products:[p])` שזה מצב **standalone** (`onCycle==null`),
+שמשתמש ב-`_localProduct` ומחליף לוקאלית. אבל באפליקציה החיה הרשימה היא
+`LipskeyProductsList` → `onCycle` → `_swap[origSku]` → `_displayed` → `kCatalogProducts`.
+שני נתיבים שונים לגמרי; ה-standalone לא נוגע ב-`_displayed`.
+
+**כלל אימות:** טסט-החלפה חייב לבנות `LipskeyProductsList(products: fam)` (הנתיב החי),
+לא כרטיס בודד. ולא לאשר "הציפ נפתח" — לאשר ש**המוצר המוצג באמת התחלף**, דרך
+ה-`#sku` שמרונדר בשורה (`find.textContaining('#<sku-יעד>')`). PPRCT (`#6091602200`)
+הוא היחיד מסוגו → הופעתו בשורה = הוכחה חד-משמעית. ראה
+`test/card_interactions_test.dart` קבוצת `external LIST`.
+
+**מלכודת-סדר:** המשפחה מתכווצת לשורה אחת; המוצר המוצג הוא ה**ראשון ב-`fam`** (אצל
+הפייזר זה התאום של Aquatherm `#95270708`, לא ה-Heliroma `#6001602200`). אל תתליל
+את ה-assertion על "מי ראשון" — תאשר לפי הופעת ה**וריאנט-היעד** אחרי הבחירה.
+
+### באג נלווה: בורר-המידה הוצף בכל מידות-המותג
+`findAttrSiblings` בענף PPR סינן לפי `_getCompoundType == "צינור"` — וזה תופס את **כל**
+קווי-הצינורות (פייזר 20–110, אבל גם ניקוז 160/200/250/315/400, אספקה…). הבורר הציג ~30
+מידות מעורבבות, ו-`32×4.4` נדחק מחוץ-למסך ב-scroll האופקי → ה-tap החטיא → לא הוחלף.
+**תיקון:** מידה היא ממד **תוך-קווי** — להגביל ל-`q.categoryHe == p.categoryHe` עבור
+`AttrKind.size` בלבד (material/subtype נשארים חוצי-קו כדי לאפשר PPR↔PPRCT / פייזר↔אספקה).
+**לקח טסט:** בורר אופקי — `await t.ensureVisible(finder)` לפני `tap`, אחרת אופציה
+מחוץ-למסך גורמת ל-tap שקט שמחטיא.

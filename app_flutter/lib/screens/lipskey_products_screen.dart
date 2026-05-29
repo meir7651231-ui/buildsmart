@@ -102,7 +102,7 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
   LipskeyCatalogProduct _displayed(LipskeyCatalogProduct orig) {
     final cur = _swap[orig.sku];
     if (cur == null || cur == orig.sku) return orig;
-    return kLipskeyCatalog.firstWhere(
+    return kCatalogProducts.firstWhere(
       (q) => q.sku == cur,
       orElse: () => orig,
     );
@@ -1335,9 +1335,15 @@ final _kSubtypeWords = <String>{
 /// Intentionally does NOT include catalog page, pack qty or pallet qty —
 /// variant products are sometimes printed on different catalogue pages.
 String productListDedupeKey(LipskeyCatalogProduct p) {
+  // Material (PPR/PPRCT) is a variant dimension like size — collapse it so the
+  // faser pipe shows once (PPR), with the material chip switching to PPRCT.
   final stripped = p.nameHe
       .split(RegExp(r'\s+'))
-      .where((w) => w.isNotEmpty && !isSizeToken(w) && !_kAttrWordSet.contains(w))
+      .where((w) =>
+          w.isNotEmpty &&
+          !isSizeToken(w) &&
+          !_kAttrWordSet.contains(w) &&
+          !_kPprMaterials.contains(w))
       .join(' ');
   return '${p.brand}||${p.categoryHe}||$stripped';
 }
@@ -1394,10 +1400,17 @@ List<LipskeyCatalogProduct> findAttrSiblings(
   // separate per-line categories.
   if (p.brand == kPolyrollBrand) {
     final pType = _getCompoundType(p);
+    // Size is a within-line dimension: a faser pipe's size variants are the
+    // other faser sizes — never another line's (drainage 160/200…). Restrict
+    // it to the same category so the picker isn't flooded with every pipe
+    // size in the brand. Material/subtype stay cross-line so the picker can
+    // still switch PPR↔PPRCT or faser↔supply.
+    final sameLineOnly = kind == AttrKind.size;
     final seen = <String>{};
     final res = <LipskeyCatalogProduct>[];
     for (final q in kCatalogProducts) {
       if (q.brand != kPolyrollBrand || _getCompoundType(q) != pType) continue;
+      if (sameLineOnly && q.categoryHe != p.categoryHe) continue;
       final v = q.nameHe
           .split(RegExp(r'\s+'))
           .where((w) => _attrKindFor(w) == kind)
