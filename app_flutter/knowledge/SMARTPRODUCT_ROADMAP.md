@@ -49,7 +49,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 ## Phase 3 · Compatibility-engine integration (21–30)
 21. ✅ "🔗 מתחבר ל-N מוצרים" in the smart card (`compatibleProductsFor` +
    `connectionExplainHe` labels, in the 📦 section).
-22. ⬜ "Build my line" button → `buildInstallation` → full BOM.
+22. ✅ "Build my line" button → `buildInstallation` (anchors = cart line so far +
+   this product, autoCompliance, 60°C) → BOM dialog (qty × name + gap count).
+   Engine itself covered by engine tests; this is UI wiring over it.
 23. ⬜ Materialized chain diagram inline (explicit pipes/couplings).
 24. 🟦 System (supply/drainage) safety note + min-bore inline via
    `systemSafetyNoteHe` (gravity-drainage / upstream-shutoff) + the bore row.

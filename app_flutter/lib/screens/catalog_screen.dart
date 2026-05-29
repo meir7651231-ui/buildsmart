@@ -9,6 +9,7 @@ import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
@@ -4459,6 +4460,72 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   void _tapStage(int i) =>
       setState(() => _activeStage = _activeStage == i ? null : i);
 
+  // Roadmap step 28/22 — resolve the smart cart's lines to catalog products.
+  List<LipskeyCatalogProduct> _resolveCartProducts() {
+    final cart = ref.read(smartCartProvider);
+    final out = <LipskeyCatalogProduct>[];
+    for (final line in cart) {
+      final csp = smartProductByKey(line.productKey);
+      if (csp == null) continue;
+      SmartBrand? cb;
+      for (final b in csp.brands) {
+        if (b.name == line.brandName) {
+          cb = b;
+          break;
+        }
+      }
+      final cprod = cb == null ? null : catalogProductForBrand(cb);
+      if (cprod != null) out.add(cprod);
+    }
+    return out;
+  }
+
+  // Roadmap step 22 — "build my line": run the install engine over the line so
+  // far (cart) + this product, and show the materialized BOM.
+  void _showLineBom(LipskeyCatalogProduct prod) {
+    final anchors = <LipskeyCatalogProduct>[..._resolveCartProducts(), prod];
+    final plan = buildInstallation(anchors, autoCompliance: true, tempC: 60);
+    final items = plan.items.isEmpty ? [prod] : plan.items;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: Text('קו מוצע — ${items.length} פריטים'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (final it in items)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Text(
+                        '${plan.quantities[it.sku] ?? 1}× ${it.nameHe}',
+                        style: const TextStyle(fontSize: 12.5)),
+                  ),
+                if (plan.gaps.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text('⚠ ${plan.gaps.length} פערים ללא חיבור ישיר',
+                        style: const TextStyle(
+                            color: Color(0xFFB45309),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600)),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('סגור')),
+          ],
+        ),
+      ),
+    );
+  }
+
   int get _total {
     final brand = widget.product.brands[_selectedBrand];
     var t = brand.price ?? 0;
@@ -5027,6 +5094,26 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     color: Color(0xFF888888), fontSize: 11),
                               ),
                             ),
+                          // Roadmap step 22 — "build my line" → materialized BOM.
+                          const SizedBox(height: 8),
+                          GestureDetector(
+                            onTap: () => _showLineBom(prod),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 7),
+                              decoration: BoxDecoration(
+                                color: BsTokens.brand.withAlpha(24),
+                                borderRadius: BorderRadius.circular(10),
+                                border:
+                                    Border.all(color: BsTokens.brand.withAlpha(90)),
+                              ),
+                              child: const Text('🔧 בנה לי קו (BOM)',
+                                  style: TextStyle(
+                                      color: BsTokens.brand,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700)),
+                            ),
+                          ),
                         ],
                         // Roadmap step 19 — auto compliance/safety triggers.
                         Builder(builder: (_) {

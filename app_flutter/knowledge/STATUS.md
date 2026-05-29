@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.03` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.04` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — opens on **בית (finder home)** as the default landing: layman
