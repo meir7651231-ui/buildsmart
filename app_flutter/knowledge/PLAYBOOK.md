@@ -20,9 +20,16 @@ checkpoint (0/0, full suite green) is a good moment to *offer* a push — not to
 perform one. This rule was added after pushes were made on the strength of the
 old "push on a clean checkpoint" line; that line is now void.
 
-Cadence: run the **full test suite every ~5 steps**; bump the version label on a
-clean checkpoint and **commit it locally**; keep momentum. Hold all commits for a
-single approved push later.
+### ⏱ Cadence (operation-based, user-set)
+- **Full test suite** every ~5 steps (ground truth before any checkpoint).
+- **Local commit** = batch ~**20 operations and above** into one local commit
+  (don't commit every tiny edit — accumulate, then bump the version label +
+  commit locally on a clean 0/0 checkpoint). Hold all commits for a single
+  approved push later (see PUSH POLICY).
+- **Live demo** = refresh the local web server (port 8090) and show the running
+  build every ~**10 operations and above**, so the user can watch progress.
+- "operation" = a meaningful build action (a wired helper, a UI block, a fix),
+  not a single keystroke/tool call. Keep momentum; never idle.
 
 ---
 
