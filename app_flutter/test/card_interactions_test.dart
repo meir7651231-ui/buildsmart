@@ -78,13 +78,14 @@ void main() {
   setUpAll(_loadFonts);
 
   group('external card — chip pickers', () {
-    testWidgets('type chip → picker', (t) async {
+    testWidgets('type chip does NOT open a cross-product picker (PPR)', (t) async {
       await t.binding.setSurfaceSize(const Size(520, 700));
       await t.pumpWidget(_external(_ref));
       await t.pumpAndSettle();
       await t.tap(find.text('צינור'));
       await t.pumpAndSettle();
-      expect(find.text('בחר סוג:'), findsOneWidget);
+      // For PPR, type == category → no junk picker of every product type.
+      expect(find.text('בחר סוג:'), findsNothing);
     });
 
     testWidgets('material chip → PPR↔PPRCT', (t) async {
@@ -168,6 +169,23 @@ void main() {
       // The row now reads the 32 size — the 20 variant is gone.
       expect(find.text('20×2.8'), findsNothing);
       expect(find.text('32×4.4'), findsOneWidget);
+    });
+  });
+
+  // Regression guard (§19): pickers must offer only relevant, de-duplicated
+  // options — no cross-product type junk, no fragmentation duplicates.
+  group('regression · PPR pickers are clean', () {
+    test('type picker: same category only, no duplicate leading type', () {
+      for (final p in kPolyrollCatalog) {
+        final sibs = findTypeSiblings(p);
+        for (final q in sibs) {
+          expect(q.categoryHe, p.categoryHe,
+              reason: '${p.sku}: cross-category type option ${q.sku}');
+        }
+        final lead = sibs.map((q) => q.nameHe.split(' ').first).toList();
+        expect(lead.length, lead.toSet().length,
+            reason: '${p.sku}: duplicate type options $lead');
+      }
     });
   });
 

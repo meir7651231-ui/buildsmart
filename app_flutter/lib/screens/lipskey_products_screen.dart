@@ -953,7 +953,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Text((p.dims?['תיאור'] as String?) ?? p.categoryHe,
+                  child: Text(_externalTitle(p),
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 15,
@@ -1478,18 +1478,45 @@ String _getCompoundType(LipskeyCatalogProduct p) {
   return '';
 }
 
+/// External-card title. PPR/PPRCT is shown as a chip (not in the title), so for
+/// Polyroll we strip it from the תיאור/categoryHe fallback (e.g. "מצמדים PPR" →
+/// "מצמדים"). The internal sheet keeps it in the full name.
+String _externalTitle(LipskeyCatalogProduct p) {
+  final t = (p.dims?['תיאור'] as String?) ?? p.categoryHe;
+  if (p.brand != kPolyrollBrand) return t;
+  return t
+      .replaceAll(RegExp(r'\bPPRCT\b|\bPPR\b'), '')
+      .replaceAll(RegExp(r'\s{2,}'), ' ')
+      .trim();
+}
+
+/// First kLipskeyTypes word as it appears in the name (left-to-right) — the real
+/// leading product type, unlike _getCompoundType which scans kLipskeyTypes in
+/// list-order and can grab a secondary word (רקורד/מצרה) in PPR fitting names.
+String _leadingType(LipskeyCatalogProduct p) {
+  for (final w in p.nameHe.split(RegExp(r'\s+'))) {
+    if (kLipskeyTypes.contains(w)) return w;
+  }
+  return _getCompoundType(p);
+}
+
 /// Type siblings: one representative per distinct compound type in the same
 /// category. Type is the top-level dimension — no frame restriction needed.
 List<LipskeyCatalogProduct> findTypeSiblings(LipskeyCatalogProduct p) {
   final compound = _getCompoundType(p);
   if (compound.isEmpty) return [p];
+  // Same category only — no cross-product (pipe→valve→drill). For PPR, key by
+  // the LEADING type word (not _getCompoundType, which matches whichever
+  // kLipskeyTypes word comes first in list-order and so fragments e.g. "מתאם …
+  // רקורד" into fake types). This keeps real splits (collar↔flange) but collapses
+  // duplicates.
+  final ppr = p.brand == kPolyrollBrand;
+  String keyOf(LipskeyCatalogProduct q) => ppr ? _leadingType(q) : _getCompoundType(q);
   final byCompound = <String, LipskeyCatalogProduct>{};
-  byCompound[compound] = p;
+  byCompound[keyOf(p)] = p;
   for (final q in kCatalogProducts) {
-    if (p.brand == kPolyrollBrand
-        ? q.brand != kPolyrollBrand
-        : q.categoryHe != p.categoryHe) continue;
-    final qc = _getCompoundType(q);
+    if (q.categoryHe != p.categoryHe) continue;
+    final qc = keyOf(q);
     if (qc.isEmpty) continue;
     if (!byCompound.containsKey(qc)) byCompound[qc] = q;
   }
