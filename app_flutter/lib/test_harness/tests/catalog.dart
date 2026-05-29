@@ -172,6 +172,27 @@ List<TestResult> testCatalog() {
     got: '${prodCats.length}',
   ));
 
+  // PPR misaligned-d tracker (protocol §15): bulk extraction shifted columns on
+  // some fittings, dropping the nominal diameter. dims['d'] must appear as a
+  // number in the name. SOFT for now (working the debt down line-by-line from
+  // the PDF) → flip to HARD when it reaches 0.
+  final pprMisD = kPolyrollCatalog.where((p) {
+    final d = p.dims?['d'];
+    if (d == null) return false;
+    final nums = RegExp(r'\d+(?:\.\d+)?')
+        .allMatches(p.nameHe)
+        .map((m) => m.group(0))
+        .toSet();
+    return !nums.contains(d.toString());
+  }).toList();
+  soft.add(TestCheck(
+    name: 'PPR · dims[d] תואם לשם (חוב יישור-עמודות)',
+    pass: true,
+    got: '${kPolyrollCatalog.length - pprMisD.length}/${kPolyrollCatalog.length}',
+    detail: 'לא-מיושרים: ${pprMisD.length} · '
+        '${pprMisD.take(4).map((p) => p.sku).join(", ")}',
+  ));
+
   // PPR card-richness per line (protocol §15): the 9-strip card builds from
   // dims, so avgDims is the pace metric — thin lines are the next to enrich.
   final pprByCat = <String, List<int>>{};
