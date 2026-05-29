@@ -816,6 +816,32 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
   return out;
 }
 
+// ─── תגיות גילוי (Roadmap step 67) ──────────────────────────────────────────
+/// Short discovery badges for the selected product+brand, derived from real
+/// signals: recommended flag, price position among siblings, variant breadth,
+/// and connection richness. Order-stable, de-duplicated, may be empty.
+List<String> discoveryTagsFor(SmartProduct sp, SmartBrand brand) {
+  final tags = <String>[];
+  if (brand.rec) tags.add('⭐ מומלץ מקצועי');
+
+  final priced = sp.brands.where((b) => b.price != null).map((b) => b.price!);
+  if (brand.price != null && priced.length > 1) {
+    final min = priced.reduce((a, b) => a < b ? a : b);
+    final max = priced.reduce((a, b) => a > b ? a : b);
+    if (min != max) {
+      if (brand.price == min) tags.add('💰 הכי משתלם');
+      if (brand.price == max) tags.add('👑 פרימיום');
+    }
+  }
+
+  final prod = catalogProductForBrand(brand);
+  if (prod != null) {
+    if (variantSiblingsCountFor(prod) >= 4) tags.add('🎚 מבחר וריאנטים');
+    if (compatibleProductsCount(prod) >= 20) tags.add('🔗 רב-תאימות');
+  }
+  return tags;
+}
+
 // ─── תקציר שורה אחת (Roadmap step 59) ───────────────────────────────────────
 /// A single human-readable line summarising the selected product+brand:
 /// name · material · system · max-temp · price. Pure; safe when the brand has

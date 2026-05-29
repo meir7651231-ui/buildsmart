@@ -4710,6 +4710,36 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 color: Color(0xFF444444),
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w600)),
+                        // Roadmap step 67 — discovery tags.
+                        Builder(builder: (_) {
+                          final tags = discoveryTagsFor(p, brand);
+                          if (tags.isEmpty) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: [
+                                for (final t in tags)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF1F5F9),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          color: const Color(0xFFE2E8F0)),
+                                    ),
+                                    child: Text(t,
+                                        style: const TextStyle(
+                                            color: Color(0xFF475569),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w700)),
+                                  ),
+                              ],
+                            ),
+                          );
+                        }),
                         const SizedBox(height: 6),
                         if (spec != null) ...[
                           catRow('חומר', spec.material),

@@ -107,7 +107,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 66. ✅ "Recently viewed" history — persisted `recentlyViewedProvider`
    (move-to-front + dedupe + cap-20), recorded on card open, shown as
    "נצפו לאחרונה". Guard: `recently_viewed_test`.
-67. ⬜ Discovery tags ("new", "best-seller", "pro-recommended").
+67. ✅ Discovery tags (⭐ מומלץ מקצועי · 💰 הכי משתלם · 👑 פרימיום · 🎚 וריאנטים ·
+   🔗 רב-תאימות) via `discoveryTagsFor`, shown as chips under the summary in both
+   modes. Guard: `discovery_tags_test`.
 68. ⬜ Deep-link per product (share a link that opens the card).
 69. ⬜ QR on the physical product → opens the card.
 70. ⬜ Voice search that lands on the card.
