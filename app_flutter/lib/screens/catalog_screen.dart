@@ -2,6 +2,7 @@ import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
@@ -15,8 +16,10 @@ import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/hidden_catalog_sections.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
+import 'package:buildsmart/state/recently_viewed.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -44,6 +47,10 @@ final catalogSectionsListProvider = StateProvider<List<String>>(
 /// titles included in that list. Lists not present default to empty.
 final catalogListItemsProvider =
     StateProvider<Map<String, Set<String>>>((_) => {});
+
+// hiddenCatalogSectionsProvider (persisted) lives in
+// state/hidden_catalog_sections.dart — sections the user hid stay in the list
+// but are filtered out of the chip row, restorable from "ניהול רשימות".
 
 /// True while the search panel is open (search bar focused / has input).
 final searchPanelOpenProvider = StateProvider<bool>((_) => false);
@@ -538,6 +545,7 @@ class _SectionChipsRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final active   = ref.watch(catalogSectionProvider);
     final sections = ref.watch(catalogSectionsListProvider);
+    final hidden   = ref.watch(hiddenCatalogSectionsProvider);
 
     void activate(String label) =>
         ref.read(catalogSectionProvider.notifier).state = label;
@@ -546,6 +554,11 @@ class _SectionChipsRow extends ConsumerWidget {
       final list = List<String>.from(ref.read(catalogSectionsListProvider))
         ..remove(label);
       ref.read(catalogSectionsListProvider.notifier).state = list;
+      if (active == label) activate('הכל');
+    }
+
+    void hideSection(String label) {
+      ref.read(hiddenCatalogSectionsProvider.notifier).hide(label);
       if (active == label) activate('הכל');
     }
 
@@ -591,6 +604,20 @@ class _SectionChipsRow extends ConsumerWidget {
             ),
           ),
           const PopupMenuItem<String>(
+            value: 'hide',
+            child: Row(
+              children: [
+                Icon(Icons.visibility_off_outlined,
+                    color: Colors.black54, size: 20),
+                SizedBox(width: 12),
+                Text(
+                  'הסתרת רשימה',
+                  style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+                ),
+              ],
+            ),
+          ),
+          const PopupMenuItem<String>(
             value: 'delete',
             child: Row(
               children: [
@@ -612,6 +639,7 @@ class _SectionChipsRow extends ConsumerWidget {
         final idx = list.indexOf(label);
         if (idx != -1) _showRenameDialog(ctx, ref, idx, label);
       }
+      if (choice == 'hide') hideSection(label);
       if (choice == 'delete') deleteSection(label);
     }
 
@@ -627,7 +655,7 @@ class _SectionChipsRow extends ConsumerWidget {
               active: active == 'הכל',
               onTap: () => activate('הכל'),
             ),
-            for (final s in sections) ...[
+            for (final s in sections.where((s) => !hidden.contains(s))) ...[
               const SizedBox(width: 8),
               _SectionPill(
                 label: s,
@@ -669,9 +697,18 @@ class _ManageListsSheet extends ConsumerStatefulWidget {
 }
 
 class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
+  void _toggleHidden(String s) {
+    ref.read(hiddenCatalogSectionsProvider.notifier).toggle(s);
+    if (ref.read(hiddenCatalogSectionsProvider).contains(s) &&
+        ref.read(catalogSectionProvider) == s) {
+      ref.read(catalogSectionProvider.notifier).state = 'הכל';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final sections = ref.watch(catalogSectionsListProvider);
+    final hidden = ref.watch(hiddenCatalogSectionsProvider);
 
     return DraggableScrollableSheet(
       expand: false,
@@ -732,30 +769,51 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
               itemCount: sections.length,
               itemBuilder: (_, i) {
                 final s = sections[i];
+                final isHidden = hidden.contains(s);
                 return ListTile(
                   key: ValueKey(s),
                   tileColor: const Color(0xFFFFFFFF),
-                  // Leading: icon matching section
+                  // Leading: icon matching section (dimmed when hidden)
                   leading: Icon(
                     _sectionIcon(s),
-                    color: Colors.black54,
+                    color: isHidden ? const Color(0xFFCCCCCC) : Colors.black54,
                     size: 22,
                   ),
                   title: Text(
                     s,
-                    style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                    style: TextStyle(
+                      color: isHidden
+                          ? const Color(0xFFAAAAAA)
+                          : const Color(0xFF1A1A1A),
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  subtitle: const Text(
-                    'הגדרה מראש',
-                    style: TextStyle(color: Color(0xFF888888), fontSize: 12),
+                  subtitle: Text(
+                    isHidden ? 'מוסתר — מוסתר מהקטלוג' : 'הגדרה מראש',
+                    style: TextStyle(
+                        color: isHidden
+                            ? const Color(0xFFBBBBBB)
+                            : const Color(0xFF888888),
+                        fontSize: 12),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Hide / show (eye) — non-destructive visibility toggle.
+                      IconButton(
+                        tooltip: isHidden ? 'הצג' : 'הסתר',
+                        icon: Icon(
+                          isHidden
+                              ? Icons.visibility_off
+                              : Icons.visibility_outlined,
+                          color: isHidden
+                              ? const Color(0xFFEA8A00)
+                              : const Color(0xFF888888),
+                          size: 20,
+                        ),
+                        onPressed: () => _toggleHidden(s),
+                      ),
                       IconButton(
                         icon: const Icon(
                           Icons.edit_outlined,
@@ -2239,8 +2297,6 @@ class _AllOverview extends ConsumerWidget {
               ),
           ],
         ),
-        // ספק מוביל — כרטיס תצוגה של ליפסקי ברקן (קטלוג חיצוני)
-        const _LipskeySupplierCard(),
       ],
     );
   }
@@ -2388,479 +2444,7 @@ class _OverviewEmpty extends StatelessWidget {
 }
 
 // ── Lipskey supplier card — pinned at top of catalog list ────────────────────
-class _LipskeySupplierCard extends StatelessWidget {
-  const _LipskeySupplierCard();
-
-  // SKU 217861 — סיפון אמריקאי 1¼" לבן — our showcase product
-  static final LipskeyCatalogProduct _showcase =
-      kLipskeyCatalog.firstWhere((p) => p.sku == '217861');
-
-  @override
-  Widget build(BuildContext context) {
-    final p = _showcase;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [Color(0xFF0D1B2A), Color(0xFF1A1A2E)],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF3D5A80), width: 0.8),
-        ),
-        child: Column(
-          children: [
-            // ── header: supplier badge + "כל המוצרים" ────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF3D5A80).withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: const Color(0xFF3D5A80), width: 0.7),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('🏭', style: TextStyle(fontSize: 13)),
-                          SizedBox(width: 4),
-                          Flexible(
-                            child: Text('ליפסקי ברקן',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: Color(0xFF64FFDA),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        LipskeyBrandScreen.route(),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text('כל הקטגוריות',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: Colors.black38, fontSize: 12)),
-                          ),
-                          SizedBox(width: 3),
-                          Icon(Icons.chevron_left, color: Colors.white38, size: 16),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const Divider(height: 1, color: Color(0xFF3D5A80), indent: 14, endIndent: 14),
-
-            // ── showcase product row ─────────────────────────
-            GestureDetector(
-              onTap: () {
-                final catProducts = kLipskeyCatalog
-                    .where((x) => x.categoryHe == p.categoryHe)
-                    .toList();
-                showLipskeyProductSheet(context, p, catProducts);
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Row(
-                  children: [
-                    // תמונה
-                    Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF080815),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: p.imageAsset != null
-                          ? Image.asset(p.imageAsset!, fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) =>
-                                  Center(child: Text(p.categoryEmoji,
-                                      style: const TextStyle(fontSize: 32))))
-                          : Center(child: Text(p.categoryEmoji,
-                              style: const TextStyle(fontSize: 32))),
-                    ),
-                    const SizedBox(width: 12),
-
-                    // שם + פרטים
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Text(p.nameHe,
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 13,
-                                        height: 1.3),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF3D5A80).withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                      color: const Color(0xFF3D5A80), width: 0.7),
-                                ),
-                                child: const Text('פרטים',
-                                    style: TextStyle(
-                                        color: Color(0xFF64FFDA),
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          Text('#${p.sku}',
-                              style: const TextStyle(
-                                  color: Color(0xFFFFB300),
-                                  fontFamily: 'monospace',
-                                  fontSize: 11)),
-                          const SizedBox(height: 5),
-                          Wrap(
-                            spacing: 6,
-                            children: [
-                              if (p.color != null)
-                                _InfoChip('🎨 ${p.color!}'),
-                              if (p.qtyPack != null)
-                                _InfoChip('📦 ${p.qtyPack}'),
-                              if (p.qtyPallet != null)
-                                _InfoChip('🏗️ ${p.qtyPallet}'),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoChip extends StatelessWidget {
-  const _InfoChip(this.label);
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.07),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(label,
-            style: const TextStyle(color: Colors.black38, fontSize: 11)),
-      );
-}
-
 // ── Featured product card — shown at top of main catalog list ────────────────
-class _FeaturedProductCard extends ConsumerStatefulWidget {
-  const _FeaturedProductCard({required this.product});
-  final SmartProduct product;
-
-  @override
-  ConsumerState<_FeaturedProductCard> createState() =>
-      _FeaturedProductCardState();
-}
-
-class _FeaturedProductCardState extends ConsumerState<_FeaturedProductCard> {
-  int _qty = 1;
-  bool _added = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final rec = widget.product.recBrand;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: GestureDetector(
-        onTap: () =>
-            _SmartTreeProductList._openProductSheet(context, widget.product),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF1C2B2A), Color(0xFF1A1A2E)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Color.fromARGB(90, 31, 111, 107),
-              width: 1,
-            ),
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Header row ──
-              Row(
-                children: [
-                  SizedBox(
-                    width: 52,
-                    height: 52,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: BsTokens.brand.withAlpha(30),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            widget.product.emoji,
-                            style: const TextStyle(fontSize: 26),
-                          ),
-                        ),
-                        if (_added)
-                          Positioned(
-                            right: -4,
-                            bottom: -4,
-                            child: Container(
-                              width: 20,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF22C55E),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: const Color(0xFFFFFFFF),
-                                  width: 2,
-                                ),
-                              ),
-                              alignment: Alignment.center,
-                              child: const Icon(
-                                Icons.check,
-                                color: Colors.white,
-                                size: 12,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: BsTokens.brand,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Text(
-                                'מומלץ',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'מוצר היום',
-                              style: TextStyle(
-                                color: Color(0xFF888888),
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.product.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          widget.product.cat,
-                          style: const TextStyle(
-                            color: Color(0xFF888888),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        rec.price != null ? '₪${rec.price}' : 'מחיר לפי ספק',
-                        style: const TextStyle(
-                          color: BsTokens.brand,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const Text(
-                        'ממותג מומלץ',
-                        style: TextStyle(
-                          color: Color(0xFF666666),
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              // ── Qty stepper + Add to cart ──
-              Row(
-                children: [
-                  // Stepper
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF252525),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _QtyBtn(
-                          icon: Icons.remove,
-                          onTap: _qty > 1
-                              ? () => setState(() => _qty--)
-                              : null,
-                        ),
-                        SizedBox(
-                          width: 36,
-                          child: Text(
-                            '$_qty',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        _QtyBtn(
-                          icon: Icons.add,
-                          onTap: () => setState(() => _qty++),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  // Add to cart button
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        ref.read(smartCartProvider.notifier).add(
-                              SmartCartLine(
-                                productKey: widget.product.key,
-                                productName: widget.product.name,
-                                productEmoji: widget.product.emoji,
-                                brandName: rec.name,
-                                brandPrice: rec.price ?? 0,
-                                productQty: _qty,
-                                accessories: const [],
-                              ),
-                            );
-                        setState(() => _added = true);
-                        showToast(
-                          context,
-                          '${widget.product.name} × $_qty נוסף לסל 🛒',
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 11),
-                        decoration: BoxDecoration(
-                          color: BsTokens.brand,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          rec.price != null
-                              ? 'הוסף לסל · ₪${rec.price! * _qty}'
-                              : 'הוסף לסל · לפי ספק',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _QtyBtn extends StatelessWidget {
-  const _QtyBtn({required this.icon, required this.onTap});
-  final IconData icon;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        child: Icon(
-          icon,
-          size: 16,
-          color: onTap != null ? Colors.white : const Color(0xFF555555),
-        ),
-      ),
-    );
-  }
-}
-
 CatalogNode? _findCatalogTreeNodeByTitle(String title) {
   for (final n in kCatalogTree) {
     if (n.title == title) return n;
@@ -3821,8 +3405,6 @@ class _SmartTreeCatList extends ConsumerWidget {
     final cats = kSmartTreeCats;
     return Column(
       children: [
-        // מוצר היום — כרטיס מוצר חכם מומלץ (קטלוג פנימי)
-        _FeaturedProductCard(product: kSmartProducts.first),
         Expanded(
           child: ListView.separated(
             itemCount: cats.length,
@@ -4860,6 +4442,14 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
     final acc = widget.product.acc;
     _accSelected = {for (var i = 0; i < acc.length; i++) i: false};
     _accQty = {for (var i = 0; i < acc.length; i++) i: 1};
+    // Roadmap step 66 — record this product as recently-viewed (post-frame so
+    // we don't mutate a provider during the initial build).
+    final sku = widget.product.recBrand.sku;
+    if (sku != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.read(recentlyViewedProvider.notifier).touch(sku);
+      });
+    }
   }
 
   void _tapStage(int i) =>
@@ -4885,6 +4475,25 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
     final optItems = p.acc.where((a) => !a.must).toList();
     final types = _deriveBrandTypes(p.brands);
     final sizes = _deriveBrandSizes(p.brands);
+
+    // Roadmap steps 6/11/21 — pull the catalog's engineering data into the smart
+    // card for the selected brand's real SKU, via the SmartProduct↔catalog bridge.
+    Widget catRow(String k, String v) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(children: [
+            Text('$k: ',
+                style: const TextStyle(color: Color(0xFF888888), fontSize: 12)),
+            Expanded(
+              child: Text(v,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600)),
+            ),
+          ]),
+        );
 
     return DraggableScrollableSheet(
       expand: false,
@@ -5041,6 +4650,247 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       }),
                     ),
                   ),
+
+                // 📦 נתוני קטלוג — spec / compat / price of the selected
+                // brand's real SKU (Roadmap 6/11/21), via the bridge.
+                Builder(builder: (_) {
+                  final prod = catalogProductForBrand(brand);
+                  if (prod == null) return const SizedBox.shrink();
+                  final spec = engineeringSpecFor(prod);
+                  final price = priceFor(prod);
+                  final compat = compatibleProductsFor(prod);
+                  final finder = finderGroupFor(prod);
+                  final kit = installKitFor(prod);
+                  final variants = variantSiblingsCountFor(prod);
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('📦 נתוני קטלוג',
+                            style: TextStyle(
+                                color: Color(0xFF888888),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 4),
+                        // Roadmap step 59 — one-line card summary.
+                        Text(smartCardSummaryHe(p, brand),
+                            style: const TextStyle(
+                                color: Color(0xFF444444),
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 6),
+                        if (spec != null) ...[
+                          catRow('חומר', spec.material),
+                          if (spec.pressureRating != null)
+                            catRow('לחץ', spec.pressureRating!),
+                          catRow('טמפ׳ מרבית',
+                              '${spec.maxTempC.toStringAsFixed(0)}°C'),
+                          catRow('מערכת', spec.waterSystem),
+                          if (spec.endsSummary.isNotEmpty)
+                            catRow('קצוות', spec.endsSummary),
+                          if (spec.minBoreMm != null)
+                            catRow('קוטר מינ׳',
+                                '${spec.minBoreMm!.toStringAsFixed(0)}mm'),
+                        ],
+                        if (finder != null)
+                          catRow('מאתר', '${finder.emoji} ${finder.label}'),
+                        if (kit != null)
+                          catRow('ערכת התקנה',
+                              '${kit.must} חובה · ${kit.optional} אופ׳ · ${kit.tools} כלים'),
+                        if (variants > 1)
+                          catRow('וריאנטים', '$variants גרסאות'),
+                        if (price != null) catRow('מחיר משוער', '~₪$price'),
+                        // Roadmap step 45 — cheaper standard-comparable brand.
+                        Builder(builder: (_) {
+                          final alt = cheaperAlternativeBrand(p, _selectedBrand);
+                          if (alt == null) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                                '💰 חלופה זולה יותר: ${alt.name} (~₪${alt.price})',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: Color(0xFF15803D),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600)),
+                          );
+                        }),
+                        if (compat.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text('🔗 מתחבר ל-${compat.length} מוצרים',
+                              style: const TextStyle(
+                                  color: Color(0xFF0F766E),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700)),
+                          for (final h in compat.take(3))
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Text(
+                                '· ${h.nameHe} — ${connectionExplainHe(prod, h)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: Color(0xFF888888), fontSize: 11),
+                              ),
+                            ),
+                        ],
+                        // Roadmap step 19 — auto compliance/safety triggers.
+                        Builder(builder: (_) {
+                          final triggers = complianceTriggersFor(prod);
+                          if (triggers.isEmpty) return const SizedBox.shrink();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 6),
+                              const Text('תקינות נדרשת',
+                                  style: TextStyle(
+                                      color: Color(0xFF888888),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600)),
+                              for (final t in triggers)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text('${t.label} — ${t.reason}',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          color: Color(0xFFB45309),
+                                          fontSize: 11)),
+                                ),
+                            ],
+                          );
+                        }),
+                        // Roadmap step 12 — relevant Israeli standards (ת"י).
+                        Builder(builder: (_) {
+                          final stds = israeliStandardsFor(prod);
+                          if (stds.isEmpty) return const SizedBox.shrink();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 6),
+                              const Text('תקן ישראלי רלוונטי',
+                                  style: TextStyle(
+                                      color: Color(0xFF888888),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600)),
+                              for (final s in stds)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text('📋 ${s.code} — ${s.scope}',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          color: Color(0xFF0F766E),
+                                          fontSize: 11)),
+                                ),
+                            ],
+                          );
+                        }),
+                        // Roadmap step 33 — required tools (derived from ends).
+                        Builder(builder: (_) {
+                          final tools = installToolsFor(prod);
+                          if (tools.isEmpty) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: catRow('כלי עבודה', tools.join(' · ')),
+                          );
+                        }),
+                        // Roadmap step 63 — variant family ("גרסאות נוספות").
+                        Builder(builder: (_) {
+                          final fam = variantSiblingsOf(prod)
+                              .where((q) => q.sku != prod.sku)
+                              .toList();
+                          if (fam.isEmpty) return const SizedBox.shrink();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 6),
+                              Text('גרסאות נוספות במשפחה (${fam.length})',
+                                  style: const TextStyle(
+                                      color: Color(0xFF888888),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600)),
+                              for (final q in fam.take(4))
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text('· ${q.nameHe}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          color: Color(0xFF888888),
+                                          fontSize: 11)),
+                                ),
+                            ],
+                          );
+                        }),
+                        // Roadmap step 16 — "when to pick which" brand guide.
+                        Builder(builder: (_) {
+                          final guide = brandDecisionGuide(p);
+                          if (guide.length < 2) return const SizedBox.shrink();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 6),
+                              const Text('מתי לבחור איזה מותג',
+                                  style: TextStyle(
+                                      color: Color(0xFF888888),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600)),
+                              for (final g in guide)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text('• ${g.brand}: ${g.advice}',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          color: Color(0xFF666666),
+                                          fontSize: 11)),
+                                ),
+                            ],
+                          );
+                        }),
+                        // Roadmap step 66 — recently-viewed history.
+                        Builder(builder: (_) {
+                          final recent = ref
+                              .watch(recentlyViewedProvider)
+                              .where((s) => s != prod.sku)
+                              .take(5)
+                              .toList();
+                          if (recent.isEmpty) return const SizedBox.shrink();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 6),
+                              const Text('נצפו לאחרונה',
+                                  style: TextStyle(
+                                      color: Color(0xFF888888),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600)),
+                              for (final sku in recent)
+                                Builder(builder: (_) {
+                                  final rp = catalogProductForSku(sku);
+                                  if (rp == null) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text('🕘 ${rp.nameHe}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF888888),
+                                            fontSize: 11)),
+                                  );
+                                }),
+                            ],
+                          );
+                        }),
+                      ],
+                    ),
+                  );
+                }),
 
                 // Must accessories
                 if (mustItems.isNotEmpty) ...[

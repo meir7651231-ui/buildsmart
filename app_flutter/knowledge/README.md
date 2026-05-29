@@ -9,6 +9,8 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 | File | What it holds |
 |---|---|
 | `README.md` (this) | the protocol + index |
+| `PLAYBOOK.md` | **continuous learning log** — every stuck→solved problem (env/git/dart/engine/refactor/persistence/UI). Read it first; append to it as you go. |
+| `SMARTPRODUCT_ROADMAP.md` | the 100-step SmartProduct improvement plan + progress |
 | `TARGET.md` | **prototype & target** — `index.html` prototype, parity goal, cutover, store launch |
 | `PARITY.md` | **port map** — full inventory of all prototype + Preact knowledge, current Flutter status, and the dial-form implementation plan, phased. The source of truth for the parity effort. |
 | `SPEC.md` | **spec map** — condensed every-screen/element/flow/status overview |
