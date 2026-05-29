@@ -157,11 +157,16 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 70. ⬜ Voice search that lands on the card.
 
 ## Phase 8 · Contractor & projects (71–80)
-71. ⬜ Add product to a specific project (floor/apartment/room).
-72. ⬜ Duplicate-to-many-points ("need 6 of these in 3 rooms").
+71. ✅ Add product to a project location — persisted `cardProjectsProvider`
+   (ProjectItem: project/location/product/brand/qty, merges qty); "➕ הוסף
+   לפרויקט" button. Guard: `card_projects_test`.
+72. ✅ Duplicate-to-many-points — `addToLocations` + "×3 חדרים" button adds the
+   product to several locations at once. Guard: `card_projects_test`.
 73. ✅ Material dependencies — `connectionNeedsHe` lists what each end needs to
    mate ("מה הקו צריך לחיבור"). Guard: `line_fit_test`.
-74. ⬜ Cumulative project BOM from all chosen cards.
+74. 🟦 Cumulative project view — running "📋 בפרויקט: N יחידות · M מיקומים" from
+   `cardProjectsProvider`. (Full materialized project BOM dialog pending.)
+   Guard: `card_projects_test`.
 75. ⬜ Customer quote straight from the choices.
 76. ⬜ Config versioning (compare alternatives for the project).
 77. ⬜ Team sharing: chat/notes on a chosen product.

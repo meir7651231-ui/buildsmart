@@ -17,6 +17,7 @@ import 'package:buildsmart/screens/finder_screen.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/card_detail_mode.dart';
+import 'package:buildsmart/state/card_projects.dart';
 import 'package:buildsmart/state/card_selection.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
@@ -5249,6 +5250,99 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             ),
                           ),
                         ],
+                        // Roadmap steps 71/72/74 — assign to a project.
+                        Builder(builder: (_) {
+                          const proj = 'הפרויקט שלי';
+                          final loc = finderGroupFor(prod)?.label ?? 'כללי';
+                          ProjectItem mk(String l) => ProjectItem(
+                              project: proj,
+                              location: l,
+                              productKey: p.key,
+                              brandName: brand.name,
+                              sku: prod.sku);
+                          ref.watch(cardProjectsProvider);
+                          final notifier =
+                              ref.read(cardProjectsProvider.notifier);
+                          final inProj = notifier.forProject(proj);
+                          final units =
+                              inProj.fold<int>(0, (s, e) => s + e.qty);
+                          final locs = {for (final e in inProj) e.location}.length;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      notifier.add(mk(loc));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text(
+                                                  'נוסף ל"$proj" · $loc'),
+                                              duration:
+                                                  const Duration(seconds: 2)));
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 7),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFEEF2FF),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color: const Color(0xFFC7D2FE)),
+                                      ),
+                                      child: const Text('➕ הוסף לפרויקט',
+                                          style: TextStyle(
+                                              color: Color(0xFF4338CA),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () {
+                                      notifier.addToLocations(
+                                          mk(loc), ['חדר 1', 'חדר 2', 'חדר 3']);
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              content:
+                                                  Text('נוסף ל-3 חדרים'),
+                                              duration: Duration(seconds: 2)));
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 7),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF1F5F9),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color: const Color(0xFFE2E8F0)),
+                                      ),
+                                      child: const Text('×3 חדרים',
+                                          style: TextStyle(
+                                              color: Color(0xFF475569),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (units > 0)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                      '📋 בפרויקט "$proj": $units יחידות · $locs מיקומים',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          color: Color(0xFF4338CA),
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600)),
+                                ),
+                            ],
+                          );
+                        }),
                         // Roadmap step 19 — auto compliance/safety triggers.
                         Builder(builder: (_) {
                           final triggers = complianceTriggersFor(prod);
