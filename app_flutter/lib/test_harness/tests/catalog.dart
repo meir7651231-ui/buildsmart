@@ -194,7 +194,11 @@ List<TestResult> testCatalog() {
   // sub-type spec image · dims≥3). Reported every CI run.
   final pprN = kPolyrollCatalog.length;
   final pImg = kPolyrollCatalog.where((p) => p.imageAsset != null).length;
-  final pSpec = kPolyrollCatalog.where((p) => p.specImageFile != null).length;
+  // A real spec diagram = the flip side's first image is a cropped
+  // `/products/spec_*` drawing, not the full catalog page fallback.
+  final pSpec = kPolyrollCatalog
+      .where((p) => p.specImageAssets.first.contains('/products/spec_'))
+      .length;
   final pDims = kPolyrollCatalog.where((p) => (p.dims?.length ?? 0) >= 3).length;
   int pct(int x) => (100 * x / pprN).round();
   soft.add(TestCheck(
