@@ -63,6 +63,8 @@ String? _pprImageFor(String categoryHe, String nameHe) {
       return nameHe.contains('מצרה')
           ? 'ppr_coupler_reducing.jpg'
           : 'ppr_coupler.jpg';
+    case kPprTees:
+      return nameHe.contains('מצרה') ? 'ppr_tee_reducing.jpg' : 'ppr_tee.jpg';
   }
   return _kPprCategoryImage[categoryHe];
 }
