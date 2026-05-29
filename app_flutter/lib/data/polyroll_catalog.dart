@@ -65,6 +65,15 @@ String? _pprImageFor(String categoryHe, String nameHe) {
           : 'ppr_coupler.jpg';
     case kPprTees:
       return nameHe.contains('מצרה') ? 'ppr_tee_reducing.jpg' : 'ppr_tee.jpg';
+    case kPprValves:
+      if (nameHe.contains('פרפר')) return 'ppr_valve_butterfly.jpg';
+      if (nameHe.contains('בין אוגנים')) return 'ppr_valve_wafer.jpg';
+      if (nameHe.contains('סמוי')) return 'ppr_valve_concealed.jpg';
+      if (nameHe.contains('אלכסוני')) return 'ppr_valve_angle.jpg';
+      if (nameHe.contains('מעבר')) return 'ppr_valve_straight.jpg';
+      return 'ppr_valve.jpg'; // כדורי (ball) default
+    case kPprElectrofusion:
+      return nameHe.contains('מסעף') ? 'ppr_ef_tee.jpg' : 'ppr_ef.jpg';
   }
   return _kPprCategoryImage[categoryHe];
 }
