@@ -778,6 +778,92 @@ List<String> installToolsFor(LipskeyCatalogProduct p) {
   return tools;
 }
 
+// ─── זמן + רמת קושי התקנה (Roadmap step 34) ─────────────────────────────────
+/// A rough install time + difficulty derived purely from the spec ends and the
+/// install kit: threaded/compression are quick & DIY; press fittings need tools
+/// and skill; more required safety items add time. Returns null without a spec.
+({int minutes, String difficulty})? installEffortFor(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return null;
+  var minutes = 10; // base prep
+  var hard = 0;
+  for (final e in spec.ends) {
+    switch (e.type) {
+      case EndType.bspMale:
+      case EndType.bspFemale:
+        minutes += 8;
+      case EndType.hdpeCompression:
+        minutes += 6;
+      case EndType.pexPress:
+        minutes += 12;
+        hard += 1;
+      case EndType.copperPress:
+        minutes += 15;
+        hard += 2;
+      case EndType.drainOpening:
+        minutes += 10;
+    }
+  }
+  final kit = installKitFor(p);
+  if (kit != null) minutes += kit.must * 5;
+  final difficulty = hard >= 2
+      ? 'מקצועי'
+      : (hard == 1 || minutes > 35 ? 'בינוני' : 'DIY');
+  return (minutes: minutes, difficulty: difficulty);
+}
+
+// ─── טעויות נפוצות + טיפים (Roadmap step 35) ────────────────────────────────
+/// Common-mistake / tip lines for installing [p], derived from its end types
+/// and material. De-duplicated, order-stable, empty without a spec.
+List<String> installTipsFor(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return const [];
+  final tips = <String>[];
+  final seen = <String>{};
+  void add(String t) {
+    if (seen.add(t)) tips.add(t);
+  }
+
+  for (final e in spec.ends) {
+    switch (e.type) {
+      case EndType.bspMale:
+      case EndType.bspFemale:
+        add('⚠ לא להדק יתר על המידה — סדק בהברגה. 2-3 פניות אחרי היד.');
+        add('💡 לכרוך טפלון בכיוון ההברגה (עם כיוון השעון).');
+      case EndType.hdpeCompression:
+        add('⚠ לוודא שהצינור נכנס עד הסוף לפני הידוק האום.');
+      case EndType.pexPress:
+        add('⚠ לכייל את המכבש — לחיצה חלקית גורמת לנזילה.');
+      case EndType.copperPress:
+        add('⚠ לנקות ולשייף את הקצה; לוודא שה-O-ring במקומו לפני הלחיצה.');
+      case EndType.drainOpening:
+        add('💡 שיפוע מינ׳ 2% לניקוז; להמתין לייבוש הדבק לפני בדיקת מים.');
+    }
+  }
+  if (spec.material == 'נחושת' || spec.material == 'פליז') {
+    add('⚠ להימנע ממגע ישיר עם פלדה מגולוונת — קורוזיה גלוונית.');
+  }
+  return tips;
+}
+
+// ─── התראת מערכת (Roadmap step 24) ──────────────────────────────────────────
+/// A one-line system-safety note: gravity drainage must not be tied to a
+/// pressure line; a supply line needs an upstream shutoff. Returns null when
+/// the system can't be determined.
+String? systemSafetyNoteHe(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return null;
+  final sys = spec.endSystems;
+  if (sys.length == 1 && sys.contains(WaterSystem.drainage)) {
+    return '🕳 קו ניקוז בכבידה — לא לחבר לקו לחץ; לשמור שיפוע ונקודת ביקורת.';
+  }
+  if (sys.contains(WaterSystem.supply)) {
+    final pr = spec.pressureRating;
+    return '🚰 קו הזנה בלחץ${pr != null ? ' ($pr)' : ''} — חובה ברז ניתוק במעלה הזרם.';
+  }
+  return null;
+}
+
 // ─── מתי לבחור איזה מותג (Roadmap step 16) ──────────────────────────────────
 /// "When to pick which" guidance across a SmartProduct's brands. For each brand
 /// returns a one-line reason derived from its recommended flag, its relative

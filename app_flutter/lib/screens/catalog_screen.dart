@@ -4740,6 +4740,21 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             ),
                           );
                         }),
+                        // Roadmap step 24 — system safety note (always shown).
+                        Builder(builder: (_) {
+                          final note = systemSafetyNoteHe(prod);
+                          if (note == null) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(note,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: Color(0xFF1D4ED8),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600)),
+                          );
+                        }),
                         const SizedBox(height: 6),
                         if (spec != null) ...[
                           catRow('חומר', spec.material),
@@ -4759,6 +4774,14 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                         if (expert && kit != null)
                           catRow('ערכת התקנה',
                               '${kit.must} חובה · ${kit.optional} אופ׳ · ${kit.tools} כלים'),
+                        // Roadmap step 34 — install time + difficulty.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final eff = installEffortFor(prod);
+                            if (eff == null) return const SizedBox.shrink();
+                            return catRow('התקנה',
+                                '~${eff.minutes} דק׳ · ${eff.difficulty}');
+                          }),
                         if (expert && variants > 1)
                           catRow('וריאנטים', '$variants גרסאות'),
                         if (price != null) catRow('מחיר משוער', '~₪$price'),
@@ -4873,6 +4896,34 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             child: catRow('כלי עבודה', tools.join(' · ')),
                           );
                         }),
+                        // Roadmap step 35 — common mistakes + tips.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final tips = installTipsFor(prod);
+                            if (tips.isEmpty) return const SizedBox.shrink();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 6),
+                                const Text('טעויות נפוצות וטיפים',
+                                    style: TextStyle(
+                                        color: Color(0xFF888888),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)),
+                                for (final t in tips)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(t,
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF7C2D12),
+                                            fontSize: 10.5,
+                                            height: 1.25)),
+                                  ),
+                              ],
+                            );
+                          }),
                         // Roadmap step 63 — variant family ("גרסאות נוספות").
                         if (expert)
                           Builder(builder: (_) {

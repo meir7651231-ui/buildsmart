@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.95 · 29.5.26 · SmartProduct: תגיות גילוי (מומלץ/משתלם/פרימיום) + מצב מורחב/פשוט + "למה זה חשוב"',
+                          'v4.96 · 29.5.26 · SmartProduct: זמן+קושי התקנה + טעויות נפוצות/טיפים + התראת מערכת (ניקוז/הזנה)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

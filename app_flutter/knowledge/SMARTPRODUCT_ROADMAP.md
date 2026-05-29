@@ -47,7 +47,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    `connectionExplainHe` labels, in the 📦 section).
 22. ⬜ "Build my line" button → `buildInstallation` → full BOM.
 23. ⬜ Materialized chain diagram inline (explicit pipes/couplings).
-24. ⬜ System (supply/drainage) warning + min-bore + ΔP inline.
+24. 🟦 System (supply/drainage) safety note + min-bore inline via
+   `systemSafetyNoteHe` (gravity-drainage / upstream-shutoff) + the bore row.
+   (Line-level ΔP still ⬜ — needs a built line.) Guard: `install_effort_test`.
 25. ⬜ Auto install-kit — card offers all required safety items (correct-by-construction).
 26. ⬜ Temperature picker → filters heat-unsuitable brands in real time.
 27. ⬜ Smart adapter recommendation when a brand doesn't directly mate the cart.
@@ -60,8 +62,10 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 32. ⬜ Short install video per stage.
 33. ✅ Required-tools list (derived from spec ends → wrench/teflon, press tool,
    saw/solvent) via `installToolsFor` ("כלי עבודה" row). Guard: `standards_tools_test`.
-34. ⬜ Time estimate + difficulty (DIY/pro) per install.
-35. ⬜ Common mistakes + tips per stage.
+34. ✅ Time estimate + difficulty (DIY/בינוני/מקצועי) via `installEffortFor`
+   (from ends + kit), shown as the "התקנה" row. Guard: `install_effort_test`.
+35. ✅ Common mistakes + tips via `installTipsFor` (per end-type + material) —
+   "טעויות נפוצות וטיפים" block. Guard: `install_effort_test`.
 36. ⬜ AR mode — place the product in space/on a wall via camera.
 37. ⬜ Exploded view of the parts.
 38. ⬜ "Test kit" — pressure/leak check at the end, with a compliance checklist.
