@@ -4821,6 +4821,19 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           }),
                         if (expert && variants > 1)
                           catRow('וריאנטים', '$variants גרסאות'),
+                        // Roadmap step 20 — manufacturer + part number.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final mi = manufacturerInfoFor(prod);
+                            if (mi == null) return const SizedBox.shrink();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                catRow('יצרן', mi.manufacturer),
+                                catRow('מק"ט יצרן', mi.partNumber),
+                              ],
+                            );
+                          }),
                         if (price != null) catRow('מחיר משוער', '~₪$price'),
                         // Roadmap step 45 — cheaper standard-comparable brand.
                         Builder(builder: (_) {

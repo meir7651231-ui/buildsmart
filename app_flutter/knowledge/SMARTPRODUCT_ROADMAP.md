@@ -40,7 +40,8 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 18. ⬜ Price history + trend chart for the selected brand.
 19. ✅ Auto compliance/warning labels via `complianceTriggersFor` ("תקינות נדרשת"
    block in the 📦 section).
-20. ⬜ Warranty + manufacturer + mfr part-number per brand.
+20. 🟦 Manufacturer + mfr part-number via `manufacturerInfoFor` (יצרן + מק"ט יצרן
+   = the SKU). (Warranty still ⬜ — no warranty data.) Guard: `manufacturer_info_test`.
 
 ## Phase 3 · Compatibility-engine integration (21–30)
 21. ✅ "🔗 מתחבר ל-N מוצרים" in the smart card (`compatibleProductsFor` +

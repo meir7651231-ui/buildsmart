@@ -902,6 +902,20 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
   return out;
 }
 
+// ─── יצרן + מק"ט יצרן (Roadmap step 20) ─────────────────────────────────────
+/// Manufacturer + manufacturer part-number for [p]. The SKU *is* the catalog
+/// part number; the brand is the manufacturer (falls back to the house brand).
+/// Returns null only when there is no SKU to show.
+({String manufacturer, String partNumber})? manufacturerInfoFor(
+    LipskeyCatalogProduct p) {
+  if (p.sku.isEmpty) return null;
+  final mfr = p.brand.trim();
+  return (
+    manufacturer: mfr.isEmpty ? 'לפסקי-ברקן' : mfr,
+    partNumber: p.sku,
+  );
+}
+
 // ─── הקו שלך עד כה (Roadmap step 28) ────────────────────────────────────────
 /// How the [current] product fits a line already in progress. Given the catalog
 /// products already chosen ([lineProducts]), returns how many of them [current]
