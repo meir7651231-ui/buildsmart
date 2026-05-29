@@ -596,6 +596,35 @@ List<({String label, String reason})> complianceTriggersFor(
   return out;
 }
 
+// ─── למה זה חשוב (Roadmap step 58) ──────────────────────────────────────────
+/// A one-sentence plain-language explanation of *why* a compliance item matters,
+/// keyed off the trigger label produced by [complianceTriggersFor]. Returns null
+/// for an unrecognised label so callers can simply skip the detail line.
+String? complianceWhyHe(String label) {
+  if (label.contains('PRV')) {
+    return 'בקו חם סגור הלחץ עולה עם החימום — שסתום פורק לחץ מונע נזק לדוד ולצנרת.';
+  }
+  if (label.contains('התפשטות') && label.contains('Bladder')) {
+    return 'מים מתרחבים ~4% בחימום; כלי התפשטות סופג את הנפח ומונע קפיצות לחץ.';
+  }
+  if (label.contains('בידוד')) {
+    return 'בידוד תרמי חוסך אנרגיה ומונע כוויות ממגע בצנרת חמה.';
+  }
+  if (label.contains('TMTV') || label.contains('anti-scald')) {
+    return 'מגביל את טמפ׳ היציאה ל-≤45°C — מניעת כוויות, חובה בקו חם לשימוש אישי.';
+  }
+  if (label.contains('ניתוק')) {
+    return 'ברז ניתוק במעלה הזרם מאפשר תחזוקה/החלפה בלי לסגור את כל הבית.';
+  }
+  if (label.contains('דיאלקטרי')) {
+    return 'מגע ישיר בין שתי מתכות שונות גורם לקורוזיה גלוונית; רקורד דיאלקטרי מפריד.';
+  }
+  if (label.contains('PEX')) {
+    return 'PEX מתרחב ומתכווץ עם הטמפ׳; מפצה התפשטות מסיר מתח מהחיבורים.';
+  }
+  return null;
+}
+
 bool _isHotPotential(LipskeyCatalogProduct p) {
   final cat = p.categoryHe;
   return cat == 'מחלקים' ||
@@ -749,6 +778,92 @@ List<String> installToolsFor(LipskeyCatalogProduct p) {
   return tools;
 }
 
+// ─── זמן + רמת קושי התקנה (Roadmap step 34) ─────────────────────────────────
+/// A rough install time + difficulty derived purely from the spec ends and the
+/// install kit: threaded/compression are quick & DIY; press fittings need tools
+/// and skill; more required safety items add time. Returns null without a spec.
+({int minutes, String difficulty})? installEffortFor(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return null;
+  var minutes = 10; // base prep
+  var hard = 0;
+  for (final e in spec.ends) {
+    switch (e.type) {
+      case EndType.bspMale:
+      case EndType.bspFemale:
+        minutes += 8;
+      case EndType.hdpeCompression:
+        minutes += 6;
+      case EndType.pexPress:
+        minutes += 12;
+        hard += 1;
+      case EndType.copperPress:
+        minutes += 15;
+        hard += 2;
+      case EndType.drainOpening:
+        minutes += 10;
+    }
+  }
+  final kit = installKitFor(p);
+  if (kit != null) minutes += kit.must * 5;
+  final difficulty = hard >= 2
+      ? 'מקצועי'
+      : (hard == 1 || minutes > 35 ? 'בינוני' : 'DIY');
+  return (minutes: minutes, difficulty: difficulty);
+}
+
+// ─── טעויות נפוצות + טיפים (Roadmap step 35) ────────────────────────────────
+/// Common-mistake / tip lines for installing [p], derived from its end types
+/// and material. De-duplicated, order-stable, empty without a spec.
+List<String> installTipsFor(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return const [];
+  final tips = <String>[];
+  final seen = <String>{};
+  void add(String t) {
+    if (seen.add(t)) tips.add(t);
+  }
+
+  for (final e in spec.ends) {
+    switch (e.type) {
+      case EndType.bspMale:
+      case EndType.bspFemale:
+        add('⚠ לא להדק יתר על המידה — סדק בהברגה. 2-3 פניות אחרי היד.');
+        add('💡 לכרוך טפלון בכיוון ההברגה (עם כיוון השעון).');
+      case EndType.hdpeCompression:
+        add('⚠ לוודא שהצינור נכנס עד הסוף לפני הידוק האום.');
+      case EndType.pexPress:
+        add('⚠ לכייל את המכבש — לחיצה חלקית גורמת לנזילה.');
+      case EndType.copperPress:
+        add('⚠ לנקות ולשייף את הקצה; לוודא שה-O-ring במקומו לפני הלחיצה.');
+      case EndType.drainOpening:
+        add('💡 שיפוע מינ׳ 2% לניקוז; להמתין לייבוש הדבק לפני בדיקת מים.');
+    }
+  }
+  if (spec.material == 'נחושת' || spec.material == 'פליז') {
+    add('⚠ להימנע ממגע ישיר עם פלדה מגולוונת — קורוזיה גלוונית.');
+  }
+  return tips;
+}
+
+// ─── התראת מערכת (Roadmap step 24) ──────────────────────────────────────────
+/// A one-line system-safety note: gravity drainage must not be tied to a
+/// pressure line; a supply line needs an upstream shutoff. Returns null when
+/// the system can't be determined.
+String? systemSafetyNoteHe(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return null;
+  final sys = spec.endSystems;
+  if (sys.length == 1 && sys.contains(WaterSystem.drainage)) {
+    return '🕳 קו ניקוז בכבידה — לא לחבר לקו לחץ; לשמור שיפוע ונקודת ביקורת.';
+  }
+  if (sys.contains(WaterSystem.supply)) {
+    final pr = spec.pressureRating;
+    return '🚰 קו הזנה בלחץ${pr != null ? ' ($pr)' : ''} — חובה ברז ניתוק במעלה הזרם.';
+  }
+  return null;
+}
+
 // ─── מתי לבחור איזה מותג (Roadmap step 16) ──────────────────────────────────
 /// "When to pick which" guidance across a SmartProduct's brands. For each brand
 /// returns a one-line reason derived from its recommended flag, its relative
@@ -785,6 +900,300 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
     ));
   }
   return out;
+}
+
+// ─── דירוג עמידות (Roadmap step 15, heuristic) ──────────────────────────────
+/// A 1-5 durability heuristic from the verified spec: metallic materials,
+/// hot-water rating and a pressure rating push it up; cold-only pushes it down.
+/// Honest as a heuristic (real lab ratings pending). Null without a spec.
+({int stars, String reason})? durabilityRatingFor(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return null;
+  var score = 3;
+  final reasons = <String>[];
+
+  const strong = {'נחושת', 'פליז', 'פלדה'};
+  if (strong.contains(spec.material)) {
+    score += 1;
+    reasons.add('חומר מתכתי עמיד');
+  } else if (spec.material == 'PEX' || spec.material == 'רב שכבתי') {
+    reasons.add('עמיד-קורוזיה');
+  }
+  if (spec.maxTempC >= 90) {
+    score += 1;
+    reasons.add('עמיד למים חמים');
+  } else if (spec.maxTempC < 60) {
+    score -= 1;
+    reasons.add('מים קרים בלבד');
+  }
+  if (spec.pressureRating != null) reasons.add('מדורג ללחץ');
+
+  if (score < 1) score = 1;
+  if (score > 5) score = 5;
+  return (
+    stars: score,
+    reason: reasons.isEmpty ? 'דירוג בסיסי' : reasons.join(' · '),
+  );
+}
+
+// ─── מוצרים משלימים נפוצים (Roadmap step 56) ────────────────────────────────
+/// The product *types* that most often connect to [p], data-driven from the
+/// compatibility engine (not a curated list) — a "frequently paired" signal.
+/// Ordered by frequency desc, up to four, de-duplicated. Empty when nothing
+/// connects or types are unknown.
+List<String> frequentlyPairedTypesFor(LipskeyCatalogProduct p) {
+  final counts = <String, int>{};
+  for (final c in compatibleProductsFor(p)) {
+    final t = c.productType;
+    if (t == null || t.isEmpty) continue;
+    counts[t] = (counts[t] ?? 0) + 1;
+  }
+  final sorted = counts.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
+  return [for (final e in sorted.take(4)) e.key];
+}
+
+// ─── אזהרת חיבור פיזי (Roadmap step 29) ─────────────────────────────────────
+/// Warns when a spec'd product has no direct catalog mate (so the line will
+/// need an adapter). Returns null when there's no spec (can't judge) or when
+/// the product connects to something.
+String? connectionWarningHe(LipskeyCatalogProduct p) {
+  if (kVerifiedSpecs[p.sku] == null) return null;
+  if (compatibleProductsCount(p) == 0) {
+    return '⚠ לא נמצאו חיבורים ישירים בקטלוג — ייתכן שנדרש מתאם.';
+  }
+  return null;
+}
+
+// ─── דיפ-לינק למוצר (Roadmap step 68) ───────────────────────────────────────
+/// A shareable deep link that identifies this product (+ optional brand), e.g.
+/// `https://buildsmart.app/p/<key>?brand=<name>`. Pure & URL-encoded.
+String deepLinkFor(SmartProduct sp, [int? brandIndex]) {
+  final buf =
+      StringBuffer('https://buildsmart.app/p/${Uri.encodeComponent(sp.key)}');
+  if (brandIndex != null &&
+      brandIndex >= 0 &&
+      brandIndex < sp.brands.length) {
+    buf.write('?brand=${Uri.encodeComponent(sp.brands[brandIndex].name)}');
+  }
+  return buf.toString();
+}
+
+// ─── טקסט הצעת מחיר לשיתוף (Roadmap step 48) ────────────────────────────────
+/// A plain-text price quote for the selected brand, ready to copy/share. Built
+/// from the line-cost estimate (falls back to the brand price). Pure & stable.
+String quoteTextFor(SmartProduct sp, int brandIndex) {
+  final idx = (brandIndex >= 0 && brandIndex < sp.brands.length)
+      ? brandIndex
+      : sp.brands.indexOf(sp.recBrand);
+  final b = sp.brands[idx];
+  final lines = <String>['הצעת מחיר — ${sp.name}', 'מותג: ${b.name}'];
+  final cost = lineCostEstimateFor(sp, idx);
+  if (cost != null) {
+    lines.add('מוצר: ~₪${cost.product}');
+    if (cost.accessories > 0) lines.add('אביזרים: ~₪${cost.accessories}');
+    if (cost.labour > 0) lines.add('עבודה (משוער): ~₪${cost.labour}');
+    lines.add('סה"כ משוער: ~₪${cost.total}');
+  } else if (b.price != null) {
+    lines.add('מחיר: ~₪${b.price}');
+  }
+  lines.add('🔗 ${deepLinkFor(sp, idx)}');
+  lines.add('— נוצר ב-BuildSmart');
+  return lines.join('\n');
+}
+
+// ─── צ'קליסט בדיקת קבלה (Roadmap step 38) ───────────────────────────────────
+/// End-of-install acceptance checks for [p], derived from its system + ends:
+/// supply lines get a pressure/flow test, drainage gets a flow/slope test,
+/// threaded ends get a seal check. De-duplicated, order-stable, never empty.
+List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
+  final out = <String>[];
+  final seen = <String>{};
+  void add(String s) {
+    if (seen.add(s)) out.add(s);
+  }
+
+  add('✔ הידוק כל החיבורים לפי המומלץ');
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec != null) {
+    final supply = spec.endSystems.contains(WaterSystem.supply);
+    final drainOnly = spec.endSystems.length == 1 &&
+        spec.endSystems.contains(WaterSystem.drainage);
+    if (supply) {
+      add('✔ בדיקת לחץ (${spec.pressureRating ?? "לחץ מערכת"}) — ללא נזילה');
+      add('✔ פתיחת ברז ניתוק ובדיקת זרימה');
+    }
+    if (drainOnly) {
+      add('✔ בדיקת ניקוז במים זורמים + אטימות סיפון');
+      add('✔ אימות שיפוע ונקודת ביקורת');
+    }
+    if (spec.ends.any(
+        (e) => e.type == EndType.bspMale || e.type == EndType.bspFemale)) {
+      add('✔ בדיקת אטימת הברגות (טפלון/חבל)');
+    }
+  }
+  add('✔ ניקוי וסילוק שאריות');
+  return out;
+}
+
+// ─── התאמת מים חמים בין מותגים (Roadmap step 26) ────────────────────────────
+/// How many of a SmartProduct's brands are rated for hot water at [tempC]
+/// (default 60°C). Mirrors `productSuitableForTemp`: a brand with no spec/temp
+/// is treated as suitable (don't flag legacy items). Used to surface
+/// "X/Y מותגים מתאימים למים חמים" before a full temperature picker exists.
+({int suitable, int total, int tempC}) hotWaterSuitabilityFor(SmartProduct sp,
+    {int tempC = 60}) {
+  var suitable = 0;
+  var total = 0;
+  for (final b in sp.brands) {
+    final prod = catalogProductForBrand(b);
+    if (prod == null) continue;
+    total++;
+    final t = kVerifiedSpecs[prod.sku]?.maxTempC;
+    if (t == null || tempC <= t) suitable++;
+  }
+  return (suitable: suitable, total: total, tempC: tempC);
+}
+
+// ─── ציון נתוני כרטיס (Roadmap step 30, card-level) ─────────────────────────
+/// A 0-100 readiness score for how complete & connectable [p]'s card data is:
+/// engineering spec (+40), connectivity (up to +30), discoverable in the finder
+/// (+10), priced (+10), has variant choice (+10). Returns a score + a Hebrew
+/// label. (Line-level scoring across a built line is still pending.)
+({int score, String label}) cardReadinessScore(LipskeyCatalogProduct p) {
+  var score = 0;
+  if (kVerifiedSpecs[p.sku] != null) score += 40;
+  final compat = compatibleProductsCount(p);
+  score += compat >= 20 ? 30 : (compat >= 5 ? 20 : (compat > 0 ? 10 : 0));
+  if (finderGroupFor(p) != null) score += 10;
+  if (priceFor(p) != null) score += 10;
+  if (variantSiblingsCountFor(p) > 1) score += 10;
+  if (score > 100) score = 100;
+  final label = score >= 80
+      ? 'מצוין'
+      : (score >= 55 ? 'טוב' : (score >= 30 ? 'בסיסי' : 'חלקי'));
+  return (score: score, label: label);
+}
+
+// ─── יצרן + מק"ט יצרן (Roadmap step 20) ─────────────────────────────────────
+/// Manufacturer + manufacturer part-number for [p]. The SKU *is* the catalog
+/// part number; the brand is the manufacturer (falls back to the house brand).
+/// Returns null only when there is no SKU to show.
+({String manufacturer, String partNumber})? manufacturerInfoFor(
+    LipskeyCatalogProduct p) {
+  if (p.sku.isEmpty) return null;
+  final mfr = p.brand.trim();
+  return (
+    manufacturer: mfr.isEmpty ? 'לפסקי-ברקן' : mfr,
+    partNumber: p.sku,
+  );
+}
+
+// ─── הקו שלך עד כה (Roadmap step 28) ────────────────────────────────────────
+/// How the [current] product fits a line already in progress. Given the catalog
+/// products already chosen ([lineProducts]), returns how many of them [current]
+/// directly connects to + the names of up to three. Pure — the UI resolves the
+/// cart lines to catalog products and passes them in.
+({int connects, List<String> names}) lineFitFor(
+    LipskeyCatalogProduct current, List<LipskeyCatalogProduct> lineProducts) {
+  if (lineProducts.isEmpty) return (connects: 0, names: const []);
+  final compatible = compatibleProductsFor(current).map((p) => p.sku).toSet();
+  final hits = <String>[];
+  for (final lp in lineProducts) {
+    if (lp.sku == current.sku) continue;
+    if (compatible.contains(lp.sku)) hits.add(lp.nameHe);
+  }
+  return (connects: hits.length, names: hits.take(3).toList());
+}
+
+// ─── תלויות חומר / מה הקו צריך (Roadmap step 73) ────────────────────────────
+/// What the line needs to mate each end of [p] (the part on the other side):
+/// a matching pipe/coupling for compression ends, the opposite thread gender
+/// for BSP, a press pipe for press ends, a drain pipe for a drain opening.
+/// De-duplicated, order-stable, empty without a spec.
+List<String> connectionNeedsHe(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return const [];
+  final needs = <String>[];
+  final seen = <String>{};
+  void add(String s) {
+    if (seen.add(s)) needs.add(s);
+  }
+
+  for (final e in spec.ends) {
+    switch (e.type) {
+      case EndType.hdpeCompression:
+        add('צינור/מצמד HDPE בקוטר ${e.size}');
+      case EndType.pexPress:
+        add('צינור PEX + מכבש בקוטר ${e.size}');
+      case EndType.copperPress:
+        add('צינור נחושת + מכבש בקוטר ${e.size}');
+      case EndType.bspMale:
+        add('חיבור הברגה נקבה ${e.size}" מנגד');
+      case EndType.bspFemale:
+        add('חיבור הברגה זכר ${e.size}" מנגד');
+      case EndType.drainOpening:
+        add('צינור ניקוז ${e.size} + איטום');
+    }
+  }
+  return needs;
+}
+
+// ─── עלות קו משוערת (Roadmap step 42) ───────────────────────────────────────
+/// A rough total-cost breakdown for installing the selected brand as a line:
+/// the product itself + the mandatory accessories + an estimated labour charge
+/// (derived from [installEffortFor] minutes at ~₪2.5/min ≈ ₪150/hr). All values
+/// are estimates (₪). Returns null when nothing can be priced.
+({int product, int accessories, int labour, int total})? lineCostEstimateFor(
+    SmartProduct sp, int brandIndex) {
+  if (brandIndex < 0 || brandIndex >= sp.brands.length) return null;
+  final brand = sp.brands[brandIndex];
+  final cat = catalogProductForBrand(brand);
+  final product =
+      brand.price ?? (cat == null ? 0 : (priceFor(cat) ?? 0));
+
+  var accessories = 0;
+  for (final a in sp.acc) {
+    if (a.must) accessories += a.price ?? 0;
+  }
+
+  final eff = cat == null ? null : installEffortFor(cat);
+  final labour = eff == null ? 0 : (eff.minutes * 2.5).round();
+
+  final total = product + accessories + labour;
+  if (total == 0) return null;
+  return (
+    product: product,
+    accessories: accessories,
+    labour: labour,
+    total: total,
+  );
+}
+
+// ─── תגיות גילוי (Roadmap step 67) ──────────────────────────────────────────
+/// Short discovery badges for the selected product+brand, derived from real
+/// signals: recommended flag, price position among siblings, variant breadth,
+/// and connection richness. Order-stable, de-duplicated, may be empty.
+List<String> discoveryTagsFor(SmartProduct sp, SmartBrand brand) {
+  final tags = <String>[];
+  if (brand.rec) tags.add('⭐ מומלץ מקצועי');
+
+  final priced = sp.brands.where((b) => b.price != null).map((b) => b.price!);
+  if (brand.price != null && priced.length > 1) {
+    final min = priced.reduce((a, b) => a < b ? a : b);
+    final max = priced.reduce((a, b) => a > b ? a : b);
+    if (min != max) {
+      if (brand.price == min) tags.add('💰 הכי משתלם');
+      if (brand.price == max) tags.add('👑 פרימיום');
+    }
+  }
+
+  final prod = catalogProductForBrand(brand);
+  if (prod != null) {
+    if (variantSiblingsCountFor(prod) >= 4) tags.add('🎚 מבחר וריאנטים');
+    if (compatibleProductsCount(prod) >= 20) tags.add('🔗 רב-תאימות');
+  }
+  return tags;
 }
 
 // ─── תקציר שורה אחת (Roadmap step 59) ───────────────────────────────────────

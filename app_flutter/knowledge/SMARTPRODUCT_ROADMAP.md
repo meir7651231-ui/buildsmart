@@ -19,9 +19,14 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    307 with SKU · 252 of those with a verified spec. Guard: `smartproduct_contract_test`.
 6. ✅ "📦 נתוני קטלוג" section in the smart card injects the catalog's spec /
    compat / price for the selected brand's SKU (via the bridge).
-7. ⬜ Unified state (single provider for brand/acc/qty selection) with persist.
+7. 🟦 Persisted selection — `cardSelectionProvider` remembers the last brand per
+   product (`productKey→brandName`); restored in `initState`, saved on tap.
+   (acc/qty persistence still ⬜.) Guard: `card_selection_test`.
 8. ⬜ Golden tests for the unified card across every category.
-9. ⬜ Remove dead code left from the duplication + clean analyze warnings.
+9. 🟦 Cleared safe analyze warnings in `catalog_screen.dart` (unused
+   `lipskey_brand_screen` import + unused `cs` local). Remaining dead widgets
+   (`_MiniSearchPill`/`_Chip`/`_CatalogDrillSection`/`_diameterSubGroups`) await
+   a careful dedicated removal pass (file is large + shared with the other session).
 10. ⬜ Feature-flag infra to swap old/new card safely (A/B).
 
 ## Phase 2 · Data enrichment (11–20)
@@ -32,7 +37,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    Guard: `standards_tools_test`.
 13. ⬜ Real image gallery per brand (zoom, 360°).
 14. ⬜ Precise dimensions + small engineering sketch (DN/length/thread) per variant.
-15. ⬜ Quality/durability rating per brand (stars + reason).
+15. 🟦 Durability rating (1-5 stars + reason) via `durabilityRatingFor`
+   (material/temp/pressure heuristic). (Real lab ratings pending.)
+   Guard: `durability_test`.
 16. ✅ "When to pick which" decision table between brands via `brandDecisionGuide`
    (rec / price-extreme / hot-suitability → one-line advice; "מתי לבחור איזה מותג"
    block). Guard: `brand_guide_test`.
@@ -40,44 +47,69 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 18. ⬜ Price history + trend chart for the selected brand.
 19. ✅ Auto compliance/warning labels via `complianceTriggersFor` ("תקינות נדרשת"
    block in the 📦 section).
-20. ⬜ Warranty + manufacturer + mfr part-number per brand.
+20. 🟦 Manufacturer + mfr part-number via `manufacturerInfoFor` (יצרן + מק"ט יצרן
+   = the SKU). (Warranty still ⬜ — no warranty data.) Guard: `manufacturer_info_test`.
 
 ## Phase 3 · Compatibility-engine integration (21–30)
 21. ✅ "🔗 מתחבר ל-N מוצרים" in the smart card (`compatibleProductsFor` +
    `connectionExplainHe` labels, in the 📦 section).
-22. ⬜ "Build my line" button → `buildInstallation` → full BOM.
+22. ✅ "Build my line" button → `buildInstallation` (anchors = cart line so far +
+   this product, autoCompliance, 60°C) → BOM dialog (qty × name + gap count).
+   Engine call path guarded by `build_line_bom_test`. (Live canvas-tap on the
+   dialog button is unreliable — see PLAYBOOK §G — so verified by unit test.)
 23. ⬜ Materialized chain diagram inline (explicit pipes/couplings).
-24. ⬜ System (supply/drainage) warning + min-bore + ΔP inline.
+24. 🟦 System (supply/drainage) safety note + min-bore inline via
+   `systemSafetyNoteHe` (gravity-drainage / upstream-shutoff) + the bore row.
+   (Line-level ΔP still ⬜ — needs a built line.) Guard: `install_effort_test`.
 25. ⬜ Auto install-kit — card offers all required safety items (correct-by-construction).
-26. ⬜ Temperature picker → filters heat-unsuitable brands in real time.
+26. 🟦 Hot-water suitability across brands via `hotWaterSuitabilityFor`
+   ("🌡 מים חמים: X/Y מותגים מתאימים", cross-checked vs engine
+   `productSuitableForTemp`). (Interactive temp picker still ⬜.)
+   Guard: `hot_water_suitability_test`.
 27. ⬜ Smart adapter recommendation when a brand doesn't directly mate the cart.
-28. ⬜ "Your line so far" — what's in cart + how this product fits.
-29. ⬜ Physical validation: warn on impossible connections.
-30. ⬜ Line score (safety/pressure/cost) that updates with each choice.
+28. ✅ "Your line so far" — `lineFitFor` reads the smart cart and reports how
+   many cart items this product connects to ("🧩 בקו שלך"). Guard: `line_fit_test`.
+29. 🟦 Physical-connection warning — `connectionWarningHe` flags a spec'd product
+   with zero direct catalog mates ("ייתכן שנדרש מתאם"). (Full per-pair impossible-
+   connection validation lives in the engine gaps.) Guard: `paired_warning_test`.
+30. 🟦 Card data-readiness score (0-100 + label) via `cardReadinessScore`
+   (spec/connectivity/finder/price/variants) shown as a badge in the 📦 header.
+   (Line-level safety/pressure/cost scoring still ⬜.) Guard: `card_score_test`.
 
 ## Phase 4 · Installation guidance (31–40)
-31. ⬜ Interactive stages with "mark done" checklist.
+31. ✅ Interactive stages with "mark done" — persisted `stageProgressProvider`
+   (per-product `key#idx`); tappable stage chips + "X/N שלבים בוצעו".
+   Guard: `acceptance_stage_test`.
 32. ⬜ Short install video per stage.
 33. ✅ Required-tools list (derived from spec ends → wrench/teflon, press tool,
    saw/solvent) via `installToolsFor` ("כלי עבודה" row). Guard: `standards_tools_test`.
-34. ⬜ Time estimate + difficulty (DIY/pro) per install.
-35. ⬜ Common mistakes + tips per stage.
+34. ✅ Time estimate + difficulty (DIY/בינוני/מקצועי) via `installEffortFor`
+   (from ends + kit), shown as the "התקנה" row. Guard: `install_effort_test`.
+35. ✅ Common mistakes + tips via `installTipsFor` (per end-type + material) —
+   "טעויות נפוצות וטיפים" block. Guard: `install_effort_test`.
 36. ⬜ AR mode — place the product in space/on a wall via camera.
 37. ⬜ Exploded view of the parts.
-38. ⬜ "Test kit" — pressure/leak check at the end, with a compliance checklist.
+38. ✅ "Test kit" — `acceptanceChecklistFor` end-of-install checks (pressure/flow
+   for supply, flow/slope for drainage, seal for threads). Guard: `acceptance_stage_test`.
 39. ⬜ Export a tailored install-guide PDF.
 40. ⬜ Voice / read-aloud of the stages for hands-busy work.
 
 ## Phase 5 · Price, suppliers & commerce (41–50)
 41. ⬜ Real multi-supplier price (not "by supplier") with comparison.
-42. ⬜ "Total cost for the line" — product + accessories + pipes + est. labour.
+42. ✅ "Total cost for the line" — `lineCostEstimateFor` (product + mandatory
+   accessories + labour@~₪2.5/min) → "🧮 עלות קו משוערת" breakdown.
+   Guard: `line_cost_test`.
 43. ⬜ Quantity discounts + auto promotions.
 44. ⬜ Supplier choice by distance/rating/availability from settings.
 45. ✅ "Cheaper alternative" — strictly-cheapest sibling brand via
    `cheaperAlternativeBrand` ("💰 חלופה זולה יותר"). Guard: `summary_alt_test`.
 46. ⬜ Smart add-to-cart: the whole line in one tap (incl. safety).
-47. ⬜ Save config as favorite / project template.
-48. ⬜ Share a quote (WhatsApp/PDF) straight from the card.
+47. ✅ Save config as favourite — persisted `savedConfigsProvider`
+   (`productKey#brandName`); "☆ שמור / ★ נשמר" toggle in the 📦 header.
+   Guard: `quote_saved_test`.
+48. 🟦 Share a quote — `quoteTextFor` builds a plain-text quote; "📋 הצעה" copies
+   it to the clipboard. (WhatsApp/PDF export still ⬜ — needs url_launcher/PDF.)
+   Guard: `quote_saved_test`.
 49. ⬜ Price tracking: alert when a selected brand drops in price.
 50. ⬜ Direct order/payment from the card (when backend exists).
 
@@ -87,9 +119,13 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 53. ⬜ In-card AI assistant: "what suits me?" in free text.
 54. ⬜ Learning: more lines built → sharper recommendations.
 55. ⬜ Product recognition from camera (barcode/image) → opens the card.
-56. ⬜ "People who bought X also added Y" (data-driven accessories).
+56. 🟦 "Frequently paired" — `frequentlyPairedTypesFor` surfaces the product
+   *types* that most often connect (data-driven from the compat engine).
+   (Real co-purchase data pending a backend.) Guard: `paired_warning_test`.
 57. ⬜ Profession-aware (plumber/contractor/DIY) — different detail level.
-58. ⬜ AI explanation of each compliance warning + "why it matters".
+58. ✅ "Why it matters" explanation under each compliance warning via
+   `complianceWhyHe` (↳ line). Coverage-gated: every trigger label has a why.
+   Guard: `compliance_why_test`.
 59. ✅ One-line text summary via `smartCardSummaryHe` (name·material·system·temp·
    price) at the top of the 📦 section. Guard: `summary_alt_test`.
    (Voice read-aloud still ⬜.)
@@ -105,15 +141,20 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 66. ✅ "Recently viewed" history — persisted `recentlyViewedProvider`
    (move-to-front + dedupe + cap-20), recorded on card open, shown as
    "נצפו לאחרונה". Guard: `recently_viewed_test`.
-67. ⬜ Discovery tags ("new", "best-seller", "pro-recommended").
-68. ⬜ Deep-link per product (share a link that opens the card).
+67. ✅ Discovery tags (⭐ מומלץ מקצועי · 💰 הכי משתלם · 👑 פרימיום · 🎚 וריאנטים ·
+   🔗 רב-תאימות) via `discoveryTagsFor`, shown as chips under the summary in both
+   modes. Guard: `discovery_tags_test`.
+68. 🟦 Deep-link per product — `deepLinkFor` builds `…/p/<key>?brand=<name>`,
+   embedded in the shared quote. (Actual route-handling to open the card from a
+   link pending web routing.) Guard: `deep_link_test`.
 69. ⬜ QR on the physical product → opens the card.
 70. ⬜ Voice search that lands on the card.
 
 ## Phase 8 · Contractor & projects (71–80)
 71. ⬜ Add product to a specific project (floor/apartment/room).
 72. ⬜ Duplicate-to-many-points ("need 6 of these in 3 rooms").
-73. ⬜ Material dependencies: the card knows what else the line needs before/after.
+73. ✅ Material dependencies — `connectionNeedsHe` lists what each end needs to
+   mate ("מה הקו צריך לחיבור"). Guard: `line_fit_test`.
 74. ⬜ Cumulative project BOM from all chosen cards.
 75. ⬜ Customer quote straight from the choices.
 76. ⬜ Config versioning (compare alternatives for the project).
@@ -123,7 +164,10 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 80. ⬜ Ready project templates ("standard bathroom" = a product set).
 
 ## Phase 9 · Quality, performance, accessibility (81–90)
-81. ⬜ Comprehensive widget tests for the smart card (every category loads).
+81. ✅ Comprehensive card-data integrity test (every SmartProduct × brand:
+   bridge/summary/standards/tools/guide/compat/compliance+why/variants/
+   cheaper-alt all coherent & non-throwing). Rendering of all 935 sheets stays
+   covered by `product_journey_test`. Guard: `smart_card_data_test`.
 82. ⬜ Golden + mutation tests on the price/selection logic.
 83. ⬜ Offline-first: caching of data + images.
 84. ⬜ Lazy-load images + smart prefetch.
@@ -139,7 +183,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 92. ⬜ Built-in A/B experiments on the card layout.
 93. ⬜ User ratings + real user photos ("here's how it looks at my place").
 94. ⬜ Manufacturer integration (official datasheets) via API.
-95. ⬜ Expert mode vs simple mode (toggle that changes depth).
+95. ✅ Expert vs simple mode — persisted `cardDetailModeProvider`; "מצב מורחב/פשוט"
+   chip in the 📦 header gates standards/tools/bore/kit/variants/brand-guide/
+   recently-viewed/compliance-why. Guard: `card_detail_mode_test`.
 96. ⬜ Home-screen widget ("reorder my last line").
 97. ⬜ Contractor inventory integration ("I have 3 in stock").
 98. ⬜ Export the chosen config to CAD/BIM.

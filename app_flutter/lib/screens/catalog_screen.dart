@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
@@ -7,20 +9,24 @@ import 'package:buildsmart/data/search_index.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/screens/barcode_scanner.dart';
-import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
 import 'package:buildsmart/screens/finder_screen.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
+import 'package:buildsmart/state/card_detail_mode.dart';
+import 'package:buildsmart/state/card_selection.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/recently_viewed.dart';
+import 'package:buildsmart/state/saved_configs.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/state/stage_progress.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -4357,7 +4363,13 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
     final b = widget.product.brands[i];
     final selected = i == _selectedBrand;
     return GestureDetector(
-      onTap: () => setState(() => _selectedBrand = i),
+      onTap: () {
+        setState(() => _selectedBrand = i);
+        // Roadmap step 7 — remember this brand choice for the product.
+        ref
+            .read(cardSelectionProvider.notifier)
+            .setBrand(widget.product.key, b.name);
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -4439,6 +4451,13 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
     _selectedBrand = widget.product.brands
         .indexWhere((b) => b.rec)
         .clamp(0, widget.product.brands.length - 1);
+    // Roadmap step 7 — restore the user's last brand choice for this product.
+    final savedBrand = ref.read(cardSelectionProvider)[widget.product.key];
+    if (savedBrand != null) {
+      final si =
+          widget.product.brands.indexWhere((b) => b.name == savedBrand);
+      if (si >= 0) _selectedBrand = si;
+    }
     final acc = widget.product.acc;
     _accSelected = {for (var i = 0; i < acc.length; i++) i: false};
     _accQty = {for (var i = 0; i < acc.length; i++) i: 1};
@@ -4454,6 +4473,72 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
 
   void _tapStage(int i) =>
       setState(() => _activeStage = _activeStage == i ? null : i);
+
+  // Roadmap step 28/22 — resolve the smart cart's lines to catalog products.
+  List<LipskeyCatalogProduct> _resolveCartProducts() {
+    final cart = ref.read(smartCartProvider);
+    final out = <LipskeyCatalogProduct>[];
+    for (final line in cart) {
+      final csp = smartProductByKey(line.productKey);
+      if (csp == null) continue;
+      SmartBrand? cb;
+      for (final b in csp.brands) {
+        if (b.name == line.brandName) {
+          cb = b;
+          break;
+        }
+      }
+      final cprod = cb == null ? null : catalogProductForBrand(cb);
+      if (cprod != null) out.add(cprod);
+    }
+    return out;
+  }
+
+  // Roadmap step 22 — "build my line": run the install engine over the line so
+  // far (cart) + this product, and show the materialized BOM.
+  void _showLineBom(LipskeyCatalogProduct prod) {
+    final anchors = <LipskeyCatalogProduct>[..._resolveCartProducts(), prod];
+    final plan = buildInstallation(anchors, autoCompliance: true, tempC: 60);
+    final items = plan.items.isEmpty ? [prod] : plan.items;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: Text('קו מוצע — ${items.length} פריטים'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (final it in items)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Text(
+                        '${plan.quantities[it.sku] ?? 1}× ${it.nameHe}',
+                        style: const TextStyle(fontSize: 12.5)),
+                  ),
+                if (plan.gaps.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text('⚠ ${plan.gaps.length} פערים ללא חיבור ישיר',
+                        style: const TextStyle(
+                            color: Color(0xFFB45309),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600)),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('סגור')),
+          ],
+        ),
+      ),
+    );
+  }
 
   int get _total {
     final brand = widget.product.brands[_selectedBrand];
@@ -4610,6 +4695,59 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           a,
                     ],
                   ),
+                // Roadmap step 31 — install progress: tap a stage to mark done.
+                if (p.stages.isNotEmpty)
+                  Builder(builder: (_) {
+                    ref.watch(stageProgressProvider);
+                    final prog = ref.read(stageProgressProvider.notifier);
+                    final done = prog.doneCount(p.key, p.stages.length);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('מעקב התקנה — $done/${p.stages.length} שלבים בוצעו',
+                              style: const TextStyle(
+                                  color: Color(0xFF666666),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: [
+                              for (var i = 0; i < p.stages.length; i++)
+                                GestureDetector(
+                                  onTap: () => prog.toggle(p.key, i),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 9, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: prog.isDone(p.key, i)
+                                          ? const Color(0xFFD1FAE5)
+                                          : const Color(0xFFF1F5F9),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          color: prog.isDone(p.key, i)
+                                              ? const Color(0xFF34D399)
+                                              : const Color(0xFFE2E8F0)),
+                                    ),
+                                    child: Text(
+                                        '${prog.isDone(p.key, i) ? "✓ " : ""}${p.stages[i].label}',
+                                        style: TextStyle(
+                                            color: prog.isDone(p.key, i)
+                                                ? const Color(0xFF047857)
+                                                : const Color(0xFF475569),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w700)),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                 // ── Selectors: מותג / סוג / מידה (collapsible) ──
                 _SheetSection(
                   title: 'בחר מותג',
@@ -4662,16 +4800,108 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                   final finder = finderGroupFor(prod);
                   final kit = installKitFor(prod);
                   final variants = variantSiblingsCountFor(prod);
+                  // Roadmap step 95 — expert/simple depth toggle (persisted).
+                  final expert =
+                      ref.watch(cardDetailModeProvider) == CardDetailMode.expert;
                   return Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('📦 נתוני קטלוג',
-                            style: TextStyle(
-                                color: Color(0xFF888888),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600)),
+                        Row(
+                          children: [
+                            const Text('📦 נתוני קטלוג',
+                                style: TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600)),
+                            const SizedBox(width: 8),
+                            // Roadmap step 30 — card data readiness score.
+                            Builder(builder: (_) {
+                              final s = cardReadinessScore(prod);
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFECFDF5),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                      color: const Color(0xFFA7F3D0)),
+                                ),
+                                child: Text('ציון ${s.score} · ${s.label}',
+                                    style: const TextStyle(
+                                        color: Color(0xFF047857),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700)),
+                              );
+                            }),
+                            const Spacer(),
+                            // Roadmap step 47 — save this config (favourite).
+                            Builder(builder: (_) {
+                              ref.watch(savedConfigsProvider);
+                              final saved = ref
+                                  .read(savedConfigsProvider.notifier)
+                                  .isSaved(p.key, brand.name);
+                              return GestureDetector(
+                                onTap: () => ref
+                                    .read(savedConfigsProvider.notifier)
+                                    .toggle(p.key, brand.name),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8),
+                                  child: Text(saved ? '★ נשמר' : '☆ שמור',
+                                      style: TextStyle(
+                                          color: saved
+                                              ? const Color(0xFFD97706)
+                                              : const Color(0xFF999999),
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w700)),
+                                ),
+                              );
+                            }),
+                            // Roadmap step 48 — copy a shareable price quote.
+                            GestureDetector(
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(
+                                    text: quoteTextFor(p, _selectedBrand)));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('הצעת המחיר הועתקה'),
+                                      duration: Duration(seconds: 2)),
+                                );
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.only(left: 8),
+                                child: Text('📋 הצעה',
+                                    style: TextStyle(
+                                        color: Color(0xFF0F766E),
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700)),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => ref
+                                  .read(cardDetailModeProvider.notifier)
+                                  .toggle(),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: expert
+                                      ? BsTokens.brand.withAlpha(28)
+                                      : const Color(0xFFEEEEEE),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(expert ? 'מצב מורחב ▾' : 'מצב פשוט ▸',
+                                    style: TextStyle(
+                                        color: expert
+                                            ? BsTokens.brand
+                                            : const Color(0xFF777777),
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700)),
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 4),
                         // Roadmap step 59 — one-line card summary.
                         Text(smartCardSummaryHe(p, brand),
@@ -4679,6 +4909,124 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 color: Color(0xFF444444),
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w600)),
+                        // Roadmap step 67 — discovery tags.
+                        Builder(builder: (_) {
+                          final tags = discoveryTagsFor(p, brand);
+                          if (tags.isEmpty) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: [
+                                for (final t in tags)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF1F5F9),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          color: const Color(0xFFE2E8F0)),
+                                    ),
+                                    child: Text(t,
+                                        style: const TextStyle(
+                                            color: Color(0xFF475569),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w700)),
+                                  ),
+                              ],
+                            ),
+                          );
+                        }),
+                        // Roadmap step 24 — system safety note (always shown).
+                        Builder(builder: (_) {
+                          final note = systemSafetyNoteHe(prod);
+                          if (note == null) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(note,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: Color(0xFF1D4ED8),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600)),
+                          );
+                        }),
+                        // Roadmap step 29 — physical-connection warning.
+                        Builder(builder: (_) {
+                          final warn = connectionWarningHe(prod);
+                          if (warn == null) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(warn,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: Color(0xFFB91C1C),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700)),
+                          );
+                        }),
+                        // Roadmap step 28 — "your line so far": how this product
+                        // fits what's already in the cart.
+                        Builder(builder: (_) {
+                          final cart = ref.watch(smartCartProvider);
+                          if (cart.isEmpty) return const SizedBox.shrink();
+                          final lineProducts = <LipskeyCatalogProduct>[];
+                          for (final line in cart) {
+                            final csp = smartProductByKey(line.productKey);
+                            if (csp == null) continue;
+                            SmartBrand? cb;
+                            for (final b in csp.brands) {
+                              if (b.name == line.brandName) {
+                                cb = b;
+                                break;
+                              }
+                            }
+                            final cprod = cb == null
+                                ? null
+                                : catalogProductForBrand(cb);
+                            if (cprod != null) lineProducts.add(cprod);
+                          }
+                          final fit = lineFitFor(prod, lineProducts);
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                                '🧩 בקו שלך: ${cart.length} פריטים · '
+                                '${fit.connects > 0 ? "מתחבר ל-${fit.connects} מהם" : "אין חיבור ישיר לפריטי הקו"}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: fit.connects > 0
+                                        ? const Color(0xFF0F766E)
+                                        : const Color(0xFF9A3412),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700)),
+                          );
+                        }),
+                        // Roadmap step 26 — hot-water suitability across brands.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final hw = hotWaterSuitabilityFor(p);
+                            if (hw.total < 2) return const SizedBox.shrink();
+                            final allOk = hw.suitable == hw.total;
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text(
+                                  '🌡 מים חמים (${hw.tempC}°C): '
+                                  '${hw.suitable}/${hw.total} מותגים מתאימים',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      color: allOk
+                                          ? const Color(0xFF0F766E)
+                                          : const Color(0xFFB45309),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600)),
+                            );
+                          }),
                         const SizedBox(height: 6),
                         if (spec != null) ...[
                           catRow('חומר', spec.material),
@@ -4687,19 +5035,48 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           catRow('טמפ׳ מרבית',
                               '${spec.maxTempC.toStringAsFixed(0)}°C'),
                           catRow('מערכת', spec.waterSystem),
-                          if (spec.endsSummary.isNotEmpty)
+                          if (expert && spec.endsSummary.isNotEmpty)
                             catRow('קצוות', spec.endsSummary),
-                          if (spec.minBoreMm != null)
+                          if (expert && spec.minBoreMm != null)
                             catRow('קוטר מינ׳',
                                 '${spec.minBoreMm!.toStringAsFixed(0)}mm'),
                         ],
-                        if (finder != null)
+                        // Roadmap step 15 — durability rating (heuristic stars).
+                        if (expert)
+                          Builder(builder: (_) {
+                            final d = durabilityRatingFor(prod);
+                            if (d == null) return const SizedBox.shrink();
+                            final stars = '★' * d.stars + '☆' * (5 - d.stars);
+                            return catRow('עמידות', '$stars · ${d.reason}');
+                          }),
+                        if (expert && finder != null)
                           catRow('מאתר', '${finder.emoji} ${finder.label}'),
-                        if (kit != null)
+                        if (expert && kit != null)
                           catRow('ערכת התקנה',
                               '${kit.must} חובה · ${kit.optional} אופ׳ · ${kit.tools} כלים'),
-                        if (variants > 1)
+                        // Roadmap step 34 — install time + difficulty.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final eff = installEffortFor(prod);
+                            if (eff == null) return const SizedBox.shrink();
+                            return catRow('התקנה',
+                                '~${eff.minutes} דק׳ · ${eff.difficulty}');
+                          }),
+                        if (expert && variants > 1)
                           catRow('וריאנטים', '$variants גרסאות'),
+                        // Roadmap step 20 — manufacturer + part number.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final mi = manufacturerInfoFor(prod);
+                            if (mi == null) return const SizedBox.shrink();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                catRow('יצרן', mi.manufacturer),
+                                catRow('מק"ט יצרן', mi.partNumber),
+                              ],
+                            );
+                          }),
                         if (price != null) catRow('מחיר משוער', '~₪$price'),
                         // Roadmap step 45 — cheaper standard-comparable brand.
                         Builder(builder: (_) {
@@ -4717,6 +5094,25 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     fontWeight: FontWeight.w600)),
                           );
                         }),
+                        // Roadmap step 42 — estimated line cost breakdown.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final c =
+                                lineCostEstimateFor(p, _selectedBrand);
+                            if (c == null) return const SizedBox.shrink();
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                  '🧮 עלות קו משוערת: ~₪${c.total}  '
+                                  '(מוצר ₪${c.product} · אביזרים ₪${c.accessories} · עבודה ₪${c.labour})',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      color: Color(0xFF334155),
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w600)),
+                            );
+                          }),
                         if (compat.isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text('🔗 מתחבר ל-${compat.length} מוצרים',
@@ -4735,6 +5131,43 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     color: Color(0xFF888888), fontSize: 11),
                               ),
                             ),
+                          // Roadmap step 56 — data-driven "frequently paired".
+                          if (expert)
+                            Builder(builder: (_) {
+                              final types = frequentlyPairedTypesFor(prod);
+                              if (types.isEmpty) return const SizedBox.shrink();
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                    'מוצרים משלימים נפוצים: ${types.join(" · ")}',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: Color(0xFF6D28D9),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600)),
+                              );
+                            }),
+                          // Roadmap step 22 — "build my line" → materialized BOM.
+                          const SizedBox(height: 8),
+                          GestureDetector(
+                            onTap: () => _showLineBom(prod),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 7),
+                              decoration: BoxDecoration(
+                                color: BsTokens.brand.withAlpha(24),
+                                borderRadius: BorderRadius.circular(10),
+                                border:
+                                    Border.all(color: BsTokens.brand.withAlpha(90)),
+                              ),
+                              child: const Text('🔧 בנה לי קו (BOM)',
+                                  style: TextStyle(
+                                      color: BsTokens.brand,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700)),
+                            ),
+                          ),
                         ],
                         // Roadmap step 19 — auto compliance/safety triggers.
                         Builder(builder: (_) {
@@ -4749,7 +5182,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                       color: Color(0xFF888888),
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600)),
-                              for (final t in triggers)
+                              for (final t in triggers) ...[
                                 Padding(
                                   padding: const EdgeInsets.only(top: 2),
                                   child: Text('${t.label} — ${t.reason}',
@@ -4759,11 +5192,79 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           color: Color(0xFFB45309),
                                           fontSize: 11)),
                                 ),
+                                if (expert && complianceWhyHe(t.label) != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 1, right: 14),
+                                    child: Text('↳ ${complianceWhyHe(t.label)}',
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF999999),
+                                            fontSize: 10,
+                                            height: 1.25)),
+                                  ),
+                              ],
                             ],
                           );
                         }),
+                        // Roadmap step 73 — what the line needs to mate each end.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final needs = connectionNeedsHe(prod);
+                            if (needs.isEmpty) return const SizedBox.shrink();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 6),
+                                const Text('מה הקו צריך לחיבור',
+                                    style: TextStyle(
+                                        color: Color(0xFF888888),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)),
+                                for (final n in needs)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text('🔩 $n',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF555555),
+                                            fontSize: 11)),
+                                  ),
+                              ],
+                            );
+                          }),
+                        // Roadmap step 38 — end-of-install acceptance checklist.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final checks = acceptanceChecklistFor(prod);
+                            if (checks.isEmpty) return const SizedBox.shrink();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 6),
+                                const Text('בדיקת קבלה (סיום התקנה)',
+                                    style: TextStyle(
+                                        color: Color(0xFF888888),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)),
+                                for (final c in checks)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(c,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF0F766E),
+                                            fontSize: 11)),
+                                  ),
+                              ],
+                            );
+                          }),
                         // Roadmap step 12 — relevant Israeli standards (ת"י).
-                        Builder(builder: (_) {
+                        if (expert)
+                          Builder(builder: (_) {
                           final stds = israeliStandardsFor(prod);
                           if (stds.isEmpty) return const SizedBox.shrink();
                           return Column(
@@ -4789,7 +5290,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           );
                         }),
                         // Roadmap step 33 — required tools (derived from ends).
-                        Builder(builder: (_) {
+                        if (expert)
+                          Builder(builder: (_) {
                           final tools = installToolsFor(prod);
                           if (tools.isEmpty) return const SizedBox.shrink();
                           return Padding(
@@ -4797,8 +5299,37 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             child: catRow('כלי עבודה', tools.join(' · ')),
                           );
                         }),
+                        // Roadmap step 35 — common mistakes + tips.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final tips = installTipsFor(prod);
+                            if (tips.isEmpty) return const SizedBox.shrink();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 6),
+                                const Text('טעויות נפוצות וטיפים',
+                                    style: TextStyle(
+                                        color: Color(0xFF888888),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)),
+                                for (final t in tips)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(t,
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF7C2D12),
+                                            fontSize: 10.5,
+                                            height: 1.25)),
+                                  ),
+                              ],
+                            );
+                          }),
                         // Roadmap step 63 — variant family ("גרסאות נוספות").
-                        Builder(builder: (_) {
+                        if (expert)
+                          Builder(builder: (_) {
                           final fam = variantSiblingsOf(prod)
                               .where((q) => q.sku != prod.sku)
                               .toList();
@@ -4826,7 +5357,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           );
                         }),
                         // Roadmap step 16 — "when to pick which" brand guide.
-                        Builder(builder: (_) {
+                        if (expert)
+                          Builder(builder: (_) {
                           final guide = brandDecisionGuide(p);
                           if (guide.length < 2) return const SizedBox.shrink();
                           return Column(
@@ -4852,7 +5384,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           );
                         }),
                         // Roadmap step 66 — recently-viewed history.
-                        Builder(builder: (_) {
+                        if (expert)
+                          Builder(builder: (_) {
                           final recent = ref
                               .watch(recentlyViewedProvider)
                               .where((s) => s != prod.sku)
@@ -6237,7 +6770,6 @@ class _SubGroupBrowser extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(variantsActiveSubGroupProvider);
     final selected = ref.watch(provider);
-    final cs = Theme.of(context).colorScheme;
     void toggleValue(String v) {
       final next = {...selected};
       if (next.contains(v)) {

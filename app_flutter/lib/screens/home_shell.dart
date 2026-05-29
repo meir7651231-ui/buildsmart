@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.93 · 29.5.26 · ניקוי קטלוג PPR: צינורות מיזוג אוויר (Aquatherm) + כלי ריתוך כקטגוריות נפרדות + בורר-מידה תוך-קווי + החלפת-מוצר חיה',
+                          'v5.08 · 29.5.26 · SmartProduct: דיפ-לינק בהצעת מחיר + דירוג עמידות (★) + זכירת מותג נבחר + מוצרים משלימים',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

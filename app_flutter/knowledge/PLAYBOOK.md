@@ -1,18 +1,35 @@
 # PLAYBOOK — continuous learning log (read me first)
 
-## Working mode — NO STOPPING
-Keep building, verifying, and pushing **without pausing for confirmation**. A
-step that looks "blocked" is **not** a stop — try **dozens of different
-approaches** first: local stubs, synthetic/mock data, heuristics, alternative
-libraries, placeholders, workarounds, re-framings. Only declare a **wall** when
-it is genuinely impassable *and* cannot be broken or bypassed after many honest
-attempts (e.g. it fundamentally requires a live external server, real device
-hardware, or paid third-party access that does not exist here). When you do hit
-such a wall, document it below **with every approach you tried** and move on to
-the next thing you *can* advance — never idle.
+## Working mode — NO STOPPING (but NO PUSHING without approval)
+Keep building, verifying, and **committing locally** **without pausing for
+confirmation**. A step that looks "blocked" is **not** a stop — try **dozens of
+different approaches** first: local stubs, synthetic/mock data, heuristics,
+alternative libraries, placeholders, workarounds, re-framings. Only declare a
+**wall** when it is genuinely impassable *and* cannot be broken or bypassed
+after many honest attempts (e.g. it fundamentally requires a live external
+server, real device hardware, or paid third-party access that does not exist
+here). When you do hit such a wall, document it below **with every approach you
+tried** and move on to the next thing you *can* advance — never idle.
 
-Cadence: run the **full test suite every ~5 steps**; bump version + push on a
-clean checkpoint; keep momentum.
+### 🚫 PUSH POLICY — hard rule (overrides everything above)
+**Do NOT `git push` until the user explicitly approves it in chat**, every time.
+"NO STOPPING" applies to *building/testing/committing locally* — it is **not** a
+standing authorization to push. Work freely on local commits; let them stack up.
+Only push when the user says so (e.g. "תדחוף" / "push" / "approved"). A clean
+checkpoint (0/0, full suite green) is a good moment to *offer* a push — not to
+perform one. This rule was added after pushes were made on the strength of the
+old "push on a clean checkpoint" line; that line is now void.
+
+### ⏱ Cadence (operation-based, user-set)
+- **Full test suite** every ~5 steps (ground truth before any checkpoint).
+- **Local commit** = batch ~**20 operations and above** into one local commit
+  (don't commit every tiny edit — accumulate, then bump the version label +
+  commit locally on a clean 0/0 checkpoint). Hold all commits for a single
+  approved push later (see PUSH POLICY).
+- **Live demo** = refresh the local web server (port 8090) and show the running
+  build every ~**10 operations and above**, so the user can watch progress.
+- "operation" = a meaningful build action (a wired helper, a UI block, a fix),
+  not a single keystroke/tool call. Keep momentum; never idle.
 
 ---
 
@@ -163,6 +180,10 @@ Format per entry:
 ### Coordinate clicking on the Flutter `<canvas>` is unreliable
 - **Problem:** Flutter web renders to one canvas; `computer left_click` by coordinate frequently misses (tab positions shift; long-press isn't supported).
 - **Fix:** prefer **code verification** (tests + grep) as ground truth. For live demos, use tappable entry points (the manage-sheet eye-toggle) over long-press; take a screenshot to read current positions before clicking; tell the user the exact path so they can verify themselves.
+
+### Canvas taps land *intermittently* — and the a11y tree is empty
+- **Problem:** in one card session, chip taps (stage tracker, mode toggle) registered fine, but a `GestureDetector` button deeper in the scrollable sheet (the "בנה לי קו (BOM)" button) would not fire from a coordinate `left_click` after several attempts. `find` returned only "Enable accessibility" + "flutter typography measurement" — Flutter web doesn't expose canvas widgets to the a11y tree until accessibility is explicitly enabled.
+- **Fix:** don't loop on a dead tap (2-3 tries max). Treat the rendered widget + green tests as proof it works; demo the *static* render and tell the user the tap path. Buttons that open a `showDialog` are the least reliable to drive via canvas coords — verify their logic with a unit test on the underlying function instead. Tap targets near the top of the sheet (chips) seem more reliable than ones mid-scroll.
 
 ---
 

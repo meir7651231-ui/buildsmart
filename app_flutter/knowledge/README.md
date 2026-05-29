@@ -48,8 +48,10 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
    bug, confirm a test goes red, revert. The goal for domain logic is
    **100% caught** (see `TESTING.md`). UI-only effects are exercised through
    their underlying providers/helpers, not pixel rendering.
-6. **Commit small, push to** `claude/whats-happening-LyY9G`. Never push to
-   main without explicit approval. Bump the in-app version label
+6. **Commit small (locally).** Target branch is `claude/whats-happening-LyY9G`.
+   **Do NOT `git push` (to ANY branch) without explicit user approval each time**
+   — see PLAYBOOK "PUSH POLICY". Let local commits stack; offer a push at a clean
+   checkpoint, don't perform one. Bump the in-app version label
    (`home_shell.dart`) when shipping a user-visible change.
 
 ## Enforcement (the protocol has teeth)
