@@ -67,6 +67,17 @@ String? _pprImageFor(String categoryHe, String nameHe) {
   return _kPprCategoryImage[categoryHe];
 }
 
+/// Per-sub-type spec **diagram(s)** (dimension drawings cropped from the catalog
+/// pages). Prepended to the flip-side pager before the full page. Grows as more
+/// sub-type diagrams are cropped (protocol §17.1).
+List<String>? _pprSpecFor(String categoryHe, String nameHe) {
+  switch (categoryHe) {
+    case kPprCouplers:
+      if (!nameHe.contains('מצרה')) return ['spec_coupler.jpg'];
+  }
+  return null;
+}
+
 LipskeyCatalogProduct _ppr(
   String sku,
   String nameHe,
@@ -92,6 +103,7 @@ LipskeyCatalogProduct _ppr(
       dims: dims,
       imageFile: imageFile ?? _pprImageFor(categoryHe, nameHe),
       specImageFile: specImageFile,
+      specImageFiles: _pprSpecFor(categoryHe, nameHe),
       color: color,
     );
 
