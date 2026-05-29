@@ -1147,7 +1147,7 @@ class _ZoomHint extends StatelessWidget {
       );
 }
 
-class _SpecSide extends StatelessWidget {
+class _SpecSide extends StatefulWidget {
   const _SpecSide({
     required this.product,
     required this.onFlip,
@@ -1158,22 +1158,60 @@ class _SpecSide extends StatelessWidget {
   final VoidCallback onZoom;
 
   @override
+  State<_SpecSide> createState() => _SpecSideState();
+}
+
+class _SpecSideState extends State<_SpecSide> {
+  int _i = 0;
+
+  @override
+  void didUpdateWidget(_SpecSide old) {
+    super.didUpdateWidget(old);
+    if (old.product.sku != widget.product.sku) _i = 0;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final product = widget.product;
+    final specs = product.specImageAssets;
+    final i = _i % specs.length;
     return GestureDetector(
-      onTap: onZoom, // tap spec → fullscreen zoom
+      onTap: widget.onZoom, // tap spec → fullscreen zoom
       child: Container(
         color: Colors.white,
         child: Stack(
           fit: StackFit.expand,
           children: [
             Image.asset(
-              product.specImageAsset,
+              specs[i],
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) => Center(
                 child: Text(product.typeEmoji,
                     style: const TextStyle(fontSize: 72)),
               ),
             ),
+            // multi-spec pager (1/N) — only when there's more than one image.
+            if (specs.length > 1)
+              Positioned(
+                top: 10,
+                left: 10,
+                child: GestureDetector(
+                  onTap: () => setState(() => _i = (i + 1) % specs.length),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xCC1A1200),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text('${i + 1}/${specs.length}',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800)),
+                  ),
+                ),
+              ),
             // zoom hint
             const Positioned(top: 10, right: 10, child: _ZoomHint()),
             // back-to-product button
@@ -1181,7 +1219,7 @@ class _SpecSide extends StatelessWidget {
               bottom: 10,
               left: 10,
               child: GestureDetector(
-                onTap: onFlip,
+                onTap: widget.onFlip,
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 7),

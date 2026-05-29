@@ -17,6 +17,9 @@ class LipskeyCatalogProduct {
   /// A cropped spec/diagram image (in the products dir). When set, the spec side
   /// shows just this diagram instead of the whole catalog page.
   final String? specImageFile;
+  /// Extra cropped spec/diagram images (in order) — the flip side shows a 1/N
+  /// pager across these + specImageFile + the full catalog page.
+  final List<String>? specImageFiles;
   final String brand;
 
   const LipskeyCatalogProduct({
@@ -33,6 +36,7 @@ class LipskeyCatalogProduct {
     this.dims,
     this.imageFile,
     this.specImageFile,
+    this.specImageFiles,
     this.brand = 'ליפסקי',
   });
 
@@ -48,6 +52,23 @@ class LipskeyCatalogProduct {
     // Polyroll products flip to their own catalog page (where the dimension
     // diagram defining d/z/l/A/B… lives); everything else is Lipskey.
     return 'assets/$dir/pages/page_$p.jpg';
+  }
+
+  /// All spec images, in order, for the flip side's 1/N pager: the cropped
+  /// diagram(s) first (specImageFiles → specImageFile), then the full catalog
+  /// page. ≥1 always; the sheet shows a pager only when length > 1.
+  List<String> get specImageAssets {
+    final dir = brand == 'פולירול' ? 'polyroll' : 'lipskey';
+    final out = <String>[];
+    for (final f in specImageFiles ?? const <String>[]) {
+      out.add('assets/$dir/products/$f');
+    }
+    if (specImageFile != null) {
+      out.add('assets/$dir/products/$specImageFile');
+    }
+    final pageAsset = 'assets/$dir/pages/page_${page.toString().padLeft(2, '0')}.jpg';
+    if (!out.contains(pageAsset)) out.add(pageAsset);
+    return out;
   }
 
   /// Connection sizes (DN ends) of this product — the single source of truth
