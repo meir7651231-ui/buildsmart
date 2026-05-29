@@ -4940,6 +4940,21 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     fontWeight: FontWeight.w600)),
                           );
                         }),
+                        // Roadmap step 29 — physical-connection warning.
+                        Builder(builder: (_) {
+                          final warn = connectionWarningHe(prod);
+                          if (warn == null) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(warn,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: Color(0xFFB91C1C),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700)),
+                          );
+                        }),
                         // Roadmap step 28 — "your line so far": how this product
                         // fits what's already in the cart.
                         Builder(builder: (_) {
@@ -5094,6 +5109,23 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     color: Color(0xFF888888), fontSize: 11),
                               ),
                             ),
+                          // Roadmap step 56 — data-driven "frequently paired".
+                          if (expert)
+                            Builder(builder: (_) {
+                              final types = frequentlyPairedTypesFor(prod);
+                              if (types.isEmpty) return const SizedBox.shrink();
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                    'מוצרים משלימים נפוצים: ${types.join(" · ")}',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: Color(0xFF6D28D9),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600)),
+                              );
+                            }),
                           // Roadmap step 22 — "build my line" → materialized BOM.
                           const SizedBox(height: 8),
                           GestureDetector(

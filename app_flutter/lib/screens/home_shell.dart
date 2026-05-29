@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.04 · 29.5.26 · SmartProduct: "בנה לי קו" (BOM ממנוע ההתקנה) + שמירת תצורה + העתקת הצעת מחיר',
+                          'v5.05 · 29.5.26 · SmartProduct: מוצרים משלימים נפוצים + אזהרת חיבור + "בנה לי קו" (BOM) + שמירת תצורה',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

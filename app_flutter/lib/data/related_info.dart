@@ -902,6 +902,35 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
   return out;
 }
 
+// ─── מוצרים משלימים נפוצים (Roadmap step 56) ────────────────────────────────
+/// The product *types* that most often connect to [p], data-driven from the
+/// compatibility engine (not a curated list) — a "frequently paired" signal.
+/// Ordered by frequency desc, up to four, de-duplicated. Empty when nothing
+/// connects or types are unknown.
+List<String> frequentlyPairedTypesFor(LipskeyCatalogProduct p) {
+  final counts = <String, int>{};
+  for (final c in compatibleProductsFor(p)) {
+    final t = c.productType;
+    if (t == null || t.isEmpty) continue;
+    counts[t] = (counts[t] ?? 0) + 1;
+  }
+  final sorted = counts.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
+  return [for (final e in sorted.take(4)) e.key];
+}
+
+// ─── אזהרת חיבור פיזי (Roadmap step 29) ─────────────────────────────────────
+/// Warns when a spec'd product has no direct catalog mate (so the line will
+/// need an adapter). Returns null when there's no spec (can't judge) or when
+/// the product connects to something.
+String? connectionWarningHe(LipskeyCatalogProduct p) {
+  if (kVerifiedSpecs[p.sku] == null) return null;
+  if (compatibleProductsCount(p) == 0) {
+    return '⚠ לא נמצאו חיבורים ישירים בקטלוג — ייתכן שנדרש מתאם.';
+  }
+  return null;
+}
+
 // ─── טקסט הצעת מחיר לשיתוף (Roadmap step 48) ────────────────────────────────
 /// A plain-text price quote for the selected brand, ready to copy/share. Built
 /// from the line-cost estimate (falls back to the brand price). Pure & stable.

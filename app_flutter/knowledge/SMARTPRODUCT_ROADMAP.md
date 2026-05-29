@@ -65,7 +65,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 27. ⬜ Smart adapter recommendation when a brand doesn't directly mate the cart.
 28. ✅ "Your line so far" — `lineFitFor` reads the smart cart and reports how
    many cart items this product connects to ("🧩 בקו שלך"). Guard: `line_fit_test`.
-29. ⬜ Physical validation: warn on impossible connections.
+29. 🟦 Physical-connection warning — `connectionWarningHe` flags a spec'd product
+   with zero direct catalog mates ("ייתכן שנדרש מתאם"). (Full per-pair impossible-
+   connection validation lives in the engine gaps.) Guard: `paired_warning_test`.
 30. 🟦 Card data-readiness score (0-100 + label) via `cardReadinessScore`
    (spec/connectivity/finder/price/variants) shown as a badge in the 📦 header.
    (Line-level safety/pressure/cost scoring still ⬜.) Guard: `card_score_test`.
@@ -113,7 +115,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 53. ⬜ In-card AI assistant: "what suits me?" in free text.
 54. ⬜ Learning: more lines built → sharper recommendations.
 55. ⬜ Product recognition from camera (barcode/image) → opens the card.
-56. ⬜ "People who bought X also added Y" (data-driven accessories).
+56. 🟦 "Frequently paired" — `frequentlyPairedTypesFor` surfaces the product
+   *types* that most often connect (data-driven from the compat engine).
+   (Real co-purchase data pending a backend.) Guard: `paired_warning_test`.
 57. ⬜ Profession-aware (plumber/contractor/DIY) — different detail level.
 58. ✅ "Why it matters" explanation under each compliance warning via
    `complianceWhyHe` (↳ line). Coverage-gated: every trigger label has a why.
