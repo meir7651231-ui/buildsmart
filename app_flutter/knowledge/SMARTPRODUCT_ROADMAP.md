@@ -37,7 +37,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    Guard: `standards_tools_test`.
 13. ⬜ Real image gallery per brand (zoom, 360°).
 14. ⬜ Precise dimensions + small engineering sketch (DN/length/thread) per variant.
-15. ⬜ Quality/durability rating per brand (stars + reason).
+15. 🟦 Durability rating (1-5 stars + reason) via `durabilityRatingFor`
+   (material/temp/pressure heuristic). (Real lab ratings pending.)
+   Guard: `durability_test`.
 16. ✅ "When to pick which" decision table between brands via `brandDecisionGuide`
    (rec / price-extreme / hot-suitability → one-line advice; "מתי לבחור איזה מותג"
    block). Guard: `brand_guide_test`.

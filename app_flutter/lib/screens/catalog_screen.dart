@@ -5041,6 +5041,14 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             catRow('קוטר מינ׳',
                                 '${spec.minBoreMm!.toStringAsFixed(0)}mm'),
                         ],
+                        // Roadmap step 15 — durability rating (heuristic stars).
+                        if (expert)
+                          Builder(builder: (_) {
+                            final d = durabilityRatingFor(prod);
+                            if (d == null) return const SizedBox.shrink();
+                            final stars = '★' * d.stars + '☆' * (5 - d.stars);
+                            return catRow('עמידות', '$stars · ${d.reason}');
+                          }),
                         if (expert && finder != null)
                           catRow('מאתר', '${finder.emoji} ${finder.label}'),
                         if (expert && kit != null)

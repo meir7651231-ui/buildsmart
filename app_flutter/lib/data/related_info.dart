@@ -902,6 +902,40 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
   return out;
 }
 
+// ─── דירוג עמידות (Roadmap step 15, heuristic) ──────────────────────────────
+/// A 1-5 durability heuristic from the verified spec: metallic materials,
+/// hot-water rating and a pressure rating push it up; cold-only pushes it down.
+/// Honest as a heuristic (real lab ratings pending). Null without a spec.
+({int stars, String reason})? durabilityRatingFor(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return null;
+  var score = 3;
+  final reasons = <String>[];
+
+  const strong = {'נחושת', 'פליז', 'פלדה'};
+  if (strong.contains(spec.material)) {
+    score += 1;
+    reasons.add('חומר מתכתי עמיד');
+  } else if (spec.material == 'PEX' || spec.material == 'רב שכבתי') {
+    reasons.add('עמיד-קורוזיה');
+  }
+  if (spec.maxTempC >= 90) {
+    score += 1;
+    reasons.add('עמיד למים חמים');
+  } else if (spec.maxTempC < 60) {
+    score -= 1;
+    reasons.add('מים קרים בלבד');
+  }
+  if (spec.pressureRating != null) reasons.add('מדורג ללחץ');
+
+  if (score < 1) score = 1;
+  if (score > 5) score = 5;
+  return (
+    stars: score,
+    reason: reasons.isEmpty ? 'דירוג בסיסי' : reasons.join(' · '),
+  );
+}
+
 // ─── מוצרים משלימים נפוצים (Roadmap step 56) ────────────────────────────────
 /// The product *types* that most often connect to [p], data-driven from the
 /// compatibility engine (not a curated list) — a "frequently paired" signal.
