@@ -36,17 +36,36 @@ const Map<String, String> _kPprCategoryImage = {
   kPprPipesFiber: 'pipe_faser_20.jpg',
   kPprPipesAC: 'ppr_ac_pipe.jpg',
   kPprCouplers: 'ppr_coupler.jpg',
-  kPprElbows: 'ppr_elbow.jpg',
+  kPprElbows: 'ppr_elbow_90.jpg',
   kPprTees: 'ppr_tee.jpg',
   kPprPlugs: 'ppr_plug.jpg',
   kPprOmega: 'ppr_omega.jpg',
-  kPprAdapters: 'ppr_adapter.jpg',
+  kPprAdapters: 'ppr_adapter_round.jpg',
   kPprValves: 'ppr_valve.jpg',
   kPprCollars: 'ppr_collar.jpg',
   kPprElectrofusion: 'ppr_ef.jpg',
   kPprTools: 'ppr_tools.jpg',
-  // Saddles (p84) have no embedded raster (vector diagrams) → emoji fallback.
+  kPprSaddles: 'ppr_saddle.jpg',
 };
+
+/// Per-sub-type product image: a line's sub-types (elbow 45°/90°, coupler
+/// straight/reducing, adapter round/hex) carry distinct diagrams. Falls back to
+/// the per-line image. Keyed by name keywords (protocol §17).
+String? _pprImageFor(String categoryHe, String nameHe) {
+  switch (categoryHe) {
+    case kPprElbows:
+      return nameHe.contains('45') ? 'ppr_elbow_45.jpg' : 'ppr_elbow_90.jpg';
+    case kPprAdapters:
+      return nameHe.contains('משושה')
+          ? 'ppr_adapter_hex.jpg'
+          : 'ppr_adapter_round.jpg';
+    case kPprCouplers:
+      return nameHe.contains('מצרה')
+          ? 'ppr_coupler_reducing.jpg'
+          : 'ppr_coupler.jpg';
+  }
+  return _kPprCategoryImage[categoryHe];
+}
 
 LipskeyCatalogProduct _ppr(
   String sku,
@@ -71,7 +90,7 @@ LipskeyCatalogProduct _ppr(
       page: page,
       brand: kPolyrollBrand,
       dims: dims,
-      imageFile: imageFile ?? _kPprCategoryImage[categoryHe],
+      imageFile: imageFile ?? _pprImageFor(categoryHe, nameHe),
       specImageFile: specImageFile,
       color: color,
     );
