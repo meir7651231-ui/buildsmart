@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v4.76` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v4.87` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — opens on **בית (finder home)** as the default landing: layman
@@ -69,6 +69,18 @@ addresses/invoices/warranty/biometric. All need data, a server, or device APIs.
   shower it protects, and the hot-source group (shutoff · expansion vessel ·
   PRV) clusters at the inlet. Dielectric stays at the metal seam. So the chain
   reads correctly one-after-another with each in-line item where it belongs.
+- **Drainage ≠ supply (v4.87)** — `lineIsSupply()` gates supply compliance: a
+  gravity drainage line (traps + drain pipe) never gets a supply isolation ball
+  valve / PRV (a supply valve can't connect to a drain trap). Fixes a chain that
+  read מחסום → ברז כדורי → מצמד (impossible).
+- **Chain materialization (v4.87)** — `materializeChain` / `buildInstallation`
+  insert the component that physically spans each compression joint, so the BOM
+  is complete and 100% direct: fitting↔fitting → the bridging PIPE (real
+  drainage SKU or a synthetic "cut-to-length" supply pipe); pipe↔pipe → the
+  COUPLING that joins them; pipe↔fitting → already direct. Audited: 230 physical
+  paths → 100% direct links; 9340 carousel hits → 0 false mates; synthetic
+  PIPE-* specs never leak into the product card (`compatibleProductsFor` filters
+  on `kLipskeyCatalog`). Guards: `materialize_test`, `drainage_no_supply_test`.
 - **ΔP bottleneck fix (v4.76)** — `estimatePressureDrop` excludes off-line side
   branches (¼″ Legionella sampling tap, air vent, expansion tank) from the
   bore/K calc; they were wrongly read as the in-line bottleneck (bogus ~4.8 bar
