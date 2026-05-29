@@ -4663,6 +4663,13 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 color: Color(0xFF888888),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 4),
+                        // Roadmap step 59 — one-line card summary.
+                        Text(smartCardSummaryHe(p, brand),
+                            style: const TextStyle(
+                                color: Color(0xFF444444),
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600)),
                         const SizedBox(height: 6),
                         if (spec != null) ...[
                           catRow('חומר', spec.material),
@@ -4685,6 +4692,22 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                         if (variants > 1)
                           catRow('וריאנטים', '$variants גרסאות'),
                         if (price != null) catRow('מחיר משוער', '~₪$price'),
+                        // Roadmap step 45 — cheaper standard-comparable brand.
+                        Builder(builder: (_) {
+                          final alt = cheaperAlternativeBrand(p, _selectedBrand);
+                          if (alt == null) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                                '💰 חלופה זולה יותר: ${alt.name} (~₪${alt.price})',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    color: Color(0xFF15803D),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600)),
+                          );
+                        }),
                         if (compat.isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text('🔗 מתחבר ל-${compat.length} מוצרים',

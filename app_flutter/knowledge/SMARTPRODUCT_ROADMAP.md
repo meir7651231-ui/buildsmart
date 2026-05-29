@@ -8,7 +8,8 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## Phase 1 · Unification & foundation (1–10)
 1. ⬜ Merge the two duplicate product sheets (`_SmartProductSheet` ↔ `showLipskeyProductSheet`).
-2. ⬜ `SmartProduct` as single source of truth, linked to `LipskeyCatalogProduct` by SKU.
+2. 🟦 `SmartProduct` linked to the **unified** catalog by SKU — bridge + contract
+   now index `kCatalogProducts` (Lipskey + Polyroll), so any brand SKU resolves.
 3. ✅ Bidirectional bridge: `catalogProductForBrand` / `catalogProductForSmart`
    (related_info.dart) + `smartProductForSku` (reverse). Round-trip guarded in
    `smartproduct_contract_test`.
@@ -72,7 +73,8 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 42. ⬜ "Total cost for the line" — product + accessories + pipes + est. labour.
 43. ⬜ Quantity discounts + auto promotions.
 44. ⬜ Supplier choice by distance/rating/availability from settings.
-45. ⬜ "Cheaper alternative" — standard-compliant equivalent at lower price.
+45. ✅ "Cheaper alternative" — strictly-cheapest sibling brand via
+   `cheaperAlternativeBrand` ("💰 חלופה זולה יותר"). Guard: `summary_alt_test`.
 46. ⬜ Smart add-to-cart: the whole line in one tap (incl. safety).
 47. ⬜ Save config as favorite / project template.
 48. ⬜ Share a quote (WhatsApp/PDF) straight from the card.
@@ -88,7 +90,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 56. ⬜ "People who bought X also added Y" (data-driven accessories).
 57. ⬜ Profession-aware (plumber/contractor/DIY) — different detail level.
 58. ⬜ AI explanation of each compliance warning + "why it matters".
-59. ⬜ Voice/text one-line summary of the card.
+59. ✅ One-line text summary via `smartCardSummaryHe` (name·material·system·temp·
+   price) at the top of the 📦 section. Guard: `summary_alt_test`.
+   (Voice read-aloud still ⬜.)
 60. ⬜ Timing recommendation (when to order per project schedule).
 
 ## Phase 7 · Search & discovery (61–70)

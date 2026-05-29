@@ -2,14 +2,15 @@
 // The smart-tree card and the catalog must stay linked: every SmartBrand.sku is
 // a real catalog SKU. This is the foundation the unification (steps 1–4) builds
 // on — if a brand points at a missing SKU the merged card would 404.
-import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final catalogSkus = {for (final p in kLipskeyCatalog) p.sku};
+  // The unified catalog (Lipskey + Polyroll) is the single source of truth.
+  final catalogSkus = {for (final p in kCatalogProducts) p.sku};
 
   test('every SmartBrand.sku is a real catalog SKU', () {
     final missing = <String>[];

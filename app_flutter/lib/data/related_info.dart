@@ -66,7 +66,9 @@ const List<_FinderGroup> _kFinderGroups = [
 // the brand the user picked. Memoised sku→product map for O(1) lookups.
 Map<String, LipskeyCatalogProduct>? _skuToProduct;
 Map<String, LipskeyCatalogProduct> get _skuIndex =>
-    _skuToProduct ??= {for (final p in kLipskeyCatalog) p.sku: p};
+    // Index the UNIFIED catalog (Lipskey + Polyroll) so a SmartBrand SKU
+    // resolves regardless of which catalog the product lives in.
+    _skuToProduct ??= {for (final p in kCatalogProducts) p.sku: p};
 
 /// The catalog product a [brand] points at, or null when it has no SKU / the
 /// SKU isn't in the catalog.
@@ -779,4 +781,50 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
     ));
   }
   return out;
+}
+
+// ─── תקציר שורה אחת (Roadmap step 59) ───────────────────────────────────────
+/// A single human-readable line summarising the selected product+brand:
+/// name · material · system · max-temp · price. Pure; safe when the brand has
+/// no catalog SKU (falls back to the name only).
+String smartCardSummaryHe(SmartProduct sp, SmartBrand brand) {
+  final parts = <String>['${sp.name} — ${brand.name}'];
+  final prod = catalogProductForBrand(brand);
+  final spec = prod == null ? null : kVerifiedSpecs[prod.sku];
+  if (spec != null) {
+    parts.add(spec.material);
+    final sys = spec.endSystems.length == 1
+        ? (spec.endSystems.contains(WaterSystem.supply) ? 'הזנה' : 'ניקוז')
+        : 'משולב';
+    parts.add('מערכת $sys');
+    if (spec.maxTempC >= 60) {
+      parts.add('עד ${spec.maxTempC.toStringAsFixed(0)}°C');
+    }
+  }
+  final price = brand.price ?? (prod == null ? null : priceFor(prod));
+  if (price != null) parts.add('~₪$price');
+  return parts.join(' · ');
+}
+
+// ─── חלופה זולה יותר (Roadmap step 45) ──────────────────────────────────────
+/// The cheapest *other* brand of [sp] whose price is strictly lower than the
+/// brand at [selectedIndex]. Returns null when the selection has no price, no
+/// cheaper sibling exists, or the index is out of range. Brand prices are the
+/// curated `SmartBrand.price` (standard-comparable within one product).
+({String name, int price})? cheaperAlternativeBrand(
+    SmartProduct sp, int selectedIndex) {
+  if (selectedIndex < 0 || selectedIndex >= sp.brands.length) return null;
+  final sel = sp.brands[selectedIndex];
+  final selPrice = sel.price;
+  if (selPrice == null) return null;
+  ({String name, int price})? best;
+  for (var i = 0; i < sp.brands.length; i++) {
+    if (i == selectedIndex) continue;
+    final p = sp.brands[i].price;
+    if (p == null || p >= selPrice) continue;
+    if (best == null || p < best.price) {
+      best = (name: sp.brands[i].name, price: p);
+    }
+  }
+  return best;
 }

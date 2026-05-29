@@ -74,6 +74,11 @@ Format per entry:
 ### Verify work survived a rebase
 - **Fix:** `git merge-base --is-ancestor <my-commit> origin/<branch>` → confirms my commit is in the cloud history (nothing lost).
 
+### The other session can migrate the data layer under you
+- **Problem:** I built the SmartProduct↔catalog bridge on `kLipskeyCatalog`; meanwhile the other session introduced `kCatalogProducts = [...kLipskeyCatalog, ...kPolyrollCatalog]` (a superset adding PPR) and switched `variantSiblingsOf`/`engineeringSpecFor`/`finderGroupFor` to it. The rebase auto-merged (different regions) but my bridge still indexed the *old* narrower list — a brand pointing at a Polyroll SKU would silently fail to resolve.
+- **Fix:** after a rebase that touches a shared data file, `git diff <base> origin/<branch> -- <file>` to see what moved, then align my code to the **new superset** (`_skuIndex` + the contract test's `catalogSkus` now build from `kCatalogProducts`). Re-run the contract test — still 0 missing.
+- **Why:** on a fast branch the canonical collection name can change; grep for the *new* source-of-truth list and re-point, don't assume the list you coded against is still the whole catalog.
+
 ---
 
 ## C. Dart / test pitfalls
