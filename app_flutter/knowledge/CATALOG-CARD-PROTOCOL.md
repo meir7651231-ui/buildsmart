@@ -433,3 +433,24 @@ grep -nE "פייזר [0-9]{6,}|אספקת מים'," lib/data/polyroll_catalog.da
 
 **למה:** deploy אחד ל-100+ מוצרים במקום 10 deploys ל-10 קווים. שומר על היסטוריית-commits
 לוקאלית מפורטת (לכל קו) אבל gh-pages/CI נטענים פעם אחת לבאצ׳.
+
+## 17. תמונות-מוצר לכל קו (product image) — מפת-קטגוריה + חילוץ מה-PDF
+
+**הבעיה:** רק 11/777 מוצרי-PPR היו עם `imageFile` → השאר הציגו emoji/עמוד-מלא ("כללי").
+**הפתרון (פה-מולטיפלייר כמו §15):** `_kPprCategoryImage` ב-`polyroll_catalog.dart` —
+מפה `categoryHe → קובץ-תמונה`; ב-`_ppr`: `imageFile: imageFile ?? _kPprCategoryImage[categoryHe]`.
+ערך אחד לקו מכסה את כל מוצריו; `imageFile` פר-מוצר עדיין גובר.
+
+**זרימת חילוץ-תמונה מ-PDF (אין ImageMagick — יש PIL):**
+```bash
+pdfimages -p -j -f <page> -l <page> "$PDF" /tmp/pimg/p   # מחלץ image+smask
+# כל image-rgb מלווה ב-smask (gray) בעמוד הבא; להרכיב על רקע לבן:
+python3 -c "from PIL import Image; i=Image.open('rgb.jpg').convert('RGB'); \
+m=Image.open('smask.jpg').convert('L').resize(i.size); \
+bg=Image.new('RGB',i.size,(255,255,255)); bg.paste(i,(0,0),m); bg.save('assets/polyroll/products/ppr_<line>.jpg',quality=92)"
+```
+**זיהוי:** `pdfimages -list` → ה-rgb הרחב/גדול הוא צילום-המוצר; smask = ה-idx הבא.
+להרכיב כמה למונטאז׳ ולצפות בתמונה אחת כדי לזהות מי-זה-מי (חוסך Read-ים).
+**ספק-תמונה:** `spec` כבר נופל ל-`pages/page_NN.jpg` (העמוד המלא) — תקין-תוכן; לחיתוך
+נקי צריך crop ידני (כמו `spec_faser_20.jpg`). **תיקייה `assets/polyroll/products/` כבר
+רשומה ב-pubspec** — קובץ חדש נכלל אוטומטית.

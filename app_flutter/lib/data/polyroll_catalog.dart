@@ -28,6 +28,16 @@ const String kPprValves = 'ברזים PPR';
 const String kPprCollars = 'צווארונים ואוגנים PPR';
 const String kPprElectrofusion = 'אביזרי ריתוך חשמלי PPR';
 
+/// Per-line product image (extracted from the catalog PDF diagrams). One entry
+/// covers every product in the line — a per-product `imageFile` still overrides.
+/// Populated line-by-line as diagrams are pulled from the PDF (protocol §17).
+const Map<String, String> _kPprCategoryImage = {
+  kPprPipesSupply: 'ppr_supply_pipe.jpg',
+  kPprPipesFiber: 'pipe_faser_20.jpg',
+  kPprPipesAC: 'ppr_ac_pipe.jpg',
+  kPprCouplers: 'ppr_coupler.jpg',
+};
+
 LipskeyCatalogProduct _ppr(
   String sku,
   String nameHe,
@@ -51,7 +61,7 @@ LipskeyCatalogProduct _ppr(
       page: page,
       brand: kPolyrollBrand,
       dims: dims,
-      imageFile: imageFile,
+      imageFile: imageFile ?? _kPprCategoryImage[categoryHe],
       specImageFile: specImageFile,
       color: color,
     );
