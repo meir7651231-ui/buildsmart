@@ -1,0 +1,233 @@
+# פרוטוקול בניית כרטיס-מוצר + הטמעת קטלוג חדש
+
+> מקור-אמת לתהליך. נכתב אחרי בניית מוצר-הייחוס **צינור PPR פייזר 20×2.8** (מק"ט הלירומה `6001602200`).
+> מטרה: שכל מוצר/קטלוג הבא ייבנה במהירות לפי checklist — בלי להמציא דבר.
+>
+> **עיקרון-על (R8): אין המצאה.** כל טקסט/מספר בכרטיס חייב לבוא **verbatim מהקטלוג**.
+> אם לא מצאת בקטלוג — אל תכתוב. תחפש (טקסט + תמונות-עמודים), ורק אז תכתוב.
+
+---
+
+## 0. קבצי-ליבה
+
+| קובץ | תפקיד |
+|------|--------|
+| `lib/data/lipskey_catalog.dart` | מודל `LipskeyCatalogProduct` + getters (`imageAsset`, `specImageAsset`, `parsedName`, `connectionSizes`…) |
+| `lib/data/polyroll_catalog.dart` | קטלוג PPR: `kPolyrollBrand`, קבועי-קטגוריה `kPpr*`, helper `_ppr()`, `kPolyrollCatalog`, **`kCatalogProducts = [...kLipskeyCatalog, ...kPolyrollCatalog]`** |
+| `lib/screens/lipskey_products_screen.dart` | **כרטיס חיצוני** — מערכת הצ׳יפים (`AttrKind`, `_attrKindFor`, `_NameWords`, `_AttrChip`, `findAttrSiblings`, `findTypeSiblings`, `_getCompoundType`) |
+| `lib/screens/lipskey_product_sheet.dart` | **כרטיס פנימי** — היפוך מוצר/מפרט, כותרת, `_InteractiveChips`, רצועת 9 הכרטיסים (`_StripKind`/`_StripPanel`/`_build*`), `_kPprWeldPlan` |
+| `lib/data/related_info.dart` | פונקציות-הנתונים של הרצועה (`finderGroupFor`, `compatibleProductsCount`, `installKitFor`, `variantSiblingsCountFor`, `complianceTriggersFor`, `engineeringSpecFor`, `priceFor`) |
+| `lib/logic/install_kit.dart` | `recommendedKitForProduct` — כלי ההתקנה |
+| `lib/data/variant_families.dart` | `productCanonicalKey`, `variantValue`, `kindOf` |
+| `test/ref_card_golden_test.dart` | **רנדור-ביקורת (זמני)** — מצלם את הכרטיסים ל-PNG לסקירה ויזואלית |
+
+---
+
+## 1. מודל הנתונים — `LipskeyCatalogProduct`
+
+שדות-ליבה: `sku, nameHe, nameEn, color, qtyPack, qtyPallet, categoryHe, categoryEn,
+categoryEmoji, page, dims, imageFile, specImageFile, brand`.
+
+`dims` (Map) — **כל התוכן ה"עשיר" של המוצר**. מפתחות שבשימוש (סדר = סדר תצוגה בטבלת "פרטי מוצר"):
+
+| מפתח | דוגמה | מופיע ב |
+|------|-------|---------|
+| `שם מלא` | `צינור פולירול PPR פייזר הולירומה למים חמים וקרים` | כותרת הכרטיס הפנימי (לא בטבלה) |
+| `תיאור` | `צינור פייזר למים חמים וקרים` | כותרת הכרטיס החיצוני |
+| `יצרן` | `Heliroma` | צ׳יפ יצרן + טבלה |
+| `מק"ט יצרן` | `P-16020-F` | טבלה |
+| `PN` / `SDR` | `16` / `7.4` | שורה תחתונה (חיצוני) + מפרט הנדסי |
+| `חומר` | `PPR · מחוזק בסיבי זכוכית (faser)` | מפרט הנדסי + צ׳יפ חומר |
+| `dn נומינלי` | `20` | חתימת-יצרן + תוכנית ריתוך + מפרט |
+| `de/e/di` | `20.0–20.3` / `2.8–3.2` / `13.6–14.7` | טבלה + מפרט (di = "קוטר פנימי") |
+| `משקל (ק"ג/מ׳)` | `0.153` | טבלה |
+| `תקנים` | `EN ISO 15874 · DIN 8077/8078` | טבלה + תקינות |
+| `לחץ עבודה (50 שנה)` | `24.5 בר ב-20°C · 8.1 בר ב-70°C` | מפרט הנדסי |
+| `אורך` | `4 מ׳` | צ׳יפ-אורך אפור |
+
+**תמונות (brand-aware):**
+- `imageAsset` → `assets/{polyroll|lipskey}/products/{imageFile}` — תמונת המוצר.
+- `specImageAsset` → אם הוגדר `specImageFile` ⇒ דיאגרמה חתוכה ב-`products/`; אחרת עמוד-קטלוג מלא ב-`pages/page_{page}.jpg`.
+
+---
+
+## 2. הכרטיס החיצוני — `_ProductRow` / `_NameWords` / `_AttrChip`
+
+**פריסה:**
+- **א — כותרת:** `dims['תיאור']` (לא `nameHe`).
+- **ב — צ׳יפים (מ-`nameHe`):** כל מילה מסווגת ל-`AttrKind` ע"י `_attrKindFor`. צ׳יפ **כתום** = יש לו siblings אמיתיים (פותח בורר); **אפור** = ערך יחיד.
+  - סדר לדוגמה: `צינור(type) · PPR(material) · פייזר(subtype) · Heliroma(maker) · 2.8×20(size) · 4 מ׳(length)`.
+- **ג — שורה תחתונה:** `brand` · `#sku` · `PN..` · `SDR..`.
+
+**`AttrKind`** = `{ size, color, colorMod, model, subtype, type, material, pressure, sdr, maker }`.
+- `material`: `_kPprMaterials = {'PPR','PPRCT'}` (מצומצם בכוונה — לא לפגוע בצבעי ליפסקי).
+- `maker`: **צ׳יפ סינתטי** — הערך מ-`dims['יצרן']`, לא מ-`nameHe`. נוסף ב-`_NameWords` אחרי צ׳יפ ה-subtype.
+
+**מנגנון ה-siblings (מה הופך צ׳יפ לכתום):**
+- `findAttrSiblings` — לכל המותג (`kCatalogProducts` עם `brand==kPolyrollBrand`) בתוך אותו `_getCompoundType`. צ׳יפ כתום רק אם יש ≥2 ערכים שונים.
+  - **צ׳יפ חומר כתום (PPR↔PPRCT)** דורש שקיים מוצר PPRCT אמיתי באותו סוג. לכן הוטמע התאום `6091602200` (PPRCT פייזר 20, עמ' 85).
+- `maker`: `_makerSignature(p)` = `category | compoundType | nominalBore | PN | SDR`. שני מוצרים עם אותה חתימה ו-`dims['יצרן']` שונה = חלופות (Heliroma↔Aquatherm).
+- **צ׳יפ אורך** = אפור-תמיד (אינפורמטיבי), נבנה ישירות מ-`dims['אורך']`.
+
+---
+
+## 3. הכרטיס הפנימי — `LipskeyProductSheet`
+
+1. **היפוך תמונה (`_FlipImage`):** צד מוצר (`imageAsset`) ↔ צד מפרט (`specImageAsset` = דיאגרמה חתוכה). כפתור "פרטים / מפרט".
+2. **כותרת:** `dims['שם מלא'] ?? nameHe`. תת-כותרת = `nameEn`.
+3. **`_InteractiveChips`:** entries מ-`parsedName` + `variantValue`: `סוג · תת-סוג · גודל · צבע · אורך`.
+   - גודל עטוף ב-LTR isolate (`‪…‬`) כדי ש-20×2.8 לא יתהפך.
+4. **רצועת 9 כרטיסים (`_StripKind`)** — כל אחד מוצג רק אם פונקציית-הנתונים שלו מחזירה תוכן:
+
+| כרטיס | gate (`related_info.dart`) | מקור-קטלוג ל-PPR |
+|------|---------------------------|------------------|
+| נמצא ב | `finderGroupFor` → `brand=='פולירול'` ⇒ "אספקת מים" | מבנה הקטלוג |
+| מוצרים תואמים | `compatibleProductsCount` (דורש verified-spec) | **טרם הוטמע ל-PPR** |
+| ערכת התקנה | `installKitFor` + `recommendedKitForProduct` | כלים + **תוכנית ריתוך `_kPprWeldPlan` (עמ' 9)** |
+| דומים | `variantSiblingsCountFor` → **`kCatalogProducts`** | משפחת הגדלים |
+| תקינות | `complianceTriggersFor` ענף PPR | תקנים (עמ' 6-7) · La (עמ' 12) · ריתוך · PN/SDR/טמפ |
+| מפרט הנדסי | `engineeringSpecFor` ענף PPR | dims + ריתוך 260°C (עמ' 9) + **לחץ-עבודה (עמ' 16)** |
+| מחיר משוער | `priceFor` | "מחיר לפי ספק" — אין |
+| **מידע כללי** | `_buildInfo` (brand-gated) | **יתרונות (עמ' 2-3) + תמונת מערכת ירוקה** |
+| **חיטוי וניקוי** | `_buildHygiene` (brand-gated) | **הוראות חיטוי (עמ' 17)** |
+
+> כל פונקציות-הרצועה היו Lipskey-only. להטמעת מותג חדש מוסיפים **ענף `if (p.brand == '<מותג>')`** לכל פונקציה רלוונטית.
+> `variantSiblingsCountFor`/`Of` שונו מ-`kLipskeyCatalog` ל-`kCatalogProducts` (המפתח הקנוני כולל brand+category ⇒ אין דליפה בין מותגים).
+
+---
+
+## 4. מלכודות רנדור (golden tests) — חובה לדעת
+
+| תופעה | סיבה | פתרון |
+|-------|------|-------|
+| צ׳יפים/טקסט כ-□□□ | `RichText` **לא** יורש את פונט ה-theme | להשתמש ב-`Text.rich` |
+| ערכי-מפרט כ-□□□ | משפחת `monospace` לא רשומה בבדיקה | ב-`_loadFonts`: `FontLoader('monospace')` → Heebo |
+| `20×2.8` מתהפך ל-`2.8×20` | bidi (RTL) | לעטוף ב-LTR isolate `‪…‬` |
+| תמונת JPEG ריקה/מטושטשת | golden לא מפענח JPEG אסינכרוני | `runAsync` + `precacheImage` על כל `find.byType(Image)` אחרי ה-flip/pump |
+| אימוג'י כ-□ | אין פונט-אימוג'י בבדיקה | קוסמטי בלבד — באפליקציה תקין |
+
+---
+
+## 5. הטמעת קטלוג חדש — תהליך מלא (PDF → כרטיסים)
+
+### שלב א — חילוץ
+```bash
+# טקסט (עם פריסה) + ניקוי סימוני bidi בעברית
+pdftotext -layout catalog.pdf /tmp/full.txt
+#   ניקוי: sed -E 's/[‎‏‪-‮⁦-⁩​]//g'
+# תמונות-עמודים
+pdftoppm -jpeg -r 110 catalog.pdf assets/<brand>/pages/page    # → page-NN.jpg
+```
+⚠️ **מלכודת מיפוי עמודים:** מספר עמוד ה-PDF ≠ מספר העמוד המודפס בתוכן-העניינים
+(בקטלוג פולירול היה היסט גדל בגלל שני קווי-יצרן). **למפות סקשנים ע"י קריאת העמודים, לא לפי מספרי התו"ע.**
+לקרוא קודם את **תוכן-העניינים** (כדי לדעת אילו סקשנים קיימים), ואז לאתר אותם ויזואלית.
+
+### שלב ב — מבנה הקטלוג (לזהות מהתו"ע)
+מקטעי-מידע ("מידע כללי"): אודות · תקנים · **שלבי ריתוך** · התפשטות+מרחקי-תליה ·
+**טבלת לחץ/טמפ** · **תחזוקה וחיטוי** · בדיקת-לחץ. מקטעי-מוצר: צינורות · ברכיים · מסעפים · מצמדים · מתאמים · רוכבים · ברזים · צווארונים · פקקים · אומגה · ריתוך-חשמלי · כלים.
+
+### שלב ג — תשתית קוד (קובץ קטלוג חדש כמו `polyroll_catalog.dart`)
+1. `const String k<Brand>Brand = '<שם>';`
+2. קבועי-קטגוריה `const String k<Brand><Family> = '...';`
+3. helper `_<brand>(sku, nameHe, nameEn, categoryHe, categoryEn, emoji, page, {dims})`.
+4. `final k<Brand>Catalog = [ ... ];` והוספה ל-`kCatalogProducts`.
+
+### שלב ד — הטמעת מוצרים
+- כל ה-SKUs כ-shells (`_<brand>(...)` עם dims בסיסי).
+- **מוצר-הייחוס** של כל משפחה = literal מלא עם **כל** ה-dims (טבלה 1) + `imageFile` + `specImageFile`.
+
+### שלב ה — חיווט המותג לפונקציות המשותפות
+- `findAttrSiblings` / `findTypeSiblings` — ענף brand (כבר קיים גנרי דרך `kPolyrollBrand`; להכליל לפי הצורך).
+- `finderGroupFor`, `engineeringSpecFor`, `complianceTriggersFor`, `installKitFor`,
+  `recommendedKitForProduct` — ענף `if (p.brand=='<מותג>')`.
+- `_StripDef` של `info`/`hygiene` — gate `brand=='<מותג>'`.
+
+### שלב ו — תוכן אותנטי לכל כרטיס (verbatim מהקטלוג)
+| כרטיס | מאיפה לחלץ |
+|------|-----------|
+| מידע כללי | עמוד "יתרונות"/"אודות המערכת" + תמונת מערכת |
+| חיטוי וניקוי | עמוד "תחזוקה וחיטוי" (תרמי/כימי + אזהרות) |
+| תוכנית ריתוך | עמוד "שלבי הריתוך" — טבלת קוטר/עומק/חימום/קירור + טמפ׳-פלטה → `_kPprWeldPlan` |
+| תקינות | עמוד התקנים + מקדם התפשטות `La` |
+| מפרט הנדסי | dims + טבלת לחץ/טמפ (`לחץ עבודה`) |
+
+### שלב ז — נכסים (תמונות חתוכות מעמודי-הקטלוג)
+`pdftoppm` ⇒ Pillow crop ⇒ `assets/<brand>/products/`:
+`{family}_{dn}.jpg` (מוצר) · `spec_{family}_{dn}.jpg` (דיאגרמת חתך) · `<brand>_system.jpg` (מידע כללי).
+לוודא ש-`pubspec.yaml` כולל את תיקיות הנכסים.
+
+### שלב ח — אימות
+```bash
+flutter analyze            # 0 errors
+flutter test               # כל הסְוויטה + golden snapshots
+```
+
+---
+
+## 6. Checklist ל"לחיצה אחת" — מוצר/משפחה הבא/ה
+
+באותו קטלוג (התשתית קיימת) → רוב העבודה היא **נתונים**:
+- [ ] **לבדוק שהמק"ט לא קיים כבר** בקטלוג (`grep "'<sku>'"`) — ⚠️ קווי SDR/PPRCT ממחזרים מק"טים דומים; הוספה כפולה נתפסת רק ב-`ppr_infra` (ראה §9).
+- [ ] למלא `dims` מלא למוצר-הייחוס של המשפחה (טבלה §1).
+- [ ] לחתוך `imageFile` + `specImageFile` מעמוד-הקטלוג (או שימוש חוזר אם זהה ויזואלית).
+- [ ] לוודא שהמותג כבר מחווט בכל פונקציות הרצועה (אם משפחה חדשה — להוסיף ענף).
+- [ ] תוכן 9-הכרטיסים מגיע verbatim מהקטלוג (לא להמציא).
+- [ ] `flutter analyze` (0) + `flutter test` ירוקים.
+- [ ] (אופציונלי) לרנדר golden ולסקור ויזואלית לפני אישור.
+
+קטלוג חדש לגמרי → להוסיף שלבים ג+ה (מותג + קבועים + ענפי-brand) פעם אחת, ואז כל מוצר רץ לפי ה-checklist.
+
+---
+
+## 7. מקורות הקטלוג שמופו (Polyroll/Heliroma, PDF 96 עמ')
+
+> עמ' = **אינדקס PDF** (לא בהכרח המספר המודפס).
+
+- עמ' 2-3 — יתרונות צנרת PPR (ירוק) → **מידע כללי**
+- עמ' 4 — תוכן עניינים
+- עמ' 9-11 — שלבי ריתוך: שקע (260°C) / שולחני / butt (210°C) → **תוכנית ריתוך** (`_kPprWeldPlan`)
+- עמ' 12 / 79 — `La = 0.035 mm/mK` + מרחקי תלייה → **תקינות**
+- עמ' 13 / 93-94 — בדיקת לחץ (3× @15 bar, עיקרית 10 bar ≤0.5 bar)
+- עמ' 16 — טבלת לחץ/טמפ (Green pipes, SDR 7.4 MF) → **מפרט הנדסי / לחץ עבודה**
+- עמ' 17 — **הוראות חיטוי המערכת** (תרמי 70°C/30דק׳ · כימי כלור 50מ"ג/ל׳ / H2O2 · איסור בו-זמני / כלור-דיאוקסיד) → **חיטוי וניקוי**
+- עמ' 35 — צינור PPR פייזר הלירומה (מוצר-הייחוס) · עמ' 85 — PPRCT פייזר (תאום החומר)
+- עמ' 89-92 — כלים (מזוודת ריתוך 20-63 מ"מ `99521318`, תבניות, חותכים)
+
+---
+
+## 8. החלטות-מפתח שננעלו
+
+- **יצרן ≠ כפילות:** Heliroma ו-Aquatherm הם מוצרים נפרדים (מק"ט שונה). מציגים **Heliroma** (נתונים עשירים יותר); Aquatherm נשמר כחלופת-יצרן בצ׳יפ.
+- **שם:** `nameHe` נשאר טכני-קצר (`צינור PPR פייזר 20×2.8`) כדי לשמר צ׳יפים; השם המלא ב-`dims['שם מלא']`.
+- **חומר PPR אפור** עד שקיים PPRCT אמיתי באותו סוג — אז כתום (בורר).
+- **R8 — אין המצאה:** המשתמש דחה תוכן שלא-מהקטלוג (מידע-כללי של הצינור הכחול; חיטוי משוער). תמיד לאמת מול עמודי-ה-PDF.
+
+---
+
+## 9. לקחים ושער-אימות (מהרצת 8 גדלי הפייזר)
+
+**מהמורות שצצו — והפכו לכללים:**
+
+1. **כפילות מק"ט.** הוספת תאום ה-PPRCT (`6091602200`) שיכפלה shell שכבר היה בקטלוג
+   (עמ' 86). נתפס ב-`ppr_infra_test` (`skus.toSet().length == skus.length`).
+   → **כלל:** לפני הוספת מוצר — `grep "'<sku>'" polyroll_catalog.dart` חייב להחזיר 0.
+
+2. **קוויקים של golden (לא באגים באפליקציה) — fixture קבוע:**
+   ```dart
+   // _loadFonts(): Heebo (Regular/Bold/SemiBold) + family 'monospace'→Heebo
+   // theme: ThemeData(fontFamily: 'Heebo')   ← אחרת overflow מ-glyphs רחבים
+   // JPEG: await tester.runAsync(() => precacheImage(...)) אחרי pump
+   // מידה (20×2.8): לעטוף ב-LTR isolate ‪…‬ כדי שלא תתהפך
+   ```
+   טסט-אינטראקציה (taps→expect) דורש את אותו fixture, אחרת overflow מפיל אותו.
+
+3. **שער-אימות אחרי כל אצווה:**
+   ```bash
+   flutter analyze lib/                 # 0 errors
+   flutter test test/ppr_infra_test.dart   # ייחודיות מק"ט + reachability
+   flutter test                         # סְוויטה מלאה + golden
+   ```
+
+**מה כבר אוטומטי (לא צריך עבודה פר-מוצר):** כל 9 הכרטיסים, הציפים, תוכנית-הריתוך
+לפי הקוטר (`_kPprWeldPlan[dn]`), בורר היצרן, ספירת הווריאנטים — נגזרים מ-`dims`
+ומהפונקציות המשותפות. מוצר חדש באותה משפחה = מילוי `dims` + תמונות, וזהו.

@@ -460,7 +460,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                             ],
                           ),
                           const SizedBox(height: 6),
-                          Text(p.nameHe,
+                          Text((p.dims?['שם מלא'] as String?) ?? p.nameHe,
                               style: const TextStyle(
                                   color: Color(0xFF1A1A1A),
                                   fontSize: 18,
@@ -560,7 +560,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                   '${p.qtyPallet}'),
                             if (p.dims != null)
                               for (final e in p.dims!.entries)
-                                if (e.value != null)
+                                if (e.value != null && e.key != 'שם מלא')
                                   _SpecRow('📐', e.key, '${e.value}'),
                             _SpecRow('📄', 'עמוד בקטלוג',
                                 'עמוד ${p.page}'),
@@ -1587,7 +1587,22 @@ class _QuickInfoStrips extends StatefulWidget {
   State<_QuickInfoStrips> createState() => _QuickInfoStripsState();
 }
 
-enum _StripKind { finder, compat, kit, variants, compliance, spec, price }
+enum _StripKind { finder, compat, kit, variants, compliance, spec, price, info, hygiene }
+
+/// Socket-fusion welding plan per nominal diameter (catalog p.9):
+/// (insertion depth mm, heating sec, cooling min). Plate temp 260°C.
+const _kPprWeldPlan = <String, (double, int, int)>{
+  '20': (14.5, 8, 2),
+  '25': (16.0, 11, 2),
+  '32': (18.0, 12, 4),
+  '40': (20.5, 18, 4),
+  '50': (23.5, 27, 4),
+  '63': (27.5, 36, 6),
+  '75': (30.0, 45, 8),
+  '90': (33.0, 60, 8),
+  '110': (37.0, 75, 8),
+  '125': (40.0, 90, 8),
+};
 
 /// One-line summary of a unified install-kit (smart-tree + auto-derived
 /// tools): "3 חובה · 2 אופציה · 4 כלים", omitting any zero segment.
@@ -1696,6 +1711,22 @@ class _QuickInfoStripsState extends State<_QuickInfoStrips> {
           label: 'מחיר משוער',
           value: '~₪${priceFor(p)}',
           tint: const Color(0xFF22C55E),
+        ),
+      if (p.brand == 'פולירול')
+        _StripDef(
+          kind: _StripKind.info,
+          emoji: 'ℹ️',
+          label: 'מידע כללי',
+          value: 'צנרת PPR · יתרונות',
+          tint: const Color(0xFF3B82F6),
+        ),
+      if (p.brand == 'פולירול')
+        _StripDef(
+          kind: _StripKind.hygiene,
+          emoji: '🧼',
+          label: 'חיטוי וניקוי',
+          value: 'בור חלק · ללא אבנית',
+          tint: const Color(0xFF06B6D4),
         ),
     ];
     if (rows.isEmpty) return const SizedBox.shrink();
@@ -1864,6 +1895,8 @@ class _StripPanel extends StatelessWidget {
         _StripKind.compliance => _buildCompliance(),
         _StripKind.spec => _buildSpec(),
         _StripKind.price => _buildPrice(),
+        _StripKind.info => _buildInfo(),
+        _StripKind.hygiene => _buildHygiene(),
       },
     );
   }
@@ -1912,7 +1945,10 @@ class _StripPanel extends StatelessWidget {
   Widget _buildKit() {
     final sp = smartProductForSku(product.sku);
     final tools = recommendedKitForProduct(product);
-    if ((sp == null || sp.acc.isEmpty) && tools.isEmpty) {
+    final isPpr = product.brand == 'פולירול';
+    final dn = product.dims?['dn נומינלי']?.toString();
+    final weld = isPpr ? _kPprWeldPlan[dn] : null;
+    if ((sp == null || sp.acc.isEmpty) && tools.isEmpty && !isPpr) {
       return const _EmptyHint('אין רשימת ערכת התקנה');
     }
 
@@ -1957,6 +1993,16 @@ class _StripPanel extends StatelessWidget {
                     fontWeight: FontWeight.w700)),
           ),
           for (final k in tools) _kitRow(k),
+        ],
+        if (isPpr) ...[
+          _infoHead('תוכנית ריתוך-שקע (פלטה 260°C)'),
+          if (weld != null)
+            _infoBullet(
+                '⌀$dn: עומק ${weld.$1} מ"מ · חימום ${weld.$2} שנ׳ · קירור ${weld.$3} דק׳'),
+          _infoBullet('ודא פלטה ב-260°C ותותבים מחוזקים'),
+          _infoBullet('הכנס צינור ואביזר לתותבים (נקבה+זכר)'),
+          _infoBullet('חמם לפי הזמן בטבלה, שלוף וחבר מיד עד הסימון'),
+          _infoBullet('החזק מחוברים ללא סיבוב עד התקררות'),
         ],
       ],
     );
@@ -2138,11 +2184,83 @@ class _StripPanel extends StatelessWidget {
       children: [
         row('חומר', s.material),
         if (s.pressureRating != null) row('דירוג לחץ', s.pressureRating!),
+        if ((product.dims?['לחץ עבודה (50 שנה)'] as String?)?.isNotEmpty ?? false)
+          row('לחץ עבודה', product.dims!['לחץ עבודה (50 שנה)'] as String),
         row('טמפ\' מקס\'', '${s.maxTempC.toStringAsFixed(0)}°C'),
         row('מערכת', s.waterSystem),
         if (s.minBoreMm != null)
-          row('קוטר פנימי קטן', '${s.minBoreMm!.toStringAsFixed(0)} mm'),
+          row(
+              'קוטר פנימי',
+              '${s.minBoreMm! == s.minBoreMm!.roundToDouble() ? s.minBoreMm!.toStringAsFixed(0) : s.minBoreMm!.toStringAsFixed(1)} mm'),
         row('קצוות חיבור', s.endsSummary),
+      ],
+    );
+  }
+
+  Widget _infoBullet(String t) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+        child: Text('• $t',
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+                color: Color(0xFF1A1A1A), fontSize: 11.5, height: 1.35)),
+      );
+
+  Widget _infoHead(String t) => Padding(
+        padding: const EdgeInsets.fromLTRB(4, 8, 4, 2),
+        child: Text(t,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+                color: tint, fontSize: 12, fontWeight: FontWeight.w800)),
+      );
+
+  // ── מידע כללי: מבנה רב-שכבתי + חומר גלם + יתרונות (מהקטלוג, עמ' 77) ───────
+  Widget _buildInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.asset('assets/polyroll/products/ppr_green_system.jpg',
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+        ),
+        const SizedBox(height: 2),
+        const Text('צנרת PPR לאספקת מים חמים וקרים',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xFF888888), fontSize: 10.5)),
+        _infoHead('חומר גלם'),
+        _infoBullet('אביזרים: PPR'),
+        _infoBullet('אביזרי תבריג: PPR + פליז DZR'),
+        _infoHead('יתרונות'),
+        _infoBullet('הצנרת היחידה לאספקת מים ההומוגנית בכל חלקיה לאחר ריתוך'),
+        _infoBullet('אין קורוזיה ואין הצטברות אבנית בכל חלקי המערכת'),
+        _infoBullet('מקדם חיכוך נמוך ביותר — נשארת נקייה לאורך שנים'),
+        _infoBullet('אין הקטנת קוטר בצינורות ובאביזרים לאחר החיבור'),
+        _infoBullet('עמידות מצוינת וארוכת טווח בלחצים גבוהים'),
+        _infoBullet('רמת אקוסטיקה גבוהה'),
+        _infoBullet('צנרת קלה ונוחה לעבודה, מגוון אביזרים רחב'),
+        _infoBullet('מחברי הברגה מפליז DZR לסביבה קורוזיבית'),
+      ],
+    );
+  }
+
+  // ── חיטוי וניקוי: תכונות הניקיון של הצנרת (מהקטלוג, עמ' 77) ──────────────
+  Widget _buildHygiene() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _infoBullet('שתי צורות חיטוי למערכות פולירול: תרמי וכימי'),
+        _infoHead('חיטוי תרמי'),
+        _infoBullet('70°C למשך 30 דק׳ (טיפול בלגיונלה)'),
+        _infoBullet('ניתן בטמפ׳ גבוהה יותר לפי הטבלאות — ללא חריגה מהמרבי'),
+        _infoHead('חיטוי כימי'),
+        _infoBullet('כלור חופשי 50 מ"ג/ל׳ מעל 12 שעות — פעמיים בשנה'),
+        _infoBullet('חלופה: מי חמצן (H2O2) 150 מ"ג/ל׳ למשך 24 שעות'),
+        _infoBullet('טמפ׳ עד 30°C בזמן החיטוי הכימי'),
+        _infoHead('אזהרות (חוליות)'),
+        _infoBullet('אסור לבצע חיטוי תרמי וכימי בו-זמנית'),
+        _infoBullet('אסור שימוש בכלור דיאוקסיד במערכות PPR'),
+        _infoBullet('חיטוי בכלור עלול לקצר את אורך חיי הצנרת'),
       ],
     );
   }
@@ -2496,6 +2614,7 @@ class _InteractiveChips extends StatelessWidget {
   Widget build(BuildContext context) {
     final parsed = product.parsedName;
     final compound = _resolveCompoundType(product);
+    final sizeVal = variantValue(product, AttrKind.size);
 
     final entries = <({String label, String value, Color color, String key})>[
       if (parsed.type != null)
@@ -2512,6 +2631,20 @@ class _InteractiveChips extends StatelessWidget {
           color: const Color(0xFF7FD0FF),
           key: 'subtype',
         ),
+      if (sizeVal.isNotEmpty)
+        (
+          label: 'גודל',
+          value: '\u202A$sizeVal\u202C', // LTR embed so 20x2.8 isn't flipped
+          color: const Color(0xFF4CAF50),
+          key: 'size',
+        ),
+      if (parsed.variant != null)
+        (
+          label: 'צבע',
+          value: parsed.variant!,
+          color: const Color(0xFFC9A7FF),
+          key: 'color',
+        ),
       if (parsed.brand != null)
         (
           label: 'דגם',
@@ -2519,12 +2652,12 @@ class _InteractiveChips extends StatelessWidget {
           color: const Color(0xFFFF9D4D),
           key: 'model',
         ),
-      if (parsed.variant != null)
+      if ((product.dims?['אורך'] as String?)?.isNotEmpty ?? false)
         (
-          label: 'גוון',
-          value: parsed.variant!,
-          color: const Color(0xFFC9A7FF),
-          key: 'color',
+          label: 'אורך',
+          value: product.dims!['אורך'] as String,
+          color: const Color(0xFF9E9E9E),
+          key: 'length',
         ),
     ];
     if (entries.isEmpty) return const SizedBox.shrink();
@@ -2570,8 +2703,8 @@ class _InteractiveChips extends StatelessWidget {
           width: tappable ? 1.5 : 1.0,
         ),
       ),
-      child: RichText(
-        text: TextSpan(children: [
+      child: Text.rich(
+        TextSpan(children: [
           TextSpan(
             text: '${c.label} ',
             style: const TextStyle(color: Color(0xFF888888), fontSize: 10),

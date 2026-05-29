@@ -4,8 +4,10 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/logic/install_kit.dart';
 
 // ─── מאתר (layman finder group) ─────────────────────────────────────────────
 // Local copy of the finder taxonomy so we don't import the screen here.
@@ -48,6 +50,7 @@ const List<_FinderGroup> _kFinderGroups = [
 
 /// Layman category info for [p]: emoji + label (or null when "אחר").
 ({String emoji, String label})? finderGroupFor(LipskeyCatalogProduct p) {
+  if (p.brand == 'פולירול') return (emoji: '🚰', label: 'אספקת מים');
   for (final g in _kFinderGroups) {
     if (g.cats.contains(p.categoryHe)) {
       return (emoji: g.emoji, label: g.label);
@@ -345,6 +348,9 @@ String gapAdviceHe(LipskeyCatalogProduct from, LipskeyCatalogProduct to) {
       }
     }
     if (sawBspThread) tools++; // one PTFE-tape item shared by all BSP joints
+  } else if (p.brand == 'פולירול') {
+    // PPR socket-fusion tooling (welder, fusion die, cutter).
+    tools = recommendedKitForProduct(p).length;
   }
 
   if (must == 0 && opt == 0 && tools == 0) return null;
@@ -358,7 +364,7 @@ String gapAdviceHe(LipskeyCatalogProduct from, LipskeyCatalogProduct to) {
 int variantSiblingsCountFor(LipskeyCatalogProduct p) {
   final key = productCanonicalKey(p);
   var n = 0;
-  for (final q in kLipskeyCatalog) {
+  for (final q in kCatalogProducts) {
     if (productCanonicalKey(q) == key) n++;
   }
   return n;
@@ -369,7 +375,7 @@ int variantSiblingsCountFor(LipskeyCatalogProduct p) {
 List<LipskeyCatalogProduct> variantSiblingsOf(LipskeyCatalogProduct p) {
   final key = productCanonicalKey(p);
   final out = <LipskeyCatalogProduct>[];
-  for (final q in kLipskeyCatalog) {
+  for (final q in kCatalogProducts) {
     if (productCanonicalKey(q) == key) out.add(q);
   }
   out.sort((a, b) => a.sku.compareTo(b.sku));
@@ -389,7 +395,35 @@ List<LipskeyCatalogProduct> variantSiblingsOf(LipskeyCatalogProduct p) {
   double? minBoreMm,
 })? engineeringSpecFor(LipskeyCatalogProduct p) {
   final spec = kVerifiedSpecs[p.sku];
-  if (spec == null) return null;
+  if (spec == null) {
+    // PPR (Polyroll) carries no verified-spec row; build the snapshot from the
+    // catalog dims + the PPR system's documented working envelope (page-35/85
+    // pressure-temperature table tops out at 90°C; ends join by socket fusion).
+    if (p.brand == 'פולירול') {
+      final pn = p.dims?['PN'];
+      final di = p.dims?['di קוטר פנימי']?.toString();
+      // di is a tolerance range like "13.6–14.7" — take the max bore (14.7).
+      final diNums = di == null
+          ? const <double>[]
+          : RegExp(r'[\d.]+')
+              .allMatches(di)
+              .map((m) => double.tryParse(m.group(0)!))
+              .whereType<double>()
+              .toList();
+      final bore = diNums.isEmpty
+          ? null
+          : diNums.reduce((a, b) => a > b ? a : b);
+      return (
+        material: (p.dims?['חומר'] as String?) ?? 'PPR',
+        pressureRating: pn == null ? null : 'PN$pn',
+        maxTempC: 90,
+        waterSystem: 'הזנה — חמים וקרים',
+        endsSummary: 'ריתוך (socket fusion)',
+        minBoreMm: bore,
+      );
+    }
+    return null;
+  }
 
   // Compact ends summary — e.g. "BSP-M ½" × 2" or "DN32 + DN25".
   final parts = <String>[];
@@ -450,6 +484,29 @@ List<LipskeyCatalogProduct> variantSiblingsOf(LipskeyCatalogProduct p) {
 /// add them, the user benefits from seeing them up-front in the product card.
 List<({String label, String reason})> complianceTriggersFor(
     LipskeyCatalogProduct p) {
+  // PPR (Polyroll) — requirements taken straight from the catalog: the
+  // standards it's certified to, thermal-expansion compensation (faser La),
+  // fusion-welded joints, and the documented pressure/temperature envelope.
+  if (p.brand == 'פולירול') {
+    return const [
+      (
+        label: '🛡 EN ISO 15874',
+        reason: 'DIN 8077/8078 · DIN 16962 · ASTM F 2389 · RP 001.78',
+      ),
+      (
+        label: '🛡 התפשטות תרמית La = 0.035 mm/m·K',
+        reason: '50 מ׳ ב-ΔT 50°C ⇒ 88 מ"מ — לולאות/מפצים',
+      ),
+      (
+        label: '🛡 ריתוך-שקע (socket fusion)',
+        reason: 'חיבור הצינור לאביזרים בריתוך-שקע',
+      ),
+      (
+        label: '🛡 PN16 · SDR7.4 · עד 90°C',
+        reason: 'לחץ נומינלי 16 bar · מים חמים וקרים',
+      ),
+    ];
+  }
   final out = <({String label, String reason})>[];
   final cat = p.categoryHe;
   final type = p.productType ?? '';

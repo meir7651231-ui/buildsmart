@@ -41,7 +41,49 @@ enum Severity { required, recommended, optional }
 /// THIS product — even before they've assembled a full chain.
 List<KitItem> recommendedKitForProduct(LipskeyCatalogProduct p) {
   final spec = kVerifiedSpecs[p.sku];
-  if (spec == null) return const [];
+  if (spec == null) {
+    // PPR (Polyroll) is a socket-fusion system — the kit is the welding tooling
+    // plus a square cutter, sized to the pipe's nominal diameter.
+    if (p.brand == 'פולירול') {
+      final dn = p.dims?['dn נומינלי']?.toString() ?? '';
+      final ds = dn.isEmpty ? '' : ' ⌀$dn מ"מ';
+      return [
+        KitItem(
+          kind: KitKind.tool,
+          label: 'מצמד PPR${dn.isEmpty ? '' : ' $dn'} (אביזר חיבור)',
+          reason: 'מאחד שני קטעי צינור בריתוך-שקע',
+        ),
+        const KitItem(
+          kind: KitKind.tool,
+          label: 'מכונת ריתוך-שקע 260°C',
+          reason: 'מחממת את הצינור ואת השקע בו-זמנית',
+        ),
+        KitItem(
+          kind: KitKind.tool,
+          label: 'תבנית/ראש ריתוך$ds',
+          reason: 'זוג תבניות (זכר+נקבה) לקוטר הצינור',
+        ),
+        const KitItem(
+          kind: KitKind.tool,
+          label: 'מספריים/חותך צינור PPR',
+          reason: 'חיתוך ניצב ונקי של הצינור',
+        ),
+        const KitItem(
+          kind: KitKind.tool,
+          label: 'מסיר גרדים + מטלית ניקוי',
+          reason: 'ניקוי וייבוש הקצה לפני ריתוך',
+          severity: Severity.recommended,
+        ),
+        const KitItem(
+          kind: KitKind.tool,
+          label: 'עט סימון עומק',
+          reason: 'סימון עומק ההחדרה לשקע על הצינור',
+          severity: Severity.recommended,
+        ),
+      ];
+    }
+    return const [];
+  }
   final out = <String, KitItem>{};
   void add(String key, KitItem item) => out.putIfAbsent(key, () => item);
 

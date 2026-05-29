@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -538,6 +539,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   /// colorMod → modifier word or "רגיל".
   /// others   → longest-match entry from the relevant list.
   String _attrVal(LipskeyCatalogProduct product, AttrKind kind) {
+    if (kind == AttrKind.maker) return _makerOf(product);
     if (kind == AttrKind.color) return _baseColor(product);
     if (kind == AttrKind.colorMod) return _colorModifier(product) ?? 'רגיל';
     final words = product.nameHe.split(RegExp(r'\s+'));
@@ -786,6 +788,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       AttrKind.material => 'חומר',
       AttrKind.pressure => 'לחץ',
       AttrKind.sdr => 'SDR',
+      AttrKind.maker => 'יצרן',
     };
     // Dedupe by the displayed value so the same value isn't listed more than
     // once (e.g. 3 sibling products that all read "דו כיווני" → one option).
@@ -950,7 +953,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Text(p.categoryHe,
+                  child: Text((p.dims?['תיאור'] as String?) ?? p.categoryHe,
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 15,
@@ -996,6 +999,15 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                           fontSize: 10,
                           fontFamily: 'monospace')),
                 ),
+                if (p.dims?['PN'] != null || p.dims?['SDR'] != null) ...[
+                  const SizedBox(width: 10),
+                  Text(
+                      [
+                        if (p.dims?['PN'] != null) 'PN${p.dims!['PN']}',
+                        if (p.dims?['SDR'] != null) 'SDR${p.dims!['SDR']}',
+                      ].join(' · '),
+                      style: TextStyle(color: _muted, fontSize: 10)),
+                ],
                 if (widget.familySiblings.length > 1) ...[
                   const SizedBox(width: 8),
                   GestureDetector(
@@ -1214,7 +1226,7 @@ bool isLinkableWord(String w) {
 /// Kinds of attributes that are cyclable variants on a product card.
 /// [colorMod] is the finish/modifier word of a compound colour (e.g. "מוברש"
 /// from "ניקל מוברש") — shown as a separate chip from the base colour.
-enum AttrKind { size, color, colorMod, model, subtype, type, material, pressure, sdr }
+enum AttrKind { size, color, colorMod, model, subtype, type, material, pressure, sdr, maker }
 
 /// PPR material grades — a critical chip for pipe systems (what the part is
 /// made of). Shown as a 🧪 chip distinct from colour/model.
@@ -1246,6 +1258,7 @@ String _attrEmoji(AttrKind k) => switch (k) {
       AttrKind.material => '🧪',
       AttrKind.pressure => '🔵',
       AttrKind.sdr => '📊',
+      AttrKind.maker => '🏭',
     };
 
 /// Drop every word that belongs to [kind] from a name. What remains is the
@@ -1274,6 +1287,7 @@ String _stripWordsOfKind(String name, AttrKind kind) {
     AttrKind.material => _kPprMaterials,
     AttrKind.pressure => const {},
     AttrKind.sdr => const {},
+    AttrKind.maker => const {},
   };
   return result
       .split(RegExp(r'\s+'))
@@ -1336,16 +1350,68 @@ String productListDedupeKey(LipskeyCatalogProduct p) {
 /// Color / colorMod / subtype / size are frame-based (chip 2+): the frame
 /// (name minus words of [kind]) must match so that only same-type/same-model
 /// variants appear in the picker.
+/// Manufacturer (יצרן) of a Polyroll product — e.g. Heliroma / Aquatherm.
+/// Stored in dims (not the name), so the maker chip is synthetic.
+String _makerOf(LipskeyCatalogProduct p) =>
+    (p.dims?['יצרן'] as String?)?.trim() ?? '';
+
+/// Nominal bore (dn) used to match the same product across manufacturers.
+String _nominalBore(LipskeyCatalogProduct p) {
+  final d = p.dims;
+  final raw = (d?['dn נומינלי'] ?? d?['קוטר חיצוני'] ?? d?['de קוטר חיצוני'])
+      ?.toString();
+  final src = raw ?? p.nameHe;
+  return RegExp(r'\d+(?:\.\d+)?').firstMatch(src)?.group(0) ?? '';
+}
+
+/// Spec signature identical for the same product from different manufacturers,
+/// so the maker picker pairs e.g. the Heliroma and Aquatherm faser 20×2.8.
+String _makerSignature(LipskeyCatalogProduct p) =>
+    '${p.categoryHe}|${_getCompoundType(p)}|${_nominalBore(p)}'
+    '|${p.dims?['PN'] ?? ''}|${p.dims?['SDR'] ?? ''}';
+
 List<LipskeyCatalogProduct> findAttrSiblings(
   LipskeyCatalogProduct p,
   String word,
   AttrKind kind,
 ) {
+  // Manufacturer: same spec from a different maker (cross-line, cross-category).
+  if (kind == AttrKind.maker) {
+    final sig = _makerSignature(p);
+    final seen = <String>{};
+    final res = <LipskeyCatalogProduct>[];
+    for (final q in kCatalogProducts) {
+      if (q.brand != kPolyrollBrand || _makerSignature(q) != sig) continue;
+      final m = _makerOf(q);
+      if (m.isEmpty || !seen.add(m)) continue;
+      res.add(q);
+    }
+    return res.length <= 1 ? [p] : res;
+  }
+  // PPR: every chip is a pickable dimension. Scope = whole brand within the
+  // same product type, so the picker offers the real alternatives — material
+  // (PPR/PPRCT), line/subtype (פייזר ↔ אספקת מים), size, etc. — even across the
+  // separate per-line categories.
+  if (p.brand == kPolyrollBrand) {
+    final pType = _getCompoundType(p);
+    final seen = <String>{};
+    final res = <LipskeyCatalogProduct>[];
+    for (final q in kCatalogProducts) {
+      if (q.brand != kPolyrollBrand || _getCompoundType(q) != pType) continue;
+      final v = q.nameHe
+          .split(RegExp(r'\s+'))
+          .where((w) => _attrKindFor(w) == kind)
+          .join(' ');
+      if (v.isEmpty || !seen.add(v)) continue;
+      res.add(q);
+    }
+    return res.length <= 1 ? [p] : res;
+  }
   if (kind == AttrKind.model) {
     // Category-wide: one representative per distinct model word.
     final seen = <String>{};
     final result = <LipskeyCatalogProduct>[];
-    for (final q in kLipskeyCatalog) {
+    for (final q in kCatalogProducts) {
       if (q.categoryHe != p.categoryHe) continue;
       final modelWord = q.nameHe
           .split(RegExp(r'\s+'))
@@ -1359,7 +1425,7 @@ List<LipskeyCatalogProduct> findAttrSiblings(
 
   final pFrame = _stripWordsOfKind(p.nameHe, kind);
   if (pFrame.length < 2) return [p];
-  return kLipskeyCatalog.where((q) {
+  return kCatalogProducts.where((q) {
     if (q.categoryHe != p.categoryHe) return false;
     if (_stripWordsOfKind(q.nameHe, kind) != pFrame) return false;
     if (kind == AttrKind.colorMod) return true;
@@ -1406,8 +1472,10 @@ List<LipskeyCatalogProduct> findTypeSiblings(LipskeyCatalogProduct p) {
   if (compound.isEmpty) return [p];
   final byCompound = <String, LipskeyCatalogProduct>{};
   byCompound[compound] = p;
-  for (final q in kLipskeyCatalog) {
-    if (q.categoryHe != p.categoryHe) continue;
+  for (final q in kCatalogProducts) {
+    if (p.brand == kPolyrollBrand
+        ? q.brand != kPolyrollBrand
+        : q.categoryHe != p.categoryHe) continue;
     final qc = _getCompoundType(q);
     if (qc.isEmpty) continue;
     if (!byCompound.containsKey(qc)) byCompound[qc] = q;
@@ -1446,6 +1514,7 @@ class _NameWords extends StatelessWidget {
     final chips = <Widget>[];
     final seen = <String>{}; // dedupe repeated chips (e.g. "לחץ"/"יציאה"/"+")
     bool compoundEmitted = false;
+    int? afterSubtypeIdx; // where to slot the maker chip — right after פייזר
     int i = 0;
 
     while (i < words.length) {
@@ -1480,6 +1549,7 @@ class _NameWords extends StatelessWidget {
               onTap: onAttrTap,
               isOpen: openKind == AttrKind.subtype,
             ));
+            afterSubtypeIdx = chips.length;
           }
           i += 2;
           continue;
@@ -1500,6 +1570,7 @@ class _NameWords extends StatelessWidget {
           onTap: onAttrTap,
           isOpen: openKind == kind,
         ));
+        if (kind == AttrKind.subtype) afterSubtypeIdx = chips.length;
       } else if (isLinkableWord(w)) {
         chips.add(GestureDetector(
           onTap: () => LipskeyProductsScreen.openWordSearch(context, w),
@@ -1519,6 +1590,42 @@ class _NameWords extends StatelessWidget {
                 height: 1.3)));
       }
       i++;
+    }
+
+    // Manufacturer chip — synthetic (value from dims, not the name). Slots right
+    // after the subtype (פייזר) chip; falls back to the end if there is none.
+    final maker = _makerOf(product);
+    if (maker.isNotEmpty) {
+      final makerChip = _AttrChip(
+        word: maker,
+        kind: AttrKind.maker,
+        product: product,
+        onTap: onAttrTap,
+        isOpen: openKind == AttrKind.maker,
+      );
+      if (afterSubtypeIdx != null && afterSubtypeIdx! <= chips.length) {
+        chips.insert(afterSubtypeIdx!, makerChip);
+      } else {
+        chips.add(makerChip);
+      }
+    }
+
+    // Length — informational gray chip (e.g. "4 מ׳"), never pickable.
+    final length = product.dims?['אורך'] as String?;
+    if (length != null && length.isNotEmpty) {
+      chips.add(Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0x10888888),
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(color: const Color(0x30888888), width: 0.9),
+        ),
+        child: Text(length,
+            style: const TextStyle(
+                color: Color(0xFF909090),
+                fontSize: 12,
+                fontWeight: FontWeight.w600)),
+      ));
     }
 
     return Wrap(

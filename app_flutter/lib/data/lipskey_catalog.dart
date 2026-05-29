@@ -14,6 +14,9 @@ class LipskeyCatalogProduct {
   final int page;
   final Map<String, dynamic>? dims;
   final String? imageFile;
+  /// A cropped spec/diagram image (in the products dir). When set, the spec side
+  /// shows just this diagram instead of the whole catalog page.
+  final String? specImageFile;
   final String brand;
 
   const LipskeyCatalogProduct({
@@ -29,6 +32,7 @@ class LipskeyCatalogProduct {
     required this.page,
     this.dims,
     this.imageFile,
+    this.specImageFile,
     this.brand = 'ליפסקי',
   });
 
@@ -37,10 +41,12 @@ class LipskeyCatalogProduct {
       : 'assets/${brand == 'פולירול' ? 'polyroll' : 'lipskey'}/products/$imageFile';
 
   String get specImageAsset {
+    final dir = brand == 'פולירול' ? 'polyroll' : 'lipskey';
+    // A cropped diagram (spec only) wins over the full catalog page.
+    if (specImageFile != null) return 'assets/$dir/products/$specImageFile';
     final p = page.toString().padLeft(2, '0');
     // Polyroll products flip to their own catalog page (where the dimension
     // diagram defining d/z/l/A/B… lives); everything else is Lipskey.
-    final dir = brand == 'פולירול' ? 'polyroll' : 'lipskey';
     return 'assets/$dir/pages/page_$p.jpg';
   }
 
