@@ -902,6 +902,28 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
   return out;
 }
 
+// ─── טקסט הצעת מחיר לשיתוף (Roadmap step 48) ────────────────────────────────
+/// A plain-text price quote for the selected brand, ready to copy/share. Built
+/// from the line-cost estimate (falls back to the brand price). Pure & stable.
+String quoteTextFor(SmartProduct sp, int brandIndex) {
+  final idx = (brandIndex >= 0 && brandIndex < sp.brands.length)
+      ? brandIndex
+      : sp.brands.indexOf(sp.recBrand);
+  final b = sp.brands[idx];
+  final lines = <String>['הצעת מחיר — ${sp.name}', 'מותג: ${b.name}'];
+  final cost = lineCostEstimateFor(sp, idx);
+  if (cost != null) {
+    lines.add('מוצר: ~₪${cost.product}');
+    if (cost.accessories > 0) lines.add('אביזרים: ~₪${cost.accessories}');
+    if (cost.labour > 0) lines.add('עבודה (משוער): ~₪${cost.labour}');
+    lines.add('סה"כ משוער: ~₪${cost.total}');
+  } else if (b.price != null) {
+    lines.add('מחיר: ~₪${b.price}');
+  }
+  lines.add('— נוצר ב-BuildSmart');
+  return lines.join('\n');
+}
+
 // ─── צ'קליסט בדיקת קבלה (Roadmap step 38) ───────────────────────────────────
 /// End-of-install acceptance checks for [p], derived from its system + ends:
 /// supply lines get a pressure/flow test, drainage gets a flow/slope test,

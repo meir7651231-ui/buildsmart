@@ -92,8 +92,12 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 45. ✅ "Cheaper alternative" — strictly-cheapest sibling brand via
    `cheaperAlternativeBrand` ("💰 חלופה זולה יותר"). Guard: `summary_alt_test`.
 46. ⬜ Smart add-to-cart: the whole line in one tap (incl. safety).
-47. ⬜ Save config as favorite / project template.
-48. ⬜ Share a quote (WhatsApp/PDF) straight from the card.
+47. ✅ Save config as favourite — persisted `savedConfigsProvider`
+   (`productKey#brandName`); "☆ שמור / ★ נשמר" toggle in the 📦 header.
+   Guard: `quote_saved_test`.
+48. 🟦 Share a quote — `quoteTextFor` builds a plain-text quote; "📋 הצעה" copies
+   it to the clipboard. (WhatsApp/PDF export still ⬜ — needs url_launcher/PDF.)
+   Guard: `quote_saved_test`.
 49. ⬜ Price tracking: alert when a selected brand drops in price.
 50. ⬜ Direct order/payment from the card (when backend exists).
 

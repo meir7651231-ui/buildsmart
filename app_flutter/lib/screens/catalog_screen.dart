@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
@@ -21,6 +23,7 @@ import 'package:buildsmart/state/hidden_catalog_sections.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/recently_viewed.dart';
+import 'package:buildsmart/state/saved_configs.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/stage_progress.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -4753,6 +4756,48 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               );
                             }),
                             const Spacer(),
+                            // Roadmap step 47 — save this config (favourite).
+                            Builder(builder: (_) {
+                              ref.watch(savedConfigsProvider);
+                              final saved = ref
+                                  .read(savedConfigsProvider.notifier)
+                                  .isSaved(p.key, brand.name);
+                              return GestureDetector(
+                                onTap: () => ref
+                                    .read(savedConfigsProvider.notifier)
+                                    .toggle(p.key, brand.name),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8),
+                                  child: Text(saved ? '★ נשמר' : '☆ שמור',
+                                      style: TextStyle(
+                                          color: saved
+                                              ? const Color(0xFFD97706)
+                                              : const Color(0xFF999999),
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w700)),
+                                ),
+                              );
+                            }),
+                            // Roadmap step 48 — copy a shareable price quote.
+                            GestureDetector(
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(
+                                    text: quoteTextFor(p, _selectedBrand)));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('הצעת המחיר הועתקה'),
+                                      duration: Duration(seconds: 2)),
+                                );
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.only(left: 8),
+                                child: Text('📋 הצעה',
+                                    style: TextStyle(
+                                        color: Color(0xFF0F766E),
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700)),
+                              ),
+                            ),
                             GestureDetector(
                               onTap: () => ref
                                   .read(cardDetailModeProvider.notifier)
