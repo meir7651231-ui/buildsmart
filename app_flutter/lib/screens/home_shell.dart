@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.99 · 29.5.26 · SmartProduct: יצרן + מק"ט יצרן + "הקו שלך עד כה" + "מה הקו צריך לחיבור" + עלות קו',
+                          'v5.00 · 29.5.26 · SmartProduct: ציון נתוני כרטיס + יצרן/מק"ט + "הקו שלך עד כה" + "מה הקו צריך" + עלות קו',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

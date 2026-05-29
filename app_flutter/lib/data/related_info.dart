@@ -902,6 +902,26 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
   return out;
 }
 
+// ─── ציון נתוני כרטיס (Roadmap step 30, card-level) ─────────────────────────
+/// A 0-100 readiness score for how complete & connectable [p]'s card data is:
+/// engineering spec (+40), connectivity (up to +30), discoverable in the finder
+/// (+10), priced (+10), has variant choice (+10). Returns a score + a Hebrew
+/// label. (Line-level scoring across a built line is still pending.)
+({int score, String label}) cardReadinessScore(LipskeyCatalogProduct p) {
+  var score = 0;
+  if (kVerifiedSpecs[p.sku] != null) score += 40;
+  final compat = compatibleProductsCount(p);
+  score += compat >= 20 ? 30 : (compat >= 5 ? 20 : (compat > 0 ? 10 : 0));
+  if (finderGroupFor(p) != null) score += 10;
+  if (priceFor(p) != null) score += 10;
+  if (variantSiblingsCountFor(p) > 1) score += 10;
+  if (score > 100) score = 100;
+  final label = score >= 80
+      ? 'מצוין'
+      : (score >= 55 ? 'טוב' : (score >= 30 ? 'בסיסי' : 'חלקי'));
+  return (score: score, label: label);
+}
+
 // ─── יצרן + מק"ט יצרן (Roadmap step 20) ─────────────────────────────────────
 /// Manufacturer + manufacturer part-number for [p]. The SKU *is* the catalog
 /// part number; the brand is the manufacturer (falls back to the house brand).

@@ -57,7 +57,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 28. ✅ "Your line so far" — `lineFitFor` reads the smart cart and reports how
    many cart items this product connects to ("🧩 בקו שלך"). Guard: `line_fit_test`.
 29. ⬜ Physical validation: warn on impossible connections.
-30. ⬜ Line score (safety/pressure/cost) that updates with each choice.
+30. 🟦 Card data-readiness score (0-100 + label) via `cardReadinessScore`
+   (spec/connectivity/finder/price/variants) shown as a badge in the 📦 header.
+   (Line-level safety/pressure/cost scoring still ⬜.) Guard: `card_score_test`.
 
 ## Phase 4 · Installation guidance (31–40)
 31. ⬜ Interactive stages with "mark done" checklist.

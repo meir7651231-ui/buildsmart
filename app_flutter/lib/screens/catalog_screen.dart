@@ -4678,6 +4678,26 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     color: Color(0xFF888888),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600)),
+                            const SizedBox(width: 8),
+                            // Roadmap step 30 — card data readiness score.
+                            Builder(builder: (_) {
+                              final s = cardReadinessScore(prod);
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFECFDF5),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                      color: const Color(0xFFA7F3D0)),
+                                ),
+                                child: Text('ציון ${s.score} · ${s.label}',
+                                    style: const TextStyle(
+                                        color: Color(0xFF047857),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700)),
+                              );
+                            }),
                             const Spacer(),
                             GestureDetector(
                               onTap: () => ref
