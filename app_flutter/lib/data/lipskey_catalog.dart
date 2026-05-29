@@ -400,6 +400,7 @@ const List<String> kLipskeySubtypes = [
   'למחסום רצפה', 'כניסה למדיח', 'לברז ניל',
   // PPR (Polyroll) connection / subtype terms:
   'לריתוך', 'מחוזק', 'פייזר', 'משושה',
+  'מיזוג אוויר', // AC blue-pipe line — render as ONE chip (not מיזוג + אוויר)
 ];
 
 const List<String> kLipskeyColors = [

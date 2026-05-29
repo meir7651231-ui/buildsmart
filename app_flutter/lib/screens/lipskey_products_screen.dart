@@ -1732,6 +1732,10 @@ class _AttrChip extends StatelessWidget {
           children: [
             Text(
               word,
+              // Dimension tokens ("20×2.8") are LTR — without this the RTL
+              // paragraph reorders them to "2.8×20".
+              textDirection:
+                  word.contains(RegExp(r'\d')) ? TextDirection.ltr : null,
               style: TextStyle(
                 color: textColor,
                 fontSize: 12,

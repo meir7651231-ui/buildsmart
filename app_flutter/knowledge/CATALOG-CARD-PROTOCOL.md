@@ -102,9 +102,10 @@ categoryEmoji, page, dims, imageFile, specImageFile, brand`.
 |-------|------|-------|
 | צ׳יפים/טקסט כ-□□□ | `RichText` **לא** יורש את פונט ה-theme | להשתמש ב-`Text.rich` |
 | ערכי-מפרט כ-□□□ | משפחת `monospace` לא רשומה בבדיקה | ב-`_loadFonts`: `FontLoader('monospace')` → Heebo |
-| `20×2.8` מתהפך ל-`2.8×20` | bidi (RTL) | לעטוף ב-LTR isolate `‪…‬` |
+| `20×2.8` מתהפך ל-`2.8×20` | bidi (RTL) — **גם באפליקציה האמיתית, לא רק golden** | ב-`_AttrChip`: `textDirection: word.contains(\d)? ltr : null`. (התגלה רק בצילום-מסך — הטסטים בודקים `data` ולא ויזואל) |
 | תמונת JPEG ריקה/מטושטשת | golden לא מפענח JPEG אסינכרוני | `runAsync` + `precacheImage` על כל `find.byType(Image)` אחרי ה-flip/pump |
 | אימוג'י כ-□ | אין פונט-אימוג'י בבדיקה | קוסמטי בלבד — באפליקציה תקין |
+| מונח-קו דו-מילולי נשבר ל-2 צ׳יפים (1 ירוק) | `_NameWords` מזהה מילה-בודדת; מילה לא-מוכרת=ירוק | להוסיף את הצירוף ל-`kLipskeySubtypes` (כמו `'מיזוג אוויר'`) → זיהוי דו-מילולי = צ׳יפ כתום אחד |
 
 ---
 
