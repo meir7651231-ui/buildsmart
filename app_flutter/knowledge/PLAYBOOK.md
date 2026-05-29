@@ -181,6 +181,10 @@ Format per entry:
 - **Problem:** Flutter web renders to one canvas; `computer left_click` by coordinate frequently misses (tab positions shift; long-press isn't supported).
 - **Fix:** prefer **code verification** (tests + grep) as ground truth. For live demos, use tappable entry points (the manage-sheet eye-toggle) over long-press; take a screenshot to read current positions before clicking; tell the user the exact path so they can verify themselves.
 
+### Canvas taps land *intermittently* — and the a11y tree is empty
+- **Problem:** in one card session, chip taps (stage tracker, mode toggle) registered fine, but a `GestureDetector` button deeper in the scrollable sheet (the "בנה לי קו (BOM)" button) would not fire from a coordinate `left_click` after several attempts. `find` returned only "Enable accessibility" + "flutter typography measurement" — Flutter web doesn't expose canvas widgets to the a11y tree until accessibility is explicitly enabled.
+- **Fix:** don't loop on a dead tap (2-3 tries max). Treat the rendered widget + green tests as proof it works; demo the *static* render and tell the user the tap path. Buttons that open a `showDialog` are the least reliable to drive via canvas coords — verify their logic with a unit test on the underlying function instead. Tap targets near the top of the sheet (chips) seem more reliable than ones mid-scroll.
+
 ---
 
 ## H. Synthetic catalog products (pattern)

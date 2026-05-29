@@ -51,7 +51,8 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    `connectionExplainHe` labels, in the 📦 section).
 22. ✅ "Build my line" button → `buildInstallation` (anchors = cart line so far +
    this product, autoCompliance, 60°C) → BOM dialog (qty × name + gap count).
-   Engine itself covered by engine tests; this is UI wiring over it.
+   Engine call path guarded by `build_line_bom_test`. (Live canvas-tap on the
+   dialog button is unreliable — see PLAYBOOK §G — so verified by unit test.)
 23. ⬜ Materialized chain diagram inline (explicit pipes/couplings).
 24. 🟦 System (supply/drainage) safety note + min-bore inline via
    `systemSafetyNoteHe` (gravity-drainage / upstream-shutoff) + the bore row.
