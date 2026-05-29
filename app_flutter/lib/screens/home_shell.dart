@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.89 · 29.5.26 · כרטיס PPR מלא (7 כרטיסים + פייזר 20→110 + פרוטוקול) + מנוע: חימור צינורות/מצמדים + הפרדת ניקוז/הזנה',
+                          'v4.90 · 29.5.26 · SmartProduct: 📦 נתוני קטלוג + תקן ישראלי + כלי עבודה + מתי לבחור מותג + גרסאות + הסתרת רשימות',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
