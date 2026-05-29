@@ -4755,6 +4755,43 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     fontWeight: FontWeight.w600)),
                           );
                         }),
+                        // Roadmap step 28 — "your line so far": how this product
+                        // fits what's already in the cart.
+                        Builder(builder: (_) {
+                          final cart = ref.watch(smartCartProvider);
+                          if (cart.isEmpty) return const SizedBox.shrink();
+                          final lineProducts = <LipskeyCatalogProduct>[];
+                          for (final line in cart) {
+                            final csp = smartProductByKey(line.productKey);
+                            if (csp == null) continue;
+                            SmartBrand? cb;
+                            for (final b in csp.brands) {
+                              if (b.name == line.brandName) {
+                                cb = b;
+                                break;
+                              }
+                            }
+                            final cprod = cb == null
+                                ? null
+                                : catalogProductForBrand(cb);
+                            if (cprod != null) lineProducts.add(cprod);
+                          }
+                          final fit = lineFitFor(prod, lineProducts);
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                                '🧩 בקו שלך: ${cart.length} פריטים · '
+                                '${fit.connects > 0 ? "מתחבר ל-${fit.connects} מהם" : "אין חיבור ישיר לפריטי הקו"}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: fit.connects > 0
+                                        ? const Color(0xFF0F766E)
+                                        : const Color(0xFF9A3412),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700)),
+                          );
+                        }),
                         const SizedBox(height: 6),
                         if (spec != null) ...[
                           catRow('חומר', spec.material),
@@ -4878,6 +4915,33 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             ],
                           );
                         }),
+                        // Roadmap step 73 — what the line needs to mate each end.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final needs = connectionNeedsHe(prod);
+                            if (needs.isEmpty) return const SizedBox.shrink();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 6),
+                                const Text('מה הקו צריך לחיבור',
+                                    style: TextStyle(
+                                        color: Color(0xFF888888),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)),
+                                for (final n in needs)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text('🔩 $n',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF555555),
+                                            fontSize: 11)),
+                                  ),
+                              ],
+                            );
+                          }),
                         // Roadmap step 12 — relevant Israeli standards (ת"י).
                         if (expert)
                           Builder(builder: (_) {

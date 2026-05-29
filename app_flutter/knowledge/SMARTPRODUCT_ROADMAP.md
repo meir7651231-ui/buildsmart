@@ -53,7 +53,8 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 25. ⬜ Auto install-kit — card offers all required safety items (correct-by-construction).
 26. ⬜ Temperature picker → filters heat-unsuitable brands in real time.
 27. ⬜ Smart adapter recommendation when a brand doesn't directly mate the cart.
-28. ⬜ "Your line so far" — what's in cart + how this product fits.
+28. ✅ "Your line so far" — `lineFitFor` reads the smart cart and reports how
+   many cart items this product connects to ("🧩 בקו שלך"). Guard: `line_fit_test`.
 29. ⬜ Physical validation: warn on impossible connections.
 30. ⬜ Line score (safety/pressure/cost) that updates with each choice.
 
@@ -123,7 +124,8 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 ## Phase 8 · Contractor & projects (71–80)
 71. ⬜ Add product to a specific project (floor/apartment/room).
 72. ⬜ Duplicate-to-many-points ("need 6 of these in 3 rooms").
-73. ⬜ Material dependencies: the card knows what else the line needs before/after.
+73. ✅ Material dependencies — `connectionNeedsHe` lists what each end needs to
+   mate ("מה הקו צריך לחיבור"). Guard: `line_fit_test`.
 74. ⬜ Cumulative project BOM from all chosen cards.
 75. ⬜ Customer quote straight from the choices.
 76. ⬜ Config versioning (compare alternatives for the project).

@@ -902,6 +902,56 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
   return out;
 }
 
+// ─── הקו שלך עד כה (Roadmap step 28) ────────────────────────────────────────
+/// How the [current] product fits a line already in progress. Given the catalog
+/// products already chosen ([lineProducts]), returns how many of them [current]
+/// directly connects to + the names of up to three. Pure — the UI resolves the
+/// cart lines to catalog products and passes them in.
+({int connects, List<String> names}) lineFitFor(
+    LipskeyCatalogProduct current, List<LipskeyCatalogProduct> lineProducts) {
+  if (lineProducts.isEmpty) return (connects: 0, names: const []);
+  final compatible = compatibleProductsFor(current).map((p) => p.sku).toSet();
+  final hits = <String>[];
+  for (final lp in lineProducts) {
+    if (lp.sku == current.sku) continue;
+    if (compatible.contains(lp.sku)) hits.add(lp.nameHe);
+  }
+  return (connects: hits.length, names: hits.take(3).toList());
+}
+
+// ─── תלויות חומר / מה הקו צריך (Roadmap step 73) ────────────────────────────
+/// What the line needs to mate each end of [p] (the part on the other side):
+/// a matching pipe/coupling for compression ends, the opposite thread gender
+/// for BSP, a press pipe for press ends, a drain pipe for a drain opening.
+/// De-duplicated, order-stable, empty without a spec.
+List<String> connectionNeedsHe(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return const [];
+  final needs = <String>[];
+  final seen = <String>{};
+  void add(String s) {
+    if (seen.add(s)) needs.add(s);
+  }
+
+  for (final e in spec.ends) {
+    switch (e.type) {
+      case EndType.hdpeCompression:
+        add('צינור/מצמד HDPE בקוטר ${e.size}');
+      case EndType.pexPress:
+        add('צינור PEX + מכבש בקוטר ${e.size}');
+      case EndType.copperPress:
+        add('צינור נחושת + מכבש בקוטר ${e.size}');
+      case EndType.bspMale:
+        add('חיבור הברגה נקבה ${e.size}" מנגד');
+      case EndType.bspFemale:
+        add('חיבור הברגה זכר ${e.size}" מנגד');
+      case EndType.drainOpening:
+        add('צינור ניקוז ${e.size} + איטום');
+    }
+  }
+  return needs;
+}
+
 // ─── עלות קו משוערת (Roadmap step 42) ───────────────────────────────────────
 /// A rough total-cost breakdown for installing the selected brand as a line:
 /// the product itself + the mandatory accessories + an estimated labour charge
