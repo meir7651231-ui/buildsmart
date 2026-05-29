@@ -596,6 +596,35 @@ List<({String label, String reason})> complianceTriggersFor(
   return out;
 }
 
+// ─── למה זה חשוב (Roadmap step 58) ──────────────────────────────────────────
+/// A one-sentence plain-language explanation of *why* a compliance item matters,
+/// keyed off the trigger label produced by [complianceTriggersFor]. Returns null
+/// for an unrecognised label so callers can simply skip the detail line.
+String? complianceWhyHe(String label) {
+  if (label.contains('PRV')) {
+    return 'בקו חם סגור הלחץ עולה עם החימום — שסתום פורק לחץ מונע נזק לדוד ולצנרת.';
+  }
+  if (label.contains('התפשטות') && label.contains('Bladder')) {
+    return 'מים מתרחבים ~4% בחימום; כלי התפשטות סופג את הנפח ומונע קפיצות לחץ.';
+  }
+  if (label.contains('בידוד')) {
+    return 'בידוד תרמי חוסך אנרגיה ומונע כוויות ממגע בצנרת חמה.';
+  }
+  if (label.contains('TMTV') || label.contains('anti-scald')) {
+    return 'מגביל את טמפ׳ היציאה ל-≤45°C — מניעת כוויות, חובה בקו חם לשימוש אישי.';
+  }
+  if (label.contains('ניתוק')) {
+    return 'ברז ניתוק במעלה הזרם מאפשר תחזוקה/החלפה בלי לסגור את כל הבית.';
+  }
+  if (label.contains('דיאלקטרי')) {
+    return 'מגע ישיר בין שתי מתכות שונות גורם לקורוזיה גלוונית; רקורד דיאלקטרי מפריד.';
+  }
+  if (label.contains('PEX')) {
+    return 'PEX מתרחב ומתכווץ עם הטמפ׳; מפצה התפשטות מסיר מתח מהחיבורים.';
+  }
+  return null;
+}
+
 bool _isHotPotential(LipskeyCatalogProduct p) {
   final cat = p.categoryHe;
   return cat == 'מחלקים' ||

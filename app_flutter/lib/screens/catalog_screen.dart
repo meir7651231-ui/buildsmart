@@ -4749,7 +4749,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                       color: Color(0xFF888888),
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600)),
-                              for (final t in triggers)
+                              for (final t in triggers) ...[
                                 Padding(
                                   padding: const EdgeInsets.only(top: 2),
                                   child: Text('${t.label} — ${t.reason}',
@@ -4759,6 +4759,19 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           color: Color(0xFFB45309),
                                           fontSize: 11)),
                                 ),
+                                if (complianceWhyHe(t.label) != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 1, right: 14),
+                                    child: Text('↳ ${complianceWhyHe(t.label)}',
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF999999),
+                                            fontSize: 10,
+                                            height: 1.25)),
+                                  ),
+                              ],
                             ],
                           );
                         }),

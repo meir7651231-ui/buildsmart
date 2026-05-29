@@ -89,7 +89,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 55. ⬜ Product recognition from camera (barcode/image) → opens the card.
 56. ⬜ "People who bought X also added Y" (data-driven accessories).
 57. ⬜ Profession-aware (plumber/contractor/DIY) — different detail level.
-58. ⬜ AI explanation of each compliance warning + "why it matters".
+58. ✅ "Why it matters" explanation under each compliance warning via
+   `complianceWhyHe` (↳ line). Coverage-gated: every trigger label has a why.
+   Guard: `compliance_why_test`.
 59. ✅ One-line text summary via `smartCardSummaryHe` (name·material·system·temp·
    price) at the top of the 📦 section. Guard: `summary_alt_test`.
    (Voice read-aloud still ⬜.)
@@ -123,7 +125,10 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 80. ⬜ Ready project templates ("standard bathroom" = a product set).
 
 ## Phase 9 · Quality, performance, accessibility (81–90)
-81. ⬜ Comprehensive widget tests for the smart card (every category loads).
+81. ✅ Comprehensive card-data integrity test (every SmartProduct × brand:
+   bridge/summary/standards/tools/guide/compat/compliance+why/variants/
+   cheaper-alt all coherent & non-throwing). Rendering of all 935 sheets stays
+   covered by `product_journey_test`. Guard: `smart_card_data_test`.
 82. ⬜ Golden + mutation tests on the price/selection logic.
 83. ⬜ Offline-first: caching of data + images.
 84. ⬜ Lazy-load images + smart prefetch.
