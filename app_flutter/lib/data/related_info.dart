@@ -83,6 +83,17 @@ LipskeyCatalogProduct? catalogProductForBrand(SmartBrand brand) =>
 LipskeyCatalogProduct? catalogProductForSmart(SmartProduct sp) =>
     sp.brands.isEmpty ? null : catalogProductForBrand(sp.recBrand);
 
+// ─── פילטר מותג מהיר (Roadmap step 65) ──────────────────────────────────────
+/// Whether a brand's product is rated for hot water at [tempC] (default 60°C).
+/// Mirrors the engine rule: an unknown/spec-less brand is kept (not filtered
+/// out). Used by the card's quick "מים חמים בלבד" brand filter.
+bool brandSuitableForHot(SmartBrand brand, {int tempC = 60}) {
+  final prod = catalogProductForBrand(brand);
+  if (prod == null) return true;
+  final t = kVerifiedSpecs[prod.sku]?.maxTempC;
+  return t == null || tempC <= t;
+}
+
 // ─── כיסוי מחברים (connector-coverage classification) ───────────────────────
 /// True when [p] is a flow-connector that SHOULD carry a [VerifiedSpec] — i.e.
 /// it physically joins the pipe network. Accessories / supports / tools (see

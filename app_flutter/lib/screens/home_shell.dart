@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.10 · 29.5.26 · SmartProduct: שרשרת מומחשת inline (🔗) + המלצת מתאם + דיפ-לינק + דירוג עמידות',
+                          'v5.11 · 29.5.26 · SmartProduct: פילטר מותג "מים חמים בלבד" (🌡) + שרשרת מומחשת + המלצת מתאם + דיפ-לינק',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

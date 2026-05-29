@@ -4340,6 +4340,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   bool _sizeOpen = false;
   String? _selType;
   String? _selSize;
+  bool _hotOnly = false; // Roadmap step 65 — quick "hot-water only" filter.
 
   // Brands matching the chosen סוג / מידה filters (derived from names).
   List<int> get _filteredBrandIdx {
@@ -4347,7 +4348,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
     return [
       for (var i = 0; i < brands.length; i++)
         if ((_selType == null || brands[i].name.contains(_selType!)) &&
-            (_selSize == null || brands[i].name.contains(_selSize!)))
+            (_selSize == null || brands[i].name.contains(_selSize!)) &&
+            (!_hotOnly || brandSuitableForHot(brands[i])))
           i,
     ];
   }
@@ -4755,7 +4757,43 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                   expanded: _brandOpen,
                   onToggle: () => setState(() => _brandOpen = !_brandOpen),
                   child: Column(
-                    children: [for (final i in _filteredBrandIdx) _brandCard(i)],
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Roadmap step 65 — quick "hot-water only" brand filter.
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                          onTap: () => setState(() {
+                            _hotOnly = !_hotOnly;
+                            _applyFilterSelection();
+                          }),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: _hotOnly
+                                  ? const Color(0xFFFFEDD5)
+                                  : const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                  color: _hotOnly
+                                      ? const Color(0xFFFB923C)
+                                      : const Color(0xFFE2E8F0)),
+                            ),
+                            child: Text(
+                                '${_hotOnly ? "✓ " : ""}🌡 מים חמים בלבד',
+                                style: TextStyle(
+                                    color: _hotOnly
+                                        ? const Color(0xFFC2410C)
+                                        : const Color(0xFF64748B),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700)),
+                          ),
+                        ),
+                      ),
+                      for (final i in _filteredBrandIdx) _brandCard(i),
+                    ],
                   ),
                 ),
                 if (types.isNotEmpty)
