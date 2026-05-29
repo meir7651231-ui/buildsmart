@@ -128,6 +128,20 @@ List<TestResult> testCatalog() {
     pass: pprSkuName.isEmpty, expected: '0', got: '${pprSkuName.length}',
     detail: pprSkuName.take(3).map((p) => '${p.sku}: ${p.nameHe}').join(' · '),
   ));
+  // Mis-category guard: a tool-named product (מקדח/תותב/מזוודת/מכונת/מברגה/
+  // פלטת ריתוך) must live in 'כלי ריתוך PPR' — caught dies→EF and drills→saddles.
+  const _toolWords = ['מקדח', 'תותב', 'מזוודת', 'מכונת', 'מברגה', 'פלטת ריתוך'];
+  final pprMisTool = kPolyrollCatalog
+      .where((p) =>
+          _toolWords.any((w) => p.nameHe.contains(w)) &&
+          p.categoryHe != 'כלי ריתוך PPR')
+      .toList();
+  pprHard.add(TestCheck(
+    name: 'PPR · מוצר עם שם-כלי יושב בקטגוריית "כלי ריתוך"',
+    pass: pprMisTool.isEmpty, expected: '0', got: '${pprMisTool.length}',
+    detail:
+        pprMisTool.take(3).map((p) => '${p.sku}: ${p.categoryHe}').join(' · '),
+  ));
   results.add(TestResult(
     id: 'catalog:hard-ppr',
     category: TestCategory.catalog,

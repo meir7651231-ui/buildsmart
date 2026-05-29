@@ -381,6 +381,7 @@ grep -nE "פייזר [0-9]{6,}|אספקת מים'," lib/data/polyroll_catalog.da
 | 11–12 | החלפת-ציפ לא מחליפה מוצר (נתיב חי) | `card_interactions_test` · קבוצת `external LIST` (assert על `#sku`) |
 | 12 | בורר-מידה מציג מידות חוצות-קו | `card_interactions_test` · `regression · size siblings…` (findAttrSiblings) |
 | 13 | שם-זבל: SKU-כ-שם / שם ריק / קוד-יצרן בשם / מספר-תקוע | `catalog.dart` · בלוק `catalog:hard-ppr` (4 בדיקות על `kPolyrollCatalog`) |
+| 13/15 | mis-category: מוצר עם שם-כלי מחוץ ל"כלי ריתוך" (תותב→EF, מקדח→רוכבים) | `catalog.dart` · `catalog:hard-ppr` · "מוצר עם שם-כלי יושב בקטגוריית כלי ריתוך" |
 
 **הרחבה ל"קובץ שלם":** ה-gate ב-`catalog:hard-ppr` רץ על **כל** `kPolyrollCatalog`,
 כך שכל מאות-המוצרים נשמרים אוטומטית — שם-זבל חדש מ-auto-extract מפיל את ה-CI מיד.
