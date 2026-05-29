@@ -158,6 +158,26 @@ List<TestResult> testCatalog() {
     got: '${prodCats.length}',
   ));
 
+  // PPR card-richness per line (protocol §15): the 9-strip card builds from
+  // dims, so avgDims is the pace metric — thin lines are the next to enrich.
+  final pprByCat = <String, List<int>>{};
+  for (final p in kPolyrollCatalog) {
+    pprByCat.putIfAbsent(p.categoryHe, () => []).add(p.dims?.length ?? 0);
+  }
+  final richness = pprByCat.entries
+      .map((e) => (cat: e.key, n: e.value.length,
+          avg: e.value.fold<int>(0, (a, b) => a + b) / e.value.length))
+      .toList()
+    ..sort((a, b) => a.avg.compareTo(b.avg));
+  soft.add(TestCheck(
+    name: 'PPR · עושר-dims לכל קו (מטריקת-קצב §15)',
+    pass: true,
+    got: '${kPolyrollCatalog.length} מוצרים · ${richness.length} קווים',
+    detail: richness
+        .map((r) => '${r.cat}=${r.avg.toStringAsFixed(1)}(${r.n})')
+        .join(' · '),
+  ));
+
   results.add(TestResult(
     id: 'catalog:coverage',
     category: TestCategory.catalog,
