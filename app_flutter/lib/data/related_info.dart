@@ -59,6 +59,24 @@ const List<_FinderGroup> _kFinderGroups = [
   return null;
 }
 
+// ─── גשר SmartProduct ↔ קטלוג (Roadmap step 3) ──────────────────────────────
+// smartProductForSku() (smart_tree.dart) gives SKU → SmartProduct. This is the
+// other direction: a SmartBrand (or its SKU) → the real catalog product it
+// points at, so a unified card can pull the catalog's spec / chips / compat for
+// the brand the user picked. Memoised sku→product map for O(1) lookups.
+Map<String, LipskeyCatalogProduct>? _skuToProduct;
+Map<String, LipskeyCatalogProduct> get _skuIndex =>
+    _skuToProduct ??= {for (final p in kLipskeyCatalog) p.sku: p};
+
+/// The catalog product a [brand] points at, or null when it has no SKU / the
+/// SKU isn't in the catalog.
+LipskeyCatalogProduct? catalogProductForBrand(SmartBrand brand) =>
+    brand.sku == null ? null : _skuIndex[brand.sku];
+
+/// The catalog product behind a SmartProduct's recommended brand (null if none).
+LipskeyCatalogProduct? catalogProductForSmart(SmartProduct sp) =>
+    sp.brands.isEmpty ? null : catalogProductForBrand(sp.recBrand);
+
 // ─── כיסוי מחברים (connector-coverage classification) ───────────────────────
 /// True when [p] is a flow-connector that SHOULD carry a [VerifiedSpec] — i.e.
 /// it physically joins the pipe network. Accessories / supports / tools (see
@@ -640,4 +658,125 @@ int? priceFor(LipskeyCatalogProduct p) {
     'אביזרי מקלחת ': 28,
   };
   return _catPrices[p.categoryHe];
+}
+
+// ─── תקן ישראלי רלוונטי (Roadmap step 12) ──────────────────────────────────
+/// The Israeli standards (ת"י) that govern a product of this kind, derived from
+/// its material / water-system / category. This is a *relevance* mapping — it
+/// tells the installer which standard applies to this class of part, not a
+/// per-SKU certification claim (we have no certification data). Returns an
+/// empty list when nothing maps. Codes are de-duplicated and order-stable.
+List<({String code, String scope})> israeliStandardsFor(
+    LipskeyCatalogProduct p) {
+  final out = <({String code, String scope})>[];
+  final seen = <String>{};
+  void add(String code, String scope) {
+    if (seen.add(code)) out.add((code: code, scope: scope));
+  }
+
+  final spec = kVerifiedSpecs[p.sku];
+  final cat = p.categoryHe;
+
+  final isDrain = spec != null &&
+      spec.endSystems.length == 1 &&
+      spec.endSystems.contains(WaterSystem.drainage);
+  final isSupply = spec != null && spec.endSystems.contains(WaterSystem.supply);
+
+  // Drainage / sanitary system.
+  if (isDrain) add('ת"י 1205', 'מערכות תברואה (ניקוז)');
+
+  // PEX / multilayer pressurised pipes.
+  if (spec?.material == 'PEX' ||
+      cat == 'צינורות רב שכבתי' ||
+      cat == 'מחברי NTM') {
+    add('ת"י 1519', 'צינורות פלסטיים למים חמים/קרים');
+  }
+
+  // Sanitary taps / faucets.
+  const faucetCats = {
+    'ברזי כיור', 'ברזי מטבח', 'ברזי אמבטיה', 'ברזי מקלחת', 'ברזי קיר',
+    'ברזי גן', 'ברזי דלי', 'ברזים',
+  };
+  if (faucetCats.contains(cat)) add('ת"י 1385', 'ברזים סניטריים');
+
+  // Generic pressurised-water fittings (when not already a tap).
+  if (isSupply && !seen.contains('ת"י 1385')) {
+    add('ת"י 5452', 'אבזרי צנרת למים בלחץ');
+  }
+
+  return out;
+}
+
+// ─── כלי עבודה נדרשים (Roadmap step 33) ─────────────────────────────────────
+/// The hand-tools an installer needs to make this product's connections,
+/// derived purely from its verified-spec end types (thread → wrench+teflon,
+/// compression → adjustable wrench, press → press tool + cutter, drain → saw +
+/// solvent). De-duplicated and order-stable. Empty when [p] has no spec.
+List<String> installToolsFor(LipskeyCatalogProduct p) {
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec == null) return const [];
+  final tools = <String>[];
+  final seen = <String>{};
+  void add(String t) {
+    if (seen.add(t)) tools.add(t);
+  }
+
+  for (final e in spec.ends) {
+    switch (e.type) {
+      case EndType.bspMale:
+      case EndType.bspFemale:
+        add('🔧 מפתח צינורות');
+        add('🧵 סרט טפלון / חבל איטום');
+      case EndType.hdpeCompression:
+        add('🔧 מפתח שוודי / מפתח רצועה');
+      case EndType.pexPress:
+        add('🛠 מכבש PEX (קלקש)');
+        add('✂️ חותך צינור');
+      case EndType.copperPress:
+        add('🛠 מכבש נחושת (press)');
+        add('✂️ חותך צינור נחושת');
+      case EndType.drainOpening:
+        add('🪚 מסור / משור');
+        add('🧴 דבק / חומר איטום');
+    }
+  }
+  return tools;
+}
+
+// ─── מתי לבחור איזה מותג (Roadmap step 16) ──────────────────────────────────
+/// "When to pick which" guidance across a SmartProduct's brands. For each brand
+/// returns a one-line reason derived from its recommended flag, its relative
+/// price among the siblings, and (when its SKU resolves) its catalog spec
+/// (hot-water suitability). Pure + order-stable (mirrors `sp.brands`).
+List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
+  final brands = sp.brands;
+  if (brands.isEmpty) return const [];
+
+  final priced = brands.where((b) => b.price != null).map((b) => b.price!);
+  final hasSpread = priced.isNotEmpty && priced.toSet().length > 1;
+  final minP = hasSpread ? priced.reduce((a, b) => a < b ? a : b) : null;
+  final maxP = hasSpread ? priced.reduce((a, b) => a > b ? a : b) : null;
+
+  final out = <({String brand, String advice})>[];
+  for (final b in brands) {
+    final reasons = <String>[];
+    if (b.rec) reasons.add('מומלץ — איזון מחיר/איכות');
+    if (hasSpread && b.price != null) {
+      if (b.price == minP) {
+        reasons.add('המחיר הנמוך ביותר');
+      } else if (b.price == maxP) {
+        reasons.add('פרימיום / עמיד יותר');
+      }
+    }
+    final prod = catalogProductForBrand(b);
+    final spec = prod == null ? null : kVerifiedSpecs[prod.sku];
+    if (spec != null && spec.maxTempC >= 90) {
+      reasons.add('עומד במים חמים מאוד');
+    }
+    out.add((
+      brand: b.name,
+      advice: reasons.isEmpty ? 'בחירה תקנית' : reasons.join(' · '),
+    ));
+  }
+  return out;
 }
