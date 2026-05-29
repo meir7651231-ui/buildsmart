@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local golden review harness — env-sensitive, kept out of CI (see knowledge/CATALOG-CARD-PROTOCOL.md §10)
+test/failures/
+test/ref_*.png
+test/ref_card_golden_test.dart
