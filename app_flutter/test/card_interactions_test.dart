@@ -171,6 +171,20 @@ void main() {
     });
   });
 
+  // Regression guard for §12: a pipe's size variants must stay within its own
+  // line (category), never leak another line's sizes into the picker.
+  group('regression · size siblings stay within the same line (§12)', () {
+    test('faser 20×2.8 size picker offers ONLY faser sizes', () {
+      final sibs = findAttrSiblings(_ref, '20×2.8', AttrKind.size);
+      expect(sibs.length, greaterThan(1), reason: 'expected ≥2 faser sizes');
+      for (final s in sibs) {
+        expect(s.categoryHe, _ref.categoryHe,
+            reason: 'foreign-line size leaked into the faser size picker: '
+                '${s.sku} (${s.categoryHe})');
+      }
+    });
+  });
+
   group('internal sheet — strips & flip', () {
     Future<void> open(WidgetTester t, String label) async {
       await t.binding.setSurfaceSize(const Size(430, 1400));

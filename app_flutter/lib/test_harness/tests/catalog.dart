@@ -1,6 +1,7 @@
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/test_harness/types.dart';
 
@@ -94,6 +95,45 @@ List<TestResult> testCatalog() {
     label: 'תקינות נתוני הקטלוג (${products.length} מוצרים)',
     area: 'שגיאות קשות',
     checks: hard,
+  ));
+
+  // ── HARD: same validity gate over the Polyroll/PPR catalog ────────────────
+  // The Lipskey block above ran on kLipskeyCatalog only — auto-extracted PPR
+  // garbage (SKU-as-name, manufacturer-code merged into the name, blank names)
+  // slipped through. Gate the PPR file with the same predicates + a SKU-in-name
+  // check (catches "צינור PPR פייזר 9092071130" style scrapes).
+  final pprHard = <TestCheck>[];
+  final pprEmpty = kPolyrollCatalog.where((p) => p.nameHe.trim().isEmpty).toList();
+  pprHard.add(TestCheck(
+    name: 'PPR · אין שמות ריקים',
+    pass: pprEmpty.isEmpty, expected: '0', got: '${pprEmpty.length}',
+    detail: pprEmpty.take(3).map((p) => p.sku).join(', '),
+  ));
+  final pprBad = kPolyrollCatalog.where((p) => garbled(p.nameHe)).toList();
+  pprHard.add(TestCheck(
+    name: 'PPR · אין שמות פגומים (זבל/גרשיים/סוגריים)',
+    pass: pprBad.isEmpty, expected: '0', got: '${pprBad.length}',
+    detail: pprBad.take(3).map((p) => '${p.sku}: ${p.nameHe}').join(' · '),
+  ));
+  final pprStuck = kPolyrollCatalog.where((p) => _hasStuckDigit(p.nameHe)).toList();
+  pprHard.add(TestCheck(
+    name: 'PPR · אין מספר תקוע במילה',
+    pass: pprStuck.isEmpty, expected: '0', got: '${pprStuck.length}',
+    detail: pprStuck.take(3).map((p) => '${p.sku}: ${p.nameHe}').join(' · '),
+  ));
+  final pprSkuName =
+      kPolyrollCatalog.where((p) => p.nameHe.contains(p.sku)).toList();
+  pprHard.add(TestCheck(
+    name: 'PPR · השם אינו מכיל את המק"ט (חילוץ-זבל)',
+    pass: pprSkuName.isEmpty, expected: '0', got: '${pprSkuName.length}',
+    detail: pprSkuName.take(3).map((p) => '${p.sku}: ${p.nameHe}').join(' · '),
+  ));
+  results.add(TestResult(
+    id: 'catalog:hard-ppr',
+    category: TestCategory.catalog,
+    label: 'תקינות נתוני PPR (${kPolyrollCatalog.length} מוצרים)',
+    area: 'שגיאות קשות',
+    checks: pprHard,
   ));
 
   // ── SOFT: completeness (informational — pass, but report counts) ──────────
