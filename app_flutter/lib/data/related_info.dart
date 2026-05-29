@@ -902,6 +902,25 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
   return out;
 }
 
+// ─── התאמת מים חמים בין מותגים (Roadmap step 26) ────────────────────────────
+/// How many of a SmartProduct's brands are rated for hot water at [tempC]
+/// (default 60°C). Mirrors `productSuitableForTemp`: a brand with no spec/temp
+/// is treated as suitable (don't flag legacy items). Used to surface
+/// "X/Y מותגים מתאימים למים חמים" before a full temperature picker exists.
+({int suitable, int total, int tempC}) hotWaterSuitabilityFor(SmartProduct sp,
+    {int tempC = 60}) {
+  var suitable = 0;
+  var total = 0;
+  for (final b in sp.brands) {
+    final prod = catalogProductForBrand(b);
+    if (prod == null) continue;
+    total++;
+    final t = kVerifiedSpecs[prod.sku]?.maxTempC;
+    if (t == null || tempC <= t) suitable++;
+  }
+  return (suitable: suitable, total: total, tempC: tempC);
+}
+
 // ─── ציון נתוני כרטיס (Roadmap step 30, card-level) ─────────────────────────
 /// A 0-100 readiness score for how complete & connectable [p]'s card data is:
 /// engineering spec (+40), connectivity (up to +30), discoverable in the finder

@@ -52,7 +52,10 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    `systemSafetyNoteHe` (gravity-drainage / upstream-shutoff) + the bore row.
    (Line-level ΔP still ⬜ — needs a built line.) Guard: `install_effort_test`.
 25. ⬜ Auto install-kit — card offers all required safety items (correct-by-construction).
-26. ⬜ Temperature picker → filters heat-unsuitable brands in real time.
+26. 🟦 Hot-water suitability across brands via `hotWaterSuitabilityFor`
+   ("🌡 מים חמים: X/Y מותגים מתאימים", cross-checked vs engine
+   `productSuitableForTemp`). (Interactive temp picker still ⬜.)
+   Guard: `hot_water_suitability_test`.
 27. ⬜ Smart adapter recommendation when a brand doesn't directly mate the cart.
 28. ✅ "Your line so far" — `lineFitFor` reads the smart cart and reports how
    many cart items this product connects to ("🧩 בקו שלך"). Guard: `line_fit_test`.

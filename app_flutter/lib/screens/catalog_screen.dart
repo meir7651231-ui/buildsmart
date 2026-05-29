@@ -4812,6 +4812,27 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     fontWeight: FontWeight.w700)),
                           );
                         }),
+                        // Roadmap step 26 — hot-water suitability across brands.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final hw = hotWaterSuitabilityFor(p);
+                            if (hw.total < 2) return const SizedBox.shrink();
+                            final allOk = hw.suitable == hw.total;
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text(
+                                  '🌡 מים חמים (${hw.tempC}°C): '
+                                  '${hw.suitable}/${hw.total} מותגים מתאימים',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      color: allOk
+                                          ? const Color(0xFF0F766E)
+                                          : const Color(0xFFB45309),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600)),
+                            );
+                          }),
                         const SizedBox(height: 6),
                         if (spec != null) ...[
                           catRow('חומר', spec.material),
