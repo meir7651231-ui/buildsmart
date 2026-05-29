@@ -15,6 +15,8 @@ const String kPolyrollBrand = 'פולירול';
 
 const String kPprPipesSupply = 'צינורות PPR אספקת מים';
 const String kPprPipesFiber = 'צינורות PPR פייזר';
+const String kPprPipesAC = 'צינורות PPR מיזוג אוויר';
+const String kPprTools = 'כלי ריתוך PPR';
 const String kPprElbows = 'ברכיים PPR';
 const String kPprTees = 'מסעפים PPR';
 const String kPprCouplers = 'מצמדים PPR';
@@ -53,6 +55,29 @@ LipskeyCatalogProduct _ppr(
       specImageFile: specImageFile,
       color: color,
     );
+
+// AQUATHERM "blue pipe" for air-conditioning (PDF page 80). All columns are
+// verbatim from the table: size = "d X wall", SDR, d, S (wall), d1 (inner ⌀),
+// weight (ק"ג/מ), water volume (ל/מ). The name carries "d×wall" so the size
+// chip works. No PN column on that page → not invented (R8).
+LipskeyCatalogProduct _acPipe(String sku, String size, String sdr, String d,
+        String s, String di, String w, String vol, String len) =>
+    _ppr(sku, 'צינור PPR מיזוג אוויר $size', 'PPR AC Blue Pipe $size',
+        kPprPipesAC, 'PPR AC Blue Pipes', '❄️', 80,
+        color: 'כחול',
+        dims: {
+          'יצרן': 'Aquatherm',
+          'תיאור': 'צינור מיזוג אוויר (blue pipe)',
+          'חומר': 'PPR · מחוזק בסיבי זכוכית (faser)',
+          'SDR': sdr,
+          'dn נומינלי': d,
+          'de קוטר חיצוני': d,
+          'e עובי דופן': s,
+          'di קוטר פנימי': di,
+          'משקל (ק"ג/מ׳)': w,
+          'נפח מים (ל׳/מ׳)': vol,
+          'אורך': len,
+        });
 
 final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('95016002', 'צינור PPR אספקת מים 20', 'PPR Pipe 20', kPprPipesSupply, 'PPR Supply Pipes', '🔵', 18, dims: {'SDR': '6', 'PN': '20', 'קוטר חיצוני': '20', 'עובי דופן': '3.4', 'קוטר פנימי': '13.2', 'משקל ק"ג/מ׳': '0.174', 'נפח ל׳/מ׳': '0.137'}),
@@ -715,20 +740,24 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('6007002020', 'אומגה PPR 20', 'PPR Omega 20', kPprOmega, 'PPR Omega', '🛟', 74, dims: {'R': '61.2', 'E': '20', 'D': '22', 'C': '42', 'B': '80', 'A': '300'}),
   _ppr('6007002025', 'אומגה PPR 25', 'PPR Omega 25', kPprOmega, 'PPR Omega', '🛟', 74, dims: {'R': '81.8', 'E': '25', 'D': '27', 'C': '52', 'B': '75', 'A': '330'}),
   _ppr('6007002032', 'אומגה PPR 32', 'PPR Omega 32', kPprOmega, 'PPR Omega', '🛟', 74, dims: {'R': '97.5', 'E': '32', 'D': '34', 'C': '64', 'B': '80', 'A': '380'}),
-  _ppr('9092071112', 'צינור PPR פייזר 4.4', 'PPR Pipe 4.4', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '4.4', 'de קוטר חיצוני': 'X–32', 'e עובי דופן': '7.4–32', 'di קוטר פנימי': '4.4–23.2', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '0.391'}),
-  _ppr('9092071114', 'צינור PPR פייזר 3.7', 'PPR Pipe 3.7', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '3.7', 'de קוטר חיצוני': 'X–40', 'e עובי דופן': '11–40', 'di קוטר פנימי': '3.7–32.6', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '0.435'}),
-  _ppr('9092071116', 'צינור PPR פייזר 4.6', 'PPR Pipe 4.6', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '4.6', 'de קוטר חיצוני': 'X–50', 'e עובי דופן': '11–50', 'di קוטר פנימי': '4.6–40.8', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '0.674'}),
-  _ppr('9092071118', 'צינור PPR פייזר 5.8', 'PPR Pipe 5.8', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '5.8', 'de קוטר חיצוני': 'X–63', 'e עובי דופן': '11–63', 'di קוטר פנימי': '5.8–51.4', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '1.065'}),
-  _ppr('9092071120', 'צינור PPR פייזר 6.8', 'PPR Pipe 6.8', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '6.8', 'de קוטר חיצוני': 'X–75', 'e עובי דופן': '11–75', 'di קוטר פנימי': '6.8–61.4', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '1.485'}),
-  _ppr('9092071122', 'צינור PPR פייזר 8.2', 'PPR Pipe 8.2', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '8.2', 'de קוטר חיצוני': 'X–90', 'e עובי דופן': '11–90', 'di קוטר פנימי': '8.2–73.6', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '2.150'}),
-  _ppr('9092071124', 'צינור PPR פייזר 10.0', 'PPR Pipe 10.0', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '10.0', 'de קוטר חיצוני': 'X–110', 'e עובי דופן': '11–110', 'di קוטר פנימי': '10.0–90.0', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '3.185'}),
-  _ppr('9092071126', 'צינור PPR פייזר 11.4', 'PPR Pipe 11.4', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '11.4', 'de קוטר חיצוני': 'X–125', 'e עובי דופן': '11–125', 'di קוטר פנימי': '11.4–102.2', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '4.130'}),
-  _ppr('9092071130', 'צינור PPR פייזר 9092071130', 'PPR Pipe 9092071130', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '9092071130', 'de קוטר חיצוני': '5.8מ’–160X14.6', 'e עובי דופן': '11–160', 'di קוטר פנימי': '14.6–130.8', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '6.751'}),
-  _ppr('9092071134', 'צינור PPR פייזר 9092071134', 'PPR Pipe 9092071134', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '9092071134', 'de קוטר חיצוני': '5.8מ’–200X18.2', 'e עובי דופן': '11–200', 'di קוטר פנימי': '18.2–163.6', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '10.515'}),
-  _ppr('9092071138', 'צינור PPR פייזר 9092071138', 'PPR Pipe 9092071138', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '9092071138', 'de קוטר חיצוני': '5.8מ’–250X22.7', 'e עובי דופן': '11–250', 'di קוטר פנימי': '22.7–204.6', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '16.363'}),
-  _ppr('9093570130', 'צינור PPR פייזר 9093570130', 'PPR Pipe 9093570130', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '9093570130', 'de קוטר חיצוני': '5.8מ’–160X9.1', 'e עובי דופן': '17.6–160', 'di קוטר פנימי': '9.1–141.8', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '4.574'}),
-  _ppr('9093570134', 'צינור PPR פייזר 9093570134', 'PPR Pipe 9093570134', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '9093570134', 'de קוטר חיצוני': '5.8מ’–200X11.4', 'e עובי דופן': '17.6–200', 'di קוטר פנימי': '11.4–177.2', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '7.081'}),
-  _ppr('9093570138', 'צינור PPR פייזר 9093570138', 'PPR Pipe 9093570138', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 80, dims: {'dn נומינלי': '9093570138', 'de קוטר חיצוני': '5.8מ’–250X14.2', 'e עובי דופן': '17.6–250', 'di קוטר פנימי': '14.2–221.6', 'SDR': '7.4', 'PN': '16', 'משקל ק"ג/מ׳': '10.949'}),
+  // AQUATHERM blue pipe (מיזוג אוויר) — PDF page 80, verbatim table.
+  // SDR7.4 line + SDR11 line (40–250) + SDR17.6 line (160–250).
+  _acPipe('96070108', '20×2.8', '7.4', '20', '2.8', '14.4', '0.157', '0.163', '4 מ׳'),
+  _acPipe('96070109', '25×3.5', '7.4', '25', '3.5', '18.0', '0.244', '0.254', '4 מ׳'),
+  _acPipe('9092071112', '32×4.4', '7.4', '32', '4.4', '23.2', '0.391', '0.423', '4 מ׳'),
+  _acPipe('9092071114', '40×3.7', '11', '40', '3.7', '32.6', '0.435', '0.834', '4 מ׳'),
+  _acPipe('9092071116', '50×4.6', '11', '50', '4.6', '40.8', '0.674', '1.307', '4 מ׳'),
+  _acPipe('9092071118', '63×5.8', '11', '63', '5.8', '51.4', '1.065', '2.074', '4 מ׳'),
+  _acPipe('9092071120', '75×6.8', '11', '75', '6.8', '61.4', '1.485', '2.959', '4 מ׳'),
+  _acPipe('9092071122', '90×8.2', '11', '90', '8.2', '73.6', '2.150', '4.252', '4 מ׳'),
+  _acPipe('9092071124', '110×10.0', '11', '110', '10.0', '90.0', '3.185', '6.359', '4 מ׳'),
+  _acPipe('9092071126', '125×11.4', '11', '125', '11.4', '102.2', '4.130', '8.199', '4 מ׳'),
+  _acPipe('9092071130', '160×14.6', '11', '160', '14.6', '130.8', '6.751', '13.430', '5.8 מ׳'),
+  _acPipe('9092071134', '200×18.2', '11', '200', '18.2', '163.6', '10.515', '21.010', '5.8 מ׳'),
+  _acPipe('9092071138', '250×22.7', '11', '250', '22.7', '204.6', '16.363', '32.861', '5.8 מ׳'),
+  _acPipe('9093570130', '160×9.1', '17.6', '160', '9.1', '141.8', '4.574', '15.792', '5.8 מ׳'),
+  _acPipe('9093570134', '200×11.4', '17.6', '200', '11.4', '177.2', '7.081', '24.661', '5.8 מ׳'),
+  _acPipe('9093570138', '250×14.2', '17.6', '250', '14.2', '221.6', '10.949', '38.568', '5.8 מ׳'),
   _ppr('992412131', 'ברך PPR 90° פנים 160', 'PPR Elbow 160', kPprElbows, 'PPR Elbows', '↪️', 81, dims: {'z': '145', 'd': '160', 'SD': '11'}),
   _ppr('992412135', 'ברך PPR 90° פנים 200', 'PPR Elbow 200', kPprElbows, 'PPR Elbows', '↪️', 81, dims: {'z': '175', 'd': '200', 'SD': '11'}),
   _ppr('992412139', 'ברך PPR 90° פנים 250', 'PPR Elbow 250', kPprElbows, 'PPR Elbows', '↪️', 81, dims: {'z': '220', 'd': '250', 'SD': '11'}),
@@ -820,8 +849,6 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('99560010', 'אוגן PPR', 'PPR אוגן ', kPprCollars, 'PPR Collars', '⭕', 34),
   _ppr('6002350500', 'מצמד PPR פנים/חוץ מצרה', 'PPR מצמד ', kPprCouplers, 'PPR Couplers', '🔗', 45),
   _ppr('6002380161', 'מצמד PPR מצרה', 'PPR מצמד ', kPprCouplers, 'PPR Couplers', '🔗', 47),
-  _ppr('96070108', 'צינור PPR אספקת מים 2.8', 'PPR צינור 2.8', kPprPipesSupply, 'PPR Supply Pipes', '🔵', 80),
-  _ppr('96070109', 'צינור PPR אספקת מים 3.5', 'PPR צינור 3.5', kPprPipesSupply, 'PPR Supply Pipes', '🔵', 80),
   _ppr('98217795', 'רוכב PPR 160/20', 'PPR רוכב 160/20', kPprSaddles, 'PPR Saddles', '🪢', 84),
   _ppr('98217796', 'רוכב PPR 160/25', 'PPR רוכב 160/25', kPprSaddles, 'PPR Saddles', '🪢', 84),
   _ppr('98217797', 'רוכב PPR 160/32', 'PPR רוכב 160/32', kPprSaddles, 'PPR Saddles', '🪢', 84),
@@ -857,11 +884,12 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('98414213', 'אוגן PPR 160', 'PPR אוגן 160', kPprCollars, 'PPR Collars', '⭕', 85),
   _ppr('98414215', 'אוגן PPR 200', 'PPR אוגן 200', kPprCollars, 'PPR Collars', '⭕', 85),
   _ppr('98415738', 'אוגן PPR 250', 'PPR אוגן 250', kPprCollars, 'PPR Collars', '⭕', 85),
-  _ppr('99521318', 'צינור PPR אספקת מים', 'PPR צינור ', kPprPipesSupply, 'PPR Supply Pipes', '🔵', 90),
-  _ppr('99515015', 'צינור PPR אספקת מים', 'PPR צינור ', kPprPipesSupply, 'PPR Supply Pipes', '🔵', 90),
-  _ppr('99515145', 'צינור PPR אספקת מים', 'PPR צינור ', kPprPipesSupply, 'PPR Supply Pipes', '🔵', 90),
-  _ppr('99515148', 'צינור PPR אספקת מים', 'PPR צינור ', kPprPipesSupply, 'PPR Supply Pipes', '🔵', 90),
-  _ppr('99550149', 'צינור PPR אספקת מים', 'PPR צינור ', kPprPipesSupply, 'PPR Supply Pipes', '🔵', 91),
+  // Welding tools (PDF pages 90–91) — names verbatim from the catalog.
+  _ppr('99521318', 'מזוודת ריתוך קטנה 20-63 מ"מ', 'PPR Welding Case (small) 20-63mm', kPprTools, 'PPR Welding Tools', '🧰', 90, dims: {'טווח קטרים': '20–63 מ"מ'}),
+  _ppr('99515015', 'פלטת ריתוך גדולה 75-125 מ"מ', 'PPR Welding Plate (large) 75-125mm', kPprTools, 'PPR Welding Tools', '🔥', 90, dims: {'טווח קטרים': '75–125 מ"מ'}),
+  _ppr('99515145', 'מכונת פיגורות קלה לקטרים 63-125 מ"מ', 'PPR Facing Machine (light) 63-125mm', kPprTools, 'PPR Welding Tools', '⚙️', 90, dims: {'טווח קטרים': '63–125 מ"מ'}),
+  _ppr('99515148', 'מכונת פיגורות שולחני 50-125 מ"מ', 'PPR Facing Machine (bench) 50-125mm', kPprTools, 'PPR Welding Tools', '⚙️', 90, dims: {'טווח קטרים': '50–125 מ"מ'}),
+  _ppr('99550149', 'מברגה לקטרים 63-125 מ"מ (לעבודה בגובה)', 'PPR Drill Driver 63-125mm', kPprTools, 'PPR Welding Tools', '🪛', 91, dims: {'טווח קטרים': '63–125 מ"מ'}),
   _ppr('99515042', 'שרוול PPR חשמלי 20', 'PPR שרוול 20', kPprElectrofusion, 'PPR Electrofusion', '⚡', 91),
   _ppr('99515043', 'שרוול PPR חשמלי 25', 'PPR שרוול 25', kPprElectrofusion, 'PPR Electrofusion', '⚡', 91),
   _ppr('99515044', 'שרוול PPR חשמלי 32', 'PPR שרוול 32', kPprElectrofusion, 'PPR Electrofusion', '⚡', 91),
@@ -901,7 +929,7 @@ final List<LipskeyCatalogProduct> kCatalogProducts = [
 ];
 
 const List<String> kPprCategories = [
-  kPprPipesSupply, kPprPipesFiber, kPprElbows, kPprTees, kPprCouplers,
-  kPprAdapters, kPprSaddles, kPprPlugs, kPprOmega, kPprValves,
-  kPprCollars, kPprElectrofusion,
+  kPprPipesSupply, kPprPipesFiber, kPprPipesAC, kPprElbows, kPprTees,
+  kPprCouplers, kPprAdapters, kPprSaddles, kPprPlugs, kPprOmega, kPprValves,
+  kPprCollars, kPprElectrofusion, kPprTools,
 ];

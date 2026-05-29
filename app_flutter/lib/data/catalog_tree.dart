@@ -949,6 +949,13 @@ const List<CatalogNode> kCatalogTree = [
             brandIds: ['polyroll'],
             lipskeyCategory: 'צינורות PPR פייזר',
           ),
+          CatalogNode(
+            id: 'ppr.pipes.ac',
+            title: 'צינורות מיזוג אוויר',
+            emoji: '❄️',
+            brandIds: ['polyroll'],
+            lipskeyCategory: 'צינורות PPR מיזוג אוויר',
+          ),
         ],
       ),
       CatalogNode(
@@ -1027,6 +1034,13 @@ const List<CatalogNode> kCatalogTree = [
         emoji: '⚡',
         brandIds: ['polyroll'],
         lipskeyCategory: 'אביזרי ריתוך חשמלי PPR',
+      ),
+      CatalogNode(
+        id: 'ppr.tools',
+        title: 'כלי ריתוך',
+        emoji: '🛠️',
+        brandIds: ['polyroll'],
+        lipskeyCategory: 'כלי ריתוך PPR',
       ),
     ],
   ),

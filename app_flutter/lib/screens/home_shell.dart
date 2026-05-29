@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.92 · 29.5.26 · SmartProduct: היסטוריית "נצפו לאחרונה" נשמרת + תקציר שורה + חלופה זולה + 📦 נתוני קטלוג',
+                          'v4.93 · 29.5.26 · ניקוי קטלוג PPR: צינורות מיזוג אוויר (Aquatherm) + כלי ריתוך כקטגוריות נפרדות + בורר-מידה תוך-קווי + החלפת-מוצר חיה',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
