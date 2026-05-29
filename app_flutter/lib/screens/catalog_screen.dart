@@ -10,7 +10,6 @@ import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
-import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
 import 'package:buildsmart/screens/finder_screen.dart';
@@ -6630,7 +6629,6 @@ class _SubGroupBrowser extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(variantsActiveSubGroupProvider);
     final selected = ref.watch(provider);
-    final cs = Theme.of(context).colorScheme;
     void toggleValue(String v) {
       final next = {...selected};
       if (next.contains(v)) {

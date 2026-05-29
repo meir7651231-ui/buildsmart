@@ -21,7 +21,10 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    compat / price for the selected brand's SKU (via the bridge).
 7. ⬜ Unified state (single provider for brand/acc/qty selection) with persist.
 8. ⬜ Golden tests for the unified card across every category.
-9. ⬜ Remove dead code left from the duplication + clean analyze warnings.
+9. 🟦 Cleared safe analyze warnings in `catalog_screen.dart` (unused
+   `lipskey_brand_screen` import + unused `cs` local). Remaining dead widgets
+   (`_MiniSearchPill`/`_Chip`/`_CatalogDrillSection`/`_diameterSubGroups`) await
+   a careful dedicated removal pass (file is large + shared with the other session).
 10. ⬜ Feature-flag infra to swap old/new card safely (A/B).
 
 ## Phase 2 · Data enrichment (11–20)
