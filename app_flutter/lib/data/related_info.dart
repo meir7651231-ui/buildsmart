@@ -902,6 +902,37 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
   return out;
 }
 
+// ─── עלות קו משוערת (Roadmap step 42) ───────────────────────────────────────
+/// A rough total-cost breakdown for installing the selected brand as a line:
+/// the product itself + the mandatory accessories + an estimated labour charge
+/// (derived from [installEffortFor] minutes at ~₪2.5/min ≈ ₪150/hr). All values
+/// are estimates (₪). Returns null when nothing can be priced.
+({int product, int accessories, int labour, int total})? lineCostEstimateFor(
+    SmartProduct sp, int brandIndex) {
+  if (brandIndex < 0 || brandIndex >= sp.brands.length) return null;
+  final brand = sp.brands[brandIndex];
+  final cat = catalogProductForBrand(brand);
+  final product =
+      brand.price ?? (cat == null ? 0 : (priceFor(cat) ?? 0));
+
+  var accessories = 0;
+  for (final a in sp.acc) {
+    if (a.must) accessories += a.price ?? 0;
+  }
+
+  final eff = cat == null ? null : installEffortFor(cat);
+  final labour = eff == null ? 0 : (eff.minutes * 2.5).round();
+
+  final total = product + accessories + labour;
+  if (total == 0) return null;
+  return (
+    product: product,
+    accessories: accessories,
+    labour: labour,
+    total: total,
+  );
+}
+
 // ─── תגיות גילוי (Roadmap step 67) ──────────────────────────────────────────
 /// Short discovery badges for the selected product+brand, derived from real
 /// signals: recommended flag, price position among siblings, variant breadth,

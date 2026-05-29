@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v4.96 · 29.5.26 · SmartProduct: זמן+קושי התקנה + טעויות נפוצות/טיפים + התראת מערכת (ניקוז/הזנה)',
+                          'v4.97 · 29.5.26 · SmartProduct: עלות קו משוערת (מוצר+אביזרים+עבודה) + זמן/קושי התקנה + טיפים + התראת מערכת',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

@@ -74,7 +74,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## Phase 5 · Price, suppliers & commerce (41–50)
 41. ⬜ Real multi-supplier price (not "by supplier") with comparison.
-42. ⬜ "Total cost for the line" — product + accessories + pipes + est. labour.
+42. ✅ "Total cost for the line" — `lineCostEstimateFor` (product + mandatory
+   accessories + labour@~₪2.5/min) → "🧮 עלות קו משוערת" breakdown.
+   Guard: `line_cost_test`.
 43. ⬜ Quantity discounts + auto promotions.
 44. ⬜ Supplier choice by distance/rating/availability from settings.
 45. ✅ "Cheaper alternative" — strictly-cheapest sibling brand via

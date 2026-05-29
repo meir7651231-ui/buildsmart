@@ -4801,6 +4801,25 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     fontWeight: FontWeight.w600)),
                           );
                         }),
+                        // Roadmap step 42 — estimated line cost breakdown.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final c =
+                                lineCostEstimateFor(p, _selectedBrand);
+                            if (c == null) return const SizedBox.shrink();
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                  '🧮 עלות קו משוערת: ~₪${c.total}  '
+                                  '(מוצר ₪${c.product} · אביזרים ₪${c.accessories} · עבודה ₪${c.labour})',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      color: Color(0xFF334155),
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w600)),
+                            );
+                          }),
                         if (compat.isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text('🔗 מתחבר ל-${compat.length} מוצרים',
