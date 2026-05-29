@@ -401,6 +401,13 @@ const List<String> kLipskeySubtypes = [
   // PPR (Polyroll) connection / subtype terms:
   'לריתוך', 'מחוזק', 'פייזר', 'משושה',
   'מיזוג אוויר', // AC blue-pipe line — render as ONE chip (not מיזוג + אוויר)
+  // PPR connection/form/welding terms — were rendering as green "linkable" words.
+  'פנים', 'חוץ', 'פנים/חוץ', 'מצרה', 'חשמלי', 'שקע', 'תקע', 'סמוי', 'ישר',
+  'פרפר', 'בין', 'אוגנים', 'אספקת', 'לנקודת',
+  // PPR welding-tool descriptors (kPprTools names):
+  'תותב', 'ריתוך', 'מקדח', 'מזוודת', 'פלטת', 'מכונת', 'מברגה', 'פיגורות',
+  'שולחני', 'קטנה', 'גדולה', 'לקטרים', 'חורים', 'לעבודה', 'בגובה',
+  'לצינורות', 'לרוכבים', 'מ"מ',
 ];
 
 const List<String> kLipskeyColors = [
