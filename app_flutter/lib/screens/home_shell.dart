@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.01 · 29.5.26 · SmartProduct: התאמת מים חמים בין מותגים + ציון נתוני כרטיס + יצרן/מק"ט + "הקו שלך עד כה"',
+                          'v5.02 · 29.5.26 · SmartProduct: מעקב התקנה (סימון שלבים נשמר) + צ׳קליסט בדיקת קבלה + התאמת מים חמים',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

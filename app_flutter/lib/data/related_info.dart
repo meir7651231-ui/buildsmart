@@ -902,6 +902,40 @@ List<({String brand, String advice})> brandDecisionGuide(SmartProduct sp) {
   return out;
 }
 
+// ─── צ'קליסט בדיקת קבלה (Roadmap step 38) ───────────────────────────────────
+/// End-of-install acceptance checks for [p], derived from its system + ends:
+/// supply lines get a pressure/flow test, drainage gets a flow/slope test,
+/// threaded ends get a seal check. De-duplicated, order-stable, never empty.
+List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
+  final out = <String>[];
+  final seen = <String>{};
+  void add(String s) {
+    if (seen.add(s)) out.add(s);
+  }
+
+  add('✔ הידוק כל החיבורים לפי המומלץ');
+  final spec = kVerifiedSpecs[p.sku];
+  if (spec != null) {
+    final supply = spec.endSystems.contains(WaterSystem.supply);
+    final drainOnly = spec.endSystems.length == 1 &&
+        spec.endSystems.contains(WaterSystem.drainage);
+    if (supply) {
+      add('✔ בדיקת לחץ (${spec.pressureRating ?? "לחץ מערכת"}) — ללא נזילה');
+      add('✔ פתיחת ברז ניתוק ובדיקת זרימה');
+    }
+    if (drainOnly) {
+      add('✔ בדיקת ניקוז במים זורמים + אטימות סיפון');
+      add('✔ אימות שיפוע ונקודת ביקורת');
+    }
+    if (spec.ends.any(
+        (e) => e.type == EndType.bspMale || e.type == EndType.bspFemale)) {
+      add('✔ בדיקת אטימת הברגות (טפלון/חבל)');
+    }
+  }
+  add('✔ ניקוי וסילוק שאריות');
+  return out;
+}
+
 // ─── התאמת מים חמים בין מותגים (Roadmap step 26) ────────────────────────────
 /// How many of a SmartProduct's brands are rated for hot water at [tempC]
 /// (default 60°C). Mirrors `productSuitableForTemp`: a brand with no spec/temp

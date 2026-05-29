@@ -22,6 +22,7 @@ import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/state/recently_viewed.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/state/stage_progress.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -4611,6 +4612,59 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           a,
                     ],
                   ),
+                // Roadmap step 31 — install progress: tap a stage to mark done.
+                if (p.stages.isNotEmpty)
+                  Builder(builder: (_) {
+                    ref.watch(stageProgressProvider);
+                    final prog = ref.read(stageProgressProvider.notifier);
+                    final done = prog.doneCount(p.key, p.stages.length);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('מעקב התקנה — $done/${p.stages.length} שלבים בוצעו',
+                              style: const TextStyle(
+                                  color: Color(0xFF666666),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: [
+                              for (var i = 0; i < p.stages.length; i++)
+                                GestureDetector(
+                                  onTap: () => prog.toggle(p.key, i),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 9, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: prog.isDone(p.key, i)
+                                          ? const Color(0xFFD1FAE5)
+                                          : const Color(0xFFF1F5F9),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          color: prog.isDone(p.key, i)
+                                              ? const Color(0xFF34D399)
+                                              : const Color(0xFFE2E8F0)),
+                                    ),
+                                    child: Text(
+                                        '${prog.isDone(p.key, i) ? "✓ " : ""}${p.stages[i].label}',
+                                        style: TextStyle(
+                                            color: prog.isDone(p.key, i)
+                                                ? const Color(0xFF047857)
+                                                : const Color(0xFF475569),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w700)),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                 // ── Selectors: מותג / סוג / מידה (collapsible) ──
                 _SheetSection(
                   title: 'בחר מותג',
@@ -4991,6 +5045,33 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                             color: Color(0xFF555555),
+                                            fontSize: 11)),
+                                  ),
+                              ],
+                            );
+                          }),
+                        // Roadmap step 38 — end-of-install acceptance checklist.
+                        if (expert)
+                          Builder(builder: (_) {
+                            final checks = acceptanceChecklistFor(prod);
+                            if (checks.isEmpty) return const SizedBox.shrink();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 6),
+                                const Text('בדיקת קבלה (סיום התקנה)',
+                                    style: TextStyle(
+                                        color: Color(0xFF888888),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)),
+                                for (final c in checks)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(c,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF0F766E),
                                             fontSize: 11)),
                                   ),
                               ],

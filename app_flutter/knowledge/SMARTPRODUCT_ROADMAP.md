@@ -65,7 +65,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    (Line-level safety/pressure/cost scoring still ⬜.) Guard: `card_score_test`.
 
 ## Phase 4 · Installation guidance (31–40)
-31. ⬜ Interactive stages with "mark done" checklist.
+31. ✅ Interactive stages with "mark done" — persisted `stageProgressProvider`
+   (per-product `key#idx`); tappable stage chips + "X/N שלבים בוצעו".
+   Guard: `acceptance_stage_test`.
 32. ⬜ Short install video per stage.
 33. ✅ Required-tools list (derived from spec ends → wrench/teflon, press tool,
    saw/solvent) via `installToolsFor` ("כלי עבודה" row). Guard: `standards_tools_test`.
@@ -75,7 +77,8 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    "טעויות נפוצות וטיפים" block. Guard: `install_effort_test`.
 36. ⬜ AR mode — place the product in space/on a wall via camera.
 37. ⬜ Exploded view of the parts.
-38. ⬜ "Test kit" — pressure/leak check at the end, with a compliance checklist.
+38. ✅ "Test kit" — `acceptanceChecklistFor` end-of-install checks (pressure/flow
+   for supply, flow/slope for drainage, seal for threads). Guard: `acceptance_stage_test`.
 39. ⬜ Export a tailored install-guide PDF.
 40. ⬜ Voice / read-aloud of the stages for hands-busy work.
 
