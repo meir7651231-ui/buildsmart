@@ -36,6 +36,16 @@ const Map<String, String> _kPprCategoryImage = {
   kPprPipesFiber: 'pipe_faser_20.jpg',
   kPprPipesAC: 'ppr_ac_pipe.jpg',
   kPprCouplers: 'ppr_coupler.jpg',
+  kPprElbows: 'ppr_elbow.jpg',
+  kPprTees: 'ppr_tee.jpg',
+  kPprPlugs: 'ppr_plug.jpg',
+  kPprOmega: 'ppr_omega.jpg',
+  kPprAdapters: 'ppr_adapter.jpg',
+  kPprValves: 'ppr_valve.jpg',
+  kPprCollars: 'ppr_collar.jpg',
+  kPprElectrofusion: 'ppr_ef.jpg',
+  kPprTools: 'ppr_tools.jpg',
+  // Saddles (p84) have no embedded raster (vector diagrams) → emoji fallback.
 };
 
 LipskeyCatalogProduct _ppr(
