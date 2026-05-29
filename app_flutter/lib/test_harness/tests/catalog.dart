@@ -194,21 +194,32 @@ List<TestResult> testCatalog() {
   // some fittings, dropping the nominal diameter. dims['d'] must appear as a
   // number in the name. SOFT for now (working the debt down line-by-line from
   // the PDF) → flip to HARD when it reaches 0.
+  // Precise: the nominal (a number in the name) must appear in d / D / dn.
+  // Skip valves (d=bore), threaded fittings (d=socket-OD) and ranges where d
+  // legitimately isn't the nominal. Now 0 → a real guard (pass = empty).
   final pprMisD = kPolyrollCatalog.where((p) {
     final d = p.dims?['d'];
     if (d == null) return false;
+    if (p.nameHe.contains('ברז') ||
+        p.nameHe.contains('"') ||
+        d.toString().contains('-')) return false;
+    final cand = {
+      d.toString(),
+      p.dims?['D']?.toString(),
+      p.dims?['dn נומינלי']?.toString(),
+    };
     final nums = RegExp(r'\d+(?:\.\d+)?')
         .allMatches(p.nameHe)
-        .map((m) => m.group(0))
+        .map((m) => m.group(0)!)
         .toSet();
-    return !nums.contains(d.toString());
+    return nums.isNotEmpty && !nums.any(cand.contains);
   }).toList();
   soft.add(TestCheck(
-    name: 'PPR · dims[d] תואם לשם (חוב יישור-עמודות)',
-    pass: true,
-    got: '${kPolyrollCatalog.length - pprMisD.length}/${kPolyrollCatalog.length}',
-    detail: 'לא-מיושרים: ${pprMisD.length} · '
-        '${pprMisD.take(4).map((p) => p.sku).join(", ")}',
+    name: 'PPR · dims[d] תואם לשם (יישור-עמודות)',
+    pass: pprMisD.isEmpty,
+    expected: '0',
+    got: '${pprMisD.length}',
+    detail: pprMisD.take(4).map((p) => '${p.sku}: ${p.nameHe}').join(' · '),
   ));
 
   // PPR card-richness per line (protocol §15): the 9-strip card builds from
