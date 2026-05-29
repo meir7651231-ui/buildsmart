@@ -66,7 +66,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    ("🌡 מים חמים: X/Y מותגים מתאימים", cross-checked vs engine
    `productSuitableForTemp`). (Interactive temp picker still ⬜.)
    Guard: `hot_water_suitability_test`.
-27. ⬜ Smart adapter recommendation when a brand doesn't directly mate the cart.
+27. ✅ Smart adapter recommendation — `adapterSuggestionFor` finds a bridging
+   catalog product that mates BOTH this product and a cart item, when there's no
+   direct connection ("🔌 מתאם מומלץ"). Guard: `adapter_suggestion_test`.
 28. ✅ "Your line so far" — `lineFitFor` reads the smart cart and reports how
    many cart items this product connects to ("🧩 בקו שלך"). Guard: `line_fit_test`.
 29. 🟦 Physical-connection warning — `connectionWarningHe` flags a spec'd product

@@ -4991,19 +4991,41 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             if (cprod != null) lineProducts.add(cprod);
                           }
                           final fit = lineFitFor(prod, lineProducts);
+                          // Roadmap step 27 — suggest a bridging adapter when
+                          // this product doesn't directly mate the line.
+                          final adapter = fit.connects > 0
+                              ? null
+                              : adapterSuggestionFor(prod, lineProducts);
                           return Padding(
                             padding: const EdgeInsets.only(top: 6),
-                            child: Text(
-                                '🧩 בקו שלך: ${cart.length} פריטים · '
-                                '${fit.connects > 0 ? "מתחבר ל-${fit.connects} מהם" : "אין חיבור ישיר לפריטי הקו"}',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: fit.connects > 0
-                                        ? const Color(0xFF0F766E)
-                                        : const Color(0xFF9A3412),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    '🧩 בקו שלך: ${cart.length} פריטים · '
+                                    '${fit.connects > 0 ? "מתחבר ל-${fit.connects} מהם" : "אין חיבור ישיר לפריטי הקו"}',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        color: fit.connects > 0
+                                            ? const Color(0xFF0F766E)
+                                            : const Color(0xFF9A3412),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700)),
+                                if (adapter != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                        '🔌 מתאם מומלץ: ${adapter.nameHe}',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF1D4ED8),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600)),
+                                  ),
+                              ],
+                            ),
                           );
                         }),
                         // Roadmap step 26 — hot-water suitability across brands.

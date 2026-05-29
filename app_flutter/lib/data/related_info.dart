@@ -1106,6 +1106,27 @@ List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
   return (connects: hits.length, names: hits.take(3).toList());
 }
 
+// ─── המלצת מתאם (Roadmap step 27) ───────────────────────────────────────────
+/// When [prod] does NOT directly mate anything already in [lineProducts], find
+/// a single catalog product that mates BOTH [prod] and at least one line item —
+/// a bridging adapter. Returns null when [prod] already connects, the line is
+/// empty, or no bridge exists. Correct-by-construction (uses the verified
+/// compatibility engine, never fabricates a part).
+LipskeyCatalogProduct? adapterSuggestionFor(
+    LipskeyCatalogProduct prod, List<LipskeyCatalogProduct> lineProducts) {
+  if (lineProducts.isEmpty) return null;
+  final prodMates = compatibleProductsFor(prod);
+  final prodMateSkus = prodMates.map((p) => p.sku).toSet();
+  if (lineProducts.any((lp) => prodMateSkus.contains(lp.sku))) return null;
+  final lineSkus = lineProducts.map((lp) => lp.sku).toSet();
+  for (final cand in prodMates) {
+    if (cand.sku == prod.sku) continue;
+    final candMates = compatibleProductsFor(cand).map((p) => p.sku).toSet();
+    if (candMates.any(lineSkus.contains)) return cand;
+  }
+  return null;
+}
+
 // ─── תלויות חומר / מה הקו צריך (Roadmap step 73) ────────────────────────────
 /// What the line needs to mate each end of [p] (the part on the other side):
 /// a matching pipe/coupling for compression ends, the opposite thread gender
