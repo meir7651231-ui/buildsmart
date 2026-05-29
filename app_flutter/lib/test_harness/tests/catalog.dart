@@ -190,6 +190,20 @@ List<TestResult> testCatalog() {
     got: '${prodCats.length}',
   ));
 
+  // PPR enrichment coverage — the drive-to-100% gauge (product image · per-
+  // sub-type spec image · dims≥3). Reported every CI run.
+  final pprN = kPolyrollCatalog.length;
+  final pImg = kPolyrollCatalog.where((p) => p.imageAsset != null).length;
+  final pSpec = kPolyrollCatalog.where((p) => p.specImageFile != null).length;
+  final pDims = kPolyrollCatalog.where((p) => (p.dims?.length ?? 0) >= 3).length;
+  int pct(int x) => (100 * x / pprN).round();
+  soft.add(TestCheck(
+    name: 'PPR · כיסוי-העשרה (תמונה · spec · dims)',
+    pass: true,
+    got: 'image ${pct(pImg)}% · spec ${pct(pSpec)}% · dims ${pct(pDims)}%',
+    detail: 'image $pImg/$pprN · spec $pSpec/$pprN · dims≥3 $pDims/$pprN',
+  ));
+
   // PPR misaligned-d tracker (protocol §15): bulk extraction shifted columns on
   // some fittings, dropping the nominal diameter. dims['d'] must appear as a
   // number in the name. SOFT for now (working the debt down line-by-line from
