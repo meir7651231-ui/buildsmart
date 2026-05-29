@@ -1,18 +1,28 @@
 # PLAYBOOK — continuous learning log (read me first)
 
-## Working mode — NO STOPPING
-Keep building, verifying, and pushing **without pausing for confirmation**. A
-step that looks "blocked" is **not** a stop — try **dozens of different
-approaches** first: local stubs, synthetic/mock data, heuristics, alternative
-libraries, placeholders, workarounds, re-framings. Only declare a **wall** when
-it is genuinely impassable *and* cannot be broken or bypassed after many honest
-attempts (e.g. it fundamentally requires a live external server, real device
-hardware, or paid third-party access that does not exist here). When you do hit
-such a wall, document it below **with every approach you tried** and move on to
-the next thing you *can* advance — never idle.
+## Working mode — NO STOPPING (but NO PUSHING without approval)
+Keep building, verifying, and **committing locally** **without pausing for
+confirmation**. A step that looks "blocked" is **not** a stop — try **dozens of
+different approaches** first: local stubs, synthetic/mock data, heuristics,
+alternative libraries, placeholders, workarounds, re-framings. Only declare a
+**wall** when it is genuinely impassable *and* cannot be broken or bypassed
+after many honest attempts (e.g. it fundamentally requires a live external
+server, real device hardware, or paid third-party access that does not exist
+here). When you do hit such a wall, document it below **with every approach you
+tried** and move on to the next thing you *can* advance — never idle.
 
-Cadence: run the **full test suite every ~5 steps**; bump version + push on a
-clean checkpoint; keep momentum.
+### 🚫 PUSH POLICY — hard rule (overrides everything above)
+**Do NOT `git push` until the user explicitly approves it in chat**, every time.
+"NO STOPPING" applies to *building/testing/committing locally* — it is **not** a
+standing authorization to push. Work freely on local commits; let them stack up.
+Only push when the user says so (e.g. "תדחוף" / "push" / "approved"). A clean
+checkpoint (0/0, full suite green) is a good moment to *offer* a push — not to
+perform one. This rule was added after pushes were made on the strength of the
+old "push on a clean checkpoint" line; that line is now void.
+
+Cadence: run the **full test suite every ~5 steps**; bump the version label on a
+clean checkpoint and **commit it locally**; keep momentum. Hold all commits for a
+single approved push later.
 
 ---
 
