@@ -83,6 +83,17 @@ LipskeyCatalogProduct? catalogProductForBrand(SmartBrand brand) =>
 LipskeyCatalogProduct? catalogProductForSmart(SmartProduct sp) =>
     sp.brands.isEmpty ? null : catalogProductForBrand(sp.recBrand);
 
+// ─── פילטר מותג מהיר (Roadmap step 65) ──────────────────────────────────────
+/// Whether a brand's product is rated for hot water at [tempC] (default 60°C).
+/// Mirrors the engine rule: an unknown/spec-less brand is kept (not filtered
+/// out). Used by the card's quick "מים חמים בלבד" brand filter.
+bool brandSuitableForHot(SmartBrand brand, {int tempC = 60}) {
+  final prod = catalogProductForBrand(brand);
+  if (prod == null) return true;
+  final t = kVerifiedSpecs[prod.sku]?.maxTempC;
+  return t == null || tempC <= t;
+}
+
 // ─── כיסוי מחברים (connector-coverage classification) ───────────────────────
 /// True when [p] is a flow-connector that SHOULD carry a [VerifiedSpec] — i.e.
 /// it physically joins the pipe network. Accessories / supports / tools (see
@@ -1089,6 +1100,13 @@ List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
   );
 }
 
+// ─── שרשרת מומחשת (Roadmap step 23) ─────────────────────────────────────────
+/// Format a materialized line (the engine's `plan.items`, which already include
+/// the inserted pipes/couplings/safety) as a glanceable RTL arrow sequence,
+/// e.g. "מחסום ← צינור ← מצמד". Pure formatting; empty list → ''.
+String chainArrowText(List<LipskeyCatalogProduct> items) =>
+    items.map((p) => p.nameHe).join(' ← ');
+
 // ─── הקו שלך עד כה (Roadmap step 28) ────────────────────────────────────────
 /// How the [current] product fits a line already in progress. Given the catalog
 /// products already chosen ([lineProducts]), returns how many of them [current]
@@ -1104,6 +1122,27 @@ List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
     if (compatible.contains(lp.sku)) hits.add(lp.nameHe);
   }
   return (connects: hits.length, names: hits.take(3).toList());
+}
+
+// ─── המלצת מתאם (Roadmap step 27) ───────────────────────────────────────────
+/// When [prod] does NOT directly mate anything already in [lineProducts], find
+/// a single catalog product that mates BOTH [prod] and at least one line item —
+/// a bridging adapter. Returns null when [prod] already connects, the line is
+/// empty, or no bridge exists. Correct-by-construction (uses the verified
+/// compatibility engine, never fabricates a part).
+LipskeyCatalogProduct? adapterSuggestionFor(
+    LipskeyCatalogProduct prod, List<LipskeyCatalogProduct> lineProducts) {
+  if (lineProducts.isEmpty) return null;
+  final prodMates = compatibleProductsFor(prod);
+  final prodMateSkus = prodMates.map((p) => p.sku).toSet();
+  if (lineProducts.any((lp) => prodMateSkus.contains(lp.sku))) return null;
+  final lineSkus = lineProducts.map((lp) => lp.sku).toSet();
+  for (final cand in prodMates) {
+    if (cand.sku == prod.sku) continue;
+    final candMates = compatibleProductsFor(cand).map((p) => p.sku).toSet();
+    if (candMates.any(lineSkus.contains)) return cand;
+  }
+  return null;
 }
 
 // ─── תלויות חומר / מה הקו צריך (Roadmap step 73) ────────────────────────────

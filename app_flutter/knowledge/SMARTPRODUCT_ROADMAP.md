@@ -6,6 +6,22 @@ it connects · how to install · what it costs · who sells it*.
 
 Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
+## 📌 Handoff — where we are (v5.14, ~46%: 32 ✅ + 14 🟦)
+Saved for the next run. Pick up here:
+- **Group A (still buildable locally, no deps) — do these next:**
+  76 config-versioning · 25 auto safety-kit (engine-grounded) · 46 add-whole-line-to-cart ·
+  74 full project BOM dialog (currently just a counter) · 89 regression-gate meta-test ·
+  82 mutation tests on price/selection · 85 accessibility (Semantics) · 57 profession-aware depth.
+- **Group B (finish the 🟦 partials):** 2,7,9,15,20,24,26,29,30,48,56,65,68 — see each step's note.
+- **Group C (needs infra/pkg/backend/assets — needs user decision):** 13,17,18,32,36,37,39,40,
+  41,43,44,49,50,53,54,55,60,69,70,79,83,84,86,88,90,91,92,93,94,96,97,98.
+- **Group D (risky / shared-subsystem / big refactor):** 1 (merge sheets — user said don't touch
+  catalog card), 10 (A/B flag), 61 (search index), 64 (modal→tab nav), 99/100 (meta).
+- Cadence reminder: full suite ~5 steps · local commit ~20 ops · live demo ~10 ops · **no push w/o approval**.
+- Prototype (`/index.html`) has NONE of these card features (only base leaves: אביזרים-נלווים/ספק/
+  מחיר/מותג/מק"ט/התקנה) — the SmartProduct "brain" is a Flutter-only evolution; content is grounded
+  in `kSmartProducts`/`kCatalogProducts`, only UI labels are new.
+
 ## Phase 1 · Unification & foundation (1–10)
 1. ⬜ Merge the two duplicate product sheets (`_SmartProductSheet` ↔ `showLipskeyProductSheet`).
 2. 🟦 `SmartProduct` linked to the **unified** catalog by SKU — bridge + contract
@@ -57,7 +73,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    this product, autoCompliance, 60°C) → BOM dialog (qty × name + gap count).
    Engine call path guarded by `build_line_bom_test`. (Live canvas-tap on the
    dialog button is unreliable — see PLAYBOOK §G — so verified by unit test.)
-23. ⬜ Materialized chain diagram inline (explicit pipes/couplings).
+23. ✅ Materialized chain inline — when a line is in progress (cart), show the
+   engine's materialized sequence (incl. inserted pipes/couplings) as an RTL
+   arrow chain via `chainArrowText`. Guard: `chain_arrow_test`.
 24. 🟦 System (supply/drainage) safety note + min-bore inline via
    `systemSafetyNoteHe` (gravity-drainage / upstream-shutoff) + the bore row.
    (Line-level ΔP still ⬜ — needs a built line.) Guard: `install_effort_test`.
@@ -66,7 +84,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
    ("🌡 מים חמים: X/Y מותגים מתאימים", cross-checked vs engine
    `productSuitableForTemp`). (Interactive temp picker still ⬜.)
    Guard: `hot_water_suitability_test`.
-27. ⬜ Smart adapter recommendation when a brand doesn't directly mate the cart.
+27. ✅ Smart adapter recommendation — `adapterSuggestionFor` finds a bridging
+   catalog product that mates BOTH this product and a cart item, when there's no
+   direct connection ("🔌 מתאם מומלץ"). Guard: `adapter_suggestion_test`.
 28. ✅ "Your line so far" — `lineFitFor` reads the smart cart and reports how
    many cart items this product connects to ("🧩 בקו שלך"). Guard: `line_fit_test`.
 29. 🟦 Physical-connection warning — `connectionWarningHe` flags a spec'd product
@@ -137,7 +157,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 63. ✅ "Similar" — variant-family list ("גרסאות נוספות במשפחה") in the 📦 section
    via `variantSiblingsOf`. (Upgrade/cheaper-alternative still ⬜.)
 64. ⬜ Health navigation: from the card straight to the relevant finder/category.
-65. ⬜ Quick in-brand filter (type/size/material/price) — extend existing.
+65. 🟦 Quick in-brand filter — extended the brand selector (סוג/מידה) with a
+   "🌡 מים חמים בלבד" toggle via `brandSuitableForHot`. (material/price quick
+   filters still ⬜.) Guard: `brand_hot_filter_test`.
 66. ✅ "Recently viewed" history — persisted `recentlyViewedProvider`
    (move-to-front + dedupe + cap-20), recorded on card open, shown as
    "נצפו לאחרונה". Guard: `recently_viewed_test`.
@@ -151,17 +173,26 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 70. ⬜ Voice search that lands on the card.
 
 ## Phase 8 · Contractor & projects (71–80)
-71. ⬜ Add product to a specific project (floor/apartment/room).
-72. ⬜ Duplicate-to-many-points ("need 6 of these in 3 rooms").
+71. ✅ Add product to a project location — persisted `cardProjectsProvider`
+   (ProjectItem: project/location/product/brand/qty, merges qty); "➕ הוסף
+   לפרויקט" button. Guard: `card_projects_test`.
+72. ✅ Duplicate-to-many-points — `addToLocations` + "×3 חדרים" button adds the
+   product to several locations at once. Guard: `card_projects_test`.
 73. ✅ Material dependencies — `connectionNeedsHe` lists what each end needs to
    mate ("מה הקו צריך לחיבור"). Guard: `line_fit_test`.
-74. ⬜ Cumulative project BOM from all chosen cards.
-75. ⬜ Customer quote straight from the choices.
+74. 🟦 Cumulative project view — running "📋 בפרויקט: N יחידות · M מיקומים" from
+   `cardProjectsProvider`. (Full materialized project BOM dialog pending.)
+   Guard: `card_projects_test`.
+75. ✅ Customer quote for the whole project — `projectQuoteText` aggregates each
+   assigned item (location/brand/qty + est. price) into a copyable quote
+   ("📋 הצעת מחיר לפרויקט"). Guard: `card_projects_test`.
 76. ⬜ Config versioning (compare alternatives for the project).
 77. ⬜ Team sharing: chat/notes on a chosen product.
 78. ⬜ Sync with the Gantt/tasks.
 79. ⬜ Unified procurement report (PDF) for the whole project.
-80. ⬜ Ready project templates ("standard bathroom" = a product set).
+80. ✅ Ready project templates — `projectTemplates` (אמבטיה/מטבח סטנדרטי, one real
+   SmartProduct per role, no over-pull) + `applyTemplate`; "🧩 תבניות" chips add
+   the whole set to the project. Guard: `card_projects_test`.
 
 ## Phase 9 · Quality, performance, accessibility (81–90)
 81. ✅ Comprehensive card-data integrity test (every SmartProduct × brand:

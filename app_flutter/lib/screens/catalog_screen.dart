@@ -17,6 +17,7 @@ import 'package:buildsmart/screens/finder_screen.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/card_detail_mode.dart';
+import 'package:buildsmart/state/card_projects.dart';
 import 'package:buildsmart/state/card_selection.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
@@ -4340,6 +4341,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   bool _sizeOpen = false;
   String? _selType;
   String? _selSize;
+  bool _hotOnly = false; // Roadmap step 65 — quick "hot-water only" filter.
 
   // Brands matching the chosen סוג / מידה filters (derived from names).
   List<int> get _filteredBrandIdx {
@@ -4347,7 +4349,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
     return [
       for (var i = 0; i < brands.length; i++)
         if ((_selType == null || brands[i].name.contains(_selType!)) &&
-            (_selSize == null || brands[i].name.contains(_selSize!)))
+            (_selSize == null || brands[i].name.contains(_selSize!)) &&
+            (!_hotOnly || brandSuitableForHot(brands[i])))
           i,
     ];
   }
@@ -4755,7 +4758,43 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                   expanded: _brandOpen,
                   onToggle: () => setState(() => _brandOpen = !_brandOpen),
                   child: Column(
-                    children: [for (final i in _filteredBrandIdx) _brandCard(i)],
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Roadmap step 65 — quick "hot-water only" brand filter.
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                          onTap: () => setState(() {
+                            _hotOnly = !_hotOnly;
+                            _applyFilterSelection();
+                          }),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: _hotOnly
+                                  ? const Color(0xFFFFEDD5)
+                                  : const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                  color: _hotOnly
+                                      ? const Color(0xFFFB923C)
+                                      : const Color(0xFFE2E8F0)),
+                            ),
+                            child: Text(
+                                '${_hotOnly ? "✓ " : ""}🌡 מים חמים בלבד',
+                                style: TextStyle(
+                                    color: _hotOnly
+                                        ? const Color(0xFFC2410C)
+                                        : const Color(0xFF64748B),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700)),
+                          ),
+                        ),
+                      ),
+                      for (final i in _filteredBrandIdx) _brandCard(i),
+                    ],
                   ),
                 ),
                 if (types.isNotEmpty)
@@ -4991,19 +5030,41 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             if (cprod != null) lineProducts.add(cprod);
                           }
                           final fit = lineFitFor(prod, lineProducts);
+                          // Roadmap step 27 — suggest a bridging adapter when
+                          // this product doesn't directly mate the line.
+                          final adapter = fit.connects > 0
+                              ? null
+                              : adapterSuggestionFor(prod, lineProducts);
                           return Padding(
                             padding: const EdgeInsets.only(top: 6),
-                            child: Text(
-                                '🧩 בקו שלך: ${cart.length} פריטים · '
-                                '${fit.connects > 0 ? "מתחבר ל-${fit.connects} מהם" : "אין חיבור ישיר לפריטי הקו"}',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: fit.connects > 0
-                                        ? const Color(0xFF0F766E)
-                                        : const Color(0xFF9A3412),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    '🧩 בקו שלך: ${cart.length} פריטים · '
+                                    '${fit.connects > 0 ? "מתחבר ל-${fit.connects} מהם" : "אין חיבור ישיר לפריטי הקו"}',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        color: fit.connects > 0
+                                            ? const Color(0xFF0F766E)
+                                            : const Color(0xFF9A3412),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700)),
+                                if (adapter != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                        '🔌 מתאם מומלץ: ${adapter.nameHe}',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFF1D4ED8),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600)),
+                                  ),
+                              ],
+                            ),
                           );
                         }),
                         // Roadmap step 26 — hot-water suitability across brands.
@@ -5148,6 +5209,26 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         fontWeight: FontWeight.w600)),
                               );
                             }),
+                          // Roadmap step 23 — inline materialized chain when a
+                          // line is in progress (cart not empty).
+                          Builder(builder: (_) {
+                            final line = _resolveCartProducts();
+                            if (line.isEmpty) return const SizedBox.shrink();
+                            final plan = buildInstallation([...line, prod],
+                                tempC: 60);
+                            final text = chainArrowText(plan.items);
+                            if (text.isEmpty) return const SizedBox.shrink();
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text('🔗 שרשרת: $text',
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      color: Color(0xFF475569),
+                                      fontSize: 10.5,
+                                      height: 1.3)),
+                            );
+                          }),
                           // Roadmap step 22 — "build my line" → materialized BOM.
                           const SizedBox(height: 8),
                           GestureDetector(
@@ -5169,6 +5250,177 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             ),
                           ),
                         ],
+                        // Roadmap steps 71/72/74 — assign to a project.
+                        Builder(builder: (_) {
+                          const proj = 'הפרויקט שלי';
+                          final loc = finderGroupFor(prod)?.label ?? 'כללי';
+                          ProjectItem mk(String l) => ProjectItem(
+                              project: proj,
+                              location: l,
+                              productKey: p.key,
+                              brandName: brand.name,
+                              sku: prod.sku);
+                          ref.watch(cardProjectsProvider);
+                          final notifier =
+                              ref.read(cardProjectsProvider.notifier);
+                          final inProj = notifier.forProject(proj);
+                          final units =
+                              inProj.fold<int>(0, (s, e) => s + e.qty);
+                          final locs = {for (final e in inProj) e.location}.length;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      notifier.add(mk(loc));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text(
+                                                  'נוסף ל"$proj" · $loc'),
+                                              duration:
+                                                  const Duration(seconds: 2)));
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 7),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFEEF2FF),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color: const Color(0xFFC7D2FE)),
+                                      ),
+                                      child: const Text('➕ הוסף לפרויקט',
+                                          style: TextStyle(
+                                              color: Color(0xFF4338CA),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () {
+                                      notifier.addToLocations(
+                                          mk(loc), ['חדר 1', 'חדר 2', 'חדר 3']);
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              content:
+                                                  Text('נוסף ל-3 חדרים'),
+                                              duration: Duration(seconds: 2)));
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 7),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF1F5F9),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color: const Color(0xFFE2E8F0)),
+                                      ),
+                                      child: const Text('×3 חדרים',
+                                          style: TextStyle(
+                                              color: Color(0xFF475569),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              // Roadmap step 80 — ready project templates.
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: [
+                                    const Text('תבניות:',
+                                        style: TextStyle(
+                                            color: Color(0xFF94A3B8),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600)),
+                                    for (final t in projectTemplates())
+                                      GestureDetector(
+                                        onTap: () {
+                                          notifier.applyTemplate(
+                                              proj, t.name, t.products);
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(SnackBar(
+                                                  content: Text(
+                                                      'הוחלה תבנית "${t.name}" (${t.products.length} פריטים)'),
+                                                  duration: const Duration(
+                                                      seconds: 2)));
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 9, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFDF4FF),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                                color: const Color(0xFFF0ABFC)),
+                                          ),
+                                          child: Text('🧩 ${t.name}',
+                                              style: const TextStyle(
+                                                  color: Color(0xFF86198F),
+                                                  fontSize: 10.5,
+                                                  fontWeight: FontWeight.w700)),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              if (units > 0)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                      '📋 בפרויקט "$proj": $units יחידות · $locs מיקומים',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          color: Color(0xFF4338CA),
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600)),
+                                ),
+                              // Roadmap step 75 — customer quote for the project.
+                              if (units > 0)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Clipboard.setData(ClipboardData(
+                                          text: projectQuoteText(
+                                              proj, inProj)));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              content: Text(
+                                                  'הצעת מחיר לפרויקט הועתקה'),
+                                              duration: Duration(seconds: 2)));
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 7),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFECFDF5),
+                                        borderRadius:
+                                            BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color: const Color(0xFFA7F3D0)),
+                                      ),
+                                      child: const Text(
+                                          '📋 הצעת מחיר לפרויקט',
+                                          style: TextStyle(
+                                              color: Color(0xFF047857),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700)),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        }),
                         // Roadmap step 19 — auto compliance/safety triggers.
                         Builder(builder: (_) {
                           final triggers = complianceTriggersFor(prod);
