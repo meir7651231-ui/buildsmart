@@ -965,6 +965,20 @@ String? connectionWarningHe(LipskeyCatalogProduct p) {
   return null;
 }
 
+// ─── דיפ-לינק למוצר (Roadmap step 68) ───────────────────────────────────────
+/// A shareable deep link that identifies this product (+ optional brand), e.g.
+/// `https://buildsmart.app/p/<key>?brand=<name>`. Pure & URL-encoded.
+String deepLinkFor(SmartProduct sp, [int? brandIndex]) {
+  final buf =
+      StringBuffer('https://buildsmart.app/p/${Uri.encodeComponent(sp.key)}');
+  if (brandIndex != null &&
+      brandIndex >= 0 &&
+      brandIndex < sp.brands.length) {
+    buf.write('?brand=${Uri.encodeComponent(sp.brands[brandIndex].name)}');
+  }
+  return buf.toString();
+}
+
 // ─── טקסט הצעת מחיר לשיתוף (Roadmap step 48) ────────────────────────────────
 /// A plain-text price quote for the selected brand, ready to copy/share. Built
 /// from the line-cost estimate (falls back to the brand price). Pure & stable.
@@ -983,6 +997,7 @@ String quoteTextFor(SmartProduct sp, int brandIndex) {
   } else if (b.price != null) {
     lines.add('מחיר: ~₪${b.price}');
   }
+  lines.add('🔗 ${deepLinkFor(sp, idx)}');
   lines.add('— נוצר ב-BuildSmart');
   return lines.join('\n');
 }

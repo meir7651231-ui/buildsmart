@@ -144,7 +144,9 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 67. ✅ Discovery tags (⭐ מומלץ מקצועי · 💰 הכי משתלם · 👑 פרימיום · 🎚 וריאנטים ·
    🔗 רב-תאימות) via `discoveryTagsFor`, shown as chips under the summary in both
    modes. Guard: `discovery_tags_test`.
-68. ⬜ Deep-link per product (share a link that opens the card).
+68. 🟦 Deep-link per product — `deepLinkFor` builds `…/p/<key>?brand=<name>`,
+   embedded in the shared quote. (Actual route-handling to open the card from a
+   link pending web routing.) Guard: `deep_link_test`.
 69. ⬜ QR on the physical product → opens the card.
 70. ⬜ Voice search that lands on the card.
 
