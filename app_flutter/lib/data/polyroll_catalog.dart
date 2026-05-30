@@ -50,12 +50,10 @@ const Map<String, String> _kPprCategoryImage = {
 
 /// Single-photo (or uniform multi-photo) pages → the product photo to use,
 /// extracted verbatim from the catalog PDF. Pages that mix sub-types are
-/// handled by `_pprPagePhoto`'s switch; pages with no usable photo (33,
-/// 81–85 — table-only) return null and fall back to a generic image. (§17)
+/// handled by `_pprPagePhoto`'s switch; pages with no usable photo (81–85
+/// — PPRCT table-only) return null and fall back to a generic image. (§17)
 const Map<int, String> _kPprPagePhoto = {
   21: 'ppr_p21_a.jpg', 23: 'ppr_p23_a.jpg', 24: 'ppr_p24_a.jpg',
-  25: 'ppr_p25_a.jpg', 26: 'ppr_p26_a.jpg', 27: 'ppr_p27_a.jpg',
-  28: 'ppr_p28_a.jpg', 32: 'ppr_p32_a.jpg', 34: 'ppr_p34_a.jpg',
   36: 'ppr_p36_a.jpg', 37: 'ppr_p37_a.jpg', 38: 'ppr_p38_a.jpg',
   39: 'ppr_p39_a.jpg', 40: 'ppr_p40_a.jpg', 41: 'ppr_p41_a.jpg',
   42: 'ppr_p42_a.jpg', 43: 'ppr_p43_a.jpg', 44: 'ppr_p44_a.jpg',
@@ -68,7 +66,7 @@ const Map<int, String> _kPprPagePhoto = {
   63: 'ppr_p63_a.jpg', 64: 'ppr_p64_a.jpg', 65: 'ppr_p65_a.jpg',
   66: 'ppr_p66_a.jpg', 67: 'ppr_p67_a.jpg', 68: 'ppr_p68_a.jpg',
   69: 'ppr_p69_a.jpg', 70: 'ppr_p70_a.jpg', 71: 'ppr_p71_a.jpg',
-  72: 'ppr_p72_a.jpg', 80: 'ppr_p80_a.jpg', 86: 'ppr_p86_a.jpg',
+  80: 'ppr_p80_a.jpg', 86: 'ppr_p86_a.jpg',
   87: 'ppr_p87_b.jpg',
 };
 
@@ -89,6 +87,24 @@ String? _pprPagePhoto(int page, String nameHe) {
     case 22: // פקק (a) · אומגה (b) · מצמד (c)
       return _pp(22,
           nameHe.contains('אומגה') ? 'b' : (nameHe.contains('פקק') ? 'a' : 'c'));
+    case 25: // ברך: משטח ריסון פנימי (a) · חיצוני (b) · פנימי (c)
+      if (nameHe.contains('משטח ריסון')) return _pp(25, 'a');
+      return _pp(25, nameHe.contains('חיצוני') ? 'b' : 'c');
+    case 26: // מסעף: פנימי (a) · חיצוני (b)
+      return _pp(26, nameHe.contains('חיצוני') ? 'b' : 'a');
+    case 27: // מתאם עגול: פנימי (a) · חיצוני (b)
+      return _pp(27, nameHe.contains('חיצוני') ? 'b' : 'a');
+    case 28: // מתאם משושה: פנימי (a) · חיצוני (b)
+      return _pp(28, nameHe.contains('חיצוני') ? 'b' : 'a');
+    case 33: // EF שרוול (a) · צווארון (b) · gasket=c · פקק חורים (d)
+      if (nameHe.contains('שרוול')) return _pp(33, 'a');
+      if (nameHe.contains('צווארון')) return _pp(33, 'b');
+      if (nameHe.contains('פקק')) return _pp(33, 'd');
+      return null;
+    case 34: // אוגן (a) · סעפת למונים (b) · לוחית (c)
+      if (nameHe.contains('סעפת')) return _pp(34, 'b');
+      if (nameHe.contains('לוחית')) return _pp(34, 'c');
+      return _pp(34, 'a');
     case 29: // מתאם משושה (a) · רוכב משושה (c)
       return _pp(29, nameHe.contains('רוכב') ? 'c' : 'a');
     case 30: // סמוי+ידית (a) · סמוי ללא ידית (b) · בין אוגנים = wafer (c)
@@ -97,6 +113,10 @@ String? _pprPagePhoto(int page, String nameHe) {
     case 31: // מעבר (a) · אלכסוני עם מניעת זרימה (b) · אלכסוני (c)
       if (nameHe.contains('מניעת זרימה')) return _pp(31, 'b');
       return _pp(31, nameHe.contains('אלכסוני') ? 'c' : 'a');
+    case 32: // ברז כדורי standard (a) · פוליפרופילן (b)
+      return _pp(32, nameHe.contains('פוליפרופילן') ? 'b' : 'a');
+    case 72: // ברך חשמלי 45° (a) · 90° (b)
+      return _pp(72, nameHe.contains('90°') ? 'b' : 'a');
     case 73: // מסעף חשמלי (a) · מצמד חשמלי (b)
       return _pp(73, nameHe.contains('מצמד') ? 'b' : 'a');
     case 74: // מצמד חשמלי (a) · אומגה (b)
@@ -412,61 +432,61 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('98217783', 'רוכב PPR 125/40', 'PPR Saddle 125/40', kPprSaddles, 'PPR Saddles', '🪢', 24, dims: {'D': '52.00', 'z': '20.50', 'l': '34.00', 'd2': '40', 'd1': '125', 'd': '40'}),
   _ppr('98217784', 'רוכב PPR 125/50', 'PPR Saddle 125/50', kPprSaddles, 'PPR Saddles', '🪢', 24, dims: {'D': '68.00', 'z': '23.50', 'l': '34.00', 'd2': '50', 'd1': '125', 'd': '50'}),
   _ppr('98217785', 'רוכב PPR 125/63', 'PPR Saddle 125/63', kPprSaddles, 'PPR Saddles', '🪢', 24, dims: {'D': '84.00', 'z': '27.50', 'l': '38.00', 'd2': '63', 'd1': '125', 'd': '63'}),
-  _ppr('9091020108', 'ברך PPR 20x½"', 'PPR Elbow 20x½"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '½"', 'c': '20', 'L': '51', 'D1': '37', 'z1': '15.5', 'l1': '31.5', 'D': '29.5', 'z': '16.5', 'l': '31', 'd': '20'}),
-  _ppr('9091020110', 'ברך PPR 20x¾"', 'PPR Elbow 20x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'c': '25', 'L': '54', 'D1': '44', 'z1': '24.0', 'l1': '37.0', 'D': '34.0', 'z': '22.5', 'l': '37', 'd': '20'}),
-  _ppr('9091020113', 'ברך PPR 25x½"', 'PPR Elbow 25x½"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '½"', 'c': '20', 'L': '53', 'D1': '37', 'z1': '15.0', 'l1': '31.0', 'D': '34.0', 'z': '17.5', 'l': '37', 'd': '25'}),
-  _ppr('9091020112', 'ברך PPR 25x¾"', 'PPR Elbow 25x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'c': '25', 'L': '54', 'D1': '44', 'z1': '24.0', 'l1': '37.0', 'D': '34.0', 'z': '21.0', 'l': '37', 'd': '25'}),
-  _ppr('9091023506', 'ברך PPR 20x½"', 'PPR Elbow 20x½"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '½"', 'D1': '37', 'Z1': '53.0', 'D': '29.5', 'z': '17.0', 'L': '31.5', 'd': '20'}),
-  _ppr('9091023508', 'ברך PPR 20x¾"', 'PPR Elbow 20x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'D1': '38', 'Z1': '54.0', 'D': '34.0', 'z': '22.5', 'L': '37.0', 'd': '20'}),
-  _ppr('9091023510', 'ברך PPR 25x¾"', 'PPR Elbow 25x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'D1': '¾"', 'Z1': '38', 'D': '54.0', 'z': '34.0', 'L': '21.0', 'd': '37.0'}),
-  _ppr('9091023512', 'ברך PPR 32x¾"', 'PPR Elbow 32x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'D1': '38', 'Z1': '68.0', 'D': '43.0', 'z': '9.5', 'L': '27.5', 'd': '32'}),
-  _ppr('9091023514', 'ברך PPR "32x1', 'PPR Elbow "32x1', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'Z1': '"1', 'D': '52', 'z': '85.5', 'L': '43.0', 'd': '13.0'}),
-  _ppr('9091023010', 'ברך PPR 20x½"', 'PPR Elbow 20x½"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '½"', 'D1': '37.0', 'Z1': '18.5', 'L1': '31.5', 'D': '29.5', 'z': '17.0', 'L': '31.5', 'd': '20'}),
-  _ppr('9091023008', 'ברך PPR 20x¾"', 'PPR Elbow 20x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'D1': '44.0', 'Z1': '24.0', 'L1': '37.0', 'D': '34.0', 'z': '22.5', 'L': '37.0', 'd': '20'}),
-  _ppr('9091023014', 'ברך PPR 25x½"', 'PPR Elbow 25x½"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '½"', 'D1': '37.0', 'Z1': '24.0', 'L1': '37.0', 'D': '34.0', 'z': '18.0', 'L': '34.0', 'd': '25'}),
-  _ppr('9091023012', 'ברך PPR 25x¾"', 'PPR Elbow 25x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'D1': '¾"', 'Z1': '44.0', 'L1': '24.0', 'D': '37.0', 'z': '34.0', 'L': '21.0', 'd': '37.0'}),
-  _ppr('9091023016', 'ברך PPR 32x¾"', 'PPR Elbow 32x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'D1': '44.0', 'Z1': '38.0', 'L1': '51', 'D': '43.0', 'z': '9.5', 'L': '27.5', 'd': '32'}),
-  _ppr('9091023018', 'ברך PPR "32x1', 'PPR Elbow "32x1', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '"1', 'D1': '60.5', 'Z1': '44.5', 'L1': '66.5', 'D': '43.0', 'z': '16.0', 'L': '32.0', 'd': '32'}),
-  _ppr('9091025006', 'מסעף PPR 20x½"', 'PPR Tee 20x½"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '½"', 'D1': '37', 'Z1': '24', 'L1': '37', 'D': '29.5', 'z': '17.0', 'L': '31.5', 'd': '20'}),
-  _ppr('9091025008', 'מסעף PPR 20x¾"', 'PPR Tee 20x¾"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '¾"', 'D1': '44', 'Z1': '25', 'L1': '38', 'D': '34.0', 'z': '22.5', 'L': '37.0', 'd': '20'}),
-  _ppr('9091025010', 'מסעף PPR 25x½"', 'PPR Tee 25x½"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '½"', 'D1': '37', 'Z1': '25', 'L1': '38', 'D': '34.0', 'z': '18.0', 'L': '34.0', 'd': '25'}),
-  _ppr('9091025012', 'מסעף PPR 25x¾"', 'PPR Tee 25x¾"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'D1': '¾"', 'Z1': '44', 'L1': '25', 'D': '38', 'z': '34.0', 'L': '21.0', 'd': '37.0'}),
-  _ppr('9091025014', 'מסעף PPR 32x¾"', 'PPR Tee 32x¾"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '¾"', 'D1': '44', 'Z1': '38', 'L1': '51', 'D': '43.0', 'z': '9.5', 'L': '27.5', 'd': '32'}),
-  _ppr('9091025016', 'מסעף PPR 32x1"x32', 'PPR Tee 32x1"x32', kPprTees, 'PPR Tees', '🔱', 26, dims: {'D1': '"1', 'Z1': '60', 'L1': '49', 'D': '67', 'z': '43.0', 'L': '13.5', 'd': '31.0'}),
-  _ppr('9091025018', 'מסעף PPR 40x½"', 'PPR Tee 40x½"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'Z1': '½"', 'L1': '37', 'D': '27', 'z': '40', 'L': '52', 'd': '21'}),
-  _ppr('9091025019', 'מסעף PPR 40x¾"', 'PPR Tee 40x¾"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '¾"', 'D1': '52', 'Z1': '27.5', 'L1': '40.5', 'D': '52', 'z': '20', 'L': '40.4', 'd': '40'}),
-  _ppr('9091025020', 'מסעף PPR 40x1"x40', 'PPR Tee 40x1"x40', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '"1', 'D1': '60', 'Z1': '34', 'L1': '56', 'D': '52', 'z': '21', 'L': '41.5', 'd': '40'}),
-  _ppr('9091025506', 'מסעף PPR 20x½"', 'PPR Tee 20x½"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '½"', 'D1': '37', 'l1': '53', 'D': '29.5', 'z2': '16', 'z': '17', 'l': '31.5', 'd': '20'}),
-  _ppr('9091021008', 'מתאם PPR עגול 20x½"', 'PPR Adapter 20x½"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '½"', 'L': '40.5', 'D': '37.5', 'z': '13.0', 'l': '27.5', 'd': '20'}),
-  _ppr('9091021010', 'מתאם PPR עגול 20x¾"', 'PPR Adapter 20x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '¾"', 'L': '40.5', 'D': '43.5', 'z': '13.0', 'l': '27.5', 'd': '20'}),
-  _ppr('9091021011', 'מתאם PPR עגול 25x½"', 'PPR Adapter 25x½"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '½"', 'L': '42.0', 'D': '37.5', 'z': '13.0', 'l': '29.5', 'd': '25'}),
-  _ppr('9091021012', 'מתאם PPR עגול 25x¾"', 'PPR Adapter 25x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '¾"', 'L': '40.5', 'D': '43.5', 'z': '11.5', 'l': '27.5', 'd': '25'}),
-  _ppr('9091021013', 'מתאם PPR עגול 32x¾"', 'PPR Adapter 32x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'z': '¾"', 'l': '43.5', 'd': '43.5'}),
-  _ppr('9091021208', 'מתאם PPR עגול 20x½"', 'PPR Adapter 20x½"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '½"', 'D': '38.5', 'z': '42.0', 'L': '56.5', 'd': '20'}),
-  _ppr('9091021210', 'מתאם PPR עגול 20x¾"', 'PPR Adapter 20x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '¾"', 'D': '38.5', 'z': '43.0', 'L': '57.5', 'd': '20'}),
-  _ppr('9091021211', 'מתאם PPR עגול 25x½"', 'PPR Adapter 25x½"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '½"', 'D': '38.5', 'z': '42.0', 'L': '58.0', 'd': '25'}),
-  _ppr('9091021212', 'מתאם PPR עגול 25x¾"', 'PPR Adapter 25x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '¾"', 'D': '38.5', 'z': '41.5', 'L': '57.5', 'd': '25'}),
-  _ppr('9091021213', 'מתאם PPR עגול 32x¾"', 'PPR Adapter 32x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'L': '¾"', 'd': '43.0'}),
-  _ppr('9091021114', 'מתאם PPR משושה "32x1', 'PPR Adapter "32x1', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '39', 'R': '"1', 'L1': '59.5', 'D': '60.0', 'z': '19.5', 'l': '37.5', 'd': '32'}),
-  _ppr('9091021115', 'מתאם PPR משושה "40x1', 'PPR Adapter "40x1', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '39', 'R': '"1', 'L1': '62.0', 'D': '60.0', 'z': '19.5', 'l': '40.0', 'd': '40'}),
-  _ppr('9091021116', 'מתאם PPR משושה 40x¼"', 'PPR Adapter 40x¼"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '50', 'R': '1x¼"', 'L1': '63.0', 'D': '74.0', 'z': '19.5', 'l': '40.0', 'd': '40'}),
-  _ppr('9091021117', 'מתאם PPR משושה 50x¼"', 'PPR Adapter 50x¼"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '50', 'R': '1x¼"', 'L1': '66.0', 'D': '74.0', 'z': '19.5', 'l': '43.0', 'd': '50'}),
-  _ppr('9091021118', 'מתאם PPR משושה 50x½"', 'PPR Adapter 50x½"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'D': '55', 'z': '1x½"', 'l': '67.0', 'd': '85.5'}),
-  _ppr('9091021119', 'מתאם PPR משושה 63x½"', 'PPR Adapter 63x½"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '55', 'R': '1x½"', 'L1': '73.5', 'D': '84.0', 'z': '24.0', 'l': '51.5', 'd': '63'}),
-  _ppr('9091021120', 'מתאם PPR משושה "63x2', 'PPR Adapter "63x2', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'R': '67', 'L1': '"2', 'D': '77.0', 'z': '101.0', 'l': '23.5', 'd': '51.0'}),
-  _ppr('9091021122', 'מתאם PPR משושה "75x2', 'PPR Adapter "75x2', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'R': '67', 'L1': '"2', 'D': '77.0', 'z': '100.0', 'l': '21.0', 'd': '51.0'}),
-  _ppr('9091021314', 'מתאם PPR משושה "32x1', 'PPR Adapter "32x1', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '32', 'R': '"1', 'D': '53.0', 'z': '60.5', 'L': '78.5', 'd': '32'}),
-  _ppr('9091021316', 'מתאם PPR משושה 32x¼"', 'PPR Adapter 32x¼"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '41', 'R': '1x¼"', 'D': '68.0', 'z': '63.0', 'L': '81.0', 'd': '32'}),
-  _ppr('9091021317', 'מתאם PPR משושה "40x1', 'PPR Adapter "40x1', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '32', 'R': '"1', 'D': '52.0', 'z': '60.5', 'L': '81.0', 'd': '40'}),
-  _ppr('9091021318', 'מתאם PPR משושה 40x¼"', 'PPR Adapter 40x¼"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '41', 'R': '1x¼"', 'D': '68.0', 'z': '64.0', 'L': '84.5', 'd': '40'}),
-  _ppr('9091021319', 'מתאם PPR משושה 50x¼"', 'PPR Adapter 50x¼"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '41', 'R': '1x¼"', 'D': '68.0', 'z': '62.0', 'L': '85.5', 'd': '50'}),
-  _ppr('9091021320', 'מתאם PPR משושה 50x½"', 'PPR Adapter 50x½"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '46', 'R': '1x½"', 'D': '74.0', 'z': '65.0', 'L': '88.5', 'd': '50'}),
-  _ppr('9091021321', 'מתאם PPR משושה 63x½"', 'PPR Adapter 63x½"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '46', 'R': '1x½"', 'D': '72.5', 'z': '67.0', 'L': '94.5', 'd': '63'}),
-  _ppr('9091021322', 'מתאם PPR משושה "63x2', 'PPR Adapter "63x2', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '50', 'R': '"2', 'D': '84.0', 'z': '75.0', 'L': '102.5', 'd': '63'}),
-  _ppr('9091021323', 'מתאם PPR משושה "75x2', 'PPR Adapter "75x2', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '50', 'R': '"2', 'D': '84.0', 'z': '72.0', 'L': '102.0', 'd': '75'}),
-  _ppr('9091021324', 'מתאם PPR משושה 75x½"', 'PPR Adapter 75x½"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '65', 'R': '2x½"', 'D': '100.0', 'z': '75.0', 'L': '105.0', 'd': '75'}),
-  _ppr('9091021325', 'מתאם PPR משושה "90x3', 'PPR Adapter "90x3', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '85', 'R': '"3', 'D': '120.0', 'z': '88.0', 'L': '121.0', 'd': '90'}),
-  _ppr('9091021327', 'מתאם PPR משושה "110x4', 'PPR Adapter "110x4', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '105', 'R': '"4', 'D': '147.0', 'z': '111.0', 'L': '148.0', 'd': '110'}),
+  _ppr('9091020108', 'ברך PPR משטח ריסון תבריג פנימי 20x½"', 'PPR Elbow 20x½"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '½"', 'c': '20', 'L': '51', 'D1': '37', 'z1': '15.5', 'l1': '31.5', 'D': '29.5', 'z': '16.5', 'l': '31', 'd': '20'}),
+  _ppr('9091020110', 'ברך PPR משטח ריסון תבריג פנימי 20x¾"', 'PPR Elbow 20x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'c': '25', 'L': '54', 'D1': '44', 'z1': '24.0', 'l1': '37.0', 'D': '34.0', 'z': '22.5', 'l': '37', 'd': '20'}),
+  _ppr('9091020113', 'ברך PPR משטח ריסון תבריג פנימי 25x½"', 'PPR Elbow 25x½"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '½"', 'c': '20', 'L': '53', 'D1': '37', 'z1': '15.0', 'l1': '31.0', 'D': '34.0', 'z': '17.5', 'l': '37', 'd': '25'}),
+  _ppr('9091020112', 'ברך PPR משטח ריסון תבריג פנימי 25x¾"', 'PPR Elbow 25x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'c': '25', 'L': '54', 'D1': '44', 'z1': '24.0', 'l1': '37.0', 'D': '34.0', 'z': '21.0', 'l': '37', 'd': '25'}),
+  _ppr('9091023506', 'ברך PPR תבריג חיצוני 20x½"', 'PPR Elbow 20x½"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '½"', 'D1': '37', 'Z1': '53.0', 'D': '29.5', 'z': '17.0', 'L': '31.5', 'd': '20'}),
+  _ppr('9091023508', 'ברך PPR תבריג חיצוני 20x¾"', 'PPR Elbow 20x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'D1': '38', 'Z1': '54.0', 'D': '34.0', 'z': '22.5', 'L': '37.0', 'd': '20'}),
+  _ppr('9091023510', 'ברך PPR תבריג חיצוני 25x¾"', 'PPR Elbow 25x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'D1': '¾"', 'Z1': '38', 'D': '54.0', 'z': '34.0', 'L': '21.0', 'd': '37.0'}),
+  _ppr('9091023512', 'ברך PPR תבריג חיצוני 32x¾"', 'PPR Elbow 32x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'D1': '38', 'Z1': '68.0', 'D': '43.0', 'z': '9.5', 'L': '27.5', 'd': '32'}),
+  _ppr('9091023514', 'ברך PPR תבריג חיצוני "32x1', 'PPR Elbow "32x1', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'Z1': '"1', 'D': '52', 'z': '85.5', 'L': '43.0', 'd': '13.0'}),
+  _ppr('9091023010', 'ברך PPR תבריג פנימי 20x½"', 'PPR Elbow 20x½"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '½"', 'D1': '37.0', 'Z1': '18.5', 'L1': '31.5', 'D': '29.5', 'z': '17.0', 'L': '31.5', 'd': '20'}),
+  _ppr('9091023008', 'ברך PPR תבריג פנימי 20x¾"', 'PPR Elbow 20x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'D1': '44.0', 'Z1': '24.0', 'L1': '37.0', 'D': '34.0', 'z': '22.5', 'L': '37.0', 'd': '20'}),
+  _ppr('9091023014', 'ברך PPR תבריג פנימי 25x½"', 'PPR Elbow 25x½"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '½"', 'D1': '37.0', 'Z1': '24.0', 'L1': '37.0', 'D': '34.0', 'z': '18.0', 'L': '34.0', 'd': '25'}),
+  _ppr('9091023012', 'ברך PPR תבריג פנימי 25x¾"', 'PPR Elbow 25x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'D1': '¾"', 'Z1': '44.0', 'L1': '24.0', 'D': '37.0', 'z': '34.0', 'L': '21.0', 'd': '37.0'}),
+  _ppr('9091023016', 'ברך PPR תבריג פנימי 32x¾"', 'PPR Elbow 32x¾"', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '¾"', 'D1': '44.0', 'Z1': '38.0', 'L1': '51', 'D': '43.0', 'z': '9.5', 'L': '27.5', 'd': '32'}),
+  _ppr('9091023018', 'ברך PPR תבריג פנימי "32x1', 'PPR Elbow "32x1', kPprElbows, 'PPR Elbows', '↪️', 25, dims: {'R': '"1', 'D1': '60.5', 'Z1': '44.5', 'L1': '66.5', 'D': '43.0', 'z': '16.0', 'L': '32.0', 'd': '32'}),
+  _ppr('9091025006', 'מסעף PPR תבריג פנימי 20x½"', 'PPR Tee 20x½"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '½"', 'D1': '37', 'Z1': '24', 'L1': '37', 'D': '29.5', 'z': '17.0', 'L': '31.5', 'd': '20'}),
+  _ppr('9091025008', 'מסעף PPR תבריג פנימי 20x¾"', 'PPR Tee 20x¾"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '¾"', 'D1': '44', 'Z1': '25', 'L1': '38', 'D': '34.0', 'z': '22.5', 'L': '37.0', 'd': '20'}),
+  _ppr('9091025010', 'מסעף PPR תבריג פנימי 25x½"', 'PPR Tee 25x½"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '½"', 'D1': '37', 'Z1': '25', 'L1': '38', 'D': '34.0', 'z': '18.0', 'L': '34.0', 'd': '25'}),
+  _ppr('9091025012', 'מסעף PPR תבריג פנימי 25x¾"', 'PPR Tee 25x¾"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'D1': '¾"', 'Z1': '44', 'L1': '25', 'D': '38', 'z': '34.0', 'L': '21.0', 'd': '37.0'}),
+  _ppr('9091025014', 'מסעף PPR תבריג פנימי 32x¾"', 'PPR Tee 32x¾"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '¾"', 'D1': '44', 'Z1': '38', 'L1': '51', 'D': '43.0', 'z': '9.5', 'L': '27.5', 'd': '32'}),
+  _ppr('9091025016', 'מסעף PPR תבריג פנימי 32x1"x32', 'PPR Tee 32x1"x32', kPprTees, 'PPR Tees', '🔱', 26, dims: {'D1': '"1', 'Z1': '60', 'L1': '49', 'D': '67', 'z': '43.0', 'L': '13.5', 'd': '31.0'}),
+  _ppr('9091025018', 'מסעף PPR תבריג פנימי 40x½"', 'PPR Tee 40x½"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'Z1': '½"', 'L1': '37', 'D': '27', 'z': '40', 'L': '52', 'd': '21'}),
+  _ppr('9091025019', 'מסעף PPR תבריג פנימי 40x¾"', 'PPR Tee 40x¾"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '¾"', 'D1': '52', 'Z1': '27.5', 'L1': '40.5', 'D': '52', 'z': '20', 'L': '40.4', 'd': '40'}),
+  _ppr('9091025020', 'מסעף PPR תבריג פנימי 40x1"x40', 'PPR Tee 40x1"x40', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '"1', 'D1': '60', 'Z1': '34', 'L1': '56', 'D': '52', 'z': '21', 'L': '41.5', 'd': '40'}),
+  _ppr('9091025506', 'מסעף PPR תבריג חיצוני 20x½"', 'PPR Tee 20x½"', kPprTees, 'PPR Tees', '🔱', 26, dims: {'R': '½"', 'D1': '37', 'l1': '53', 'D': '29.5', 'z2': '16', 'z': '17', 'l': '31.5', 'd': '20'}),
+  _ppr('9091021008', 'מתאם PPR עגול תבריג פנימי 20x½"', 'PPR Adapter 20x½"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '½"', 'L': '40.5', 'D': '37.5', 'z': '13.0', 'l': '27.5', 'd': '20'}),
+  _ppr('9091021010', 'מתאם PPR עגול תבריג פנימי 20x¾"', 'PPR Adapter 20x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '¾"', 'L': '40.5', 'D': '43.5', 'z': '13.0', 'l': '27.5', 'd': '20'}),
+  _ppr('9091021011', 'מתאם PPR עגול תבריג פנימי 25x½"', 'PPR Adapter 25x½"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '½"', 'L': '42.0', 'D': '37.5', 'z': '13.0', 'l': '29.5', 'd': '25'}),
+  _ppr('9091021012', 'מתאם PPR עגול תבריג פנימי 25x¾"', 'PPR Adapter 25x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '¾"', 'L': '40.5', 'D': '43.5', 'z': '11.5', 'l': '27.5', 'd': '25'}),
+  _ppr('9091021013', 'מתאם PPR עגול תבריג פנימי 32x¾"', 'PPR Adapter 32x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'z': '¾"', 'l': '43.5', 'd': '43.5'}),
+  _ppr('9091021208', 'מתאם PPR עגול תבריג חיצוני 20x½"', 'PPR Adapter 20x½"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '½"', 'D': '38.5', 'z': '42.0', 'L': '56.5', 'd': '20'}),
+  _ppr('9091021210', 'מתאם PPR עגול תבריג חיצוני 20x¾"', 'PPR Adapter 20x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '¾"', 'D': '38.5', 'z': '43.0', 'L': '57.5', 'd': '20'}),
+  _ppr('9091021211', 'מתאם PPR עגול תבריג חיצוני 25x½"', 'PPR Adapter 25x½"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '½"', 'D': '38.5', 'z': '42.0', 'L': '58.0', 'd': '25'}),
+  _ppr('9091021212', 'מתאם PPR עגול תבריג חיצוני 25x¾"', 'PPR Adapter 25x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'R': '¾"', 'D': '38.5', 'z': '41.5', 'L': '57.5', 'd': '25'}),
+  _ppr('9091021213', 'מתאם PPR עגול תבריג חיצוני 32x¾"', 'PPR Adapter 32x¾"', kPprAdapters, 'PPR Adapters', '🔩', 27, dims: {'L': '¾"', 'd': '43.0'}),
+  _ppr('9091021114', 'מתאם PPR משושה תבריג פנימי "32x1', 'PPR Adapter "32x1', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '39', 'R': '"1', 'L1': '59.5', 'D': '60.0', 'z': '19.5', 'l': '37.5', 'd': '32'}),
+  _ppr('9091021115', 'מתאם PPR משושה תבריג פנימי "40x1', 'PPR Adapter "40x1', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '39', 'R': '"1', 'L1': '62.0', 'D': '60.0', 'z': '19.5', 'l': '40.0', 'd': '40'}),
+  _ppr('9091021116', 'מתאם PPR משושה תבריג פנימי 40x¼"', 'PPR Adapter 40x¼"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '50', 'R': '1x¼"', 'L1': '63.0', 'D': '74.0', 'z': '19.5', 'l': '40.0', 'd': '40'}),
+  _ppr('9091021117', 'מתאם PPR משושה תבריג פנימי 50x¼"', 'PPR Adapter 50x¼"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '50', 'R': '1x¼"', 'L1': '66.0', 'D': '74.0', 'z': '19.5', 'l': '43.0', 'd': '50'}),
+  _ppr('9091021118', 'מתאם PPR משושה תבריג פנימי 50x½"', 'PPR Adapter 50x½"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'D': '55', 'z': '1x½"', 'l': '67.0', 'd': '85.5'}),
+  _ppr('9091021119', 'מתאם PPR משושה תבריג פנימי 63x½"', 'PPR Adapter 63x½"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '55', 'R': '1x½"', 'L1': '73.5', 'D': '84.0', 'z': '24.0', 'l': '51.5', 'd': '63'}),
+  _ppr('9091021120', 'מתאם PPR משושה תבריג פנימי "63x2', 'PPR Adapter "63x2', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'R': '67', 'L1': '"2', 'D': '77.0', 'z': '101.0', 'l': '23.5', 'd': '51.0'}),
+  _ppr('9091021122', 'מתאם PPR משושה תבריג פנימי "75x2', 'PPR Adapter "75x2', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'R': '67', 'L1': '"2', 'D': '77.0', 'z': '100.0', 'l': '21.0', 'd': '51.0'}),
+  _ppr('9091021314', 'מתאם PPR משושה תבריג חיצוני "32x1', 'PPR Adapter "32x1', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '32', 'R': '"1', 'D': '53.0', 'z': '60.5', 'L': '78.5', 'd': '32'}),
+  _ppr('9091021316', 'מתאם PPR משושה תבריג חיצוני 32x¼"', 'PPR Adapter 32x¼"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '41', 'R': '1x¼"', 'D': '68.0', 'z': '63.0', 'L': '81.0', 'd': '32'}),
+  _ppr('9091021317', 'מתאם PPR משושה תבריג חיצוני "40x1', 'PPR Adapter "40x1', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '32', 'R': '"1', 'D': '52.0', 'z': '60.5', 'L': '81.0', 'd': '40'}),
+  _ppr('9091021318', 'מתאם PPR משושה תבריג חיצוני 40x¼"', 'PPR Adapter 40x¼"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '41', 'R': '1x¼"', 'D': '68.0', 'z': '64.0', 'L': '84.5', 'd': '40'}),
+  _ppr('9091021319', 'מתאם PPR משושה תבריג חיצוני 50x¼"', 'PPR Adapter 50x¼"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '41', 'R': '1x¼"', 'D': '68.0', 'z': '62.0', 'L': '85.5', 'd': '50'}),
+  _ppr('9091021320', 'מתאם PPR משושה תבריג חיצוני 50x½"', 'PPR Adapter 50x½"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '46', 'R': '1x½"', 'D': '74.0', 'z': '65.0', 'L': '88.5', 'd': '50'}),
+  _ppr('9091021321', 'מתאם PPR משושה תבריג חיצוני 63x½"', 'PPR Adapter 63x½"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '46', 'R': '1x½"', 'D': '72.5', 'z': '67.0', 'L': '94.5', 'd': '63'}),
+  _ppr('9091021322', 'מתאם PPR משושה תבריג חיצוני "63x2', 'PPR Adapter "63x2', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '50', 'R': '"2', 'D': '84.0', 'z': '75.0', 'L': '102.5', 'd': '63'}),
+  _ppr('9091021323', 'מתאם PPR משושה תבריג חיצוני "75x2', 'PPR Adapter "75x2', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '50', 'R': '"2', 'D': '84.0', 'z': '72.0', 'L': '102.0', 'd': '75'}),
+  _ppr('9091021324', 'מתאם PPR משושה תבריג חיצוני 75x½"', 'PPR Adapter 75x½"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '65', 'R': '2x½"', 'D': '100.0', 'z': '75.0', 'L': '105.0', 'd': '75'}),
+  _ppr('9091021325', 'מתאם PPR משושה תבריג חיצוני "90x3', 'PPR Adapter "90x3', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '85', 'R': '"3', 'D': '120.0', 'z': '88.0', 'L': '121.0', 'd': '90'}),
+  _ppr('9091021327', 'מתאם PPR משושה תבריג חיצוני "110x4', 'PPR Adapter "110x4', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '105', 'R': '"4', 'D': '147.0', 'z': '111.0', 'L': '148.0', 'd': '110'}),
   _ppr('98415838', 'מתאם PPR משושה 20', 'PPR Adapter 20', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '46', 'z1': '5.5', 'L1': '20.0', 'z': '12', 'L': '26', 'd': '20'}),
   _ppr('98415840', 'מתאם PPR משושה 25', 'PPR Adapter 25', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '56', 'z1': '5.0', 'L1': '21.0', 'z': '12', 'L': '28', 'd': '25'}),
   _ppr('98415842', 'מתאם PPR משושה 32', 'PPR Adapter 32', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '66', 'z1': '5.0', 'L1': '23.0', 'z': '12', 'L': '32', 'd': '32'}),
@@ -513,12 +533,12 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('99020412', 'ברז PPR כדורי 50', 'PPR Valve 50', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L1': '140', 'h': '114', 'D': '70.5', 'z': '60.0', 'l': '83.5', 'd': '50'}),
   _ppr('99020414', 'ברז PPR כדורי 63', 'PPR Valve 63', kPprValves, 'PPR Valves', '🚰', 32, dims: {'h': '140', 'D': '132', 'z': '87.0', 'l': '75.0', 'd': '102.5'}),
   _ppr('99041400', 'ברז PPR כדורי 75', 'PPR Valve 75', kPprValves, 'PPR Valves', '🚰', 32, dims: {'D': '152', 'z': '139', 'l': '129', 'd': '108'}),
-  _ppr('99041388', 'ברז PPR כדורי 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L3': '68.0', 'L2': '56.5', 'H': '48.0', 'h': '27', 'E': '66.0', 'D1': '50.3', 'dk': '13.5', 'd': '20', 'DN': '15'}),
-  _ppr('99041390', 'ברז PPR כדורי 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L3': '78.0', 'L2': '65.5', 'H': '56.5', 'h': '30', 'E': '81.0', 'D1': '59.0', 'dk': '18.5', 'd': '25', 'DN': '20'}),
-  _ppr('99041392', 'ברז PPR כדורי 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L3': '84.5', 'L2': '72.0', 'H': '64.5', 'h': '40', 'E': '81.5', 'D1': '70.3', 'dk': '23.9', 'd': '32', 'DN': '25'}),
-  _ppr('99041394', 'ברז PPR כדורי 40', 'PPR Valve 40', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L3': '100.0', 'L2': '85.0', 'H': '83.3', 'h': '46', 'E': '91.5', 'D1': '85.9', 'dk': '31.0', 'd': '40', 'DN': '32'}),
-  _ppr('99041396', 'ברז PPR כדורי 50', 'PPR Valve 50', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L2': '107.0', 'H': '89.0', 'h': '89.4', 'E': '55', 'D1': '91.5', 'dk': '99.5', 'd': '38.5', 'DN': '63'}),
-  _ppr('99041398', 'ברז PPR כדורי 63', 'PPR Valve 63', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L3': '118.0', 'L2': '101.0', 'H': '115.0', 'h': '70', 'E': '141.5', 'D1': '125.5', 'dk': '50.0', 'd': '75', 'DN': '50'}),
+  _ppr('99041388', 'ברז PPR כדורי פוליפרופילן 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L3': '68.0', 'L2': '56.5', 'H': '48.0', 'h': '27', 'E': '66.0', 'D1': '50.3', 'dk': '13.5', 'd': '20', 'DN': '15'}),
+  _ppr('99041390', 'ברז PPR כדורי פוליפרופילן 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L3': '78.0', 'L2': '65.5', 'H': '56.5', 'h': '30', 'E': '81.0', 'D1': '59.0', 'dk': '18.5', 'd': '25', 'DN': '20'}),
+  _ppr('99041392', 'ברז PPR כדורי פוליפרופילן 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L3': '84.5', 'L2': '72.0', 'H': '64.5', 'h': '40', 'E': '81.5', 'D1': '70.3', 'dk': '23.9', 'd': '32', 'DN': '25'}),
+  _ppr('99041394', 'ברז PPR כדורי פוליפרופילן 40', 'PPR Valve 40', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L3': '100.0', 'L2': '85.0', 'H': '83.3', 'h': '46', 'E': '91.5', 'D1': '85.9', 'dk': '31.0', 'd': '40', 'DN': '32'}),
+  _ppr('99041396', 'ברז PPR כדורי פוליפרופילן 50', 'PPR Valve 50', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L2': '107.0', 'H': '89.0', 'h': '89.4', 'E': '55', 'D1': '91.5', 'dk': '99.5', 'd': '38.5', 'DN': '63'}),
+  _ppr('99041398', 'ברז PPR כדורי פוליפרופילן 63', 'PPR Valve 63', kPprValves, 'PPR Valves', '🚰', 32, dims: {'L3': '118.0', 'L2': '101.0', 'H': '115.0', 'h': '70', 'E': '141.5', 'D1': '125.5', 'dk': '50.0', 'd': '75', 'DN': '50'}),
   _ppr('91814802', 'שרוול PPR חשמלי 20', 'PPR EF Sleeve 20', kPprElectrofusion, 'PPR Electrofusion', '⚡', 33, dims: {'D': '31.5', 'h': '36.0', 'l': '35.0', 'd': '20'}),
   _ppr('91814803', 'שרוול PPR חשמלי 25', 'PPR EF Sleeve 25', kPprElectrofusion, 'PPR Electrofusion', '⚡', 33, dims: {'D': '36.5', 'h': '38.5', 'l': '39.0', 'd': '25'}),
   _ppr('91814804', 'שרוול PPR חשמלי 32', 'PPR EF Sleeve 32', kPprElectrofusion, 'PPR Electrofusion', '⚡', 33, dims: {'D': '45.0', 'h': '42.5', 'l': '40.0', 'd': '32'}),
@@ -861,17 +881,17 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('6002422200', 'פקק PPR פנים 200', 'PPR Plug 200', kPprPlugs, 'PPR Plugs', '🔘', 71, dims: {'G': '120', 'F': '96', 'C': '164', 'B': '200', 'A': '180'}),
   _ppr('6002422250', 'פקק PPR פנים 250', 'PPR Plug 250', kPprPlugs, 'PPR Plugs', '🔘', 71, dims: {'G': '135', 'F': '115', 'C': '205', 'B': '250', 'A': '217'}),
   _ppr('6002422315', 'פקק PPR פנים 315', 'PPR Plug 315', kPprPlugs, 'PPR Plugs', '🔘', 71, dims: {'G': '161', 'F': '143', 'C': '258', 'B': '315', 'A': '256'}),
-  _ppr('6005302063', 'ברך PPR חשמלי 63', 'PPR Elbow 63', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '63'}),
-  _ppr('6005302090', 'ברך PPR חשמלי 90', 'PPR Elbow 90', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '90'}),
-  _ppr('6005302110', 'ברך PPR חשמלי 110', 'PPR Elbow 110', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '110'}),
-  _ppr('6005302125', 'ברך PPR חשמלי 125', 'PPR Elbow 125', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '125'}),
-  _ppr('6005302160', 'ברך PPR חשמלי 160', 'PPR Elbow 160', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '160'}),
-  _ppr('6005360063', 'ברך PPR חשמלי 63', 'PPR Elbow 63', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '63'}),
-  _ppr('6005360075', 'ברך PPR חשמלי 75', 'PPR Elbow 75', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '75'}),
-  _ppr('6005360090', 'ברך PPR חשמלי 90', 'PPR Elbow 90', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '90'}),
-  _ppr('6005360110', 'ברך PPR חשמלי 110', 'PPR Elbow 110', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '110'}),
-  _ppr('6005360125', 'ברך PPR חשמלי 125', 'PPR Elbow 125', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '125'}),
-  _ppr('6005360160', 'ברך PPR חשמלי 160', 'PPR Elbow 160', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '160'}),
+  _ppr('6005302063', 'ברך PPR חשמלי 45° 63', 'PPR Elbow 63', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '63'}),
+  _ppr('6005302090', 'ברך PPR חשמלי 45° 90', 'PPR Elbow 90', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '90'}),
+  _ppr('6005302110', 'ברך PPR חשמלי 45° 110', 'PPR Elbow 110', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '110'}),
+  _ppr('6005302125', 'ברך PPR חשמלי 45° 125', 'PPR Elbow 125', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '125'}),
+  _ppr('6005302160', 'ברך PPR חשמלי 45° 160', 'PPR Elbow 160', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '160'}),
+  _ppr('6005360063', 'ברך PPR חשמלי 90° 63', 'PPR Elbow 63', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '63'}),
+  _ppr('6005360075', 'ברך PPR חשמלי 90° 75', 'PPR Elbow 75', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '75'}),
+  _ppr('6005360090', 'ברך PPR חשמלי 90° 90', 'PPR Elbow 90', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '90'}),
+  _ppr('6005360110', 'ברך PPR חשמלי 90° 110', 'PPR Elbow 110', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '110'}),
+  _ppr('6005360125', 'ברך PPR חשמלי 90° 125', 'PPR Elbow 125', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '125'}),
+  _ppr('6005360160', 'ברך PPR חשמלי 90° 160', 'PPR Elbow 160', kPprElectrofusion, 'PPR Electrofusion', '⚡', 72, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '160'}),
   _ppr('6005370063', 'מסעף PPR חשמלי 63', 'PPR Tee 63', kPprElectrofusion, 'PPR Electrofusion', '⚡', 73, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '63'}),
   _ppr('6005370075', 'מסעף PPR חשמלי 75', 'PPR Tee 75', kPprElectrofusion, 'PPR Electrofusion', '⚡', 73, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '75'}),
   _ppr('6005370090', 'מסעף PPR חשמלי 90', 'PPR Tee 90', kPprElectrofusion, 'PPR Electrofusion', '⚡', 73, dims: {'שיטת חיבור': 'ריתוך אלקטרופיוזן', 'חומר': 'PPR', 'dn נומינלי': '90'}),
@@ -1006,12 +1026,12 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('98414209', 'אוגן PPR 90', 'PPR אוגן 90', kPprCollars, 'PPR Collars', '⭕', 34, dims: {'d1': '110', 'D': '201', 'K': '160', 'd2': '18', 'b': '21.0', 'z': '8'}),
   _ppr('98414210', 'אוגן PPR 110', 'PPR אוגן 110', kPprCollars, 'PPR Collars', '⭕', 34, dims: {'d1': '133', 'D': '221', 'K': '180', 'd2': '18', 'b': '22.0', 'z': '8'}),
   _ppr('98414211', 'אוגן PPR 125', 'PPR אוגן 125', kPprCollars, 'PPR Collars', '⭕', 34, dims: {'d1': '167', 'D': '251', 'K': '210', 'd2': '18', 'b': '26.0', 'z': '8'}),
-  _ppr('99905102', 'אוגן PPR 2', 'PPR אוגן 2', kPprCollars, 'PPR Collars', '⭕', 34),
-  _ppr('99905103', 'אוגן PPR 3', 'PPR אוגן 3', kPprCollars, 'PPR Collars', '⭕', 34),
-  _ppr('99905104', 'אוגן PPR 4', 'PPR אוגן 4', kPprCollars, 'PPR Collars', '⭕', 34),
-  _ppr('99905105', 'אוגן PPR 5', 'PPR אוגן 5', kPprCollars, 'PPR Collars', '⭕', 34),
-  _ppr('99905106', 'אוגן PPR 6', 'PPR אוגן 6', kPprCollars, 'PPR Collars', '⭕', 34),
-  _ppr('99560010', 'אוגן PPR', 'PPR אוגן ', kPprCollars, 'PPR Collars', '⭕', 34),
+  _ppr('99905102', 'סעפת למונים תבריג חיצוני PPR 2', 'PPR אוגן 2', kPprCollars, 'PPR Collars', '⭕', 34),
+  _ppr('99905103', 'סעפת למונים תבריג חיצוני PPR 3', 'PPR אוגן 3', kPprCollars, 'PPR Collars', '⭕', 34),
+  _ppr('99905104', 'סעפת למונים תבריג חיצוני PPR 4', 'PPR אוגן 4', kPprCollars, 'PPR Collars', '⭕', 34),
+  _ppr('99905105', 'סעפת למונים תבריג חיצוני PPR 5', 'PPR אוגן 5', kPprCollars, 'PPR Collars', '⭕', 34),
+  _ppr('99905106', 'סעפת למונים תבריג חיצוני PPR 6', 'PPR אוגן 6', kPprCollars, 'PPR Collars', '⭕', 34),
+  _ppr('99560010', 'לוחית למיקום נקודת מים PPR', 'PPR אוגן ', kPprCollars, 'PPR Collars', '⭕', 34),
   _ppr('6002350500', 'מצמד PPR פ.ח מצרה', 'PPR מצמד ', kPprCouplers, 'PPR Couplers', '🔗', 45),
   _ppr('6002380161', 'מצמד PPR מצרה', 'PPR מצמד ', kPprCouplers, 'PPR Couplers', '🔗', 47),
   _ppr('98217795', 'רוכב PPR 160/20', 'PPR רוכב 160/20', kPprSaddles, 'PPR Saddles', '🪢', 84, dims: {'D1': '160', 'd': '20', 'd2': '25', 'l': '27.5', 'z2': '14.5', 'D': '29.5'}),
