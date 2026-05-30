@@ -90,6 +90,39 @@ void main() {
             'routed to (page has photos but products collapse to fewer):\n${gaps.join('\n')}');
   });
 
+  // §18.1 — confirmed PPRCT SKU patterns (catalog evidence: P-CT/P-HLCT/-FCT/-FRCT
+  // mfr codes OR "PP-R-CT" branding visible on photo OR explicit "HELIROMA"
+  // header). Any matching product MUST carry "PPRCT" in nameHe.
+  // Confirmed pages:
+  //   p48–p52 — brass-threaded fittings (SKU 6602080/120/090/320/330 prefix)
+  //   p53/p54 small sizes only (200,250,260,320,330 endings) — MIX pages
+  //   p86–p87 — PPRCT faser pipes for AC (SKU 6091*, 600130*, 600140*)
+  // Excluded pending verification: 6604/6605/6702/6706/6006/6005/6701.
+  test('SKU PPRCT pattern ⇒ name must say PPRCT', () {
+    bool isConfirmedPprct(String sku) {
+      if (RegExp(r'^(6091|6001301|6001302|6001403|6001404)').hasMatch(sku)) {
+        return true; // p86/p87 PPRCT pipes
+      }
+      if (RegExp(r'^6602(080|090|120|320|330)').hasMatch(sku)) return true; // p48-52
+      if (RegExp(r'^660234[0-9]?(200|250|260|320|330)$').hasMatch(sku)) {
+        return true; // p53 small
+      }
+      if (RegExp(r'^660235[0-9]?(200|250|260|320|330)$').hasMatch(sku)) {
+        return true; // p54 small
+      }
+      return false;
+    }
+    final misnamed = <String>[];
+    for (final p in kPolyrollCatalog) {
+      if (!isConfirmedPprct(p.sku)) continue;
+      if (!p.nameHe.contains('PPRCT')) {
+        misnamed.add('${p.sku} p${p.page}: ${p.nameHe}');
+      }
+    }
+    expect(misnamed, isEmpty,
+        reason: 'SKU confirmed PPRCT but name says PPR:\n${misnamed.join('\n')}');
+  });
+
   // Locks the _pprSpecFor wiring: a sub-type keyword must map to its own
   // diagram. Guards the "PPR/PPRCT-style confusion" bug class for spec images.
   group('PPR sub-type → correct spec diagram', () {

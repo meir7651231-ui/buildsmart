@@ -385,6 +385,7 @@ grep -nE "פייזר [0-9]{6,}|אספקת מים'," lib/data/polyroll_catalog.da
 | 13/15 | mis-category: מוצר עם שם-כלי מחוץ ל"כלי ריתוך" (תותב→EF, מקדח→רוכבים) | `catalog.dart` · `catalog:hard-ppr` · "מוצר עם שם-כלי יושב בקטגוריית כלי ריתוך" |
 | 15 | יישור-עמודות: `dims[d]` ≠ מידת-השם (extraction הזיז עמודה, הפיל את הקוטר) | `catalog.dart` · `catalog:coverage` · "dims[d] תואם לשם" (SOFT→HARD כשמגיע ל-0) |
 | 18 | PPR↔PPRCT: מוצרי PPRCT (עמ' 86-87, קוד-יצרן …FCT/FRCT) שתויגו "PPR" בשם | `catalog.dart` · `catalog:hard-ppr` · "חומר בשם תואם ל-dims[חומר]" |
+| 18.1 | PPR↔PPRCT: דפוס SKU `66xx`/`67xx`/`6006xxx` ⇒ PPRCT, אבל שם אומר PPR (אודיט מצא ~80 מוצרים) | `spec_assets_test` · "SKU PPRCT pattern ⇒ name must say PPRCT" |
 | 17.1 | תמונת-תת-סוג שבורה (typo בנתיב) / נופלת בשקט לעמוד-מלא | `spec_assets_test` · "every referenced Polyroll spec/product asset exists on disk" + "fitting categories all have a real cropped spec diagram" |
 | 17.1 | תת-סוג ממופה לדיאגרמה שגויה (בלבול 45/90, מצרה/ישר, סוגי-ברז) | `spec_assets_test` · קבוצת "PPR sub-type → correct spec diagram" |
 | 16/17.3 | נכסי-יתומים: כל קובץ-תמונה ב-`assets/polyroll/products/` (`ppr_*`/`pipe_*`) שלא מחובר לאף מוצר | `spec_assets_test` · "no orphan Polyroll product images on disk" |
@@ -470,9 +471,35 @@ bg=Image.new('RGB',i.size,(255,255,255)); bg.paste(i,(0,0),m); bg.save('assets/p
 **הבאג:** 19 צינורות PPRCT (עמ' 86-87) תויגו "צינור **PPR** פייזר", וגם **חסרו `dims['חומר']`**
 — ולכן `engineeringSpecFor` (ש-default שלו `'PPR'`) הציג אותם כ-PPR גם במפרט.
 **התיקון:** שם → "צינור **PPRCT** פייזר", + הזרקת `'חומר': 'PPRCT · מחוזק בסיבי זכוכית (faser)'`.
-**זיהוי מהיר:** קוד-יצרן עם `FCT`/`FRCT` = PPRCT. עמ' 85-87 = PPRCT. אל תניח מה-prefix
-לבד — קרא את כותרת-העמוד ב-PDF.
-**שער:** `catalog:hard-ppr` → "חומר בשם תואם ל-dims[חומר]" — נופל אם שם אומר PPRCT והחומר לא (או הפוך).
+
+### 18.1 ⚠️ הרחבת ה-לקח: PPRCT אינו רק פייזר — גם כל ה-brass-threaded fittings
+
+באודיט מאוחר נמצא ש-**~80 מוצרים נוספים** בקטלוג הם PPRCT אבל היו מתויגים "PPR":
+
+| SKU prefix | משמעות | עמודים | סטטוס |
+|---|---|---|---|
+| `90xx`/`95xx`/`98xx` | Polyroll PPR סטנדרטי | 18-34, 81-85 | ✅ נכון |
+| `6001`/`6002` | Polyroll PPR (Polyroll line) | 35-47, 70, 71, 87 | ✅ נכון |
+| `6602xxx` | **PPRCT** brass-threaded fittings | 48-54, 56 | תוקן באודיט |
+| `6604`/`6605xxx` | **PPRCT** saddles/collars | 59, 60, 66-68 | תוקן באודיט |
+| `6702`/`6706xxx` | **PPRCT** record-couplings/valves | 55, 57, 61, 65 | תוקן באודיט |
+| `6006xxx` | **PPRCT** valves | 62-64 | תוקן באודיט |
+| `6701xxx` | **אוגן פלדה מצופה PP** (לא פלסטיק טהור!) | 69 | שם verbatim |
+| `ES2xxx`/`6005xxx EF` | אלקטרופיוז'ן — חומר לא נחתם | 33, 72-74, 85 | משאיר PPR (אין סימן PPRCT) |
+
+**עמודי-MIX (פר-SKU, לא פר-עמוד):** עמ' 53/54 — הקטנים (20-32mm, קוד `P-CT*`) הם
+PPRCT; הגדולים (40-110mm, קוד `P-*` בלי CT) הם PPR. **חובה לקרוא את קוד-היצרן per row**,
+לא להניח שעמוד שלם הוא חומר אחד.
+
+**זיהוי שיטתי:**
+1. **קוד-יצרן** הוא ה-ground truth: `P-CT…`/`P-HLCT…`/`…-FCT/-FRCT` ⇒ PPRCT.
+2. **SKU prefix** הוא רמז: כל `66xx`/`67xx` ⇒ סביר PPRCT (אבל בדוק קוד-יצרן).
+3. **כיתוב על הצילום**: "PP-R-CT" מודפס על הגוף הירוק = PPRCT ודאי.
+4. **כותרת-עמוד** עם "HELIROMA" / "Heliroma" = סדרת PPRCT.
+
+**שער חדש (§14):** בדיקה שכל מוצר עם SKU תואם דפוס PPRCT (`66xx`/`67xx`/`6006xxx`)
+**חייב** להכיל `PPRCT` בשם. לכן עמ' 86-87 (גם 6091*) כלולים. EF (6005) פטור כי
+הקטלוג עצמו לא מסמן.
 
 ### 17.1 תמונה לכל תת-סוג (`_pprImageFor`)
 תמונת-קו אחת לא מספיקה: בתוך קו יש תת-סוגים בעלי צורה שונה (ברך 45°/90°, מצמד ישר/מצרה,
