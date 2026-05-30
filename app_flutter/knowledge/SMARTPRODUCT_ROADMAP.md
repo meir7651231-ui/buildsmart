@@ -208,7 +208,10 @@ Saved for the next run. Pick up here:
    bridge/summary/standards/tools/guide/compat/compliance+why/variants/
    cheaper-alt all coherent & non-throwing). Rendering of all 935 sheets stays
    covered by `product_journey_test`. Guard: `smart_card_data_test`.
-82. ⬜ Golden + mutation tests on the price/selection logic.
+82. 🟦 Mutation-resistance tests for price/selection helpers (6 invariants:
+   cost sum · strict-cheaper alt · score band fences · effort threshold ·
+   safety-kit disjoint · cheap+premium tags mutually exclusive). Guard:
+   `mutation_test`. (Golden image tests still ⬜.)
 83. ⬜ Offline-first: caching of data + images.
 84. ⬜ Lazy-load images + smart prefetch.
 85. ⬜ Full accessibility (screen reader, contrast, text size) across the card.

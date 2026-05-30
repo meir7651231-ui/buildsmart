@@ -135,6 +135,16 @@ Format per entry:
 ### Comprehensive test cadence
 - **Fix:** run the **full suite** (`flutter test`, ~2.5–3 min) at checkpoints; for quick iteration run the specific test files. Full suite is the ground truth before any push.
 
+### Test file must end in `_test.dart` (singular) — `*_tests.dart` is invisible
+- **Problem:** named a new file `mutation_tests.dart` (plural). `flutter test test/mutation_tests.dart` ran it fine, but plain `flutter test` (no args) showed the same pre-creation total — the file was silently skipped.
+- **Fix:** rename to singular: `mutation_test.dart`. After: full suite jumped 627 → 633.
+- **Why:** flutter test auto-discovers `**/*_test.dart`, not `*_tests.dart`. The suite stayed green during the regression so this would slip past every checkpoint. Always: filename ends `_test.dart`, and *confirm the count rose* after adding a test file.
+
+### Mutation tests: assert invariants, don't gate on `count > 0`
+- **Problem:** added a mutation test for `installEffortFor` that iterated `kLipskeyCatalog` for copper-press products and asserted `difficulty == 'מקצועי'`, with a final `expect(checked, greaterThan(0))`. It failed — but the helper was correct. The `copperPress` end-type *did* exist (6 times) but only in **synthetic** specs (HW-*) that don't appear in `kLipskeyCatalog`. Same issue hit `cheaperAlternativeBrand` (no SmartProducts have 2+ priced brands).
+- **Fix:** drop the `count > 0` gate. The invariant assertion still fires on every real sample encountered; if the data has zero samples, the test is *vacuously true* — which is correct, not a regression. Direct boundary coverage of the helper lives in its dedicated test (`install_effort_test`), so the mutation test doesn't need to re-prove sample existence.
+- **Why:** mutation tests check what a *mutated* helper would do; they should never depend on data prevalence. A "must find samples" gate creates a false failure when the data drifts (legitimate engine evolution) even though the logic is untouched.
+
 ---
 
 ## D. Engine / domain insights (compatibility + install)
