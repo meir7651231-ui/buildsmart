@@ -110,6 +110,9 @@ void main() {
       if (RegExp(r'^660235[0-9]?(200|250|260|320|330)$').hasMatch(sku)) {
         return true; // p54 small
       }
+      if (RegExp(r'^670234[0-9]?(200|250|260|320|330)$').hasMatch(sku)) {
+        return true; // p55 small (mfr P-HLCT*)
+      }
       return false;
     }
     final misnamed = <String>[];
