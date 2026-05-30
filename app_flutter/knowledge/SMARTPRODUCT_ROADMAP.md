@@ -214,7 +214,10 @@ Saved for the next run. Pick up here:
    `mutation_test`. (Golden image tests still ⬜.)
 83. ⬜ Offline-first: caching of data + images.
 84. ⬜ Lazy-load images + smart prefetch.
-85. ⬜ Full accessibility (screen reader, contrast, text size) across the card.
+85. 🟦 Accessibility — explicit `Semantics(button, label)` on 6 key card actions
+   (save · BOM · add-to-project · cart+safety · save-version · mode-toggle), so
+   screen readers announce intent not just visible text. Gated by
+   `accessibility_test`. (Contrast + text-size still ⬜.)
 86. ⬜ Perfect RTL + Arabic/English support (i18n).
 87. ⬜ Reduced-motion / sun mode per settings.
 88. ⬜ Bundle size: split & code-split the card.

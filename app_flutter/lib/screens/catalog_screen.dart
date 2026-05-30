@@ -4944,19 +4944,23 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               final saved = ref
                                   .read(savedConfigsProvider.notifier)
                                   .isSaved(p.key, brand.name);
-                              return GestureDetector(
-                                onTap: () => ref
-                                    .read(savedConfigsProvider.notifier)
-                                    .toggle(p.key, brand.name),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 8),
-                                  child: Text(saved ? '★ נשמר' : '☆ שמור',
-                                      style: TextStyle(
-                                          color: saved
-                                              ? const Color(0xFFD97706)
-                                              : const Color(0xFF999999),
-                                          fontSize: 10.5,
-                                          fontWeight: FontWeight.w700)),
+                              return Semantics(
+                                button: true,
+                                label: 'שמור תצורה כמועדף',
+                                child: GestureDetector(
+                                  onTap: () => ref
+                                      .read(savedConfigsProvider.notifier)
+                                      .toggle(p.key, brand.name),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: Text(saved ? '★ נשמר' : '☆ שמור',
+                                        style: TextStyle(
+                                            color: saved
+                                                ? const Color(0xFFD97706)
+                                                : const Color(0xFF999999),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w700)),
+                                  ),
                                 ),
                               );
                             }),
@@ -4980,26 +4984,31 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         fontWeight: FontWeight.w700)),
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () => ref
-                                  .read(cardDetailModeProvider.notifier)
-                                  .toggle(),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: expert
-                                      ? BsTokens.brand.withAlpha(28)
-                                      : const Color(0xFFEEEEEE),
-                                  borderRadius: BorderRadius.circular(10),
+                            Semantics(
+                              button: true,
+                              label: 'החלף מצב הצגה (מורחב או פשוט)',
+                              child: GestureDetector(
+                                onTap: () => ref
+                                    .read(cardDetailModeProvider.notifier)
+                                    .toggle(),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: expert
+                                        ? BsTokens.brand.withAlpha(28)
+                                        : const Color(0xFFEEEEEE),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                      expert ? 'מצב מורחב ▾' : 'מצב פשוט ▸',
+                                      style: TextStyle(
+                                          color: expert
+                                              ? BsTokens.brand
+                                              : const Color(0xFF777777),
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w700)),
                                 ),
-                                child: Text(expert ? 'מצב מורחב ▾' : 'מצב פשוט ▸',
-                                    style: TextStyle(
-                                        color: expert
-                                            ? BsTokens.brand
-                                            : const Color(0xFF777777),
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w700)),
                               ),
                             ),
                           ],
@@ -5294,22 +5303,26 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           }),
                           // Roadmap step 22 — "build my line" → materialized BOM.
                           const SizedBox(height: 8),
-                          GestureDetector(
-                            onTap: () => _showLineBom(prod),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 7),
-                              decoration: BoxDecoration(
-                                color: BsTokens.brand.withAlpha(24),
-                                borderRadius: BorderRadius.circular(10),
-                                border:
-                                    Border.all(color: BsTokens.brand.withAlpha(90)),
+                          Semantics(
+                            button: true,
+                            label: 'פתח קו פריטים מומחש',
+                            child: GestureDetector(
+                              onTap: () => _showLineBom(prod),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 7),
+                                decoration: BoxDecoration(
+                                  color: BsTokens.brand.withAlpha(24),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                      color: BsTokens.brand.withAlpha(90)),
+                                ),
+                                child: const Text('🔧 בנה לי קו (BOM)',
+                                    style: TextStyle(
+                                        color: BsTokens.brand,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700)),
                               ),
-                              child: const Text('🔧 בנה לי קו (BOM)',
-                                  style: TextStyle(
-                                      color: BsTokens.brand,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700)),
                             ),
                           ),
                           // Roadmap step 25 — engine-derived auto safety kit.
@@ -5351,7 +5364,11 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     // Roadmap step 46 — add line + safety to cart.
                                     Padding(
                                       padding: const EdgeInsets.only(top: 6),
-                                      child: GestureDetector(
+                                      child: Semantics(
+                                        button: true,
+                                        label:
+                                            'הוסף את הקו לסל כולל פריטי בטיחות',
+                                        child: GestureDetector(
                                         onTap: () {
                                           final selectedAcc = <SmartCartAcc>[
                                             for (var i = 0;
@@ -5410,6 +5427,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                                   fontWeight: FontWeight.w700)),
                                         ),
                                       ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -5439,7 +5457,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  GestureDetector(
+                                  Semantics(
+                                    button: true,
+                                    label: 'הוסף את המוצר לפרויקט',
+                                    child: GestureDetector(
                                     onTap: () {
                                       notifier.add(mk(loc));
                                       ScaffoldMessenger.of(context)
@@ -5464,6 +5485,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700)),
                                     ),
+                                  ),
                                   ),
                                   const SizedBox(width: 8),
                                   GestureDetector(
@@ -5813,7 +5835,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                 children: [
                                   Row(
                                     children: [
-                                      GestureDetector(
+                                      Semantics(
+                                        button: true,
+                                        label: 'שמור גרסת תצורה',
+                                        child: GestureDetector(
                                         onTap: () {
                                           notif.save(
                                               label: brand.name,
@@ -5843,6 +5868,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w700)),
                                         ),
+                                      ),
                                       ),
                                       const SizedBox(width: 8),
                                       if (versions.isNotEmpty)
