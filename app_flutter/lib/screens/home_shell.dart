@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.16 · 29.5.26 · SmartProduct: ערכת בטיחות אוטו׳ (🛡 מהמנוע) + גרסאות תצורה + תבניות פרויקט',
+                          'v5.17 · 29.5.26 · SmartProduct: קו שלם + בטיחות לסל (🛒) + ערכת בטיחות אוטו׳ + גרסאות תצורה',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

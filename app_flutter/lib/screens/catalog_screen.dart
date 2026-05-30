@@ -20,6 +20,7 @@ import 'package:buildsmart/state/card_detail_mode.dart';
 import 'package:buildsmart/state/card_projects.dart';
 import 'package:buildsmart/state/card_selection.dart';
 import 'package:buildsmart/state/card_versions.dart';
+import 'package:buildsmart/state/cart_safety.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
@@ -5274,15 +5275,83 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               if (kit.isEmpty) return const SizedBox.shrink();
                               return Padding(
                                 padding: const EdgeInsets.only(top: 6),
-                                child: Text(
-                                    '🛡 ערכת בטיחות (auto): ${kit.map((p) => p.nameHe).take(4).join(" · ")}',
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                        color: Color(0xFFB45309),
-                                        fontSize: 10.5,
-                                        height: 1.3,
-                                        fontWeight: FontWeight.w600)),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                        '🛡 ערכת בטיחות (auto): ${kit.map((p) => p.nameHe).take(4).join(" · ")}',
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFFB45309),
+                                            fontSize: 10.5,
+                                            height: 1.3,
+                                            fontWeight: FontWeight.w600)),
+                                    // Roadmap step 46 — add line + safety to cart.
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 6),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          final selectedAcc = <SmartCartAcc>[
+                                            for (var i = 0;
+                                                i < p.acc.length;
+                                                i++)
+                                              if (_accSelected[i] ?? false)
+                                                SmartCartAcc(
+                                                    name: p.acc[i].name,
+                                                    emoji: p.acc[i].emoji,
+                                                    price: p.acc[i].price ?? 0,
+                                                    qty: _accQty[i] ?? 1),
+                                          ];
+                                          final safetyAcc =
+                                              buildSafetyAccessories(
+                                                  kit,
+                                                  (cp) =>
+                                                      priceFor(cp) ?? 0);
+                                          ref
+                                              .read(smartCartProvider.notifier)
+                                              .add(SmartCartLine(
+                                                productKey: p.key,
+                                                productName: p.name,
+                                                productEmoji: p.emoji,
+                                                brandName: brand.name,
+                                                brandPrice: brand.price ??
+                                                    (priceFor(prod) ?? 0),
+                                                productQty: 1,
+                                                accessories: [
+                                                  ...selectedAcc,
+                                                  ...safetyAcc,
+                                                ],
+                                              ));
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(SnackBar(
+                                                  content: Text(
+                                                      'הקו נוסף לסל (+${kit.length} פריטי בטיחות)'),
+                                                  duration: const Duration(
+                                                      seconds: 2)));
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 7),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFEF3C7),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                                color:
+                                                    const Color(0xFFFCD34D)),
+                                          ),
+                                          child: const Text(
+                                              '🛒 + בטיחות לסל',
+                                              style: TextStyle(
+                                                  color: Color(0xFFB45309),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w700)),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               );
                             }),
                         ],

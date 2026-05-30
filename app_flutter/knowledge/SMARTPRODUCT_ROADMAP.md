@@ -125,7 +125,10 @@ Saved for the next run. Pick up here:
 44. ⬜ Supplier choice by distance/rating/availability from settings.
 45. ✅ "Cheaper alternative" — strictly-cheapest sibling brand via
    `cheaperAlternativeBrand` ("💰 חלופה זולה יותר"). Guard: `summary_alt_test`.
-46. ⬜ Smart add-to-cart: the whole line in one tap (incl. safety).
+46. ✅ Smart add-to-cart with safety — `buildSafetyAccessories` converts engine
+   safety SKUs to `SmartCartAcc`, and "🛒 + בטיחות לסל" adds the whole line
+   (user-selected acc + engine safety) to the cart in one tap. Distinct from the
+   existing "הוסף לסל" (no safety). Guard: `cart_safety_test`.
 47. ✅ Save config as favourite — persisted `savedConfigsProvider`
    (`productKey#brandName`); "☆ שמור / ★ נשמר" toggle in the 📦 header.
    Guard: `quote_saved_test`.
