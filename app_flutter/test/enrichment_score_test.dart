@@ -69,12 +69,14 @@ void main() {
         withSpec / specCeiling,
         '$withSpec/$n real spec; ceiling=$specCeiling (≥3=tools/EF have none)'));
 
-    // 4) Dims richness — % products with ≥3 dim keys.
+    // 4) Dims richness — % products with ≥5 dim keys (raised from ≥3 once we
+    // could hit it: every product now carries Huliyot-SKU + יצרן + ≥3 catalog
+    // dims, so the bar is meaningful again).
     final withDims = kPolyrollCatalog
-        .where((p) => (p.dims?.length ?? 0) >= 3)
+        .where((p) => (p.dims?.length ?? 0) >= 5)
         .length;
-    axes.add(_Axis('dims richness ≥3', 15, withDims / n,
-        '$withDims/$n products have ≥3 dim keys'));
+    axes.add(_Axis('dims richness ≥5', 15, withDims / n,
+        '$withDims/$n products have ≥5 dim keys'));
 
     // 5) PPRCT correctness — every SKU that the catalog marks as PPRCT
     // must say PPRCT in nameHe. Confirmed PPRCT patterns:
