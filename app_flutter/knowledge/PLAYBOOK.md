@@ -31,6 +31,10 @@ old "push on a clean checkpoint" line; that line is now void.
 - "operation" = a meaningful build action (a wired helper, a UI block, a fix),
   not a single keystroke/tool call. Keep momentum; never idle.
 
+### Meta-lesson: in this harness, sub-agents are net-negative for small tasks
+After 26 agent invocations in one session: 50% raw success, 50% mess (529s, wrong-cwd writes, **one R8-violating fabrication caught only by manual review**). Each failure cost ~200 s of API time + supervisor recovery effort. The successful agents produced ~3-5-minute tasks (small state files, scaffolds, doc pages) — work the supervisor could write directly faster than the brief-and-wait cycle.
+**Default rule going forward:** for tasks the supervisor can finish in under ~10 minutes, **just do it directly**. Reserve `Agent` calls for tasks that are *genuinely* parallelizable AND big enough to overcome the briefing/review overhead (e.g., a multi-file refactor, an analysis sweep over many files, generating dozens of similar items). 50%-success agents that produce 5-minute work = net loss.
+
 ### Sub-agents may inherit a different cwd — and *invent* content if they can't find the project
 - **Problem:** in a 3-agent batch with absolute-path briefs:
   - **Agent A** wrote to the real project successfully (lucky/correct cwd).
