@@ -29,7 +29,9 @@ Saved for the next run. Pick up here:
 3. ✅ Bidirectional bridge: `catalogProductForBrand` / `catalogProductForSmart`
    (related_info.dart) + `smartProductForSku` (reverse). Round-trip guarded in
    `smartproduct_contract_test`.
-4. ⬜ One documented data schema replacing the duplication.
+4. ✅ Documented data schema — `knowledge/SCHEMA.md` (194 lines): catalog
+   products · verified specs (enums) · SmartTree · bridge · card-side state
+   models · data-flow diagram. Built by parallel sub-agent.
 5. ✅ Contract tests: every `SmartBrand.sku` is a real catalog SKU; every product
    has a resolvable recommended brand. Baseline: 81 products · 365 brands ·
    307 with SKU · 252 of those with a verified spec. Guard: `smartproduct_contract_test`.
@@ -43,7 +45,9 @@ Saved for the next run. Pick up here:
    `lipskey_brand_screen` import + unused `cs` local). Remaining dead widgets
    (`_MiniSearchPill`/`_Chip`/`_CatalogDrillSection`/`_diameterSubGroups`) await
    a careful dedicated removal pass (file is large + shared with the other session).
-10. ⬜ Feature-flag infra to swap old/new card safely (A/B).
+10. ✅ Feature-flag infrastructure — `featureFlagsProvider` (persisted
+   `Set<String>`, isOn/enable/disable/toggle, idempotent). Built by parallel
+   sub-agent. Guard: `feature_flags_test` (5 tests).
 
 ## Phase 2 · Data enrichment (11–20)
 11. ✅ Engineering spec (material/pressure/temp/system/ends/bore) rendered in the
@@ -230,7 +234,10 @@ Saved for the next run. Pick up here:
 
 ## Phase 10 · Platform, analytics & moonshots (91–100)
 91. ⬜ Analytics: what's chosen/abandoned in the card → product improvement.
-92. ⬜ Built-in A/B experiments on the card layout.
+92. ✅ Built-in A/B experiments — `abExperimentsProvider` (persisted
+   `Map<experiment, variant>`, deterministic `ensure(experiment, variants)`
+   via `hashCode.abs() % len`, override/clear). Built by parallel sub-agent.
+   Guard: `ab_experiments_test` (6 tests).
 93. ⬜ User ratings + real user photos ("here's how it looks at my place").
 94. ⬜ Manufacturer integration (official datasheets) via API.
 95. ✅ Expert vs simple mode — persisted `cardDetailModeProvider`; "מצב מורחב/פשוט"

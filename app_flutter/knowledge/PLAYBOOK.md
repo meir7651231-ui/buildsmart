@@ -31,6 +31,16 @@ old "push on a clean checkpoint" line; that line is now void.
 - "operation" = a meaningful build action (a wired helper, a UI block, a fix),
   not a single keystroke/tool call. Keep momentum; never idle.
 
+### Parallel sub-agents work on disjoint NEW files (no merge cost)
+- **Pattern that worked:** ran 3 sub-agents in one Agent-tool call (each `subagent_type: general-purpose`) for ROADMAP steps 4 (docs), 10 (feature-flag state), 92 (A/B state). Each agent was briefed with: (a) absolute paths into the repo, (b) "add NEW files only — never modify an existing file", (c) the 10-step protocol + push policy + `_test.dart` naming convention, (d) a reference file from `lib/state/` to mirror for persistence patterns. All 3 returned clean: 5/5 + 6/6 + docs (194 lines), 0 analyze errors, suite jumped 640→651.
+- **Why it worked:** the deliverables touched **disjoint file paths** (3 brand-new files each) — zero merge cost. Supervisor reviewed summaries, ran the integrated suite once, marked roadmap + committed.
+- **When NOT to parallelize:** if any task would modify a shared file (e.g. `catalog_screen.dart`), keep it sequential or queue on one agent. Concurrent edits on the same file would force a manual conflict resolution that erases the speed-up.
+
+### Sub-agent worktree isolation needs the supervisor's cwd = git repo root
+- **Problem:** tried to spawn 3 agents with `isolation: "worktree"` to parallelize step 4/10/92. All three failed instantly with "Cannot create agent worktree: not in a git repository". My cwd was a parent folder, not the repo.
+- **Fix:** either (a) the supervisor `cd`s into the repo before spawning, or (b) skip `isolation: "worktree"` and brief each agent with **absolute paths** into the repo + a strict rule to ONLY add new files (no overlap with each other or the supervisor's in-flight work). (b) is fine for parallel tasks that touch disjoint files, but loses the per-agent branch.
+- **Why:** worktree creation runs `git worktree add …` in the supervisor's cwd; with no `.git` there, no isolation. Future runs: pre-check `git rev-parse --is-inside-work-tree` before relying on `isolation: "worktree"`, or always pass agents fully-qualified paths.
+
 ### 🔟 10-step decomposition per action (user-set)
 Before executing each meaningful action (a roadmap step / a fix), decompose it
 into ~**10 explicit sub-steps** and *show them*. Catches missed checks (test
