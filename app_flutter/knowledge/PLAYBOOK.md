@@ -31,6 +31,22 @@ old "push on a clean checkpoint" line; that line is now void.
 - "operation" = a meaningful build action (a wired helper, a UI block, a fix),
   not a single keystroke/tool call. Keep momentum; never idle.
 
+### Pre-flight checklist before spawning sub-agents (raise success rate)
+After 17 agent calls in one session (53% raw success), the recurring failure modes were:
+worktree-isolation (cwd reset) · API 529 · target file already exists. To push the
+rate higher next round, run this **6-step pre-flight before every parallel batch**:
+1. `ls lib/state/ test/ knowledge/` — confirm each agent's target path is genuinely **free**.
+2. `git fetch && git log --oneline @{u}..origin/<branch> | head` — check if the other session
+   pushed something in the last few minutes that may have grabbed your target name.
+3. Pick targets that are **disjoint from each other** AND **disjoint from the supervisor's
+   current edit set**.
+4. Cap concurrency at **3** (the proven ceiling pre-529).
+5. Brief each agent with the **fallback rule** verbatim: *"If the target file already exists,
+   do NOT modify it — add a `_test.dart` against the existing API and report the mismatch."*
+6. Include `_test.dart` (singular) suffix reminder + absolute paths + no-push rule.
+If 529 hits anyway, fall through the chain: concurrent → serial → supervisor-direct.
+Document any new failure mode under §B before the next batch.
+
 ### Pre-flight check: target file may already exist from the other session
 - **Problem:** spawned an agent to create `lib/state/recent_searches.dart`. The agent discovered the file **already existed** — the other session had shipped a (slightly different) version with `kMaxRecentSearches=8` and an `add` method. The protocol forbids modifying existing files.
 - **Fix (the agent did this correctly):** since the file existed, the agent did NOT modify it. Instead, it pivoted and wrote a **test-only backfill** for the existing API — 6/6 green, no source change. The supervisor accepts that as a partial deliverable (test coverage added) and notes the API doesn't match the brief.
