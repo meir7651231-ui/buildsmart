@@ -141,7 +141,9 @@ void main() {
     print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     // Self-asserts a minimum bar so a regression below it fails CI.
-    expect(total, greaterThanOrEqualTo(80),
-        reason: 'enrichment score regressed below 80');
+    // Now that we hit 100/100, bumped from 80 to 95 — anything below means
+    // the catalog/data lost something substantial.
+    expect(total, greaterThanOrEqualTo(95),
+        reason: 'enrichment score regressed below 95');
   });
 }

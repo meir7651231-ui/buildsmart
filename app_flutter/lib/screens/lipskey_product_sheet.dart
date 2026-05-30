@@ -1126,6 +1126,30 @@ class _ProductSideState extends State<_ProductSide> {
               right: 10,
               child: _ZoomHint(),
             ),
+            // PPRCT material badge (bottom-right) — helpful when the catalog
+            // doesn't supply a distinct PPRCT product photo (pages 81-85 use
+            // the matching PPR family image). Shows on PPR too if the user
+            // wants symmetry — gated on material in dims.
+            if (product.dims?['חומר']?.toString().contains('PPRCT') == true)
+              Positioned(
+                bottom: 10,
+                right: 10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 9, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2A623D), // dark green
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.white, width: 1.5),
+                  ),
+                  child: const Text('PPR-CT',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5)),
+                ),
+              ),
             // "פרטים / מפרט" button — flips to the spec page
             Positioned(
               bottom: 10,

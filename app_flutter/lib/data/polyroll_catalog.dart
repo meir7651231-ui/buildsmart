@@ -198,11 +198,14 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe) {
     case kPprPlugs:
       return ['spec_plug.jpg'];
     case kPprPipesFiber:
+      // PPRCT fiber pipes (pages 86/87, AQUATHERM blue series) get their own
+      // blue-tinted cross-section; PPR fiber (pages 18/35) keep the
+      // generic green-tinted one.
+      if (nameHe.contains('PPRCT')) return ['spec_pprct_pipe.jpg'];
+      return ['spec_faser_20.jpg'];
     case kPprPipesSupply:
     case kPprPipesAC:
-      // Generic pipe cross-section (de/di/e markings, no faser branding) —
-      // serves all pipe lines. Supply and AC pipes previously fell back to
-      // the full catalog page render.
+      // Generic pipe cross-section serves the rest.
       return ['spec_faser_20.jpg'];
   }
   // kPprElectrofusion: photo-only in the catalog (no dimension drawing) → the

@@ -120,7 +120,7 @@ void main() {
     print('  TOTAL (external card): ${total.toStringAsFixed(1)} / 100');
     print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-    expect(total, greaterThanOrEqualTo(80),
-        reason: 'external-card score regressed below 80');
+    expect(total, greaterThanOrEqualTo(95),
+        reason: 'external-card score regressed below 95');
   });
 }
