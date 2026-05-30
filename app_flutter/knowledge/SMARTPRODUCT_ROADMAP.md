@@ -185,9 +185,10 @@ Saved for the next run. Pick up here:
    product to several locations at once. Guard: `card_projects_test`.
 73. ✅ Material dependencies — `connectionNeedsHe` lists what each end needs to
    mate ("מה הקו צריך לחיבור"). Guard: `line_fit_test`.
-74. 🟦 Cumulative project view — running "📋 בפרויקט: N יחידות · M מיקומים" from
-   `cardProjectsProvider`. (Full materialized project BOM dialog pending.)
-   Guard: `card_projects_test`.
+74. ✅ Cumulative project BOM — running counter ("📋 בפרויקט: N יחידות · M מיקומים")
+   + "📋 BOM פרויקט מלא" button that runs `buildInstallation` over all project
+   products (resolved via SKU) and shows the materialized list in a dialog.
+   Guard: engine via `build_line_bom_test`; project model via `card_projects_test`.
 75. ✅ Customer quote for the whole project — `projectQuoteText` aggregates each
    assigned item (location/brand/qty + est. price) into a copyable quote
    ("📋 הצעת מחיר לפרויקט"). Guard: `card_projects_test`.

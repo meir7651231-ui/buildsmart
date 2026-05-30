@@ -4501,6 +4501,67 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
 
   // Roadmap step 22 — "build my line": run the install engine over the line so
   // far (cart) + this product, and show the materialized BOM.
+  // Roadmap step 74 — full project BOM: run buildInstallation over all
+  // products assigned to a project (resolved via their stored SKU), show the
+  // materialized list in a dialog (reuses _showLineBom's presentation).
+  void _showProjectBom(String project) {
+    final notifier = ref.read(cardProjectsProvider.notifier);
+    final items = notifier.forProject(project);
+    final anchors = <LipskeyCatalogProduct>[];
+    for (final it in items) {
+      final cp = catalogProductForSku(it.sku);
+      if (cp != null) anchors.add(cp);
+    }
+    if (anchors.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('אין פריטים שניתן לפתור לקו ב"$project"'),
+            duration: const Duration(seconds: 2)),
+      );
+      return;
+    }
+    final plan = buildInstallation(anchors, autoCompliance: true, tempC: 60);
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: Text('BOM פרויקט "$project" — ${plan.items.length} פריטים'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (final it in plan.items)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Text(
+                        '${plan.quantities[it.sku] ?? 1}× ${it.nameHe}',
+                        style: const TextStyle(fontSize: 12.5)),
+                  ),
+                if (plan.gaps.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                        '⚠ ${plan.gaps.length} פערים ללא חיבור ישיר',
+                        style: const TextStyle(
+                            color: Color(0xFFB45309),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600)),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('סגור')),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showLineBom(LipskeyCatalogProduct prod) {
     final anchors = <LipskeyCatalogProduct>[..._resolveCartProducts(), prod];
     final plan = buildInstallation(anchors, autoCompliance: true, tempC: 60);
@@ -5488,6 +5549,31 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           color: Color(0xFF4338CA),
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600)),
+                                ),
+                              // Roadmap step 74 — full project BOM dialog.
+                              if (units > 0)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: GestureDetector(
+                                    onTap: () => _showProjectBom(proj),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 7),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE0E7FF),
+                                        borderRadius:
+                                            BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color: const Color(0xFFA5B4FC)),
+                                      ),
+                                      child: const Text(
+                                          '📋 BOM פרויקט מלא',
+                                          style: TextStyle(
+                                              color: Color(0xFF3730A3),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700)),
+                                    ),
+                                  ),
                                 ),
                               // Roadmap step 75 — customer quote for the project.
                               if (units > 0)
