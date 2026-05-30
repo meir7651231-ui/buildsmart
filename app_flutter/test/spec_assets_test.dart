@@ -139,6 +139,26 @@ void main() {
             '${bad.join('\n')}');
   });
 
+  // §14 — products the catalog photographs from multiple angles or with
+  // included accessories must surface ALL views via the pagers (front 1/N or
+  // spec 1/N), not just one. Locks the §17.3 wiring for p29 union (assembled
+  // + dismantled) and p33 collar (collar + gasket "כולל אטם").
+  test('multi-view products surface all views', () {
+    final union = kPolyrollCatalog.firstWhere(
+        (p) => p.sku == '98415840',
+        orElse: () => throw 'union 98415840 not in catalog');
+    expect(union.imageAssets.length, greaterThanOrEqualTo(2),
+        reason: 'p29 union should show assembled + dismantled in front pager');
+
+    final collar = kPolyrollCatalog.firstWhere(
+        (p) => p.sku == '98417805',
+        orElse: () => throw 'p33 collar 98417805 not in catalog');
+    final hasGasket = collar.specImageAssets
+        .any((a) => a.endsWith('ppr_p33_c.jpg'));
+    expect(hasGasket, isTrue,
+        reason: 'p33 collar should show gasket in spec pager (כולל אטם)');
+  });
+
   // §14 — pipe wall thickness must match OD/SDR (within ±15% — catalogs give
   // a min-max range). Catches the p86/p87 bug where SDR labels were 7.4 for
   // all sizes but the actual walls implied SDR 11 / SDR 17 per row.
