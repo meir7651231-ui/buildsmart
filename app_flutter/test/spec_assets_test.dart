@@ -5,6 +5,7 @@
 // crop here = a blank/wrong flip side at runtime — this is the guard.
 import 'dart:io';
 
+import 'package:buildsmart/data/chip_hierarchy.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -124,6 +125,27 @@ void main() {
     }
     expect(misnamed, isEmpty,
         reason: 'SKU confirmed PPRCT but name says PPR:\n${misnamed.join('\n')}');
+  });
+
+  // §14 / §21 — chip hierarchy parser must classify every nameHe token.
+  // A leftover token = a missing vocabulary entry (must be added to one of
+  // kChipLevel{1..4} sets). The parser is the foundation of the new
+  // external-card breadcrumb chips — if it fails here, the card breaks.
+  test('chip hierarchy parser: no leftover tokens, every product has a type', () {
+    final leftovers = <String, int>{};
+    final noType = <String>[];
+    for (final p in kPolyrollCatalog) {
+      final c = parseChips(p.nameHe);
+      if (c.type == null) noType.add('${p.sku}: ${p.nameHe}');
+      for (final l in c.leftover) {
+        leftovers.update(l, (v) => v + 1, ifAbsent: () => 1);
+      }
+    }
+    expect(noType, isEmpty,
+        reason: 'products missing a hierarchy type:\n${noType.take(5).join('\n')}');
+    expect(leftovers, isEmpty,
+        reason: 'unclassified tokens — add to chip_hierarchy.dart vocab:\n'
+            '${leftovers.entries.map((e) => "${e.value} | ${e.key}").join("\n")}');
   });
 
   // §14 — embedded mfr-code in nameHe (e.g. "צווארון PPR פנים P-PBRIDA160H").
