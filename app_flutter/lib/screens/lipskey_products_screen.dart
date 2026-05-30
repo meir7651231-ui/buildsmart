@@ -516,6 +516,9 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   /// Inline attribute picker state — non-null when picker is open.
   AttrKind? _pickerKind;
   List<LipskeyCatalogProduct>? _pickerSiblings;
+  /// PPR hierarchy picker: chip-index in the parsed path that's currently open.
+  int? _hPickerIndex;
+  String? _hPickerTitle;
 
   static const _brand = Color(0xFFFF7A18);
   static const _teal = Color(0xFF3DD9B0);
@@ -532,6 +535,8 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       _localProduct = null;
       _pickerKind = null;
       _pickerSiblings = null;
+      _hPickerIndex = null;
+      _hPickerTitle = null;
     }
   }
 
@@ -600,11 +605,57 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     });
   }
 
+  /// §21 — open the faceted picker for the chip at [chipIndex] in the
+  /// current product's parsed path. Returns siblings that match every chip
+  /// to the left and differ at chipIndex.
+  void _cycleHierarchy(int chipIndex) {
+    final path = parseChips(p.nameHe).path;
+    if (chipIndex >= path.length) return;
+    final all = kPolyrollCatalog;
+    final sibs = findHierarchySiblings(
+      p, chipIndex,
+      all: all,
+      nameOf: (q) => q.nameHe,
+      brandOf: (q) => q.brand,
+      polyrollBrand: (_) => kPolyrollBrand,
+    );
+    // Dedupe by value-at-chipIndex (keep first occurrence of each distinct value).
+    final byVal = <String, LipskeyCatalogProduct>{};
+    for (final q in sibs) {
+      final qp = parseChips(q.nameHe).path;
+      if (chipIndex >= qp.length) continue;
+      byVal.putIfAbsent(qp[chipIndex], () => q);
+    }
+    if (byVal.length <= 1) return;
+    setState(() {
+      if (_hPickerIndex == chipIndex) {
+        _hPickerIndex = null;
+        _hPickerTitle = null;
+        _pickerSiblings = null;
+        _pickerKind = null;
+      } else {
+        _pickerKind = null; // close any old kind-picker
+        _hPickerIndex = chipIndex;
+        _hPickerTitle = _hierarchyPickerTitle(chipIndex, path[chipIndex]);
+        _pickerSiblings = byVal.values.toList();
+      }
+    });
+  }
+
+  String _hierarchyPickerTitle(int chipIndex, String currentValue) {
+    if (RegExp(r'^["”]?\d|^\d').hasMatch(currentValue)) return 'בחר מידה:';
+    // Heuristic by level (path order roughly follows level1..level5).
+    // Generic title — sufficient since the chip's current value shows above.
+    return 'בחר ערך:';
+  }
+
   void _selectFromPicker(LipskeyCatalogProduct next) {
     final cb = widget.onCycle;
     setState(() {
       _pickerKind = null;
       _pickerSiblings = null;
+      _hPickerIndex = null;
+      _hPickerTitle = null;
       if (next.sku != p.sku) {
         if (cb != null) {
           // parent list owns the state — close and report
@@ -734,9 +785,32 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
           ),
           if (_pickerKind != null && _pickerSiblings != null)
             _attrPicker(),
+          if (_hPickerIndex != null && _pickerSiblings != null)
+            _hierarchyPicker(),
         ],
       ),
     );
+  }
+
+  /// §21 hierarchy picker: shows distinct values at the open chip's level
+  /// and tapping one swaps the rendered product to that sibling.
+  Widget _hierarchyPicker() {
+    final idx = _hPickerIndex!;
+    final siblings = _pickerSiblings!;
+    final title = _hPickerTitle ?? 'בחר ערך:';
+    return _pickerShell(children: [
+      _pickerLabel(title),
+      const SizedBox(height: 6),
+      _pickerRow(
+        items: siblings,
+        label: (s) {
+          final qp = parseChips(s.nameHe).path;
+          return idx < qp.length ? qp[idx] : s.sku;
+        },
+        isSelected: (s) => s.sku == p.sku,
+        onTap: _selectFromPicker,
+      ),
+    ]);
   }
 
   Widget _attrPicker() {
@@ -974,7 +1048,10 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
           // line 2: chips. Polyroll uses the hierarchy breadcrumb (§21);
           // Lipskey stays on the word-by-word extractor for now.
           if (p.brand == kPolyrollBrand)
-            _HierarchyChips(product: p)
+            _HierarchyChips(
+                product: p,
+                onChipTap: _cycleHierarchy,
+                openIndex: _hPickerIndex)
           else
             _NameWords(product: p, onAttrTap: _cycleAttr, openKind: _pickerKind),
           const SizedBox(height: 8),
@@ -1694,12 +1771,13 @@ class _NameWords extends StatelessWidget {
 /// Tapping an orange chip opens the inline picker for that dimension.
 /// PPR hierarchy chips per protocol §21: renders the parseChips path
 /// (connection ‹ shape ‹ feature ‹ thread ‹ size) as a breadcrumb. Replaces
-/// `_NameWords` for Polyroll products only; Lipskey keeps the word-by-word
-/// extractor. Step 2 of 4 — chips are decorative for now (clickable picker
-/// arrives in step 3).
+/// `_NameWords` for Polyroll products only; Lipskey keeps `_NameWords`.
+/// Tapping a chip calls [onChipTap] with the chip's path index.
 class _HierarchyChips extends StatelessWidget {
-  const _HierarchyChips({required this.product});
+  const _HierarchyChips({required this.product, this.onChipTap, this.openIndex});
   final LipskeyCatalogProduct product;
+  final void Function(int chipIndex)? onChipTap;
+  final int? openIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -1720,7 +1798,11 @@ class _HierarchyChips extends StatelessWidget {
                       fontSize: 13,
                       fontWeight: FontWeight.w700)),
             ),
-          _HierarchyChipPill(word: path[i]),
+          _HierarchyChipPill(
+            word: path[i],
+            isOpen: i == openIndex,
+            onTap: onChipTap == null ? null : () => onChipTap!(i),
+          ),
         ],
       ],
     );
@@ -1728,30 +1810,41 @@ class _HierarchyChips extends StatelessWidget {
 }
 
 class _HierarchyChipPill extends StatelessWidget {
-  const _HierarchyChipPill({required this.word});
+  const _HierarchyChipPill(
+      {required this.word, this.onTap, this.isOpen = false});
   final String word;
+  final VoidCallback? onTap;
+  final bool isOpen;
 
   @override
   Widget build(BuildContext context) {
     final isSize = RegExp(r'^["”]?\d|^\d').hasMatch(word);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-      decoration: BoxDecoration(
-        color: isSize ? const Color(0xFFFF7A18) : const Color(0xFFF1F1F4),
-        borderRadius: BorderRadius.circular(11),
-        border: Border.all(
-            color: isSize
-                ? const Color(0xFFFF7A18)
-                : const Color(0xFFE0E0E5),
-            width: 1),
-      ),
-      child: Text(
-        word,
-        textDirection: word.contains(RegExp(r'\d')) ? TextDirection.ltr : null,
-        style: TextStyle(
-          color: isSize ? Colors.white : const Color(0xFF1C1C1E),
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
+    final bg = isOpen
+        ? const Color(0xFFFF7A18)
+        : (isSize ? const Color(0xFFFF7A18) : const Color(0xFFF1F1F4));
+    final fg = (isOpen || isSize) ? Colors.white : const Color(0xFF1C1C1E);
+    final border = isOpen
+        ? const Color(0xFFFF7A18)
+        : (isSize
+            ? const Color(0xFFFF7A18)
+            : const Color(0xFFE0E0E5));
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(11),
+          border: Border.all(color: border, width: 1),
+        ),
+        child: Text(
+          word,
+          textDirection: word.contains(RegExp(r'\d')) ? TextDirection.ltr : null,
+          style: TextStyle(
+            color: fg,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );

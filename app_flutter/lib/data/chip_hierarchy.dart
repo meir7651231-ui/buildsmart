@@ -158,3 +158,41 @@ const _l3Compounds = {
   'לעבודה בגובה', 'לתיקון חורים', 'פלדה מצופה',
 };
 const _l4Compounds = {'שקע תקע', 'שקע-תקע'};
+
+/// Faceted filter for the hierarchy chips: returns all products that share
+/// [product]'s type AND match its values for every level **strictly left of**
+/// [chipLevelIndex] (0 = the first chip in the path). The result is the
+/// candidate set when a user taps the chip at position [chipLevelIndex] —
+/// it lets them pivot only on that one chip while everything to the left
+/// is fixed.
+List<P> findHierarchySiblings<P>(
+  P product,
+  int chipLevelIndex, {
+  required Iterable<P> all,
+  required String Function(P) nameOf,
+  required String Function(P) brandOf,
+  required String Function(P) polyrollBrand,
+}) {
+  final pol = polyrollBrand(product);
+  if (brandOf(product) != pol) return [];
+  final src = parseChips(nameOf(product)).path;
+  // Build the "fixed prefix" up to (but excluding) chipLevelIndex.
+  final prefix = src.take(chipLevelIndex).toList();
+  final type = parseChips(nameOf(product)).type;
+  final out = <P>[];
+  for (final q in all) {
+    if (brandOf(q) != pol) continue;
+    final qc = parseChips(nameOf(q));
+    if (qc.type != type) continue;
+    final qPath = qc.path;
+    if (qPath.length <= chipLevelIndex) continue; // q has no chip at that level
+    // All prefix levels must match.
+    var ok = true;
+    for (int i = 0; i < prefix.length; i++) {
+      if (i >= qPath.length || qPath[i] != prefix[i]) { ok = false; break; }
+    }
+    if (!ok) continue;
+    out.add(q);
+  }
+  return out;
+}
