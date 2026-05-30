@@ -84,57 +84,68 @@ class ChipPath {
 
 ChipPath parseChips(String nameHe) {
   // Tokenize, keep size-tokens intact (e.g. "25x½\"", "63x32", "20×2.8").
-  final tokens = nameHe.split(RegExp(r'\s+'));
+  final tokens = nameHe.split(RegExp(r'\s+'))
+      .where((t) => t.trim().isNotEmpty)
+      .toList();
   String? type;
-  var l1 = <String>[];
-  var l2 = <String>[];
-  var l3 = <String>[];
-  var l4 = <String>[];
+  final l1 = <String>[];
+  final l2 = <String>[];
+  final l3 = <String>[];
+  final l4 = <String>[];
   String? l5;
   final leftover = <String>[];
   // Size tokens: usually start with a digit but RTL quoting can prefix
   // tokens like `"32x1` (the trailing quote got pulled to the start by bidi).
   final sizeRe = RegExp(r'^["”]?\d|^\d');
 
-  for (final t0 in tokens) {
-    final t = t0.trim();
-    if (t.isEmpty) continue;
-    if (kChipMaterial.contains(t)) continue;
-    if (type == null && kChipTypes.contains(t)) {
-      type = t;
-      continue;
-    }
-    if (sizeRe.hasMatch(t)) {
-      l5 ??= t;
-      continue;
-    }
-    if (kChipLevel1Connection.contains(t)) { l1.add(t); continue; }
-    if (kChipLevel2Shape.contains(t)) { l2.add(t); continue; }
-    if (kChipLevel3Feature.contains(t)) { l3.add(t); continue; }
-    if (kChipLevel4Thread.contains(t)) { l4.add(t); continue; }
-    leftover.add(t);
-  }
+  // Multi-word compounds, longest first per level. Walked at every position
+  // BEFORE single-token classification, so "לנקודת מים" gets one chip even
+  // though "מים" alone would land in L2.
+  List<List<String>> sortByLen(Set<String> src) =>
+      (src.map((s) => s.split(' ')).toList())
+        ..sort((a, b) => b.length.compareTo(a.length));
+  final l1c = sortByLen(_l1Compounds);
+  final l2c = sortByLen(_l2Compounds);
+  final l3c = sortByLen(_l3Compounds);
+  final l4c = sortByLen(_l4Compounds);
 
-  List<String> mergePair(List<String> src, Set<String> dual) {
-    final out = <String>[];
-    for (int i = 0; i < src.length; i++) {
-      if (i + 1 < src.length) {
-        final pair = '${src[i]} ${src[i + 1]}';
-        if (dual.contains(pair)) {
-          out.add(pair);
-          i++;
-          continue;
+  int i = 0;
+  while (i < tokens.length) {
+    final t = tokens[i];
+    if (kChipMaterial.contains(t)) { i++; continue; }
+    if (type == null && kChipTypes.contains(t)) { type = t; i++; continue; }
+    if (sizeRe.hasMatch(t)) { l5 ??= t; i++; continue; }
+
+    // Try compound match (look ahead). Probe levels in priority order so
+    // a substring that's ambiguous picks the most-specific level.
+    bool tryCompound(List<List<String>> comps, List<String> out) {
+      for (final comp in comps) {
+        if (comp.length > tokens.length - i) continue;
+        var ok = true;
+        for (int j = 0; j < comp.length; j++) {
+          if (tokens[i + j] != comp[j]) { ok = false; break; }
+        }
+        if (ok) {
+          out.add(comp.join(' '));
+          i += comp.length;
+          return true;
         }
       }
-      out.add(src[i]);
+      return false;
     }
-    return out;
-  }
+    if (tryCompound(l3c, l3)) continue;
+    if (tryCompound(l2c, l2)) continue;
+    if (tryCompound(l1c, l1)) continue;
+    if (tryCompound(l4c, l4)) continue;
 
-  l1 = mergePair(l1, _l1Compounds);
-  l2 = mergePair(l2, _l2Compounds);
-  l3 = mergePair(l3, _l3Compounds);
-  l4 = mergePair(l4, _l4Compounds);
+    // Single-token level lookups.
+    if (kChipLevel1Connection.contains(t)) { l1.add(t); i++; continue; }
+    if (kChipLevel2Shape.contains(t)) { l2.add(t); i++; continue; }
+    if (kChipLevel3Feature.contains(t)) { l3.add(t); i++; continue; }
+    if (kChipLevel4Thread.contains(t)) { l4.add(t); i++; continue; }
+    leftover.add(t);
+    i++;
+  }
 
   return ChipPath(
     type: type,
@@ -155,7 +166,12 @@ const _l3Compounds = {
   'משטח ריסון', 'ללא ידית', 'לנקודת מים',
   'עם מניעת זרימה חוזרת', 'עם מניעת זרימה', 'מניעת זרימה',
   'ציפוי כרום', 'כולל אטם', 'מפלסטיק פוליפרופילן',
-  'לעבודה בגובה', 'לתיקון חורים', 'פלדה מצופה',
+  'לעבודה בגובה', 'לתיקון חורים',
+  'פלדה מצופה PP', 'פלדה מצופה',
+  'מכונת פיגורות', 'פיגורות שולחני', 'פיגורות קלה',
+  'לקטרים', 'מקדח לרוכבים', 'תותב ריתוך',
+  'לריתוך רוכב',
+  '(לעבודה בגובה)',
 };
 const _l4Compounds = {'שקע תקע', 'שקע-תקע'};
 

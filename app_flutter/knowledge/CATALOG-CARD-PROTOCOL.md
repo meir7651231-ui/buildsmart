@@ -631,11 +631,10 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 | 5 | מידה | מספר נומינלי או mixed (`20 / 25×½" / 63×32`) |
 
 ### תכנית-העבודה (4 שלבים, כל אחד עם commit)
-1. **`lib/data/chip_hierarchy.dart`** — vocabulary maps + parser `parseChips(nameHe) → {type, level1..level5}`.
-   §14: בדיקה שכל מוצר מתפזר נקי (אין שגיאות-קלסיפיקציה, אין מילים-יתומות).
-2. **`lib/screens/lipskey_products_screen.dart`** — `_externalTitle` מחזיר רק את ה-type היחיד; ה-chips נבנים מ-`parseChips` עם מפריד `‹`.
-3. **בורר faceted:** `findAttrSiblings` עבור ציר X מחזיר רק מוצרים עם **אותו type + אותם ערכי-רמות שמשמאל לרמת-X**, ושונים ברמה-X. §14 בדיקה שזה עובד.
-4. **דחיפה במכה אחת** אחרי שהבדיקות עוברות + אישור ויזואלי.
+1. ✅ **`lib/data/chip_hierarchy.dart`** — vocabulary maps + parser `parseChips(nameHe) → ChipPath(type, level1..level5, leftover)`. שיפור מאוחר: look-ahead על compounds רב-מילים (longest-first) כך ש-"לנקודת מים" / "פלדה מצופה PP" / "עם מניעת זרימה חוזרת" מתאחדים לציפ אחד. §14: `spec_assets_test` · "no leftover tokens".
+2. ✅ **`_externalTitle` ⟸ singular type; `_HierarchyChips` widget** — מצייר את ה-path עם `‹`. Polyroll בלבד; Lipskey ממשיך עם `_NameWords`.
+3. ✅ **בורר faceted:** `findHierarchySiblings(p, chipIndex)` ⟸ אותו type + אותם chip-values עד chipIndex. `_cycleHierarchy` פותח picker; `_hierarchyPicker()` מציג. טסטים שודרגו: חומר=בדג' (`_HierarchyChips` לא רנדר PPR/PPRCT), יצרן=dims-only.
+4. ⏳ **שלב ויזואלי + push** — אחרי אישור משתמש.
 
 ### חומר (PPR/PPRCT) — לא בצ׳יפים
 החומר מוצג כ-בדג' "PPR-CT" על תמונת-המוצר (§20 #1, מוטמע). לא חלק מהשרשור.
