@@ -126,6 +126,51 @@ void main() {
         reason: 'SKU confirmed PPRCT but name says PPR:\n${misnamed.join('\n')}');
   });
 
+  // §14 — embedded mfr-code in nameHe (e.g. "צווארון PPR פנים P-PBRIDA160H").
+  // Manufacturer codes belong in nameEn / dims['מק"ט יצרן'], never in nameHe.
+  test('nameHe contains no embedded mfr code', () {
+    final bad = <String>[];
+    final pat = RegExp(r'\bP-[A-Z]{2,}\d|\bP-\d{3,}|\bES\d{4,}|\bDMTR\d');
+    for (final p in kPolyrollCatalog) {
+      if (pat.hasMatch(p.nameHe)) bad.add('${p.sku}: ${p.nameHe}');
+    }
+    expect(bad, isEmpty,
+        reason: 'mfr code leaked into nameHe (verbatim header preferred):\n'
+            '${bad.join('\n')}');
+  });
+
+  // §14 — pipe wall thickness must match OD/SDR (within ±15% — catalogs give
+  // a min-max range). Catches the p86/p87 bug where SDR labels were 7.4 for
+  // all sizes but the actual walls implied SDR 11 / SDR 17 per row.
+  test('pipe wall ≈ OD / SDR', () {
+    double? num(dynamic v) {
+      if (v == null) return null;
+      final s = v.toString().split('–').first.trim();
+      return double.tryParse(s);
+    }
+    final mismatches = <String>[];
+    for (final p in kPolyrollCatalog) {
+      final d = p.dims;
+      if (d == null) continue;
+      final od = num(d['de קוטר חיצוני'] ?? d['קוטר חיצוני']);
+      final wall = num(d['e עובי דופן'] ?? d['עובי דופן']);
+      final sdrStr = d['SDR']?.toString();
+      if (od == null || wall == null || sdrStr == null) continue;
+      final sdr = double.tryParse(sdrStr);
+      if (sdr == null) continue;
+      final expected = od / sdr;
+      final diff = (wall - expected).abs() / expected;
+      if (diff > 0.15) {
+        mismatches.add('${p.sku} p${p.page}: OD=$od wall=$wall SDR=$sdr '
+            '⇒ expected≈${expected.toStringAsFixed(2)} (off ${(diff*100).round()}%)');
+      }
+    }
+    expect(mismatches, isEmpty,
+        reason: 'wall thickness inconsistent with SDR — SDR label is probably '
+            'wrong for that row:\n${mismatches.take(8).join('\n')}'
+            '${mismatches.length > 8 ? "\n(total ${mismatches.length})" : ""}');
+  });
+
   // Locks the _pprSpecFor wiring: a sub-type keyword must map to its own
   // diagram. Guards the "PPR/PPRCT-style confusion" bug class for spec images.
   group('PPR sub-type → correct spec diagram', () {
