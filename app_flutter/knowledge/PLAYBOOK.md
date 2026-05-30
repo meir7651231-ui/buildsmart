@@ -31,6 +31,19 @@ old "push on a clean checkpoint" line; that line is now void.
 - "operation" = a meaningful build action (a wired helper, a UI block, a fix),
   not a single keystroke/tool call. Keep momentum; never idle.
 
+### 🔟 10-step decomposition per action (user-set)
+Before executing each meaningful action (a roadmap step / a fix), decompose it
+into ~**10 explicit sub-steps** and *show them*. Catches missed checks (test
+first, analyze, RTL, version bump, commit) and makes regressions obvious.
+Standard template:
+  1. Requirement + acceptance criteria · 2. Data sources / dependencies ·
+  3. Check for existing similar patterns/overlap · 4. Design (signature +
+  behavior) · 5. Write the test(s) first (red) · 6. Implement (green) ·
+  7. `flutter analyze` → 0 errors · 8. Wire UI (minimal, RTL-safe) ·
+  9. Scoped test(s) green; full suite at the ~5-step cadence · 10. Mark
+  ROADMAP entry + bump version + local commit (no push w/o approval).
+Adjust the template per step; never skip silently.
+
 ---
 
 **Protocol:** every time I get *stuck* and then *solve* it, I append a one-entry
