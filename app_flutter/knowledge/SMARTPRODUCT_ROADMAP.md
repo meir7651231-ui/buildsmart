@@ -79,7 +79,9 @@ Saved for the next run. Pick up here:
 24. 🟦 System (supply/drainage) safety note + min-bore inline via
    `systemSafetyNoteHe` (gravity-drainage / upstream-shutoff) + the bore row.
    (Line-level ΔP still ⬜ — needs a built line.) Guard: `install_effort_test`.
-25. ⬜ Auto install-kit — card offers all required safety items (correct-by-construction).
+25. ✅ Auto install-kit — engine-derived safety SKUs via `safetyKitItems`
+   (diff of `buildInstallation` autoCompliance:true vs false). Shown inline as
+   "🛡 ערכת בטיחות (auto): …". Guard: `safety_kit_test` (incl. integration probe).
 26. 🟦 Hot-water suitability across brands via `hotWaterSuitabilityFor`
    ("🌡 מים חמים: X/Y מותגים מתאימים", cross-checked vs engine
    `productSuitableForTemp`). (Interactive temp picker still ⬜.)

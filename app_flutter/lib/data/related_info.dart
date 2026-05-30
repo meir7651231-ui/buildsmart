@@ -1100,6 +1100,17 @@ List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
   );
 }
 
+// ─── ערכת בטיחות אוטומטית (Roadmap step 25) ─────────────────────────────────
+/// Pure list-diff by SKU: what's in [withCompliance] but not in [withoutCompliance].
+/// Used to surface the items the engine's auto-compliance inserted into the
+/// line (correct-by-construction — never invents a SKU). Order-preserving.
+List<LipskeyCatalogProduct> safetyKitItems(
+    List<LipskeyCatalogProduct> withCompliance,
+    List<LipskeyCatalogProduct> withoutCompliance) {
+  final base = withoutCompliance.map((p) => p.sku).toSet();
+  return [for (final p in withCompliance) if (!base.contains(p.sku)) p];
+}
+
 // ─── שרשרת מומחשת (Roadmap step 23) ─────────────────────────────────────────
 /// Format a materialized line (the engine's `plan.items`, which already include
 /// the inserted pipes/couplings/safety) as a glanceable RTL arrow sequence,

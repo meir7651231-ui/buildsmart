@@ -5250,6 +5250,41 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                       fontWeight: FontWeight.w700)),
                             ),
                           ),
+                          // Roadmap step 25 — engine-derived auto safety kit.
+                          if (expert)
+                            Builder(builder: (_) {
+                              final line = _resolveCartProducts();
+                              // Pick anchors: cart+prod, else prod + top compat
+                              // partner (so a single product still has a
+                              // meaningful line for the engine).
+                              final anchors = line.isNotEmpty
+                                  ? <LipskeyCatalogProduct>[...line, prod]
+                                  : (compat.isEmpty
+                                      ? <LipskeyCatalogProduct>[prod]
+                                      : <LipskeyCatalogProduct>[
+                                          prod,
+                                          compat.first,
+                                        ]);
+                              if (anchors.length < 2) return const SizedBox.shrink();
+                              final withT = buildInstallation(anchors,
+                                  autoCompliance: true, tempC: 60);
+                              final withF = buildInstallation(anchors,
+                                  autoCompliance: false, tempC: 60);
+                              final kit = safetyKitItems(withT.items, withF.items);
+                              if (kit.isEmpty) return const SizedBox.shrink();
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Text(
+                                    '🛡 ערכת בטיחות (auto): ${kit.map((p) => p.nameHe).take(4).join(" · ")}',
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: Color(0xFFB45309),
+                                        fontSize: 10.5,
+                                        height: 1.3,
+                                        fontWeight: FontWeight.w600)),
+                              );
+                            }),
                         ],
                         // Roadmap steps 71/72/74 — assign to a project.
                         Builder(builder: (_) {
