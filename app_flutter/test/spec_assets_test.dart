@@ -31,13 +31,9 @@ void main() {
   test('no orphan Polyroll product images on disk', () {
     final used = <String>{};
     for (final p in kPolyrollCatalog) {
-      final a = p.imageAsset;
-      if (a != null) used.add(a.split('/').last);
-      // Secondary photos exposed via the spec-pager (e.g. a collar's gasket
-      // on page 33) count as referenced too.
-      for (final s in p.specImageAssets) {
-        used.add(s.split('/').last);
-      }
+      // Front-side images (pager handles the 1/N) AND spec-side pager.
+      for (final a in p.imageAssets) used.add(a.split('/').last);
+      for (final s in p.specImageAssets) used.add(s.split('/').last);
     }
     final onDisk = Directory('assets/polyroll/products')
         .listSync()
@@ -67,13 +63,12 @@ void main() {
     }
     final usedByPage = <int, Set<String>>{};
     for (final p in kPolyrollCatalog) {
-      // Count primary image AND any secondary photos in the spec pager
-      // (so a collar that uses one photo as front and another in the
-      // pager fully covers a 2-photo page).
-      final refs = <String>[];
-      final a = p.imageAsset;
-      if (a != null) refs.add(a.split('/').last);
-      for (final s in p.specImageAssets) refs.add(s.split('/').last);
+      // Count every photo wired to the product — front pager (imageAssets)
+      // and spec pager (specImageAssets).
+      final refs = <String>[
+        ...p.imageAssets.map((a) => a.split('/').last),
+        ...p.specImageAssets.map((a) => a.split('/').last),
+      ];
       for (final f in refs) {
         if (re.hasMatch(f)) {
           usedByPage.putIfAbsent(p.page, () => {}).add(f);

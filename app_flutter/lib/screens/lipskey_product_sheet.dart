@@ -1041,7 +1041,7 @@ class _HeroImageState extends State<_HeroImage>
   }
 }
 
-class _ProductSide extends StatelessWidget {
+class _ProductSide extends StatefulWidget {
   const _ProductSide({
     required this.product,
     required this.onFlip,
@@ -1052,9 +1052,26 @@ class _ProductSide extends StatelessWidget {
   final VoidCallback onZoom;
 
   @override
+  State<_ProductSide> createState() => _ProductSideState();
+}
+
+class _ProductSideState extends State<_ProductSide> {
+  int _i = 0;
+
+  @override
+  void didUpdateWidget(_ProductSide old) {
+    super.didUpdateWidget(old);
+    if (old.product.sku != widget.product.sku) _i = 0;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final product = widget.product;
+    final imgs = product.imageAssets;
+    final hasImg = imgs.isNotEmpty;
+    final i = hasImg ? _i % imgs.length : 0;
     return GestureDetector(
-      onTap: onZoom, // tap image → fullscreen zoom
+      onTap: widget.onZoom, // tap image → fullscreen zoom
       child: Container(
         color: const Color(0xFFF5F6FA),
         child: Stack(
@@ -1073,13 +1090,36 @@ class _ProductSide extends StatelessWidget {
               ),
             ),
             Image.asset(
-              product.imageAsset ?? product.specImageAsset,
-              fit: product.imageAsset != null ? BoxFit.contain : BoxFit.cover,
+              hasImg ? imgs[i] : product.specImageAsset,
+              fit: hasImg ? BoxFit.contain : BoxFit.cover,
               errorBuilder: (_, __, ___) => Center(
                 child: Text(product.typeEmoji,
                     style: const TextStyle(fontSize: 72)),
               ),
             ),
+            // multi-image pager (1/N) — only when there's more than one photo.
+            if (imgs.length > 1)
+              Positioned(
+                top: 10,
+                left: 10,
+                child: GestureDetector(
+                  onTap: () =>
+                      setState(() => _i = (i + 1) % imgs.length),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xCC1A1200),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text('${i + 1}/${imgs.length}',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800)),
+                  ),
+                ),
+              ),
             // zoom hint (top-right)
             const Positioned(
               top: 10,
@@ -1091,7 +1131,7 @@ class _ProductSide extends StatelessWidget {
               bottom: 10,
               left: 10,
               child: GestureDetector(
-                onTap: onFlip,
+                onTap: widget.onFlip,
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 7),

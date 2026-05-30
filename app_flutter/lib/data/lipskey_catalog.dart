@@ -14,6 +14,11 @@ class LipskeyCatalogProduct {
   final int page;
   final Map<String, dynamic>? dims;
   final String? imageFile;
+  /// Extra product photos (in order) shown on the FRONT side via a 1/N pager.
+  /// When set, the front cycles through `imageFile` (or first of these) + the
+  /// rest — for products the catalog displays as multiple views (e.g. the
+  /// page-29 union shown both assembled and dismantled).
+  final List<String>? imageFiles;
   /// A cropped spec/diagram image (in the products dir). When set, the spec side
   /// shows just this diagram instead of the whole catalog page.
   final String? specImageFile;
@@ -35,6 +40,7 @@ class LipskeyCatalogProduct {
     required this.page,
     this.dims,
     this.imageFile,
+    this.imageFiles,
     this.specImageFile,
     this.specImageFiles,
     this.brand = 'ליפסקי',
@@ -43,6 +49,20 @@ class LipskeyCatalogProduct {
   String? get imageAsset => imageFile == null
       ? null
       : 'assets/${brand == 'פולירול' ? 'polyroll' : 'lipskey'}/products/$imageFile';
+
+  /// All FRONT-side images for the 1/N pager: `imageFile` first, then any
+  /// extras from `imageFiles` (de-duplicated). Empty list when no image at all
+  /// — caller falls back to the type emoji.
+  List<String> get imageAssets {
+    final dir = brand == 'פולירול' ? 'polyroll' : 'lipskey';
+    final out = <String>[];
+    if (imageFile != null) out.add('assets/$dir/products/$imageFile');
+    for (final f in imageFiles ?? const <String>[]) {
+      final a = 'assets/$dir/products/$f';
+      if (!out.contains(a)) out.add(a);
+    }
+    return out;
+  }
 
   String get specImageAsset {
     final dir = brand == 'פולירול' ? 'polyroll' : 'lipskey';

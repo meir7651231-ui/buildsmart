@@ -103,8 +103,10 @@ String? _pprPagePhoto(int page, String nameHe) {
       if (nameHe.contains('סעפת')) return _pp(34, 'b');
       if (nameHe.contains('לוחית')) return _pp(34, 'c');
       return _pp(34, 'a');
-    case 29: // מתאם משושה (a) · רוכב משושה (c)
-      return _pp(29, nameHe.contains('רוכב') ? 'c' : 'a');
+    case 29: // מחבר מתוברג מורכב (b, main) · מפורק (a, in pager) · רוכב משושה (c)
+      if (nameHe.contains('רוכב')) return _pp(29, 'c');
+      return _pp(29, 'b'); // union: front-page main = assembled
+
     case 30: // סמוי+ידית (a) · סמוי ללא ידית (b) · בין אוגנים = wafer (c)
       if (nameHe.contains('בין אוגנים')) return _pp(30, 'c');
       return _pp(30, nameHe.contains('ללא ידית') ? 'b' : 'a');
@@ -213,6 +215,7 @@ LipskeyCatalogProduct _ppr(
   int page, {
   Map<String, dynamic>? dims,
   String? imageFile,
+  List<String>? imageFiles,
   String? specImageFile,
   String? color,
 }) =>
@@ -227,10 +230,23 @@ LipskeyCatalogProduct _ppr(
       brand: kPolyrollBrand,
       dims: dims,
       imageFile: imageFile ?? _pprImageFor(categoryHe, nameHe, page),
+      imageFiles: imageFiles ?? _pprImageFilesFor(categoryHe, nameHe, page),
       specImageFile: specImageFile,
       specImageFiles: _pprSpecFor(categoryHe, nameHe),
       color: color,
     );
+
+/// Secondary product photos shown via the FRONT-side 1/N pager (e.g. the
+/// page-29 union is photographed both assembled and dismantled — both belong
+/// on the main image side, not on the spec side). Returns null when the
+/// product has only one front photo (most products).
+List<String>? _pprImageFilesFor(String categoryHe, String nameHe, int page) {
+  if (page == 29 && nameHe.contains('מחבר מתוברג')) {
+    // Main = p29_b (assembled); pager adds p29_a (dismantled view).
+    return const ['ppr_p29_a.jpg'];
+  }
+  return null;
+}
 
 // AQUATHERM "blue pipe" for air-conditioning (PDF page 80). All columns are
 // verbatim from the table: size = "d X wall", SDR, d, S (wall), d1 (inner ⌀),
@@ -479,12 +495,12 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('9091021324', 'מתאם PPR משושה תבריג חיצוני 75x½"', 'PPR Adapter 75x½"', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '65', 'R': '2x½"', 'D': '100.0', 'z': '75.0', 'L': '105.0', 'd': '75'}),
   _ppr('9091021325', 'מתאם PPR משושה תבריג חיצוני "90x3', 'PPR Adapter "90x3', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '85', 'R': '"3', 'D': '120.0', 'z': '88.0', 'L': '121.0', 'd': '90'}),
   _ppr('9091021327', 'מתאם PPR משושה תבריג חיצוני "110x4', 'PPR Adapter "110x4', kPprAdapters, 'PPR Adapters', '🔩', 28, dims: {'SW': '105', 'R': '"4', 'D': '147.0', 'z': '111.0', 'L': '148.0', 'd': '110'}),
-  _ppr('98415838', 'מתאם PPR משושה 20', 'PPR Adapter 20', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '46', 'z1': '5.5', 'L1': '20.0', 'z': '12', 'L': '26', 'd': '20'}),
-  _ppr('98415840', 'מתאם PPR משושה 25', 'PPR Adapter 25', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '56', 'z1': '5.0', 'L1': '21.0', 'z': '12', 'L': '28', 'd': '25'}),
-  _ppr('98415842', 'מתאם PPR משושה 32', 'PPR Adapter 32', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '66', 'z1': '5.0', 'L1': '23.0', 'z': '12', 'L': '32', 'd': '32'}),
-  _ppr('98415844', 'מתאם PPR משושה 40', 'PPR Adapter 40', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '79', 'z1': '5.0', 'L1': '25.5', 'z': '14', 'L': '38', 'd': '40'}),
-  _ppr('98415846', 'מתאם PPR משושה 50', 'PPR Adapter 50', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '87', 'z1': '5.0', 'L1': '28.5', 'z': '16', 'L': '45', 'd': '50'}),
-  _ppr('98415848', 'מתאם PPR משושה 63', 'PPR Adapter 63', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '107', 'z1': '5.0', 'L1': '32.5', 'z': '20', 'L': '55.5', 'd': '63'}),
+  _ppr('98415838', 'מחבר מתוברג מפלסטיק פוליפרופילן מפורק 20', 'PPR Adapter 20', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '46', 'z1': '5.5', 'L1': '20.0', 'z': '12', 'L': '26', 'd': '20'}),
+  _ppr('98415840', 'מחבר מתוברג מפלסטיק פוליפרופילן מפורק 25', 'PPR Adapter 25', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '56', 'z1': '5.0', 'L1': '21.0', 'z': '12', 'L': '28', 'd': '25'}),
+  _ppr('98415842', 'מחבר מתוברג מפלסטיק פוליפרופילן מפורק 32', 'PPR Adapter 32', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '66', 'z1': '5.0', 'L1': '23.0', 'z': '12', 'L': '32', 'd': '32'}),
+  _ppr('98415844', 'מחבר מתוברג מפלסטיק פוליפרופילן מפורק 40', 'PPR Adapter 40', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '79', 'z1': '5.0', 'L1': '25.5', 'z': '14', 'L': '38', 'd': '40'}),
+  _ppr('98415846', 'מחבר מתוברג מפלסטיק פוליפרופילן מפורק 50', 'PPR Adapter 50', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '87', 'z1': '5.0', 'L1': '28.5', 'z': '16', 'L': '45', 'd': '50'}),
+  _ppr('98415848', 'מחבר מתוברג מפלסטיק פוליפרופילן מפורק 63', 'PPR Adapter 63', kPprAdapters, 'PPR Adapters', '🔩', 29, dims: {'D': '107', 'z1': '5.0', 'L1': '32.5', 'z': '20', 'L': '55.5', 'd': '63'}),
   _ppr('9091028214', 'רוכב PPR משושה 40x½"', 'PPR Saddle 40x½"', kPprSaddles, 'PPR Saddles', '🪢', 29, dims: {'SW': '24', 'R': '½"', 'D': '38.5', 'z': '43.0', 'L': '39', 'd1': '25', 'd': '40'}),
   _ppr('9091028216', 'רוכב PPR משושה 50x½"', 'PPR Saddle 50x½"', kPprSaddles, 'PPR Saddles', '🪢', 29, dims: {'SW': '24', 'R': '½"', 'D': '38.5', 'z': '48.0', 'L': '39', 'd1': '25', 'd': '50'}),
   _ppr('9091028218', 'רוכב PPR משושה 63x½"', 'PPR Saddle 63x½"', kPprSaddles, 'PPR Saddles', '🪢', 29, dims: {'SW': '24', 'R': '½"', 'D': '38.5', 'z': '54.5', 'L': '39', 'd1': '25', 'd': '63'}),
