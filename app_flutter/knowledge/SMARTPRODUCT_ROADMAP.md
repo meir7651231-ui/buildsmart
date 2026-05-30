@@ -40,7 +40,9 @@ Saved for the next run. Pick up here:
 7. 🟦 Persisted selection — `cardSelectionProvider` remembers the last brand per
    product (`productKey→brandName`); restored in `initState`, saved on tap.
    (acc/qty persistence still ⬜.) Guard: `card_selection_test`.
-8. ⬜ Golden tests for the unified card across every category.
+8. 🟦 Comprehensive widget rendering already covered by `product_journey_test`
+   (all 935 sheets render at narrow phone + large text). Pixel-level golden
+   files (`matchesGoldenFile`) still ⬜ — deferred (heavy + flaky in CI).
 9. 🟦 Cleared safe analyze warnings in `catalog_screen.dart` (unused
    `lipskey_brand_screen` import + unused `cs` local). Remaining dead widgets
    (`_MiniSearchPill`/`_Chip`/`_CatalogDrillSection`/`_diameterSubGroups`) await
@@ -147,14 +149,19 @@ Saved for the next run. Pick up here:
    `Map<productKey, Map<brand, count>>` with `record`, `favouriteFor` (ties
    broken alphabetically), `countsFor`, `totalPicks`. Guard: `brand_history_test`
    (6 tests). Card wiring (auto-select fav on open) still ⬜.
-52. ⬜ Filter by the active project (cold/hot/commercial) — hide irrelevant.
+52. 🟦 Project-mode setting — `projectModeProvider` (enum any/cold/hot/commercial,
+   persisted), with `isFiltering` flag. UI filter wiring still ⬜ (touches
+   `catalog_screen.dart`). Guard: `project_mode_test`.
 53. ⬜ In-card AI assistant: "what suits me?" in free text.
 54. ⬜ Learning: more lines built → sharper recommendations.
 55. ⬜ Product recognition from camera (barcode/image) → opens the card.
 56. 🟦 "Frequently paired" — `frequentlyPairedTypesFor` surfaces the product
    *types* that most often connect (data-driven from the compat engine).
    (Real co-purchase data pending a backend.) Guard: `paired_warning_test`.
-57. ⬜ Profession-aware (plumber/contractor/DIY) — different detail level.
+57. 🟦 Profession-mode setting — `professionModeProvider` (enum diy/contractor/
+   pro, persisted, contractor default) + `defaultDetailFor()` (diy→simple,
+   contractor/pro→expert). Orthogonal to `cardDetailModeProvider`. UI affordance
+   to switch profession still ⬜. Guard: `profession_mode_test`.
 58. ✅ "Why it matters" explanation under each compliance warning via
    `complianceWhyHe` (↳ line). Coverage-gated: every trigger label has a why.
    Guard: `compliance_why_test`.
@@ -165,7 +172,10 @@ Saved for the next run. Pick up here:
 
 ## Phase 7 · Search & discovery (61–70)
 61. ⬜ Index SmartProduct in the main search (not just the tree).
-62. ⬜ Forgiving search (layman word → product) in the smart card too.
+62. 🟦 Forgiving multi-word catalog search — `fuzzySearchProducts(query)` (every
+   word must appear; whole-phrase substring matches rank highest; proximity
+   tiebreak; configurable products iterable + limit). Search-box UI still ⬜.
+   Guard: `fuzzy_search_test`.
 63. ✅ "Similar" — variant-family list ("גרסאות נוספות במשפחה") in the 📦 section
    via `variantSiblingsOf`. (Upgrade/cheaper-alternative still ⬜.)
 64. ⬜ Health navigation: from the card straight to the relevant finder/category.
@@ -233,7 +243,11 @@ Saved for the next run. Pick up here:
    wiring yet. Guard: `smart_card_strings_test` (non-empty · no-dup · screen-
    containment). Full localization (RTL Arabic, language switch) still ⬜.
    Built by parallel sub-agent.
-87. ⬜ Reduced-motion / sun mode per settings.
+87. 🟦 Reduced-motion — by construction the SmartProduct card additions
+   introduce NO new animations (all chips/sections are static), so they
+   already respect `catalog_settings.reducedMotion`. Gating the legacy
+   `_DiagramFlow` stage animations still ⬜ — that's a shared-file edit
+   to defer to a careful pass.
 88. 🟦 Bundle-split strategy — `knowledge/BUNDLE_SPLIT.md` analysis of top files
    (catalog_screen 7668L · lipskey_catalog 6822L · install_studio 3184L) + a
    concrete plan (extract `_SmartProductSheet` to its own file; deferred-import
