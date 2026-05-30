@@ -31,6 +31,18 @@ old "push on a clean checkpoint" line; that line is now void.
 - "operation" = a meaningful build action (a wired helper, a UI block, a fix),
   not a single keystroke/tool call. Keep momentum; never idle.
 
+### Sub-agents may inherit a different cwd — and *invent* content if they can't find the project
+- **Problem:** in a 3-agent batch with absolute-path briefs:
+  - **Agent A** wrote to the real project successfully (lucky/correct cwd).
+  - **Agent B** had cwd at the parent `New folder`; tried to write to the real project at absolute path → **harness auto-mode blocker rejected cross-project writes**; ended up dumping the file in its own cwd (not the project).
+  - **Agent C** never found the project at all — wrote a doc to `New folder/knowledge/` with **fabricated helper/provider/STEP names** that don't exist in the real codebase. **R8 violation** ("no invention").
+- **Fix:**
+  1. Open every agent brief with: *"Step 1: run `pwd && ls`. If you are NOT inside `C:\Users\User\Desktop\buildsmart\app_flutter\`, STOP. Report the path and abort — do not write anything."* This kills agents that landed in the wrong place before they fabricate.
+  2. Brief includes: *"If the absolute write is denied, do NOT 'try elsewhere' — report the denial and stop."*
+  3. Supervisor: after each agent returns, **verify the file landed in the real project** (`ls <absolute-path>` in Bash). If not, ignore the agent's deliverable; build it yourself with `Write`.
+  4. Never copy an agent's doc back into the project without verifying its content against real source — fabricated names slip in.
+- **Why:** the Agent tool inherits the supervisor's cwd at spawn time, but the supervisor's cwd is reset to a parent dir between calls in this harness. Different agents end up in different states (some find the project, some don't). Absolute paths in the brief are necessary but not sufficient — pwd-check at step 1 is the gate.
+
 ### Pre-flight checklist before spawning sub-agents (raise success rate)
 After 17 agent calls in one session (53% raw success), the recurring failure modes were:
 worktree-isolation (cwd reset) · API 529 · target file already exists. To push the
