@@ -31,21 +31,19 @@ const String kPprElectrofusion = 'אביזרי ריתוך חשמלי PPR';
 /// Per-line product image (extracted from the catalog PDF diagrams). One entry
 /// covers every product in the line — a per-product `imageFile` still overrides.
 /// Populated line-by-line as diagrams are pulled from the PDF (protocol §17).
+/// Last-resort fallback for categories that lack a page photo (the PPRCT
+/// pages 81–85 are table-only — no raster product photo in the catalog —
+/// so their products borrow the matching PPR family image). Only categories
+/// that actually fall through `_pprImageFor` are listed; the rest reach a
+/// page photo or a sub-type keyword branch first (protocol §17).
 const Map<String, String> _kPprCategoryImage = {
-  kPprPipesSupply: 'ppr_supply_pipe.jpg',
   kPprPipesFiber: 'pipe_faser_20.jpg',
-  kPprPipesAC: 'ppr_ac_pipe.jpg',
-  kPprCouplers: 'ppr_coupler.jpg',
-  kPprElbows: 'ppr_elbow_90.jpg',
-  kPprTees: 'ppr_tee.jpg',
-  kPprPlugs: 'ppr_plug.jpg',
-  kPprOmega: 'ppr_omega.jpg',
-  kPprAdapters: 'ppr_adapter_round.jpg',
-  kPprValves: 'ppr_valve.jpg',
-  kPprCollars: 'ppr_collar.jpg',
-  kPprElectrofusion: 'ppr_ef.jpg',
-  kPprTools: 'ppr_tools.jpg',
-  kPprSaddles: 'ppr_saddle.jpg',
+  kPprElbows: 'ppr_elbow_90.jpg', // PPRCT page 81 fallback
+  kPprTees: 'ppr_tee.jpg', // PPRCT page 82 fallback
+  kPprPlugs: 'ppr_plug.jpg', // PPRCT page 83 fallback
+  kPprCollars: 'ppr_collar.jpg', // PPRCT page 85 fallback
+  kPprElectrofusion: 'ppr_ef.jpg', // PPRCT page 85 fallback (sleeves only)
+  kPprSaddles: 'ppr_saddle.jpg', // PPRCT page 84 fallback
 };
 
 /// Single-photo (or uniform multi-photo) pages → the product photo to use,
@@ -141,28 +139,17 @@ String? _pprPagePhoto(int page, String nameHe) {
 String? _pprImageFor(String categoryHe, String nameHe, int page) {
   final photo = _pprPagePhoto(page, nameHe);
   if (photo != null) return photo;
+  // Sub-type-aware fallbacks for PPRCT pages 81–83 (table-only, no photo);
+  // PPRCT EF on page 85 is sleeves only (handled by the map below).
   switch (categoryHe) {
     case kPprElbows:
       return nameHe.contains('45') ? 'ppr_elbow_45.jpg' : 'ppr_elbow_90.jpg';
-    case kPprAdapters:
-      return nameHe.contains('משושה')
-          ? 'ppr_adapter_hex.jpg'
-          : 'ppr_adapter_round.jpg';
     case kPprCouplers:
-      return nameHe.contains('מצרה')
-          ? 'ppr_coupler_reducing.jpg'
-          : 'ppr_coupler.jpg';
+      // PPRCT couplers on page 83 are all reducing; if a straight PPRCT
+      // coupler is ever added, re-add `ppr_coupler.jpg` (a copy of p22_c).
+      return 'ppr_coupler_reducing.jpg';
     case kPprTees:
       return nameHe.contains('מצרה') ? 'ppr_tee_reducing.jpg' : 'ppr_tee.jpg';
-    case kPprValves:
-      if (nameHe.contains('פרפר')) return 'ppr_valve_butterfly.jpg';
-      if (nameHe.contains('בין אוגנים')) return 'ppr_valve_wafer.jpg';
-      if (nameHe.contains('סמוי')) return 'ppr_valve_concealed.jpg';
-      if (nameHe.contains('אלכסוני')) return 'ppr_valve_angle.jpg';
-      if (nameHe.contains('מעבר')) return 'ppr_valve_straight.jpg';
-      return 'ppr_valve.jpg'; // כדורי (ball) default
-    case kPprElectrofusion:
-      return nameHe.contains('מסעף') ? 'ppr_ef_tee.jpg' : 'ppr_ef.jpg';
   }
   return _kPprCategoryImage[categoryHe];
 }

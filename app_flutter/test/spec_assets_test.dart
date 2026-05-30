@@ -28,7 +28,7 @@ void main() {
 
   // No orphan product photos: every ppr_pNN_* file we ship must be referenced
   // by at least one product. Catches dead weight left after re-mapping (§16).
-  test('no orphan Polyroll page photos on disk', () {
+  test('no orphan Polyroll product images on disk', () {
     final used = <String>{};
     for (final p in kPolyrollCatalog) {
       final a = p.imageAsset;
@@ -37,10 +37,51 @@ void main() {
     final onDisk = Directory('assets/polyroll/products')
         .listSync()
         .map((e) => e.path.split('/').last)
-        .where((f) => RegExp(r'^ppr_p\d+_[a-z]\.jpg$').hasMatch(f))
+        .where((f) =>
+            (f.startsWith('ppr_') || f.startsWith('pipe_')) && f.endsWith('.jpg'))
         .toSet();
     final orphans = onDisk.difference(used).toList()..sort();
     expect(orphans, isEmpty, reason: 'unused photos:\n${orphans.join('\n')}');
+  });
+
+  // §14 detection test for the merged-sub-types bug class (the one that bit
+  // p22/p30/p92/p25/p26/p27/p28/p32/p72): a page with ≥2 ppr_pNN_* photos on
+  // disk represents ≥2 distinct sub-types in the catalog, so the products on
+  // that page must resolve to ≥2 distinct images. If they all collapse to one,
+  // the catalog has merged sub-types that the photos distinguish → silent
+  // "wrong product photo" at runtime.
+  test('multi-photo pages must split: products resolve to all photos', () {
+    final filesByPage = <int, Set<String>>{};
+    final re = RegExp(r'^ppr_p(\d+)_[a-z]\.jpg$');
+    for (final e in Directory('assets/polyroll/products').listSync()) {
+      final f = e.path.split('/').last;
+      final m = re.firstMatch(f);
+      if (m != null) {
+        filesByPage.putIfAbsent(int.parse(m.group(1)!), () => {}).add(f);
+      }
+    }
+    final usedByPage = <int, Set<String>>{};
+    for (final p in kPolyrollCatalog) {
+      final a = p.imageAsset;
+      if (a == null) continue;
+      final f = a.split('/').last;
+      if (re.hasMatch(f)) {
+        usedByPage.putIfAbsent(p.page, () => {}).add(f);
+      }
+    }
+    final gaps = <String>[];
+    for (final e in filesByPage.entries) {
+      if (e.value.length < 2) continue; // single-photo page — nothing to split
+      final used = usedByPage[e.key] ?? const <String>{};
+      if (used.length < e.value.length) {
+        final missing = e.value.difference(used).toList()..sort();
+        gaps.add('p${e.key}: ${e.value.length} photos on disk, '
+            '${used.length} used → unused: ${missing.join(", ")}');
+      }
+    }
+    expect(gaps, isEmpty,
+        reason: 'merged sub-types — distinct catalog photos are not being '
+            'routed to (page has photos but products collapse to fewer):\n${gaps.join('\n')}');
   });
 
   // Locks the _pprSpecFor wiring: a sub-type keyword must map to its own
