@@ -86,14 +86,16 @@ String? _pprPagePhoto(int page, String nameHe) {
     case 20: // ברך 45° (a) · 90° (b) · מסעף (c)
       return _pp(20,
           nameHe.contains('מסעף') ? 'c' : (nameHe.contains('90') ? 'b' : 'a'));
-    case 22: // מצמד (a) · אומגה (b) · פקק (c)
+    case 22: // פקק (a) · אומגה (b) · מצמד (c)
       return _pp(22,
-          nameHe.contains('אומגה') ? 'b' : (nameHe.contains('פקק') ? 'c' : 'a'));
+          nameHe.contains('אומגה') ? 'b' : (nameHe.contains('פקק') ? 'a' : 'c'));
     case 29: // מתאם משושה (a) · רוכב משושה (c)
       return _pp(29, nameHe.contains('רוכב') ? 'c' : 'a');
-    case 30: // בין אוגנים (a) · סמוי (b)
-      return _pp(30, nameHe.contains('סמוי') ? 'b' : 'a');
-    case 31: // מעבר (a) · אלכסוני (c)
+    case 30: // סמוי+ידית (a) · סמוי ללא ידית (b) · בין אוגנים = wafer (c)
+      if (nameHe.contains('בין אוגנים')) return _pp(30, 'c');
+      return _pp(30, nameHe.contains('ללא ידית') ? 'b' : 'a');
+    case 31: // מעבר (a) · אלכסוני עם מניעת זרימה (b) · אלכסוני (c)
+      if (nameHe.contains('מניעת זרימה')) return _pp(31, 'b');
       return _pp(31, nameHe.contains('אלכסוני') ? 'c' : 'a');
     case 73: // מסעף חשמלי (a) · מצמד חשמלי (b)
       return _pp(73, nameHe.contains('מצמד') ? 'b' : 'a');
@@ -107,8 +109,8 @@ String? _pprPagePhoto(int page, String nameHe) {
     case 91: // מברגה (a) · תותב (b) · מקדח (c)
       return _pp(91,
           nameHe.contains('מקדח') ? 'c' : (nameHe.contains('תותב') ? 'b' : 'a'));
-    case 92: // תותב רוכב (a) · תיקון חורים (c)
-      return _pp(92, nameHe.contains('חורים') ? 'c' : 'a');
+    case 92: // תותב רוכב (a) · תותב לתיקון חורים (b)
+      return _pp(92, nameHe.contains('חורים') ? 'b' : 'a');
   }
   return _kPprPagePhoto[page];
 }
@@ -486,9 +488,9 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('99040858', 'ברז PPR סמוי 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '59', 'h1': '28', 'h': '116', 'D': '29.5', 'z': '20.5', 'l': '35', 'd': '20'}),
   _ppr('99040860', 'ברז PPR סמוי 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '59', 'h1': '28', 'h': '116', 'D': '34.0', 'z': '22.0', 'l': '38', 'd': '25'}),
   _ppr('99040862', 'ברז PPR סמוי 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '59', 'h1': '34', 'h': '121', 'D': '43.0', 'z': '31.0', 'l': '49', 'd': '32'}),
-  _ppr('99040888', 'ברז PPR סמוי 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '28', 'h': '109', 'D': '29.5', 'z': '20.5', 'l': '35', 'd': '20'}),
-  _ppr('99040890', 'ברז PPR סמוי 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '28', 'h': '109', 'D': '34.0', 'z': '22.0', 'l': '38', 'd': '25'}),
-  _ppr('99040892', 'ברז PPR סמוי 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '34', 'h': '115', 'D': '43.0', 'z': '31.0', 'l': '49', 'd': '32'}),
+  _ppr('99040888', 'ברז PPR סמוי ללא ידית 20', 'PPR Concealed Valve (no handle) 20', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '28', 'h': '109', 'D': '29.5', 'z': '20.5', 'l': '35', 'd': '20'}),
+  _ppr('99040890', 'ברז PPR סמוי ללא ידית 25', 'PPR Concealed Valve (no handle) 25', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '28', 'h': '109', 'D': '34.0', 'z': '22.0', 'l': '38', 'd': '25'}),
+  _ppr('99040892', 'ברז PPR סמוי ללא ידית 32', 'PPR Concealed Valve (no handle) 32', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '34', 'h': '115', 'D': '43.0', 'z': '31.0', 'l': '49', 'd': '32'}),
   _ppr('99041602', 'ברז PPR כדורי בין אוגנים 90', 'PPR Valve 90', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '150', 'D': '160', 'z': '124', 'l': '210', 'd': '77', 'DN': '80'}),
   _ppr('99041604', 'ברז PPR כדורי בין אוגנים 110', 'PPR Valve 110', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '103.0', 'h1': '165', 'D': '180', 'z': '145', 'l': '260', 'd': '94', 'DN': '100'}),
   _ppr('99041607', 'ברז PPR כדורי בין אוגנים 160', 'PPR Valve 160', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '136.5', 'h1': '210', 'D': '240', 'z': '205', 'l': '310', 'd': '135', 'DN': '150'}),
@@ -496,10 +498,10 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('99040810', 'ברז PPR מעבר ישר 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '70.0', 'D': '34.0', 'z': '22.0', 'l': '38', 'd': '25'}),
   _ppr('99040812', 'ברז PPR מעבר ישר 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '86.5', 'D': '43.0', 'z': '31.0', 'l': '49', 'd': '32'}),
   _ppr('99040814', 'ברז PPR מעבר ישר 40', 'PPR Valve 40', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '100.5', 'D': '52.0', 'z': '39.5', 'l': '60', 'd': '40'}),
-  _ppr('99041208', 'ברז PPR אלכסוני 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '95.5', 'D': '34', 'z': '30.5', 'l': '45', 'd': '20'}),
-  _ppr('99041210', 'ברז PPR אלכסוני 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '95.5', 'D': '34', 'z': '29.0', 'l': '45', 'd': '25'}),
-  _ppr('99041212', 'ברז PPR אלכסוני 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '111.5', 'D': '43', 'z': '38.0', 'l': '56', 'd': '32'}),
-  _ppr('99041214', 'ברז PPR אלכסוני 40', 'PPR Valve 40', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '135.0', 'D': '52', 'z': '44.5', 'l': '65', 'd': '40'}),
+  _ppr('99041208', 'ברז PPR אלכסוני עם מניעת זרימה חוזרת 20', 'PPR Angle Check Valve 20', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '95.5', 'D': '34', 'z': '30.5', 'l': '45', 'd': '20'}),
+  _ppr('99041210', 'ברז PPR אלכסוני עם מניעת זרימה חוזרת 25', 'PPR Angle Check Valve 25', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '95.5', 'D': '34', 'z': '29.0', 'l': '45', 'd': '25'}),
+  _ppr('99041212', 'ברז PPR אלכסוני עם מניעת זרימה חוזרת 32', 'PPR Angle Check Valve 32', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '111.5', 'D': '43', 'z': '38.0', 'l': '56', 'd': '32'}),
+  _ppr('99041214', 'ברז PPR אלכסוני עם מניעת זרימה חוזרת 40', 'PPR Angle Check Valve 40', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '135.0', 'D': '52', 'z': '44.5', 'l': '65', 'd': '40'}),
   _ppr('99041108', 'ברז PPR אלכסוני 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '95.5', 'D': '34', 'z': '30.5', 'l': '45', 'd': '20'}),
   _ppr('99041110', 'ברז PPR אלכסוני 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '95.5', 'D': '34', 'z': '29.0', 'l': '45', 'd': '25'}),
   _ppr('99041112', 'ברז PPR אלכסוני 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 31, dims: {'h': '111.5', 'D': '43', 'z': '38.0', 'l': '56', 'd': '32'}),
