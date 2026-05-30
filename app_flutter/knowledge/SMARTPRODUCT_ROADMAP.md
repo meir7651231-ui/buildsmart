@@ -218,7 +218,11 @@ Saved for the next run. Pick up here:
 86. ⬜ Perfect RTL + Arabic/English support (i18n).
 87. ⬜ Reduced-motion / sun mode per settings.
 88. ⬜ Bundle size: split & code-split the card.
-89. ⬜ Regression gate: every card choice covered by a test.
+89. ✅ Regression gate — `regression_gate_test` asserts every curated card
+   helper (47 names) is referenced by at least one test file. It caught 3
+   uncovered helpers on first run (engineeringSpecFor/priceFor/
+   catalogProductForSmart) → backfilled by `core_helpers_test`. Going forward:
+   adding a helper without a test goes red.
 90. ⬜ Crash monitoring + telemetry for render errors.
 
 ## Phase 10 · Platform, analytics & moonshots (91–100)
