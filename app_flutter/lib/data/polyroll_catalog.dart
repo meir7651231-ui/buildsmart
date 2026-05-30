@@ -187,6 +187,11 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe) {
     case kPprSaddles:
       return ['spec_saddle.jpg'];
     case kPprCollars:
+      // Page-33 collars ship with a gasket (verbatim "כולל אטם"); pager
+      // shows the dimension diagram then the gasket photo (p33_c).
+      if (nameHe.contains('צווארון')) {
+        return ['spec_collar.jpg', 'ppr_p33_c.jpg'];
+      }
       return ['spec_collar.jpg'];
     case kPprPlugs:
       return ['spec_plug.jpg'];

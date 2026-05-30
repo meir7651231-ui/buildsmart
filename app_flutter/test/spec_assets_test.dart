@@ -33,6 +33,11 @@ void main() {
     for (final p in kPolyrollCatalog) {
       final a = p.imageAsset;
       if (a != null) used.add(a.split('/').last);
+      // Secondary photos exposed via the spec-pager (e.g. a collar's gasket
+      // on page 33) count as referenced too.
+      for (final s in p.specImageAssets) {
+        used.add(s.split('/').last);
+      }
     }
     final onDisk = Directory('assets/polyroll/products')
         .listSync()
@@ -62,11 +67,17 @@ void main() {
     }
     final usedByPage = <int, Set<String>>{};
     for (final p in kPolyrollCatalog) {
+      // Count primary image AND any secondary photos in the spec pager
+      // (so a collar that uses one photo as front and another in the
+      // pager fully covers a 2-photo page).
+      final refs = <String>[];
       final a = p.imageAsset;
-      if (a == null) continue;
-      final f = a.split('/').last;
-      if (re.hasMatch(f)) {
-        usedByPage.putIfAbsent(p.page, () => {}).add(f);
+      if (a != null) refs.add(a.split('/').last);
+      for (final s in p.specImageAssets) refs.add(s.split('/').last);
+      for (final f in refs) {
+        if (re.hasMatch(f)) {
+          usedByPage.putIfAbsent(p.page, () => {}).add(f);
+        }
       }
     }
     final gaps = <String>[];
