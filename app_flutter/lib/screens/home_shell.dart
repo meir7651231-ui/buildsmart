@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.27 · 31.5.26 · SmartProduct: 5 שלבים יחד — golden 🟦 + project-mode + profession-mode + fuzzy-search + reduced-motion 🟦',
+                          'v5.28 · 31.5.26 · SmartProduct: ברירת מותג מהיסטוריה (שלב 51 ✅) — selection → history → rec',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

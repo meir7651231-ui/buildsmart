@@ -145,10 +145,12 @@ Saved for the next run. Pick up here:
 50. ⬜ Direct order/payment from the card (when backend exists).
 
 ## Phase 6 · Personalization & AI (51–60)
-51. 🟦 Brand-history tracker — `brandHistoryProvider`: persisted
-   `Map<productKey, Map<brand, count>>` with `record`, `favouriteFor` (ties
-   broken alphabetically), `countsFor`, `totalPicks`. Guard: `brand_history_test`
-   (6 tests). Card wiring (auto-select fav on open) still ⬜.
+51. ✅ Smart default brand from history — `brandHistoryProvider` records every
+   pick; `resolveDefaultBrandIndex` (in `default_brand_resolver.dart`) picks
+   the default brand on card open with precedence:
+   **last-selection → most-used → recommended → 0**. Wired into the card's
+   `initState` (replaces the simple step-7 lookup) and the brand-tap onTap also
+   feeds the history. Guards: `brand_history_test` (6) + `default_brand_resolver_test` (5).
 52. 🟦 Project-mode setting — `projectModeProvider` (enum any/cold/hot/commercial,
    persisted), with `isFiltering` flag. UI filter wiring still ⬜ (touches
    `catalog_screen.dart`). Guard: `project_mode_test`.

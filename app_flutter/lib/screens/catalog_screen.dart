@@ -18,8 +18,10 @@ import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/card_detail_mode.dart';
 import 'package:buildsmart/state/card_projects.dart';
+import 'package:buildsmart/state/brand_history.dart';
 import 'package:buildsmart/state/card_selection.dart';
 import 'package:buildsmart/state/card_versions.dart';
+import 'package:buildsmart/state/default_brand_resolver.dart';
 import 'package:buildsmart/state/cart_safety.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
@@ -4374,6 +4376,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
         ref
             .read(cardSelectionProvider.notifier)
             .setBrand(widget.product.key, b.name);
+        // Roadmap step 51 — also tally cross-session brand-pick frequency.
+        ref
+            .read(brandHistoryProvider.notifier)
+            .record(widget.product.key, b.name);
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
@@ -4453,16 +4459,17 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   @override
   void initState() {
     super.initState();
-    _selectedBrand = widget.product.brands
-        .indexWhere((b) => b.rec)
-        .clamp(0, widget.product.brands.length - 1);
-    // Roadmap step 7 — restore the user's last brand choice for this product.
+    // Roadmap step 7 + step 51 — resolve default brand: last selection wins,
+    // then most-used (brand history), then recommended.
     final savedBrand = ref.read(cardSelectionProvider)[widget.product.key];
-    if (savedBrand != null) {
-      final si =
-          widget.product.brands.indexWhere((b) => b.name == savedBrand);
-      if (si >= 0) _selectedBrand = si;
-    }
+    final histFav = ref
+        .read(brandHistoryProvider.notifier)
+        .favouriteFor(widget.product.key);
+    _selectedBrand = resolveDefaultBrandIndex(
+      sp: widget.product,
+      cardSelection: savedBrand,
+      brandHistoryFav: histFav,
+    );
     final acc = widget.product.acc;
     _accSelected = {for (var i = 0; i < acc.length; i++) i: false};
     _accQty = {for (var i = 0; i < acc.length; i++) i: 1};
