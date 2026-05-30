@@ -143,7 +143,10 @@ Saved for the next run. Pick up here:
 50. ⬜ Direct order/payment from the card (when backend exists).
 
 ## Phase 6 · Personalization & AI (51–60)
-51. ⬜ Smart default brand from the user's order history.
+51. 🟦 Brand-history tracker — `brandHistoryProvider`: persisted
+   `Map<productKey, Map<brand, count>>` with `record`, `favouriteFor` (ties
+   broken alphabetically), `countsFor`, `totalPicks`. Guard: `brand_history_test`
+   (6 tests). Card wiring (auto-select fav on open) still ⬜.
 52. ⬜ Filter by the active project (cold/hot/commercial) — hide irrelevant.
 53. ⬜ In-card AI assistant: "what suits me?" in free text.
 54. ⬜ Learning: more lines built → sharper recommendations.
@@ -216,7 +219,10 @@ Saved for the next run. Pick up here:
    cost sum · strict-cheaper alt · score band fences · effort threshold ·
    safety-kit disjoint · cheap+premium tags mutually exclusive). Guard:
    `mutation_test`. (Golden image tests still ⬜.)
-83. ⬜ Offline-first: caching of data + images.
+83. 🟦 Offline-cache primitive — `offlineCacheProvider`: persisted
+   `Map<String, CacheEntry>` with TTL (`get`/`put`/`sweep`/`clearAll`),
+   in-memory + JSON-backed. Guard: `offline_cache_test` (6 tests). Concrete
+   consumers (image cache, network response cache) still ⬜.
 84. ⬜ Lazy-load images + smart prefetch.
 85. 🟦 Accessibility — explicit `Semantics(button, label)` on 6 key card actions
    (save · BOM · add-to-project · cart+safety · save-version · mode-toggle), so
@@ -238,7 +244,11 @@ Saved for the next run. Pick up here:
    uncovered helpers on first run (engineeringSpecFor/priceFor/
    catalogProductForSmart) → backfilled by `core_helpers_test`. Going forward:
    adding a helper without a test goes red.
-90. ⬜ Crash monitoring + telemetry for render errors.
+90. 🟦 In-app crash log — `crashLogProvider`: in-memory bounded `List<CrashEntry>`
+   (newest-first, `maxEntries` trim), with `record(message, context:)`, `clear`,
+   `countBy(contextFilter:)`. NOT persisted (error payloads may be sensitive).
+   Guard: `crash_log_test` (5 tests). External telemetry (Sentry/Crashlytics)
+   still ⬜ — wall (needs service account).
 
 ## Phase 10 · Platform, analytics & moonshots (91–100)
 91. ⬜ Analytics: what's chosen/abandoned in the card → product improvement.

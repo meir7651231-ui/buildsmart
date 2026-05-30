@@ -31,6 +31,12 @@ old "push on a clean checkpoint" line; that line is now void.
 - "operation" = a meaningful build action (a wired helper, a UI block, a fix),
   not a single keystroke/tool call. Keep momentum; never idle.
 
+### API 529 (Overloaded) on concurrent sub-agent spawns — back off, serialize
+- **Problem:** sent 3 parallel `Agent` calls in one message during a second-batch parallel run; all 3 returned `API Error: 529 Overloaded` after ~200 s each with `tool_uses: 0`. Concurrent API load (from this conversation alone, or the platform globally) tripped the rate limit.
+- **Fix (in order):** (1) **serialize** — spawn ONE agent first; if it succeeds, queue the next; (2) if a single agent also 529s, wait a few minutes for global capacity to free, then retry; (3) NEVER blindly resend the same 3-agent batch on 529 — the load is exactly what tripped it. Don't `SendMessage` to resume the failed agents either; they're empty (`tool_uses: 0`) so a fresh spawn is cleaner.
+- **Why:** 529 is platform back-pressure; honour it by reducing concurrency. The earlier successful 3-agent batch (steps 4/10/92 and 86/88/99-100) worked because capacity was available; that's a property of the moment, not a guarantee — assume it can fail mid-run and plan for serial fallback.
+- **Confirmed mid-session:** after the 3-concurrent batch 529'd, a single-agent retry **also** 529'd. **In that case, fall back further: do the work yourself with `Write`/`Bash` tools** — the supervisor already has the full context, no extra briefing needed. Document the pivot, don't loop on 529.
+
 ### Parallel sub-agents work on disjoint NEW files (no merge cost)
 - **Pattern that worked:** ran 3 sub-agents in one Agent-tool call (each `subagent_type: general-purpose`) for ROADMAP steps 4 (docs), 10 (feature-flag state), 92 (A/B state). Each agent was briefed with: (a) absolute paths into the repo, (b) "add NEW files only — never modify an existing file", (c) the 10-step protocol + push policy + `_test.dart` naming convention, (d) a reference file from `lib/state/` to mirror for persistence patterns. All 3 returned clean: 5/5 + 6/6 + docs (194 lines), 0 analyze errors, suite jumped 640→651.
 - **Why it worked:** the deliverables touched **disjoint file paths** (3 brand-new files each) — zero merge cost. Supervisor reviewed summaries, ran the integrated suite once, marked roadmap + committed.
@@ -38,8 +44,8 @@ old "push on a clean checkpoint" line; that line is now void.
 
 ### Sub-agent worktree isolation needs the supervisor's cwd = git repo root
 - **Problem:** tried to spawn 3 agents with `isolation: "worktree"` to parallelize step 4/10/92. All three failed instantly with "Cannot create agent worktree: not in a git repository". My cwd was a parent folder, not the repo.
-- **Fix:** either (a) the supervisor `cd`s into the repo before spawning, or (b) skip `isolation: "worktree"` and brief each agent with **absolute paths** into the repo + a strict rule to ONLY add new files (no overlap with each other or the supervisor's in-flight work). (b) is fine for parallel tasks that touch disjoint files, but loses the per-agent branch.
-- **Why:** worktree creation runs `git worktree add …` in the supervisor's cwd; with no `.git` there, no isolation. Future runs: pre-check `git rev-parse --is-inside-work-tree` before relying on `isolation: "worktree"`, or always pass agents fully-qualified paths.
+- **Fix:** in this harness the cwd is **explicitly reset after every Bash call** (`Shell cwd was reset to …`), so `cd` before `Agent` doesn't help — option (a) "cd into the repo first" is **NOT viable here**. The only working approach is **option (b)**: skip `isolation: "worktree"` and brief each agent with **absolute paths** into the repo + a strict rule to ONLY add new files (no overlap with each other or the supervisor's in-flight work).
+- **Why:** worktree creation runs `git worktree add …` in the supervisor's cwd at the moment of the call; the harness resets cwd back to a parent directory between tool calls, so cwd-based fixes don't persist. Option (b) sidesteps the issue entirely — verified working for 3 concurrent agents on disjoint NEW files (steps 4/10/92).
 
 ### 🔟 10-step decomposition per action (user-set)
 Before executing each meaningful action (a roadmap step / a fix), decompose it
