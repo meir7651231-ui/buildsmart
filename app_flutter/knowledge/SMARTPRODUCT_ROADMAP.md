@@ -222,9 +222,17 @@ Saved for the next run. Pick up here:
    (save · BOM · add-to-project · cart+safety · save-version · mode-toggle), so
    screen readers announce intent not just visible text. Gated by
    `accessibility_test`. (Contrast + text-size still ⬜.)
-86. ⬜ Perfect RTL + Arabic/English support (i18n).
+86. 🟦 i18n scaffold — `lib/l10n/smart_card_strings.dart` extracts 28 SmartProduct
+   card labels as `static const` fields, ready for parallel En/Ar classes. No
+   wiring yet. Guard: `smart_card_strings_test` (non-empty · no-dup · screen-
+   containment). Full localization (RTL Arabic, language switch) still ⬜.
+   Built by parallel sub-agent.
 87. ⬜ Reduced-motion / sun mode per settings.
-88. ⬜ Bundle size: split & code-split the card.
+88. 🟦 Bundle-split strategy — `knowledge/BUNDLE_SPLIT.md` analysis of top files
+   (catalog_screen 7668L · lipskey_catalog 6822L · install_studio 3184L) + a
+   concrete plan (extract `_SmartProductSheet` to its own file; deferred-import
+   `install_engine` behind BOM tap; lazy verified-spec; category-split catalog).
+   Built by parallel sub-agent. Actual code-split refactor still ⬜.
 89. ✅ Regression gate — `regression_gate_test` asserts every curated card
    helper (47 names) is referenced by at least one test file. It caught 3
    uncovered helpers on first run (engineeringSpecFor/priceFor/
@@ -246,9 +254,16 @@ Saved for the next run. Pick up here:
 96. ⬜ Home-screen widget ("reorder my last line").
 97. ⬜ Contractor inventory integration ("I have 3 in stock").
 98. ⬜ Export the chosen config to CAD/BIM.
-99. ⬜ "Coach mode" — the app teaches a junior plumber as they go.
-100. ⬜ It all converges: one unified product card that knows *what · why · how it
-    connects · how to install · cost · supplier* — the knowledge brain of plumbing.
+99. ✅ Coach mode — `knowledge/COACH_MODE.md` vision doc: how the card *teaches*
+   by orchestrating already-shipped helpers (`complianceWhyHe`, `installTipsFor`,
+   `connectionWarningHe`, `safetyKitItems`, `lineFitFor`, `adapterSuggestionFor`,
+   `cardDetailModeProvider`) into just-in-time hints + next-best-action.
+   Built by parallel sub-agent.
+100. 🟦 Convergence checklist (in `knowledge/COACH_MODE.md`): what ✅ · why ✅ ·
+    connects ✅ · install 🟦 · cost ✅ · supplier ⬜ — the latter two block on
+    external infra (video/AR/voice/PDF + backend supplier feeds). The card is
+    already the *knowledge brain* for everything that doesn't need a third-party
+    integration. Built by parallel sub-agent.
 
 ---
 _Created during the SmartProduct deep-dive. Execution starts at Phase 1, Step 5
