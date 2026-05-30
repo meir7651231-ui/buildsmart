@@ -19,6 +19,7 @@ import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/card_detail_mode.dart';
 import 'package:buildsmart/state/card_projects.dart';
 import 'package:buildsmart/state/card_selection.dart';
+import 'package:buildsmart/state/card_versions.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
@@ -5608,6 +5609,93 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             ],
                           );
                         }),
+                        // Roadmap step 76 — config versioning (save+compare).
+                        if (expert)
+                          Builder(builder: (_) {
+                            ref.watch(cardVersionsProvider);
+                            final notif =
+                                ref.read(cardVersionsProvider.notifier);
+                            final versions = notif.forProduct(p.key);
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          notif.save(
+                                              label: brand.name,
+                                              productKey: p.key,
+                                              brandName: brand.name);
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(SnackBar(
+                                                  content: Text(
+                                                      'נשמר: "${brand.name}"'),
+                                                  duration: const Duration(
+                                                      seconds: 2)));
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 5),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFF5F3FF),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                                color:
+                                                    const Color(0xFFC4B5FD)),
+                                          ),
+                                          child: const Text('💾 שמור גרסה',
+                                              style: TextStyle(
+                                                  color: Color(0xFF5B21B6),
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700)),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      if (versions.isNotEmpty)
+                                        Text('${versions.length} גרסאות',
+                                            style: const TextStyle(
+                                                color: Color(0xFF6D28D9),
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600)),
+                                    ],
+                                  ),
+                                  if (versions.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Wrap(
+                                        spacing: 6,
+                                        runSpacing: 4,
+                                        children: [
+                                          for (final v in versions)
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFEDE9FE),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Text(v.label,
+                                                  style: const TextStyle(
+                                                      color:
+                                                          Color(0xFF5B21B6),
+                                                      fontSize: 10.5,
+                                                      fontWeight:
+                                                          FontWeight.w600)),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          }),
                         // Roadmap step 16 — "when to pick which" brand guide.
                         if (expert)
                           Builder(builder: (_) {

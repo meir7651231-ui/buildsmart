@@ -186,7 +186,10 @@ Saved for the next run. Pick up here:
 75. ✅ Customer quote for the whole project — `projectQuoteText` aggregates each
    assigned item (location/brand/qty + est. price) into a copyable quote
    ("📋 הצעת מחיר לפרויקט"). Guard: `card_projects_test`.
-76. ⬜ Config versioning (compare alternatives for the project).
+76. ✅ Config versioning — persisted `cardVersionsProvider` saves named snapshots
+   (label/product/brand). "💾 שמור גרסה" stores the current brand under its name;
+   chips list saved versions for the product. Re-saving the same label replaces
+   (no dup). Guard: `card_versions_test`.
 77. ⬜ Team sharing: chat/notes on a chosen product.
 78. ⬜ Sync with the Gantt/tasks.
 79. ⬜ Unified procurement report (PDF) for the whole project.
