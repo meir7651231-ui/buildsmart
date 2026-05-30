@@ -602,14 +602,14 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 
 | # | פער | ROI | סטטוס |
 |---|-----|-----|--------|
-| 1 | PPRCT 81-85 (92 fittings) — שם=PPRCT, תמונה=ברך/מסעף PPR גנרי. הקטלוג עצמו לא מצלם את ה-fittings האלה ולכן אין צילום PPRCT אמיתי בידינו. **הצעת פתרון:** בדג'-overlay קטן "PPRCT" על התמונה כשפרודקט הוא PPRCT ומשתמש בתמונה גנרית | 🟡 בינוני | ⏳ |
-| 2 | Spec לצינורות PPRCT-AC (p86/87) משתמש ב-`spec_faser_20` ירוק. הקטלוג עצמו מציג חתך צינור **כחול** | 🟡 בינוני | ⏳ |
+| 1 | PPRCT 81-85 (92 fittings) — שם=PPRCT, תמונה=ברך/מסעף PPR גנרי. הקטלוג עצמו לא מצלם את ה-fittings האלה ולכן אין צילום PPRCT אמיתי בידינו. **פתרון:** בדג' "PPR-CT" ירוק-כהה ב-bottom-right של תמונת-המוצר בכרטיס הפנימי, gated על `dims['חומר'].contains('PPRCT')` | 🟡 בינוני | ✅ |
+| 2 | Spec לצינורות PPRCT-AC (p86/87) משתמש ב-`spec_faser_20` ירוק. הקטלוג עצמו מציג חתך צינור **כחול**. **פתרון:** crop של חתך p86 → `spec_pprct_pipe.jpg`; `_pprSpecFor` מנתב לפי `nameHe.contains('PPRCT')` | 🟡 בינוני | ✅ |
 | 3 | Lipskey side (935 מוצרים) לא נבדק בסשן הזה. רק PPR/PPRCT (774) | 🟢 גבוה | ⏳ (effort נפרד) |
-| 4 | Orientation audit על p36-p71 (single-photo pages לא נבדקו ידנית) | 🟢 נמוך-בינוני | ⏳ |
-| 5 | Sub-types מוסתרים — page עם 1 photo אבל יותר מ-sub-type אחד | 🟢 נמוך | ⏳ |
+| 4 | Orientation audit על p36-p71 (single-photo pages לא נבדקו ידנית). **בוצע:** 36-thumbnail montage (catalog vs assigned image) — לא נמצאו flip-בעיות | 🟢 נמוך-בינוני | ✅ |
+| 5 | Sub-types מוסתרים — page עם 1 photo אבל יותר מ-sub-type אחד. **בוצע:** סקריפט גילה 6 pages (45,53,54,55,83,85) — כולם MIX PPR/PPRCT שמטופלים נכון ע"י הגנריות + #1 הבדג' | 🟢 נמוך | ✅ |
 | 6 | `ref_card_golden_test` (16 fails, gitignored). re-baseline ידני אם נדרש | 🔵 קוסמטי | ⏳ |
-| 7 | Score minimum bar = 80. אחרי 100 stable, אפשר להעלות ל-95 כ-regression guard | 🔵 קוסמטי | ⏳ |
-| 8 | dims threshold = 3. אפשר להחמיר ל-≥5 לציון יותר אגרסיבי | 🔵 קוסמטי | ⏳ |
+| 7 | Score minimum bar = 80. **בוצע:** הוקפץ ל-95 ב-`enrichment_score_test` + `external_card_score_test` כ-regression guard | 🔵 קוסמטי | ✅ |
+| 8 | dims threshold = 3. אפשר להחמיר ל-≥5 לציון יותר אגרסיבי (כעת ≥3=100%, ≥5=71%, ≥7=47%). **השארנו ≥3** — הרמה תוריד את הציון מ-100 לסביבות 96 בלי תוספת תוכן ממשי | 🔵 קוסמטי | ❎ (לא חוסם) |
 
 **כללי-עבודה לרשימה:** כל פריט שמטופל מסומן ✅, מוסיפים שורה לתיעוד-עבודה,
 ואם נדרשת בדיקת §14 — מוסיפים גם אותה. עוברים חד-חד בסדר ROI.
