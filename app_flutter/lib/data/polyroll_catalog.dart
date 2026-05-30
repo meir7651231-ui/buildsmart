@@ -198,6 +198,11 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe) {
     case kPprPlugs:
       return ['spec_plug.jpg'];
     case kPprPipesFiber:
+    case kPprPipesSupply:
+    case kPprPipesAC:
+      // Generic pipe cross-section (de/di/e markings, no faser branding) —
+      // serves all pipe lines. Supply and AC pipes previously fell back to
+      // the full catalog page render.
       return ['spec_faser_20.jpg'];
   }
   // kPprElectrofusion: photo-only in the catalog (no dimension drawing) → the
