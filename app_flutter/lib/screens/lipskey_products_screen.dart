@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:buildsmart/data/chip_hierarchy.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
@@ -970,8 +971,12 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             ),
           ),
           const SizedBox(height: 4),
-          // line 2: name words as tappable chips — any attribute chip cycles
-          _NameWords(product: p, onAttrTap: _cycleAttr, openKind: _pickerKind),
+          // line 2: chips. Polyroll uses the hierarchy breadcrumb (§21);
+          // Lipskey stays on the word-by-word extractor for now.
+          if (p.brand == kPolyrollBrand)
+            _HierarchyChips(product: p)
+          else
+            _NameWords(product: p, onAttrTap: _cycleAttr, openKind: _pickerKind),
           const SizedBox(height: 8),
           // brand + sku
           Row(
@@ -1482,6 +1487,12 @@ String _getCompoundType(LipskeyCatalogProduct p) {
 /// Polyroll we strip it from the תיאור/categoryHe fallback (e.g. "מצמדים PPR" →
 /// "מצמדים"). The internal sheet keeps it in the full name.
 String _externalTitle(LipskeyCatalogProduct p) {
+  if (p.brand == kPolyrollBrand) {
+    // Per §21: title = the singular type noun (`ברך`/`מסעף`/…). Drill-down
+    // qualifiers live in the chip breadcrumb instead.
+    final type = parseChips(p.nameHe).type;
+    if (type != null) return type;
+  }
   final t = (p.dims?['תיאור'] as String?) ?? p.categoryHe;
   if (p.brand != kPolyrollBrand) return t;
   return t
@@ -1681,6 +1692,72 @@ class _NameWords extends StatelessWidget {
 /// • Has siblings → orange border; shows `word · N` where N = picker option count.
 /// • No siblings  → gray border; shows just `word`.
 /// Tapping an orange chip opens the inline picker for that dimension.
+/// PPR hierarchy chips per protocol §21: renders the parseChips path
+/// (connection ‹ shape ‹ feature ‹ thread ‹ size) as a breadcrumb. Replaces
+/// `_NameWords` for Polyroll products only; Lipskey keeps the word-by-word
+/// extractor. Step 2 of 4 — chips are decorative for now (clickable picker
+/// arrives in step 3).
+class _HierarchyChips extends StatelessWidget {
+  const _HierarchyChips({required this.product});
+  final LipskeyCatalogProduct product;
+
+  @override
+  Widget build(BuildContext context) {
+    final path = parseChips(product.nameHe).path;
+    if (path.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 4,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        for (var i = 0; i < path.length; i++) ...[
+          if (i > 0)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 2),
+              child: Text('‹',
+                  style: TextStyle(
+                      color: Color(0xFF8E8E93),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700)),
+            ),
+          _HierarchyChipPill(word: path[i]),
+        ],
+      ],
+    );
+  }
+}
+
+class _HierarchyChipPill extends StatelessWidget {
+  const _HierarchyChipPill({required this.word});
+  final String word;
+
+  @override
+  Widget build(BuildContext context) {
+    final isSize = RegExp(r'^["”]?\d|^\d').hasMatch(word);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+      decoration: BoxDecoration(
+        color: isSize ? const Color(0xFFFF7A18) : const Color(0xFFF1F1F4),
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(
+            color: isSize
+                ? const Color(0xFFFF7A18)
+                : const Color(0xFFE0E0E5),
+            width: 1),
+      ),
+      child: Text(
+        word,
+        textDirection: word.contains(RegExp(r'\d')) ? TextDirection.ltr : null,
+        style: TextStyle(
+          color: isSize ? Colors.white : const Color(0xFF1C1C1E),
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
 class _AttrChip extends StatelessWidget {
   const _AttrChip({
     required this.word,
