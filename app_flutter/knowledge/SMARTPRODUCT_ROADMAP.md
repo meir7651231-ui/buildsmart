@@ -251,7 +251,11 @@ Saved for the next run. Pick up here:
    still ⬜ — wall (needs service account).
 
 ## Phase 10 · Platform, analytics & moonshots (91–100)
-91. ⬜ Analytics: what's chosen/abandoned in the card → product improvement.
+91. 🟦 In-app analytics-event log — `analyticsLogProvider`: in-memory bounded
+   `List<AnalyticsEvent>` (newest-first; `record(name, props:)`, `clear`,
+   `countByName`, `recent(name:, limit:)`). NOT persisted by design. Foundation
+   for future external analytics wiring. Guard: `analytics_log_test` (6 tests).
+   External services (GA/Mixpanel) still wall-blocked. Built by parallel sub-agent.
 92. ✅ Built-in A/B experiments — `abExperimentsProvider` (persisted
    `Map<experiment, variant>`, deterministic `ensure(experiment, variants)`
    via `hashCode.abs() % len`, override/clear). Built by parallel sub-agent.

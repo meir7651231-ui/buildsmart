@@ -31,6 +31,11 @@ old "push on a clean checkpoint" line; that line is now void.
 - "operation" = a meaningful build action (a wired helper, a UI block, a fix),
   not a single keystroke/tool call. Keep momentum; never idle.
 
+### Pre-flight check: target file may already exist from the other session
+- **Problem:** spawned an agent to create `lib/state/recent_searches.dart`. The agent discovered the file **already existed** — the other session had shipped a (slightly different) version with `kMaxRecentSearches=8` and an `add` method. The protocol forbids modifying existing files.
+- **Fix (the agent did this correctly):** since the file existed, the agent did NOT modify it. Instead, it pivoted and wrote a **test-only backfill** for the existing API — 6/6 green, no source change. The supervisor accepts that as a partial deliverable (test coverage added) and notes the API doesn't match the brief.
+- **Why:** in a shared-branch context, the other session can ship anything between checkpoints. Pre-flight: before spawning, the supervisor should `ls lib/state/ test/ knowledge/` and confirm the target filename is free. Brief the agent with a fallback rule: "if your target file already exists, do NOT modify it — add a `_test.dart` that exercises whatever API exists, and report the mismatch."
+
 ### API 529 (Overloaded) on concurrent sub-agent spawns — back off, serialize
 - **Problem:** sent 3 parallel `Agent` calls in one message during a second-batch parallel run; all 3 returned `API Error: 529 Overloaded` after ~200 s each with `tool_uses: 0`. Concurrent API load (from this conversation alone, or the platform globally) tripped the rate limit.
 - **Fix (in order):** (1) **serialize** — spawn ONE agent first; if it succeeds, queue the next; (2) if a single agent also 529s, wait a few minutes for global capacity to free, then retry; (3) NEVER blindly resend the same 3-agent batch on 529 — the load is exactly what tripped it. Don't `SendMessage` to resume the failed agents either; they're empty (`tool_uses: 0`) so a fresh spawn is cleaner.
