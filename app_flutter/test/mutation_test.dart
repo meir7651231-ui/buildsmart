@@ -2,10 +2,13 @@
 // helpers. Each test asserts a STRONG INVARIANT that would catch a common
 // mutation (off-by-one, < vs <=, swapped arguments, missing null guard) even
 // if the broader feature tests still passed.
+import 'package:buildsmart/data/line_score.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/smart_tree.dart';
+import 'package:buildsmart/state/default_brand_resolver.dart';
+import 'package:buildsmart/state/display_temp.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -106,6 +109,95 @@ void main() {
         final hasPremium = tags.any((t) => t.contains('פרימיום'));
         expect(hasCheap && hasPremium, isFalse,
             reason: '${sp.key}/${b.name} got both');
+      }
+    }
+  });
+
+  // 7. lineReadinessFromCounts: score is clamped to [0, 100]. Catches a
+  //    missing .clamp() or a rescale mutation that overflowed the band.
+  test('lineReadinessFromCounts: score always in [0, 100]', () {
+    for (var g = 0; g <= 20; g++) {
+      for (var k = 0; k <= 20; k++) {
+        final s = lineReadinessFromCounts(gapCount: g, safetyKitSize: k);
+        expect(s.score, inInclusiveRange(0, 100),
+            reason: 'gaps=$g kit=$k → ${s.score}');
+      }
+    }
+  });
+
+  // 8. lineReadinessFromCounts: MORE gaps never IMPROVES the score (monotone
+  //    in `gapCount`). Catches a sign flip in the connectivity term.
+  test('lineReadinessFromCounts: monotone non-increasing in gapCount', () {
+    for (var k = 0; k <= 10; k++) {
+      var prev = lineReadinessFromCounts(gapCount: 0, safetyKitSize: k).score;
+      for (var g = 1; g <= 10; g++) {
+        final cur =
+            lineReadinessFromCounts(gapCount: g, safetyKitSize: k).score;
+        expect(cur <= prev, isTrue,
+            reason: 'gaps=$g kit=$k: $cur > prev $prev');
+        prev = cur;
+      }
+    }
+  });
+
+  // 9. lineReadinessFromCounts: a BIGGER safety kit never WORSENS the score
+  //    (monotone non-decreasing in `safetyKitSize`). Catches a sign flip
+  //    on the safety term.
+  test('lineReadinessFromCounts: monotone non-decreasing in safetyKitSize',
+      () {
+    for (var g = 0; g <= 10; g++) {
+      var prev = lineReadinessFromCounts(gapCount: g, safetyKitSize: 0).score;
+      for (var k = 1; k <= 10; k++) {
+        final cur =
+            lineReadinessFromCounts(gapCount: g, safetyKitSize: k).score;
+        expect(cur >= prev, isTrue,
+            reason: 'gaps=$g kit=$k: $cur < prev $prev');
+        prev = cur;
+      }
+    }
+  });
+
+  // 10. cycleDisplayTemp: the next temperature must DIFFER from the input,
+  //     and must be one of the three allowed values. Catches a stuck-at-
+  //     same-temp mutation or an out-of-set return.
+  test('cycleDisplayTemp: always returns a different allowed temperature',
+      () {
+    const allowed = {60, 80, 95};
+    for (final t in allowed) {
+      final next = cycleDisplayTemp(t);
+      expect(next, isNot(t), reason: 'cycle($t) returned same value');
+      expect(allowed.contains(next), isTrue,
+          reason: 'cycle($t)=$next not in {60,80,95}');
+    }
+  });
+
+  // 11. hotWaterSuitabilityFor: `suitable` count never exceeds `total`.
+  //     Catches a swap of numerator/denominator in the helper.
+  test('hotWaterSuitabilityFor: suitable ≤ total at every temp', () {
+    for (final sp in kSmartProducts) {
+      for (final t in [60, 80, 95]) {
+        final hw = hotWaterSuitabilityFor(sp, tempC: t);
+        expect(hw.suitable, lessThanOrEqualTo(hw.total),
+            reason: '${sp.key} @${t}°C: ${hw.suitable}/${hw.total}');
+      }
+    }
+  });
+
+  // 12. resolveDefaultBrandIndex: always returns a VALID index into the
+  //     product's brands list. Catches an off-by-one or wrong-bound mutation.
+  test('resolveDefaultBrandIndex: result is always a valid brand index',
+      () {
+    for (final sp in kSmartProducts) {
+      if (sp.brands.isEmpty) continue;
+      // Try every combination of inputs reachable in practice.
+      for (final cs in <String?>[null, 'no-such-brand', sp.brands.first.name]) {
+        for (final h in <String?>[null, 'unknown', sp.brands.last.name]) {
+          final i = resolveDefaultBrandIndex(
+              sp: sp, cardSelection: cs, brandHistoryFav: h);
+          expect(i, inInclusiveRange(0, sp.brands.length - 1),
+              reason:
+                  '${sp.key} cs=$cs h=$h → $i (max ${sp.brands.length - 1})');
+        }
       }
     }
   });

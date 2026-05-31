@@ -4332,6 +4332,71 @@ class _ChipWrap extends StatelessWidget {
   }
 }
 
+/// Polish G — visual UI for a saved card-version (Roadmap step 76).
+/// Two tap targets: the label loads the saved brand into the card; the small
+/// "×" deletes the version. Matches the existing violet palette of the
+/// "💾 שמור גרסה" button so the relationship is obvious.
+class _SavedVersionChip extends StatelessWidget {
+  const _SavedVersionChip({
+    required this.label,
+    required this.onLoad,
+    required this.onDelete,
+  });
+
+  final String label;
+  final VoidCallback onLoad;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFEDE9FE),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Tooltip(
+            message: 'טעינת גרסה — החלף למותג השמור',
+            child: Semantics(
+              button: true,
+              label: 'טען גרסה $label',
+              child: GestureDetector(
+                onTap: onLoad,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.fromLTRB(8, 3, 6, 3),
+                  child: Text(label,
+                      style: const TextStyle(
+                          color: Color(0xFF5B21B6),
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600)),
+                ),
+              ),
+            ),
+          ),
+          Tooltip(
+            message: 'מחק גרסה',
+            child: Semantics(
+              button: true,
+              label: 'מחק גרסה $label',
+              child: GestureDetector(
+                onTap: onDelete,
+                child: const Padding(
+                  padding: EdgeInsets.fromLTRB(2, 3, 6, 3),
+                  child: Icon(Icons.close,
+                      size: 12, color: Color(0xFF7C3AED)),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SmartProductSheet extends ConsumerStatefulWidget {
   const _SmartProductSheet({required this.product});
 
@@ -6058,24 +6123,38 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         spacing: 6,
                                         runSpacing: 4,
                                         children: [
+                                          // Polish G — each saved version is
+                                          // now a [load][×] pair: tap the
+                                          // label to switch to that brand,
+                                          // tap × to delete it. Closes the
+                                          // missing UI for step 76.
                                           for (final v in versions)
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 3),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFFEDE9FE),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: Text(v.label,
-                                                  style: const TextStyle(
-                                                      color:
-                                                          Color(0xFF5B21B6),
-                                                      fontSize: 10.5,
-                                                      fontWeight:
-                                                          FontWeight.w600)),
+                                            _SavedVersionChip(
+                                              label: v.label,
+                                              onLoad: () {
+                                                final idx = widget
+                                                    .product.brands
+                                                    .indexWhere((b) =>
+                                                        b.name == v.brandName);
+                                                if (idx >= 0) {
+                                                  setState(() =>
+                                                      _selectedBrand = idx);
+                                                  ref
+                                                      .read(
+                                                          cardSelectionProvider
+                                                              .notifier)
+                                                      .setBrand(p.key,
+                                                          v.brandName);
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(SnackBar(
+                                                          content: Text(
+                                                              'נטען: "${v.label}"'),
+                                                          duration:
+                                                              const Duration(
+                                                                  seconds: 2)));
+                                                }
+                                              },
+                                              onDelete: () => notif.remove(v.id),
                                             ),
                                         ],
                                       ),
