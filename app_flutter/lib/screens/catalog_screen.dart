@@ -19,6 +19,7 @@ import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/card_detail_mode.dart';
 import 'package:buildsmart/state/card_projects.dart';
 import 'package:buildsmart/state/brand_history.dart';
+import 'package:buildsmart/state/card_acc_state.dart';
 import 'package:buildsmart/state/card_selection.dart';
 import 'package:buildsmart/state/card_versions.dart';
 import 'package:buildsmart/state/profession_mode.dart';
@@ -4476,8 +4477,16 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
       brandHistoryFav: histFav,
     );
     final acc = widget.product.acc;
-    _accSelected = {for (var i = 0; i < acc.length; i++) i: false};
-    _accQty = {for (var i = 0; i < acc.length; i++) i: 1};
+    // Roadmap step 7 — restore per-accessory selected+qty from persistence.
+    final accStore = ref.read(cardAccStateProvider.notifier);
+    _accSelected = {
+      for (var i = 0; i < acc.length; i++)
+        i: accStore.get(widget.product.key, acc[i].name)?.selected ?? false
+    };
+    _accQty = {
+      for (var i = 0; i < acc.length; i++)
+        i: accStore.get(widget.product.key, acc[i].name)?.qty ?? 1
+    };
     // Roadmap step 66 — record this product as recently-viewed (post-frame so
     // we don't mutate a provider during the initial build).
     final sku = widget.product.recBrand.sku;
@@ -6091,9 +6100,20 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       acc: a,
                       selected: _accSelected[gi] ?? false,
                       qty: _accQty[gi] ?? 1,
-                      onToggle: (v) =>
-                          setState(() => _accSelected[gi] = v),
-                      onQtyChanged: (q) => setState(() => _accQty[gi] = q),
+                      onToggle: (v) {
+                        setState(() => _accSelected[gi] = v);
+                        // Roadmap step 7 — persist acc selection.
+                        ref
+                            .read(cardAccStateProvider.notifier)
+                            .setSelected(p.key, a.name, v);
+                      },
+                      onQtyChanged: (q) {
+                        setState(() => _accQty[gi] = q);
+                        // Roadmap step 7 — persist acc qty.
+                        ref
+                            .read(cardAccStateProvider.notifier)
+                            .setQty(p.key, a.name, q);
+                      },
                       activeMatch: _activeStage != null
                           ? p.stages[_activeStage!].match
                           : null,
@@ -6121,9 +6141,20 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       acc: a,
                       selected: _accSelected[gi] ?? false,
                       qty: _accQty[gi] ?? 1,
-                      onToggle: (v) =>
-                          setState(() => _accSelected[gi] = v),
-                      onQtyChanged: (q) => setState(() => _accQty[gi] = q),
+                      onToggle: (v) {
+                        setState(() => _accSelected[gi] = v);
+                        // Roadmap step 7 — persist acc selection.
+                        ref
+                            .read(cardAccStateProvider.notifier)
+                            .setSelected(p.key, a.name, v);
+                      },
+                      onQtyChanged: (q) {
+                        setState(() => _accQty[gi] = q);
+                        // Roadmap step 7 — persist acc qty.
+                        ref
+                            .read(cardAccStateProvider.notifier)
+                            .setQty(p.key, a.name, q);
+                      },
                       activeMatch: _activeStage != null
                           ? p.stages[_activeStage!].match
                           : null,

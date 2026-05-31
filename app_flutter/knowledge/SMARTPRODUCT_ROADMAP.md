@@ -37,9 +37,13 @@ Saved for the next run. Pick up here:
    307 with SKU · 252 of those with a verified spec. Guard: `smartproduct_contract_test`.
 6. ✅ "📦 נתוני קטלוג" section in the smart card injects the catalog's spec /
    compat / price for the selected brand's SKU (via the bridge).
-7. 🟦 Persisted selection — `cardSelectionProvider` remembers the last brand per
-   product (`productKey→brandName`); restored in `initState`, saved on tap.
-   (acc/qty persistence still ⬜.) Guard: `card_selection_test`.
+7. ✅ Unified persisted selection — brand via `cardSelectionProvider` (last
+   pick) + `brand_history` (cross-session) resolved by `default_brand_resolver`;
+   acc selected+qty via `cardAccStateProvider` (`Map<productKey, Map<accName,
+   {selected, qty}>>`, JSON-persisted under `bs.card-acc-state.v1`). Both
+   restored in `initState`, persisted on every tap / qty change.
+   Guards: `card_selection_test`, `brand_history_test`, `default_brand_resolver_test`,
+   `card_acc_state_test`.
 8. 🟦 Comprehensive widget rendering already covered by `product_journey_test`
    (all 935 sheets render at narrow phone + large text). Pixel-level golden
    files (`matchesGoldenFile`) still ⬜ — deferred (heavy + flaky in CI).
