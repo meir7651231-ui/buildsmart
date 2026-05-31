@@ -18,7 +18,12 @@ import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/state/card_detail_mode.dart';
 import 'package:buildsmart/state/card_projects.dart';
+import 'package:buildsmart/state/brand_history.dart';
 import 'package:buildsmart/state/card_selection.dart';
+import 'package:buildsmart/state/card_versions.dart';
+import 'package:buildsmart/state/profession_mode.dart';
+import 'package:buildsmart/state/default_brand_resolver.dart';
+import 'package:buildsmart/state/cart_safety.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/hidden_catalog_sections.dart';
@@ -4372,6 +4377,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
         ref
             .read(cardSelectionProvider.notifier)
             .setBrand(widget.product.key, b.name);
+        // Roadmap step 51 — also tally cross-session brand-pick frequency.
+        ref
+            .read(brandHistoryProvider.notifier)
+            .record(widget.product.key, b.name);
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
@@ -4451,16 +4460,17 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   @override
   void initState() {
     super.initState();
-    _selectedBrand = widget.product.brands
-        .indexWhere((b) => b.rec)
-        .clamp(0, widget.product.brands.length - 1);
-    // Roadmap step 7 — restore the user's last brand choice for this product.
+    // Roadmap step 7 + step 51 — resolve default brand: last selection wins,
+    // then most-used (brand history), then recommended.
     final savedBrand = ref.read(cardSelectionProvider)[widget.product.key];
-    if (savedBrand != null) {
-      final si =
-          widget.product.brands.indexWhere((b) => b.name == savedBrand);
-      if (si >= 0) _selectedBrand = si;
-    }
+    final histFav = ref
+        .read(brandHistoryProvider.notifier)
+        .favouriteFor(widget.product.key);
+    _selectedBrand = resolveDefaultBrandIndex(
+      sp: widget.product,
+      cardSelection: savedBrand,
+      brandHistoryFav: histFav,
+    );
     final acc = widget.product.acc;
     _accSelected = {for (var i = 0; i < acc.length; i++) i: false};
     _accQty = {for (var i = 0; i < acc.length; i++) i: 1};
@@ -4499,6 +4509,67 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
 
   // Roadmap step 22 — "build my line": run the install engine over the line so
   // far (cart) + this product, and show the materialized BOM.
+  // Roadmap step 74 — full project BOM: run buildInstallation over all
+  // products assigned to a project (resolved via their stored SKU), show the
+  // materialized list in a dialog (reuses _showLineBom's presentation).
+  void _showProjectBom(String project) {
+    final notifier = ref.read(cardProjectsProvider.notifier);
+    final items = notifier.forProject(project);
+    final anchors = <LipskeyCatalogProduct>[];
+    for (final it in items) {
+      final cp = catalogProductForSku(it.sku);
+      if (cp != null) anchors.add(cp);
+    }
+    if (anchors.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('אין פריטים שניתן לפתור לקו ב"$project"'),
+            duration: const Duration(seconds: 2)),
+      );
+      return;
+    }
+    final plan = buildInstallation(anchors, autoCompliance: true, tempC: 60);
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: Text('BOM פרויקט "$project" — ${plan.items.length} פריטים'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                for (final it in plan.items)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Text(
+                        '${plan.quantities[it.sku] ?? 1}× ${it.nameHe}',
+                        style: const TextStyle(fontSize: 12.5)),
+                  ),
+                if (plan.gaps.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                        '⚠ ${plan.gaps.length} פערים ללא חיבור ישיר',
+                        style: const TextStyle(
+                            color: Color(0xFFB45309),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600)),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('סגור')),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showLineBom(LipskeyCatalogProduct prod) {
     final anchors = <LipskeyCatalogProduct>[..._resolveCartProducts(), prod];
     final plan = buildInstallation(anchors, autoCompliance: true, tempC: 60);
@@ -4875,25 +4946,47 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               );
                             }),
                             const Spacer(),
+                            // Roadmap step 57 — profession mode chip (tap cycles).
+                            Builder(builder: (_) {
+                              final prof = ref.watch(professionModeProvider);
+                              final l = labelForProfession(prof);
+                              return GestureDetector(
+                                onTap: () => ref
+                                    .read(professionModeProvider.notifier)
+                                    .set(nextProfessionMode(prof)),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8),
+                                  child: Text('${l.emoji} ${l.label}',
+                                      style: const TextStyle(
+                                          color: Color(0xFF6B7280),
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w700)),
+                                ),
+                              );
+                            }),
                             // Roadmap step 47 — save this config (favourite).
                             Builder(builder: (_) {
                               ref.watch(savedConfigsProvider);
                               final saved = ref
                                   .read(savedConfigsProvider.notifier)
                                   .isSaved(p.key, brand.name);
-                              return GestureDetector(
-                                onTap: () => ref
-                                    .read(savedConfigsProvider.notifier)
-                                    .toggle(p.key, brand.name),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 8),
-                                  child: Text(saved ? '★ נשמר' : '☆ שמור',
-                                      style: TextStyle(
-                                          color: saved
-                                              ? const Color(0xFFD97706)
-                                              : const Color(0xFF999999),
-                                          fontSize: 10.5,
-                                          fontWeight: FontWeight.w700)),
+                              return Semantics(
+                                button: true,
+                                label: 'שמור תצורה כמועדף',
+                                child: GestureDetector(
+                                  onTap: () => ref
+                                      .read(savedConfigsProvider.notifier)
+                                      .toggle(p.key, brand.name),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: Text(saved ? '★ נשמר' : '☆ שמור',
+                                        style: TextStyle(
+                                            color: saved
+                                                ? const Color(0xFFD97706)
+                                                : const Color(0xFF999999),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w700)),
+                                  ),
                                 ),
                               );
                             }),
@@ -4917,26 +5010,31 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                         fontWeight: FontWeight.w700)),
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () => ref
-                                  .read(cardDetailModeProvider.notifier)
-                                  .toggle(),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: expert
-                                      ? BsTokens.brand.withAlpha(28)
-                                      : const Color(0xFFEEEEEE),
-                                  borderRadius: BorderRadius.circular(10),
+                            Semantics(
+                              button: true,
+                              label: 'החלף מצב הצגה (מורחב או פשוט)',
+                              child: GestureDetector(
+                                onTap: () => ref
+                                    .read(cardDetailModeProvider.notifier)
+                                    .toggle(),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: expert
+                                        ? BsTokens.brand.withAlpha(28)
+                                        : const Color(0xFFEEEEEE),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                      expert ? 'מצב מורחב ▾' : 'מצב פשוט ▸',
+                                      style: TextStyle(
+                                          color: expert
+                                              ? BsTokens.brand
+                                              : const Color(0xFF777777),
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w700)),
                                 ),
-                                child: Text(expert ? 'מצב מורחב ▾' : 'מצב פשוט ▸',
-                                    style: TextStyle(
-                                        color: expert
-                                            ? BsTokens.brand
-                                            : const Color(0xFF777777),
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w700)),
                               ),
                             ),
                           ],
@@ -5231,24 +5329,136 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           }),
                           // Roadmap step 22 — "build my line" → materialized BOM.
                           const SizedBox(height: 8),
-                          GestureDetector(
-                            onTap: () => _showLineBom(prod),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 7),
-                              decoration: BoxDecoration(
-                                color: BsTokens.brand.withAlpha(24),
-                                borderRadius: BorderRadius.circular(10),
-                                border:
-                                    Border.all(color: BsTokens.brand.withAlpha(90)),
+                          Semantics(
+                            button: true,
+                            label: 'פתח קו פריטים מומחש',
+                            child: GestureDetector(
+                              onTap: () => _showLineBom(prod),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 7),
+                                decoration: BoxDecoration(
+                                  color: BsTokens.brand.withAlpha(24),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                      color: BsTokens.brand.withAlpha(90)),
+                                ),
+                                child: const Text('🔧 בנה לי קו (BOM)',
+                                    style: TextStyle(
+                                        color: BsTokens.brand,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700)),
                               ),
-                              child: const Text('🔧 בנה לי קו (BOM)',
-                                  style: TextStyle(
-                                      color: BsTokens.brand,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700)),
                             ),
                           ),
+                          // Roadmap step 25 — engine-derived auto safety kit.
+                          if (expert)
+                            Builder(builder: (_) {
+                              final line = _resolveCartProducts();
+                              // Pick anchors: cart+prod, else prod + top compat
+                              // partner (so a single product still has a
+                              // meaningful line for the engine).
+                              final anchors = line.isNotEmpty
+                                  ? <LipskeyCatalogProduct>[...line, prod]
+                                  : (compat.isEmpty
+                                      ? <LipskeyCatalogProduct>[prod]
+                                      : <LipskeyCatalogProduct>[
+                                          prod,
+                                          compat.first,
+                                        ]);
+                              if (anchors.length < 2) return const SizedBox.shrink();
+                              final withT = buildInstallation(anchors,
+                                  autoCompliance: true, tempC: 60);
+                              final withF = buildInstallation(anchors,
+                                  autoCompliance: false, tempC: 60);
+                              final kit = safetyKitItems(withT.items, withF.items);
+                              if (kit.isEmpty) return const SizedBox.shrink();
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                        '🛡 ערכת בטיחות (auto): ${kit.map((p) => p.nameHe).take(4).join(" · ")}',
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Color(0xFFB45309),
+                                            fontSize: 10.5,
+                                            height: 1.3,
+                                            fontWeight: FontWeight.w600)),
+                                    // Roadmap step 46 — add line + safety to cart.
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 6),
+                                      child: Semantics(
+                                        button: true,
+                                        label:
+                                            'הוסף את הקו לסל כולל פריטי בטיחות',
+                                        child: GestureDetector(
+                                        onTap: () {
+                                          final selectedAcc = <SmartCartAcc>[
+                                            for (var i = 0;
+                                                i < p.acc.length;
+                                                i++)
+                                              if (_accSelected[i] ?? false)
+                                                SmartCartAcc(
+                                                    name: p.acc[i].name,
+                                                    emoji: p.acc[i].emoji,
+                                                    price: p.acc[i].price ?? 0,
+                                                    qty: _accQty[i] ?? 1),
+                                          ];
+                                          final safetyAcc =
+                                              buildSafetyAccessories(
+                                                  kit,
+                                                  (cp) =>
+                                                      priceFor(cp) ?? 0);
+                                          ref
+                                              .read(smartCartProvider.notifier)
+                                              .add(SmartCartLine(
+                                                productKey: p.key,
+                                                productName: p.name,
+                                                productEmoji: p.emoji,
+                                                brandName: brand.name,
+                                                brandPrice: brand.price ??
+                                                    (priceFor(prod) ?? 0),
+                                                productQty: 1,
+                                                accessories: [
+                                                  ...selectedAcc,
+                                                  ...safetyAcc,
+                                                ],
+                                              ));
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(SnackBar(
+                                                  content: Text(
+                                                      'הקו נוסף לסל (+${kit.length} פריטי בטיחות)'),
+                                                  duration: const Duration(
+                                                      seconds: 2)));
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 7),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFEF3C7),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                                color:
+                                                    const Color(0xFFFCD34D)),
+                                          ),
+                                          child: const Text(
+                                              '🛒 + בטיחות לסל',
+                                              style: TextStyle(
+                                                  color: Color(0xFFB45309),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w700)),
+                                        ),
+                                      ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
                         ],
                         // Roadmap steps 71/72/74 — assign to a project.
                         Builder(builder: (_) {
@@ -5273,7 +5483,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  GestureDetector(
+                                  Semantics(
+                                    button: true,
+                                    label: 'הוסף את המוצר לפרויקט',
+                                    child: GestureDetector(
                                     onTap: () {
                                       notifier.add(mk(loc));
                                       ScaffoldMessenger.of(context)
@@ -5298,6 +5511,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700)),
                                     ),
+                                  ),
                                   ),
                                   const SizedBox(width: 8),
                                   GestureDetector(
@@ -5383,6 +5597,31 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           color: Color(0xFF4338CA),
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600)),
+                                ),
+                              // Roadmap step 74 — full project BOM dialog.
+                              if (units > 0)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: GestureDetector(
+                                    onTap: () => _showProjectBom(proj),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 7),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE0E7FF),
+                                        borderRadius:
+                                            BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color: const Color(0xFFA5B4FC)),
+                                      ),
+                                      child: const Text(
+                                          '📋 BOM פרויקט מלא',
+                                          style: TextStyle(
+                                              color: Color(0xFF3730A3),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700)),
+                                    ),
+                                  ),
                                 ),
                               // Roadmap step 75 — customer quote for the project.
                               if (units > 0)
@@ -5608,6 +5847,97 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             ],
                           );
                         }),
+                        // Roadmap step 76 — config versioning (save+compare).
+                        if (expert)
+                          Builder(builder: (_) {
+                            ref.watch(cardVersionsProvider);
+                            final notif =
+                                ref.read(cardVersionsProvider.notifier);
+                            final versions = notif.forProduct(p.key);
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Semantics(
+                                        button: true,
+                                        label: 'שמור גרסת תצורה',
+                                        child: GestureDetector(
+                                        onTap: () {
+                                          notif.save(
+                                              label: brand.name,
+                                              productKey: p.key,
+                                              brandName: brand.name);
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(SnackBar(
+                                                  content: Text(
+                                                      'נשמר: "${brand.name}"'),
+                                                  duration: const Duration(
+                                                      seconds: 2)));
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 5),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFF5F3FF),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                                color:
+                                                    const Color(0xFFC4B5FD)),
+                                          ),
+                                          child: const Text('💾 שמור גרסה',
+                                              style: TextStyle(
+                                                  color: Color(0xFF5B21B6),
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700)),
+                                        ),
+                                      ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      if (versions.isNotEmpty)
+                                        Text('${versions.length} גרסאות',
+                                            style: const TextStyle(
+                                                color: Color(0xFF6D28D9),
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600)),
+                                    ],
+                                  ),
+                                  if (versions.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Wrap(
+                                        spacing: 6,
+                                        runSpacing: 4,
+                                        children: [
+                                          for (final v in versions)
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFEDE9FE),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Text(v.label,
+                                                  style: const TextStyle(
+                                                      color:
+                                                          Color(0xFF5B21B6),
+                                                      fontSize: 10.5,
+                                                      fontWeight:
+                                                          FontWeight.w600)),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          }),
                         // Roadmap step 16 — "when to pick which" brand guide.
                         if (expert)
                           Builder(builder: (_) {

@@ -31,6 +31,73 @@ old "push on a clean checkpoint" line; that line is now void.
 - "operation" = a meaningful build action (a wired helper, a UI block, a fix),
   not a single keystroke/tool call. Keep momentum; never idle.
 
+### Meta-lesson: in this harness, sub-agents are net-negative for small tasks
+After 26 agent invocations in one session: 50% raw success, 50% mess (529s, wrong-cwd writes, **one R8-violating fabrication caught only by manual review**). Each failure cost ~200 s of API time + supervisor recovery effort. The successful agents produced ~3-5-minute tasks (small state files, scaffolds, doc pages) — work the supervisor could write directly faster than the brief-and-wait cycle.
+**Default rule going forward:** for tasks the supervisor can finish in under ~10 minutes, **just do it directly**. Reserve `Agent` calls for tasks that are *genuinely* parallelizable AND big enough to overcome the briefing/review overhead (e.g., a multi-file refactor, an analysis sweep over many files, generating dozens of similar items). 50%-success agents that produce 5-minute work = net loss.
+
+### Sub-agents may inherit a different cwd — and *invent* content if they can't find the project
+- **Problem:** in a 3-agent batch with absolute-path briefs:
+  - **Agent A** wrote to the real project successfully (lucky/correct cwd).
+  - **Agent B** had cwd at the parent `New folder`; tried to write to the real project at absolute path → **harness auto-mode blocker rejected cross-project writes**; ended up dumping the file in its own cwd (not the project).
+  - **Agent C** never found the project at all — wrote a doc to `New folder/knowledge/` with **fabricated helper/provider/STEP names** that don't exist in the real codebase. **R8 violation** ("no invention").
+- **Fix:**
+  1. Open every agent brief with: *"Step 1: run `pwd && ls`. If you are NOT inside `C:\Users\User\Desktop\buildsmart\app_flutter\`, STOP. Report the path and abort — do not write anything."* This kills agents that landed in the wrong place before they fabricate.
+  2. Brief includes: *"If the absolute write is denied, do NOT 'try elsewhere' — report the denial and stop."*
+  3. Supervisor: after each agent returns, **verify the file landed in the real project** (`ls <absolute-path>` in Bash). If not, ignore the agent's deliverable; build it yourself with `Write`.
+  4. Never copy an agent's doc back into the project without verifying its content against real source — fabricated names slip in.
+- **Why:** the Agent tool inherits the supervisor's cwd at spawn time, but the supervisor's cwd is reset to a parent dir between calls in this harness. Different agents end up in different states (some find the project, some don't). Absolute paths in the brief are necessary but not sufficient — pwd-check at step 1 is the gate.
+
+### Pre-flight checklist before spawning sub-agents (raise success rate)
+After 17 agent calls in one session (53% raw success), the recurring failure modes were:
+worktree-isolation (cwd reset) · API 529 · target file already exists. To push the
+rate higher next round, run this **6-step pre-flight before every parallel batch**:
+1. `ls lib/state/ test/ knowledge/` — confirm each agent's target path is genuinely **free**.
+2. `git fetch && git log --oneline @{u}..origin/<branch> | head` — check if the other session
+   pushed something in the last few minutes that may have grabbed your target name.
+3. Pick targets that are **disjoint from each other** AND **disjoint from the supervisor's
+   current edit set**.
+4. Cap concurrency at **3** (the proven ceiling pre-529).
+5. Brief each agent with the **fallback rule** verbatim: *"If the target file already exists,
+   do NOT modify it — add a `_test.dart` against the existing API and report the mismatch."*
+6. Include `_test.dart` (singular) suffix reminder + absolute paths + no-push rule.
+If 529 hits anyway, fall through the chain: concurrent → serial → supervisor-direct.
+Document any new failure mode under §B before the next batch.
+
+### Pre-flight check: target file may already exist from the other session
+- **Problem:** spawned an agent to create `lib/state/recent_searches.dart`. The agent discovered the file **already existed** — the other session had shipped a (slightly different) version with `kMaxRecentSearches=8` and an `add` method. The protocol forbids modifying existing files.
+- **Fix (the agent did this correctly):** since the file existed, the agent did NOT modify it. Instead, it pivoted and wrote a **test-only backfill** for the existing API — 6/6 green, no source change. The supervisor accepts that as a partial deliverable (test coverage added) and notes the API doesn't match the brief.
+- **Why:** in a shared-branch context, the other session can ship anything between checkpoints. Pre-flight: before spawning, the supervisor should `ls lib/state/ test/ knowledge/` and confirm the target filename is free. Brief the agent with a fallback rule: "if your target file already exists, do NOT modify it — add a `_test.dart` that exercises whatever API exists, and report the mismatch."
+
+### API 529 (Overloaded) on concurrent sub-agent spawns — back off, serialize
+- **Problem:** sent 3 parallel `Agent` calls in one message during a second-batch parallel run; all 3 returned `API Error: 529 Overloaded` after ~200 s each with `tool_uses: 0`. Concurrent API load (from this conversation alone, or the platform globally) tripped the rate limit.
+- **Fix (in order):** (1) **serialize** — spawn ONE agent first; if it succeeds, queue the next; (2) if a single agent also 529s, wait a few minutes for global capacity to free, then retry; (3) NEVER blindly resend the same 3-agent batch on 529 — the load is exactly what tripped it. Don't `SendMessage` to resume the failed agents either; they're empty (`tool_uses: 0`) so a fresh spawn is cleaner.
+- **Why:** 529 is platform back-pressure; honour it by reducing concurrency. The earlier successful 3-agent batch (steps 4/10/92 and 86/88/99-100) worked because capacity was available; that's a property of the moment, not a guarantee — assume it can fail mid-run and plan for serial fallback.
+- **Confirmed mid-session:** after the 3-concurrent batch 529'd, a single-agent retry **also** 529'd. **In that case, fall back further: do the work yourself with `Write`/`Bash` tools** — the supervisor already has the full context, no extra briefing needed. Document the pivot, don't loop on 529.
+- **529 clusters across sessions:** observed TWICE in one conversation, separated by ~30 minutes of clean operation. Pattern: when a 3-agent batch returns all-529 simultaneously, **skip the serial-retry** and go directly to supervisor-direct. The serial retry would only burn another ~200 s and likely 529 again because capacity is globally constrained, not per-call.
+
+### Parallel sub-agents work on disjoint NEW files (no merge cost)
+- **Pattern that worked:** ran 3 sub-agents in one Agent-tool call (each `subagent_type: general-purpose`) for ROADMAP steps 4 (docs), 10 (feature-flag state), 92 (A/B state). Each agent was briefed with: (a) absolute paths into the repo, (b) "add NEW files only — never modify an existing file", (c) the 10-step protocol + push policy + `_test.dart` naming convention, (d) a reference file from `lib/state/` to mirror for persistence patterns. All 3 returned clean: 5/5 + 6/6 + docs (194 lines), 0 analyze errors, suite jumped 640→651.
+- **Why it worked:** the deliverables touched **disjoint file paths** (3 brand-new files each) — zero merge cost. Supervisor reviewed summaries, ran the integrated suite once, marked roadmap + committed.
+- **When NOT to parallelize:** if any task would modify a shared file (e.g. `catalog_screen.dart`), keep it sequential or queue on one agent. Concurrent edits on the same file would force a manual conflict resolution that erases the speed-up.
+
+### Sub-agent worktree isolation needs the supervisor's cwd = git repo root
+- **Problem:** tried to spawn 3 agents with `isolation: "worktree"` to parallelize step 4/10/92. All three failed instantly with "Cannot create agent worktree: not in a git repository". My cwd was a parent folder, not the repo.
+- **Fix:** in this harness the cwd is **explicitly reset after every Bash call** (`Shell cwd was reset to …`), so `cd` before `Agent` doesn't help — option (a) "cd into the repo first" is **NOT viable here**. The only working approach is **option (b)**: skip `isolation: "worktree"` and brief each agent with **absolute paths** into the repo + a strict rule to ONLY add new files (no overlap with each other or the supervisor's in-flight work).
+- **Why:** worktree creation runs `git worktree add …` in the supervisor's cwd at the moment of the call; the harness resets cwd back to a parent directory between tool calls, so cwd-based fixes don't persist. Option (b) sidesteps the issue entirely — verified working for 3 concurrent agents on disjoint NEW files (steps 4/10/92).
+
+### 🔟 10-step decomposition per action (user-set)
+Before executing each meaningful action (a roadmap step / a fix), decompose it
+into ~**10 explicit sub-steps** and *show them*. Catches missed checks (test
+first, analyze, RTL, version bump, commit) and makes regressions obvious.
+Standard template:
+  1. Requirement + acceptance criteria · 2. Data sources / dependencies ·
+  3. Check for existing similar patterns/overlap · 4. Design (signature +
+  behavior) · 5. Write the test(s) first (red) · 6. Implement (green) ·
+  7. `flutter analyze` → 0 errors · 8. Wire UI (minimal, RTL-safe) ·
+  9. Scoped test(s) green; full suite at the ~5-step cadence · 10. Mark
+  ROADMAP entry + bump version + local commit (no push w/o approval).
+Adjust the template per step; never skip silently.
+
 ---
 
 **Protocol:** every time I get *stuck* and then *solve* it, I append a one-entry
@@ -121,6 +188,16 @@ Format per entry:
 
 ### Comprehensive test cadence
 - **Fix:** run the **full suite** (`flutter test`, ~2.5–3 min) at checkpoints; for quick iteration run the specific test files. Full suite is the ground truth before any push.
+
+### Test file must end in `_test.dart` (singular) — `*_tests.dart` is invisible
+- **Problem:** named a new file `mutation_tests.dart` (plural). `flutter test test/mutation_tests.dart` ran it fine, but plain `flutter test` (no args) showed the same pre-creation total — the file was silently skipped.
+- **Fix:** rename to singular: `mutation_test.dart`. After: full suite jumped 627 → 633.
+- **Why:** flutter test auto-discovers `**/*_test.dart`, not `*_tests.dart`. The suite stayed green during the regression so this would slip past every checkpoint. Always: filename ends `_test.dart`, and *confirm the count rose* after adding a test file.
+
+### Mutation tests: assert invariants, don't gate on `count > 0`
+- **Problem:** added a mutation test for `installEffortFor` that iterated `kLipskeyCatalog` for copper-press products and asserted `difficulty == 'מקצועי'`, with a final `expect(checked, greaterThan(0))`. It failed — but the helper was correct. The `copperPress` end-type *did* exist (6 times) but only in **synthetic** specs (HW-*) that don't appear in `kLipskeyCatalog`. Same issue hit `cheaperAlternativeBrand` (no SmartProducts have 2+ priced brands).
+- **Fix:** drop the `count > 0` gate. The invariant assertion still fires on every real sample encountered; if the data has zero samples, the test is *vacuously true* — which is correct, not a regression. Direct boundary coverage of the helper lives in its dedicated test (`install_effort_test`), so the mutation test doesn't need to re-prove sample existence.
+- **Why:** mutation tests check what a *mutated* helper would do; they should never depend on data prevalence. A "must find samples" gate creates a false failure when the data drifts (legitimate engine evolution) even though the logic is untouched.
 
 ---
 

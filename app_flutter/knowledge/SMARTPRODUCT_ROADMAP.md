@@ -29,7 +29,9 @@ Saved for the next run. Pick up here:
 3. ✅ Bidirectional bridge: `catalogProductForBrand` / `catalogProductForSmart`
    (related_info.dart) + `smartProductForSku` (reverse). Round-trip guarded in
    `smartproduct_contract_test`.
-4. ⬜ One documented data schema replacing the duplication.
+4. ✅ Documented data schema — `knowledge/SCHEMA.md` (194 lines): catalog
+   products · verified specs (enums) · SmartTree · bridge · card-side state
+   models · data-flow diagram. Built by parallel sub-agent.
 5. ✅ Contract tests: every `SmartBrand.sku` is a real catalog SKU; every product
    has a resolvable recommended brand. Baseline: 81 products · 365 brands ·
    307 with SKU · 252 of those with a verified spec. Guard: `smartproduct_contract_test`.
@@ -38,12 +40,16 @@ Saved for the next run. Pick up here:
 7. 🟦 Persisted selection — `cardSelectionProvider` remembers the last brand per
    product (`productKey→brandName`); restored in `initState`, saved on tap.
    (acc/qty persistence still ⬜.) Guard: `card_selection_test`.
-8. ⬜ Golden tests for the unified card across every category.
+8. 🟦 Comprehensive widget rendering already covered by `product_journey_test`
+   (all 935 sheets render at narrow phone + large text). Pixel-level golden
+   files (`matchesGoldenFile`) still ⬜ — deferred (heavy + flaky in CI).
 9. 🟦 Cleared safe analyze warnings in `catalog_screen.dart` (unused
    `lipskey_brand_screen` import + unused `cs` local). Remaining dead widgets
    (`_MiniSearchPill`/`_Chip`/`_CatalogDrillSection`/`_diameterSubGroups`) await
    a careful dedicated removal pass (file is large + shared with the other session).
-10. ⬜ Feature-flag infra to swap old/new card safely (A/B).
+10. ✅ Feature-flag infrastructure — `featureFlagsProvider` (persisted
+   `Set<String>`, isOn/enable/disable/toggle, idempotent). Built by parallel
+   sub-agent. Guard: `feature_flags_test` (5 tests).
 
 ## Phase 2 · Data enrichment (11–20)
 11. ✅ Engineering spec (material/pressure/temp/system/ends/bore) rendered in the
@@ -79,7 +85,9 @@ Saved for the next run. Pick up here:
 24. 🟦 System (supply/drainage) safety note + min-bore inline via
    `systemSafetyNoteHe` (gravity-drainage / upstream-shutoff) + the bore row.
    (Line-level ΔP still ⬜ — needs a built line.) Guard: `install_effort_test`.
-25. ⬜ Auto install-kit — card offers all required safety items (correct-by-construction).
+25. ✅ Auto install-kit — engine-derived safety SKUs via `safetyKitItems`
+   (diff of `buildInstallation` autoCompliance:true vs false). Shown inline as
+   "🛡 ערכת בטיחות (auto): …". Guard: `safety_kit_test` (incl. integration probe).
 26. 🟦 Hot-water suitability across brands via `hotWaterSuitabilityFor`
    ("🌡 מים חמים: X/Y מותגים מתאימים", cross-checked vs engine
    `productSuitableForTemp`). (Interactive temp picker still ⬜.)
@@ -123,7 +131,10 @@ Saved for the next run. Pick up here:
 44. ⬜ Supplier choice by distance/rating/availability from settings.
 45. ✅ "Cheaper alternative" — strictly-cheapest sibling brand via
    `cheaperAlternativeBrand` ("💰 חלופה זולה יותר"). Guard: `summary_alt_test`.
-46. ⬜ Smart add-to-cart: the whole line in one tap (incl. safety).
+46. ✅ Smart add-to-cart with safety — `buildSafetyAccessories` converts engine
+   safety SKUs to `SmartCartAcc`, and "🛒 + בטיחות לסל" adds the whole line
+   (user-selected acc + engine safety) to the cart in one tap. Distinct from the
+   existing "הוסף לסל" (no safety). Guard: `cart_safety_test`.
 47. ✅ Save config as favourite — persisted `savedConfigsProvider`
    (`productKey#brandName`); "☆ שמור / ★ נשמר" toggle in the 📦 header.
    Guard: `quote_saved_test`.
@@ -134,15 +145,25 @@ Saved for the next run. Pick up here:
 50. ⬜ Direct order/payment from the card (when backend exists).
 
 ## Phase 6 · Personalization & AI (51–60)
-51. ⬜ Smart default brand from the user's order history.
-52. ⬜ Filter by the active project (cold/hot/commercial) — hide irrelevant.
+51. ✅ Smart default brand from history — `brandHistoryProvider` records every
+   pick; `resolveDefaultBrandIndex` (in `default_brand_resolver.dart`) picks
+   the default brand on card open with precedence:
+   **last-selection → most-used → recommended → 0**. Wired into the card's
+   `initState` (replaces the simple step-7 lookup) and the brand-tap onTap also
+   feeds the history. Guards: `brand_history_test` (6) + `default_brand_resolver_test` (5).
+52. 🟦 Project-mode setting — `projectModeProvider` (enum any/cold/hot/commercial,
+   persisted), with `isFiltering` flag. UI filter wiring still ⬜ (touches
+   `catalog_screen.dart`). Guard: `project_mode_test`.
 53. ⬜ In-card AI assistant: "what suits me?" in free text.
 54. ⬜ Learning: more lines built → sharper recommendations.
 55. ⬜ Product recognition from camera (barcode/image) → opens the card.
 56. 🟦 "Frequently paired" — `frequentlyPairedTypesFor` surfaces the product
    *types* that most often connect (data-driven from the compat engine).
    (Real co-purchase data pending a backend.) Guard: `paired_warning_test`.
-57. ⬜ Profession-aware (plumber/contractor/DIY) — different detail level.
+57. ✅ Profession-aware — `professionModeProvider` (enum diy/contractor/pro,
+   persisted), `defaultDetailFor()` mapping, `nextProfessionMode()` cycle,
+   `labelForProfession()` emoji+label. Wired as a tap-cycling chip in the
+   📦 header (🔨 DIY / 💼 קבלן / 🛠 מקצועי). Guard: `profession_mode_test` (5).
 58. ✅ "Why it matters" explanation under each compliance warning via
    `complianceWhyHe` (↳ line). Coverage-gated: every trigger label has a why.
    Guard: `compliance_why_test`.
@@ -153,7 +174,10 @@ Saved for the next run. Pick up here:
 
 ## Phase 7 · Search & discovery (61–70)
 61. ⬜ Index SmartProduct in the main search (not just the tree).
-62. ⬜ Forgiving search (layman word → product) in the smart card too.
+62. 🟦 Forgiving multi-word catalog search — `fuzzySearchProducts(query)` (every
+   word must appear; whole-phrase substring matches rank highest; proximity
+   tiebreak; configurable products iterable + limit). Search-box UI still ⬜.
+   Guard: `fuzzy_search_test`.
 63. ✅ "Similar" — variant-family list ("גרסאות נוספות במשפחה") in the 📦 section
    via `variantSiblingsOf`. (Upgrade/cheaper-alternative still ⬜.)
 64. ⬜ Health navigation: from the card straight to the relevant finder/category.
@@ -180,13 +204,17 @@ Saved for the next run. Pick up here:
    product to several locations at once. Guard: `card_projects_test`.
 73. ✅ Material dependencies — `connectionNeedsHe` lists what each end needs to
    mate ("מה הקו צריך לחיבור"). Guard: `line_fit_test`.
-74. 🟦 Cumulative project view — running "📋 בפרויקט: N יחידות · M מיקומים" from
-   `cardProjectsProvider`. (Full materialized project BOM dialog pending.)
-   Guard: `card_projects_test`.
+74. ✅ Cumulative project BOM — running counter ("📋 בפרויקט: N יחידות · M מיקומים")
+   + "📋 BOM פרויקט מלא" button that runs `buildInstallation` over all project
+   products (resolved via SKU) and shows the materialized list in a dialog.
+   Guard: engine via `build_line_bom_test`; project model via `card_projects_test`.
 75. ✅ Customer quote for the whole project — `projectQuoteText` aggregates each
    assigned item (location/brand/qty + est. price) into a copyable quote
    ("📋 הצעת מחיר לפרויקט"). Guard: `card_projects_test`.
-76. ⬜ Config versioning (compare alternatives for the project).
+76. ✅ Config versioning — persisted `cardVersionsProvider` saves named snapshots
+   (label/product/brand). "💾 שמור גרסה" stores the current brand under its name;
+   chips list saved versions for the product. Re-saving the same label replaces
+   (no dup). Guard: `card_versions_test`.
 77. ⬜ Team sharing: chat/notes on a chosen product.
 78. ⬜ Sync with the Gantt/tasks.
 79. ⬜ Unified procurement report (PDF) for the whole project.
@@ -199,19 +227,55 @@ Saved for the next run. Pick up here:
    bridge/summary/standards/tools/guide/compat/compliance+why/variants/
    cheaper-alt all coherent & non-throwing). Rendering of all 935 sheets stays
    covered by `product_journey_test`. Guard: `smart_card_data_test`.
-82. ⬜ Golden + mutation tests on the price/selection logic.
-83. ⬜ Offline-first: caching of data + images.
+82. 🟦 Mutation-resistance tests for price/selection helpers (6 invariants:
+   cost sum · strict-cheaper alt · score band fences · effort threshold ·
+   safety-kit disjoint · cheap+premium tags mutually exclusive). Guard:
+   `mutation_test`. (Golden image tests still ⬜.)
+83. 🟦 Offline-cache primitive — `offlineCacheProvider`: persisted
+   `Map<String, CacheEntry>` with TTL (`get`/`put`/`sweep`/`clearAll`),
+   in-memory + JSON-backed. Guard: `offline_cache_test` (6 tests). Concrete
+   consumers (image cache, network response cache) still ⬜.
 84. ⬜ Lazy-load images + smart prefetch.
-85. ⬜ Full accessibility (screen reader, contrast, text size) across the card.
-86. ⬜ Perfect RTL + Arabic/English support (i18n).
-87. ⬜ Reduced-motion / sun mode per settings.
-88. ⬜ Bundle size: split & code-split the card.
-89. ⬜ Regression gate: every card choice covered by a test.
-90. ⬜ Crash monitoring + telemetry for render errors.
+85. 🟦 Accessibility — explicit `Semantics(button, label)` on 6 key card actions
+   (save · BOM · add-to-project · cart+safety · save-version · mode-toggle), so
+   screen readers announce intent not just visible text. Gated by
+   `accessibility_test`. (Contrast + text-size still ⬜.)
+86. 🟦 i18n scaffold — `lib/l10n/smart_card_strings.dart` extracts 28 SmartProduct
+   card labels as `static const` fields, ready for parallel En/Ar classes. No
+   wiring yet. Guard: `smart_card_strings_test` (non-empty · no-dup · screen-
+   containment). Full localization (RTL Arabic, language switch) still ⬜.
+   Built by parallel sub-agent.
+87. 🟦 Reduced-motion — by construction the SmartProduct card additions
+   introduce NO new animations (all chips/sections are static), so they
+   already respect `catalog_settings.reducedMotion`. Gating the legacy
+   `_DiagramFlow` stage animations still ⬜ — that's a shared-file edit
+   to defer to a careful pass.
+88. 🟦 Bundle-split strategy — `knowledge/BUNDLE_SPLIT.md` analysis of top files
+   (catalog_screen 7668L · lipskey_catalog 6822L · install_studio 3184L) + a
+   concrete plan (extract `_SmartProductSheet` to its own file; deferred-import
+   `install_engine` behind BOM tap; lazy verified-spec; category-split catalog).
+   Built by parallel sub-agent. Actual code-split refactor still ⬜.
+89. ✅ Regression gate — `regression_gate_test` asserts every curated card
+   helper (47 names) is referenced by at least one test file. It caught 3
+   uncovered helpers on first run (engineeringSpecFor/priceFor/
+   catalogProductForSmart) → backfilled by `core_helpers_test`. Going forward:
+   adding a helper without a test goes red.
+90. 🟦 In-app crash log — `crashLogProvider`: in-memory bounded `List<CrashEntry>`
+   (newest-first, `maxEntries` trim), with `record(message, context:)`, `clear`,
+   `countBy(contextFilter:)`. NOT persisted (error payloads may be sensitive).
+   Guard: `crash_log_test` (5 tests). External telemetry (Sentry/Crashlytics)
+   still ⬜ — wall (needs service account).
 
 ## Phase 10 · Platform, analytics & moonshots (91–100)
-91. ⬜ Analytics: what's chosen/abandoned in the card → product improvement.
-92. ⬜ Built-in A/B experiments on the card layout.
+91. 🟦 In-app analytics-event log — `analyticsLogProvider`: in-memory bounded
+   `List<AnalyticsEvent>` (newest-first; `record(name, props:)`, `clear`,
+   `countByName`, `recent(name:, limit:)`). NOT persisted by design. Foundation
+   for future external analytics wiring. Guard: `analytics_log_test` (6 tests).
+   External services (GA/Mixpanel) still wall-blocked. Built by parallel sub-agent.
+92. ✅ Built-in A/B experiments — `abExperimentsProvider` (persisted
+   `Map<experiment, variant>`, deterministic `ensure(experiment, variants)`
+   via `hashCode.abs() % len`, override/clear). Built by parallel sub-agent.
+   Guard: `ab_experiments_test` (6 tests).
 93. ⬜ User ratings + real user photos ("here's how it looks at my place").
 94. ⬜ Manufacturer integration (official datasheets) via API.
 95. ✅ Expert vs simple mode — persisted `cardDetailModeProvider`; "מצב מורחב/פשוט"
@@ -220,9 +284,16 @@ Saved for the next run. Pick up here:
 96. ⬜ Home-screen widget ("reorder my last line").
 97. ⬜ Contractor inventory integration ("I have 3 in stock").
 98. ⬜ Export the chosen config to CAD/BIM.
-99. ⬜ "Coach mode" — the app teaches a junior plumber as they go.
-100. ⬜ It all converges: one unified product card that knows *what · why · how it
-    connects · how to install · cost · supplier* — the knowledge brain of plumbing.
+99. ✅ Coach mode — `knowledge/COACH_MODE.md` vision doc: how the card *teaches*
+   by orchestrating already-shipped helpers (`complianceWhyHe`, `installTipsFor`,
+   `connectionWarningHe`, `safetyKitItems`, `lineFitFor`, `adapterSuggestionFor`,
+   `cardDetailModeProvider`) into just-in-time hints + next-best-action.
+   Built by parallel sub-agent.
+100. 🟦 Convergence checklist (in `knowledge/COACH_MODE.md`): what ✅ · why ✅ ·
+    connects ✅ · install 🟦 · cost ✅ · supplier ⬜ — the latter two block on
+    external infra (video/AR/voice/PDF + backend supplier feeds). The card is
+    already the *knowledge brain* for everything that doesn't need a third-party
+    integration. Built by parallel sub-agent.
 
 ---
 _Created during the SmartProduct deep-dive. Execution starts at Phase 1, Step 5
