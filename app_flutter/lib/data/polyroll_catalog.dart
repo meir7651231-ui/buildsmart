@@ -274,9 +274,9 @@ const Map<int, String> _kPprCouplerPageSpec = {
 const Map<int, String> _kPprCouplerReducingPageSpec = {
   23: 'spec_coupler_reducing_p23.jpg', // PPR reducing (l/z/D/d1/d)
   45: 'spec_coupler_reducing_p45.jpg', // PPRCT reducing (dual view צד פנים/חוץ)
+  46: 'spec_coupler_reducing_p45.jpg', // p46 = "המשך" continuation of p45, same diagram.
   47: 'spec_coupler_reducing_p47.jpg', // large reducing (A/B/C/D2)
   83: 'spec_coupler_reducing_p83.jpg', // PPRCT reducing (D/d1/d/l/z)
-  // p46 shares geometry with p45 (legit shared) → falls back to generic.
 };
 
 const Map<int, String> _kPprAdapterRoundPageSpec = {
@@ -296,8 +296,8 @@ const Map<int, String> _kPprAdapterHexPageSpec = {
 const Map<int, String> _kPprTeeReducingPageSpec = {
   21: 'spec_tee_reducing_p21.jpg', // PPR reducing tee (l2/z2/z/l/d2/d1)
   42: 'spec_tee_reducing_p42.jpg', // PPRCT reducing tee (A/B1/B2/B3/C1/C3/E)
+  43: 'spec_tee_reducing_p42.jpg', // p43 = "המשך" continuation of p42, same diagram.
   82: 'spec_tee_reducing_p82.jpg', // PPRCT reducing tee (D1/d1/l/d)
-  // p43 shares geometry with p42 (legit shared) → falls back to generic.
 };
 
 const Map<int, String> _kPprCollarPagePlainSpec = {
