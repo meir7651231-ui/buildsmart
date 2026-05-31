@@ -375,3 +375,46 @@ Format per entry:
 - **Why this beats reading source:** the printed output answers concrete questions in one run ("does kVerifiedSpecs have an entry for PPR sku 95016002? no. does priceFor return ₪18 from dims? no. does compatibleProductsFor return mates? 0."). Reading source to answer those gives a *theory*; the probe gives a *fact*.
 - **Discovery from this session:** running a probe on 3 PPR SKUs (95016002 / 95270708 / 94117202) revealed that all 774 Polyroll products are missing `VerifiedSpec`, so 8 card helpers (price, compat, standards, tools, effort, tips, pair-warning, install-engine) silently return null/empty for them — a gap NOT visible in any aggregate test. That gap is now the next session target.
 - **Etiquette:** put the probe in `test/` so `flutter test` runs it, but delete it the moment its question is answered. Probes that linger become noise.
+
+### Material-gated branching for cross-cutting helpers
+- **When a shared helper (`installToolsFor`, `installEffortFor`, `installTipsFor`) needs to behave differently for a new material**, branch on `spec.material.startsWith('X')` BEFORE the existing end-type switch.
+- **Why this beats a switch-case extension:** all existing materials keep their exact behavior (no risk of overlapping with the new branch), and the new material's logic lives in one block. Lipskey products never enter the PPR branch because they have `'נחושת'`/`'פליז'`/`'PEX'`/`'HDPE'`/`'PVC'`, not `'PPR'`.
+- **Pattern:**
+  ```dart
+  if (spec.material.startsWith('PPR')) {
+    // PPR-specific tools / effort / tips
+    return ...;  // or continue with PPR-aware accumulation
+  }
+  // existing per-end-type switch stays untouched
+  ```
+- **Verified by:** 818/818 tests green after adding PPR branches — zero Lipskey regression.
+
+### The "swallowing" anti-pattern in accumulating helpers
+- **`complianceTriggersFor` originally had:**
+  ```dart
+  if (p.brand == 'פולירול') {
+    return const [...4 PPR items...];  // ← swallows the rest!
+  }
+  ```
+- **Bug:** PPR products got their 4 material items but silently lost ALL line-level checks (PRV, ברז ניתוק, TMTV, dielectric). A PPR hot-water line still needs all those.
+- **Rule:** in any helper meant to ACCUMULATE items across multiple conditions, `addAll` into a shared `out` list — NEVER early-return inside the accumulator.
+- **Pattern:**
+  ```dart
+  final out = <...>[];
+  if (matCond) out.addAll([...material items...]);   // ✓ accumulates
+  if (catCond) out.addAll([...category items...]);
+  if (specCond) out.addAll([...spec items...]);
+  return out;
+  ```
+
+### Meta-invariant tests catch silent regressions before they happen
+- **Pattern:** for every aggregate property you care about (coverage, count, ratio), write a test that asserts the property holds across the WHOLE dataset, with an explicit exempt list.
+- **Example this session:** `catalog_spec_coverage_test` — "every non-exempt category in the unified catalog must hit ≥80% VerifiedSpec coverage." Would have caught the Polyroll 0/757 gap on day one.
+- **Why it matters:** unit tests sample N specific cases; meta-invariants assert across all cases. A new category silently shipping without specs would be invisible to unit tests but red-flag the meta-test.
+- **Exempt list as documentation:** make the exempt list explicit (`_kSpecExemptCategories`) so adding a NEW category forces a conscious decision ("connector → backfill specs" vs "accessory → add to exempt").
+
+### Search across `kCatalogProducts`, never `kLipskeyCatalog` directly
+- **Rule for shared helpers:** when a function looks up products by SKU or iterates the catalog, search the unified `kCatalogProducts` (= Lipskey + Polyroll). Direct use of `kLipskeyCatalog` is a code smell that silently misses Polyroll products.
+- **This session's bug:** `compatibleProductsCount` and `compatibleProductsFor` looped over `kVerifiedSpecs.entries` then did `kLipskeyCatalog.where((x) => x.sku == entry.key)`. Even though PPR specs were registered into `kVerifiedSpecs`, the catalog lookup missed them — so PPR↔PPR mating returned 0.
+- **Fix:** one-line change — `kLipskeyCatalog` → `kCatalogProducts`. Materials gate everything else, so no false cross-mating between PPR and Lipskey.
+- **Future grep:** if you see `kLipskeyCatalog.where` in a helper, it's suspicious. Prefer the unified list.
