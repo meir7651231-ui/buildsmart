@@ -472,7 +472,8 @@ void main() {
           }
           // Valves: concealed under '_concealed', ball under '_ball';
           // butterfly/wafer/angle/straight have category-wide sub-type specs
-          // that the §22 per-page map deliberately skips.
+          // that the §22 per-page map deliberately skips. p32 polypropylene
+          // ball valves route to §22.D split.
           if (cat == kPprValves) {
             final isConc = p.nameHe.contains('סמוי');
             final isBall = !p.nameHe.contains('פרפר') &&
@@ -482,6 +483,8 @@ void main() {
                 !p.nameHe.contains('מעבר');
             if (isConcealedValve && !isConc) return false;
             if (isBallValve && !isBall) return false;
+            // p32 polypropylene → §22.D split.
+            if (p.page == 32 && p.nameHe.contains('פוליפרופילן')) return false;
           }
           // Collars: skip products handled by sub-type logic (פרפר, פנים,
           // שקע תקע) — those don't use the page-based map.
@@ -491,6 +494,9 @@ void main() {
                 p.nameHe.contains('שקע תקע')) {
               return false;
             }
+            // p34 non-flange + p85 non-collar route via §22.D sub-type logic.
+            if (p.page == 34 && !p.nameHe.startsWith('אוגן')) return false;
+            if (p.page == 85 && !p.nameHe.startsWith('צווארון')) return false;
           }
           // Saddles: p84 'תבריג' (threaded) routes to §22.D variant.
           if (cat == kPprSaddles && p.page == 84 && p.nameHe.contains('תבריג')) {
@@ -635,6 +641,45 @@ void main() {
       }
     }
     expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
+  // §22.D — p32 ball valve split: regular vs polypropylene get distinct specs.
+  test('§22.D p32 valve split — regular ball vs polypropylene', () {
+    final regular = kPolyrollCatalog.firstWhere((p) =>
+        p.page == 32 && !p.nameHe.contains('פוליפרופילן'));
+    final pp = kPolyrollCatalog.firstWhere((p) =>
+        p.page == 32 && p.nameHe.contains('פוליפרופילן'));
+    expect(regular.specImageAssets.first, endsWith('spec_valve_p32.jpg'));
+    expect(pp.specImageAssets.first, endsWith('spec_valve_p32_pp.jpg'));
+  });
+
+  // §22.D — p34 three sub-types: אוגן / סעפת / לוחית each get distinct specs.
+  test('§22.D p34 sub-type split — flange/manifold/plate', () {
+    final flange = kPolyrollCatalog.firstWhere((p) =>
+        p.page == 34 && p.nameHe.startsWith('אוגן'));
+    final manifold = kPolyrollCatalog.firstWhere((p) =>
+        p.page == 34 && p.nameHe.contains('סעפת'));
+    final plate = kPolyrollCatalog.firstWhere((p) =>
+        p.page == 34 && p.nameHe.contains('לוחית'));
+    expect(flange.specImageAssets.first, endsWith('spec_collar_p34.jpg'));
+    expect(manifold.specImageAssets.first, endsWith('spec_manifold_p34.jpg'));
+    expect(plate.specImageAssets.first, endsWith('spec_plate_p34.jpg'));
+  });
+
+  // §22.D — p85 three sub-types: collar / flange / shroud each get distinct
+  // specs. Previously spec_collar_p85.jpg was misassigned (was the shroud
+  // diagram going to collar products); now it correctly carries the gasket
+  // collar diagram.
+  test('§22.D p85 sub-type split — collar/flange/shroud', () {
+    final collar = kPolyrollCatalog.firstWhere((p) =>
+        p.page == 85 && p.nameHe.startsWith('צווארון'));
+    final flange = kPolyrollCatalog.firstWhere((p) =>
+        p.page == 85 && p.nameHe.contains('אוגן'));
+    final shroud = kPolyrollCatalog.firstWhere((p) =>
+        p.page == 85 && p.nameHe.contains('שרוול'));
+    expect(collar.specImageAssets.first, endsWith('spec_collar_p85.jpg'));
+    expect(flange.specImageAssets.first, endsWith('spec_collar_p85_flange.jpg'));
+    expect(shroud.specImageAssets.first, endsWith('spec_shroud_p85.jpg'));
   });
 
   // §22.D — p84 saddle sub-type split: plain saddle ("רוכב לריתוך") shares

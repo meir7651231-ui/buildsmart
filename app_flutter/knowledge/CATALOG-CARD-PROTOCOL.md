@@ -836,7 +836,16 @@ page header that becomes part of the product nameHe (e.g. "ללא ידית",
 | Page | Sub-types on page | Split by | Specs |
 |------|-------------------|----------|-------|
 | p30 ברז סמוי | "(ציפוי כרום)" (כולל ידית) / "(ציפוי כרום - ללא ידית)" / "כדורי בין אוגנים" | `nameHe.contains('ללא ידית')` + `nameHe.contains('בין אוגנים')` | `spec_valve_concealed_p30_a.jpg` (with handle), `spec_valve_concealed_p30_b.jpg` (no handle), `spec_valve_wafer_p30.jpg` (ball-wafer) |
+| p32 ברז כדורי | "ברז כדורי" / "ברז כדורי פוליפרופילן" (different 3-view geometry) | `nameHe.contains('פוליפרופילן')` | `spec_valve_p32.jpg` (regular), `spec_valve_p32_pp.jpg` (PP) |
+| p34 אוגן+סעפת+לוחית | אוגן (flange) / סעפת למונים (meter manifold) / לוחית למיקום (positioning plate) | `nameHe.startsWith('אוגן')` etc | `spec_collar_p34.jpg` (flange default), `spec_manifold_p34.jpg`, `spec_plate_p34.jpg` |
 | p84 רוכב PPRCT | "רוכב לריתוך" (plain) / "רוכב לריתוך תבריג פנימי" (threaded) | `nameHe.contains('תבריג')` | `spec_saddle_p84.jpg` (plain default), `spec_saddle_p84_threaded.jpg` (threaded) |
+| p85 צווארון+אוגן+שרוול | צווארון (collar+gasket) / אוגן פלדה (steel flange) / שרוול חשמלי (EF shroud) | `nameHe.contains('אוגן' / 'שרוול')` | `spec_collar_p85.jpg` (gasket-collar, was MIS-cropped as shroud — fixed), `spec_collar_p85_flange.jpg`, `spec_shroud_p85.jpg` |
+
+**§22.D over-generalization bug fixed:** Previous protocol comment "EF =
+photo-only in catalog" was too broad. p85 שרוול חשמלי HAS a dim drawing
+on the top section of its page (D/h/l/d labels). Single-page exception
+(p85) added to the kPprElectrofusion case; the other EF pages (p33, p72-74)
+remain photo-only and still correctly fall through to page render.
 
 **Detection rule:** when a page has ≥2 dim diagrams AND ≥2 header lines
 (green text in catalog) AND your code currently routes all of them to the

@@ -393,6 +393,11 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       }
       if (nameHe.contains('אלכסוני')) return ['spec_valve_angle.jpg'];
       if (nameHe.contains('מעבר')) return ['spec_valve_straight.jpg'];
+      // §22.D p32 split: regular ball valve vs polypropylene ball valve.
+      // Polypropylene has a 3-view diagram (E/D1/L2/L3/H/h/M/V labels).
+      if (page == 32 && nameHe.contains('פוליפרופילן')) {
+        return ['spec_valve_p32_pp.jpg'];
+      }
       // §22: per-page כדורי (ball) spec when cropped.
       if (_kPprValveBallPageSpec.containsKey(page)) {
         return [_kPprValveBallPageSpec[page]!];
@@ -426,6 +431,20 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       }
       // Page-66 collar (שקע תקע) — single dimension diagram.
       if (nameHe.contains('שקע תקע')) return ['spec_collar_p66.jpg'];
+      // §22.D p34 sub-type split: 3 different products with 3 different
+      // diagrams on the same page.
+      if (page == 34) {
+        if (nameHe.contains('סעפת')) return ['spec_manifold_p34.jpg'];
+        if (nameHe.contains('לוחית')) return ['spec_plate_p34.jpg'];
+        // אוגן default → existing spec_collar_p34.jpg
+      }
+      // §22.D p85 sub-type split: collar (gasket) vs steel-plated flange.
+      // The shroud product on p85 doesn't reach this branch (kPprPipesSupply
+      // / EF route — falls through to page_85.jpg).
+      if (page == 85) {
+        if (nameHe.contains('אוגן')) return ['spec_collar_p85_flange.jpg'];
+        // צווארון default → spec_collar_p85.jpg (now the gasket diagram)
+      }
       // §22 per-page plain-collar specs (p34 small flange, p69 plated, p85 PPRCT).
       if (_kPprCollarPagePlainSpec.containsKey(page)) {
         return [_kPprCollarPagePlainSpec[page]!];
@@ -455,9 +474,14 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
     case kPprPipesAC:
       // Generic pipe cross-section serves the rest.
       return ['spec_faser_20.jpg'];
+    case kPprElectrofusion:
+      // §22.D p85 shroud (שרוול PPRCT חשמלי) DOES have a dim drawing on p85
+      // top — earlier blanket "EF = photo-only" was an over-generalization.
+      // Other EF pages (p33, p72-74) remain photo-only → falls through.
+      if (page == 85 && nameHe.contains('שרוול')) return ['spec_shroud_p85.jpg'];
+      return null;
   }
-  // kPprElectrofusion: photo-only in the catalog (no dimension drawing) → the
-  // page render is used as fallback (R8 — not invented).
+  // Default fallback for unmapped categories: page render (R8 — not invented).
   return null;
 }
 
