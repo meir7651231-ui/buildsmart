@@ -317,4 +317,58 @@ void main() {
     }
     expect(gaps, isEmpty, reason: 'sub-types still on page fallback:\n${gaps.join('\n')}');
   });
+
+  // §22 — every catalog page with its own dimension diagram routes its products
+  // to a page-specific spec. Families currently cropped: elbow 90°, tee, saddle.
+  // When you crop a new family, add its expected (category, pageNumber → spec
+  // filename) row here and the test will guarantee no regression.
+  test('§22 per-page spec routing — products land on their page-specific crop',
+      () {
+    const expected = <String, Map<int, String>>{
+      kPprElbows: {
+        20: 'spec_elbow_90_p20.jpg',
+        25: 'spec_elbow_90_p25.jpg',
+        38: 'spec_elbow_90_p38.jpg',
+        39: 'spec_elbow_90_p39.jpg',
+        48: 'spec_elbow_90_p48.jpg',
+        49: 'spec_elbow_90_p49.jpg',
+        50: 'spec_elbow_90_p50.jpg',
+        81: 'spec_elbow_90_p81.jpg',
+      },
+      kPprTees: {
+        26: 'spec_tee_p26.jpg',
+        40: 'spec_tee_p40.jpg',
+        41: 'spec_tee_p41.jpg',
+        51: 'spec_tee_p51.jpg',
+        52: 'spec_tee_p52.jpg',
+        82: 'spec_tee_p82.jpg',
+      },
+      kPprSaddles: {
+        29: 'spec_saddle_p29.jpg',
+        58: 'spec_saddle_p58.jpg',
+        59: 'spec_saddle_p59.jpg',
+        60: 'spec_saddle_p60.jpg',
+        84: 'spec_saddle_p84.jpg',
+      },
+    };
+    final gaps = <String>[];
+    expected.forEach((cat, perPage) {
+      perPage.forEach((page, spec) {
+        final hits = kPolyrollCatalog.where((p) =>
+            p.categoryHe == cat &&
+            p.page == page &&
+            // exclude reducing tees (different drawing) and 45° elbows
+            !(cat == kPprTees && p.nameHe.contains('מצרה')) &&
+            !(cat == kPprElbows && p.nameHe.contains('45')));
+        if (hits.isEmpty) return;
+        for (final p in hits) {
+          final s = p.specImageAssets.first;
+          if (!s.endsWith(spec)) {
+            gaps.add('$cat p$page ${p.sku}: $s ≠ $spec');
+          }
+        }
+      });
+    });
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
 }

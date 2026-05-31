@@ -179,6 +179,14 @@ const Map<int, String> _kPprTeePageSpec = {
   82: 'spec_tee_p82.jpg', // PPRCT plain tee
 };
 
+const Map<int, String> _kPprSaddlePageSpec = {
+  29: 'spec_saddle_p29.jpg', // hexagonal saddle (משושה, threaded)
+  58: 'spec_saddle_p58.jpg', // PPR EF saddle (dual model A/B)
+  59: 'spec_saddle_p59.jpg', // welding/threading saddle, internal thread
+  60: 'spec_saddle_p60.jpg', // welding/threading saddle, external thread
+  84: 'spec_saddle_p84.jpg', // PPRCT saddle (standard)
+};
+
 /// Per-sub-type spec **diagram(s)** (dimension drawings cropped from the catalog
 /// pages). Prepended to the flip-side pager before the full page. Grows as more
 /// sub-type diagrams are cropped (protocol §17.1 / §22).
@@ -222,6 +230,11 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
     case kPprOmega:
       return ['spec_omega.jpg'];
     case kPprSaddles:
+      // §22: per-page saddle spec when the catalog page has its own diagram.
+      // p24 keeps the generic spec_saddle.jpg.
+      if (_kPprSaddlePageSpec.containsKey(page)) {
+        return [_kPprSaddlePageSpec[page]!];
+      }
       return ['spec_saddle.jpg'];
     case kPprCollars:
       // Page-68 collar for butterfly valve — Model A=size 160, Model B=200+.

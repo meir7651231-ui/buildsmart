@@ -707,3 +707,32 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 |---|---|---|
 | 22 | spec משותף בין עמודים שלכל אחד דיאגרמה ייחודית | `spec_assets_test` · "every product page must route to its own spec" |
 | 22 | spec לא תואם לעמוד-המקור (file name) | `spec_assets_test` · "no shared spec across >2 pages" |
+
+### Progress tracker — families (15 total)
+
+| # | family | pages cropped | status | commit |
+|---|---|---|---|---|
+| 1 | elbow_90 | p20, p25, p38, p39, p48, p49, p50, p81 (8) | ✅ done | `6276820` |
+| 2 | tee | p26, p40, p41, p51, p52, p82 (6) | ✅ done | `9a63f04` |
+| 3 | saddle | p29, p58, p59, p60, p84 (5) | ✅ done | local |
+| 4 | elbow_45 | p20, p25, p36, p37, p81 (5) | pending | — |
+| 5 | plug | p33, p70, p71, p83 (4) | pending | — |
+| 6 | coupler_reducing | p45, p46, p47, p83 (4) | pending | — |
+| 7 | adapter_round | p29, p53, p54, p55 (4) | pending | — |
+| 8 | tee_reducing | p42, p43, p82 (3) | pending | — |
+| 9 | collar | p34, p69, p85 (3) | pending | — |
+| 10 | faser_20 | p35, p80 (2) | pending | — |
+| 11 | adapter_hex | p56, p57 (2) | pending | — |
+| 12 | valve_concealed | p62, p63 (2) | pending | — |
+| 13 | valve | p64, p65 (2) | pending | — |
+| 14 | omega | p74 (1) | pending | — |
+| 15 | coupler | p44 (1) | pending | — |
+
+**§14 detection installed** (`spec_assets_test.dart` · "§22 per-page spec routing"): every per-page crop is asserted to route only its own page; reducing-tee/45°-elbow excluded since those are different families altogether. The map auto-extends as new families land — no test boilerplate per crop.
+
+### Lessons applied while doing family 3/saddle (Stage-B/C lessons sharpened)
+
+- **p58 has TWO models on one page (מודל A + מודל B).** Diagram crop must capture both side-by-side; if we only crop one, R8 verbatim breaks for the other half of the page's products. Adopted: when a page-spec covers multiple models, the crop spans **both** models in one image (kept as a single asset, not split — different from the multi-photo pattern, because dimensions are the same).
+- **p29 has saddle dimension at the bottom-left, not the top-left.** Don't assume "diagram = top". Always grid-render and locate visually.
+- **p84 has TWO unrelated drawings** (standard saddle top, hexagonal saddle bottom). Only the top maps to the products on the page; the bottom belongs to other products on the same page (different SKU prefix). Confirmed via grep on `_ppr('98217...',` lines.
+- Crops are tight to the diagram edges (~20px margin); table-column fragments on the right edge looked ugly in the earlier elbow_90 crops, so this family went straight to tight crops.
