@@ -391,7 +391,7 @@ void main() {
         27: 'spec_adapter_round_p27.jpg',
         29: 'spec_adapter_round_p29.jpg',
         53: 'spec_adapter_round_p53.jpg',
-        54: 'spec_adapter_round_p54.jpg',
+        // p54 split into _a/_b/_c by §22.C — tested separately below.
         55: 'spec_adapter_round_p55.jpg',
       },
       '${kPprAdapters}_hex': {
@@ -411,7 +411,8 @@ void main() {
         85: 'spec_collar_p85.jpg',
       },
       '${kPprValves}_concealed': {
-        30: 'spec_valve_concealed_p30.jpg',
+        // p30 split into _a (with handle) and _b (no handle) by §22.D —
+        // tested in §22.D test below, excluded here.
         62: 'spec_valve_concealed_p62.jpg',
         63: 'spec_valve_concealed_p63.jpg',
       },
@@ -561,6 +562,87 @@ void main() {
       // R8 verbatim: 'מודל' dim must match the catalog table.
       if (p.dims?['מודל'] != entry.value) {
         gaps.add('${entry.key}: dims[\'מודל\']=${p.dims?['מודל']} ≠ ${entry.value}');
+      }
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
+  // §22.C — p54 PPRCT round adapter external-thread: 3 models on one page.
+  // Model A = 20-32, Model B = 40-50, Model C = 63-110 (per catalog table).
+  test('§22.C p54 adapter — Model A 20-32, B 40-50, C 63-110', () {
+    const expectModel = {
+      '6602350200': 'A', '6602350250': 'A', '6602350260': 'A',
+      '6602350330': 'A', '6602350320': 'A',
+      '6602350400': 'B', '6602350500': 'B',
+      '6602350630': 'C', '6602350750': 'C', '6602350900': 'C', '6602350110': 'C',
+    };
+    final gaps = <String>[];
+    for (final entry in expectModel.entries) {
+      final p = kPolyrollCatalog.firstWhere((x) => x.sku == entry.key);
+      final wantedSpec = 'spec_adapter_round_p54_${entry.value.toLowerCase()}.jpg';
+      if (!p.specImageAssets.first.endsWith(wantedSpec)) {
+        gaps.add('${entry.key} (${p.nameHe}) → ${p.specImageAssets.first} ≠ $wantedSpec');
+      }
+      if (p.dims?['מודל'] != entry.value) {
+        gaps.add('${entry.key}: dims[\'מודל\']=${p.dims?['מודל']} ≠ ${entry.value}');
+      }
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
+  // §22.D — p30 valve sub-type split: 3 distinct dim drawings on one page,
+  // separated by Hebrew suffix in the product nameHe.
+  test('§22.D p30 valve sub-type split — with/without handle, wafer', () {
+    const expectSpec = {
+      // ברז סמוי (ציפוי כרום) - with handle → _a
+      '99040858': 'spec_valve_concealed_p30_a.jpg',
+      '99040860': 'spec_valve_concealed_p30_a.jpg',
+      '99040862': 'spec_valve_concealed_p30_a.jpg',
+      // ברז סמוי (ציפוי כרום - ללא ידית) - no handle → _b
+      '99040888': 'spec_valve_concealed_p30_b.jpg',
+      '99040890': 'spec_valve_concealed_p30_b.jpg',
+      '99040892': 'spec_valve_concealed_p30_b.jpg',
+      // ברז כדורי בין אוגנים → wafer (page-specific crop)
+      '99041602': 'spec_valve_wafer_p30.jpg',
+      '99041604': 'spec_valve_wafer_p30.jpg',
+      '99041607': 'spec_valve_wafer_p30.jpg',
+    };
+    final gaps = <String>[];
+    for (final entry in expectSpec.entries) {
+      final p = kPolyrollCatalog.firstWhere((x) => x.sku == entry.key);
+      if (!p.specImageAssets.first.endsWith(entry.value)) {
+        gaps.add('${entry.key} (${p.nameHe}) → ${p.specImageAssets.first} ≠ ${entry.value}');
+      }
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
+  // §22.E — finish parenthetical (ציפוי כרום, ציפוי כרום - ללא ידית, etc.)
+  // must appear verbatim in nameHe per R8.
+  test('§22.E finish suffix verbatim — p30/p62/p63 carry their catalog parenthetical', () {
+    const expectContains = {
+      // p30 with handle
+      '99040858': 'ציפוי כרום',
+      '99040860': 'ציפוי כרום',
+      '99040862': 'ציפוי כרום',
+      // p30 without handle
+      '99040888': 'ציפוי כרום - ללא ידית',
+      '99040890': 'ציפוי כרום - ללא ידית',
+      '99040892': 'ציפוי כרום - ללא ידית',
+      // p62 with handle
+      '6006224420': 'ציפוי כרום - כולל ידית',
+      '6006224425': 'ציפוי כרום - כולל ידית',
+      '6006224432': 'ציפוי כרום - כולל ידית',
+      // p63 without handle
+      '6006324420': 'ציפוי כרום - ללא ידית',
+      '6006324425': 'ציפוי כרום - ללא ידית',
+      '6006324432': 'ציפוי כרום - ללא ידית',
+    };
+    final gaps = <String>[];
+    for (final entry in expectContains.entries) {
+      final p = kPolyrollCatalog.firstWhere((x) => x.sku == entry.key);
+      if (!p.nameHe.contains(entry.value)) {
+        gaps.add('${entry.key}: nameHe="${p.nameHe}" missing "${entry.value}"');
       }
     }
     expect(gaps, isEmpty, reason: gaps.join('\n'));

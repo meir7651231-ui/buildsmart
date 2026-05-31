@@ -181,6 +181,18 @@ String _p37ElbowModel(String nameHe) {
   return 'A';
 }
 
+/// p54 (מתאם PPRCT לריתוך הברגה תבריג חיצוני): catalog "מודל" column
+/// assigns A to sizes 20-32, B to 40-50, C to 63-110.
+String _p54AdapterModel(String nameHe) {
+  for (final size in const ['63', '75', '90', '110']) {
+    if (nameHe.contains('${size}x')) return 'C';
+  }
+  for (final size in const ['40', '50']) {
+    if (nameHe.contains('${size}x')) return 'B';
+  }
+  return 'A';
+}
+
 const Map<int, String> _kPprElbow45PageSpec = {
   19: 'spec_elbow_45_p19.jpg', // PPR plain 45° (basic welding)
   20: 'spec_elbow_45_p20.jpg', // PPR 45° + coupler (l1/l variant)
@@ -301,6 +313,12 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       return [is45 ? 'spec_elbow_45.jpg' : 'spec_elbow_90.jpg'];
     case kPprAdapters:
       final hex = nameHe.contains('משושה');
+      // §22.C: p54 PPRCT round adapter externally-threaded splits by
+      // size into Model A (20-32), B (40-50), C (63-110).
+      if (!hex && page == 54) {
+        final m = _p54AdapterModel(nameHe).toLowerCase();
+        return ['spec_adapter_round_p54_$m.jpg'];
+      }
       if (hex && _kPprAdapterHexPageSpec.containsKey(page)) {
         return [_kPprAdapterHexPageSpec[page]!];
       }
@@ -329,8 +347,20 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       return [reducing ? 'spec_tee_reducing.jpg' : 'spec_tee.jpg'];
     case kPprValves:
       if (nameHe.contains('פרפר')) return ['spec_valve_butterfly.jpg'];
-      if (nameHe.contains('בין אוגנים')) return ['spec_valve_wafer.jpg'];
+      // §22.D p30: ball-wafer ("כדורי בין אוגנים") gets its own page-specific
+      // diagram (the 3rd sub-type on the page).
+      if (nameHe.contains('בין אוגנים')) {
+        if (page == 30) return ['spec_valve_wafer_p30.jpg'];
+        return ['spec_valve_wafer.jpg'];
+      }
       if (nameHe.contains('סמוי')) {
+        // §22.D p30 split by handle: "ללא ידית" → diagram B (no handle).
+        // p62 = with-handle PPRCT; p63 = without-handle PPRCT.
+        if (page == 30) {
+          return [nameHe.contains('ללא ידית')
+              ? 'spec_valve_concealed_p30_b.jpg'
+              : 'spec_valve_concealed_p30_a.jpg'];
+        }
         if (_kPprValveConcealedPageSpec.containsKey(page)) {
           return [_kPprValveConcealedPageSpec[page]!];
         }
@@ -709,12 +739,12 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('9091028240', 'רוכב PPR משושה 75x¾"', 'PPR Saddle 75x¾"', kPprSaddles, 'PPR Saddles', '🪢', 29, dims: {'SW': '31', 'R': '¾"', 'D': '43.5', 'z': '63.0', 'L': '39', 'd1': '25', 'd': '75', 'מק"ט חוליות': '9091028240', 'יצרן': 'Polyroll'}),
   _ppr('9091028242', 'רוכב PPR משושה 90x¾"', 'PPR Saddle 90x¾"', kPprSaddles, 'PPR Saddles', '🪢', 29, dims: {'SW': '31', 'R': '¾"', 'D': '43.5', 'z': '73.0', 'L': '39', 'd1': '25', 'd': '90', 'מק"ט חוליות': '9091028242', 'יצרן': 'Polyroll'}),
   _ppr('9091028244', 'רוכב PPR משושה 110x¾"', 'PPR Saddle 110x¾"', kPprSaddles, 'PPR Saddles', '🪢', 29, dims: {'SW': '31', 'R': '¾"', 'D': '43.5', 'z': '80.5', 'L': '39', 'd1': '25', 'd': '110', 'מק"ט חוליות': '9091028244', 'יצרן': 'Polyroll'}),
-  _ppr('99040858', 'ברז PPR סמוי 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '59', 'h1': '28', 'h': '116', 'D': '29.5', 'z': '20.5', 'l': '35', 'd': '20', 'מק"ט חוליות': '99040858', 'יצרן': 'Polyroll'}),
-  _ppr('99040860', 'ברז PPR סמוי 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '59', 'h1': '28', 'h': '116', 'D': '34.0', 'z': '22.0', 'l': '38', 'd': '25', 'מק"ט חוליות': '99040860', 'יצרן': 'Polyroll'}),
-  _ppr('99040862', 'ברז PPR סמוי 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '59', 'h1': '34', 'h': '121', 'D': '43.0', 'z': '31.0', 'l': '49', 'd': '32', 'מק"ט חוליות': '99040862', 'יצרן': 'Polyroll'}),
-  _ppr('99040888', 'ברז PPR סמוי ללא ידית 20', 'PPR Concealed Valve (no handle) 20', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '28', 'h': '109', 'D': '29.5', 'z': '20.5', 'l': '35', 'd': '20', 'מק"ט חוליות': '99040888', 'יצרן': 'Polyroll'}),
-  _ppr('99040890', 'ברז PPR סמוי ללא ידית 25', 'PPR Concealed Valve (no handle) 25', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '28', 'h': '109', 'D': '34.0', 'z': '22.0', 'l': '38', 'd': '25', 'מק"ט חוליות': '99040890', 'יצרן': 'Polyroll'}),
-  _ppr('99040892', 'ברז PPR סמוי ללא ידית 32', 'PPR Concealed Valve (no handle) 32', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '34', 'h': '115', 'D': '43.0', 'z': '31.0', 'l': '49', 'd': '32', 'מק"ט חוליות': '99040892', 'יצרן': 'Polyroll'}),
+  _ppr('99040858', 'ברז PPR סמוי (ציפוי כרום) 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '59', 'h1': '28', 'h': '116', 'D': '29.5', 'z': '20.5', 'l': '35', 'd': '20', 'מק"ט חוליות': '99040858', 'יצרן': 'Polyroll'}),
+  _ppr('99040860', 'ברז PPR סמוי (ציפוי כרום) 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '59', 'h1': '28', 'h': '116', 'D': '34.0', 'z': '22.0', 'l': '38', 'd': '25', 'מק"ט חוליות': '99040860', 'יצרן': 'Polyroll'}),
+  _ppr('99040862', 'ברז PPR סמוי (ציפוי כרום) 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '59', 'h1': '34', 'h': '121', 'D': '43.0', 'z': '31.0', 'l': '49', 'd': '32', 'מק"ט חוליות': '99040862', 'יצרן': 'Polyroll'}),
+  _ppr('99040888', 'ברז PPR סמוי (ציפוי כרום - ללא ידית) 20', 'PPR Concealed Valve (no handle) 20', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '28', 'h': '109', 'D': '29.5', 'z': '20.5', 'l': '35', 'd': '20', 'מק"ט חוליות': '99040888', 'יצרן': 'Polyroll'}),
+  _ppr('99040890', 'ברז PPR סמוי (ציפוי כרום - ללא ידית) 25', 'PPR Concealed Valve (no handle) 25', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '28', 'h': '109', 'D': '34.0', 'z': '22.0', 'l': '38', 'd': '25', 'מק"ט חוליות': '99040890', 'יצרן': 'Polyroll'}),
+  _ppr('99040892', 'ברז PPR סמוי (ציפוי כרום - ללא ידית) 32', 'PPR Concealed Valve (no handle) 32', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '34', 'h': '115', 'D': '43.0', 'z': '31.0', 'l': '49', 'd': '32', 'מק"ט חוליות': '99040892', 'יצרן': 'Polyroll'}),
   _ppr('99041602', 'ברז PPR כדורי בין אוגנים 90', 'PPR Valve 90', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h1': '150', 'D': '160', 'z': '124', 'l': '210', 'd': '77', 'DN': '80', 'מק"ט חוליות': '99041602', 'יצרן': 'Polyroll'}),
   _ppr('99041604', 'ברז PPR כדורי בין אוגנים 110', 'PPR Valve 110', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '103.0', 'h1': '165', 'D': '180', 'z': '145', 'l': '260', 'd': '94', 'DN': '100', 'מק"ט חוליות': '99041604', 'יצרן': 'Polyroll'}),
   _ppr('99041607', 'ברז PPR כדורי בין אוגנים 160', 'PPR Valve 160', kPprValves, 'PPR Valves', '🚰', 30, dims: {'h2': '136.5', 'h1': '210', 'D': '240', 'z': '205', 'l': '310', 'd': '135', 'DN': '150', 'מק"ט חוליות': '99041607', 'יצרן': 'Polyroll'}),
@@ -975,17 +1005,17 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('6602340750', 'מתאם PPR לריתוך הברגה עגול תבריג פנימי 75x2½"', 'PPR Adapter 1/2"', kPprAdapters, 'PPR Adapters', '🔩', 53, dims: {'R': '31', 'G': '81', 'F': '63', 'E': '73.7', 'D': '100', 'B2': '114', 'B1': '85', 'מק"ט חוליות': '6602340750', 'יצרן': 'Polyroll'}),
   _ppr('6602340900', 'מתאם PPR לריתוך הברגה עגול תבריג פנימי 90x3"', 'PPR Adapter 90x3"', kPprAdapters, 'PPR Adapters', '🔩', 53, dims: {'R': '34', 'G': '33', 'F': '94', 'E': '71', 'D': '88.6', 'B2': '119', 'B1': '128', 'A': '92', 'מק"ט חוליות': '6602340900', 'יצרן': 'Polyroll'}),
   _ppr('6602340110', 'מתאם PPR לריתוך הברגה עגול תבריג פנימי 110x4"', 'PPR Adapter 110x4"', kPprAdapters, 'PPR Adapters', '🔩', 53, dims: {'R': '41', 'G': '37', 'F': '119', 'E': '83', 'D': '108.4', 'B2': '144', 'B1': '164', 'A': '104', 'מק"ט חוליות': '6602340110', 'יצרן': 'Polyroll'}),
-  _ppr('6602350200', 'מתאם PPRCT לריתוך הברגה עגול תבריג חיצוני 20x1/2"', 'PPR Adapter 20x1/2"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'R2': '1/2"', 'R1': '21', 'F': '15', 'E': '33', 'D': '19.2', 'B2': '27', 'B1': '33', 'A': '47', 'חומר': 'PPRCT', 'מק"ט חוליות': '6602350200', 'יצרן': 'Polyroll'}),
-  _ppr('6602350250', 'מתאם PPRCT לריתוך הברגה עגול תבריג חיצוני 25x1/2"', 'PPR Adapter 25x1/2"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'R2': '1/2"', 'R1': '21', 'F': '16', 'E': '34', 'D': '24.2', 'B2': '33', 'B1': '36', 'A': '48', 'חומר': 'PPRCT', 'מק"ט חוליות': '6602350250', 'יצרן': 'Polyroll'}),
-  _ppr('6602350260', 'מתאם PPRCT לריתוך הברגה עגול תבריג חיצוני 25x3/4"', 'PPR Adapter 25x3/4"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'R2': '3/4"', 'R1': '21', 'F': '16', 'E': '36', 'D': '24.2', 'B2': '33', 'B1': '40', 'A': '53', 'חומר': 'PPRCT', 'מק"ט חוליות': '6602350260', 'יצרן': 'Polyroll'}),
-  _ppr('6602350330', 'מתאם PPRCT לריתוך הברגה עגול תבריג חיצוני 32x3/4"', 'PPR Adapter 32x3/4"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'R2': '3/4"', 'R1': '26', 'F': '18', 'E': '39', 'D': '31.1', 'B2': '43', 'B1': '42', 'A': '55', 'חומר': 'PPRCT', 'מק"ט חוליות': '6602350330', 'יצרן': 'Polyroll'}),
-  _ppr('6602350320', 'מתאם PPRCT לריתוך הברגה עגול תבריג חיצוני 32x1"', 'PPR Adapter 32x1"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'R2': '1"', 'R1': '26', 'F': '18', 'E': '41', 'D': '31.1', 'B2': '43', 'B1': '51', 'A': '61', 'חומר': 'PPRCT', 'מק"ט חוליות': '6602350320', 'יצרן': 'Polyroll'}),
-  _ppr('6602350400', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 40x1¼"', 'PPR Adapter 1/4"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'R2': '28', 'R1': '21', 'F': '48', 'E': '39.0', 'D': '54', 'B2': '68', 'B1': '77', 'מק"ט חוליות': '6602350400', 'יצרן': 'Polyroll'}),
-  _ppr('6602350500', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 50x1½"', 'PPR Adapter 1/2"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'R2': '32', 'R1': '24', 'F': '54', 'E': '48.9', 'D': '66', 'B2': '79', 'B1': '90', 'מק"ט חוליות': '6602350500', 'יצרן': 'Polyroll'}),
-  _ppr('6602350630', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 63x2"', 'PPR Adapter 63x2"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'R2': '2"', 'R1': '32', 'F': '28', 'E': '60', 'D': '61.9', 'B2': '84', 'B1': '95', 'A': '98', 'מק"ט חוליות': '6602350630', 'יצרן': 'Polyroll'}),
-  _ppr('6602350750', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 75x2½"', 'PPR Adapter 1/2"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'R2': '32', 'R1': '31', 'F': '64', 'E': '73.7', 'D': '100', 'B2': '112', 'B1': '109', 'מק"ט חוליות': '6602350750', 'יצרן': 'Polyroll'}),
-  _ppr('6602350900', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 90x3"', 'PPR Adapter 90x3"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'R2': '3"', 'R1': '34', 'F': '37', 'E': '67', 'D': '88.6', 'B2': '119', 'B1': '127', 'A': '121', 'מק"ט חוליות': '6602350900', 'יצרן': 'Polyroll'}),
-  _ppr('6602350110', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 110x4"', 'PPR Adapter 110x4"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'R2': '4"', 'R1': '41', 'F': '42', 'E': '78', 'D': '108.4', 'B2': '144', 'B1': '166', 'A': '137', 'מק"ט חוליות': '6602350110', 'יצרן': 'Polyroll'}),
+  _ppr('6602350200', 'מתאם PPRCT לריתוך הברגה עגול תבריג חיצוני 20x1/2"', 'PPR Adapter 20x1/2"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'מודל': 'A', 'R2': '1/2"', 'R1': '21', 'F': '15', 'E': '33', 'D': '19.2', 'B2': '27', 'B1': '33', 'A': '47', 'חומר': 'PPRCT', 'מק"ט חוליות': '6602350200', 'יצרן': 'Polyroll'}),
+  _ppr('6602350250', 'מתאם PPRCT לריתוך הברגה עגול תבריג חיצוני 25x1/2"', 'PPR Adapter 25x1/2"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'מודל': 'A', 'R2': '1/2"', 'R1': '21', 'F': '16', 'E': '34', 'D': '24.2', 'B2': '33', 'B1': '36', 'A': '48', 'חומר': 'PPRCT', 'מק"ט חוליות': '6602350250', 'יצרן': 'Polyroll'}),
+  _ppr('6602350260', 'מתאם PPRCT לריתוך הברגה עגול תבריג חיצוני 25x3/4"', 'PPR Adapter 25x3/4"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'מודל': 'A', 'R2': '3/4"', 'R1': '21', 'F': '16', 'E': '36', 'D': '24.2', 'B2': '33', 'B1': '40', 'A': '53', 'חומר': 'PPRCT', 'מק"ט חוליות': '6602350260', 'יצרן': 'Polyroll'}),
+  _ppr('6602350330', 'מתאם PPRCT לריתוך הברגה עגול תבריג חיצוני 32x3/4"', 'PPR Adapter 32x3/4"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'מודל': 'A', 'R2': '3/4"', 'R1': '26', 'F': '18', 'E': '39', 'D': '31.1', 'B2': '43', 'B1': '42', 'A': '55', 'חומר': 'PPRCT', 'מק"ט חוליות': '6602350330', 'יצרן': 'Polyroll'}),
+  _ppr('6602350320', 'מתאם PPRCT לריתוך הברגה עגול תבריג חיצוני 32x1"', 'PPR Adapter 32x1"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'מודל': 'A', 'R2': '1"', 'R1': '26', 'F': '18', 'E': '41', 'D': '31.1', 'B2': '43', 'B1': '51', 'A': '61', 'חומר': 'PPRCT', 'מק"ט חוליות': '6602350320', 'יצרן': 'Polyroll'}),
+  _ppr('6602350400', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 40x1¼"', 'PPR Adapter 1/4"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'מודל': 'B', 'R2': '28', 'R1': '21', 'F': '48', 'E': '39.0', 'D': '54', 'B2': '68', 'B1': '77', 'מק"ט חוליות': '6602350400', 'יצרן': 'Polyroll'}),
+  _ppr('6602350500', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 50x1½"', 'PPR Adapter 1/2"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'מודל': 'B', 'R2': '32', 'R1': '24', 'F': '54', 'E': '48.9', 'D': '66', 'B2': '79', 'B1': '90', 'מק"ט חוליות': '6602350500', 'יצרן': 'Polyroll'}),
+  _ppr('6602350630', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 63x2"', 'PPR Adapter 63x2"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'מודל': 'C', 'R2': '2"', 'R1': '32', 'F': '28', 'E': '60', 'D': '61.9', 'B2': '84', 'B1': '95', 'A': '98', 'מק"ט חוליות': '6602350630', 'יצרן': 'Polyroll'}),
+  _ppr('6602350750', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 75x2½"', 'PPR Adapter 1/2"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'מודל': 'C', 'R2': '32', 'R1': '31', 'F': '64', 'E': '73.7', 'D': '100', 'B2': '112', 'B1': '109', 'מק"ט חוליות': '6602350750', 'יצרן': 'Polyroll'}),
+  _ppr('6602350900', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 90x3"', 'PPR Adapter 90x3"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'מודל': 'C', 'R2': '3"', 'R1': '34', 'F': '37', 'E': '67', 'D': '88.6', 'B2': '119', 'B1': '127', 'A': '121', 'מק"ט חוליות': '6602350900', 'יצרן': 'Polyroll'}),
+  _ppr('6602350110', 'מתאם PPR לריתוך הברגה עגול תבריג חיצוני 110x4"', 'PPR Adapter 110x4"', kPprAdapters, 'PPR Adapters', '🔩', 54, dims: {'מודל': 'C', 'R2': '4"', 'R1': '41', 'F': '42', 'E': '78', 'D': '108.4', 'B2': '144', 'B1': '166', 'A': '137', 'מק"ט חוליות': '6602350110', 'יצרן': 'Polyroll'}),
   _ppr('6702340200', 'מתאם PPRCT ריתוך/הברגה עם רקורד 20x3/4"', 'PPR Adapter 20x3/4”', kPprAdapters, 'PPR Adapters', '🔩', 55, dims: {'R1': '21', 'G': '15', 'F': '32', 'E': '13', 'D2': '35', 'D1': '19.2', 'B2': '27', 'B1': '33', 'A': '67', 'חומר': 'PPRCT', 'מק"ט חוליות': '6702340200', 'יצרן': 'Polyroll'}),
   _ppr('6702340260', 'מתאם PPRCT ריתוך/הברגה עם רקורד 25x3/4"', 'PPR Adapter 25x3/4”', kPprAdapters, 'PPR Adapters', '🔩', 55, dims: {'R1': '21', 'G': '16', 'F': '32', 'E': '13', 'D2': '35', 'D1': '24.2', 'B2': '33', 'B1': '36', 'A': '67', 'חומר': 'PPRCT', 'מק"ט חוליות': '6702340260', 'יצרן': 'Polyroll'}),
   _ppr('6702340250', 'מתאם PPRCT ריתוך/הברגה עם רקורד 25x1"', 'PPR Adapter 25x1”', kPprAdapters, 'PPR Adapters', '🔩', 55, dims: {'R1': '21', 'G': '16', 'F': '41', 'E': '16', 'D2': '39', 'D1': '24.2', 'B2': '33', 'B1': '40', 'A': '72', 'חומר': 'PPRCT', 'מק"ט חוליות': '6702340250', 'יצרן': 'Polyroll'}),
@@ -1022,12 +1052,12 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('6706124420', 'ברז PPR פרפר 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 61, dims: {'R': '79', 'I': '38', 'G': '15', 'F': '43', 'E': '53', 'D2': '83', 'D1': '19.2', 'B': '29', 'A': '68', 'מק"ט חוליות': '6706124420', 'יצרן': 'Polyroll'}),
   _ppr('6706124425', 'ברז PPR פרפר 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 61, dims: {'R': '79', 'I': '45', 'G': '16', 'F': '46', 'E': '53', 'D2': '86', 'D1': '24.2', 'B': '47', 'A': '77', 'מק"ט חוליות': '6706124425', 'יצרן': 'Polyroll'}),
   _ppr('6706124432', 'ברז PPR פרפר 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 61, dims: {'R': '79', 'I': '53', 'G': '18', 'F': '66', 'E': '53', 'D2': '106', 'D1': '31.1', 'B': '67', 'A': '80', 'מק"ט חוליות': '6706124432', 'יצרן': 'Polyroll'}),
-  _ppr('6006224420', 'ברז PPR סמוי 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 62, dims: {'R': '13', 'H3': '35', 'H2': '27', 'H1': '38', 'G': '15', 'F': '103', 'E2': '43', 'E1': '47', 'D3': '24', 'D2': '64', 'D1': '19.2', 'B': '29', 'A': '68', 'מק"ט חוליות': '6006224420', 'יצרן': 'Polyroll'}),
-  _ppr('6006224425', 'ברז PPR סמוי 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 62, dims: {'R': '13', 'H3': '35', 'H2': '27', 'H1': '45', 'G': '16', 'F': '106', 'E2': '46', 'E1': '47', 'D3': '24', 'D2': '64', 'D1': '24.2', 'B': '47', 'A': '77', 'מק"ט חוליות': '6006224425', 'יצרן': 'Polyroll'}),
-  _ppr('6006224432', 'ברז PPR סמוי 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 62, dims: {'R': '13', 'H3': '35', 'H2': '27', 'H1': '53', 'G': '18', 'F': '126', 'E2': '66', 'E1': '47', 'D3': '24', 'D2': '64', 'D1': '31.1', 'B': '67', 'A': '80', 'מק"ט חוליות': '6006224432', 'יצרן': 'Polyroll'}),
-  _ppr('6006324420', 'ברז PPR סמוי 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 63, dims: {'I': '12', 'H2': '41', 'H1': '38', 'G': '15', 'F': '89', 'E1': '43', 'E': '24', 'D2': '64', 'D1': '19.2', 'B': '29', 'A': '68', 'מק"ט חוליות': '6006324420', 'יצרן': 'Polyroll'}),
-  _ppr('6006324425', 'ברז PPR סמוי 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 63, dims: {'I': '12', 'H2': '41', 'H1': '45', 'G': '16', 'F': '92', 'E1': '46', 'E': '24', 'D2': '64', 'D1': '24.2', 'B': '47', 'A': '77', 'מק"ט חוליות': '6006324425', 'יצרן': 'Polyroll'}),
-  _ppr('6006324432', 'ברז PPR סמוי 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 63, dims: {'I': '12', 'H2': '41', 'H1': '53', 'G': '18', 'F': '112', 'E1': '66', 'E': '24', 'D2': '64', 'D1': '31.1', 'B': '67', 'A': '80', 'מק"ט חוליות': '6006324432', 'יצרן': 'Polyroll'}),
+  _ppr('6006224420', 'ברז PPR סמוי (ציפוי כרום - כולל ידית) 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 62, dims: {'R': '13', 'H3': '35', 'H2': '27', 'H1': '38', 'G': '15', 'F': '103', 'E2': '43', 'E1': '47', 'D3': '24', 'D2': '64', 'D1': '19.2', 'B': '29', 'A': '68', 'מק"ט חוליות': '6006224420', 'יצרן': 'Polyroll'}),
+  _ppr('6006224425', 'ברז PPR סמוי (ציפוי כרום - כולל ידית) 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 62, dims: {'R': '13', 'H3': '35', 'H2': '27', 'H1': '45', 'G': '16', 'F': '106', 'E2': '46', 'E1': '47', 'D3': '24', 'D2': '64', 'D1': '24.2', 'B': '47', 'A': '77', 'מק"ט חוליות': '6006224425', 'יצרן': 'Polyroll'}),
+  _ppr('6006224432', 'ברז PPR סמוי (ציפוי כרום - כולל ידית) 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 62, dims: {'R': '13', 'H3': '35', 'H2': '27', 'H1': '53', 'G': '18', 'F': '126', 'E2': '66', 'E1': '47', 'D3': '24', 'D2': '64', 'D1': '31.1', 'B': '67', 'A': '80', 'מק"ט חוליות': '6006224432', 'יצרן': 'Polyroll'}),
+  _ppr('6006324420', 'ברז PPR סמוי (ציפוי כרום - ללא ידית) 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 63, dims: {'I': '12', 'H2': '41', 'H1': '38', 'G': '15', 'F': '89', 'E1': '43', 'E': '24', 'D2': '64', 'D1': '19.2', 'B': '29', 'A': '68', 'מק"ט חוליות': '6006324420', 'יצרן': 'Polyroll'}),
+  _ppr('6006324425', 'ברז PPR סמוי (ציפוי כרום - ללא ידית) 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 63, dims: {'I': '12', 'H2': '41', 'H1': '45', 'G': '16', 'F': '92', 'E1': '46', 'E': '24', 'D2': '64', 'D1': '24.2', 'B': '47', 'A': '77', 'מק"ט חוליות': '6006324425', 'יצרן': 'Polyroll'}),
+  _ppr('6006324432', 'ברז PPR סמוי (ציפוי כרום - ללא ידית) 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 63, dims: {'I': '12', 'H2': '41', 'H1': '53', 'G': '18', 'F': '112', 'E1': '66', 'E': '24', 'D2': '64', 'D1': '31.1', 'B': '67', 'A': '80', 'מק"ט חוליות': '6006324432', 'יצרן': 'Polyroll'}),
   _ppr('6006024420', 'ברז PPR כדורי 20', 'PPR Valve 20', kPprValves, 'PPR Valves', '🚰', 64, dims: {'F': '75', 'E': '90', 'D2': '85', 'D1': '19.2', 'B': '30', 'A': '74', 'מק"ט חוליות': '6006024420', 'יצרן': 'Polyroll'}),
   _ppr('6006024425', 'ברז PPR כדורי 25', 'PPR Valve 25', kPprValves, 'PPR Valves', '🚰', 64, dims: {'F': '75', 'E': '100', 'D2': '85', 'D1': '24.2', 'B': '36', 'A': '78', 'מק"ט חוליות': '6006024425', 'יצרן': 'Polyroll'}),
   _ppr('6006024432', 'ברז PPR כדורי 32', 'PPR Valve 32', kPprValves, 'PPR Valves', '🚰', 64, dims: {'F': '85', 'E': '115', 'D2': '108', 'D1': '31.1', 'B': '45', 'A': '89', 'מק"ט חוליות': '6006024432', 'יצרן': 'Polyroll'}),

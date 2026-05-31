@@ -794,11 +794,12 @@ routing per-product by whatever attribute (size, thread, etc.) the catalog
 table uses to determine the model.
 
 **Identified cases so far:**
-| Page | Split by | Model A | Model B | Routing |
-|------|----------|---------|---------|---------|
-| p37 ברך 45° לריתוך פנים | size | 160, 200, 250, 315 | 355, 400 | `_p37ElbowModel(nameHe)` |
-| p67 צווארון פנים (collar) | size | 160 | 200+ | inline `nameHe.contains(' 160')` |
-| p68 צווארון פרפר (butterfly collar) | size | 160 | 200+ | inline `nameHe.contains(' 160')` |
+| Page | Split by | Model A | Model B | Model C | Routing |
+|------|----------|---------|---------|---------|---------|
+| p37 ברך 45° לריתוך פנים | size | 160, 200, 250, 315 | 355, 400 | — | `_p37ElbowModel(nameHe)` |
+| p54 מתאם ריתוך הברגה תבריג חיצוני PPRCT | size | 20-32 | 40-50 | 63-110 | `_p54AdapterModel(nameHe)` |
+| p67 צווארון פנים (collar) | size | 160 | 200+ | — | inline `nameHe.contains(' 160')` |
+| p68 צווארון פרפר (butterfly collar) | size | 160 | 200+ | — | inline `nameHe.contains(' 160')` |
 
 **Page that LOOKS like §22.C but isn't:**
 - **p69 אוגן פלדה (steel-plated flange)** — the catalog shows model A (4 holes)
@@ -820,6 +821,50 @@ written into the product's `dims['מודל']` (verbatim per R8: 'A', 'B', or
 | § | bug class | detection |
 |---|-----------|-----------|
 | 22.C | model split — product sees the wrong model's diagram | `spec_assets_test.dart` · "§22.C p37 elbow_45 — Model A for 160-315, Model B for 355-400" (extend with new pages as they're added) |
+
+### §22.D — Multi-sub-type pages (split by name suffix, not by size)
+
+Some catalog pages put TWO OR THREE distinct sub-types under ONE catalog
+page (each with its own header line and its own dim diagram). Unlike §22.C
+where the split is by size, here the split is by a Hebrew suffix in the
+page header that becomes part of the product nameHe (e.g. "ללא ידית",
+"כולל ידית", "כדורי בין אוגנים").
+
+**Identified cases:**
+| Page | Sub-types on page | Split by | Specs |
+|------|-------------------|----------|-------|
+| p30 ברז סמוי | "(ציפוי כרום)" (כולל ידית) / "(ציפוי כרום - ללא ידית)" / "כדורי בין אוגנים" | `nameHe.contains('ללא ידית')` + `nameHe.contains('בין אוגנים')` | `spec_valve_concealed_p30_a.jpg` (with handle), `spec_valve_concealed_p30_b.jpg` (no handle), `spec_valve_wafer_p30.jpg` (ball-wafer) |
+
+**Detection rule:** when a page has ≥2 dim diagrams AND ≥2 header lines
+(green text in catalog) AND your code currently routes all of them to the
+same per-page spec → that's §22.D. Split by the Hebrew keyword that
+distinguishes them in the catalog header, and put that keyword **verbatim
+in nameHe** per R8.
+
+### §22.E — Chrome-plated and other finish suffixes (R8 verbatim)
+
+The catalog distinguishes valve finishes inline in its page headers:
+- "(ציפוי כרום)" — chrome plated, with-handle default
+- "(ציפוי כרום - ללא ידית)" — chrome plated, no handle
+- "(ציפוי כרום - כולל ידית)" — chrome plated, with handle (explicit)
+- "(הולירומה)" — sub-brand finish
+
+These finish strings are part of the page header line, therefore part of
+the product nameHe per R8. They were missed for ~14 products on p30, p62,
+p63 — the products were named simply "ברז PPR סמוי 20" while the catalog
+calls them "ברז סמוי (ציפוי כרום - X)". Fix: add the parenthetical finish
+verbatim into nameHe at the position the catalog uses (typically right
+after the noun: "ברז PPR סמוי (ציפוי כרום) 20").
+
+**Detection rule:** when the page header has a parenthetical "(ציפוי …)" or
+"(הולירומה)" or any other finish indicator, the products that page contains
+must carry that parenthetical in nameHe verbatim.
+
+§14 rows added:
+| § | bug class | detection |
+|---|-----------|-----------|
+| 22.D | multi-sub-type page collapses to one spec | `spec_assets_test` · "§22.D p30 valve sub-type split — with/without handle, wafer" |
+| 22.E | finish suffix missing from nameHe (R8 violation) | `spec_assets_test` · "§22.E finish suffix verbatim — p30/p62/p63 carry their catalog parenthetical" |
 
 ### §22.B.2 — Meta-lesson: knowing ≠ preventing
 
