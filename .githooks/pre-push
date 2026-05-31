@@ -1,0 +1,15 @@
+#!/bin/bash
+# חוסם force push אוטומטית
+
+while read local_ref local_sha remote_ref remote_sha; do
+    if [[ "$remote_sha" == "0000000000000000000000000000000000000000" ]]; then
+        continue
+    fi
+    if ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+        echo "❌ חסום: force push יפגע בהיסטוריה."
+        echo "   השרת מכיל commits שאין מקומית — משוך קודם."
+        exit 1
+    fi
+done
+
+exit 0

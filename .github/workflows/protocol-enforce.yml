@@ -1,0 +1,93 @@
+name: Protocol Enforcement
+
+# רץ על כל push וכל PR — שכבת הגנה אחרונה שלא ניתן לעקוף מקומית
+on:
+  push:
+    branches:
+      - 'claude/**'
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  protocol-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Gate 1 — Code analysis
+        working-directory: app_flutter
+        run: |
+          ANALYZE=$(flutter analyze --no-pub 2>&1)
+          if echo "$ANALYZE" | grep -qE "^error •"; then
+            echo "❌ Code errors found:"
+            echo "$ANALYZE" | grep -E "^error •"
+            exit 1
+          fi
+          echo "✅ Analysis clean"
+
+      - name: Gate 2 — All tests green
+        working-directory: app_flutter
+        run: flutter test --no-pub
+
+      - name: Gate 3 — Web build succeeds
+        working-directory: app_flutter
+        run: flutter build web --release --no-pub
+
+      - name: Gate 4 — Versions synced
+        working-directory: app_flutter
+        run: |
+          V_SHELL=$(grep -oE "v[0-9]+\.[0-9]+" lib/screens/home_shell.dart | head -1)
+          V_STATUS=$(grep -oE "v[0-9]+\.[0-9]+" knowledge/STATUS.md | head -1)
+          if [[ "$V_SHELL" != "$V_STATUS" ]]; then
+            echo "❌ Version drift: home_shell=$V_SHELL, STATUS=$V_STATUS"
+            exit 1
+          fi
+          echo "✅ Versions synced ($V_SHELL)"
+
+      - name: Gate 5 — No dark surfaces
+        working-directory: app_flutter
+        run: |
+          DARK=$(grep -rn "0xFF111111\|BsTokens.bgDark" lib/screens/ 2>/dev/null | grep -v "_test\|//")
+          if [[ -n "$DARK" ]]; then
+            echo "❌ Dark surfaces found:"
+            echo "$DARK"
+            exit 1
+          fi
+          echo "✅ No dark surfaces"
+
+      - name: Gate 6 — Hooks not tampered
+        run: |
+          if [[ ! -f .githooks/pre-commit ]]; then
+            echo "❌ pre-commit hook missing from repo"
+            exit 1
+          fi
+          if [[ ! -x .githooks/pre-commit ]]; then
+            echo "❌ pre-commit hook not executable"
+            exit 1
+          fi
+          echo "✅ Hooks intact"
+
+      - name: Gate 7 — Claude settings intact
+        run: |
+          if [[ ! -f .claude/settings.json ]]; then
+            echo "❌ Claude settings missing"
+            exit 1
+          fi
+          if [[ ! -f .claude/hooks/pre-tool.sh ]]; then
+            echo "❌ pre-tool hook missing"
+            exit 1
+          fi
+          echo "✅ Claude settings intact"
