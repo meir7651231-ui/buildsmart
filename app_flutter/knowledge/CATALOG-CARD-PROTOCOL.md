@@ -901,6 +901,50 @@ must carry that parenthetical in nameHe verbatim.
 | 22.D | multi-sub-type page collapses to one spec | `spec_assets_test` · "§22.D p30 valve sub-type split — with/without handle, wafer" |
 | 22.E | finish suffix missing from nameHe (R8 violation) | `spec_assets_test` · "§22.E finish suffix verbatim — p30/p62/p63 carry their catalog parenthetical" |
 
+### §22.F — Systematic page-by-page audit (mandatory before claiming "done")
+
+After several sweeps in this session uncovered 4+ real issues per sweep
+(p61 butterfly partial, p38 partial, p39 split, p33 EF+collar+plug
+misroute), the lesson is: **opening every catalog page once is the only
+way to be sure**. "Looked good in tests" or "spec exists with _pNN suffix"
+do NOT prove correctness — they prove plumbing, not content match.
+
+**Audit checklist per catalog page (mandatory):**
+
+1. Open `assets/polyroll/pages/page_NN.jpg` and read its green section
+   headers (each is a sub-type — e.g. "ברז סמוי (ציפוי כרום)").
+2. For each sub-type, count distinct dim drawings on that section.
+3. Run `grep "', NN, dims" lib/data/polyroll_catalog.dart` to enumerate
+   the SKUs my data attributes to that page.
+4. For each SKU, check `p.specImageAssets.first`: does the spec content
+   match the catalog drawing that's beside that SKU's row in the table?
+5. Verify the table's "מודל" column (if present): is the model assignment
+   correctly routed? If the column says "A/B" for every row (like p69),
+   confirm single spec showing both is OK; if values differ per row,
+   that's §22.C size-routed.
+6. Look for parenthetical finishes in the section header (§22.E):
+   "(ציפוי כרום)", "(הולירומה)", etc. — these must appear verbatim in
+   nameHe per R8.
+
+**Tracking:** as each page is audited, add it to the audited-pages list
+below. A page added to the list is a contract: "I verified content match,
+not just the filename pattern."
+
+**Audited pages so far (this session):**
+p19, p20, p22, p24, p29, p30, p31, p32, p33, p34, p37, p38, p39, p53,
+p54, p55, p61, p62, p63, p67, p68, p69, p72, p73, p74, p82, p83, p84,
+p85, p90, p91, p92.
+
+**Pages still needing visual audit:**
+p18, p21, p23, p25, p26, p27, p28, p35, p36, p40, p41, p42, p43, p44,
+p45, p46, p47, p48, p49, p50, p51, p52, p56, p57, p58, p59, p60, p64,
+p65, p66, p70, p71, p75-79, p80, p81, p86, p87, p88, p89.
+
+§14 row added:
+| § | bug class | detection |
+|---|-----------|-----------|
+| 22.F | page audited via filename pattern only; content not opened | Manual — protocol §22.F audited-pages list is the contract. Going forward, no claim of "done" without explicit list-entry. |
+
 ### §22.B.2 — Meta-lesson: knowing ≠ preventing
 
 Three families' worth of "tighten margins, avoid photo, avoid table" lessons
