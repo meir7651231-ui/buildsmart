@@ -23,6 +23,7 @@ import 'package:buildsmart/state/card_detail_mode.dart';
 import 'package:buildsmart/state/card_projects.dart';
 import 'package:buildsmart/state/brand_history.dart';
 import 'package:buildsmart/state/card_acc_state.dart';
+import 'package:buildsmart/state/card_filter_state.dart';
 import 'package:buildsmart/state/card_selection.dart';
 import 'package:buildsmart/state/card_versions.dart';
 import 'package:buildsmart/state/profession_mode.dart';
@@ -4490,6 +4491,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
       for (var i = 0; i < acc.length; i++)
         i: accStore.get(widget.product.key, acc[i].name)?.qty ?? 1
     };
+    // Roadmap step 7 (filter dimension) — restore סוג / מידה picks per-product.
+    final f = ref.read(cardFilterStateProvider)[widget.product.key];
+    _selType = f?.type;
+    _selSize = f?.size;
     // Roadmap step 66 — record this product as recently-viewed (post-frame so
     // we don't mutate a provider during the initial build).
     final sku = widget.product.recBrand.sku;
@@ -4945,6 +4950,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       selected: _selType,
                       onSelect: (v) => setState(() {
                         _selType = _selType == v ? null : v;
+                        // Roadmap step 7 — persist filter selection per product.
+                        ref
+                            .read(cardFilterStateProvider.notifier)
+                            .setType(widget.product.key, _selType);
                         _applyFilterSelection();
                       }),
                     ),
@@ -4960,6 +4969,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       selected: _selSize,
                       onSelect: (v) => setState(() {
                         _selSize = _selSize == v ? null : v;
+                        // Roadmap step 7 — persist filter selection per product.
+                        ref
+                            .read(cardFilterStateProvider.notifier)
+                            .setSize(widget.product.key, _selSize);
                         _applyFilterSelection();
                       }),
                     ),
