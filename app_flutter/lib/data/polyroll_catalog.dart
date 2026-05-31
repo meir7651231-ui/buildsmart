@@ -216,6 +216,20 @@ const Map<int, String> _kPprCouplerReducingPageSpec = {
   // p46 shares geometry with p45 (legit shared) → falls back to generic.
 };
 
+const Map<int, String> _kPprAdapterRoundPageSpec = {
+  27: 'spec_adapter_round_p27.jpg', // PPR round, internal thread
+  29: 'spec_adapter_round_p29.jpg', // threaded connector "מחבר מתוברג"
+  53: 'spec_adapter_round_p53.jpg', // PPRCT round, internal thread (dual)
+  54: 'spec_adapter_round_p54.jpg', // PPRCT round, external thread (3 models)
+  55: 'spec_adapter_round_p55.jpg', // PPRCT round with rekord (2 models)
+};
+
+const Map<int, String> _kPprAdapterHexPageSpec = {
+  28: 'spec_adapter_hex_p28.jpg', // PPR hex, internal thread
+  56: 'spec_adapter_hex_p56.jpg', // PPR hex + rekord, internal thread
+  57: 'spec_adapter_hex_p57.jpg', // PPR hex + rekord, external thread
+};
+
 /// Per-sub-type spec **diagram(s)** (dimension drawings cropped from the catalog
 /// pages). Prepended to the flip-side pager before the full page. Grows as more
 /// sub-type diagrams are cropped (protocol §17.1 / §22).
@@ -234,11 +248,14 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       }
       return [is45 ? 'spec_elbow_45.jpg' : 'spec_elbow_90.jpg'];
     case kPprAdapters:
-      return [
-        nameHe.contains('משושה')
-            ? 'spec_adapter_hex.jpg'
-            : 'spec_adapter_round.jpg',
-      ];
+      final hex = nameHe.contains('משושה');
+      if (hex && _kPprAdapterHexPageSpec.containsKey(page)) {
+        return [_kPprAdapterHexPageSpec[page]!];
+      }
+      if (!hex && _kPprAdapterRoundPageSpec.containsKey(page)) {
+        return [_kPprAdapterRoundPageSpec[page]!];
+      }
+      return [hex ? 'spec_adapter_hex.jpg' : 'spec_adapter_round.jpg'];
     case kPprCouplers:
       final reducing = nameHe.contains('מצרה');
       if (reducing && _kPprCouplerReducingPageSpec.containsKey(page)) {

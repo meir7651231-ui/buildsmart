@@ -281,7 +281,7 @@ void main() {
       expect(
           spec(find((p) =>
               p.categoryHe == kPprAdapters && p.nameHe.contains('משושה'))),
-          endsWith('spec_adapter_hex.jpg'));
+          matches(r'spec_adapter_hex(?:_p\d+)?\.jpg$'));
     });
 
     test('valve sub-types each resolve distinctly', () {
@@ -381,16 +381,32 @@ void main() {
         47: 'spec_coupler_reducing_p47.jpg',
         83: 'spec_coupler_reducing_p83.jpg',
       },
+      kPprAdapters: {
+        // round (non-hex)
+        27: 'spec_adapter_round_p27.jpg',
+        29: 'spec_adapter_round_p29.jpg',
+        53: 'spec_adapter_round_p53.jpg',
+        54: 'spec_adapter_round_p54.jpg',
+        55: 'spec_adapter_round_p55.jpg',
+      },
+      '${kPprAdapters}_hex': {
+        28: 'spec_adapter_hex_p28.jpg',
+        56: 'spec_adapter_hex_p56.jpg',
+        57: 'spec_adapter_hex_p57.jpg',
+      },
     };
     final gaps = <String>[];
     expected.forEach((key, perPage) {
       final is45Elbow = key == '${kPprElbows}_45';
       final isReducingCoupler = key == '${kPprCouplers}_reducing';
+      final isHexAdapter = key == '${kPprAdapters}_hex';
       String cat;
       if (is45Elbow) {
         cat = kPprElbows;
       } else if (isReducingCoupler) {
         cat = kPprCouplers;
+      } else if (isHexAdapter) {
+        cat = kPprAdapters;
       } else {
         cat = key;
       }
@@ -409,6 +425,11 @@ void main() {
           if (cat == kPprCouplers) {
             final isRed = p.nameHe.contains('מצרה');
             if (isRed != isReducingCoupler) return false;
+          }
+          // Adapters: hex live under the synthetic '_hex' key.
+          if (cat == kPprAdapters) {
+            final isHex = p.nameHe.contains('משושה');
+            if (isHex != isHexAdapter) return false;
           }
           return true;
         });
