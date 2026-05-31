@@ -171,6 +171,16 @@ const Map<int, String> _kPprElbow90PageSpec = {
   81: 'spec_elbow_90_p81.jpg', // PPRCT plain 90°
 };
 
+/// p37 (ברך 45° לריתוך פנים): catalog table column "מודל" assigns
+/// A to sizes 160-315 and B to 355-400. The two models are distinct
+/// geometries (Model A uses dims A/B/C/D/E; Model B uses A/C/E/F/G).
+String _p37ElbowModel(String nameHe) {
+  for (final size in const ['355', '400']) {
+    if (nameHe.contains(' $size')) return 'B';
+  }
+  return 'A';
+}
+
 const Map<int, String> _kPprElbow45PageSpec = {
   19: 'spec_elbow_45_p19.jpg', // PPR plain 45° (basic welding)
   20: 'spec_elbow_45_p20.jpg', // PPR 45° + coupler (l1/l variant)
@@ -274,6 +284,14 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       // §22: per-page elbow specs win when the catalog page has its own
       // dimension diagram. Falls back to generic spec_elbow_45/90 only when
       // the page hasn't been cropped yet.
+      // §22.C special case: p37 catalog page splits its 45° elbows into
+      // Model A (sizes 160-315) and Model B (sizes 355-400) with two
+      // distinct dimension drawings. Route by size.
+      if (is45 && page == 37) {
+        return [_p37ElbowModel(nameHe) == 'A'
+            ? 'spec_elbow_45_p37_a.jpg'
+            : 'spec_elbow_45_p37_b.jpg'];
+      }
       if (is45 && _kPprElbow45PageSpec.containsKey(page)) {
         return [_kPprElbow45PageSpec[page]!];
       }
@@ -826,12 +844,12 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('6002020900', 'ברך PPR 45° שקע תקע 90', 'PPR Elbow 90', kPprElbows, 'PPR Elbows', '↪️', 36, dims: {'F': '79', 'D': '88.6', 'B': '122', 'A': '150', 'מק"ט חוליות': '6002020900', 'יצרן': 'Polyroll'}),
   _ppr('6002020110', 'ברך PPR 45° שקע תקע 110', 'PPR Elbow 110', kPprElbows, 'PPR Elbows', '↪️', 36, dims: {'F': '92', 'D': '108.4', 'B': '144', 'A': '179', 'מק"ט חוליות': '6002020110', 'יצרן': 'Polyroll'}),
   _ppr('6002020125', 'ברך PPR 45° שקע תקע 125', 'PPR Elbow 125', kPprElbows, 'PPR Elbows', '↪️', 36, dims: {'F': '110', 'D': '122.4', 'B': '162', 'A': '209', 'מק"ט חוליות': '6002020125', 'יצרן': 'Polyroll'}),
-  _ppr('6002020160', 'ברך PPR 45° פ.פ 160', 'PPR Elbow 160', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'מק"ט יצרן': 'P-2020160', 'F': '39', 'E': '116.2', 'D': '160', 'C': '223', 'A': '160', 'מק"ט חוליות': '6002020160', 'יצרן': 'Polyroll'}),
-  _ppr('6002020200', 'ברך PPR 45° פ.פ 200', 'PPR Elbow 200', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'E': '151', 'D': '162.0', 'C': '200', 'A': '354', 'מק"ט חוליות': '6002020200', 'יצרן': 'Polyroll'}),
-  _ppr('6002020250', 'ברך PPR 45° פ.פ 250', 'PPR Elbow 250', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'E': '156', 'D': '202.0', 'C': '250', 'A': '418', 'מק"ט חוליות': '6002020250', 'יצרן': 'Polyroll'}),
-  _ppr('6002020315', 'ברך PPR 45° פ.פ 315', 'PPR Elbow 315', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'E': '202', 'D': '255.0', 'C': '315', 'A': '522', 'מק"ט חוליות': '6002020315', 'יצרן': 'Polyroll'}),
-  _ppr('6002020355', 'ברך PPR 45° פ.פ 355', 'PPR Elbow 355', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'G': '421', 'F': '272', 'E': '350', 'C': '355', 'A': '1060', 'מק"ט חוליות': '6002020355', 'יצרן': 'Polyroll'}),
-  _ppr('6002020400', 'ברך PPR 45° פ.פ 400', 'PPR Elbow 400', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'G': '480', 'F': '306', 'E': '400', 'C': '400', 'A': '1200', 'מק"ט חוליות': '6002020400', 'יצרן': 'Polyroll'}),
+  _ppr('6002020160', 'ברך PPR 45° פ.פ 160', 'PPR Elbow 160', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'מודל': 'A', 'מק"ט יצרן': 'P-2020160', 'F': '39', 'E': '116.2', 'D': '160', 'C': '223', 'A': '160', 'מק"ט חוליות': '6002020160', 'יצרן': 'Polyroll'}),
+  _ppr('6002020200', 'ברך PPR 45° פ.פ 200', 'PPR Elbow 200', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'מודל': 'A', 'E': '151', 'D': '162.0', 'C': '200', 'A': '354', 'מק"ט חוליות': '6002020200', 'יצרן': 'Polyroll'}),
+  _ppr('6002020250', 'ברך PPR 45° פ.פ 250', 'PPR Elbow 250', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'מודל': 'A', 'E': '156', 'D': '202.0', 'C': '250', 'A': '418', 'מק"ט חוליות': '6002020250', 'יצרן': 'Polyroll'}),
+  _ppr('6002020315', 'ברך PPR 45° פ.פ 315', 'PPR Elbow 315', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'מודל': 'A', 'E': '202', 'D': '255.0', 'C': '315', 'A': '522', 'מק"ט חוליות': '6002020315', 'יצרן': 'Polyroll'}),
+  _ppr('6002020355', 'ברך PPR 45° פ.פ 355', 'PPR Elbow 355', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'מודל': 'B', 'G': '421', 'F': '272', 'E': '350', 'C': '355', 'A': '1060', 'מק"ט חוליות': '6002020355', 'יצרן': 'Polyroll'}),
+  _ppr('6002020400', 'ברך PPR 45° פ.פ 400', 'PPR Elbow 400', kPprElbows, 'PPR Elbows', '↪️', 37, dims: {'מודל': 'B', 'G': '480', 'F': '306', 'E': '400', 'C': '400', 'A': '1200', 'מק"ט חוליות': '6002020400', 'יצרן': 'Polyroll'}),
   _ppr('6002060220', 'ברך PPR 90° שקע תקע 20', 'PPR Elbow 20', kPprElbows, 'PPR Elbows', '↪️', 38, dims: {'F': '19.2', 'B': '27.2', 'A': '39.1', 'מק"ט חוליות': '6002060220', 'יצרן': 'Polyroll'}),
   _ppr('6002060255', 'ברך PPR 90° שקע תקע 25', 'PPR Elbow 25', kPprElbows, 'PPR Elbows', '↪️', 38, dims: {'F': '24.2', 'B': '32.8', 'A': '44.9', 'מק"ט חוליות': '6002060255', 'יצרן': 'Polyroll'}),
   _ppr('6002060320', 'ברך PPR 90° שקע תקע 32', 'PPR Elbow 32', kPprElbows, 'PPR Elbows', '↪️', 38, dims: {'F': '31.1', 'B': '42.6', 'A': '57.3', 'מק"ט חוליות': '6002060320', 'יצרן': 'Polyroll'}),
@@ -1044,14 +1062,14 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('6005131500', 'צווארון PPR פנים פרפר 315', 'PPR Collar 315', kPprCollars, 'PPR Collars', '⭕', 68, dims: {'K': '160', 'I': '39', 'H': '209', 'F': '340', 'E': '257', 'D': '248', 'C': '257', 'B': '315', 'A': '369', 'מק"ט חוליות': '6005131500', 'יצרן': 'Polyroll'}),
   _ppr('6005135355', 'צווארון PPR פנים פרפר 355', 'PPR Collar 355', kPprCollars, 'PPR Collars', '⭕', 68, dims: {'K': '56', 'I': '42', 'H': '110', 'F': '375', 'E': '284', 'D': '152', 'C': '283', 'B': '355', 'A': '429', 'מק"ט חוליות': '6005135355', 'יצרן': 'Polyroll'}),
   _ppr('6005135401', 'צווארון PPR פנים פרפר 400', 'PPR Collar 400', kPprCollars, 'PPR Collars', '⭕', 68, dims: {'K': '40', 'I': '47', 'H': '91', 'F': '426', 'E': '324', 'D': '138', 'C': '324', 'B': '400', 'A': '478', 'מק"ט חוליות': '6005135401', 'יצרן': 'Polyroll'}),
-  _ppr('6701163000', 'אוגן פלדה מצופה PP 63', 'PPR Flange 63', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'S': '20', 'R': '18', 'F': '15', 'E': '15', 'C': '125', 'B': '78', 'A': '172', 'מק"ט חוליות': '6701163000', 'יצרן': 'Polyroll'}),
-  _ppr('6701175000', 'אוגן פלדה מצופה PP 75', 'PPR Flange 75', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'S': '22', 'R': '18', 'F': '13', 'E': '16', 'C': '145', 'B': '95', 'A': '189', 'מק"ט חוליות': '6701175000', 'יצרן': 'Polyroll'}),
-  _ppr('6701190000', 'אוגן פלדה מצופה PP 90', 'PPR Flange 90', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'S': '20', 'R': '18', 'F': '11', 'E': '14', 'C': '160', 'B': '115', 'A': '200', 'מק"ט חוליות': '6701190000', 'יצרן': 'Polyroll'}),
-  _ppr('6701111000', 'אוגן פלדה מצופה PP 110', 'PPR Flange 110', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'S': '20', 'R': '18', 'F': '13', 'E': '13', 'C': '179', 'B': '135', 'A': '223', 'מק"ט חוליות': '6701111000', 'יצרן': 'Polyroll'}),
-  _ppr('6701112500', 'אוגן פלדה מצופה PP 125', 'PPR Flange 125', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'S': '24', 'R': '18', 'F': '12', 'E': '12', 'C': '209', 'B': '168', 'A': '250', 'מק"ט חוליות': '6701112500', 'יצרן': 'Polyroll'}),
-  _ppr('6701116000', 'אוגן פלדה מצופה PP 160', 'PPR Flange 160', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'S': '24', 'R': '22', 'F': '13', 'E': '20', 'C': '240', 'B': '178', 'A': '287', 'מק"ט חוליות': '6701116000', 'יצרן': 'Polyroll'}),
-  _ppr('6701120000', 'אוגן פלדה מצופה PP 200', 'PPR Flange 200', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'S': '20', 'R': '23', 'F': '13', 'E': '19', 'C': '295', 'B': '235', 'A': '344', 'מק"ט חוליות': '6701120000', 'יצרן': 'Polyroll'}),
-  _ppr('6701125000', 'אוגן פלדה מצופה PP 250', 'PPR Flange 250', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'S': '30', 'R': '22', 'F': '17', 'E': '20', 'C': '350', 'B': '288', 'A': '406', 'מק"ט חוליות': '6701125000', 'יצרן': 'Polyroll'}),
+  _ppr('6701163000', 'אוגן פלדה מצופה PP 63', 'PPR Flange 63', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'מודל': 'A/B', 'S': '20', 'R': '18', 'F': '15', 'E': '15', 'C': '125', 'B': '78', 'A': '172', 'מק"ט חוליות': '6701163000', 'יצרן': 'Polyroll'}),
+  _ppr('6701175000', 'אוגן פלדה מצופה PP 75', 'PPR Flange 75', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'מודל': 'A/B', 'S': '22', 'R': '18', 'F': '13', 'E': '16', 'C': '145', 'B': '95', 'A': '189', 'מק"ט חוליות': '6701175000', 'יצרן': 'Polyroll'}),
+  _ppr('6701190000', 'אוגן פלדה מצופה PP 90', 'PPR Flange 90', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'מודל': 'A/B', 'S': '20', 'R': '18', 'F': '11', 'E': '14', 'C': '160', 'B': '115', 'A': '200', 'מק"ט חוליות': '6701190000', 'יצרן': 'Polyroll'}),
+  _ppr('6701111000', 'אוגן פלדה מצופה PP 110', 'PPR Flange 110', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'מודל': 'A/B', 'S': '20', 'R': '18', 'F': '13', 'E': '13', 'C': '179', 'B': '135', 'A': '223', 'מק"ט חוליות': '6701111000', 'יצרן': 'Polyroll'}),
+  _ppr('6701112500', 'אוגן פלדה מצופה PP 125', 'PPR Flange 125', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'מודל': 'A/B', 'S': '24', 'R': '18', 'F': '12', 'E': '12', 'C': '209', 'B': '168', 'A': '250', 'מק"ט חוליות': '6701112500', 'יצרן': 'Polyroll'}),
+  _ppr('6701116000', 'אוגן פלדה מצופה PP 160', 'PPR Flange 160', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'מודל': 'A/B', 'S': '24', 'R': '22', 'F': '13', 'E': '20', 'C': '240', 'B': '178', 'A': '287', 'מק"ט חוליות': '6701116000', 'יצרן': 'Polyroll'}),
+  _ppr('6701120000', 'אוגן פלדה מצופה PP 200', 'PPR Flange 200', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'מודל': 'A/B', 'S': '20', 'R': '23', 'F': '13', 'E': '19', 'C': '295', 'B': '235', 'A': '344', 'מק"ט חוליות': '6701120000', 'יצרן': 'Polyroll'}),
+  _ppr('6701125000', 'אוגן פלדה מצופה PP 250', 'PPR Flange 250', kPprCollars, 'PPR Collars', '⭕', 69, dims: {'מודל': 'A/B', 'S': '30', 'R': '22', 'F': '17', 'E': '20', 'C': '350', 'B': '288', 'A': '406', 'מק"ט חוליות': '6701125000', 'יצרן': 'Polyroll'}),
   _ppr('6002420200', 'פקק PPR 20', 'PPR Plug 20', kPprPlugs, 'PPR Plugs', '🔘', 70, dims: {'F': '19.2', 'B1': '28', 'A': '20', 'מק"ט חוליות': '6002420200', 'יצרן': 'Polyroll'}),
   _ppr('6002420250', 'פקק PPR 25', 'PPR Plug 25', kPprPlugs, 'PPR Plugs', '🔘', 70, dims: {'F': '24.2', 'B1': '34', 'A': '22', 'מק"ט חוליות': '6002420250', 'יצרן': 'Polyroll'}),
   _ppr('6002420320', 'פקק PPR 32', 'PPR Plug 32', kPprPlugs, 'PPR Plugs', '🔘', 70, dims: {'F': '31.1', 'B1': '42', 'A': '26', 'מק"ט חוליות': '6002420320', 'יצרן': 'Polyroll'}),

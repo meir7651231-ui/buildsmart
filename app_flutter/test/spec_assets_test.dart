@@ -348,7 +348,9 @@ void main() {
         19: 'spec_elbow_45_p19.jpg',
         20: 'spec_elbow_45_p20.jpg',
         36: 'spec_elbow_45_p36.jpg',
-        37: 'spec_elbow_45_p37.jpg',
+        // p37 is intentionally excluded from this static map because it
+        // routes by model (size 160-315 → _a, 355-400 → _b). The §22.C
+        // model split is asserted in its own test below.
       },
       kPprTees: {
         20: 'spec_tee_p20.jpg',
@@ -534,5 +536,33 @@ void main() {
         reason:
             'Specs shared across >2 pages — crop a per-page variant or add '
             'to allowlistSharedAcrossPages with a reason:\n${offenders.join("\n")}');
+  });
+
+  // §22.C — pages where two geometric models live on the same catalog page
+  // and the model is picked per-product by size. p37 ברך 45° לריתוך פנים:
+  // Model A = 160-315, Model B = 355-400. The card MUST show only the
+  // model that applies to the product's size.
+  test('§22.C p37 elbow_45 — Model A for 160-315, Model B for 355-400', () {
+    const expectModel = {
+      '6002020160': 'A',
+      '6002020200': 'A',
+      '6002020250': 'A',
+      '6002020315': 'A',
+      '6002020355': 'B',
+      '6002020400': 'B',
+    };
+    final gaps = <String>[];
+    for (final entry in expectModel.entries) {
+      final p = kPolyrollCatalog.firstWhere((x) => x.sku == entry.key);
+      final wantedSpec = 'spec_elbow_45_p37_${entry.value.toLowerCase()}.jpg';
+      if (!p.specImageAssets.first.endsWith(wantedSpec)) {
+        gaps.add('${entry.key} (${p.nameHe}) → ${p.specImageAssets.first} ≠ $wantedSpec');
+      }
+      // R8 verbatim: 'מודל' dim must match the catalog table.
+      if (p.dims?['מודל'] != entry.value) {
+        gaps.add('${entry.key}: dims[\'מודל\']=${p.dims?['מודל']} ≠ ${entry.value}');
+      }
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
   });
 }

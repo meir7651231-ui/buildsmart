@@ -784,6 +784,43 @@ app's product card renders it** (typically 280–400px wide for the diagram pane
 on a phone, larger on tablet). Lower than that = hidden contamination.
 Higher = wasted space but no risk.
 
+### §22.C — Multi-model pages: split by table column, expose model in dims
+
+Some catalog pages put TWO geometrically distinct variants on the same page
+(separate side-by-side drawings under green "מודל A" / "מודל B" headers) and
+a "מודל" column in the dimension table assigns each SKU to one model. When
+that happens, the §22 per-page spec must split into `_a` / `_b` files,
+routing per-product by whatever attribute (size, thread, etc.) the catalog
+table uses to determine the model.
+
+**Identified cases so far:**
+| Page | Split by | Model A | Model B | Routing |
+|------|----------|---------|---------|---------|
+| p37 ברך 45° לריתוך פנים | size | 160, 200, 250, 315 | 355, 400 | `_p37ElbowModel(nameHe)` |
+| p67 צווארון פנים (collar) | size | 160 | 200+ | inline `nameHe.contains(' 160')` |
+| p68 צווארון פרפר (butterfly collar) | size | 160 | 200+ | inline `nameHe.contains(' 160')` |
+
+**Page that LOOKS like §22.C but isn't:**
+- **p69 אוגן פלדה (steel-plated flange)** — the catalog shows model A (4 holes)
+  and model B (8 holes) side-by-side, BUT the dim table's "מודל" column
+  reads "A/B" for EVERY size. The product is available in BOTH model
+  configurations and the customer picks at order time. Showing both in one
+  spec is correct here. Do NOT split.
+
+**Detection rule:** before deciding to split, zoom the catalog table's
+"מודל" column. If every row says "A/B" — single spec showing both. If rows
+say only "A" or only "B" — split and route per the splitting attribute.
+
+**UX exposure ("ציפ קצר אורך או משהו דומה"):** the model assignment is also
+written into the product's `dims['מודל']` (verbatim per R8: 'A', 'B', or
+'A/B'). The dim line appears in the card's spec-back table — the user sees
+"מודל: A" alongside the diagram, so the assignment is visible, not implicit.
+
+§14 row added:
+| § | bug class | detection |
+|---|-----------|-----------|
+| 22.C | model split — product sees the wrong model's diagram | `spec_assets_test.dart` · "§22.C p37 elbow_45 — Model A for 160-315, Model B for 355-400" (extend with new pages as they're added) |
+
 ### §22.B.2 — Meta-lesson: knowing ≠ preventing
 
 Three families' worth of "tighten margins, avoid photo, avoid table" lessons
