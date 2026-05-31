@@ -335,7 +335,7 @@ void main() {
         20: 'spec_elbow_90_p20.jpg',
         25: 'spec_elbow_90_p25.jpg',
         38: 'spec_elbow_90_p38.jpg',
-        39: 'spec_elbow_90_p39.jpg',
+        // p39 is model-split (§22.C) — tested separately.
         48: 'spec_elbow_90_p48.jpg',
         49: 'spec_elbow_90_p49.jpg',
         50: 'spec_elbow_90_p50.jpg',
@@ -568,6 +568,27 @@ void main() {
         gaps.add('${entry.key} (${p.nameHe}) → ${p.specImageAssets.first} ≠ $wantedSpec');
       }
       // R8 verbatim: 'מודל' dim must match the catalog table.
+      if (p.dims?['מודל'] != entry.value) {
+        gaps.add('${entry.key}: dims[\'מודל\']=${p.dims?['מודל']} ≠ ${entry.value}');
+      }
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
+  // §22.C — p39 brass 90° elbow פ.פ: 2 models on one page (smooth A vs
+  // segmented B). A = 160-315, B = 355-400 per catalog "מודל" column.
+  test('§22.C p39 elbow_90 — Model A 160-315, B 355-400', () {
+    const expectModel = {
+      '6002060160': 'A', '6002060200': 'A', '6002060250': 'A', '6002060315': 'A',
+      '6002060355': 'B', '6002060400': 'B',
+    };
+    final gaps = <String>[];
+    for (final entry in expectModel.entries) {
+      final p = kPolyrollCatalog.firstWhere((x) => x.sku == entry.key);
+      final wantedSpec = 'spec_elbow_90_p39_${entry.value.toLowerCase()}.jpg';
+      if (!p.specImageAssets.first.endsWith(wantedSpec)) {
+        gaps.add('${entry.key} → ${p.specImageAssets.first} ≠ $wantedSpec');
+      }
       if (p.dims?['מודל'] != entry.value) {
         gaps.add('${entry.key}: dims[\'מודל\']=${p.dims?['מודל']} ≠ ${entry.value}');
       }

@@ -211,6 +211,15 @@ String _p55AdapterModel(String nameHe) {
   return 'A';
 }
 
+/// p39 (ברך 90° לריתוך פנים, large): A = smooth elbow 160-315,
+/// B = segmented elbow 355-400.
+String _p39ElbowModel(String nameHe) {
+  for (final size in const ['355', '400']) {
+    if (nameHe.contains(' $size')) return 'B';
+  }
+  return 'A';
+}
+
 const Map<int, String> _kPprElbow45PageSpec = {
   19: 'spec_elbow_45_p19.jpg', // PPR plain 45° (basic welding)
   20: 'spec_elbow_45_p20.jpg', // PPR 45° + coupler (l1/l variant)
@@ -321,6 +330,11 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
         return [_p37ElbowModel(nameHe) == 'A'
             ? 'spec_elbow_45_p37_a.jpg'
             : 'spec_elbow_45_p37_b.jpg'];
+      }
+      if (!is45 && page == 39) {
+        return [_p39ElbowModel(nameHe) == 'A'
+            ? 'spec_elbow_90_p39_a.jpg'
+            : 'spec_elbow_90_p39_b.jpg'];
       }
       if (is45 && _kPprElbow45PageSpec.containsKey(page)) {
         return [_kPprElbow45PageSpec[page]!];
@@ -959,12 +973,12 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('6002060900', 'ברך PPR 90° שקע תקע 90', 'PPR Elbow 90', kPprElbows, 'PPR Elbows', '↪️', 38, dims: {'F': '88.6', 'B': '121.0', 'A': '145.0', 'מק"ט חוליות': '6002060900', 'יצרן': 'Polyroll'}),
   _ppr('6002060110', 'ברך PPR 90° שקע תקע 110', 'PPR Elbow 110', kPprElbows, 'PPR Elbows', '↪️', 38, dims: {'F': '108.4', 'B': '131.0', 'A': '168.0', 'מק"ט חוליות': '6002060110', 'יצרן': 'Polyroll'}),
   _ppr('6002060125', 'ברך PPR 90° שקע תקע 125', 'PPR Elbow 125', kPprElbows, 'PPR Elbows', '↪️', 38, dims: {'F': '122.4', 'B': '155.0', 'A': '191.0', 'מק"ט חוליות': '6002060125', 'יצרן': 'Polyroll'}),
-  _ppr('6002060160', 'ברך PPR 90° פ.פ 160', 'PPR Elbow 160', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'E': '39', 'D': '116.2', 'C': '160', 'A': '223', 'מק"ט חוליות': '6002060160', 'יצרן': 'Polyroll'}),
-  _ppr('6002060200', 'ברך PPR 90° פ.פ 200', 'PPR Elbow 200', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'E': '151', 'D': '162.0', 'C': '200', 'A': '354', 'מק"ט חוליות': '6002060200', 'יצרן': 'Polyroll'}),
-  _ppr('6002060250', 'ברך PPR 90° פ.פ 250', 'PPR Elbow 250', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'E': '156', 'D': '202.0', 'C': '250', 'A': '418', 'מק"ט חוליות': '6002060250', 'יצרן': 'Polyroll'}),
-  _ppr('6002060315', 'ברך PPR 90° פ.פ 315', 'PPR Elbow 315', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'E': '202', 'D': '255.0', 'C': '315', 'A': '522', 'מק"ט חוליות': '6002060315', 'יצרן': 'Polyroll'}),
-  _ppr('6002060355', 'ברך PPR 90° פ.פ 355', 'PPR Elbow 355', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'G': '421', 'F': '272', 'E': '350', 'C': '355', 'A': '1060', 'מק"ט חוליות': '6002060355', 'יצרן': 'Polyroll'}),
-  _ppr('6002060400', 'ברך PPR 90° פ.פ 400', 'PPR Elbow 400', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'G': '480', 'F': '306', 'E': '400', 'C': '400', 'A': '1200', 'מק"ט חוליות': '6002060400', 'יצרן': 'Polyroll'}),
+  _ppr('6002060160', 'ברך PPR 90° פ.פ 160', 'PPR Elbow 160', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'מודל': 'A', 'E': '39', 'D': '116.2', 'C': '160', 'A': '223', 'מק"ט חוליות': '6002060160', 'יצרן': 'Polyroll'}),
+  _ppr('6002060200', 'ברך PPR 90° פ.פ 200', 'PPR Elbow 200', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'מודל': 'A', 'E': '151', 'D': '162.0', 'C': '200', 'A': '354', 'מק"ט חוליות': '6002060200', 'יצרן': 'Polyroll'}),
+  _ppr('6002060250', 'ברך PPR 90° פ.פ 250', 'PPR Elbow 250', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'מודל': 'A', 'E': '156', 'D': '202.0', 'C': '250', 'A': '418', 'מק"ט חוליות': '6002060250', 'יצרן': 'Polyroll'}),
+  _ppr('6002060315', 'ברך PPR 90° פ.פ 315', 'PPR Elbow 315', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'מודל': 'A', 'E': '202', 'D': '255.0', 'C': '315', 'A': '522', 'מק"ט חוליות': '6002060315', 'יצרן': 'Polyroll'}),
+  _ppr('6002060355', 'ברך PPR 90° פ.פ 355', 'PPR Elbow 355', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'מודל': 'B', 'G': '421', 'F': '272', 'E': '350', 'C': '355', 'A': '1060', 'מק"ט חוליות': '6002060355', 'יצרן': 'Polyroll'}),
+  _ppr('6002060400', 'ברך PPR 90° פ.פ 400', 'PPR Elbow 400', kPprElbows, 'PPR Elbows', '↪️', 39, dims: {'מודל': 'B', 'G': '480', 'F': '306', 'E': '400', 'C': '400', 'A': '1200', 'מק"ט חוליות': '6002060400', 'יצרן': 'Polyroll'}),
   _ppr('6002300220', 'מסעף PPR 20', 'PPR Tee 20', kPprTees, 'PPR Tees', '🔱', 40, dims: {'F': '39', 'E': '12', 'D': '19.2', 'B': '27', 'A': '51', 'מק"ט חוליות': '6002300220', 'יצרן': 'Polyroll'}),
   _ppr('6002300255', 'מסעף PPR 25', 'PPR Tee 25', kPprTees, 'PPR Tees', '🔱', 40, dims: {'F': '46', 'E': '14', 'D': '24.2', 'B': '33', 'A': '60', 'מק"ט חוליות': '6002300255', 'יצרן': 'Polyroll'}),
   _ppr('6002300320', 'מסעף PPR 32', 'PPR Tee 32', kPprTees, 'PPR Tees', '🔱', 40, dims: {'F': '43', 'E': '16', 'D': '31.1', 'B': '43', 'A': '73', 'מק"ט חוליות': '6002300320', 'יצרן': 'Polyroll'}),
