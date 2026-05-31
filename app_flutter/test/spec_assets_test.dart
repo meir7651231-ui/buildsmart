@@ -364,7 +364,7 @@ void main() {
       kPprSaddles: {
         24: 'spec_saddle_p24.jpg',
         29: 'spec_saddle_p29.jpg',
-        58: 'spec_saddle_p58.jpg',
+        // p58 is model-split (§22.C) — tested separately.
         59: 'spec_saddle_p59.jpg',
         60: 'spec_saddle_p60.jpg',
         84: 'spec_saddle_p84.jpg',
@@ -709,6 +709,26 @@ void main() {
           : 'spec_adapter_hex_p28_internal.jpg';
       expect(s, want, reason: '${p.sku} ${p.nameHe}');
     }
+  });
+
+  // §22.C — p58 PPR EF saddle: catalog "מודל" column assigns per-SKU.
+  test('§22.C p58 saddle — Model A vs Model B per catalog table', () {
+    const expectModel = {
+      '6004800630': 'A', '6004800640': 'A', '6004801100': 'A',
+      '6004800650': 'B', '6004801110': 'B', '6004801120': 'B',
+    };
+    final gaps = <String>[];
+    for (final entry in expectModel.entries) {
+      final p = kPolyrollCatalog.firstWhere((x) => x.sku == entry.key);
+      final want = 'spec_saddle_p58_${entry.value.toLowerCase()}.jpg';
+      if (!p.specImageAssets.first.endsWith(want)) {
+        gaps.add('${entry.key} → ${p.specImageAssets.first} ≠ $want');
+      }
+      if (p.dims?['מודל'] != entry.value) {
+        gaps.add('${entry.key}: model=${p.dims?['מודל']} ≠ ${entry.value}');
+      }
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
   });
 
   // §22.C — p41 PPR plain tee (large): 2 models split by size.

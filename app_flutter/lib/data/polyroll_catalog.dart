@@ -241,11 +241,22 @@ const Map<int, String> _kPprTeePageSpec = {
 const Map<int, String> _kPprSaddlePageSpec = {
   24: 'spec_saddle_p24.jpg', // PPR standard saddle (z/l/d2/d1/D/d)
   29: 'spec_saddle_p29.jpg', // hexagonal saddle (משושה, threaded)
-  58: 'spec_saddle_p58.jpg', // PPR EF saddle (dual model A/B)
+  // p58 is §22.C model-split — routed inline in case kPprSaddles.
   59: 'spec_saddle_p59.jpg', // welding/threading saddle, internal thread
   60: 'spec_saddle_p60.jpg', // welding/threading saddle, external thread
   84: 'spec_saddle_p84.jpg', // PPRCT saddle (standard)
 };
+
+/// p58 (רוכב PPR EF saddle): catalog "מודל" column assigns A/B per-row.
+/// Pattern from the catalog table:
+/// - x32 sizes → B (rows 3, 6).
+/// - 110-125-160x25 → B (row 5).
+/// - All others → A.
+String _p58SaddleModel(String nameHe) {
+  if (nameHe.contains('x32')) return 'B';
+  if (nameHe.contains('110-125-160x25')) return 'B';
+  return 'A';
+}
 
 const Map<int, String> _kPprPlugPageSpec = {
   22: 'spec_plug_p22.jpg', // PPR plain plug (D, z, l, d)
@@ -456,6 +467,12 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       }
       return ['spec_omega.jpg'];
     case kPprSaddles:
+      // §22.C p58 model split: catalog table assigns model A or B per SKU.
+      if (page == 58) {
+        return [_p58SaddleModel(nameHe) == 'A'
+            ? 'spec_saddle_p58_a.jpg'
+            : 'spec_saddle_p58_b.jpg'];
+      }
       // §22.D p84: page has plain saddle (top section) AND threaded saddle
       // (bottom section "רוכב לריתוך תבריג פנימי"). Split by nameHe.contains('תבריג').
       if (page == 84 && nameHe.contains('תבריג')) {
@@ -1146,12 +1163,12 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('6702000320', 'מתאם PPR ריתוך/רקורד משושה תבריג חיצוני 32x1"', 'PPR Adapter 32x1”', kPprAdapters, 'PPR Adapters', '🔩', 57, dims: {'R': '34', 'G': '18', 'F': '43', 'E': '23', 'D2': '18', 'D1': '31.5', 'B': '55', 'A': '58', 'מק"ט חוליות': '6702000320', 'יצרן': 'Polyroll'}),
   _ppr('6702000400', 'מתאם PPR ריתוך/רקורד משושה תבריג חיצוני 40x1¼"', 'PPR Adapter 1/4”', kPprAdapters, 'PPR Adapters', '🔩', 57, dims: {'R': '21', 'G': '51', 'F': '23', 'E': '20', 'D2': '39.4', 'D1': '63', 'B': '62', 'מק"ט חוליות': '6702000400', 'יצרן': 'Polyroll'}),
   _ppr('6702000500', 'מתאם PPR ריתוך/רקורד משושה תבריג חיצוני 50x1½"', 'PPR Adapter 1/2”', kPprAdapters, 'PPR Adapters', '🔩', 57, dims: {'R': '24', 'G': '66', 'F': '25', 'E': '24', 'D2': '49.4', 'D1': '80', 'B': '71', 'מק"ט חוליות': '6702000500', 'יצרן': 'Polyroll'}),
-  _ppr('6004800630', 'רוכב PPR 63-75-90x20', 'PPR Saddle 63-75-90x20', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'G': '10', 'F2': '15', 'F1': '25', 'D': '27', 'C3': '19.2', 'C1': '16', 'B': '38', 'A': '38', 'מק"ט חוליות': '6004800630', 'יצרן': 'Polyroll'}),
-  _ppr('6004800640', 'רוכב PPR 63-75-90x25', 'PPR Saddle 63-75-90x25', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'G': '10', 'F2': '16', 'F1': '25', 'D': '33', 'C3': '24.2', 'C1': '16', 'B': '38', 'A': '38', 'מק"ט חוליות': '6004800640', 'יצרן': 'Polyroll'}),
-  _ppr('6004800650', 'רוכב PPR 63-75-90x32', 'PPR Saddle 63-75-90x32', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'G': '11', 'F2': '18', 'F1': '32', 'D': '42', 'C3': '31.1', 'C1': '20', 'B': '38', 'A': '46', 'מק"ט חוליות': '6004800650', 'יצרן': 'Polyroll'}),
-  _ppr('6004801100', 'רוכב PPR 110-125-160x20', 'PPR Saddle 110-125-160x20', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'G': '14', 'F2': '15', 'F1': '25', 'D': '27', 'C3': '19.2', 'C1': '16', 'B': '38', 'A': '42', 'מק"ט חוליות': '6004801100', 'יצרן': 'Polyroll'}),
-  _ppr('6004801110', 'רוכב PPR 110-125-160x25', 'PPR Saddle 110-125-160x25', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'G': '14', 'F2': '16', 'F1': '25', 'D': '33', 'C3': '24.2', 'C1': '16', 'B': '38', 'A': '42', 'מק"ט חוליות': '6004801110', 'יצרן': 'Polyroll'}),
-  _ppr('6004801120', 'רוכב PPR 110-125-160x32', 'PPR Saddle 110-125-160x32', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'G': '14', 'F2': '18', 'F1': '32', 'D': '42', 'C3': '31.1', 'C1': '20', 'B': '38', 'A': '50', 'מק"ט חוליות': '6004801120', 'יצרן': 'Polyroll'}),
+  _ppr('6004800630', 'רוכב PPR 63-75-90x20', 'PPR Saddle 63-75-90x20', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'מודל': 'A', 'G': '10', 'F2': '15', 'F1': '25', 'D': '27', 'C3': '19.2', 'C1': '16', 'B': '38', 'A': '38', 'מק"ט חוליות': '6004800630', 'יצרן': 'Polyroll'}),
+  _ppr('6004800640', 'רוכב PPR 63-75-90x25', 'PPR Saddle 63-75-90x25', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'מודל': 'A', 'G': '10', 'F2': '16', 'F1': '25', 'D': '33', 'C3': '24.2', 'C1': '16', 'B': '38', 'A': '38', 'מק"ט חוליות': '6004800640', 'יצרן': 'Polyroll'}),
+  _ppr('6004800650', 'רוכב PPR 63-75-90x32', 'PPR Saddle 63-75-90x32', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'מודל': 'B', 'G': '11', 'F2': '18', 'F1': '32', 'D': '42', 'C3': '31.1', 'C1': '20', 'B': '38', 'A': '46', 'מק"ט חוליות': '6004800650', 'יצרן': 'Polyroll'}),
+  _ppr('6004801100', 'רוכב PPR 110-125-160x20', 'PPR Saddle 110-125-160x20', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'מודל': 'A', 'G': '14', 'F2': '15', 'F1': '25', 'D': '27', 'C3': '19.2', 'C1': '16', 'B': '38', 'A': '42', 'מק"ט חוליות': '6004801100', 'יצרן': 'Polyroll'}),
+  _ppr('6004801110', 'רוכב PPR 110-125-160x25', 'PPR Saddle 110-125-160x25', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'מודל': 'B', 'G': '14', 'F2': '16', 'F1': '25', 'D': '33', 'C3': '24.2', 'C1': '16', 'B': '38', 'A': '42', 'מק"ט חוליות': '6004801110', 'יצרן': 'Polyroll'}),
+  _ppr('6004801120', 'רוכב PPR 110-125-160x32', 'PPR Saddle 110-125-160x32', kPprSaddles, 'PPR Saddles', '🪢', 58, dims: {'מודל': 'B', 'G': '14', 'F2': '18', 'F1': '32', 'D': '42', 'C3': '31.1', 'C1': '20', 'B': '38', 'A': '50', 'מק"ט חוליות': '6004801120', 'יצרן': 'Polyroll'}),
   _ppr('6604900630', 'רוכב PPR ריתוך/הברגה תבריג פנים 63-75-90x1/2"', 'PPR Saddle "63-75-90x1/2', kPprSaddles, 'PPR Saddles', '🪢', 59, dims: {'R': '"1/2', 'F2': '28', 'F1': '10', 'D': '32', 'C3': '42', 'C2': '27', 'C1': '20', 'B': '38', 'A': '46', 'מק"ט חוליות': '6604900630', 'יצרן': 'Polyroll'}),
   _ppr('6604900640', 'רוכב PPR ריתוך/הברגה תבריג פנים 63-75-90x3/4"', 'PPR Saddle "63-75-90x3/4', kPprSaddles, 'PPR Saddles', '🪢', 59, dims: {'R': '"3/4', 'F2': '28', 'F1': '10', 'D': '32', 'C3': '42', 'C2': '32', 'C1': '20', 'B': '38', 'A': '46', 'מק"ט חוליות': '6604900640', 'יצרן': 'Polyroll'}),
   _ppr('6604900110', 'רוכב PPR ריתוך/הברגה תבריג פנים 110-125-160x1/2"', 'PPR Saddle 110-125-160x1/2"', kPprSaddles, 'PPR Saddles', '🪢', 59, dims: {'R': '"1/2', 'F2': '28', 'F1': '15', 'D': '32', 'C3': '42', 'C2': '27', 'C1': '20', 'B': '38', 'A': '50', 'מק"ט חוליות': '6604900110', 'יצרן': 'Polyroll'}),
