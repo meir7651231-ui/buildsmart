@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/line_score.dart';
+import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
@@ -4800,6 +4801,21 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   color: Color(0xFF666666),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 4),
+                          // Polish D — visual progress bar that fills as
+                          // stages are marked done (Roadmap step 31).
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(3),
+                            child: LinearProgressIndicator(
+                              value: p.stages.isEmpty
+                                  ? 0
+                                  : done / p.stages.length,
+                              minHeight: 5,
+                              backgroundColor: const Color(0xFFF1F5F9),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color(0xFFFF7A2D)), // brand-orange fill
+                            ),
+                          ),
                           const SizedBox(height: 6),
                           Wrap(
                             spacing: 6,
@@ -4976,21 +4992,22 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600)),
                             const SizedBox(width: 8),
-                            // Roadmap step 30 — card data readiness score.
+                            // Roadmap step 30 — card data readiness score
+                            // (polish E — colorised by band 🟢/🟡/🔴).
                             Builder(builder: (_) {
                               final s = cardReadinessScore(prod);
+                              final c = scoreBandColors(s.score);
                               return Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 7, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFECFDF5),
+                                  color: c.bg,
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                      color: const Color(0xFFA7F3D0)),
+                                  border: Border.all(color: c.border),
                                 ),
                                 child: Text('ציון ${s.score} · ${s.label}',
-                                    style: const TextStyle(
-                                        color: Color(0xFF047857),
+                                    style: TextStyle(
+                                        color: c.fg,
                                         fontSize: 10,
                                         fontWeight: FontWeight.w700)),
                               );
@@ -5000,7 +5017,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             Builder(builder: (_) {
                               final m = ref.watch(projectModeProvider);
                               final l = labelForProjectMode(m);
-                              return Semantics(
+                              return Tooltip(
+                                message:
+                                    'סוג פרויקט · טאפ למחזר: כל פרויקט / מערכת קרה / מערכת חמה / מסחרי',
+                                child: Semantics(
                                 button: true,
                                 label: 'החלף סוג פרויקט (קר/חם/מסחרי)',
                                 child: GestureDetector(
@@ -5016,13 +5036,17 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           fontWeight: FontWeight.w700)),
                                 ),
                               ),
+                              ),
                               );
                             }),
                             // Roadmap step 57 — profession mode chip (tap cycles).
                             Builder(builder: (_) {
                               final prof = ref.watch(professionModeProvider);
                               final l = labelForProfession(prof);
-                              return Semantics(
+                              return Tooltip(
+                                message:
+                                    'רמת משתמש · טאפ למחזר: DIY (חובב) / קבלן / מקצועי. רמת ההסבר מתאימה עצמה.',
+                                child: Semantics(
                                 button: true,
                                 label: 'החלף סוג משתמש (DIY/קבלן/מקצועי)',
                                 child: GestureDetector(
@@ -5037,6 +5061,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           fontSize: 10,
                                           fontWeight: FontWeight.w700)),
                                 ),
+                              ),
                               ),
                               );
                             }),
@@ -5251,7 +5276,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             final allOk = hw.suitable == hw.total;
                             return Padding(
                               padding: const EdgeInsets.only(top: 6),
-                              child: Semantics(
+                              child: Tooltip(
+                                message:
+                                    'בורר טמפ׳ תצוגה · טאפ למחזר: 60°C → 80°C → 95°C → 60°C. משפיע על "מותגים מתאימים".',
+                                child: Semantics(
                                 button: true,
                                 label: 'החלף טמפ׳ תצוגה (60/80/95)',
                                 child: GestureDetector(
@@ -5269,6 +5297,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                             : const Color(0xFFB45309),
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600)),
+                              ),
                               ),
                               ),
                             );
@@ -5475,11 +5504,11 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     Text(
                                         '🎯 ציון קו ${lineScore.score} · ${lineScore.label}  ·  💧 ΔP ~${pd.dropBar.toStringAsFixed(2)} bar',
                                         style: TextStyle(
-                                            color: lineScore.score >= 80
-                                                ? const Color(0xFF0F766E)
-                                                : lineScore.score >= 55
-                                                    ? const Color(0xFF1D4ED8)
-                                                    : const Color(0xFFB45309),
+                                            // Polish E — unified band palette
+                                            // (≥75 emerald · 50–74 amber · <50 rose).
+                                            color: scoreBandColors(
+                                                    lineScore.score)
+                                                .fg,
                                             fontSize: 11,
                                             fontWeight: FontWeight.w700)),
                                     Text(

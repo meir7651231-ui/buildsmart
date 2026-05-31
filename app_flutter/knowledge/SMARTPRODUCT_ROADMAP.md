@@ -6,7 +6,19 @@ it connects · how to install · what it costs · who sells it*.
 
 Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
-## 📌 Handoff — where we are (v5.14, ~46%: 32 ✅ + 14 🟦)
+## 📌 Handoff — where we are (v5.36, ~68%: 50 ✅ + 18 🟦)
+
+v5.36 polish bump (no new step ✅, three existing steps tightened):
+- Step 30 (card+line score) — badges now colorised by band via `scoreBandColors`
+  (≥75 emerald / 50–74 amber / <50 rose). Same fences for both scopes. Guard:
+  `score_band_test` (8 tests, exhaustive 0..100).
+- Step 31 (install stages) — added a thin brand-orange `LinearProgressIndicator`
+  beneath the "מעקב התקנה — X/N" text; fills as stages are tapped done.
+- Steps 26/52/57 — wrapped the three header chips (project mode · profession
+  mode · temp picker) in `Tooltip` widgets so long-press/hover explains "what
+  this chip does", plain Hebrew.
+
+## 📌 Earlier handoff (v5.14, ~46%)
 Saved for the next run. Pick up here:
 - **Group A (still buildable locally, no deps) — do these next:**
   76 config-versioning · 25 auto safety-kit (engine-grounded) · 46 add-whole-line-to-cart ·
