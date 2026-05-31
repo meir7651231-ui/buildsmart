@@ -836,6 +836,7 @@ page header that becomes part of the product nameHe (e.g. "ללא ידית",
 | Page | Sub-types on page | Split by | Specs |
 |------|-------------------|----------|-------|
 | p30 ברז סמוי | "(ציפוי כרום)" (כולל ידית) / "(ציפוי כרום - ללא ידית)" / "כדורי בין אוגנים" | `nameHe.contains('ללא ידית')` + `nameHe.contains('בין אוגנים')` | `spec_valve_concealed_p30_a.jpg` (with handle), `spec_valve_concealed_p30_b.jpg` (no handle), `spec_valve_wafer_p30.jpg` (ball-wafer) |
+| p84 רוכב PPRCT | "רוכב לריתוך" (plain) / "רוכב לריתוך תבריג פנימי" (threaded) | `nameHe.contains('תבריג')` | `spec_saddle_p84.jpg` (plain default), `spec_saddle_p84_threaded.jpg` (threaded) |
 
 **Detection rule:** when a page has ≥2 dim diagrams AND ≥2 header lines
 (green text in catalog) AND your code currently routes all of them to the

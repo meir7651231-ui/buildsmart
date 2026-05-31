@@ -404,6 +404,11 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       }
       return ['spec_omega.jpg'];
     case kPprSaddles:
+      // §22.D p84: page has plain saddle (top section) AND threaded saddle
+      // (bottom section "רוכב לריתוך תבריג פנימי"). Split by nameHe.contains('תבריג').
+      if (page == 84 && nameHe.contains('תבריג')) {
+        return ['spec_saddle_p84_threaded.jpg'];
+      }
       // §22: per-page saddle spec when the catalog page has its own diagram.
       // p24 keeps the generic spec_saddle.jpg.
       if (_kPprSaddlePageSpec.containsKey(page)) {

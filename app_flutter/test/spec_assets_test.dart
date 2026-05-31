@@ -492,6 +492,10 @@ void main() {
               return false;
             }
           }
+          // Saddles: p84 'תבריג' (threaded) routes to §22.D variant.
+          if (cat == kPprSaddles && p.page == 84 && p.nameHe.contains('תבריג')) {
+            return false;
+          }
           return true;
         });
         if (hits.isEmpty) return;
@@ -629,6 +633,28 @@ void main() {
       if (p.dims?['מודל'] != entry.value) {
         gaps.add('${entry.key}: dims[\'מודל\']=${p.dims?['מודל']} ≠ ${entry.value}');
       }
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
+  // §22.D — p84 saddle sub-type split: plain saddle ("רוכב לריתוך") shares
+  // page with threaded saddle ("רוכב לריתוך תבריג פנימי"). 6 threaded SKUs
+  // must show the threaded diagram, not the plain saddle one.
+  test('§22.D p84 saddle sub-type split — plain vs threaded', () {
+    const threadedSkus = ['98318381', '98318382', '98318368',
+                          '98318371', '98318373', '98318369'];
+    final gaps = <String>[];
+    for (final sku in threadedSkus) {
+      final p = kPolyrollCatalog.firstWhere((x) => x.sku == sku);
+      if (!p.specImageAssets.first.endsWith('spec_saddle_p84_threaded.jpg')) {
+        gaps.add('$sku (${p.nameHe}) → ${p.specImageAssets.first} ≠ threaded');
+      }
+    }
+    // Plain saddles on p84 must NOT route to threaded.
+    final plain = kPolyrollCatalog.firstWhere(
+        (x) => x.page == 84 && !x.nameHe.contains('תבריג'));
+    if (plain.specImageAssets.first.contains('threaded')) {
+      gaps.add('${plain.sku} (${plain.nameHe}) wrongly routed to threaded');
     }
     expect(gaps, isEmpty, reason: gaps.join('\n'));
   });
