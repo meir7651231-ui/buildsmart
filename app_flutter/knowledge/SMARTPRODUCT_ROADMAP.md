@@ -6,7 +6,10 @@ it connects · how to install · what it costs · who sells it*.
 
 Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
-## 📌 Handoff — where we are (v5.36, ~68%: 50 ✅ + 18 🟦)
+## 📌 Handoff — where we are (v5.37, ~71%: 53 ✅ + 15 🟦)
+
+v5.37 — closed 3 🟦 → ✅: step 7 (filter persistence), step 76 (saved-
+version load/× UI), step 82 (mutation×2 → 12 invariants). 782/782 green.
 
 v5.36 polish bump (no new step ✅, three existing steps tightened):
 - Step 30 (card+line score) — badges now colorised by band via `scoreBandColors`
@@ -52,10 +55,12 @@ Saved for the next run. Pick up here:
 7. ✅ Unified persisted selection — brand via `cardSelectionProvider` (last
    pick) + `brand_history` (cross-session) resolved by `default_brand_resolver`;
    acc selected+qty via `cardAccStateProvider` (`Map<productKey, Map<accName,
-   {selected, qty}>>`, JSON-persisted under `bs.card-acc-state.v1`). Both
-   restored in `initState`, persisted on every tap / qty change.
-   Guards: `card_selection_test`, `brand_history_test`, `default_brand_resolver_test`,
-   `card_acc_state_test`.
+   {selected, qty}>>`, JSON-persisted under `bs.card-acc-state.v1`); סוג /
+   מידה filter via `cardFilterStateProvider` (`Map<productKey, {type?, size?}>`,
+   persisted under `bs.card-filter-state.v1`, auto-clears empty entries).
+   All three restored in `initState`, persisted on every tap / qty / filter
+   change. Guards: `card_selection_test`, `brand_history_test`,
+   `default_brand_resolver_test`, `card_acc_state_test`, `card_filter_state_test`.
 8. 🟦 Comprehensive widget rendering already covered by `product_journey_test`
    (all 935 sheets render at narrow phone + large text). Pixel-level golden
    files (`matchesGoldenFile`) still ⬜ — deferred (heavy + flaky in CI).
@@ -234,9 +239,10 @@ Saved for the next run. Pick up here:
    assigned item (location/brand/qty + est. price) into a copyable quote
    ("📋 הצעת מחיר לפרויקט"). Guard: `card_projects_test`.
 76. ✅ Config versioning — persisted `cardVersionsProvider` saves named snapshots
-   (label/product/brand). "💾 שמור גרסה" stores the current brand under its name;
-   chips list saved versions for the product. Re-saving the same label replaces
-   (no dup). Guard: `card_versions_test`.
+   (label/product/brand). "💾 שמור גרסה" stores the current brand under its name.
+   Each saved version is a `[label][×]` pair: tap label LOADS that brand (with
+   snackbar + sticky brand pref), tap × DELETES. Re-saving the same label
+   replaces (no dup). Guards: `card_versions_test` + (UI) `_SavedVersionChip`.
 77. ⬜ Team sharing: chat/notes on a chosen product.
 78. ⬜ Sync with the Gantt/tasks.
 79. ⬜ Unified procurement report (PDF) for the whole project.
@@ -249,10 +255,13 @@ Saved for the next run. Pick up here:
    bridge/summary/standards/tools/guide/compat/compliance+why/variants/
    cheaper-alt all coherent & non-throwing). Rendering of all 935 sheets stays
    covered by `product_journey_test`. Guard: `smart_card_data_test`.
-82. 🟦 Mutation-resistance tests for price/selection helpers (6 invariants:
-   cost sum · strict-cheaper alt · score band fences · effort threshold ·
-   safety-kit disjoint · cheap+premium tags mutually exclusive). Guard:
-   `mutation_test`. (Golden image tests still ⬜.)
+82. ✅ Mutation-resistance tests for price/selection helpers — 12 strong
+   invariants: cost sum · strict-cheaper alt · score band fences · effort
+   threshold · safety-kit disjoint · cheap+premium tags mutually exclusive ·
+   lineReadiness clamp [0,100] · lineReadiness monotone (gaps↓, kit↑) ·
+   cycleDisplayTemp valid set · hotWaterSuitability suitable≤total ·
+   resolveDefaultBrandIndex valid index. Guard: `mutation_test`. (Golden image
+   tests still ⬜ — heavy/flaky in CI.)
 83. 🟦 Offline-cache primitive — `offlineCacheProvider`: persisted
    `Map<String, CacheEntry>` with TTL (`get`/`put`/`sweep`/`clearAll`),
    in-memory + JSON-backed. Guard: `offline_cache_test` (6 tests). Concrete
