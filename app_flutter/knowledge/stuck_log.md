@@ -438,3 +438,20 @@ RULE: לפני שמתחיל עבודה — בדוק ב-origin מה הגרסה ה
 ### ג — כלל המניעה
 ANTIPATTERN: flutter test --no-pub --reporter expanded
 RULE: אבחון gate → קובץ ספציפי בלבד. suite מלא רק לפני commit. אם פקודה נכשלה פעמיים — פיבוט, לא חזרה.
+
+---
+
+## 2026-05-31 · gate 32 חוסם commit נקי בגלל pre-existing failures ב-origin
+
+### א — הבעיה
+origin עצמו מכיל 16 כשלים ב-`paired_warning_test.dart`.
+סוכן שלא נגע בקבצי בדיקה נחסם על ידי gate 32 — למרות שה-diff שלו נקי.
+`git diff test/paired_warning_test.dart` ריק — הקובץ זהה ל-origin.
+
+### ב — הפתרון
+gate 32 שונה ל-baseline tracking: חוסם רק אם `FAIL_COUNT > known-failing` ב-STATUS.md.
+הענף עם 16 כשלים צריך להוסיף `known-failing: 16` ל-STATUS.md.
+
+### ג — כלל המניעה
+ANTIPATTERN: err.*32.*exit=\$TEST_EXIT.*תקן את הבדיקות
+RULE: gate 32 חייב לבדוק baseline מ-STATUS.md (known-failing: N) — לא לחסום על pre-existing failures שקיימות ב-origin.

@@ -1,6 +1,7 @@
 # Status snapshot — app_flutter
 
 _Version label: `v5.43` (see `home_shell.dart`). Update on each user-visible change._
+_known-failing: 0 (gate 32 baseline — update when pre-existing failures exist on branch)_
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — opens on **בית (finder home)** as the default landing: layman

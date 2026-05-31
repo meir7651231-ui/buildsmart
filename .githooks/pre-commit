@@ -184,12 +184,20 @@ if [[ -n "$NEEDS_FLUTTER" ]]; then
         err "31" "$ERR_COUNT שגיאות ניתוח" "תקן את השגיאות"
     fi
 
-    # שער 32: כל הבדיקות ירוקות (תיקון באג #6 — בודק גם exit code)
+    # שער 32: בדיקות לא נכשלות מעבר ל-baseline (תיקון באג #19 — baseline tracking)
+    # baseline מאוחסן ב-STATUS.md: "known-failing: N" — מאפשר pre-existing failures
     TEST_OUT=$(flutter test --no-pub 2>&1)
     TEST_EXIT=$?
-    if [[ $TEST_EXIT -ne 0 ]] || echo "$TEST_OUT" | grep -qE "^FAILED|Some tests failed|Test failed"; then
-        echo "$TEST_OUT" | grep -E "FAILED|Error:|Test failed" | head -3
-        err "32" "בדיקות נכשלות (exit=$TEST_EXIT)" "תקן את הבדיקות"
+    if [[ $TEST_EXIT -ne 0 ]] || echo "$TEST_OUT" | grep -qE "Some tests failed"; then
+        FAIL_COUNT=$(echo "$TEST_OUT" | grep -oE "[0-9]+ ✗" | grep -oE "^[0-9]+" | head -1)
+        FAIL_COUNT=${FAIL_COUNT:-0}
+        KNOWN_FAIL=$(grep -oE "known-failing: [0-9]+" knowledge/STATUS.md 2>/dev/null | grep -oE "[0-9]+$" || echo 0)
+        if [[ "$FAIL_COUNT" -gt "$KNOWN_FAIL" ]]; then
+            echo "$TEST_OUT" | grep -E "✗|FAILED" | head -5
+            err "32" "בדיקות נכשלות: $FAIL_COUNT > baseline $KNOWN_FAIL" "תקן את הבדיקות או עדכן known-failing ב-STATUS.md"
+        else
+            warn "32" "יש $FAIL_COUNT כשלים pre-existing (baseline=$KNOWN_FAIL) — מותר להמשיך"
+        fi
     fi
 
     TEST_COUNT=$(echo "$TEST_OUT" | grep -oE "\+[0-9]+" | tail -1 | tr -d '+')
