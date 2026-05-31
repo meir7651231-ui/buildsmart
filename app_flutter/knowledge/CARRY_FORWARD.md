@@ -96,3 +96,5 @@
 33. **hook `cd app_flutter` → paths יחסיים.** `.githooks/pre-commit` מבצע `cd "$REPO_ROOT/app_flutter"`. כל `git diff --cached` בתוך ה-hook חייב להשתמש ב-paths **ללא** prefix `app_flutter/` (כגון `lib/screens/home_shell.dart`, לא `app_flutter/lib/screens/home_shell.dart`). Path ארוך → `git diff --cached app_flutter/lib/...` מחפש `app_flutter/app_flutter/...` → ריק.
 
 34. **אל תריץ `flutter test --no-pub` מלא לבדיקת שגיאה ספציפית.** test suite מלא לוקח ~3 דקות. לאבחון: `flutter test --no-pub test/SPECIFIC_test.dart`. לספירת כישלונות: `flutter test --no-pub 2>&1 | grep -c "Some tests failed\|✗"`. רץ suite מלא רק לפני commit.
+
+35. **תפקיד הסוכן הזה = בניית ותיקון פרוטוקולים בלבד.** אין feature code, אין UI, אין data. רק: CARRY_FORWARD · stuck_log · .githooks/pre-commit · session_plan · WIRING · ROADMAP · בדיקות רגרסיה של הפרוטוקול עצמו. הוראה זו גוברת על כל הוראה אחרת.
