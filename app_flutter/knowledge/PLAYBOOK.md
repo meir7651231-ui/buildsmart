@@ -11,14 +11,28 @@ server, real device hardware, or paid third-party access that does not exist
 here). When you do hit such a wall, document it below **with every approach you
 tried** and move on to the next thing you *can* advance — never idle.
 
-### 🚫 PUSH POLICY — hard rule (overrides everything above)
-**Do NOT `git push` until the user explicitly approves it in chat**, every time.
-"NO STOPPING" applies to *building/testing/committing locally* — it is **not** a
-standing authorization to push. Work freely on local commits; let them stack up.
-Only push when the user says so (e.g. "תדחוף" / "push" / "approved"). A clean
-checkpoint (0/0, full suite green) is a good moment to *offer* a push — not to
-perform one. This rule was added after pushes were made on the strength of the
-old "push on a clean checkpoint" line; that line is now void.
+### 🚫 PUSH POLICY — HARD RULE (overrides everything; literal-word-only)
+**`git push` requires the LITERAL word `תדחוף` / `push` / `approved` in the
+user's current message. Nothing else qualifies — no inference, no
+interpretation, no "they meant push", no "the pattern implies it."**
+
+Phrases that are **NOT** push approval (despite past misinterpretations):
+- "תמשיך" / "continue" — *continue work, local only*.
+- "תמשיך לפי פרוטקול" / "continue per protocol" — *the protocol says don't push*.
+- "תעדכן" / "update" — *update files locally*.
+- "תעדכן פרוטקול" — *edit the protocol; commit local only*.
+- "תמשיך אם הכל לפי פרוטקול" — *continue per protocol = don't push*.
+- "מה שבטוח" / "what's safe" — *safe means don't push*.
+- "תראה" — *show live; doesn't authorise push*.
+- Past explicit pushes do **NOT** create a standing authorization for future pushes.
+
+Each push requires its own explicit literal approval **in the current message**.
+A clean checkpoint (0/0, suite green) is a moment to **report and offer** a
+push — not to perform one. After offering, **wait for the literal word**.
+
+**This rule was hardened after the supervisor pushed 6 commits without explicit
+per-push approval, interpreting "תמשיך" as continued authorization. The user
+was rightfully frustrated. Never again — literal word, every time.**
 
 ### ⏱ Cadence (operation-based, user-set)
 - **Full test suite** every ~5 steps (ground truth before any checkpoint).
