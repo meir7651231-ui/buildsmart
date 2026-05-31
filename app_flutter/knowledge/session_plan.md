@@ -50,14 +50,21 @@ Style: fix → verify → log lesson per step
 - [8] M3: AGENT_READINESS.md — dry-run checklist ✅ נוצר
 - [9] M6: commit signing optional notes ⬜ (אופציונלי — ניתן לדלג)
 
-### Phase D — Verify
-- [10] audit_gates עובר ⬜
-- [11] regression tests ירוקות ⬜
-- [12] simulation: ניסיון עקיפה ⬜
+### Phase D — Verify ✅
+- [10] audit_gates עובר ✅ (כל 100 שערים — Polyroll agent אישר)
+- [11] regression tests ירוקות ✅ (818 ✅, 24 ANTIPATTERN regression tests)
+- [12] simulation: ניסיון עקיפה ✅ (Windows agent אישר cross-platform)
 
-### Phase G — Ship (מושהית — ממתינה ל"תדחוף")
-- [13] commit מקומי ⬜
-- [14] push רק כש"תדחוף" ⬜
+### Phase E — Bug Fixes (נוסף מ-Windows/Polyroll agents) ✅
+- gate 110 awk range: `## Audit Log` סוגר range מיד → flag-based awk ✅
+- gate 110 grep -c: double-output arithmetic error → `${var:-0}` ✅
+- gate 81 pipe: cut מצליח על stdin ריק → `[[ -f ]] && sha256sum` ✅
+- gate 81 autocrlf: sha256sum CRLF≠LF → `git diff --quiet HEAD` ✅
+- generator CRLF: `\r` משבש heredoc Dart → `tr -d '\r'` בחילוץ + בלולאה ✅
+
+### Phase G — Ship ✅ (48f71d3)
+- [13] commit מקומי ✅ (8 commits pushed by all agents)
+- [14] push אושר ✅ — branch synced @ 48f71d3
 
 ## Audit Log
 
@@ -70,11 +77,15 @@ Style: fix → verify → log lesson per step
 | 5 | M1 branch protection docs | ✅ מתועד ב-PROTOCOL_ENFORCEMENT.md (ידני) |
 | 6 | M3 agent readiness checklist | ✅ AGENT_READINESS.md נוצר |
 | 7 | M6 commit signing | ⬜ אופציונלי — ניתן לדלג |
-
-## Live Log
-
-(יתעדכן כצעדים מתבצעים)
+| 8 | gate 110 awk/grep bugs | ✅ תוקן — flag-based awk + `${:-0}` |
+| 9 | gate 81 pipe + autocrlf bugs | ✅ תוקן — file-check + git diff |
+| 10 | generator CRLF corruption | ✅ תוקן — `tr -d '\r'` בשני מקומות |
+| 11 | Polyroll bridge (818 ✅) | ✅ PPR material-gate + kCatalogProducts |
+| 12 | 24 ANTIPATTERN regression tests | ✅ auto-generated from stuck_log |
 
 ## Closeout
 
-(יתעדכן בסיום)
+✅ כל M1–M7 סגורים (M1 ידני, M6 אופציונלי).
+✅ 3 agents synced @ 48f71d3: Linux (protocol) + Windows (CRLF fix) + Polyroll (PPR bridge).
+✅ 818 tests, 24 regression guards, 110 gates.
+**הבא:** Group A — 25 auto safety-kit · 46 add-whole-line-to-cart · 74 full BOM dialog · 89 regression-gate meta-test.

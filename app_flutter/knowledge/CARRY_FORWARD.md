@@ -74,3 +74,21 @@
 23. **Owner: this session.** מי אחראי. שמירה בריפו.
 24. **Scope: <file:axis>.** **משפט אחד**. מונע scope creep.
 25. **Style: fix → verify → log lesson per step.** הקצב הוא ה-protocol.
+
+---
+
+## 🔒 Protocol enforcement
+
+26. **awk range על `## X` — סוגר מיד.** שורה שמפעילה `start` מתחילה ב-`##` → מפעילה גם `end` (`^##`) באותה שורה. פתרון: `in_section=1; next` (flag+skip) במקום range pattern.
+
+27. **`grep -c ... || echo 0` = double-output.** `grep -c` מדפיס `0` עם exit 1; הpipe בודק exit של `grep` (לא `cut`/`echo`). שימוש: `${var:-0}` אחרי `grep -c`, לא `|| echo 0`.
+
+28. **pipe ← cut מצליח על stdin ריק.** `sha256sum file | cut | || echo "missing"` — cut exit 0 גם כשsha256sum נכשל. תמיד `[[ -f ]] && sha256sum` לפני pipe, לא `|| echo` אחריו.
+
+29. **sha256sum CRLF vs LF (Windows autocrlf).** `git show HEAD:file | sha256sum` מחזיר LF-hash; working copy CRLF-hash → false positive. השוואת HEAD↔disk חייבת לעבור `git diff --quiet HEAD --` (git מנרמל line-endings).
+
+30. **`tr -d '\r'` בחילוץ patterns מ-Windows.** `grep | sed` על MSYS מחזיר `\r` בסוף שורות. `\r` בתוך heredoc → cursor קופץ לתחילת שורה → Dart שבור. תמיד `| tr -d '\r'` בחילוץ AND per-line בלולאה.
+
+31. **Emergency token מחוץ ל-git.** `.emergency_token` חייב להיות ב-`.gitignore` (לא יתועד). hook בודק `${#EXPECTED} -ge 16` + השוואה מדויקת. env var: `export BUILDSMART_EMERGENCY_DISABLE="$(cat .emergency_token)"`.
+
+32. **Flutter paths דינמיים — 6 מועמדים.** `/home/user/flutter/bin` (Linux CI) + `/c/flutter/bin` (MSYS) + `$HOME/flutter/bin` (macOS Intel) + `/usr/local/flutter/bin` + `/opt/homebrew/opt/flutter/bin` (macOS ARM) + `/opt/flutter/bin`. לולאה על כולם; שגיאה ברורה אם אף אחד לא עובד.
