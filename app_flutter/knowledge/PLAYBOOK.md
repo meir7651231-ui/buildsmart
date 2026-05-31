@@ -369,3 +369,9 @@ Format per entry:
 ### Origin can move under your feet — fetch before push, not during work
 - The other session pushed `240585a` (knowledge docs) while I was working. I'm 8 ahead of `dd45bb1` (my fork point) but only 7 ahead of `240585a` (current origin). Status `git fetch && git log` makes this visible.
 - **Push protocol:** fetch first → rebase if origin moved → verify clean diff → push. Don't push without fetching, even if the user is impatient.
+
+### The "probe" pattern — write a throwaway diagnostic test before deep work
+- **When entering unfamiliar territory** (e.g. "does my toolbox even work on these products?"), write a temporary test file (e.g. `test/ppr_helpers_probe.dart`) that runs every relevant helper on real inputs and **prints** the output. Then delete it once you've learned what you needed.
+- **Why this beats reading source:** the printed output answers concrete questions in one run ("does kVerifiedSpecs have an entry for PPR sku 95016002? no. does priceFor return ₪18 from dims? no. does compatibleProductsFor return mates? 0."). Reading source to answer those gives a *theory*; the probe gives a *fact*.
+- **Discovery from this session:** running a probe on 3 PPR SKUs (95016002 / 95270708 / 94117202) revealed that all 774 Polyroll products are missing `VerifiedSpec`, so 8 card helpers (price, compat, standards, tools, effort, tips, pair-warning, install-engine) silently return null/empty for them — a gap NOT visible in any aggregate test. That gap is now the next session target.
+- **Etiquette:** put the probe in `test/` so `flutter test` runs it, but delete it the moment its question is answered. Probes that linger become noise.

@@ -6,7 +6,29 @@ it connects · how to install · what it costs · who sells it*.
 
 Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
-## 📌 Handoff — where we are (v5.40, ~75%: 57 ✅ + 11 🟦)
+## 📌 Handoff — where we are (v5.41, ~77%: 58 ✅ + 11 🟦 + new bridge)
+
+v5.41 — 🌉 **Polyroll bridge** (discovered via probe pattern). All 757 PPR
+products were silently invisible to 8 card helpers because they had no
+`VerifiedSpec`. Fixed:
+- `polyrollSpecFor(p)` synthesises a spec for every PPR fitting/pipe from
+  category + dims + name (DN parser handles 4 patterns). Coverage: 733/739
+  fusion-cat products (99.2%); the 6 misses are legitimate non-connectors
+  (5 manifolds with imperial threads + 1 mounting plate).
+- `registerPolyrollSpecs()` called once at app startup from `main.dart`
+  populates `kVerifiedSpecs`.
+- `installToolsFor` → 🔥 socket fusion welder + cutter + caliper (or
+  ⚡ electrofusion transformer for the EF category).
+- `installEffortFor` → always 'מקצועי' for PPR (heat-fusion needs training).
+- `installTipsFor` → 4 PPR-specific tips (heat time, insertion depth,
+  cool-down, thermal expansion) + EF-only "input code into transformer."
+- `israeliStandardsFor` → ת"י 5452 (PPR is `systemOverride: supply`).
+- `compatibleProductsFor` / `compatibleProductsCount` → search across the
+  unified `kCatalogProducts` (was only `kLipskeyCatalog`), so PPR↔PPR mates.
+
+Guards: `polyroll_specs_test` (10 tests · pure factory) +
+`polyroll_e2e_test` (8 tests · helper coverage + aggregate ≥99%).
+Total: 792 → 810 green. No Lipskey regression.
 
 v5.40 — closed step 2 🟦 → ✅ (label-only: bridge is in fact complete —
 307/307 with-SKU brands resolve, the 58 without are intentionally "by

@@ -172,7 +172,9 @@ int compatibleProductsCount(LipskeyCatalogProduct p) {
   var n = 0;
   for (final entry in kVerifiedSpecs.entries) {
     if (entry.key == p.sku) continue;
-    final q = kLipskeyCatalog.where((x) => x.sku == entry.key);
+    // Polyroll bridge — search across the unified catalog (Lipskey + Polyroll)
+    // so PPR products can mate with each other after `registerPolyrollSpecs`.
+    final q = kCatalogProducts.where((x) => x.sku == entry.key);
     if (q.isEmpty) continue;
     if (_reallyMates(p, mySpec, q.first, entry.value)) n++;
   }
@@ -195,7 +197,9 @@ List<LipskeyCatalogProduct> compatibleProductsFor(LipskeyCatalogProduct p) {
   final out = <LipskeyCatalogProduct>[];
   for (final entry in kVerifiedSpecs.entries) {
     if (entry.key == p.sku) continue;
-    final q = kLipskeyCatalog.where((x) => x.sku == entry.key);
+    // Polyroll bridge — search across the unified catalog (Lipskey + Polyroll)
+    // so PPR products can mate with each other after `registerPolyrollSpecs`.
+    final q = kCatalogProducts.where((x) => x.sku == entry.key);
     if (q.isEmpty) continue;
     if (!_reallyMates(p, mySpec, q.first, entry.value)) continue;
     out.add(q.first);
@@ -779,6 +783,24 @@ List<String> installToolsFor(LipskeyCatalogProduct p) {
     if (seen.add(t)) tools.add(t);
   }
 
+  // PPR is fused at sockets (not compressed), so it overrides the generic
+  // hdpeCompression tool set with the welding kit. Electrofusion variants
+  // use a transformer instead of a hand welder.
+  final isPpr = spec.material.startsWith('PPR');
+  final isElectrofusion = p.categoryHe == kPprElectrofusion;
+  if (isPpr) {
+    if (isElectrofusion) {
+      add('⚡ שנאי ריתוך חשמלי PPR');
+      add('✂️ חותך צינור PPR');
+      add('📏 מד עומק / קליבר');
+    } else {
+      add('🔥 מלחם פוליפוזיה (socket fusion)');
+      add('✂️ חותך צינור PPR');
+      add('📏 קליבר וסימון עומק');
+    }
+    return tools;
+  }
+
   for (final e in spec.ends) {
     switch (e.type) {
       case EndType.bspMale:
@@ -810,21 +832,29 @@ List<String> installToolsFor(LipskeyCatalogProduct p) {
   if (spec == null) return null;
   var minutes = 10; // base prep
   var hard = 0;
-  for (final e in spec.ends) {
-    switch (e.type) {
-      case EndType.bspMale:
-      case EndType.bspFemale:
-        minutes += 8;
-      case EndType.hdpeCompression:
-        minutes += 6;
-      case EndType.pexPress:
-        minutes += 12;
-        hard += 1;
-      case EndType.copperPress:
-        minutes += 15;
-        hard += 2;
-      case EndType.drainOpening:
-        minutes += 10;
+  // PPR heat-fusion overrides per-end accounting: every fused joint needs
+  // training (heat-up + insert + hold + cool-down). 2 fusion-joints per
+  // fitting * ~5 min + setup = ~20 min, always 'מקצועי' (hard +=2).
+  if (spec.material.startsWith('PPR')) {
+    minutes += spec.ends.length * 7; // per-joint heat cycle
+    hard += 2;
+  } else {
+    for (final e in spec.ends) {
+      switch (e.type) {
+        case EndType.bspMale:
+        case EndType.bspFemale:
+          minutes += 8;
+        case EndType.hdpeCompression:
+          minutes += 6;
+        case EndType.pexPress:
+          minutes += 12;
+          hard += 1;
+        case EndType.copperPress:
+          minutes += 15;
+          hard += 2;
+        case EndType.drainOpening:
+          minutes += 10;
+      }
     }
   }
   final kit = installKitFor(p);
@@ -845,6 +875,19 @@ List<String> installTipsFor(LipskeyCatalogProduct p) {
   final seen = <String>{};
   void add(String t) {
     if (seen.add(t)) tips.add(t);
+  }
+
+  // PPR heat-fusion has its own failure modes (over/under-heat, insertion
+  // depth, cooling time) — distinct from compression/thread tips.
+  if (spec.material.startsWith('PPR')) {
+    add('🔥 לחמם בדיוק לזמן הטבלאי לפי DN (חימום-יתר → דופן צרה, חימום-חסר → נזילה).');
+    add('📏 לסמן עומק הכנסה לפני החימום — הצינור חייב להיכנס עד הסימן.');
+    add('⏱ אסור להזיז את החיבור במהלך זמן הקירור (≈30 שנ׳ ל-DN20, יותר ל-DN גדול).');
+    add('🌡 קו חם 90°C מאריך התפשטות תרמית — לתכנן לולאת התפשטות / קצוות חופשיים.');
+    if (p.categoryHe == kPprElectrofusion) {
+      add('⚡ לבדוק קוד מק"ט על האביזר ולהזין אותו לשנאי לפני הזרקת הזרם.');
+    }
+    return tips;
   }
 
   for (final e in spec.ends) {

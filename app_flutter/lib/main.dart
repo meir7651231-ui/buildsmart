@@ -1,3 +1,4 @@
+import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -7,6 +8,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
+  // Bridge step — synthesise VerifiedSpec for every Polyroll PPR product so
+  // the card's compat / pair-warning / install-engine helpers cover the
+  // 757-strong PPR catalog the same way they cover Lipskey.
+  registerPolyrollSpecs();
   runApp(const ProviderScope(child: BuildSmartApp()));
 }
 

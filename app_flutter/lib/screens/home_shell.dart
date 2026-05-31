@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.41 · 31.5.26 · Finder גודל: 16 תיקונים (sort/family/normalize/bidi/font) על 10 קטגוריות; tooltips contract (792 ✅)',
+                          'v5.42 · 31.5.26 · 🌉 Polyroll bridge: 733 PPR specs · מנוע התאמה + כלים + טיפים + ת"י לקטלוג ה־PPR השלם (810 ✅)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
