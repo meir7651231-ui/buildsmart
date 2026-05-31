@@ -156,13 +156,34 @@ String? _pprImageFor(String categoryHe, String nameHe, int page) {
   return _kPprCategoryImage[categoryHe];
 }
 
+/// §22 per-page spec maps. Each page that has its own unique dimension
+/// drawing in the catalog gets a row here; the fallback `spec_elbow_90.jpg`
+/// etc. only applies to pages we haven't cropped yet.
+const Map<int, String> _kPprElbow90PageSpec = {
+  20: 'spec_elbow_90_p20.jpg', // straight 90° (PPR plain)
+  25: 'spec_elbow_90_p25.jpg', // threaded 90° (multi-section page, default = פנימי)
+  38: 'spec_elbow_90_p38.jpg', // brass שקע-תקע 90°
+  39: 'spec_elbow_90_p39.jpg', // brass פ.פ 90° (Model B — curved bend)
+  48: 'spec_elbow_90_p48.jpg', // PPRCT threaded פנימי
+  49: 'spec_elbow_90_p49.jpg', // PPRCT threaded פנימי + משטח ריסון
+  50: 'spec_elbow_90_p50.jpg', // PPRCT threaded חיצוני
+  81: 'spec_elbow_90_p81.jpg', // PPRCT plain 90°
+};
+
 /// Per-sub-type spec **diagram(s)** (dimension drawings cropped from the catalog
 /// pages). Prepended to the flip-side pager before the full page. Grows as more
-/// sub-type diagrams are cropped (protocol §17.1).
+/// sub-type diagrams are cropped (protocol §17.1 / §22).
 List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
   switch (categoryHe) {
     case kPprElbows:
-      return [nameHe.contains('45') ? 'spec_elbow_45.jpg' : 'spec_elbow_90.jpg'];
+      final is45 = nameHe.contains('45');
+      // §22: per-page elbow specs win when the catalog page has its own
+      // dimension diagram. Falls back to generic spec_elbow_45/90 only when
+      // the page hasn't been cropped yet.
+      if (!is45 && _kPprElbow90PageSpec.containsKey(page)) {
+        return [_kPprElbow90PageSpec[page]!];
+      }
+      return [is45 ? 'spec_elbow_45.jpg' : 'spec_elbow_90.jpg'];
     case kPprAdapters:
       return [
         nameHe.contains('משושה')
