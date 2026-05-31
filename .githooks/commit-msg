@@ -1,0 +1,34 @@
+#!/bin/bash
+# פרוטוקול BuildSmart — בדיקת הודעת commit
+# תיקון באג #26
+
+MSG_FILE="$1"
+MSG=$(cat "$MSG_FILE")
+
+# הסר שורות תגובה
+CLEAN_MSG=$(echo "$MSG" | grep -v "^#")
+
+# מינימום 15 תווים
+MSG_LEN=$(echo -n "$CLEAN_MSG" | tr -d '\n ' | wc -c)
+if [[ "$MSG_LEN" -lt 15 ]]; then
+    echo "❌ הודעת commit קצרה מדי ($MSG_LEN תווים, מינימום 15)" >&2
+    echo "   ההודעה: '$CLEAN_MSG'" >&2
+    exit 1
+fi
+
+# חסום הודעות-זבל
+TRASH_PATTERNS="^(wip|test|asdf|tmp|fix|update|change|123|aaa|xxx|todo)\s*$"
+FIRST_LINE=$(echo "$CLEAN_MSG" | head -1 | tr '[:upper:]' '[:lower:]')
+if echo "$FIRST_LINE" | grep -qE "$TRASH_PATTERNS"; then
+    echo "❌ הודעת commit לא תיאורית: '$FIRST_LINE'" >&2
+    echo "   כתוב מה השתנה ולמה" >&2
+    exit 1
+fi
+
+# המלצה: conventional commits
+if ! echo "$FIRST_LINE" | grep -qE "^(feat|fix|docs|style|refactor|test|build|ci|perf|chore|revert)(\([^)]+\))?:"; then
+    echo "⚠️  לא בפורמט conventional commits (feat:/fix:/docs:/...)" >&2
+    # אזהרה בלבד, לא חוסם
+fi
+
+exit 0

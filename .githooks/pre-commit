@@ -60,6 +60,7 @@ git rev-parse "origin/$BRANCH" >/dev/null 2>&1 || warn "5" "אין מעקב של
 # שער 6-9: hooks קיימים בריפו
 [[ -f "$REPO_ROOT/.githooks/pre-commit" ]] || err "6" "pre-commit חסר מהריפו" "שחזר את .githooks/pre-commit"
 [[ -f "$REPO_ROOT/.githooks/pre-push" ]] || err "7" "pre-push חסר מהריפו" "שחזר את .githooks/pre-push"
+[[ -f "$REPO_ROOT/.githooks/commit-msg" ]] || err "105" "commit-msg חסר" "שחזר את .githooks/commit-msg"
 [[ -f "$REPO_ROOT/.claude/settings.json" ]] || err "8" "settings.json חסר" "שחזר את .claude/settings.json"
 [[ -f "$REPO_ROOT/.claude/hooks/pre-tool.sh" ]] || err "9" "pre-tool.sh חסר" "שחזר את .claude/hooks/pre-tool.sh"
 
@@ -135,33 +136,41 @@ BAD_URI=$(git diff --cached -- '*.dart' 2>/dev/null | grep "^+" | grep -v "^+++"
 
 # ═══ קבוצה ד: בדיקה (31-45) ═══
 
-# שער 31: ניתוח קוד — שגיאות בלבד
-ANALYZE=$(flutter analyze --no-pub 2>&1)
-if echo "$ANALYZE" | grep -qE "^error •"; then
-    ERR_COUNT=$(echo "$ANALYZE" | grep -cE "^error •")
-    echo "$ANALYZE" | grep -E "^error •" | head -3
-    err "31" "$ERR_COUNT שגיאות ניתוח" "תקן את השגיאות"
-fi
+# תיקון באג #19: tiered execution
+# אם אין שינוי dart/yaml — מדלגים על flutter analyze/test/build (חוסך 3-5 דק' לcommits של תיעוד)
+NEEDS_FLUTTER=$(git diff --cached --name-only | grep -E "\.(dart|yaml|yml)$" | head -1)
+if [[ -n "$NEEDS_FLUTTER" ]]; then
+    # שער 31: ניתוח קוד — שגיאות בלבד
+    ANALYZE=$(flutter analyze --no-pub 2>&1)
+    if echo "$ANALYZE" | grep -qE "^error •"; then
+        ERR_COUNT=$(echo "$ANALYZE" | grep -cE "^error •")
+        echo "$ANALYZE" | grep -E "^error •" | head -3
+        err "31" "$ERR_COUNT שגיאות ניתוח" "תקן את השגיאות"
+    fi
 
-# שער 32: כל הבדיקות ירוקות
-TEST_OUT=$(flutter test --no-pub 2>&1)
-if echo "$TEST_OUT" | grep -qE "^FAILED|Some tests failed"; then
-    echo "$TEST_OUT" | grep -E "FAILED|Error:" | head -3
-    err "32" "בדיקות נכשלות" "תקן את הבדיקות"
-fi
+    # שער 32: כל הבדיקות ירוקות (תיקון באג #6 — בודק גם exit code)
+    TEST_OUT=$(flutter test --no-pub 2>&1)
+    TEST_EXIT=$?
+    if [[ $TEST_EXIT -ne 0 ]] || echo "$TEST_OUT" | grep -qE "^FAILED|Some tests failed|Test failed"; then
+        echo "$TEST_OUT" | grep -E "FAILED|Error:|Test failed" | head -3
+        err "32" "בדיקות נכשלות (exit=$TEST_EXIT)" "תקן את הבדיקות"
+    fi
 
-TEST_COUNT=$(echo "$TEST_OUT" | grep -oE "\+[0-9]+" | tail -1 | tr -d '+')
+    TEST_COUNT=$(echo "$TEST_OUT" | grep -oE "\+[0-9]+" | tail -1 | tr -d '+')
 
-# שער 33: מספר בדיקות לא יורד
-LAST_TEST_COUNT=$(grep -oE "[0-9]+ tests" knowledge/STATUS.md 2>/dev/null | head -1 | grep -oE "[0-9]+" || echo 0)
-if [[ "$TEST_COUNT" -lt "$LAST_TEST_COUNT" ]]; then
-    err "33" "מספר בדיקות ירד: $TEST_COUNT < $LAST_TEST_COUNT" "אל תמחק בדיקות"
-fi
+    # שער 33: מספר בדיקות לא יורד (תיקון באג #10 — pattern נכון)
+    LAST_TEST_COUNT=$(grep -oE "[0-9]+\+ tests|[0-9]+ tests pass" knowledge/STATUS.md 2>/dev/null | head -1 | grep -oE "^[0-9]+" || echo 0)
+    if [[ -n "$TEST_COUNT" && "$TEST_COUNT" -lt "$LAST_TEST_COUNT" ]]; then
+        err "33" "מספר בדיקות ירד: $TEST_COUNT < $LAST_TEST_COUNT" "אל תמחק בדיקות"
+    fi
 
-# שער 34: בנייה לאינטרנט
-BUILD_OUT=$(flutter build web --release --no-pub 2>&1)
-if echo "$BUILD_OUT" | grep -qE "^Error|Failed to"; then
-    err "34" "בנייה נכשלה" "תקן שגיאות בנייה"
+    # שער 34: בנייה לאינטרנט
+    BUILD_OUT=$(flutter build web --release --no-pub 2>&1)
+    if echo "$BUILD_OUT" | grep -qE "^Error|Failed to"; then
+        err "34" "בנייה נכשלה" "תקן שגיאות בנייה"
+    fi
+else
+    echo "ℹ️  אין שינוי בקוד — מדלג על flutter analyze/test/build (חוסך 3-5 דק')"
 fi
 
 # שער 35-40: בדיקות חיוניות עוברות
@@ -260,16 +269,11 @@ NEW_DEPS=$(git diff --cached pubspec.yaml 2>/dev/null | grep "^+" | grep -v "^++
 
 # ═══ קבוצה ו: שפה ותרבות (61-75) ═══
 
-# שער 61: מחרוזות עברית — חיפוש בקטלוג
-NEW_HE=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -oE "'[א-ת][^']*'" | head -3)
-if [[ -n "$NEW_HE" ]]; then
-    while read -r heb; do
-        clean=$(echo "$heb" | tr -d "'")
-        if [[ -f "$REPO_ROOT/index.html" ]] && ! grep -q "$clean" "$REPO_ROOT/index.html" 2>/dev/null; then
-            warn "61" "מחרוזת '$clean' לא נמצאה בקטלוג"
-        fi
-    done <<< "$NEW_HE"
-fi
+# שער 61: מחרוזות עברית — חיפוש בקטלוג (תיקון באג #17 — רק לקבצי Preact-shared)
+# הסרנו את הבדיקה האוטומטית כי Flutter-only עלים לא חייבים להיות ב-index.html.
+# המקור עכשיו: index.html VS app/src/ — לא Flutter.
+# (שמירת הכלל לידע: יש לוודא ידנית verbatim כשמעתיקים מ-Preact ל-Flutter)
+:
 
 # שער 62: RTL — אין left/right קשיח
 HARD_LR=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "padding.*\b(left|right):" | grep -v "EdgeInsetsDirectional" | head -1)
@@ -379,10 +383,15 @@ HP=$(git config --get core.hooksPath)
 [[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] || err "84" "GitHub workflow נמחק" "שחזר את .github/workflows/protocol-enforce.yml"
 grep -q "protocol-gates" "$REPO_ROOT/.github/workflows/protocol-enforce.yml" 2>/dev/null || err "85" "workflow מקולקל"
 
-# שער 86-90: catalog integrity
-if git diff --cached lib/data/lipskey_catalog.dart >/dev/null 2>&1; then
-    DUP_SKU=$(git diff --cached lib/data/lipskey_catalog.dart | grep "^+" | grep -oE "sku: '[^']+'" | sort | uniq -d | head -1)
-    [[ -z "$DUP_SKU" ]] || err "86" "SKU כפול: $DUP_SKU" "כל SKU חייב להיות ייחודי"
+# שער 86-90: catalog integrity (תיקון באג #28 — בדיקה על כל הקובץ, לא רק diff)
+if git diff --cached --name-only | grep -q "lib/data/.*catalog\.dart"; then
+    # בדוק כפילויות בכל הקובץ אחרי השינוי
+    for catalog_file in lib/data/lipskey_catalog.dart lib/data/polyroll_catalog.dart; do
+        if [[ -f "$catalog_file" ]]; then
+            DUP_SKU=$(grep -oE "sku: '[^']+'" "$catalog_file" | sort | uniq -d | head -1)
+            [[ -z "$DUP_SKU" ]] || err "86" "SKU כפול ב-$catalog_file: $DUP_SKU" "כל SKU חייב להיות ייחודי"
+        fi
+    done
 fi
 
 if git diff --cached lib/data/polyroll_catalog.dart >/dev/null 2>&1; then
