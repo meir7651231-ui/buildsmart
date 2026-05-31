@@ -561,24 +561,26 @@ fi
 
 # שער 103: אנטי-פטרנים מ-stuck_log לא חוזרים בקוד החדש
 # תיקון באג #11: pattern עובר ל-grep בלי shell expansion
+# תיקון באג #32: shell-meta warning רצה גם כשאין Dart staged → false positives
+# הפתרון: מחשב STAGED_DART לפני הלולאה ועוטף את כולה
 if [[ -f "$STUCK_LOG" ]]; then
-    while IFS= read -r line; do
-        pattern="${line#ANTIPATTERN: }"
-        [[ -z "$pattern" ]] && continue
-        # חסום shell-injection chars לפני שימוש ב-pattern
-        if echo "$pattern" | grep -qE '\$\(|\`|\\$\{'; then
-            warn "103" "אנטי-פטרן ב-stuck_log מכיל shell-meta: $pattern"
-            continue
-        fi
-        STAGED_DART=$(git diff --cached --name-only -- '*.dart' 2>/dev/null)
-        if [[ -n "$STAGED_DART" ]]; then
-            # השתמש ב-grep -F לפטרנים פשוטים, או -E בlevel המתאים
+    STAGED_DART_103=$(git diff --cached --name-only -- '*.dart' 2>/dev/null)
+    if [[ -n "$STAGED_DART_103" ]]; then
+        while IFS= read -r line; do
+            pattern="${line#ANTIPATTERN: }"
+            [[ -z "$pattern" ]] && continue
+            # חסום shell-injection chars לפני שימוש ב-pattern
+            if echo "$pattern" | grep -qE '\$\(|\`|\\$\{'; then
+                warn "103" "אנטי-פטרן ב-stuck_log מכיל shell-meta (דלג): $pattern"
+                continue
+            fi
+            # השתמש ב-grep -E בlevel המתאים
             MATCH=$(git diff --cached -- '*.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E -- "$pattern" 2>/dev/null | head -1)
             if [[ -n "$MATCH" ]]; then
                 err "103" "אנטי-פטרן חזר: $pattern" "ראה stuck_log.md — הבעיה תועדה כבר"
             fi
-        fi
-    done < <(grep "^ANTIPATTERN:" "$STUCK_LOG" 2>/dev/null)
+        done < <(grep "^ANTIPATTERN:" "$STUCK_LOG" 2>/dev/null)
+    fi
 fi
 
 # שער 104: re-generate stuck_regression_test אם stuck_log השתנה
