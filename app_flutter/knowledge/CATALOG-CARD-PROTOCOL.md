@@ -771,6 +771,33 @@ drawing. Start `t` BELOW these tags. They are not part of the drawing.
 "sign-off" montage round trip, costing 1 user feedback cycle and a force-redo.
 The total wall-time saved by skipping step 4 is ≪ the cost of the redo.
 
+### §22.B.1 — Sign-off montage display rule
+
+The first sign-off montage (signoff_signed.png) used 160px-height panels
+arranged 3-wide. At that scale, a green photo strip at the crop's top edge
+appears as a 2-pixel green line — invisible at a glance. The user's "תבדוק
+הרוב חתוך לא טוב" feedback came AFTER they spotted the contamination at
+full-asset size; the thumbnail-montage had hidden it.
+
+**Rule:** sign-off montages must show each spec at the **same resolution the
+app's product card renders it** (typically 280–400px wide for the diagram pane
+on a phone, larger on tablet). Lower than that = hidden contamination.
+Higher = wasted space but no risk.
+
+### §22.B.2 — Meta-lesson: knowing ≠ preventing
+
+Three families' worth of "tighten margins, avoid photo, avoid table" lessons
+existed in the protocol BEFORE the cf3966c batch — and that batch produced
+9 contaminated specs out of 13. The pattern is: **a lesson written in past
+tense ("we should have avoided X") doesn't prevent the next occurrence. Only
+an enforced pre-action checklist does.** Going forward, every new bug class
+gets two protocol additions: (a) a §14 detection (or, when no automated check
+is possible, a pre-action checklist) AND (b) a "knowing ≠ preventing" review
+question: "If this lesson had existed yesterday, would my procedure today have
+been different?" If the honest answer is "no, I'd still have made the same
+mistake," the lesson is aspirational — not real — and needs a procedural
+enforcement step.
+
 ### Lessons applied while doing family 4/elbow_45
 
 - **A page can carry BOTH 45° and 90° drawings (p19, p20, p81).** The same page number must route to two different specs depending on `nameHe.contains('45')`. We added `_kPprElbow45PageSpec` parallel to the 90° map, and the `case kPprElbows` block probes both before falling back.
