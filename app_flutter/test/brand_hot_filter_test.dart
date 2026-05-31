@@ -33,4 +33,20 @@ void main() {
       }
     }
   });
+
+  test('brandIsMetallic: spec-less kept; non-metal rejected; metal kept', () {
+    for (final sp in kSmartProducts) {
+      for (final b in sp.brands) {
+        final prod = catalogProductForBrand(b);
+        if (prod == null) {
+          expect(brandIsMetallic(b), isTrue, reason: 'spec-less → kept');
+          continue;
+        }
+        final mat = kVerifiedSpecs[prod.sku]?.material;
+        final expected =
+            mat == null || const {'נחושת', 'פליז', 'פלדה'}.contains(mat);
+        expect(brandIsMetallic(b), expected, reason: '${sp.key}/${b.name}');
+      }
+    }
+  });
 }

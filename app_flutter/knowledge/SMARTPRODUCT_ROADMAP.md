@@ -182,9 +182,11 @@ Saved for the next run. Pick up here:
 63. ✅ "Similar" — variant-family list ("גרסאות נוספות במשפחה") in the 📦 section
    via `variantSiblingsOf`. (Upgrade/cheaper-alternative still ⬜.)
 64. ⬜ Health navigation: from the card straight to the relevant finder/category.
-65. 🟦 Quick in-brand filter — extended the brand selector (סוג/מידה) with a
-   "🌡 מים חמים בלבד" toggle via `brandSuitableForHot`. (material/price quick
-   filters still ⬜.) Guard: `brand_hot_filter_test`.
+65. ✅ Quick in-brand filters — `brandSuitableForHot` ("🌡 מים חמים בלבד") +
+   `brandIsMetallic` ("💎 מתכת בלבד") side-by-side in the brand selector.
+   Both combine with the existing סוג/מידה filters (logical AND). Guards in
+   `brand_hot_filter_test`. (A price filter would be moot — `b.price` is
+   rarely set per-brand; category-level prices tie across siblings.)
 66. ✅ "Recently viewed" history — persisted `recentlyViewedProvider`
    (move-to-front + dedupe + cap-20), recorded on card open, shown as
    "נצפו לאחרונה". Guard: `recently_viewed_test`.

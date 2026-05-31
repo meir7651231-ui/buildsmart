@@ -4349,6 +4349,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   String? _selType;
   String? _selSize;
   bool _hotOnly = false; // Roadmap step 65 — quick "hot-water only" filter.
+  bool _metallicOnly = false; // Roadmap step 65 — quick "metal-only" filter.
 
   // Brands matching the chosen סוג / מידה filters (derived from names).
   List<int> get _filteredBrandIdx {
@@ -4357,7 +4358,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
       for (var i = 0; i < brands.length; i++)
         if ((_selType == null || brands[i].name.contains(_selType!)) &&
             (_selSize == null || brands[i].name.contains(_selSize!)) &&
-            (!_hotOnly || brandSuitableForHot(brands[i])))
+            (!_hotOnly || brandSuitableForHot(brands[i])) &&
+            (!_metallicOnly || brandIsMetallic(brands[i])))
           i,
     ];
   }
@@ -4833,37 +4835,72 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Roadmap step 65 — quick "hot-water only" brand filter.
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: GestureDetector(
-                          onTap: () => setState(() {
-                            _hotOnly = !_hotOnly;
-                            _applyFilterSelection();
-                          }),
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: _hotOnly
-                                  ? const Color(0xFFFFEDD5)
-                                  : const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
+                      // Roadmap step 65 — quick "hot-water only" + "metal only"
+                      // brand filters.
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Wrap(
+                          alignment: WrapAlignment.end,
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            GestureDetector(
+                              onTap: () => setState(() {
+                                _hotOnly = !_hotOnly;
+                                _applyFilterSelection();
+                              }),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
                                   color: _hotOnly
-                                      ? const Color(0xFFFB923C)
-                                      : const Color(0xFFE2E8F0)),
+                                      ? const Color(0xFFFFEDD5)
+                                      : const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                      color: _hotOnly
+                                          ? const Color(0xFFFB923C)
+                                          : const Color(0xFFE2E8F0)),
+                                ),
+                                child: Text(
+                                    '${_hotOnly ? "✓ " : ""}🌡 מים חמים בלבד',
+                                    style: TextStyle(
+                                        color: _hotOnly
+                                            ? const Color(0xFFC2410C)
+                                            : const Color(0xFF64748B),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700)),
+                              ),
                             ),
-                            child: Text(
-                                '${_hotOnly ? "✓ " : ""}🌡 מים חמים בלבד',
-                                style: TextStyle(
-                                    color: _hotOnly
-                                        ? const Color(0xFFC2410C)
-                                        : const Color(0xFF64748B),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700)),
-                          ),
+                            GestureDetector(
+                              onTap: () => setState(() {
+                                _metallicOnly = !_metallicOnly;
+                                _applyFilterSelection();
+                              }),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: _metallicOnly
+                                      ? const Color(0xFFF1F5F9)
+                                      : const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                      color: _metallicOnly
+                                          ? const Color(0xFF94A3B8)
+                                          : const Color(0xFFE2E8F0)),
+                                ),
+                                child: Text(
+                                    '${_metallicOnly ? "✓ " : ""}💎 מתכת בלבד',
+                                    style: TextStyle(
+                                        color: _metallicOnly
+                                            ? const Color(0xFF334155)
+                                            : const Color(0xFF64748B),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700)),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       for (final i in _filteredBrandIdx) _brandCard(i),

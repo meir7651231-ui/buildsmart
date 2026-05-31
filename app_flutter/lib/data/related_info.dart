@@ -94,6 +94,18 @@ bool brandSuitableForHot(SmartBrand brand, {int tempC = 60}) {
   return t == null || tempC <= t;
 }
 
+/// Whether a brand's product is made of a *metallic* material (brass / copper
+/// / steel). Brands with no verified spec are kept (unknown ≠ rejected). Used
+/// by the card's quick "💎 מתכת בלבד" brand filter.
+bool brandIsMetallic(SmartBrand brand) {
+  final prod = catalogProductForBrand(brand);
+  if (prod == null) return true;
+  final mat = kVerifiedSpecs[prod.sku]?.material;
+  if (mat == null) return true;
+  const metals = {'נחושת', 'פליז', 'פלדה'};
+  return metals.contains(mat);
+}
+
 // ─── כיסוי מחברים (connector-coverage classification) ───────────────────────
 /// True when [p] is a flow-connector that SHOULD carry a [VerifiedSpec] — i.e.
 /// it physically joins the pipe network. Accessories / supports / tools (see
