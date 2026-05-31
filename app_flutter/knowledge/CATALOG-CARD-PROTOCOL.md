@@ -705,8 +705,8 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 
 | § | מחלקת-באג | הבדיקה ששומרת |
 |---|---|---|
-| 22 | spec משותף בין עמודים שלכל אחד דיאגרמה ייחודית | `spec_assets_test` · "every product page must route to its own spec" |
-| 22 | spec לא תואם לעמוד-המקור (file name) | `spec_assets_test` · "no shared spec across >2 pages" |
+| 22 | spec משותף בין עמודים שלכל אחד דיאגרמה ייחודית | `spec_assets_test` · "§22 per-page spec routing — products land on their page-specific crop" |
+| 22 | spec משמש >2 עמודים (קטגוריה×עמוד) ללא הצדקה | `spec_assets_test` · "§22 sharing — no spec serves >2 catalog pages (allowlist exempt)" — allowlist מכיל את חתך-הרוחב של הצינורות (spec_faser_20/spec_pprct_pipe/spec_pprct_pipe_sdr17) ששותפים לגיטימית כי הגאומטריה זהה לכל קוטר |
 
 ### Progress tracker — families (15 total)
 
@@ -721,7 +721,7 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 | 6b | coupler (straight) | p22, p44 (2) | ✅ done | `b691c2a`+local |
 | 7 | adapter_round | p27, p29, p53, p54, p55 (5) | ✅ done | `8d09839` |
 | 7b | adapter_hex | p28, p56, p57 (3) | ✅ done | `8d09839` |
-| 8 | tee_reducing | p21, p42 (2; p43 shared) | ✅ done | local |
+| 8 | tee_reducing | p21, p42, p82 (3; p43 shared) | ✅ done | local |
 | 9 | collar (plain) | p34, p69, p85 (3) | ✅ done | local |
 | 10 | faser_20 | n/a — pipe geometry is universally shared (one cross-section spec covers all sizes) | ✅ n/a | — |
 | 11 | adapter_hex | merged into family 7b above | ✅ done | — |

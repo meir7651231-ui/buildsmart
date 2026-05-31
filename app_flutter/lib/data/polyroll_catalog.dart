@@ -236,6 +236,7 @@ const Map<int, String> _kPprAdapterHexPageSpec = {
 const Map<int, String> _kPprTeeReducingPageSpec = {
   21: 'spec_tee_reducing_p21.jpg', // PPR reducing tee (l2/z2/z/l/d2/d1)
   42: 'spec_tee_reducing_p42.jpg', // PPRCT reducing tee (A/B1/B2/B3/C1/C3/E)
+  82: 'spec_tee_reducing_p82.jpg', // PPRCT reducing tee (D1/d1/l/d)
   // p43 shares geometry with p42 (legit shared) → falls back to generic.
 };
 

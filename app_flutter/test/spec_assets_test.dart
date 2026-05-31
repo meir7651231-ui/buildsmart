@@ -400,6 +400,7 @@ void main() {
       '${kPprTees}_reducing': {
         21: 'spec_tee_reducing_p21.jpg',
         42: 'spec_tee_reducing_p42.jpg',
+        82: 'spec_tee_reducing_p82.jpg',
       },
       kPprCollars: {
         // Plain-collar per-page (excludes p66/67/68 which use sub-type logic).
@@ -502,5 +503,36 @@ void main() {
       });
     });
     expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
+  // §22 stage D complementary check: no spec asset may serve more than two
+  // (category, page) combos. Universally-shared geometries (pipes whose
+  // dimension diagram is one circular cross-section regardless of size) are
+  // allow-listed. Anything else hitting >2 pages means a per-page crop is
+  // missing.
+  test('§22 sharing — no spec serves >2 catalog pages (allowlist exempt)', () {
+    const allowlistSharedAcrossPages = {
+      // Pipes: one cross-section spec is geometrically correct for every
+      // diameter (just scaled). Catalog itself doesn't draw it per page.
+      'spec_faser_20.jpg',
+      'spec_pprct_pipe.jpg',
+      'spec_pprct_pipe_sdr17.jpg',
+    };
+    final usage = <String, Set<String>>{};
+    for (final p in kPolyrollCatalog) {
+      final s = p.specImageAssets.first.split('/').last;
+      usage.putIfAbsent(s, () => {}).add('${p.categoryHe}|${p.page}');
+    }
+    final offenders = <String>[];
+    usage.forEach((spec, pages) {
+      if (allowlistSharedAcrossPages.contains(spec)) return;
+      if (pages.length > 2) {
+        offenders.add('$spec → ${pages.length} pages: ${pages.join(", ")}');
+      }
+    });
+    expect(offenders, isEmpty,
+        reason:
+            'Specs shared across >2 pages — crop a per-page variant or add '
+            'to allowlistSharedAcrossPages with a reason:\n${offenders.join("\n")}');
   });
 }
