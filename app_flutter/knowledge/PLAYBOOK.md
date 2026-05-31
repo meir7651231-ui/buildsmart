@@ -336,3 +336,36 @@ Format per entry:
 
 ## H. Synthetic catalog products (pattern)
 - To model items the real catalogue lacks (hot-water gear, cut-to-length pipes): build a `LipskeyCatalogProduct` like `lipskey_hotwater.dart::_hw(...)` (productType derives from the name via `kLipskeyTypes`, so name a pipe "צינור …") and register its `VerifiedSpec` in `kVerifiedSpecs` (it's a mutable `final Map` — `putIfAbsent`). They stay out of the product carousel because that filters on `kLipskeyCatalog`.
+
+---
+
+## I. Lessons from the v5.36–v5.40 push-free session (closed 7 🟦)
+
+### Static text-count tests as cheap invariant locks
+- **Pattern:** when the behavior you want to lock is STRUCTURAL — "every animation has a reducedMotion guard", "every chip carries a Tooltip", "the search UI wires all three matchers" — don't write a widget-tree test. Write a `File('lib/screens/X.dart').readAsStringSync()` + `contains(...)` / `allMatches(...).length` check.
+- **Wins:** runs in milliseconds, no Flutter test harness, no canvas-tap flake. Lives or dies by the source text, which is what you want for "did we wire it?" invariants.
+- **Examples this session:** `reduced_motion_test` (AnimationController count ≤ reducedMotion count), `chip_tooltips_test` (6 expected message snippets present), `search_fallback_test` (three matcher names all referenced in `_SearchResultsList`).
+- **Don't use for:** behavior that depends on actual values at runtime (use `ProviderContainer` for those — see `card_filter_state_test`).
+
+### Re-verify "pre-existing failures" claims before treating them as wall
+- **Trap:** STATUS.md said `category_scan_test` and `wiring_test` were "pre-existing failures (catalog-data issues, not code bugs)." A fresh run showed they pass clean.
+- **Fix:** before quoting a stale "this is broken" note, re-run the specific test. Notes age, code moves.
+- **Cost of not re-checking:** you carry a false-positive wall in your mental model — and may waste the user's time apologizing for a non-issue or skipping a fix that isn't needed.
+
+### Block-of-3 cadence keeps local commits revertable
+- Group 3 small polish/feature/test items per local commit (e.g. D+E+F → v5.36 polish, J alone, G+I together). Each commit is a complete unit a `git revert` can undo without breaking the rest.
+- **Anti-pattern:** one giant commit at end of session — irreversible and hard to review.
+- **Sweet spot:** ~3 items, ~150 LOC, ~5 files, message that names every step touched.
+
+### Closing 🟦 honestly — audit the code, sometimes the work is already done
+- **Step 2** was 🟦 only because the label was stale: the bridge IS complete (84% SKU coverage, the 58 brands without a SKU are intentional "by supplier" variants). Mark ✅ with the exact coverage numbers, don't pretend new work was needed.
+- **Step 87** was 🟦 because the comment said "still ⬜" but the code already had the guard in BOTH animation controllers. The fix was adding a `reduced_motion_test` to LOCK the invariant, not adding the guard (which existed).
+- **Rule:** when planning to close a 🟦, FIRST audit the source. If the work is shipped, your job is to document + lock, not to re-build.
+
+### Helper-first → UI is still the cleanest pattern
+- This session shipped 4 pure helpers (scoreBandColors, CardFilterSelection, pairConnectionWarningHe, fuzzySearch UI fallback) and 1 widget (_SavedVersionChip), all helper-first with tests before any UI wiring. Zero rework, zero test churn.
+- The earlier subagent debacle taught not to outsource UI; doing helpers in-thread with TDD is still faster than any orchestration.
+
+### Origin can move under your feet — fetch before push, not during work
+- The other session pushed `240585a` (knowledge docs) while I was working. I'm 8 ahead of `dd45bb1` (my fork point) but only 7 ahead of `240585a` (current origin). Status `git fetch && git log` makes this visible.
+- **Push protocol:** fetch first → rebase if origin moved → verify clean diff → push. Don't push without fetching, even if the user is impatient.
