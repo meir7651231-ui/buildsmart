@@ -41,49 +41,50 @@ enum Severity { required, recommended, optional }
 /// THIS product — even before they've assembled a full chain.
 List<KitItem> recommendedKitForProduct(LipskeyCatalogProduct p) {
   final spec = kVerifiedSpecs[p.sku];
-  if (spec == null) {
-    // PPR (Polyroll) is a socket-fusion system — the kit is the welding tooling
-    // plus a square cutter, sized to the pipe's nominal diameter.
-    if (p.brand == 'פולירול') {
-      final dn = p.dims?['dn נומינלי']?.toString() ?? '';
-      final ds = dn.isEmpty ? '' : ' ⌀$dn מ"מ';
-      return [
-        KitItem(
-          kind: KitKind.tool,
-          label: 'מצמד PPR${dn.isEmpty ? '' : ' $dn'} (אביזר חיבור)',
-          reason: 'מאחד שני קטעי צינור בריתוך-שקע',
-        ),
-        const KitItem(
-          kind: KitKind.tool,
-          label: 'מכונת ריתוך-שקע 260°C',
-          reason: 'מחממת את הצינור ואת השקע בו-זמנית',
-        ),
-        KitItem(
-          kind: KitKind.tool,
-          label: 'תבנית/ראש ריתוך$ds',
-          reason: 'זוג תבניות (זכר+נקבה) לקוטר הצינור',
-        ),
-        const KitItem(
-          kind: KitKind.tool,
-          label: 'מספריים/חותך צינור PPR',
-          reason: 'חיתוך ניצב ונקי של הצינור',
-        ),
-        const KitItem(
-          kind: KitKind.tool,
-          label: 'מסיר גרדים + מטלית ניקוי',
-          reason: 'ניקוי וייבוש הקצה לפני ריתוך',
-          severity: Severity.recommended,
-        ),
-        const KitItem(
-          kind: KitKind.tool,
-          label: 'עט סימון עומק',
-          reason: 'סימון עומק ההחדרה לשקע על הצינור',
-          severity: Severity.recommended,
-        ),
-      ];
-    }
-    return const [];
+  // Material-gated PPR kit (PLAYBOOK §I). After registerPolyrollSpecs every
+  // PPR product has a spec, so the gate now also accepts spec.material — both
+  // paths return the welding kit (NOT a compression wrench, which would be
+  // wrong for socket-fusion).
+  if (p.brand == 'פולירול' ||
+      (spec?.material.startsWith('PPR') ?? false)) {
+    final dn = p.dims?['dn נומינלי']?.toString() ?? '';
+    final ds = dn.isEmpty ? '' : ' ⌀$dn מ"מ';
+    return [
+      KitItem(
+        kind: KitKind.tool,
+        label: 'מצמד PPR${dn.isEmpty ? '' : ' $dn'} (אביזר חיבור)',
+        reason: 'מאחד שני קטעי צינור בריתוך-שקע',
+      ),
+      const KitItem(
+        kind: KitKind.tool,
+        label: 'מכונת ריתוך-שקע 260°C',
+        reason: 'מחממת את הצינור ואת השקע בו-זמנית',
+      ),
+      KitItem(
+        kind: KitKind.tool,
+        label: 'תבנית/ראש ריתוך$ds',
+        reason: 'זוג תבניות (זכר+נקבה) לקוטר הצינור',
+      ),
+      const KitItem(
+        kind: KitKind.tool,
+        label: 'מספריים/חותך צינור PPR',
+        reason: 'חיתוך ניצב ונקי של הצינור',
+      ),
+      const KitItem(
+        kind: KitKind.tool,
+        label: 'מסיר גרדים + מטלית ניקוי',
+        reason: 'ניקוי וייבוש הקצה לפני ריתוך',
+        severity: Severity.recommended,
+      ),
+      const KitItem(
+        kind: KitKind.tool,
+        label: 'עט סימון עומק',
+        reason: 'סימון עומק ההחדרה לשקע על הצינור',
+        severity: Severity.recommended,
+      ),
+    ];
   }
+  if (spec == null) return const [];
   final out = <String, KitItem>{};
   void add(String key, KitItem item) => out.putIfAbsent(key, () => item);
 
@@ -177,8 +178,29 @@ List<KitItem> recommendedKitFor(List<LipskeyCatalogProduct> chain) {
           ));
     }
 
+    // Material-gated PPR welding kit overrides the compression branch.
+    if (sa.material.startsWith('PPR') && sb.material.startsWith('PPR')) {
+      addItem('ppr-welder',
+          const KitItem(
+            kind: KitKind.tool,
+            label: 'מכונת ריתוך-שקע PPR (260°C)',
+            reason: 'ריתוך-שקע למצמד / ברך / מסעף PPR',
+          ));
+      addItem('ppr-die-${jointA.size}',
+          KitItem(
+            kind: KitKind.tool,
+            label: 'תבנית ריתוך ⌀${jointA.size} מ"מ',
+            reason: 'זוג תבניות (זכר+נקבה) לקוטר הקו',
+          ));
+      addItem('ppr-cutter',
+          const KitItem(
+            kind: KitKind.tool,
+            label: 'חותך צינור PPR',
+            reason: 'חיתוך ניצב לפני ריתוך',
+          ));
+    }
     // Compression / pipe-bridged joint → compression-nut wrench.
-    if (jointA.type == EndType.hdpeCompression) {
+    else if (jointA.type == EndType.hdpeCompression) {
       final mat = sa.material;
       addItem('wrench-comp-$mat-${jointA.size}',
           KitItem(

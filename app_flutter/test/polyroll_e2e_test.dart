@@ -11,6 +11,7 @@ import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/logic/install_kit.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -77,6 +78,29 @@ void main() {
       expect(tools.any((t) => t.contains('⚡') || t.contains('חשמלי')),
           isTrue, reason: 'tools=$tools');
     });
+  });
+
+  test('recommendedKitForProduct on PPR returns the welding kit', () {
+    final pipe = kPolyrollCatalog.firstWhere((p) => p.sku == '95016002');
+    final kit = recommendedKitForProduct(pipe);
+    final labels = kit.map((k) => k.label).join(' · ');
+    expect(labels.contains('ריתוך-שקע'), isTrue,
+        reason: 'PPR kit must mention socket fusion welder · $labels');
+    expect(labels.contains('compression') || labels.contains('חבישה'),
+        isFalse,
+        reason: 'PPR kit must NOT contain a compression wrench (wrong tool)');
+  });
+
+  test('recommendedKitFor (chain) on PPR↔PPR joint uses welder, not compression',
+      () {
+    final pipe = kPolyrollCatalog.firstWhere((p) => p.sku == '95016002');
+    final elbow = kPolyrollCatalog.firstWhere((p) => p.sku == '92117042');
+    final kit = recommendedKitFor([pipe, elbow]);
+    final labels = kit.map((k) => k.label).join(' · ');
+    expect(labels.contains('ריתוך-שקע'), isTrue,
+        reason: 'PPR↔PPR chain kit must use welder · $labels');
+    expect(labels.contains('חבישה'), isFalse,
+        reason: 'PPR↔PPR chain must NOT use compression wrench');
   });
 
   test(
