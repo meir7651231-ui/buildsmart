@@ -281,7 +281,7 @@ void main() {
       expect(
           spec(find((p) =>
               p.categoryHe == kPprAdapters && p.nameHe.contains('משושה'))),
-          matches(r'spec_adapter_hex(?:_p\d+)?\.jpg$'));
+          matches(r'spec_adapter_hex(?:_p\d+(?:_\w+)?)?\.jpg$'));
     });
 
     test('valve sub-types each resolve distinctly', () {
@@ -333,7 +333,7 @@ void main() {
         // 90° per-page (handles non-45 elbows)
         19: 'spec_elbow_90_p19.jpg',
         20: 'spec_elbow_90_p20.jpg',
-        25: 'spec_elbow_90_p25.jpg',
+        // p25 is sub-type-split (§22.D) — tested separately.
         38: 'spec_elbow_90_p38.jpg',
         // p39 is model-split (§22.C) — tested separately.
         48: 'spec_elbow_90_p48.jpg',
@@ -354,9 +354,9 @@ void main() {
       },
       kPprTees: {
         20: 'spec_tee_p20.jpg',
-        26: 'spec_tee_p26.jpg',
+        // p26 is sub-type-split (§22.D) — tested separately.
         40: 'spec_tee_p40.jpg',
-        41: 'spec_tee_p41.jpg',
+        // p41 is model-split (§22.C) — tested separately.
         51: 'spec_tee_p51.jpg',
         52: 'spec_tee_p52.jpg',
         82: 'spec_tee_p82.jpg',
@@ -387,13 +387,12 @@ void main() {
         83: 'spec_coupler_reducing_p83.jpg',
       },
       kPprAdapters: {
-        // round (non-hex)
-        27: 'spec_adapter_round_p27.jpg',
+        // round (non-hex). p27 sub-type-split (§22.D) — tested separately.
         29: 'spec_adapter_round_p29.jpg',
         // p53, p54, p55 all model-split by §22.C — tested separately below.
       },
       '${kPprAdapters}_hex': {
-        28: 'spec_adapter_hex_p28.jpg',
+        // p28 sub-type-split (§22.D) — tested separately.
         56: 'spec_adapter_hex_p56.jpg',
         57: 'spec_adapter_hex_p57.jpg',
       },
@@ -659,6 +658,74 @@ void main() {
       }
       if (p.dims?['מודל'] != entry.value) {
         gaps.add('${entry.key}: dims[\'מודל\']=${p.dims?['מודל']} ≠ ${entry.value}');
+      }
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
+  // §22.D — p25 PPR threaded brass elbow 90° has 3 distinct sub-types:
+  // משטח ריסון (with damper), חיצוני (external thread), פנימי (internal).
+  test('§22.D p25 elbow_90 sub-type split — damper/external/internal', () {
+    for (final p in kPolyrollCatalog.where((p) => p.page == 25)) {
+      final s = p.specImageAssets.first.split('/').last;
+      String want;
+      if (p.nameHe.contains('משטח ריסון')) {
+        want = 'spec_elbow_90_p25_damper.jpg';
+      } else if (p.nameHe.contains('חיצוני')) {
+        want = 'spec_elbow_90_p25_external.jpg';
+      } else {
+        want = 'spec_elbow_90_p25_internal.jpg';
+      }
+      expect(s, want, reason: '${p.sku} ${p.nameHe}');
+    }
+  });
+
+  // §22.D — p26 PPR threaded brass tee: internal vs external thread split.
+  test('§22.D p26 tee sub-type split — internal vs external thread', () {
+    for (final p in kPolyrollCatalog.where((p) => p.page == 26)) {
+      final s = p.specImageAssets.first.split('/').last;
+      final want = p.nameHe.contains('חיצוני')
+          ? 'spec_tee_p26_external.jpg'
+          : 'spec_tee_p26_internal.jpg';
+      expect(s, want, reason: '${p.sku} ${p.nameHe}');
+    }
+  });
+
+  // §22.D — p27/p28 round/hex adapter: internal vs external thread split.
+  test('§22.D p27 adapter round — internal vs external thread', () {
+    for (final p in kPolyrollCatalog.where((p) => p.page == 27)) {
+      final s = p.specImageAssets.first.split('/').last;
+      final want = p.nameHe.contains('חיצוני')
+          ? 'spec_adapter_round_p27_external.jpg'
+          : 'spec_adapter_round_p27_internal.jpg';
+      expect(s, want, reason: '${p.sku} ${p.nameHe}');
+    }
+  });
+  test('§22.D p28 adapter hex — internal vs external thread', () {
+    for (final p in kPolyrollCatalog.where((p) => p.page == 28)) {
+      final s = p.specImageAssets.first.split('/').last;
+      final want = p.nameHe.contains('חיצוני')
+          ? 'spec_adapter_hex_p28_external.jpg'
+          : 'spec_adapter_hex_p28_internal.jpg';
+      expect(s, want, reason: '${p.sku} ${p.nameHe}');
+    }
+  });
+
+  // §22.C — p41 PPR plain tee (large): 2 models split by size.
+  test('§22.C p41 tee — Model A 160-250, Model B 315-400', () {
+    const expectModel = {
+      '6002300160': 'A', '6002300200': 'A', '6002300250': 'A',
+      '6002300315': 'B', '6002300355': 'B', '6002300400': 'B',
+    };
+    final gaps = <String>[];
+    for (final entry in expectModel.entries) {
+      final p = kPolyrollCatalog.firstWhere((x) => x.sku == entry.key);
+      final want = 'spec_tee_p41_${entry.value.toLowerCase()}.jpg';
+      if (!p.specImageAssets.first.endsWith(want)) {
+        gaps.add('${entry.key} → ${p.specImageAssets.first} ≠ $want');
+      }
+      if (p.dims?['מודל'] != entry.value) {
+        gaps.add('${entry.key}: model=${p.dims?['מודל']} ≠ ${entry.value}');
       }
     }
     expect(gaps, isEmpty, reason: gaps.join('\n'));

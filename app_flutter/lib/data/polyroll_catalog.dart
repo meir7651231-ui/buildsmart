@@ -336,6 +336,12 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
             ? 'spec_elbow_90_p39_a.jpg'
             : 'spec_elbow_90_p39_b.jpg'];
       }
+      // §22.D p25: 3 sub-types (משטח ריסון / חיצוני / פנימי).
+      if (!is45 && page == 25) {
+        if (nameHe.contains('משטח ריסון')) return ['spec_elbow_90_p25_damper.jpg'];
+        if (nameHe.contains('חיצוני')) return ['spec_elbow_90_p25_external.jpg'];
+        return ['spec_elbow_90_p25_internal.jpg'];
+      }
       if (is45 && _kPprElbow45PageSpec.containsKey(page)) {
         return [_kPprElbow45PageSpec[page]!];
       }
@@ -345,6 +351,17 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       return [is45 ? 'spec_elbow_45.jpg' : 'spec_elbow_90.jpg'];
     case kPprAdapters:
       final hex = nameHe.contains('משושה');
+      // §22.D p27/p28: split by internal vs external thread.
+      if (!hex && page == 27) {
+        return [nameHe.contains('חיצוני')
+            ? 'spec_adapter_round_p27_external.jpg'
+            : 'spec_adapter_round_p27_internal.jpg'];
+      }
+      if (hex && page == 28) {
+        return [nameHe.contains('חיצוני')
+            ? 'spec_adapter_hex_p28_external.jpg'
+            : 'spec_adapter_hex_p28_internal.jpg'];
+      }
       // §22.C: p53/p54/p55 round adapter pages split by size into models.
       if (!hex && page == 53) {
         final m = _p53AdapterModel(nameHe).toLowerCase();
@@ -376,6 +393,17 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       return [reducing ? 'spec_coupler_reducing.jpg' : 'spec_coupler.jpg'];
     case kPprTees:
       final reducing = nameHe.contains('מצרה');
+      // §22.D p26: split by internal vs external thread.
+      if (!reducing && page == 26) {
+        return [nameHe.contains('חיצוני')
+            ? 'spec_tee_p26_external.jpg'
+            : 'spec_tee_p26_internal.jpg'];
+      }
+      // §22.C p41: split by size (A 160-250, B 315-400).
+      if (!reducing && page == 41) {
+        final isB = ['315', '355', '400'].any((s) => nameHe.contains(' $s'));
+        return [isB ? 'spec_tee_p41_b.jpg' : 'spec_tee_p41_a.jpg'];
+      }
       // §22: per-page tee spec for both reducing and non-reducing variants.
       if (reducing && _kPprTeeReducingPageSpec.containsKey(page)) {
         return [_kPprTeeReducingPageSpec[page]!];
@@ -989,12 +1017,12 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('6002300900', 'מסעף PPR 90', 'PPR Tee 90', kPprTees, 'PPR Tees', '🔱', 40, dims: {'F': '145', 'E': '23', 'D': '88.6', 'B': '120', 'A': '165', 'מק"ט חוליות': '6002300900', 'יצרן': 'Polyroll'}),
   _ppr('6002300110', 'מסעף PPR 110', 'PPR Tee 110', kPprTees, 'PPR Tees', '🔱', 40, dims: {'F': '169', 'E': '28', 'D': '108.4', 'B': '140', 'A': '201', 'מק"ט חוליות': '6002300110', 'יצרן': 'Polyroll'}),
   _ppr('6002300125', 'מסעף PPR 125', 'PPR Tee 125', kPprTees, 'PPR Tees', '🔱', 40, dims: {'F': '180', 'E': '30', 'D': '122.4', 'B': '163', 'A': '223', 'מק"ט חוליות': '6002300125', 'יצרן': 'Polyroll'}),
-  _ppr('6002300160', 'מסעף PPR פ.פ 160', 'PPR Tee 160', kPprTees, 'PPR Tees', '🔱', 41, dims: {'מק"ט יצרן': 'P-2300160', 'E': '116.8', 'D': '160', 'C': '296', 'A': '160', 'מק"ט חוליות': '6002300160', 'יצרן': 'Polyroll'}),
-  _ppr('6002300200', 'מסעף PPR פ.פ 200', 'PPR Tee 200', kPprTees, 'PPR Tees', '🔱', 41, dims: {'E': '120', 'D': '159.7', 'C': '200', 'A': '500', 'מק"ט חוליות': '6002300200', 'יצרן': 'Polyroll'}),
-  _ppr('6002300250', 'מסעף PPR פ.פ 250', 'PPR Tee 250', kPprTees, 'PPR Tees', '🔱', 41, dims: {'E': '131', 'D': '214', 'C': '250', 'A': '573', 'מק"ט חוליות': '6002300250', 'יצרן': 'Polyroll'}),
-  _ppr('6002300315', 'מסעף PPR פ.פ 315', 'PPR Tee 315', kPprTees, 'PPR Tees', '🔱', 41, dims: {'E': '295', 'D': '277', 'C': '315', 'A': '945', 'מק"ט חוליות': '6002300315', 'יצרן': 'Polyroll'}),
-  _ppr('6002300355', 'מסעף PPR פ.פ 355', 'PPR Tee 355', kPprTees, 'PPR Tees', '🔱', 41, dims: {'E': '309', 'D': '307', 'C': '355', 'A': '948', 'מק"ט חוליות': '6002300355', 'יצרן': 'Polyroll'}),
-  _ppr('6002300400', 'מסעף PPR פ.פ 400', 'PPR Tee 400', kPprTees, 'PPR Tees', '🔱', 41, dims: {'E': '324', 'D': '349', 'C': '400', 'A': '1145', 'מק"ט חוליות': '6002300400', 'יצרן': 'Polyroll'}),
+  _ppr('6002300160', 'מסעף PPR פ.פ 160', 'PPR Tee 160', kPprTees, 'PPR Tees', '🔱', 41, dims: {'מודל': 'A', 'מק"ט יצרן': 'P-2300160', 'E': '116.8', 'D': '160', 'C': '296', 'A': '160', 'מק"ט חוליות': '6002300160', 'יצרן': 'Polyroll'}),
+  _ppr('6002300200', 'מסעף PPR פ.פ 200', 'PPR Tee 200', kPprTees, 'PPR Tees', '🔱', 41, dims: {'מודל': 'A', 'E': '120', 'D': '159.7', 'C': '200', 'A': '500', 'מק"ט חוליות': '6002300200', 'יצרן': 'Polyroll'}),
+  _ppr('6002300250', 'מסעף PPR פ.פ 250', 'PPR Tee 250', kPprTees, 'PPR Tees', '🔱', 41, dims: {'מודל': 'A', 'E': '131', 'D': '214', 'C': '250', 'A': '573', 'מק"ט חוליות': '6002300250', 'יצרן': 'Polyroll'}),
+  _ppr('6002300315', 'מסעף PPR פ.פ 315', 'PPR Tee 315', kPprTees, 'PPR Tees', '🔱', 41, dims: {'מודל': 'B', 'E': '295', 'D': '277', 'C': '315', 'A': '945', 'מק"ט חוליות': '6002300315', 'יצרן': 'Polyroll'}),
+  _ppr('6002300355', 'מסעף PPR פ.פ 355', 'PPR Tee 355', kPprTees, 'PPR Tees', '🔱', 41, dims: {'מודל': 'B', 'E': '309', 'D': '307', 'C': '355', 'A': '948', 'מק"ט חוליות': '6002300355', 'יצרן': 'Polyroll'}),
+  _ppr('6002300400', 'מסעף PPR פ.פ 400', 'PPR Tee 400', kPprTees, 'PPR Tees', '🔱', 41, dims: {'מודל': 'B', 'E': '324', 'D': '349', 'C': '400', 'A': '1145', 'מק"ט חוליות': '6002300400', 'יצרן': 'Polyroll'}),
   _ppr('6002310200', 'מסעף PPR מצרה 25x20x20', 'PPR Tee 25x20x20', kPprTees, 'PPR Tees', '🔱', 42, dims: {'E': '44', 'F3': '15', 'F2': '15', 'F1': '16', 'C3': '12', 'C2': '19', 'C1': '27', 'B3': '14', 'B2': '24', 'B1': '33', 'A': '53', 'מק"ט חוליות': '6002310200', 'יצרן': 'Polyroll'}),
   _ppr('6002310250', 'מסעף PPR מצרה 25x20x25', 'PPR Tee 25x20x25', kPprTees, 'PPR Tees', '🔱', 42, dims: {'E': '45', 'F3': '15', 'F2': '16', 'F1': '16', 'C3': '12', 'C2': '19', 'C1': '27', 'B3': '14', 'B2': '24', 'B1': '33', 'A': '54', 'מק"ט חוליות': '6002310250', 'יצרן': 'Polyroll'}),
   _ppr('6002310230', 'מסעף PPR מצרה 25x25x20', 'PPR Tee 25x25x20', kPprTees, 'PPR Tees', '🔱', 42, dims: {'E': '46', 'F3': '16', 'F2': '15', 'F1': '16', 'C3': '14', 'C2': '24', 'C1': '33', 'B3': '13', 'B2': '24', 'B1': '33', 'A': '56', 'מק"ט חוליות': '6002310230', 'יצרן': 'Polyroll'}),

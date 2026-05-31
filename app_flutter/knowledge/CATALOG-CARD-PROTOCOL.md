@@ -798,6 +798,7 @@ table uses to determine the model.
 |------|----------|---------|---------|---------|---------|
 | p37 ברך 45° לריתוך פנים | size | 160, 200, 250, 315 | 355, 400 | — | `_p37ElbowModel(nameHe)` |
 | p39 ברך 90° לריתוך פנים | size | 160, 200, 250, 315 (smooth) | 355, 400 (segmented) | — | `_p39ElbowModel(nameHe)` |
+| p41 מסעף לריתוך פנים | size | 160, 200, 250 (smooth) | 315, 355, 400 (chunky) | — | inline by size in case kPprTees |
 | p53 מתאם ריתוך הברגה תבריג פנימי | size | 20-32 (PPRCT) | 40-110 (PPR) | — | `_p53AdapterModel(nameHe)` |
 | p54 מתאם ריתוך הברגה תבריג חיצוני | size | 20-32 | 40-50 | 63-110 | `_p54AdapterModel(nameHe)` |
 | p55 מתאם ריתוך/הברגה עם רקורד | size | 20-32 (PPRCT) | 40-75 (PPR) | — | `_p55AdapterModel(nameHe)` |
@@ -837,6 +838,10 @@ page header that becomes part of the product nameHe (e.g. "ללא ידית",
 | Page | Sub-types on page | Split by | Specs |
 |------|-------------------|----------|-------|
 | p30 ברז סמוי | "(ציפוי כרום)" (כולל ידית) / "(ציפוי כרום - ללא ידית)" / "כדורי בין אוגנים" | `nameHe.contains('ללא ידית')` + `nameHe.contains('בין אוגנים')` | `spec_valve_concealed_p30_a.jpg` (with handle), `spec_valve_concealed_p30_b.jpg` (no handle), `spec_valve_wafer_p30.jpg` (ball-wafer) |
+| p25 ברך 90° תבריג brass | "משטח ריסון" / "חיצוני" / "פנימי" (3 different diagrams) | `nameHe.contains('משטח ריסון' / 'חיצוני')` | `spec_elbow_90_p25_damper.jpg`, `spec_elbow_90_p25_external.jpg`, `spec_elbow_90_p25_internal.jpg` |
+| p26 מסעף תבריג brass | "תבריג פנימי" / "תבריג חיצוני" | `nameHe.contains('חיצוני')` | `spec_tee_p26_internal.jpg` / `spec_tee_p26_external.jpg` |
+| p27 מתאם עגול תבריג | "פנימי" / "חיצוני" | `nameHe.contains('חיצוני')` | `spec_adapter_round_p27_internal.jpg` / `_external.jpg` |
+| p28 מתאם משושה תבריג | "פנימי" / "חיצוני" | `nameHe.contains('חיצוני')` | `spec_adapter_hex_p28_internal.jpg` / `_external.jpg` |
 | p32 ברז כדורי | "ברז כדורי" / "ברז כדורי פוליפרופילן" (different 3-view geometry) | `nameHe.contains('פוליפרופילן')` | `spec_valve_p32.jpg` (regular), `spec_valve_p32_pp.jpg` (PP) |
 | p34 אוגן+סעפת+לוחית | אוגן (flange) / סעפת למונים (meter manifold) / לוחית למיקום (positioning plate) | `nameHe.startsWith('אוגן')` etc | `spec_collar_p34.jpg` (flange default), `spec_manifold_p34.jpg`, `spec_plate_p34.jpg` |
 | p84 רוכב PPRCT | "רוכב לריתוך" (plain) / "רוכב לריתוך תבריג פנימי" (threaded) | `nameHe.contains('תבריג')` | `spec_saddle_p84.jpg` (plain default), `spec_saddle_p84_threaded.jpg` (threaded) |
@@ -931,14 +936,14 @@ below. A page added to the list is a contract: "I verified content match,
 not just the filename pattern."
 
 **Audited pages so far (this session):**
-p19, p20, p22, p24, p29, p30, p31, p32, p33, p34, p37, p38, p39, p53,
-p54, p55, p61, p62, p63, p67, p68, p69, p72, p73, p74, p82, p83, p84,
-p85, p90, p91, p92.
+p19, p20, p22, p24, p25, p26, p27, p28, p29, p30, p31, p32, p33, p34,
+p37, p38, p39, p41, p44, p53, p54, p55, p61, p62, p63, p67, p68, p69,
+p72, p73, p74, p82, p83, p84, p85, p90, p91, p92.
 
 **Pages still needing visual audit:**
-p18, p21, p23, p25, p26, p27, p28, p35, p36, p40, p41, p42, p43, p44,
-p45, p46, p47, p48, p49, p50, p51, p52, p56, p57, p58, p59, p60, p64,
-p65, p66, p70, p71, p75-79, p80, p81, p86, p87, p88, p89.
+p18, p21, p23, p35, p36, p40, p42, p43, p45, p46, p47, p48, p49, p50,
+p51, p52, p56, p57, p58, p59, p60, p64, p65, p66, p70, p71, p75-79,
+p80, p81, p86, p87, p88, p89.
 
 §14 row added:
 | § | bug class | detection |
