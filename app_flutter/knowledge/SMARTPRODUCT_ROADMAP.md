@@ -88,10 +88,10 @@ Saved for the next run. Pick up here:
 25. ✅ Auto install-kit — engine-derived safety SKUs via `safetyKitItems`
    (diff of `buildInstallation` autoCompliance:true vs false). Shown inline as
    "🛡 ערכת בטיחות (auto): …". Guard: `safety_kit_test` (incl. integration probe).
-26. 🟦 Hot-water suitability across brands via `hotWaterSuitabilityFor`
-   ("🌡 מים חמים: X/Y מותגים מתאימים", cross-checked vs engine
-   `productSuitableForTemp`). (Interactive temp picker still ⬜.)
-   Guard: `hot_water_suitability_test`.
+26. ✅ Hot-water suitability + **interactive temp picker** — `hotWaterSuitabilityFor`
+   reads from `displayTempProvider`; tap on the "🌡 מים חמים" row cycles
+   60 → 80 → 95 → 60 (`cycleDisplayTemp`). The "X/Y מותגים מתאימים" updates
+   live. Guards: `hot_water_suitability_test` + `display_temp_test`.
 27. ✅ Smart adapter recommendation — `adapterSuggestionFor` finds a bridging
    catalog product that mates BOTH this product and a cart item, when there's no
    direct connection ("🔌 מתאם מומלץ"). Guard: `adapter_suggestion_test`.
