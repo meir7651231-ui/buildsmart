@@ -11,6 +11,7 @@ import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
+import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
@@ -4999,7 +5000,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             Builder(builder: (_) {
                               final m = ref.watch(projectModeProvider);
                               final l = labelForProjectMode(m);
-                              return GestureDetector(
+                              return Semantics(
+                                button: true,
+                                label: 'החלף סוג פרויקט (קר/חם/מסחרי)',
+                                child: GestureDetector(
                                 onTap: () => ref
                                     .read(projectModeProvider.notifier)
                                     .set(nextProjectMode(m)),
@@ -5011,13 +5015,17 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           fontSize: 10,
                                           fontWeight: FontWeight.w700)),
                                 ),
+                              ),
                               );
                             }),
                             // Roadmap step 57 — profession mode chip (tap cycles).
                             Builder(builder: (_) {
                               final prof = ref.watch(professionModeProvider);
                               final l = labelForProfession(prof);
-                              return GestureDetector(
+                              return Semantics(
+                                button: true,
+                                label: 'החלף סוג משתמש (DIY/קבלן/מקצועי)',
+                                child: GestureDetector(
                                 onTap: () => ref
                                     .read(professionModeProvider.notifier)
                                     .set(nextProfessionMode(prof)),
@@ -5029,6 +5037,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                           fontSize: 10,
                                           fontWeight: FontWeight.w700)),
                                 ),
+                              ),
                               );
                             }),
                             // Roadmap step 47 — save this config (favourite).
@@ -5242,7 +5251,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             final allOk = hw.suitable == hw.total;
                             return Padding(
                               padding: const EdgeInsets.only(top: 6),
-                              child: GestureDetector(
+                              child: Semantics(
+                                button: true,
+                                label: 'החלף טמפ׳ תצוגה (60/80/95)',
+                                child: GestureDetector(
                                 onTap: () => ref
                                     .read(displayTempProvider.notifier)
                                     .state = cycleDisplayTemp(tempC),
@@ -5257,6 +5269,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                             : const Color(0xFFB45309),
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600)),
+                              ),
                               ),
                             );
                           }),
@@ -5452,13 +5465,15 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               final lineScore = lineReadinessFromCounts(
                                   gapCount: withT.gaps.length,
                                   safetyKitSize: kit.length);
+                              // Roadmap step 24 — ΔP inline estimate for this line.
+                              final pd = estimatePressureDrop(withT.items);
                               return Padding(
                                 padding: const EdgeInsets.only(top: 6),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                        '🎯 ציון קו ${lineScore.score} · ${lineScore.label}',
+                                        '🎯 ציון קו ${lineScore.score} · ${lineScore.label}  ·  💧 ΔP ~${pd.dropBar.toStringAsFixed(2)} bar',
                                         style: TextStyle(
                                             color: lineScore.score >= 80
                                                 ? const Color(0xFF0F766E)

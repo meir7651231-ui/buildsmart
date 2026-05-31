@@ -86,9 +86,10 @@ Saved for the next run. Pick up here:
 23. ✅ Materialized chain inline — when a line is in progress (cart), show the
    engine's materialized sequence (incl. inserted pipes/couplings) as an RTL
    arrow chain via `chainArrowText`. Guard: `chain_arrow_test`.
-24. 🟦 System (supply/drainage) safety note + min-bore inline via
-   `systemSafetyNoteHe` (gravity-drainage / upstream-shutoff) + the bore row.
-   (Line-level ΔP still ⬜ — needs a built line.) Guard: `install_effort_test`.
+24. ✅ System/safety + ΔP all inline — `systemSafetyNoteHe` (drainage/supply
+   warning) + bore row + line-level ΔP via `estimatePressureDrop(plan.items)`
+   shown as "💧 ΔP ~X.XX bar" alongside the line readiness score. Guards:
+   `install_effort_test` + `pressure_drop_offline_test`.
 25. ✅ Auto install-kit — engine-derived safety SKUs via `safetyKitItems`
    (diff of `buildInstallation` autoCompliance:true vs false). Shown inline as
    "🛡 ערכת בטיחות (auto): …". Guard: `safety_kit_test` (incl. integration probe).
@@ -245,10 +246,11 @@ Saved for the next run. Pick up here:
    in-memory + JSON-backed. Guard: `offline_cache_test` (6 tests). Concrete
    consumers (image cache, network response cache) still ⬜.
 84. ⬜ Lazy-load images + smart prefetch.
-85. 🟦 Accessibility — explicit `Semantics(button, label)` on 6 key card actions
-   (save · BOM · add-to-project · cart+safety · save-version · mode-toggle), so
-   screen readers announce intent not just visible text. Gated by
-   `accessibility_test`. (Contrast + text-size still ⬜.)
+85. 🟦 Accessibility — explicit `Semantics(button, label)` on **9** key card
+   actions (save · BOM · add-to-project · cart+safety · save-version · mode-
+   toggle · project-mode · profession-mode · temp-picker). Gated by
+   `accessibility_test`. (Contrast + text-size adjustment still ⬜ — needs
+   platform-level theme work.)
 86. 🟦 i18n scaffold — `lib/l10n/smart_card_strings.dart` extracts 28 SmartProduct
    card labels as `static const` fields, ready for parallel En/Ar classes. No
    wiring yet. Guard: `smart_card_strings_test` (non-empty · no-dup · screen-
