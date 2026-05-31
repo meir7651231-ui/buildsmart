@@ -6,7 +6,11 @@ it connects · how to install · what it costs · who sells it*.
 
 Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
-## 📌 Handoff — where we are (v5.37, ~71%: 53 ✅ + 15 🟦)
+## 📌 Handoff — where we are (v5.38, ~73%: 55 ✅ + 13 🟦)
+
+v5.38 — closed 2 more 🟦 → ✅: step 29 (`pairConnectionWarningHe` per-pair
+validation), step 87 (reducedMotion locked by static-count guard). 788/788
+green.
 
 v5.37 — closed 3 🟦 → ✅: step 7 (filter persistence), step 76 (saved-
 version load/× UI), step 82 (mutation×2 → 12 invariants). 782/782 green.
@@ -119,9 +123,12 @@ Saved for the next run. Pick up here:
    direct connection ("🔌 מתאם מומלץ"). Guard: `adapter_suggestion_test`.
 28. ✅ "Your line so far" — `lineFitFor` reads the smart cart and reports how
    many cart items this product connects to ("🧩 בקו שלך"). Guard: `line_fit_test`.
-29. 🟦 Physical-connection warning — `connectionWarningHe` flags a spec'd product
-   with zero direct catalog mates ("ייתכן שנדרש מתאם"). (Full per-pair impossible-
-   connection validation lives in the engine gaps.) Guard: `paired_warning_test`.
+29. ✅ Physical-connection warning, per-product AND per-pair —
+   `connectionWarningHe(p)` flags a spec'd product with zero direct catalog
+   mates ("ייתכן שנדרש מתאם"); `pairConnectionWarningHe(a, b)` flags a
+   SPECIFIC pair that won't mate ("⚠ X ו-Y לא מתחברים ישירות — נדרש מתאם"),
+   so a partner being added to a line is checked before the engine builds it.
+   Reflexive (a,a)=null, symmetric, spec-gated. Guard: `paired_warning_test`.
 30. ✅ Score in both scopes — card-level via `cardReadinessScore` (badge in
    📦 header) + line-level via `lineReadinessFromCounts(gapCount, safetyKitSize)`
    shown as "🎯 ציון קו N · מצוין/טוב/בסיסי/חלקי" when a cart line exists.
@@ -277,11 +284,13 @@ Saved for the next run. Pick up here:
    wiring yet. Guard: `smart_card_strings_test` (non-empty · no-dup · screen-
    containment). Full localization (RTL Arabic, language switch) still ⬜.
    Built by parallel sub-agent.
-87. 🟦 Reduced-motion — by construction the SmartProduct card additions
-   introduce NO new animations (all chips/sections are static), so they
-   already respect `catalog_settings.reducedMotion`. Gating the legacy
-   `_DiagramFlow` stage animations still ⬜ — that's a shared-file edit
-   to defer to a careful pass.
+87. ✅ Reduced-motion — every `AnimationController` in the SmartProduct card
+   path (`_DiagramFlow` stage cascade + `_ExplodeChips` accessory burst) gates
+   on `catalogSettingsProvider.reducedMotion`: when on, the controller jumps
+   straight to `value: 1` instead of running `forward()`. New SmartProduct
+   additions added no extra animations. Locked by `reduced_motion_test`: a
+   static count invariant that goes red if a new AnimationController is added
+   to `catalog_screen.dart` without a matching reducedMotion check.
 88. 🟦 Bundle-split strategy — `knowledge/BUNDLE_SPLIT.md` analysis of top files
    (catalog_screen 7668L · lipskey_catalog 6822L · install_studio 3184L) + a
    concrete plan (extract `_SmartProductSheet` to its own file; deferred-import

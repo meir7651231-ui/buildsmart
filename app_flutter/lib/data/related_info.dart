@@ -988,6 +988,21 @@ String? connectionWarningHe(LipskeyCatalogProduct p) {
   return null;
 }
 
+/// Per-pair physical-connection warning (closes the 🟦 of step 29). Returns a
+/// Hebrew warning when two specific products do NOT have a direct joint, so
+/// adding the partner straight onto the candidate's line would fail without
+/// an adapter. Returns null when either product is unspec'd (can't judge) OR
+/// the pair really does mate.
+String? pairConnectionWarningHe(
+    LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
+  if (a.sku == b.sku) return null;
+  final sa = kVerifiedSpecs[a.sku];
+  final sb = kVerifiedSpecs[b.sku];
+  if (sa == null || sb == null) return null;
+  if (_reallyMates(a, sa, b, sb)) return null;
+  return '⚠ "${a.nameHe}" ו-"${b.nameHe}" לא מתחברים ישירות — נדרש מתאם.';
+}
+
 // ─── דיפ-לינק למוצר (Roadmap step 68) ───────────────────────────────────────
 /// A shareable deep link that identifies this product (+ optional brand), e.g.
 /// `https://buildsmart.app/p/<key>?brand=<name>`. Pure & URL-encoded.
