@@ -92,3 +92,5 @@
 31. **Emergency token מחוץ ל-git.** `.emergency_token` חייב להיות ב-`.gitignore` (לא יתועד). hook בודק `${#EXPECTED} -ge 16` + השוואה מדויקת. env var: `export BUILDSMART_EMERGENCY_DISABLE="$(cat .emergency_token)"`.
 
 32. **Flutter paths דינמיים — 6 מועמדים.** `/home/user/flutter/bin` (Linux CI) + `/c/flutter/bin` (MSYS) + `$HOME/flutter/bin` (macOS Intel) + `/usr/local/flutter/bin` + `/opt/homebrew/opt/flutter/bin` (macOS ARM) + `/opt/flutter/bin`. לולאה על כולם; שגיאה ברורה אם אף אחד לא עובד.
+
+33. **hook `cd app_flutter` → paths יחסיים.** `.githooks/pre-commit` מבצע `cd "$REPO_ROOT/app_flutter"`. כל `git diff --cached` בתוך ה-hook חייב להשתמש ב-paths **ללא** prefix `app_flutter/` (כגון `lib/screens/home_shell.dart`, לא `app_flutter/lib/screens/home_shell.dart`). Path ארוך → `git diff --cached app_flutter/lib/...` מחפש `app_flutter/app_flutter/...` → ריק.

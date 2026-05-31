@@ -307,7 +307,7 @@ NEW_DEFINE=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep "fromEnvironm
 
 # שער 59: גרסה עלתה אם נגעת בקוד
 if [[ -n "$STAGED_LIB" ]]; then
-    SHELL_DIFF=$(git diff --cached app_flutter/lib/screens/home_shell.dart 2>/dev/null | grep "^+" | grep -oE "v[0-9]+\.[0-9]+" | head -1)
+    SHELL_DIFF=$(git diff --cached lib/screens/home_shell.dart 2>/dev/null | grep "^+" | grep -oE "v[0-9]+\.[0-9]+" | head -1)
     [[ -n "$SHELL_DIFF" ]] || err "59" "גרסה לא עלתה" "bump גרסה ב-home_shell + STATUS"
 fi
 

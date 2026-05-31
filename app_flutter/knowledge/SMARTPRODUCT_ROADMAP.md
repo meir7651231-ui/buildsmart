@@ -55,11 +55,11 @@ v5.36 polish bump (no new step ✅, three existing steps tightened):
   mode · temp picker) in `Tooltip` widgets so long-press/hover explains "what
   this chip does", plain Hebrew.
 
-## 📌 Handoff (v5.42, ~88% ✅)
+## 📌 Handoff (v5.43, ~89% ✅)
 Saved for the next run. Pick up here:
 - **Group A — כולו ✅** (76·25·46·74·89·82·85·57 — all done, tests green)
-- **Group B remaining 🟦:** 9 (dead-widget cleanup — large file, risky) · 86 (i18n scaffold) · 88 (bundle-split docs) · 90 (crash-log)
-- **Group B — closed this session ✅:** 2·7·15·20·24·26·29·30·48·56·65·68
+- **Group B remaining 🟦:** 86 (i18n scaffold) · 88 (bundle-split docs) · 90 (crash-log)
+- **Group B — closed this session ✅:** 2·7·9·15·20·24·26·29·30·48·56·65·68
 - **Group C (needs infra/pkg/backend/assets — needs user decision):** 13,17,18,32,36,37,39,40,
   41,43,44,49,50,53,54,55,60,69,70,79,83,84,86,88,90,91,92,93,94,96,97,98.
 - **Group D (risky / shared-subsystem / big refactor):** 1 (merge sheets — user said don't touch
@@ -101,10 +101,9 @@ Saved for the next run. Pick up here:
 8. 🟦 Comprehensive widget rendering already covered by `product_journey_test`
    (all 935 sheets render at narrow phone + large text). Pixel-level golden
    files (`matchesGoldenFile`) still ⬜ — deferred (heavy + flaky in CI).
-9. 🟦 Cleared safe analyze warnings in `catalog_screen.dart` (unused
-   `lipskey_brand_screen` import + unused `cs` local). Remaining dead widgets
-   (`_MiniSearchPill`/`_Chip`/`_CatalogDrillSection`/`_diameterSubGroups`) await
-   a careful dedicated removal pass (file is large + shared with the other session).
+9. ✅ Dead-widget cleanup in `catalog_screen.dart` — removed 466 lines across 4 phases:
+   `_MiniSearchPill` (22L) · `_Chip` (37L) · `_diameterSubGroups`+`_diameterCounts`+`_diameterBucket`+`_SectionBanner`+`scrollCtrl`/`subGroups` params (54L) · `_CatalogDrillSection` cluster (353L).
+   `catalogDrillCatProvider` kept (smoke test). 908 tests ✅. v5.43.
 10. ✅ Feature-flag infrastructure — `featureFlagsProvider` (persisted
    `Set<String>`, isOn/enable/disable/toggle, idempotent). Built by parallel
    sub-agent. Guard: `feature_flags_test` (5 tests).

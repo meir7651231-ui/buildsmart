@@ -132,4 +132,19 @@ plain-Hebrew gloss with the technical term in parens (e.g. "ברז ערבוב נ
 
 UI-only effects (theme/contrast/text-scale, grid layout, VAT display, image size)
 are documented above but exercised through their underlying providers/helpers
+
+---
+
+## Dead code removed (step 9)
+
+Symbols removed from `catalog_screen.dart` — never had callers, no visual impact:
+
+| Symbol | Lines removed | Phase |
+|--------|--------------|-------|
+| `_MiniSearchPill` | ~22 | B ✅ |
+| `_Chip` | ~37 | C ✅ |
+| `_diameterSubGroups` + `_diameterCounts` + `_diameterBucket` + `scrollCtrl`/`subGroups` params + `_SectionBanner` | ~54 | D ✅ |
+| `_CatalogDrillSection` cluster (P4+P5+P6+P7) | ~353 | E ✅ |
+
+Total removed: ~466 lines. Kept: `catalogDrillCatProvider` (line 237) — used in smoke test `tabs.dart`.
 rather than pixel rendering.

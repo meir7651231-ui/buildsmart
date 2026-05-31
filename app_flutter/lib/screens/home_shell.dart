@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.42 · 31.5.26 · 🌉 Polyroll bridge: 733 PPR specs · מנוע התאמה + כלים + טיפים + ת"י לקטלוג ה־PPR השלם (810 ✅)',
+                          'v5.43 · 31.5.26 · ♻️ step-9: הסרת 466 שורות קוד מת מ-catalog_screen',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

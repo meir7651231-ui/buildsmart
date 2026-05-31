@@ -394,6 +394,23 @@ RULE: STAGED_DART חייב להיות מחושב לפני הלולאה שמשת�
 
 ---
 
+## 2026-05-31 · gate 59 — גרסה לא עלתה למרות שעלתה
+
+### א — הבעיה
+שער 59 בודק: `git diff --cached app_flutter/lib/screens/home_shell.dart`.
+הhook מבצע `cd "$REPO_ROOT/app_flutter"` בשורה 44 — אז הנתיב הנכון הוא `lib/screens/home_shell.dart`, לא `app_flutter/lib/screens/home_shell.dart`.
+מ-`app_flutter/`, `git diff --cached app_flutter/lib/screens/home_shell.dart` מחזיר ריק כי git מחפש `app_flutter/app_flutter/...`.
+
+### ב — הפתרון
+שינוי gate 59 מ-`app_flutter/lib/screens/home_shell.dart` ל-`lib/screens/home_shell.dart`.
+סינכרון `.git/hooks/pre-commit` ← `.githooks/pre-commit`.
+
+### ג — כלל המניעה
+ANTIPATTERN: git diff --cached app_flutter/lib/screens/home_shell.dart
+RULE: hook מבצע cd app_flutter — כל נתיב גיט בתוך ה-hook חייב להיות יחסי ל-app_flutter (ללא prefix app_flutter/).
+
+---
+
 ## 2026-05-31 · rebase conflict v5.41→v5.42 ב-home_shell.dart
 ### א — הבעיה
 שני sessions בחרו v5.41 בו-זמנית — git pull --rebase נתקע ב-home_shell.dart.

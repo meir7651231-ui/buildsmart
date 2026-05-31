@@ -532,28 +532,6 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   }
 }
 
-class _MiniSearchPill extends StatelessWidget {
-  const _MiniSearchPill({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-        height: 36,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        alignment: Alignment.center,
-        child: const Icon(Icons.search, color: Color(0xFF888888), size: 18),
-      ),
-    );
-  }
-}
-
 // Horizontal pill tabs — הכל + dynamic user sections + [+] button.
 // Short-tap activates the section.
 // Long-press on a non-הכל chip shows ניהול/מחיקה popup.
@@ -1349,44 +1327,6 @@ class _AddPill extends StatelessWidget {
         child: const Padding(
           padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           child: Icon(Icons.add, color: Color(0xFF6E6E73), size: 18),
-        ),
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({required this.icon, required this.label, required this.onTap});
-
-  final String icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFFF5F5F5),
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(icon, style: const TextStyle(fontSize: 14)),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -2202,13 +2142,11 @@ class _EmptySection extends StatelessWidget {
 }
 
 class _CatalogList extends StatelessWidget {
-  const _CatalogList({this.scrollCtrl});
-  final ScrollController? scrollCtrl;
+  const _CatalogList();
 
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      controller: scrollCtrl,
       key: const Key('catalog-list'),
       itemCount: kCatalogCats.length,
       separatorBuilder: (_, __) => const Divider(
@@ -3740,440 +3678,6 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
   }
 }
 
-// ── Catalog Drill Section ─────────────────────────────────────────────────────
-// Level 1: 11 kCatalogCats grid → Level 2: smartProductsForCat() list → sheet.
-
-class _CatalogDrillSection extends ConsumerWidget {
-  const _CatalogDrillSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedCat = ref.watch(catalogDrillCatProvider);
-    if (selectedCat == null) return const _CatalogDrillCatGrid();
-    return _CatalogDrillProductList(cat: selectedCat);
-  }
-}
-
-class _CatalogDrillCatGrid extends ConsumerWidget {
-  const _CatalogDrillCatGrid();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        Container(
-          color: const Color(0xFFFFFFFF),
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: const Row(
-            children: [
-              Text('▦', style: TextStyle(fontSize: 20)),
-              SizedBox(width: 10),
-              Text(
-                'קטגוריות — בחר תחום',
-                style: TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const Divider(height: 1, color: Color(0xFFF5F5F5)),
-        Expanded(
-          child: GridView.builder(
-            padding: const EdgeInsets.all(12),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.3,
-            ),
-            itemCount: kCatalogCats.length,
-            itemBuilder: (context, i) {
-              final cat = kCatalogCats[i];
-              final count = smartProductsForCat(cat.title).length;
-              return GestureDetector(
-                onTap: () =>
-                    ref.read(catalogDrillCatProvider.notifier).state = cat.title,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E2E),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                        color: const Color(0xFF3A3A4A), width: 0.8),
-                  ),
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(cat.emoji,
-                          style: const TextStyle(fontSize: 32)),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            cat.title,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              height: 1.2,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 7, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: count > 0
-                                  ? const Color(0xFF3D5A80).withOpacity(0.25)
-                                  : Colors.white.withOpacity(0.06),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              count > 0 ? '$count פריטים' : 'בקרוב',
-                              style: TextStyle(
-                                color: count > 0
-                                    ? const Color(0xFF64FFDA)
-                                    : Colors.white38,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ── Catalog → Lipskey category mapping ───────────────────────────────────────
-const Map<String, List<String>> _kCatalogToLipskeyCats = {
-  'ניקוז וצנרת': [
-    'מחסומים (סיפונים) גלויים',
-    'מחסומי רצפה',
-    'מאספים וקולטים',
-    'אביזרי שקע-תקע',
-    'ברכיים',
-    'מסעפים וחיבורי אסלה',
-    'מצמדים וצינורות',
-    'צינורות',
-    'אביזרי תבריג',
-  ],
-  'אסלות': [
-    'התקנה גבוהה',
-    'התקנה נמוכה',
-    'התקנה צמודה',
-    'מושבי אסלה',
-    'זקיף אסלה',
-  ],
-  'מקלחות ואמבטיות': [
-    'אמבט ואגנית',
-  ],
-  'גופי תברואה': [
-    'חלקים סניטריים',
-  ],
-  'אביזרי קצה וחיבורים': [
-    'אטמים אומים ופקקים',
-  ],
-};
-
-class _CatalogDrillProductList extends ConsumerWidget {
-  const _CatalogDrillProductList({required this.cat});
-
-  final String cat;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final smartProducts = smartProductsForCat(cat);
-    final catData = kCatalogCats.firstWhere(
-      (c) => c.title == cat,
-      orElse: () => kCatalogCats.first,
-    );
-
-    // Lipskey sub-categories for this catalog cat
-    final lipskeySubCatNames = _kCatalogToLipskeyCats[cat] ?? [];
-    final lipskeyGroups = [
-      for (final catName in lipskeySubCatNames)
-        (
-          name: catName,
-          products: kLipskeyCatalog
-              .where((p) => p.categoryHe == catName)
-              .toList(),
-        ),
-    ].where((g) => g.products.isNotEmpty).toList();
-
-    final isEmpty = smartProducts.isEmpty && lipskeyGroups.isEmpty;
-
-    return Column(
-      children: [
-        // Breadcrumb header
-        Container(
-          color: const Color(0xFFFFFFFF),
-          padding: const EdgeInsets.fromLTRB(4, 4, 16, 4),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios,
-                    color: BsTokens.brand, size: 18),
-                onPressed: () =>
-                    ref.read(catalogDrillCatProvider.notifier).state = null,
-              ),
-              Text('${catData.emoji} ', style: const TextStyle(fontSize: 16)),
-              Text(
-                cat,
-                style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const Divider(height: 1, color: Color(0xFFF5F5F5)),
-        if (isEmpty)
-          const Expanded(
-            child: Center(
-              child: Text('בקרוב',
-                  style: TextStyle(color: Color(0xFF999999), fontSize: 16)),
-            ),
-          )
-        else
-          Expanded(
-            child: CustomScrollView(
-              slivers: [
-                // ── SmartTree section ──────────────────────────────────────
-                if (smartProducts.isNotEmpty) ...[
-                  SliverToBoxAdapter(
-                    child: _SectionBanner(
-                        emoji: '🌳', label: 'עץ חכם', color: const Color(0xFF1B2D1B)),
-                  ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (_, i) {
-                        final p = smartProducts[i];
-                        return Column(
-                          children: [
-                            InkWell(
-                              onTap: () => _openSmartSheet(context, p),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 10),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 50,
-                                      height: 50,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFF5F5F5),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(p.emoji,
-                                          style: const TextStyle(fontSize: 24)),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(p.name,
-                                                    style: const TextStyle(
-                                                      color: Color(0xFF1A1A1A),
-                                                      fontSize: 15,
-                                                      fontWeight: FontWeight.w600,
-                                                    )),
-                                              ),
-                                              Text(
-                                                p.recBrand.price != null
-                                                    ? '₪${p.recBrand.price}'
-                                                    : '—',
-                                                style: const TextStyle(
-                                                    color: Color(0xFF888888),
-                                                    fontSize: 12),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 3),
-                                          Text(
-                                            '⚡ ${p.mustCount} פריטי חובה · ${p.acc.length} סה"כ',
-                                            style: const TextStyle(
-                                                color: Color(0xFF888888),
-                                                fontSize: 13),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Icon(Icons.chevron_left,
-                                        color: Color(0xFF555555), size: 20),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            if (i < smartProducts.length - 1)
-                              const Divider(
-                                  height: 1,
-                                  indent: 76,
-                                  color: Color(0xFFF5F5F5)),
-                          ],
-                        );
-                      },
-                      childCount: smartProducts.length,
-                    ),
-                  ),
-                ],
-
-                // ── Lipskey section ────────────────────────────────────────
-                if (lipskeyGroups.isNotEmpty) ...[
-                  SliverToBoxAdapter(
-                    child: _SectionBanner(
-                        emoji: '🏭',
-                        label: 'ליפסקי ברקן',
-                        color: const Color(0xFF0D1B2A)),
-                  ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (_, i) {
-                        final g = lipskeyGroups[i];
-                        return Column(
-                          children: [
-                            InkWell(
-                              onTap: () => Navigator.push(
-                                context,
-                                LipskeyProductsScreen.route(
-                                  category: g.name,
-                                  products: g.products,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 50,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF0D1B2A),
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: const Color(0xFF3D5A80)
-                                              .withOpacity(0.5),
-                                        ),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        g.products.first.categoryEmoji,
-                                        style:
-                                            const TextStyle(fontSize: 22),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(g.name,
-                                              style: const TextStyle(
-                                                color: Color(0xFF1A1A1A),
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w600,
-                                              )),
-                                          const SizedBox(height: 3),
-                                          Text(
-                                            '${g.products.length} פריטים · ליפסקי ברקן',
-                                            style: const TextStyle(
-                                                color: Color(0xFF64FFDA),
-                                                fontSize: 12),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Icon(Icons.chevron_left,
-                                        color: Color(0xFF555555), size: 20),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            if (i < lipskeyGroups.length - 1)
-                              const Divider(
-                                  height: 1,
-                                  indent: 76,
-                                  color: Color(0xFFF5F5F5)),
-                          ],
-                        );
-                      },
-                      childCount: lipskeyGroups.length,
-                    ),
-                  ),
-                ],
-
-                const SliverToBoxAdapter(child: SizedBox(height: 24)),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-
-  static void _openSmartSheet(BuildContext context, SmartProduct p) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFFFFFFFF),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => _SmartProductSheet(product: p),
-    );
-  }
-}
-
-class _SectionBanner extends StatelessWidget {
-  const _SectionBanner(
-      {required this.emoji, required this.label, required this.color});
-
-  final String emoji;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: color,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: Row(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 16)),
-          const SizedBox(width: 8),
-          Text(label,
-              style: const TextStyle(
-                color: Colors.black54,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              )),
-        ],
-      ),
-    );
-  }
-}
 
 /// Public entry point — opens the unified "ברז לכיור" sheet (brand picker +
 /// accessories + cart sync) for [product]. Used by the catalog drill-down so
@@ -7703,21 +7207,6 @@ List<(String value, int count)> _patternCounts() {
   return out;
 }
 
-List<(String value, int count)> _diameterCounts() {
-  final freq = <String, int>{};
-  for (final fam in familiesByKind(AttrKind.size)) {
-    for (final p in fam.products) {
-      final v = variantValue(p, AttrKind.size);
-      if (v.isEmpty) continue;
-      for (final a in sizeDiameterAtoms(v)) {
-        freq[a] = (freq[a] ?? 0) + 1;
-      }
-    }
-  }
-  final out = freq.entries.map((e) => (e.key, e.value)).toList()..sort((a, b) => b.$2.compareTo(a.$2));
-  return out;
-}
-
 /// Counts of distinct PRODUCT TYPES in size families. Used under axis "מבנה"
 /// (renamed) so the user sees זווית/טי/מאסף/... instead of the old system.
 List<(String value, int count)> _systemCounts() {
@@ -7759,38 +7248,17 @@ List<List<(String value, int count)>> _patternSubGroups() {
   return [for (final k in keys) by[k]!];
 }
 
-String _diameterBucket(String atom) {
-  if (atom.contains('"') || atom.contains('/')) return 'תבריג';
-  if (atom.startsWith('DN')) return 'DN';
-  final n = int.tryParse(atom);
-  if (n != null) {
-    if (n >= 16 && n <= 63) return 'HDPE';
-    if (n >= 75) return 'DN';
-  }
-  return 'אחר';
-}
-
 double _diameterSortKey(String atom) {
   final m = RegExp(r'\d+(?:\.\d+)?').firstMatch(atom);
   if (m == null) return 9999;
   return double.tryParse(m.group(0)!) ?? 9999;
 }
 
-List<List<(String value, int count)>> _diameterSubGroups() {
-  final all = _diameterCounts();
-  final by = <String, List<(String, int)>>{};
-  for (final e in all) { by.putIfAbsent(_diameterBucket(e.$1), () => []).add(e); }
-  for (final list in by.values) { list.sort((a, b) => _diameterSortKey(a.$1).compareTo(_diameterSortKey(b.$1))); }
-  const order = ['תבריג', 'HDPE', 'DN', 'אחר'];
-  return [for (final k in order) if (by[k] != null) by[k]!];
-}
-
 class _SizeFacetRow extends ConsumerWidget {
-  const _SizeFacetRow({required this.label, required this.items, required this.provider, this.subGroups});
+  const _SizeFacetRow({required this.label, required this.items, required this.provider});
   final String label;
   final List<(String value, int count)> items;
   final StateProvider<Set<String>> provider;
-  final List<List<(String value, int count)>>? subGroups;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(provider);
@@ -7800,7 +7268,7 @@ class _SizeFacetRow extends ConsumerWidget {
       if (next.contains(v)) { next.remove(v); } else { next.add(v); }
       ref.read(provider.notifier).state = next;
     }
-    final groups = subGroups ?? [items];
+    final groups = [items];
     return Wrap(
       spacing: 0, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center,
       children: [
