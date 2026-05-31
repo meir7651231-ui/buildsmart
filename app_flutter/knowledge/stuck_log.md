@@ -315,3 +315,27 @@ ANTIPATTERN: awk.*Audit.*,.*\^##
 RULE: awk range pattern עם ^## כ-end יסגור מיד אם השורה ה-start מתחילה ב-##. השתמש ב-flag (in_section) במקום range.
 ANTIPATTERN: grep -c.*\|\| echo 0
 RULE: grep -c תמיד מדפיס count (גם 0) — || echo 0 יוצר double-output. השתמש ב- ${var:-0} אחרי grep -c.
+
+---
+
+## 2026-05-31 · gate 81 — pipe ל-cut מצליח כשsha256sum נכשל (Windows/MSYS)
+
+### א — הבעיה
+שער 81 בדק `sha256sum "$REPO_ROOT/.git/hooks/pre-commit" 2>/dev/null | cut -d' ' -f1 || echo "missing"`.
+כש-.git/hooks/pre-commit לא קיים: sha256sum נכשל, אבל cut מצליח (stdin ריק → exit 0).
+הביטוי `|| echo "missing"` בודק את exit code של cut (לא sha256sum).
+התוצאה: LOCAL_HOOK_HASH="" (לא "missing") — gate נכשל בטעות על Windows/MSYS ועל כל מכונה ללא hook מקומי.
+
+### ב — הפתרון
+בדיקת קיום קובץ לפני sha256sum:
+```bash
+if [[ -f "$REPO_ROOT/.git/hooks/pre-commit" ]]; then
+    LOCAL_HOOK_HASH=$(sha256sum ... | cut ...); LOCAL_HOOK_HASH=${LOCAL_HOOK_HASH:-missing}
+else
+    LOCAL_HOOK_HASH="missing"
+fi
+```
+
+### ג — כלל המניעה
+ANTIPATTERN: sha256sum.*2>/dev/null.*\|.*cut.*\|\| echo "missing"
+RULE: pipe מחזיר exit code של הפקודה האחרונה — בדוק קיום קובץ ב-if לפני sha256sum, אל תסמוך על || אחרי pipe.

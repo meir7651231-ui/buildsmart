@@ -420,7 +420,13 @@ LOCK_CHANGE=$(git diff --cached pubspec.lock 2>/dev/null | grep "^+" | grep "ver
 # בודק שה-hook הנוכחי תואם את הגרסה ב-HEAD (לא ניתן להחליף בשקט)
 HEAD_HOOK_HASH=$(git show "HEAD:.githooks/pre-commit" 2>/dev/null | sha256sum | cut -d' ' -f1)
 CURRENT_HOOK_HASH=$(sha256sum "$REPO_ROOT/.githooks/pre-commit" | cut -d' ' -f1)
-LOCAL_HOOK_HASH=$(sha256sum "$REPO_ROOT/.git/hooks/pre-commit" 2>/dev/null | cut -d' ' -f1 || echo "missing")
+# תיקון באג #30: pipe ל-cut מצליח גם כשsha256sum נכשל (Windows/MSYS) — בדוק קיום קובץ קודם
+if [[ -f "$REPO_ROOT/.git/hooks/pre-commit" ]]; then
+    LOCAL_HOOK_HASH=$(sha256sum "$REPO_ROOT/.git/hooks/pre-commit" 2>/dev/null | cut -d' ' -f1)
+    LOCAL_HOOK_HASH=${LOCAL_HOOK_HASH:-missing}
+else
+    LOCAL_HOOK_HASH="missing"
+fi
 
 # pre-commit ב-.git/hooks חייב להיות שווה ל-.githooks (working copy)
 if [[ "$LOCAL_HOOK_HASH" != "missing" && "$LOCAL_HOOK_HASH" != "$CURRENT_HOOK_HASH" ]]; then
