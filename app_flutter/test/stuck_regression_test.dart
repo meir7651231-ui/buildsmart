@@ -448,5 +448,26 @@ void main() {
       expect(matches, isEmpty,
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
+
+    test("antipattern #22 לא קיים", () {
+      final libDir = Directory('lib');
+      final matches = <String>[];
+      final re = RegExp(r'''grep.*ANTIPATTERN.*\|.*sed.*pattern\b[^|]''');
+      for (final entity in libDir.listSync(recursive: true)) {
+        if (entity is File && entity.path.endsWith('.dart')) {
+          if (entity.path.contains('stuck_regression')) continue;
+          try {
+            final content = entity.readAsStringSync();
+            for (final line in content.split('\n')) {
+              if (re.hasMatch(line)) {
+                matches.add('${entity.path}: ${line.trim()}');
+              }
+            }
+          } catch (_) {}
+        }
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+    });
   });
 }

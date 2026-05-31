@@ -10,8 +10,8 @@ if [[ ! -f "$STUCK_LOG" ]]; then
     exit 0
 fi
 
-# חלץ ANTIPATTERN-ים
-PATTERNS=$(grep "^ANTIPATTERN:" "$STUCK_LOG" 2>/dev/null | sed 's/^ANTIPATTERN: //')
+# חלץ ANTIPATTERN-ים (tr -d '\r' מונע CRLF-corruption על Windows/MSYS)
+PATTERNS=$(grep "^ANTIPATTERN:" "$STUCK_LOG" 2>/dev/null | sed 's/^ANTIPATTERN: //' | tr -d '\r')
 
 if [[ -z "$PATTERNS" ]]; then
     # אין רשומות אמיתיות — צור test ריק
@@ -44,6 +44,7 @@ HEADER
 # הוסף test לכל pattern
 LINE_NUM=0
 while IFS= read -r pattern; do
+    pattern=$(echo "$pattern" | tr -d '\r')  # strip CRLF (Windows/MSYS)
     [[ -z "$pattern" ]] && continue
     LINE_NUM=$((LINE_NUM + 1))
     # ב-raw string של dart (r'''...''') backslash בודד הוא literal — לא לכפול

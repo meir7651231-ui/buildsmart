@@ -339,3 +339,21 @@ fi
 ### ג — כלל המניעה
 ANTIPATTERN: sha256sum.*2>/dev/null.*\|.*cut.*\|\| echo "missing"
 RULE: pipe מחזיר exit code של הפקודה האחרונה — בדוק קיום קובץ ב-if לפני sha256sum, אל תסמוך על || אחרי pipe.
+
+---
+
+## 2026-05-31 · generate_stuck_regression — CRLF מ-Windows משבש heredoc
+
+### א — הבעיה
+על Windows/MSYS, `grep | sed` מחזיר שורות עם `\r` בסוף (CRLF).
+כשה-pattern מוכנס לתוך heredoc Dart (`r'''${pattern}'''`),
+ה-`\r` גורם ל-cursor לקפוץ לתחילת השורה ולדרוס תוכן,
+מייצר Dart שבור (למשל: `y.readAsStringSync()` במקום `entity.readAsStringSync()`).
+
+### ב — הפתרון
+הוספת `| tr -d '\r'` אחרי ה-sed בחילוץ הpatterns,
+וגם `pattern=$(echo "$pattern" | tr -d '\r')` בתוך הלולאה.
+
+### ג — כלל המניעה
+ANTIPATTERN: grep.*ANTIPATTERN.*\|.*sed.*pattern\b[^|]
+RULE: כל חילוץ pattern מקובץ עלול לכלול \r על Windows — תמיד pipe ל-tr -d '\r' לפני שימוש בheredoc.
