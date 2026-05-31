@@ -161,13 +161,22 @@ String? _pprImageFor(String categoryHe, String nameHe, int page) {
 /// etc. only applies to pages we haven't cropped yet.
 const Map<int, String> _kPprElbow90PageSpec = {
   20: 'spec_elbow_90_p20.jpg', // straight 90° (PPR plain)
-  25: 'spec_elbow_90_p25.jpg', // threaded 90° (multi-section page, default = פנימי)
+  25: 'spec_elbow_90_p25.jpg', // threaded 90° (multi-section, default = פנימי)
   38: 'spec_elbow_90_p38.jpg', // brass שקע-תקע 90°
   39: 'spec_elbow_90_p39.jpg', // brass פ.פ 90° (Model B — curved bend)
   48: 'spec_elbow_90_p48.jpg', // PPRCT threaded פנימי
   49: 'spec_elbow_90_p49.jpg', // PPRCT threaded פנימי + משטח ריסון
   50: 'spec_elbow_90_p50.jpg', // PPRCT threaded חיצוני
   81: 'spec_elbow_90_p81.jpg', // PPRCT plain 90°
+};
+
+const Map<int, String> _kPprTeePageSpec = {
+  26: 'spec_tee_p26.jpg', // threaded tee פנימי (default; 9 פנימי + 1 חיצוני)
+  40: 'spec_tee_p40.jpg', // PPR plain tee (sizes 20-90)
+  41: 'spec_tee_p41.jpg', // PPR plain tee (160-250, Model A default)
+  51: 'spec_tee_p51.jpg', // PPRCT threaded tee פנימי
+  52: 'spec_tee_p52.jpg', // PPRCT threaded tee חיצוני
+  82: 'spec_tee_p82.jpg', // PPRCT plain tee
 };
 
 /// Per-sub-type spec **diagram(s)** (dimension drawings cropped from the catalog
@@ -197,7 +206,12 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
             : 'spec_coupler.jpg',
       ];
     case kPprTees:
-      return [nameHe.contains('מצרה') ? 'spec_tee_reducing.jpg' : 'spec_tee.jpg'];
+      final reducing = nameHe.contains('מצרה');
+      // §22: per-page tee spec (non-reducing variant) when cropped.
+      if (!reducing && _kPprTeePageSpec.containsKey(page)) {
+        return [_kPprTeePageSpec[page]!];
+      }
+      return [reducing ? 'spec_tee_reducing.jpg' : 'spec_tee.jpg'];
     case kPprValves:
       if (nameHe.contains('פרפר')) return ['spec_valve_butterfly.jpg'];
       if (nameHe.contains('בין אוגנים')) return ['spec_valve_wafer.jpg'];
