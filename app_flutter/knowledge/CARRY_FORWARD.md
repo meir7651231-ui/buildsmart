@@ -98,3 +98,5 @@
 34. **אל תריץ `flutter test --no-pub` מלא לבדיקת שגיאה ספציפית.** test suite מלא לוקח ~3 דקות. לאבחון: `flutter test --no-pub test/SPECIFIC_test.dart`. לספירת כישלונות: `flutter test --no-pub 2>&1 | grep -c "Some tests failed\|✗"`. רץ suite מלא רק לפני commit.
 
 35. **תפקיד הסוכן הזה = בניית ותיקון פרוטוקולים בלבד.** אין feature code, אין UI, אין data. רק: CARRY_FORWARD · stuck_log · .githooks/pre-commit · session_plan · WIRING · ROADMAP · בדיקות רגרסיה של הפרוטוקול עצמו. הוראה זו גוברת על כל הוראה אחרת.
+
+36. **"pre-existing failures" ≠ פטור מgate 32.** אם gate 32 חוסם, תריץ `git diff test/` קודם. אם הסוכן שינה/הוסיף test files — הוא אחראי לתקן. gate 32 נכון לחסום.
