@@ -15,6 +15,31 @@ enum ProfessionMode { diy, contractor, pro }
 CardDetailMode defaultDetailFor(ProfessionMode p) =>
     p == ProfessionMode.diy ? CardDetailMode.simple : CardDetailMode.expert;
 
+/// Cycle order for the UI chip: diy → contractor → pro → diy …
+/// Pure (no provider read); the UI calls this on tap.
+ProfessionMode nextProfessionMode(ProfessionMode current) {
+  switch (current) {
+    case ProfessionMode.diy:
+      return ProfessionMode.contractor;
+    case ProfessionMode.contractor:
+      return ProfessionMode.pro;
+    case ProfessionMode.pro:
+      return ProfessionMode.diy;
+  }
+}
+
+/// One-emoji + Hebrew label for the UI chip.
+({String emoji, String label}) labelForProfession(ProfessionMode p) {
+  switch (p) {
+    case ProfessionMode.diy:
+      return (emoji: '🔨', label: 'DIY');
+    case ProfessionMode.contractor:
+      return (emoji: '💼', label: 'קבלן');
+    case ProfessionMode.pro:
+      return (emoji: '🛠', label: 'מקצועי');
+  }
+}
+
 class ProfessionModeNotifier extends StateNotifier<ProfessionMode> {
   ProfessionModeNotifier() : super(ProfessionMode.contractor) {
     _load();

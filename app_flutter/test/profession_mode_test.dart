@@ -17,6 +17,20 @@ void main() {
     expect(defaultDetailFor(ProfessionMode.pro), CardDetailMode.expert);
   });
 
+  test('nextProfessionMode cycles diy → contractor → pro → diy', () {
+    expect(nextProfessionMode(ProfessionMode.diy), ProfessionMode.contractor);
+    expect(nextProfessionMode(ProfessionMode.contractor), ProfessionMode.pro);
+    expect(nextProfessionMode(ProfessionMode.pro), ProfessionMode.diy);
+  });
+
+  test('labelForProfession returns a non-empty label per mode', () {
+    for (final p in ProfessionMode.values) {
+      final l = labelForProfession(p);
+      expect(l.emoji, isNotEmpty);
+      expect(l.label, isNotEmpty);
+    }
+  });
+
   test('set persists across a fresh notifier', () async {
     SharedPreferences.setMockInitialValues({});
     final n1 = ProfessionModeNotifier();

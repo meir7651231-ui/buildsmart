@@ -160,10 +160,10 @@ Saved for the next run. Pick up here:
 56. 🟦 "Frequently paired" — `frequentlyPairedTypesFor` surfaces the product
    *types* that most often connect (data-driven from the compat engine).
    (Real co-purchase data pending a backend.) Guard: `paired_warning_test`.
-57. 🟦 Profession-mode setting — `professionModeProvider` (enum diy/contractor/
-   pro, persisted, contractor default) + `defaultDetailFor()` (diy→simple,
-   contractor/pro→expert). Orthogonal to `cardDetailModeProvider`. UI affordance
-   to switch profession still ⬜. Guard: `profession_mode_test`.
+57. ✅ Profession-aware — `professionModeProvider` (enum diy/contractor/pro,
+   persisted), `defaultDetailFor()` mapping, `nextProfessionMode()` cycle,
+   `labelForProfession()` emoji+label. Wired as a tap-cycling chip in the
+   📦 header (🔨 DIY / 💼 קבלן / 🛠 מקצועי). Guard: `profession_mode_test` (5).
 58. ✅ "Why it matters" explanation under each compliance warning via
    `complianceWhyHe` (↳ line). Coverage-gated: every trigger label has a why.
    Guard: `compliance_why_test`.
