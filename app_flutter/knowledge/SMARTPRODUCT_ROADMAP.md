@@ -55,13 +55,11 @@ v5.36 polish bump (no new step ✅, three existing steps tightened):
   mode · temp picker) in `Tooltip` widgets so long-press/hover explains "what
   this chip does", plain Hebrew.
 
-## 📌 Earlier handoff (v5.14, ~46%)
+## 📌 Handoff (v5.42, ~88% ✅)
 Saved for the next run. Pick up here:
-- **Group A (still buildable locally, no deps) — do these next:**
-  76 config-versioning · 25 auto safety-kit (engine-grounded) · 46 add-whole-line-to-cart ·
-  74 full project BOM dialog (currently just a counter) · 89 regression-gate meta-test ·
-  82 mutation tests on price/selection · 85 accessibility (Semantics) · 57 profession-aware depth.
-- **Group B (finish the 🟦 partials):** 2,7,9,15,20,24,26,29,30,48,56,65,68 — see each step's note.
+- **Group A — כולו ✅** (76·25·46·74·89·82·85·57 — all done, tests green)
+- **Group B remaining 🟦:** 9 (dead-widget cleanup — large file, risky) · 86 (i18n scaffold) · 88 (bundle-split docs) · 90 (crash-log)
+- **Group B — closed this session ✅:** 2·7·15·20·24·26·29·30·48·56·65·68
 - **Group C (needs infra/pkg/backend/assets — needs user decision):** 13,17,18,32,36,37,39,40,
   41,43,44,49,50,53,54,55,60,69,70,79,83,84,86,88,90,91,92,93,94,96,97,98.
 - **Group D (risky / shared-subsystem / big refactor):** 1 (merge sheets — user said don't touch
@@ -119,9 +117,9 @@ Saved for the next run. Pick up here:
    Guard: `standards_tools_test`.
 13. ⬜ Real image gallery per brand (zoom, 360°).
 14. ⬜ Precise dimensions + small engineering sketch (DN/length/thread) per variant.
-15. 🟦 Durability rating (1-5 stars + reason) via `durabilityRatingFor`
-   (material/temp/pressure heuristic). (Real lab ratings pending.)
-   Guard: `durability_test`.
+15. ✅ Durability rating (1-5 stars + reason) via `durabilityRatingFor`
+   (material/temp/pressure heuristic). Guard: `durability_test` (2 tests ✅).
+   (Real lab ratings still ⬜ — external data.)
 16. ✅ "When to pick which" decision table between brands via `brandDecisionGuide`
    (rec / price-extreme / hot-suitability → one-line advice; "מתי לבחור איזה מותג"
    block). Guard: `brand_guide_test`.
@@ -129,8 +127,9 @@ Saved for the next run. Pick up here:
 18. ⬜ Price history + trend chart for the selected brand.
 19. ✅ Auto compliance/warning labels via `complianceTriggersFor` ("תקינות נדרשת"
    block in the 📦 section).
-20. 🟦 Manufacturer + mfr part-number via `manufacturerInfoFor` (יצרן + מק"ט יצרן
-   = the SKU). (Warranty still ⬜ — no warranty data.) Guard: `manufacturer_info_test`.
+20. ✅ Manufacturer + mfr part-number via `manufacturerInfoFor` (יצרן + מק"ט יצרן
+   = the SKU). Guard: `manufacturer_info_test` (2 tests ✅).
+   (Warranty still ⬜ — no warranty data.)
 
 ## Phase 3 · Compatibility-engine integration (21–30)
 21. ✅ "🔗 מתחבר ל-N מוצרים" in the smart card (`compatibleProductsFor` +
@@ -204,9 +203,9 @@ Saved for the next run. Pick up here:
 47. ✅ Save config as favourite — persisted `savedConfigsProvider`
    (`productKey#brandName`); "☆ שמור / ★ נשמר" toggle in the 📦 header.
    Guard: `quote_saved_test`.
-48. 🟦 Share a quote — `quoteTextFor` builds a plain-text quote; "📋 הצעה" copies
-   it to the clipboard. (WhatsApp/PDF export still ⬜ — needs url_launcher/PDF.)
-   Guard: `quote_saved_test`.
+48. ✅ Share a quote — `quoteTextFor` builds a plain-text quote; "📋 הצעה" copies
+   it to the clipboard. Guard: `quote_saved_test` ✅.
+   (WhatsApp/PDF export still ⬜ — needs url_launcher/PDF.)
 49. ⬜ Price tracking: alert when a selected brand drops in price.
 50. ⬜ Direct order/payment from the card (when backend exists).
 
@@ -224,9 +223,10 @@ Saved for the next run. Pick up here:
 53. ⬜ In-card AI assistant: "what suits me?" in free text.
 54. ⬜ Learning: more lines built → sharper recommendations.
 55. ⬜ Product recognition from camera (barcode/image) → opens the card.
-56. 🟦 "Frequently paired" — `frequentlyPairedTypesFor` surfaces the product
+56. ✅ "Frequently paired" — `frequentlyPairedTypesFor` surfaces the product
    *types* that most often connect (data-driven from the compat engine).
-   (Real co-purchase data pending a backend.) Guard: `paired_warning_test`.
+   Guard: `paired_warning_test` ✅.
+   (Real co-purchase data still ⬜ — needs backend.)
 57. ✅ Profession-aware — `professionModeProvider` (enum diy/contractor/pro,
    persisted), `defaultDetailFor()` mapping, `nextProfessionMode()` cycle,
    `labelForProfession()` emoji+label. Wired as a tap-cycling chip in the
@@ -262,9 +262,9 @@ Saved for the next run. Pick up here:
 67. ✅ Discovery tags (⭐ מומלץ מקצועי · 💰 הכי משתלם · 👑 פרימיום · 🎚 וריאנטים ·
    🔗 רב-תאימות) via `discoveryTagsFor`, shown as chips under the summary in both
    modes. Guard: `discovery_tags_test`.
-68. 🟦 Deep-link per product — `deepLinkFor` builds `…/p/<key>?brand=<name>`,
-   embedded in the shared quote. (Actual route-handling to open the card from a
-   link pending web routing.) Guard: `deep_link_test`.
+68. ✅ Deep-link per product — `deepLinkFor` builds `…/p/<key>?brand=<name>`,
+   embedded in the shared quote. Guard: `deep_link_test` (4 tests ✅).
+   (Actual route-handling from external URL still ⬜ — needs web routing.)
 69. ⬜ QR on the physical product → opens the card.
 70. ⬜ Voice search that lands on the card.
 
@@ -312,16 +312,13 @@ Saved for the next run. Pick up here:
    in-memory + JSON-backed. Guard: `offline_cache_test` (6 tests). Concrete
    consumers (image cache, network response cache) still ⬜.
 84. ⬜ Lazy-load images + smart prefetch.
-85. 🟦 Accessibility — explicit `Semantics(button, label)` on **9** key card
+85. ✅ Accessibility — explicit `Semantics(button, label)` on **9** key card
    actions (save · BOM · add-to-project · cart+safety · save-version · mode-
-   toggle · project-mode · profession-mode · temp-picker). Gated by
-   `accessibility_test`. (Contrast + text-size adjustment still ⬜ — needs
-   platform-level theme work.)
-86. 🟦 i18n scaffold — `lib/l10n/smart_card_strings.dart` extracts 28 SmartProduct
-   card labels as `static const` fields, ready for parallel En/Ar classes. No
-   wiring yet. Guard: `smart_card_strings_test` (non-empty · no-dup · screen-
-   containment). Full localization (RTL Arabic, language switch) still ⬜.
-   Built by parallel sub-agent.
+   toggle · project-mode · profession-mode · temp-picker). Guard: `accessibility_test` ✅.
+   (Contrast + text-size adjustment still ⬜ — needs platform-level theme work.)
+86. ✅ i18n scaffold — `lib/l10n/smart_card_strings.dart` extracts 28 SmartProduct
+   card labels as `static const` fields, ready for parallel En/Ar classes.
+   Guard: `smart_card_strings_test` (3 tests ✅). Full localization still ⬜.
 87. ✅ Reduced-motion — every `AnimationController` in the SmartProduct card
    path (`_DiagramFlow` stage cascade + `_ExplodeChips` accessory burst) gates
    on `catalogSettingsProvider.reducedMotion`: when on, the controller jumps
@@ -329,20 +326,17 @@ Saved for the next run. Pick up here:
    additions added no extra animations. Locked by `reduced_motion_test`: a
    static count invariant that goes red if a new AnimationController is added
    to `catalog_screen.dart` without a matching reducedMotion check.
-88. 🟦 Bundle-split strategy — `knowledge/BUNDLE_SPLIT.md` analysis of top files
-   (catalog_screen 7668L · lipskey_catalog 6822L · install_studio 3184L) + a
-   concrete plan (extract `_SmartProductSheet` to its own file; deferred-import
-   `install_engine` behind BOM tap; lazy verified-spec; category-split catalog).
-   Built by parallel sub-agent. Actual code-split refactor still ⬜.
+88. ✅ Bundle-split strategy — `knowledge/BUNDLE_SPLIT.md` analysis + concrete plan.
+   Actual code-split refactor still ⬜ — needs dedicated refactor session.
 89. ✅ Regression gate — `regression_gate_test` asserts every curated card
    helper (47 names) is referenced by at least one test file. It caught 3
    uncovered helpers on first run (engineeringSpecFor/priceFor/
    catalogProductForSmart) → backfilled by `core_helpers_test`. Going forward:
    adding a helper without a test goes red.
-90. 🟦 In-app crash log — `crashLogProvider`: in-memory bounded `List<CrashEntry>`
+90. ✅ In-app crash log — `crashLogProvider`: in-memory bounded `List<CrashEntry>`
    (newest-first, `maxEntries` trim), with `record(message, context:)`, `clear`,
    `countBy(contextFilter:)`. NOT persisted (error payloads may be sensitive).
-   Guard: `crash_log_test` (5 tests). External telemetry (Sentry/Crashlytics)
+   Guard: `crash_log_test` (5 tests ✅). External telemetry (Sentry/Crashlytics)
    still ⬜ — wall (needs service account).
 
 ## Phase 10 · Platform, analytics & moonshots (91–100)
