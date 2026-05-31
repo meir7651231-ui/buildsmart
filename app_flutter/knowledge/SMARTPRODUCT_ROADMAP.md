@@ -88,10 +88,10 @@ Saved for the next run. Pick up here:
 25. ✅ Auto install-kit — engine-derived safety SKUs via `safetyKitItems`
    (diff of `buildInstallation` autoCompliance:true vs false). Shown inline as
    "🛡 ערכת בטיחות (auto): …". Guard: `safety_kit_test` (incl. integration probe).
-26. 🟦 Hot-water suitability across brands via `hotWaterSuitabilityFor`
-   ("🌡 מים חמים: X/Y מותגים מתאימים", cross-checked vs engine
-   `productSuitableForTemp`). (Interactive temp picker still ⬜.)
-   Guard: `hot_water_suitability_test`.
+26. ✅ Hot-water suitability + **interactive temp picker** — `hotWaterSuitabilityFor`
+   reads from `displayTempProvider`; tap on the "🌡 מים חמים" row cycles
+   60 → 80 → 95 → 60 (`cycleDisplayTemp`). The "X/Y מותגים מתאימים" updates
+   live. Guards: `hot_water_suitability_test` + `display_temp_test`.
 27. ✅ Smart adapter recommendation — `adapterSuggestionFor` finds a bridging
    catalog product that mates BOTH this product and a cart item, when there's no
    direct connection ("🔌 מתאם מומלץ"). Guard: `adapter_suggestion_test`.
@@ -151,9 +151,10 @@ Saved for the next run. Pick up here:
    **last-selection → most-used → recommended → 0**. Wired into the card's
    `initState` (replaces the simple step-7 lookup) and the brand-tap onTap also
    feeds the history. Guards: `brand_history_test` (6) + `default_brand_resolver_test` (5).
-52. 🟦 Project-mode setting — `projectModeProvider` (enum any/cold/hot/commercial,
-   persisted), with `isFiltering` flag. UI filter wiring still ⬜ (touches
-   `catalog_screen.dart`). Guard: `project_mode_test`.
+52. ✅ Project-mode — `projectModeProvider` (enum any/cold/hot/commercial,
+   persisted) + `nextProjectMode` cycle + `labelForProjectMode` emoji+label.
+   Wired as a tap-cycling chip in the 📦 header (◯הכל / ❄️קר / 🔥חם / 🏢מסחרי).
+   Filtering of card content by mode still ⬜. Guard: `project_mode_test` (5).
 53. ⬜ In-card AI assistant: "what suits me?" in free text.
 54. ⬜ Learning: more lines built → sharper recommendations.
 55. ⬜ Product recognition from camera (barcode/image) → opens the card.
