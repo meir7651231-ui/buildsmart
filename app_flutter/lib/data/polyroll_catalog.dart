@@ -200,8 +200,20 @@ const Map<int, String> _kPprPlugPageSpec = {
   22: 'spec_plug_p22.jpg', // PPR plain plug (D, z, l, d)
   70: 'spec_plug_p70.jpg', // PPR פנים plug (rectangular, dual view)
   71: 'spec_plug_p71.jpg', // PPR פנים plug large dia (domed, dual view)
-  83: 'spec_plug_p83.jpg', // PPRCT plug (cylindrical socket)
+  83: 'spec_plug_p83.jpg', // PPRCT end plug "פקק סופי" — flat ring diagram
   // p33 has 1 plug product only and shares the generic diagram → falls back.
+};
+
+const Map<int, String> _kPprCouplerPageSpec = {
+  44: 'spec_coupler_p44.jpg', // straight coupler (rectangular, A/B/C/F)
+};
+
+const Map<int, String> _kPprCouplerReducingPageSpec = {
+  23: 'spec_coupler_reducing_p23.jpg', // PPR reducing (l/z/D/d1/d)
+  45: 'spec_coupler_reducing_p45.jpg', // PPRCT reducing (dual view צד פנים/חוץ)
+  47: 'spec_coupler_reducing_p47.jpg', // large reducing (A/B/C/D2)
+  83: 'spec_coupler_reducing_p83.jpg', // PPRCT reducing (D/d1/d/l/z)
+  // p46 shares geometry with p45 (legit shared) → falls back to generic.
 };
 
 /// Per-sub-type spec **diagram(s)** (dimension drawings cropped from the catalog
@@ -228,11 +240,14 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
             : 'spec_adapter_round.jpg',
       ];
     case kPprCouplers:
-      return [
-        nameHe.contains('מצרה')
-            ? 'spec_coupler_reducing.jpg'
-            : 'spec_coupler.jpg',
-      ];
+      final reducing = nameHe.contains('מצרה');
+      if (reducing && _kPprCouplerReducingPageSpec.containsKey(page)) {
+        return [_kPprCouplerReducingPageSpec[page]!];
+      }
+      if (!reducing && _kPprCouplerPageSpec.containsKey(page)) {
+        return [_kPprCouplerPageSpec[page]!];
+      }
+      return [reducing ? 'spec_coupler_reducing.jpg' : 'spec_coupler.jpg'];
     case kPprTees:
       final reducing = nameHe.contains('מצרה');
       // §22: per-page tee spec (non-reducing variant) when cropped.

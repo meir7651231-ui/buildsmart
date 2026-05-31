@@ -254,14 +254,16 @@ void main() {
     });
 
     test('coupler straight vs reducing', () {
+      // §22: page-specific spec_coupler/spec_coupler_reducing variants are
+      // also valid endings.
       expect(
           spec(find((p) =>
               p.categoryHe == kPprCouplers && !p.nameHe.contains('מצרה'))),
-          endsWith('spec_coupler.jpg'));
+          matches(r'spec_coupler(?:_p\d+)?\.jpg$'));
       expect(
           spec(find((p) =>
               p.categoryHe == kPprCouplers && p.nameHe.contains('מצרה'))),
-          endsWith('spec_coupler_reducing.jpg'));
+          matches(r'spec_coupler_reducing(?:_p\d+)?\.jpg$'));
     });
 
     test('tee straight vs reducing', () {
@@ -369,11 +371,29 @@ void main() {
         71: 'spec_plug_p71.jpg',
         83: 'spec_plug_p83.jpg',
       },
+      kPprCouplers: {
+        // straight (non-reducing)
+        44: 'spec_coupler_p44.jpg',
+      },
+      '${kPprCouplers}_reducing': {
+        23: 'spec_coupler_reducing_p23.jpg',
+        45: 'spec_coupler_reducing_p45.jpg',
+        47: 'spec_coupler_reducing_p47.jpg',
+        83: 'spec_coupler_reducing_p83.jpg',
+      },
     };
     final gaps = <String>[];
     expected.forEach((key, perPage) {
       final is45Elbow = key == '${kPprElbows}_45';
-      final cat = is45Elbow ? kPprElbows : key;
+      final isReducingCoupler = key == '${kPprCouplers}_reducing';
+      String cat;
+      if (is45Elbow) {
+        cat = kPprElbows;
+      } else if (isReducingCoupler) {
+        cat = kPprCouplers;
+      } else {
+        cat = key;
+      }
       perPage.forEach((page, spec) {
         final hits = kPolyrollCatalog.where((p) {
           if (p.categoryHe != cat || p.page != page) return false;
@@ -384,6 +404,11 @@ void main() {
           if (cat == kPprElbows) {
             final is45 = p.nameHe.contains('45');
             if (is45 != is45Elbow) return false;
+          }
+          // Couplers: reducing live under the synthetic '_reducing' key.
+          if (cat == kPprCouplers) {
+            final isRed = p.nameHe.contains('מצרה');
+            if (isRed != isReducingCoupler) return false;
           }
           return true;
         });

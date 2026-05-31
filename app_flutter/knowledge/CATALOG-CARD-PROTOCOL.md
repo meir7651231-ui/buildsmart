@@ -716,8 +716,9 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 | 2 | tee | p26, p40, p41, p51, p52, p82 (6) | ✅ done | `fcffe38` |
 | 3 | saddle | p29, p58, p59, p60, p84 (5) | ✅ done | `a9db854` |
 | 4 | elbow_45 | p19, p20, p36, p37 (4) | ✅ done | `ac57a4f` |
-| 5 | plug | p22, p70, p71, p83 (4) | ✅ done | local |
-| 6 | coupler_reducing | p45, p46, p47, p83 (4) | pending | — |
+| 5 | plug | p22, p70, p71, p83 (4) | ✅ done | `f319423` |
+| 6 | coupler_reducing | p23, p45, p47, p83 (4) | ✅ done | local |
+| 6b | coupler (straight) | p44 (1) | ✅ done | local |
 | 7 | adapter_round | p29, p53, p54, p55 (4) | pending | — |
 | 8 | tee_reducing | p42, p43, p82 (3) | pending | — |
 | 9 | collar | p34, p69, p85 (3) | pending | — |
@@ -726,7 +727,7 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 | 12 | valve_concealed | p62, p63 (2) | pending | — |
 | 13 | valve | p64, p65 (2) | pending | — |
 | 14 | omega | p74 (1) | pending | — |
-| 15 | coupler | p44 (1) | pending | — |
+| 15 | coupler | merged into family 6b above | ✅ done | — |
 
 **§14 detection installed** (`spec_assets_test.dart` · "§22 per-page spec routing"): every per-page crop is asserted to route only its own page; reducing-tee/45°-elbow excluded since those are different families altogether. The map auto-extends as new families land — no test boilerplate per crop.
 
