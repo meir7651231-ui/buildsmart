@@ -22,10 +22,12 @@ if echo "$command" | grep -qE "rm.*\.githooks|rm.*\.git/hooks"; then
     exit 2
 fi
 
-# חסום שינוי core.hooksPath
+# חסום שינוי core.hooksPath — רק .githooks מאושר
 if echo "$command" | grep -qE "git config.*core\.hooksPath"; then
-    echo "🔒 חסום: שינוי core.hooksPath פוגע בפרוטוקול." >&2
-    exit 2
+    if ! echo "$command" | grep -qE "core\.hooksPath\s+\.githooks($|\s)"; then
+        echo "🔒 חסום: core.hooksPath חייב להיות .githooks." >&2
+        exit 2
+    fi
 fi
 
 # חסום עריכת settings.json של Claude
