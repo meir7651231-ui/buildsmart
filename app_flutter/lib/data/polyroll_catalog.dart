@@ -160,6 +160,7 @@ String? _pprImageFor(String categoryHe, String nameHe, int page) {
 /// drawing in the catalog gets a row here; the fallback `spec_elbow_90.jpg`
 /// etc. only applies to pages we haven't cropped yet.
 const Map<int, String> _kPprElbow90PageSpec = {
+  19: 'spec_elbow_90_p19.jpg', // PPR plain 90° (basic welding)
   20: 'spec_elbow_90_p20.jpg', // straight 90° (PPR plain)
   25: 'spec_elbow_90_p25.jpg', // threaded 90° (multi-section, default = פנימי)
   38: 'spec_elbow_90_p38.jpg', // brass שקע-תקע 90°
@@ -168,6 +169,14 @@ const Map<int, String> _kPprElbow90PageSpec = {
   49: 'spec_elbow_90_p49.jpg', // PPRCT threaded פנימי + משטח ריסון
   50: 'spec_elbow_90_p50.jpg', // PPRCT threaded חיצוני
   81: 'spec_elbow_90_p81.jpg', // PPRCT plain 90°
+};
+
+const Map<int, String> _kPprElbow45PageSpec = {
+  19: 'spec_elbow_45_p19.jpg', // PPR plain 45° (basic welding)
+  20: 'spec_elbow_45_p20.jpg', // PPR 45° + coupler (l1/l variant)
+  36: 'spec_elbow_45_p36.jpg', // brass שקע-תקע 45° (electro-fusion socket)
+  37: 'spec_elbow_45_p37.jpg', // brass tubed-internal 45° (model A + B)
+  // p81 PPRCT plain 45° shares geometry with p19 plain 45° → falls back.
 };
 
 const Map<int, String> _kPprTeePageSpec = {
@@ -197,6 +206,9 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       // §22: per-page elbow specs win when the catalog page has its own
       // dimension diagram. Falls back to generic spec_elbow_45/90 only when
       // the page hasn't been cropped yet.
+      if (is45 && _kPprElbow45PageSpec.containsKey(page)) {
+        return [_kPprElbow45PageSpec[page]!];
+      }
       if (!is45 && _kPprElbow90PageSpec.containsKey(page)) {
         return [_kPprElbow90PageSpec[page]!];
       }

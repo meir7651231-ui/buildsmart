@@ -712,10 +712,10 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 
 | # | family | pages cropped | status | commit |
 |---|---|---|---|---|
-| 1 | elbow_90 | p20, p25, p38, p39, p48, p49, p50, p81 (8) | ✅ done | `6276820` |
-| 2 | tee | p26, p40, p41, p51, p52, p82 (6) | ✅ done | `9a63f04` |
-| 3 | saddle | p29, p58, p59, p60, p84 (5) | ✅ done | local |
-| 4 | elbow_45 | p20, p25, p36, p37, p81 (5) | pending | — |
+| 1 | elbow_90 | p19, p20, p25, p38, p39, p48, p49, p50, p81 (9) | ✅ done | `016721b`+local |
+| 2 | tee | p26, p40, p41, p51, p52, p82 (6) | ✅ done | `fcffe38` |
+| 3 | saddle | p29, p58, p59, p60, p84 (5) | ✅ done | `a9db854` |
+| 4 | elbow_45 | p19, p20, p36, p37 (4) | ✅ done | local |
 | 5 | plug | p33, p70, p71, p83 (4) | pending | — |
 | 6 | coupler_reducing | p45, p46, p47, p83 (4) | pending | — |
 | 7 | adapter_round | p29, p53, p54, p55 (4) | pending | — |
@@ -736,3 +736,10 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 - **p29 has saddle dimension at the bottom-left, not the top-left.** Don't assume "diagram = top". Always grid-render and locate visually.
 - **p84 has TWO unrelated drawings** (standard saddle top, hexagonal saddle bottom). Only the top maps to the products on the page; the bottom belongs to other products on the same page (different SKU prefix). Confirmed via grep on `_ppr('98217...',` lines.
 - Crops are tight to the diagram edges (~20px margin); table-column fragments on the right edge looked ugly in the earlier elbow_90 crops, so this family went straight to tight crops.
+
+### Lessons applied while doing family 4/elbow_45
+
+- **A page can carry BOTH 45° and 90° drawings (p19, p20, p81).** The same page number must route to two different specs depending on `nameHe.contains('45')`. We added `_kPprElbow45PageSpec` parallel to the 90° map, and the `case kPprElbows` block probes both before falling back.
+- **p19 was missed in family 1.** When we did elbow_90 we cropped p20/p25/p38/p39/p48/p49/p50/p81 but skipped p19 — the very first PPR plain 90° page. Caught only when grepping for product distribution per page during family 4. Lesson: every family's first step is `grep -c '_ppr(' | awk` to enumerate **all** pages with that sub-type, not relying on a prior memorized list.
+- **Generic spec can legitimately be shared.** p81 PPRCT plain 45° elbow uses the same geometry/labels as p19 plain 45° (just blue tint in catalog vs green). Per §22 "definition of unique," this is the rare legitimate shared case — left on the generic `spec_elbow_45.jpg` fallback rather than forcing a duplicate crop.
+- **Test refactor (synthetic `_45` key).** When a category has two distinct families (90° vs 45°), the §22 routing test uses a synthetic key (e.g. `'${kPprElbows}_45'`) instead of polluting the iterator with category-specific keyword logic. The test stays declarative.

@@ -242,13 +242,15 @@ void main() {
     String spec(LipskeyCatalogProduct p) => p.specImageAssets.first;
 
     test('elbow 45° vs 90°', () {
+      // Either the generic spec or any per-page elbow_45/elbow_90 variant.
+      // (§22 introduced page-specific specs that supersede the generic ones.)
       expect(
           spec(find((p) => p.categoryHe == kPprElbows && p.nameHe.contains('45'))),
-          endsWith('spec_elbow_45.jpg'));
+          matches(r'spec_elbow_45(?:_p\d+)?\.jpg$'));
       expect(
           spec(find((p) =>
               p.categoryHe == kPprElbows && !p.nameHe.contains('45'))),
-          endsWith('spec_elbow_90.jpg'));
+          matches(r'spec_elbow_90(?:_p\d+)?\.jpg$'));
     });
 
     test('coupler straight vs reducing', () {
@@ -326,6 +328,8 @@ void main() {
       () {
     const expected = <String, Map<int, String>>{
       kPprElbows: {
+        // 90° per-page (handles non-45 elbows)
+        19: 'spec_elbow_90_p19.jpg',
         20: 'spec_elbow_90_p20.jpg',
         25: 'spec_elbow_90_p25.jpg',
         38: 'spec_elbow_90_p38.jpg',
@@ -334,6 +338,15 @@ void main() {
         49: 'spec_elbow_90_p49.jpg',
         50: 'spec_elbow_90_p50.jpg',
         81: 'spec_elbow_90_p81.jpg',
+      },
+      // 45° elbow per-page (separate dict keyed by page → expected 45° asset).
+      // We check this distinctly so both 45 and 90 on the same page (p19, p20)
+      // each land on their own spec.
+      '${kPprElbows}_45': {
+        19: 'spec_elbow_45_p19.jpg',
+        20: 'spec_elbow_45_p20.jpg',
+        36: 'spec_elbow_45_p36.jpg',
+        37: 'spec_elbow_45_p37.jpg',
       },
       kPprTees: {
         26: 'spec_tee_p26.jpg',
@@ -352,19 +365,27 @@ void main() {
       },
     };
     final gaps = <String>[];
-    expected.forEach((cat, perPage) {
+    expected.forEach((key, perPage) {
+      final is45Elbow = key == '${kPprElbows}_45';
+      final cat = is45Elbow ? kPprElbows : key;
       perPage.forEach((page, spec) {
-        final hits = kPolyrollCatalog.where((p) =>
-            p.categoryHe == cat &&
-            p.page == page &&
-            // exclude reducing tees (different drawing) and 45° elbows
-            !(cat == kPprTees && p.nameHe.contains('מצרה')) &&
-            !(cat == kPprElbows && p.nameHe.contains('45')));
+        final hits = kPolyrollCatalog.where((p) {
+          if (p.categoryHe != cat || p.page != page) return false;
+          // Reducing tees use a different spec family — skip.
+          if (cat == kPprTees && p.nameHe.contains('מצרה')) return false;
+          // Elbows: 45° products live under the synthetic '_45' key; the
+          // base kPprElbows key covers everything else (the 90° variants).
+          if (cat == kPprElbows) {
+            final is45 = p.nameHe.contains('45');
+            if (is45 != is45Elbow) return false;
+          }
+          return true;
+        });
         if (hits.isEmpty) return;
         for (final p in hits) {
           final s = p.specImageAssets.first;
           if (!s.endsWith(spec)) {
-            gaps.add('$cat p$page ${p.sku}: $s ≠ $spec');
+            gaps.add('$key p$page ${p.sku}: $s ≠ $spec');
           }
         }
       });
