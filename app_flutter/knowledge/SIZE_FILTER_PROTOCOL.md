@@ -34,6 +34,7 @@
 | **P14** | **Angles styled as size-chips on card, hidden from filter axis** | `isSizeToken` (card) treats `\d+°` as a size, `_kSizeRe` (filter) does NOT | card shows `15° ▾` as orange clickable size-chip, finder "גודל" never lists angles — user sees a chip they can't filter by |
 | **P15** | **Leading zeros preserved in mm labels** | `_tokenize` keeps raw digit prefix from the source name | אסלות filter shows `020 מ"מ` / `040 מ"מ` instead of `20 מ"מ` / `40 מ"מ`; sorts correctly but reads as a different size |
 | **P16** | **Bidi flips cross-dim chip labels in the filter row** | `_chip` widget in `finder_screen.dart` doesn't force LTR on digit-bearing labels (unlike `_AttrChip`) | source data `40×60` renders visually as `60×40` because the Hebrew paragraph direction reverses the run around `×` |
+| **P17** | **Card splits by whitespace, finder uses regex** | `_AttrChip` builds chips from `name.split(' ')` + `isSizeToken`; finder uses `parseSizeTokens` (regex over the full name) | `"... 200 ס"מ"`: finder shows chip `200 ס"מ`, card shows chip `200` — clicking the finder chip ranks cards by an orphan label. Found by `test/finder_card_consistency_test.dart`; closes in I3 (SizeChipLabel unification). |
 
 ---
 

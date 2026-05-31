@@ -1292,8 +1292,9 @@ bool isSizeToken(String w) {
   // A leading Ø (diameter symbol) is a noise prefix on inch sizes —
   // strip it and re-test so `Ø1/2"` is recognised the same as `1/2"`.
   final stripped = w.startsWith('Ø') ? w.substring(1) : w;
-  // numbers, fractions, ratios, inch marks, degrees, with × / - separators
-  return RegExp(r'^[\d]+([./×x\-"׳״⅛¼½¾⅜⅝⅞°]+[\d"׳״°]*)*[\"׳״°]?$')
+  // numbers, fractions, ratios, inch marks, degrees, with × / x / X /
+  // - separators (capital X appears in PPR product names like `160X25X1/2"`).
+  return RegExp(r'^[\d]+([./×xX\-"׳״⅛¼½¾⅜⅝⅞°]+[\d"׳״°]*)*[\"׳״°]?$')
           .hasMatch(stripped) &&
       RegExp(r'\d').hasMatch(stripped);
 }
@@ -1688,8 +1689,57 @@ class _NameWords extends StatelessWidget {
         }
       }
 
+      // ── Multi-word size token — `200 ס"מ` / `300 מ׳` / `40 מ"מ` ─────────
+      // Card used to split by whitespace and lose the unit suffix, so the
+      // chip read `200` while the finder filter read `200 ס"מ` (P17). Look
+      // ahead: if joining `w` with the next word produces a finder size
+      // token, emit ONE chip and skip the consumed pair.
+      if (i + 1 < words.length) {
+        final two = '$w ${words[i + 1]}';
+        final twoTokens = parseSizeTokens(two);
+        // Only collapse if the joined form yields exactly one size token AND
+        // that token spans the unit suffix (i.e. `w` alone wouldn't have
+        // produced it). Guards against accidental merges like `25 שנים`.
+        if (twoTokens.length == 1 &&
+            twoTokens.first.label.endsWith(words[i + 1])) {
+          final label = twoTokens.first.label;
+          if (seen.add(label)) {
+            chips.add(_AttrChip(
+              word: label,
+              kind: AttrKind.size,
+              product: product,
+              onTap: onAttrTap,
+              isOpen: openKind == AttrKind.size,
+            ));
+          }
+          i += 2;
+          continue;
+        }
+      }
+
       // ── Single-word attribute chip ───────────────────────────────────────
       final kind = _attrKindFor(w);
+      // Cross-inch like `1/2"×3/8"` (a reducing tee) is one word that yields
+      // TWO finder tokens (`½"` + `3/8"`). Mirror that on the card so the
+      // user can filter by either dim — emit a chip per token.
+      if (kind == AttrKind.size) {
+        final tokens = parseSizeTokens(w);
+        if (tokens.length > 1) {
+          for (final t in tokens) {
+            if (seen.add(t.label)) {
+              chips.add(_AttrChip(
+                word: t.label,
+                kind: AttrKind.size,
+                product: product,
+                onTap: onAttrTap,
+                isOpen: openKind == AttrKind.size,
+              ));
+            }
+          }
+          i++;
+          continue;
+        }
+      }
       if (!seen.add(w)) {
         i++; // already shown this chip on this card — skip the duplicate
         continue;
