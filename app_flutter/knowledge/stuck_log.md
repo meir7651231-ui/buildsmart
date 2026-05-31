@@ -198,6 +198,81 @@ RULE: paths קשיחים אסורים — חפש דינמית
 
 ---
 
+## 2026-05-31 · לקחים מ-SIZE_FILTER_PROTOCOL (session מקביל)
+### א — הבעיה
+ה-session המקביל פיתח 16 תיקונים על מסנן גודל ב-finder. בסוף הוא כתב פרוטוקול
+544 שורות עם 25 לקחים — אבל לא היה לי דרך לאמץ אותם אוטומטית.
+
+### ב — הפתרון
+1. יצרתי `CARRY_FORWARD.md` — לקחים קבועים חוצי-sessions
+2. יצרתי `SESSION_PLAN_TEMPLATE.md` — מבנה חובה
+3. הוספתי שערים 106-110 לפרוטוקול
+4. שער 107 דורש visual log לשינויי UI
+
+### ג — כללי המניעה
+ANTIPATTERN: ^Owner:\s*$
+RULE: כל session_plan חייב שורת Owner: + Scope: בראש
+ANTIPATTERN: lib/screens/.*\.dart.*\+\+\+.*no visual
+RULE: שינוי UI דורש screenshot או visual_log entry
+
+---
+
+## 2026-05-31 · LL-04 (מ-size protocol) — 2 pipelines, 2 display forms
+### א — הבעיה
+Finder הציג `1¼"` והכרטיס הציג `1.25"` — אותו מוצר, אותו גודל פיזי, שתי צורות
+ויזואליות. unit tests היו ירוקות, רק העין תפסה.
+
+### ב — הפתרון
+helper משותף `displaySizeLabel()` שנקרא משתי הpipelines.
+
+### ג — כללי המניעה
+ANTIPATTERN: prettyInch\([a-z]+\).*finder
+RULE: כל פונקציית display של chip חייבת להיקרא משני הצדדים — finder + card
+
+---
+
+## 2026-05-31 · LL-05 (מ-size protocol) — "falls back" ≠ "union"
+### א — הבעיה
+`_productSizeTokens` היה name-or-dims (else-if). פייפ שמכיל אורך בשם וקוטר ב-dims —
+רק האחד הופיע.
+
+### ב — הפתרון
+union — שני המקורות תורמים. הdedup והגrouping עושים את העבודה.
+
+### ג — כללי המניעה
+ANTIPATTERN: parseSizeTokens.*\?\?.*tokensFromDims
+RULE: כששני מקורות מתארים צירים אורתוגונליים — union. רק כשהם substitutes — fallback.
+
+---
+
+## 2026-05-31 · LL-08 (מ-size protocol) — \\d+ vs \\d+(?:\\.\\d+)?
+### א — הבעיה
+`'\d+×\d+'` חתך עשרוני (`20×2.8` → `20×2`) כי הregex לא קיבל נקודה.
+
+### ב — הפתרון
+תמיד `\d+(?:\.\d+)?` בדומיין שבו עשרוניים אפשריים.
+
+### ג — כללי המניעה
+ANTIPATTERN: \\\\d\\+×\\\\d\\+
+RULE: regex על מספרים בדומיין הנדסי חייב לקבל נקודה עשרונית
+
+---
+
+## 2026-05-31 · LL-14 (מ-size protocol) — bidi flips silent
+### א — הבעיה
+Filter chip הציג `60×40`, card chip הציג `40×60`. data היה זהה — RTL paragraph
+direction רק היפך את הdisplay.
+
+### ב — הפתרון
+`textDirection: label.contains(RegExp(r'\d')) ? LTR : null` על כל Text widget
+שעלול להכיל digits בעברית.
+
+### ג — כללי המניעה
+NOTE: pattern קיים אבל לא נאכף אוטומטית — יוצר too-many-positives ב-Text widgets שכבר תחת LTR ancestor. נשמר כ-manual review point ב-CARRY_FORWARD לקח #10.
+RULE: text widget שהמחרוזת בתוכו מכילה גם עברית וגם מספרים → textDirection ltr חובה
+
+---
+
 ## 2026-05-31 · #14, #15, #18, #9, #23, #25 — שיפורי דיוק
 ### א — הבעיות
 - gate 26: תפס שמות `_tests.dart` גם בlib/ (לא רק test/)

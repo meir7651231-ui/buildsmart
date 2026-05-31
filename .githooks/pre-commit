@@ -567,6 +567,56 @@ if [[ "$FAIL" -gt 0 ]]; then
     tail -100 "$FINGERPRINT_FILE" > "$FINGERPRINT_FILE.tmp" && mv "$FINGERPRINT_FILE.tmp" "$FINGERPRINT_FILE"
 fi
 
+# ═══ קבוצה י: לקחים מ-SIZE_FILTER_PROTOCOL (106-110) ═══
+
+# שער 106: session_plan חייב Owner + Scope (לקח 23-24 מ-CARRY_FORWARD)
+if [[ -n "$STAGED_LIB" ]] && [[ -f "knowledge/session_plan.md" ]]; then
+    if ! grep -qE "^Owner:" knowledge/session_plan.md; then
+        err "106" "session_plan חסר Owner:" "הוסף 'Owner: this session' לראש הקובץ"
+    fi
+    if ! grep -qE "^Scope:" knowledge/session_plan.md; then
+        err "106" "session_plan חסר Scope:" "הוסף 'Scope: <file:axis>' — משפט אחד שמונע scope creep"
+    fi
+fi
+
+# שער 107: שינוי UI (screens/) דורש visual verification log
+# מתועד באמצעות קובץ knowledge/visual_log.md שמופנה מ-session_plan
+STAGED_UI=$(git diff --cached --name-only | grep -E "^app_flutter/lib/screens/.*\.dart$" | head -1)
+if [[ -n "$STAGED_UI" ]]; then
+    # אם זה pure refactor (אין שינוי visible) → מתעד באמצעות commit body
+    SUBJECT=$(git log -1 --format="%s" 2>/dev/null)
+    # אם נגעת ב-UI ולא תיעדת visual — אזהרה, לא חוסם
+    if [[ ! -f "knowledge/visual_log.md" ]] && [[ ! -f "knowledge/session_plan.md" || -z "$(grep -i 'screenshot\|visual' knowledge/session_plan.md 2>/dev/null)" ]]; then
+        warn "107" "שינוי UI ללא visual log" "מומלץ: צור knowledge/visual_log.md או תעד screenshot ב-session_plan"
+    fi
+fi
+
+# שער 108: CARRY_FORWARD קיים
+[[ -f "knowledge/CARRY_FORWARD.md" ]] || err "108" "CARRY_FORWARD חסר" "הקובץ מכיל לקחים חוצי-sessions"
+
+# שער 109: אם נסגר sub-protocol — חייב להוסיף ל-CARRY_FORWARD
+# heuristic: אם session_plan מכיל "sub-protocol" + הcommit מסיים אותו (✅ ברוב הצעדים)
+if [[ -f "knowledge/session_plan.md" ]] && grep -q "sub-protocol" knowledge/session_plan.md 2>/dev/null; then
+    DONE_COUNT=$(grep -c "✅" knowledge/session_plan.md 2>/dev/null || echo 0)
+    PENDING=$(grep -c "⬜" knowledge/session_plan.md 2>/dev/null || echo 0)
+    # אם 5+ ✅ ואין שינוי ב-CARRY_FORWARD — אזהרה
+    if [[ "$DONE_COUNT" -gt 5 && "$PENDING" -eq 0 ]]; then
+        STAGED_CF=$(git diff --cached --name-only | grep "CARRY_FORWARD.md" | head -1)
+        if [[ -z "$STAGED_CF" ]]; then
+            warn "109" "sub-protocol הושלם בלי עדכון CARRY_FORWARD" "הוסף לקחים חוצי-sessions"
+        fi
+    fi
+fi
+
+# שער 110: audit log — אם נסקרה קטגוריה
+# session_plan עם טבלת "Audit log" חייב לפחות שורה אחת
+if [[ -f "knowledge/session_plan.md" ]] && grep -q "Audit log\|Audit Log" knowledge/session_plan.md 2>/dev/null; then
+    AUDIT_LINES=$(awk '/[Aa]udit [Ll]og/,/^---|^##/' knowledge/session_plan.md 2>/dev/null | grep -cE "^\|.*\|.*\|" || echo 0)
+    if [[ "$AUDIT_LINES" -lt 2 ]]; then
+        warn "110" "Audit log קיים אבל ריק" "תעד קטגוריות שנסקרו (כולל clean runs כ-sentinels)"
+    fi
+fi
+
 # שער 100: סיכום
 echo ""
 echo "══════════════════════════════════════════════"
