@@ -151,3 +151,72 @@ RULE: שערים יקרים חייבים gate מקדים שבודק רלוונט
 ### ג — כלל המניעה
 ANTIPATTERN: ^(wip|test|asdf|tmp)$
 RULE: הודעת commit חייבת לתאר את השינוי, לא רק מילה גנרית
+
+---
+
+## 2026-05-31 · #11 — shell injection ב-gate 103
+### א — הבעיה
+gate 103 העביר ANTIPATTERN ל-`grep -E "$pattern"` ללא וידוא.
+פטרן עם `$(cmd)` או backtick יורץ כshell command.
+
+### ב — הפתרון
+בדיקה מקדימה: `if echo "$pattern" | grep -qE '\$\(|\`|\\$\{'` — דילוג + warning.
+שימוש ב-`grep -E -- "$pattern"` עם `--` למניעת flag injection.
+
+### ג — כלל המניעה
+ANTIPATTERN: grep -E "\$[a-z]+"
+RULE: פטרן ממקור חיצוני חייב לעבור validation לפני שימוש ב-grep -E
+
+---
+
+## 2026-05-31 · #16 — gate 52 secrets false-positive
+### א — הבעיה
+`final passwordRegex = RegExp(r"^[a-z]{8,}$")` — מילה "password" + string ארוך → flag שגוי.
+
+### ב — הפתרון
+1. דרשנו string של 16+ תווים (לא 8)
+2. צמצמנו לתווי secret אמיתי: `[A-Za-z0-9+/_-]`
+3. החרגנו: regex/pattern/kSecret/kToken/.test(/expect(
+
+### ג — כלל המניעה
+ANTIPATTERN: kSecret\w*\s*=\s*compute
+RULE: שמות משתנים שמכילים Secret/Token/Password חייבים להיות kPrefix או להכיל "regex"
+
+---
+
+## 2026-05-31 · #29 — paths קשיחים
+### א — הבעיה
+`export PATH="/home/user/flutter/bin"` עבד רק במחשב אחד.
+
+### ב — הפתרון
+לולאה על מועמדים: `/home/user/flutter/bin`, `/c/flutter/bin`, `$HOME/flutter/bin`, `/usr/local/flutter/bin`.
+שגיאה ברורה אם flutter לא נמצא.
+
+### ג — כלל המניעה
+ANTIPATTERN: export PATH=.*[/]home[/]user
+RULE: paths קשיחים אסורים — חפש דינמית
+
+---
+
+## 2026-05-31 · #14, #15, #18, #9, #23, #25 — שיפורי דיוק
+### א — הבעיות
+- gate 26: תפס שמות `_tests.dart` גם בlib/ (לא רק test/)
+- gate 48: print() pattern רדוד — תפס רק תחילת שורה
+- gate 60: לא הבחין בין dependencies ל-dev_dependencies
+- gate 81: hash check רק מול disk, לא מול HEAD
+- pre-push: בודק רק fast-forward — לא ענף יעד או הודעה
+- אין הוראה ל-branch protection ב-GitHub UI
+
+### ב — הפתרונות
+- gate 26: `^app_flutter/test/.*_tests\.dart$` בלבד
+- gate 48: pattern `(^|[^a-zA-Z0-9_])print\s*\(` + exclude debugPrint/comments/strings
+- gate 60: awk מבדיל בין dependencies ו-dev_dependencies
+- gate 81: hash גם מול `git show HEAD:.githooks/pre-commit`
+- pre-push: חוסם main/master ללא `.allow_push_main` + מוודא commit messages
+- צרתי `knowledge/PROTOCOL_ENFORCEMENT.md` עם הוראות branch protection
+
+### ג — כלל המניעה
+ANTIPATTERN: pubspec.yaml.*grep.*"\^"
+RULE: בדיקת dependencies חייבת להבחין dev מ-prod
+ANTIPATTERN: sha256sum.*\.git/hooks.*compare
+RULE: integrity check חייב להיות גם מול HEAD, לא רק disk

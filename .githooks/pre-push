@@ -1,14 +1,39 @@
 #!/bin/bash
-# חוסם force push אוטומטית
+# פרוטוקול BuildSmart — pre-push
+# תיקון באג #23: בודק שכל commit עבר את pre-commit + ענף יעד נכון
+
+REMOTE="$1"
+URL="$2"
+
+PROTECTED_REMOTES="main|master|production"
 
 while read local_ref local_sha remote_ref remote_sha; do
-    if [[ "$remote_sha" == "0000000000000000000000000000000000000000" ]]; then
-        continue
+    # חסום push ל-main/master ללא אישור
+    if echo "$remote_ref" | grep -qE "refs/heads/($PROTECTED_REMOTES)$"; then
+        if [[ ! -f "$(git rev-parse --show-toplevel)/.allow_push_main" ]]; then
+            echo "❌ חסום: push לרfn $remote_ref ללא אישור מפורש" >&2
+            echo "   צור קובץ .allow_push_main עם הוראה לדחיפה" >&2
+            exit 1
+        fi
     fi
-    if ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
-        echo "❌ חסום: force push יפגע בהיסטוריה."
-        echo "   השרת מכיל commits שאין מקומית — משוך קודם."
-        exit 1
+
+    # חסום force push (גם אם PreToolUse פספס)
+    if [[ "$remote_sha" != "0000000000000000000000000000000000000000" ]]; then
+        if ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+            echo "❌ חסום: השרת קדימה — force push פוגע בהיסטוריה" >&2
+            echo "   משוך עדכונים: git pull --rebase" >&2
+            exit 1
+        fi
+    fi
+
+    # בדוק שכל commit חדש מכיל גוף הודעה תקין
+    BASE_SHA="${remote_sha:-$(git merge-base HEAD origin/main 2>/dev/null || echo)}"
+    if [[ -n "$BASE_SHA" && "$BASE_SHA" != "0000000000000000000000000000000000000000" ]]; then
+        EMPTY=$(git log --format="%h %s" "${BASE_SHA}..${local_sha}" 2>/dev/null | awk '{if(length($0)<25){print $1; exit}}')
+        if [[ -n "$EMPTY" ]]; then
+            echo "❌ commit עם הודעה קצרה מדי: $EMPTY" >&2
+            exit 1
+        fi
     fi
 done
 

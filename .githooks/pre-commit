@@ -3,7 +3,19 @@
 # נשמר בריפו ב-.githooks/ — חל על כל מודל וכל clone
 # כל הפרת פרוטוקול = חסימה מוחלטת
 
-export PATH="/home/user/flutter/bin:$PATH:/c/flutter/bin"
+# תיקון באג #29: paths דינמיים — מחפש flutter במגוון מיקומים
+for candidate in "/home/user/flutter/bin" "/c/flutter/bin" "$HOME/flutter/bin" "/usr/local/flutter/bin"; do
+    [[ -d "$candidate" ]] && PATH="$candidate:$PATH"
+done
+export PATH
+
+# וודא ש-flutter זמין; אם לא — שגיאה ברורה
+if ! command -v flutter >/dev/null 2>&1; then
+    echo "❌ flutter לא נמצא ב-PATH" >&2
+    echo "   הוסף flutter/bin ל-PATH או התקן Flutter" >&2
+    exit 1
+fi
+
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT/app_flutter" || exit 1
 
@@ -123,8 +135,8 @@ for shared in app_settings catalog_settings chat_settings notif_settings store_s
     fi
 done
 
-# שער 26-28: שמות קבצים תקינים
-BAD_TEST=$(git diff --cached --name-only | grep -E "_tests\.dart$" | head -1)
+# שער 26-28: שמות קבצים תקינים (תיקון באג #14 — רק ב-test/ בלבד)
+BAD_TEST=$(git diff --cached --name-only | grep -E "^app_flutter/test/.*_tests\.dart$" | head -1)
 [[ -z "$BAD_TEST" ]] || err "26" "שם בדיקה שגוי: $BAD_TEST" "שנה ל-_test.dart (singular)"
 
 BAD_HELPER=$(git diff --cached --name-only | grep -E "^app_flutter/lib/.*[A-Z].*\.dart$" | head -1)
@@ -214,8 +226,14 @@ if [[ -n "$NEW_DIALOG" && -z "$STAGED_WIRING" ]]; then
     warn "47" "dialog/sheet חדש — וודא שמופיע ב-WIRING"
 fi
 
-# שער 48: אין print() בproduction
-PRINTS=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "^\+\s*print\(" | head -1)
+# שער 48: אין print() בproduction (תיקון באג #15 — pattern רחב יותר)
+# תופס: ^print(, "  print(", " print(", "} print(", "; print("
+# לא תופס: 'print(...)' בstring, // print(...) בcomment, debugPrint(
+PRINTS=$(git diff --cached -- 'app_flutter/lib/*.dart' 2>/dev/null \
+    | grep "^+" | grep -v "^+++" \
+    | grep -E "(^\+|[^a-zA-Z0-9_])print\s*\(" \
+    | grep -v "debugPrint\|//.*print\|'print\|\"print" \
+    | head -1)
 [[ -z "$PRINTS" ]] || err "48" "print() בקוד production" "השתמש ב-debugPrint או הסר"
 
 # שער 49: אין TODO/FIXME חדשים בלי context
@@ -230,9 +248,15 @@ BAD_IMPORT=$(git diff --cached lib/ 2>/dev/null | grep "^+import 'dart:html'" | 
 HARD_URL=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "https?://[^\"']+\"" | head -1)
 [[ -z "$HARD_URL" ]] || warn "51" "URL קשיח — שקול config"
 
-# שער 52: אין secrets/keys (רק בקוד dart/yaml/json, לא בhook עצמו)
-SECRETS=$(git diff --cached -- '*.dart' '*.yaml' '*.yml' '*.json' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -iE "(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][^'\"]{8,}" | grep -v "test/\|//" | head -1)
-[[ -z "$SECRETS" ]] || err "52" "secret/api_key בקוד" "אסור לשמור secrets"
+# שער 52: אין secrets/keys (תיקון באג #16 — pattern מדויק יותר)
+# מחפש: STRING של ערך, לא רק "המילה password"
+# false-positives ידועים: passwordRegex, secretRegex, kSecretKey = compute()
+SECRETS=$(git diff --cached -- '*.dart' '*.yaml' '*.yml' '*.json' 2>/dev/null \
+    | grep "^+" | grep -v "^+++" \
+    | grep -iE "(api[_-]?key|secret|token|password|bearer)\s*[:=]\s*['\"][A-Za-z0-9+/_-]{16,}['\"]" \
+    | grep -viE "regex|pattern|kSecret|kToken|kPassword|kApiKey|\.test\(|expect\(|placeholder" \
+    | head -1)
+[[ -z "$SECRETS" ]] || err "52" "secret/api_key בקוד" "אסור לשמור secrets (אם false-positive — שנה שם משתנה כך שיכלול 'regex'/'pattern')"
 
 # שער 53: אין .env בstaged
 STAGED_ENV=$(git diff --cached --name-only | grep -E "^\.env|\.env\.|credentials" | head -1)
@@ -263,9 +287,15 @@ if [[ -n "$STAGED_LIB" ]]; then
     [[ -n "$SHELL_DIFF" ]] || err "59" "גרסה לא עלתה" "bump גרסה ב-home_shell + STATUS"
 fi
 
-# שער 60: אין dependencies חדשות בלי וידוא
-NEW_DEPS=$(git diff --cached pubspec.yaml 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "^\+\s+[a-z_]+:\s+\^" | head -1)
-[[ -z "$NEW_DEPS" ]] || warn "60" "dependency חדש: $NEW_DEPS"
+# שער 60: אין dependencies חדשות בלי וידוא (תיקון באג #18 — מבחין dev_deps)
+# בודק רק production deps (מתחת ל-dependencies:, לא dev_dependencies:)
+NEW_DEPS=$(git diff --cached pubspec.yaml 2>/dev/null | awk '
+    /^[+-]dependencies:/ { in_prod=1; in_dev=0; next }
+    /^[+-]dev_dependencies:/ { in_dev=1; in_prod=0; next }
+    /^[+-][a-z]/ && !/^[+-][[:space:]]/ { in_prod=0; in_dev=0 }
+    in_prod && /^\+[[:space:]]+[a-z_]+:/ { print; exit }
+')
+[[ -z "$NEW_DEPS" ]] || warn "60" "production dep חדש: $NEW_DEPS"
 
 # ═══ קבוצה ו: שפה ותרבות (61-75) ═══
 
@@ -362,11 +392,23 @@ STAGED_LOCK=$(git diff --cached --name-only | grep -E "\.lock$|node_modules" | h
 LOCK_CHANGE=$(git diff --cached pubspec.lock 2>/dev/null | grep "^+" | grep "version:" | head -1)
 [[ -z "$LOCK_CHANGE" ]] || warn "80" "שינוי version ב-lock — וודא pub get הריץ"
 
-# שער 81-85: hook integrity
-HOOK_HASH_EXPECTED=$(sha256sum "$REPO_ROOT/.githooks/pre-commit" | cut -d' ' -f1)
-HOOK_HASH_LOCAL=$(sha256sum "$REPO_ROOT/.git/hooks/pre-commit" 2>/dev/null | cut -d' ' -f1 || echo "missing")
-if [[ "$HOOK_HASH_LOCAL" != "missing" && "$HOOK_HASH_EXPECTED" != "$HOOK_HASH_LOCAL" ]]; then
-    err "81" "ה-hook המקומי שונה מהריפו" "cp .githooks/pre-commit .git/hooks/"
+# שער 81-85: hook integrity (תיקון באג #9 — מבדק גם מול commit מקורי)
+# בודק שה-hook הנוכחי תואם את הגרסה ב-HEAD (לא ניתן להחליף בשקט)
+HEAD_HOOK_HASH=$(git show "HEAD:.githooks/pre-commit" 2>/dev/null | sha256sum | cut -d' ' -f1)
+CURRENT_HOOK_HASH=$(sha256sum "$REPO_ROOT/.githooks/pre-commit" | cut -d' ' -f1)
+LOCAL_HOOK_HASH=$(sha256sum "$REPO_ROOT/.git/hooks/pre-commit" 2>/dev/null | cut -d' ' -f1 || echo "missing")
+
+# pre-commit ב-.git/hooks חייב להיות שווה ל-.githooks (working copy)
+if [[ "$LOCAL_HOOK_HASH" != "missing" && "$LOCAL_HOOK_HASH" != "$CURRENT_HOOK_HASH" ]]; then
+    err "81" "ה-hook המקומי שונה מ-.githooks/" "cp .githooks/pre-commit .git/hooks/"
+fi
+
+# אם .githooks/pre-commit השתנה מ-HEAD ולא נמצא ב-staged → חשד
+if [[ -n "$HEAD_HOOK_HASH" && "$CURRENT_HOOK_HASH" != "$HEAD_HOOK_HASH" ]]; then
+    STAGED_HOOK=$(git diff --cached --name-only | grep "^\.githooks/pre-commit$" | head -1)
+    if [[ -z "$STAGED_HOOK" ]]; then
+        err "81" "pre-commit השתנה אבל לא ב-staging" "git add .githooks/pre-commit (או שחזר)"
+    fi
 fi
 
 if [[ -f "$REPO_ROOT/.git/hooks/pre-push" ]]; then
@@ -486,13 +528,20 @@ if [[ "$IS_RETRY" == "true" && -f "$STUCK_LOG" ]]; then
 fi
 
 # שער 103: אנטי-פטרנים מ-stuck_log לא חוזרים בקוד החדש
+# תיקון באג #11: pattern עובר ל-grep בלי shell expansion
 if [[ -f "$STUCK_LOG" ]]; then
     while IFS= read -r line; do
-        pattern=$(echo "$line" | sed 's/^ANTIPATTERN: //')
+        pattern="${line#ANTIPATTERN: }"
         [[ -z "$pattern" ]] && continue
+        # חסום shell-injection chars לפני שימוש ב-pattern
+        if echo "$pattern" | grep -qE '\$\(|\`|\\$\{'; then
+            warn "103" "אנטי-פטרן ב-stuck_log מכיל shell-meta: $pattern"
+            continue
+        fi
         STAGED_DART=$(git diff --cached --name-only -- '*.dart' 2>/dev/null)
         if [[ -n "$STAGED_DART" ]]; then
-            MATCH=$(git diff --cached -- '*.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "$pattern" | head -1)
+            # השתמש ב-grep -F לפטרנים פשוטים, או -E בlevel המתאים
+            MATCH=$(git diff --cached -- '*.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E -- "$pattern" 2>/dev/null | head -1)
             if [[ -n "$MATCH" ]]; then
                 err "103" "אנטי-פטרן חזר: $pattern" "ראה stuck_log.md — הבעיה תועדה כבר"
             fi
