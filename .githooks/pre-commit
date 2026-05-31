@@ -13,6 +13,23 @@ err()  { echo ""; echo "❌ [שער $1] $2"; echo "   → $3"; FAIL=$((FAIL+1));
 warn() { echo "⚠️  [שער $1] $2"; WARN=$((WARN+1)); }
 ok()   { :; }  # שתיקה — רק כשלים נראים
 
+# ═══ מנגנון למידה: זיהוי retry ═══
+FINGERPRINT_FILE="$REPO_ROOT/.git/stuck_fingerprints.txt"
+touch "$FINGERPRINT_FILE"
+
+# חתימת הניסיון הנוכחי
+CURRENT_FP=$(git diff --cached --name-only | sort | sha256sum | cut -d' ' -f1 | head -c 12)
+IS_RETRY="false"
+# אם החתימה הופיעה ב-5 השעות האחרונות → זה retry
+NOW=$(date +%s)
+FIVE_HOURS_AGO=$((NOW - 18000))
+while IFS=' ' read -r fp ts rest; do
+    if [[ "$fp" == "$CURRENT_FP" && "$ts" -gt "$FIVE_HOURS_AGO" ]]; then
+        IS_RETRY="true"
+        break
+    fi
+done < "$FINGERPRINT_FILE"
+
 echo ""
 echo "══════════════════════════════════════════════"
 echo "  פרוטוקול BuildSmart — 100 שערים אוטומטיים"
@@ -435,6 +452,62 @@ LAYERS_OK=0
 [[ -f "$REPO_ROOT/.claude/hooks/session-start.sh" ]] && LAYERS_OK=$((LAYERS_OK+1))
 [[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] && LAYERS_OK=$((LAYERS_OK+1))
 [[ "$LAYERS_OK" -eq 4 ]] || err "99" "רק $LAYERS_OK/4 שכבות אכיפה" "שחזר חסרות"
+
+# ═══ קבוצה ט: שכבת למידה (101-104) ═══
+
+# שער 101: stuck_log קיים
+STUCK_LOG="knowledge/stuck_log.md"
+[[ -f "$STUCK_LOG" ]] || err "101" "stuck_log.md חסר" "צור knowledge/stuck_log.md"
+
+# שער 102: אם זה retry אחרי כשלון — חייב להוסיף רשומה אמיתית
+if [[ "$IS_RETRY" == "true" && -f "$STUCK_LOG" ]]; then
+    STAGED_STUCK=$(git diff --cached --name-only | grep "stuck_log.md" | head -1)
+    if [[ -z "$STAGED_STUCK" ]]; then
+        err "102" "פתרת בעיה — לא תיעדת" "עדכן knowledge/stuck_log.md: בעיה + פתרון + ANTIPATTERN + RULE"
+    else
+        # ANTIPATTERN: (בדיוק) חייב להופיע ברשומה החדשה — לא ANTIPATTERN-EXAMPLE:
+        NEW_LINES=$(git diff --cached "$STUCK_LOG" 2>/dev/null | grep "^+" | grep -v "^+++")
+        if ! echo "$NEW_LINES" | grep -qE "^\+ANTIPATTERN:"; then
+            err "102" "רשומה חסרה ANTIPATTERN" "הוסף שורת ANTIPATTERN: regex (בלי -EXAMPLE)"
+        fi
+        if ! echo "$NEW_LINES" | grep -qE "^\+RULE:"; then
+            err "102" "רשומה חסרה RULE" "הוסף שורת RULE: כלל בעברית (בלי -EXAMPLE)"
+        fi
+    fi
+fi
+
+# שער 103: אנטי-פטרנים מ-stuck_log לא חוזרים בקוד החדש
+if [[ -f "$STUCK_LOG" ]]; then
+    while IFS= read -r line; do
+        pattern=$(echo "$line" | sed 's/^ANTIPATTERN: //')
+        [[ -z "$pattern" ]] && continue
+        STAGED_DART=$(git diff --cached --name-only -- '*.dart' 2>/dev/null)
+        if [[ -n "$STAGED_DART" ]]; then
+            MATCH=$(git diff --cached -- '*.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "$pattern" | head -1)
+            if [[ -n "$MATCH" ]]; then
+                err "103" "אנטי-פטרן חזר: $pattern" "ראה stuck_log.md — הבעיה תועדה כבר"
+            fi
+        fi
+    done < <(grep "^ANTIPATTERN:" "$STUCK_LOG" 2>/dev/null)
+fi
+
+# שער 104: re-generate stuck_regression_test אם stuck_log השתנה
+STAGED_STUCK_LOG=$(git diff --cached --name-only | grep "stuck_log.md" | head -1)
+if [[ -n "$STAGED_STUCK_LOG" ]]; then
+    bash "$REPO_ROOT/app_flutter/scripts/generate_stuck_regression.sh" >/dev/null 2>&1
+    # אם קובץ ה-test השתנה — הוסף ל-commit
+    if ! git diff --quiet test/stuck_regression_test.dart 2>/dev/null; then
+        git add test/stuck_regression_test.dart
+        echo "🔁 stuck_regression_test.dart התעדכן אוטומטית"
+    fi
+fi
+
+# רישום fingerprint אם נכשל
+if [[ "$FAIL" -gt 0 ]]; then
+    echo "$CURRENT_FP $NOW gates=$FAIL" >> "$FINGERPRINT_FILE"
+    # שמור רק 100 שורות אחרונות
+    tail -100 "$FINGERPRINT_FILE" > "$FINGERPRINT_FILE.tmp" && mv "$FINGERPRINT_FILE.tmp" "$FINGERPRINT_FILE"
+fi
 
 # שער 100: סיכום
 echo ""
