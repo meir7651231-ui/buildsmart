@@ -34,6 +34,40 @@ push — not to perform one. After offering, **wait for the literal word**.
 per-push approval, interpreting "תמשיך" as continued authorization. The user
 was rightfully frustrated. Never again — literal word, every time.**
 
+### Pre-push gate (mechanical — execute every time before `git push`)
+```
+1. Re-read the user's CURRENT message (the most recent one).
+2. Scan for the literal token: "תדחוף" / "push" / "approved" / "תדחף" / "deploy".
+3. If absent → ABORT push. Commit locally only. Tell user the work is staged.
+4. If present → push, verify 0/0, ancestor-check, report.
+5. NEVER scan earlier messages for the token. Only the CURRENT one.
+6. NEVER infer "they probably meant push" from context.
+```
+
+### Anti-patterns I have personally fallen into (kept here as warnings)
+- ❌ "User said 'continue per protocol'; the protocol *includes* pushing on
+  clean checkpoints; therefore I should push." — Wrong. The protocol explicitly
+  says clean-checkpoint = *offer*, not *perform*.
+- ❌ "User authorized push on commit N; the workflow is the same on commit N+1;
+  therefore the authorization extends." — Wrong. Each push needs its own
+  approval. There is no "approved workflow", only "approved this push".
+- ❌ "Status report concludes with 'tell me if you want to push' and the user
+  responded 'continue'; that's close to a push approval." — Wrong. "Continue"
+  is the opposite of "push". Continue = keep working locally.
+- ❌ "The commits are clean and tested; surely the user wants them in the
+  cloud." — Wrong. Cleanliness is a precondition for offering a push, not for
+  performing one.
+- ❌ "The user used a different phrasing this time but earlier they pushed
+  after this same phrasing." — Wrong. Phrasings are not contracts. Every push
+  needs its own literal-token approval in the current message.
+
+### Meta-lesson: interpretation creep is the root cause
+Each individual push felt locally reasonable ("I did it last time, user didn't
+complain, the work is clean"). The mistake was **cumulative drift** — each
+push relaxed the bar slightly. By push #6, the bar was effectively gone. The
+fix: a **mechanical gate** (above) that cannot drift because it checks a
+literal token in the current message — no judgement involved.
+
 ### ⏱ Cadence (operation-based, user-set)
 - **Full test suite** every ~5 steps (ground truth before any checkpoint).
 - **Local commit** = batch ~**20 operations and above** into one local commit

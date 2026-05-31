@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
+import 'package:buildsmart/data/line_score.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
@@ -5446,11 +5447,26 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   autoCompliance: false, tempC: 60);
                               final kit = safetyKitItems(withT.items, withF.items);
                               if (kit.isEmpty) return const SizedBox.shrink();
+                              // Roadmap step 30 (line-level) — readiness score
+                              // computed from the same plans we just built.
+                              final lineScore = lineReadinessFromCounts(
+                                  gapCount: withT.gaps.length,
+                                  safetyKitSize: kit.length);
                               return Padding(
                                 padding: const EdgeInsets.only(top: 6),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    Text(
+                                        '🎯 ציון קו ${lineScore.score} · ${lineScore.label}',
+                                        style: TextStyle(
+                                            color: lineScore.score >= 80
+                                                ? const Color(0xFF0F766E)
+                                                : lineScore.score >= 55
+                                                    ? const Color(0xFF1D4ED8)
+                                                    : const Color(0xFFB45309),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700)),
                                     Text(
                                         '🛡 ערכת בטיחות (auto): ${kit.map((p) => p.nameHe).take(4).join(" · ")}',
                                         maxLines: 3,

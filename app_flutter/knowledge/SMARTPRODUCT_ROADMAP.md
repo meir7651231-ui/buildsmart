@@ -104,9 +104,11 @@ Saved for the next run. Pick up here:
 29. 🟦 Physical-connection warning — `connectionWarningHe` flags a spec'd product
    with zero direct catalog mates ("ייתכן שנדרש מתאם"). (Full per-pair impossible-
    connection validation lives in the engine gaps.) Guard: `paired_warning_test`.
-30. 🟦 Card data-readiness score (0-100 + label) via `cardReadinessScore`
-   (spec/connectivity/finder/price/variants) shown as a badge in the 📦 header.
-   (Line-level safety/pressure/cost scoring still ⬜.) Guard: `card_score_test`.
+30. ✅ Score in both scopes — card-level via `cardReadinessScore` (badge in
+   📦 header) + line-level via `lineReadinessFromCounts(gapCount, safetyKitSize)`
+   shown as "🎯 ציון קו N · מצוין/טוב/בסיסי/חלקי" when a cart line exists.
+   Pure formula: connectivity 50% (-15/gap, floor 0) + safety 25% (+5/item,
+   cap 25), rescaled 0-100. Guards: `card_score_test` + `line_score_test`.
 
 ## Phase 4 · Installation guidance (31–40)
 31. ✅ Interactive stages with "mark done" — persisted `stageProgressProvider`
