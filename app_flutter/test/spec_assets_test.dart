@@ -363,6 +363,12 @@ void main() {
         60: 'spec_saddle_p60.jpg',
         84: 'spec_saddle_p84.jpg',
       },
+      kPprPlugs: {
+        22: 'spec_plug_p22.jpg',
+        70: 'spec_plug_p70.jpg',
+        71: 'spec_plug_p71.jpg',
+        83: 'spec_plug_p83.jpg',
+      },
     };
     final gaps = <String>[];
     expected.forEach((key, perPage) {

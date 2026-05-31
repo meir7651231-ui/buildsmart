@@ -196,6 +196,14 @@ const Map<int, String> _kPprSaddlePageSpec = {
   84: 'spec_saddle_p84.jpg', // PPRCT saddle (standard)
 };
 
+const Map<int, String> _kPprPlugPageSpec = {
+  22: 'spec_plug_p22.jpg', // PPR plain plug (D, z, l, d)
+  70: 'spec_plug_p70.jpg', // PPR פנים plug (rectangular, dual view)
+  71: 'spec_plug_p71.jpg', // PPR פנים plug large dia (domed, dual view)
+  83: 'spec_plug_p83.jpg', // PPRCT plug (cylindrical socket)
+  // p33 has 1 plug product only and shares the generic diagram → falls back.
+};
+
 /// Per-sub-type spec **diagram(s)** (dimension drawings cropped from the catalog
 /// pages). Prepended to the flip-side pager before the full page. Grows as more
 /// sub-type diagrams are cropped (protocol §17.1 / §22).
@@ -266,6 +274,10 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       }
       return ['spec_collar.jpg'];
     case kPprPlugs:
+      // §22: per-page plug spec when the catalog page has its own diagram.
+      if (_kPprPlugPageSpec.containsKey(page)) {
+        return [_kPprPlugPageSpec[page]!];
+      }
       return ['spec_plug.jpg'];
     case kPprPipesFiber:
       // PPRCT fiber pipes (AQUATHERM blue series): p87 is SDR 17 (its own
