@@ -79,6 +79,22 @@ void main() {
     });
   });
 
+  test(
+      'complianceTriggersFor PPR adds its 4 material items WITHOUT swallowing '
+      'standard supply compliance', () {
+    final pipe = kPolyrollCatalog.firstWhere((p) => p.sku == '95016002');
+    final trig = complianceTriggersFor(pipe);
+    final labels = trig.map((t) => t.label).toList();
+    // PPR-specific items present.
+    expect(labels.any((l) => l.contains('EN ISO 15874')), isTrue);
+    expect(labels.any((l) => l.contains('socket fusion')), isTrue);
+    expect(labels.any((l) => l.contains('PN16')), isTrue);
+    // Standard line-level checks are also present (this is the FIX — PPR
+    // products used to early-return and miss these).
+    expect(labels.any((l) => l.contains('ברז ניתוק')), isTrue,
+        reason: 'every product needs an upstream shutoff');
+  });
+
   test('aggregate coverage: ≥99% of PPR fusion-cat products yield rich tips',
       () {
     var checked = 0;

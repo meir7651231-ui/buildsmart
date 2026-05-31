@@ -535,11 +535,16 @@ List<LipskeyCatalogProduct> variantSiblingsOf(LipskeyCatalogProduct p) {
 /// add them, the user benefits from seeing them up-front in the product card.
 List<({String label, String reason})> complianceTriggersFor(
     LipskeyCatalogProduct p) {
-  // PPR (Polyroll) — requirements taken straight from the catalog: the
-  // standards it's certified to, thermal-expansion compensation (faser La),
-  // fusion-welded joints, and the documented pressure/temperature envelope.
+  final out = <({String label, String reason})>[];
+
+  // PPR (Polyroll) — material-specific compliance taken straight from the
+  // catalog: standards it's certified to, thermal-expansion compensation
+  // (faser La), fusion-welded joints, and the documented pressure /
+  // temperature envelope. These are ADDED to (not replacing) the line-level
+  // supply compliance below, since a PPR hot-water line still needs PRV /
+  // bladder / upstream shutoff just like any other hot supply line.
   if (p.brand == 'פולירול') {
-    return const [
+    out.addAll(const [
       (
         label: '🛡 EN ISO 15874',
         reason: 'DIN 8077/8078 · DIN 16962 · ASTM F 2389 · RP 001.78',
@@ -556,9 +561,8 @@ List<({String label, String reason})> complianceTriggersFor(
         label: '🛡 PN16 · SDR7.4 · עד 90°C',
         reason: 'לחץ נומינלי 16 bar · מים חמים וקרים',
       ),
-    ];
+    ]);
   }
-  final out = <({String label, String reason})>[];
   final cat = p.categoryHe;
   final type = p.productType ?? '';
 
