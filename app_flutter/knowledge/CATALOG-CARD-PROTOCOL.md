@@ -707,6 +707,7 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 |---|---|---|
 | 22 | spec משותף בין עמודים שלכל אחד דיאגרמה ייחודית | `spec_assets_test` · "§22 per-page spec routing — products land on their page-specific crop" |
 | 22 | spec משמש >2 עמודים (קטגוריה×עמוד) ללא הצדקה | `spec_assets_test` · "§22 sharing — no spec serves >2 catalog pages (allowlist exempt)" — allowlist מכיל את חתך-הרוחב של הצינורות (spec_faser_20/spec_pprct_pipe/spec_pprct_pipe_sdr17) ששותפים לגיטימית כי הגאומטריה זהה לכל קוטר |
+| 22.B | spec מזוהם בתמונת מוצר/עמודת טבלה/חיתוך חלקי | אין בדיקה אוטומטית — האכיפה היא **pre-save checklist בפרוטקול §22.B**: 4-edge check לפני שמירה. הופעל אחרי 2 batches רצופים שבהם 9/13 specs היו מזוהמים. אם הדפוס חוזר שוב — לבנות בדיקת tf-idf על pixel-histogram של ה-crop (proxy לתמונה במקום ציור B&W). |
 
 ### Progress tracker — families (15 total)
 
@@ -738,6 +739,37 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 - **p29 has saddle dimension at the bottom-left, not the top-left.** Don't assume "diagram = top". Always grid-render and locate visually.
 - **p84 has TWO unrelated drawings** (standard saddle top, hexagonal saddle bottom). Only the top maps to the products on the page; the bottom belongs to other products on the same page (different SKU prefix). Confirmed via grep on `_ppr('98217...',` lines.
 - Crops are tight to the diagram edges (~20px margin); table-column fragments on the right edge looked ugly in the earlier elbow_90 crops, so this family went straight to tight crops.
+
+### §22.B — Pre-save crop checklist (4-edge audit, enforced)
+
+Every crop **must** be sanity-checked against these four edges before the asset
+ships. This came after two consecutive batches (cf3966c + 5278792 + edfc9f3)
+in which ≥50% of new specs had contamination of one or more of these patterns,
+even though I had "learned" them in earlier families. Pattern recurrence =
+procedure isn't real until it's enforced.
+
+| Edge | Forbidden content | Concrete check |
+|------|-------------------|----------------|
+| **Top** | Product photo (green PPR / blue PPRCT / black metal / chrome handle / colored knob) | Pixel-sample 10px below `t`: must be ≥95% white/grey. If you see any saturated green/blue/black, push `t` down 30px and retry. |
+| **Right** | Table column borders, table cells, SDR/קוטר/מק"ט headers | Pixel-sample 10px left of `r`: must be white. The catalog tables start where the diagram ends — there is usually a clear gap (~20–40px) of pure white between them. Crop right edge into that gap. |
+| **Bottom** | Half-cut labels (D1, d, z1 missing letters) | The diagram has a baseline (the bottom-most measurement-line); `b` must be ≥10px below that. Cross-check against the labels visible in the dimension table — every label that has a row in the table must be visible in the drawing. |
+| **Left** | Diagram cut mid-stroke | Same as right — crop into the gap before the dim-arrow leftmost extent. |
+
+**Section-header guard (separate concern):** in pages with multiple models on
+one page (e.g. p69 "מודל A | מודל B"), the green "מודל" tags sit ABOVE the
+drawing. Start `t` BELOW these tags. They are not part of the drawing.
+
+**Sequence (mandatory):**
+1. Render the page with grid overlay at 25px / 100px intervals.
+2. Pick l/t/r/b from grid coords.
+3. Crop and view immediately.
+4. Run the 4-edge check above on the rendered crop, not on the page.
+5. If any edge fails — adjust by 25px and re-crop. Do NOT save the contaminated version.
+6. Only after 4 edges pass cleanly: copy to `assets/polyroll/products/`.
+
+**Rationale for the brutal cadence:** every contaminated crop survived to a
+"sign-off" montage round trip, costing 1 user feedback cycle and a force-redo.
+The total wall-time saved by skipping step 4 is ≪ the cost of the redo.
 
 ### Lessons applied while doing family 4/elbow_45
 
