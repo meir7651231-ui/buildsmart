@@ -517,13 +517,32 @@ List<LipskeyCatalogProduct> variantSiblingsOf(LipskeyCatalogProduct p) {
       ? (systems.first.name == 'supply' ? 'הזנה' : 'ניקוז')
       : 'משולב';
 
+  // PPR thick-walled override: spec ends carry the SOCKET OD (DN), but the
+  // pipe's internal flow bore is much smaller (e.g. DN20 PN16 → Di ≈14.4mm).
+  // When the catalog dims expose `di קוטר פנימי`, use that for the bore so
+  // pressure-drop calcs don't over-estimate flow capacity.
+  double? bore = minBore;
+  if (spec.material.startsWith('PPR')) {
+    final di = p.dims?['di קוטר פנימי']?.toString();
+    if (di != null) {
+      final nums = RegExp(r'[\d.]+')
+          .allMatches(di)
+          .map((m) => double.tryParse(m.group(0)!))
+          .whereType<double>()
+          .toList();
+      if (nums.isNotEmpty) {
+        bore = nums.reduce((a, b) => a > b ? a : b);
+      }
+    }
+  }
+
   return (
     material: spec.material,
     pressureRating: spec.pressureRating,
     maxTempC: spec.maxTempC,
     waterSystem: ws,
     endsSummary: endsSummary,
-    minBoreMm: minBore,
+    minBoreMm: bore,
   );
 }
 

@@ -80,6 +80,21 @@ void main() {
     });
   });
 
+  test(
+      'engineeringSpecFor on PPR DN20 fiber uses real Di (~14.4mm), not DN',
+      () {
+    // sku 95270708 = צינור PPR פייזר 20×2.8 with di קוטר פנימי = 14.4mm.
+    final fiber = kPolyrollCatalog.firstWhere((p) => p.sku == '95270708');
+    final eng = engineeringSpecFor(fiber)!;
+    // Should NOT be 20 (the DN/OD); should be the real internal diameter.
+    expect(eng.minBoreMm, isNotNull);
+    expect(eng.minBoreMm! < 20, isTrue,
+        reason:
+            'PPR thick wall → internal bore < DN. got minBoreMm=${eng.minBoreMm}');
+    expect(eng.minBoreMm! > 10, isTrue,
+        reason: 'sanity — bore for DN20 fiber should be > 10mm');
+  });
+
   test('recommendedKitForProduct on PPR returns the welding kit', () {
     final pipe = kPolyrollCatalog.firstWhere((p) => p.sku == '95016002');
     final kit = recommendedKitForProduct(pipe);
