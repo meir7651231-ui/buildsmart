@@ -390,9 +390,7 @@ void main() {
         // round (non-hex)
         27: 'spec_adapter_round_p27.jpg',
         29: 'spec_adapter_round_p29.jpg',
-        53: 'spec_adapter_round_p53.jpg',
-        // p54 split into _a/_b/_c by §22.C — tested separately below.
-        55: 'spec_adapter_round_p55.jpg',
+        // p53, p54, p55 all model-split by §22.C — tested separately below.
       },
       '${kPprAdapters}_hex': {
         28: 'spec_adapter_hex_p28.jpg',
@@ -560,6 +558,51 @@ void main() {
         gaps.add('${entry.key} (${p.nameHe}) → ${p.specImageAssets.first} ≠ $wantedSpec');
       }
       // R8 verbatim: 'מודל' dim must match the catalog table.
+      if (p.dims?['מודל'] != entry.value) {
+        gaps.add('${entry.key}: dims[\'מודל\']=${p.dims?['מודל']} ≠ ${entry.value}');
+      }
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
+  // §22.C — p53 round adapter internal-thread: 2 models on one page.
+  // Model A = sizes 20-32 (PPRCT line), Model B = sizes 40-110 (PPR line).
+  test('§22.C p53 adapter — Model A 20-32, B 40-110', () {
+    const expectModel = {
+      '6602340200': 'A', '6602340250': 'A', '6602340260': 'A',
+      '6602340330': 'A', '6602340320': 'A',
+      '6602340400': 'B', '6602340500': 'B', '6602340630': 'B',
+      '6602340750': 'B', '6602340900': 'B', '6602340110': 'B',
+    };
+    final gaps = <String>[];
+    for (final entry in expectModel.entries) {
+      final p = kPolyrollCatalog.firstWhere((x) => x.sku == entry.key);
+      final wantedSpec = 'spec_adapter_round_p53_${entry.value.toLowerCase()}.jpg';
+      if (!p.specImageAssets.first.endsWith(wantedSpec)) {
+        gaps.add('${entry.key} (${p.nameHe}) → ${p.specImageAssets.first} ≠ $wantedSpec');
+      }
+      if (p.dims?['מודל'] != entry.value) {
+        gaps.add('${entry.key}: dims[\'מודל\']=${p.dims?['מודל']} ≠ ${entry.value}');
+      }
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
+  // §22.C — p55 adapter with rekord: 2 models on one page.
+  test('§22.C p55 adapter rekord — Model A 20-32, B 40-75', () {
+    const expectModel = {
+      '6702340200': 'A', '6702340260': 'A', '6702340250': 'A',
+      '6702340320': 'A', '6702340330': 'A',
+      '6702340400': 'B', '6702340500': 'B', '6702340630': 'B',
+      '6702340750': 'B',
+    };
+    final gaps = <String>[];
+    for (final entry in expectModel.entries) {
+      final p = kPolyrollCatalog.firstWhere((x) => x.sku == entry.key);
+      final wantedSpec = 'spec_adapter_round_p55_${entry.value.toLowerCase()}.jpg';
+      if (!p.specImageAssets.first.endsWith(wantedSpec)) {
+        gaps.add('${entry.key} (${p.nameHe}) → ${p.specImageAssets.first} ≠ $wantedSpec');
+      }
       if (p.dims?['מודל'] != entry.value) {
         gaps.add('${entry.key}: dims[\'מודל\']=${p.dims?['מודל']} ≠ ${entry.value}');
       }

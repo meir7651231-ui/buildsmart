@@ -797,7 +797,9 @@ table uses to determine the model.
 | Page | Split by | Model A | Model B | Model C | Routing |
 |------|----------|---------|---------|---------|---------|
 | p37 ברך 45° לריתוך פנים | size | 160, 200, 250, 315 | 355, 400 | — | `_p37ElbowModel(nameHe)` |
-| p54 מתאם ריתוך הברגה תבריג חיצוני PPRCT | size | 20-32 | 40-50 | 63-110 | `_p54AdapterModel(nameHe)` |
+| p53 מתאם ריתוך הברגה תבריג פנימי | size | 20-32 (PPRCT) | 40-110 (PPR) | — | `_p53AdapterModel(nameHe)` |
+| p54 מתאם ריתוך הברגה תבריג חיצוני | size | 20-32 | 40-50 | 63-110 | `_p54AdapterModel(nameHe)` |
+| p55 מתאם ריתוך/הברגה עם רקורד | size | 20-32 (PPRCT) | 40-75 (PPR) | — | `_p55AdapterModel(nameHe)` |
 | p67 צווארון פנים (collar) | size | 160 | 200+ | — | inline `nameHe.contains(' 160')` |
 | p68 צווארון פרפר (butterfly collar) | size | 160 | 200+ | — | inline `nameHe.contains(' 160')` |
 
