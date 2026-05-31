@@ -270,11 +270,11 @@ void main() {
       expect(
           spec(find(
               (p) => p.categoryHe == kPprTees && !p.nameHe.contains('מצרה'))),
-          endsWith('spec_tee.jpg'));
+          matches(r'spec_tee(?:_p\d+)?\.jpg$'));
       expect(
           spec(find(
               (p) => p.categoryHe == kPprTees && p.nameHe.contains('מצרה'))),
-          endsWith('spec_tee_reducing.jpg'));
+          matches(r'spec_tee_reducing(?:_p\d+)?\.jpg$'));
     });
 
     test('adapter round vs hex', () {
@@ -394,27 +394,61 @@ void main() {
         56: 'spec_adapter_hex_p56.jpg',
         57: 'spec_adapter_hex_p57.jpg',
       },
+      '${kPprTees}_reducing': {
+        21: 'spec_tee_reducing_p21.jpg',
+        42: 'spec_tee_reducing_p42.jpg',
+      },
+      kPprCollars: {
+        // Plain-collar per-page (excludes p66/67/68 which use sub-type logic).
+        34: 'spec_collar_p34.jpg',
+        69: 'spec_collar_p69.jpg',
+        85: 'spec_collar_p85.jpg',
+      },
+      '${kPprValves}_concealed': {
+        30: 'spec_valve_concealed_p30.jpg',
+        62: 'spec_valve_concealed_p62.jpg',
+        63: 'spec_valve_concealed_p63.jpg',
+      },
+      '${kPprValves}_ball': {
+        32: 'spec_valve_p32.jpg',
+        64: 'spec_valve_p64.jpg',
+        65: 'spec_valve_p65.jpg',
+      },
+      kPprOmega: {
+        22: 'spec_omega_p22.jpg',
+        74: 'spec_omega_p74.jpg',
+      },
     };
     final gaps = <String>[];
     expected.forEach((key, perPage) {
       final is45Elbow = key == '${kPprElbows}_45';
       final isReducingCoupler = key == '${kPprCouplers}_reducing';
+      final isReducingTee = key == '${kPprTees}_reducing';
       final isHexAdapter = key == '${kPprAdapters}_hex';
+      final isConcealedValve = key == '${kPprValves}_concealed';
+      final isBallValve = key == '${kPprValves}_ball';
       String cat;
       if (is45Elbow) {
         cat = kPprElbows;
       } else if (isReducingCoupler) {
         cat = kPprCouplers;
+      } else if (isReducingTee) {
+        cat = kPprTees;
       } else if (isHexAdapter) {
         cat = kPprAdapters;
+      } else if (isConcealedValve || isBallValve) {
+        cat = kPprValves;
       } else {
         cat = key;
       }
       perPage.forEach((page, spec) {
         final hits = kPolyrollCatalog.where((p) {
           if (p.categoryHe != cat || p.page != page) return false;
-          // Reducing tees use a different spec family — skip.
-          if (cat == kPprTees && p.nameHe.contains('מצרה')) return false;
+          // Tees: reducing live under synthetic '_reducing' key.
+          if (cat == kPprTees) {
+            final isRed = p.nameHe.contains('מצרה');
+            if (isRed != isReducingTee) return false;
+          }
           // Elbows: 45° products live under the synthetic '_45' key; the
           // base kPprElbows key covers everything else (the 90° variants).
           if (cat == kPprElbows) {
@@ -430,6 +464,28 @@ void main() {
           if (cat == kPprAdapters) {
             final isHex = p.nameHe.contains('משושה');
             if (isHex != isHexAdapter) return false;
+          }
+          // Valves: concealed under '_concealed', ball under '_ball';
+          // butterfly/wafer/angle/straight have category-wide sub-type specs
+          // that the §22 per-page map deliberately skips.
+          if (cat == kPprValves) {
+            final isConc = p.nameHe.contains('סמוי');
+            final isBall = !p.nameHe.contains('פרפר') &&
+                !p.nameHe.contains('בין אוגנים') &&
+                !p.nameHe.contains('סמוי') &&
+                !p.nameHe.contains('אלכסוני') &&
+                !p.nameHe.contains('מעבר');
+            if (isConcealedValve && !isConc) return false;
+            if (isBallValve && !isBall) return false;
+          }
+          // Collars: skip products handled by sub-type logic (פרפר, פנים,
+          // שקע תקע) — those don't use the page-based map.
+          if (cat == kPprCollars) {
+            if (p.nameHe.contains('פרפר') ||
+                (p.nameHe.contains('פנים') && !p.nameHe.contains('פרפר')) ||
+                p.nameHe.contains('שקע תקע')) {
+              return false;
+            }
           }
           return true;
         });

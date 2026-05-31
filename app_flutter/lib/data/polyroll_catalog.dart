@@ -230,6 +230,36 @@ const Map<int, String> _kPprAdapterHexPageSpec = {
   57: 'spec_adapter_hex_p57.jpg', // PPR hex + rekord, external thread
 };
 
+const Map<int, String> _kPprTeeReducingPageSpec = {
+  21: 'spec_tee_reducing_p21.jpg', // PPR reducing tee (l2/z2/z/l/d2/d1)
+  42: 'spec_tee_reducing_p42.jpg', // PPRCT reducing tee (A/B1/B2/B3/C1/C3/E)
+  // p43 shares geometry with p42 (legit shared) → falls back to generic.
+};
+
+const Map<int, String> _kPprCollarPagePlainSpec = {
+  // For collars NOT matched by the special פרפר/פנים/שקע תקע/p33 rules.
+  34: 'spec_collar_p34.jpg', // PPR אוגן (flange) small (K/D/d1/d2)
+  69: 'spec_collar_p69.jpg', // PPR plated flange model A
+  85: 'spec_collar_p85.jpg', // PPRCT collar (h/d/l1)
+};
+
+const Map<int, String> _kPprValveConcealedPageSpec = {
+  30: 'spec_valve_concealed_p30.jpg', // PPR concealed (3-variant stack)
+  62: 'spec_valve_concealed_p62.jpg', // PPR concealed knob (D1/G/R/B/F/E1)
+  63: 'spec_valve_concealed_p63.jpg', // PPR concealed knob detail
+};
+
+const Map<int, String> _kPprValveBallPageSpec = {
+  32: 'spec_valve_p32.jpg', // PPR ball valve (L1/h/d)
+  64: 'spec_valve_p64.jpg', // PPR ball valve large (D2 only)
+  65: 'spec_valve_p65.jpg', // PPR ball valve with rekord
+};
+
+const Map<int, String> _kPprOmegaPageSpec = {
+  22: 'spec_omega_p22.jpg', // PPR omega Z-pipe (l/h)
+  74: 'spec_omega_p74.jpg', // PPR omega large Z-pipe (A/B/C)
+};
+
 /// Per-sub-type spec **diagram(s)** (dimension drawings cropped from the catalog
 /// pages). Prepended to the flip-side pager before the full page. Grows as more
 /// sub-type diagrams are cropped (protocol §17.1 / §22).
@@ -267,7 +297,10 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       return [reducing ? 'spec_coupler_reducing.jpg' : 'spec_coupler.jpg'];
     case kPprTees:
       final reducing = nameHe.contains('מצרה');
-      // §22: per-page tee spec (non-reducing variant) when cropped.
+      // §22: per-page tee spec for both reducing and non-reducing variants.
+      if (reducing && _kPprTeeReducingPageSpec.containsKey(page)) {
+        return [_kPprTeeReducingPageSpec[page]!];
+      }
       if (!reducing && _kPprTeePageSpec.containsKey(page)) {
         return [_kPprTeePageSpec[page]!];
       }
@@ -275,11 +308,23 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
     case kPprValves:
       if (nameHe.contains('פרפר')) return ['spec_valve_butterfly.jpg'];
       if (nameHe.contains('בין אוגנים')) return ['spec_valve_wafer.jpg'];
-      if (nameHe.contains('סמוי')) return ['spec_valve_concealed.jpg'];
+      if (nameHe.contains('סמוי')) {
+        if (_kPprValveConcealedPageSpec.containsKey(page)) {
+          return [_kPprValveConcealedPageSpec[page]!];
+        }
+        return ['spec_valve_concealed.jpg'];
+      }
       if (nameHe.contains('אלכסוני')) return ['spec_valve_angle.jpg'];
       if (nameHe.contains('מעבר')) return ['spec_valve_straight.jpg'];
+      // §22: per-page כדורי (ball) spec when cropped.
+      if (_kPprValveBallPageSpec.containsKey(page)) {
+        return [_kPprValveBallPageSpec[page]!];
+      }
       return ['spec_valve.jpg']; // כדורי (ball) default
     case kPprOmega:
+      if (_kPprOmegaPageSpec.containsKey(page)) {
+        return [_kPprOmegaPageSpec[page]!];
+      }
       return ['spec_omega.jpg'];
     case kPprSaddles:
       // §22: per-page saddle spec when the catalog page has its own diagram.
@@ -299,6 +344,10 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       }
       // Page-66 collar (שקע תקע) — single dimension diagram.
       if (nameHe.contains('שקע תקע')) return ['spec_collar_p66.jpg'];
+      // §22 per-page plain-collar specs (p34 small flange, p69 plated, p85 PPRCT).
+      if (_kPprCollarPagePlainSpec.containsKey(page)) {
+        return [_kPprCollarPagePlainSpec[page]!];
+      }
       // Page-33 collar ships with a gasket (verbatim "כולל אטם"); pager
       // shows the dimension diagram then the gasket photo (p33_c).
       if (nameHe.contains('צווארון')) {

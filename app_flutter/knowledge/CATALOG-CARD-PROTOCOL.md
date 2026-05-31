@@ -719,15 +719,15 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 | 5 | plug | p22, p70, p71, p83 (4) | ✅ done | `f319423` |
 | 6 | coupler_reducing | p23, p45, p47, p83 (4) | ✅ done | `b691c2a` |
 | 6b | coupler (straight) | p44 (1) | ✅ done | `b691c2a` |
-| 7 | adapter_round | p27, p29, p53, p54, p55 (5) | ✅ done | local |
-| 7b | adapter_hex | p28, p56, p57 (3) | ✅ done | local |
-| 8 | tee_reducing | p42, p43, p82 (3) | pending | — |
-| 9 | collar | p34, p69, p85 (3) | pending | — |
-| 10 | faser_20 | p35, p80 (2) | pending | — |
+| 7 | adapter_round | p27, p29, p53, p54, p55 (5) | ✅ done | `8d09839` |
+| 7b | adapter_hex | p28, p56, p57 (3) | ✅ done | `8d09839` |
+| 8 | tee_reducing | p21, p42 (2; p43 shared) | ✅ done | local |
+| 9 | collar (plain) | p34, p69, p85 (3) | ✅ done | local |
+| 10 | faser_20 | n/a — pipe geometry is universally shared (one cross-section spec covers all sizes) | ✅ n/a | — |
 | 11 | adapter_hex | merged into family 7b above | ✅ done | — |
-| 12 | valve_concealed | p62, p63 (2) | pending | — |
-| 13 | valve | p64, p65 (2) | pending | — |
-| 14 | omega | p74 (1) | pending | — |
+| 12 | valve_concealed | p30, p62, p63 (3) | ✅ done | local |
+| 13 | valve ball | p32, p64, p65 (3) | ✅ done | local |
+| 14 | omega | p22, p74 (2) | ✅ done | local |
 | 15 | coupler | merged into family 6b above | ✅ done | — |
 
 **§14 detection installed** (`spec_assets_test.dart` · "§22 per-page spec routing"): every per-page crop is asserted to route only its own page; reducing-tee/45°-elbow excluded since those are different families altogether. The map auto-extends as new families land — no test boilerplate per crop.
