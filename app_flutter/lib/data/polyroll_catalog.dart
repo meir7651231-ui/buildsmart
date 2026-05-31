@@ -371,7 +371,12 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       }
       return [reducing ? 'spec_tee_reducing.jpg' : 'spec_tee.jpg'];
     case kPprValves:
-      if (nameHe.contains('פרפר')) return ['spec_valve_butterfly.jpg'];
+      if (nameHe.contains('פרפר')) {
+        // §22 per-page: p61 has the full 3-view butterfly diagram.
+        // (Previous spec_valve_butterfly.jpg was only a small bonnet detail.)
+        if (page == 61) return ['spec_valve_butterfly_p61.jpg'];
+        return ['spec_valve_butterfly.jpg'];
+      }
       // §22.D p30: ball-wafer ("כדורי בין אוגנים") gets its own page-specific
       // diagram (the 3rd sub-type on the page).
       if (nameHe.contains('בין אוגנים')) {

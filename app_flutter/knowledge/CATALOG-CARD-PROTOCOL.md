@@ -847,6 +847,16 @@ on the top section of its page (D/h/l/d labels). Single-page exception
 (p85) added to the kPprElectrofusion case; the other EF pages (p33, p72-74)
 remain photo-only and still correctly fall through to page render.
 
+**Mis-cropped pre-existing spec bug (p61):** when reviewing sub-type specs
+that already exist (spec_valve_butterfly.jpg in this case), open the file
+and confirm it contains the FULL dim drawing from the catalog page — not
+just a partial detail. spec_valve_butterfly.jpg had only the small bonnet
+exploded view; the actual p61 page has a 3-view (front + side cut-away +
+exploded) diagram with 10 dimension labels (D1/D2/A/B/C/E/R/G/F/I). Cropped
+fresh as spec_valve_butterfly_p61.jpg and routed by page. Detection rule:
+when adding §14 protection for a sub-type, also check if the file content
+matches the catalog source — file-name-correctness ≠ content-correctness.
+
 **Detection rule:** when a page has ≥2 dim diagrams AND ≥2 header lines
 (green text in catalog) AND your code currently routes all of them to the
 same per-page spec → that's §22.D. Split by the Hebrew keyword that

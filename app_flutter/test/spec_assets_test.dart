@@ -643,6 +643,15 @@ void main() {
     expect(gaps, isEmpty, reason: gaps.join('\n'));
   });
 
+  // §22 — p61 butterfly valve: spec_valve_butterfly.jpg was previously just a
+  // tiny bonnet exploded view (missing the main 3-view dim diagram). New
+  // spec_valve_butterfly_p61.jpg now carries the full diagram.
+  test('§22 p61 butterfly — uses full 3-view diagram, not the bonnet detail', () {
+    final p = kPolyrollCatalog.firstWhere((p) =>
+        p.page == 61 && p.nameHe.contains('פרפר'));
+    expect(p.specImageAssets.first, endsWith('spec_valve_butterfly_p61.jpg'));
+  });
+
   // §22.D — p32 ball valve split: regular vs polypropylene get distinct specs.
   test('§22.D p32 valve split — regular ball vs polypropylene', () {
     final regular = kPolyrollCatalog.firstWhere((p) =>
