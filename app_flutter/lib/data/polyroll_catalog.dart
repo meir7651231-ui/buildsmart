@@ -159,7 +159,7 @@ String? _pprImageFor(String categoryHe, String nameHe, int page) {
 /// Per-sub-type spec **diagram(s)** (dimension drawings cropped from the catalog
 /// pages). Prepended to the flip-side pager before the full page. Grows as more
 /// sub-type diagrams are cropped (protocol §17.1).
-List<String>? _pprSpecFor(String categoryHe, String nameHe) {
+List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
   switch (categoryHe) {
     case kPprElbows:
       return [nameHe.contains('45') ? 'spec_elbow_45.jpg' : 'spec_elbow_90.jpg'];
@@ -189,7 +189,17 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe) {
     case kPprSaddles:
       return ['spec_saddle.jpg'];
     case kPprCollars:
-      // Page-33 collars ship with a gasket (verbatim "כולל אטם"); pager
+      // Page-68 collar for butterfly valve — Model A=size 160, Model B=200+.
+      if (nameHe.contains('פרפר')) {
+        return [nameHe.contains(' 160') ? 'spec_collar_p68_a.jpg' : 'spec_collar_p68_b.jpg'];
+      }
+      // Page-67 collar (פנים, no פרפר) — same A/B split by size.
+      if (nameHe.contains('פנים') && !nameHe.contains('פרפר')) {
+        return [nameHe.contains(' 160') ? 'spec_collar_p67_a.jpg' : 'spec_collar_p67_b.jpg'];
+      }
+      // Page-66 collar (שקע תקע) — single dimension diagram.
+      if (nameHe.contains('שקע תקע')) return ['spec_collar_p66.jpg'];
+      // Page-33 collar ships with a gasket (verbatim "כולל אטם"); pager
       // shows the dimension diagram then the gasket photo (p33_c).
       if (nameHe.contains('צווארון')) {
         return ['spec_collar.jpg', 'ppr_p33_c.jpg'];
@@ -198,10 +208,13 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe) {
     case kPprPlugs:
       return ['spec_plug.jpg'];
     case kPprPipesFiber:
-      // PPRCT fiber pipes (pages 86/87, AQUATHERM blue series) get their own
-      // blue-tinted cross-section; PPR fiber (pages 18/35) keep the
-      // generic green-tinted one.
-      if (nameHe.contains('PPRCT')) return ['spec_pprct_pipe.jpg'];
+      // PPRCT fiber pipes (AQUATHERM blue series): p87 is SDR 17 (its own
+      // cross-section), p86 is SDR 7.4/11 — sizes overlap so route by page.
+      // PPR fiber (pages 18/35) keep the generic green-tinted one.
+      if (nameHe.contains('PPRCT')) {
+        if (page == 87) return ['spec_pprct_pipe_sdr17.jpg', 'spec_pprct_pipe.jpg'];
+        return ['spec_pprct_pipe.jpg'];
+      }
       return ['spec_faser_20.jpg'];
     case kPprPipesSupply:
     case kPprPipesAC:
@@ -240,7 +253,7 @@ LipskeyCatalogProduct _ppr(
       imageFile: imageFile ?? _pprImageFor(categoryHe, nameHe, page),
       imageFiles: imageFiles ?? _pprImageFilesFor(categoryHe, nameHe, page),
       specImageFile: specImageFile,
-      specImageFiles: _pprSpecFor(categoryHe, nameHe),
+      specImageFiles: _pprSpecFor(categoryHe, nameHe, page),
       color: color,
     );
 
@@ -619,7 +632,7 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
     color: 'כחול',
     page: 86,
     imageFile: 'ppr_p86_a.jpg',
-    specImageFile: 'spec_faser_20.jpg',
+    specImageFile: 'spec_pprct_pipe.jpg',
     dims: {
       'שם מלא': 'צינור פולירול PPRCT פייזר הולירומה למים חמים וקרים',
       'תיאור': 'צינור מיזוג אוויר (blue pipe)',
