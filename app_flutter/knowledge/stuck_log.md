@@ -374,3 +374,14 @@ git diff מנרמל line-endings לפי `.gitattributes` — לא מושפע מ-
 ### ג — כלל המניעה
 ANTIPATTERN: sha256sum.*git show.*HEAD.*githooks
 RULE: השוואת קבצים בין HEAD לworking copy חייבת לעבור דרך git diff, לא sha256sum — git מנרמל line endings, sha256sum לא.
+
+---
+
+## 2026-05-31 · rebase conflict v5.41→v5.42 ב-home_shell.dart
+### א — הבעיה
+שני sessions בחרו v5.41 בו-זמנית — git pull --rebase נתקע ב-home_shell.dart.
+### ב — הפתרון
+שינוי גרסה של הענף שלי ל-v5.42 בקובץ הconflict, המשך rebase.
+### ג — כלל המניעה
+ANTIPATTERN: 'v5\.\d+ · \d+\.\d+\.\d+' .*v5\.41
+RULE: לפני שמתחיל עבודה — בדוק ב-origin מה הגרסה הנוכחית ותחשב את שלך כגרסה+1 כדי להימנע מconflict.
