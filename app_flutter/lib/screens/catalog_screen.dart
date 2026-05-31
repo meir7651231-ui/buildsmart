@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
+import 'package:buildsmart/data/fuzzy_search.dart';
 import 'package:buildsmart/data/line_score.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
@@ -1917,15 +1918,21 @@ class _SearchResultsList extends ConsumerWidget {
     final sort = ref.watch(catalogProductSortProvider);
     // AND-match first; if a reasonable query finds nothing (e.g. a stray word
     // the catalogue doesn't use), fall back to matching ANY word so the user
-    // never hits a dead end.
+    // never hits a dead end. Final fallback: `fuzzySearchProducts` (closes
+    // step 62 — the helper is now wired into the UI search path) — used only
+    // when both AND and OR fail so it never disturbs the happy path.
     List<LipskeyCatalogProduct> matchProducts() {
       final and = kLipskeyCatalog
           .where((p) => catalogProductMatchesQuery(p, query))
           .toList();
       if (and.isNotEmpty) return and;
-      return kLipskeyCatalog
+      final or = kLipskeyCatalog
           .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
           .toList();
+      if (or.isNotEmpty) return or;
+      // Last-chance forgiving search (each word as a substring of nameHe,
+      // ranked by proximity). Empty if even fuzzy can't find it.
+      return fuzzySearchProducts(query, limit: 40);
     }
 
     // Default order ranks by relevance (best match first); an explicit

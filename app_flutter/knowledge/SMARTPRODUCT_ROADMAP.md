@@ -6,7 +6,11 @@ it connects · how to install · what it costs · who sells it*.
 
 Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
-## 📌 Handoff — where we are (v5.38, ~73%: 55 ✅ + 13 🟦)
+## 📌 Handoff — where we are (v5.39, ~74%: 56 ✅ + 12 🟦)
+
+v5.39 — closed step 62 🟦 → ✅: `fuzzySearchProducts` now the 3rd-tier
+fallback in `_SearchResultsList` (AND → OR → fuzzy). Guard:
+`search_fallback_test`. 791/791 green.
 
 v5.38 — closed 2 more 🟦 → ✅: step 29 (`pairConnectionWarningHe` per-pair
 validation), step 87 (reducedMotion locked by static-count guard). 788/788
@@ -206,10 +210,13 @@ Saved for the next run. Pick up here:
 
 ## Phase 7 · Search & discovery (61–70)
 61. ⬜ Index SmartProduct in the main search (not just the tree).
-62. 🟦 Forgiving multi-word catalog search — `fuzzySearchProducts(query)` (every
-   word must appear; whole-phrase substring matches rank highest; proximity
-   tiebreak; configurable products iterable + limit). Search-box UI still ⬜.
-   Guard: `fuzzy_search_test`.
+62. ✅ Forgiving catalog search — three-tier UI fallback chain (closes 🟦):
+   1. AND-match (`catalogProductMatchesQuery`) — every query word must appear;
+   2. OR-match (same helper, `requireAll: false`) — any-word fallback;
+   3. `fuzzySearchProducts` — whole-phrase substring ranks highest, proximity
+      tiebreak. Triggers only when both AND and OR return zero (never disturbs
+      the happy path). Guards: `fuzzy_search_test` + `search_fallback_test`
+      (static check that all three matchers are wired into `_SearchResultsList`).
 63. ✅ "Similar" — variant-family list ("גרסאות נוספות במשפחה") in the 📦 section
    via `variantSiblingsOf`. (Upgrade/cheaper-alternative still ⬜.)
 64. ⬜ Health navigation: from the card straight to the relevant finder/category.
