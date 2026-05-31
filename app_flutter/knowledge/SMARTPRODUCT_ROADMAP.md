@@ -6,7 +6,11 @@ it connects · how to install · what it costs · who sells it*.
 
 Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
-## 📌 Handoff — where we are (v5.39, ~74%: 56 ✅ + 12 🟦)
+## 📌 Handoff — where we are (v5.40, ~75%: 57 ✅ + 11 🟦)
+
+v5.40 — closed step 2 🟦 → ✅ (label-only: bridge is in fact complete —
+307/307 with-SKU brands resolve, the 58 without are intentionally "by
+supplier" variants) + Tooltip coverage on all 6 header chips. 792/792.
 
 v5.39 — closed step 62 🟦 → ✅: `fuzzySearchProducts` now the 3rd-tier
 fallback in `_SearchResultsList` (AND → OR → fuzzy). Guard:
@@ -47,8 +51,13 @@ Saved for the next run. Pick up here:
 
 ## Phase 1 · Unification & foundation (1–10)
 1. ⬜ Merge the two duplicate product sheets (`_SmartProductSheet` ↔ `showLipskeyProductSheet`).
-2. 🟦 `SmartProduct` linked to the **unified** catalog by SKU — bridge + contract
-   now index `kCatalogProducts` (Lipskey + Polyroll), so any brand SKU resolves.
+2. ✅ `SmartProduct` linked to the **unified** catalog by SKU — bridge + contract
+   index `kCatalogProducts` (Lipskey + Polyroll), so any brand SKU resolves.
+   Coverage: 81 SmartProducts · 365 brands · 307 with SKU (84%) · 252 verified-
+   spec (82% of with-SKU). The 58 brand entries without a SKU are intentional
+   "by-supplier" variants (no catalog twin); the contract test asserts that
+   every SmartBrand.sku that IS set resolves to a real catalog product.
+   Guard: `smartproduct_contract_test` (informational coverage report).
 3. ✅ Bidirectional bridge: `catalogProductForBrand` / `catalogProductForSmart`
    (related_info.dart) + `smartProductForSku` (reverse). Round-trip guarded in
    `smartproduct_contract_test`.
