@@ -180,6 +180,7 @@ const Map<int, String> _kPprElbow45PageSpec = {
 };
 
 const Map<int, String> _kPprTeePageSpec = {
+  20: 'spec_tee_p20.jpg', // PPR plain tee (basic welding)
   26: 'spec_tee_p26.jpg', // threaded tee פנימי (default; 9 פנימי + 1 חיצוני)
   40: 'spec_tee_p40.jpg', // PPR plain tee (sizes 20-90)
   41: 'spec_tee_p41.jpg', // PPR plain tee (160-250, Model A default)
@@ -189,6 +190,7 @@ const Map<int, String> _kPprTeePageSpec = {
 };
 
 const Map<int, String> _kPprSaddlePageSpec = {
+  24: 'spec_saddle_p24.jpg', // PPR standard saddle (z/l/d2/d1/D/d)
   29: 'spec_saddle_p29.jpg', // hexagonal saddle (משושה, threaded)
   58: 'spec_saddle_p58.jpg', // PPR EF saddle (dual model A/B)
   59: 'spec_saddle_p59.jpg', // welding/threading saddle, internal thread
@@ -205,6 +207,7 @@ const Map<int, String> _kPprPlugPageSpec = {
 };
 
 const Map<int, String> _kPprCouplerPageSpec = {
+  22: 'spec_coupler_p22.jpg', // PPR straight coupler (basic welding, l/z/d/D)
   44: 'spec_coupler_p44.jpg', // straight coupler (rectangular, A/B/C/F)
 };
 

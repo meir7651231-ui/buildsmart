@@ -351,6 +351,7 @@ void main() {
         37: 'spec_elbow_45_p37.jpg',
       },
       kPprTees: {
+        20: 'spec_tee_p20.jpg',
         26: 'spec_tee_p26.jpg',
         40: 'spec_tee_p40.jpg',
         41: 'spec_tee_p41.jpg',
@@ -359,6 +360,7 @@ void main() {
         82: 'spec_tee_p82.jpg',
       },
       kPprSaddles: {
+        24: 'spec_saddle_p24.jpg',
         29: 'spec_saddle_p29.jpg',
         58: 'spec_saddle_p58.jpg',
         59: 'spec_saddle_p59.jpg',
@@ -373,6 +375,7 @@ void main() {
       },
       kPprCouplers: {
         // straight (non-reducing)
+        22: 'spec_coupler_p22.jpg',
         44: 'spec_coupler_p44.jpg',
       },
       '${kPprCouplers}_reducing': {

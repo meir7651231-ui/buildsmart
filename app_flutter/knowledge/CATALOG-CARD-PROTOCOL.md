@@ -713,12 +713,12 @@ pdfimages -p -j  -f 18 -l 92 "$PDF" /tmp/x/img   # מחלץ; img-{page:03}-{num:
 | # | family | pages cropped | status | commit |
 |---|---|---|---|---|
 | 1 | elbow_90 | p19, p20, p25, p38, p39, p48, p49, p50, p81 (9) | ✅ done | `016721b`+`ac57a4f` |
-| 2 | tee | p26, p40, p41, p51, p52, p82 (6) | ✅ done | `fcffe38` |
-| 3 | saddle | p29, p58, p59, p60, p84 (5) | ✅ done | `a9db854` |
+| 2 | tee | p20, p26, p40, p41, p51, p52, p82 (7) | ✅ done | `fcffe38`+local |
+| 3 | saddle | p24, p29, p58, p59, p60, p84 (6) | ✅ done | `a9db854`+local |
 | 4 | elbow_45 | p19, p20, p36, p37 (4) | ✅ done | `ac57a4f` |
 | 5 | plug | p22, p70, p71, p83 (4) | ✅ done | `f319423` |
 | 6 | coupler_reducing | p23, p45, p47, p83 (4) | ✅ done | `b691c2a` |
-| 6b | coupler (straight) | p44 (1) | ✅ done | `b691c2a` |
+| 6b | coupler (straight) | p22, p44 (2) | ✅ done | `b691c2a`+local |
 | 7 | adapter_round | p27, p29, p53, p54, p55 (5) | ✅ done | `8d09839` |
 | 7b | adapter_hex | p28, p56, p57 (3) | ✅ done | `8d09839` |
 | 8 | tee_reducing | p21, p42 (2; p43 shared) | ✅ done | local |
