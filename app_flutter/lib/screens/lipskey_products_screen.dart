@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:buildsmart/data/chip_hierarchy.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/screens/_size_norm.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -1288,10 +1289,13 @@ const Set<String> kSearchStopWords = {
 /// Examples: DN50 · 3/4" · 1¼" · 110 · 130/50 · 50/40 · 45° · 90°.
 bool isSizeToken(String w) {
   if (RegExp(r'^DN', caseSensitive: false).hasMatch(w)) return true;
+  // A leading Ø (diameter symbol) is a noise prefix on inch sizes —
+  // strip it and re-test so `Ø1/2"` is recognised the same as `1/2"`.
+  final stripped = w.startsWith('Ø') ? w.substring(1) : w;
   // numbers, fractions, ratios, inch marks, degrees, with × / - separators
   return RegExp(r'^[\d]+([./×x\-"׳״⅛¼½¾⅜⅝⅞°]+[\d"׳״°]*)*[\"׳״°]?$')
-          .hasMatch(w) &&
-      RegExp(r'\d').hasMatch(w);
+          .hasMatch(stripped) &&
+      RegExp(r'\d').hasMatch(stripped);
 }
 
 /// A plain word is a meaningful tappable link if it isn't a stop-word, has
@@ -1928,7 +1932,10 @@ class _AttrChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              word,
+              // Card and finder share one display function so the chip on the
+              // product card and the chip in the filter row always read the
+              // same canonical form for the same physical size (P9, P12).
+              kind == AttrKind.size ? displaySizeLabel(word) : word,
               // Dimension tokens ("20×2.8") are LTR — without this the RTL
               // paragraph reorders them to "2.8×20".
               textDirection:

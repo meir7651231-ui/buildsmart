@@ -5,6 +5,7 @@
 // the shared LipskeyProductsList so cards behave like the rest of the catalog.
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/screens/_size_norm.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -185,45 +186,45 @@ List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
 
 /// Readable size tokens found in product names (1/2" · 3/4" · DN40 · 16×20 ·
 /// 50 מ"מ). Catches inch/fraction, DN, cross-sizes, and Hebrew "מ"מ" (mm).
-final RegExp _sizeRe = RegExp(
-    r'DN ?\d+|\d+ ?[מס]["״]מ|\d+°|\d+\.\d+(?:/\d+)?["׳]|\d*[¼½¾⅛⅜⅝⅞]["׳]|\d+(?:/\d+)?×\d+(?:/\d+)?|\d+(?:/\d+)?["׳]|\d+/\d+');
+/// (Regex lives in `_size_norm.dart` now; this comment marker stays as the
+/// reading entry-point.)
 
-/// Confusing compound/decimal inch notations folded to one clean fraction
-/// glyph, so "11/4"" and "1.25"" don't show as two chips for the same 1¼".
-const Map<String, String> _kInchPretty = {
-  '1.25"': '1¼"', '11/4"': '1¼"',
-  '1.5"': '1½"', '11/2"': '1½"',
-  '21/2"': '2½"',
-};
-
-/// Size labels a product carries — readable tokens from the name, or (when the
-/// name has none, e.g. gray pipes) derived from dims (DN + length in metres).
-Set<String> _productSizes(LipskeyCatalogProduct p) {
-  final fromName = <String>{};
-  for (final m in _sizeRe.allMatches(p.nameHe)) {
-    final v = m.group(0)!.trim();
-    if (v.length <= 12) fromName.add(_kInchPretty[v] ?? v);
-  }
-  if (fromName.isNotEmpty) return fromName;
+/// Size labels a product carries — readable tokens from the name AND from
+/// the dims map. A pipe carries TWO orthogonal axes: a diameter (in dims)
+/// and a length (in name); the chooser needs both — they aren't substitutes.
+/// Returns a deduped set; the family tag lets the chooser keep family-
+/// coherent ordering (no inch interleaved with cm).
+List<SizeToken> _productSizeTokens(LipskeyCatalogProduct p) {
+  final out = <SizeToken>{...parseSizeTokens(p.nameHe)};
   final d = p.dims;
-  if (d == null) return const {};
-  final out = <String>{};
-  final dn = (d['DN'] ?? d['dn'] ?? d['mm'])?.toString();
-  if (dn != null && dn.trim().isNotEmpty) out.add('DN$dn');
-  final cm = double.tryParse(d['L (cm)']?.toString() ?? '');
-  if (cm != null) {
-    final m = cm / 100;
-    out.add('${m == m.roundToDouble() ? m.toInt() : m} מ׳');
+  if (d != null) out.addAll(tokensFromDims(d));
+  return out.toList();
+}
+
+/// Sorted, deduped chip list for the pool. Keeps every family the pool
+/// surfaces (mm + cm, inch + DN, …) but groups them so the row reads
+/// coherently: all mm in numeric order, THEN all cm in numeric order — never
+/// `200 · 25 · 250 · 30` interleaved. Length equivalents across cm/meters/mm
+/// collapse to one chip (e.g. `15 ס"מ` ≡ `0.15 מ׳`).
+List<SizeToken> _sizeTokensIn(List<LipskeyCatalogProduct> ps) {
+  final all = <SizeToken>{};
+  for (final p in ps) {
+    all.addAll(_productSizeTokens(p));
   }
+  final out = dedupLengthByMm(all.toList());
+  sortSizeTokens(out);
   return out;
 }
 
-List<String> _sizesIn(List<LipskeyCatalogProduct> ps) {
-  final set = <String>{};
+/// Angle chips for the pool (separate axis — used only when sizes don't
+/// split). Sorted ascending.
+List<SizeToken> _angleTokensIn(List<LipskeyCatalogProduct> ps) {
+  final all = <SizeToken>{};
   for (final p in ps) {
-    set.addAll(_productSizes(p));
+    all.addAll(parseAngleTokens(p.nameHe));
   }
-  return set.toList()..sort((a, b) => a.compareTo(b));
+  final out = all.toList()..sort((a, b) => a.mm.compareTo(b.mm));
+  return out;
 }
 
 /// Characterizing-word chips for sub-types with no size axis (e.g. toilet seats
@@ -273,9 +274,10 @@ List<String> _colorOptions(List<LipskeyCatalogProduct> pool) {
   return cols.length > 1 ? (cols.toList()..sort()) : const [];
 }
 
-/// "Narrow by" axis for a pool, best first: curated facets → sizes → colours →
-/// characterizing words. Returns a Hebrew axis label (for the chip-row hint)
-/// plus the chips; empty when nothing splits the pool.
+/// "Narrow by" axis for a pool, best first: curated facets → sizes → angles
+/// (when sizes don't split) → colours → characterizing words. Returns a Hebrew
+/// axis label (for the chip-row hint) plus the chip *labels*; empty when
+/// nothing splits the pool.
 ({String label, List<String> chips}) _narrowAxis(
     List<LipskeyCatalogProduct> pool, String? subtype) {
   final curated = subtype == null ? null : kFinderFacets[subtype];
@@ -286,14 +288,36 @@ List<String> _colorOptions(List<LipskeyCatalogProduct> pool) {
   }
   // Each axis must actually split the pool (>1 option); a lone chip can't
   // narrow anything, so fall through to the next axis (or show no bar).
-  final sizes = _sizesIn(pool);
-  if (sizes.length > 1) return (label: 'גודל', chips: sizes);
+  final sizes = _sizeTokensIn(pool);
+  if (sizes.length > 1) {
+    return (label: 'גודל', chips: sizes.map((t) => t.label).toList());
+  }
+  final angles = _angleTokensIn(pool);
+  if (angles.length > 1) {
+    return (label: 'זווית', chips: angles.map((t) => t.label).toList());
+  }
   final colors = _colorOptions(pool);
   if (colors.length > 1) return (label: 'צבע', chips: colors);
   final words = _wordOptions(pool);
   return words.length > 1
       ? (label: 'דגם', chips: words)
       : (label: '', chips: const <String>[]);
+}
+
+/// Returns true iff a product carries the structural token for [chipLabel] —
+/// no String.contains fallback. Lets the filter reject "25 שנים אחריות" when
+/// the chip is "25 ס"מ".
+bool _productHasChip(LipskeyCatalogProduct p, String chipLabel) {
+  for (final t in _productSizeTokens(p)) {
+    if (t.label == chipLabel) return true;
+  }
+  for (final t in parseAngleTokens(p.nameHe)) {
+    if (t.label == chipLabel) return true;
+  }
+  // curated-facet chips (kFinderFacets) are plain words; the only place a
+  // substring match is *correct* (e.g. "אמריקאי" inside a drain name).
+  if (p.nameHe.contains(chipLabel)) return true;
+  return p.color == chipLabel;
 }
 
 class FinderScreen extends ConsumerStatefulWidget {
@@ -306,6 +330,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
   FinderGroup? _group;
   String? _sub;
   String? _size;
+  String? _angle;
 
   @override
   Widget build(BuildContext context) {
@@ -324,14 +349,19 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         ? base
         : base.where((p) => sel!.cats.contains(p.categoryHe)).toList();
     final narrow = _narrowAxis(pool, _sub);
-    final results = _size == null
-        ? pool
-        : pool
-            .where((p) =>
-                _productSizes(p).contains(_size!) ||
-                p.nameHe.contains(_size!) ||
-                p.color == _size)
-            .toList();
+    // Secondary angle row appears whenever the primary axis was סוג/גודל/דגם
+    // AND the pool has >1 angles — so a user looking at a 90° elbow can flip
+    // to 45° from the same screen.
+    final angleChips = narrow.label == 'זווית'
+        ? const <String>[]
+        : _angleTokensIn(pool).map((t) => t.label).toList();
+    var results = pool;
+    if (_size != null) {
+      results = results.where((p) => _productHasChip(p, _size!)).toList();
+    }
+    if (_angle != null) {
+      results = results.where((p) => _productHasChip(p, _angle!)).toList();
+    }
     // Count of cards the user will actually see (variants collapse to one).
     final shown = results.map(productListDedupeKey).toSet().length;
 
@@ -340,6 +370,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         _header(),
         if (subs.length > 1) _subBar(subs),
         if (narrow.chips.isNotEmpty) _sizeBar(narrow.label, narrow.chips),
+        if (angleChips.length > 1) _angleBar(angleChips),
         if (results.isNotEmpty) _countStrip(shown),
         if (results.isNotEmpty &&
             !ref.watch(finderChipTipDismissedProvider))
@@ -353,6 +384,16 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         ),
       ],
     );
+  }
+
+  /// Secondary chip row for angle variants — same vocabulary as the primary
+  /// `_sizeBar`, but keyed against `_angle` so size + angle can co-filter.
+  Widget _angleBar(List<String> chips) {
+    return _chipRow('זווית', [
+      _chip('הכל', _angle == null, () => setState(() => _angle = null)),
+      for (final c in chips)
+        _chip(c, _angle == c, () => setState(() => _angle = c)),
+    ]);
   }
 
   // One-time hint explaining the orange chips on the product cards below
@@ -411,6 +452,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
             _group = g;
             _sub = null;
             _size = null;
+            _angle = null;
           }),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -483,7 +525,9 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
       color: Colors.white,
       child: InkWell(
         onTap: () => setState(() {
-          if (_size != null) {
+          if (_angle != null) {
+            _angle = null;
+          } else if (_size != null) {
             _size = null;
           } else if (_sub != null) {
             _sub = null;
@@ -582,12 +626,14 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
           () => setState(() {
                 _sub = null;
                 _size = null;
+                _angle = null;
               })),
       for (final s in subs)
         _chip(s.label, _sub == s.label,
             () => setState(() {
                   _sub = s.label;
                   _size = null;
+                  _angle = null;
                 })),
     ]);
   }
@@ -613,7 +659,11 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
             color: active ? BsTokens.brand : _surface,
             borderRadius: BorderRadius.circular(20),
           ),
+          // Digit-bearing chips (DN40, 40×60, 1¼") are LTR — without this
+          // the Hebrew RTL paragraph flips `40×60` to read as `60×40`.
           child: Text(label,
+              textDirection:
+                  label.contains(RegExp(r'\d')) ? TextDirection.ltr : null,
               style: TextStyle(
                   color: active ? Colors.white : _ink,
                   fontSize: 13,

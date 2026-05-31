@@ -8,6 +8,17 @@ _Version label: `v5.40` (see `home_shell.dart`). Update on each user-visible cha
   plain-Hebrew description + product-count badge (same idiom as the category rows).
   Other sections: overview blocks (categories / recent / compat / favorites /
   smart-tree), in-tab drill, grid↔list product view, smart-tree, search panel.
+  **Size axis** uses `_size_norm.dart`: tokens are family-tagged (DN / inch /
+  mm / cm / metre / angle) and sorted numerically inside each family — the
+  chip row reads `200·250·25·30` (mm block then cm block), never
+  `200·25·250·30` interleaved. Angles are their own axis (`'זווית'`); the
+  filter matches by structural token, not `String.contains` (so "25 שנים
+  אחריות" never trips a `25` chip). **Inch chips share one canonical glyph**
+  across the finder AND the product-card chips via `prettyInch(...)` — a card
+  saying `1¼"` corresponds 1:1 to the `1¼"` filter chip, not `1.25"`. Rare
+  fractions canvaskit can't draw (`⅛/⅜/⅝/⅞`) fold to ASCII (`3/8"`).
+  **Angles get a SECOND chip row** (`'זווית'`) when both sizes and angles
+  split the pool — co-filter for elbows. See `knowledge/SIZE_FILTER_PROTOCOL.md`.
 - **שיחות** — thread list, conversation, archive screen, new-chat, mute-all.
 - **התראות** — grouped list with per-type + importance filtering, snooze.
 - **חנות** — sections all/cart/orders/services, full cart + checkout.
@@ -156,6 +167,8 @@ the product list card and the product detail sheet.
 - **wiring / knowledge_protocol** — search synonyms + finder grouping + protocol "teeth"
 - **cart_bulk_order / cart_stress** — real cart: 20-product order + 50 hard
   scenarios + mutation edge cases (units · subtotal · VAT · delivery · total)
+- **finder_size_filter** — size-token normalization: family tags, numeric sort,
+  no `String.contains` false-positives, angle is its own axis (15 checks)
 
 **In-app full-regression button** (`🔬 מרכז בדיקות רגרסיה`, the
 `▶ הרץ בדיקת רגרסיה מלאה` action): the harness in `lib/test_harness/` mirrors

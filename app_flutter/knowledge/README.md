@@ -21,6 +21,7 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 | `CONVENTIONS.md` | light-mode, RTL, commit/version, inherited shell rules |
 | `CHECKLISTS.md` | copy-paste checklists for common changes |
 | `DECISIONS.md` | ADR-style log of notable decisions |
+| `SIZE_FILTER_PROTOCOL.md` | finder (בית) "גודל" axis — bug→fix→lessons protocol (P1-P8, 100-step plan, Live Log) |
 | `../WIRING.md` | the wiring contract — every button/setting → behavior → status |
 | `../test/knowledge_protocol_test.dart` | **enforcement** — fails the suite on protocol violations |
 

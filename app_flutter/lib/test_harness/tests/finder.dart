@@ -1,4 +1,5 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/screens/_size_norm.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/finder_screen.dart';
 import 'package:buildsmart/test_harness/types.dart';
@@ -141,6 +142,47 @@ List<TestResult> testFinder() {
     label: 'חיפוש מוצרים סלחני',
     area: 'בית',
     checks: searchChecks,
+  ));
+
+  // ── size axis: numeric, family-coherent, no false-positives ──────────────
+  final sizeChecks = <TestCheck>[];
+  // 1. lexical 200·25·250·30 → numeric mm-group then cm-group
+  final mixed = [
+    SizeToken(label: '200 מ"מ', family: SizeFamily.mm, mm: 200),
+    SizeToken(label: '25 ס"מ',  family: SizeFamily.cm, mm: 250),
+    SizeToken(label: '250 מ"מ', family: SizeFamily.mm, mm: 250),
+    SizeToken(label: '30 ס"מ',  family: SizeFamily.cm, mm: 300),
+  ];
+  sortSizeTokens(mixed);
+  sizeChecks.add(TestCheck(
+    name: 'מסנן גודל — מ"מ קודם ס"מ, מספרי',
+    pass: mixed.map((t) => t.label).join('|') ==
+        '200 מ"מ|250 מ"מ|25 ס"מ|30 ס"מ',
+    expected: '200|250|25|30 (mm→cm)',
+    got: mixed.map((t) => t.label).join('|'),
+  ));
+  // 2. "25 שנים" is not a size token
+  sizeChecks.add(TestCheck(
+    name: 'גודל — "25 שנים אחריות" אינו chip',
+    pass: parseSizeTokens('ברז 25 שנים אחריות').isEmpty,
+  ));
+  // 3. angles are their own axis
+  sizeChecks.add(TestCheck(
+    name: 'גודל — 45° אינו chip גודל (זווית)',
+    pass: parseSizeTokens('ברך 45°').isEmpty &&
+        parseAngleTokens('ברך 45°').isNotEmpty,
+  ));
+  // 4. P13: rare fraction folds to ASCII for canvaskit
+  sizeChecks.add(TestCheck(
+    name: 'גודל — ⅜" מתקפל ל-3/8" (canvaskit font)',
+    pass: parseSizeTokens('ברך ⅜"').first.label == '3/8"',
+  ));
+  results.add(TestResult(
+    id: 'finder:size',
+    category: TestCategory.catalog,
+    label: 'מסנן גודל — נורמליזציה',
+    area: 'בית',
+    checks: sizeChecks,
   ));
 
   return results;
