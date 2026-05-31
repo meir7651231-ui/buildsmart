@@ -936,14 +936,24 @@ below. A page added to the list is a contract: "I verified content match,
 not just the filename pattern."
 
 **Audited pages so far (this session):**
-p19, p20, p22, p24, p25, p26, p27, p28, p29, p30, p31, p32, p33, p34,
-p37, p38, p39, p41, p44, p53, p54, p55, p61, p62, p63, p67, p68, p69,
-p72, p73, p74, p82, p83, p84, p85, p90, p91, p92.
+p19, p20, p22, p23, p24, p25, p26, p27, p28, p29, p30, p31, p32, p33,
+p34, p36, p37, p38, p39, p40, p41, p42, p44, p45, p51, p52, p53, p54,
+p55, p61, p62, p63, p67, p68, p69, p72, p73, p74, p75-79, p82, p83,
+p84, p85, p88-89, p90, p91, p92.
 
 **Pages still needing visual audit:**
-p18, p21, p23, p35, p36, p40, p42, p43, p45, p46, p47, p48, p49, p50,
-p51, p52, p56, p57, p58, p59, p60, p64, p65, p66, p70, p71, p75-79,
-p80, p81, p86, p87, p88, p89.
+p18, p21, p35, p43, p46, p47, p48, p49, p50, p56, p57, p58, p59, p60,
+p64, p65, p66, p70, p71, p80, p81, p86, p87.
+
+**Verified-clean (catalog has no products / installation-photo reference):**
+p75, p76, p77, p78, p79, p88, p89.
+
+**Multi-view partial-spec fixes (re-cropped from 1 view → 3-view):**
+p23, p40, p42, p51, p52, p82. Pattern: early family-batch crops were
+tight to the front view only; the catalog actually shows 3 views per
+fitting (front + cross-section + circle). When a catalog page has
+multiple views, the spec must include them all (per R8 — every dim
+label in the table must be reachable from the spec drawing).
 
 §14 row added:
 | § | bug class | detection |
