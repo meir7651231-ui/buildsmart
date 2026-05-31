@@ -127,6 +127,27 @@ void main() {
         reason: 'SKU confirmed PPRCT but name says PPR:\n${misnamed.join('\n')}');
   });
 
+  // §14 / §21 — brass-threaded PPRCT/PPR pages (48-60) carry multi-level
+  // catalog headers like "ברך ריתוך/הברגה לנקודת מים - תבריג פנימי".
+  // If our nameHe stops at "ברך ... הברגה {size}" the chip breadcrumb collapses
+  // to 2 chips and loses the welding method ("ריתוך") and thread direction
+  // ("תבריג פנימי/חיצוני"). This guard asserts at least 3 path chips
+  // (connection + something + size) for every product on those pages.
+  test('brass-threaded pages keep ≥3 chip-path levels (§21 verbatim)', () {
+    final affected = <int>{
+      48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60,
+    };
+    final thin = <String>[];
+    for (final p in kPolyrollCatalog) {
+      if (!affected.contains(p.page)) continue;
+      final path = parseChips(p.nameHe).path;
+      if (path.length < 3) thin.add('${p.sku} p${p.page} (${path.length}): ${p.nameHe}');
+    }
+    expect(thin, isEmpty,
+        reason: 'breadcrumb collapsed — name is missing verbatim qualifiers '
+            'from the catalog header:\n${thin.take(8).join('\n')}');
+  });
+
   // §14 / §21 — chip hierarchy parser must classify every nameHe token.
   // A leftover token = a missing vocabulary entry (must be added to one of
   // kChipLevel{1..4} sets). The parser is the foundation of the new

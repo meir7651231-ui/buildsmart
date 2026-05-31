@@ -389,6 +389,8 @@ grep -nE "פייזר [0-9]{6,}|אספקת מים'," lib/data/polyroll_catalog.da
 | 18.2 | קוד-יצרן הודבק ב-nameHe (`"צווארון PPR פנים P-PBRIDA160H"`) במקום ב-`nameEn`/`dims['מק"ט יצרן']` | `spec_assets_test` · "nameHe contains no embedded mfr code" |
 | 18.3 | SDR label שגוי per-row של צינור — עובי פיזית נכון אבל label אחיד שגוי (p86/87 שכבת SDR 11/17 שתויגה SDR 7.4) | `spec_assets_test` · "pipe wall ≈ OD / SDR" (±15%) |
 | 17.3 | מוצרים שהקטלוג מצלם מכמה זוויות / עם אביזרים כלולים (p29 מחבר מורכב+פירוק; p33 צווארון+אטם) חייבים להציג את כל התצוגות ב-pager | `spec_assets_test` · "multi-view products surface all views" |
+| 21 | שם-המוצר חתוך מהכותרת בקטלוג: brass-threaded p48-60 בקטלוג אומר "ברך ריתוך/הברגה לנקודת מים - תבריג פנימי" אבל אצלנו היה רק "ברך הברגה לנקודת מים" → ה-breadcrumb קורס ל-2 ציפים במקום 4-5 | `spec_assets_test` · "brass-threaded pages keep ≥3 chip-path levels" |
+| 9 | פר-עמוד category mismatch: p65 קטלוג אומר "ברז כדורי עם רקורד" אבל אצלנו kPprAdapters → מוצר מופיע באטגוריה שגויה | התגלה באודיט §21 — מוצרי 6706424xxx שונה ל-kPprValves |
 | 17.1 | תמונת-תת-סוג שבורה (typo בנתיב) / נופלת בשקט לעמוד-מלא | `spec_assets_test` · "every referenced Polyroll spec/product asset exists on disk" + "fitting categories all have a real cropped spec diagram" |
 | 17.1 | תת-סוג ממופה לדיאגרמה שגויה (בלבול 45/90, מצרה/ישר, סוגי-ברז) | `spec_assets_test` · קבוצת "PPR sub-type → correct spec diagram" |
 | 16/17.3 | נכסי-יתומים: כל קובץ-תמונה ב-`assets/polyroll/products/` (`ppr_*`/`pipe_*`) שלא מחובר לאף מוצר | `spec_assets_test` · "no orphan Polyroll product images on disk" |

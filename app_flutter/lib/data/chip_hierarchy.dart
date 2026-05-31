@@ -13,6 +13,7 @@ const Set<String> kChipTypes = {
 
 const Set<String> kChipLevel1Connection = {
   'לריתוך', 'ריתוך', 'הברגה',
+  'ריתוך/הברגה', 'ריתוך/רקורד',
   // EF compound: when we see 'חשמלי' adjacent we promote to "ריתוך חשמלי"
   'חשמלי', 'אלקטרופיוזן',
 };
@@ -158,22 +159,30 @@ ChipPath parseChips(String nameHe) {
   );
 }
 
-const _l1Compounds = {'ריתוך חשמלי', 'לריתוך חשמלי'};
+const _l1Compounds = {
+  'ריתוך חשמלי', 'לריתוך חשמלי',
+  'לריתוך הברגה',
+};
 const _l2Compounds = {
   'בין אוגנים', 'מעבר ישר', 'מיזוג אוויר', 'אספקת מים',
 };
 const _l3Compounds = {
-  'משטח ריסון', 'ללא ידית', 'לנקודת מים',
+  'משטח ריסון', 'עם משטח ריסון',
+  'ללא ידית', 'לנקודת מים',
   'עם מניעת זרימה חוזרת', 'עם מניעת זרימה', 'מניעת זרימה',
   'ציפוי כרום', 'כולל אטם', 'מפלסטיק פוליפרופילן',
   'לעבודה בגובה', 'לתיקון חורים',
   'פלדה מצופה PP', 'פלדה מצופה',
   'מכונת פיגורות', 'פיגורות שולחני', 'פיגורות קלה',
   'לקטרים', 'מקדח לרוכבים', 'תותב ריתוך',
-  'לריתוך רוכב',
+  'לריתוך רוכב', 'עם רקורד',
   '(לעבודה בגובה)',
 };
-const _l4Compounds = {'שקע תקע', 'שקע-תקע'};
+const _l4Compounds = {
+  'שקע תקע', 'שקע-תקע',
+  'תבריג פנימי', 'תבריג חיצוני',
+  'תבריג פנים', 'תבריג חוץ',
+};
 
 /// Faceted filter for the hierarchy chips: returns all products that share
 /// [product]'s type AND match its values for every level **strictly left of**
