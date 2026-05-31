@@ -22,6 +22,7 @@ import 'package:buildsmart/state/brand_history.dart';
 import 'package:buildsmart/state/card_selection.dart';
 import 'package:buildsmart/state/card_versions.dart';
 import 'package:buildsmart/state/profession_mode.dart';
+import 'package:buildsmart/state/project_mode.dart';
 import 'package:buildsmart/state/default_brand_resolver.dart';
 import 'package:buildsmart/state/cart_safety.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -4946,6 +4947,24 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               );
                             }),
                             const Spacer(),
+                            // Roadmap step 52 — project mode chip (tap cycles).
+                            Builder(builder: (_) {
+                              final m = ref.watch(projectModeProvider);
+                              final l = labelForProjectMode(m);
+                              return GestureDetector(
+                                onTap: () => ref
+                                    .read(projectModeProvider.notifier)
+                                    .set(nextProjectMode(m)),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 6),
+                                  child: Text('${l.emoji}${l.label}',
+                                      style: const TextStyle(
+                                          color: Color(0xFF6B7280),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700)),
+                                ),
+                              );
+                            }),
                             // Roadmap step 57 — profession mode chip (tap cycles).
                             Builder(builder: (_) {
                               final prof = ref.watch(professionModeProvider);
@@ -4955,11 +4974,11 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     .read(professionModeProvider.notifier)
                                     .set(nextProfessionMode(prof)),
                                 child: Padding(
-                                  padding: const EdgeInsets.only(left: 8),
-                                  child: Text('${l.emoji} ${l.label}',
+                                  padding: const EdgeInsets.only(left: 6),
+                                  child: Text('${l.emoji}${l.label}',
                                       style: const TextStyle(
                                           color: Color(0xFF6B7280),
-                                          fontSize: 10.5,
+                                          fontSize: 10,
                                           fontWeight: FontWeight.w700)),
                                 ),
                               );

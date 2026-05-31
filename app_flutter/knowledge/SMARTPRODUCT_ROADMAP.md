@@ -151,9 +151,10 @@ Saved for the next run. Pick up here:
    **last-selection → most-used → recommended → 0**. Wired into the card's
    `initState` (replaces the simple step-7 lookup) and the brand-tap onTap also
    feeds the history. Guards: `brand_history_test` (6) + `default_brand_resolver_test` (5).
-52. 🟦 Project-mode setting — `projectModeProvider` (enum any/cold/hot/commercial,
-   persisted), with `isFiltering` flag. UI filter wiring still ⬜ (touches
-   `catalog_screen.dart`). Guard: `project_mode_test`.
+52. ✅ Project-mode — `projectModeProvider` (enum any/cold/hot/commercial,
+   persisted) + `nextProjectMode` cycle + `labelForProjectMode` emoji+label.
+   Wired as a tap-cycling chip in the 📦 header (◯הכל / ❄️קר / 🔥חם / 🏢מסחרי).
+   Filtering of card content by mode still ⬜. Guard: `project_mode_test` (5).
 53. ⬜ In-card AI assistant: "what suits me?" in free text.
 54. ⬜ Learning: more lines built → sharper recommendations.
 55. ⬜ Product recognition from camera (barcode/image) → opens the card.

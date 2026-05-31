@@ -23,6 +23,21 @@ void main() {
     expect(n2.isFiltering, isTrue);
   });
 
+  test('nextProjectMode cycles any → cold → hot → commercial → any', () {
+    expect(nextProjectMode(ProjectMode.any), ProjectMode.cold);
+    expect(nextProjectMode(ProjectMode.cold), ProjectMode.hot);
+    expect(nextProjectMode(ProjectMode.hot), ProjectMode.commercial);
+    expect(nextProjectMode(ProjectMode.commercial), ProjectMode.any);
+  });
+
+  test('labelForProjectMode returns a non-empty label per mode', () {
+    for (final m in ProjectMode.values) {
+      final l = labelForProjectMode(m);
+      expect(l.emoji, isNotEmpty);
+      expect(l.label, isNotEmpty);
+    }
+  });
+
   test('setting the same mode is a no-op (no churn)', () {
     SharedPreferences.setMockInitialValues({});
     final n = ProjectModeNotifier();

@@ -40,6 +40,35 @@ class ProjectModeNotifier extends StateNotifier<ProjectMode> {
   bool get isFiltering => state != ProjectMode.any;
 }
 
+/// Cycle order for the UI chip: any → cold → hot → commercial → any.
+/// Pure — caller passes the current; UI taps to advance.
+ProjectMode nextProjectMode(ProjectMode current) {
+  switch (current) {
+    case ProjectMode.any:
+      return ProjectMode.cold;
+    case ProjectMode.cold:
+      return ProjectMode.hot;
+    case ProjectMode.hot:
+      return ProjectMode.commercial;
+    case ProjectMode.commercial:
+      return ProjectMode.any;
+  }
+}
+
+/// One-emoji + Hebrew label for the UI chip.
+({String emoji, String label}) labelForProjectMode(ProjectMode m) {
+  switch (m) {
+    case ProjectMode.any:
+      return (emoji: '◯', label: 'הכל');
+    case ProjectMode.cold:
+      return (emoji: '❄️', label: 'קר');
+    case ProjectMode.hot:
+      return (emoji: '🔥', label: 'חם');
+    case ProjectMode.commercial:
+      return (emoji: '🏢', label: 'מסחרי');
+  }
+}
+
 final projectModeProvider =
     StateNotifierProvider<ProjectModeNotifier, ProjectMode>(
   (_) => ProjectModeNotifier(),
