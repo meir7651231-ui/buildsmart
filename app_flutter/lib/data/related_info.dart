@@ -267,11 +267,18 @@ List<LipskeyCatalogProduct> compatibleProductsFor(LipskeyCatalogProduct p) {
 /// Canonical short Hebrew label for a joint kind + size — the SAME wording used
 /// by the carousel and the chain diagram (e.g. "תבריג ½″", "אום הידוק DN32",
 /// "Press PEX 16", "ניקוז ⌀110").
-String jointLabelHe(EndType type, String size) => switch (type) {
+///
+/// [material] disambiguates the `hdpeCompression` enum (which is overloaded
+/// across materials): PPR fittings are heat-fused (ריתוך-שקע), HDPE/PVC
+/// fittings use the compression-nut wording.
+String jointLabelHe(EndType type, String size, {String? material}) =>
+    switch (type) {
       EndType.bspMale || EndType.bspFemale => 'תבריג $size',
       EndType.pexPress => 'Press PEX $size',
       EndType.copperPress => 'Press נחושת $size',
-      EndType.hdpeCompression => 'אום הידוק DN$size',
+      EndType.hdpeCompression => material != null && material.startsWith('PPR')
+          ? 'ריתוך-שקע DN$size'
+          : 'אום הידוק DN$size',
       EndType.drainOpening => 'ניקוז ⌀$size',
     };
 
@@ -281,7 +288,11 @@ String jointLabelHe(EndType type, String size) => switch (type) {
 String connectionExplainHe(
     LipskeyCatalogProduct sourceP, LipskeyCatalogProduct otherP) {
   final j = connectionJoint(sourceP, otherP);
-  return j == null ? '' : jointLabelHe(j.type, j.size);
+  if (j == null) return '';
+  // Use the source product's material for the label (joint material is shared
+  // by definition — _reallyMates already gated on material compatibility).
+  final mat = kVerifiedSpecs[sourceP.sku]?.material;
+  return jointLabelHe(j.type, j.size, material: mat);
 }
 
 /// Label for an edge between two engine-placed neighbours in the install-studio
@@ -292,7 +303,10 @@ String connectionExplainHe(
 /// '' when there is no spec to read (e.g. a synthetic HW-* safety part).
 String chainEdgeLabelHe(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   final j = connectionJoint(a, b);
-  if (j != null) return jointLabelHe(j.type, j.size);
+  if (j != null) {
+    return jointLabelHe(j.type, j.size,
+        material: kVerifiedSpecs[a.sku]?.material);
+  }
   final sa = kVerifiedSpecs[a.sku], sb = kVerifiedSpecs[b.sku];
   if (sa != null && sb != null) {
     for (final eA in sa.ends) {
@@ -329,9 +343,10 @@ String lineStructureText(List<LipskeyCatalogProduct> items) {
   return b.toString().trimRight();
 }
 
-/// All distinct end-labels of a spec, joined (e.g. "תבריג ½″, אום הידוק DN32").
+/// All distinct end-labels of a spec, joined (e.g. "תבריג ½″, אום הידוק DN32"
+/// — or "ריתוך-שקע DN20" for PPR). Material-aware so PPR ends read correctly.
 String _endsLabel(VerifiedSpec s) =>
-    s.ends.map((e) => jointLabelHe(e.type, e.size)).toSet().join(', ');
+    s.ends.map((e) => jointLabelHe(e.type, e.size, material: s.material)).toSet().join(', ');
 
 /// Actionable advice for a gap the engine couldn't bridge between [from] and
 /// [to]. Crucially distinguishes:
@@ -1263,10 +1278,17 @@ List<String> connectionNeedsHe(LipskeyCatalogProduct p) {
     if (seen.add(s)) needs.add(s);
   }
 
+  // Material-gated hdpeCompression label: enum is overloaded across materials
+  // so the human-readable need depends on what's actually in the socket.
+  final isPpr = spec.material.startsWith('PPR');
   for (final e in spec.ends) {
     switch (e.type) {
       case EndType.hdpeCompression:
-        add('צינור/מצמד HDPE בקוטר ${e.size}');
+        if (isPpr) {
+          add('צינור PPR + ריתוך-שקע בקוטר ${e.size}');
+        } else {
+          add('צינור/מצמד HDPE בקוטר ${e.size}');
+        }
       case EndType.pexPress:
         add('צינור PEX + מכבש בקוטר ${e.size}');
       case EndType.copperPress:

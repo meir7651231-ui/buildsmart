@@ -80,6 +80,32 @@ void main() {
     });
   });
 
+  test('connectionNeedsHe on PPR reads "PPR" / "ריתוך-שקע", not "HDPE"',
+      () {
+    final pipe = kPolyrollCatalog.firstWhere((p) => p.sku == '95016002');
+    final needs = connectionNeedsHe(pipe);
+    expect(needs, isNotEmpty);
+    final joined = needs.join(' · ');
+    expect(joined.contains('PPR'), isTrue,
+        reason: 'PPR pipe needs should mention PPR · $joined');
+    expect(joined.contains('HDPE'), isFalse,
+        reason: 'PPR pipe needs must NOT label "HDPE" · $joined');
+  });
+
+  test('connectionExplainHe + chainEdgeLabelHe say "ריתוך-שקע" for PPR↔PPR',
+      () {
+    final pipe = kPolyrollCatalog.firstWhere((p) => p.sku == '95016002');
+    final elbow = kPolyrollCatalog.firstWhere((p) => p.sku == '92117042');
+    final carouselLabel = connectionExplainHe(pipe, elbow);
+    final chainLabel = chainEdgeLabelHe(pipe, elbow);
+    expect(carouselLabel.contains('ריתוך-שקע'), isTrue,
+        reason: 'carousel label · $carouselLabel');
+    expect(chainLabel.contains('ריתוך-שקע'), isTrue,
+        reason: 'chain label · $chainLabel');
+    expect(carouselLabel.contains('אום הידוק'), isFalse,
+        reason: 'PPR must NOT read as compression-nut');
+  });
+
   test(
       'engineeringSpecFor on PPR DN20 fiber uses real Di (~14.4mm), not DN',
       () {
