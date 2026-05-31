@@ -357,3 +357,20 @@ RULE: pipe מחזיר exit code של הפקודה האחרונה — בדוק ק
 ### ג — כלל המניעה
 ANTIPATTERN: grep.*ANTIPATTERN.*\|.*sed.*pattern\b[^|]
 RULE: כל חילוץ pattern מקובץ עלול לכלול \r על Windows — תמיד pipe ל-tr -d '\r' לפני שימוש בheredoc.
+
+---
+
+## 2026-05-31 · gate 81 — sha256sum רואה CRLF vs LF (Windows autocrlf)
+
+### א — הבעיה
+gate 81 השווה `sha256sum HEAD:.githooks/pre-commit` מול `sha256sum` על הworking copy.
+`git show` מחזיר LF. Windows עם `autocrlf=true` שומר CRLF בworking copy.
+hash שונה → gate נכשל בטעות גם כשהקובץ זהה לוגית.
+
+### ב — הפתרון
+החלפת השוואת sha256sum ב-`git diff --quiet HEAD -- .githooks/pre-commit`.
+git diff מנרמל line-endings לפי `.gitattributes` — לא מושפע מ-autocrlf.
+
+### ג — כלל המניעה
+ANTIPATTERN: sha256sum.*git show.*HEAD.*githooks
+RULE: השוואת קבצים בין HEAD לworking copy חייבת לעבור דרך git diff, לא sha256sum — git מנרמל line endings, sha256sum לא.

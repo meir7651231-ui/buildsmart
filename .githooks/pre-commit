@@ -417,7 +417,8 @@ LOCK_CHANGE=$(git diff --cached pubspec.lock 2>/dev/null | grep "^+" | grep "ver
 [[ -z "$LOCK_CHANGE" ]] || warn "80" "שינוי version ב-lock — וודא pub get הריץ"
 
 # שער 81-85: hook integrity (תיקון באג #9 — מבדק גם מול commit מקורי)
-# בודק שה-hook הנוכחי תואם את הגרסה ב-HEAD (לא ניתן להחליף בשקט)
+# תיקון באג #31: sha256sum רואה CRLF vs LF על Windows/autocrlf → false positive.
+# פתרון: git diff (line-ending aware) במקום sha256sum להשוואת HEAD vs working.
 HEAD_HOOK_HASH=$(git show "HEAD:.githooks/pre-commit" 2>/dev/null | sha256sum | cut -d' ' -f1)
 CURRENT_HOOK_HASH=$(sha256sum "$REPO_ROOT/.githooks/pre-commit" | cut -d' ' -f1)
 # תיקון באג #30: pipe ל-cut מצליח גם כשsha256sum נכשל (Windows/MSYS) — בדוק קיום קובץ קודם
@@ -434,7 +435,8 @@ if [[ "$LOCAL_HOOK_HASH" != "missing" && "$LOCAL_HOOK_HASH" != "$CURRENT_HOOK_HA
 fi
 
 # אם .githooks/pre-commit השתנה מ-HEAD ולא נמצא ב-staged → חשד
-if [[ -n "$HEAD_HOOK_HASH" && "$CURRENT_HOOK_HASH" != "$HEAD_HOOK_HASH" ]]; then
+# git diff מנרמל line-endings (autocrlf-aware) — לא sha256sum
+if ! git diff --quiet HEAD -- "$REPO_ROOT/.githooks/pre-commit" 2>/dev/null; then
     STAGED_HOOK=$(git diff --cached --name-only | grep "^\.githooks/pre-commit$" | head -1)
     if [[ -z "$STAGED_HOOK" ]]; then
         err "81" "pre-commit השתנה אבל לא ב-staging" "git add .githooks/pre-commit (או שחזר)"
