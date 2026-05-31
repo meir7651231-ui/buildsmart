@@ -7,6 +7,23 @@ tool=$(echo "$input" | jq -r '.tool_name // ""')
 command=$(echo "$input" | jq -r '.tool_input.command // ""')
 file_path=$(echo "$input" | jq -r '.tool_input.file_path // ""')
 
+# M4: emergency disable — לשימוש בעת באג קריטי בפרוטוקול בלבד
+# הפעלה: export BUILDSMART_EMERGENCY_DISABLE="$(cat .emergency_token)"
+if [[ -n "${BUILDSMART_EMERGENCY_DISABLE:-}" ]]; then
+    REPO=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
+    TOKEN_FILE="${REPO}/.emergency_token"
+    if [[ -f "$TOKEN_FILE" ]]; then
+        EXPECTED=$(tr -d '[:space:]' < "$TOKEN_FILE")
+        GIVEN=$(echo "${BUILDSMART_EMERGENCY_DISABLE}" | tr -d '[:space:]')
+        if [[ ${#EXPECTED} -ge 16 && "$GIVEN" == "$EXPECTED" ]]; then
+            echo "⚠️  EMERGENCY DISABLE פעיל ב-pre-tool — פרוטוקול מושהה." >&2
+            echo "[$(date -Iseconds)] EMERGENCY_DISABLE used — pre-tool bypassed tool=$tool" \
+                >> "${REPO}/.git/protocol_audit.log" 2>/dev/null
+            exit 0
+        fi
+    fi
+fi
+
 # ─── שכבת הגנה: עריכה ישירה של קבצי הגנה ───
 # חל על Edit/Write/NotebookEdit
 PROTECTED_PATHS=(
@@ -27,14 +44,44 @@ if [[ "$tool" =~ ^(Edit|Write|NotebookEdit)$ ]] && [[ -n "$file_path" ]]; then
     for protected in "${PROTECTED_PATHS[@]}"; do
         if [[ "$file_path" == *"$protected" ]]; then
             echo "🔒 חסום: עריכת קובץ הגנה ($protected) דורשת הוראה מפורשת מהמשתמש." >&2
-            echo "   אם הוראה ניתנה — צור קובץ .allow_protocol_edit ב-repo root עם כותרת ההוראה." >&2
             REPO=$(git -C "$(dirname "$file_path")" rev-parse --show-toplevel 2>/dev/null || echo "")
-            if [[ -n "$REPO" && -f "$REPO/.allow_protocol_edit" ]]; then
-                # רשום שהפעולה אושרה
-                echo "[$(date)] allowed edit: $file_path" >> "$REPO/.git/protocol_audit.log"
-                exit 0
+            if [[ -z "$REPO" ]]; then
+                exit 2
             fi
-            exit 2
+
+            # תיקון M2: bypass דורש (א) קובץ קיים, (ב) תוקף ≤24h, (ג) לא ריק
+            BYPASS_FILE="$REPO/.allow_protocol_edit"
+            if [[ ! -f "$BYPASS_FILE" ]]; then
+                echo "   אם הוראה ניתנה — צור $BYPASS_FILE עם:" >&2
+                echo "     שורה 1: prompt-id (hash 8 תווים)" >&2
+                echo "     שורה 2: timestamp בפורמט YYYY-MM-DD HH:MM" >&2
+                echo "     שורה 3: כותרת ההוראה מהמשתמש (לפחות 30 תווים)" >&2
+                exit 2
+            fi
+
+            # בדוק תוקף — הקובץ לא יכול להיות ישן יותר מ-24h
+            FILE_AGE=$(( $(date +%s) - $(stat -c %Y "$BYPASS_FILE" 2>/dev/null || echo 0) ))
+            if [[ "$FILE_AGE" -gt 86400 ]]; then
+                echo "   $BYPASS_FILE פג תוקף (${FILE_AGE}s > 86400s)." >&2
+                echo "   צור מחדש עם הוראה עדכנית מהמשתמש." >&2
+                exit 2
+            fi
+
+            # בדוק תוכן — חייב לפחות 30 תווים תיאוריים (לא רק whitespace)
+            CONTENT_LEN=$(grep -v "^$" "$BYPASS_FILE" | tr -d '[:space:]' | wc -c)
+            if [[ "$CONTENT_LEN" -lt 30 ]]; then
+                echo "   $BYPASS_FILE קצר מדי ($CONTENT_LEN תווים)." >&2
+                echo "   חייב לכלול: prompt-id + timestamp + הוראה (30+ תווים)." >&2
+                exit 2
+            fi
+
+            # רשום את הפעולה
+            mkdir -p "$REPO/.git" 2>/dev/null
+            {
+                echo "[$(date -Iseconds)] tool=$tool file=$file_path"
+                echo "  bypass-age=${FILE_AGE}s content-len=$CONTENT_LEN"
+            } >> "$REPO/.git/protocol_audit.log"
+            exit 0
         fi
     done
 fi

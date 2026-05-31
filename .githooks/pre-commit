@@ -3,8 +3,14 @@
 # נשמר בריפו ב-.githooks/ — חל על כל מודל וכל clone
 # כל הפרת פרוטוקול = חסימה מוחלטת
 
-# תיקון באג #29: paths דינמיים — מחפש flutter במגוון מיקומים
-for candidate in "/home/user/flutter/bin" "/c/flutter/bin" "$HOME/flutter/bin" "/usr/local/flutter/bin"; do
+# M7: paths דינמיים — מחפש flutter על Linux / macOS (Intel+ARM) / Windows Git Bash
+for candidate in \
+    "/home/user/flutter/bin" \
+    "/c/flutter/bin" \
+    "$HOME/flutter/bin" \
+    "/usr/local/flutter/bin" \
+    "/opt/homebrew/opt/flutter/bin" \
+    "/opt/flutter/bin"; do
     [[ -d "$candidate" ]] && PATH="$candidate:$PATH"
 done
 export PATH
@@ -17,6 +23,24 @@ if ! command -v flutter >/dev/null 2>&1; then
 fi
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+# M4: emergency disable — לשימוש בעת באג קריטי בפרוטוקול בלבד
+# הפעלה: export BUILDSMART_EMERGENCY_DISABLE="$(cat .emergency_token)"
+if [[ -n "${BUILDSMART_EMERGENCY_DISABLE:-}" ]]; then
+    TOKEN_FILE="$REPO_ROOT/.emergency_token"
+    if [[ -f "$TOKEN_FILE" ]]; then
+        EXPECTED=$(tr -d '[:space:]' < "$TOKEN_FILE")
+        GIVEN=$(echo "${BUILDSMART_EMERGENCY_DISABLE}" | tr -d '[:space:]')
+        if [[ ${#EXPECTED} -ge 16 && "$GIVEN" == "$EXPECTED" ]]; then
+            echo "⚠️  EMERGENCY DISABLE פעיל — פרוטוקול מושהה. רשום ב-stuck_log." >&2
+            echo "[$(date -Iseconds)] EMERGENCY_DISABLE used — pre-commit bypassed" \
+                >> "$REPO_ROOT/.git/protocol_audit.log"
+            exit 0
+        fi
+    fi
+    echo "🔒 BUILDSMART_EMERGENCY_DISABLE לא תקין — token חסר/לא נכון." >&2
+fi
+
 cd "$REPO_ROOT/app_flutter" || exit 1
 
 FAIL=0
@@ -611,7 +635,13 @@ fi
 # שער 110: audit log — אם נסקרה קטגוריה
 # session_plan עם טבלת "Audit log" חייב לפחות שורה אחת
 if [[ -f "knowledge/session_plan.md" ]] && grep -q "Audit log\|Audit Log" knowledge/session_plan.md 2>/dev/null; then
-    AUDIT_LINES=$(awk '/[Aa]udit [Ll]og/,/^---|^##/' knowledge/session_plan.md 2>/dev/null | grep -cE "^\|.*\|.*\|" || echo 0)
+    AUDIT_LINES=$(awk '
+      /[Aa]udit [Ll]og/ { in_section=1; next }
+      in_section && /^##/ { in_section=0 }
+      in_section && /^\|.*\|.*\|/ { count++ }
+      END { print count+0 }
+    ' knowledge/session_plan.md 2>/dev/null)
+    AUDIT_LINES=${AUDIT_LINES:-0}
     if [[ "$AUDIT_LINES" -lt 2 ]]; then
         warn "110" "Audit log קיים אבל ריק" "תעד קטגוריות שנסקרו (כולל clean runs כ-sentinels)"
     fi

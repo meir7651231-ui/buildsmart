@@ -295,3 +295,23 @@ ANTIPATTERN: pubspec.yaml.*grep.*"\^"
 RULE: בדיקת dependencies חייבת להבחין dev מ-prod
 ANTIPATTERN: sha256sum.*\.git/hooks.*compare
 RULE: integrity check חייב להיות גם מול HEAD, לא רק disk
+
+---
+
+## 2026-05-31 · gate 110 — awk range pattern סוגר על אותה שורה
+
+### א — הבעיה
+שער 110 אמור לספור שורות טבלה ב-Audit Log של session_plan.
+`awk '/[Aa]udit [Ll]og/,/^---|^##/'` — השורה `## Audit Log` מפעילה
+גם את start וגם את end pattern (`^##`), ולכן awk סוגר את הrange מיד. תוצאה: AUDIT_LINES=0 תמיד.
+שגיאת syntax נוספת: `grep -c ... || echo 0` מייצר שתי שורות (count + "0") — arithmetic comparison נכשלת.
+
+### ב — הפתרון
+שינוי ל-awk עם flag: `in_section=1; next` כשמגיע ל-Audit Log (דילוג על השורה עצמה).
+`AUDIT_LINES=${AUDIT_LINES:-0}` במקום `|| echo 0`.
+
+### ג — כלל המניעה
+ANTIPATTERN: awk.*Audit.*,.*\^##
+RULE: awk range pattern עם ^## כ-end יסגור מיד אם השורה ה-start מתחילה ב-##. השתמש ב-flag (in_section) במקום range.
+ANTIPATTERN: grep -c.*\|\| echo 0
+RULE: grep -c תמיד מדפיס count (גם 0) — || echo 0 יוצר double-output. השתמש ב- ${var:-0} אחרי grep -c.

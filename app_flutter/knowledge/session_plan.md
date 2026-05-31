@@ -1,99 +1,80 @@
 # Session Plan
 
 Owner: this session
-Scope: עדכון הפרוטוקול לפי 25 לקחים מ-SIZE_FILTER_PROTOCOL
+Scope: סגירת 7 חסמי-בשלות לפני שימוש autonomous בסוכנים
 Style: fix → verify → log lesson per step
 
 ## Rules of Engagement
-- Local only — אין commit/push עד אישור מפורש מהמשתמש.
-- Phase Ship מושהית עד "תדחוף".
-- Re-fetch origin לפני commit (parallel sessions).
-
-## הצעד הנוכחי
-
-**משימה:** הטמעת 25 לקחים מ-SIZE_FILTER_PROTOCOL.md לתוך הפרוטוקול
-**סטטוס:** 🟦 בתהליך
+- Local only — אין push עד אישור.
+- Phase G מושהית.
 
 ## P-Table
 
 | # | Problem | Where | Symptom |
 |---|---------|-------|---------|
-| P1 | אין lessons חוצי-sessions | knowledge/ | session הבא חוזר ללקחים ישנים |
-| P2 | session_plan ללא Owner/Scope | template ישן | scope creep אפשרי |
-| P3 | אין visual verification phase | hook ישן | UI bugs מתגלים בייצור |
-| P4 | אין sub-protocol pattern | template | משימות שמתרחבות נכתבות מחדש |
-| P5 | אין audit log עם sentinels | אין | clean runs לא מתועדים |
+| M1 | Branch protection לא הוגדר | GitHub UI | סוכן יכול למזג קוד לא תקין ל-main |
+| M2 | `.allow_protocol_edit` הוא master key | pre-tool.sh | סוכן יוצר קובץ ועוקף הכל |
+| M3 | לא נבדק עם סוכן אמיתי | אין | edge cases לא ידועים |
+| M4 | אין emergency stop | אין | באג בפרוטוקול = הכל חסום |
+| M5 | false positives ב-stuck_log | LL-14 case | פטרן מדויק מדי תופס לגיטימי |
+| M6 | אין commit signing | git config | זיוף author אפשרי |
+| M7 | לא cross-platform | Linux only | Mac/Windows עלולים לשבור |
 
 ## S — Solution Shape
 
-חוזה: **3 קבצים + 5 שערים חדשים:**
-1. `knowledge/CARRY_FORWARD.md` — לקחים קבועים
-2. `knowledge/SESSION_PLAN_TEMPLATE.md` — template חדש
-3. שערים 106-110 ב-pre-commit
-4. עדכון stuck_log עם 5 רשומות חדשות
-5. רענון ANTIPATTERNs
+**מה ניתן לתקן כאן:**
+- M2: `.allow_protocol_edit` דורש hash של ה-prompt + תוקף 24 שעות
+- M4: emergency disable דרך `EMERGENCY_DISABLE` env var עם token יחודי
+- M5: NOTE mechanism + warning-only entries
+- M7: hooks portable (POSIX-compatible, fallback paths)
+
+**מה דורש פעולה מהמשתמש:**
+- M1: הגדרת branch protection ב-GitHub Settings (תיעוד מדויק)
+- M3: dry-run עם סוכן אמיתי על משימה קטנה
+- M6: GPG setup (אופציונלי, ניתן לדלג)
 
 ## Phases
 
 ### Phase A — Recon ✅
-- [1] קרא SIZE_FILTER_PROTOCOL.md ✅
-- [2] חלץ 25 לקחים ✅
-- [3] מיין ל-קטגוריות (Process/Testing/Debug/Arch/Cross-session) ✅
+- [1] איזה חסמים ניתנים לתיקון אוטו ✅
+- [2] איזה דורשים user action ✅
 
-### Phase B — Build (חלקית — אין tests-first ל-docs)
-- [4] צור CARRY_FORWARD.md ✅
-- [5] צור SESSION_PLAN_TEMPLATE.md ✅
-- [6] עדכן session_plan לפורמט החדש ✅
+### Phase B — Fixes Code
+- [3] M2: hash-based .allow_protocol_edit ✅ age≤24h + 30+ chars + audit log
+- [4] M4: emergency disable mechanism ✅ .emergency_token + env var BUILDSMART_EMERGENCY_DISABLE
+- [5] M5: NOTE: prefix לרשומות manual-review בלבד ✅ gate 103 + regression gen מדלגים על NOTE:
+- [6] M7: portable paths ✅ Linux/macOS-Intel/macOS-ARM/Windows Git Bash paths
 
-### Phase C — Gates
-- [7] שער 106 — Owner+Scope ✅
-- [8] שער 107 — visual log ל-UI changes ✅
-- [9] שער 108 — CARRY_FORWARD קיים ✅
-- [10] שער 109 — sub-protocol → CARRY_FORWARD ✅
-- [11] שער 110 — audit log לא ריק ✅
+### Phase C — Documentation
+- [7] M1: הוראת branch protection ב-PROTOCOL_ENFORCEMENT ✅ (קיים)
+- [8] M3: AGENT_READINESS.md — dry-run checklist ✅ נוצר
+- [9] M6: commit signing optional notes ⬜ (אופציונלי — ניתן לדלג)
 
-### Phase D — Integration
-- [12] סנכרון hooks ✅
+### Phase D — Verify
+- [10] audit_gates עובר ⬜
+- [11] regression tests ירוקות ⬜
+- [12] simulation: ניסיון עקיפה ⬜
+
+### Phase G — Ship (מושהית — ממתינה ל"תדחוף")
 - [13] commit מקומי ⬜
-- [14] verify gates 100-110 ⬜
-
-### Phase G — Ship (מושהית)
-- [15-20] push רק לאחר אישור ⬜
+- [14] push רק כש"תדחוף" ⬜
 
 ## Audit Log
 
-| Row | Area | Pool | Outcome |
-|-----|------|------|---------|
-| 1 | knowledge/ | 11 קבצים | added 2 new (CARRY_FORWARD + TEMPLATE) |
-| 2 | .githooks/pre-commit | 105 שערים | extended → 110 |
-| 3 | stuck_log.md | 13 entries | יתעדכן אחרי commit |
+| Row | Area | Status |
+|-----|------|--------|
+| 1 | M2 .allow_protocol_edit | ✅ בוצע — age≤24h + 30+ chars |
+| 2 | M4 emergency disable | ✅ בוצע — .emergency_token + env var |
+| 3 | M5 NOTE mechanism | ✅ בוצע — NOTE: מדלג על gate 103 ורגרסיה |
+| 4 | M7 portable paths | ✅ בוצע — 6 paths: Linux/macOS/Windows |
+| 5 | M1 branch protection docs | ✅ מתועד ב-PROTOCOL_ENFORCEMENT.md (ידני) |
+| 6 | M3 agent readiness checklist | ✅ AGENT_READINESS.md נוצר |
+| 7 | M6 commit signing | ⬜ אופציונלי — ניתן לדלג |
 
 ## Live Log
 
-### LL-01 — step 4 — Carry-forward distinct from per-bug stuck_log
-**Problem:** stuck_log.md מצטבר באגים — קשה לראות את הלקחים החשובים.
-**Solution:** קובץ נפרד CARRY_FORWARD.md עם 3-8 משפטים מזוקקים בלבד.
-**Lesson:** לקחים שאמורים לנדוד לsession הבא = משפט אחד. הפרטים נשארים ב-stuck_log.
+(יתעדכן כצעדים מתבצעים)
 
-### LL-02 — step 7 — Owner+Scope catches scope creep early
-**Problem:** session_plan ישן ללא Scope → קל לסחוף לדברים נוספים.
-**Solution:** שער 106 דורש שתי שורות בראש הקובץ.
-**Lesson:** constraint שרשום בקובץ עצמו עובד הרבה יותר טוב מ-discipline פנימית.
+## Closeout
 
-## Closeout (after this session)
-
-### What will change
-- knowledge/CARRY_FORWARD.md — NEW
-- knowledge/SESSION_PLAN_TEMPLATE.md — NEW
-- knowledge/session_plan.md — בפורמט החדש
-- .githooks/pre-commit — +5 gates (106-110)
-
-### Problems closed
-- ✅ P1 — CARRY_FORWARD נוצר
-- ✅ P2 — Owner/Scope אכוף בשער 106
-- ✅ P3 — visual log אזהרה בשער 107
-- ✅ P4 — sub-protocol pattern בtemplate
-- ✅ P5 — audit log gate 110
-
-### Pending — gated on user approval
-- push אחרי שsession-מקביל מסיים
+(יתעדכן בסיום)
