@@ -4,6 +4,7 @@
 // these families in the new "וריאנטים" section.
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart';
 
 enum AttrKind { size, color, model, subtype }
 
@@ -80,7 +81,10 @@ List<VariantFamily> allVariantFamilies() {
   for (final kind in AttrKind.values) {
     // Group key: frame + brand + categoryHe + page + qtyPack + qtyPallet
     final groups = <String, List<LipskeyCatalogProduct>>{};
-    for (final p in kLipskeyCatalog) {
+    // Search the unified catalog (Lipskey + Polyroll) so PPR products get
+    // variant families just like Lipskey products. Grouping by brand keeps
+    // PPR families distinct from Lipskey families — no cross-pollination.
+    for (final p in kCatalogProducts) {
       final hasKind = p.nameHe
           .split(RegExp(r'\s+'))
           .any((w) => kindOf(w) == kind);
