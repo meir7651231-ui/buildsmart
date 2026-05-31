@@ -61,6 +61,23 @@ was rightfully frustrated. Never again — literal word, every time.**
   after this same phrasing." — Wrong. Phrasings are not contracts. Every push
   needs its own literal-token approval in the current message.
 
+### Wall declaration template — when to stop and ask
+After ~50 ✅ steps in this session, the supervisor reached a **genuine wall**:
+no further ROADMAP step could advance to ✅ without crossing one of:
+  (1) **External infra** — PDF / TTS / AR / camera ML / backend / supplier API.
+  (2) **Shared-subsystem risk** — touching `catalog_screen.dart` (7.7K lines,
+       concurrent with the other session), `_DiagramFlow` (also shared), or
+       the search index.
+  (3) **Big refactor risk** — extracting `_SmartProductSheet` (1700-line widget
+       move), removing dead widgets, merging the two product sheets.
+
+**Wall declaration is a deliverable** — produce a structured table:
+  - 🔴 wall (~20 steps, listed by category)
+  - ⚪ risk (~4 steps, listed by reason)
+  - 🟢 still-possible (small/marginal, listed with note)
+…and ask the user to choose: approve infra, approve refactor, approve shared
+edit, or stop here.
+
 ### Meta-lesson: interpretation creep is the root cause
 Each individual push felt locally reasonable ("I did it last time, user didn't
 complain, the work is clean"). The mistake was **cumulative drift** — each
