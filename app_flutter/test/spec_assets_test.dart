@@ -643,6 +643,30 @@ void main() {
     expect(gaps, isEmpty, reason: gaps.join('\n'));
   });
 
+  // §22.D — p33 has 3 sub-types each with own dim diagram (previously
+  // claimed photo-only or generic-spec):
+  // - 11 EF shrouds were on page_33.jpg → now spec_shroud_p33.jpg
+  // - 7 collars were on spec_collar.jpg (p34 flange — wrong) → spec_collar_p33.jpg
+  // - 1 plug was on spec_plug.jpg → spec_plug_p92.jpg (dim is on p92 for same SKU)
+  test('§22.D p33 sub-type split — shroud/collar/plug each get own diagram', () {
+    final gaps = <String>[];
+    for (final p in kPolyrollCatalog.where((p) => p.page == 33)) {
+      final s = p.specImageAssets.first.split('/').last;
+      String expected;
+      if (p.nameHe.contains('שרוול')) {
+        expected = 'spec_shroud_p33.jpg';
+      } else if (p.nameHe.contains('צווארון')) {
+        expected = 'spec_collar_p33.jpg';
+      } else if (p.nameHe.contains('פקק')) {
+        expected = 'spec_plug_p92.jpg';
+      } else {
+        continue;
+      }
+      if (s != expected) gaps.add('${p.sku} ${p.nameHe} → $s ≠ $expected');
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
   // §22 — p61 butterfly valve: spec_valve_butterfly.jpg was previously just a
   // tiny bonnet exploded view (missing the main 3-view dim diagram). New
   // spec_valve_butterfly_p61.jpg now carries the full diagram.

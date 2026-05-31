@@ -841,11 +841,23 @@ page header that becomes part of the product nameHe (e.g. "ללא ידית",
 | p84 רוכב PPRCT | "רוכב לריתוך" (plain) / "רוכב לריתוך תבריג פנימי" (threaded) | `nameHe.contains('תבריג')` | `spec_saddle_p84.jpg` (plain default), `spec_saddle_p84_threaded.jpg` (threaded) |
 | p85 צווארון+אוגן+שרוול | צווארון (collar+gasket) / אוגן פלדה (steel flange) / שרוול חשמלי (EF shroud) | `nameHe.contains('אוגן' / 'שרוול')` | `spec_collar_p85.jpg` (gasket-collar, was MIS-cropped as shroud — fixed), `spec_collar_p85_flange.jpg`, `spec_shroud_p85.jpg` |
 
-**§22.D over-generalization bug fixed:** Previous protocol comment "EF =
-photo-only in catalog" was too broad. p85 שרוול חשמלי HAS a dim drawing
-on the top section of its page (D/h/l/d labels). Single-page exception
-(p85) added to the kPprElectrofusion case; the other EF pages (p33, p72-74)
-remain photo-only and still correctly fall through to page render.
+**§22.D over-generalization bug fixed (twice):** Previous protocol comment
+"EF = photo-only in catalog" was too broad. p85 שרוול חשמלי HAS a dim
+drawing on the top section of its page (D/h/l/d labels). After fixing p85,
+a deeper sweep prompted by the user found that **p33 also has an EF shroud
+dim drawing** at the top, AND p33 has a collar dim drawing at the bottom
+that's geometrically distinct from p34's flange (which spec_collar.jpg was
+showing for p33 collars). AND p33's plug appears with photo-only on p33
+but with a dim drawing on p92 (same SKU 99515080). All three are now
+routed correctly (spec_shroud_p33.jpg, spec_collar_p33.jpg, spec_plug_p92.jpg).
+Only p72, p73, p74 EF pages remain genuinely photo-only.
+
+**Lesson:** "verified diagram-free" claim requires opening the catalog page,
+not inferring from category. Cross-page lookup also matters — the same SKU
+can appear on multiple pages with one carrying the diagram. Use
+`grep "_ppr('<SKU>" lib/data/polyroll_catalog.dart` to confirm the page
+attribution, then look at every catalog page that lists the SKU before
+deciding "photo-only".
 
 **Mis-cropped pre-existing spec bug (p61):** when reviewing sub-type specs
 that already exist (spec_valve_butterfly.jpg in this case), open the file

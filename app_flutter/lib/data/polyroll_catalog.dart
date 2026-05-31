@@ -455,12 +455,21 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
         return [_kPprCollarPagePlainSpec[page]!];
       }
       // Page-33 collar ships with a gasket (verbatim "כולל אטם"); pager
-      // shows the dimension diagram then the gasket photo (p33_c).
+      // shows the dimension diagram then the gasket photo (p33_c). The
+      // p33 collar has its OWN dim drawing (D/d/d1/l/z/z1/z2) — different
+      // from p34 flange (K/d1/d2). Use spec_collar_p33.jpg.
+      if (page == 33 && nameHe.contains('צווארון')) {
+        return ['spec_collar_p33.jpg', 'ppr_p33_c.jpg'];
+      }
       if (nameHe.contains('צווארון')) {
         return ['spec_collar.jpg', 'ppr_p33_c.jpg'];
       }
       return ['spec_collar.jpg'];
     case kPprPlugs:
+      // §22.D p33 plug "פקק לריתוך לתיקון חורים" appears with only a photo on
+      // p33 but the dim diagram (A/B/C labels) is on p92 — same SKU sold
+      // across both pages. R8 honor the diagram even if not on the same page.
+      if (page == 33) return ['spec_plug_p92.jpg'];
       // §22: per-page plug spec when the catalog page has its own diagram.
       if (_kPprPlugPageSpec.containsKey(page)) {
         return [_kPprPlugPageSpec[page]!];
@@ -480,10 +489,11 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       // Generic pipe cross-section serves the rest.
       return ['spec_faser_20.jpg'];
     case kPprElectrofusion:
-      // §22.D p85 shroud (שרוול PPRCT חשמלי) DOES have a dim drawing on p85
-      // top — earlier blanket "EF = photo-only" was an over-generalization.
-      // Other EF pages (p33, p72-74) remain photo-only → falls through.
+      // §22.D p33 + p85 shroud (שרוול חשמלי) DO have dim drawings on their
+      // top sections — earlier blanket "EF = photo-only" was even broader
+      // than just p85. Other EF pages (p72-74) remain photo-only → fall through.
       if (page == 85 && nameHe.contains('שרוול')) return ['spec_shroud_p85.jpg'];
+      if (page == 33 && nameHe.contains('שרוול')) return ['spec_shroud_p33.jpg'];
       return null;
   }
   // Default fallback for unmapped categories: page render (R8 — not invented).
