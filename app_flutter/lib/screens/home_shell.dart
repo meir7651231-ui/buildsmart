@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.39 · 31.5.26 · SmartProduct: ציון 🟢🟡🔴 + פס שלבים + tooltips + persist + load/× + pair-warn + reducedMotion + חיפוש 3-טייר (791 ✅, 74%)',
+                          'v5.40 · 31.5.26 · SmartProduct: tooltips על כל 6 הצ׳יפים בהדר + נעילת contract סטטית (792 ✅, 74%)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

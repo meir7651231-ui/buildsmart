@@ -5156,7 +5156,11 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                               final saved = ref
                                   .read(savedConfigsProvider.notifier)
                                   .isSaved(p.key, brand.name);
-                              return Semantics(
+                              return Tooltip(
+                                message: saved
+                                    ? 'תצורה שמורה — טאפ להסיר ממועדפים'
+                                    : 'שמור את התצורה הזו (מותג נוכחי) כמועדפת',
+                                child: Semantics(
                                 button: true,
                                 label: 'שמור תצורה כמועדף',
                                 child: GestureDetector(
@@ -5174,52 +5178,64 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                             fontWeight: FontWeight.w700)),
                                   ),
                                 ),
+                                ),
                               );
                             }),
                             // Roadmap step 48 — copy a shareable price quote.
-                            GestureDetector(
-                              onTap: () {
-                                Clipboard.setData(ClipboardData(
-                                    text: quoteTextFor(p, _selectedBrand)));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('הצעת המחיר הועתקה'),
-                                      duration: Duration(seconds: 2)),
-                                );
-                              },
-                              child: const Padding(
-                                padding: EdgeInsets.only(left: 8),
-                                child: Text('📋 הצעה',
-                                    style: TextStyle(
-                                        color: Color(0xFF0F766E),
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w700)),
-                              ),
-                            ),
-                            Semantics(
-                              button: true,
-                              label: 'החלף מצב הצגה (מורחב או פשוט)',
+                            Tooltip(
+                              message:
+                                  'העתק הצעת מחיר לזיכרון — מחיר + מק"ט + מותג, מוכן ל-WhatsApp',
                               child: GestureDetector(
-                                onTap: () => ref
-                                    .read(cardDetailModeProvider.notifier)
-                                    .toggle(),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: expert
-                                        ? BsTokens.brand.withAlpha(28)
-                                        : const Color(0xFFEEEEEE),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                      expert ? 'מצב מורחב ▾' : 'מצב פשוט ▸',
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(
+                                      text:
+                                          quoteTextFor(p, _selectedBrand)));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content:
+                                            Text('הצעת המחיר הועתקה'),
+                                        duration: Duration(seconds: 2)),
+                                  );
+                                },
+                                child: const Padding(
+                                  padding: EdgeInsets.only(left: 8),
+                                  child: Text('📋 הצעה',
                                       style: TextStyle(
-                                          color: expert
-                                              ? BsTokens.brand
-                                              : const Color(0xFF777777),
+                                          color: Color(0xFF0F766E),
                                           fontSize: 10.5,
                                           fontWeight: FontWeight.w700)),
+                                ),
+                              ),
+                            ),
+                            Tooltip(
+                              message: expert
+                                  ? 'מצב מורחב — מציג את כל המפרט. טאפ לפישוט.'
+                                  : 'מצב פשוט — מסתיר פרטים הנדסיים. טאפ להרחבה.',
+                              child: Semantics(
+                                button: true,
+                                label: 'החלף מצב הצגה (מורחב או פשוט)',
+                                child: GestureDetector(
+                                  onTap: () => ref
+                                      .read(cardDetailModeProvider.notifier)
+                                      .toggle(),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: expert
+                                          ? BsTokens.brand.withAlpha(28)
+                                          : const Color(0xFFEEEEEE),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                        expert ? 'מצב מורחב ▾' : 'מצב פשוט ▸',
+                                        style: TextStyle(
+                                            color: expert
+                                                ? BsTokens.brand
+                                                : const Color(0xFF777777),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w700)),
+                                  ),
                                 ),
                               ),
                             ),
