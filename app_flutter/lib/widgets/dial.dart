@@ -38,7 +38,7 @@ class DialRow extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(BsTokens.radiusCircle),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: BsTokens.space1),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

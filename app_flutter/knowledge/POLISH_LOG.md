@@ -26,8 +26,7 @@
   כיסוי-בסיס תקין. (P2: audit-עומק ל-labels דינמיים — pending capture.)
 
 ### 🟢 ready-to-apply — safe, token-equal, אפס שינוי ויזואלי
-- **B/C:** `dial.dart:41` — `EdgeInsets.symmetric(vertical: 4)` → `BsTokens.space1` (4==4,
-  token-consistency, ללא שינוי-render). gate: `flutter test` ירוק (before/after = literal→token).
+- ✅ **בוצע** (ראה "שינויים שבוצעו"): `dial.dart` `vertical:4` → `BsTokens.space1`.
 
 ### 🟡 needs token-decision (ערך לא בסקאלה)
 - `dial.dart:69` — `vertical: 6` (אין token; scale=4,8,12...). או token חדש, או 6→8 (`space2`,
@@ -49,4 +48,4 @@
 ## שינויים שבוצעו
 | # | קובץ | before → after | gate | ref |
 |---|------|----------------|------|-----|
-| — | — | (pass ראשון = Plan בלבד. apply ימתין למנגנון-capture/החלטה.) | — | — |
+| 1 | `lib/widgets/dial.dart` | `DialRow` padding `vertical: 4` → `BsTokens.space1` (token-equal, 4==4, אפס שינוי-render) | analyze 0 · test 986 ✅ | non-visual (literal→token) |
