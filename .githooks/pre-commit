@@ -705,6 +705,21 @@ if [[ -f "knowledge/stuck_log.md" && -f "test/stuck_regression_test.dart" ]]; th
     [[ -z "$DUP_AP" ]] || err "111" "מספור כפול ב-stuck_regression: $DUP_AP" "הרץ scripts/generate_stuck_regression.sh"
 fi
 
+# שער 112: stubs מאוחדים — TESTING/CHECKLISTS/BUG_INVESTIGATION חייבים להישאר
+# שלטי-הפניה ל-VERIFICATION_PROTOCOL, ולא לברוא פרוטוקול-בדיקה מקביל. מונע מסוכן
+# לעבוד לפי מסמך-בדיקה ישן ולהגיד "בדקתי לפי הפרוטוקול". bash builtin, רץ תמיד.
+for stub in TESTING CHECKLISTS BUG_INVESTIGATION_PROTOCOL; do
+    sf="knowledge/$stub.md"
+    [[ -f "$sf" ]] || continue
+    case "$(head -1 "$sf")" in
+        *DEPRECATED*) : ;;
+        *) err "112" "$stub.md אינו stub מאוחד (שורה 1 ללא ⛔ DEPRECATED)" "השאר רק שלט-הפניה ל-VERIFICATION_PROTOCOL.md" ;;
+    esac
+    grep -q "VERIFICATION_PROTOCOL" "$sf" || err "112" "$stub.md לא מצביע ל-VERIFICATION_PROTOCOL.md" "הוסף הפניה ל-VERIFICATION_PROTOCOL.md"
+    SLN=$(grep -c '' "$sf"); SLN=${SLN:-0}
+    [[ "$SLN" -le 20 ]] || err "112" "$stub.md תפח ל-$SLN שורות — תוכן-בדיקה זלג חזרה ל-stub" "השאר רק שלט-הפניה (≤20 שורות); התוכן ב-VERIFICATION_PROTOCOL §"
+done
+
 # רישום fingerprint אם נכשל
 if [[ "$FAIL" -gt 0 ]]; then
     echo "$CURRENT_FP $NOW gates=v2:${FAILED_GATES#,} head=$HEAD_SHA" >> "$FINGERPRINT_FILE"

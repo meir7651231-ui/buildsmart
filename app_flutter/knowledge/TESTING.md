@@ -1,20 +1,15 @@
-# Testing — ⛔ אוחד תחת VERIFICATION_PROTOCOL.md
+# ⛔ DEPRECATED — אוחד ל-VERIFICATION_PROTOCOL.md
 
-> **המסמך הזה אוחד.** פרוטוקול-הבדיקה המלא והמאוחד חי עכשיו ב-
-> **`VERIFICATION_PROTOCOL.md`** — שם נמצאים סולם-הבדיקה (L0–L7), שלוש השכבות
-> (`flutter test` · in-app harness · mutation), השיטה הבטוחה למוטציה
-> (`scripts/mutation_verify.sh` — backup byte-exact, **לא** `git checkout`),
-> מרשם-המנגנונים המלא (חיווט · hooks · scripts · 10 דומיינים), וה-checklists.
->
-> **אל תוסיף תוכן כאן.** הקובץ נשאר רק כדי לא לשבור הפניות
-> (`knowledge_protocol_test.dart` אוכף את קיומו). כל עדכון → `VERIFICATION_PROTOCOL.md`.
+> **אל תעבוד לפי הקובץ הזה. אל תבדוק לפיו. אל תצטט אותו.**
+> פרוטוקול-הבדיקה היחיד והשלם הוא **`VERIFICATION_PROTOCOL.md`** — ושם בלבד.
 
-## למה אוחד
-~150 מסמכים נכתבו ב-11 ימים; הבדיקה התפזרה ל-4 קבצים. האיחוד מרכז הכל
-ל-entry-point אחד כך שסוכן קורא מסמך אחד ויודע איך לוודא כל שינוי.
-ה-verdict המלא של האיחוד: `KNOWLEDGE_AUDIT.md` (סבב 1).
+הקובץ הזה רוקן בכוונה. אין בו תוכן-בדיקה. הוא קיים אך-ורק כדי לא לשבור הפניות
+ישנות (`knowledge_protocol_test.dart` אוכף את קיומו), ושער ב-pre-commit אוכף
+שהוא יישאר stub ריק-מהוראות — כך שאי-אפשר להחזיר אליו תוכן ולברוא פרוטוקול-בדיקה
+מקביל בטעות.
 
-## שלוש השכבות (תקציר — הפירוט ב-VERIFICATION_PROTOCOL §1)
-1. **`flutter test`** — סוויטת-הרגרסיה (129 קבצים, 10 דומיינים) = ground-truth.
-2. **in-app harness** (`runRegression`) — מודולים נבדקים בתוך-האפליקציה.
-3. **mutation** — לוגיקת-דומיין חייבת 100% נתפסת; הזרק→אדום→שחזר→ירוק.
+כל מה שהיה כאן — שלוש שכבות-הבדיקה, המוטציה, ההיסטוריה — נמצא עכשיו בתוך
+`VERIFICATION_PROTOCOL.md` (הסולם L0–L7 + §3 מוטציה). ה-verdict של האיחוד:
+`KNOWLEDGE_AUDIT.md`, סבב 1.
+
+**אם הגעת לכאן מחיפוש "איך בודקים" → לך ל-`VERIFICATION_PROTOCOL.md`.**
