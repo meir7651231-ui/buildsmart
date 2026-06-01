@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.63 · 1.6.31 · 🌳 חוליות בעץ-החכם — באצ\' 2: +62 מוצרי צנרת (צינורות+ברכיים+מסעפים+סיפונים) → 79/170 מק"טים ממופים',
+                          'v5.64 · 1.6.31 · 🌳 חוליות בעץ-החכם — באצ\' 3: +38 (מאספים+AQUA SLIM+מכסים) → 117/170 מק"טים ממופים בעץ-החכם',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

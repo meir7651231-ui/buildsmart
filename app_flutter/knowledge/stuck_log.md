@@ -1046,3 +1046,19 @@ ANTIPATTERN: catalogSkus.*final p in products
 RULE: בדיקת-יתום של SmartProduct.brands (וכל בדיקת תקינות-מק"ט חוצת-מותג) חייבת
 להיגזר מ-kCatalogProducts המאוחד — לא מ-kLipskeyCatalog/`products` הצר. הקטלוג
 אוחד (Lipskey+Polyroll+Huliot); כרטיס-חכם יכול להמליץ על כל מותג, לא רק Lipskey.
+
+## 2026-06-02 · שער 32 נכשל מבדיקת-WIP של סוכן אחר (מקבץ)
+### א — הבעיה
+קומיט באצ' 3 (חיווט חוליות) נפל בשער 32: `flutter test` סורק את כל `test/` כולל
+`test/product_images_test.dart` — קובץ **untracked** של סוכן אחר (מיפוי CDN
+לתמונות) שהיה אדום באמצע עבודתו. הכשל לא קשור לשינוי שלי (נתוני SmartBrand בלבד);
+הבדיקות שלי (smartproduct_contract — 11 כרטיסים, ≥117 ממופים) עברו בבידוד.
+### ב — הפתרון
+אימות `git ls-files` → הקובץ untracked (לא שלי, לא ב-HEAD). לא תיקנתי את הבדיקה
+שלו, לא עדכנתי known-failing עבורה, לא הזזתי/מחקתי את קבצי ה-WIP שלו. המתנתי —
+הסוכן השלים (הבדיקה ירוקה: 4/4), ואז retry של הקומיט.
+### ג — כלל המניעה
+ANTIPATTERN: known-failing.*product_images
+RULE: כשל בשער 32 על קובץ שאינו שלך — בדוק ב-`git ls-files` אם הוא untracked/לא-שלך.
+אם כן: אל תתקן את הבדיקה שלו, אל תוסיף אותה ל-known_failing/STATUS, ואל תזיז/תמחק
+קבצי-WIP שלו. המתן שהבדיקה תוריק ואז retry. רק בדיקות *שלך* מצדיקות תיקון/baseline.

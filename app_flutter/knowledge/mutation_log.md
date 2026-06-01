@@ -153,3 +153,11 @@
 - תוצאה: 2 בדיקות אדומות ✅ — "Huliot … wired into the smart-tree" + "every
   SmartBrand.sku is a real catalog SKU".
 - מסקנה: הכיסוי המורחב מוגן; כל 8 הכרטיסים נבדקים שיש בהם מותג חוליות + spot-check.
+
+### Huliot smart-tree wiring batch 3 (v5.64) — 2026-06-02
+- שינוי: +38 מק"טי חוליות כ-SmartBrand: roofCollector+8 (מאספים), drainChannel+10
+  (AQUA SLIM), floorCover+20 (מכסים/רשתות). כיסוי 372→410, חוליות 117/170.
+- תקלה שהוזרקה: מק"ט AQUA SLIM מחובר '60150331' → '00000000' (לא בקטלוג).
+- תוצאה: 2 בדיקות אדומות ✅ — "Huliot … wired into the smart-tree" + "every
+  SmartBrand.sku is a real catalog SKU".
+- מסקנה: כיסוי 11 הכרטיסים מוגן (spot-check + ≥117 ממופים).

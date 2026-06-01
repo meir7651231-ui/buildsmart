@@ -412,3 +412,15 @@ rather than pixel rendering.
   contract). Pure data; no engine change.
 - REMAINING (batch 3): מאספים/AQUA SLIM → floorCollector/drainageManifold; מכסים
   → floorCover; אום/חותך/אביזרים משלימים (mostly SmartAcc, not brands).
+
+## Huliot SmartLock → smart-tree wiring, batch 3: collectors/channels/covers (v5.64)
+- `smart_tree.dart`: +38 Huliot SKUs as `SmartBrand` options on 3 more cards:
+  - `roofCollector` (מאספים וקולטי גג) +8 — מאסף 70/40·130·230 + מאסף נפילה 50/100/110
+  - `drainChannel` (תעלת ניקוז) +10 — AQUA SLIM 330/700 נירוסטה (סטים + פסים)
+  - `floorCover` (מכסים ורשתות) +20 — הגבהות + מכסים עגול/ריבועי + רשתות
+- Effect: smart-tree mapped coverage 372 → **410** SKUs; Huliot **117/170** mapped.
+  All of Huliot's installable units (fixtures · piping · collectors · channels ·
+  covers) now open a כרטיס-חכם. The unmapped ~53 are nuts/cutters/complementary
+  accessories — SmartAcc-style, not standalone brand cards.
+- Guards: `smartproduct_contract_test` Huliot test now spans 11 cards + sku→card
+  spot-checks + ≥117 mapped. Mutation-verified. Pure data; no engine change.

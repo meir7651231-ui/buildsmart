@@ -76,7 +76,10 @@ void main() {
       'pvcPipe',
       'drainageElbow',
       'drainageFittings',
-      'visibleTrap'
+      'visibleTrap',
+      'roofCollector',
+      'floorCover',
+      'drainChannel'
     ]) {
       final sp = kSmartProducts.firstWhere((s) => s.key == key);
       final huliotBrands = sp.brands
@@ -94,10 +97,14 @@ void main() {
     expect(smartProductForSku('70033960')?.key, 'drainageElbow');
     expect(smartProductForSku('70633460')?.key, 'drainageFittings');
     expect(smartProductForSku('62450060')?.key, 'visibleTrap');
-    // Batches 1+2 map at least 79 Huliot SKUs (drainage fixtures + piping).
+    expect(smartProductForSku('70140760')?.key, 'roofCollector');
+    expect(smartProductForSku('60200260')?.key, 'floorCover');
+    expect(smartProductForSku('60150331')?.key, 'drainChannel');
+    // Batches 1-3 map at least 117 Huliot SKUs (fixtures + piping + collectors
+    // + covers + channels).
     final mappedHuliot =
         huliotSkus.where((s) => smartProductForSku(s) != null).length;
-    expect(mappedHuliot, greaterThanOrEqualTo(79),
+    expect(mappedHuliot, greaterThanOrEqualTo(117),
         reason: 'only $mappedHuliot Huliot SKUs mapped to a SmartProduct');
   });
 
