@@ -79,12 +79,12 @@
 - **קובץ:** `lib/data/lipskey_catalog.dart:49`
 - **מה עושה:** static helper — ממפה brand string לתיקיית assets:
   פולירול→polyroll, חוליות→huliot_smartlock, אחר→lipskey.
-- תקלה שהוזרקה: שינוי `if (brand == 'חוליות') return 'huliot_smartlock'`
-  → `return 'lipskey'` (התעלמות מ-Huliot).
-- תוצאה: הבדיקות נשארו ירוקות (אין test פיזי לקיום הקבצים תחת assets/huliot_smartlock).
-  חולשה ידועה.
-- מסקנה: הבדיקה **חלשה כרגע** ל-Huliot. TODO לסשן הבא: §22-Huliot test
-  ש-`imageAsset`/`specImageAssets` של כל מוצר Huliot מתחיל ב-`assets/huliot_smartlock/`.
+- **בדיקה חיזק (2026-06-01 — סשן 100%):** נוסף `§22-Huliot every product
+  asset resolves to assets/huliot_smartlock/` ב-spec_assets_test.dart שסורק
+  כל imageAssets/specImageAssets של 170 מוצרי Huliot. בנוסף `§22-Huliot
+  every Huliot page asset exists on disk` מוודא קיום פיזי.
+- mutation_verify.sh ראשוני (תיעד את החולשה) → אחרי הוספת ה-test, mutation_verify
+  שני (`s|if (brand == 'חוליות') return 'huliot_smartlock';|// removed|`) → אדום ✅.
 
 ### availableLensesForSet — 2026-05-31
 - תקלה שהוזרקה: `>= smartTreeMinFraction` → `> smartTreeMinFraction` (סף עץ-חכם)
@@ -123,3 +123,15 @@
 - תקלה שהוזרקה: `var score = breadth + depth` → `var score = breadth` (התעלמות מעומק).
 - תוצאה: 2 בדיקות אדומות ✅ — "composite == breadth + depth" וגם "raised bar PPR hits top band" (PPR צנח ל-49<80).
 - מסקנה: הבדיקות נועלות גם את הזהות composite=breadth+depth וגם את שילוב שני הצירים בפועל.
+
+### lib/data/huliot_smartlock_catalog.dart — 2026-06-01T19:21:42+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `/'יצרן': 'חוליות',/d`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/spec_assets_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### lib/data/lipskey_catalog.dart — 2026-06-01T19:22:05+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s|if (brand == 'חוליות') return 'huliot_smartlock';|// removed for mutation test|`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/spec_assets_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

@@ -1859,6 +1859,14 @@ class _QuickInfoStripsState extends State<_QuickInfoStrips> {
           value: 'בור חלק · ללא אבנית',
           tint: const Color(0xFF06B6D4),
         ),
+      if (p.brand == 'חוליות')
+        _StripDef(
+          kind: _StripKind.info,
+          emoji: 'ℹ️',
+          label: 'מידע כללי',
+          value: 'SmartLock™ · דלוחין PP · 32-63 מ"מ',
+          tint: const Color(0xFF14764A),
+        ),
     ];
     if (rows.isEmpty) return const SizedBox.shrink();
 
@@ -2353,6 +2361,7 @@ class _StripPanel extends StatelessWidget {
 
   // ── מידע כללי: מבנה רב-שכבתי + חומר גלם + יתרונות (מהקטלוג, עמ' 77) ───────
   Widget _buildInfo() {
+    if (product.brand == 'חוליות') return _buildInfoHuliot();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -2378,6 +2387,78 @@ class _StripPanel extends StatelessWidget {
         _infoBullet('רמת אקוסטיקה גבוהה'),
         _infoBullet('צנרת קלה ונוחה לעבודה, מגוון אביזרים רחב'),
         _infoBullet('מחברי הברגה מפליז DZR לסביבה קורוזיבית'),
+      ],
+    );
+  }
+
+  // ── מידע כללי — חוליות SmartLock (מהקטלוג, עמ' 5-6 verbatim) ─────────────
+  Widget _buildInfoHuliot() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+            'SMART LOCK — מערכת דלוחין, צנרת ואביזרים מפוליפרופילן בקטרים 32-63 מ"מ בצבע שחור',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xFF888888), fontSize: 10.5)),
+        _infoHead('חומר גלם'),
+        _infoBullet('צינור רב שכבתי PPML-MD-S16'),
+        _infoBullet('שכבה חיצונית: פוליפרופילן שחור — מעכבת קרני UV'),
+        _infoBullet(
+            'שכבה אמצעית: פוליפרופילן עם תרכובת מינרלית PPMD — בידוד אקוסטי'),
+        _infoBullet(
+            'שכבה פנימית: פוליפרופילן לבן — מאפשרת ניטור ובקרה חזותיים'),
+        _infoBullet('אביזרים: PPMD PP'),
+        _infoBullet('שיטת חיבור: נעילת שיניים - ראטצ\'ט'),
+        _infoBullet('אטם מערכת: אטם לחץ אלסטומרי TPE'),
+        _infoHead('יתרונות'),
+        _infoBullet('התקנה מהירה ופשוטה, אטם אינטגרלי באביזר'),
+        _infoBullet('אטם עמיד לאורך זמן'),
+        _infoBullet('חוזק טבעתי גבוה'),
+        _infoBullet('עמידות כימית גבוהה'),
+        _infoBullet('קשיחות ויציבות גבוהים'),
+        _infoBullet('עמידות בפני פגיעות מכניות'),
+        _infoBullet('מודול אלסטיות ואימפקט גבוה'),
+        _infoBullet('פנים צינור חלק מאפשר זרימה נקיה'),
+        _infoBullet('תוצאות צילום חדות במיוחד'),
+        _infoBullet('מיוצר בישראל · בעל תו תקן ישראלי'),
+        _infoBullet('קיימות (אורך חיים) ל-100 שנה'),
+        _infoBullet('שימוש בצינורות חלקים'),
+        _infoBullet(
+            'אין צורך בהכנת פאזה לצינור (נדרש לנקות גראדים) · אין צורך בשימוש בחומרי סיכה'),
+        _infoBullet('צנרת אקוסטית להפחתת רעש'),
+        _infoBullet('צנרת עמידה בעומסי כבידה ללא היווצרות בטן'),
+        _infoBullet('עמידות בתנאי מזג אויר קשים'),
+        _infoHead('תקינות'),
+        _infoBullet('ת"י 958-1 — היתר 737 (צנרת PP לסילוק שפכים חמים)'),
+        _infoBullet('ת"י 71253-1 — היתר 114782 (מחסום ריחות מפלסטיק לרצפה)'),
+        _infoBullet('ת"י 71253-2 (מאסף מפלסטיק לרצפה ברצפה)'),
+        _infoBullet(
+            'ת"י 5694 — היתר 114783 (אביזרי ניקוז לאמבט, מחסומים גלויה וסיפונים)'),
+        _infoBullet('ת"י 14020 — היתר 70304 (תו ירוק למוצרי PP)'),
+        _infoBullet('תקן בינלאומי EN-1451 · DIN 8078 · ISO 180'),
+        _infoHead('התקנה כללית (עמ\' 8)'),
+        _infoBullet('1. הכנס את הצינור* או האביזר עד למעצור (*ללא גראדים)'),
+        _infoBullet('2. הדק את האום עד לנעילת השיניים'),
+        _infoHead('התקנת מתאם זווית - ג\'וקר'),
+        _infoBullet(
+            '1. הכנס את גוף הג\'וקר לאביזר הנדרש, ללא הידוק חיבור הסמארטלוק'),
+        _infoBullet('2. השחל את האום והאטם הכדורי על הצינור'),
+        _infoBullet(
+            '3. קבע את הזווית הרצויה במחבר הג\'וקר והדק את אום הג\'וקר'),
+        _infoBullet('4. הדק את אביזר הסמארט לוק'),
+        _infoHead('התקנת פקק במחסום/מאסף (עמ\' 9)'),
+        _infoBullet(
+            'הכנס את הפקק שהמילה UP נמצאת בחלקו העליון וידית האחיזה נמצאת במצב אנכי'),
+        _infoBullet('הדק את האום עד נעילת השיניים'),
+        _infoHead('התקנה ידנית של האום'),
+        _infoBullet(
+            '⚠️ האביזרים מגיעים כשהאומים מורכבים עליהם ומוכנים להתקנה. במצב שבו האום מופרד מהאביזר יכול להתקיים רק על ידי פתיחה מכוונת'),
+        _infoBullet(
+            'כוון את החץ הירוק שעל האום מול השן הגדולה באביזר ← הברג את האום עד לשמיעת הקליק (מעבר מעל השן הגדולה)'),
+        _infoHead('חיטוי וניקוי'),
+        _infoBullet(
+            'תכונות הניקיון נובעות משכבה פנימית פוליפרופילן לבן חלקה ⇒ ללא הצטברות זרימה חופשית'),
+        _infoBullet('לא נדרש חיטוי שוטף — שטיפה במים בלבד ברוב המקרים'),
       ],
     );
   }

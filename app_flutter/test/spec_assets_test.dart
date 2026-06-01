@@ -450,6 +450,223 @@ void main() {
             'always inject יצרן + מק"ט חוליות:\n${missing.take(12).join('\n')}');
   });
 
+  // §22-Huliot path resolution — every Huliot product's image/spec assets
+  // must resolve to `assets/huliot_smartlock/`. This guards against the
+  // brand-dir mapping regressing (the bug fixed by _brandDir static helper).
+  test('§22-Huliot every product asset resolves to assets/huliot_smartlock/',
+      () {
+    final wrongDir = <String>[];
+    for (final p in kHuliotCatalog) {
+      for (final a in p.imageAssets) {
+        if (!a.startsWith('assets/huliot_smartlock/')) {
+          wrongDir.add('${p.sku} imageAsset="$a"');
+        }
+      }
+      for (final a in p.specImageAssets) {
+        if (!a.startsWith('assets/huliot_smartlock/')) {
+          wrongDir.add('${p.sku} specImageAsset="$a"');
+        }
+      }
+    }
+    expect(wrongDir, isEmpty,
+        reason: 'Huliot assets escaping the brand directory '
+            '(brand→dir mapping regression?):\n${wrongDir.take(12).join('\n')}');
+  });
+
+  // §22-Huliot every page asset referenced by a product exists on disk.
+  // Catches: typo in page number, missing page export, _huliotImageFor
+  // returning a path that wasn't generated.
+  test('§22-Huliot every Huliot page asset exists on disk', () {
+    final missing = <String>[];
+    for (final p in kHuliotCatalog) {
+      for (final a in p.specImageAssets) {
+        if (!File(a).existsSync()) missing.add('${p.sku} → $a');
+      }
+    }
+    expect(missing, isEmpty,
+        reason: 'broken Huliot asset paths:\n${missing.take(12).join('\n')}');
+  });
+
+  // §21.B-Huliot — name recoverability via _NameWords. Since Huliot stays on
+  // the Lipskey-style word-by-word renderer (not the §21 chip hierarchy),
+  // recoverability = each nameHe word is non-trivial and the full name is
+  // shown verbatim. This guards against silent name truncation.
+  test('§21.B-Huliot every product name renders verbatim (no empty words)',
+      () {
+    final broken = <String>[];
+    for (final p in kHuliotCatalog) {
+      final words = p.nameHe
+          .split(RegExp(r'\s+'))
+          .where((w) => w.trim().isNotEmpty)
+          .toList();
+      if (words.isEmpty) {
+        broken.add('${p.sku} → empty/whitespace-only name "${p.nameHe}"');
+      }
+      // No control chars / bidi marks.
+      if (RegExp(r'[‎‏‪-‮⁦-⁩​]')
+          .hasMatch(p.nameHe)) {
+        broken.add('${p.sku} → contains bidi control char');
+      }
+    }
+    expect(broken, isEmpty,
+        reason: 'name rendering will break:\n${broken.take(12).join('\n')}');
+  });
+
+  // §22-Huliot paranoid audit — 12 cross-product checks that supplement the
+  // single-product tests above. Mirrors the 20-check audit run on Polyroll.
+  test('§22-Huliot paranoid 12-check audit — cross-product consistency', () {
+    final cat = kHuliotCatalog;
+    final failures = <String>[];
+
+    // #1 SKU uniqueness
+    final skuCount = <String, int>{};
+    for (final p in cat) {
+      skuCount[p.sku] = (skuCount[p.sku] ?? 0) + 1;
+    }
+    final dupSkus = skuCount.entries.where((e) => e.value > 1).toList();
+    if (dupSkus.isNotEmpty) {
+      failures.add('#1 duplicate SKUs: ${dupSkus.map((e) => "${e.key}×${e.value}").join(", ")}');
+    }
+
+    // #2 nameHe uniqueness (key by full name — duplicates are R8 violations)
+    final nameCount = <String, int>{};
+    for (final p in cat) {
+      nameCount[p.nameHe] = (nameCount[p.nameHe] ?? 0) + 1;
+    }
+    final dupNames = nameCount.entries.where((e) => e.value > 1).toList();
+    if (dupNames.isNotEmpty) {
+      failures.add('#2 duplicate nameHe: ${dupNames.map((e) => "\"${e.key}\"×${e.value}").join("; ")}');
+    }
+
+    // #3 every product has non-empty name
+    final emptyN = cat.where((p) => p.nameHe.trim().isEmpty).toList();
+    if (emptyN.isNotEmpty) {
+      failures.add('#3 empty names: ${emptyN.length}');
+    }
+
+    // #4 SKU never appears in nameHe (antipattern — would echo SKU as title)
+    final skuInName = cat.where((p) => p.nameHe.contains(p.sku)).toList();
+    if (skuInName.isNotEmpty) {
+      failures.add('#4 SKU appears in nameHe: ${skuInName.length}');
+    }
+
+    // #5 every product belongs to a known category
+    final validCats = kHuliotCategories.toSet();
+    final badCat = cat.where((p) => !validCats.contains(p.categoryHe)).toList();
+    if (badCat.isNotEmpty) {
+      failures.add('#5 invalid category: ${badCat.map((p) => "${p.sku}=${p.categoryHe}").take(3).join(", ")}');
+    }
+
+    // #6 page in valid range (catalog has product pages 11-43)
+    final badPage = cat.where((p) => p.page < 11 || p.page > 43).toList();
+    if (badPage.isNotEmpty) {
+      failures.add('#6 page out of [11,43]: ${badPage.length}');
+    }
+
+    // #7 every product has at least 1 dim entry beyond יצרן+מק"ט
+    final thinDims = cat.where((p) => (p.dims?.length ?? 0) < 3).toList();
+    if (thinDims.isNotEmpty) {
+      failures.add('#7 dims too thin (<3 entries): ${thinDims.length}');
+    }
+
+    // #8 every product is branded חוליות (was the regression with _brandDir)
+    final wrongBrand = cat.where((p) => p.brand != 'חוליות').toList();
+    if (wrongBrand.isNotEmpty) {
+      failures.add('#8 wrong brand: ${wrongBrand.length}');
+    }
+
+    // #9 page coverage: at least 1 product per page in product-page range
+    //    (11-43 is mostly product pages; allow gaps where the page is an
+    //    informational diagram). Acceptable: TOC page or empty range.
+    final productPages = cat.map((p) => p.page).toSet();
+    final missingPages = <int>[];
+    for (var pg = 11; pg <= 43; pg++) {
+      if (!productPages.contains(pg)) missingPages.add(pg);
+    }
+    // Page 26 is an informational AQUA SLIM diagram (no SKUs on that page).
+    final unexpectedMissing = missingPages.where((p) => p != 26).toList();
+    if (unexpectedMissing.isNotEmpty) {
+      failures.add('#9 product pages with zero SKUs (unexpected): $unexpectedMissing');
+    }
+
+    // #10 every dim value is a String (not int/double leaking through)
+    final wrongType = <String>[];
+    for (final p in cat) {
+      for (final e in (p.dims ?? {}).entries) {
+        if (e.value is! String) {
+          wrongType.add('${p.sku} dims["${e.key}"]=${e.value} (${e.value.runtimeType})');
+        }
+      }
+    }
+    if (wrongType.isNotEmpty) {
+      failures.add('#10 non-String dim values: ${wrongType.take(3).join(", ")}');
+    }
+
+    // #11 categoryEmoji is consistent (one emoji per catalog for v1 = 🚰)
+    final emojis = cat.map((p) => p.categoryEmoji).toSet();
+    if (emojis.length > 3) {
+      failures.add('#11 too many distinct categoryEmoji (${emojis.length}): $emojis');
+    }
+
+    // #12 every product's nameHe carries the category root word (the singular
+    //     stem of the categoryHe plural). Catches mis-categorisation.
+    final namelessCat = <String>[];
+    // Hebrew plural→singular roots (categoryHe is plural; nameHe is singular).
+    const catRoot = <String, List<String>>{
+      'מאספים': ['מאסף'],
+      'מחסומים': ['מחסום'],
+      'סיפונים': ['סיפון', 'מחסום', 'ניקוז', 'מערכת', 'מבוא'],
+      'מכסים, הגבהות ורשתות': ['מכסה', 'הגבהה', 'רשת', 'Top Floor'],
+      'אביזרים משלימים': [],  // umbrella — too varied, skip
+      'מאסף קווי AQUA SLIM': ['Aqua Slim', 'AQUA SLIM', 'פס', 'סט'],
+      'אום SmartLock': ['אום'],
+    };
+    for (final p in cat) {
+      final roots = catRoot[p.categoryHe] ??
+          [p.categoryHe.split(RegExp(r'\s+')).first];
+      if (roots.isEmpty) continue;
+      final ok = roots.any((r) => p.nameHe.contains(r));
+      if (!ok) {
+        namelessCat.add('${p.sku} "${p.nameHe}" → cat="${p.categoryHe}"');
+      }
+    }
+    if (namelessCat.isNotEmpty) {
+      failures.add('#12 nameHe missing category root: ${namelessCat.take(3).join("; ")}');
+    }
+
+    expect(failures, isEmpty,
+        reason: 'Huliot paranoid audit failed:\n${failures.join('\n')}');
+  });
+
+  // §22-Huliot every 2-3 digit token in nameHe must correspond to some dim
+  // value (DN, D, D1/D2, DN1/DN2, L, angle, etc.). Catches typos / orphaned
+  // numbers / wrong sizes. Skips numbers inside parentheses (which are
+  // verbatim catalog notes like "(6)" or "(70)").
+  test('§22-Huliot every numeric token in name is grounded in dims', () {
+    final orphan = <String>[];
+    for (final p in kHuliotCatalog) {
+      // Strip parenthetical content (e.g. "סיפון 2" כפול לכיור אמריקאי (4)").
+      final nameStripped = p.nameHe.replaceAll(RegExp(r'\([^)]*\)'), '');
+      final nameNums =
+          RegExp(r'\b(\d{2,4})\b').allMatches(nameStripped).map((m) => m.group(1)!).toSet();
+      if (nameNums.isEmpty) continue;
+      final dimNums = <String>{};
+      for (final v in (p.dims ?? const {}).values) {
+        final s = v.toString();
+        for (final m in RegExp(r'\b(\d{2,4})\b').allMatches(s)) {
+          dimNums.add(m.group(1)!);
+        }
+      }
+      final orphaned = nameNums.difference(dimNums);
+      if (orphaned.isNotEmpty) {
+        orphan.add('${p.sku} "${p.nameHe}" → orphan nums: $orphaned');
+      }
+    }
+    expect(orphan, isEmpty,
+        reason: 'name has numbers not grounded in any dim — typo or missing '
+            'dim:\n${orphan.take(12).join('\n')}');
+  });
+
   test('fitting categories all have a real cropped spec diagram', () {
     // Categories with a genuine dimension drawing in the catalog. EF is
     // photo-only (R8 — no diagram exists), so it is intentionally excluded.

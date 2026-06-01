@@ -293,7 +293,56 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
-## Huliot SmartLock catalog ingestion (v5.59 — 2026-06-01)
+## Huliot SmartLock catalog ingestion (v5.59-60 — 2026-06-01)
+
+### Catalog tree leaves (sml.*)
+| Leaf id | Title | Category (kSml*) | Products | Pages |
+|---|---|---|---|---|
+| `sml.pipes` | צינור חלק | `kSmlPipes` | 7 | 11 |
+| `sml.cutters` | חותך צינורות | `kSmlCutters` | 2 | 11 |
+| `sml.joker` | מתאם זווית - ג'וקר | `kSmlJoker` | 3 | 11 |
+| `sml.elbow_oneside` | ברכיים צד אחד חלק | `kSmlElbowOneSide` | 8 | 12 |
+| `sml.elbow` | ברכיים | `kSmlElbow` | 7 | 13 |
+| `sml.elbow_reducing` | ברך מצרה | `kSmlElbowReducing` | 5 | 13-14 |
+| `sml.elbow_telescopic` | ברך טלסקופית | `kSmlElbowTelescopic` | 4 | 15 |
+| `sml.tees` | מסעפים | `kSmlTee` | 11 | 16-17 |
+| `sml.double_coupling` | מצמד כפול | `kSmlDoubleCoupling` | 4 | 18 |
+| `sml.reducer` | מצרה | `kSmlReducer` | 5 | 18, 25 |
+| `sml.gutters` | מאספים | `kSmlGutters` | 8 | 19-20 |
+| `sml.drains` | מחסומים | `kSmlFloorDrains` | 7 | 21-23 |
+| `sml.accessories` | אביזרים משלימים | `kSmlAccessories` | 46 | 24, 39-43 |
+| `sml.nuts` | אום SmartLock | `kSmlNuts` | 5 | 25 |
+| `sml.aquaslim` | מאסף קווי AQUA SLIM | `kSmlAquaSlim` | 10 | 27 |
+| `sml.covers` | מכסים, הגבהות ורשתות | `kSmlCovers` | 20 | 28-30 |
+| `sml.siphons` | סיפונים | `kSmlSiphons` | 18 | 31-38 |
+| **TOTAL** | | | **170** | **11-43 (excl. 26)** |
+
+### Guards
+- `test/spec_assets_test.dart`:
+  - `§22.I-Huliot every product carries יצרן + מק"ט` (170 SKUs)
+  - `§22-Huliot every product asset resolves to assets/huliot_smartlock/`
+  - `§22-Huliot every Huliot page asset exists on disk` (170 × N pages)
+  - `§21.B-Huliot every product name renders verbatim (no empty words)`
+  - `§22-Huliot every numeric token in name is grounded in dims`
+  - `§22-Huliot paranoid 12-check audit — cross-product consistency`
+- `test/ppr_infra_test.dart`: `kCatalogProducts.length == Lipskey + Polyroll + Huliot`
+- `knowledge/mutation_log.md`: `_sl` (factory) + `_brandDir` (path mapping) verified.
+
+### File map
+- **Data:** `lib/data/huliot_smartlock_catalog.dart` (170 products, factory `_sl`).
+- **Brand:** `lib/data/brands.dart` Brand(id='huliot', name='חוליות', emoji='🟢').
+- **Tree:** `lib/data/catalog_tree.dart` root `sml` + 17 leaves.
+- **Path mapping:** `lib/data/lipskey_catalog.dart` `_brandDir(brand)` static.
+- **Unified registry:** `lib/data/polyroll_catalog.dart` `kCatalogProducts +=
+  kHuliotCatalog`.
+- **Sheet content:** `lib/screens/lipskey_product_sheet.dart` `_buildInfoHuliot()`
+  — page 5-6 advantages + page 4 standards + page 8-9 install verbatim.
+- **Brand emoji:** `lib/screens/lipskey_products_screen.dart:1187-1192` —
+  '🟢 חוליות' (was '🏭 ${brand}' fallback).
+- **Assets:** `assets/huliot_smartlock/pages/page_01-44.jpg` (3.5MB).
+
+### Detail
+
 - New file: `lib/data/huliot_smartlock_catalog.dart` — 170 products from the
   Huliot SmartLock™ HE catalog PDF (44 pages, REV 001 / 02.2026). PP drainage
   system, 32-63mm, ratchet-tooth locking, TPE elastomer pressure seal.

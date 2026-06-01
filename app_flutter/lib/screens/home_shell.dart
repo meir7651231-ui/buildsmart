@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.59 · 1.6.30 · 🟢 קטלוג חוליות SmartLock נקלט: 170 מוצרים, 17 קטגוריות, עמ׳ 11-43 verbatim',
+                          'v5.60 · 1.6.31 · 🟢 חוליות SmartLock — מלא: 12-check audit · §22-Huliot tests · מידע כללי+התקנה verbatim · mutation_verify ×2 · web build OK',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

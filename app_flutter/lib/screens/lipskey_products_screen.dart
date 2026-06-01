@@ -1186,7 +1186,11 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                 Text(
                     p.brand == 'AQUATEC'
                         ? '💧 AQUATEC'
-                        : '🏭 ${p.brand}',
+                        : p.brand == kPolyrollBrand
+                            ? '🔵 ${p.brand}'
+                            : p.brand == 'חוליות'
+                                ? '🟢 ${p.brand}'
+                                : '🏭 ${p.brand}',
                     style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
                         fontSize: 10)),
