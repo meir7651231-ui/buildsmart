@@ -50,7 +50,7 @@ echo "📋 צעדים הבאים (קבוצה א׳):"
 grep -A2 "Group A" knowledge/SMARTPRODUCT_ROADMAP.md 2>/dev/null | head -5 || echo "  76 · 25 · 46 · 74 · 89 · 82 · 85 · 57"
 
 echo ""
-echo "🚫 לא לדחוף ללא 'תדחוף' מפורש מהמשתמש"
+echo "🚫 לא לדחוף ללא 'תדחוף' מפורש · אל תבקש דחיפה בחצי עבודה — רק כשקריטי להמשך (לקח #48)"
 echo "🔒 ה-hooks אוכפים אוטומטית — אסור לעקוף"
 echo "🔁 6 כללים: מצא → helper → בדיקה → analyze → test → build"
 echo ""
