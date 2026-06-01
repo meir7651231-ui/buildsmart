@@ -114,3 +114,5 @@
 42. **"האם קובץ X staged" = `git diff --cached --name-only | grep -q X`.** `git diff --cached X >/dev/null` מחזיר exit 0 גם כשהקובץ tracked-ולא-staged (no-diff=0) → תנאי תמיד-אמת. שער 88 ירה warn בכל commit עד שתוקן.
 
 43. **`STAGED_DART` חייב להיחשב לפני בדיקת shell-meta בשער 103.** הבדיקה ל-shell-meta chars ב-ANTIPATTERN רצה לפני שחושב אם יש Dart staged — תיקון: חשב את התלות לפני כל בדיקה שצורכת אותה (גם שער 103, גם שערים 35-40 = לקח #41). תועד ב-stuck_log פעמיים, חסר כאן עד אודיט 2026-06-01.
+
+44. **`stuck_regression_test.dart` סורק רק `lib/` — 17/31 אנטי-פטרנים הם hook-bash ולכן לא מוגנים.** שער 109 הצליח להחזיר את אנטי-פטרן #27 (`grep -c || echo 0`) בלי שאף בדיקה תפסה. עד שהגנרטור יסווק גם `.githooks/` (דורש סיווג: hook-antipattern מול lib-antipattern, כי `flutter test --no-pub` חוקי ב-hook אך לא ב-lib), אנטי-פטרנים של ה-hook נשענים רק על שער 103 (שגם הוא סורק *.dart בלבד). פער מבני פתוח.
