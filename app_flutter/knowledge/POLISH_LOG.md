@@ -14,10 +14,12 @@
 - **ממצא-על:** ה-UI **כבר מלוטש היטב** — token-based, `DialRow` כולל `Semantics(label,button:true)`
   ומבנה RTL-מודע. ההזדמנויות קטנות/מדויקות (כמו פאזה K — בריא מהחשש שבפרוטוקול).
 
-## ⛔ בלוקר — מנגנון before/after (steps 4–6 · 10–11 · 93–94)
-אין `display`/chrome, ואין `golden-tests`/`integration_test` בריפו. כלל-הזהב אוסר שינוי-UI
-בלי before/after מתועד. → **ה-apply של פאזות B–F חסום** עד שייבנה מנגנון-לכידה headless
-(golden tests / Playwright על `build web` / display). **דרושה החלטה.**
+## ✅ מנגנון before/after — נבנה (2026-06-01)
+`scripts/polish_shot.sh` — לוכד **צילום אמיתי** של ה-app (עברית/RTL/layout/color), headless.
+- **למה ככה:** gstatic (canvaskit+fonts CDN) חסום ע"י policy-הרשת → build web עם canvaskit
+  **מקומי** (`--no-web-resources-cdn`), שרת מקומי, ו-Playwright chromium headless (`ignoreHTTPSErrors`).
+- **שימוש:** `bash scripts/polish_shot.sh <out.png> [waitMs] [url-path]`. לכוד before → שנה → after → השווה (Read על ה-PNG).
+- **פאזות B–F פתוחות עכשיו** לליטוש ויזואלי אמיתי מבוסס before/after.
 
 ## Backlog (B–J) — מעוגן-מקור, מתועדף
 
@@ -40,8 +42,9 @@
   (verbatim מ-`app/src/components/search/submenu-barcode.tsx`, R6/R8). ראה "שינויים שבוצעו" #2.
 - היקף: audit עליון בלבד (menu+search top-level). ~200+ leaves נותרו ל-audit מלא (סבב המשך).
 
-### 🔴 חסום על capture (דורש שיפוט ויזואלי + before/after)
-- **B** layout/spacing · **C** color/contrast · **D** motion-feel · **E** states (empty/loading/error) · **F** RTL-render.
+### 🟢 פתוח לליטוש (capture עובד — `scripts/polish_shot.sh`)
+- **B** layout/spacing · **C** color/contrast · **D** motion-static · **E** states · **F** RTL-render —
+  כולם ניתנים עכשיו ל-before/after אמיתי. (אנק׳ור: השוואה ל-`proto/` + Preact `app/`.)
 
 ## תיאום (בעלות — AGENT_COORDINATION)
 - `dial.dart`/`tokens.dart` = `lib/widgets`/`theme` → **נתיב ליטוש** ✅.
