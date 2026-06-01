@@ -16,7 +16,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''grep -[qc] "(🟦|✅|⬜)''');
+      final re = RegExp('grep -[qc] "(🟦|✅|⬜)');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -34,7 +34,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''grep -cvE.*\|\| echo 0''');
+      final re = RegExp('grep -cvE.*\\|\\| echo 0');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -52,7 +52,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''gates=\$FAIL"''');
+      final re = RegExp('gates=\\\$FAIL"');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -70,7 +70,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''git add.*emergency_token''');
+      final re = RegExp('git add.*emergency_token');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -88,7 +88,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''echo "\$[a-z_]+" \| grep -qE.*shell-meta''');
+      final re = RegExp('echo "\\\$[a-z_]+" \\| grep -qE.*shell-meta');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -106,7 +106,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''grep -c [^|]*2>/dev/null \|\| echo 0''');
+      final re = RegExp('grep -c [^|]*2>/dev/null \\|\\| echo 0');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -124,7 +124,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''^for critical in compat_coverage_test''');
+      final re = RegExp('^for critical in compat_coverage_test');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -142,7 +142,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''git diff --cached [a-z].*\.md >/dev/null''');
+      final re = RegExp('git diff --cached [a-z].*\\.md >/dev/null');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -156,7 +156,7 @@ void main() {
     test("antipattern #9 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''^\s*print\(''');
+      final re = RegExp('^\\s*print\\(');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -177,7 +177,7 @@ void main() {
     test("antipattern #10 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''matcher.*[\"\']Bash[\"\']\s*$''');
+      final re = RegExp('matcher.*[\\"\\\']Bash[\\"\\\']\\s*\$');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -198,7 +198,7 @@ void main() {
     test("antipattern #11 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''core\.hooksPath\s*=\s*[^.]''');
+      final re = RegExp('core\\.hooksPath\\s*=\\s*[^.]');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -219,7 +219,7 @@ void main() {
     test("antipattern #12 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''TEST_OUT=\$\([^)]+\)\s*$''');
+      final re = RegExp('TEST_OUT=\\\$\\([^)]+\\)\\s*\$');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -240,7 +240,7 @@ void main() {
     test("antipattern #13 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''grep -oE "\[0-9\]\+ tests"\s''');
+      final re = RegExp('grep -oE "\\[0-9\\]\\+ tests"\\s');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -261,7 +261,7 @@ void main() {
     test("antipattern #14 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''git diff --cached.*\| sort \| uniq -d''');
+      final re = RegExp('git diff --cached.*\\| sort \\| uniq -d');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -282,7 +282,7 @@ void main() {
     test("antipattern #15 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''flutter (test|analyze|build).*--no-pub''');
+      final re = RegExp('flutter (test|analyze|build).*--no-pub');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -303,7 +303,7 @@ void main() {
     test("antipattern #16 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''^(wip|test|asdf|tmp)$''');
+      final re = RegExp('^(wip|test|asdf|tmp)\$');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -324,7 +324,7 @@ void main() {
     test("antipattern #17 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''grep -E "\$[a-z]+"''');
+      final re = RegExp('grep -E "\\\$[a-z]+"');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -345,7 +345,7 @@ void main() {
     test("antipattern #18 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''kSecret\w*\s*=\s*compute''');
+      final re = RegExp('kSecret\\w*\\s*=\\s*compute');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -366,7 +366,7 @@ void main() {
     test("antipattern #19 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''export PATH=.*[/]home[/]user''');
+      final re = RegExp('export PATH=.*[/]home[/]user');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -387,7 +387,7 @@ void main() {
     test("antipattern #20 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''^Owner:\s*$''');
+      final re = RegExp('^Owner:\\s*\$');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -408,7 +408,7 @@ void main() {
     test("antipattern #21 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''lib/screens/.*\.dart.*\+\+\+.*no visual''');
+      final re = RegExp('lib/screens/.*\\.dart.*\\+\\+\\+.*no visual');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -429,7 +429,7 @@ void main() {
     test("antipattern #22 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''prettyInch\([a-z]+\).*finder''');
+      final re = RegExp('prettyInch\\([a-z]+\\).*finder');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -450,7 +450,7 @@ void main() {
     test("antipattern #23 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''parseSizeTokens.*\?\?.*tokensFromDims''');
+      final re = RegExp('parseSizeTokens.*\\?\\?.*tokensFromDims');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -471,7 +471,7 @@ void main() {
     test("antipattern #24 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''\\\\d\\+×\\\\d\\+''');
+      final re = RegExp('\\\\\\\\d\\\\+×\\\\\\\\d\\\\+');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -492,7 +492,7 @@ void main() {
     test("antipattern #25 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''pubspec.yaml.*grep.*"\^"''');
+      final re = RegExp('pubspec.yaml.*grep.*"\\^"');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -513,7 +513,7 @@ void main() {
     test("antipattern #26 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''sha256sum.*\.git/hooks.*compare''');
+      final re = RegExp('sha256sum.*\\.git/hooks.*compare');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -534,7 +534,7 @@ void main() {
     test("antipattern #27 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''awk.*Audit.*,.*\^##''');
+      final re = RegExp('awk.*Audit.*,.*\\^##');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -555,7 +555,7 @@ void main() {
     test("antipattern #28 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''grep -c.*\|\| echo 0''');
+      final re = RegExp('grep -c.*\\|\\| echo 0');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -576,7 +576,7 @@ void main() {
     test("antipattern #29 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''sha256sum.*2>/dev/null.*\|.*cut.*\|\| echo "missing"''');
+      final re = RegExp('sha256sum.*2>/dev/null.*\\|.*cut.*\\|\\| echo "missing"');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -597,7 +597,7 @@ void main() {
     test("antipattern #30 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''grep.*ANTIPATTERN.*\|.*sed.*pattern\b[^|]''');
+      final re = RegExp('grep.*ANTIPATTERN.*\\|.*sed.*pattern\\b[^|]');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -618,7 +618,7 @@ void main() {
     test("antipattern #31 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''sha256sum.*git show.*HEAD.*githooks''');
+      final re = RegExp('sha256sum.*git show.*HEAD.*githooks');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -639,7 +639,7 @@ void main() {
     test("antipattern #32 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''while.*ANTIPATTERN.*done.*STAGED_DART=\$\(git diff''');
+      final re = RegExp('while.*ANTIPATTERN.*done.*STAGED_DART=\\\$\\(git diff');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -660,7 +660,7 @@ void main() {
     test("antipattern #33 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''git diff --cached app_flutter/lib/screens/home_shell.dart''');
+      final re = RegExp('git diff --cached app_flutter/lib/screens/home_shell.dart');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -681,7 +681,7 @@ void main() {
     test("antipattern #34 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r''''v5\.\d+ · \d+\.\d+\.\d+' .*v5\.41''');
+      final re = RegExp('\'v5\\.\\d+ · \\d+\\.\\d+\\.\\d+\' .*v5\\.41');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -702,7 +702,7 @@ void main() {
     test("antipattern #35 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''flutter test --no-pub --reporter expanded''');
+      final re = RegExp('flutter test --no-pub --reporter expanded');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -727,7 +727,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''grep -oE "\[0-9\]\+ ✗"''');
+      final re = RegExp('grep -oE "\\[0-9\\]\\+ ✗"');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -741,7 +741,7 @@ void main() {
     test("antipattern #37 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''err.*32.*exit=\$TEST_EXIT.*תקן את הבדיקות''');
+      final re = RegExp('err.*32.*exit=\\\$TEST_EXIT.*תקן את הבדיקות');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -762,7 +762,7 @@ void main() {
     test("antipattern #38 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''case kPpr[A-Z][a-z]+:\s*\n\s*case kPpr[A-Z][a-z]+:\s*\n\s*return \[.spec_faser_20''');
+      final re = RegExp('case kPpr[A-Z][a-z]+:\\s*\\n\\s*case kPpr[A-Z][a-z]+:\\s*\\n\\s*return \\[.spec_faser_20');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -787,7 +787,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''grep [^|#]*(🟦|✅|⬜|🎯|🎨|🎮|🎪|🎲)''');
+      final re = RegExp('grep [^|#]*(🟦|✅|⬜|🎯|🎨|🎮|🎪|🎲)');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -801,7 +801,7 @@ void main() {
     test("antipattern #40 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''new provider or map in lib screens shipped without a matching WIRING row''');
+      final re = RegExp('new provider or map in lib screens shipped without a matching WIRING row');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -822,7 +822,7 @@ void main() {
     test("antipattern #41 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''version label bumped in home_shell without the same bump in STATUS''');
+      final re = RegExp('version label bumped in home_shell without the same bump in STATUS');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -843,7 +843,7 @@ void main() {
     test("antipattern #42 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''letter size regex without a negative lookahead on equals sign''');
+      final re = RegExp('letter size regex without a negative lookahead on equals sign');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;
@@ -859,6 +859,42 @@ void main() {
       }
       expect(matches, isEmpty,
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+    });
+
+    test("antipattern #43 (hook) לא קיים ב-.githooks/pre-commit", () {
+      final hook = File('../.githooks/pre-commit');
+      if (!hook.existsSync()) {
+        // הריצה אולי לא מ-app_flutter/ — דלג בלי לשבור.
+        return;
+      }
+      final matches = <String>[];
+      final re = RegExp('RegExp\\(r\'\'\'');
+      final lines = hook.readAsStringSync().split('\n');
+      for (final line in lines) {
+        // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
+        if (RegExp(r'^\s*#').hasMatch(line)) continue;
+        if (re.hasMatch(line)) matches.add(line.trim());
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
+    });
+
+    test("antipattern #44 (hook) לא קיים ב-.githooks/pre-commit", () {
+      final hook = File('../.githooks/pre-commit');
+      if (!hook.existsSync()) {
+        // הריצה אולי לא מ-app_flutter/ — דלג בלי לשבור.
+        return;
+      }
+      final matches = <String>[];
+      final re = RegExp('cached -- \'\\*\\.dart\' 2>/dev/null \\| grep');
+      final lines = hook.readAsStringSync().split('\n');
+      for (final line in lines) {
+        // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
+        if (RegExp(r'^\s*#').hasMatch(line)) continue;
+        if (re.hasMatch(line)) matches.add(line.trim());
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
     });
   });
 }

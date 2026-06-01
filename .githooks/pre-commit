@@ -186,7 +186,7 @@ BAD_HELPER=$(git diff --cached --name-only | grep -E "^app_flutter/lib/.*[A-Z].*
 [[ -z "$BAD_HELPER" ]] || err "27" "שם קובץ ב-CamelCase: $BAD_HELPER" "שנה ל-snake_case"
 
 # שער 28-30: אין URI מקומי (רק בקוד dart, לא בhook עצמו)
-BAD_URI=$(git diff --cached -- '*.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "file:///|C:\\\\" | head -1)
+BAD_URI=$(git diff --cached -- '*.dart' ':(exclude)*stuck_regression_test.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "file:///|C:\\\\" | head -1)
 [[ -z "$BAD_URI" ]] || err "28" "URI מקומי בקוד" "הסר נתיב מוחלט"
 
 # ═══ קבוצה ד: בדיקה (31-45) ═══
@@ -621,7 +621,11 @@ fi
 # תיקון אודיט 2026-06-01: ANTIPATTERN[hook]: סורק את ה-hook ה-staged, לא *.dart
 # הפתרון: מחשב staged diffs לפני הלולאה; כל pattern מנותב ליעד שלו
 if [[ -f "$STUCK_LOG" ]]; then
-    STAGED_DART_103=$(git diff --cached --name-only -- '*.dart' 2>/dev/null)
+    # החרגת קובץ הרגרסיה המיוצר: הוא מכיל את *כל* האנטי-פטרנים by-construction
+    # (כל ANTIPATTERN נרשם בו כ-RegExp). בלי ההחרגה — כל regen ששינה הרבה שורות
+    # מפיל את שער 103 false-positive על הפטרנים שתואמים את צורתם-שלהם. מקביל
+    # ל-self-exclude של הבדיקה עצמה (contains('stuck_regression')).
+    STAGED_DART_103=$(git diff --cached --name-only -- '*.dart' ':(exclude)*stuck_regression_test.dart' 2>/dev/null)
     STAGED_HOOK_103=$(git diff --cached --name-only -- ':/.githooks/pre-commit' 2>/dev/null)
     if [[ -n "$STAGED_DART_103" || -n "$STAGED_HOOK_103" ]]; then
         while IFS= read -r line; do
@@ -647,7 +651,7 @@ if [[ -f "$STUCK_LOG" ]]; then
                 MATCH=$(git diff --cached -- ':/.githooks/pre-commit' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -vE "^\+\s*#" | grep -E -- "$pattern" 2>/dev/null | head -1)
             else
                 [[ -n "$STAGED_DART_103" ]] || continue
-                MATCH=$(git diff --cached -- '*.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E -- "$pattern" 2>/dev/null | head -1)
+                MATCH=$(git diff --cached -- '*.dart' ':(exclude)*stuck_regression_test.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E -- "$pattern" 2>/dev/null | head -1)
             fi
             if [[ -n "$MATCH" ]]; then
                 err "103" "אנטי-פטרן חזר: $pattern" "ראה stuck_log.md — הבעיה תועדה כבר"

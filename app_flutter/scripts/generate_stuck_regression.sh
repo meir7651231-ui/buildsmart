@@ -64,7 +64,14 @@ while IFS= read -r raw; do
         pattern="${raw#ANTIPATTERN: }"
     fi
     [[ -z "$pattern" ]] && continue
-    pattern_for_dart="$pattern"  # raw-string של dart — backslash בודד הוא literal
+    # הקשחה (דיווח קטלגן 2026-06-01, commit 4ad3dbb): pattern שמתחיל/נגמר ב-'
+    # שובר את עטיפת `r'''…'''` (4 גרשים רצופים בגבול ⇒ שגיאת קומפילציה ⇒ כל
+    # הסוויטה נשברת לכל הסוכנים). פתרון כללי: escape ל-Dart string רגיל (לא-raw).
+    # סדר קריטי — backslash ראשון: כל `\` ⇒ `\\`, ואז אין "unknown escape" ב-Dart.
+    pattern_for_dart="$pattern"
+    pattern_for_dart="${pattern_for_dart//\\/\\\\}"   # \  → \\
+    pattern_for_dart="${pattern_for_dart//\$/\\\$}"   # $  → \$
+    pattern_for_dart="${pattern_for_dart//\'/\\\'}"   # '  → \'
 
     if [[ "$target" == "hook" ]]; then
         cat >> "$OUT" << TESTEOF
@@ -76,7 +83,7 @@ while IFS= read -r raw; do
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''${pattern_for_dart}''');
+      final re = RegExp('${pattern_for_dart}');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -93,7 +100,7 @@ TESTEOF
     test("antipattern #${LINE_NUM} לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r'''${pattern_for_dart}''');
+      final re = RegExp('${pattern_for_dart}');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;

@@ -719,3 +719,44 @@ RULE: כל שינוי של version label ב-home_shell מחייב את אותה 
 ### ג — כלל המניעה
 ANTIPATTERN: letter size regex without a negative lookahead on equals sign
 RULE: זיהוי מידת-אות בודדת חייב lookbehind/lookahead שמוציא אות צמודה וסימן שווה. L צמוד לשווה הוא אורך, לא מידה. דורשים יותר ממידה אחת ב-pool לפני הצגת ציר.
+
+---
+
+## 2026-06-01 · generator · ANTIPATTERN עם גרש בגבול שובר r'''…''' (קטלגן, 4ad3dbb)
+
+### א — הבעיה
+`generate_stuck_regression.sh` עטף כל pattern ב-`RegExp(r'''${pattern}''')`. אם
+ה-ANTIPATTERN מתחיל או נגמר בגרש בודד `'` (למשל `'bs\.[a-z-]+'`), נוצרים 4 גרשים
+רצופים בגבול (`r''''…''''`) ⇒ Dart לא יכול לזהות את גבול ה-raw-string ⇒ שגיאת
+קומפילציה ב-`stuck_regression_test.dart` ⇒ כל סוויטת הבדיקות נשברת לכל הסוכנים.
+landmine סמוי: אף antipattern נוכחי לא הפעיל אותו, אך הוספת אחד כזה הייתה מפוצצת.
+
+### ב — הפתרון
+הגנרטור עושה escape ל-Dart string רגיל (לא-raw) ועוטף ב-`'…'`:
+`\`→`\\`, `$`→`\$`, `'`→`\'` (סדר קריטי — backslash ראשון, אחרת escape כפול).
+semantics של regex נשמרים. אומת: pattern עם גרש בשני הקצוות מתקמפל ותופס נכון.
+
+### ג — כלל המניעה
+ANTIPATTERN[hook]: RegExp\(r'''
+RULE: גנרטור קוד לא עוטף תוכן-משתנה ב-delimiter שמניח שהתוכן לא מכילו (r'''…'''). escape דטרמיניסטי ל-Dart string רגיל. הערה: ה-pattern הזה סורק את ה-hook (לא רלוונטי שם) — שמירה כתיעוד; הגנרטור עצמו נבדק ע"י torture-test ידני.
+
+
+---
+
+## 2026-06-01 · שער 103 — false-positive על הקובץ המיוצר אחרי regen רב-שורות
+
+### א — הבעיה
+שער 103 סורק `git diff --cached -- '*.dart'` לכל ANTIPATTERN. אבל
+`stuck_regression_test.dart` מכיל את **כל** האנטי-פטרנים by-construction
+(כל ANTIPATTERN נרשם בו כ-`RegExp(...)`). commit שמ-regen אותו עם שינוי רב-שורות
+(escape-refactor: `r'''…'''`→`'…'`) הכניס את כל 40 הפטרנים ל-diff כ-added lines
+→ 7 שערים נכשלו false-positive (הפטרנים שתואמים את צורתם-שלהם). חסם commit לגיטימי.
+
+### ב — הפתרון
+החרגת הקובץ המיוצר מסריקת ה-dart של שער 103 ע"י git pathspec:
+`-- '*.dart' ':(exclude)*stuck_regression_test.dart'` (גם ב-STAGED_DART_103 וגם
+בסריקת ה-MATCH). מקביל ל-self-exclude של הבדיקה עצמה (`contains('stuck_regression')`).
+
+### ג — כלל המניעה
+ANTIPATTERN[hook]: cached -- '\*\.dart' 2>/dev/null \| grep
+RULE: סריקת שער 103 ב-dart חייבת `:(exclude)*stuck_regression_test.dart` — קובץ הרישום מכיל את כל הפטרנים, בלי החרגה כל regen מפיל false-positive. (ה-antipattern תופס את הצורה הישנה `'*.dart' 2>/dev/null | grep` בלי ה-exclude.)
