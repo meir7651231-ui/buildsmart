@@ -276,13 +276,61 @@ List<LipskeyCatalogProduct> filterByImage(
 /// Pure: keep only products whose verified spec belongs to [system]
 /// (מים נקיים = supply · שפכים = drainage). Products without a spec are dropped
 /// when a system is selected (R8 — don't guess their system).
+/// The water system(s) a product belongs to for the catalog division (Benzi #1).
+/// Verified spec wins; PPR (פולירול) carries no spec but is clean-water
+/// (supply); everything else without a spec defaults to שפכים (drainage) for now.
+Set<WaterSystem> productDivisionSystems(LipskeyCatalogProduct p) {
+  final ends = kVerifiedSpecs[p.sku]?.endSystems;
+  if (ends != null && ends.isNotEmpty) return ends;
+  if (p.brand == 'פולירול') return const {WaterSystem.supply};
+  return const {WaterSystem.drainage};
+}
+
 List<LipskeyCatalogProduct> filterBySystem(
     List<LipskeyCatalogProduct> list, WaterSystem? system) {
   if (system == null) return list;
-  return list
-      .where((p) => kVerifiedSpecs[p.sku]?.endSystems.contains(system) ?? false)
-      .toList();
+  return list.where((p) => productDivisionSystems(p).contains(system)).toList();
 }
+
+/// True if [node] has ≥1 product in [system] (recursive over the catalog tree).
+/// Drives the department division (Benzi #1) at the **sub-category** level: each
+/// tree node appears under the system it really belongs to; a fixture (e.g.
+/// אסלות) splits — its supply leaves show under מים נקיים, its drainage leaves
+/// under שפכים. Classification is `productSystems` (the תכנון-חיבור engine).
+/// True fixtures — they genuinely bridge both systems, so they show in BOTH
+/// departments and their sub-categories split. Everything else belongs to its
+/// dominant system only (Benzi #1, option 2 — clean, non-overlapping lists).
+const _fixtureTitles = {'אסלות', 'מקלחות ואמבטיות', 'גופי תברואה'};
+
+bool nodeHasSystem(CatalogNode node, WaterSystem system) {
+  if (_fixtureTitles.contains(node.title)) return true;
+  var sup = 0, dr = 0;
+  void walk(CatalogNode n) {
+    if (n.isLeaf) {
+      final c = n.lipskeyCategory;
+      if (c == null) return;
+      for (final p in kCatalogProducts) {
+        if (p.categoryHe != c) continue;
+        final s = productDivisionSystems(p);
+        if (s.contains(WaterSystem.supply)) sup++;
+        if (s.contains(WaterSystem.drainage)) dr++;
+      }
+    } else {
+      for (final ch in n.children) {
+        walk(ch);
+      }
+    }
+  }
+
+  walk(node);
+  if (sup == 0 && dr == 0) return false;
+  return (sup >= dr ? WaterSystem.supply : WaterSystem.drainage) == system;
+}
+
+/// Synthetic root whose children are the top catalog categories — a live
+/// department opens this so its system-filtered category tree shows.
+const CatalogNode kDepartmentTreeRoot = CatalogNode(
+    id: 'dept-root', title: 'מחלקות', emoji: '🏬', children: kCatalogTree);
 
 List<LipskeyCatalogProduct> _sortProducts(
     List<LipskeyCatalogProduct> list, ProductSort s) {
@@ -2600,11 +2648,19 @@ class _CatalogRow extends ConsumerWidget {
 // (bottom) stay fixed; only the rows scroll. A fixed drill bar replaces the
 // search bar: back-one-level + the current category as a pressed orange chip
 // with an X that cancels the whole drill.
-int _treeNodeCount(CatalogNode node) {
-  if (!node.isLeaf) return node.children.length;
+int _treeNodeCount(CatalogNode node, [WaterSystem? system]) {
+  if (!node.isLeaf) {
+    return (system == null
+            ? node.children
+            : node.children.where((c) => nodeHasSystem(c, system)))
+        .length;
+  }
   if (node.lipskeyCategory != null) {
-    return kCatalogProducts
-        .where((p) => p.categoryHe == node.lipskeyCategory)
+    return filterBySystem(
+            kCatalogProducts
+                .where((p) => p.categoryHe == node.lipskeyCategory)
+                .toList(),
+            system)
         .length;
   }
   if (node.smartKey != null) {
@@ -2615,20 +2671,25 @@ int _treeNodeCount(CatalogNode node) {
 
 /// Secondary-line description — child names for a branch, or the
 /// product/model/brand summary for a leaf.
-String _treeNodeDesc(CatalogNode node) {
+String _treeNodeDesc(CatalogNode node, [WaterSystem? system]) {
   if (!node.isLeaf) {
-    return node.children.map((c) => c.title).join(' · ');
+    final kids = system == null
+        ? node.children
+        : node.children.where((c) => nodeHasSystem(c, system)).toList();
+    return kids.map((c) => c.title).join(' · ');
   }
   if (node.lipskeyCategory != null) {
     // Preview of what's inside (characterizing words / sample names) rather
     // than a bare product count.
-    final prods = kCatalogProducts
-        .where((p) => p.categoryHe == node.lipskeyCategory)
-        .toList();
+    final prods = filterBySystem(
+        kCatalogProducts
+            .where((p) => p.categoryHe == node.lipskeyCategory)
+            .toList(),
+        system);
     final preview = _facetDesc(prods);
     return preview.isNotEmpty
         ? preview
-        : '${_treeNodeCount(node)} מוצרים · ליפסקי ברקן';
+        : '${_treeNodeCount(node, system)} מוצרים · ליפסקי ברקן';
   }
   if (node.smartKey != null) {
     final p = smartProductByKey(node.smartKey!);
@@ -2646,6 +2707,7 @@ class _TreeDrill extends ConsumerWidget {
     final current = path.last;
     final query = ref.watch(catalogTreeQueryProvider).trim();
     final facetSel = ref.watch(catalogFacetProvider);
+    final systemFilter = ref.watch(catalogSystemFilterProvider);
 
     // A leaf that maps to a lipskey category with products drills by facets
     // (curated where defined, else auto-derived) before the product list.
@@ -2717,8 +2779,9 @@ class _TreeDrill extends ConsumerWidget {
     Widget? special;
 
     if (isProductLeaf) {
-      final base =
-          kCatalogProducts.where((p) => p.categoryHe == leafCat).toList();
+      final base = filterBySystem(
+          kCatalogProducts.where((p) => p.categoryHe == leafCat).toList(),
+          systemFilter);
       final curated = kProductFacets[leafCat];
       final options = <({String label, String desc, int count})>[];
       if (curated != null) {
@@ -2765,14 +2828,17 @@ class _TreeDrill extends ConsumerWidget {
     } else if (current.children.isEmpty) {
       special = _TreeComingSoon(node: current);
     } else {
-      final rows = query.isEmpty
+      var rows = query.isEmpty
           ? current.children
           : _searchSubtree(current, query);
+      if (systemFilter != null) {
+        rows = rows.where((c) => nodeHasSystem(c, systemFilter)).toList();
+      }
       rowWidgets = [
         for (final n in rows)
-          _TreeCatRow(node: n, onTap: () => openNode(n)),
+          _TreeCatRow(node: n, system: systemFilter, onTap: () => openNode(n)),
       ];
-      products = _subtreeProducts(current);
+      products = filterBySystem(_subtreeProducts(current), systemFilter);
       if (query.isNotEmpty) {
         products =
             products.where((p) => p.nameHe.contains(query)).toList();
@@ -3303,14 +3369,15 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
 }
 
 class _TreeCatRow extends StatelessWidget {
-  const _TreeCatRow({required this.node, required this.onTap});
+  const _TreeCatRow({required this.node, required this.onTap, this.system});
   final CatalogNode node;
   final VoidCallback onTap;
+  final WaterSystem? system;
 
   @override
   Widget build(BuildContext context) {
-    final count = _treeNodeCount(node);
-    final desc = _treeNodeDesc(node);
+    final count = _treeNodeCount(node, system);
+    final desc = _treeNodeDesc(node, system);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(

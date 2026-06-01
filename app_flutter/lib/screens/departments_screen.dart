@@ -1,36 +1,41 @@
+import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Which live department's catalog is open inside the departments home
-/// (null = show the departments grid). It lives in the shell's first tab so the
-/// chrome (AppBar + bottom nav) stays put; tapping the מחלקות tab resets it.
+/// Which live department is open inside the departments home (null = show the
+/// grid). It lives in the shell's first tab so the chrome (AppBar + bottom nav)
+/// stays put; tapping the מחלקות tab resets it.
 final homeDepartmentProvider = StateProvider<String?>((_) => null);
 
-/// Departments home (Benzi #2/#3) — the app's new landing: a grid of the
-/// 9 departments. Plumbing departments (the existing catalog) are live; the rest
-/// are placeholders until their catalog data exists (R8 — no data, no invention).
+/// Departments home (Benzi #2/#3) — the app's landing: a grid of departments.
+/// The two live departments ARE the clean-water/sewage division (Benzi #1):
+/// each opens the catalog's category tree filtered to its `WaterSystem`, so a
+/// fixture's sub-categories split (supply parts under מים נקיים = ברזים
+/// וסניטריים, drainage parts under שפכים = אינסטלציה). The rest are placeholders
+/// until their catalog data exists (R8 — no data, no invention).
 class DepartmentsScreen extends ConsumerWidget {
   const DepartmentsScreen({super.key});
 
-  // Names verbatim from Benzi's spec (#2). `live` = has catalog data today.
-  static const List<({String name, IconData icon, bool live})> departments = [
-    (name: 'אינסטלציה', icon: Icons.plumbing, live: true),
-    (name: 'ברזים וסניטריים', icon: Icons.water_drop, live: true),
-    (name: 'חשמל', icon: Icons.electrical_services, live: false),
-    (name: 'חומרי בניין', icon: Icons.foundation, live: false),
-    (name: 'כלי עבודה ידני', icon: Icons.handyman, live: false),
-    (name: 'כלי עבודה חשמלי', icon: Icons.construction, live: false),
-    (name: 'צבע וכלים לצבע', icon: Icons.format_paint, live: false),
-    (name: 'גבס ופרופילים', icon: Icons.view_column, live: false),
-    (name: 'אספקה טכנית', icon: Icons.settings_input_component, live: false),
+  // Names verbatim from Benzi's spec (#2). `system` set on the two live ones.
+  static const List<({String name, IconData icon, bool live, WaterSystem? system})>
+      departments = [
+    (name: 'אינסטלציה', icon: Icons.plumbing, live: true, system: WaterSystem.drainage),
+    (name: 'ברזים וסניטריים', icon: Icons.water_drop, live: true, system: WaterSystem.supply),
+    (name: 'חשמל', icon: Icons.electrical_services, live: false, system: null),
+    (name: 'חומרי בניין', icon: Icons.foundation, live: false, system: null),
+    (name: 'כלי עבודה ידני', icon: Icons.handyman, live: false, system: null),
+    (name: 'כלי עבודה חשמלי', icon: Icons.construction, live: false, system: null),
+    (name: 'צבע וכלים לצבע', icon: Icons.format_paint, live: false, system: null),
+    (name: 'גבס ופרופילים', icon: Icons.view_column, live: false, system: null),
+    (name: 'אספקה טכנית', icon: Icons.settings_input_component, live: false, system: null),
   ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // A live department selected → show its catalog inline (shell chrome stays).
+    // A live department selected → its filtered catalog tree (shell chrome stays).
     if (ref.watch(homeDepartmentProvider) != null) return const CatalogScreen();
 
     final theme = Theme.of(context);
@@ -70,7 +75,7 @@ class DepartmentsScreen extends ConsumerWidget {
 class _DeptTile extends ConsumerWidget {
   const _DeptTile({required this.dept});
 
-  final ({String name, IconData icon, bool live}) dept;
+  final ({String name, IconData icon, bool live, WaterSystem? system}) dept;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -84,11 +89,16 @@ class _DeptTile extends ConsumerWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         onTap: () {
-          if (dept.live) {
-            ref.read(homeDepartmentProvider.notifier).state = dept.name;
-          } else {
+          if (!dept.live) {
             showToast(context, 'בקרוב');
+            return;
           }
+          // Open the catalog's category tree, filtered to this department's
+          // water system (Benzi #1 division, at sub-category level).
+          ref.read(catalogSystemFilterProvider.notifier).state = dept.system;
+          ref.read(catalogTreePathProvider.notifier).state =
+              const [kDepartmentTreeRoot];
+          ref.read(homeDepartmentProvider.notifier).state = dept.name;
         },
         child: Semantics(
           label: dept.live ? dept.name : '${dept.name} — בקרוב',

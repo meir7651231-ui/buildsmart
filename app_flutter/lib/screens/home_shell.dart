@@ -88,8 +88,13 @@ class HomeShell extends ConsumerWidget {
         currentIndex: tabIndex,
         onTap: (i) {
           resetAllDials(ref);
-          // Re-tapping the מחלקות tab returns to the departments grid.
-          if (i == 0) ref.read(homeDepartmentProvider.notifier).state = null;
+          // Re-tapping the מחלקות tab returns to the departments grid (clear the
+          // department + its system/tree drill).
+          if (i == 0) {
+            ref.read(homeDepartmentProvider.notifier).state = null;
+            ref.read(catalogSystemFilterProvider.notifier).state = null;
+            ref.read(catalogTreePathProvider.notifier).state = const [];
+          }
           ref.read(mainTabProvider.notifier).state = i;
         },
       ),

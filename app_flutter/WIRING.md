@@ -30,16 +30,26 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 ## Departments home (`departments_screen.dart` — Benzi #2/#3)
 
 The landing tab (bottom-nav "מחלקות", index 0): a 2-col grid of 9 departments
-(verbatim names). **Live** (have catalog data): אינסטלציה · ברזים וסניטריים — tap
-shows the existing catalog **inline** (shell chrome stays; `homeDepartmentProvider`).
-The other 7 → "בקרוב" toast (R8: no data, no invention). Re-tapping the מחלקות tab
-returns to the grid.
+(verbatim names). **Live** (have catalog data) — each opens the catalog **inline**
+(shell chrome stays; `homeDepartmentProvider`) **pre-filtered to one water system**
+(Benzi #1, see below):
+- אינסטלציה → `WaterSystem.drainage` (שפכים) — every drainage category
+- ברזים וסניטריים → `WaterSystem.supply` (מים נקיים) — every clean-water category
+
+Tapping a live tile sets `catalogSystemFilterProvider` + seeds the tree at
+`kDepartmentTreeRoot` (`catalogTreePathProvider`). The other 7 → "בקרוב" toast
+(R8: no data, no invention). Re-tapping the מחלקות tab resets all three providers
+→ back to the grid.
 
 ## Catalog search panel tools (`catalog_screen.dart` · `_SearchToolsRow`)
 
-> **חלוקת מערכת (Benzi #1):** ה-⚙️ פילטרים כולל גם **מים נקיים / שפכים** —
-> `catalogSystemFilterProvider` → `filterBySystem` (מסונן מ-`VerifiedSpec.endSystems`:
-> supply=מים נקיים · drainage=שפכים). מוצר בלי verified-spec אינו מסווג (R8).
+> **חלוקת מערכת (Benzi #1) — דרך מחלקות (option 2):** `catalogSystemFilterProvider`
+> מסנן את כל עץ הקטגוריות, הספירות והתיאורים. סיווג מוצר ב-`productDivisionSystems`:
+> `VerifiedSpec.endSystems` (supply=נקיים · drainage=שפכים) → fallback PPR=נקיים →
+> שאר=שפכים (הכרעת המשתמש, אין spec). `nodeHasSystem`: מתקנים (אסלות / מקלחות
+> ואמבטיות / גופי תברואה) מופיעים ב**שני** הצדדים; שאר הקטגוריות לפי המערכת
+> ה**דומיננטית**. הכניסה היא מסך המחלקות (לא גיליון הפילטרים).
+> ⚠️ ה-sysOpt בגיליון ⚙️ פילטרים כעת **מיותר** (כפילות) — מסומן להסרה ב-ACTION_PLAN.md.
 
 | Tool | Behavior | Status |
 |---|---|---|

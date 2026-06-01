@@ -8,6 +8,16 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
+v5.59 — 💧 **Water-system division via departments** (Benzi #1, closes 🟦).
+Home departments (v5.57) now route into the catalog **pre-filtered by `WaterSystem`**:
+אינסטלציה→drainage · ברזים וסניטריים→supply. `productDivisionSystems`
+(spec.endSystems → PPR=supply → else drainage; PPR aligns with the v5.41
+`systemOverride: supply` bridge) + `nodeHasSystem` (fixtures both-sides, else
+dominant) filter the whole category tree + counts + descriptions. Entry is the
+department grid, NOT the filter sheet (the sheet sysOpt is now redundant —
+flagged for removal in `ACTION_PLAN.md`). **Open:** tree-drill vs.
+finder-with-filtered-chips (user design question). 986/986 green.
+
 v5.41 — 🌉 **Polyroll bridge** (discovered via probe pattern). All 757 PPR
 products were silently invisible to 8 card helpers because they had no
 `VerifiedSpec`. Fixed:

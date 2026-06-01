@@ -3,6 +3,18 @@
 _Version label: `v5.68` (see `home_shell.dart`). Update on each user-visible change._
 _known-failing: 0 (gate 32 baseline — 0 כשלים מאומת 2026-06-01; שמות ב-knowledge/known_failing.txt)_
 
+## Water-system division via departments (v5.59 — Benzi #1+#2+#3)
+Home = departments grid (`departments_screen.dart`, `homeDepartmentProvider`).
+Live tiles open the catalog **pre-filtered to one `WaterSystem`**:
+אינסטלציה→drainage (שפכים) · ברזים וסניטריים→supply (מים נקיים).
+`catalog_screen.dart`: `catalogSystemFilterProvider` filters the whole category
+tree + counts + descriptions; `productDivisionSystems` classifies each product
+(`VerifiedSpec.endSystems` → PPR=supply → else drainage); `nodeHasSystem` puts
+fixtures (אסלות/מקלחות ואמבטיות/גופי תברואה) on **both** sides, else dominant
+system. Entry is the department screen — the ⚙️ filter-sheet sysOpt is now
+redundant (pending removal, see `ACTION_PLAN.md`). **Open design question** (user):
+tree-drill vs. finder-with-filtered-section-chips. 986/986 tests green.
+
 ## Catalog lens selector (v5.45 — data layer)
 A list-level view-axis control (OUTSIDE the product card) re-organises a
 product list by `CatalogLens`: 📂 category / 🎚 variant / 🌳 smart-tree.

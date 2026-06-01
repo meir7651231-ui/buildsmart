@@ -3,6 +3,7 @@ import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chat_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
+import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
@@ -185,9 +186,10 @@ void main() {
   testWidgets('19 · catalog search panel renders live results', (t) async {
     await t.pumpWidget(const ProviderScope(child: BuildSmartApp()));
     await t.pumpAndSettle();
-    await t.tap(find.text('אינסטלציה'));
-    await t.pumpAndSettle();
     final c = shellContainer(t);
+    c.read(homeDepartmentProvider.notifier).state = 'אינסטלציה';
+    c.read(catalogTreePathProvider.notifier).state = const [];
+    await t.pumpAndSettle();
     c.read(searchPanelOpenProvider.notifier).state = true;
     c.read(searchQueryProvider.notifier).state = 'מחסום';
     await t.pumpAndSettle();

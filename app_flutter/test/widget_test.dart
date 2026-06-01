@@ -1,9 +1,21 @@
 import 'package:buildsmart/main.dart';
+import 'package:buildsmart/screens/catalog_screen.dart';
+import 'package:buildsmart/screens/departments_screen.dart';
+import 'package:buildsmart/screens/home_shell.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _wrap() => const ProviderScope(child: BuildSmartApp());
+
+/// Open the catalog FINDER directly. Departments now open a system-filtered
+/// category tree, so the finder tests set the providers for the plain finder.
+Future<void> _openFinder(WidgetTester t) async {
+  final c = ProviderScope.containerOf(t.element(find.byType(HomeShell)));
+  c.read(homeDepartmentProvider.notifier).state = 'אינסטלציה';
+  c.read(catalogTreePathProvider.notifier).state = const [];
+  await t.pumpAndSettle();
+}
 
 Future<void> _open(WidgetTester t, String tooltip) async {
   await t.tap(find.byTooltip(tooltip).first);
@@ -60,9 +72,7 @@ void main() {
   testWidgets('"הכל" overview shows a preview block per section', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    // Enter the catalog via the new departments home, then open 'הכל'.
-    await t.tap(find.text('אינסטלציה'));
-    await t.pumpAndSettle();
+    await _openFinder(t);
     await t.tap(find.text('הכל').first);
     await t.pumpAndSettle();
     // Section labels are present (they also appear as chips → at least one).
@@ -83,9 +93,7 @@ void main() {
   testWidgets('קטגוריות section shows all 11 verbatim categories', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    // Enter the catalog via the new departments home, then open 'קטגוריות'.
-    await t.tap(find.text('אינסטלציה'));
-    await t.pumpAndSettle();
+    await _openFinder(t);
     final catChip = find.text('קטגוריות').first;
     await t.ensureVisible(catChip);
     await t.pumpAndSettle();

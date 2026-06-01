@@ -1,5 +1,7 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/main.dart';
+import 'package:buildsmart/screens/catalog_screen.dart';
+import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/store_screen.dart';
@@ -38,8 +40,11 @@ void main() {
     await t.pumpWidget(app());
     await t.pumpAndSettle();
 
-    // 0 · enter the catalog via the new departments home (Benzi #2/#3)
-    await t.tap(find.text('אינסטלציה'));
+    // 0 · open the catalog finder (departments now open a filtered tree; the
+    // journey needs the unfiltered finder to search any SKU).
+    final c0 = containerOf(t);
+    c0.read(homeDepartmentProvider.notifier).state = 'אינסטלציה';
+    c0.read(catalogTreePathProvider.notifier).state = const [];
     await t.pumpAndSettle();
 
     // 1 · catalog boots
