@@ -82,13 +82,15 @@ done < "$FINGERPRINT_FILE"
 # סיווג: האם הכשל הקודם כלל שער code/test (31-45)? רק אז שער 102 דורש תיעוד.
 # bookkeeping טהור (12 version / 24 WIRING / 59 path) → פטור: אין ANTIPATTERN
 # משמעותי ל"שכחתי לבמפ version", וה-gate עצמו תופס אותם שוב ממילא.
+# שער 42 (helper חדש בלי בדיקה) → פטור: הפתרון הוא הוספת בדיקה — אין ANTIPATTERN לתעד
+# (לקח #64 — דווח ע"י בנצי, 2026-06-01)
 # פורמט v2: `gates=v2:12,24` (רשימת מספרי-שערים). רשומה ישנה (`gates=<count>`)
 # או לא-מזוהה → conservative: דורש תיעוד (כמו לפני התיקון).
 PRIOR_HAS_CODE_TEST=""
 if [[ "$PRIOR_GATES" == v2:* ]]; then
     prior_nums="${PRIOR_GATES#v2:}"
     for g in ${prior_nums//,/ }; do
-        [[ "$g" =~ ^[0-9]+$ ]] && (( g >= 31 && g <= 45 )) && { PRIOR_HAS_CODE_TEST="1"; break; }
+        [[ "$g" =~ ^[0-9]+$ ]] && (( g >= 31 && g <= 45 )) && (( g != 42 )) && { PRIOR_HAS_CODE_TEST="1"; break; }
     done
 elif [[ -n "$PRIOR_GATES" ]]; then
     PRIOR_HAS_CODE_TEST="1"   # פורמט ישן/לא-מזוהה → צד זהיר
@@ -619,8 +621,10 @@ STUCK_LOG="knowledge/stuck_log.md"
 # שער 102: אם זה retry אחרי כשלון code/test — חייב להוסיף רשומה אמיתית.
 # תיקון לקח #56 (דיווח Finder): retry שכשלו הקודם היה bookkeeping טהור
 # (12 version-sync / 24 WIRING / 59 path) פטור — אי-אפשר לכתוב ANTIPATTERN
-# משמעותי ל"שכחתי לבמפ version", וה-gate עצמו תופס אותם שוב. דורש תיעוד רק
-# כשהכשל הקודם כלל שער code/test (31-45) — שם ה-gate גנרי וה-antipattern מוסיף ערך.
+# תיקון לקח #64 (דיווח בנצי): שער 42 (helper חדש בלי בדיקה) → פטור: הפתרון
+# הוא הוספת בדיקה, אין ANTIPATTERN משמעותי לתעד. ה-gate עצמו תופס מחדש.
+# דורש תיעוד רק כשהכשל הקודם כלל שער code/test (31-45, חוץ מ-42) —
+# שם ה-gate גנרי וה-antipattern מוסיף ערך.
 if [[ "$IS_RETRY" == "true" && -n "$PRIOR_HAS_CODE_TEST" && -f "$STUCK_LOG" ]]; then
     STAGED_STUCK=$(git diff --cached --name-only | grep "stuck_log.md" | head -1)
     if [[ -z "$STAGED_STUCK" ]]; then
