@@ -349,14 +349,19 @@ void main() {
       var recon = '${c.type ?? ''} ${c.path.join(' ')}';
       if (mat != null) recon = '$recon $mat';
       String norm(String w) => w.replaceAll('(', '').replaceAll(')', '');
+      // Cosmetic separators ('-', '/') the parser intentionally skips — don't
+      // count them as lossy.
+      bool keep(String w) => w != '-' && w != '—' && w != '/';
       final orig = p.nameHe
           .split(RegExp(r'\s+'))
           .where((w) => w.trim().isNotEmpty)
+          .where(keep)
           .map(norm)
           .toSet();
       final rebuilt = recon
           .split(RegExp(r'\s+'))
           .where((w) => w.trim().isNotEmpty)
+          .where(keep)
           .map(norm)
           .toSet();
       final missing = orig.difference(rebuilt);
@@ -487,29 +492,73 @@ void main() {
         reason: 'broken Huliot asset paths:\n${missing.take(12).join('\n')}');
   });
 
-  // §21.B-Huliot — name recoverability via _NameWords. Since Huliot stays on
-  // the Lipskey-style word-by-word renderer (not the §21 chip hierarchy),
-  // recoverability = each nameHe word is non-trivial and the full name is
-  // shown verbatim. This guards against silent name truncation.
-  test('§21.B-Huliot every product name renders verbatim (no empty words)',
+  // §21.B-Huliot — STRONG recoverability via parseChips. Huliot now renders
+  // via `_HierarchyChips` (same as Polyroll), so every word in nameHe must be
+  // classifiable into the §21 hierarchy (type + level1..5) with NO leftover.
+  // The catalog is recoverable from the chip path alone, satisfying §14.E.
+  test('§21.B-Huliot every product name is fully recoverable via parseChips',
       () {
-    final broken = <String>[];
+    final lossy = <String>[];
     for (final p in kHuliotCatalog) {
-      final words = p.nameHe
+      final c = parseChips(p.nameHe);
+      // Normalise for comparison: strip parens (parser strips them too) and
+      // drop cosmetic separators ('-', '/') that the parser intentionally
+      // skips (they carry no semantic content for the chip path).
+      String norm(String w) => w.replaceAll('(', '').replaceAll(')', '');
+      bool keep(String w) => w != '-' && w != '—' && w != '/';
+      var recon = '${c.type ?? ''} ${c.path.join(' ')} ${c.leftover.join(' ')}';
+      final orig = p.nameHe
           .split(RegExp(r'\s+'))
           .where((w) => w.trim().isNotEmpty)
-          .toList();
-      if (words.isEmpty) {
-        broken.add('${p.sku} → empty/whitespace-only name "${p.nameHe}"');
-      }
-      // No control chars / bidi marks.
-      if (RegExp(r'[‎‏‪-‮⁦-⁩​]')
-          .hasMatch(p.nameHe)) {
-        broken.add('${p.sku} → contains bidi control char');
+          .where(keep)
+          .map(norm)
+          .toSet();
+      final rebuilt = recon
+          .split(RegExp(r'\s+'))
+          .where((w) => w.trim().isNotEmpty)
+          .where(keep)
+          .map(norm)
+          .toSet();
+      final missing = orig.difference(rebuilt);
+      if (missing.isNotEmpty || c.leftover.isNotEmpty) {
+        lossy.add('${p.sku} "${p.nameHe}" → '
+            '${missing.isNotEmpty ? "missing: ${missing.join(",")} " : ""}'
+            '${c.leftover.isNotEmpty ? "leftover: ${c.leftover.join(",")}" : ""}');
       }
     }
-    expect(broken, isEmpty,
-        reason: 'name rendering will break:\n${broken.take(12).join('\n')}');
+    expect(lossy, isEmpty,
+        reason: 'Huliot chip is lossy — these words vanish from the card '
+            '(type+breadcrumb can\'t rebuild the name):\n'
+            '${lossy.take(20).join('\n')}');
+  });
+
+  // §21.C-Huliot — every visible chip carries a semantic level label
+  // (חיבור / צורה / תכונה / תבריג / מידה). Mirrors the Polyroll test so the
+  // picker reads "בחר חיבור:" not generic "בחר ערך".
+  test('§21.C-Huliot every visible chip carries a semantic level label', () {
+    const allowed = {'חיבור', 'צורה', 'תכונה', 'תבריג', 'מידה'};
+    const noise = {'מ"מ', 'מ”מ', 'mm'};
+    final bad = <String>[];
+    for (final p in kHuliotCatalog) {
+      final c = parseChips(p.nameHe);
+      for (var i = 0; i < c.path.length; i++) {
+        if (noise.contains(c.path[i].trim())) continue;
+        final lbl = c.levelLabelOf(i);
+        if (!allowed.contains(lbl)) {
+          bad.add('${p.sku} chip[$i]="${c.path[i]}" → "$lbl"');
+        }
+      }
+      if (c.level5 != null) {
+        final sizeIdx = c.path.length - 1;
+        final sizeLbl = c.levelLabelOf(sizeIdx);
+        if (sizeLbl != 'מידה') {
+          bad.add('${p.sku} size chip "${c.path[sizeIdx]}" → "$sizeLbl" '
+              '(expected "מידה")');
+        }
+      }
+    }
+    expect(bad, isEmpty,
+        reason: 'Huliot chip without a level label:\n${bad.take(12).join('\n')}');
   });
 
   // §22-Huliot paranoid audit — 12 cross-product checks that supplement the

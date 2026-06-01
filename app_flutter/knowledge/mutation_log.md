@@ -162,6 +162,29 @@
   SmartBrand.sku is a real catalog SKU".
 - מסקנה: כיסוי 11 הכרטיסים מוגן (spot-check + ≥117 ממופים).
 
+## parseChips — Huliot vocab + parser-skip cosmetics (lib/data/chip_hierarchy.dart) — 2026-06-01
+- **קובץ:** `lib/data/chip_hierarchy.dart`
+- **מה השתנה:** (א) tokenizer מדלג על '-', '—', '/' (separators קוסמטיים).
+  (ב) ב-loop, raw token עם parens עוטפות → strip לפני vocab lookup.
+  (ג) מספר נומרי אחרי `l5` נצמד אליו ב-space (היה ?? = pin to first only).
+  (ד) kChipTypes/Level2/Level3 + _l3Compounds הורחבו ב-100+ tokens של Huliot.
+- **בדיקות:**
+  - `test/spec_assets_test.dart §21.B-Huliot every product fully recoverable
+    via parseChips` — סורק 170/170; recon = type + path + leftover; כל מילה
+    בשם (אחרי norm + skip '-/—//') חייבת להופיע ב-recon; leftover חייב להיות
+    ריק. עבר 170/170.
+  - `test/spec_assets_test.dart §21.C-Huliot every visible chip carries
+    semantic level label` — כל chip ב-path מקבל אחת מ-{חיבור/צורה/תכונה/
+    תבריג/מידה}; size chip תמיד 'מידה'. עבר.
+- **תקלות שהוזרקו:**
+  - הסרת ענף ה-`(raw.startsWith('(') && raw.endsWith(')'))` (paren-strip) →
+    §21.B-Huliot אדום ✅ עם 12 מקרים `leftover: סיפון` (כש-(סיפון) לא matchen).
+  - שינוי `l5 == null ? t : '$l5 $t'` → `l5 ??= t` (multi-numeric drop) →
+    §21.B-Huliot אדום ✅ עם `missing: 3000/4000` ב-7 מוצרי צינור.
+- שני המוטציות שוחזרו → ירוק ✅.
+- מסקנה: הבדיקה חזקה — תופסת כל regression בפרסר שמשפיעה על תכולת ה-card
+  (משאיר מילה מאחור = מילה מתאדה מה-UI = הפרת §14.E).
+
 ## FinderGroup 'דלוחין SmartLock' — finder_screen.dart — 2026-06-01
 - **קובץ:** `lib/screens/finder_screen.dart:71` (אחרי 'צנרת PPR')
 - **מה עושה:** קבוצת home שמאחדת 17 קטגוריות kSml* תחת label אחד

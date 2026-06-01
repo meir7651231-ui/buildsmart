@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.66 · 1.6.32 · 🟢 דלוחין SmartLock — קבוצת בית ייעודית (170 מוצרים) · ניקוז 168→150 (סיפוני Huliot עברו לקבוצה החדשה)',
+                          'v5.67 · 1.6.33 · 🟢 חוליות — chips היררכיים (חיבור/צורה/תכונה/מידה) + תמונות מוצר · parseChips vocab +60 tokens · §21.B-Huliot ירוק (170/170 recoverable)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

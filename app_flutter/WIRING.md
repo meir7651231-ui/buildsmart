@@ -294,6 +294,28 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — chips היררכיים + תמונות (v5.62 — 2026-06-01)
+- `lib/screens/lipskey_products_screen.dart:1175` — Huliot מצטרף ל-Polyroll
+  במסלול `_HierarchyChips` (היה `_NameWords` Lipskey-style). כל קלף Huliot
+  עכשיו מציג pills עם labels (חיבור/צורה/תכונה/תבריג/מידה) ו-breadcrumb '‹'.
+- `lib/data/chip_hierarchy.dart`:
+  - `kChipTypes` += 23 Huliot types (סיפון, מחסום, מאסף, אום, אטם, ...).
+  - `kChipLevel2Shape` += 15°/30°/87.5° + חלק/טלסקופית/כפול/נפילה/קומקום/...
+  - `kChipLevel3Feature` += 60+ Huliot tokens (לג'וקר, מטבח, רחצה, אמריקאי, ...)
+  - `_l3Compounds` += 40+ multi-word compounds (צד אחד חלק, AQUA SLIM, ...)
+  - Parser: skip cosmetic separators ('-', '—', '/'); strip surrounding parens
+    on token before vocab lookup; multi-numeric tokens fold INTO `level5`.
+  - Existing `_l3Compounds` של Polyroll עודכנו (הסרת '-' פנימי) כדי לתאום
+    ל-skip-dash בtokenizer החדש.
+- `lib/data/lipskey_catalog.dart`: image-asset path resolver — שם קובץ
+  שמתחיל ב-`page_` הולך ל-`pages/` (לא `products/`). מאפשר ל-Huliot להציג
+  את עמוד הקטלוג כתמונת מוצר כברירת-מחדל עד שתחתכו crops פר-משפחה.
+- `lib/data/huliot_smartlock_catalog.dart`: `_huliotImageFor(page, …)`
+  מחזיר `'page_NN.jpg'` (היה null → emoji-fallback). 170/170 cards עם תמונה.
+- Guards: `§21.B-Huliot` strong recoverability עבר (parseChips); `§21.C-Huliot`
+  מאמת שכל chip נושא label סמנטי. שני tests של Polyroll עודכנו במקביל
+  (skip '-/—//' מ-orig set כדי שלא יסומנו כ-lossy אחרי שהפרסר מדלג עליהם).
+
 ## Huliot SmartLock — קבוצת בית ייעודית (v5.61 — 2026-06-01)
 - `lib/screens/finder_screen.dart`:
   - `kFinderGroups` += `FinderGroup('🟢', 'דלוחין SmartLock', {kSml* ×17})` —

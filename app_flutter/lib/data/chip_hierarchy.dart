@@ -9,6 +9,10 @@ const Set<String> kChipTypes = {
   'אומגה', 'שרוול', 'צינור', 'מחבר', 'סעפת', 'לוחית',
   // tool nouns — keep as standalone type
   'מזוודת', 'פלטת', 'מכונת', 'מברגה', 'תותב', 'מקדח',
+  // Huliot SmartLock — drainage system types
+  'סיפון', 'מחסום', 'מאסף', 'אום', 'אטם', 'משפך', 'אביק', 'רוזטה', 'מבוא',
+  'מכלול', 'מצרה', 'חותך', 'מערכת', 'מצחיה', 'ונטיל', 'מפתח', 'חיבור',
+  'מאריך', 'הגבהה', 'מכסה', 'רשת', 'סט', 'פס',
 };
 
 const Set<String> kChipLevel1Connection = {
@@ -23,12 +27,19 @@ const Set<String> kChipLevel2Shape = {
   // '45'/'90' are intentionally NOT here — those would collide with the
   // diameters 45mm/90mm and steal them from the size slot.
   '45°', '90°',
+  // Huliot SmartLock — drainage angles. 15°/30° = single-side elbows; 87.5°
+  // = telescopic elbow per the SmartLock catalog (pages 12, 15).
+  '15°', '30°', '87.5°',
   'מצרה', 'שווה', 'סמוי', 'פרפר', 'כדורי',
   'מעבר', 'ישר', 'אלכסוני',
   'בין', 'אוגנים', // compound "בין אוגנים"
   'עגול', 'משושה', 'רקורד',
   'פייזר', 'אספקת', 'מים', // pipe sub-types: "אספקת מים", "פייזר"
   'מיזוג', 'אוויר',
+  // Huliot SmartLock shape qualifiers
+  'חלק', 'טלסקופית', 'גלילית', 'כפול', 'נפילה', 'קומקום',
+  'זווית', 'ריבועי', 'מוגבה', 'קבוע', 'זמני', 'אמריקאי',
+  'אוניברסלית',
 };
 
 const Set<String> kChipLevel3Feature = {
@@ -48,6 +59,54 @@ const Set<String> kChipLevel3Feature = {
   'הולירומה', // sub-brand qualifier
   'מצופה', 'פלדה', // for "אוגן פלדה מצופה PP"
   'PP',
+  // ─── Huliot SmartLock features (qualifiers, suffixes, contexts) ─────────
+  // open/closed access
+  'סגור', 'פתוח',
+  // accessory targets ("ל…")
+  'לג\'וקר', 'למחסום/מאסף', 'למאסף', 'למחסום', 'לכיור', 'לאמבט', 'למזגן',
+  'למדיח', 'למכונת', 'לסיפון', 'לאגנית', 'לאביק', 'לברז', 'לסילוק',
+  // installation contexts
+  'מטבח', 'רחצה', 'כביסה', 'מדיח', 'כלים', 'מקלחת', 'אמבט',
+  // joiner words / connectors
+  'אורך', 'ארוך', 'קצר', 'קומפלט', 'משלימים', 'מדידה', 'יציאה', 'כניסה',
+  'חיבור', 'אקוסטית',
+  // catalog suffixes — model/series numbers + parens
+  'מספר', 'דגם', 'מערכת',
+  'AQUA', 'SLIM', 'SmartLock', 'Aqua', 'Slim',  // brand series identifiers
+  'מתאם', 'ניקוז',  'הורקה', 'תקע', 'ראש',
+  'ABS', 'TPE', 'SBR', 'PP+ABS',
+  // parens (size variants from catalog headers like (6) (1) (3) (4) (5))
+  '(1)', '(2)', '(3)', '(4)', '(5)', '(6)', '(8)', '(10)',
+  '(70)', '(17)', '(שרשרת+10)', '(ללא',
+  // colors / decorative
+  'ירוק', 'שחור', 'אפור', 'בז\'', 'לבן', 'כחול', 'נירוסטה', 'ניירוסטה',
+  'נילון', '66',
+  'ניקל', 'פסים', 'ריבועים', 'מלא/אריח', 'משפך)',
+  'אינטגרלי', '+',
+  // shape feminine forms / Huliot stragglers
+  'רבועה', 'כיור', 'זחיח', 'למבוא', 'קומפלקט',
+  // Type words that already-took-the-leading-type may appear again as features
+  // ('סט חיבור למדיח / מכונת כביסה' — type='סט', then 'מכונת' is a feature).
+  'מכונת', 'מצרה', 'סיפון', 'מחסום', 'מבוא', 'משפך',
+  // joiner/list words
+  'שרשרת', 'פקקים', 'ושבלונה', 'לאום',
+  '1¼', '1½', '½"',  // size variants seen as feature tokens
+  'J', 'H', 'Top', 'Floor',
+  // joker/SmartLock specific
+  'ג\'וקר',
+  // 2002 = bathtub drain model number
+  '2002',
+  // catalog row helpers (size pair label)
+  'דלוחין',
+  // ─── parser-aid vocab for Huliot ───────────────────────────────────────
+  'צינורות', 'קוטר',  // 'חותך צינורות קוטר 40' (אורך already above)
+  'מעביר', 'SL',  // 'אטם מעביר SL 40/32'
+  'מברזל', 'למעבר',  // 'אום מעבר מברזל'
+  'פתח', 'רבוע', 'לאריח',  // 'הגבהה פתח רבוע'
+  'מוגבהת', 'עגולה',  // 'רשת מוגבהת עגולה'
+  'אחד', '(צד', 'חלק)',  // '(צד אחד חלק)' tokenization with parens
+  // SmartLock-specific contexts
+  'נחושת',
 };
 
 const Set<String> kChipLevel4Thread = {
@@ -115,6 +174,7 @@ ChipPath parseChips(String nameHe) {
   // Tokenize, keep size-tokens intact (e.g. "25x½\"", "63x32", "20×2.8").
   final tokens = nameHe.split(RegExp(r'\s+'))
       .where((t) => t.trim().isNotEmpty)
+      .where((t) => t != '-' && t != '—' && t != '/') // skip cosmetic seps
       .toList();
   String? type;
   final l1 = <String>[];
@@ -140,7 +200,12 @@ ChipPath parseChips(String nameHe) {
 
   int i = 0;
   while (i < tokens.length) {
-    final t = tokens[i];
+    final raw = tokens[i];
+    // Strip surrounding parens for vocabulary lookup ("(סיפון)" → "סיפון")
+    // but keep the original text so the reconstruction stays verbatim.
+    final t = (raw.startsWith('(') && raw.endsWith(')') && raw.length > 2)
+        ? raw.substring(1, raw.length - 1)
+        : raw;
     if (kChipMaterial.contains(t)) { i++; continue; }
     if (type == null && kChipTypes.contains(t)) { type = t; i++; continue; }
     // Size detection — but NOT for declared shape tokens that happen to start
@@ -148,7 +213,10 @@ ChipPath parseChips(String nameHe) {
     // level-2 (shape); letting sizeRe grab them would eat the angle and
     // silently drop the real diameter (e.g. "ברך 45° פ.פ 160" → 160 lost).
     if (sizeRe.hasMatch(t) && !kChipLevel2Shape.contains(t)) {
-      l5 ??= t;
+      // First numeric → main size. Subsequent numerics → folded INTO the size
+      // chip ("130 50/50/50" → "130 50/50/50") so the full catalog name stays
+      // recoverable from the chips alone (E2E §21.B).
+      l5 = l5 == null ? t : '$l5 $t';
       i++;
       continue;
     }
@@ -226,10 +294,53 @@ const _l3Compounds = {
   'לקטרים', 'מקדח לרוכבים', 'תותב ריתוך',
   'לריתוך רוכב', 'עם רקורד',
   '(לעבודה בגובה)',
-  // §22.E finish parentheticals (verbatim from catalog page headers)
+  // §22.E finish parentheticals (verbatim from catalog page headers — dashes
+  // are stripped by tokenizer so compound match expects tokens WITHOUT '-').
   '(ציפוי כרום)',
-  '(ציפוי כרום - ללא ידית)',
-  '(ציפוי כרום - כולל ידית)',
+  '(ציפוי כרום ללא ידית)',
+  '(ציפוי כרום כולל ידית)',
+  // ─── Huliot SmartLock compounds (multi-word qualifiers from catalog) ───
+  'צד אחד חלק', 'צד אחד שקע תקע',
+  'AQUA SLIM', 'Aqua Slim',
+  'מערכת ניקוז',
+  'לכיור רחצה', 'לכיור מטבח', 'לכיור אמריקאי',
+  'למכונת כביסה', 'למדיח כלים', 'למדיח/מ.כביסה',
+  'עם כניסה למדיח/מ.כביסה', 'עם כניסה למדיח', 'עם כניסה למזגן',
+  'עם 2 מבואים צידיים', 'עם מבוא צידי וכניסה למ.כלים/מ.כביסה',
+  'עם יציאה למדיח', 'יציאה למדיח',
+  '+ צינור מדידה',
+  'מצרה (צד אחד חלק)', 'מצרה (צד אחד חלק) חיבור ברזל ופלסטיק',
+  'מתאם זווית - ג\'וקר', 'מתאם זווית',
+  'אום מעבר מברזל', 'אום מעבר מברזל למעבר מברזל',
+  'מתאם זחיח לכיור אמריקאי', 'מתאם זחיח',
+  'מבוא זחיח עם חיבור למזגן', 'מבוא זחיח',
+  'מאריך למבוא זחיח', 'ראש שקע תקע', 'ראש שקע תקע + אטם',
+  'מאסף קווי AQUA SLIM',
+  'סט פקקים לברז ושבלונה', 'סט פקקים לברז',
+  'מצחיה קומפלט לאביק לאמבט',
+  'מערכת ניקוז לאמבט',
+  'ונטיל לכיור אמריקאי J', 'ונטיל לכיור אמריקאי',
+  'מחסום הורקה למכונת כביסה',
+  'סיפון הורקה קומפלקט J', 'סיפון הורקה קומפלקט',
+  'מחסום H למכונת כביסה',
+  'הגבהה אוניברסלית לאריח עם מכסה אטום מונע ריחות',
+  'הגבהה אוניברסלית לאריח', 'מכסה אטום מונע ריחות',
+  'אביזרים משלימים',
+  'דגם פסים', 'דגם ריבועים', 'דגם מלא/אריח',
+  'חיבור ברזל ופלסטיק', 'חיבור קצר לאגנית', 'חיבור ארוך לאגנית',
+  'סט חיבור למדיח / מכונת כביסה', 'סט חיבור למדיח',
+  'הגבהה פתח רבוע',
+  'מצרה לסיפון', 'ברך מצרה לסיפון',
+  'פקק לאביק', 'פקק לברז',
+  'מבוא לכיור אמריקאי', 'מבוא לכיור',
+  'מכלול לסיפון', 'צינור זחיח לסיפון',
+  'אטם מעביר SL',
+  'גומי אלסטומרי',
+  'מפתח לאום תבריג',
+  'Top Floor',
+  // catalog notes
+  '(ללא משפך)', '(שרשרת+10)', '(שחור)',
+  'מאסף נפילה',
 };
 const _l4Compounds = {
   'שקע תקע', 'שקע-תקע',

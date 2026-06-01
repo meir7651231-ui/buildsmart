@@ -39,10 +39,12 @@ const List<String> kHuliotCategories = [
 ];
 
 // ── Image routing ─────────────────────────────────────────────────────────
-/// Per-page product photo. MVP returns null so the flip side falls back to
-/// the full catalog page (`assets/huliot_smartlock/pages/page_NN.jpg`).
-/// Per-family crop overrides go here once cut from the PDF (protocol §17).
-String? _huliotImageFor(int page, String nameHe, String categoryHe) => null;
+/// Per-page product photo. Returns the catalog page image as a fallback so
+/// every Huliot product has a visible front image (the catalog page shows
+/// the product photo + spec diagram for its row). Per-family crops will
+/// override this once cut from the PDF (protocol §17).
+String? _huliotImageFor(int page, String nameHe, String categoryHe) =>
+    'page_${page.toString().padLeft(2, '0')}.jpg';
 
 /// Per-product spec image (the diagram on the flip side). MVP returns null
 /// → the flip side falls back to the full catalog page. Per-family crops

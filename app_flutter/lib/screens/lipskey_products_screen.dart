@@ -1173,7 +1173,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
           const SizedBox(height: 4),
           // line 2: chips. Polyroll uses the hierarchy breadcrumb (§21);
           // Lipskey stays on the word-by-word extractor for now.
-          if (p.brand == kPolyrollBrand)
+          if (p.brand == kPolyrollBrand || p.brand == 'חוליות')
             _HierarchyChips(
                 product: p,
                 onChipTap: _cycleHierarchy,

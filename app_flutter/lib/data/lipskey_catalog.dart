@@ -52,9 +52,14 @@ class LipskeyCatalogProduct {
     return 'lipskey';
   }
 
-  String? get imageAsset => imageFile == null
-      ? null
-      : 'assets/${_brandDir(brand)}/products/$imageFile';
+  // Filenames starting with `page_` live under `pages/` (full catalog page,
+  // used as fallback for Huliot/SmartLock where per-product crops don't exist
+  // yet); everything else is a per-product crop under `products/`.
+  static String _imgPath(String dir, String file) =>
+      'assets/$dir/${file.startsWith('page_') ? 'pages' : 'products'}/$file';
+
+  String? get imageAsset =>
+      imageFile == null ? null : _imgPath(_brandDir(brand), imageFile!);
 
   /// All FRONT-side images for the 1/N pager: `imageFile` first, then any
   /// extras from `imageFiles` (de-duplicated). Empty list when no image at all
@@ -62,9 +67,9 @@ class LipskeyCatalogProduct {
   List<String> get imageAssets {
     final dir = _brandDir(brand);
     final out = <String>[];
-    if (imageFile != null) out.add('assets/$dir/products/$imageFile');
+    if (imageFile != null) out.add(_imgPath(dir, imageFile!));
     for (final f in imageFiles ?? const <String>[]) {
-      final a = 'assets/$dir/products/$f';
+      final a = _imgPath(dir, f);
       if (!out.contains(a)) out.add(a);
     }
     return out;
