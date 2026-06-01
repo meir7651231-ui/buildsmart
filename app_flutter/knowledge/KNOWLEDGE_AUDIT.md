@@ -237,3 +237,33 @@ README מאנדקס רק `spec/`. חסרים מצביעים ל-`port/` (או ה�
 - **אומת:** `knowledge_protocol_test` ירוק (6/6); README >400 תווים (שער קיום); 0 יתומים נותרו.
 
 **נותר ל-SUBMIT (אישור-משתמש/פרוטוקוליסט):** deprecate ל-`PROTOCOL.md` (+שימור §5/§8 ל-adr/inspections) · drift-guard ל-MASTER.
+
+---
+
+## K11 — סיכום פאזה K (2026-06-01 · סוכן: ליטוש)
+
+**כיסוי:** 76/76 מסמכים קיבלו verdict (סבב 1: 4 · סבב 2: 44 top-level · סבב 3: 32 תת-תיקייה).
+**אינדקס:** 100% — 0 יתומים (היה 27).
+
+**מאזן פעולות:**
+| קטגוריה | כמות | הערה |
+|---|---|---|
+| keep-canonical | רוב המסמכים | אפס כפילות מזיקה |
+| deprecate-stub | 3 | TESTING/CHECKLISTS/BUG_INVESTIGATION (סבב 1, בוצע) |
+| deprecate-candidate | 1 | `PROTOCOL.md` — **SUBMIT**, טרם בוצע |
+| delete / archive | **0** | מחיקה = מוצא-אחרון, לא נדרש |
+| index-rebuild | K9 | 27→0 יתומים, בוצע |
+
+**הכרעות K5–K8:**
+- **K5 (חוק-על):** `MASTER_PROTOCOL` = הסמכות (שער 88). `PROTOCOL.md` superseded → deprecate **SUBMIT**.
+- **K6 (ממשל-סוכנים):** 4 מסמכי `AGENT_*` — כל אחד תפקיד נבדל (matrix / work-plan / readiness / patterns).
+  **אין מיזוג** — keep+index. החלטה: לא נדרשת קונסולידציה.
+- **K7 (ADR כפול):** `app_flutter/adr/` = canonical ל-Flutter; `app/` = לגאסי, **לא נגעתי** (audit-only). אין פעולה.
+- **K8 (מסמכים-מתים):** ב-`app_flutter/` **אין** מסמך-מת (פרט ל-3 ה-stubs המנותבים). `IMPLEMENTATION_PROTOCOL`⛔ הוא ב-`app/` (מחוץ לתחום).
+
+**מסקנה:** בסיס-הידע היה **בריא יותר מהחשש** ב-POLISH_PROTOCOL — לא "150 מסמכים עם כפילות המונית" אלא
+76 מסמכים, רובם תפקיד-נבדל, עם בעיית-**אינדקס** אמיתית (נפתרה ב-K9) ו-supersession בודד (PROTOCOL → SUBMIT).
+**0 פעולות הרסניות בוצעו.** כל מחיקה/מיזוג/deprecate עתידי — עם verdict + אישור.
+
+**פתוח (דורש GO):** (1) deprecate ל-`PROTOCOL.md` + שימור §5/§8. (2) drift-guard ל-MASTER (פרוטוקוליסט).
+(3) קיפול לקח-המתודולוגיה ל-`POLISH_PROTOCOL`/`MASTER` (פרוטוקוליסט).
