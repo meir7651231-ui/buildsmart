@@ -29,6 +29,26 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 
 <!-- הוסף רשומה חדשה כאן אחרי כל בעיה שנפתרה -->
 
+## 2026-06-01 · baseline-phantom — known-failing: 16 בעוד 0 כשלים בפועל
+
+### א — הבעיה
+סוכן הגדיר `known-failing: 16` ב-STATUS.md (טען: paired_warning_test pre-existing).
+אימות בפועל: `paired_warning_test` עובר 8/8, והסוויטה המלאה **927 ✅ / 0 ✗**.
+ה-16 הוא **phantom**. סכנה: gate 32 עם baseline=16 בולע עד 16 רגרסיות אמיתיות
+בשקט. בנוסף — agents נתקעים: "16" הוא מספר בלי שמות, אי-אפשר לדעת מה נכשל.
+
+### ב — הפתרון
+(1) תיקון known-failing → 0 (מאומת).
+(2) `knowledge/known_failing.txt` — שמות הבדיקות הכושלות (ריק כשאין).
+(3) שער 32: known-failing > 0 חייב מספר-שורות תואם ב-known_failing.txt (אחרת
+baseline-phantom → חסום), ומדפיס שמות-בדיקות שנכשלו כדי שהסוכן ידע מה שלו.
+
+### ג — כלל המניעה
+ANTIPATTERN[hook]: grep -cvE.*\|\| echo 0
+RULE: baseline (known-failing) חייב שמות מאומתים ב-known_failing.txt, לא מספר בלבד. מספר בלי שמות = phantom שבולע רגרסיות. ספירת שורות: grep -cvE → ${var:-0}, לא "|| echo 0".
+
+---
+
 ## 2026-06-01 · זיהוי retry התחמק ע"י שינוי סט-הקבצים (פער #3 מהאודיט)
 
 ### א — הבעיה

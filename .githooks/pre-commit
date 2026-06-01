@@ -197,15 +197,24 @@ if [[ -n "$NEEDS_FLUTTER" ]]; then
     # baseline מאוחסן ב-STATUS.md: "known-failing: N" — מאפשר pre-existing failures
     TEST_OUT=$(flutter test --no-pub 2>&1)
     TEST_EXIT=$?
+    KNOWN_FAIL=$(grep -oE "known-failing: [0-9]+" knowledge/STATUS.md 2>/dev/null | grep -oE "[0-9]+$" || echo 0)
+    # מניעת baseline-phantom (אודיט 2026-06-01): known-failing > 0 חייב רשימת שמות
+    # תואמת ב-known_failing.txt — אחרת אפשר להגדיר baseline מדומה ש"בולע" רגרסיות
+    # אמיתיות בשקט. לקח #27: grep -c → ${var:-0}, לא "|| echo 0".
+    KF_LISTED=$(grep -cvE '^[[:space:]]*(#|$)' knowledge/known_failing.txt 2>/dev/null); KF_LISTED=${KF_LISTED:-0}
+    if [[ "$KNOWN_FAIL" -gt 0 && "$KF_LISTED" -ne "$KNOWN_FAIL" ]]; then
+        err "32" "baseline-phantom: known-failing=$KNOWN_FAIL אך known_failing.txt מפרט $KF_LISTED שמות" "פרט את שמות הבדיקות ב-known_failing.txt, או הגדר known-failing: 0"
+    fi
     if [[ $TEST_EXIT -ne 0 ]] || echo "$TEST_OUT" | grep -qE "Some tests failed"; then
         # flutter compact output: "XX:XX +888 -16: Some tests failed." — חלץ את -N
         # תיקון באג #32: pattern הקודם "[0-9]+ ✗" לא מוצא דבר ב-compact mode
         FAIL_COUNT=$(echo "$TEST_OUT" | grep -oE "\+[0-9]+ -[0-9]+:" | grep -oE -- "-[0-9]+" | grep -oE "[0-9]+" | tail -1)
         FAIL_COUNT=${FAIL_COUNT:-0}
-        KNOWN_FAIL=$(grep -oE "known-failing: [0-9]+" knowledge/STATUS.md 2>/dev/null | grep -oE "[0-9]+$" || echo 0)
         if [[ "$FAIL_COUNT" -gt "$KNOWN_FAIL" ]]; then
-            echo "$TEST_OUT" | grep -E "✗|FAILED" | head -5
-            err "32" "בדיקות נכשלות: $FAIL_COUNT > baseline $KNOWN_FAIL" "תקן את הבדיקות או עדכן known-failing ב-STATUS.md"
+            # הדפס אילו בדיקות נכשלו בשמן — שהסוכן לא ייתקע "לא יודע מה נכשל"
+            echo "   ❌ בדיקות שנכשלו (שמות):"
+            echo "$TEST_OUT" | grep -aE "\[E\]|✗|FAILED|: .+ \[E\]" | head -20
+            err "32" "בדיקות נכשלות: $FAIL_COUNT > baseline $KNOWN_FAIL" "תקן, או עדכן known-failing ב-STATUS.md + שמות ב-known_failing.txt"
         else
             warn "32" "יש $FAIL_COUNT כשלים pre-existing (baseline=$KNOWN_FAIL) — מותר להמשיך"
         fi
