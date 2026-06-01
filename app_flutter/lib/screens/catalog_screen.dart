@@ -1931,16 +1931,46 @@ class _SearchResultsList extends ConsumerWidget {
             subtitle: Text('${p.categoryHe} · #${p.sku}',
                 style: const TextStyle(color: Color(0xFF666666), fontSize: 11),
                 maxLines: 1, overflow: TextOverflow.ellipsis),
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1c1409),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text('מוצר',
-                  style: TextStyle(
-                      color: Color(0xFFFF7A18), fontSize: 10,
-                      fontWeight: FontWeight.w600)),
+            // Row-level data-readiness score (composite breadth+depth), so it
+            // is visible at a glance without opening the card. Band-coloured.
+            trailing: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Builder(builder: (_) {
+                  final s = cardReadinessScore(p);
+                  final c = scoreBandColors(s.score);
+                  return Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: c.bg,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: c.border),
+                    ),
+                    child: Text('📊 ${s.score}',
+                        style: TextStyle(
+                            color: c.fg,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700)),
+                  );
+                }),
+                const SizedBox(height: 4),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1c1409),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text('מוצר',
+                      style: TextStyle(
+                          color: Color(0xFFFF7A18),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600)),
+                ),
+              ],
             ),
             onTap: () {
               final cat = kLipskeyCatalog

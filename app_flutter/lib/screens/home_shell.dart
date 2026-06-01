@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.60 · 1.6.31 · 🟢 חוליות SmartLock — מלא: 12-check audit · §22-Huliot tests · מידע כללי+התקנה verbatim · mutation_verify ×2 · web build OK',
+                          'v5.61 · 1.6.31 · 📊 הציון המשוכלל מוצג עכשיו גם על שורת המוצר בחיפוש (צ\'יפ צבוע לפי להקה) — נראה במבט בלי לפתוח כרטיס',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

@@ -367,3 +367,11 @@ rather than pixel rendering.
   crops will go here as they're cut from the PDF (protocol §17).
 - 44 pages extracted via `pdftoppm` to `assets/huliot_smartlock/pages/` +
   `pubspec.yaml` asset entry added.
+
+## cardReadinessScore — row-level chip in search results (v5.59)
+- `catalog_screen.dart::_SearchResultsList` product `ListTile` now shows the
+  composite `cardReadinessScore` as a band-coloured `📊 N` chip in `trailing`
+  (above the "מוצר" tag), via `cardReadinessScore`/`scoreBandColors` (already
+  imported). Makes the score visible at a glance in the catalog search list —
+  no need to open the card overlay. Verified live: PPR אספקה → 📊 99 (🟢);
+  מושב אסלה → 📊 15 (🔴). Pure display; the score engine (v5.58) is unchanged.
