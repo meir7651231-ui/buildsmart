@@ -16,7 +16,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''git add.*emergency_token''');
+      final re = RegExp(r'''gates=\$FAIL"''');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -34,7 +34,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''echo "\$[a-z_]+" \| grep -qE.*shell-meta''');
+      final re = RegExp(r'''git add.*emergency_token''');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -52,7 +52,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''grep -c [^|]*2>/dev/null \|\| echo 0''');
+      final re = RegExp(r'''echo "\$[a-z_]+" \| grep -qE.*shell-meta''');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -70,7 +70,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''^for critical in compat_coverage_test''');
+      final re = RegExp(r'''grep -c [^|]*2>/dev/null \|\| echo 0''');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
@@ -88,6 +88,24 @@ void main() {
         return;
       }
       final matches = <String>[];
+      final re = RegExp(r'''^for critical in compat_coverage_test''');
+      final lines = hook.readAsStringSync().split('\n');
+      for (final line in lines) {
+        // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
+        if (RegExp(r'^\s*#').hasMatch(line)) continue;
+        if (re.hasMatch(line)) matches.add(line.trim());
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
+    });
+
+    test("antipattern #6 (hook) לא קיים ב-.githooks/pre-commit", () {
+      final hook = File('../.githooks/pre-commit');
+      if (!hook.existsSync()) {
+        // הריצה אולי לא מ-app_flutter/ — דלג בלי לשבור.
+        return;
+      }
+      final matches = <String>[];
       final re = RegExp(r'''git diff --cached [a-z].*\.md >/dev/null''');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
@@ -99,7 +117,7 @@ void main() {
         reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #6 לא קיים", () {
+    test("antipattern #7 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''^\s*print\(''');
@@ -120,7 +138,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #7 לא קיים", () {
+    test("antipattern #8 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''matcher.*[\"\']Bash[\"\']\s*$''');
@@ -141,7 +159,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #8 לא קיים", () {
+    test("antipattern #9 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''core\.hooksPath\s*=\s*[^.]''');
@@ -162,7 +180,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #9 לא קיים", () {
+    test("antipattern #10 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''TEST_OUT=\$\([^)]+\)\s*$''');
@@ -183,7 +201,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #10 לא קיים", () {
+    test("antipattern #11 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''grep -oE "\[0-9\]\+ tests"\s''');
@@ -204,7 +222,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #11 לא קיים", () {
+    test("antipattern #12 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''git diff --cached.*\| sort \| uniq -d''');
@@ -225,7 +243,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #12 לא קיים", () {
+    test("antipattern #13 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''flutter (test|analyze|build).*--no-pub''');
@@ -246,7 +264,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #13 לא קיים", () {
+    test("antipattern #14 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''^(wip|test|asdf|tmp)$''');
@@ -267,7 +285,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #14 לא קיים", () {
+    test("antipattern #15 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''grep -E "\$[a-z]+"''');
@@ -288,7 +306,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #15 לא קיים", () {
+    test("antipattern #16 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''kSecret\w*\s*=\s*compute''');
@@ -309,7 +327,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #16 לא קיים", () {
+    test("antipattern #17 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''export PATH=.*[/]home[/]user''');
@@ -330,7 +348,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #17 לא קיים", () {
+    test("antipattern #18 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''^Owner:\s*$''');
@@ -351,7 +369,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #18 לא קיים", () {
+    test("antipattern #19 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''lib/screens/.*\.dart.*\+\+\+.*no visual''');
@@ -372,7 +390,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #19 לא קיים", () {
+    test("antipattern #20 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''prettyInch\([a-z]+\).*finder''');
@@ -393,7 +411,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #20 לא קיים", () {
+    test("antipattern #21 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''parseSizeTokens.*\?\?.*tokensFromDims''');
@@ -414,7 +432,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #21 לא קיים", () {
+    test("antipattern #22 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''\\\\d\\+×\\\\d\\+''');
@@ -435,7 +453,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #22 לא קיים", () {
+    test("antipattern #23 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''pubspec.yaml.*grep.*"\^"''');
@@ -456,7 +474,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #23 לא קיים", () {
+    test("antipattern #24 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''sha256sum.*\.git/hooks.*compare''');
@@ -477,7 +495,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #24 לא קיים", () {
+    test("antipattern #25 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''awk.*Audit.*,.*\^##''');
@@ -498,7 +516,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #25 לא קיים", () {
+    test("antipattern #26 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''grep -c.*\|\| echo 0''');
@@ -519,7 +537,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #26 לא קיים", () {
+    test("antipattern #27 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''sha256sum.*2>/dev/null.*\|.*cut.*\|\| echo "missing"''');
@@ -540,7 +558,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #27 לא קיים", () {
+    test("antipattern #28 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''grep.*ANTIPATTERN.*\|.*sed.*pattern\b[^|]''');
@@ -561,7 +579,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #28 לא קיים", () {
+    test("antipattern #29 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''sha256sum.*git show.*HEAD.*githooks''');
@@ -582,7 +600,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #29 לא קיים", () {
+    test("antipattern #30 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''while.*ANTIPATTERN.*done.*STAGED_DART=\$\(git diff''');
@@ -603,7 +621,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #30 לא קיים", () {
+    test("antipattern #31 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''git diff --cached app_flutter/lib/screens/home_shell.dart''');
@@ -624,7 +642,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #31 לא קיים", () {
+    test("antipattern #32 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r''''v5\.\d+ · \d+\.\d+\.\d+' .*v5\.41''');
@@ -645,7 +663,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #32 לא קיים", () {
+    test("antipattern #33 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''flutter test --no-pub --reporter expanded''');
@@ -666,7 +684,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #33 (hook) לא קיים ב-.githooks/pre-commit", () {
+    test("antipattern #34 (hook) לא קיים ב-.githooks/pre-commit", () {
       final hook = File('../.githooks/pre-commit');
       if (!hook.existsSync()) {
         // הריצה אולי לא מ-app_flutter/ — דלג בלי לשבור.
@@ -684,7 +702,7 @@ void main() {
         reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #34 לא קיים", () {
+    test("antipattern #35 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp(r'''err.*32.*exit=\$TEST_EXIT.*תקן את הבדיקות''');

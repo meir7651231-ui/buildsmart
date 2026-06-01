@@ -53,16 +53,25 @@ ok()   { :; }  # שתיקה — רק כשלים נראים
 FINGERPRINT_FILE="$REPO_ROOT/.git/stuck_fingerprints.txt"
 touch "$FINGERPRINT_FILE"
 
-# חתימת הניסיון הנוכחי
+# חתימת הניסיון הנוכחי (שמות הקבצים ב-staging)
 CURRENT_FP=$(git diff --cached --name-only | sort | sha256sum | cut -d' ' -f1 | head -c 12)
+# תיקון #3 (אודיט 2026-06-01): גם HEAD — שינוי סט-הקבצים לא יתחמק מזיהוי retry.
+# retry = ניסיון commit כש-HEAD לא זז מאז כשל (אי-אפשר להצליח commit עם שער נכשל,
+# אז HEAD זז רק בהצלחה → אותו HEAD + כשל קודם = retry, לא משנה אילו קבצים).
+HEAD_SHA=$(git rev-parse HEAD 2>/dev/null || echo "none")
 IS_RETRY="false"
-# אם החתימה הופיעה ב-5 השעות האחרונות → זה retry
+# אם חתימת-הקבצים או ה-HEAD הופיעו ב-5 השעות האחרונות → retry
 NOW=$(date +%s)
 FIVE_HOURS_AGO=$((NOW - 18000))
 while IFS=' ' read -r fp ts rest; do
-    if [[ "$fp" == "$CURRENT_FP" && "$ts" -gt "$FIVE_HOURS_AGO" ]]; then
-        IS_RETRY="true"
-        break
+    [[ "$ts" -gt "$FIVE_HOURS_AGO" ]] || continue
+    if [[ "$fp" == "$CURRENT_FP" ]]; then
+        IS_RETRY="true"; break
+    fi
+    # תואם-לאחור: רשומה ישנה בלי "head=" → rec_head=כל ה-rest, לא יתאים ל-sha
+    rec_head="${rest##*head=}"
+    if [[ "$HEAD_SHA" != "none" && "$rec_head" == "$HEAD_SHA" ]]; then
+        IS_RETRY="true"; break
     fi
 done < "$FINGERPRINT_FILE"
 
@@ -632,7 +641,7 @@ fi
 
 # רישום fingerprint אם נכשל
 if [[ "$FAIL" -gt 0 ]]; then
-    echo "$CURRENT_FP $NOW gates=$FAIL" >> "$FINGERPRINT_FILE"
+    echo "$CURRENT_FP $NOW gates=$FAIL head=$HEAD_SHA" >> "$FINGERPRINT_FILE"
     # שמור רק 100 שורות אחרונות
     tail -100 "$FINGERPRINT_FILE" > "$FINGERPRINT_FILE.tmp" && mv "$FINGERPRINT_FILE.tmp" "$FINGERPRINT_FILE"
 fi
