@@ -17,7 +17,6 @@
 1. כל פיצ׳ר חדש = `app_flutter/` בלבד.
 2. תיקון באג ב-`app/` מותר (זה ה-live).
 3. אם הוספת string חדש ב-`app/` — להעתיק verbatim ל-`app_flutter/`.
-4. R1–R9 חלים על שני הפרויקטים.
 
 **Flutter dev loop:**
 ```bash
@@ -32,26 +31,10 @@ flutter run -d chrome        # dev
 
 ---
 
-## ⚠️ הכלל המוחלט — R2: אין חלון, נקודה.
-
-**שום קומפוננטה לא ממלאת את `<main class="content">` עבור פיצ׳ר חדש.**
-כל פעולה חדשה = **dial**, ולא משנה מה כתוב בלגאסי.
-
-- ❌ אסור: views חדשים שמחליפים את ה-main
-- ❌ אסור: `<section class="dashboard">` מלא מסך
-- ❌ אסור: dashboards לפי persona (Store/Courier/Worker יישארו placeholder מינימלי)
-- ✅ מותר: dial רב-רמתי דרך FAB (BS / menu / search)
-- ✅ העיקרון: כשהאב-טיפוס פותח חלון מלא — אנחנו מתרגמים אותו ל-**dial**
-
-**הפרת R2 שלוש פעמים גרמה ל-3 רברטים. אל תתחיל לקוד dashboard view לפני שאישרת מפורשות.**
-
----
-
 ## אם הגעת לכאן למשימת BuildSmart (תפריט / הגדרות / dial)
 
 קרא בסדר הזה לפני שאתה נוגע בקוד:
-1. `app/RULES.md` — R1–R9 (R2 אבסולוטי)
-2. `app/knowledge/wip-menu-wiring.md` — מה בנוי
+1. `app/knowledge/wip-menu-wiring.md` — מה בנוי
 3. `app/knowledge/inspector/checklist.md` — Inspector protocol
 4. הדוח האחרון: `app/knowledge/inspections/INSP-0040-*.md`
 
@@ -61,8 +44,7 @@ flutter run -d chrome        # dev
 
 ## ⚠️ אסור לקרוא בתור הנחיה לעבודה
 
-- `app/knowledge/IMPLEMENTATION_PROTOCOL.md` — **DEPRECATED**. מנחה לבנות
-  dashboards כ-views, וזה הפרת R2. לקריאה היסטורית בלבד.
+- `app/knowledge/IMPLEMENTATION_PROTOCOL.md` — **DEPRECATED**. לקריאה היסטורית בלבד.
 
 ---
 
@@ -80,21 +62,6 @@ flutter run -d chrome        # dev
 - `app/RULES.md`
 
 לכל שאר המשימות (בגים, features אחרים, שאלות) — תחבור ישר לעבודה.
-
----
-
-## כללים קריטיים — תקציר R1–R9
-
-| # | כלל | עיקרון |
-|---|-----|--------|
-| **R1** | 5 FABs בדיוק | BS · חיפוש · BS-mode · תפריט · BS — לא לשנות |
-| **R2** | **אין חלון, נקודה** | persona views = placeholder. כל פיצ׳ר = dial |
-| **R3** | הגדרות = dial בלבד | אסור drawer / sheet / modal |
-| **R4** | כל שורת dial = circle + label | שני elements נפרדים תמיד |
-| **R6** | טקסטים עבריים = verbatim | חייב לבוא מ-index.html, לא המצאה |
-| **R7** | regression לא נשבר | `src/test/tests/tabs.tsx` חייב לעבור |
-| **R8** | אין המצאה | אם אתה לא רואה את זה בלגאסי, אל תוסיף |
-| **R9** | שדות טקסט = inline input | שורת הקלדה צמודה לעלה, לא prompt/sheet/modal |
 
 ---
 
@@ -122,7 +89,7 @@ node app/smoke-settings.mjs          # 21/21 PASS חובה
 |------|--------|
 | `app/src/store/app-settings.ts` | settings signal + persist + DOM effect |
 | `app/src/store/bs-store.ts` | persona + BS dial drill state |
-| `app/src/store/user-profile.ts` | user profile fields (R9) |
+| `app/src/store/user-profile.ts` | user profile fields |
 | `app/src/store/toast-store.ts` | toast system |
 | `app/src/components/menu-speed-dial.tsx` | menu FAB dial — 4 tabs |
 | `app/src/components/bs/bs-dial.tsx` | BS FAB dial — 5 personas × sub-trees |
