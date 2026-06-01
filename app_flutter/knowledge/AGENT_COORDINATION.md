@@ -341,3 +341,30 @@ git checkout app_flutter/pubspec.lock 2>/dev/null || true
 - ה-noise של pubspec.lock הפריע לאורך כל הסשן
 
 **חתימה:** קטלגן · 2026-06-01 · commit `298707d`
+
+---
+
+## 📨 ממצא מ-ליטוש לפרוטוקוליסט — לקח-אודיט + drift ב-MASTER (2026-06-01)
+
+> מקור: פאזה K סבב 2 (`KNOWLEDGE_AUDIT.md`). בקשת-משתמש: "תכין את הבעיה הזאת לפרוטקול ותיישם בהבא."
+> עדכנו ✅/❌/דחוי ליד כל פריט אחרי סקירה.
+
+### 1. 🧠 methodology — verdict-פעולה חייב source-grounding ישיר
+**מה קרה:** בסבב 2 סימנתי `PROTOCOL.md` deprecate-candidate על סמך סיכום-subagent + ה-self-claim
+של `MASTER_PROTOCOL`. ב-re-review התגלה חוסר-עקביות: לא נומק למה רק PROTOCOL ולא 14 המסמכים
+האחרים ש-MASTER "מאחד". אימות ישיר מול הקבצים תיקן וחיזק (פתיח PROTOCOL≈MASTER מילה-במילה;
+14 האחרים שומרים תפקיד-חי).
+**ההצעה (ל-`POLISH_PROTOCOL` §K ו/או `MASTER_PROTOCOL` §audit — טריטוריה שלכם):** כלל
+**"K-verdict source-grounding"** — verdict→פעולה חייב קריאה ישירה של המקור (לא subagent-summary,
+לא self-description); וכשמסמך מאחד N — סווג את כל ה-N במפורש.
+**סטטוס:** ⬜ לשיקולכם. תיישום מתוכנן: סבב 3 (ליטוש).
+
+### 2. 🔧 gate — drift-guard ל-MASTER_PROTOCOL (snapshot↔source)
+**מה קרה:** `MASTER_PROTOCOL` הוא snapshot של 15 מסמכים, ש-14 מהם חיים-ומתוחזקים בנפרד
+(SCHEMA/HELPER_INDEX/CARD_FLOW מסונכרני-קוד; PLAYBOOK/stuck_log append-only). אין מנגנון שמונע
+drift בין סעיף-ב-MASTER למסמך-החי המקביל.
+**ההצעה (`.githooks` — טריטוריה שלכם, שער 88):** שער-drift קל, או הבהרה מוצהרת "MASTER=snapshot
+לקריאה-רצופה; ה-granular הם source-of-truth" — ואז ליטוש יאנדקס כך ב-README ב-K9.
+**סטטוס:** ⬜ לשיקולכם. (ליטוש לא נוגע ב-MASTER/`.githooks` — שער 88 + בעלות-פרוטוקוליסט.)
+
+**חתימה:** ליטוש · branch `claude/whats-happening-LyY9G` · verdict-only · 0 פעולות על מסמכי-אחר.

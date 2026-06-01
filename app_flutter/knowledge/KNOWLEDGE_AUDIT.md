@@ -46,7 +46,7 @@
 > `AGENT_WORK_PLAN` · generator · `stuck_log`/`mutation_log` append-only).
 
 ### K1 — ממצא-על
-- 76 מסמכי `.md`: ~45 top-level + 31 בתתי-תיקיות (`port/` 19 · `spec/` 9 · `adr/` 3 · `inspections/` 1).
+- 76 מסמכי `.md`: **44 top-level + 32 בתתי-תיקיות** (`port/` 19 · `spec/` 9 · `adr/` 3 · `inspections/` 1).
   כמעט כולם נוצרו 2026-05-31 בקומיט-על יחיד ("close M1-M7 session").
 - **הבעיה אינה כפילות המונית.** סקירת-תוכן מצביעה על **היררכיות-תכלית נבדלות**, לא שכפול.
   הבעיה האמיתית: **פער-אינדקס** — README מאנדקס 18 שמות בלבד, ו-**27 מסמכי top-level יתומים**.
@@ -158,5 +158,33 @@
 - **SUBMIT (דורש אישור-משתמש):** deprecate ל-`PROTOCOL.md` + הכרעת-סמכות חוק-העל (K5).
 - **🔒 audit-only (לא לגעת):** MASTER_PROTOCOL · CARRY_FORWARD · PROTOCOL_AUDIT_PLAN · AGENT_WORK_PLAN · mutation_log · stuck_log + `.githooks/`. אאנדקס אותם ב-K9, **בלי לערוך** את גופם.
 
-**סיכום סבב 2:** 45 מסמכי top-level מסווגים · 27 לאינדקס (K9) · 1 deprecate-candidate (SUBMIT) ·
-6 audit-only(🔒) · **0 פעולות בוצעו**. אפס הפניות נשברו.
+**סיכום סבב 2 (pass ראשון):** 44 מסמכי top-level מסווגים · 27 לאינדקס (K9) · 1 deprecate-candidate
+(SUBMIT) · 6 audit-only(🔒) · **0 פעולות בוצעו**. אפס הפניות נשברו.
+
+---
+
+### ביקורת-עצמית — re-review מול הקבצים (2026-06-01)
+> אומת ישירות מול גוף-המסמכים (לא רק סיכום-subagent). זהו ה-grounding שדרוש לפני כל פעולה.
+- ✅ **`PROTOCOL.md` → deprecate-candidate אומת.** פתיח PROTOCOL ≈ פתיח MASTER מילה-במילה (אותו
+  ציטוט INSP-0025, אותה שורת "source of truth לתהליך"); MASTER הוא ה-evolution הישיר (החליף רק
+  `ROADMAP`→`SMARTPRODUCT_ROADMAP`). אף מקום פעיל לא מצטט את PROTOCOL.md כחוק. הוורדיקט מחוזק.
+- ✅ **MASTER = הסמכות הפעילה** — מוגן ע"י **שער 88** (`.allow_master_protocol_edit`), מצוטט
+  מ-hook/stuck_log/POLISH/PROTOCOL_AUDIT_PLAN. מאשר 🔒 + SUBMIT.
+- ⚠️ **למה רק PROTOCOL (ולא 14 ש-MASTER "מאחד"):** 14 שומרים תפקיד-חי נבדל (SMARTPRODUCT_ROADMAP=
+  מקור-תוכן מוצהר; PLAYBOOK/stuck_log=append-only; SCHEMA/HELPER_INDEX/CARD_FLOW=reference מסונכרן-קוד).
+  PROTOCOL לבדו חסר תפקיד-חי — הגרסה הישנה בלבד.
+- ⚠️ **Watch-item (לא פעולה):** MASTER הקפיא snapshot של 14 מסמכים חיים → **סיכון-drift**. הוגש
+  לפרוטוקוליסט (`AGENT_COORDINATION.md` §ממצא ליטוש).
+- ⚠️ **תיקוני-ספירה:** top-level=44 (לא 45) · subdir=32 (לא 31). תוקן לעיל.
+
+### לקח-מתודולוגיה — הוכן לפרוטוקול · תיישום בסבב 3
+> **K-verdict source-grounding:** verdict שמוביל לפעולה (deprecate/merge/delete) חייב קריאה
+> **ישירה** של מסמך-המקור — לא סיכום-subagent ולא ה-self-description של המסמך.
+> **Consolidation-consistency:** כשמסמך טוען שהוא מאחד N מסמכים — סווג את **כל ה-N** במפורש
+> (superseded מול שומר-תפקיד-חי), אל תבודד אחד בלי נימוק.
+> הוגש כהצעה לפרוטוקוליסט (`AGENT_COORDINATION.md`). **תיישום: סבב 3.**
+
+### סבב 3 — מתוכנן (טרם בוצע)
+1. verdict ל-32 מסמכי תת-תיקייה (`port/`/`spec/`/`adr/`/`inspections/`) — צפי keep (עוגנים/אפיון).
+2. יישום לקח-המתודולוגיה: סיווג עקבי ומאומת-מקור של 15 מסמכי-ה-consolidation של MASTER.
+3. K9 (בניית README index) — לאחר GO + הכרעת יחס MASTER↔granular.
