@@ -392,6 +392,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
   String? _sub;
   String? _size;
   String? _angle;
+  String? _letter;
 
   @override
   Widget build(BuildContext context) {
@@ -416,12 +417,20 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     final angleChips = narrow.label == 'זווית'
         ? const <String>[]
         : _angleTokensIn(pool).map((t) => t.label).toList();
+    // Secondary letter-size row (S/M/L): some collars/anchors carry a letter
+    // size instead of a number. Surfaced like the angle axis, co-filterable.
+    final letterChips = _letterOptions(pool);
     var results = pool;
     if (_size != null) {
       results = results.where((p) => _productHasChip(p, _size!)).toList();
     }
     if (_angle != null) {
       results = results.where((p) => _productHasChip(p, _angle!)).toList();
+    }
+    if (_letter != null) {
+      results = results
+          .where((p) => letterSizeTokens(p.nameHe).contains(_letter))
+          .toList();
     }
     // Count of cards the user will actually see (variants collapse to one).
     final shown = results.map(productListDedupeKey).toSet().length;
@@ -432,6 +441,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         if (subs.length > 1) _subBar(subs),
         if (narrow.chips.isNotEmpty) _sizeBar(narrow.label, narrow.chips),
         if (angleChips.length > 1) _angleBar(angleChips),
+        if (letterChips.length > 1) _letterBar(letterChips),
         if (results.isNotEmpty) _countStrip(shown),
         if (results.isNotEmpty &&
             !ref.watch(finderChipTipDismissedProvider))
@@ -455,6 +465,28 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
       for (final c in chips)
         _chip(c, _angle == c, () => setState(() => _angle = c)),
     ]);
+  }
+
+  /// Secondary chip row for letter sizes (S/M/L) — keyed against `_letter`.
+  Widget _letterBar(List<String> chips) {
+    return _chipRow('מידה', [
+      _chip('הכל', _letter == null, () => setState(() => _letter = null)),
+      for (final c in chips)
+        _chip(c, _letter == c, () => setState(() => _letter = c)),
+    ]);
+  }
+
+  /// Distinct letter sizes across the pool (small→large), or empty.
+  List<String> _letterOptions(List<LipskeyCatalogProduct> pool) {
+    final all = <String>{};
+    for (final p in pool) {
+      all.addAll(letterSizeTokens(p.nameHe));
+    }
+    final out = all.toList()
+      ..sort((a, b) => kLetterSizeOrder
+          .indexOf(a)
+          .compareTo(kLetterSizeOrder.indexOf(b)));
+    return out;
   }
 
   // One-time hint explaining the orange chips on the product cards below
@@ -514,6 +546,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
             _sub = null;
             _size = null;
             _angle = null;
+            _letter = null;
           }),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -588,6 +621,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         onTap: () => setState(() {
           if (_angle != null) {
             _angle = null;
+            _letter = null;
           } else if (_size != null) {
             _size = null;
           } else if (_sub != null) {
@@ -682,6 +716,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                 _sub = null;
                 _size = null;
                 _angle = null;
+                _letter = null;
               })),
       for (final s in subs)
         _chip(s.label, _sub == s.label,
@@ -689,6 +724,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                   _sub = s.label;
                   _size = null;
                   _angle = null;
+                  _letter = null;
                 })),
     ]);
   }

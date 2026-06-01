@@ -296,3 +296,26 @@ SizeFamily? dominantFamily(List<SizeToken> toks) {
   });
   return best;
 }
+
+/// Letter clothing-style sizes (S / M / L …) that some products carry instead
+/// of a numeric size — e.g. clamp collars "אקווה אוגן כפול M". Ordered
+/// small→large for display. EXCLUDES the `L=` length prefix (e.g. gray pipe
+/// "DN40 L=50 ס"מ" — that L is "length", not a size letter).
+const List<String> kLetterSizeOrder = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+final RegExp _kLetterRe = RegExp(
+  // a standalone size letter: not glued to another latin/hebrew letter, and
+  // not immediately followed by '=' (which marks a length like L=50).
+  r'(?<![A-Za-zא-ת])(XXL|XXS|XL|XS|S|M|L)(?![A-Za-zא-ת=])',
+);
+
+/// Distinct letter sizes found in a product name, small→large. Empty when none.
+List<String> letterSizeTokens(String name) {
+  final found = <String>{};
+  for (final m in _kLetterRe.allMatches(name)) {
+    found.add(m.group(0)!);
+  }
+  final out = found.toList()
+    ..sort((a, b) => kLetterSizeOrder.indexOf(a).compareTo(kLetterSizeOrder.indexOf(b)));
+  return out;
+}

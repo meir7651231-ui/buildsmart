@@ -262,4 +262,24 @@ void main() {
       expect(dominantFamily(const []), isNull);
     });
   });
+
+  _i5();
+}
+
+void _i5() {
+  group('letterSizeTokens (I5) — S/M/L axis, excludes L= length', () {
+    test('clamp collar M / S are letter sizes', () {
+      expect(letterSizeTokens('אקווה אוגן כפול M'), ['M']);
+      expect(letterSizeTokens('אקווה אוגן כפול S'), ['S']);
+    });
+    test('L= length prefix is NOT a letter size', () {
+      expect(letterSizeTokens('צינור אפור DN40 L=50 ס"מ'), isEmpty);
+    });
+    test('distinct letters sorted small→large', () {
+      expect(letterSizeTokens('ערכה M ו-S ו-XL'), ['S', 'M', 'XL']);
+    });
+    test('letters glued inside words are ignored', () {
+      expect(letterSizeTokens('HDPE מצמד SLIP'), isEmpty);
+    });
+  });
 }

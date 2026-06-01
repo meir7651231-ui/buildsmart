@@ -700,3 +700,22 @@ RULE: כל provider או map חדש ב-lib screens שמניע UI מקבל שור
 ### ג — כלל המניעה
 ANTIPATTERN: version label bumped in home_shell without the same bump in STATUS
 RULE: כל שינוי של version label ב-home_shell מחייב את אותה גרסה ב-STATUS.md באותו commit. שתי הגרסאות תמיד זהות.
+
+
+---
+
+## 2026-06-01 · I5 · letter-size axis בלע L= length כ"מידה L"
+
+### א — הבעיה
+זיהוי מידות-אות (S/M/L) ל-pool ה-finder. regex תמים ל-L בודד תפס את ה-L
+ב-"צינור אפור DN40 L=50 ס\"מ" (9 מוצרים) — כאן L הוא "אורך" (length=), לא מידה.
+זה היה יוצר ציר "מידה: L" שגוי על כל הצינורות.
+
+### ב — הפתרון
+ה-regex של letterSizeTokens דורש שהאות לא תהיה צמודה לאות אחרת ולא ייעקב
+אחריה תו שווה: lookahead שלילי על אות-לטינית/עברית ועל סימן-שווה. נדרש >1
+מידות שונות ב-pool כדי שהציר יופיע (S יחיד בניקוז לא יוצר ציר).
+
+### ג — כלל המניעה
+ANTIPATTERN: letter size regex without a negative lookahead on equals sign
+RULE: זיהוי מידת-אות בודדת חייב lookbehind/lookahead שמוציא אות צמודה וסימן שווה. L צמוד לשווה הוא אורך, לא מידה. דורשים יותר ממידה אחת ב-pool לפני הצגת ציר.
