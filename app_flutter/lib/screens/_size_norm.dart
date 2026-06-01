@@ -6,7 +6,7 @@
 ///  - numeric value for true ordering (25, 30, 200, 250 — not lex).
 library;
 
-import 'package:flutter/widgets.dart' show immutable, TextDirection;
+import 'package:flutter/widgets.dart' show TextDirection, immutable;
 
 /// Physical family of a size token. Different families do NOT share a chooser
 /// row — a user can't meaningfully compare an inch diameter to a cm length.
@@ -137,7 +137,7 @@ List<SizeToken> parseSizeTokens(String name) {
     final display = kHardToRenderFractions[tok.label] ?? tok.label;
     out.add(display == tok.label
         ? tok
-        : SizeToken(label: display, family: tok.family, mm: tok.mm));
+        : SizeToken(label: display, family: tok.family, mm: tok.mm),);
   }
   return out;
 }
@@ -171,7 +171,7 @@ SizeToken? _tokenize(String label) {
   if (dn != null) {
     final v = double.parse(dn.group(1)!);
     return SizeToken(label: 'DN${_fmt(v)}',
-        family: SizeFamily.dnDiameter, mm: v);
+        family: SizeFamily.dnDiameter, mm: v,);
   }
   // mm — normalize the number so `020 מ"מ` reads `20 מ"מ`.
   final mm = RegExp(r'^(\d+(?:\.\d+)?) ?מ["״]מ$').firstMatch(label);
@@ -201,7 +201,7 @@ SizeToken? _tokenize(String label) {
     return SizeToken(
         label: '${inches.toInt()}"',
         family: SizeFamily.inchDiameter,
-        mm: inches * 25.4);
+        mm: inches * 25.4,);
   }
   return null;
 }
@@ -214,7 +214,7 @@ List<SizeToken> tokensFromDims(Map<String, dynamic> dims) {
     final n = double.tryParse(dnRaw.trim());
     if (n != null) {
       out.add(SizeToken(label: 'DN${n.toInt()}',
-          family: SizeFamily.dnDiameter, mm: n));
+          family: SizeFamily.dnDiameter, mm: n,),);
     }
   }
   final cm = double.tryParse(dims['L (cm)']?.toString() ?? '');
@@ -283,8 +283,8 @@ SizeFamily? dominantFamily(List<SizeToken> toks) {
     counts[t.family] = (counts[t.family] ?? 0) + 1;
   }
   SizeFamily? best;
-  int bestRank = 1 << 30;
-  int bestCount = -1;
+  var bestRank = 1 << 30;
+  var bestCount = -1;
   counts.forEach((f, c) {
     final r = _kFamilyPrecedence.indexOf(f);
     final fr = r < 0 ? _kFamilyPrecedence.length : r;
@@ -306,7 +306,7 @@ const List<String> kLetterSizeOrder = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'];
 final RegExp _kLetterRe = RegExp(
   // a standalone size letter: not glued to another latin/hebrew letter, and
   // not immediately followed by '=' (which marks a length like L=50).
-  r'(?<![A-Za-zא-ת])(XXL|XXS|XL|XS|S|M|L)(?![A-Za-zא-ת=])',
+  '(?<![A-Za-zא-ת])(XXL|XXS|XL|XS|S|M|L)(?![A-Za-zא-ת=])',
 );
 
 /// Distinct letter sizes found in a product name, small→large. Empty when none.

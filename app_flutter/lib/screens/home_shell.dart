@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.53 · 1.6.29 · Finder: אייקון "מאתר" במקום emoji ריק בכרטיס המוצר + שורת קטלוג (I1-fu)',
+                          'v5.54 · 1.6.29 · I10-partial: dart-fix sweep — 44 lints ב-finder_screen + _size_norm',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

@@ -40,40 +40,40 @@ const List<FinderGroup> kFinderGroups = [
     'ברזי כיור', 'ברזי מטבח', 'ברזי אמבטיה', 'ברזי מקלחת', 'ברזי קיר',
     'ברזי ניל', 'ברזי מעבר', 'ברזי דלי', 'ברזי גן', 'ברזים',
     'מחלקים', 'נקודות מים', 'אביזרי ברזים', 'דיורים ופיות',
-  }, desc: 'ברזים לכיור, מטבח, אמבטיה, מקלחת וגינה'),
+  }, desc: 'ברזים לכיור, מטבח, אמבטיה, מקלחת וגינה',),
   FinderGroup('🚽', 'אסלות', {
     'אסלות וכיורים', 'מושבי אסלה', 'אביזרי אסלה', 'מנגנונים',
     'חלקים סניטריים', 'התקנה גבוהה', 'התקנה נמוכה', 'התקנה צמודה',
-  }, desc: 'אסלות, מושבים, מנגנוני הדחה ואביזרים'),
+  }, desc: 'אסלות, מושבים, מנגנוני הדחה ואביזרים',),
   FinderGroup('🚿', 'מקלחת ואמבטיה', {
     'ראשי מקלחת', 'מזלפי יד', 'זרועות דוש', 'אביזרי מקלחת',
     'מערכות אמבטיה', 'ערכות רחצה', 'מערכות שטיפה',
     'אביזרי חדר רחצה', 'ידיות אחיזה',
-  }, desc: 'ראשי מקלחת, מזלפים, מערכות אמבטיה וידיות אחיזה'),
+  }, desc: 'ראשי מקלחת, מזלפים, מערכות אמבטיה וידיות אחיזה',),
   FinderGroup('🕳️', 'ניקוז', {
     'תעלות ניקוז', 'מחסומי רצפה', 'מחסומים גלויים', 'מאספי רצפה',
     'מאספים וקולטים', 'סיפונים', 'כיסויים', 'מכסים ורשתות', 'ניקוז גג',
     'אביזרי ביוב', 'מסעפים וחיבורי אסלה', 'זקיף אסלה',
-  }, desc: 'מחסומי רצפה, סיפונים, תעלות ניקוז ומכסים'),
+  }, desc: 'מחסומי רצפה, סיפונים, תעלות ניקוז ומכסים',),
   FinderGroup('📏', 'צינורות', {
     'צינורות אפורות', 'צינורות', 'צינורות PP', 'צינורות רב שכבתי',
     'צינורות גמישים', 'צינורות מקלחת',
-  }, desc: 'צינורות מים, ביוב, גמישים ורב-שכבתיים'),
+  }, desc: 'צינורות מים, ביוב, גמישים ורב-שכבתיים',),
   FinderGroup('🌱', 'גינה', {'ציוד גן'}, desc: 'ציוד גינה והשקיה'),
   FinderGroup('🔗', 'מחברים וחיבורים', {
     'אביזרי נחושת', 'מחברי HDPE', 'מחברי NTM', 'אביזרי תבריג',
     'אביזרי שקע-תקע', 'ברכיים', 'מצמדים וצינורות', 'אטמים ופקקים',
     'אל חזור', 'אביזרי חיבור', 'סטי הידוק וחיבורים', 'פקקים וצינורות',
-  }, desc: 'מחברים, ברכיים, מצמדים ואביזרי תבריג'),
+  }, desc: 'מחברים, ברכיים, מצמדים ואביזרי תבריג',),
   FinderGroup('🔩', 'חבקים ותלייה', {
     'חבקי תליה', 'חבקי צינור', 'עוגנים ובנדים',
-  }, desc: 'חבקים, תליות ועוגנים לצנרת'),
+  }, desc: 'חבקים, תליות ועוגנים לצנרת',),
   FinderGroup('🔵', 'צנרת PPR', {
     'צינורות PPR אספקת מים', 'צינורות PPR פייזר', 'צינורות PPR מיזוג אוויר',
     'ברכיים PPR', 'מסעפים PPR', 'מצמדים PPR', 'מתאמים PPR', 'רוכבים PPR',
     'פקקים PPR', 'אומגה PPR', 'ברזים PPR', 'צווארונים ואוגנים PPR',
     'אביזרי ריתוך חשמלי PPR', 'כלי ריתוך PPR',
-  }, desc: 'מערכת צנרת PPR לאספקת מים ומיזוג — פולירול'),
+  }, desc: 'מערכת צנרת PPR לאספקת מים ומיזוג — פולירול',),
   FinderGroup('🔧', 'אחר', {}, desc: 'כל שאר המוצרים בקטלוג'), // catch-all
 ];
 
@@ -133,7 +133,7 @@ Widget finderGroupGlyph(String label, {required double size}) {
         // If the file is missing/corrupt, degrade to the icon — never a
         // broken-image box.
         errorBuilder: (_, __, ___) =>
-            Icon(finderGroupIcon(label), size: size * 0.7, color: BsTokens.brand));
+            Icon(finderGroupIcon(label), size: size * 0.7, color: BsTokens.brand),);
   }
   return Icon(finderGroupIcon(label), size: size * 0.7, color: BsTokens.brand);
 }
@@ -340,7 +340,7 @@ List<String> _colorOptions(List<LipskeyCatalogProduct> pool) {
 /// axis label (for the chip-row hint) plus the chip *labels*; empty when
 /// nothing splits the pool.
 ({String label, List<String> chips}) _narrowAxis(
-    List<LipskeyCatalogProduct> pool, String? subtype) {
+    List<LipskeyCatalogProduct> pool, String? subtype,) {
   final curated = subtype == null ? null : kFinderFacets[subtype];
   if (curated != null) {
     final matching =
@@ -450,7 +450,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
           child: results.isEmpty
               ? const Center(
                   child: Text('לא נמצאו מוצרים',
-                      style: TextStyle(color: _mute)))
+                      style: TextStyle(color: _mute),),)
               : LipskeyProductsList(products: results),
         ),
       ],
@@ -485,7 +485,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     final out = all.toList()
       ..sort((a, b) => kLetterSizeOrder
           .indexOf(a)
-          .compareTo(kLetterSizeOrder.indexOf(b)));
+          .compareTo(kLetterSizeOrder.indexOf(b)),);
     return out;
   }
 
@@ -504,14 +504,14 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         const SizedBox(width: 6),
         const Expanded(
           child: Text('צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע',
-              style: TextStyle(color: _ink, fontSize: 12)),
+              style: TextStyle(color: _ink, fontSize: 12),),
         ),
         GestureDetector(
           onTap: () =>
               ref.read(finderChipTipDismissedProvider.notifier).state = true,
           child: const Icon(Icons.close, size: 16, color: _mute),
         ),
-      ]),
+      ],),
     );
   }
 
@@ -522,7 +522,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
       child: Align(
         alignment: Alignment.centerRight,
         child: Text('נמצאו $n מוצרים',
-            style: const TextStyle(color: _mute, fontSize: 12)),
+            style: const TextStyle(color: _mute, fontSize: 12),),
       ),
     );
   }
@@ -555,7 +555,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                 width: 54,
                 height: 54,
                 decoration: const BoxDecoration(
-                    color: _surface, shape: BoxShape.circle),
+                    color: _surface, shape: BoxShape.circle,),
                 alignment: Alignment.center,
                 child: finderGroupGlyph(g.label, size: 46),
               ),
@@ -568,7 +568,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                         style: const TextStyle(
                             color: _ink,
                             fontSize: 17,
-                            fontWeight: FontWeight.w600)),
+                            fontWeight: FontWeight.w600,),),
                     const SizedBox(height: 3),
                     Row(
                       children: [
@@ -577,13 +577,13 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                  color: _mute, fontSize: 13)),
+                                  color: _mute, fontSize: 13,),),
                         ),
                         const SizedBox(width: 8),
                         // Count pill — same idiom as the קטלוג category badge.
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
+                              horizontal: 8, vertical: 2,),
                           decoration: BoxDecoration(
                             color: BsTokens.brand,
                             borderRadius: BorderRadius.circular(10),
@@ -592,7 +592,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                               style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
-                                  fontWeight: FontWeight.w700)),
+                                  fontWeight: FontWeight.w700,),),
                         ),
                       ],
                     ),
@@ -601,7 +601,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
               ),
               const SizedBox(width: 8),
               const Icon(Icons.chevron_left, color: _mute),
-            ]),
+            ],),
           ),
         );
       },
@@ -649,9 +649,9 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      color: _ink, fontSize: 16, fontWeight: FontWeight.w700)),
+                      color: _ink, fontSize: 16, fontWeight: FontWeight.w700,),),
             ),
-          ]),
+          ],),
         ),
       ),
     );
@@ -702,10 +702,10 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
           padding: const EdgeInsets.only(right: 14, left: 2),
           child: Text(hint,
               style: const TextStyle(
-                  color: _mute, fontSize: 12, fontWeight: FontWeight.w700)),
+                  color: _mute, fontSize: 12, fontWeight: FontWeight.w700,),),
         ),
         Expanded(child: _ChipScroll(children: chips)),
-      ]),
+      ],),
     );
   }
 
@@ -717,7 +717,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                 _size = null;
                 _angle = null;
                 _letter = null;
-              })),
+              }),),
       for (final s in subs)
         _chip(s.label, _sub == s.label,
             () => setState(() {
@@ -725,7 +725,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                   _size = null;
                   _angle = null;
                   _letter = null;
-                })),
+                }),),
     ]);
   }
 
@@ -757,7 +757,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
               style: TextStyle(
                   color: active ? Colors.white : _ink,
                   fontSize: 13,
-                  fontWeight: FontWeight.w600)),
+                  fontWeight: FontWeight.w600,),),
         ),
       ),
     );
