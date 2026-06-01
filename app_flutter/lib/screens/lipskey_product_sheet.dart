@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:buildsmart/data/product_images.dart';
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
@@ -45,7 +46,7 @@ void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
             minScale: 0.8,
             maxScale: 5,
             child: Center(
-              child: Image.asset(asset,
+              child: productImage(asset,
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => Text(emoji,
                       style: const TextStyle(fontSize: 96))),
@@ -951,7 +952,7 @@ class _RelatedCard extends StatelessWidget {
             SizedBox(
               height: 56,
               child: product.imageAsset != null
-                  ? Image.asset(product.imageAsset!,
+                  ? productImage(product.imageAsset!,
                       fit: BoxFit.contain,
                       errorBuilder: (_, __, ___) => Center(
                           child: Text(product.typeEmoji,
@@ -1114,7 +1115,7 @@ class _ProductSideState extends State<_ProductSide> {
                 ),
               ),
             ),
-            Image.asset(
+            productImage(
               hasImg ? imgs[i] : product.specImageAsset,
               fit: hasImg ? BoxFit.contain : BoxFit.cover,
               errorBuilder: (_, __, ___) => Center(
@@ -1271,7 +1272,7 @@ class _SpecSideState extends State<_SpecSide> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(
+            productImage(
               specs[i],
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) => Center(
@@ -1385,7 +1386,7 @@ class _VariantSelector extends StatelessWidget {
                   SizedBox(
                     width: 48,
                     height: 48,
-                    child: Image.asset(
+                    child: productImage(
                         p.imageAsset ?? p.specImageAsset,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Text(
@@ -2367,7 +2368,7 @@ class _StripPanel extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.asset('assets/polyroll/products/ppr_green_system.jpg',
+          child: productImage('assets/polyroll/products/ppr_green_system.jpg',
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) => const SizedBox.shrink()),
         ),
@@ -2567,7 +2568,7 @@ class _StripPanel extends StatelessWidget {
                   SizedBox(
                     height: 44,
                     child: q.imageAsset != null
-                        ? Image.asset(q.imageAsset!,
+                        ? productImage(q.imageAsset!,
                             fit: BoxFit.contain,
                             errorBuilder: (_, __, ___) => Center(
                                 child: Text(q.typeEmoji,

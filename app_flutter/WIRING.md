@@ -424,3 +424,15 @@ rather than pixel rendering.
   accessories — SmartAcc-style, not standalone brand cards.
 - Guards: `smartproduct_contract_test` Huliot test now spans 11 cards + sku→card
   spot-checks + ≥117 mapped. Mutation-verified. Pure data; no engine change.
+
+## Product/page images → CDN + bounded on-device cache (#3 weight)
+- `lib/data/product_images.dart`: `productImageUrl` (pure asset-path → CDN-URL map,
+  strips `assets/`) + `resolveProductImage`/`productImage` (drop-in for `Image.asset`).
+  Full-quality images load from Cloudflare R2; cached on-device in a hard-capped LRU
+  (`productImageCache`, ≤700 objects) so the device never fills, even at 60k+ images.
+- Call-sites migrated `Image.asset(` → `productImage(`: `catalog_screen.dart` (2),
+  `lipskey_products_screen.dart` (5), `lipskey_product_sheet.dart` (7),
+  `install_studio_screen.dart` (1). Category icons + fonts stay bundled.
+- Effect: release AAB 141.6 MB → 68.2 MB (−52%), image quality unchanged. Product/page
+  assets de-bundled from pubspec; `IMAGE_BASE_URL` empty → bundled-asset fallback.
+- Guards: `product_images_test.dart` (URL mapping, mutation-verified: strip + base).

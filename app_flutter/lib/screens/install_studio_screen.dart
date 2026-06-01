@@ -3,6 +3,7 @@
 // energy pipes, colour-coded by plumbing system, with a one-tap auto-assemble
 // that fills every connector into an orderable bill of materials.
 import 'dart:math' as math;
+import 'package:buildsmart/data/product_images.dart';
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_hotwater.dart';
@@ -3007,7 +3008,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: p.imageAsset != null
-                    ? Image.asset(
+                    ? productImage(
                         p.imageAsset!,
                         width: 56, height: 56,
                         fit: BoxFit.cover,

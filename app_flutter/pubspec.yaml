@@ -1,7 +1,7 @@
 name: buildsmart
 description: "BuildSmart — construction site procurement & task management"
 publish_to: 'none'
-version: 1.4.1+6
+version: 1.4.2+7
 
 environment:
   sdk: ^3.7.2
@@ -51,13 +51,10 @@ flutter:
   generate: true
 
   assets:
+    # Product/page photos load from Cloudflare R2 at runtime + on-device cache
+    # (lib/data/product_images.dart) — only category icons + fonts stay bundled,
+    # so the app ships light (#3 weight; full image quality preserved on the CDN).
     - assets/lipskey/categories/
-    - assets/lipskey/products/
-    - assets/lipskey/pages/
-    - assets/polyroll/pages/
-    - assets/polyroll/products/
-    - assets/huliot_smartlock/pages/
-    - assets/huliot_smartlock/products/
     - assets/fonts/
 
   fonts:

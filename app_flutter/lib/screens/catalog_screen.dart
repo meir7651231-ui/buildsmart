@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:buildsmart/data/product_images.dart';
 
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
@@ -1919,7 +1920,7 @@ class _SearchResultsList extends ConsumerWidget {
               clipBehavior: Clip.antiAlias,
               alignment: Alignment.center,
               child: p.imageAsset != null
-                  ? Image.asset(p.imageAsset!,
+                  ? productImage(p.imageAsset!,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Text(p.categoryEmoji,
                           style: const TextStyle(fontSize: 20)))
@@ -6650,7 +6651,7 @@ class _FavProductRow extends ConsumerWidget {
       leading: product.imageAsset != null
           ? ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(product.imageAsset!,
+              child: productImage(product.imageAsset!,
                   width: 48, height: 48, fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Text(product.typeEmoji,
                       style: const TextStyle(fontSize: 30))),

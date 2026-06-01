@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:buildsmart/data/product_images.dart';
 
 import 'package:buildsmart/data/catalog_lens.dart';
 import 'package:buildsmart/data/chip_hierarchy.dart';
@@ -376,7 +377,7 @@ class LipskeyProductGridCard extends ConsumerWidget {
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(img.pad),
                     child: product.imageAsset != null
-                        ? Image.asset(product.imageAsset!,
+                        ? productImage(product.imageAsset!,
                             fit: BoxFit.contain,
                             errorBuilder: (_, __, ___) => Text(product.typeEmoji,
                                 style: TextStyle(fontSize: img.emoji)))
@@ -854,10 +855,10 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
           maxScale: 4,
           child: Center(
             child: p.imageAsset != null
-                ? Image.asset(p.imageAsset!, fit: BoxFit.contain,
+                ? productImage(p.imageAsset!, fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) =>
-                        Image.asset(p.specImageAsset, fit: BoxFit.contain))
-                : Image.asset(p.specImageAsset, fit: BoxFit.contain),
+                        productImage(p.specImageAsset, fit: BoxFit.contain))
+                : productImage(p.specImageAsset, fit: BoxFit.contain),
           ),
         ),
       ),
@@ -1104,7 +1105,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                 color: Colors.white,
                 alignment: Alignment.center,
                 child: p.imageAsset != null
-                    ? Image.asset(p.imageAsset!,
+                    ? productImage(p.imageAsset!,
                         height: h,
                         fit: BoxFit.contain,
                         errorBuilder: (_, __, ___) => Text(p.typeEmoji,
