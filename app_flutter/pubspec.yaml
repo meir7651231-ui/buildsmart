@@ -22,6 +22,11 @@ dependencies:
   # i18n — לא בשימוש ישיר; `any` נפתר על שני ה-SDK pins (0.19 ב-3.29 / 0.20 ב-3.44)
   intl: any
 
+  # cloud product images (Cloudflare R2) — keeps the AAB light (−52%); LRU-bounded
+  # on-device cache. lib/data/product_images.dart is the single resolver.
+  cached_network_image: ^3.4.1
+  flutter_cache_manager: ^3.4.1
+
   # native barcode scanner — iOS/Android + Web (limited)
   mobile_scanner: ^5.2.3
 
