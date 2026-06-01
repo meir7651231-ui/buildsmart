@@ -44,6 +44,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Android signing — NEVER commit (secrets / keystore)
+/android/key.properties
+**/*.jks
+**/*.keystore
+
 # Local golden review harness — env-sensitive, kept out of CI (see knowledge/CATALOG-CARD-PROTOCOL.md §10)
 test/failures/
 test/ref_*.png
