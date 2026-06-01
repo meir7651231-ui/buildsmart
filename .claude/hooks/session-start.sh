@@ -1,20 +1,23 @@
 #!/bin/bash
 set -euo pipefail
 
+REPO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+
+# ─── שכבה 3: הפעלת שערי הפרוטוקול — בכל סביבה (גם מקומית), לפני ה-guard ───
+# תיקון אודיט 2026-06-01: core.hooksPath חייב לרוץ גם בסביבה לא-remote,
+# אחרת ה-hook לא נאכף מקומית (רק CI תופס). ההפעלה זולה — קודמת ל-guard.
+if [[ -n "$REPO" && -d "$REPO/.githooks" ]]; then
+    git -C "$REPO" config core.hooksPath .githooks
+    chmod +x "$REPO/.githooks/"* 2>/dev/null || true
+    echo "🔒 שערי הפרוטוקול הופעלו מהריפו"
+fi
+
+# ─── מכאן ואילך: remote בלבד (pub get איטי + סיכום פרוטוקול) ───
 if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   exit 0
 fi
 
 export PATH="/home/user/flutter/bin:$PATH"
-REPO="$CLAUDE_PROJECT_DIR"
-
-# ─── שכבה 3: שחזור אוטומטי של hooks ───
-# אם מישהו מחק או שינה — משחזר מהריפו
-if [[ -d "$REPO/.githooks" ]]; then
-    git -C "$REPO" config core.hooksPath .githooks
-    chmod +x "$REPO/.githooks/"* 2>/dev/null || true
-    echo "🔒 שערי הפרוטוקול הופעלו מהריפו"
-fi
 
 # ─── תלויות ───
 cd "$REPO/app_flutter"

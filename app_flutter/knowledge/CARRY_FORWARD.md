@@ -120,3 +120,5 @@
 45. **בדיקת תווים במשתנה לא-מהימן = bash `case`/glob, לא `echo "$v" | grep`.** שער 103 השתמש ב-`echo "$pattern" | grep -qE` לזיהוי shell-meta — והוא **לא-דטרמיניסטי בין סביבות**: ב-commit סימן 32/32 false-positive, אינטראקטיבית 0/32. `case "$v" in *'$('*) ... esac` הוא builtin טהור, אפס variance. עבור כל בדיקת-תוכן של משתנה — העדף glob builtin על pipe ל-grep.
 
 46. **כל token שה-hook קורא חייב ב-.gitignore + חסום ב-staged (שער 53).** `.emergency_token` (מקור token לעקיפת הפרוטוקול) לא היה ב-.gitignore — אם נוצר, היה committable. שתי שכבות: (א) `.gitignore` מונע `git add` רגיל, (ב) שער 53 חוסם גם `git add -f`. `protocol_security_test.dart` מאמת את שתיהן. כלל: כל קובץ סוד/bypass שה-hook קורא — שתי השכבות חובה.
+
+47. **הפעלת `core.hooksPath` חייבת לקדום ל-guard של `CLAUDE_CODE_REMOTE`.** `session-start.sh` יצא מוקדם בסביבה לא-remote — *לפני* שהפעיל את ה-hook → ה-hook לא נאכף מקומית (רק CI תפס). תיקון: `git config core.hooksPath .githooks` רץ ראשון (זול), ורק החלק האיטי (pub get + סיכום) נשאר remote-בלבד. כלל: הפעלת אכיפה תמיד לפני כל early-exit.
