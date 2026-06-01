@@ -171,3 +171,10 @@ rather than pixel rendering.
   `_chipDisplayLabel` strips wrapping parens, `_isNoiseChip` hides bare units
   (מ"מ). nameHe stays verbatim (R8); tap index maps back to the raw path level.
 - §14: `spec_assets_test` · "§21 angle fittings keep the diameter as size".
+
+## §21.A chip fixes (2026-06-01)
+- Angle elbows keep diameter as size (sizeRe skips shape tokens); bare 45/90
+  removed from shape set. Display: parens stripped, units (מ"מ) hidden.
+- Multi-word phrase "למיקום נקודת מים" kept as one ordered chip (_l3Compounds).
+- Guards: spec_assets_test "§21 angle fittings keep the diameter as size" +
+  "§21 multi-word phrase stays one ordered chip".

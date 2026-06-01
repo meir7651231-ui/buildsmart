@@ -954,10 +954,31 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #37 לא קיים", () {
+    test("antipattern #48 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
-      final re = RegExp(r''''45',\s*'90'''');
+      final re = RegExp('45\',\\s*\'90');
+      for (final entity in libDir.listSync(recursive: true)) {
+        if (entity is File && entity.path.endsWith('.dart')) {
+          if (entity.path.contains('stuck_regression')) continue;
+          try {
+            final content = entity.readAsStringSync();
+            for (final line in content.split('\n')) {
+              if (re.hasMatch(line)) {
+                matches.add('${entity.path}: ${line.trim()}');
+              }
+            }
+          } catch (_) {}
+        }
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+    });
+
+    test("antipattern #49 לא קיים", () {
+      final libDir = Directory('lib');
+      final matches = <String>[];
+      final re = RegExp('path=\\[מים, למיקום');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
           if (entity.path.contains('stuck_regression')) continue;

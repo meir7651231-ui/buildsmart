@@ -321,6 +321,20 @@ void main() {
     expect(gaps, isEmpty, reason: gaps.join('\n'));
   });
 
+  // §21 — a multi-word descriptive phrase whose individual words also live in
+  // another level (e.g. "מים" is an L2 pipe-shape word) must be kept as ONE
+  // ordered compound chip, not scattered across levels. Guard the known case
+  // (לוחית למיקום נקודת מים) and assert the phrase survives intact in order.
+  test('§21 multi-word phrase stays one ordered chip (no scatter)', () {
+    final plate = kPolyrollCatalog.firstWhere((p) => p.nameHe.contains('לוחית'));
+    final path = parseChips(plate.nameHe).path;
+    expect(path, contains('למיקום נקודת מים'),
+        reason: 'phrase scattered: $path');
+    // and it must NOT appear as separate scattered tokens
+    expect(path.contains('מים') && path.contains('למיקום'), isFalse,
+        reason: 'phrase split into separate chips: $path');
+  });
+
   test('fitting categories all have a real cropped spec diagram', () {
     // Categories with a genuine dimension drawing in the catalog. EF is
     // photo-only (R8 — no diagram exists), so it is intentionally excluded.

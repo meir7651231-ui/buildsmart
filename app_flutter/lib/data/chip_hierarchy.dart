@@ -180,6 +180,10 @@ const _l2Compounds = {
 const _l3Compounds = {
   'משטח ריסון', 'עם משטח ריסון',
   'ללא ידית', 'לנקודת מים',
+  // "לוחית למיקום נקודת מים" — keep the whole positioning phrase as ONE chip
+  // so it reads in order; otherwise מים→L2, למיקום/נקודת→L3 and the breadcrumb
+  // scrambles to "מים ‹ למיקום ‹ נקודת".
+  'למיקום נקודת מים',
   'עם מניעת זרימה חוזרת', 'עם מניעת זרימה', 'מניעת זרימה',
   'ציפוי כרום', 'כולל אטם', 'מפלסטיק פוליפרופילן',
   'לעבודה בגובה', 'לתיקון חורים',
