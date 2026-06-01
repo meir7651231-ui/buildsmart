@@ -441,6 +441,24 @@ RULE: אבחון gate → קובץ ספציפי בלבד. suite מלא רק לפ
 
 ---
 
+## 2026-06-01 · gate 32 — pattern שגוי לספירת כשלים ב-compact mode
+
+### א — הבעיה
+gate 32 ניסה לחלץ מספר כשלים עם pattern `[0-9]+ ✗`.
+ב-flutter test compact output, כשלים מוצגים כ:`+888 -16: Some tests failed.`
+Pattern `[0-9]+ ✗` לא מוצא דבר → `FAIL_COUNT=0` תמיד → השוואה ל-baseline לא עובדת.
+תוצאה: גם אם `known-failing: 16` ב-STATUS.md, gate 32 לא מכבד אותו.
+
+### ב — הפתרון
+שינוי ל-`grep -oE "\+[0-9]+ -[0-9]+:" | grep -oE -- "-[0-9]+" | grep -oE "[0-9]+"`.
+חולץ נכון: `+888 -16:` → `16`.
+
+### ג — כלל המניעה
+ANTIPATTERN: grep -oE "\[0-9\]\+ ✗"
+RULE: flutter compact output מציג כשלים כ`-N:` (לא ✗). לחלץ FAIL_COUNT: `grep -oE "\+[0-9]+ -[0-9]+:"`
+
+---
+
 ## 2026-05-31 · gate 32 חוסם commit נקי בגלל pre-existing failures ב-origin
 
 ### א — הבעיה

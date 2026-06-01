@@ -189,7 +189,9 @@ if [[ -n "$NEEDS_FLUTTER" ]]; then
     TEST_OUT=$(flutter test --no-pub 2>&1)
     TEST_EXIT=$?
     if [[ $TEST_EXIT -ne 0 ]] || echo "$TEST_OUT" | grep -qE "Some tests failed"; then
-        FAIL_COUNT=$(echo "$TEST_OUT" | grep -oE "[0-9]+ ✗" | grep -oE "^[0-9]+" | head -1)
+        # flutter compact output: "XX:XX +888 -16: Some tests failed." — חלץ את -N
+        # תיקון באג #32: pattern הקודם "[0-9]+ ✗" לא מוצא דבר ב-compact mode
+        FAIL_COUNT=$(echo "$TEST_OUT" | grep -oE "\+[0-9]+ -[0-9]+:" | grep -oE -- "-[0-9]+" | grep -oE "[0-9]+" | tail -1)
         FAIL_COUNT=${FAIL_COUNT:-0}
         KNOWN_FAIL=$(grep -oE "known-failing: [0-9]+" knowledge/STATUS.md 2>/dev/null | grep -oE "[0-9]+$" || echo 0)
         if [[ "$FAIL_COUNT" -gt "$KNOWN_FAIL" ]]; then

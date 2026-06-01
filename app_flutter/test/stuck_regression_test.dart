@@ -578,6 +578,27 @@ void main() {
     test("antipattern #28 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
+      final re = RegExp(r'''grep -oE "\[0-9\]\+ ✗"''');
+      for (final entity in libDir.listSync(recursive: true)) {
+        if (entity is File && entity.path.endsWith('.dart')) {
+          if (entity.path.contains('stuck_regression')) continue;
+          try {
+            final content = entity.readAsStringSync();
+            for (final line in content.split('\n')) {
+              if (re.hasMatch(line)) {
+                matches.add('${entity.path}: ${line.trim()}');
+              }
+            }
+          } catch (_) {}
+        }
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+    });
+
+    test("antipattern #29 לא קיים", () {
+      final libDir = Directory('lib');
+      final matches = <String>[];
       final re = RegExp(r'''err.*32.*exit=\$TEST_EXIT.*תקן את הבדיקות''');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {
