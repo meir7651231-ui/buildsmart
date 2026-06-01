@@ -3,6 +3,8 @@
 
 # bypass-token לעריכת hooks — local-only, אישור per-session בלבד
 .allow_protocol_edit
+# emergency-disable token — local-only, לעולם לא ב-git (לקח #31)
+.emergency_token
 .git/protocol_audit.log
 __pycache__/
 scripts/__pycache__/

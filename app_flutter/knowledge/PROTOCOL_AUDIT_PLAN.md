@@ -151,12 +151,12 @@
 |-----|-------------|--------|--------|--------|
 | א — שערים חסרים | 1–15 | 10 | 1 (35-40 מחוץ ל-NEEDS_FLUTTER) | 4 (59/81 = false positive; 103 חסר ב-CF) |
 | ב — לוגיקה שגויה | 16–30 | 13 | 1 (88 git diff exit) | 2 (36-40 לא `# שער NN`) |
-| ג — CARRY_FORWARD | 31–50 | | | |
-| ד — stuck_log | 51–65 | | | |
-| ה — session-start | 66–75 | | | |
-| ו — regression tests | 76–85 | | | |
-| ז — עקביות | 86–95 | | | |
-| ח — פערים | 96–100 | | | |
+| ג — CARRY_FORWARD | 31–50 | 17 | 1 (#35 לא ב-session-start) | משמעת (#1,#36-39) לא-gate-able מטבען |
+| ד — stuck_log | 51–65 | 14 | 0 | — (3 רשומות gate-32 = באגים נפרדים, לא כפילות) |
+| ה — session-start | 66–75 | 6 | 3 (#35/#39/BUG_INVESTIGATION חסרים) | — |
+| ו — regression tests | 76–85 | 10 | 0 | — (הפרדה hook/lib תקינה) |
+| ז — עקביות | 86–95 | 6 | 3 (ROADMAP drift · MASTER OPS-03 · .emergency_token) | — |
+| ח — פערים | 96–100 | 2 | 3 (ROADMAP drift gate · BUG_INVESTIGATION ב-start · משמעת) | — |
 
 ---
 
@@ -169,5 +169,17 @@
 | 3 | שער 88 — `git diff --cached file >/dev/null`=0 כש-tracked-ולא-staged | 🟡 רעש | `--name-only \| grep -q` · לקח #42 |
 | 4 | גייט 103 תועד ב-stuck_log אך לא ב-CARRY_FORWARD | 🟢 תיעוד | לקח #43 |
 | — | גייטים 59/81 "לא מתועדים" | ✅ false positive | קיימים כלקחים #33/#29 (topic-based) |
+| 5 | שער 103 — shell-meta `echo\|grep` לא-דטרמיניסטי (32 vs 0) | 🟡 רעש | bash `case`/glob · לקח #45 |
+| 6 | פער מבני — רגרסיה סרקה רק lib/ | 🔴 כיסוי | `ANTIPATTERN[hook]:` · לקח #44 |
 
-**עדיין פתוח לחקירה:** חלקים ג׳–ח׳ (צעדים 31-100).
+## ממצאים שתוקנו — אודיט 2026-06-01 (חלקים ג׳–ח׳)
+
+| # | ממצא | חומרה | תיקון |
+|---|------|-------|-------|
+| 7 | `.emergency_token` לא ב-.gitignore — bypass token committable | 🔴 אבטחה | gitignore + שער 53 + `protocol_security_test` · לקח #46 |
+| 8 | ROADMAP version drift — כותרת Handoff עליונה v5.41 vs v5.43 | 🟡 עקביות | תויג כ-Changelog (handoff יחיד = v5.43) |
+| 9 | MASTER_PROTOCOL OPS-03 "0 failures" סותר את gate-32 baseline | 🟡 עקביות | OPS-03 → "≤ known-failing" |
+| 10 | session-start חסר #35/#39/BUG_INVESTIGATION | 🟢 תיעוד | 2 שורות ל-session-start.sh |
+| — | "כפילות gate-32 ב-stuck_log" | ✅ false positive | 3 באגים נפרדים (exit-code · compact · baseline) |
+
+**אודיט הושלם — 100 צעדים. כל ה-❌ תוקנו או סווגו כ-false-positive.**

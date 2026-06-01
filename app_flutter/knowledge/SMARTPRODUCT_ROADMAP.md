@@ -6,7 +6,7 @@ it connects · how to install · what it costs · who sells it*.
 
 Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
-## 📌 Handoff — where we are (v5.41, ~77%: 58 ✅ + 11 🟦 + new bridge)
+## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
 v5.41 — 🌉 **Polyroll bridge** (discovered via probe pattern). All 757 PPR
 products were silently invisible to 8 card helpers because they had no

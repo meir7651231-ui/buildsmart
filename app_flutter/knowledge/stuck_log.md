@@ -29,6 +29,27 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 
 <!-- הוסף רשומה חדשה כאן אחרי כל בעיה שנפתרה -->
 
+## 2026-06-01 · `.emergency_token` לא ב-.gitignore — bypass token דליף (אודיט חלק ז׳)
+
+### א — הבעיה
+ה-hook קורא `.emergency_token` (שורה 30) כמקור token לעקיפת **כל** הפרוטוקול,
+ומנחה `export ...="$(cat .emergency_token)"`. אבל `.gitignore` הכיל רק
+`.allow_protocol_edit` — **לא** את `.emergency_token`. אף gate לא חסם staging שלו.
+אם session ייצר אותו (כפי שה-hook מנחה) → committable → ה-bypass token נחשף
+ב-git. סותר את לקח #31. נמצא באודיט PROTOCOL_AUDIT_PLAN צעד 94.
+
+### ב — הפתרון
+(1) הוספת `.emergency_token` ל-`.gitignore`.
+(2) הרחבת שער 53 לחסום staging של `.emergency_token`/`.allow_protocol_edit`/
+`.allow_master_protocol_edit` (defense-in-depth נגד `git add -f`).
+(3) `protocol_security_test.dart` — מאמת ש-.gitignore מכיל את הtokens ושה-gate קיים.
+
+### ג — כלל המניעה
+ANTIPATTERN[hook]: git add.*emergency_token
+RULE: כל token שה-hook קורא (bypass/emergency) חייב גם ב-.gitignore וגם חסום ב-staged ע"י שער 53. לעולם לא `git add` עליו.
+
+---
+
 ## 2026-06-01 · שער 103 — `echo "$p" | grep -qE` לא-דטרמיניסטי בין סביבות
 
 ### א — הבעיה

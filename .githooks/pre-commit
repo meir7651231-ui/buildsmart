@@ -297,6 +297,11 @@ SECRETS=$(git diff --cached -- '*.dart' '*.yaml' '*.yml' '*.json' 2>/dev/null \
 STAGED_ENV=$(git diff --cached --name-only | grep -E "^\.env|\.env\.|credentials" | head -1)
 [[ -z "$STAGED_ENV" ]] || err "53" "קובץ סודות נוסף: $STAGED_ENV" "הסר מ-staging"
 
+# שער 53 (המשך): bypass-tokens לעולם לא ב-git (לקח #31 + אודיט 2026-06-01).
+# defense-in-depth: גם אם מישהו עשה git add -f על קובץ ש-.gitignore אמור לחסום.
+STAGED_TOKEN=$(git diff --cached --name-only | grep -E "^\.(emergency_token|allow_protocol_edit|allow_master_protocol_edit)$" | head -1)
+[[ -z "$STAGED_TOKEN" ]] || err "53" "bypass-token ב-staging: $STAGED_TOKEN" "git reset HEAD $STAGED_TOKEN — קובץ זה local-only בלבד"
+
 # שער 54: אין ColoredBox עם color כהה
 DARK_BOX=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "ColoredBox.*0xFF[0-3][0-3]" | head -1)
 [[ -z "$DARK_BOX" ]] || err "54" "ColoredBox כהה" "השתמש בצבעי בהירים"

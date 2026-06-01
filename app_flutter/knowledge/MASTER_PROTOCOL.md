@@ -213,7 +213,7 @@ skip שלב [7] = commit ללא gate = revert שמגיע אחר כך.
 |---|---|---|
 | OPS-01 | `flutter analyze` — `No issues found!` | CRITICAL |
 | OPS-02 | `flutter build web --release` — מצליח | CRITICAL |
-| OPS-03 | `flutter test` — 0 failures | CRITICAL |
+| OPS-03 | `flutter test` — כשלים ≤ `known-failing: N` ב-STATUS.md (gate 32 baseline; 0 אם אין pre-existing) | CRITICAL |
 | OPS-04 | גרסה bumped ב-`pubspec.yaml` (version: X.Y.Z+N) | MAJOR |
 | OPS-05 | WIRING.md מעודכן לכל שינוי-התנהגות | MAJOR |
 | OPS-06 | commit message מציין `@rule R2`/`@legacy L#`/`@adr ADR-NNN` | MINOR |
