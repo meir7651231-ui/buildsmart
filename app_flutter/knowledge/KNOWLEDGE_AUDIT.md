@@ -223,4 +223,17 @@ README מאנדקס רק `spec/`. חסרים מצביעים ל-`port/` (או ה�
 
 **סיכום סבב 3:** 32 keep-canonical · 0 פעולות · גילוי-תלות אחד (adr/inspections → `PROTOCOL.md` חלק 5/8).
 **כיסוי-אודיט מצטבר: 76/76 מסמכים קיבלו verdict** (44 top-level [סבב 2] + 32 תת-תיקייה [סבב 3]).
-פעולות עדיין ממתינות לאישור: deprecate ל-PROTOCOL · K9 (אינדקס) · drift-guard ל-MASTER.
+פעולות עדיין ממתינות לאישור: deprecate ל-`PROTOCOL.md` · drift-guard ל-MASTER. (K9 — **בוצע**, ראה למטה.)
+
+---
+
+## K9 — בניית README כאינדקס-אמת (בוצע · 2026-06-01)
+> "תמשיך לפי פרוטוקול" → ביצוע K9 באופן **decision-agnostic** (בלי ה-SUBMIT).
+- **27 → 0 יתומים.** README מאנדקס כעת את כל 44 מסמכי top-level + 4 תת-התיקיות
+  (`port/`/`spec/`/`adr/`/`inspections/`), מסווגים ל-12 שכבות, משפט-תפקיד לכל אחד.
+- **decision-agnostic:** `MASTER_PROTOCOL` מסומן "consolidated process law / source-of-truth
+  לתהליך" (+שער 88); `PROTOCOL.md` מסומן "⚠️ superseded — deprecate pending". **לא** בוצע deprecate.
+- **אדיטיבי:** החלקים הנאכפים (protocol steps · enforcement · legend) נשמרו verbatim; אף מסמך לא נמחק.
+- **אומת:** `knowledge_protocol_test` ירוק (6/6); README >400 תווים (שער קיום); 0 יתומים נותרו.
+
+**נותר ל-SUBMIT (אישור-משתמש/פרוטוקוליסט):** deprecate ל-`PROTOCOL.md` (+שימור §5/§8 ל-adr/inspections) · drift-guard ל-MASTER.
