@@ -102,6 +102,15 @@ git commit -m "..."
 
 ---
 
+## ⚠️ WIRING.md — קובץ משותף, לא בבעלות אף סוכן
+
+- מיקום: **`app_flutter/WIRING.md`** (root של app_flutter, **לא** ב-`knowledge/`).
+- **כל** סוכן שנוגע ב-`lib/screens` / `lib/state` / `lib/logic` **חייב** להוסיף את
+  הוויירינג שלו ל-`WIRING.md` ולעשות לו `git add` — זו הדרישה של **שער 24**.
+- זה **לא** באג ב-hook ו**לא** בבעלות פרוטוקוליסט. הסוכן ששינה את הקוד הוא זה
+  שמתעד. אל תדווח על שער 24 כבאג — פשוט עדכן את `WIRING.md` והוסף ל-staged.
+- פרוטוקוליסט נוגע רק ב-`.githooks/`, `knowledge/`, `test/` — **לא** ב-`WIRING.md`.
+
 ## כלל זהב
 
 **כל סוכן עובד על ענף `claude/whats-happening-LyY9G`.**
