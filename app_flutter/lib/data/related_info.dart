@@ -1184,28 +1184,51 @@ List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
 /// product (a spec'd, connectable PPR/supply fitting) approaches the top, while
 /// a fixture endpoint (no spec, no connections) stays low.
 ///
+/// QUANTITY-AWARE: most dimensions are GRADED by how MUCH knowledge the product
+/// actually carries (number of catalog `dims` fields, count of tips / compliance
+/// / acceptance items, mate count) — not a flat binary "has it / doesn't". So a
+/// data-rich fitting (e.g. a PPR faser pipe with 11 dims fields) is rewarded for
+/// its depth even if it happens to mate few products, instead of being pinned
+/// down to the connectivity term alone.
+///
 /// Weights (sum = 100):
-///   • engineering spec (VerifiedSpec)            +25
-///   • connectivity (mates: ≥20→20 / ≥5→13 / >0→7) +20
-///   • Israeli standard tagged                    +12
-///   • install guidance (tools derived from spec) +13
-///   • acceptance checklist present                +5
-///   • compliance triggers present                 +5
-///   • discoverable in the finder                  +5
-///   • priced                                      +5
-///   • variant choice (>1 in family)              +10
+///   • engineering spec (VerifiedSpec)                       +20
+///   • data depth (`dims` fields: ≥8→15 / 4-7→10 / 1-3→5)    +15
+///   • connectivity (mates: ≥20→18 / ≥5→12 / >0→6)           +18
+///   • Israeli standard tagged                               +10
+///   • install guidance (tools derived from spec)            +10
+///   • install tips (count: ≥3→7 / 1-2→4)                     +7
+///   • acceptance checks (count: ≥3→5 / >0→3)                 +5
+///   • compliance items (count: ≥3→5 / >0→3)                  +5
+///   • discoverable in the finder                            +3
+///   • priced                                                +2
+///   • variant choice (>1 in family)                         +5
 ({int score, String label}) cardReadinessScore(LipskeyCatalogProduct p) {
   var score = 0;
-  if (kVerifiedSpecs[p.sku] != null) score += 25;
+  // Foundation: a verified connection spec.
+  if (kVerifiedSpecs[p.sku] != null) score += 20;
+  // Data depth — how much catalog knowledge (dims fields) the product carries.
+  final dims = p.dims?.length ?? 0;
+  score += dims >= 8 ? 15 : (dims >= 4 ? 10 : (dims >= 1 ? 5 : 0));
+  // Connectivity — how many catalog products it directly mates.
   final compat = compatibleProductsCount(p);
-  score += compat >= 20 ? 20 : (compat >= 5 ? 13 : (compat > 0 ? 7 : 0));
-  if (israeliStandardsFor(p).isNotEmpty) score += 12;
-  if (installToolsFor(p).isNotEmpty) score += 13;
-  if (acceptanceChecklistFor(p).isNotEmpty) score += 5;
-  if (complianceTriggersFor(p).isNotEmpty) score += 5;
-  if (finderGroupFor(p) != null) score += 5;
-  if (priceFor(p) != null) score += 5;
-  if (variantSiblingsCountFor(p) > 1) score += 10;
+  score += compat >= 20 ? 18 : (compat >= 5 ? 12 : (compat > 0 ? 6 : 0));
+  // Standard.
+  if (israeliStandardsFor(p).isNotEmpty) score += 10;
+  // Install guidance.
+  if (installToolsFor(p).isNotEmpty) score += 10;
+  // Install tips — graded by how many.
+  final tips = installTipsFor(p).length;
+  score += tips >= 3 ? 7 : (tips >= 1 ? 4 : 0);
+  // Acceptance checks — graded.
+  final acc = acceptanceChecklistFor(p).length;
+  score += acc >= 3 ? 5 : (acc > 0 ? 3 : 0);
+  // Compliance items — graded.
+  final comp = complianceTriggersFor(p).length;
+  score += comp >= 3 ? 5 : (comp > 0 ? 3 : 0);
+  if (finderGroupFor(p) != null) score += 3;
+  if (priceFor(p) != null) score += 2;
+  if (variantSiblingsCountFor(p) > 1) score += 5;
   if (score > 100) score = 100;
   final label = score >= 80
       ? 'מצוין'

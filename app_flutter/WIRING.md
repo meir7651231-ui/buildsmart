@@ -267,3 +267,14 @@ rather than pixel rendering.
   ("📊 ציון נתונים N · label", `scoreBandColors`) — same metric the smart card
   shows. Closes the gap: PPR/Lipskey products that open the INTERNAL card (not
   the smart card) now display their data-readiness score (PPR ~95).
+
+## cardReadinessScore — quantity-aware (v5.57)
+- `related_info.dart::cardReadinessScore` now grades by AMOUNT of knowledge, not
+  binary presence (user: "לא תתסתכל על הכמות ידע שיש לו"). New/regraded terms:
+  data-depth `p.dims.length` (≥8→15 · 4-7→10 · 1-3→5); connectivity (≥20→18 ·
+  ≥5→12 · >0→6); install-tips / acceptance / compliance graded by item count;
+  spec 25→20, finder 5→3, price 5→2. Effect: the PPR faser pipe (dims=11, richest
+  but 0 mates) rises ~75→80 מצוין instead of being pinned by connectivity.
+  Verified live-equivalent: PPR supply 98 · faser 80 · toilet seat 16 · trap 63.
+  Guards: card_score_test (spec-weight 25→20) + mutation_log (dims `:0`→`:50`
+  turns the seat "stays low" + "no single dim=100" guards red).

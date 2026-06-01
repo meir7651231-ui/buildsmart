@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.56 · 1.6.29 · 📊 ציון נתונים מוצג גם בכרטיס הפנימי (PPR/Lipskey) — לא רק בעץ-חכם',
+                          'v5.57 · 1.6.29 · 📊 הציון מודד עכשיו כמות-ידע: עומק נתונים (dims), מספר חיבורים, וכמות טיפים/בדיקות — לא רק נוכחות',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

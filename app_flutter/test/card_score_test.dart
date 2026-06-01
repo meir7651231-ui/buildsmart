@@ -56,10 +56,10 @@ void main() {
   test('a product with a verified spec scores at least the spec weight', () {
     for (final p in kLipskeyCatalog) {
       if (kVerifiedSpecs[p.sku] != null) {
-        // Spec weight is +25 in the raised-bar formula (was +40). A spec'd
-        // product is guaranteed at least the spec weight; richer signals
-        // (compat/standards/install) lift it further.
-        expect(cardReadinessScore(p).score, greaterThanOrEqualTo(25),
+        // Spec weight is +20 in the quantity-aware formula. A spec'd product
+        // is guaranteed at least that; data-depth / connectivity / standards
+        // lift it further.
+        expect(cardReadinessScore(p).score, greaterThanOrEqualTo(20),
             reason: p.sku);
       }
     }
