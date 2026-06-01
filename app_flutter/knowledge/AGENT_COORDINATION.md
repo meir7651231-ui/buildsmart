@@ -113,8 +113,51 @@ git commit -m "..."
   שמתעד. אל תדווח על שער 24 כבאג — פשוט עדכן את `WIRING.md` והוסף ל-staged.
 - פרוטוקוליסט נוגע רק ב-`.githooks/`, `knowledge/`, `test/` — **לא** ב-`WIRING.md`.
 
+## 🔄 נוהל Push & Sync — חובה (מצמצם התנגשויות rebase)
+
+כל הסוכנים דוחפים לאותו ענף במקביל. בלי נוהל → התנגשויות rebase חוזרות.
+הכלל פשוט: **תמיד pull --rebase לפני push, ותמיד sync ל-hook המקומי.**
+
+### לפני כל push — 4 צעדים
+```bash
+# 1. וודא working tree נקי (commit מקומי קודם)
+git status                    # חייב להיות clean
+
+# 2. משוך עדכוני סוכנים אחרים — תמיד rebase, לא merge
+git fetch origin claude/whats-happening-LyY9G
+git rebase origin/claude/whats-happening-LyY9G
+
+# 3. סנכרן את ה-hook המקומי (אם אין core.hooksPath=.githooks)
+cp .githooks/pre-commit .git/hooks/pre-commit
+
+# 4. דחוף
+git push -u origin claude/whats-happening-LyY9G
+```
+
+### אם יש conflict ב-rebase — מי מנצח לכל קובץ
+| קובץ | פתרון |
+|------|--------|
+| `knowledge/stuck_log.md` | **שמור את שתי הרשומות** (שלך + של האחר). לא מוחקים. |
+| `knowledge/STATUS.md` | תווית-גרסה: **הגבוהה ביותר**. known-failing: 0. |
+| `test/stuck_regression_test.dart` | **אל תמזג ידנית** — הרץ `bash scripts/generate_stuck_regression.sh` והוא נוצר מחדש מ-stuck_log הממוזג. |
+| `WIRING.md` | שמור את שתי השורות (שלך + של האחר). |
+| `lib/**` (קוד) | אם שני סוכנים נגעו באותו קובץ — עצור, פנה לפרוטוקוליסט/משתמש. |
+
+### חלוקת-בעלות שמצמצמת חיכוך
+- **`.githooks/` + `knowledge/CARRY_FORWARD.md` + `PROTOCOL_AUDIT_PLAN.md` + generator** = **פרוטוקוליסט בלבד**. סוכן אחר שנוגע בהם = התנגשות מובטחת. אל תיגעו.
+- **`stuck_log.md`** — append-only. כל סוכן מוסיף בסוף; conflict נפתר ע"י שמירת שניהם + regen של הבדיקה.
+- **`lib/`** — מחולק לפי תפקיד (קטלגן=data, סדרן=ui/widgets, מקבץ=features/screens, משיק=audit). אם שניים צריכים אותו קובץ — תאמו דרך המשתמש.
+
+### תדירות push
+- **תיקוני-hook קריטיים (פרוטוקוליסט)** → push מיד אחרי אימות (סוכנים חסומים מחכים).
+- **feature commits** → אפשר לצבור 2-3 ולדחוף יחד (פחות סבבי-rebase לאחרים).
+- **בתחילת סשן עבודה** → `git pull --rebase` ראשון, תמיד.
+
+---
+
 ## כלל זהב
 
 **כל סוכן עובד על ענף `claude/whats-happening-LyY9G`.**
 לפני כל commit: `flutter analyze` (0 errors) + `flutter test` (0 failures).
+לפני כל push: `git pull --rebase` (ראה נוהל Push & Sync למעלה).
 שערי ה-hook אוכפים אוטומטית — אין עקיפה.
