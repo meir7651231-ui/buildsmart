@@ -145,3 +145,11 @@
   SmartBrand.sku is a real catalog SKU".
 - מסקנה: הקישור מוגן דו-שכבתית — test/smartproduct_contract_test + harness
   lib/test_harness/tests/catalog.dart (צעד 77).
+
+### Huliot smart-tree wiring batch 2 (v5.63) — 2026-06-02
+- שינוי: +62 מק"טי חוליות (צנרת PP) כ-SmartBrand ל-4 כרטיסים: pvcPipe+7,
+  drainageElbow+27, drainageFittings+20, visibleTrap+8. כיסוי 310→372, חוליות 79/170.
+- תקלה שהוזרקה: מק"ט ברך מחובר '70033960' → '00000000' (לא בקטלוג).
+- תוצאה: 2 בדיקות אדומות ✅ — "Huliot … wired into the smart-tree" + "every
+  SmartBrand.sku is a real catalog SKU".
+- מסקנה: הכיסוי המורחב מוגן; כל 8 הכרטיסים נבדקים שיש בהם מותג חוליות + spot-check.

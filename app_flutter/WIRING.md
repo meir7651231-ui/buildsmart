@@ -396,3 +396,19 @@ rather than pixel rendering.
   62650060/62750060 + 61233172/63350060/61100062) → visibleTrap/otherTraps;
   pipes/elbows/tees/couplings → pvcPipe/drainageElbow/drainageFittings;
   gutters/covers/aquaslim → floorCollector/drainageManifold/floorCover.
+
+## Huliot SmartLock → smart-tree wiring, batch 2: PP piping + remaining siphons (v5.63)
+- `smart_tree.dart`: +62 Huliot SmartLock SKUs as `SmartBrand` options on 4 more
+  drainage cards:
+  - `pvcPipe` (צינור ניקוז) +7 — צינור חלק 32/40/50/63 (3-4 מ')
+  - `drainageElbow` (ברכיים) +27 — ג'וקר ×3 · צד-אחד ×8 · 45°/90° ×7 · מצרה ×5 · טלסקופית ×4
+  - `drainageFittings` (מחברים/מצמדים) +20 — מסעפים ×11 · מצמד כפול ×4 · מצרה ×5
+  - `visibleTrap` (מחסום גלוי) +8 — סיפוני כיור-אמריקאי ×5 · ללא-סיפון · הורקה · אמבט
+- Effect: smart-tree mapped coverage 310 → **372** SKUs; Huliot **79/170** mapped.
+  Together with batch 1, all of Huliot's drainage *fixtures* + *piping* now open a
+  כרטיס-חכם as a brand option.
+- Guards: `smartproduct_contract_test` Huliot test extended to all 8 cards + sku→card
+  spot-checks + ≥79 mapped. Mutation-verified (broken sku fails it + the catalog-SKU
+  contract). Pure data; no engine change.
+- REMAINING (batch 3): מאספים/AQUA SLIM → floorCollector/drainageManifold; מכסים
+  → floorCover; אום/חותך/אביזרים משלימים (mostly SmartAcc, not brands).

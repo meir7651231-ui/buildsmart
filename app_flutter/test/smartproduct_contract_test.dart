@@ -67,12 +67,16 @@ void main() {
 
   test('Huliot SmartLock drainage fixtures are wired into the smart-tree', () {
     final huliotSkus = {for (final p in kHuliotCatalog) p.sku};
-    // The 4 primary drainage-fixture cards each carry ≥1 Huliot brand option.
+    // The drainage cards (fixtures + piping) each carry ≥1 Huliot brand option.
     for (final key in const [
       'floorDrain',
       'basinTrap',
       'kitchenDrain',
-      'washingMachineDrain'
+      'washingMachineDrain',
+      'pvcPipe',
+      'drainageElbow',
+      'drainageFittings',
+      'visibleTrap'
     ]) {
       final sp = kSmartProducts.firstWhere((s) => s.key == key);
       final huliotBrands = sp.brands
@@ -86,10 +90,14 @@ void main() {
     expect(smartProductForSku('61230060')?.key, 'basinTrap');
     expect(smartProductForSku('61450060')?.key, 'kitchenDrain');
     expect(smartProductForSku('61480100')?.key, 'washingMachineDrain');
-    // The first wiring batch maps at least 17 Huliot SKUs.
+    expect(smartProductForSku('64032300')?.key, 'pvcPipe');
+    expect(smartProductForSku('70033960')?.key, 'drainageElbow');
+    expect(smartProductForSku('70633460')?.key, 'drainageFittings');
+    expect(smartProductForSku('62450060')?.key, 'visibleTrap');
+    // Batches 1+2 map at least 79 Huliot SKUs (drainage fixtures + piping).
     final mappedHuliot =
         huliotSkus.where((s) => smartProductForSku(s) != null).length;
-    expect(mappedHuliot, greaterThanOrEqualTo(17),
+    expect(mappedHuliot, greaterThanOrEqualTo(79),
         reason: 'only $mappedHuliot Huliot SKUs mapped to a SmartProduct');
   });
 
