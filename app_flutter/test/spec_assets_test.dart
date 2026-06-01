@@ -299,6 +299,28 @@ void main() {
     });
   });
 
+  // §21 regression — an angle elbow/tee (45°/90°) must keep its real DIAMETER
+  // in the size slot, not the angle. The angle starts with a digit, so a naive
+  // size regex used to grab "45°" as the size and silently drop "160".
+  test('§21 angle fittings keep the diameter as size, angle as shape', () {
+    final gaps = <String>[];
+    for (final p in kPolyrollCatalog) {
+      if (p.categoryHe != kPprElbows && p.categoryHe != kPprTees) continue;
+      if (!(p.nameHe.contains('45°') || p.nameHe.contains('90°'))) continue;
+      final cp = parseChips(p.nameHe);
+      // size must exist and must NOT be the angle.
+      if (cp.level5 == null || cp.level5!.contains('°')) {
+        gaps.add('${p.sku} "${p.nameHe}" → size=${cp.level5} (lost the diameter)');
+      }
+      // the angle must appear in the path as a shape chip.
+      final angle = p.nameHe.contains('90°') ? '90°' : '45°';
+      if (!cp.path.contains(angle)) {
+        gaps.add('${p.sku} "${p.nameHe}" → angle $angle missing from chips');
+      }
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+  });
+
   test('fitting categories all have a real cropped spec diagram', () {
     // Categories with a genuine dimension drawing in the catalog. EF is
     // photo-only (R8 — no diagram exists), so it is intentionally excluded.

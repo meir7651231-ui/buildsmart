@@ -1827,6 +1827,25 @@ class _NameWords extends StatelessWidget {
 /// (connection ‹ shape ‹ feature ‹ thread ‹ size) as a breadcrumb. Replaces
 /// `_NameWords` for Polyroll products only; Lipskey keeps `_NameWords`.
 /// Tapping a chip calls [onChipTap] with the chip's path index.
+/// Display-only cleanup for a chip word: strips a wrapping parenthesis so a
+/// verbatim catalog finish like "(ציפוי כרום - ללא ידית)" reads as a clean
+/// breadcrumb chip. nameHe stays verbatim (R8) and the raw path is unchanged
+/// for the faceted-filter matching — this only affects the rendered label.
+String _chipDisplayLabel(String word) {
+  var w = word.trim();
+  if (w.startsWith('(') && w.endsWith(')')) {
+    w = w.substring(1, w.length - 1).trim();
+  }
+  return w;
+}
+
+/// Bare unit/noise tokens that are classified (so they don't become parser
+/// leftover) but add nothing as a breadcrumb chip — hidden from display only.
+bool _isNoiseChip(String word) {
+  const noise = {'מ"מ', 'מ”מ', 'mm'};
+  return noise.contains(word.trim());
+}
+
 class _HierarchyChips extends StatelessWidget {
   const _HierarchyChips({required this.product, this.onChipTap, this.openIndex});
   final LipskeyCatalogProduct product;
@@ -1835,15 +1854,23 @@ class _HierarchyChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final path = parseChips(product.nameHe).path;
-    if (path.isEmpty) return const SizedBox.shrink();
+    final rawPath = parseChips(product.nameHe).path;
+    // Render with the ORIGINAL index preserved (so a tap maps back to the
+    // right faceted-filter level), but skip noise chips (bare unit tokens like
+    // מ"מ) and clean wrapping parens for display.
+    final shown = <MapEntry<int, String>>[];
+    for (var i = 0; i < rawPath.length; i++) {
+      if (_isNoiseChip(rawPath[i])) continue;
+      shown.add(MapEntry(i, _chipDisplayLabel(rawPath[i])));
+    }
+    if (shown.isEmpty) return const SizedBox.shrink();
     return Wrap(
       spacing: 4,
       runSpacing: 4,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        for (var i = 0; i < path.length; i++) ...[
-          if (i > 0)
+        for (var j = 0; j < shown.length; j++) ...[
+          if (j > 0)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 2),
               child: Text('‹',
@@ -1853,9 +1880,9 @@ class _HierarchyChips extends StatelessWidget {
                       fontWeight: FontWeight.w700)),
             ),
           _HierarchyChipPill(
-            word: path[i],
-            isOpen: i == openIndex,
-            onTap: onChipTap == null ? null : () => onChipTap!(i),
+            word: shown[j].value,
+            isOpen: shown[j].key == openIndex,
+            onTap: onChipTap == null ? null : () => onChipTap!(shown[j].key),
           ),
         ],
       ],

@@ -819,3 +819,24 @@ RULE: שער 102 דורש תיעוד רק על retry של כשל code/test (31-4
 ### ג — כלל המניעה
 ANTIPATTERN: return null;\s*//.*photo-only.*fall.*through
 RULE: photo-only page ⇒ crop ממוקד [photo+table] פר-תת-סוג, לא page fallback מלא. R8: crop של אותו עמוד מותר; העמוד נשאר כסליד-פייג'ר שני.
+
+---
+
+## 2026-05-31 · §21 · chip חיצוני בלגן — זווית נבלעת כגודל, קוטר נעלם
+
+### א — הבעיה
+`ברך PPR 45° פ.פ 160` נתן chip path=[פ.פ, 45°] — sizeRe תפס את "45°"
+(מתחיל בספרה) כ-size, והקוטר האמיתי 160 נעלם. בנוסף bare '45'/'90'
+ב-kChipLevel2Shape גנבו את הקטרים 45mm/90mm. ועוד: parenthetical
+"(ציפוי כרום)" ו-יחידת "מ"מ" הוצגו כ-chips מילוליים מכוערים.
+
+### ב — הפתרון
+1. sizeRe מסומן לא לתפוס shape מוצהר: `&& !kChipLevel2Shape.contains(t)`.
+2. הסרת bare '45','90' מ-kChipLevel2Shape (זוויות תמיד עם °).
+3. תצוגה: `_chipDisplayLabel` מסיר סוגריים עוטפים, `_isNoiseChip` מסתיר 'מ"מ'.
+   nameHe נשאר verbatim (R8), ה-path ל-matching נשאר.
+
+### ג — כלל המניעה
+ANTIPATTERN: '45',\s*'90'
+RULE: זווית chip = '45°'/'90°' עם ° בלבד. bare 45/90 מתנגשים עם קטרים.
+size detection חייב לדלג על shape-tokens מוצהרים.

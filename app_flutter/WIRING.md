@@ -162,3 +162,12 @@ rather than pixel rendering.
 - §14 detection: `test/spec_assets_test.dart` enforces 36 routing rules
   including "every page lands on its own per-page crop or a legit shared one".
 - All 74 catalog pages audited per §22.F mandatory audit checklist.
+
+## External-card chip hierarchy (§21)
+- `chip_hierarchy.dart` `parseChips(nameHe)` → breadcrumb [shape ‹ thread ‹ size];
+  the title is the type noun. Angles (45°/90°) are shape, the diameter is the
+  size — a digit-leading angle no longer steals the size slot.
+- `lipskey_products_screen.dart` `_HierarchyChips`: display-only cleanup —
+  `_chipDisplayLabel` strips wrapping parens, `_isNoiseChip` hides bare units
+  (מ"מ). nameHe stays verbatim (R8); tap index maps back to the raw path level.
+- §14: `spec_assets_test` · "§21 angle fittings keep the diameter as size".

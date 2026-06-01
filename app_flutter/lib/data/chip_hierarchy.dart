@@ -19,7 +19,10 @@ const Set<String> kChipLevel1Connection = {
 };
 
 const Set<String> kChipLevel2Shape = {
-  '45°', '90°', '45', '90',
+  // Angles carry the degree symbol in this catalog (45° / 90°). The bare
+  // '45'/'90' are intentionally NOT here — those would collide with the
+  // diameters 45mm/90mm and steal them from the size slot.
+  '45°', '90°',
   'מצרה', 'שווה', 'סמוי', 'פרפר', 'כדורי',
   'מעבר', 'ישר', 'אלכסוני',
   'בין', 'אוגנים', // compound "בין אוגנים"
@@ -115,7 +118,15 @@ ChipPath parseChips(String nameHe) {
     final t = tokens[i];
     if (kChipMaterial.contains(t)) { i++; continue; }
     if (type == null && kChipTypes.contains(t)) { type = t; i++; continue; }
-    if (sizeRe.hasMatch(t)) { l5 ??= t; i++; continue; }
+    // Size detection — but NOT for declared shape tokens that happen to start
+    // with a digit (45° / 90°). Those are the elbow/tee ANGLE and belong in
+    // level-2 (shape); letting sizeRe grab them would eat the angle and
+    // silently drop the real diameter (e.g. "ברך 45° פ.פ 160" → 160 lost).
+    if (sizeRe.hasMatch(t) && !kChipLevel2Shape.contains(t)) {
+      l5 ??= t;
+      i++;
+      continue;
+    }
 
     // Try compound match (look ahead). Probe levels in priority order so
     // a substring that's ambiguous picks the most-specific level.
