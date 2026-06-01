@@ -40,10 +40,14 @@ cart). Surfaced in `regression_panel_screen.dart` (reachable from the BS dial).
 All counts are computed **dynamically** from `kLipskeyCatalog` — no hard-coded
 totals.
 
+> **⚠️ מאוחד תחת `VERIFICATION_PROTOCOL.md` — זה ה-entry-point. המסמך כאן = פירוט-רקע.**
+
 ## 3. Mutation testing (the teeth check)
 Inject a deliberate bug into logic, run `flutter test`, confirm a test goes
-red (CAUGHT), then `git checkout --` to revert. Scripts used live in `/tmp`
-(not committed). History:
+red (CAUGHT), then **restore byte-exact from a backup** — use
+`scripts/mutation_verify.sh` (it backs up with `cp`, not `git checkout`, so
+uncommitted edits in the same file survive). **Do NOT use `git checkout -- file`**
+to revert a mutation — it wipes unstaged edits. History:
 - 30 obvious bugs → 30/30 caught.
 - 50 subtle bugs → 32/50 (18 gaps in embedded/uncovered logic).
 - Closed the 18 by extracting pure helpers + tests.
@@ -56,8 +60,10 @@ extract it from widgets into pure top-level functions (see ARCHITECTURE).
 Genuinely-equivalent mutants are pinned with adversarial inputs, not ignored.
 
 ### Quick mutation-test recipe
-```python
-# for each (file, old, new): replace → flutter test → returncode!=0 == CAUGHT → git checkout -- file
+```bash
+# Safe: scripts/mutation_verify.sh <file> '<sed-expr>' '<test>'
+# backup(cp) → mutate → flutter test (expect red=CAUGHT) → restore(cp) → flutter test (expect green)
+# NOT: git checkout -- file  (wipes uncommitted edits)
 ```
 UI-only effects (theme/grid/VAT display/image size) are covered through their
 providers/helpers, not pixel rendering — a known, accepted boundary.

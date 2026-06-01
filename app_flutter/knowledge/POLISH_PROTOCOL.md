@@ -291,7 +291,11 @@ K11. **סכם פאזה K ב-`KNOWLEDGE_AUDIT.md`:** כמה keep/merge/deprecate/
 
 ## 4. סיום-סשן (חובה)
 
+> **בדיקה = `VERIFICATION_PROTOCOL.md`.** ליטוש מאמת **כל** שינוי דרך סולם-הבדיקה
+> המאוחד שם (L0–L7). §6 שם ממפה אילו שכבות חלות על כל פאזת-ליטוש (B–K).
+
 - [ ] `POLISH_LOG.md` מעודכן — before/after לכל שינוי בסשן.
+- [ ] סולם-הבדיקה הרלוונטי (`VERIFICATION_PROTOCOL.md` §2/§6) ירוק במלואו.
 - [ ] `flutter analyze` (0 errors) + `flutter test` (ירוק) + `build web` עובר.
 - [ ] `WIRING.md` עודכן אם נגעת ב-`lib/screens|state|logic`.
 - [ ] דוח-ביצוע ב-`AGENT_COORDINATION.md` (כולל מה נגעת — תיאום מול בנצי).
