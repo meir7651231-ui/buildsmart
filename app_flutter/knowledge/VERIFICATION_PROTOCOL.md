@@ -22,18 +22,22 @@
 
 ## 1. סולם-הבדיקה (רוץ בסדר הזה, לפני כל commit)
 
-| # | שכבה | פקודה | תנאי-מעבר |
-|---|------|--------|-----------|
+| # | שכבה | פקודה / מנגנון | תנאי-מעבר |
+|---|------|----------------|-----------|
 | **L0** | סטטי | `flutter analyze` + `dart format --set-exit-if-changed .` | 0 errors · 0 שינויי-פורמט |
-| **L1** | רגרסיה | `flutter test` | ירוק · ≤ `known_failing.txt` |
+| **L1** | רגרסיה (129 קבצים, 10 דומיינים) | `flutter test` | ירוק · ≤ `known_failing.txt` |
+| **L1c** | **חוזה-החיווט (חיווט)** | `wiring_test.dart` + `gaps_test.dart` מול `../WIRING.md` | כל שורת-WIRING מכוסה |
 | **L2** | harness בתוך-האפליקציה | `runRegression(ref)` (פאנל BS-dial) | כל המודולים עוברים |
 | **L3** | מוטציה (לשינוי-לוגיקה) | `scripts/mutation_verify.sh` ← **לא** `git checkout` | אדום→שחזור→ירוק |
-| **L4** | build | `flutter build web --release` | עובר · גודל-bundle במגמה |
+| **L3g** | **stuck → regression** | `scripts/generate_stuck_regression.sh` | אנטי-פטרן חדש = טסט חדש |
+| **L4** | build | `flutter build web --release` (+ `post_build.sh`) | עובר · גודל-bundle במגמה |
 | **L5** | ויזואלי (לשינוי-UI) | screenshot before/after | מתועד ב-`POLISH_LOG.md` |
-| **L6** | ידע (לשינוי-knowledge) | verdict כתוב + `knowledge_protocol_test` | ירוק · אין הפניות-שבורות |
-| **L7** | 100 שערים | אוטומטי ב-pre-commit | כל 100 עוברים |
+| **L6** | ידע (לשינוי-knowledge) | verdict + `knowledge_protocol_test` + `protocol_security_test` | ירוק · אין הפניות-שבורות |
+| **L7** | **שרשרת hooks (3)** | `commit-msg` → `pre-commit` (100 שערים) → `pre-push` | כל 100 + פורמט + ענף-יעד |
+| **L7a** | **גם השערים נבדקים** | `scripts/audit_gates.sh` (מזריק באג לכל שער) | כל שער חוסם הרמטית |
 
 > **L7 חוסם — לא לעקוף.** בעיית-שער → דווח לפרוטוקוליסט (טמפלט ב-`AGENT_COORDINATION`).
+> **`protocol_check.sh`** = הריצה המלאה של L0–L7 ידנית לפני commit/push.
 
 ---
 
@@ -118,9 +122,55 @@ catchable — חלץ אותה מ-widget ל-top-level pure function (ראה `ARCH
 
 ---
 
-## 8. עקרונות-מנחים
+## 8. מרשם המנגנונים — איפה כל בדיקה רשומה בפועל
+
+> כשמשהו נשבר, זה הטבלה שאומרת לאיזה קובץ ללכת.
+
+### חיווט (WIRING)
+| מנגנון | קובץ | מה הוא אוכף |
+|--------|------|--------------|
+| חוזה-החיווט | `../WIRING.md` (86 שורות) | כל כפתור/הגדרה → התנהגות → סטטוס |
+| בדיקת-חיווט | `test/wiring_test.dart` | ה-wiring contract חי בקוד |
+| פערים | `test/gaps_test.dart` | pure-logic contract + mirrors WIRING |
+
+### שרשרת ה-hooks (3 שלבים)
+| hook | קובץ | מה הוא בודק |
+|------|------|--------------|
+| הודעה | `.githooks/commit-msg` | פורמט-הודעה (באג #26) |
+| לפני-commit | `.githooks/pre-commit` | **100 שערים** |
+| לפני-push | `.githooks/pre-push` | כל commit עבר pre-commit + ענף-יעד נכון (באג #23) |
+
+### סקריפטי-אכיפה (`scripts/`)
+| סקריפט | תפקיד |
+|--------|--------|
+| `protocol_check.sh` | ריצת L0–L7 מלאה לפני commit/push |
+| `audit_gates.sh` | מזריק באג מיקרוסקופי לכל שער — מוודא שהשער חוסם |
+| `generate_stuck_regression.sh` | `stuck_log.md` → `test/stuck_regression_test.dart` |
+| `mutation_verify.sh` | מוטציה בטוחה (backup byte-exact) |
+| `post_build.sh` | canvasKit config ל-serving מקומי |
+
+### הסוויטה — 129 קבצים, 10 דומיינים (אינדקס מלא ב-`TESTS_OVERVIEW.md`)
+1. SmartProduct card · 2. Compat engine · 3. Install/studio · 4. Card helpers ·
+5. Persisted state · 6. Cart/commerce · 7. **Mutation/regression gates** ·
+8. Audits/health · 9. Interactions/robustness · 10. Misc helpers
+
+### אכיפת-פרוטוקול כטסטים
+| קובץ | מה הוא אוכף |
+|------|--------------|
+| `test/knowledge_protocol_test.dart` | הפרות-פרוטוקול מפילות את הסוויטה |
+| `test/protocol_security_test.dart` | אבטחת-פרוטוקול |
+| `test/stuck_regression_test.dart` | כל אנטי-פטרן מ-`stuck_log` נחסם לנצח |
+
+### מערכות 100-צעדים נלוות
+`BUG_INVESTIGATION_PROTOCOL` (חקירת-באג) · `SMARTPRODUCT_ROADMAP` (תוכנית-מוצר) ·
+`LAUNCH_READINESS_PROTOCOL` (בנצי) · `POLISH_PROTOCOL` (ליטוש).
+
+---
+
+## 9. עקרונות-מנחים
 
 - **הסוויטה היא ground-truth** לפני כל checkpoint/push (PLAYBOOK §C).
 - **שם-קובץ-טסט = `_test.dart` (יחיד).** `_tests.dart` מדולג שקט ע"י flutter test.
-- **כל helper מחווט חייב להיות מכוסה** בלפחות טסט אחד (regression_gate_test).
+- **כל helper מחווט חייב להיות מכוסה** בלפחות טסט אחד (regression_gate_test) + שורה ב-`WIRING.md`.
 - **מוטציה > כיסוי-שורות.** טסט שלא נצבע אדום על באג-מוזרק = טסט-ראווה.
+- **wire ⇒ contract ⇒ test.** כל אפקט מחווט = שורה ב-`WIRING.md` + בדיקה ב-`test/`.
