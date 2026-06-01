@@ -17,9 +17,13 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 | `spec/` | **full אפיון** — formal per-screen specs (10 sections each); `spec/README.md` is the index |
 | `STATUS.md` | current state snapshot — screens, features, wiring counts, version |
 | `ARCHITECTURE.md` | structure: screens / state / data / widgets, navigation, theming |
-| `TESTING.md` | the verification protocol — harness, `flutter test`, mutation testing |
+| **`VERIFICATION_PROTOCOL.md`** | **the single unified testing protocol** — ladder L0–L7, mutation, 100-step bug investigation, checklists, machinery registry. **Start here for verification.** |
+| `TESTING.md` | ⛔ merged → `VERIFICATION_PROTOCOL.md` (stub kept; enforced to exist) |
+| `CHECKLISTS.md` | ⛔ merged → `VERIFICATION_PROTOCOL.md` §4b (stub) |
+| `BUG_INVESTIGATION_PROTOCOL.md` | ⛔ merged → `VERIFICATION_PROTOCOL.md` §4 (stub) |
+| `TESTS_OVERVIEW.md` | per-file test index (102 files, 10 domains) — appendix to VERIFICATION |
+| `KNOWLEDGE_AUDIT.md` | Phase-K verdict ledger for knowledge-base cleanup |
 | `CONVENTIONS.md` | light-mode, RTL, commit/version, inherited shell rules |
-| `CHECKLISTS.md` | copy-paste checklists for common changes |
 | `DECISIONS.md` | ADR-style log of notable decisions |
 | `SIZE_FILTER_PROTOCOL.md` | finder (בית) "גודל" axis — bug→fix→lessons protocol (P1-P8, 100-step plan, Live Log) |
 | `../WIRING.md` | the wiring contract — every button/setting → behavior → status |

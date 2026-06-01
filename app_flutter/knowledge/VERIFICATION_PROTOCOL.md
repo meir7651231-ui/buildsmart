@@ -73,13 +73,137 @@ catchable — חלץ אותה מ-widget ל-top-level pure function (ראה `ARCH
 
 ---
 
-## 4. נמצא באג / טסט נצבע אדום → חקירה
+## 4. נמצא באג / טסט נצבע אדום → חקירת-100-צעדים (מקופל לכאן)
 
-> **אל תתקן מהיר.** באג שנמצא = עבור ל-**`BUG_INVESTIGATION_PROTOCOL.md`** (100 צעדים,
-> 7 פאזות: זיהוי → שכפול → שורש → תכנון → יישום → אימות → תיעוד).
+> **כלל #39:** לעולם לא להציע פתרון לפני שהבעיה ידועה ב-100%.
+> חקור → חקור עמוק → ודא → רק אז פתרון. **אל תתקן מהיר.**
 
-החוק (#39): **אסור להציע פתרון לפני שהבעיה ידועה ב-100%.** אחרי תיקון —
-הוסף regression שתופס את הבאג, ותעד ב-`stuck_log.md` אם זה אנטי-פטרן חוזר.
+### Phase A — זיהוי וסיווג (1–15)
+1. קרא את הודעת השגיאה **המלאה** — לא רק שורה אחת.
+2. זהה: באיזה **שער** נכשל (31? 32? 59?).
+3. זהה: **שגיאה** (❌) או **אזהרה** (⚠️) — אזהרה אינה חוסמת.
+4. בדוק אם הכשל מתועד ב-`stuck_log.md` — אולי כבר נפתר.
+5. בדוק אם הכשל מתועד ב-`CARRY_FORWARD.md` — אולי יש לקח קיים.
+6. `git status --short` — שינויים לא-committed?
+7. `git log --oneline -5` — מה השתנה לאחרונה?
+8. `git diff --cached --name-only` — אילו קבצים staged?
+9. הכשל חדש או קיים מלפני השינוי? (`git stash && commit-test && git stash pop`)
+10. קבע: באג ב-**hook** / **קוד** / **תיעוד** / **סביבה**.
+11. מדרג חומרה: חוסם commit / אזהרה / intermittent / תלוי-OS.
+12. `.git/hooks/pre-commit` ≡ `.githooks/pre-commit`? (`sha256sum` שניהם).
+13. Flutter זמין — `flutter --version`.
+14. פועל מ-`app_flutter/` — `pwd`.
+15. **עצור.** האם הבעיה מוגדרת במשפט אחד ברור?
+
+### Phase B — שכפול (16–30)
+16. שכפל בסביבה נקייה: `git stash && [commit מינימלי] && git stash pop`.
+17. הכשל **בכל פעם** או רק לפעמים?
+18. תלוי בתוכן הקובץ הספציפי או בכל שינוי?
+19. הקטן repro למינימום — איזה קובץ staged גורם לכשל?
+20. קורה גם עם `git commit --allow-empty`?
+21. קורה רק ב-Dart staged? רק ב-knowledge? רק ב-lib/?
+22. קורה בשני כיוונים (Bash בלבד ≠ Edit בלבד)?
+23. שמור פלט מלא: `git commit 2>&1 | tee /tmp/gate_fail.txt`.
+24. הרץ ידנית: `bash .githooks/pre-commit 2>&1 | head -50`.
+25. `set -x` זמני לפני שורת-הכשל — לראות כל פקודה.
+26. ה-cwd משפיע? נסה מ-root ומ-app_flutter/.
+27. PATH משפיע? `echo $PATH | tr ':' '\n' | grep flutter`.
+28. locale/encoding? `echo $LANG $LC_ALL`.
+29. CRLF בקבצי hook? `file .githooks/pre-commit`.
+30. **עצור.** יש repro מינימלי עקבי?
+
+### Phase C — ניתוח שורש (31–55)
+31. קרא את קוד-השער הכושל **במלואו** — `sed -n 'A,Bp' .githooks/pre-commit`.
+32. זהה כל משתנה שהשער משתמש בו — מאיפה הוא מגיע?
+33. הדפס ערך כל משתנה לפני הבדיקה: `echo "VAR=[$VAR]"`.
+34. ה-match pattern נכון? `echo "test" | grep -E "pattern"`.
+35. ה-path נכון אחרי `cd app_flutter/`? (לקח #33 — prefix כפול).
+36. pipe exit code נלכד? `cmd1 | cmd2; echo ${PIPESTATUS[@]}`.
+37. `grep -c` מחזיר כפול? (לקח #27).
+38. awk range סוגר מוקדם? (לקח #26).
+39. `sha256sum` מושפע מ-CRLF? (לקח #29).
+40. `tr -d '\r'` נדרש? (לקח #30).
+41. `STAGED_LIB` מחושב לפני הלולאה? (לקח #24 — gate 103).
+42. baseline ב-STATUS.md מעודכן? `grep "known-failing" knowledge/STATUS.md`.
+43. test count ב-STATUS.md מעודכן?
+44. הגרסה ב-home_shell.dart שונה מה-commit האחרון?
+45. WIRING.md עודכן עם השינוי?
+46. mutation_log.md עודכן ל-helper חדש?
+47. stuck_log.md מכיל antipattern שחוזר?
+48. ה-test הכושל **חדש** (נוסף בסשן) או **קיים**?
+49. ה-test הכושל **קשור** לשינוי?
+50. test קיים ולא נגעת בו → `git stash` ובדוק אם נכשל גם בלי שינויים.
+51. test קשור → קרא את ה-test ואת הקוד שהשתנה.
+52. test לא קשור → תעד ב-STATUS.md `known-failing: N` והמשך.
+53. הבעיה ב-**implementation** או ב-**expectation** (test שגוי)?
+54. implementation → מה בדיוק השורה הלא-נכונה?
+55. **עצור.** כתוב משפט: "הבעיה היא X כי Y."
+
+### Phase D — תכנון פתרון (56–70)
+56. כתוב את הפתרון בעברית לפני שורת-קוד.
+57. פותר את השורש — לא רק סימפטום?
+58. לא שובר gate אחר? 59. לא שובר test אחר?
+60. לא יוצר regression ב-Windows/MSYS? 61. ב-macOS?
+62. מינימלי — בלי לוגיקה מיותרת?
+63. צריך לעדכן `CARRY_FORWARD.md`? 64. `stuck_log.md`? 65. regression test חדש?
+66. לסנכרן `.git/hooks/pre-commit`? 67. bump גרסה (שינוי ב-lib/)? 68. WIRING.md?
+69. תלויות — קבצים שמסתמכים על מה שמשתנה?
+70. **עצור.** הפתרון ברור, מינימלי, ולא שובר כלום?
+
+### Phase E — יישום (71–85)
+71. ערוך — שינוי **מינימלי** בלבד.
+72. קרא שוב — עושה בדיוק מה שתכננת?
+73. בדוק שה-patch פותר repro: `bash .githooks/pre-commit`.
+74. hook שונה → `cp .githooks/pre-commit .git/hooks/pre-commit`.
+75. `flutter analyze --no-pub` — 0 errors.
+76. `flutter test --no-pub test/SPECIFIC.dart` — רק הכושל.
+77. ודא שעובר עכשיו. 78. הרץ tests קשורים (לא suite מלא עדיין).
+79. stuck_log עודכן → regex תקין. 80. CARRY_FORWARD → לקח במשפט אחד.
+81. STATUS.md → test count + known-failing נכונים.
+82. `git add FILE1 FILE2`. 83. `git diff --cached --name-only` — רק מה שצריך.
+84. `git diff --cached` — אין מיותר. 85. **עצור.** מינימלי, נכון, מוכן?
+
+### Phase F — אימות (86–95)
+86. `flutter test --no-pub` מלא — ≥ baseline ✅.
+87. מספר הבדיקות לא ירד. 88. כל הכשלים ≤ `known-failing`.
+89. commit — כל 100 השערים עוברים. 90. שער נכשל → חזור ל-Phase C (לא לנחש).
+91. `sha256sum` של שני ה-hooks זהים. 92. אין uncommitted אחרי commit.
+93. הודעת-commit מתארת **למה** לא **מה**. 94. אין `--no-verify`/`--force`/bypass.
+95. **עצור.** עבר כל 100 שערים?
+
+### Phase G — תיעוד ומניעה (96–100)
+96. רשומה ל-`stuck_log.md`: בעיה · פתרון · ANTIPATTERN + RULE.
+97. לקח ל-`CARRY_FORWARD.md` — משפט אחד, ממוספר.
+98. regression — ודא שה-hook יצר אותו אוטומטית מ-ANTIPATTERN.
+99. עדכן את הפרוטוקול אם גילית צעד חסר.
+100. **מה הלקח שמונע שהבאג יחזור?** וודא שהוא מוטמע.
+
+**כללי-ברזל:** לא פתרון לפני 55 · לא suite מלא לפני 86 · פקודה שנכשלה
+פעמיים → פיבוט (#37) · בעיה של סוכן אחר → `git diff test/` ועצור (#38).
+
+---
+
+## 4b. Checklists להעתקה (מקופל מ-CHECKLISTS)
+
+**חיווט הגדרה לאפקט אמיתי:**
+- [ ] מצא את השדה ב-`lib/state/<area>_settings.dart`, ודא write-only כרגע.
+- [ ] לוגיקה (math/filter/threshold) → **חלץ pure top-level helper**, ה-widget קורא לו.
+- [ ] חווט widget → helper/provider.
+- [ ] הוסף שורה ל-`../WIRING.md` עם ✅ + שם-ה-helper.
+- [ ] בדיקה ב-`test/gaps_test.dart` (או `wiring_test.dart`).
+- [ ] helper "enforced" → חתימה ב-`knowledge_protocol_test.dart` + הפניה ב-WIRING.
+- [ ] L0+L1 ירוקים → מוטציה (`mutation_verify.sh`) → bump גרסה ב-`home_shell.dart`.
+
+**הוספת/המרת מסך (light mode):**
+- [ ] bg `0xFFF5F6FA`, cards `0xFFFFFFFF`, AppBar `foregroundColor 0xFF1A1A1A`.
+- [ ] אין טקסט-לבן על משטח-בהיר (לבן רק על כפתורים/badges צבעוניים).
+- [ ] light-mode guard ב-`knowledge_protocol_test` נשאר ירוק.
+
+**placeholder → התנהגות אמיתית:**
+- [ ] החלף toast "בבנייה" בפעולה האמיתית. הזז שורה ב-WIRING מ-🚧 ל-✅ + טסט.
+
+**כשמוטציה מוצאת באג שלא-נתפס:** פער-כיסוי. חלץ לוגיקה אם embedded; הוסף
+pinning test. מוטנט שקול → קלט-יריב (subtotal שלילי), לא להתעלם.
 
 ---
 
@@ -106,19 +230,22 @@ catchable — חלץ אותה מ-widget ל-top-level pure function (ראה `ARCH
 
 ---
 
-## 7. נספחי-הפירוט (המקורות שמאוחדים כאן)
+## 7. סטטוס-האיחוד (מה קופל לכאן, מה נשאר נספח)
 
-| מסמך | מה הוא מוסיף | תפקיד היום |
-|------|--------------|------------|
-| `TESTING.md` | פילוסופיית 3-השכבות + היסטוריית-מוטציה | פירוט-רקע ל-L1–L3 |
-| `TESTS_OVERVIEW.md` | אינדקס 102 קבצי-טסט לפי דומיין + ROADMAP-step | "איזה טסט שומר על מה" |
-| `CHECKLISTS.md` | רשימות copy-paste (wire setting / add screen / before-commit) | quick-ref מעשי |
-| `BUG_INVESTIGATION_PROTOCOL.md` | 100 צעדי-חקירה ב-7 פאזות | זרוע §4 (באג נמצא) |
-| `scripts/mutation_verify.sh` | מוטציה בטוחה (backup-restore) | הכלי של L3 |
+> **המסמך הזה הוא הסמכות היחידה לבדיקה.** התוכן הפרוצדורלי קופל פנימה.
+> ה-verdict המלא לכל מקור ב-`KNOWLEDGE_AUDIT.md`.
 
-> **הערה לליטוש (פאזה K):** ארבעת הנספחים אינם כפילות — כל אחד עונה על שאלה אחרת
-> (פילוסופיה / אינדקס / רשימות / חקירה). ה-verdict שלהם: **keep כנספח**, עם הפניה
-> מ-`README` למסמך-הזה כ-entry-point. **אל תמחק אותם** — הם הפירוט.
+| מקור | מה נעשה | למה |
+|------|---------|------|
+| `TESTING.md` | ✅ קופל (§1·§3) → **stub מנותב** | נאכף ע"י `knowledge_protocol_test` (>400 ת') — לא נמחק |
+| `CHECKLISTS.md` | ✅ קופל (§4b) → **stub מנותב** | לא נאכף — הומר להפניה |
+| `BUG_INVESTIGATION_PROTOCOL.md` | ✅ קופל (§4) → **stub מנותב** | 100 הצעדים עכשיו כאן |
+| `TESTS_OVERVIEW.md` | **נשאר נספח** (לא קופל) | אינדקס 102-קבצים = lookup, לא פרוצדורה; נאכף ע"י שער 2 |
+| `scripts/mutation_verify.sh` | הכלי של L3 | קוד, לא מסמך |
+
+> **למה TESTS_OVERVIEW לא קופל (verdict מפורש):** הוא טבלת-lookup של 102 קבצי-טסט —
+> נתוני-עזר, לא "איך מוודאים". קיפולו היה מנפח את המסמך ל-2× בלי ערך-פרוצדורלי.
+> נשאר כ**אינדקס-הטסטים** שאליו §8 מפנה. (אם תרצה גם אותו פנימה — אמור ואכפיל.)
 
 ---
 

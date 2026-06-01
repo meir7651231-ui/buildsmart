@@ -1,69 +1,20 @@
-# Testing protocol — app_flutter
+# Testing — ⛔ אוחד תחת VERIFICATION_PROTOCOL.md
 
-Three layers verify the app. Run all before every commit.
+> **המסמך הזה אוחד.** פרוטוקול-הבדיקה המלא והמאוחד חי עכשיו ב-
+> **`VERIFICATION_PROTOCOL.md`** — שם נמצאים סולם-הבדיקה (L0–L7), שלוש השכבות
+> (`flutter test` · in-app harness · mutation), השיטה הבטוחה למוטציה
+> (`scripts/mutation_verify.sh` — backup byte-exact, **לא** `git checkout`),
+> מרשם-המנגנונים המלא (חיווט · hooks · scripts · 10 דומיינים), וה-checklists.
+>
+> **אל תוסיף תוכן כאן.** הקובץ נשאר רק כדי לא לשבור הפניות
+> (`knowledge_protocol_test.dart` אוכף את קיומו). כל עדכון → `VERIFICATION_PROTOCOL.md`.
 
-## 1. `flutter test` (the regression suite)
-`test/` holds **52 test files** (hundreds of checks). Key files:
-- `gaps_test.dart` — pure-logic contract checks (cart math, checkout gates,
-  notif predicate/grouping/importance, index tokenizer, chat presence,
-  catalog defaults). Mirrors `../WIRING.md`.
-- `wiring_test.dart` — the wiring contract (cart stepper, store→cart defaults,
-  notif filter, chat mute/archive).
-- `edge_cases_test.dart` — 30 adversarial edge cases.
-- `catalog_regression_test.dart` — runs the in-app `testCatalog()` harness.
-- `widget_test.dart` — shell boot, dial drills, overview/categories.
-- `robustness_test.dart` — **20 robustness checks**: every major screen rendered
-  under stress (large text 1.15 / extra-large 1.3, narrow 340 / tiny 300 widths)
-  plus shell tab/section/dial states. Caught real horizontal-Row overflows in
-  catalog, store (quick actions), chat settings, and install studio — all fixed
-  with `Flexible`/`Wrap`/ellipsis.
-- `product_journey_test.dart` — **end-to-end purchase journey** for **10 real
-  products** across categories: catalog search → product sheet → add-to-cart →
-  cart FAB → store cart (stepper + summary) → checkout → confirmation, asserting
-  UI **and** providers at every stage. (This suite caught a real `_RelatedCard`
-  overflow for long product names — now fixed via a `Flexible` name.) It also
-  includes a **catalog-wide sweep**: one product per distinct category (all 69),
-  the product sheet fully scrolled, asserting no overflow/render error for any
-  category's layout. Plus a **HARD sweep** over all **935** products at the
-  app's largest text scale (1.15) on a narrow 340×680 phone — which exposed 92
-  horizontal Row overflows (accessory name, section title, category header,
-  size badge), all fixed with `Flexible`/ellipsis.
-- domain: `pathfinder_test`, `catalog_bfs_test`, `bfs_demo_test`,
-  `install_builder_test`, `manifold_test`, `deep_audit_test`, etc.
+## למה אוחד
+~150 מסמכים נכתבו ב-11 ימים; הבדיקה התפזרה ל-4 קבצים. האיחוד מרכז הכל
+ל-entry-point אחד כך שסוכן קורא מסמך אחד ויודע איך לוודא כל שינוי.
+ה-verdict המלא של האיחוד: `KNOWLEDGE_AUDIT.md` (סבב 1).
 
-## 2. In-app regression harness (`lib/test_harness/`)
-`runRegression(ref)` runs modules: dsync · tabs · buttons · products ·
-behavior · dupes · sections · settings · catalog · finder · engine · **cart**
-(`tests/cart.dart` — unit count, line+accessory totals, VAT/delivery/total,
-JSON persistence; pure checks only so it never touches the live persisted
-cart). Surfaced in `regression_panel_screen.dart` (reachable from the BS dial).
-All counts are computed **dynamically** from `kLipskeyCatalog` — no hard-coded
-totals.
-
-> **⚠️ מאוחד תחת `VERIFICATION_PROTOCOL.md` — זה ה-entry-point. המסמך כאן = פירוט-רקע.**
-
-## 3. Mutation testing (the teeth check)
-Inject a deliberate bug into logic, run `flutter test`, confirm a test goes
-red (CAUGHT), then **restore byte-exact from a backup** — use
-`scripts/mutation_verify.sh` (it backs up with `cp`, not `git checkout`, so
-uncommitted edits in the same file survive). **Do NOT use `git checkout -- file`**
-to revert a mutation — it wipes unstaged edits. History:
-- 30 obvious bugs → 30/30 caught.
-- 50 subtle bugs → 32/50 (18 gaps in embedded/uncovered logic).
-- Closed the 18 by extracting pure helpers + tests.
-- A 2nd subtler round found 9 more gaps → closed.
-- Final 50-mutation sweep → **49/50**, last one an *equivalent mutant*
-  (`minOrderAmount > 0` vs `>= 0`), pinned with a negative-subtotal case → **50/50**.
-
-**Rule:** domain logic must be 100% mutation-caught. To make logic catchable,
-extract it from widgets into pure top-level functions (see ARCHITECTURE).
-Genuinely-equivalent mutants are pinned with adversarial inputs, not ignored.
-
-### Quick mutation-test recipe
-```bash
-# Safe: scripts/mutation_verify.sh <file> '<sed-expr>' '<test>'
-# backup(cp) → mutate → flutter test (expect red=CAUGHT) → restore(cp) → flutter test (expect green)
-# NOT: git checkout -- file  (wipes uncommitted edits)
-```
-UI-only effects (theme/grid/VAT display/image size) are covered through their
-providers/helpers, not pixel rendering — a known, accepted boundary.
+## שלוש השכבות (תקציר — הפירוט ב-VERIFICATION_PROTOCOL §1)
+1. **`flutter test`** — סוויטת-הרגרסיה (129 קבצים, 10 דומיינים) = ground-truth.
+2. **in-app harness** (`runRegression`) — מודולים נבדקים בתוך-האפליקציה.
+3. **mutation** — לוגיקת-דומיין חייבת 100% נתפסת; הזרק→אדום→שחזר→ירוק.
