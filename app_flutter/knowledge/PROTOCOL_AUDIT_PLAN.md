@@ -212,3 +212,14 @@
 | 152 | 22 | `grep -q "<!-- לדוגמה:"` (session_plan template) | false-negative (err לא יורה) |
 | 402 | 67 | `grep -E "['\"][א-ת]..."` (Hebrew string ב-app/) | false-negative (warn לא יורה) |
 | 570 | 95 | `grep -oE "[א-ת]+ [0-9]+×[0-9]+"` (Hebrew dimension) | false-negative (warn לא יורה) |
+
+### ✅ class `echo \"$var\" | grep` — נבדק 2026-06-01, נקי (לא להמיר)
+
+15 מופעים ב-hook. **אינם** ה-class של לקח #45. ההבחנה: לקח #45 היה על echo של
+**משתנה-pattern לא-מהימן** (תוכן stuck_log) — שם echo פירש shell-meta שונה בין
+סביבות; **תוקן בשער 103**. 15 המופעים הנותרים echo-ים **פלט-פקודה שנלכד**
+($ANALYZE/$TEST_OUT/$BUILD_OUT/$GIT_DIFF) ומחפשים **pattern ASCII קבוע ועוגן**
+(`^error •`, `Some tests failed`, `\+[0-9]+`, `knowledge_protocol_test`). זה ה-idiom
+הסטנדרטי, דטרמיניסטי. **לא ממירים** ל-`<<<` herestring ספקולטיבית (לקח #39/#37 —
+אין ראיה לכשל + churn ב-15 אתרים = סיכון typo). אם אי-פעם תרצה robustness מקסימלי,
+`grep … <<< "$var"` הוא תחליף מכני 1:1 — אבל רק עם ראיה לכשל אמיתי.
