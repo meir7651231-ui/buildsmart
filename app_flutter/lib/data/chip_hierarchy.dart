@@ -43,7 +43,7 @@ const Set<String> kChipLevel3Feature = {
   'לעבודה', 'בגובה', '(לעבודה', 'בגובה)',
   'לתיקון', 'חורים', 'לצינורות', 'לרוכבים', 'רוכב',
   'למונים', 'פיגורות', 'לקטרים',
-  'מ"מ',
+  // ('מ"מ' moved to _kChipUnits — folded into the size chip, not a level-3 word)
   'סופי', 'גשר',
   'הולירומה', // sub-brand qualifier
   'מצופה', 'פלדה', // for "אוגן פלדה מצופה PP"
@@ -59,6 +59,11 @@ const Set<String> kChipLevel4Thread = {
 
 // Material tokens — shown as image badge, not in chip path.
 const Set<String> kChipMaterial = {'PPR', 'PPRCT', 'PP-RCT'};
+
+// Unit tokens — folded INTO the size chip rather than dropped or shown as a
+// standalone chip, so the size reads "20-63 מ"מ" and the full catalog name is
+// recoverable from the chips alone (E2E §21.B).
+const Set<String> _kChipUnits = {'מ"מ', 'מ”מ', 'mm'};
 
 /// Returns chip components per the §21 hierarchy.
 /// type: leading product noun (kChipTypes word).
@@ -124,6 +129,15 @@ ChipPath parseChips(String nameHe) {
     // silently drop the real diameter (e.g. "ברך 45° פ.פ 160" → 160 lost).
     if (sizeRe.hasMatch(t) && !kChipLevel2Shape.contains(t)) {
       l5 ??= t;
+      i++;
+      continue;
+    }
+
+    // Unit token (מ"מ / mm) — fold it INTO the size chip instead of dropping
+    // it or showing it standalone, so the size reads "20-63 מ"מ" and the full
+    // catalog name stays recoverable from the chips alone (E2E §21.B).
+    if (_kChipUnits.contains(t)) {
+      if (l5 != null) l5 = '$l5 $t';
       i++;
       continue;
     }

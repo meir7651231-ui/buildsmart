@@ -335,6 +335,40 @@ void main() {
         reason: 'phrase split into separate chips: $path');
   });
 
+  // §21.B — END-TO-END recoverability: the external card shows [type] + the
+  // breadcrumb path + a material badge. Every word of the original catalog
+  // name must be recoverable from those three, or the chip is lossy (the user
+  // can't read the full product off the card). This is the automated form of
+  // the "take 10 names, rebuild from the chip" manual check.
+  test('§21.B every Polyroll name is fully recoverable from the chips', () {
+    final lossy = <String>[];
+    for (final p in kPolyrollCatalog) {
+      final c = parseChips(p.nameHe);
+      final mat = RegExp(r'PPRCT|PP-RCT|PPR').firstMatch(p.nameHe)?.group(0);
+      var recon = '${c.type ?? ''} ${c.path.join(' ')}';
+      if (mat != null) recon = '$recon $mat';
+      String norm(String w) => w.replaceAll('(', '').replaceAll(')', '');
+      final orig = p.nameHe
+          .split(RegExp(r'\s+'))
+          .where((w) => w.trim().isNotEmpty)
+          .map(norm)
+          .toSet();
+      final rebuilt = recon
+          .split(RegExp(r'\s+'))
+          .where((w) => w.trim().isNotEmpty)
+          .map(norm)
+          .toSet();
+      final missing = orig.difference(rebuilt);
+      if (missing.isNotEmpty) {
+        lossy.add('${p.sku} "${p.nameHe}" → lost: ${missing.join(", ")}');
+      }
+    }
+    expect(lossy, isEmpty,
+        reason: 'chip is lossy — these words vanish from the card '
+            '(type+breadcrumb+badge can\'t rebuild the name):\n'
+            '${lossy.take(12).join('\n')}');
+  });
+
   test('fitting categories all have a real cropped spec diagram', () {
     // Categories with a genuine dimension drawing in the catalog. EF is
     // photo-only (R8 — no diagram exists), so it is intentionally excluded.

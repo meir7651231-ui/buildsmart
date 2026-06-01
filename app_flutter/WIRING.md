@@ -178,3 +178,13 @@ rather than pixel rendering.
 - Multi-word phrase "למיקום נקודת מים" kept as one ordered chip (_l3Compounds).
 - Guards: spec_assets_test "§21 angle fittings keep the diameter as size" +
   "§21 multi-word phrase stays one ordered chip".
+
+## §21.B unit-fold — lossless recoverability (2026-06-01)
+- `chip_hierarchy.dart` `_kChipUnits {מ"מ, mm}` + a parseChips branch fold the
+  unit INTO the size chip (`l5 = '$l5 $t'`), so the size reads "20-63 מ"מ" and
+  the full Polyroll name is recoverable from [type]+breadcrumb+material badge.
+  'מ"מ' removed from kChipLevel3Feature (was being hidden as noise → dropped).
+- Guard: spec_assets_test "§21.B every Polyroll name is fully recoverable from
+  the chips" — behavioral, scoped to kPolyrollCatalog (no grep antipattern: מ"מ
+  is a legit standalone token in lipskey_catalog, so a source grep can't tell
+  the wrong placement from the right one). E2E result: 774/774 full recon.
