@@ -1986,10 +1986,9 @@ class _AttrChip extends StatelessWidget {
               // product card and the chip in the filter row always read the
               // same canonical form for the same physical size (P9, P12).
               kind == AttrKind.size ? displaySizeLabel(word) : word,
-              // Dimension tokens ("20×2.8") are LTR — without this the RTL
-              // paragraph reorders them to "2.8×20".
-              textDirection:
-                  word.contains(RegExp(r'\d')) ? TextDirection.ltr : null,
+              // LTR for digit-bearing labels — shared with the finder filter
+              // chip via chipLabelDirection so the two paths stay in sync.
+              textDirection: chipLabelDirection(word),
               style: TextStyle(
                 color: textColor,
                 fontSize: 12,

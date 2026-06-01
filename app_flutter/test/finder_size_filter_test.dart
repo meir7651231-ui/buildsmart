@@ -1,4 +1,5 @@
 import 'package:buildsmart/screens/_size_norm.dart';
+import 'package:flutter/widgets.dart' show TextDirection;
 import 'package:flutter_test/flutter_test.dart';
 
 /// Pure-logic coverage of the finder's size axis. These run against the
@@ -263,7 +264,24 @@ void main() {
     });
   });
 
+  _i3();
   _i5();
+}
+
+void _i3() {
+  group('chipLabelDirection (I3) — one display rule for card + filter', () {
+    test('digit-bearing labels render LTR (no RTL flip of 40×60)', () {
+      expect(chipLabelDirection('40×60'), TextDirection.ltr);
+      expect(chipLabelDirection('DN40'), TextDirection.ltr);
+      expect(chipLabelDirection('1¼"'), TextDirection.ltr);
+      expect(chipLabelDirection('20×2.8'), TextDirection.ltr);
+    });
+    test('letter / plain-word labels keep ambient direction (null)', () {
+      expect(chipLabelDirection('M'), isNull);
+      expect(chipLabelDirection('שחור'), isNull);
+      expect(chipLabelDirection('½"'), isNull); // glyph fraction, no digit
+    });
+  });
 }
 
 void _i5() {

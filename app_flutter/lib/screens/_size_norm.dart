@@ -6,7 +6,7 @@
 ///  - numeric value for true ordering (25, 30, 200, 250 — not lex).
 library;
 
-import 'package:flutter/foundation.dart' show immutable;
+import 'package:flutter/widgets.dart' show immutable, TextDirection;
 
 /// Physical family of a size token. Different families do NOT share a chooser
 /// row — a user can't meaningfully compare an inch diameter to a cm length.
@@ -319,3 +319,10 @@ List<String> letterSizeTokens(String name) {
     ..sort((a, b) => kLetterSizeOrder.indexOf(a).compareTo(kLetterSizeOrder.indexOf(b)));
   return out;
 }
+
+/// Text direction for a chip label, shared by the finder filter chips and the
+/// product-card chips so the two can't drift. Digit-bearing labels (DN40,
+/// 40×60, 1¼", 20×2.8) render LTR — otherwise the RTL paragraph flips the run
+/// (e.g. `40×60` → `60×40`). Plain Hebrew words keep the ambient direction.
+TextDirection? chipLabelDirection(String label) =>
+    label.contains(RegExp(r'\d')) ? TextDirection.ltr : null;

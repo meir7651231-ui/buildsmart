@@ -31,17 +31,26 @@
 
 ## Order of attack (low risk → high yield)
 
-Done: ✅ I4 (post_build.sh) · ✅ I2 (consistency test) · ✅ I1 (3D product icons).
+Done: ✅ I4 (post_build.sh) · ✅ I2 (consistency test) · ✅ I1 (3D product icons)
+· ✅ I8 (scroll hint) · ✅ I5 (מידה axis) · ✅ I3 (chip display contract — lean).
+
+**I3 closed lean (not a heavyweight widget):** the card↔filter drift the
+plan worried about is already prevented by two SHARED helpers —
+`displaySizeLabel` (label text) + `chipLabelDirection` (LTR for digits) — and
+GUARDED by the live `finder_card_consistency_test` (finder ⊆ card over the
+whole catalog). A separate `SizeChipLabel` widget would only dedupe ~3 lines
+across two differently-styled chips, with regression + parallel-conflict risk;
+the test guard is the stronger enforcement. So I3's goal is met without it.
+**I9 (rename `_size_norm.dart`) deferred** — pure churn, high parallel-conflict
+risk (3 importers), near-zero value; revisit only if the file's role shifts.
 
 Remaining, in execution order:
-1. **I8** (scroll affordance) — small UX, low-risk · NEXT
-2. **I5** (M/S/L "מידה" axis) — small UX win
-3. **I3** (SizeChipLabel widget) — root-cause cleanup (closes P9/P12/P17 drift forever)
-4. **I9** (rename `_size_norm.dart`) — mechanical, do alongside I3
-5. **I1-followup** (emoji→icon in product sheet + catalog overview) — 2 stray text sites
-6. **I6** (variant grouping by DN) — bigger UX
-7. **I7** (cross-dim split) — biggest scope
-8. **I10** (analyzer sweep) — separate dedicated session
+1. **I1-followup** (emoji→icon in product sheet + catalog overview) — 2 stray
+   text sites still show an empty box · NEXT
+2. **I6** (variant grouping by DN) — bigger UX (PPR 1/39 picker)
+3. **I7** (cross-dim split) — biggest scope
+4. **I10** (analyzer sweep) — separate dedicated session (incl. the dead
+   `_attrEmoji`/`_sizeLabel`/`_firstSizeNum` in lipskey_products_screen.dart)
 
 ---
 

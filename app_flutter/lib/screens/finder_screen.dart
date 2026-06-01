@@ -750,11 +750,10 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
             color: active ? BsTokens.brand : _surface,
             borderRadius: BorderRadius.circular(20),
           ),
-          // Digit-bearing chips (DN40, 40×60, 1¼") are LTR — without this
-          // the Hebrew RTL paragraph flips `40×60` to read as `60×40`.
+          // LTR for digit-bearing labels (shared with the product-card chip
+          // via chipLabelDirection — keeps the two display paths in sync).
           child: Text(label,
-              textDirection:
-                  label.contains(RegExp(r'\d')) ? TextDirection.ltr : null,
+              textDirection: chipLabelDirection(label),
               style: TextStyle(
                   color: active ? Colors.white : _ink,
                   fontSize: 13,

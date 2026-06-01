@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.46 · 1.6.26 · Finder: ציר "מידה" משני (S/M/L) לחבקים/עוגנים — מסנן עם גודל וזווית',
+                          'v5.47 · 1.6.26 · Finder: chipLabelDirection משותף לכרטיס+מסנן (מונע drift RTL/תצוגה) — I3',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
