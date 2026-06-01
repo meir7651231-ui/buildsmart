@@ -21,7 +21,7 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 | File | Role |
 |---|---|
 | `MASTER_PROTOCOL.md` | **consolidated process law — source of truth for *process*** (folds PROTOCOL · PLAYBOOK · CATALOG-CARD · SMARTPRODUCT_ROADMAP · AGENT_PATTERNS · SCHEMA · STATE_OVERVIEW · TESTS_OVERVIEW · HELPER_INDEX · CARD_FLOW · PROJECTS_GUIDE · COACH_MODE · BUNDLE_SPLIT · DECISIONS · CONVENTIONS). Protected by gate 88. |
-| `PROTOCOL.md` | ⚠️ earlier process law — superseded by `MASTER_PROTOCOL` (deprecate pending; KNOWLEDGE_AUDIT round 2). adr/ + inspections/ still cite its §5/§8. |
+| `PROTOCOL.md` | ⛔ superseded by `MASTER_PROTOCOL` — deprecated stub with section-map (2026-06-01). |
 | `PLAYBOOK.md` | **continuous learning log** — every stuck→solved problem (env/git/dart/engine/refactor/persistence/UI) + PUSH POLICY. |
 | `PROTOCOL_ENFORCEMENT.md` | overview of the 4 enforcement layers (git hooks · Claude hooks · auto-recovery · regression tests) |
 
@@ -38,10 +38,11 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 ### ממשל-סוכנים · agent governance
 | File | Role |
 |---|---|
-| `AGENT_COORDINATION.md` | permissions matrix for the agents + push/sync protocol + cross-agent findings |
+| `AGENT_COORDINATION.md` | permissions matrix for the agents + push/sync protocol + mandatory end-of-session report template + cross-agent findings |
 | `AGENT_WORK_PLAN.md` | protocolist's prioritized task list |
 | `AGENT_READINESS.md` | pre-handoff environment-readiness checklist |
 | `AGENT_PATTERNS.md` | parallel-work playbook (disjoint paths, absolute paths, 3-agent ceiling) |
+| `SESSION_REPORT_2026-06-01.md` | סיכום סשן — כל הסוכנים · v5.62 · חסמים פתוחים · עדכוני פרוטוקול |
 
 ### תוכניות-עבודה · roadmaps & fix-protocols
 | File | Role |
