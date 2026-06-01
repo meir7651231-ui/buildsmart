@@ -902,4 +902,56 @@ void main() {
     }
     expect(gaps, isEmpty, reason: gaps.join('\n'));
   });
+
+  // §22.H — photo-only pages (EF p72-74, tools p90-92) have no dimension
+  // drawing in the catalog, but they DO have a per-sub-type [photo + table]
+  // block. Every product on these pages must resolve to a focused crop as its
+  // FIRST spec asset — never the whole-page fallback as the primary.
+  test('§22.H photo-only pages route to a focused crop, not the whole page', () {
+    // Per-sub-type expected crop — keyed by a nameHe substring. The first
+    // matching rule for the product's page wins (order matters where a page
+    // has overlapping words). This asserts the SPECIFIC crop, so a sub-type
+    // swap (e.g. p72 45°↔90°) is caught, not just "not the whole page".
+    // page: ordered [nameHe-substring, expected-crop] rules; first match wins.
+    // A product that matches NO rule is skipped — it has its own real spec
+    // (e.g. the 3 אומגה on p74 use spec_omega_p74.jpg, not a §22.H crop).
+    const expected = <int, List<List<String>>>{
+      72: [['90', 'spec_ef_p72_90.jpg'], ['45', 'spec_ef_p72_45.jpg']],
+      73: [['מצמד', 'spec_ef_p73_coupler.jpg'], ['מסעף', 'spec_ef_p73_tee.jpg']],
+      74: [['מצמד', 'spec_ef_p74_coupler.jpg']],
+      90: [['פלטת', 'spec_tool_p90_plate.jpg'],
+           ['שולחני', 'spec_tool_p90_bench.jpg'],
+           ['מכונת', 'spec_tool_p90_light.jpg'],
+           ['מזוודת', 'spec_tool_p90_case.jpg']],
+      91: [['מקדח', 'spec_tool_p91_bit.jpg'],
+           ['תותב', 'spec_tool_p91_die.jpg'],
+           ['מברגה', 'spec_tool_p91_driver.jpg']],
+      92: [['חורים', 'spec_tool_p92_hole.jpg'],
+           ['רוכב', 'spec_tool_p92_saddle.jpg']],
+    };
+    final gaps = <String>[];
+    var asserted = 0;
+    for (final p in kPolyrollCatalog.where((p) => expected.containsKey(p.page))) {
+      final rules = expected[p.page]!;
+      final match = rules.where((r) => p.nameHe.contains(r[0])).toList();
+      if (match.isEmpty) continue; // product with its own real spec — not §22.H
+      asserted++;
+      final first = p.specImageAssets.first.split('/').last;
+      final want = match.first[1];
+      if (first != want) {
+        gaps.add('${p.sku} p${p.page} (${p.nameHe}) → $first ≠ $want');
+      }
+      // The crop must exist on disk.
+      if (!File(p.specImageAssets.first).existsSync()) {
+        gaps.add('${p.sku} → missing ${p.specImageAssets.first}');
+      }
+      // The full page must still be available as a later pager slide.
+      final hasPage =
+          p.specImageAssets.any((a) => a.split('/').last.startsWith('page_'));
+      if (!hasPage) gaps.add('${p.sku} → lost the full-page pager slide');
+    }
+    expect(gaps, isEmpty, reason: gaps.join('\n'));
+    expect(asserted, greaterThanOrEqualTo(70),
+        reason: 'expected ~75 photo-only products asserted, got $asserted');
+  });
 }

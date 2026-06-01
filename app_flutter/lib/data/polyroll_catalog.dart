@@ -553,9 +553,40 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
     case kPprElectrofusion:
       // §22.D p33 + p85 shroud (שרוול חשמלי) DO have dim drawings on their
       // top sections — earlier blanket "EF = photo-only" was even broader
-      // than just p85. Other EF pages (p72-74) remain photo-only → fall through.
+      // than just p85.
       if (page == 85 && nameHe.contains('שרוול')) return ['spec_shroud_p85.jpg'];
       if (page == 33 && nameHe.contains('שרוול')) return ['spec_shroud_p33.jpg'];
+      // §22.H — the rest of EF (p72-74) has no dimension drawing, only a photo
+      // + a sizes/part-number table. Instead of the whole-page fallback, route
+      // each sub-type to a focused [photo + its table] crop (R8: same page,
+      // just cropped to this product's block). The full page stays as the
+      // pager's second slide via specImageAssets.
+      if (page == 72) {
+        return [nameHe.contains('90') ? 'spec_ef_p72_90.jpg' : 'spec_ef_p72_45.jpg'];
+      }
+      if (page == 73) {
+        return [nameHe.contains('מצמד') ? 'spec_ef_p73_coupler.jpg' : 'spec_ef_p73_tee.jpg'];
+      }
+      if (page == 74) return ['spec_ef_p74_coupler.jpg'];
+      return null;
+    case kPprTools:
+      // §22.H — welding tools (p90-92) are photo-only too; focused per-tool
+      // [photo + table] crop beats the whole-page fallback.
+      if (page == 90) {
+        if (nameHe.contains('פלטת')) return ['spec_tool_p90_plate.jpg'];
+        if (nameHe.contains('שולחני')) return ['spec_tool_p90_bench.jpg'];
+        if (nameHe.contains('מכונת')) return ['spec_tool_p90_light.jpg'];
+        return ['spec_tool_p90_case.jpg'];
+      }
+      if (page == 91) {
+        if (nameHe.contains('מקדח')) return ['spec_tool_p91_bit.jpg'];
+        if (nameHe.contains('תותב')) return ['spec_tool_p91_die.jpg'];
+        return ['spec_tool_p91_driver.jpg'];
+      }
+      if (page == 92) {
+        if (nameHe.contains('חורים')) return ['spec_tool_p92_hole.jpg'];
+        return ['spec_tool_p92_saddle.jpg'];
+      }
       return null;
   }
   // Default fallback for unmapped categories: page render (R8 — not invented).

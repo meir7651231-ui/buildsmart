@@ -684,8 +684,6 @@ git add WIRING.md ואז commit חוזר — שער 24 עבר.
 ### ג — כלל המניעה
 ANTIPATTERN: new provider or map in lib screens shipped without a matching WIRING row
 RULE: כל provider או map חדש ב-lib screens שמניע UI מקבל שורת WIRING.md באותו commit. WIRING.md ב-root ומשותף לכל הסוכנים — לא בבעלות הפרוטוקוליסט.
-
-
 ---
 
 ## 2026-06-01 · gate 12 · bump גרסה ב-home_shell בלי לסנכרן STATUS.md
@@ -722,6 +720,7 @@ RULE: זיהוי מידת-אות בודדת חייב lookbehind/lookahead שמו
 
 ---
 
+<<<<<<< HEAD
 ## 2026-06-01 · generator · ANTIPATTERN עם גרש בגבול שובר r'''…''' (קטלגן, 4ad3dbb)
 
 ### א — הבעיה
@@ -802,3 +801,21 @@ STATUS" — רעש: אי-אפשר לכתוב ANTIPATTERN regex משמעותי ל
 ### ג — כלל המניעה
 ANTIPATTERN[hook]: IS_RETRY" == "true" && -f "\$STUCK_LOG"
 RULE: שער 102 דורש תיעוד רק על retry של כשל code/test (31-45) — התנאי חייב לכלול `-n "$PRIOR_HAS_CODE_TEST"`. bookkeeping טהור (12/24/59) פטור.
+
+---
+
+## 2026-05-31 · §22.H · 75 photo-only products fell back to whole-page spec
+
+### א — הבעיה
+75 מוצרים (EF p72-74, כלי ריתוך p90-92) ללא דיאגרמת-מידה בקטלוג —
+ה-spec שלהם נפל ל-`page_NN.jpg` (העמוד המלא, כולל מוצרים אחרים ותתי-סוגים).
+המשתמש ראה עמוד שלם במקום את הבלוק של המוצר.
+
+### ב — הפתרון
+14 crops ממוקדים [צילום + טבלה] פר-תת-סוג. routing ב-`_pprSpecFor`:
+`case kPprElectrofusion` (p72-74) + `case kPprTools` (p90-92) חדש, לפי nameHe.
+העמוד המלא נשמר כסליד שני ב-specImageAssets (לא אבד). 0/774 על page primary.
+
+### ג — כלל המניעה
+ANTIPATTERN: return null;\s*//.*photo-only.*fall.*through
+RULE: photo-only page ⇒ crop ממוקד [photo+table] פר-תת-סוג, לא page fallback מלא. R8: crop של אותו עמוד מותר; העמוד נשאר כסליד-פייג'ר שני.

@@ -23,3 +23,11 @@
 - **מה עושה:** factory function — יוצר `LipskeyCatalogProduct` לצינור PPR מיזוג אוויר (Aquatherm blue pipe). עוטף `_ppr()` עם קבועים ספציפיים ל-AC.
 - **בדיקה:** `test/polyroll_catalog_test.dart` — ודא שמוצר AC Blue Pipe מופיע ב-`kPolyrollCatalog` עם SKU תקין.
 - מסקנה: factory בלי לוגיקה — בדיקה מינימלית מספיקה (SKU קיים, קטגוריה נכונה)
+
+## §22.H photo-only routing (_pprSpecFor: kPprElectrofusion + kPprTools) — 2026-05-31
+- תקלה שהוזרקה #1: p72 routing `90→45` (כל ברך 90° מקבל spec של 45°).
+- תוצאה: §22.H אדום ✅ (תפס את ה-swap, לא רק "לא page").
+- תקלה שהוזרקה #2: p91 routing `תותב die→driver`.
+- תוצאה: §22.H אדום ✅.
+- מסקנה: הבדיקה חזקה — אחרי שחיזקתי מ-"not page + exists" ל-מיפוי-ספציפי
+  פר-תת-סוג. הגרסה החלשה הראשונה הייתה עוברת את שני ה-swaps.

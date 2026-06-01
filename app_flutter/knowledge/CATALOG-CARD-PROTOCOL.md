@@ -947,7 +947,24 @@ p91, p92.
 **Pages still needing visual audit:** none — all 74 catalog pages opened
 and verified content match.
 
-**§22.F complete + §22.G dim sweep done.**
+**§22.F complete + §22.G dim sweep done + §22.H photo-only focus.**
+
+§22.H — photo-only pages get a focused crop (no whole-page fallback as primary):
+- EF fittings (p72 ברך, p73 מסעף/מצמד, p74 מצמד) and welding tools
+  (p90 מזוודת/פלטת/מכונות, p91 מברגה/תותב/מקדח, p92 תותב/חורים) have
+  NO dimension drawing in the catalog — only a photo + a sizes/part-number
+  table. They were falling back to the whole `page_NN.jpg` as their spec.
+- Cropped 14 focused [photo + table] blocks (one per sub-type) so each
+  product's flip side shows just its own block. The full page stays as the
+  pager's 2nd slide (specImageAssets keeps page_NN.jpg appended).
+- Routing: `case kPprElectrofusion` (p72-74) + new `case kPprTools`
+  (p90-92) in `_pprSpecFor`, keyed by nameHe sub-type.
+- Result: 0/774 products now use the whole-page as their PRIMARY spec
+  (was 75). §14: `spec_assets_test` · "§22.H photo-only pages route to a
+  focused crop, not the whole page".
+- R8 note: these crops are NOT invented diagrams — they are tighter crops
+  of the same catalog page, scoped to one product block. The dimensional
+  truth (the sizes table) is preserved; only the framing improved.
 
 §22.G — dims completeness audit:
 - Pre-sweep: 1 product (99515080 פקק PPR 7/11) had only 4 dims.
