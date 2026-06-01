@@ -781,3 +781,24 @@ no_duplicate_specs) למרות ש-937/937 עברו. → warn שגוי קבוע �
 ### ג — כלל המניעה
 ANTIPATTERN[hook]: echo "\$TEST_OUT" \| grep -q "\$critical"
 RULE: "האם בדיקה חיונית קיימת" ב-hook = `[[ -f test/X.dart ]]`, לא `grep -q` על פלט flutter test (default-reporter לא-דטרמיניסטי כשנלכד — 3/6 שמות חסרים).
+
+
+---
+
+## 2026-06-01 · שער 102 — לולאת תיעוד על כשלי-bookkeeping (דיווח Finder)
+
+### א — הבעיה
+שער 102 ירה "פתרת בעיה — לא תיעדת" על **כל** retry אחרי commit חסום, כולל כשהכשל
+הקודם היה bookkeeping טהור (שער 12 version-sync / 24 WIRING / 59 path) — לא באג
+code/test. כפה רשומת stuck_log + ANTIPATTERN + regression-test על "שכחתי לבמפ
+STATUS" — רעש: אי-אפשר לכתוב ANTIPATTERN regex משמעותי לכשל bookkeeping, וה-gate
+עצמו תופס אותו שוב ממילא (דטרמיניסטי).
+
+### ב — הפתרון
+`err()` רושם מספרי-שערים ל-FAILED_GATES; ה-fingerprint שומר `gates=v2:12,24`;
+זיהוי ה-retry מחלץ PRIOR_GATES ומסווג PRIOR_HAS_CODE_TEST (שער 31-45). שער 102
+דורש תיעוד רק כש-PRIOR_HAS_CODE_TEST. פורמט ישן (`gates=<count>`) → conservative.
+
+### ג — כלל המניעה
+ANTIPATTERN[hook]: IS_RETRY" == "true" && -f "\$STUCK_LOG"
+RULE: שער 102 דורש תיעוד רק על retry של כשל code/test (31-45) — התנאי חייב לכלול `-n "$PRIOR_HAS_CODE_TEST"`. bookkeeping טהור (12/24/59) פטור.

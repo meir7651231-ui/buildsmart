@@ -45,7 +45,8 @@ cd "$REPO_ROOT/app_flutter" || exit 1
 
 FAIL=0
 WARN=0
-err()  { echo ""; echo "❌ [שער $1] $2"; echo "   → $3"; FAIL=$((FAIL+1)); }
+FAILED_GATES=""   # מספרי השערים שנכשלו — לסיווג retry (code/test מול bookkeeping)
+err()  { echo ""; echo "❌ [שער $1] $2"; echo "   → $3"; FAIL=$((FAIL+1)); FAILED_GATES="$FAILED_GATES,$1"; }
 warn() { echo "⚠️  [שער $1] $2"; WARN=$((WARN+1)); }
 ok()   { :; }  # שתיקה — רק כשלים נראים
 
@@ -60,20 +61,38 @@ CURRENT_FP=$(git diff --cached --name-only | sort | sha256sum | cut -d' ' -f1 | 
 # אז HEAD זז רק בהצלחה → אותו HEAD + כשל קודם = retry, לא משנה אילו קבצים).
 HEAD_SHA=$(git rev-parse HEAD 2>/dev/null || echo "none")
 IS_RETRY="false"
+PRIOR_GATES=""   # מספרי השערים שנכשלו בניסיון הקודם (לסיווג שער 102)
 # אם חתימת-הקבצים או ה-HEAD הופיעו ב-5 השעות האחרונות → retry
 NOW=$(date +%s)
 FIVE_HOURS_AGO=$((NOW - 18000))
 while IFS=' ' read -r fp ts rest; do
     [[ "$ts" -gt "$FIVE_HOURS_AGO" ]] || continue
-    if [[ "$fp" == "$CURRENT_FP" ]]; then
-        IS_RETRY="true"; break
-    fi
+    # חילוץ שדה gates= מהרשומה (רשימת שערים מופרדת בפסיקים, או count ברשומה ישנה)
+    rec_gates="${rest#gates=}"; rec_gates="${rec_gates%% *}"
     # תואם-לאחור: רשומה ישנה בלי "head=" → rec_head=כל ה-rest, לא יתאים ל-sha
     rec_head="${rest##*head=}"
+    if [[ "$fp" == "$CURRENT_FP" ]]; then
+        IS_RETRY="true"; PRIOR_GATES="$rec_gates"; break
+    fi
     if [[ "$HEAD_SHA" != "none" && "$rec_head" == "$HEAD_SHA" ]]; then
-        IS_RETRY="true"; break
+        IS_RETRY="true"; PRIOR_GATES="$rec_gates"; break
     fi
 done < "$FINGERPRINT_FILE"
+
+# סיווג: האם הכשל הקודם כלל שער code/test (31-45)? רק אז שער 102 דורש תיעוד.
+# bookkeeping טהור (12 version / 24 WIRING / 59 path) → פטור: אין ANTIPATTERN
+# משמעותי ל"שכחתי לבמפ version", וה-gate עצמו תופס אותם שוב ממילא.
+# פורמט v2: `gates=v2:12,24` (רשימת מספרי-שערים). רשומה ישנה (`gates=<count>`)
+# או לא-מזוהה → conservative: דורש תיעוד (כמו לפני התיקון).
+PRIOR_HAS_CODE_TEST=""
+if [[ "$PRIOR_GATES" == v2:* ]]; then
+    prior_nums="${PRIOR_GATES#v2:}"
+    for g in ${prior_nums//,/ }; do
+        [[ "$g" =~ ^[0-9]+$ ]] && (( g >= 31 && g <= 45 )) && { PRIOR_HAS_CODE_TEST="1"; break; }
+    done
+elif [[ -n "$PRIOR_GATES" ]]; then
+    PRIOR_HAS_CODE_TEST="1"   # פורמט ישן/לא-מזוהה → צד זהיר
+fi
 
 echo ""
 echo "══════════════════════════════════════════════"
@@ -597,8 +616,12 @@ LAYERS_OK=0
 STUCK_LOG="knowledge/stuck_log.md"
 [[ -f "$STUCK_LOG" ]] || err "101" "stuck_log.md חסר" "צור knowledge/stuck_log.md"
 
-# שער 102: אם זה retry אחרי כשלון — חייב להוסיף רשומה אמיתית
-if [[ "$IS_RETRY" == "true" && -f "$STUCK_LOG" ]]; then
+# שער 102: אם זה retry אחרי כשלון code/test — חייב להוסיף רשומה אמיתית.
+# תיקון לקח #56 (דיווח Finder): retry שכשלו הקודם היה bookkeeping טהור
+# (12 version-sync / 24 WIRING / 59 path) פטור — אי-אפשר לכתוב ANTIPATTERN
+# משמעותי ל"שכחתי לבמפ version", וה-gate עצמו תופס אותם שוב. דורש תיעוד רק
+# כשהכשל הקודם כלל שער code/test (31-45) — שם ה-gate גנרי וה-antipattern מוסיף ערך.
+if [[ "$IS_RETRY" == "true" && -n "$PRIOR_HAS_CODE_TEST" && -f "$STUCK_LOG" ]]; then
     STAGED_STUCK=$(git diff --cached --name-only | grep "stuck_log.md" | head -1)
     if [[ -z "$STAGED_STUCK" ]]; then
         err "102" "פתרת בעיה — לא תיעדת" "עדכן knowledge/stuck_log.md: בעיה + פתרון + ANTIPATTERN + RULE"
@@ -673,7 +696,7 @@ fi
 
 # רישום fingerprint אם נכשל
 if [[ "$FAIL" -gt 0 ]]; then
-    echo "$CURRENT_FP $NOW gates=$FAIL head=$HEAD_SHA" >> "$FINGERPRINT_FILE"
+    echo "$CURRENT_FP $NOW gates=v2:${FAILED_GATES#,} head=$HEAD_SHA" >> "$FINGERPRINT_FILE"
     # שמור רק 100 שורות אחרונות
     tail -100 "$FINGERPRINT_FILE" > "$FINGERPRINT_FILE.tmp" && mv "$FINGERPRINT_FILE.tmp" "$FINGERPRINT_FILE"
 fi
