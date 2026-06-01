@@ -6,6 +6,7 @@
 import 'dart:io';
 
 import 'package:buildsmart/data/chip_hierarchy.dart';
+import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -427,6 +428,26 @@ void main() {
             'מק"ט for every row, the product sheet shows it for every product. '
             'If a builder helper skips these, the user sees a thinner card than '
             'the catalog:\n${missing.take(12).join('\n')}');
+  });
+
+  // §22.I (Huliot) — same contract for the SmartLock catalog. The factory
+  // (`_sl`) is supposed to inject 'יצרן': 'חוליות' + 'מק"ט חוליות': sku
+  // automatically; this guards against a future refactor breaking that.
+  test('§22.I every Huliot SmartLock product carries יצרן + at least one מק"ט',
+      () {
+    final missing = <String>[];
+    for (final p in kHuliotCatalog) {
+      final hasMaker = p.dims?['יצרן'] != null;
+      final hasMakat = (p.dims?['מק"ט יצרן'] ?? p.dims?['מק"ט חוליות']) != null;
+      if (!hasMaker || !hasMakat) {
+        missing.add('${p.sku} "${p.nameHe}" '
+            '${!hasMaker ? "[no יצרן]" : ""}${!hasMakat ? "[no מק\"ט]" : ""}');
+      }
+    }
+    expect(missing, isEmpty,
+        reason:
+            'Huliot SmartLock internal-card data hole — `_sl` factory should '
+            'always inject יצרן + מק"ט חוליות:\n${missing.take(12).join('\n')}');
   });
 
   test('fitting categories all have a real cropped spec diagram', () {

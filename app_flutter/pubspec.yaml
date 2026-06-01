@@ -51,6 +51,8 @@ flutter:
     - assets/lipskey/pages/
     - assets/polyroll/pages/
     - assets/polyroll/products/
+    - assets/huliot_smartlock/pages/
+    - assets/huliot_smartlock/products/
     - assets/fonts/
 
   fonts:

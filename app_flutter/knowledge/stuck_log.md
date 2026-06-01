@@ -995,3 +995,37 @@ stuck_log ל"בעיה" שלא הייתה (זה refinement מודרך-פידבק,
 ### ג — כלל המניעה
 ANTIPATTERN: openSmartProductSheet.*group.*header$
 RULE: פעולה פר-פריט (פתיחת כרטיס) שייכת לפריט עצמו, לא לכותרת-קבוצה שפותחת אחד-לכולם. (תצפית נוספת למתחזק: IS_RETRY על סט-שמות-קבצים בלבד מתריע-יתר לפיצ׳ר חדש.)
+
+## 2026-06-01 · brand-dir mapping היה ternary קשיח (קטלגן)
+### א — הבעיה
+`LipskeyCatalogProduct.imageAsset/specImageAsset` השתמשו ב-
+`brand == 'פולירול' ? 'polyroll' : 'lipskey'` — קטלוג שלישי (חוליות SmartLock)
+היה נופל ל-`lipskey/` ומחפש קבצים בתיקייה הלא נכונה. נחשף מיד כשהוספתי
+את `kHuliotCatalog` (170 מוצרים) — תמונות לא נטענו.
+### ב — הפתרון
+החלפתי את 4 המקומות (imageAsset, imageAssets, specImageAsset, specImageAssets)
+ב-`_brandDir(brand)` סטטי שמכיר ב-3 מותגים: פולירול→polyroll, חוליות→
+huliot_smartlock, אחר→lipskey. כל קטלוג חדש = +case אחד במקום אחד.
+### ג — כלל המניעה
+ANTIPATTERN: brand == 'פולירול' \? '
+RULE: כל mapping brand→dir/path ב-LipskeyCatalogProduct חייב לעבור דרך
+`_brandDir(brand)` — לא ternary קשיח. הוספת brand חדש = case ב-`_brandDir`,
+לא duplicate-edit ב-4 מקומות.
+
+## 2026-06-01 · Huliot SmartLock ingestion (קטלגן)
+### א — הבעיה
+אין באג — סשן הקמה. PDF של 44 עמודים עם 170 מוצרים נכנס לאפליקציה. צעדים:
+(1) חילוץ pdftotext-raw + pdftoppm לעמודי-תמונה. (2) Read של כל 33 עמודי-המוצרים
+(11-43) ויזואלית. (3) קובץ קטלוג חדש `lib/data/huliot_smartlock_catalog.dart` עם
+factory `_sl` שמזריק יצרן+מק"ט אוטומטית (§22.I by-construction). (4) wire ל-
+`kCatalogProducts`, `kBrands`, `kCatalogTree` (root `sml` + 17 leaves).
+(5) §22.I-Huliot test נוסף ל-`spec_assets_test.dart`. (6) paranoid 8-check audit
+על 170 מוצרים — 0/8 anomalies. הכל ירוק (984 tests).
+### ב — הפתרון
+לא רלוונטי — לא היה באג. שילוב נקי לפי פרוטוקול §5 (שלבים א-ח).
+### ג — כלל המניעה
+ANTIPATTERN: kCatalogProducts.*\.\.\.\s*$
+RULE: קטלוג חדש = (א) קובץ `lib/data/<brand>_catalog.dart` עם factory שמזריק
+יצרן+מק"ט; (ב) הוספה ל-`kCatalogProducts` ב-polyroll_catalog.dart; (ג) brand-id
+ב-`kBrands`; (ד) root + leaves ב-`kCatalogTree`; (ה) §22.I test כפול לקטלוג
+החדש; (ו) `_brandDir` עודכן (אם חדש). פיספוס אחד מהשלבים = הקטלוג לא נגיש.

@@ -9,6 +9,7 @@
 // 35–92) is pending — append below under the matching kPpr* constant.
 // ─────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 
 const String kPolyrollBrand = 'פולירול';
@@ -1512,6 +1513,7 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
 final List<LipskeyCatalogProduct> kCatalogProducts = [
   ...kLipskeyCatalog,
   ...kPolyrollCatalog,
+  ...kHuliotCatalog,
 ];
 
 const List<String> kPprCategories = [

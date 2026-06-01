@@ -292,3 +292,29 @@ rather than pixel rendering.
   Verified: PPR supply 99 (b49/d50) · faser 75 (b41/d34) · seat 15 (b11/d4).
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
+
+## Huliot SmartLock catalog ingestion (v5.59 — 2026-06-01)
+- New file: `lib/data/huliot_smartlock_catalog.dart` — 170 products from the
+  Huliot SmartLock™ HE catalog PDF (44 pages, REV 001 / 02.2026). PP drainage
+  system, 32-63mm, ratchet-tooth locking, TPE elastomer pressure seal.
+  Standards: ת"י 958-1, 71253-1, 71253-2, 5694, 14020.
+- 17 verbatim TOC families: `kSmlPipes`/`kSmlCutters`/`kSmlJoker`/
+  `kSmlElbowOneSide`/`kSmlElbow`/`kSmlElbowReducing`/`kSmlElbowTelescopic`/
+  `kSmlTee`/`kSmlDoubleCoupling`/`kSmlReducer`/`kSmlGutters`/`kSmlFloorDrains`/
+  `kSmlAccessories`/`kSmlNuts`/`kSmlAquaSlim`/`kSmlCovers`/`kSmlSiphons`.
+- Factory `_sl` auto-injects `יצרן='חוליות'` + `מק"ט חוליות'=sku` into every
+  product's dims — §22.I (internal card completeness) is satisfied by
+  construction (guarded by a new spec_assets_test §22.I-Huliot test).
+- Wired into `kCatalogProducts` (polyroll_catalog.dart) — now Lipskey 935 +
+  Polyroll 774 + Huliot 170 = **1,879 products**.
+- Brand `'חוליות'` added to `lib/data/brands.dart` (id `huliot`, green 🟢).
+- Catalog tree: `lib/data/catalog_tree.dart` `'sml'` root + 17 leaf nodes
+  (`sml.pipes` → `sml.siphons`), each `brandIds: ['huliot']` +
+  `lipskeyCategory: <kSml*>`. Reachable from the catalog drill-down.
+- `lib/data/lipskey_catalog.dart` `_brandDir(brand)` helper now resolves
+  Huliot to `assets/huliot_smartlock/` (was hardcoded `polyroll|lipskey`).
+- Image fallback: `_huliotImageFor` returns null → flip side lands on the
+  full catalog page (`assets/huliot_smartlock/pages/page_NN.jpg`). Per-family
+  crops will go here as they're cut from the PDF (protocol §17).
+- 44 pages extracted via `pdftoppm` to `assets/huliot_smartlock/pages/` +
+  `pubspec.yaml` asset entry added.

@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.58 · 1.6.29 · 📊 ציון משוכלל משני הצירים: רוחב-ידע (כמה סוגי ידע יש) + עומק-ידע (כמה מכל סוג) — מחוברים לציון אחד',
+                          'v5.59 · 1.6.30 · 🟢 קטלוג חוליות SmartLock נקלט: 170 מוצרים, 17 קטגוריות, עמ׳ 11-43 verbatim',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

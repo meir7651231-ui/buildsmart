@@ -46,15 +46,21 @@ class LipskeyCatalogProduct {
     this.brand = 'ליפסקי',
   });
 
+  static String _brandDir(String brand) {
+    if (brand == 'פולירול') return 'polyroll';
+    if (brand == 'חוליות') return 'huliot_smartlock';
+    return 'lipskey';
+  }
+
   String? get imageAsset => imageFile == null
       ? null
-      : 'assets/${brand == 'פולירול' ? 'polyroll' : 'lipskey'}/products/$imageFile';
+      : 'assets/${_brandDir(brand)}/products/$imageFile';
 
   /// All FRONT-side images for the 1/N pager: `imageFile` first, then any
   /// extras from `imageFiles` (de-duplicated). Empty list when no image at all
   /// — caller falls back to the type emoji.
   List<String> get imageAssets {
-    final dir = brand == 'פולירול' ? 'polyroll' : 'lipskey';
+    final dir = _brandDir(brand);
     final out = <String>[];
     if (imageFile != null) out.add('assets/$dir/products/$imageFile');
     for (final f in imageFiles ?? const <String>[]) {
@@ -65,7 +71,7 @@ class LipskeyCatalogProduct {
   }
 
   String get specImageAsset {
-    final dir = brand == 'פולירול' ? 'polyroll' : 'lipskey';
+    final dir = _brandDir(brand);
     // A cropped diagram (spec only) wins over the full catalog page.
     if (specImageFile != null) return 'assets/$dir/products/$specImageFile';
     final p = page.toString().padLeft(2, '0');
@@ -78,7 +84,7 @@ class LipskeyCatalogProduct {
   /// diagram(s) first (specImageFiles → specImageFile), then the full catalog
   /// page. ≥1 always; the sheet shows a pager only when length > 1.
   List<String> get specImageAssets {
-    final dir = brand == 'פולירול' ? 'polyroll' : 'lipskey';
+    final dir = _brandDir(brand);
     final out = <String>[];
     for (final f in specImageFiles ?? const <String>[]) {
       out.add('assets/$dir/products/$f');

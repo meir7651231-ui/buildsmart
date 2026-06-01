@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
+import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/variant_families.dart';
@@ -106,11 +107,15 @@ void main() {
         'בית ✓ (group "${pprGroups.first.label}")\n');
   });
 
-  test('PPR · unified catalog = Lipskey + Polyroll', () {
+  test('PPR · unified catalog = Lipskey + Polyroll + Huliot SmartLock', () {
     print('\nkLipskeyCatalog=${kLipskeyCatalog.length}  '
         'kPolyrollCatalog=${kPolyrollCatalog.length}  '
+        'kHuliotCatalog=${kHuliotCatalog.length}  '
         'kCatalogProducts=${kCatalogProducts.length}\n');
-    expect(kCatalogProducts.length,
-        kLipskeyCatalog.length + kPolyrollCatalog.length);
+    expect(
+        kCatalogProducts.length,
+        kLipskeyCatalog.length +
+            kPolyrollCatalog.length +
+            kHuliotCatalog.length);
   });
 }

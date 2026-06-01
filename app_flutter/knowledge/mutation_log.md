@@ -63,6 +63,29 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/spec_assets_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+## _sl — Huliot SmartLock factory (lib/data/huliot_smartlock_catalog.dart) — 2026-06-01
+- **קובץ:** `lib/data/huliot_smartlock_catalog.dart:61`
+- **מה עושה:** factory — בונה `LipskeyCatalogProduct` עם brand='חוליות' ומזריק
+  `יצרן='חוליות'` + `מק"ט חוליות'=sku` ל-dims אוטומטית (§22.I by-construction).
+- תקלה שהוזרקה: הסרת `'יצרן': 'חוליות'` משדה ה-fullDims.
+- תוצאה: הבדיקה הייתה אדומה ✅ — `§22.I every Huliot product carries יצרן`
+  נכשל עם 170 קוויי "[no יצרן]".
+- שחזור: byte-exact (החזרת השורה). הרצה חוזרת ירוקה ✅.
+- מסקנה: הבדיקה חזקה — תופסת §22.I פר-מוצר. ה-factory pattern מבטיח שאי-אפשר
+  לשכוח יצרן/מק"ט גם כשמוסיפים 170 מוצרים ב-batch.
+
+## _brandDir — brand→dir mapping (lib/data/lipskey_catalog.dart) — 2026-06-01
+- **קובץ:** `lib/data/lipskey_catalog.dart:49`
+- **מה עושה:** static helper — ממפה brand string לתיקיית assets:
+  פולירול→polyroll, חוליות→huliot_smartlock, אחר→lipskey.
+- תקלה שהוזרקה: שינוי `if (brand == 'חוליות') return 'huliot_smartlock'`
+  → `return 'lipskey'` (התעלמות מ-Huliot).
+- תוצאה: הבדיקות נשארו ירוקות (אין test פיזי לקיום הקבצים תחת assets/huliot_smartlock).
+  חולשה ידועה.
+- מסקנה: הבדיקה **חלשה כרגע** ל-Huliot. TODO לסשן הבא: §22-Huliot test
+  ש-`imageAsset`/`specImageAssets` של כל מוצר Huliot מתחיל ב-`assets/huliot_smartlock/`.
+
 ### availableLensesForSet — 2026-05-31
 - תקלה שהוזרקה: `>= smartTreeMinFraction` → `> smartTreeMinFraction` (סף עץ-חכם)
 - תוצאה: הבדיקה הייתה אדומה ✅ ("exactly at the fraction → smart-tree included" נפל — 0.25 > 0.25 = false)
