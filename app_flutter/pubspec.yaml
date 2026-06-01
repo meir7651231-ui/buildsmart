@@ -46,6 +46,7 @@ flutter:
   generate: true
 
   assets:
+    - assets/lipskey/categories/
     - assets/lipskey/products/
     - assets/lipskey/pages/
     - assets/polyroll/pages/

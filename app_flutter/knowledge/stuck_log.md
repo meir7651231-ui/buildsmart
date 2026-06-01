@@ -665,3 +665,22 @@ byte-match עקבי בכל סביבה, ללא תלות ב-binary/PATH/locale.
 ### ג — כלל המניעה
 ANTIPATTERN[hook]: grep -a[qc]*F? "(🟦|✅|⬜)"
 RULE: emoji/multibyte-match ב-hook = bash case/glob builtin בלבד — לעולם לא grep חיצוני (אפילו -aF). git מחליף את ה-grep binary ב-invocation, כך ש-standalone-pass לא מבטיח commit-pass.
+
+---
+
+## 2026-06-01 · gate 24 · finder group glyph נוסף בלי לתעד ב-WIRING.md
+
+### א — הבעיה
+הוספת `kFinderGroupImage` + `finderGroupGlyph` ל-`lib/screens/finder_screen.dart`
+(אייקוני מוצר 3D לעיגולי הבית) בלי שורה מקבילה ב-`app_flutter/WIRING.md`.
+שער 24 חסם את ה-commit. הנחה שגויה שהקובץ ב-knowledge ושייך לפרוטוקוליסט —
+בפועל הוא ב-root ומשותף, וכל סוכן שנוגע ב-lib screens חייב לתעד שם.
+
+### ב — הפתרון
+נוספה שורת group glyph לטבלת ה-finder ב-WIRING.md: label לאייקון מוצר דרך
+kFinderGroupImage עם fallback ל-Material icon, מאומת ב-finder_group_icons_test.
+git add WIRING.md ואז commit חוזר — שער 24 עבר.
+
+### ג — כלל המניעה
+ANTIPATTERN: new provider or map in lib screens shipped without a matching WIRING row
+RULE: כל provider או map חדש ב-lib screens שמניע UI מקבל שורת WIRING.md באותו commit. WIRING.md ב-root ומשותף לכל הסוכנים — לא בבעלות הפרוטוקוליסט.

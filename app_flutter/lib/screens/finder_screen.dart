@@ -77,6 +77,67 @@ const List<FinderGroup> kFinderGroups = [
   FinderGroup('🔧', 'אחר', {}, desc: 'כל שאר המוצרים בקטלוג'), // catch-all
 ];
 
+/// Display-only icon per finder group. The data keeps its emoji (`g.emoji`,
+/// still used in text contexts like the catalog overview row), but the home
+/// circles render a Material icon because canvasKit's bundled font can't draw
+/// the plumbing emoji (🚰🚽🕳️…) — they showed as empty boxes. Keyed by the
+/// group label (stable identity); `finder_group_icons_test` fails if a group
+/// ships without an entry. Same display-fold philosophy as P13's font fold.
+const Map<String, IconData> kFinderGroupIcons = {
+  'ברזים': Icons.water_drop,
+  'אסלות': Icons.wc,
+  'מקלחת ואמבטיה': Icons.shower,
+  'ניקוז': Icons.water,
+  'צינורות': Icons.plumbing,
+  'גינה': Icons.grass,
+  'מחברים וחיבורים': Icons.link,
+  'חבקים ותלייה': Icons.hardware,
+  'צנרת PPR': Icons.trip_origin,
+  'אחר': Icons.category,
+};
+
+/// The Material icon for a finder group, with a generic catch-all fallback
+/// for any unmapped label (the test guards against that path in practice).
+IconData finderGroupIcon(String label) =>
+    kFinderGroupIcons[label] ?? Icons.category;
+
+/// Designer-supplied 3D product icon per finder group (transparent PNGs in
+/// `assets/lipskey/categories/`). Groups without an image fall back to the
+/// Material icon (all 10 groups now have a dedicated product icon).
+const Map<String, String> kFinderGroupImage = {
+  'ברזים': 'faucets',
+  'אסלות': 'toilets',
+  'מקלחת ואמבטיה': 'shower_bath',
+  'ניקוז': 'drainage',
+  'צינורות': 'pipes',
+  'גינה': 'garden',
+  'מחברים וחיבורים': 'connectors',
+  'חבקים ותלייה': 'clamps',
+  'צנרת PPR': 'ppr',
+  'אחר': 'other',
+};
+
+/// Asset path for a group's product icon, or null when none exists.
+String? finderGroupImageAsset(String label) {
+  final f = kFinderGroupImage[label];
+  return f == null ? null : 'assets/lipskey/categories/$f.png';
+}
+
+/// The circle content for a finder group: the designer's product image when
+/// present, else the Material icon. [size] is the icon/image box edge.
+Widget finderGroupGlyph(String label, {required double size}) {
+  final asset = finderGroupImageAsset(label);
+  if (asset != null) {
+    return Image.asset(asset,
+        width: size, height: size, fit: BoxFit.contain,
+        // If the file is missing/corrupt, degrade to the icon — never a
+        // broken-image box.
+        errorBuilder: (_, __, ___) =>
+            Icon(finderGroupIcon(label), size: size * 0.7, color: BsTokens.brand));
+  }
+  return Icon(finderGroupIcon(label), size: size * 0.7, color: BsTokens.brand);
+}
+
 /// A curated sub-type within a finder group: a plain label + the real
 /// `categoryHe` values it covers. Lets us merge catalog misfiles (e.g. the lone
 /// "ברזים" garden tap belongs under "גן") and drop jargon-y 1-item categories,
@@ -463,7 +524,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                 decoration: const BoxDecoration(
                     color: _surface, shape: BoxShape.circle),
                 alignment: Alignment.center,
-                child: Text(g.emoji, style: const TextStyle(fontSize: 26)),
+                child: finderGroupGlyph(g.label, size: 46),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -546,7 +607,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
               decoration:
                   const BoxDecoration(color: _surface, shape: BoxShape.circle),
               alignment: Alignment.center,
-              child: Text(_group!.emoji, style: const TextStyle(fontSize: 18)),
+              child: finderGroupGlyph(_group!.label, size: 30),
             ),
             const SizedBox(width: 10),
             Expanded(
