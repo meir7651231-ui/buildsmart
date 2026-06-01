@@ -215,20 +215,21 @@ if [[ -n "$NEEDS_FLUTTER" ]]; then
     if echo "$BUILD_OUT" | grep -qE "^Error|Failed to"; then
         err "34" "בנייה נכשלה" "תקן שגיאות בנייה"
     fi
+
+    # שערים 35-40: בדיקות חיוניות עוברות (תיקון באג #41 — חייב בתוך NEEDS_FLUTTER)
+    # TEST_OUT ריק כשאין Dart staged → warn שגוי על כל 6 הבדיקות בכל commit תיעוד.
+    for critical in compat_coverage_test regression_gate_test knowledge_protocol_test \
+                    smartproduct_contract_test dedup_test no_duplicate_specs_test; do
+        if [[ -f "test/${critical}.dart" ]]; then
+            N=$((35 + $(echo "compat_coverage_test regression_gate_test knowledge_protocol_test smartproduct_contract_test dedup_test no_duplicate_specs_test" | tr ' ' '\n' | grep -n "^${critical}$" | cut -d: -f1) - 1))
+            if ! echo "$TEST_OUT" | grep -q "$critical"; then
+                warn "$N" "$critical לא רץ"
+            fi
+        fi
+    done
 else
     echo "ℹ️  אין שינוי בקוד — מדלג על flutter analyze/test/build (חוסך 3-5 דק')"
 fi
-
-# שער 35-40: בדיקות חיוניות עוברות
-for critical in compat_coverage_test regression_gate_test knowledge_protocol_test \
-                smartproduct_contract_test dedup_test no_duplicate_specs_test; do
-    if [[ -f "test/${critical}.dart" ]]; then
-        N=$((35 + $(echo "compat_coverage_test regression_gate_test knowledge_protocol_test smartproduct_contract_test dedup_test no_duplicate_specs_test" | tr ' ' '\n' | grep -n "^${critical}$" | cut -d: -f1) - 1))
-        if ! echo "$TEST_OUT" | grep -q "$critical"; then
-            warn "$N" "$critical לא רץ"
-        fi
-    fi
-done
 
 # שער 41: אין בדיקות עם count > 0
 BAD_COUNT=$(git diff --cached test/ 2>/dev/null | grep "^+" | grep -E "greaterThan\(0\)" | head -1)
@@ -483,7 +484,9 @@ if git diff --cached lib/data/polyroll_catalog.dart >/dev/null 2>&1; then
 fi
 
 # שער 88: אין שינוי MASTER_PROTOCOL (אם קיים) ללא הוראה
-if git diff --cached knowledge/MASTER_PROTOCOL.md >/dev/null 2>&1 && [[ ! -f "$REPO_ROOT/.allow_master_protocol_edit" ]]; then
+# תיקון באג #88: git diff --cached file מחזיר exit 0 גם כשהקובץ קיים-ולא-staged
+# (no-diff=0). חייב name-only grep — נכון רק כשהקובץ באמת staged.
+if git diff --cached --name-only | grep -q "MASTER_PROTOCOL.md" && [[ ! -f "$REPO_ROOT/.allow_master_protocol_edit" ]]; then
     warn "88" "שינוי MASTER_PROTOCOL — וודא הוראה מפורשת"
 fi
 

@@ -108,3 +108,9 @@
 39. **לעולם לא להציע פתרון לפני שהבעיה ידועה ב-100%.** לא יודע מה הבעיה → חקור עוד. עדיין לא יודע → חקור עמוק יותר. רק כשהבעיה ברורה לחלוטין → פתרון. הצעת פתרון מוקדמת = בזבוז זמן + נסחף לכיוון הלא נכון.
 
 40. **flutter compact output מציג כשלים כ`-N:` — לא ✗.** Pattern `[0-9]+ ✗` לא מוצא דבר ב-compact mode. לחלץ FAIL_COUNT: `grep -oE "\+[0-9]+ -[0-9]+:" | grep -oE -- "-[0-9]+" | grep -oE "[0-9]+" | tail -1`.
+
+41. **בדיקה התלויה ב-`$TEST_OUT` חייבת לרוץ בתוך בלוק NEEDS_FLUTTER.** שערים 35-40 רצו אחרי ה-`fi` → ב-commit תיעוד `$TEST_OUT` ריק → 6 אזהרות שגויות. כל gate שצורך פלט flutter test/analyze/build נמצא בתוך `if [[ -n "$NEEDS_FLUTTER" ]]`.
+
+42. **"האם קובץ X staged" = `git diff --cached --name-only | grep -q X`.** `git diff --cached X >/dev/null` מחזיר exit 0 גם כשהקובץ tracked-ולא-staged (no-diff=0) → תנאי תמיד-אמת. שער 88 ירה warn בכל commit עד שתוקן.
+
+43. **`STAGED_DART` חייב להיחשב לפני בדיקת shell-meta בשער 103.** הבדיקה ל-shell-meta chars ב-ANTIPATTERN רצה לפני שחושב אם יש Dart staged — תיקון: חשב את התלות לפני כל בדיקה שצורכת אותה (גם שער 103, גם שערים 35-40 = לקח #41). תועד ב-stuck_log פעמיים, חסר כאן עד אודיט 2026-06-01.

@@ -29,6 +29,41 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 
 <!-- הוסף רשומה חדשה כאן אחרי כל בעיה שנפתרה -->
 
+## 2026-06-01 · שערים 35-40 רצים מחוץ ל-NEEDS_FLUTTER — warn שגוי בכל commit
+
+### א — הבעיה
+לולאת שערים 35-40 (בדיקות חיוניות) רצה **אחרי** ה-`fi` של בלוק `NEEDS_FLUTTER`.
+כשcommit לא נוגע ב-Dart (תיעוד בלבד) → `$TEST_OUT` ריק → `grep -q "$critical"`
+נכשל על כל 6 הבדיקות → 6 אזהרות שגויות (`compat_coverage_test לא רץ` וכו') בכל commit.
+נראה בכל commit של תיעוד בסשן הזה.
+
+### ב — הפתרון
+העברת הלולאה **לתוך** בלוק `if [[ -n "$NEEDS_FLUTTER" ]]`. כשאין Dart staged —
+flutter לא רץ בכלל, ולכן אין מה לבדוק שרץ. אין אזהרות שגויות.
+
+### ג — כלל המניעה
+ANTIPATTERN: ^done\s*$\n+# שער 41
+RULE: בדיקה שתלויה ב-$TEST_OUT (פלט flutter test) חייבת לרוץ בתוך בלוק NEEDS_FLUTTER. מחוצה לו $TEST_OUT ריק → warn שגוי.
+
+---
+
+## 2026-06-01 · שער 88 — git diff --cached file מחזיר exit 0 כשלא-staged
+
+### א — הבעיה
+שער 88 בדק `git diff --cached knowledge/MASTER_PROTOCOL.md >/dev/null 2>&1 && warn`.
+מ-`app_flutter/` הקובץ קיים ו-tracked → `git diff --cached file` מחזיר exit **0**
+(no-diff = 0), לא משנה אם הקובץ staged. → התנאי תמיד אמת → warn 88 בכל commit.
+
+### ב — הפתרון
+שינוי ל-`git diff --cached --name-only | grep -q "MASTER_PROTOCOL.md"` — מחזיר 0
+רק כשהקובץ באמת ברשימת ה-staged.
+
+### ג — כלל המניעה
+ANTIPATTERN: git diff --cached [a-z].*\.md >/dev/null
+RULE: לזיהוי "האם קובץ X staged" — `git diff --cached --name-only | grep -q X`, לא `git diff --cached X >/dev/null` (מחזיר 0 גם בלי שינוי).
+
+---
+
 ## 2026-05-31 · באג לדוגמה — שימוש ב-print במקום debugPrint
 ### א — הבעיה
 שער 48 חסם commit כי היה `print()` בקוד production.
