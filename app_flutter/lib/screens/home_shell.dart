@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.44 · 1.6.26 · Finder: אייקוני מוצר 3D לקבוצות הבית (10 קטגוריות מ-sprite שחותך אוטומטית)',
+                          'v5.45 · 1.6.26 · Finder: רמז גלילה (fade + ‹) בשורות צ׳יפ שנחתכות',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

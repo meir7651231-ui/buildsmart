@@ -31,16 +31,103 @@
 
 ## Order of attack (low risk → high yield)
 
-1. **I4** (post_build.sh) — saves friction every build for the rest of the session
-2. **I2** (consistency test) — anchors the guarantees before more refactors
-3. **I1** (Material icons for groups) — immediate visual win on the home screen
-4. **I3** (SizeChipLabel widget) — root-cause cleanup
-5. **I5** (M/S/L axis) — small UX win
-6. **I8** (scroll affordance) — small UX win
-7. **I9** (rename) — mechanical
-8. **I6** (variant grouping) — bigger UX
-9. **I7** (cross-dim split) — biggest scope
-10. **I10** (analyzer sweep) — separate dedicated session
+Done: ✅ I4 (post_build.sh) · ✅ I2 (consistency test) · ✅ I1 (3D product icons).
+
+Remaining, in execution order:
+1. **I8** (scroll affordance) — small UX, low-risk · NEXT
+2. **I5** (M/S/L "מידה" axis) — small UX win
+3. **I3** (SizeChipLabel widget) — root-cause cleanup (closes P9/P12/P17 drift forever)
+4. **I9** (rename `_size_norm.dart`) — mechanical, do alongside I3
+5. **I1-followup** (emoji→icon in product sheet + catalog overview) — 2 stray text sites
+6. **I6** (variant grouping by DN) — bigger UX
+7. **I7** (cross-dim split) — biggest scope
+8. **I10** (analyzer sweep) — separate dedicated session
+
+---
+
+## 📐 Action Plan — detailed sub-protocols (lane: מקבץ/סדרן · `lib/screens`)
+
+> **Per-task discipline (every task):** failing test first → implement → `flutter
+> analyze` clean → `flutter test` green → rebuild + `scripts/post_build.sh` →
+> verify (asset-preview for images, screenshot for layout) → **same-commit
+> bookkeeping**: WIRING.md row (if a provider/map/behavior added) + STATUS
+> version bump + stuck_log entry IF a gate/bug was solved → commit (let the 100
+> gates run) → offer push (never push without explicit "תדחוף").
+> Re-fetch origin before each commit (parallel agents push often).
+
+### I8 — chip-row scroll affordance  ·  NEXT
+- **Goal:** when `_chipRow` (סוג / גודל / זווית / מידה) overflows, show a soft
+  edge-fade + a subtle ‹ cue so the user knows more chips exist (today they're
+  silently clipped at the start edge).
+- **Files:** `lib/screens/finder_screen.dart` (`_chipRow`).
+- **Steps:**
+  1. Wrap the horizontal `ListView`/`SingleChildScrollView` in a
+     `ShaderMask` (left-edge fade) OR add a trailing chevron when scrollable.
+  2. Keep RTL correctness — fade on the START (right) edge in RTL.
+  3. Widget test: pump a group whose size row overflows (e.g. חבקים 14 inch
+     chips); assert the scroll view is scrollable and a fade/cue widget exists.
+  4. analyze + full test + visual screenshot (layout — screenshot works for
+     this; no Image.asset involved).
+  5. WIRING.md: note the affordance under the finder narrow-chips row.
+  6. version bump + commit.
+- **Exit:** overflow row shows a fade/cue; non-overflow row unchanged; tests green.
+
+### I5 — secondary "מידה" (S/M/L) axis
+- **Goal:** clamps/anchors carry `M`/`S`/`L` as plain text today (not filterable).
+  Surface a `_chipRow('מידה', …)` when a pool has >1 letter-size token, co-filter
+  like the angle axis.
+- **Files:** `lib/screens/finder_screen.dart` (`_narrowAxis`/build), maybe
+  `_size_norm.dart` (a `letterSizeTokens` helper).
+- **Steps:**
+  1. Test: pool with `M`/`S` items → a `'מידה'` axis with those chips; a pool
+     without → no such row.
+  2. Add `letterSizeTokens(name)` (S/M/L/XL, word-boundary, not inside words).
+  3. Wire a 3rd chip row + `_letter` filter state (mirror `_angle`).
+  4. Reset `_letter` on group/sub/back nav (like `_angle`).
+  5. Harness `finder:size` block + analyze + full test.
+  6. WIRING row + version + commit.
+- **Exit:** clamps pool shows מידה chips; co-filters with size; no regression.
+
+### I3 — unify card+filter chip display (`SizeChipLabel`)  ·  + I9 rename
+- **Goal:** one widget/function is the single source for a size chip's text so
+  card (`_AttrChip`) and finder (`_chip`) can never drift again (closes the
+  P9/P12/P17 root). Fold I9 (rename `_size_norm.dart` → `display_size.dart`) in.
+- **Files:** NEW `lib/widgets/size_chip_label.dart` (or extend `_size_norm`),
+  `lipskey_products_screen.dart` (`_AttrChip`), `finder_screen.dart` (`_chip`).
+- **Steps:**
+  1. Re-enable the skipped strict-equality assertion in
+     `finder_card_consistency_test.dart` (remove `skip:`) — it should still pass
+     after I3 (P17 already closed) and now GUARD the unification.
+  2. Extract a `SizeChipText`/`displaySizeLabel` single entry; route both chip
+     builders through it (label + LTR-for-digits + glyph fold).
+  3. Rename `_size_norm.dart` → `display_size.dart`, update imports (I9).
+  4. analyze + full test (incl. the un-skipped consistency test).
+  5. WIRING row (note the shared chip-display helper) + version + commit.
+- **Exit:** consistency test un-skipped & green; one helper drives both chips.
+
+### I1-followup — emoji→glyph in the 2 stray text sites
+- **Goal:** `lipskey_product_sheet.dart:1764` and `catalog_screen.dart:5429`
+  still interpolate `g.emoji` into strings (empty box). Convert to the icon
+  (Row + `Icon(finderGroupIcon(label))`) or the product image.
+- **Steps:** locate both, replace string-emoji with `finderGroupGlyph`/icon,
+  test renders, WIRING note, version, commit.
+
+### I6 — variant picker group-by-DN (N>12)
+- **Goal:** PPR Faser `1/39` flat picker → group options by DN with sub-headers.
+- **Files:** `lipskey_products_screen.dart` (`_AttrChip` size picker).
+- **Steps:** detect N>12 size siblings → bucket by `dominantFamily`/DN →
+  sectioned picker. Test the bucketing pure-fn first. WIRING + version + commit.
+
+### I7 — cross-dim → 2 axes for PPR (OD + wall)
+- **Goal:** `20×2.8` (OD×wall) currently sorts on OD only; let PPR filter wall
+  thickness separately. Scope-heavy — design a `crossDimAxes()` first.
+- **Steps:** test the split fn; add a 2nd axis only for the PPR group; verify no
+  change to non-PPR cross-dims (`16×16` etc.). WIRING + version + commit.
+
+### I10 — analyzer sweep (separate session)
+- **Goal:** `flutter analyze` 3002 → 0 (trailing commas, redundant args, etc.).
+- **Note:** mostly mechanical/`dart fix`; do in a dedicated commit so it doesn't
+  bury feature diffs. Likely overlaps other agents' files — coordinate.
 
 ---
 

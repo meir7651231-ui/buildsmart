@@ -684,3 +684,19 @@ git add WIRING.md ואז commit חוזר — שער 24 עבר.
 ### ג — כלל המניעה
 ANTIPATTERN: new provider or map in lib screens shipped without a matching WIRING row
 RULE: כל provider או map חדש ב-lib screens שמניע UI מקבל שורת WIRING.md באותו commit. WIRING.md ב-root ומשותף לכל הסוכנים — לא בבעלות הפרוטוקוליסט.
+
+
+---
+
+## 2026-06-01 · gate 12 · bump גרסה ב-home_shell בלי לסנכרן STATUS.md
+
+### א — הבעיה
+שינוי גרסת ה-label ב-`lib/screens/home_shell.dart` (v5.44 -> v5.45) בלי לעדכן
+את אותה גרסה ב-`knowledge/STATUS.md`. שער 12 חסם — הגרסאות לא מסונכרנות.
+
+### ב — הפתרון
+עדכון `_Version label:` ב-STATUS.md לאותה גרסה כמו ב-home_shell, באותו commit.
+
+### ג — כלל המניעה
+ANTIPATTERN: version label bumped in home_shell without the same bump in STATUS
+RULE: כל שינוי של version label ב-home_shell מחייב את אותה גרסה ב-STATUS.md באותו commit. שתי הגרסאות תמיד זהות.
