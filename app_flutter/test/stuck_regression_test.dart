@@ -897,7 +897,7 @@ void main() {
         reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #42 (hook) לא קיים ב-.githooks/pre-commit", () {
+    test("antipattern #43 (hook) לא קיים ב-.githooks/pre-commit", () {
       final hook = File('../.githooks/pre-commit');
       if (!hook.existsSync()) {
         // הריצה אולי לא מ-app_flutter/ — דלג בלי לשבור.
@@ -915,7 +915,7 @@ void main() {
         reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #43 (hook) לא קיים ב-.githooks/pre-commit", () {
+    test("antipattern #44 (hook) לא קיים ב-.githooks/pre-commit", () {
       final hook = File('../.githooks/pre-commit');
       if (!hook.existsSync()) {
         // הריצה אולי לא מ-app_flutter/ — דלג בלי לשבור.
