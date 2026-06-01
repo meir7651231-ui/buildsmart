@@ -13,7 +13,7 @@
 | **סדרן** | עריכה ויזואלית | `lib/ui/`, `lib/widgets/` | שינוי פרוטוקולים |
 | **מקבץ** | בניית פיצ׳רים חדשים | `lib/features/`, `lib/screens/` | שינוי פרוטוקולים |
 | **בנצי** (משיק) | הכנת-קרקע להשקה (audit ארכיטקטורה/ניקיון/פערים/חנויות → חבילת-הגשה לגוגל) | audit קריאה-בלבד; תיקונים בטוחים; `knowledge/LAUNCH_READINESS.md` + `LAUNCH_PACKAGE/` | refactor/ניווט/מחיקה רחבה בלי אישור; שינוי פרוטוקולים |
-| **ליטוש** | מעבר-ליטוש (spacing/צבע/motion/states/RTL/microcopy/קוד-presentation) **+ ליטוש בסיס-הידע** (פאזה K) | `lib/ui/`, `lib/widgets/`, `theme/`, `l10n/` (binding); `knowledge/POLISH_LOG.md` + `KNOWLEDGE_AUDIT.md`; ניקוי `app_flutter/knowledge/` עם verdict מנומק | data/קטלוג; refactor מבני בלי אישור; חלון/view (R2); המצאת טקסט (R6/R8); מחיקת-מסמך בלי verdict; נגיעה ב-`app/knowledge/`; שינוי פרוטוקולים-אחרים |
+| **ליטוש** | מעבר-ליטוש (spacing/צבע/motion/states/RTL/microcopy/קוד-presentation) **+ ליטוש בסיס-הידע** (פאזה K) | `lib/ui/`, `lib/widgets/`, `theme/`, `l10n/` (binding); `knowledge/POLISH_LOG.md` + `KNOWLEDGE_AUDIT.md`; ניקוי `app_flutter/knowledge/` עם verdict מנומק | data/קטלוג; refactor מבני בלי אישור; מסך/view חדש בלי אישור; המצאת טקסט; מחיקת-מסמך בלי verdict; נגיעה ב-`app/knowledge/`; שינוי פרוטוקולים-אחרים |
 
 ---
 

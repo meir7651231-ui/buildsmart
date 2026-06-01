@@ -19,13 +19,12 @@
 
 ## 0. כללי-יסוד — לקרוא לפני הכל
 
-1. **R1–R9 חלים במלואם** (ראה `app/RULES.md`). הקריטיים לליטוש:
-   - **R2 — אין חלון, נקודה.** מלטשים את ה-**dial** הקיים. אסור להפוך ליטוש
-     לתירוץ ל-view/dashboard/sheet/modal. הפרת R2 גרמה כבר ל-3 רברטים.
-   - **R4 — כל שורת dial = circle + label** (שני elements נפרדים תמיד).
-   - **R6/R8 — טקסט עברי verbatim, אין המצאה.** ליטוש-קופי = **התאמה למקור**
+1. **עקרונות-יסוד לליטוש:**
+   - **מלטשים את הקיים, לא בונים חדש.** ליטוש = שיפור ה-UI הקיים, לא תירוץ
+     לבנות מסכים/views חדשים. כל שינוי-מבנה משמעותי = אישור-משתמש.
+   - **טקסט עברי verbatim, אין המצאה.** ליטוש-קופי = **התאמה למקור**
      (`app/` Preact + `knowledge/port/proto/`), לא ניסוח-מחדש יצירתי.
-   - **R7 — regression לא נשבר.** `flutter test` ירוק תמיד.
+   - **regression לא נשבר.** `flutter test` ירוק תמיד.
 2. **אסור לגעת ב-`app/`** (Preact, פרודקשן חי). כל הליטוש ב-`app_flutter/` בלבד.
 3. **שער 25 — אסור לגעת ב-Preact-shared** (`app_settings`/`catalog_settings`/
    `chat_settings`/`notif_settings`/`store_settings`).
@@ -81,7 +80,7 @@ spacing/padding דרך tokens קיימים, `const`, צבע מ-token קיים, d
 3. **`theme/` + tokens** — מקור-אמת לצבע/מידה/typography. לא hardcode.
 4. **Material 3 + Flutter HIG** — ברירת-מחדל למה שאין בעוגנים 1–3.
 
-סדר-קדימות: proto > Preact > tokens > Material. **אם אין באף עוגן — לא ממציאים** (R8).
+סדר-קדימות: proto > Preact > tokens > Material. **אם אין באף עוגן — לא ממציאים.**
 
 ---
 
@@ -92,7 +91,7 @@ spacing/padding דרך tokens קיימים, `const`, צבע מ-token קיים, d
 
 ## פאזה A — תצלום-בסיס ומיפוי (1–12)
 
-1. קרא `CLAUDE.md` + `app/RULES.md` — הפנם R1–R9, R2/R4/R6/R8.
+1. קרא `CLAUDE.md` — הפנם את מבנה שני-הפרויקטים ועקרונות-היסוד לליטוש (§0).
 2. קרא `STATUS.md` · `WIRING.md` · `knowledge/README.md` — מצב נוכחי.
 3. קרא `knowledge/port/proto/` + `knowledge/port/preact/` — העוגנים הויזואליים.
 4. `flutter run -d chrome` — הרץ את האפליקציה החיה.
@@ -111,7 +110,7 @@ spacing/padding דרך tokens קיימים, `const`, צבע מ-token קיים, d
 14. בדוק padding-מסך אחיד (margins חיצוניים) על כל ה-dial-levels.
 15. בדוק יישור (alignment) — circles ו-labels מיושרים לאורך כל השורות?
 16. בדוק radius עקבי (FAB/chip/card) — מ-token יחיד?
-17. בדוק גדלי-FAB מול R1 (5 FABs) — אחידים ובמיקום יציב?
+17. בדוק גדלי-FAB — אחידים ובמיקום יציב?
 18. אתר spacing קסום (hardcoded EdgeInsets) → המר ל-token. before/after.
 19. בדוק density: רווח-נשימה מספיק? לא צפוף ולא דליל מדי מול proto.
 20. בדוק overflow/clipping בשמות-עברית ארוכים (labels נחתכים?).
@@ -126,11 +125,11 @@ spacing/padding דרך tokens קיימים, `const`, צבע מ-token קיים, d
 26. אתר צבעים hardcoded (`Color(0xFF...)`) → המר ל-token. before/after.
 27. בדוק contrast (WCAG AA) טקסט-על-רקע בכל ה-states.
 28. בדוק היררכיית-typography: כותרת/גוף/label — scale עקבי מ-theme?
-29. בדוק font-weight/size אחיד ל-labels של dial (R4).
+29. בדוק font-weight/size אחיד ל-labels של dial.
 30. בדוק line-height/letter-spacing לעברית — נושם, לא צפוף.
 31. בדוק emphasis-states: selected/active/disabled — נבדלים ויזואלית וברורים?
 32. בדוק elevation/shadow עקבי (FAB/sheet-dial) — מ-token?
-33. בדוק emoji-rendering ב-labels (R6 — verbatim מהלגאסי) — מיושר, לא חתוך.
+33. בדוק emoji-rendering ב-labels (verbatim מהלגאסי) — מיושר, לא חתוך.
 34. בדוק icon-sizing/optical-alignment בתוך circles.
 35. בצע תיקוני-token-binding בטוחים (לא שינוי-ערכים גלובלי — זה אישור-משתמש).
 36. סכם פאזה C ב-POLISH_LOG.
@@ -155,7 +154,7 @@ spacing/padding דרך tokens קיימים, `const`, צבע מ-token קיים, d
 49. מפה לכל זרימה את 4 ה-states: loading / empty / error / success.
 50. בדוק empty-state: יש הודעה+אייקון verbatim, לא מסך לבן ריק?
 51. בדוק loading-state: skeleton/spinner עקבי, לא קפיצת-layout.
-52. בדוק error-state: הודעה ברורה + פעולת-retry, נוסח verbatim (R6).
+52. בדוק error-state: הודעה ברורה + פעולת-retry, נוסח verbatim מהמקור.
 53. בדוק offline: ה-PWA מציג מצב-נתק ברור? (פתח, נתק, רענן).
 54. בדוק transitions בין states — fade עדין, לא הבהוב.
 55. בדוק שאין layout-shift כשעוברים loading→content.
@@ -189,14 +188,14 @@ spacing/padding דרך tokens קיימים, `const`, צבע מ-token קיים, d
 
 ## פאזה H — Microcopy (verbatim-guarded) (77–84)
 
-> ⚠️ **R6/R8 שולטים.** "ליטוש-קופי" = **התאמה למקור**, לא כתיבה-מחדש.
+> ⚠️ **verbatim שולט.** "ליטוש-קופי" = **התאמה למקור**, לא כתיבה-מחדש.
 > כל שינוי-טקסט חייב מקור: `app/index.html` / Preact / `proto/`. אין מקור → אין שינוי.
 
 77. אתר מחרוזות ב-`app_flutter/` שסוטות מהמקור ב-`app/` (diff verbatim).
 78. תקן סטיות-verbatim (typo/ניסוח-שונה-מהמקור) → אל המקור המדויק.
 79. בדוק עקביות-מינוח: אותו מושג = אותה מילה בכל המסכים (מול המקור).
 80. בדוק ש-strings מרוכזים ב-`lib/l10n/` (binding), לא מפוזרים hardcoded.
-81. בדוק placeholders/hints בשדות-קלט (R9) — verbatim מהמקור.
+81. בדוק placeholders/hints בשדות-קלט — verbatim מהמקור.
 82. בדוק הודעות-error/toast — נוסח מהמקור, לא המצאה.
 83. תקן binding (string→מקור-מרוכז) בטוח. before/after (diff-טקסט).
 84. סכם פאזה H ב-POLISH_LOG (כל שינוי עם ציטוט-מקור).
@@ -218,9 +217,9 @@ spacing/padding דרך tokens קיימים, `const`, צבע מ-token קיים, d
 
 93. צלם **after** לכל מצב-dial שצולם ב-baseline (צעד 5).
 94. הצב before↔after זה-ליד-זה ב-POLISH_LOG לכל שינוי.
-95. הרץ regression מלא: `flutter test` ירוק (R7 לא נשבר).
+95. הרץ regression מלא: `flutter test` ירוק (לא נשבר).
 96. `flutter analyze` 0 errors + `flutter build web --release` עובר.
-97. בדוק שלא נוצר אף חלון/view (R2) ולא הומצא טקסט (R6/R8) בכל השינויים.
+97. בדוק שלא נוצר מסך/view חדש בלי אישור ולא הומצא טקסט בכל השינויים.
 98. סווג פריטים שנותרו: P1 (כדאי) · P2 (nice) · ⬜ "דרוש אישור/מקור".
 99. עדכן `STATUS.md` (שורת-ליטוש %) + `WIRING.md` אם נגעת ב-screens/state/logic.
 100. כתוב סיכום ב-POLISH_LOG: מה לוטש, before/after, מה נותר — **המלצת polish-done**.
@@ -246,7 +245,7 @@ spacing/padding דרך tokens קיימים, `const`, צבע מ-token קיים, d
 > 3. **רלוונטי?** — ✅ כן · ⚠️ חלקית · ❌ לא.
 > 4. **למה כן / למה לא** — נימוק קונקרטי הקשור למציאות-היום (לא "מרגיש ישן").
 >
-> **בלי 4 השדות — אין פעולה.** פעולה בלי נימוק = הפרת-פרוטוקול (כמו R8 לקוד).
+> **בלי 4 השדות — אין פעולה.** פעולה בלי נימוק = הפרת-פרוטוקול.
 
 **עקרונות-בטיחות (מעל הכל):**
 - **מחיקה = מוצא אחרון.** סדר-עדיפות: `keep` > `merge-into-X` > `mark-deprecated`
@@ -303,9 +302,9 @@ K11. **סכם פאזה K ב-`KNOWLEDGE_AUDIT.md`:** כמה keep/merge/deprecate/
 
 ## 5. עקרונות-מנחים (מתוך CARRY_FORWARD)
 
-- **R2:** מלטשים את ה-dial. אף פעם לא הופכים ליטוש לחלון.
-- **R6/R8:** טקסט verbatim מהמקור. אין מקור → אין שינוי.
-- **R7:** regression לא נשבר. `flutter test` ירוק לפני ואחרי.
+- **מלטשים את הקיים:** ליטוש משפר UI קיים, לא בונה מסכים חדשים בלי אישור.
+- **verbatim:** טקסט מהמקור. אין מקור → אין שינוי.
+- **regression לא נשבר:** `flutter test` ירוק לפני ואחרי.
 - **לקח #39:** אבחן 100% לפני פתרון. before/after מתועד או שלא קורה.
 - **לקח #17:** תיקון מדויק > תיקון רחב. שמור את הצורה הטובה איפה שאפשר.
 - **לקח #37:** פעולה שנכשלה פעמיים → פיבוט, לא ניסיון שלישי זהה.

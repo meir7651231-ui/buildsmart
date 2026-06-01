@@ -15,10 +15,8 @@
 
 ## 0. כללי-יסוד — לקרוא לפני הכל
 
-1. **R1–R9 חלים במלואם** (ראה `app/RULES.md`). במיוחד:
-   - **R2 — אין חלון, נקודה.** כל הצעת-שיפור ל-UI חייבת להישאר dial. אסור להציע
-     dashboards/views מלאי-מסך. הפרת R2 גרמה כבר ל-3 רברטים.
-   - **R6/R8 — טקסטים עבריים verbatim, אין המצאה.**
+1. **אל תמציא.** טקסטים עבריים מגיעים verbatim מהמקור (`app/` Preact + `proto/`).
+   הצעת-שיפור ל-UI נשארת בתוך מודל-הניווט הקיים — לא בונים מסכים-חדשים בלי אישור.
 2. **שני פרויקטים:** `app/` (Preact, חי בפרודקשן — reference) ו-`app_flutter/`
    (Flutter, יעד ההשקה). **כל עבודת ההשקה היא ב-`app_flutter/` בלבד.**
 3. **שער 25 — אסור לגעת ב-Preact-shared** (`app_settings`/`catalog_settings`/
@@ -72,13 +70,13 @@
 
 ## פאזה A — אוריינטציה ומיפוי (1–10)
 
-1. קרא `CLAUDE.md` + `app/RULES.md` — הפנם R1–R9, R2 אבסולוטי, שני-הפרויקטים.
+1. קרא `CLAUDE.md` — הפנם את מבנה שני-הפרויקטים (`app/` Preact · `app_flutter/`).
 2. קרא `knowledge/README.md` · `STATUS.md` · `ARCHITECTURE.md` · `CONVENTIONS.md`.
 3. קרא `WIRING.md` · `STATE_OVERVIEW.md` · `HELPER_INDEX.md` — מה כבר מתועד.
 4. מפה את עץ `lib/`: `screens/ state/ logic/ data/ widgets/ services/ theme/ l10n/ features/`.
 5. ספור: קבצי `.dart`, סך-שורות, מספר screens/providers/widgets (`grep -r`).
 6. אתר את `main.dart` — מפה את שרשרת ה-bootstrap (ProviderScope, init, theme).
-7. מפה את מודל-הניווט מול R1 (5 FABs) ו-R2 (dial-only, אין חלון).
+7. מפה את מודל-הניווט הקיים (FABs + dial) — תעד אותו כפי שהוא.
 8. רשום גרסאות: Flutter, Dart SDK, Riverpod, ותלויות עיקריות מ-`pubspec.yaml`.
 9. הרץ `flutter pub outdated` — רשום תלויות מיושנות + פערי-major.
 10. צור שלד `knowledge/LAUNCH_READINESS.md` (כותרות 9 הפאזות, עדיין ריק).
@@ -94,7 +92,7 @@
 17. בדוק עקביות-דפוס: כל ה-screens באותו דפוס מבני? סטיות?
 18. בדוק `theme/` ו-tokens — ריכוז מול פיזור של צבעים/מידות/typography.
 19. בדוק error-handling — אחיד? יש crash boundaries / fallback-UI?
-20. אמת את הניווט מול R2 — אין מסלולים שפותחים חלון-מלא לפיצ׳ר חדש.
+20. אמת עקביות-ניווט — כל המסלולים עקביים עם מודל-הניווט הקיים שמיפית בצעד 7.
 21. אתר God-objects / קבצים >500 שורות — מועמדים לפיצול.
 22. בדוק את ההפרדה Preact-shared ↔ Flutter-only (שער 25) — אין דליפה.
 23. מפה persistence: `shared_preferences`/local-storage/cache — מה נשמר ואיפה.
@@ -195,14 +193,14 @@
     ב-`LAUNCH_READINESS.md` + **המלצת go/no-go** מנומקת (חייב **P0=0** כדי לארוז).
 96. **החלטת-משתמש לפני אריזה:** רשום ב-`LAUNCH_READINESS.md` את מה שדורש אישור/קלט
     מהמשתמש ואי-אפשר להמציא — **release-keystore + סיסמאות** (חתימה), `applicationId`
-    סופי, חשבון Play Console, privacy-policy URL חי, אישורי-R2/refactor. עצור כאן עד שיש keystore.
+    סופי, חשבון Play Console, privacy-policy URL חי, אישורי-refactor. עצור כאן עד שיש keystore.
 97. **בנה את ה-AAB החתום:** הגדר signing ב-`android/key.properties` +
     `app/build.gradle` (release signingConfig), ואז `flutter build appbundle --release`.
     אמת: הפלט `build/app/outputs/bundle/release/app-release.aab` חתום ב-release-key
     (לא debug), `applicationId` נכון, `versionCode`/`versionName` תואמים ל-`pubspec`.
 98. **אסוף את נכסי-הליסטינג** ל-`LAUNCH_PACKAGE/store-listing/`: כותרת+תיאור he/en,
     screenshots לכל גודל-מכשיר, feature-graphic 1024×500, icon 512×512 — כולם verbatim/אמיתיים
-    (R6/R8: אין המצאת טקסט-שיווק; מה שאין — סמן ⬜ "דרוש מהמשתמש", לא ממציאים).
+    (אין המצאת טקסט-שיווק; מה שאין — סמן ⬜ "דרוש מהמשתמש", לא ממציאים).
 99. **השלם compliance:** `data-safety.md` (כל שאלות הטופס נענו לפי מה שהאפליקציה באמת
     אוספת — צולב מול פאזה H), `privacy-policy-url.txt`, `release-notes-he.txt`.
 100. **ארוז וכתוב את ה-runbook הסופי** `LAUNCH_PACKAGE/SEND_TO_GOOGLE.md`: רשימת-העלאה
@@ -225,5 +223,4 @@
 - **לקח #39:** אבחן 100% לפני שמציעים פתרון. לא יודע → חקור עוד.
 - **לקח #37:** פקודה שנכשלה פעמיים → פיבוט, לא ניסיון שלישי זהה.
 - **לקח #17:** תיקון מדויק > תיקון רחב. שמור את הצורה הטובה איפה שאפשר.
-- **R2:** כשהאב-טיפוס פותח חלון מלא — מתרגמים ל-dial, לא משכפלים חלון.
-- **אל תמציא:** אם זה לא בלגאסי/לא מאומת — אל תוסיף (R8).
+- **אל תמציא:** אם זה לא בלגאסי/לא מאומת — אל תוסיף.
