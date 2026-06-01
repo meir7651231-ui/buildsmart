@@ -52,6 +52,7 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 | `SIZE_FILTER_PROTOCOL.md` | finder (בית) "גודל" axis — bug→fix→lessons protocol (P1–P10, 100-step plan, Live Log) |
 | `IMPROVEMENTS_PROTOCOL.md` | round-2 improvements (I1–I10+) built on the size-filter foundation |
 | `PROTOCOL_AUDIT_PLAN.md` | 100-step audit of the pre-commit gate logic itself |
+| `ACTION_PLAN.md` | **live backlog** — everything NOT yet done (Benzi #1–#6 status, open nav question, cleanup, polish phases, unpushed-commit ledger) |
 
 ### port · parity · target
 | File | Role |
