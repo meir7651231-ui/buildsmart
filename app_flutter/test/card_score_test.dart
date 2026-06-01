@@ -53,15 +53,27 @@ void main() {
     }
   });
 
-  test('a product with a verified spec scores at least the spec weight', () {
+  test('a verified spec contributes its full breadth weight (composite)', () {
+    // In the composite model a verified spec is the heaviest BREADTH category
+    // (+10). It no longer guarantees a fixed total — the rest of the score
+    // depends on how broad AND deep the product is — but the spec presence must
+    // always show up in the breadth sub-score.
     for (final p in kLipskeyCatalog) {
       if (kVerifiedSpecs[p.sku] != null) {
-        // Spec weight is +20 in the quantity-aware formula. A spec'd product
-        // is guaranteed at least that; data-depth / connectivity / standards
-        // lift it further.
-        expect(cardReadinessScore(p).score, greaterThanOrEqualTo(20),
+        expect(cardReadinessScore(p).breadth, greaterThanOrEqualTo(10),
             reason: p.sku);
       }
+    }
+  });
+
+  test('composite == breadth + depth (capped at 100), both within 0..50', () {
+    for (final p in [...kLipskeyCatalog, ...kPolyrollCatalog]) {
+      final r = cardReadinessScore(p);
+      expect(r.breadth, inInclusiveRange(0, 50), reason: p.sku);
+      expect(r.depth, inInclusiveRange(0, 50), reason: p.sku);
+      // Composite is the sum, unless the (impossible-in-practice) >100 cap hit.
+      final raw = r.breadth + r.depth;
+      expect(r.score, raw > 100 ? 100 : raw, reason: p.sku);
     }
   });
 }

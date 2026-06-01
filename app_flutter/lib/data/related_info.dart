@@ -1184,56 +1184,71 @@ List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
 /// product (a spec'd, connectable PPR/supply fitting) approaches the top, while
 /// a fixture endpoint (no spec, no connections) stays low.
 ///
-/// QUANTITY-AWARE: most dimensions are GRADED by how MUCH knowledge the product
-/// actually carries (number of catalog `dims` fields, count of tips / compliance
-/// / acceptance items, mate count) — not a flat binary "has it / doesn't". So a
-/// data-rich fitting (e.g. a PPR faser pipe with 11 dims fields) is rewarded for
-/// its depth even if it happens to mate few products, instead of being pinned
-/// down to the connectivity term alone.
+/// COMPOSITE — the score integrates TWO complementary views of a product's
+/// knowledge (ציון משוכלל משני הצירים), each worth up to 50:
 ///
-/// Weights (sum = 100):
-///   • engineering spec (VerifiedSpec)                       +20
-///   • data depth (`dims` fields: ≥8→15 / 4-7→10 / 1-3→5)    +15
-///   • connectivity (mates: ≥20→18 / ≥5→12 / >0→6)           +18
-///   • Israeli standard tagged                               +10
-///   • install guidance (tools derived from spec)            +10
-///   • install tips (count: ≥3→7 / 1-2→4)                     +7
-///   • acceptance checks (count: ≥3→5 / >0→3)                 +5
-///   • compliance items (count: ≥3→5 / >0→3)                  +5
-///   • discoverable in the finder                            +3
-///   • priced                                                +2
-///   • variant choice (>1 in family)                         +5
-({int score, String label}) cardReadinessScore(LipskeyCatalogProduct p) {
-  var score = 0;
-  // Foundation: a verified connection spec.
-  if (kVerifiedSpecs[p.sku] != null) score += 20;
-  // Data depth — how much catalog knowledge (dims fields) the product carries.
+///   • BREADTH (≤50): how many DISTINCT KINDS of knowledge the product carries
+///     (variety). Weighted presence — a verified spec counts more than a price.
+///     Answers "is it well-rounded?".
+///   • DEPTH (≤50): how MUCH knowledge it carries within the measurable kinds
+///     (`dims` fields, mate count, tips / acceptance / compliance counts).
+///     Answers "how deep does it go?".
+///
+/// composite = breadth + depth. So a product that is broad-but-shallow (many
+/// kinds, little of each) or deep-but-narrow (e.g. a PPR faser pipe rich in
+/// `dims` but with 0 mates) lands in the middle; only products that are BOTH
+/// broad AND deep reach the top band. The two sub-scores are returned alongside
+/// the composite so callers can show the split.
+///
+/// BREADTH weights (sum 50): spec 10 · connects 8 · has-dims 6 · standard 6 ·
+///   install 5 · variants 4 · tips 4 · acceptance 3 · compliance 2 · finder 1 ·
+///   price 1.
+/// DEPTH grades (sum 50): dims (≥8→18 / 4-7→12 / 1-3→6) · mates (≥20→16 / ≥5→10
+///   / >0→5) · tips (≥3→6 / 1-2→3) · acceptance (≥3→5 / >0→2) · compliance
+///   (≥3→5 / >0→2).
+({int score, String label, int breadth, int depth}) cardReadinessScore(
+    LipskeyCatalogProduct p) {
+  // Shared measurements (each feeds breadth as presence + depth as quantity).
+  final hasSpec = kVerifiedSpecs[p.sku] != null;
   final dims = p.dims?.length ?? 0;
-  score += dims >= 8 ? 15 : (dims >= 4 ? 10 : (dims >= 1 ? 5 : 0));
-  // Connectivity — how many catalog products it directly mates.
   final compat = compatibleProductsCount(p);
-  score += compat >= 20 ? 18 : (compat >= 5 ? 12 : (compat > 0 ? 6 : 0));
-  // Standard.
-  if (israeliStandardsFor(p).isNotEmpty) score += 10;
-  // Install guidance.
-  if (installToolsFor(p).isNotEmpty) score += 10;
-  // Install tips — graded by how many.
   final tips = installTipsFor(p).length;
-  score += tips >= 3 ? 7 : (tips >= 1 ? 4 : 0);
-  // Acceptance checks — graded.
   final acc = acceptanceChecklistFor(p).length;
-  score += acc >= 3 ? 5 : (acc > 0 ? 3 : 0);
-  // Compliance items — graded.
   final comp = complianceTriggersFor(p).length;
-  score += comp >= 3 ? 5 : (comp > 0 ? 3 : 0);
-  if (finderGroupFor(p) != null) score += 3;
-  if (priceFor(p) != null) score += 2;
-  if (variantSiblingsCountFor(p) > 1) score += 5;
+  final hasStandard = israeliStandardsFor(p).isNotEmpty;
+  final hasInstall = installToolsFor(p).isNotEmpty;
+  final hasVariants = variantSiblingsCountFor(p) > 1;
+  final hasFinder = finderGroupFor(p) != null;
+  final hasPrice = priceFor(p) != null;
+
+  // ── BREADTH (≤50): weighted variety of knowledge KINDS present.
+  var breadth = 0;
+  if (hasSpec) breadth += 10; // foundational verified connection spec
+  if (compat > 0) breadth += 8; // it connects to something
+  if (dims >= 1) breadth += 6; // carries dimensional data at all
+  if (hasStandard) breadth += 6; // tied to an Israeli standard
+  if (hasInstall) breadth += 5; // has install guidance
+  if (hasVariants) breadth += 4; // part of a choosable family
+  if (tips > 0) breadth += 4; // has install tips
+  if (acc > 0) breadth += 3; // has acceptance checks
+  if (comp > 0) breadth += 2; // has compliance triggers
+  if (hasFinder) breadth += 1; // discoverable in the finder
+  if (hasPrice) breadth += 1; // priced
+
+  // ── DEPTH (≤50): graded QUANTITY within the measurable kinds.
+  var depth = 0;
+  depth += dims >= 8 ? 18 : (dims >= 4 ? 12 : (dims >= 1 ? 6 : 0));
+  depth += compat >= 20 ? 16 : (compat >= 5 ? 10 : (compat > 0 ? 5 : 0));
+  depth += tips >= 3 ? 6 : (tips >= 1 ? 3 : 0);
+  depth += acc >= 3 ? 5 : (acc > 0 ? 2 : 0);
+  depth += comp >= 3 ? 5 : (comp > 0 ? 2 : 0);
+
+  var score = breadth + depth; // composite of both axes
   if (score > 100) score = 100;
   final label = score >= 80
       ? 'מצוין'
       : (score >= 55 ? 'טוב' : (score >= 30 ? 'בסיסי' : 'חלקי'));
-  return (score: score, label: label);
+  return (score: score, label: label, breadth: breadth, depth: depth);
 }
 
 // ─── יצרן + מק"ט יצרן (Roadmap step 20) ─────────────────────────────────────

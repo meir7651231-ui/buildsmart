@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.57 · 1.6.29 · 📊 הציון מודד עכשיו כמות-ידע: עומק נתונים (dims), מספר חיבורים, וכמות טיפים/בדיקות — לא רק נוכחות',
+                          'v5.58 · 1.6.29 · 📊 ציון משוכלל משני הצירים: רוחב-ידע (כמה סוגי ידע יש) + עומק-ידע (כמה מכל סוג) — מחוברים לציון אחד',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

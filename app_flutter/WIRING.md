@@ -278,3 +278,17 @@ rather than pixel rendering.
   Verified live-equivalent: PPR supply 98 · faser 80 · toilet seat 16 · trap 63.
   Guards: card_score_test (spec-weight 25→20) + mutation_log (dims `:0`→`:50`
   turns the seat "stays low" + "no single dim=100" guards red).
+
+## cardReadinessScore — composite breadth+depth (v5.58)
+- `related_info.dart::cardReadinessScore` now returns a COMPOSITE of two axes
+  (user: "ציון משוכלל משני הצירים"), each ≤50, and exposes both sub-scores in
+  the return record `({score, label, breadth, depth})`:
+  • BREADTH — weighted presence of distinct knowledge KINDS (variety).
+  • DEPTH — graded QUANTITY within the measurable kinds (dims/mates/tips/…).
+  composite = breadth + depth (cap 100). Broad-but-shallow or deep-but-narrow
+  products land mid-band; only broad AND deep reach מצוין. Callers
+  (`lipskey_product_sheet.dart`, `catalog_screen.dart`) keep using `.score`/
+  `.label` (named access — extra record fields are non-breaking).
+  Verified: PPR supply 99 (b49/d50) · faser 75 (b41/d34) · seat 15 (b11/d4).
+  Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
+  polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
