@@ -154,9 +154,17 @@ if [[ -n "$STAGED_LIB" ]]; then
     fi
 
     # שער 23: יש צעד 🟦 ב-ROADMAP
-    # תיקון MSYS (אותו class כמו 81/103): emoji-regex grep נכשל תחת locale של
-    # git-commit ב-Windows. -aF = binary-safe + fixed-string → byte-match locale-independent.
-    grep -aqF "🟦" knowledge/SMARTPRODUCT_ROADMAP.md || err "23" "אין צעד בתהליך" "סמן 🟦 ב-ROADMAP לפני קוד"
+    # תיקון אודיט 2026-06-01 (לקח #52, אותו class כמו 103): אפילו `grep -aqF` נכשל
+    # תחת invocation של git-for-windows — git מחליף את ה-grep binary/PATH, כך
+    # שהבדיקה עוברת standalone אך נכשלת תחת `git commit`. bash case/glob הוא
+    # builtin טהור (אפס binary חיצוני) → byte-match עקבי בכל סביבה.
+    _has_blue=""
+    if [[ -f "knowledge/SMARTPRODUCT_ROADMAP.md" ]]; then
+        while IFS= read -r _l || [[ -n "$_l" ]]; do
+            case "$_l" in *🟦*) _has_blue=1; break;; esac
+        done < knowledge/SMARTPRODUCT_ROADMAP.md
+    fi
+    [[ -n "$_has_blue" ]] || err "23" "אין צעד בתהליך" "סמן 🟦 ב-ROADMAP לפני קוד"
 
     # שער 24: WIRING.md עודכן
     STAGED_WIRING=$(git diff --cached --name-only | grep "WIRING.md" | head -1)
@@ -687,11 +695,14 @@ fi
 # שער 109: אם נסגר sub-protocol — חייב להוסיף ל-CARRY_FORWARD
 # heuristic: אם session_plan מכיל "sub-protocol" + הcommit מסיים אותו (✅ ברוב הצעדים)
 if [[ -f "knowledge/session_plan.md" ]] && grep -q "sub-protocol" knowledge/session_plan.md 2>/dev/null; then
-    # תיקון לקח #27: grep -c מדפיס 0 + exit 1 → "|| echo 0" יורה כפול → "0\n0".
-    # נכון: ${var:-0} אחרי grep -c, לא || echo 0.
-    # תיקון MSYS: emoji grep → -aF (binary-safe + fixed-string, locale-independent)
-    DONE_COUNT=$(grep -acF "✅" knowledge/session_plan.md 2>/dev/null); DONE_COUNT=${DONE_COUNT:-0}
-    PENDING=$(grep -acF "⬜" knowledge/session_plan.md 2>/dev/null); PENDING=${PENDING:-0}
+    # תיקון לקח #52 (אותו class כמו 23/103): ספירת emoji ב-bash builtin, לא grep —
+    # git-for-windows מחליף את ה-grep binary ב-invocation של ה-hook, כך ש-emoji-match
+    # נכשל תחת `git commit` למרות שעובר standalone. case/glob = byte-match עקבי.
+    DONE_COUNT=0; PENDING=0
+    while IFS= read -r _l || [[ -n "$_l" ]]; do
+        case "$_l" in *✅*) DONE_COUNT=$((DONE_COUNT+1));; esac
+        case "$_l" in *⬜*) PENDING=$((PENDING+1));; esac
+    done < knowledge/session_plan.md
     # אם 5+ ✅ ואין שינוי ב-CARRY_FORWARD — אזהרה
     if [[ "$DONE_COUNT" -gt 5 && "$PENDING" -eq 0 ]]; then
         STAGED_CF=$(git diff --cached --name-only | grep "CARRY_FORWARD.md" | head -1)

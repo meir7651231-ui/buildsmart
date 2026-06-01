@@ -644,3 +644,24 @@ RULE: gate 32 חייב לבדוק baseline מ-STATUS.md (known-failing: N) — �
 ANTIPATTERN: case kPpr[A-Z][a-z]+:\s*\n\s*case kPpr[A-Z][a-z]+:\s*\n\s*return \[.spec_faser_20
 RULE: case kPprPipesAC חייב להחזיר spec_pprct_pipe (כחול) — לא spec_faser_20 (ירוק). חיבור case-fall-through מסתיר שגיאות צבע. הפרד לכל case בנפרד.
 
+
+
+---
+
+## 2026-06-01 · gate 23/109 · emoji grep נכשל תחת git-commit (מקבץ) — גם `-aqF` לא הספיק
+
+### א — הבעיה
+סוכן (מקבץ) דיווח: שער 23 (`grep -aqF "🟦"`) עדיין נכשל תחת `git commit` למרות לקח #51.
+ראיות מסביבתו: `grep -aqF "🟦"` עובר standalone בכל locale (`LC_ALL=C`/`LANG=C`/plain),
+ה-ROADMAP מכיל 12 שורות 🟦, ה-cwd תקין (gates 44/59/72 עוברים) — אך תחת `git commit`
+בלבד הוא נכשל. השורש: git-for-windows מחליף את ה-grep binary/PATH ב-invocation של
+ה-hook, כך שכל תלות ב-binary חיצוני (ולא ה-flags) היא הבעיה. אותו class כמו gate 103.
+
+### ב — הפתרון
+שערים 23 ו-109 הומרו ל-bash builtin טהור — אפס grep חיצוני:
+`while IFS= read -r _l; do case "$_l" in *🟦*) ...;; esac; done < file`.
+byte-match עקבי בכל סביבה, ללא תלות ב-binary/PATH/locale.
+
+### ג — כלל המניעה
+ANTIPATTERN[hook]: grep -a[qc]*F? "(🟦|✅|⬜)"
+RULE: emoji/multibyte-match ב-hook = bash case/glob builtin בלבד — לעולם לא grep חיצוני (אפילו -aF). git מחליף את ה-grep binary ב-invocation, כך ש-standalone-pass לא מבטיח commit-pass.
