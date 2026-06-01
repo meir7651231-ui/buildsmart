@@ -644,10 +644,12 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   }
 
   String _hierarchyPickerTitle(int chipIndex, String currentValue) {
-    if (RegExp(r'^["”]?\d|^\d').hasMatch(currentValue)) return 'בחר מידה:';
-    // Heuristic by level (path order roughly follows level1..level5).
-    // Generic title — sufficient since the chip's current value shows above.
-    return 'בחר ערך:';
+    // §21.C — name the dimension being picked (חיבור / צורה / תכונה / תבריג /
+    // מידה) so the user knows whether this is the primary, secondary or final
+    // filter. Without this the header read a generic "בחר ערך" and every chip
+    // looked the same — "אני לא יודע מה הוא בורר ראשי ומה משני ומה אחרון".
+    final label = parseChips(p.nameHe).levelLabelOf(chipIndex);
+    return label.isEmpty ? 'בחר ערך:' : 'בחר $label:';
   }
 
   void _selectFromPicker(LipskeyCatalogProduct next) {
@@ -1854,7 +1856,8 @@ class _HierarchyChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rawPath = parseChips(product.nameHe).path;
+    final chips = parseChips(product.nameHe);
+    final rawPath = chips.path;
     // Render with the ORIGINAL index preserved (so a tap maps back to the
     // right faceted-filter level), but skip noise chips (bare unit tokens like
     // מ"מ) and clean wrapping parens for display.
@@ -1864,25 +1867,46 @@ class _HierarchyChips extends StatelessWidget {
       shown.add(MapEntry(i, _chipDisplayLabel(rawPath[i])));
     }
     if (shown.isEmpty) return const SizedBox.shrink();
+    // §21.C — each chip is stacked: tiny grey label on top (חיבור / צורה /
+    // תכונה / תבריג / מידה) + the value pill below. The label makes the
+    // hierarchy visible at a glance — primary (חיבור) reads first in RTL,
+    // מידה reads last — and the separator stays at pill-level so the
+    // breadcrumb still flows.
     return Wrap(
       spacing: 4,
       runSpacing: 4,
-      crossAxisAlignment: WrapCrossAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.end,
       children: [
         for (var j = 0; j < shown.length; j++) ...[
           if (j > 0)
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 2),
+              padding: EdgeInsets.only(left: 2, right: 2, bottom: 4),
               child: Text('‹',
                   style: TextStyle(
                       color: Color(0xFF8E8E93),
                       fontSize: 13,
                       fontWeight: FontWeight.w700)),
             ),
-          _HierarchyChipPill(
-            word: shown[j].value,
-            isOpen: shown[j].key == openIndex,
-            onTap: onChipTap == null ? null : () => onChipTap!(shown[j].key),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                chips.levelLabelOf(shown[j].key),
+                style: const TextStyle(
+                  color: Color(0xFF8E8E93),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  height: 1.0,
+                ),
+              ),
+              const SizedBox(height: 2),
+              _HierarchyChipPill(
+                word: shown[j].value,
+                isOpen: shown[j].key == openIndex,
+                onTap: onChipTap == null ? null : () => onChipTap!(shown[j].key),
+              ),
+            ],
           ),
         ],
       ],

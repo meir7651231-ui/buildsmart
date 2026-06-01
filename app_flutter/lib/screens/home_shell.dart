@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.49 · 1.6.27 · §21.B: השם המלא ניתן לשחזור מהציפ — קיפול יחידת מ"מ לגודל',
+                          'v5.50 · 1.6.28 · §21.C: תוויות סמנטיות לציפים ולכותרת הבורר — חיבור/צורה/תכונה/תבריג/מידה',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

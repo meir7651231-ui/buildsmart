@@ -188,3 +188,17 @@ rather than pixel rendering.
   the chips" — behavioral, scoped to kPolyrollCatalog (no grep antipattern: מ"מ
   is a legit standalone token in lipskey_catalog, so a source grep can't tell
   the wrong placement from the right one). E2E result: 774/774 full recon.
+
+## §21.C chip + picker level labels — primary/secondary/final clarity (2026-06-01)
+- User: "אני נכנס לבורר בציפ אני לא יודע מה הוא בורר ראשי ומה משני ומה אחרון
+  זה בבלגן." Chips were identical-looking pills, picker said "בחר ערך" generic.
+- `chip_hierarchy.dart` `ChipPath.levelLabelOf(int) → String` maps a path index
+  to one of {חיבור, צורה, תכונה, תבריג, מידה}. Two consumers:
+  - `lipskey_products_screen.dart` `_HierarchyChips` — stacks each chip in a
+    Column: 9pt grey level label on top + value pill below. RTL → "חיבור" reads
+    first (primary), "מידה" last (final).
+  - `lipskey_products_screen.dart` `_hierarchyPickerTitle` — picker header now
+    reads "בחר חיבור:" / "בחר צורה:" / "בחר תכונה:" / "בחר תבריג:" / "בחר מידה:".
+- Guard: spec_assets_test "§21.C every visible chip carries a semantic level
+  label" — sweeps kPolyrollCatalog, asserts every non-noise chip gets one of
+  the 5 allowed labels and the size chip always reads "מידה".

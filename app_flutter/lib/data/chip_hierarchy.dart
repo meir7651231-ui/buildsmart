@@ -89,6 +89,26 @@ class ChipPath {
 
   List<String> get path =>
       [...level1, ...level2, ...level3, ...level4, if (level5 != null) level5!];
+
+  /// §21.C — semantic level label for the chip at [pathIndex] in [path].
+  /// Used by the UI to show "חיבור / צורה / תכונה / תבריג / מידה" above each
+  /// chip and as the picker header, so the user knows what dimension they're
+  /// picking instead of seeing a generic "בחר ערך" and identical-looking pills.
+  /// Returns '' for an out-of-range index.
+  String levelLabelOf(int pathIndex) {
+    if (pathIndex < 0) return '';
+    var i = pathIndex;
+    if (i < level1.length) return 'חיבור';
+    i -= level1.length;
+    if (i < level2.length) return 'צורה';
+    i -= level2.length;
+    if (i < level3.length) return 'תכונה';
+    i -= level3.length;
+    if (i < level4.length) return 'תבריג';
+    i -= level4.length;
+    if (i == 0 && level5 != null) return 'מידה';
+    return '';
+  }
 }
 
 ChipPath parseChips(String nameHe) {

@@ -369,6 +369,43 @@ void main() {
             '${lossy.take(12).join('\n')}');
   });
 
+  // §21.C — every visible chip must carry a semantic level label
+  // (חיבור / צורה / תכונה / תבריג / מידה). Without this the chips were
+  // identical-looking pills and the picker said a generic "בחר ערך", so the
+  // user couldn't tell primary from secondary from final. Two guarantees:
+  //   1) levelLabelOf is one of the 5 allowed labels for every non-noise chip
+  //      across the whole Polyroll catalog (none left blank, none invented).
+  //   2) The size chip — always the final, deepest filter — always reads "מידה".
+  test('§21.C every visible chip carries a semantic level label', () {
+    const allowed = {'חיבור', 'צורה', 'תכונה', 'תבריג', 'מידה'};
+    const noise = {'מ"מ', 'מ”מ', 'mm'};
+    final bad = <String>[];
+    for (final p in kPolyrollCatalog) {
+      final c = parseChips(p.nameHe);
+      for (var i = 0; i < c.path.length; i++) {
+        if (noise.contains(c.path[i].trim())) continue;
+        final lbl = c.levelLabelOf(i);
+        if (!allowed.contains(lbl)) {
+          bad.add('${p.sku} chip[$i]="${c.path[i]}" → "$lbl"');
+        }
+      }
+      // The size chip (level5) must always be the "מידה" label — this is the
+      // anchor that lets the user know "this is the final, narrowest filter".
+      if (c.level5 != null) {
+        final sizeIdx = c.path.length - 1;
+        final sizeLbl = c.levelLabelOf(sizeIdx);
+        if (sizeLbl != 'מידה') {
+          bad.add('${p.sku} size chip "${c.path[sizeIdx]}" → "$sizeLbl" '
+              '(expected "מידה")');
+        }
+      }
+    }
+    expect(bad, isEmpty,
+        reason: 'chip without a level label — picker would read "בחר ערך" '
+            'and pills would be indistinguishable:\n'
+            '${bad.take(12).join('\n')}');
+  });
+
   test('fitting categories all have a real cropped spec diagram', () {
     // Categories with a genuine dimension drawing in the catalog. EF is
     // photo-only (R8 — no diagram exists), so it is intentionally excluded.
