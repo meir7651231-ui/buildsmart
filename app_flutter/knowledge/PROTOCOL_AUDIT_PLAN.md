@@ -194,13 +194,21 @@
 
 ### 🔭 Watch-list — greps על Hebrew-pattern (לא אומת, לא דווח — להמיר רק על דיווח)
 
-לקח #52 אומת רק על **emoji 4-byte**. ה-greps הבאים מתאימים ל-**Hebrew 2-byte**
-patterns — אותו class *פוטנציאלי* אך **אין ראיה** שהם נכשלים, ולכן **לא** הומרו
-(לקח #39 — לא מתקנים ספקולטיבית). אם סוכן מדווח שאחד מהם נכשל תחת git-commit →
-המר ל-bash builtin מיד:
+לקח #52 אומת רק על **emoji** דרך דיווח של סוכן Windows. ה-greps הבאים על
+**עברית** **לא** הומרו (לקח #39 — לא מתקנים ספקולטיבית). **שתי סיבות טכניות
+שהם low-priority — לא סתם "טרם נבדק":**
 
-| שורה | שער | pattern |
-|------|-----|---------|
-| 152 | 22 | `grep -q "<!-- לדוגמה:"` (session_plan template) |
-| 397 | — | `grep -E "['\"][א-ת]..."` (Hebrew string ב-app/) |
-| 561 | — | `grep -oE "[א-ת]+ [0-9]+×[0-9]+"` (Hebrew dimension) |
+1. **כיוון הכשל בטוח (false-negative, לא false-block).** שער 23 נכשל ל-`|| err`
+   ⇒ חסם את הסוכן. שלושת אלה במבנה `if grep…; then warn/err` — כשל-התאמה ⇒
+   פשוט **לא יורה** ⇒ עובר בשקט. אף סוכן לא נתקע, רק היחלשות שקטה.
+2. **astral-plane מול BMP.** emoji = U+1F000+ (surrogate pairs ב-UTF-16) ששוברים
+   regex-engine ב-C-locale; עברית = BMP (U+05xx) שאותם engines מטפלים בו תקין.
+   סביר שעברית-grep **לא** נכשלת כלל באותה סביבה.
+
+**טריגר להמרה:** רק אם סוכן מדווח במפורש שאחד מהם נכשל/החמיץ תחת git-commit.
+
+| שורה | שער | pattern | כיוון כשל |
+|------|-----|---------|-----------|
+| 152 | 22 | `grep -q "<!-- לדוגמה:"` (session_plan template) | false-negative (err לא יורה) |
+| 402 | 67 | `grep -E "['\"][א-ת]..."` (Hebrew string ב-app/) | false-negative (warn לא יורה) |
+| 570 | 95 | `grep -oE "[א-ת]+ [0-9]+×[0-9]+"` (Hebrew dimension) | false-negative (warn לא יורה) |
