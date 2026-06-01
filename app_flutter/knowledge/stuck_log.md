@@ -760,3 +760,24 @@ RULE: גנרטור קוד לא עוטף תוכן-משתנה ב-delimiter שמנ�
 ### ג — כלל המניעה
 ANTIPATTERN[hook]: cached -- '\*\.dart' 2>/dev/null \| grep
 RULE: סריקת שער 103 ב-dart חייבת `:(exclude)*stuck_regression_test.dart` — קובץ הרישום מכיל את כל הפטרנים, בלי החרגה כל regen מפיל false-positive. (ה-antipattern תופס את הצורה הישנה `'*.dart' 2>/dev/null | grep` בלי ה-exclude.)
+
+
+---
+
+## 2026-06-01 · שערים 36/37/40 — warn "test לא רץ" למרות שעבר (דיווח Finder)
+
+### א — הבעיה
+שערים 35-40 בדקו `echo "$TEST_OUT" | grep -q "$critical"` — האם שם הבדיקה החיונית
+מופיע בפלט flutter test. אבל default-reporter כשהפלט נלכד (לא-TTY) מדפיס את שמות
+הקבצים **לא-דטרמיניסטית**: אומת בריצה — 3/6 שמות מופיעים (compat_coverage,
+smartproduct_contract, dedup) ו-3 חסרים (regression_gate, knowledge_protocol,
+no_duplicate_specs) למרות ש-937/937 עברו. → warn שגוי קבוע בכל commit. בנוסף:
+הצורה דילגה לגמרי כש-`[[ -f ]]` נכשל → התעלמה ממחיקת בדיקה חיונית (הסיכון האמיתי).
+
+### ב — הפתרון
+שינוי הבדיקה ל-`[[ -f "test/${critical}.dart" ]] || warn` — בודק קיום-קובץ
+(תופס מחיקה), לא הופעה בפלט. מעבר/כשל מכוסה ע"י שער 32 (FAIL_COUNT מול baseline).
+
+### ג — כלל המניעה
+ANTIPATTERN[hook]: echo "\$TEST_OUT" \| grep -q "\$critical"
+RULE: "האם בדיקה חיונית קיימת" ב-hook = `[[ -f test/X.dart ]]`, לא `grep -q` על פלט flutter test (default-reporter לא-דטרמיניסטי כשנלכד — 3/6 שמות חסרים).

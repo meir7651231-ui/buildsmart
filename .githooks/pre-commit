@@ -244,16 +244,16 @@ if [[ -n "$NEEDS_FLUTTER" ]]; then
         err "34" "בנייה נכשלה" "תקן שגיאות בנייה"
     fi
 
-    # שערים 35-40: בדיקות חיוניות עוברות (תיקון באג #41 — חייב בתוך NEEDS_FLUTTER)
-    # TEST_OUT ריק כשאין Dart staged → warn שגוי על כל 6 הבדיקות בכל commit תיעוד.
+    # שערים 35-40: קבצי בדיקה חיוניים קיימים (לא נמחקו).
+    # תיקון לקח #55 (דיווח Finder): הצורה הישנה (`grep -q "$critical" $TEST_OUT`)
+    # הסתמכה על כך ש-default-reporter מדפיס את שם כל קובץ — אבל כשהפלט נלכד
+    # (לא-TTY) זה לא-דטרמיניסטי: 3/6 שמות חסרים בכל ריצה → warn שגוי קבוע.
+    # גרוע מכך — הבדיקה הישנה דילגה לגמרי כשהקובץ *נמחק* (הסיכון האמיתי).
+    # הנכון: warn אם הקובץ החיוני חסר. מעבר/כשל מכוסה ע"י שער 32 (FAIL_COUNT).
     for critical in compat_coverage_test regression_gate_test knowledge_protocol_test \
                     smartproduct_contract_test dedup_test no_duplicate_specs_test; do
-        if [[ -f "test/${critical}.dart" ]]; then
-            N=$((35 + $(echo "compat_coverage_test regression_gate_test knowledge_protocol_test smartproduct_contract_test dedup_test no_duplicate_specs_test" | tr ' ' '\n' | grep -n "^${critical}$" | cut -d: -f1) - 1))
-            if ! echo "$TEST_OUT" | grep -q "$critical"; then
-                warn "$N" "$critical לא רץ"
-            fi
-        fi
+        N=$((35 + $(echo "compat_coverage_test regression_gate_test knowledge_protocol_test smartproduct_contract_test dedup_test no_duplicate_specs_test" | tr ' ' '\n' | grep -n "^${critical}$" | cut -d: -f1) - 1))
+        [[ -f "test/${critical}.dart" ]] || warn "$N" "$critical חסר — בדיקה חיונית נמחקה?"
     done
 else
     echo "ℹ️  אין שינוי בקוד — מדלג על flutter analyze/test/build (חוסך 3-5 דק')"
