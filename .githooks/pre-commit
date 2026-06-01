@@ -562,8 +562,9 @@ if [[ "$IS_RETRY" == "true" && -f "$STUCK_LOG" ]]; then
         err "102" "פתרת בעיה — לא תיעדת" "עדכן knowledge/stuck_log.md: בעיה + פתרון + ANTIPATTERN + RULE"
     else
         # ANTIPATTERN: (בדיוק) חייב להופיע ברשומה החדשה — לא ANTIPATTERN-EXAMPLE:
+        # מקבל גם את הצורה המתויגת ANTIPATTERN[hook]: (סורק את ה-hook במקום lib/).
         NEW_LINES=$(git diff --cached "$STUCK_LOG" 2>/dev/null | grep "^+" | grep -v "^+++")
-        if ! echo "$NEW_LINES" | grep -qE "^\+ANTIPATTERN:"; then
+        if ! echo "$NEW_LINES" | grep -qE "^\+ANTIPATTERN(\[hook\])?:"; then
             err "102" "רשומה חסרה ANTIPATTERN" "הוסף שורת ANTIPATTERN: regex (בלי -EXAMPLE)"
         fi
         if ! echo "$NEW_LINES" | grep -qE "^\+RULE:"; then
@@ -575,24 +576,37 @@ fi
 # שער 103: אנטי-פטרנים מ-stuck_log לא חוזרים בקוד החדש
 # תיקון באג #11: pattern עובר ל-grep בלי shell expansion
 # תיקון באג #32: shell-meta warning רצה גם כשאין Dart staged → false positives
-# הפתרון: מחשב STAGED_DART לפני הלולאה ועוטף את כולה
+# תיקון אודיט 2026-06-01: ANTIPATTERN[hook]: סורק את ה-hook ה-staged, לא *.dart
+# הפתרון: מחשב staged diffs לפני הלולאה; כל pattern מנותב ליעד שלו
 if [[ -f "$STUCK_LOG" ]]; then
     STAGED_DART_103=$(git diff --cached --name-only -- '*.dart' 2>/dev/null)
-    if [[ -n "$STAGED_DART_103" ]]; then
+    STAGED_HOOK_103=$(git diff --cached --name-only -- ':/.githooks/pre-commit' 2>/dev/null)
+    if [[ -n "$STAGED_DART_103" || -n "$STAGED_HOOK_103" ]]; then
         while IFS= read -r line; do
-            pattern="${line#ANTIPATTERN: }"
+            # נתב לפי תיוג: ANTIPATTERN[hook]: → ה-hook, ANTIPATTERN: → *.dart
+            if [[ "$line" == ANTIPATTERN\[hook\]:* ]]; then
+                a103_target="hook"; pattern="${line#ANTIPATTERN\[hook\]: }"
+            else
+                a103_target="dart"; pattern="${line#ANTIPATTERN: }"
+            fi
             [[ -z "$pattern" ]] && continue
             # חסום shell-injection chars לפני שימוש ב-pattern
             if echo "$pattern" | grep -qE '\$\(|\`|\\$\{'; then
                 warn "103" "אנטי-פטרן ב-stuck_log מכיל shell-meta (דלג): $pattern"
                 continue
             fi
-            # השתמש ב-grep -E בlevel המתאים
-            MATCH=$(git diff --cached -- '*.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E -- "$pattern" 2>/dev/null | head -1)
+            if [[ "$a103_target" == "hook" ]]; then
+                [[ -n "$STAGED_HOOK_103" ]] || continue
+                # התעלם משורות שמתווספות כהערה (#) — תיעוד התיקון מותר
+                MATCH=$(git diff --cached -- ':/.githooks/pre-commit' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -vE "^\+\s*#" | grep -E -- "$pattern" 2>/dev/null | head -1)
+            else
+                [[ -n "$STAGED_DART_103" ]] || continue
+                MATCH=$(git diff --cached -- '*.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E -- "$pattern" 2>/dev/null | head -1)
+            fi
             if [[ -n "$MATCH" ]]; then
                 err "103" "אנטי-פטרן חזר: $pattern" "ראה stuck_log.md — הבעיה תועדה כבר"
             fi
-        done < <(grep "^ANTIPATTERN:" "$STUCK_LOG" 2>/dev/null)
+        done < <(grep -E "^ANTIPATTERN(\[hook\])?:" "$STUCK_LOG" 2>/dev/null)
     fi
 fi
 

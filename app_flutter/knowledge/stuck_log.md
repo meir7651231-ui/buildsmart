@@ -43,7 +43,7 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 שינוי ל-`X=$(grep -c ...); X=${X:-0}` (שורה נפרדת). תוקן בשתי השורות.
 
 ### ג — כלל המניעה
-ANTIPATTERN: grep -c [^|]*2>/dev/null \|\| echo 0
+ANTIPATTERN[hook]: grep -c [^|]*2>/dev/null \|\| echo 0
 RULE: ספירה עם grep -c → `X=$(grep -c ...); X=${X:-0}`. לעולם לא `grep -c ... || echo 0` (double-output כשהספירה 0).
 
 ---
@@ -61,8 +61,8 @@ RULE: ספירה עם grep -c → `X=$(grep -c ...); X=${X:-0}`. לעולם לא
 flutter לא רץ בכלל, ולכן אין מה לבדוק שרץ. אין אזהרות שגויות.
 
 ### ג — כלל המניעה
-ANTIPATTERN: ^done\s*$\n+# שער 41
-RULE: בדיקה שתלויה ב-$TEST_OUT (פלט flutter test) חייבת לרוץ בתוך בלוק NEEDS_FLUTTER. מחוצה לו $TEST_OUT ריק → warn שגוי.
+ANTIPATTERN[hook]: ^for critical in compat_coverage_test
+RULE: בדיקה שתלויה ב-$TEST_OUT (פלט flutter test) חייבת לרוץ בתוך בלוק NEEDS_FLUTTER (לולאת השערים 35-40 מוזחת 4 רווחים בתוך הבלוק). מחוץ לבלוק (`^for` ללא הזחה) → $TEST_OUT ריק → warn שגוי.
 
 ---
 
@@ -78,7 +78,7 @@ RULE: בדיקה שתלויה ב-$TEST_OUT (פלט flutter test) חייבת לר
 רק כשהקובץ באמת ברשימת ה-staged.
 
 ### ג — כלל המניעה
-ANTIPATTERN: git diff --cached [a-z].*\.md >/dev/null
+ANTIPATTERN[hook]: git diff --cached [a-z].*\.md >/dev/null
 RULE: לזיהוי "האם קובץ X staged" — `git diff --cached --name-only | grep -q X`, לא `git diff --cached X >/dev/null` (מחזיר 0 גם בלי שינוי).
 
 ---
@@ -508,7 +508,7 @@ Pattern `[0-9]+ ✗` לא מוצא דבר → `FAIL_COUNT=0` תמיד → השו
 חולץ נכון: `+888 -16:` → `16`.
 
 ### ג — כלל המניעה
-ANTIPATTERN: grep -oE "\[0-9\]\+ ✗"
+ANTIPATTERN[hook]: grep -oE "\[0-9\]\+ ✗"
 RULE: flutter compact output מציג כשלים כ`-N:` (לא ✗). לחלץ FAIL_COUNT: `grep -oE "\+[0-9]+ -[0-9]+:"`
 
 ---

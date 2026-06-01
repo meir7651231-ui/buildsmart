@@ -1,5 +1,6 @@
 // ⚠️ AUTO-GENERATED from knowledge/stuck_log.md — אל תערוך ידנית
 // כל ANTIPATTERN: שמתועד ב-stuck_log.md הופך לבדיקה רגרסיה לנצח.
+// ANTIPATTERN:       → סורק lib/ (Dart).  ANTIPATTERN[hook]: → סורק ../.githooks/pre-commit (bash).
 // אם בדיקה כאן נכשלת = הבאג חזר. ראה stuck_log.md לפתרון.
 
 import 'dart:io';
@@ -8,67 +9,58 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('stuck_log regression — אנטי-פטרנים שלא חוזרים', () {
 
-    test("antipattern #1 לא קיים", () {
-      final libDir = Directory('lib');
+    test("antipattern #1 (hook) לא קיים ב-.githooks/pre-commit", () {
+      final hook = File('../.githooks/pre-commit');
+      if (!hook.existsSync()) {
+        // הריצה אולי לא מ-app_flutter/ — דלג בלי לשבור.
+        return;
+      }
       final matches = <String>[];
       final re = RegExp(r'''grep -c [^|]*2>/dev/null \|\| echo 0''');
-      for (final entity in libDir.listSync(recursive: true)) {
-        if (entity is File && entity.path.endsWith('.dart')) {
-          if (entity.path.contains('stuck_regression')) continue;
-          try {
-            final content = entity.readAsStringSync();
-            for (final line in content.split('\n')) {
-              if (re.hasMatch(line)) {
-                matches.add('${entity.path}: ${line.trim()}');
-              }
-            }
-          } catch (_) {}
-        }
+      final lines = hook.readAsStringSync().split('\n');
+      for (final line in lines) {
+        // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
+        if (RegExp(r'^\s*#').hasMatch(line)) continue;
+        if (re.hasMatch(line)) matches.add(line.trim());
       }
       expect(matches, isEmpty,
-        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+        reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #2 לא קיים", () {
-      final libDir = Directory('lib');
+    test("antipattern #2 (hook) לא קיים ב-.githooks/pre-commit", () {
+      final hook = File('../.githooks/pre-commit');
+      if (!hook.existsSync()) {
+        // הריצה אולי לא מ-app_flutter/ — דלג בלי לשבור.
+        return;
+      }
       final matches = <String>[];
-      final re = RegExp(r'''^done\s*$\n+# שער 41''');
-      for (final entity in libDir.listSync(recursive: true)) {
-        if (entity is File && entity.path.endsWith('.dart')) {
-          if (entity.path.contains('stuck_regression')) continue;
-          try {
-            final content = entity.readAsStringSync();
-            for (final line in content.split('\n')) {
-              if (re.hasMatch(line)) {
-                matches.add('${entity.path}: ${line.trim()}');
-              }
-            }
-          } catch (_) {}
-        }
+      final re = RegExp(r'''^for critical in compat_coverage_test''');
+      final lines = hook.readAsStringSync().split('\n');
+      for (final line in lines) {
+        // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
+        if (RegExp(r'^\s*#').hasMatch(line)) continue;
+        if (re.hasMatch(line)) matches.add(line.trim());
       }
       expect(matches, isEmpty,
-        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+        reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #3 לא קיים", () {
-      final libDir = Directory('lib');
+    test("antipattern #3 (hook) לא קיים ב-.githooks/pre-commit", () {
+      final hook = File('../.githooks/pre-commit');
+      if (!hook.existsSync()) {
+        // הריצה אולי לא מ-app_flutter/ — דלג בלי לשבור.
+        return;
+      }
       final matches = <String>[];
       final re = RegExp(r'''git diff --cached [a-z].*\.md >/dev/null''');
-      for (final entity in libDir.listSync(recursive: true)) {
-        if (entity is File && entity.path.endsWith('.dart')) {
-          if (entity.path.contains('stuck_regression')) continue;
-          try {
-            final content = entity.readAsStringSync();
-            for (final line in content.split('\n')) {
-              if (re.hasMatch(line)) {
-                matches.add('${entity.path}: ${line.trim()}');
-              }
-            }
-          } catch (_) {}
-        }
+      final lines = hook.readAsStringSync().split('\n');
+      for (final line in lines) {
+        // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
+        if (RegExp(r'^\s*#').hasMatch(line)) continue;
+        if (re.hasMatch(line)) matches.add(line.trim());
       }
       expect(matches, isEmpty,
-        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+        reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
     });
 
     test("antipattern #4 לא קיים", () {
@@ -638,25 +630,22 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #31 לא קיים", () {
-      final libDir = Directory('lib');
+    test("antipattern #31 (hook) לא קיים ב-.githooks/pre-commit", () {
+      final hook = File('../.githooks/pre-commit');
+      if (!hook.existsSync()) {
+        // הריצה אולי לא מ-app_flutter/ — דלג בלי לשבור.
+        return;
+      }
       final matches = <String>[];
       final re = RegExp(r'''grep -oE "\[0-9\]\+ ✗"''');
-      for (final entity in libDir.listSync(recursive: true)) {
-        if (entity is File && entity.path.endsWith('.dart')) {
-          if (entity.path.contains('stuck_regression')) continue;
-          try {
-            final content = entity.readAsStringSync();
-            for (final line in content.split('\n')) {
-              if (re.hasMatch(line)) {
-                matches.add('${entity.path}: ${line.trim()}');
-              }
-            }
-          } catch (_) {}
-        }
+      final lines = hook.readAsStringSync().split('\n');
+      for (final line in lines) {
+        // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
+        if (RegExp(r'^\s*#').hasMatch(line)) continue;
+        if (re.hasMatch(line)) matches.add(line.trim());
       }
       expect(matches, isEmpty,
-        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+        reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
     });
 
     test("antipattern #32 לא קיים", () {

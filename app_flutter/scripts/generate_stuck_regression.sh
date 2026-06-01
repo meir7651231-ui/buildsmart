@@ -1,6 +1,12 @@
 #!/bin/bash
 # מייצר test/stuck_regression_test.dart מתוך knowledge/stuck_log.md
-# כל ANTIPATTERN: regex הופך לבדיקה אוטומטית שרצה לנצח
+# כל ANTIPATTERN: regex הופך לבדיקה אוטומטית שרצה לנצח.
+#
+# שני סוגים:
+#   ANTIPATTERN:        regex  → סורק את כל lib/ (קוד Dart)
+#   ANTIPATTERN[hook]:  regex  → סורק את ../.githooks/pre-commit (קוד bash)
+# (תיקון אודיט 2026-06-01: 17/31 אנטי-פטרנים הם hook-bash. עד לתיקון הם סרקו
+#  lib/ לחינם — שער 109 החזיר את אנטי-פטרן #27 בלי שאף בדיקה תפסה.)
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 STUCK_LOG="$REPO_ROOT/app_flutter/knowledge/stuck_log.md"
@@ -10,10 +16,10 @@ if [[ ! -f "$STUCK_LOG" ]]; then
     exit 0
 fi
 
-# חלץ ANTIPATTERN-ים (tr -d '\r' מונע CRLF-corruption על Windows/MSYS)
-PATTERNS=$(grep "^ANTIPATTERN:" "$STUCK_LOG" 2>/dev/null | sed 's/^ANTIPATTERN: //' | tr -d '\r')
+# חלץ שורות ANTIPATTERN (כולל הצורה המתויגת [hook]). tr -d '\r' מונע CRLF.
+RAW=$(grep -E "^ANTIPATTERN(\[hook\])?:" "$STUCK_LOG" 2>/dev/null | tr -d '\r')
 
-if [[ -z "$PATTERNS" ]]; then
+if [[ -z "$RAW" ]]; then
     # אין רשומות אמיתיות — צור test ריק
     cat > "$OUT" << 'EOF'
 // generated from knowledge/stuck_log.md
@@ -28,10 +34,11 @@ EOF
     exit 0
 fi
 
-# בנה test שסורק את כל lib/ לכל אנטי-פטרן
+# בנה test
 cat > "$OUT" << 'HEADER'
 // ⚠️ AUTO-GENERATED from knowledge/stuck_log.md — אל תערוך ידנית
 // כל ANTIPATTERN: שמתועד ב-stuck_log.md הופך לבדיקה רגרסיה לנצח.
+// ANTIPATTERN:       → סורק lib/ (Dart).  ANTIPATTERN[hook]: → סורק ../.githooks/pre-commit (bash).
 // אם בדיקה כאן נכשלת = הבאג חזר. ראה stuck_log.md לפתרון.
 
 import 'dart:io';
@@ -43,15 +50,45 @@ HEADER
 
 # הוסף test לכל pattern
 LINE_NUM=0
-while IFS= read -r pattern; do
-    pattern=$(echo "$pattern" | tr -d '\r')  # strip CRLF (Windows/MSYS)
-    [[ -z "$pattern" ]] && continue
+while IFS= read -r raw; do
+    raw=$(echo "$raw" | tr -d '\r')
+    [[ -z "$raw" ]] && continue
     LINE_NUM=$((LINE_NUM + 1))
-    # ב-raw string של dart (r'''...''') backslash בודד הוא literal — לא לכפול
-    pattern_for_dart="$pattern"
-    # ל-title של הtest: escape אפוסטרופים בלבד
-    pattern_for_title=$(echo "$pattern" | sed "s/'/\\\\'/g")
-    cat >> "$OUT" << TESTEOF
+
+    # זהה סוג + חלץ את ה-regex עצמו
+    if [[ "$raw" == ANTIPATTERN\[hook\]:* ]]; then
+        target="hook"
+        pattern="${raw#ANTIPATTERN\[hook\]: }"
+    else
+        target="lib"
+        pattern="${raw#ANTIPATTERN: }"
+    fi
+    [[ -z "$pattern" ]] && continue
+    pattern_for_dart="$pattern"  # raw-string של dart — backslash בודד הוא literal
+
+    if [[ "$target" == "hook" ]]; then
+        cat >> "$OUT" << TESTEOF
+
+    test("antipattern #${LINE_NUM} (hook) לא קיים ב-.githooks/pre-commit", () {
+      final hook = File('../.githooks/pre-commit');
+      if (!hook.existsSync()) {
+        // הריצה אולי לא מ-app_flutter/ — דלג בלי לשבור.
+        return;
+      }
+      final matches = <String>[];
+      final re = RegExp(r'''${pattern_for_dart}''');
+      final lines = hook.readAsStringSync().split('\n');
+      for (final line in lines) {
+        // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.
+        if (RegExp(r'^\s*#').hasMatch(line)) continue;
+        if (re.hasMatch(line)) matches.add(line.trim());
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן hook חזר ב-.githooks/pre-commit. ראה knowledge/stuck_log.md');
+    });
+TESTEOF
+    else
+        cat >> "$OUT" << TESTEOF
 
     test("antipattern #${LINE_NUM} לא קיים", () {
       final libDir = Directory('lib');
@@ -74,7 +111,8 @@ while IFS= read -r pattern; do
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 TESTEOF
-done <<< "$PATTERNS"
+    fi
+done <<< "$RAW"
 
 cat >> "$OUT" << 'FOOTER'
   });
