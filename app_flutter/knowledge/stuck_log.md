@@ -29,6 +29,26 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 
 <!-- הוסף רשומה חדשה כאן אחרי כל בעיה שנפתרה -->
 
+## 2026-06-01 · שער 23 (+109) — emoji-regex grep נכשל תחת git-commit ב-MSYS
+
+### א — הבעיה
+שער 23: `grep -q "🟦" ROADMAP`. הקובץ מכיל 12 × 🟦, ה-grep מצליח אינטראקטיבית
+(גם תחת LC_ALL=C ב-Linux) — אבל **תחת סביבת git-commit ב-Windows/MSYS הוא נכשל**,
+ו-gate 23 חוסם כל commit שנוגע ב-lib/state/screens. אותו class בדיוק כמו
+gate 81 (sha256 CRLF) ו-gate 103 (echo|grep) — fragility של locale/encoding ב-MSYS.
+אותו דפוס גם בשער 109 (`grep -c "✅"/"⬜"` על session_plan).
+(הערה: לא שוחזר על Linux — ספציפי-פלטפורמה, אך עקבי עם 81/103 המתועדים.)
+
+### ב — הפתרון
+emoji grep → `grep -aqF` / `grep -acF`: `-a` binary-safe, `-F` fixed-string
+(byte-match בלי regex-engine) → locale-independent. תוקן ב-3 המקומות (23 + 109×2).
+
+### ג — כלל המניעה
+ANTIPATTERN[hook]: grep -[qc] "(🟦|✅|⬜)
+RULE: grep של emoji ב-hook חייב `-aF` (binary + fixed-string), לא `-q`/`-c` רגיל — אחרת נכשל תחת locale של git-commit ב-MSYS.
+
+---
+
 ## 2026-06-01 · baseline-phantom — known-failing: 16 בעוד 0 כשלים בפועל
 
 ### א — הבעיה
