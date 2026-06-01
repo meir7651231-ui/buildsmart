@@ -647,6 +647,7 @@ LipskeyCatalogProduct _acPipe(String sku, String size, String sdr, String d,
         color: 'כחול',
         dims: {
           'יצרן': 'Aquatherm',
+          'מק"ט חוליות': sku,
           'תיאור': 'צינור מיזוג אוויר (blue pipe)',
           'חומר': 'PPR · מחוזק בסיבי זכוכית (faser)',
           'SDR': sdr,

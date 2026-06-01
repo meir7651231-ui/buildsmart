@@ -1126,3 +1126,18 @@ enforcement step.
 - **p19 was missed in family 1.** When we did elbow_90 we cropped p20/p25/p38/p39/p48/p49/p50/p81 but skipped p19 — the very first PPR plain 90° page. Caught only when grepping for product distribution per page during family 4. Lesson: every family's first step is `grep -c '_ppr(' | awk` to enumerate **all** pages with that sub-type, not relying on a prior memorized list.
 - **Generic spec can legitimately be shared.** p81 PPRCT plain 45° elbow uses the same geometry/labels as p19 plain 45° (just blue tint in catalog vs green). Per §22 "definition of unique," this is the rare legitimate shared case — left on the generic `spec_elbow_45.jpg` fallback rather than forcing a duplicate crop.
 - **Test refactor (synthetic `_45` key).** When a category has two distinct families (90° vs 45°), the §22 routing test uses a synthetic key (e.g. `'${kPprElbows}_45'`) instead of polluting the iterator with category-specific keyword logic. The test stays declarative.
+
+### §22.I — INTERNAL CARD completeness: builder-loop omissions break verbatim
+
+**הממצא (אודיט קטלגן 2026-06-01):** בדיקת 20 מוצרים אמיתיים × 19 בדיקות-תצוגה (חיצוני + פנימי) חשפה ש-16 צינורות מיזוג-אוויר (`_acPipe`, עמ' 80) מקבלים dims בלי `מק"ט חוליות` ו-בלי `מק"ט יצרן` — בעוד כל שאר הקטלוג (758 מוצרים) מקבל לפחות `מק"ט חוליות = sku` ו-`יצרן`. הכרטיס הפנימי הציג טבלה דקה יותר מהשורה בקטלוג המקורי. הציון לפני התיקון: 379/380 (99.74%).
+
+**שורש:** ה-helper הייעודי `_acPipe` נכתב כלולה לתמצות, אבל הושמטה ידנית שורת `'מק"ט חוליות': sku` מה-dims. ה-helper-ים האחרים בקטלוג מטמיעים אותה inline (לכל `_ppr(...)`); רק `_acPipe` חרג.
+
+**התיקון:** הוספת `'מק"ט חוליות': sku` ל-dims ב-`_acPipe`. כל 16 הצינורות עכשיו עם המק"ט שלהם (= ה-SKU שלהם), בדיוק כמו כל שאר הקטלוג. תוצאה: **380/380 בדגימה, 774/774 בקטלוג כולו**.
+
+**יישום-להבא:** כל builder-helper שמייצר רב-מוצרים בלולאה חייב להחיל את **אותו מינימום dims סטנדרטי** של מוצרי `_ppr` יחידני — לכל הפחות `{יצרן, מק"ט חוליות OR מק"ט יצרן}`. הקטלוג המקורי תמיד מציג טבלה מלאה; הכרטיס הפנימי מבטל R8 verbatim אם הוא דק יותר.
+
+**§14 שמירה (mutation-verified ע"י `scripts/mutation_verify.sh`):**
+- "§22.I every Polyroll product carries יצרן + at least one מק"ט"
+
+**מטרת השומר:** התנהגותי על כל `kPolyrollCatalog` — אם helper עתידי (loop או single) ישכח את השדות, ה-test נופל מיד. אין ANTIPATTERN grep — `'מק"ט חוליות'` הוא token לגיטימי בכל מקום ש**יש בו**; השומר חייב להיות "חייב להכיל" (קיומי), לא "אסור להופיע" (היעדרי) — לפי הכלל החדש מ-§21.B / coord-msg #2.

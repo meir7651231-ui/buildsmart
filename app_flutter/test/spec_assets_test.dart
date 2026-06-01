@@ -406,6 +406,29 @@ void main() {
             '${bad.take(12).join('\n')}');
   });
 
+  // §22.I — INTERNAL CARD completeness. The product sheet renders dims as a
+  // generic loop over `dims.entries` plus a fixed catalog-page footer; the
+  // Polyroll catalog ALWAYS lists at least the manufacturer name + at least
+  // one part number (יצרן + מק"ט יצרן/חוליות) for every product. A builder
+  // helper that skips those (as `_acPipe` did for 16 AC pipes) breaks the
+  // verbatim contract — the user sees a thinner card than the catalog row.
+  test('§22.I every Polyroll product carries יצרן + at least one מק"ט', () {
+    final missing = <String>[];
+    for (final p in kPolyrollCatalog) {
+      final hasMaker = p.dims?['יצרן'] != null;
+      final hasMakat = (p.dims?['מק"ט יצרן'] ?? p.dims?['מק"ט חוליות']) != null;
+      if (!hasMaker || !hasMakat) {
+        missing.add('${p.sku} "${p.nameHe}" '
+            '${!hasMaker ? "[no יצרן]" : ""}${!hasMakat ? "[no מק\"ט]" : ""}');
+      }
+    }
+    expect(missing, isEmpty,
+        reason: 'internal-card data hole — the catalog table shows יצרן + '
+            'מק"ט for every row, the product sheet shows it for every product. '
+            'If a builder helper skips these, the user sees a thinner card than '
+            'the catalog:\n${missing.take(12).join('\n')}');
+  });
+
   test('fitting categories all have a real cropped spec diagram', () {
     // Categories with a genuine dimension drawing in the catalog. EF is
     // photo-only (R8 — no diagram exists), so it is intentionally excluded.

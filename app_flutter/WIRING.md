@@ -159,6 +159,12 @@ rather than pixel rendering.
   `knowledge/CATALOG-CARD-PROTOCOL.md` §22.C/D/E/F for the full ruleset.
 - p80 AQUATHERM AC blue pipes: kPprPipesAC → `spec_pprct_pipe.jpg` (was
   routing to `spec_faser_20.jpg` green by mistake; fixed in §22.F sweep).
+- **§22.I — internal-card dims completeness:** `_acPipe` builder now injects
+  `'מק"ט חוליות': sku` into its dims map (was missing for all 16 AC pipes,
+  thinning the internal card vs. the catalog). Guard: spec_assets_test
+  "§22.I every Polyroll product carries יצרן + at least one מק"ט" — sweeps
+  the whole catalog, fails on any builder that skips the standard dim fields.
+  mutation-verified by `scripts/mutation_verify.sh` (the protocolist's tool).
 - §14 detection: `test/spec_assets_test.dart` enforces 36 routing rules
   including "every page lands on its own per-page crop or a legit shared one".
 - All 74 catalog pages audited per §22.F mandatory audit checklist.
