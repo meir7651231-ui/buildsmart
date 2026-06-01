@@ -285,3 +285,41 @@ dups=$(grep -oE 'antipattern #[0-9]+' app_flutter/test/stuck_regression_test.dar
 שלושת הראשונים מהותיים (workflow + methodology + §14 generalization);
 שניים האחרונים סדר וניקיון. אם רוצים, אני יכול לכתוב את (1) `mutation_verify.sh`
 בעצמי — תגידו ב-AGENT_WORK_PLAN.md.
+
+---
+
+## 📨 ממצא #6 מהקטלגן לפרוטוקוליסט — רעש `pubspec.lock` (2026-06-01)
+
+> **מקור:** סשן §22.I (v5.51, `298707d`).
+> **בקשת המשתמש:** "תעביר ותתעדכן ותדחוף נקי לפי פרוטקול."
+> תעדכנו ✅/❌/דחוי ליד הפריט לאחר סקירה.
+
+### 6. 🔔 `pubspec.lock` נעשה dirty בכל `flutter pub get` — stop-hook מתעורר לשווא
+
+**מה קרה:** בכל פעם שהרצתי `flutter test` (שכולל `flutter pub get` פנימי),
+`pubspec.lock` השתנה בכ-46 שורות — רישום-גיבוב פנימי ו-timestamp-ים,
+**ללא שינוי תלויות בפועל**. כתוצאה, ה-stop-hook של pre-commit זיהה
+"uncommitted changes" ועצר את הסשן בכל פעם.
+
+**עקיפה זמנית:** `git checkout app_flutter/pubspec.lock` לפני כל commit/rebase.
+
+**ההצעה (לפרוטוקוליסט לבחור):**
+
+אפשרות א — הוסף ל-Push & Sync protocol (בסקציה "לפני כל push — 4 צעדים"):
+```bash
+# 0. בטל churn של pubspec.lock (flutter pub get משנה hash-ים פנימיים)
+git checkout app_flutter/pubspec.lock 2>/dev/null || true
+```
+
+אפשרות ב — הוסף חריג ל-stop-hook: אם הקובץ היחיד שהשתנה הוא `pubspec.lock`
+(ללא שינוי dependency אמיתי) — המשך בלי עצירה.
+
+אפשרות ג — הוסף `pubspec.lock` ל-`.gitattributes` עם `merge=ours` כדי
+שהוא לא ייספר בהשוואת worktree.
+
+**ממצאי הסשן שהפעיל:**
+- 774 מוצרי Polyroll × 20 checks = 15,480 assertions → PASS
+- 1 באג אמיתי: 16 צינורות AC pipe חסרו `מק"ט חוליות` (תוקן, mutation-verified)
+- ה-noise של pubspec.lock הפריע לאורך כל הסשן
+
+**חתימה:** קטלגן · 2026-06-01 · commit `298707d`
