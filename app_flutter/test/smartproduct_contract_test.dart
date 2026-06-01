@@ -2,6 +2,7 @@
 // The smart-tree card and the catalog must stay linked: every SmartBrand.sku is
 // a real catalog SKU. This is the foundation the unification (steps 1–4) builds
 // on — if a brand points at a missing SKU the merged card would 404.
+import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
@@ -62,6 +63,34 @@ void main() {
       }
     }
     expect(checked, greaterThan(200));
+  });
+
+  test('Huliot SmartLock drainage fixtures are wired into the smart-tree', () {
+    final huliotSkus = {for (final p in kHuliotCatalog) p.sku};
+    // The 4 primary drainage-fixture cards each carry ≥1 Huliot brand option.
+    for (final key in const [
+      'floorDrain',
+      'basinTrap',
+      'kitchenDrain',
+      'washingMachineDrain'
+    ]) {
+      final sp = kSmartProducts.firstWhere((s) => s.key == key);
+      final huliotBrands = sp.brands
+          .where((b) => b.sku != null && huliotSkus.contains(b.sku))
+          .length;
+      expect(huliotBrands, greaterThan(0),
+          reason: '$key carries no Huliot brand');
+    }
+    // Spot-check the specific reverse mappings (sku → card).
+    expect(smartProductForSku('70124599')?.key, 'floorDrain');
+    expect(smartProductForSku('61230060')?.key, 'basinTrap');
+    expect(smartProductForSku('61450060')?.key, 'kitchenDrain');
+    expect(smartProductForSku('61480100')?.key, 'washingMachineDrain');
+    // The first wiring batch maps at least 17 Huliot SKUs.
+    final mappedHuliot =
+        huliotSkus.where((s) => smartProductForSku(s) != null).length;
+    expect(mappedHuliot, greaterThanOrEqualTo(17),
+        reason: 'only $mappedHuliot Huliot SKUs mapped to a SmartProduct');
   });
 
   test('coverage report (informational)', () {

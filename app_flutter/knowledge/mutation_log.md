@@ -135,3 +135,13 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/spec_assets_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### Huliot smart-tree wiring (v5.62) — 2026-06-02
+- שינוי: 17 מק"טי חוליות נוספו כ-SmartBrand ל-4 כרטיסי-ניקוז (floorDrain+7,
+  basinTrap+3, kitchenDrain+4, washingMachineDrain+3). כיסוי עץ-חכם 293→310.
+- תקלה שהוזרקה: מק"ט חוליות מחובר '70124599' → '00000000' (לא קיים בקטלוג).
+- תוצאה: 2 בדיקות אדומות ✅ — smartproduct_contract "Huliot … wired into the
+  smart-tree" (spot-check sku→card + card-has-Huliot-brand) וגם "every
+  SmartBrand.sku is a real catalog SKU".
+- מסקנה: הקישור מוגן דו-שכבתית — test/smartproduct_contract_test + harness
+  lib/test_harness/tests/catalog.dart (צעד 77).

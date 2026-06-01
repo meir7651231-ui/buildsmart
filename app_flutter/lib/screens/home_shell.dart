@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.62 · 1.6.31 · Finder: ציר "עובי" משני ל-PPR — עובי-דופן/PN נפרד מהקוטר (אותו OD ב-2 עוביים)',
+                          'v5.62 · 1.6.31 · 🌳 חוליות נכנסו לעץ-החכם — 17 מוצרי ניקוז (מחסומים+סיפונים) חוברו ל-4 כרטיסים חכמים כאופציית מותג',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

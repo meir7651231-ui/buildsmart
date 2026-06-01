@@ -1029,3 +1029,20 @@ RULE: קטלוג חדש = (א) קובץ `lib/data/<brand>_catalog.dart` עם fac
 יצרן+מק"ט; (ב) הוספה ל-`kCatalogProducts` ב-polyroll_catalog.dart; (ג) brand-id
 ב-`kBrands`; (ד) root + leaves ב-`kCatalogTree`; (ה) §22.I test כפול לקטלוג
 החדש; (ו) `_brandDir` עודכן (אם חדש). פיספוס אחד מהשלבים = הקטלוג לא נגיש.
+
+## 2026-06-02 · בדיקת-יתום SmartProduct מול קטלוג צר (מקבץ)
+### א — הבעיה
+חיווט מותגי חוליות לכרטיסים-חכמים (SmartProduct.brands) הפיל את שער 32: הבדיקה
+"אין קישור-SmartProduct יתום — צעד 77" ב-lib/test_harness/tests/catalog.dart בדקה
+מק"טי-מותג מול kLipskeyCatalog בלבד (משתנה `products`, שורה 17) — לא מול הקטלוג
+המאוחד. מק"טי חוליות (וגם PPR) חוקיים ב-kCatalogProducts אך לא ב-kLipskeyCatalog →
+דווחו כ"יתומים". הבדיקה המקבילה ב-test/smartproduct_contract_test.dart כבר בדקה
+נכון מול kCatalogProducts, ולכן עברה — רק ה-harness היה מיושן.
+### ב — הפתרון
+שורה 428: catalogSkus נגזר מ-kCatalogProducts (Lipskey+Polyroll+Huliot) במקום
+products. שתי הבדיקות (harness + test/) עכשיו עקביות. שער 32 ירוק.
+### ג — כלל המניעה
+ANTIPATTERN: catalogSkus.*final p in products
+RULE: בדיקת-יתום של SmartProduct.brands (וכל בדיקת תקינות-מק"ט חוצת-מותג) חייבת
+להיגזר מ-kCatalogProducts המאוחד — לא מ-kLipskeyCatalog/`products` הצר. הקטלוג
+אוחד (Lipskey+Polyroll+Huliot); כרטיס-חכם יכול להמליץ על כל מותג, לא רק Lipskey.

@@ -179,6 +179,10 @@ const List<SmartProduct> kSmartProducts = [
         sku: '218553',
         imageAsset: 'assets/lipskey/products/218553.jpeg',
       ),
+      // ── חוליות SmartLock ──
+      SmartBrand(name: 'סיפון SmartLock 1¼" לכיור רחצה (חוליות)', tag: 'חוליות · SmartLock', sku: '61230060'),
+      SmartBrand(name: 'סיפון SmartLock 1¼" + צינור מדידה (חוליות)', tag: 'חוליות · מדידה', sku: '63466055'),
+      SmartBrand(name: 'סיפון SmartLock 1¼" + כניסה למזגן (חוליות)', tag: 'חוליות · מזגן', sku: '61233360'),
     ],
     acc: [
       SmartAcc(name: 'סרט טפלון', emoji: '🎗️', price: 4, why: 'אוטם את ההברגה — חובה', must: true),
@@ -484,6 +488,14 @@ const List<SmartProduct> kSmartProducts = [
         sku: '220543',
         imageAsset: 'assets/lipskey/products/220543.jpeg',
       ),
+      // ── חוליות SmartLock — מערכת ניקוז PP (ת"י 958-1) ──
+      SmartBrand(name: 'מחסום SmartLock 245/50 סגור (חוליות)', tag: 'חוליות · 245/50', sku: '70124599'),
+      SmartBrand(name: 'מחסום SmartLock 245/40/50 פתוח (חוליות)', tag: 'חוליות · פתוח', sku: '70124590'),
+      SmartBrand(name: 'מחסום SmartLock 140/50 סגור (חוליות)', tag: 'חוליות · קומפקטי', sku: '70114500'),
+      SmartBrand(name: 'מחסום SmartLock 140/40/50 פתוח (חוליות)', tag: 'חוליות · 140 פתוח', sku: '70114590'),
+      SmartBrand(name: 'מחסום SmartLock 80/50 סגור (חוליות)', tag: 'חוליות · קטן', sku: '70145960'),
+      SmartBrand(name: 'מחסום SmartLock קומקום 175/50 סגור (חוליות)', tag: 'חוליות · קומקום', sku: '70117500'),
+      SmartBrand(name: 'מחסום SmartLock קומקום 175/40/50 פתוח (חוליות)', tag: 'חוליות · קומקום פתוח', sku: '70117560'),
     ],
     acc: [
       SmartAcc(
@@ -1291,6 +1303,11 @@ const List<SmartProduct> kSmartProducts = [
         tag: 'גרסה משופרת',
         sku: '116649',
       ),
+      // ── חוליות SmartLock ──
+      SmartBrand(name: 'סיפון SmartLock 2" לכיור מטבח (חוליות)', tag: 'חוליות · 2"', sku: '61450060'),
+      SmartBrand(name: 'סיפון SmartLock 2" + כניסה למדיח/כביסה (חוליות)', tag: 'חוליות · מדיח', sku: '61550060'),
+      SmartBrand(name: 'סיפון SmartLock 2" כפול (חוליות)', tag: 'חוליות · כפול', sku: '61350060'),
+      SmartBrand(name: 'סיפון SmartLock 2" כפול + מדיח/כביסה (חוליות)', tag: 'חוליות · כפול+מדיח', sku: '61650060'),
     ],
     acc: [
       SmartAcc(name: 'סרט טפלון',          emoji: '🎗️', price: 4,  why: 'אוטם הברגה — חובה', must: true),
@@ -1318,6 +1335,10 @@ const List<SmartProduct> kSmartProducts = [
       ),
       SmartBrand(name: 'מחסום 1½" למכ. כביסה (20 ארז.)', tag: 'אריזה גדולה', sku: '171189'),
       SmartBrand(name: 'מחסום 1½" למכ. כביסה (פרימיום)', tag: 'דגם מורחב',   sku: '218495'),
+      // ── חוליות SmartLock ──
+      SmartBrand(name: 'מחסום SmartLock H למכונת כביסה (חוליות)', tag: 'חוליות · H', sku: '61480100'),
+      SmartBrand(name: 'סיפון SmartLock 1¼" למכונת כביסה (חוליות)', tag: 'חוליות · 1¼"', sku: '61230065'),
+      SmartBrand(name: 'מחסום הורקה SmartLock 1½" (חוליות)', tag: 'חוליות · הורקה', sku: '62850060'),
     ],
     acc: [
       SmartAcc(name: 'צינור גמיש למכונה',  emoji: '〰️', price: 32, why: 'מחבר את הניקוז — חובה', must: true),

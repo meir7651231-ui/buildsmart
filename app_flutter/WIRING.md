@@ -376,3 +376,23 @@ rather than pixel rendering.
   imported). Makes the score visible at a glance in the catalog search list —
   no need to open the card overlay. Verified live: PPR אספקה → 📊 99 (🟢);
   מושב אסלה → 📊 15 (🔴). Pure display; the score engine (v5.58) is unchanged.
+
+## Huliot SmartLock → smart-tree wiring, batch 1: drainage fixtures (v5.62)
+- `smart_tree.dart`: added 17 Huliot SmartLock SKUs as `SmartBrand` options to 4
+  existing drainage-fixture cards (so they become mapped via `smartProductForSku`
+  and reachable under the 🌳 smart-tree lens / "כרטיס חכם" button):
+  - `floorDrain` (מחסום רצפה) +7 — 70124599 · 70124590 · 70114500 · 70114590 ·
+    70145960 · 70117500 · 70117560
+  - `basinTrap` (סיפון לכיור רחצה) +3 — 61230060 · 63466055 · 61233360
+  - `kitchenDrain` (סיפון לכיור מטבח) +4 — 61450060 · 61550060 · 61350060 · 61650060
+  - `washingMachineDrain` (סיפון למכונת כביסה) +3 — 61480100 · 61230065 · 62850060
+- Effect: smart-tree mapped coverage 293 → **310** SKUs. Huliot floor-drains &
+  siphons now show a כרטיס-חכם instead of falling back to the plain sheet.
+- Guards: `smartproduct_contract_test` — new "Huliot … wired into the smart-tree"
+  test (4 cards carry a Huliot brand; spot-check sku→card; ≥17 mapped) + the
+  existing "every SmartBrand.sku is a real catalog SKU" + bridge round-trip.
+  Mutation-verified (a broken Huliot sku fails both). Pure data; no engine change.
+- REMAINING (next batches): American-sink siphons (62230060/62450060/62550060/
+  62650060/62750060 + 61233172/63350060/61100062) → visibleTrap/otherTraps;
+  pipes/elbows/tees/couplings → pvcPipe/drainageElbow/drainageFittings;
+  gutters/covers/aquaslim → floorCollector/drainageManifold/floorCover.
