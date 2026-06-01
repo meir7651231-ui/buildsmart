@@ -158,9 +158,27 @@ git push -u origin claude/whats-happening-LyY9G
 
 ---
 
+## ⚠️ צעד-פתיחה לכל סשן — יישור-ענף (חובה, לפני כל עבודה)
+
+> נוסף אחרי שסוכן נפתח על ענף ישן/אחר וחשב שמסמכי-ליבה "חסרים" — בעוד הם
+> היו על הענף הנכון ב-commit מאוחר יותר. **אל תניח "אותו commit" — אמת.**
+
+```bash
+git fetch origin claude/whats-happening-LyY9G
+git checkout claude/whats-happening-LyY9G            # אם אתה על ענף אחר
+git reset --hard origin/claude/whats-happening-LyY9G # יישר לראש הרימוט
+git rev-parse --short HEAD                            # אמת שזה ה-SHA של הרימוט
+```
+
+- **"קובץ חסר"?** בדוק `git ls-tree -r origin/claude/whats-happening-LyY9G | grep <name>`
+  לפני שמכריזים על חוסר — לא רק את ה-working-tree המקומי.
+- **תוצר-נוצר-תוך-כדי** (`POLISH_LOG.md`, `LAUNCH_PACKAGE/`) ≠ מסמך-קיים-מראש;
+  חוסר שלו אינו באג — הסוכן יוצר אותו בעבודה.
+
 ## כלל זהב
 
 **כל סוכן עובד על ענף `claude/whats-happening-LyY9G`.**
+**תחילת סשן:** יישור-ענף (למעלה) — fetch + checkout + אימות SHA, לפני כל עבודה.
 לפני כל commit: `flutter analyze` (0 errors) + `flutter test` (0 failures).
 לפני כל push: `git pull --rebase` (ראה נוהל Push & Sync למעלה).
 שערי ה-hook אוכפים אוטומטית — אין עקיפה.

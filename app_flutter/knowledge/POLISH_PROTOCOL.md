@@ -91,6 +91,10 @@ spacing/padding דרך tokens קיימים, `const`, צבע מ-token קיים, d
 
 ## פאזה A — תצלום-בסיס ומיפוי (1–12)
 
+0. **יישור-ענף (לפני הכל):** `git fetch origin claude/whats-happening-LyY9G` →
+   `git checkout` אליו → `git reset --hard origin/...` → אמת `git rev-parse HEAD`
+   מול הרימוט. אם מסמך נראה "חסר" — בדוק `git ls-tree -r origin/<branch>` לפני
+   שמכריזים. (`POLISH_LOG`/`KNOWLEDGE_AUDIT` שאתה כותב = תוצר, לא חוסר.)
 1. קרא `CLAUDE.md` — הפנם את מבנה שני-הפרויקטים ועקרונות-היסוד לליטוש (§0).
 2. קרא `STATUS.md` · `WIRING.md` · `knowledge/README.md` — מצב נוכחי.
 3. קרא `knowledge/port/proto/` + `knowledge/port/preact/` — העוגנים הויזואליים.
