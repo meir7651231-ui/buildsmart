@@ -1,11 +1,15 @@
 # פרוטוקול הכנת-קרקע להשקה — סוכן "משיק"
 
-> **תפקיד הסוכן:** להכין את `app_flutter/` להשקה בחנויות (iOS · Android · Web/PWA).
-> לבדוק **איך** האפליקציה בנויה, **איך** לארגן טוב ונקי יותר, **מה חסר**, **מה לתקן**.
-> התוצר: דוח מוכנות-השקה מתועדף + תוכנית ביצוע + המלצת go/no-go.
+> **תפקיד הסוכן:** להכין את `app_flutter/` להשקה בחנויות (Google Play ראשי · iOS · Web/PWA).
+> לבדוק **איך** האפליקציה בנויה, **איך** לארגן טוב ונקי יותר, **מה חסר**, **מה לתקן** —
+> ובסוף **לארוז חבילת-הגשה ממשית שהמשתמש מעלה ל-Google Play Console וזהו.**
+>
+> **התוצר הסופי (terminal deliverable):** תיקיית `LAUNCH_PACKAGE/` עם:
+> `app-release.aab` חתום + כל נכסי-הליסטינג + תשובות Data-Safety + runbook "שלח-לגוגל".
+> ברגע שהקובץ הזה מוכן — המשתמש מעלה ל-Play Console והסיפור נגמר.
 >
 > **ענף:** `claude/whats-happening-LyY9G` · אין push ללא אישור מפורש.
-> **שם הסוכן בטבלת התיאום:** משיק (ניתן לשינוי ב-AGENT_COORDINATION.md).
+> **שם הסוכן בטבלת התיאום:** בנצי (משיק).
 
 ---
 
@@ -41,19 +45,30 @@
 
 ## 2. תוצרים (Deliverables)
 
-1. **`knowledge/LAUNCH_READINESS.md`** — הדוח המרכזי:
+> **התוצר הסופי = #1. כל השאר משרת אותו.** הפרוטוקול לא "נגמר" בדוח —
+> הוא נגמר כש-`LAUNCH_PACKAGE/` מוכן-להעלאה ל-Google Play.
+
+1. **`LAUNCH_PACKAGE/` — חבילת-ההגשה לגוגל פליי (terminal deliverable):**
+   - `app-release.aab` — App Bundle **חתום** ב-release-keystore (לא debug).
+   - `store-listing/` — כותרת+תיאור (he/en), screenshots לכל גודל-מכשיר נדרש,
+     feature-graphic 1024×500, app-icon 512×512.
+   - `data-safety.md` — תשובות מלאות לטופס Data-Safety של Google.
+   - `privacy-policy-url.txt` — קישור פעיל למדיניות-פרטיות.
+   - `release-notes-he.txt` — תיאור-שחרור לגרסה הראשונה.
+   - `SEND_TO_GOOGLE.md` — runbook צעד-אחר-צעד: מה להעלות, לאן, באיזה סדר.
+2. **`knowledge/LAUNCH_READINESS.md`** — הדוח המרכזי (הדרך לתוצר #1):
    - סיכום מנהלים + המלצת go/no-go
    - backlog מתועדף: P0 (blocker-השקה) · P1 (חשוב) · P2 (nice-to-have)
    - ממצאי כל 9 הפאזות
-2. **עדכון `STATUS.md`** — שורת מוכנות-השקה (% מוכן).
-3. **דוח ביצוע** ל-`AGENT_COORDINATION.md` בכל סשן (טמפלט קיים שם).
+3. **עדכון `STATUS.md`** — שורת מוכנות-השקה (% מוכן).
+4. **דוח ביצוע** ל-`AGENT_COORDINATION.md` בכל סשן (טמפלט קיים שם).
 
 ---
 
 # הפרוטוקול — 100 צעדים
 
 > סמן ליד כל צעד: ✅ בוצע · ⚠️ ממצא · ❌ חוסם · ⬜ טרם.
-> צעדים 1–94 הם **Audit (קריאה)**. 95–100 בונים את ה-plan.
+> צעדים 1–94 הם **Audit (קריאה)**. 95–100 **בונים ואורזים את חבילת-ההגשה לגוגל**.
 
 ## פאזה A — אוריינטציה ומיפוי (1–10)
 
@@ -173,14 +188,27 @@
 93. בדוק permissions: מינימליות ומוצדקות לכל פלטפורמה.
 94. בדוק crash-reporting (`crashLogProvider`, step 90) — מוכן ל-telemetry חיצוני?
 
-## פאזה I — ניתוח-פערים ו-checklist השקה (95–100)
+## פאזה I — ניתוח-פערים, go/no-go, ואריזת חבילת-ההגשה לגוגל (95–100)
 
-95. רכז את **כל** הממצאים (פאזות A–H) ל-backlog אחד מתועדף.
-96. סווג כל פריט: **P0** (חוסם השקה) · **P1** (חשוב) · **P2** (nice-to-have).
-97. בנה launch-checklist עם **go/no-go criteria** מפורשים (מה חייב P0=0).
-98. הצע סדר-ביצוע לפי תלויות (מה חוסם מה; מה אפשר במקביל בין הסוכנים).
-99. זהה מה דורש **החלטת-משתמש**: אישורי-R2, refactors, backend, חשבונות-חנות.
-100. כתוב סיכום-מנהלים ב-`LAUNCH_READINESS.md` + **המלצת go/no-go** מנומקת.
+95. רכז את **כל** הממצאים (פאזות A–H) ל-backlog אחד מתועדף; סווג כל פריט
+    **P0** (חוסם השקה) · **P1** (חשוב) · **P2** (nice-to-have). כתוב סיכום-מנהלים
+    ב-`LAUNCH_READINESS.md` + **המלצת go/no-go** מנומקת (חייב **P0=0** כדי לארוז).
+96. **החלטת-משתמש לפני אריזה:** רשום ב-`LAUNCH_READINESS.md` את מה שדורש אישור/קלט
+    מהמשתמש ואי-אפשר להמציא — **release-keystore + סיסמאות** (חתימה), `applicationId`
+    סופי, חשבון Play Console, privacy-policy URL חי, אישורי-R2/refactor. עצור כאן עד שיש keystore.
+97. **בנה את ה-AAB החתום:** הגדר signing ב-`android/key.properties` +
+    `app/build.gradle` (release signingConfig), ואז `flutter build appbundle --release`.
+    אמת: הפלט `build/app/outputs/bundle/release/app-release.aab` חתום ב-release-key
+    (לא debug), `applicationId` נכון, `versionCode`/`versionName` תואמים ל-`pubspec`.
+98. **אסוף את נכסי-הליסטינג** ל-`LAUNCH_PACKAGE/store-listing/`: כותרת+תיאור he/en,
+    screenshots לכל גודל-מכשיר, feature-graphic 1024×500, icon 512×512 — כולם verbatim/אמיתיים
+    (R6/R8: אין המצאת טקסט-שיווק; מה שאין — סמן ⬜ "דרוש מהמשתמש", לא ממציאים).
+99. **השלם compliance:** `data-safety.md` (כל שאלות הטופס נענו לפי מה שהאפליקציה באמת
+    אוספת — צולב מול פאזה H), `privacy-policy-url.txt`, `release-notes-he.txt`.
+100. **ארוז וכתוב את ה-runbook הסופי** `LAUNCH_PACKAGE/SEND_TO_GOOGLE.md`: רשימת-העלאה
+     מסודרת ל-Play Console (איזה קובץ → איזה מסך → באיזה סדר), טבלת go/no-go סופית
+     (P0=0 ✅), ומה נשאר ב-⬜ "דרוש מהמשתמש". **כשכל ה-⬜ נסגרו — המשתמש מעלה את
+     `app-release.aab` + הליסטינג ל-Play Console והסיפור נגמר.**
 
 ---
 
