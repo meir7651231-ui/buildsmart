@@ -33,10 +33,11 @@
   **שינוי ויזואלי** → דורש before/after).
 - `dial.dart:109` — stagger `28ms` literal — לשקול `BsTokens.dialStagger`.
 
-### 🔵 feasible ללא צילום (טקסט בלבד)
-- **H · microcopy verbatim:** label-ים ב-dials הם literals עבריים inline (`'בית'`,`'הפרויקטים'`,
-  `'רכש'`,`'הגדרות'`...). לוודא verbatim מול `app/` Preact + `port/proto/`. (`lib/screens` —
-  תיאום מקבץ/סדרן לפני נגיעה.)
+### 🔵 H · microcopy verbatim — audit בוצע (2026-06-01)
+- **15/16 label-ים עליונים verbatim ✅** מול `app/src/` Preact (menu 4 + search 11 תואמים מילה-במילה).
+- ✅ **drift 1 תוקן** (באישור-משתמש): `search_dial_widget.dart:94` — `'פתח מצלמה'` → **`'הפעל מצלמה'`**
+  (verbatim מ-`app/src/components/search/submenu-barcode.tsx`, R6/R8). ראה "שינויים שבוצעו" #2.
+- היקף: audit עליון בלבד (menu+search top-level). ~200+ leaves נותרו ל-audit מלא (סבב המשך).
 
 ### 🔴 חסום על capture (דורש שיפוט ויזואלי + before/after)
 - **B** layout/spacing · **C** color/contrast · **D** motion-feel · **E** states (empty/loading/error) · **F** RTL-render.
@@ -49,3 +50,4 @@
 | # | קובץ | before → after | gate | ref |
 |---|------|----------------|------|-----|
 | 1 | `lib/widgets/dial.dart` | `DialRow` padding `vertical: 4` → `BsTokens.space1` (token-equal, 4==4, אפס שינוי-render) | analyze 0 · test 986 ✅ | non-visual (literal→token) |
+| 2 | `lib/screens/search_dial_widget.dart` | label `'פתח מצלמה'` → `'הפעל מצלמה'` (verbatim מ-Preact `submenu-barcode.tsx`) | gate analyze+test+build | H · R6/R8 · באישור-משתמש |

@@ -32,7 +32,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 | Tool | Behavior | Status |
 |---|---|---|
 | 🎤 קולי | `VoiceService.listen` (browser speech) | ✅ |
-| 📷 ברקוד | `openBarcodeScanner` | ✅ |
+| 📷 ברקוד | `openBarcodeScanner` (כפתור: "הפעל מצלמה" — verbatim ← Preact `submenu-barcode`) | ✅ |
 | ⚙️ פילטרים | sheet → `searchImageOnlyProvider`; live results filtered by `filterByImage` (הכל / עם תמונה בלבד) | ✅ |
 | ↕️ מיון | sheet → `catalogProductSortProvider` (`_sortProducts`): ברירת מחדל / שם א-ת / שם ת-א / מק"ט, applied to live results | ✅ |
 | ▦ קטלוג | closes the panel + jumps to the קטגוריות section | ✅ |

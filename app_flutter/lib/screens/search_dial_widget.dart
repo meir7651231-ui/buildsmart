@@ -91,7 +91,7 @@ class SearchDialWidget extends ConsumerWidget {
     if (tool == SearchTool.barcode) {
       return [
         DialRow(
-          label: 'פתח מצלמה',
+          label: 'הפעל מצלמה',
           emoji: '📷',
           icon: Icons.circle,
           onTap: () => openBarcodeScanner(context),
