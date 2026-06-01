@@ -694,6 +694,17 @@ if [[ -n "$STAGED_STUCK_LOG" ]]; then
     fi
 fi
 
+# שער 111: עקביות stuck_regression (דיווח קטלגן) — מספר ANTIPATTERN = מספר tests,
+# ואין מספור כפול. תופס drift אחרי rebase (test מיוצר מ-commit ביניים לא תואם את
+# stuck_log הממוזג) — בדיוק התרחיש שחזר ב-rebase הכפול. cheap (3 greps), רץ תמיד.
+if [[ -f "knowledge/stuck_log.md" && -f "test/stuck_regression_test.dart" ]]; then
+    AP_COUNT=$(grep -cE '^ANTIPATTERN(\[hook\])?:' knowledge/stuck_log.md); AP_COUNT=${AP_COUNT:-0}
+    RT_COUNT=$(grep -cE 'test\("antipattern #' test/stuck_regression_test.dart); RT_COUNT=${RT_COUNT:-0}
+    DUP_AP=$(grep -oE 'antipattern #[0-9]+' test/stuck_regression_test.dart | sort | uniq -d | head -1)
+    [[ "$AP_COUNT" == "$RT_COUNT" ]] || err "111" "stuck_regression לא מסונכרן ($AP_COUNT ANTIPATTERN ≠ $RT_COUNT tests)" "הרץ scripts/generate_stuck_regression.sh"
+    [[ -z "$DUP_AP" ]] || err "111" "מספור כפול ב-stuck_regression: $DUP_AP" "הרץ scripts/generate_stuck_regression.sh"
+fi
+
 # רישום fingerprint אם נכשל
 if [[ "$FAIL" -gt 0 ]]; then
     echo "$CURRENT_FP $NOW gates=v2:${FAILED_GATES#,} head=$HEAD_SHA" >> "$FINGERPRINT_FILE"

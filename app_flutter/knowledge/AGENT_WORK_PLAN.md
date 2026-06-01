@@ -67,6 +67,20 @@
 
 ---
 
+## פעולות שבוצעו מ-5 הממצאים של קטלגן (2026-06-01)
+
+| # | ממצא | פעולה | מיקום |
+|---|------|--------|--------|
+| 1 | git checkout במוטציה מוחק עריכות | ✅ נכתב `scripts/mutation_verify.sh` (buffer-restore) | scripts/ |
+| 2 | ANTIPATTERN grep ל-token תלוי-הקשר | ✅ template עודכן (`grep -rn` לפני + `GUARD:` חלופי) | stuck_log.md header |
+| 3 | "מוסתר-בתצוגה ≠ נמחק-מהמודל" | ✅ נוסף §14.E | CATALOG-CARD-PROTOCOL.md |
+| 4 | stuck_regression numbering כפול | ✅ נוסף שער 111 (count + dup check) | .githooks/pre-commit |
+| 5 | שערים 36/37/40 "לא רץ" | ✅ כבר תוקן (`e837943`) — קטלגן צריך sync hook מקומי | — |
+
+לקח #57 ב-CARRY_FORWARD מסכם את 1–4.
+
+---
+
 ## כללים קריטיים לסוכן זה
 
 - **לא feature code, לא UI, לא data** — רק hook/knowledge/tests
