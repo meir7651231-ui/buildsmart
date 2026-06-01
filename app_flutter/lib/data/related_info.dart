@@ -1175,17 +1175,36 @@ List<String> acceptanceChecklistFor(LipskeyCatalogProduct p) {
 }
 
 // ─── ציון נתוני כרטיס (Roadmap step 30, card-level) ─────────────────────────
-/// A 0-100 readiness score for how complete & connectable [p]'s card data is:
-/// engineering spec (+40), connectivity (up to +30), discoverable in the finder
-/// (+10), priced (+10), has variant choice (+10). Returns a score + a Hebrew
-/// label. (Line-level scoring across a built line is still pending.)
+/// A 0-100 readiness score for how complete & connectable [p]'s card data is.
+///
+/// The bar was RAISED to reflect the full smart-card capability the catalog now
+/// carries (post-Polyroll-bridge): a product that scores ~100 has the engine
+/// spec AND connects AND carries a standard AND install guidance AND
+/// acceptance/compliance — not just the original 5 fields. So a richly-equipped
+/// product (a spec'd, connectable PPR/supply fitting) approaches the top, while
+/// a fixture endpoint (no spec, no connections) stays low.
+///
+/// Weights (sum = 100):
+///   • engineering spec (VerifiedSpec)            +25
+///   • connectivity (mates: ≥20→20 / ≥5→13 / >0→7) +20
+///   • Israeli standard tagged                    +12
+///   • install guidance (tools derived from spec) +13
+///   • acceptance checklist present                +5
+///   • compliance triggers present                 +5
+///   • discoverable in the finder                  +5
+///   • priced                                      +5
+///   • variant choice (>1 in family)              +10
 ({int score, String label}) cardReadinessScore(LipskeyCatalogProduct p) {
   var score = 0;
-  if (kVerifiedSpecs[p.sku] != null) score += 40;
+  if (kVerifiedSpecs[p.sku] != null) score += 25;
   final compat = compatibleProductsCount(p);
-  score += compat >= 20 ? 30 : (compat >= 5 ? 20 : (compat > 0 ? 10 : 0));
-  if (finderGroupFor(p) != null) score += 10;
-  if (priceFor(p) != null) score += 10;
+  score += compat >= 20 ? 20 : (compat >= 5 ? 13 : (compat > 0 ? 7 : 0));
+  if (israeliStandardsFor(p).isNotEmpty) score += 12;
+  if (installToolsFor(p).isNotEmpty) score += 13;
+  if (acceptanceChecklistFor(p).isNotEmpty) score += 5;
+  if (complianceTriggersFor(p).isNotEmpty) score += 5;
+  if (finderGroupFor(p) != null) score += 5;
+  if (priceFor(p) != null) score += 5;
   if (variantSiblingsCountFor(p) > 1) score += 10;
   if (score > 100) score = 100;
   final label = score >= 80

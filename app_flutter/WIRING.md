@@ -254,3 +254,10 @@ rather than pixel rendering.
   smartProductForSku for THAT product's fixture (not a group-level gateway).
   Falls back to the standard Lipskey sheet when unmapped. `_LensGroupHeader`
   reverted to a plain label (🌳 prefix cue only, not tappable).
+
+## cardReadinessScore — raised bar (v5.53)
+- `related_info.dart::cardReadinessScore` expanded 5→9 dimensions so 100 reflects
+  FULL smart-card readiness (spec+25 · connectivity+20 · ת"י+12 · install+13 ·
+  acceptance+5 · compliance+5 · finder+5 · price+5 · variants+10). A spec'd
+  connectable PPR fitting now reaches ~95 (was 90); fixture endpoints stay low.
+  Guards: card_score_test (raised-bar group) + mutation_log.

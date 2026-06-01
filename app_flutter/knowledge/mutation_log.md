@@ -76,3 +76,9 @@
 - תקלה שנייה: ב-variant case, `singletons.add(...)` → הוסר (singletons נזרקים)
 - תוצאה: הבדיקה הייתה אדומה ✅ ("variant nothing dropped" — total != copper.length)
 - מסקנה: הבדיקה חזקה — תופסת גם drop של unmapped ב-smartTree וגם drop של singletons ב-variant.
+
+### cardReadinessScore (raised bar, 9 dims) — 2026-06-01
+- שינוי: הנוסחה הורחבה מ-5 ל-9 ממדים (spec25/compat20/תקן12/התקנה13/קבלה5/תאימות5/מאתר5/מחיר5/וריאנט10), max 100.
+- תקלה שהוזרקה: `score += 25` (spec) → `score += 0`.
+- תוצאה: הבדיקה הייתה אדומה ✅ ("rich spec+connectable PPR hits top band" נפל — PPR ירד מ-95 ל-70 < 80).
+- מסקנה: הבדיקה החדשה ("raised bar") חזקה — תופסת ירידת משקל ליבה. בנוסף: endpoint נשאר נמוך, ואין ממד יחיד שמגיע ל-100 (דורש רוחב).
