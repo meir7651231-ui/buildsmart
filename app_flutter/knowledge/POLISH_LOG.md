@@ -28,10 +28,11 @@
 ### 🟢 ready-to-apply — safe, token-equal, אפס שינוי ויזואלי
 - ✅ **בוצע** (ראה "שינויים שבוצעו"): `dial.dart` `vertical:4` → `BsTokens.space1`.
 
-### 🟡 needs token-decision (ערך לא בסקאלה)
-- `dial.dart:69` — `vertical: 6` (אין token; scale=4,8,12...). או token חדש, או 6→8 (`space2`,
-  **שינוי ויזואלי** → דורש before/after).
-- `dial.dart:109` — stagger `28ms` literal — לשקול `BsTokens.dialStagger`.
+### 🟡 needs token-decision / larger pass
+- ✅ stagger `28ms` → `BsTokens.dialStaggerStep` (#3) · toast `2s` → `BsTokens.toastDuration` (#4).
+- `dial.dart:69` `vertical: 6` — אין token (scale 4,8,12); ערך/token decision.
+- **typography pass (Phase C):** font-sizes magic ב-`toast.dart`(14) · `chain_diagram.dart`(8/9/22) +
+  `chain_diagram` לא מייבא tokens — pass נפרד, דורש type-scale (החלטת-design).
 
 ### 🔵 H · microcopy verbatim — audit בוצע (2026-06-01)
 - **15/16 label-ים עליונים verbatim ✅** מול `app/src/` Preact (menu 4 + search 11 תואמים מילה-במילה).
@@ -51,3 +52,5 @@
 |---|------|----------------|------|-----|
 | 1 | `lib/widgets/dial.dart` | `DialRow` padding `vertical: 4` → `BsTokens.space1` (token-equal, 4==4, אפס שינוי-render) | analyze 0 · test 986 ✅ | non-visual (literal→token) |
 | 2 | `lib/screens/search_dial_widget.dart` | label `'פתח מצלמה'` → `'הפעל מצלמה'` (verbatim מ-Preact `submenu-barcode.tsx`) | gate analyze+test+build | H · R6/R8 · באישור-משתמש |
+| 3 | `lib/theme/tokens.dart` · `lib/widgets/dial.dart` | stagger `28ms` → `BsTokens.dialStaggerStep` (motion token; zero-visual) | gate analyze+test+build | D |
+| 4 | `lib/theme/tokens.dart` · `lib/widgets/toast.dart` | toast `2s` → `BsTokens.toastDuration` (zero-visual) | gate | D |

@@ -27,6 +27,8 @@ class BsTokens {
   // Animation timing.
   static const Duration dialIn = Duration(milliseconds: 280);
   static const Duration ssubIn = Duration(milliseconds: 240);
+  static const Duration dialStaggerStep = Duration(milliseconds: 28); // per-row rise delay
+  static const Duration toastDuration = Duration(seconds: 2);
   static const Curve dialCurve = Cubic(0.2, 0.9, 0.3, 1.2);
 
   // Brand color (ported from --brand in tokens.css — orange used in Preact).

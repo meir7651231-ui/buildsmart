@@ -106,7 +106,7 @@ class DialColumn extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: BsTokens.space3),
             child: _StaggerIn(
-              delay: Duration(milliseconds: 28 * (reversed.length - 1 - i)),
+              delay: BsTokens.dialStaggerStep * (reversed.length - 1 - i),
               child: reversed[i],
             ),
           ),

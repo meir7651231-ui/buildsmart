@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// Toast helper — equivalent of app/src/store/toast-store.ts showToast().
 /// Brief, bottom-of-screen notification that fades on its own.
 void showToast(BuildContext context, String message,
-    {Duration duration = const Duration(seconds: 2)}) {
+    {Duration duration = BsTokens.toastDuration}) {
   final messenger = ScaffoldMessenger.maybeOf(context);
   if (messenger == null) return;
   messenger
