@@ -39,12 +39,127 @@ const List<String> kHuliotCategories = [
 ];
 
 // ── Image routing ─────────────────────────────────────────────────────────
-/// Per-page product photo. Returns the catalog page image as a fallback so
-/// every Huliot product has a visible front image (the catalog page shows
-/// the product photo + spec diagram for its row). Per-family crops will
-/// override this once cut from the PDF (protocol §17).
-String? _huliotImageFor(int page, String nameHe, String categoryHe) =>
-    'page_${page.toString().padLeft(2, '0')}.jpg';
+/// Per-family product photo, cropped from the catalog page's left photo
+/// column (protocol §17.1, mirrors polyroll `_pprPagePhoto`). Each page has
+/// 1-4 sections stacked top→bottom; we route by a distinguishing keyword in
+/// nameHe to the matching crop `sml_p{NN}_{a|b|c|d}.jpg`. Table-only rows
+/// (no left photo in the catalog) fall back to a sibling crop or the page.
+String _p(int page, String tag) => 'sml_p${page.toString().padLeft(2, '0')}_$tag.jpg';
+
+String? _huliotImageFor(int page, String nameHe, String categoryHe) {
+  bool has(String s) => nameHe.contains(s);
+  switch (page) {
+    case 11: // pipe (a) · cutter (b) · joker (c)
+      if (has('חותך')) return _p(11, 'b');
+      if (has('ג\'וקר')) return _p(11, 'c');
+      return _p(11, 'a');
+    case 12: // one-side elbow by angle: 15(a) 30(b) 45(c) 90(d)
+      if (has('15°')) return _p(12, 'a');
+      if (has('30°')) return _p(12, 'b');
+      if (has('45°')) return _p(12, 'c');
+      return _p(12, 'd');
+    case 13: // elbow 45(a) · 90(b) · reducing 90(c)
+      if (has('מצרה')) return _p(13, 'c');
+      if (has('90°')) return _p(13, 'b');
+      return _p(13, 'a');
+    case 14: // reducing-to-siphon (a) · reducing socket (b)
+      return has('לסיפון') ? _p(14, 'a') : _p(14, 'b');
+    case 15: // telescopic (a) · tel one-side (b) · tel-reducing one-side (c)
+      if (has('מצרה')) return _p(15, 'c');
+      if (has('צד אחד')) return _p(15, 'b');
+      return _p(15, 'a');
+    case 16: // tee 45 (a) · tee reducing 45 (b)
+      return has('מצרה') ? _p(16, 'b') : _p(16, 'a');
+    case 17: // tee 90 (a) · tee reducing 90 (b)
+      return has('מצרה') ? _p(17, 'b') : _p(17, 'a');
+    case 18: // double coupling (a) · reducer (b)
+      return has('מצמד') ? _p(18, 'a') : _p(18, 'b');
+    case 19: // gutter 70/40 (a) · 130 (b) · 230 (c)
+      if (has('130')) return _p(19, 'b');
+      if (has('230')) return _p(19, 'c');
+      return _p(19, 'a');
+    case 20: // drop gutter 50 (a) · 100 (b) · 110 (c)
+      if (has('100')) return _p(20, 'b');
+      if (has('110')) return _p(20, 'c');
+      return _p(20, 'a');
+    case 21: // closed drain 80/50 (a) · 140/50 (b) · 245/50 (c)
+      if (has('140')) return _p(21, 'b');
+      if (has('245')) return _p(21, 'c');
+      return _p(21, 'a');
+    case 22: // open drain 140 (a) · 245 (b)
+      return has('245') ? _p(22, 'b') : _p(22, 'a');
+    case 23: // kettle drain closed (a) · open (b)
+      return has('פתוח') ? _p(23, 'b') : _p(23, 'a');
+    case 24: // joker seal (a) · transfer seal (no photo→a) · joker nut (c) · plug (d)
+      if (has('פקק')) return _p(24, 'd');
+      if (has('אום')) return _p(24, 'c');
+      return _p(24, 'a'); // both seal types share the seal photo
+    case 25: // SmartLock nut (a) · reducer iron-plastic (no photo→reducer) · iron nut (c)
+      if (has('מעבר מברזל')) return _p(25, 'c');
+      if (has('מצרה')) return _p(18, 'b'); // table-only here → reuse reducer photo
+      return _p(25, 'a');
+    case 27: // AQUA SLIM — page is mostly tables + two renders; use page image
+      return 'page_27.jpg';
+    case 28: // raise square (a) · Top Floor (b) · cylindrical (c) · temp round (d)
+      if (has('Top Floor')) return _p(28, 'b');
+      if (has('גלילית')) return _p(28, 'c');
+      if (has('זמני')) return _p(28, 'd');
+      return _p(28, 'a');
+    case 29: // raised round (a) · fixed round (b) · sq external (c) · sq internal (d)
+      if (has('קבוע')) return _p(29, 'b');
+      if (has('חיצוני')) return _p(29, 'c');
+      if (has('פנימי')) return _p(29, 'd');
+      return _p(29, 'a');
+    case 30: // grid raised (a) · nickel (b) · round (c) · square (d)
+      if (has('ניקל')) return _p(30, 'b');
+      if (has('רבועה')) return _p(30, 'd');
+      if (has('עגולה')) return _p(30, 'c');
+      return _p(30, 'a');
+    case 31: // basin siphon (a) · +measure (b) · +AC (c)
+      if (has('מדידה')) return _p(31, 'b');
+      if (has('מזגן')) return _p(31, 'c');
+      return _p(31, 'a');
+    case 32: // no-siphon (a) · kitchen 2" (b) · kitchen+dishwasher (c)
+      if (has('ללא סיפון')) return _p(32, 'a');
+      if (has('כניסה')) return _p(32, 'c');
+      return _p(32, 'b');
+    case 33: // double 2-inlets (a) · double+side (b)
+      return has('מבוא צידי') ? _p(33, 'b') : _p(33, 'a');
+    case 34: // american 1¼ (a) · american 2" (b)
+      return has('2"') ? _p(34, 'b') : _p(34, 'a');
+    case 35: // american+dishwasher (a) · double american (b)
+      return has('כפול') ? _p(35, 'b') : _p(35, 'a');
+    case 36: // double+dishwasher (a) · H washing (b)
+      return has('H ') || has('מחסום H') ? _p(36, 'b') : _p(36, 'a');
+    case 37: // 1¼ washing (a) · 1½ overflow (b)
+      return has('הורקה') ? _p(37, 'b') : _p(37, 'a');
+    case 38: // 1½ J complete (a) · bathtub 2002 (b)
+      return has('2002') ? _p(38, 'b') : _p(38, 'a');
+    case 39: // short basin (a) · long basin (b) · rosette (c) · american inlet (d)
+      if (has('רוזטה')) return _p(39, 'c');
+      if (has('מבוא')) return _p(39, 'd');
+      if (has('ארוך')) return _p(39, 'b');
+      return _p(39, 'a');
+    case 40: // siphon kit (a) · slip pipe (b) · inlet extension (c)
+      if (has('זחיח')) return _p(40, 'b');
+      if (has('מאריך')) return _p(40, 'c');
+      return _p(40, 'a');
+    case 41: // long inlet (a) · inlet+AC (b) · american adapter (c)
+      if (has('מזגן')) return _p(41, 'b');
+      if (has('מתאם')) return _p(41, 'c');
+      return _p(41, 'a');
+    case 42: // dishwasher set (a) · funnel (b) · vent (c) · abik (d)
+      if (has('ונטיל')) return _p(42, 'c');
+      if (has('אביק')) return _p(42, 'd');
+      if (has('משפך')) return _p(42, 'b');
+      return _p(42, 'a');
+    case 43: // plugs (a) · plug set (b) · wrench (c)
+      if (has('מפתח')) return _p(43, 'c');
+      if (has('סט')) return _p(43, 'b');
+      return _p(43, 'a');
+  }
+  return 'page_${page.toString().padLeft(2, '0')}.jpg';
+}
 
 /// Per-product spec image (the diagram on the flip side). MVP returns null
 /// → the flip side falls back to the full catalog page. Per-family crops

@@ -162,6 +162,21 @@
   SmartBrand.sku is a real catalog SKU".
 - מסקנה: כיסוי 11 הכרטיסים מוגן (spot-check + ≥117 ממופים).
 
+## _huliotImageFor — per-family crop routing (lib/data/huliot_smartlock_catalog.dart) — 2026-06-01
+- **קובץ:** `lib/data/huliot_smartlock_catalog.dart:46`
+- **מה עושה:** switch פר-עמוד (11-43) שמנתב כל מוצר Huliot ל-crop פר-משפחה
+  `sml_p{NN}_{a|b|c|d}.jpg` לפי keyword ב-nameHe. החליף את ה-fallback של
+  עמוד-מוקטן (`page_NN.jpg`) ב-88 תמונות מוצר חתוכות (§17.1).
+- **בדיקה:** `test/spec_assets_test.dart §17.1-Huliot every product front
+  image exists + is a real crop` — מאמת (א) imageAsset קיים על דיסק; (ב) אינו
+  `/pages/page_` (פרט לעמ' 27 AQUA SLIM). סורק 170/170.
+- תקלה שהוזרקה: שינוי `case 11:` להחזיר `'page_11.jpg'` במקום `_p(11,'a')`.
+- תוצאה: §17.1-Huliot אדום ✅ — "still on whole-page fallback" עם 7 מוצרי
+  צינור (עמ' 11) שחזרו ל-page image.
+- שחזור: החזרת `_p(11,'a')`. הרצה חוזרת ירוקה ✅.
+- מסקנה: הבדיקה חזקה — תופסת כל regression לעמוד-מוקטן (הפרת §17.1). זו
+  בדיוק התלונה של המשתמש ("איפה תמונות לפי פרוטוקול") — עכשיו test-guarded.
+
 ## parseChips — Huliot vocab + parser-skip cosmetics (lib/data/chip_hierarchy.dart) — 2026-06-01
 - **קובץ:** `lib/data/chip_hierarchy.dart`
 - **מה השתנה:** (א) tokenizer מדלג על '-', '—', '/' (separators קוסמטיים).

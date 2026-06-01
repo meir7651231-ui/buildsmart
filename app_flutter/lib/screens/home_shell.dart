@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.67 · 1.6.33 · 🟢 חוליות — chips היררכיים (חיבור/צורה/תכונה/מידה) + תמונות מוצר · parseChips vocab +60 tokens · §21.B-Huliot ירוק (170/170 recoverable)',
+                          'v5.68 · 1.6.34 · 🟢 חוליות — 88 תמונות מוצר חתוכות פר-משפחה (§17.1) במקום עמוד מוקטן · _huliotImageFor routing פר-עמוד · §17.1-Huliot test ירוק',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

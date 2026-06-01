@@ -294,6 +294,20 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — 88 תמונות מוצר חתוכות פר-משפחה (v5.63 — 2026-06-01)
+- מענה לפידבק "איפה תמונות לפי פרוטוקול?": עמוד-מוקטן הוחלף ב-crops אמיתיים.
+- `scripts/crop_huliot.py` (one-off): חותך את עמודת-התצלום השמאלית (x=12-250)
+  של כל עמוד-מוצר ל-N בנדים (לפי מספר הסקשנים), `sml_p{NN}_{a|b|c|d}.jpg`.
+  88 קבצים ב-`assets/huliot_smartlock/products/`.
+- `lib/data/huliot_smartlock_catalog.dart::_huliotImageFor` — switch פר-עמוד
+  (11-43) שמנתב כל מוצר ל-crop שלו לפי keyword ב-nameHe (זווית/מידה/קטגוריה),
+  בדיוק כמו polyroll `_pprPagePhoto`. שורות table-only (אטם מעביר p24, מצרה
+  p25) ממחזרות crop של אח או מצמד. עמ' 27 (AQUA SLIM, render-on-table) =
+  page image לגיטימי.
+- Guard: `§17.1-Huliot every product front image exists + is a real crop` —
+  מאמת שכל imageAsset קיים על דיסק ו**אינו** page-fallback (פרט לעמ' 27).
+  זו ההגנה שמוודאת שלא נחזור לעמוד-מוקטן.
+
 ## Huliot SmartLock — chips היררכיים + תמונות (v5.62 — 2026-06-01)
 - `lib/screens/lipskey_products_screen.dart:1175` — Huliot מצטרף ל-Polyroll
   במסלול `_HierarchyChips` (היה `_NameWords` Lipskey-style). כל קלף Huliot

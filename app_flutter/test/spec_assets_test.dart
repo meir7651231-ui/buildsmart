@@ -492,6 +492,33 @@ void main() {
         reason: 'broken Huliot asset paths:\n${missing.take(12).join('\n')}');
   });
 
+  // §17.1-Huliot every product's FRONT image is a per-family crop that exists
+  // on disk (not the whole-page fallback). This is the protocol §17.1 contract:
+  // the card shows a cropped product photo, not a scaled-down catalog page.
+  // Pages with table-only rows may legitimately reuse a sibling crop; the only
+  // page-image fallback allowed is page 27 (AQUA SLIM, render-on-table layout).
+  test('§17.1-Huliot every product front image exists + is a real crop', () {
+    final missing = <String>[];
+    final pageFallback = <String>[];
+    for (final p in kHuliotCatalog) {
+      final a = p.imageAsset;
+      if (a == null) {
+        missing.add('${p.sku} → null imageAsset');
+        continue;
+      }
+      if (!File(a).existsSync()) missing.add('${p.sku} → $a (not on disk)');
+      // Whole-page fallback is only acceptable for AQUA SLIM (page 27).
+      if (a.contains('/pages/page_') && p.page != 27) {
+        pageFallback.add('${p.sku} "${p.nameHe}" → $a');
+      }
+    }
+    expect(missing, isEmpty,
+        reason: 'Huliot front-image crops missing:\n${missing.take(12).join('\n')}');
+    expect(pageFallback, isEmpty,
+        reason: 'Huliot products still on whole-page fallback (need a crop):\n'
+            '${pageFallback.take(12).join('\n')}');
+  });
+
   // §21.B-Huliot — STRONG recoverability via parseChips. Huliot now renders
   // via `_HierarchyChips` (same as Polyroll), so every word in nameHe must be
   // classifiable into the §21 hierarchy (type + level1..5) with NO leftover.
