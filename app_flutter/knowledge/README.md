@@ -93,6 +93,7 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 | File | Role |
 |---|---|
 | `POLISH_PROTOCOL.md` | the **ליטוש** (polish) agent protocol — UI feel + knowledge-base polish (Phase K) |
+| `POLISH_LOG.md` | ליטוש's before→after log for every UI polish change (Phases A–J) |
 | `LAUNCH_READINESS_PROTOCOL.md` | the **בנצי** (launch) agent protocol — store-readiness audit + submission package |
 | `SESSION_PLAN_TEMPLATE.md` | mandatory structure for `session_plan.md` (gates 21/22/106) |
 | `session_plan.md` | current-session artifact (ephemeral) |
