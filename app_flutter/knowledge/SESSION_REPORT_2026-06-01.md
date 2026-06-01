@@ -81,22 +81,28 @@
 
 ---
 
-### בנצי (משיק)
-**פרוטוקול-אב:** LAUNCH_READINESS_PROTOCOL (100 צעדים)
+### בנצי (משיק) — ✅ דוח התקבל 2026-06-02
+**פרוטוקול-אב:** LAUNCH_READINESS_PROTOCOL (+ POLISH לעבודת-המשקל)
 **מה בוצע:**
 - LAUNCH_READINESS.md — audit קריאה-בלבד (שלב A)
-- LAUNCH_PACKAGE/ — תוצרים: `SEND_TO_GOOGLE.md` · `data-safety.md` · `privacy-policy.md` · `release-notes-he.txt` · `store-listing/listing.md` · `image-cdn-setup.md`
+- LAUNCH_PACKAGE/ — `SEND_TO_GOOGLE.md` · `data-safety.md` · `privacy-policy.md` · `release-notes-he.txt` · `store-listing/listing.md` · `image-cdn-setup.md`
 - Signed-AAB pipeline ב-CI (`1913191`)
+- **תשתית-תמונות (image-CDN):** `product_images.dart` — `productImageUrl` טהורה + LRU ≤700 + `cached_network_image`. מיגרציה 15 `Image.asset`→`productImage` ב-4 מסכים.
+- **AAB: 141.6MB → 68.2MB (−52%)** באיכות מלאה (R2 במקום דחיסה).
+- `product_images_test` (4) · mutation-verified ×2 · 1001 טסטים ✅
 
-**עצר בשלב 96 — חסמי-משתמש:**
+**✅ הציל עבודה — תפס באג בפרוטוקול שלי:** סירב להריץ `git reset --hard` כי
+זיהה commit פעיל + עבודה לא-דחופה. **צדק.** → תוקן (לקח #63, ראה למטה).
+
+**עצר — חסמי-משתמש:**
 | חסם | מה נדרש ממך |
 |-----|------------|
-| Keystore | קובץ `.jks` + סיסמה → ל-GitHub Secret |
-| Application ID | `com.something.buildsmart` |
-| Play Console account | חשבון מפתח (25$ חד-פעמי) |
-| Privacy Policy URL | קישור לדף פרטיות |
+| 🔴 R2 token נחשף בצ'אט | **בטל ב-Cloudflare עכשיו** |
+| Keystore + App ID | `.jks`+סיסמה → GitHub Secret · `com.x.buildsmart` |
+| Play Console | חשבון מפתח (25$) + אירוח privacy-policy |
+| העלאת תמונות ל-R2 | המשתמש מריץ `upload-images-to-r2.ps1` |
 
-**commit אחרון:** `1913191` · **דוח:** ⬜ ממתין לדוח רשמי
+**commit אחרון:** `1913191` (מיגרציה בתהליך-דחיפה) · **דוח:** ✅ התקבל
 
 ---
 
@@ -122,9 +128,11 @@
 
 | # | חסם | מי מחכה | מה נדרש |
 |---|-----|---------|---------|
+| **🔴 C0** | **R2 token נחשף בצ'אט** | אבטחה | **בטל ב-Cloudflare R2 → API Tokens → Revoke. עכשיו.** |
 | **C1** | I6 — מי לוקח `lipskey_products_screen.dart` | מקבץ | החלטה: מקבץ או קטלגן? |
 | **C2** | Keystore + App ID + Play Console | בנצי | אספקת 4 הפרטים (ראה טבלה למעלה) |
 | **C3** | עדכון טסטים DepartmentsScreen (13 כושלים) | ליטוש | SHA מ-ליטוש אחרי דחיפה |
+| **C4** | מיגרציית-תמונות של בנצי על ענף נפרד | בנצי | מיזוג ל-branch ראשי אחרי שהפיצול יתיישב |
 
 ---
 
@@ -137,7 +145,8 @@
 | שער 112 | `.githooks/pre-commit` | stubs ישנים נשחקו חזרה לתוכן — עכשיו נאכף מכונית |
 | R1-R9 הוסרו מ-CLAUDE.md | CLAUDE.md | R חזר לכל סשן ו"זיהם" פרוטוקולים חדשים |
 | VERIFICATION_PROTOCOL.md | knowledge/ | 4 מסמכי-בדיקה מפוזרים → סמכות-יחידה |
-| CARRY_FORWARD #57–62 | CARRY_FORWARD.md | לקחים מהסשן לסוכנים הבאים |
+| **🔧 יישור-ענף בטוח** (תיקון `reset --hard`) | AGENT_COORDINATION + POLISH + LAUNCH | **בנצי תפס:** reset עיוור מוחק commits לא-דחופים. הוחלף ב-`merge --ff-only` אחרי בדיקת-ahead (לקח #63) |
+| CARRY_FORWARD #57–63 | CARRY_FORWARD.md | לקחים מהסשן לסוכנים הבאים |
 
 ---
 

@@ -88,7 +88,7 @@ git commit -m "..."
 | קטלגן | ✅ פעיל — קטלוג חוליות (170 מוצרים, v5.54) | 2026-06-01 | ⬜ ממתין לדוח |
 | סדרן | 🟦 ממתין | — | ⬜ ממתין לדוח |
 | מקבץ (Finder) | ✅ פעיל — IMPROVEMENTS 9/10 · 948 טסטים · gh-pages חי (v5.62) | 2026-06-01 | ✅ דוח התקבל (`9103878`) |
-| בנצי (משיק) | ✅ פעיל — `LAUNCH_PACKAGE` + signed-AAB (v5.61) | 2026-06-01 | ⬜ ממתין לדוח |
+| בנצי (משיק) | ✅ פעיל — LAUNCH_PACKAGE + AAB 68.2MB (−52%) + image-CDN | 2026-06-02 | ✅ דוח התקבל (`1913191` + מיגרציה) |
 | ליטוש | ✅ פעיל — פאזה K הושלמה (76/76) | 2026-06-01 | ⬜ ממתין לדוח |
 
 > **⬜ ממתין לדוח** = הסוכן עבד אבל טרם הגיש דוח-ביצוע בפורמט למעלה. עדכן ל-✅
@@ -176,17 +176,36 @@ git push -u origin claude/whats-happening-LyY9G
 
 ---
 
-## ⚠️ צעד-פתיחה לכל סשן — יישור-ענף (חובה, לפני כל עבודה)
+## ⚠️ צעד-פתיחה לכל סשן — יישור-ענף **בטוח** (חובה, לפני כל עבודה)
 
-> נוסף אחרי שסוכן נפתח על ענף ישן/אחר וחשב שמסמכי-ליבה "חסרים" — בעוד הם
-> היו על הענף הנכון ב-commit מאוחר יותר. **אל תניח "אותו commit" — אמת.**
+> נוסף אחרי שסוכן נפתח על ענף ישן/אחר וחשב שמסמכי-ליבה "חסרים".
+> **עודכן (לקח #63):** הגרסה הישנה אמרה `git reset --hard` עיוור — זה **footgun**
+> בסביבת ריבוי-סוכנים: הוא **מוחק commits מקומיים לא-דחופים** ועבודה ב-staging.
+> בנצי תפס את זה נכון ועצר. **לעולם לא `reset --hard` בלי לבדוק קודם.**
 
 ```bash
+# 0. אם יש commit פעיל (hook רץ) — אל תיגע ב-git עד שיסתיים
+[[ -f .git/index.lock ]] && { echo "⛔ commit פעיל — המתן"; exit; }
+
+# 1. הבא את מצב הרימוט (לא משנה כלום מקומית)
 git fetch origin claude/whats-happening-LyY9G
-git checkout claude/whats-happening-LyY9G            # אם אתה על ענף אחר
-git reset --hard origin/claude/whats-happening-LyY9G # יישר לראש הרימוט
-git rev-parse --short HEAD                            # אמת שזה ה-SHA של הרימוט
+
+# 2. בדוק לפני שאתה משנה — שלושה תנאים
+git status --short                                              # נקי?
+git rev-list --left-right --count origin/claude/whats-happening-LyY9G...HEAD
+#   פלט "<behind> <ahead>". ahead>0 = יש לך commits לא-דחופים!
+
+# 3. החלט לפי המצב:
+#   • נקי + ahead=0          → git merge --ff-only origin/...  (fast-forward, אפס אובדן)
+#   • ahead>0 (לא-דחוף)      → ⛔ עצור. דחוף קודם (באישור) או שמור. אל תאפס.
+#   • dirty (שינויים)        → commit/stash קודם. אל תאפס.
+#   • ענף אחר לגמרי          → git checkout claude/whats-happening-LyY9G ואז שלב 2
+
+git rev-parse --short HEAD                                      # אמת SHA מול הרימוט
 ```
+
+**`reset --hard` מותר רק** כשאימתת ידנית `ahead=0` **וגם** tree נקי — ואז ממילא
+`merge --ff-only` עושה את אותו דבר בלי סיכון. בספק — אל תאפס; דחוף/שמור והתייעץ.
 
 - **"קובץ חסר"?** בדוק `git ls-tree -r origin/claude/whats-happening-LyY9G | grep <name>`
   לפני שמכריזים על חוסר — לא רק את ה-working-tree המקומי.
@@ -196,7 +215,7 @@ git rev-parse --short HEAD                            # אמת שזה ה-SHA ש�
 ## כלל זהב
 
 **כל סוכן עובד על ענף `claude/whats-happening-LyY9G`.**
-**תחילת סשן:** יישור-ענף (למעלה) — fetch + checkout + אימות SHA, לפני כל עבודה.
+**תחילת סשן:** יישור-ענף **בטוח** (למעלה) — fetch + בדיקת-ahead + ff-only, **לא** reset עיוור.
 לפני כל commit: `flutter analyze` (0 errors) + `flutter test` (0 failures).
 לפני כל push: `git pull --rebase` (ראה נוהל Push & Sync למעלה).
 שערי ה-hook אוכפים אוטומטית — אין עקיפה.
