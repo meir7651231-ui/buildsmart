@@ -382,7 +382,12 @@ HARD_ALIGN=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -E "TextAlign
 [[ -z "$HARD_ALIGN" ]] || warn "63" "TextAlign.left/right — השתמש ב-start/end"
 
 # שער 64: אין emoji המצאה (לא קיים בlegacy)
-NEW_EMOJI=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -oE "[🎯🎨🎮🎪🎲]" | head -1)
+# תיקון לקח #52: emoji-match ב-bash builtin (לא grep חיצוני) — git מחליף את ה-grep
+# binary ב-invocation של ה-hook ⇒ grep emoji נכשל בשקט (false-negative). case=עקבי.
+NEW_EMOJI=""
+while IFS= read -r _l; do
+    case "$_l" in "+"*) case "$_l" in *🎯*|*🎨*|*🎮*|*🎪*|*🎲*) NEW_EMOJI=1; break;; esac;; esac
+done < <(git diff --cached lib/ 2>/dev/null)
 [[ -z "$NEW_EMOJI" ]] || warn "64" "emoji חדש — וודא verbatim מהלגאסי"
 
 # שער 65: אין Direction.ltr ב-Hebrew
@@ -546,7 +551,11 @@ fi
 
 # שער 93: ROADMAP עודכן אם השלמת צעד
 if [[ -n "$STAGED_LIB" ]]; then
-    ROADMAP_DIFF=$(git diff --cached knowledge/SMARTPRODUCT_ROADMAP.md 2>/dev/null | grep "^+" | grep -E "^\+.*✅" | head -1)
+    # תיקון לקח #52: emoji ✅ ב-bash builtin, לא grep חיצוני (אותו class כמו 23/64).
+    ROADMAP_DIFF=""
+    while IFS= read -r _l; do
+        case "$_l" in "+"*) case "$_l" in *✅*) ROADMAP_DIFF=1; break;; esac;; esac
+    done < <(git diff --cached knowledge/SMARTPRODUCT_ROADMAP.md 2>/dev/null)
     [[ -n "$ROADMAP_DIFF" || -n "$STAGED_KNOWLEDGE" ]] || warn "93" "ROADMAP לא עודכן עם ✅"
 fi
 

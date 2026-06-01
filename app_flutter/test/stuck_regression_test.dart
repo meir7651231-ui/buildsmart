@@ -787,7 +787,7 @@ void main() {
         return;
       }
       final matches = <String>[];
-      final re = RegExp(r'''grep -a[qc]*F? "(🟦|✅|⬜)"''');
+      final re = RegExp(r'''grep [^|#]*(🟦|✅|⬜|🎯|🎨|🎮|🎪|🎲)''');
       final lines = hook.readAsStringSync().split('\n');
       for (final line in lines) {
         // התעלם משורות הערה (מתחילות ב-# אחרי whitespace) — תיעוד התיקון מותר.

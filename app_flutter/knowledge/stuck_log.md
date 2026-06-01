@@ -663,8 +663,8 @@ RULE: case kPprPipesAC חייב להחזיר spec_pprct_pipe (כחול) — לא
 byte-match עקבי בכל סביבה, ללא תלות ב-binary/PATH/locale.
 
 ### ג — כלל המניעה
-ANTIPATTERN[hook]: grep -a[qc]*F? "(🟦|✅|⬜)"
-RULE: emoji/multibyte-match ב-hook = bash case/glob builtin בלבד — לעולם לא grep חיצוני (אפילו -aF). git מחליף את ה-grep binary ב-invocation, כך ש-standalone-pass לא מבטיח commit-pass.
+ANTIPATTERN[hook]: grep [^|#]*(🟦|✅|⬜|🎯|🎨|🎮|🎪|🎲)
+RULE: emoji/multibyte-match ב-hook = bash case/glob builtin בלבד — לעולם לא grep חיצוני (אפילו -aF / -oE / charclass). git מחליף את ה-grep binary ב-invocation, כך ש-standalone-pass לא מבטיח commit-pass. חל על שערים 23/64/93/109 — כולם הומרו ל-builtin.
 
 ---
 

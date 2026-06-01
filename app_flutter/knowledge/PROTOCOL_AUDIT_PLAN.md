@@ -183,3 +183,24 @@
 | — | "כפילות gate-32 ב-stuck_log" | ✅ false positive | 3 באגים נפרדים (exit-code · compact · baseline) |
 
 **אודיט הושלם — 100 צעדים. כל ה-❌ תוקנו או סווגו כ-false-positive.**
+
+## ממצאים שתוקנו — סבב 2 (תיקוני סוכנים + הקשחה פרואקטיבית 2026-06-01)
+
+| # | ממצא | חומרה | תיקון |
+|---|------|-------|-------|
+| 11 | שער 23/109 — `grep -aqF "🟦"` נכשל תחת git-commit (git מחליף grep binary), עובר standalone | 🔴 חוסם סוכן | bash `case`/glob builtin · לקח #52 (מאחד 45/51/52) |
+| 12 | שער 24 (WIRING) — דווח כבאג, בפועל by-design + WIRING ב-app_flutter/ לא knowledge/ | ✅ false positive | הובהר ב-AGENT_COORDINATION |
+| 13 | שערים 64/93 — emoji-grep חיצוני (אותו class כמו 23) → false-negative בשקט | 🟡 הקשחה | הומרו ל-bash builtin פרואקטיבית · לקח #52 |
+
+### 🔭 Watch-list — greps על Hebrew-pattern (לא אומת, לא דווח — להמיר רק על דיווח)
+
+לקח #52 אומת רק על **emoji 4-byte**. ה-greps הבאים מתאימים ל-**Hebrew 2-byte**
+patterns — אותו class *פוטנציאלי* אך **אין ראיה** שהם נכשלים, ולכן **לא** הומרו
+(לקח #39 — לא מתקנים ספקולטיבית). אם סוכן מדווח שאחד מהם נכשל תחת git-commit →
+המר ל-bash builtin מיד:
+
+| שורה | שער | pattern |
+|------|-----|---------|
+| 152 | 22 | `grep -q "<!-- לדוגמה:"` (session_plan template) |
+| 397 | — | `grep -E "['\"][א-ת]..."` (Hebrew string ב-app/) |
+| 561 | — | `grep -oE "[א-ת]+ [0-9]+×[0-9]+"` (Hebrew dimension) |
