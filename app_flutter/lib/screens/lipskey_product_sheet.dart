@@ -1762,6 +1762,9 @@ class _QuickInfoStripsState extends State<_QuickInfoStrips> {
         _StripDef(
           kind: _StripKind.finder,
           emoji: finder.emoji,
+          // finder.emoji is a plumbing glyph (🚰🚽🕳️…) canvaskit can't draw —
+          // render a "finder" Material icon instead (see I1-followup).
+          icon: Icons.travel_explore,
           label: 'נמצא ב',
           value: finder.label,
           tint: const Color(0xFF3DD9B0),
@@ -1878,12 +1881,17 @@ class _StripDef {
     required this.label,
     required this.value,
     required this.tint,
+    this.icon,
   });
   final _StripKind kind;
   final String emoji;
   final String label;
   final String value;
   final Color tint;
+  // When set, the strip renders this Material icon instead of [emoji] — used
+  // where the emoji is a glyph canvaskit's bundled font can't draw (e.g. the
+  // finder group emoji 🚰🚽🕳️, which showed as an empty box).
+  final IconData? icon;
 }
 
 class _StripRow extends StatefulWidget {
@@ -1930,7 +1938,9 @@ class _StripRowState extends State<_StripRow> {
                 borderRadius: BorderRadius.circular(8),
               ),
               alignment: Alignment.center,
-              child: Text(d.emoji, style: const TextStyle(fontSize: 15)),
+              child: d.icon != null
+                  ? Icon(d.icon, size: 16, color: d.tint)
+                  : Text(d.emoji, style: const TextStyle(fontSize: 15)),
             ),
             const SizedBox(width: 10),
             Text(

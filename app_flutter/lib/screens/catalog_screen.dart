@@ -4930,7 +4930,9 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             return catRow('עמידות', '$stars · ${d.reason}');
                           }),
                         if (expert && finder != null)
-                          catRow('מאתר', '${finder.emoji} ${finder.label}'),
+                          // finder.emoji is a plumbing glyph canvaskit can't
+                          // draw (empty box) — show just the label (I1-fu).
+                          catRow('מאתר', finder.label),
                         if (expert && kit != null)
                           catRow('ערכת התקנה',
                               '${kit.must} חובה · ${kit.optional} אופ׳ · ${kit.tools} כלים'),
