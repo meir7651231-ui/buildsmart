@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.65 · 1.6.32 · 📦 אפליקציה קלה — תמונות-מוצר מהענן (R2): AAB 141→68MB, איכות מלאה',
+                          'v5.66 · 1.6.32 · 🟢 דלוחין SmartLock — קבוצת בית ייעודית (170 מוצרים) · ניקוז 168→150 (סיפוני Huliot עברו לקבוצה החדשה)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

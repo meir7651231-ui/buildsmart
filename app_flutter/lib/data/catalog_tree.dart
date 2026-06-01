@@ -1168,7 +1168,7 @@ const List<CatalogNode> kCatalogTree = [
         title: 'סיפונים',
         emoji: '🚰',
         brandIds: ['huliot'],
-        lipskeyCategory: 'סיפונים',
+        lipskeyCategory: 'סיפונים SmartLock',
       ),
     ],
   ),

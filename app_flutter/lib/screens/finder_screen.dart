@@ -3,6 +3,7 @@
 // questions a layman can answer: מה זה (a plain-language type — not the plumber
 // taxonomy) and איזה גודל (a size read off their list). Results render through
 // the shared LipskeyProductsList so cards behave like the rest of the catalog.
+import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/screens/_size_norm.dart';
@@ -74,6 +75,13 @@ const List<FinderGroup> kFinderGroups = [
     'פקקים PPR', 'אומגה PPR', 'ברזים PPR', 'צווארונים ואוגנים PPR',
     'אביזרי ריתוך חשמלי PPR', 'כלי ריתוך PPR',
   }, desc: 'מערכת צנרת PPR לאספקת מים ומיזוג — פולירול',),
+  FinderGroup('🟢', 'דלוחין SmartLock', {
+    kSmlPipes, kSmlCutters, kSmlJoker,
+    kSmlElbowOneSide, kSmlElbow, kSmlElbowReducing, kSmlElbowTelescopic,
+    kSmlTee, kSmlDoubleCoupling, kSmlReducer,
+    kSmlGutters, kSmlFloorDrains, kSmlAccessories, kSmlNuts,
+    kSmlAquaSlim, kSmlCovers, kSmlSiphons,
+  }, desc: 'מערכת דלוחין SmartLock מפוליפרופילן 32-63 מ"מ — חוליות',),
   FinderGroup('🔧', 'אחר', {}, desc: 'כל שאר המוצרים בקטלוג'), // catch-all
 ];
 
@@ -93,6 +101,7 @@ const Map<String, IconData> kFinderGroupIcons = {
   'מחברים וחיבורים': Icons.link,
   'חבקים ותלייה': Icons.hardware,
   'צנרת PPR': Icons.trip_origin,
+  'דלוחין SmartLock': Icons.water_damage,
   'אחר': Icons.category,
 };
 
@@ -114,6 +123,7 @@ const Map<String, String> kFinderGroupImage = {
   'מחברים וחיבורים': 'connectors',
   'חבקים ותלייה': 'clamps',
   'צנרת PPR': 'ppr',
+  'דלוחין SmartLock': 'smartlock',
   'אחר': 'other',
 };
 

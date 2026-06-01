@@ -294,6 +294,20 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — קבוצת בית ייעודית (v5.61 — 2026-06-01)
+- `lib/screens/finder_screen.dart`:
+  - `kFinderGroups` += `FinderGroup('🟢', 'דלוחין SmartLock', {kSml* ×17})` —
+    מוצב בין "צנרת PPR" (פולירול) ל-"אחר" (catch-all).
+  - `kFinderGroupIcons` += `'דלוחין SmartLock': Icons.water_damage` (Material).
+  - `kFinderGroupImage` += `'דלוחין SmartLock': 'smartlock'` — תמונה
+    `assets/lipskey/categories/smartlock.png`.
+- `lib/data/huliot_smartlock_catalog.dart`:
+  - `kSmlSiphons = 'סיפונים SmartLock'` (היה 'סיפונים' — התנגש עם קבוצת
+    'ניקוז' שכבר כוללת את 'סיפונים' של Lipskey/Aquatec). הקבוצות עכשיו
+    pairwise-disjoint (wiring_test).
+- `lib/data/catalog_tree.dart`: `sml.siphons.lipskeyCategory` עודכן בהתאם.
+- אפקט: ניקוז יצא 168→150 (18 סיפוני Huliot עברו לקבוצה החדשה).
+
 ## Huliot SmartLock catalog ingestion (v5.59-60 — 2026-06-01)
 
 ### Catalog tree leaves (sml.*)

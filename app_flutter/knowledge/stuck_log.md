@@ -1062,3 +1062,25 @@ ANTIPATTERN: known-failing.*product_images
 RULE: כשל בשער 32 על קובץ שאינו שלך — בדוק ב-`git ls-files` אם הוא untracked/לא-שלך.
 אם כן: אל תתקן את הבדיקה שלו, אל תוסיף אותה ל-known_failing/STATUS, ואל תזיז/תמחק
 קבצי-WIP שלו. המתן שהבדיקה תוריק ואז retry. רק בדיקות *שלך* מצדיקות תיקון/baseline.
+## 2026-06-01 · קטלוג חדש לא הופיע במסך הבית — קבוצת finder חסרה (קטלגן)
+### א — הבעיה
+אחרי קליטת 170 מוצרי Huliot SmartLock ל-`kCatalogProducts` + `kCatalogTree`
+(sml root), המוצרים לא הופיעו כקבוצה ייעודית במסך "בית" של ה-finder. המשתמש
+בדק: "אין במסך הבית חוליות". `kCatalogTree.sml` בלבד לא מספיק —
+`finder_screen.dart` משתמש ב-`kFinderGroups` (רשימה נפרדת של home groups).
+Polyroll קיבל group ייעודי ('🔵 צנרת PPR') כשהוטמע; חוליות חסר אותו צעד.
+### ב — הפתרון
+1. הוספת `FinderGroup('🟢', 'דלוחין SmartLock', {kSml*17})` אחרי 'צנרת PPR'.
+2. בעת ההוספה התגלה שה-test `wiring_test pairwise disjoint` נפל: `kSmlSiphons
+   = 'סיפונים'` התנגש עם קטגוריית 'סיפונים' של Lipskey/Aquatec בקבוצת 'ניקוז'.
+   עדכנתי `kSmlSiphons = 'סיפונים SmartLock'`. 18 סיפוני Huliot עברו אוטומטית
+   מ-ניקוז (168→150) לקבוצה החדשה.
+3. נוסף `assets/lipskey/categories/smartlock.png` + Material icon לדרישת
+   `finder_group_icons_test`.
+### ג — כלל המניעה
+ANTIPATTERN: kFinderGroups\s*=\s*\[[^]]*'צנרת PPR'[^]]*'אחר'
+RULE: קטלוג חדש שמתווסף ל-finder.home דורש 3 צעדים נוספים מעבר ל-Catalog
+tree: (1) FinderGroup ב-`kFinderGroups`; (2) קטגוריות שמתחלקות עם finder
+groups קיימים — להוסיף suffix ייחודי (למשל ' SmartLock') כדי לעמוד ב-
+pairwise disjoint; (3) הקבוצה דורשת Material icon + תמונת 3D ייחודית
+(`kFinderGroupIcons` + `kFinderGroupImage` + קובץ ב-`assets/lipskey/categories/`).

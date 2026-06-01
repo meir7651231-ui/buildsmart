@@ -28,7 +28,7 @@ const String kSmlAccessories = 'אביזרים משלימים';
 const String kSmlNuts = 'אום SmartLock';
 const String kSmlAquaSlim = 'מאסף קווי AQUA SLIM';
 const String kSmlCovers = 'מכסים, הגבהות ורשתות';
-const String kSmlSiphons = 'סיפונים';
+const String kSmlSiphons = 'סיפונים SmartLock';
 
 const List<String> kHuliotCategories = [
   kSmlPipes, kSmlCutters, kSmlJoker,

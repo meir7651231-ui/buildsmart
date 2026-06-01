@@ -161,3 +161,22 @@
 - תוצאה: 2 בדיקות אדומות ✅ — "Huliot … wired into the smart-tree" + "every
   SmartBrand.sku is a real catalog SKU".
 - מסקנה: כיסוי 11 הכרטיסים מוגן (spot-check + ≥117 ממופים).
+
+## FinderGroup 'דלוחין SmartLock' — finder_screen.dart — 2026-06-01
+- **קובץ:** `lib/screens/finder_screen.dart:71` (אחרי 'צנרת PPR')
+- **מה עושה:** קבוצת home שמאחדת 17 קטגוריות kSml* תחת label אחד
+  ("🟢 דלוחין SmartLock"); 170 מוצרי Huliot נספרים תחתיה במסך הבית.
+- **בדיקה:**
+  - `test/wiring_test.dart` "named groups are pairwise disjoint" — מאמת
+    שאין קטגוריה משותפת לשתי קבוצות. תפס שה-'סיפונים' הופיע גם בניקוז וגם
+    ב-SmartLock; כשעדכנתי `kSmlSiphons = 'סיפונים SmartLock'`, הבדיקה עברה ירוק.
+  - `test/finder_group_icons_test.dart` "every group has dedicated icon/image" —
+    מאמת שלכל קבוצה יש Material icon ייעודי + תמונה ייעודית.
+- תקלה שהוזרקה: החזרת `kSmlSiphons = 'סיפונים'` (הערך הקודם).
+- תוצאה: שני בדיקות אדומות ✅ — `pairwise disjoint` שיכפל את 'סיפונים'
+  בין ניקוז ו-SmartLock; `paranoid 12-check` לא נפגע (catRoot mapping של
+  הבדיקה מסתמך על categoryHe).
+- שחזור: החזרת `'סיפונים SmartLock'`. הרצה חוזרת ירוקה ✅.
+- מסקנה: הבדיקה חזקה — תופסת collision של category-set בין שתי קבוצות
+  finder. זו ההגנה היחידה שמבטיחה ש-finder.home לא מציג מוצר באותו פעם
+  באף one of two distinct groups (UX duplicate).
