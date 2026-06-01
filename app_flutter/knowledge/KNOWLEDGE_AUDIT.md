@@ -188,3 +188,39 @@
 1. verdict ל-32 מסמכי תת-תיקייה (`port/`/`spec/`/`adr/`/`inspections/`) — צפי keep (עוגנים/אפיון).
 2. יישום לקח-המתודולוגיה: סיווג עקבי ומאומת-מקור של 15 מסמכי-ה-consolidation של MASTER.
 3. K9 (בניית README index) — לאחר GO + הכרעת יחס MASTER↔granular.
+
+---
+
+## סבב 3 — תת-תיקיות (בוצע · 2026-06-01 · source-grounded)
+
+> יישום לקח-המתודולוגיה מסבב 2: כל verdict מאומת בקריאה ישירה של ה-README של תת-התיקייה
+> (לא הנחה). **verdict-only — 0 פעולות.**
+
+### K1 — מצאי תת-תיקיות (32 מסמכים · ~10,000 שורות)
+- `port/` (19) — ידע-הטמעה: עוגני-המקור (`proto/` = הפרוטוטייפ, `preact/` = התרגום-ל-dial),
+  `design-system`, `COVERAGE`. אינדקס פנימי: `port/README.md`. (עוגן §3 בפרוטוקול-הליטוש.)
+- `spec/` (9) — אפיון פורמלי מסך-אחר-מסך (10 סעיפים, R8). אינדקס פנימי: `spec/README.md`.
+- `adr/` (3) — Architecture Decision Records (ADR-001 No-Window · ADR-002 Dial). אינדקס: `adr/README.md`.
+- `inspections/` (1) — README בלבד (אין עדיין ביקורות Flutter; הלגאסי ב-`port/preact/05`).
+
+### K3+K4 — verdict
+**כל 32 — ✅ keep-canonical.** אפס כפילות, אפס מסמך-מת. כל אשכול מאונדקס פנימית ב-README שלו.
+
+| אשכול | verdict | אינדקס מ-top-level? |
+|------|---------|---------------------|
+| `port/*` (19) | ✅ keep — עוגן-מקור לפאריטי | 🟡 עקיף (דרך `PARITY.md`), לא ישיר |
+| `spec/*` (9) | ✅ keep — אפיון פורמלי | ✅ כן (README שורה 17) |
+| `adr/*` (3) | ✅ keep — החלטות-אדריכלות | ❌ לא |
+| `inspections/README` (1) | ✅ keep — שלד-ארכיון | ❌ לא |
+
+### ⚠️ תלות שהתגלתה (source-grounding תפס) — נוגעת ל-SUBMIT של `PROTOCOL.md`
+`adr/README.md` ו-`inspections/README.md` מפנים ל-**`PROTOCOL.md` חלק 5/8** (תבנית-ADR · תהליך-ביקורת).
+מסקנה: אם PROTOCOL.md יקבל deprecate — ה-stub **חייב** לשמר נגישות לחלקים 5/8 (או להפנותם ל-MASTER),
+אחרת שתי ההפניות יישברו. מחזק את הכלל: **deprecate-stub-עם-הפניה, לא מחיקה.** (טרם בוצע — SUBMIT.)
+
+### K9 — פערי-אינדקס top-level שנותרו (להשלמה לאחר GO)
+README מאנדקס רק `spec/`. חסרים מצביעים ל-`port/` (או הבהרה ש-`PARITY.md` מכסה) · `adr/` · `inspections/`.
+
+**סיכום סבב 3:** 32 keep-canonical · 0 פעולות · גילוי-תלות אחד (adr/inspections → `PROTOCOL.md` חלק 5/8).
+**כיסוי-אודיט מצטבר: 76/76 מסמכים קיבלו verdict** (44 top-level [סבב 2] + 32 תת-תיקייה [סבב 3]).
+פעולות עדיין ממתינות לאישור: deprecate ל-PROTOCOL · K9 (אינדקס) · drift-guard ל-MASTER.
