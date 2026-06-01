@@ -46,6 +46,17 @@
 - **B** layout/spacing · **C** color/contrast · **D** motion-static · **E** states · **F** RTL-render —
   כולם ניתנים עכשיו ל-before/after אמיתי. (אנק׳ור: השוואה ל-`proto/` + Preact `app/`.)
 
+## פאזה B/C — השוואה ראשונה לעוגן proto (2026-06-01, capture עובד)
+> Flutter בית (`/tmp/polish/verify.png`) מול proto `index.html` (`/tmp/polish/proto.png`).
+- **proto פותח ב-onboarding/login** ("כניסה ללקוח קיים" / "המשך ללא רישום"); Flutter פותח ישר בקטלוג
+  → פער-**parity** (מקבץ/feature), לא ליטוש.
+- **brand teal↔orange:** ה-proto teal הוא **stale** — Preact (reference חי) + המוצר = כתום מכוון. **❌ לא לשנות.**
+- **frosted-glass header:** ל-proto יש header עם gradient/זכוכית-מוטשטשת; ל-Flutter header שטוח. מסומן
+  ב-`port/design-system.md` כ"חסר". מועמד-ליטוש אמיתי (Phase C) — אבל ב-`lib/screens` = טריטוריית מקבץ +
+  שינוי-design → **SUBMIT** (אישור/תיאום).
+- **לקח:** הפערים הגדולים הם design-authority/parity/lib-screens — **לא ליטוש חד-צדדי בנתיב שלי.**
+  ליטוש-נתיב-שלי (widgets/theme/dial) דורש השוואה אפל-לאפל עמוקה יותר (לנווט שתי האפליקציות לאותו מסך).
+
 ## תיאום (בעלות — AGENT_COORDINATION)
 - `dial.dart`/`tokens.dart` = `lib/widgets`/`theme` → **נתיב ליטוש** ✅.
 - `*_dial_widget.dart` = `lib/screens` → תיאום מקבץ/סדרן לפני נגיעה.
