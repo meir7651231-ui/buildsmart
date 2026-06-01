@@ -568,3 +568,19 @@ gate 32 שונה ל-baseline tracking: חוסם רק אם `FAIL_COUNT > known-fa
 ### ג — כלל המניעה
 ANTIPATTERN: err.*32.*exit=\$TEST_EXIT.*תקן את הבדיקות
 RULE: gate 32 חייב לבדוק baseline מ-STATUS.md (known-failing: N) — לא לחסום על pre-existing failures שקיימות ב-origin.
+
+
+---
+
+## 2026-05-31 · gate 102 · p80 misrouted blue PPRCT pipes to green PPR spec
+
+### א — הבעיה
+`kPprPipesAC` (page 80 AQUATHERM blue pipes) ניתב 16 מוצרים ל-`spec_faser_20.jpg` (חתך-רוחב PPR ירוק). הקטלוג עצמו מציג צילום כחול חד-משמעי — אלה צינורות PPRCT. ה-spec הירוק היה חזותית שגוי לכל 16 המוצרים.
+
+### ב — הפתרון
+`case kPprPipesAC` ב-`_pprSpecFor` שונה להחזיר `spec_pprct_pipe.jpg` (חתך כחול, אותה משפחה כמו p86 PPRCT fiber).
+
+### ג — כלל המניעה
+ANTIPATTERN: case kPpr[A-Z][a-z]+:\s*\n\s*case kPpr[A-Z][a-z]+:\s*\n\s*return \[.spec_faser_20
+RULE: case kPprPipesAC חייב להחזיר spec_pprct_pipe (כחול) — לא spec_faser_20 (ירוק). חיבור case-fall-through מסתיר שגיאות צבע. הפרד לכל case בנפרד.
+

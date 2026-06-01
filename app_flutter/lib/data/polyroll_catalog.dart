@@ -544,9 +544,12 @@ List<String>? _pprSpecFor(String categoryHe, String nameHe, int page) {
       }
       return ['spec_faser_20.jpg'];
     case kPprPipesSupply:
-    case kPprPipesAC:
-      // Generic pipe cross-section serves the rest.
+      // Generic pipe cross-section serves p18 + supply water pipes.
       return ['spec_faser_20.jpg'];
+    case kPprPipesAC:
+      // p80 = AQUATHERM blue pipe (PPRCT). Uses the PPRCT cross-section, not
+      // the green PPR one. R8: catalog photo is unambiguously blue.
+      return ['spec_pprct_pipe.jpg'];
     case kPprElectrofusion:
       // §22.D p33 + p85 shroud (שרוול חשמלי) DO have dim drawings on their
       // top sections — earlier blanket "EF = photo-only" was even broader
@@ -1379,7 +1382,7 @@ final List<LipskeyCatalogProduct> kPolyrollCatalog = [
   _ppr('6001403150', 'צינור PPRCT פייזר מיזוג אוויר 315', 'PPRCT Pipe 315', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 87, dims: {'חומר': 'PPRCT · מחוזק בסיבי זכוכית (faser)', 'dn נומינלי': '315', 'de קוטר חיצוני': '315.0–317.5', 'e עובי דופן': '18.7–20.7', 'di קוטר פנימי': '273.6–280.1', 'SDR': '17', 'PN': '10', 'משקל ק"ג/מ׳': '16.750', 'מק"ט חוליות': '6001403150', 'יצרן': 'Polyroll'}),
   _ppr('6001403550', 'צינור PPRCT פייזר מיזוג אוויר 355', 'PPRCT Pipe 355', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 87, dims: {'חומר': 'PPRCT · מחוזק בסיבי זכוכית (faser)', 'dn נומינלי': '355', 'de קוטר חיצוני': '355.0–358.2', 'e עובי דופן': '21.1–23.4', 'di קוטר פנימי': '308.2–316.0', 'SDR': '17', 'PN': '10', 'משקל ק"ג/מ׳': '21.520', 'מק"ט חוליות': '6001403550', 'יצרן': 'Polyroll'}),
   _ppr('6001404000', 'צינור PPRCT פייזר מיזוג אוויר 400', 'PPRCT Pipe 400', kPprPipesFiber, 'PPR Faser Pipes', '🟦', 87, dims: {'חומר': 'PPRCT · מחוזק בסיבי זכוכית (faser)', 'dn נומינלי': '400', 'de קוטר חיצוני': '400.0–403.6', 'e עובי דופן': '23.7–26.2', 'di קוטר פנימי': '347.6–356.2', 'SDR': '17', 'PN': '10', 'משקל ק"ג/מ׳': '27.300', 'מק"ט חוליות': '6001404000', 'יצרן': 'Polyroll'}),
-  _ppr('99515080', 'פקק PPR 7/11', 'PPR פקק 7/11', kPprPlugs, 'PPR Plugs', '🔘', 33, dims: {'מידה': '7/11', 'מק"ט חוליות': '99515080', 'שיטת חיבור': 'שקע ריתוך', 'יצרן': 'Polyroll'}),
+  _ppr('99515080', 'פקק PPR 7/11', 'PPR פקק 7/11', kPprPlugs, 'PPR Plugs', '🔘', 33, dims: {'A': '11.4', 'B': '7.5', 'C': '101.5', 'ק"ג/מ': '0.008', 'מידה': '7/11', 'מק"ט יצרן': 'P-4501', 'מק"ט חוליות': '99515080', 'שיטת חיבור': 'שקע ריתוך', 'יצרן': 'Polyroll'}),
   _ppr('98414205', 'אוגן PPR 40', 'PPR אוגן 40', kPprCollars, 'PPR Collars', '⭕', 34, dims: {'d1': '51', 'D': '141', 'K': '100', 'd2': '18', 'b': '17.5', 'z': '4', 'מק"ט חוליות': '98414205', 'יצרן': 'Polyroll'}),
   _ppr('98414206', 'אוגן PPR 50', 'PPR אוגן 50', kPprCollars, 'PPR Collars', '⭕', 34, dims: {'d1': '62', 'D': '151', 'K': '110', 'd2': '18', 'b': '17.5', 'z': '4', 'מק"ט חוליות': '98414206', 'יצרן': 'Polyroll'}),
   _ppr('98414207', 'אוגן PPR 63', 'PPR אוגן 63', kPprCollars, 'PPR Collars', '⭕', 34, dims: {'d1': '78', 'D': '166', 'K': '125', 'd2': '18', 'b': '19.0', 'z': '4', 'מק"ט חוליות': '98414207', 'יצרן': 'Polyroll'}),

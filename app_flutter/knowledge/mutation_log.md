@@ -16,3 +16,10 @@
 
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
+
+## _acPipe — PPR AC Blue Pipe factory
+
+- **קובץ:** `lib/data/polyroll_catalog.dart:609`
+- **מה עושה:** factory function — יוצר `LipskeyCatalogProduct` לצינור PPR מיזוג אוויר (Aquatherm blue pipe). עוטף `_ppr()` עם קבועים ספציפיים ל-AC.
+- **בדיקה:** `test/polyroll_catalog_test.dart` — ודא שמוצר AC Blue Pipe מופיע ב-`kPolyrollCatalog` עם SKU תקין.
+- מסקנה: factory בלי לוגיקה — בדיקה מינימלית מספיקה (SKU קיים, קטגוריה נכונה)

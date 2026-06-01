@@ -148,3 +148,13 @@ Symbols removed from `catalog_screen.dart` — never had callers, no visual impa
 
 Total removed: ~466 lines. Kept: `catalogDrillCatProvider` (line 237) — used in smoke test `tabs.dart`.
 rather than pixel rendering.
+
+## Polyroll catalog spec routing (§22)
+- `lib/data/polyroll_catalog.dart` `_pprSpecFor(categoryHe, nameHe, page)` returns
+  the correct per-page or per-sub-type spec for each product. See
+  `knowledge/CATALOG-CARD-PROTOCOL.md` §22.C/D/E/F for the full ruleset.
+- p80 AQUATHERM AC blue pipes: kPprPipesAC → `spec_pprct_pipe.jpg` (was
+  routing to `spec_faser_20.jpg` green by mistake; fixed in §22.F sweep).
+- §14 detection: `test/spec_assets_test.dart` enforces 36 routing rules
+  including "every page lands on its own per-page crop or a legit shared one".
+- All 74 catalog pages audited per §22.F mandatory audit checklist.

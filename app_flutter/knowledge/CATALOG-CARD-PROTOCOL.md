@@ -937,14 +937,36 @@ below. A page added to the list is a contract: "I verified content match,
 not just the filename pattern."
 
 **Audited pages so far (this session):**
-p19, p20, p22, p23, p24, p25, p26, p27, p28, p29, p30, p31, p32, p33,
-p34, p36, p37, p38, p39, p40, p41, p42, p44, p45, p48, p49, p50, p51,
-p52, p53, p54, p55, p56, p57, p58, p59, p60, p61, p62, p63, p64, p65,
-p66, p67, p68, p69, p70, p71, p72, p73, p74, p75-79, p82, p83, p84,
-p85, p88-89, p90, p91, p92.
+p18, p19, p20, p21, p22, p23, p24, p25, p26, p27, p28, p29, p30, p31,
+p32, p33, p34, p35, p36, p37, p38, p39, p40, p41, p42, p43, p44, p45,
+p46, p47, p48, p49, p50, p51, p52, p53, p54, p55, p56, p57, p58, p59,
+p60, p61, p62, p63, p64, p65, p66, p67, p68, p69, p70, p71, p72, p73,
+p74, p75-79, p80, p81, p82, p83, p84, p85, p86, p87, p88-89, p90,
+p91, p92.
 
-**Pages still needing visual audit:**
-p18, p21, p35, p43, p46, p47, p80, p81, p86, p87.
+**Pages still needing visual audit:** none — all 74 catalog pages opened
+and verified content match.
+
+**§22.F complete + §22.G dim sweep done.**
+
+§22.G — dims completeness audit:
+- Pre-sweep: 1 product (99515080 פקק PPR 7/11) had only 4 dims.
+- Catalog p92 bottom section table provides the missing values:
+  A=11.4, B=7.5, C=101.5, ק"ג/מ=0.008, מק"ט יצרן=P-4501.
+- Added per R8 verbatim — now 774/774 = 100% products with ≥5 dims.
+
+§22.F final findings from the last 10-page sweep
+(p18, p21, p35, p43, p46, p47, p80, p81, p86, p87):
+- **p80 misroute caught** — 16 AQUATHERM blue PPRCT AC pipes routed
+  to `spec_faser_20.jpg` (green PPR cross-section). The kPprPipesAC
+  case now returns `spec_pprct_pipe.jpg` (blue). Same diagram family
+  as p86, R8 verbatim per catalog photo.
+- p18, p35, p86, p87 pipes route correctly to their respective
+  cross-section specs.
+- p21, p43 (continuation of p42), p46 (continuation of p45), p47:
+  all reducing-fitting pages correctly routed.
+- p81 dual-elbow page correctly routes 90° → `spec_elbow_90_p81.jpg`,
+  45° → `spec_elbow_45.jpg` (shared with p19 plain 45°).
 
 **Verified-clean (catalog has no products / installation-photo reference):**
 p75, p76, p77, p78, p79, p88, p89.
