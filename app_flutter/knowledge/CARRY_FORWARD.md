@@ -115,4 +115,6 @@
 
 43. **`STAGED_DART` חייב להיחשב לפני בדיקת shell-meta בשער 103.** הבדיקה ל-shell-meta chars ב-ANTIPATTERN רצה לפני שחושב אם יש Dart staged — תיקון: חשב את התלות לפני כל בדיקה שצורכת אותה (גם שער 103, גם שערים 35-40 = לקח #41). תועד ב-stuck_log פעמיים, חסר כאן עד אודיט 2026-06-01.
 
-44. **`stuck_regression_test.dart` סורק רק `lib/` — 17/31 אנטי-פטרנים הם hook-bash ולכן לא מוגנים.** שער 109 הצליח להחזיר את אנטי-פטרן #27 (`grep -c || echo 0`) בלי שאף בדיקה תפסה. עד שהגנרטור יסווק גם `.githooks/` (דורש סיווג: hook-antipattern מול lib-antipattern, כי `flutter test --no-pub` חוקי ב-hook אך לא ב-lib), אנטי-פטרנים של ה-hook נשענים רק על שער 103 (שגם הוא סורק *.dart בלבד). פער מבני פתוח.
+44. **אנטי-פטרן של ה-hook מתויג `ANTIPATTERN[hook]:` וסורק את `.githooks/pre-commit`.** `ANTIPATTERN:` רגיל סורק `lib/`. הפער שבגללו שער 109 החזיר את #27 בלי שנתפס — נסגר: הגנרטור מייצר בדיקה שסורקת את ה-hook עבור פטרנים מתויגים, ושער 103 סורק את ה-hook ה-staged בזמן commit. דפוס שחוקי ב-hook (כמו `flutter test --no-pub`) חייב להישאר `ANTIPATTERN:` רגיל (lib-only) כדי לא לסמן את ה-hook עצמו.
+
+45. **בדיקת תווים במשתנה לא-מהימן = bash `case`/glob, לא `echo "$v" | grep`.** שער 103 השתמש ב-`echo "$pattern" | grep -qE` לזיהוי shell-meta — והוא **לא-דטרמיניסטי בין סביבות**: ב-commit סימן 32/32 false-positive, אינטראקטיבית 0/32. `case "$v" in *'$('*) ... esac` הוא builtin טהור, אפס variance. עבור כל בדיקת-תוכן של משתנה — העדף glob builtin על pipe ל-grep.

@@ -29,6 +29,26 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 
 <!-- הוסף רשומה חדשה כאן אחרי כל בעיה שנפתרה -->
 
+## 2026-06-01 · שער 103 — `echo "$p" | grep -qE` לא-דטרמיניסטי בין סביבות
+
+### א — הבעיה
+בדיקת shell-meta של שער 103 השתמשה ב-`echo "$pattern" | grep -qE '\$\(|\`|\\$\{'`.
+ב-commit (52430cb) היא סימנה את **כל 32** האנטי-פטרנים כ-shell-meta (false positive,
+לא חוסם — רק רעש). אינטראקטיבית, אותו קלט, אותו קובץ, אותו hook: **0/32**.
+הוכחה ל-non-determinism של `echo | grep` בין סביבות shell (variance של echo
+ו/או binary של grep ב-PATH). המנגנון המדויק לא שוחזר — אבל אי-העקביות מוכחת.
+
+### ב — הפתרון
+החלפה ל-bash `case "$pattern" in *'$('*|*'\`'*|*'${'*) ... esac` — pattern-matching
+builtin טהור, ללא echo/grep/regex-engine. דטרמיניסטי בכל סביבה: 0/32 false,
+ועדיין תופס הזרקה אמיתית (`foo$(rm)bar` → flagged).
+
+### ג — כלל המניעה
+ANTIPATTERN[hook]: echo "\$[a-z_]+" \| grep -qE.*shell-meta
+RULE: בדיקת תווים בתוך משתנה לא-מהימן → bash `case`/glob (builtin), לא `echo "$v" | grep` (לא-דטרמיניסטי בין סביבות).
+
+---
+
 ## 2026-06-01 · שער 109 הפר את לקח #27 — grep -c || echo 0 (לא נתפס כי הרגרסיה סורקת רק lib/)
 
 ### א — הבעיה

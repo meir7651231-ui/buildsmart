@@ -590,11 +590,15 @@ if [[ -f "$STUCK_LOG" ]]; then
                 a103_target="dart"; pattern="${line#ANTIPATTERN: }"
             fi
             [[ -z "$pattern" ]] && continue
-            # חסום shell-injection chars לפני שימוש ב-pattern
-            if echo "$pattern" | grep -qE '\$\(|\`|\\$\{'; then
-                warn "103" "אנטי-פטרן ב-stuck_log מכיל shell-meta (דלג): $pattern"
-                continue
-            fi
+            # חסום shell-injection chars לפני שימוש ב-pattern.
+            # תיקון אודיט 2026-06-01: `echo "$p" | grep -qE` היה לא-דטרמיניסטי —
+            # בסביבת ה-commit סימן 32/32 false-positive, אינטראקטיבית 0/32.
+            # bash case/glob הוא builtin טהור — אפס variance של echo/grep בין סביבות.
+            case "$pattern" in
+                *'$('*|*'`'*|*'${'*)
+                    warn "103" "אנטי-פטרן ב-stuck_log מכיל shell-meta (דלג): $pattern"
+                    continue ;;
+            esac
             if [[ "$a103_target" == "hook" ]]; then
                 [[ -n "$STAGED_HOOK_103" ]] || continue
                 # התעלם משורות שמתווספות כהערה (#) — תיעוד התיקון מותר
