@@ -12,7 +12,8 @@
 | **קטלגן** | עריכת קטלוגים | `lib/data/`, `assets/` | שינוי פרוטוקולים |
 | **סדרן** | עריכה ויזואלית | `lib/ui/`, `lib/widgets/` | שינוי פרוטוקולים |
 | **מקבץ** | בניית פיצ׳רים חדשים | `lib/features/`, `lib/screens/` | שינוי פרוטוקולים |
-| **משיק** | הכנת-קרקע להשקה (audit ארכיטקטורה/ניקיון/פערים/חנויות) | audit קריאה-בלבד; תיקונים בטוחים; `knowledge/LAUNCH_READINESS.md` | refactor/ניווט/מחיקה רחבה בלי אישור; שינוי פרוטוקולים |
+| **בנצי** (משיק) | הכנת-קרקע להשקה (audit ארכיטקטורה/ניקיון/פערים/חנויות → חבילת-הגשה לגוגל) | audit קריאה-בלבד; תיקונים בטוחים; `knowledge/LAUNCH_READINESS.md` + `LAUNCH_PACKAGE/` | refactor/ניווט/מחיקה רחבה בלי אישור; שינוי פרוטוקולים |
+| **ליטוש** | מעבר-ליטוש (spacing/צבע/motion/states/RTL/microcopy/קוד-presentation) | `lib/ui/`, `lib/widgets/`, `theme/`, `l10n/` (binding); `knowledge/POLISH_LOG.md` | data/קטלוג; refactor מבני בלי אישור; חלון/view (R2); המצאת טקסט (R6/R8); שינוי פרוטוקולים |
 
 ---
 
@@ -72,7 +73,8 @@ git commit -m "..."
 | קטלגן | 🟦 ממתין | — | — |
 | סדרן | 🟦 ממתין | — | — |
 | מקבץ | ✅ שוחרר (שער 23/109 תוקן ב-bash builtin) | 2026-06-01 | lens step 2/3 |
-| משיק | 🟦 חדש — פרוטוקול מוכן (`LAUNCH_READINESS_PROTOCOL.md`) | 2026-06-01 | — |
+| בנצי (משיק) | 🟦 חדש — פרוטוקול מוכן (`LAUNCH_READINESS_PROTOCOL.md`) | 2026-06-01 | — |
+| ליטוש | 🟦 חדש — פרוטוקול מוכן (`POLISH_PROTOCOL.md`) | 2026-06-01 | — |
 
 ---
 
@@ -146,7 +148,8 @@ git push -u origin claude/whats-happening-LyY9G
 ### חלוקת-בעלות שמצמצמת חיכוך
 - **`.githooks/` + `knowledge/CARRY_FORWARD.md` + `PROTOCOL_AUDIT_PLAN.md` + generator** = **פרוטוקוליסט בלבד**. סוכן אחר שנוגע בהם = התנגשות מובטחת. אל תיגעו.
 - **`stuck_log.md`** — append-only. כל סוכן מוסיף בסוף; conflict נפתר ע"י שמירת שניהם + regen של הבדיקה.
-- **`lib/`** — מחולק לפי תפקיד (קטלגן=data, סדרן=ui/widgets, מקבץ=features/screens, משיק=audit). אם שניים צריכים אותו קובץ — תאמו דרך המשתמש.
+- **`lib/`** — מחולק לפי תפקיד (קטלגן=data, סדרן=ui/widgets, מקבץ=features/screens, בנצי=audit+packaging, ליטוש=presentation-polish). אם שניים צריכים אותו קובץ — תאמו דרך המשתמש.
+- **חפיפת ליטוש↔סדרן (`lib/ui` + `lib/widgets`):** סדרן=מבנה-תצוגה; ליטוש=ליטוש-feel (spacing/motion/states). חפיפת ליטוש↔בנצי (cleanup-קוד): בנצי מאתֵר, ליטוש מבצע. בכל מקרה — תאמו דרך AGENT_COORDINATION לפני double-touch.
 
 ### תדירות push
 - **תיקוני-hook קריטיים (פרוטוקוליסט)** → push מיד אחרי אימות (סוכנים חסומים מחכים).
