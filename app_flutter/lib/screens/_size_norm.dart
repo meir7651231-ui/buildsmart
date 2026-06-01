@@ -326,3 +326,20 @@ List<String> letterSizeTokens(String name) {
 /// (e.g. `40×60` → `60×40`). Plain Hebrew words keep the ambient direction.
 TextDirection? chipLabelDirection(String label) =>
     label.contains(RegExp(r'\d')) ? TextDirection.ltr : null;
+
+/// Wall-thickness values from cross-dim tokens (`20×2.8` → `2.8`). PPR &
+/// multilayer pipes ship the SAME outer diameter at different walls (PN
+/// pressure ratings — e.g. OD 40 comes in 3.7 and 5.5), so wall is a real
+/// second filter axis, not derivable from OD. Returns distinct walls,
+/// numeric-ascending. Empty when the name carries no cross-dim.
+final RegExp _kCrossWallRe = RegExp(r'\d+(?:\.\d+)?×(\d+(?:\.\d+)?)');
+
+List<String> wallTokens(String name) {
+  final out = <String>{};
+  for (final m in _kCrossWallRe.allMatches(name)) {
+    out.add(m.group(1)!);
+  }
+  final list = out.toList()
+    ..sort((a, b) => double.parse(a).compareTo(double.parse(b)));
+  return list;
+}

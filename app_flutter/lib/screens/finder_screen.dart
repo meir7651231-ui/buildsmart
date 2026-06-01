@@ -393,6 +393,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
   String? _size;
   String? _angle;
   String? _letter;
+  String? _wall;
 
   @override
   Widget build(BuildContext context) {
@@ -420,6 +421,10 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
     // Secondary letter-size row (S/M/L): some collars/anchors carry a letter
     // size instead of a number. Surfaced like the angle axis, co-filterable.
     final letterChips = _letterOptions(pool);
+    // Secondary wall-thickness row (PPR/multilayer): the SAME OD ships at
+    // different walls (PN ratings), so `20×2.8` vs `40×5.5` — wall narrows
+    // beyond the גודל (OD) axis. Co-filterable.
+    final wallChips = _wallOptions(pool);
     var results = pool;
     if (_size != null) {
       results = results.where((p) => _productHasChip(p, _size!)).toList();
@@ -432,6 +437,10 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
           .where((p) => letterSizeTokens(p.nameHe).contains(_letter))
           .toList();
     }
+    if (_wall != null) {
+      results =
+          results.where((p) => wallTokens(p.nameHe).contains(_wall)).toList();
+    }
     // Count of cards the user will actually see (variants collapse to one).
     final shown = results.map(productListDedupeKey).toSet().length;
 
@@ -442,6 +451,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
         if (narrow.chips.isNotEmpty) _sizeBar(narrow.label, narrow.chips),
         if (angleChips.length > 1) _angleBar(angleChips),
         if (letterChips.length > 1) _letterBar(letterChips),
+        if (wallChips.length > 1) _wallBar(wallChips),
         if (results.isNotEmpty) _countStrip(shown),
         if (results.isNotEmpty &&
             !ref.watch(finderChipTipDismissedProvider))
@@ -486,6 +496,26 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
       ..sort((a, b) => kLetterSizeOrder
           .indexOf(a)
           .compareTo(kLetterSizeOrder.indexOf(b)),);
+    return out;
+  }
+
+  /// Secondary chip row for wall thickness (PPR PN ratings) — keyed `_wall`.
+  Widget _wallBar(List<String> chips) {
+    return _chipRow('עובי', [
+      _chip('הכל', _wall == null, () => setState(() => _wall = null)),
+      for (final c in chips)
+        _chip('$c מ"מ', _wall == c, () => setState(() => _wall = c)),
+    ]);
+  }
+
+  /// Distinct cross-dim wall thicknesses across the pool (numeric-ascending).
+  List<String> _wallOptions(List<LipskeyCatalogProduct> pool) {
+    final all = <String>{};
+    for (final p in pool) {
+      all.addAll(wallTokens(p.nameHe));
+    }
+    final out = all.toList()
+      ..sort((a, b) => double.parse(a).compareTo(double.parse(b)));
     return out;
   }
 
@@ -547,6 +577,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
             _size = null;
             _angle = null;
             _letter = null;
+            _wall = null;
           }),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -622,6 +653,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
           if (_angle != null) {
             _angle = null;
             _letter = null;
+            _wall = null;
           } else if (_size != null) {
             _size = null;
           } else if (_sub != null) {
@@ -717,6 +749,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                 _size = null;
                 _angle = null;
                 _letter = null;
+                _wall = null;
               }),),
       for (final s in subs)
         _chip(s.label, _sub == s.label,
@@ -725,6 +758,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
                   _size = null;
                   _angle = null;
                   _letter = null;
+                  _wall = null;
                 }),),
     ]);
   }

@@ -266,6 +266,7 @@ void main() {
 
   _i3();
   _i5();
+  _i7();
 }
 
 void _i3() {
@@ -298,6 +299,27 @@ void _i5() {
     });
     test('letters glued inside words are ignored', () {
       expect(letterSizeTokens('HDPE מצמד SLIP'), isEmpty);
+    });
+  });
+}
+
+void _i7() {
+  group('wallTokens (I7) — cross-dim wall is a real second axis', () {
+    test('extracts the wall part of a cross-dim', () {
+      expect(wallTokens('צינור PPR 20×2.8'), ['2.8']);
+      expect(wallTokens('צינור PPR 40×5.5'), ['5.5']);
+    });
+    test('same OD, different walls are distinct (PN ratings)', () {
+      // OD 40 ships in 3.7 (PN16) and 5.5 (PN20) — independent of OD.
+      expect(wallTokens('PPR 40×3.7'), ['3.7']);
+      expect(wallTokens('PPR 40×5.5'), ['5.5']);
+    });
+    test('numeric-ascending, deduped', () {
+      expect(wallTokens('ערכה 20×5.5 ו-25×2.8'), ['2.8', '5.5']);
+    });
+    test('non-cross-dim names yield no wall', () {
+      expect(wallTokens('ברז 1/2"'), isEmpty);
+      expect(wallTokens('צינור DN40 200 ס"מ'), isEmpty);
     });
   });
 }

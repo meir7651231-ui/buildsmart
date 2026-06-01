@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.61 · 1.6.31 · 📊 הציון המשוכלל מוצג עכשיו גם על שורת המוצר בחיפוש (צ\'יפ צבוע לפי להקה) — נראה במבט בלי לפתוח כרטיס',
+                          'v5.62 · 1.6.31 · Finder: ציר "עובי" משני ל-PPR — עובי-דופן/PN נפרד מהקוטר (אותו OD ב-2 עוביים)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
