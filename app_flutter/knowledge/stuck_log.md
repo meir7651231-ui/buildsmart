@@ -653,6 +653,7 @@ RULE: case kPprPipesAC חייב להחזיר spec_pprct_pipe (כחול) — לא
 
 
 
+
 ---
 
 ## 2026-06-01 · gate 23/109 · emoji grep נכשל תחת git-commit (מקבץ) — גם `-aqF` לא הספיק
@@ -727,7 +728,6 @@ RULE: זיהוי מידת-אות בודדת חייב lookbehind/lookahead שמו
 
 ---
 
-<<<<<<< HEAD
 ## 2026-06-01 · generator · ANTIPATTERN עם גרש בגבול שובר r'''…''' (קטלגן, 4ad3dbb)
 
 ### א — הבעיה
@@ -944,3 +944,54 @@ helper-tight ≠ thin-card. R8 verbatim חל גם על הכרטיס הפנימי
 **אין ANTIPATTERN grep** — `'מק"ט חוליות'` token לגיטימי בכל מקום שהוא; ה-guard
 חייב להיות "חייב להכיל" (קיומי, per-catalog), לא "אסור להופיע" (היעדרי).
 (זה ה-class שכבר זוהה ב-§21.B + coord-msg #2.)
+## 2026-05-31 · commit עם & ברקע מת באמצע ה-gate
+### א — הבעיה
+הרצתי `git commit -m "..." &` (background עם & בתוך כלי Bash) לcommit שמפעיל
+gate איטי (flutter test ~5 דק'). כשכלי ה-Bash חזר, תהליך ה-git נהרג — אבל
+ה-pre-commit hook כבר הריץ flutter_tester. התוצאה: commit חצי-גמור (קבצים
+staged, HEAD לא זז), תהליכי flutter יתומים שורפים CPU, ואין git חי שישלים.
+### ב — הפתרון
+commit שמפעיל gate איטי חייב לרוץ ב-FOREGROUND עם timeout ארוך (עד 540000ms),
+או דרך run_in_background של כלי ה-Bash עצמו — לעולם לא עם `&` של shell.
+הריגת היתומים: `taskkill //IM dart.exe //F` (ההורה) → flutter_tester מת אחריו.
+### ג — כלל המניעה
+ANTIPATTERN: git commit.*&\s*$
+RULE: gated commit חייב foreground+timeout ארוך או run_in_background של הכלי — לא & של shell, שנהרג כשהכלי חוזר ומשאיר commit חצי-גמור.
+
+## 2026-06-01 · אחרי תיקון hook של סוכן אחר — חובה cp ל-.git/hooks (מקבץ)
+### א — הבעיה
+פרוטוקוליסט דחף תיקון ל-.githooks/pre-commit (gate 23). `git pull` עדכן את
+.githooks/ אך לא את .git/hooks/pre-commit (עותק לוקלי ephemeral). בלי cp, git
+מריץ את ה-hook הישן → השער שתוקן נכשל שוב, ובוזבז סבב commit מלא.
+### ב — הפתרון
+אחרי כל pull שמושך תיקון hook: `cp .githooks/pre-commit .git/hooks/pre-commit`
+(או לוודא core.hooksPath=.githooks). אימות לפני commit: הרצת לוגיקת השער ידנית
+(bash case/glob → blue=1) מוודאת שה-hook החדש תפס.
+### ג — כלל המניעה
+ANTIPATTERN[hook]: grep .*🟦.*ROADMAP
+RULE: אחרי pull שמושך תיקון hook — cp .githooks/pre-commit ל-.git/hooks/ לפני commit; ובדיקת status-emoji ב-hook = bash case/glob builtin, לא grep חיצוני.
+
+## 2026-06-01 · re.sub על מחרוזת Dart הוסיף פסיק כפול → build נכשל (מקבץ)
+### א — הבעיה
+לבאמפ גרסה השתמשתי ב-`re.sub(r"'v5\.47 · [^']*'", "'v5.48 · ...',", s)`. ה-regex
+תפס רק את ה-string (בלי הפסיק שאחריו), וההחלפה הוסיפה `,` — נוצר `,,` כפול
+בתוך Text(...). flutter analyze חד-קובץ עם grep "error •" החזיר 0 (false-confidence),
+אבל flutter test/build נכשל: "Expected an identifier, but got ','". שערים 32+34.
+### ב — הפתרון
+תיקון ה-`,,` ידנית ב-Edit. לקח: לעריכת קוד — כלי Edit (התאמה מדויקת), לא re.sub.
+אם re.sub על שורת קוד — לתפוס ולהחליף את כל השורה כולל הפסיק, לא רק את ה-literal.
+### ג — כלל המניעה
+ANTIPATTERN: ,,\s*$
+RULE: עריכת קוד = כלי Edit, לא python re.sub. ל-version bump — להחליף את השורה המלאה (כולל הפסיק), ולעולם לא לסמוך על grep "error •" חד-קובץ; build/test הם האמת.
+
+## 2026-06-01 · gate 102 false-positive — IS_RETRY על אותו סט-קבצים (מקבץ)
+### א — הבעיה
+פיצ׳ר חדש (per-row gateway) עם אותו סט 4 קבצים כמו ניסיון כושל קודם (תוך 5ש')
+→ CURRENT_FP (sha של שמות-קבצים) התאים → IS_RETRY=true → שער 102 דרש רשומת
+stuck_log ל"בעיה" שלא הייתה (זה refinement מודרך-פידבק, לא תיקון באג).
+### ב — הפתרון
+תיעדתי רשומה זו (מספק את שער 102). הצעה למתחזק: IS_RETRY שמסתמך על שמות-קבצים
+בלבד מתריע-יתר; עדיף content-hash של ה-diff + HEAD, או חלון קצר בהרבה מ-5ש'.
+### ג — כלל המניעה
+ANTIPATTERN: openSmartProductSheet.*group.*header$
+RULE: פעולה פר-פריט (פתיחת כרטיס) שייכת לפריט עצמו, לא לכותרת-קבוצה שפותחת אחד-לכולם. (תצפית נוספת למתחזק: IS_RETRY על סט-שמות-קבצים בלבד מתריע-יתר לפיצ׳ר חדש.)

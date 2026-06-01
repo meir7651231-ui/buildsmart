@@ -208,3 +208,47 @@ rather than pixel rendering.
 - Guard: spec_assets_test "§21.C every visible chip carries a semantic level
   label" — sweeps kPolyrollCatalog, asserts every non-noise chip gets one of
   the 5 allowed labels and the size chip always reads "מידה".
+## Catalog lens selector (v5.44 — data layer)
+- `lib/data/catalog_lens.dart` — `CatalogLens {category,variant,smartTree}`,
+  `availableLensesForSet(products)` (which lenses are meaningful for a set;
+  smart-tree hidden below 25% mapped — approach א), `groupByLens(products,lens)`
+  (titled `LensGroup` buckets per axis), `setSupportsLens`.
+- `lib/state/catalog_lens_state.dart` — `catalogLensProvider` (transient
+  StateProvider, default category) + `resolveActiveLens(selected, available)`
+  (falls back to first-available; never strands on an unavailable lens).
+- Wiring status: data layer ONLY. The selector chips + list router (which read
+  `catalogLensProvider` and render `groupByLens` output beside the existing
+  grid/list + sort controls) are the NEXT step — not yet wired into
+  `catalog_screen.dart`. Guard: `catalog_lens_test` (18 tests).
+
+## Lens selector UI — step 3a (v5.46)
+- `lib/screens/lens_selector_row.dart` — `LensSelectorRow(products:)` ConsumerWidget:
+  a list-level chip row ("סדר לפי: 📂/🎚/🌳") that reads/writes `catalogLensProvider`
+  and shows only the lenses `availableLensesForSet(products)` deems meaningful.
+  Renders nothing when <2 lenses apply (category-only sets unchanged).
+- Wiring status: widget BUILT + tested (`lens_selector_row_test`, 3 widget tests),
+  NOT yet placed in a product-list screen. Placement into the product browse view
+  (where `groupByLens` output renders) is step 3b.
+
+## Lens selector — step 3b WIRED (v5.47)
+- `LipskeyProductsList` (lib/screens/lipskey_products_screen.dart) now renders
+  `LensSelectorRow` ABOVE the product list. Default lens = category → the
+  original flat grid/list, unchanged. variant/smartTree → `_groupedList` renders
+  `groupByLens` output: a `_LensGroupHeader` (title + count) per group, products
+  as standard rows. The selector hides itself when <2 lenses apply.
+- This is the user-visible activation of the lens feature (steps 1+2+3a).
+
+## Lens selector — option א: smart-tree group = gateway (v5.48)
+- Under the 🌳 smart-tree lens, each `_LensGroupHeader` in `lipskey_products_screen.dart`
+  is now TAPPABLE → `openSmartProductSheet(context, smartProductForSku(first.sku))`,
+  opening the rich SmartProduct card (install/compat/brands/BOM). Header shows a
+  🌳 prefix + "פתח כרטיס ›" hint + Semantics(button). Category/variant headers
+  stay non-tappable. Imports via `show` (openSmartProductSheet, smartProductForSku)
+  to avoid circular-import symbol pollution.
+
+## Lens selector — option א refined: per-row "כרטיס חכם" (v5.49)
+- Under 🌳 smart-tree lens, each `_ProductRow` shows "כרטיס חכם" (was "פרטים")
+  → `_openSheet` opens the rich SmartProduct card via openSmartProductSheet/
+  smartProductForSku for THAT product's fixture (not a group-level gateway).
+  Falls back to the standard Lipskey sheet when unmapped. `_LensGroupHeader`
+  reverted to a plain label (🌳 prefix cue only, not tappable).

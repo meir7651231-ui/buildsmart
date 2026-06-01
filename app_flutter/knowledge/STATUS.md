@@ -1,7 +1,16 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.51` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.52` (see `home_shell.dart`). Update on each user-visible change._
 _known-failing: 0 (gate 32 baseline — 0 כשלים מאומת 2026-06-01; שמות ב-knowledge/known_failing.txt)_
+
+## Catalog lens selector (v5.45 — data layer)
+A list-level view-axis control (OUTSIDE the product card) re-organises a
+product list by `CatalogLens`: 📂 category / 🎚 variant / 🌳 smart-tree.
+`lib/data/catalog_lens.dart`: `availableLensesForSet` (which lenses are
+meaningful — smart-tree hidden below 25% mapped) + `groupByLens` (titled
+buckets per axis). `lib/state/catalog_lens_state.dart`: `catalogLensProvider`
+(transient) + `resolveActiveLens` (never strands on an unavailable lens).
+Guards: `catalog_lens_test` (18). UI selector chips = next step.
 
 ## Tabs & screens — all light-mode, readable
 - **קטלוג** — opens on **בית (finder home)** as the default landing: layman

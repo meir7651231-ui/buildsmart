@@ -1,10 +1,15 @@
 import 'dart:math';
 
+import 'package:buildsmart/data/catalog_lens.dart';
 import 'package:buildsmart/data/chip_hierarchy.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/smart_tree.dart' show smartProductForSku;
 import 'package:buildsmart/screens/_size_norm.dart';
+import 'package:buildsmart/screens/catalog_screen.dart' show openSmartProductSheet;
+import 'package:buildsmart/screens/lens_selector_row.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
+import 'package:buildsmart/state/catalog_lens_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
@@ -139,6 +144,27 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
 
   @override
   Widget build(BuildContext context) {
+    // Step 3b — list-level lens selector ABOVE the list. Default lens =
+    // category → the existing flat list, visually unchanged. A non-category
+    // lens re-organises the SAME products into titled groups via groupByLens.
+    final available = availableLensesForSet(widget.products);
+    final active =
+        resolveActiveLens(ref.watch(catalogLensProvider), available);
+
+    final body = active == CatalogLens.category
+        ? _flatList()
+        : _groupedList(active);
+
+    return Column(
+      children: [
+        LensSelectorRow(products: widget.products),
+        Expanded(child: body),
+      ],
+    );
+  }
+
+  /// The original flat product list (category lens / default) — unchanged.
+  Widget _flatList() {
     final settings = ref.watch(catalogSettingsProvider);
     final slots = _visibleSlots();
     if (settings.viewMode == CatalogViewMode.grid) {
@@ -171,6 +197,85 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
           onCycle: (next) => setState(() => _swap[origSku] = next.sku),
         );
       },
+    );
+  }
+
+  /// Grouped view for variant / smart-tree lenses: a titled section per
+  /// [LensGroup], products rendered as the standard row card (forced row
+  /// style for a clean sectioned list regardless of grid/list setting).
+  Widget _groupedList(CatalogLens lens) {
+    final groups = groupByLens(widget.products, lens);
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(0, 4, 0, 24),
+      children: [
+        for (final g in groups) ...[
+          // Header is a plain label. Under the 🌳 smart-tree lens, the GATEWAY
+          // to the rich SmartProduct card is each row's own "כרטיס חכם" button
+          // (option א, per-row) — not the header.
+          _LensGroupHeader(
+            title: g.title,
+            count: g.count,
+            smartTree: lens == CatalogLens.smartTree,
+          ),
+          for (final p in g.products)
+            _ProductRow(
+              key: ValueKey('${lens.name}:${p.sku}'),
+              product: p,
+              categoryProducts: widget.products,
+              smartLens: lens == CatalogLens.smartTree,
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Section header for a lens group (title + product count). A 🌳 prefix marks
+/// smart-tree groups (a cue that each row opens the rich card via its own
+/// "כרטיס חכם" button) — the header itself is a plain label, not tappable.
+class _LensGroupHeader extends StatelessWidget {
+  const _LensGroupHeader({
+    required this.title,
+    required this.count,
+    this.smartTree = false,
+  });
+
+  final String title;
+  final int count;
+  final bool smartTree;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: smartTree ? const Color(0xFFF0FBF4) : const Color(0xFFF7F7F8),
+      padding: const EdgeInsets.fromLTRB(14, 9, 14, 9),
+      child: Row(
+        children: [
+          if (smartTree) ...[
+            const Text('🌳', style: TextStyle(fontSize: 14)),
+            const SizedBox(width: 6),
+          ],
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Color(0xFF1A1A1A),
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Text(
+            '$count',
+            style: const TextStyle(
+              color: Color(0xFF888888),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -491,10 +596,16 @@ class _ProductRow extends ConsumerStatefulWidget {
     required this.categoryProducts,
     this.familySiblings = const [],
     this.onCycle,
+    this.smartLens = false,
   });
 
   final LipskeyCatalogProduct product;
   final List<LipskeyCatalogProduct> categoryProducts;
+
+  /// When true (the 🌳 smart-tree lens is active), the row's details button
+  /// opens the rich SmartProduct card for this product's fixture instead of
+  /// the standard Lipskey sheet — and is labelled "כרטיס חכם".
+  final bool smartLens;
   /// Every product in the same canonical-family (collapsed into this row).
   /// When length > 1 the card shows a ↻ button to cycle through them.
   final List<LipskeyCatalogProduct> familySiblings;
@@ -718,8 +829,19 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     }
   }
 
-  void _openSheet() =>
-      showLipskeyProductSheet(context, p, widget.categoryProducts);
+  void _openSheet() {
+    // Option א (per-row) — under the 🌳 smart-tree lens, the details button
+    // opens the rich SmartProduct card for this product's fixture. Falls back
+    // to the standard Lipskey sheet when not in smart-tree lens or unmapped.
+    if (widget.smartLens) {
+      final sp = smartProductForSku(p.sku);
+      if (sp != null) {
+        openSmartProductSheet(context, sp);
+        return;
+      }
+    }
+    showLipskeyProductSheet(context, p, widget.categoryProducts);
+  }
 
   void _openImage() {
     showDialog<void>(
@@ -1158,12 +1280,23 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                             .withOpacity(0.4)),
                   ),
                   alignment: Alignment.center,
-                  child: Text('ⓘ',
-                      style: TextStyle(color: _muted, fontSize: 10)),
+                  child: Text(widget.smartLens ? '🌳' : 'ⓘ',
+                      style: TextStyle(
+                          color: widget.smartLens
+                              ? const Color(0xFF0F766E)
+                              : _muted,
+                          fontSize: 10)),
                 ),
                 const SizedBox(width: 4),
-                Text('פרטים',
-                    style: TextStyle(color: _muted, fontSize: 10)),
+                Text(widget.smartLens ? 'כרטיס חכם' : 'פרטים',
+                    style: TextStyle(
+                        color: widget.smartLens
+                            ? const Color(0xFF0F766E)
+                            : _muted,
+                        fontSize: 10,
+                        fontWeight: widget.smartLens
+                            ? FontWeight.w700
+                            : FontWeight.w400)),
               ],
             ),
           ),

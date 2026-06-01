@@ -387,7 +387,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.51 · 1.6.29 · §22.I: כרטיס פנימי — 16 צינורות מיזוג קיבלו מק"ט חוליות שחסר',
+                          'v5.52 · 1.6.29 · 👁 בורר עדשות: סדר רשימה לפי קטגוריה/וריאנט/עץ-חכם · בעץ-חכם כל שורה פותחת את הכרטיס המלא',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
