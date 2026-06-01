@@ -37,6 +37,10 @@ returns to the grid.
 
 ## Catalog search panel tools (`catalog_screen.dart` · `_SearchToolsRow`)
 
+> **חלוקת מערכת (Benzi #1):** ה-⚙️ פילטרים כולל גם **מים נקיים / שפכים** —
+> `catalogSystemFilterProvider` → `filterBySystem` (מסונן מ-`VerifiedSpec.endSystems`:
+> supply=מים נקיים · drainage=שפכים). מוצר בלי verified-spec אינו מסווג (R8).
+
 | Tool | Behavior | Status |
 |---|---|---|
 | 🎤 קולי | `VoiceService.listen` (browser speech) | ✅ |

@@ -7,6 +7,7 @@ import 'package:buildsmart/data/fuzzy_search.dart';
 import 'package:buildsmart/data/line_score.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/search_index.dart';
@@ -166,6 +167,10 @@ final searchScopeProvider = StateProvider<String>((_) => 'הכל');
 /// (the ⚙️ פילטרים tool · "עם תמונה").
 final searchImageOnlyProvider = StateProvider<bool>((_) => false);
 
+/// Active water-system division (Benzi #1): null = all · supply = מים נקיים ·
+/// drainage = שפכים. Filters the live product results.
+final catalogSystemFilterProvider = StateProvider<WaterSystem?>((_) => null);
+
 // recentSearchesProvider lives in state/recent_searches.dart (persisted).
 
 /// Currently selected category in the smart tree section. Null = show categories.
@@ -266,6 +271,17 @@ List<LipskeyCatalogProduct> filterByImage(
     List<LipskeyCatalogProduct> list, bool imageOnly) {
   if (!imageOnly) return list;
   return list.where((p) => p.imageAsset != null).toList();
+}
+
+/// Pure: keep only products whose verified spec belongs to [system]
+/// (מים נקיים = supply · שפכים = drainage). Products without a spec are dropped
+/// when a system is selected (R8 — don't guess their system).
+List<LipskeyCatalogProduct> filterBySystem(
+    List<LipskeyCatalogProduct> list, WaterSystem? system) {
+  if (system == null) return list;
+  return list
+      .where((p) => kVerifiedSpecs[p.sku]?.endSystems.contains(system) ?? false)
+      .toList();
 }
 
 List<LipskeyCatalogProduct> _sortProducts(
@@ -1572,6 +1588,19 @@ class _SearchToolsRow extends ConsumerWidget {
   // ⚙️ פילטרים — filter the live product results.
   void _openFilterSheet(BuildContext context, WidgetRef ref) {
     final imageOnly = ref.read(searchImageOnlyProvider);
+    final sysFilter = ref.read(catalogSystemFilterProvider);
+    Widget sysOpt(String label, WaterSystem? value) => ListTile(
+          leading: Icon(
+            value == sysFilter ? Icons.check : Icons.radio_button_unchecked,
+            color:
+                value == sysFilter ? BsTokens.brand : const Color(0xFF888888),
+          ),
+          title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+          onTap: () {
+            ref.read(catalogSystemFilterProvider.notifier).state = value;
+            Navigator.pop(context);
+          },
+        );
     Widget opt(String label, bool value) => ListTile(
           leading: Icon(
             value == imageOnly ? Icons.check : Icons.radio_button_unchecked,
@@ -1592,7 +1621,12 @@ class _SearchToolsRow extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const _SheetTitle('סינון תוצאות'),
+            const _SheetTitle('מערכת'),
+            sysOpt('כל המערכות', null),
+            sysOpt('מים נקיים', WaterSystem.supply),
+            sysOpt('שפכים', WaterSystem.drainage),
+            const Divider(height: 1),
+            const _SheetTitle('תמונה'),
             opt('הכל', false),
             opt('עם תמונה בלבד', true),
           ],
@@ -1856,6 +1890,7 @@ class _SearchResultsList extends ConsumerWidget {
     // Apply the ⚙️ image filter and ↕️ sort (from the search-panel tools)
     // before capping to 40 results.
     final imageOnly = ref.watch(searchImageOnlyProvider);
+    final systemFilter = ref.watch(catalogSystemFilterProvider);
     final sort = ref.watch(catalogProductSortProvider);
     // AND-match first; if a reasonable query finds nothing (e.g. a stray word
     // the catalogue doesn't use), fall back to matching ANY word so the user
@@ -1885,7 +1920,10 @@ class _SearchResultsList extends ConsumerWidget {
     }
 
     final products = showProducts
-        ? orderProducts(filterByImage(matchProducts(), imageOnly)).take(40).toList()
+        ? orderProducts(filterBySystem(
+                filterByImage(matchProducts(), imageOnly), systemFilter))
+            .take(40)
+            .toList()
         : const <LipskeyCatalogProduct>[];
 
     if (filtered.isEmpty && products.isEmpty) {
