@@ -261,3 +261,9 @@ rather than pixel rendering.
   acceptance+5 · compliance+5 · finder+5 · price+5 · variants+10). A spec'd
   connectable PPR fitting now reaches ~95 (was 90); fixture endpoints stay low.
   Guards: card_score_test (raised-bar group) + mutation_log.
+
+## Score badge on internal card (v5.56)
+- `lipskey_product_sheet.dart` header now renders the `cardReadinessScore` badge
+  ("📊 ציון נתונים N · label", `scoreBandColors`) — same metric the smart card
+  shows. Closes the gap: PPR/Lipskey products that open the INTERNAL card (not
+  the smart card) now display their data-readiness score (PPR ~95).

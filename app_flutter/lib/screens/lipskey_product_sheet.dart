@@ -5,6 +5,7 @@ import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/logic/install_kit.dart';
@@ -475,6 +476,30 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                     fontSize: 12,
                                     fontStyle: FontStyle.italic)),
                           ],
+                          // Card-data readiness score — same metric the smart
+                          // card shows (📊), surfaced here too so internal-card
+                          // products (PPR/Lipskey) display how complete their
+                          // data is. Closes the gap where PPR scored ~95 but the
+                          // badge only lived on the smart card.
+                          const SizedBox(height: 6),
+                          Builder(builder: (_) {
+                            final s = cardReadinessScore(p);
+                            final c = scoreBandColors(s.score);
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: c.bg,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: c.border),
+                              ),
+                              child: Text('📊 ציון נתונים ${s.score} · ${s.label}',
+                                  style: TextStyle(
+                                      color: c.fg,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700)),
+                            );
+                          }),
                           const SizedBox(height: 8),
                           _InteractiveChips(
                             product: p,
