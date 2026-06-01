@@ -185,6 +185,8 @@ void main() {
   testWidgets('19 · catalog search panel renders live results', (t) async {
     await t.pumpWidget(const ProviderScope(child: BuildSmartApp()));
     await t.pumpAndSettle();
+    await t.tap(find.text('אינסטלציה'));
+    await t.pumpAndSettle();
     final c = shellContainer(t);
     c.read(searchPanelOpenProvider.notifier).state = true;
     c.read(searchQueryProvider.notifier).state = 'מחסום';

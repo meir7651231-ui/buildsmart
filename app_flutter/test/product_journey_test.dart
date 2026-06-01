@@ -38,6 +38,10 @@ void main() {
     await t.pumpWidget(app());
     await t.pumpAndSettle();
 
+    // 0 · enter the catalog via the new departments home (Benzi #2/#3)
+    await t.tap(find.text('אינסטלציה'));
+    await t.pumpAndSettle();
+
     // 1 · catalog boots
     expect(find.text('BuildSmart'), findsOneWidget);
 

@@ -11,12 +11,13 @@ Future<void> _open(WidgetTester t, String tooltip) async {
 }
 
 void main() {
-  testWidgets('Shell boots showing brand and finder landing', (t) async {
+  testWidgets('Shell boots showing brand and departments landing', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     expect(find.text('BuildSmart'), findsOneWidget);
-    // Default catalog tab now lands on 'בית' (finder home); its group rows show.
-    expect(find.text('ברזים'), findsAtLeastNWidgets(1));
+    // The home is now the departments grid (Benzi #2/#3).
+    expect(find.text('מחלקות'), findsAtLeastNWidgets(1));
+    expect(find.text('אינסטלציה'), findsOneWidget);
   });
 
   testWidgets('BS dial opens 5 personas verbatim', (t) async {
@@ -59,7 +60,9 @@ void main() {
   testWidgets('"הכל" overview shows a preview block per section', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    // 'הכל' is no longer the default landing — open it via its chip.
+    // Enter the catalog via the new departments home, then open 'הכל'.
+    await t.tap(find.text('אינסטלציה'));
+    await t.pumpAndSettle();
     await t.tap(find.text('הכל').first);
     await t.pumpAndSettle();
     // Section labels are present (they also appear as chips → at least one).
@@ -80,7 +83,9 @@ void main() {
   testWidgets('קטגוריות section shows all 11 verbatim categories', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
-    // 'בית' is now the default landing — open the 'קטגוריות' section first.
+    // Enter the catalog via the new departments home, then open 'קטגוריות'.
+    await t.tap(find.text('אינסטלציה'));
+    await t.pumpAndSettle();
     final catChip = find.text('קטגוריות').first;
     await t.ensureVisible(catChip);
     await t.pumpAndSettle();

@@ -1,6 +1,7 @@
 import 'package:buildsmart/screens/bs_dial_widget.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
+import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chat_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
@@ -40,7 +41,7 @@ class HomeShell extends ConsumerWidget {
           IndexedStack(
             index: tabIndex,
             children: const [
-              CatalogScreen(),
+              DepartmentsScreen(),
               ChatsScreen(),
               NotificationsScreen(),
               StoreScreen(),
@@ -87,6 +88,8 @@ class HomeShell extends ConsumerWidget {
         currentIndex: tabIndex,
         onTap: (i) {
           resetAllDials(ref);
+          // Re-tapping the מחלקות tab returns to the departments grid.
+          if (i == 0) ref.read(homeDepartmentProvider.notifier).state = null;
           ref.read(mainTabProvider.notifier).state = i;
         },
       ),
@@ -465,8 +468,8 @@ class _BottomNav extends ConsumerWidget {
       unselectedFontSize: 11,
       items: [
         const BottomNavigationBarItem(
-          icon: Icon(Icons.grid_view),
-          label: 'קטלוג',
+          icon: Icon(Icons.apps),
+          label: 'מחלקות',
         ),
         const BottomNavigationBarItem(
           icon: Icon(Icons.chat_bubble_outline),

@@ -27,6 +27,14 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 | מחירים/מע"מ/מטבע/מחיר-יחידה/השוואה | — | ⛔ no price data |
 | דירוג/מרחק/ספקים מקומיים · AI×4 · יחידות/עשרוני · מיון-ברירת-מחדל · רדיוס | — | ⛔ no data/engine |
 
+## Departments home (`departments_screen.dart` — Benzi #2/#3)
+
+The landing tab (bottom-nav "מחלקות", index 0): a 2-col grid of 9 departments
+(verbatim names). **Live** (have catalog data): אינסטלציה · ברזים וסניטריים — tap
+shows the existing catalog **inline** (shell chrome stays; `homeDepartmentProvider`).
+The other 7 → "בקרוב" toast (R8: no data, no invention). Re-tapping the מחלקות tab
+returns to the grid.
+
 ## Catalog search panel tools (`catalog_screen.dart` · `_SearchToolsRow`)
 
 | Tool | Behavior | Status |
