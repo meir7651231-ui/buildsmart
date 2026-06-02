@@ -178,4 +178,51 @@
 
 ---
 
-_נכתב ע"י פרוטוקוליסט · 2026-06-01, עודכן 2026-06-02 (v5.68, post-push 3/4 סוכנים)_
+## וידוא פריסה (CI/CD) — 2026-06-02
+
+| Workflow | Flutter pin | מצב | הערה |
+|----------|-------------|------|------|
+| Deploy to GitHub Pages | 3.44.0 | ✅ הצליח (`8830a5f`/`4a9bf3f`/`7cd3632`) | gh-pages חי; ה-3 האחרונים pending (concurrency) |
+| Android package (AAB/APK) | 3.44.0 | ✅ רץ | AAB 68.2MB חתום |
+| catalog-qa | 3.29.3 | ✅ | |
+| Protocol Enforcement | ~~3.29.0~~ → **3.29.3** | 🔧 **תוקן בסשן זה** | היה אדום: `^3.7.2` מול Dart 3.7.0; pin עודכן (לקח #67) |
+
+**מסקנה:** האפליקציה **פרוסה** ל-GitHub Pages וה-AAB נבנה. ה-red-X היחיד (Protocol
+Enforcement) היה תקלת-pin ולא באג-קוד — תוקן; ירוק יאומת אחרי הדחיפה הבאה.
+
+---
+
+## 📋 תוכנית פעולה — מחר (פר-סוכן)
+
+> ענף נעול ב-`9458c6c` (+ הדחיפה הזו). כל סוכן: צעד-פתיחה = `fetch`→`ff-only`/`rebase` (לקח #63/#66), לא `reset --hard`.
+
+### 🔴 המשתמש — קודם כל (חוסם השקה)
+1. **R2 token** — Cloudflare → R2 → Manage API Tokens → **Revoke** (נחשף בצ'אט). דחוף-אבטחה.
+2. **Google Play** — חשבון מפתח (25$) + אירוח `privacy-policy.md` + העלאת תמונות ל-R2 (`upload-images-to-r2.ps1`). הכל מוכן ב-`LAUNCH_PACKAGE/`.
+3. **2 הכרעות-עיצוב:** (א) זרימת-ניווט option 1/2 (ליטוש ממתין); (ב) בעלות על `lipskey_products_screen.dart` (מקבץ/קטלגן ל-I6).
+
+### 👷 מקבץ (Finder)
+- I6 — פיקר group-by-DN ב-`lipskey_products_screen.dart` (**אחרי הכרעת-בעלות 3ב**)
+- I10-full — dart-fix lints נותרים (תיאום: רק קבצים שאף סוכן-אחר לא פתח)
+- I9 (rename) — ערך-נמוך, רק אם יש זמן
+
+### 🚀 בנצי (Launch)
+- **תלוי-משתמש:** ברגע שיש keystore + App ID → לסגור חתימה ב-GitHub Secret, להגיש ל-Play
+- אופציונלי: split debug-symbols (גזימה נוספת מעבר ל-68MB)
+
+### 📦 קטלגן (Catalog)
+- P1–P9 ב-`HULIOT_TODO.md`: הפרדת תצלום/דיאגרמה (P1) · spec crops §17.2 (P3) · AQUA SLIM עמ'27 (P4) · brand-wiring משותף (P6) · full dims (P7) · לוגו (P8) · שורת PARITY brand#3 (P9)
+
+### ✨ ליטוש (Polish)
+- **תלוי-משתמש:** זרימת-ניווט (3א) → אז להמשיך
+- פאזות B–J (UI polish) — דורש `/run` skill לצילומי-מסך
+- sysOpt כפול · בנצי #4/#5/#6 · 7 placeholders (R8) — ראה `ACTION_PLAN.md`
+
+### 📐 פרוטוקוליסט
+- לאמת ש-Protocol Enforcement ירוק אחרי תיקון ה-pin (#67)
+- לאמת gh-pages פרוס בגרסה האחרונה
+- לתחזק את תור-הדחיפה אם כמה סוכנים פעילים במקביל (#66)
+
+---
+
+_נכתב ע"י פרוטוקוליסט · 2026-06-01, עודכן 2026-06-02 (v5.68 · CI מתוקן · תוכנית-מחר פר-סוכן)_
