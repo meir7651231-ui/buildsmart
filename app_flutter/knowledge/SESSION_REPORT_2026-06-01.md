@@ -185,10 +185,16 @@
 | Deploy to GitHub Pages | 3.44.0 | ✅ הצליח (`8830a5f`/`4a9bf3f`/`7cd3632`) | gh-pages חי; ה-3 האחרונים pending (concurrency) |
 | Android package (AAB/APK) | 3.44.0 | ✅ רץ | AAB 68.2MB חתום |
 | catalog-qa | 3.29.3 | ✅ | |
-| Protocol Enforcement | ~~3.29.0~~ → **3.29.3** | 🔧 **תוקן בסשן זה** | היה אדום: `^3.7.2` מול Dart 3.7.0; pin עודכן (לקח #67) |
+| Protocol Enforcement | ~~3.29.0~~ → **3.29.3** | 🟡 2 באגים תוקנו · 1 false-positive נותר | ראה למטה |
 
-**מסקנה:** האפליקציה **פרוסה** ל-GitHub Pages וה-AAB נבנה. ה-red-X היחיד (Protocol
-Enforcement) היה תקלת-pin ולא באג-קוד — תוקן; ירוק יאומת אחרי הדחיפה הבאה.
+**Protocol Enforcement — 3 שורשים שהתגלו ב"ווידוא פריסה" (לקח #67):**
+1. ✅ **pin-drift** — `flutter 3.29.0` (Dart 3.7.0) מול `^3.7.2` → `pub get` נכשל. תוקן: pin→3.29.3.
+2. ✅ **`set -e` הורג substitution** — `flutter analyze` יוצא ≠0 על infos; ההשמה מתה לפני ה-grep. תוקן: `|| true` ב-Gate 1+5.
+3. 🟡 **Gate 5 false-positive (נותר — להכרעה מחר)** — ה-CI סורק את **כל** העץ ותפס 2 צבעי-**טקסט** קיימים ב-`chats_screen.dart` (`0xFF111111` = טקסט כהה על בועות בהירות, **לא משטח**). זה **סוטה מהכלל הקנוני** — ה-hook המקומי (שער 46) הוא diff-scoped (חוסם רק *הוספה חדשה*). החלטה למחר: או להתאים את Gate 5 ל-diff-scope של שער 46, או להמיר את 2 הצבעים ל-token.
+
+**מסקנה:** האפליקציה **פרוסה ורצה** — Deploy ל-GitHub Pages ✅ + Android AAB 68MB ✅
+(אומת ב-`5b91dec`/`9458c6c`/`ac2ba7a`; צילום-מסך חי מאשר רינדור תקין). ה-red של
+Protocol Enforcement **אינו חוסם דפלוי** (workflow נפרד) — נותר false-positive אחד שאינו באג-קוד.
 
 ---
 
@@ -219,8 +225,8 @@ Enforcement) היה תקלת-pin ולא באג-קוד — תוקן; ירוק י�
 - sysOpt כפול · בנצי #4/#5/#6 · 7 placeholders (R8) — ראה `ACTION_PLAN.md`
 
 ### 📐 פרוטוקוליסט
-- לאמת ש-Protocol Enforcement ירוק אחרי תיקון ה-pin (#67)
-- לאמת gh-pages פרוס בגרסה האחרונה
+- **Gate 5 false-positive** (#67 שורש 3): להכריע — להתאים את Gate 5 ב-`protocol-enforce.yml` ל-diff-scope של שער 46 (canonical), **או** להמיר 2 צבעי-הטקסט ב-`chats_screen.dart:981,1262` ל-token. אז Protocol Enforcement ירוק.
+- לאמת gh-pages פרוס בגרסה האחרונה (Deploy כבר ✅)
 - לתחזק את תור-הדחיפה אם כמה סוכנים פעילים במקביל (#66)
 
 ---
