@@ -395,7 +395,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.69 · 1.6.35 · 🟢 חוליות P1+P2 — תצלומי-מוצר נקיים (render בלבד, photo-height קבוע) · בלי דיאגרמת L/DN ובלי שאריות-טבלה (X 250→238)',
+                          'v5.70 · 1.6.36 · 🟢 חוליות P6 — חיווט מותג: finderGroupFor (דלוחין SmartLock) · engineeringSpec (PP/95°C) · תקנים (ת"י 958-1/71253/5694/14020) verbatim',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

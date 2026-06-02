@@ -218,3 +218,9 @@
 - מסקנה: הבדיקה חזקה — תופסת collision של category-set בין שתי קבוצות
   finder. זו ההגנה היחידה שמבטיחה ש-finder.home לא מציג מוצר באותו פעם
   באף one of two distinct groups (UX duplicate).
+
+### lib/data/related_info.dart — 2026-06-02T13:07:53+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s#if (p.brand == 'חוליות') return (emoji: '🟢', label: 'דלוחין SmartLock');#// mutated#`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/polyroll_e2e_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

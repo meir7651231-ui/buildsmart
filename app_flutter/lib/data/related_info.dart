@@ -51,6 +51,7 @@ const List<_FinderGroup> _kFinderGroups = [
 /// Layman category info for [p]: emoji + label (or null when "אחר").
 ({String emoji, String label})? finderGroupFor(LipskeyCatalogProduct p) {
   if (p.brand == 'פולירול') return (emoji: '🚰', label: 'אספקת מים');
+  if (p.brand == 'חוליות') return (emoji: '🟢', label: 'דלוחין SmartLock');
   for (final g in _kFinderGroups) {
     if (g.cats.contains(p.categoryHe)) {
       return (emoji: g.emoji, label: g.label);
@@ -488,6 +489,22 @@ List<LipskeyCatalogProduct> variantSiblingsOf(LipskeyCatalogProduct p) {
         minBoreMm: bore,
       );
     }
+    // Huliot SmartLock — gravity drainage; no verified-spec row. Snapshot from
+    // the page-4 spec table + page-6 envelope (verbatim): PP multilayer (PPMD),
+    // softening 155-162°C, long-term up to 95°C, ratchet-tooth + TPE seal join.
+    // Gravity drainage → no pressure rating (R8: no PN column in the catalog).
+    if (p.brand == 'חוליות') {
+      final dn = p.dims?['DN']?.toString();
+      final bore = dn == null ? null : double.tryParse(dn);
+      return (
+        material: 'PP רב-שכבתי (PPMD)',
+        pressureRating: null,
+        maxTempC: 95,
+        waterSystem: 'דלוחין (שפכים)',
+        endsSummary: 'נעילת שיניים ראטצ\'ט + אטם TPE',
+        minBoreMm: bore,
+      );
+    }
     return null;
   }
 
@@ -597,6 +614,31 @@ List<({String label, String reason})> complianceTriggersFor(
       ),
     ]);
   }
+  // Huliot SmartLock — drainage standards (verbatim, page 6: היתרים).
+  if (p.brand == 'חוליות') {
+    out.addAll(const [
+      (
+        label: '🛡 ת"י 958-1',
+        reason: 'צנרת PP לסילוק שפכים בתוך הבניין — היתר מספר 737',
+      ),
+      (
+        label: '🛡 ת"י 71253-1/2',
+        reason: 'מחסום ריחות + מאסף מפלסטיק להתקנה ברצפה — היתר 114782',
+      ),
+      (
+        label: '🛡 ת"י 5694',
+        reason: 'אביזרי ניקוז, מחסומים גלויה וסיפונים — היתר 114783',
+      ),
+      (
+        label: '🛡 תו ירוק ת"י 14020',
+        reason: 'מוצרי PP — היתר מספר 70304',
+      ),
+      (
+        label: '🛡 EN-1451 · DIN 8078',
+        reason: 'תקן בנייה בינלאומי · עמידות כימית PH2 עד PH12',
+      ),
+    ]);
+  }
   final cat = p.categoryHe;
   final type = p.productType ?? '';
 
@@ -686,6 +728,22 @@ String? complianceWhyHe(String label) {
   }
   if (label.contains('PEX')) {
     return 'PEX מתרחב ומתכווץ עם הטמפ׳; מפצה התפשטות מסיר מתח מהחיבורים.';
+  }
+  // Huliot SmartLock — drainage standards (page-6 היתרים).
+  if (label.contains('958-1')) {
+    return 'התקן לצנרת פלסטיק PP לסילוק שפכים חמים בתוך הבניין — מבטיח עמידות חום וכימית.';
+  }
+  if (label.contains('71253')) {
+    return 'התקן למחסום-ריחות ולמאסף מפלסטיק להתקנה ברצפה — אטימות ריח ומים.';
+  }
+  if (label.contains('5694')) {
+    return 'התקן לאביזרי ניקוז, מחסומים גלויה וסיפונים — התאמה לשימוש סניטרי.';
+  }
+  if (label.contains('תו ירוק') || label.contains('14020')) {
+    return 'תו ירוק למוצרי PP — עמידה בדרישות סביבה ומיחזוריות.';
+  }
+  if (label.contains('EN-1451') || label.contains('DIN 8078')) {
+    return 'תקן בנייה בינלאומי ל-PP + עמידות כימית רחבה (PH2–PH12).';
   }
   return null;
 }

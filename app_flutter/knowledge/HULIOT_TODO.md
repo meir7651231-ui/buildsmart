@@ -29,7 +29,8 @@
 - **בעיה:** פס אפור מימין (אייקוני יח'/ארגז/משטח של הטבלה).
 - **תיקון שבוצע:** `X1` 250→238 ב-`crop_huliot.py`. נחתך מחדש, אין שאריות.
 
-### P3 — spec images פר-משפחה (§17.2)
+### P3 — spec images פר-משפחה (§17.2) 🔵 ירד בעדיפות
+- **ממצא:** ה-flip כבר מציג את עמוד-הקטלוג המלא (דיאגרמה+טבלה בהקשר) דרך fallback. crop צמוד = cosmetic בלבד, לא פער.
 - כרגע `_huliotSpecFor` מחזיר null → flip נופל ל-page image מלא.
 - לחתוך את דיאגרמת-החתך (L/DN/W/t/H) פר-משפחה → `spec_sml_p{NN}_{tag}.jpg`
   ולנתב ב-`_huliotSpecFor` (כמו `_pprSpecFor`).
@@ -43,7 +44,8 @@
   (אין תצלום בקטלוג). כרגע ממחזרים crop אח/מצמד. להחליט: לקבל, או לחתוך
   תצלום-אח מדויק יותר.
 
-### P6 — brand wiring בפונקציות משותפות
+### P6 — brand wiring בפונקציות משותפות ✅ בוצע (v5.70)
+- **בוצע:** finderGroupFor + engineeringSpecFor + complianceTriggersFor + complianceWhyHe קיבלו ענף חוליות (verbatim עמ' 4/6). 4 בדיקות P6 + mutation_verify.
 - `findAttrSiblings` / `findTypeSiblings` / `finderGroupFor` / `engineeringSpecFor`
   / `complianceTriggersFor` / `installKitFor` / `_StripDef` info+hygiene —
   כולן עם `if (p.brand == kPolyrollBrand)`. Huliot נופל לברירת-מחדל.

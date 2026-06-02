@@ -316,6 +316,20 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — P6 חיווט מותג לפונקציות משותפות (v5.70 — 2026-06-02)
+- CATALOG שלב ה' — Huliot נפל ל-default ב-4 פונקציות משותפות. נוסף ענף 'חוליות':
+  - `related_info.dart::finderGroupFor` → (🟢, 'דלוחין SmartLock') — "נמצא ב" עכשיו מאוכלס.
+  - `related_info.dart::engineeringSpecFor` → snapshot מ-עמ' 4/6: PP רב-שכבתי
+    (PPMD) · ללא PN (כבידה) · 95°C · דלוחין · נעילת ראטצ'ט+TPE · bore=DN.
+  - `related_info.dart::complianceTriggersFor` → 5 תקני Huliot verbatim
+    (ת"י 958-1/71253-1+2/5694/14020 + EN-1451·DIN 8078), בלי לדלוף תקני PPR.
+  - `related_info.dart::complianceWhyHe` → 5 הסברי-why ל-labels החדשים
+    (smart_card_data_test דורש why לכל label, כי Huliot smart-wired ע"י בנצי).
+- Guards: `test/polyroll_e2e_test.dart` group `P6 · Huliot brand-wiring` (4
+  בדיקות: finderGroup=דלוחין · engineeringSpec PP/no-PN/95°C · 5 תקנים נוכחים
+  + לא דולף 15874 · 0 orphans). mutation_verify על finderGroupFor (red→green).
+- 1013 tests pass.
+
 ## Huliot SmartLock — P1+P2 תצלומי-מוצר נקיים (v5.69 — 2026-06-02)
 - מענה לפידבק "חלק מה-crops כוללים דיאגרמת L/DN + שאריות-טבלה":
 - `scripts/crop_huliot.py`: `TOP_FRAC` (חלק יחסי מהבנד) → `PHOTO_H=170` קבוע
