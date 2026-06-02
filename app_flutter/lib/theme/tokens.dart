@@ -41,6 +41,10 @@ class BsTokens {
   static const Color inkLight = Color(0xFF1A1A1A);
   static const Color mutedLight = Color(0xFF666666);
 
+  // Chat-specific text colors (light background, high-contrast).
+  static const Color chatText = Color(0xFF111111);
+  static const Color chatTimestamp = Color(0xFF777777);
+
   // Dark theme colors — still used by AppTheme.dark(), dial & toast. Restored
   // after the light-mode transition removed them while consumers still ref them.
   static const Color bgDark = Color(0xFF0E1116);

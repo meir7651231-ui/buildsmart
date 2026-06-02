@@ -395,7 +395,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.68 · 1.6.34 · 🟢 חוליות — 88 תמונות מוצר חתוכות פר-משפחה (§17.1) במקום עמוד מוקטן · _huliotImageFor routing פר-עמוד · §17.1-Huliot test ירוק',
+                          'v5.69 · 1.6.34 · 🟢 CI Gate-5 false-positive נפתר — chatText token; צבע טקסט צ׳אט → BsTokens',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

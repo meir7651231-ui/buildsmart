@@ -497,6 +497,14 @@ rather than pixel rendering.
 - Guards: `smartproduct_contract_test` Huliot test now spans 11 cards + sku→card
   spot-checks + ≥117 mapped. Mutation-verified. Pure data; no engine change.
 
+## CI Gate-5 false-positive fix — BsTokens.chatText token (v5.68)
+- `lib/theme/tokens.dart`: הוספת `BsTokens.chatText = Color(0xFF111111)` +
+  `BsTokens.chatTimestamp = Color(0xFF777777)` כטוקנים ייעודיים לצ'אט.
+- `lib/screens/chats_screen.dart`: החלפת שני שימושים בצבע גולמי `0xFF111111`
+  (צבע טקסט, לא משטח כהה) בטוקן `BsTokens.chatText`.
+- Effect: Gate-5 ב-CI (`grep ... lib/screens/`) מחזיר 0 תוצאות — false-positive נפתר.
+  הטוקן עצמו נמצא ב-`lib/theme/` שלא נסרק ע"י Gate-5.
+
 ## Product/page images → CDN + bounded on-device cache (#3 weight)
 - `lib/data/product_images.dart`: `productImageUrl` (pure asset-path → CDN-URL map,
   strips `assets/`) + `resolveProductImage`/`productImage` (drop-in for `Image.asset`).
