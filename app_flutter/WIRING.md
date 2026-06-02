@@ -36,12 +36,22 @@ The landing tab (bottom-nav "מחלקות", index 0): a 2-col grid of 9 departme
 - אינסטלציה → `WaterSystem.drainage` (שפכים) — every drainage category
 - ברזים וסניטריים → `WaterSystem.supply` (מים נקיים) — every clean-water category
 
-Tapping a live tile sets `catalogSystemFilterProvider` + opens the catalog on the
+Tapping a water tile sets `catalogSystemFilterProvider` + opens the catalog on the
 **finder (בית)** (`catalogSectionProvider='בית'`, tree path cleared) — Benzi #1
-option 2: the division flows through the finder, not a forced tree. A
-`_DeptScopeBar` over the catalog names the active scope + a "כל המחלקות" clear.
-The other 7 → "בקרוב" toast (R8: no data, no invention). Re-tapping the מחלקות
-tab (or the bar's clear) resets all three providers → back to the grid.
+option 2: the division flows through the finder, not a forced tree.
+
+**Tool departments (v5.83 — gather every real tool category):** a full audit (all
+99 leaf categories) confirmed the catalog is 100% plumbing, so the only genuine
+tool data backs two live tiles via `toolCats` (leaf `categoryHe`) →
+`_toolDeptPath` (synthetic drill node, no system scope): **כלי עבודה ידני** →
+`כלי עבודה` (2 wrenches) + `חותך צינורות` (2 cutters) · **כלי עבודה חשמלי** →
+`כלי ריתוך PPR` (35 welding machines/drivers). Fitting-like cats stayed out
+(מכשירי לחץ/מנגנונים/סטי-הידוק). The remaining **5** trades (חשמל · חומרי בניין ·
+צבע · גבס · אספקה טכנית) → "בקרוב" toast (R8: no data) — guarded by
+`departments_test`.
+
+A `_DeptScopeBar` over the catalog names the active scope + a "כל המחלקות" clear.
+Re-tapping the מחלקות tab (or the bar's clear) resets all three providers → grid.
 
 ## Catalog search panel tools (`catalog_screen.dart` · `_SearchToolsRow`)
 

@@ -1,3 +1,4 @@
+import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
@@ -11,6 +12,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// stays put; tapping the מחלקות tab resets it.
 final homeDepartmentProvider = StateProvider<String?>((_) => null);
 
+/// Build a drill path for a tool department straight from its leaf `categoryHe`
+/// names — a synthetic node tree, so the department gathers categories that live
+/// in different branches (e.g. כלי עבודה + חותך צינורות). One category drills
+/// straight to its products; several show a row each, then drill to products.
+/// `_TreeDrill` only needs `lipskeyCategory` (leaf) / `children` (branch).
+List<CatalogNode> _toolDeptPath(String name, List<String> cats) {
+  CatalogNode leaf(String c) =>
+      CatalogNode(id: 'dept-cat.$c', title: c, emoji: '🧰', lipskeyCategory: c);
+  if (cats.length == 1) return [leaf(cats.first)];
+  return [
+    CatalogNode(
+      id: 'dept.$name',
+      title: name,
+      emoji: '🧰',
+      children: [for (final c in cats) leaf(c)],
+    ),
+  ];
+}
+
 /// Departments home (Benzi #2/#3) — the app's landing: a grid of departments.
 /// The two live departments ARE the clean-water/sewage division (Benzi #1,
 /// option 2): each opens the catalog's **finder (בית)** scoped to its
@@ -20,18 +40,28 @@ final homeDepartmentProvider = StateProvider<String?>((_) => null);
 class DepartmentsScreen extends ConsumerWidget {
   const DepartmentsScreen({super.key});
 
-  // Names verbatim from Benzi's spec (#2). `system` set on the two live ones.
-  static const List<({String name, IconData icon, bool live, WaterSystem? system})>
-      departments = [
-    (name: 'אינסטלציה', icon: Icons.plumbing, live: true, system: WaterSystem.drainage),
-    (name: 'ברזים וסניטריים', icon: Icons.water_drop, live: true, system: WaterSystem.supply),
-    (name: 'חשמל', icon: Icons.electrical_services, live: false, system: null),
-    (name: 'חומרי בניין', icon: Icons.foundation, live: false, system: null),
-    (name: 'כלי עבודה ידני', icon: Icons.handyman, live: false, system: null),
-    (name: 'כלי עבודה חשמלי', icon: Icons.construction, live: false, system: null),
-    (name: 'צבע וכלים לצבע', icon: Icons.format_paint, live: false, system: null),
-    (name: 'גבס ופרופילים', icon: Icons.view_column, live: false, system: null),
-    (name: 'אספקה טכנית', icon: Icons.settings_input_component, live: false, system: null),
+  // Names verbatim from Benzi's spec (#2). Two are the clean-water/sewage
+  // division (`system`); two more (כלי עבודה) gather EVERY real tool category in
+  // the catalog (`toolCats` — leaf `categoryHe` names; a full audit of all 99
+  // categories found these are the only genuine tools). The rest stay
+  // placeholders until their catalog data exists (R8 — no data, no invention).
+  static const List<
+      ({
+        String name,
+        IconData icon,
+        bool live,
+        WaterSystem? system,
+        List<String>? toolCats,
+      })> departments = [
+    (name: 'אינסטלציה', icon: Icons.plumbing, live: true, system: WaterSystem.drainage, toolCats: null),
+    (name: 'ברזים וסניטריים', icon: Icons.water_drop, live: true, system: WaterSystem.supply, toolCats: null),
+    (name: 'חשמל', icon: Icons.electrical_services, live: false, system: null, toolCats: null),
+    (name: 'חומרי בניין', icon: Icons.foundation, live: false, system: null, toolCats: null),
+    (name: 'כלי עבודה ידני', icon: Icons.handyman, live: true, system: null, toolCats: ['כלי עבודה', 'חותך צינורות']),
+    (name: 'כלי עבודה חשמלי', icon: Icons.construction, live: true, system: null, toolCats: ['כלי ריתוך PPR']),
+    (name: 'צבע וכלים לצבע', icon: Icons.format_paint, live: false, system: null, toolCats: null),
+    (name: 'גבס ופרופילים', icon: Icons.view_column, live: false, system: null, toolCats: null),
+    (name: 'אספקה טכנית', icon: Icons.settings_input_component, live: false, system: null, toolCats: null),
   ];
 
   @override
@@ -90,7 +120,13 @@ class DepartmentsScreen extends ConsumerWidget {
 class _DeptTile extends ConsumerWidget {
   const _DeptTile({required this.dept});
 
-  final ({String name, IconData icon, bool live, WaterSystem? system}) dept;
+  final ({
+    String name,
+    IconData icon,
+    bool live,
+    WaterSystem? system,
+    List<String>? toolCats,
+  }) dept;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -108,12 +144,20 @@ class _DeptTile extends ConsumerWidget {
             showToast(context, 'בקרוב');
             return;
           }
-          // Open the catalog's finder (בית) scoped to this department's water
-          // system (Benzi #1, option 2 — the division flows through the finder,
-          // not a forced tree). Every browse section reads the scope provider.
-          ref.read(catalogSystemFilterProvider.notifier).state = dept.system;
-          ref.read(catalogSectionProvider.notifier).state = 'בית';
-          ref.read(catalogTreePathProvider.notifier).state = const [];
+          final toolCats = dept.toolCats;
+          if (toolCats != null) {
+            // Tool department (כלי עבודה) → drill into ALL its real tool
+            // categories; no water-system scope (it isn't a plumbing system).
+            ref.read(catalogSystemFilterProvider.notifier).state = null;
+            ref.read(catalogTreePathProvider.notifier).state =
+                _toolDeptPath(dept.name, toolCats);
+          } else {
+            // Water-system department (Benzi #1, option 2 — the division flows
+            // through the finder, not a forced tree). Sections read the scope.
+            ref.read(catalogSystemFilterProvider.notifier).state = dept.system;
+            ref.read(catalogSectionProvider.notifier).state = 'בית';
+            ref.read(catalogTreePathProvider.notifier).state = const [];
+          }
           ref.read(homeDepartmentProvider.notifier).state = dept.name;
         },
         child: Semantics(

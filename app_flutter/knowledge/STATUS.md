@@ -1,6 +1,20 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.83` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.84` (see `home_shell.dart`). Update on each user-visible change._
+
+## Departments — tool departments live from real data (v5.83 — R8)
+A full catalog audit (all 99 leaf categories + product-name search) confirmed the
+catalog is 100% plumbing: the 5 trade placeholders (חשמל · חומרי בניין · צבע ·
+גבס · אספקה טכנית) have **zero** real products → stay "בקרוב" (R8 — no data, no
+invention; keyword "hits" like "לבן"/"ברגים"/"מדיח כלים" are false positives).
+The only genuine tools DO exist, gathered into two live departments via
+`toolCats` (leaf `categoryHe`) → `_toolDeptPath` builds a synthetic drill node
+(no water-system scope): **כלי עבודה ידני** → `כלי עבודה` (2 מפתחות) + `חותך
+צינורות` (2 חותכים) · **כלי עבודה חשמלי** → `כלי ריתוך PPR` (35 מכונות/מקדחים/
+מברגות). Borderline cats stayed OUT (מכשירי לחץ/מנגנונים/סטי-הידוק = fittings, not
+tools). Guarded by `departments_test` (toolCats ⇒ live + every category >0;
+placeholders non-live).
+
 _known-failing: 0 (gate 32 baseline — 0 כשלים מאומת 2026-06-01; שמות ב-knowledge/known_failing.txt)_
 
 ## Search autocomplete — `searchSuggestions` (v5.80 — Benzi #6)

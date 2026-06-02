@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.83 · 1.6.47 · 🔧 חוליות P11 — installKit parity מול Polyroll: חותך + מפתח-לאום (32-40/50-63) ב-strip ערכת התקנה',
+                          'v5.84 · 1.6.48 · 🔧 חוליות P11 installKit parity (חותך + מפתח-לאום) + 🧰 כלי-עבודה מחלקות חיות (אודיט-קטלוג)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
