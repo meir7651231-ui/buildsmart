@@ -30,7 +30,11 @@ jobs:
       - name: Gate 1 — Code analysis
         working-directory: app_flutter
         run: |
-          ANALYZE=$(flutter analyze --no-pub 2>&1)
+          # `flutter analyze` יוצא עם קוד 1 על *כל* lint (info/warning) של
+          # very_good_analysis, לא רק error. ה-shell כאן הוא `bash -e`, אז בלי
+          # `|| true` ההשמה הזו מתה לפני ה-grep וה-gate נכשל ללא שגיאת-קוד אמיתית.
+          # הגייט אוכף רק error אמיתי (`^error •`), כמו ה-pre-commit המקומי.
+          ANALYZE=$(flutter analyze --no-pub 2>&1 || true)
           if echo "$ANALYZE" | grep -qE "^error •"; then
             echo "❌ Code errors found:"
             echo "$ANALYZE" | grep -E "^error •"
@@ -60,7 +64,9 @@ jobs:
       - name: Gate 5 — No dark surfaces
         working-directory: app_flutter
         run: |
-          DARK=$(grep -rn "0xFF111111\|BsTokens.bgDark" lib/screens/ 2>/dev/null | grep -v "_test\|//")
+          # `|| true`: כשאין משטחים כהים (המצב התקין) grep מחזיר 1, ותחת `bash -e`
+          # ההשמה הזו הייתה הורגת את ה-gate. שורש זהה ל-Gate 1.
+          DARK=$(grep -rn "0xFF111111\|BsTokens.bgDark" lib/screens/ 2>/dev/null | grep -v "_test\|//" || true)
           if [[ -n "$DARK" ]]; then
             echo "❌ Dark surfaces found:"
             echo "$DARK"
