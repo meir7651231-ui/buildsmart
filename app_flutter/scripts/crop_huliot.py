@@ -104,6 +104,8 @@ PER_BAND_PHOTO_H = {
     (12, 'd'): 110,
     # Page 14 — elbow מצרה צד אחד שקע תקע (band b)
     (14, 'b'): 145,
+    # Page 28 — cylindrical raised has DN tick below
+    (28, 'c'): 110,
     # Page 30 — nickel grid has visible DN+H ticks
     (30, 'b'): 100,
     # Page 32 — kitchen siphon — diagram pulled in below
