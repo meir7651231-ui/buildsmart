@@ -104,15 +104,41 @@ PER_BAND_PHOTO_H = {
     (12, 'd'): 110,
     # Page 14 — elbow מצרה צד אחד שקע תקע (band b)
     (14, 'b'): 145,
+    # Page 20 — drop gutters (photos larger than PER_PAGE)
+    (20, 'a'): 150,
+    (20, 'b'): 170,
+    (20, 'c'): 180,
+    # Page 21 — drains (photos scale with size)
+    (21, 'a'): 150,
+    (21, 'b'): 170,
+    (21, 'c'): 195,
+    # Page 22 — drains open
+    (22, 'a'): 155,
+    (22, 'b'): 180,
+    # Page 23 — kettle drains
+    (23, 'a'): 155,
+    (23, 'b'): 150,
     # Page 28 — cylindrical raised has DN tick below
     (28, 'c'): 110,
     # Page 30 — nickel grid has visible DN+H ticks
     (30, 'b'): 100,
-    # Page 32 — kitchen siphon — diagram pulled in below
+    # Page 32 — no-siphon (tall photo) + kitchen siphon
+    (32, 'a'): 145,
     (32, 'b'): 165,
-    (32, 'c'): 160,    # kitchen+dishwasher siphon
-    # Page 40 — inlet extension photo + adjacent label "ראש שקע תקע"
+    (32, 'c'): 160,
+    # Page 34 — american 1¼ siphon
+    (34, 'a'): 165,
+    # Page 35 — double american siphon (tall photo)
+    (35, 'b'): 195,
+    # Page 36 — H-washing tall photo
+    (36, 'b'): 190,
+    # Page 39 — long basin connector
+    (39, 'b'): 165,
+    # Page 40 — siphon kit + inlet extension
+    (40, 'a'): 165,
     (40, 'c'): 105,
+    # Page 42 — funnel
+    (42, 'b'): 195,
 }
 
 # Per-band override (page, tag) → PHOTO_H. Wins over PER_PAGE_PHOTO_H.
