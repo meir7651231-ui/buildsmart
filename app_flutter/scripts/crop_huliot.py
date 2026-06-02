@@ -299,16 +299,43 @@ def crop_page(pg, tags):
     bottoms = tops[1:] + [H - 50]
     photo_count = spec_count = 0
     for tag, top, bot in zip(tags, tops, bottoms):
-        # Default: PHOTO_H = clamp(band_h * frac, min, max). Per-band/per-page
-        # overrides win when the silhouette is unusual.
+        # Density-based: photo rows have ≥25% ink (dense product silhouette),
+        # diagram rows have <15% ink (thin lines + labels). Find the last
+        # photo-density row before a transition to diagram-density.
         ph_top = top + PHOTO_TOP_GAP
         band_h = bot - top
-        default_h = max(PHOTO_H_MIN,
-                        min(int(band_h * PHOTO_H_FRAC), PHOTO_H_MAX))
-        fph = PER_BAND_PHOTO_H.get((pg, tag),
-                                   PER_PAGE_PHOTO_H.get(pg, default_h))
-        if True:  # Always use the formula/overrides; no block fallback.
-            ph_bot = min(ph_top + fph, bot - 5)
+        scan_end = min(top + int(band_h * 0.65), bot - 5)
+        px = im.load()
+        last_dense = ph_top
+        in_diagram = False
+        for y in range(ph_top, scan_end):
+            ink = 0
+            tot = 0
+            for x in range(X0, X1, 3):
+                r, g, b = px[x, y]
+                tot += 1
+                if r < 230 or g < 230 or b < 230:
+                    ink += 1
+            density = ink / tot
+            if density >= 0.25:           # photo body
+                last_dense = y
+                in_diagram = False
+            elif density < 0.10:          # whitespace OR mid-diagram
+                if not in_diagram:
+                    # First gap: photo ends here
+                    pass
+                else:
+                    # Still in transition
+                    pass
+            else:                          # 0.10-0.25 — diagram thin lines
+                in_diagram = True
+        # Photo bottom = last dense row + small pad
+        ph_bot = min(last_dense + 8, bot - 5)
+        # PER_BAND override wins if specified (for tricky cases)
+        if (pg, tag) in PER_BAND_PHOTO_H:
+            ph_bot = ph_top + PER_BAND_PHOTO_H[(pg, tag)]
+        if False:  # legacy branch (kept for path-flow)
+            ph_bot = ph_top
             photo = im.crop((X0, ph_top, X1, ph_bot))
             photo.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
             photo_count += 1
