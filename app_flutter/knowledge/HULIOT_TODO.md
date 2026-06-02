@@ -52,9 +52,11 @@
   להוסיף ענף `'חוליות'` (או להכליל) לכל אחת — אחרת "מוצרים דומים"/מפרט
   הנדסי/ערכת התקנה לא מותאמים ל-Huliot.
 
-### P7 — reference product full dims
-- חלק מהמשפחות עם dims בסיסי (DN/L/W). מוצר-ייחוס פר-משפחה צריך את **כל**
-  עמודות הטבלה (יח'/ארגז, יח'/משטח, t, t1/t2, D, צבע, חומר) verbatim.
+### P7 — reference product full dims ✅ בוצע (v5.71)
+- **בוצע:** 13 מוצרי-ייחוס פר-משפחה קיבלו `יח׳/ארגז` + `יח׳/משטח` verbatim
+  מהקטלוג. שאר הממדים (t/L/W/D וכו') כבר היו. guard §22.J + mutation_verify.
+- **פטור:** kSmlAccessories (umbrella, 5 עמודים-תת-משפחות) + kSmlAquaSlim
+  (layout שונה, אין pack-icons). דורש crops/data-entry נפרד אם רוצים.
 
 ### P8 — לוגו מותג
 - `assets/lipskey/categories/smartlock.png` = כרגע עותק של drainage.png.

@@ -590,6 +590,37 @@ void main() {
 
   // §22-Huliot paranoid audit — 12 cross-product checks that supplement the
   // single-product tests above. Mirrors the 20-check audit run on Polyroll.
+  // §22.J-Huliot — reference product per family carries pack/pallet counts.
+  // Mirrors CATALOG §13 "reference product = full table row verbatim". The
+  // first product in each family is the reference; it must carry the catalog's
+  // יח׳/ארגז (pack) + יח׳/משטח (pallet) values verbatim. Catches data-entry
+  // gaps where a family-reference was added without the pack columns.
+  //
+  // Excludes families that genuinely lack these in the source catalog:
+  //   - kSmlAccessories (umbrella — many pages, varied table shapes)
+  //   - kSmlAquaSlim (page 27 — different table layout, no pack-icons)
+  test('§22.J-Huliot reference product per family carries יח׳/ארגז + יח׳/משטח',
+      () {
+    const exempt = {kSmlAccessories, kSmlAquaSlim};
+    final firstOf = <String, LipskeyCatalogProduct>{};
+    for (final p in kHuliotCatalog) {
+      firstOf.putIfAbsent(p.categoryHe, () => p);
+    }
+    final missing = <String>[];
+    for (final entry in firstOf.entries) {
+      if (exempt.contains(entry.key)) continue;
+      final d = entry.value.dims ?? const {};
+      if (d['יח׳/ארגז'] == null || d['יח׳/משטח'] == null) {
+        missing.add('${entry.key} (${entry.value.sku}) '
+            '[ארגז=${d['יח׳/ארגז']}, משטח=${d['יח׳/משטח']}]');
+      }
+    }
+    expect(missing, isEmpty,
+        reason:
+            'reference product per family missing pack/pallet (CATALOG §13):\n'
+            '${missing.join('\n')}');
+  });
+
   test('§22-Huliot paranoid 12-check audit — cross-product consistency', () {
     final cat = kHuliotCatalog;
     final failures = <String>[];

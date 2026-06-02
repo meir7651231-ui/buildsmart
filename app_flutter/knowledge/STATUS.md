@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.70` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.71` (see `home_shell.dart`). Update on each user-visible change._
 _known-failing: 0 (gate 32 baseline — 0 כשלים מאומת 2026-06-01; שמות ב-knowledge/known_failing.txt)_
 
 ## Water-system division via departments (v5.59 — Benzi #1+#2+#3)

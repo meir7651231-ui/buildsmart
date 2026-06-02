@@ -316,6 +316,18 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — P7 full dims למוצר-ייחוס פר-משפחה (v5.71 — 2026-06-02)
+- CATALOG §13 — מוצר-ייחוס פר-משפחה = שורת-טבלה מלאה verbatim. נוספו
+  `יח׳/ארגז` (per-box) + `יח׳/משטח` (per-pallet) ל-13 מוצרי-ייחוס:
+  pipes(40·L3000), cutters, joker, elbow oneside 15°/40, elbow 45°/32,
+  elbow reducing 90°/32-40, telescopic 40, tee 45°/32, double coupling 32,
+  reducer 32/40, gutter 70/40, drain 80/50 סגור, nut 32, raised cover 28, basin
+  siphon 1¼". ערכים נשלפו ישירות מ-PDF (smartlock_raw.txt) לכל reference SKU.
+- Guard: `§22.J-Huliot reference product per family carries יח׳/ארגז + יח׳/משטח`
+  ב-`spec_assets_test.dart` — סורק את ה-product הראשון בכל categoryHe,
+  פטור: kSmlAccessories (umbrella, varied) + kSmlAquaSlim (layout שונה).
+- mutation_verify על §22.J (מחיקת זוג ערכים → red→green). 1014 tests pass.
+
 ## Huliot SmartLock — P6 חיווט מותג לפונקציות משותפות (v5.70 — 2026-06-02)
 - CATALOG שלב ה' — Huliot נפל ל-default ב-4 פונקציות משותפות. נוסף ענף 'חוליות':
   - `related_info.dart::finderGroupFor` → (🟢, 'דלוחין SmartLock') — "נמצא ב" עכשיו מאוכלס.
