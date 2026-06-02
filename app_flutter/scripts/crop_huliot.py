@@ -93,13 +93,52 @@ MAX_PHOTO_H = 175          # cap so a tall band doesn't grab the diagram below
 PHOTO_H_FRAC = 0.45
 PHOTO_H_MIN, PHOTO_H_MAX = 90, 195
 
-# Per-page PHOTO_H — used when the page's bands all need the same offset.
-PER_PAGE_PHOTO_H = {}
+PER_PAGE_PHOTO_H = {
+    # Pages flagged as not-clean in v25 → strict hand-tuned heights below
+    # the diagram tick-mark lines. Pages NOT listed fall back to density-
+    # based detection (clean enough in v25).
+    12: 95,     # elbow oneside 4 angles — photos ~95-100, diagram ~5px below
+    14: 115,    # elbow מצרה לסיפון/צד אחד
+    20: 130,    # drop gutters
+    24: 105,    # accessories (joker seal/nut/plug)
+    30: 100,    # grids (taller variants use PER_BAND)
+    32: 130,    # no-siphon / kitchen siphons
+    34: 175,    # american 1¼ siphon
+    35: 170,    # american+dishwasher siphon
+    36: 170,    # double+dishwasher / H washing
+    39: 95,     # short/long basin + rosette + american inlet
+    40: 110,    # siphon kit / slip pipe / extension
+    41: 105,    # long inlet / inlet+AC / american adapter
+    42: 95,     # dishwasher set / funnel / vent / abik
+}
+
+# Per-band override (page, tag) → PHOTO_H. Wins over PER_PAGE_PHOTO_H.
+# Used for bands where the photo is taller than the page average.
+PER_BAND_PHOTO_H = {
+    # Page 21 — drains scale 80/50 → 140/50 → 245/50
+    (21, 'a'): 110,
+    (21, 'b'): 140,
+    (21, 'c'): 165,
+    # Page 22 — drains 140 → 245 (open)
+    (22, 'a'): 130,
+    (22, 'b'): 155,
+    # Page 23 — kettle drains closed → open
+    (23, 'a'): 125,
+    (23, 'b'): 130,
+    # Page 30 — variants vary in height
+    (30, 'b'): 140,    # nickel grid (slightly taller)
+    (30, 'c'): 105,    # round grid
+    (30, 'd'): 100,    # square grid
+    # Misc
+    (40, 'c'): 95,     # inlet extension (very short)
+    (42, 'a'): 80,     # dishwasher set
+    (42, 'c'): 95,     # vent
+}
 
 # Per-band override (page, tag) → PHOTO_H. Wins over PER_PAGE_PHOTO_H.
 # Used for bands where the photo is taller than the page average — e.g.
 # drains scale 80/50 → 140/50 → 245/50 within p21.
-PER_BAND_PHOTO_H = {}
+PER_BAND_PHOTO_H = PER_BAND_PHOTO_H  # noqa: keeps the named dict above
 FIXED_SPEC_GAP = 14        # gap from photo bottom to spec top (FIXED pages)
 
 
@@ -299,43 +338,31 @@ def crop_page(pg, tags):
     bottoms = tops[1:] + [H - 50]
     photo_count = spec_count = 0
     for tag, top, bot in zip(tags, tops, bottoms):
-        # Density-based: photo rows have ≥25% ink (dense product silhouette),
-        # diagram rows have <15% ink (thin lines + labels). Find the last
-        # photo-density row before a transition to diagram-density.
+        # PER_BAND / PER_PAGE override wins; else density-based detection.
         ph_top = top + PHOTO_TOP_GAP
         band_h = bot - top
-        scan_end = min(top + int(band_h * 0.65), bot - 5)
-        px = im.load()
-        last_dense = ph_top
-        in_diagram = False
-        for y in range(ph_top, scan_end):
-            ink = 0
-            tot = 0
-            for x in range(X0, X1, 3):
-                r, g, b = px[x, y]
-                tot += 1
-                if r < 230 or g < 230 or b < 230:
-                    ink += 1
-            density = ink / tot
-            if density >= 0.25:           # photo body
-                last_dense = y
-                in_diagram = False
-            elif density < 0.10:          # whitespace OR mid-diagram
-                if not in_diagram:
-                    # First gap: photo ends here
-                    pass
-                else:
-                    # Still in transition
-                    pass
-            else:                          # 0.10-0.25 — diagram thin lines
-                in_diagram = True
-        # Photo bottom = last dense row + small pad
-        ph_bot = min(last_dense + 8, bot - 5)
-        # PER_BAND override wins if specified (for tricky cases)
-        if (pg, tag) in PER_BAND_PHOTO_H:
-            ph_bot = ph_top + PER_BAND_PHOTO_H[(pg, tag)]
-        if False:  # legacy branch (kept for path-flow)
-            ph_bot = ph_top
+        forced = PER_BAND_PHOTO_H.get((pg, tag),
+                                       PER_PAGE_PHOTO_H.get(pg))
+        if forced is not None:
+            ph_bot = min(ph_top + forced, bot - 5)
+        else:
+            # Density-based for pages NOT in the strict list — these were
+            # already clean in v25's density approach.
+            scan_end = min(top + int(band_h * 0.65), bot - 5)
+            px = im.load()
+            last_dense = ph_top
+            for y in range(ph_top, scan_end):
+                ink = 0
+                tot = 0
+                for x in range(X0, X1, 3):
+                    r, g, b = px[x, y]
+                    tot += 1
+                    if r < 230 or g < 230 or b < 230:
+                        ink += 1
+                density = ink / tot
+                if density >= 0.25:
+                    last_dense = y
+            ph_bot = min(last_dense + 8, bot - 5)
             photo = im.crop((X0, ph_top, X1, ph_bot))
             photo.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
             photo_count += 1
