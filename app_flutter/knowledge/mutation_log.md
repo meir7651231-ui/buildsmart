@@ -242,3 +242,30 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/spec_assets_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### system_division (productDivisionSystems · filterBySystem · nodeHasSystem) — 2026-06-02
+- **קובץ:** `lib/logic/system_division.dart` · בדיקה: `test/system_division_test.dart`
+- **מה עושה:** ליבת חלוקת מים/שפכים (בנצי #1) — סיווג מוצר/צומת-עץ ל-WaterSystem.
+- תקלה שהוזרקה #1: ב-`productDivisionSystems` הפכתי את fallback ה-PPR מ-`supply` ל-`drainage`.
+- תוצאה: אדום ✅ — `'PPR ... → supply'` נתפס (הכלל שהמשתמש קבע: PPR=מים נקיים).
+- תקלה שהוזרקה #2: ב-`nodeHasSystem` הסרתי את שורת ה-`_fixtureTitles` (מתקנים
+  לא יופיעו בשני הצדדים).
+- תוצאה: אדום ✅ — `'fixture (אסלות) shows under BOTH systems'` נתפס (כלל option 2).
+- תקלה שהוזרקה #3: ב-`filterBySystem` החזרתי `list` גם כש-system≠null (ביטול הסינון).
+- תוצאה: אדום ✅ — `'supply filter keeps only supply'` נתפס.
+- שחזור: שלושתן הוחזרו → הרצה ירוקה (9/9) ✅.
+- מסקנה: הבדיקה חזקה — מכסה את שלושת הכללים (PPR=נקיים, מתקנים בשני צדדים, סינון ממשי).
+
+### system_division — פאזה 2b (smartProductSystems · filterSmartBySystem) — 2026-06-02
+- **קובץ:** `lib/logic/system_division.dart` · בדיקה: `test/system_division_test.dart`
+- **מה עושה:** סינון עץ-חכם — ממפה את ה-SKU של מותגי ה-SmartProduct חזרה לקטלוג
+  כדי לסווג כל מוצר-חכם למערכת (לא-פתיר → נשאר בשני הצדדים).
+- תקלה שהוזרקה A: ב-`smartProductSystems` שיניתי `p.sku == sku` ל-SKU שלעולם
+  אינו קיים (אף התאמה → כל מוצר "לא-פתיר").
+- תוצאה: אדום ✅ — `'brand-SKU mapping resolves'` **וגם** `'filter discriminates'`
+  נתפסו (הכול הפך ל"בשני הצדדים" → sup==dr==all).
+- תקלה שהוזרקה B: ב-`filterSmartBySystem` החזרתי `list` תמיד (no-op, ביטול הסינון).
+- תוצאה: אדום ✅ — `'filter discriminates — supply/drainage pools differ'` נתפס.
+- שחזור: שתיהן הוחזרו → 14/14 ירוק ✅.
+- מסקנה: הבדיקה חזקה — מכסה מיפוי-לא-no-op, אי-היעלמות (supply∪drainage מכסה הכול),
+  והבחנה ממשית (48 נקיים · 58 שפכים מתוך 81; 23 supply-only · 33 drainage-only).

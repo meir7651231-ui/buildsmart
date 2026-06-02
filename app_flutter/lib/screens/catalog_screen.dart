@@ -16,6 +16,7 @@ import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
+import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
@@ -167,9 +168,8 @@ final searchScopeProvider = StateProvider<String>((_) => 'הכל');
 /// (the ⚙️ פילטרים tool · "עם תמונה").
 final searchImageOnlyProvider = StateProvider<bool>((_) => false);
 
-/// Active water-system division (Benzi #1): null = all · supply = מים נקיים ·
-/// drainage = שפכים. Filters the live product results.
-final catalogSystemFilterProvider = StateProvider<WaterSystem?>((_) => null);
+// catalogSystemFilterProvider lives in logic/system_division.dart (shared with
+// the finder so neither screen back-imports the other).
 
 // recentSearchesProvider lives in state/recent_searches.dart (persisted).
 
@@ -273,59 +273,8 @@ List<LipskeyCatalogProduct> filterByImage(
   return list.where((p) => p.imageAsset != null).toList();
 }
 
-/// Pure: keep only products whose verified spec belongs to [system]
-/// (מים נקיים = supply · שפכים = drainage). Products without a spec are dropped
-/// when a system is selected (R8 — don't guess their system).
-/// The water system(s) a product belongs to for the catalog division (Benzi #1).
-/// Verified spec wins; PPR (פולירול) carries no spec but is clean-water
-/// (supply); everything else without a spec defaults to שפכים (drainage) for now.
-Set<WaterSystem> productDivisionSystems(LipskeyCatalogProduct p) {
-  final ends = kVerifiedSpecs[p.sku]?.endSystems;
-  if (ends != null && ends.isNotEmpty) return ends;
-  if (p.brand == 'פולירול') return const {WaterSystem.supply};
-  return const {WaterSystem.drainage};
-}
-
-List<LipskeyCatalogProduct> filterBySystem(
-    List<LipskeyCatalogProduct> list, WaterSystem? system) {
-  if (system == null) return list;
-  return list.where((p) => productDivisionSystems(p).contains(system)).toList();
-}
-
-/// True if [node] has ≥1 product in [system] (recursive over the catalog tree).
-/// Drives the department division (Benzi #1) at the **sub-category** level: each
-/// tree node appears under the system it really belongs to; a fixture (e.g.
-/// אסלות) splits — its supply leaves show under מים נקיים, its drainage leaves
-/// under שפכים. Classification is `productSystems` (the תכנון-חיבור engine).
-/// True fixtures — they genuinely bridge both systems, so they show in BOTH
-/// departments and their sub-categories split. Everything else belongs to its
-/// dominant system only (Benzi #1, option 2 — clean, non-overlapping lists).
-const _fixtureTitles = {'אסלות', 'מקלחות ואמבטיות', 'גופי תברואה'};
-
-bool nodeHasSystem(CatalogNode node, WaterSystem system) {
-  if (_fixtureTitles.contains(node.title)) return true;
-  var sup = 0, dr = 0;
-  void walk(CatalogNode n) {
-    if (n.isLeaf) {
-      final c = n.lipskeyCategory;
-      if (c == null) return;
-      for (final p in kCatalogProducts) {
-        if (p.categoryHe != c) continue;
-        final s = productDivisionSystems(p);
-        if (s.contains(WaterSystem.supply)) sup++;
-        if (s.contains(WaterSystem.drainage)) dr++;
-      }
-    } else {
-      for (final ch in n.children) {
-        walk(ch);
-      }
-    }
-  }
-
-  walk(node);
-  if (sup == 0 && dr == 0) return false;
-  return (sup >= dr ? WaterSystem.supply : WaterSystem.drainage) == system;
-}
+// productDivisionSystems · filterBySystem · nodeHasSystem moved to
+// logic/system_division.dart (shared with the finder; see the import above).
 
 /// Synthetic root whose children are the top catalog categories — a live
 /// department opens this so its system-filtered category tree shows.
@@ -1636,19 +1585,6 @@ class _SearchToolsRow extends ConsumerWidget {
   // ⚙️ פילטרים — filter the live product results.
   void _openFilterSheet(BuildContext context, WidgetRef ref) {
     final imageOnly = ref.read(searchImageOnlyProvider);
-    final sysFilter = ref.read(catalogSystemFilterProvider);
-    Widget sysOpt(String label, WaterSystem? value) => ListTile(
-          leading: Icon(
-            value == sysFilter ? Icons.check : Icons.radio_button_unchecked,
-            color:
-                value == sysFilter ? BsTokens.brand : const Color(0xFF888888),
-          ),
-          title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
-          onTap: () {
-            ref.read(catalogSystemFilterProvider.notifier).state = value;
-            Navigator.pop(context);
-          },
-        );
     Widget opt(String label, bool value) => ListTile(
           leading: Icon(
             value == imageOnly ? Icons.check : Icons.radio_button_unchecked,
@@ -1669,11 +1605,6 @@ class _SearchToolsRow extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const _SheetTitle('מערכת'),
-            sysOpt('כל המערכות', null),
-            sysOpt('מים נקיים', WaterSystem.supply),
-            sysOpt('שפכים', WaterSystem.drainage),
-            const Divider(height: 1),
             const _SheetTitle('תמונה'),
             opt('הכל', false),
             opt('עם תמונה בלבד', true),
@@ -2258,24 +2189,39 @@ class _EmptySection extends StatelessWidget {
   }
 }
 
-class _CatalogList extends StatelessWidget {
+/// Top categories (+ their meta) that belong to [system] — matched to their
+/// catalog-tree node's dominant system (fixtures show in both), consistent with
+/// the tree drill. null → all. Keeps category ⇄ `_kMeta` index alignment.
+List<({Section cat, ({String preview, String time, int badge}) meta})>
+    _catRowsForSystem(WaterSystem? system) {
+  final out =
+      <({Section cat, ({String preview, String time, int badge}) meta})>[];
+  for (var i = 0; i < kCatalogCats.length; i++) {
+    if (system != null) {
+      final node = _findCatalogTreeNodeByTitle(kCatalogCats[i].title);
+      if (node == null || !nodeHasSystem(node, system)) continue;
+    }
+    out.add((cat: kCatalogCats[i], meta: _kMeta[i]));
+  }
+  return out;
+}
+
+class _CatalogList extends ConsumerWidget {
   const _CatalogList();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rows = _catRowsForSystem(ref.watch(catalogSystemFilterProvider));
     return ListView.separated(
       key: const Key('catalog-list'),
-      itemCount: kCatalogCats.length,
+      itemCount: rows.length,
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 76,
         color: Color(0xFFF5F5F5),
       ),
       itemBuilder: (context, i) {
-        return _CatalogRow(
-          cat: kCatalogCats[i],
-          meta: _kMeta[i],
-        );
+        return _CatalogRow(cat: rows[i].cat, meta: rows[i].meta);
       },
     );
   }
@@ -2293,21 +2239,32 @@ class _AllOverview extends ConsumerWidget {
 
     final recents = ref.watch(recentSearchesProvider);
     final favSkus = ref.watch(productFavoritesProvider);
-    final favProducts =
-        kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).take(3).toList();
+    final systemFilter = ref.watch(catalogSystemFilterProvider);
+    final catRows = _catRowsForSystem(systemFilter);
+    final smartCats = systemFilter == null
+        ? kSmartTreeCats
+        : kSmartTreeCats
+            .where((c) =>
+                filterSmartBySystem(smartProductsForCat(c), systemFilter)
+                    .isNotEmpty)
+            .toList();
+    final favProducts = filterBySystem(
+            kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).toList(),
+            systemFilter)
+        .take(3)
+        .toList();
 
     return ListView(
       controller: scrollCtrl,
       key: const Key('catalog-list'),
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        // קטגוריות — full list inline (no preview cap, no "הצג הכל").
+        // קטגוריות — full list inline, scoped to the active water system.
         _OverviewBlock(
           title: 'קטגוריות',
-          count: kCatalogCats.length,
+          count: catRows.length,
           children: [
-            for (var i = 0; i < kCatalogCats.length; i++)
-              _CatalogRow(cat: kCatalogCats[i], meta: _kMeta[i]),
+            for (final r in catRows) _CatalogRow(cat: r.cat, meta: r.meta),
           ],
         ),
         // חיפושים אחרונים
@@ -2358,21 +2315,20 @@ class _AllOverview extends ConsumerWidget {
                     ),
                 ],
         ),
-        // עץ חכם
+        // עץ חכם — scoped to the active water system (Phase 2b).
         _OverviewBlock(
           title: 'עץ חכם',
-          count: kSmartTreeCats.length,
+          count: smartCats.length,
           onShowAll: () => go('עץ חכם'),
           isLast: true,
           children: [
-            for (var i = 0; i < kSmartTreeCats.length && i < 3; i++)
+            for (var i = 0; i < smartCats.length && i < 3; i++)
               _OverviewRow(
                 icon: Icons.account_tree_outlined,
                 label:
-                    '${kSmartTreeCats[i]} · ${smartProductsForCat(kSmartTreeCats[i]).length} מוצרים',
+                    '${smartCats[i]} · ${filterSmartBySystem(smartProductsForCat(smartCats[i]), systemFilter).length} מוצרים',
                 onTap: () {
-                  ref.read(smartTreeCatProvider.notifier).state =
-                      kSmartTreeCats[i];
+                  ref.read(smartTreeCatProvider.notifier).state = smartCats[i];
                   go('עץ חכם');
                 },
               ),
@@ -3502,7 +3458,15 @@ class _SmartTreeCatList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cats = kSmartTreeCats;
+    // Scope the smart tree to the active water system (Benzi #1, Phase 2b):
+    // keep only categories that still have an in-system product.
+    final system = ref.watch(catalogSystemFilterProvider);
+    final cats = system == null
+        ? kSmartTreeCats
+        : kSmartTreeCats
+            .where((c) =>
+                filterSmartBySystem(smartProductsForCat(c), system).isNotEmpty)
+            .toList();
     return Column(
       children: [
         Expanded(
@@ -3512,7 +3476,8 @@ class _SmartTreeCatList extends ConsumerWidget {
                 const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
             itemBuilder: (_, i) {
               final cat = cats[i];
-              final prods = smartProductsForCat(cat);
+              final prods =
+                  filterSmartBySystem(smartProductsForCat(cat), system);
               final count = prods.length;
               final desc = prods.map((p) => p.name).join(' · ');
               final emoji = _catEmojis[cat] ?? '📦';
@@ -3636,7 +3601,8 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
   Widget build(BuildContext context) {
     const green = Color(0xFF22C55E);
     final query = ref.watch(smartTreeQueryProvider).trim();
-    final all = smartProductsForCat(widget.cat);
+    final all = filterSmartBySystem(smartProductsForCat(widget.cat),
+        ref.watch(catalogSystemFilterProvider));
     final products = query.isEmpty
         ? all
         : all.where((p) => p.name.contains(query)).toList();
@@ -6712,8 +6678,10 @@ class _FavoritesSection extends ConsumerWidget {
     if (favSkus.isEmpty) {
       return const _EmptySection(emoji: '⭐', label: 'מועדפים');
     }
-    final products =
-        kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).toList();
+    // Scope favorites to the active water system (Benzi #1, option 2).
+    final products = filterBySystem(
+        kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).toList(),
+        ref.watch(catalogSystemFilterProvider));
     return Column(
       children: [
         Container(

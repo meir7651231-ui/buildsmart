@@ -220,6 +220,23 @@ RULE: PreToolUse matcher חייב לכלול את כל הכלים שכותבים
 
 ---
 
+## 2026-06-02 · helper חדש ב-lib/logic נחסם ע"י שערים 42+44
+
+### א — הבעיה
+חילצתי את חלוקת-המערכת ל-`lib/logic/system_division.dart` (קובץ-helper חדש,
+option 2). ה-commit הראשון נחסם: שער 42 ("helper חדש בלי בדיקה") + שער 44
+("mutation_log לא עודכן") — שניהם יורים יחד על כל קובץ חדש תחת `lib/(logic|data)/`.
+
+### ב — הפתרון
+באותו commit הוספתי `test/system_division_test.dart` (9 בדיקות ל-3 ה-helpers) +
+רשומת `mutation_log.md` (3 הזרקות-תקלה) + אזכור `system_division` ב-WIRING (שער 72).
+
+### ג — כלל המניעה
+ANTIPATTERN[hook]: warn "4[24]"
+RULE: קובץ-helper חדש ב-lib/logic|data → באותו commit חייב _test.dart + רשומת mutation_log + אזכור ב-WIRING. לבדל מראש, לא לגלות ב-retry.
+
+---
+
 ## 2026-05-31 · #1-#5 — וקטורי עקיפה נוספים
 ### א — הבעיה
 PreToolUse חסם רק patterns רדודים. ניתן היה לעקוף ב:

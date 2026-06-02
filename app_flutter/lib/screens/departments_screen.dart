@@ -1,4 +1,5 @@
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -11,11 +12,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final homeDepartmentProvider = StateProvider<String?>((_) => null);
 
 /// Departments home (Benzi #2/#3) — the app's landing: a grid of departments.
-/// The two live departments ARE the clean-water/sewage division (Benzi #1):
-/// each opens the catalog's category tree filtered to its `WaterSystem`, so a
-/// fixture's sub-categories split (supply parts under מים נקיים = ברזים
-/// וסניטריים, drainage parts under שפכים = אינסטלציה). The rest are placeholders
-/// until their catalog data exists (R8 — no data, no invention).
+/// The two live departments ARE the clean-water/sewage division (Benzi #1,
+/// option 2): each opens the catalog's **finder (בית)** scoped to its
+/// `WaterSystem`, so every browse section (finder / categories / tree / search)
+/// shows only that system's products. The rest are placeholders until their
+/// catalog data exists (R8 — no data, no invention).
 class DepartmentsScreen extends ConsumerWidget {
   const DepartmentsScreen({super.key});
 
@@ -35,8 +36,22 @@ class DepartmentsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // A live department selected → its filtered catalog tree (shell chrome stays).
-    if (ref.watch(homeDepartmentProvider) != null) return const CatalogScreen();
+    // A live department selected → a scope bar (department · system + clear) over
+    // the catalog finder, all scoped to its water system (shell chrome stays).
+    final active = ref.watch(homeDepartmentProvider);
+    if (active != null) {
+      final dept = departments.firstWhere((d) => d.name == active,
+          orElse: () => departments.first);
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: [
+            _DeptScopeBar(name: dept.name, system: dept.system),
+            const Expanded(child: CatalogScreen()),
+          ],
+        ),
+      );
+    }
 
     final theme = Theme.of(context);
     return Directionality(
@@ -93,11 +108,12 @@ class _DeptTile extends ConsumerWidget {
             showToast(context, 'בקרוב');
             return;
           }
-          // Open the catalog's category tree, filtered to this department's
-          // water system (Benzi #1 division, at sub-category level).
+          // Open the catalog's finder (בית) scoped to this department's water
+          // system (Benzi #1, option 2 — the division flows through the finder,
+          // not a forced tree). Every browse section reads the scope provider.
           ref.read(catalogSystemFilterProvider.notifier).state = dept.system;
-          ref.read(catalogTreePathProvider.notifier).state =
-              const [kDepartmentTreeRoot];
+          ref.read(catalogSectionProvider.notifier).state = 'בית';
+          ref.read(catalogTreePathProvider.notifier).state = const [];
           ref.read(homeDepartmentProvider.notifier).state = dept.name;
         },
         child: Semantics(
@@ -126,6 +142,69 @@ class _DeptTile extends ConsumerWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Context bar shown above the catalog while a department is open: names the
+/// active department + water-system scope, and clears back to the grid. Makes
+/// the clean-water/sewage division visible (Benzi #1) instead of silent.
+class _DeptScopeBar extends ConsumerWidget {
+  const _DeptScopeBar({required this.name, required this.system});
+
+  final String name;
+  final WaterSystem? system;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final sysLabel = switch (system) {
+      WaterSystem.supply => 'מים נקיים',
+      WaterSystem.drainage => 'שפכים',
+      null => null,
+    };
+    return Material(
+      color: BsTokens.brand.withValues(alpha: 0.10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: BsTokens.space4, vertical: BsTokens.space2),
+        child: Row(
+          children: [
+            const Icon(Icons.tune, size: 18, color: BsTokens.brand),
+            const SizedBox(width: BsTokens.space2),
+            Expanded(
+              child: Text(
+                sysLabel == null ? name : '$name · $sysLabel',
+                style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w700, color: BsTokens.brand),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                ref.read(homeDepartmentProvider.notifier).state = null;
+                ref.read(catalogSystemFilterProvider.notifier).state = null;
+                ref.read(catalogTreePathProvider.notifier).state = const [];
+              },
+              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              child: const Padding(
+                padding: EdgeInsets.all(BsTokens.space1),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('כל המחלקות',
+                        style: TextStyle(
+                            color: BsTokens.brand,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600)),
+                    SizedBox(width: 2),
+                    Icon(Icons.close, size: 16, color: BsTokens.brand),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

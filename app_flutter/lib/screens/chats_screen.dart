@@ -978,7 +978,7 @@ class _Bubble extends ConsumerWidget {
     );
     const bubbleMe = Color(0xFFDCF8C6);
     const bubbleOther = Color(0xFFFFFFFF);
-    const textColor = Color(0xFF111111);
+    const textColor = BsTokens.chatText;
     const timeColor = Color(0xFF777777);
 
     return Align(
@@ -1259,7 +1259,7 @@ class _InputBar extends StatelessWidget {
                         maxLines: 5,
                         minLines: 1,
                         style: const TextStyle(
-                          color: Color(0xFF111111),
+                          color: BsTokens.chatText,
                           fontSize: 15,
                         ),
                         decoration: const InputDecoration(

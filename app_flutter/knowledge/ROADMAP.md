@@ -19,6 +19,7 @@
 | הגדרות | 4 מסכים · ~20 הגדרות פעילות · persist |
 | BS dial | 5 personas × עצים · 4 עם תוכן-עלים |
 | בדיקות | 52 קבצי-בדיקה · 12 suites · flutter analyze clean |
+| CI Protocol Enforcement | ✅ Gate-5 false-positive נפתר (BsTokens.chatText v5.69); Gate 1+5 set-e fix; Flutter pin 3.29.3 |
 
 ### מה בנוי אך מנותק 🔌
 | תחום | פירוט |

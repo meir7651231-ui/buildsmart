@@ -36,20 +36,27 @@ The landing tab (bottom-nav "מחלקות", index 0): a 2-col grid of 9 departme
 - אינסטלציה → `WaterSystem.drainage` (שפכים) — every drainage category
 - ברזים וסניטריים → `WaterSystem.supply` (מים נקיים) — every clean-water category
 
-Tapping a live tile sets `catalogSystemFilterProvider` + seeds the tree at
-`kDepartmentTreeRoot` (`catalogTreePathProvider`). The other 7 → "בקרוב" toast
-(R8: no data, no invention). Re-tapping the מחלקות tab resets all three providers
-→ back to the grid.
+Tapping a live tile sets `catalogSystemFilterProvider` + opens the catalog on the
+**finder (בית)** (`catalogSectionProvider='בית'`, tree path cleared) — Benzi #1
+option 2: the division flows through the finder, not a forced tree. A
+`_DeptScopeBar` over the catalog names the active scope + a "כל המחלקות" clear.
+The other 7 → "בקרוב" toast (R8: no data, no invention). Re-tapping the מחלקות
+tab (or the bar's clear) resets all three providers → back to the grid.
 
 ## Catalog search panel tools (`catalog_screen.dart` · `_SearchToolsRow`)
 
-> **חלוקת מערכת (Benzi #1) — דרך מחלקות (option 2):** `catalogSystemFilterProvider`
-> מסנן את כל עץ הקטגוריות, הספירות והתיאורים. סיווג מוצר ב-`productDivisionSystems`:
-> `VerifiedSpec.endSystems` (supply=נקיים · drainage=שפכים) → fallback PPR=נקיים →
-> שאר=שפכים (הכרעת המשתמש, אין spec). `nodeHasSystem`: מתקנים (אסלות / מקלחות
-> ואמבטיות / גופי תברואה) מופיעים ב**שני** הצדדים; שאר הקטגוריות לפי המערכת
-> ה**דומיננטית**. הכניסה היא מסך המחלקות (לא גיליון הפילטרים).
-> ⚠️ ה-sysOpt בגיליון ⚙️ פילטרים כעת **מיותר** (כפילות) — מסומן להסרה ב-ACTION_PLAN.md.
+> **חלוקת מערכת (Benzi #1) — option 2, דרך ה-finder:** מחלקה חיה קובעת
+> `catalogSystemFilterProvider` ופותחת את ה-finder (בית) מסונן. הלוגיקה ב-
+> `logic/system_division.dart` (משותף ל-catalog+finder, ללא back-import):
+> `productDivisionSystems` (`VerifiedSpec.endSystems` supply=נקיים/drainage=שפכים
+> → PPR=נקיים → שאר=שפכים), `filterBySystem`, `nodeHasSystem` (מתקנים בשני
+> הצדדים; שאר לפי דומיננטיות). **פאזה 1:** finder (groups ריקים מוסתרים) +
+> tree-drill + search. **פאזה 2 (v5.70):** קטגוריות + הכל + מועדפים —
+> `_catRowsForSystem` (קטגוריות לפי `nodeHasSystem` הדומיננטי) · `filterBySystem`
+> (מוצרים). **פאזה 2b (v5.71):** עץ חכם — `filterSmartBySystem`/`smartProductSystems`
+> ממפים את ה-SKU של מותגי ה-SmartProduct חזרה לקטלוג (לא-פתיר → נשאר בשני
+> הצדדים, R8). **פאזה 3 (v5.71):** בורר המערכת הכפול (`sysOpt`) הוסר מגיליון ⚙️
+> פילטרים — המערכת מגיעה רק מהמחלקות (source-of-truth אחד). **כל סקשני ה-browse מסוננים.**
 
 | Tool | Behavior | Status |
 |---|---|---|
@@ -573,6 +580,14 @@ rather than pixel rendering.
   accessories — SmartAcc-style, not standalone brand cards.
 - Guards: `smartproduct_contract_test` Huliot test now spans 11 cards + sku→card
   spot-checks + ≥117 mapped. Mutation-verified. Pure data; no engine change.
+
+## CI Gate-5 false-positive fix — BsTokens.chatText token (v5.68)
+- `lib/theme/tokens.dart`: הוספת `BsTokens.chatText = Color(0xFF111111)` +
+  `BsTokens.chatTimestamp = Color(0xFF777777)` כטוקנים ייעודיים לצ'אט.
+- `lib/screens/chats_screen.dart`: החלפת שני שימושים בצבע גולמי `0xFF111111`
+  (צבע טקסט, לא משטח כהה) בטוקן `BsTokens.chatText`.
+- Effect: Gate-5 ב-CI (`grep ... lib/screens/`) מחזיר 0 תוצאות — false-positive נפתר.
+  הטוקן עצמו נמצא ב-`lib/theme/` שלא נסרק ע"י Gate-5.
 
 ## Product/page images → CDN + bounded on-device cache (#3 weight)
 - `lib/data/product_images.dart`: `productImageUrl` (pure asset-path → CDN-URL map,

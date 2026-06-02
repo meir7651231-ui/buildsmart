@@ -1,3 +1,4 @@
+import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/bs_dial_widget.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
@@ -395,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.75 · 1.6.41 · 🟢 חוליות P8 — לוגו brand ייעודי: smartlock.png 512x512 (Y-tee מעמ\' 1 בצבע הברנד) במקום עותק drainage · HULIOT_TODO סגור 9/9',
+                          'v5.76 · 1.6.42 · 🔀 merge: Huliot SmartLock 9/9 ✅ + חלוקת-מערכת Benzi פאזה 2b+3 — דו-זרמי',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
