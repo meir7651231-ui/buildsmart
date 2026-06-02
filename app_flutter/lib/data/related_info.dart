@@ -418,6 +418,11 @@ String gapAdviceHe(LipskeyCatalogProduct from, LipskeyCatalogProduct to) {
   } else if (p.brand == 'פולירול') {
     // PPR socket-fusion tooling (welder, fusion die, cutter).
     tools = recommendedKitForProduct(p).length;
+  } else if (p.brand == 'חוליות') {
+    // Huliot SmartLock — snap-fit; cutter (pipes only) + dedicated bayonet
+    // wrench for the SmartLock nut. Same shape as Polyroll: count what
+    // recommendedKitForProduct emits for this product (P11 parity).
+    tools = recommendedKitForProduct(p).length;
   }
 
   if (must == 0 && opt == 0 && tools == 0) return null;

@@ -29,6 +29,18 @@
 - **בעיה:** פס אפור מימין (אייקוני יח'/ארגז/משטח של הטבלה).
 - **תיקון שבוצע:** `X1` 250→238 ב-`crop_huliot.py`. נחתך מחדש, אין שאריות.
 
+### P11 — installKit parity ל-Polyroll ✅ בוצע (v5.83)
+- **בעיה:** `installKitFor` ב-`related_info.dart` היה עם ענף ל-Polyroll
+  (`recommendedKitForProduct(p).length`) אך לא לחוליות → strip "ערכת התקנה"
+  לא הוצג ב-product sheet של מוצרי SmartLock.
+- **בוצע:** ב-`lib/logic/install_kit.dart` הוסף ענף `if (p.brand == 'חוליות')`
+  ב-`recommendedKitForProduct` שמחזיר:
+  - **חותך צינורות SmartLock** (רק למוצרי `kSmlPipes`)
+  - **מפתח לאום SmartLock** — bracketed לפי DN: ≤40 → מק"ט 61040360, >40 → 61060560
+  ענף תואם ב-`installKitFor` ב-`related_info.dart` סופר את ה-length.
+- **4 בדיקות P11** ב-`polyroll_e2e_test.dart`: צינור→tools≥2 · fitting→tools=1 ·
+  bracket-by-DN · כל מוצר חוליות מקבל strip. mutation_verify ✓.
+
 ### P10 — העלאת 89+83 crops ל-R2 (חוסם UI, פתוח) 🔴 דחוף
 - **בעיה (אבחנת בנצי 2026-06-02):** כל ה-crops של Huliot (89 photo + 83 spec)
   לא הועלו ל-bucket Cloudflare R2. ב-web/release: `CachedNetworkImage` מקבל

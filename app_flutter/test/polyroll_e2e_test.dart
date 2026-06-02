@@ -221,4 +221,45 @@ void main() {
               '${orphans.take(5).map((p) => p.sku).join(",")}');
     });
   });
+
+  // ── P11: install-kit parity. Without these branches Huliot fell through to
+  // the empty default (no ערכת התקנה strip), so a plumber browsing a SmartLock
+  // product saw nothing about the cutter or bayonet wrench they need.
+  group('P11 · Huliot installKit parity', () {
+    LipskeyCatalogProduct huliot(String sku) =>
+        kHuliotCatalog.firstWhere((p) => p.sku == sku);
+
+    test('installKitFor pipe → both cutter + wrench (tools≥2)', () {
+      final kit = installKitFor(huliot('64032300')); // צינור 32
+      expect(kit, isNotNull, reason: 'pipe must surface an install-kit strip');
+      expect(kit!.tools, greaterThanOrEqualTo(2),
+          reason: 'pipe needs cutter + wrench');
+    });
+
+    test('installKitFor fitting → wrench only (tools=1)', () {
+      final kit = installKitFor(huliot('70033460')); // ברך 45° 32
+      expect(kit, isNotNull);
+      expect(kit!.tools, 1,
+          reason: 'fitting installs with the wrench; cutter belongs to the pipe');
+    });
+
+    test('recommendedKitForProduct wrench bracket follows DN', () {
+      // Small bracket: DN 32-40 → 61040360.
+      final smallKit = recommendedKitForProduct(huliot('70033460')); // ברך 32
+      expect(smallKit.any((k) => k.label.contains('61040360')), isTrue,
+          reason: 'DN 32 → small-bracket wrench');
+      // Large bracket: DN 50-63 → 61060560.
+      final largeKit = recommendedKitForProduct(huliot('70055460')); // ברך 50
+      expect(largeKit.any((k) => k.label.contains('61060560')), isTrue,
+          reason: 'DN 50 → large-bracket wrench');
+    });
+
+    test('every Huliot SmartLock product surfaces an install-kit', () {
+      final missing =
+          kHuliotCatalog.where((p) => installKitFor(p) == null).toList();
+      expect(missing, isEmpty,
+          reason: 'Huliot products without an install-kit strip: '
+              '${missing.take(5).map((p) => p.sku).join(",")}');
+    });
+  });
 }

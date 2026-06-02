@@ -326,6 +326,16 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — P11 installKit parity (v5.83 — 2026-06-02)
+- **`recommendedKitForProduct` קיבל ענף `if (p.brand == 'חוליות')`** ב-
+  `lib/logic/install_kit.dart`: חותך-צינורות (רק ל-`kSmlPipes`) + מפתח-לאום
+  SmartLock לפי DN bracket (≤40 → 61040360, >40 → 61060560). ענף תואם ב-
+  `installKitFor` (`related_info.dart`) סופר tools.
+- **תוצאה ב-UI:** product sheet של כל מוצר חוליות מציג עכשיו strip "ערכת
+  התקנה" (📦) — צינור = tools≥2, fitting/nut = tools=1.
+- 4 בדיקות P11 חדשות ב-`polyroll_e2e_test.dart` (קבוצה אחרי P6) +
+  mutation_verify על ענף ה-Huliot. 1041 tests pass.
+
 ## Huliot SmartLock — hotfix R2-fallback (v5.80 — 2026-06-02)
 - **באג שאובחן ע"י בנצי:** כרטיסי Huliot ב-web/release התרוקנו. שורש:
   89 photo crops + 83 spec crops לא הועלו ל-R2 bucket → CDN 404 →

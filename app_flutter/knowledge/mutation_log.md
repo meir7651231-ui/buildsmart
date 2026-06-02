@@ -301,3 +301,9 @@
 - תוצאה: 2 בדיקות אדומות ✅ — "Huliot … wired into the smart-tree" + "every
   SmartBrand.sku is a real catalog SKU".
 - מסקנה: כיסוי 13 הכרטיסים מוגן (spot-check + ≥170 ממופים).
+
+### lib/logic/install_kit.dart — 2026-06-02T20:25:13+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s|if (p.brand == 'חוליות')|if (p.brand == 'מותג-שלא-קיים')|`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/polyroll_e2e_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.
