@@ -107,10 +107,10 @@ PER_BAND_PHOTO_H = {
     # Page 20 — drop gutters (re-measured from PAGE overlay — base was cut)
     (20, 'a'): 145,    # photo 160-290 incl. base; diagram starts ~305
     (20, 'b'): 165,    # photo 520-680; diagram ~695
-    (20, 'c'): 175,    # photo 895-1055; diagram ~1070
+    (20, 'c'): 160,    # photo 895-1055; D1 tick at y=1060 trimmed
     # Page 21 — drains scale with size (re-measured)
     (21, 'a'): 118,    # drain 80/50 photo 170-275; diagram ~290
-    (21, 'b'): 180,    # drain 140/50 photo 460-625; diagram ~640
+    (21, 'b'): 165,    # drain 140/50 photo 460-625; tick at y=635 trimmed
     (21, 'c'): 180,    # drain 245/50 photo 840-1010; diagram ~1025
     # Page 22 — drains open
     (22, 'a'): 155,
