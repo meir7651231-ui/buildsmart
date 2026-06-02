@@ -1,7 +1,10 @@
 import 'package:buildsmart/data/catalog_tree.dart';
+import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
+import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +32,23 @@ List<CatalogNode> _toolDeptPath(String name, List<String> cats) {
       children: [for (final c in cats) leaf(c)],
     ),
   ];
+}
+
+/// Benzi #5 — when true, the open department shows ALL its products in one flat
+/// list ("ברצף, ללא קשר לקטלוג") instead of the catalog tree/finder navigation.
+final deptFlatProductsProvider = StateProvider<bool>((_) => false);
+
+/// Every product in a department's scope, flat: a water department = all of its
+/// in-system products; a tool department = all products in its `toolCats`.
+List<LipskeyCatalogProduct> departmentProducts(
+    {WaterSystem? system, List<String>? toolCats}) {
+  if (toolCats != null) {
+    return kCatalogProducts
+        .where((p) => toolCats.contains(p.categoryHe))
+        .toList();
+  }
+  if (system != null) return filterBySystem(kCatalogProducts, system);
+  return const [];
 }
 
 /// Departments home (Benzi #2/#3) — the app's landing: a grid of departments.
@@ -72,12 +92,21 @@ class DepartmentsScreen extends ConsumerWidget {
     if (active != null) {
       final dept = departments.firstWhere((d) => d.name == active,
           orElse: () => departments.first);
+      // Benzi #5 — "כל המוצרים ברצף": a flat list of the whole department,
+      // bypassing the catalog tree/finder, toggled from the scope bar.
+      final flat = ref.watch(deptFlatProductsProvider);
       return Directionality(
         textDirection: TextDirection.rtl,
         child: Column(
           children: [
             _DeptScopeBar(name: dept.name, system: dept.system),
-            const Expanded(child: CatalogScreen()),
+            Expanded(
+              child: flat
+                  ? LipskeyProductsList(
+                      products: departmentProducts(
+                          system: dept.system, toolCats: dept.toolCats))
+                  : const CatalogScreen(),
+            ),
           ],
         ),
       );
@@ -158,6 +187,7 @@ class _DeptTile extends ConsumerWidget {
             ref.read(catalogSectionProvider.notifier).state = 'בית';
             ref.read(catalogTreePathProvider.notifier).state = const [];
           }
+          ref.read(deptFlatProductsProvider.notifier).state = false;
           ref.read(homeDepartmentProvider.notifier).state = dept.name;
         },
         child: Semantics(
@@ -209,6 +239,7 @@ class _DeptScopeBar extends ConsumerWidget {
       WaterSystem.drainage => 'שפכים',
       null => null,
     };
+    final flat = ref.watch(deptFlatProductsProvider);
     return Material(
       color: BsTokens.brand.withValues(alpha: 0.10),
       child: Padding(
@@ -221,12 +252,38 @@ class _DeptScopeBar extends ConsumerWidget {
             Expanded(
               child: Text(
                 sysLabel == null ? name : '$name · $sysLabel',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w700, color: BsTokens.brand),
               ),
             ),
+            // Benzi #5 — toggle the flat "all products" list ↔ catalog view.
+            InkWell(
+              onTap: () =>
+                  ref.read(deptFlatProductsProvider.notifier).state = !flat,
+              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              child: Padding(
+                padding: const EdgeInsets.all(BsTokens.space1),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(flat ? Icons.account_tree_outlined : Icons.view_list,
+                        size: 16, color: BsTokens.brand),
+                    const SizedBox(width: 2),
+                    Text(flat ? 'קטלוג' : 'כל המוצרים',
+                        style: const TextStyle(
+                            color: BsTokens.brand,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: BsTokens.space3),
             InkWell(
               onTap: () {
+                ref.read(deptFlatProductsProvider.notifier).state = false;
                 ref.read(homeDepartmentProvider.notifier).state = null;
                 ref.read(catalogSystemFilterProvider.notifier).state = null;
                 ref.read(catalogTreePathProvider.notifier).state = const [];

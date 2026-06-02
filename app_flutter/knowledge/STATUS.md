@@ -1,6 +1,37 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.85` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.87` (see `home_shell.dart`). Update on each user-visible change._
+
+## Finder filter — substring false-match fixed (v5.86)
+`_productHasChip` (`finder_screen.dart`) ended with an unconditional
+`nameHe.contains(chipLabel)` fallback (meant for curated-facet plain words like
+אמריקאי). It also fired for digit-bearing size/angle chips, so `5"` matched
+`1.25"`, `50 מ"מ` matched `250 מ"מ`, `2"` matched `1/2"` — a size filter
+surfaced larger sizes it isn't. Fix: gate the fallback to digit-free labels
+(structural tokens already cover sizes/angles). Global false-positive upper
+bound 350→0. Guarded by `finder_filter_falsematch_test` (2).
+
+## Card — dims-derived DN chip (v5.84 + v5.85)
+Fittings whose bore lives only in `dims` now show a gray DN chip on the card
+(via `tokensFromDims`), so the finder's DN size axis is visible and collapsed
+size variants are distinguishable. **v5.84:** Lipskey cards (`_NameWords`) — adds
+each dims DN not already a name size-chip (mirrors the finder, incl. showing both
+`4"` + `DN110`). **v5.85:** חוליות hierarchy cards (`_HierarchyChips`) — covers/
+risers/grates carry their bore only in dims, so a gray "מידה" DN pill is appended
+when the breadcrumb has no size of its own (gated so a PPR valve, whose name
+states the OD, never gets a second possibly-inconsistent DN). Cards with truly no
+visible size dropped 18→1 (the lone remainder: `סט פקקים…½"` — `parseChips`
+doesn't surface a leading-fraction `½"`, a tokenizer asymmetry vs `parseSizeTokens`).
+Guarded by `card_dims_dn_chip_test` (4).
+
+## Departments — flat "all products" per branch (v5.87 — Benzi #5)
+Each open department has a `_DeptScopeBar` toggle **"כל המוצרים" ↔ "קטלוג"**
+(`deptFlatProductsProvider`): "כל המוצרים" shows the whole branch as ONE flat
+`LipskeyProductsList` ("ברצף, ללא קשר לקטלוג"), bypassing the finder/tree.
+`departmentProducts(system/toolCats)` is the scope — a water department = all its
+in-system products (`filterBySystem`), a tool department = all its `toolCats`
+products. Resets on department open + "כל המחלקות" clear. Guarded by
+`departments_test`.
 
 ## Departments — tool departments live from real data (v5.83 — R8)
 A full catalog audit (all 99 leaf categories + product-name search) confirmed the
