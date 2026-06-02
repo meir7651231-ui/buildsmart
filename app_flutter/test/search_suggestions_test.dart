@@ -4,48 +4,55 @@ import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Benzi #6 — as-you-type autocomplete (`searchSuggestions`). Pure over the
-/// catalog, so it's unit-tested here; the chip UI is wired in `_SearchPanel`.
+/// Benzi #6 — as-you-type word completion (`searchSuggestions`): completes the
+/// last typed word from the vocabulary of catalog PRODUCT-name words.
 void main() {
-  final allCats = kLipskeyCatalog.map((p) => p.categoryHe).toSet();
+  final allWords = <String>{
+    for (final p in kLipskeyCatalog)
+      for (final w in p.nameHe.split(RegExp(r'\s+')))
+        if (w.isNotEmpty) w,
+  };
 
-  group('searchSuggestions (Benzi #6 autocomplete)', () {
-    test('empty / whitespace query → no suggestions', () {
+  group('searchSuggestions (Benzi #6 — product word completion)', () {
+    test('empty / too-short / post-space fragment → no suggestions', () {
       expect(searchSuggestions(''), isEmpty);
-      expect(searchSuggestions('   '), isEmpty);
+      expect(searchSuggestions('א'), isEmpty); // 1-char fragment
+      expect(searchSuggestions('ברז '), isEmpty); // nothing after the space
     });
 
-    test('a common term yields real, distinct, capped category labels', () {
-      final s = searchSuggestions('אסלה');
+    test('completes the typed word from real product words', () {
+      final s = searchSuggestions('מחס');
       expect(s, isNotEmpty);
       expect(s.length, lessThanOrEqualTo(6));
-      expect(s.toSet().length, s.length, reason: 'no duplicate suggestions');
-      for (final c in s) {
-        expect(allCats, contains(c),
-            reason: '"$c" is not a real catalog category');
+      expect(s.toSet().length, s.length, reason: 'distinct');
+      for (final sug in s) {
+        expect(allWords.contains(sug), isTrue,
+            reason: '"$sug" is not a real product word');
+        expect(sug.startsWith('מחס'), isTrue,
+            reason: '"$sug" should extend the typed fragment');
+      }
+    });
+
+    test('keeps the already-typed words, completes only the last', () {
+      final s = searchSuggestions('ברז כד'); // last word ≥2 chars (כדורי…)
+      expect(s, isNotEmpty);
+      for (final sug in s) {
+        expect(sug.startsWith('ברז '), isTrue,
+            reason: '"$sug" should keep the committed prefix');
       }
     });
 
     test('respects an explicit limit', () {
-      expect(searchSuggestions('א', limit: 3).length, lessThanOrEqualTo(3));
+      expect(searchSuggestions('מח', limit: 3).length, lessThanOrEqualTo(3));
     });
 
-    test('never echoes a category the user already typed in full', () {
-      // A real, populous category typed verbatim must not suggest itself back.
-      const exact = 'מושבי אסלה';
-      expect(allCats, contains(exact)); // precondition guard
-      expect(searchSuggestions(exact), isNot(contains(exact)));
-    });
-
-    test('system scope — every suggestion has an in-system matching product',
-        () {
-      expect(searchSuggestions('צינור'), isNotEmpty); // anchor (no scope)
+    test('system scope — each suggestion word is in an in-system product', () {
       for (final sys in WaterSystem.values) {
-        for (final cat in searchSuggestions('צינור', system: sys)) {
-          final inSystem = filterBySystem(
-              kLipskeyCatalog.where((p) => p.categoryHe == cat).toList(), sys);
-          expect(inSystem, isNotEmpty,
-              reason: 'suggestion "$cat" has no $sys product');
+        for (final sug in searchSuggestions('צי', system: sys)) {
+          final inSystem = filterBySystem(kLipskeyCatalog, sys)
+              .any((p) => p.nameHe.split(RegExp(r'\s+')).contains(sug));
+          expect(inSystem, isTrue,
+              reason: '"$sug" not found in any $sys product');
         }
       }
     });

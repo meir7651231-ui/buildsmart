@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.84` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.85` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Departments — tool departments live from real data (v5.83 — R8)
 A full catalog audit (all 99 leaf categories + product-name search) confirmed the
@@ -17,14 +17,17 @@ placeholders non-live).
 
 _known-failing: 0 (gate 32 baseline — 0 כשלים מאומת 2026-06-01; שמות ב-knowledge/known_failing.txt)_
 
-## Search autocomplete — `searchSuggestions` (v5.80 — Benzi #6)
+## Search word-completion — `searchSuggestions` (v5.85 — Benzi #6)
 As-you-type suggestion chips above the search results (`_SearchSuggestions` in
-`_SearchPanel`): distinct catalog **category** labels whose products match the
-query (forgiving any-word match, reuses `catalogProductMatchesQuery`), ranked
-name-hit → popularity → א-ת, capped at 6, never echoing a fully-typed category.
-Respects the active `catalogSystemFilterProvider` (same scope as results), shown
-only at ≥2 chars in a product scope. Tapping a chip completes `searchQueryProvider`
-→ live results re-run. Pure helper, tested by `search_suggestions_test` (5).
+`_SearchPanel`) **complete the word currently being typed from the vocabulary of
+catalog PRODUCT-name words** (Benzi #6 — "השלמת מילים לפי מוצרים"): the last
+whitespace-token is the fragment, suggestions are distinct product words it's a
+prefix of, ranked most-frequent → א-ת, capped at 6; the already-typed words are
+kept (e.g. `מח` → מחסום · מחבר · מחזיק; `ברז כד` → ברז כדורי). Respects the active
+`catalogSystemFilterProvider` (vocabulary drawn from in-system products). Tapping
+a chip fills `searchQueryProvider` → live results re-run. Pure, tested by
+`search_suggestions_test` (5). _(Earlier v5.80 suggested categories; switched to
+product-word completion per Benzi's spec.)_
 
 ## Water-system division — option 2, through the finder (v5.69 — Benzi #1)
 Home = departments grid (`departments_screen.dart`, `homeDepartmentProvider`).
