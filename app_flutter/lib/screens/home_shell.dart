@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.76 · 1.6.42 · 🔀 merge: Huliot SmartLock 9/9 ✅ + חלוקת-מערכת Benzi פאזה 2b+3 — דו-זרמי',
+                          'v5.77 · 1.6.42 · 🌳 חוליות בעץ-החכם באצ\' 4: חותכים+מפתחות→כלים, אומי-חיבור→מצמדים (126/170 ממופים)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

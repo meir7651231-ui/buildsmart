@@ -814,6 +814,12 @@ const List<SmartProduct> kSmartProducts = [
       SmartBrand(name: 'מצרה 40/50 (חוליות)', tag: 'חוליות · מצרה', sku: '72150460'),
       SmartBrand(name: 'מצרה 50/63 (חוליות)', tag: 'חוליות · מצרה', sku: '72163563'),
       SmartBrand(name: 'מצרה ברזל/פלסטיק 60/50 (חוליות)', tag: 'חוליות · מעבר', sku: '62161560'),
+      // ── חוליות SmartLock — אומי-חיבור ──
+      SmartBrand(name: 'אום SmartLock 32 (חוליות)', tag: 'חוליות · אום', sku: '70703260'),
+      SmartBrand(name: 'אום SmartLock 40 (חוליות)', tag: 'חוליות · אום', sku: '70704060'),
+      SmartBrand(name: 'אום SmartLock 50 (חוליות)', tag: 'חוליות · אום', sku: '70705060'),
+      SmartBrand(name: 'אום SmartLock 63 (חוליות)', tag: 'חוליות · אום', sku: '70763063'),
+      SmartBrand(name: 'אום מעבר מברזל 60 (חוליות)', tag: 'חוליות · מעבר', sku: '60760060'),
     ],
     acc: [
       SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום החיבור — חובה', must: true),
@@ -1225,6 +1231,11 @@ const List<SmartProduct> kSmartProducts = [
       SmartBrand(name: 'מפתח צינורות 12"',  tag: 'חזק וגדול'),
       SmartBrand(name: 'מפתח צינורות 14"',  tag: 'גדול במיוחד'),
       SmartBrand(name: 'מפתח שוודי',          tag: 'מתכוונן'),
+      // ── חוליות SmartLock — חותכים + מפתחות-אום ──
+      SmartBrand(name: 'חותך צינורות SmartLock 40 (חוליות)', tag: 'חוליות · חותך', sku: '79904070'),
+      SmartBrand(name: 'חותך צינורות SmartLock 50 (חוליות)', tag: 'חוליות · חותך', sku: '79905070'),
+      SmartBrand(name: 'מפתח לאום SmartLock 32-40 (חוליות)', tag: 'חוליות · מפתח', sku: '61040360'),
+      SmartBrand(name: 'מפתח לאום SmartLock 50-69 (חוליות)', tag: 'חוליות · מפתח', sku: '61060560'),
     ],
     acc: [
       SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4,  why: 'אוטם את ההברגה', must: true),
