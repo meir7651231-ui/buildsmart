@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.80 · 1.6.45 · 🔧 חוליות hotfix — R2 fallback: crops חסרים ב-CDN → page_NN.jpg זמני (כרטיס לא ריק). HULIOT_TODO P10 פתוח: upload',
+                          'v5.82 · 1.6.46 · 🔧 חוליות hotfix R2 + 🗂️ קטגוריות חיות (בנצי) — crops fallback ל-page זמני (P10 upload) + תיאור+ספירה פר-מחלקה',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

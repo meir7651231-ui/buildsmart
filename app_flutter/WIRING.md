@@ -52,8 +52,10 @@ tab (or the bar's clear) resets all three providers → back to the grid.
 > → PPR=נקיים → שאר=שפכים), `filterBySystem`, `nodeHasSystem` (מתקנים בשני
 > הצדדים; שאר לפי דומיננטיות). **פאזה 1:** finder (groups ריקים מוסתרים) +
 > tree-drill + search. **פאזה 2 (v5.70):** קטגוריות + הכל + מועדפים —
-> `_catRowsForSystem` (קטגוריות לפי `nodeHasSystem` הדומיננטי) · `filterBySystem`
-> (מוצרים). **פאזה 2b (v5.71):** עץ חכם — `filterSmartBySystem`/`smartProductSystems`
+> `_catsForSystem` (קטגוריות לפי `nodeHasSystem` הדומיננטי) · `filterBySystem`
+> (מוצרים). **שורות הקטגוריה חיות (v5.79):** `_categorySummary` נותן לכל שורה
+> ספירת-מוצרים אמיתית פר-מערכת (badge) + תיאור מתת-הקטגוריות שבמערכת — במקום
+> ה-`_kMeta` הסטטי שהיה זהה בכל המחלקות. **פאזה 2b (v5.71):** עץ חכם — `filterSmartBySystem`/`smartProductSystems`
 > ממפים את ה-SKU של מותגי ה-SmartProduct חזרה לקטלוג (לא-פתיר → נשאר בשני
 > הצדדים, R8). **פאזה 3 (v5.71):** בורר המערכת הכפול (`sysOpt`) הוסר מגיליון ⚙️
 > פילטרים — המערכת מגיעה רק מהמחלקות (source-of-truth אחד). **כל סקשני ה-browse מסוננים.**
@@ -73,6 +75,7 @@ tab (or the bar's clear) resets all three providers → back to the grid.
 |---|---|---|
 | forgiving product search | matches across name + category + SKU + colour, word-by-word (order-independent); folds Hebrew gershayim/geresh (״ ׳ → " ') so a Hebrew-keyboard size query matches; expands everyday words via `kSearchSynonyms` (kept precise — e.g. שירותים → toilet fixtures only, not branch connectors); AND-match with a graceful any-word fallback (`requireAll:false`) so a reasonable query never dead-ends | ✅ |
 | relevance ranking | default order sorts results by `searchRelevance` (name match > category-only > synonym/colour), so the product the user meant surfaces first; an explicit ↕️ sort overrides it | ✅ |
+| autocomplete (Benzi #6) | `searchSuggestions` → `_SearchSuggestions` chip row above the results: distinct catalog **category** labels whose products match the query (forgiving any-word), ranked name-hit → popularity → א-ת, capped at 6, never echoing a fully-typed category; respects `catalogSystemFilterProvider`; shown only at ≥2 chars in a product scope (הכל/מוצרים). Tapping a chip completes `searchQueryProvider` → results re-run. Guarded by `search_suggestions_test` | ✅ |
 
 ## Catalog בית — finder home (`finder_screen.dart`)
 

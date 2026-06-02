@@ -161,6 +161,39 @@ int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
   return score;
 }
 
+/// As-you-type search suggestions (Benzi #6): distinct catalog **category**
+/// labels whose products match [query] (forgiving, any-word), most-matched
+/// first, with categories whose own name hits the query floated to the top.
+/// Respects the active water-system scope ([system]) like every other section,
+/// and never echoes a category the user already typed in full. Tapping one
+/// completes the query to that term — short, tappable, and complementary to the
+/// product cards below (categories, not duplicate product names). Pure → tested.
+List<String> searchSuggestions(String query,
+    {WaterSystem? system, int limit = 6}) {
+  final q = _normForSearch(query.trim());
+  if (q.isEmpty) return const [];
+  final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
+  final counts = <String, int>{};
+  for (final p in filterBySystem(kLipskeyCatalog, system)) {
+    if (!catalogProductMatchesQuery(p, query, requireAll: false)) continue;
+    counts[p.categoryHe] = (counts[p.categoryHe] ?? 0) + 1;
+  }
+  bool nameHit(String c) {
+    final n = _normForSearch(c);
+    return tokens.any((t) => n.contains(t));
+  }
+
+  final out = counts.keys.where((c) => _normForSearch(c) != q).toList()
+    ..sort((a, b) {
+      final an = nameHit(a) ? 1 : 0;
+      final bn = nameHit(b) ? 1 : 0;
+      if (an != bn) return bn - an; // category-name matches first
+      final byCount = counts[b]!.compareTo(counts[a]!);
+      return byCount != 0 ? byCount : a.compareTo(b); // then popularity, then א-ת
+    });
+  return out.take(limit).toList();
+}
+
 /// Active search scope chip (הכל / מוצרים / קטגוריות / מסכים).
 final searchScopeProvider = StateProvider<String>((_) => 'הכל');
 
@@ -404,24 +437,6 @@ String _facetDesc(List<LipskeyCatalogProduct> matching) {
   }
   return matching.map((p) => p.nameHe).take(2).join(' · ');
 }
-
-// Simulated metadata — preview text, timestamp, unread badge count.
-// Ordered to match kCatalogCats (same index).
-const _kMeta = [
-  (preview: 'ברז מיקסר + אמבטיה · 12 פריטים חדשים', time: 'עכשיו', badge: 12),
-  (preview: 'אסלה תלויה חדשה · 4 פריטים',            time: 'אתמול', badge: 4),
-  (preview: 'ערכת מקלחת חדשה × 3',                    time: 'אתמול', badge: 0),
-  (preview: 'דוד שמש 150L – מבצע',                    time: '21.5',  badge: 2),
-  (preview: 'כיור גרניט 2 אגנים',                      time: '21.5',  badge: 0),
-  (preview: 'צינור PVC 110mm – מלאי מוגבל',           time: '20.5',  badge: 0),
-  (preview: '3 ספקים עדכנו מחירים',                   time: '20.5',  badge: 3),
-  (preview: 'חיבורים לחץ ½″ · מחיר עודכן',           time: '19.5',  badge: 0),
-  (preview: 'לבנה בטון 25×25×15 – מבצע שבוע',        time: '19.5',  badge: 0),
-  (preview: 'צבע לבן 15L · 2 מותגים',                 time: '18.5',  badge: 0),
-  (preview: 'ערכת כלים מקצועית 120 חלקים',            time: '18.5',  badge: 0),
-  (preview: 'מערכת השקיה · טפטפות + מחברים',          time: '17.5',  badge: 0),
-  (preview: 'צנרת PPR · 12 תת-קטגוריות',              time: 'חדש',   badge: 50),
-];
 
 class CatalogScreen extends ConsumerStatefulWidget {
   const CatalogScreen({super.key});
@@ -1534,7 +1549,12 @@ class _SearchPanel extends ConsumerWidget {
           const Divider(height: 1, color: Color(0xFFF5F5F5)),
           Expanded(
             child: showResults
-                ? const _SearchResultsList()
+                ? const Column(
+                    children: [
+                      _SearchSuggestions(),
+                      Expanded(child: _SearchResultsList()),
+                    ],
+                  )
                 : const _RecentSearchesList(),
           ),
         ],
@@ -1837,6 +1857,74 @@ class _RecentSearchesList extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// As-you-type suggestion chips (Benzi #6) above the product results. Hidden
+/// until the query is ≥2 chars in a product scope, and renders nothing when
+/// there's nothing to suggest — so it never adds empty chrome. Tapping a chip
+/// completes the query (`searchQueryProvider`), which re-runs the live results.
+class _SearchSuggestions extends ConsumerWidget {
+  const _SearchSuggestions();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final query = ref.watch(searchQueryProvider);
+    final scope = ref.watch(searchScopeProvider);
+    final system = ref.watch(catalogSystemFilterProvider);
+    final productScope = scope == 'הכל' || scope == 'מוצרים';
+    if (!productScope || query.trim().length < 2) return const SizedBox.shrink();
+    final sugg = searchSuggestions(query, system: system);
+    if (sugg.isEmpty) return const SizedBox.shrink();
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFFF5F5F5))),
+      ),
+      child: SizedBox(
+        height: 46,
+        child: ListView(
+          key: const Key('search-suggestions'),
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          children: [
+            for (final s in sugg)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: 8),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: () =>
+                      ref.read(searchQueryProvider.notifier).state = s,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: const Color(0xFFE0E0E0)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.search,
+                            size: 15, color: Color(0xFF888888)),
+                        const SizedBox(width: 6),
+                        Text(
+                          s,
+                          style: const TextStyle(
+                            color: Color(0xFF1A1A1A),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -2146,7 +2234,7 @@ class _FilteredCatalogList extends StatelessWidget {
       ),
       itemBuilder: (_, i) {
         final idx = indices[i];
-        return _CatalogRow(cat: kCatalogCats[idx], meta: _kMeta[idx]);
+        return _CatalogRow(cat: kCatalogCats[idx]);
       },
     );
   }
@@ -2189,21 +2277,49 @@ class _EmptySection extends StatelessWidget {
   }
 }
 
-/// Top categories (+ their meta) that belong to [system] — matched to their
-/// catalog-tree node's dominant system (fixtures show in both), consistent with
-/// the tree drill. null → all. Keeps category ⇄ `_kMeta` index alignment.
-List<({Section cat, ({String preview, String time, int badge}) meta})>
-    _catRowsForSystem(WaterSystem? system) {
-  final out =
-      <({Section cat, ({String preview, String time, int badge}) meta})>[];
-  for (var i = 0; i < kCatalogCats.length; i++) {
-    if (system != null) {
-      final node = _findCatalogTreeNodeByTitle(kCatalogCats[i].title);
-      if (node == null || !nodeHasSystem(node, system)) continue;
-    }
-    out.add((cat: kCatalogCats[i], meta: _kMeta[i]));
+/// Top categories that belong to [system] — matched to their catalog-tree
+/// node's dominant system (fixtures show in both), consistent with the tree
+/// drill. null → all.
+List<Section> _catsForSystem(WaterSystem? system) {
+  if (system == null) return kCatalogCats;
+  final out = <Section>[];
+  for (final c in kCatalogCats) {
+    final node = _findCatalogTreeNodeByTitle(c.title);
+    if (node != null && nodeHasSystem(node, system)) out.add(c);
   }
   return out;
+}
+
+/// Real, department-aware summary for a top category — its in-system product
+/// count + a description built from its in-system sub-categories. Replaces the
+/// old static `_kMeta` copy so each row reflects the *active* system, not fixed
+/// marketing text identical across departments.
+({int count, String desc}) _categorySummary(String title, WaterSystem? system) {
+  final node = _findCatalogTreeNodeByTitle(title);
+  if (node == null) return (count: 0, desc: 'בקרוב');
+  final leafCats = <String>{};
+  void collect(CatalogNode n) {
+    if (n.isLeaf) {
+      final c = n.lipskeyCategory;
+      if (c != null) leafCats.add(c);
+    } else {
+      for (final ch in n.children) {
+        collect(ch);
+      }
+    }
+  }
+
+  collect(node);
+  final count = filterBySystem(
+          kCatalogProducts.where((p) => leafCats.contains(p.categoryHe)).toList(),
+          system)
+      .length;
+  final subs = [
+    for (final ch in node.children)
+      if (system == null || nodeHasSystem(ch, system)) ch.title,
+  ];
+  final desc = subs.isEmpty ? '$count מוצרים' : subs.take(3).join(' · ');
+  return (count: count, desc: desc);
 }
 
 class _CatalogList extends ConsumerWidget {
@@ -2211,18 +2327,16 @@ class _CatalogList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rows = _catRowsForSystem(ref.watch(catalogSystemFilterProvider));
+    final cats = _catsForSystem(ref.watch(catalogSystemFilterProvider));
     return ListView.separated(
       key: const Key('catalog-list'),
-      itemCount: rows.length,
+      itemCount: cats.length,
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 76,
         color: Color(0xFFF5F5F5),
       ),
-      itemBuilder: (context, i) {
-        return _CatalogRow(cat: rows[i].cat, meta: rows[i].meta);
-      },
+      itemBuilder: (context, i) => _CatalogRow(cat: cats[i]),
     );
   }
 }
@@ -2240,7 +2354,7 @@ class _AllOverview extends ConsumerWidget {
     final recents = ref.watch(recentSearchesProvider);
     final favSkus = ref.watch(productFavoritesProvider);
     final systemFilter = ref.watch(catalogSystemFilterProvider);
-    final catRows = _catRowsForSystem(systemFilter);
+    final catList = _catsForSystem(systemFilter);
     final smartCats = systemFilter == null
         ? kSmartTreeCats
         : kSmartTreeCats
@@ -2262,9 +2376,9 @@ class _AllOverview extends ConsumerWidget {
         // קטגוריות — full list inline, scoped to the active water system.
         _OverviewBlock(
           title: 'קטגוריות',
-          count: catRows.length,
+          count: catList.length,
           children: [
-            for (final r in catRows) _CatalogRow(cat: r.cat, meta: r.meta),
+            for (final c in catList) _CatalogRow(cat: c),
           ],
         ),
         // חיפושים אחרונים
@@ -2490,14 +2604,15 @@ CatalogNode? _findCatalogTreeNodeByTitle(String title) {
 }
 
 class _CatalogRow extends ConsumerWidget {
-  const _CatalogRow({required this.cat, required this.meta});
+  const _CatalogRow({required this.cat});
 
   final Section cat;
-  final ({String preview, String time, int badge}) meta;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasBadge = meta.badge > 0;
+    final summary =
+        _categorySummary(cat.title, ref.watch(catalogSystemFilterProvider));
+    final hasBadge = summary.count > 0;
     return InkWell(
       onTap: () {
         // Categories without tree data drill into a designed "coming soon"
@@ -2531,35 +2646,20 @@ class _CatalogRow extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          cat.title,
-                          style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        meta.time,
-                        style: TextStyle(
-                          color: hasBadge
-                              ? BsTokens.brand
-                              : const Color(0xFF888888),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    cat.title,
+                    style: const TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Row(
                     children: [
                       Expanded(
                         child: Text(
-                          meta.preview,
+                          summary.desc,
                           style: const TextStyle(
                             color: Color(0xFF888888),
                             fontSize: 13,
@@ -2579,7 +2679,7 @@ class _CatalogRow extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            '${meta.badge}',
+                            '${summary.count}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
