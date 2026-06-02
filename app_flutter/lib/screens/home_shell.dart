@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.85 · 1.6.48 · 🔎 בנצי #6 — השלמת-מילים בחיפוש לפי שמות-מוצרים אמיתיים (מחסום · מחבר · מחזיק…), מסונן-מערכת',
+                          'v5.85 · 1.6.48 · 📐 צ׳יפ DN על הכרטיס — קוטר מ-dims (ברכיים/אטמים/מכסים) מוצג כעת על הכרטיס בדומה למאתר, כך שוריאנטי-מידה מאוחדים נבדלים זה מזה',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

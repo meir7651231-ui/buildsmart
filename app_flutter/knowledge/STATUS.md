@@ -2,6 +2,12 @@
 
 _Version label: `v5.85` (see `home_shell.dart`). Update on each user-visible change._
 
+## Card — dims-derived DN chip (v5.84)
+Lipskey fittings whose bore lives only in `dims` (elbows/seals/covers — 218
+products) now show a gray DN chip on the card (`_NameWords`, via `tokensFromDims`),
+so the finder's DN size axis is visible and collapsed DN variants are
+distinguishable. Guarded by `card_dims_dn_chip_test`.
+
 ## Departments — tool departments live from real data (v5.83 — R8)
 A full catalog audit (all 99 leaf categories + product-name search) confirmed the
 catalog is 100% plumbing: the 5 trade placeholders (חשמל · חומרי בניין · צבע ·

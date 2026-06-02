@@ -1932,22 +1932,34 @@ class _NameWords extends StatelessWidget {
       }
     }
 
+    // Diameter from dims (e.g. DN110) — informational gray chip. Many fittings
+    // (elbows, seals, covers) carry their bore ONLY in dims, never in the name,
+    // so without this the finder's DN size axis is invisible on the card and the
+    // collapsed size variants (cycled via the "N/M" family badge) look
+    // identical. Sourced from tokensFromDims so the label matches the finder
+    // size chip verbatim. We add each dims DN whose label isn't already one of
+    // the name's own size chips — this mirrors the finder exactly (which also
+    // shows e.g. BOTH `4"` from the name AND `DN110` from dims) while never
+    // duplicating a DN the name already states. (An angle like `90°` is a size
+    // token but not a diameter, so an elbow still gets its dims DN chip.)
+    if (product.dims != null) {
+      final nameSizeLabels = product.nameHe
+          .split(RegExp(r'\s+'))
+          .where(isSizeToken)
+          .expand((w) => parseSizeTokens(w).map((t) => t.label))
+          .toSet();
+      for (final t in tokensFromDims(product.dims!)) {
+        if (t.family == SizeFamily.dnDiameter &&
+            !nameSizeLabels.contains(t.label)) {
+          chips.add(_grayInfoChip(t.label));
+        }
+      }
+    }
+
     // Length — informational gray chip (e.g. "4 מ׳"), never pickable.
     final length = product.dims?['אורך'] as String?;
     if (length != null && length.isNotEmpty) {
-      chips.add(Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-        decoration: BoxDecoration(
-          color: const Color(0x10888888),
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(color: const Color(0x30888888), width: 0.9),
-        ),
-        child: Text(length,
-            style: const TextStyle(
-                color: Color(0xFF909090),
-                fontSize: 12,
-                fontWeight: FontWeight.w600)),
-      ));
+      chips.add(_grayInfoChip(length));
     }
 
     return Wrap(
@@ -1958,6 +1970,23 @@ class _NameWords extends StatelessWidget {
     );
   }
 }
+
+/// A small, non-pickable informational chip (gray) — used for the dims-derived
+/// diameter (DN) and the length, neither of which is a tappable variant axis.
+Widget _grayInfoChip(String text) => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: const Color(0x10888888),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: const Color(0x30888888), width: 0.9),
+      ),
+      child: Text(text,
+          textDirection: chipLabelDirection(text),
+          style: const TextStyle(
+              color: Color(0xFF909090),
+              fontSize: 12,
+              fontWeight: FontWeight.w600)),
+    );
 
 /// One attribute chip in the product name.
 /// • Has siblings → orange border; shows `word · N` where N = picker option count.
