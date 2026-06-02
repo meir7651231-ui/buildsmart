@@ -111,7 +111,7 @@ PER_BAND_PHOTO_H = {
     # Page 21 — drains (photos scale with size)
     (21, 'a'): 150,
     (21, 'b'): 170,
-    (21, 'c'): 195,
+    (21, 'c'): 190,
     # Page 22 — drains open
     (22, 'a'): 155,
     (22, 'b'): 180,
