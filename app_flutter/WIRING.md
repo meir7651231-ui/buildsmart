@@ -323,6 +323,22 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — P3 spec crops פר-משפחה (v5.77 — 2026-06-02)
+- `scripts/crop_huliot.py` הורחב: לכל band ש-`SPEC_PAGES` (31 עמודי-טבלה),
+  מתחת לתצלום נחתכת **דיאגרמת חתך** (L/DN/W/t/H verbatim) → 83 קבצי
+  `spec_sml_p{NN}_{tag}.jpg`. פטור: עמ' 24 (אביזרים), עמ' 27 (AQUA SLIM —
+  hand-tuned).
+- `_huliotSpecFor` עבר מ-`return null` ל-routing: מקבל את ה-tag
+  מ-`_huliotImageFor` וממפה `spec_$img`. נופל ל-null עבור page-fallback +
+  עמודי 24/27.
+- **2 שערים חדשים/מורחבים:**
+  - **§17.2-Huliot** (חדש) — every product with specImageFile → קובץ קיים פיזית.
+  - **§17.1.b** הורחב לכלול גם `spec_sml_p*.jpg` ב-orphan scanning.
+- 39 lint-infos `avoid_escaping_inner_quotes` נוקו ב-`dart fix --apply`
+  (single→double quotes ל-strings עם `'` בתוכן).
+- mutation_verify ✓ · 1031 tests · flutter analyze: 0 Huliot warnings.
+- **HULIOT_TODO סגור 9/9 ✅ 100%** (P3 הומר מ-🔵 ל-✅).
+
 ## Huliot SmartLock — P8 לוגו brand ייעודי (v5.75 — 2026-06-02)
 - `assets/lipskey/categories/smartlock.png` — היה עותק של `drainage.png`
   (placeholder). הוחלף ב-crop של ה-Y-tee האייקוני מעמ' 1 של הקטלוג

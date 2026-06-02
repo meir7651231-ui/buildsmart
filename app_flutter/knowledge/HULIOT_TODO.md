@@ -29,11 +29,15 @@
 - **בעיה:** פס אפור מימין (אייקוני יח'/ארגז/משטח של הטבלה).
 - **תיקון שבוצע:** `X1` 250→238 ב-`crop_huliot.py`. נחתך מחדש, אין שאריות.
 
-### P3 — spec images פר-משפחה (§17.2) 🔵 ירד בעדיפות
-- **ממצא:** ה-flip כבר מציג את עמוד-הקטלוג המלא (דיאגרמה+טבלה בהקשר) דרך fallback. crop צמוד = cosmetic בלבד, לא פער.
-- כרגע `_huliotSpecFor` מחזיר null → flip נופל ל-page image מלא.
-- לחתוך את דיאגרמת-החתך (L/DN/W/t/H) פר-משפחה → `spec_sml_p{NN}_{tag}.jpg`
-  ולנתב ב-`_huliotSpecFor` (כמו `_pprSpecFor`).
+### P3 — spec images פר-משפחה (§17.2) ✅ בוצע (v5.77)
+- **בוצע:** 83 spec crops נחתכו אוטומטית מתחת לכל תצלום-מוצר באותו band
+  (דיאגרמת חתך L/DN/W/t/H verbatim מהקטלוג). `crop_huliot.py` הורחב עם
+  `SPEC_TOP_PAD`+`SPEC_BOT_PAD`+`SPEC_PAGES` (31 עמודי-טבלה, פטור 24/27).
+- `_huliotSpecFor` עודכן: מקבל את ה-tag מ-`_huliotImageFor` וממפה ל-`spec_$img`.
+  נופל ל-null עבור page-fallbacks ועמודי 24/27 (אין דיאגרמה ייעודית).
+- **guard §17.2-Huliot** ב-`spec_assets_test.dart`: לכל מוצר עם specImageFile
+  הקובץ קיים פיזית. mutation_verify ✓.
+- §17.1.b הורחב לכלול גם `spec_sml_p*.jpg` orphans.
 
 ### P4 — AQUA SLIM (עמ' 27) ✅ בוצע (v5.74)
 - **בוצע:** 3 crops hand-tuned לעמ' 27 (CROPS_27 ב-crop_huliot.py):

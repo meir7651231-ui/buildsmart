@@ -14,7 +14,7 @@ const String kHuliotBrand = 'חוליות';
 // ── Families (verbatim from TOC, page 3) ──────────────────────────────────
 const String kSmlPipes = 'צינור חלק';
 const String kSmlCutters = 'חותך צינורות';
-const String kSmlJoker = 'מתאם זווית - ג\'וקר';
+const String kSmlJoker = "מתאם זווית - ג'וקר";
 const String kSmlElbowOneSide = 'ברך צד אחד חלק';
 const String kSmlElbow = 'ברך';
 const String kSmlElbowReducing = 'ברך מצרה';
@@ -51,7 +51,7 @@ String? _huliotImageFor(int page, String nameHe, String categoryHe) {
   switch (page) {
     case 11: // pipe (a) · cutter (b) · joker (c)
       if (has('חותך')) return _p(11, 'b');
-      if (has('ג\'וקר')) return _p(11, 'c');
+      if (has("ג'וקר")) return _p(11, 'c');
       return _p(11, 'a');
     case 12: // one-side elbow by angle: 15(a) 30(b) 45(c) 90(d)
       if (has('15°')) return _p(12, 'a');
@@ -169,10 +169,24 @@ String? _huliotImageFor(int page, String nameHe, String categoryHe) {
   return 'page_${page.toString().padLeft(2, '0')}.jpg';
 }
 
-/// Per-product spec image (the diagram on the flip side). MVP returns null
-/// → the flip side falls back to the full catalog page. Per-family crops
-/// go here once cut from the PDF (protocol §17.2).
-String? _huliotSpecFor(int page, String nameHe, String categoryHe) => null;
+/// Per-product spec image (the diagram on the flip side). Routes to the
+/// `spec_sml_p{NN}_{tag}.jpg` crop that pairs with the product's photo —
+/// the dimension diagram (L/DN/W/t/H labels) sits directly below the photo
+/// on the same catalog band, so the same tag identifies both (P3 / §17.2).
+/// Pages without an auto-cropped diagram (24, 27, 36/37/38/40-43 accessory
+/// layouts) return null → flip falls back to the full catalog page.
+String? _huliotSpecFor(int page, String nameHe, String categoryHe) {
+  final img = _huliotImageFor(page, nameHe, categoryHe);
+  // Routing fell through to the whole page (no per-family crop) → no spec.
+  if (img == null || img.startsWith('page_')) return null;
+  // Page 27 (AQUA SLIM) uses hand-tuned photo crops; the catalog page has
+  // renders, not a dimension diagram, so there's no matching spec.
+  if (img.startsWith('sml_p27_')) return null;
+  // Page 24 (joker seals + plug) — accessory band, no diagram cropped.
+  if (img.startsWith('sml_p24_')) return null;
+  // The image is `sml_pNN_x.jpg` → the spec is `spec_sml_pNN_x.jpg`.
+  return 'spec_$img';
+}
 
 // ── Factory ───────────────────────────────────────────────────────────────
 LipskeyCatalogProduct _sl(
@@ -232,13 +246,13 @@ final List<LipskeyCatalogProduct> kHuliotCatalog = [
       dims: {'DN': '50'}),
 
   // ── page 11: מתאם זווית - ג'וקר ───────────────────────────────────────
-  _sl('70940160', 'מתאם זווית - ג\'וקר 40', kSmlJoker, 11,
-      dims: {'סימון': 'ג\'וקר', 'DN': '40', 'L': '89', 'W': '66',
+  _sl('70940160', "מתאם זווית - ג'וקר 40", kSmlJoker, 11,
+      dims: {'סימון': "ג'וקר", 'DN': '40', 'L': '89', 'W': '66',
         'יח׳/ארגז': '80', 'יח׳/משטח': '3,360'}),
-  _sl('70850060', 'מתאם זווית - ג\'וקר 50', kSmlJoker, 11,
-      dims: {'סימון': 'ג\'וקר 50', 'DN': '50', 'L': '87', 'W': '77'}),
-  _sl('70963160', 'מתאם זווית - ג\'וקר 63', kSmlJoker, 11,
-      dims: {'סימון': 'ג\'וקר 63', 'DN': '63', 'L': '95', 'W': '90'}),
+  _sl('70850060', "מתאם זווית - ג'וקר 50", kSmlJoker, 11,
+      dims: {'סימון': "ג'וקר 50", 'DN': '50', 'L': '87', 'W': '77'}),
+  _sl('70963160', "מתאם זווית - ג'וקר 63", kSmlJoker, 11,
+      dims: {'סימון': "ג'וקר 63", 'DN': '63', 'L': '95', 'W': '90'}),
 
   // ── page 12: ברך 15° צד אחד חלק ───────────────────────────────────────
   _sl('70041150', 'ברך 15° צד אחד חלק 40', kSmlElbowOneSide, 12,
@@ -403,26 +417,26 @@ final List<LipskeyCatalogProduct> kHuliotCatalog = [
       dims: {'סימון': 'פתוח 175/40/50', 'DN1': '40', 'DN2': '50', 'D': '98.3', 't1': '40', 't2': '41', 'L1': '175', 'L2': '55', 'W': '200'}),
 
   // ── page 24: אטם לג'וקר ───────────────────────────────────────────────
-  _sl('67750440', 'אטם לג\'וקר 40', kSmlAccessories, 24,
-      dims: {'סימון': 'אטם לג\'וקר 40', 'חומר': 'SBR', 'DN': '40', 'L': '30', 'W': '50'}),
-  _sl('67760440', 'אטם לג\'וקר מצרה 40-50', kSmlAccessories, 24,
-      dims: {'סימון': 'אטם לג\'וקר מצרה 40-50', 'חומר': 'SBR', 'DN': '40-50', 'L': '42', 'W': '60'}),
-  _sl('67760540', 'אטם לג\'וקר 50', kSmlAccessories, 24,
-      dims: {'סימון': 'אטם לג\'וקר 50', 'חומר': 'SBR', 'DN': '50', 'L': '30', 'W': '60'}),
-  _sl('67763063', 'אטם לג\'וקר 63', kSmlAccessories, 24,
-      dims: {'סימון': 'אטם לג\'וקר 63', 'חומר': 'SBR', 'DN': '63', 'L': '30.5', 'W': '73'}),
+  _sl('67750440', "אטם לג'וקר 40", kSmlAccessories, 24,
+      dims: {'סימון': "אטם לג'וקר 40", 'חומר': 'SBR', 'DN': '40', 'L': '30', 'W': '50'}),
+  _sl('67760440', "אטם לג'וקר מצרה 40-50", kSmlAccessories, 24,
+      dims: {'סימון': "אטם לג'וקר מצרה 40-50", 'חומר': 'SBR', 'DN': '40-50', 'L': '42', 'W': '60'}),
+  _sl('67760540', "אטם לג'וקר 50", kSmlAccessories, 24,
+      dims: {'סימון': "אטם לג'וקר 50", 'חומר': 'SBR', 'DN': '50', 'L': '30', 'W': '60'}),
+  _sl('67763063', "אטם לג'וקר 63", kSmlAccessories, 24,
+      dims: {'סימון': "אטם לג'וקר 63", 'חומר': 'SBR', 'DN': '63', 'L': '30.5', 'W': '73'}),
   // ── page 24: אטם מעביר ────────────────────────────────────────────────
   _sl('767943440', 'אטם מעביר SL 40/32', kSmlAccessories, 24,
       dims: {'סימון': 'אטם מעביר SL 40/32'}),
   _sl('767950440', 'אטם מעביר SL 50/40', kSmlAccessories, 24,
       dims: {'סימון': 'אטם מעביר SL 50/40'}),
   // ── page 24: אום לג'וקר ───────────────────────────────────────────────
-  _sl('70950160', 'אום לג\'וקר 40', kSmlAccessories, 24,
-      dims: {'סימון': 'אום לג\'וקר 40', 'DN': '40', 'L': '19', 'W': '66'}),
-  _sl('70860060', 'אום לג\'וקר 50', kSmlAccessories, 24,
-      dims: {'סימון': 'אום לג\'וקר 50', 'DN': '50', 'L': '22', 'W': '77'}),
-  _sl('70863063', 'אום לג\'וקר 63', kSmlAccessories, 24,
-      dims: {'סימון': 'אום לג\'וקר 63', 'DN': '63', 'L': '22', 'W': '90'}),
+  _sl('70950160', "אום לג'וקר 40", kSmlAccessories, 24,
+      dims: {'סימון': "אום לג'וקר 40", 'DN': '40', 'L': '19', 'W': '66'}),
+  _sl('70860060', "אום לג'וקר 50", kSmlAccessories, 24,
+      dims: {'סימון': "אום לג'וקר 50", 'DN': '50', 'L': '22', 'W': '77'}),
+  _sl('70863063', "אום לג'וקר 63", kSmlAccessories, 24,
+      dims: {'סימון': "אום לג'וקר 63", 'DN': '63', 'L': '22', 'W': '90'}),
   // ── page 24: פקק למחסום/מאסף ──────────────────────────────────────────
   _sl('70940060', 'פקק למחסום 40', kSmlAccessories, 24,
       dims: {'סימון': 'פקק למחסום 40', 'DN': '40', 'L': '42'}),
@@ -483,9 +497,9 @@ final List<LipskeyCatalogProduct> kHuliotCatalog = [
       dims: {'שם': 'Aqua Slim 700 פס נירוסטה דגם מלא/אריח', 'חומר': 'נירוסטה', 'L1': '684.4', 'L2': '38.5'}),
 
   // ── page 28: הגבהה פתח רבוע ───────────────────────────────────────────
-  _sl('60200260', 'הגבהה פתח רבוע בז\'', kSmlCovers, 28,
-      color: 'בז\'',
-      dims: {'סימון': 'בז\'', 'חומר': 'PP', 'DN': '98.2', 'L1': '104', 'L2': '80', 'H': '11',
+  _sl('60200260', "הגבהה פתח רבוע בז'", kSmlCovers, 28,
+      color: "בז'",
+      dims: {'סימון': "בז'", 'חומר': 'PP', 'DN': '98.2', 'L1': '104', 'L2': '80', 'H': '11',
         'יח׳/ארגז': '80', 'יח׳/משטח': '1,920'}),
   _sl('60200251', 'הגבהה פתח רבוע אפור', kSmlCovers, 28,
       color: 'אפור',
@@ -503,37 +517,37 @@ final List<LipskeyCatalogProduct> kHuliotCatalog = [
       dims: {'חומר': 'PP', 'DN': '98', 'D': '98', 'H': '13.3'}),
 
   // ── page 29: מכסה עגול מוגבה ──────────────────────────────────────────
-  _sl('60300367', 'מכסה עגול מוגבה בז\'', kSmlCovers, 29,
-      color: 'בז\'',
+  _sl('60300367', "מכסה עגול מוגבה בז'", kSmlCovers, 29,
+      color: "בז'",
       dims: {'חומר': 'PP', 'DN': '111', 'D': '98.2', 'L': '42', 'H': '2.5'}),
   _sl('60300351', 'מכסה עגול מוגבה אפור', kSmlCovers, 29,
       color: 'אפור',
       dims: {'חומר': 'PP', 'DN': '111', 'D': '98.2', 'L': '42', 'H': '2.5'}),
   // ── page 29: מכסה עגול קבוע ───────────────────────────────────────────
-  _sl('60300263', 'מכסה עגול קבוע בז\' 117', kSmlCovers, 29,
-      color: 'בז\'',
+  _sl('60300263', "מכסה עגול קבוע בז' 117", kSmlCovers, 29,
+      color: "בז'",
       dims: {'חומר': 'PP', 'DN': '117', 'D': '98.2', 'H': '2.5'}),
   _sl('60300251', 'מכסה עגול קבוע אפור 130', kSmlCovers, 29,
       color: 'אפור',
       dims: {'חומר': 'PP', 'DN': '130', 'D': '98.2', 'H': '2.5'}),
   // ── page 29: מכסה ריבועי חיצוני ───────────────────────────────────────
-  _sl('60300567', 'מכסה ריבועי חיצוני בז\'', kSmlCovers, 29,
-      color: 'בז\'',
+  _sl('60300567', "מכסה ריבועי חיצוני בז'", kSmlCovers, 29,
+      color: "בז'",
       dims: {'חומר': 'PP', 'L': '112', 'H': '2.5'}),
   _sl('60300551', 'מכסה ריבועי חיצוני אפור', kSmlCovers, 29,
       color: 'אפור',
       dims: {'חומר': 'PP', 'L': '112', 'H': '2.5'}),
   // ── page 29: מכסה ריבועי פנימי ────────────────────────────────────────
-  _sl('60300467', 'מכסה ריבועי פנימי בז\'', kSmlCovers, 29,
-      color: 'בז\'',
+  _sl('60300467', "מכסה ריבועי פנימי בז'", kSmlCovers, 29,
+      color: "בז'",
       dims: {'חומר': 'PP', 'L': '103', 'H': '5'}),
   _sl('60300451', 'מכסה ריבועי פנימי אפור', kSmlCovers, 29,
       color: 'אפור',
       dims: {'חומר': 'PP', 'L': '103', 'H': '5'}),
 
   // ── page 30: רשת מוגבהת עגולה ─────────────────────────────────────────
-  _sl('60400260', 'רשת מוגבהת עגולה בז\'', kSmlCovers, 30,
-      color: 'בז\'',
+  _sl('60400260', "רשת מוגבהת עגולה בז'", kSmlCovers, 30,
+      color: "בז'",
       dims: {'חומר': 'ABS', 'DN': '104', 'D': '98.2', 'L': '43', 'H': '2.5'}),
   _sl('60400251', 'רשת מוגבהת עגולה אפור', kSmlCovers, 30,
       color: 'אפור',
@@ -543,15 +557,15 @@ final List<LipskeyCatalogProduct> kHuliotCatalog = [
       color: 'ניקל',
       dims: {'חומר': 'ABS', 'DN': '104', 'D': '98.2', 'H': '2.5'}),
   // ── page 30: רשת עגולה ────────────────────────────────────────────────
-  _sl('60400163', 'רשת עגולה בז\'', kSmlCovers, 30,
-      color: 'בז\'',
+  _sl('60400163', "רשת עגולה בז'", kSmlCovers, 30,
+      color: "בז'",
       dims: {'חומר': 'ABS', 'DN': '104', 'D': '98.2', 'H': '2.5'}),
   _sl('60400151', 'רשת עגולה אפור', kSmlCovers, 30,
       color: 'אפור',
       dims: {'חומר': 'ABS', 'DN': '104', 'D': '98.2', 'H': '2.5'}),
   // ── page 30: רשת רבועה ────────────────────────────────────────────────
-  _sl('60400360', 'רשת רבועה בז\'', kSmlCovers, 30,
-      color: 'בז\'',
+  _sl('60400360', "רשת רבועה בז'", kSmlCovers, 30,
+      color: "בז'",
       dims: {'חומר': 'ABS', 'DN': '102', 'L': '98.2', 'H': '10'}),
   _sl('60400351', 'רשת רבועה אפור', kSmlCovers, 30,
       color: 'אפור',

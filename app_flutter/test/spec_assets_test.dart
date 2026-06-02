@@ -609,18 +609,47 @@ void main() {
     for (final p in kHuliotCatalog) {
       final a = p.imageAsset;
       if (a != null) referenced.add(a.split('/').last);
+      // P3: spec crops are paired with photo crops; both must be referenced.
+      for (final s in p.specImageAssets) {
+        referenced.add(s.split('/').last);
+      }
     }
     final dir = Directory('assets/huliot_smartlock/products');
     final orphans = dir
         .listSync()
         .whereType<File>()
         .map((f) => f.path.split('/').last)
-        .where((n) => n.startsWith('sml_p') && n.endsWith('.jpg'))
+        .where((n) =>
+            (n.startsWith('sml_p') || n.startsWith('spec_sml_p')) &&
+            n.endsWith('.jpg'))
         .where((n) => !referenced.contains(n))
         .toList();
     expect(orphans, isEmpty,
         reason: 'unreferenced crop files (delete or wire them):\n'
             '${orphans.join('\n')}');
+  });
+
+  // §17.2-Huliot — every product with a dedicated photo crop also has its
+  // matching spec/diagram crop on disk. The pairing is by-construction (the
+  // diagram sits below the photo in the same catalog band), so a missing
+  // spec means the photo's band-y math drifted or the page was excluded from
+  // SPEC_PAGES in crop_huliot.py without updating _huliotSpecFor.
+  // Exempt: products routed to a whole-page fallback (no photo crop), and
+  // pages 24/27 where the diagram doesn't exist in the catalog (accessories
+  // and AQUA SLIM renders).
+  test('§17.2-Huliot every product with a photo crop has its spec crop', () {
+    final missing = <String>[];
+    for (final p in kHuliotCatalog) {
+      final s = p.specImageFile;
+      if (s == null) continue;
+      final path = 'assets/huliot_smartlock/products/$s';
+      if (!File(path).existsSync()) {
+        missing.add('${p.sku} "${p.nameHe}" → $path (NOT ON DISK)');
+      }
+    }
+    expect(missing, isEmpty,
+        reason: 'spec crops referenced by _huliotSpecFor but not on disk:\n'
+            '${missing.take(15).join('\n')}');
   });
 
   test('§22.J-Huliot reference product per family carries יח׳/ארגז + יח׳/משטח',

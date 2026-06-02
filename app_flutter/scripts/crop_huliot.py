@@ -66,6 +66,19 @@ X0, X1 = 12, 238        # left photo column (P2: 250→238 trims table unit-icon
 # diagram on dense 4-section pages (band≈265 → 95px diagram margin left out).
 PHOTO_H = 170
 
+# P3 §17.2: the dimension DIAGRAM sits directly below the product photo in the
+# same band — same left column, height ≈ band - PHOTO_H, with a small top
+# margin so the photo's drop-shadow doesn't bleed in. Spec crops are written
+# as `spec_sml_p{NN}_{tag}.jpg` and routed by _huliotSpecFor(). Pages where
+# the diagram doesn't fit this scheme (page 27 AQUA SLIM, varied accessory
+# layouts) are excluded — they fall back to the full page on the flip side.
+SPEC_TOP_PAD = 8            # margin between photo bottom and diagram top
+SPEC_BOT_PAD = 14           # leave the trailing sku-row out of the diagram crop
+SPEC_PAGES = {              # which SECTIONS pages get auto spec crops
+    11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+    28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
+}
+
 for pg, tags in SECTIONS.items():
     src = f'{PAGES}/page_{pg:02d}.jpg'
     im = Image.open(src)
@@ -74,13 +87,22 @@ for pg, tags in SECTIONS.items():
     for idx, tag in enumerate(tags):
         by0 = Y0 + idx * band
         # photo height never exceeds the band itself (small bands stay in-band)
-        by1 = by0 + min(PHOTO_H, band * 0.92)
-        crop = im.crop((X0, int(by0), X1, int(by1)))
+        ph_top = by0
+        ph_bot = by0 + min(PHOTO_H, band * 0.92)
+        crop = im.crop((X0, int(ph_top), X1, int(ph_bot)))
         crop.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
+        # P3 — diagram crop (skip pages where the layout doesn't match)
+        if pg in SPEC_PAGES:
+            sp_top = ph_bot + SPEC_TOP_PAD
+            sp_bot = by0 + band - SPEC_BOT_PAD
+            if sp_bot - sp_top >= 40:  # only when there's room
+                d = im.crop((X0, int(sp_top), X1, int(sp_bot)))
+                d.save(f'{OUT}/spec_sml_p{pg:02d}_{tag}.jpg', quality=85)
 
 # Page 27 — apply hand-tuned crops (overrides any generic SECTIONS entry).
 im27 = Image.open(f'{PAGES}/page_27.jpg')
 for tag, box in CROPS_27.items():
     im27.crop(box).save(f'{OUT}/sml_p27_{tag}.jpg', quality=85)
 
-print('cropped', sum(len(v) for v in SECTIONS.values()) + len(CROPS_27), 'images')
+print('cropped', sum(len(v) for v in SECTIONS.values()) + len(CROPS_27), 'images +',
+      sum(len(v) for k, v in SECTIONS.items() if k in SPEC_PAGES), 'spec diagrams')
