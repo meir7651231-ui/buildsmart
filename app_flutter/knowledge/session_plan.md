@@ -49,3 +49,12 @@ Owner: this session · Scope: `catalog_screen.dart` בלבד (search panel). א�
   טאפ משלים `searchQueryProvider` → התוצאות מתעדכנות.
 - בדיקה: `search_suggestions_test` (5 — empty · real/distinct/capped · limit · no-echo · system-scope).
 - analyze 0 · full suite ירוק (אחרי rebase על origin v5.77).
+
+# Follow-on — שורות הקטגוריה חיות פר-מחלקה ✅ (v5.79)
+משוב משתמש: "אני רואה עדיין בתיאורים אותו דבר" — שורות ה-קטגוריות הציגו `_kMeta`
+סטטי (טקסט שיווקי + timestamp + badge קבוע), זהה בכל מחלקה.
+- `_categorySummary(title, system)`: סופר מוצרי-במערכת אמיתיים מתחת לצומת-העץ +
+  בונה תיאור מתת-הקטגוריות שבמערכת. `_CatalogRow` מציג ספירה+תיאור אמיתיים, ה-timestamp
+  המזויף הוסר. `_kMeta` נמחק (call-sites: `_CatalogList`/`_AllOverview`/`_FilteredCatalogList`).
+- אומת בצילום: אסלות שפכים 60 (מושבי אסלה · חיבורי אסלה) מול נקיים 30 (מיכלי הדחה).
+- analyze 0 · 1035 ירוק.

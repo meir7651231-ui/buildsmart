@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.80 · 1.6.44 · 🔎 autocomplete בחיפוש (בנצי #6) — שבבי-השלמה לקטגוריות תוך-כדי-הקלדה, מסונני-מערכת',
+                          'v5.81 · 1.6.44 · 🗂️ קטגוריות — תיאור+ספירה אמיתיים פר-מחלקה (תת-קטגוריות חיות במקום טקסט סטטי)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

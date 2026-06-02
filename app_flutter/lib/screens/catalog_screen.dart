@@ -438,24 +438,6 @@ String _facetDesc(List<LipskeyCatalogProduct> matching) {
   return matching.map((p) => p.nameHe).take(2).join(' · ');
 }
 
-// Simulated metadata — preview text, timestamp, unread badge count.
-// Ordered to match kCatalogCats (same index).
-const _kMeta = [
-  (preview: 'ברז מיקסר + אמבטיה · 12 פריטים חדשים', time: 'עכשיו', badge: 12),
-  (preview: 'אסלה תלויה חדשה · 4 פריטים',            time: 'אתמול', badge: 4),
-  (preview: 'ערכת מקלחת חדשה × 3',                    time: 'אתמול', badge: 0),
-  (preview: 'דוד שמש 150L – מבצע',                    time: '21.5',  badge: 2),
-  (preview: 'כיור גרניט 2 אגנים',                      time: '21.5',  badge: 0),
-  (preview: 'צינור PVC 110mm – מלאי מוגבל',           time: '20.5',  badge: 0),
-  (preview: '3 ספקים עדכנו מחירים',                   time: '20.5',  badge: 3),
-  (preview: 'חיבורים לחץ ½″ · מחיר עודכן',           time: '19.5',  badge: 0),
-  (preview: 'לבנה בטון 25×25×15 – מבצע שבוע',        time: '19.5',  badge: 0),
-  (preview: 'צבע לבן 15L · 2 מותגים',                 time: '18.5',  badge: 0),
-  (preview: 'ערכת כלים מקצועית 120 חלקים',            time: '18.5',  badge: 0),
-  (preview: 'מערכת השקיה · טפטפות + מחברים',          time: '17.5',  badge: 0),
-  (preview: 'צנרת PPR · 12 תת-קטגוריות',              time: 'חדש',   badge: 50),
-];
-
 class CatalogScreen extends ConsumerStatefulWidget {
   const CatalogScreen({super.key});
 
@@ -2252,7 +2234,7 @@ class _FilteredCatalogList extends StatelessWidget {
       ),
       itemBuilder: (_, i) {
         final idx = indices[i];
-        return _CatalogRow(cat: kCatalogCats[idx], meta: _kMeta[idx]);
+        return _CatalogRow(cat: kCatalogCats[idx]);
       },
     );
   }
@@ -2295,21 +2277,49 @@ class _EmptySection extends StatelessWidget {
   }
 }
 
-/// Top categories (+ their meta) that belong to [system] — matched to their
-/// catalog-tree node's dominant system (fixtures show in both), consistent with
-/// the tree drill. null → all. Keeps category ⇄ `_kMeta` index alignment.
-List<({Section cat, ({String preview, String time, int badge}) meta})>
-    _catRowsForSystem(WaterSystem? system) {
-  final out =
-      <({Section cat, ({String preview, String time, int badge}) meta})>[];
-  for (var i = 0; i < kCatalogCats.length; i++) {
-    if (system != null) {
-      final node = _findCatalogTreeNodeByTitle(kCatalogCats[i].title);
-      if (node == null || !nodeHasSystem(node, system)) continue;
-    }
-    out.add((cat: kCatalogCats[i], meta: _kMeta[i]));
+/// Top categories that belong to [system] — matched to their catalog-tree
+/// node's dominant system (fixtures show in both), consistent with the tree
+/// drill. null → all.
+List<Section> _catsForSystem(WaterSystem? system) {
+  if (system == null) return kCatalogCats;
+  final out = <Section>[];
+  for (final c in kCatalogCats) {
+    final node = _findCatalogTreeNodeByTitle(c.title);
+    if (node != null && nodeHasSystem(node, system)) out.add(c);
   }
   return out;
+}
+
+/// Real, department-aware summary for a top category — its in-system product
+/// count + a description built from its in-system sub-categories. Replaces the
+/// old static `_kMeta` copy so each row reflects the *active* system, not fixed
+/// marketing text identical across departments.
+({int count, String desc}) _categorySummary(String title, WaterSystem? system) {
+  final node = _findCatalogTreeNodeByTitle(title);
+  if (node == null) return (count: 0, desc: 'בקרוב');
+  final leafCats = <String>{};
+  void collect(CatalogNode n) {
+    if (n.isLeaf) {
+      final c = n.lipskeyCategory;
+      if (c != null) leafCats.add(c);
+    } else {
+      for (final ch in n.children) {
+        collect(ch);
+      }
+    }
+  }
+
+  collect(node);
+  final count = filterBySystem(
+          kCatalogProducts.where((p) => leafCats.contains(p.categoryHe)).toList(),
+          system)
+      .length;
+  final subs = [
+    for (final ch in node.children)
+      if (system == null || nodeHasSystem(ch, system)) ch.title,
+  ];
+  final desc = subs.isEmpty ? '$count מוצרים' : subs.take(3).join(' · ');
+  return (count: count, desc: desc);
 }
 
 class _CatalogList extends ConsumerWidget {
@@ -2317,18 +2327,16 @@ class _CatalogList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rows = _catRowsForSystem(ref.watch(catalogSystemFilterProvider));
+    final cats = _catsForSystem(ref.watch(catalogSystemFilterProvider));
     return ListView.separated(
       key: const Key('catalog-list'),
-      itemCount: rows.length,
+      itemCount: cats.length,
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 76,
         color: Color(0xFFF5F5F5),
       ),
-      itemBuilder: (context, i) {
-        return _CatalogRow(cat: rows[i].cat, meta: rows[i].meta);
-      },
+      itemBuilder: (context, i) => _CatalogRow(cat: cats[i]),
     );
   }
 }
@@ -2346,7 +2354,7 @@ class _AllOverview extends ConsumerWidget {
     final recents = ref.watch(recentSearchesProvider);
     final favSkus = ref.watch(productFavoritesProvider);
     final systemFilter = ref.watch(catalogSystemFilterProvider);
-    final catRows = _catRowsForSystem(systemFilter);
+    final catList = _catsForSystem(systemFilter);
     final smartCats = systemFilter == null
         ? kSmartTreeCats
         : kSmartTreeCats
@@ -2368,9 +2376,9 @@ class _AllOverview extends ConsumerWidget {
         // קטגוריות — full list inline, scoped to the active water system.
         _OverviewBlock(
           title: 'קטגוריות',
-          count: catRows.length,
+          count: catList.length,
           children: [
-            for (final r in catRows) _CatalogRow(cat: r.cat, meta: r.meta),
+            for (final c in catList) _CatalogRow(cat: c),
           ],
         ),
         // חיפושים אחרונים
@@ -2596,14 +2604,15 @@ CatalogNode? _findCatalogTreeNodeByTitle(String title) {
 }
 
 class _CatalogRow extends ConsumerWidget {
-  const _CatalogRow({required this.cat, required this.meta});
+  const _CatalogRow({required this.cat});
 
   final Section cat;
-  final ({String preview, String time, int badge}) meta;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasBadge = meta.badge > 0;
+    final summary =
+        _categorySummary(cat.title, ref.watch(catalogSystemFilterProvider));
+    final hasBadge = summary.count > 0;
     return InkWell(
       onTap: () {
         // Categories without tree data drill into a designed "coming soon"
@@ -2637,35 +2646,20 @@ class _CatalogRow extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          cat.title,
-                          style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        meta.time,
-                        style: TextStyle(
-                          color: hasBadge
-                              ? BsTokens.brand
-                              : const Color(0xFF888888),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    cat.title,
+                    style: const TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Row(
                     children: [
                       Expanded(
                         child: Text(
-                          meta.preview,
+                          summary.desc,
                           style: const TextStyle(
                             color: Color(0xFF888888),
                             fontSize: 13,
@@ -2685,7 +2679,7 @@ class _CatalogRow extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            '${meta.badge}',
+                            '${summary.count}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,

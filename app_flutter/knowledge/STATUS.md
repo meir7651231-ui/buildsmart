@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.80` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.81` (see `home_shell.dart`). Update on each user-visible change._
 _known-failing: 0 (gate 32 baseline — 0 כשלים מאומת 2026-06-01; שמות ב-knowledge/known_failing.txt)_
 
 ## Search autocomplete — `searchSuggestions` (v5.80 — Benzi #6)
@@ -24,8 +24,11 @@ catalog + finder so neither back-imports the other. **User chose option 2**
 (finder, not the forced tree). **Filtered (Phase 1):** finder home (empty groups
 hidden) + tree-drill + search panel. **Filtered (Phase 2, v5.70):** קטגוריות +
 הכל overview (categories + favorites blocks) + מועדפים — categories via
-`_catRowsForSystem` (tree-node dominant, reuses `nodeHasSystem`), products via
-`filterBySystem`. **Filtered (Phase 2b, v5.71):** עץ חכם — `filterSmartBySystem`
+`_catsForSystem` (tree-node dominant, reuses `nodeHasSystem`), products via
+`filterBySystem`. **Category rows show live data (v5.81):** `_categorySummary`
+gives each קטגוריה row its real in-system product count (badge) + a description
+built from its in-system sub-categories — replacing the old static `_kMeta`
+marketing copy that was identical across departments. **Filtered (Phase 2b, v5.71):** עץ חכם — `filterSmartBySystem`
 maps each SmartProduct's brand SKUs back to the catalog (`smartProductSystems`);
 unresolvable products stay visible in both (R8 — don't hide on a guess). **Phase
 3 (v5.71):** the redundant `sysOpt` system selector was removed from the ⚙️
