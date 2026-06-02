@@ -275,3 +275,19 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/spec_assets_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### Huliot smart-tree wiring batch 4 (v5.72) — 2026-06-02
+- שינוי: +9 מק"טי חוליות כ-SmartBrand: tools+4 (חותכים+מפתחות), drainageFittings+5
+  (אומי-חיבור). חוליות 117→126/170. הנותרים (~44) = אביזרי-סיפון (SmartAcc), לא כרטיסים.
+- תקלה שהוזרקה: מק"ט חותך מחובר '79904070' → '00000000' (לא בקטלוג).
+- תוצאה: 2 בדיקות אדומות ✅ — "Huliot … wired into the smart-tree" + "every
+  SmartBrand.sku is a real catalog SKU".
+- מסקנה: כיסוי 12 הכרטיסים מוגן (spot-check + ≥126 ממופים).
+
+### Huliot smart-tree wiring batch 5 — spare-parts card (v5.78) — 2026-06-02
+- שינוי: כרטיס חדש `smlSpareParts` עם 44 מק"טי אביזרי-סיפון/מחסום כ-SmartBrand.
+  כיסוי חוליות 126→**170/170 (100%)**.
+- תקלה שהוזרקה: מק"ט אטם מחובר '67750440' → '00000000' (לא בקטלוג).
+- תוצאה: 2 בדיקות אדומות ✅ — "Huliot … wired into the smart-tree" + "every
+  SmartBrand.sku is a real catalog SKU".
+- מסקנה: כיסוי 13 הכרטיסים מוגן (spot-check + ≥170 ממופים).

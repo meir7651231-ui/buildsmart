@@ -44,7 +44,7 @@ jobs:
 
       - name: Gate 2 — All tests green
         working-directory: app_flutter
-        run: flutter test --no-pub
+        run: flutter test --no-pub --concurrency=4
 
       - name: Gate 3 — Web build succeeds
         working-directory: app_flutter
@@ -97,3 +97,7 @@ jobs:
             exit 1
           fi
           echo "✅ Claude settings intact"
+
+      - name: Gate 8 — Android release build (לקח בנצי — debug מדלג על permission enforcement)
+        working-directory: app_flutter
+        run: flutter build appbundle --release --no-pub

@@ -814,6 +814,12 @@ const List<SmartProduct> kSmartProducts = [
       SmartBrand(name: 'מצרה 40/50 (חוליות)', tag: 'חוליות · מצרה', sku: '72150460'),
       SmartBrand(name: 'מצרה 50/63 (חוליות)', tag: 'חוליות · מצרה', sku: '72163563'),
       SmartBrand(name: 'מצרה ברזל/פלסטיק 60/50 (חוליות)', tag: 'חוליות · מעבר', sku: '62161560'),
+      // ── חוליות SmartLock — אומי-חיבור ──
+      SmartBrand(name: 'אום SmartLock 32 (חוליות)', tag: 'חוליות · אום', sku: '70703260'),
+      SmartBrand(name: 'אום SmartLock 40 (חוליות)', tag: 'חוליות · אום', sku: '70704060'),
+      SmartBrand(name: 'אום SmartLock 50 (חוליות)', tag: 'חוליות · אום', sku: '70705060'),
+      SmartBrand(name: 'אום SmartLock 63 (חוליות)', tag: 'חוליות · אום', sku: '70763063'),
+      SmartBrand(name: 'אום מעבר מברזל 60 (חוליות)', tag: 'חוליות · מעבר', sku: '60760060'),
     ],
     acc: [
       SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום החיבור — חובה', must: true),
@@ -1225,6 +1231,11 @@ const List<SmartProduct> kSmartProducts = [
       SmartBrand(name: 'מפתח צינורות 12"',  tag: 'חזק וגדול'),
       SmartBrand(name: 'מפתח צינורות 14"',  tag: 'גדול במיוחד'),
       SmartBrand(name: 'מפתח שוודי',          tag: 'מתכוונן'),
+      // ── חוליות SmartLock — חותכים + מפתחות-אום ──
+      SmartBrand(name: 'חותך צינורות SmartLock 40 (חוליות)', tag: 'חוליות · חותך', sku: '79904070'),
+      SmartBrand(name: 'חותך צינורות SmartLock 50 (חוליות)', tag: 'חוליות · חותך', sku: '79905070'),
+      SmartBrand(name: 'מפתח לאום SmartLock 32-40 (חוליות)', tag: 'חוליות · מפתח', sku: '61040360'),
+      SmartBrand(name: 'מפתח לאום SmartLock 50-69 (חוליות)', tag: 'חוליות · מפתח', sku: '61060560'),
     ],
     acc: [
       SmartAcc(name: 'סרט טפלון',         emoji: '🎗️', price: 4,  why: 'אוטם את ההברגה', must: true),
@@ -2444,6 +2455,75 @@ const List<SmartProduct> kSmartProducts = [
       SmartAcc(name: 'סרט טפלון',   emoji: '🎗️', price: 4,  why: 'אוטם ההברגה — חובה', must: true),
       SmartAcc(name: 'אטם דו צדדי', emoji: '⚫', price: 6,  why: 'איטום החיבור',        must: true),
       SmartAcc(name: 'מפתח אלן',     emoji: '🔧', price: 18, why: 'להידוק',                must: false),
+    ],
+  ),
+
+  // ===== חוליות — חלקי חילוף ואביזרי סיפון/מחסום SmartLock =====
+  SmartProduct(
+    key: 'smlSpareParts',
+    name: 'חלקי חילוף לסיפון/מחסום SmartLock (חוליות)',
+    emoji: '🧩',
+    cat: 'ניקוז וצנרת',
+    diagramTitle: 'בחירת חלק-חילוף / אביזר לסיפון או מחסום',
+    stages: _strap,
+    brands: [
+      // אטמים
+      SmartBrand(name: 'אטם לג\'וקר 40 (חוליות)', tag: 'חוליות · אטם', rec: true, sku: '67750440'),
+      SmartBrand(name: 'אטם לג\'וקר מצרה 40-50 (חוליות)', tag: 'חוליות · אטם', sku: '67760440'),
+      SmartBrand(name: 'אטם לג\'וקר 50 (חוליות)', tag: 'חוליות · אטם', sku: '67760540'),
+      SmartBrand(name: 'אטם לג\'וקר 63 (חוליות)', tag: 'חוליות · אטם', sku: '67763063'),
+      SmartBrand(name: 'אטם מעביר SL 40/32 (חוליות)', tag: 'חוליות · אטם', sku: '767943440'),
+      SmartBrand(name: 'אטם מעביר SL 50/40 (חוליות)', tag: 'חוליות · אטם', sku: '767950440'),
+      // אומי ג'וקר
+      SmartBrand(name: 'אום לג\'וקר 40 (חוליות)', tag: 'חוליות · אום', sku: '70950160'),
+      SmartBrand(name: 'אום לג\'וקר 50 (חוליות)', tag: 'חוליות · אום', sku: '70860060'),
+      SmartBrand(name: 'אום לג\'וקר 63 (חוליות)', tag: 'חוליות · אום', sku: '70863063'),
+      // פקקים
+      SmartBrand(name: 'פקק למחסום 40 (חוליות)', tag: 'חוליות · פקק', sku: '70940060'),
+      SmartBrand(name: 'פקק למחסום/מאסף 50 (חוליות)', tag: 'חוליות · פקק', sku: '70950060'),
+      SmartBrand(name: 'פקק למאסף 63 (חוליות)', tag: 'חוליות · פקק', sku: '70963060'),
+      SmartBrand(name: 'פקק 1¼" (חוליות)', tag: 'חוליות · פקק', sku: '61239940'),
+      SmartBrand(name: 'פקק 2" (חוליות)', tag: 'חוליות · פקק', sku: '61451640'),
+      SmartBrand(name: 'פקק לאביק 1½ (חוליות)', tag: 'חוליות · פקק', sku: '61436565'),
+      SmartBrand(name: 'פקק + שרשרת (חוליות)', tag: 'חוליות · פקק', sku: '61110141'),
+      SmartBrand(name: 'סט פקקים לברז + שבלונה ½" (חוליות)', tag: 'חוליות · פקק', sku: '61602000'),
+      SmartBrand(name: 'פקק לברז שחור (חוליות)', tag: 'חוליות · פקק', sku: '61600060'),
+      // חיבורי אגנית + רוזטות
+      SmartBrand(name: 'חיבור קצר לאגנית (חוליות)', tag: 'חוליות · אגנית', sku: '61651065'),
+      SmartBrand(name: 'חיבור ארוך לאגנית (חוליות)', tag: 'חוליות · אגנית', sku: '61651061'),
+      SmartBrand(name: 'רוזטה 1¼" (חוליות)', tag: 'חוליות · רוזטה', sku: '61235061'),
+      SmartBrand(name: 'רוזטה 2" (חוליות)', tag: 'חוליות · רוזטה', sku: '61451161'),
+      // מבואים
+      SmartBrand(name: 'מבוא מס\' 3 לסיפון 2" (חוליות)', tag: 'חוליות · מבוא', sku: '61350861'),
+      SmartBrand(name: 'מבוא מס\' 4 (חוליות)', tag: 'חוליות · מבוא', sku: '61657761'),
+      SmartBrand(name: 'מבוא מס\' 5 אמריקאי + מדיח (חוליות)', tag: 'חוליות · מבוא', sku: '62750160'),
+      SmartBrand(name: 'מבוא זחיח 1¼" ארוך (חוליות)', tag: 'חוליות · מבוא', sku: '62233560'),
+      SmartBrand(name: 'מבוא זחיח 1¼" + מזגן (חוליות)', tag: 'חוליות · מבוא', sku: '61233361'),
+      // מכלולים · צינורות זחיחים · מאריכים · מתאם
+      SmartBrand(name: 'מכלול לסיפון 2" ללא משפך (חוליות)', tag: 'חוליות · מכלול', sku: '61433260'),
+      SmartBrand(name: 'מכלול לסיפון 1¼" ללא משפך (חוליות)', tag: 'חוליות · מכלול', sku: '61233260'),
+      SmartBrand(name: 'צינור זחיח לסיפון 1¼" (חוליות)', tag: 'חוליות · זחיח', sku: '61233060'),
+      SmartBrand(name: 'צינור זחיח לסיפון 2" (חוליות)', tag: 'חוליות · זחיח', sku: '61450361'),
+      SmartBrand(name: 'מאריך למבוא זחיח 1¼" (חוליות)', tag: 'חוליות · מאריך', sku: '61239460'),
+      SmartBrand(name: 'מאריך למבוא זחיח 2" + אטם (חוליות)', tag: 'חוליות · מאריך', sku: '61458460'),
+      SmartBrand(name: 'מתאם זחיח 1½" אמריקאי + מדיח J (חוליות)', tag: 'חוליות · מתאם', sku: '61300030'),
+      // סטי חיבור למדיח/מכונת כביסה
+      SmartBrand(name: 'סט חיבור למדיח/כביסה 1¼ 45° (חוליות)', tag: 'חוליות · סט', sku: '61531561'),
+      SmartBrand(name: 'סט חיבור למדיח/כביסה 1½ 45° (חוליות)', tag: 'חוליות · סט', sku: '61554561'),
+      SmartBrand(name: 'סט חיבור למדיח/כביסה 1½ 90° (חוליות)', tag: 'חוליות · סט', sku: '61551561'),
+      // משפכים
+      SmartBrand(name: 'משפך 1¼" קומפלט (חוליות)', tag: 'חוליות · משפך', sku: '61233161'),
+      SmartBrand(name: 'משפך ארוך 1¼" קומפלט (חוליות)', tag: 'חוליות · משפך', sku: '61233162'),
+      SmartBrand(name: 'משפך 2" קומפלט (חוליות)', tag: 'חוליות · משפך', sku: '61450365'),
+      // אביקים נירוסטה · ונטיל · מצחיה
+      SmartBrand(name: 'אביק 1¼ נירוסטה (חוליות)', tag: 'חוליות · אביק', sku: '61237040'),
+      SmartBrand(name: 'אביק 2" נירוסטה (חוליות)', tag: 'חוליות · אביק', sku: '61451740'),
+      SmartBrand(name: 'ונטיל לכיור אמריקאי J (חוליות)', tag: 'חוליות · ונטיל', sku: '62200001'),
+      SmartBrand(name: 'מצחיה קומפלט לאביק לאמבט (חוליות)', tag: 'חוליות · מצחיה', sku: '61116041'),
+    ],
+    acc: [
+      SmartAcc(name: 'סרט טפלון', emoji: '🎗️', price: 4, why: 'אוטם הברגה', must: true),
+      SmartAcc(name: 'סיליקון סניטרי', emoji: '🧴', price: 21, why: 'איטום', must: false),
     ],
   ),
 ];

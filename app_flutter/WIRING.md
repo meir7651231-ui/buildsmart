@@ -616,3 +616,26 @@ rather than pixel rendering.
 - Effect: release AAB 141.6 MB → 68.2 MB (−52%), image quality unchanged. Product/page
   assets de-bundled from pubspec; `IMAGE_BASE_URL` empty → bundled-asset fallback.
 - Guards: `product_images_test.dart` (URL mapping, mutation-verified: strip + base).
+
+## Huliot SmartLock → smart-tree wiring, batch 4: tools + connection nuts (v5.72)
+- `smart_tree.dart`: +9 Huliot SKUs as `SmartBrand` options on 2 existing cards:
+  - `tools` (כלי עבודה) +4 — חותך צינורות 40/50 + מפתח לאום 32-40/50-69
+  - `drainageFittings` (מחברים/מצמדים) +5 — אום SmartLock 32/40/50/63 + אום מעבר מברזל
+- Effect: smart-tree mapped coverage → Huliot **126/170** mapped.
+- The remaining ~44 Huliot SKUs are kSmlAccessories (אטמים/פקקים/משפכים/מבואים/
+  רוזטות — siphon spare-parts/seals). These are accessory-tier (SmartAcc), not
+  standalone brand-cards; left as plain catalog products by design (a 44-brand
+  catch-all card would be a dumping ground, not a usable smart-card).
+- Guards: `smartproduct_contract_test` Huliot test extended to 12 cards (+tools)
+  + sku→card spot-checks + ≥126 mapped. Mutation-verified. Pure data.
+
+## Huliot SmartLock → smart-tree wiring, batch 5: spare-parts card (v5.78) — COMPLETE 170/170
+- `smart_tree.dart`: new SmartProduct `smlSpareParts` ("חלקי חילוף לסיפון/מחסום
+  SmartLock") — a parts-picker card listing the 44 remaining kSmlAccessories as
+  SmartBrand options: אטמים (6) · אומי-ג'וקר (3) · פקקים (9) · אגנית/רוזטות (4) ·
+  מבואים (5) · מכלולים/זחיחים/מאריכים/מתאם (7) · סטי-חיבור (3) · משפכים (3) ·
+  אביקים/ונטיל/מצחיה (4).
+- Effect: **Huliot smart-tree coverage = 170/170 (100%)**. Every Huliot SmartLock
+  product now opens a כרטיס-חכם.
+- Guard: `smartproduct_contract_test` Huliot test → 13 cards (+smlSpareParts) +
+  sku→card spot-check + ≥170 mapped. Mutation-verified. Pure data.

@@ -158,6 +158,30 @@ HOOK_PATH=$(git config --get core.hooksPath)
 [[ -d "lib/state" ]] || err "19" "תיקיית lib/state חסרה" "מבנה הפרויקט פגום"
 [[ -d "test" ]] || err "20" "תיקיית test חסרה" "מבנה הפרויקט פגום"
 
+# שערים 81-83: hook integrity (הועברו לפני Flutter — fail-fast, לקח #68 בנצי)
+# מיקום מקורי: אחרי Flutter (שורות 489-524). hook שגוי = 13 דק' לחינם.
+# תיקון באג #31: sha256sum רואה CRLF vs LF על Windows/autocrlf → false positive.
+# פתרון: git diff (line-ending aware) במקום sha256sum להשוואת HEAD vs working.
+HEAD_HOOK_HASH=$(git show "HEAD:.githooks/pre-commit" 2>/dev/null | sha256sum | cut -d' ' -f1)
+CURRENT_HOOK_HASH=$(sha256sum "$REPO_ROOT/.githooks/pre-commit" | cut -d' ' -f1)
+if [[ -f "$REPO_ROOT/.git/hooks/pre-commit" ]]; then
+    LOCAL_HOOK_HASH=$(sha256sum "$REPO_ROOT/.git/hooks/pre-commit" 2>/dev/null | cut -d' ' -f1)
+    LOCAL_HOOK_HASH=${LOCAL_HOOK_HASH:-missing}
+else
+    LOCAL_HOOK_HASH="missing"
+fi
+if [[ "$LOCAL_HOOK_HASH" != "missing" && "$LOCAL_HOOK_HASH" != "$CURRENT_HOOK_HASH" ]]; then
+    err "81" "ה-hook המקומי שונה מ-.githooks/" "cp .githooks/pre-commit .git/hooks/"
+fi
+if ! git diff --quiet HEAD -- "$REPO_ROOT/.githooks/pre-commit" 2>/dev/null; then
+    STAGED_HOOK=$(git diff --cached --name-only | grep "^\.githooks/pre-commit$" | head -1)
+    if [[ -z "$STAGED_HOOK" ]]; then
+        err "81" "pre-commit השתנה אבל לא ב-staging" "git add .githooks/pre-commit (או שחזר)"
+    fi
+fi
+HP=$(git config --get core.hooksPath)
+[[ "$HP" == ".githooks" ]] || err "83" "core.hooksPath שונה: $HP" "git config core.hooksPath .githooks"
+
 # ═══ קבוצה ג: תכנון (21-30) ═══
 
 STAGED_LIB=$(git diff --cached --name-only | grep -E "^app_flutter/lib/(screens|state|logic)/" | head -1)
@@ -190,6 +214,16 @@ if [[ -n "$STAGED_LIB" ]]; then
     # שער 24: WIRING.md עודכן
     STAGED_WIRING=$(git diff --cached --name-only | grep "WIRING.md" | head -1)
     [[ -n "$STAGED_WIRING" ]] || err "24" "WIRING.md לא עודכן" "עדכן WIRING.md"
+
+    # שער 59: גרסה עלתה אם נגעת בקוד (הועבר לפני Flutter — fail-fast, לקח #68 בנצי)
+    # מיקום מקורי: אחרי Flutter. עלות-כשל: 13 דק' Flutter רצה לחינם.
+    # כל 3 המקומות חייבים להתעדכן: home_shell + STATUS + pubspec (build number).
+    SHELL_DIFF=$(git diff --cached lib/screens/home_shell.dart 2>/dev/null | grep "^+" | grep -oE "v[0-9]+\.[0-9]+" | head -1)
+    if [[ -z "$SHELL_DIFF" ]]; then
+        CURR_VER=$(grep -oE "v[0-9]+\.[0-9]+" lib/screens/home_shell.dart 2>/dev/null | head -1)
+        err "59" "גרסה לא עלתה (נוכחי: ${CURR_VER:-?})" \
+            "bump ב-3 מקומות: home_shell.dart · knowledge/STATUS.md · pubspec.yaml (build number)"
+    fi
 fi
 
 # שער 25: לא לגעת ב-Preact-shared
@@ -210,6 +244,19 @@ BAD_HELPER=$(git diff --cached --name-only | grep -E "^app_flutter/lib/.*[A-Z].*
 BAD_URI=$(git diff --cached -- '*.dart' ':(exclude)*stuck_regression_test.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "file:///|C:\\\\" | head -1)
 [[ -z "$BAD_URI" ]] || err "28" "URI מקומי בקוד" "הסר נתיב מוחלט"
 
+# ══ Fail-fast: אם יש כשלים בשערים מהירים — לא מריצים Flutter (~13 דק') ══
+# לקח #68 (בנצי 2026-06-02): שערים 59/81 גרמו ל-4 מחזורי Flutter לחינם.
+# פתרון: כל השערים הזולים רצים קודם; בכשל — עוצרים לפני analyze/test/build.
+if [[ "$FAIL" -gt 0 ]]; then
+    echo ""
+    echo "══════════════════════════════════════════════"
+    echo "  ❌ $FAIL שגיאות בשערים מהירים — עוצר לפני Flutter"
+    echo "  תקן ונסה שוב (חוסך ~13 דק' analyze/test/build)"
+    echo "══════════════════════════════════════════════"
+    echo "$CURRENT_FP $NOW gates=v2:${FAILED_GATES#,} head=$HEAD_SHA" >> "$FINGERPRINT_FILE"
+    exit 1
+fi
+
 # ═══ קבוצה ד: בדיקה (31-45) ═══
 
 # תיקון באג #19: tiered execution
@@ -226,7 +273,7 @@ if [[ -n "$NEEDS_FLUTTER" ]]; then
 
     # שער 32: בדיקות לא נכשלות מעבר ל-baseline (תיקון באג #19 — baseline tracking)
     # baseline מאוחסן ב-STATUS.md: "known-failing: N" — מאפשר pre-existing failures
-    TEST_OUT=$(flutter test --no-pub 2>&1)
+    TEST_OUT=$(flutter test --no-pub --concurrency=4 2>&1)
     TEST_EXIT=$?
     KNOWN_FAIL=$(grep -oE "known-failing: [0-9]+" knowledge/STATUS.md 2>/dev/null | grep -oE "[0-9]+$" || echo 0)
     # מניעת baseline-phantom (אודיט 2026-06-01): known-failing > 0 חייב רשימת שמות
@@ -370,12 +417,6 @@ fi
 NEW_DEFINE=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep "fromEnvironment" | head -1)
 [[ -z "$NEW_DEFINE" ]] || warn "58" "fromEnvironment חדש — תעד ב-WIRING"
 
-# שער 59: גרסה עלתה אם נגעת בקוד
-if [[ -n "$STAGED_LIB" ]]; then
-    SHELL_DIFF=$(git diff --cached lib/screens/home_shell.dart 2>/dev/null | grep "^+" | grep -oE "v[0-9]+\.[0-9]+" | head -1)
-    [[ -n "$SHELL_DIFF" ]] || err "59" "גרסה לא עלתה" "bump גרסה ב-home_shell + STATUS"
-fi
-
 # שער 60: אין dependencies חדשות בלי וידוא (תיקון באג #18 — מבחין dev_deps)
 # בודק רק production deps (מתחת ל-dependencies:, לא dev_dependencies:)
 NEW_DEPS=$(git diff --cached pubspec.yaml 2>/dev/null | awk '
@@ -486,42 +527,13 @@ STAGED_LOCK=$(git diff --cached --name-only | grep -E "\.lock$|node_modules" | h
 LOCK_CHANGE=$(git diff --cached pubspec.lock 2>/dev/null | grep "^+" | grep "version:" | head -1)
 [[ -z "$LOCK_CHANGE" ]] || warn "80" "שינוי version ב-lock — וודא pub get הריץ"
 
-# שער 81-85: hook integrity (תיקון באג #9 — מבדק גם מול commit מקורי)
-# תיקון באג #31: sha256sum רואה CRLF vs LF על Windows/autocrlf → false positive.
-# פתרון: git diff (line-ending aware) במקום sha256sum להשוואת HEAD vs working.
-HEAD_HOOK_HASH=$(git show "HEAD:.githooks/pre-commit" 2>/dev/null | sha256sum | cut -d' ' -f1)
-CURRENT_HOOK_HASH=$(sha256sum "$REPO_ROOT/.githooks/pre-commit" | cut -d' ' -f1)
-# תיקון באג #30: pipe ל-cut מצליח גם כשsha256sum נכשל (Windows/MSYS) — בדוק קיום קובץ קודם
-if [[ -f "$REPO_ROOT/.git/hooks/pre-commit" ]]; then
-    LOCAL_HOOK_HASH=$(sha256sum "$REPO_ROOT/.git/hooks/pre-commit" 2>/dev/null | cut -d' ' -f1)
-    LOCAL_HOOK_HASH=${LOCAL_HOOK_HASH:-missing}
-else
-    LOCAL_HOOK_HASH="missing"
-fi
-
-# pre-commit ב-.git/hooks חייב להיות שווה ל-.githooks (working copy)
-if [[ "$LOCAL_HOOK_HASH" != "missing" && "$LOCAL_HOOK_HASH" != "$CURRENT_HOOK_HASH" ]]; then
-    err "81" "ה-hook המקומי שונה מ-.githooks/" "cp .githooks/pre-commit .git/hooks/"
-fi
-
-# אם .githooks/pre-commit השתנה מ-HEAD ולא נמצא ב-staged → חשד
-# git diff מנרמל line-endings (autocrlf-aware) — לא sha256sum
-if ! git diff --quiet HEAD -- "$REPO_ROOT/.githooks/pre-commit" 2>/dev/null; then
-    STAGED_HOOK=$(git diff --cached --name-only | grep "^\.githooks/pre-commit$" | head -1)
-    if [[ -z "$STAGED_HOOK" ]]; then
-        err "81" "pre-commit השתנה אבל לא ב-staging" "git add .githooks/pre-commit (או שחזר)"
-    fi
-fi
-
+# שערים 81-83 הועברו לפני Flutter (fail-fast, לקח #68) — ראה קבוצה ב לעיל.
+# pre-push integrity (שער 82) עדיין כאן — לא חוסם Flutter, רק warn.
 if [[ -f "$REPO_ROOT/.git/hooks/pre-push" ]]; then
     PUSH_EXPECTED=$(sha256sum "$REPO_ROOT/.githooks/pre-push" | cut -d' ' -f1)
     PUSH_LOCAL=$(sha256sum "$REPO_ROOT/.git/hooks/pre-push" | cut -d' ' -f1)
     [[ "$PUSH_EXPECTED" == "$PUSH_LOCAL" ]] || warn "82" "pre-push מקומי שונה — סנכרן"
 fi
-
-# שער 83: hooksPath נכון
-HP=$(git config --get core.hooksPath)
-[[ "$HP" == ".githooks" ]] || err "83" "core.hooksPath שונה: $HP" "git config core.hooksPath .githooks"
 
 # שער 84-85: workflow file לא הוסר
 [[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] || err "84" "GitHub workflow נמחק" "שחזר את .github/workflows/protocol-enforce.yml"
