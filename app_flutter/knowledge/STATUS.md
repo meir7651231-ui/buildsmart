@@ -1,6 +1,15 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.85` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.86` (see `home_shell.dart`). Update on each user-visible change._
+
+## Finder filter — substring false-match fixed (v5.86)
+`_productHasChip` (`finder_screen.dart`) ended with an unconditional
+`nameHe.contains(chipLabel)` fallback (meant for curated-facet plain words like
+אמריקאי). It also fired for digit-bearing size/angle chips, so `5"` matched
+`1.25"`, `50 מ"מ` matched `250 מ"מ`, `2"` matched `1/2"` — a size filter
+surfaced larger sizes it isn't. Fix: gate the fallback to digit-free labels
+(structural tokens already cover sizes/angles). Global false-positive upper
+bound 350→0. Guarded by `finder_filter_falsematch_test` (2).
 
 ## Card — dims-derived DN chip (v5.84 + v5.85)
 Fittings whose bore lives only in `dims` now show a gray DN chip on the card

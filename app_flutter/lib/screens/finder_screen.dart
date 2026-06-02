@@ -386,9 +386,15 @@ bool _productHasChip(LipskeyCatalogProduct p, String chipLabel) {
   for (final t in parseAngleTokens(p.nameHe)) {
     if (t.label == chipLabel) return true;
   }
-  // curated-facet chips (kFinderFacets) are plain words; the only place a
-  // substring match is *correct* (e.g. "אמריקאי" inside a drain name).
-  if (p.nameHe.contains(chipLabel)) return true;
+  // curated-facet chips (kFinderFacets) are plain Hebrew words — substring
+  // match is correct ONLY for them (e.g. "אמריקאי" inside a drain name). It
+  // must NEVER run for a digit-bearing size/angle label: "5\"" is a substring
+  // of "1.25\"", "50 מ\"מ" of "250 מ\"מ", "2\"" of "1/2\"" — so a bare contains
+  // would let a chip match a larger size it isn't. Those are handled
+  // structurally above; here we gate the fallback to digit-free labels.
+  if (!RegExp(r'\d').hasMatch(chipLabel) && p.nameHe.contains(chipLabel)) {
+    return true;
+  }
   return p.color == chipLabel;
 }
 
