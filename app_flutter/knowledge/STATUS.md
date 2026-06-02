@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.86` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.87` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Finder filter — substring false-match fixed (v5.86)
 `_productHasChip` (`finder_screen.dart`) ended with an unconditional
@@ -23,6 +23,15 @@ states the OD, never gets a second possibly-inconsistent DN). Cards with truly n
 visible size dropped 18→1 (the lone remainder: `סט פקקים…½"` — `parseChips`
 doesn't surface a leading-fraction `½"`, a tokenizer asymmetry vs `parseSizeTokens`).
 Guarded by `card_dims_dn_chip_test` (4).
+
+## Departments — flat "all products" per branch (v5.87 — Benzi #5)
+Each open department has a `_DeptScopeBar` toggle **"כל המוצרים" ↔ "קטלוג"**
+(`deptFlatProductsProvider`): "כל המוצרים" shows the whole branch as ONE flat
+`LipskeyProductsList` ("ברצף, ללא קשר לקטלוג"), bypassing the finder/tree.
+`departmentProducts(system/toolCats)` is the scope — a water department = all its
+in-system products (`filterBySystem`), a tool department = all its `toolCats`
+products. Resets on department open + "כל המחלקות" clear. Guarded by
+`departments_test`.
 
 ## Departments — tool departments live from real data (v5.83 — R8)
 A full catalog audit (all 99 leaf categories + product-name search) confirmed the

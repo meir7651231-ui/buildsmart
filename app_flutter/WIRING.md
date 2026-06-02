@@ -53,6 +53,13 @@ tool data backs two live tiles via `toolCats` (leaf `categoryHe`) →
 A `_DeptScopeBar` over the catalog names the active scope + a "כל המחלקות" clear.
 Re-tapping the מחלקות tab (or the bar's clear) resets all three providers → grid.
 
+**Flat "all products" per branch (Benzi #5, v5.86):** the scope bar also carries a
+**"כל המוצרים" ↔ "קטלוג"** toggle (`deptFlatProductsProvider`) — "כל המוצרים"
+swaps the catalog for ONE flat `LipskeyProductsList` of the whole branch
+("ברצף, ללא קשר לקטלוג"). Scope = `departmentProducts`: water dept = all its
+in-system products (`filterBySystem`), tool dept = all its `toolCats` products.
+Resets on department open + clear. Guarded by `departments_test`.
+
 ## Catalog search panel tools (`catalog_screen.dart` · `_SearchToolsRow`)
 
 > **חלוקת מערכת (Benzi #1) — option 2, דרך ה-finder:** מחלקה חיה קובעת

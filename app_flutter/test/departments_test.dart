@@ -1,4 +1,6 @@
+import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -49,6 +51,34 @@ void main() {
         expect(d.system, isNotNull);
         expect(d.toolCats, isNull);
       }
+    });
+  });
+
+  group('departmentProducts (Benzi #5 — flat "all products" per branch)', () {
+    test('water department = all its in-system products', () {
+      for (final sys in WaterSystem.values) {
+        final flat = departmentProducts(system: sys);
+        expect(flat, isNotEmpty);
+        expect(flat, equals(filterBySystem(kCatalogProducts, sys)));
+      }
+    });
+
+    test('tool department = exactly its toolCats products', () {
+      final hand = DepartmentsScreen.departments
+          .firstWhere((d) => d.name == 'כלי עבודה ידני');
+      final flat = departmentProducts(toolCats: hand.toolCats);
+      expect(flat, isNotEmpty);
+      for (final p in flat) {
+        expect(hand.toolCats!.contains(p.categoryHe), isTrue);
+      }
+      final expected = kCatalogProducts
+          .where((p) => hand.toolCats!.contains(p.categoryHe))
+          .length;
+      expect(flat.length, expected);
+    });
+
+    test('no scope (placeholder) → empty', () {
+      expect(departmentProducts(), isEmpty);
     });
   });
 }

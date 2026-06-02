@@ -76,3 +76,11 @@ Owner: this session · Scope: `catalog_screen.dart` בלבד (search panel). א�
 של שמות-המוצרים (token אחרון = fragment; מילים שהוא prefix שלהן; frequency→א-ת; cap 6;
 שומר מילים שכבר הוקלדו). מסונן-מערכת. אומת בצילום (מח → מחסום·מחבר·מחזיק).
 `search_suggestions_test` נכתבה מחדש (5). 1044 ירוק.
+
+# Benzi #5 — "כל המוצרים ברצף" per-מחלקה ✅ (v5.86)
+דרישה (פריט 5): "כל המוצרים ברצף ללא קשר לקטלוג, בכל ענף לבד".
+- `deptFlatProductsProvider` (bool) + toggle "כל המוצרים"↔"קטלוג" ב-`_DeptScopeBar`.
+- `departmentProducts(system/toolCats)`: water=`filterBySystem(kCatalogProducts)`,
+  tool=מוצרי ה-toolCats. מרונדר ב-`LipskeyProductsList` שטוח (במקום ה-CatalogScreen).
+- reset על פתיחת-מחלקה + "כל המחלקות". `departments_test` +3 (6 סה"כ). 1047 ירוק.
+- אומת בצילום: אינסטלציה→"כל המוצרים"→רשימה שטוחה של כל מוצרי-השפכים.
