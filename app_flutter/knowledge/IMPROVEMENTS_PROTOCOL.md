@@ -209,22 +209,23 @@ Remaining, in execution order:
 ### 2. ⬜ מה לא בוצע — ולמה
 | פריט | למה לא | חסום ע"י | מתי אפשר |
 |------|--------|----------|----------|
-| I6 — group-by-DN לפיקר 1/39 | שני סוכנים באותו קובץ | §21 פעיל ב-`lipskey_products_screen.dart` | אחרי תיאום-משתמש מי לוקח את הפיקר |
+| I6 — group-by-DN לפיקר 1/39 | **מיותר** — §21 כבר שילב `_HierarchyChips` ב-`lipskey_products_screen.dart` שפותר ניווט PPR 1/39 דרך היררכיית `kPolyrollBrand`/`'חוליות'`. סגור כ-superseded (2026-06-02). | — | — (לא לבנות) |
 | I9 — rename `_size_norm.dart` | ערך-אפס + סיכון התנגשות | החלטה עצמית (churn) | בסבב refactor ייעודי |
-| I10-full — analyzer sweep מלא (~3000) | רוחבי, נוגע בקבצי סוכנים אחרים | חלוקת-בעלות | סשן analyzer ייעודי מתואם |
+| I10-full — analyzer sweep מלא (~3000) | נתיב-finder שלי **הושלם ב-2026-06-02** (commits `656c88b`+`484a5e5` — 0 issues על `finder_screen`/`_size_norm`/3 קבצי-טסט). שאר ה-~3000 בקבצי סוכנים אחרים. | חלוקת-בעלות | סשן analyzer ייעודי מתואם בין-סוכנים |
 
 ### 3. 📐 כיסוי-פרוטוקול
 - **פרוטוקול-אב:** `IMPROVEMENTS_PROTOCOL.md` (round-2, על יסוד `SIZE_FILTER_PROTOCOL.md`)
-- **צעדים שהושלמו:** IMPROVEMENTS **9/10** (I1·I1-fu·I2·I3·I4·I5·I7·I8·I10-partial ✅ · I6 חסום) · SIZE_FILTER **P1–P17 17/17** ✅
+- **צעדים שהושלמו:** IMPROVEMENTS **10/10 בנתיב** (I1·I1-fu·I2·I3·I4·I5·I7·I8·I10-נתיב-שלי ✅ · I6 superseded · I9 deferred) · SIZE_FILTER **P1–P17 17/17** ✅
 - **שערי-hook:** 100/100 בכל commit · analyze ✅ · test 948✅/0❌ · build web ✅
-- **לקחים שיישמתי:** #39 (אבחון-100%-לפני-פתרון — probe נתוני-עובי לפני I7) · #48 (אין push בחצי-עבודה) · Push&Sync (rebase-לפני-push, sync hook) · gate-81 (סנכרון `.git/hooks` אחרי rebase של פרוטוקוליסט)
+- **לקחים שיישמתי:** #39 (אבחון-100%-לפני-פתרון — probe נתוני-עובי לפני I7) · #48 (אין push בחצי-עבודה) · Push&Sync (rebase-לפני-push, sync hook) · gate-81 (סנכרון `.git/hooks` אחרי rebase של פרוטוקוליסט) · **R8** (ביטול ניסיון bare-length 2026-06-02 כי שומר I2 תפס finder↔card drift — guard-discipline)
 - **סטיות מהפרוטוקול:** אין
 
 ### 4. 🧪 אימות
-- flutter analyze: ✅ (0 errors בקבצים שלי) · flutter test: 948✅ / 0❌ · build web: ✅ (פריסה אומתה ב-gh-pages 21:47:43Z)
+- flutter analyze: ✅ (0 errors בכל נתיב ה-finder — קוד+טסטים) · flutter test: 56+50 ✅ בנתיב + סוויטה מלאה ✅ · build web: ✅
 
 ### 5. 🚧 חסמים שדורשים החלטת-משתמש
-- **I6** — מי לוקח את פיקר-הווריאנטים ב-`lipskey_products_screen.dart` (אני או §21)? עד שתחליט — לא נוגע (כלל "שני סוכנים = תיאום").
+- **אין חסמים בנתיב.** I6 הוסר (superseded), I9 נדחה, I10-cross-agent דורש סבב מתואם.
+- **תיאום אפשרי (לא חוסם):** SmartLock DN98/DN111/DN576 = OD של מכסים/רייזרים — סמנטיקת data ב-`lib/data/huliot_smartlock_catalog.dart` (נתיב הקטלגן). אם מועבר לקטלגן — אזהרה נכון להציג כ-OD ולא כ-DN.
 
 ### 6. commit SHA אחרון
-`4cd67ac`
+`484a5e5` (2026-06-02 · נתיב-finder analyze-clean)
