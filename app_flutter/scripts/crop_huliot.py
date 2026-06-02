@@ -104,14 +104,14 @@ PER_BAND_PHOTO_H = {
     (12, 'd'): 110,
     # Page 14 — elbow מצרה צד אחד שקע תקע (band b)
     (14, 'b'): 145,
-    # Page 20 — drop gutters (photos larger than PER_PAGE)
-    (20, 'a'): 150,
-    (20, 'b'): 170,
-    (20, 'c'): 180,
-    # Page 21 — drains (photos scale with size)
-    (21, 'a'): 150,
-    (21, 'b'): 170,
-    (21, 'c'): 190,
+    # Page 20 — drop gutters (measured from ruler)
+    (20, 'a'): 120,    # photo 160-275 → 115; +5 pad
+    (20, 'b'): 138,    # photo 520-655 → 135; +3 pad
+    (20, 'c'): 145,    # photo 895-1035 → 140; +5 pad
+    # Page 21 — drains scale with size (measured from ruler)
+    (21, 'a'): 88,     # drain 80/50 photo 170-240 → 70; +18 pad for green ports
+    (21, 'b'): 155,    # drain 140/50 photo 455-600 → 145; +10 pad
+    (21, 'c'): 165,    # drain 245/50 photo 840-995 → 155; +10 pad
     # Page 22 — drains open
     (22, 'a'): 155,
     (22, 'b'): 180,
