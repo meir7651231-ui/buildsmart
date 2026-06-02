@@ -316,6 +316,14 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — P9 תיעוד PARITY+COVERAGE (v5.72 — 2026-06-02)
+- `knowledge/PARITY.md` סעיף H · קטלוג: השורה הישנה "קטלוג 935" → "קטלוג
+  3-brand (1,879 מוצרים)"; נוסף sub-table "Brand catalogs" עם 3 השורות
+  (ליפסקי 935·21 cats · פולירול 774·14 cats · חוליות 170·17 cats).
+- `knowledge/port/COVERAGE.md` "תוצאות מדודות" — שורה חדשה:
+  **קטלוגי-מותג ב-Flutter · 1,879/1,879 = 100%** (כולל הקרדיט ל-brand #3).
+- אין שינוי קוד; תיעוד-בלבד (סוגר את החוזה הפורמלי של ה-brand).
+
 ## Huliot SmartLock — P7 full dims למוצר-ייחוס פר-משפחה (v5.71 — 2026-06-02)
 - CATALOG §13 — מוצר-ייחוס פר-משפחה = שורת-טבלה מלאה verbatim. נוספו
   `יח׳/ארגז` (per-box) + `יח׳/משטח` (per-pallet) ל-13 מוצרי-ייחוס:

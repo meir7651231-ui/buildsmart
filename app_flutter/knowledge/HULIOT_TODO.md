@@ -62,9 +62,9 @@
 - `assets/lipskey/categories/smartlock.png` = כרגע עותק של drainage.png.
   לחתוך/לעצב אייקון 3D ייעודי ל-SmartLock (או מהלוגו Huliot שבעמ' 1).
 
-### P9 — תיעוד
-- `knowledge/PARITY.md` + `knowledge/port/COVERAGE.md` — להוסיף שורת
-  Huliot SmartLock (catalog brand #3, 170/170).
+### P9 — תיעוד ✅ בוצע (v5.72)
+- **בוצע:** PARITY.md סעיף H עודכן (935→1,879 + sub-table 3 brands).
+  COVERAGE.md "תוצאות מדודות" קיבל שורה: 1,879/1,879 = 100% (brand #3).
 
 ## הערות
 - כל crop חדש → `flutter analyze` + `flutter test` + עדכון §17.1/§17.2 guards.
