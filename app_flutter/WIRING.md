@@ -316,6 +316,16 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — P4 AQUA SLIM crops עמ' 27 (v5.74 — 2026-06-02)
+- עמ' 27 = layout ייחודי (2 renders + strip schematic) שלא מתאים ל-band-loop
+  הגנרי. `scripts/crop_huliot.py` הורחב ב-`CROPS_27` עם hand-tuned boxes:
+  - `sml_p27_a.jpg` — Aqua Slim 330 render (470,195→825,315)
+  - `sml_p27_b.jpg` — Aqua Slim 700 render (420,440→825,540)
+  - `sml_p27_c.jpg` — פס ניקוז ללא סט (strip-only schematic, 150,870→670,920)
+- `_huliotImageFor` case 27: `has('פס') → c` · `has('700') → b` · default 330(a).
+- 10 מוצרי AQUA SLIM (סטים + פסים) יצאו מ-page-27 fallback ל-crops ייעודיים.
+- mutation_verify על default routing (page_27 → red §17.1, restore → green).
+
 ## Huliot SmartLock — P5 orphan-crop cleanup + 2 routing fixes (v5.73 — 2026-06-02)
 - **P5 בוצע:** נמחקו `sml_p24_b.jpg` + `sml_p25_b.jpg` (table-only rows שלא
   היו ב-routing). `scripts/crop_huliot.py` SECTIONS עודכן (24:`['a','c','d']`,

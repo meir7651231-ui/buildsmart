@@ -495,8 +495,8 @@ void main() {
   // §17.1-Huliot every product's FRONT image is a per-family crop that exists
   // on disk (not the whole-page fallback). This is the protocol §17.1 contract:
   // the card shows a cropped product photo, not a scaled-down catalog page.
-  // Pages with table-only rows may legitimately reuse a sibling crop; the only
-  // page-image fallback allowed is page 27 (AQUA SLIM, render-on-table layout).
+  // P4 (v5.74) added hand-tuned crops for page 27 (AQUA SLIM) — removing the
+  // last page-fallback exception. ZERO page-fallbacks now permitted.
   test('§17.1-Huliot every product front image exists + is a real crop', () {
     final missing = <String>[];
     final pageFallback = <String>[];
@@ -507,8 +507,8 @@ void main() {
         continue;
       }
       if (!File(a).existsSync()) missing.add('${p.sku} → $a (not on disk)');
-      // Whole-page fallback is only acceptable for AQUA SLIM (page 27).
-      if (a.contains('/pages/page_') && p.page != 27) {
+      // Page-fallback is no longer permitted for any Huliot product.
+      if (a.contains('/pages/page_')) {
         pageFallback.add('${p.sku} "${p.nameHe}" → $a');
       }
     }

@@ -98,8 +98,11 @@ String? _huliotImageFor(int page, String nameHe, String categoryHe) {
       if (has('מעבר מברזל')) return _p(25, 'c');
       if (has('מצרה')) return _p(18, 'b'); // table-only here → reuse reducer photo
       return _p(25, 'a');
-    case 27: // AQUA SLIM — page is mostly tables + two renders; use page image
-      return 'page_27.jpg';
+    case 27: // AQUA SLIM — three hand-tuned crops (P4):
+             // (a) Aqua Slim 330 render · (b) 700 render · (c) פס strip
+      if (has('פס')) return _p(27, 'c');
+      if (has('700')) return _p(27, 'b');
+      return _p(27, 'a'); // 330 sets default
     case 28: // raise square (a) · Top Floor (b) · cylindrical (c) · temp round (d)
       if (has('Top Floor')) return _p(28, 'b');
       if (has('גלילית')) return _p(28, 'c');

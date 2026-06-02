@@ -8,6 +8,16 @@ os.makedirs(OUT, exist_ok=True)
 # Per page: ordered list of section tags (top→bottom). Photo column = left.
 # Section count drives even vertical division of the content area.
 # tag letters a,b,c,d map to _huliotImageFor routing.
+## Page 27 (AQUA SLIM) has a UNIQUE layout — 2 product renders (330 + 700) on
+## the right side and a thin strip drawing at the bottom; the standard band
+## scheme (PHOTO_H from top of equal bands) doesn't fit. Hand-tuned crops below
+## (CROPS_27) are applied AFTER the loop, overriding any generic SECTIONS entry.
+CROPS_27 = {
+  'a': (470, 195, 825, 315),   # Aqua Slim 330 render
+  'b': (420, 440, 825, 540),   # Aqua Slim 700 render
+  'c': (150, 870, 670, 920),   # פס ניקוז ללא סט (strip-only)
+}
+
 SECTIONS = {
   11: ['a','b','c'],            # pipe / cutter / joker
   12: ['a','b','c','d'],        # elbow oneside 15/30/45/90
@@ -67,4 +77,10 @@ for pg, tags in SECTIONS.items():
         by1 = by0 + min(PHOTO_H, band * 0.92)
         crop = im.crop((X0, int(by0), X1, int(by1)))
         crop.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
-print('cropped', sum(len(v) for v in SECTIONS.values()), 'images')
+
+# Page 27 — apply hand-tuned crops (overrides any generic SECTIONS entry).
+im27 = Image.open(f'{PAGES}/page_27.jpg')
+for tag, box in CROPS_27.items():
+    im27.crop(box).save(f'{OUT}/sml_p27_{tag}.jpg', quality=85)
+
+print('cropped', sum(len(v) for v in SECTIONS.values()) + len(CROPS_27), 'images')

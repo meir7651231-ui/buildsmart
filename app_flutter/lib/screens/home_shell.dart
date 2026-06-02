@@ -395,7 +395,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.73 · 1.6.39 · 🧹 חוליות P5 — orphan-guard §17.1.b חשף 2 בגי-routing: עמ\' 30 "מוגבהת" קודם ל"עגולה" · עמ\' 40 "מאריך" קודם ל"זחיח"',
+                          'v5.74 · 1.6.40 · 🟢 חוליות P4 — AQUA SLIM crops (עמ\' 27): 3 hand-tuned (330 render, 700 render, strip) · 10 מוצרי AQUA SLIM יצאו מ-page-fallback',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

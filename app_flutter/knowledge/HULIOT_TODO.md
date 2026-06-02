@@ -35,9 +35,13 @@
 - לחתוך את דיאגרמת-החתך (L/DN/W/t/H) פר-משפחה → `spec_sml_p{NN}_{tag}.jpg`
   ולנתב ב-`_huliotSpecFor` (כמו `_pprSpecFor`).
 
-### P4 — AQUA SLIM (עמ' 27)
-- כרגע page image. צריך crops ל-2 ה-renders (Aqua Slim 330 / 700) +
-  אולי לפרק את 10 חלקי-המערכת מעמ' 26 (רשת/אטם/מחסום פנימי/בסיס/...).
+### P4 — AQUA SLIM (עמ' 27) ✅ בוצע (v5.74)
+- **בוצע:** 3 crops hand-tuned לעמ' 27 (CROPS_27 ב-crop_huliot.py):
+  330 render · 700 render · strip schematic. routing case 27 עודכן (פס/700/default).
+  10 מוצרים יצאו מ-page-fallback. mutation_verify ✓.
+- **לא בוצע (scope):** עמ' 26 (10 חלקי-מערכת ממוספרים — רשת/אטם/בסיס/...)
+  אינם מוצרים נפרדים בקטלוג (אין SKU על העמוד), אז אין להם imageAsset. עמוד
+  אינפורמטיבי בלבד.
 
 ### P5 — table-only rows ✅ בוצע (v5.73)
 - **בוצע:** נמחקו 2 הקבצים הלא-מיושמים (`24_b`, `25_b`). `crop_huliot.py`
