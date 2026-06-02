@@ -2034,6 +2034,22 @@ class _HierarchyChips extends StatelessWidget {
       shown.add(MapEntry(i, _chipDisplayLabel(rawPath[i])));
     }
     if (shown.isEmpty) return const SizedBox.shrink();
+    // Dims-derived DN — only when the breadcrumb carries NO size of its own.
+    // Hierarchy products usually expose their size in the name (PPR `20`,
+    // חוליות `32`), but covers/risers/grates (e.g. הגבהה/מכסה/רשת) carry their
+    // bore ONLY in dims, so without this their card shows no size at all while
+    // the finder filters them by DN. Gated on "no path size" so a PPR valve
+    // (whose name already states the OD) never gets a second, possibly
+    // less-reliable, dims-DN chip. Sourced from tokensFromDims → matches the
+    // finder chip verbatim.
+    final pathHasSize =
+        rawPath.any((seg) => seg.split(RegExp(r'\s+')).any(isSizeToken));
+    final dnInfoChips = (!pathHasSize && product.dims != null)
+        ? tokensFromDims(product.dims!)
+            .where((t) => t.family == SizeFamily.dnDiameter)
+            .map((t) => t.label)
+            .toList()
+        : const <String>[];
     // §21.C — each chip is stacked: tiny grey label on top (חיבור / צורה /
     // תכונה / תבריג / מידה) + the value pill below. The label makes the
     // hierarchy visible at a glance — primary (חיבור) reads first in RTL,
@@ -2076,6 +2092,26 @@ class _HierarchyChips extends StatelessWidget {
             ],
           ),
         ],
+        // Informational dims-DN (covers/risers with no name size) — a stacked
+        // "מידה" label + gray pill, non-tappable (not a navigable level).
+        for (final dn in dnInfoChips)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text(
+                'מידה',
+                style: TextStyle(
+                  color: Color(0xFF8E8E93),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  height: 1.0,
+                ),
+              ),
+              const SizedBox(height: 2),
+              _grayInfoChip(dn),
+            ],
+          ),
       ],
     );
   }

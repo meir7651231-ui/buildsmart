@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.85 · 1.6.48 · 📐 צ׳יפ DN על הכרטיס — קוטר מ-dims (ברכיים/אטמים/מכסים) מוצג כעת על הכרטיס בדומה למאתר, כך שוריאנטי-מידה מאוחדים נבדלים זה מזה',
+                          'v5.85 · 1.6.48 · 📐 צ׳יפ DN גם על כרטיסי חוליות (מכסים/הגבהות/רשתות) — מסלול ה-breadcrumb; מידה-נעלמת 18→1. צ׳יפ DN על הכרטיס בדומה למאתר',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

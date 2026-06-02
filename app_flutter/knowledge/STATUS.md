@@ -2,11 +2,18 @@
 
 _Version label: `v5.85` (see `home_shell.dart`). Update on each user-visible change._
 
-## Card — dims-derived DN chip (v5.84)
-Lipskey fittings whose bore lives only in `dims` (elbows/seals/covers — 218
-products) now show a gray DN chip on the card (`_NameWords`, via `tokensFromDims`),
-so the finder's DN size axis is visible and collapsed DN variants are
-distinguishable. Guarded by `card_dims_dn_chip_test`.
+## Card — dims-derived DN chip (v5.84 + v5.85)
+Fittings whose bore lives only in `dims` now show a gray DN chip on the card
+(via `tokensFromDims`), so the finder's DN size axis is visible and collapsed
+size variants are distinguishable. **v5.84:** Lipskey cards (`_NameWords`) — adds
+each dims DN not already a name size-chip (mirrors the finder, incl. showing both
+`4"` + `DN110`). **v5.85:** חוליות hierarchy cards (`_HierarchyChips`) — covers/
+risers/grates carry their bore only in dims, so a gray "מידה" DN pill is appended
+when the breadcrumb has no size of its own (gated so a PPR valve, whose name
+states the OD, never gets a second possibly-inconsistent DN). Cards with truly no
+visible size dropped 18→1 (the lone remainder: `סט פקקים…½"` — `parseChips`
+doesn't surface a leading-fraction `½"`, a tokenizer asymmetry vs `parseSizeTokens`).
+Guarded by `card_dims_dn_chip_test` (4).
 
 ## Departments — tool departments live from real data (v5.83 — R8)
 A full catalog audit (all 99 leaf categories + product-name search) confirmed the
