@@ -1,6 +1,16 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.87` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.88` (see `home_shell.dart`). Update on each user-visible change._
+
+## Finder/card — tokenizer agreement on leading fractions (v5.88)
+`isSizeToken` (card word-classifier) required a leading DIGIT, so it rejected a
+bare leading fraction like `½"` while `parseSizeTokens` (finder) accepts it.
+On the Lipskey `_NameWords` path that would render `½"` as a plain link, not a
+size chip, and `productListDedupeKey` wouldn't strip it (variants wouldn't
+collapse). No catalog product triggers it today (the lone `½"` item is a חוליות
+hierarchy card, rendered correctly via `parseChips`), but the asymmetry was a
+latent bug. Fix: `isSizeToken` now accepts a leading fraction glyph. Full suite
+1061/1061 green (no regression). Guarded by `finder_tokenizer_agreement_test` (3).
 
 ## Finder filter — mm tokens no longer collapse (reachability) (v5.87)
 `dedupLengthByMm` collapses equivalent LENGTH chips (cm≡meters, P11) but also
