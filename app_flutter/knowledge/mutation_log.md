@@ -277,3 +277,11 @@
 - תוצאה: 2 בדיקות אדומות ✅ — "Huliot … wired into the smart-tree" + "every
   SmartBrand.sku is a real catalog SKU".
 - מסקנה: כיסוי 12 הכרטיסים מוגן (spot-check + ≥126 ממופים).
+
+### Huliot smart-tree wiring batch 5 — spare-parts card (v5.78) — 2026-06-02
+- שינוי: כרטיס חדש `smlSpareParts` עם 44 מק"טי אביזרי-סיפון/מחסום כ-SmartBrand.
+  כיסוי חוליות 126→**170/170 (100%)**.
+- תקלה שהוזרקה: מק"ט אטם מחובר '67750440' → '00000000' (לא בקטלוג).
+- תוצאה: 2 בדיקות אדומות ✅ — "Huliot … wired into the smart-tree" + "every
+  SmartBrand.sku is a real catalog SKU".
+- מסקנה: כיסוי 13 הכרטיסים מוגן (spot-check + ≥170 ממופים).

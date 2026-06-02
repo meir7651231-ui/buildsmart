@@ -612,3 +612,14 @@ rather than pixel rendering.
   catch-all card would be a dumping ground, not a usable smart-card).
 - Guards: `smartproduct_contract_test` Huliot test extended to 12 cards (+tools)
   + sku→card spot-checks + ≥126 mapped. Mutation-verified. Pure data.
+
+## Huliot SmartLock → smart-tree wiring, batch 5: spare-parts card (v5.78) — COMPLETE 170/170
+- `smart_tree.dart`: new SmartProduct `smlSpareParts` ("חלקי חילוף לסיפון/מחסום
+  SmartLock") — a parts-picker card listing the 44 remaining kSmlAccessories as
+  SmartBrand options: אטמים (6) · אומי-ג'וקר (3) · פקקים (9) · אגנית/רוזטות (4) ·
+  מבואים (5) · מכלולים/זחיחים/מאריכים/מתאם (7) · סטי-חיבור (3) · משפכים (3) ·
+  אביקים/ונטיל/מצחיה (4).
+- Effect: **Huliot smart-tree coverage = 170/170 (100%)**. Every Huliot SmartLock
+  product now opens a כרטיס-חכם.
+- Guard: `smartproduct_contract_test` Huliot test → 13 cards (+smlSpareParts) +
+  sku→card spot-check + ≥170 mapped. Mutation-verified. Pure data.
