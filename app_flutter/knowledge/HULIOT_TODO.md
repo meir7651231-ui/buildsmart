@@ -63,9 +63,9 @@
 - **פטור:** kSmlAccessories (umbrella, 5 עמודים-תת-משפחות) + kSmlAquaSlim
   (layout שונה, אין pack-icons). דורש crops/data-entry נפרד אם רוצים.
 
-### P8 — לוגו מותג
-- `assets/lipskey/categories/smartlock.png` = כרגע עותק של drainage.png.
-  לחתוך/לעצב אייקון 3D ייעודי ל-SmartLock (או מהלוגו Huliot שבעמ' 1).
+### P8 — לוגו מותג ✅ בוצע (v5.75)
+- **בוצע:** `smartlock.png` הוחלף — Y-tee האייקוני מעמ' 1 (crop 500x500
+  בצבע ה-Huliot הירוק הכהה), resize ל-512x512 RGBA. md5 שונה מ-drainage.
 
 ### P9 — תיעוד ✅ בוצע (v5.72)
 - **בוצע:** PARITY.md סעיף H עודכן (935→1,879 + sub-table 3 brands).

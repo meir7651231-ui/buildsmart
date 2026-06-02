@@ -316,6 +316,15 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — P8 לוגו brand ייעודי (v5.75 — 2026-06-02)
+- `assets/lipskey/categories/smartlock.png` — היה עותק של `drainage.png`
+  (placeholder). הוחלף ב-crop של ה-Y-tee האייקוני מעמ' 1 של הקטלוג
+  (x=10-510, y=150-650), resize ל-512×512 RGBA. דומיננטי בצבע ה-Huliot הירוק
+  הכהה, מציג את חתימת SmartLock visual signature (3 השקעים + הטבעות הירוקות).
+- `finder_group_icons_test` "no two groups share the same product image"
+  עובר (md5 שונה מ-drainage.png). 1015 tests pass.
+- **HULIOT_TODO סגור 9/9** — כל הפריטים בוצעו או הוכרעו כ-cosmetic.
+
 ## Huliot SmartLock — P4 AQUA SLIM crops עמ' 27 (v5.74 — 2026-06-02)
 - עמ' 27 = layout ייחודי (2 renders + strip schematic) שלא מתאים ל-band-loop
   הגנרי. `scripts/crop_huliot.py` הורחב ב-`CROPS_27` עם hand-tuned boxes:

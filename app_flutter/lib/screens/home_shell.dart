@@ -395,7 +395,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.74 · 1.6.40 · 🟢 חוליות P4 — AQUA SLIM crops (עמ\' 27): 3 hand-tuned (330 render, 700 render, strip) · 10 מוצרי AQUA SLIM יצאו מ-page-fallback',
+                          'v5.75 · 1.6.41 · 🟢 חוליות P8 — לוגו brand ייעודי: smartlock.png 512x512 (Y-tee מעמ\' 1 בצבע הברנד) במקום עותק drainage · HULIOT_TODO סגור 9/9',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
