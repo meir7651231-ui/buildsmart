@@ -161,37 +161,42 @@ int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
   return score;
 }
 
-/// As-you-type search suggestions (Benzi #6): distinct catalog **category**
-/// labels whose products match [query] (forgiving, any-word), most-matched
-/// first, with categories whose own name hits the query floated to the top.
-/// Respects the active water-system scope ([system]) like every other section,
-/// and never echoes a category the user already typed in full. Tapping one
-/// completes the query to that term — short, tappable, and complementary to the
-/// product cards below (categories, not duplicate product names). Pure → tested.
+/// As-you-type word completion (Benzi #6): completes the word currently being
+/// typed from the vocabulary of words that appear in catalog **product names**
+/// (system-scoped), most-frequent first, capped at [limit]. Returns the whole
+/// query with its last word completed (the already-typed words are kept), so
+/// tapping a chip fills the search box with a real product term. Pure → tested.
 List<String> searchSuggestions(String query,
     {WaterSystem? system, int limit = 6}) {
-  final q = _normForSearch(query.trim());
-  if (q.isEmpty) return const [];
-  final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
-  final counts = <String, int>{};
+  // The word being typed = the last whitespace-delimited token; keep the rest.
+  final lastSpace = query.lastIndexOf(RegExp(r'\s'));
+  final committed = lastSpace < 0 ? '' : query.substring(0, lastSpace + 1);
+  final frag = query.substring(lastSpace + 1);
+  final fragN = _normForSearch(frag);
+  if (fragN.length < 2) return const [];
+  // Frequency of product-name words the fragment is a prefix of.
+  final freq = <String, int>{}; // original word → count
   for (final p in filterBySystem(kLipskeyCatalog, system)) {
-    if (!catalogProductMatchesQuery(p, query, requireAll: false)) continue;
-    counts[p.categoryHe] = (counts[p.categoryHe] ?? 0) + 1;
+    for (final w in p.nameHe.split(RegExp(r'\s+'))) {
+      final wN = _normForSearch(w);
+      if (wN.length < 2 || wN == fragN || !wN.startsWith(fragN)) continue;
+      freq[w] = (freq[w] ?? 0) + 1;
+    }
   }
-  bool nameHit(String c) {
-    final n = _normForSearch(c);
-    return tokens.any((t) => n.contains(t));
-  }
-
-  final out = counts.keys.where((c) => _normForSearch(c) != q).toList()
+  // Most-frequent first, then א-ת; de-dupe by normalized form.
+  final words = freq.keys.toList()
     ..sort((a, b) {
-      final an = nameHit(a) ? 1 : 0;
-      final bn = nameHit(b) ? 1 : 0;
-      if (an != bn) return bn - an; // category-name matches first
-      final byCount = counts[b]!.compareTo(counts[a]!);
-      return byCount != 0 ? byCount : a.compareTo(b); // then popularity, then א-ת
+      final c = freq[b]!.compareTo(freq[a]!);
+      return c != 0 ? c : a.compareTo(b);
     });
-  return out.take(limit).toList();
+  final seen = <String>{};
+  final out = <String>[];
+  for (final w in words) {
+    if (!seen.add(_normForSearch(w))) continue;
+    out.add('$committed$w');
+    if (out.length >= limit) break;
+  }
+  return out;
 }
 
 /// Active search scope chip (הכל / מוצרים / קטגוריות / מסכים).
