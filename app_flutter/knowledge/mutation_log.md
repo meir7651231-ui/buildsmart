@@ -218,3 +218,16 @@
 - מסקנה: הבדיקה חזקה — תופסת collision של category-set בין שתי קבוצות
   finder. זו ההגנה היחידה שמבטיחה ש-finder.home לא מציג מוצר באותו פעם
   באף one of two distinct groups (UX duplicate).
+
+### system_division (productDivisionSystems · filterBySystem · nodeHasSystem) — 2026-06-02
+- **קובץ:** `lib/logic/system_division.dart` · בדיקה: `test/system_division_test.dart`
+- **מה עושה:** ליבת חלוקת מים/שפכים (בנצי #1) — סיווג מוצר/צומת-עץ ל-WaterSystem.
+- תקלה שהוזרקה #1: ב-`productDivisionSystems` הפכתי את fallback ה-PPR מ-`supply` ל-`drainage`.
+- תוצאה: אדום ✅ — `'PPR ... → supply'` נתפס (הכלל שהמשתמש קבע: PPR=מים נקיים).
+- תקלה שהוזרקה #2: ב-`nodeHasSystem` הסרתי את שורת ה-`_fixtureTitles` (מתקנים
+  לא יופיעו בשני הצדדים).
+- תוצאה: אדום ✅ — `'fixture (אסלות) shows under BOTH systems'` נתפס (כלל option 2).
+- תקלה שהוזרקה #3: ב-`filterBySystem` החזרתי `list` גם כש-system≠null (ביטול הסינון).
+- תוצאה: אדום ✅ — `'supply filter keeps only supply'` נתפס.
+- שחזור: שלושתן הוחזרו → הרצה ירוקה (9/9) ✅.
+- מסקנה: הבדיקה חזקה — מכסה את שלושת הכללים (PPR=נקיים, מתקנים בשני צדדים, סינון ממשי).

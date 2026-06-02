@@ -3,17 +3,18 @@
 _Version label: `v5.69` (see `home_shell.dart`). Update on each user-visible change._
 _known-failing: 0 (gate 32 baseline — 0 כשלים מאומת 2026-06-01; שמות ב-knowledge/known_failing.txt)_
 
-## Water-system division via departments (v5.59 — Benzi #1+#2+#3)
+## Water-system division — option 2, through the finder (v5.69 — Benzi #1)
 Home = departments grid (`departments_screen.dart`, `homeDepartmentProvider`).
-Live tiles open the catalog **pre-filtered to one `WaterSystem`**:
-אינסטלציה→drainage (שפכים) · ברזים וסניטריים→supply (מים נקיים).
-`catalog_screen.dart`: `catalogSystemFilterProvider` filters the whole category
-tree + counts + descriptions; `productDivisionSystems` classifies each product
-(`VerifiedSpec.endSystems` → PPR=supply → else drainage); `nodeHasSystem` puts
-fixtures (אסלות/מקלחות ואמבטיות/גופי תברואה) on **both** sides, else dominant
-system. Entry is the department screen — the ⚙️ filter-sheet sysOpt is now
-redundant (pending removal, see `ACTION_PLAN.md`). **Open design question** (user):
-tree-drill vs. finder-with-filtered-section-chips. 986/986 tests green.
+A live tile sets `catalogSystemFilterProvider` + opens the catalog's **finder
+(בית)** scoped to that `WaterSystem` (אינסטלציה→drainage/שפכים · ברזים
+וסניטריים→supply/מים נקיים), with a `_DeptScopeBar` showing the active scope +
+a "כל המחלקות" clear. Division logic lives in `logic/system_division.dart`
+(`productDivisionSystems`: VerifiedSpec → PPR=supply → else drainage;
+`filterBySystem`; `nodeHasSystem`: fixtures both-sides else dominant) — shared by
+catalog + finder so neither back-imports the other. **User chose option 2**
+(finder, not the forced tree). Filtered so far (Phase 1): finder home (empty
+groups hidden) + tree-drill + search panel. Phase 2 (pending): הכל / קטגוריות /
+מועדפים / עץ חכם. Phase 3: remove redundant filter-sheet sysOpt. 1009/1009 green.
 
 ## Catalog lens selector (v5.45 — data layer)
 A list-level view-axis control (OUTSIDE the product card) re-organises a

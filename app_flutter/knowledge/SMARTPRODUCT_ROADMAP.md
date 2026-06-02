@@ -8,6 +8,14 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
+v5.69 — 💧 **Division option 2 — through the finder** (Benzi #1, user-chosen).
+A live department now opens the **finder (בית)** scoped to its `WaterSystem`
+(not a forced tree): `_DeptScopeBar` shows the scope + clear; the finder hides
+empty groups + filters its pool. Division helpers extracted to
+`logic/system_division.dart` (shared catalog+finder, no back-import cycle).
+Phase 1 of 3 (finder + tree-drill + search filtered; remaining sections = Phase
+2; sysOpt removal = Phase 3). 1009/1009 green.
+
 v5.59 — 💧 **Water-system division via departments** (Benzi #1, closes 🟦).
 Home departments (v5.57) now route into the catalog **pre-filtered by `WaterSystem`**:
 אינסטלציה→drainage · ברזים וסניטריים→supply. `productDivisionSystems`

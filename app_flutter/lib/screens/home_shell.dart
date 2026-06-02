@@ -1,3 +1,4 @@
+import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/bs_dial_widget.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
@@ -395,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.69 · 1.6.34 · 🟢 CI Gate-5 false-positive נפתר — chatText token; צבע טקסט צ׳אט → BsTokens',
+                          'v5.69 · 1.6.34 · 💧 חלוקת מים/שפכים דרך ה-finder (בנצי #1, option 2): מחלקה → בית מסונן + סרגל-scope',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

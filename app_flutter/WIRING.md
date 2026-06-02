@@ -36,20 +36,23 @@ The landing tab (bottom-nav "מחלקות", index 0): a 2-col grid of 9 departme
 - אינסטלציה → `WaterSystem.drainage` (שפכים) — every drainage category
 - ברזים וסניטריים → `WaterSystem.supply` (מים נקיים) — every clean-water category
 
-Tapping a live tile sets `catalogSystemFilterProvider` + seeds the tree at
-`kDepartmentTreeRoot` (`catalogTreePathProvider`). The other 7 → "בקרוב" toast
-(R8: no data, no invention). Re-tapping the מחלקות tab resets all three providers
-→ back to the grid.
+Tapping a live tile sets `catalogSystemFilterProvider` + opens the catalog on the
+**finder (בית)** (`catalogSectionProvider='בית'`, tree path cleared) — Benzi #1
+option 2: the division flows through the finder, not a forced tree. A
+`_DeptScopeBar` over the catalog names the active scope + a "כל המחלקות" clear.
+The other 7 → "בקרוב" toast (R8: no data, no invention). Re-tapping the מחלקות
+tab (or the bar's clear) resets all three providers → back to the grid.
 
 ## Catalog search panel tools (`catalog_screen.dart` · `_SearchToolsRow`)
 
-> **חלוקת מערכת (Benzi #1) — דרך מחלקות (option 2):** `catalogSystemFilterProvider`
-> מסנן את כל עץ הקטגוריות, הספירות והתיאורים. סיווג מוצר ב-`productDivisionSystems`:
-> `VerifiedSpec.endSystems` (supply=נקיים · drainage=שפכים) → fallback PPR=נקיים →
-> שאר=שפכים (הכרעת המשתמש, אין spec). `nodeHasSystem`: מתקנים (אסלות / מקלחות
-> ואמבטיות / גופי תברואה) מופיעים ב**שני** הצדדים; שאר הקטגוריות לפי המערכת
-> ה**דומיננטית**. הכניסה היא מסך המחלקות (לא גיליון הפילטרים).
-> ⚠️ ה-sysOpt בגיליון ⚙️ פילטרים כעת **מיותר** (כפילות) — מסומן להסרה ב-ACTION_PLAN.md.
+> **חלוקת מערכת (Benzi #1) — option 2, דרך ה-finder:** מחלקה חיה קובעת
+> `catalogSystemFilterProvider` ופותחת את ה-finder (בית) מסונן. הלוגיקה ב-
+> `logic/system_division.dart` (משותף ל-catalog+finder, ללא back-import):
+> `productDivisionSystems` (`VerifiedSpec.endSystems` supply=נקיים/drainage=שפכים
+> → PPR=נקיים → שאר=שפכים), `filterBySystem`, `nodeHasSystem` (מתקנים בשני
+> הצדדים; שאר לפי דומיננטיות). מסונן בפאזה 1: finder (groups ריקים מוסתרים) +
+> tree-drill + search panel. פאזה 2 (ממתין): הכל / קטגוריות / מועדפים / עץ חכם.
+> ⚠️ ה-sysOpt בגיליון ⚙️ פילטרים מיותר — הסרה בפאזה 3 (ACTION_PLAN.md).
 
 | Tool | Behavior | Status |
 |---|---|---|

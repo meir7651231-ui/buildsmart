@@ -1,0 +1,67 @@
+import 'package:buildsmart/data/catalog_tree.dart';
+import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// Water-system division (Benzi #1) — the single source of truth for which
+/// `WaterSystem` a product / catalog node belongs to, shared by the catalog
+/// (`catalog_screen.dart`) and the finder (`finder_screen.dart`) so neither has
+/// to import the other (catalog already imports the finder — a back-import would
+/// be a cycle).
+
+/// Active water-system division: null = all · supply = מים נקיים · drainage =
+/// שפכים. A live department (`departments_screen.dart`) sets this; every browse
+/// section filters by it.
+final catalogSystemFilterProvider = StateProvider<WaterSystem?>((_) => null);
+
+/// The water system(s) a product belongs to. Verified spec wins; PPR (פולירול)
+/// carries no spec but is clean-water (supply, per the v5.41 systemOverride
+/// bridge); everything else without a spec defaults to שפכים (drainage) for now.
+Set<WaterSystem> productDivisionSystems(LipskeyCatalogProduct p) {
+  final ends = kVerifiedSpecs[p.sku]?.endSystems;
+  if (ends != null && ends.isNotEmpty) return ends;
+  if (p.brand == 'פולירול') return const {WaterSystem.supply};
+  return const {WaterSystem.drainage};
+}
+
+/// Pure: keep only products whose division belongs to [system]. Products with no
+/// classifiable system are dropped when a system is selected (R8 — don't guess).
+List<LipskeyCatalogProduct> filterBySystem(
+    List<LipskeyCatalogProduct> list, WaterSystem? system) {
+  if (system == null) return list;
+  return list.where((p) => productDivisionSystems(p).contains(system)).toList();
+}
+
+/// True fixtures genuinely bridge both systems, so they show in BOTH departments
+/// and their sub-categories split. Everything else belongs to its dominant
+/// system only (Benzi #1, option 2 — clean, non-overlapping lists).
+const _fixtureTitles = {'אסלות', 'מקלחות ואמבטיות', 'גופי תברואה'};
+
+/// True if [node] belongs to [system]: fixtures → both sides; otherwise the
+/// node's dominant system (over all products under it). Drives the department
+/// division at the sub-category level.
+bool nodeHasSystem(CatalogNode node, WaterSystem system) {
+  if (_fixtureTitles.contains(node.title)) return true;
+  var sup = 0, dr = 0;
+  void walk(CatalogNode n) {
+    if (n.isLeaf) {
+      final c = n.lipskeyCategory;
+      if (c == null) return;
+      for (final p in kCatalogProducts) {
+        if (p.categoryHe != c) continue;
+        final s = productDivisionSystems(p);
+        if (s.contains(WaterSystem.supply)) sup++;
+        if (s.contains(WaterSystem.drainage)) dr++;
+      }
+    } else {
+      for (final ch in n.children) {
+        walk(ch);
+      }
+    }
+  }
+
+  walk(node);
+  if (sup == 0 && dr == 0) return false;
+  return (sup >= dr ? WaterSystem.supply : WaterSystem.drainage) == system;
+}

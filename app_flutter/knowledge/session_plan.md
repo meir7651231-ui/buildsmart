@@ -1,37 +1,34 @@
-# Session Plan — חלוקת קטלוג מים נקיים / שפכים דרך מחלקות (בנצי #1+#2)
+# Session Plan — חלוקת מים/שפכים דרך ה-finder (בנצי #1, option 2)
 
 Owner: this session
-Scope: departments_screen.dart + catalog_screen.dart — חלוקת מערכת (WaterSystem) דרך כניסת מחלקה, לא דרך גיליון פילטרים. אסור לגעת בלוגיקת BFS / install_engine.
+Scope: departments_screen + finder_screen + catalog_screen — מחלקה פותחת את ה-finder (בית) מסונן-מערכת, לא עץ כפוי. אסור לגעת ב-lib/data (קטלגן) או install_engine.
 
-Style: department tile → set system filter → filtered category tree → verify (screenshot) → test → commit.
+Style: phase → analyze (0) → test (1009) → commit מקומי. אין push ללא "תדחוף".
 
-## ⚠️ כללי בטיחות לסשן זה
-- **אין push** ללא "תדחוף" מפורש
-- **אין המצאה (R8)** — עברית verbatim מהמקור; אין spec → PPR=נקיים, השאר=שפכים (הכרעת המשתמש)
-- **כל שלב** = flutter analyze (0 errors) + flutter test (986) לפני commit
-- visual verification = screenshot של שתי הכניסות (אינסטלציה / ברזים)
+המשתמש בחר **option 2**: מחלקה → ה-finder הרגיל (בית/הכל/קטגוריות/חיפושים/תכנון חיבור),
+אבל כל סקשני-ה-browse מסוננים ל-WaterSystem. (option 1 = tree כפוי — מוחלף.)
 
----
+## אבחון (Explore — 2026-06-02)
+מסונן כבר: `_TreeDrill` + `_SearchResultsList`. **לא** מסונן: בית (`FinderScreen`),
+הכל (`_AllOverview`), קטגוריות (`_CatalogList`), מועדפים, עץ חכם.
+מקור-דאטה של בית: `_productsForGroup(g)` → `kCatalogProducts`. helpers
+(`productDivisionSystems`/`filterBySystem`/`nodeHasSystem`) ב-catalog_screen, אין test refs.
+catalog_screen מייבא finder_screen → finder לא יכול לייבא חזרה (cycle).
 
-## מה נבנה (option 2 — דומיננטיות + מתקנים בשניהם)
+## Phases
 
-1. **`departments_screen.dart`** — `homeDepartmentProvider` + רשת 9 מחלקות.
-   אינסטלציה→`WaterSystem.drainage` · ברזים וסניטריים→`WaterSystem.supply` · 7 placeholders ("בקרוב").
-2. **`catalog_screen.dart`** — `catalogSystemFilterProvider` + `productDivisionSystems` (spec.endSystems → PPR=supply → שאר=drainage) + `filterBySystem` + `nodeHasSystem` (מתקנים=שניהם; אחרת מערכת דומיננטית) + `kDepartmentTreeRoot`. עץ הקטגוריות, הספירות והתיאורים מסוננים לפי המערכת.
-3. **`home_shell.dart`** — מחלקות = טאב 0; ניווט reset מאפס את 3 ה-providers.
+### Phase 1 — Foundation + Landing + Finder ⬜
+- [1a] חילוץ `system_division.dart` (logic): provider + 3 helpers — בלי cycle
+- [1b] departments: tap → system filter + `catalogSectionProvider='בית'` + clear tree
+- [1c] finder: סינון `_productsForGroup` + הסתרת groups/subs ריקים
+- [1d] שבב-scope dismissible ("מציג: שפכים ✕") — המשתמש יודע/מנקה
+- [1e] עדכון טסטים (widget/journey/robustness) → ירוק 1009
 
-## אימות ויזואלי (screenshot)
-- `/tmp/polish/supply.png` — ברזים → מים נקיים (PPR נכלל, ~1257 מוצרים)
-- `/tmp/polish/drainage.png` — אינסטלציה → שפכים (PPR לא נכלל, ~455)
-- אסלות: "מיכלי הדחה" תחת נקיים · "מושבי אסלה · חיבורי אסלה" תחת שפכים ✅
+### Phase 2 — שאר הסקשנים ⬜
+- הכל / קטגוריות / מועדפים / עץ חכם → `filterBySystem`/`nodeHasSystem`
 
-## בדיקות
-- 986/986 ✅ (תיקון: import חסר ל-departments_screen.dart ב-robustness_test → גרר "compiler exited unexpectedly" ב-widget_test).
+### Phase 3 — ניקוי ⬜
+- הסרת sysOpt כפול מגיליון-הפילטרים
 
----
-
-## פתוח (→ ACTION_PLAN.md)
-- הכרעת זרימת ניווט: tree-drill מסונן מול finder עם section-chips מסוננים (שאלת המשתמש "דרך איפה הניוט שלך ולמה")
-- הסרת sysOpt כפול מגיליון הפילטרים (ceca667 — מיותר עכשיו)
-- בנצי #4 (popup משלוח) · #5 (מוצרים רצף per-סניף) · #6 (autocomplete חיפוש)
-- מילוי דאטה ל-7 המחלקות ה-placeholder
+## החלטות-ברירת-מחדל (screenshot visual verification בכל פאזה)
+- תכנון חיבור (install studio) + חיפושים אחרונים = system-agnostic (כלי-תכנון / מחרוזות).

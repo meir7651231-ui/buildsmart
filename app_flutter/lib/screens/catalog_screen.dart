@@ -16,6 +16,7 @@ import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
+import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
@@ -167,9 +168,8 @@ final searchScopeProvider = StateProvider<String>((_) => 'הכל');
 /// (the ⚙️ פילטרים tool · "עם תמונה").
 final searchImageOnlyProvider = StateProvider<bool>((_) => false);
 
-/// Active water-system division (Benzi #1): null = all · supply = מים נקיים ·
-/// drainage = שפכים. Filters the live product results.
-final catalogSystemFilterProvider = StateProvider<WaterSystem?>((_) => null);
+// catalogSystemFilterProvider lives in logic/system_division.dart (shared with
+// the finder so neither screen back-imports the other).
 
 // recentSearchesProvider lives in state/recent_searches.dart (persisted).
 
@@ -273,59 +273,8 @@ List<LipskeyCatalogProduct> filterByImage(
   return list.where((p) => p.imageAsset != null).toList();
 }
 
-/// Pure: keep only products whose verified spec belongs to [system]
-/// (מים נקיים = supply · שפכים = drainage). Products without a spec are dropped
-/// when a system is selected (R8 — don't guess their system).
-/// The water system(s) a product belongs to for the catalog division (Benzi #1).
-/// Verified spec wins; PPR (פולירול) carries no spec but is clean-water
-/// (supply); everything else without a spec defaults to שפכים (drainage) for now.
-Set<WaterSystem> productDivisionSystems(LipskeyCatalogProduct p) {
-  final ends = kVerifiedSpecs[p.sku]?.endSystems;
-  if (ends != null && ends.isNotEmpty) return ends;
-  if (p.brand == 'פולירול') return const {WaterSystem.supply};
-  return const {WaterSystem.drainage};
-}
-
-List<LipskeyCatalogProduct> filterBySystem(
-    List<LipskeyCatalogProduct> list, WaterSystem? system) {
-  if (system == null) return list;
-  return list.where((p) => productDivisionSystems(p).contains(system)).toList();
-}
-
-/// True if [node] has ≥1 product in [system] (recursive over the catalog tree).
-/// Drives the department division (Benzi #1) at the **sub-category** level: each
-/// tree node appears under the system it really belongs to; a fixture (e.g.
-/// אסלות) splits — its supply leaves show under מים נקיים, its drainage leaves
-/// under שפכים. Classification is `productSystems` (the תכנון-חיבור engine).
-/// True fixtures — they genuinely bridge both systems, so they show in BOTH
-/// departments and their sub-categories split. Everything else belongs to its
-/// dominant system only (Benzi #1, option 2 — clean, non-overlapping lists).
-const _fixtureTitles = {'אסלות', 'מקלחות ואמבטיות', 'גופי תברואה'};
-
-bool nodeHasSystem(CatalogNode node, WaterSystem system) {
-  if (_fixtureTitles.contains(node.title)) return true;
-  var sup = 0, dr = 0;
-  void walk(CatalogNode n) {
-    if (n.isLeaf) {
-      final c = n.lipskeyCategory;
-      if (c == null) return;
-      for (final p in kCatalogProducts) {
-        if (p.categoryHe != c) continue;
-        final s = productDivisionSystems(p);
-        if (s.contains(WaterSystem.supply)) sup++;
-        if (s.contains(WaterSystem.drainage)) dr++;
-      }
-    } else {
-      for (final ch in n.children) {
-        walk(ch);
-      }
-    }
-  }
-
-  walk(node);
-  if (sup == 0 && dr == 0) return false;
-  return (sup >= dr ? WaterSystem.supply : WaterSystem.drainage) == system;
-}
+// productDivisionSystems · filterBySystem · nodeHasSystem moved to
+// logic/system_division.dart (shared with the finder; see the import above).
 
 /// Synthetic root whose children are the top catalog categories — a live
 /// department opens this so its system-filtered category tree shows.

@@ -6,6 +6,7 @@
 import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/_size_norm.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -409,7 +410,11 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
   Widget build(BuildContext context) {
     if (_group == null) return _typeList();
 
-    final base = _productsForGroup(_group!);
+    // Scope to the active water system (Benzi #1, option 2): a department sets
+    // catalogSystemFilterProvider, so the finder's whole pool — subs, narrow
+    // chips, results — derives from the filtered base.
+    final systemFilter = ref.watch(catalogSystemFilterProvider);
+    final base = filterBySystem(_productsForGroup(_group!), systemFilter);
     final subs = _subsFor(base);
     FinderSub? sel;
     for (final s in subs) {
@@ -569,17 +574,25 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
 
   // ── step 1: type rows — same WhatsApp-style row as _CatalogList ──────────
   Widget _typeList() {
+    // Scope to the active water system (Benzi #1, option 2): hide groups with no
+    // products in it, and show the in-system count.
+    final systemFilter = ref.watch(catalogSystemFilterProvider);
+    final groups = <(FinderGroup, int)>[];
+    for (final g in kFinderGroups) {
+      final n = filterBySystem(_productsForGroup(g), systemFilter).length;
+      if (n > 0) groups.add((g, n));
+    }
     return ListView.separated(
       key: const Key('catalog-list'),
-      itemCount: kFinderGroups.length,
+      itemCount: groups.length,
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 82,
         color: _surface,
       ),
       itemBuilder: (_, i) {
-        final g = kFinderGroups[i];
-        final count = _productsForGroup(g).length;
+        final g = groups[i].$1;
+        final count = groups[i].$2;
         return InkWell(
           onTap: () => setState(() {
             _group = g;
