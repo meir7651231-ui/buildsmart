@@ -240,13 +240,20 @@ void sortSizeTokens(List<SizeToken> toks) {
 }
 
 /// Length-only family rank: prefer cm (most product-like, compact), then
-/// meters, then mm. Used by [dedupLengthByMm] to collapse equivalent length
+/// meters. Used by [dedupLengthByMm] to collapse equivalent length
 /// representations (e.g. `15 ס"מ` and `0.15 מ׳` are the same physical value
 /// and should not both be chips).
+///
+/// `mm` is deliberately EXCLUDED: an `mm` token is almost always a DIAMETER
+/// (a `250 מ"מ` shower head) or a cross-dim OD (`16×20`, tokenized as `mm`),
+/// not a length. Collapsing by raw mm-value wrongly merged `250 מ"מ` with
+/// `25 ס"מ` and `16×20` with `16×16` (same first dim) into one chip — and
+/// because the per-product filter (`_productHasChip`) matches by exact label,
+/// every product carrying the collapsed-away label became unreachable by the
+/// surviving chip. Keeping mm out means each mm token stays its own chip.
 const Map<SizeFamily, int> _kLengthFamilyRank = {
   SizeFamily.cm: 0,
   SizeFamily.meters: 1,
-  SizeFamily.mm: 2,
 };
 
 /// Collapse equivalent length tokens (same `mm`, length families) to a single

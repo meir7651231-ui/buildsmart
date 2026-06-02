@@ -2,6 +2,15 @@
 
 _Version label: `v5.87` (see `home_shell.dart`). Update on each user-visible change._
 
+## Finder filter — mm tokens no longer collapse (reachability) (v5.87)
+`dedupLengthByMm` collapses equivalent LENGTH chips (cm≡meters, P11) but also
+included the `mm` family — wrong, since an mm token is usually a DIAMETER
+(`250 מ"מ` head) or cross-dim OD (`16×20`). It merged `250 מ"מ`→`25 ס"מ` and
+`16×20`→`16×16`; the per-product filter matches by exact label, so every
+product with the collapsed-away label became UNREACHABLE by the surviving chip
+(328 catalog-wide). Fix: drop `mm` from the length-dedup rank (cm/meters still
+collapse). dedup-missed 328→0. Guarded by `finder_dedup_reachability_test` (4).
+
 ## Finder filter — substring false-match fixed (v5.86)
 `_productHasChip` (`finder_screen.dart`) ended with an unconditional
 `nameHe.contains(chipLabel)` fallback (meant for curated-facet plain words like
