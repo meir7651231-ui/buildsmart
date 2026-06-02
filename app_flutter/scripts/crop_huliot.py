@@ -84,8 +84,11 @@ MAX_PHOTO_H = 175          # cap so a tall band doesn't grab the diagram below
 # offset, which is exact for these fitting-only pages (no AQUA SLIM/render).
 FIXED_HEIGHT_PAGES = {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
                       33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43}
-FIXED_PHOTO_H = 130        # photo height in pixels for FIXED_HEIGHT_PAGES
-FIXED_SPEC_GAP = 12        # gap from photo bottom to spec top (FIXED pages)
+# Per-section-count photo height for FIXED_HEIGHT_PAGES. Dense 4-section pages
+# (12, 28-30, 39, 42) carry small photos with their dimension diagram only
+# 5-10 px below — anything over 115 grabs the diagram's "DN" tick mark.
+FIXED_PHOTO_H_BY_N = {2: 140, 3: 115, 4: 105}
+FIXED_SPEC_GAP = 14        # gap from photo bottom to spec top (FIXED pages)
 
 
 def find_green_lines(im, min_width_frac=0.15):
@@ -289,7 +292,8 @@ def crop_page(pg, tags):
         # below the green header line; the spec sits right under it.
         if pg in FIXED_HEIGHT_PAGES:
             ph_top = top + PHOTO_TOP_GAP
-            ph_bot = min(ph_top + FIXED_PHOTO_H, bot - 5)
+            fph = FIXED_PHOTO_H_BY_N.get(len(tags), 130)
+            ph_bot = min(ph_top + fph, bot - 5)
             photo = im.crop((X0, ph_top, X1, ph_bot))
             photo.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
             photo_count += 1
