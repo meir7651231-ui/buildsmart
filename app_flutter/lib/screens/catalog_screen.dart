@@ -161,6 +161,39 @@ int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
   return score;
 }
 
+/// As-you-type search suggestions (Benzi #6): distinct catalog **category**
+/// labels whose products match [query] (forgiving, any-word), most-matched
+/// first, with categories whose own name hits the query floated to the top.
+/// Respects the active water-system scope ([system]) like every other section,
+/// and never echoes a category the user already typed in full. Tapping one
+/// completes the query to that term — short, tappable, and complementary to the
+/// product cards below (categories, not duplicate product names). Pure → tested.
+List<String> searchSuggestions(String query,
+    {WaterSystem? system, int limit = 6}) {
+  final q = _normForSearch(query.trim());
+  if (q.isEmpty) return const [];
+  final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
+  final counts = <String, int>{};
+  for (final p in filterBySystem(kLipskeyCatalog, system)) {
+    if (!catalogProductMatchesQuery(p, query, requireAll: false)) continue;
+    counts[p.categoryHe] = (counts[p.categoryHe] ?? 0) + 1;
+  }
+  bool nameHit(String c) {
+    final n = _normForSearch(c);
+    return tokens.any((t) => n.contains(t));
+  }
+
+  final out = counts.keys.where((c) => _normForSearch(c) != q).toList()
+    ..sort((a, b) {
+      final an = nameHit(a) ? 1 : 0;
+      final bn = nameHit(b) ? 1 : 0;
+      if (an != bn) return bn - an; // category-name matches first
+      final byCount = counts[b]!.compareTo(counts[a]!);
+      return byCount != 0 ? byCount : a.compareTo(b); // then popularity, then א-ת
+    });
+  return out.take(limit).toList();
+}
+
 /// Active search scope chip (הכל / מוצרים / קטגוריות / מסכים).
 final searchScopeProvider = StateProvider<String>((_) => 'הכל');
 
@@ -1534,7 +1567,12 @@ class _SearchPanel extends ConsumerWidget {
           const Divider(height: 1, color: Color(0xFFF5F5F5)),
           Expanded(
             child: showResults
-                ? const _SearchResultsList()
+                ? const Column(
+                    children: [
+                      _SearchSuggestions(),
+                      Expanded(child: _SearchResultsList()),
+                    ],
+                  )
                 : const _RecentSearchesList(),
           ),
         ],
@@ -1837,6 +1875,74 @@ class _RecentSearchesList extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// As-you-type suggestion chips (Benzi #6) above the product results. Hidden
+/// until the query is ≥2 chars in a product scope, and renders nothing when
+/// there's nothing to suggest — so it never adds empty chrome. Tapping a chip
+/// completes the query (`searchQueryProvider`), which re-runs the live results.
+class _SearchSuggestions extends ConsumerWidget {
+  const _SearchSuggestions();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final query = ref.watch(searchQueryProvider);
+    final scope = ref.watch(searchScopeProvider);
+    final system = ref.watch(catalogSystemFilterProvider);
+    final productScope = scope == 'הכל' || scope == 'מוצרים';
+    if (!productScope || query.trim().length < 2) return const SizedBox.shrink();
+    final sugg = searchSuggestions(query, system: system);
+    if (sugg.isEmpty) return const SizedBox.shrink();
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFFF5F5F5))),
+      ),
+      child: SizedBox(
+        height: 46,
+        child: ListView(
+          key: const Key('search-suggestions'),
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          children: [
+            for (final s in sugg)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: 8),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: () =>
+                      ref.read(searchQueryProvider.notifier).state = s,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: const Color(0xFFE0E0E0)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.search,
+                            size: 15, color: Color(0xFF888888)),
+                        const SizedBox(width: 6),
+                        Text(
+                          s,
+                          style: const TextStyle(
+                            color: Color(0xFF1A1A1A),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

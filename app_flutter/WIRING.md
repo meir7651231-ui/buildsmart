@@ -73,6 +73,7 @@ tab (or the bar's clear) resets all three providers → back to the grid.
 |---|---|---|
 | forgiving product search | matches across name + category + SKU + colour, word-by-word (order-independent); folds Hebrew gershayim/geresh (״ ׳ → " ') so a Hebrew-keyboard size query matches; expands everyday words via `kSearchSynonyms` (kept precise — e.g. שירותים → toilet fixtures only, not branch connectors); AND-match with a graceful any-word fallback (`requireAll:false`) so a reasonable query never dead-ends | ✅ |
 | relevance ranking | default order sorts results by `searchRelevance` (name match > category-only > synonym/colour), so the product the user meant surfaces first; an explicit ↕️ sort overrides it | ✅ |
+| autocomplete (Benzi #6) | `searchSuggestions` → `_SearchSuggestions` chip row above the results: distinct catalog **category** labels whose products match the query (forgiving any-word), ranked name-hit → popularity → א-ת, capped at 6, never echoing a fully-typed category; respects `catalogSystemFilterProvider`; shown only at ≥2 chars in a product scope (הכל/מוצרים). Tapping a chip completes `searchQueryProvider` → results re-run. Guarded by `search_suggestions_test` | ✅ |
 
 ## Catalog בית — finder home (`finder_screen.dart`)
 

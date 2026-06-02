@@ -1,7 +1,16 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.79` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.80` (see `home_shell.dart`). Update on each user-visible change._
 _known-failing: 0 (gate 32 baseline — 0 כשלים מאומת 2026-06-01; שמות ב-knowledge/known_failing.txt)_
+
+## Search autocomplete — `searchSuggestions` (v5.80 — Benzi #6)
+As-you-type suggestion chips above the search results (`_SearchSuggestions` in
+`_SearchPanel`): distinct catalog **category** labels whose products match the
+query (forgiving any-word match, reuses `catalogProductMatchesQuery`), ranked
+name-hit → popularity → א-ת, capped at 6, never echoing a fully-typed category.
+Respects the active `catalogSystemFilterProvider` (same scope as results), shown
+only at ≥2 chars in a product scope. Tapping a chip completes `searchQueryProvider`
+→ live results re-run. Pure helper, tested by `search_suggestions_test` (5).
 
 ## Water-system division — option 2, through the finder (v5.69 — Benzi #1)
 Home = departments grid (`departments_screen.dart`, `homeDepartmentProvider`).
