@@ -114,9 +114,14 @@ bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery,
     {bool requireAll = true}) {
   final q = _normForSearch(rawQuery.trim());
   if (q.isEmpty) return false;
-  final hay =
-      _normForSearch('${p.nameHe} ${p.categoryHe} ${p.sku} ${p.color ?? ''}');
-  if (hay.contains(q)) return true; // fast path: exact phrase or SKU
+  // SKU is matched separately and ONLY for queries long enough to be a real
+  // SKU fragment (≥5 chars — catalogue SKUs are 5–10 digits). Short numeric
+  // size queries like "20" / "200" / "3000" must never substring-match an
+  // unrelated SKU (e.g. "200" inside SKU 120011) — that buried real size hits
+  // under SKU-coincidence noise. Word queries don't touch the SKU at all.
+  if (q.length >= 5 && _normForSearch(p.sku).contains(q)) return true;
+  final hay = _normForSearch('${p.nameHe} ${p.categoryHe} ${p.color ?? ''}');
+  if (hay.contains(q)) return true; // fast path: exact phrase
   final tokens = q.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
   if (tokens.isEmpty) return false;
   bool hit(String t) {

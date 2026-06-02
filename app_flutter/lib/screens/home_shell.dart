@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.88 · 1.6.48 · 🔧 עקביות tokenizer — מידת שבר מובילה (½") מזוהה כעת זהה בכרטיס ובמאתר (היה פער לטנטי). + תיקוני סינון מ-5.86/5.87',
+                          'v5.89 · 1.6.48 · 🔎 חיפוש — שאילתת-מספר ("20"/"200") לא מחזירה יותר מוצרים שה-SKU שלהם מכיל את המספר במקרה (היו 55% זבל); SKU נתפס רק ב-5+ תווים',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
