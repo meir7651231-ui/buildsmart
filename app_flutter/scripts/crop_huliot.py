@@ -104,14 +104,14 @@ PER_BAND_PHOTO_H = {
     (12, 'd'): 110,
     # Page 14 — elbow מצרה צד אחד שקע תקע (band b)
     (14, 'b'): 145,
-    # Page 20 — drop gutters (measured from ruler)
-    (20, 'a'): 120,    # photo 160-275 → 115; +5 pad
-    (20, 'b'): 138,    # photo 520-655 → 135; +3 pad
-    (20, 'c'): 145,    # photo 895-1035 → 140; +5 pad
-    # Page 21 — drains scale with size (measured from ruler)
-    (21, 'a'): 88,     # drain 80/50 photo 170-240 → 70; +18 pad for green ports
-    (21, 'b'): 155,    # drain 140/50 photo 455-600 → 145; +10 pad
-    (21, 'c'): 165,    # drain 245/50 photo 840-995 → 155; +10 pad
+    # Page 20 — drop gutters (re-measured from PAGE overlay — base was cut)
+    (20, 'a'): 145,    # photo 160-290 incl. base; diagram starts ~305
+    (20, 'b'): 165,    # photo 520-680; diagram ~695
+    (20, 'c'): 175,    # photo 895-1055; diagram ~1070
+    # Page 21 — drains scale with size (re-measured)
+    (21, 'a'): 118,    # drain 80/50 photo 170-275; diagram ~290
+    (21, 'b'): 180,    # drain 140/50 photo 460-625; diagram ~640
+    (21, 'c'): 180,    # drain 245/50 photo 840-1010; diagram ~1025
     # Page 22 — drains open
     (22, 'a'): 155,
     (22, 'b'): 180,
@@ -123,22 +123,28 @@ PER_BAND_PHOTO_H = {
     # Page 30 — nickel grid has visible DN+H ticks
     (30, 'b'): 100,
     # Page 32 — no-siphon (tall photo) + kitchen siphon
-    (32, 'a'): 145,
+    (32, 'a'): 95,     # no-siphon — was capturing W tick at bottom
     (32, 'b'): 165,
     (32, 'c'): 160,
     # Page 34 — american 1¼ siphon
     (34, 'a'): 165,
-    # Page 35 — double american siphon (tall photo)
-    (35, 'b'): 195,
-    # Page 36 — H-washing tall photo
-    (36, 'b'): 190,
+    # Page 35 — double american siphon
+    (35, 'b'): 180,    # was 195 — capturing diagram tick
+    # Page 36 — H-washing (cylinder + extension); see PER_BAND_X for narrow x-crop
+    (36, 'b'): 290,    # photo full: y=720→1010 (band_top 704 + 22 + 290 = 1016)
     # Page 39 — long basin connector
-    (39, 'b'): 165,
+    (39, 'b'): 88,     # capturing L1 tick at y=683-690
     # Page 40 — siphon kit + inlet extension
-    (40, 'a'): 165,
+    (40, 'a'): 120,    # was 165 — capturing green line below
     (40, 'c'): 105,
     # Page 42 — funnel
     (42, 'b'): 195,
+}
+
+# Per-band X1 override (page, tag) → x1. Used when a diagram element sits in
+# the right portion of the photo column (e.g. p36_b: H tick + rect at x=180+).
+PER_BAND_X1 = {
+    (36, 'b'): 168,    # photo column is x=12-170; diagram H tick starts at x=180
 }
 
 # Per-band override (page, tag) → PHOTO_H. Wins over PER_PAGE_PHOTO_H.
@@ -366,7 +372,7 @@ def crop_page(pg, tags):
         # PER_BAND override is reserved for hand-tuned edge cases.
         if (pg, tag) in PER_BAND_PHOTO_H:
             ph_bot = ph_top + PER_BAND_PHOTO_H[(pg, tag)]
-            photo = im.crop((X0, ph_top, X1, ph_bot))
+            photo = im.crop((X0, ph_top, PER_BAND_X1.get((pg, tag), X1), ph_bot))
             photo.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
             photo_count += 1
             sp_top = ph_bot + FIXED_SPEC_GAP
@@ -398,7 +404,7 @@ def crop_page(pg, tags):
         ph_bot = min(ph_bot + 2, bot - 5)
         if ph_bot - ph_top < MIN_PHOTO_H:
             ph_bot = min(ph_top + MIN_PHOTO_H, bot - 5)
-        photo = im.crop((X0, ph_top, X1, ph_bot))
+        photo = im.crop((X0, ph_top, PER_BAND_X1.get((pg, tag), X1), ph_bot))
         photo.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
         photo_count += 1
         # Diagram from block 1
