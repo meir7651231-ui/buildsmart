@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.87 · 1.6.48 · 🐛 תיקון סינון מאתר — צ׳יפ מידה במ"מ (250 מ"מ ראש-מקלחת · 16×20) לא מתמזג יותר בטעות עם ס"מ/מידה אחרת, כך ש-328 מוצרים שוב נתפסים בלחיצה',
+                          'v5.88 · 1.6.48 · 🔧 עקביות tokenizer — מידת שבר מובילה (½") מזוהה כעת זהה בכרטיס ובמאתר (היה פער לטנטי). + תיקוני סינון מ-5.86/5.87',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

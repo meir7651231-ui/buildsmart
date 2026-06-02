@@ -1434,9 +1434,13 @@ bool isSizeToken(String w) {
   final stripped = w.startsWith('Ø') ? w.substring(1) : w;
   // numbers, fractions, ratios, inch marks, degrees, with × / x / X /
   // - separators (capital X appears in PPR product names like `160X25X1/2"`).
-  return RegExp(r'^[\d]+([./×xX\-"׳״⅛¼½¾⅜⅝⅞°]+[\d"׳״°]*)*[\"׳״°]?$')
+  // A leading bare fraction glyph counts as numeric too, so `½"` (no leading
+  // digit) is recognised the same as `parseSizeTokens` does — keeping the two
+  // tokenizers in agreement (no chip the finder surfaces that the card's
+  // word-classifier would treat as a plain link).
+  return RegExp(r'^[\d¼½¾⅛⅜⅝⅞]+([./×xX\-"׳״⅛¼½¾⅜⅝⅞°]+[\d"׳״°]*)*[\"׳״°]?$')
           .hasMatch(stripped) &&
-      RegExp(r'\d').hasMatch(stripped);
+      RegExp(r'[\d¼½¾⅛⅜⅝⅞]').hasMatch(stripped);
 }
 
 /// A plain word is a meaningful tappable link if it isn't a stop-word, has
