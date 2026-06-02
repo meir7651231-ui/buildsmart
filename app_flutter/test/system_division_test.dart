@@ -97,5 +97,22 @@ void main() {
               nodeHasSystem(node, WaterSystem.drainage),
           isTrue);
     });
+
+    test('category division discriminates — some supply-only, some drain-only',
+        () {
+      // Phase 2 filters the קטגוריות / הכל / מועדפים sections by this exact
+      // logic, so the division is only meaningful if categories actually split
+      // onto one side (fixtures land on both; these are the non-fixtures).
+      bool supplyOnly(CatalogNode n) =>
+          nodeHasSystem(n, WaterSystem.supply) &&
+          !nodeHasSystem(n, WaterSystem.drainage);
+      bool drainOnly(CatalogNode n) =>
+          nodeHasSystem(n, WaterSystem.drainage) &&
+          !nodeHasSystem(n, WaterSystem.supply);
+      expect(kCatalogTree.any(supplyOnly), isTrue,
+          reason: 'expected at least one supply-only top category');
+      expect(kCatalogTree.any(drainOnly), isTrue,
+          reason: 'expected at least one drainage-only top category');
+    });
   });
 }

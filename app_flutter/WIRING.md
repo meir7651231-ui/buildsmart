@@ -50,9 +50,11 @@ tab (or the bar's clear) resets all three providers → back to the grid.
 > `logic/system_division.dart` (משותף ל-catalog+finder, ללא back-import):
 > `productDivisionSystems` (`VerifiedSpec.endSystems` supply=נקיים/drainage=שפכים
 > → PPR=נקיים → שאר=שפכים), `filterBySystem`, `nodeHasSystem` (מתקנים בשני
-> הצדדים; שאר לפי דומיננטיות). מסונן בפאזה 1: finder (groups ריקים מוסתרים) +
-> tree-drill + search panel. פאזה 2 (ממתין): הכל / קטגוריות / מועדפים / עץ חכם.
-> ⚠️ ה-sysOpt בגיליון ⚙️ פילטרים מיותר — הסרה בפאזה 3 (ACTION_PLAN.md).
+> הצדדים; שאר לפי דומיננטיות). **פאזה 1:** finder (groups ריקים מוסתרים) +
+> tree-drill + search. **פאזה 2 (v5.70):** קטגוריות + הכל + מועדפים —
+> `_catRowsForSystem` (קטגוריות לפי `nodeHasSystem` הדומיננטי) · `filterBySystem`
+> (מוצרים). **פאזה 2b ממתין:** עץ חכם (SmartProduct = מפתחות סמנטיים, לא SKU →
+> צריך מיפוי key→system). ⚠️ ה-sysOpt בגיליון ⚙️ פילטרים מיותר — הסרה בפאזה 3.
 
 | Tool | Behavior | Status |
 |---|---|---|

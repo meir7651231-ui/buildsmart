@@ -24,8 +24,11 @@ catalog_screen מייבא finder_screen → finder לא יכול לייבא חז
 - [1d] שבב-scope dismissible ("מציג: שפכים ✕") — המשתמש יודע/מנקה
 - [1e] עדכון טסטים (widget/journey/robustness) → ירוק 1009
 
-### Phase 2 — שאר הסקשנים ⬜
-- הכל / קטגוריות / מועדפים / עץ חכם → `filterBySystem`/`nodeHasSystem`
+### Phase 2 — שאר הסקשנים ✅ (v5.70)
+- קטגוריות + הכל (קטגוריות+מועדפים) + מועדפים → `_catRowsForSystem` + `filterBySystem`
+- screenshot verification ✅ (פאזה 1 + מסך מסונן); 1019 ירוק
+- **Phase 2b ⬜:** עץ חכם — SmartProduct = מפתחות סמנטיים (basinTrap/faucet), לא SKU;
+  צריך מיפוי key→system. נדחה (מודל-נתונים שונה, סיכון).
 
 ### Phase 3 — ניקוי ⬜
 - הסרת sysOpt כפול מגיליון-הפילטרים

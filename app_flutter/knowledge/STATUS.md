@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.69` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.70` (see `home_shell.dart`). Update on each user-visible change._
 _known-failing: 0 (gate 32 baseline — 0 כשלים מאומת 2026-06-01; שמות ב-knowledge/known_failing.txt)_
 
 ## Water-system division — option 2, through the finder (v5.69 — Benzi #1)
@@ -12,9 +12,13 @@ a "כל המחלקות" clear. Division logic lives in `logic/system_division.da
 (`productDivisionSystems`: VerifiedSpec → PPR=supply → else drainage;
 `filterBySystem`; `nodeHasSystem`: fixtures both-sides else dominant) — shared by
 catalog + finder so neither back-imports the other. **User chose option 2**
-(finder, not the forced tree). Filtered so far (Phase 1): finder home (empty
-groups hidden) + tree-drill + search panel. Phase 2 (pending): הכל / קטגוריות /
-מועדפים / עץ חכם. Phase 3: remove redundant filter-sheet sysOpt. 1009/1009 green.
+(finder, not the forced tree). **Filtered (Phase 1):** finder home (empty groups
+hidden) + tree-drill + search panel. **Filtered (Phase 2, v5.70):** קטגוריות +
+הכל overview (categories + favorites blocks) + מועדפים — categories via
+`_catRowsForSystem` (tree-node dominant, reuses `nodeHasSystem`), products via
+`filterBySystem`. **Phase 2b pending:** עץ חכם (SmartProduct uses semantic keys,
+not SKUs → needs a key→system map). **Phase 3:** remove redundant filter-sheet
+sysOpt. 1019/1019 green.
 
 ## Catalog lens selector (v5.45 — data layer)
 A list-level view-axis control (OUTSIDE the product card) re-organises a

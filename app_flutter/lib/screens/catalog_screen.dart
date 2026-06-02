@@ -2207,24 +2207,39 @@ class _EmptySection extends StatelessWidget {
   }
 }
 
-class _CatalogList extends StatelessWidget {
+/// Top categories (+ their meta) that belong to [system] — matched to their
+/// catalog-tree node's dominant system (fixtures show in both), consistent with
+/// the tree drill. null → all. Keeps category ⇄ `_kMeta` index alignment.
+List<({Section cat, ({String preview, String time, int badge}) meta})>
+    _catRowsForSystem(WaterSystem? system) {
+  final out =
+      <({Section cat, ({String preview, String time, int badge}) meta})>[];
+  for (var i = 0; i < kCatalogCats.length; i++) {
+    if (system != null) {
+      final node = _findCatalogTreeNodeByTitle(kCatalogCats[i].title);
+      if (node == null || !nodeHasSystem(node, system)) continue;
+    }
+    out.add((cat: kCatalogCats[i], meta: _kMeta[i]));
+  }
+  return out;
+}
+
+class _CatalogList extends ConsumerWidget {
   const _CatalogList();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rows = _catRowsForSystem(ref.watch(catalogSystemFilterProvider));
     return ListView.separated(
       key: const Key('catalog-list'),
-      itemCount: kCatalogCats.length,
+      itemCount: rows.length,
       separatorBuilder: (_, __) => const Divider(
         height: 1,
         indent: 76,
         color: Color(0xFFF5F5F5),
       ),
       itemBuilder: (context, i) {
-        return _CatalogRow(
-          cat: kCatalogCats[i],
-          meta: _kMeta[i],
-        );
+        return _CatalogRow(cat: rows[i].cat, meta: rows[i].meta);
       },
     );
   }
@@ -2242,21 +2257,25 @@ class _AllOverview extends ConsumerWidget {
 
     final recents = ref.watch(recentSearchesProvider);
     final favSkus = ref.watch(productFavoritesProvider);
-    final favProducts =
-        kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).take(3).toList();
+    final systemFilter = ref.watch(catalogSystemFilterProvider);
+    final catRows = _catRowsForSystem(systemFilter);
+    final favProducts = filterBySystem(
+            kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).toList(),
+            systemFilter)
+        .take(3)
+        .toList();
 
     return ListView(
       controller: scrollCtrl,
       key: const Key('catalog-list'),
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        // קטגוריות — full list inline (no preview cap, no "הצג הכל").
+        // קטגוריות — full list inline, scoped to the active water system.
         _OverviewBlock(
           title: 'קטגוריות',
-          count: kCatalogCats.length,
+          count: catRows.length,
           children: [
-            for (var i = 0; i < kCatalogCats.length; i++)
-              _CatalogRow(cat: kCatalogCats[i], meta: _kMeta[i]),
+            for (final r in catRows) _CatalogRow(cat: r.cat, meta: r.meta),
           ],
         ),
         // חיפושים אחרונים
@@ -6661,8 +6680,10 @@ class _FavoritesSection extends ConsumerWidget {
     if (favSkus.isEmpty) {
       return const _EmptySection(emoji: '⭐', label: 'מועדפים');
     }
-    final products =
-        kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).toList();
+    // Scope favorites to the active water system (Benzi #1, option 2).
+    final products = filterBySystem(
+        kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).toList(),
+        ref.watch(catalogSystemFilterProvider));
     return Column(
       children: [
         Container(

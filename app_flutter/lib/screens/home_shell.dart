@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.69 · 1.6.34 · 💧 חלוקת מים/שפכים דרך ה-finder (בנצי #1, option 2): מחלקה → בית מסונן + סרגל-scope',
+                          'v5.70 · 1.6.34 · 💧 חלוקת מערכת פאזה 2 — קטגוריות · הכל · מועדפים מסוננים גם הם (option 2)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
