@@ -1,4 +1,24 @@
-from PIL import Image
+"""Adaptive crop for Huliot SmartLock catalog pages.
+
+The catalog draws a thin green horizontal line at the TOP of every product
+band (page 5 protocol). The bands within a page are NOT equal height — band
+heights grow with diagram complexity, and some pages also carry an extra
+green line under a page-level header (e.g. "אביזרים משלימים"). Equal-spaced
+bands therefore drift, capturing the diagram of one product on top of the
+photo of the next.
+
+This script:
+  1. Detects every green horizontal line on the page (≥15% of width, ≥g130).
+  2. Drops the page-header line(s) (excess over expected SECTIONS count).
+  3. Treats each remaining green line as a band-top; band-bottom is the next
+     line (or the page footer for the last band).
+  4. Crops a photo box from the upper half of the band (right under the
+     header gap) — small enough to never spill into the diagram below.
+  5. Crops a spec box from the lower half, BUT skips it when the box is
+     mostly white (this band has no dimension diagram — e.g. the cutter
+     on page 11). spec crops are paired with photo crops by tag (a/b/c/d).
+"""
+from PIL import Image, ImageStat
 import os
 
 PAGES = 'assets/huliot_smartlock/pages'
@@ -6,103 +26,185 @@ OUT = 'assets/huliot_smartlock/products'
 os.makedirs(OUT, exist_ok=True)
 
 # Per page: ordered list of section tags (top→bottom). Photo column = left.
-# Section count drives even vertical division of the content area.
 # tag letters a,b,c,d map to _huliotImageFor routing.
-## Page 27 (AQUA SLIM) has a UNIQUE layout — 2 product renders (330 + 700) on
-## the right side and a thin strip drawing at the bottom; the standard band
-## scheme (PHOTO_H from top of equal bands) doesn't fit. Hand-tuned crops below
-## (CROPS_27) are applied AFTER the loop, overriding any generic SECTIONS entry.
-CROPS_27 = {
-  'a': (470, 195, 825, 315),   # Aqua Slim 330 render
-  'b': (420, 440, 825, 540),   # Aqua Slim 700 render
-  'c': (150, 870, 670, 920),   # פס ניקוז ללא סט (strip-only)
-}
-
 SECTIONS = {
-  11: ['a','b','c'],            # pipe / cutter / joker
-  12: ['a','b','c','d'],        # elbow oneside 15/30/45/90
-  13: ['a','b','c'],            # elbow 45 / 90 / reducing 90
-  14: ['a','b'],               # reducing-to-siphon / reducing socket
-  15: ['a','b','c'],            # telescopic / tel oneside / tel-reducing oneside
-  16: ['a','b'],               # tee 45 / tee reducing 45
-  17: ['a','b'],               # tee 90 / tee reducing 90
-  18: ['a','b'],               # double coupling / reducer
-  19: ['a','b','c'],            # gutter 70-40 / 130 / 230
-  20: ['a','b','c'],            # drop gutter 50 / 100 / 110
-  21: ['a','b','c'],            # drain closed 80-50 / 140-50 / 245-50
-  22: ['a','b'],               # drain open 140 / 245
-  23: ['a','b'],               # kettle drain closed / open
-  24: ['a','c','d'],            # joker seal (a) · joker nut (c) · plug (d) — 24_b
-                                #   "אטם מעביר" is table-only (no photo); routing
-                                #   reuses 24_a (shared seal). P5 removed unused crop.
-  25: ['a','c'],                # SmartLock nut (a) · iron nut (c) — 25_b "מצרה
-                                #   צד אחד חלק חיבור ברזל ופלסטיק" is table-only;
-                                #   routing reuses 18_b (reducer). P5 removed crop.
-  28: ['a','b','c','d'],        # raise square / Top Floor / cylindrical / temp round
-  29: ['a','b','c','d'],        # round raised / fixed round / sq ext / sq int
-  30: ['a','b','c','d'],        # grid raised / nickel / round / square
-  31: ['a','b','c'],            # basin siphon / +measure / +AC
-  32: ['a','b','c'],            # no-siphon / kitchen 2" / kitchen+dishwasher
-  33: ['a','b'],               # double 2 inlets / double+side
-  34: ['a','b'],               # american 1¼ / american 2"
-  35: ['a','b'],               # american+dishwasher / double american
-  36: ['a','b'],               # double+dishwasher / H washing
-  37: ['a','b'],               # 1¼ washing / 1½ overflow
-  38: ['a','b'],               # 1½ J / bathtub 2002
-  39: ['a','b','c','d'],        # short basin / long basin / rosette / american inlet
-  40: ['a','b','c'],            # siphon kit / slip pipe / inlet extension
-  41: ['a','b','c'],            # long inlet / inlet+AC / american adapter
-  42: ['a','b','c','d'],        # dishwasher set / funnel / vent / abik
-  43: ['a','b','c'],            # plugs / plug set / wrench
+    11: ['a', 'b', 'c'],
+    12: ['a', 'b', 'c', 'd'],
+    13: ['a', 'b', 'c'],
+    14: ['a', 'b'],
+    15: ['a', 'b', 'c'],
+    16: ['a', 'b'],
+    17: ['a', 'b'],
+    18: ['a', 'b'],
+    19: ['a', 'b', 'c'],
+    20: ['a', 'b', 'c'],
+    21: ['a', 'b', 'c'],
+    22: ['a', 'b'],
+    23: ['a', 'b'],
+    24: ['a', 'c', 'd'],
+    25: ['a', 'c'],
+    28: ['a', 'b', 'c', 'd'],
+    29: ['a', 'b', 'c', 'd'],
+    30: ['a', 'b', 'c', 'd'],
+    31: ['a', 'b', 'c'],
+    32: ['a', 'b', 'c'],
+    33: ['a', 'b'],
+    34: ['a', 'b'],
+    35: ['a', 'b'],
+    36: ['a', 'b'],
+    37: ['a', 'b'],
+    38: ['a', 'b'],
+    39: ['a', 'b', 'c', 'd'],
+    40: ['a', 'b', 'c'],
+    41: ['a', 'b', 'c'],
+    42: ['a', 'b', 'c', 'd'],
+    43: ['a', 'b', 'c'],
 }
 
-Y0, Y1 = 140, 1200      # content area (below page top, above footer)
-X0, X1 = 12, 238        # left photo column (P2: 250→238 trims table unit-icons)
-# P1: the product render sits at the TOP of each section band at a roughly
-# CONSTANT height regardless of band count (the L/DN dimension diagram + value
-# table sit BELOW it). So crop a fixed photo height from each band top — this
-# yields a clean product photo (front), not photo+diagram. Tall items (drains,
-# cylinders) need a touch more; PHOTO_H=170 fits them without grabbing the
-# diagram on dense 4-section pages (band≈265 → 95px diagram margin left out).
-PHOTO_H = 170
-
-# P3 §17.2: the dimension DIAGRAM sits directly below the product photo in the
-# same band — same left column, height ≈ band - PHOTO_H, with a small top
-# margin so the photo's drop-shadow doesn't bleed in. Spec crops are written
-# as `spec_sml_p{NN}_{tag}.jpg` and routed by _huliotSpecFor(). Pages where
-# the diagram doesn't fit this scheme (page 27 AQUA SLIM, varied accessory
-# layouts) are excluded — they fall back to the full page on the flip side.
-SPEC_TOP_PAD = 8            # margin between photo bottom and diagram top
-SPEC_BOT_PAD = 14           # leave the trailing sku-row out of the diagram crop
-SPEC_PAGES = {              # which SECTIONS pages get auto spec crops
-    11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-    28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
+# Page 27 (AQUA SLIM) has a UNIQUE layout — 2 product renders (330+700)
+# on the right side and a thin strip drawing at the bottom; the band scheme
+# doesn't fit. Hand-tuned crops apply directly.
+CROPS_27 = {
+    'a': (470, 195, 825, 315),   # Aqua Slim 330 render
+    'b': (420, 440, 825, 540),   # Aqua Slim 700 render
+    'c': (150, 870, 670, 920),   # פס ניקוז ללא סט (strip-only)
 }
 
-for pg, tags in SECTIONS.items():
+# Photo column (left side of band) + tuning constants
+X0, X1 = 12, 238
+PHOTO_TOP_GAP = 22         # px gap below the green header line
+PHOTO_BOTTOM_FRAC = 0.43   # photo ends at 43% of band (avoids diagram lip)
+SPEC_TOP_FRAC = 0.45       # spec diagram starts at 45% of band
+SPEC_BOTTOM_FRAC = 0.97    # spec diagram ends at 97% of band
+MAX_PHOTO_H = 165          # cap so tiny bands don't crop a giant rectangle
+
+
+def find_green_lines(im, min_width_frac=0.15):
+    """Find every row where a horizontal green line spans ≥min_width_frac.
+    Returns (y, max_run_width) pairs, GROUPED across consecutive y rows."""
+    W, H = im.size
+    px = im.load()
+    raw = []
+    for y in range(50, H - 50):
+        max_run = run = 0
+        for x in range(W):
+            r, g, b = px[x, y]
+            if g > 130 and g > r + 30 and g > b + 20:
+                run += 1
+                if run > max_run:
+                    max_run = run
+            else:
+                run = 0
+        if max_run > W * min_width_frac:
+            raw.append((y, max_run))
+    grouped = []
+    if not raw:
+        return grouped
+    start = last = raw[0][0]
+    best = raw[0][1]
+    for y, run in raw[1:]:
+        if y == last + 1:
+            last = y
+            if run > best:
+                best = run
+        else:
+            grouped.append(((start + last) // 2, best))
+            start = y
+            last = y
+            best = run
+    grouped.append(((start + last) // 2, best))
+    return grouped
+
+
+def band_tops_for(im, expected_n):
+    """Return [y, y, ...] of length expected_n — one band-top per section."""
+    lines = find_green_lines(im)
+    if len(lines) == expected_n:
+        return [y for y, _ in sorted(lines, key=lambda t: t[0])]
+    if len(lines) > expected_n:
+        # Drop page-header line(s); keep the bottom-most N (those are the bands).
+        lines_by_y = sorted(lines, key=lambda t: t[0])
+        drop = len(lines_by_y) - expected_n
+        return [y for y, _ in lines_by_y[drop:]]
+    # Underdetection — pad with equal spacing as a soft fallback.
+    H = im.height
+    last_y = max(y for y, _ in lines) if lines else 135
+    extra = (H - 100 - last_y) // (expected_n - len(lines) + 1)
+    out = sorted(y for y, _ in lines)
+    while len(out) < expected_n:
+        out.append(out[-1] + extra)
+    return out
+
+
+def is_mostly_white(crop, min_ink_pixels=120):
+    """True if the crop has fewer than `min_ink_pixels` dark pixels.
+
+    Diagram crops are 99% white with thin dark lines + dimension labels — the
+    mean brightness stays ~250 even when ink IS present, so we count dark
+    pixels directly. 120 covers a basic L/DN/W tick-mark drawing comfortably."""
+    px = crop.load()
+    W, H = crop.size
+    dark = 0
+    for y in range(0, H, 2):
+        for x in range(0, W, 2):
+            r, g, b = px[x, y]
+            if r < 200 and g < 200 and b < 200:
+                dark += 1
+                if dark >= min_ink_pixels:
+                    return False
+    return True
+
+
+def crop_page(pg, tags):
     src = f'{PAGES}/page_{pg:02d}.jpg'
-    im = Image.open(src)
-    n = len(tags)
-    band = (Y1 - Y0) / n
-    for idx, tag in enumerate(tags):
-        by0 = Y0 + idx * band
-        # photo height never exceeds the band itself (small bands stay in-band)
-        ph_top = by0
-        ph_bot = by0 + min(PHOTO_H, band * 0.92)
-        crop = im.crop((X0, int(ph_top), X1, int(ph_bot)))
-        crop.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
-        # P3 — diagram crop (skip pages where the layout doesn't match)
-        if pg in SPEC_PAGES:
-            sp_top = ph_bot + SPEC_TOP_PAD
-            sp_bot = by0 + band - SPEC_BOT_PAD
-            if sp_bot - sp_top >= 40:  # only when there's room
-                d = im.crop((X0, int(sp_top), X1, int(sp_bot)))
-                d.save(f'{OUT}/spec_sml_p{pg:02d}_{tag}.jpg', quality=85)
+    im = Image.open(src).convert('RGB')
+    H = im.height
+    tops = band_tops_for(im, len(tags))
+    # band_bottom of band i is start of band i+1; the last band ends ~H-50
+    bottoms = tops[1:] + [H - 50]
+    photo_count = spec_count = 0
+    for tag, top, bot in zip(tags, tops, bottoms):
+        band_h = bot - top
+        # Photo box
+        ph_top = top + PHOTO_TOP_GAP
+        ph_bot = top + min(int(band_h * PHOTO_BOTTOM_FRAC), MAX_PHOTO_H + PHOTO_TOP_GAP)
+        # safety: never spill past band bottom
+        ph_bot = min(ph_bot, bot - 5)
+        photo = im.crop((X0, ph_top, X1, ph_bot))
+        photo.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
+        photo_count += 1
+        # Spec box (skip if blank)
+        sp_top = top + int(band_h * SPEC_TOP_FRAC)
+        sp_bot = top + int(band_h * SPEC_BOTTOM_FRAC)
+        if sp_bot - sp_top < 40:
+            continue
+        spec = im.crop((X0, sp_top, X1, sp_bot))
+        # Decide: keep spec only if it has ink (diagram pixels), drop if blank.
+        if not is_mostly_white(spec):
+            spec.save(f'{OUT}/spec_sml_p{pg:02d}_{tag}.jpg', quality=85)
+            spec_count += 1
+    return photo_count, spec_count
 
-# Page 27 — apply hand-tuned crops (overrides any generic SECTIONS entry).
-im27 = Image.open(f'{PAGES}/page_27.jpg')
-for tag, box in CROPS_27.items():
-    im27.crop(box).save(f'{OUT}/sml_p27_{tag}.jpg', quality=85)
 
-print('cropped', sum(len(v) for v in SECTIONS.values()) + len(CROPS_27), 'images +',
-      sum(len(v) for k, v in SECTIONS.items() if k in SPEC_PAGES), 'spec diagrams')
+if __name__ == '__main__':
+    # Clean any old crops first so we don't keep stale ones from earlier runs.
+    for f in os.listdir(OUT):
+        if (f.startswith('sml_p') or f.startswith('spec_sml_p')) and f.endswith('.jpg'):
+            # Page 27 hand-tuned crops are managed separately below.
+            if f.startswith('sml_p27_'):
+                continue
+            os.remove(os.path.join(OUT, f))
+
+    total_p = total_s = 0
+    for pg, tags in SECTIONS.items():
+        p, s = crop_page(pg, tags)
+        total_p += p
+        total_s += s
+
+    # Page 27 — hand-tuned crops (overrides any auto SECTIONS entry).
+    im27 = Image.open(f'{PAGES}/page_27.jpg')
+    for tag, box in CROPS_27.items():
+        im27.crop(box).save(f'{OUT}/sml_p27_{tag}.jpg', quality=85)
+    total_p += len(CROPS_27)
+
+    print(f'cropped {total_p} photos + {total_s} spec diagrams')
