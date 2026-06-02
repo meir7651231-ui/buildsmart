@@ -43,8 +43,14 @@ SECTIONS = {
 }
 
 Y0, Y1 = 140, 1200      # content area (below page top, above footer)
-X0, X1 = 12, 250        # left photo column (excludes table)
-TOP_FRAC = 0.72         # photo sits in top ~72% of each band
+X0, X1 = 12, 238        # left photo column (P2: 250→238 trims table unit-icons)
+# P1: the product render sits at the TOP of each section band at a roughly
+# CONSTANT height regardless of band count (the L/DN dimension diagram + value
+# table sit BELOW it). So crop a fixed photo height from each band top — this
+# yields a clean product photo (front), not photo+diagram. Tall items (drains,
+# cylinders) need a touch more; PHOTO_H=170 fits them without grabbing the
+# diagram on dense 4-section pages (band≈265 → 95px diagram margin left out).
+PHOTO_H = 170
 
 for pg, tags in SECTIONS.items():
     src = f'{PAGES}/page_{pg:02d}.jpg'
@@ -52,8 +58,9 @@ for pg, tags in SECTIONS.items():
     n = len(tags)
     band = (Y1 - Y0) / n
     for idx, tag in enumerate(tags):
-        by0 = Y0 + idx*band
-        by1 = by0 + band*TOP_FRAC
+        by0 = Y0 + idx * band
+        # photo height never exceeds the band itself (small bands stay in-band)
+        by1 = by0 + min(PHOTO_H, band * 0.92)
         crop = im.crop((X0, int(by0), X1, int(by1)))
         crop.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
 print('cropped', sum(len(v) for v in SECTIONS.values()), 'images')
