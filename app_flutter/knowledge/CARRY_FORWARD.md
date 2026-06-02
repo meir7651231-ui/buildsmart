@@ -27,6 +27,22 @@
    הצהרתי "100%" → 80% מהcrops לוכדים גם דיאגרמה. **קונדנציה כעת: אם אסט
    נוצר ע"י script → לפני commit-of-done, contact-sheet + visual verify חובה.**
 
+7. **Per-band tuning גובר על per-page או per-N-sections לcrop scripts.**
+   כל מודל אחיד (`PHOTO_H = const`, `FIXED_PHOTO_H_BY_N`, `frac * band_h`)
+   נכשל לקטלוגים שיש בהם variability בגודל מוצר בתוך עמוד אחד. דוגמא:
+   page 21 ב-Huliot מציג drain 80/50 (photo 120px), drain 140/50 (150px),
+   drain 245/50 (175px) — באותו עמוד. כל single PHOTO_H יחתוך את הגדולים
+   או יכלול diagram בקטנים. **גישה נכונה:** dict `{(page, tag): height}`
+   או bbox-detection per-band עם defaults הכי בטוחים. ניסיתי 6 גישות
+   אוטומטיות לפני שעברתי לper-band — הפסדתי 2 שעות.
+
+8. **כשscript-output נכנס לbinary repo (תמונות/PDFs), revert קל יותר
+   מ-iteration במקום.** הקבצים גדולים, ה-diff לא קריא, ו-merge-conflicts
+   פוגעים. השתדל לעבוד באיזורי-עבודה נפרדים (`/tmp/`) עד אישור visual,
+   ורק אז להעביר ל-repo. ב-2026-06-02 דחפתי 4 batches של 89-172 crops
+   לrepo (89→123→89→89 files churned), כל אחד יצר merge-conflicts עם
+   commits מקבילים של בנצי.
+
 ---
 
 ## 🧪 Testing patterns

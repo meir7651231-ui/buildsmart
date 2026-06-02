@@ -1160,3 +1160,28 @@ RULE: asset-generation script (crop/render/composite) → לפני commit-of-don
 חייב: (א) להריץ את ה-script, (ב) ליצור contact-sheet שמרכז את כל הoutputs,
 (ג) לקרוא אותו עם Read tool ולסרוק עיני, (ד) להחליט per-asset או per-row אם
 תקין, (ה) רק אז להצהיר "done". זה ב-CARRY_FORWARD #6.
+
+---
+
+## 2026-06-02 (V) — iteration-overshoot ב-crop tuning (לקח #7, #8)
+
+### א — הבעיה
+אחרי שתיקנתי P3 crops עם adaptive band-tops detection (v3), המשתמש דחה
+("עדיין לא נקי"). ניסיתי 6 גישות אוטומטיות נוספות (v3→v17): row-density,
+white-row, block-detection, fused-block-splitting, fixed-by-N, per-page,
+per-band. כל גישה אחידה נכשלה כי gthm פoyfo מובלעת — באותו עמוד יש drain
+80/50 (120px), drain 140/50 (150px), drain 245/50 (175px). PHOTO_H אחיד
+חוטא לאחד הקצוות.
+
+### ב — הפתרון
+- per-band PHOTO_H dict (`PER_BAND_PHOTO_H = {(page,tag): height}`)
+  שעוקף את `PER_PAGE_PHOTO_H` עבור bands בעייתיים ספציפיים.
+- אובחנו ב-visual contact-sheets אחרי כל iteration (לקח #6).
+- מסקנה הוסיפה ל-CARRY_FORWARD #7 + #8.
+
+### ג — כלל המניעה
+ANTIPATTERN: `PHOTO_H = N` אחיד עבור catalog עם photos בגדלים שונים בעמוד.
+RULE: אם asset-generation מטפל ב-catalog שיש בו variability יותר מ-20%
+בגודל-מוצר ב-namespace (עמוד/section/band), השתמש ב-per-leaf override dict
+מההתחלה. הימנע מ-N נסיונות-אוטומציה עם heuristics שונים — אלה רק יעצרו
+בקצוות. **תמיד קודם:** dict {(scope, leaf): override} עם documented defaults.
