@@ -273,7 +273,7 @@ if [[ -n "$NEEDS_FLUTTER" ]]; then
 
     # שער 32: בדיקות לא נכשלות מעבר ל-baseline (תיקון באג #19 — baseline tracking)
     # baseline מאוחסן ב-STATUS.md: "known-failing: N" — מאפשר pre-existing failures
-    TEST_OUT=$(flutter test --no-pub 2>&1)
+    TEST_OUT=$(flutter test --no-pub --concurrency=4 2>&1)
     TEST_EXIT=$?
     KNOWN_FAIL=$(grep -oE "known-failing: [0-9]+" knowledge/STATUS.md 2>/dev/null | grep -oE "[0-9]+$" || echo 0)
     # מניעת baseline-phantom (אודיט 2026-06-01): known-failing > 0 חייב רשימת שמות
