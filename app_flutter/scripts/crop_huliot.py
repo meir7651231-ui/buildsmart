@@ -94,7 +94,24 @@ PHOTO_H_FRAC = 0.45
 PHOTO_H_MIN, PHOTO_H_MAX = 90, 195
 
 PER_PAGE_PHOTO_H = {}
-PER_BAND_PHOTO_H = {}
+# Per-band override (page, tag) → PHOTO_H. Used when density-scan picks up the
+# diagram's "DN" label as a false-positive dense row (page 12 elbows, p14_b, etc).
+PER_BAND_PHOTO_H = {
+    # Page 12 — elbow oneside × 4 angles; DN label below catches density
+    (12, 'a'): 110,
+    (12, 'b'): 110,
+    (12, 'c'): 110,
+    (12, 'd'): 110,
+    # Page 14 — elbow מצרה צד אחד שקע תקע (band b)
+    (14, 'b'): 145,
+    # Page 30 — nickel grid has visible DN+H ticks
+    (30, 'b'): 100,
+    # Page 32 — kitchen siphon — diagram pulled in below
+    (32, 'b'): 165,
+    (32, 'c'): 160,    # kitchen+dishwasher siphon
+    # Page 40 — inlet extension photo + adjacent label "ראש שקע תקע"
+    (40, 'c'): 105,
+}
 
 # Per-band override (page, tag) → PHOTO_H. Wins over PER_PAGE_PHOTO_H.
 # Used for bands where the photo is taller than the page average — e.g.
