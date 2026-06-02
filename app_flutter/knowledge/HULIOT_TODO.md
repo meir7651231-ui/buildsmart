@@ -29,6 +29,22 @@
 - **בעיה:** פס אפור מימין (אייקוני יח'/ארגז/משטח של הטבלה).
 - **תיקון שבוצע:** `X1` 250→238 ב-`crop_huliot.py`. נחתך מחדש, אין שאריות.
 
+### P10 — העלאת 89+83 crops ל-R2 (חוסם UI, פתוח) 🔴 דחוף
+- **בעיה (אבחנת בנצי 2026-06-02):** כל ה-crops של Huliot (89 photo + 83 spec)
+  לא הועלו ל-bucket Cloudflare R2. ב-web/release: `CachedNetworkImage` מקבל
+  404 → cache-manager זורק → **כרטיס המוצר מתרוקן**.
+- **תיקון זמני (v5.80):** `_huliotImageFor` ו-`_huliotSpecFor` מחזירים
+  `page_NN.jpg`/null עד שיעלו (ה-pages כבר ב-R2 מהסשן הקודם). הקבצים
+  ב-source נשמרים — guard `_routeCropDisabled` ו-`_specCropDisabled` לפי
+  flag אחד. ברגע ש-upload יקרה → flip ל-`false`.
+- **הצעדים לסגירה:**
+  1. להעלות `app_flutter/assets/huliot_smartlock/products/sml_p*.jpg` (89)
+     + `spec_sml_p*.jpg` (83) ל-`huliot_smartlock/products/` ב-R2 bucket.
+  2. `dart fix` יבוטל: לשנות `_routeCropDisabled = false` + `_specCropDisabled = false`
+     ב-`lib/data/huliot_smartlock_catalog.dart`.
+  3. לאמת באופן ויזואלי שכרטיס מציג crop ולא page.
+  4. לעדכן §17.1 ו-§17.1.b לאכוף "crop only, no page-fallback" שוב.
+
 ### P3 — spec images פר-משפחה (§17.2) ✅ בוצע (v5.77)
 - **בוצע:** 83 spec crops נחתכו אוטומטית מתחת לכל תצלום-מוצר באותו band
   (דיאגרמת חתך L/DN/W/t/H verbatim מהקטלוג). `crop_huliot.py` הורחב עם

@@ -284,6 +284,16 @@
   SmartBrand.sku is a real catalog SKU".
 - מסקנה: כיסוי 12 הכרטיסים מוגן (spot-check + ≥126 ממופים).
 
+### _huliotImageForCrop — R2-fallback helper extraction (v5.80) — 2026-06-02
+- **קובץ:** `lib/data/huliot_smartlock_catalog.dart`
+- **מה עושה:** ה-routing הקנוני (per-page tag mapping) חולץ ל-`_huliotImageForCrop`.
+  `_huliotImageFor` עכשיו מחזיר `page_NN.jpg` כברירת-מחדל (R2-fallback)
+  כל עוד `_routeCropDisabled = true`. כשהדגל יוסר → חוזר לקרוא ל-helper הקנוני.
+- תקלה שהוזרקה: `s|return 'page_\${page.toString().padLeft(2, '0')}.jpg';|return null;|`
+  (לדמות מצב שבו ה-fallback בעצמו נכשל).
+- תוצאה: §17.1-Huliot אדום ✅ — `${p.sku} → null imageAsset`.
+- מסקנה: ה-guard המוקל ("exists") עדיין תופס נפילה מוחלטת, ולא רק crop-vs-page.
+
 ### Huliot smart-tree wiring batch 5 — spare-parts card (v5.78) — 2026-06-02
 - שינוי: כרטיס חדש `smlSpareParts` עם 44 מק"טי אביזרי-סיפון/מחסום כ-SmartBrand.
   כיסוי חוליות 126→**170/170 (100%)**.

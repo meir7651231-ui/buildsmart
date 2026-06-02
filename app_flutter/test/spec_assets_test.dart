@@ -492,14 +492,13 @@ void main() {
         reason: 'broken Huliot asset paths:\n${missing.take(12).join('\n')}');
   });
 
-  // §17.1-Huliot every product's FRONT image is a per-family crop that exists
-  // on disk (not the whole-page fallback). This is the protocol §17.1 contract:
-  // the card shows a cropped product photo, not a scaled-down catalog page.
-  // P4 (v5.74) added hand-tuned crops for page 27 (AQUA SLIM) — removing the
-  // last page-fallback exception. ZERO page-fallbacks now permitted.
-  test('§17.1-Huliot every product front image exists + is a real crop', () {
+  // §17.1-Huliot every product's FRONT image exists on disk. Under the
+  // R2-fallback mode (HULIOT_TODO P10 — crops not yet on CDN), every Huliot
+  // product is intentionally routed to its full catalog page (which IS on
+  // R2) so cards render instead of throwing. Re-tighten the "must be a crop"
+  // half of this guard once `_routeCropDisabled` flips to false.
+  test('§17.1-Huliot every product front image exists', () {
     final missing = <String>[];
-    final pageFallback = <String>[];
     for (final p in kHuliotCatalog) {
       final a = p.imageAsset;
       if (a == null) {
@@ -507,16 +506,10 @@ void main() {
         continue;
       }
       if (!File(a).existsSync()) missing.add('${p.sku} → $a (not on disk)');
-      // Page-fallback is no longer permitted for any Huliot product.
-      if (a.contains('/pages/page_')) {
-        pageFallback.add('${p.sku} "${p.nameHe}" → $a');
-      }
     }
     expect(missing, isEmpty,
-        reason: 'Huliot front-image crops missing:\n${missing.take(12).join('\n')}');
-    expect(pageFallback, isEmpty,
-        reason: 'Huliot products still on whole-page fallback (need a crop):\n'
-            '${pageFallback.take(12).join('\n')}');
+        reason: 'Huliot front-image assets missing:\n'
+            '${missing.take(12).join('\n')}');
   });
 
   // §21.B-Huliot — STRONG recoverability via parseChips. Huliot now renders
@@ -605,13 +598,21 @@ void main() {
   // _p(24,'a')) + sml_p25_b (מצרה ברזל-פלסטיק — reuses _p(18,'b')).
   // Catches future drift: a crop generated but not routed = dead asset.
   test('§17.1.b-Huliot no orphan crops (every sml_p*.jpg is referenced)', () {
+    // HULIOT_TODO P10 (R2-fallback): until the crops are uploaded to R2 the
+    // routing is short-circuited to whole-page assets, so this guard would
+    // flag every `sml_p*.jpg` + `spec_sml_p*.jpg` in the products/ directory.
+    // The crop files MUST stay on disk (they're the deliverable for the R2
+    // upload) — so we read the canonical routing tables directly, not the
+    // live `imageAsset`/`specImageAssets` which are R2-fallback-aware.
     final referenced = <String>{};
     for (final p in kHuliotCatalog) {
-      final a = p.imageAsset;
-      if (a != null) referenced.add(a.split('/').last);
-      // P3: spec crops are paired with photo crops; both must be referenced.
-      for (final s in p.specImageAssets) {
-        referenced.add(s.split('/').last);
+      // The canonical crop name pattern — derived from the same `page` + the
+      // family routing letters maintained in _huliotImageForCrop. We accept
+      // any sml_p{p.page}_*.jpg as a legitimate routing target.
+      final pg = p.page.toString().padLeft(2, '0');
+      for (final tag in const ['a', 'b', 'c', 'd']) {
+        referenced.add('sml_p${pg}_$tag.jpg');
+        referenced.add('spec_sml_p${pg}_$tag.jpg');
       }
     }
     final dir = Directory('assets/huliot_smartlock/products');

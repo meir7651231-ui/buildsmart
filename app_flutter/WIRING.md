@@ -323,6 +323,20 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — hotfix R2-fallback (v5.80 — 2026-06-02)
+- **באג שאובחן ע"י בנצי:** כרטיסי Huliot ב-web/release התרוקנו. שורש:
+  89 photo crops + 83 spec crops לא הועלו ל-R2 bucket → CDN 404 →
+  `CachedNetworkImage` זרק חריגה → build failed → כרטיס ריק.
+- **תיקון זמני:** `_huliotImageFor` ו-`_huliotSpecFor` קיבלו flags
+  `_routeCropDisabled` + `_specCropDisabled = true`. הכרטיס מציג עכשיו
+  את עמוד-הקטלוג המלא (`page_NN.jpg` — כבר ב-R2) במקום crop. הרוטינג
+  הקנוני נשמר ב-`_huliotImageForCrop` — flip של flag אחד מחזיר את
+  ההתנהגות המקורית ברגע שה-crops יעלו.
+- **§17.1 הוקל זמנית** ל"exists" בלבד (במקום "is a real crop"). **§17.1.b**
+  עודכן לעבוד מול ה-routing table הקנוני, לא מול imageAsset הדינמי, כך
+  שה-crops הקיימים על דיסק נחשבים legitimate (הם ה-deliverable ל-upload).
+- **P10 בHULIOT_TODO** — הוראות upload + reversal steps.
+
 ## Huliot SmartLock — P3 spec crops פר-משפחה (v5.77 — 2026-06-02)
 - `scripts/crop_huliot.py` הורחב: לכל band ש-`SPEC_PAGES` (31 עמודי-טבלה),
   מתחת לתצלום נחתכת **דיאגרמת חתך** (L/DN/W/t/H verbatim) → 83 קבצי

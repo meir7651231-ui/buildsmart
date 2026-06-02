@@ -47,6 +47,21 @@ const List<String> kHuliotCategories = [
 String _p(int page, String tag) => 'sml_p${page.toString().padLeft(2, '0')}_$tag.jpg';
 
 String? _huliotImageFor(int page, String nameHe, String categoryHe) {
+  // R2-fallback (2026-06-02): the 89 per-family `sml_p*.jpg` crops are not yet
+  // uploaded to the R2 bucket, so the CDN returns 404 on web/release and the
+  // cache-manager throws — leaving the product card EMPTY. Until the crops
+  // are pushed to R2, every product points to its full catalog page (which is
+  // already in R2 and renders fine). The routing tables below are preserved
+  // verbatim — flip the `_routeCropDisabled` guard back to false in a single
+  // line the moment the bucket has the crops. See HULIOT_TODO P10.
+  const _routeCropDisabled = true;
+  if (_routeCropDisabled) {
+    return 'page_${page.toString().padLeft(2, '0')}.jpg';
+  }
+  return _huliotImageForCrop(page, nameHe, categoryHe);
+}
+
+String? _huliotImageForCrop(int page, String nameHe, String categoryHe) {
   bool has(String s) => nameHe.contains(s);
   switch (page) {
     case 11: // pipe (a) · cutter (b) · joker (c)
@@ -176,7 +191,12 @@ String? _huliotImageFor(int page, String nameHe, String categoryHe) {
 /// Pages without an auto-cropped diagram (24, 27, 36/37/38/40-43 accessory
 /// layouts) return null → flip falls back to the full catalog page.
 String? _huliotSpecFor(int page, String nameHe, String categoryHe) {
-  final img = _huliotImageFor(page, nameHe, categoryHe);
+  // R2-fallback (2026-06-02): the 83 spec crops aren't on R2 either — flip
+  // returns null so the spec pager falls back to the catalog page (which IS
+  // on R2). Re-enable once HULIOT_TODO P10 (upload) is done.
+  const _specCropDisabled = true;
+  if (_specCropDisabled) return null;
+  final img = _huliotImageForCrop(page, nameHe, categoryHe);
   // Routing fell through to the whole page (no per-family crop) → no spec.
   if (img == null || img.startsWith('page_')) return null;
   // Page 27 (AQUA SLIM) uses hand-tuned photo crops; the catalog page has

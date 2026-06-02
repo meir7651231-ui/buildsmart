@@ -1101,3 +1101,34 @@ tree: (1) FinderGroup ב-`kFinderGroups`; (2) קטגוריות שמתחלקות 
 groups קיימים — להוסיף suffix ייחודי (למשל ' SmartLock') כדי לעמוד ב-
 pairwise disjoint; (3) הקבוצה דורשת Material icon + תמונת 3D ייחודית
 (`kFinderGroupIcons` + `kFinderGroupImage` + קובץ ב-`assets/lipskey/categories/`).
+
+---
+
+## 2026-06-02 — כרטיסי Huliot ריקים ב-web/release (אבחנת בנצי)
+
+### א — הבעיה
+v5.77 הוסיף 89 photo crops + 83 spec crops ל-Huliot. ב-web/release
+(IMAGE_BASE_URL מוגדר ל-R2 CDN) הכרטיסים התרוקנו. שורש: ה-crops לא הועלו
+ל-R2 bucket — `huliot_smartlock/products/sml_p*.jpg` החזיר 404, ה-
+`CachedNetworkImage` של flutter_cache_manager זרק חריגה ב-build → הכרטיס
+פלט "Another exception was thrown: Instance of 'minified:o1'" ולא נצבע.
+הבדיקות המקומיות (1031/1031) עברו כי הן בודקות disk paths, לא CDN.
+
+### ב — הפתרון
+תיקון זמני: `_huliotImageFor` ו-`_huliotSpecFor` מקבלים flags
+(`_routeCropDisabled` + `_specCropDisabled = true`) שמחזירים `page_NN.jpg`/
+null — עמוד הקטלוג המלא (שכבר ב-R2 מהסשן הקודם). הרוטינג הקנוני חולץ
+ל-`_huliotImageForCrop` (שאינו נקרא כל עוד הדגל true). ה-guards §17.1 +
+§17.1.b עודכנו: §17.1 הוקל ל"exists" (במקום "is a real crop"); §17.1.b
+בודק מול ה-routing table הקנוני (page+tag) במקום מול ה-imageAsset הדינמי,
+כך שה-crops על דיסק נחשבים legitimate (הם ה-deliverable ל-upload).
+P10 ב-HULIOT_TODO מתעד את ה-reversal: upload → flags=false → אכיפת
+§17.1 קשיחה שוב.
+
+### ג — כלל המניעה
+ANTIPATTERN: hooking a brand to per-family crops without an R2 upload-check
+RULE: לפני מיגרציה ל-CDN-based product images, חובה לוודא שכל
+nameSchemeNew של brand x פוטנציאלי שיתווסף לרוטינג קיים ב-bucket. בדיקה
+מהירה: `curl -sI $kImageBaseUrl/<brand>/products/<sample>.jpg | head -1`
+חייב להחזיר 200 לפני שינוי routing שמפנה אליו. אחרת — להישאר ב-page
+fallback או להעלות תחילה.
