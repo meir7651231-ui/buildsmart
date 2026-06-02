@@ -1,4 +1,3 @@
-import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/screens/_size_norm.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
@@ -71,14 +70,20 @@ void main() {
           final finder = finderSizeChipsFor(p.nameHe);
           final missing = finder.difference(card);
           if (missing.isNotEmpty) {
-            orphans.add('sku=${p.sku}  name="${p.nameHe}"  '
-                'finder=$finder  card=$card  missing=$missing');
+            orphans.add(
+              'sku=${p.sku}  name="${p.nameHe}"  '
+              'finder=$finder  card=$card  missing=$missing',
+            );
           }
         }
-        expect(orphans, isEmpty,
-            reason: 'finder chips with no matching card chip '
-                '(would be orphan filter clicks):\n'
-                '${orphans.take(8).join("\n")}');
+        expect(
+          orphans,
+          isEmpty,
+          reason:
+              'finder chips with no matching card chip '
+              '(would be orphan filter clicks):\n'
+              '${orphans.take(8).join("\n")}',
+        );
       },
     );
 
@@ -91,12 +96,16 @@ void main() {
         for (final t in parseSizeTokens(p.nameHe)) {
           if (t.label.contains('×')) {
             final parts = t.label.split('×');
-            expect(parts.length, 2,
-                reason: 'cross-dim label "${t.label}" should have exactly one ×');
             expect(
-                double.tryParse(parts.first.replaceAll(RegExp(r'[^\d.]'), '')),
-                isNotNull,
-                reason: 'first half of cross-dim "${t.label}" should be numeric');
+              parts.length,
+              2,
+              reason: 'cross-dim label "${t.label}" should have exactly one ×',
+            );
+            expect(
+              double.tryParse(parts.first.replaceAll(RegExp(r'[^\d.]'), '')),
+              isNotNull,
+              reason: 'first half of cross-dim "${t.label}" should be numeric',
+            );
           }
         }
       }
