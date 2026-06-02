@@ -11,9 +11,9 @@ void main() {
       final b = parseSizeTokens('ברז ½"').map((t) => t.label).toSet();
       final c = parseSizeTokens('ברז 1.5"').map((t) => t.label).toSet();
       expect(a, equals(b),
-          reason: '1/2" and ½" must yield the same chip label');
+          reason: '1/2" and ½" must yield the same chip label',);
       expect(c.first, equals('1½"'),
-          reason: '1.5" must pretty-print to 1½"');
+          reason: '1.5" must pretty-print to 1½"',);
     });
 
     test('mm / cm / metre / DN are tagged with the correct family', () {
@@ -124,10 +124,10 @@ void main() {
   group('dedup length by mm (P11) — cm wins over equivalent meters', () {
     test('15 ס"מ + 0.15 מ׳ → ONE chip (cm form survives)', () {
       final tokens = [
-        SizeToken(label: '15 ס"מ',  family: SizeFamily.cm,     mm: 150),
-        SizeToken(label: '0.15 מ׳', family: SizeFamily.meters,  mm: 150),
-        SizeToken(label: '3 מ׳',    family: SizeFamily.meters,  mm: 3000),
-        SizeToken(label: '300 ס"מ', family: SizeFamily.cm,     mm: 3000),
+        const SizeToken(label: '15 ס"מ',  family: SizeFamily.cm,     mm: 150),
+        const SizeToken(label: '0.15 מ׳', family: SizeFamily.meters,  mm: 150),
+        const SizeToken(label: '3 מ׳',    family: SizeFamily.meters,  mm: 3000),
+        const SizeToken(label: '300 ס"מ', family: SizeFamily.cm,     mm: 3000),
       ];
       final out = dedupLengthByMm(tokens);
       final labels = out.map((t) => t.label).toSet();
@@ -136,7 +136,7 @@ void main() {
 
     test('meters survives when no cm twin exists', () {
       final tokens = [
-        SizeToken(label: '5 מ׳', family: SizeFamily.meters, mm: 5000),
+        const SizeToken(label: '5 מ׳', family: SizeFamily.meters, mm: 5000),
       ];
       final out = dedupLengthByMm(tokens);
       expect(out.map((t) => t.label), ['5 מ׳']);
@@ -144,9 +144,9 @@ void main() {
 
     test('non-length tokens (DN/inch/angle) pass through untouched', () {
       final tokens = [
-        SizeToken(label: 'DN40', family: SizeFamily.dnDiameter, mm: 40),
-        SizeToken(label: '½"',   family: SizeFamily.inchDiameter, mm: 12.7),
-        SizeToken(label: '45°',  family: SizeFamily.angle,        mm: 45),
+        const SizeToken(label: 'DN40', family: SizeFamily.dnDiameter, mm: 40),
+        const SizeToken(label: '½"',   family: SizeFamily.inchDiameter, mm: 12.7),
+        const SizeToken(label: '45°',  family: SizeFamily.angle,        mm: 45),
       ];
       final out = dedupLengthByMm(tokens);
       expect(out.length, 3);
@@ -168,21 +168,21 @@ void main() {
   group('sortSizeTokens — numeric, not lexical', () {
     test('mm pool sorts by value: 25, 30, 200, 250', () {
       final toks = [
-        SizeToken(label: '250 מ"מ', family: SizeFamily.mm, mm: 250),
-        SizeToken(label: '25 מ"מ',  family: SizeFamily.mm, mm: 25),
-        SizeToken(label: '200 מ"מ', family: SizeFamily.mm, mm: 200),
-        SizeToken(label: '30 מ"מ',  family: SizeFamily.mm, mm: 30),
+        const SizeToken(label: '250 מ"מ', family: SizeFamily.mm, mm: 250),
+        const SizeToken(label: '25 מ"מ',  family: SizeFamily.mm, mm: 25),
+        const SizeToken(label: '200 מ"מ', family: SizeFamily.mm, mm: 200),
+        const SizeToken(label: '30 מ"מ',  family: SizeFamily.mm, mm: 30),
       ];
       sortSizeTokens(toks);
       expect(toks.map((t) => t.label).toList(),
-          ['25 מ"מ', '30 מ"מ', '200 מ"מ', '250 מ"מ']);
+          ['25 מ"מ', '30 מ"מ', '200 מ"מ', '250 מ"מ'],);
     });
 
     test('DN tokens: DN16, DN20, DN32 in order', () {
       final toks = [
-        SizeToken(label: 'DN32', family: SizeFamily.dnDiameter, mm: 32),
-        SizeToken(label: 'DN16', family: SizeFamily.dnDiameter, mm: 16),
-        SizeToken(label: 'DN20', family: SizeFamily.dnDiameter, mm: 20),
+        const SizeToken(label: 'DN32', family: SizeFamily.dnDiameter, mm: 32),
+        const SizeToken(label: 'DN16', family: SizeFamily.dnDiameter, mm: 16),
+        const SizeToken(label: 'DN20', family: SizeFamily.dnDiameter, mm: 20),
       ];
       sortSizeTokens(toks);
       expect(toks.map((t) => t.label).toList(), ['DN16', 'DN20', 'DN32']);
@@ -191,9 +191,9 @@ void main() {
     test('mixed inch + DN — diameter family precedes by precedence, '
         'NOT mixed numerically across families', () {
       final toks = [
-        SizeToken(label: 'DN32', family: SizeFamily.dnDiameter, mm: 32),
-        SizeToken(label: '½"',   family: SizeFamily.inchDiameter, mm: 12.7),
-        SizeToken(label: 'DN16', family: SizeFamily.dnDiameter, mm: 16),
+        const SizeToken(label: 'DN32', family: SizeFamily.dnDiameter, mm: 32),
+        const SizeToken(label: '½"',   family: SizeFamily.inchDiameter, mm: 12.7),
+        const SizeToken(label: 'DN16', family: SizeFamily.dnDiameter, mm: 16),
       ];
       sortSizeTokens(toks);
       // The contract is: family-grouped, then numeric inside the family.
@@ -204,7 +204,7 @@ void main() {
         i++;
       }
       expect(fams.skip(i).every((f) => f != fams[0]), isTrue,
-          reason: 'families must not interleave after sort');
+          reason: 'families must not interleave after sort',);
     });
   });
 
@@ -212,14 +212,14 @@ void main() {
     test('200 מ"מ · 25 ס"מ · 250 מ"מ · 30 ס"מ → mm group first, then cm; '
         'inside each group numeric ascending', () {
       final toks = [
-        SizeToken(label: '200 מ"מ', family: SizeFamily.mm, mm: 200),
-        SizeToken(label: '25 ס"מ',  family: SizeFamily.cm, mm: 250),
-        SizeToken(label: '250 מ"מ', family: SizeFamily.mm, mm: 250),
-        SizeToken(label: '30 ס"מ',  family: SizeFamily.cm, mm: 300),
+        const SizeToken(label: '200 מ"מ', family: SizeFamily.mm, mm: 200),
+        const SizeToken(label: '25 ס"מ',  family: SizeFamily.cm, mm: 250),
+        const SizeToken(label: '250 מ"מ', family: SizeFamily.mm, mm: 250),
+        const SizeToken(label: '30 ס"מ',  family: SizeFamily.cm, mm: 300),
       ];
       sortSizeTokens(toks);
       expect(toks.map((t) => t.label).toList(),
-          ['200 מ"מ', '250 מ"מ', '25 ס"מ', '30 ס"מ']);
+          ['200 מ"מ', '250 מ"מ', '25 ס"מ', '30 ס"מ'],);
     });
   });
 
@@ -244,17 +244,17 @@ void main() {
   group('dominantFamily — pool-level chooser pick', () {
     test('mixed inch + mm: diameter wins for the chooser', () {
       final fam = dominantFamily([
-        SizeToken(label: '½"',     family: SizeFamily.inchDiameter, mm: 12.7),
-        SizeToken(label: '25 מ"מ', family: SizeFamily.mm, mm: 25),
-        SizeToken(label: '50 מ"מ', family: SizeFamily.mm, mm: 50),
+        const SizeToken(label: '½"',     family: SizeFamily.inchDiameter, mm: 12.7),
+        const SizeToken(label: '25 מ"מ', family: SizeFamily.mm, mm: 25),
+        const SizeToken(label: '50 מ"מ', family: SizeFamily.mm, mm: 50),
       ]);
       expect(fam, SizeFamily.inchDiameter);
     });
 
     test('only-mm pool returns mm', () {
       final fam = dominantFamily([
-        SizeToken(label: '25 מ"מ', family: SizeFamily.mm, mm: 25),
-        SizeToken(label: '50 מ"מ', family: SizeFamily.mm, mm: 50),
+        const SizeToken(label: '25 מ"מ', family: SizeFamily.mm, mm: 25),
+        const SizeToken(label: '50 מ"מ', family: SizeFamily.mm, mm: 50),
       ]);
       expect(fam, SizeFamily.mm);
     });

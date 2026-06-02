@@ -13,19 +13,19 @@ void main() {
       if (!kFinderGroupIcons.containsKey(g.label)) unmapped.add(g.label);
     }
     expect(unmapped, isEmpty,
-        reason: 'finder groups without an icon mapping: ${unmapped.join(", ")}');
+        reason: 'finder groups without an icon mapping: ${unmapped.join(", ")}',);
   });
 
   test('finderGroupIcon returns the mapped icon, fallback only for unknown', () {
     expect(finderGroupIcon('ברזים'), isNot(Icons.category),
-        reason: 'a known group must not resolve to the catch-all fallback');
+        reason: 'a known group must not resolve to the catch-all fallback',);
     expect(finderGroupIcon('__no_such_group__'), Icons.category);
   });
 
   test('no two groups share the same icon (each is visually distinct)', () {
     final icons = kFinderGroups.map((g) => finderGroupIcon(g.label)).toList();
     expect(icons.toSet().length, icons.length,
-        reason: 'duplicate icons make groups indistinguishable: $icons');
+        reason: 'duplicate icons make groups indistinguishable: $icons',);
   });
 
   // Designer 3D product icons (the primary glyph; icon is the fallback).
@@ -35,20 +35,20 @@ void main() {
       if (!kFinderGroupImage.containsKey(g.label)) unmapped.add(g.label);
     }
     expect(unmapped, isEmpty,
-        reason: 'finder groups without a product image: ${unmapped.join(", ")}');
+        reason: 'finder groups without a product image: ${unmapped.join(", ")}',);
   });
 
   test('finderGroupImageAsset points under assets/lipskey/categories', () {
     expect(finderGroupImageAsset('ברזים'),
-        'assets/lipskey/categories/faucets.png');
+        'assets/lipskey/categories/faucets.png',);
     expect(finderGroupImageAsset('צנרת PPR'),
-        'assets/lipskey/categories/ppr.png');
+        'assets/lipskey/categories/ppr.png',);
     expect(finderGroupImageAsset('__no_such_group__'), isNull);
   });
 
   test('no two groups share the same product image', () {
     final imgs = kFinderGroupImage.values.toList();
     expect(imgs.toSet().length, imgs.length,
-        reason: 'duplicate product images: $imgs');
+        reason: 'duplicate product images: $imgs',);
   });
 }
