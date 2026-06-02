@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Product/page images load from the cloud (Cloudflare R2) at runtime, so the
+         RELEASE build needs INTERNET. Flutter auto-adds this only to the debug/profile
+         manifests, so without it here release builds show blank product images. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="buildsmart"
         android:name="${applicationName}"
