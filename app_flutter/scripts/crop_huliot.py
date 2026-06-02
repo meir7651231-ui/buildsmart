@@ -86,46 +86,20 @@ MAX_PHOTO_H = 175          # cap so a tall band doesn't grab the diagram below
 # page. Small-fitting pages (elbows/tees) get a tight 105-130 to avoid the
 # diagram "DN" tick-marks; large-drain pages (19-23) get 160-170 so the bigger
 # fixtures aren't truncated. Pages not listed fall back to block detection.
-PER_PAGE_PHOTO_H = {
-    # 4-section fittings — photo ~100px tall, diagram ~5px below it
-    12: 110, 13: 115, 14: 130, 15: 115,
-    # 2-section fittings — wider gap, larger photos
-    16: 145, 17: 145, 18: 145,
-    # Drain gutters + drains — default; per-band overrides below cover the
-    # bands where the photo is larger (e.g. drain 245/50 in p21_c).
-    19: 125, 20: 130, 21: 125, 22: 140, 23: 125,
-    # Accessory bands — short fittings, tight crops
-    24: 110, 25: 115,
-    # Covers / grids — short photos (most are <120 high, diagram below)
-    28: 125, 29: 105, 30: 125,
-    # Basin siphons + variants — large white plumbing
-    31: 160, 32: 175,
-    # Siphons — large white plumbing photos, generous height
-    33: 165, 34: 175, 35: 175, 36: 175, 37: 165, 38: 175,
-    # Basin connectors — varied
-    39: 110, 40: 130, 41: 130, 42: 110, 43: 110,
-}
+# Default formula: PHOTO_H = clamp(band_h × 0.45, 90..195).
+# Catches the ~290-band fittings (130px photo) AND the ~500-band siphons
+# (195px capped). Per-page/per-band overrides win when the silhouette is
+# unusual (drains 245/50, AQUA SLIM strip, etc.).
+PHOTO_H_FRAC = 0.45
+PHOTO_H_MIN, PHOTO_H_MAX = 90, 195
+
+# Per-page PHOTO_H — used when the page's bands all need the same offset.
+PER_PAGE_PHOTO_H = {}
 
 # Per-band override (page, tag) → PHOTO_H. Wins over PER_PAGE_PHOTO_H.
 # Used for bands where the photo is taller than the page average — e.g.
 # drains scale 80/50 → 140/50 → 245/50 within p21.
-PER_BAND_PHOTO_H = {
-    (18, 'b'): 130,  # reducer (smaller than coupling)
-    (19, 'c'): 160,  # gutter 230 (larger drum)
-    (20, 'b'): 150,  # drop gutter 100 (taller)
-    (20, 'c'): 165,  # drop gutter 110 (largest)
-    (21, 'b'): 155,  # drain 140/50
-    (21, 'c'): 175,  # drain 245/50 (largest)
-    (22, 'b'): 165,  # drain open 245
-    (23, 'b'): 140,  # kettle drain open
-    (25, 'c'): 100,  # iron nut (very short)
-    (28, 'c'): 165,  # cylindrical raised (taller fixture)
-    (30, 'b'): 155,  # nickel grid (slightly taller)
-    (36, 'b'): 165,  # H-washing siphon (slim, drops label below)
-    (39, 'b'): 100,  # long basin connector (slim, leaves L1 tick out)
-    (40, 'c'): 120,  # inlet extension (short)
-    (42, 'c'): 100,  # vent (short)
-}
+PER_BAND_PHOTO_H = {}
 FIXED_SPEC_GAP = 14        # gap from photo bottom to spec top (FIXED pages)
 
 
@@ -325,10 +299,15 @@ def crop_page(pg, tags):
     bottoms = tops[1:] + [H - 50]
     photo_count = spec_count = 0
     for tag, top, bot in zip(tags, tops, bottoms):
-        # Per-band override wins; else per-page; else fall to block detection.
-        if pg in PER_PAGE_PHOTO_H:
-            ph_top = top + PHOTO_TOP_GAP
-            fph = PER_BAND_PHOTO_H.get((pg, tag), PER_PAGE_PHOTO_H[pg])
+        # Default: PHOTO_H = clamp(band_h * frac, min, max). Per-band/per-page
+        # overrides win when the silhouette is unusual.
+        ph_top = top + PHOTO_TOP_GAP
+        band_h = bot - top
+        default_h = max(PHOTO_H_MIN,
+                        min(int(band_h * PHOTO_H_FRAC), PHOTO_H_MAX))
+        fph = PER_BAND_PHOTO_H.get((pg, tag),
+                                   PER_PAGE_PHOTO_H.get(pg, default_h))
+        if True:  # Always use the formula/overrides; no block fallback.
             ph_bot = min(ph_top + fph, bot - 5)
             photo = im.crop((X0, ph_top, X1, ph_bot))
             photo.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
