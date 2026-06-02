@@ -1585,19 +1585,6 @@ class _SearchToolsRow extends ConsumerWidget {
   // ⚙️ פילטרים — filter the live product results.
   void _openFilterSheet(BuildContext context, WidgetRef ref) {
     final imageOnly = ref.read(searchImageOnlyProvider);
-    final sysFilter = ref.read(catalogSystemFilterProvider);
-    Widget sysOpt(String label, WaterSystem? value) => ListTile(
-          leading: Icon(
-            value == sysFilter ? Icons.check : Icons.radio_button_unchecked,
-            color:
-                value == sysFilter ? BsTokens.brand : const Color(0xFF888888),
-          ),
-          title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
-          onTap: () {
-            ref.read(catalogSystemFilterProvider.notifier).state = value;
-            Navigator.pop(context);
-          },
-        );
     Widget opt(String label, bool value) => ListTile(
           leading: Icon(
             value == imageOnly ? Icons.check : Icons.radio_button_unchecked,
@@ -1618,11 +1605,6 @@ class _SearchToolsRow extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const _SheetTitle('מערכת'),
-            sysOpt('כל המערכות', null),
-            sysOpt('מים נקיים', WaterSystem.supply),
-            sysOpt('שפכים', WaterSystem.drainage),
-            const Divider(height: 1),
             const _SheetTitle('תמונה'),
             opt('הכל', false),
             opt('עם תמונה בלבד', true),
@@ -2259,6 +2241,13 @@ class _AllOverview extends ConsumerWidget {
     final favSkus = ref.watch(productFavoritesProvider);
     final systemFilter = ref.watch(catalogSystemFilterProvider);
     final catRows = _catRowsForSystem(systemFilter);
+    final smartCats = systemFilter == null
+        ? kSmartTreeCats
+        : kSmartTreeCats
+            .where((c) =>
+                filterSmartBySystem(smartProductsForCat(c), systemFilter)
+                    .isNotEmpty)
+            .toList();
     final favProducts = filterBySystem(
             kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).toList(),
             systemFilter)
@@ -2326,21 +2315,20 @@ class _AllOverview extends ConsumerWidget {
                     ),
                 ],
         ),
-        // עץ חכם
+        // עץ חכם — scoped to the active water system (Phase 2b).
         _OverviewBlock(
           title: 'עץ חכם',
-          count: kSmartTreeCats.length,
+          count: smartCats.length,
           onShowAll: () => go('עץ חכם'),
           isLast: true,
           children: [
-            for (var i = 0; i < kSmartTreeCats.length && i < 3; i++)
+            for (var i = 0; i < smartCats.length && i < 3; i++)
               _OverviewRow(
                 icon: Icons.account_tree_outlined,
                 label:
-                    '${kSmartTreeCats[i]} · ${smartProductsForCat(kSmartTreeCats[i]).length} מוצרים',
+                    '${smartCats[i]} · ${filterSmartBySystem(smartProductsForCat(smartCats[i]), systemFilter).length} מוצרים',
                 onTap: () {
-                  ref.read(smartTreeCatProvider.notifier).state =
-                      kSmartTreeCats[i];
+                  ref.read(smartTreeCatProvider.notifier).state = smartCats[i];
                   go('עץ חכם');
                 },
               ),
@@ -3470,7 +3458,15 @@ class _SmartTreeCatList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cats = kSmartTreeCats;
+    // Scope the smart tree to the active water system (Benzi #1, Phase 2b):
+    // keep only categories that still have an in-system product.
+    final system = ref.watch(catalogSystemFilterProvider);
+    final cats = system == null
+        ? kSmartTreeCats
+        : kSmartTreeCats
+            .where((c) =>
+                filterSmartBySystem(smartProductsForCat(c), system).isNotEmpty)
+            .toList();
     return Column(
       children: [
         Expanded(
@@ -3480,7 +3476,8 @@ class _SmartTreeCatList extends ConsumerWidget {
                 const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
             itemBuilder: (_, i) {
               final cat = cats[i];
-              final prods = smartProductsForCat(cat);
+              final prods =
+                  filterSmartBySystem(smartProductsForCat(cat), system);
               final count = prods.length;
               final desc = prods.map((p) => p.name).join(' · ');
               final emoji = _catEmojis[cat] ?? '📦';
@@ -3604,7 +3601,8 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
   Widget build(BuildContext context) {
     const green = Color(0xFF22C55E);
     final query = ref.watch(smartTreeQueryProvider).trim();
-    final all = smartProductsForCat(widget.cat);
+    final all = filterSmartBySystem(smartProductsForCat(widget.cat),
+        ref.watch(catalogSystemFilterProvider));
     final products = query.isEmpty
         ? all
         : all.where((p) => p.name.contains(query)).toList();

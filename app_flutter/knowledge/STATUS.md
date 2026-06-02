@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.70` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.71` (see `home_shell.dart`). Update on each user-visible change._
 _known-failing: 0 (gate 32 baseline — 0 כשלים מאומת 2026-06-01; שמות ב-knowledge/known_failing.txt)_
 
 ## Water-system division — option 2, through the finder (v5.69 — Benzi #1)
@@ -16,9 +16,12 @@ catalog + finder so neither back-imports the other. **User chose option 2**
 hidden) + tree-drill + search panel. **Filtered (Phase 2, v5.70):** קטגוריות +
 הכל overview (categories + favorites blocks) + מועדפים — categories via
 `_catRowsForSystem` (tree-node dominant, reuses `nodeHasSystem`), products via
-`filterBySystem`. **Phase 2b pending:** עץ חכם (SmartProduct uses semantic keys,
-not SKUs → needs a key→system map). **Phase 3:** remove redundant filter-sheet
-sysOpt. 1019/1019 green.
+`filterBySystem`. **Filtered (Phase 2b, v5.71):** עץ חכם — `filterSmartBySystem`
+maps each SmartProduct's brand SKUs back to the catalog (`smartProductSystems`);
+unresolvable products stay visible in both (R8 — don't hide on a guess). **Phase
+3 (v5.71):** the redundant `sysOpt` system selector was removed from the ⚙️
+filter sheet — system now comes only from departments + the scope bar (one source
+of truth). **Every browse section is now system-scoped.** 1023/1023 green.
 
 ## Catalog lens selector (v5.45 — data layer)
 A list-level view-axis control (OUTSIDE the product card) re-organises a

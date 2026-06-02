@@ -53,8 +53,10 @@ tab (or the bar's clear) resets all three providers → back to the grid.
 > הצדדים; שאר לפי דומיננטיות). **פאזה 1:** finder (groups ריקים מוסתרים) +
 > tree-drill + search. **פאזה 2 (v5.70):** קטגוריות + הכל + מועדפים —
 > `_catRowsForSystem` (קטגוריות לפי `nodeHasSystem` הדומיננטי) · `filterBySystem`
-> (מוצרים). **פאזה 2b ממתין:** עץ חכם (SmartProduct = מפתחות סמנטיים, לא SKU →
-> צריך מיפוי key→system). ⚠️ ה-sysOpt בגיליון ⚙️ פילטרים מיותר — הסרה בפאזה 3.
+> (מוצרים). **פאזה 2b (v5.71):** עץ חכם — `filterSmartBySystem`/`smartProductSystems`
+> ממפים את ה-SKU של מותגי ה-SmartProduct חזרה לקטלוג (לא-פתיר → נשאר בשני
+> הצדדים, R8). **פאזה 3 (v5.71):** בורר המערכת הכפול (`sysOpt`) הוסר מגיליון ⚙️
+> פילטרים — המערכת מגיעה רק מהמחלקות (source-of-truth אחד). **כל סקשני ה-browse מסוננים.**
 
 | Tool | Behavior | Status |
 |---|---|---|

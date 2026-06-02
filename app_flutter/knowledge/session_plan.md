@@ -27,11 +27,13 @@ catalog_screen מייבא finder_screen → finder לא יכול לייבא חז
 ### Phase 2 — שאר הסקשנים ✅ (v5.70)
 - קטגוריות + הכל (קטגוריות+מועדפים) + מועדפים → `_catRowsForSystem` + `filterBySystem`
 - screenshot verification ✅ (פאזה 1 + מסך מסונן); 1019 ירוק
-- **Phase 2b ⬜:** עץ חכם — SmartProduct = מפתחות סמנטיים (basinTrap/faucet), לא SKU;
-  צריך מיפוי key→system. נדחה (מודל-נתונים שונה, סיכון).
+- **Phase 2b ✅ (v5.71):** עץ חכם — `filterSmartBySystem` ממפה את ה-SKU של מותגי
+  SmartProduct חזרה לקטלוג (`smartProductSystems`); לא-פתיר → נשאר בשני הצדדים (R8).
+  3 בדיקות חדשות (identity · no-vanish · mapping-not-no-op). 1023 ירוק.
 
-### Phase 3 — ניקוי ⬜
-- הסרת sysOpt כפול מגיליון-הפילטרים
+### Phase 3 — ניקוי ✅ (v5.71)
+- בורר המערכת הכפול (`sysOpt`) הוסר מגיליון ⚙️ הפילטרים — המערכת מגיעה רק מהמחלקות
+  (source-of-truth אחד; bypass של ה-scope-bar נמנע). נשאר רק פילטר התמונה.
 
 ## החלטות-ברירת-מחדל (screenshot visual verification בכל פאזה)
 - תכנון חיבור (install studio) + חיפושים אחרונים = system-agnostic (כלי-תכנון / מחרוזות).

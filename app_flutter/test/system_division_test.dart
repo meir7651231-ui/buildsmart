@@ -1,6 +1,7 @@
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -113,6 +114,52 @@ void main() {
           reason: 'expected at least one supply-only top category');
       expect(kCatalogTree.any(drainOnly), isTrue,
           reason: 'expected at least one drainage-only top category');
+    });
+  });
+
+  group('smart-tree division (Phase 2b)', () {
+    test('null system → identity (same list, no filtering)', () {
+      for (final c in kSmartTreeCats) {
+        final all = smartProductsForCat(c);
+        expect(filterSmartBySystem(all, null), same(all));
+      }
+    });
+
+    test('every smart product stays reachable under supply ∪ drainage', () {
+      // Unresolvable products show in both; resolvable ones in their system(s).
+      // Either way none may vanish from BOTH when a system is selected.
+      for (final c in kSmartTreeCats) {
+        final all = smartProductsForCat(c);
+        final sup = filterSmartBySystem(all, WaterSystem.supply).toSet();
+        final dr = filterSmartBySystem(all, WaterSystem.drainage).toSet();
+        for (final p in all) {
+          expect(sup.contains(p) || dr.contains(p), isTrue,
+              reason: '${p.name} vanished from both systems');
+        }
+      }
+    });
+
+    test('brand-SKU mapping resolves for at least some smart products', () {
+      // Guards against the mapping silently becoming a no-op (then everything
+      // would be "unresolvable" → shown everywhere, i.e. no real filtering).
+      final resolved = kSmartTreeCats
+          .expand(smartProductsForCat)
+          .where((p) => smartProductSystems(p).isNotEmpty);
+      expect(resolved, isNotEmpty,
+          reason: 'no smart product mapped to a system — mapping is a no-op');
+    });
+
+    test('filter discriminates — supply and drainage pools genuinely differ',
+        () {
+      // Some smart products are exclusive to one system, so the two filtered
+      // pools must differ AND each be a strict subset — guards against the
+      // filter degrading into a pass-through (which would hide nothing).
+      final all = kSmartTreeCats.expand(smartProductsForCat).toList();
+      final sup = filterSmartBySystem(all, WaterSystem.supply);
+      final dr = filterSmartBySystem(all, WaterSystem.drainage);
+      expect(sup.length, isNot(equals(dr.length)));
+      expect(sup.length, lessThan(all.length));
+      expect(dr.length, lessThan(all.length));
     });
   });
 }

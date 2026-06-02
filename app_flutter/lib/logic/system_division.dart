@@ -2,6 +2,7 @@ import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/smart_tree.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Water-system division (Benzi #1) — the single source of truth for which
@@ -65,3 +66,37 @@ bool nodeHasSystem(CatalogNode node, WaterSystem system) {
   if (sup == 0 && dr == 0) return false;
   return (sup >= dr ? WaterSystem.supply : WaterSystem.drainage) == system;
 }
+
+/// Smart-tree (`עץ חכם`) products carry no spec of their own, so their system is
+/// inferred from their brand SKUs mapped back to the catalog. An empty result =
+/// no resolvable SKU → treated as system-agnostic (shown in both) rather than
+/// hidden on a guess, since the smart tree is fixture-heavy (R8 — no invention).
+Set<WaterSystem> smartProductSystems(SmartProduct sp) {
+  final out = <WaterSystem>{};
+  for (final b in sp.brands) {
+    final sku = b.sku;
+    if (sku == null) continue;
+    for (final p in kCatalogProducts) {
+      if (p.sku == sku) {
+        out.addAll(productDivisionSystems(p));
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+/// True if a smart-tree product belongs to [system]. Unresolvable products (no
+/// SKU match) stay visible in every system — we never hide on missing data.
+bool smartProductInSystem(SmartProduct sp, WaterSystem? system) {
+  if (system == null) return true;
+  final sys = smartProductSystems(sp);
+  return sys.isEmpty || sys.contains(system);
+}
+
+/// Pure: keep smart-tree products that belong to [system] (null → all).
+List<SmartProduct> filterSmartBySystem(
+        List<SmartProduct> list, WaterSystem? system) =>
+    system == null
+        ? list
+        : list.where((p) => smartProductInSystem(p, system)).toList();

@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.70 · 1.6.34 · 💧 חלוקת מערכת פאזה 2 — קטגוריות · הכל · מועדפים מסוננים גם הם (option 2)',
+                          'v5.71 · 1.6.34 · 💧 חלוקת מערכת — עץ חכם מסונן (פאזה 2b, מיפוי SKU) + בורר מערכת כפול הוסר מהפילטרים (פאזה 3)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
