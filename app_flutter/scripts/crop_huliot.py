@@ -73,10 +73,19 @@ CROPS_27 = {
 # Photo column (left side of band) + tuning constants
 X0, X1 = 12, 238
 PHOTO_TOP_GAP = 22         # px gap below the green header line
-PHOTO_BOTTOM_FRAC = 0.43   # photo ends at 43% of band (avoids diagram lip)
-SPEC_TOP_FRAC = 0.45       # spec diagram starts at 45% of band
-SPEC_BOTTOM_FRAC = 0.97    # spec diagram ends at 97% of band
-MAX_PHOTO_H = 165          # cap so tiny bands don't crop a giant rectangle
+PHOTO_SAFETY_PAD = 6       # safety margin between detected photo-bottom and crop
+SPEC_TOP_PAD = 8           # gap between photo bottom and spec top
+SPEC_BOTTOM_PAD = 18       # leave page footer / sku row out of the spec
+MIN_PHOTO_H = 80           # bands narrower than this — keep up to MIN_PHOTO_H
+MAX_PHOTO_H = 175          # cap so a tall band doesn't grab the diagram below
+
+# Pages where the photo↔diagram gap is too small (5-8 px) for block detection
+# to reliably split. We fall back to a fixed photo height + spec at a fixed
+# offset, which is exact for these fitting-only pages (no AQUA SLIM/render).
+FIXED_HEIGHT_PAGES = {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+                      33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43}
+FIXED_PHOTO_H = 130        # photo height in pixels for FIXED_HEIGHT_PAGES
+FIXED_SPEC_GAP = 12        # gap from photo bottom to spec top (FIXED pages)
 
 
 def find_green_lines(im, min_width_frac=0.15):
@@ -155,6 +164,117 @@ def is_mostly_white(crop, min_ink_pixels=120):
     return True
 
 
+def row_has_ink(im, x0, x1, y, threshold=0.015):
+    """True if row y contains at least `threshold` fraction of non-white pixels.
+
+    Used to detect a content row vs an empty/whitespace row. The threshold is
+    low (1.5%) because diagrams have only thin lines."""
+    px = im.load()
+    n = ink = 0
+    for x in range(x0, x1, 3):
+        r, g, b = px[x, y]
+        n += 1
+        if r < 235 or g < 235 or b < 235:
+            ink += 1
+    return (ink / n) >= threshold
+
+
+def find_content_blocks(im, x0, x1, y0, y1, gap_threshold=8):
+    """Return [(block_top, block_bottom), ...] — vertically separated runs of
+    content rows. Two blocks are separated when ≥`gap_threshold` consecutive
+    whitespace rows sit between them.
+
+    NOTE: the previous "merge nearby blocks" hack was wrong — in catalog page
+    12 the photo↔diagram gap is only ~10px, while in pages with internal
+    photo white-space the inside gap is ~6-7px. So we keep gap_threshold
+    moderate (8) and use bbox-trim later (`trim_block_y`) to remove the
+    diagram lip that sometimes leaks into the photo block."""
+    blocks = []
+    in_block = False
+    block_start = 0
+    empty_run = 0
+    for y in range(y0, y1):
+        if row_has_ink(im, x0, x1, y):
+            if not in_block:
+                in_block = True
+                block_start = y
+            empty_run = 0
+        else:
+            if in_block:
+                empty_run += 1
+                if empty_run >= gap_threshold:
+                    blocks.append((block_start, y - empty_run))
+                    in_block = False
+    if in_block:
+        blocks.append((block_start, y1 - 1))
+    return blocks
+
+
+def trim_block_y(im, x0, x1, y_top, y_bot):
+    """Tighten a content block's vertical bounds by stripping leading/trailing
+    rows that have only minimal ink (<1.5%). Removes the diagram-leakage tail
+    that sometimes attaches to the bottom of a photo block."""
+    while y_top < y_bot and not row_has_ink(im, x0, x1, y_top, 0.015):
+        y_top += 1
+    while y_bot > y_top and not row_has_ink(im, x0, x1, y_bot, 0.015):
+        y_bot -= 1
+    return y_top, y_bot
+
+
+def split_photo_and_diagram(im, x0, x1, block_top, block_bot):
+    """When a single content block is BOTH photo + diagram fused, split it.
+
+    Strategy 1: look for an internal low-ink stretch (<5% pixels) ≥4 rows.
+    Strategy 2 (fallback): use the longest internal LOWEST-ink window —
+    diagrams have higher AVERAGE row-ink than photos (per pixel), but the
+    transition row always has the local-minimum density.
+
+    Returns (photo_bot, diagram_top) — or (None, None) when no fused-split
+    is needed (block too short to be photo+diagram)."""
+    block_h = block_bot - block_top
+    if block_h < 160:
+        return (None, None)
+
+    # Strategy 1: longest stretch of low-density rows
+    seam_y = None
+    seam_len = 0
+    cur_start = None
+    scan_end = min(block_top + 230, block_bot - 30)
+    for y in range(block_top + 60, scan_end):
+        if not row_has_ink(im, x0, x1, y, 0.04):
+            if cur_start is None:
+                cur_start = y
+        else:
+            if cur_start is not None:
+                run = y - cur_start
+                if run >= 4 and run > seam_len:
+                    seam_len = run
+                    seam_y = cur_start + run // 2
+                cur_start = None
+    if cur_start is not None:
+        run = scan_end - cur_start
+        if run >= 4 and run > seam_len:
+            seam_len = run
+            seam_y = cur_start + run // 2
+
+    if seam_y is not None:
+        return (seam_y - seam_len // 2 - 2, seam_y + seam_len // 2 + 2)
+
+    # Strategy 2: pick the row with absolute-lowest ink density in the
+    # candidate seam zone (rows 100-200 from block_top). The photo+diagram
+    # transition always dips here even when the gap is only 1-2 white rows.
+    candidates = []
+    for y in range(block_top + 100, min(block_top + 200, block_bot - 50)):
+        d = sum(1 for x in range(x0, x1, 3)
+                if any(c < 235 for c in im.getpixel((x, y))[:3]))
+        candidates.append((d, y))
+    if not candidates:
+        return (None, None)
+    candidates.sort()  # ascending by ink density
+    seam_y = candidates[0][1]
+    return (seam_y - 3, seam_y + 3)
+
+
 def crop_page(pg, tags):
     src = f'{PAGES}/page_{pg:02d}.jpg'
     im = Image.open(src).convert('RGB')
@@ -164,25 +284,55 @@ def crop_page(pg, tags):
     bottoms = tops[1:] + [H - 50]
     photo_count = spec_count = 0
     for tag, top, bot in zip(tags, tops, bottoms):
-        band_h = bot - top
-        # Photo box
-        ph_top = top + PHOTO_TOP_GAP
-        ph_bot = top + min(int(band_h * PHOTO_BOTTOM_FRAC), MAX_PHOTO_H + PHOTO_TOP_GAP)
-        # safety: never spill past band bottom
-        ph_bot = min(ph_bot, bot - 5)
+        # Fixed-height pages: pages where block detection struggles because
+        # photo↔diagram gap is too small. Use a fixed photo height anchored
+        # below the green header line; the spec sits right under it.
+        if pg in FIXED_HEIGHT_PAGES:
+            ph_top = top + PHOTO_TOP_GAP
+            ph_bot = min(ph_top + FIXED_PHOTO_H, bot - 5)
+            photo = im.crop((X0, ph_top, X1, ph_bot))
+            photo.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
+            photo_count += 1
+            sp_top = ph_bot + FIXED_SPEC_GAP
+            sp_bot = bot - SPEC_BOTTOM_PAD
+            if sp_bot - sp_top >= 40:
+                spec = im.crop((X0, sp_top, X1, sp_bot))
+                if not is_mostly_white(spec):
+                    spec.save(f'{OUT}/spec_sml_p{pg:02d}_{tag}.jpg', quality=85)
+                    spec_count += 1
+            continue
+        blocks = find_content_blocks(
+            im, X0, X1, top + PHOTO_TOP_GAP, bot - SPEC_BOTTOM_PAD)
+        if not blocks:
+            continue
+        # If the first block is suspiciously tall (>160 px), try to split it —
+        # might be a photo+diagram fused by a too-small internal whitespace
+        # (e.g. page 12 / page 13 where the gap is ~10px).
+        b_top, b_bot = blocks[0]
+        if b_bot - b_top > 160 and len(blocks) == 1:
+            split_photo_bot, split_diag_top = split_photo_and_diagram(
+                im, X0, X1, b_top, b_bot)
+            if split_photo_bot is not None:
+                # rewrite the block list as if it was always 2 blocks
+                blocks = [(b_top, split_photo_bot), (split_diag_top, b_bot)]
+                b_top, b_bot = blocks[0]
+        # Photo from block 0
+        ph_top, ph_bot = trim_block_y(im, X0, X1, b_top, b_bot)
+        ph_top = max(ph_top - 2, top + PHOTO_TOP_GAP)
+        ph_bot = min(ph_bot + 2, bot - 5)
+        if ph_bot - ph_top < MIN_PHOTO_H:
+            ph_bot = min(ph_top + MIN_PHOTO_H, bot - 5)
         photo = im.crop((X0, ph_top, X1, ph_bot))
         photo.save(f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
         photo_count += 1
-        # Spec box (skip if blank)
-        sp_top = top + int(band_h * SPEC_TOP_FRAC)
-        sp_bot = top + int(band_h * SPEC_BOTTOM_FRAC)
-        if sp_bot - sp_top < 40:
-            continue
-        spec = im.crop((X0, sp_top, X1, sp_bot))
-        # Decide: keep spec only if it has ink (diagram pixels), drop if blank.
-        if not is_mostly_white(spec):
-            spec.save(f'{OUT}/spec_sml_p{pg:02d}_{tag}.jpg', quality=85)
-            spec_count += 1
+        # Diagram from block 1
+        if len(blocks) >= 2:
+            d_top, d_bot = trim_block_y(im, X0, X1, blocks[1][0], blocks[1][1])
+            spec = im.crop((X0, max(d_top - 2, ph_bot + SPEC_TOP_PAD),
+                            X1, min(d_bot + 4, bot - SPEC_BOTTOM_PAD)))
+            if not is_mostly_white(spec):
+                spec.save(f'{OUT}/spec_sml_p{pg:02d}_{tag}.jpg', quality=85)
+                spec_count += 1
     return photo_count, spec_count
 
 

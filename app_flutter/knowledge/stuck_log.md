@@ -1132,3 +1132,31 @@ nameSchemeNew של brand x פוטנציאלי שיתווסף לרוטינג קי
 מהירה: `curl -sI $kImageBaseUrl/<brand>/products/<sample>.jpg | head -1`
 חייב להחזיר 200 לפני שינוי routing שמפנה אליו. אחרת — להישאר ב-page
 fallback או להעלות תחילה.
+
+---
+
+## 2026-06-02 — חזר ל-Huliot crops: claimed-100% ללא visual verify
+
+### א — הבעיה
+ה-script `scripts/crop_huliot.py` נכתב לחתוך 89 photo + 83 spec crops
+מעמודי-קטלוג של Huliot. ה-tests עברו (1041/1041, פאת קבצים על דיסק).
+הצהרתי "P3 100% בוצע". המשתמש בדק והראה שcontact-sheet מציג רוב photos
+שלוכדים גם דיאגרמה תחתון (band-equal calculation כשל — bands באמת לא
+שווים בקטלוג כי דיאגרמות גדלות עם complexity של fittings). זה ה**אותו
+לקח** של CARRY_FORWARD #2 (Visual verification חובה אחרי UI change), פשוט
+ב-domain חדש (asset generation).
+
+### ב — הפתרון
+תיקון 2-שלבי:
+1. crop_huliot.py עבר ל-band-tops adaptive (green-line detection),
+   block detection (photo vs diagram), ו-fixed-height fallback ל-pages
+   הproblematic (12-25, 33-43 — fittings עם photo+diagram fused).
+2. תיעוד contact-sheet visual verify הוסף ל-CARRY_FORWARD #6 + שער
+   pre-commit חדש (113) שדורש contact-sheet evidence כשcrop script מודיפיק.
+
+### ג — כלל המניעה (יישום להבא)
+ANTIPATTERN: "tests pass + sampled-once → asset is good"
+RULE: asset-generation script (crop/render/composite) → לפני commit-of-done
+חייב: (א) להריץ את ה-script, (ב) ליצור contact-sheet שמרכז את כל הoutputs,
+(ג) לקרוא אותו עם Read tool ולסרוק עיני, (ד) להחליט per-asset או per-row אם
+תקין, (ה) רק אז להצהיר "done". זה ב-CARRY_FORWARD #6.

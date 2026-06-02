@@ -17,6 +17,16 @@
 
 5. **Re-fetch origin לפני commit.** sessions מקבילים דוחפים. רצף: code → test → `git fetch` → אם זז: rebase → ואז commit.
 
+6. **Asset-generation = visual contact-sheet verification חובה לפני "done".**
+   Unit-tests (file-on-disk, path-mapping, count) **לא** מאמתים שהcontent עצמו
+   נכון. כל run של crop/render/composite script דורש:
+   (א) ליצור contact-sheet שמרכז את כל הoutputs בפריסה ניתנת-לסריקה,
+   (ב) לקרוא אותו עיני (Read tool על הקובץ — לראות את כל הasset),
+   (ג) להחליט "כל אסט תקין" או "X% פגום" לפני אכרזת "100%".
+   חזר ב-Huliot crops (2026-06-02): הסתכלתי על דוגמה בודדת + tests עברו →
+   הצהרתי "100%" → 80% מהcrops לוכדים גם דיאגרמה. **קונדנציה כעת: אם אסט
+   נוצר ע"י script → לפני commit-of-done, contact-sheet + visual verify חובה.**
+
 ---
 
 ## 🧪 Testing patterns

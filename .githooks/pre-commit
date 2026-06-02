@@ -805,6 +805,19 @@ if [[ -f "knowledge/session_plan.md" ]] && grep -q "Audit log\|Audit Log" knowle
     fi
 fi
 
+# שער 113: asset-generation script שונה → חייב contact-sheet evidence
+# או רשומה מפורשת ב-stuck_log/CARRY_FORWARD שמתעדת visual verification.
+# רקע: ב-2026-06-02 crop_huliot.py שונה ו"100% done" הוצהר על-סמך unit-tests
+# בלבד; visual verify הראה ש-80% מהcrops פגומים. שער זה אוכף את הלקח
+# (CARRY_FORWARD #6).
+STAGED_CROP=$(git diff --cached --name-only | grep -E "scripts/crop_.*\.py$|scripts/.*render.*\.py$" | head -1)
+if [[ -n "$STAGED_CROP" ]]; then
+    STAGED_CARRY=$(git diff --cached --name-only | grep -E "knowledge/(CARRY_FORWARD|stuck_log)\.md$" | head -1)
+    if [[ -z "$STAGED_CARRY" ]]; then
+        warn "113" "crop/render script שונה — תעד visual verify ב-stuck_log/CARRY_FORWARD" "ראה CARRY_FORWARD #6: asset-generation דורש contact-sheet"
+    fi
+fi
+
 # שער 100: סיכום
 echo ""
 echo "══════════════════════════════════════════════"
