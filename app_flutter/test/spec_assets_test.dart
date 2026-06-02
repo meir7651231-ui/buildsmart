@@ -599,6 +599,30 @@ void main() {
   // Excludes families that genuinely lack these in the source catalog:
   //   - kSmlAccessories (umbrella — many pages, varied table shapes)
   //   - kSmlAquaSlim (page 27 — different table layout, no pack-icons)
+  // §17.1.b-Huliot — no orphan crops. Every sml_p{NN}_{tag}.jpg under
+  // products/ must be referenced by at least one Huliot product via
+  // _huliotImageFor. P5: removed sml_p24_b (אטם מעביר — table-only, reuses
+  // _p(24,'a')) + sml_p25_b (מצרה ברזל-פלסטיק — reuses _p(18,'b')).
+  // Catches future drift: a crop generated but not routed = dead asset.
+  test('§17.1.b-Huliot no orphan crops (every sml_p*.jpg is referenced)', () {
+    final referenced = <String>{};
+    for (final p in kHuliotCatalog) {
+      final a = p.imageAsset;
+      if (a != null) referenced.add(a.split('/').last);
+    }
+    final dir = Directory('assets/huliot_smartlock/products');
+    final orphans = dir
+        .listSync()
+        .whereType<File>()
+        .map((f) => f.path.split('/').last)
+        .where((n) => n.startsWith('sml_p') && n.endsWith('.jpg'))
+        .where((n) => !referenced.contains(n))
+        .toList();
+    expect(orphans, isEmpty,
+        reason: 'unreferenced crop files (delete or wire them):\n'
+            '${orphans.join('\n')}');
+  });
+
   test('§22.J-Huliot reference product per family carries יח׳/ארגז + יח׳/משטח',
       () {
     const exempt = {kSmlAccessories, kSmlAquaSlim};

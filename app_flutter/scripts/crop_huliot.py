@@ -22,8 +22,12 @@ SECTIONS = {
   21: ['a','b','c'],            # drain closed 80-50 / 140-50 / 245-50
   22: ['a','b'],               # drain open 140 / 245
   23: ['a','b'],               # kettle drain closed / open
-  24: ['a','b','c','d'],        # joker seal / transfer seal / joker nut / plug
-  25: ['a','b','c'],            # SmartLock nut / reducer iron / iron nut
+  24: ['a','c','d'],            # joker seal (a) · joker nut (c) · plug (d) — 24_b
+                                #   "אטם מעביר" is table-only (no photo); routing
+                                #   reuses 24_a (shared seal). P5 removed unused crop.
+  25: ['a','c'],                # SmartLock nut (a) · iron nut (c) — 25_b "מצרה
+                                #   צד אחד חלק חיבור ברזל ופלסטיק" is table-only;
+                                #   routing reuses 18_b (reducer). P5 removed crop.
   28: ['a','b','c','d'],        # raise square / Top Floor / cylindrical / temp round
   29: ['a','b','c','d'],        # round raised / fixed round / sq ext / sq int
   30: ['a','b','c','d'],        # grid raised / nickel / round / square

@@ -111,6 +111,9 @@ String? _huliotImageFor(int page, String nameHe, String categoryHe) {
       if (has('פנימי')) return _p(29, 'd');
       return _p(29, 'a');
     case 30: // grid raised (a) · nickel (b) · round (c) · square (d)
+      // "מוגבהת" must be checked BEFORE "עגולה" — "רשת מוגבהת עגולה" carries
+      // both, but the raised variant has its own dedicated photo (a).
+      if (has('מוגבהת')) return _p(30, 'a');
       if (has('ניקל')) return _p(30, 'b');
       if (has('רבועה')) return _p(30, 'd');
       if (has('עגולה')) return _p(30, 'c');
@@ -141,8 +144,10 @@ String? _huliotImageFor(int page, String nameHe, String categoryHe) {
       if (has('ארוך')) return _p(39, 'b');
       return _p(39, 'a');
     case 40: // siphon kit (a) · slip pipe (b) · inlet extension (c)
-      if (has('זחיח')) return _p(40, 'b');
+      // "מאריך" must be checked BEFORE "זחיח" — "מאריך למבוא זחיח" carries
+      // both, but it's the extension (c), not the bare slip pipe (b).
       if (has('מאריך')) return _p(40, 'c');
+      if (has('זחיח')) return _p(40, 'b');
       return _p(40, 'a');
     case 41: // long inlet (a) · inlet+AC (b) · american adapter (c)
       if (has('מזגן')) return _p(41, 'b');

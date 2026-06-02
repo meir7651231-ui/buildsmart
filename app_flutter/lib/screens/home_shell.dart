@@ -395,7 +395,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.72 · 1.6.38 · 📋 חוליות P9 — תיעוד: PARITY+COVERAGE עודכנו ל-brand #3 (1,879 מוצרים = Lipskey 935 + Polyroll 774 + Huliot 170)',
+                          'v5.73 · 1.6.39 · 🧹 חוליות P5 — orphan-guard §17.1.b חשף 2 בגי-routing: עמ\' 30 "מוגבהת" קודם ל"עגולה" · עמ\' 40 "מאריך" קודם ל"זחיח"',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

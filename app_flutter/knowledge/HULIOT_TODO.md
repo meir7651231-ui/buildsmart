@@ -39,10 +39,11 @@
 - כרגע page image. צריך crops ל-2 ה-renders (Aqua Slim 330 / 700) +
   אולי לפרק את 10 חלקי-המערכת מעמ' 26 (רשת/אטם/מחסום פנימי/בסיס/...).
 
-### P5 — table-only rows
-- `sml_p24_b` (אטם מעביר SL) + `sml_p25_b` (מצרה צד אחד חלק) = בנדים ריקים
-  (אין תצלום בקטלוג). כרגע ממחזרים crop אח/מצמד. להחליט: לקבל, או לחתוך
-  תצלום-אח מדויק יותר.
+### P5 — table-only rows ✅ בוצע (v5.73)
+- **בוצע:** נמחקו 2 הקבצים הלא-מיושמים (`24_b`, `25_b`). `crop_huliot.py`
+  עודכן (SECTIONS לא כולל אותם יותר). 88→86 crops.
+- **Bonus:** ה-orphan-guard החדש §17.1.b חשף 2 בגי-routing אמיתיים בעמ' 30+40
+  שתוקנו (מילות-מפתח לא-ספציפיות נבלעו ע"י כלליות). mutation_verify ✓.
 
 ### P6 — brand wiring בפונקציות משותפות ✅ בוצע (v5.70)
 - **בוצע:** finderGroupFor + engineeringSpecFor + complianceTriggersFor + complianceWhyHe קיבלו ענף חוליות (verbatim עמ' 4/6). 4 בדיקות P6 + mutation_verify.

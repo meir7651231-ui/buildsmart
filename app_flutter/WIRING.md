@@ -316,6 +316,19 @@ rather than pixel rendering.
   Guards: card_score_test (spec→breadth≥10; composite==breadth+depth) +
   polyroll_score_test (pre-spec baseline ≤50) + mutation_log.
 
+## Huliot SmartLock — P5 orphan-crop cleanup + 2 routing fixes (v5.73 — 2026-06-02)
+- **P5 בוצע:** נמחקו `sml_p24_b.jpg` + `sml_p25_b.jpg` (table-only rows שלא
+  היו ב-routing). `scripts/crop_huliot.py` SECTIONS עודכן (24:`['a','c','d']`,
+  25:`['a','c']`). 88→86 crops.
+- **Guard חדש §17.1.b-Huliot:** "no orphan crops" — סורק
+  `assets/huliot_smartlock/products/sml_p*.jpg`, וכל קובץ חייב להיות referenced
+  ע"י לפחות מוצר Huliot אחד דרך `_huliotImageFor`. **גילה 2 בגי-routing נוספים:**
+  - **עמ' 30:** "רשת מוגבהת עגולה בז'/אפור" נפלה ל-`_p(30,'c')` (עגולה) במקום
+    `_p(30,'a')` (raised). תוקן: `מוגבהת` נבדק לפני `עגולה`.
+  - **עמ' 40:** "מאריך למבוא זחיח" נפלה ל-`_p(40,'b')` (slip pipe) במקום
+    `_p(40,'c')` (extension). תוקן: `מאריך` נבדק לפני `זחיח`.
+- mutation_verify על תיקון עמ' 30 (red→green). 1015 tests pass.
+
 ## Huliot SmartLock — P9 תיעוד PARITY+COVERAGE (v5.72 — 2026-06-02)
 - `knowledge/PARITY.md` סעיף H · קטלוג: השורה הישנה "קטלוג 935" → "קטלוג
   3-brand (1,879 מוצרים)"; נוסף sub-table "Brand catalogs" עם 3 השורות
