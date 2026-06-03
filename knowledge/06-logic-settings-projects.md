@@ -43,3 +43,18 @@
 ## סטטוס-הזמנה (7632–7700)
 - `ORDER_STATUS` (7632) — 4 סטטוסי-תצוגה: `pending`(ממתינה) · `processing`(בהכנה) · `shipped`(בדרך) · `delivered`(נמסרה) + CSS-cls.
 - **`resolveStatus(o)`** (7641) — מנרמל `status` (הזמנות-חדשות) **ו**-`stage` (seed: new/preparing/ready/transit/delivered) ל-4 הסטטוסים. `fmtOrderDate` · **`orderTotal`** · `orderItemCount` · `syncStatusFromSystem`.
+
+---
+
+## 🔄 Preact (`app/src/components/menu/submenu-settings.tsx`) — דלתא (הגדרות = dial, R3/R9)
+> 1461 ש׳ — תרגום `renderSettings` (sheet) ל-**עץ-dial**. state ב-`app-store.ts` (settingsLevel/group/path).
+
+⬆️ **שודרג:**
+- **8 קבוצות (sheet) → `SETTINGS_ROWS` 9 קבוצות (dial):** account · notifications · display · accessibility · security · support · delivery · region · about (+reset). אותן קבוצות, כ-dial-rows (R3).
+- **`SETTINGS_SUB`** = `Record<SettingsGroupId, Node[]>` — עץ-dial עמוק לכל קבוצה (`Node={label, children?}`). `walkSettings` מנווט; רנדרים `SettingsTopSubmenu`/`SettingsSubmenu`/`SettingsTreeSubmenu`.
+- **`SETTINGS_LABELS` → `LEAF_BINDINGS`** = `Record<string, Binding>` — ~60 עלים מחווטים (toggle/select/link → אפקט אמיתי על `appSettings`).
+- profile → **`PROFILE_TREE`** (עץ כרטיס-קבלן/דרגות/הישגים כ-dial), מול מסך-הפרופיל.
+
+➕ **נוסף:** **R9 — עריכת-leaf inline** (`editingLeafKey` → `.dial__input` מחליף label). אין באב-הטיפוס (שם `editAccountField`=prompt/sheet).
+
+➖ **הוחסר:** ה-`settingsOverlay` (sheet) — הכל dial. (מידע/גרסה/תנאי/פרטיות נשמרו כעלים.)
