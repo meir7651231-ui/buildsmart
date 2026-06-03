@@ -316,5 +316,5 @@ cart/orders→cart, catnav→catalog).
 - `FinderScreen` (מאתר לא-טכני) · `suppliers/lipskey_*` (מסכי-מותג) · **שיחות** (`chats_screen` **1437ש׳**, 6 threads + auto-reply + ארכוב) · **התראות** (**1081ש׳**, קיבוץ-run≥3 + סינון + swipe) · **חנות** (**1500+ש׳**, סל + checkout VAT-18% + הזמנות + שירותים) · **4 מסכי-הגדרות** (~40 שדות כ"א, persisted).
 
 ➖ **מה כן toast 'בבנייה':** ה-dial-overlays (menu-leaves · פרסונות store/courier/worker/manager = leaves שמציגים toast) · חלק ממצבי-מצלמה · כפתורי-משנה. אבל ה-**ליבה אמיתית ופועלת** (מחלקות→קטלוג→install-studio→סל · chats · notifications · settings).
-🔧 **מול פרוטוטייפ/Preact:** **לא** port של 5-הפרסונות — אפליקציית-אינסטלציה אמיתית. install-studio/chats/notifications = **חדשים לגמרי**. ~92% roadmap · 155 בדיקות · checkout בסיסי (mock).
+🔧 **מול פרוטוטייפ/Preact:** **לא** port של 5-הפרסונות — אפליקציית-אינסטלציה אמיתית. install-studio/chats/notifications = **חדשים לגמרי**. ~92% roadmap · 1,023 בדיקות (155 קבצים) · checkout בסיסי (mock).
 ⚠️ **drift:** ה-README של app_flutter מתאר Phase-0/5-FAB מיושן; הקוד = 4-tab בוגר. הקוד קובע.

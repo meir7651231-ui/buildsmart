@@ -57,5 +57,5 @@
 ---
 
 ## 📱 Flutter (`app_flutter/lib/data/`) — דלתא
-⭐ נכתב-מחדש: `catalog_tree.dart` (עץ-ניווט ~210 leaves) · `variant_families.dart` (זיהוי משפחות size/color/model/subtype) · `chip_hierarchy.dart` · `fuzzy_search.dart` · `lipskey_smart_data.dart` (accessories/stages per-SKU) · `menu_trees.dart` (`kHomeTree`/`kCartTree`/**`kFinanceHub`**/`projectsTree`).
+⭐ נכתב-מחדש: `catalog_tree.dart` (עץ-ניווט **153 nodes / ~108 leaves**, אומת — לא ~210) · `variant_families.dart` (זיהוי משפחות size/color/model/subtype) · `chip_hierarchy.dart` · `fuzzy_search.dart` · `lipskey_smart_data.dart` (accessories/stages per-SKU) · `menu_trees.dart` (`kHomeTree`/`kCartTree`/**`kFinanceHub`**/`projectsTree`).
 🔧 **מול אב-הטיפוס:** VARIANTS → `variant_families` (computed) · SIZES → **`_size_norm.dart`** (`SizeFamily`/`SizeToken` — ראה SIZE_FILTER-protocol, דוח 22) · TOOLS → `install_kit.dart` (לוגיקה, לא bundles). הקטלוג = **1,877 מוצרים** (935+772+170, אומת שורה-שורה — דוח 03), לא ה-`pl_`/SIZES/TOOLS של הפרוטוטייפ.

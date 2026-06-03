@@ -50,7 +50,7 @@ Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dar
 - **`system_division.dart` (103ש׳):** supply(מים-נקיים)/drainage(שפכים) · VerifiedSpec.endSystems מנצח · פולירול→supply · אחרת→drainage · **fixtures (אסלות/מקלחות-ואמבטיות/גופי-תברואה)→שני-הצדדים** · `nodeHasSystem` (ספירת-דומיננטיות) · **SSOT-חוצה-מסכים: מונע cycle `catalog`↔`finder`** (בנצי #1).
 
 ## G. Launch-readiness (`LAUNCH_READINESS.md`)
-- **קוד בריא:** ~92% roadmap · 0 analyze-errors · 948-tests · SSOT.
+- **קוד בריא:** ~92% roadmap · 0 analyze-errors · **1,023 בדיקות** (953 test+70 widget · 155 קבצים · 16,441ש׳, אומת-עצמי) · SSOT.
 - **Web/PWA 🟢 GO** (אחרי asset-opt 101MB→WebP). **iOS 🔴 NO-GO** (Info.plist camera/mic usage-strings + signing-team). **Android 🔴 NO-GO** (release-keystore + Play-account).
 - **P0 = store-config (לא קוד).** P1: asset-opt · status-line · הסרת-deps-לא-בשימוש (go_router?) · נעילת-theme.light · exclude-test_harness-מ-release · חיווט-search/menu-dials (5-FAB או BS-only) · global-error-handler. **חסום:** pricing(`brandPrice=0`)/ratings/AI/push/telephony.
 - **`LAUNCH_PACKAGE/`:** aab חתום 68MB · store-listing he/en · privacy-policy · data-safety · `SEND_TO_GOOGLE.md` runbook.

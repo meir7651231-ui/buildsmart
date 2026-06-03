@@ -34,7 +34,7 @@
 | אבטחה / RBAC (I) | ✅ Category-I | 🟡 23-leaves | 🟡 privacy/2FA-בהגדרות-אמיתי; אין RBAC-matrix | 17 |
 | שירות / chatbot (J) | ✅ Category-J | 🟡 16-leaves | 🟡 chatbot=chat-thread אמיתי; שאר toast | 17 |
 | סורק-תוכניות / סדר-הרכבה | ✅ | ➖ | 🔀 הוחלף ב-Install-Studio | 08 |
-| **self-test** | ✅ 350-registry | 🟡 21-button | ✅ **155 בדיקות + `test_harness`** (11 suites) | 11 |
+| **self-test** | ✅ 350-registry | 🟡 21-button | ✅ **1,023 בדיקות (155 קבצים) + `test_harness`** (11 suites) | 11 |
 | ⭐ **עולם-פרוטוקולים** (gates/hooks/agents) | ➖ | 🟡 Inspector (43 INSP) | ✅ **116 שערים · 4 שכבות · 6 סוכנים** | 21/22 |
 | PWA / offline | ✅ SW (v107) | ✅ Workbox | 🟡 flutter-web (מבטל-SW, אין-offline) | 17/20 |
 | persistence | localStorage | localStorage | ✅ **shared_preferences** | 06/10 |
@@ -46,7 +46,7 @@
 ## תובנת-העל (מתוקנת מהמציאות)
 - **אב-טיפוס** = ה-100% breadth — כל פיצ׳ר קיים (גם כהדמיה). מקור-האמת ל"מה".
 - **Preact** = **dial-shell** שתרגם את **כל התוכן** ל-dial-leaves verbatim (R6); ה-hubs ported כ-leaves אך **המימוש = drill/toast**, לא flows.
-- **Flutter = אפליקציית-אינסטלציה אמיתית, לא port.** קטלוג-מותגים אמיתי (1,877: Lipskey 935/Polyroll 772/Huliot 170) · **Install-Studio הנדסי** (Dijkstra/BOM/pressure-drop — היחיד **עמוק מהפרוטוטייפ**) · chat+notifications כטאבים-מלאים · 155 בדיקות · **116-שערי-פרוטוקול**. ~92% roadmap, קוד מוכן-להשקה (חוסמים=store-config).
+- **Flutter = אפליקציית-אינסטלציה אמיתית, לא port.** קטלוג-מותגים אמיתי (1,877: Lipskey 935/Polyroll 772/Huliot 170) · **Install-Studio הנדסי** (Dijkstra/BOM/pressure-drop — היחיד **עמוק מהפרוטוטייפ**) · chat+notifications כטאבים-מלאים · 1,023 בדיקות · **116-שערי-פרוטוקול**. ~92% roadmap, קוד מוכן-להשקה (חוסמים=store-config).
 - **רק ב-Flutter:** native · device-APIs אמיתיים · **Install-Studio + VerifiedSpec-engine** · chat+notifications-טאבים · readiness-score · עולם-116-שערים.
 - **רק באב-הטיפוס (כ-flows מלאים):** SYS_ORDERS חוצה-פרסונות · checkout-engine מלא · B2B/AI/site/rewards פונקציונליים · דשבורדי-פרסונה מלאים (ב-Flutter = BS-dial toast-stubs).
 - ⚠️ **drift מתועד (הקוד קובע, R6):** ה-KB אומר tab0=קטלוג/teal — הקוד אומר **tab0=מחלקות/כתום**. ✅ ספירת-מוצרים: הקוד **1,877** ≈ "~1,879" של ה-KB → **תואם** (ה-"1,337" שנכתב קודם = טעות, תוקן — דוח 03).
