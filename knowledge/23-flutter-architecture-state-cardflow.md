@@ -8,8 +8,8 @@ Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dar
 ## B. SCHEMA — 3 עמודי-נתונים (SKU = מפתח-העל)
 1. **`kCatalogProducts`** (1,337 · `LipskeyCatalogProduct`) — קטלוג מאוחד (Lipskey 255 + Polyroll 779 + Huliot 170 + HW-סינתטי 133).
 2. **`kVerifiedSpecs`** (808+ · `VerifiedSpec`{sku,material,ends[ConnectorEnd],pressureRating,maxTempC,systemOverride}) — **מנוע-החיבוריות**. enums EndType/WaterSystem.
-3. **`kSmartProducts`** (~81 · `SmartProduct`{key,name,cat,brands[],acc[],stages[]}) — כרטיסים-מובחרים. **SKU על ה-brand.**
-- **גשר:** forward `catalogProductForBrand(brand)` · reverse `smartProductForSku(sku)`. round-trip שמור (`smartproduct_contract_test`, 307/365 brands-עם-SKU).
+3. **`kSmartProducts`** (**82** · `SmartProduct`{key,name,emoji,cat,brands[`SmartBrand`],acc[`SmartAcc`],diagramTitle,stages[`SmartStage`]}) — כרטיסים-מובחרים. **SKU על ה-`SmartBrand`** (`{name,tag,price?,rec,sku?,imageAsset?}`; חלק גנריים-ללא-SKU). getters: `recBrand`(firstWhere rec→[0]) · `mustCount`. `SmartStage` = שלבי-דיאגרמה verbatim מ-prototype DIAGRAMS (3–4/מוצר). `SmartAcc`{name,emoji,why,**must**,price?,sku?}. ✅ **אומת-עצמי שורה-שורה (smart_tree.dart 2,551ש': 4-מחלקות+82-entries+4-helpers).**
+- **גשר:** forward `catalogProductForBrand(brand)` · reverse `smartProductForSku(sku)` (lazy `_smartBySku`) · `smartProductByKey` (לעלי catalog-tree) · `kSmartTreeCats`/`smartProductsForCat`. round-trip שמור (`smartproduct_contract_test`, 307/365 brands-עם-SKU).
 
 ## C. state-model — **41 Riverpod providers** (כולם `bs.*.v1` ב-shared_preferences, פרט ל-UI-transient + in-memory-logs)
 - **settings (8):** app/catalog/chat/notif/store-settings · profession/project/cardDetail-mode.
