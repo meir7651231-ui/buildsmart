@@ -31,7 +31,8 @@
 
 ## dashboards + UI + history (root) — **specs עשירים (לא כותרות)**
 - **`UI_ARCHITECTURE`** (1560 ש׳) — סדרת-spec UI/UX ב-**6 חלקים** (contractor + 4 פרסונות + role-drawer). מתעד מודל **5-FAB** (בית/חיפוש/BS-mode/תפריט/חשבון) + 4 סוגי-הצעות-חיפוש (nav/prod/acc/cat). תיאור-משני של אותו תוכן שלכדתי מהמקור (01–17).
-- **`{SYSTEM_MANAGER,STORE,COURIER,WORKER}_DASHBOARD`** (615–864 ש׳) — spec-עומק מלא לכל פרסונה (מסכים/זרימות/state). מקבילים לדוחות 11/12/13 (שלכדתי מהמקור).
+- **`{COURIER,WORKER,STORE}_DASHBOARD`** (615–753 ש׳) — ⭐ **כן הוסיפו פרטים תפעוליים אמיתיים** שתיעדתי תמציתי-מדי מהמקור: courier job-model + vehicle-filter (→13) · worker task state-machine 5-מצבים (→07) · store order state-machine + held/resolved (→12). **נקראו, נשזרו.**
+- **`SYSTEM_MANAGER_DASHBOARD`** (864 ש׳) — מבנה 4-הטאבים מאשר את המקור, אך ⚠️ **המספרים אידיאליים/מומצאים** (1,247 מוצרים · 156 קבלנים · ₪847K · +12%) — **לא** הנתונים-האמיתיים (4 הזמנות-דמו ב-SYS_ORDERS). לא ידע-נתונים.
 - ⭐ **`legacy-map`** — port-map מדויק (לגאסי line-range → Preact file + status). ⚠️ **חלק מהספירות מיושנות** (ציין BUTTON_REGISTRY=176 בעוד המקור=350; store="stub" בעוד store.tsx=302 ש׳ כיום). מצוין ל-line-mapping, לא-מהימן-לגמרי לספירות.
 - **`wip-menu-wiring`** — SSOT לחיווט-ההגדרות (~70 עלים, persist `bs.settings.v1`/`bs.profile.v1`).
 - `IMPLEMENTATION_PROTOCOL` = **deprecated** (הנחה לבנות dashboards-as-views = הפרת R2).

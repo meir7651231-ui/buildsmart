@@ -22,7 +22,12 @@
 - **`renderStoreHome`** (17080) → "🏠 בית" (פעולה-ראשית `sh-action` + סטטים + התראת-מלאי + פעולות-מהירות).
 - `SIM_CUSTOMERS` (17159) = ['אלי בניין בע"מ',…] · `SIM_SITES` = ['מגדל יוקרה — רמת גן',…] · **`simulateIncomingOrder`** (17161) — מחולל הזמנה-נכנסת ריאליסטית.
 - תעודת-משלוח: **`showDeliveryNote`** (17212)/`closeDeliveryNote` (מסמך מודפס, `dn-*`).
-- הזמנות-חנות: `renderStoreOrders` · `soChip` · `storeOrderSetFilter` · **`storeAdvance`** (קדם-סטטוס: התקבלה→בהכנה→מוכן) · `shStat`.
+- הזמנות-חנות: `renderStoreOrders` · `soChip` · `storeOrderSetFilter` · **`storeAdvance`** · `shStat`.
+
+**⭐ state-machine + held (מ-`STORE_DASHBOARD.md`):**
+- stage: `new`(לאישור/צהוב) →"✓ אשר וקבל להכנה"→ `preparing`(בהכנה/כחול) →"📦 סמן כמוכן — העבר לשליח"→ `ready`(מוכן/ירוק) →"🛵 ממתין לאיסוף השליח"(info-only). כולם דרך `storeAdvance`.
+- שדות מיוחדים: **`heldForMissing`** (פריט-חסר/כתום — כפתור מוסתר עד החלטת-קבלן) · **`missingResolved`** (✓ תיקון בוצע — re-enable) · **`splitInto`>1** ("🚚×N", pulsing `fresh`).
+- home (`renderStoreHome`): toApprove(new)/inPrep/ready/**held**/todayRevenue(Σ new+preparing+ready). handlers: `data-sadvance`→storeAdvance · `data-sdetail`→storeOrderDetail (picking).
 - **תעודת-ליקוט** (picking, 17400–17627): `storeItemInfo`/`storeOrderLines`/`storeOrderDetail` · **`renderStorePick`** (17455) · `storePickLine` (✓ לוקט) / `storeMissLine` (חסר במלאי).
 
 ---

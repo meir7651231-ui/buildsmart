@@ -7,7 +7,12 @@
 - `WORKERS` (8021) = `['רן (עובד)','עומר (עובד)']`.
 - `TASKS` (8023) — 5 משימות: `{id, name, detail, steps[]}` (קו-מים-חם · מיכל-הדחה-סמוי · איטום-רצפה · נקזון · ברז-כיור+ניל).
 - `WORK_LOG` (8156) — יומן: `{date, items:[{worker, task, status}]}` (אתמול/שלשום; רן/עומר).
-- פונקציות: `pickRole`(מנהל/עובד) · `setTaskLocation`(אתר/מחסן) · `pickWorker` · `taskStatusInfo` · `taskCard` · `renderTasks` · `openTask`/`taskActionClick` · **`taskUpload`/`taskApprove`/`taskReject`** (זרימת עובד→מנהל: ביצוע→תמונה→אישור) · `openTaskLog`.
+- פונקציות: `pickRole`(מנהל/עובד) · `setTaskLocation`(אתר/מחסן) · `pickWorker` · `taskStatusInfo` · `taskCard` · `renderTasks` · `openTask`/`taskActionClick` · **`taskUpload`/`taskApprove`/`taskReject`** · `openTaskLog`.
+
+**⭐ state-machine של משימה (מ-`WORKER_DASHBOARD.md`):** 5 מצבים —
+`pending`(⏳בתור/כחול) → `active`(🔨בביצוע/ירוק) → `review`(📋בבדיקה/צהוב) → `done`(✓הושלם/ירוק); ו-`rejected`(✕דחוי/אדום) → active (retry).
+מעברים: **`startTask`** (pending/rejected→active) · **`completeTask`** (active→review) · `taskApprove` (review→done) · `taskReject` (review→rejected).
+schema-מלא (לפי הדשבורד): `{id, worker(idx ל-WORKERS), title, desc, site, when, role, status, notes, photo, approval}`. worker-home: greeting + progress-bar (`doneCount/total`) + 3 סטטים (פעילה/בתור/הוגשו).
 
 ## מלאי (8195–8249)
 `accLookup` · `pickStockTab`(warehouse/site) · `renderStock` · `moveStock` (העברה מחסן↔אתר).
