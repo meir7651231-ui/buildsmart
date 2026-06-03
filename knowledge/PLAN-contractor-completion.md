@@ -133,3 +133,5 @@
 
 ## 🔒 תפיסות (claims log)
 - 2026-06-03 · **מקבץ** · `claude/whats-happening-LyY9G` · לקח **T0 + T1** (תשתית-מינימלית + קטלוג-⋮ "חלופות זולות"). בעבודה — מיישם על whats-happening לפי הסדר (T0 DoD → T1).
+
+- 2026-06-03 · **בנצי (משיק)** · `claude/whats-happening-LyY9G` · לקח **P0 השקה** (usage-strings iOS + scaffolding לחתימת-Android release) — source-prep, לא תלוי ב-T0. push קוד רק על "תדחוף".
