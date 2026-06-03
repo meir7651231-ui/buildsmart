@@ -64,6 +64,14 @@ fi
 # ── WIRING קיים ──
 [[ -f "WIRING.md" ]] || err "3" "WIRING.md חסר" "צור app_flutter/WIRING.md"
 
+# ── pubspec.lock churn (הסדרן, לקח #72): flutter test מלכלך אותו → stop-hook עוצר.
+#    אם השתנה אך לא staged ולא מכוון — שחזר (מונע churn מיותר ב-barrier). ──
+if ! git diff --quiet pubspec.lock 2>/dev/null && ! git diff --cached --quiet pubspec.lock 2>/dev/null; then
+    : # staged בכוונה — אל תיגע
+elif ! git diff --quiet pubspec.lock 2>/dev/null; then
+    git checkout pubspec.lock 2>/dev/null && echo "ℹ️  pubspec.lock churn שוחזר (לא היה staged)"
+fi
+
 # ── אין קבצים binaries ──
 STAGED_BINARY=$(git diff --cached --name-only | grep -E "\.(exe|dll|so|dylib)$" | head -1)
 [[ -z "$STAGED_BINARY" ]] || err "78" "binary ב-staging: $STAGED_BINARY" "לא לשמור binaries"

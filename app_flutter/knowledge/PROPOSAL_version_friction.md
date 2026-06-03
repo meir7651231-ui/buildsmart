@@ -1,7 +1,11 @@
 # הצעה — פתרון חיכוך תווית-הגרסה (flagged ע"י 4/4 הסוכנים)
 
-> **סטטוס:** draft → reviewed 6/6×2 → **P0 IMPLEMENTED (v5.92)** → P1/P2 pending. פרוטוקוליסט, 2026-06-03 (לקח #72).
-> P0 שוחרר: `scripts/gen_version.sh` · `lib/version.g.dart` (gitignored) · שערים 11/12/59 · home_shell · CI×4 · session-start · `test/version_g_test.dart`. הכרעות→`DECISIONS.md` D-014/D-015. כש-P1/P2 יושלמו → המסמך הופך stub (D-015).
+> **סטטוס:** draft → reviewed 6/6×2 → **P0+P1+P2 IMPLEMENTED (v5.92)**. פרוטוקוליסט, 2026-06-03 (לקח #72).
+> - **P0** (`f8c0628`): `scripts/gen_version.sh` · `lib/version.g.dart` (gitignored) · שערים 11/12/59 · home_shell · CI×4 · session-start · `test/version_g_test.dart` · D-014/D-015.
+> - **P2 fast-gate** (`d3aa510`): build web → pre-push · skip test ב-rebase replay.
+> - **P2 gates** (`e7b3b6c`): 113→assets · 115 hot-file claims · 116 visual-verify enforce.
+> - **P1 self-verifying-hook**: כבר נאכף ע"י שערים 81 (hash sync .githooks↔.git/hooks) + 83 (hooksPath=.githooks) — סוכן עם hook stale נחסם. rollout-procedure: ראה §M0 + AGENT_COORDINATION.
+> - הכרעות נספגו ל-`DECISIONS.md` D-014/D-015 + לקחים #73/#74. **כש-launch ב-stores → המסמך הופך stub (D-015).**
 > **בעלות:** פרוטוקוליסט (hook) + סוכן-UI-יחיד (home_shell, 3 שורות) · נוגע ב-UI render → דורש אישור משתמש.
 > **lifecycle:** ביום-implemented → ההכרעות עוברות ל-`DECISIONS.md`/`adr/`, המסמך → stub (כלל ליטוש, מונע כשל #58).
 
