@@ -27,7 +27,7 @@
 | קובץ | תחום | טווח במקור |
 |---|---|---|
 | `README.md` (זה) | אינדקס + שיטה + מעקב-כיסוי | — |
-| `01-design-system.md` | מערכת-עיצוב (יסודות + תוכן + sheets + Cat A–J + עץ) | 14–1520 |
+| `01-design-system.md` | מערכת-עיצוב (יסודות→ספריית-רכיבים תפעולית) | 14–2038 |
 | `02-shell-and-screens.md` | המעטפת + כל המסכים והתיבות | 4021–5419 |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
@@ -41,7 +41,8 @@
 | 14–480 | CSS — יסודות (tokens/type/frame/components) | ✅ נלכד | `01-design-system.md` |
 | 481–1000 | CSS — רכיבי-תוכן + מערכת-sheets | ✅ נלכד | `01-design-system.md` |
 | 1001–1520 | CSS — Categories A–J + עץ-מוצרים | ✅ נלכד | `01-design-system.md` |
-| 1520–4019 | CSS — accessory/pickers/catalog/onboarding/admin | ⬜ טרם | `01-design-system.md` |
+| 1520–2038 | CSS — ספריית-רכיבים תפעולית (btn/qty/משימות/סל) | ✅ נלכד | `01-design-system.md` |
+| 2039–4019 | CSS — admin dashboards + onboarding/login | ⬜ טרם | `01-design-system.md` |
 | 4021–5419 | body — מעטפת + מסכים + תיבות | ✅ נלכד | `02-shell-and-screens.md` |
 | 5419–5439 | script bootstrap | ⬜ טרם | — |
 | 5440–22414 | JS — נתונים + לוגיקה | ⬜ טרם | `03+`… |

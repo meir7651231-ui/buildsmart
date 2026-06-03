@@ -130,4 +130,38 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 - **`.accessory`** (1511): כרטיס-אביזר — `.picked`=teal · `.must`=אדום · `.stage-dim/.stage-hit` (עמעום/הדגשה לפי שלב נבחר).
 
 ---
-**טרם נקרא בקובץ הזה:** 1520–4019 (המשך accessory · brand/variant pickers · catalog · onboarding/login · admin dashboards · misc).
+
+## חלק ד׳ — ספריית-הרכיבים התפעולית (1520–2038)
+
+### אביזר · מוצר-עשיר · בוררים (1519–1617)
+- accessory-detail: `.acc-arrow` פותח · `.acc-why` · `.acc-stock-note` (כתום) · **`.stock-pill`** (order=כתום "הזמן" / wh=ירוק "במחסן" / site=teal "באתר") · `.acc-size`/`.acc-info` chips · `.have-it`(.72).
+- מוצר-עשיר: `.opt-btn` (אופציות teal) · `.grp-head` (must=אדום/maybe=כתום/tools=אפור) · `.tool-box` (.picked=כתום).
+- **`.pick-opt`** (brand/variant picker): `.po-check` עיגול (✓ teal) + `.po-name/.po-tag/.po-price`.
+
+### מלאי · back-bar (1619–1661)
+`.stock-tab` (.on=teal) · `.stock-row` (+`.sr-move`) · `.stock-empty` · `.back-head` (חץ-עיגול + כותרת).
+
+### ⭐ בקרות-ניווט (1664–1693)
+- **`.view-switch`** — segmented control (project↔sites · cart↔orders); `.vs-btn` (`.on`=card לבן + צל).
+- **`.cat-chips`** — grid 3-עמ׳; `.cat-chip` (`.on`=teal מלא).
+
+### שורת-מוצר בקטלוג (1700–1747)
+`.prod-row` (`.in-cart`=teal) — `.prod-check` (✓) · `.pn-title/.pn-price` · foot: `.pf-tree`(כתום) + `.pf-brand`(teal).
+
+### ⭐ מערכת-משימות (1748–1856)
+- `.task-loc` (dropdown מיקום) · `.role-switch/.role-btn` (מנהל/עובד) · `.worker-pick/.wp-btn`.
+- **5 מצבי-משימה** (צבע אחיד ל-group/icon/pill/status): `rev`=ביקורת(כתום) · `act`=פעיל(teal) · `pend`=ממתין(אפור) · `done`(ירוק) · `rej`=נדחה(אדום).
+- `.task-card` · task-detail `td-*`: `.td-photo/.td-upload` (העלאת-תמונה) · `.td-note` (textarea) · `.td-approve`(ירוק)/`.td-reject`(אדום). work-log `.log-day/.log-row`. `.ad-*` (admin hero).
+
+### ⭐ qty-wheel · check · btn-system (1866–1912)
+- **`.qty-wheel`** stepper: `.qw-btn` ‹ › + `.qw-val` (לחיצה=הקלדה). `.check` (✓ teal).
+- `.sheet-foot` (תחתית-sheet קבועה) + `.foot-row .total` (22px).
+- **`.btn` (CTA ראשי): `.btn-primary` teal · `.btn-amber` כתום** (לחיצה→שוקע 2px, inset-shadow).
+
+### סל + checkout (1914–2038)
+- `.site-strip` (banner כהה, יעד + `.switch` כתום) · `.cart-line` (`.auto`=מקווקו לפריט-עץ · `.cl-link` קישור-מוצר · `.cl-del`) · `.empty`.
+- `.deliv-pick/.slot` (חלון-אספקה) · `.summary-box`/`.checkout-box` (מסגרת teal; `.row.grand` סה"כ).
+- **`.store-group`** — קיבוץ-סל לפי **חנות-ספק** (`.sg-name` + `.sg-eta` + `.sg-foot.ship`). `.order-card`(.open=teal).
+
+---
+**טרם נקרא בקובץ הזה:** 2039–4019 (admin dashboards: manager/store/courier/worker · onboarding/login styling · misc).
