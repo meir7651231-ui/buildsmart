@@ -4,16 +4,17 @@
 
 ## הגדרות (6750–7012)
 ### `SETTINGS_LABELS` (6750) — מפות value→תווית
-`textSize`(קטן/בינוני/גדול) · `theme`(בהיר/כהה) · `defaultHaul`(משלוח קטן/טנדר/משאית) · `lang`(עברית/العربية/English) · `units`(מטרי/אימפריאלי) · `currency`(₪/$).
+`textSize`(קטן/בינוני/גדול) · `theme`(בהיר/כהה) · `defaultHaul`(משלוח קטן/טנדר/משאית) · `lang`(עברית/العربية/English) · `units`(`מטרי (מ׳, ק״ג)`/`אימפריאלי`) · `currency`(`₪ שקל`/`$ דולר`). (verbatim units/currency: INSP-0007.)
 ### `renderSettings()` (6806) — sheet "הגדרות מתקדמות", **8 קבוצות + reset**:
 1. 👤 **חשבון** — שם/טלפון/סוג-עוסק/תחום (`editAccountField`, מ-`userProfile`).
 2. 🔔 **התראות** (toggles אמיתיים): shipments · deals · budget · orders.
 3. 🎨 **תצוגה**: theme · textSize · reduceMotion.
-4. ♿ **נגישות**: high-contrast (`toggleHighContrast`).
-5. 🔒 **אבטחה**: → `openSecurityHub` (2FA·RBAC·יומן).
-6. 🎧 **שירות**: → `openServiceHub` (תמיכה·צ׳אטבוט·כלים).
-7. 🚚 **משלוח ותשלום**: defaultHaul · express · payment.
-8. 🌍 **אזור**: lang · units · currency.
+4. ♿ **נגישות**: `מצב ניגודיות גבוהה (לשמש)` (`toggleHighContrast`, verbatim @6842 / INSP-0006).
+5. 🔒 **אבטחה והרשאות**: → `openSecurityHub` (2FA·RBAC·יומן).
+6. 🎧 **שירות ותמיכה**: → `openServiceHub` (תמיכה·צ׳אטבוט·כלים).
+7. 🚚 **משלוח ותשלום**: defaultHaul · express (`ברירת מחדל — משלוח אקספרס`, verbatim/INSP-0006) · payment.
+8. 🌍 **אזור ושפה**: lang · units · currency.
+> כותרות-הקבוצות verbatim בסדר-המקור (`renderSettings` @6806, INSP-0005): חשבון · התראות · תצוגה · נגישות · אבטחה והרשאות · שירות ותמיכה · משלוח ותשלום · אזור ושפה · מידע · איפוס.
 9. ℹ️ **מידע**: גרסה "BuildSmart 1.0 · אב-טיפוס" · תנאי/פרטיות · קשר `support@buildsmart.demo`.
 10. ↺ **danger**: `resetSettings`.
 - builders: `setGroup/setToggle/setSelect/setLink` (6883–6911). מצב ב-**`appSettings`**.

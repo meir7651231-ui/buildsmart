@@ -5,6 +5,7 @@
 - **תוכן-עומק verbatim (INSP-0008):** RBAC **5 תפקידים** (קבלן · מנהל-מערכת · ספק/חנות · שליח · עובד) · session-timeouts **5/15/30/60 דק'** · encryption **4** (HTTPS/TLS · נתונים-מקומיים · סיסמאות-Hash · גיבוי-ענן) · privacy **4 toggles** (נתוני-שימוש · מיקום · שיווק · דוחות-תקלה).
 - **session-lock**: `resetSessionTimer`/`lockSession`/**`unlockSession`**/`initSessionTimeout` (נעילה-אוטומטית, `#sessionLock`).
 - `openSecurityHub`→`secFeature`: **`secTwoFA`/`toggle2FA`** · **`secRBAC`** (תצוגת-הרשאות, מ-RBAC_MATRIX) · `secBiometric`/`toggleBiometric` · `secAudit` · `secGPS`/`requestGPS` · `secSession`/`setSessionTimeout`/`toggleSession` · `secEncryption` · `secLoginHistory` · `secDevices`/`revokeDevice` · `secPrivacy`/`togglePrivacy`.
+- **10 אריחי-המרכז verbatim (`openSecurityHub` @21752–21762, INSP-0007):** אימות דו-שלבי · הרשאות גישה · כניסה ביומטרית · יומן ביקורת · הרשאת מיקום · נעילת הפעלה · הצפנת נתונים · היסטוריית כניסות · ניהול מכשירים · בקרת פרטיות. (אלה ה-strings הפונים-למשתמש; השמות לעיל הם שמות-הפונקציות.)
 > הערה-מקור (21666): "אבטחה אמיתית חיה בשרת — RBAC/audit/2FA כאן הם הדמיה."
 
 ## ⭐ מרכז-שירות + chatbot `svc-*` (Category J) (22044–22414)
@@ -13,6 +14,7 @@
 - **chatbot**: **`BOT_KB`** (22065) — knowledge-base `{kw[], a}`. `svcChatbot`/**`botReply`** (התאמת-kw→תשובה)/`sendBotMsg`/`botQuick` (צ׳יפים).
 - **shake-to-report**: `svcShakeReport`/`toggleShakeReport`/`onDeviceShake`/`triggerBugReport` (ניעור-מכשיר→דיווח-באג).
 - כלים: `svcUnitConvert`/`runUnitConv` (ממיר-יחידות) · **`svcQtyCalc`/`runQtyCalc`** (מחשבון-כמויות — 3 מצבים: אריחים/צבע/בטון) · `svcCalendar` · **`svcJobBoard`/`postJob`** (לוח-דרושים) · **`svcOnboarding`/`renderTourStep`/`tourNext`** (סיור — 6 שלבים: בית/הזמנה/תקציב/משימות-ואתר/מועדון/מוכנים). (verbatim, INSP-0008.)
+- **8 אריחי-המרכז verbatim (`openServiceHub` @22081–22090, INSP-0007):** מוקד תמיכה · צ׳אטבוט · דיווח על באג · המרת מידות · מחשבון כמויות · סנכרון יומן · לוח דרושים · סיור היכרות. (strings פונים-למשתמש; לעיל = שמות-פונקציות.)
 
 ---
 **🏁 סוף ה-JS (שורה 22414) → `</script>` → `</body>` (22415).**
