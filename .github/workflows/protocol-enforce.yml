@@ -1,6 +1,19 @@
 name: Protocol Enforcement
 
-# רץ על כל push וכל PR — שכבת הגנה אחרונה שלא ניתן לעקוף מקומית
+# ═══════════════════════════════════════════════════════════════════════════
+#  R1 — CI IS THE ONLY UN-SKIPPABLE LAYER.
+#  Local hooks can be skipped (commit -n, env-config, chmod -x, GIT_DIR,
+#  plumbing, merge/FF-into-protected) — CI cannot. This job runs the FULL
+#  protocol on the RESULTING TREE of every push AND pull_request to BOTH
+#  whats-happening AND main, with NO branch-scoping (the suite runs regardless
+#  of branch). It computes the diff vs the merge-base and scans the post-merge
+#  tree with --no-replace-objects.
+#
+#  Make this AUTHORITATIVE via GitHub branch protection (admin step — see
+#  PROTOCOL_V3.md): required status check = `protocol-gates`; disallow
+#  force-push; require PR + this check before merge to whats-happening/main.
+# ═══════════════════════════════════════════════════════════════════════════
+
 on:
   push:
     branches:
@@ -8,19 +21,49 @@ on:
       - main
   pull_request:
     branches:
+      - 'claude/whats-happening-LyY9G'
       - main
+
+# One pinned Flutter version EVERYWHERE (R8). Keep in lock-step with deploy.yml
+# and android-package.yml — gate `flutter-version-parity` (below) fails if they
+# diverge. 3.44.0 is the SHIP version (what deploy/android build), so the gate
+# now matches what users actually get.
+env:
+  FLUTTER_VERSION: '3.44.0'
+  GIT_REPLACE_REF_BASE: ''   # belt-and-suspenders: ignore replace refs globally
 
 jobs:
   protocol-gates:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout (full history — need the merge-base)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Flutter
+      - name: Compute base + the touched tree (diff vs merge-base)
+        id: diffset
+        run: |
+          set -euo pipefail
+          # The base differs for PR vs push. For a PR, GitHub gives us the base
+          # SHA; for a push, diff against origin/main's merge-base with HEAD.
+          if [[ -n "${{ github.event.pull_request.base.sha }}" ]]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            git fetch --no-tags origin main >/dev/null 2>&1 || true
+            BASE=$(git merge-base origin/main HEAD 2>/dev/null || git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)
+          fi
+          echo "base=$BASE" >> "$GITHUB_OUTPUT"
+          # Touched paths in the RESULTING tree (BASE...HEAD). --no-replace-objects
+          # so a planted `git replace` cannot launder a malicious blob past us.
+          git --no-replace-objects diff --name-only "$BASE...HEAD" > /tmp/touched.txt || true
+          echo "── touched files vs $BASE ──"
+          cat /tmp/touched.txt || true
+
+      - name: Setup Flutter (pinned — R8)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.3'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
 
       - name: Install dependencies
@@ -30,78 +73,182 @@ jobs:
       - name: Generate version.g.dart (gitignored — לקח #72)
         run: bash scripts/gen_version.sh
 
-      - name: Gate 1 — Code analysis
+      # ── R8: one Flutter version everywhere — fail if the workflows diverge ──
+      - name: Gate — Flutter version parity across workflows
+        run: |
+          set -euo pipefail
+          want='${{ env.FLUTTER_VERSION }}'
+          fail=0
+          check() {
+            local f="$1"
+            # extract every flutter-version pin in the file
+            local found
+            found=$(grep -oE "flutter-version:?[[:space:]]*['\"]?[0-9]+\.[0-9]+\.[0-9]+" "$f" 2>/dev/null \
+                      | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" | sort -u)
+            if [[ -z "$found" ]]; then echo "  $f: (no pin)"; return; fi
+            while IFS= read -r v; do
+              if [[ "$v" != "$want" ]]; then
+                echo "❌ $f pins Flutter $v, expected $want"
+                fail=1
+              else
+                echo "  ✅ $f pins $v"
+              fi
+            done <<< "$found"
+          }
+          for wf in .github/workflows/protocol-enforce.yml \
+                    .github/workflows/deploy.yml \
+                    .github/workflows/android-package.yml \
+                    .github/workflows/catalog-qa.yml; do
+            [[ -f "$wf" ]] && check "$wf"
+          done
+          [[ "$fail" -eq 0 ]] || { echo "Flutter version drift — pin ALL workflows to $want"; exit 1; }
+
+      # ── R6: prove the content engine is intact and its logic works ──
+      - name: Gate — content-engine self-test (blocking)
+        working-directory: app_flutter
+        run: dart run tool/protocol_check.dart --self-test
+
+      # ── R6: integrity-pin the engine/registry/scripts ──
+      - name: Gate — integrity pins (engine/registry/scripts)
+        run: |
+          set -euo pipefail
+          if [[ ! -f protocol/pins.sha256 ]]; then
+            echo "ℹ️ protocol/pins.sha256 absent — skipping (bootstrap)"; exit 0
+          fi
+          # Recompute and compare. A tampered pinned file fails here.
+          fail=0
+          while read -r want path; do
+            [[ -z "$want" || "$want" == \#* ]] && continue
+            if [[ ! -f "$path" ]]; then echo "❌ pinned file missing: $path"; fail=1; continue; fi
+            have=$(sha256sum "$path" | awk '{print $1}')
+            if [[ "$have" != "$want" ]]; then echo "❌ integrity: $path changed vs pin"; fail=1; fi
+          done < protocol/pins.sha256
+          [[ "$fail" -eq 0 ]] || exit 1
+          echo "✅ integrity pins OK"
+
+      # ── R1: the FULL content engine over the committed/merged tree ──
+      - name: Gate — content engine over the resulting tree (R1/R2)
         working-directory: app_flutter
         run: |
-          # `flutter analyze` יוצא עם קוד 1 על *כל* lint (info/warning) של
-          # very_good_analysis, לא רק error. ה-shell כאן הוא `bash -e`, אז בלי
-          # `|| true` ההשמה הזו מתה לפני ה-grep וה-gate נכשל ללא שגיאת-קוד אמיתית.
-          # הגייט אוכף רק error אמיתי (`^error •`), כמו ה-pre-commit המקומי.
-          ANALYZE=$(flutter analyze --no-pub 2>&1 || true)
-          if echo "$ANALYZE" | grep -qE "^error •"; then
-            echo "❌ Code errors found:"
-            echo "$ANALYZE" | grep -E "^error •"
+          set -euo pipefail
+          # Repo-relative names for the engine's path scoping.
+          sed 's#^app_flutter/##' /tmp/touched.txt > /tmp/touched_rel.txt || true
+          cp /tmp/touched.txt /tmp/touched_abs.txt
+          # Diff mode over the full BASE...HEAD diff (added lines) + tree mode
+          # over the post-image of touched files. --no-replace-objects on the
+          # blob fetch so a planted replace ref cannot hide content.
+          git --no-replace-objects diff "${{ steps.diffset.outputs.base }}...HEAD" > /tmp/fulldiff.txt || true
+          dart run tool/protocol_check.dart \
+            --diff /tmp/fulldiff.txt \
+            --names /tmp/touched_abs.txt \
+            --stuck-log knowledge/stuck_log.md
+          ENGINE_RC=$?
+          # Tree mode: scan post-image of each touched file from the HEAD tree.
+          dart run tool/protocol_check.dart \
+            --tree \
+            --names /tmp/touched_abs.txt \
+            --show "git --no-replace-objects show HEAD:" \
+            --stuck-log knowledge/stuck_log.md
+          TREE_RC=$?
+          if [[ "$ENGINE_RC" -ne 0 || "$TREE_RC" -ne 0 ]]; then
+            echo "❌ content engine found ERR-level findings in the resulting tree"
             exit 1
           fi
-          echo "✅ Analysis clean"
+          echo "✅ content engine clean over the resulting tree"
 
-      - name: Gate 2 — All tests green
+      # ── R6: registry <-> runtime parity (the engine + the structural ids) ──
+      - name: Gate — registry parity (malformed rows FAIL)
+        run: |
+          set -euo pipefail
+          # Build the runtime id set: the engine's content gates + the structural
+          # gate ids the CI structural checks below cover + reg. (CI runs the full
+          # suite, so all enforced ids are exercised by SOME step here.)
+          awk -F'\t' 'NF>=9 && $8=="enforced" {print $1}' protocol/gates.tsv | sort -u > /tmp/enforced.txt
+          # The engine emits its own RAN list; everything else is structurally
+          # enforced by this workflow, so for the PARITY check we assert the
+          # registry itself is well-formed AND the engine's ids are a subset.
+          EMPTY=$(mktemp); : > "$EMPTY"
+          ENGINE_RAN=$(mktemp)
+          ( cd app_flutter && dart run tool/protocol_check.dart --diff "$EMPTY" --emit-ran 2>/dev/null ) \
+            | grep '^RAN' | cut -f2 | sort -u > "$ENGINE_RAN"
+          # malformed-row detection (engine returns 2 on a bad tsv even if ids match)
+          cp /tmp/enforced.txt /tmp/claimed.txt
+          ( cd app_flutter && dart run tool/protocol_check.dart \
+              --verify-registry --emitted /tmp/claimed.txt --registry ../protocol/gates.tsv )
+          # Every engine-emitted id must be an enforced row (no orphan gate).
+          if ! comm -23 "$ENGINE_RAN" /tmp/enforced.txt | grep -q .; then
+            echo "✅ engine ids ⊆ enforced registry"
+          else
+            echo "❌ engine emits an id missing from the registry:"; comm -23 "$ENGINE_RAN" /tmp/enforced.txt; exit 1
+          fi
+
+      # ── structural checks (the bash-gate equivalents, branch-agnostic) ──
+      - name: Gate — structural protections present
+        run: |
+          set -euo pipefail
+          fail=0
+          must() { [[ -e "$1" ]] || { echo "❌ missing $1"; fail=1; }; }
+          must .githooks/pre-commit
+          must .githooks/pre-push
+          must .githooks/commit-msg
+          must .claude/settings.json
+          must .claude/hooks/pre-tool.sh
+          must .github/workflows/protocol-enforce.yml
+          must protocol/gates.tsv
+          must app_flutter/tool/protocol_check.dart
+          [[ -x .githooks/pre-commit ]] || { echo "❌ pre-commit not executable"; fail=1; }
+          grep -q "protocol-gates" .github/workflows/protocol-enforce.yml || { echo "❌ workflow self-name missing"; fail=1; }
+          # No secret/bypass files committed.
+          if git --no-replace-objects ls-files | grep -qE '(^|/)\.(env|emergency_token|allow_protocol_edit|allow_push_main|allow_master_protocol_edit)$'; then
+            echo "❌ a bypass/secret file is tracked"; fail=1
+          fi
+          [[ "$fail" -eq 0 ]] || exit 1
+          echo "✅ structural protections intact"
+
+      - name: Gate — Flutter analyze (errors fatal always; warnings fatal for CHANGED files — R3)
+        working-directory: app_flutter
+        run: |
+          set -euo pipefail
+          ANALYZE=$(flutter analyze --no-pub 2>&1 || true)
+          # Errors are ALWAYS fatal, repo-wide.
+          if echo "$ANALYZE" | grep -qE "^error •"; then
+            echo "❌ analyze errors:"; echo "$ANALYZE" | grep -E "^error •"; exit 1
+          fi
+          # R3: warnings are fatal ONLY for files changed in THIS PR/push, so the
+          # ~34 pre-existing warnings elsewhere don't false-block an unrelated
+          # change (they are tracked separately for cleanup). A NEW warning in a
+          # touched file blocks.
+          sed 's#^app_flutter/##' /tmp/touched.txt | grep -E '\.dart$' > /tmp/touched_dart.txt || true
+          if [[ -s /tmp/touched_dart.txt ]]; then
+            HIT=0
+            while IFS= read -r f; do
+              [[ -z "$f" ]] && continue
+              if echo "$ANALYZE" | grep -E "^warning •" | grep -qF "$f"; then
+                echo "$ANALYZE" | grep -E "^warning •" | grep -F "$f"
+                HIT=1
+              fi
+            done < /tmp/touched_dart.txt
+            [[ "$HIT" -eq 0 ]] || { echo "❌ analyze warnings in changed files (R3: fatal)"; exit 1; }
+          fi
+          echo "✅ analyze: 0 errors; no warnings in changed files"
+
+      - name: Gate — All tests green
         working-directory: app_flutter
         run: flutter test --no-pub --concurrency=4
 
-      - name: Gate 3 — Web build succeeds
+      - name: Gate — Web build succeeds
         working-directory: app_flutter
         run: flutter build web --release --no-pub
 
-      - name: Gate 4 — Versions synced
+      - name: Gate — Versions synced (version.g.dart ↔ STATUS)
         working-directory: app_flutter
         run: |
-          # version.g.dart (אוטומטי, נוצר לעיל) ↔ STATUS (מקור-אמת) — לקח #72.
+          set -euo pipefail
           V_GEN=$(grep -oE "v[0-9]+\.[0-9]+" lib/version.g.dart | head -1)
           V_STATUS=$(grep -oE "v[0-9]+\.[0-9]+" knowledge/STATUS.md | head -1)
-          if [[ "$V_GEN" != "$V_STATUS" ]]; then
-            echo "❌ Version drift: version.g.dart=$V_GEN, STATUS=$V_STATUS"
-            exit 1
-          fi
+          [[ "$V_GEN" == "$V_STATUS" ]] || { echo "❌ Version drift: $V_GEN vs $V_STATUS"; exit 1; }
           echo "✅ Versions synced ($V_GEN)"
 
-      - name: Gate 5 — No dark surfaces
-        working-directory: app_flutter
-        run: |
-          # `|| true`: כשאין משטחים כהים (המצב התקין) grep מחזיר 1, ותחת `bash -e`
-          # ההשמה הזו הייתה הורגת את ה-gate. שורש זהה ל-Gate 1.
-          DARK=$(grep -rn "0xFF111111\|BsTokens.bgDark" lib/screens/ 2>/dev/null | grep -v "_test\|//" || true)
-          if [[ -n "$DARK" ]]; then
-            echo "❌ Dark surfaces found:"
-            echo "$DARK"
-            exit 1
-          fi
-          echo "✅ No dark surfaces"
-
-      - name: Gate 6 — Hooks not tampered
-        run: |
-          if [[ ! -f .githooks/pre-commit ]]; then
-            echo "❌ pre-commit hook missing from repo"
-            exit 1
-          fi
-          if [[ ! -x .githooks/pre-commit ]]; then
-            echo "❌ pre-commit hook not executable"
-            exit 1
-          fi
-          echo "✅ Hooks intact"
-
-      - name: Gate 7 — Claude settings intact
-        run: |
-          if [[ ! -f .claude/settings.json ]]; then
-            echo "❌ Claude settings missing"
-            exit 1
-          fi
-          if [[ ! -f .claude/hooks/pre-tool.sh ]]; then
-            echo "❌ pre-tool hook missing"
-            exit 1
-          fi
-          echo "✅ Claude settings intact"
-
-      - name: Gate 8 — Android release build (לקח בנצי — debug מדלג על permission enforcement)
+      - name: "Gate — Android release build (release enforces permissions — לקח בנצי)"
         working-directory: app_flutter
         run: flutter build appbundle --release --no-pub

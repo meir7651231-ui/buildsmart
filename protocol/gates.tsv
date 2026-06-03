@@ -43,9 +43,9 @@ id	group	name	severity	trigger	tier	engine	status	check-desc
 20	state	test-dir	err	always	cheap	bash	enforced	test/ directory present
 21	planning	session-plan-exists	err	staged:lib	cheap	bash	enforced	knowledge/session_plan.md exists when lib/ staged
 22	planning	session-plan-filled	err	staged:lib	cheap	bash	enforced	session_plan.md is not the empty template
-23	planning	roadmap-in-progress	err	staged:lib	cheap	dart	enforced	ROADMAP has a in-progress marker (content gate)
+23	planning	roadmap-in-progress	err	staged:lib	cheap	bash	enforced	ROADMAP has a in-progress marker (bash builtin whole-file read, MSYS-safe)
 24	planning	wiring-updated	err	staged:lib	cheap	bash	enforced	WIRING.md staged when lib/ staged
-25	planning	preact-shared-untouched	err	staged:lib	cheap	dart	enforced	no edits to Preact-shared *_settings.dart (content gate)
+25	planning	preact-shared-untouched	err	staged:lib	cheap	bash	enforced	no edits to Preact-shared *_settings.dart (bash per-file glob, MSYS-safe)
 26	planning	test-filename-singular	err	staged	cheap	bash	enforced	no *_tests.dart (must be _test.dart)
 27	planning	filename-snake-case	err	staged	cheap	bash	enforced	no CamelCase .dart filenames under lib/
 28	planning	no-local-uri	err	staged:dart	cheap	dart	enforced	no absolute file:/// or C:\ URIs in dart diff (content gate)
@@ -104,7 +104,7 @@ id	group	name	severity	trigger	tier	engine	status	check-desc
 90	final-safety	no-delete-state	err	staged:del	cheap	bash	enforced	no lib/state/ file deleted
 91	final-safety	unstaged-lib-warn	warn	always	cheap	bash	enforced	unstaged lib/ changes present
 92	final-safety	state-needs-status	warn	staged:state	cheap	bash	enforced	state change without STATUS.md update
-93	final-safety	roadmap-checkmark	warn	staged:lib	cheap	dart	enforced	ROADMAP updated with done-marker (content gate)
+93	final-safety	roadmap-checkmark	warn	staged:lib	cheap	bash	enforced	ROADMAP updated with done-marker (bash whole-file diff, MSYS-safe) — v3 made it actually run
 94	final-safety	knowledge-protocol-test	err	flutter	flutter	bash	enforced	knowledge_protocol_test not failed in test output
 95	final-safety	number-needs-isolate	warn	staged:lib	cheap	dart	enforced	NxN number with Hebrew without LTR isolate (content gate)
 96	final-safety	pubspec-version-warn	warn	staged:pubspec	cheap	bash	enforced	pubspec version changed without code change
@@ -118,7 +118,7 @@ id	group	name	severity	trigger	tier	engine	status	check-desc
 106	knowledge	session-plan-owner-scope	err	staged:lib	cheap	bash	enforced	session_plan.md has Owner: and Scope:
 107	knowledge	ui-needs-visual-log	warn	staged:screens	cheap	bash	enforced	screens/ change without visual log (advisory)
 108	knowledge	carry-forward-exists	err	always	cheap	bash	enforced	knowledge/CARRY_FORWARD.md present
-109	knowledge	subprotocol-carry-forward	warn	staged:lib	cheap	dart	enforced	completed sub-protocol updates CARRY_FORWARD (content gate)
+109	knowledge	subprotocol-carry-forward	warn	staged:lib	cheap	bash	enforced	completed sub-protocol updates CARRY_FORWARD (bash session_plan scan) — v3 made it actually run
 110	knowledge	audit-log-not-empty	warn	staged:lib	cheap	bash	enforced	Audit log section has >=2 rows when present
 111	content-engine	stuck-regression-consistent	err	always	cheap	bash	enforced	ANTIPATTERN count == regression test count; no dup numbering
 112	knowledge	stubs-unified	err	always	cheap	bash	enforced	TESTING/CHECKLISTS/BUG_INVESTIGATION are DEPRECATED stubs <=20 lines

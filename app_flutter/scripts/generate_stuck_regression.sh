@@ -10,7 +10,10 @@
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 STUCK_LOG="$REPO_ROOT/app_flutter/knowledge/stuck_log.md"
-OUT="$REPO_ROOT/app_flutter/test/stuck_regression_test.dart"
+# Output path is overridable (STUCK_REGEN_OUT) so the pre-commit gate 111 can
+# regenerate to a TEMP file and byte-diff it against the committed one (R5
+# tamper-evidence) without clobbering the real file. Default = the real file.
+OUT="${STUCK_REGEN_OUT:-$REPO_ROOT/app_flutter/test/stuck_regression_test.dart}"
 
 if [[ ! -f "$STUCK_LOG" ]]; then
     exit 0

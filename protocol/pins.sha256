@@ -1,0 +1,7 @@
+# protocol/pins.sha256 — R6 integrity pins. Regenerate via scripts/update_pins.sh
+# after an INTENTIONAL change to a pinned file. <sha256>  <repo-relative-path>
+8e3bb08b044a4e09fa4876c344eb3a36825fa3ddb5b093d05cf0c49d98508e4f  app_flutter/tool/protocol_check.dart
+ed856896e1daed7d5b977ede0a1615ab8ad9dbd55e5106fb7f6e5d3238257728  app_flutter/tool/protocol_check_selftest.dart
+a83de5aa8350ca66b01347ed77accecf5aff7f5c11c5186fb77254e11e01bb3f  protocol/gates.tsv
+f4e60e6fbf8c7fe1652741d8f62bcbd27dd8a74835c9d60527b38943f0ac2f15  scripts/gen_version.sh
+3b0802525fb9a893fce3438f09b4a64ba1fb968a306d43834c70f1e8f9ee772f  app_flutter/scripts/generate_stuck_regression.sh

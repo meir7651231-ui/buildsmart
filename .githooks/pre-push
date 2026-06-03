@@ -54,11 +54,41 @@ fi
 # build web release (~2-4 דק') הוצא מ-pre-commit כדי לא להרוג איטרציה. כאן הוא רץ
 # פעם אחת לפני push — תופס שגיאות-build שלא נתפסו ב-analyze/test המקומי.
 REPO_ROOT_PP="$(git rev-parse --show-toplevel 2>/dev/null)"
-if [[ -n "$REPO_ROOT_PP" && -z "${BUILDSMART_SKIP_BUILD:-}" ]]; then
+
+# ═══ R7: BUILDSMART_SKIP_BUILD must be GATED by the signed emergency token ═══
+# (the red team simply exported it to skip the build). It now requires the same
+# >=16-char .emergency_token as the pre-commit emergency-disable, and is audited.
+_SKIP_BUILD=""
+if [[ -n "${BUILDSMART_SKIP_BUILD:-}" ]]; then
+    _TOK="$REPO_ROOT_PP/.emergency_token"
+    if [[ -f "$_TOK" ]]; then
+        _EXP=$(tr -d '[:space:]' < "$_TOK")
+        _GIV=$(echo "${BUILDSMART_SKIP_BUILD}" | tr -d '[:space:]')
+        if [[ ${#_EXP} -ge 16 && "$_GIV" == "$_EXP" ]]; then
+            _SKIP_BUILD=1
+            echo "⚠️  BUILDSMART_SKIP_BUILD מאושר (token) — מדלג על build web. מתועד." >&2
+            echo "[$(date -Iseconds)] BUILDSMART_SKIP_BUILD used (signed) — pre-push build skipped" \
+                >> "$REPO_ROOT_PP/.git/protocol_audit.log" 2>/dev/null
+        fi
+    fi
+    if [[ -z "$_SKIP_BUILD" ]]; then
+        echo "❌ BUILDSMART_SKIP_BUILD ללא token תקין (.emergency_token >=16 תווים) — לא ניתן לדלג על build." >&2
+        exit 1
+    fi
+fi
+
+if [[ -n "$REPO_ROOT_PP" && -z "$_SKIP_BUILD" ]]; then
     for cand in "/home/user/flutter/bin" "/c/flutter/bin" "$HOME/flutter/bin" \
                 "/usr/local/flutter/bin" "/opt/homebrew/opt/flutter/bin" "/opt/flutter/bin"; do
         [[ -d "$cand" ]] && PATH="$cand:$PATH"
     done
+    # R3: on a proto push, flutter MISSING is a HARD fail (do not silently skip
+    # the build gate — that was a bypass: uninstall/hide flutter to skip build).
+    if [[ -d "$REPO_ROOT_PP/app_flutter" ]] && ! command -v flutter >/dev/null 2>&1; then
+        echo "❌ pre-push: flutter לא נמצא ב-PATH על ענף-פרוטוקול — לא ניתן לאמת build." >&2
+        echo "   התקן Flutter או הוסף flutter/bin ל-PATH." >&2
+        exit 1
+    fi
     if command -v flutter >/dev/null 2>&1 && [[ -d "$REPO_ROOT_PP/app_flutter" ]]; then
         echo "  🏗️  pre-push: flutter build web --release ..."
         if ( cd "$REPO_ROOT_PP/app_flutter" \
@@ -67,7 +97,7 @@ if [[ -n "$REPO_ROOT_PP" && -z "${BUILDSMART_SKIP_BUILD:-}" ]]; then
              && ! echo "$BUILD_PP" | grep -qE "^Error|Failed to" ); then
             echo "  ✅ build web עבר"
         else
-            echo "❌ pre-push: build web נכשל — תקן לפני push (חירום: BUILDSMART_SKIP_BUILD=1)" >&2
+            echo "❌ pre-push: build web נכשל — תקן לפני push (חירום: BUILDSMART_SKIP_BUILD=token)" >&2
             exit 1
         fi
     fi

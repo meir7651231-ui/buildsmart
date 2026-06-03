@@ -1,0 +1,36 @@
+#!/bin/bash
+# update_pins.sh — regenerate protocol/pins.sha256 (R6 integrity pins).
+#
+# The pre-commit gate `reg` (gate_engine_integrity) and the CI integrity step
+# verify that each protocol-critical file matches its recorded sha256 here. Run
+# this ONLY after an INTENTIONAL change to one of the pinned files, then commit
+# protocol/pins.sha256 alongside that change. Format: `<sha256>␠␠<repo-rel-path>`
+# (two spaces — `sha256sum --check` compatible).
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+PINNED=(
+    "app_flutter/tool/protocol_check.dart"
+    "app_flutter/tool/protocol_check_selftest.dart"
+    "protocol/gates.tsv"
+    "scripts/gen_version.sh"
+    "app_flutter/scripts/generate_stuck_regression.sh"
+)
+
+OUT="$REPO_ROOT/protocol/pins.sha256"
+{
+    echo "# protocol/pins.sha256 — R6 integrity pins. Regenerate via scripts/update_pins.sh"
+    echo "# after an INTENTIONAL change to a pinned file. <sha256>  <repo-relative-path>"
+    for f in "${PINNED[@]}"; do
+        if [[ -f "$f" ]]; then
+            sha256sum "$f"
+        else
+            echo "# MISSING: $f" >&2
+        fi
+    done
+} > "$OUT"
+
+echo "✅ wrote $OUT"
+cat "$OUT"
