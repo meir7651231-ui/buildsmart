@@ -65,5 +65,8 @@
 
 ---
 
-## 📱 Flutter (`app_flutter/lib/data/settings_tree.dart`) — דלתא
-⬆️ הגדרות → **dial-tree** (`SettingsNode`/`SettingsGroup`/`kSettingsGroups`) — אותו דפוס כמו Preact (R3). מצב ב-`state/app_settings.dart` (Riverpod, **נשמר ב-`shared_preferences`** — persistence אמיתי, לא in-memory).
+## 📱 Flutter — דלתא (הגדרות) ⭐ נכתב-מחדש מהמציאות
+> ב-Flutter ההגדרות חיות ב-**שני מקומות**: (א) menu-dial · (ב) **4 מסכי-הגדרות מלאים** (חריגה מ-R2 — מסכים אמיתיים, לא dial).
+⬆️ **menu-dial** (`data/settings_tree.dart`): `SettingsNode`/`SettingsGroup`/`kSettingsGroups` — **10 קבוצות** (חשבון/התראות/תצוגה/נגישות/אבטחה/שירות/משלוח/אזור/מידע/איפוס), ~38 leaves. leaf מחיל theme/textSize/lang/units/haul/express/contrast/2FA/biometric/notif/privacy (`_applyLeaf`) או toast. מצב ב-`state/app_settings.dart` (Riverpod + `bs.settings.v1`).
+➕ **נוסף — 4 מסכי-הגדרות native** (~140 שדות, persist אמיתי, ExpansionTile עם count-badge, reset-dialog): **`catalog_settings_screen`** (~40: חיפוש/תצוגה/מחירים/מועדפים/יחידות/ספקים/AI/נגישות — פעילים: view/grid/image-size/text-size/contrast/reduced-motion/search-history) · **`chat_settings_screen`** (~30: presence/notif/media/privacy/backup/bot) · **`notif_settings_screen`** (~40: snooze/channels/types/quiet-hours/per-persona/lock-screen) · **`store_settings_screen`** (~30: shipping/payment/invoices/cart-gates). keys `bs.{catalog/chat/notif/store}-settings.v1`.
+🔧 **מול פרוטוטייפ/Preact:** שם הגדרות = dial-עץ בלבד (R3); ב-Flutter **מסכים-מלאים + dial** — עשיר יותר (~140 שדות מול ~70), אך חורג מ-R2.

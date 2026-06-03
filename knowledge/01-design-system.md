@@ -301,6 +301,7 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 ## 📱 Flutter (`app_flutter/lib/theme/`) — דלתא מול אב-הטיפוס (עיצוב)
 > `tokens.dart` (`BsTokens`) + `app_theme.dart` (`AppTheme.light()/dark()`). native Flutter/Material + Riverpod.
 
-⬆️ **פורט מ-Preact `tokens.css`:** סקאלות זהות — `space1..6` · radii · **dial-dims** (`dialCircle:48` · `fabSize:56` · `dialIn:280ms`) · animation curves.
-🔀 **שונה — מותג כתום:** `brand = #FF7A18` (`brandDark #E85F00`) — **לא** ה-teal `#1f6f6b` של אב-הטיפוס/Preact. (פער-מותג מתועד ב-CLAUDE.md.)
-➕ **נוסף (native):** `AppTheme.light()`+`dark()` (MaterialApp `themeMode` לפי הגדרה) · **RTL** (`Directionality`) · **i18n** he/ar/en (`flutter_localizations`) · dark-palette (`bgDark #0E1116`/`cardDark`/`inkDark`) · Riverpod `ProviderScope`.
+⬆️ **`BsTokens`:** `space1..6` (4/8/12/16/24/32) · radii (pill 999 · card 16 · circle 24) · **dial-dims** (`dialCircle:48` · `dialIconSize:22` · `dialEmojiSize:20` · `fabSize:56`) · animation (`dialIn:280ms` · `ssubIn:240` · `dialStaggerStep:28` · `toastDuration:2s` · `dialCurve:Cubic(0.2,0.9,0.3,1.2)`) · shadows (`circleShadow`/`labelShadow`).
+🔀 **מותג כתום:** `brand=#FF7A18` · `brandDark=#E85F00` (לא teal). בהיר: `bgLight #FAFAFA`/`cardLight #FFF`/`inkLight #1A1A1A`/`mutedLight #666`; כהה: `bgDark #0E1116`/`cardDark #181D26`/`inkDark #F1F3F8`.
+➕ **native:** `app_theme.dart` = `ColorScheme.fromSeed(brand)` · Material3 · font **Heebo** · light/dark/high-contrast · RTL (`Directionality`) · i18n he/ar/en (`flutter_localizations`) · `ProviderScope`.
+⚠️ **פערים מהמתוכנן (`port/design-system.md`):** Flutter **חסר** tokens amber(`#f2a516`)/ok/danger/line · **חסר font Rubik** (Heebo-בלבד → body כבד) · **חסר ה-glass-aesthetic** (frosted-over-photo של Preact → כרטיסים שטוחים) · dial leaf-"on" ו-sub-row-size לא-ממודלים. (ה-KB מסמן גם את הכתום עצמו כפער מ-teal-המתוכנן.)

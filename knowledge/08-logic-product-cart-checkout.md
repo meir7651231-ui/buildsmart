@@ -54,6 +54,10 @@
 
 ---
 
-## 📱 Flutter (`app_flutter/lib/screens/catalog_screen.dart`, 2190 ש') — דלתא
-**טאב-הקטלוג** (המסך הגדול ביותר) = ניווט-קטגוריות + **smart-tree** (`smart_tree.dart` עם brands+acc, דוח 03) + תצוגת-מוצר + חיפוש. עץ-המוצרים (smart-tree, כולל `must`/`why`/`brands`) הוא הליבה — קרוב יותר לאב-הטיפוס מ-Preact.
-➖ סדר-הרכבה (`DIAGRAMS`/assembly) + סורק-תוכניות המלאים — חלקי/נעדר. checkout — דרך store/cart, לא `computeCheckout` המלא.
+## 📱 Flutter — דלתא (מוצר/סל/checkout) ⭐ נכתב-מחדש מהמציאות
+> ⚠️ הגרסה הקודמת תיארה snapshot מיושן (catalog_screen 2190ש׳). המציאות: **`catalog_screen.dart` 7,660ש׳** + מנוע-התקנה. זו הליבה של האפליקציה.
+⭐ **כרטיס-מוצר חכם** (`_SmartProductSheet`, ~2,000ש׳ בתוך catalog_screen): בורר-מותג (`brands[]`) · בורר סוג/מידה (`variant_families`) · **אביזרים** (חובה/אופציונלי · must/why · qty) · install-stages (diagram) · **חיבוריות** (`compat` מ-`VerifiedSpec`) · תקינות · readiness-score · כפתור "הוסף לסל ₪N". ה-helpers ב-`related_info.dart` (1,141ש׳ · ~47 helpers · regression-gated).
+⭐ **`InstallStudioScreen` (3,185ש׳) = יהלום-הכתר (חדש לגמרי, אין בפרוטוטייפ):** גרירת-מוצרים לקנבס → `install_engine` (1,391ש׳: **Dijkstra-pathfinding + auto-compliance** PRV/TMTV/הרחבה/dielectric) → **BOM** + צ'קליסט-תקינות + `pressure_drop` (Darcy-Weisbach) + `price_estimate` + שמירת-פרויקטים → "הוסף לסל".
+⬆️ **סל** (`state/smart_cart.dart`): `SmartCartLine{productKey, brand, qty, accessories[]}` persisted `bs.smart-cart.v1` · chat-bubbles + cart-FAB.
+⬆️ **checkout** (`store_screen.dart`): קיבוץ-לפי-ספק · משלוח (express ₪120/standard ₪45/pickup) · **VAT 18%** (inclusive/exclusive) · payment (card/bit/supplier-credit) · gates (min-order · large-order-confirm). ⚠️ אישור-סופי = **mock** (toast "הזמנה אושרה", לא יוצר הזמנה-אמיתית — אין backend).
+🔧 **מול הפרוטוטייפ:** `computeCheckout`/`SYS_ORDERS` המלא לא הומר; אבל ה-card + install-engine **עמוקים מהפרוטוטייפ** (חיבוריות-פיזיקלית · BOM · ציון — אין מקבילה).
