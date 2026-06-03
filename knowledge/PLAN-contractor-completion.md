@@ -12,6 +12,17 @@
 
 ---
 
+## 🎨 סגנון-הבנייה (חובה — אומת מהקוד v5.96; התאם בדיוק, אל תנחש)
+1. **State:** Riverpod (`ConsumerWidget`/`ConsumerStatefulWidget`, לא setState).
+2. **ניווט:** אין go_router. **מסך-יעד** = `Navigator.push` + `Scaffold`+`AppBar` (דגם: `store_screen`/`updates_screen`/`install_studio_screen`). **תוכן-נקודתי** = `showModalBottomSheet`+`DraggableScrollableSheet`+`Directionality(rtl)`+`_SheetClose` (דגם: `_BomSheet`/`_SmartProductSheet`).
+3. **טאבים-במסך:** `StateProvider<int>` + segmented-toggle + `IndexedStack` (דגם `updates_screen`) · או chips (`store_screen._SectionChipsRow`).
+4. **עלה ב-dial:** `DialRow` (`widgets/dial.dart`) — circle+label-pill נפרדים.
+5. **אבני-בניין:** widgets פרטיים `_Xxx` (`_SheetSection`/`_SectionHeader`/`_…Row`/`_ChipWrap`).
+6. **Tokens:** `BsTokens` בלבד (space 4-32 · radiusCard 16 · radiusPill 999 · כתום #FF7A18 · Heebo). אסור מספרי-קסם/צבע-קשיח.
+7. **Toast:** `showToast(context, msg)`. **RTL · Material-3 · light.**
+
+---
+
 # שלב א׳ — כפתורים קיימים-ונגישים (העדיפות העליונה)
 *כל אלה נגישים-עכשיו במסך ומציגים "בבנייה"/toast. רק ממלאים תוכן.*
 
@@ -69,11 +80,14 @@
 - מקור: §1.
 ✅ **DoD:** לחיצה פותחת תוכן (לא 'בקרוב' ריק).
 
-## T9 · BS-dial → עלי 5 הפרסונות — ⏱️ ~1 יום
-🎯 **יעד:** עלי הפרסונות (מנהל/חנות/שליח/עובד) מציגים תוכן (כעלים/sheets).
-- צעדים: אתֵר `grep -rn "בבנייה" lib/screens/bs_dial_widget.dart` → החלף → תוכן-פרסונה כעלים.
-- מקור: persona-dashboards (port/preact/03).
-✅ **DoD:** עלי-פרסונה מציגים content.
+## T9 · פרסונות → **מסכים-מלאים** (חנות / שליח / עובד) — ⏱️ ~3 ימים
+🎯 **יעד:** כל פרסונה = **מסך-מלא חדש, בנוי בדיוק כמו האפליקציה** (תבנית `ManagerDashboardScreen`) — **לא** עלי-dial.
+- דפוס (לכל פרסונה): `XxxDashboardScreen` (Scaffold+AppBar) + טאבים (segmented כמו `updates_screen`) + `role_picker` → `Navigator.push` (במקום `OpenDial.bs`). תוכן ב-BsTokens/Riverpod/RTL.
+  - 🏪 **חנות** — 4 טאבים (בית/הזמנות/מלאי/פורטל), `kStoreSections` + picking 6-states + state-machine. מקור: `index.html` screen-store + proto/06 §2.
+  - 🛵 **שליח** — 4 (הרכב/pickup/active/פורטל), `kCourierSections`. מקור: screen-courier + proto/06 §3.
+  - 🦺 **עובד** — 3 (status-groups), `kWorkerSections`. מקור: screen-worker + proto/06 §4.
+- ⚠️ **מנהל = מדולג** (עדיפות-נמוכה — תוכנית-נפרדת `PLAN-manager-completion.md`; "שלי", לא קריטי).
+✅ **DoD:** 3 הפרסונות נפתחות כמסכים-מלאים עם תוכן-אמת.
 
 > **🏁 סוף שלב א׳ — הקבלן רואה תוכן-אמת בכל הכפתורים הנגישים.**
 
@@ -128,7 +142,7 @@
 1. ✅ הכפתור מציג content (לא toast 'בבנייה') · 2. ✅ verbatim מהמקור · 3. ✅ קלט inline · 4. ✅ `analyze`=0 + `test` ירוק + test/helper · 5. ✅ עובר שערי-`.githooks/pre-commit` · 6. ✅ push רק על "תדחוף"/"push".
 
 ## אומדן
-שלב א׳ (כפתורים קיימים) ≈ **3.5 ימים** · שלב ב׳ ≈ **8 ימים** · סה"כ ≈ **11–12 ימי-עבודה**.
+שלב א׳ (כפתורים קיימים T0–T8 ≈ 3.5 + פרסונות-מסכים T9 ≈ 3) ≈ **6.5 ימים** · שלב ב׳ ≈ **8 ימים** · סה"כ ≈ **14–15 ימי-עבודה**.
 *נפרד (P0 השקה, לא-קוד): iOS/Android signing + usage-strings + Huliot-R2 — ~1–2 ימים + חשבונות-חנות.*
 
 ## 🔒 תפיסות (claims log)
