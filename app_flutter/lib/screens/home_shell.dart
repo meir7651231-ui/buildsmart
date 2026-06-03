@@ -39,6 +39,21 @@ class HomeShell extends ConsumerWidget {
     final open = ref.watch(openDialProvider);
     final tabIndex = ref.watch(mainTabProvider);
 
+    // Benzi #4 — one-time "לאן לשלוח" popup on the FIRST product selection
+    // (cart 0→1, not on load), never at checkout. Persisted flag stops repeats.
+    ref.listen<List<SmartCartLine>>(smartCartProvider, (prev, next) {
+      if (prev != null &&
+          prev.isEmpty &&
+          next.isNotEmpty &&
+          !ref.read(shipToPromptedProvider)) {
+        ref.read(shipToPromptedProvider.notifier).state = true;
+        saveShipToPrompted();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) openShipToSheet(context, ref);
+        });
+      }
+    });
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: const _HomeAppBar(),

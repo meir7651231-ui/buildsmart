@@ -1,5 +1,6 @@
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
+import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
@@ -16,9 +17,14 @@ Future<void> main() async {
   registerPolyrollSpecs();
   // First-run gate: seed the welcome flag from prefs before the first frame.
   final welcomeSeen = await loadWelcomeSeen();
+  // Benzi #4: seed the one-time ship-to-prompt flag (absent → false → prompt).
+  final shipToPrompted = await loadShipToPrompted();
   runApp(
     ProviderScope(
-      overrides: [welcomeSeenProvider.overrideWith((ref) => welcomeSeen)],
+      overrides: [
+        welcomeSeenProvider.overrideWith((ref) => welcomeSeen),
+        shipToPromptedProvider.overrideWith((ref) => shipToPrompted),
+      ],
       child: const BuildSmartApp(),
     ),
   );

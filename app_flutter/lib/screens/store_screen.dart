@@ -77,6 +77,24 @@ final cartProjectProvider = StateProvider<String>((_) => 'בית דוד 3');
 /// Benzi #4 — optional, NON-binding "where to ship" address chosen during the
 /// purchase (empty = not set; checkout never requires it).
 final shipToProvider = StateProvider<String>((_) => '');
+
+/// Benzi #4 — whether the one-time "לאן לשלוח" popup has already been shown. It
+/// pops up ONCE, the first time a product is added to the cart (the selection
+/// stage) — never at checkout.
+///
+/// Default **true** (mirrors `welcomeSeenProvider`) so widget tests never trip
+/// the popup; `main()` overrides it with the persisted value, where an absent
+/// key → `false` → a fresh install sees the popup on its first product.
+const String kShipToPromptedKey = 'bs.shipto-prompted.v1';
+final shipToPromptedProvider = StateProvider<bool>((ref) => true);
+
+/// Read the persisted "already-prompted" flag (absent → false → will prompt).
+Future<bool> loadShipToPrompted() async =>
+    (await SharedPreferences.getInstance()).getBool(kShipToPromptedKey) ?? false;
+
+/// Persist that the one-time popup has been shown — so it never prompts again.
+Future<void> saveShipToPrompted() async =>
+    (await SharedPreferences.getInstance()).setBool(kShipToPromptedKey, true);
 final cartPaymentProvider = StateProvider<CartPaymentMethod>(
   (ref) => cartPaymentFor(ref.read(storeSettingsProvider).defaultPayment),
 );
@@ -1706,67 +1724,12 @@ class _StepBtn extends StatelessWidget {
   }
 }
 
-// ─── ship-to row (Benzi #4) ───────────────────────────────────────────────────
+// ─── ship-to popup (Benzi #4) — one-time, on the first product selection ──────
 
-/// Non-binding "where to ship" row, placed in the cart right after the delivery
-/// (time) options and before checkout. Tapping opens an optional address sheet —
-/// the order can be confirmed with or without it.
-class _ShipToRow extends ConsumerWidget {
-  const _ShipToRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ship = ref.watch(shipToProvider).trim();
-    final set = ship.isNotEmpty;
-    return Material(
-      color: const Color(0xFFF5F5F5),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => _openShipToSheet(context, ref),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              const Text('📍', style: TextStyle(fontSize: 18)),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('לאן לשלוח?',
-                        style: TextStyle(
-                            color: Color(0xFF1A1A1A),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 2),
-                    Text(
-                      set ? ship : 'לא חובה — אפשר להשלים גם אחרי ההזמנה',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          color: set ? BsTokens.brand : Colors.black54,
-                          fontSize: 12,
-                          fontWeight: set ? FontWeight.w600 : FontWeight.normal),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                  set
-                      ? Icons.edit_outlined
-                      : Icons.add_location_alt_outlined,
-                  size: 18,
-                  color: BsTokens.brand),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-void _openShipToSheet(BuildContext context, WidgetRef ref) {
+/// Non-binding "where to ship" popup. Auto-opened ONCE the first time a product
+/// is added to the cart (see `home_shell` + `shipToPromptedProvider`), never at
+/// checkout. The order can be confirmed with or without an address.
+void openShipToSheet(BuildContext context, WidgetRef ref) {
   final ctrl = TextEditingController(text: ref.read(shipToProvider));
   showModalBottomSheet<void>(
     context: context,
@@ -2253,10 +2216,6 @@ class _CheckoutSheet extends ConsumerWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 16),
-            // Benzi #4 — non-binding "where to ship": top row of the order sheet
-            // (after "הזמן עכשיו" opens it, before "אישור הזמנה").
-            const _ShipToRow(),
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(

@@ -200,7 +200,7 @@ Resets on department open + clear. Guarded by `departments_test`.
 | cart stepper (+ / − / לעגלה) | `qtyForKey` / `setQtyForKey` | ✅ |
 | saveCartToProject | show/hide the cart project selector | ✅ |
 | summary chips (פריטים בסל / הזמנות פתוחות / הצעות ספקים) | derived live: `cartItemCount` (cart+smart lines), `isOrderOpen` over `_kOrders`, offers single-sourced from the מכרז ספקים row badge | ✅ |
-| לאן לשלוח (Benzi #4) | `_ShipToRow` at the **top of the order-summary sheet** ("הזמן עכשיו" opens it, before "אישור הזמנה") → `_openShipToSheet`: a **non-binding** address popup (TextField + דלג/שמירה; order confirms with or without it). State `shipToProvider` | ✅ |
+| לאן לשלוח (Benzi #4) | **one-time** non-binding popup `openShipToSheet` (TextField + דלג/שמירה), auto-opened by `home_shell`'s `smartCartProvider` listener on the **first product add** (cart 0→1) — NOT at checkout. Guard `shipToPromptedProvider` (default true for tests; seeded in `main()` via `loadShipToPrompted`, persisted via `saveShipToPrompted`). Address → `shipToProvider`. Guarded by `shipto_prompt_test` | ✅ |
 | כתובות/חשבוניות/ספקים/השכרה/אחריות/ביומטרי/אשראי-יומי | — | ⛔ server/data |
 
 ## Install Studio (`install_studio_screen.dart` → `logic/install_engine.dart`)

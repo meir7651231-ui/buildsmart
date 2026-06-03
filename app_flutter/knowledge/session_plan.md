@@ -104,3 +104,13 @@ Owner: this session · Scope: `catalog_screen.dart` בלבד (search panel). א�
 - `catalog_screen`: default section 'בית'→'הכל' (drill-in עדיין מגדיר 'בית').
 - טסט עודכן: widget_test (boot על בית + 4 טאבים · dashboard 'אביזרים נלווים' ≥1).
   analyze 0 · 1084 ירוק · build ✓. אומת בצילום (4 טאבים + מתג).
+
+# Benzi #4 — תיקון: חלונית חד-פעמית בבחירת מוצר ראשונה ✅ (v5.94)
+משוב משתמש: "#4 צריך להיות חלונית קופצת חד-פעמית רק בפעם הראשונה שבוחרים מוצר, לא בסוף הזמנה".
+(זו הדרישה המקורית "בשלב הבחירה".) הוסר מה-checkout, הוחלף ב-auto-popup חד-פעמי.
+- הוסר `_ShipToRow` + השימוש ב-checkout sheet. `_openShipToSheet`→`openShipToSheet` (public).
+- `shipToPromptedProvider` = `StateProvider<bool>(=>true)` (כמו welcomeSeen — tests מדלגים);
+  `main()` override מ-`loadShipToPrompted` (חסר→false→מציג); `saveShipToPrompted` משמר.
+- `home_shell`: `ref.listen(smartCartProvider)` — על 0→1 + !prompted → popup פעם אחת + persist.
+- בדיקה: `shipto_prompt_test` (2, load/save). product_journey ירוק (default true → אין popup).
+  analyze 0 · 1086 ירוק · build ✓. אומת בצילום (popup על הוספת מוצר ראשון).

@@ -34,3 +34,17 @@
 - ✅ טאב חנות — StoreScreen (ללא שינוי, מיקום חדש).
 - ✅ `flutter analyze` lib — 0 errors · `flutter test` — 1084 ✅ · `build web` — ✓.
 - bottom-nav עקבי בכל הטאבים; הסל = FAB צף (מוסתר ב-חנות).
+
+---
+
+## v5.94 — "לאן לשלוח" חלונית חד-פעמית בבחירת מוצר ראשונה (בנצי #4, תיקון)
+**שינוי:** `store_screen` (הוסר `_ShipToRow` מה-checkout; `openShipToSheet` public +
+`shipToPromptedProvider`) + `home_shell` (listener על `smartCartProvider`) + `main`.
+החלונית עברה מ-checkout ל-auto-popup חד-פעמי בהוספת המוצר הראשון.
+
+**אימות ויזואלי (screenshot, נסקר):**
+- ✅ הוספת מוצר ראשון (cart 0→1) → חלונית "לאן לשלוח?" קופצת אוטומטית מלמטה,
+  לא-מחייבת ("לא חובה — אפשר לאשר גם בלי כתובת"), שדה כתובת + דלג/שמירה.
+- ✅ ה-checkout sheet כבר לא מכיל את שורת ה-ship-to.
+- ✅ `flutter analyze` lib — 0 errors · `flutter test` — 1086 ✅ · `build web` — ✓.
+- חד-פעמיות: `shipToPromptedProvider` נשמר (prefs) → לא קופץ שוב.
