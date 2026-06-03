@@ -49,6 +49,8 @@
 | `18-legacy-knowledge-index.md` | אינדקס `app/knowledge` הישן (ADR · R1–R9 · 43 INSP) | app/knowledge |
 | `19-feature-source-matrix.md` | מטריצת פיצ'ר × מקור (אב-טיפוס/Preact/Flutter) | חוצה-מקורות |
 | `20-infra-build-tooling-protocol.md` | build/native(Capacitor)/CI/extract-catalog/protocol | תשתית |
+| `21-protocols-spine-gates-enforcement.md` | ⭐ עולם-הפרוטוקולים (1): MASTER_PROTOCOL R1–R9 · 116 שערים · 4 שכבות-אכיפה · scripts/CI | app_flutter (whats-happening) |
+| `22-protocols-agents-process-specialized.md` | ⭐ עולם-הפרוטוקולים (2): 6 סוכנים · PLAYBOOK · סולם L0–L7 · 10 פרוטוקולים-ייעודיים · 15 ADRs · stuck_log | app_flutter (whats-happening) |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
