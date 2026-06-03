@@ -1,122 +1,98 @@
-# תוכנית — סיום "לוח קבלן": גל 1 (חיווט כפתורים קיימים) → גל 2 (פיצ'רים חסרים)
+# תוכנית-עבודה — סיום "לוח קבלן"
 
-> **הגדרת-המשתמש (2026-06-03):** לוח-קבלן = אפליקציית-ה-Flutter הקיימת (`app_flutter/`, סגנון-וואטסאפ, 4 טאבים). "להכניס את כל מידע-הקבלן **בלי כפתורים חדשים**. קודם חיווט-מלא על בסיס הכפתורים הקיימים, אחר-כך הפיצ'רים החסרים."
-> ביצוע על **`claude/whats-happening-LyY9G`** דרך הפרוטוקול (116 שערים, דוחות 21–22). מסמך זה = תכנון.
-
-## עיקרון-העל (אומת מול הקוד)
-- **כל עלי-התפריט הקיימים = toast "בבנייה"** היום (`menu_dial_widget.dart:118` → `showToast('${s.title} — בבנייה')`; גם ב-`bs_dial_widget.dart:79`). ⇒ **גל 1 = להחליף את ה-toast בהתנהגות-אמת. אפס כפתורים/מסכים חדשים.**
-- מקור-אמת verbatim: **`app_flutter/knowledge/port/proto/04-contractor-projects-tasks.md`** (546ש', כל String/מספר/`[L#]`).
-- **R2** (אין view חדש) · **R6/R8** (מחרוזות verbatim) · **R9** (`prompt`→inline) · server/print/camera/OCR→toast-stub.
-- **קדימות:** פיצ'ר שיש לו כפתור (גל 1) לפני פיצ'ר בלי כפתור (גל 2).
-
-## ⭐ מפת-העל — תוכן → משטח-קיים, לפי נגישות (סקר 2026-06-03, אומת בקוד)
-> תיקון-קריטי: **תפריט-ה-dial וחיפוש-ה-dial לא-נגישים** (`OpenDial.menu`/`.search` לא מוצבים בשום מקום — `home_shell` רק *מציג* אותם). רק BS-dial נגיש (דרך לוגו-BS → `role_picker:129`). לכן "כפתורים קיימים" = 2 סוגים:
-
-### 🟢 TIER 1 — נגישים-עכשיו-וריקים (התוכן הכי קל; אפס טריגר)
-| משטח (נתיב) | מצב | תוכן (מקור) |
-|---|---|---|
-| קטלוג ⋮ → סרוק תוכנית (`_ScanPlanSheet`) | sheet קיים, 4 toast (`home_shell:891`) | PLAN_TYPES §9 (zones/חנויות/cart) |
-| קטלוג ⋮ → חלופות זולות | toast (`:627`) | **`cheaperAlternativeBrand` helper קיים** |
-| קטלוג ⋮ → השוואת מחירים | toast (`:629`) | store-compare §9 / מכרז |
-| חנות → services | items בלי-flow | RFQ/RMA/MSDS/rental/deposits §3 |
-| חנות → orders | items | ORDER_STATUS + doc-OCR §9d |
-| התראות → budget/safety | sections | thresholds §3 / SAFETY_TIPS §5 |
-| שיחות (auto-reply) | בסיסי | BOT_KB §J |
-| מחלקות "בקרוב" (5) | toast 'בקרוב' | קטגוריות §1 |
-
-### 🟡 TIER 2 — בנויים-אבל-מוסתרים (W1.−1: טריגר `OpenDial.menu` → 41 עלים)
-finance-hub(10 §4) · site-hub(10 §5) · stock(2 §8) · scan(4 §9) · AI(9) · projects(3 §2). + search-dial trigger.
-
-### 🔵 TIER 3 — BS-personas (נגיש; dial-content R2-safe)
-manager/store/courier/worker תת-עצים → proto persona-dashboards כעלים.
+> **מטרה:** להכניס את כל תוכן-הקבלן (מהאב-טיפוס) לתוך אפליקציית-ה-Flutter הקיימת — **בלי כפתורים חדשים**.
+> **אפליקציה:** `app_flutter/` (Flutter · סגנון-וואטסאפ · 4 טאבים: מחלקות/שיחות/התראות/חנות).
+> **ביצוע:** ענף `claude/whats-happening-LyY9G` · דרך 116 השערים (דוחות 21–22) · literal-push-gate.
+> **מקור-אמת:** `app_flutter/knowledge/port/proto/04-contractor-projects-tasks.md` (546ש' verbatim) + proto §1–§9.
+> **כללים:** R2 (אין view חדש · dial-leaf בלבד) · R6/R8 (מחרוזות verbatim) · R9 (`prompt`→inline) · server/print/camera/OCR→toast-stub.
 
 ---
 
-## מצאי-הכפתורים הקיימים (מ-`data/menu_trees.dart`, אומת)
-| dial-tree | כפתורים | סטטוס היום |
-|---|---|---|
-| `kHomeTree` 🤖 | 9 כלי-AI | toast "בבנייה" |
-| `kHomeTree` 📐 | 4 סוגי-תוכנית (סריקה) | toast |
-| `kHomeTree` 📦 | 2 (מחסן/אתר) | toast |
-| `kHomeTree` 📋 | 10 כלי ניהול-אתר | toast |
-| `kCartTree` 🛒/📦 | סל + 6 שירותים | סל=אמת; שירותים=toast |
-| `kFinanceHub` | 10 פיצ'רי-פיננסים | toast |
-| `projectsTree()` | 3 פרויקטים + מרכז-פיננסים | toast |
-**סה"כ גל-1 = ~41 עלים קיימים לחיווט.**
+## חלק א׳ — מודל-העבודה (אומת בקוד 2026-06-03)
+
+**3 שכבות-נגישות של הכפתורים הקיימים:**
+
+| Tier | מהות | נגישות | מספר |
+|---|---|---|---|
+| 🟢 **1** | משטחים נגישים-עכשיו שמציגים "בבנייה" | מיידי, אפס-טריגר | ~9 |
+| 🟡 **2** | תפריט-dial בנוי אבל **מוסתר** (`OpenDial.menu` לא-מוצב) | צריך טריגר-אחד | 41 עלים |
+| 🔵 **3** | BS-personas (מנהל/חנות/שליח/עובד) | נגיש (לוגו-BS) | 4 תת-עצים |
+
+**אסטרטגיה:** תשתית → Tier-1 (ניצחונות-נגישים) → טריגר → Tier-2 → חסרים+personas.
+**עיקרון anti-כפילות:** לוגיקה משותפת (scan, services) נבנית **פעם-אחת** וצפה בכמה משטחים.
 
 ---
 
-# 🌊 גל 1 — חיווט מלא של הכפתורים הקיימים (~6.5 ימים)
+## חלק ב׳ — רצף-ה-Sprints (מסודר לפי תלות + ערך)
 
-## W1.0 — תשתית (חוסם — חייב ראשון) ≈1 יום
-data verbatim → Dart immutables + Riverpod StateNotifiers + helpers (proto/04 §0,§דata-notes).
-- seeds: `PROJECTS`(3) · `budgetCategories`(4)+`projectBudget` · `subcontractors`(3) · `approvalQueue`(2) · `PAYMENT_TERMS`(4) · `FX_RATES`/`BUILD_INDEX` · `GANTT_TASKS`(6) · `snagList`(2) · `inspections`(2) · `SAFETY_TIPS`(5) · `SITE_TREE`(3) · `ARCHIVED_PROJECTS`(3) · `STOCK_DEMO`(11) · `PLAN_TYPES`(4+zones/stores).
-- helpers + מתמטיקה-מדויקת: `fMoney`/`caToday` · pct=**66%** · ROI×1.42 · index +6.10% · invoice-split-לפי-משקל · triangular-weights. **gate-42: test לכל helper.**
+### 🔧 Sprint 0 — תשתית (≈1 יום) · **חוסם הכל**
+| # | משימה | מקור | DoD |
+|---|---|---|---|
+| 0.1 | data-seeds verbatim → Dart immutables (PROJECTS·budget·finance·site·stock·PLAN_TYPES·tasks·…) | §0,§2–§9 | counts-test verbatim |
+| 0.2 | StateNotifiers (mutable: projects/tasks/budget/stock/snag/…) | §port-notes #1 | persist-test |
+| 0.3 | helpers `fMoney`/`caToday` + מתמטיקה (pct=66%·ROI×1.42·index+6.10%·weights) | §0,§3,§4 | gate-42 test/helper |
 
-## W1.A — מרכז-פיננסים: 10 כפתורים (`kFinanceHub`) ≈1.5 ימים
-*proto/04 §4. כל leaf מחליף toast ב-render-אמת.*
-| כפתור | מקור | מהות |
+### 🟢 Sprint 1 — Tier-1: ניצחונות-נגישים (≈2 ימים) · ערך-מיידי
+| # | כפתור (נתיב) | היום | תוכן | מקור |
+|---|---|---|---|---|
+| 1.1 | קטלוג ⋮ → סרוק תוכנית | sheet, 4×toast | PLAN_TYPES מלא (zones/חנויות/cart) | §9 |
+| 1.2 | קטלוג ⋮ → חלופות זולות | toast | `cheaperAlternativeBrand` (**helper קיים**) | helper |
+| 1.3 | קטלוג ⋮ → השוואת מחירים | toast | השוואת-חנויות | §9/store |
+| 1.4 | חנות → services | items בלי-flow | RFQ/RMA/MSDS/השכרה/פקדונות (**R9 inline**) | §3 |
+| 1.5 | חנות → orders | items | ORDER_STATUS + doc-OCR (OCR→toast) | §9d |
+| 1.6 | התראות → budget/safety | sections | thresholds 80/90% · SAFETY_TIPS×5 | §3,§5 |
+| 1.7 | שיחות → chatbot | auto-reply בסיסי | BOT_KB (kw→תשובה) | §J |
+| 1.8 | מחלקות "בקרוב" (5) | toast 'בקרוב' | קטגוריות (חשמל/בנייה/גמר/בטיחות) או honest-stub | §1 |
+
+### 🟡 Sprint 2 — פתיחת-התפריט (≈0.5 יום) · **חוסם את Tier-2**
+| # | משימה | הערה |
 |---|---|---|
-| 📈 הצמדה למדד | §4 finIndex `[L19520]` | base121.3/cur128.7/+6.10%/צמוד |
-| 🗓️ תנאי תשלום | finPayTerms `[L19545]` | 4 תנאים + בחירה |
-| 👷 קבלני משנה | finSubs `[L19569]` | 3 subs + ניצול |
-| ✅ אישורי רכש | finApprovals `[L19594]` | **RBAC `requirePerm`** + audit + push |
-| 🔔 התראות חריגה | finThresholds `[L19633]` | 80/90/100% gauge |
-| 📊 ניתוח ROI | finROI `[L19657]` | ×1.42 |
-| 🧾 פיצול חשבוניות | finInvoiceSplit `[L19678]` | ₪12,800 לפי-משקל |
-| ⏰ פיצויים וקנסות | finPenalties `[L19698]` | **R9 inline** + ₪500/יום |
-| 📄 דוחות PDF | finReports `[L19729]` | **toast-stub** (print) |
-| 💱 רכש במט״ח | finFX `[L19773]` | מחשבון USD/EUR/GBP |
+| 2.0 | לחווט טריגר `OpenDial.menu` (מחווה/פקד R2-safe) → 41 העלים נגישים | פער-ידוע (LAUNCH_READINESS P1) |
+| 2.1 | (אופ׳) טריגר `OpenDial.search` (קולי/ברקוד כבר אמיתיים) | — |
 
-## W1.B — ניהול-אתר: 10 כפתורים (`kHomeTree` 📋) ≈1.5 ימים
-*proto/04 §5.*
-📅 גאנט(6, RTL) · 🔧 ליקויים(**R9 inline**+fix) · 🏢 קומה·דירה·חדר(SITE_TREE) · 📍 נוכחות(clock GPS-demo) · 📓 יומן(**R9 inline**) · 🦺 בטיחות(5 tips+ack→push) · 🔗 תלויות(4) · 📸 צילום(**toast camera**) · 🔍 ביקורות(**R9 inline**+complete) · 🗄️ ארכיון(3).
+### 🟡 Sprint 3 — Tier-2: תוכן 41 העלים (≈5 ימים)
+| # | קבוצה | כפתורים | מקור | אומדן |
+|---|---|---|---|---|
+| 3A | מרכז-פיננסים | 10 (מדד/תשלום/subs/אישורים-RBAC/חריגה/ROI/פיצול/קנסות/דוחות/מט״ח) | §4 | 1.5 |
+| 3B | ניהול-אתר | 10 (גאנט/ליקויים/מיקום/נוכחות/יומן/בטיחות/תלויות/צילום/ביקורת/ארכיון) | §5 | 1.5 |
+| 3C | מלאי | 2 (מחסן/אתר + move) | §8 | 0.25 |
+| 3D | סריקה (תפריט) | 4 — *משתף לוגיקה עם 1.1* | §9 | 0.5 |
+| 3E | AI | 9 (ברקוד/דיבור אמיתיים · השאר honest-stub) | AI-hub | 0.5 |
+| 3F | פרויקטים | 3 (רשימה/switch/סטטוס) | §2 | 0.5 |
 
-## W1.C — מלאי: 2 כפתורים (`kHomeTree` 📦) ≈0.25 יום
-*proto/04 §8.* מחסן/אתר · `STOCK_DEMO`(11) · `moveStock` · empty-states.
-
-## W1.D — סריקת-תוכנית: 4 כפתורים (`kHomeTree` 📐) ≈0.75 יום
-*proto/04 §9.* אינסטלציה/חשמל/אדריכלות/גמר · `PLAN_TYPES`+zones+stores · `bestStore`(השוואה) · `addScanToCart` · OCR→**toast-stub**. canvas=ויזואל-סטטי (לא view).
-
-## W1.E — AI hub: 9 כפתורים (`kHomeTree` 🤖) ≈0.5 יום
-חיזוי-מלאי · **ברקוד(אמת — mobile_scanner קיים)** · **דיבור(אמת — speech_to_text)** · חלופות-זולות · סריקת-תוכניות(→W1.D) · התאמה-משולשת(→VerifiedSpec) · מזג-אוויר · בלאי · analytics. *רוב = honest-toast (server-side); ברקוד/דיבור כבר אמיתיים — לחווט.*
-
-## W1.F — הזמנות/שירותים: 6 כפתורים (`kCartTree` 📦) ≈0.75 יום
-*proto/03.* השכרת-כלים · פקדונות · החזרה(RMA) · מכרז-ספקים(RFQ) · גיליונות-בטיחות(MSDS) · השוואת-מחירים. (חלק demo-stubs ב-store היום → לחווט מלא או honest-stub.)
-
-## W1.G — פרויקטים: 3 כפתורים (`projectsTree`) ≈0.5 יום
-*proto/04 §2.* רשימת `PROJECTS` · `switchProject`(cart per-project) · סטטוס-אתר. (עריכה/הוספה = **R9 inline**.)
+### 🔵 Sprint 4 — פיצ'רים-חסרים + personas (≈4 ימים)
+| # | פיצ'ר | הערה | מקור | אומדן |
+|---|---|---|---|---|
+| 4A | מערכת-משימות (מנהל/עובד · מכונת-סטטוס 5) | אין-לו-כפתור → צריך נקודת-תליה | §6 | 1 |
+| 4B | פרויקט-חכם "מאפס עד מסירה" (9 stages) | תלוי-diagram | §7 | 1 |
+| 4C | תקציב-בסיסי (box/detail/editor + 4 קט') | קפל-לפרויקטים | §3 | 0.5 |
+| 4D | תוכן-בית (reorder · product-cards) | — | §1 | 0.5 |
+| 4E | BS-personas (מנהל/חנות/שליח/עובד) | dial-content R2-safe | persona-dashboards | 1 |
 
 ---
 
-# 🌊 גל 2 — הפיצ'רים החסרים (אין כפתור היום) (~3.5 ימים)
-*תוכן-קבלן מ-proto/04 שאין לו leaf קיים → כאן צריך להחליט איפה לתלות (R2: dial-leaf, לא view).*
+## חלק ג׳ — אומדן ו-milestones
 
-## W2.A — מערכת-המשימות (proto/04 §6) ≈1 יום
-5 משימות + מכונת-סטטוס 5-מצבים · worker-submit→review **auto-advance** · manager approve/reject · תצוגת-מנהל/עובד · `WORK_LOG`. *(העלה 📋 הנוכחי מוביל ל-ניהול-אתר, לא לזה — צריך נקודת-תליה.)*
+| Sprint | תוכן | אומדן | Milestone |
+|---|---|---|---|
+| 0 | תשתית | 1 יום | data+helpers ירוקים |
+| 1 | Tier-1 נגיש | 2 ימים | **🎯 הקבלן רואה תוכן-אמת בלי טריגר** |
+| 2 | טריגר-תפריט | 0.5 | התפריט נפתח |
+| 3 | Tier-2 (41) | 5 ימים | **🎯 פיננסים+אתר+מלאי+סריקה חיים** |
+| 4 | חסרים+personas | 4 ימים | **🎯 parity-קבלן מלא** |
+| | **סה"כ** | **~12.5 ימים** | (ניכוי-כפילות scan/services ≈ −1) → **~11–12** |
 
-## W2.B — פרויקט-חכם "מאפס עד מסירה" (§7) ≈1 יום
-9 day-stages · done-marking לא-מסודר · `smartStepDone` · day-picker · diagram-embed (תלוי בקטלוג).
-
-## W2.C — תקציב-בסיסי (§3) ≈0.5 יום
-`projectBudget` box/detail/editor + 4 קטגוריות (provider יחיד). *(מרכז-הפיננסים ≠ תקציב-בסיסי; כדאי לקפל לפרויקטים.)*
-
-## W2.D — תוכן-בית (§1) ≈0.5 יום
-reorder-history(DEMO_HISTORY 2) · home product-cards(3) · smart-work-route hero.
-
-## W2.E — flows מפורטים של אתרים (§2) ≈0.5 יום
-site-status-sheet · site-editor · site-picker (מעבר ל-3 השמות).
+**נפרד (לא-קוד · P0 השקה):** iOS usage-strings+signing · Android keystore+Play · Huliot R2-crops · ~1–2 ימים + חשבונות-חנות.
 
 ---
 
-## סיכום
-| גל | תוכן | אומדן |
-|---|---|---|
-| **1** | חיווט 41 הכפתורים הקיימים (תשתית→פיננסים→אתר→מלאי→סריקה→AI→שירותים→פרויקטים) | **~6.5 ימים** |
-| **2** | פיצ'רים חסרים (משימות · פרויקט-חכם · תקציב · בית · אתרים) | **~3.5 ימים** |
-| | **סה"כ parity-קבלן מלא** | **~10 ימים** |
+## חלק ד׳ — Definition-of-Done (לכל משימה)
+1. ✅ הכפתור מציג content-אמת (לא toast 'בבנייה')
+2. ✅ מחרוזות/מספרים **verbatim** מהאב-טיפוס (R6/R8)
+3. ✅ קלטים = R9-inline (לא prompt/modal) · אין view-מסך-מלא חדש (R2)
+4. ✅ `flutter analyze`=0 · `flutter test`=ירוק · test לכל helper (gate-42)
+5. ✅ עובר 116-מספור-השערים + ANTIPATTERN-clean (gate-103/111)
+6. ✅ push רק אחרי אישור-מילולי (`תדחוף`/`push`)
 
-*נפרד: חוסמי-השקה P0 (קונפיג-חנות, לא-קוד) — iOS/Android signing + usage-strings. ~1–2 ימים + חשבונות.*
-
-## נקודת-התחלה
-**W1.0 (תשתית)** — חוסם את כל גל 1. בלי ה-data-seeds + helpers אי-אפשר לחווט אף כפתור. אחריו W1.A (פיננסים) — 10 כפתורים, ההשפעה-הכי-גדולה-לקבלן.
+## חלק ה׳ — נקודת-התחלה
+**Sprint 0 → Sprint 1.** התשתית חוסמת הכל; אחריה Tier-1 נותן ערך-נראה-לקבלן מיד בלי תלות בטריגר. רק אז Sprint 2 (טריגר) פותח את Tier-2.
