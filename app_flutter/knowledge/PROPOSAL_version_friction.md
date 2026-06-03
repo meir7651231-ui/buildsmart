@@ -87,3 +87,38 @@ git add lib/version.g.dart
 2. ה-changelog note — להשאיר `kReleaseNote` (קצר, מכוון) או למחוק לגמרי מה-UI?
 3. fast pre-gate — איזה "אזור שהשתנה" tests להריץ? לפי תיקיית-הקובץ-שהשתנה? יש סיכון לפספס רגרסיה חוצת-מודולים?
 4. האם פספסתי concern שראית בשטח (אתה הכי נכווית מזה)?
+
+---
+
+## ✅ ביקורת בנצי (2026-06-03) — הכרעות מעודכנות
+
+בנצי (שנכווה ישירות) ביקר את ההצעה. **התובנות שלו גוברות על המלצותיי המקוריות** — הוא הפריד שתי כוויות שערבבתי:
+- **כוויה 1 (test-trap):** טקסט-כפתור במחרוזת מרונדרת → 10 journey tests מתו.
+- **כוויה 2 (rebase-magnet):** הענף זז +11, כל קונפליקט על שורת-הגרסה.
+
+### ש1 — גישה C (לא A): build נגזר מ-git → קובץ gitignored
+בנצי דחה את A: ב-**rebase** של commit-stack, כל commit שינה `kBuild` (47→48→49) ו-origin כבר ב-52 → קונפליקט על **כל** commit ב-stack. בדיוק מה שכווה אותו. B (`rev-list --count`) אפס-conflict אבל `build=0` ב-dev מאבד את ה-signal.
+**גישה C המנצחת:** ה-hook מחשב `kBuild=$(git rev-list --count HEAD)` וכותב ל-`version.g.dart` ש**ב-.gitignore** (לא tracked). אפס-conflict (אין שורה למזג) + אין build=0 (תמיד נגזר). CI/build עם fallback אם הקובץ חסר. build לא-דטרמיניסטי בין מכונות לפני push — אבל זה build-number, לא נכונות.
+
+### ש2 — למחוק `kReleaseNote` מה-UI לחלוטין
+בנצי נחרץ: `kReleaseNote` הוא אותו tar-pit בקובץ אחר. שדה-טקסט-חופשי מרונדר → סוכן ישים שם טקסט-כפתור שוב → journey tests יישברו שוב. **changelog חי רק ב-markdown** (`STATUS.md`/`CARRY_FORWARD.md`). אם UI-changelog נדרש מוצרית — מאחורי `Key('release_note')` ש-journey tests **מסננים במפורש**.
+
+### ש3 — fast-gate = analyze + כל ה-journey suite **תמיד**
+scope-by-directory **מסוכן** ובדיוק יפספס את הבאג של בנצי: הוא נגע ב-`home_shell` (shell) ושבר journey tests חוצי-מודול. fast-gate שרץ רק על "screens/" היה מאשר ירוק → 10 כשלים מתגלים רק ב-push.
+**כלל:** (1) תמיד analyze מלא; (2) תמיד **כל ה-journey/integration suite** (cross-module guard, בד"כ מיעוט); (3) unit/widget — רק תיקיות שהשתנו; (4) shell/router/state-גלובלי (`home_shell`, providers משותפים) → **תמיד מפעיל full journey**, אף פעם לא scope מצומצם.
+
+### ש4 — הפספוס הקריטי: לתקן שערים 11+12+59 **יחד**
+1. **שער 59 הוא ה-conflict-magnet האמיתי** — הוא דורש שורת `+...vX.YY` ב-diff של `home_shell`, וזה מה שמאלץ עריכה ידנית בכל commit. בגישה C הקובץ gitignored → שער 59 חייב לבדוק **תוצאה** (build נגזר תקין), לא **diff**. שער שדורש diff = החזרת כל הבעיה בשם חדש.
+2. **שערים 11+12 grep-ים `vX.YY` מ-`home_shell.dart`** (שורות 139-142). אחרי ההפרדה ל-`version.g.dart` המחרוזת תזוז → 11/12 יישברו/יתפסו match שגוי. ה-grep חייב לעבור ל-`version.g.dart`. **חייבים לתקן את שלושת השערים באותו patch.**
+3. **drift שקט חדש:** build אוטומטי-נסתר → סוכן ישכח לבמפ `kVersionLabel` ב-release מכוון. שער 12 (label↔STATUS) חייב להישאר חזק + ה-hook ידפיס את ה-label ל-stdout בכל commit (לשמר visibility שאיבדנו).
+
+### TL;DR — העיצוב הסופי המוסכם
+| נושא | הכרעה |
+|---|---|
+| build | **גישה C** — git-derived → `version.g.dart` ב-.gitignore |
+| changelog | **למחוק מ-UI** — markdown בלבד (או `Key` מסונן) |
+| fast-gate | analyze + **כל journey תמיד** + unit לתיקיות-שהשתנו; shell/state → full |
+| שערים | תקן **11+12+59 יחד**; 59 בודק תוצאה לא diff; 11/12 grep ל-version.g.dart |
+| visibility | hook מדפיס `kVersionLabel` ל-stdout בכל commit |
+
+**נימוק-על (בנצי):** הכאב לא מ-render ולא מ-git — אלא מ**שער שאילץ עריכה ידנית של שורה משותפת** + **טקסט-מוצר בעץ-ה-tests**. כל פתרון שמשאיר אחד מהשניים — מחזיר את הכוויה בשם חדש.
