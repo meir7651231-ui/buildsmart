@@ -39,3 +39,15 @@
 4. `expressFee` (אם express) → `taxable = subtotal+shipping+express` → **`vat = taxable·VAT_RATE`** → `grandTotal`.
 מחזיר `{storeGroups, itemsSubtotal, shippingTotal, shipmentShipping, expressFee, vat, grandTotal, itemCount}`.
 עריכת-סל: `stepCartQty`/`removeCartItem`/`syncCartToProject` · `openCartSitePicker`/`chooseCartSite` · `openPaymentDetail`.
+
+---
+
+## 🔄 Preact (`app/src/components/`) — דלתא (כרטיס-מוצר + עץ)
+> `category-circles` + `product-grid` + `product-card` + `product-sheet`.
+
+⬆️ **שודרג:**
+- ניווט-קטגוריות → **`category-circles`** (drill-down circles לפי עץ-`CATEGORIES`, `childrenOf`/`drillInto`).
+- כרטיס-מוצר → `product-card` + `product-grid` (3 עמ׳); **`product-sheet`** (`ProductSheet`, `psheet__*`) = sheet-פרטי עם תמונה/מחיר/ספק.
+- הסל → signals (`setQty`/`incQty`/`decQty`, stepper), לא `computeCheckout`.
+
+➖ **הוחסר/פושט:** **מנוע עץ-המוצרים המלא** (`overlay#overlay` · `DIAGRAMS` · `ACC_GROUPS` · סדר-הרכבה · סורק) — Preact מציג מוצר + `accessories[]` (מ-catalog) בכרטיס/sheet, בלי דיאגרמות-שלבים/assembly-order/scan. `computeCheckout`/`checkout` המלא **לא הומר** (פרסונת-קבלן = catalog+cart פשוט).

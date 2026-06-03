@@ -27,3 +27,18 @@
 
 ---
 **תובנה:** החיפוש מאחד 3 מקורות — יעדי-ניווט (`NAV_DESTINATIONS`) · אינדקס-תוכן (`CONTENT_INDEX`) · מוצרי-קטלוג — ל-suggest אחד עם fuzzy + `kw`. 3 שורות-חיפוש (בית/קטלוג/catnav) חולקות את אותו מנוע.
+
+---
+
+## 🔄 Preact (`app/src/components/search/` + `lib/`) — דלתא (חיפוש = FAB-dial)
+> `search-panel` + 6 submenus + `tools-dial` + `scope-chips` + `results-list` · `lib/search.ts`/`voice.ts`/`barcode.ts` · `store/search-store.ts` · `data/search-index.ts`.
+
+⬆️ **שודרג:**
+- **3 שורות-חיפוש → search-FAB יחיד** (R1) שפותח `SearchPanel` (input + `scope-chips` + `results-list`).
+- fuzzy → `lib/search.ts`; `NAV_DESTINATIONS`/`CONTENT_INDEX` → `search-index.ts`/`search-store.ts`.
+
+➕ **נוסף — tools-dial בחיפוש** (5 כלי-משנה): **🎤 voice** (`submenu-voice`+`lib/voice.ts`) · **📷 barcode** (`submenu-barcode`+`lib/barcode.ts`) · ⚙️ filters · ↕️ sort · ▦ catalog (`submenu-catalog`).
+- ⭐ **voice+barcode הועברו ממרכז-AI (G) → חיפוש** (בפרוטוטייפ `aiVoiceTask`/`aiBarcodeScan` היו ב-AI-hub).
+- **קטלוג עבר ל-search-FAB** (`submenu-catalog`) — מול tab נפרד בפרוטוטייפ.
+
+➖ **הוחסר:** מנוע-AI המלא (G) — רק voice+barcode שרדו; predict-stock/alternatives/3way/weather/wear-detect לא הומרו.

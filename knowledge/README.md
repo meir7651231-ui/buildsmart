@@ -103,4 +103,5 @@
 | `01` עיצוב | tokens זהים + סקאלות; מערכת-dial/fab/float נטו-חדשה (R1/R9) | ✅ |
 | `03/04/10` נתונים+מנוע | catalog/variants/tools/suppliers **auto-gen מ-index.html**, מטוייפים; brands נגזם; הסל פושט | ✅ |
 | `06` הגדרות | renderSettings(sheet)→עץ-dial (R3) · LEAF_BINDINGS · PROFILE_TREE · R9 inline-edit | ✅ |
-| `07–09,11–17` חיפוש/סל/QA/פרסונות | — | ⬜ בעבודה |
+| `07/08` חיפוש/מוצר | search=FAB-dial (voice/barcode מ-AI) · category-circles · product card/sheet; עץ-מלא לא הומר | ✅ |
+| `09,11–17` סל/QA/פרסונות/hubs | — | ⬜ בעבודה |
