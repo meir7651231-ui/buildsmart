@@ -3,7 +3,7 @@
 > "שאר הקבצים" — packaging/CI/tooling + שכבת-הפרוטוקול. לא ידע-מוצר, אבל חלק מהפרויקט.
 
 ## ⭐ אריזה ל-native (חנויות)
-- **Preact → Capacitor** (`app/capacitor.config.ts`): `appId:'com.buildsmart.app'` · `appName:'BuildSmart'` · `webDir:'dist'` + ios(`contentInset:always`)/android. כלומר ה-Preact (web) **נארז ל-native iOS/Android** דרך Capacitor → **תיקון לדלתא 02: Preact אינו רק-web.**
+- **Preact → Capacitor** (`app/capacitor.config.ts`): `appId:'com.buildsmart.app'` · `webDir:'dist'` + ios/android. 🔧 **תיקון (app/README):** Capacitor **מוגדר אך טרם-נוסף** — "תיוסף בשלב הבא"; `npm i @capacitor/ios/android` + `npx cap add` עדיין ממתינים. כלומר native-packaging **מתוכנן, לא פעיל**. (Preact כיום = web/PWA.)
 - **Flutter → native מובנה** (`flutter build ios/android/web`).
 → **שני מסלולים לחנויות:** Preact+Capacitor · Flutter-native.
 

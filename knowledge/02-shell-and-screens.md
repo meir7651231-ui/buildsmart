@@ -311,3 +311,4 @@ cart/orders→cart, catnav→catalog).
 ⬆️ **dials (bs/search/menu)** — אותו pattern כמו Preact (`menu_dial_widget`/`search_dial_widget`/`bs_dial_widget` + `widgets/dial.dart`), אך **overlay מעל 4-הטאבים** (`openDialProvider` + scrim), לא routing.
 ➕ **נוסף:** **שיחות + התראות כטאבים ראשיים** (`chats_screen` 914 · `notifications_screen` 906) — לא היו בפרוטוטייפ/Preact כמסכים.
 ⚠️ **חריגת-R2:** מסכי-טאב מלאים (catalog/store) במקום הכל-dial — בסגנון WhatsApp, שונה מ-"אין חלון" של Preact.
+⚠️ **README↔code drift:** `app_flutter/README` מתאר **Phase-0** (5-FAB rail: BS·Search·BS-mode·Menu·BS + dial-menu בית/הפרויקטים/רכש/הגדרות, R1-R9) — אבל `home_shell.dart` בפועל = **WhatsApp 4-tab** (קטלוג/שיחות/התראות/חנות). הקוד **התפתח מעבר ל-README** וחרג מ-R1/R2 (README מיושן, roadmap Phase 1-7 לא-מסומן).
