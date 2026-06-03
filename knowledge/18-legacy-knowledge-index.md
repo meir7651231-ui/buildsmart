@@ -39,7 +39,10 @@
 
 ## INSP — 43 ביקורות
 `inspections/INSP-0001→0044` — כל commit של menu/settings/dial עבר Inspector subagent (typecheck + build + smoke 21/21 + דוח). `inspector/` = הפרוטוקול. ציר-הזמן: INSP-0009→0040 כולם GO.
-**אופי (נדגם):** כל INSP = log-בנייה/QA (scope + טבלת-leaves verbatim + rule-checks R1–R8 + severity 0/0/0 + GO/NO-GO). מתעד את **בניית-ה-dial ב-Preact מול מבני-המקור** (citations ל-`index.html:NNNN`) — תהליך/QA, **לא ידע-מוצר חדש**. (למשל INSP-0040: Home→📐 PLAN_TYPES 4-leaves + 📦 stock-tabs 2-leaves.)
+**אופי:** כל INSP = log-בנייה/QA (scope + טבלת-leaves verbatim + rule-checks R1–R8 + GO/NO-GO), citations ל-`index.html:NNNN`.
+**⭐ מפת-הבנייה (43 INSP, כרונולוגית — מאשרת שכל ה-hubs נשזרו כ-dial-leaves):**
+- `#1–11` frame/dial foundation · `#13–21` settings/support/security/R9/profile · `#22–24` persona-skeletons (store/courier/worker) · `#25–32` BsDial drill (store/courier/worker/manager + deepening) · `#33–35` menu-tabs→dial (קטלוג/רכש/בית) · `#36–40` home-deepening (**AI 9** · **site-hub 10** · **rewards 7** · **finance** · plan/stock) · `#41–43` worker-statuses (5×3) + deferred (16 leaves) · **`#44` catalog→search-FAB** (מאשר דוח 07).
+→ מספק את הספירות-המדויקות לתיקון ה-hub-leaves (דוחות 14–17).
 
 ---
 **הקשר:** זו ההיסטוריה-המוסדית של תרגום-אב-הטיפוס→Preact. ה-ADRs + R1–R9 הם ה-WHY מאחורי ה-dial pattern שתועד בדלתאות (01/02). מקור-משני — אינדקס, לא תעתוק.
