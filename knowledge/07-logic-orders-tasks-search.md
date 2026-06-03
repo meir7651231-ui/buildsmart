@@ -11,6 +11,7 @@
 
 **⭐ state-machine של משימה (מ-`WORKER_DASHBOARD.md`):** 5 מצבים —
 `pending`(⏳בתור/כחול) → `active`(🔨בביצוע/ירוק) → `review`(📋בבדיקה/צהוב) → `done`(✓הושלם/ירוק); ו-`rejected`(✕דחוי/אדום) → active (retry).
+תוויות-תצוגה verbatim (`taskStatusInfo` @:8048, INSP-0041): **⏳ ממתינה · 🔨 בביצוע · 📸 ממתין-לאישור · ✅ אושר ✓ · ↩️ נדחה — לתקן.**
 מעברים: **`startTask`** (pending/rejected→active) · **`completeTask`** (active→review) · `taskApprove` (review→done) · `taskReject` (review→rejected).
 schema-מלא (לפי הדשבורד): `{id, worker(idx ל-WORKERS), title, desc, site, when, role, status, notes, photo, approval}`. worker-home: greeting + progress-bar (`doneCount/total`) + 3 סטטים (פעילה/בתור/הוגשו).
 
