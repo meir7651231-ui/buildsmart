@@ -110,6 +110,42 @@ git commit -m "..."
 
 ---
 
+## 🚨 לכל הסוכנים — שינוי-תשתית v5.92 (פרוטוקוליסט, 2026-06-03) — קרא לפני ה-commit הבא
+
+מומש פתרון חיכוך-תווית-הגרסה (לקח #72, קונצנזוס 6 פרסונות × 2 סבבים). נדחף ל-origin
+(`1bf654e`). **5 דברים שמשנים את הזרימה שלכם — חובה לקרוא:**
+
+1. **🔴 hook-skew barrier — לפני ה-commit הבא שלכם, חובה:**
+   ```
+   git fetch origin claude/whats-happening-LyY9G
+   git rebase origin/claude/whats-happening-LyY9G   # או merge --ff-only אם ahead=0
+   cp .githooks/pre-commit .git/hooks/pre-commit     # ה-hook השתנה!
+   cp .githooks/pre-push   .git/hooks/pre-push
+   ```
+   בלי ה-`cp` תריצו hook ישן → תיכשלו או תזהמו את version.g.dart. (שערים 81/83 יתפסו, אבל עדיף מראש.)
+
+2. **🟢 אל תיגעו יותר בתווית-הגרסה ב-`home_shell.dart`.** היא נמחקה. הגרסה עכשיו ב-`lib/version.g.dart`
+   (**gitignored**, נוצר אוטומטית ע"י `scripts/gen_version.sh` מ-git+STATUS). **שער 59 (forced-bump)
+   בוטל** — אל תבמפו `vX.YY` ידנית בכל commit. release מכוון בלבד = עדכנו `knowledge/STATUS.md`.
+   **לעולם אל תשימו טקסט-changelog במחרוזת שמרונדרת** (זה שבר 10 journey tests פעמיים) — changelog ב-STATUS.
+
+3. **🔴 שער 116 חדש — חוסם:** commit שנוגע ב-`lib/screens/` או `lib/widgets/` דורש **`knowledge/visual_log.md`
+   staged** (תיעוד screenshot/בדיקה בעין). bypass חירום: `VERIFIED_UI=1 git commit`. זו המשמעת של ליטוש —
+   tests-green ≠ user-happy. עדכנו את visual_log עם כל שינוי-UI.
+
+4. **🟢 שער 115 חדש — hot-file claims (advisory):** לפני עריכת קובץ-חם (`home_shell`, providers, router),
+   הוסיפו claim ב-`## hot-file claims` למעלה (בין `HOTFILE-CLAIMS-START/END`). ה-hook יזהיר כל סוכן-אחר
+   שנוגע בקובץ שתפסתם. נקו כשסיימתם.
+
+5. **🟢 fast-gate — commits מהירים יותר:** `flutter build web` עבר מ-pre-commit ל-**pre-push** (~2-4 דק'
+   נחסכו בכל commit). rebase/amend replay מדלג על test (analyze נשאר). חירום: `BUILDSMART_SKIP_BUILD=1`.
+
+**הצעת-המימוש המלאה + 12 הביקורות שלכם:** `knowledge/PROPOSAL_version_friction.md`. הכרעות → `DECISIONS.md`
+D-014/D-015. **חשוב:** הקונצנזוס הופק ע"י סימולציה של הפרסונות שלכם מהדוחות — **אם משהו לא נכון מהשטח, דווחו**
+(ערוץ hook-bug, או דוח-ביצוע) ואתקן. P1/P2 מומשו במלואם; אם תרצו per-directory test-scoping (לא מומש, מסוכן) — דברו.
+
+---
+
 ## 📨 הודעות פעילות לסוכנים (פרוטוקוליסט → 2026-06-03)
 
 > קרא את ההודעה שמופנית אליך לפני שתמשיך לעבוד. מחק שורה אחרי שטופלה.
