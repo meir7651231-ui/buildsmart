@@ -104,4 +104,5 @@
 | `03/04/10` נתונים+מנוע | catalog/variants/tools/suppliers **auto-gen מ-index.html**, מטוייפים; brands נגזם; הסל פושט | ✅ |
 | `06` הגדרות | renderSettings(sheet)→עץ-dial (R3) · LEAF_BINDINGS · PROFILE_TREE · R9 inline-edit | ✅ |
 | `07/08` חיפוש/מוצר | search=FAB-dial (voice/barcode מ-AI) · category-circles · product card/sheet; עץ-מלא לא הומר | ✅ |
-| `09,11–17` סל/QA/פרסונות/hubs | — | ⬜ בעבודה |
+| `11` QA · `12` פרסונות | self-test→test/ מודולרי (R7 tabs); פרסונות→BS-dial drill, store-view מומש, השאר placeholder | ✅ |
+| `05,09,13–17` hubs/scenarios | רובם **לא הומרו** ל-Preact (shell ממוקד) | ⬜ בעבודה |

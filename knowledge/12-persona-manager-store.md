@@ -27,3 +27,13 @@
 
 ---
 **זרימת-החנות:** הזמנה נכנסת (מ-`SYS_ORDERS`) → `renderStoreOrders` → `storeAdvance`/picking (`storePickLine`/`storeMissLine`) → `stage` מתקדם → השליח/מנהל רואים. תעודת-משלוח (`showDeliveryNote`) ניתנת להדפסה (A4).
+
+---
+
+## 🔄 Preact (`app/src/store/bs-store.ts` + `views/`) — דלתא (פרסונות)
+> 5 פרסונות (`Persona`): contractor/manager/store/courier/worker. `BsDial` (`bs-dial.tsx`, 361 ש׳) drill-in לעץ-section של כל פרסונה (`bsDrillPath`, אותו דפוס כמו profilePath).
+
+⬆️ **שודרג:** דשבורדי-פרסונה (מסכים-מלאים) → **BS-dial drill-trees** (R2): בחירת-פרסונה ב-L1 → עץ-section ב-dial. שמות: שלמה-הקבלן · מנהל-המערכת · חנות-הסניטריה · שליח·משאית-14 · יוסי-העובד.
+- **`views/store.tsx` (302 ש׳)** = הפרסונה היחידה עם **view ממשי** (`store-row`/`store-sheet` ב-CSS — הזמנות-נכנסות).
+
+➖ **הוחסר/placeholder:** `views/` manager(16)/courier(12)/worker(12)/home(11) = מינימליים (R2). הדשבורדים המלאים מהפרוטוטייפ (`md-*`/`mm-*`/`mo-*`/`mc-*` מנהל · ליקוט-חנות מלא · שליח-מעקב · עובד-משימות) — **לא הומרו** (placeholder/חלקי).

@@ -22,3 +22,12 @@
 
 ---
 **תובנה:** האב-טיפוס כולל **QA-harness ברמת-production** — registry של כל כפתור + עשרות בדיקות-התנהגות אמיתיות (לא smoke). זה המקור ל-`#regTestPanel`/`reg-*` ול-`▶ הרץ בדיקת רגרסיה מלאה`. (ה-Flutter תרגם זאת ל-`lib/test_harness/` — ראה knowledge הישן.)
+
+---
+
+## 🔄 Preact (`app/src/test/` + `components/regression/`) — דלתא (self-test)
+> `test/registry.ts`(68) + `test/runner.ts`(53) + `test/tests/{buttons,dsync,products,dupes,tabs}` + `components/regression/regression-panel.tsx`(135) + `store/regression-store.ts`.
+
+⬆️ **שודרג:** ה-self-test של הפרוטוטייפ → **מודולים מטוייפים**: `registry.ts` (רישום) + `runner.ts` + tests נפרדים. `regression-panel` (inline במנהל, `reg-*` CSS) מריץ; `regression-store` (state).
+➕ **נוסף:** `tests/tabs.tsx` (**R7** — regression שחייב לעבור) · `tests/dsync.ts` (display-sync).
+➖ **הוחסר:** רוב משפחות-הבדיקה (`testCrit_/testImp_/testFamily_/testContract_` + ~350 `BUTTON_REGISTRY`) — Preact מכסה תת-קבוצה ממוקדת (buttons/products/dupes/dsync/tabs).
