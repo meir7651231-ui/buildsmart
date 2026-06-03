@@ -339,3 +339,15 @@ scope-by-directory **מסוכן** ובדיוק יפספס את הבאג של ב�
 
 **חדש (חוסם) — tracked-residue:** `.gitignore` **לא מסיר קבצים שכבר tracked.** סוכן שעשה פעם `git add version.g.dart` לפני שנכנס ל-gitignore → הקובץ נשאר tracked → ה-printf כותב לקובץ-tracked → **כל הכוויה חוזרת בשם חדש** (שורת-build ב-diff, conflict ב-rebase). ה-barrier מטפל ב-hook-skew, לא ב-tracked-residue.
 → **שלב-2 חייב `git rm --cached app_flutter/lib/version.g.dart`** (אם tracked) *באותו commit* עם ה-.gitignore. hook-guard: `git ls-files --error-unmatch lib/version.g.dart 2>/dev/null && exit 1`. בלי זה גישה-C דולפת אצל כל מי שנגע בקובץ פעם.
+
+## ביקורת קטלגן — סבב 2
+
+**M5 (fast-gate table — שלי):** הסיווג נקי רעיונית, אבל ה-hook הקיים אין בו סיווג — `NEEDS_FLUTTER` מפיל הכל ל-full אם יש `.dart`. **commit מעורב (asset-gen .py + helper .dart) → full אוטומטית** (Dart נגע → נכון). אבל הטבלה צריכה qualifier מפורש: **highest-tier-wins; "scripts/assets בלבד" = אפס `lib/**` staged**. אחרת סוכן יקרא שורה-3 ויחשוב ש-asset-gen helper פטור מ-journey.
+→ הוסף qualifier "scripts/assets-only = אפס lib".
+
+**M5 content-scan exclusions + self-hash:** ההחרגה של מקבץ (`assets/**`) היא **no-op על המימוש הקיים** — כל ה-content-scan gates (28/48/52/103) **כבר** משתמשים ב-pathspec `-- '*.dart'` → מעולם לא קוראים binary. תעד כ-**invariant**, לא feature. self-verifying-hash (הסדרן) = `sha256sum` על `.githooks/pre-commit` בלבד (~30KB), דפוס קיים בשערים 81/82 — אפס דליפה ל-assets. שניהם בטוחים.
+
+**M7 (binary sub-protocol):** **נשאר הצעה-עתידית, לא מקבל lifecycle-trigger** כמו ה-meta-rule של ליטוש. binary-sub-protocol הוא feature-אח עתידי (בעלות קטלגן), לא חי-בתוך-המסמך-שיהפוך-stub. טריגר-הפעלה: כשנדחף batch assets ראשון >20. הוספת טריגר עכשיו = bookkeeping ל-vapor.
+
+**חדש (חוסם-רך) — שער 113 לא תופס את כל asset-generation:** ה-regex = `scripts/crop_*.py`/`*render*.py` **בלבד**. אבל הטריגר האמיתי לבאג #6 הוא **כל שינוי שמשנה פלט-תמונה** — כולל החלפת PNG ידנית ב-`assets/**`, שינוי manifest, או script בשם אחר (`gen_`/`slice_`/`montage_`). commit שמחליף 80 PNG בלי לגעת ב-`crop_*.py` → **113 שותק** → השורה "scripts/assets-only → 113 בלבד" מבטיחה שמירה שלא קיימת = חזרה לכוויית-80%-פגום בכניסה אחרת.
+→ **הרחב טריגר 113** מ-`scripts/crop|render` ל-**`assets/** staged OR asset-gen script staged`**, ואז fast-gate שורה-3 אמינה.
