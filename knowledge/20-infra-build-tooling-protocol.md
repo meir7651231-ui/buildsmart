@@ -16,6 +16,7 @@
 
 ## build configs
 - **Preact:** `package.json`(+lock) · `tsconfig.json` · `vite.config.ts` · `app/index.html`(shell) · `.gitignore`/`README`.
+  > ⚠️ **typecheck-caveat (INSP-0015, 2026-05-21):** `npx tsc -b --noEmit` פלט **2 שגיאות ידועות** (`vite.config.ts` + `worker.tsx`) — **build של Vite נקי**; tracked כ-MINOR-פתוח ב-`wip-menu-wiring.md`. (smoke 21/21 + in-app regression **236/236** עוברים בנפרד.)
 - **Flutter:** `pubspec.yaml`(+lock) · `analysis_options.yaml` · `.metadata` · platform-scaffold (android/ios/web/macos/linux/windows — 66 קבצי-boilerplate).
 
 ## tests
