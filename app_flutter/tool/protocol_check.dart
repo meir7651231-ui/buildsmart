@@ -564,22 +564,6 @@ double shannonEntropy(String s) {
   return h;
 }
 
-/// Shannon entropy (bits per BYTE) of a raw byte buffer. Used by the S1 (v8)
-/// airtight image exemption, which scans the DECODED bytes of a base64 blob.
-double byteEntropy(List<int> bytes) {
-  if (bytes.isEmpty) return 0;
-  final counts = <int, int>{};
-  for (final b in bytes) {
-    counts[b] = (counts[b] ?? 0) + 1;
-  }
-  var h = 0.0;
-  final n = bytes.length;
-  for (final c in counts.values) {
-    final p = c / n;
-    h -= p * (math.log(p) / math.ln2);
-  }
-  return h;
-}
 
 /// Provider fingerprints — a literal value containing any of these is a secret
 /// regardless of the variable name (name-agnostic). Order-independent.
@@ -617,48 +601,15 @@ final RegExp _integrityContext = RegExp(
 bool _isSriDigest(String v) =>
     RegExp(r'^sha(?:256|384|512)-[A-Za-z0-9+/]+={0,2}$').hasMatch(v);
 
-/// S1 (v8) — AIRTIGHT inline-image exemption. v7's `_isInlineImageBlob` did a
-/// pure TEXT `b64.startsWith("iVBORw0KGgo"/…)` — it NEVER decoded the blob. So
-/// `const k="iVBORw0KGgo<base64-secret>"` text-matched the PNG prefix, was
-/// downgraded to a non-blocking WARN, and the SECRET shipped (hook + CI RC 0).
-/// v8 makes the exemption decide on the DECODED BYTES, not on the leading text:
-///   (a) base64-DECODE the blob (robust to missing padding / url-safe alphabet);
-///       a value that is NOT real base64 (the text-prefix laundering vector)
-///       FAILS to decode → NOT an image → falls through to the secret path.
-///   (b) verify a REAL image MAGIC on the DECODED bytes (\x89PNG, \xFF\xD8\xFF,
-///       GIF8, RIFF…WEBP, BM, ICO) — naming a value `imageData` cannot fake this.
-///   (c) run provider-fingerprint detection on the DECODED bytes (latin1 view):
-///       a known secret (AKIA…/ghp_…/PEM/JWT) hidden INSIDE the decoded payload
-///       is caught even if the blob otherwise looks like an image.
-///   (d) reject a magic-then-high-entropy SPLICE: a real image's structural
-///       header (the bytes right after the magic — dimensions, chunk names,
-///       colour tables) is LOW entropy (~3.1–4.5 on real PNG/JPEG/GIF; measured
-///       across this repo's catalog). A "magic bytes + secret bytes" splice has
-///       HIGH entropy immediately after the magic. The whole-file entropy of a
-///       real compressed photo is ~7.9, so we do NOT gate on whole-blob entropy
-///       (that would reject real images); we gate on the HEADER window only.
-/// An attacker therefore cannot launder a secret: a text-prefix splice fails (a),
-/// a name-only claim fails (b), a fingerprinted secret fails (c), and a
-/// magic+random-payload splice fails (d). A genuine inline image passes all four
-/// and is surfaced as an actionable WARN ("prefer assets/"). NO detection lost.
-///
-/// Returns true ONLY for a value that is a real, secret-free inline image.
-bool _isInlineImageBlob(String v) {
-  return _classifyImageBlob(v) == _ImageVerdict.image;
-}
-
-enum _ImageVerdict {
-  /// A real, secret-free inline image — exempt from the secret ERR (WARN only).
-  image,
-
-  /// Not an image at all (decode failed / no magic) — let the secret path decide.
-  notImage,
-
-  /// Has an image magic but a secret was found in the decoded bytes (fingerprint
-  /// or a high-entropy header splice) — this is a LAUNDERING attempt; treat as a
-  /// SECRET (caller must NOT downgrade to WARN).
-  laundered,
-}
+// V9-A — the v7/v8 inline-IMAGE exemption (`_isInlineImageBlob`, `_ImageVerdict`,
+// `_classifyImageBlob`, `_hasImageMagic`, `byteEntropy`) has been REMOVED. It was
+// a recurring laundering surface: v7 text-matched a PNG prefix and downgraded a
+// spliced secret to WARN; v8's decode-and-scan re-fix left TWO holes (a secret
+// APPENDED after a valid image escaped the scanned header window; a data-URI
+// payload was never extracted). V9 eliminates the CLASS instead of patching the
+// edge cases: any inline base64/binary blob (`_looksBinaryBlob`) is an ERR. Real
+// images belong in assets/, not inline in source. See `_looksBinaryBlob` and
+// `gateNoSecrets`.
 
 /// Robustly base64-DECODE a candidate blob, or null if it is not valid base64.
 /// Tolerates: an optional `data:...;base64,` prefix, url-safe alphabet (`-`/`_`),
@@ -677,60 +628,51 @@ List<int>? _tryBase64Decode(String v) {
   }
 }
 
-/// True when the DECODED bytes begin with a real image MAGIC number.
-bool _hasImageMagic(List<int> b) {
-  bool starts(List<int> sig) {
-    if (b.length < sig.length) return false;
-    for (var i = 0; i < sig.length; i++) {
-      if (b[i] != sig[i]) return false;
-    }
-    return true;
+/// Fraction of bytes that are NON-printable (outside tab/CR/LF and the
+/// 0x20–0x7E printable-ASCII band). A real BINARY payload (image, archive,
+/// compiled blob, raw key material) is dominated by non-printable bytes; a
+/// base64 encoding of plain TEXT (a sentence, a JSON snippet) decodes to ~0
+/// non-printable. This is the SHAPE discriminator V9 uses to tell an inline
+/// binary blob apart from a long base64-charset *text* token.
+double _nonPrintableFraction(List<int> b) {
+  if (b.isEmpty) return 0;
+  var np = 0;
+  for (final x in b) {
+    final printable = (x >= 0x20 && x <= 0x7E) || x == 0x09 || x == 0x0A || x == 0x0D;
+    if (!printable) np++;
   }
-
-  if (starts(const [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])) {
-    return true; // PNG
-  }
-  if (starts(const [0xFF, 0xD8, 0xFF])) return true; // JPEG
-  if (b.length >= 6) {
-    final h = String.fromCharCodes(b.sublist(0, 6));
-    if (h == 'GIF87a' || h == 'GIF89a') return true; // GIF
-  }
-  if (b.length >= 12 &&
-      String.fromCharCodes(b.sublist(0, 4)) == 'RIFF' &&
-      String.fromCharCodes(b.sublist(8, 12)) == 'WEBP') {
-    return true; // WEBP
-  }
-  if (starts(const [0x42, 0x4D])) return true; // BMP "BM"
-  if (starts(const [0x00, 0x00, 0x01, 0x00])) return true; // ICO
-  return false;
+  return np / b.length;
 }
 
-/// S1 (v8) — the airtight image classifier. See `_isInlineImageBlob`.
-_ImageVerdict _classifyImageBlob(String v) {
-  // A real inline image base64 blob is at least a few dozen chars.
-  final rawB64 = v.contains(',') ? v.substring(v.indexOf(',') + 1) : v;
-  if (rawB64.length < 24) return _ImageVerdict.notImage;
+/// V9-A — the CLASS-KILLER. True when a quoted VALUE is an inline base64/binary
+/// BLOB: a pure base64-charset token (standard or url-safe, ≥32 chars, optional
+/// `=` padding) that base64-DECODES to a substantially NON-PRINTABLE (binary)
+/// payload. This subsumes the entire former "inline image" exemption surface:
+///   * a REAL inline image (PNG/JPEG/…) decodes to binary → blob → ERR (the
+///     accepted small DX cost: real images belong in `assets/`, not source);
+///   * a TRAILING secret appended after a complete valid image (v8 Hole A) is
+///     part of the SAME blob → still binary → ERR (no header-window edge case,
+///     no entropy threshold to tune, the trailing-bytes gap is gone);
+///   * an OPAQUE high-entropy secret blob decodes to binary → ERR.
+/// It is DELIBERATELY shape-based (no entropy floor) so a low-entropy real image
+/// (entropy ~2.9–3.7, BELOW the old 4.2 floor) is ALSO caught — entropy tuning
+/// is no longer a laundering surface. Legit non-blob base64-charset values (hex
+/// git/asset DIGESTS, SRI integrity tokens, dotted/snake IDs, base32 seeds) are
+/// exempted by the EARLIER guards in `_looksHighEntropySecret` and never reach
+/// this check; a base64-of-plain-TEXT token decodes to printable bytes and is
+/// NOT a binary blob here.
+bool _looksBinaryBlob(String v) {
+  if (!RegExp(r'^[A-Za-z0-9+/_\-]{32,}={0,2}$').hasMatch(v)) return false;
+  // BUILDABILITY guard: a dotted/snake/kebab LOWERCASE identifier
+  // (`some_long_snake_case_value`, `a.b.c.d`) is base64-CHARSET by accident but is
+  // a human-readable ID, not binary content. Such ids decode to garbage bytes
+  // (high non-printable) yet must NOT be flagged. A REAL base64 blob of binary
+  // data is mixed-case (spans the full alphabet) and never matches this id shape
+  // (verified across the real PNG/JPEG/secret fixtures — all return false here).
+  if (RegExp(r'^[a-z0-9]+(?:[._-][a-z0-9]+)+$').hasMatch(v)) return false;
   final bytes = _tryBase64Decode(v);
-  // (a) not valid base64 → the text-prefix laundering vector → not an image.
-  if (bytes == null || bytes.length < 8) return _ImageVerdict.notImage;
-  // (b) must carry a real image magic on the DECODED bytes.
-  if (!_hasImageMagic(bytes)) return _ImageVerdict.notImage;
-  // (c) provider fingerprint anywhere in the decoded payload → laundering.
-  final latin = String.fromCharCodes(bytes);
-  for (final fp in _secretFingerprints) {
-    if (fp.hasMatch(latin)) return _ImageVerdict.laundered;
-  }
-  // (d) structural-header splice test: bytes [8..40) of a real image are a
-  // low-entropy structured header; a "magic + secret" splice is high-entropy
-  // right after the magic. Real PNG/JPEG/GIF headers measure ~3.1–4.5 here; a
-  // random secret payload measures >5. Threshold 4.7 leaves a wide margin and
-  // never rejects a real image (verified across this repo's catalog assets).
-  final hdrEnd = bytes.length >= 40 ? 40 : bytes.length;
-  final header = bytes.sublist(8, hdrEnd);
-  if (header.length >= 16 && byteEntropy(header) >= 4.7) {
-    return _ImageVerdict.laundered;
-  }
-  return _ImageVerdict.image;
+  if (bytes == null || bytes.length < 16) return false;
+  return _nonPrintableFraction(bytes) >= 0.30;
 }
 
 /// N1 + F2 — a value that is a PUBLIC content/object DIGEST by SHAPE, not a
@@ -857,6 +799,20 @@ bool _isConcretePathOrUrl(String v) {
   return false;
 }
 
+/// V9-B (Hole B) — strip a leading `data:[<mime>][;base64],` URI prefix from an
+/// extracted value, returning the bare PAYLOAD so it is judged as a base64 blob /
+/// secret. v8's secret-extraction char-classes excluded `:` `;` `,`, so a
+/// `data:image/png;base64,<secret>` literal was never extracted and its payload
+/// never decoded — an opaque secret (no provider fingerprint) shipped as NONE.
+/// We match `data:` followed by an OPTIONAL `<mediatype>` (token/subtype +
+/// optional `;param`/`;base64`) up to the first `,`, and return everything after
+/// the comma. A value with NO `data:`+`,` shape is returned unchanged.
+String _stripDataUriPrefix(String v) {
+  final m = RegExp(r'^data:[A-Za-z0-9/.+\-]*(?:;[A-Za-z0-9.+\-]+)*,(.*)$')
+      .firstMatch(v);
+  return m != null ? m.group(1)! : v;
+}
+
 /// C1 — a credential-shaped quoted value, detected by SHAPE not by char-class
 /// mix. v3 required upper+lower+digit ALL present, which let a lowercase-hex,
 /// UPPER-only, no-digit, or all-digit token sail through. We now fire on ANY of:
@@ -874,7 +830,12 @@ bool _looksHighEntropySecret(String line) {
   // A1: floor lowered 20→16 so a 16-char base32 TOTP/2FA seed is captured. The
   // PER-SHAPE length floors below remain stricter (hex/base64 ≥32, general ≥24,
   // base32 ≥16), so lowering the extractor admits ONLY base32 in the 16-19 band.
-  final assign = RegExp(r'''[:=]\s*['"]([A-Za-z0-9+/_.=\-]{16,})['"]''');
+  // V9-B (Hole B): the char-class now ALSO admits `:` `;` `,` so a whole
+  // `data:image/png;base64,<payload>` URI literal is CAPTURED as one token (v8's
+  // class stopped at the `:`, so a data-URI was never extracted → its payload was
+  // never judged → an opaque secret wrapped in a data-URI laundered to NONE). The
+  // `data:` prefix is stripped per-token below before any secret test runs.
+  final assign = RegExp(r'''[:=]\s*['"]([A-Za-z0-9+/_.=:;,\-]{16,})['"]''');
   // F2/N1: a digest-ish NAME on the line (buildSha/cacheKey/assetHash/etag/…)
   // means a bare-hex value is a PUBLIC digest, not a credential.
   final digestCtx = _digestNameCtx.hasMatch(line);
@@ -884,7 +845,10 @@ bool _looksHighEntropySecret(String line) {
       _credentialNameCtx.hasMatch(line) ||
       _secretFingerprints.any((fp) => fp.hasMatch(line));
   for (final m in assign.allMatches(line)) {
-    final v = m.group(1)!;
+    // V9-B: unwrap a `data:[mime];base64,` prefix so the data-URI PAYLOAD is the
+    // value we judge (closes Hole B — an opaque secret in a data-URI now reaches
+    // the binary-blob / entropy tests below instead of sliding through as NONE).
+    final v = _stripDataUriPrefix(m.group(1)!);
     // H4 (v6): the path/id exemption must NOT override an explicit credential
     // NAME. A value containing `/` (or a dotted id, or a known asset extension)
     // is normally a path — but if the LINE names it as a credential
@@ -893,7 +857,18 @@ bool _looksHighEntropySecret(String line) {
     // is not itself a real file/URL shape (a concrete extension or URL scheme).
     // This keeps asset-path false-positives out (no cred name → exemption still
     // applies) while closing the slash-laundered-secret hole.
-    if (_looksLikePathOrId(v) && (!credCtx || _isConcretePathOrUrl(v))) continue;
+    //
+    // V9-A: the path/id exemption ALSO must NOT swallow an inline base64/BINARY
+    // BLOB. A base64 blob legitimately contains `/` (base64 alphabet), which made
+    // `_looksLikePathOrId` mis-classify a real PNG / a trailing-secret blob as a
+    // "path" and `continue` past the blob ERR (v8 Hole A would have re-opened).
+    // A blob is base64-charset-only (no `.ext`, no dotted segments), so it is
+    // never a real file path; we let it fall through to the blob check below.
+    if (_looksLikePathOrId(v) &&
+        !_looksBinaryBlob(v) &&
+        (!credCtx || _isConcretePathOrUrl(v))) {
+      continue;
+    }
     if (_isSriDigest(v)) continue; // F2: sha256-<base64>
     if (integrityCtx) continue; // F2: integrity:/checksum/digest context
     // N1 path-a guard: a single-repeated-character run (all-zero `0000…0`,
@@ -922,16 +897,20 @@ bool _looksHighEntropySecret(String line) {
         return true;
       }
     }
-    // (b) base64 blob — high entropy, base64 charset, length >=32. A base64 blob
-    // mixes the full A-Za-z0-9+/ alphabet (entropy-mixed signal), so it is
-    // distinct from a pure-hex digest and remains a secret.
+    // (b) V9-A — inline base64/BINARY BLOB. Any base64-charset token (≥32 chars)
+    // that DECODES to a substantially non-printable (binary) payload is an inline
+    // blob and is BLOCKED. This REPLACES v8's entropy-gated branch and its image
+    // exemption: there is NO `_isInlineImageBlob` downgrade and NO entropy floor
+    // here, so (1) a real inline image (low-entropy, ~2.9–3.7) is ERR — the
+    // accepted DX cost; real images belong in assets/ — and (2) a secret APPENDED
+    // after a valid image (v8 Hole A) is part of the same binary blob → ERR, with
+    // no header-window or threshold to launder past. The whole class is gone.
+    if (_looksBinaryBlob(v)) return true;
+    // (b-text) a base64 blob that decodes to PRINTABLE text but is itself a
+    // HIGH-ENTROPY base64-charset token is still a credential (an opaque token /
+    // key material that happens to encode printable bytes). Kept name-agnostic.
     if (RegExp(r'^[A-Za-z0-9+/]{32,}={0,2}$').hasMatch(v) &&
         shannonEntropy(v) >= 4.2) {
-      // DX7a: a base64 blob whose decoded prefix is a real IMAGE magic is inline
-      // asset data, not a credential — content-based, unforgeable, no detection
-      // loss. Skip the ENTROPY hit (a separate advisory WARNs "prefer assets/").
-      // Provider fingerprints already ran in lineHasSecret and are unaffected.
-      if (_isInlineImageBlob(v)) continue;
       return true;
     }
     // (c) general high-entropy token (case-mix AGNOSTIC). Require a stronger
@@ -951,27 +930,26 @@ bool _looksHighEntropySecret(String line) {
 }
 
 /// S1 (v8) — true when a base64 literal on the line DECODES to bytes that hide a
-/// secret: a provider fingerprint inside the decoded payload, OR a magic-then-
-/// high-entropy splice (`_ImageVerdict.laundered`). This is the "secret in the
-/// DECODED bytes" laundering vector — the secret lives ONLY after base64-decoding,
-/// so a text/fingerprint scan of the source line alone never sees it. We decode
-/// every base64-shaped literal (≥24 chars) on the JOINED line and inspect bytes.
+/// PROVIDER FINGERPRINT (AKIA…/ghp_…/PEM/JWT) inside the decoded payload. This is
+/// the "secret in the DECODED bytes" vector — the secret lives ONLY after base64-
+/// decoding, so a text scan of the source line never sees it. It complements
+/// `_looksBinaryBlob`: a blob whose decoded payload is a printable fingerprint
+/// (low non-printable fraction) is NOT caught as a binary blob, but IS caught
+/// here. (V9: the former image-magic `laundered` branch is gone — any binary/
+/// high-entropy blob is now an ERR via `_looksBinaryBlob`, so there is no
+/// "magic + splice" special case left to evaluate.)
+/// V9-B: the char-class admits `:;,` and we strip a `data:...,` prefix, so a
+/// fingerprint hidden in a `data:...;base64,<payload>` literal is also decoded.
 bool _decodedLiteralHidesSecret(String joined) {
-  // base64-shaped quoted literals (allow url-safe + padding); ≥24 chars.
-  final re = RegExp(r'''['"]([A-Za-z0-9+/_\-]{24,}={0,2})['"]''');
+  // base64-shaped quoted literals (allow url-safe + padding + data-URI); ≥24.
+  final re = RegExp(r'''['"]([A-Za-z0-9+/_.=:;,\-]{24,})['"]''');
   for (final m in re.allMatches(joined)) {
-    final v = m.group(1)!;
+    final v = _stripDataUriPrefix(m.group(1)!);
     final bytes = _tryBase64Decode(v);
     if (bytes == null || bytes.length < 8) continue;
     final latin = String.fromCharCodes(bytes);
     for (final fp in _secretFingerprints) {
       if (fp.hasMatch(latin)) return true; // fingerprint in decoded payload
-    }
-    // A blob with an image magic but a laundering splice (fingerprint or high-
-    // entropy header) is a secret, not an image.
-    if (_hasImageMagic(bytes) &&
-        _classifyImageBlob(v) == _ImageVerdict.laundered) {
-      return true;
     }
   }
   return false;
@@ -1656,48 +1634,54 @@ List<Finding> gateNoHardUrl(String libDiff) {
 }
 
 /// Gate 52: secret literal — name-AGNOSTIC entropy + provider fingerprints +
-/// joined adjacent literals. Scans the configured text file types.
-/// S1 (v8): the inline-IMAGE exemption is AIRTIGHT — a base64 blob is exempted
-/// from the ERR secret path (and surfaced as an actionable WARN) ONLY when it
-/// base64-DECODES to bytes that carry a real image magic, contain NO provider
-/// fingerprint, and have a low-entropy structural header. A `magic-text+secret`
-/// or `magic-bytes+secret` splice is NOT exempt → it is caught as an ERR secret.
-/// (v7's text-only `startsWith` check let such splices ship as a WARN — closed.)
+/// joined adjacent literals + decoded-bytes scan. Scans the configured text file
+/// types.
+///
+/// V9-A: the inline-IMAGE WARN exemption is REMOVED. It was a recurring
+/// laundering surface — v7 had a text-prefix hole, and v8's decode-and-scan
+/// re-fix introduced two more (Hole A: a secret APPENDED after a valid image left
+/// the scanned header window clean; Hole B: a data-URI payload was never
+/// extracted). Rather than tune the entropy threshold or patch the header window
+/// again, V9 ELIMINATES THE CLASS: ANY literal that decodes to an inline
+/// base64/binary blob (`_looksBinaryBlob`) is an ERR that BLOCKS — there is no
+/// "looks like an image → downgrade to WARN" path left. Inline base64/binary in
+/// source is a rare anti-pattern; real images belong in `assets/`. The message is
+/// actionable. Provider-fingerprint and decoded-bytes (S1) detection are intact.
 List<Finding> gateNoSecrets(String diff) {
   for (final l in addedLines(diff)) {
     // lineHasSecret JOINS adjacent literals first, so a split blob
-    // `"iVBORw0KGgo" "<secret>"` is reconstructed and (S1) caught here as ERR.
+    // `"iVBORw0KGgo" "<secret>"` is reconstructed and caught here as ERR.
     if (lineHasSecret(l)) {
+      // V9-A: an inline base64/binary BLOB gets an ACTIONABLE message pointing at
+      // assets/ (distinguished from a provider/entropy credential message, which
+      // is more useful when the offending literal is real binary data).
+      final isBlob = _lineHasInlineBinaryBlob(l);
+      final body = l.trim().length > 80 ? "${l.trim().substring(0, 80)}…" : l.trim();
       return [
         Finding(
           '52',
           Sev.err,
-          'secret/high-entropy credential in code: ${l.trim().length > 80 ? "${l.trim().substring(0, 80)}…" : l.trim()}',
+          isBlob
+              ? 'inline base64/binary data is not allowed in source — move images '
+                  'to assets/ and load them as an asset: $body'
+              : 'secret/high-entropy credential in code: $body',
         ),
       ];
     }
   }
-  // S1 advisory: NO secret found above, but a GENUINE inline image blob (real
-  // magic on decoded bytes, no fingerprint, low-entropy header) is still a WARN
-  // ("prefer assets/"). We scan the JOINED line so a split real image is caught
-  // too; the airtight `_isInlineImageBlob` returns true ONLY for a real image,
-  // so a laundering splice never reaches this WARN (it ERR'd above).
-  final imgAssign = RegExp(r'''[:=]\s*['"]([A-Za-z0-9+/_.=\-]{24,})['"]''');
-  for (final raw in addedLines(diff)) {
-    final l = joinAdjacentLiterals(raw);
-    for (final m in imgAssign.allMatches(l)) {
-      if (_isInlineImageBlob(m.group(1)!)) {
-        return [
-          Finding(
-            '52',
-            Sev.warn,
-            'inline base64 image blob — move binary assets to assets/ and reference by path (not a secret)',
-          ),
-        ];
-      }
-    }
-  }
   return const [];
+}
+
+/// V9-A — true when the (literal-joined) line carries an inline base64/binary
+/// BLOB value (used only to pick the actionable "move to assets/" message). A
+/// data-URI prefix is stripped first so a `data:...;base64,<blob>` is recognised.
+bool _lineHasInlineBinaryBlob(String line) {
+  final joined = joinAdjacentLiterals(line);
+  final re = RegExp(r'''['"]([A-Za-z0-9+/_.=:;,\-]{24,})['"]''');
+  for (final m in re.allMatches(joined)) {
+    if (_looksBinaryBlob(_stripDataUriPrefix(m.group(1)!))) return true;
+  }
+  return false;
 }
 
 /// Gate 54: no ColoredBox constructed with a dark color (semantic luminance).

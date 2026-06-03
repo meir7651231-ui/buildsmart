@@ -43,7 +43,7 @@ String _addedFiles(List<(String, String)> files) => files
 /// Run all built-in unit tests. Returns process exit code (0 ok, 2 failures).
 int runSelfTest() {
   _selfTestFailures = 0;
-  stdout.writeln('protocol_check v7 self-test');
+  stdout.writeln('protocol_check v9 self-test');
 
   // ════════════════════════════════════════════════════════════════════
   //  R4 REGRESSIONS — semantic, not literal/substring (the headline closes)
@@ -1121,100 +1121,143 @@ ANTIPATTERN-EXAMPLE: ignored
   }());
 
   // ════════════════════════════════════════════════════════════════════
-  //  v8 (S1) — AIRTIGHT base64 image exemption. HONEST fixtures: the image
-  //  blobs are REAL base64 that DECODE to a valid PNG/JPEG (low-entropy header);
-  //  the laundering blobs carry the magic TEXT or magic BYTES but hide a secret.
-  //  v7's self-test used FAKE blobs (magic text + random tail that never decoded)
-  //  and asserted they were exempt — that IS the hole. These cases test the REAL
-  //  laundering vectors the spec names and assert they are now CAUGHT.
+  //  v9 — base64/data-URI laundering CLASS ELIMINATED. The v7/v8 inline-IMAGE
+  //  WARN exemption is GONE: ANY inline base64/binary blob is an ERR that BLOCKS.
+  //  These cases assert the EXACT proven vectors (v8 Hole A trailing bytes, Hole
+  //  B data-URI, the entropy-threshold-tuned splice, the split literal, and a
+  //  genuine real PNG) are now ERR — nothing reaches WARN/NONE.
+  //
+  //  HONESTY: every blob below is REAL base64 (verified by round-trip in tooling).
+  //  The trailing-secret fixture decodes to a valid PNG magic FOLLOWED by an
+  //  appended opaque secret; the v8 self-test only spliced the HEADER and so
+  //  MISSED this case — v9 tests the trailing bytes explicitly.
   // ════════════════════════════════════════════════════════════════════
-  // A REAL 1x1 PNG: decodes to \x89PNG.. with a structured (low-entropy) IHDR.
+  // A genuine tiny REAL 1x1 PNG (entire payload is a valid image, decodes clean).
   const _pngReal =
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAAHxXEiQAAAA1JREFUeJxiAAAAAP//AwAABgAF';
-  // A REAL minimal JPEG: SOI+JFIF+flat-DQT+EOI → \xFF\xD8\xFF, low-entropy header.
+  // A genuine REAL minimal JPEG.
   const _jpgReal =
       '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/2Q==';
-  // LAUNDER V1: PNG magic TEXT + random secret base64 → does NOT decode to a real
-  // PNG (invalid base64 / no real magic on decoded bytes). v7 exempted it (HOLE).
-  const _launderTextPrefix =
-      'iVBORw0KGgoktM5SGxdCgFuAfhCmCF7tqhqRCLtcqgHD4pMt0fCC/XCsi1bq2JazoWHXYvkFZfI';
-  // LAUNDER V2: real PNG magic BYTES spliced with a random secret → decodes, has a
-  // real magic, but the bytes right after the magic are HIGH entropy (the splice).
-  const _launderByteSplice =
+  // V8 HOLE A — a complete valid PNG with an opaque high-entropy secret APPENDED
+  // AFTER IEND. base64(realPNG ++ secret): decodes to \x89PNG… (clean header
+  // window) then the secret bytes. v8 scanned ONLY bytes[8:40] (the clean PNG
+  // IHDR) → classified `image` → WARN → RC 0 (LAUNDERED). v9: it is a binary blob
+  // → ERR. (Round-trip verified: decoded starts with PNG magic, ends with secret.)
+  const _trailingSecretAfterPng =
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAAHxXEiQAAAA1JREFUeJxiAAAAAP//AwAABgAFU8JZpDE0iGXlD6gNCFbaEPFjbD0kH8Oool8DklZDOCj2ISaJ';
+  // V8 HOLE B raw key — an AWS AKIA key wrapped in a data: URI. The fingerprint
+  // path catches the AKIA text directly, but v9 ALSO unwraps the data-URI so the
+  // payload is judged — this asserts the data-URI vector is ERR.
+  const _dataUriAkia = 'data:image/png;base64,AKIAIOSFODNN7EXAMPLE1';
+  // V8 HOLE B opaque — an OPAQUE high-entropy secret (NO provider fingerprint)
+  // wrapped in a data: URI. v8's extractor char-class excluded ':' so the literal
+  // was never extracted → NONE → RC 0 (LAUNDERED). v9 unwraps + judges → ERR.
+  const _dataUriOpaque =
+      'data:image/png;base64,U8JZpDE0iGXlD6gNCFbaEPFjbD0kH8Oool8DklZDOCj2ISaJ';
+  // v7 magic-TEXT vector wrapped in a data: URI (the auditor showed this re-opens
+  // at RC 0). v9: data-URI unwrapped, blob judged → ERR.
+  const _dataUriMagicText =
+      'data:image/png;base64,iVBORw0KGgoktM5SGxdCgFuAfhCmCF7tqhqRCLtcqgHD4pMt0fCC/XCsi1bq2JazoWHXYvkFZfI';
+  // ENTROPY-THRESHOLD-TUNED splice: real PNG magic BYTES + a payload tuned so the
+  // v8 HEADER-window entropy sat under the 4.7 cutoff in v8's earlier form. v9 has
+  // NO entropy threshold for blobs → ERR regardless of tuning.
+  const _entropyTunedSplice =
       'iVBORw0KGgr0hn60leqiLSid62JtMVSP4OJLjacDaKjrsdBdzeLqN7EoB1C5sflT3rXq4/mmsug=';
-  // LAUNDER V3: real PNG magic BYTES + a `ghp_` provider fingerprint in the DECODED
-  // payload (low-entropy filler so the entropy heuristic alone would NOT fire).
-  const _launderFpInDecoded =
+  // a `ghp_` provider fingerprint hidden in the DECODED payload (decodes to mostly
+  // PRINTABLE bytes → NOT a binary blob; caught by the decoded-bytes S1 path).
+  const _fpInDecoded =
       'iVBORw0KGgpnaHBfYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhQUFBQUFBQUFBQUFBQUFBQUFBQUE=';
-  // pure-alphanumeric high-entropy token (no '/' or '+' so the path/id exemption
-  // is not involved) — an unambiguous credential the engine catches by entropy.
+  // pure-alphanumeric high-entropy token — an unambiguous credential.
   const _randomSecret = 'U8JZpDE0iGXlD6gNCFbaEPFjbD0kH8Oool8DklZDOCj2ISaJ';
 
-  // (1) A REAL image blob is exempt (WARN, not ERR) — decode + magic + clean.
-  _check('S1 _isInlineImageBlob true for a REAL (decodable) PNG blob',
-      _isInlineImageBlob(_pngReal));
-  _check('S1 _isInlineImageBlob true for a REAL (decodable) JPEG blob',
-      _isInlineImageBlob(_jpgReal));
-  _check('S1 a REAL PNG blob is a WARN (not ERR) in gate 52', () {
-    final f = gateNoSecrets(_added('const img = "$_pngReal";'));
-    return f.length == 1 && f.first.sev == Sev.warn;
-  }());
-  // (2) THE HOLE — magic-TEXT-prefix + entropy payload (same blob). v7: WARN/ship.
-  //     v8: NOT an image (decode fails) → caught as ERR secret.
-  _check('S1 LAUNDER text-prefix+secret is NOT an image (decode/ magic fail)',
-      _isInlineImageBlob(_launderTextPrefix) == false);
-  _check('S1 LAUNDER text-prefix+secret (same blob) is an ERR secret', () {
-    final f = gateNoSecrets(_added('const k = "$_launderTextPrefix";'));
-    return f.length == 1 && f.first.sev == Sev.err;
-  }());
-  // (3) magic-BYTES + secret bytes (valid base64, real magic) → high-entropy
-  //     header splice → laundered → ERR (not exempt).
-  _check('S1 LAUNDER magic-bytes+secret-splice is NOT exempt (high-entropy hdr)',
-      _isInlineImageBlob(_launderByteSplice) == false);
-  _check('S1 LAUNDER magic-bytes+secret-splice is an ERR secret', () {
-    final f = gateNoSecrets(_added('const k = "$_launderByteSplice";'));
-    return f.length == 1 && f.first.sev == Sev.err;
-  }());
-  // (4) magic-prefix + a secret living ONLY in the DECODED bytes (provider
-  //     fingerprint). v7 never decoded → missed it. v8: ERR.
-  _check('S1 LAUNDER fingerprint-in-decoded-bytes is NOT exempt',
-      _isInlineImageBlob(_launderFpInDecoded) == false);
-  _check('S1 LAUNDER fingerprint-in-decoded-bytes is an ERR secret', () {
-    final f = gateNoSecrets(_added('const k = "$_launderFpInDecoded";'));
-    return f.length == 1 && f.first.sev == Sev.err;
-  }());
-  // (5) SPLIT adjacent literals — the JOINED value is the laundering blob. v7
-  //     emitted NOTHING (the WARN regex saw one literal). v8: joined → ERR.
-  _check('S1 SPLIT literal "magic" "secret" (joined) is an ERR secret', () {
-    final f =
-        gateNoSecrets(_added('const k = "iVBORw0KGgo" "$_randomSecret";'));
+  bool _isErr(List<Finding> f) => f.length == 1 && f.first.sev == Sev.err;
+  bool _mentionsAssets(List<Finding> f) =>
+      f.isNotEmpty && f.first.message.contains('assets/');
+
+  // (V9 vector 1) trailing-secret-after-valid-PNG → ERR (was WARN/RC0 in v8).
+  _check('V9 _looksBinaryBlob TRUE for trailing-secret-after-PNG',
+      _looksBinaryBlob(_trailingSecretAfterPng));
+  _check('V9 (1) trailing-secret-after-valid-PNG is an ERR (Hole A closed)',
+      _isErr(gateNoSecrets(_added('const img = "$_trailingSecretAfterPng";'))));
+  // (V9 vector 2) data:URI-wrapped AKIA → ERR.
+  _check('V9 (2) data:URI-wrapped AKIA is an ERR (Hole B)',
+      gateNoSecrets(_added('const k = "$_dataUriAkia";')).any((f) => f.sev == Sev.err));
+  _check('V9 (2b) data:URI-wrapped OPAQUE high-entropy is an ERR (Hole B core)',
+      _isErr(gateNoSecrets(_added('const k = "$_dataUriOpaque";'))));
+  _check('V9 (2c) data:URI-wrapped v7 magic-text vector is an ERR (re-open shut)',
+      _isErr(gateNoSecrets(_added('const k = "$_dataUriMagicText";'))));
+  // (V9 vector 4) entropy-threshold-tuned blob → ERR.
+  _check('V9 _looksBinaryBlob TRUE for entropy-tuned splice',
+      _looksBinaryBlob(_entropyTunedSplice));
+  _check('V9 (4) entropy-threshold-tuned blob is an ERR',
+      _isErr(gateNoSecrets(_added('const k = "$_entropyTunedSplice";'))));
+  // (V9 vector 5) a genuine tiny REAL PNG inline → ERR with "move to assets/".
+  _check('V9 _looksBinaryBlob TRUE for a genuine real PNG',
+      _looksBinaryBlob(_pngReal));
+  _check('V9 (5) a genuine REAL PNG inline is an ERR (accepted DX cost)',
+      _isErr(gateNoSecrets(_added('const img = "$_pngReal";'))));
+  _check('V9 (5b) the REAL PNG ERR message says "move … to assets/"',
+      _mentionsAssets(gateNoSecrets(_added('const img = "$_pngReal";'))));
+  _check('V9 a genuine REAL JPEG inline is an ERR too',
+      _isErr(gateNoSecrets(_added('const img = "$_jpgReal";'))));
+  // (V9 vector 6) split-literal blob → ERR (joined then judged).
+  _check('V9 (6) SPLIT literal "magic" "secret" (joined) is an ERR', () {
+    final f = gateNoSecrets(_added('const k = "iVBORw0KGgo" "$_randomSecret";'));
     return f.isNotEmpty && f.first.sev == Sev.err;
   }());
-  // (6) a real-image blob SPLIT across two literals still gets the WARN (the WARN
-  //     path now joins too) — no friction regression for a legitimately split img.
-  _check('S1 SPLIT a REAL image across literals still WARNs (not ERR)', () {
+  _check('V9 (6b) a REAL PNG SPLIT across two literals is ALSO an ERR (no WARN)', () {
     final half = _pngReal.length ~/ 2;
     final a = _pngReal.substring(0, half);
     final b = _pngReal.substring(half);
     final f = gateNoSecrets(_added('const img = "$a" "$b";'));
-    return f.length == 1 && f.first.sev == Sev.warn;
+    return f.isNotEmpty && f.first.sev == Sev.err;
   }());
 
-  // SECURITY counter-cases (carried from v7, now stronger):
-  _check('S1 _isInlineImageBlob FALSE for a random high-entropy secret',
-      _isInlineImageBlob(_randomSecret) == false);
-  _check('S1 a random secret is STILL an ERR secret in gate 52', () {
+  // Provider fingerprint hidden in decoded bytes (printable payload) → still ERR
+  // via the S1 decoded-bytes scan (the binary-blob detector does NOT fire here,
+  // so this proves S1 is intact AND is reached through a data-URI too).
+  _check('V9 fingerprint-in-decoded-bytes is an ERR (S1 intact)',
+      gateNoSecrets(_added('const k = "$_fpInDecoded";')).any((f) => f.sev == Sev.err));
+  _check('V9 fingerprint-in-decoded-bytes via data:URI is an ERR (S1 + Hole B)', () {
+    final f = gateNoSecrets(_added('const k = "data:application/octet-stream;base64,$_fpInDecoded";'));
+    return f.any((x) => x.sev == Sev.err);
+  }());
+
+  // SECURITY counter-cases — nothing reaches WARN/NONE:
+  _check('V9 NO base64-blob path yields WARN — gate52 never emits WARN now', () {
+    for (final blob in [
+      _pngReal, _jpgReal, _trailingSecretAfterPng, _entropyTunedSplice,
+      _randomSecret,
+    ]) {
+      final f = gateNoSecrets(_added('const x = "$blob";'));
+      if (f.any((x) => x.sev == Sev.warn)) return false; // a WARN = laundering surface
+    }
+    return true;
+  }());
+  _check('V9 a random secret is STILL an ERR secret in gate 52', () {
     final f = gateNoSecrets(_added('const k = "$_randomSecret";'));
     return f.length == 1 && f.first.sev == Sev.err;
   }());
-  _check('S1 a secret named imageData is NOT laundered (still ERR)', () {
+  _check('V9 a secret named imageData is NOT laundered (still ERR)', () {
     final f = gateNoSecrets(_added('const imageData = "$_randomSecret";'));
     return f.length == 1 && f.first.sev == Sev.err;
   }());
-  _check('S1 a fingerprinted secret in an image-named field still ERR', () {
+  _check('V9 a fingerprinted secret in an image-named field still ERR', () {
     final f = gateNoSecrets(_added('const imageData = "AKIAIOSFODNN7EXAMPLE";'));
     return f.isNotEmpty && f.first.sev == Sev.err;
   }());
+  // Buildability counter-cases — legit non-blob base64-charset values stay CLEAN
+  // (handled by the earlier digest/SRI/path exemptions; never reach the blob ERR).
+  _check('V9 BUILD a 40-hex git/asset SHA stays clean (not a blob ERR)',
+      gateNoSecrets(_added('const sha = "da39a3ee5e6b4b0d3255bfef95601890afd80709";')).isEmpty);
+  _check('V9 BUILD a 64-hex sha256 digest stays clean',
+      gateNoSecrets(_added('const d = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";')).isEmpty);
+  _check('V9 BUILD an SRI integrity token stays clean',
+      gateNoSecrets(_added("const x = {'integrity': 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='};")).isEmpty);
+  _check('V9 BUILD a dotted/snake id stays clean',
+      gateNoSecrets(_added('const id = "this_is_a_very_long_snake_case_identifier_value_here";')).isEmpty);
+  _check('V9 BUILD base64-of-plain-TEXT (decodes printable) is NOT a binary blob',
+      _looksBinaryBlob('VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZw==') == false);
 
   // DX7b: the dark-surface messages are now actionable (mention lib/theme/).
   _check('DX7b gate46 message names lib/theme/ (actionable)', () {
@@ -1228,7 +1271,7 @@ ANTIPATTERN-EXAMPLE: ignored
 
   stdout.writeln(
     _selfTestFailures == 0
-        ? 'ALL PASS (v8 self-test)'
+        ? 'ALL PASS (v9 self-test)'
         : '$_selfTestFailures FAILURE(S)',
   );
   return _selfTestFailures == 0 ? 0 : 2;
