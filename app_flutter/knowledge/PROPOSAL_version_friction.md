@@ -287,3 +287,23 @@ scope-by-directory **מסוכן** ובדיוק יפספס את הבאג של ב�
 **6/6 מסכימים על הליבה:** גישה C, מחיקת note, journey-always ל-shell, תיקון 11/12/59 כיחידה. **3 הרחבות קריטיות שהתגלו בביקורת:** (11) rollout מתואם + hook-skew barrier [הסדרן] — בלעדיו חוזרים לכאוס-26-commits; (13) יתום-#59 חי + lifecycle ל-proposals [ליטוש]; (14) visual-verify ב-fast-gate [ליטוש].
 
 **צעד הבא:** ממתין ל-GO משתמש (נוגע UI+hook → מחוץ ל-scope פרוטוקוליסט-טהור). **רצף-מימוש מתואם (לפי הסדרן):** הסדרן פותח freeze-window → פרוטוקוליסט דוחף יחידת-hook (version.g.dart + .gitignore + שערים 11/12/59 state-aware) → כל הסוכנים hook-skew-barrier sync → סוכן-UI-יחיד נוגע ב-home_shell (3 שורות, feel לפי ליטוש) → push → README-line + DECISIONS עדכון.
+
+---
+
+# 🔁 סבב ביקורת 2 (סדר הפוך: ליטוש → הסדרן → מקבץ → קטלגן → בנצי)
+
+> בודק את **מפרט-המימוש הקונקרטי** (§M0-M7), לא את העקרונות. כל אחד בונה על קודמו.
+
+## ביקורת ליטוש — סבב 2
+
+**M2 (feel) — חוסם:** ה-placeholder `<secondary-grey-token>` לא נפתר. ה-token הנכון = **`BsTokens.mutedLight` (`0xFF666666`)** — לא `mutedDark` (ה-AppBar קבוע לבן `home_shell.dart:366`, ו-`mutedDark`=`0xFF9AA3B2` על לבן = contrast גרוע). בנוסף: המחיקה של הנקודה-הירוקה חייבת לכלול את ה-`SizedBox(width:4)` היתום; הוסף `maxLines:1` מפורש. **אל תיתן לסוכן-UI לנחש token.**
+→ פתור `<secondary-grey-token>` → `BsTokens.mutedLight` + מחק SizedBox יתום.
+
+**M5 (visual-verify) — חוסם:** "חוסם-רך" כתזכורת-stdout = no-op בלחץ (בדיוק שחיקת-ה-discipline). צריך acknowledgment אכיף: **trailer בהודעת-commit `Visual-verified: <screenshot|"manual">`** (או env `VERIFIED_UI=1`) שה-hook אוכף — יוצא non-zero בלעדיו על commit שנוגע `lib/screens|widgets/**`. claim שמושאר ב-git history וניתן לביקורת בדיעבד.
+→ trailer `Visual-verified:` אכיף, לא תזכורת-נייר.
+
+**M7 + lifecycle:** יתום-#59 תוקן (README:93 ✅). אבל כלל-ה-lifecycle ל-proposals **אינו "נפרד"** כמו binary-assets — הוא meta-כלל שחל על המסמך הזה עצמו → חייב **DECISIONS entry עכשיו**, decoupled מ-GO על תווית-הגרסה (class-rule, לא חלק מהתיקון). אם חי רק כאן → מת כשהמסמך הופך stub (#58).
+→ כלל-lifecycle → DECISIONS עכשיו; binary-assets נשאר נפרד (M7).
+
+**חדש — מעבר-ל-stub חייב אטומי:** M0 שלב 5 אומר "DECISIONS update" כצעד-סיום אבל לא שהמסמך הופך stub **באותו commit**. חלון-ביניים שבו ההכרעות חיות גם ב-DECISIONS גם כאן → מישהו יערוך אחד ולא השני (#58). היתום-#59 שתיקנו חוזר ככפילות-#58 תוך ימים.
+→ הוסף ל-M0.5: "באותו commit-סיום — ההכרעות → DECISIONS/ADR + המסמך → stub-pointer **אטומית**".
