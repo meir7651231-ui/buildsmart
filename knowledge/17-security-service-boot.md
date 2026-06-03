@@ -2,6 +2,7 @@
 
 ## ⭐ מרכז-אבטחה `sec-*` (Category I) (21660–22043)
 - **`RBAC_MATRIX`** (21675) — `role→permissions[]` (בקרת-גישה מבוססת-תפקיד). `currentSecurityRole`/**`can(perm)`**/**`requirePerm`** (אכיפת-הרשאה) · `auditLog` (יומן-פעולות).
+- **תוכן-עומק verbatim (INSP-0008):** RBAC **5 תפקידים** (קבלן · מנהל-מערכת · ספק/חנות · שליח · עובד) · session-timeouts **5/15/30/60 דק'** · encryption **4** (HTTPS/TLS · נתונים-מקומיים · סיסמאות-Hash · גיבוי-ענן) · privacy **4 toggles** (נתוני-שימוש · מיקום · שיווק · דוחות-תקלה).
 - **session-lock**: `resetSessionTimer`/`lockSession`/**`unlockSession`**/`initSessionTimeout` (נעילה-אוטומטית, `#sessionLock`).
 - `openSecurityHub`→`secFeature`: **`secTwoFA`/`toggle2FA`** · **`secRBAC`** (תצוגת-הרשאות, מ-RBAC_MATRIX) · `secBiometric`/`toggleBiometric` · `secAudit` · `secGPS`/`requestGPS` · `secSession`/`setSessionTimeout`/`toggleSession` · `secEncryption` · `secLoginHistory` · `secDevices`/`revokeDevice` · `secPrivacy`/`togglePrivacy`.
 > הערה-מקור (21666): "אבטחה אמיתית חיה בשרת — RBAC/audit/2FA כאן הם הדמיה."
@@ -11,7 +12,7 @@
 - **help-desk**: `svcHelpDesk`/`submitHelpDesk`.
 - **chatbot**: **`BOT_KB`** (22065) — knowledge-base `{kw[], a}`. `svcChatbot`/**`botReply`** (התאמת-kw→תשובה)/`sendBotMsg`/`botQuick` (צ׳יפים).
 - **shake-to-report**: `svcShakeReport`/`toggleShakeReport`/`onDeviceShake`/`triggerBugReport` (ניעור-מכשיר→דיווח-באג).
-- כלים: `svcUnitConvert`/`runUnitConv` (ממיר-יחידות) · `svcQtyCalc`/`runQtyCalc` (מחשבון-כמויות) · `svcCalendar` · **`svcJobBoard`/`postJob`** (לוח-דרושים) · `svcOnboarding`/`renderTourStep`/`tourNext` (סיור-מודרך).
+- כלים: `svcUnitConvert`/`runUnitConv` (ממיר-יחידות) · **`svcQtyCalc`/`runQtyCalc`** (מחשבון-כמויות — 3 מצבים: אריחים/צבע/בטון) · `svcCalendar` · **`svcJobBoard`/`postJob`** (לוח-דרושים) · **`svcOnboarding`/`renderTourStep`/`tourNext`** (סיור — 6 שלבים: בית/הזמנה/תקציב/משימות-ואתר/מועדון/מוכנים). (verbatim, INSP-0008.)
 
 ---
 **🏁 סוף ה-JS (שורה 22414) → `</script>` → `</body>` (22415).**

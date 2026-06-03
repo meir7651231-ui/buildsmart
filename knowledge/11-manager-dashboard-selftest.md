@@ -2,6 +2,7 @@
 
 ## דשבורד-מנהל (12062–12319)
 `orderStoreIndex`/`ordersForActiveStore` (הזמנות לחנות-הפעילה) · **`mgrAnalytics`** (12081)/`mgrStats` (מדדים) · **`renderMgrDashboard`** (12133) → pane "📊 לוח בקרה" (hero-הכנסות · metric tiles · order-pipeline · chart-קטגוריות · ביצועי-חנויות + medals).
+5 metric-tiles verbatim (`mdMetric`, INSP-0029): 🚚 הזמנות-פתוחות · 📦 מוצרים-בקטלוג · 🧰 אביזרים-נלווים · ✅ זמינים-כעת · 🏪 חנויות-פעילות.
 
 ## ⭐ BUTTON_REGISTRY + self-test harness (12320–15900)
 > תשתית-QA מובנית; חשופה ב-`#regTestPanel` של המנהל ("🔬 מרכז בדיקות רגרסיה", `reg-*` ב-CSS חלק ו׳).
