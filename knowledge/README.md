@@ -46,6 +46,7 @@
 | `17-security-service-boot.md` | אבטחה/RBAC (I) + שירות/chatbot (J) + boot + PWA/deploy | 21660–22414 |
 | `18-legacy-knowledge-index.md` | אינדקס `app/knowledge` הישן (ADR · R1–R9 · 43 INSP) | app/knowledge |
 | `19-feature-source-matrix.md` | מטריצת פיצ'ר × מקור (אב-טיפוס/Preact/Flutter) | חוצה-מקורות |
+| `20-infra-build-tooling-protocol.md` | build/native(Capacitor)/CI/extract-catalog/protocol | תשתית |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
