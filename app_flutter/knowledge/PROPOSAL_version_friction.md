@@ -122,3 +122,57 @@ scope-by-directory **מסוכן** ובדיוק יפספס את הבאג של ב�
 | visibility | hook מדפיס `kVersionLabel` ל-stdout בכל commit |
 
 **נימוק-על (בנצי):** הכאב לא מ-render ולא מ-git — אלא מ**שער שאילץ עריכה ידנית של שורה משותפת** + **טקסט-מוצר בעץ-ה-tests**. כל פתרון שמשאיר אחד מהשניים — מחזיר את הכוויה בשם חדש.
+
+---
+
+## ✅ ביקורת קטלגן (assets/crops) — 2026-06-03
+
+**ש1 — fast-gate ו-asset work:** crop scripts (`scripts/crop_*.py`) לא מפעילים את בלוק `STAGED_LIB` — הם נכנסים ל"לא נגעתי בקוד". fast-gate שמסנן "unit לפי תיקייה" ירוץ 0 Dart tests על commit-של-crop — זה **טוב**, אבל "journey תמיד" של בנצי עיוור על asset-commit = 15-דק'-לחינם שהרגו לי איטרציה. הסיכון ההפוך (תמונות מאיטות) הוא דרך ה-**git layer**, לא ה-tests: שער שעושה `git diff --cached` content-scan בלי `:(exclude)` יקרא מגה-בייטים.
+→ **הכרעה:** שורה רביעית בטבלת fast-gate: **"commit שכולו scripts/assets → analyze + שער 113 בלבד, אפס Dart/journey"** + content-scanning gates מחריגים `assets/**` ו-`*.png/jpg/webp`.
+
+**ש2 — גישה C ו-R2:** הזרימה שלי לא תלויה ב-`kBuild`. מסכים עם בנצי על C. **מלכודת:** אם אי-פעם cache-busting לפי build (`?v=$kBuild`) — C שובר אותו שקט (build לא-דטרמיניסטי בין מכונות → cache-miss/asset כפול). כרגע אין coupling כזה (`kImageBaseUrl` סטטי).
+→ **הכרעה:** C מאושר. הערה ב-`version.g.dart`: "kBuild לא-דטרמיניסטי — אסור לקשור ל-asset-URL/cache-key."
+
+**ש3 — binary-repo = בעיה נפרדת:** ההצעה פותרת **text**-conflict על `home_shell`; לא נוגעת ב-**binary**-conflict על `assets/` (89-172 תמונות ש-git לא ממזג). אל תיצור אשליית-פתרון.
+→ **הכרעה:** משפט מפורש "binary-asset conflicts = sub-protocol נפרד (קטלגן)". קטלגן יכתוב asset-staging sub-protocol (עבודה ב-`/tmp/` עד visual-verify → batch אטומי; assets בענף/PR נפרד מ-code).
+
+**ש4 — פספוס:** (1) **שער 113 הוא `warn` ולא חוסם** — אם fast-gate ידלג על warn-gates למהירות, 113 ייעלם בדיוק ב-crop-commit. **113 חייב לרוץ ב-fast-gate תמיד** (זול — רק `git diff --name-only`); שקול שדרוג ל-err על batch >20 assets. (2) **תקדים מסוכן:** `version.g.dart` ב-gitignore → מישהו יחיל "generated→gitignore" על **asset-manifest** שחייב להיות tracked (ה-app טוען ממנו).
+→ **הכרעה:** (א) שער 113 רץ ב-fast-gate תמיד; (ב) **תחם את גישה-C ל-`version.g.dart` בלבד** במפורש — "generated≠gitignored כברירת-מחדל; חריג ל-build-number בלבד".
+
+---
+
+## ✅ ביקורת מקבץ (bug-fixer, hot-files) — 2026-06-03
+
+**ש1 — התנגשות-גרסה (גישה C):** פותר את הכוויה שלי כמעט לגמרי (השורש = re-number ידני של stack כש-origin קפץ). **edge-case שבנצי פספס:** `git rev-list --count HEAD` **לא מונוטוני בין branches** ומשתנה רטרואקטיבית ב-rebase → שני builds מקבילים יכולים לקבל **אותו מספר**. שובר את ההבטחה ש-build עולה מונוטונית (QA: "באג ב-build 412" → יש שניים).
+→ **הכרעה:** C, אבל build = **`count.shortSHA`** (`412.a3f9c1`), לא count לבד — SHA נותן ייחודיות במקום מונוטוניות בלתי-אפשרית.
+
+**ש2 — עץ-עבודה משותף (הכוויה הקשה ביותר):** ההצעה לא נוגעת בזה. תווית-הגרסה היא רק התסמין הגלוי; השורש = `home_shell` בעלות-משותפת. C **מקטין** שטח-מגע (מסיר שורת-גרסה) אבל ה-shell עדיין hot (router/tabs/FAB).
+→ **הכרעה:** צריך שכבה נוספת — **לא lock פורמלי** (כבד). מינימום: **advisory hot-file warning ב-hook** — `git log origin/<branch> --since=2h -- <hot-files>`; אם סוכן אחר נגע ב-2 שעות → `⚠️ בנצי נגע ב-home_shell לפני 18 דק' — rebase לפני שתמשיך`. לא חוסם, מאיר לפני commit. עתידי: לפצל `home_shell` לאזורים (tabs/FAB/router נפרדים).
+
+**ש3 — fast-gate ובידוד:** הבידוד-הכושל שלי = `stash בלי path-filter` (בעיית-זרימה, לא מהירות). fast-gate לא מתקן את ה-stash — **אבל** השער-האיטי **החמיר** את הבידוד (כל ניסיון = רבע-שעה → ניחשתי במקום לבדוק). מסכים עם בנצי: shell/state → full journey.
+→ **הכרעה:** fast-gate שווה כ**מאיץ-בידוד**. חייב **לבנות על `scripts/preflight.sh` הקיים** (לקח #68), לא מקביל: preflight (30s) → fast-gate (analyze+journey ~2min) → full (push).
+
+**ש4 — פספוס (קריטי):** (1) ה-hook ינסה לכתוב `version.g.dart` **באמצע `git commit`** — ריצת-מירוץ עם stash/partial-tree. אם הקובץ קיים-אבל-stale, C לא הגדיר מה קורה.
+→ **הכרעה:** ה-hook **idempotent — תמיד re-generate מ-git, לעולם לא mutate-in-place**. (2) **שער 12 ישבר ביום-1:** אם `kVersionLabel='v5'` (בלי minor) אבל STATUS='v5.91', ה-regex `v[0-9]+\.[0-9]+` לא יתפוס → שער 11 "גרסה חסרה". בנצי אמר "תקנו 11+12 יחד" אבל לא ראה שה-**פורמט** משתנה.
+→ **הכרעה:** הכרע פורמט `kVersionLabel` (`v5` או `v5.91`) **לפני** כתיבת השערים; regex 11/12 + STATUS + הקובץ — כולם אותו פורמט באותו patch.
+
+---
+
+## 🏁 הכרעה סופית — קונצנזוס 4 הסוכנים
+
+| # | נושא | הכרעה מוסכמת | מקור |
+|---|------|--------------|------|
+| 1 | build mechanism | **גישה C** — נגזר מ-git, נכתב ל-`version.g.dart` ב-.gitignore; ה-hook **idempotent** (re-generate, לא mutate); build = **`count.shortSHA`** | בנצי+מקבץ |
+| 2 | changelog note | **למחוק מ-UI** — markdown בלבד; אם ב-UI → מאחורי `Key('release_note')` ש-journey מסנן | בנצי |
+| 3 | היקף גישה C | **רק `version.g.dart`** — "generated≠gitignored כברירת-מחדל"; asset-manifests נשארים tracked | קטלגן |
+| 4 | build ↔ assets | build לא-דטרמיניסטי → **אסור** ב-asset-URL/cache-key (הערה בקובץ) | קטלגן |
+| 5 | fast-gate scope | analyze + **journey תמיד** + unit לתיקיות-שהשתנו; **shell/state → full journey**; **scripts/assets-only → analyze+113 בלבד** | בנצי+קטלגן |
+| 6 | fast-gate בסיס | **לבנות על `preflight.sh`** (לקח #68): preflight 30s → fast-gate ~2min → full ב-push | מקבץ |
+| 7 | שער 113 | רץ ב-fast-gate **תמיד**; שקול err על batch >20 assets | קטלגן |
+| 8 | שערים 11+12+59 | תקן **שלושתם יחד**; 59 בודק **תוצאה** לא diff; **הכרע פורמט `kVersionLabel` לפני** (regex+STATUS+קובץ זהים) | בנצי+מקבץ |
+| 9 | hot-files | **advisory warning ב-hook** (`git log origin --since=2h -- home_shell`) — לא lock; עתידי: פיצול shell | מקבץ |
+| 10 | binary conflicts | **sub-protocol נפרד (קטלגן)** — לא מטופל כאן; אל תיצור אשליית-פתרון | קטלגן |
+
+**4/4 הסוכנים מסכימים:** גישה C (לא A), מחיקת note מ-UI, journey-always ל-shell, ותיקון שערים 11/12/59 כיחידה אחת. שתי הרחבות מעבר ל-scope המקורי: (ט) advisory hot-files, (י) asset sub-protocol — שתיהן נפרדות מהתיקון הזה.
+
+**צעד הבא:** ממתין לאישור משתמש לתחילת מימוש (נוגע ב-UI + hook → מחוץ ל-scope פרוטוקוליסט-טהור, דורש GO). סדר-מימוש מומלץ: שערים 11/12/59 כיחידה → `version.g.dart` + idempotent hook → מחיקת note → fast-gate על preflight.
