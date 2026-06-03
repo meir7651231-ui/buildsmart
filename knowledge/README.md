@@ -148,4 +148,4 @@
 > כל קבצי ה-build/config נקראו: `package.json` · `vite.config.ts` · `capacitor.config.ts` · `tsconfig.json` · `smoke-settings.mjs` · `pubspec.yaml` · `analysis_options.yaml` · `manifest.json` · `service-worker.js` · `vercel.json` · `deploy.yml` + 2 web-shells.
 - ⭐ **תיקון מהותי:** `deploy.yml` פורס את **שתי האפליקציות** — Preact→`/buildsmart/` **+ Flutter web→`/buildsmart/flutter/`** (flutter 3.29.3). לא רק Preact חי! → doc 20.
 - ➕ Workbox-strategy (NetworkFirst/SWR/CacheFirst) → doc 17 · Capacitor `cap:*` scripts + cli/core מותקנים → doc 20 · dep-versions מדויקים → doc 20 · `security`={twoFA,sessionTimeout,privacy.analytics} (אומת מ-smoke) → doc 06 · Flutter-web מבטל SW (אין offline) → doc 17.
-🏁 **הכל נקרא ואומת — `.md` + פרוטוטייפ (22,416) + קוד-מקור (24K) + config. נותרו רק lockfiles · תמונות · platform-scaffold = רעש-מיוצר, אפס ידע.**
+🏁 **הכל נקרא ואומת — `.md` + פרוטוטייפ (22,416) + קוד-מקור (24K) + config + native-manifests.** נותרו רק lockfiles · תמונות · יתר platform-scaffold = boilerplate מיוצר (ה-content-bearing נלכד: Android `applicationId=com.buildsmart.buildsmart` + iOS-perms-gap → doc 20).
