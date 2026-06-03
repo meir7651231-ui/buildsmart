@@ -144,6 +144,11 @@ PER_BAND_PHOTO_H = {
 # Per-band X1 override (page, tag) → x1. Used when a diagram element sits in
 # the right portion of the photo column (e.g. p36_b: H tick + rect at x=180+).
 PER_BAND_X1 = {
+    # Drains pages 20-23 — right port/elbow extends past default X1=238
+    (20, 'a'): 265, (20, 'b'): 265, (20, 'c'): 265,
+    (21, 'a'): 275, (21, 'b'): 275, (21, 'c'): 275,
+    (22, 'a'): 260, (22, 'b'): 260,
+    (23, 'a'): 290, (23, 'b'): 290,
     (36, 'b'): 168,    # photo column is x=12-170; diagram H tick starts at x=180
 }
 
