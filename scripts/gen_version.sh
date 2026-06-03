@@ -10,7 +10,8 @@
 #   - template-עם-גרשיים מפורש (מקבץ) — const String חוקי, לא שגיאת-קומפילציה
 set -euo pipefail
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$REPO_ROOT/app_flutter"
 
 LABEL=$(grep -oE 'v[0-9]+\.[0-9]+' knowledge/STATUS.md 2>/dev/null | head -1)

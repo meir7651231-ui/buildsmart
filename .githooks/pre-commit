@@ -66,13 +66,18 @@ if [[ -n "$_LOCAL_FLUTTER_VER" && "$_LOCAL_FLUTTER_VER" != "$FLUTTER_ENFORCE_VER
 fi
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
+# In a git WORKTREE, $REPO_ROOT/.git is a FILE, not a dir — write targets that
+# the protocol stores under the git dir (audit log, stuck fingerprints) must use
+# the REAL git dir. Resolve it once here; fall back to $REPO_ROOT/.git for the
+# normal (non-worktree) checkout where the literal still holds.
+BS_GIT_DIR="$(git rev-parse --git-dir 2>/dev/null || echo "$REPO_ROOT/.git")"
 
 # ═══ branch-scoping — only protocol branches get full enforcement ═══
 # EXCEPTION (K3): PROTOCOL_AUDIT_MODE bypasses branch-scoping. CI runs the gate-
 # runner in audit mode to produce the registry-parity ledger regardless of the
 # branch it is checking; audit mode is non-blocking and only emits a ledger.
 _CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
-_PROTO_BRANCHES=("claude/whats-happening-LyY9G")
+_PROTO_BRANCHES=("claude/whats-happening-LyY9G" "claude/agent-network-proto-build")
 _IS_PROTO=0
 for _pb in "${_PROTO_BRANCHES[@]}"; do
     [[ "$_CURRENT_BRANCH" == "$_pb" ]] && _IS_PROTO=1 && break
@@ -90,7 +95,7 @@ if [[ -n "${BUILDSMART_EMERGENCY_DISABLE:-}" ]]; then
         if [[ ${#EXPECTED} -ge 16 && "$GIVEN" == "$EXPECTED" ]]; then
             echo "⚠️  EMERGENCY DISABLE פעיל — פרוטוקול מושהה. רשום ב-stuck_log." >&2
             echo "[$(date -Iseconds)] EMERGENCY_DISABLE used — pre-commit bypassed" \
-                >> "$REPO_ROOT/.git/protocol_audit.log"
+                >> "$BS_GIT_DIR/protocol_audit.log"
             exit 0
         fi
     fi
@@ -1313,7 +1318,7 @@ gate_learning() {
     if [[ -f "knowledge/stuck_log.md" && -f "test/stuck_regression_test.dart" ]]; then
         AP_COUNT=$(grep -cE '^ANTIPATTERN(\[hook\])?:' knowledge/stuck_log.md); AP_COUNT=${AP_COUNT:-0}
         RT_COUNT=$(grep -cE 'test\("antipattern #' test/stuck_regression_test.dart); RT_COUNT=${RT_COUNT:-0}
-        DUP_AP=$(grep -oE 'antipattern #[0-9]+' test/stuck_regression_test.dart | sort | uniq -d | head -1)
+        DUP_AP=$(grep -oE 'test\("antipattern #[0-9]+' test/stuck_regression_test.dart | grep -oE '#[0-9]+' | sort | uniq -d | head -1)
         [[ "$AP_COUNT" == "$RT_COUNT" ]] || err "111" "stuck_regression לא מסונכרן ($AP_COUNT ANTIPATTERN ≠ $RT_COUNT tests)" "הרץ scripts/generate_stuck_regression.sh"
         [[ -z "$DUP_AP" ]] || err "111" "מספור כפול ב-stuck_regression: $DUP_AP" "הרץ scripts/generate_stuck_regression.sh"
         # R5: BYTE-DIFF the regenerated test against the committed one. A manual
@@ -1507,7 +1512,7 @@ gate_registry_parity() {
 # ═══════════════════════════════════════════════════════════════════════════
 init_retry_state() {
     local fp ts rest rec_gates rec_head g prior_nums
-    FINGERPRINT_FILE="$REPO_ROOT/.git/stuck_fingerprints.txt"
+    FINGERPRINT_FILE="$BS_GIT_DIR/stuck_fingerprints.txt"
     touch "$FINGERPRINT_FILE"
     CURRENT_FP=$(git diff --cached --name-only | sort | sha256sum | cut -d' ' -f1 | head -c 12)
     HEAD_SHA=$(git rev-parse HEAD 2>/dev/null || echo "none")
