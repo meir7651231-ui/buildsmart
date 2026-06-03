@@ -8,7 +8,13 @@
 
 ## ⭐ דשבורד-שליח (17938–18277)
 - `VEHICLE_RANK` (17946) = `{small:0, van:1, truck:2}`. `haulInfo`/`vehicleCanCarry` (האם הרכב נושא את ההובלה) · **`pickCourierVehicle`** (בורר-רכב, `ch-veh`).
-- `renderCourier`/`renderCourierHome` (🛵 + 3 סטטים) · `chStat` · `shipStage`/`deriveOrderStageFromShipments` · `renderCourierList` (משלוחים: ready/pickup/transit) · `courierDetail`/**`courierAdvance`** (קדם: נאסף→בדרך→נמסר).
+- `renderCourier`/`renderCourierHome` (🛵 + 3 סטטים) · `chStat` · `shipStage`/`deriveOrderStageFromShipments` · `renderCourierList` · `courierDetail`/**`courierAdvance`**.
+
+**⭐ פירוט-עומק (מ-`COURIER_DASHBOARD.md`):**
+- **job ≠ order:** הזמנה מפוצלת (`shipments.length>1`) יוצרת **N jobs** (אחד per-shipment; `shipStage(o,sh)` קובע שלב-לכל-גל); הרשימה מציגה **jobs**, לא orders.
+- **vehicleCanCarry(v,need)** = `VEHICLE_RANK[need] ≤ VEHICLE_RANK[v]` (רכב-גדול נושא קטן); **default = 'truck'**.
+- **stage-flow + תוויות verbatim:** `ready` →"📦 אספתי מהחנות"→ `pickup` →"🚚 יצאתי לדרך"→ `transit` →"✅ נמסר ללקוח"→ `delivered`. `ACTIVE=['ready','pickup','transit']` (delivered יורד מהרשימה).
+- pill-colors: ready=צהוב · pickup=כחול · transit=ירוק; split-pill "🚚 משלוח 1/3" (`fresh` פועם בפעם-ראשונה).
 
 ## Cross-tab sync (18278–18316)
 סנכרון בין-טאבים/חלונות — שינוי `SYS_ORDERS` בטאב אחד מתעדכן באחרים (localStorage `storage` event).
