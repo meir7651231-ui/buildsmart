@@ -196,13 +196,52 @@ parse_json_passcount() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
-#  DX3 (v7) — CHANGED-FILES test scoping for the LOCAL hook ONLY.
-#  Maps each staged lib/*.dart to its sibling test(s) + always includes a small
-#  CRITICAL subset. Returns a space-separated list of `test/*.dart` paths, OR ""
-#  to mean "run the WHOLE suite" (used when a broad/shared/ambiguous file changed,
-#  when only tests changed, or when mapping is uncertain — fail toward MORE tests,
-#  never fewer than needed). CI/pre-push ALWAYS run the full suite, so this only
-#  trades a little local speed for zero security loss.
+#  H1 / B3 (v8) — emit a file's CODE lines with `// line comments` and quoted
+#  string literals stripped, so a symbol-reference grep matches ACTUAL CODE only
+#  (not a `// MySymbol` comment or a "MySymbol" string). Used by the coverage
+#  checks (gate 42/116, helper-test gate 56) and by B3's smarter test selection.
+#  Conservative: removes `//`-to-EOL and the CONTENTS of single/double-quoted
+#  literals (keeps the quotes as empty so structure survives). Block comments are
+#  rare in tests and left as-is (a worst case only ADDS a match → fail-safe).
+# ═══════════════════════════════════════════════════════════════════════════
+_code_lines() {
+    # awk state machine (portable; awk is already a hook dependency). Strips, in
+    # order of precedence: multi-line `/* … */` block comments, `// …` line
+    # comments, and the CONTENTS of single/double-quoted string literals (escapes
+    # honoured). Keeps the surrounding code structure so a `\bSymbol\b` grep on the
+    # output matches ONLY a real code reference — not a `// Symbol` comment, a
+    # `/* Symbol */`, or a "Symbol" string. (H1 honest-coverage requirement.)
+    awk '
+    {
+        line = $0; out = ""; i = 1; n = length(line)
+        while (i <= n) {
+            c = substr(line, i, 1); two = substr(line, i, 2)
+            if (inblock) { if (two == "*/") { inblock = 0; i += 2 } else { i += 1 } continue }
+            if (instr) {
+                if (c == "\\") { i += 2; continue }
+                if (c == q) { instr = 0; out = out q }
+                i += 1; continue
+            }
+            if (two == "//") { break }
+            if (two == "/*") { inblock = 1; i += 2; continue }
+            if (c == "\"" || c == "\047") { instr = 1; q = c; out = out c; i += 1; continue }
+            out = out c; i += 1
+        }
+        print out
+    }
+    ' "$1" 2>/dev/null
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  DX3 (v7) / B3 (v8) — CHANGED-FILES test scoping for the LOCAL hook ONLY.
+#  Maps each staged lib/*.dart to its sibling test(s) + tests that REFERENCE its
+#  symbols in code (B3 smarter selection) + a small CRITICAL subset. Returns a
+#  space-separated list of `test/*.dart` paths, OR "" to mean "run the WHOLE
+#  suite" (used when a broad/shared/ambiguous file changed, when only tests
+#  changed, or when mapping is uncertain — fail toward MORE tests, never fewer).
+#  CI/pre-push ALWAYS run the full suite, so this only trades a little local speed
+#  for zero security loss. The CALLER prints a clear "scoped run — N tests; full
+#  suite runs in CI" notice (B3) so a dev is never surprised by a CI-only failure.
 # ═══════════════════════════════════════════════════════════════════════════
 # CRITICAL subset — protocol/contract tests that must run on EVERY code commit.
 _DX3_CRITICAL="knowledge_protocol_test stuck_regression_test protocol_security_test \
@@ -236,6 +275,35 @@ select_test_targets() {
                 for _t in test/*"${_base}"*_test.dart; do
                     [[ -f "$_t" ]] && _cand="$_cand $_t"
                 done
+                # B3 (v8): SMARTER selection AS A FALLBACK. When NO name-sibling
+                # test exists, a change's real covering test may still live under a
+                # different name (renamed/split test). Rather than fall straight to
+                # the WHOLE suite, look for a test that REALLY covers the file — a
+                # genuine `import '…/<base>.dart'` OR a reference to one of the
+                # file's public symbols in REAL CODE (comments/strings stripped, H1
+                # rule). If found, run exactly those (+ the critical subset); else
+                # WHOLE. We do this ONLY when the sibling search found nothing, so a
+                # sibling-tested file keeps the fast ~12s path (it is not diluted by
+                # every test that happens to mention a common symbol). CI runs the
+                # full suite regardless, so a missed non-sibling cover only ever
+                # costs a re-run, never a security gap.
+                if [[ -z "$_cand" ]]; then
+                    local _csym _csyms _ct
+                    _csyms=$(grep -hoE '^(class|enum|mixin|extension)[[:space:]]+[A-Z][A-Za-z0-9_]+|^[A-Za-z_][A-Za-z0-9_<>, ?]*[[:space:]]+[a-z][A-Za-z0-9_]*[[:space:]]*\(' "$_f" 2>/dev/null \
+                              | grep -oE '[A-Z][A-Za-z0-9_]+|[a-z][A-Za-z0-9_]*[[:space:]]*\(' \
+                              | sed -E 's/[[:space:]]*\($//' | sort -u | head -20)
+                    for _ct in test/*_test.dart; do
+                        [[ -f "$_ct" ]] || continue
+                        if grep -qE "import[[:space:]]+['\"][^'\"]*\b$_base\.dart['\"]" "$_ct" 2>/dev/null; then
+                            _cand="$_cand $_ct"; continue
+                        fi
+                        for _csym in $_csyms; do
+                            if _code_lines "$_ct" | grep -qE "\b$_csym\b" 2>/dev/null; then
+                                _cand="$_cand $_ct"; break
+                            fi
+                        done
+                    done
+                fi
                 # a lib file with NO discoverable covering test → WHOLE suite
                 # (do not under-test; gate 42/56 separately demand a test exists)
                 if [[ -z "$_cand" ]]; then echo ""; return; fi
@@ -257,22 +325,24 @@ select_test_targets() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
-#  DX4 (v7) — gate 42 trigger refinement: STRICTER-AND-SMARTER.
-#  OLD: err 42 whenever ANY lib/(logic|data) file was staged and no *_test.dart
-#       was staged — taxing a one-line fix to an ALREADY-tested helper.
-#  NEW: err 42 only when a NEW public top-level symbol (class/enum/mixin/
-#       extension/top-level function) is ADDED that has NO covering test (on disk
-#       OR staged). Editing an existing tested helper adds no new symbol → no
-#       demand. A brand-new untested public API → still demanded (and gate 56
-#       independently covers new *_helper.dart files). NOT weaker: an attacker
-#       adding new logic still must add a covering test; an UNTESTED new public
-#       symbol is exactly what we want to block, and CI re-runs the full suite.
+#  DX4 (v7) + H1 (v8) — gate 42 trigger: STRICTER, SMARTER, HONEST coverage.
+#  v7: err 42 only on a NEW public top-level symbol (class/enum/mixin/extension/
+#       function) in lib/(logic|data) with no covering test.
+#  H1 (v8) TWO fixes:
+#    (1) WIDER detection — also catch new public top-level VARS / CONSTS / GETTERS
+#        (extensions already covered), and also scan lib/state/ (a new untested
+#        public provider/state symbol is exactly the risk; v7 missed those).
+#    (2) HONEST coverage — the "covered" check matches the symbol in REAL CODE
+#        (comments + string literals stripped via _code_lines) or a real import of
+#        the file. A `// MySymbol` comment or "MySymbol" string no longer counts.
+#  KEEP the v7 DX win: editing an EXISTING tested symbol adds no NEW symbol → no
+#  demand. Only a genuinely-NEW untested public API is blocked; CI runs full suite.
 # Echoes the FIRST "<file>::<symbol>" that is a newly-added public top-level
-# symbol lacking any covering test; empty if none (=> gate 42 does not fire).
+# symbol lacking any REAL-CODE covering test; empty if none.
 staged_new_untested_symbol() {
     local _files _file _syms _sym _base _covered _t _diff
     _files=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null \
-               | grep -E '^app_flutter/lib/(logic|data)/.*\.dart$' | sed 's#^app_flutter/##')
+               | grep -E '^app_flutter/lib/(logic|data|state)/.*\.dart$' | sed 's#^app_flutter/##')
     [[ -z "$_files" ]] && { echo ""; return; }
     while IFS= read -r _file; do
         [[ -z "$_file" ]] && continue
@@ -297,20 +367,32 @@ $(printf '%s\n' "$_diff" \
             | grep -vE '^\+[[:space:]]' \
             | grep -vE '\b(if|for|while|switch|return|assert|case|catch)\b' \
             | sed -E 's/^\+[A-Za-z_][A-Za-z0-9_<>, ?]*[[:space:]]+([a-z][A-Za-z0-9_]*)[[:space:]]*\(.*/\1/')"
+        # H1 (v8): top-level public VARS / CONSTS / FINALS (column 0 = top-level,
+        # public lowercase name): `+ final|const|var|late|<Type> name = …`.
+        _syms="$_syms
+$(printf '%s\n' "$_diff" \
+            | grep -E '^\+(final|const|var|late|[A-Z][A-Za-z0-9_<>, ?]*)[[:space:]]+[a-z][A-Za-z0-9_]*[[:space:]]*=' \
+            | grep -vE '^\+[[:space:]]' \
+            | sed -E 's/^\+(final|const|var|late|[A-Z][A-Za-z0-9_<>, ?]*)[[:space:]]+([a-z][A-Za-z0-9_]*)[[:space:]]*=.*/\2/')"
+        # H1 (v8): top-level public GETTERS: `+ <Type> get name …`.
+        _syms="$_syms
+$(printf '%s\n' "$_diff" \
+            | grep -E '^\+[A-Za-z_][A-Za-z0-9_<>, ?]*[[:space:]]+get[[:space:]]+[a-z][A-Za-z0-9_]*' \
+            | grep -vE '^\+[[:space:]]' \
+            | sed -E 's/^\+[A-Za-z_][A-Za-z0-9_<>, ?]*[[:space:]]+get[[:space:]]+([a-z][A-Za-z0-9_]*).*/\1/')"
         _syms=$(printf '%s\n' "$_syms" | grep -E '^[A-Za-z][A-Za-z0-9_]*$' | sort -u)
         [[ -z "$_syms" ]] && continue
         _base=$(basename "$_file" .dart)
         for _sym in $_syms; do
             _covered=""
-            # covering test = ANY test/*_test.dart (on disk OR staged) that
-            # references the symbol or imports the changed file. Staged-but-new
-            # test files are on disk too (staging copies content to the index, but
-            # the working tree has them), so a disk scan of test/ suffices and we
-            # ALSO honour an explicitly staged test referencing the symbol.
+            # H1 (v8): covering test = ANY test/*_test.dart that references the
+            # symbol in REAL CODE (comments + strings stripped via _code_lines) OR
+            # imports the changed file. A `// $_sym` comment / "$_sym" string no
+            # longer satisfies coverage — the test must actually USE the symbol.
             for _t in test/*_test.dart; do
                 [[ -f "$_t" ]] || continue
-                if grep -qE "\b$_sym\b" "$_t" 2>/dev/null; then _covered=1; break; fi
                 if grep -qF "$_base.dart" "$_t" 2>/dev/null; then _covered=1; break; fi
+                if _code_lines "$_t" | grep -qE "\b$_sym\b" 2>/dev/null; then _covered=1; break; fi
             done
             [[ -n "$_covered" ]] && continue
             echo "$_file::$_sym"
@@ -344,13 +426,14 @@ staged_ui_covered_by_widget_test() {
                      | sed -E 's/class[[:space:]]+([A-Z][A-Za-z0-9_]+).*/\1/' | sort -u)
         _covered=""
         # search widget tests: a _test.dart that uses widget-test machinery AND
-        # references one of the classes OR imports the changed file path.
+        # references one of the classes (H1: in REAL CODE, not a comment/string)
+        # OR imports the changed file path.
         for _t in test/*_test.dart; do
             [[ -f "$_t" ]] || continue
             grep -qE 'testWidgets|pumpWidget' "$_t" 2>/dev/null || continue
             if grep -qF "$_base" "$_t" 2>/dev/null; then _covered=1; break; fi
             for _cls in $_classes; do
-                if grep -qE "\b$_cls\b" "$_t" 2>/dev/null; then _covered=1; break; fi
+                if _code_lines "$_t" | grep -qE "\b$_cls\b" 2>/dev/null; then _covered=1; break; fi
             done
             [[ -n "$_covered" ]] && break
         done
@@ -641,20 +724,53 @@ gate_test_tier() {
         echo "$ANALYZE" | grep -E "^error •" | head -3
         err "31" "$ERR_COUNT שגיאות ניתוח" "תקן את השגיאות"
     fi
-    # R3: treat WARNINGS as fatal — but ONLY for files changed in THIS commit, so
-    # pre-existing lint warnings elsewhere don't block an unrelated change.
+    # B2 (v8): treat WARNINGS as fatal ONLY for warnings INTRODUCED by THIS change
+    # — i.e. on an ADDED/changed LINE of a touched file — NOT pre-existing warnings
+    # that already sit on UNTOUCHED lines of a file this commit happens to edit.
+    # v7 fired on ANY warning whose FILE matched a changed file (a per-FILE tax: 33
+    # such warnings live across lib, incl. the most-edited screens, so editing one
+    # line forced fixing an unrelated pre-existing warning). v8 is per-CHANGE: we
+    # map each changed .dart file to the set of line numbers it ADDED (from the
+    # staged diff hunks), then count a `warning • … • file:line:col • rule` as
+    # fatal only when file:line is in that added-line set. Pre-existing warnings on
+    # untouched lines no longer block. CI still runs the FULL analyze over the
+    # whole tree (protocol-enforce.yml) — this only relaxes the LOCAL per-file tax
+    # to per-change; no warning is hidden from the authoritative layer.
     CHANGED_DART=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.dart$' | sed 's#^app_flutter/##')
     if [[ -n "$CHANGED_DART" ]]; then
         WARN_COUNT=0
+        local _wfile _wline _added_lines _shown=0
         while IFS= read -r _f; do
             [[ -z "$_f" ]] && continue
-            if echo "$ANALYZE" | grep -E "^warning •" | grep -qF "$_f"; then
-                WARN_COUNT=$((WARN_COUNT+1))
-            fi
+            # Added line numbers for THIS file from the staged diff (new-side `+`).
+            # `git diff --cached -U0` emits `@@ -a,b +c,d @@`; we walk hunks and
+            # number every '+' (non-header) line on the new side.
+            _added_lines=$(git diff --cached -U0 -- "app_flutter/$_f" "$_f" 2>/dev/null | awk '
+                /^@@/ {
+                    # parse the +c[,d] new-side start
+                    match($0, /\+[0-9]+/); s=substr($0,RSTART+1,RLENGTH-1); ln=s+0; next
+                }
+                /^\+\+\+/ { next }
+                /^\+/ { print ln; ln++ }
+            ' | tr "\n" " ")
+            # Each warning on this file whose line is in the added set is fatal.
+            while IFS= read -r _wline_full; do
+                [[ -z "$_wline_full" ]] && continue
+                # extract file:line — analyze format: "... • <path>:<line>:<col> • rule"
+                _wfile=$(printf '%s' "$_wline_full" | sed -E 's/.* • ([^ ]+):[0-9]+:[0-9]+ • .*/\1/')
+                _wline=$(printf '%s' "$_wline_full" | sed -E 's/.* • [^ ]+:([0-9]+):[0-9]+ • .*/\1/')
+                # match the file (analyze prints lib/-relative paths)
+                [[ "$_wfile" == "$_f" || "$_wfile" == "app_flutter/$_f" ]] || continue
+                case " $_added_lines " in
+                    *" $_wline "*)
+                        WARN_COUNT=$((WARN_COUNT+1))
+                        if [[ "$_shown" -lt 5 ]]; then echo "   ⚠️ $_wline_full"; _shown=$((_shown+1)); fi
+                        ;;
+                esac
+            done <<< "$(echo "$ANALYZE" | grep -E "^warning •")"
         done <<< "$CHANGED_DART"
         if [[ "$WARN_COUNT" -gt 0 ]]; then
-            echo "$ANALYZE" | grep -E "^warning •" | head -5
-            err "31" "$WARN_COUNT אזהרות analyze בקבצים ששונו (R3: warnings=fatal)" "תקן את האזהרות בקבצים החדשים"
+            err "31" "$WARN_COUNT אזהרות analyze חדשות (B2: רק אזהרות שהשינוי הזה הוסיף)" "תקן את האזהרות בשורות ששינית"
         fi
     fi
 
@@ -669,14 +785,25 @@ gate_test_tier() {
         # push/PR and (b) can be forced locally with BUILDSMART_FULL_TEST=1. So
         # NO detection is lost: CI is the un-skippable layer. `select_test_targets`
         # returns either "" (=> run the whole suite) or an explicit file list.
-        local _scoped_targets _scope_label
+        local _scoped_targets _scope_label _scope_n
         _scoped_targets=""
         _scope_label="FULL suite"
         if [[ -z "${BUILDSMART_FULL_TEST:-}" ]]; then
             _scoped_targets="$(select_test_targets)"
             [[ -n "$_scoped_targets" ]] && _scope_label="scoped ($(echo "$_scoped_targets" | wc -w | tr -d ' ') files)"
         fi
-        echo "  🧪 flutter test — $_scope_label (CI/pre-push always run the FULL suite — DX3)"
+        # B3 (v8): when running a SCOPED subset, print an explicit, unmissable
+        # notice so a dev knows the FULL suite runs in CI — a covering test that is
+        # NOT in the scoped set will fail in CI, not here. (Selection is also
+        # smarter now — symbol-referencing tests are included — but the notice is
+        # the honest backstop against a push→CI-fail surprise.)
+        if [[ -n "$_scoped_targets" ]]; then
+            _scope_n=$(echo "$_scoped_targets" | wc -w | tr -d ' ')
+            echo "  🧪 flutter test — scoped run — $_scope_n test file(s); the FULL suite runs in CI (B3)"
+            echo "     (set BUILDSMART_FULL_TEST=1 to run the full suite locally)"
+        else
+            echo "  🧪 flutter test — $_scope_label (CI/pre-push always run the FULL suite — DX3)"
+        fi
         # DX2 (v7): run with --reporter json so failure COUNT and failure NAMES
         # both come from ONE machine-readable stream (the testDone events) — the
         # compact-reporter `^NN:NN +P -F:` summary scrape used carriage-returns and
@@ -781,13 +908,46 @@ gate_test_bookkeeping() {
             err "42" "סמל ציבורי חדש בלי בדיקה: $_NEW_SYM" "הוסף test/*_test.dart שמכסה את $_NEW_SYM (או יבא את הקובץ)"
         fi
     fi
-    if [[ -n "$STAGED_HELPER" ]]; then
+    # B4 (v8): mutation_log was demanded on EVERY lib/(logic|data) edit — even a
+    # one-line CONSTANT tweak that has no fault to inject (performative). Relax to
+    # GENUINELY-NEW FAULT-INJECTABLE LOGIC: the staged helper diff must ADD a new
+    # function/method declaration OR a control-flow/operator construct (if/for/
+    # while/switch/ternary/comparison/arithmetic/return-with-expression). A pure
+    # constant/string/list-literal change adds none of these → no mutation_log
+    # demand. (gate 42/56 still demand a TEST for new public API; this only drops
+    # the mutation-LOG ceremony on edits with nothing to mutate. bookkeep.sh still
+    # stubs the entry when it IS demanded.)
+    if [[ -n "$STAGED_HELPER" ]] && _staged_helper_adds_logic; then
         [[ -f "knowledge/mutation_log.md" ]] || err "43" "mutation_log חסר" "צור knowledge/mutation_log.md"
         if [[ -f "knowledge/mutation_log.md" ]]; then
             STAGED_MUT=$(git diff --cached --name-only | grep "mutation_log.md" | head -1)
-            [[ -n "$STAGED_MUT" ]] || err "44" "mutation_log לא עודכן" "תעד הזרקת תקלה ב-mutation_log.md"
+            [[ -n "$STAGED_MUT" ]] || err "44" "mutation_log לא עודכן (לוגיקה חדשה הניתנת להזרקת-תקלה)" "תעד הזרקת תקלה ב-mutation_log.md (או bash scripts/bookkeep.sh)"
         fi
     fi
+}
+
+# B4 (v8): true when the staged lib/(logic|data) diff ADDS genuinely
+# fault-injectable logic (a new fn/method, or a control-flow/operator construct)
+# — as opposed to a constant/data-literal-only change with nothing to mutate.
+_staged_helper_adds_logic() {
+    local _hf _hfiles _added
+    _hfiles=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null \
+                | grep -E '^app_flutter/lib/(logic|data)/.*\.dart$' | sed 's#^app_flutter/##')
+    [[ -z "$_hfiles" ]] && return 1
+    while IFS= read -r _hf; do
+        [[ -z "$_hf" ]] && continue
+        # ADDED ('+') code lines, excluding pure comments. We strip // comments so a
+        # `// if (x)` comment cannot count as logic.
+        _added=$(git diff --cached -- "app_flutter/$_hf" "$_hf" 2>/dev/null \
+                   | grep -E '^\+' | grep -vE '^\+\+\+' | sed -E 's://.*$::')
+        # fault-injectable signals: control flow, a comparison/logical/arith
+        # operator, a ternary, an early return-with-expression, or a new
+        # function/method signature (`name(...) {` or `=> expr`).
+        if printf '%s\n' "$_added" | grep -qE '\b(if|for|while|switch|else)\b|[!<>=]=|&&|\|\||[-+*/%]=| \? .* : |return[[:space:]]+[^;]|=>[[:space:]]*[^;{]|[A-Za-z0-9_]+[[:space:]]*\([^)]*\)[[:space:]]*\{'; then
+            return 0
+        fi
+    done <<<"$_hfiles"
+    return 1
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -840,10 +1000,11 @@ gate_quality() {
                         | grep -oE '\b(class|enum|mixin|extension)\s+[A-Z][A-Za-z0-9_]+|\b[A-Za-z_][A-Za-z0-9_]+\s*\(' \
                         | grep -oE '[A-Z][A-Za-z0-9_]+' | sort -u | head -10)
                 for _sym in $_syms; do
-                    if grep -qE "\b$_sym\b" "$TEST_FILE" 2>/dev/null; then _ok=1; break; fi
+                    # H1 (v8): require the reference in REAL CODE (not a comment/string).
+                    if _code_lines "$TEST_FILE" | grep -qE "\b$_sym\b" 2>/dev/null; then _ok=1; break; fi
                 done
             fi
-            [[ -n "$_ok" ]] || err "56" "test קיים אך אינו מתייחס לסמל מ-$NAME" "ודא ש-$TEST_FILE בודק את הפונקציה/מחלקה שהשתנתה"
+            [[ -n "$_ok" ]] || err "56" "test קיים אך אינו מתייחס לסמל מ-$NAME (בקוד, לא בהערה)" "ודא ש-$TEST_FILE בודק את הפונקציה/מחלקה שהשתנתה"
         fi
     fi
     ran 56   # helper-needs-test detection always runs (body conditional on NEW_HELPER)
@@ -1273,14 +1434,30 @@ init_retry_state() {
         if [[ "$fp" == "$CURRENT_FP" ]]; then IS_RETRY="true"; PRIOR_GATES="$rec_gates"; break; fi
         if [[ "$HEAD_SHA" != "none" && "$rec_head" == "$HEAD_SHA" ]]; then IS_RETRY="true"; PRIOR_GATES="$rec_gates"; break; fi
     done < "$FINGERPRINT_FILE"
+    # B1 (v8): the gate-102 retry-trap forced a manufactured stuck_log "lesson" on
+    # the 2nd attempt of ANY retried commit — even when the FIRST failure was just
+    # a forgotten BOOKKEEPING file (12/24/44/116/59) or a pre-existing-warning
+    # touch-tax (31, now relaxed by B2). A real lesson is only warranted when the
+    # prior failure included a GENUINE CODE/TEST-LOGIC gate (analyze ERROR, a test
+    # failure, a compile/build break, a critical-test-missing). We therefore gate
+    # PRIOR_HAS_CODE_TEST on an EXPLICIT allowlist of code/test gates, not a broad
+    # numeric range (the v7 range 31..45 wrongly swept in 43/44 = mutation_log
+    # bookkeeping), and we DROP the v7 `elif` that treated ANY legacy-format prior
+    # as code/test (a fail-toward-friction default that manufactured lessons).
+    #   CODE/TEST gates (demand a lesson on retry): 31 analyze · 32 test-vs-baseline
+    #     · 33 test-count · 34 build-web · 35-41 critical-test/greaterThan logic.
+    #   Bookkeeping-only (NO lesson on retry): 11/12 version · 24 wiring · 42 helper
+    #     -needs-test · 43/44 mutation_log · 56 logic-helper-test · 59 cancelled ·
+    #     116 visual-verify · and any non-numeric id (reg / engine advisories).
     PRIOR_HAS_CODE_TEST=""
     if [[ "$PRIOR_GATES" == v2:* ]]; then
         prior_nums="${PRIOR_GATES#v2:}"
         for g in ${prior_nums//,/ }; do
-            [[ "$g" =~ ^[0-9]+$ ]] && (( g >= 31 && g <= 45 )) && (( g != 42 )) && { PRIOR_HAS_CODE_TEST="1"; break; }
+            case "$g" in
+                31|32|33|34|35|36|37|38|39|40|41)
+                    PRIOR_HAS_CODE_TEST="1"; break ;;
+            esac
         done
-    elif [[ -n "$PRIOR_GATES" ]]; then
-        PRIOR_HAS_CODE_TEST="1"
     fi
 }
 

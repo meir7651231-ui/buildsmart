@@ -38,6 +38,8 @@ PINNED=(
     "protocol/regression_v6.sh"
     # v7 — pin the DX friction-fix regression suite (DX1-DX6 bash-hook half).
     "protocol/regression_v7.sh"
+    # v8 — pin the S1-laundering + B1/B2/B3/B4/H1 regression suite.
+    "protocol/regression_v8.sh"
 )
 
 OUT="$REPO_ROOT/protocol/pins.sha256"

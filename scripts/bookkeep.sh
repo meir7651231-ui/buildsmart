@@ -29,6 +29,22 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 FLUTTER_DIR="$REPO_ROOT/app_flutter"
 cd "$FLUTTER_DIR" || { echo "❌ לא נמצא app_flutter"; exit 1; }
 
+# B4 (v8): gen_version onboarding. lib/version.g.dart is gitignored (generated from
+# git + STATUS.md by scripts/gen_version.sh) but is IMPORTED by lib code, so a
+# FRESH CLONE is compile-RED until it is generated — a `flutter test` before the
+# first commit fails for a reason that has nothing to do with the dev's change.
+# Generate it here (idempotent, the pre-commit hook + preflight do the same) so the
+# one-command bookkeeping flow also fixes a fresh checkout. Never fatal.
+if [[ -f "$REPO_ROOT/scripts/gen_version.sh" ]]; then
+    if [[ -n "${DRY:-}" ]]; then
+        [[ -f lib/version.g.dart ]] || echo "  • WOULD run gen_version.sh (lib/version.g.dart missing — fresh clone)"
+    else
+        bash "$REPO_ROOT/scripts/gen_version.sh" >/dev/null 2>&1 \
+            && [[ -f lib/version.g.dart ]] \
+            && echo "  • version.g.dart ensured (gen_version — fresh-clone compile guard, B4)"
+    fi
+fi
+
 STAMP="$(date '+%Y-%m-%d %H:%M')"
 MARKER="<!-- bookkeep-stub $STAMP -->"   # idempotency / fill-me marker
 

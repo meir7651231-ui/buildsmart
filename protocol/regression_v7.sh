@@ -67,6 +67,7 @@ DX3_LIB="$WORK/dx3.sh"
 # _DX3_CRITICAL is multi-line (ends on a line closing the double-quote).
 awk '/^_DX3_CRITICAL=/{f=1} f{print} f&&/"[[:space:]]*$/{exit}' "$HOOK" > "$DX3_LIB"
 echo "" >> "$DX3_LIB"
+extract_to _code_lines "$DX3_LIB"   # B3 (v8): select_test_targets now uses it
 extract_to select_test_targets "$DX3_LIB"
 cat >> "$DX3_LIB" <<'MOCKEOF'
 git() { case "$*" in *"diff --cached --name-only"*) printf '%s\n' "$MOCK";; *) :;; esac; }
@@ -86,7 +87,7 @@ fi
 
 # ── DX4: gate 42 — edit-existing=NO demand; new untested symbol=DEMAND ──
 # (No `git commit` needed: the function compares the STAGED diff to on-disk tests.)
-DX4_LIB="$WORK/dx4.sh"; : > "$DX4_LIB"; extract_to staged_new_untested_symbol "$DX4_LIB"
+DX4_LIB="$WORK/dx4.sh"; : > "$DX4_LIB"; extract_to _code_lines "$DX4_LIB"; extract_to staged_new_untested_symbol "$DX4_LIB"
 T4="$WORK/r4"; AF="$T4/app_flutter"; mkdir -p "$AF/lib/logic" "$AF/test"
 ( cd "$T4" && git init -q )
 printf 'int existingFn(int a)=>a+1;\n' > "$AF/lib/logic/foo.dart"
@@ -106,7 +107,7 @@ D=$( cd "$AF" && bash -c "source '$DX4_LIB'; staged_new_untested_symbol" )
 case "$D" in *bar.dart*) ok "DX4 NEW untested public symbol → DEMAND";; *) bad "DX4 new symbol (got: '$D')";; esac
 
 # ── DX5: gate 116 — widget-test coverage satisfies; uncovered demands ──
-DX5_LIB="$WORK/dx5.sh"; : > "$DX5_LIB"; extract_to staged_ui_covered_by_widget_test "$DX5_LIB"
+DX5_LIB="$WORK/dx5.sh"; : > "$DX5_LIB"; extract_to _code_lines "$DX5_LIB"; extract_to staged_ui_covered_by_widget_test "$DX5_LIB"
 T5="$WORK/r5"; mkdir -p "$T5/lib/widgets" "$T5/test"
 printf 'class MyWidget extends StatelessWidget{ const MyWidget(); }\n' > "$T5/lib/widgets/my_widget.dart"
 printf 'void main(){ testWidgets("w",(t) async { await t.pumpWidget(const MyWidget()); }); }\n' > "$T5/test/my_widget_test.dart"

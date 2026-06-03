@@ -760,29 +760,68 @@ void main() {
     });
   });
 
-  // ── v7 DX7 — friction fixes that must NOT weaken detection ──
-  group('DX7 — image-blob FP + actionable dark-surface message', () {
-    // PNG/JPEG-magic blobs (real magic + high-entropy body); pure-alnum secret.
-    const pngBlob =
-        'iVBORw0KGgo5DIx9ckc0LNgQDy9vdw1l1nDljgNR2K6OT26sNC/CMbewhxbrP8EolrliIxd0lCh3M8KO6LpTvbVriCRXfVPs';
+  // ── v8 S1 — AIRTIGHT base64 image exemption (decode-and-scan). HONEST
+  //    fixtures: real images DECODE to a valid PNG/JPEG; laundering blobs carry
+  //    the magic but hide a secret and must be CAUGHT as ERR. ──
+  group('S1 — airtight base64 image exemption (decode-and-scan)', () {
+    // REAL 1x1 PNG (decodes; low-entropy IHDR) and a real minimal JPEG.
+    const pngReal =
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAAHxXEiQAAAA1JREFUeJxiAAAAAP//AwAABgAF';
+    const jpgReal =
+        '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/2Q==';
+    // LAUNDER vectors (the v7 hole): magic-text+secret, magic-bytes+secret,
+    // fingerprint-in-decoded-bytes.
+    const launderTextPrefix =
+        'iVBORw0KGgoktM5SGxdCgFuAfhCmCF7tqhqRCLtcqgHD4pMt0fCC/XCsi1bq2JazoWHXYvkFZfI';
+    const launderByteSplice =
+        'iVBORw0KGgr0hn60leqiLSid62JtMVSP4OJLjacDaKjrsdBdzeLqN7EoB1C5sflT3rXq4/mmsug=';
+    const launderFpInDecoded =
+        'iVBORw0KGgpnaHBfYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhQUFBQUFBQUFBQUFBQUFBQUFBQUE=';
     const randomSecret = 'U8JZpDE0iGXlD6gNCFbaEPFjbD0kH8Oool8DklZDOCj2ISaJ';
 
-    test('DX7a a PNG-magic base64 blob is a WARN (prefer assets), not ERR', () {
-      final f = gateNoSecrets(added('const img = "$pngBlob";'));
+    test('a REAL (decodable) PNG blob is a WARN (prefer assets), not ERR', () {
+      final f = gateNoSecrets(added('const img = "$pngReal";'));
       expect(f.length, 1);
       expect(f.first.sev, Sev.warn);
     });
-    test('DX7a a random high-entropy secret is STILL an ERR (no loss)', () {
+    test('a REAL (decodable) JPEG blob is a WARN, not ERR', () {
+      final f = gateNoSecrets(added('const img = "$jpgReal";'));
+      expect(f.length, 1);
+      expect(f.first.sev, Sev.warn);
+    });
+    test('LAUNDER magic-TEXT-prefix + secret (same blob) is an ERR secret', () {
+      // THE HOLE: v7 downgraded this to WARN and shipped it.
+      final f = gateNoSecrets(added('const k = "$launderTextPrefix";'));
+      expect(f.length, 1);
+      expect(f.first.sev, Sev.err);
+    });
+    test('LAUNDER magic-BYTES + secret splice is an ERR secret', () {
+      final f = gateNoSecrets(added('const k = "$launderByteSplice";'));
+      expect(f.length, 1);
+      expect(f.first.sev, Sev.err);
+    });
+    test('LAUNDER fingerprint hidden in DECODED bytes is an ERR secret', () {
+      final f = gateNoSecrets(added('const k = "$launderFpInDecoded";'));
+      expect(f.length, 1);
+      expect(f.first.sev, Sev.err);
+    });
+    test('SPLIT literal "magic" "secret" (joined) is an ERR secret', () {
+      final f =
+          gateNoSecrets(added('const k = "iVBORw0KGgo" "$randomSecret";'));
+      expect(f.isNotEmpty, isTrue);
+      expect(f.first.sev, Sev.err);
+    });
+    test('a random high-entropy secret is STILL an ERR (no loss)', () {
       final f = gateNoSecrets(added('const k = "$randomSecret";'));
       expect(f.length, 1);
       expect(f.first.sev, Sev.err);
     });
-    test('DX7a naming a secret "imageData" does NOT launder it (still ERR)', () {
+    test('naming a secret "imageData" does NOT launder it (still ERR)', () {
       final f = gateNoSecrets(added('const imageData = "$randomSecret";'));
       expect(f.isNotEmpty, isTrue);
       expect(f.first.sev, Sev.err);
     });
-    test('DX7a a provider-fingerprint secret in an image field still fires', () {
+    test('a provider-fingerprint secret in an image field still fires', () {
       final f = gateNoSecrets(added('const imageData = "AKIAIOSFODNN7EXAMPLE";'));
       expect(f.isNotEmpty, isTrue);
       expect(f.first.sev, Sev.err);

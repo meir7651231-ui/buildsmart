@@ -133,10 +133,12 @@ JSONEOF
   });
 
   group('DX3 — select_test_targets scopes correctly (CI still full)', () {
-    // _DX3_CRITICAL is referenced by the function; pull it too.
+    // _DX3_CRITICAL is referenced by the function; pull it too. B3 (v8):
+    // select_test_targets now calls _code_lines — extract it as well.
     final critical = Process.runSync(
         'sed', ['-n', '/^_DX3_CRITICAL=/,/"\$/p', _hook]).stdout as String;
-    final pre = critical + _extract('select_test_targets');
+    final pre =
+        critical + _extract('_code_lines') + _extract('select_test_targets');
 
     // mock git: any `git diff --cached --name-only …` returns \$MOCK; other git
     // calls are no-ops. (select_test_targets only calls diff --cached --name-only.)
@@ -181,7 +183,8 @@ git() { case "$*" in *"diff --cached --name-only"*) printf '%s\n' "$MOCK";; *) :
   });
 
   group('DX4 — gate 42 fires only on a NEW untested public symbol', () {
-    final pre = _extract('staged_new_untested_symbol');
+    // H1 (v8): staged_new_untested_symbol now uses _code_lines — extract it too.
+    final pre = _extract('_code_lines') + _extract('staged_new_untested_symbol');
 
     // Build an isolated temp git repo that MIRRORS the real layout: files live
     // under app_flutter/ (the function greps `^app_flutter/lib/…` then strips the
@@ -199,6 +202,7 @@ git() { case "$*" in *"diff --cached --name-only"*) printf '%s\n' "$MOCK";; *) :
       git(['init', '-q']);
       git(['config', 'user.email', 't@t']);
       git(['config', 'user.name', 't']);
+      git(['config', 'commit.gpgsign', 'false']); // no signing in temp repos
     });
     tearDown(() => tmp.deleteSync(recursive: true));
 
@@ -215,7 +219,7 @@ git() { case "$*" in *"diff --cached --name-only"*) printf '%s\n' "$MOCK";; *) :
           "import 'package:flutter_test/flutter_test.dart';\n"
           "void main(){ test('t',(){ expect(existingFn(1),2); }); }\n");
       git(['add', '-A']);
-      git(['commit', '-qm', 'base']);
+      git(['commit', '-qm', 'base', '--no-gpg-sign']);
       // a trivial edit (comment) — adds no new public symbol
       File('$af/lib/logic/foo.dart')
           .writeAsStringSync('int existingFn(int a) => a + 1; // tweak\n');
@@ -245,10 +249,49 @@ git() { case "$*" in *"diff --cached --name-only"*) printf '%s\n' "$MOCK";; *) :
       expect(run(), isEmpty,
           reason: 'a new symbol covered by a referencing test is satisfied');
     });
+
+    // ── H1 (v8): HONEST coverage + widened detection ──
+    test('H1 a COMMENT/STRING mention does NOT satisfy coverage → DEMAND', () {
+      File('$af/lib/logic/calc.dart')
+          .writeAsStringSync('int newCompute(int x) => x * 3;\n');
+      // the test only NAMES the symbol in a // comment and a "string" — no real use
+      File('$af/test/calc_test.dart').writeAsStringSync(
+          "import 'package:flutter_test/flutter_test.dart';\n"
+          "void main(){ // newCompute\n test('t',(){ var s = 'newCompute'; }); }\n");
+      git(['add', 'app_flutter/lib/logic/calc.dart']);
+      final out = run();
+      expect(out, isNotEmpty,
+          reason: 'a comment/string mention must NOT count as coverage (H1)');
+      expect(out, contains('newCompute'));
+    });
+
+    test('H1 a REAL CODE reference DOES satisfy coverage → NO demand', () {
+      File('$af/lib/logic/calc2.dart')
+          .writeAsStringSync('int reCompute(int x) => x * 3;\n');
+      File('$af/test/calc2_test.dart').writeAsStringSync(
+          "import 'package:flutter_test/flutter_test.dart';\n"
+          "void main(){ test('t',(){ expect(reCompute(2), 6); }); }\n");
+      git(['add', '-A']);
+      expect(run(), isEmpty,
+          reason: 'a real code reference satisfies coverage (H1)');
+    });
+
+    test('H1 a NEW top-level VAR in lib/state → gate 42 fires (widened)', () {
+      Directory('$af/lib/state').createSync(recursive: true);
+      File('$af/lib/state/prov.dart')
+          .writeAsStringSync('final myProvider = 42;\n');
+      git(['add', 'app_flutter/lib/state/prov.dart']);
+      final out = run();
+      expect(out, isNotEmpty,
+          reason: 'a new untested public var in lib/state is caught (H1)');
+      expect(out, contains('myProvider'));
+    });
   });
 
   group('DX5 — gate 116 satisfied by a covering widget test', () {
-    final pre = _extract('staged_ui_covered_by_widget_test');
+    // H1 (v8): staged_ui_covered_by_widget_test now uses _code_lines.
+    final pre =
+        _extract('_code_lines') + _extract('staged_ui_covered_by_widget_test');
 
     late Directory tmp;
     setUp(() {
