@@ -249,4 +249,32 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 `.asc-btn` (order=teal/wh=כתום/site=ירוק — מחזור-מצב-מלאי).
 
 ---
-**טרם נקרא בקובץ הזה:** 3654–4019 (catalog product spec-sheet `cd-*` + misc — אחרון).
+
+## חלק ח׳ — catalog spec-sheet + ניווט + print + misc (3654–4019)
+
+### ⭐ כרטיס-מפרט-מוצר `cd-*` (3653–3922)
+`.cd-card` · `.cd-ic-img`/`.prod-thumb-img` (**תמונות-אמת** object-fit) · `.cd-store` (בורר-חנות `.on`=teal + eta) · `.cd-name/.cd-sub/.cd-desc` · **`.cd-size`** (בורר-מידה `.on`=teal) · `.cd-specs/.cd-row` (zebra) · `.cd-sku` (monospace) · `.cd-price` · `.cd-note`.
+
+### ⭐ ניווט-קטלוג מדורג (3678–3880)
+- drill-down (`#catDrill`): `.drill-crumb` · **`.drill-chip`** (`.on`=teal — סינון-תכונה).
+- catnav (מסך עצמאי): `.catnav-crumb` (breadcrumb) · **`.cn-row`** (קטגוריה/תכונה; `.cn-row-attr` קומפקטי · `.cn-row-acc` מקווקו) · `.catnav-attrgrid` (2-עמ׳) · `.cn-allbtn`.
+- **`.catnav-bar`** (sticky): `.catnav-back` · `.catnav-search`+`.search-clear`(✕) · **`.catnav-suggest`/`.cns-item`** (הצעות: label+path+kind) · `.catnav-sort/.csm-item` (מיון) · `.cnm-btn` (toggle-מצב).
+
+### print (3923–3940)
+`@media print` + `@page A4` — מסתיר הכל חוץ מ-`#screen-delivery-note`; `.dn-table` page-break-aware. תעודה מודפסת נקייה.
+
+### Manager — Customers `mc-*` (3941–3976)
+`.mc-card` · `.mc-pill` (live=ירוק/low=אדום/off=אפור) · **`.mc-credit-bar`** (`.hot`=אדום) · `.mc-d-order` (היסטוריה).
+
+### misc סופי (3977–4017)
+`.trk-map/.trk-svg` (מפת-מעקב SVG) · `.help-card/.help-q/.help-a` (שו"ת) · `.adm-act-btn` (teal/amber) · `.deliv-track/.dt-step` (מעקב אופקי).
+
+---
+**🏁 סוף ה-CSS (שורה 4019). מערכת-העיצוב נלכדה במלואה (head + 14–4019).**
+
+### תובנות-על (cross-cutting)
+- **2 צבעי-מותג בלבד:** teal `#1f6f6b` (ראשי/מבנה) + amber `#f2a516` (מבטא/CTA). ירוק=הצלחה, אדום=סכנה, אפור=ניטרלי.
+- **שפה עקבית:** כרטיס לבן + `--line` border + radius 12–18; `.btn-primary`(teal)/`.btn-amber` הם ה-CTA; כל ה-sheets יורשים `.overlay/.sheet/.grip`; כל בורר משתמש ב-`.on`=teal.
+- **4 פרסונות חולקות מעטפת** `.admin-screen/.adm-*`, וכל אחת prefix: manager=`md/mm/mo/mc`, store=`sh/so`, courier=`ch`, worker=`ww`.
+- **מצבי-סטטוס בצבע אחיד** לאורך כל האפליקציה (משימה/הזמנה/משלוח): כתום=בתהליך, teal=פעיל, ירוק=הושלם, אדום=בעיה, אפור=ממתין.
+- **טיפוגרפיה:** Heebo-900 לכותרות/מספרים, Rubik לגוף.
