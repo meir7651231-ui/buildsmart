@@ -1,6 +1,6 @@
 # הצעה — פתרון חיכוך תווית-הגרסה (flagged ע"י 4/4 הסוכנים)
 
-> **סטטוס:** draft → **reviewed (6/6 agents, round 1)** → ממתין ל-GO. לא מיושם. פרוטוקוליסט, 2026-06-03 (לקח #72).
+> **סטטוס:** draft → reviewed **6/6 agents × 2 rounds** → ממתין ל-GO על **P0** (סיכום בסוף). לא מיושם. פרוטוקוליסט, 2026-06-03 (לקח #72).
 > **בעלות:** פרוטוקוליסט (hook) + סוכן-UI-יחיד (home_shell, 3 שורות) · נוגע ב-UI render → דורש אישור משתמש.
 > **lifecycle:** ביום-implemented → ההכרעות עוברות ל-`DECISIONS.md`/`adr/`, המסמך → stub (כלל ליטוש, מונע כשל #58).
 
@@ -351,3 +351,48 @@ scope-by-directory **מסוכן** ובדיוק יפספס את הבאג של ב�
 
 **חדש (חוסם-רך) — שער 113 לא תופס את כל asset-generation:** ה-regex = `scripts/crop_*.py`/`*render*.py` **בלבד**. אבל הטריגר האמיתי לבאג #6 הוא **כל שינוי שמשנה פלט-תמונה** — כולל החלפת PNG ידנית ב-`assets/**`, שינוי manifest, או script בשם אחר (`gen_`/`slice_`/`montage_`). commit שמחליף 80 PNG בלי לגעת ב-`crop_*.py` → **113 שותק** → השורה "scripts/assets-only → 113 בלבד" מבטיחה שמירה שלא קיימת = חזרה לכוויית-80%-פגום בכניסה אחרת.
 → **הרחב טריגר 113** מ-`scripts/crop|render` ל-**`assets/** staged OR asset-gen script staged`**, ואז fast-gate שורה-3 אמינה.
+
+## ביקורת בנצי — סבב 2 (סוגר)
+
+**המבחן האמיתי (אני זה שנכווה):** שתי הכוויות נמנעות —
+- **test-trap:** נמנעת לחלוטין (`kReleaseNote=''` תמיד, changelog ב-markdown).
+- **rebase-magnet:** נמנעת **רק** עם 2 תיקוני-סבב-2: (א) `git rm --cached` (מקבץ) — **הפרצה האחרונה**, `.gitignore` לא מסיר tracked → בלעדיו הכוויה חוזרת; (ב) חלון-אדום 11/12→version.g.dart בשלב-2 (הסדרן).
+- פרצה נותרת: rev-list לא-מונוטוני — `count.shortSHA` מספיק (ייחודיות), לא חוסם.
+
+**over-engineering — הפרדה חדה:** הסבב הוסיף ~10 מנגנונים. 3 load-bearing, 7 altitude.
+**self-verifying-hash דווקא מפשט** (3 שורות, מחליף "נעילה עד 4 מאשרים" advisory-vapor) — לא over-eng.
+
+**🎯 MVP — priority ordering:**
+```
+P0 (היחידה האטומית — בלי זה אין פתרון):
+  M1  version.g.dart gitignored + count.shortSHA
+  M3  idempotent hook (re-generate, never mutate) + empty-LABEL guard
+  שלב-2: git rm --cached + hook-guard ls-files       ← הפרצה האחרונה
+  M4  שערים 11/12/59 → version.g.dart בשלב-2, 59=תוצאה לא-diff
+  M2  home_shell: kVersionLabel בלבד, kReleaseNote='' תמיד
+P1 (rollout — בלי זה: כאוס-תזמון, לא כוויה):
+  M0 freeze-window + סדר אטומי · self-verifying-hook-hash
+P2 (דחוי — נחמד, לא חוסם, קומיטים נפרדים מחוץ ל-window):
+  M5 fast-gate · M6 hot-files · M7 binary · trailer Visual-verified ·
+  rebase-detection · shallow-guard · pubspec checkout · 113→assets הרחבה
+```
+
+**פסיקה סופית: GO על P0+P1, NO-GO על ערבוב P2 לאותה יחידה.** המפרט לא נהיה כבד-מדי — אבל **יישום-הכל-כיחידה-אחת** = בדיוק ה-26-commit-chaos שברחנו ממנו, עם hook אחד. דחפו P0 רזה (5 פריטים), נעלו את הכוויה, ואז הוסיפו שכבות. ה-trailer של ליטוש ו-113-expansion של קטלגן נכונים — אבל **phase-2, קומיטים נפרדים**.
+
+---
+
+## 🏁🏁 סיכום שני הסבבים — מוכן ל-GO
+
+**2 סבבים, 6 סוכנים, 12 ביקורות.** הקונצנזוס סגור. **המלצת-מימוש מדורגת (בנצי-סוגר):**
+
+| Phase | תוכן | חוסם כוויה? |
+|---|---|---|
+| **P0** (יחידה אטומית, ~5 פריטים) | version.g.dart gitignored+shortSHA · idempotent hook+empty-guard · **git rm --cached**+hook-guard · שערים 11/12/59→קובץ בשלב-2 · kReleaseNote='' | ✅ **כן — שתי הכוויות** |
+| **P1** (rollout) | freeze-window 60דק+סדר אטומי+rollback · self-verifying-hash (מחליף barrier ידני) | תזמון בלבד |
+| **P2** (קומיטים נפרדים, מחוץ ל-window) | fast-gate · hot-files · binary-sub-protocol · trailer · rebase/shallow guards · 113→assets | שיפור-תהליך |
+
+**הכרעות שיש להעביר ל-DECISIONS/ADR ביום-המימוש (לא תלוי ב-GO על P0):**
+1. כלל-lifecycle ל-proposals (ליטוש) — meta-class, עכשיו.
+2. "generated≠gitignored כברירת-מחדל" (קטלגן) — חריג ל-build בלבד.
+
+**Status:** draft → reviewed (6/6 × 2 rounds) → **ממתין ל-GO משתמש על P0**. סדר-מימוש: הסדרן פותח window → פרוטוקוליסט דוחף P0 כיחידה אטומית (כולל git rm --cached + self-hash) → ליטוש דוחף home_shell (feel: mutedLight, בלי ירוק) → פרוטוקוליסט סוגר (stub+DECISIONS אטומי) → P1/P2 בקומיטים נפרדים.
