@@ -1,5 +1,12 @@
 #	BuildSmart Protocol v2 — Gate Registry (SINGLE SOURCE OF TRUTH)
 #	------------------------------------------------------------------
+#	v4 note: no gate IDs changed. v4 hardened HOW the registry is enforced —
+#	CI now RUNS the gate-runner in PROTOCOL_AUDIT_MODE to produce a GENUINE
+#	`ran` ledger (K3, no more cp-enforced-claimed self-comparison); the runner
+#	emits `ran <id>` AFTER each check (deleted check => missing id => parity
+#	FAILS); the engine/hooks/workflows are content-hash pinned (K4). See
+#	PROTOCOL_V4.md.
+#	------------------------------------------------------------------
 #	One row per REAL, DISTINCT protection. Reconciled 1:1 against the emitted
 #	gate ids in .githooks/pre-commit (see PROTOCOL_V2.md OLD->NEW mapping).
 #	The consistency check (tool/protocol_check.dart --verify-registry, mirrored

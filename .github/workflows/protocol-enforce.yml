@@ -1,17 +1,24 @@
 name: Protocol Enforcement
 
 # ═══════════════════════════════════════════════════════════════════════════
-#  R1 — CI IS THE ONLY UN-SKIPPABLE LAYER.
-#  Local hooks can be skipped (commit -n, env-config, chmod -x, GIT_DIR,
-#  plumbing, merge/FF-into-protected) — CI cannot. This job runs the FULL
-#  protocol on the RESULTING TREE of every push AND pull_request to BOTH
-#  whats-happening AND main, with NO branch-scoping (the suite runs regardless
-#  of branch). It computes the diff vs the merge-base and scans the post-merge
-#  tree with --no-replace-objects.
+#  R1 / v4 — CI IS THE ONLY UN-SKIPPABLE LAYER, and it now:
+#   K1  scans the WHOLE resulting TREE (git ls-tree -r HEAD → --tree), not just
+#       the BASE…HEAD touched files. Establishes a CLEAN-TREE baseline; never
+#       assumes the merge-base was clean. FAIL-CLOSED if a push changed refs but
+#       the diff-set is empty (push-to-main empty-diff / incremental-not-whole).
+#   K2  runs the engine + gate-runner + registry from a TRUSTED ref
+#       (origin/main), NOT the PR/pushed branch's own copy, so an attacker cannot
+#       ship a stubbed engine that judges itself. (Full anchor still needs
+#       branch-protection + CODEOWNERS on main — see THE WALL in PROTOCOL_V4.md.)
+#   K3  RUNS the gate-runner to produce a GENUINE runtime ledger and diffs it
+#       against gates.tsv (no more `cp enforced claimed` self-comparison).
+#   K4  integrity-pins the hooks + workflows themselves (content-hash, not
+#       existence / grep -q job-name).
+#   K6  captures engine RCs explicitly under set +e so crash-vs-finding is real
+#       and tree-mode always runs.
 #
-#  Make this AUTHORITATIVE via GitHub branch protection (admin step — see
-#  PROTOCOL_V3.md): required status check = `protocol-gates`; disallow
-#  force-push; require PR + this check before merge to whats-happening/main.
+#  Triggers: push AND pull_request to BOTH whats-happening AND main. No
+#  branch-scoping inside the job (the suite runs regardless of branch).
 # ═══════════════════════════════════════════════════════════════════════════
 
 on:
@@ -24,29 +31,66 @@ on:
       - 'claude/whats-happening-LyY9G'
       - main
 
-# One pinned Flutter version EVERYWHERE (R8). Keep in lock-step with deploy.yml
-# and android-package.yml — gate `flutter-version-parity` (below) fails if they
-# diverge. 3.44.0 is the SHIP version (what deploy/android build), so the gate
-# now matches what users actually get.
+# K7 — TWO Flutter versions exist by DESIGN and the split is documented:
+#   * SHIP / CI version = 3.44.0 (what deploy.yml + android-package.yml build,
+#     i.e. what users actually get). CI enforces against THIS so "passes CI" ==
+#     "ships".
+#   * Local pre-commit/pre-push hooks float on whatever the dev has installed
+#     (here 3.29.3). The hook prints a NOTICE when its local Flutter != the
+#     ENFORCEMENT_FLUTTER below so the divergence is visible (see pre-commit).
+# The parity gate asserts ALL workflows pin the same SHIP version.
 env:
   FLUTTER_VERSION: '3.44.0'
-  GIT_REPLACE_REF_BASE: ''   # belt-and-suspenders: ignore replace refs globally
+  ENFORCEMENT_FLUTTER: '3.44.0'
+  TRUSTED_REF: 'origin/main'   # K2 — engine/runner/registry come from HERE
+  GIT_REPLACE_REF_BASE: ''     # belt-and-suspenders: ignore replace refs globally
 
 jobs:
   protocol-gates:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (full history — need the merge-base)
+      - name: Checkout (full history — need the merge-base + the trusted ref)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Compute base + the touched tree (diff vs merge-base)
+      # ── K2: materialise the TRUSTED engine/runner/registry from origin/main ──
+      # An attacker who stubs tool/protocol_check.dart in their PR cannot make CI
+      # judge them with the stub: we judge with origin/main's copy. If a file is
+      # absent on the trusted ref (genuine bootstrap, before this lands on main),
+      # we fall back to the checked-out copy WITH a loud notice. Once merged to
+      # main + protected, the trusted path is authoritative.
+      - name: K2 — fetch trusted engine/runner/registry from origin/main
+        id: trusted
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main >/dev/null 2>&1 || echo "::warning::could not fetch origin/main"
+          mkdir -p .trusted/tool .trusted/protocol .trusted/githooks
+          fetched_all=1
+          pull() { # <repo-path> <dest>
+            local src="$1" dst="$2"
+            if git --no-replace-objects cat-file -e "${TRUSTED_REF}:${src}" 2>/dev/null; then
+              git --no-replace-objects show "${TRUSTED_REF}:${src}" > "$dst"
+              echo "  trusted: $src ← ${TRUSTED_REF}"
+            else
+              echo "::warning::trusted ref ${TRUSTED_REF} lacks $src — BOOTSTRAP fallback to PR copy"
+              if [[ -f "$src" ]]; then cp "$src" "$dst"; else echo "::error::$src missing in PR too"; exit 1; fi
+              fetched_all=0
+            fi
+          }
+          pull app_flutter/tool/protocol_check.dart           .trusted/tool/protocol_check.dart
+          pull app_flutter/tool/protocol_check_selftest.dart  .trusted/tool/protocol_check_selftest.dart
+          pull protocol/gates.tsv                              .trusted/protocol/gates.tsv
+          pull .githooks/pre-commit                            .trusted/githooks/pre-commit
+          echo "trusted_complete=$fetched_all" >> "$GITHUB_OUTPUT"
+          # The engine is a `part`-based 2-file program; place the selftest beside it.
+          ls -l .trusted/tool
+
+      - name: K1/K6 — compute base, touched set, and the WHOLE tree (fail-closed)
         id: diffset
         run: |
           set -euo pipefail
-          # The base differs for PR vs push. For a PR, GitHub gives us the base
-          # SHA; for a push, diff against origin/main's merge-base with HEAD.
+          # Base differs for PR vs push.
           if [[ -n "${{ github.event.pull_request.base.sha }}" ]]; then
             BASE="${{ github.event.pull_request.base.sha }}"
           else
@@ -54,13 +98,31 @@ jobs:
             BASE=$(git merge-base origin/main HEAD 2>/dev/null || git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)
           fi
           echo "base=$BASE" >> "$GITHUB_OUTPUT"
-          # Touched paths in the RESULTING tree (BASE...HEAD). --no-replace-objects
+          HEAD_SHA=$(git rev-parse HEAD)
+          echo "head=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+          # Touched paths in the resulting tree (BASE…HEAD). --no-replace-objects
           # so a planted `git replace` cannot launder a malicious blob past us.
           git --no-replace-objects diff --name-only "$BASE...HEAD" > /tmp/touched.txt || true
-          echo "── touched files vs $BASE ──"
-          cat /tmp/touched.txt || true
+          # K1 — the WHOLE resulting tree (every tracked file), the clean-tree
+          # baseline. We never assume the merge-base was clean.
+          git --no-replace-objects ls-tree -r --name-only HEAD > /tmp/tree_all.txt
+          echo "── touched vs $BASE ──"; cat /tmp/touched.txt || true
+          echo "── tree size ──"; wc -l /tmp/tree_all.txt
+          # K1 FAIL-CLOSED: a push that MOVED the ref but yields an EMPTY diff-set
+          # is suspicious (history rewrite / replace-ref laundering / merge that
+          # GitHub reports with no file delta). For a push (not PR) with a real
+          # before-sha, require a non-empty diff-set OR fail closed.
+          BEFORE='${{ github.event.before }}'
+          IS_PR='${{ github.event_name }}'
+          if [[ "$IS_PR" == "push" && -n "$BEFORE" && "$BEFORE" != "0000000000000000000000000000000000000000" ]]; then
+            if [[ "$BEFORE" != "$HEAD_SHA" ]] && [[ ! -s /tmp/touched.txt ]]; then
+              echo "::error::push changed refs ($BEFORE → $HEAD_SHA) but the diff-set is EMPTY — fail closed (K1)"
+              exit 1
+            fi
+          fi
+          echo "✅ diff-set/tree computed (K1 fail-closed armed)"
 
-      - name: Setup Flutter (pinned — R8)
+      - name: Setup Flutter (pinned — K7 ship version)
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -73,26 +135,20 @@ jobs:
       - name: Generate version.g.dart (gitignored — לקח #72)
         run: bash scripts/gen_version.sh
 
-      # ── R8: one Flutter version everywhere — fail if the workflows diverge ──
+      # ── K7: one SHIP Flutter version across all workflows ──
       - name: Gate — Flutter version parity across workflows
         run: |
           set -euo pipefail
           want='${{ env.FLUTTER_VERSION }}'
           fail=0
           check() {
-            local f="$1"
-            # extract every flutter-version pin in the file
-            local found
+            local f="$1" found
             found=$(grep -oE "flutter-version:?[[:space:]]*['\"]?[0-9]+\.[0-9]+\.[0-9]+" "$f" 2>/dev/null \
                       | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" | sort -u)
             if [[ -z "$found" ]]; then echo "  $f: (no pin)"; return; fi
             while IFS= read -r v; do
-              if [[ "$v" != "$want" ]]; then
-                echo "❌ $f pins Flutter $v, expected $want"
-                fail=1
-              else
-                echo "  ✅ $f pins $v"
-              fi
+              if [[ "$v" != "$want" ]]; then echo "❌ $f pins Flutter $v, expected $want"; fail=1
+              else echo "  ✅ $f pins $v"; fi
             done <<< "$found"
           }
           for wf in .github/workflows/protocol-enforce.yml \
@@ -103,86 +159,124 @@ jobs:
           done
           [[ "$fail" -eq 0 ]] || { echo "Flutter version drift — pin ALL workflows to $want"; exit 1; }
 
-      # ── R6: prove the content engine is intact and its logic works ──
-      - name: Gate — content-engine self-test (blocking)
-        working-directory: app_flutter
-        run: dart run tool/protocol_check.dart --self-test
+      # ── K2/R6: prove the TRUSTED engine is intact and its logic works ──
+      - name: Gate — trusted content-engine self-test (blocking)
+        run: dart run .trusted/tool/protocol_check.dart --self-test
 
-      # ── R6: integrity-pin the engine/registry/scripts ──
-      - name: Gate — integrity pins (engine/registry/scripts)
+      # ── K4: integrity-pin the engine/registry/scripts AND the hooks+workflows ──
+      # Content-hash, not existence / grep -q. A gutted-but-executable hook or a
+      # neutered workflow fails HERE because its sha256 no longer matches the pin.
+      - name: K4 — integrity pins (engine + registry + scripts + hooks + workflows)
         run: |
           set -euo pipefail
           if [[ ! -f protocol/pins.sha256 ]]; then
-            echo "ℹ️ protocol/pins.sha256 absent — skipping (bootstrap)"; exit 0
+            echo "::error::protocol/pins.sha256 absent — cannot verify integrity (fail closed)"; exit 1
           fi
-          # Recompute and compare. A tampered pinned file fails here.
-          fail=0
+          fail=0; seen=0
           while read -r want path; do
-            [[ -z "$want" || "$want" == \#* ]] && continue
+            [[ -z "${want:-}" || "$want" == \#* ]] && continue
+            seen=$((seen+1))
             if [[ ! -f "$path" ]]; then echo "❌ pinned file missing: $path"; fail=1; continue; fi
             have=$(sha256sum "$path" | awk '{print $1}')
-            if [[ "$have" != "$want" ]]; then echo "❌ integrity: $path changed vs pin"; fail=1; fi
+            if [[ "$have" != "$want" ]]; then echo "❌ integrity: $path changed vs pin ($have != $want)"; fail=1; fi
           done < protocol/pins.sha256
-          [[ "$fail" -eq 0 ]] || exit 1
-          echo "✅ integrity pins OK"
+          # The hooks + BOTH workflows MUST be pinned (K4) — assert their presence
+          # in the pin file, so deleting their pin lines cannot un-protect them.
+          for must in .githooks/pre-commit .githooks/pre-push .githooks/commit-msg \
+                      .github/workflows/protocol-enforce.yml .github/workflows/deploy.yml; do
+            grep -qF "  $must" protocol/pins.sha256 || { echo "❌ $must is not integrity-pinned (K4)"; fail=1; }
+          done
+          [[ "$fail" -eq 0 && "$seen" -ge 5 ]] || { echo "integrity FAILED"; exit 1; }
+          echo "✅ integrity pins OK ($seen files, hooks+workflows pinned)"
 
-      # ── R1: the FULL content engine over the committed/merged tree ──
-      - name: Gate — content engine over the resulting tree (R1/R2)
+      # ── K1/K2/K6: TRUSTED engine over the WHOLE resulting tree ──
+      # We scan EVERY tracked file (tree_all), not just touched, with the TRUSTED
+      # engine. RCs are captured explicitly under `set +e` (K6) so a crash is
+      # distinct from a finding and tree-mode ALWAYS runs.
+      - name: K1 — trusted content engine over the WHOLE tree (+ touched diff)
         working-directory: app_flutter
         run: |
           set -euo pipefail
+          TRUSTED="$GITHUB_WORKSPACE/.trusted/tool/protocol_check.dart"
           # Repo-relative names for the engine's path scoping.
           sed 's#^app_flutter/##' /tmp/touched.txt > /tmp/touched_rel.txt || true
           cp /tmp/touched.txt /tmp/touched_abs.txt
-          # Diff mode over the full BASE...HEAD diff (added lines) + tree mode
-          # over the post-image of touched files. --no-replace-objects on the
-          # blob fetch so a planted replace ref cannot hide content.
+          cp /tmp/tree_all.txt /tmp/tree_abs.txt
+          # (a) DIFF mode over the BASE…HEAD added lines (catches new violations
+          #     with their exact line, incl. positional gates 62/63/65/95).
           git --no-replace-objects diff "${{ steps.diffset.outputs.base }}...HEAD" > /tmp/fulldiff.txt || true
-          dart run tool/protocol_check.dart \
+          set +e   # K6: capture RCs, do not let a non-zero abort the script
+          dart run "$TRUSTED" \
             --diff /tmp/fulldiff.txt \
             --names /tmp/touched_abs.txt \
             --stuck-log knowledge/stuck_log.md
-          ENGINE_RC=$?
-          # Tree mode: scan post-image of each touched file from the HEAD tree.
-          dart run tool/protocol_check.dart \
+          DIFF_RC=$?
+          # (b) WHOLE-TREE mode (K1): scan the post-image of EVERY tracked file
+          #     from HEAD. This is the clean-tree baseline; --show fetches blobs
+          #     with --no-replace-objects so a planted replace ref cannot hide content.
+          dart run "$TRUSTED" \
             --tree \
-            --names /tmp/touched_abs.txt \
+            --names /tmp/tree_abs.txt \
             --show "git --no-replace-objects show HEAD:" \
             --stuck-log knowledge/stuck_log.md
           TREE_RC=$?
-          if [[ "$ENGINE_RC" -ne 0 || "$TREE_RC" -ne 0 ]]; then
-            echo "❌ content engine found ERR-level findings in the resulting tree"
-            exit 1
+          set -e
+          echo "DIFF_RC=$DIFF_RC TREE_RC=$TREE_RC"
+          # K6: exit code 2 == ERR findings; anything else (1/127/139) == engine
+          # crash/tamper — both are failures, but we report which.
+          if [[ "$DIFF_RC" -eq 2 || "$TREE_RC" -eq 2 ]]; then
+            echo "::error::content engine found ERR-level findings in the resulting tree (DIFF_RC=$DIFF_RC TREE_RC=$TREE_RC)"; exit 1
           fi
-          echo "✅ content engine clean over the resulting tree"
+          if [[ "$DIFF_RC" -ne 0 || "$TREE_RC" -ne 0 ]]; then
+            echo "::error::content engine CRASHED (non-0/2 rc: DIFF_RC=$DIFF_RC TREE_RC=$TREE_RC) — fail closed"; exit 1
+          fi
+          echo "✅ trusted content engine clean over the WHOLE tree"
 
-      # ── R6: registry <-> runtime parity (the engine + the structural ids) ──
-      - name: Gate — registry parity (malformed rows FAIL)
+      # ── K3: REAL registry⇄runtime parity by RUNNING the gate-runner ──
+      # No more `cp enforced claimed`. We invoke the pre-commit gate-runner in its
+      # AUDIT mode (PROTOCOL_AUDIT_MODE=1) which executes every gate's body over a
+      # forced-applicable synthetic context and prints a GENUINE `ran <id>` ledger
+      # AFTER each check runs. That ledger is diffed against gates.tsv(enforced).
+      # A gate whose CHECK is deleted but whose `ran` was left behind no longer
+      # records (ran is emitted AFTER the check) → parity catches it.
+      - name: K3 — real registry parity (run the gate-runner, diff vs gates.tsv)
         run: |
           set -euo pipefail
-          # Build the runtime id set: the engine's content gates + the structural
-          # gate ids the CI structural checks below cover + reg. (CI runs the full
-          # suite, so all enforced ids are exercised by SOME step here.)
-          awk -F'\t' 'NF>=9 && $8=="enforced" {print $1}' protocol/gates.tsv | sort -u > /tmp/enforced.txt
-          # The engine emits its own RAN list; everything else is structurally
-          # enforced by this workflow, so for the PARITY check we assert the
-          # registry itself is well-formed AND the engine's ids are a subset.
-          EMPTY=$(mktemp); : > "$EMPTY"
-          ENGINE_RAN=$(mktemp)
-          ( cd app_flutter && dart run tool/protocol_check.dart --diff "$EMPTY" --emit-ran 2>/dev/null ) \
-            | grep '^RAN' | cut -f2 | sort -u > "$ENGINE_RAN"
-          # malformed-row detection (engine returns 2 on a bad tsv even if ids match)
-          cp /tmp/enforced.txt /tmp/claimed.txt
-          ( cd app_flutter && dart run tool/protocol_check.dart \
-              --verify-registry --emitted /tmp/claimed.txt --registry ../protocol/gates.tsv )
-          # Every engine-emitted id must be an enforced row (no orphan gate).
-          if ! comm -23 "$ENGINE_RAN" /tmp/enforced.txt | grep -q .; then
-            echo "✅ engine ids ⊆ enforced registry"
-          else
-            echo "❌ engine emits an id missing from the registry:"; comm -23 "$ENGINE_RAN" /tmp/enforced.txt; exit 1
+          TRUSTED_ENGINE="$GITHUB_WORKSPACE/.trusted/tool/protocol_check.dart"
+          TRUSTED_REG="$GITHUB_WORKSPACE/.trusted/protocol/gates.tsv"
+          # 1) Genuine runtime ledger from the gate-runner's audit mode.
+          LEDGER=$(mktemp)
+          PROTOCOL_AUDIT_MODE=1 PROTOCOL_AUDIT_LEDGER="$LEDGER" \
+            bash .githooks/pre-commit >/tmp/audit.log 2>&1 || true
+          if [[ ! -s "$LEDGER" ]]; then
+            echo "::error::gate-runner audit produced an EMPTY ledger — runner stubbed? (fail closed)"
+            tail -40 /tmp/audit.log || true
+            exit 1
           fi
+          sort -u "$LEDGER" > /tmp/ran.txt
+          echo "── runtime ledger (ran ids) ──"; cat /tmp/ran.txt
+          # 2) Enforced ids from the TRUSTED registry.
+          awk -F'\t' 'NF>=9 && $8=="enforced" {print $1}' "$TRUSTED_REG" | sort -u > /tmp/enforced.txt
+          # 3) The engine emits its own RAN ids — they must be ⊆ enforced (no orphan).
+          EMPTY=$(mktemp); : > "$EMPTY"
+          ( cd app_flutter && dart run "$TRUSTED_ENGINE" --diff "$EMPTY" --emit-ran 2>/dev/null ) \
+            | grep '^RAN' | cut -f2 | sort -u > /tmp/engine_ran.txt
+          # 4) Malformed-row detection via the engine (returns 2 on a bad tsv).
+          ( cd app_flutter && dart run "$TRUSTED_ENGINE" \
+              --verify-registry --emitted /tmp/ran.txt --registry "$TRUSTED_REG" ) || {
+            echo "::error::registry⇄runtime parity FAILED or registry malformed (K3)"; exit 1; }
+          # 5) Belt: every enforced id appeared in the runtime ledger.
+          if comm -23 /tmp/enforced.txt /tmp/ran.txt | grep -q .; then
+            echo "::error::enforced gate(s) that did NOT run (deleted-but-registered?):"
+            comm -23 /tmp/enforced.txt /tmp/ran.txt; exit 1
+          fi
+          # 6) Engine ids ⊆ enforced.
+          if comm -23 /tmp/engine_ran.txt /tmp/enforced.txt | grep -q .; then
+            echo "::error::engine emits an id missing from the registry:"; comm -23 /tmp/engine_ran.txt /tmp/enforced.txt; exit 1
+          fi
+          echo "✅ REAL registry⇄runtime parity (ran ledger == enforced; engine ⊆ enforced)"
 
-      # ── structural checks (the bash-gate equivalents, branch-agnostic) ──
+      # ── structural presence (kept as a CHEAP belt; integrity is the real lock) ──
       - name: Gate — structural protections present
         run: |
           set -euo pipefail
@@ -194,41 +288,35 @@ jobs:
           must .claude/settings.json
           must .claude/hooks/pre-tool.sh
           must .github/workflows/protocol-enforce.yml
+          must .github/workflows/deploy.yml
           must protocol/gates.tsv
+          must protocol/pins.sha256
           must app_flutter/tool/protocol_check.dart
           [[ -x .githooks/pre-commit ]] || { echo "❌ pre-commit not executable"; fail=1; }
-          grep -q "protocol-gates" .github/workflows/protocol-enforce.yml || { echo "❌ workflow self-name missing"; fail=1; }
-          # No secret/bypass files committed.
           if git --no-replace-objects ls-files | grep -qE '(^|/)\.(env|emergency_token|allow_protocol_edit|allow_push_main|allow_master_protocol_edit)$'; then
             echo "❌ a bypass/secret file is tracked"; fail=1
           fi
           [[ "$fail" -eq 0 ]] || exit 1
           echo "✅ structural protections intact"
 
-      - name: Gate — Flutter analyze (errors fatal always; warnings fatal for CHANGED files — R3)
+      - name: Gate — Flutter analyze (errors fatal always; warnings fatal for CHANGED files)
         working-directory: app_flutter
         run: |
           set -euo pipefail
           ANALYZE=$(flutter analyze --no-pub 2>&1 || true)
-          # Errors are ALWAYS fatal, repo-wide.
           if echo "$ANALYZE" | grep -qE "^error •"; then
             echo "❌ analyze errors:"; echo "$ANALYZE" | grep -E "^error •"; exit 1
           fi
-          # R3: warnings are fatal ONLY for files changed in THIS PR/push, so the
-          # ~34 pre-existing warnings elsewhere don't false-block an unrelated
-          # change (they are tracked separately for cleanup). A NEW warning in a
-          # touched file blocks.
           sed 's#^app_flutter/##' /tmp/touched.txt | grep -E '\.dart$' > /tmp/touched_dart.txt || true
           if [[ -s /tmp/touched_dart.txt ]]; then
             HIT=0
             while IFS= read -r f; do
               [[ -z "$f" ]] && continue
               if echo "$ANALYZE" | grep -E "^warning •" | grep -qF "$f"; then
-                echo "$ANALYZE" | grep -E "^warning •" | grep -F "$f"
-                HIT=1
+                echo "$ANALYZE" | grep -E "^warning •" | grep -F "$f"; HIT=1
               fi
             done < /tmp/touched_dart.txt
-            [[ "$HIT" -eq 0 ]] || { echo "❌ analyze warnings in changed files (R3: fatal)"; exit 1; }
+            [[ "$HIT" -eq 0 ]] || { echo "❌ analyze warnings in changed files (fatal)"; exit 1; }
           fi
           echo "✅ analyze: 0 errors; no warnings in changed files"
 

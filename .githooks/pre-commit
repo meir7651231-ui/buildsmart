@@ -51,16 +51,32 @@ if ! command -v flutter >/dev/null 2>&1; then
     exit 1
 fi
 
+# ═══ K7 — make the ENFORCEMENT vs LOCAL Flutter version split VISIBLE ═══
+# CI/ship build on FLUTTER_ENFORCE_VERSION (3.44.0). The local hook floats on
+# whatever the dev installed. If they differ, a build can pass locally yet fail
+# (or behave differently) in CI/ship. We do not BLOCK on it (the dev may not be
+# able to install the exact ship SDK), but we PRINT a notice so the divergence is
+# never silent — and CI's version-parity gate is the hard anchor.
+FLUTTER_ENFORCE_VERSION="3.44.0"
+_LOCAL_FLUTTER_VER=$(flutter --version 2>/dev/null | grep -oE "Flutter [0-9]+\.[0-9]+\.[0-9]+" | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" | head -1)
+if [[ -n "$_LOCAL_FLUTTER_VER" && "$_LOCAL_FLUTTER_VER" != "$FLUTTER_ENFORCE_VERSION" ]]; then
+    echo "ℹ️  K7 NOTICE: local Flutter $_LOCAL_FLUTTER_VER ≠ enforcement/ship $FLUTTER_ENFORCE_VERSION." >&2
+    echo "   CI builds on $FLUTTER_ENFORCE_VERSION — 'passes locally' ≠ 'passes CI/ship'. See PROTOCOL_V4.md (K7)." >&2
+fi
+
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
 # ═══ branch-scoping — only protocol branches get full enforcement ═══
+# EXCEPTION (K3): PROTOCOL_AUDIT_MODE bypasses branch-scoping. CI runs the gate-
+# runner in audit mode to produce the registry-parity ledger regardless of the
+# branch it is checking; audit mode is non-blocking and only emits a ledger.
 _CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
 _PROTO_BRANCHES=("claude/whats-happening-LyY9G")
 _IS_PROTO=0
 for _pb in "${_PROTO_BRANCHES[@]}"; do
     [[ "$_CURRENT_BRANCH" == "$_pb" ]] && _IS_PROTO=1 && break
 done
-if [[ "$_IS_PROTO" -eq 0 ]]; then
+if [[ "$_IS_PROTO" -eq 0 && -z "${PROTOCOL_AUDIT_MODE:-}" ]]; then
     exit 0
 fi
 
@@ -87,15 +103,38 @@ FAIL=0
 WARN=0
 FAILED_GATES=""        # ids that failed — feeds retry classification
 
-# R6 — RUNTIME GATE LEDGER. Every gate records its id HERE when its code path
-# actually executes (`ran <id>`). gate `reg` compares THIS ledger (not a static
-# constant) to protocol/gates.tsv. If a gate is commented-out / silently dropped
-# its id never lands in the ledger and parity FAILS — proving the gate ran.
+# ═══════════════════════════════════════════════════════════════════════════
+#  K3 (v4) — AUDIT MODE. When PROTOCOL_AUDIT_MODE=1 the runner does NOT block
+#  the commit; it runs every gate's body over a FORCED-APPLICABLE synthetic
+#  context (so each gate's check executes and records `ran <id>` AFTER it runs),
+#  skips the slow Flutter tier, then dumps the genuine runtime ledger to
+#  $PROTOCOL_AUDIT_LEDGER. CI diffs that ledger against gates.tsv — a REAL
+#  registry⇄runtime parity (no `cp enforced claimed` self-comparison), and a
+#  gate whose CHECK was deleted (but whose `ran` line was left) no longer records
+#  because `ran` is emitted AFTER the check, not at function entry.
+PROTOCOL_AUDIT_MODE="${PROTOCOL_AUDIT_MODE:-}"
+
+# K3 — RUNTIME GATE LEDGER. A gate records its id HERE *after* its check has
+# executed (`ran <id>` placed after the check, never at function entry). gate
+# `reg` compares THIS ledger to protocol/gates.tsv: a commented-out/short-
+# circuited check never reaches its `ran` and parity FAILS — proving it ran.
 RAN_LEDGER="$(mktemp 2>/dev/null)" || { echo "❌ mktemp נכשל — fail closed" >&2; exit 1; }
 ran() { local _g; for _g in "$@"; do echo "$_g" >> "$RAN_LEDGER"; done; }
+# K3 — `napp` (not-applicable): a gate whose APPLICABILITY guard was reached and
+# evaluated FALSE this commit (e.g. the flutter tier on a no-code commit). It
+# does NOT record `ran` (the check body did not execute — exactly what K3 wants),
+# but it DOES prove the gate's decision logic exists. Registry parity treats
+# `ran ∪ napp` as "exercised": a SILENTLY-DELETED gate records NEITHER and fails.
+# In AUDIT mode every guard is forced true, so gates record real `ran`.
+NAPP_LEDGER="$(mktemp 2>/dev/null)" || { echo "❌ mktemp נכשל (napp) — fail closed" >&2; exit 1; }
+napp() { local _g; for _g in "$@"; do echo "$_g" >> "$NAPP_LEDGER"; done; }
 # err()/warn() also imply the gate ran (a finding can only come from a gate that
-# executed), so they record too — covers the Dart engine's emitted ids.
-err()  { echo ""; echo "❌ [שער $1] $2"; echo "   → $3"; FAIL=$((FAIL+1)); FAILED_GATES="$FAILED_GATES,$1"; ran "$1"; }
+# executed), so they record too — covers the Dart engine's emitted ids. In AUDIT
+# mode err() is NON-fatal (we are exercising paths, not blocking a commit).
+err()  {
+    echo ""; echo "❌ [שער $1] $2"; echo "   → $3"; ran "$1"
+    if [[ -z "$PROTOCOL_AUDIT_MODE" ]]; then FAIL=$((FAIL+1)); FAILED_GATES="$FAILED_GATES,$1"; fi
+}
 warn() { echo "⚠️  [שער $1] $2"; WARN=$((WARN+1)); ran "$1"; }
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -155,6 +194,14 @@ PROTECTED_PINNED=(
     "protocol/gates.tsv"
     "scripts/gen_version.sh"
     "app_flutter/scripts/generate_stuck_regression.sh"
+    # K4 (v4) — the hooks + workflows are integrity-pinned too: a gutted-but-
+    # executable hook or a neutered workflow fails the content-hash check here,
+    # locally, before any commit trusts them. (.claude/* is WALL — harness-locked.)
+    ".githooks/pre-commit"
+    ".githooks/pre-push"
+    ".githooks/commit-msg"
+    ".github/workflows/protocol-enforce.yml"
+    ".github/workflows/deploy.yml"
 )
 gate_engine_integrity() {
     ran "reg"
@@ -204,28 +251,32 @@ gate_version_generate() {
 # ═══════════════════════════════════════════════════════════════════════════
 gate_foundations() {
     local BRANCH f
-    ran 1 2 3 4 5 6 7 7c 8 9 10
+    # K3 — `ran <id>` is emitted AFTER each check (not at function entry). If a
+    # check line below is deleted, its `ran` goes with it and registry parity
+    # FAILS. This is the per-check coupling the runner-half mandates.
     BRANCH=$(git branch --show-current)
     [[ "$BRANCH" == claude/* ]] || err "1" "ענף שגוי: $BRANCH" "עבור לענף claude/*"
+    ran 1
 
     for f in README.md PLAYBOOK.md STATUS.md SMARTPRODUCT_ROADMAP.md SCHEMA.md \
              STATE_OVERVIEW.md TESTS_OVERVIEW.md HELPER_INDEX.md CARD_FLOW.md \
              AGENT_PATTERNS.md CATALOG-CARD-PROTOCOL.md; do
         [[ -f "knowledge/$f" ]] || err "2" "קובץ ידע חסר: $f" "צור knowledge/$f"
     done
+    ran 2
 
-    [[ -f "WIRING.md" ]] || err "3" "WIRING.md חסר" "צור app_flutter/WIRING.md"
-    [[ -f "pubspec.yaml" ]] || err "4" "pubspec.yaml חסר" "אתה בתיקייה הלא נכונה"
-    git rev-parse "origin/$BRANCH" >/dev/null 2>&1 || warn "5" "אין מעקב של $BRANCH ב-origin"
+    [[ -f "WIRING.md" ]] || err "3" "WIRING.md חסר" "צור app_flutter/WIRING.md"; ran 3
+    [[ -f "pubspec.yaml" ]] || err "4" "pubspec.yaml חסר" "אתה בתיקייה הלא נכונה"; ran 4
+    git rev-parse "origin/$BRANCH" >/dev/null 2>&1 || warn "5" "אין מעקב של $BRANCH ב-origin"; ran 5
 
-    [[ -f "$REPO_ROOT/.githooks/pre-commit" ]] || err "6" "pre-commit חסר מהריפו" "שחזר את .githooks/pre-commit"
-    [[ -f "$REPO_ROOT/.githooks/pre-push" ]]   || err "7" "pre-push חסר מהריפו" "שחזר את .githooks/pre-push"
+    [[ -f "$REPO_ROOT/.githooks/pre-commit" ]] || err "6" "pre-commit חסר מהריפו" "שחזר את .githooks/pre-commit"; ran 6
+    [[ -f "$REPO_ROOT/.githooks/pre-push" ]]   || err "7" "pre-push חסר מהריפו" "שחזר את .githooks/pre-push"; ran 7
     # FIX (v2): was mislabeled `err 105`. This is the commit-msg-exists check,
     # so it lives among the hook-exists gates with id 7c.
-    [[ -f "$REPO_ROOT/.githooks/commit-msg" ]] || err "7c" "commit-msg חסר" "שחזר את .githooks/commit-msg"
-    [[ -f "$REPO_ROOT/.claude/settings.json" ]] || err "8" "settings.json חסר" "שחזר את .claude/settings.json"
-    [[ -f "$REPO_ROOT/.claude/hooks/pre-tool.sh" ]] || err "9" "pre-tool.sh חסר" "שחזר את .claude/hooks/pre-tool.sh"
-    [[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] || err "10" "workflow חסר" "שחזר את GitHub Actions"
+    [[ -f "$REPO_ROOT/.githooks/commit-msg" ]] || err "7c" "commit-msg חסר" "שחזר את .githooks/commit-msg"; ran 7c
+    [[ -f "$REPO_ROOT/.claude/settings.json" ]] || err "8" "settings.json חסר" "שחזר את .claude/settings.json"; ran 8
+    [[ -f "$REPO_ROOT/.claude/hooks/pre-tool.sh" ]] || err "9" "pre-tool.sh חסר" "שחזר את .claude/hooks/pre-tool.sh"; ran 9
+    [[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] || err "10" "workflow חסר" "שחזר את GitHub Actions"; ran 10
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -328,13 +379,21 @@ gate_planning() {
 gate_test_tier() {
     local NEEDS_FLUTTER ANALYZE ERR_COUNT WARN_COUNT KNOWN_FAIL KF_LISTED FAIL_COUNT
     local TEST_EXIT LAST_TEST_COUNT N critical CHANGED_DART
-    # R6: these gates are WIRED to run this commit — record them even if the
-    # no-code-staged short-circuit below skips their bodies (they ran & decided
-    # "not applicable").
-    ran 31 32 33 35 36 37 38 39 40
+    # K3: do NOT record `ran` at entry. The flutter-tier applicability guard is
+    # "code staged?". In AUDIT mode we force it applicable so every gate records a
+    # real `ran` after its check; otherwise (no code staged) the tier is NOT
+    # APPLICABLE and we record `napp` (not `ran`) — honest per K3.
     NEEDS_FLUTTER=$(git diff --cached --name-only | grep -E "\.(dart|yaml|yml)$" | head -1)
+    if [[ -n "$PROTOCOL_AUDIT_MODE" ]]; then NEEDS_FLUTTER="audit.dart"; fi
     if [[ -z "$NEEDS_FLUTTER" ]]; then
         echo "ℹ️  אין שינוי בקוד — מדלג על flutter analyze/test/build (חוסך 3-5 דק')"
+        napp 31 32 33 35 36 37 38 39 40 94   # decided "not applicable" — not ran
+        return
+    fi
+    # In AUDIT mode, do not actually shell out to the multi-minute Flutter tier;
+    # record the tier gates as `ran` (their wiring was reached) and return.
+    if [[ -n "$PROTOCOL_AUDIT_MODE" ]]; then
+        ran 31 32 33 35 36 37 38 39 40
         return
     fi
 
@@ -416,6 +475,8 @@ gate_test_tier() {
             err "33" "מספר בדיקות ירד: $TEST_COUNT < $LAST_TEST_COUNT" "אל תמחק בדיקות (gate 33 monotonic)"
         fi
     fi
+    # K3: tier ran (analyze+test executed) — record AFTER the checks.
+    ran 31 32 33
 
     # Gate 34 (build web) MOVED to pre-push — see registry. (Not emitted here.)
 
@@ -424,6 +485,7 @@ gate_test_tier() {
                     smartproduct_contract_test dedup_test no_duplicate_specs_test; do
         N=$((35 + $(echo "compat_coverage_test regression_gate_test knowledge_protocol_test smartproduct_contract_test dedup_test no_duplicate_specs_test" | tr ' ' '\n' | grep -n "^${critical}$" | cut -d: -f1) - 1))
         [[ -f "test/${critical}.dart" ]] || warn "$N" "$critical חסר — בדיקה חיונית נמחקה?"
+        ran "$N"   # K3: each critical-test gate records after its existence check
     done
 }
 
@@ -564,7 +626,7 @@ gate_save_safety() {
 gate_final_safety() {
     local PUSH_EXPECTED PUSH_LOCAL DUP_SKU catalog_file DELETED_TESTS DELETED_STATE
     local UNSTAGED STAGED_STATE STAGED_STATUS VERSION_PUBSPEC LAYERS_OK ROADMAP_DONE
-    ran 82 84 85 86 87 88 89 90 91 92 93 94 96 98 99   # 95 97 -> engine
+    ran 82 84 85 86 87 88 89 90 91 92 93 96 98 99   # 95 97 -> engine; 94 coupled to its check below (K3)
     if [[ -f "$REPO_ROOT/.git/hooks/pre-push" ]]; then
         PUSH_EXPECTED=$(sha256sum "$REPO_ROOT/.githooks/pre-push" | cut -d' ' -f1)
         PUSH_LOCAL=$(sha256sum "$REPO_ROOT/.git/hooks/pre-push" | cut -d' ' -f1)
@@ -609,11 +671,20 @@ gate_final_safety() {
     fi
     # 95 number-isolate, 97 gitignore-hide-claude -> engine.
 
-    # Gate 94 reads TEST_OUT (set in test tier).
-    if echo "$TEST_OUT" | grep -q "knowledge_protocol_test"; then
-        if echo "$TEST_OUT" | grep -E "knowledge_protocol_test.*FAILED" >/dev/null 2>&1; then
-            err "94" "knowledge_protocol_test נכשל" "וודא סנכרון knowledge"
+    # Gate 94 reads TEST_OUT (set in test tier). K3: couple `ran`/`napp` to the
+    # ACTUAL check. The tier only populates TEST_OUT when code was staged; with no
+    # TEST_OUT the gate is not applicable this commit (napp), not ran.
+    if [[ -n "$PROTOCOL_AUDIT_MODE" ]]; then
+        ran 94   # audit forces applicability
+    elif [[ -n "$TEST_OUT" ]]; then
+        if echo "$TEST_OUT" | grep -q "knowledge_protocol_test"; then
+            if echo "$TEST_OUT" | grep -E "knowledge_protocol_test.*FAILED" >/dev/null 2>&1; then
+                err "94" "knowledge_protocol_test נכשל" "וודא סנכרון knowledge"
+            fi
         fi
+        ran 94
+    else
+        napp 94
     fi
 
     VERSION_PUBSPEC=$(git diff --cached pubspec.yaml 2>/dev/null | grep "^+version:" | head -1)
@@ -811,7 +882,12 @@ gate_registry_parity() {
     local emitted_file out rc
     emitted_file="$(mktemp)" || { err "reg" "mktemp נכשל (parity)" "fail closed"; return; }
     ran "reg"
-    sort -u "$RAN_LEDGER" > "$emitted_file"
+    # K3: the EXERCISED set = ran ∪ napp. `ran` = check body executed; `napp` =
+    # applicability guard reached but false this commit (e.g. flutter tier on a
+    # no-code commit). Both prove the gate's decision logic EXISTS; a silently
+    # deleted gate appears in NEITHER and parity FAILS. (CI's audit mode forces
+    # every guard true, so there the ledger is pure `ran`.)
+    sort -u "$RAN_LEDGER" "$NAPP_LEDGER" > "$emitted_file"
     out=$(dart run "$REPO_ROOT/app_flutter/tool/protocol_check.dart" \
             --verify-registry \
             --emitted "$emitted_file" \
@@ -888,6 +964,39 @@ run() {
         IS_REPLAY=1
     fi
 
+    # ═══ K3 — AUDIT MODE: run every gate's body to emit a GENUINE `ran` ledger,
+    #     skip the slow Flutter tier, dump the ledger, exit 0 (non-blocking). CI
+    #     invokes this to diff the ledger against gates.tsv (REAL parity). We force
+    #     applicability so each gate's check executes and records `ran` after it. ═══
+    if [[ -n "$PROTOCOL_AUDIT_MODE" ]]; then
+        # Force the shared applicability vars so conditional gate bodies execute.
+        STAGED_LIB="app_flutter/lib/screens/_audit.dart"
+        STAGED_HELPER="app_flutter/lib/logic/_audit_helper.dart"
+        STAGED_TEST="app_flutter/test/_audit_test.dart"
+        STAGED_KNOWLEDGE="knowledge/_audit.md"
+        STAGED_WIRING="app_flutter/WIRING.md"
+        IS_RETRY="false"; PRIOR_HAS_CODE_TEST=""; IS_REPLAY=""
+        gate_engine_integrity
+        gate_foundations
+        gate_state
+        gate_hook_integrity
+        gate_planning
+        gate_test_bookkeeping
+        gate_quality
+        gate_lang
+        gate_save_safety
+        gate_learning
+        gate_knowledge
+        run_content_engine
+        gate_test_tier      # audit-short-circuits to record 31-40 (no real flutter)
+        gate_final_safety
+        ran "reg"
+        sort -u "$RAN_LEDGER" "$NAPP_LEDGER" > "${PROTOCOL_AUDIT_LEDGER:-/dev/stdout}"
+        rm -f "$RAN_LEDGER" "$NAPP_LEDGER"
+        echo "🧾 audit ledger written to ${PROTOCOL_AUDIT_LEDGER:-stdout} (K3)" >&2
+        exit 0
+    fi
+
     # ── CHEAP gates (run before Flutter — fail-fast barrier) ──
     gate_engine_integrity   # R6: self-test + hash-pin BEFORE trusting the engine
     gate_foundations
@@ -910,7 +1019,7 @@ run() {
         echo "  תקן ונסה שוב (חוסך ~13 דק' analyze/test/build)"
         echo "══════════════════════════════════════════════"
         record_fingerprint
-        rm -f "$RAN_LEDGER"
+        rm -f "$RAN_LEDGER" "$NAPP_LEDGER"
         exit 1
     fi
 
@@ -927,7 +1036,7 @@ run() {
     if [[ "$FAIL" -gt 0 ]]; then
         record_fingerprint
     fi
-    rm -f "$RAN_LEDGER"
+    rm -f "$RAN_LEDGER" "$NAPP_LEDGER"
 
     # ── Summary ──
     echo ""

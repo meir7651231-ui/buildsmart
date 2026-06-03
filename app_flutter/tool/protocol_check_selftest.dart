@@ -25,13 +25,23 @@ void _check(String name, bool ok) {
   }
 }
 
-/// Builds a one-line unified-diff "added" hunk.
+/// Builds a one-line unified-diff "added" hunk (generic header).
 String _added(String content) => '+++ b/x\n+$content';
+
+/// Builds an added hunk whose `+++ b/<path>` header carries a REAL path, so the
+/// F1 per-file scoping in runAllContentGates can resolve the file's scope from
+/// the diff itself (mirrors how `git diff` emits headers).
+String _addedIn(String path, String content) => '+++ b/$path\n+$content';
+
+/// Builds an added hunk with multiple files concatenated (F1 cross-file test).
+String _addedFiles(List<(String, String)> files) => files
+    .map((f) => '+++ b/${f.$1}\n${f.$2.split('\n').map((l) => '+$l').join('\n')}')
+    .join('\n');
 
 /// Run all built-in unit tests. Returns process exit code (0 ok, 2 failures).
 int runSelfTest() {
   _selfTestFailures = 0;
-  stdout.writeln('protocol_check v3 self-test');
+  stdout.writeln('protocol_check v4 self-test');
 
   // ════════════════════════════════════════════════════════════════════
   //  R4 REGRESSIONS — semantic, not literal/substring (the headline closes)
@@ -404,14 +414,20 @@ id\tgroup\tname\tseverity\ttrigger\ttier\tengine\tstatus\tcheck-desc
   _check(
     'scope: runAllContentGates skips secrets when only a test is touched',
     runAllContentGates(
-      diff: _added('const k = "AKIAIOSFODNN7EXAMPLE1";'),
+      diff: _addedIn(
+        'app_flutter/test/x_test.dart',
+        'const k = "AKIAIOSFODNN7EXAMPLE1";',
+      ),
       names: ['app_flutter/test/x_test.dart'],
     ).isEmpty,
   );
   _check(
     'scope: runAllContentGates RUNS secrets when a lib file is touched',
     runAllContentGates(
-      diff: _added('const k = "AKIAIOSFODNN7EXAMPLE1";'),
+      diff: _addedIn(
+        'app_flutter/lib/data/x.dart',
+        'const k = "AKIAIOSFODNN7EXAMPLE1";',
+      ),
       names: ['app_flutter/lib/data/x.dart'],
     ).isNotEmpty,
   );
@@ -476,9 +492,276 @@ ANTIPATTERN-EXAMPLE: ignored
     gateNoManualContainer(_added('final c = ProviderContainer();')).isNotEmpty,
   );
 
+  // ════════════════════════════════════════════════════════════════════
+  //  v4 REGRESSIONS — the 3-agent re-attack residuals (C1-C6, F1-F4)
+  // ════════════════════════════════════════════════════════════════════
+
+  // --- C1: secret entropy is gameable — catch shape, not char-class mix -----
+  _check(
+    'C1 gate52 catches LOWERCASE-hex 40-run (was bypass)',
+    gateNoSecrets(
+      _added('const a = "deadbeefcafebabedeadbeefcafebabe12345678";'),
+    ).isNotEmpty,
+  );
+  _check(
+    'C1 gate52 catches UPPER-only hex 40-run (was bypass)',
+    gateNoSecrets(
+      _added('const b = "DEADBEEFCAFEBABEDEADBEEFCAFEBABE12345678";'),
+    ).isNotEmpty,
+  );
+  _check(
+    'C1 gate52 catches ALL-DIGIT 40-run (was bypass)',
+    gateNoSecrets(
+      _added('const d = "0123456789012345678901234567890123456789";'),
+    ).isNotEmpty,
+  );
+  _check(
+    'C1 gate52 catches base64 blob regardless of case mix (was bypass)',
+    gateNoSecrets(
+      _added('const e = "aGVsbG93b3JsZHRoaXNpc2Fsb25nYmFzZTY0c3RyaW5n";'),
+    ).isNotEmpty,
+  );
+  _check(
+    'C1 gate52 still allows a short numeric SKU',
+    gateNoSecrets(_added('const sku = "94517251";')).isEmpty,
+  );
+  _check(
+    'C1 gate52 still allows a persistence key',
+    gateNoSecrets(_added('const k = "bs.cart.v1";')).isEmpty,
+  );
+
+  // --- F2: SRI / integrity digests are NOT secrets --------------------------
+  _check(
+    'F2 gate52 does NOT flag an sha384- SRI digest',
+    gateNoSecrets(
+      _added(
+        'const sri = "sha384-oqVuAfXRKap7fdgcCY5uykM6R9GqQ8KuxyHNQlGYl1kPzQho1wx4JwY8wC";',
+      ),
+    ).isEmpty,
+  );
+  _check(
+    'F2 gate52 does NOT flag a value in an integrity: context',
+    gateNoSecrets(
+      _added("const x = {'integrity': '47DEQpj8HBSaTImW5JCeuQeRkm5NMpJWZG3hSuFU'};"),
+    ).isEmpty,
+  );
+  _check(
+    'F2 fingerprint STILL beats the integrity allowlist (AKIA in integrity line)',
+    gateNoSecrets(
+      _added("const x = {'integrity': 'AKIAIOSFODNN7EXAMPLE1'};"),
+    ).isNotEmpty,
+  );
+
+  // --- C3: --tree extension gap — scan kt/swift/html/css/toml/etc ----------
+  _check('C3 isSecretScannablePath covers .kt', isSecretScannablePath('android/app/src/Main.kt'));
+  _check('C3 isSecretScannablePath covers .swift', isSecretScannablePath('ios/Runner/AppDelegate.swift'));
+  _check('C3 isSecretScannablePath covers .html', isSecretScannablePath('web/index.html'));
+  _check('C3 isSecretScannablePath covers .css', isSecretScannablePath('web/style.css'));
+  _check('C3 isSecretScannablePath covers .toml', isSecretScannablePath('rust/Cargo.toml'));
+  _check('C3 tree-mode catches a secret in a .kt file', () {
+    final f = runTreeGates(files: {
+      'android/app/src/Main.kt':
+          'val key = "deadbeefcafebabedeadbeefcafebabe12345678"',
+    });
+    return f.any((x) => x.gateId == '52');
+  }());
+
+  // --- C4: print sinks — =print tear-off, stdout.add, unqualified log( ------
+  _check(
+    'C4 gate48 catches stdout.add (was bypass)',
+    gateNoPrint(_added('  stdout.add(utf8.encode("x"));')).isNotEmpty,
+  );
+  _check(
+    'C4 gate48 catches x = print tear-off (was bypass)',
+    gateNoPrint(_added('  final f = print;')).isNotEmpty,
+  );
+  _check(
+    'C4 gate48 catches unqualified log("msg") (was bypass)',
+    gateNoPrint(_added('  log("user did the thing");')).isNotEmpty,
+  );
+  _check(
+    'C4 gate48 does NOT flag math.log(number) (false-positive guard)',
+    gateNoPrint(_added('  final y = math.log(2.0);')).isEmpty,
+  );
+  _check(
+    'C4 gate48 does NOT flag a numeric bare log(value)',
+    gateNoPrint(_added('  final z = log(value);')).isEmpty,
+  );
+  _check(
+    'C4 gate48 does NOT flag obj.logSomething()',
+    gateNoPrint(_added('  catalog.logSomething();')).isEmpty,
+  );
+
+  // --- C5: gate 65 isolate-substring bypass — require a real isolate ctx -----
+  _check(
+    'C5 gate65 NO LONGER bypassed by a bare "isolate" substring (was bypass)',
+    gateNoTextDirectionLtr(
+      _added('final isolate = TextDirection.ltr; // not a real isolate'),
+    ).isNotEmpty,
+  );
+  _check(
+    'C5 gate65 still skips a GENUINE Directionality isolate',
+    gateNoTextDirectionLtr(
+      _added('Directionality(textDirection: TextDirection.ltr, child: x)'),
+    ).isEmpty,
+  );
+  _check(
+    'C5 gate65 still skips a genuine Bidi. context',
+    gateNoTextDirectionLtr(_added('Bidi.isolate(TextDirection.ltr)')).isEmpty,
+  );
+
+  // --- C6 + F3 + F4: colour luminance — greys vs ink vs saturated -----------
+  _check(
+    'C6 gate46 catches 0xFF2E2E2E near-black grey SURFACE (was below threshold)',
+    gateNoDarkSurface(
+      _added('backgroundColor: const Color(0xFF2E2E2E),'),
+    ).isNotEmpty,
+  );
+  _check(
+    'C6 gate46 catches 0xFF333333 grey SURFACE (tightened threshold)',
+    gateNoDarkSurface(
+      _added('scaffoldBackgroundColor: const Color(0xFF333333),'),
+    ).isNotEmpty,
+  );
+  _check(
+    'F3 gate46 does NOT flag 0xFF1A1A1A as TextStyle ink (false-positive)',
+    gateNoDarkSurface(
+      _added('style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),'),
+    ).isEmpty,
+  );
+  _check(
+    'F3 gate46 does NOT flag 0xFF111111 in a TextStyle ink context',
+    gateNoDarkSurface(
+      _added('style: const TextStyle(color: Color(0xFF1A1200)),'),
+    ).isEmpty,
+  );
+  _check(
+    'F4 gate46 does NOT flag 0xFF0D47A1 saturated dark BLUE surface',
+    gateNoDarkSurface(
+      _added('backgroundColor: const Color(0xFF0D47A1),'),
+    ).isEmpty,
+  );
+  _check(
+    'F4 gate54 does NOT flag a saturated dark-blue ColoredBox',
+    gateNoDarkColoredBox(
+      _added('ColoredBox(color: Color(0xFF0D47A1)),'),
+    ).isEmpty,
+  );
+  _check(
+    'F4 gate54 STILL flags a near-black grey ColoredBox',
+    gateNoDarkColoredBox(
+      _added('ColoredBox(color: Color(0xFF222225)),'),
+    ).isNotEmpty,
+  );
+
+  // --- F1: per-file scoping — no cross-file contamination -------------------
+  _check(
+    'F1 gate46 does NOT fire on a theme/ file co-committed with a screen (was bypass-FP)',
+    runAllContentGates(
+      diff: _addedFiles([
+        (
+          'app_flutter/lib/theme/app_theme.dart',
+          'scaffoldBackgroundColor: isDark ? BsTokens.bgDark : const Color(0xFFF5F6FA),',
+        ),
+        ('app_flutter/lib/screens/home.dart', "return Scaffold(body: Text('hi'));"),
+      ]),
+      names: [
+        'app_flutter/lib/theme/app_theme.dart',
+        'app_flutter/lib/screens/home.dart',
+      ],
+    ).where((f) => f.gateId == '46').isEmpty,
+  );
+  _check(
+    'F1 gate114 does NOT fire on a data/ file co-committed with a screen (data/ exempt)',
+    runAllContentGates(
+      diff: _addedFiles([
+        (
+          'app_flutter/lib/data/lipskey_catalog.dart',
+          'for (final p in kLipskeyCatalog) { use(p); }',
+        ),
+        ('app_flutter/lib/screens/home.dart', "return Scaffold(body: Text('hi'));"),
+      ]),
+      names: [
+        'app_flutter/lib/data/lipskey_catalog.dart',
+        'app_flutter/lib/screens/home.dart',
+      ],
+    ).where((f) => f.gateId == '114').isEmpty,
+  );
+  _check(
+    'F1 gate114 STILL fires when the SCREEN file itself uses kLipskeyCatalog',
+    runAllContentGates(
+      diff: _addedFiles([
+        ('app_flutter/lib/data/lipskey_catalog.dart', 'const x = 1;'),
+        (
+          'app_flutter/lib/screens/home.dart',
+          'final p = kLipskeyCatalog.first;',
+        ),
+      ]),
+      names: [
+        'app_flutter/lib/data/lipskey_catalog.dart',
+        'app_flutter/lib/screens/home.dart',
+      ],
+    ).where((f) => f.gateId == '114').isNotEmpty,
+  );
+  _check('F1 splitDiffByFile keys lines to the right file', () {
+    final m = splitDiffByFile(_addedFiles([
+      ('app_flutter/lib/a.dart', 'AAA'),
+      ('app_flutter/lib/b.dart', 'BBB'),
+    ]));
+    final a = m['app_flutter/lib/a.dart'] ?? '';
+    final b = m['app_flutter/lib/b.dart'] ?? '';
+    return a.contains('AAA') && !a.contains('BBB') &&
+        b.contains('BBB') && !b.contains('AAA');
+  }());
+
+  // --- C2: context-line smuggling — gates 46/54/48/114 in --tree mode -------
+  _check('C2 tree-mode runs gate48 (print) on a lib post-image', () {
+    final f = runTreeGates(files: {
+      'app_flutter/lib/screens/home.dart': 'void f() { print("ctx-smuggled"); }',
+    });
+    return f.any((x) => x.gateId == '48');
+  }());
+  _check('C2 tree-mode runs gate46 (dark surface) on a screens post-image', () {
+    final f = runTreeGates(files: {
+      'app_flutter/lib/screens/home.dart':
+          'Widget b() => Container(color: const Color(0xFF111111));',
+    });
+    return f.any((x) => x.gateId == '46');
+  }());
+  _check('C2 tree-mode gate54 catches a dark ColoredBox post-image', () {
+    final f = runTreeGates(files: {
+      'app_flutter/lib/screens/home.dart':
+          'Widget b() => ColoredBox(color: Color(0xFF101012));',
+    });
+    return f.any((x) => x.gateId == '54');
+  }());
+  _check('C2 tree-mode emits gate114 as a WARN (advisory, not blocking)', () {
+    final f = runTreeGates(files: {
+      'app_flutter/lib/screens/home.dart': 'final p = kLipskeyCatalog.first;',
+    });
+    final g114 = f.where((x) => x.gateId == '114');
+    return g114.isNotEmpty && g114.every((x) => x.sev == Sev.warn);
+  }());
+  _check('C2 tree-mode dark-surface does NOT fire on a screen full of TEXT ink', () {
+    final f = runTreeGates(files: {
+      'app_flutter/lib/screens/home.dart':
+          'Text("a", style: TextStyle(color: Color(0xFF1A1A1A)));\n'
+          'Text("b", style: TextStyle(color: Color(0xFF222222)));',
+    });
+    return f.where((x) => x.gateId == '46' || x.gateId == '54').isEmpty;
+  }());
+
+  // --- K3 mirror: registry parity catches a check-deleted-but-registered id -
+  _check('K3 registryDiff flags an enforced id that did not run', () {
+    // enforced = {1,2,3}; runtime ledger lost '2' (its check was deleted) =>
+    // parity must report '2' as missing-from-code.
+    final missing = registryDiff({'1', '3'}, {'1', '2', '3'}).missingFromCode;
+    return missing.contains('2') && !missing.contains('1');
+  }());
+
   stdout.writeln(
     _selfTestFailures == 0
-        ? 'ALL PASS (v3 self-test)'
+        ? 'ALL PASS (v4 self-test)'
         : '$_selfTestFailures FAILURE(S)',
   );
   return _selfTestFailures == 0 ? 0 : 2;

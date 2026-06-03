@@ -17,6 +17,18 @@ PINNED=(
     "protocol/gates.tsv"
     "scripts/gen_version.sh"
     "app_flutter/scripts/generate_stuck_regression.sh"
+    # K4 (v4) — integrity-pin the hooks + workflows THEMSELVES so a
+    # gutted-but-executable hook or a neutered workflow fails the content-hash
+    # check (not just an existence / grep -q job-name check). NOTE: .claude/*
+    # (pre-tool.sh, settings.json) are HARNESS-LOCKED (writes denied at the
+    # environment level) — they are documented as WALL in PROTOCOL_V4.md and are
+    # NOT pinned here because this script cannot rewrite the pin on an intentional
+    # change to them; their integrity is the platform's responsibility.
+    ".githooks/pre-commit"
+    ".githooks/pre-push"
+    ".githooks/commit-msg"
+    ".github/workflows/protocol-enforce.yml"
+    ".github/workflows/deploy.yml"
 )
 
 OUT="$REPO_ROOT/protocol/pins.sha256"

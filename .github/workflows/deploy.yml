@@ -64,6 +64,34 @@ jobs:
         working-directory: app_flutter
         run: flutter test --reporter=compact
 
+      # ── K5: CONTENT GATES before shipping. v3 deployed to prod with ZERO
+      #    content gates — a dark surface / secret / RTL violation could ship even
+      #    if protocol-enforce.yml was bypassed. We now run the content engine over
+      #    the WHOLE resulting tree as a REQUIRED step before gh-pages/APK publish.
+      #    RC captured explicitly (set +e) so crash ≠ finding; ERR-level findings
+      #    (rc 2) block the deploy, a crash (other rc) also blocks (fail closed).
+      - name: K5 — content engine over the whole tree (REQUIRED pre-ship gate)
+        working-directory: app_flutter
+        run: |
+          set -euo pipefail
+          git --no-replace-objects ls-tree -r --name-only HEAD > /tmp/tree_all.txt
+          sed 's#^app_flutter/##' /tmp/tree_all.txt > /dev/null || true
+          set +e
+          dart run tool/protocol_check.dart \
+            --tree \
+            --names /tmp/tree_all.txt \
+            --show "git --no-replace-objects show HEAD:" \
+            --stuck-log knowledge/stuck_log.md
+          TREE_RC=$?
+          set -e
+          if [[ "$TREE_RC" -eq 2 ]]; then
+            echo "::error::K5 content engine found ERR-level findings — NOT shipping"; exit 1
+          fi
+          if [[ "$TREE_RC" -ne 0 ]]; then
+            echo "::error::K5 content engine crashed (rc=$TREE_RC) — fail closed, NOT shipping"; exit 1
+          fi
+          echo "✅ K5 content engine clean — safe to ship"
+
       - name: Build Flutter web
         working-directory: app_flutter
         run: flutter build web --release --base-href "/buildsmart/flutter/"

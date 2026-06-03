@@ -101,6 +101,91 @@ List<String> removedLines(String diff) {
   return out;
 }
 
+// --- F1: PER-FILE diff partitioning (kills cross-file contamination) -------
+//
+// The v3 false-positive keystone: runAllContentGates concatenated the WHOLE
+// `git diff --cached` into one string, then ran each gate over it if ANY touched
+// file matched the gate's scope. So a screens-only gate (46/114) fired on lines
+// belonging to an out-of-scope CO-COMMITTED file (a theme/ file, a data/ file)
+// merely because some OTHER file in the same commit was a screen. We now split
+// the unified diff back into per-file sub-diffs keyed by the `+++ b/<path>`
+// header, so each gate runs ONLY over the hunks of files whose PATH matches its
+// own scope predicate. This is the structurally-correct fix (a gate's scope is a
+// property of the FILE, not of the commit).
+
+/// Split a unified `git diff` into a map of `path -> sub-diff`. Each sub-diff
+/// retains a `+++ b/<path>` header plus that file's own +/-/context lines, so the
+/// existing line-oriented gate predicates work unchanged.
+///
+/// The file BOUNDARY is detected from any of: a `diff --git a/x b/y` line, a
+/// `--- a/<path>` / `+++ b/<path>` header pair, or a bare `+++ b/<path>` header
+/// (our synthetic/test form, which has no `---`). Crucially each new boundary
+/// FLUSHES the accumulated buffer to the PREVIOUS path first, so a file's lines
+/// can never bleed into the next file's bucket (the v3 cross-file contamination
+/// bug came from concatenation, and a naive splitter that only flushed on `---`
+/// re-introduced it when `---` was absent). The post-image name wins; a
+/// `+++ /dev/null` deletion is keyed by the `--- a/<path>` so removal gates see it.
+Map<String, String> splitDiffByFile(String diff) {
+  final out = <String, String>{};
+  String? curPath;
+  String? pendingMinusPath;
+  final buf = StringBuffer();
+
+  void flushTo(String? path) {
+    if (path != null && buf.isNotEmpty) {
+      final prev = out[path];
+      out[path] = prev == null ? buf.toString() : '$prev\n${buf.toString()}';
+    }
+    buf.clear();
+  }
+
+  String strip(String raw, int prefixLen) {
+    var p = raw.substring(prefixLen).trim();
+    final tab = p.indexOf('\t');
+    if (tab >= 0) p = p.substring(0, tab);
+    if (p.startsWith('a/') || p.startsWith('b/')) p = p.substring(2);
+    return p;
+  }
+
+  for (final raw in const LineSplitter().convert(diff)) {
+    if (raw.startsWith('diff --git ')) {
+      // New file boundary — commit whatever we held for the previous file.
+      flushTo(curPath);
+      curPath = null;
+      pendingMinusPath = null;
+      // Try to pre-seed the path from `diff --git a/x b/y` (post-image = b/y).
+      final m = RegExp(r'^diff --git a/(.+) b/(.+)$').firstMatch(raw);
+      if (m != null) curPath = m.group(2);
+      buf.writeln(raw);
+      continue;
+    }
+    if (raw.startsWith('--- ')) {
+      final a = strip(raw, 4);
+      pendingMinusPath = a == '/dev/null' ? null : a;
+      buf.writeln(raw);
+      continue;
+    }
+    if (raw.startsWith('+++ ')) {
+      // A bare `+++` (no preceding `diff --git`) is also a boundary: flush first.
+      final b = strip(raw, 4);
+      final newPath = b == '/dev/null' ? pendingMinusPath : b;
+      // If this header opens a DIFFERENT file than what we're buffering, flush
+      // the previous file's content before switching.
+      if (curPath != null && newPath != curPath) {
+        // The `+++`/`---` header lines for THIS file were just written into buf;
+        // pull them off and carry them to the new bucket.
+        flushTo(curPath);
+      }
+      curPath = newPath;
+      buf.writeln(raw);
+      continue;
+    }
+    buf.writeln(raw);
+  }
+  flushTo(curPath);
+  return out;
+}
+
 // --- Path scoping (R4: never fire on tests/docs/protocol files) -----------
 //
 // The #1 false-positive class the red team found was a content gate firing on a
@@ -164,7 +249,9 @@ bool isPreactAppPath(String path) {
       p.endsWith('.jsx');
 }
 
-/// Text files secrets are scanned in (R4: widen beyond .dart).
+/// Text files secrets are scanned in (R4 + C3: widen beyond .dart so a secret
+/// hidden in a native/web/build file is still caught — .kt/.swift/.html/.css/
+/// .toml/.gradle/.xml at least).
 bool isSecretScannablePath(String path) {
   final p = path.replaceAll('\\', '/').toLowerCase();
   if (isExemptPath(p)) return false;
@@ -179,6 +266,16 @@ bool isSecretScannablePath(String path) {
     '.env',
     '.gradle',
     '.xml',
+    // C3 — close the --tree extension gap (native + web + build configs).
+    '.kt',
+    '.kts',
+    '.swift',
+    '.html',
+    '.htm',
+    '.css',
+    '.toml',
+    '.cfg',
+    '.ini',
   ]) {
     if (p.endsWith(ext)) return true;
   }
@@ -241,32 +338,53 @@ String joinAdjacentLiterals(String line) {
 double _luma(int r, int g, int b) =>
     (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0;
 
-/// Dark when luminance below this. 0.18 catches #111..#2E greys without
-/// flagging mid-tone brand colors. (0xFF333333 -> ~0.20 passes; 0xFF2A2A2A ->
-/// ~0.16 fails, matching the legacy 0xFF[0-3][0-3] intent but semantically.)
-const double _darkLumaThreshold = 0.18;
+/// C6 — dark when luminance below this. Raised from 0.18 to 0.205 so the
+/// near-black grey band 0x2E..0x33 is caught as a dark surface
+/// (0xFF333333 -> luma 0.20 < 0.205 now fails; 0xFF2E2E2E -> 0.18; 0xFF393939 ->
+/// 0.224 still passes as a legit mid grey). Used together with the F4
+/// near-greyscale test below so a SATURATED dark colour is NOT called "dark".
+const double _darkLumaThreshold = 0.205;
 
-/// Parse every color construction on a line and return the list of luminances
-/// found (empty if none). Case-insensitive; handles 0x/0X and 6- or 8-digit
-/// hex (assumes opaque when 6-digit). Also parses fromARGB/fromRGBO/HSL.
-List<double> colorLuminances(String line) {
-  final out = <double>[];
+/// F4 — max channel spread for a colour to count as "near-greyscale". A dark
+/// SURFACE in this app's design is a grey/near-black (R≈G≈B); a saturated colour
+/// (a brand blue like 0xFF0D47A1, a dark green ink) has a wide channel spread and
+/// is NOT a "dark surface" even if its luma is low. Spread = max-min channel.
+/// 64/255 ≈ 0.25 tolerates anti-aliased greys (e.g. 0xFF1A1B22) while rejecting
+/// any colour with a real hue (0xFF0D47A1 spread = 0x9A = 154 ≫ 64).
+const int _greyscaleSpreadMax = 64;
+
+/// A parsed colour: its luminance plus the channel spread (max-min), so callers
+/// can apply BOTH the dark-luma test (C6) and the near-greyscale test (F4).
+class ParsedColor {
+  final double luma;
+  final int spread; // max(r,g,b) - min(r,g,b); -1 when unknown (HSL lightness)
+  const ParsedColor(this.luma, this.spread);
+
+  /// True for a DARK, NEAR-GREYSCALE colour — i.e. a dark *surface* candidate.
+  /// (HSL with spread==-1 falls back to luma-only since we only have lightness.)
+  bool get isDarkGrey =>
+      luma < _darkLumaThreshold && (spread < 0 || spread <= _greyscaleSpreadMax);
+}
+
+int _spread(int r, int g, int b) {
+  final mx = math.max(r, math.max(g, b));
+  final mn = math.min(r, math.min(g, b));
+  return mx - mn;
+}
+
+/// Parse every colour construction on a line. Case-insensitive; handles 0x/0X
+/// and 6- or 8-digit hex (opaque when 6-digit), fromARGB/fromRGBO/HSL.
+List<ParsedColor> parseColors(String line) {
+  final out = <ParsedColor>[];
 
   // 0xAARRGGBB or 0xRRGGBB (case-insensitive).
   for (final m in RegExp(r'0[xX]([0-9a-fA-F]{6,8})').allMatches(line)) {
     final hex = m.group(1)!;
     final v = int.parse(hex, radix: 16);
-    final int r, g, b;
-    if (hex.length == 8) {
-      r = (v >> 16) & 0xFF;
-      g = (v >> 8) & 0xFF;
-      b = v & 0xFF;
-    } else {
-      r = (v >> 16) & 0xFF;
-      g = (v >> 8) & 0xFF;
-      b = v & 0xFF;
-    }
-    out.add(_luma(r, g, b));
+    final r = (v >> 16) & 0xFF;
+    final g = (v >> 8) & 0xFF;
+    final b = v & 0xFF;
+    out.add(ParsedColor(_luma(r, g, b), _spread(r, g, b)));
   }
 
   // Color.fromARGB(a, r, g, b)
@@ -274,13 +392,10 @@ List<double> colorLuminances(String line) {
     r'fromARGB\s*\(\s*\d+\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)',
     caseSensitive: false,
   ).allMatches(line)) {
-    out.add(
-      _luma(
-        int.parse(m.group(1)!),
-        int.parse(m.group(2)!),
-        int.parse(m.group(3)!),
-      ),
-    );
+    final r = int.parse(m.group(1)!);
+    final g = int.parse(m.group(2)!);
+    final b = int.parse(m.group(3)!);
+    out.add(ParsedColor(_luma(r, g, b), _spread(r, g, b)));
   }
 
   // Color.fromRGBO(r, g, b, o)
@@ -288,30 +403,38 @@ List<double> colorLuminances(String line) {
     r'fromRGBO\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,',
     caseSensitive: false,
   ).allMatches(line)) {
-    out.add(
-      _luma(
-        int.parse(m.group(1)!),
-        int.parse(m.group(2)!),
-        int.parse(m.group(3)!),
-      ),
-    );
+    final r = int.parse(m.group(1)!);
+    final g = int.parse(m.group(2)!);
+    final b = int.parse(m.group(3)!);
+    out.add(ParsedColor(_luma(r, g, b), _spread(r, g, b)));
   }
 
-  // HSLColor.fromAHSL(a, h, s, l) — use lightness directly as a luma proxy.
+  // HSLColor.fromAHSL(a, h, s, l) — lightness as a luma proxy; spread unknown
+  // (-1) BUT only treat as dark-grey when saturation is low, so a saturated dark
+  // HSL hue is not mis-called grey. We encode that by reading saturation too.
   for (final m in RegExp(
-    r'fromAHSL\s*\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*([\d.]+)\s*\)',
+    r'fromAHSL\s*\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)',
     caseSensitive: false,
   ).allMatches(line)) {
-    out.add(double.parse(m.group(1)!));
+    final sat = double.parse(m.group(1)!);
+    final light = double.parse(m.group(2)!);
+    // low saturation -> behaves like grey (spread -1 => luma-only path);
+    // high saturation -> give it a large spread so F4 rejects it as a surface.
+    out.add(ParsedColor(light, sat <= 0.25 ? -1 : 255));
   }
 
   return out;
 }
 
-/// True if the line constructs at least one color darker than the threshold.
+/// Backward-compatible list of luminances (older callers/self-test).
+List<double> colorLuminances(String line) =>
+    parseColors(line).map((c) => c.luma).toList();
+
+/// True if the line constructs at least one DARK, NEAR-GREYSCALE colour. F4:
+/// saturated dark colours (brand blues/greens) are NOT counted as "dark" here.
 bool hasDarkColor(String line) {
-  for (final l in colorLuminances(line)) {
-    if (l < _darkLumaThreshold) return true;
+  for (final c in parseColors(line)) {
+    if (c.isDarkGrey) return true;
   }
   return false;
 }
@@ -371,6 +494,23 @@ final RegExp _secretAllow = RegExp(
   caseSensitive: false,
 );
 
+/// F2 — Subresource-Integrity / content-hash prefixes. A value carrying one of
+/// these is an INTEGRITY DIGEST (a PUBLIC hash of a public asset), never a
+/// credential. Allowlisted so the strengthened entropy heuristic (C1) does not
+/// false-flag `integrity: "sha384-…"`, a pinned digest, or a git/blob sha.
+/// Matched against the literal VALUE and its immediate context.
+final RegExp _integrityContext = RegExp(
+  r'''\bsha(?:1|224|256|384|512)-|'''       // SRI: sha256-/sha384-/sha512-
+  r'''\bintegrity['"]?\s*[:=]|'''           // integrity: / 'integrity':
+  r'''\b(?:sha256sum|sha1sum|checksum|digest|fingerprint|etag)\b|'''
+  r'''\bsha(?:1|256|512)['"]?\s*[:=]''',    // sha256: <hex>
+  caseSensitive: false,
+);
+
+/// True when the VALUE itself is an SRI digest token (sha256-BASE64==).
+bool _isSriDigest(String v) =>
+    RegExp(r'^sha(?:256|384|512)-[A-Za-z0-9+/]+={0,2}$').hasMatch(v);
+
 /// A value that is obviously NOT a credential even at high length: a file path,
 /// an asset reference, a dotted lowercase identifier (e.g. 'bs.cart.v1' or
 /// 'drainage.traps.floor'), a URL, or a snake/kebab key. These dominate this
@@ -391,23 +531,53 @@ bool _looksLikePathOrId(String v) {
   return false;
 }
 
-/// A high-entropy assignment to a secret-ish value. We include `.` and `=` in
-/// the value class (tokens often contain them) and require length+entropy so we
-/// don't flag ordinary identifiers. Path/id/asset shapes are excluded.
+/// C1 — a credential-shaped quoted value, detected by SHAPE not by char-class
+/// mix. v3 required upper+lower+digit ALL present, which let a lowercase-hex,
+/// UPPER-only, no-digit, or all-digit token sail through. We now fire on ANY of:
+///   (a) a long hex run `[0-9a-fA-F]{32,}`  (md5/sha/hex secret, any case),
+///   (b) a base64 blob `[A-Za-z0-9+/]{32,}={0,2}` that is high-entropy,
+///   (c) a long token with high Shannon entropy regardless of case mix,
+/// while EXCLUDING path/id/asset shapes (dominant non-secret class here), SRI/
+/// integrity digests (F2), and regex/placeholder contexts.
 bool _looksHighEntropySecret(String line) {
   if (_secretAllow.hasMatch(line)) return false;
-  // assignment of a quoted value: name [:=] "VALUE"
+  // F2: an SRI/integrity/checksum CONTEXT on the line means the long token is a
+  // public digest, not a credential — do not entropy-flag it.
+  final integrityCtx = _integrityContext.hasMatch(line);
+  // assignment of a quoted value: name [:=] "VALUE". Allow base64 padding (=).
   final assign = RegExp(r'''[:=]\s*['"]([A-Za-z0-9+/_.=\-]{20,})['"]''');
   for (final m in assign.allMatches(line)) {
     final v = m.group(1)!;
     if (_looksLikePathOrId(v)) continue;
-    // Require BOTH high entropy and a mixed-case/alnum signature (real tokens
-    // mix cases and digits; a long lowercase word does not).
-    final mixed =
-        RegExp(r'[A-Z]').hasMatch(v) &&
-        RegExp(r'[a-z]').hasMatch(v) &&
-        RegExp(r'[0-9]').hasMatch(v);
-    if (shannonEntropy(v) >= 4.0 && mixed) {
+    if (_isSriDigest(v)) continue; // F2: sha256-<base64>
+    if (integrityCtx) continue; // F2: integrity:/checksum/digest context
+    // (a) long contiguous hex run — catches lowercase-hex / UPPER-hex / all-digit
+    // (a 32+ all-digit value IS a hex run) / no-digit-hex. A real git blob sha or
+    // SRI digest is excluded above by context; a bare 32+ hex literal assigned to
+    // a variable in production code is a credential by our policy.
+    final hexRun = RegExp(r'[0-9a-fA-F]{32,}').firstMatch(v);
+    if (hexRun != null) {
+      // A pure hex value of >=32 chars is suspicious regardless of case.
+      final hx = hexRun.group(0)!;
+      // Avoid flagging a long DECIMAL id (e.g. a 32-digit catalog code) ONLY if
+      // it is all-digits AND short-ish; >=32 hex digits is still flagged (that is
+      // far longer than any SKU/timestamp in this codebase).
+      if (hx.length >= 32) return true;
+    }
+    // (b) base64 blob — high entropy, base64 charset, length >=32.
+    if (RegExp(r'^[A-Za-z0-9+/]{32,}={0,2}$').hasMatch(v) &&
+        shannonEntropy(v) >= 4.2) {
+      return true;
+    }
+    // (c) general high-entropy token (case-mix AGNOSTIC). Require a stronger
+    // entropy floor than (b) so an ordinary long identifier/word does not trip.
+    // Natural words and snake_case ids sit well below ~4.0 bits/char; random
+    // tokens sit above. We also require it not be a single repeated alphabet.
+    final distinctClasses = (RegExp(r'[A-Z]').hasMatch(v) ? 1 : 0) +
+        (RegExp(r'[a-z]').hasMatch(v) ? 1 : 0) +
+        (RegExp(r'[0-9]').hasMatch(v) ? 1 : 0) +
+        (RegExp(r'[+/=_\-.]').hasMatch(v) ? 1 : 0);
+    if (v.length >= 24 && distinctClasses >= 2 && shannonEntropy(v) >= 4.3) {
       return true;
     }
   }
@@ -858,9 +1028,12 @@ Finding? _printFinding(String l) {
   final patterns = <RegExp>[
     RegExp(r'(^|[^A-Za-z0-9_.])print\s*\('), // print(
     RegExp(r'(^|[^A-Za-z0-9_])std(out|err)\s*\.\s*write(ln)?\s*\('),
+    // C4: stdout/stderr.add(...) is also a raw byte sink.
+    RegExp(r'(^|[^A-Za-z0-9_])std(out|err)\s*\.\s*add(Stream)?\s*\('),
     RegExp(r'(^|[^A-Za-z0-9_])developer\s*\.\s*log\s*\('),
     RegExp(r'(^|[^A-Za-z0-9_.])print\s*\)'), // tear-off: foo(print)
-    RegExp(r':\s*print\s*[,)]'), // tear-off in arg position
+    RegExp(r':\s*print\s*[,)]'), // tear-off in arg position (named: print)
+    RegExp(r'=\s*print\s*[,;)]'), // C4: tear-off via assignment (x = print)
   ];
   for (final re in patterns) {
     if (re.hasMatch(outsideStrings)) {
@@ -870,6 +1043,18 @@ Finding? _printFinding(String l) {
         'print/log sink in production code: ${l.trim()} — use debugPrint or logger',
       );
     }
+  }
+  // C4: unqualified `log(` from dart:developer. `math.log`/`obj.log` are EXCLUDED
+  // by the no-dot prefix; to avoid flagging a bare dart:math `log(<number>)` we
+  // only fire when the argument is MESSAGE-shaped (a string literal / interpolation
+  // existed on the original line `l`), which a numeric math.log call is not.
+  final bareLog = RegExp(r'(^|[^A-Za-z0-9_.])log\s*\(').hasMatch(outsideStrings);
+  if (bareLog && RegExp(r'''log\s*\(\s*['"$]''').hasMatch(l)) {
+    return Finding(
+      '48',
+      Sev.err,
+      'log(...) sink in production code: ${l.trim()} — use debugPrint or logger',
+    );
   }
   return null;
 }
@@ -977,16 +1162,31 @@ List<Finding> gateNoInventedEmoji(String libDiff) {
   return const [];
 }
 
-/// Gate 65: no TextDirection.ltr in RTL app (warn). Only skips an explicit
-/// isolate use (the legitimate case); the blanket `//`/`LTR` substring escapes
-/// are removed (red team used `// LTR` to bypass).
+/// C5 — a GENUINE bidi-isolate / Unicode-isolate context where a local
+/// `TextDirection.ltr` is correct (wrapping LTR content inside RTL). v3 skipped
+/// on ANY line containing the substring "isolate", so `// isolate` or a variable
+/// named `isolate` was a bypass. We require a real isolate construct: a
+/// `Directionality(`, a `Bidi.` call, a Unicode isolate format char (LRI/RLI/FSI
+/// /PDI U+2066..U+2069), or an explicit `unicodeWrap`/`stripHtmlIfNeeded`-style
+/// bidi helper — not a bare mention.
+final RegExp _genuineIsolateCtx = RegExp(
+  r'\bDirectionality\s*\(|'
+  r'\bBidi\.|'
+  r'\bunicodeWrap\b|'
+  r'\bTextDirection\.ltr\s*,\s*\)\s*\.wrap|'
+  // LRI/RLI/FSI/PDI written as \u escapes so no literal bidi chars sit in the
+  // source (avoids analyzer warning text_direction_code_point_in_literal).
+  '[\u2066\u2067\u2068\u2069]',
+);
+
+/// Gate 65: no TextDirection.ltr in RTL app (warn). Skips only a whole-line
+/// comment or a GENUINE isolate/Bidi context (C5 — not any "isolate" substring).
 List<Finding> gateNoTextDirectionLtr(String libDiff) {
   for (final l in addedLines(libDiff)) {
     if (!l.contains('TextDirection.ltr')) continue;
-    // Skip ONLY if the line is a comment in its entirety, or uses an isolate.
     final trimmed = l.trimLeft();
     if (trimmed.startsWith('//')) continue;
-    if (l.contains('isolate') || l.contains('Isolate')) continue;
+    if (_genuineIsolateCtx.hasMatch(l)) continue;
     return [Finding('65', Sev.warn, 'TextDirection.ltr — app is RTL')];
   }
   return const [];
@@ -1356,52 +1556,101 @@ const List<String> kDartEngineGateIds = [
   '114',
 ];
 
-/// Run every line-oriented content gate over a combined `git diff --cached`
-/// dump. `names` (when given) PATH-SCOPES the gates so they never fire on
-/// exempt files. When `names` is null (legacy callers) all gates run over the
-/// whole diff (preserves v2 behavior for the bash --diff path which already
-/// pre-scopes via cheap name checks).
+/// Run every line-oriented content gate over a `git diff --cached` dump.
+///
+/// F1 — PER-FILE SCOPING. When `names` is given the diff is split by file and
+/// each gate runs ONLY over the sub-diff of files whose PATH matches that gate's
+/// scope predicate. This kills the v3 cross-file contamination class where a
+/// screens-scoped gate fired on lines of an out-of-scope co-committed file
+/// merely because some OTHER file in the commit was a screen.
+///
+/// When `names` is null (legacy bash --diff callers that pre-scope by cheap name
+/// checks) the gates run over the whole diff, preserving v2 behavior.
 List<Finding> runAllContentGates({
   required String diff,
   List<String>? names,
   String? stuckLog,
   String? gitignoreDiff,
 }) {
-  // Decide which path-scoped families are in play.
-  final touched = names ?? const <String>[];
-  final anyLib = names == null || touched.any(isLibDartPath);
-  final anyScreens = names == null || touched.any(isScreensPath);
-  final anySSL = names == null || touched.any(isScreensStateLogicPath);
-  final anyPreact = names == null || touched.any(isPreactAppPath);
-  final anySecretScannable =
-      names == null || touched.any(isSecretScannablePath);
+  final findings = <Finding>[];
 
-  final findings = <Finding>[
-    if (anyLib) ...gateNoLocalUri(diff),
-    if (anyScreens) ...gateNoDarkSurface(diff),
-    if (anyLib) ...gateNoPrint(diff),
-    if (anyLib) ...gateNoDartHtml(diff),
-    if (anyLib) ...gateNoHardUrl(diff),
-    if (anySecretScannable) ...gateNoSecrets(diff),
-    if (anyScreens) ...gateNoDarkColoredBox(diff),
-    if (anyLib) ...gateNoHardLeftRight(diff),
-    if (anyLib) ...gateNoTextAlignLR(diff),
-    if (anyLib) ...gateNoInventedEmoji(diff),
-    if (anyLib) ...gateNoTextDirectionLtr(diff),
-    if (anyScreens) ...gateColorRevert(diff),
-    if (anyLib) ...gatePersistenceKey(diff),
-    if (anyScreens) ...gateNoManualContainer(diff),
-    if (anySSL) ...gateNoKLipskeyInUi(diff),
-    if (anyLib) ...gateNumberIsolate(diff),
-    if (anyPreact) ...gateAppHebrewString(diff),
-  ];
+  if (names == null) {
+    // Legacy whole-diff path (pre-scoped by the caller).
+    findings.addAll([
+      ...gateNoLocalUri(diff),
+      ...gateNoDarkSurface(diff),
+      ...gateNoPrint(diff),
+      ...gateNoDartHtml(diff),
+      ...gateNoHardUrl(diff),
+      ...gateNoSecrets(diff),
+      ...gateNoDarkColoredBox(diff),
+      ...gateNoHardLeftRight(diff),
+      ...gateNoTextAlignLR(diff),
+      ...gateNoInventedEmoji(diff),
+      ...gateNoTextDirectionLtr(diff),
+      ...gateColorRevert(diff),
+      ...gatePersistenceKey(diff),
+      ...gateNoManualContainer(diff),
+      ...gateNoKLipskeyInUi(diff),
+      ...gateNumberIsolate(diff),
+      ...gateAppHebrewString(diff),
+    ]);
+  } else {
+    // F1 — partition the diff by file and run each gate only on the sub-diffs of
+    // in-scope files. A gate that yields multiple findings across files is
+    // accumulated (we no longer stop at the first file).
+    final byFile = splitDiffByFile(diff);
+
+    // (scopePredicate, gateOverSubDiff) pairs. Each gate is a closure taking a
+    // single file's sub-diff string.
+    final scoped = <(bool Function(String), List<Finding> Function(String))>[
+      (isLibDartPath, gateNoLocalUri),
+      (isScreensPath, gateNoDarkSurface),
+      (isLibDartPath, gateNoPrint),
+      (isLibDartPath, gateNoDartHtml),
+      (isLibDartPath, gateNoHardUrl),
+      (isSecretScannablePath, gateNoSecrets),
+      (isScreensPath, gateNoDarkColoredBox),
+      (isLibDartPath, gateNoHardLeftRight),
+      (isLibDartPath, gateNoTextAlignLR),
+      (isLibDartPath, gateNoInventedEmoji),
+      (isLibDartPath, gateNoTextDirectionLtr),
+      (isScreensPath, gateColorRevert),
+      (isLibDartPath, gatePersistenceKey),
+      (isScreensPath, gateNoManualContainer),
+      (isScreensStateLogicPath, gateNoKLipskeyInUi),
+      (isLibDartPath, gateNumberIsolate),
+      (isPreactAppPath, gateAppHebrewString),
+    ];
+
+    for (final entry in byFile.entries) {
+      final path = entry.key;
+      final subDiff = entry.value;
+      if (isExemptPath(path)) continue; // never police tests/docs/engine
+      for (final (inScope, gate) in scoped) {
+        if (inScope(path)) findings.addAll(gate(subDiff));
+      }
+    }
+  }
+
   if (gitignoreDiff != null && gitignoreDiff.isNotEmpty) {
     findings
       ..addAll(gateGitignoreSecretsGuard(gitignoreDiff))
       ..addAll(gateGitignoreNoHideClaude(gitignoreDiff));
   }
   if (stuckLog != null && stuckLog.isNotEmpty) {
-    final added = addedLines(diff);
+    // Antipattern recurrence runs over the production-code added lines only.
+    final List<String> added;
+    if (names == null) {
+      added = addedLines(diff);
+    } else {
+      final byFile = splitDiffByFile(diff);
+      added = <String>[];
+      for (final e in byFile.entries) {
+        if (isExemptPath(e.key)) continue;
+        if (isLibDartPath(e.key)) added.addAll(addedLines(e.value));
+      }
+    }
     findings.addAll(
       gateAntipatternRecurrence(
         stuckLog: stuckLog,
@@ -1413,14 +1662,30 @@ List<Finding> runAllContentGates({
   return findings;
 }
 
+/// C2 — tree-mode variant of gate 114. The raw kLipskeyCatalog symbol appears in
+/// ~21 PRE-EXISTING legit screens/logic uses across the mature app, so promoting
+/// a whole-tree 114 to ERR would permanently red the clean-tree baseline. We
+/// therefore emit it as a WARN in tree mode (surfaces a context-line-smuggled
+/// use without false-blocking the legacy uses); the --diff path keeps the ERR
+/// for NEWLY-added uses. Honest split: tree=advisory, diff=blocking.
+List<Finding> gateNoKLipskeyInUiTree(String uiDiff) =>
+    gateNoKLipskeyInUi(uiDiff)
+        .map((f) => Finding('114', Sev.warn, '${f.message} (tree-mode advisory)'))
+        .toList();
+
 /// R2 — run the VALUE-oriented content gates over the whole-file POST-IMAGE of
-/// each touched file (multi-line literals joined). Tree mode exists to catch the
-/// bypass class where a forbidden VALUE is split/computed/encoded across diff
-/// hunk boundaries: secrets, dark surfaces/ColoredBox, emoji, persistence keys,
-/// the lipskey symbol, local URIs. The POSITIONAL/style gates (62/63/65/95/51)
-/// are intentionally NOT run here: they cannot be "split", the unified diff
-/// covers them line-locally, and re-scanning a whole touched file would re-flag
-/// pre-existing instances (a false-block). They remain on the --diff path.
+/// each touched file (multi-line literals joined). Tree mode catches the bypass
+/// class where a forbidden VALUE is split/computed/encoded across hunk
+/// boundaries OR hidden on an UNCHANGED context line the --diff addedLines path
+/// never sees (C2 — context-line smuggling): secrets, dark surfaces/ColoredBox,
+/// print sinks, emoji, persistence keys, the lipskey symbol, local URIs.
+///
+/// Each file's post-image is emitted as an all-`+` hunk, so the LINE-ORIENTED
+/// predicates run line-locally (no literal-joining false-pairing across a giant
+/// build() expression — that concern only applied to value-joining, not to the
+/// per-line surface/print checks). The PURELY POSITIONAL gates (62/63/65/95/51)
+/// stay --diff-only: they cannot be value-split and re-scanning a whole file
+/// would re-flag pre-existing instances of legacy RTL/style choices.
 List<Finding> runTreeGates({
   required Map<String, String> files, // path -> post-image contents
   String? stuckLog,
@@ -1439,17 +1704,25 @@ List<Finding> runTreeGates({
         ..addAll(gateNoLocalUri(asDiff))
         ..addAll(gateNoDartHtml(asDiff))
         ..addAll(gateNoInventedEmoji(asDiff))
-        ..addAll(gatePersistenceKey(asDiff));
+        ..addAll(gatePersistenceKey(asDiff))
+        // C2: print sinks are line-local and have ZERO pre-existing in-scope
+        // matches (verified on the live tree) — safe as ERR in tree mode.
+        ..addAll(gateNoPrint(asDiff));
     }
     if (isScreensPath(path)) {
-      // NOTE: the dark-SURFACE / ColoredBox gates are intentionally NOT run in
-      // tree mode. Dart `build()` methods are giant single expressions that mix
-      // a surface constructor with legitimate dark TEXT ink (0xFF1A1A1A) in the
-      // same statement, so any whole-file/statement flattening false-pairs them
-      // (verified against the live tree). A dark surface is not a realistic
-      // line-split bypass; the line-local --diff check (surface keyword + dark
-      // color on the same added line, or `ColoredBox(color: <dark>)`) is sound.
-      findings.addAll(gateNoManualContainer(asDiff));
+      // C2: dark-SURFACE + dark-ColoredBox run line-locally here. They require a
+      // surface context ON THE SAME LINE (F3), so the 172 dark TEXT inks in the
+      // live tree do NOT fire; whole-tree is clean for these (verified). This
+      // closes the context-line-smuggling hole (a dark surface on an unchanged
+      // line that --diff missed) without re-flagging legit ink.
+      findings
+        ..addAll(gateNoManualContainer(asDiff))
+        ..addAll(gateNoDarkSurface(asDiff))
+        ..addAll(gateNoDarkColoredBox(asDiff));
+    }
+    if (isScreensStateLogicPath(path)) {
+      // C2: lipskey symbol in tree mode — advisory (see gateNoKLipskeyInUiTree).
+      findings.addAll(gateNoKLipskeyInUiTree(asDiff));
     }
     if (isSecretScannablePath(path)) {
       findings.addAll(gateNoSecrets(asDiff));
