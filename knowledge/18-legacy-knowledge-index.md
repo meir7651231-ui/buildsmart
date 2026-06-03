@@ -35,6 +35,8 @@
 - **`SYSTEM_MANAGER_DASHBOARD`** (864 ש׳) — מבנה 4-הטאבים מאשר את המקור, אך ⚠️ **המספרים אידיאליים/מומצאים** (1,247 מוצרים · 156 קבלנים · ₪847K · +12%) — **לא** הנתונים-האמיתיים (4 הזמנות-דמו ב-SYS_ORDERS). לא ידע-נתונים.
 - ⭐ **`legacy-map`** — port-map מדויק (לגאסי line-range → Preact file + status). ⚠️ **חלק מהספירות מיושנות** (ציין BUTTON_REGISTRY=176 בעוד המקור=350; store="stub" בעוד store.tsx=302 ש׳ כיום). מצוין ל-line-mapping, לא-מהימן-לגמרי לספירות.
 - **`wip-menu-wiring`** — SSOT לחיווט-ההגדרות (~70 עלים, persist `bs.settings.v1`/`bs.profile.v1`).
+- **`spec.json`** (29 features; schema status/legacy-refs/rules/adrs/testedBy) — ⚠️ **snapshot מוקדם** (2026-05-21, לפני deepening; statuses 'missing'/'stub' **מיושנים** — ה-dial-leaves נוספו ב-INSP-0029→0044). מאשר voice/barcode=implemented; מתעד **owner-added features שאינם באב-הטיפוס:** search-recent (localStorage) · bathroom-bg (frosted-glass) · search-filters.
+- **process-docs:** `reporting.md` (פורמט-דיווח-לבעלים) · `agent-board.md` (deep↔fast) · `inspector/` (checklist/loops/prompt) · README-ים.
 - `IMPLEMENTATION_PROTOCOL` = **deprecated** (הנחה לבנות dashboards-as-views = הפרת R2).
 
 ## INSP — 43 ביקורות

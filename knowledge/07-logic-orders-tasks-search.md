@@ -45,6 +45,7 @@ schema-מלא (לפי הדשבורד): `{id, worker(idx ל-WORKERS), title, desc
 ➕ **נוסף — tools-dial בחיפוש** (5 כלי-משנה): **🎤 voice** (`submenu-voice`+`lib/voice.ts`) · **📷 barcode** (`submenu-barcode`+`lib/barcode.ts`) · ⚙️ filters · ↕️ sort · ▦ catalog (`submenu-catalog`).
 - ⭐ **voice+barcode הועברו ממרכז-AI (G) → חיפוש** (בפרוטוטייפ `aiVoiceTask`/`aiBarcodeScan` היו ב-AI-hub).
 - **קטלוג עבר ל-search-FAB** (`submenu-catalog`) — מול tab נפרד בפרוטוטייפ.
+- ➕ **net-new ב-Preact (לא באב-הטיפוס; spec.json):** **search-recent** (חיפושים-אחרונים ב-localStorage) · **search-filters** (image/price — "invented but documented"). + sort-submenu (5 מצבים, מ-cat-sort).
 
 ➖ **הוחסר:** מנוע-AI המלא (G) — רק voice+barcode שרדו; predict-stock/alternatives/3way/weather/wear-detect לא הומרו.
 

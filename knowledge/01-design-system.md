@@ -292,6 +292,7 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 - **`.fab`/`.fab--menu`/`.fab--search`** (R1 — "5 ה-floating buttons NEVER move", §1257) · **`.float`/`--logo/--name/--cart`** (FloatingHeader).
 - **`.dial`** (speed-dial): `.dial__btn`/`.dial__circle`(+`--active/--on`)/`.dial__item`(+`--sub/--danger`)/`.dial__label` · **`.dial__input`** (R9 — input מחליף label בעריכה, §639).
 - **`.bsdial`** (BS persona-dial) · right-rail tools+sub-menu (search §1007) · scope-chips · `.content` (main יחיד) · `.category-circles` (§156) · regression-panel inline (§1872).
+- ➕ **net-new (owner-specified, אין באב-הטיפוס):** `.screen__bg` — **רקע-אמבטיה חד + כרטיסי frosted-glass** (`global.css` §49; spec.json `FEAT-bathroom-bg`).
 
 ➖ **הוחסר:** רוב ה-CSS הפר-מסך/פר-פיצ'ר של אב-הטיפוס (budget-box · stage-card · scan-canvas · order-card · ship-* · sc-*(אתר) · fin-* · sec-* · rw-* · ai-* · admin dashboards) — כי ב-Preact הפיצ'רים = dials והפרסונות = placeholder.
 
