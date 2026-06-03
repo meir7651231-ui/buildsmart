@@ -7,23 +7,22 @@
 
 ## 0. תנאים מוקדמים (⬜ דרוש ממך — צעד 96 בפרוטוקול)
 1. ⬜ **חשבון Google Play Developer** — הרשמה חד-פעמית ($25) ב-play.google.com/console.
-2. ⬜ **release keystore + סיסמאות** — מפתח-החתימה. (בנצי יכול לייצר אותו ב-keytool כשתאשר; אתה שומר את הסיסמאות — בלעדיהן אי-אפשר לעדכן את האפליקציה לעולם.)
+2. ✅ **release keystore + signingConfig — כבר קיימים ומוגדרים** (`key.properties` + `upload-keystore.jks`, gitignored, keyAlias=`upload`). ⬜ **דרוש ממך:** שמור גיבוי של ה-keystore + הסיסמאות במקום בטוח — אובדנם = אי-אפשר לעדכן את האפליקציה ב-Play לעולם.
 3. ⬜ **applicationId סופי** — כיום `com.buildsmart.buildsmart`. לא ניתן לשינוי אחרי הפרסום הראשון.
 4. ⬜ **privacy-policy URL חי** — דף-אינטרנט ציבורי. בנצי מכין טיוטת-תוכן (`privacy-policy.md`); אתה מארח אותו (GitHub Pages / אתר) ונותן קישור.
 
 ---
 
-## 1. בניית ה-AAB החתום (🔧 בנצי, כשיש keystore + Android SDK/CI)
+## 1. בניית ה-AAB החתום (✅ חתימה מוכנה — נותר רק build ב-CI/SDK)
 ```bash
-# 1. הגדרת חתימה — android/key.properties (לא נכנס ל-git):
-#    storeFile=<path>\upload-keystore.jks
-#    storePassword=***  keyPassword=***  keyAlias=upload
-# 2. build.gradle.kts כבר יקרא מ-key.properties (בנצי יכין את ה-signingConfig).
+# 1. ✅ חתימה כבר מוגדרת: android/key.properties (gitignored) + signingConfig ב-build.gradle.kts.
+#    (key.properties → storeFile/storePassword/keyPassword/keyAlias=upload + keystore — כבר קיימים.)
+# 2. ה-release ייחתם אוטומטית במפתח-ה-upload. נותר רק להריץ את הבנייה:
 # 3. הבנייה:
 flutter build appbundle --release
 # פלט: build/app/outputs/bundle/release/app-release.aab
 ```
-**אימות לפני העלאה:** האם ה-AAB חתום ב-release-key (לא debug)? `applicationId` נכון? `versionCode`/`versionName` תואמים ל-`pubspec` (כיום 1.4.1+6)?
+**אימות לפני העלאה:** האם ה-AAB חתום ב-release-key (לא debug)? `applicationId` נכון? `versionCode`/`versionName` תואמים ל-`pubspec` (כיום 1.4.2+8)?
 
 ---
 
@@ -55,7 +54,7 @@ flutter build appbundle --release
 ## 7. טבלת go/no-go סופית (חייב P0=0 כדי להעלות)
 | חוסם | מצב |
 |---|---|
-| `app-release.aab` חתום | ⬜ דורש keystore + build (סעיף 1) |
+| `app-release.aab` חתום | ⬜ דורש **build** בלבד — keystore + signingConfig ✅ מוכנים (סעיף 1) |
 | applicationId סופי | ⬜ אישורך |
 | חשבון Play | ⬜ שלך |
 | privacy-policy URL | ⬜ שלך (טיוטה ✅) |
