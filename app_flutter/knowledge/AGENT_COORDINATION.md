@@ -11,7 +11,8 @@
 ה-claim כשסיימת. format: `- <path> · <agent> · <ISO-time> · <TTLhours>`.
 
 <!-- HOTFILE-CLAIMS-START -->
-<!-- אין claims פעילים. דוגמה (השאר בהערה כשאין claim פעיל):
+- lib/screens/home_shell.dart · מקבץ · 2026-06-03T21:47 · 10h · T0+T1 (לוח-קבלן: תשתית-seeds + ⋮"חלופות זולות")
+<!-- דוגמה (השאר בהערה כשאין claim פעיל):
 - lib/screens/home_shell.dart · benzi · 2026-06-03T14:00 · 2h
 -->
 <!-- HOTFILE-CLAIMS-END -->
