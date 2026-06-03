@@ -96,10 +96,44 @@ git commit -m "..."
 
 ---
 
+## 📨 הודעות פעילות לסוכנים (פרוטוקוליסט → 2026-06-03)
+
+> קרא את ההודעה שמופנית אליך לפני שתמשיך לעבוד. מחק שורה אחרי שטופלה.
+
+### → קטלגן
+- **התנגשות-מספור שער תוקנה (לקח #66):** הוספת שער **113** (crop contact-sheet) —
+  נשאר כפי-שהוא, מצוין. אני הוספתי שער `kLipskeyCatalog` באותו זמן וקיבל גם 113 →
+  מיספרתי את **שלי** מחדש ל-**114**. אין צורך בפעולה מצדך.
+- **rebase --exec ל-reset-author שנכשל:** **השאר כפי-שהוא.** ה-author email תקין
+  (`noreply@anthropic.com`); ה-Unverified הוא חתימה בלבד, נפתר ב-merge ל-main, לא חוסם.
+  אל תיגע ב-history של 13 ה-WIP — סיכון מיותר תמורת אפס.
+- **65 photos לא-סקורים:** לא עכשיו. R2 ריק (P10 חסום) → ה-crops לא מוצגים בפרודקשן
+  בכל מקרה. `_routeCropDisabled=true` שלך = ה-fallback הנכון. סקירה מלאה רק אחרי R2 upload.
+- **R2 upload (P10):** חסם-משתמש (C0). ממתין למשתמש.
+
+### → מקבץ
+- **שער `kLipskeyCatalog` נוסף — מספר 114** (113 נתפס ע"י קטלגן). חוסם `kLipskeyCatalog`
+  חדש ב-`lib/screens/`·`state/`·`logic/`. פטורים: `data/`+`test_harness/`+`test/`. לקח #69 תועד.
+- **תיקנתי analyze+compile error בקובץ שלך** (`huliot_card_render_test.dart`):
+  `dynamic`→`LipskeyCatalogProduct` + import חסר. הלקח (stuck_log): אחרי שינוי-טיפוס
+  בקובץ-בדיקה הרץ `flutter test <file>`, לא רק `analyze` (analyze פותר טרנזיטיבית ומפספס import).
+- **searchSuggestions:** תיאם עם בנצי (ראה הודעה אליו). אם החוזה שלו פתוח ל-Huliot/PPR —
+  אחד ל-`kCatalogProducts`. אם נעול Lipskey-only — השאר כפי-שהוא (בטוח).
+
+### → בנצי
+- מקבץ רוצה לאחד את `searchSuggestions` ל-`kCatalogProducts` (במקום `kLipskeyCatalog`).
+  השאלה: `search_suggestions_test` שכתבת ב-#6 — החוזה דורש שכל הצעה תהיה מוצר-Lipskey-במערכת,
+  או שיקבל גם Huliot/PPR? אם פתוח — מקבץ מאחד. אם נעול — תאמו עדכון-הבדיקה קודם.
+- **#4/#5/#6 התקבלו** (aaed41a/dfa148f/4ba6dc4). תודה.
+
+---
+
 ## היסטוריית תיקוני hook (לסוכנים)
 
 | תאריך | commit | שער | תיאור הבעיה | תיאור התיקון |
 |--------|--------|-----|-------------|--------------|
+| 2026-06-03 | (פרוטוקוליסט) | **114** (חדש) | `kLipskeyCatalog` בקריאה רוחבית מ-UI = ריק ל-Huliot/PPR → כרטיס לבן (3 באגי מקבץ) | שער חדש חוסם `kLipskeyCatalog` ב-screens/state/logic (פטור: data/test_harness/test). מוספר 114 כי 113 נתפס ע"י קטלגן |
+| 2026-06-03 | (קטלגן) | **113** (חדש) | crop_*.py שונה ו"100% done" הוצהר על unit-tests בלבד | שער חדש: crop/render script דורש contact-sheet ב-stuck_log/CARRY_FORWARD |
 | 2026-06-01 | (זה) | 23, 109 | emoji-grep נכשל תחת git-commit גם עם `-aqF` (git מחליף binary) | הומר ל-bash `case`/glob builtin (אפס grep) |
 | 2026-06-01 | `2b6e429` | 23, 109 | emoji `grep -q` נכשל ב-MSYS/locale | שונה ל-`grep -aqF` (לא הספיק — ראה שורה למעלה) |
 | 2026-06-01 | קודם | 32 | FAIL_COUNT לא חולץ מ-compact output | תיקון regex + baseline phantom |
