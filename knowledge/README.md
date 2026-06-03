@@ -46,10 +46,10 @@
 | `15-finance-site-hubs.md` | מרכז-פיננסים (B) + ניהול-אתר (C) | 19452–20800 |
 | `16-portal-ai-rewards.md` | פורטל/chat (F) + AI (G) + תגמולים (H) | 20800–21659 |
 | `17-security-service-boot.md` | אבטחה/RBAC (I) + שירות/chatbot (J) + boot + PWA/deploy | 21660–22414 |
-| `18-legacy-knowledge-index.md` | אינדקס `app/knowledge` הישן (ADR · R1–R9 · 43 INSP) | app/knowledge |
+| `18-legacy-knowledge-index.md` | אינדקס `app/knowledge` הישן (ADR · כללים · 43 INSP) | app/knowledge |
 | `19-feature-source-matrix.md` | מטריצת פיצ'ר × מקור (אב-טיפוס/Preact/Flutter) | חוצה-מקורות |
 | `20-infra-build-tooling-protocol.md` | build/native(Capacitor)/CI/extract-catalog/protocol | תשתית |
-| `21-protocols-spine-gates-enforcement.md` | ⭐ עולם-הפרוטוקולים (1): MASTER_PROTOCOL R1–R9 · 116 שערים · 4 שכבות-אכיפה · scripts/CI | app_flutter (whats-happening) |
+| `21-protocols-spine-gates-enforcement.md` | ⭐ עולם-הפרוטוקולים (1): MASTER_PROTOCOL · 116 שערים · 4 שכבות-אכיפה · scripts/CI | app_flutter (whats-happening) |
 | `22-protocols-agents-process-specialized.md` | ⭐ עולם-הפרוטוקולים (2): 6 סוכנים · PLAYBOOK · סולם L0–L7 · 10 פרוטוקולים-ייעודיים · 15 ADRs · stuck_log | app_flutter (whats-happening) |
 | `23-flutter-architecture-state-cardflow.md` | ⭐ Flutter: ארכיטקטורה · 41 providers · SmartProduct card-flow(42) · 47 helpers · 5 engines · launch-readiness | app_flutter (whats-happening) |
 
@@ -102,17 +102,17 @@
 ## 🔄 מקור 2 — Preact (`app/`) — נשזר כדלתא בדוחות הקיימים
 > ה-Preact (האפליקציה החיה בפרודקשן) **אינו מקבל דוחות נפרדים**. הוא נשזר כסקציית-דלתא
 > בתוך כל דוח-תחום רלוונטי: **➕ נוסף · ⬆️ שודרג · ➖ הוחסר** מול אב-הטיפוס.
-> מקור: `app/src/` (53 קבצי TS/TSX · 13,657 ש׳). הסיפור-הגדול: תרגום מסכים → **dial pattern** (R1–R9).
+> מקור: `app/src/` (53 קבצי TS/TSX · 13,657 ש׳). הסיפור-הגדול: תרגום מסכים → **dial pattern**.
 > 🏁 **הושלם — דלתא Preact נשזרה בכל 17 הדוחות.**
 
 | דוח | דלתא-Preact | סטטוס |
 |---|---|---|
 | `02` מעטפת | dial pattern: מסכים→dials · tabbar→MenuSpeedDial · appbar→FloatingHeader · routing לפי-פרסונה | ✅ |
-| `01` עיצוב | tokens זהים + סקאלות; מערכת-dial/fab/float נטו-חדשה (R1/R9) | ✅ |
+| `01` עיצוב | tokens זהים + סקאלות; מערכת-dial/fab/float נטו-חדשה | ✅ |
 | `03/04/10` נתונים+מנוע | catalog/variants/tools/suppliers **auto-gen מ-index.html**, מטוייפים; brands נגזם; הסל פושט | ✅ |
-| `06` הגדרות | renderSettings(sheet)→עץ-dial (R3) · LEAF_BINDINGS · PROFILE_TREE · R9 inline-edit | ✅ |
+| `06` הגדרות | renderSettings(sheet)→עץ-dial · LEAF_BINDINGS · PROFILE_TREE · inline-edit | ✅ |
 | `07/08` חיפוש/מוצר | search=FAB-dial (voice/barcode מ-AI) · category-circles · product card/sheet; עץ-מלא לא הומר | ✅ |
-| `11` QA · `12` פרסונות | self-test→test/ מודולרי (R7 tabs); פרסונות→BS-dial drill, store-view מומש, השאר placeholder | ✅ |
+| `11` QA · `12` פרסונות | self-test→test/ מודולרי (regression tabs); פרסונות→BS-dial drill, store-view מומש, השאר placeholder | ✅ |
 | `05,09,13–17` hubs/scenarios | RANKS/identity/projects הומרו; ORDERS/B2B/finance/site/AI/rewards/security/service/onboarding/scenarios **לא הומרו** | ✅ |
 
 ## 📱 מקור 3 — Flutter (`app_flutter/`) — **האפליקציה הסופית** (יעד לחנויות)
@@ -139,15 +139,15 @@
 > כל המאגר-הישן נקרא **verbatim, שורה-אחר-שורה**, ונשזר/תוקן בדוחות 01–20.
 > 🏁 **הושלם — 100% מקבצי ה-`.md` בריפו נקראו** (פרט ל-Xcode-LaunchImage boilerplate, ללא-ידע).
 - **43/43 INSP** (`INSP-0001→0044`) — מפת-בנייה (doc 18); enrichments verbatim: hub-tile-labels (אבטחה 10 @21752 / שירות 8 @22081) · PROFILE_TREE L1–L3 · worker per-group status-filter (0042↔0041) · manager 4-sections @4213 · ניגודיות(לשמש)/אקספרס.
-- **3 ADR** (no-window / dial-pattern / README) — ה-WHY; 2 חריגי-R2 + עיגון-4-פינות + bathroom-bg rationale (doc 18).
+- **3 ADR** (no-window / dial-pattern / README) — ה-WHY; 2 חריגי-overlay + עיגון-4-פינות + bathroom-bg rationale (doc 18).
 - **4 dashboards** (COURIER/STORE/WORKER/SYSTEM_MANAGER) + **UI_ARCHITECTURE** (1560 ש׳) — אישרו docs 10/12/13 (courier-6/store-8 portals · stores · HAUL).
-- **`RULES.md` R1–R9** (אומת: R7=אין-המצאה · R8=RTL · R9=inline · R1 5-FAB-positions) · **inspector/** (prompt/checklist/loops) · **ROLE_DRAWER_SYSTEM** (5 subtitles + flows) · **IMPLEMENTATION_PROTOCOL** (deprecated).
-- ⚠️ **divergences שנתפסו (המקור `index.html` קובע — R6):** UI_ARCH profile-mockup (סולם-דרגות + 8-badges) ≠ `RANKS`/6-`identityAchievements` · SYSTEM_MANAGER מספרים/7-manage-sections/REST-API **מומצאים** · ROLE_DRAWER worker-names (דוד/אברהם/עלי) ≠ `WORKERS` (רן/עומר) · `adr`+README קדמו-ל-R9.
+- **`RULES.md` (הכללים)** (אומת: אין-המצאה · RTL · inline · 5-FAB-positions) · **inspector/** (prompt/checklist/loops) · **ROLE_DRAWER_SYSTEM** (5 subtitles + flows) · **IMPLEMENTATION_PROTOCOL** (deprecated).
+- ⚠️ **divergences שנתפסו (המקור `index.html` קובע):** UI_ARCH profile-mockup (סולם-דרגות + 8-badges) ≠ `RANKS`/6-`identityAchievements` · SYSTEM_MANAGER מספרים/7-manage-sections/REST-API **מומצאים** · ROLE_DRAWER worker-names (דוד/אברהם/עלי) ≠ `WORKERS` (רן/עומר) · `adr`+README קדמו-לכלל-ה-inline.
 
 ## ⭐ אימות-מקור — קוד Preact + Flutter נקרא line-by-line ✅
 > ⚠️ **סעיף זה תיעד אימות מול ה-snapshot המיושן של Flutter (27/8,482).** ה-**Preact** (55/15,841) תקף; ה-**Flutter האמיתי** (123/61,550) נקרא-מחדש בנפרד — ראה מקור-3 + דוחות 21–23. תיקוני-ה-Preact למטה תקפים:
 - `LEAF_BINDINGS`=**72** (לא ~70) · service-hub=**15** (לא ~16) · `AppSettings`=**6 מפתחות** (+security) → doc 06/17.
-- `fabs.tsx`=**2 FABs** (menu+search); BS/שם/עגלה ב-`FloatingHeader` — 5 ה-R1-elements מפוצלים 2+3 (doc 02 כבר מדויק).
+- `fabs.tsx`=**2 FABs** (menu+search); BS/שם/עגלה ב-`FloatingHeader` — 5 האלמנטים הקבועים מפוצלים 2+3 (doc 02 כבר מדויק).
 - ~~Flutter ~30 מוצרים~~ → **בוטל (snapshot מיושן). האמת: 1,877 מוצרים / 3 מותגים** (935+772+170, אומת שורה-שורה — דוח 03/19). Flutter search-dial=4 כלים — תקף.
 - Preact `registry.ts`=**21 כפתורים** (מול ~350 בפרוטוטייפ) → doc 11.
 - ⚠️ **parity-insight תוקן:** Preact = shell+leaves=toast. **אבל Flutter האמיתי בוגר** (Install-Studio · checkout · 1,023-בדיקות · 116-שערים) — **לא** 'shell+toast'. ראה דוחות 02/08/19/23.
