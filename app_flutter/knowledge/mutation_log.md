@@ -315,3 +315,9 @@
 - אימות: cartLineDisplay('lip:64032300') → שם-קטלוג ולא fallback;
   catalogProductMatchesQuery על kCatalogProducts מוצא 64032300, על kLipskeyCatalog ריק.
 - נשאר Lipskey בכוונה: searchSuggestions (autocomplete) + ספירת-מתכנן.
+
+### lib/data/chip_hierarchy.dart — 2026-06-03T17:46:43+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s|if (brandOf(q) != brand) continue;|if (brandOf(q) == brand) continue;|`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/huliot_picker_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

@@ -48,3 +48,18 @@
 - ✅ ה-checkout sheet כבר לא מכיל את שורת ה-ship-to.
 - ✅ `flutter analyze` lib — 0 errors · `flutter test` — 1086 ✅ · `build web` — ✓.
 - חד-פעמיות: `shipToPromptedProvider` נשמר (prefs) → לא קופץ שוב.
+
+---
+
+## v5.95 — Huliot chip picker (בורר) opens (T8 visual verify)
+**שינוי:** התיקון של `_cycleHierarchy` + `findHierarchySiblings` שמפעיל את
+הבורר הפאסטי למוצרי חוליות (היה מת — אחים ריקים).
+- **אימות ויזואלי:** רונדר כרטיס `ברך 45° 32` (SKU 70033460) ב-widget-test
+  → הקלקה על chip הצורה (`45°`) → צילום PNG.
+  - **לפני התיקון:** הקלקה לא פתחה כלום (שורת-בורר ריקה).
+  - **אחרי:** נפתחה שורת-בורר מתחת לכרטיס עם **6 pills של אחים** (45°/90° +
+    מידות 32/40/50/63). screenshot: `knowledge/visual/v5.93_huliot_picker_open.png`.
+  - הטקסט מרובע (אין פונט עברי ב-test env) אבל המבנה ודאי: pill כתום (גודל)
+    + אפור (צורה) בכרטיס, שורת-בורר עם 6 pills מתחתיו.
+- **אימות לוגי:** `huliot_picker_test` (4) — shape→{45°,90°}, size→{32,40,50,63},
+  Huliot-only, Polyroll regression-guard. mutation_verify על brand-gate (red→green).

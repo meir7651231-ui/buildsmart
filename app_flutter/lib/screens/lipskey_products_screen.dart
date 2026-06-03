@@ -724,13 +724,13 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   void _cycleHierarchy(int chipIndex) {
     final path = parseChips(p.nameHe).path;
     if (chipIndex >= path.length) return;
-    final all = kPolyrollCatalog;
+    // Unified catalog so Huliot/PPR products find their own-brand siblings
+    // (kPolyrollCatalog excluded Huliot → dead picker — lesson T4).
     final sibs = findHierarchySiblings(
       p, chipIndex,
-      all: all,
+      all: kCatalogProducts,
       nameOf: (q) => q.nameHe,
       brandOf: (q) => q.brand,
-      polyrollBrand: (_) => kPolyrollBrand,
     );
     // Dedupe by value-at-chipIndex (keep first occurrence of each distinct value).
     final byVal = <String, LipskeyCatalogProduct>{};

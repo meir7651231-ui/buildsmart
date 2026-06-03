@@ -290,6 +290,18 @@ rather than pixel rendering.
   is a legit standalone token in lipskey_catalog, so a source grep can't tell
   the wrong placement from the right one). E2E result: 774/774 full recon.
 
+## §21 chip picker (בורר) — works for Huliot (v5.95 — 2026-06-03)
+- The faceted chip picker (tap a breadcrumb chip → swap that attribute for a
+  sibling product) was dead for every Huliot product. Two bugs, lesson T4:
+  - `lipskey_products_screen.dart` `_cycleHierarchy` drew siblings from
+    `kPolyrollCatalog` → now `kCatalogProducts` (unified).
+  - `chip_hierarchy.dart` `findHierarchySiblings` gated on a fixed
+    `polyrollBrand` (returned `[]` for Huliot) → now gates on the product's
+    **own** brand (same-brand siblings); the `polyrollBrand` param is removed.
+- Behavior: tap a חוליות `ברך 45°` shape chip → picker offers `45°`+`90°`; size
+  chip → `32/40/50/63`. Polyroll/PPR picker unaffected (same-brand still holds).
+- Guard: `huliot_picker_test` (4) + mutation_verify on the brand gate.
+
 ## §21.C chip + picker level labels — primary/secondary/final clarity (2026-06-01)
 - User: "אני נכנס לבורר בציפ אני לא יודע מה הוא בורר ראשי ומה משני ומה אחרון
   זה בבלגן." Chips were identical-looking pills, picker said "בחר ערך" generic.

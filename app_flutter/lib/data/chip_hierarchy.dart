@@ -360,17 +360,18 @@ List<P> findHierarchySiblings<P>(
   required Iterable<P> all,
   required String Function(P) nameOf,
   required String Function(P) brandOf,
-  required String Function(P) polyrollBrand,
 }) {
-  final pol = polyrollBrand(product);
-  if (brandOf(product) != pol) return [];
+  // Siblings share the product's OWN brand — a Polyroll elbow finds Polyroll
+  // elbows, a Huliot elbow finds Huliot elbows. (Was gated to a fixed
+  // `polyrollBrand`, which returned [] for every Huliot product — lesson T4.)
+  final brand = brandOf(product);
   final src = parseChips(nameOf(product)).path;
   // Build the "fixed prefix" up to (but excluding) chipLevelIndex.
   final prefix = src.take(chipLevelIndex).toList();
   final type = parseChips(nameOf(product)).type;
   final out = <P>[];
   for (final q in all) {
-    if (brandOf(q) != pol) continue;
+    if (brandOf(q) != brand) continue;
     final qc = parseChips(nameOf(q));
     if (qc.type != type) continue;
     final qPath = qc.path;
