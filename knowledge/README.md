@@ -4,9 +4,9 @@
 **`/index.html`** בשורש הריפו — 1.4MB, **22,416 שורות**.
 
 > נבנה על ענף-הכתיבה `claude/nice-volta-BSbVm` (קריאה מהקוד הקיים, כתיבה לכאן בלבד).
-> **לא** קשור לפרוטוקול / ל-`app_flutter/knowledge/port/` הקיים. זה דף חלק.
+> 📖 **המקור נקרא מהענף הנכון `claude/whats-happening-LyY9G`** (האפליקציה הסופית) דרך git-worktree. ⭐ **תיקון:** `app_flutter/knowledge/` הוא **מאגר-ידע קיים ומקיף שנלכד כמקור** — לא "דף חלק" כפי שכתבתי בטעות.
 
-> 🚨 **תיקון קריטי (התגלה ע"י הבעלים, 2026-06-03):** דלתאות ה-**Flutter** בדוחות (וכן דוחות 21–23) נבנו מ-snapshot **מיושן** של `app_flutter/lib` — **27 קבצים** על ענף `nice-volta`. **האפליקציה האמיתית/הסופית** חיה על ענף **`claude/whats-happening-LyY9G`** ובה **123 קבצים** (קטלוגי-מותגים אמיתיים Huliot/Lipskey/Polyroll · `install_engine`/`pressure_drop`/`price_estimate` · onboarding/welcome/profession · `install_studio` · test_harness מלא). **כל דלתאות-Flutter + דוחות 21–23 = לכידה-מחדש מול `whats-happening` (TODO).** ✅ תקף ולא-מושפע: הפרוטוטייפ (`index.html`, דוחות 01–17 base) + **Preact** (`app/src` זהה ב-2 הענפים, 55 קבצים).
+> ⚠️ **בתהליך-תיקון מתמשך:** דלתאות-ה-Flutter שנשזרו ב-01–17 נכתבו בתחילה מ-snapshot **מיושן** (27 קבצים, nice-volta). האפליקציה האמיתית (123 קבצים, whats-happening) **נקראה במלואה** ועכשיו נשזרת-מחדש לתוך הדוחות. **המאגר עדיין לא שלם — יש עוד מידע רב להטמיע.** תקף ולא-מושפע: הפרוטוטייפ (01–17 base) + Preact.
 
 ## השיטה (חוק-ברזל)
 1. **קוראים כל שורה, כל תיבה.** לא סורקים (grep), לא מנחשים, לא מדלגים. הידע
@@ -49,9 +49,6 @@
 | `18-legacy-knowledge-index.md` | אינדקס `app/knowledge` הישן (ADR · R1–R9 · 43 INSP) | app/knowledge |
 | `19-feature-source-matrix.md` | מטריצת פיצ'ר × מקור (אב-טיפוס/Preact/Flutter) | חוצה-מקורות |
 | `20-infra-build-tooling-protocol.md` | build/native(Capacitor)/CI/extract-catalog/protocol | תשתית |
-| `21-build-plan-gap.md` | ⭐ תוכנית-בנייה + ניתוח-פערים (מה יש/מה חסר → משימות, ליבה🔑/תפאורה🎨) | נגזר מ-01–20 |
-| `22-sprint-plan-stage-a.md` | ⭐ שלב א' מפורק לימים·שעות·משימות·יעדים (20 ימים → "ליבה עובדת") | נגזר מ-21 |
-| `23-contractor-completion-plan.md` | ⭐ השלמת פרסונת-הקבלן ל-100% — 5 טאבים, חיווט מלא, מה-חסר (~15–18 ימים) | נגזר מ-21 |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
@@ -115,20 +112,25 @@
 | `11` QA · `12` פרסונות | self-test→test/ מודולרי (R7 tabs); פרסונות→BS-dial drill, store-view מומש, השאר placeholder | ✅ |
 | `05,09,13–17` hubs/scenarios | RANKS/identity/projects הומרו; ORDERS/B2B/finance/site/AI/rewards/security/service/onboarding/scenarios **לא הומרו** | ✅ |
 
-## 📱 מקור 3 — Flutter (`app_flutter/`) — נשזר כדלתא בדוחות
-> ה-Flutter (native iOS/Android/Web, ה-target לחנויות) נשזר כסקציית-דלתא (`📱 Flutter`).
-> מקור: `app_flutter/lib/` (27 קבצי dart · 8,482 ש׳). **Riverpod + go_router + device-APIs אמיתיים** (mobile_scanner/speech_to_text/shared_preferences).
+## 📱 מקור 3 — Flutter (`app_flutter/`) — **האפליקציה הסופית** (יעד לחנויות)
+> 🚧 **שכבה זו נכתבת-מחדש** מול הקוד האמיתי על `whats-happening` (התיאור הקודם היה מ-snapshot מיושן/27-קבצים).
+> מקור: `app_flutter/lib/` (**123 קבצים · 61,550 ש׳**) · `test/` (155 · 16,441) · `app_flutter/knowledge/` (~88 מסמכים — מאגר-ידע קיים). Flutter 3.29 · Riverpod · go_router · shared_preferences · mobile_scanner · speech_to_text · permission_handler.
+> ⭐ **לא** port של 5-הפרסונות — **אפליקציית-אינסטלציה בוגרת** (v5.92 · ~92% roadmap · קוד מוכן-להשקה).
 
-| דוח | דלתא-Flutter | סטטוס |
-|---|---|---|
-| `01` עיצוב | tokens פורט מ-Preact; **מותג כתום #FF7A18** (לא teal); native light/dark + RTL + i18n | ✅ |
-| `02` מעטפת | מעטפת WhatsApp: 4 בוטם-טאבים (קטלוג/שיחות/התראות/חנות) + dial-overlays | ✅ |
-| `03/04/15` data+hub | smart_tree **brands שוחזרו** · menu_trees + **kFinanceHub** | ✅ |
-| `06/07` הגדרות/חיפוש | settings-dial · **device-APIs אמיתיים** (mobile_scanner/speech_to_text) | ✅ |
-| `08/09/16` קטלוג/התראות/שיחות | catalog_screen · **chats+notifications = טאבים native מלאים** ⭐ | ✅ |
-| `05,10–14,17` שאר | projects.dart; ORDERS/B2B/site/security/self-test/scenarios **לא הומרו** | ✅ |
+| תחום | המציאות (אומת-מקוד, whats-happening) |
+|---|---|
+| מעטפת | 4 בוטם-טאבים: **מחלקות · שיחות · התראות · חנות** + AppBar (BS-dial / מצלמה / ⋮) + 3 dial-overlays (bs/search/menu) + cart-FAB |
+| קטלוג | **1,337 מוצרים** (Lipskey 255 · Polyroll 779 · Huliot 170 · +133 HW-סינתטי) מ-PDFים אמיתיים; 8 sections (הכל/בית-Finder/תכנון-חיבור/קטגוריות/עץ-חכם/וריאנטים/מועדפים/חיפושים) |
+| ⭐ Install Studio | מנוע-תכנון-צנרת אמיתי: **Dijkstra-pathfinding · Darcy-Weisbach pressure-drop · auto-compliance (PRV/TMTV/הרחבה/dielectric) · BOM · שמירת-פרויקטים** (`install_engine` 1391ש׳ · `pressure_drop` 501). עמוק מהפרוטוטייפ |
+| כרטיס-מוצר | brands · accessories (must/why) · install-stages · compat · compliance · score → add-to-cart; SKU↔`VerifiedSpec` bridge |
+| state | **41 Riverpod providers** (כולם `bs.*.v1` ב-shared_preferences) |
+| מסחר | `smart_cart` (persisted) · checkout VAT 18% (mock) · **chats(6)/notifications(smart-collapse)/store** אמיתיים + **4 מסכי-הגדרות** (~40 כל אחד) |
+| עיצוב | מותג **כתום `#FF7A18`** (ה-KB מסמן כפער מ-teal המתוכנן) · Heebo · light/dark + RTL |
+| QA/launch | **155 בדיקות · 863 cases · 47-helper-gate · 116 שערים** · LAUNCH_PACKAGE מוכן (aab חתום 68MB) · חוסמים = קונפיג-חנות (iOS-perms · keystore · Huliot-R2-crops) |
+| מאגר-קיים | `app_flutter/knowledge/`: `port/proto`(פרוטוטייפ 100%) + `port/preact` + `spec/` + architecture/status/parity/roadmap — **נלכד כמקור** |
 
-🏁 **הושלם — דלתא Flutter נשזרה בכל 17 הדוחות.** המאגר מחזיק עכשיו **3 מקורות** (אב-טיפוס בסיס · Preact · Flutter) בכל דוח.
+⚠️ **doc-vs-code drift שנתפס (הקוד קובע):** ה-KB אומר **1,879 מוצרים / tab0=קטלוג / מותג-teal** — הקוד אומר **1,337 / tab0=מחלקות / כתום**.
+🚧 **סטטוס:** דלתאות-Flutter ב-01–17 + מקור-3 ייכתבו-מחדש מהמציאות הזו.
 
 ## 📚 מקור-משני — `app/knowledge/` (62 מסמכים) + `RULES.md` — סריקה-מלאה ✅
 > כל המאגר-הישן נקרא **verbatim, שורה-אחר-שורה**, ונשזר/תוקן בדוחות 01–20.
