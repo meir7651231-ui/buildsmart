@@ -83,4 +83,29 @@ void main() {
         all.any((p) => inToilets.contains(p.categoryHe)), isTrue,
         reason: 'ברזים should include the אסלות white-ware');
   });
+
+  test('dual-system fittings appear under BOTH מים and שפכים headings (#1)', () {
+    // Items that fit either pipe must be reachable from either heading.
+    const dual = {
+      'אטמים ופקקים',
+      'חבקי תליה',
+      'חבקי צינור',
+      'עוגנים ובנדים',
+      'סטי הידוק וחיבורים',
+    };
+    final inst = kDeptCatHeadings['אינסטלציה']!;
+    final water =
+        inst.firstWhere((h) => h.label == 'צינורות מים').titles.toSet();
+    final sewage =
+        inst.firstWhere((h) => h.label == 'צינורות שפכים').titles.toSet();
+    for (final d in dual) {
+      expect(water.contains(d), isTrue, reason: '$d missing from צינורות מים');
+      expect(sewage.contains(d), isTrue,
+          reason: '$d missing from צינורות שפכים');
+      final node = resolveCatTitle(d);
+      expect(node, isNotNull, reason: '$d does not resolve');
+      expect(catNodeProductCount(node!), greaterThan(0),
+          reason: '$d has no products');
+    }
+  });
 }

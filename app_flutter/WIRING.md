@@ -76,8 +76,13 @@ drill into); a row tap drills into that category via `catalogTreePathProvider`.
   manifolds · multilayer) · 🟤 צינורות שפכים (drainage · SmartLock · toilet
   branches).
 A genuinely-mixed top-node splits per leaf (ברז-כיור→גמר but ברז-מעבר→מים); pure
-families (PPR/SmartLock/אסלות) collapse to one drill-in row. Supersedes the old
-department-level `WaterSystem` filter. Guarded by `category_division_test`.
+families (PPR/SmartLock/אסלות) collapse to one drill-in row. **Dual-system
+fittings** (אטמים ופקקים · חבקי תליה/צינור · עוגנים ובנדים · סטי הידוק, v5.97)
+appear under **both** מים and שפכים headings — they fit either pipe. Supersedes
+the old department-level `WaterSystem` filter. Guarded by `category_division_test`.
+**v5.97 (בנצי #2):** `_CatGroupRow` dropped its trailing `Icon(Icons.chevron_left)`;
+the orange product-count badge is now the row's END element (where the chevron was).
+Row stays tappable (`InkWell` → `catalogTreePathProvider = [node]`).
 
 **Tool departments (v5.83 — gather every real tool category):** a full audit (all
 99 leaf categories) confirmed the catalog is 100% plumbing, so the only genuine

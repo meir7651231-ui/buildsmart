@@ -433,8 +433,6 @@ class _CatGroupRow extends ConsumerWidget {
                           fontWeight: FontWeight.w700),
                     ),
                   ),
-                const SizedBox(width: BsTokens.space2),
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
               ],
             ),
           ),
