@@ -38,8 +38,9 @@
 - **⛔ כן-משמעותי:** leaf חסום מציג snackbar עם **הסיבה** (backend/geo/pricing), **לא** toast "בבנייה" שמסתיר חוב.
 - **push: literal-word-only** (ראה דוח 22 §PLAYBOOK).
 
-## C. `GATE_REGISTRY.md` = 116 שערים (הבא=117)
+## C. `GATE_REGISTRY.md` = מספור עד 116 (הבא=117) · **~66 שערים פעילים ב-pre-commit**
 > סמכות-המספור — מונע התנגשות. כל שער חדש נרשם כאן + ב-`.githooks/pre-commit`.
+> ✅ **אומת-עצמי מול `.githooks/pre-commit`:** המספר הגבוה ביותר = **116** (תואם "הבא=117"). אבל בפועל **66 שערים נפרדים פעילים** (78 call-sites של `err "N"`); מספרים חסרים בטווח 1–116 = **שערים שפרשו או הועברו** (למשל שער 34 build-web→pre-push · שער 59 version disabled→auto). כלומר "116" = תקרת-המספור, לא ספירת-הפעילים.
 
 - **Group A — יסודות (1–20):** ענף · 11 קבצי-knowledge קיימים · WIRING.md · pubspec · hooks-קיימים · GitHub-Actions · **11/12 version.g.dart קיים+מסונכרן ל-STATUS** · hooksPath=.githooks.
 - **Group B — בטיחות-קוד (24–80):** 24 WIRING-update · 25 shared-state-frozen · **31 analyze=0 · 32 test-baseline · 33 build-web** (CRIT) · 41 אין-`greaterThan(0)` · 42 helper→test · 46 אין-dark-surface(0xFF111111) · 48 אין-print · 52/53 אין-secrets/.env · **59 version (disabled→auto)** · 62/63/65 RTL · 64 אין-emoji-לא-מהלגאסי · 70 gitignore-secrets · 73 LS-key-format · 74 אין-manual-ProviderContainer · 78 אין-binaries · 86 SKU-unique · 88 MASTER-edit-guard · 89/90 אין-מחיקת-test/state.
@@ -47,7 +48,7 @@
 - **Group D — ידע-ופרוטוקול (101–116):** 101 stuck_log קיים · **102 retry→stuck_log-entry-חדש** · **103 אנטי-דפוסים-לא-חוזרים** · 104 stuck_regression-מתעדכן · 107/116 UI→visual_log · 108 CARRY_FORWARD · 111 ANTIPATTERN-count=test-count · 112 stubs-deprecated · **114 `kLipskeyCatalog` אסור ב-screens/state/logic** (השתמש `kCatalogProducts`) · 115 hot-file-claims (advisory).
 
 ## D. `PROTOCOL_ENFORCEMENT.md` (154ש׳) = 4 שכבות-אכיפה
-1. **Git-hooks** (`.githooks/`): `pre-commit` (925ש׳ — 116 שערים, **tiered**: docs-only=5ש׳ / קוד=3–5דק׳) · `commit-msg` (≥15 תווים, חוסם wip/test/asdf/tmp) · `pre-push` (חוסם main ללא `.allow_push_main` · חוסם force-push · `flutter build web` fast-gate).
+1. **Git-hooks** (`.githooks/`): `pre-commit` (925ש׳ ✓אומת — **~66 שערים פעילים** מתוך מספור-עד-116, **tiered**: docs-only=5ש׳ / קוד=3–5דק׳) · `commit-msg` (≥15 תווים, חוסם wip/test/asdf/tmp) · `pre-push` (חוסם main ללא `.allow_push_main` · חוסם force-push · `flutter build web` fast-gate).
 2. **Claude-hooks** (`.claude/hooks/`): `pre-tool.sh` (186ש׳ — חוסם 10 וקטורי-עקיפה: `--no-verify` · `-c core.hooksPath=` · force-push · rm/mv/find-delete על hooks · edit על protected-paths) · `session-start.sh` (70ש׳ — משחזר hooksPath + `gen_version` + סיכום-פרוטוקול).
 3. **Auto-restoration** (`session-start.sh` בכל פתיחת-סשן).
 4. **GitHub-Actions** (`protocol-enforce.yml`, 8 שערים — לא-ניתן-לעקיפה-מקומית) + branch-protection ב-GitHub-UI.
@@ -68,4 +69,4 @@
 - **`protocol-enforce.yml`** — 8 שערים (analyze · test · build-web · version-sync · אין-dark · hooks-intact · claude-settings · android-build), על **כל** הענפים.
 
 ---
-**שורה תחתונה:** ~3,100 שורות אכיפה · 128 בדיקות-ממוספרות (116 pre-commit + 8 CI + 3 pre-push + 1 commit-msg) · 100+ כללי-קטלוג · כל-עוקף-חסום-ומבוקר. זו מכונת-הממשל; דוח 22 = עולם-הסוכנים, ה-PLAYBOOK, סולם-הבדיקות, וה-protocols הייעודיים.
+**שורה תחתונה:** ~3,100 שורות אכיפה · **מספור-שערים עד 116** (תקרת-GATE_REGISTRY; ~66 פעילים ב-pre-commit + 8 CI + ~8 pre-push-checks + 1 commit-msg — אומת-עצמי) · 100+ כללי-קטלוג · כל-עוקף-חסום-ומבוקר. זו מכונת-הממשל; דוח 22 = עולם-הסוכנים, ה-PLAYBOOK, סולם-הבדיקות, וה-protocols הייעודיים.
