@@ -18,9 +18,9 @@
 
 ### 5 שלבי-Checklist (רק שלבים שה-diff נגע בהם; OPS תמיד אחרון)
 - **FND** (יסודות, 8): analyze=0 (CRIT) · אין-SKU-כפול (CRIT) · provider ב-providers.dart · StateNotifier עם initial-state · LS-key `bs.{thing}.v{N}` · helper-טהור→test (CRIT) · אין-לוגיקה-ב-build().
-- **FRM** (מסגרת, 9 = R1–R5+R7): כמפורט בטבלה.
+- **FRM** (מסגרת, 9): כללי-framework (layout/dials/overlay/RTL) — נאכפים בשערי-FRM.
 - **WIR** (חיווט, 7): אין `ref.watch` ב-callback · אין-mutation-ב-build · **אינווריאנט עגלה `cartCount==Σqty`** (CRIT) · button חדש→WIRING.md · state-machine→test · אין-`Future.delayed`-להמתנה (השתמש `ref.listen`).
-- **VRB** (verbatim, 5 = R6/R8 — ההפרה הנפוצה ביותר): ציטוט-`[L#]` · אין-שינוי-סדר-מילים · אין-פיצ׳ר-מומצא · emoji-verbatim · חדש-ב-app→מועתק-ל-app_flutter.
+- **VRB** (verbatim, 5 — ההפרה הנפוצה ביותר): ציטוט-`[L#]` · אין-שינוי-סדר-מילים · אין-פיצ׳ר-מומצא · emoji-verbatim · חדש-ב-app→מועתק-ל-app_flutter.
 - **OPS** (always-last, 7): `flutter analyze`=0 (CRIT) · `build web --release` (CRIT) · `flutter test` ≤ known-failing (CRIT) · version-bump · WIRING-update · commit מצטט `@rule/@legacy/@adr` · **loop-check OPS-07** (אותו finding לא ב-2/3 דוחות אחרונים).
 
 ### מנגנונים נוספים ב-MASTER
