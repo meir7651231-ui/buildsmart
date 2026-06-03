@@ -3,7 +3,7 @@
 > השלמת-התמונה: תת-המערכות של האפליקציה האמיתית (`app_flutter/`, whats-happening) שלא נכנסו במלואן לדלתאות 01–17. נלכד מ-`app_flutter/knowledge/` (SCHEMA/STATE_OVERVIEW/CARD_FLOW/HELPER_INDEX/SMARTPRODUCT_ROADMAP/LAUNCH_READINESS) + הקוד. **אומת-מקוד.**
 
 ## A. ארכיטקטורה
-Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dart` → `registerPolyrollSpecs()` → `ProviderScope` → `MaterialApp` → **`OnboardingGate`** (welcome/HomeShell). שכבות: `data/` (25) · `logic/` (5 engines) · `state/` (41 providers) · `screens/` (30) · `widgets/` · `theme/` · `l10n/` · `test_harness/`. **SSOT · אין circular-deps · Preact-shared מבודד** (5 קבצי-settings = JSON-contracts).
+Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dart` → `registerPolyrollSpecs()` → `ProviderScope` → `MaterialApp` → **`OnboardingGate`** (welcome/HomeShell). שכבות (123 קבצי-lib): `data/` (25) · `logic/` (5 engines) · `state/` (**41 קבצים · 50 providers**) · `screens/` (29) · `services/` (1) · `widgets/` (3) · `theme/` (2) · `l10n/` (1) · `test_harness/` (3). **SSOT · אין circular-deps · Preact-shared מבודד** (קבצי-settings = JSON-contracts אמיתיים: `app_settings.dart` הוא port של `app-settings.ts` עם **אותו מפתח `bs.settings.v1` ואותו shape מקונן** — ערכים שנכתבו ב-Preact קריאים ב-Flutter על אותו domain).
 
 ## B. SCHEMA — 3 עמודי-נתונים (SKU = מפתח-העל)
 1. **`kCatalogProducts`** (1,337 · `LipskeyCatalogProduct`) — קטלוג מאוחד (Lipskey 255 + Polyroll 779 + Huliot 170 + HW-סינתטי 133).
@@ -11,7 +11,8 @@ Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dar
 3. **`kSmartProducts`** (**82** · `SmartProduct`{key,name,emoji,cat,brands[`SmartBrand`],acc[`SmartAcc`],diagramTitle,stages[`SmartStage`]}) — כרטיסים-מובחרים. **SKU על ה-`SmartBrand`** (`{name,tag,price?,rec,sku?,imageAsset?}`; חלק גנריים-ללא-SKU). getters: `recBrand`(firstWhere rec→[0]) · `mustCount`. `SmartStage` = שלבי-דיאגרמה verbatim מ-prototype DIAGRAMS (3–4/מוצר). `SmartAcc`{name,emoji,why,**must**,price?,sku?}. ✅ **אומת-עצמי שורה-שורה (smart_tree.dart 2,551ש': 4-מחלקות+82-entries+4-helpers).**
 - **גשר:** forward `catalogProductForBrand(brand)` · reverse `smartProductForSku(sku)` (lazy `_smartBySku`) · `smartProductByKey` (לעלי catalog-tree) · `kSmartTreeCats`/`smartProductsForCat`. round-trip שמור (`smartproduct_contract_test`, 307/365 brands-עם-SKU).
 
-## C. state-model — **41 Riverpod providers** (כולם `bs.*.v1` ב-shared_preferences, פרט ל-UI-transient + in-memory-logs)
+## C. state-model — **50 providers ב-`state/`** (41 קבצים; ‎114 providers repo-wide כולל UI-local ב-screens/widgets) · הנמשכים: `bs.*.v1` ב-shared_preferences, פרט ל-UI-transient + in-memory-logs
+> 🔧 **תיקון-ספירה (אומת-עצמי):** "41" בגרסה קודמת היה **ספירת-קבצים**, לא providers. בפועל: state/ = 41 קבצים שמכריזים **50 providers** (`dial_state` 7 · `menu_state` 5 · `onboarding_gate` 2 · השאר 1 כ"א); סה"כ **114 providers ברחבי lib** (היתר UI-local). פירוט-הקטגוריות למטה מונה קבצים/נושאים.
 - **settings (8):** app/catalog/chat/notif/store-settings · profession/project/cardDetail-mode.
 - **בחירה+היסטוריה (9):** cardSelection · brandHistory · cardFilter · cardAcc · cardVersions · savedConfigs · productFavorites · comparisonSet (≤4).
 - **סל+פרויקטים (5):** smartCart (`SmartCartLine`) · cardProjects · savedProjects · cartLists · draftQuote (≤30).
@@ -20,7 +21,8 @@ Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dar
 - **flags+progress (5):** featureFlags · abExperiments · onboardingProgress · welcomeSeen · stageProgress.
 - **logs in-memory (4, לא-נשמר):** analyticsLog (≤500) · crashLog (≤200) · lastAction (≤50) · shareLog.
 - **גשרים:** `catalogProductForBrand` · `cartSafetyProvider` · `defaultBrandResolver` (cardSelection>brandHistory>recBrand>0).
-- ⚠️ **אין `autoDispose`** (48 providers חיים-תמיד) — חוב-ארכיטקטוני P1 (memory).
+- ⚠️ **אין `autoDispose`** (ה-providers חיים-תמיד) — חוב-ארכיטקטוני P1 (memory).
+- ✅ **אומת-עצמי שורה-שורה:** `smart_cart.dart` (174ש׳ — `SmartCartLine{productKey,name,emoji,brandName,brandPrice,productQty,acc[`SmartCartAcc`]}`+`total`; `SmartCartNotifier` persist→`bs.smart-cart.v1` בכל set-state; add/remove/setLineQty[qty≤0→remove]/qtyForKey/setQtyForKey/clear) · `app_settings.dart` (294ש׳ — 20 שדות ב-6 קבוצות display/notif/region/delivery/accessibility/security; ברירות theme=**light**/lang=he/currency=ils/session=15ד'/privMarketing=opt-in; persist→`bs.settings.v1`).
 
 ## D. כרטיס-המוצר החכם — **CARD_FLOW (42 אלמנטים)** = "מוח-הידע" (`_SmartProductSheet`)
 - **header:** כותרת+emoji+קטגוריה · diagram-3-שלבים · score-chip.
