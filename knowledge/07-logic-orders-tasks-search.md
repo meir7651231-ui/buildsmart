@@ -4,7 +4,7 @@
 `renderMyOrders` (→`view-orders`) · `getAllOrders` · `openShipmentStatus`/**`animateShipmentMaps`** (sheet-מעקב + מפות-SVG מונפשות) · **`orderCard`** (כרטיס מתרחב) · `toggleOrder` · `generateMockOrder` (🧪 הזמנת-בדיקה).
 
 ## מערכת-משימות (8021–8194)
-- `WORKERS` (8021) = `['רן (עובד)','עומר (עובד)']`.
+- `WORKERS` (8021) = `['רן (עובד)','עומר (עובד)']`. (⚠️ `ROLE_DRAWER_SYSTEM` מציג שמות-דוגמה אחרים — דוד כהן/אברהם/עלי — illustration בלבד; המקור קובע.)
 - `TASKS` (8023) — 5 משימות: `{id, name, detail, steps[]}` (קו-מים-חם · מיכל-הדחה-סמוי · איטום-רצפה · נקזון · ברז-כיור+ניל).
 - `WORK_LOG` (8156) — יומן: `{date, items:[{worker, task, status}]}` (אתמול/שלשום; רן/עומר).
 - פונקציות: `pickRole`(מנהל/עובד) · `setTaskLocation`(אתר/מחסן) · `pickWorker` · `taskStatusInfo` · `taskCard` · `renderTasks` · `openTask`/`taskActionClick` · **`taskUpload`/`taskApprove`/`taskReject`** · `openTaskLog`.

@@ -12,7 +12,7 @@
 | `app/RULES.md` | 1 | R1–R9 — ה-spec ל"איך" |
 
 ## ⭐ החלטות-היסוד (ADR) — ה-WHY מאחורי ה-dial
-- **ADR-001 · No-Window** (2026-05-20, Accepted): אוסר חלונות-מלאים (drawers/modals/sheets/overlays). הנמקה: משתמשי-אתר-בנייה (ידיים מלוכלכות/כפפות · יד-אחת · הפרעות) — חלון חוסם מסך, גונב פוקוס, דורש סגירה. ציטוט-בעלים verbatim: **"אף אחד מהם לא פותח חלון. נקודה."** → R2/R3. ⭐ **2 חריגים תחומים:** (1) `product-sheet` (פירוט-מוצר ממוקד) · (2) backdrop-קל על menu/search dials (**≤45% opacity · ≤3px blur** — לסימון "מצב-פעיל" בלבד). עלות-עבר: `bs-panel` drawer + search-sheets **נבנו-מחדש** ל-dial. אכיפה: Inspector FRM-02 (`position:fixed;inset:0`→CRITICAL) + FRM-06 (opacity/blur).
+- **ADR-001 · No-Window** (2026-05-20, Accepted): אוסר חלונות-מלאים (drawers/modals/sheets/overlays). הנמקה: משתמשי-אתר-בנייה (ידיים מלוכלכות/כפפות · יד-אחת · הפרעות) — חלון חוסם מסך, גונב פוקוס, דורש סגירה. ציטוט-בעלים verbatim: **"אף אחד מהם לא פותח חלון. נקודה."** → R2/R3. ⭐ **רשימת-ה-fixed-overlays המותרת (checklist FRM-02):** `product-sheet` · `search-panel` · `menu-speed-dial` · `bs-dial-scrim` — **כל overlay חדש מעבר לאלה = CRITICAL**; backdrop מותר **≤0.45 opacity · ≤3px blur** (FRM-06). עלות-עבר: `bs-panel` drawer + search-sheets **נבנו-מחדש** ל-dial. אכיפה: Inspector FRM-02 (`position:fixed;inset:0`→CRITICAL) + FRM-06 (opacity/blur).
 - **ADR-002 · Dial Pattern** (2026-05-20): החלופה — **dial** (טור-כפתורים קומפקטי שנפתח מתחת/מעל הכפתור-הראשי). → R3/R4/R5. **השורש של ה-dial pattern ב-Preact וב-Flutter** (דוחות 01/02). ⭐ **עיגון-לפי-פינה (same-side):** BS (ימין-עליון)↘ · search-FAB (ימין-תחתון)↗ · menu-FAB (שמאל-תחתון)↗ · **עגלה (שמאל-עליון)↘ — גם dial**. ⭐ **circle+pill כשני-אלמנטים נפרדים (רווח ~10px) — בכוונה כדי שה-`bathroom-background` ייראה דרך הרווח** (חלק מה-look-and-feel; קושר ל-bathroom-bg/דוח 01). פעיל=שניהם teal · לא-פעיל=pill לבן+icon teal. (`dial-in` keyframe משותף לכל ה-FABs.)
 
 ## ⭐ R1–R9 (`app/RULES.md`) — ה-spec ל"איך" (verbatim)
@@ -38,7 +38,7 @@
 - **`spec.json`** (29 features; schema status/legacy-refs/rules/adrs/testedBy) — ⚠️ **snapshot מוקדם** (2026-05-21, לפני deepening; statuses 'missing'/'stub' **מיושנים** — ה-dial-leaves נוספו ב-INSP-0029→0044). מאשר voice/barcode=implemented; מתעד **owner-added features שאינם באב-הטיפוס:** search-recent (localStorage) · bathroom-bg (frosted-glass) · search-filters.
 - **process-docs:** `reporting.md` (פורמט-דיווח-לבעלים) · `agent-board.md` (deep↔fast) · **`inspector/`** = פרוטוקול-המפקח המלא (prompt/checklist FND/FRM/WIR/FIN/OPS/loops; CRITICAL=block · MAJOR=approval · MINOR=record · stuck-loop=NO-GO) · README-ים.
 - **סריקת 43 INSP (אומת):** כולם **final-GO** — 3 החלו NO-GO (MAJOR/CRITICAL) → תוקנו → GO; 3 עם MINOR (התאמות-מותרות, למשל INSP-0010 accessibility-בכוונה-ב-LS). אין ממצא-מוצר חדש מעבר ל-verbatim-leaf-tables (מאשרים את התוכן שלכדתי).
-- `IMPLEMENTATION_PROTOCOL` = **deprecated** (הנחה לבנות dashboards-as-views = הפרת R2).
+- `IMPLEMENTATION_PROTOCOL` = **deprecated** (בוטל 2026-05-21; הנחה לבנות Store/Courier/Worker כ-views מלאים = הפרת R2). הציע ארכיטקטורת `*-role.ts` + תיקיות-קומפוננטות + LS-keys `bs.orders.v1`/`bs.stock.v1` — **נדחתה**; 3 ניסיונות נרברטו (INSP-0016/0017/0022/0023/0024) והוחלפו ב-BS-dial drill (INSP-0025+). נשמר immutable להיסטוריה.
 
 ## INSP — 43 ביקורות
 `inspections/INSP-0001→0044` — כל commit של menu/settings/dial עבר Inspector subagent (typecheck + build + smoke 21/21 + דוח). `inspector/` = הפרוטוקול. ציר-הזמן: INSP-0009→0040 כולם GO.
