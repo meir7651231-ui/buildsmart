@@ -294,3 +294,12 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 - **`.bsdial`** (BS persona-dial) · right-rail tools+sub-menu (search §1007) · scope-chips · `.content` (main יחיד) · `.category-circles` (§156) · regression-panel inline (§1872).
 
 ➖ **הוחסר:** רוב ה-CSS הפר-מסך/פר-פיצ'ר של אב-הטיפוס (budget-box · stage-card · scan-canvas · order-card · ship-* · sc-*(אתר) · fin-* · sec-* · rw-* · ai-* · admin dashboards) — כי ב-Preact הפיצ'רים = dials והפרסונות = placeholder.
+
+---
+
+## 📱 Flutter (`app_flutter/lib/theme/`) — דלתא מול אב-הטיפוס (עיצוב)
+> `tokens.dart` (`BsTokens`) + `app_theme.dart` (`AppTheme.light()/dark()`). native Flutter/Material + Riverpod.
+
+⬆️ **פורט מ-Preact `tokens.css`:** סקאלות זהות — `space1..6` · radii · **dial-dims** (`dialCircle:48` · `fabSize:56` · `dialIn:280ms`) · animation curves.
+🔀 **שונה — מותג כתום:** `brand = #FF7A18` (`brandDark #E85F00`) — **לא** ה-teal `#1f6f6b` של אב-הטיפוס/Preact. (פער-מותג מתועד ב-CLAUDE.md.)
+➕ **נוסף (native):** `AppTheme.light()`+`dark()` (MaterialApp `themeMode` לפי הגדרה) · **RTL** (`Directionality`) · **i18n** he/ar/en (`flutter_localizations`) · dark-palette (`bgDark #0E1116`/`cardDark`/`inkDark`) · Riverpod `ProviderScope`.

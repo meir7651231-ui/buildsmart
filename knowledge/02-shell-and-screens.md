@@ -299,3 +299,15 @@ cart/orders→cart, catnav→catalog).
 ➖ **הוחסר / placeholder:**
 - **12 מסכי-onboarding** (splash/welcome/login/profession/prep) — אין; כניסה לפי-פרסונה ישירה.
 - **דשבורדי-פרסונה** (`views/*.tsx`, 11–302 ש') — placeholder מינימלי (R2), מול המסכים-המלאים באב-הטיפוס.
+
+---
+
+## 📱 Flutter (`app_flutter/lib/screens/`) — דלתא מול אב-הטיפוס (מעטפת)
+> מעטפת **WhatsApp-Business** (`home_shell.dart`): `Scaffold` + AppBar + **4 בוטם-טאבים** + 3 dial-overlays. state Riverpod, nav go_router.
+
+🔀 **שונה (מ-Preact וגם מאב-הטיפוס):**
+- **4 בוטם-טאבים** (`IndexedStack`): **קטלוג · שיחות · התראות · חנות** (RTL: קטלוג מימין). לא ה-tabbar-5 של אב-הטיפוס, ולא persona-routing של Preact.
+- AppBar: כותרת "BuildSmart" (→BS/profile dial) + actions 📷 camera (→barcode) · ⋮ more-vert (→menu).
+⬆️ **dials (bs/search/menu)** — אותו pattern כמו Preact (`menu_dial_widget`/`search_dial_widget`/`bs_dial_widget` + `widgets/dial.dart`), אך **overlay מעל 4-הטאבים** (`openDialProvider` + scrim), לא routing.
+➕ **נוסף:** **שיחות + התראות כטאבים ראשיים** (`chats_screen` 914 · `notifications_screen` 906) — לא היו בפרוטוטייפ/Preact כמסכים.
+⚠️ **חריגת-R2:** מסכי-טאב מלאים (catalog/store) במקום הכל-dial — בסגנון WhatsApp, שונה מ-"אין חלון" של Preact.

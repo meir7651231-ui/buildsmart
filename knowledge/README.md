@@ -107,3 +107,13 @@
 | `07/08` חיפוש/מוצר | search=FAB-dial (voice/barcode מ-AI) · category-circles · product card/sheet; עץ-מלא לא הומר | ✅ |
 | `11` QA · `12` פרסונות | self-test→test/ מודולרי (R7 tabs); פרסונות→BS-dial drill, store-view מומש, השאר placeholder | ✅ |
 | `05,09,13–17` hubs/scenarios | RANKS/identity/projects הומרו; ORDERS/B2B/finance/site/AI/rewards/security/service/onboarding/scenarios **לא הומרו** | ✅ |
+
+## 📱 מקור 3 — Flutter (`app_flutter/`) — נשזר כדלתא בדוחות
+> ה-Flutter (native iOS/Android/Web, ה-target לחנויות) נשזר כסקציית-דלתא (`📱 Flutter`).
+> מקור: `app_flutter/lib/` (27 קבצי dart · 8,482 ש׳). **Riverpod + go_router + device-APIs אמיתיים** (mobile_scanner/speech_to_text/shared_preferences).
+
+| דוח | דלתא-Flutter | סטטוס |
+|---|---|---|
+| `01` עיצוב | tokens פורט מ-Preact; **מותג כתום #FF7A18** (לא teal); native light/dark + RTL + i18n | ✅ |
+| `02` מעטפת | מעטפת WhatsApp: 4 בוטם-טאבים (קטלוג/שיחות/התראות/חנות) + dial-overlays | ✅ |
+| `03–17` נתונים/לוגיקה/screens | — | ⬜ בעבודה |
