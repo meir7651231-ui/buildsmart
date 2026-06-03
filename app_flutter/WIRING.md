@@ -762,3 +762,13 @@ origin advanced to v5.89):
 Intentionally Lipskey-scoped: searchSuggestions (autocomplete, pinned by
 search_suggestions_test) + the connection-planner count (install_engine Lipskey).
 Rule in CONVENTIONS.md. Guards: huliot_card_render_test (2) + huliot_search_test (2).
+
+## Contractor seeds foundation — T0 partial (לוח-קבלן)
+- New `lib/data/contractor_seeds.dart` — verbatim const seeds (proto/04, T0.1/T0.3):
+  PLAN_TYPES (4 · 13 zones · 3-store offers) · SAFETY_TIPS×5 · budget thresholds +
+  `budgetLevel` · budgetCategories(4)+projectBudget · DEPT tiles(8) · helpers
+  `bestStore`/`fMoney`/`caToday`.
+- Guard: `test/contractor_seeds_test` (8 tests; fMoney/bestStore mutation-verified).
+- Deferred (per PLAN): T0.2 StateNotifiers (mute→T7 · orders→T5; favorites exists) +
+  ORDER_STATUS/STORE-services seeds (proto/04 lacks the verbatim labels → T4/T5).
+  No `kLipskeyCatalog` introduced (gate 114 clean).
