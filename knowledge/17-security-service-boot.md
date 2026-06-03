@@ -40,7 +40,7 @@ boot: האפליקציה standalone; מאותחלת ע"י splash-default (`scree
 ## 🌐 PWA · offline · deploy (תשתית-שורש)
 > שכבת-המסירה — חלה על ה-web builds.
 - **`manifest.json`** (root) — PWA לאב-הטיפוס: name "BuildSmart — רכש חומרי בנייה" · `start_url:./index.html` · `display:standalone` · `orientation:portrait` · `theme_color:#1f6f6b` (teal) · אייקוני-BS (SVG data-URI 192/512, `maskable`).
-- **`service-worker.js`** (root · `CACHE_NAME:'buildsmart-v107'`) — SW **של אב-הטיפוס**: offline (network-first → cache-fallback → `index.html`). 🔧 ה-**Preact** מייצר PWA **משלו** דרך **`vite-plugin-pwa` (Workbox)** — SW+manifest אוטומטיים (app/README), לא ה-SW הידני הזה.
+- **`service-worker.js`** (root · `CACHE_NAME:'buildsmart-v107'`) — SW **של אב-הטיפוס**: offline (network-first → cache-fallback → `index.html`). 🔧 ה-**Preact** מייצר PWA **משלו** דרך **`vite-plugin-pwa` (Workbox, `registerType:autoUpdate`)** — SW+manifest אוטומטיים: manifest דומה (name "BuildSmart — רכש חומרי בנייה" · teal #1f6f6b · bg #f4f5f3 · he/rtl · BS-icons SVG) + **runtimeCaching:** NetworkFirst למסמכים (`bs-html`, timeout 3s) · StaleWhileRevalidate ל-script/style/font (`bs-assets`) · CacheFirst לתמונות (`bs-images`, 200 entries/30 יום). base `/buildsmart/` ב-Pages. **לא** ה-SW הידני (v107).
 - **`vercel.json`** — deploy של **Preact**: `installCommand/buildCommand: cd app` → `outputDirectory: app/dist` + SPA-rewrites (הכל→`index.html` חוץ מ-assets). (CLAUDE.md: Preact חי גם ב-GitHub Pages.)
-- **Flutter web**: `app_flutter/web/index.html` (shell נפרד; `flutter build web`).
+- **Flutter web**: `app_flutter/web/index.html` (shell נפרד; `flutter_bootstrap.js`; `base href=$FLUTTER_BASE_HREF` מוחלף ב-build → `/buildsmart/flutter/`). ⚠️ **מבטל service-workers** (`getRegistrations→unregister`) — אין PWA/offline ל-Flutter-web (בניגוד ל-Workbox של Preact). פרוס ב-CI ל-`/buildsmart/flutter/`.
 - **`CLAUDE.md`** (root) — הוראות-פרויקט (ענפי-עבודה · R1–R9 · Flutter dev-loop) — מטא-פיתוח, לא ידע-מוצר.

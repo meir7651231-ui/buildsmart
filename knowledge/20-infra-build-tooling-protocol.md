@@ -3,7 +3,7 @@
 > "שאר הקבצים" — packaging/CI/tooling + שכבת-הפרוטוקול. לא ידע-מוצר, אבל חלק מהפרויקט.
 
 ## ⭐ אריזה ל-native (חנויות)
-- **Preact → Capacitor** (`app/capacitor.config.ts`): `appId:'com.buildsmart.app'` · `webDir:'dist'` + ios/android. 🔧 **תיקון (app/README):** Capacitor **מוגדר אך טרם-נוסף** — "תיוסף בשלב הבא"; `npm i @capacitor/ios/android` + `npx cap add` עדיין ממתינים. כלומר native-packaging **מתוכנן, לא פעיל**. (Preact כיום = web/PWA.)
+- **Preact → Capacitor** (`app/capacitor.config.ts`): `appId:'com.buildsmart.app'` · `appName:'BuildSmart'` · `webDir:'dist'` · ios(`contentInset:'always'`)/android(`allowMixedContent:false`). 🔧 **דיוק (אומת מ-package.json):** `@capacitor/cli`+`@capacitor/core` ^6.2 **מותקנים** (devDeps) + scripts `cap:sync`/`cap:ios`/`cap:android` **קיימים** — אבל חבילות-הפלטפורמה (`@capacitor/ios`/`@capacitor/android`) **טרם הותקנו** ו-`npx cap add` לא רץ. native-packaging **מחווט אך לא-פעיל** (Preact כיום = web/PWA).
 - **Flutter → native מובנה** (`flutter build ios/android/web`).
 → **שני מסלולים לחנויות:** Preact+Capacitor · Flutter-native.
 
@@ -12,12 +12,12 @@
 → זה מקור השורות-הענק ב-index.html (תמונות base64) ושל `image:/catalog/*.jpg` (דוחות 03/04). הרצה: `node scripts/extract-catalog.mjs`.
 
 ## CI / deploy
-- **`.github/workflows/deploy.yml`** — בונה **Preact** (`npm ci && npm run build`, `GITHUB_PAGES=1`) ופורס ל-**GitHub Pages**. trigger: `claude/whats-happening-LyY9G` + `main`.
+- **`.github/workflows/deploy.yml`** — ⭐ **בונה ופורס את שתי האפליקציות** ל-**GitHub Pages** (branch `gh-pages`, force-push, `.nojekyll`): **Preact** (`npm ci && npm run build`, `GITHUB_PAGES=1`, node 20) → `/buildsmart/` · **Flutter web** (`flutter build web --release --base-href "/buildsmart/flutter/"`, flutter **3.29.3** stable) → מועתק ל-`app/dist/flutter/` → `/buildsmart/flutter/`. trigger: `claude/whats-happening-LyY9G` + `main` + `workflow_dispatch`. **תיקון: גם ה-Flutter חי כ-preview** (`/buildsmart/flutter/`) — לא רק Preact.
 
 ## build configs
-- **Preact:** `package.json`(+lock) · `tsconfig.json` · `vite.config.ts` · `app/index.html`(shell) · `.gitignore`/`README`.
+- **Preact:** `package.json` (deps: preact 10 · @preact/signals · @fontsource/heebo+rubik; dev: vite 5 · vite-plugin-pwa · typescript 5.7 · @playwright/test 1.60 · @capacitor/cli+core 6.2; scripts: dev · **build=`tsc -b && vite build`** · typecheck=`tsc -b --noEmit` · cap:sync/ios/android)(+lock) · `tsconfig.json` (strict + noUnused* + noUncheckedIndexedAccess · jsx=preact) · `vite.config.ts` · `app/index.html`(shell) · `.gitignore`/`README`.
   > ⚠️ **typecheck-caveat (INSP-0015, 2026-05-21):** `npx tsc -b --noEmit` פלט **2 שגיאות ידועות** (`vite.config.ts` + `worker.tsx`) — **build של Vite נקי**; tracked כ-MINOR-פתוח ב-`wip-menu-wiring.md`. (smoke 21/21 + in-app regression **236/236** עוברים בנפרד.)
-- **Flutter:** `pubspec.yaml`(+lock) · `analysis_options.yaml` · `.metadata` · platform-scaffold (android/ios/web/macos/linux/windows — 66 קבצי-boilerplate).
+- **Flutter:** `pubspec.yaml` (sdk ^3.7.2; deps: flutter_riverpod ^2.6 · go_router ^14.6 · intl ^0.19 · flutter_localizations · mobile_scanner ^5.2 · speech_to_text ^7.0 · **permission_handler ^11.3** · shared_preferences ^2.3 · cupertino_icons; dev: very_good_analysis ^7.0; `generate:true`)(+lock) · `analysis_options.yaml` (very_good preset; ללא line-80/public-api-docs) · `.metadata` · platform-scaffold (android/ios/web/macos/linux/windows — 66 קבצי-boilerplate).
 
 ## tests
 - **Preact:** `app/src/test/` (8 — registry/runner/buttons/dsync/products/dupes/tabs — דוח 11) · `app/smoke-settings.mjs`.

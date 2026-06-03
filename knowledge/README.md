@@ -142,4 +142,10 @@
 - Preact `registry.ts`=**21 כפתורים** (מול ~350 בפרוטוטייפ) → doc 11.
 - **parity-insight:** שני ה-ports = shell+dial מלאים, leaves=toast `'בבנייה'`; Flutter הוסיף תוכן-דמו עשיר ב-chats(6)/notif(9)/store(8) → doc 02.
 - ✅ **CONFIRMED:** voice/barcode אמיתיים (web + native) · brands: Preact גזם / Flutter שחזר (מותג סטנדרט/כלכלי/פרימיום) · brand-color: teal `#1f6f6b` (Preact) ↔ orange `#FF7A18`+`#E85F00` (Flutter) · `shared_preferences` persist אמיתי (Flutter) · 202 מוצרים + tokens + dark-theme `#3a9e99` (Preact).
-🏁 **3 המקורות אומתו ברמת-קוד. אין עוד קובץ לקרוא — לא `.md`, לא קוד-מקור, לא config.**
+🏁 **3 המקורות אומתו ברמת-קוד.**
+
+## ⚙️ config/infra — נקרא verbatim ✅
+> כל קבצי ה-build/config נקראו: `package.json` · `vite.config.ts` · `capacitor.config.ts` · `tsconfig.json` · `smoke-settings.mjs` · `pubspec.yaml` · `analysis_options.yaml` · `manifest.json` · `service-worker.js` · `vercel.json` · `deploy.yml` + 2 web-shells.
+- ⭐ **תיקון מהותי:** `deploy.yml` פורס את **שתי האפליקציות** — Preact→`/buildsmart/` **+ Flutter web→`/buildsmart/flutter/`** (flutter 3.29.3). לא רק Preact חי! → doc 20.
+- ➕ Workbox-strategy (NetworkFirst/SWR/CacheFirst) → doc 17 · Capacitor `cap:*` scripts + cli/core מותקנים → doc 20 · dep-versions מדויקים → doc 20 · `security`={twoFA,sessionTimeout,privacy.analytics} (אומת מ-smoke) → doc 06 · Flutter-web מבטל SW (אין offline) → doc 17.
+🏁 **הכל נקרא ואומת — `.md` + פרוטוטייפ (22,416) + קוד-מקור (24K) + config. נותרו רק lockfiles · תמונות · platform-scaffold = רעש-מיוצר, אפס ידע.**
