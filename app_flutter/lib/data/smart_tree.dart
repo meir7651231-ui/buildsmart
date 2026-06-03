@@ -1129,7 +1129,7 @@ const List<SmartProduct> kSmartProducts = [
         sku: '220943',
       ),
       SmartBrand(name: 'מושב טבור soft-close לבן',  tag: 'סגירה רכה',     sku: '187133'),
-      SmartBrand(name: 'מושב כרמל soft-close לבן',  tag: 'סגירה רכה+',    sku: '195425'),
+      SmartBrand(name: 'מושב כרמל soft-close לבן',  tag: 'סגירה רכה+',    sku: '195505'),
       SmartBrand(name: 'מושב ULTRA טרמו',            tag: 'תרמו חזק',      sku: '224286'),
       SmartBrand(name: 'מושב ציר נירוסטה',          tag: 'ציר חזק',       sku: '218361'),
       SmartBrand(name: 'מושב מס.3 פרגמון',           tag: 'גוון פרגמון',  sku: '116703'),
@@ -1348,8 +1348,9 @@ const List<SmartProduct> kSmartProducts = [
         rec: true,
         sku: '187133',
       ),
-      SmartBrand(name: 'מושב טבור soft-close פרגמון', tag: 'גוון פרגמון',   sku: '197134'),
-      SmartBrand(name: 'מושב כרמל soft-close לבן',   tag: 'דגם כרמל לבן', sku: '195425'),
+      // gate 117: 197134 was a typo of 187134 (תבור פרגמון); 195425 was phantom (real כרמל לבן = 195505).
+      SmartBrand(name: 'מושב טבור soft-close פרגמון', tag: 'גוון פרגמון',   sku: '187134'),
+      SmartBrand(name: 'מושב כרמל soft-close לבן',   tag: 'דגם כרמל לבן', sku: '195505'),
       SmartBrand(name: 'מושב כרמל soft-close פרגמון', tag: 'כרמל פרגמון',  sku: '195506'),
     ],
     acc: [

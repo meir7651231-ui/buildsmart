@@ -4,6 +4,24 @@
 
 ---
 
+## v5.99 — Lipski toilet-seat parity to PDF (gate 117 · קטגוריה 2/9)
+
+**שינוי:** סנכרון `kLipskeyCatalog` ל-26 SKUs של מושבי אסלה מהקטלוג (עמ' 53–55):
+- 20 רשומות `nameHe` גנרי תוקנו לשמות-מודל מפורשים (`מס. 1`, `מס. 4 ציר פלסטיק/ניירוסטה`,
+  `מס. 9 ציר ניירוסטה אנטי ונדליזם`, `חרמון`, `אדיר`, `תבור סגירה רכה`,
+  `כרמל סגירה רכה`, `הגייני אנטי ונדליזם ציר ניירוסטה`, `טרמו ULTRA`).
+- 4 phantom SKUs נמחקו (179370/197134/195425/107222) + 5 stub placeholders אוחדו.
+- `smart_tree.dart` עודכן (195425→195505, 197134→187134).
+
+**אימות:**
+- ✅ `test/lipskey_pdf_parity_test.dart` (gate 117) — 51/51 (24 מיכלים + 27 מושבים).
+- ✅ `test/product_journey_test.dart · HARD · all 935 sheets` — אפס overflow על מסכים-צרים+טקסט-מוגדל.
+- ✅ `test/catalog_regression_test.dart · אין קישור-SmartProduct יתום` — GREEN.
+- ✅ `test/catalog_spec_coverage_test.dart` — מושבי אסלה לא ב-non-exempt.
+- ✅ `flutter test` — 1149/1149 ירוקים.
+
+---
+
 ## v5.96 — Lipski toilet-tank parity to PDF (gate 117 · קטגוריה 1/9)
 
 **שינוי:** סנכרון `kLipskeyCatalog` למיכלי הדחה לפי קטלוג ה-PDF המקורי (עמ' 50–52):

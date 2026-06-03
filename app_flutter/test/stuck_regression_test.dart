@@ -1326,7 +1326,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #65 לא קיים", () {
+    test("antipattern #66 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp('titles: \\[\\]');
