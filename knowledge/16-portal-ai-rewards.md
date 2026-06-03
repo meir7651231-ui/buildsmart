@@ -23,5 +23,8 @@
 
 ---
 
-## 📱 Flutter (`app_flutter/lib/screens/chats_screen.dart`, 914 ש') — דלתא ⭐
-**טאב-שיחות מלא בסגנון WhatsApp** (native): `_SearchBar` + `_FilterChipsRow` + `_ThreadList` + `_Pill` + שיחה. מול אב-הטיפוס (chat ב-Category F, `chatOverlay`) ו-Preact (לא הומר). ⭐ **chat = טאב ראשי** (אחד מ-4 הטאבים). שאר Category-F/G/H — לא הומרו.
+## 📱 Flutter — דלתא (portal/AI/rewards) ⭐ נכתב-מחדש
+- **chat (F):** `chats_screen.dart` (**1,437ש׳**) = **טאב-ראשי native** (6 threads + bot auto-reply; פירוט בדוח 09). ה-צ׳אטבוט = thread + auto-reply.
+- **AI (G):** `kHomeTree` 🤖 = **9 כלי-AI כ-menu-dial toast-stubs** (חיזוי-מלאי/סורק/דיבור/חלופות/סריקה/3-way/מזג/בלאי/Analytics). barcode+voice **אמיתיים** (דוח 07).
+- ➖ **תגמולים (H):** BuildCoins/אתגרים/לוח-מובילים/VIP/קופונים — **לא הומרו** (אין gamification ב-Flutter; במקום — readiness-score per-מוצר).
+🔧 מול הפרוטוטייפ: F→טאב-אמיתי · G→toast-stubs · H→נעדר.

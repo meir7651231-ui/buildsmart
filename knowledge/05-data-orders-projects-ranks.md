@@ -49,4 +49,4 @@
 ---
 
 ## 📱 Flutter — דלתא
-`projects.dart` (37 ש׳) = `Project` + רשימת-פרויקטים. ➖ `RANKS`/זהות/`ORDERS` — לא כמבני-data נפרדים (מינימלי; הפוקוס ב-Flutter על קטלוג/שיחות/התראות/חנות).
+`projects.dart` (38ש׳, 3 פרויקטים) + `personas.dart` (5). ➖ `RANKS`/זהות/`ORDERS`(סדר-הרכבה) — **אין** ב-Flutter: במקום gamification-קבלן, לכל מוצר **readiness-score** (`cardReadinessScore`, דוח 08). הפוקוס: קטלוג/install-studio/chats/notif/חנות.

@@ -57,4 +57,5 @@
 ---
 
 ## 📱 Flutter (`app_flutter/lib/data/`) — דלתא
-`catalog.dart` (`kCatalogCats`) + `sections.dart` (`kStoreSections`/`kCourierSections`) + **`menu_trees.dart`** (`kHomeTree`/`kCartTree`/**`kFinanceHub`**/`projectsTree()`) — עצי-ה-dial. ⭐ **`kFinanceHub` קיים** (מרכז-פיננסים כעץ-dial — לא הומר ב-Preact). VARIANTS/TOOLS/SIZES — אין כמבני-data נפרדים (`smart_tree.dart` מאחד brands+acc).
+⭐ נכתב-מחדש: `catalog_tree.dart` (עץ-ניווט ~210 leaves) · `variant_families.dart` (זיהוי משפחות size/color/model/subtype) · `chip_hierarchy.dart` · `fuzzy_search.dart` · `lipskey_smart_data.dart` (accessories/stages per-SKU) · `menu_trees.dart` (`kHomeTree`/`kCartTree`/**`kFinanceHub`**/`projectsTree`).
+🔧 **מול אב-הטיפוס:** VARIANTS → `variant_families` (computed) · SIZES → **`_size_norm.dart`** (`SizeFamily`/`SizeToken` — ראה SIZE_FILTER-protocol, דוח 22) · TOOLS → `install_kit.dart` (לוגיקה, לא bundles). הקטלוג = **1,337 מוצרים** (דוח 03), לא ה-`pl_`/SIZES/TOOLS של הפרוטוטייפ.

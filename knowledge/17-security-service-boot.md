@@ -32,8 +32,8 @@ boot: האפליקציה standalone; מאותחלת ע"י splash-default (`scree
 ---
 
 ## 📱 Flutter — דלתא
-➖ אבטחה/RBAC (I) + שירות/chatbot (J) — לא הומרו (קבוצות "אבטחה"/"שירות" קיימות ב-`settings_tree` כ-rows בלבד).
-**boot ב-Flutter:** `main.dart` → `runApp(ProviderScope(BuildSmartApp))` → `MaterialApp` (light/dark · RTL · he/ar/en) → `HomeShell`. אין splash/onboarding.
+⭐ נכתב-מחדש: ➖ **אבטחה/RBAC (I)** — קבוצת "אבטחה" ב-menu-dial + **הגדרות-פרטיות אמיתיות** ב-`app_settings` (2FA/biometric/location/privacy toggles נשמרים), אבל **אין RBAC-matrix/session-lock/audit** מלא. **שירות/chatbot (J)** — ה-צ׳אטבוט קיים כ-thread ב-`chats_screen` (auto-reply) + bot ב-chat-settings; שאר כלי-השירות (מחשבונים/סיור) — לא.
+**boot ב-Flutter:** `main.dart` → **`registerPolyrollSpecs()`** (סינתוז ~779 VerifiedSpecs) → gen `welcomeSeen` → `runApp(ProviderScope(BuildSmartApp))` → `MaterialApp` (light/dark · RTL · he/ar/en) → **`OnboardingGate`** (welcome ב-first-run, אחרת `HomeShell`). ⚠️ **יש onboarding** (welcome/profession/slides — תיקון). **PWA Flutter-web:** `flutter_bootstrap.js`, **מבטל SW** (אין offline, בניגוד ל-Workbox של Preact).
 
 ---
 

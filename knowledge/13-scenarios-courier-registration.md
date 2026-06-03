@@ -37,4 +37,4 @@
 ---
 
 ## 📱 Flutter — דלתא
-`sections.dart` `kCourierSections` (סקשני-שליח כעץ-dial). ➖ תרחישי פריט-חסר/אזל · רישום/onboarding · courier-tracking מלא — לא הומרו.
+שליח = `kCourierSections` (BS-dial **toast-stubs**, לא view). ➖ תרחישי פריט-חסר/אזל · courier-tracking · רישום — לא הומרו. ✅ **onboarding** (welcome/profession/3-slides, `OnboardingGate`) מחליף את ה-registration של הפרוטוטייפ (ראה דוח 09).

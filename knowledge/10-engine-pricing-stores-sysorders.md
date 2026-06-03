@@ -36,4 +36,4 @@
 ---
 
 ## 📱 Flutter — דלתא
-➖ מנוע-checkout/`SUPPLIER_STORES`/`SYS_ORDERS`/VAT המלא — אין כמבנה-data נפרד; מסחר דרך `store_screen`+`sections` (חנות) + cart מקומי. ✅ persistence אמיתי ב-`shared_preferences` (state/app_settings).
+⭐ נכתב-מחדש: ✅ **VAT 18% מיושם** (checkout ב-`store_screen`, inclusive/exclusive) · משלוח (express ₪120/standard ₪45/pickup) · **`price_estimate.dart`** (אומדן לפי-קטגוריה). ➖ **`SYS_ORDERS`/sync-חוצה-פרסונות/`SUPPLIER_STORES` המלא — אין** (אין backend; הזמנות=mock). ⚠️ **מחירים:** `brandPrice` ברוב המוצרים = **0** (ממתין לנתוני-ספק — חוסם-launch). persist ב-`shared_preferences`.
