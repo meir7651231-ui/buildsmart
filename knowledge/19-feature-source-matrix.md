@@ -10,7 +10,7 @@
 | dial pattern | ➖ (מסכים) | ✅ | ✅ (overlay מעל-טאבים) | 01/02 |
 | מעטפת | 5-tabbar+מסכים | persona-routing (R2) | 🔀 **4 טאבים: מחלקות/שיחות/התראות/חנות** | 02 |
 | onboarding | ✅ 12 מסכים | ➖ | 🟡 welcome/profession/3-slides (שונה) | 09 |
-| קטלוג + עץ-מוצרים | ✅ TREES (202) | ✅ typed (202) | 🔀 **1,337 מוצרים אמיתיים** (Lipskey/Polyroll/Huliot) | 03 |
+| קטלוג + עץ-מוצרים | ✅ TREES (202) | ✅ typed (202) | 🔀 **1,877 מוצרים אמיתיים** (935+772+170 Lipskey/Polyroll/Huliot) | 03 |
 | **brands** (בחירת-מותג) | ✅ | ➖ נגזם | ✅ שוחזר (אמיתיים) | 03 |
 | שלבי-פרויקט (infra/sealing) | ✅ | ✅ קטגוריות | ➖ | 03 |
 | VARIANTS / TOOLS / SIZES | ✅ | ✅ typed | 🟡 `variant_families`/`install_kit`/`_size_norm` | 04 |
@@ -46,7 +46,7 @@
 ## תובנת-העל (מתוקנת מהמציאות)
 - **אב-טיפוס** = ה-100% breadth — כל פיצ׳ר קיים (גם כהדמיה). מקור-האמת ל"מה".
 - **Preact** = **dial-shell** שתרגם את **כל התוכן** ל-dial-leaves verbatim (R6); ה-hubs ported כ-leaves אך **המימוש = drill/toast**, לא flows.
-- **Flutter = אפליקציית-אינסטלציה אמיתית, לא port.** קטלוג-מותגים אמיתי (1,337: Lipskey/Polyroll/Huliot) · **Install-Studio הנדסי** (Dijkstra/BOM/pressure-drop — היחיד **עמוק מהפרוטוטייפ**) · chat+notifications כטאבים-מלאים · 155 בדיקות · **116-שערי-פרוטוקול**. ~92% roadmap, קוד מוכן-להשקה (חוסמים=store-config).
+- **Flutter = אפליקציית-אינסטלציה אמיתית, לא port.** קטלוג-מותגים אמיתי (1,877: Lipskey 935/Polyroll 772/Huliot 170) · **Install-Studio הנדסי** (Dijkstra/BOM/pressure-drop — היחיד **עמוק מהפרוטוטייפ**) · chat+notifications כטאבים-מלאים · 155 בדיקות · **116-שערי-פרוטוקול**. ~92% roadmap, קוד מוכן-להשקה (חוסמים=store-config).
 - **רק ב-Flutter:** native · device-APIs אמיתיים · **Install-Studio + VerifiedSpec-engine** · chat+notifications-טאבים · readiness-score · עולם-116-שערים.
 - **רק באב-הטיפוס (כ-flows מלאים):** SYS_ORDERS חוצה-פרסונות · checkout-engine מלא · B2B/AI/site/rewards פונקציונליים · דשבורדי-פרסונה מלאים (ב-Flutter = BS-dial toast-stubs).
-- ⚠️ **drift מתועד:** ה-KB של Flutter אומר 1,879 מוצרים/tab0=קטלוג/teal — הקוד אומר **1,337/מחלקות/כתום** (הקוד קובע, R6).
+- ⚠️ **drift מתועד (הקוד קובע, R6):** ה-KB אומר tab0=קטלוג/teal — הקוד אומר **tab0=מחלקות/כתום**. ✅ ספירת-מוצרים: הקוד **1,877** ≈ "~1,879" של ה-KB → **תואם** (ה-"1,337" שנכתב קודם = טעות, תוקן — דוח 03).
