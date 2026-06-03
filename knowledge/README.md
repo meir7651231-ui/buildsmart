@@ -101,4 +101,5 @@
 |---|---|---|
 | `02` מעטפת | dial pattern: מסכים→dials · tabbar→MenuSpeedDial · appbar→FloatingHeader · routing לפי-פרסונה | ✅ |
 | `01` עיצוב | tokens זהים + סקאלות; מערכת-dial/fab/float נטו-חדשה (R1/R9) | ✅ |
-| `03/04` נתונים · `06–17` לוגיקה/פרסונות | — | ⬜ בעבודה |
+| `03/04/10` נתונים+מנוע | catalog/variants/tools/suppliers **auto-gen מ-index.html**, מטוייפים; brands נגזם; הסל פושט | ✅ |
+| `06–09,11–17` לוגיקה/פרסונות | — | ⬜ בעבודה |

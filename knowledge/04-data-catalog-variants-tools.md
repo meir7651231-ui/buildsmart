@@ -40,3 +40,16 @@
 
 ---
 **תובנה:** שכבת-הקטלוג עוטפת את `TREES` — CATALOG=ארגון-תצוגה · VARIANTS=בחירה · SIZES=תמחור-מידה · STOCK_DEMO=מצב-התחלתי · TOOLS=השלמת-כלים. מפתח משותף: product-key / accessory-name.
+
+---
+
+## 🔄 Preact (`app/src/data/`) — דלתא מול אב-הטיפוס (שכבת-קטלוג)
+> כולם **auto-generated מ-`/index.html`** (`scripts/extract-catalog.mjs`), מטוייפים.
+
+⬆️ **שודרג (מטוייף, אותו תוכן):**
+- `VARIANTS` → **`variants.ts`** (2366 ש׳): `VARIANTS: Record<string, VariantDef>` + types `VariantDef`/`VariantOption`.
+- `TOOLS` → **`tools.ts`** (425 ש׳): `TOOL_BUNDLES: Record<string, ToolItem[]>` + `ToolItem`.
+- `SUPPLIER_STORES`+`STORE_PRICING` → **`suppliers.ts`** (759 ש׳): `SUPPLIERS`(s1/s2/s3) + `STORE_PRICING`(per-store SKU) + `DEFAULT_SUPPLIER_ID='s1'`. (גם דוח 10.)
+- `CATALOG`/`CATEGORIES` → `catalog.ts` (דוח 03).
+
+➖ **הוחסר משכבת-ה-data:** `SIZES` (delta-מחיר) · `STOCK_DEMO` · `ACC_TYPES`/`ACC_GROUPS`/`ACC_PRICE_BOOK`/`SPECS`/`CAT_DESC`/`DIAGRAMS`/`ICN` — לא נמצאים כמבני-data אוטו-מחולצים (חלקם אולי inline בקומפוננטה). **ה-`brands[]` נגזם לחלוטין** (`grep brand` ב-`data/`→0).

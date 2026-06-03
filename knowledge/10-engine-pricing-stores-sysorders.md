@@ -26,3 +26,9 @@
 
 ---
 **עמוד-השדרה החוצה-פרסונות:** `SYS_ORDERS` (ב-localStorage) הוא המאגר המשותף — קבלן מזמין (`checkout`→`syncOrderToSystem`), והחנות/שליח/מנהל קוראים אותו ומקדמים `stage`. זרימת-מחיר: `pl_` מ-`STORE_PRICING` (לפי חנות) · rich מ-`brands.price+delta` (08) · checkout מוסיף `SUPPLIER_STORES.shipping + haulExtra + EXPRESS_FEE + VAT(18%)`.
+
+---
+
+## 🔄 Preact (`app/src/`) — דלתא מול אב-הטיפוס (מנוע-מסחר)
+⬆️ `SUPPLIER_STORES`+`STORE_PRICING` → **`suppliers.ts`** (auto-gen מ-index.html): `SUPPLIERS`(s1/s2/s3, אותם shipping/eta) + `STORE_PRICING`(per-store SKU) + `DEFAULT_SUPPLIER_ID='s1'`, מטוייפים.
+➖ **הסל פושט:** `app-store.ts` — `cart`/`setQty`/`incQty`/`decQty`/`cartCount` (signals בלבד). `computeCheckout`/`SYS_ORDERS`/split-shipment/VAT — **לא אומתו** בשכבת-Preact (פרסונות placeholder; ה-checkout-engine המלא כנראה לא הומר).
