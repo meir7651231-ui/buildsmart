@@ -102,4 +102,32 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 - **`ca-*`** (שרשרת-אספקה): `.ca-primary` (כפתור teal ראשי) · `.ca-rma-item` (checkbox) · `.ca-select` · `.ca-tool-grid` (השכרת כלים) · `.ca-card` (`.overdue`=כתום) · `.ca-pill` (danger/done) · **`.ca-sig-canvas`** (קנבס-חתימה) · `.ca-svc` (כפתורי-שירות).
 
 ---
-**טרם נקרא בקובץ הזה:** 1001–4019 (Categories A(המשך)–J · tree-stage diagram · brand/variant pickers · accessory · onboarding/login styling · misc).
+
+## חלק ג׳ — Categories A–J + עץ-המוצרים (1001–1520)
+
+האב-טיפוס מארגן את הפיצ'רים המתקדמים ל-**10 "קטגוריות" (A–J)**, כל אחת עם prefix-CSS
+משלה. זו עמוד-השדרה של הפיצ'רים (תואם ל-hub/feature overlays ב-`02`). **אין Category D** (דילוג במקור).
+
+| קט' | prefix | תחום | רכיבי-מפתח |
+|---|---|---|---|
+| **A** | `ca-` | שרשרת-אספקה | scan-frame · OCR (`ocr-row`) · XML preview (monospace ltr) · price-compare (`cmp-row .best`=ירוק) · RFQ (`rfq-quote`) · **MSDS** (`msds-risk` m/h/x) |
+| **B** | `fin-` | פיננסים | `fin-hub-btn` (gradient teal) · grid/tile · rows (up=ירוק/dn=אדום) · callout · opt(.on) · sub(bar) · **appr** (ok/no) · **gauge** (ok/h/x) · thr · fx-calc |
+| **C** | `sc-` | ניהול-אתר | **gantt** (track/fill/pct) · floor/apt/rooms · attendance(.in) · safety-today (gradient כתום) · dep(.ready) · photo-pair (before→after) |
+| **E** | (שונים) | UX/נגישות | skeleton(`ux-shimmer`) · page-trans · pull-to-refresh · **undo bar**(`ux-undo`) · **high-contrast**(`html[data-contrast=high]`) · focus-visible · reduce-motion |
+| **F** | `ux-`/`ca-pod` | פורטל ספק/שליח | chat (בועות `ux-msg` them/me) · stars · POD · barcode |
+| **G** | `ai-` | AI/אוטומציה | did-you-mean · mic · transcript · alt(from→to) · 3way-compare · warn |
+| **H** | `rw-` | gamification | coin-banner (gradient כתום) · **leaderboard**(`rw-lb` .me) · badges(.on) · referral-code · **VIP tiers** |
+| **I** | `sec-` | אבטחה | status · 2FA-OTP · **roles+perms (RBAC)**(`sec-role`/`sec-perm`) · biometric · audit · timeout · encryption · privacy-toggles |
+| **J** | `svc-` | שירות/הרחבה | bot-chips · calc-tabs · **guided tour**(`svc-tour-dots`) |
+
+### session-lock + פנים-ה-sheet (1384–1428)
+`#sessionLock` overlay-נעילה (blur 6). `.sheet-head` (h3 Heebo-900 + p). **`.eyebrow` + `.pulse`** (נקודת-teal פועמת — מסמן "הופעל"). `.site-opt` בורר-אתר (.on=teal) + `.site-add` input.
+
+### ⭐ עץ-המוצרים — tree-root + diagram + accessory (1430–1519)
+- **`.tree-root`** (1430): כרטיס כהה (ink) — `.rthumb` 58 · `.name` · `.meta` · `.price` כתום · `.root-check` (✓ הופך לכתום).
+- `.branch-label` (1455) + `.ai` תג-teal ("מומלץ ע"י BuildSmart").
+- **`.tdiagram`** (1462): דיאגרמת-שלבים gradient כהה — `.td-stage` (clickable; `.active`=כתום, `.final`=teal) + `.td-icon` 46 + `.td-label/.td-sub` + `.td-arrow/.td-line` (teal).
+- **`.accessory`** (1511): כרטיס-אביזר — `.picked`=teal · `.must`=אדום · `.stage-dim/.stage-hit` (עמעום/הדגשה לפי שלב נבחר).
+
+---
+**טרם נקרא בקובץ הזה:** 1520–4019 (המשך accessory · brand/variant pickers · catalog · onboarding/login · admin dashboards · misc).
