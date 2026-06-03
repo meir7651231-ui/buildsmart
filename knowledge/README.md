@@ -43,7 +43,9 @@
 | `14-b2b-supply-chain.md` | B2B (Cat-A): planner/RMA/השכרה/פקדונות/MSDS/RFQ | 18423–19451 |
 | `15-finance-site-hubs.md` | מרכז-פיננסים (B) + ניהול-אתר (C) | 19452–20800 |
 | `16-portal-ai-rewards.md` | פורטל/chat (F) + AI (G) + תגמולים (H) | 20800–21659 |
-| `17-security-service-boot.md` | אבטחה/RBAC (I) + שירות/chatbot (J) + boot | 21660–22414 |
+| `17-security-service-boot.md` | אבטחה/RBAC (I) + שירות/chatbot (J) + boot + PWA/deploy | 21660–22414 |
+| `18-legacy-knowledge-index.md` | אינדקס `app/knowledge` הישן (ADR · R1–R9 · 43 INSP) | app/knowledge |
+| `19-feature-source-matrix.md` | מטריצת פיצ'ר × מקור (אב-טיפוס/Preact/Flutter) | חוצה-מקורות |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
