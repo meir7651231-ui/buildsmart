@@ -1,0 +1,42 @@
+# שכבת-הקטלוג — CATALOG · VARIANTS · SIZES · STOCK_DEMO · TOOLS (6046–6320)
+
+כולם ממופתחים ב-**product-key** (מ-`TREES`) או ב-**accessory-name**.
+
+## `CATALOG` (6046–6058) — אינדקס-קטגוריות לתצוגה
+מערך 11 קטגוריות: `{cat, icon, items:[product-keys]}`. ממפה קטגוריה → מפתחות-מוצרים (rich + `acc_N`).
+| icon | קטגוריה | items (דוגמה) |
+|---|---|---|
+| 🚰 | ברזים וכיורים | faucet · kitchenFaucet · basin · acc_* |
+| 🚽 | אסלות | toilet · toiletFloor · acc_* |
+| 🚿 | מקלחות ואמבטיות | shower · bathtub · acc_* |
+| ♨️ | חימום מים | boilerElectric · boilerSolar |
+| 🍽️ | מטבח | kitchenSink · dishwasher · washingPoint |
+| 🕳️ | ניקוז וצנרת | pipes · floorDrain · pressureReg |
+| 🚾 | גופי תברואה | showerCabin · bidet |
+| 🔗 | אביזרי קצה וחיבורים | endTaps · elbows · extenders · connectors · seals |
+| 🧱 | בנייה ומחיצות | wall · door |
+| 🎨 | גמר | seal · floor |
+| 🧰 | אביזרים נלווים | acc_1 … acc_148 |
+
+## `VARIANTS` (6060–6184) — ציר-וריאציה לכל מוצר
+- **pl_*** (23 SKU): `{label:"מידה / קוטר", sku:true, opts:[{name,sku}]}` — מידות נושאות-מק"ט.
+- **rich** (~22): `{label, opts:[…]}` — ציר-בחירה אחד לכל מוצר-אב:
+  `faucet`=גובה הברז · `kitchenFaucet`=סוג · `basin`=סוג הכיור · `toilet`=צבע/גימור ·
+  `toiletFloor`=סוג ההדחה · `shower`=סוג הסוללה · `bathtub`=מידה · `wall`=סוג הגבס ·
+  `door`=מידה · `floor`=מידת האריח · `seal`=סוג מערכת-איטום · `pipes`=סוג הצנרת ·
+  `boilerElectric/boilerSolar`=נפח · `kitchenSink`=מספר כיורים · `dishwasher/washingPoint`=סוג התקנה ·
+  `floorDrain`=סוג המחסום · `pressureReg`=סוג · `showerCabin`=צורה · `bidet`=סוג התקנה.
+
+## `SIZES` (6185–6199) — מידות-אביזר עם delta-מחיר
+`'accessoryName':[{name, delta}]` — אופציות-מידה לאביזר; **`delta`** = תוספת/הנחה למחיר-הבסיס.
+דוגמה: `'צינורות מים PEX':[{16מ"מ,0},{20מ"מ,+55}]` · `'מאריך 1/2"':[{2ס"מ,-2},{5ס"מ,0}]` (delta שלילי = זול יותר).
+
+## `STOCK_DEMO` (6202–6214) — seed-מלאי-הדגמה
+`'accessoryName':'warehouse'|'site'` — מצב-מלאי התחלתי לפי שם-אביזר (במחסן / באתר). מזין את `view-stock`.
+
+## `TOOLS` (6216–6320) — כלים-נדרשים לכל מוצר
+`productKey:[{name, img, why, price}]` — רשימת-הכלים להתקנת ~21 מוצרי-אב.
+דוגמה `faucet`: מפתח-צינורות מתכוונן (why:"להידוק האום", ₪—) · מפתח-אלן (₪24) · מברגה (₪280).
+
+---
+**תובנה:** שכבת-הקטלוג עוטפת את `TREES` — CATALOG=ארגון-תצוגה · VARIANTS=בחירה · SIZES=תמחור-מידה · STOCK_DEMO=מצב-התחלתי · TOOLS=השלמת-כלים. מפתח משותף: product-key / accessory-name.
