@@ -39,6 +39,7 @@
 | `10-engine-pricing-stores-sysorders.md` | מנוע-מסחר: תמחור/ספקים/VAT/SYS_ORDERS | 11908–12061 |
 | `11-manager-dashboard-selftest.md` | דשבורד-מנהל + BUTTON_REGISTRY/self-test | 12062–15900 |
 | `12-persona-manager-store.md` | דשבורד-מנהל (מלא) + דשבורד-חנות | 15900–17627 |
+| `13-scenarios-courier-registration.md` | פריט-חסר/אזל + דשבורד-שליח + רישום | 17627–18422 |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
@@ -61,7 +62,8 @@
 | 11908–12061 | JS — מנוע-מסחר (תמחור/ספקים/VAT/SYS_ORDERS) | ✅ נלכד | `10-engine-pricing-stores-sysorders.md` |
 | 12062–15900 | JS — דשבורד-מנהל + BUTTON_REGISTRY/self-test | ✅ נלכד | `11-manager-dashboard-selftest.md` |
 | 15901–17627 | JS — דשבורד-מנהל (מלא) + דשבורד-חנות | ✅ נלכד | `12-persona-manager-store.md` |
-| 17628–22414 | JS — פריט-חסר/שליח/עובד/B2B/hubs/chat + דוח-פיננסי | ⬜ טרם | `13+`… |
+| 17628–18422 | JS — פריט-חסר/אזל + שליח + רישום | ✅ נלכד | `13-scenarios-courier-registration.md` |
+| 18423–22414 | JS — B2B (planner/RFQ/RMA/MSDS) + hubs + chat + עובד + דוח-פיננסי | ⬜ טרם | `14+`… |
 
 ## מפת-ניווט ל-JS (5440–22414) — roadmap לקריאה, **טרם נלכד**
 > רשימת שמות+שורות בלבד, להכוונת הקריאה הרציפה. **התוכן ייחשב נלכד רק אחרי
