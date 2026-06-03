@@ -42,3 +42,5 @@ committing it here. Pins regenerated to match.
    guard -> a `(a+)+$`-style pattern can hang the hook and CI forever.
 2. **whole-tree skips** — content in a submodule / behind a `.dart` symlink / in a
    git-LFS-tracked file is skipped by the scan; H3 reconciliation falsely passes.
+
+<!-- protocol active on this branch; verification touch 1780525722 -->

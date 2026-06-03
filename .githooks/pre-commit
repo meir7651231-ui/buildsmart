@@ -726,8 +726,8 @@ gate_hook_integrity() {
     if [[ "$LOCAL_HOOK_HASH" != "missing" && "$LOCAL_HOOK_HASH" != "$CURRENT_HOOK_HASH" ]]; then
         err "81" "ה-hook המקומי שונה מ-.githooks/" "cp .githooks/pre-commit .git/hooks/"
     fi
-    if ! git diff --quiet HEAD -- "$REPO_ROOT/.githooks/pre-commit" 2>/dev/null; then
-        STAGED_HOOK=$(git diff --cached --name-only | grep "^\.githooks/pre-commit$" | head -1)
+    if ! git -C "$REPO_ROOT" diff --quiet HEAD -- .githooks/pre-commit 2>/dev/null; then
+        STAGED_HOOK=$(git -C "$REPO_ROOT" diff --cached --name-only | grep "^\.githooks/pre-commit$" | head -1)
         [[ -n "$STAGED_HOOK" ]] || err "81" "pre-commit השתנה אבל לא ב-staging" "git add .githooks/pre-commit (או שחזר)"
     fi
 }
