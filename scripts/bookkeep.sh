@@ -139,8 +139,21 @@ EOF
     fi
 fi
 
-# ── (3) mutation_log.md — gate 43/44 (new helper logic) ──
+# ── (3) mutation_log.md — gate 43/44 (B4 v8: only GENUINELY-NEW fault-injectable
+#        logic, mirroring the hook's _staged_helper_adds_logic — a constant/data
+#        tweak has nothing to mutate, so we do NOT stub a performative entry). ──
+HELPER_ADDS_LOGIC=""
 if [[ -n "$STAGED_HELPER" ]]; then
+    while IFS= read -r _hf; do
+        [[ -z "$_hf" ]] && continue
+        _rel=${_hf#app_flutter/}
+        _added=$(git diff --cached -- "$_hf" "$_rel" 2>/dev/null | grep -E '^\+' | grep -vE '^\+\+\+' | sed -E 's://.*$::')
+        if printf '%s\n' "$_added" | grep -qE '\b(if|for|while|switch|else)\b|[!<>=]=|&&|\|\||[-+*/%]=| \? .* : |return[[:space:]]+[^;]|=>[[:space:]]*[^;{]|[A-Za-z0-9_]+[[:space:]]*\([^)]*\)[[:space:]]*\{'; then
+            HELPER_ADDS_LOGIC=1; break
+        fi
+    done <<<"$STAGED_HELPER"
+fi
+if [[ -n "$STAGED_HELPER" && -n "$HELPER_ADDS_LOGIC" ]]; then
     if [[ ! -f knowledge/mutation_log.md ]]; then
         act "mutation_log.md (was missing)" "$FLUTTER_DIR/knowledge/mutation_log.md" "# Mutation log — app_flutter"
         DID=1
