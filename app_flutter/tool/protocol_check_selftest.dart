@@ -35,27 +35,35 @@ String _addedIn(String path, String content) => '+++ b/$path\n+$content';
 
 /// Builds an added hunk with multiple files concatenated (F1 cross-file test).
 String _addedFiles(List<(String, String)> files) => files
-    .map((f) => '+++ b/${f.$1}\n${f.$2.split('\n').map((l) => '+$l').join('\n')}')
+    .map(
+      (f) => '+++ b/${f.$1}\n${f.$2.split('\n').map((l) => '+$l').join('\n')}',
+    )
     .join('\n');
 
 /// Run all built-in unit tests. Returns process exit code (0 ok, 2 failures).
 int runSelfTest() {
   _selfTestFailures = 0;
-  stdout.writeln('protocol_check v4 self-test');
+  stdout.writeln('protocol_check v5 self-test');
 
   // ════════════════════════════════════════════════════════════════════
   //  R4 REGRESSIONS — semantic, not literal/substring (the headline closes)
   // ════════════════════════════════════════════════════════════════════
 
   // --- colors: lowercase hex / fromARGB / fromRGBO / HSL / off-by-one ---
-  // The legacy dark-surface token fires regardless of context (preserved v2):
+  // F3 (v5): the legacy `0xFF111111` token fires ONLY in a SURFACE context (a
+  // bare `color:` is ambiguous ink/surface and is NOT flagged — see the F3 ink
+  // tests). These assert the UPPER/lowercase token IS caught in a SURFACE context.
   _check(
-    'R4 gate46 catches UPPER 0xFF111111 token',
-    gateNoDarkSurface(_added('color: const Color(0xFF111111),')).isNotEmpty,
+    'R4 gate46 catches UPPER 0xFF111111 token in a backgroundColor surface',
+    gateNoDarkSurface(
+      _added('backgroundColor: const Color(0xFF111111),'),
+    ).isNotEmpty,
   );
   _check(
-    'R4 gate46 catches LOWERCASE 0xff111111 token (was bypass)',
-    gateNoDarkSurface(_added('color: const Color(0xff111111),')).isNotEmpty,
+    'R4 gate46 catches LOWERCASE 0xff111111 token in a Container surface',
+    gateNoDarkSurface(
+      _added('Container(color: const Color(0xff111111)),'),
+    ).isNotEmpty,
   );
   // Other dark backgrounds fire when in a SURFACE context (semantic luminance):
   _check(
@@ -497,22 +505,30 @@ ANTIPATTERN-EXAMPLE: ignored
   // ════════════════════════════════════════════════════════════════════
 
   // --- C1: secret entropy is gameable — catch shape, not char-class mix -----
+  // v5 RECONCILIATION (N1/F2): a CONTEXTLESS 40/64-lowercase-hex literal is
+  // SHAPE-IDENTICAL to a git-object SHA / md5 / sha256 digest and therefore is
+  // NOT flagged on its own (v4's contextless-hex assertion WAS the N1/F2 false-
+  // positive — it red the engine's own clean tree). A hex secret is still caught
+  // when (a) the line NAMES it as a credential, (b) it is a NON-digest length, or
+  // (c) it is a base64/base32/entropy-mixed blob. These tests assert EXACTLY that.
   _check(
-    'C1 gate52 catches LOWERCASE-hex 40-run (was bypass)',
+    'C1 gate52 catches LOWERCASE-hex 40-run NAMED as a credential',
     gateNoSecrets(
-      _added('const a = "deadbeefcafebabedeadbeefcafebabe12345678";'),
+      _added('const apiSecret = "deadbeefcafebabedeadbeefcafebabe12345678";'),
     ).isNotEmpty,
   );
   _check(
-    'C1 gate52 catches UPPER-only hex 40-run (was bypass)',
+    'C1 gate52 catches UPPER-only hex 40-run NAMED as a secret',
     gateNoSecrets(
-      _added('const b = "DEADBEEFCAFEBABEDEADBEEFCAFEBABE12345678";'),
+      _added(
+        'const clientSecret = "DEADBEEFCAFEBABEDEADBEEFCAFEBABE12345678";',
+      ),
     ).isNotEmpty,
   );
   _check(
-    'C1 gate52 catches ALL-DIGIT 40-run (was bypass)',
+    'C1 gate52 catches a NON-digest-length (48) hex run (not a git/hash shape)',
     gateNoSecrets(
-      _added('const d = "0123456789012345678901234567890123456789";'),
+      _added('const d = "0123456789abcdef0123456789abcdef0123456789abcdef";'),
     ).isNotEmpty,
   );
   _check(
@@ -530,6 +546,90 @@ ANTIPATTERN-EXAMPLE: ignored
     gateNoSecrets(_added('const k = "bs.cart.v1";')).isEmpty,
   );
 
+  // --- N1: the engine must NOT red its OWN clean tree (the #1 acceptance) ----
+  // The K1 fail-closed code embeds the 40-char all-zero SHA in a `!=` compare.
+  // v4 flagged it as a secret → whole-tree TREE_RC=2 → CI failed on every clean
+  // PR. The fix exempts (a) repeated-single-character runs and (b) git-SHA shapes
+  // in the bare-hex path. Each test asserts the EXACT input it names.
+  _check(
+    'N1 gate52 does NOT flag the all-zero 40-hex SHA (the K1 fail-closed code)',
+    gateNoSecrets(
+      _added(
+        r'''if [[ "$BEFORE" != "0000000000000000000000000000000000000000" ]]; then''',
+      ),
+    ).isEmpty,
+  );
+  _check(
+    'N1 gate52 does NOT flag an all-same-char 64-hex run',
+    gateNoSecrets(
+      _added(
+        'const z = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";',
+      ),
+    ).isEmpty,
+  );
+  _check(
+    'N1 whole-tree mode: secret engine does NOT fire on the zero-SHA in a .yml',
+    () {
+      final f = runTreeGates(
+        files: {
+          '.github/workflows/protocol-enforce.yml':
+              'if [[ "\$BEFORE" != "0000000000000000000000000000000000000000" ]]; then\n'
+              '  echo fail-closed\nfi',
+        },
+      );
+      return f.where((x) => x.gateId == '52').isEmpty;
+    }(),
+  );
+
+  // --- F2: bare hex DIGESTS (git sha1 / md5 / sha256) are NOT secrets --------
+  // buildSha / cacheKey / assetHash carry public content digests, not creds.
+  _check(
+    'F2 gate52 does NOT flag a 40-hex git sha1 buildSha',
+    gateNoSecrets(
+      _added('const buildSha = "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3";'),
+    ).isEmpty,
+  );
+  _check(
+    'F2 gate52 does NOT flag a 32-hex md5 cacheKey',
+    gateNoSecrets(
+      _added('const cacheKey = "5d41402abc4b2a76b9719d911017c592";'),
+    ).isEmpty,
+  );
+  _check(
+    'F2 gate52 does NOT flag a 64-hex sha256 assetHash',
+    gateNoSecrets(
+      _added(
+        'const assetHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";',
+      ),
+    ).isEmpty,
+  );
+  _check(
+    'F2 gate52 does NOT flag a bare 40-hex digest with NO credential name',
+    gateNoSecrets(
+      _added('const rev = "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3";'),
+    ).isEmpty,
+  );
+
+  // --- A1: base32 (TOTP/2FA) secrets are CAUGHT despite the sub-4.2 entropy --
+  // Base32 is distinguishable from a hex digest by its G-Z letters, so this does
+  // NOT reopen the F2 hex-digest exemption.
+  _check(
+    'A1 gate52 catches a 16-char base32 TOTP seed (entropy < 4.2)',
+    gateNoSecrets(_added('const totp = "JBSWY3DPEHPK3PXP";')).isNotEmpty,
+  );
+  _check(
+    'A1 gate52 catches a 32-char base32 2FA secret',
+    gateNoSecrets(
+      _added('const seed = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ";'),
+    ).isNotEmpty,
+  );
+  _check(
+    'A1 base32 rule does NOT reopen F2: a 32-hex md5 stays exempt',
+    gateNoSecrets(
+      _added('const cacheKey = "5d41402abc4b2a76b9719d911017c592";'),
+    ).isEmpty,
+  );
+
   // --- F2: SRI / integrity digests are NOT secrets --------------------------
   _check(
     'F2 gate52 does NOT flag an sha384- SRI digest',
@@ -542,7 +642,9 @@ ANTIPATTERN-EXAMPLE: ignored
   _check(
     'F2 gate52 does NOT flag a value in an integrity: context',
     gateNoSecrets(
-      _added("const x = {'integrity': '47DEQpj8HBSaTImW5JCeuQeRkm5NMpJWZG3hSuFU'};"),
+      _added(
+        "const x = {'integrity': '47DEQpj8HBSaTImW5JCeuQeRkm5NMpJWZG3hSuFU'};",
+      ),
     ).isEmpty,
   );
   _check(
@@ -553,16 +655,34 @@ ANTIPATTERN-EXAMPLE: ignored
   );
 
   // --- C3: --tree extension gap — scan kt/swift/html/css/toml/etc ----------
-  _check('C3 isSecretScannablePath covers .kt', isSecretScannablePath('android/app/src/Main.kt'));
-  _check('C3 isSecretScannablePath covers .swift', isSecretScannablePath('ios/Runner/AppDelegate.swift'));
-  _check('C3 isSecretScannablePath covers .html', isSecretScannablePath('web/index.html'));
-  _check('C3 isSecretScannablePath covers .css', isSecretScannablePath('web/style.css'));
-  _check('C3 isSecretScannablePath covers .toml', isSecretScannablePath('rust/Cargo.toml'));
+  _check(
+    'C3 isSecretScannablePath covers .kt',
+    isSecretScannablePath('android/app/src/Main.kt'),
+  );
+  _check(
+    'C3 isSecretScannablePath covers .swift',
+    isSecretScannablePath('ios/Runner/AppDelegate.swift'),
+  );
+  _check(
+    'C3 isSecretScannablePath covers .html',
+    isSecretScannablePath('web/index.html'),
+  );
+  _check(
+    'C3 isSecretScannablePath covers .css',
+    isSecretScannablePath('web/style.css'),
+  );
+  _check(
+    'C3 isSecretScannablePath covers .toml',
+    isSecretScannablePath('rust/Cargo.toml'),
+  );
   _check('C3 tree-mode catches a secret in a .kt file', () {
-    final f = runTreeGates(files: {
-      'android/app/src/Main.kt':
-          'val key = "deadbeefcafebabedeadbeefcafebabe12345678"',
-    });
+    final f = runTreeGates(
+      files: {
+        // Named as a credential AND an AKIA fingerprint so it is unambiguously a
+        // secret (not a git-sha-shaped digest exempted by N1/F2).
+        'android/app/src/Main.kt': 'val apiSecret = "AKIAIOSFODNN7EXAMPLE1"',
+      },
+    );
     return f.any((x) => x.gateId == '52');
   }());
 
@@ -629,11 +749,35 @@ ANTIPATTERN-EXAMPLE: ignored
       _added('style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),'),
     ).isEmpty,
   );
+  // F3 (v5) — HONEST rewrite. The v4 test was LAUNDERED: it claimed to test
+  // `0xFF111111` ink but asserted `0xFF1A1200` (a DIFFERENT colour) to dodge the
+  // bug that `_legacyDarkSurface` fired UNCONDITIONALLY on the real `0xFF111111`.
+  // These two tests assert the EXACT `0xFF111111` the name claims:
+  //   (1) `0xFF111111` as TextStyle INK is NOT a surface → NOT flagged;
+  //   (2) `0xFF111111` as a SURFACE (backgroundColor) IS flagged.
   _check(
-    'F3 gate46 does NOT flag 0xFF111111 in a TextStyle ink context',
+    'F3 gate46 does NOT flag the REAL 0xFF111111 as TextStyle ink (was FP)',
     gateNoDarkSurface(
-      _added('style: const TextStyle(color: Color(0xFF1A1200)),'),
+      _added('style: const TextStyle(color: Color(0xFF111111)),'),
     ).isEmpty,
+  );
+  _check(
+    'F3 gate46 STILL flags 0xFF111111 as a SURFACE (backgroundColor)',
+    gateNoDarkSurface(
+      _added('backgroundColor: const Color(0xFF111111),'),
+    ).isNotEmpty,
+  );
+  _check(
+    'F3 gate46 does NOT flag BsTokens.bgDark referenced as a foreground/ink arg',
+    gateNoDarkSurface(
+      _added('Icon(Icons.add, color: BsTokens.bgDark),'),
+    ).isEmpty,
+  );
+  _check(
+    'F3 gate46 STILL flags BsTokens.bgDark as a Container surface',
+    gateNoDarkSurface(
+      _added('Container(color: BsTokens.bgDark, child: x),'),
+    ).isNotEmpty,
   );
   _check(
     'F4 gate46 does NOT flag 0xFF0D47A1 saturated dark BLUE surface',
@@ -654,6 +798,115 @@ ANTIPATTERN-EXAMPLE: ignored
     ).isNotEmpty,
   );
 
+  // --- E4: multi-line dark SURFACE (dart-format wrap at >80 cols) ------------
+  // `backgroundColor:` on one line, `Color(0xFF0A0A0A)` wrapped to the next, used
+  // to evade the same-line predicate. The SURFACE gate now joins continuation
+  // lines within the enclosing paren span and catches it. The same-line INK
+  // exclusion is PRESERVED: a wrapped `TextStyle(color: Color(0xFF0A0A0A))` ink
+  // is NOT a surface context and is NOT flagged.
+  _check(
+    'E4 gate46 catches a SURFACE color wrapped to the next line (Scaffold)',
+    gateNoDarkSurface(
+      '+++ b/x\n'
+      '+      return Scaffold(\n'
+      '+        backgroundColor:\n'
+      '+            const Color(0xFF0A0A0A),\n'
+      '+      );',
+    ).isNotEmpty,
+  );
+  _check(
+    'E4 gate46 catches a scaffoldBackgroundColor wrapped to the next line',
+    gateNoDarkSurface(
+      '+++ b/x\n'
+      '+    return MaterialApp(\n'
+      '+      theme: ThemeData(\n'
+      '+        scaffoldBackgroundColor:\n'
+      '+            const Color(0xFF0A0A0A),\n'
+      '+      ),\n'
+      '+    );',
+    ).isNotEmpty,
+  );
+  _check(
+    'E4 gate46 catches a cardColor value wrapped across the Color() paren',
+    gateNoDarkSurface(
+      '+++ b/x\n'
+      '+        cardColor: const Color(\n'
+      '+          0xFF101010,\n'
+      '+        ),',
+    ).isNotEmpty,
+  );
+  _check(
+    'E4 gate46 does NOT flag dark INK wrapped to the next line (ink exclusion kept)',
+    gateNoDarkSurface(
+      '+++ b/x\n'
+      '+      style: const TextStyle(\n'
+      '+        color: Color(0xFF111111),\n'
+      '+        fontSize: 14,\n'
+      '+      ),',
+    ).isEmpty,
+  );
+  _check(
+    'E4 gate54 catches a ColoredBox whose dark Color wrapped to the next line',
+    gateNoDarkColoredBox(
+      '+++ b/x\n'
+      '+      return ColoredBox(\n'
+      '+        color: Color(0xFF101012),\n'
+      '+        child: child,\n'
+      '+      );',
+    ).isNotEmpty,
+  );
+  _check(
+    'E4 _parenDelta ignores parens inside string literals',
+    _parenDelta('Text("(unbalanced") + foo(') == 1,
+  );
+  // F3+E4 defensive: a SURFACE constructor whose CHILD carries dark TEXT ink
+  // (wrapped) must NOT false-fire — the constructor-span join strips nested ink.
+  _check(
+    'F3+E4 gate46 does NOT flag a Container whose CHILD has wrapped dark ink',
+    gateNoDarkSurface(
+      '+++ b/x\n'
+      '+    Container(\n'
+      '+      child: Text(\n'
+      '+        "hi",\n'
+      '+        style: TextStyle(color: Color(0xFF111111)),\n'
+      '+      ),\n'
+      '+    );',
+    ).isEmpty,
+  );
+  _check(
+    'F3+E4 gate46 does NOT flag a single-line Container with nested dark TextStyle ink',
+    gateNoDarkSurface(
+      _added(
+        'Container(child: Text("x", style: TextStyle(color: Color(0xFF111111))))',
+      ),
+    ).isEmpty,
+  );
+  _check(
+    'F3+E4 gate46 STILL flags a Container whose own color: is dark (ink child present)',
+    gateNoDarkSurface(
+      _added(
+        'Container(color: const Color(0xFF0A0A0A), child: Text("x", style: TextStyle(color: Colors.white)))',
+      ),
+    ).isNotEmpty,
+  );
+  // F4 hardening: a TRANSLUCENT shadow/scrim black is NOT a dark surface — its
+  // alpha byte (< 0x80) marks it as a shadow, so a `BoxShadow(color: 0x14000000)`
+  // inside a surface decoration must NOT false-fire the surface gate.
+  _check(
+    'F4 gate46 does NOT flag a translucent BoxShadow black (alpha 0x14) as a surface',
+    gateNoDarkSurface(
+      _added(
+        'decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Color(0x14000000))]),',
+      ),
+    ).isEmpty,
+  );
+  _check(
+    'F4 gate46 STILL flags an OPAQUE dark surface (alpha 0xFF) backgroundColor',
+    gateNoDarkSurface(
+      _added('backgroundColor: const Color(0xFF0A0A0A),'),
+    ).isNotEmpty,
+  );
+
   // --- F1: per-file scoping — no cross-file contamination -------------------
   _check(
     'F1 gate46 does NOT fire on a theme/ file co-committed with a screen (was bypass-FP)',
@@ -663,7 +916,10 @@ ANTIPATTERN-EXAMPLE: ignored
           'app_flutter/lib/theme/app_theme.dart',
           'scaffoldBackgroundColor: isDark ? BsTokens.bgDark : const Color(0xFFF5F6FA),',
         ),
-        ('app_flutter/lib/screens/home.dart', "return Scaffold(body: Text('hi'));"),
+        (
+          'app_flutter/lib/screens/home.dart',
+          "return Scaffold(body: Text('hi'));",
+        ),
       ]),
       names: [
         'app_flutter/lib/theme/app_theme.dart',
@@ -679,7 +935,10 @@ ANTIPATTERN-EXAMPLE: ignored
           'app_flutter/lib/data/lipskey_catalog.dart',
           'for (final p in kLipskeyCatalog) { use(p); }',
         ),
-        ('app_flutter/lib/screens/home.dart', "return Scaffold(body: Text('hi'));"),
+        (
+          'app_flutter/lib/screens/home.dart',
+          "return Scaffold(body: Text('hi'));",
+        ),
       ]),
       names: [
         'app_flutter/lib/data/lipskey_catalog.dart',
@@ -704,52 +963,70 @@ ANTIPATTERN-EXAMPLE: ignored
     ).where((f) => f.gateId == '114').isNotEmpty,
   );
   _check('F1 splitDiffByFile keys lines to the right file', () {
-    final m = splitDiffByFile(_addedFiles([
-      ('app_flutter/lib/a.dart', 'AAA'),
-      ('app_flutter/lib/b.dart', 'BBB'),
-    ]));
+    final m = splitDiffByFile(
+      _addedFiles([
+        ('app_flutter/lib/a.dart', 'AAA'),
+        ('app_flutter/lib/b.dart', 'BBB'),
+      ]),
+    );
     final a = m['app_flutter/lib/a.dart'] ?? '';
     final b = m['app_flutter/lib/b.dart'] ?? '';
-    return a.contains('AAA') && !a.contains('BBB') &&
-        b.contains('BBB') && !b.contains('AAA');
+    return a.contains('AAA') &&
+        !a.contains('BBB') &&
+        b.contains('BBB') &&
+        !b.contains('AAA');
   }());
 
   // --- C2: context-line smuggling — gates 46/54/48/114 in --tree mode -------
   _check('C2 tree-mode runs gate48 (print) on a lib post-image', () {
-    final f = runTreeGates(files: {
-      'app_flutter/lib/screens/home.dart': 'void f() { print("ctx-smuggled"); }',
-    });
+    final f = runTreeGates(
+      files: {
+        'app_flutter/lib/screens/home.dart':
+            'void f() { print("ctx-smuggled"); }',
+      },
+    );
     return f.any((x) => x.gateId == '48');
   }());
   _check('C2 tree-mode runs gate46 (dark surface) on a screens post-image', () {
-    final f = runTreeGates(files: {
-      'app_flutter/lib/screens/home.dart':
-          'Widget b() => Container(color: const Color(0xFF111111));',
-    });
+    final f = runTreeGates(
+      files: {
+        'app_flutter/lib/screens/home.dart':
+            'Widget b() => Container(color: const Color(0xFF111111));',
+      },
+    );
     return f.any((x) => x.gateId == '46');
   }());
   _check('C2 tree-mode gate54 catches a dark ColoredBox post-image', () {
-    final f = runTreeGates(files: {
-      'app_flutter/lib/screens/home.dart':
-          'Widget b() => ColoredBox(color: Color(0xFF101012));',
-    });
+    final f = runTreeGates(
+      files: {
+        'app_flutter/lib/screens/home.dart':
+            'Widget b() => ColoredBox(color: Color(0xFF101012));',
+      },
+    );
     return f.any((x) => x.gateId == '54');
   }());
   _check('C2 tree-mode emits gate114 as a WARN (advisory, not blocking)', () {
-    final f = runTreeGates(files: {
-      'app_flutter/lib/screens/home.dart': 'final p = kLipskeyCatalog.first;',
-    });
+    final f = runTreeGates(
+      files: {
+        'app_flutter/lib/screens/home.dart': 'final p = kLipskeyCatalog.first;',
+      },
+    );
     final g114 = f.where((x) => x.gateId == '114');
     return g114.isNotEmpty && g114.every((x) => x.sev == Sev.warn);
   }());
-  _check('C2 tree-mode dark-surface does NOT fire on a screen full of TEXT ink', () {
-    final f = runTreeGates(files: {
-      'app_flutter/lib/screens/home.dart':
-          'Text("a", style: TextStyle(color: Color(0xFF1A1A1A)));\n'
-          'Text("b", style: TextStyle(color: Color(0xFF222222)));',
-    });
-    return f.where((x) => x.gateId == '46' || x.gateId == '54').isEmpty;
-  }());
+  _check(
+    'C2 tree-mode dark-surface does NOT fire on a screen full of TEXT ink',
+    () {
+      final f = runTreeGates(
+        files: {
+          'app_flutter/lib/screens/home.dart':
+              'Text("a", style: TextStyle(color: Color(0xFF1A1A1A)));\n'
+              'Text("b", style: TextStyle(color: Color(0xFF222222)));',
+        },
+      );
+      return f.where((x) => x.gateId == '46' || x.gateId == '54').isEmpty;
+    }(),
+  );
 
   // --- K3 mirror: registry parity catches a check-deleted-but-registered id -
   _check('K3 registryDiff flags an enforced id that did not run', () {
@@ -761,7 +1038,7 @@ ANTIPATTERN-EXAMPLE: ignored
 
   stdout.writeln(
     _selfTestFailures == 0
-        ? 'ALL PASS (v4 self-test)'
+        ? 'ALL PASS (v5 self-test)'
         : '$_selfTestFailures FAILURE(S)',
   );
   return _selfTestFailures == 0 ? 0 : 2;

@@ -29,6 +29,10 @@ PINNED=(
     ".githooks/commit-msg"
     ".github/workflows/protocol-enforce.yml"
     ".github/workflows/deploy.yml"
+    # v5 — pin the bash/CI regression suite so a silent edit that neuters an
+    # S1-S4 assertion is integrity-detected (it is the runner/workflow half's
+    # honest test; the engine half is covered by the Dart --self-test pin above).
+    "protocol/regression_v5.sh"
 )
 
 OUT="$REPO_ROOT/protocol/pins.sha256"

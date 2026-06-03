@@ -363,7 +363,8 @@ class ParsedColor {
   /// True for a DARK, NEAR-GREYSCALE colour — i.e. a dark *surface* candidate.
   /// (HSL with spread==-1 falls back to luma-only since we only have lightness.)
   bool get isDarkGrey =>
-      luma < _darkLumaThreshold && (spread < 0 || spread <= _greyscaleSpreadMax);
+      luma < _darkLumaThreshold &&
+      (spread < 0 || spread <= _greyscaleSpreadMax);
 }
 
 int _spread(int r, int g, int b) {
@@ -384,6 +385,15 @@ List<ParsedColor> parseColors(String line) {
     final r = (v >> 16) & 0xFF;
     final g = (v >> 8) & 0xFF;
     final b = v & 0xFF;
+    // F4/E4 hardening: an 8-digit value carries an ALPHA byte. A TRANSLUCENT
+    // colour (alpha < 0x80) is a shadow / scrim / overlay — NOT a solid dark
+    // SURFACE. `Color(0x14000000)` (a 8%-opacity black shadow) must NOT be read
+    // as a dark surface. We skip it as a surface candidate; a solid dark surface
+    // uses full/near-full alpha (`0xFF…`). 6-digit values are opaque (no alpha).
+    if (hex.length == 8) {
+      final a = (v >> 24) & 0xFF;
+      if (a < 0x80) continue; // translucent — shadow/scrim, not a surface
+    }
     out.add(ParsedColor(_luma(r, g, b), _spread(r, g, b)));
   }
 
@@ -500,16 +510,91 @@ final RegExp _secretAllow = RegExp(
 /// false-flag `integrity: "sha384-…"`, a pinned digest, or a git/blob sha.
 /// Matched against the literal VALUE and its immediate context.
 final RegExp _integrityContext = RegExp(
-  r'''\bsha(?:1|224|256|384|512)-|'''       // SRI: sha256-/sha384-/sha512-
-  r'''\bintegrity['"]?\s*[:=]|'''           // integrity: / 'integrity':
+  r'''\bsha(?:1|224|256|384|512)-|''' // SRI: sha256-/sha384-/sha512-
+  r'''\bintegrity['"]?\s*[:=]|''' // integrity: / 'integrity':
   r'''\b(?:sha256sum|sha1sum|checksum|digest|fingerprint|etag)\b|'''
-  r'''\bsha(?:1|256|512)['"]?\s*[:=]''',    // sha256: <hex>
+  r'''\bsha(?:1|256|512)['"]?\s*[:=]''', // sha256: <hex>
   caseSensitive: false,
 );
 
 /// True when the VALUE itself is an SRI digest token (sha256-BASE64==).
 bool _isSriDigest(String v) =>
     RegExp(r'^sha(?:256|384|512)-[A-Za-z0-9+/]+={0,2}$').hasMatch(v);
+
+/// N1 + F2 — a value that is a PUBLIC content/object DIGEST by SHAPE, not a
+/// credential. We exempt these from the bare-hex secret path so the engine does
+/// NOT red its own clean tree (N1: the all-zero 40-hex SHA in the K1 fail-closed
+/// code) and does not false-fire on git SHAs / md5 / sha256 digests (F2:
+/// buildSha/cacheKey/assetHash). The discriminator is deliberate and honest:
+///   * a SINGLE-REPEATED-CHARACTER run (all-zero `0000…`, all-`f`, …) carries
+///     ZERO entropy — it is never a real credential (N1 path-a);
+///   * a PURE-HEX token at a canonical git-object / hash DIGEST LENGTH
+///     (md5=32, sha1=40, sha256=64) in LOWERCASE (or all-UPPER, the two ways a
+///     digest is written) is a public hash, not a secret — UNLESS the LINE also
+///     carries a credential/provider signal (then it IS flagged; see caller).
+/// A pure-hex token of a NON-digest length (e.g. 48, 50, 33) is NOT exempted
+/// here — only the canonical digest lengths are git/hash shapes.
+bool _isRepeatedSingleChar(String v) =>
+    v.isNotEmpty && RegExp(r'^(.)\1*$').hasMatch(v);
+
+/// A pure-hex (only 0-9a-f / 0-9A-F, one case) token at a canonical digest
+/// length (32/40/64). These are md5 / sha1 / sha256 / git-object shapes.
+bool _isHexDigestShape(String v) {
+  if (v.length != 32 && v.length != 40 && v.length != 64) return false;
+  // Pure hex in a SINGLE case (a real digest is not MiXeD-case; a mixed-case
+  // 40-char token is far more likely a credential than a git sha).
+  return RegExp(r'^[0-9a-f]+$').hasMatch(v) ||
+      RegExp(r'^[0-9A-F]+$').hasMatch(v);
+}
+
+/// A1 — a base32 token (RFC 4648 alphabet A-Z2-7, optional `=` padding), the
+/// shape TOTP/2FA seeds and many recovery secrets use. Its entropy band
+/// (~3.4–4.2 over 16–32 chars) sits BELOW the generic 4.2 base64 floor, so it
+/// evaded the entropy heuristic. It is DISTINGUISHABLE from a pure-hex git SHA:
+/// base32 contains uppercase letters G–Z and/or the digit 7 (and never lowercase
+/// hex), which a `[0-9a-f]` digest cannot. We require ≥16 chars, the base32
+/// charset, at least one char OUTSIDE the hex range (so a 32-hex md5 is NOT
+/// mis-read as base32), and a real-token entropy floor (≥3.2) so an all-`A`
+/// padding run does not trip.
+bool _looksBase32Secret(String v) {
+  if (v.length < 16) return false;
+  if (!RegExp(r'^[A-Z2-7]+=*$').hasMatch(v)) return false;
+  // Must use the base32-only part of the alphabet (G-Z, or 0/1/8/9 absence is
+  // implied) — i.e. at least one symbol a hex digest could never contain.
+  if (!RegExp(r'[G-Z]').hasMatch(v)) return false;
+  if (_isRepeatedSingleChar(v)) return false;
+  return shannonEntropy(v) >= 3.2;
+}
+
+/// A LINE-level credential/provider signal: a variable/field NAME or a provider
+/// keyword that means "this value is a SECRET" even when its VALUE is bare hex.
+/// Used so a hex run WITH this signal is STILL flagged (we lose no protection),
+/// while a hex digest WITHOUT it (a git sha, an asset hash, the zero-SHA) is
+/// exempt. Deliberately EXCLUDES digest-ish names (sha/hash/digest/etag/checksum
+/// /buildSha/cacheKey/assetHash) which mean "public digest", not "secret".
+///
+/// NOTE: NO word-boundary anchors — camelCase names concatenate words without a
+/// boundary (`apiSecret`, `clientSecretValue`, `accessKey`), so anchoring would
+/// miss them. These keywords are distinctive enough that an unanchored match is
+/// the correct (safe-side) behaviour: a hex value on a line mentioning "secret"
+/// SHOULD be flagged.
+final RegExp _credentialNameCtx = RegExp(
+  r'secret|password|passwd|api[_-]?key|apikey|access[_-]?key|'
+  r'client[_-]?secret|private[_-]?key|auth[_-]?token|bearer|credential|'
+  r'session[_-]?key|encryption[_-]?key|signing[_-]?key|'
+  r'passphrase|[_-]token|token[_-]|authtoken',
+  caseSensitive: false,
+);
+
+/// A digest-ish NAME on the line (buildSha / cacheKey / assetHash / etag /
+/// checksum / fingerprint / *Hash / *Sha / *Digest). When present, a bare-hex
+/// value is a PUBLIC digest (F2) and must not be flagged — this is the explicit
+/// counterpart to _credentialNameCtx.
+final RegExp _digestNameCtx = RegExp(
+  r'\b([A-Za-z_]*(sha|hash|digest|checksum|etag|fingerprint|crc|md5|blob|'
+  r'commit|revision|oid))\b|\b(buildSha|cacheKey|assetHash)\b',
+  caseSensitive: false,
+);
 
 /// A value that is obviously NOT a credential even at high length: a file path,
 /// an asset reference, a dotted lowercase identifier (e.g. 'bs.cart.v1' or
@@ -545,26 +630,52 @@ bool _looksHighEntropySecret(String line) {
   // public digest, not a credential — do not entropy-flag it.
   final integrityCtx = _integrityContext.hasMatch(line);
   // assignment of a quoted value: name [:=] "VALUE". Allow base64 padding (=).
-  final assign = RegExp(r'''[:=]\s*['"]([A-Za-z0-9+/_.=\-]{20,})['"]''');
+  // A1: floor lowered 20→16 so a 16-char base32 TOTP/2FA seed is captured. The
+  // PER-SHAPE length floors below remain stricter (hex/base64 ≥32, general ≥24,
+  // base32 ≥16), so lowering the extractor admits ONLY base32 in the 16-19 band.
+  final assign = RegExp(r'''[:=]\s*['"]([A-Za-z0-9+/_.=\-]{16,})['"]''');
+  // F2/N1: a digest-ish NAME on the line (buildSha/cacheKey/assetHash/etag/…)
+  // means a bare-hex value is a PUBLIC digest, not a credential.
+  final digestCtx = _digestNameCtx.hasMatch(line);
+  // A credential/provider NAME on the line (secret/apiKey/password/…) means a
+  // bare-hex value IS a credential even at digest length — we lose no protection.
+  final credCtx =
+      _credentialNameCtx.hasMatch(line) ||
+      _secretFingerprints.any((fp) => fp.hasMatch(line));
   for (final m in assign.allMatches(line)) {
     final v = m.group(1)!;
     if (_looksLikePathOrId(v)) continue;
     if (_isSriDigest(v)) continue; // F2: sha256-<base64>
     if (integrityCtx) continue; // F2: integrity:/checksum/digest context
-    // (a) long contiguous hex run — catches lowercase-hex / UPPER-hex / all-digit
-    // (a 32+ all-digit value IS a hex run) / no-digit-hex. A real git blob sha or
-    // SRI digest is excluded above by context; a bare 32+ hex literal assigned to
-    // a variable in production code is a credential by our policy.
+    // N1 path-a guard: a single-repeated-character run (all-zero `0000…0`,
+    // all-`f`, …) is ZERO-entropy — never a credential. This is the SHA the K1
+    // fail-closed code embeds; exempting it stops the engine reding its own tree.
+    if (_isRepeatedSingleChar(v)) continue;
+    // (A1) base32 (TOTP/2FA seed) — distinguishable from a hex digest by its
+    // G–Z letters; entropy floor lowered for the 32-char base32 band. Checked
+    // BEFORE the digest exemption so a base32 token is never read as a digest.
+    if (_looksBase32Secret(v)) return true;
+    // (a) long contiguous hex run — catches lowercase-hex / UPPER-hex / all-digit.
     final hexRun = RegExp(r'[0-9a-fA-F]{32,}').firstMatch(v);
     if (hexRun != null) {
-      // A pure hex value of >=32 chars is suspicious regardless of case.
       final hx = hexRun.group(0)!;
-      // Avoid flagging a long DECIMAL id (e.g. a 32-digit catalog code) ONLY if
-      // it is all-digits AND short-ish; >=32 hex digits is still flagged (that is
-      // far longer than any SKU/timestamp in this codebase).
-      if (hx.length >= 32) return true;
+      if (hx.length >= 32) {
+        // F2/N1: a PURE-HEX value at a canonical DIGEST LENGTH (md5=32/sha1=40/
+        // sha256=64), single-case, is a git-object / content hash — a PUBLIC
+        // digest, not a credential. Exempt it UNLESS the line names it as a
+        // credential (credCtx) AND does not name it as a digest (digestCtx).
+        final isDigestShape = _isHexDigestShape(v);
+        if (isDigestShape && (digestCtx || !credCtx)) {
+          continue; // public digest (git sha / md5 / sha256 / asset hash)
+        }
+        // A hex run that is NOT a canonical digest shape (odd length / mixed
+        // case), or one explicitly named as a secret, is a credential.
+        return true;
+      }
     }
-    // (b) base64 blob — high entropy, base64 charset, length >=32.
+    // (b) base64 blob — high entropy, base64 charset, length >=32. A base64 blob
+    // mixes the full A-Za-z0-9+/ alphabet (entropy-mixed signal), so it is
+    // distinct from a pure-hex digest and remains a secret.
     if (RegExp(r'^[A-Za-z0-9+/]{32,}={0,2}$').hasMatch(v) &&
         shannonEntropy(v) >= 4.2) {
       return true;
@@ -573,7 +684,8 @@ bool _looksHighEntropySecret(String line) {
     // entropy floor than (b) so an ordinary long identifier/word does not trip.
     // Natural words and snake_case ids sit well below ~4.0 bits/char; random
     // tokens sit above. We also require it not be a single repeated alphabet.
-    final distinctClasses = (RegExp(r'[A-Z]').hasMatch(v) ? 1 : 0) +
+    final distinctClasses =
+        (RegExp(r'[A-Z]').hasMatch(v) ? 1 : 0) +
         (RegExp(r'[a-z]').hasMatch(v) ? 1 : 0) +
         (RegExp(r'[0-9]').hasMatch(v) ? 1 : 0) +
         (RegExp(r'[+/=_\-.]').hasMatch(v) ? 1 : 0);
@@ -977,17 +1089,191 @@ List<Finding> gateNoLocalUri(String dartDiff) {
   return const [];
 }
 
-/// Gate 46: no dark surface in screens. Preserves the v2 contract — the known
-/// dark-surface tokens (`0xFF111111` / `BsTokens.bgDark`, case-insensitive) fire
-/// unconditionally — and ADDS semantic, surface-context-scoped luminance
-/// detection for OTHER dark backgrounds (lowercase/fromARGB/HSL), without
-/// false-flagging dark TEXT ink.
+/// Gate 46: no dark surface in screens. The known dark-surface tokens
+/// (`0xFF111111` / `BsTokens.bgDark`, case-insensitive) PLUS the semantic
+/// luminance detector both fire ONLY in a SURFACE context.
+///
+/// F3 (v5) — `_legacyDarkSurface` previously fired UNCONDITIONALLY (no surface
+/// guard), so `0xFF111111` used as TEXT INK (e.g. `TextStyle(color: …)`) and
+/// `BsTokens.bgDark` referenced off a surface false-fired the gate. The codebase
+/// legitimately uses `0xFF111111`/near-black as dark text ink. We now guard the
+/// legacy token behind `_surfaceCtx` EXACTLY like the semantic path:
+///   (legacyToken ∧ surfaceCtx) ∨ hasDarkSurface(line)
+/// `hasDarkSurface` already requires surfaceCtx, so the whole predicate is
+/// surface-scoped. A dark `0xFF111111` BACKGROUND/Container/Scaffold still fires;
+/// a dark `0xFF111111` TextStyle ink does not.
 final RegExp _legacyDarkSurface = RegExp(
   r'0[xX][fF]{2}111111|BsTokens\.bgDark',
 );
+
+/// True when this single line paints a dark surface — by the legacy token in a
+/// surface context, OR by the semantic luminance detector (itself surface-
+/// scoped). E4 (v5): the SURFACE gate also accepts a line that has ALREADY been
+/// joined with its continuation (see _surfaceGateLines), so a `backgroundColor:`
+/// whose `Color(0xFF0A0A0A)` wrapped to the next line is still caught.
+///
+/// F3 (v5): we STRIP nested ink spans (`TextStyle(...)`, `Icon(...)`) BEFORE the
+/// decision, so a SURFACE constructor that merely CONTAINS dark TEXT ink (e.g.
+/// `Container(child: Text(..., style: TextStyle(color: 0xFF111111)))`) does NOT
+/// false-fire. A surface whose OWN `color:`/`backgroundColor:` is dark still
+/// fires (its colour survives the strip). The strip is a no-op on a pure ink line
+/// (a `TextStyle(color: …)` with no surrounding surface), which stays non-surface.
+bool _isDarkSurfaceLine(String l) {
+  final s = _stripInkSpans(l);
+  return (_legacyDarkSurface.hasMatch(s) && _surfaceCtx.hasMatch(s)) ||
+      hasDarkSurface(s);
+}
+
+/// E4 — a SURFACE COLOR PROPERTY that expects a colour VALUE: the named
+/// background/fill properties, plus the surface constructors that take a `color:`
+/// directly (ColoredBox/DecoratedBox). When such a property appears but its
+/// colour value is NOT on the same line (dart-format wrapped it at >80 cols), we
+/// must join the continuation lines to see the value.
+///
+/// This is INTENTIONALLY NARROWER than `_surfaceCtx`: we do NOT seed on a bare
+/// `Scaffold(`/`Container(`/`Card(` (whose body may contain dark TEXT ink on a
+/// later line — joining those would reopen F3). We seed ONLY on a property that
+/// itself takes a surface colour, so the joined value is unambiguously a surface
+/// colour, never ink.
+final RegExp _surfaceColorPropSeed = RegExp(
+  r'\b(backgroundColor|scaffoldBackgroundColor|barBackgroundColor|canvasColor|'
+  r'cardColor|surfaceTintColor|fillColor)\b\s*:|'
+  r'\b(ColoredBox|DecoratedBox)\s*\(',
+  caseSensitive: false,
+);
+
+/// A line that OPENS a direct-colour surface constructor whose FIRST argument is
+/// the surface colour (`ColoredBox(` / `DecoratedBox(` … actually take a
+/// `decoration:`, but `ColoredBox` takes `color:` directly). Used so a bare
+/// `color:` wrapped onto the line AFTER such a constructor is recognised as a
+/// surface colour without seeding on every `Container(`/`Scaffold(` (whose body
+/// carries siblings — shadows/borders/children — that must NOT be pulled in).
+final RegExp _directColorSurfaceOpen = RegExp(
+  r'\b(ColoredBox)\s*\(\s*$',
+  caseSensitive: false,
+);
+
+/// Remove nested INK spans from a (joined) surface span so a dark text/icon ink
+/// inside a surface constructor is not mistaken for the surface colour. Removes
+/// the balanced `TextStyle( … )` / `Icon( … )` / `IconThemeData( … )` /
+/// `TextTheme( … )` paren spans — conservative, structural (depth-balanced).
+String _stripInkSpans(String s) {
+  var out = s;
+  for (final ctor in const [
+    'TextStyle',
+    'Icon',
+    'IconThemeData',
+    'TextTheme',
+  ]) {
+    out = _removeBalancedCalls(out, ctor);
+  }
+  return out;
+}
+
+/// Remove every `name( … )` balanced-paren call from a string (handles nesting).
+String _removeBalancedCalls(String s, String name) {
+  final start = RegExp('\\b${RegExp.escape(name)}\\s*\\(');
+  while (true) {
+    final m = start.firstMatch(s);
+    if (m == null) return s;
+    var depth = 0;
+    var end = -1;
+    for (var i = m.end - 1; i < s.length; i++) {
+      final c = s.codeUnitAt(i);
+      if (c == 0x28) depth++;
+      if (c == 0x29) {
+        depth--;
+        if (depth == 0) {
+          end = i;
+          break;
+        }
+      }
+    }
+    if (end < 0) {
+      // unbalanced — drop from the call start to end of string
+      return s.substring(0, m.start);
+    }
+    s = s.substring(0, m.start) + ' ' + s.substring(end + 1);
+  }
+}
+
+/// E4 — produce, IN ADDITION to every raw line, EXTRA joined lines so a surface
+/// colour VALUE that `dart format` wrapped to a later line is scanned alongside
+/// its surface property. The join is DELIBERATELY MINIMAL — it stops at the FIRST
+/// colour token (or `;`) and consumes at most a few lines — so it captures the
+/// wrapped value WITHOUT swallowing sibling shadows/borders/children (those
+/// produced the v5 whole-tree over-fire when a constructor's full span was
+/// joined). Two seeds:
+///   (1) a NAMED surface-colour property (`backgroundColor:` / `cardColor:` /
+///       `ColoredBox(` …) whose value is not on its own line;
+///   (2) a bare `color:` whose IMMEDIATELY-PRECEDING line opened a direct-colour
+///       surface constructor (`ColoredBox(` at end-of-line) — so a wrapped
+///       `ColoredBox(\n color: Color(0x..))` is caught, while a `Container(`'s
+///       inner siblings are NOT joined (Container takes a `decoration:`, not a
+///       bare surface `color:`, so its real surface colour is a NAMED property
+///       handled by seed (1)).
+/// Nested ink spans are stripped from the join (F3). The same-line INK exclusion
+/// is intact because an ink line (`TextStyle(color:)`) is neither seed.
+List<String> _surfaceGateLines(List<String> lines) {
+  final out = <String>[];
+  final colorTok = RegExp(r'0[xX][0-9a-fA-F]{6,8}|BsTokens\.bg|Color\.from');
+
+  String joinFromValue(int start) {
+    // Join `lines[start]` forward until the first colour token / `;` is consumed.
+    final buf = StringBuffer(lines[start]);
+    for (var k = 1; k <= 4 && start + k < lines.length; k++) {
+      final nxt = lines[start + k];
+      buf.write(' ');
+      buf.write(nxt);
+      if (colorTok.hasMatch(nxt) || nxt.contains(';')) break;
+    }
+    return _stripInkSpans(buf.toString()).replaceAll(RegExp(r'\(\s+'), '(');
+  }
+
+  for (var i = 0; i < lines.length; i++) {
+    final line = lines[i];
+    out.add(line); // always keep the raw line
+
+    // (1) named surface-property / ColoredBox/DecoratedBox seed whose value is
+    //     not already on this line.
+    if (_surfaceColorPropSeed.hasMatch(line) && !colorTok.hasMatch(line)) {
+      out.add(joinFromValue(i));
+    }
+
+    // (2) a bare `color:` whose previous line opened a direct-colour surface
+    //     constructor (ColoredBox()) — recognise the wrapped surface colour.
+    if (i > 0 &&
+        _directColorSurfaceOpen.hasMatch(lines[i - 1]) &&
+        RegExp(r'^\s*color\s*:').hasMatch(line) &&
+        !colorTok.hasMatch(line)) {
+      // Seed from the constructor line so the join carries the `ColoredBox(`
+      // surface context together with the wrapped value.
+      out.add(joinFromValue(i - 1));
+    }
+  }
+  return out;
+}
+
+/// Net parenthesis balance of a line (open minus close), ignoring parens inside
+/// string literals so a `"("` in a Hebrew label does not skew the depth.
+int _parenDelta(String line) {
+  final code = line.replaceAll(
+    RegExp(r'''"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*' '''),
+    '',
+  );
+  var d = 0;
+  for (final c in code.codeUnits) {
+    if (c == 0x28) d++; // (
+    if (c == 0x29) d--; // )
+  }
+  return d;
+}
+
 List<Finding> gateNoDarkSurface(String screensDiff) {
-  for (final l in addedLines(screensDiff)) {
-    if (_legacyDarkSurface.hasMatch(l) || hasDarkSurface(l)) {
+  // E4: evaluate each added line, AND each surface-continuation-joined line.
+  final added = addedLines(screensDiff);
+  for (final l in _surfaceGateLines(added)) {
+    if (_isDarkSurfaceLine(l)) {
       return [
         Finding(
           '46',
@@ -1048,7 +1334,9 @@ Finding? _printFinding(String l) {
   // by the no-dot prefix; to avoid flagging a bare dart:math `log(<number>)` we
   // only fire when the argument is MESSAGE-shaped (a string literal / interpolation
   // existed on the original line `l`), which a numeric math.log call is not.
-  final bareLog = RegExp(r'(^|[^A-Za-z0-9_.])log\s*\(').hasMatch(outsideStrings);
+  final bareLog = RegExp(
+    r'(^|[^A-Za-z0-9_.])log\s*\(',
+  ).hasMatch(outsideStrings);
   if (bareLog && RegExp(r'''log\s*\(\s*['"$]''').hasMatch(l)) {
     return Finding(
       '48',
@@ -1100,8 +1388,12 @@ List<Finding> gateNoSecrets(String diff) {
 }
 
 /// Gate 54: no ColoredBox constructed with a dark color (semantic luminance).
+/// E4 (v5): a `ColoredBox(` whose `Color(0x…)` wrapped to the next line is joined
+/// via _surfaceGateLines (ColoredBox is a surface context) before the same-line
+/// `ColoredBox ∧ hasDarkColor` predicate, so a dart-format-wrapped dark ColoredBox
+/// is caught. (No ink concern: a ColoredBox is itself a surface.)
 List<Finding> gateNoDarkColoredBox(String libDiff) {
-  for (final l in addedLines(libDiff)) {
+  for (final l in _surfaceGateLines(addedLines(libDiff))) {
     if (l.contains('ColoredBox') && hasDarkColor(l)) {
       return [Finding('54', Sev.err, 'dark ColoredBox: use light colors')];
     }
@@ -1670,7 +1962,9 @@ List<Finding> runAllContentGates({
 /// for NEWLY-added uses. Honest split: tree=advisory, diff=blocking.
 List<Finding> gateNoKLipskeyInUiTree(String uiDiff) =>
     gateNoKLipskeyInUi(uiDiff)
-        .map((f) => Finding('114', Sev.warn, '${f.message} (tree-mode advisory)'))
+        .map(
+          (f) => Finding('114', Sev.warn, '${f.message} (tree-mode advisory)'),
+        )
         .toList();
 
 /// R2 — run the VALUE-oriented content gates over the whole-file POST-IMAGE of

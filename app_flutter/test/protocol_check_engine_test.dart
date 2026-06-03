@@ -19,19 +19,37 @@ String addedIn(String path, String content) => '+++ b/$path\n+$content';
 
 /// Multiple files concatenated into one diff (F1 cross-file scoping tests).
 String addedFiles(List<List<String>> files) => files
-    .map((f) => '+++ b/${f[0]}\n${f[1].split('\n').map((l) => '+$l').join('\n')}')
+    .map(
+      (f) => '+++ b/${f[0]}\n${f[1].split('\n').map((l) => '+$l').join('\n')}',
+    )
     .join('\n');
 
 void main() {
   group('R4 colors — semantic luminance, surface-scoped', () {
-    test('legacy dark-surface token fires (upper & lower case)', () {
+    test(
+      'legacy dark-surface token fires in a SURFACE context (upper & lower)',
+      () {
+        // F3 (v5): the 0xFF111111 token fires ONLY in a surface context (a bare
+        // `color:` is ambiguous ink/surface — see the ink guard test below).
+        expect(
+          gateNoDarkSurface(added('backgroundColor: const Color(0xFF111111),')),
+          isNotEmpty,
+        );
+        expect(
+          gateNoDarkSurface(
+            added('Container(color: const Color(0xff111111)),'),
+          ),
+          isNotEmpty,
+        );
+      },
+    );
+    test('F3: the REAL 0xFF111111 as TextStyle ink is NOT a dark surface', () {
+      // Honest assertion of the EXACT 0xFF111111 the v4 mirror laundered.
       expect(
-        gateNoDarkSurface(added('color: const Color(0xFF111111),')),
-        isNotEmpty,
-      );
-      expect(
-        gateNoDarkSurface(added('color: const Color(0xff111111),')),
-        isNotEmpty,
+        gateNoDarkSurface(
+          added('style: const TextStyle(color: Color(0xFF111111)),'),
+        ),
+        isEmpty,
       );
     });
     test('fromARGB / fromRGBO / HSL dark BACKGROUND fires', () {
@@ -312,22 +330,74 @@ void main() {
   });
 
   // ── v4 residual closes (mirror of the engine --self-test v4 block) ──
-  group('v4 C1 — secret shape, not char-class mix', () {
-    test('lowercase/UPPER/all-digit hex + base64 blob all fire', () {
+  group('v5 C1/N1/F2 — secret shape; hex DIGESTS are NOT secrets', () {
+    test('hex secret fires WHEN named a credential; base64 blob fires', () {
+      // v5 reconciliation (N1/F2): a CONTEXTLESS 40-hex literal is git-SHA-shaped
+      // and is NOT a secret; it fires when NAMED as a credential.
       expect(
-        gateNoSecrets(added('const a = "deadbeefcafebabedeadbeefcafebabe12345678";')),
+        gateNoSecrets(
+          added(
+            'const apiSecret = "deadbeefcafebabedeadbeefcafebabe12345678";',
+          ),
+        ),
         isNotEmpty,
       );
       expect(
-        gateNoSecrets(added('const b = "DEADBEEFCAFEBABEDEADBEEFCAFEBABE12345678";')),
+        gateNoSecrets(
+          added(
+            'const clientSecret = "DEADBEEFCAFEBABEDEADBEEFCAFEBABE12345678";',
+          ),
+        ),
         isNotEmpty,
       );
       expect(
-        gateNoSecrets(added('const d = "0123456789012345678901234567890123456789";')),
+        gateNoSecrets(
+          added('const e = "aGVsbG93b3JsZHRoaXNpc2Fsb25nYmFzZTY0c3RyaW5n";'),
+        ),
+        isNotEmpty,
+      );
+    });
+    test('N1: the all-zero 40-hex SHA is NOT a secret (engine clean-tree)', () {
+      expect(
+        gateNoSecrets(
+          added(
+            r'''if [[ "$BEFORE" != "0000000000000000000000000000000000000000" ]]; then''',
+          ),
+        ),
+        isEmpty,
+      );
+    });
+    test('F2: git sha1 / md5 / sha256 digests are NOT secrets', () {
+      expect(
+        gateNoSecrets(
+          added('const buildSha = "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3";'),
+        ),
+        isEmpty,
+      );
+      expect(
+        gateNoSecrets(
+          added('const cacheKey = "5d41402abc4b2a76b9719d911017c592";'),
+        ),
+        isEmpty,
+      );
+      expect(
+        gateNoSecrets(
+          added(
+            'const assetHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";',
+          ),
+        ),
+        isEmpty,
+      );
+    });
+    test('A1: base32 TOTP/2FA secrets ARE caught', () {
+      expect(
+        gateNoSecrets(added('const totp = "JBSWY3DPEHPK3PXP";')),
         isNotEmpty,
       );
       expect(
-        gateNoSecrets(added('const e = "aGVsbG93b3JsZHRoaXNpc2Fsb25nYmFzZTY0c3RyaW5n";')),
+        gateNoSecrets(
+          added('const seed = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ";'),
+        ),
         isNotEmpty,
       );
     });
@@ -338,71 +408,93 @@ void main() {
   });
 
   group('v4 F2 — SRI / integrity digests are not secrets', () {
-    test('sha384- SRI and integrity: context allowlisted; fingerprint still wins', () {
-      expect(
-        gateNoSecrets(added(
-          'const s = "sha384-oqVuAfXRKap7fdgcCY5uykM6R9GqQ8KuxyHNQlGYl1kPzQho1wx4JwY8wC";',
-        )),
-        isEmpty,
-      );
-      expect(
-        gateNoSecrets(added(
-          "const x = {'integrity': '47DEQpj8HBSaTImW5JCeuQeRkm5NMpJWZG3hSuFU'};",
-        )),
-        isEmpty,
-      );
-      expect(
-        gateNoSecrets(added("const x = {'integrity': 'AKIAIOSFODNN7EXAMPLE1'};")),
-        isNotEmpty,
-      );
-    });
+    test(
+      'sha384- SRI and integrity: context allowlisted; fingerprint still wins',
+      () {
+        expect(
+          gateNoSecrets(
+            added(
+              'const s = "sha384-oqVuAfXRKap7fdgcCY5uykM6R9GqQ8KuxyHNQlGYl1kPzQho1wx4JwY8wC";',
+            ),
+          ),
+          isEmpty,
+        );
+        expect(
+          gateNoSecrets(
+            added(
+              "const x = {'integrity': '47DEQpj8HBSaTImW5JCeuQeRkm5NMpJWZG3hSuFU'};",
+            ),
+          ),
+          isEmpty,
+        );
+        expect(
+          gateNoSecrets(
+            added("const x = {'integrity': 'AKIAIOSFODNN7EXAMPLE1'};"),
+          ),
+          isNotEmpty,
+        );
+      },
+    );
   });
 
   group('v4 C3 — wider --tree extensions', () {
-    test('kt/swift/html/css/toml are secret-scannable; secret in .kt caught', () {
-      expect(isSecretScannablePath('android/app/Main.kt'), isTrue);
-      expect(isSecretScannablePath('ios/Runner/AppDelegate.swift'), isTrue);
-      expect(isSecretScannablePath('web/index.html'), isTrue);
-      expect(isSecretScannablePath('web/style.css'), isTrue);
-      expect(isSecretScannablePath('Cargo.toml'), isTrue);
-      expect(
-        runTreeGates(files: {
-          'android/Main.kt':
-              'val k = "deadbeefcafebabedeadbeefcafebabe12345678"',
-        }).any((f) => f.gateId == '52'),
-        isTrue,
-      );
-    });
+    test(
+      'kt/swift/html/css/toml are secret-scannable; secret in .kt caught',
+      () {
+        expect(isSecretScannablePath('android/app/Main.kt'), isTrue);
+        expect(isSecretScannablePath('ios/Runner/AppDelegate.swift'), isTrue);
+        expect(isSecretScannablePath('web/index.html'), isTrue);
+        expect(isSecretScannablePath('web/style.css'), isTrue);
+        expect(isSecretScannablePath('Cargo.toml'), isTrue);
+        expect(
+          runTreeGates(
+            files: {
+              'android/Main.kt': 'val apiSecret = "AKIAIOSFODNN7EXAMPLE1"',
+            },
+          ).any((f) => f.gateId == '52'),
+          isTrue,
+        );
+      },
+    );
   });
 
   group('v4 C4 — print sinks', () {
-    test('stdout.add / x=print / log("msg") fire; math.log / log(value) do not', () {
-      expect(gateNoPrint(added('  stdout.add(utf8.encode("x"));')), isNotEmpty);
-      expect(gateNoPrint(added('  final f = print;')), isNotEmpty);
-      expect(gateNoPrint(added('  log("user did the thing");')), isNotEmpty);
-      expect(gateNoPrint(added('  final y = math.log(2.0);')), isEmpty);
-      expect(gateNoPrint(added('  final z = log(value);')), isEmpty);
-      expect(gateNoPrint(added('  catalog.logSomething();')), isEmpty);
-    });
+    test(
+      'stdout.add / x=print / log("msg") fire; math.log / log(value) do not',
+      () {
+        expect(
+          gateNoPrint(added('  stdout.add(utf8.encode("x"));')),
+          isNotEmpty,
+        );
+        expect(gateNoPrint(added('  final f = print;')), isNotEmpty);
+        expect(gateNoPrint(added('  log("user did the thing");')), isNotEmpty);
+        expect(gateNoPrint(added('  final y = math.log(2.0);')), isEmpty);
+        expect(gateNoPrint(added('  final z = log(value);')), isEmpty);
+        expect(gateNoPrint(added('  catalog.logSomething();')), isEmpty);
+      },
+    );
   });
 
   group('v4 C5 — gate65 isolate must be a real context', () {
-    test('bare "isolate" substring no longer bypasses; Directionality/Bidi do', () {
-      expect(
-        gateNoTextDirectionLtr(added('final isolate = TextDirection.ltr;')),
-        isNotEmpty,
-      );
-      expect(
-        gateNoTextDirectionLtr(
-          added('Directionality(textDirection: TextDirection.ltr, child: x)'),
-        ),
-        isEmpty,
-      );
-      expect(
-        gateNoTextDirectionLtr(added('Bidi.isolate(TextDirection.ltr)')),
-        isEmpty,
-      );
-    });
+    test(
+      'bare "isolate" substring no longer bypasses; Directionality/Bidi do',
+      () {
+        expect(
+          gateNoTextDirectionLtr(added('final isolate = TextDirection.ltr;')),
+          isNotEmpty,
+        );
+        expect(
+          gateNoTextDirectionLtr(
+            added('Directionality(textDirection: TextDirection.ltr, child: x)'),
+          ),
+          isEmpty,
+        );
+        expect(
+          gateNoTextDirectionLtr(added('Bidi.isolate(TextDirection.ltr)')),
+          isEmpty,
+        );
+      },
+    );
   });
 
   group('v4 C6/F3/F4 — colour luminance', () {
@@ -412,7 +504,9 @@ void main() {
         isNotEmpty,
       );
       expect(
-        gateNoDarkSurface(added('scaffoldBackgroundColor: const Color(0xFF333333),')),
+        gateNoDarkSurface(
+          added('scaffoldBackgroundColor: const Color(0xFF333333),'),
+        ),
         isNotEmpty,
       );
       expect(
@@ -434,6 +528,51 @@ void main() {
     });
   });
 
+  group('v5 E4 — multi-line dark SURFACE (dart-format wrap)', () {
+    test('wrapped backgroundColor fires; wrapped INK does not', () {
+      expect(
+        gateNoDarkSurface(
+          '+++ b/x\n'
+          '+      return Scaffold(\n'
+          '+        backgroundColor:\n'
+          '+            const Color(0xFF0A0A0A),\n'
+          '+      );',
+        ),
+        isNotEmpty,
+      );
+      // Ink wrapped to the next line is NOT a surface (F3 preserved).
+      expect(
+        gateNoDarkSurface(
+          '+++ b/x\n'
+          '+      style: const TextStyle(\n'
+          '+        color: Color(0xFF111111),\n'
+          '+      ),',
+        ),
+        isEmpty,
+      );
+    });
+    test('wrapped ColoredBox fires; translucent shadow does not (alpha)', () {
+      expect(
+        gateNoDarkColoredBox(
+          '+++ b/x\n'
+          '+      return ColoredBox(\n'
+          '+        color: Color(0xFF101012),\n'
+          '+      );',
+        ),
+        isNotEmpty,
+      );
+      // F4 alpha hardening: a translucent shadow black is not a dark surface.
+      expect(
+        gateNoDarkSurface(
+          added(
+            'decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Color(0x14000000))]),',
+          ),
+        ),
+        isEmpty,
+      );
+    });
+  });
+
   group('v4 F1 — per-file scoping (no cross-file contamination)', () {
     test('46 not on theme co-committed with screen; 114 not on data/', () {
       expect(
@@ -443,7 +582,10 @@ void main() {
               'app_flutter/lib/theme/app_theme.dart',
               'scaffoldBackgroundColor: isDark ? BsTokens.bgDark : const Color(0xFFF5F6FA),',
             ],
-            ['app_flutter/lib/screens/home.dart', "return Scaffold(body: Text('hi'));"],
+            [
+              'app_flutter/lib/screens/home.dart',
+              "return Scaffold(body: Text('hi'));",
+            ],
           ]),
           names: const [
             'app_flutter/lib/theme/app_theme.dart',
@@ -455,8 +597,14 @@ void main() {
       expect(
         runAllContentGates(
           diff: addedFiles([
-            ['app_flutter/lib/data/lipskey_catalog.dart', 'for (final p in kLipskeyCatalog) {}'],
-            ['app_flutter/lib/screens/home.dart', "return Scaffold(body: Text('hi'));"],
+            [
+              'app_flutter/lib/data/lipskey_catalog.dart',
+              'for (final p in kLipskeyCatalog) {}',
+            ],
+            [
+              'app_flutter/lib/screens/home.dart',
+              "return Scaffold(body: Text('hi'));",
+            ],
           ]),
           names: const [
             'app_flutter/lib/data/lipskey_catalog.dart',
@@ -471,7 +619,10 @@ void main() {
         runAllContentGates(
           diff: addedFiles([
             ['app_flutter/lib/data/lipskey_catalog.dart', 'const x = 1;'],
-            ['app_flutter/lib/screens/home.dart', 'final p = kLipskeyCatalog.first;'],
+            [
+              'app_flutter/lib/screens/home.dart',
+              'final p = kLipskeyCatalog.first;',
+            ],
           ]),
           names: const [
             'app_flutter/lib/data/lipskey_catalog.dart',
@@ -486,30 +637,39 @@ void main() {
   group('v4 C2 — context-line smuggling: 46/54/48/114 in tree mode', () {
     test('48 print + 46 dark surface + 54 ColoredBox fire; 114 is WARN', () {
       expect(
-        runTreeGates(files: {
-          'app_flutter/lib/screens/home.dart': 'void f(){ print("x"); }',
-        }).any((f) => f.gateId == '48'),
+        runTreeGates(
+          files: {
+            'app_flutter/lib/screens/home.dart': 'void f(){ print("x"); }',
+          },
+        ).any((f) => f.gateId == '48'),
         isTrue,
       );
       expect(
-        runTreeGates(files: {
-          'app_flutter/lib/screens/home.dart':
-              'Widget b()=>Container(color: const Color(0xFF111111));',
-        }).any((f) => f.gateId == '46'),
+        runTreeGates(
+          files: {
+            'app_flutter/lib/screens/home.dart':
+                'Widget b()=>Container(color: const Color(0xFF111111));',
+          },
+        ).any((f) => f.gateId == '46'),
         isTrue,
       );
-      final g114 = runTreeGates(files: {
-        'app_flutter/lib/screens/home.dart': 'final p = kLipskeyCatalog.first;',
-      }).where((f) => f.gateId == '114');
+      final g114 = runTreeGates(
+        files: {
+          'app_flutter/lib/screens/home.dart':
+              'final p = kLipskeyCatalog.first;',
+        },
+      ).where((f) => f.gateId == '114');
       expect(g114, isNotEmpty);
       expect(g114.every((f) => f.sev == Sev.warn), isTrue);
     });
     test('tree-mode dark-surface does NOT fire on a screen of TEXT ink', () {
       expect(
-        runTreeGates(files: {
-          'app_flutter/lib/screens/home.dart':
-              'Text("a", style: TextStyle(color: Color(0xFF1A1A1A)));',
-        }).where((f) => f.gateId == '46' || f.gateId == '54'),
+        runTreeGates(
+          files: {
+            'app_flutter/lib/screens/home.dart':
+                'Text("a", style: TextStyle(color: Color(0xFF1A1A1A)));',
+          },
+        ).where((f) => f.gateId == '46' || f.gateId == '54'),
         isEmpty,
       );
     });

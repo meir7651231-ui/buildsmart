@@ -82,9 +82,44 @@ jobs:
           pull app_flutter/tool/protocol_check_selftest.dart  .trusted/tool/protocol_check_selftest.dart
           pull protocol/gates.tsv                              .trusted/protocol/gates.tsv
           pull .githooks/pre-commit                            .trusted/githooks/pre-commit
+          # S4 — also fetch the trusted pre-push + commit-msg + workflows + pins so
+          # K4/S3 can compare the PR copies against the TRUSTED origin/main copies.
+          pull .githooks/pre-push                              .trusted/githooks/pre-push
+          pull .githooks/commit-msg                            .trusted/githooks/commit-msg
+          pull .github/workflows/protocol-enforce.yml          .trusted/workflows/protocol-enforce.yml
+          pull .github/workflows/deploy.yml                    .trusted/workflows/deploy.yml
+          pull protocol/pins.sha256                            .trusted/protocol/pins.sha256
           echo "trusted_complete=$fetched_all" >> "$GITHUB_OUTPUT"
           # The engine is a `part`-based 2-file program; place the selftest beside it.
           ls -l .trusted/tool
+
+      # ── S1: the bootstrap fallback is NO LONGER silent or unbounded ──
+      # v4 computed fetched_all but NEVER read it: when origin/main lacked the
+      # engine, CI silently fell back to the PR copy (a `::warning::`, not a block)
+      # so a STUBBED PR engine could ship. v5 reads trusted_complete and FAILS
+      # CLOSED unless this is an explicitly-marked one-time BOOTSTRAP (the protocol
+      # is not yet seeded on main). The exception is a repo VARIABLE `BOOTSTRAP=1`
+      # (vars.BOOTSTRAP) — an admin must set it deliberately, and remove it once the
+      # protocol lands on main. Absent that marker, an incomplete trusted fetch is a
+      # HARD failure (no silent stub-judges-itself path).
+      - name: S1 — trusted-fetch completeness (fail closed unless BOOTSTRAP)
+        env:
+          BOOTSTRAP_VAR: ${{ vars.BOOTSTRAP }}
+        run: |
+          set -euo pipefail
+          complete='${{ steps.trusted.outputs.trusted_complete }}'
+          echo "trusted_complete=$complete  BOOTSTRAP=${BOOTSTRAP_VAR:-<unset>}"
+          if [[ "$complete" == "1" ]]; then
+            echo "✅ S1: trusted engine/runner/registry fully materialised from origin/main"
+            exit 0
+          fi
+          # Incomplete fetch (origin/main lacks a protocol file).
+          if [[ "${BOOTSTRAP_VAR:-}" == "1" ]]; then
+            echo "::warning::S1 BOOTSTRAP=1 — trusted ref incomplete; PR-copy fallback ALLOWED this ONE time. Remove vars.BOOTSTRAP once the protocol is on main."
+            exit 0
+          fi
+          echo "::error::S1 FAIL-CLOSED — origin/main is missing a protocol file and BOOTSTRAP is not set. CI will NOT judge a PR with its OWN (untrusted) engine copy. Seed the protocol on main, or set vars.BOOTSTRAP=1 for a one-time bootstrap."
+          exit 1
 
       - name: K1/K6 — compute base, touched set, and the WHOLE tree (fail-closed)
         id: diffset
@@ -189,6 +224,96 @@ jobs:
           [[ "$fail" -eq 0 && "$seen" -ge 5 ]] || { echo "integrity FAILED"; exit 1; }
           echo "✅ integrity pins OK ($seen files, hooks+workflows pinned)"
 
+      # ── S3: defeat the K4 self-consistency re-pin BYPASS ──
+      # v4's K4 verified the PR's pinned files against the PR's OWN pins.sha256 —
+      # so an attacker could gut .githooks/pre-commit, run update_pins.sh, commit
+      # the new pins.sha256, and K4 passed (the pin and the file are both the
+      # tampered PR copy; `.trusted/githooks/pre-commit` was fetched but DEAD —
+      # never executed or compared). v5 compares the PR's hooks/workflows/pins
+      # against the TRUSTED origin/main copies (fetched in K2). A mismatch is a
+      # CHANGE to a protocol-critical file; on a PR that is only legitimate via
+      # CODEOWNERS review on main (THE WALL half — see PROTOCOL_V5.md). Here we
+      # FAIL on any drift unless the change is explicitly acknowledged by a repo
+      # variable PROTOCOL_CHANGE_OK=1 (an admin sets it for a reviewed protocol PR).
+      # We also RUN the trusted pre-commit's --self-test-equivalent by executing the
+      # TRUSTED engine (already done in the self-test step) — the .trusted hook set
+      # is no longer a dead fetch: it is the comparison baseline.
+      - name: S3 — hooks/workflows/pins match the TRUSTED origin/main (no re-pin bypass)
+        env:
+          PROTOCOL_CHANGE_OK: ${{ vars.PROTOCOL_CHANGE_OK }}
+          BOOTSTRAP_VAR: ${{ vars.BOOTSTRAP }}
+        run: |
+          set -euo pipefail
+          # If we are bootstrapping (origin/main has no protocol yet) there is no
+          # trusted baseline to compare against — skip with a notice (S1 governs).
+          if [[ "${BOOTSTRAP_VAR:-}" == "1" ]]; then
+            echo "::warning::S3 skipped — BOOTSTRAP=1 (no trusted baseline on main yet)"; exit 0
+          fi
+          drift=0
+          cmp_one() { # <pr-path> <trusted-path> <label>
+            local pr="$1" tr="$2" label="$3"
+            if [[ ! -f "$tr" ]]; then
+              echo "::error::S3 trusted copy missing for $label ($tr) — fail closed"; drift=1; return
+            fi
+            if [[ ! -f "$pr" ]]; then
+              echo "::error::S3 PR copy missing for $label ($pr)"; drift=1; return
+            fi
+            if ! diff -q "$tr" "$pr" >/dev/null 2>&1; then
+              echo "❌ S3 DRIFT: $label differs from trusted origin/main"
+              diff "$tr" "$pr" | head -40 || true
+              drift=1
+            else
+              echo "  ✅ $label matches trusted origin/main"
+            fi
+          }
+          cmp_one .githooks/pre-commit   .trusted/githooks/pre-commit   ".githooks/pre-commit"
+          cmp_one .githooks/pre-push     .trusted/githooks/pre-push     ".githooks/pre-push"
+          cmp_one .githooks/commit-msg   .trusted/githooks/commit-msg   ".githooks/commit-msg"
+          cmp_one .github/workflows/protocol-enforce.yml .trusted/workflows/protocol-enforce.yml ".github/workflows/protocol-enforce.yml"
+          cmp_one .github/workflows/deploy.yml           .trusted/workflows/deploy.yml           ".github/workflows/deploy.yml"
+          cmp_one protocol/pins.sha256   .trusted/protocol/pins.sha256  "protocol/pins.sha256"
+          if [[ "$drift" -eq 0 ]]; then
+            echo "✅ S3: hooks/workflows/pins identical to trusted origin/main — no re-pin bypass"
+            exit 0
+          fi
+          # Drift detected. A LEGITIMATE protocol change reaches main only through a
+          # CODEOWNERS-reviewed PR (THE WALL). In CI we additionally require an
+          # explicit admin acknowledgement so a gut-and-re-pin PR cannot self-approve.
+          if [[ "${PROTOCOL_CHANGE_OK:-}" == "1" ]]; then
+            echo "::warning::S3 drift ACK'd via vars.PROTOCOL_CHANGE_OK=1 (reviewed protocol change). CODEOWNERS on main is the binding control."
+            exit 0
+          fi
+          echo "::error::S3 — a protocol-critical file (hook/workflow/pins) differs from trusted origin/main and is NOT acknowledged. A re-pin (update_pins.sh + commit pins.sha256) does NOT bypass this: the baseline is origin/main, not the PR. Land the change via a CODEOWNERS-reviewed PR, or set vars.PROTOCOL_CHANGE_OK=1 for a reviewed protocol PR."
+          exit 1
+
+      # ── S3b: the trusted pre-commit hook is no longer a DEAD fetch — RUN it ──
+      # We execute the TRUSTED pre-commit in audit mode to produce the registry
+      # ledger from the origin/main runner (not the PR's), feeding K3 below. This
+      # is what makes the fetched `.trusted/githooks/pre-commit` load-bearing.
+      - name: S3b — produce the K3 ledger from the TRUSTED runner (not the PR copy)
+        id: trustedledger
+        env:
+          BOOTSTRAP_VAR: ${{ vars.BOOTSTRAP }}
+        run: |
+          set -euo pipefail
+          LEDGER="$GITHUB_WORKSPACE/.trusted_ran.txt"
+          # Use the trusted hook if we have a full trusted set; else (bootstrap) the
+          # PR copy, governed by S1.
+          HOOK=".trusted/githooks/pre-commit"
+          if [[ ! -s "$HOOK" || "${BOOTSTRAP_VAR:-}" == "1" ]]; then
+            echo "::warning::S3b using PR pre-commit (bootstrap or trusted hook absent)"
+            HOOK=".githooks/pre-commit"
+          fi
+          chmod +x "$HOOK" || true
+          PROTOCOL_AUDIT_MODE=1 PROTOCOL_AUDIT_LEDGER="$LEDGER" bash "$HOOK" >/tmp/trusted_audit.log 2>&1 || true
+          if [[ ! -s "$LEDGER" ]]; then
+            echo "::error::S3b trusted runner produced an EMPTY ledger — runner stubbed? (fail closed)"
+            tail -40 /tmp/trusted_audit.log || true
+            exit 1
+          fi
+          echo "ledger=$LEDGER" >> "$GITHUB_OUTPUT"
+          echo "✅ S3b: K3 ledger produced by the TRUSTED runner ($(wc -l < "$LEDGER") ids)"
+
       # ── K1/K2/K6: TRUSTED engine over the WHOLE resulting tree ──
       # We scan EVERY tracked file (tree_all), not just touched, with the TRUSTED
       # engine. RCs are captured explicitly under `set +e` (K6) so a crash is
@@ -244,14 +369,11 @@ jobs:
           set -euo pipefail
           TRUSTED_ENGINE="$GITHUB_WORKSPACE/.trusted/tool/protocol_check.dart"
           TRUSTED_REG="$GITHUB_WORKSPACE/.trusted/protocol/gates.tsv"
-          # 1) Genuine runtime ledger from the gate-runner's audit mode.
-          LEDGER=$(mktemp)
-          PROTOCOL_AUDIT_MODE=1 PROTOCOL_AUDIT_LEDGER="$LEDGER" \
-            bash .githooks/pre-commit >/tmp/audit.log 2>&1 || true
-          if [[ ! -s "$LEDGER" ]]; then
-            echo "::error::gate-runner audit produced an EMPTY ledger — runner stubbed? (fail closed)"
-            tail -40 /tmp/audit.log || true
-            exit 1
+          # 1) Genuine runtime ledger — produced by the TRUSTED runner in S3b (not
+          #    the PR copy). This closes the K3 "run the PR's own runner" gap.
+          LEDGER='${{ steps.trustedledger.outputs.ledger }}'
+          if [[ -z "$LEDGER" || ! -s "$LEDGER" ]]; then
+            echo "::error::K3 trusted ledger from S3b missing/empty (fail closed)"; exit 1
           fi
           sort -u "$LEDGER" > /tmp/ran.txt
           echo "── runtime ledger (ran ids) ──"; cat /tmp/ran.txt

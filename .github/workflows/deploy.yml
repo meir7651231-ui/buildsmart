@@ -64,24 +64,56 @@ jobs:
         working-directory: app_flutter
         run: flutter test --reporter=compact
 
-      # ── K5: CONTENT GATES before shipping. v3 deployed to prod with ZERO
-      #    content gates — a dark surface / secret / RTL violation could ship even
-      #    if protocol-enforce.yml was bypassed. We now run the content engine over
-      #    the WHOLE resulting tree as a REQUIRED step before gh-pages/APK publish.
-      #    RC captured explicitly (set +e) so crash ≠ finding; ERR-level findings
-      #    (rc 2) block the deploy, a crash (other rc) also blocks (fail closed).
-      - name: K5 — content engine over the whole tree (REQUIRED pre-ship gate)
-        working-directory: app_flutter
+      # ── S4 (v5): K5 now runs the TRUSTED engine over the WHOLE REPO-ROOT tree ──
+      # v4's K5 ran the PR's OWN (untrusted) tool/protocol_check.dart from the
+      # app_flutter CWD, so (a) a stubbed PR engine shipped itself, and (b) the
+      # `ls-tree` only saw app_flutter/* paths (the engine's path scoping then
+      # missed `.github/`, `app/`, root `index.html`). v5:
+      #   * fetches the engine + registry from origin/main (the TRUSTED ref, same
+      #     as protocol-enforce K2) so the PR cannot judge itself with a stub;
+      #   * runs `ls-tree` from the REPO ROOT (like K1) and feeds repo-root-relative
+      #     names, so EVERY tracked file is scanned (incl. .github/, app/, index.html).
+      - name: S4 — fetch the TRUSTED engine/registry from origin/main
+        id: trusted
+        env:
+          BOOTSTRAP_VAR: ${{ vars.BOOTSTRAP }}
         run: |
           set -euo pipefail
+          git fetch --no-tags --depth=1 origin main >/dev/null 2>&1 || echo "::warning::could not fetch origin/main"
+          mkdir -p .trusted/tool .trusted/protocol
+          fetched_all=1
+          pull() { # <repo-path> <dest>
+            if git --no-replace-objects cat-file -e "origin/main:$1" 2>/dev/null; then
+              git --no-replace-objects show "origin/main:$1" > "$2"; echo "  trusted: $1"
+            else
+              echo "::warning::origin/main lacks $1 — BOOTSTRAP fallback to PR copy"
+              if [[ -f "$1" ]]; then cp "$1" "$2"; else echo "::error::$1 missing in PR too"; exit 1; fi
+              fetched_all=0
+            fi
+          }
+          pull app_flutter/tool/protocol_check.dart          .trusted/tool/protocol_check.dart
+          pull app_flutter/tool/protocol_check_selftest.dart .trusted/tool/protocol_check_selftest.dart
+          pull protocol/gates.tsv                             .trusted/protocol/gates.tsv
+          # S1-parity: fail closed if the trusted fetch is incomplete and this is
+          # not an explicitly-marked bootstrap — do NOT ship judged by a PR stub.
+          if [[ "$fetched_all" != "1" && "${BOOTSTRAP_VAR:-}" != "1" ]]; then
+            echo "::error::S4 fail-closed — origin/main missing a protocol file and BOOTSTRAP unset; refusing to ship judged by the PR's own engine."
+            exit 1
+          fi
+
+      - name: K5/S4 — TRUSTED content engine over the WHOLE repo-root tree (pre-ship)
+        run: |
+          set -euo pipefail
+          TRUSTED="$GITHUB_WORKSPACE/.trusted/tool/protocol_check.dart"
+          # Repo-ROOT tree (like K1) — every tracked file, not just app_flutter/*.
           git --no-replace-objects ls-tree -r --name-only HEAD > /tmp/tree_all.txt
-          sed 's#^app_flutter/##' /tmp/tree_all.txt > /dev/null || true
+          echo "── tree size ──"; wc -l /tmp/tree_all.txt
           set +e
-          dart run tool/protocol_check.dart \
+          dart run "$TRUSTED" \
             --tree \
             --names /tmp/tree_all.txt \
             --show "git --no-replace-objects show HEAD:" \
-            --stuck-log knowledge/stuck_log.md
+            --stuck-log app_flutter/knowledge/stuck_log.md
           TREE_RC=$?
           set -e
           if [[ "$TREE_RC" -eq 2 ]]; then
@@ -90,7 +122,7 @@ jobs:
           if [[ "$TREE_RC" -ne 0 ]]; then
             echo "::error::K5 content engine crashed (rc=$TREE_RC) — fail closed, NOT shipping"; exit 1
           fi
-          echo "✅ K5 content engine clean — safe to ship"
+          echo "✅ K5/S4 trusted content engine clean over the WHOLE repo-root tree — safe to ship"
 
       - name: Build Flutter web
         working-directory: app_flutter

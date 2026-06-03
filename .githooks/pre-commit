@@ -202,6 +202,7 @@ PROTECTED_PINNED=(
     ".githooks/commit-msg"
     ".github/workflows/protocol-enforce.yml"
     ".github/workflows/deploy.yml"
+    "protocol/regression_v5.sh"   # v5 — pin the bash/CI regression suite
 )
 gate_engine_integrity() {
     ran "reg"
@@ -284,25 +285,27 @@ gate_foundations() {
 # ═══════════════════════════════════════════════════════════════════════════
 gate_state() {
     local V_GEN V_STATUS HOOK_PATH
-    ran 11 12 13 14 15 16 17 18 19 20
+    # S2 (v5): `ran <id>` is emitted PER-CHECK, AFTER each check line — not as one
+    # batch at function entry. A gutted check loses its `ran` and registry parity
+    # FAILS (entry-proof → exec-proof, like gate_foundations).
     V_GEN=$(grep -oE "v[0-9]+\.[0-9]+" lib/version.g.dart 2>/dev/null | head -1)
     V_STATUS=$(grep -oE "v[0-9]+\.[0-9]+" knowledge/STATUS.md 2>/dev/null | head -1)
-    [[ -n "$V_GEN" ]] || err "11" "version.g.dart חסר/ריק" "bash scripts/gen_version.sh"
-    [[ "$V_GEN" == "$V_STATUS" ]] || err "12" "גרסה לא מסונכרנת" "version.g.dart=$V_GEN STATUS=$V_STATUS"
+    [[ -n "$V_GEN" ]] || err "11" "version.g.dart חסר/ריק" "bash scripts/gen_version.sh"; ran 11
+    [[ "$V_GEN" == "$V_STATUS" ]] || err "12" "גרסה לא מסונכרנת" "version.g.dart=$V_GEN STATUS=$V_STATUS"; ran 12
 
-    grep -q "Group A" knowledge/SMARTPRODUCT_ROADMAP.md || err "13" "ROADMAP בלי קבוצה א'" "ROADMAP מקולקל"
-    [[ -n "$V_STATUS" ]] || err "14" "גרסה חסרה ב-STATUS.md" "הוסף תווית גרסה"
+    grep -q "Group A" knowledge/SMARTPRODUCT_ROADMAP.md || err "13" "ROADMAP בלי קבוצה א'" "ROADMAP מקולקל"; ran 13
+    [[ -n "$V_STATUS" ]] || err "14" "גרסה חסרה ב-STATUS.md" "הוסף תווית גרסה"; ran 14
 
     # FIX (v2): old gates 15 and 83 BOTH checked core.hooksPath==.githooks
     # (duplicate). Merged into a single gate 15. (83 retired — see registry.)
     HOOK_PATH=$(git config --get core.hooksPath)
-    [[ "$HOOK_PATH" == ".githooks" ]] || err "15" "hooks לא מופעלים מהריפו" "git config core.hooksPath .githooks"
-    [[ -x "$REPO_ROOT/.githooks/pre-commit" ]] || err "16" "pre-commit לא executable" "chmod +x .githooks/pre-commit"
-    [[ -x "$REPO_ROOT/.githooks/pre-push" ]]   || err "17" "pre-push לא executable" "chmod +x .githooks/pre-push"
+    [[ "$HOOK_PATH" == ".githooks" ]] || err "15" "hooks לא מופעלים מהריפו" "git config core.hooksPath .githooks"; ran 15
+    [[ -x "$REPO_ROOT/.githooks/pre-commit" ]] || err "16" "pre-commit לא executable" "chmod +x .githooks/pre-commit"; ran 16
+    [[ -x "$REPO_ROOT/.githooks/pre-push" ]]   || err "17" "pre-push לא executable" "chmod +x .githooks/pre-push"; ran 17
 
-    [[ -d "knowledge" ]] || err "18" "תיקיית knowledge חסרה" "צור knowledge/"
-    [[ -d "lib/state" ]] || err "19" "תיקיית lib/state חסרה" "מבנה הפרויקט פגום"
-    [[ -d "test" ]]      || err "20" "תיקיית test חסרה" "מבנה הפרויקט פגום"
+    [[ -d "knowledge" ]] || err "18" "תיקיית knowledge חסרה" "צור knowledge/"; ran 18
+    [[ -d "lib/state" ]] || err "19" "תיקיית lib/state חסרה" "מבנה הפרויקט פגום"; ran 19
+    [[ -d "test" ]]      || err "20" "תיקיית test חסרה" "מבנה הפרויקט פגום"; ran 20
 }
 
 # Hook integrity (fail-fast, lesson #68). CRLF-safe: git diff, not sha256sum,
@@ -333,12 +336,15 @@ gate_hook_integrity() {
 # ═══════════════════════════════════════════════════════════════════════════
 gate_planning() {
     local BAD_TEST BAD_HELPER shared sdiff _l _has_blue
-    ran 21 22 23 24 25 26 27   # 28 -> engine
+    # S2 (v5): per-check `ran` AFTER each check. Gates 21-24 sit behind the
+    # STAGED_LIB applicability guard → they record `ran` when the guard fires and
+    # `napp` (not `ran`) when it does not — honest, like gate 94/the flutter tier.
     if [[ -n "$STAGED_LIB" ]]; then
-        [[ -f "knowledge/session_plan.md" ]] || err "21" "session_plan חסר" "צור knowledge/session_plan.md"
+        [[ -f "knowledge/session_plan.md" ]] || err "21" "session_plan חסר" "צור knowledge/session_plan.md"; ran 21
         if [[ -f "knowledge/session_plan.md" ]] && grep -q "<!-- לדוגמה:" knowledge/session_plan.md; then
             err "22" "session_plan ריק" "מלא את session_plan.md לפני כתיבת קוד"
         fi
+        ran 22
         # Gate 23: ROADMAP must contain an in-progress marker. Whole-file read
         # via bash builtin case/glob (lesson #52 — no external grep on content).
         _has_blue=""
@@ -347,9 +353,11 @@ gate_planning() {
                 case "$_l" in *🟦*) _has_blue=1; break;; esac
             done < knowledge/SMARTPRODUCT_ROADMAP.md
         fi
-        [[ -n "$_has_blue" ]] || err "23" "אין צעד בתהליך" "סמן 🟦 ב-ROADMAP לפני קוד"
+        [[ -n "$_has_blue" ]] || err "23" "אין צעד בתהליך" "סמן 🟦 ב-ROADMAP לפני קוד"; ran 23
 
-        [[ -n "$STAGED_WIRING" ]] || err "24" "WIRING.md לא עודכן" "עדכן WIRING.md"
+        [[ -n "$STAGED_WIRING" ]] || err "24" "WIRING.md לא עודכן" "עדכן WIRING.md"; ran 24
+    else
+        napp 21 22 23 24
     fi
 
     # Gate 25: Preact-shared untouched. Per-file glob on the staged diff using a
@@ -364,11 +372,12 @@ gate_planning() {
             esac
         done <<< "$sdiff"
     done
+    ran 25   # the per-file Preact-shared scan loop always executes
 
     BAD_TEST=$(git diff --cached --name-only | grep -E "^app_flutter/test/.*_tests\.dart$" | head -1)
-    [[ -z "$BAD_TEST" ]] || err "26" "שם בדיקה שגוי: $BAD_TEST" "שנה ל-_test.dart (singular)"
+    [[ -z "$BAD_TEST" ]] || err "26" "שם בדיקה שגוי: $BAD_TEST" "שנה ל-_test.dart (singular)"; ran 26
     BAD_HELPER=$(git diff --cached --name-only | grep -E "^app_flutter/lib/.*[A-Z].*\.dart$" | head -1)
-    [[ -z "$BAD_HELPER" ]] || err "27" "שם קובץ ב-CamelCase: $BAD_HELPER" "שנה ל-snake_case"
+    [[ -z "$BAD_HELPER" ]] || err "27" "שם קובץ ב-CamelCase: $BAD_HELPER" "שנה ל-snake_case"; ran 27
     # Gate 28 (local URI) — handled by Dart engine (content gate).
 }
 
@@ -515,27 +524,28 @@ gate_test_bookkeeping() {
 gate_quality() {
     local NEW_DIALOG NEW_TODO NEW_HELPER NEW_DEFINE NEW_DEPS NAME TEST_FILE
     local STAGED_ENV STAGED_TOKEN EMBED_LOGIC
-    ran 47 49 53 55 56 58 60   # 48 50 51 52 54 -> engine
+    # S2 (v5): per-check `ran` AFTER each detection runs (48/50/51/52/54 -> engine).
     NEW_DIALOG=$(git diff --cached lib/screens/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "showDialog|showModalBottomSheet" | head -1)
     if [[ -n "$NEW_DIALOG" && -z "$STAGED_WIRING" ]]; then
         warn "47" "dialog/sheet חדש — וודא שמופיע ב-WIRING"
     fi
+    ran 47
     # 48 print(), 50 dart:html, 51 hard URL, 52 secrets -> Dart engine.
 
     NEW_TODO=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "// TODO[^:]|// FIXME[^:]" | head -1)
-    [[ -z "$NEW_TODO" ]] || warn "49" "TODO/FIXME בלי הסבר"
+    [[ -z "$NEW_TODO" ]] || warn "49" "TODO/FIXME בלי הסבר"; ran 49
 
     # Gate 53 (secret files) — name-only, MSYS-safe, stays bash. Merged the 3 v1
     # `err 53` checks (.env, bypass-token) into one gate body.
     STAGED_ENV=$(git diff --cached --name-only | grep -E "^\.env|\.env\.|credentials" | head -1)
     [[ -z "$STAGED_ENV" ]] || err "53" "קובץ סודות נוסף: $STAGED_ENV" "הסר מ-staging"
     STAGED_TOKEN=$(git diff --cached --name-only | grep -E "^\.(emergency_token|allow_protocol_edit|allow_master_protocol_edit)$" | head -1)
-    [[ -z "$STAGED_TOKEN" ]] || err "53" "bypass-token ב-staging: $STAGED_TOKEN" "git reset HEAD $STAGED_TOKEN — local-only בלבד"
+    [[ -z "$STAGED_TOKEN" ]] || err "53" "bypass-token ב-staging: $STAGED_TOKEN" "git reset HEAD $STAGED_TOKEN — local-only בלבד"; ran 53
 
     # 54 dark ColoredBox -> Dart engine.
 
     EMBED_LOGIC=$(git diff --cached lib/screens/ 2>/dev/null | grep "^+" | grep -E "if\s*\(.*&&.*&&.*\)" | head -1)
-    [[ -z "$EMBED_LOGIC" ]] || warn "55" "לוגיקה מקוננת ב-UI — שקול helper"
+    [[ -z "$EMBED_LOGIC" ]] || warn "55" "לוגיקה מקוננת ב-UI — שקול helper"; ran 55
 
     NEW_HELPER=$(git diff --cached --name-only | grep -E "^app_flutter/lib/logic/.*_helper\.dart$" | head -1)
     if [[ -n "$NEW_HELPER" ]]; then
@@ -563,16 +573,17 @@ gate_quality() {
             [[ -n "$_ok" ]] || err "56" "test קיים אך אינו מתייחס לסמל מ-$NAME" "ודא ש-$TEST_FILE בודק את הפונקציה/מחלקה שהשתנתה"
         fi
     fi
+    ran 56   # helper-needs-test detection always runs (body conditional on NEW_HELPER)
 
     NEW_DEFINE=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep "fromEnvironment" | head -1)
-    [[ -z "$NEW_DEFINE" ]] || warn "58" "fromEnvironment חדש — תעד ב-WIRING"
+    [[ -z "$NEW_DEFINE" ]] || warn "58" "fromEnvironment חדש — תעד ב-WIRING"; ran 58
 
     NEW_DEPS=$(git diff --cached pubspec.yaml 2>/dev/null | awk '
         /^[+-]dependencies:/ { in_prod=1; in_dev=0; next }
         /^[+-]dev_dependencies:/ { in_dev=1; in_prod=0; next }
         /^[+-][a-z]/ && !/^[+-][[:space:]]/ { in_prod=0; in_dev=0 }
         in_prod && /^\+[[:space:]]+[a-z_]+:/ { print; exit }')
-    [[ -z "$NEW_DEPS" ]] || warn "60" "production dep חדש: $NEW_DEPS"
+    [[ -z "$NEW_DEPS" ]] || warn "60" "production dep חדש: $NEW_DEPS"; ran 60
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -581,13 +592,13 @@ gate_quality() {
 # ═══════════════════════════════════════════════════════════════════════════
 gate_lang() {
     local STAGED_APP PREACT_INSP
-    ran 66 68   # 62/63/64/65/67/69/70 -> engine
+    # S2 (v5): per-check `ran` AFTER each check (62/63/64/65/67/69/70 -> engine).
     # 61 removed (registry). 62/63/64/65 -> engine.
     STAGED_APP=$(git diff --cached --name-only | grep "^app/" | head -1)
-    [[ -z "$STAGED_APP" ]] || warn "66" "נגעת ב-app/ (Preact) — וודא העתקה verbatim ל-Flutter"
+    [[ -z "$STAGED_APP" ]] || warn "66" "נגעת ב-app/ (Preact) — וודא העתקה verbatim ל-Flutter"; ran 66
     # 67 (Hebrew string in app/) -> engine.
     PREACT_INSP=$(git diff --cached --name-only | grep "^app/knowledge/inspections/" | head -1)
-    [[ -z "$PREACT_INSP" ]] || err "68" "Preact inspections frozen" "אל תיגע באלה"
+    [[ -z "$PREACT_INSP" ]] || err "68" "Preact inspections frozen" "אל תיגע באלה"; ran 68
     # 69 color-revert, 70 gitignore-secrets -> engine.
 }
 
@@ -596,27 +607,30 @@ gate_lang() {
 # ═══════════════════════════════════════════════════════════════════════════
 gate_save_safety() {
     local HELPER_NAME LARGE STAGED_BINARY STAGED_LOCK LOCK_CHANGE REMOVED
-    ran 71 72 75 77 78 79 80   # 73 74 -> engine
+    # S2 (v5): per-check `ran` AFTER each check (73/74 -> engine).
     if git diff --cached lib/state/smart_cart.dart >/dev/null 2>&1; then
         [[ -f "test/cart_bulk_order_test.dart" ]] || warn "71" "שינוי cart בלי cart_bulk_order_test"
     fi
+    ran 71
     if [[ -n "$STAGED_HELPER" ]]; then
         HELPER_NAME=$(basename "$STAGED_HELPER" .dart)
         grep -q "$HELPER_NAME" "$REPO_ROOT/app_flutter/WIRING.md" 2>/dev/null || warn "72" "$HELPER_NAME לא ב-WIRING"
     fi
+    ran 72
     # 73 persistence key, 74 manual container -> engine.
     if git diff --cached lib/providers.dart 2>/dev/null | grep -q "^-"; then
         REMOVED=$(git diff --cached lib/providers.dart | grep -cE "^-final.*Provider")
         [[ "$REMOVED" -eq 0 ]] || warn "75" "$REMOVED providers נמחקו"
     fi
+    ran 75
     LARGE=$(git diff --cached --stat | grep -E "\| [0-9]{4,} " | head -1)
-    [[ -z "$LARGE" ]] || warn "77" "קובץ גדול: $LARGE"
+    [[ -z "$LARGE" ]] || warn "77" "קובץ גדול: $LARGE"; ran 77
     STAGED_BINARY=$(git diff --cached --name-only | grep -E "\.(exe|dll|so|dylib|jar|war)$" | head -1)
-    [[ -z "$STAGED_BINARY" ]] || err "78" "binary בstaging: $STAGED_BINARY" "לא לשמור binaries"
+    [[ -z "$STAGED_BINARY" ]] || err "78" "binary בstaging: $STAGED_BINARY" "לא לשמור binaries"; ran 78
     STAGED_LOCK=$(git diff --cached --name-only | grep -E "\.lock$|node_modules" | head -1)
-    [[ -z "$STAGED_LOCK" ]] || warn "79" "lock/modules ב-staging"
+    [[ -z "$STAGED_LOCK" ]] || warn "79" "lock/modules ב-staging"; ran 79
     LOCK_CHANGE=$(git diff --cached pubspec.lock 2>/dev/null | grep "^+" | grep "version:" | head -1)
-    [[ -z "$LOCK_CHANGE" ]] || warn "80" "שינוי version ב-lock — וודא pub get הריץ"
+    [[ -z "$LOCK_CHANGE" ]] || warn "80" "שינוי version ב-lock — וודא pub get הריץ"; ran 80
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -626,14 +640,15 @@ gate_save_safety() {
 gate_final_safety() {
     local PUSH_EXPECTED PUSH_LOCAL DUP_SKU catalog_file DELETED_TESTS DELETED_STATE
     local UNSTAGED STAGED_STATE STAGED_STATUS VERSION_PUBSPEC LAYERS_OK ROADMAP_DONE
-    ran 82 84 85 86 87 88 89 90 91 92 93 96 98 99   # 95 97 -> engine; 94 coupled to its check below (K3)
+    # S2 (v5): per-check `ran` AFTER each check (95/97 -> engine; 94 coupled below).
     if [[ -f "$REPO_ROOT/.git/hooks/pre-push" ]]; then
         PUSH_EXPECTED=$(sha256sum "$REPO_ROOT/.githooks/pre-push" | cut -d' ' -f1)
         PUSH_LOCAL=$(sha256sum "$REPO_ROOT/.git/hooks/pre-push" | cut -d' ' -f1)
         [[ "$PUSH_EXPECTED" == "$PUSH_LOCAL" ]] || warn "82" "pre-push מקומי שונה — סנכרן"
     fi
-    [[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] || err "84" "GitHub workflow נמחק" "שחזר"
-    grep -q "protocol-gates" "$REPO_ROOT/.github/workflows/protocol-enforce.yml" 2>/dev/null || err "85" "workflow מקולקל"
+    ran 82
+    [[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] || err "84" "GitHub workflow נמחק" "שחזר"; ran 84
+    grep -q "protocol-gates" "$REPO_ROOT/.github/workflows/protocol-enforce.yml" 2>/dev/null || err "85" "workflow מקולקל"; ran 85
 
     if git diff --cached --name-only | grep -q "lib/data/.*catalog\.dart"; then
         for catalog_file in lib/data/lipskey_catalog.dart lib/data/polyroll_catalog.dart; do
@@ -643,24 +658,28 @@ gate_final_safety() {
             fi
         done
     fi
+    ran 86
     if git diff --cached lib/data/polyroll_catalog.dart >/dev/null 2>&1; then
         [[ -f "test/ppr_infra_test.dart" ]] || warn "87" "שינוי polyroll בלי ppr_infra_test"
     fi
+    ran 87
     if git diff --cached --name-only | grep -q "MASTER_PROTOCOL.md" && [[ ! -f "$REPO_ROOT/.allow_master_protocol_edit" ]]; then
         warn "88" "שינוי MASTER_PROTOCOL — וודא הוראה מפורשת"
     fi
+    ran 88
     DELETED_TESTS=$(git diff --cached --name-only --diff-filter=D | grep "_test.dart$" | head -1)
-    [[ -z "$DELETED_TESTS" ]] || err "89" "test נמחק: $DELETED_TESTS" "אל תמחק tests"
+    [[ -z "$DELETED_TESTS" ]] || err "89" "test נמחק: $DELETED_TESTS" "אל תמחק tests"; ran 89
     DELETED_STATE=$(git diff --cached --name-only --diff-filter=D | grep "lib/state/" | head -1)
-    [[ -z "$DELETED_STATE" ]] || err "90" "state נמחק: $DELETED_STATE" "אל תמחק state files"
+    [[ -z "$DELETED_STATE" ]] || err "90" "state נמחק: $DELETED_STATE" "אל תמחק state files"; ran 90
 
     UNSTAGED=$(git diff --name-only | grep -E "^app_flutter/lib/" | head -1)
-    [[ -z "$UNSTAGED" ]] || warn "91" "יש שינויים unstaged בקוד — שקול לכלול"
+    [[ -z "$UNSTAGED" ]] || warn "91" "יש שינויים unstaged בקוד — שקול לכלול"; ran 91
     STAGED_STATE=$(git diff --cached --name-only | grep "lib/state/" | head -1)
     STAGED_STATUS=$(git diff --cached --name-only | grep "STATUS.md" | head -1)
     if [[ -n "$STAGED_STATE" && -z "$STAGED_STATUS" ]]; then
         warn "92" "שינוי state בלי עדכון STATUS.md"
     fi
+    ran 92
     # Gate 93: a lib change should be accompanied by a ROADMAP done-marker added
     # this commit (✅ / ✓ / [x]). Implemented in bash (whole-file diff + builtins,
     # MSYS-safe). Advisory. (Registry: engine column corrected dart->bash in v3.)
@@ -668,6 +687,9 @@ gate_final_safety() {
         ROADMAP_DONE=$(git diff --cached -- knowledge/SMARTPRODUCT_ROADMAP.md 2>/dev/null \
             | grep "^+" | grep -v "^+++" | grep -E "✅|✔|✓|\[x\]" | head -1)
         [[ -n "$ROADMAP_DONE" ]] || warn "93" "שינוי lib בלי סימון התקדמות ב-ROADMAP" "סמן ✅/[x] את הצעד שהושלם"
+        ran 93
+    else
+        napp 93
     fi
     # 95 number-isolate, 97 gitignore-hide-claude -> engine.
 
@@ -691,14 +713,15 @@ gate_final_safety() {
     if [[ -n "$VERSION_PUBSPEC" && -z "$STAGED_LIB" ]]; then
         warn "96" "pubspec version עודכן בלי שינוי קוד"
     fi
+    ran 96
 
-    [[ -f "$REPO_ROOT/.claude/settings.json" ]] || err "98" "settings.json נמחק מהריפו" "שחזר"
+    [[ -f "$REPO_ROOT/.claude/settings.json" ]] || err "98" "settings.json נמחק מהריפו" "שחזר"; ran 98
     LAYERS_OK=0
     [[ -f "$REPO_ROOT/.githooks/pre-commit" ]] && LAYERS_OK=$((LAYERS_OK+1))
     [[ -f "$REPO_ROOT/.claude/settings.json" ]] && LAYERS_OK=$((LAYERS_OK+1))
     [[ -f "$REPO_ROOT/.claude/hooks/session-start.sh" ]] && LAYERS_OK=$((LAYERS_OK+1))
     [[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] && LAYERS_OK=$((LAYERS_OK+1))
-    [[ "$LAYERS_OK" -eq 4 ]] || err "99" "רק $LAYERS_OK/4 שכבות אכיפה" "שחזר חסרות"
+    [[ "$LAYERS_OK" -eq 4 ]] || err "99" "רק $LAYERS_OK/4 שכבות אכיפה" "שחזר חסרות"; ran 99
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -706,8 +729,9 @@ gate_final_safety() {
 # ═══════════════════════════════════════════════════════════════════════════
 gate_learning() {
     local STAGED_STUCK NEW_LINES STAGED_STUCK_LOG AP_COUNT RT_COUNT DUP_AP
-    ran 101 102 104 111   # 103 -> engine
-    [[ -f "$STUCK_LOG" ]] || err "101" "stuck_log.md חסר" "צור knowledge/stuck_log.md"
+    # S2 (v5): per-check `ran`/`napp` (103 -> engine). 101 always runs; 102/104/111
+    # sit behind applicability guards → `ran` when reached, `napp` otherwise.
+    [[ -f "$STUCK_LOG" ]] || err "101" "stuck_log.md חסר" "צור knowledge/stuck_log.md"; ran 101
 
     if [[ "$IS_RETRY" == "true" && -n "$PRIOR_HAS_CODE_TEST" && -f "$STUCK_LOG" ]]; then
         STAGED_STUCK=$(git diff --cached --name-only | grep "stuck_log.md" | head -1)
@@ -722,6 +746,9 @@ gate_learning() {
                 err "102" "רשומה חסרה RULE" "הוסף שורת RULE: כלל בעברית (בלי -EXAMPLE)"
             fi
         fi
+        ran 102
+    else
+        napp 102
     fi
 
     # Gate 103 (antipattern recurrence) -> Dart engine (run_content_engine).
@@ -734,6 +761,9 @@ gate_learning() {
             git add test/stuck_regression_test.dart
             echo "🔁 stuck_regression_test.dart התעדכן אוטומטית"
         fi
+        ran 104
+    else
+        napp 104
     fi
 
     # Gate 111: stuck_regression consistency (cheap, always).
@@ -764,6 +794,9 @@ gate_learning() {
         if [[ -n "$_ap_base" && "$AP_COUNT" -lt "$_ap_base" ]]; then
             err "111" "מספר אנטי-פטרנים ירד: $AP_COUNT < baseline $_ap_base" "אנטי-פטרנים נצברים בלבד — אל תמחק לקחים"
         fi
+        ran 111
+    else
+        napp 111
     fi
 }
 
@@ -773,7 +806,9 @@ gate_learning() {
 gate_knowledge() {
     local stub sf SLN DONE_COUNT PENDING STAGED_CF AUDIT_LINES STAGED_CROP STAGED_CARRY
     local CLAIMS_FILE STAGED_NAMES STAGED_UI STAGED_UI2 STAGED_VLOG _l _in_claims _cpath
-    ran 106 107 108 109 110 112 113 115 116   # 114 -> engine
+    # S2 (v5): per-check `ran` AFTER each gate's detection runs (114 -> engine).
+    # The detection logic (the VAR=$(...) + guard) always executes structurally;
+    # `ran` after the block is exec-proof — deleting the block drops its `ran`.
 
     # Gate 112: unified stubs.
     for stub in TESTING CHECKLISTS BUG_INVESTIGATION_PROTOCOL; do
@@ -787,11 +822,15 @@ gate_knowledge() {
         SLN=$(grep -c '' "$sf"); SLN=${SLN:-0}
         [[ "$SLN" -le 20 ]] || err "112" "$stub.md תפח ל-$SLN שורות" "השאר רק שלט-הפניה (≤20 שורות)"
     done
+    ran 112
 
     # Gate 106: session_plan Owner + Scope.
     if [[ -n "$STAGED_LIB" ]] && [[ -f "knowledge/session_plan.md" ]]; then
         grep -qE "^Owner:" knowledge/session_plan.md || err "106" "session_plan חסר Owner:" "הוסף 'Owner: this session'"
         grep -qE "^Scope:" knowledge/session_plan.md || err "106" "session_plan חסר Scope:" "הוסף 'Scope: <file:axis>'"
+        ran 106
+    else
+        napp 106
     fi
 
     # Gate 107: UI change visual log (advisory).
@@ -801,9 +840,10 @@ gate_knowledge() {
             warn "107" "שינוי UI ללא visual log" "מומלץ: knowledge/visual_log.md או screenshot ב-session_plan"
         fi
     fi
+    ran 107
 
     # Gate 108: CARRY_FORWARD exists.
-    [[ -f "knowledge/CARRY_FORWARD.md" ]] || err "108" "CARRY_FORWARD חסר" "מכיל לקחים חוצי-sessions"
+    [[ -f "knowledge/CARRY_FORWARD.md" ]] || err "108" "CARRY_FORWARD חסר" "מכיל לקחים חוצי-sessions"; ran 108
 
     # Gate 109: closed sub-protocol -> CARRY_FORWARD (counts via bash builtin).
     if [[ -f "knowledge/session_plan.md" ]] && grep -q "sub-protocol" knowledge/session_plan.md 2>/dev/null; then
@@ -816,6 +856,9 @@ gate_knowledge() {
             STAGED_CF=$(git diff --cached --name-only | grep "CARRY_FORWARD.md" | head -1)
             [[ -n "$STAGED_CF" ]] || warn "109" "sub-protocol הושלם בלי עדכון CARRY_FORWARD" "הוסף לקחים חוצי-sessions"
         fi
+        ran 109
+    else
+        napp 109
     fi
 
     # Gate 110: audit log not empty.
@@ -827,6 +870,9 @@ gate_knowledge() {
           END { print count+0 }' knowledge/session_plan.md 2>/dev/null)
         AUDIT_LINES=${AUDIT_LINES:-0}
         [[ "$AUDIT_LINES" -ge 2 ]] || warn "110" "Audit log קיים אבל ריק" "תעד קטגוריות שנסקרו"
+        ran 110
+    else
+        napp 110
     fi
 
     # Gate 113: asset-generation contact-sheet.
@@ -835,6 +881,7 @@ gate_knowledge() {
         STAGED_CARRY=$(git diff --cached --name-only | grep -E "knowledge/(CARRY_FORWARD|stuck_log)\.md$" | head -1)
         [[ -n "$STAGED_CARRY" ]] || warn "113" "crop/render script שונה — תעד visual verify ב-stuck_log/CARRY_FORWARD" "ראה CARRY_FORWARD #6"
     fi
+    ran 113
 
     # Gate 114 (kLipskeyCatalog) -> Dart engine.
 
@@ -860,6 +907,7 @@ gate_knowledge() {
             esac
         done < "$CLAIMS_FILE"
     fi
+    ran 115   # hot-file claims scan always executes (body conditional on the file)
 
     # Gate 116: UI change requires visual_log staged (enforce; replay-skip).
     STAGED_UI2=$(echo "$STAGED_NAMES" | grep -E "^app_flutter/lib/(screens|widgets)/.*\.dart$" | head -1)
@@ -867,6 +915,7 @@ gate_knowledge() {
         STAGED_VLOG=$(git diff --cached --name-only | grep -E "knowledge/visual_log\.md$" | head -1)
         [[ -n "$STAGED_VLOG" ]] || err "116" "שינוי UI ($STAGED_UI2) בלי visual-verify מתועד" "עדכן knowledge/visual_log.md או VERIFIED_UI=1 לחירום"
     fi
+    ran 116   # UI-visual-verify detection always executes
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
