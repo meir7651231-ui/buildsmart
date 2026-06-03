@@ -32,3 +32,8 @@
 ## 🔄 Preact (`app/src/`) — דלתא מול אב-הטיפוס (מנוע-מסחר)
 ⬆️ `SUPPLIER_STORES`+`STORE_PRICING` → **`suppliers.ts`** (auto-gen מ-index.html): `SUPPLIERS`(s1/s2/s3, אותם shipping/eta) + `STORE_PRICING`(per-store SKU) + `DEFAULT_SUPPLIER_ID='s1'`, מטוייפים.
 ➖ **הסל פושט:** `app-store.ts` — `cart`/`setQty`/`incQty`/`decQty`/`cartCount` (signals בלבד). `computeCheckout`/`SYS_ORDERS`/split-shipment/VAT — **לא אומתו** בשכבת-Preact (פרסונות placeholder; ה-checkout-engine המלא כנראה לא הומר).
+
+---
+
+## 📱 Flutter — דלתא
+➖ מנוע-checkout/`SUPPLIER_STORES`/`SYS_ORDERS`/VAT המלא — אין כמבנה-data נפרד; מסחר דרך `store_screen`+`sections` (חנות) + cart מקומי. ✅ persistence אמיתי ב-`shared_preferences` (state/app_settings).

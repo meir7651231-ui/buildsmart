@@ -24,3 +24,9 @@ boot: האפליקציה standalone; מאותחלת ע"י splash-default (`scree
 ## 🔄 Preact — דלתא מול אב-הטיפוס
 ➖ **לא הומרו ל-Preact:** מרכז-אבטחה/RBAC (I — 2FA/biometric/audit/session-lock/encryption/privacy) + מרכז-שירות/chatbot (J — help-desk/BOT_KB/shake-report/ממיר-יחידות/לוח-דרושים/סיור). הקבוצות "אבטחה" ו"שירות ותמיכה" קיימות כ-rows בהגדרות (דוח 06), אך ה-hubs עצמם — placeholder/נעדרים.
 **boot ב-Preact:** `main.tsx` → `render(<App/>)` (Preact). אין splash; error-catcher = כלי-Vite/dev.
+
+---
+
+## 📱 Flutter — דלתא
+➖ אבטחה/RBAC (I) + שירות/chatbot (J) — לא הומרו (קבוצות "אבטחה"/"שירות" קיימות ב-`settings_tree` כ-rows בלבד).
+**boot ב-Flutter:** `main.dart` → `runApp(ProviderScope(BuildSmartApp))` → `MaterialApp` (light/dark · RTL · he/ar/en) → `HomeShell`. אין splash/onboarding.

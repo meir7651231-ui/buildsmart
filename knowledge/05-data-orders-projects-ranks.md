@@ -44,3 +44,8 @@
 ## 🔄 Preact (`app/src/data/`) — דלתא מול אב-הטיפוס
 ⬆️ **שודרג (מטוייף):** `PROJECTS` → **`projects.ts`** (3 דמו, `ACTIVE_PROJECT_ID='PRJ-1'`). `RANKS`+זהות → **`identity.ts`**: `RANKS` · `identityStats`/`currentRank`/`nextRank`/`identityAchievements`/`formatIls` — **הלוגיקה הומרה במלואה**.
 ➖ **הוחסר:** `ORDERS` (סדר-הרכבה) — לא הומר (אין assembly-order ב-Preact).
+
+---
+
+## 📱 Flutter — דלתא
+`projects.dart` (37 ש׳) = `Project` + רשימת-פרויקטים. ➖ `RANKS`/זהות/`ORDERS` — לא כמבני-data נפרדים (מינימלי; הפוקוס ב-Flutter על קטלוג/שיחות/התראות/חנות).

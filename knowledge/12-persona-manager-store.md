@@ -37,3 +37,10 @@
 - **`views/store.tsx` (302 ש׳)** = הפרסונה היחידה עם **view ממשי** (`store-row`/`store-sheet` ב-CSS — הזמנות-נכנסות).
 
 ➖ **הוחסר/placeholder:** `views/` manager(16)/courier(12)/worker(12)/home(11) = מינימליים (R2). הדשבורדים המלאים מהפרוטוטייפ (`md-*`/`mm-*`/`mo-*`/`mc-*` מנהל · ליקוט-חנות מלא · שליח-מעקב · עובד-משימות) — **לא הומרו** (placeholder/חלקי).
+
+---
+
+## 📱 Flutter — דלתא (פרסונות)
+`personas.dart` (`Persona`/`kPersonas`) + `bs_dial_widget` (BS-dial). `sections.dart`: `kStoreSections`/`kCourierSections` + order-status sections (st-pending/active/…).
+- **`store_screen.dart` (990 ש׳)** = **טאב-חנות מלא native** (quick-actions + sheets מועדים/תזמון/שיחה) — פרסונת-החנות בולטת, וכאן **טאב-ראשי** (לא רק dial-drill).
+➖ manager/worker/courier — סקשנים ב-`sections.dart` אך ללא view מלא.

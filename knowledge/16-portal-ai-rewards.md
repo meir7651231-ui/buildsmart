@@ -19,3 +19,8 @@
 ## 🔄 Preact — דלתא מול אב-הטיפוס
 ➖ **לא הומרו ל-Preact:** פורטל ספק/שליח (F, כולל chat) · מרכז-AI (G) · תגמולים (H).
 ⬆️ **חריג:** **voice + barcode** (שהיו ב-AI-hub G) **הועברו ל-search-FAB** ב-Preact (`submenu-voice`/`submenu-barcode` + `lib/voice.ts`/`lib/barcode.ts` — ראה דוח 07). שאר ה-AI (predict/alternatives/3way/weather/wear) + תגמולים + portal — נעדרים.
+
+---
+
+## 📱 Flutter (`app_flutter/lib/screens/chats_screen.dart`, 914 ש') — דלתא ⭐
+**טאב-שיחות מלא בסגנון WhatsApp** (native): `_SearchBar` + `_FilterChipsRow` + `_ThreadList` + `_Pill` + שיחה. מול אב-הטיפוס (chat ב-Category F, `chatOverlay`) ו-Preact (לא הומר). ⭐ **chat = טאב ראשי** (אחד מ-4 הטאבים). שאר Category-F/G/H — לא הומרו.

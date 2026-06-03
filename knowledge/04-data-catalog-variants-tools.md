@@ -53,3 +53,8 @@
 - `CATALOG`/`CATEGORIES` → `catalog.ts` (דוח 03).
 
 ➖ **הוחסר משכבת-ה-data:** `SIZES` (delta-מחיר) · `STOCK_DEMO` · `ACC_TYPES`/`ACC_GROUPS`/`ACC_PRICE_BOOK`/`SPECS`/`CAT_DESC`/`DIAGRAMS`/`ICN` — לא נמצאים כמבני-data אוטו-מחולצים (חלקם אולי inline בקומפוננטה). **ה-`brands[]` נגזם לחלוטין** (`grep brand` ב-`data/`→0).
+
+---
+
+## 📱 Flutter (`app_flutter/lib/data/`) — דלתא
+`catalog.dart` (`kCatalogCats`) + `sections.dart` (`kStoreSections`/`kCourierSections`) + **`menu_trees.dart`** (`kHomeTree`/`kCartTree`/**`kFinanceHub`**/`projectsTree()`) — עצי-ה-dial. ⭐ **`kFinanceHub` קיים** (מרכז-פיננסים כעץ-dial — לא הומר ב-Preact). VARIANTS/TOOLS/SIZES — אין כמבני-data נפרדים (`smart_tree.dart` מאחד brands+acc).

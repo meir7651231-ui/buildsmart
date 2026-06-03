@@ -28,3 +28,8 @@
 
 ## 🔄 Preact — דלתא מול אב-הטיפוס
 ➖ **כל Category-A לא הומר ל-Preact** — מתכנן-משלוחים · RMA · השכרת-כלים · פקדונות · חתימה · MSDS · doc-scan · gov-XML · RFQ. Preact = shell ממוקד (catalog + dials + store-view), בלי שכבת-B2B. (אין קומפוננטות מתאימות ב-`app/src`.)
+
+---
+
+## 📱 Flutter — דלתא
+➖ Category-A (planner/RMA/השכרה/פקדונות/חתימה/MSDS/gov-XML/RFQ) — **לא הומר** ל-Flutter (אין קומפוננטות). הפוקוס: קטלוג/שיחות/התראות/חנות.

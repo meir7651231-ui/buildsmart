@@ -42,3 +42,9 @@
 - **קטלוג עבר ל-search-FAB** (`submenu-catalog`) — מול tab נפרד בפרוטוטייפ.
 
 ➖ **הוחסר:** מנוע-AI המלא (G) — רק voice+barcode שרדו; predict-stock/alternatives/3way/weather/wear-detect לא הומרו.
+
+---
+
+## 📱 Flutter — דלתא (חיפוש + device-APIs אמיתיים) ⭐
+- `search_dial_widget.dart` (`SearchDialWidget`+`_ToolsRoot`) + `data/search_index.dart` (325 ש׳) — search-dial עם tools (כמו Preact).
+- ⭐ **device-APIs אמיתיים (לא הדמיה):** **barcode** → `barcode_scanner.dart` + `camera_sheet.dart` (`mobile_scanner` — מצלמה אמיתית, `MobileScannerController`); **voice** → `services/voice.dart` (`speech_to_text` — זיהוי-דיבור אמיתי). מול הסימולציה בפרוטוטייפ/Preact.

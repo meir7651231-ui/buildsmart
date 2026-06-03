@@ -26,3 +26,8 @@
 - **onboarding הוסר לחלוטין** — אין splash/welcome/login/profession/prep; כניסה לפי-פרסונה ישירה (`ActiveView`).
 - **התראות**: רק `notificationCount` signal (`app-store.ts`) — אין `seedNotifications`/`pushNotification`/פאנל-התראות.
 - **checkout-submit** המלא (`checkout`/`syncOrderToSystem`/`generateMockOrder`) — לא הומר.
+
+---
+
+## 📱 Flutter (`app_flutter/lib/screens/notifications_screen.dart`, 906 ש') — דלתא ⭐
+**טאב-התראות מלא native** (לא רק badge): `_Header` + `_NotifSearchBar` + `_SectionChipsRow` (סינון per-type) + show-more + snooze. מול אב-הטיפוס (פאנל ב-appbar) ו-Preact (רק `notificationCount` signal). ⭐ **התראות = טאב ראשי** — הרחבה אמיתית מעבר לשני המקורות הקודמים.

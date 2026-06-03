@@ -31,3 +31,8 @@
 ⬆️ **שודרג:** ה-self-test של הפרוטוטייפ → **מודולים מטוייפים**: `registry.ts` (רישום) + `runner.ts` + tests נפרדים. `regression-panel` (inline במנהל, `reg-*` CSS) מריץ; `regression-store` (state).
 ➕ **נוסף:** `tests/tabs.tsx` (**R7** — regression שחייב לעבור) · `tests/dsync.ts` (display-sync).
 ➖ **הוחסר:** רוב משפחות-הבדיקה (`testCrit_/testImp_/testFamily_/testContract_` + ~350 `BUTTON_REGISTRY`) — Preact מכסה תת-קבוצה ממוקדת (buttons/products/dupes/dsync/tabs).
+
+---
+
+## 📱 Flutter — דלתא
+➖ ענף `nice-volta`: **אין `test_harness`/self-test** ב-`lib/` (27 הקבצים = feature-code בלבד). (בענפי-Flutter אחרים תועד `lib/test_harness/` שמשקף את ה-self-test — בענף הזה נעדר.)

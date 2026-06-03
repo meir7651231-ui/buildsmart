@@ -116,4 +116,9 @@
 |---|---|---|
 | `01` עיצוב | tokens פורט מ-Preact; **מותג כתום #FF7A18** (לא teal); native light/dark + RTL + i18n | ✅ |
 | `02` מעטפת | מעטפת WhatsApp: 4 בוטם-טאבים (קטלוג/שיחות/התראות/חנות) + dial-overlays | ✅ |
-| `03–17` נתונים/לוגיקה/screens | — | ⬜ בעבודה |
+| `03/04/15` data+hub | smart_tree **brands שוחזרו** · menu_trees + **kFinanceHub** | ✅ |
+| `06/07` הגדרות/חיפוש | settings-dial · **device-APIs אמיתיים** (mobile_scanner/speech_to_text) | ✅ |
+| `08/09/16` קטלוג/התראות/שיחות | catalog_screen · **chats+notifications = טאבים native מלאים** ⭐ | ✅ |
+| `05,10–14,17` שאר | projects.dart; ORDERS/B2B/site/security/self-test/scenarios **לא הומרו** | ✅ |
+
+🏁 **הושלם — דלתא Flutter נשזרה בכל 17 הדוחות.** המאגר מחזיק עכשיו **3 מקורות** (אב-טיפוס בסיס · Preact · Flutter) בכל דוח.

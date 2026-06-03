@@ -58,3 +58,8 @@
 ➕ **נוסף:** **R9 — עריכת-leaf inline** (`editingLeafKey` → `.dial__input` מחליף label). אין באב-הטיפוס (שם `editAccountField`=prompt/sheet).
 
 ➖ **הוחסר:** ה-`settingsOverlay` (sheet) — הכל dial. (מידע/גרסה/תנאי/פרטיות נשמרו כעלים.)
+
+---
+
+## 📱 Flutter (`app_flutter/lib/data/settings_tree.dart`) — דלתא
+⬆️ הגדרות → **dial-tree** (`SettingsNode`/`SettingsGroup`/`kSettingsGroups`) — אותו דפוס כמו Preact (R3). מצב ב-`state/app_settings.dart` (Riverpod, **נשמר ב-`shared_preferences`** — persistence אמיתי, לא in-memory).

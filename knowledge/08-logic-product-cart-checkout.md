@@ -51,3 +51,9 @@
 - הסל → signals (`setQty`/`incQty`/`decQty`, stepper), לא `computeCheckout`.
 
 ➖ **הוחסר/פושט:** **מנוע עץ-המוצרים המלא** (`overlay#overlay` · `DIAGRAMS` · `ACC_GROUPS` · סדר-הרכבה · סורק) — Preact מציג מוצר + `accessories[]` (מ-catalog) בכרטיס/sheet, בלי דיאגרמות-שלבים/assembly-order/scan. `computeCheckout`/`checkout` המלא **לא הומר** (פרסונת-קבלן = catalog+cart פשוט).
+
+---
+
+## 📱 Flutter (`app_flutter/lib/screens/catalog_screen.dart`, 2190 ש') — דלתא
+**טאב-הקטלוג** (המסך הגדול ביותר) = ניווט-קטגוריות + **smart-tree** (`smart_tree.dart` עם brands+acc, דוח 03) + תצוגת-מוצר + חיפוש. עץ-המוצרים (smart-tree, כולל `must`/`why`/`brands`) הוא הליבה — קרוב יותר לאב-הטיפוס מ-Preact.
+➖ סדר-הרכבה (`DIAGRAMS`/assembly) + סורק-תוכניות המלאים — חלקי/נעדר. checkout — דרך store/cart, לא `computeCheckout` המלא.

@@ -24,3 +24,8 @@
 ## 🔄 Preact — דלתא מול אב-הטיפוס
 ⬆️ שליח → BS-dial placeholder (`views/courier.tsx`, 12 ש׳; ראה דוח 12).
 ➖ **לא הומר:** תרחישי **פריט-חסר/אזל** (missing-item/OOS) · **רישום** (`checkRegistration`/`finishRegistration` — אין onboarding) · `VEHICLE_RANK`/courier-tracking · cross-tab sync.
+
+---
+
+## 📱 Flutter — דלתא
+`sections.dart` `kCourierSections` (סקשני-שליח כעץ-dial). ➖ תרחישי פריט-חסר/אזל · רישום/onboarding · courier-tracking מלא — לא הומרו.
