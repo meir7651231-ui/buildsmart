@@ -63,3 +63,17 @@ faucet:{productType:"מוצר ראשי", name:'ברז לכיור', img:'🚰', c
 **הבנה מרכזית:** TREES הוא גם הקטלוג וגם מנוע-ההמלצות. `must`/`why` הם ה"חוכמה"
 שהדמו מוכר ("האביזרים שהצוות תמיד שוכח"). מוצר-אב נבחר → `acc[]` שלו מוצג בעץ
 (`overlay#overlay` ב-`02`), עם `must` מסומן וברירת-מחדל, ו-`brands[].rec` כברירת-מחדל.
+
+---
+
+## 🔄 Preact (`app/src/data/catalog.ts`) — דלתא מול אב-הטיפוס (מודל-מוצר)
+> ⭐ **auto-generated מ-`/index.html`** ע"י `scripts/extract-catalog.mjs` — קטלוג-Preact הוא **היטל מטוייפ של ה-TREES**. 4544 ש׳.
+
+⬆️ **שודרג:**
+- **3 הסכמות (pl_/stages/rich) → טיפוס אחד `CatalogProduct`** (שדות אופציונליים: `productType/series/material/catalogProduct/accessoryProduct/price/image/accessories`). `Accessory` מטוייפ: `{name, emoji, price, qty, why?, must, sizes?}`.
+- **CATALOG (11 קטגוריות שטוחות) → `CATEGORIES` עץ-עמוק** (`{id, name, emoji, parentId}`): top→sub (למשל "אביזרים מכניים" → "הברגה פנימית"/"90° מעבר"). מאפשר drill-down circles (`childrenOf`).
+- `PRODUCTS` שטוח — כל מוצר עם `categoryTopId`+`categoryLeafId` (נתיב לעץ).
+
+➕ **נוסף:** **תמונות-אמת** (`image:/catalog/pl_*.jpg`) · helpers (`childrenOf`/`productsForPath`/`productById`/`categoryById`) · `accessoryProduct` flag · `material`.
+
+➖ **הוחסר/שונה:** ה-**`brands[]`** (בחירת-מותג של מוצרי-rich) **אינו** ב-`CatalogProduct` — הועבר ל-`variants.ts` או נגזם (ראה דוח 04). שלבי-פרויקט (infra/sealing/…) — לבדוק אם שרדו ב-PRODUCTS.
