@@ -162,6 +162,8 @@ PER_BAND_BOX = {
     (36, 'b'): (12, 720, 170, 1035),
     # p39_b — basin connector: cap y=545, base elbow y=650, narrow x to skip ticks
     (39, 'b'): (12, 545, 255, 650),
+    # p40_c — inlet extension slim pipe: cap y=655, base y=760
+    (40, 'c'): (12, 650, 175, 770),
 }
 
 # Per-band override (page, tag) → PHOTO_H. Wins over PER_PAGE_PHOTO_H.
