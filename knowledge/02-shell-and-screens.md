@@ -313,7 +313,7 @@ cart/orders→cart, catnav→catalog).
 ⭐ **האפליקציה בוגרת — לא "shell + toast" (תיקון לטענה הקודמת שלי):**
 - **`CatalogScreen` (7,660ש׳)** = 8 sections (הכל · בית-Finder · תכנון-חיבור · קטגוריות · עץ-חכם · וריאנטים · מועדפים · חיפושים) · drill-עץ · חיפוש-עם-סינונימים · lens-selector · כרטיס-מוצר-חכם מלא.
 - ⭐ **`InstallStudioScreen` (3,185ש׳) = יהלום-הכתר:** מתכנן-צנרת — גרירת-מוצרים→מנוע (`install_engine` 1391ש׳: Dijkstra + auto-compliance PRV/TMTV)→BOM + צ'קליסט-תקינות + pressure-drop + אומדן-מחיר + שמירת-פרויקטים. **עמוק מהפרוטוטייפ — אין מקבילה.**
-- `FinderScreen` (מאתר לא-טכני) · `suppliers/lipskey_*` (מסכי-מותג) · **שיחות** (`chats_screen` **1437ש׳**, 6 threads + auto-reply + ארכוב) · **התראות** (**1081ש׳**, קיבוץ-run≥3 + סינון + swipe) · **חנות** (**1500+ש׳**, סל + checkout VAT-18% + הזמנות + שירותים) · **4 מסכי-הגדרות** (~40 שדות כ"א, persisted).
+- `FinderScreen` (מאתר לא-טכני) · `suppliers/lipskey_*` (מסכי-מותג) · **שיחות** (`chats_screen` **1437ש׳**, 6 threads + auto-reply + ארכוב) · **התראות** (**1081ש׳**, קיבוץ-run≥3 + סינון + swipe) · **חנות** (`store_screen` **3,131ש׳**, סל + checkout VAT-18% + הזמנות + שירותים ממוקדי-קבלן) · **4 מסכי-הגדרות** (~40 שדות כ"א, persisted).
 
 ➖ **מה כן toast 'בבנייה':** ה-dial-overlays (menu-leaves · פרסונות store/courier/worker/manager = leaves שמציגים toast) · חלק ממצבי-מצלמה · כפתורי-משנה. אבל ה-**ליבה אמיתית ופועלת** (מחלקות→קטלוג→install-studio→סל · chats · notifications · settings).
 🔧 **מול פרוטוטייפ/Preact:** **לא** port של 5-הפרסונות — אפליקציית-אינסטלציה אמיתית. install-studio/chats/notifications = **חדשים לגמרי**. ~92% roadmap · 1,023 בדיקות (155 קבצים) · checkout בסיסי (mock).
