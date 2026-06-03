@@ -25,7 +25,7 @@ boot: האפליקציה standalone; מאותחלת ע"י splash-default (`scree
 ---
 
 ## 🔄 Preact — דלתא מול אב-הטיפוס
-🔧 **תיקון (INSP + grep + אימות-מקור על nice-volta):** מרכז-אבטחה (I) + מרכז-שירות (J) **כן נשזרו ל-Preact כ-dial-subtrees מלאים** (SETTINGS_SUB), verbatim (R6): **אבטחה 23 עלים** (2FA · biometric · RBAC×5 · encryption×4 · privacy×4 · session-timeout · audit · GPS · devices) + **שירות 15 עלים** (`LEAF_BINDINGS`, אומת-מהמקור; help-desk · chatbot · ממיר-יחידות · מחשבון-כמויות · סיור). grep: "מרכז האבטחה"×24, "מרכז השירות"×16 (occurrences, לא leaves).
+🔧 **תיקון (INSP + grep + אימות-מקור על nice-volta):** מרכז-אבטחה (I) + מרכז-שירות (J) **כן נשזרו ל-Preact כ-dial-subtrees מלאים** (SETTINGS_SUB), verbatim: **אבטחה 23 עלים** (2FA · biometric · RBAC×5 · encryption×4 · privacy×4 · session-timeout · audit · GPS · devices) + **שירות 15 עלים** (`LEAF_BINDINGS`, אומת-מהמקור; help-desk · chatbot · ממיר-יחידות · מחשבון-כמויות · סיור). grep: "מרכז האבטחה"×24, "מרכז השירות"×16 (occurrences, לא leaves).
 ➖ אבל **הפונקציונליות = toast/drill בלבד** (לא ה-flows המלאים — RBAC-matrix/OTP/BOT_KB/shake לא רצים). כלומר התוכן **ported כ-leaves**, המימוש לא.
 **boot ב-Preact:** `main.tsx` → `render(<App/>)` (Preact). אין splash; error-catcher = כלי-Vite/dev.
 
@@ -43,4 +43,4 @@ boot: האפליקציה standalone; מאותחלת ע"י splash-default (`scree
 - **`service-worker.js`** (root · `CACHE_NAME:'buildsmart-v107'`) — SW **של אב-הטיפוס**: offline (network-first → cache-fallback → `index.html`). 🔧 ה-**Preact** מייצר PWA **משלו** דרך **`vite-plugin-pwa` (Workbox, `registerType:autoUpdate`)** — SW+manifest אוטומטיים: manifest דומה (name "BuildSmart — רכש חומרי בנייה" · teal #1f6f6b · bg #f4f5f3 · he/rtl · BS-icons SVG) + **runtimeCaching:** NetworkFirst למסמכים (`bs-html`, timeout 3s) · StaleWhileRevalidate ל-script/style/font (`bs-assets`) · CacheFirst לתמונות (`bs-images`, 200 entries/30 יום). base `/buildsmart/` ב-Pages. **לא** ה-SW הידני (v107).
 - **`vercel.json`** — deploy של **Preact**: `installCommand/buildCommand: cd app` → `outputDirectory: app/dist` + SPA-rewrites (הכל→`index.html` חוץ מ-assets). (CLAUDE.md: Preact חי גם ב-GitHub Pages.)
 - **Flutter web**: `app_flutter/web/index.html` (shell נפרד; `flutter_bootstrap.js`; `base href=$FLUTTER_BASE_HREF` מוחלף ב-build → `/buildsmart/flutter/`). ⚠️ **מבטל service-workers** (`getRegistrations→unregister`) — אין PWA/offline ל-Flutter-web (בניגוד ל-Workbox של Preact). פרוס ב-CI ל-`/buildsmart/flutter/`.
-- **`CLAUDE.md`** (root) — הוראות-פרויקט (ענפי-עבודה · R1–R9 · Flutter dev-loop) — מטא-פיתוח, לא ידע-מוצר.
+- **`CLAUDE.md`** (root) — הוראות-פרויקט (ענפי-עבודה · Flutter dev-loop) — מטא-פיתוח, לא ידע-מוצר.

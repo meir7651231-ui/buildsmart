@@ -48,25 +48,25 @@
 
 ---
 
-## 🔄 Preact (`app/src/components/menu/submenu-settings.tsx`) — דלתא (הגדרות = dial, R3/R9)
+## 🔄 Preact (`app/src/components/menu/submenu-settings.tsx`) — דלתא (הגדרות = dial)
 > 1461 ש׳ — תרגום `renderSettings` (sheet) ל-**עץ-dial**. state ב-`app-store.ts` (settingsLevel/group/path).
 
 ⬆️ **שודרג:**
-- **8 קבוצות (sheet) → `SETTINGS_ROWS` 9 קבוצות (dial):** account · notifications · display · accessibility · security · support · delivery · region · about (+reset). אותן קבוצות, כ-dial-rows (R3).
+- **8 קבוצות (sheet) → `SETTINGS_ROWS` 9 קבוצות (dial):** account · notifications · display · accessibility · security · support · delivery · region · about (+reset). אותן קבוצות, כ-dial-rows.
 - **`SETTINGS_SUB`** = `Record<SettingsGroupId, Node[]>` — עץ-dial עמוק לכל קבוצה (`Node={label, children?}`). `walkSettings` מנווט; רנדרים `SettingsTopSubmenu`/`SettingsSubmenu`/`SettingsTreeSubmenu`.
-- **`SETTINGS_LABELS` → `LEAF_BINDINGS`** = `Record<string, Binding>` (key=`'group>label>label'`) — **72 עלים מחווטים** (אומת מהמקור `submenu-settings.tsx`; פירוט מ-`wip-menu-wiring.md`: security 23 · support 15 · region 7 · display 6 · delivery 5 · about 4 · account 4-R9 · notif 4 · accessibility 1 · reset 1). persist: **`bs.settings.v1`** (app-settings) + **`bs.profile.v1`** (user-profile); toast 3200ms. smoke 21/21 · runRegression 236/236.
-- ⭐ **סה"כ PROFILE_TREE + SETTINGS_SUB = 117 labels** — כולל **subtrees מלאים** של מרכז-אבטחה (~23) · מרכז-שירות (~16) · מועדון/תגמולים (7) · מרכז-פיננסים · B2B-services (verbatim, R6). כלומר ה-hubs **כן ported כ-dial-leaves** (לא רק 9 הקבוצות) — ראה תיקונים בדוחות 14–17. (~84 leaves "אינטראקטיביים" סה"כ; ~70 מחווטים, השאר branches.)
+- **`SETTINGS_LABELS` → `LEAF_BINDINGS`** = `Record<string, Binding>` (key=`'group>label>label'`) — **72 עלים מחווטים** (אומת מהמקור `submenu-settings.tsx`; פירוט מ-`wip-menu-wiring.md`: security 23 · support 15 · region 7 · display 6 · delivery 5 · about 4 · account 4 · notif 4 · accessibility 1 · reset 1). persist: **`bs.settings.v1`** (app-settings) + **`bs.profile.v1`** (user-profile); toast 3200ms. smoke 21/21 · runRegression 236/236.
+- ⭐ **סה"כ PROFILE_TREE + SETTINGS_SUB = 117 labels** — כולל **subtrees מלאים** של מרכז-אבטחה (~23) · מרכז-שירות (~16) · מועדון/תגמולים (7) · מרכז-פיננסים · B2B-services (verbatim). כלומר ה-hubs **כן ported כ-dial-leaves** (לא רק 9 הקבוצות) — ראה תיקונים בדוחות 14–17. (~84 leaves "אינטראקטיביים" סה"כ; ~70 מחווטים, השאר branches.)
 - **`app-settings.ts` ארכיטקטורה (INSP-0010, אומת מהמקור):** `AppSettings = {display, notif, region, delivery, accessibility, **security**}` (6 מפתחות; `security`={twoFA,biometric,locationPerm,sessionTimeout,privacy} — לא ממופה ל-data-attr) · setters = **shallow-clone** (אין mutation) · **`effect()` יחיד חד-כיווני** → 9 `<html>` data-attrs (`data-theme/text-size/reduce-motion/lang/units/currency/haul/express/contrast`) + LS · **`load()`+`pick()`** = enum-validator (anti-corruption, אין feedback-loop). בדיקות **Playwright** התנהגותיות (currency→attr→stored→reset).
-- profile → **`PROFILE_TREE`** (עץ כרטיס-קבלן/דרגות/הישגים כ-dial), מול מסך-הפרופיל. **מבנה verbatim (INSP-0019):** L1 `הגדרות-פרופיל`·`הגדרות מתקדמות` → L2 `כרטיס קבלן`·`דרגות הקבלן` → L3-כרטיס `אתה במצב הדגמה`·`המספרים שלך`·`סך הרכש דרך BuildSmart` / L3-דרגות `ההטבה שלך`·`הישגים`·`מועדון BuildSmart`. ⚠️ `הגדרות-פרופיל` = **label שחיבר הבעלים** (לא-verbatim; חריג-R6 מתועד, INSP-0019).
+- profile → **`PROFILE_TREE`** (עץ כרטיס-קבלן/דרגות/הישגים כ-dial), מול מסך-הפרופיל. **מבנה verbatim (INSP-0019):** L1 `הגדרות-פרופיל`·`הגדרות מתקדמות` → L2 `כרטיס קבלן`·`דרגות הקבלן` → L3-כרטיס `אתה במצב הדגמה`·`המספרים שלך`·`סך הרכש דרך BuildSmart` / L3-דרגות `ההטבה שלך`·`הישגים`·`מועדון BuildSmart`. ⚠️ `הגדרות-פרופיל` = **label שחיבר הבעלים** (לא-verbatim; חריג מתועד, INSP-0019).
 
-➕ **נוסף:** **R9 — עריכת-leaf inline** (`editingLeafKey` → `.dial__input` מחליף label). אין באב-הטיפוס (שם `editAccountField`=prompt/sheet).
+➕ **נוסף:** **עריכת-leaf inline** (`editingLeafKey` → `.dial__input` מחליף label). אין באב-הטיפוס (שם `editAccountField`=prompt/sheet).
 
 ➖ **הוחסר:** ה-`settingsOverlay` (sheet) — הכל dial. (מידע/גרסה/תנאי/פרטיות נשמרו כעלים.)
 
 ---
 
 ## 📱 Flutter — דלתא (הגדרות) ⭐ נכתב-מחדש מהמציאות
-> ב-Flutter ההגדרות חיות ב-**שני מקומות**: (א) menu-dial · (ב) **4 מסכי-הגדרות מלאים** (חריגה מ-R2 — מסכים אמיתיים, לא dial).
+> ב-Flutter ההגדרות חיות ב-**שני מקומות**: (א) menu-dial · (ב) **4 מסכי-הגדרות מלאים** (מסכים אמיתיים, לא dial).
 ⬆️ **menu-dial** (`data/settings_tree.dart`): `SettingsNode`/`SettingsGroup`/`kSettingsGroups` — **10 קבוצות** (חשבון/התראות/תצוגה/נגישות/אבטחה/שירות/משלוח/אזור/מידע/איפוס), ~38 leaves. leaf מחיל theme/textSize/lang/units/haul/express/contrast/2FA/biometric/notif/privacy (`_applyLeaf`) או toast. מצב ב-`state/app_settings.dart` (Riverpod + `bs.settings.v1`).
 ➕ **נוסף — 4 מסכי-הגדרות native** (~140 שדות, persist אמיתי, ExpansionTile עם count-badge, reset-dialog): **`catalog_settings_screen`** (~40: חיפוש/תצוגה/מחירים/מועדפים/יחידות/ספקים/AI/נגישות — פעילים: view/grid/image-size/text-size/contrast/reduced-motion/search-history) · **`chat_settings_screen`** (~30: presence/notif/media/privacy/backup/bot) · **`notif_settings_screen`** (~40: snooze/channels/types/quiet-hours/per-persona/lock-screen) · **`store_settings_screen`** (~30: shipping/payment/invoices/cart-gates). keys `bs.{catalog/chat/notif/store}-settings.v1`.
-🔧 **מול פרוטוטייפ/Preact:** שם הגדרות = dial-עץ בלבד (R3); ב-Flutter **מסכים-מלאים + dial** — עשיר יותר (~140 שדות מול ~70), אך חורג מ-R2.
+🔧 **מול פרוטוטייפ/Preact:** שם הגדרות = dial-עץ בלבד; ב-Flutter **מסכים-מלאים + dial** — עשיר יותר (~140 שדות מול ~70).

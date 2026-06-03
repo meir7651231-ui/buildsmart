@@ -30,7 +30,7 @@
 > `test/registry.ts`(68) + `test/runner.ts`(53) + `test/tests/{buttons,dsync,products,dupes,tabs}` + `components/regression/regression-panel.tsx`(135) + `store/regression-store.ts`.
 
 ⬆️ **שודרג:** ה-self-test של הפרוטוטייפ → **מודולים מטוייפים**: `registry.ts` (רישום) + `runner.ts` + tests נפרדים. `regression-panel` (inline במנהל, `reg-*` CSS) מריץ; `regression-store` (state).
-➕ **נוסף:** `tests/tabs.tsx` (**R7** — regression שחייב לעבור) · `tests/dsync.ts` (display-sync).
+➕ **נוסף:** `tests/tabs.tsx` (regression שחייב לעבור) · `tests/dsync.ts` (display-sync).
 ➖ **הוחסר:** רוב משפחות-הבדיקה (`testCrit_/testImp_/testFamily_/testContract_` + ~350 `BUTTON_REGISTRY`) — Preact מכסה תת-קבוצה ממוקדת (buttons/products/dupes/dsync/tabs).
 
 ---
@@ -38,5 +38,5 @@
 ## 📱 Flutter — דלתא (self-test) ⭐ תיקון — נכתב-מחדש מ-whats-happening
 > ⚠️ הגרסה הקודמת (snapshot nice-volta, 27 קבצים) טענה "אין test_harness". **שגוי** — באפליקציה האמיתית ה-self-test **עשיר ביותר**.
 - **`lib/test_harness/`** (in-app, נפתח דרך BS-dial→מנהל→🔬 בדיקות-רגרסיה / `regression_panel_screen.dart`): `runner.dart` (**11 suites**: catalog/dsync/tabs/buttons/dupes/sections/settings/behavior/products/engine/cart/finder) + `regression_state.dart` (Riverpod) + `types.dart`. תצוגת pass/fail + filter-chips + expandable.
-- **`test/` = 155 קבצי-`.dart` (148 `_test`) · ‎16,441ש׳ · 1,023 בדיקות** (953 `test` + 70 `testWidgets` · 165 `group`) — אומת-עצמי שורה-שורה. (קובצי+שורות תואמים ל-KB במדויק; "863" של ה-KB היה ספירה-חלקית/ישנה — הקוד קובע, R6.) שערים: **47-helper-gate** (כל helper-ציבורי→test; שם-שער מ-KB) · **mutation-tests** (40 מוטציות) · **`stuck_regression`** (1,308ש׳ — אנטי-דפוסים auto-gen) · `spec_assets` (1,486ש׳) · `knowledge_protocol` · version-sync.
+- **`test/` = 155 קבצי-`.dart` (148 `_test`) · ‎16,441ש׳ · 1,023 בדיקות** (953 `test` + 70 `testWidgets` · 165 `group`) — אומת-עצמי שורה-שורה. (קובצי+שורות תואמים ל-KB במדויק; "863" של ה-KB היה ספירה-חלקית/ישנה — הקוד קובע.) שערים: **47-helper-gate** (כל helper-ציבורי→test; שם-שער מ-KB) · **mutation-tests** (40 מוטציות) · **`stuck_regression`** (1,308ש׳ — אנטי-דפוסים auto-gen) · `spec_assets` (1,486ש׳) · `knowledge_protocol` · version-sync.
 🔧 מול הפרוטוטייפ (`BUTTON_REGISTRY` 350 + reg-harness) ו-Preact (21-button registry): Flutter = ה-self-test **הכבד ביותר** מ-3 המקורות, נאכף ב-CI + 116-שערים (דוחות 21–22).

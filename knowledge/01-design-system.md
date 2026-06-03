@@ -289,8 +289,8 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 ➕ **נוסף (`tokens.css`):** סקאלות פורמליות שאב-הטיפוס hardcode — `--radius-sm/md/lg` · `--space-1..6` · `--font-display/--font-body`. text-size כ-`zoom` (small .92 / large 1.1). reduce-motion (זהה).
 
 ➕ **נוסף (`global.css`) — מערכת-ה-dial (נטו-חדש; אין באב-הטיפוס):**
-- **`.fab`/`.fab--menu`/`.fab--search`** (R1 — "5 ה-floating buttons NEVER move", §1257) · **`.float`/`--logo/--name/--cart`** (FloatingHeader).
-- **`.dial`** (speed-dial): `.dial__btn`/`.dial__circle`(+`--active/--on`)/`.dial__item`(+`--sub/--danger`)/`.dial__label` · **`.dial__input`** (R9 — input מחליף label בעריכה, §639).
+- **`.fab`/`.fab--menu`/`.fab--search`** ("5 ה-floating buttons NEVER move", §1257) · **`.float`/`--logo/--name/--cart`** (FloatingHeader).
+- **`.dial`** (speed-dial): `.dial__btn`/`.dial__circle`(+`--active/--on`)/`.dial__item`(+`--sub/--danger`)/`.dial__label` · **`.dial__input`** (input מחליף label בעריכה, §639).
 - **`.bsdial`** (BS persona-dial) · right-rail tools+sub-menu (search §1007) · scope-chips · `.content` (main יחיד) · `.category-circles` (§156) · regression-panel inline (§1872).
 - ➕ **net-new (owner-specified, אין באב-הטיפוס):** `.screen__bg` — **רקע-אמבטיה חד + כרטיסי frosted-glass** (`global.css` §49; spec.json `FEAT-bathroom-bg`).
 

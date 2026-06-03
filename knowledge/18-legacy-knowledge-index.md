@@ -9,24 +9,24 @@
 | `inspections/` | 43 | `INSP-0001→0044` — היסטוריית-ביקורות (כל commit של menu/settings/dial) |
 | `inspector/` | 4 | פרוטוקול-המפקח (checklist · loops · prompt · README) |
 | root | 12 | dashboards (COURIER/STORE/SYSTEM_MANAGER/WORKER) · UI_ARCHITECTURE · ROLE_DRAWER_SYSTEM · IMPLEMENTATION_PROTOCOL(deprecated) · legacy-map · wip-menu-wiring · agent-board · reporting · README |
-| `app/RULES.md` | 1 | R1–R9 — ה-spec ל"איך" |
+| `app/RULES.md` | 1 | ה-spec ל"איך" |
 
 ## ⭐ החלטות-היסוד (ADR) — ה-WHY מאחורי ה-dial
-- **ADR-001 · No-Window** (2026-05-20, Accepted): אוסר חלונות-מלאים (drawers/modals/sheets/overlays). הנמקה: משתמשי-אתר-בנייה (ידיים מלוכלכות/כפפות · יד-אחת · הפרעות) — חלון חוסם מסך, גונב פוקוס, דורש סגירה. ציטוט-בעלים verbatim: **"אף אחד מהם לא פותח חלון. נקודה."** → R2/R3. ⭐ **רשימת-ה-fixed-overlays המותרת (checklist FRM-02):** `product-sheet` · `search-panel` · `menu-speed-dial` · `bs-dial-scrim` — **כל overlay חדש מעבר לאלה = CRITICAL**; backdrop מותר **≤0.45 opacity · ≤3px blur** (FRM-06). עלות-עבר: `bs-panel` drawer + search-sheets **נבנו-מחדש** ל-dial. אכיפה: Inspector FRM-02 (`position:fixed;inset:0`→CRITICAL) + FRM-06 (opacity/blur).
-- **ADR-002 · Dial Pattern** (2026-05-20): החלופה — **dial** (טור-כפתורים קומפקטי שנפתח מתחת/מעל הכפתור-הראשי). → R3/R4/R5. **השורש של ה-dial pattern ב-Preact וב-Flutter** (דוחות 01/02). ⭐ **עיגון-לפי-פינה (same-side):** BS (ימין-עליון)↘ · search-FAB (ימין-תחתון)↗ · menu-FAB (שמאל-תחתון)↗ · **עגלה (שמאל-עליון)↘ — גם dial**. ⭐ **circle+pill כשני-אלמנטים נפרדים (רווח ~10px) — בכוונה כדי שה-`bathroom-background` ייראה דרך הרווח** (חלק מה-look-and-feel; קושר ל-bathroom-bg/דוח 01). פעיל=שניהם teal · לא-פעיל=pill לבן+icon teal. (`dial-in` keyframe משותף לכל ה-FABs.)
+- **ADR-001 · No-Window** (2026-05-20, Accepted): אוסר חלונות-מלאים (drawers/modals/sheets/overlays). הנמקה: משתמשי-אתר-בנייה (ידיים מלוכלכות/כפפות · יד-אחת · הפרעות) — חלון חוסם מסך, גונב פוקוס, דורש סגירה. ציטוט-בעלים verbatim: **"אף אחד מהם לא פותח חלון. נקודה."** ⭐ **רשימת-ה-fixed-overlays המותרת (checklist FRM-02):** `product-sheet` · `search-panel` · `menu-speed-dial` · `bs-dial-scrim` — **כל overlay חדש מעבר לאלה = CRITICAL**; backdrop מותר **≤0.45 opacity · ≤3px blur** (FRM-06). עלות-עבר: `bs-panel` drawer + search-sheets **נבנו-מחדש** ל-dial. אכיפה: Inspector FRM-02 (`position:fixed;inset:0`→CRITICAL) + FRM-06 (opacity/blur).
+- **ADR-002 · Dial Pattern** (2026-05-20): החלופה — **dial** (טור-כפתורים קומפקטי שנפתח מתחת/מעל הכפתור-הראשי). **השורש של ה-dial pattern ב-Preact וב-Flutter** (דוחות 01/02). ⭐ **עיגון-לפי-פינה (same-side):** BS (ימין-עליון)↘ · search-FAB (ימין-תחתון)↗ · menu-FAB (שמאל-תחתון)↗ · **עגלה (שמאל-עליון)↘ — גם dial**. ⭐ **circle+pill כשני-אלמנטים נפרדים (רווח ~10px) — בכוונה כדי שה-`bathroom-background` ייראה דרך הרווח** (חלק מה-look-and-feel; קושר ל-bathroom-bg/דוח 01). פעיל=שניהם teal · לא-פעיל=pill לבן+icon teal. (`dial-in` keyframe משותף לכל ה-FABs.)
 
-## ⭐ R1–R9 (`app/RULES.md`) — ה-spec ל"איך" (verbatim)
-| R | כלל |
+## ⭐ הכללים (`app/RULES.md`) — ה-spec ל"איך" (verbatim)
+| # | כלל |
 |---|---|
-| **R1** | חמשת הסמלים הראשיים לא זזים. בשום מצב. |
-| **R2** | אין חלון מלא. backdrop קל לסימון מצב-פעיל בלבד. |
-| **R3** | Dial — הצורה היחידה לפתיחת כלים. |
-| **R4** | פריט dial = שני אלמנטים נפרדים (circle + label). |
-| **R5** | בחירת tool. |
-| **R6** | האב-טיפוס הוא ה-spec (ל"מה"). |
-| **R7** | אסור להמציא תוכן. |
-| **R8** | RTL — בית/חיפוש מימין, חנות/עגלה משמאל. |
-| **R9** | שדות-טקסט = שורת-הקלדה inline, צמודה לעלה. |
+| 1 | חמשת הסמלים הראשיים לא זזים. בשום מצב. |
+| 2 | אין חלון מלא. backdrop קל לסימון מצב-פעיל בלבד. |
+| 3 | Dial — הצורה היחידה לפתיחת כלים. |
+| 4 | פריט dial = שני אלמנטים נפרדים (circle + label). |
+| 5 | בחירת tool. |
+| 6 | האב-טיפוס הוא ה-spec (ל"מה"). |
+| 7 | אסור להמציא תוכן. |
+| 8 | RTL — בית/חיפוש מימין, חנות/עגלה משמאל. |
+| 9 | שדות-טקסט = שורת-הקלדה inline, צמודה לעלה. |
 > ⭐ **R1 — 5 הסמלים הקבועים verbatim (`RULES.md`, מיקומים מדויקים):** BS-Logo/זהות (top-right, `inset-inline-start:14px`, פותח persona-dial) · שם-persona (top-center, טקסט בלבד, לא-נלחץ) · עגלה (top-left, `inset-inline-end:14px`) · תפריט-FAB (bottom-left, `inset-inline-end:18px`) · חיפוש-FAB (bottom-right, `inset-inline-start:18px`). מותר רק `:active` scale 0.92–0.95 + z-index (ה-inset/bottom קבועים). ⚠️ **שונה מ-5 ה-bottom-tabs של האב-טיפוס** (בית/חיפוש/BS-mode/תפריט/חשבון) — Preact ארגן-מחדש ל-chrome של dial-app. (R2 verbatim: אסור אטימות >50%/blur >4px; מותר 30-45%/≤3px.)
 > ⚠️ R1–R9 ב-`RULES.md` **שונים** מסיכום-ה-R ב-`CLAUDE.md` (שם R8="אין המצאה"). `RULES.md` הוא הקובע (אומת — קריאה מלאה: R7=אין-המצאה · R8=RTL · R9=inline-input). **גם `adr/*` + `knowledge/README` (2026-05-20) מפנים ל-"R1–R8" — קדמו ל-R9** (נוסף INSP-0014; R9=שדות-טקסט inline).
 

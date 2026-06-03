@@ -41,7 +41,7 @@ schema-מלא (לפי הדשבורד): `{id, worker(idx ל-WORKERS), title, desc
 > `search-panel` + 6 submenus + `tools-dial` + `scope-chips` + `results-list` · `lib/search.ts`/`voice.ts`/`barcode.ts` · `store/search-store.ts` · `data/search-index.ts`.
 
 ⬆️ **שודרג:**
-- **3 שורות-חיפוש → search-FAB יחיד** (R1) שפותח `SearchPanel` (input + `scope-chips` + `results-list`).
+- **3 שורות-חיפוש → search-FAB יחיד** שפותח `SearchPanel` (input + `scope-chips` + `results-list`).
 - fuzzy → `lib/search.ts`; `NAV_DESTINATIONS`/`CONTENT_INDEX` → `search-index.ts`/`search-store.ts`.
 
 ➕ **נוסף — tools-dial בחיפוש** (5 כלי-משנה): **🎤 voice** (`submenu-voice`+`lib/voice.ts`) · **📷 barcode** (`submenu-barcode`+`lib/barcode.ts`) · ⚙️ filters · ↕️ sort · ▦ catalog (`submenu-catalog`).
