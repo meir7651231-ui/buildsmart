@@ -12,8 +12,8 @@
 | `app/RULES.md` | 1 | R1–R9 — ה-spec ל"איך" |
 
 ## ⭐ החלטות-היסוד (ADR) — ה-WHY מאחורי ה-dial
-- **ADR-001 · No-Window** (2026-05-20, Accepted): אוסר חלונות-מלאים (drawers/modals/sheets/overlays). הנמקה: משתמשי-אתר-בנייה (ידיים מלוכלכות/כפפות) — חלון חוסם מסך, גונב פוקוס, דורש סגירה. → R2/R3.
-- **ADR-002 · Dial Pattern** (2026-05-20): החלופה — **dial** (טור-כפתורים קומפקטי שנפתח מתחת/מעל הכפתור-הראשי). → R3/R4/R5. **השורש של ה-dial pattern ב-Preact וב-Flutter** (דוחות 01/02).
+- **ADR-001 · No-Window** (2026-05-20, Accepted): אוסר חלונות-מלאים (drawers/modals/sheets/overlays). הנמקה: משתמשי-אתר-בנייה (ידיים מלוכלכות/כפפות · יד-אחת · הפרעות) — חלון חוסם מסך, גונב פוקוס, דורש סגירה. ציטוט-בעלים verbatim: **"אף אחד מהם לא פותח חלון. נקודה."** → R2/R3. ⭐ **2 חריגים תחומים:** (1) `product-sheet` (פירוט-מוצר ממוקד) · (2) backdrop-קל על menu/search dials (**≤45% opacity · ≤3px blur** — לסימון "מצב-פעיל" בלבד). עלות-עבר: `bs-panel` drawer + search-sheets **נבנו-מחדש** ל-dial. אכיפה: Inspector FRM-02 (`position:fixed;inset:0`→CRITICAL) + FRM-06 (opacity/blur).
+- **ADR-002 · Dial Pattern** (2026-05-20): החלופה — **dial** (טור-כפתורים קומפקטי שנפתח מתחת/מעל הכפתור-הראשי). → R3/R4/R5. **השורש של ה-dial pattern ב-Preact וב-Flutter** (דוחות 01/02). ⭐ **עיגון-לפי-פינה (same-side):** BS (ימין-עליון)↘ · search-FAB (ימין-תחתון)↗ · menu-FAB (שמאל-תחתון)↗ · **עגלה (שמאל-עליון)↘ — גם dial**. ⭐ **circle+pill כשני-אלמנטים נפרדים (רווח ~10px) — בכוונה כדי שה-`bathroom-background` ייראה דרך הרווח** (חלק מה-look-and-feel; קושר ל-bathroom-bg/דוח 01). פעיל=שניהם teal · לא-פעיל=pill לבן+icon teal. (`dial-in` keyframe משותף לכל ה-FABs.)
 
 ## ⭐ R1–R9 (`app/RULES.md`) — ה-spec ל"איך" (verbatim)
 | R | כלל |
@@ -27,7 +27,7 @@
 | **R7** | אסור להמציא תוכן. |
 | **R8** | RTL — בית/חיפוש מימין, חנות/עגלה משמאל. |
 | **R9** | שדות-טקסט = שורת-הקלדה inline, צמודה לעלה. |
-> ⚠️ R1–R9 ב-`RULES.md` **שונים** מסיכום-ה-R ב-`CLAUDE.md` (שם R8="אין המצאה"). `RULES.md` הוא הקובע.
+> ⚠️ R1–R9 ב-`RULES.md` **שונים** מסיכום-ה-R ב-`CLAUDE.md` (שם R8="אין המצאה"). `RULES.md` הוא הקובע. **גם `adr/*` + `knowledge/README` (2026-05-20) מפנים ל-"R1–R8" — קדמו ל-R9** (נוסף INSP-0014; R9=שדות-טקסט inline).
 
 ## dashboards + UI + history (root) — **specs עשירים (לא כותרות)**
 - **`UI_ARCHITECTURE`** (1560 ש׳) — סדרת-spec UI/UX ב-**6 חלקים** (contractor + 4 פרסונות + role-drawer). מתעד מודל **5-FAB** (בית/חיפוש/BS-mode/תפריט/חשבון) + 4 סוגי-הצעות-חיפוש (nav/prod/acc/cat). תיאור-משני של אותו תוכן שלכדתי מהמקור (01–17).
