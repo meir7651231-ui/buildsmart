@@ -17,6 +17,14 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## gate 117 — lipskey_pdf_parity_test (ברכיים שקע-תקע) — 2026-06-03
+
+- **קובץ:** `test/lipskey_pdf_parity_test.dart` — קבוצה רביעית (`_runInsertionBendGroup`)
+- **מה עושה:** fixture של 15 SKUs של ברכיים שקע-תקע (עמ' 40–41).
+- תקלה שהוזרקה: `'ברך 87° 75'` → `'ברך 87X 75'` (116033).
+- תוצאה: הבדיקה אדומה ✅.
+- ביטול → ירוק ✅.
+
 ## gate 117 — lipskey_pdf_parity_test (מחסומים גלויים) — 2026-06-03
 
 - **קובץ:** `test/lipskey_pdf_parity_test.dart` — קבוצה שלישית (`_runVisibleTrapGroup`)

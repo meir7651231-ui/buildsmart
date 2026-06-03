@@ -4,6 +4,17 @@
 
 ---
 
+## v6.01 — Lipski insertion-bend parity to PDF (gate 117 · קטגוריה 4a/9)
+
+**שינוי:** 15 SKUs של ברכיים שקע-תקע (עמ' 40–41): כל השמות תוקנו (היו זווית שגויה +
+"תבריג כפול" שגוי — בעצם שקע-תקע). דפים תוקנו 21 → 41.
+
+**אימות:**
+- ✅ `lipskey_pdf_parity_test` — 98/98 (24+27+32+15).
+- ✅ `flutter test` — אפס regressions.
+
+---
+
 ## v6.00 — Lipski visible-trap parity to PDF (gate 117 · קטגוריה 3/9)
 
 **שינוי:** סנכרון `kLipskeyCatalog` ל-32 SKUs של מחסומים גלויים (עמ' 8–15):

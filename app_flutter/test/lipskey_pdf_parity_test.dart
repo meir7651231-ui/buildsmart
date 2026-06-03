@@ -164,6 +164,7 @@ void main() {
   });
 
   _runVisibleTrapGroup();
+  _runInsertionBendGroup();
 }
 
 class _Seat {
@@ -245,6 +246,60 @@ void _runVisibleTrapGroup() {
         expect(p.qtyPallet,  t.qtyPallet, reason: 'qtyPallet ל-${t.sku}');
         expect(p.categoryHe, 'מחסומים גלויים', reason: 'categoryHe ל-${t.sku}');
         expect(p.page,       t.page,      reason: 'page ל-${t.sku}');
+      });
+    }
+  });
+}
+
+// ── ברכיים שקע-תקע — page 40–41 (15 SKUs) ───────────────────────────────────
+class _Bend {
+  final String sku;
+  final String nameHe;
+  final String dn;
+  final int? qtyPack;
+  final int? qtyPallet;
+  const _Bend(this.sku, this.nameHe, this.dn, this.qtyPack, this.qtyPallet);
+}
+
+const _insertionBends = <_Bend>[
+  // ברך 87° (5 sizes)
+  _Bend('116624', 'ברך 87° 40',  '40',  120, 5400),
+  _Bend('116601', 'ברך 87° 50',  '50',   75, 3375),
+  _Bend('116033', 'ברך 87° 75',  '75',   50, 1200),
+  _Bend('142289', 'ברך 87° 110', '110',  20,  720),
+  _Bend('116028', 'ברך 87° 160', '160',   8,  240),
+  // ברך 87° עם ביקורת גב
+  _Bend('116031', 'ברך 87° עם ביקורת גב 50',          '50',  60, 2700),
+  _Bend('124843', 'ברך 87° עם ביקורת גב 110',         '110', 20,  720),
+  _Bend('116026', 'ברך 87° עם ביקורת גב 110 (4 פתחים)', '110', 20,  720),
+  // ברך 15° / 30° 110
+  _Bend('194899', 'ברך 15° 110', '110', 24, null),
+  _Bend('194900', 'ברך 30° 110', '110', 24, null),
+  // ברך 45° (5 sizes + white variant of 110)
+  _Bend('116591', 'ברך 45° 50',     '50',   85, 3825),
+  _Bend('116553', 'ברך 45° 75',     '75',   48, 1920),
+  _Bend('161884', 'ברך 45° 110',    '110',  20, 1000),
+  _Bend('190297', 'ברך 45° 110 לבן', '110', 20, 1000),
+  _Bend('116037', 'ברך 45° 160',    '160',   8,  320),
+];
+
+void _runInsertionBendGroup() {
+  group('LIPSKEY PDF parity — ברכיים שקע-תקע (gate 117)', () {
+    final bySku = {
+      for (final p in kLipskeyCatalog.where((p) => p.brand == 'ליפסקי'))
+        p.sku: p,
+    };
+
+    for (final b in _insertionBends) {
+      test('SKU ${b.sku} · ${b.nameHe}', () {
+        final p = bySku[b.sku];
+        expect(p, isNotNull, reason: 'SKU ${b.sku} מהקטלוג חסר ב-kLipskeyCatalog');
+        expect(p!.nameHe,    b.nameHe,    reason: 'nameHe ל-${b.sku}');
+        expect(p.qtyPack,    b.qtyPack,   reason: 'qtyPack ל-${b.sku}');
+        expect(p.qtyPallet,  b.qtyPallet, reason: 'qtyPallet ל-${b.sku}');
+        expect(p.categoryHe, 'ברכיים',    reason: 'categoryHe ל-${b.sku}');
+        expect(p.dims?['DN'], b.dn,       reason: 'dims[DN] ל-${b.sku}');
+        expect(p.page, 41,                reason: 'page ל-${b.sku} צריך להיות 41 (insertion bends)');
       });
     }
   });
