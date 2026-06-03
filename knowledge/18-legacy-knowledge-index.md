@@ -38,6 +38,7 @@
 
 ## INSP — 43 ביקורות
 `inspections/INSP-0001→0044` — כל commit של menu/settings/dial עבר Inspector subagent (typecheck + build + smoke 21/21 + דוח). `inspector/` = הפרוטוקול. ציר-הזמן: INSP-0009→0040 כולם GO.
+**אופי (נדגם):** כל INSP = log-בנייה/QA (scope + טבלת-leaves verbatim + rule-checks R1–R8 + severity 0/0/0 + GO/NO-GO). מתעד את **בניית-ה-dial ב-Preact מול מבני-המקור** (citations ל-`index.html:NNNN`) — תהליך/QA, **לא ידע-מוצר חדש**. (למשל INSP-0040: Home→📐 PLAN_TYPES 4-leaves + 📦 stock-tabs 2-leaves.)
 
 ---
 **הקשר:** זו ההיסטוריה-המוסדית של תרגום-אב-הטיפוס→Preact. ה-ADRs + R1–R9 הם ה-WHY מאחורי ה-dial pattern שתועד בדלתאות (01/02). מקור-משני — אינדקס, לא תעתוק.
