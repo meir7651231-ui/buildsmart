@@ -15,6 +15,9 @@
 - **vehicleCanCarry(v,need)** = `VEHICLE_RANK[need] ≤ VEHICLE_RANK[v]` (רכב-גדול נושא קטן); **default = 'truck'**.
 - **stage-flow + תוויות verbatim:** `ready` →"📦 אספתי מהחנות"→ `pickup` →"🚚 יצאתי לדרך"→ `transit` →"✅ נמסר ללקוח"→ `delivered`. `ACTIVE=['ready','pickup','transit']` (delivered יורד מהרשימה).
 - pill-colors: ready=צהוב · pickup=כחול · transit=ירוק; split-pill "🚚 משלוח 1/3" (`fresh` פועם בפעם-ראשונה).
+- **`courierAdvance(id)`:** parsing `'BS-001'`(whole) / `'BS-001#2'`(shipment-2); `next()`: ready/preparing/new→pickup→transit→delivered. shipment-advance → **`deriveOrderStageFromShipments`** (order-stage נגזר מה-shipments); whole-advance → מסנכרן shipments. side-effect: `saveSysOrders` + storage-event (מנהל/חנות).
+- **detail-sheet** (`courierDetail`): tracker + לקוח/כתובת-מסירה/מועד/פריטים/פיצול + "תכולת המשלוח" + כפתור-שלב + **📄 תעודת-משלוח** (`showDeliveryNote`).
+- **courier-portal — 6 tools verbatim:** 🧭 ניווט-למשלוח (Google Maps) · 🚛 צי-רכב (`FLEET`) · ⏱️ מעקב-SLA · 🗺️ אזורי-הפצה · 📸 אישור-מסירה POD+צילום · 💬 צ׳אט-עם-חנות.
 
 ## Cross-tab sync (18278–18316)
 סנכרון בין-טאבים/חלונות — שינוי `SYS_ORDERS` בטאב אחד מתעדכן באחרים (localStorage `storage` event).

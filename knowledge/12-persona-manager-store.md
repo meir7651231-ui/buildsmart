@@ -28,6 +28,9 @@
 - stage: `new`(לאישור/צהוב) →"✓ אשר וקבל להכנה"→ `preparing`(בהכנה/כחול) →"📦 סמן כמוכן — העבר לשליח"→ `ready`(מוכן/ירוק) →"🛵 ממתין לאיסוף השליח"(info-only). כולם דרך `storeAdvance`.
 - שדות מיוחדים: **`heldForMissing`** (פריט-חסר/כתום — כפתור מוסתר עד החלטת-קבלן) · **`missingResolved`** (✓ תיקון בוצע — re-enable) · **`splitInto`>1** ("🚚×N", pulsing `fresh`).
 - home (`renderStoreHome`): toApprove(new)/inPrep/ready/**held**/todayRevenue(Σ new+preparing+ready). handlers: `data-sadvance`→storeAdvance · `data-sdetail`→storeOrderDetail (picking).
+- **picking-sheet** (`renderStorePick`): **6 line-states** — picked(✓ירוק) · missing(✕אדום) · pending · cancelled("בוטל ע"י הקבלן") · replaced(🔁) · pendingDecision(⏳). split → lines מקובצים לפי `o.splitPlan[i]` (header per-shipment). `storePickLine`/`storeMissLine`.
+- **stock** (`renderStoreStock`): `STORE_STOCK[key]=true/false` · **`toggleStoreStock` דורש RBAC `requirePerm('stock.edit','עריכת מלאי')`** · filter all/in/out.
+- **store-portal — 8 tools verbatim:** ⭐ דירוג-ספקים · ⏱️ מעקב-SLA · 🗺️ אזורי-הפצה · 📉 הנחות-כמות · 🏷️ הפקת-ברקודים · 🚛 ניהול-צי-רכב · 💬 צ׳אט-עם-קבלן · 🔄 עדכון-מלאי-אוטומטי.
 - **תעודת-ליקוט** (picking, 17400–17627): `storeItemInfo`/`storeOrderLines`/`storeOrderDetail` · **`renderStorePick`** (17455) · `storePickLine` (✓ לוקט) / `storeMissLine` (חסר במלאי).
 
 ---
