@@ -302,14 +302,19 @@ cart/orders→cart, catnav→catalog).
 
 ---
 
-## 📱 Flutter (`app_flutter/lib/screens/`) — דלתא מול אב-הטיפוס (מעטפת)
-> מעטפת **WhatsApp-Business** (`home_shell.dart`): `Scaffold` + AppBar + **4 בוטם-טאבים** + 3 dial-overlays. state Riverpod, nav go_router.
+## 📱 Flutter (`app_flutter/lib/screens/`) — האפליקציה האמיתית (מעטפת) ⭐ נכתב-מחדש מ-whats-happening
+> מעטפת WhatsApp-style (`home_shell.dart`, **1033ש׳**): `Scaffold` + AppBar + **4 בוטם-טאבים** (`IndexedStack`) + 3 dial-overlays + cart-FAB. Riverpod.
 
-🔀 **שונה (מ-Preact וגם מאב-הטיפוס):**
-- **4 בוטם-טאבים** (`IndexedStack`): **קטלוג · שיחות · התראות · חנות** (RTL: קטלוג מימין). לא ה-tabbar-5 של אב-הטיפוס, ולא persona-routing של Preact.
-- AppBar: כותרת "BuildSmart" (→BS/profile dial) + actions 📷 camera (→barcode) · ⋮ more-vert (→menu).
-⬆️ **dials (bs/search/menu)** — אותו pattern כמו Preact (`menu_dial_widget`/`search_dial_widget`/`bs_dial_widget` + `widgets/dial.dart`), אך **overlay מעל 4-הטאבים** (`openDialProvider` + scrim), לא routing.
-➕ **נוסף (אומת מהמקור):** **שיחות + התראות כטאבים-ראשיים native** — לא היו בפרוטוטייפ/Preact: **שיחות** (`chats_screen` 914) = 6 שיחות (הקבלן הראשי · ספק חומרי בנייה · השליח · מנהל המערכת · צ׳אטבוט BuildSmart · ספק צבעים) + auto-reply (4 תגובות) + ארכוב/סינון/חיפוש · **התראות** (906) = 9 התראות + קיבוץ-חכם (היום/אתמול/מוקדם יותר) + כפתורי-פעולה context (אשר איסוף · טפל כעת · עקוב) · **חנות** (`store_screen` 990) = 8 פריטים (סל · הזמנות · השכרת-כלים · פקדונות · החזרה · מכרז-ספקים · גיליונות-בטיחות · השוואת-מחירים) + 4 quick-actions (מועדפים/מועדים/תזמון/שיחה) · **מצלמה** (`camera_sheet`) = 5 מצבים (ברקוד · לפני/אחרי · אישור-מסירה · הפקת-ברקוד · צילום-משימה).
-⚠️ **חריגת-R2:** מסכי-טאב מלאים (catalog/store) במקום הכל-dial — בסגנון WhatsApp, שונה מ-"אין חלון" של Preact.
-⚠️ **README↔code drift:** `app_flutter/README` מתאר **Phase-0** (5-FAB rail: BS·Search·BS-mode·Menu·BS + dial-menu בית/הפרויקטים/רכש/הגדרות, R1-R9) — אבל `home_shell.dart` בפועל = **WhatsApp 4-tab** (קטלוג/שיחות/התראות/חנות). הקוד **התפתח מעבר ל-README** וחרג מ-R1/R2 (README מיושן, roadmap Phase 1-7 לא-מסומן).
-> ⭐ **parity-insight (אומת מקריאת-מקור מלאה):** כמו Preact — גם Flutter בנה **shell + navigation מלאים, אך פעולות-העלה = toast `'בבנייה'`** (50+ מופעים). שני ה-ports = chrome/dial/tree עשירים, לא ה-flows העמוקים (checkout/RBAC/picking וכו׳). ההבדל: Flutter הוסיף **תוכן-דמו עשיר** ב-chats/notifications/store (6/9/8 פריטים) שלא קיים ב-Preact.
+🔀 **המבנה האמיתי:**
+- **4 בוטם-טאבים:** **מחלקות · שיחות · התראות · חנות** (RTL). ⚠️ **תיקון:** טאב-0 = **`DepartmentsScreen`** (מחלקות: אינסטלציה · ברזים-וסניטריים · כלי-עבודה — 4 פעילות, 5 "בקרוב"), **לא "קטלוג"** (מסמכי-spec אומרים "קטלוג"; הקוד אומר "מחלקות" — הקוד קובע). מחלקה → `CatalogScreen`.
+- **AppBar:** "BuildSmart" (→BS/role-picker) + שם-משתמש-chip + version-label + 🔍חיפוש · 📷מצלמה (`camera_sheet`, 5 מצבים) · ⋮תפריט(per-tab) · 💡סיור.
+- **3 dial-overlays** (`openDialProvider`+scrim, אחד-בכל-רגע): **bs** (5 פרסונות) · **search** (4 כלים) · **menu** (4 tabs בית/הפרויקטים/רכש/הגדרות) + **cart-FAB** (מוסתר בטאב-חנות).
+
+⭐ **האפליקציה בוגרת — לא "shell + toast" (תיקון לטענה הקודמת שלי):**
+- **`CatalogScreen` (7,660ש׳)** = 8 sections (הכל · בית-Finder · תכנון-חיבור · קטגוריות · עץ-חכם · וריאנטים · מועדפים · חיפושים) · drill-עץ · חיפוש-עם-סינונימים · lens-selector · כרטיס-מוצר-חכם מלא.
+- ⭐ **`InstallStudioScreen` (3,185ש׳) = יהלום-הכתר:** מתכנן-צנרת — גרירת-מוצרים→מנוע (`install_engine` 1391ש׳: Dijkstra + auto-compliance PRV/TMTV)→BOM + צ'קליסט-תקינות + pressure-drop + אומדן-מחיר + שמירת-פרויקטים. **עמוק מהפרוטוטייפ — אין מקבילה.**
+- `FinderScreen` (מאתר לא-טכני) · `suppliers/lipskey_*` (מסכי-מותג) · **שיחות** (`chats_screen` **1437ש׳**, 6 threads + auto-reply + ארכוב) · **התראות** (**1081ש׳**, קיבוץ-run≥3 + סינון + swipe) · **חנות** (**1500+ש׳**, סל + checkout VAT-18% + הזמנות + שירותים) · **4 מסכי-הגדרות** (~40 שדות כ"א, persisted).
+
+➖ **מה כן toast 'בבנייה':** ה-dial-overlays (menu-leaves · פרסונות store/courier/worker/manager = leaves שמציגים toast) · חלק ממצבי-מצלמה · כפתורי-משנה. אבל ה-**ליבה אמיתית ופועלת** (מחלקות→קטלוג→install-studio→סל · chats · notifications · settings).
+🔧 **מול פרוטוטייפ/Preact:** **לא** port של 5-הפרסונות — אפליקציית-אינסטלציה אמיתית. install-studio/chats/notifications = **חדשים לגמרי**. ~92% roadmap · 155 בדיקות · checkout בסיסי (mock).
+⚠️ **drift:** ה-README של app_flutter מתאר Phase-0/5-FAB מיושן; הקוד = 4-tab בוגר. הקוד קובע.

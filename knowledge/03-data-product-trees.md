@@ -80,10 +80,15 @@ faucet:{productType:"מוצר ראשי", name:'ברז לכיור', img:'🚰', c
 
 ---
 
-## 📱 Flutter (`app_flutter/lib/data/smart_tree.dart`) — דלתא מול אב-הטיפוס (מודל-מוצר)
-> typed Dart (433 ש׳) + `catalog.dart` (`kCatalogCats`).
+## 📱 Flutter (`app_flutter/lib/data/`) — האפליקציה האמיתית (מודל-מוצר) ⭐ נכתב-מחדש מ-whats-happening
+> ⚠️ הגרסה הקודמת תיארה snapshot מיושן (~30 מוצרים, smart_tree 433ש׳). המציאות שונה לחלוטין — **קטלוג-מותגים אמיתי, לא port של TREES.**
 
-⬆️ **שחזר + שודרג:** `SmartProduct {key, name, emoji, cat, brands[], acc[]}` + helpers `mustCount`/`recBrand`.
-- ⭐ **ה-`brands[]` שוחזרו** (`SmartBrand {name, price, tag, rec}`) — **בניגוד ל-Preact שגזם אותם!** Flutter קרוב יותר לסכמת-rich של אב-הטיפוס.
-- `SmartAcc {name, emoji, price, why, must}` = עץ-האביזרים (אותו must/why). `kSmartProducts` + `kSmartTreeCats`.
-➖ (מול אב-הטיפוס) `kSmartProducts` = **סט-rich נבחר (~30 מוצרים בלבד, מול 202 בפרוטוטייפ/Preact)** — בלי ה-`pl_` (23 SKU מ-PDF) **ובלי שלבי-הפרויקט** (infra/sealing/… → 0 ב-smart_tree, בניגוד ל-Preact ששמר אותם). ⭐ **ארכיטקטורת-פיצול (אומת מהמקור):** `catalog.dart` (17 ש׳) = רק `kCatalogCats` (11 קטגוריות-עליונות לניווט) · `smart_tree.dart` (433) = מודל-המוצר המלא עם brands — מול ה-monolith של Preact (`catalog.ts` 4544, 202 מוצרים).
+⭐ **קטלוג-אמת: 1,337 מוצרים** ב-`kCatalogProducts` = **Lipskey 255 + Polyroll 779 + Huliot-SmartLock 170 + HW-סינתטי 133**. מחולץ מ-PDFים אמיתיים (Lipskey-Barkan · Polyroll/AQUATEC · Huliot 44-עמ׳) עם **QA דו-שכבתי** (`scripts/catalog_qa.py`, 100+ כללים · R8 verbatim-מ-PDF · override-tables append-only).
+- **`LipskeyCatalogProduct`** = `{sku, nameHe/En, brand, categoryHe/En, page, dims, imageFile/specImageFile, qtyPack/Pallet, color}`. **SKU = מפתח-העל** לכל המערכת.
+- **`SmartProduct`** (`smart_tree.dart`, **~81 כרטיסים-מובחרים**) = `{key, name, emoji, cat, brands[], acc[], stages[]}` · `SmartBrand{name, tag, price?, rec, sku?}` (**ה-SKU על ה-brand, לא על המוצר**) · `SmartAcc{name, emoji, why, must, price?, sku?}` · `SmartStage{emoji,label,sub,isFinal,match[]}`. reverse-index `smartProductForSku`.
+- ⭐ **`VerifiedSpec`** (`lipskey_verified_connections` + `polyroll_specs`, **808+ specs**) = מנוע-ההתאמה: `{sku, material, ends[ConnectorEnd{type,size}], pressureRating, maxTempC(ברירת 40), systemOverride}`. enums **EndType**(hdpeCompression/pexPress/copperPress/bspMale/bspFemale/drainOpening) · **WaterSystem**(supply/drainage). `main.dart` מסנתז specs ל-~779 מוצרי-Polyroll באתחול.
+- תומכים: `catalog_tree.dart` (עץ-ניווט ~210 leaves) · `variant_families.dart` (זיהוי משפחות size/color/model/subtype) · `fuzzy_search.dart` · `brands.dart` (8 מותגים) · `lipskey_hotwater`/`lipskey_smart_data`/`polyroll_specs`/`huliot_smartlock_catalog`.
+- כל הנתונים **קבועי-Dart** (אין DB/REST). תמונות → CDN (Cloudflare R2) דרך `product_images.dart`.
+
+🔧 **מול אב-הטיפוס:** מותגים **אמיתיים** (Lipskey/Polyroll/Huliot — לא "סטנדרט/כלכלי/פרימיום" גנרי) · מוצרי-אינסטלציה אמיתיים (255+779+170) במקום 202 ה-TREES; ה-`pl_`/שלבי-הפרויקט של הפרוטוטייפ **אינם רלוונטיים** (קטלוג-מותג אחר לגמרי). מנוע-ה-`VerifiedSpec` (חיבוריות פיזיקלית) — **חדש לגמרי, אין לו מקבילה בפרוטוטייפ/Preact.**
+⚠️ **doc-vs-code drift:** מסמכי-ה-KB אומרים **1,879 מוצרים (Lipskey 935)** — הקוד אומר **1,337 (Lipskey 255)**. הקוד קובע (R6).
