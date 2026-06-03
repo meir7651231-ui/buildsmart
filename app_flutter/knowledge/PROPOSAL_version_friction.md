@@ -1,7 +1,80 @@
 # הצעה — פתרון חיכוך תווית-הגרסה (flagged ע"י 4/4 הסוכנים)
 
-> **סטטוס:** טיוטה לביקורת בנצי. לא מיושם. פרוטוקוליסט, 2026-06-03 (לקח #72).
-> **בעלות:** פרוטוקוליסט (hook + gate 59/12) · נוגע ב-UI render → דורש אישור משתמש.
+> **סטטוס:** draft → **reviewed (6/6 agents, round 1)** → ממתין ל-GO. לא מיושם. פרוטוקוליסט, 2026-06-03 (לקח #72).
+> **בעלות:** פרוטוקוליסט (hook) + סוכן-UI-יחיד (home_shell, 3 שורות) · נוגע ב-UI render → דורש אישור משתמש.
+> **lifecycle:** ביום-implemented → ההכרעות עוברות ל-`DECISIONS.md`/`adr/`, המסמך → stub (כלל ליטוש, מונע כשל #58).
+
+---
+
+## 🔧 מפרט מימוש סופי (v2 — מאחד 14 הכרעות מ-6 הסוכנים)
+
+> זהו ה-spec המחייב. הסעיפים שמתחת ("הפתרון המוצע" v1 + ביקורות) הם רקע היסטורי.
+> **רצף-המימוש מתואם ע"י הסדרן** — אסור מקבילי (ראה §M0).
+
+### M0 · רצף-rollout מתואם (הסדרן — חובה לפני כל שורת-קוד)
+1. **הסדרן פותח freeze-window** 30-45 דק' על `home_shell.dart` **בלבד** (לא הענף — `lib/data`/widgets/assets ממשיכים). מודיע start ב-`AGENT_COORDINATION.md`.
+2. **פרוטוקוליסט דוחף יחידה אטומית אחת:** `version.g.dart` + `.gitignore` + שערים 11/12/59 + לוגיקת hook. (§M1-M4)
+3. **hook-skew barrier:** כל סוכן פעיל **חייב** `cp .githooks/pre-commit .git/hooks/ && git fetch && git rebase` **לפני ה-commit הבא שלו**. הסדרן נועל עד שכל 4 מאשרים sync.
+4. **סוכן-UI יחיד** (סדרן או ליטוש — **לא פרוטוקוליסט**, T9/#35) נוגע ב-`home_shell` (3 שורות: import + Text + מחיקת note) על ראש-origin טרי. push.
+5. כולם `rebase` פעם אחת. הסדרן סוגר window. README-line + DECISIONS update.
+
+### M1 · `lib/version.g.dart` (gitignored — היקף מתוחם ל-קובץ זה בלבד)
+```dart
+// GENERATED — managed by .githooks/pre-commit. DO NOT EDIT, DO NOT COMMIT.
+// בתוך .gitignore. ה-hook מ-re-generate idempotent מ-git בכל commit.
+// kBuild לא-דטרמיניסטי בין מכונות → אסור לקשור ל-asset-URL/cache-key (קטלגן).
+const String kVersionLabel = 'v5.91';                // פורמט מלא vMAJOR.MINOR (זהה ל-STATUS + regex)
+const String kBuild        = '412.a3f9c1';           // count.shortSHA — ייחודי, לא מונוטוני (מקבץ)
+const String kReleaseNote  = '';                     // תמיד ריק ב-UI; changelog חי ב-markdown בלבד (ליטוש/בנצי)
+```
+- `.gitignore` += `app_flutter/lib/version.g.dart`. **תיחום מפורש:** "generated≠gitignored כברירת-מחדל — חריג ל-build בלבד; asset-manifests נשארים tracked" (קטלגן).
+- **פורמט `kVersionLabel` = `vMAJOR.MINOR` מלא** (`v5.91`, לא `v5`) — חייב להיות זהה ל-STATUS.md ול-regex של שערים 11/12, אחרת שער 11 נופל ביום-1 (מקבץ).
+
+### M2 · `home_shell.dart` (סוכן-UI יחיד — feel לפי ליטוש)
+```dart
+import 'package:buildsmart/version.g.dart';
+// ...ב-else של "עץ חכם" (שורות 388-409): עוטף את כל ה-Row ב-Key יציב.
+const Row(key: Key('version_chrome'), mainAxisSize: MainAxisSize.min, children: [
+  // ❌ אין נקודה-ירוקה כאן (ירוק שמור ל-_PulsingStatus החי בלבד — ליטוש)
+  Flexible(child: Text(kVersionLabel,                      // v5.91 בלבד — secondary/אפור, לא ירוק
+    style: TextStyle(color: <secondary-grey-token>, fontSize: 10))),
+]);
+// kBuild + kReleaseNote → "אודות"/long-press/debug overlay בלבד, לא ב-chrome הראשי.
+```
+- **state-aware:** התווית היא ה-`else` של `if(tabIndex==0 && catalogSection=='עץ חכם')` → **לא תמיד ב-tree**. שערים בודקים תוצאה state-aware; journey דרך "עץ חכם" לא יראה `kVersionLabel` (ליטוש).
+
+### M3 · ה-hook — idempotent generate (פרוטוקוליסט)
+```bash
+# ב-pre-commit, אם STAGED_LIB: re-generate version.g.dart מ-git (לעולם לא mutate-in-place — מקבץ)
+COUNT=$(git rev-list --count HEAD); SHA=$(git rev-parse --short HEAD)
+LABEL=$(grep -oE 'v[0-9]+\.[0-9]+' knowledge/STATUS.md | head -1)   # label מ-STATUS (source of truth)
+printf '...kVersionLabel = %s...kBuild = %s.%s...' "$LABEL" "$COUNT" "$SHA" > lib/version.g.dart
+# version.g.dart ב-gitignore → לא נכנס ל-commit; נוצר-מחדש בכל commit. אין race עם stash.
+echo "  📌 $LABEL · build $COUNT.$SHA"                              # visibility ל-stdout (בנצי — מונע drift)
+```
+
+### M4 · שערים 11+12+59 (יחידה אחת — בנצי+מקבץ)
+- **שער 11** (גרסה קיימת): grep `vX.YY` עובר מ-`home_shell.dart` → `knowledge/STATUS.md`.
+- **שער 12** (sync): `STATUS.md` ↔ פורמט אחיד; build **לא** נבדק (אוטומטי).
+- **שער 59** (גרסה עלתה): בודק **תוצאה** — `kVersionLabel` ב-version.g.dart == STATUS == regex; **לא diff** על שורה. label עולה רק ב-release מכוון (ידני ב-STATUS), build אוטומטי.
+
+### M5 · fast-gate (פרוטוקוליסט — בונה על preflight.sh #68)
+| commit נוגע ב | fast-gate מריץ (~2 דק') | full (push/CI) |
+|---|---|---|
+| `lib/data`/`lib/logic` (עלים) | analyze + unit של התיקייה | הכל |
+| `lib/screens`/`lib/state`/router/shell | analyze + **כל journey suite** | הכל |
+| `scripts/`/`assets/` בלבד | analyze + **שער 113 בלבד**, אפס Dart/journey | הכל |
+| כל commit עם `lib/screens\|widgets/**` | + **visual-verify reminder חוסם-רך** (#2 ליטוש) | — |
+- **תמיד:** preflight (30s) → fast (~2min) → full **כתנאי-יציאה-מהתור** (אחרי rebase אחרון, לפני push — הסדרן).
+- content-scanning gates מחריגים `assets/**`,`*.png/jpg/webp` (קטלגן).
+
+### M6 · hot-files (claim-based — הסדרן+מקבץ)
+- `## 🔒 hot-file claims` ב-`AGENT_COORDINATION.md`: `קובץ · סוכן · timestamp · TTL`.
+- ה-hook **קורא** את ה-claims (קובץ מקומי, לא git-log-time) ומדפיס warning אם קיים claim פעיל של סוכן-אחר. advisory — לא חוסם.
+
+### M7 · נפרד מהמסמך הזה (לא חלק מהיחידה)
+- **binary-asset conflicts** → sub-protocol נפרד (קטלגן): עבודה ב-`/tmp/` עד visual-verify → batch אטומי; assets בענף/PR נפרד מ-code.
+- **כלל-lifecycle ל-proposals** (ליטוש): draft→accepted→implemented→archived; implemented → DECISIONS/ADR + CARRY_FORWARD + stub.
 
 ---
 
