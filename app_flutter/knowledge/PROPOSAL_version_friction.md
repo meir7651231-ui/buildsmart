@@ -323,3 +323,19 @@ scope-by-directory **מסוכן** ובדיוק יפספס את הבאג של ב�
 **חדש — 2 חורים תזמוניים שהמפרט חשף:**
 - **`pubspec.lock` churn מתנגש עם barrier:** 4 סוכנים רצים fast-gate בו-זמנית → churn ×4 ברגע הרגיש. → `git checkout app_flutter/pubspec.lock` ברצף ה-barrier.
 - **חלון-אדום בין שלב 2 לשלב 4:** שלב 2 דוחף שער 59 (בודק version.g.dart) אבל home_shell עדיין מכיל מחרוזת ישנה ששערים 11/12 grep-ים ממנה → חלון ששניהם ירוקים-מקרית או אחד נשבר. → **שערים 11/12 עוברים ל-version.g.dart כבר בשלב 2** (כשהקובץ קיים), לא ממתינים לשלב 4. חובה ב-M4 מפורש.
+
+## ביקורת מקבץ — סבב 2
+
+ההכרעות שלי (M1 build-string, M3 idempotent) שרדו. הקונקרטיזציה חשפה 3 חוסמים:
+
+**M3 (idempotent hook) — snippet לא production-ready:**
+- **shallow clone:** `git rev-list --count HEAD` ב-CI (`fetch-depth:1`) מחזיר `1` *שקט*. SHA מציל ייחודיות, אבל הוסף guard: `git rev-parse --is-shallow-repository` → fallback SHA-בלבד / `--unshallow`.
+- **empty-LABEL חוסם:** אם STATUS חסר/ריק → `LABEL=''` → `kVersionLabel=''` עובר build ושער 59 משווה `''==''` ומאשר drift. חובה: `[ -z "$LABEL" ] && exit 1` לפני ה-printf.
+- **template-עם-גרשיים:** `printf` חייב `'%s.%s'` *עם* גרשיים בתוך ה-Dart, אחרת `const String kBuild = 412.a3f9c1;` = שגיאת-קומפילציה. אל תיתן לסוכן לנחש את ה-printf.
+
+**M1 + self-verifying hook (הסדרן):** אין לולאה (ה-hook קורא עצמו, משנה version.g.dart — קבצים שונים) ✅. **edge:** self-check חוסם את ה-commit שמשפר את ה-hook עצמו → bypass: דלג כש-`.githooks/pre-commit` ב-staged-set.
+
+**חלון-אדום (הסדרן):** "11/12 → version.g.dart בשלב 2" סוגר את ה-collision שכווה אותי סופית (gitignored = אין שורה ל-rebase). edge נותר: rebase של stack מריץ hook פר-commit → version.g.dart קופץ N פעמים (לא-מזיק, אך 11×hook איטי). → rebase-detection (`GIT_REFLOG_ACTION=rebase`) מדלג gates בזמן replay.
+
+**חדש (חוסם) — tracked-residue:** `.gitignore` **לא מסיר קבצים שכבר tracked.** סוכן שעשה פעם `git add version.g.dart` לפני שנכנס ל-gitignore → הקובץ נשאר tracked → ה-printf כותב לקובץ-tracked → **כל הכוויה חוזרת בשם חדש** (שורת-build ב-diff, conflict ב-rebase). ה-barrier מטפל ב-hook-skew, לא ב-tracked-residue.
+→ **שלב-2 חייב `git rm --cached app_flutter/lib/version.g.dart`** (אם tracked) *באותו commit* עם ה-.gitignore. hook-guard: `git ls-files --error-unmatch lib/version.g.dart 2>/dev/null && exit 1`. בלי זה גישה-C דולפת אצל כל מי שנגע בקובץ פעם.
