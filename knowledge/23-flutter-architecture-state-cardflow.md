@@ -25,13 +25,21 @@ Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dar
 - ✅ **אומת-עצמי שורה-שורה:** `smart_cart.dart` (174ש׳ — `SmartCartLine{productKey,name,emoji,brandName,brandPrice,productQty,acc[`SmartCartAcc`]}`+`total`; `SmartCartNotifier` persist→`bs.smart-cart.v1` בכל set-state; add/remove/setLineQty[qty≤0→remove]/qtyForKey/setQtyForKey/clear) · `app_settings.dart` (294ש׳ — 20 שדות ב-6 קבוצות display/notif/region/delivery/accessibility/security; ברירות theme=**light**/lang=he/currency=ils/session=15ד'/privMarketing=opt-in; persist→`bs.settings.v1`).
 
 ## D. כרטיס-המוצר החכם — **CARD_FLOW (42 אלמנטים)** = "מוח-הידע" (`_SmartProductSheet`)
+> 🔎 **אומת-מבנית (לא שורה-שורה):** `_SmartProductSheet` = `catalog_screen.dart` שורות **4135–6128** (~2,000ש׳, הווידג'ט הגדול בקובץ בן 7,660ש׳). אומת ע"י איתור-המחלקה + ספירת קריאות-helpers בגוף (17 helpers נקראים). תוכן-הרשומות (42 אלמנטים) **לא נקרא ווידג'ט-ווידג'ט** — הוא נשען על §E.
 - **header:** כותרת+emoji+קטגוריה · diagram-3-שלבים · score-chip.
 - **selectors:** בחר-מותג (+hot-water-filter) · בחר-סוג · בחר-מידה.
 - **📦 נתוני-קטלוג (expert/simple toggle, ~30 strips):** score · ☆save · 📋quote · summary · discovery-tags · safety-note · connection-warning · "בקו שלך"+adapter · hot-water-suitability · spec-rows (material/pressure/temp/system/ends/bore/durability★/install-kit/effort/variants/manufacturer+mfr#/price) · cheaper-alt · line-cost · **🔗compat** ("מתחבר ל-N"+3-hits+frequently-paired) · inline-chain (כשהסל לא-ריק) · BOM-button · safety-kit(auto) · **project-actions** (add/dup×3/templates/full-BOM/quote) · compliance/standards/tools/tips/acceptance · brand-guide · recently-viewed.
 - **footer:** אביזרי-חובה ⚡ (checkbox+qty) · אופציונלי 💡 · "הוסף לסל ₪N".
 
-## E. HELPER_INDEX — **47 helpers** (`related_info.dart`, 1,141ש׳, regression-gated)
-catalog-bridge · compat/connection (12: compatibleProductsFor/connectionJoint/jointLabelHe/connectionExplainHe/connectionNeedsHe/connectionWarningHe/lineFitFor/adapterSuggestionFor/chainArrowText...) · spec/scoring (~10: engineeringSpecFor/cardReadinessScore/durabilityRatingFor/discoveryTagsFor/israeliStandardsFor/hotWaterSuitabilityFor...) · install/kit (5: installToolsFor/installTipsFor/installEffortFor/installKitFor/acceptanceChecklistFor) · price/share (6) · compliance (2) · variants/brand. **gate 42 + `regression_gate_test`: כל helper-ציבורי חייב ≥1 test** (47-helper-gate).
+## E. HELPER_INDEX — **43 helpers ציבוריים** (`related_info.dart`, **1,528ש׳** · אומת-עצמי: כולם בקובץ-יחיד זה)
+> 🔧 **תיקון (אומת-עצמי):** הקובץ **1,528ש׳** (לא 1,141) · ספירה מדויקת = **43 פונקציות-עזר ציבוריות** (לא 47; חלקן מחזירות records `({int score,...})` ולכן נספרו-חסר בעבר). ה-`_SmartProductSheet` (catalog_screen 4135–6128) בונה את 42 אלמנטי-הכרטיס ע"י **קריאה ל-helpers האלה** — אומת: 17 קריאות בגוף-ה-sheet (§D↔§E ארכיטקטורה אמיתית).
+- **catalog-bridge (5):** catalogProductForBrand/ForSku/ForSmart · finderGroupFor · deepLinkFor.
+- **compat/connection (15):** compatibleProductsFor/Count · connectionJoint · jointLabelHe · connectionExplainHe/NeedsHe/WarningHe · pairConnectionWarningHe · lineFitFor · adapterSuggestionFor · chainArrowText · chainEdgeLabelHe · lineStructureText · needsConnectionSpec · gapAdviceHe.
+- **spec/scoring (7):** engineeringSpecFor · cardReadinessScore · durabilityRatingFor · discoveryTagsFor · israeliStandardsFor · hotWaterSuitabilityFor · manufacturerInfoFor.
+- **install/kit (6):** installToolsFor/TipsFor/EffortFor/KitFor · acceptanceChecklistFor · safetyKitItems.
+- **price/share (5):** priceFor · lineCostEstimateFor · cheaperAlternativeBrand · quoteTextFor · smartCardSummaryHe.
+- **compliance (2):** complianceWhyHe · systemSafetyNoteHe. **brand/variants (4):** brandIsMetallic · brandSuitableForHot · variantSiblingsOf/CountFor.
+> ⚠️ טענת-ה-KB "gate 42 / regression_gate_test: כל helper ≥1 test" — מקור-KB (פרוטוקול), **לא אומת בקוד** בסשן זה.
 
 ## F. 5 מנועי-הלוגיקה (`lib/logic/`)
 > ✅ **כל 5 המנועים (2,390ש') אומתו בקריאה-עצמית מלאה — שורה-שורה, לא דרך סוכן.** install_engine 1,391 · pressure_drop 501 · install_kit 286 · price_estimate 109 · system_division 103. כל הטענות למטה מדויקות מול-הקוד.
