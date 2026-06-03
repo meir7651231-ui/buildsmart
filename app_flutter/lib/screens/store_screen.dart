@@ -73,6 +73,10 @@ final cartDeliveryProvider = StateProvider<CartDelivery>(
   (ref) => cartDeliveryFor(ref.read(storeSettingsProvider).selfPickupDefault),
 );
 final cartProjectProvider = StateProvider<String>((_) => 'בית דוד 3');
+
+/// Benzi #4 — optional, NON-binding "where to ship" address chosen during the
+/// purchase (empty = not set; checkout never requires it).
+final shipToProvider = StateProvider<String>((_) => '');
 final cartPaymentProvider = StateProvider<CartPaymentMethod>(
   (ref) => cartPaymentFor(ref.read(storeSettingsProvider).defaultPayment),
 );
@@ -1702,6 +1706,136 @@ class _StepBtn extends StatelessWidget {
   }
 }
 
+// ─── ship-to row (Benzi #4) ───────────────────────────────────────────────────
+
+/// Non-binding "where to ship" row, placed in the cart right after the delivery
+/// (time) options and before checkout. Tapping opens an optional address sheet —
+/// the order can be confirmed with or without it.
+class _ShipToRow extends ConsumerWidget {
+  const _ShipToRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ship = ref.watch(shipToProvider).trim();
+    final set = ship.isNotEmpty;
+    return Material(
+      color: const Color(0xFFF5F5F5),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => _openShipToSheet(context, ref),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              const Text('📍', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('לאן לשלוח?',
+                        style: TextStyle(
+                            color: Color(0xFF1A1A1A),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(
+                      set ? ship : 'לא חובה — אפשר להשלים גם אחרי ההזמנה',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          color: set ? BsTokens.brand : Colors.black54,
+                          fontSize: 12,
+                          fontWeight: set ? FontWeight.w600 : FontWeight.normal),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                  set
+                      ? Icons.edit_outlined
+                      : Icons.add_location_alt_outlined,
+                  size: 18,
+                  color: BsTokens.brand),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void _openShipToSheet(BuildContext context, WidgetRef ref) {
+  final ctrl = TextEditingController(text: ref.read(shipToProvider));
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18))),
+    builder: (sheetCtx) => Padding(
+      padding: EdgeInsets.only(
+          bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text('לאן לשלוח?',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1A1A1A))),
+          const SizedBox(height: 6),
+          const Text(
+              'לא חובה — אפשר לאשר את ההזמנה גם בלי כתובת ולהשלים בהמשך.',
+              style: TextStyle(color: Colors.black54, fontSize: 13)),
+          const SizedBox(height: 16),
+          TextField(
+            controller: ctrl,
+            autofocus: true,
+            textInputAction: TextInputAction.done,
+            decoration: InputDecoration(
+              hintText: 'כתובת / אתר העבודה',
+              filled: true,
+              fillColor: const Color(0xFFF5F5F5),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(sheetCtx),
+                  child: const Text('דלג'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  style: FilledButton.styleFrom(backgroundColor: BsTokens.brand),
+                  onPressed: () {
+                    ref.read(shipToProvider.notifier).state = ctrl.text.trim();
+                    Navigator.pop(sheetCtx);
+                  },
+                  child: const Text('שמירה'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    ),
+  );
+}
+
 // ─── delivery selector ────────────────────────────────────────────────────────
 
 class _DeliverySelector extends ConsumerWidget {
@@ -2119,6 +2253,10 @@ class _CheckoutSheet extends ConsumerWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
+            const SizedBox(height: 16),
+            // Benzi #4 — non-binding "where to ship": top row of the order sheet
+            // (after "הזמן עכשיו" opens it, before "אישור הזמנה").
+            const _ShipToRow(),
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(

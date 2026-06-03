@@ -307,3 +307,11 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/polyroll_e2e_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### Unified-catalog reads (v5.90) — 2026-06-03
+- איחוד שלושה תיקונים על origin (עבודת v5.85–87, יושמה-מחדש אחרי ש-origin התקדם ל-v5.89):
+  כרטיס-ריק (אחים מ-kCatalogProducts + guard), חיפוש-מק"ט (matchProducts על המאוחד),
+  מועדפים/שורת-עגלה (kCatalogProducts).
+- אימות: cartLineDisplay('lip:64032300') → שם-קטלוג ולא fallback;
+  catalogProductMatchesQuery על kCatalogProducts מוצא 64032300, על kLipskeyCatalog ריק.
+- נשאר Lipskey בכוונה: searchSuggestions (autocomplete) + ספירת-מתכנן.

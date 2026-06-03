@@ -1,6 +1,24 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.88` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.91` (see `home_shell.dart`). Update on each user-visible change._
+
+## Checkout — non-binding "where to ship" (v5.91 — Benzi #4)
+`_ShipToRow` sits at the **top of the order-summary sheet** (the one "הזמן עכשיו"
+opens), before "אישור הזמנה" — placement per Benzi. Tapping it opens
+`_openShipToSheet`, a non-binding address popup ("חלונית לא מחייבת"): a TextField
++ **דלג / שמירה**, with the note that the order can be confirmed without an
+address and completed later. State: `shipToProvider` (empty = not set; checkout
+never requires it).
+
+## Catalog search — SKU no longer pollutes numeric size queries (v5.89)
+`catalogProductMatchesQuery` folded the SKU into the haystack as a loose
+substring, so a short numeric size query matched every product whose SKU merely
+*contained* those digits (`"200"` inside SKU `120011`): 55% of the results for
+`"20"` (243/443) were unrelated SKU coincidences (mitigated only by relevance
+ranking pushing them last). Fix: SKU is matched separately and ONLY for queries
+≥5 chars (catalogue SKUs are 5–10 digits); short size queries match
+name/category/colour. Full/partial-SKU search preserved. Guarded by
+`search_sku_pollution_test` (3).
 
 ## Finder/card — tokenizer agreement on leading fractions (v5.88)
 `isSizeToken` (card word-classifier) required a leading DIGIT, so it rejected a

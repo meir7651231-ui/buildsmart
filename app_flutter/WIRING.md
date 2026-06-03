@@ -90,7 +90,7 @@ Resets on department open + clear. Guarded by `departments_test`.
 
 | Behavior | Detail | Status |
 |---|---|---|
-| forgiving product search | matches across name + category + SKU + colour, word-by-word (order-independent); folds Hebrew gershayim/geresh (״ ׳ → " ') so a Hebrew-keyboard size query matches; expands everyday words via `kSearchSynonyms` (kept precise — e.g. שירותים → toilet fixtures only, not branch connectors); AND-match with a graceful any-word fallback (`requireAll:false`) so a reasonable query never dead-ends | ✅ |
+| forgiving product search | matches across name + category + colour word-by-word (order-independent); folds Hebrew gershayim/geresh (״ ׳ → " ') so a Hebrew-keyboard size query matches; expands everyday words via `kSearchSynonyms` (kept precise — e.g. שירותים → toilet fixtures only, not branch connectors); AND-match with a graceful any-word fallback (`requireAll:false`) so a reasonable query never dead-ends. **SKU (v5.89):** matched separately, only for queries ≥5 chars — a short numeric size query (`20`/`200`/`3000`) no longer substring-matches an unrelated SKU (`200` inside `120011`), which used to make 55% of `"20"` results SKU-coincidence noise. Guarded by `search_sku_pollution_test`. | ✅ |
 | relevance ranking | default order sorts results by `searchRelevance` (name match > category-only > synonym/colour), so the product the user meant surfaces first; an explicit ↕️ sort overrides it | ✅ |
 | word-completion (Benzi #6) | `searchSuggestions` → `_SearchSuggestions` chip row above the results: **completes the word being typed from catalog PRODUCT-name words** ("השלמת מילים לפי מוצרים") — last whitespace-token is the fragment, suggestions are distinct product words it prefixes, ranked frequency → א-ת, capped at 6, keeping the already-typed words (`מח` → מחסום·מחבר·מחזיק); respects `catalogSystemFilterProvider`; ≥2-char fragment in a product scope. Tapping fills `searchQueryProvider` → results re-run. Guarded by `search_suggestions_test` | ✅ |
 
@@ -164,6 +164,7 @@ Resets on department open + clear. Guarded by `departments_test`.
 | cart stepper (+ / − / לעגלה) | `qtyForKey` / `setQtyForKey` | ✅ |
 | saveCartToProject | show/hide the cart project selector | ✅ |
 | summary chips (פריטים בסל / הזמנות פתוחות / הצעות ספקים) | derived live: `cartItemCount` (cart+smart lines), `isOrderOpen` over `_kOrders`, offers single-sourced from the מכרז ספקים row badge | ✅ |
+| לאן לשלוח (Benzi #4) | `_ShipToRow` at the **top of the order-summary sheet** ("הזמן עכשיו" opens it, before "אישור הזמנה") → `_openShipToSheet`: a **non-binding** address popup (TextField + דלג/שמירה; order confirms with or without it). State `shipToProvider` | ✅ |
 | כתובות/חשבוניות/ספקים/השכרה/אחריות/ביומטרי/אשראי-יומי | — | ⛔ server/data |
 
 ## Install Studio (`install_studio_screen.dart` → `logic/install_engine.dart`)
@@ -689,3 +690,19 @@ rather than pixel rendering.
   product now opens a כרטיס-חכם.
 - Guard: `smartproduct_contract_test` Huliot test → 13 cards (+smlSpareParts) +
   sku→card spot-check + ≥170 mapped. Mutation-verified. Pure data.
+
+## Unified-catalog reads — Huliot/PPR card, search & favorites/cart (v5.90)
+Consolidates three fixes onto origin (the v5.85–v5.87 work, re-applied after
+origin advanced to v5.89):
+- **Blank card:** the search-result onTap built the sheet's sibling list from
+  kLipskeyCatalog (empty for Huliot/PPR) → the variant pager threw
+  "Invalid argument(s): 0" → blank card. Fix: build from kCatalogProducts +
+  guard `categoryProducts.isEmpty ? [product]` in showLipskeyProductSheet.
+- **SKU search:** matchProducts (results) iterated kLipskeyCatalog → a Huliot
+  SKU (64032300) returned nothing. Fix: matchProducts runs over kCatalogProducts
+  (catalogProductMatchesQuery already matches sku for >=5-char queries).
+- **Favorites & cart:** favorites (×2), openCartLineProductSheet + cartLineDisplay,
+  and the favorites-tile sibling call-site → kCatalogProducts.
+Intentionally Lipskey-scoped: searchSuggestions (autocomplete, pinned by
+search_suggestions_test) + the connection-planner count (install_engine Lipskey).
+Rule in CONVENTIONS.md. Guards: huliot_card_render_test (2) + huliot_search_test (2).

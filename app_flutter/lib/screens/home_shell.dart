@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.88 · 1.6.48 · 🔧 עקביות tokenizer — מידת שבר מובילה (½") מזוהה כעת זהה בכרטיס ובמאתר (היה פער לטנטי). + תיקוני סינון מ-5.86/5.87',
+                          'v5.91 · 1.6.48 · 🚚 בנצי #4 — חלונית "לאן לשלוח" לא-מחייבת בראש סיכום-ההזמנה, בשלב התשלום (לא חוסמת)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
