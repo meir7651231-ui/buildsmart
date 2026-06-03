@@ -44,3 +44,5 @@ committing it here. Pins regenerated to match.
    git-LFS-tracked file is skipped by the scan; H3 reconciliation falsely passes.
 
 <!-- protocol active on this branch; verification touch 1780525722 -->
+
+<!-- clean-commit test 1780525866 -->
