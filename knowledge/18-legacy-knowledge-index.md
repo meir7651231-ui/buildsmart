@@ -29,8 +29,12 @@
 | **R9** | שדות-טקסט = שורת-הקלדה inline, צמודה לעלה. |
 > ⚠️ R1–R9 ב-`RULES.md` **שונים** מסיכום-ה-R ב-`CLAUDE.md` (שם R8="אין המצאה"). `RULES.md` הוא הקובע.
 
-## dashboards + UI + history (root)
-`UI_ARCHITECTURE` · `ROLE_DRAWER_SYSTEM` (5 personas/RBAC/enterRole) · `{COURIER,STORE,SYSTEM_MANAGER,WORKER}_DASHBOARD` (spec/פרסונה) · `legacy-map` (לגאסי→Preact) · `wip-menu-wiring` (מה בנוי). `IMPLEMENTATION_PROTOCOL` = **deprecated** (הנחה לבנות dashboards-as-views = הפרת R2).
+## dashboards + UI + history (root) — **specs עשירים (לא כותרות)**
+- **`UI_ARCHITECTURE`** (1560 ש׳) — סדרת-spec UI/UX ב-**6 חלקים** (contractor + 4 פרסונות + role-drawer). מתעד מודל **5-FAB** (בית/חיפוש/BS-mode/תפריט/חשבון) + 4 סוגי-הצעות-חיפוש (nav/prod/acc/cat). תיאור-משני של אותו תוכן שלכדתי מהמקור (01–17).
+- **`{SYSTEM_MANAGER,STORE,COURIER,WORKER}_DASHBOARD`** (615–864 ש׳) — spec-עומק מלא לכל פרסונה (מסכים/זרימות/state). מקבילים לדוחות 11/12/13 (שלכדתי מהמקור).
+- ⭐ **`legacy-map`** — port-map מדויק (לגאסי line-range → Preact file + status). ⚠️ **חלק מהספירות מיושנות** (ציין BUTTON_REGISTRY=176 בעוד המקור=350; store="stub" בעוד store.tsx=302 ש׳ כיום). מצוין ל-line-mapping, לא-מהימן-לגמרי לספירות.
+- **`wip-menu-wiring`** — SSOT לחיווט-ההגדרות (~70 עלים, persist `bs.settings.v1`/`bs.profile.v1`).
+- `IMPLEMENTATION_PROTOCOL` = **deprecated** (הנחה לבנות dashboards-as-views = הפרת R2).
 
 ## INSP — 43 ביקורות
 `inspections/INSP-0001→0044` — כל commit של menu/settings/dial עבר Inspector subagent (typecheck + build + smoke 21/21 + דוח). `inspector/` = הפרוטוקול. ציר-הזמן: INSP-0009→0040 כולם GO.

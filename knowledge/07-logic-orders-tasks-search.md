@@ -47,4 +47,4 @@
 
 ## 📱 Flutter — דלתא (חיפוש + device-APIs אמיתיים) ⭐
 - `search_dial_widget.dart` (`SearchDialWidget`+`_ToolsRoot`) + `data/search_index.dart` (325 ש׳) — search-dial עם tools (כמו Preact).
-- ⭐ **device-APIs אמיתיים (לא הדמיה):** **barcode** → `barcode_scanner.dart` + `camera_sheet.dart` (`mobile_scanner` — מצלמה אמיתית, `MobileScannerController`); **voice** → `services/voice.dart` (`speech_to_text` — זיהוי-דיבור אמיתי). מול הסימולציה בפרוטוטייפ/Preact.
+- ⭐ **device-APIs אמיתיים:** **barcode** → `barcode_scanner.dart`+`camera_sheet.dart` (`mobile_scanner` native); **voice** → `services/voice.dart` (`speech_to_text` native). מול **הסימולציה בפרוטוטייפ** (demo-modals). 🔧 **תיקון:** גם **Preact אמיתי** — `lib/voice.ts`/`barcode.ts` = **Web Speech API + BarcodeDetector** (לא הדמיה; מקור: `legacy-map.md`). כלומר רק הפרוטוטייפ מדומה; Preact=web-APIs, Flutter=native-APIs.

@@ -15,7 +15,7 @@
 | VARIANTS / TOOLS | ✅ | ✅ (typed) | 🟡 (smart_tree מאחד) | 04 |
 | SIZES / STOCK_DEMO / ACC_GROUPS | ✅ | ➖ | ➖ | 04 |
 | חיפוש | ✅ 3-bars + fuzzy | ✅ search-FAB + tools | ✅ search-dial | 07 |
-| **voice + barcode** | 🟡 הדמיה (AI-hub) | 🟡 הדמיה (search) | ✅ **אמיתי** (mobile_scanner/speech) | 07/16 |
+| **voice + barcode** | 🟡 הדמיה (AI-hub) | ✅ אמיתי (Web Speech+BarcodeDetector) | ✅ אמיתי (mobile_scanner/speech) | 07/16 |
 | הגדרות | ✅ sheet (8 קב') | ✅ dial-tree (R3/R9) | ✅ dial-tree | 06 |
 | סל | ✅ | ✅ signals | ✅ cart+store | 08/09 |
 | **checkout** (computeCheckout/VAT/split) | ✅ | ➖ | ➖ | 08/10 |

@@ -6,7 +6,7 @@
 ## ⭐ BUTTON_REGISTRY + self-test harness (12320–15900)
 > תשתית-QA מובנית; חשופה ב-`#regTestPanel` של המנהל ("🔬 מרכז בדיקות רגרסיה", `reg-*` ב-CSS חלק ו׳).
 
-- **`BUTTON_REGISTRY`** (12517) — **~350 כפתורים**, כל אחד `{fn, area, does}` (area=ניווט/קטלוג/סל/…). מסמך-אמת לכל כפתור באפליקציה.
+- **`BUTTON_REGISTRY`** (12517) — **350 כפתורים** (אומת `{fn:` במקור; `legacy-map.md` ציין 176 — מיושן), כל אחד `{fn, area, does}`. מסמך-אמת לכל כפתור.
 - **`BUTTON_TWINS`** (12900) — פונקציות-תאומות שעושות אותו דבר (`mgrAdvanceOrder`≡`storeAdvance` · `stepCatQty`≡`stepQty`) — לדדופ באודיט.
 - audit: `contractOwnerOf`/`twinsOf`/**`runButtonAudit`**/`findDuplicates` · `checkProductStandard`/`regCheckProduct` (תקינות-מוצר/תקן).
 - **משפחות-בדיקה** (כל אחת בודקת התנהגות-אמת, לא count):
