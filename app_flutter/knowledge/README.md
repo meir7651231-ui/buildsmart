@@ -87,8 +87,9 @@ protocol lives in `app/knowledge/` and does **not** govern Flutter work.
 ### למידה · lessons
 | File | Role |
 |---|---|
-| `CARRY_FORWARD.md` | numbered cross-session lessons, distilled from `stuck_log` |
+| `CARRY_FORWARD.md` | numbered cross-session lessons, distilled from `stuck_log`; Top 10 section at top |
 | `stuck_log.md` | living problem→solution→ANTIPATTERN log (append-only; gates 101/102) |
+| `GATE_REGISTRY.md` | gate number map + "next available" counter — prevents collision (lesson #66, #67) |
 
 ### הגדרות-תפקיד · session · build
 | File | Role |

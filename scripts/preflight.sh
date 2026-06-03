@@ -6,6 +6,9 @@
 # שימוש: bash scripts/preflight.sh
 # מה זה לא: לא מחליף את ה-hook. ה-hook יריץ flutter analyze/test/build בנוסף.
 #
+# ⚠️  לקח #70: analyze לא תופס import חסר (resolve טרנזיטיבי).
+#     אחרי שינוי טיפוסים/imports — הרץ: flutter test test/<file>_test.dart
+#
 # לקח #68 (בנצי 2026-06-02): 4 מחזורי Flutter לחינם בגלל שערים 59/81 שנכשלו אחרי.
 
 set -euo pipefail

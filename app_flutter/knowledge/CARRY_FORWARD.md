@@ -5,6 +5,32 @@
 
 ---
 
+## 🏆 Top 10 חובה-לסשן (קרא ראשון)
+
+> עשרת הלקחים שחוזרים הכי הרבה ושמחירם הכי גבוה אם מדלגים עליהם.
+
+**T1. Fetch + branch check פותח כל סשן.** `git fetch origin claude/whats-happening-LyY9G && git rev-parse HEAD` — אמת שה-SHA זהה לרימוט. "קובץ חסר" תמיד = בדוק ענף ראשון, לא ה-working-tree. (לקח #60)
+
+**T2. Preflight לפני commit — חוסך 13 דק'.** `bash scripts/preflight.sh` — שערים 59/81/83 + גרסאות בלי Flutter (30 שניות). רק אחרי ✅ preflight → `git commit`. (לקח #68)
+
+**T3. Re-fetch לפני commit — sessions מקבילים דוחפים.** `git fetch` → `ahead/behind` → rebase אם origin זז. "אותו HEAD" = הנחה מסוכנת. (לקח #5)
+
+**T4. kCatalogProducts לרוחב UI, לעולם לא kLipskeyCatalog.** `kLipskeyCatalog` = Lipskey בלבד → ריק ל-Huliot/PPR → כרטיס לבן. בכל `screens/` / `state/` / `logic/` → `kCatalogProducts`. שער 114 אוכף. (לקח #69)
+
+**T5. flutter test <file> אחרי שינוי טיפוסים — analyze לא מספיק.** `flutter analyze` עובר גם כשחסר `import` (resolve טרנזיטיבי). רק `flutter test test/FILE_test.dart` תופס compile error. (לקח #70)
+
+**T6. קובץ ידע חדש = שורה ב-README באותו commit.** ≥27 יתומים נוצרו כי "עוד מסמך" לא אינדוקס. חפש קיים-לעדכון לפני יצירה. (לקח #59)
+
+**T7. GATE_REGISTRY.md — רשום שער לפני שאתה מוסיף.** ראה `knowledge/GATE_REGISTRY.md`. קולידה (שני סוכנים מוסיפים 113 ביום אחד) = rebase conflict. (לקח #66, 2026-06-03)
+
+**T8. Contact-sheet + visual verify לפני "done" על assets.** unit-tests-green ≠ content-correct. Script שמייצר תמונות → contact-sheet → עין → commit. (לקח #6)
+
+**T9. פרוטוקוליסט = hook / docs / tests בלבד.** לא feature code, לא UI, לא data. הוראה זו גוברת. (לקח #35)
+
+**T10. Parallel agents = קבצים חדשים נפרדים בלבד.** שני agents על קובץ אחד = merge conflict שמבטל את כל יתרון הקבילות. (AGENT_PATTERNS)
+
+---
+
 ## 🎯 Process & Discipline
 
 1. **Tests-first.** כתוב 5-15 בדיקות **נכשלות** לפני שורת קוד ראשונה. הצעד הראשון ב-Implementation phase הוא "תרגל RED → GREEN".
@@ -192,3 +218,5 @@
 53. **גנרטור הרגרסיה — escape ל-Dart string רגיל, לא `r'''…'''`.** דווח (קטלגן): ANTIPATTERN שמתחיל/נגמר בגרש בודד `'` יוצר 4 גרשים רצופים בגבול של `r'''…'''` ⇒ שגיאת קומפילציה בקובץ המיוצר ⇒ **כל הסוויטה נשברת לכל הסוכנים** (landmine high-impact). תוקן: הגנרטור עושה escape (`\`→`\\`, `$`→`\$`, `'`→`\'`, בסדר הזה — backslash ראשון) ועוטף ב-string רגיל `'…'`. semantics נשמרים (`\$`→תו `$`→anchor/literal כמו ב-raw). כלל: כשמטמיעים תוכן משתנה בתוך מחרוזת קוד מיוצרת — escape דטרמיניסטי תמיד עדיף על delimiter-wrapping שמניח שהתוכן לא מכיל את ה-delimiter.
 
 52. **emoji-match ב-hook = bash `case`/glob builtin, לא grep כלל (אפילו לא `-aF`).** לקח #51 (`-aqF`) **לא הספיק**: סוכן (מקבץ) דיווח ששער 23 עדיין נכשל תחת `git commit` למרות ש-`grep -aqF "🟦"` עובר standalone בכל locale. השורש: git-for-windows מחליף את ה-grep binary/PATH ב-invocation של ה-hook — כך שכל תלות ב-binary חיצוני היא לא-אמינה, ללא קשר ל-flags. תוקן (אותו class כמו 103): `while IFS= read -r _l; do case "$_l" in *🟦*) ...;; esac; done < file` — builtin טהור, אפס binary חיצוני, byte-match עקבי. **כלל-על:** בדיקת-תוכן ב-hook שצריכה להיות אמינה בכל סביבה (emoji/multibyte/untrusted) → bash builtin (`case`/glob/`[[ == ]]`), לעולם לא pipe ל-grep/echo חיצוניים. זה מאחד את 45/51/52 לעיקרון אחד.
+
+70. **`flutter analyze` עובר כשחסר import — רק `flutter test <file>` תופס compile error.** (זוהה ע"י פרוטוקוליסט 2026-06-03) `huliot_card_render_test.dart`: שינוי `dynamic` → `LipskeyCatalogProduct` בלי `import` — `flutter analyze` עבר (resolve טרנזיטיבי), `flutter test test/huliot_card_render_test.dart` נכשל על "Target of URI hasn't been generated". **כלל:** אחרי כל שינוי טיפוס, signature, או import — הרץ `flutter test test/<file>_test.dart` (לא רק `flutter analyze`). זה הבדיקה האמינה. תוקן: הוסף `import 'package:buildsmart/data/lipskey_catalog.dart'` + הסר `.cast()`. תועד ב-`stuck_log.md` 2026-06-03.
