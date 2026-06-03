@@ -40,6 +40,8 @@
 | `11-manager-dashboard-selftest.md` | דשבורד-מנהל + BUTTON_REGISTRY/self-test | 12062–15900 |
 | `12-persona-manager-store.md` | דשבורד-מנהל (מלא) + דשבורד-חנות | 15900–17627 |
 | `13-scenarios-courier-registration.md` | פריט-חסר/אזל + דשבורד-שליח + רישום | 17627–18422 |
+| `14-b2b-supply-chain.md` | B2B (Cat-A): planner/RMA/השכרה/פקדונות/MSDS/RFQ | 18423–19451 |
+| `15-finance-site-hubs.md` | מרכז-פיננסים (B) + ניהול-אתר (C) | 19452–20800 |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
@@ -63,7 +65,9 @@
 | 12062–15900 | JS — דשבורד-מנהל + BUTTON_REGISTRY/self-test | ✅ נלכד | `11-manager-dashboard-selftest.md` |
 | 15901–17627 | JS — דשבורד-מנהל (מלא) + דשבורד-חנות | ✅ נלכד | `12-persona-manager-store.md` |
 | 17628–18422 | JS — פריט-חסר/אזל + שליח + רישום | ✅ נלכד | `13-scenarios-courier-registration.md` |
-| 18423–22414 | JS — B2B (planner/RFQ/RMA/MSDS) + hubs + chat + עובד + דוח-פיננסי | ⬜ טרם | `14+`… |
+| 18423–19451 | JS — B2B Category-A (planner/RMA/השכרה/MSDS/RFQ) | ✅ נלכד | `14-b2b-supply-chain.md` |
+| 19452–20800 | JS — מרכז-פיננסים (B) + ניהול-אתר (C) | ✅ נלכד | `15-finance-site-hubs.md` |
+| 20801–22414 | JS — AI(G)/rewards(H)/security(I)/service(J)/chat/עובד + דוח-פיננסי | ⬜ טרם | `16+`… |
 
 ## מפת-ניווט ל-JS (5440–22414) — roadmap לקריאה, **טרם נלכד**
 > רשימת שמות+שורות בלבד, להכוונת הקריאה הרציפה. **התוכן ייחשב נלכד רק אחרי
