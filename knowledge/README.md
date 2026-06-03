@@ -6,6 +6,8 @@
 > נבנה על ענף-הכתיבה `claude/nice-volta-BSbVm` (קריאה מהקוד הקיים, כתיבה לכאן בלבד).
 > **לא** קשור לפרוטוקול / ל-`app_flutter/knowledge/port/` הקיים. זה דף חלק.
 
+> 🚨 **תיקון קריטי (התגלה ע"י הבעלים, 2026-06-03):** דלתאות ה-**Flutter** בדוחות (וכן דוחות 21–23) נבנו מ-snapshot **מיושן** של `app_flutter/lib` — **27 קבצים** על ענף `nice-volta`. **האפליקציה האמיתית/הסופית** חיה על ענף **`claude/whats-happening-LyY9G`** ובה **123 קבצים** (קטלוגי-מותגים אמיתיים Huliot/Lipskey/Polyroll · `install_engine`/`pressure_drop`/`price_estimate` · onboarding/welcome/profession · `install_studio` · test_harness מלא). **כל דלתאות-Flutter + דוחות 21–23 = לכידה-מחדש מול `whats-happening` (TODO).** ✅ תקף ולא-מושפע: הפרוטוטייפ (`index.html`, דוחות 01–17 base) + **Preact** (`app/src` זהה ב-2 הענפים, 55 קבצים).
+
 ## השיטה (חוק-ברזל)
 1. **קוראים כל שורה, כל תיבה.** לא סורקים (grep), לא מנחשים, לא מדלגים. הידע
    נלכד רק ממה שנקרא במלואו.
