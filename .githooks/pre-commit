@@ -1,9 +1,31 @@
 #!/bin/bash
-# פרוטוקול BuildSmart — 100 שערים אוטומטיים
-# נשמר בריפו ב-.githooks/ — חל על כל מודל וכל clone
-# כל הפרת פרוטוקול = חסימה מוחלטת
+# ═══════════════════════════════════════════════════════════════════════════
+#  BuildSmart Protocol v2 — modular pre-commit
+# ═══════════════════════════════════════════════════════════════════════════
+#  WHAT CHANGED vs v1 (see PROTOCOL_V2.md for the full OLD->NEW mapping):
+#   - SINGLE SOURCE OF TRUTH: protocol/gates.tsv lists every real gate. A new
+#     gate `reg` FAILS the commit if the set of ids emitted here != the
+#     registry's `enforced` set. Registry and code can no longer drift.
+#   - CONTENT GATES MOVED TO DART: every brittle string/content gate (emoji,
+#     RTL, secrets, dark-surface, persistence-key, kLipskeyCatalog,
+#     antipattern-recurrence, ...) now runs in tool/protocol_check.dart — a
+#     deterministic, OS-independent engine — instead of MSYS-fragile bash grep.
+#     This kills the #1 recurring bug class (lesson #52). Findings are re-emitted
+#     through err()/warn() so retry/fingerprint bookkeeping is unchanged.
+#   - DEFECTS FIXED: old `err "105"` mislabel (commit-msg-missing) is now its
+#     correct id `7c`; the 15==83 duplicate is merged into gate 15; cancelled/
+#     moved/removed entries (34/59/61/76/83/100) are documented in the registry
+#     and no longer inflate the live count.
+#   - STRUCTURE: one bash function per gate-group + a thin run() at the bottom.
+#     Behavior (branch-scoping, emergency-disable, fail-fast barrier, tiering,
+#     rebase/amend replay-skip, baseline tracking, retry fingerprint) is
+#     PRESERVED.
+#
+#  Saved in-repo at .githooks/ — applies to every model and every clone.
+#  Any protocol violation = hard block.
+# ═══════════════════════════════════════════════════════════════════════════
 
-# M7: paths דינמיים — מחפש flutter על Linux / macOS (Intel+ARM) / Windows Git Bash
+# ── flutter on PATH (Linux / macOS Intel+ARM / Windows Git Bash) ──
 for candidate in \
     "/home/user/flutter/bin" \
     "/c/flutter/bin" \
@@ -15,7 +37,6 @@ for candidate in \
 done
 export PATH
 
-# וודא ש-flutter זמין; אם לא — שגיאה ברורה
 if ! command -v flutter >/dev/null 2>&1; then
     echo "❌ flutter לא נמצא ב-PATH" >&2
     echo "   הוסף flutter/bin ל-PATH או התקן Flutter" >&2
@@ -24,8 +45,7 @@ fi
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-# ═══ ענפי-פרוטוקול — רק ענפים ברשימה מקבלים אכיפה מלאה ═══
-# ענפים שלא ברשימה: hook עובר בשקט (אין חסימה, אין Flutter)
+# ═══ branch-scoping — only protocol branches get full enforcement ═══
 _CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
 _PROTO_BRANCHES=("claude/whats-happening-LyY9G")
 _IS_PROTO=0
@@ -36,8 +56,7 @@ if [[ "$_IS_PROTO" -eq 0 ]]; then
     exit 0
 fi
 
-# M4: emergency disable — לשימוש בעת באג קריטי בפרוטוקול בלבד
-# הפעלה: export BUILDSMART_EMERGENCY_DISABLE="$(cat .emergency_token)"
+# ═══ emergency disable (critical protocol-bug use only) ═══
 if [[ -n "${BUILDSMART_EMERGENCY_DISABLE:-}" ]]; then
     TOKEN_FILE="$REPO_ROOT/.emergency_token"
     if [[ -f "$TOKEN_FILE" ]]; then
@@ -55,249 +74,204 @@ fi
 
 cd "$REPO_ROOT/app_flutter" || exit 1
 
+# ── result accumulators + emitters ──────────────────────────────────────
 FAIL=0
 WARN=0
-FAILED_GATES=""   # מספרי השערים שנכשלו — לסיווג retry (code/test מול bookkeeping)
+FAILED_GATES=""        # ids that failed — feeds retry classification
 err()  { echo ""; echo "❌ [שער $1] $2"; echo "   → $3"; FAIL=$((FAIL+1)); FAILED_GATES="$FAILED_GATES,$1"; }
 warn() { echo "⚠️  [שער $1] $2"; WARN=$((WARN+1)); }
-ok()   { :; }  # שתיקה — רק כשלים נראים
 
-# ═══ P0 (לקח #72): version.g.dart — idempotent generate מ-git ═══
-# מימוש PROPOSAL_version_friction. הגרסה נגזרת מ-git+STATUS, gitignored, אף סוכן
-# לא עורך ידנית → אפס conflict + אפס test-trap. חייב לרוץ לפני שערי-גרסה (11/12)
-# ולפני flutter (שמקמפל את הקובץ). idempotent — re-generate, לא mutate (מקבץ).
-if [[ -f "$REPO_ROOT/scripts/gen_version.sh" ]]; then
-    if ! bash "$REPO_ROOT/scripts/gen_version.sh" 2>/tmp/bs_genver.err; then
-        err "11" "gen_version נכשל: $(cat /tmp/bs_genver.err 2>/dev/null)" \
-            "ודא knowledge/STATUS.md מכיל תווית vX.YY"
+# The authoritative list of ids THIS hook implements. Kept in lock-step with
+# protocol/gates.tsv (status==enforced) by gate `reg`. Adding a gate => add its
+# id here AND to the registry, or `reg` fails the commit.
+HOOK_GATE_IDS="1 2 3 4 5 6 7 7c 8 9 10 \
+11 12 13 14 15 16 17 18 19 20 \
+21 22 23 24 25 26 27 28 \
+31 32 33 35 36 37 38 39 40 41 42 43 44 \
+46 47 48 49 50 51 52 53 54 55 56 58 60 \
+62 63 64 65 66 67 68 69 70 71 72 73 74 75 77 78 79 80 \
+81 82 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 \
+101 102 103 104 106 107 108 109 110 111 112 113 114 115 116 reg"
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Dart content engine — run ALL string/content gates deterministically.
+#  Replaces the MSYS-fragile bash greps of v1. We dump the staged diff once and
+#  let tool/protocol_check.dart emit `ERR|WARN<TAB>id<TAB>msg`, which we re-emit
+#  through err()/warn() so bookkeeping (FAILED_GATES/fingerprint) is identical
+#  to a native bash gate.
+# ═══════════════════════════════════════════════════════════════════════════
+run_content_engine() {
+    local diff_file gi_file out sev id msg
+    diff_file="$(mktemp)"; gi_file="$(mktemp)"
+    git diff --cached > "$diff_file" 2>/dev/null
+    git diff --cached -- "$REPO_ROOT/.gitignore" > "$gi_file" 2>/dev/null
+    # Parse findings line-by-line; do NOT use the engine exit code for control
+    # flow (warnings must not block; err()/warn() own the counters).
+    out=$(dart run "$REPO_ROOT/app_flutter/tool/protocol_check.dart" \
+            --diff "$diff_file" \
+            --stuck-log "knowledge/stuck_log.md" \
+            --gitignore "$gi_file" 2>/dev/null)
+    while IFS=$'\t' read -r sev id msg; do
+        [[ -z "$id" ]] && continue
+        case "$sev" in
+            ERR)  err  "$id" "$msg" "ראה PROTOCOL_V2.md / stuck_log.md" ;;
+            WARN) warn "$id" "$msg" ;;
+        esac
+    done <<< "$out"
+    rm -f "$diff_file" "$gi_file"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  GROUP: version.g.dart — idempotent generate from git (lesson #72)
+# ═══════════════════════════════════════════════════════════════════════════
+gate_version_generate() {
+    if [[ -f "$REPO_ROOT/scripts/gen_version.sh" ]]; then
+        if ! bash "$REPO_ROOT/scripts/gen_version.sh" 2>/tmp/bs_genver.err; then
+            err "11" "gen_version נכשל: $(cat /tmp/bs_genver.err 2>/dev/null)" \
+                "ודא knowledge/STATUS.md מכיל תווית vX.YY"
+        fi
     fi
-fi
-# hook-guard (מקבץ סבב-2): .gitignore לא מסיר קבצים שכבר tracked → גישה-C דולפת.
-if git ls-files --error-unmatch lib/version.g.dart >/dev/null 2>&1; then
-    err "11" "version.g.dart עדיין tracked — גישה-C דולפת" \
-        "git rm --cached app_flutter/lib/version.g.dart"
-fi
-if git diff --cached --name-only | grep -q "version\.g\.dart"; then
-    err "11" "version.g.dart ב-staging (אמור להיות gitignored)" \
-        "git reset app_flutter/lib/version.g.dart"
-fi
-
-# ═══ מנגנון למידה: זיהוי retry ═══
-FINGERPRINT_FILE="$REPO_ROOT/.git/stuck_fingerprints.txt"
-touch "$FINGERPRINT_FILE"
-
-# חתימת הניסיון הנוכחי (שמות הקבצים ב-staging)
-CURRENT_FP=$(git diff --cached --name-only | sort | sha256sum | cut -d' ' -f1 | head -c 12)
-# תיקון #3 (אודיט 2026-06-01): גם HEAD — שינוי סט-הקבצים לא יתחמק מזיהוי retry.
-# retry = ניסיון commit כש-HEAD לא זז מאז כשל (אי-אפשר להצליח commit עם שער נכשל,
-# אז HEAD זז רק בהצלחה → אותו HEAD + כשל קודם = retry, לא משנה אילו קבצים).
-HEAD_SHA=$(git rev-parse HEAD 2>/dev/null || echo "none")
-IS_RETRY="false"
-PRIOR_GATES=""   # מספרי השערים שנכשלו בניסיון הקודם (לסיווג שער 102)
-# אם חתימת-הקבצים או ה-HEAD הופיעו ב-5 השעות האחרונות → retry
-NOW=$(date +%s)
-FIVE_HOURS_AGO=$((NOW - 18000))
-while IFS=' ' read -r fp ts rest; do
-    [[ "$ts" -gt "$FIVE_HOURS_AGO" ]] || continue
-    # חילוץ שדה gates= מהרשומה (רשימת שערים מופרדת בפסיקים, או count ברשומה ישנה)
-    rec_gates="${rest#gates=}"; rec_gates="${rec_gates%% *}"
-    # תואם-לאחור: רשומה ישנה בלי "head=" → rec_head=כל ה-rest, לא יתאים ל-sha
-    rec_head="${rest##*head=}"
-    if [[ "$fp" == "$CURRENT_FP" ]]; then
-        IS_RETRY="true"; PRIOR_GATES="$rec_gates"; break
+    if git ls-files --error-unmatch lib/version.g.dart >/dev/null 2>&1; then
+        err "11" "version.g.dart עדיין tracked — גישה-C דולפת" \
+            "git rm --cached app_flutter/lib/version.g.dart"
     fi
-    if [[ "$HEAD_SHA" != "none" && "$rec_head" == "$HEAD_SHA" ]]; then
-        IS_RETRY="true"; PRIOR_GATES="$rec_gates"; break
+    if git diff --cached --name-only | grep -q "version\.g\.dart"; then
+        err "11" "version.g.dart ב-staging (אמור להיות gitignored)" \
+            "git reset app_flutter/lib/version.g.dart"
     fi
-done < "$FINGERPRINT_FILE"
+}
 
-# סיווג: האם הכשל הקודם כלל שער code/test (31-45)? רק אז שער 102 דורש תיעוד.
-# bookkeeping טהור (12 version / 24 WIRING / 59 path) → פטור: אין ANTIPATTERN
-# משמעותי ל"שכחתי לבמפ version", וה-gate עצמו תופס אותם שוב ממילא.
-# שער 42 (helper חדש בלי בדיקה) → פטור: הפתרון הוא הוספת בדיקה — אין ANTIPATTERN לתעד
-# (לקח #64 — דווח ע"י בנצי, 2026-06-01)
-# פורמט v2: `gates=v2:12,24` (רשימת מספרי-שערים). רשומה ישנה (`gates=<count>`)
-# או לא-מזוהה → conservative: דורש תיעוד (כמו לפני התיקון).
-PRIOR_HAS_CODE_TEST=""
-if [[ "$PRIOR_GATES" == v2:* ]]; then
-    prior_nums="${PRIOR_GATES#v2:}"
-    for g in ${prior_nums//,/ }; do
-        [[ "$g" =~ ^[0-9]+$ ]] && (( g >= 31 && g <= 45 )) && (( g != 42 )) && { PRIOR_HAS_CODE_TEST="1"; break; }
+# ═══════════════════════════════════════════════════════════════════════════
+#  GROUP foundations (1-10)
+# ═══════════════════════════════════════════════════════════════════════════
+gate_foundations() {
+    local BRANCH f
+    BRANCH=$(git branch --show-current)
+    [[ "$BRANCH" == claude/* ]] || err "1" "ענף שגוי: $BRANCH" "עבור לענף claude/*"
+
+    for f in README.md PLAYBOOK.md STATUS.md SMARTPRODUCT_ROADMAP.md SCHEMA.md \
+             STATE_OVERVIEW.md TESTS_OVERVIEW.md HELPER_INDEX.md CARD_FLOW.md \
+             AGENT_PATTERNS.md CATALOG-CARD-PROTOCOL.md; do
+        [[ -f "knowledge/$f" ]] || err "2" "קובץ ידע חסר: $f" "צור knowledge/$f"
     done
-elif [[ -n "$PRIOR_GATES" ]]; then
-    PRIOR_HAS_CODE_TEST="1"   # פורמט ישן/לא-מזוהה → צד זהיר
-fi
 
-echo ""
-echo "══════════════════════════════════════════════"
-echo "  פרוטוקול BuildSmart — 100 שערים אוטומטיים"
-echo "══════════════════════════════════════════════"
+    [[ -f "WIRING.md" ]] || err "3" "WIRING.md חסר" "צור app_flutter/WIRING.md"
+    [[ -f "pubspec.yaml" ]] || err "4" "pubspec.yaml חסר" "אתה בתיקייה הלא נכונה"
+    git rev-parse "origin/$BRANCH" >/dev/null 2>&1 || warn "5" "אין מעקב של $BRANCH ב-origin"
 
-# ═══ קבוצה א: יסודות (1-10) ═══
+    [[ -f "$REPO_ROOT/.githooks/pre-commit" ]] || err "6" "pre-commit חסר מהריפו" "שחזר את .githooks/pre-commit"
+    [[ -f "$REPO_ROOT/.githooks/pre-push" ]]   || err "7" "pre-push חסר מהריפו" "שחזר את .githooks/pre-push"
+    # FIX (v2): was mislabeled `err 105`. This is the commit-msg-exists check,
+    # so it lives among the hook-exists gates with id 7c.
+    [[ -f "$REPO_ROOT/.githooks/commit-msg" ]] || err "7c" "commit-msg חסר" "שחזר את .githooks/commit-msg"
+    [[ -f "$REPO_ROOT/.claude/settings.json" ]] || err "8" "settings.json חסר" "שחזר את .claude/settings.json"
+    [[ -f "$REPO_ROOT/.claude/hooks/pre-tool.sh" ]] || err "9" "pre-tool.sh חסר" "שחזר את .claude/hooks/pre-tool.sh"
+    [[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] || err "10" "workflow חסר" "שחזר את GitHub Actions"
+}
 
-# שער 1: ענף עבודה
-BRANCH=$(git branch --show-current)
-[[ "$BRANCH" == claude/* ]] || err "1" "ענף שגוי: $BRANCH" "עבור לענף claude/*"
+# ═══════════════════════════════════════════════════════════════════════════
+#  GROUP state (11-20)
+# ═══════════════════════════════════════════════════════════════════════════
+gate_state() {
+    local V_GEN V_STATUS HOOK_PATH
+    V_GEN=$(grep -oE "v[0-9]+\.[0-9]+" lib/version.g.dart 2>/dev/null | head -1)
+    V_STATUS=$(grep -oE "v[0-9]+\.[0-9]+" knowledge/STATUS.md 2>/dev/null | head -1)
+    [[ -n "$V_GEN" ]] || err "11" "version.g.dart חסר/ריק" "bash scripts/gen_version.sh"
+    [[ "$V_GEN" == "$V_STATUS" ]] || err "12" "גרסה לא מסונכרנת" "version.g.dart=$V_GEN STATUS=$V_STATUS"
 
-# שער 2: 11 קבצי ידע קיימים
-for f in README.md PLAYBOOK.md STATUS.md SMARTPRODUCT_ROADMAP.md SCHEMA.md \
-         STATE_OVERVIEW.md TESTS_OVERVIEW.md HELPER_INDEX.md CARD_FLOW.md \
-         AGENT_PATTERNS.md CATALOG-CARD-PROTOCOL.md; do
-    [[ -f "knowledge/$f" ]] || err "2" "קובץ ידע חסר: $f" "צור knowledge/$f"
-done
+    grep -q "Group A" knowledge/SMARTPRODUCT_ROADMAP.md || err "13" "ROADMAP בלי קבוצה א'" "ROADMAP מקולקל"
+    [[ -n "$V_STATUS" ]] || err "14" "גרסה חסרה ב-STATUS.md" "הוסף תווית גרסה"
 
-# שער 3: WIRING.md קיים
-[[ -f "WIRING.md" ]] || err "3" "WIRING.md חסר" "צור app_flutter/WIRING.md"
+    # FIX (v2): old gates 15 and 83 BOTH checked core.hooksPath==.githooks
+    # (duplicate). Merged into a single gate 15. (83 retired — see registry.)
+    HOOK_PATH=$(git config --get core.hooksPath)
+    [[ "$HOOK_PATH" == ".githooks" ]] || err "15" "hooks לא מופעלים מהריפו" "git config core.hooksPath .githooks"
+    [[ -x "$REPO_ROOT/.githooks/pre-commit" ]] || err "16" "pre-commit לא executable" "chmod +x .githooks/pre-commit"
+    [[ -x "$REPO_ROOT/.githooks/pre-push" ]]   || err "17" "pre-push לא executable" "chmod +x .githooks/pre-push"
 
-# שער 4: pubspec.yaml תקין
-[[ -f "pubspec.yaml" ]] || err "4" "pubspec.yaml חסר" "אתה בתיקייה הלא נכונה"
+    [[ -d "knowledge" ]] || err "18" "תיקיית knowledge חסרה" "צור knowledge/"
+    [[ -d "lib/state" ]] || err "19" "תיקיית lib/state חסרה" "מבנה הפרויקט פגום"
+    [[ -d "test" ]]      || err "20" "תיקיית test חסרה" "מבנה הפרויקט פגום"
+}
 
-# שער 5: ענף שמעוקב
-git rev-parse "origin/$BRANCH" >/dev/null 2>&1 || warn "5" "אין מעקב של $BRANCH ב-origin"
-
-# שער 6-9: hooks קיימים בריפו
-[[ -f "$REPO_ROOT/.githooks/pre-commit" ]] || err "6" "pre-commit חסר מהריפו" "שחזר את .githooks/pre-commit"
-[[ -f "$REPO_ROOT/.githooks/pre-push" ]] || err "7" "pre-push חסר מהריפו" "שחזר את .githooks/pre-push"
-[[ -f "$REPO_ROOT/.githooks/commit-msg" ]] || err "105" "commit-msg חסר" "שחזר את .githooks/commit-msg"
-[[ -f "$REPO_ROOT/.claude/settings.json" ]] || err "8" "settings.json חסר" "שחזר את .claude/settings.json"
-[[ -f "$REPO_ROOT/.claude/hooks/pre-tool.sh" ]] || err "9" "pre-tool.sh חסר" "שחזר את .claude/hooks/pre-tool.sh"
-
-# שער 10: GitHub Actions קיים
-[[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] || err "10" "workflow חסר" "שחזר את GitHub Actions"
-
-# ═══ קבוצה ב: מצב נוכחי (11-20) ═══
-
-# שער 11-12: גרסה מסונכרנת — version.g.dart (אוטומטי) ↔ STATUS (מקור-אמת). לקח #72.
-# המעבר מ-home_shell ל-version.g.dart סוגר את ה-conflict-magnet: אף סוכן לא עורך
-# את שורת-הגרסה ידנית; gen_version (לעיל) מסנכרן מ-STATUS לפני בדיקה זו.
-V_GEN=$(grep -oE "v[0-9]+\.[0-9]+" lib/version.g.dart 2>/dev/null | head -1)
-V_STATUS=$(grep -oE "v[0-9]+\.[0-9]+" knowledge/STATUS.md 2>/dev/null | head -1)
-[[ -n "$V_GEN" ]] || err "11" "version.g.dart חסר/ריק" "bash scripts/gen_version.sh"
-[[ "$V_GEN" == "$V_STATUS" ]] || err "12" "גרסה לא מסונכרנת" "version.g.dart=$V_GEN STATUS=$V_STATUS (gen_version אמור לסנכרן)"
-
-# שער 13: ROADMAP מכיל קבוצה א'
-grep -q "Group A" knowledge/SMARTPRODUCT_ROADMAP.md || err "13" "ROADMAP בלי קבוצה א'" "ROADMAP מקולקל"
-
-# שער 14: STATUS מכיל גרסה
-[[ -n "$V_STATUS" ]] || err "14" "גרסה חסרה ב-STATUS.md" "הוסף תווית גרסה"
-
-# שער 15-17: hooks אקטיביים
-HOOK_PATH=$(git config --get core.hooksPath)
-[[ "$HOOK_PATH" == ".githooks" ]] || err "15" "hooks לא מופעלים מהריפו" "git config core.hooksPath .githooks"
-[[ -x "$REPO_ROOT/.githooks/pre-commit" ]] || err "16" "pre-commit לא executable" "chmod +x .githooks/pre-commit"
-[[ -x "$REPO_ROOT/.githooks/pre-push" ]] || err "17" "pre-push לא executable" "chmod +x .githooks/pre-push"
-
-# שער 18-20: knowledge/ נגיש
-[[ -d "knowledge" ]] || err "18" "תיקיית knowledge חסרה" "צור knowledge/"
-[[ -d "lib/state" ]] || err "19" "תיקיית lib/state חסרה" "מבנה הפרויקט פגום"
-[[ -d "test" ]] || err "20" "תיקיית test חסרה" "מבנה הפרויקט פגום"
-
-# שערים 81-83: hook integrity (הועברו לפני Flutter — fail-fast, לקח #68 בנצי)
-# מיקום מקורי: אחרי Flutter (שורות 489-524). hook שגוי = 13 דק' לחינם.
-# תיקון באג #31: sha256sum רואה CRLF vs LF על Windows/autocrlf → false positive.
-# פתרון: git diff (line-ending aware) במקום sha256sum להשוואת HEAD vs working.
-HEAD_HOOK_HASH=$(git show "HEAD:.githooks/pre-commit" 2>/dev/null | sha256sum | cut -d' ' -f1)
-CURRENT_HOOK_HASH=$(sha256sum "$REPO_ROOT/.githooks/pre-commit" | cut -d' ' -f1)
-if [[ -f "$REPO_ROOT/.git/hooks/pre-commit" ]]; then
-    LOCAL_HOOK_HASH=$(sha256sum "$REPO_ROOT/.git/hooks/pre-commit" 2>/dev/null | cut -d' ' -f1)
-    LOCAL_HOOK_HASH=${LOCAL_HOOK_HASH:-missing}
-else
-    LOCAL_HOOK_HASH="missing"
-fi
-if [[ "$LOCAL_HOOK_HASH" != "missing" && "$LOCAL_HOOK_HASH" != "$CURRENT_HOOK_HASH" ]]; then
-    err "81" "ה-hook המקומי שונה מ-.githooks/" "cp .githooks/pre-commit .git/hooks/"
-fi
-if ! git diff --quiet HEAD -- "$REPO_ROOT/.githooks/pre-commit" 2>/dev/null; then
-    STAGED_HOOK=$(git diff --cached --name-only | grep "^\.githooks/pre-commit$" | head -1)
-    if [[ -z "$STAGED_HOOK" ]]; then
-        err "81" "pre-commit השתנה אבל לא ב-staging" "git add .githooks/pre-commit (או שחזר)"
+# Hook integrity (fail-fast, lesson #68). CRLF-safe: git diff, not sha256sum,
+# for HEAD-vs-working. Local-vs-repo uses sha256 of the same checkout.
+gate_hook_integrity() {
+    local CURRENT_HOOK_HASH LOCAL_HOOK_HASH STAGED_HOOK
+    CURRENT_HOOK_HASH=$(sha256sum "$REPO_ROOT/.githooks/pre-commit" | cut -d' ' -f1)
+    if [[ -f "$REPO_ROOT/.git/hooks/pre-commit" ]]; then
+        LOCAL_HOOK_HASH=$(sha256sum "$REPO_ROOT/.git/hooks/pre-commit" 2>/dev/null | cut -d' ' -f1)
+        LOCAL_HOOK_HASH=${LOCAL_HOOK_HASH:-missing}
+    else
+        LOCAL_HOOK_HASH="missing"
     fi
-fi
-HP=$(git config --get core.hooksPath)
-[[ "$HP" == ".githooks" ]] || err "83" "core.hooksPath שונה: $HP" "git config core.hooksPath .githooks"
+    if [[ "$LOCAL_HOOK_HASH" != "missing" && "$LOCAL_HOOK_HASH" != "$CURRENT_HOOK_HASH" ]]; then
+        err "81" "ה-hook המקומי שונה מ-.githooks/" "cp .githooks/pre-commit .git/hooks/"
+    fi
+    if ! git diff --quiet HEAD -- "$REPO_ROOT/.githooks/pre-commit" 2>/dev/null; then
+        STAGED_HOOK=$(git diff --cached --name-only | grep "^\.githooks/pre-commit$" | head -1)
+        [[ -n "$STAGED_HOOK" ]] || err "81" "pre-commit השתנה אבל לא ב-staging" "git add .githooks/pre-commit (או שחזר)"
+    fi
+}
 
-# ═══ קבוצה ג: תכנון (21-30) ═══
+# ═══════════════════════════════════════════════════════════════════════════
+#  GROUP planning (21-28). Content gates 28 delegated to Dart engine.
+#  Gate 23 (whole-file marker read) and 25 (per-file glob) are MSYS-safe bash
+#  builtins, kept here.
+# ═══════════════════════════════════════════════════════════════════════════
+gate_planning() {
+    local BAD_TEST BAD_HELPER shared sdiff _l _has_blue
+    if [[ -n "$STAGED_LIB" ]]; then
+        [[ -f "knowledge/session_plan.md" ]] || err "21" "session_plan חסר" "צור knowledge/session_plan.md"
+        if [[ -f "knowledge/session_plan.md" ]] && grep -q "<!-- לדוגמה:" knowledge/session_plan.md; then
+            err "22" "session_plan ריק" "מלא את session_plan.md לפני כתיבת קוד"
+        fi
+        # Gate 23: ROADMAP must contain an in-progress marker. Whole-file read
+        # via bash builtin case/glob (lesson #52 — no external grep on content).
+        _has_blue=""
+        if [[ -f "knowledge/SMARTPRODUCT_ROADMAP.md" ]]; then
+            while IFS= read -r _l || [[ -n "$_l" ]]; do
+                case "$_l" in *🟦*) _has_blue=1; break;; esac
+            done < knowledge/SMARTPRODUCT_ROADMAP.md
+        fi
+        [[ -n "$_has_blue" ]] || err "23" "אין צעד בתהליך" "סמן 🟦 ב-ROADMAP לפני קוד"
 
-STAGED_LIB=$(git diff --cached --name-only | grep -E "^app_flutter/lib/(screens|state|logic)/" | head -1)
-STAGED_HELPER=$(git diff --cached --name-only | grep -E "^app_flutter/lib/(logic|data)/" | head -1)
-STAGED_TEST=$(git diff --cached --name-only | grep -E "^app_flutter/test/.*_test\.dart$" | head -1)
-STAGED_KNOWLEDGE=$(git diff --cached --name-only | grep "knowledge/" | head -1)
-
-if [[ -n "$STAGED_LIB" ]]; then
-    # שער 21: session_plan קיים
-    [[ -f "knowledge/session_plan.md" ]] || err "21" "session_plan חסר" "צור knowledge/session_plan.md"
-
-    # שער 22: session_plan לא ריק (לא template)
-    if [[ -f "knowledge/session_plan.md" ]] && grep -q "<!-- לדוגמה:" knowledge/session_plan.md; then
-        err "22" "session_plan ריק" "מלא את session_plan.md לפני כתיבת קוד"
+        [[ -n "$STAGED_WIRING" ]] || err "24" "WIRING.md לא עודכן" "עדכן WIRING.md"
     fi
 
-    # שער 23: יש צעד 🟦 ב-ROADMAP
-    # תיקון אודיט 2026-06-01 (לקח #52, אותו class כמו 103): אפילו `grep -aqF` נכשל
-    # תחת invocation של git-for-windows — git מחליף את ה-grep binary/PATH, כך
-    # שהבדיקה עוברת standalone אך נכשלת תחת `git commit`. bash case/glob הוא
-    # builtin טהור (אפס binary חיצוני) → byte-match עקבי בכל סביבה.
-    _has_blue=""
-    if [[ -f "knowledge/SMARTPRODUCT_ROADMAP.md" ]]; then
+    # Gate 25: Preact-shared untouched. Per-file glob on the staged diff using a
+    # bash builtin match (not a grep on file content) — MSYS-safe.
+    for shared in app_settings catalog_settings chat_settings notif_settings store_settings; do
+        sdiff=$(git diff --cached -- "lib/state/${shared}.dart" 2>/dev/null)
+        [[ -z "$sdiff" ]] && continue
         while IFS= read -r _l || [[ -n "$_l" ]]; do
-            case "$_l" in *🟦*) _has_blue=1; break;; esac
-        done < knowledge/SMARTPRODUCT_ROADMAP.md
+            case "$_l" in
+                ++*|--*) : ;;                       # context of diff header
+                [+-][!+-]*) err "25" "נגעת ב-$shared.dart" "$shared משותף עם Preact — אסור לגעת"; break ;;
+            esac
+        done <<< "$sdiff"
+    done
+
+    BAD_TEST=$(git diff --cached --name-only | grep -E "^app_flutter/test/.*_tests\.dart$" | head -1)
+    [[ -z "$BAD_TEST" ]] || err "26" "שם בדיקה שגוי: $BAD_TEST" "שנה ל-_test.dart (singular)"
+    BAD_HELPER=$(git diff --cached --name-only | grep -E "^app_flutter/lib/.*[A-Z].*\.dart$" | head -1)
+    [[ -z "$BAD_HELPER" ]] || err "27" "שם קובץ ב-CamelCase: $BAD_HELPER" "שנה ל-snake_case"
+    # Gate 28 (local URI) — handled by Dart engine (content gate).
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  GROUP test (31-44). The Flutter tier. Skipped if no .dart/.yaml staged;
+#  test skipped on rebase/amend replay; analyze always (cheap).
+# ═══════════════════════════════════════════════════════════════════════════
+gate_test_tier() {
+    local NEEDS_FLUTTER ANALYZE ERR_COUNT KNOWN_FAIL KF_LISTED FAIL_COUNT
+    local TEST_EXIT LAST_TEST_COUNT N critical
+    NEEDS_FLUTTER=$(git diff --cached --name-only | grep -E "\.(dart|yaml|yml)$" | head -1)
+    if [[ -z "$NEEDS_FLUTTER" ]]; then
+        echo "ℹ️  אין שינוי בקוד — מדלג על flutter analyze/test/build (חוסך 3-5 דק')"
+        return
     fi
-    [[ -n "$_has_blue" ]] || err "23" "אין צעד בתהליך" "סמן 🟦 ב-ROADMAP לפני קוד"
 
-    # שער 24: WIRING.md עודכן
-    STAGED_WIRING=$(git diff --cached --name-only | grep "WIRING.md" | head -1)
-    [[ -n "$STAGED_WIRING" ]] || err "24" "WIRING.md לא עודכן" "עדכן WIRING.md"
-
-    # שער 59: בוטל ה-forced-bump (לקח #72) — זה היה ה-conflict-magnet.
-    # build (kBuild) מתקדם אוטומטית מ-git ב-gen_version; label עולה רק ב-release
-    # מכוון (ידני ב-STATUS.md בלבד). אין יותר חובת-bump-בכל-commit שאילצה עריכה
-    # ידנית של שורה משותפת. שערים 11/12 אוכפים את הסנכרון version.g.dart↔STATUS.
-fi
-
-# שער 25: לא לגעת ב-Preact-shared
-for shared in app_settings catalog_settings chat_settings notif_settings store_settings; do
-    if git diff --cached lib/state/${shared}.dart 2>/dev/null | grep -q "^[+-][^+-]"; then
-        err "25" "נגעת ב-$shared.dart" "$shared משותף עם Preact — אסור לגעת"
-    fi
-done
-
-# שער 26-28: שמות קבצים תקינים (תיקון באג #14 — רק ב-test/ בלבד)
-BAD_TEST=$(git diff --cached --name-only | grep -E "^app_flutter/test/.*_tests\.dart$" | head -1)
-[[ -z "$BAD_TEST" ]] || err "26" "שם בדיקה שגוי: $BAD_TEST" "שנה ל-_test.dart (singular)"
-
-BAD_HELPER=$(git diff --cached --name-only | grep -E "^app_flutter/lib/.*[A-Z].*\.dart$" | head -1)
-[[ -z "$BAD_HELPER" ]] || err "27" "שם קובץ ב-CamelCase: $BAD_HELPER" "שנה ל-snake_case"
-
-# שער 28-30: אין URI מקומי (רק בקוד dart, לא בhook עצמו)
-BAD_URI=$(git diff --cached -- '*.dart' ':(exclude)*stuck_regression_test.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "file:///|C:\\\\" | head -1)
-[[ -z "$BAD_URI" ]] || err "28" "URI מקומי בקוד" "הסר נתיב מוחלט"
-
-# ══ Fail-fast: אם יש כשלים בשערים מהירים — לא מריצים Flutter (~13 דק') ══
-# לקח #68 (בנצי 2026-06-02): שערים 59/81 גרמו ל-4 מחזורי Flutter לחינם.
-# פתרון: כל השערים הזולים רצים קודם; בכשל — עוצרים לפני analyze/test/build.
-if [[ "$FAIL" -gt 0 ]]; then
-    echo ""
-    echo "══════════════════════════════════════════════"
-    echo "  ❌ $FAIL שגיאות בשערים מהירים — עוצר לפני Flutter"
-    echo "  תקן ונסה שוב (חוסך ~13 דק' analyze/test/build)"
-    echo "══════════════════════════════════════════════"
-    echo "$CURRENT_FP $NOW gates=v2:${FAILED_GATES#,} head=$HEAD_SHA" >> "$FINGERPRINT_FILE"
-    exit 1
-fi
-
-# ═══ קבוצה ד: בדיקה (31-45) ═══
-
-# תיקון באג #19: tiered execution
-# אם אין שינוי dart/yaml — מדלגים על flutter analyze/test/build (חוסך 3-5 דק' לcommits של תיעוד)
-NEEDS_FLUTTER=$(git diff --cached --name-only | grep -E "\.(dart|yaml|yml)$" | head -1)
-# fast-gate (P2, לקח #72): rebase/amend replay — ה-commits כבר אומתו פעם.
-# דלג על test היקר (מקבץ סבב-2: "11×hook"); analyze נשאר (מהיר, תופס compile
-# מ-conflict-resolution גרוע). build web המלא עבר ל-pre-push (תנאי-יציאה-מהתור).
-IS_REPLAY=""
-case "${GIT_REFLOG_ACTION:-}" in rebase*|*amend*|*cherry-pick*) IS_REPLAY=1;; esac
-if [[ -n "$NEEDS_FLUTTER" ]]; then
-    # שער 31: ניתוח קוד — שגיאות בלבד (תמיד, גם ב-replay — זול)
     ANALYZE=$(flutter analyze --no-pub 2>&1)
     if echo "$ANALYZE" | grep -qE "^error •"; then
         ERR_COUNT=$(echo "$ANALYZE" | grep -cE "^error •")
@@ -305,621 +279,489 @@ if [[ -n "$NEEDS_FLUTTER" ]]; then
         err "31" "$ERR_COUNT שגיאות ניתוח" "תקן את השגיאות"
     fi
 
-  if [[ -n "$IS_REPLAY" ]]; then
-    echo "  ⏩ rebase/amend replay — מדלג על test (אומת קודם; pre-push יריץ build מלא)"
-    TEST_OUT=""
-  else
-    # שער 32: בדיקות לא נכשלות מעבר ל-baseline (תיקון באג #19 — baseline tracking)
-    # baseline מאוחסן ב-STATUS.md: "known-failing: N" — מאפשר pre-existing failures
-    TEST_OUT=$(flutter test --no-pub --concurrency=4 2>&1)
-    TEST_EXIT=$?
-    KNOWN_FAIL=$(grep -oE "known-failing: [0-9]+" knowledge/STATUS.md 2>/dev/null | grep -oE "[0-9]+$" || echo 0)
-    # מניעת baseline-phantom (אודיט 2026-06-01): known-failing > 0 חייב רשימת שמות
-    # תואמת ב-known_failing.txt — אחרת אפשר להגדיר baseline מדומה ש"בולע" רגרסיות
-    # אמיתיות בשקט. לקח #27: grep -c → ${var:-0}, לא "|| echo 0".
-    KF_LISTED=$(grep -cvE '^[[:space:]]*(#|$)' knowledge/known_failing.txt 2>/dev/null); KF_LISTED=${KF_LISTED:-0}
-    if [[ "$KNOWN_FAIL" -gt 0 && "$KF_LISTED" -ne "$KNOWN_FAIL" ]]; then
-        err "32" "baseline-phantom: known-failing=$KNOWN_FAIL אך known_failing.txt מפרט $KF_LISTED שמות" "פרט את שמות הבדיקות ב-known_failing.txt, או הגדר known-failing: 0"
-    fi
-    if [[ $TEST_EXIT -ne 0 ]] || echo "$TEST_OUT" | grep -qE "Some tests failed"; then
-        # flutter compact output: "XX:XX +888 -16: Some tests failed." — חלץ את -N
-        # תיקון באג #32: pattern הקודם "[0-9]+ ✗" לא מוצא דבר ב-compact mode
-        FAIL_COUNT=$(echo "$TEST_OUT" | grep -oE "\+[0-9]+ -[0-9]+:" | grep -oE -- "-[0-9]+" | grep -oE "[0-9]+" | tail -1)
-        FAIL_COUNT=${FAIL_COUNT:-0}
-        if [[ "$FAIL_COUNT" -gt "$KNOWN_FAIL" ]]; then
-            # הדפס אילו בדיקות נכשלו בשמן — שהסוכן לא ייתקע "לא יודע מה נכשל"
-            echo "   ❌ בדיקות שנכשלו (שמות):"
-            echo "$TEST_OUT" | grep -aE "\[E\]|✗|FAILED|: .+ \[E\]" | head -20
-            err "32" "בדיקות נכשלות: $FAIL_COUNT > baseline $KNOWN_FAIL" "תקן, או עדכן known-failing ב-STATUS.md + שמות ב-known_failing.txt"
-        else
-            warn "32" "יש $FAIL_COUNT כשלים pre-existing (baseline=$KNOWN_FAIL) — מותר להמשיך"
+    if [[ -n "$IS_REPLAY" ]]; then
+        echo "  ⏩ rebase/amend replay — מדלג על test (אומת קודם; pre-push יריץ build מלא)"
+        TEST_OUT=""
+    else
+        TEST_OUT=$(flutter test --no-pub --concurrency=4 2>&1)
+        TEST_EXIT=$?
+        KNOWN_FAIL=$(grep -oE "known-failing: [0-9]+" knowledge/STATUS.md 2>/dev/null | grep -oE "[0-9]+$" || echo 0)
+        KF_LISTED=$(grep -cvE '^[[:space:]]*(#|$)' knowledge/known_failing.txt 2>/dev/null); KF_LISTED=${KF_LISTED:-0}
+        if [[ "$KNOWN_FAIL" -gt 0 && "$KF_LISTED" -ne "$KNOWN_FAIL" ]]; then
+            err "32" "baseline-phantom: known-failing=$KNOWN_FAIL אך known_failing.txt מפרט $KF_LISTED שמות" "פרט שמות ב-known_failing.txt, או known-failing: 0"
+        fi
+        if [[ $TEST_EXIT -ne 0 ]] || echo "$TEST_OUT" | grep -qE "Some tests failed"; then
+            FAIL_COUNT=$(echo "$TEST_OUT" | grep -oE "\+[0-9]+ -[0-9]+:" | grep -oE -- "-[0-9]+" | grep -oE "[0-9]+" | tail -1)
+            FAIL_COUNT=${FAIL_COUNT:-0}
+            if [[ "$FAIL_COUNT" -gt "$KNOWN_FAIL" ]]; then
+                echo "   ❌ בדיקות שנכשלו (שמות):"
+                echo "$TEST_OUT" | grep -aE "\[E\]|✗|FAILED|: .+ \[E\]" | head -20
+                err "32" "בדיקות נכשלות: $FAIL_COUNT > baseline $KNOWN_FAIL" "תקן, או עדכן known-failing + known_failing.txt"
+            else
+                warn "32" "יש $FAIL_COUNT כשלים pre-existing (baseline=$KNOWN_FAIL) — מותר להמשיך"
+            fi
+        fi
+        TEST_COUNT=$(echo "$TEST_OUT" | grep -oE "\+[0-9]+" | tail -1 | tr -d '+')
+        LAST_TEST_COUNT=$(grep -oE "[0-9]+\+ tests|[0-9]+ tests pass" knowledge/STATUS.md 2>/dev/null | head -1 | grep -oE "^[0-9]+" || echo 0)
+        if [[ -n "$TEST_COUNT" && "$TEST_COUNT" -lt "$LAST_TEST_COUNT" ]]; then
+            err "33" "מספר בדיקות ירד: $TEST_COUNT < $LAST_TEST_COUNT" "אל תמחק בדיקות"
         fi
     fi
 
-    TEST_COUNT=$(echo "$TEST_OUT" | grep -oE "\+[0-9]+" | tail -1 | tr -d '+')
+    # Gate 34 (build web) MOVED to pre-push — see registry. (Not emitted here.)
 
-    # שער 33: מספר בדיקות לא יורד (תיקון באג #10 — pattern נכון)
-    LAST_TEST_COUNT=$(grep -oE "[0-9]+\+ tests|[0-9]+ tests pass" knowledge/STATUS.md 2>/dev/null | head -1 | grep -oE "^[0-9]+" || echo 0)
-    if [[ -n "$TEST_COUNT" && "$TEST_COUNT" -lt "$LAST_TEST_COUNT" ]]; then
-        err "33" "מספר בדיקות ירד: $TEST_COUNT < $LAST_TEST_COUNT" "אל תמחק בדיקות"
-    fi
-  fi  # סוף IS_REPLAY guard
-
-    # שער 34: בנייה לאינטרנט — עבר ל-pre-push (fast-gate, לקח #72).
-    # build web release הוא ~2-4 דק'; ב-pre-commit זה הרג איטרציה (3 סוכנים).
-    # עכשיו רץ פעם אחת ב-push (תנאי-יציאה-מהתור) + CI. analyze+test כאן עדיין
-    # תופסים את רוב הרגרסיות לפני ה-push.
-
-    # שערים 35-40: קבצי בדיקה חיוניים קיימים (לא נמחקו).
-    # תיקון לקח #55 (דיווח Finder): הצורה הישנה (`grep -q "$critical" $TEST_OUT`)
-    # הסתמכה על כך ש-default-reporter מדפיס את שם כל קובץ — אבל כשהפלט נלכד
-    # (לא-TTY) זה לא-דטרמיניסטי: 3/6 שמות חסרים בכל ריצה → warn שגוי קבוע.
-    # גרוע מכך — הבדיקה הישנה דילגה לגמרי כשהקובץ *נמחק* (הסיכון האמיתי).
-    # הנכון: warn אם הקובץ החיוני חסר. מעבר/כשל מכוסה ע"י שער 32 (FAIL_COUNT).
+    # Gates 35-40: critical test files exist (warn). Preserved as advisory.
     for critical in compat_coverage_test regression_gate_test knowledge_protocol_test \
                     smartproduct_contract_test dedup_test no_duplicate_specs_test; do
         N=$((35 + $(echo "compat_coverage_test regression_gate_test knowledge_protocol_test smartproduct_contract_test dedup_test no_duplicate_specs_test" | tr ' ' '\n' | grep -n "^${critical}$" | cut -d: -f1) - 1))
         [[ -f "test/${critical}.dart" ]] || warn "$N" "$critical חסר — בדיקה חיונית נמחקה?"
     done
-else
-    echo "ℹ️  אין שינוי בקוד — מדלג על flutter analyze/test/build (חוסך 3-5 דק')"
-fi
+}
 
-# שער 41: אין בדיקות עם count > 0
-BAD_COUNT=$(git diff --cached test/ 2>/dev/null | grep "^+" | grep -E "greaterThan\(0\)" | head -1)
-[[ -z "$BAD_COUNT" ]] || warn "41" "test עם greaterThan(0) — שביר על נתונים ריקים"
+# Test bookkeeping gates that run regardless of Flutter tier (41-44).
+gate_test_bookkeeping() {
+    local BAD_COUNT STAGED_MUT
+    BAD_COUNT=$(git diff --cached test/ 2>/dev/null | grep "^+" | grep -E "greaterThan\(0\)" | head -1)
+    [[ -z "$BAD_COUNT" ]] || warn "41" "test עם greaterThan(0) — שביר על נתונים ריקים"
 
-# שער 42: בדיקות חדשות בקובץ עם _test.dart
-if [[ -n "$STAGED_HELPER" && -z "$STAGED_TEST" ]]; then
-    err "42" "helper חדש בלי בדיקה" "צור test/*_test.dart לפונקציה החדשה"
-fi
-
-# שער 43-45: mutation log
-if [[ -n "$STAGED_HELPER" ]]; then
-    [[ -f "knowledge/mutation_log.md" ]] || err "43" "mutation_log חסר" "צור knowledge/mutation_log.md"
-    if [[ -f "knowledge/mutation_log.md" ]]; then
-        STAGED_MUT=$(git diff --cached --name-only | grep "mutation_log.md" | head -1)
-        [[ -n "$STAGED_MUT" ]] || err "44" "mutation_log לא עודכן" "תעד הזרקת תקלה ב-mutation_log.md"
+    if [[ -n "$STAGED_HELPER" && -z "$STAGED_TEST" ]]; then
+        err "42" "helper חדש בלי בדיקה" "צור test/*_test.dart לפונקציה החדשה"
     fi
-fi
-
-# ═══ קבוצה ה: איכות קוד (46-60) ═══
-
-# שער 46: אין משטחים כהים
-DARK=$(git diff --cached lib/screens/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "0xFF111111|BsTokens\.bgDark" | head -1)
-[[ -z "$DARK" ]] || err "46" "משטח כהה" "הסר 0xFF111111/BsTokens.bgDark"
-
-# שער 47: אין dialog/sheet/route חדש בלי אישור
-NEW_DIALOG=$(git diff --cached lib/screens/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "showDialog|showModalBottomSheet" | head -1)
-if [[ -n "$NEW_DIALOG" && -z "$STAGED_WIRING" ]]; then
-    warn "47" "dialog/sheet חדש — וודא שמופיע ב-WIRING"
-fi
-
-# שער 48: אין print() בproduction (תיקון באג #15 — pattern רחב יותר)
-# תופס: ^print(, "  print(", " print(", "} print(", "; print("
-# לא תופס: 'print(...)' בstring, // print(...) בcomment, debugPrint(
-PRINTS=$(git diff --cached -- 'app_flutter/lib/*.dart' 2>/dev/null \
-    | grep "^+" | grep -v "^+++" \
-    | grep -E "(^\+|[^a-zA-Z0-9_])print\s*\(" \
-    | grep -v "debugPrint\|//.*print\|'print\|\"print" \
-    | head -1)
-[[ -z "$PRINTS" ]] || err "48" "print() בקוד production" "השתמש ב-debugPrint או הסר"
-
-# שער 49: אין TODO/FIXME חדשים בלי context
-NEW_TODO=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "// TODO[^:]|// FIXME[^:]" | head -1)
-[[ -z "$NEW_TODO" ]] || warn "49" "TODO/FIXME בלי הסבר"
-
-# שער 50: אין import של dart:html
-BAD_IMPORT=$(git diff --cached lib/ 2>/dev/null | grep "^+import 'dart:html'" | head -1)
-[[ -z "$BAD_IMPORT" ]] || err "50" "import dart:html אסור" "השתמש ב-package:web"
-
-# שער 51: אין hard-coded URLs
-HARD_URL=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "https?://[^\"']+\"" | head -1)
-[[ -z "$HARD_URL" ]] || warn "51" "URL קשיח — שקול config"
-
-# שער 52: אין secrets/keys (תיקון באג #16 — pattern מדויק יותר)
-# מחפש: STRING של ערך, לא רק "המילה password"
-# false-positives ידועים: passwordRegex, secretRegex, kSecretKey = compute()
-SECRETS=$(git diff --cached -- '*.dart' '*.yaml' '*.yml' '*.json' 2>/dev/null \
-    | grep "^+" | grep -v "^+++" \
-    | grep -iE "(api[_-]?key|secret|token|password|bearer)\s*[:=]\s*['\"][A-Za-z0-9+/_-]{16,}['\"]" \
-    | grep -viE "regex|pattern|kSecret|kToken|kPassword|kApiKey|\.test\(|expect\(|placeholder" \
-    | head -1)
-[[ -z "$SECRETS" ]] || err "52" "secret/api_key בקוד" "אסור לשמור secrets (אם false-positive — שנה שם משתנה כך שיכלול 'regex'/'pattern')"
-
-# שער 53: אין .env בstaged
-STAGED_ENV=$(git diff --cached --name-only | grep -E "^\.env|\.env\.|credentials" | head -1)
-[[ -z "$STAGED_ENV" ]] || err "53" "קובץ סודות נוסף: $STAGED_ENV" "הסר מ-staging"
-
-# שער 53 (המשך): bypass-tokens לעולם לא ב-git (לקח #31 + אודיט 2026-06-01).
-# defense-in-depth: גם אם מישהו עשה git add -f על קובץ ש-.gitignore אמור לחסום.
-STAGED_TOKEN=$(git diff --cached --name-only | grep -E "^\.(emergency_token|allow_protocol_edit|allow_master_protocol_edit)$" | head -1)
-[[ -z "$STAGED_TOKEN" ]] || err "53" "bypass-token ב-staging: $STAGED_TOKEN" "git reset HEAD $STAGED_TOKEN — קובץ זה local-only בלבד"
-
-# שער 54: אין ColoredBox עם color כהה
-DARK_BOX=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "ColoredBox.*0xFF[0-3][0-3]" | head -1)
-[[ -z "$DARK_BOX" ]] || err "54" "ColoredBox כהה" "השתמש בצבעי בהירים"
-
-# שער 55-57: helper טהור
-EMBED_LOGIC=$(git diff --cached lib/screens/ 2>/dev/null | grep "^+" | grep -E "if\s*\(.*&&.*&&.*\)" | head -1)
-[[ -z "$EMBED_LOGIC" ]] || warn "55" "לוגיקה מקוננת ב-UI — שקול helper"
-
-NEW_HELPER=$(git diff --cached --name-only | grep -E "^app_flutter/lib/logic/.*_helper\.dart$" | head -1)
-if [[ -n "$NEW_HELPER" ]]; then
-    NAME=$(basename "$NEW_HELPER" .dart)
-    TEST_FILE="test/${NAME}_test.dart"
-    [[ -f "$TEST_FILE" ]] || err "56" "helper חדש ללא test: $NAME" "צור $TEST_FILE"
-fi
-
-# שער 58: אין dart-define ללא docs
-NEW_DEFINE=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep "fromEnvironment" | head -1)
-[[ -z "$NEW_DEFINE" ]] || warn "58" "fromEnvironment חדש — תעד ב-WIRING"
-
-# שער 60: אין dependencies חדשות בלי וידוא (תיקון באג #18 — מבחין dev_deps)
-# בודק רק production deps (מתחת ל-dependencies:, לא dev_dependencies:)
-NEW_DEPS=$(git diff --cached pubspec.yaml 2>/dev/null | awk '
-    /^[+-]dependencies:/ { in_prod=1; in_dev=0; next }
-    /^[+-]dev_dependencies:/ { in_dev=1; in_prod=0; next }
-    /^[+-][a-z]/ && !/^[+-][[:space:]]/ { in_prod=0; in_dev=0 }
-    in_prod && /^\+[[:space:]]+[a-z_]+:/ { print; exit }
-')
-[[ -z "$NEW_DEPS" ]] || warn "60" "production dep חדש: $NEW_DEPS"
-
-# ═══ קבוצה ו: שפה ותרבות (61-75) ═══
-
-# שער 61: מחרוזות עברית — חיפוש בקטלוג (תיקון באג #17 — רק לקבצי Preact-shared)
-# הסרנו את הבדיקה האוטומטית כי Flutter-only עלים לא חייבים להיות ב-index.html.
-# המקור עכשיו: index.html VS app/src/ — לא Flutter.
-# (שמירת הכלל לידע: יש לוודא ידנית verbatim כשמעתיקים מ-Preact ל-Flutter)
-:
-
-# שער 62: RTL — אין left/right קשיח
-HARD_LR=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "padding.*\b(left|right):" | grep -v "EdgeInsetsDirectional" | head -1)
-[[ -z "$HARD_LR" ]] || warn "62" "left/right קשיח — השתמש ב-start/end"
-
-# שער 63: אין textAlign: TextAlign.left/right
-HARD_ALIGN=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -E "TextAlign\.(left|right)" | head -1)
-[[ -z "$HARD_ALIGN" ]] || warn "63" "TextAlign.left/right — השתמש ב-start/end"
-
-# שער 64: אין emoji המצאה (לא קיים בlegacy)
-# תיקון לקח #52: emoji-match ב-bash builtin (לא grep חיצוני) — git מחליף את ה-grep
-# binary ב-invocation של ה-hook ⇒ grep emoji נכשל בשקט (false-negative). case=עקבי.
-NEW_EMOJI=""
-while IFS= read -r _l; do
-    case "$_l" in "+"*) case "$_l" in *🎯*|*🎨*|*🎮*|*🎪*|*🎲*) NEW_EMOJI=1; break;; esac;; esac
-done < <(git diff --cached lib/ 2>/dev/null)
-[[ -z "$NEW_EMOJI" ]] || warn "64" "emoji חדש — וודא verbatim מהלגאסי"
-
-# שער 65: אין Direction.ltr ב-Hebrew
-LTR=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep "TextDirection.ltr" | grep -v "isolate\|LTR\|//" | head -1)
-[[ -z "$LTR" ]] || warn "65" "TextDirection.ltr — האפליקציה RTL"
-
-# שער 66-70: index.html sync (אם נגעת ב-app/)
-STAGED_APP=$(git diff --cached --name-only | grep "^app/" | head -1)
-[[ -z "$STAGED_APP" ]] || warn "66" "נגעת ב-app/ (Preact) — וודא העתקה verbatim ל-Flutter"
-
-# שער 67: לא להוסיף בדיקה ב-app/ ללא Flutter
-NEW_APP_STR=$(git diff --cached app/ 2>/dev/null | grep "^+" | grep -E "['\"][א-ת][^'\"]+['\"]" | head -1)
-if [[ -n "$NEW_APP_STR" ]]; then
-    warn "67" "string עברית חדשה ב-app/ — העתק ל-app_flutter"
-fi
-
-# שער 68: לא לגעת ב-knowledge/inspections של Preact
-PREACT_INSP=$(git diff --cached --name-only | grep "^app/knowledge/inspections/" | head -1)
-[[ -z "$PREACT_INSP" ]] || err "68" "Preact inspections frozen" "אל תיגע באלה"
-
-# שער 69: אין החלפה של 0xFF111111 ל-light בלי gate
-COLOR_REVERT=$(git diff --cached lib/ 2>/dev/null | grep "^-" | grep "BsTokens\.bgDark\|0xFF111111" | head -1)
-[[ -z "$COLOR_REVERT" ]] || warn "69" "מחקת צבע — וודא שאינו text-color"
-
-# שער 70: אין שינוי gitignore לסודות
-GIT_DIFF=$(git diff --cached .gitignore 2>/dev/null | grep "^-")
-if echo "$GIT_DIFF" | grep -qE "\.env|credentials|\.key|\.pem"; then
-    err "70" "הסרת sensitive pattern מ-.gitignore" "אל תסיר הגנת סודות"
-fi
-
-# שער 71-75: cart/state integrity
-if git diff --cached lib/state/smart_cart.dart >/dev/null 2>&1; then
-    [[ -f "test/cart_bulk_order_test.dart" ]] || warn "71" "שינוי cart בלי cart_bulk_order_test"
-fi
-
-if [[ -n "$STAGED_HELPER" ]]; then
-    HELPER_NAME=$(basename "$STAGED_HELPER" .dart)
-    grep -q "$HELPER_NAME" "$REPO_ROOT/app_flutter/WIRING.md" 2>/dev/null || warn "72" "$HELPER_NAME לא ב-WIRING"
-fi
-
-# שער 73-75: persistence keys
-NEW_KEY=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -oE "'bs\.[a-z-]+\.v[0-9]+'" | head -1)
-if [[ -n "$NEW_KEY" ]]; then
-    if ! echo "$NEW_KEY" | grep -qE "^'bs\.[a-z-]+\.v[0-9]+'$"; then
-        err "73" "persistence key לא תקין: $NEW_KEY" "פורמט: bs.<feature>.v1"
-    fi
-fi
-
-# שער 74: ProviderContainer ידני אסור בwidget
-BAD_CONTAINER=$(git diff --cached lib/screens/ 2>/dev/null | grep "^+" | grep "ProviderContainer()" | head -1)
-[[ -z "$BAD_CONTAINER" ]] || err "74" "ProviderContainer ידני" "השתמש ב-ProviderScope"
-
-# שער 75: providers.dart לא במחיקה
-if git diff --cached lib/providers.dart 2>/dev/null | grep -q "^-"; then
-    REMOVED=$(git diff --cached lib/providers.dart | grep -cE "^-final.*Provider")
-    [[ "$REMOVED" -eq 0 ]] || warn "75" "$REMOVED providers נמחקו"
-fi
-
-# ═══ קבוצה ז: בטיחות שמירה ודחיפה (76-90) ═══
-
-# שער 76: commit message לא ריק
-# (מנותח ב-commit-msg hook אם קיים)
-
-# שער 77-80: לא לשמור binaries בטעות
-LARGE=$(git diff --cached --stat | grep -E "\| [0-9]{4,} " | head -1)
-[[ -z "$LARGE" ]] || warn "77" "קובץ גדול: $LARGE"
-
-STAGED_BINARY=$(git diff --cached --name-only | grep -E "\.(exe|dll|so|dylib|jar|war)$" | head -1)
-[[ -z "$STAGED_BINARY" ]] || err "78" "binary בstaging: $STAGED_BINARY" "לא לשמור binaries"
-
-STAGED_LOCK=$(git diff --cached --name-only | grep -E "\.lock$|node_modules" | head -1)
-[[ -z "$STAGED_LOCK" ]] || warn "79" "lock/modules ב-staging"
-
-# שער 80: pubspec.lock — לא לשנות version override
-LOCK_CHANGE=$(git diff --cached pubspec.lock 2>/dev/null | grep "^+" | grep "version:" | head -1)
-[[ -z "$LOCK_CHANGE" ]] || warn "80" "שינוי version ב-lock — וודא pub get הריץ"
-
-# שערים 81-83 הועברו לפני Flutter (fail-fast, לקח #68) — ראה קבוצה ב לעיל.
-# pre-push integrity (שער 82) עדיין כאן — לא חוסם Flutter, רק warn.
-if [[ -f "$REPO_ROOT/.git/hooks/pre-push" ]]; then
-    PUSH_EXPECTED=$(sha256sum "$REPO_ROOT/.githooks/pre-push" | cut -d' ' -f1)
-    PUSH_LOCAL=$(sha256sum "$REPO_ROOT/.git/hooks/pre-push" | cut -d' ' -f1)
-    [[ "$PUSH_EXPECTED" == "$PUSH_LOCAL" ]] || warn "82" "pre-push מקומי שונה — סנכרן"
-fi
-
-# שער 84-85: workflow file לא הוסר
-[[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] || err "84" "GitHub workflow נמחק" "שחזר את .github/workflows/protocol-enforce.yml"
-grep -q "protocol-gates" "$REPO_ROOT/.github/workflows/protocol-enforce.yml" 2>/dev/null || err "85" "workflow מקולקל"
-
-# שער 86-90: catalog integrity (תיקון באג #28 — בדיקה על כל הקובץ, לא רק diff)
-if git diff --cached --name-only | grep -q "lib/data/.*catalog\.dart"; then
-    # בדוק כפילויות בכל הקובץ אחרי השינוי
-    for catalog_file in lib/data/lipskey_catalog.dart lib/data/polyroll_catalog.dart; do
-        if [[ -f "$catalog_file" ]]; then
-            DUP_SKU=$(grep -oE "sku: '[^']+'" "$catalog_file" | sort | uniq -d | head -1)
-            [[ -z "$DUP_SKU" ]] || err "86" "SKU כפול ב-$catalog_file: $DUP_SKU" "כל SKU חייב להיות ייחודי"
+    if [[ -n "$STAGED_HELPER" ]]; then
+        [[ -f "knowledge/mutation_log.md" ]] || err "43" "mutation_log חסר" "צור knowledge/mutation_log.md"
+        if [[ -f "knowledge/mutation_log.md" ]]; then
+            STAGED_MUT=$(git diff --cached --name-only | grep "mutation_log.md" | head -1)
+            [[ -n "$STAGED_MUT" ]] || err "44" "mutation_log לא עודכן" "תעד הזרקת תקלה ב-mutation_log.md"
         fi
+    fi
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  GROUP quality (46-60). Content gates 46/48/50/51/52/54 -> Dart engine.
+#  Non-content quality gates remain native bash (path/structure checks).
+# ═══════════════════════════════════════════════════════════════════════════
+gate_quality() {
+    local NEW_DIALOG NEW_TODO NEW_HELPER NEW_DEFINE NEW_DEPS NAME TEST_FILE
+    local STAGED_ENV STAGED_TOKEN EMBED_LOGIC
+    NEW_DIALOG=$(git diff --cached lib/screens/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "showDialog|showModalBottomSheet" | head -1)
+    if [[ -n "$NEW_DIALOG" && -z "$STAGED_WIRING" ]]; then
+        warn "47" "dialog/sheet חדש — וודא שמופיע ב-WIRING"
+    fi
+    # 48 print(), 50 dart:html, 51 hard URL, 52 secrets -> Dart engine.
+
+    NEW_TODO=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E "// TODO[^:]|// FIXME[^:]" | head -1)
+    [[ -z "$NEW_TODO" ]] || warn "49" "TODO/FIXME בלי הסבר"
+
+    # Gate 53 (secret files) — name-only, MSYS-safe, stays bash. Merged the 3 v1
+    # `err 53` checks (.env, bypass-token) into one gate body.
+    STAGED_ENV=$(git diff --cached --name-only | grep -E "^\.env|\.env\.|credentials" | head -1)
+    [[ -z "$STAGED_ENV" ]] || err "53" "קובץ סודות נוסף: $STAGED_ENV" "הסר מ-staging"
+    STAGED_TOKEN=$(git diff --cached --name-only | grep -E "^\.(emergency_token|allow_protocol_edit|allow_master_protocol_edit)$" | head -1)
+    [[ -z "$STAGED_TOKEN" ]] || err "53" "bypass-token ב-staging: $STAGED_TOKEN" "git reset HEAD $STAGED_TOKEN — local-only בלבד"
+
+    # 54 dark ColoredBox -> Dart engine.
+
+    EMBED_LOGIC=$(git diff --cached lib/screens/ 2>/dev/null | grep "^+" | grep -E "if\s*\(.*&&.*&&.*\)" | head -1)
+    [[ -z "$EMBED_LOGIC" ]] || warn "55" "לוגיקה מקוננת ב-UI — שקול helper"
+
+    NEW_HELPER=$(git diff --cached --name-only | grep -E "^app_flutter/lib/logic/.*_helper\.dart$" | head -1)
+    if [[ -n "$NEW_HELPER" ]]; then
+        NAME=$(basename "$NEW_HELPER" .dart)
+        TEST_FILE="test/${NAME}_test.dart"
+        [[ -f "$TEST_FILE" ]] || err "56" "helper חדש ללא test: $NAME" "צור $TEST_FILE"
+    fi
+
+    NEW_DEFINE=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep "fromEnvironment" | head -1)
+    [[ -z "$NEW_DEFINE" ]] || warn "58" "fromEnvironment חדש — תעד ב-WIRING"
+
+    NEW_DEPS=$(git diff --cached pubspec.yaml 2>/dev/null | awk '
+        /^[+-]dependencies:/ { in_prod=1; in_dev=0; next }
+        /^[+-]dev_dependencies:/ { in_dev=1; in_prod=0; next }
+        /^[+-][a-z]/ && !/^[+-][[:space:]]/ { in_prod=0; in_dev=0 }
+        in_prod && /^\+[[:space:]]+[a-z_]+:/ { print; exit }')
+    [[ -z "$NEW_DEPS" ]] || warn "60" "production dep חדש: $NEW_DEPS"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  GROUP lang/culture (62-70). Content gates 62/63/64/65/67/69/70 -> engine.
+#  Native path-based gates 66/68 stay bash.
+# ═══════════════════════════════════════════════════════════════════════════
+gate_lang() {
+    local STAGED_APP PREACT_INSP
+    # 61 removed (registry). 62/63/64/65 -> engine.
+    STAGED_APP=$(git diff --cached --name-only | grep "^app/" | head -1)
+    [[ -z "$STAGED_APP" ]] || warn "66" "נגעת ב-app/ (Preact) — וודא העתקה verbatim ל-Flutter"
+    # 67 (Hebrew string in app/) -> engine.
+    PREACT_INSP=$(git diff --cached --name-only | grep "^app/knowledge/inspections/" | head -1)
+    [[ -z "$PREACT_INSP" ]] || err "68" "Preact inspections frozen" "אל תיגע באלה"
+    # 69 color-revert, 70 gitignore-secrets -> engine.
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  GROUP save-safety (71-80). Content gates 73/74 -> engine.
+# ═══════════════════════════════════════════════════════════════════════════
+gate_save_safety() {
+    local HELPER_NAME LARGE STAGED_BINARY STAGED_LOCK LOCK_CHANGE REMOVED
+    if git diff --cached lib/state/smart_cart.dart >/dev/null 2>&1; then
+        [[ -f "test/cart_bulk_order_test.dart" ]] || warn "71" "שינוי cart בלי cart_bulk_order_test"
+    fi
+    if [[ -n "$STAGED_HELPER" ]]; then
+        HELPER_NAME=$(basename "$STAGED_HELPER" .dart)
+        grep -q "$HELPER_NAME" "$REPO_ROOT/app_flutter/WIRING.md" 2>/dev/null || warn "72" "$HELPER_NAME לא ב-WIRING"
+    fi
+    # 73 persistence key, 74 manual container -> engine.
+    if git diff --cached lib/providers.dart 2>/dev/null | grep -q "^-"; then
+        REMOVED=$(git diff --cached lib/providers.dart | grep -cE "^-final.*Provider")
+        [[ "$REMOVED" -eq 0 ]] || warn "75" "$REMOVED providers נמחקו"
+    fi
+    LARGE=$(git diff --cached --stat | grep -E "\| [0-9]{4,} " | head -1)
+    [[ -z "$LARGE" ]] || warn "77" "קובץ גדול: $LARGE"
+    STAGED_BINARY=$(git diff --cached --name-only | grep -E "\.(exe|dll|so|dylib|jar|war)$" | head -1)
+    [[ -z "$STAGED_BINARY" ]] || err "78" "binary בstaging: $STAGED_BINARY" "לא לשמור binaries"
+    STAGED_LOCK=$(git diff --cached --name-only | grep -E "\.lock$|node_modules" | head -1)
+    [[ -z "$STAGED_LOCK" ]] || warn "79" "lock/modules ב-staging"
+    LOCK_CHANGE=$(git diff --cached pubspec.lock 2>/dev/null | grep "^+" | grep "version:" | head -1)
+    [[ -z "$LOCK_CHANGE" ]] || warn "80" "שינוי version ב-lock — וודא pub get הריץ"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  GROUP final-safety (82-99). Content gates 93/95/97 -> engine.
+#  Gate 94 reads TEST_OUT and is therefore called AFTER the Flutter tier.
+# ═══════════════════════════════════════════════════════════════════════════
+gate_final_safety() {
+    local PUSH_EXPECTED PUSH_LOCAL DUP_SKU catalog_file DELETED_TESTS DELETED_STATE
+    local UNSTAGED STAGED_STATE STAGED_STATUS VERSION_PUBSPEC LAYERS_OK
+    if [[ -f "$REPO_ROOT/.git/hooks/pre-push" ]]; then
+        PUSH_EXPECTED=$(sha256sum "$REPO_ROOT/.githooks/pre-push" | cut -d' ' -f1)
+        PUSH_LOCAL=$(sha256sum "$REPO_ROOT/.git/hooks/pre-push" | cut -d' ' -f1)
+        [[ "$PUSH_EXPECTED" == "$PUSH_LOCAL" ]] || warn "82" "pre-push מקומי שונה — סנכרן"
+    fi
+    [[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] || err "84" "GitHub workflow נמחק" "שחזר"
+    grep -q "protocol-gates" "$REPO_ROOT/.github/workflows/protocol-enforce.yml" 2>/dev/null || err "85" "workflow מקולקל"
+
+    if git diff --cached --name-only | grep -q "lib/data/.*catalog\.dart"; then
+        for catalog_file in lib/data/lipskey_catalog.dart lib/data/polyroll_catalog.dart; do
+            if [[ -f "$catalog_file" ]]; then
+                DUP_SKU=$(grep -oE "sku: '[^']+'" "$catalog_file" | sort | uniq -d | head -1)
+                [[ -z "$DUP_SKU" ]] || err "86" "SKU כפול ב-$catalog_file: $DUP_SKU" "כל SKU חייב להיות ייחודי"
+            fi
+        done
+    fi
+    if git diff --cached lib/data/polyroll_catalog.dart >/dev/null 2>&1; then
+        [[ -f "test/ppr_infra_test.dart" ]] || warn "87" "שינוי polyroll בלי ppr_infra_test"
+    fi
+    if git diff --cached --name-only | grep -q "MASTER_PROTOCOL.md" && [[ ! -f "$REPO_ROOT/.allow_master_protocol_edit" ]]; then
+        warn "88" "שינוי MASTER_PROTOCOL — וודא הוראה מפורשת"
+    fi
+    DELETED_TESTS=$(git diff --cached --name-only --diff-filter=D | grep "_test.dart$" | head -1)
+    [[ -z "$DELETED_TESTS" ]] || err "89" "test נמחק: $DELETED_TESTS" "אל תמחק tests"
+    DELETED_STATE=$(git diff --cached --name-only --diff-filter=D | grep "lib/state/" | head -1)
+    [[ -z "$DELETED_STATE" ]] || err "90" "state נמחק: $DELETED_STATE" "אל תמחק state files"
+
+    UNSTAGED=$(git diff --name-only | grep -E "^app_flutter/lib/" | head -1)
+    [[ -z "$UNSTAGED" ]] || warn "91" "יש שינויים unstaged בקוד — שקול לכלול"
+    STAGED_STATE=$(git diff --cached --name-only | grep "lib/state/" | head -1)
+    STAGED_STATUS=$(git diff --cached --name-only | grep "STATUS.md" | head -1)
+    if [[ -n "$STAGED_STATE" && -z "$STAGED_STATUS" ]]; then
+        warn "92" "שינוי state בלי עדכון STATUS.md"
+    fi
+    # 93 roadmap-checkmark, 95 number-isolate, 97 gitignore-hide-claude -> engine.
+
+    # Gate 94 reads TEST_OUT (set in test tier).
+    if echo "$TEST_OUT" | grep -q "knowledge_protocol_test"; then
+        if echo "$TEST_OUT" | grep -E "knowledge_protocol_test.*FAILED" >/dev/null 2>&1; then
+            err "94" "knowledge_protocol_test נכשל" "וודא סנכרון knowledge"
+        fi
+    fi
+
+    VERSION_PUBSPEC=$(git diff --cached pubspec.yaml 2>/dev/null | grep "^+version:" | head -1)
+    if [[ -n "$VERSION_PUBSPEC" && -z "$STAGED_LIB" ]]; then
+        warn "96" "pubspec version עודכן בלי שינוי קוד"
+    fi
+
+    [[ -f "$REPO_ROOT/.claude/settings.json" ]] || err "98" "settings.json נמחק מהריפו" "שחזר"
+    LAYERS_OK=0
+    [[ -f "$REPO_ROOT/.githooks/pre-commit" ]] && LAYERS_OK=$((LAYERS_OK+1))
+    [[ -f "$REPO_ROOT/.claude/settings.json" ]] && LAYERS_OK=$((LAYERS_OK+1))
+    [[ -f "$REPO_ROOT/.claude/hooks/session-start.sh" ]] && LAYERS_OK=$((LAYERS_OK+1))
+    [[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] && LAYERS_OK=$((LAYERS_OK+1))
+    [[ "$LAYERS_OK" -eq 4 ]] || err "99" "רק $LAYERS_OK/4 שכבות אכיפה" "שחזר חסרות"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  GROUP learning (101-111 cheap parts). Content gate 103 -> engine.
+# ═══════════════════════════════════════════════════════════════════════════
+gate_learning() {
+    local STAGED_STUCK NEW_LINES STAGED_STUCK_LOG AP_COUNT RT_COUNT DUP_AP
+    [[ -f "$STUCK_LOG" ]] || err "101" "stuck_log.md חסר" "צור knowledge/stuck_log.md"
+
+    if [[ "$IS_RETRY" == "true" && -n "$PRIOR_HAS_CODE_TEST" && -f "$STUCK_LOG" ]]; then
+        STAGED_STUCK=$(git diff --cached --name-only | grep "stuck_log.md" | head -1)
+        if [[ -z "$STAGED_STUCK" ]]; then
+            err "102" "פתרת בעיה — לא תיעדת" "עדכן knowledge/stuck_log.md: בעיה + פתרון + ANTIPATTERN + RULE"
+        else
+            NEW_LINES=$(git diff --cached "$STUCK_LOG" 2>/dev/null | grep "^+" | grep -v "^+++")
+            if ! echo "$NEW_LINES" | grep -qE "^\+ANTIPATTERN(\[hook\])?:"; then
+                err "102" "רשומה חסרה ANTIPATTERN" "הוסף שורת ANTIPATTERN: regex (בלי -EXAMPLE)"
+            fi
+            if ! echo "$NEW_LINES" | grep -qE "^\+RULE:"; then
+                err "102" "רשומה חסרה RULE" "הוסף שורת RULE: כלל בעברית (בלי -EXAMPLE)"
+            fi
+        fi
+    fi
+
+    # Gate 103 (antipattern recurrence) -> Dart engine (run_content_engine).
+
+    # Gate 104: regenerate stuck_regression_test when stuck_log staged.
+    STAGED_STUCK_LOG=$(git diff --cached --name-only | grep "stuck_log.md" | head -1)
+    if [[ -n "$STAGED_STUCK_LOG" ]]; then
+        bash "$REPO_ROOT/app_flutter/scripts/generate_stuck_regression.sh" >/dev/null 2>&1
+        if ! git diff --quiet test/stuck_regression_test.dart 2>/dev/null; then
+            git add test/stuck_regression_test.dart
+            echo "🔁 stuck_regression_test.dart התעדכן אוטומטית"
+        fi
+    fi
+
+    # Gate 111: stuck_regression consistency (cheap, always).
+    if [[ -f "knowledge/stuck_log.md" && -f "test/stuck_regression_test.dart" ]]; then
+        AP_COUNT=$(grep -cE '^ANTIPATTERN(\[hook\])?:' knowledge/stuck_log.md); AP_COUNT=${AP_COUNT:-0}
+        RT_COUNT=$(grep -cE 'test\("antipattern #' test/stuck_regression_test.dart); RT_COUNT=${RT_COUNT:-0}
+        DUP_AP=$(grep -oE 'antipattern #[0-9]+' test/stuck_regression_test.dart | sort | uniq -d | head -1)
+        [[ "$AP_COUNT" == "$RT_COUNT" ]] || err "111" "stuck_regression לא מסונכרן ($AP_COUNT ANTIPATTERN ≠ $RT_COUNT tests)" "הרץ scripts/generate_stuck_regression.sh"
+        [[ -z "$DUP_AP" ]] || err "111" "מספור כפול ב-stuck_regression: $DUP_AP" "הרץ scripts/generate_stuck_regression.sh"
+    fi
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  GROUP knowledge (106-116 cheap). Content gate 114 -> engine.
+# ═══════════════════════════════════════════════════════════════════════════
+gate_knowledge() {
+    local stub sf SLN DONE_COUNT PENDING STAGED_CF AUDIT_LINES STAGED_CROP STAGED_CARRY
+    local CLAIMS_FILE STAGED_NAMES STAGED_UI STAGED_UI2 STAGED_VLOG _l _in_claims _cpath
+
+    # Gate 112: unified stubs.
+    for stub in TESTING CHECKLISTS BUG_INVESTIGATION_PROTOCOL; do
+        sf="knowledge/$stub.md"
+        [[ -f "$sf" ]] || continue
+        case "$(head -1 "$sf")" in
+            *DEPRECATED*) : ;;
+            *) err "112" "$stub.md אינו stub מאוחד (שורה 1 ללא ⛔ DEPRECATED)" "השאר רק שלט-הפניה ל-VERIFICATION_PROTOCOL.md" ;;
+        esac
+        grep -q "VERIFICATION_PROTOCOL" "$sf" || err "112" "$stub.md לא מצביע ל-VERIFICATION_PROTOCOL.md" "הוסף הפניה"
+        SLN=$(grep -c '' "$sf"); SLN=${SLN:-0}
+        [[ "$SLN" -le 20 ]] || err "112" "$stub.md תפח ל-$SLN שורות" "השאר רק שלט-הפניה (≤20 שורות)"
     done
-fi
 
-if git diff --cached lib/data/polyroll_catalog.dart >/dev/null 2>&1; then
-    [[ -f "test/ppr_infra_test.dart" ]] || warn "87" "שינוי polyroll בלי ppr_infra_test"
-fi
-
-# שער 88: אין שינוי MASTER_PROTOCOL (אם קיים) ללא הוראה
-# תיקון באג #88: git diff --cached file מחזיר exit 0 גם כשהקובץ קיים-ולא-staged
-# (no-diff=0). חייב name-only grep — נכון רק כשהקובץ באמת staged.
-if git diff --cached --name-only | grep -q "MASTER_PROTOCOL.md" && [[ ! -f "$REPO_ROOT/.allow_master_protocol_edit" ]]; then
-    warn "88" "שינוי MASTER_PROTOCOL — וודא הוראה מפורשת"
-fi
-
-# שער 89: אין מחיקת tests
-DELETED_TESTS=$(git diff --cached --name-only --diff-filter=D | grep "_test.dart$" | head -1)
-[[ -z "$DELETED_TESTS" ]] || err "89" "test נמחק: $DELETED_TESTS" "אל תמחק tests"
-
-# שער 90: אין מחיקת state files
-DELETED_STATE=$(git diff --cached --name-only --diff-filter=D | grep "lib/state/" | head -1)
-[[ -z "$DELETED_STATE" ]] || err "90" "state נמחק: $DELETED_STATE" "אל תמחק state files"
-
-# ═══ קבוצה ח: בטיחות סופית (91-100) ═══
-
-# שער 91: working tree עם שינויים unstaged רלוונטיים
-UNSTAGED=$(git diff --name-only | grep -E "^app_flutter/lib/" | head -1)
-[[ -z "$UNSTAGED" ]] || warn "91" "יש שינויים unstaged בקוד — שקול לכלול"
-
-# שער 92: STATUS.md עודכן אם נגעת ב-state
-STAGED_STATE=$(git diff --cached --name-only | grep "lib/state/" | head -1)
-STAGED_STATUS=$(git diff --cached --name-only | grep "STATUS.md" | head -1)
-if [[ -n "$STAGED_STATE" && -z "$STAGED_STATUS" ]]; then
-    warn "92" "שינוי state בלי עדכון STATUS.md"
-fi
-
-# שער 93: ROADMAP עודכן אם השלמת צעד
-if [[ -n "$STAGED_LIB" ]]; then
-    # תיקון לקח #52: emoji ✅ ב-bash builtin, לא grep חיצוני (אותו class כמו 23/64).
-    ROADMAP_DIFF=""
-    while IFS= read -r _l; do
-        case "$_l" in "+"*) case "$_l" in *✅*) ROADMAP_DIFF=1; break;; esac;; esac
-    done < <(git diff --cached knowledge/SMARTPRODUCT_ROADMAP.md 2>/dev/null)
-    [[ -n "$ROADMAP_DIFF" || -n "$STAGED_KNOWLEDGE" ]] || warn "93" "ROADMAP לא עודכן עם ✅"
-fi
-
-# שער 94: knowledge_protocol_test יעבור
-if echo "$TEST_OUT" | grep -q "knowledge_protocol_test"; then
-    if echo "$TEST_OUT" | grep -E "knowledge_protocol_test.*FAILED" >/dev/null 2>&1; then
-        err "94" "knowledge_protocol_test נכשל" "וודא סנכרון knowledge"
+    # Gate 106: session_plan Owner + Scope.
+    if [[ -n "$STAGED_LIB" ]] && [[ -f "knowledge/session_plan.md" ]]; then
+        grep -qE "^Owner:" knowledge/session_plan.md || err "106" "session_plan חסר Owner:" "הוסף 'Owner: this session'"
+        grep -qE "^Scope:" knowledge/session_plan.md || err "106" "session_plan חסר Scope:" "הוסף 'Scope: <file:axis>'"
     fi
-fi
 
-# שער 95: עברית RTL — מספרים בLTR isolate
-NUM_PROBLEM=$(git diff --cached lib/ 2>/dev/null | grep "^+" | grep -oE "[א-ת]+ [0-9]+×[0-9]+" | head -1)
-[[ -z "$NUM_PROBLEM" ]] || warn "95" "מספר עם × בלי LTR isolate"
-
-# שער 96: אין שינוי לא רצוי של pubspec.yaml version
-VERSION_PUBSPEC=$(git diff --cached pubspec.yaml 2>/dev/null | grep "^+version:" | head -1)
-if [[ -n "$VERSION_PUBSPEC" && -z "$STAGED_LIB" ]]; then
-    warn "96" "pubspec version עודכן בלי שינוי קוד"
-fi
-
-# שער 97: אין שינוי .gitignore שמסיר .claude/
-CLAUDE_REMOVE=$(git diff --cached .gitignore 2>/dev/null | grep "^+" | grep -E "^\+\.claude/$" | head -1)
-[[ -z "$CLAUDE_REMOVE" ]] || err "97" "ניסיון להסתיר .claude" "ההגדרות חייבות להיות בריפו"
-
-# שער 98: settings.json בריפו
-[[ -f "$REPO_ROOT/.claude/settings.json" ]] || err "98" "settings.json נמחק מהריפו" "שחזר"
-
-# שער 99: 4 שכבות אכיפה קיימות
-LAYERS_OK=0
-[[ -f "$REPO_ROOT/.githooks/pre-commit" ]] && LAYERS_OK=$((LAYERS_OK+1))
-[[ -f "$REPO_ROOT/.claude/settings.json" ]] && LAYERS_OK=$((LAYERS_OK+1))
-[[ -f "$REPO_ROOT/.claude/hooks/session-start.sh" ]] && LAYERS_OK=$((LAYERS_OK+1))
-[[ -f "$REPO_ROOT/.github/workflows/protocol-enforce.yml" ]] && LAYERS_OK=$((LAYERS_OK+1))
-[[ "$LAYERS_OK" -eq 4 ]] || err "99" "רק $LAYERS_OK/4 שכבות אכיפה" "שחזר חסרות"
-
-# ═══ קבוצה ט: שכבת למידה (101-104) ═══
-
-# שער 101: stuck_log קיים
-STUCK_LOG="knowledge/stuck_log.md"
-[[ -f "$STUCK_LOG" ]] || err "101" "stuck_log.md חסר" "צור knowledge/stuck_log.md"
-
-# שער 102: אם זה retry אחרי כשלון code/test — חייב להוסיף רשומה אמיתית.
-# תיקון לקח #56 (דיווח Finder): retry שכשלו הקודם היה bookkeeping טהור
-# (12 version-sync / 24 WIRING / 59 path) פטור — אי-אפשר לכתוב ANTIPATTERN
-# תיקון לקח #64 (דיווח בנצי): שער 42 (helper חדש בלי בדיקה) → פטור: הפתרון
-# הוא הוספת בדיקה, אין ANTIPATTERN משמעותי לתעד. ה-gate עצמו תופס מחדש.
-# דורש תיעוד רק כשהכשל הקודם כלל שער code/test (31-45, חוץ מ-42) —
-# שם ה-gate גנרי וה-antipattern מוסיף ערך.
-if [[ "$IS_RETRY" == "true" && -n "$PRIOR_HAS_CODE_TEST" && -f "$STUCK_LOG" ]]; then
-    STAGED_STUCK=$(git diff --cached --name-only | grep "stuck_log.md" | head -1)
-    if [[ -z "$STAGED_STUCK" ]]; then
-        err "102" "פתרת בעיה — לא תיעדת" "עדכן knowledge/stuck_log.md: בעיה + פתרון + ANTIPATTERN + RULE"
-    else
-        # ANTIPATTERN: (בדיוק) חייב להופיע ברשומה החדשה — לא ANTIPATTERN-EXAMPLE:
-        # מקבל גם את הצורה המתויגת ANTIPATTERN[hook]: (סורק את ה-hook במקום lib/).
-        NEW_LINES=$(git diff --cached "$STUCK_LOG" 2>/dev/null | grep "^+" | grep -v "^+++")
-        if ! echo "$NEW_LINES" | grep -qE "^\+ANTIPATTERN(\[hook\])?:"; then
-            err "102" "רשומה חסרה ANTIPATTERN" "הוסף שורת ANTIPATTERN: regex (בלי -EXAMPLE)"
-        fi
-        if ! echo "$NEW_LINES" | grep -qE "^\+RULE:"; then
-            err "102" "רשומה חסרה RULE" "הוסף שורת RULE: כלל בעברית (בלי -EXAMPLE)"
+    # Gate 107: UI change visual log (advisory).
+    STAGED_UI=$(git diff --cached --name-only | grep -E "^app_flutter/lib/screens/.*\.dart$" | head -1)
+    if [[ -n "$STAGED_UI" ]]; then
+        if [[ ! -f "knowledge/visual_log.md" ]] && [[ ! -f "knowledge/session_plan.md" || -z "$(grep -i 'screenshot\|visual' knowledge/session_plan.md 2>/dev/null)" ]]; then
+            warn "107" "שינוי UI ללא visual log" "מומלץ: knowledge/visual_log.md או screenshot ב-session_plan"
         fi
     fi
-fi
 
-# שער 103: אנטי-פטרנים מ-stuck_log לא חוזרים בקוד החדש
-# תיקון באג #11: pattern עובר ל-grep בלי shell expansion
-# תיקון באג #32: shell-meta warning רצה גם כשאין Dart staged → false positives
-# תיקון אודיט 2026-06-01: ANTIPATTERN[hook]: סורק את ה-hook ה-staged, לא *.dart
-# הפתרון: מחשב staged diffs לפני הלולאה; כל pattern מנותב ליעד שלו
-if [[ -f "$STUCK_LOG" ]]; then
-    # החרגת קובץ הרגרסיה המיוצר: הוא מכיל את *כל* האנטי-פטרנים by-construction
-    # (כל ANTIPATTERN נרשם בו כ-RegExp). בלי ההחרגה — כל regen ששינה הרבה שורות
-    # מפיל את שער 103 false-positive על הפטרנים שתואמים את צורתם-שלהם. מקביל
-    # ל-self-exclude של הבדיקה עצמה (contains('stuck_regression')).
-    STAGED_DART_103=$(git diff --cached --name-only -- '*.dart' ':(exclude)*stuck_regression_test.dart' 2>/dev/null)
-    STAGED_HOOK_103=$(git diff --cached --name-only -- ':/.githooks/pre-commit' 2>/dev/null)
-    if [[ -n "$STAGED_DART_103" || -n "$STAGED_HOOK_103" ]]; then
-        while IFS= read -r line; do
-            # נתב לפי תיוג: ANTIPATTERN[hook]: → ה-hook, ANTIPATTERN: → *.dart
-            if [[ "$line" == ANTIPATTERN\[hook\]:* ]]; then
-                a103_target="hook"; pattern="${line#ANTIPATTERN\[hook\]: }"
-            else
-                a103_target="dart"; pattern="${line#ANTIPATTERN: }"
-            fi
-            [[ -z "$pattern" ]] && continue
-            # חסום shell-injection chars לפני שימוש ב-pattern.
-            # תיקון אודיט 2026-06-01: `echo "$p" | grep -qE` היה לא-דטרמיניסטי —
-            # בסביבת ה-commit סימן 32/32 false-positive, אינטראקטיבית 0/32.
-            # bash case/glob הוא builtin טהור — אפס variance של echo/grep בין סביבות.
-            case "$pattern" in
-                *'$('*|*'`'*|*'${'*)
-                    warn "103" "אנטי-פטרן ב-stuck_log מכיל shell-meta (דלג): $pattern"
-                    continue ;;
-            esac
-            if [[ "$a103_target" == "hook" ]]; then
-                [[ -n "$STAGED_HOOK_103" ]] || continue
-                # התעלם משורות שמתווספות כהערה (#) — תיעוד התיקון מותר
-                MATCH=$(git diff --cached -- ':/.githooks/pre-commit' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -vE "^\+\s*#" | grep -E -- "$pattern" 2>/dev/null | head -1)
-            else
-                [[ -n "$STAGED_DART_103" ]] || continue
-                MATCH=$(git diff --cached -- '*.dart' ':(exclude)*stuck_regression_test.dart' 2>/dev/null | grep "^+" | grep -v "^+++" | grep -E -- "$pattern" 2>/dev/null | head -1)
-            fi
-            if [[ -n "$MATCH" ]]; then
-                err "103" "אנטי-פטרן חזר: $pattern" "ראה stuck_log.md — הבעיה תועדה כבר"
-            fi
-        done < <(grep -E "^ANTIPATTERN(\[hook\])?:" "$STUCK_LOG" 2>/dev/null)
-    fi
-fi
+    # Gate 108: CARRY_FORWARD exists.
+    [[ -f "knowledge/CARRY_FORWARD.md" ]] || err "108" "CARRY_FORWARD חסר" "מכיל לקחים חוצי-sessions"
 
-# שער 104: re-generate stuck_regression_test אם stuck_log השתנה
-STAGED_STUCK_LOG=$(git diff --cached --name-only | grep "stuck_log.md" | head -1)
-if [[ -n "$STAGED_STUCK_LOG" ]]; then
-    bash "$REPO_ROOT/app_flutter/scripts/generate_stuck_regression.sh" >/dev/null 2>&1
-    # אם קובץ ה-test השתנה — הוסף ל-commit
-    if ! git diff --quiet test/stuck_regression_test.dart 2>/dev/null; then
-        git add test/stuck_regression_test.dart
-        echo "🔁 stuck_regression_test.dart התעדכן אוטומטית"
-    fi
-fi
-
-# שער 111: עקביות stuck_regression (דיווח קטלגן) — מספר ANTIPATTERN = מספר tests,
-# ואין מספור כפול. תופס drift אחרי rebase (test מיוצר מ-commit ביניים לא תואם את
-# stuck_log הממוזג) — בדיוק התרחיש שחזר ב-rebase הכפול. cheap (3 greps), רץ תמיד.
-if [[ -f "knowledge/stuck_log.md" && -f "test/stuck_regression_test.dart" ]]; then
-    AP_COUNT=$(grep -cE '^ANTIPATTERN(\[hook\])?:' knowledge/stuck_log.md); AP_COUNT=${AP_COUNT:-0}
-    RT_COUNT=$(grep -cE 'test\("antipattern #' test/stuck_regression_test.dart); RT_COUNT=${RT_COUNT:-0}
-    DUP_AP=$(grep -oE 'antipattern #[0-9]+' test/stuck_regression_test.dart | sort | uniq -d | head -1)
-    [[ "$AP_COUNT" == "$RT_COUNT" ]] || err "111" "stuck_regression לא מסונכרן ($AP_COUNT ANTIPATTERN ≠ $RT_COUNT tests)" "הרץ scripts/generate_stuck_regression.sh"
-    [[ -z "$DUP_AP" ]] || err "111" "מספור כפול ב-stuck_regression: $DUP_AP" "הרץ scripts/generate_stuck_regression.sh"
-fi
-
-# שער 112: stubs מאוחדים — TESTING/CHECKLISTS/BUG_INVESTIGATION חייבים להישאר
-# שלטי-הפניה ל-VERIFICATION_PROTOCOL, ולא לברוא פרוטוקול-בדיקה מקביל. מונע מסוכן
-# לעבוד לפי מסמך-בדיקה ישן ולהגיד "בדקתי לפי הפרוטוקול". bash builtin, רץ תמיד.
-for stub in TESTING CHECKLISTS BUG_INVESTIGATION_PROTOCOL; do
-    sf="knowledge/$stub.md"
-    [[ -f "$sf" ]] || continue
-    case "$(head -1 "$sf")" in
-        *DEPRECATED*) : ;;
-        *) err "112" "$stub.md אינו stub מאוחד (שורה 1 ללא ⛔ DEPRECATED)" "השאר רק שלט-הפניה ל-VERIFICATION_PROTOCOL.md" ;;
-    esac
-    grep -q "VERIFICATION_PROTOCOL" "$sf" || err "112" "$stub.md לא מצביע ל-VERIFICATION_PROTOCOL.md" "הוסף הפניה ל-VERIFICATION_PROTOCOL.md"
-    SLN=$(grep -c '' "$sf"); SLN=${SLN:-0}
-    [[ "$SLN" -le 20 ]] || err "112" "$stub.md תפח ל-$SLN שורות — תוכן-בדיקה זלג חזרה ל-stub" "השאר רק שלט-הפניה (≤20 שורות); התוכן ב-VERIFICATION_PROTOCOL §"
-done
-
-# רישום fingerprint אם נכשל
-if [[ "$FAIL" -gt 0 ]]; then
-    echo "$CURRENT_FP $NOW gates=v2:${FAILED_GATES#,} head=$HEAD_SHA" >> "$FINGERPRINT_FILE"
-    # שמור רק 100 שורות אחרונות
-    tail -100 "$FINGERPRINT_FILE" > "$FINGERPRINT_FILE.tmp" && mv "$FINGERPRINT_FILE.tmp" "$FINGERPRINT_FILE"
-fi
-
-# ═══ קבוצה י: לקחים מ-SIZE_FILTER_PROTOCOL (106-110) ═══
-
-# שער 106: session_plan חייב Owner + Scope (לקח 23-24 מ-CARRY_FORWARD)
-if [[ -n "$STAGED_LIB" ]] && [[ -f "knowledge/session_plan.md" ]]; then
-    if ! grep -qE "^Owner:" knowledge/session_plan.md; then
-        err "106" "session_plan חסר Owner:" "הוסף 'Owner: this session' לראש הקובץ"
-    fi
-    if ! grep -qE "^Scope:" knowledge/session_plan.md; then
-        err "106" "session_plan חסר Scope:" "הוסף 'Scope: <file:axis>' — משפט אחד שמונע scope creep"
-    fi
-fi
-
-# שער 107: שינוי UI (screens/) דורש visual verification log
-# מתועד באמצעות קובץ knowledge/visual_log.md שמופנה מ-session_plan
-STAGED_UI=$(git diff --cached --name-only | grep -E "^app_flutter/lib/screens/.*\.dart$" | head -1)
-if [[ -n "$STAGED_UI" ]]; then
-    # אם זה pure refactor (אין שינוי visible) → מתעד באמצעות commit body
-    SUBJECT=$(git log -1 --format="%s" 2>/dev/null)
-    # אם נגעת ב-UI ולא תיעדת visual — אזהרה, לא חוסם
-    if [[ ! -f "knowledge/visual_log.md" ]] && [[ ! -f "knowledge/session_plan.md" || -z "$(grep -i 'screenshot\|visual' knowledge/session_plan.md 2>/dev/null)" ]]; then
-        warn "107" "שינוי UI ללא visual log" "מומלץ: צור knowledge/visual_log.md או תעד screenshot ב-session_plan"
-    fi
-fi
-
-# שער 108: CARRY_FORWARD קיים
-[[ -f "knowledge/CARRY_FORWARD.md" ]] || err "108" "CARRY_FORWARD חסר" "הקובץ מכיל לקחים חוצי-sessions"
-
-# שער 109: אם נסגר sub-protocol — חייב להוסיף ל-CARRY_FORWARD
-# heuristic: אם session_plan מכיל "sub-protocol" + הcommit מסיים אותו (✅ ברוב הצעדים)
-if [[ -f "knowledge/session_plan.md" ]] && grep -q "sub-protocol" knowledge/session_plan.md 2>/dev/null; then
-    # תיקון לקח #52 (אותו class כמו 23/103): ספירת emoji ב-bash builtin, לא grep —
-    # git-for-windows מחליף את ה-grep binary ב-invocation של ה-hook, כך ש-emoji-match
-    # נכשל תחת `git commit` למרות שעובר standalone. case/glob = byte-match עקבי.
-    DONE_COUNT=0; PENDING=0
-    while IFS= read -r _l || [[ -n "$_l" ]]; do
-        case "$_l" in *✅*) DONE_COUNT=$((DONE_COUNT+1));; esac
-        case "$_l" in *⬜*) PENDING=$((PENDING+1));; esac
-    done < knowledge/session_plan.md
-    # אם 5+ ✅ ואין שינוי ב-CARRY_FORWARD — אזהרה
-    if [[ "$DONE_COUNT" -gt 5 && "$PENDING" -eq 0 ]]; then
-        STAGED_CF=$(git diff --cached --name-only | grep "CARRY_FORWARD.md" | head -1)
-        if [[ -z "$STAGED_CF" ]]; then
-            warn "109" "sub-protocol הושלם בלי עדכון CARRY_FORWARD" "הוסף לקחים חוצי-sessions"
+    # Gate 109: closed sub-protocol -> CARRY_FORWARD (counts via bash builtin).
+    if [[ -f "knowledge/session_plan.md" ]] && grep -q "sub-protocol" knowledge/session_plan.md 2>/dev/null; then
+        DONE_COUNT=0; PENDING=0
+        while IFS= read -r _l || [[ -n "$_l" ]]; do
+            case "$_l" in *✅*) DONE_COUNT=$((DONE_COUNT+1));; esac
+            case "$_l" in *⬜*) PENDING=$((PENDING+1));; esac
+        done < knowledge/session_plan.md
+        if [[ "$DONE_COUNT" -gt 5 && "$PENDING" -eq 0 ]]; then
+            STAGED_CF=$(git diff --cached --name-only | grep "CARRY_FORWARD.md" | head -1)
+            [[ -n "$STAGED_CF" ]] || warn "109" "sub-protocol הושלם בלי עדכון CARRY_FORWARD" "הוסף לקחים חוצי-sessions"
         fi
     fi
-fi
 
-# שער 110: audit log — אם נסקרה קטגוריה
-# session_plan עם טבלת "Audit log" חייב לפחות שורה אחת
-if [[ -f "knowledge/session_plan.md" ]] && grep -q "Audit log\|Audit Log" knowledge/session_plan.md 2>/dev/null; then
-    AUDIT_LINES=$(awk '
-      /[Aa]udit [Ll]og/ { in_section=1; next }
-      in_section && /^##/ { in_section=0 }
-      in_section && /^\|.*\|.*\|/ { count++ }
-      END { print count+0 }
-    ' knowledge/session_plan.md 2>/dev/null)
-    AUDIT_LINES=${AUDIT_LINES:-0}
-    if [[ "$AUDIT_LINES" -lt 2 ]]; then
-        warn "110" "Audit log קיים אבל ריק" "תעד קטגוריות שנסקרו (כולל clean runs כ-sentinels)"
+    # Gate 110: audit log not empty.
+    if [[ -f "knowledge/session_plan.md" ]] && grep -q "Audit log\|Audit Log" knowledge/session_plan.md 2>/dev/null; then
+        AUDIT_LINES=$(awk '
+          /[Aa]udit [Ll]og/ { in_section=1; next }
+          in_section && /^##/ { in_section=0 }
+          in_section && /^\|.*\|.*\|/ { count++ }
+          END { print count+0 }' knowledge/session_plan.md 2>/dev/null)
+        AUDIT_LINES=${AUDIT_LINES:-0}
+        [[ "$AUDIT_LINES" -ge 2 ]] || warn "110" "Audit log קיים אבל ריק" "תעד קטגוריות שנסקרו"
     fi
-fi
 
-# שער 113: asset-generation script שונה → חייב contact-sheet evidence
-# או רשומה מפורשת ב-stuck_log/CARRY_FORWARD שמתעדת visual verification.
-# רקע: ב-2026-06-02 crop_huliot.py שונה ו"100% done" הוצהר על-סמך unit-tests
-# בלבד; visual verify הראה ש-80% מהcrops פגומים. שער זה אוכף את הלקח
-# (CARRY_FORWARD #6).
-# הרחבה (P2 לקח #72, קטלגן סבב-2): גם assets שמשתנים *ישירות* (החלפת PNG ידנית /
-# manifest / script בשם אחר gen_/slice_/montage_) דורשים contact-sheet — לא רק crop_*.
-STAGED_CROP=$(git diff --cached --name-only | grep -E "scripts/(crop|render|gen|slice|montage)_.*\.py$|scripts/.*render.*\.py$|assets/.*\.(png|jpg|jpeg|webp)$" | head -1)
-if [[ -n "$STAGED_CROP" ]]; then
-    STAGED_CARRY=$(git diff --cached --name-only | grep -E "knowledge/(CARRY_FORWARD|stuck_log)\.md$" | head -1)
-    if [[ -z "$STAGED_CARRY" ]]; then
-        warn "113" "crop/render script שונה — תעד visual verify ב-stuck_log/CARRY_FORWARD" "ראה CARRY_FORWARD #6: asset-generation דורש contact-sheet"
+    # Gate 113: asset-generation contact-sheet.
+    STAGED_CROP=$(git diff --cached --name-only | grep -E "scripts/(crop|render|gen|slice|montage)_.*\.py$|scripts/.*render.*\.py$|assets/.*\.(png|jpg|jpeg|webp)$" | head -1)
+    if [[ -n "$STAGED_CROP" ]]; then
+        STAGED_CARRY=$(git diff --cached --name-only | grep -E "knowledge/(CARRY_FORWARD|stuck_log)\.md$" | head -1)
+        [[ -n "$STAGED_CARRY" ]] || warn "113" "crop/render script שונה — תעד visual verify ב-stuck_log/CARRY_FORWARD" "ראה CARRY_FORWARD #6"
     fi
-fi
 
-# שער 114: kLipskeyCatalog אסור ב-screens/state/logic — השתמש ב-kCatalogProducts
-# (דיווח מקבץ 2026-06-03, לקח #69): קריאה ב-kLipskeyCatalog מ-UI החזירה
-# רשימה ריקה עבור מוצרי Huliot/PPR → כרטיס לבן. כלל: קריאה רוחבית = kCatalogProducts.
-# פטורים: lib/data/ (הגדרת kLipskeyCatalog) · lib/test_harness/ (ui-tests מוגדרים) · test/.
-# (שער 113 תפוס ע"י קטלגן — crop contact-sheet. לקח #66: בדוק מספרי-שערים אחרי rebase.)
-LIPSKEY_MISUSE=$(git diff --cached lib/screens/ lib/state/ lib/logic/ 2>/dev/null \
-    | grep "^+" | grep -v "^+++" \
-    | grep "kLipskeyCatalog" | head -1)
-[[ -z "$LIPSKEY_MISUSE" ]] || err "114" \
-    "kLipskeyCatalog ב-screens/state/logic: $LIPSKEY_MISUSE" \
-    "השתמש ב-kCatalogProducts (מאוחד) — kLipskeyCatalog = Lipskey בלבד"
+    # Gate 114 (kLipskeyCatalog) -> Dart engine.
 
-# שער 115 (P2 לקח #72, הסדרן+מקבץ): hot-file claims — advisory warn.
-# אם קובץ ב-staging שלך תפוס ע"י סוכן-אחר ב-AGENT_COORDINATION → אזהרה (לא חוסם).
-# claim מבוסס-מפורש (לא git-log-time, שהוא proxy גרוע לבעלות). format:
-#   <!-- HOTFILE-CLAIMS-START --> ... - path · agent · ISO · TTLh ... <!-- ...END -->
-# parsing ב-bash builtin בלבד (case/glob) — לקח #52 (grep/awk על תוכן = לא-אמין ב-MSYS).
-CLAIMS_FILE="knowledge/AGENT_COORDINATION.md"
-if [[ -f "$CLAIMS_FILE" ]]; then
+    # Gate 115: hot-file claims (advisory). bash builtin parsing (MSYS-safe).
+    CLAIMS_FILE="knowledge/AGENT_COORDINATION.md"
     STAGED_NAMES=$(git diff --cached --name-only)
-    _in_claims=""
-    while IFS= read -r _line || [[ -n "$_line" ]]; do
-        case "$_line" in
-            *HOTFILE-CLAIMS-START*) _in_claims=1; continue;;
-            *HOTFILE-CLAIMS-END*)   _in_claims="";  continue;;
-        esac
-        [[ -n "$_in_claims" ]] || continue
-        case "$_line" in
-            "- "*)
-                _cpath=${_line#- }; _cpath=${_cpath%%·*}; _cpath=${_cpath%% *}
-                [[ -z "$_cpath" ]] && continue
-                case "$STAGED_NAMES" in
-                    *"$_cpath"*) warn "115" "hot-file claim על ${_cpath} — ${_line#- } — תאם/rebase לפני המשך";;
-                esac
-                ;;
-        esac
-    done < "$CLAIMS_FILE"
-fi
+    if [[ -f "$CLAIMS_FILE" ]]; then
+        _in_claims=""
+        while IFS= read -r _l || [[ -n "$_l" ]]; do
+            case "$_l" in
+                *HOTFILE-CLAIMS-START*) _in_claims=1; continue;;
+                *HOTFILE-CLAIMS-END*)   _in_claims="";  continue;;
+            esac
+            [[ -n "$_in_claims" ]] || continue
+            case "$_l" in
+                "- "*)
+                    _cpath=${_l#- }; _cpath=${_cpath%%·*}; _cpath=${_cpath%% *}
+                    [[ -z "$_cpath" ]] && continue
+                    case "$STAGED_NAMES" in
+                        *"$_cpath"*) warn "115" "hot-file claim על ${_cpath} — ${_l#- } — תאם/rebase לפני המשך";;
+                    esac
+                    ;;
+            esac
+        done < "$CLAIMS_FILE"
+    fi
 
-# שער 116 (P2 לקח #72, ליטוש): שינוי UI דורש visual-verify מתועד (לא warn-נייר).
-# tests-green ≠ user-happy (לקח #2). enforce: visual_log.md staged (artifact עמיד,
-# עדיף על trailer ארעי), או VERIFIED_UI=1 לחירום. דלג ב-replay (כבר אומת).
-STAGED_UI2=$(echo "${STAGED_NAMES:-$(git diff --cached --name-only)}" | grep -E "^app_flutter/lib/(screens|widgets)/.*\.dart$" | head -1)
-if [[ -n "$STAGED_UI2" && -z "${VERIFIED_UI:-}" && -z "$IS_REPLAY" ]]; then
-    STAGED_VLOG=$(git diff --cached --name-only | grep -E "knowledge/visual_log\.md$" | head -1)
-    [[ -n "$STAGED_VLOG" ]] || err "116" \
-        "שינוי UI ($STAGED_UI2) בלי visual-verify מתועד" \
-        "עדכן knowledge/visual_log.md (screenshot/בדיקה בעין) או VERIFIED_UI=1 לחירום"
-fi
+    # Gate 116: UI change requires visual_log staged (enforce; replay-skip).
+    STAGED_UI2=$(echo "$STAGED_NAMES" | grep -E "^app_flutter/lib/(screens|widgets)/.*\.dart$" | head -1)
+    if [[ -n "$STAGED_UI2" && -z "${VERIFIED_UI:-}" && -z "$IS_REPLAY" ]]; then
+        STAGED_VLOG=$(git diff --cached --name-only | grep -E "knowledge/visual_log\.md$" | head -1)
+        [[ -n "$STAGED_VLOG" ]] || err "116" "שינוי UI ($STAGED_UI2) בלי visual-verify מתועד" "עדכן knowledge/visual_log.md או VERIFIED_UI=1 לחירום"
+    fi
+}
 
-# שער 100: סיכום
-echo ""
-echo "══════════════════════════════════════════════"
-if [[ "$FAIL" -gt 0 ]]; then
-    echo "  ❌ $FAIL שערים נכשלו · $WARN אזהרות"
-    echo "  השמירה נחסמה — תקן ונסה שוב"
+# ═══════════════════════════════════════════════════════════════════════════
+#  Gate `reg`: registry <-> code parity. The set of ids THIS hook can emit
+#  (HOOK_GATE_IDS) MUST equal the registry's enforced set. Deterministic Dart
+#  comparison — no grep on content. Runs always (cheap).
+# ═══════════════════════════════════════════════════════════════════════════
+gate_registry_parity() {
+    local emitted_file out rc id
+    emitted_file="$(mktemp)"
+    for id in $HOOK_GATE_IDS; do echo "$id"; done > "$emitted_file"
+    out=$(dart run "$REPO_ROOT/app_flutter/tool/protocol_check.dart" \
+            --verify-registry \
+            --emitted "$emitted_file" \
+            --registry "$REPO_ROOT/protocol/gates.tsv" 2>&1)
+    rc=$?
+    rm -f "$emitted_file"
+    if [[ $rc -ne 0 ]]; then
+        echo "$out" | sed 's/^/   /'
+        err "reg" "registry≠code — מרשם השערים והקוד נפרדו" "סנכרן protocol/gates.tsv עם HOOK_GATE_IDS"
+    fi
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  RETRY / FINGERPRINT bookkeeping (preserved from v1)
+# ═══════════════════════════════════════════════════════════════════════════
+init_retry_state() {
+    local fp ts rest rec_gates rec_head g prior_nums
+    FINGERPRINT_FILE="$REPO_ROOT/.git/stuck_fingerprints.txt"
+    touch "$FINGERPRINT_FILE"
+    CURRENT_FP=$(git diff --cached --name-only | sort | sha256sum | cut -d' ' -f1 | head -c 12)
+    HEAD_SHA=$(git rev-parse HEAD 2>/dev/null || echo "none")
+    IS_RETRY="false"; PRIOR_GATES=""
+    NOW=$(date +%s); FIVE_HOURS_AGO=$((NOW - 18000))
+    while IFS=' ' read -r fp ts rest; do
+        [[ "$ts" -gt "$FIVE_HOURS_AGO" ]] || continue
+        rec_gates="${rest#gates=}"; rec_gates="${rec_gates%% *}"
+        rec_head="${rest##*head=}"
+        if [[ "$fp" == "$CURRENT_FP" ]]; then IS_RETRY="true"; PRIOR_GATES="$rec_gates"; break; fi
+        if [[ "$HEAD_SHA" != "none" && "$rec_head" == "$HEAD_SHA" ]]; then IS_RETRY="true"; PRIOR_GATES="$rec_gates"; break; fi
+    done < "$FINGERPRINT_FILE"
+    PRIOR_HAS_CODE_TEST=""
+    if [[ "$PRIOR_GATES" == v2:* ]]; then
+        prior_nums="${PRIOR_GATES#v2:}"
+        for g in ${prior_nums//,/ }; do
+            [[ "$g" =~ ^[0-9]+$ ]] && (( g >= 31 && g <= 45 )) && (( g != 42 )) && { PRIOR_HAS_CODE_TEST="1"; break; }
+        done
+    elif [[ -n "$PRIOR_GATES" ]]; then
+        PRIOR_HAS_CODE_TEST="1"
+    fi
+}
+
+record_fingerprint() {
+    echo "$CURRENT_FP $NOW gates=v2:${FAILED_GATES#,} head=$HEAD_SHA" >> "$FINGERPRINT_FILE"
+    tail -100 "$FINGERPRINT_FILE" > "$FINGERPRINT_FILE.tmp" && mv "$FINGERPRINT_FILE.tmp" "$FINGERPRINT_FILE"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  RUNNER — orchestrates the gates, preserving v1 control flow exactly.
+# ═══════════════════════════════════════════════════════════════════════════
+run() {
+    # P0 version generate must precede version gates 11/12 and Flutter.
+    gate_version_generate
+    init_retry_state
+
+    echo ""
     echo "══════════════════════════════════════════════"
-    exit 1
-else
-    SUMMARY="✅ כל 100 השערים עברו"
-    [[ "$WARN" -gt 0 ]] && SUMMARY="$SUMMARY · $WARN אזהרות"
-    echo "  $SUMMARY"
+    echo "  פרוטוקול BuildSmart v2 — registry-driven"
     echo "══════════════════════════════════════════════"
-    exit 0
-fi
+
+    # Shared staged-file vars (computed once; many gates read them).
+    STAGED_LIB=$(git diff --cached --name-only | grep -E "^app_flutter/lib/(screens|state|logic)/" | head -1)
+    STAGED_HELPER=$(git diff --cached --name-only | grep -E "^app_flutter/lib/(logic|data)/" | head -1)
+    STAGED_TEST=$(git diff --cached --name-only | grep -E "^app_flutter/test/.*_test\.dart$" | head -1)
+    STAGED_KNOWLEDGE=$(git diff --cached --name-only | grep "knowledge/" | head -1)
+    STAGED_WIRING=$(git diff --cached --name-only | grep "WIRING.md" | head -1)
+    STUCK_LOG="knowledge/stuck_log.md"
+    TEST_OUT=""; TEST_COUNT=""
+    IS_REPLAY=""
+    case "${GIT_REFLOG_ACTION:-}" in rebase*|*amend*|*cherry-pick*) IS_REPLAY=1;; esac
+
+    # ── CHEAP gates (run before Flutter — fail-fast barrier) ──
+    gate_foundations
+    gate_state
+    gate_hook_integrity
+    gate_planning
+    gate_test_bookkeeping
+    gate_quality
+    gate_lang
+    gate_save_safety
+    gate_learning      # 101/102/104/111 (cheap parts)
+    gate_knowledge     # 106-116 (cheap)
+    run_content_engine # ALL Dart content gates (cheap, deterministic)
+    gate_registry_parity
+
+    # ── Fail-fast barrier: stop before the ~13-min Flutter tier ──
+    if [[ "$FAIL" -gt 0 ]]; then
+        echo ""
+        echo "══════════════════════════════════════════════"
+        echo "  ❌ $FAIL שגיאות בשערים מהירים — עוצר לפני Flutter"
+        echo "  תקן ונסה שוב (חוסך ~13 דק' analyze/test/build)"
+        echo "══════════════════════════════════════════════"
+        record_fingerprint
+        exit 1
+    fi
+
+    # ── FLUTTER tier (analyze always; test skipped on replay) ──
+    gate_test_tier
+    # Gate 94 depends on TEST_OUT from the tier; final-safety runs AFTER it.
+    gate_final_safety
+
+    # ── Fingerprint on failure ──
+    if [[ "$FAIL" -gt 0 ]]; then
+        record_fingerprint
+    fi
+
+    # ── Summary ──
+    echo ""
+    echo "══════════════════════════════════════════════"
+    if [[ "$FAIL" -gt 0 ]]; then
+        echo "  ❌ $FAIL שערים נכשלו · $WARN אזהרות"
+        echo "  השמירה נחסמה — תקן ונסה שוב"
+        echo "══════════════════════════════════════════════"
+        exit 1
+    else
+        local SUMMARY="✅ כל השערים עברו (registry-driven)"
+        [[ "$WARN" -gt 0 ]] && SUMMARY="$SUMMARY · $WARN אזהרות"
+        echo "  $SUMMARY"
+        echo "══════════════════════════════════════════════"
+        exit 0
+    fi
+}
+
+run

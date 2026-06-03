@@ -1,0 +1,136 @@
+#	BuildSmart Protocol v2 — Gate Registry (SINGLE SOURCE OF TRUTH)
+#	------------------------------------------------------------------
+#	One row per REAL, DISTINCT protection. Reconciled 1:1 against the emitted
+#	gate ids in .githooks/pre-commit (see PROTOCOL_V2.md OLD->NEW mapping).
+#	The consistency check (tool/protocol_check.dart --verify-registry, mirrored
+#	by gate `reg`) FAILS if the set of ids emitted by pre-commit != the set of
+#	`enforced` ids here. Editing a gate REQUIRES editing this row (and vice-versa).
+#
+#	Columns (TAB-separated):
+#	  id          stable gate id (string; legacy numeric ids preserved where 1:1)
+#	  group       logical group (foundations|state|planning|test|quality|lang|
+#	              save-safety|final-safety|learning|knowledge|content-engine|meta)
+#	  name        short human name
+#	  severity    err (blocks commit) | warn (advisory) | n/a (not a runtime gate)
+#	  trigger     when it runs (always | staged:<glob> | flutter | retry | replay-skip)
+#	  tier        cheap (pre-Flutter, fail-fast) | flutter (needs analyze/test) |
+#	              push (moved to pre-push) | ci (CI-only) | n/a
+#	  engine      bash | dart (tool/protocol_check.dart) | n/a
+#	  status      enforced | moved | cancelled | removed | summary | meta
+#	  check-desc  what it asserts
+#
+id	group	name	severity	trigger	tier	engine	status	check-desc
+1	foundations	work-branch	err	always	cheap	bash	enforced	current branch matches claude/* (proto branch only)
+2	foundations	knowledge-files-exist	err	always	cheap	bash	enforced	11 knowledge/*.md core files present
+3	foundations	wiring-exists	err	always	cheap	bash	enforced	app_flutter/WIRING.md present
+4	foundations	pubspec-exists	err	always	cheap	bash	enforced	pubspec.yaml present (correct cwd)
+5	foundations	branch-tracked	warn	always	cheap	bash	enforced	origin/<branch> tracking ref exists
+6	foundations	pre-commit-in-repo	err	always	cheap	bash	enforced	.githooks/pre-commit present in repo
+7	foundations	pre-push-in-repo	err	always	cheap	bash	enforced	.githooks/pre-push present in repo
+7c	foundations	commit-msg-in-repo	err	always	cheap	bash	enforced	.githooks/commit-msg present (was MISLABELED err 105 at old line 161)
+8	foundations	settings-in-repo	err	always	cheap	bash	enforced	.claude/settings.json present in repo
+9	foundations	pre-tool-in-repo	err	always	cheap	bash	enforced	.claude/hooks/pre-tool.sh present in repo
+10	foundations	workflow-exists	err	always	cheap	bash	enforced	.github/workflows/protocol-enforce.yml present
+11	state	version-generated	err	always	cheap	bash	enforced	version.g.dart generated, gitignored, not tracked, not staged
+12	state	version-synced	err	always	cheap	bash	enforced	version.g.dart label == STATUS.md label
+13	state	roadmap-group-a	err	always	cheap	bash	enforced	SMARTPRODUCT_ROADMAP.md contains Group A
+14	state	status-has-version	err	always	cheap	bash	enforced	STATUS.md contains a vX.YY label
+15	state	hookspath-githooks	err	always	cheap	bash	enforced	git core.hooksPath == .githooks (MERGED: old 15 + old 83 were identical)
+16	state	pre-commit-executable	err	always	cheap	bash	enforced	.githooks/pre-commit is executable
+17	state	pre-push-executable	err	always	cheap	bash	enforced	.githooks/pre-push is executable
+18	state	knowledge-dir	err	always	cheap	bash	enforced	knowledge/ directory present
+19	state	lib-state-dir	err	always	cheap	bash	enforced	lib/state/ directory present
+20	state	test-dir	err	always	cheap	bash	enforced	test/ directory present
+21	planning	session-plan-exists	err	staged:lib	cheap	bash	enforced	knowledge/session_plan.md exists when lib/ staged
+22	planning	session-plan-filled	err	staged:lib	cheap	bash	enforced	session_plan.md is not the empty template
+23	planning	roadmap-in-progress	err	staged:lib	cheap	dart	enforced	ROADMAP has a in-progress marker (content gate)
+24	planning	wiring-updated	err	staged:lib	cheap	bash	enforced	WIRING.md staged when lib/ staged
+25	planning	preact-shared-untouched	err	staged:lib	cheap	dart	enforced	no edits to Preact-shared *_settings.dart (content gate)
+26	planning	test-filename-singular	err	staged	cheap	bash	enforced	no *_tests.dart (must be _test.dart)
+27	planning	filename-snake-case	err	staged	cheap	bash	enforced	no CamelCase .dart filenames under lib/
+28	planning	no-local-uri	err	staged:dart	cheap	dart	enforced	no absolute file:/// or C:\ URIs in dart diff (content gate)
+31	test	flutter-analyze	err	flutter	flutter	bash	enforced	flutter analyze reports 0 errors
+32	test	tests-vs-baseline	err	flutter	flutter	bash	enforced	test failures <= known-failing baseline; baseline-phantom guard
+33	test	test-count-not-down	err	flutter	flutter	bash	enforced	test count not below STATUS.md recorded count
+35	test	critical-test-1-exists	warn	flutter	flutter	bash	enforced	compat_coverage_test present (emitted by the 35-40 loop)
+36	test	critical-test-2-exists	warn	flutter	flutter	bash	enforced	regression_gate_test present (emitted by the 35-40 loop)
+37	test	critical-test-3-exists	warn	flutter	flutter	bash	enforced	knowledge_protocol_test present (emitted by the 35-40 loop)
+38	test	critical-test-4-exists	warn	flutter	flutter	bash	enforced	smartproduct_contract_test present (emitted by the 35-40 loop)
+39	test	critical-test-5-exists	warn	flutter	flutter	bash	enforced	dedup_test present (emitted by the 35-40 loop)
+40	test	critical-test-6-exists	warn	flutter	flutter	bash	enforced	no_duplicate_specs_test present (emitted by the 35-40 loop)
+41	test	no-greaterThan-zero	warn	staged:test	cheap	bash	enforced	no greaterThan(0) assertions (brittle on empty data)
+42	test	helper-needs-test	err	staged:lib	cheap	bash	enforced	new helper in lib/logic|data without a *_test.dart
+43	test	mutation-log-exists	err	staged:helper	cheap	bash	enforced	knowledge/mutation_log.md present when helper staged
+44	test	mutation-log-updated	err	staged:helper	cheap	bash	enforced	mutation_log.md staged when helper staged
+46	quality	no-dark-surface	err	staged:screens	cheap	dart	enforced	no 0xFF111111/BsTokens.bgDark in screens diff (content gate)
+47	quality	dialog-needs-wiring	warn	staged:screens	cheap	bash	enforced	new showDialog/showModalBottomSheet without WIRING update
+48	quality	no-print	err	staged:dart	cheap	dart	enforced	no print() in production dart (content gate)
+49	quality	todo-needs-context	warn	staged:lib	cheap	bash	enforced	no bare TODO/FIXME without colon-context
+50	quality	no-dart-html	err	staged:lib	cheap	dart	enforced	no import dart:html (use package:web) (content gate)
+51	quality	no-hardcoded-url	warn	staged:lib	cheap	dart	enforced	no hard-coded https URL literal (content gate)
+52	quality	no-secrets	err	staged:dart-yaml-json	cheap	dart	enforced	no secret/api_key/token literal value (content gate)
+53	quality	no-secret-files	err	staged	cheap	bash	enforced	no .env/credentials/bypass-token files staged (merged 3 .env checks)
+54	quality	no-dark-coloredbox	err	staged:lib	cheap	dart	enforced	no ColoredBox with dark 0xFF0-3 color (content gate)
+55	quality	no-nested-ui-logic	warn	staged:screens	cheap	bash	enforced	no triple-&& condition nested in UI (suggest helper)
+56	quality	logic-helper-needs-test	err	staged:helper	cheap	bash	enforced	new lib/logic/*_helper.dart requires matching test
+58	quality	define-needs-docs	warn	staged:lib	cheap	bash	enforced	new fromEnvironment without docs
+60	quality	new-dep-warn	warn	staged:pubspec	cheap	bash	enforced	new production dependency (not dev_dependency)
+62	lang	no-hard-left-right	warn	staged:lib	cheap	dart	enforced	no padding left/right (use start/end) (content gate)
+63	lang	no-textalign-lr	warn	staged:lib	cheap	dart	enforced	no TextAlign.left/right (content gate)
+64	lang	no-invented-emoji	warn	staged:lib	cheap	dart	enforced	no non-legacy emoji invented (content gate)
+65	lang	no-textdirection-ltr	warn	staged:lib	cheap	dart	enforced	no TextDirection.ltr in RTL app (content gate)
+66	lang	app-touched-warn	warn	staged:app	cheap	bash	enforced	touched app/ (Preact) — verify verbatim copy to Flutter
+67	lang	app-hebrew-string-warn	warn	staged:app	cheap	dart	enforced	new Hebrew string in app/ — copy to app_flutter (content gate)
+68	lang	preact-inspections-frozen	err	staged:app	cheap	bash	enforced	no edits under app/knowledge/inspections/
+69	lang	color-revert-warn	warn	staged:lib	cheap	dart	enforced	removed bgDark/0xFF111111 — verify not text-color (content gate)
+70	lang	gitignore-secrets-guard	err	staged:gitignore	cheap	dart	enforced	no removal of .env/.key/.pem from .gitignore (content gate)
+71	save-safety	cart-needs-test	warn	staged:cart	cheap	bash	enforced	smart_cart.dart change without cart_bulk_order_test
+72	save-safety	helper-in-wiring	warn	staged:helper	cheap	bash	enforced	helper name appears in WIRING.md
+73	save-safety	persistence-key-format	err	staged:lib	cheap	dart	enforced	persistence key matches bs.<feature>.vN (content gate)
+74	save-safety	no-manual-container	err	staged:screens	cheap	dart	enforced	no manual ProviderContainer() in widget (content gate)
+75	save-safety	providers-not-removed	warn	staged:providers	cheap	bash	enforced	providers.dart removals flagged
+77	save-safety	large-file-warn	warn	staged	cheap	bash	enforced	large staged file (>=1000 line diff)
+78	save-safety	no-binaries	err	staged	cheap	bash	enforced	no .exe/.dll/.so/.dylib/.jar/.war staged
+79	save-safety	no-lock-modules	warn	staged	cheap	bash	enforced	no *.lock / node_modules staged
+80	save-safety	pubspec-lock-override	warn	staged:lock	cheap	bash	enforced	pubspec.lock version override flagged
+81	final-safety	hook-in-sync	err	always	cheap	bash	enforced	.git/hooks/pre-commit matches .githooks; staged if changed
+82	final-safety	pre-push-in-sync	warn	always	cheap	bash	enforced	.git/hooks/pre-push matches .githooks
+84	final-safety	workflow-not-deleted	err	always	cheap	bash	enforced	.github workflow still present
+85	final-safety	workflow-intact	err	always	cheap	bash	enforced	workflow contains protocol-gates job
+86	final-safety	catalog-no-dup-sku	err	staged:catalog	cheap	bash	enforced	no duplicate SKU in catalog files
+87	final-safety	polyroll-needs-test	warn	staged:polyroll	cheap	bash	enforced	polyroll_catalog change without ppr_infra_test
+88	final-safety	master-protocol-guard	warn	staged:master	cheap	bash	enforced	MASTER_PROTOCOL edit without allow file
+89	final-safety	no-delete-tests	err	staged:del	cheap	bash	enforced	no *_test.dart deleted
+90	final-safety	no-delete-state	err	staged:del	cheap	bash	enforced	no lib/state/ file deleted
+91	final-safety	unstaged-lib-warn	warn	always	cheap	bash	enforced	unstaged lib/ changes present
+92	final-safety	state-needs-status	warn	staged:state	cheap	bash	enforced	state change without STATUS.md update
+93	final-safety	roadmap-checkmark	warn	staged:lib	cheap	dart	enforced	ROADMAP updated with done-marker (content gate)
+94	final-safety	knowledge-protocol-test	err	flutter	flutter	bash	enforced	knowledge_protocol_test not failed in test output
+95	final-safety	number-needs-isolate	warn	staged:lib	cheap	dart	enforced	NxN number with Hebrew without LTR isolate (content gate)
+96	final-safety	pubspec-version-warn	warn	staged:pubspec	cheap	bash	enforced	pubspec version changed without code change
+97	final-safety	gitignore-no-hide-claude	err	staged:gitignore	cheap	dart	enforced	no .gitignore line hiding .claude/ (content gate)
+98	final-safety	settings-in-repo-2	err	always	cheap	bash	enforced	.claude/settings.json present (final check)
+99	final-safety	four-enforcement-layers	err	always	cheap	bash	enforced	all 4 enforcement layers present
+101	learning	stuck-log-exists	err	always	cheap	bash	enforced	knowledge/stuck_log.md present
+102	learning	retry-needs-stuck-entry	err	retry	cheap	bash	enforced	retry after code/test failure requires new ANTIPATTERN+RULE entry
+103	content-engine	antipattern-recurrence	err	staged:dart-hook	cheap	dart	enforced	stuck_log ANTIPATTERN regex must not reappear in diff (content gate)
+104	learning	regen-stuck-regression	n/a	staged:stuck-log	cheap	bash	enforced	auto-regenerate stuck_regression_test when stuck_log staged
+106	knowledge	session-plan-owner-scope	err	staged:lib	cheap	bash	enforced	session_plan.md has Owner: and Scope:
+107	knowledge	ui-needs-visual-log	warn	staged:screens	cheap	bash	enforced	screens/ change without visual log (advisory)
+108	knowledge	carry-forward-exists	err	always	cheap	bash	enforced	knowledge/CARRY_FORWARD.md present
+109	knowledge	subprotocol-carry-forward	warn	staged:lib	cheap	dart	enforced	completed sub-protocol updates CARRY_FORWARD (content gate)
+110	knowledge	audit-log-not-empty	warn	staged:lib	cheap	bash	enforced	Audit log section has >=2 rows when present
+111	content-engine	stuck-regression-consistent	err	always	cheap	bash	enforced	ANTIPATTERN count == regression test count; no dup numbering
+112	knowledge	stubs-unified	err	always	cheap	bash	enforced	TESTING/CHECKLISTS/BUG_INVESTIGATION are DEPRECATED stubs <=20 lines
+113	knowledge	asset-gen-contact-sheet	warn	staged:assets	cheap	bash	enforced	crop/render/asset change requires visual-verify note
+114	content-engine	no-klipskey-in-ui	err	staged:lib	cheap	dart	enforced	kLipskeyCatalog forbidden in screens/state/logic (content gate)
+115	knowledge	hotfile-claim-warn	warn	always	cheap	bash	enforced	staged file claimed by another agent in AGENT_COORDINATION
+116	knowledge	ui-needs-visual-verify	err	staged:ui	cheap	bash	enforced	screens/widgets change requires visual_log.md staged (replay-skip)
+reg	meta	registry-code-parity	err	always	cheap	dart	enforced	emitted gate-id set == registry enforced-id set (NEW in v2)
+#	--- below: documented NON-runtime entries (status != enforced); excluded from parity set ---
+34	test	flutter-build-web	n/a	push	push	bash	moved	build web release MOVED to pre-push (fast-gate, lesson #72)
+59	planning	forced-version-bump	n/a	n/a	n/a	n/a	cancelled	forced bump CANCELLED (conflict-magnet, lesson #72) — superseded by 11/12
+61	lang	hebrew-catalog-index	n/a	n/a	n/a	n/a	removed	auto Hebrew-in-index check REMOVED (Flutter-only leaves need not be in index.html)
+76	save-safety	commit-msg-nonempty	n/a	n/a	n/a	bash	moved	commit message non-empty ENFORCED in commit-msg hook, not pre-commit
+83	state	hookspath-duplicate	n/a	n/a	n/a	n/a	removed	DUPLICATE of gate 15 (both checked core.hooksPath==.githooks) — merged into 15
+100	meta	summary-banner	n/a	always	n/a	bash	summary	prints pass/fail summary; not a protection
