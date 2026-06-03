@@ -4,7 +4,7 @@
 > **אפליקציה:** `app_flutter/` (Flutter · סגנון-וואטסאפ · 4 טאבים **v5.96**: **בית · מחלקות · עדכונים · חנות**). ⚠️ "עדכונים" (`UpdatesScreen`) = התראות+שיחות **מוזגו** ל-sub-tabs [🔔 התראות · 💬 שיחות]. ⋮ של בית+מחלקות = `_CatalogMenuButton`.
 > **ביצוע:** ענף `claude/whats-happening-LyY9G` · דרך השערים (`.githooks/pre-commit`) · push רק על מילה מפורשת.
 > **מקור-אמת:** `app_flutter/knowledge/port/proto/04-contractor-projects-tasks.md` (`§` = סעיף) + proto §1–§9.
-> **כללים (כל משימה):** R2 (dial-leaf, אין view/חלון חדש) · R6/R8 (מחרוזות+מספרים verbatim) · R9 (`prompt`→inline) · server/print/camera/OCR→toast.
+> **כללים (כל משימה):** מחרוזות+מספרים **verbatim** מהמקור · קלט inline · server/print/camera/OCR→toast-stub · להתאים לסגנון-הבנייה הקיים של האפליקציה.
 
 ## איך לעבוד
 עבוד **לפי הסדר**, משימה-אחר-משימה, מלמעלה למטה. כל משימה = 🎯 יעד + צעדים מפורקים + מקור + ✅ DoD. אל תתחיל משימה לפני שהקודמת עברה DoD. **שלב א׳ (כפתורים קיימים) קודם — זו העדיפות. שלב ב׳ רק אחריו.**
@@ -42,7 +42,7 @@
 
 ## T4 · טאב חנות → services — ⏱️ ~3ש׳
 🎯 **יעד:** 6 השירותים פותחים flow אמיתי (לא רק preview).
-- צעדים: השכרת-כלים · פקדונות · החזרה(RMA) · מכרז-ספקים(RFQ) · MSDS · השוואה. כל אחד → sheet/inline (**R9**, לא prompt). חסר-flow→honest-stub.
+- צעדים: השכרת-כלים · פקדונות · החזרה(RMA) · מכרז-ספקים(RFQ) · MSDS · השוואה. כל אחד → sheet/inline (לא prompt). חסר-flow→honest-stub.
 - מקור: §3 (commerce-b2b).
 ✅ **DoD:** כל שירות פותח תוכן/flow.
 
@@ -70,7 +70,7 @@
 ✅ **DoD:** לחיצה פותחת תוכן (לא 'בקרוב' ריק).
 
 ## T9 · BS-dial → עלי 5 הפרסונות — ⏱️ ~1 יום
-🎯 **יעד:** עלי הפרסונות (מנהל/חנות/שליח/עובד) מציגים תוכן-dial (R2-safe, לא views).
+🎯 **יעד:** עלי הפרסונות (מנהל/חנות/שליח/עובד) מציגים תוכן (כעלים/sheets).
 - צעדים: אתֵר `grep -rn "בבנייה" lib/screens/bs_dial_widget.dart` → החלף → תוכן-פרסונה כעלים.
 - מקור: persona-dashboards (port/preact/03).
 ✅ **DoD:** עלי-פרסונה מציגים content.
@@ -84,14 +84,14 @@
 
 ## T10 · טריגר לתפריט-החבוי — ⏱️ ~2ש׳
 🎯 **יעד:** התפריט (4 טאבים, 41 עלים) נפתח.
-- צעדים: הצב `OpenDial.menu` ממחווה/פקד R2-safe (`home_shell`). אז 41 העלים נגישים.
+- צעדים: הצב `OpenDial.menu` ממחווה/פקד (`home_shell`). אז 41 העלים נגישים.
 ✅ **DoD:** התפריט נפתח.
 
 ## T11 · מרכז-פיננסים (10 עלים) — ⏱️ ~1.5 יום
-🎯 **יעד:** 10 פיצ'רי-פיננסים חיים. מקור §4. (מדד+6.10%/תשלום/subs/אישורים-RBAC/חריגה/ROI×1.42/פיצול/קנסות-R9/דוחות-toast/מט״ח). ✅ math תואם.
+🎯 **יעד:** 10 פיצ'רי-פיננסים חיים. מקור §4. (מדד+6.10%/תשלום/subs/אישורים-RBAC/חריגה/ROI×1.42/פיצול/קנסות-inline/דוחות-toast/מט״ח). ✅ math תואם.
 
 ## T12 · ניהול-אתר (10 עלים) — ⏱️ ~1.5 יום
-🎯 **יעד:** 10 כלי-אתר חיים. מקור §5. (גאנט-RTL/ליקויים-R9/מיקום/נוכחות/יומן-R9/בטיחות/תלויות/צילום-toast/ביקורת-R9/ארכיון). ✅ CRUD עובד.
+🎯 **יעד:** 10 כלי-אתר חיים. מקור §5. (גאנט-RTL/ליקויים-inline/מיקום/נוכחות/יומן-inline/בטיחות/תלויות/צילום-toast/ביקורת-inline/ארכיון). ✅ CRUD עובד.
 
 ## T13 · מלאי (2 עלים) — ⏱️ ~0.25 יום
 🎯 **יעד:** מחסן/אתר + move. מקור §8 (STOCK_DEMO 11). ✅ move עובד.
@@ -125,7 +125,7 @@
 ---
 
 ## Definition-of-Done גלובלי (לכל משימה)
-1. ✅ הכפתור מציג content (לא toast 'בבנייה') · 2. ✅ verbatim (R6/R8) · 3. ✅ R9-inline, אין view חדש (R2) · 4. ✅ `analyze`=0 + `test` ירוק + test/helper · 5. ✅ עובר שערי-`.githooks/pre-commit` (מספור עד ~116; חלקם פעילים) · 6. ✅ push רק על "תדחוף"/"push".
+1. ✅ הכפתור מציג content (לא toast 'בבנייה') · 2. ✅ verbatim מהמקור · 3. ✅ קלט inline · 4. ✅ `analyze`=0 + `test` ירוק + test/helper · 5. ✅ עובר שערי-`.githooks/pre-commit` · 6. ✅ push רק על "תדחוף"/"push".
 
 ## אומדן
 שלב א׳ (כפתורים קיימים) ≈ **3.5 ימים** · שלב ב׳ ≈ **8 ימים** · סה"כ ≈ **11–12 ימי-עבודה**.
@@ -137,7 +137,7 @@
 - 2026-06-03 · **בנצי (משיק)** · `claude/whats-happening-LyY9G` · לקח **P0 השקה** (usage-strings iOS + scaffolding לחתימת-Android release) — source-prep, לא תלוי ב-T0. push קוד רק על "תדחוף".
 
 - 2026-06-03 · **מקבץ-קבלן (סשן בנצי-features)** · `claude/whats-happening-LyY9G` · לקח **T9** (BS-dial — תוכן ל-leaves של הפרסונות: מנהל/חנות/שליח/עובד; קבלן deferred). מקור: `app_flutter/knowledge/port/preact/03-persona-dashboards.md`. **בלתי-תלוי ב-T0/T1.** push קוד רק על "תדחוף". בעבודה.
-  - הערות-שטח (נכון ל-v5.97, אחרי 6 דרישות בנצי): **T7 כבר בוצע** — mute/mark/clear כבר קוראים ל-state אמיתי (`home_shell._onSelected`: `toggleMuteAllChats`/`markAllNotifsRead`/`dismissAllNotifs`), לא toast-stub. **T2 חסום (R8)** — אין dataset של מחירי-חנויות ב-`lib/data/` ו-`bestStore` לא קיים; ה-"4 ספקים עדכנו מחירים" הוא טקסט-התראה. **T8 = "בקרוב תשאיר"** לפי החלטת-משתמש (5 המחלקות בעלות 0 מוצרים — honest-stub כבר ממומש).
+  - הערות-שטח (נכון ל-v5.97, אחרי 6 דרישות בנצי): **T7 כבר בוצע** — mute/mark/clear כבר קוראים ל-state אמיתי (`home_shell._onSelected`: `toggleMuteAllChats`/`markAllNotifsRead`/`dismissAllNotifs`), לא toast-stub. **T2 חסום (אין-data, אין-המצאה)** — אין dataset של מחירי-חנויות ב-`lib/data/` ו-`bestStore` לא קיים; ה-"4 ספקים עדכנו מחירים" הוא טקסט-התראה. **T8 = "בקרוב תשאיר"** לפי החלטת-משתמש (5 המחלקות בעלות 0 מוצרים — honest-stub כבר ממומש).
 
-- 2026-06-03 · **בנצי (משיק)** · `claude/whats-happening-LyY9G` · לקח **T6** (טאב עדכונים → התראות תקציב + בטיחות). סקופ: ה-action-button בהתראות (`notifications_screen` ~1026) = toast "בבנייה" → מחליף ב-תוכן inline (R9): safety→SAFETY_TIPS×5+ack (§5) · budget→ספי 80/90/100% (§3). בחירה: T2 חסום-R8 · T3/T4/T5 תלויים-T0 (WIP מקבץ) · Phase-B נעול-T10. T6 = התנגשות-מינימלית (notifications_screen). **תיאום:** התוכן יוגדר מקומית ב-notifications (לא ב-contractor_seeds של T0) — מקבץ, אין צורך ב-SAFETY_TIPS/thresholds ב-T0. push קוד רק על "תדחוף".
+- 2026-06-03 · **בנצי (משיק)** · `claude/whats-happening-LyY9G` · לקח **T6** (טאב עדכונים → התראות תקציב + בטיחות). סקופ: ה-action-button בהתראות (`notifications_screen` ~1026) = toast "בבנייה" → מחליף ב-תוכן inline: safety→SAFETY_TIPS×5+ack (§5) · budget→ספי 80/90/100% (§3). בחירה: T2 חסום (אין-data) · T3/T4/T5 תלויים-T0 (WIP מקבץ) · Phase-B נעול-T10. T6 = התנגשות-מינימלית (notifications_screen). **תיאום:** התוכן יוגדר מקומית ב-notifications (לא ב-contractor_seeds של T0) — מקבץ, אין צורך ב-SAFETY_TIPS/thresholds ב-T0. push קוד רק על "תדחוף".
 - 2026-06-04 · **מקבץ** · **T0 (ליבה: seeds+helpers+test) ✅ נדחף** ל-whats-happening (`contractor seeds foundation` · 8 בדיקות · fMoney/bestStore mutation-verified). דחוי: T0.2 StateNotifiers (→T7/T5) · ORDER_STATUS/STORE seeds (proto-gap →T4/T5). **T1 הבא.**
