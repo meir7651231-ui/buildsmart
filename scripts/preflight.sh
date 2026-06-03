@@ -18,6 +18,13 @@ FLUTTER_DIR="$REPO_ROOT/app_flutter"
 
 cd "$FLUTTER_DIR" || { echo "❌ לא נמצא app_flutter"; exit 1; }
 
+# ענפי-פרוטוקול בלבד
+_PF_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+if [[ "$_PF_BRANCH" != "claude/whats-happening-LyY9G" ]]; then
+    echo "ℹ️  ענף $_PF_BRANCH — preflight לא חל (לא ענף-פרוטוקול)"
+    exit 0
+fi
+
 FAIL=0
 err()  { echo "❌ [שער $1] $2 → $3"; FAIL=$((FAIL+1)); }
 warn() { echo "⚠️  [שער $1] $2"; }

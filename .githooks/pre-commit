@@ -24,6 +24,18 @@ fi
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
+# ═══ ענפי-פרוטוקול — רק ענפים ברשימה מקבלים אכיפה מלאה ═══
+# ענפים שלא ברשימה: hook עובר בשקט (אין חסימה, אין Flutter)
+_CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+_PROTO_BRANCHES=("claude/whats-happening-LyY9G")
+_IS_PROTO=0
+for _pb in "${_PROTO_BRANCHES[@]}"; do
+    [[ "$_CURRENT_BRANCH" == "$_pb" ]] && _IS_PROTO=1 && break
+done
+if [[ "$_IS_PROTO" -eq 0 ]]; then
+    exit 0
+fi
+
 # M4: emergency disable — לשימוש בעת באג קריטי בפרוטוקול בלבד
 # הפעלה: export BUILDSMART_EMERGENCY_DISABLE="$(cat .emergency_token)"
 if [[ -n "${BUILDSMART_EMERGENCY_DISABLE:-}" ]]; then

@@ -27,7 +27,13 @@ flutter pub get --no-example 2>&1 | tail -3
 # חייב להיווצר לפני analyze/build כי home_shell מייבא אותו.
 bash "$REPO/scripts/gen_version.sh" 2>&1 | tail -1 || echo "⚠️  gen_version נכשל — בדוק STATUS.md"
 
-# ─── סיכום פרוטוקול ───
+# ─── סיכום פרוטוקול — רק על ענף-הפרוטוקול ───
+_SS_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+if [[ "$_SS_BRANCH" != "claude/whats-happening-LyY9G" ]]; then
+    echo "ℹ️  ענף $_SS_BRANCH — מוכן (ללא פרוטוקול)"
+    exit 0
+fi
+
 echo ""
 echo "════════════════════════════════════════════"
 echo "  BuildSmart Flutter — סיכום פרוטוקול"

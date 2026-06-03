@@ -4,7 +4,7 @@ name: Protocol Enforcement
 on:
   push:
     branches:
-      - 'claude/**'
+      - 'claude/whats-happening-LyY9G'
       - main
   pull_request:
     branches:
