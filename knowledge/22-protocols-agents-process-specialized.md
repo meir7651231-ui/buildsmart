@@ -46,7 +46,7 @@
 - **`COACH_MODE.md` (roadmap 99–100):** הכרטיס כמורה (JIT pedagogy) — גרסת-טקסט שמישה כבר היום מ-helpers קיימים; voice/AR/camera = שדרוגי-ערוץ-מסירה, לא ידע.
 
 ## E. הפרוטוקולים-הייעודיים
-- **`stuck_log.md` (1,220ש׳) = רישום-אנטי-דפוסים** (48 רשומות, נאכף ב-gate-103). פורמט: בעיה/פתרון/`ANTIPATTERN:<regex>`/`RULE:`. אנטי-דפוסים מרכזיים: emoji-grep-ב-hook→bash-builtin · baseline-phantom (known-failing בלי-שמות) · retry-fingerprint+`head=$SHA` · `echo|grep`-non-determinism · `grep -c||echo 0` · `git diff file`-exit-0 · CRLF-Windows · letter-size-ambiguity · switch-fall-through · `kLipskeyCatalog`-ריק-ל-Huliot/PPR. כל `ANTIPATTERN` → `stuck_regression_test.dart` (auto-gen).
+- **`stuck_log.md` (1,220ש׳ ✓אומת) = רישום-אנטי-דפוסים** (**65 רשומות · 52 `ANTIPATTERN:`-regex → 64 בדיקות `stuck_regression_test.dart` auto-gen**; gate-111 שומר count==count · נאכף ב-gate-103. "48" היה ספירה ישנה). פורמט: בעיה/פתרון/`ANTIPATTERN:<regex>`/`RULE:`. אנטי-דפוסים מרכזיים: emoji-grep-ב-hook→bash-builtin · baseline-phantom (known-failing בלי-שמות) · retry-fingerprint+`head=$SHA` · `echo|grep`-non-determinism · `grep -c||echo 0` · `git diff file`-exit-0 · CRLF-Windows · letter-size-ambiguity · switch-fall-through · `kLipskeyCatalog`-ריק-ל-Huliot/PPR. כל `ANTIPATTERN` → `stuck_regression_test.dart` (auto-gen).
 - **`SIZE_FILTER_PROTOCOL.md` (545ש׳):** P1–P17 — מיון-נומרי · family-aware · התאמה-מבנית (לא substring) · זוויות=ציר-נפרד · cross-dim=union · pretty-inch-fold · dedup-by-mm · bidi-LTR-isolate. `_size_norm.dart` (`SizeFamily`/`SizeToken`).
 - **`CATALOG-CARD-PROTOCOL.md` (1,143ש׳):** כרטיס-מוצר 9 פאנלים (gate 64) · **2 מערכות-chip** (Lipskey-חיצוני vs smart-tree — אסור-לערבב) · brand-wiring-recipe · golden-test-traps · workflow-חילוץ-PDF.
 - **`CATALOG_PROTOCOL.md` (root, 243ש׳):** 5 חוקי-ברזל (נקי≠נכון · אין-המצאה · SKU-קדוש · הכל→regression · אותו-פרוטוקול-בקנה-מידה) · היררכיית-4-קבצים · 2 שכבות-QA (syntactic+semantic) · `catalog_qa.py`.
@@ -60,4 +60,4 @@
 - **`mutation_log.md` (317ש׳):** 48 פונקציות נבדקו-במוטציה. **`POLISH_LOG.md`:** לוג-סשן (before/after). **`PROPOSAL_version_friction.md` (403ש׳):** תיקון-ה-gen_version (P0/P1/P2) → D-014/D-015.
 
 ---
-**שורה תחתונה:** עולם-הפרוטוקולים = **6 סוכנים** + **PLAYBOOK** (NO-STOPPING + push-מילולי) + **סולם L0–L7** + **~10 פרוטוקולים-ייעודיים** + **15 ADRs** + **74 לקחי-CARRY_FORWARD** + **48 אנטי-דפוסים** — כולם נאכפים דרך 116 השערים (דוח 21). **הלולאה:** בעיה → stuck_log (ANTIPATTERN+RULE) → regression-אוטומטי → הסוכן-הבא נחסם → אין-חזרה.
+**שורה תחתונה:** עולם-הפרוטוקולים = **6 סוכנים** (אומת ✓) + **PLAYBOOK** (NO-STOPPING + push-מילולי) + **סולם L0–L7** + **~10 פרוטוקולים-ייעודיים** + **15 ADRs** (D-001..D-015 ב-`DECISIONS.md` ✓) + **~74 לקחי-CARRY_FORWARD** + **52 אנטי-דפוסי-regex (65 רשומות)** — כולם נאכפים דרך מספור-שערים-עד-116 (דוח 21). **הלולאה:** בעיה → stuck_log (ANTIPATTERN+RULE) → regression-אוטומטי → הסוכן-הבא נחסם → אין-חזרה.
