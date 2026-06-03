@@ -30,3 +30,13 @@ boot: האפליקציה standalone; מאותחלת ע"י splash-default (`scree
 ## 📱 Flutter — דלתא
 ➖ אבטחה/RBAC (I) + שירות/chatbot (J) — לא הומרו (קבוצות "אבטחה"/"שירות" קיימות ב-`settings_tree` כ-rows בלבד).
 **boot ב-Flutter:** `main.dart` → `runApp(ProviderScope(BuildSmartApp))` → `MaterialApp` (light/dark · RTL · he/ar/en) → `HomeShell`. אין splash/onboarding.
+
+---
+
+## 🌐 PWA · offline · deploy (תשתית-שורש)
+> שכבת-המסירה — חלה על ה-web builds.
+- **`manifest.json`** (root) — PWA לאב-הטיפוס: name "BuildSmart — רכש חומרי בנייה" · `start_url:./index.html` · `display:standalone` · `orientation:portrait` · `theme_color:#1f6f6b` (teal) · אייקוני-BS (SVG data-URI 192/512, `maskable`).
+- **`service-worker.js`** (root · `CACHE_NAME:'buildsmart-v107'`) — **offline** (אתרי-בנייה בלי קליטה): pre-cache של app-shell (`index.html`+`manifest.json`) ב-install · **network-first → cache-fallback → `index.html`** ב-fetch · ניקוי-caches ישנים ב-activate.
+- **`vercel.json`** — deploy של **Preact**: `installCommand/buildCommand: cd app` → `outputDirectory: app/dist` + SPA-rewrites (הכל→`index.html` חוץ מ-assets). (CLAUDE.md: Preact חי גם ב-GitHub Pages.)
+- **Flutter web**: `app_flutter/web/index.html` (shell נפרד; `flutter build web`).
+- **`CLAUDE.md`** (root) — הוראות-פרויקט (ענפי-עבודה · R1–R9 · Flutter dev-loop) — מטא-פיתוח, לא ידע-מוצר.
