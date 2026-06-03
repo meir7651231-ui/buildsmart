@@ -158,21 +158,59 @@ scope-by-directory **מסוכן** ובדיוק יפספס את הבאג של ב�
 
 ---
 
-## 🏁 הכרעה סופית — קונצנזוס 4 הסוכנים
+## ✅ ביקורת הסדרן (תיאום/orchestration) — 2026-06-03
+
+**הפער שכל 4 הסוכנים-הבודדים פספסו: אין למסמך תוכנית-rollout מתואמת.** ההצעה נכונה טכנית; הכשל יהיה ב-*תזמון*.
+
+**ש1 — hot-file warning:** `git log origin --since=2h` **לא מספיק** — 3 חולשות: (א) זמן הוא proxy גרוע לבעלות (סוכן שלקח לפני 3ש' ועדיין עורך → לא יופיע); (ב) `origin` עיוור לעבודה לא-דחופה (ahead 5/10/11 מקומי → warning ירוק כוזב לפני התנגשות); (ג) advisory בלבד → אף אחד לא יעצור.
+→ **הכרעה:** warning advisory מבוסס **claim מפורש ב-AGENT_COORDINATION** (`קובץ·סוכן·TTL`), לא git-log-time. ה-hook **קורא** את ה-claims (זול, מקומי) ומדפיס — קריאה אכיפה, claim advisory-by-convention. פותר את 3 החולשות.
+
+**ש2 — סדר-מימוש (הפער הקריטי):** התיקון נוגע ב-hook (פרוטוקוליסט, בלעדי) + `home_shell` (ה-hot-file הכי חם). מימוש מקבילי = rebase-conflict על ה-patch עצמו.
+→ **הכרעה:** **freeze-window 30-45 דק' על `home_shell.dart` בלבד** (לא הענף — `lib/data`/widgets/assets ממשיכים). סדר אטומי: פרוטוקוליסט(hook+version.g+gitignore+שערים 11/12/59 — יחידה אחת) → push → **סוכן-UI יחיד** (סדרן/ליטוש, לא פרוטוקוליסט) נוגע ב-home_shell (3 שורות) על ראש-origin טרי → push → כולם rebase פעם אחת. הסדרן מתאם start/end.
+
+**ש3 — push-queue:** גישה C **מפשטת** את #66 (שורת-build נעלמת מה-rebase). אבל fast-gate מוסיף מלכודת: שני סוכנים צוברים commits ירוקים-ב-fast ששוברים journey יחד → מתגלה אצל השלישי.
+→ **הכרעה:** push-queue נשאר rebase-each (#66). הוסף: **full-gate = תנאי-יציאה-מהתור** (רץ אחרי ה-rebase האחרון, לפני push), לא בזמן commit מקומי.
+
+**ש4 — הפספוס המסוכן ביותר: hook-skew.** הפרוטוקוליסט דוחף hook חדש (גישה C) — כל סוכן שלא עשה `cp .githooks/pre-commit .git/hooks/` ירוץ עם ה-hook הישן → יבמפ `kBuild` ידנית, או יכתוב `version.g.dart` שלא ב-gitignore שלו → **ידחוף קובץ-build tracked וישבור גישה-C לכולם** (בדיוק לקח #65 — סחיפת-קובץ). גם ה-`.gitignore` עצמו צריך להגיע לכולם לפני שמישהו מייצר את הקובץ.
+→ **הכרעה:** **barrier-סנכרון-hook** — אחרי push של הפרוטוקוליסט, כל סוכן **חייב** `cp .githooks/pre-commit .git/hooks/ && git fetch && git rebase` **לפני ה-commit הבא**. הסדרן נועל את החלון עד שכל 4 מאשרים sync.
+
+---
+
+## ✅ ביקורת ליטוש (UI feel + היגיינת-ידע) — 2026-06-03
+
+**ש1 — feel של התווית:** ה-changelog הוא **anti-feel** עוד לפני test-trap — "developer-noise בתוך chrome של מוצר", שובר את אשליית-המוצר-המוגמר. מחיקה = שיפור-feel. **הנקודה-הירוקה מבטיחה יותר ממה שמספקת:** ירוק=operational/online, אבל צמודה ל-`v5.91` סטטי = משקרת (אין health-check). `build.shortSHA` הוא debug-affordance, **לא** chrome ראשי.
+→ **הכרעה:** כותרת מציגה `v5.91` **בלבד** (secondary/אפור, לא ירוק); נקודה-ירוקה נשמרת רק ל-`_PulsingStatus` החי (לא vocab כפול של ירוק); build+SHA → "אודות"/long-press/debug בלבד.
+
+**ש2 — היגיינת-ידע (יתום-#59 חי כרגע!):** `PROPOSAL_version_friction.md` **לא ב-README index** — יתום מרגע יצירתו, בדיוק תסמין #59/#62.
+→ **הכרעה:** (א) שורה ב-README **כעת**; (ב) **כלל-lifecycle ל-proposals** (אין כזה class): נולד עם README-line + שדה-סטטוס (draft→accepted→implemented→archived); ביום-implemented — ההכרעות עוברות ל-`DECISIONS.md`/`adr/` + לקח ב-CARRY_FORWARD, והמסמך → stub עם פניה (מונע כשל #58 — שני מקורות-אמת). מאחד #59+#58+#61.
+
+**ש3 — fast-gate שוחק visual-verify:** אף אחד מ-4 לא נגע ב-visual-verify (לקח #2/#6 — של ליטוש). "מהירות כערך-על" → המסר הסמוי "ירוק=אפשר לקמט" שוחק את ה-discipline היחיד שלא-ניתן-לאוטומציה. מסוכן כפליים כאן כי התיקון **נוגע ב-UI**.
+→ **הכרעה:** fast-gate צריך **gate שלישי לא-test ולא-analyze** — visual-verify reminder **חוסם-רך** על commit שנוגע ב-`lib/screens|widgets/**`: "שינית UI. צירפת screenshot? (לקח #2)". התזכורת אוטומטית גם אם ה-verify ידני.
+
+**ש4 — הפספוס: התווית מותנית.** היא ה-`else` של `if (tabIndex==0 && catalogSection=='עץ חכם')` (שורות 388-390) — כש"עץ חכם" פעיל התווית **לא ב-tree** (מוחלפת ב-`_PulsingStatus`). משמעות: שערים 11/12/59 חייבים לבדוק תוצאה **state-aware**; journey שעובר "עץ חכם" לא יראה את `kVersionLabel` → flaky.
+→ **הכרעה:** ה-`Key` היציב חייב לעטוף את **כל ה-`else`-Row**, לא רק את ה-release-note; שערים בודקים תוצאה state-aware (לא "תמיד ב-tree").
+
+---
+
+## 🏁 הכרעה סופית — קונצנזוס 6 הסוכנים
 
 | # | נושא | הכרעה מוסכמת | מקור |
 |---|------|--------------|------|
 | 1 | build mechanism | **גישה C** — נגזר מ-git, נכתב ל-`version.g.dart` ב-.gitignore; ה-hook **idempotent** (re-generate, לא mutate); build = **`count.shortSHA`** | בנצי+מקבץ |
-| 2 | changelog note | **למחוק מ-UI** — markdown בלבד; אם ב-UI → מאחורי `Key('release_note')` ש-journey מסנן | בנצי |
+| 2 | changelog note | **למחוק מ-UI** — markdown בלבד; אם ב-UI → מאחורי `Key` ש-journey מסנן | בנצי+ליטוש |
 | 3 | היקף גישה C | **רק `version.g.dart`** — "generated≠gitignored כברירת-מחדל"; asset-manifests נשארים tracked | קטלגן |
 | 4 | build ↔ assets | build לא-דטרמיניסטי → **אסור** ב-asset-URL/cache-key (הערה בקובץ) | קטלגן |
-| 5 | fast-gate scope | analyze + **journey תמיד** + unit לתיקיות-שהשתנו; **shell/state → full journey**; **scripts/assets-only → analyze+113 בלבד** | בנצי+קטלגן |
-| 6 | fast-gate בסיס | **לבנות על `preflight.sh`** (לקח #68): preflight 30s → fast-gate ~2min → full ב-push | מקבץ |
+| 5 | fast-gate scope | analyze + **journey תמיד** + unit לתיקיות-שהשתנו; **shell/state → full**; **scripts/assets-only → analyze+113 בלבד** | בנצי+קטלגן |
+| 6 | fast-gate בסיס | **לבנות על `preflight.sh`** (#68): preflight 30s → fast ~2min → full ב-push | מקבץ |
 | 7 | שער 113 | רץ ב-fast-gate **תמיד**; שקול err על batch >20 assets | קטלגן |
-| 8 | שערים 11+12+59 | תקן **שלושתם יחד**; 59 בודק **תוצאה** לא diff; **הכרע פורמט `kVersionLabel` לפני** (regex+STATUS+קובץ זהים) | בנצי+מקבץ |
-| 9 | hot-files | **advisory warning ב-hook** (`git log origin --since=2h -- home_shell`) — לא lock; עתידי: פיצול shell | מקבץ |
-| 10 | binary conflicts | **sub-protocol נפרד (קטלגן)** — לא מטופל כאן; אל תיצור אשליית-פתרון | קטלגן |
+| 8 | שערים 11+12+59 | תקן **שלושתם יחד**; 59 בודק **תוצאה** state-aware לא diff; **הכרע פורמט `kVersionLabel` לפני** | בנצי+מקבץ+ליטוש |
+| 9 | hot-files | **claim-based ב-AGENT_COORDINATION** (`קובץ·סוכן·TTL`), ה-hook קורא ומדפיס — לא git-log-time, לא lock | מקבץ+הסדרן |
+| 10 | binary conflicts | **sub-protocol נפרד (קטלגן)** — לא מטופל כאן | קטלגן |
+| 11 | **rollout plan** | **freeze-window 30-45דק' על home_shell בלבד**; סדר אטומי: פרוטוקוליסט(hook יחידה)→push→סוכן-UI-יחיד(3 שורות)→push→כולם rebase; **hook-skew barrier** (כולם `cp`+fetch לפני commit הבא) | הסדרן |
+| 12 | **UI feel** | כותרת = `v5.91` בלבד (אפור-secondary); ירוק רק ל-`_PulsingStatus`; build/SHA → "אודות" | ליטוש |
+| 13 | **knowledge hygiene** | README-line **כעת** (יתום-#59 חי); **כלל-lifecycle ל-proposals** (draft→implemented→ההכרעות ל-DECISIONS/ADR+המסמך stub) | ליטוש |
+| 14 | **visual-verify** | fast-gate gate-שלישי: reminder חוסם-רך על commit `lib/screens\|widgets/**` (לקח #2) | ליטוש |
 
-**4/4 הסוכנים מסכימים:** גישה C (לא A), מחיקת note מ-UI, journey-always ל-shell, ותיקון שערים 11/12/59 כיחידה אחת. שתי הרחבות מעבר ל-scope המקורי: (ט) advisory hot-files, (י) asset sub-protocol — שתיהן נפרדות מהתיקון הזה.
+**6/6 מסכימים על הליבה:** גישה C, מחיקת note, journey-always ל-shell, תיקון 11/12/59 כיחידה. **3 הרחבות קריטיות שהתגלו בביקורת:** (11) rollout מתואם + hook-skew barrier [הסדרן] — בלעדיו חוזרים לכאוס-26-commits; (13) יתום-#59 חי + lifecycle ל-proposals [ליטוש]; (14) visual-verify ב-fast-gate [ליטוש].
 
-**צעד הבא:** ממתין לאישור משתמש לתחילת מימוש (נוגע ב-UI + hook → מחוץ ל-scope פרוטוקוליסט-טהור, דורש GO). סדר-מימוש מומלץ: שערים 11/12/59 כיחידה → `version.g.dart` + idempotent hook → מחיקת note → fast-gate על preflight.
+**צעד הבא:** ממתין ל-GO משתמש (נוגע UI+hook → מחוץ ל-scope פרוטוקוליסט-טהור). **רצף-מימוש מתואם (לפי הסדרן):** הסדרן פותח freeze-window → פרוטוקוליסט דוחף יחידת-hook (version.g.dart + .gitignore + שערים 11/12/59 state-aware) → כל הסוכנים hook-skew-barrier sync → סוכן-UI-יחיד נוגע ב-home_shell (3 שורות, feel לפי ליטוש) → push → README-line + DECISIONS עדכון.
