@@ -1,6 +1,20 @@
 # תיאום סוכנים — BuildSmart
 
-> עדכון אחרון: 2026-06-01 · גרסה v5.61 · ענף `claude/whats-happening-LyY9G`
+> עדכון אחרון: 2026-06-03 · גרסה v5.92 · ענף `claude/whats-happening-LyY9G`
+
+---
+
+## 🔒 hot-file claims (שער 115 — P2 לקח #72)
+
+לפני עריכת קובץ-חם משותף (`home_shell.dart`, providers משותפים, router) — הוסף claim
+כאן. ה-pre-commit מזהיר (advisory, לא חוסם) כל סוכן-אחר שנוגע בקובץ תפוס. נקה את
+ה-claim כשסיימת. format: `- <path> · <agent> · <ISO-time> · <TTLhours>`.
+
+<!-- HOTFILE-CLAIMS-START -->
+<!-- אין claims פעילים. דוגמה (השאר בהערה כשאין claim פעיל):
+- lib/screens/home_shell.dart · benzi · 2026-06-03T14:00 · 2h
+-->
+<!-- HOTFILE-CLAIMS-END -->
 
 ---
 

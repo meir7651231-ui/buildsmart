@@ -836,7 +836,9 @@ fi
 # רקע: ב-2026-06-02 crop_huliot.py שונה ו"100% done" הוצהר על-סמך unit-tests
 # בלבד; visual verify הראה ש-80% מהcrops פגומים. שער זה אוכף את הלקח
 # (CARRY_FORWARD #6).
-STAGED_CROP=$(git diff --cached --name-only | grep -E "scripts/crop_.*\.py$|scripts/.*render.*\.py$" | head -1)
+# הרחבה (P2 לקח #72, קטלגן סבב-2): גם assets שמשתנים *ישירות* (החלפת PNG ידנית /
+# manifest / script בשם אחר gen_/slice_/montage_) דורשים contact-sheet — לא רק crop_*.
+STAGED_CROP=$(git diff --cached --name-only | grep -E "scripts/(crop|render|gen|slice|montage)_.*\.py$|scripts/.*render.*\.py$|assets/.*\.(png|jpg|jpeg|webp)$" | head -1)
 if [[ -n "$STAGED_CROP" ]]; then
     STAGED_CARRY=$(git diff --cached --name-only | grep -E "knowledge/(CARRY_FORWARD|stuck_log)\.md$" | head -1)
     if [[ -z "$STAGED_CARRY" ]]; then
@@ -855,6 +857,44 @@ LIPSKEY_MISUSE=$(git diff --cached lib/screens/ lib/state/ lib/logic/ 2>/dev/nul
 [[ -z "$LIPSKEY_MISUSE" ]] || err "114" \
     "kLipskeyCatalog ב-screens/state/logic: $LIPSKEY_MISUSE" \
     "השתמש ב-kCatalogProducts (מאוחד) — kLipskeyCatalog = Lipskey בלבד"
+
+# שער 115 (P2 לקח #72, הסדרן+מקבץ): hot-file claims — advisory warn.
+# אם קובץ ב-staging שלך תפוס ע"י סוכן-אחר ב-AGENT_COORDINATION → אזהרה (לא חוסם).
+# claim מבוסס-מפורש (לא git-log-time, שהוא proxy גרוע לבעלות). format:
+#   <!-- HOTFILE-CLAIMS-START --> ... - path · agent · ISO · TTLh ... <!-- ...END -->
+# parsing ב-bash builtin בלבד (case/glob) — לקח #52 (grep/awk על תוכן = לא-אמין ב-MSYS).
+CLAIMS_FILE="knowledge/AGENT_COORDINATION.md"
+if [[ -f "$CLAIMS_FILE" ]]; then
+    STAGED_NAMES=$(git diff --cached --name-only)
+    _in_claims=""
+    while IFS= read -r _line || [[ -n "$_line" ]]; do
+        case "$_line" in
+            *HOTFILE-CLAIMS-START*) _in_claims=1; continue;;
+            *HOTFILE-CLAIMS-END*)   _in_claims="";  continue;;
+        esac
+        [[ -n "$_in_claims" ]] || continue
+        case "$_line" in
+            "- "*)
+                _cpath=${_line#- }; _cpath=${_cpath%%·*}; _cpath=${_cpath%% *}
+                [[ -z "$_cpath" ]] && continue
+                case "$STAGED_NAMES" in
+                    *"$_cpath"*) warn "115" "hot-file claim על ${_cpath} — ${_line#- } — תאם/rebase לפני המשך";;
+                esac
+                ;;
+        esac
+    done < "$CLAIMS_FILE"
+fi
+
+# שער 116 (P2 לקח #72, ליטוש): שינוי UI דורש visual-verify מתועד (לא warn-נייר).
+# tests-green ≠ user-happy (לקח #2). enforce: visual_log.md staged (artifact עמיד,
+# עדיף על trailer ארעי), או VERIFIED_UI=1 לחירום. דלג ב-replay (כבר אומת).
+STAGED_UI2=$(echo "${STAGED_NAMES:-$(git diff --cached --name-only)}" | grep -E "^app_flutter/lib/(screens|widgets)/.*\.dart$" | head -1)
+if [[ -n "$STAGED_UI2" && -z "${VERIFIED_UI:-}" && -z "$IS_REPLAY" ]]; then
+    STAGED_VLOG=$(git diff --cached --name-only | grep -E "knowledge/visual_log\.md$" | head -1)
+    [[ -n "$STAGED_VLOG" ]] || err "116" \
+        "שינוי UI ($STAGED_UI2) בלי visual-verify מתועד" \
+        "עדכן knowledge/visual_log.md (screenshot/בדיקה בעין) או VERIFIED_UI=1 לחירום"
+fi
 
 # שער 100: סיכום
 echo ""

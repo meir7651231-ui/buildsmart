@@ -8,7 +8,7 @@
 
 ---
 
-## הבא הפנוי: **115**
+## הבא הפנוי: **117**
 
 _(עדכן שורה זו בכל פעם שמוסיפים שער)_
 
@@ -108,8 +108,10 @@ _(עדכן שורה זו בכל פעם שמוסיפים שער)_
 | 110 | audit log על קטגוריה שנסקרה | v1 |
 | 111 | ANTIPATTERN count = tests count | v1 |
 | 112 | stubs מאוחדים ≤20 שורות | v1 |
-| 113 | asset-generation → contact-sheet | קטלגן 2026-06-02 |
+| 113 | asset-generation → contact-sheet (+assets/** ידני — לקח #72) | קטלגן 2026-06-02 |
 | 114 | kLipskeyCatalog אסור ב-screens/state/logic | פרוטוקוליסט 2026-06-03 |
+| 115 | hot-file claims — advisory warn (P2 לקח #72) | פרוטוקוליסט 2026-06-03 |
+| 116 | שינוי UI דורש visual_log staged (enforce, P2 לקח #72) | פרוטוקוליסט 2026-06-03 |
 
 ---
 
