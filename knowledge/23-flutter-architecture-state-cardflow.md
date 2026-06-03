@@ -32,6 +32,7 @@ Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dar
 catalog-bridge · compat/connection (12: compatibleProductsFor/connectionJoint/jointLabelHe/connectionExplainHe/connectionNeedsHe/connectionWarningHe/lineFitFor/adapterSuggestionFor/chainArrowText...) · spec/scoring (~10: engineeringSpecFor/cardReadinessScore/durabilityRatingFor/discoveryTagsFor/israeliStandardsFor/hotWaterSuitabilityFor...) · install/kit (5: installToolsFor/installTipsFor/installEffortFor/installKitFor/acceptanceChecklistFor) · price/share (6) · compliance (2) · variants/brand. **gate 42 + `regression_gate_test`: כל helper-ציבורי חייב ≥1 test** (47-helper-gate).
 
 ## F. 5 מנועי-הלוגיקה (`lib/logic/`)
+> ✅ **`install_engine.dart` (1,391ש׳) אומת בקריאה-עצמית מלאה (לא דרך סוכן)** — כל הטענות למטה מדויקות מול הקוד.
 - **`install_engine.dart` (1,391ש׳):** Dijkstra least-cost pathfinding (cost=parts+material-transition+bore) · auto-compliance (PRV/expansion-vessel/TMTV/dielectric/ball-valve/clips/sealant; recirc-loop +shutoffs/check/balance) · `buildInstallation`/`buildTreeInstallation` (manifold) · `materializeChain`.
 - **`pressure_drop.dart` (501ש׳):** Darcy-Weisbach ΔP=(K+fL/D)½ρv²+ρgh · autofix (bottleneck-swap/booster-pump HW-PUMP-40 אם ΔP>1bar או rise≥10m) · drainage-slope ≥2% (ת"י 1205).
 - **`install_kit.dart`** (tool+sealant per-joint, brand-override פולירול-260°C-welder) · **`price_estimate.dart`** (category-ILS, fallback 25₪, lowConfidence>50%-unmatched) · **`system_division.dart`** (supply/drainage taxonomy, PPR→supply, fixtures→both).
