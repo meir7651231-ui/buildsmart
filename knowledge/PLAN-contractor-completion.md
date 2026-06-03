@@ -9,6 +9,29 @@
 - **R2** (אין view חדש) · **R6/R8** (מחרוזות verbatim) · **R9** (`prompt`→inline) · server/print/camera/OCR→toast-stub.
 - **קדימות:** פיצ'ר שיש לו כפתור (גל 1) לפני פיצ'ר בלי כפתור (גל 2).
 
+## ⭐ מפת-העל — תוכן → משטח-קיים, לפי נגישות (סקר 2026-06-03, אומת בקוד)
+> תיקון-קריטי: **תפריט-ה-dial וחיפוש-ה-dial לא-נגישים** (`OpenDial.menu`/`.search` לא מוצבים בשום מקום — `home_shell` רק *מציג* אותם). רק BS-dial נגיש (דרך לוגו-BS → `role_picker:129`). לכן "כפתורים קיימים" = 2 סוגים:
+
+### 🟢 TIER 1 — נגישים-עכשיו-וריקים (התוכן הכי קל; אפס טריגר)
+| משטח (נתיב) | מצב | תוכן (מקור) |
+|---|---|---|
+| קטלוג ⋮ → סרוק תוכנית (`_ScanPlanSheet`) | sheet קיים, 4 toast (`home_shell:891`) | PLAN_TYPES §9 (zones/חנויות/cart) |
+| קטלוג ⋮ → חלופות זולות | toast (`:627`) | **`cheaperAlternativeBrand` helper קיים** |
+| קטלוג ⋮ → השוואת מחירים | toast (`:629`) | store-compare §9 / מכרז |
+| חנות → services | items בלי-flow | RFQ/RMA/MSDS/rental/deposits §3 |
+| חנות → orders | items | ORDER_STATUS + doc-OCR §9d |
+| התראות → budget/safety | sections | thresholds §3 / SAFETY_TIPS §5 |
+| שיחות (auto-reply) | בסיסי | BOT_KB §J |
+| מחלקות "בקרוב" (5) | toast 'בקרוב' | קטגוריות §1 |
+
+### 🟡 TIER 2 — בנויים-אבל-מוסתרים (W1.−1: טריגר `OpenDial.menu` → 41 עלים)
+finance-hub(10 §4) · site-hub(10 §5) · stock(2 §8) · scan(4 §9) · AI(9) · projects(3 §2). + search-dial trigger.
+
+### 🔵 TIER 3 — BS-personas (נגיש; dial-content R2-safe)
+manager/store/courier/worker תת-עצים → proto persona-dashboards כעלים.
+
+---
+
 ## מצאי-הכפתורים הקיימים (מ-`data/menu_trees.dart`, אומת)
 | dial-tree | כפתורים | סטטוס היום |
 |---|---|---|
