@@ -43,7 +43,7 @@ String _addedFiles(List<(String, String)> files) => files
 /// Run all built-in unit tests. Returns process exit code (0 ok, 2 failures).
 int runSelfTest() {
   _selfTestFailures = 0;
-  stdout.writeln('protocol_check v6 self-test');
+  stdout.writeln('protocol_check v7 self-test');
 
   // ════════════════════════════════════════════════════════════════════
   //  R4 REGRESSIONS — semantic, not literal/substring (the headline closes)
@@ -1120,9 +1120,63 @@ ANTIPATTERN-EXAMPLE: ignored
     return fired == false;
   }());
 
+  // ════════════════════════════════════════════════════════════════════
+  //  v7 (DX) REGRESSIONS — friction fixes that must NOT weaken detection.
+  // ════════════════════════════════════════════════════════════════════
+  // Stable high-entropy fixtures (deterministic bodies). The PNG/JPEG blobs begin
+  // with a REAL image magic (base64 of \x89PNG.. / \xff\xd8\xff..); the secret is
+  // random base64 with NO magic. All three have Shannon entropy > 4.2.
+  const _pngBlob =
+      'iVBORw0KGgo5DIx9ckc0LNgQDy9vdw1l1nDljgNR2K6OT26sNC/CMbewhxbrP8EolrliIxd0lCh3M8KO6LpTvbVriCRXfVPs';
+  const _jpgBlob =
+      '/9j/4DkMjH1yRzQs2BAPL293DWXWcOWOA1HYro5Pbqw0L8Ixt7CHFus/wSiWuWIjF3SUKHczwo7oulO9tWuIJFd9U+w=';
+  // pure-alphanumeric high-entropy token (no '/' or '+' so the path/id exemption
+  // is not involved) — an unambiguous credential the engine catches by entropy.
+  const _randomSecret = 'U8JZpDE0iGXlD6gNCFbaEPFjbD0kH8Oool8DklZDOCj2ISaJ';
+
+  // DX7a: an inline IMAGE base64 blob (decoded magic) is NOT an ERR secret — it
+  // is an actionable WARN ("prefer assets/"). _isInlineImageBlob is content-based.
+  _check('DX7a _isInlineImageBlob true for a PNG-magic base64 blob',
+      _isInlineImageBlob(_pngBlob));
+  _check('DX7a _isInlineImageBlob true for a JPEG-magic base64 blob',
+      _isInlineImageBlob(_jpgBlob));
+  _check('DX7a _isInlineImageBlob FALSE for a random high-entropy secret',
+      _isInlineImageBlob(_randomSecret) == false);
+  _check('DX7a a PNG-magic blob is a WARN (not ERR) in gate 52', () {
+    final f = gateNoSecrets(_added('const img = "$_pngBlob";'));
+    return f.length == 1 && f.first.sev == Sev.warn;
+  }());
+  // DX7a SECURITY: a real secret is STILL an ERR (no detection loss) …
+  _check('DX7a a random secret is STILL an ERR secret in gate 52', () {
+    final f = gateNoSecrets(_added('const k = "$_randomSecret";'));
+    return f.length == 1 && f.first.sev == Sev.err;
+  }());
+  // … and the image-magic exemption CANNOT launder a secret by NAME: naming the
+  // random secret `imageData` must still be an ERR (the check is on bytes, not name).
+  _check('DX7a a secret named imageData is NOT laundered (still ERR)', () {
+    final f = gateNoSecrets(_added('const imageData = "$_randomSecret";'));
+    return f.length == 1 && f.first.sev == Sev.err;
+  }());
+  // … and a provider fingerprint inside an "image"-named field still fires (the
+  // exemption never touches fingerprints).
+  _check('DX7a a fingerprinted secret in an image-named field still ERR', () {
+    final f = gateNoSecrets(_added('const imageData = "AKIAIOSFODNN7EXAMPLE";'));
+    return f.isNotEmpty && f.first.sev == Sev.err;
+  }());
+
+  // DX7b: the dark-surface messages are now actionable (mention lib/theme/).
+  _check('DX7b gate46 message names lib/theme/ (actionable)', () {
+    final f = gateNoDarkSurface(_added('backgroundColor: const Color(0xFF111111),'));
+    return f.isNotEmpty && f.first.message.contains('lib/theme/');
+  }());
+  _check('DX7b gate54 message names lib/theme/ (actionable)', () {
+    final f = gateNoDarkColoredBox(_added('ColoredBox(color: Color(0xFF111111))'));
+    return f.isNotEmpty && f.first.message.contains('lib/theme/');
+  }());
+
   stdout.writeln(
     _selfTestFailures == 0
-        ? 'ALL PASS (v6 self-test)'
+        ? 'ALL PASS (v7 self-test)'
         : '$_selfTestFailures FAILURE(S)',
   );
   return _selfTestFailures == 0 ? 0 : 2;

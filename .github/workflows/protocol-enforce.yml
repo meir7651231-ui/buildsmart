@@ -31,17 +31,16 @@ on:
       - 'claude/whats-happening-LyY9G'
       - main
 
-# K7 — TWO Flutter versions exist by DESIGN and the split is documented:
-#   * SHIP / CI version = 3.44.0 (what deploy.yml + android-package.yml build,
-#     i.e. what users actually get). CI enforces against THIS so "passes CI" ==
-#     "ships".
-#   * Local pre-commit/pre-push hooks float on whatever the dev has installed
-#     (here 3.29.3). The hook prints a NOTICE when its local Flutter != the
-#     ENFORCEMENT_FLUTTER below so the divergence is visible (see pre-commit).
-# The parity gate asserts ALL workflows pin the same SHIP version.
+# K7 / DX6 (v7) — ONE real Flutter version, reconciled local==CI==ship.
+#   The previous 3.44.0 pin was a LATENT CI WALL: no such stable Flutter release
+#   exists/installs, so CI could never go green. The single installable SDK here
+#   is 3.29.3 (Dart 3.7.2) — the same version local dev runs. We pin ALL workflows
+#   AND the version-parity gate to 3.29.3 so "passes CI" == "ships" == "passes
+#   locally" with no silent divergence. (No security loss: the version-parity gate
+#   still BLOCKS any workflow that drifts off the single pinned version.)
 env:
-  FLUTTER_VERSION: '3.44.0'
-  ENFORCEMENT_FLUTTER: '3.44.0'
+  FLUTTER_VERSION: '3.29.3'
+  ENFORCEMENT_FLUTTER: '3.29.3'
   TRUSTED_REF: 'origin/main'   # K2 — engine/runner/registry come from HERE
   GIT_REPLACE_REF_BASE: ''     # belt-and-suspenders: ignore replace refs globally
 

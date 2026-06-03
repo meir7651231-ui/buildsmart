@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
-        with: { flutter-version: "3.44.0" }   # R8: pinned in lock-step (ship version)
+        with: { flutter-version: "3.29.3" }   # R8/DX6: pinned in lock-step (REAL installable SDK)
       - name: flutter analyze — חוסם רק על errors (צעד 53)
         working-directory: app_flutter
         run: |

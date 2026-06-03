@@ -30,7 +30,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.44.0'
+          flutter-version: '3.29.3'   # DX6 (v7): the REAL installable SDK (local==CI==ship)
           cache: true
 
       - name: Setup Java 17

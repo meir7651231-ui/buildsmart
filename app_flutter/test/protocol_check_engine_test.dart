@@ -759,4 +759,44 @@ void main() {
       expect(emitRanIds().toSet(), kDartEngineGateIds.toSet());
     });
   });
+
+  // ── v7 DX7 — friction fixes that must NOT weaken detection ──
+  group('DX7 — image-blob FP + actionable dark-surface message', () {
+    // PNG/JPEG-magic blobs (real magic + high-entropy body); pure-alnum secret.
+    const pngBlob =
+        'iVBORw0KGgo5DIx9ckc0LNgQDy9vdw1l1nDljgNR2K6OT26sNC/CMbewhxbrP8EolrliIxd0lCh3M8KO6LpTvbVriCRXfVPs';
+    const randomSecret = 'U8JZpDE0iGXlD6gNCFbaEPFjbD0kH8Oool8DklZDOCj2ISaJ';
+
+    test('DX7a a PNG-magic base64 blob is a WARN (prefer assets), not ERR', () {
+      final f = gateNoSecrets(added('const img = "$pngBlob";'));
+      expect(f.length, 1);
+      expect(f.first.sev, Sev.warn);
+    });
+    test('DX7a a random high-entropy secret is STILL an ERR (no loss)', () {
+      final f = gateNoSecrets(added('const k = "$randomSecret";'));
+      expect(f.length, 1);
+      expect(f.first.sev, Sev.err);
+    });
+    test('DX7a naming a secret "imageData" does NOT launder it (still ERR)', () {
+      final f = gateNoSecrets(added('const imageData = "$randomSecret";'));
+      expect(f.isNotEmpty, isTrue);
+      expect(f.first.sev, Sev.err);
+    });
+    test('DX7a a provider-fingerprint secret in an image field still fires', () {
+      final f = gateNoSecrets(added('const imageData = "AKIAIOSFODNN7EXAMPLE";'));
+      expect(f.isNotEmpty, isTrue);
+      expect(f.first.sev, Sev.err);
+    });
+    test('DX7b dark-surface (gate 46) message names lib/theme/', () {
+      final f =
+          gateNoDarkSurface(added('backgroundColor: const Color(0xFF111111),'));
+      expect(f.isNotEmpty, isTrue);
+      expect(f.first.message, contains('lib/theme/'));
+    });
+    test('DX7b dark ColoredBox (gate 54) message names lib/theme/', () {
+      final f = gateNoDarkColoredBox(added('ColoredBox(color: Color(0xFF111111))'));
+      expect(f.isNotEmpty, isTrue);
+      expect(f.first.message, contains('lib/theme/'));
+    });
+  });
 }

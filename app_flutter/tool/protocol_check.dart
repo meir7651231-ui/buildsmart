@@ -600,6 +600,44 @@ final RegExp _integrityContext = RegExp(
 bool _isSriDigest(String v) =>
     RegExp(r'^sha(?:256|384|512)-[A-Za-z0-9+/]+={0,2}$').hasMatch(v);
 
+/// DX7a (v7) — true when a base64 blob's DECODED prefix is a known IMAGE/asset
+/// magic number. This is CONTENT-based, not name-based: a real PNG/JPEG/GIF/WEBP/
+/// BMP/ICO/SVG begins with these bytes, whose base64 encoding is the fixed prefix
+/// below. A random/credential blob will (with overwhelming probability) NOT begin
+/// with a valid image magic, so this exemption canNOT be used to launder a secret
+/// — an attacker cannot make a high-entropy secret also be a decodable image
+/// header. We therefore exempt the ENTROPY heuristic (the FP class: inline image
+/// data with no `data:` prefix) WITHOUT weakening secret detection; provider
+/// fingerprints (AKIA…, ghp_…, etc.) are unaffected and still fire. Callers turn
+/// this into an actionable WARN ("prefer assets/"), not a silent drop.
+bool _isInlineImageBlob(String v) {
+  // strip an optional `data:image/...;base64,` prefix (already covered elsewhere,
+  // but be robust) — we test the raw base64 payload's leading magic.
+  final b64 = v.contains(',') ? v.substring(v.indexOf(',') + 1) : v;
+  if (b64.length < 24) return false; // too short to be a real image
+  // Known base64-encoded magic prefixes (case-sensitive — base64 is).
+  const magics = <String>[
+    'iVBORw0KGgo', // PNG  (\x89PNG\r\n\x1a\n)
+    '/9j/', // JPEG (\xff\xd8\xff)
+    'R0lGODdh', // GIF87a
+    'R0lGODlh', // GIF89a
+    'UklGR', // WEBP/RIFF
+    'Qk', // BMP  (BM) — short, so also require image-ish length below
+    'PHN2Zy', // SVG  (<svg )
+    'PD94bWw', // SVG/XML (<?xml )
+    'AAABAA', // ICO
+  ];
+  for (final m in magics) {
+    if (b64.startsWith(m)) {
+      // 'Qk'/'AAABAA' are short prefixes — require a longer blob so a 2-char
+      // coincidence on a short token cannot trigger the exemption.
+      if ((m == 'Qk' || m == 'AAABAA') && b64.length < 64) continue;
+      return true;
+    }
+  }
+  return false;
+}
+
 /// N1 + F2 — a value that is a PUBLIC content/object DIGEST by SHAPE, not a
 /// credential. We exempt these from the bare-hex secret path so the engine does
 /// NOT red its own clean tree (N1: the all-zero 40-hex SHA in the K1 fail-closed
@@ -794,6 +832,11 @@ bool _looksHighEntropySecret(String line) {
     // distinct from a pure-hex digest and remains a secret.
     if (RegExp(r'^[A-Za-z0-9+/]{32,}={0,2}$').hasMatch(v) &&
         shannonEntropy(v) >= 4.2) {
+      // DX7a: a base64 blob whose decoded prefix is a real IMAGE magic is inline
+      // asset data, not a credential — content-based, unforgeable, no detection
+      // loss. Skip the ENTROPY hit (a separate advisory WARNs "prefer assets/").
+      // Provider fingerprints already ran in lineHasSecret and are unaffected.
+      if (_isInlineImageBlob(v)) continue;
       return true;
     }
     // (c) general high-entropy token (case-mix AGNOSTIC). Require a stronger
@@ -1394,7 +1437,9 @@ List<Finding> gateNoDarkSurface(String screensDiff) {
         Finding(
           '46',
           Sev.err,
-          'dark surface: ${l.trim()} (background luminance below threshold)',
+          'dark surface in a screen (by-design light-theme enforcement): '
+              '${l.trim()} — put dark/theme tokens in lib/theme/ and reference '
+              'them there; screens stay light. (Dark TEXT ink is fine.)',
         ),
       ];
     }
@@ -1488,6 +1533,9 @@ List<Finding> gateNoHardUrl(String libDiff) {
 
 /// Gate 52: secret literal — name-AGNOSTIC entropy + provider fingerprints +
 /// joined adjacent literals. Scans the configured text file types.
+/// DX7a (v7): an inline IMAGE base64 blob (decoded magic = PNG/JPEG/GIF/…) is
+/// NOT a credential (content-based, unforgeable) — it is exempted from the ERR
+/// secret path but surfaced as an actionable WARN recommending assets/.
 List<Finding> gateNoSecrets(String diff) {
   for (final l in addedLines(diff)) {
     if (lineHasSecret(l)) {
@@ -1498,6 +1546,21 @@ List<Finding> gateNoSecrets(String diff) {
           'secret/high-entropy credential in code: ${l.trim().length > 80 ? "${l.trim().substring(0, 80)}…" : l.trim()}',
         ),
       ];
+    }
+  }
+  // DX7a advisory: no secret, but flag an inline image blob (prefer assets/).
+  final imgAssign = RegExp(r'''[:=]\s*['"]([A-Za-z0-9+/]{32,}={0,2})['"]''');
+  for (final l in addedLines(diff)) {
+    for (final m in imgAssign.allMatches(l)) {
+      if (_isInlineImageBlob(m.group(1)!)) {
+        return [
+          Finding(
+            '52',
+            Sev.warn,
+            'inline base64 image blob — move binary assets to assets/ and reference by path (not a secret)',
+          ),
+        ];
+      }
     }
   }
   return const [];
@@ -1511,7 +1574,14 @@ List<Finding> gateNoSecrets(String diff) {
 List<Finding> gateNoDarkColoredBox(String libDiff) {
   for (final l in _surfaceGateLines(addedLines(libDiff))) {
     if (l.contains('ColoredBox') && hasDarkColor(l)) {
-      return [Finding('54', Sev.err, 'dark ColoredBox: use light colors')];
+      return [
+        Finding(
+          '54',
+          Sev.err,
+          'dark ColoredBox (by-design light-theme enforcement): screens stay '
+              'light — put dark/theme tokens in lib/theme/, not inline in a screen',
+        ),
+      ];
     }
   }
   return const [];

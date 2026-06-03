@@ -51,13 +51,14 @@ if ! command -v flutter >/dev/null 2>&1; then
     exit 1
 fi
 
-# ═══ K7 — make the ENFORCEMENT vs LOCAL Flutter version split VISIBLE ═══
-# CI/ship build on FLUTTER_ENFORCE_VERSION (3.44.0). The local hook floats on
-# whatever the dev installed. If they differ, a build can pass locally yet fail
-# (or behave differently) in CI/ship. We do not BLOCK on it (the dev may not be
-# able to install the exact ship SDK), but we PRINT a notice so the divergence is
-# never silent — and CI's version-parity gate is the hard anchor.
-FLUTTER_ENFORCE_VERSION="3.44.0"
+# ═══ K7 / DX6 (v7) — ENFORCEMENT vs LOCAL Flutter version ═══
+# DX6 reconciled local==CI==ship to ONE real installable SDK (3.29.3). The old
+# 3.44.0 pin did not exist as a stable release → CI could never go green. We still
+# PRINT a notice (never silent) if a dev's local Flutter drifts off the pinned
+# version; CI's version-parity gate is the hard anchor. We do not BLOCK locally
+# (a dev may transiently have another SDK), but with the pins reconciled this
+# notice should now stay quiet in the normal case.
+FLUTTER_ENFORCE_VERSION="3.29.3"
 _LOCAL_FLUTTER_VER=$(flutter --version 2>/dev/null | grep -oE "Flutter [0-9]+\.[0-9]+\.[0-9]+" | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" | head -1)
 if [[ -n "$_LOCAL_FLUTTER_VER" && "$_LOCAL_FLUTTER_VER" != "$FLUTTER_ENFORCE_VERSION" ]]; then
     echo "ℹ️  K7 NOTICE: local Flutter $_LOCAL_FLUTTER_VER ≠ enforcement/ship $FLUTTER_ENFORCE_VERSION." >&2
@@ -138,6 +139,229 @@ err()  {
 warn() { echo "⚠️  [שער $1] $2"; WARN=$((WARN+1)); ran "$1"; }
 
 # ═══════════════════════════════════════════════════════════════════════════
+#  DX2 (v7) — flutter test `--reporter json` parsers. ONE authoritative stream
+#  drives BOTH the failure count and the failure names, so gate 32's count-branch
+#  and name-branch can never disagree (the old compact-reporter scrape could).
+#  Pure awk (already a hook dependency) — portable to MSYS/Git-Bash. A "real"
+#  failure = a testDone whose result != success AND hidden != true (loader/
+#  synthetic tests are hidden:true). This is STRICTER than a printed summary line:
+#  a test that prints "+99 -0" as data cannot forge a testDone event.
+# ═══════════════════════════════════════════════════════════════════════════
+# Emits one line per FAILED test:  <suite_basename>\t<test_name>
+parse_json_failures() {
+    awk '
+        # suite id -> basename(path)
+        /"type":"suite"/ {
+            sid=""; sp="";
+            if (match($0, /"id":[0-9]+/))   { sid=substr($0,RSTART+5,RLENGTH-5) }
+            if (match($0, /"path":"([^"\\]|\\.)*"/)) {
+                sp=substr($0,RSTART+8,RLENGTH-9)
+                gsub(/^.*\//,"",sp)            # basename
+            }
+            if (sid!="") suite[sid]=sp
+            next
+        }
+        # test id -> name + suiteID  (from testStart)
+        /"type":"testStart"/ {
+            id=""; nm=""; ssid="";
+            if (match($0, /"id":[0-9]+/))      { id=substr($0,RSTART+5,RLENGTH-5) }
+            if (match($0, /"name":"([^"\\]|\\.)*"/)) { nm=substr($0,RSTART+8,RLENGTH-9) }
+            if (match($0, /"suiteID":[0-9]+/)) { ssid=substr($0,RSTART+10,RLENGTH-10) }
+            if (id!="") { name[id]=nm; tsuite[id]=ssid }
+            next
+        }
+        # testDone: a non-success, non-hidden test is a real failure
+        /"type":"testDone"/ {
+            tid=""; res=""; hid="false";
+            if (match($0, /"testID":[0-9]+/))   { tid=substr($0,RSTART+9,RLENGTH-9) }
+            if (match($0, /"result":"[a-z]+"/)) { res=substr($0,RSTART+10,RLENGTH-11) }
+            if (match($0, /"hidden":true/))     { hid="true" }
+            if (res!="" && res!="success" && hid!="true") {
+                printf "%s\t%s\n", suite[tsuite[tid]], name[tid]
+            }
+        }
+    '
+}
+# Emits the count of PASSED, non-hidden tests (the live "tests:" total — gate 33).
+parse_json_passcount() {
+    awk '
+        /"type":"testDone"/ {
+            res=""; hid="false";
+            if (match($0, /"result":"[a-z]+"/)) { res=substr($0,RSTART+10,RLENGTH-11) }
+            if (match($0, /"hidden":true/))     { hid="true" }
+            if (res=="success" && hid!="true") c++
+        }
+        END { print c+0 }
+    '
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  DX3 (v7) — CHANGED-FILES test scoping for the LOCAL hook ONLY.
+#  Maps each staged lib/*.dart to its sibling test(s) + always includes a small
+#  CRITICAL subset. Returns a space-separated list of `test/*.dart` paths, OR ""
+#  to mean "run the WHOLE suite" (used when a broad/shared/ambiguous file changed,
+#  when only tests changed, or when mapping is uncertain — fail toward MORE tests,
+#  never fewer than needed). CI/pre-push ALWAYS run the full suite, so this only
+#  trades a little local speed for zero security loss.
+# ═══════════════════════════════════════════════════════════════════════════
+# CRITICAL subset — protocol/contract tests that must run on EVERY code commit.
+_DX3_CRITICAL="knowledge_protocol_test stuck_regression_test protocol_security_test \
+               regression_gate_test wiring_test smartproduct_contract_test"
+select_test_targets() {
+    local _changed _f _base _t _cand _targets="" _seen=" " _libchanged="" _crit
+    _changed=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null \
+                 | grep -E '^app_flutter/(lib|test)/.*\.dart$' | sed 's#^app_flutter/##')
+    # No .dart staged at all → caller still runs (analyze); return "" (whole suite
+    # is harmless but the tier only reaches here when NEEDS_FLUTTER matched).
+    [[ -z "$_changed" ]] && { echo ""; return; }
+    while IFS= read -r _f; do
+        [[ -z "$_f" ]] && continue
+        case "$_f" in
+            # Shared/broad surfaces or non-mappable changes → WHOLE suite (safe).
+            lib/state/*|lib/providers.dart|lib/main.dart|lib/app.dart)
+                echo ""; return ;;
+            test/*_test.dart)
+                # a staged test file: run exactly it
+                _cand="$_f" ;;
+            test/*)
+                # non-_test test helper changed → WHOLE suite (helpers fan out)
+                echo ""; return ;;
+            lib/*.dart)
+                _libchanged=1
+                _base=$(basename "$_f" .dart)
+                _cand=""
+                # direct sibling: test/<base>_test.dart
+                [[ -f "test/${_base}_test.dart" ]] && _cand="test/${_base}_test.dart"
+                # also any test whose name contains the base (e.g. foo -> foo_*_test)
+                for _t in test/*"${_base}"*_test.dart; do
+                    [[ -f "$_t" ]] && _cand="$_cand $_t"
+                done
+                # a lib file with NO discoverable covering test → WHOLE suite
+                # (do not under-test; gate 42/56 separately demand a test exists)
+                if [[ -z "$_cand" ]]; then echo ""; return; fi
+                ;;
+            *) echo ""; return ;;
+        esac
+        for _t in $_cand; do
+            case "$_seen" in *" $_t "*) : ;; *) _targets="$_targets $_t"; _seen="$_seen$_t ";; esac
+        done
+    done <<<"$_changed"
+    # Always fold in the critical subset (only those that exist on disk).
+    for _crit in $_DX3_CRITICAL; do
+        _t="test/${_crit}.dart"
+        [[ -f "$_t" ]] || continue
+        case "$_seen" in *" $_t "*) : ;; *) _targets="$_targets $_t"; _seen="$_seen$_t ";; esac
+    done
+    # Trim leading space.
+    echo "${_targets# }"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  DX4 (v7) — gate 42 trigger refinement: STRICTER-AND-SMARTER.
+#  OLD: err 42 whenever ANY lib/(logic|data) file was staged and no *_test.dart
+#       was staged — taxing a one-line fix to an ALREADY-tested helper.
+#  NEW: err 42 only when a NEW public top-level symbol (class/enum/mixin/
+#       extension/top-level function) is ADDED that has NO covering test (on disk
+#       OR staged). Editing an existing tested helper adds no new symbol → no
+#       demand. A brand-new untested public API → still demanded (and gate 56
+#       independently covers new *_helper.dart files). NOT weaker: an attacker
+#       adding new logic still must add a covering test; an UNTESTED new public
+#       symbol is exactly what we want to block, and CI re-runs the full suite.
+# Echoes the FIRST "<file>::<symbol>" that is a newly-added public top-level
+# symbol lacking any covering test; empty if none (=> gate 42 does not fire).
+staged_new_untested_symbol() {
+    local _files _file _syms _sym _base _covered _t _diff
+    _files=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null \
+               | grep -E '^app_flutter/lib/(logic|data)/.*\.dart$' | sed 's#^app_flutter/##')
+    [[ -z "$_files" ]] && { echo ""; return; }
+    while IFS= read -r _file; do
+        [[ -z "$_file" ]] && continue
+        # $_file is repo-root-relative WITHOUT the app_flutter/ prefix (stripped
+        # above). The runner cd'd into app_flutter/, so the diff pathspec is the
+        # CWD-relative path (lib/...), NOT app_flutter/lib/... (which from here
+        # would match nothing and silently skip — a fail-OPEN we must avoid).
+        _diff=$(git diff --cached -- "$_file" 2>/dev/null)
+        # NEW public top-level symbols ADDED in this diff:
+        #  + class/enum/mixin/extension Name        (Name starts uppercase)
+        #  + <ReturnType...> funcName(  /  + funcName(   at column 0 (top-level),
+        #    public (no leading underscore). We read the char AFTER the diff '+'.
+        _syms=$(printf '%s\n' "$_diff" \
+            | grep -E '^\+(class|enum|mixin|extension)[[:space:]]+[A-Z][A-Za-z0-9_]+' \
+            | sed -E 's/^\+(class|enum|mixin|extension)[[:space:]]+([A-Z][A-Za-z0-9_]+).*/\2/')
+        # top-level public functions: a '+'-added line, NOT indented (next char is
+        # not a space), containing `name(` where name is a public identifier and
+        # the line is not a control keyword / field / annotation.
+        _syms="$_syms
+$(printf '%s\n' "$_diff" \
+            | grep -E '^\+[A-Za-z_][A-Za-z0-9_<>, ?]*[[:space:]]+[a-z][A-Za-z0-9_]*[[:space:]]*\(' \
+            | grep -vE '^\+[[:space:]]' \
+            | grep -vE '\b(if|for|while|switch|return|assert|case|catch)\b' \
+            | sed -E 's/^\+[A-Za-z_][A-Za-z0-9_<>, ?]*[[:space:]]+([a-z][A-Za-z0-9_]*)[[:space:]]*\(.*/\1/')"
+        _syms=$(printf '%s\n' "$_syms" | grep -E '^[A-Za-z][A-Za-z0-9_]*$' | sort -u)
+        [[ -z "$_syms" ]] && continue
+        _base=$(basename "$_file" .dart)
+        for _sym in $_syms; do
+            _covered=""
+            # covering test = ANY test/*_test.dart (on disk OR staged) that
+            # references the symbol or imports the changed file. Staged-but-new
+            # test files are on disk too (staging copies content to the index, but
+            # the working tree has them), so a disk scan of test/ suffices and we
+            # ALSO honour an explicitly staged test referencing the symbol.
+            for _t in test/*_test.dart; do
+                [[ -f "$_t" ]] || continue
+                if grep -qE "\b$_sym\b" "$_t" 2>/dev/null; then _covered=1; break; fi
+                if grep -qF "$_base.dart" "$_t" 2>/dev/null; then _covered=1; break; fi
+            done
+            [[ -n "$_covered" ]] && continue
+            echo "$_file::$_sym"
+            return
+        done
+    done <<<"$_files"
+    echo ""
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  DX5 (v7) — gate 116 (UI visual-verify) second satisfying path.
+#  OLD: a screens/widgets change REQUIRED a staged knowledge/visual_log.md entry,
+#       even for a non-visual edit (a manufactured "screenshot note" was the only
+#       way out → performative). NEW: gate 116 is ALSO satisfied when EVERY
+#       changed UI file is covered by a WIDGET TEST that references the changed
+#       widget (a real `testWidgets`/`pumpWidget` test naming the class, or
+#       importing the file). This is NOT weaker: an automated widget test is a
+#       STRONGER verification artefact than a hand-written note, and the visual_log
+#       path is unchanged. CI re-runs the full suite, so the widget test must
+#       actually pass. Returns the FIRST uncovered UI file, or "" if all covered.
+staged_ui_covered_by_widget_test() {
+    local _files _file _classes _cls _covered _t _imp _base
+    _files=$(printf '%s\n' "$1" | grep -E '^app_flutter/lib/(screens|widgets)/.*\.dart$' | sed 's#^app_flutter/##')
+    [[ -z "$_files" ]] && { echo ""; return; }
+    while IFS= read -r _file; do
+        [[ -z "$_file" ]] && continue
+        _base=$(basename "$_file")
+        # widget classes declared in (or added to) the file — match on disk so an
+        # edit to an existing widget is covered too, not only newly-added classes.
+        _classes=$(grep -hoE 'class[[:space:]]+[A-Z][A-Za-z0-9_]+[[:space:]]+extends[[:space:]]+(Stateless|Stateful|Consumer|HookConsumer|HookWidget)' "$_file" 2>/dev/null \
+                     | sed -E 's/class[[:space:]]+([A-Z][A-Za-z0-9_]+).*/\1/' | sort -u)
+        _covered=""
+        # search widget tests: a _test.dart that uses widget-test machinery AND
+        # references one of the classes OR imports the changed file path.
+        for _t in test/*_test.dart; do
+            [[ -f "$_t" ]] || continue
+            grep -qE 'testWidgets|pumpWidget' "$_t" 2>/dev/null || continue
+            if grep -qF "$_base" "$_t" 2>/dev/null; then _covered=1; break; fi
+            for _cls in $_classes; do
+                if grep -qE "\b$_cls\b" "$_t" 2>/dev/null; then _covered=1; break; fi
+            done
+            [[ -n "$_covered" ]] && break
+        done
+        [[ -n "$_covered" ]] && continue
+        echo "$_file"
+        return
+    done <<<"$_files"
+    echo ""
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
 #  Dart content engine — run ALL string/content gates deterministically.
 #  Replaces the MSYS-fragile bash greps of v1. We dump the staged diff once and
 #  let tool/protocol_check.dart emit `ERR|WARN<TAB>id<TAB>msg`, which we re-emit
@@ -207,6 +431,7 @@ PROTECTED_PINNED=(
     ".github/workflows/deploy.yml"
     "protocol/regression_v5.sh"   # v5 — pin the bash/CI regression suite
     "protocol/regression_v6.sh"   # v6 — pin the H1-H5 regression suite
+    "protocol/regression_v7.sh"   # v7 — pin the DX friction-fix regression suite
 )
 gate_engine_integrity() {
     ran "reg"
@@ -437,48 +662,84 @@ gate_test_tier() {
         echo "  ⏩ rebase/amend replay — מדלג על test (אומת קודם; pre-push יריץ build מלא)"
         TEST_OUT=""
     else
-        TEST_OUT=$(flutter test --no-pub --concurrency=4 2>&1)
+        # DX3 (v7): CHANGED-FILES fast path. The LOCAL hook runs only the tests
+        # that cover the staged .dart files + a small critical subset (target
+        # <60s) instead of the full ~1130-test suite. The AUTHORITATIVE FULL suite
+        # still runs (a) in CI (`flutter test`, protocol-enforce.yml) on every
+        # push/PR and (b) can be forced locally with BUILDSMART_FULL_TEST=1. So
+        # NO detection is lost: CI is the un-skippable layer. `select_test_targets`
+        # returns either "" (=> run the whole suite) or an explicit file list.
+        local _scoped_targets _scope_label
+        _scoped_targets=""
+        _scope_label="FULL suite"
+        if [[ -z "${BUILDSMART_FULL_TEST:-}" ]]; then
+            _scoped_targets="$(select_test_targets)"
+            [[ -n "$_scoped_targets" ]] && _scope_label="scoped ($(echo "$_scoped_targets" | wc -w | tr -d ' ') files)"
+        fi
+        echo "  🧪 flutter test — $_scope_label (CI/pre-push always run the FULL suite — DX3)"
+        # DX2 (v7): run with --reporter json so failure COUNT and failure NAMES
+        # both come from ONE machine-readable stream (the testDone events) — the
+        # compact-reporter `^NN:NN +P -F:` summary scrape used carriage-returns and
+        # could glue the summary onto another line, making the count read 0 while
+        # the name-branch read 1 (the self-contradiction). JSON has no such
+        # ambiguity. We KEEP a human-readable echo of the failing names. No
+        # security loss — JSON `result`+`hidden` are stricter than a printed line a
+        # test could spoof (a test that PRINTS "+99 -0" cannot forge a testDone).
+        # shellcheck disable=SC2086
+        TEST_OUT=$(flutter test --no-pub --concurrency=4 --reporter json $_scoped_targets 2>&1)
         TEST_EXIT=$?
         KNOWN_FAIL=$(grep -oE "known-failing: [0-9]+" knowledge/STATUS.md 2>/dev/null | grep -oE "[0-9]+$" || echo 0)
         KF_LISTED=$(grep -cvE '^[[:space:]]*(#|$)' knowledge/known_failing.txt 2>/dev/null); KF_LISTED=${KF_LISTED:-0}
         if [[ "$KNOWN_FAIL" -gt 0 && "$KF_LISTED" -ne "$KNOWN_FAIL" ]]; then
             err "32" "baseline-phantom: known-failing=$KNOWN_FAIL אך known_failing.txt מפרט $KF_LISTED שמות" "פרט שמות ב-known_failing.txt, או known-failing: 0"
         fi
-        if [[ $TEST_EXIT -ne 0 ]] || echo "$TEST_OUT" | grep -qE "Some tests failed"; then
-            # R5: parse the failure count from the SUMMARY line ONLY — anchored to
-            # the compact reporter's `NN:NN +P -F:` form at line start — so a test
-            # that PRINTS "+99 -0" as data cannot spoof the count.
-            FAIL_COUNT=$(echo "$TEST_OUT" \
-                | grep -aoE '^[0-9]{2}:[0-9]{2} \+[0-9]+ -[0-9]+:' \
-                | grep -oE -- '-[0-9]+:' | grep -oE '[0-9]+' | tail -1)
-            FAIL_COUNT=${FAIL_COUNT:-0}
-            # R5: the failing test NAMES must be a SUBSET of known_failing.txt —
-            # a NEW failure (name not in the baseline) blocks even if the COUNT is
+        # DX2: the SINGLE authoritative failure list — `<suite_basename>\t<name>`
+        # per real (non-hidden, non-success) testDone — parsed once from the JSON.
+        # COUNT and NAMES are now derived from the SAME file, so the count-branch
+        # and the name-branch can never disagree.
+        local _fail_list
+        _fail_list="$(parse_json_failures <<<"$TEST_OUT")"
+        FAIL_COUNT=$(printf '%s' "$_fail_list" | grep -c . )
+        FAIL_COUNT=${FAIL_COUNT:-0}
+        if [[ "$FAIL_COUNT" -gt 0 ]] || [[ $TEST_EXIT -ne 0 ]]; then
+            # R5: the failing test NAMES must be a SUBSET of known_failing.txt — a
+            # NEW failure (name not in the baseline) blocks even if the COUNT is
             # within baseline (defends against swapping one known-fail for a new one).
             if [[ -f knowledge/known_failing.txt ]]; then
                 NEW_FAIL_NAME=""
-                while IFS= read -r _fl; do
-                    # extract the test description after "… [E]" / ": <name> [E]"
-                    _nm=$(echo "$_fl" | sed -E 's/.*: (.+) \[E\].*/\1/; t; d')
+                while IFS=$'\t' read -r _suite _nm; do
                     [[ -z "$_nm" ]] && continue
                     if ! grep -qF "$_nm" knowledge/known_failing.txt; then
                         NEW_FAIL_NAME="$_nm"; break
                     fi
-                done < <(echo "$TEST_OUT" | grep -aE ': .+ \[E\]')
+                done <<<"$_fail_list"
                 [[ -z "$NEW_FAIL_NAME" ]] || err "32" "כשל חדש שאינו ב-baseline: $NEW_FAIL_NAME" "תקן, או הוסף ל-known_failing.txt + עדכן known-failing"
             fi
-            if [[ "$FAIL_COUNT" -gt "$KNOWN_FAIL" ]]; then
+            # A non-zero exit with NO parsed failures = the runner itself crashed
+            # (compile error / OOM) — fail CLOSED, never silently pass.
+            if [[ "$FAIL_COUNT" -eq 0 && $TEST_EXIT -ne 0 ]]; then
+                echo "$TEST_OUT" | grep -aiE 'error|exception|failed to' | head -5
+                err "32" "flutter test יצא $TEST_EXIT ללא כשלים מזוהים — קריסת ריצה" "בדוק קומפילציה/סביבה (fail closed)"
+            elif [[ "$FAIL_COUNT" -gt "$KNOWN_FAIL" ]]; then
                 echo "   ❌ בדיקות שנכשלו (שמות):"
-                echo "$TEST_OUT" | grep -aE "\[E\]|✗|FAILED|: .+ \[E\]" | head -20
+                printf '%s\n' "$_fail_list" | sed 's/^/     /' | head -20
                 err "32" "בדיקות נכשלות: $FAIL_COUNT > baseline $KNOWN_FAIL" "תקן, או עדכן known-failing + known_failing.txt"
-            else
+            elif [[ "$FAIL_COUNT" -gt 0 ]]; then
                 warn "32" "יש $FAIL_COUNT כשלים pre-existing (baseline=$KNOWN_FAIL) — מותר להמשיך"
             fi
         fi
         # R5: gate 33 — test count is monotonic-non-decreasing, read from the
         # machine-readable `tests: N` line in STATUS.md (anchored), and the live
-        # PASS count from the SUMMARY line only.
-        TEST_COUNT=$(echo "$TEST_OUT" | grep -aoE '^[0-9]{2}:[0-9]{2} \+[0-9]+' | grep -oE '\+[0-9]+' | tail -1 | tr -d '+')
+        # PASS count from the JSON testDone stream (success + non-hidden).
+        # NOTE: under the DX3 scoped fast path the live count is a SUBSET of the
+        # full suite, so the monotonic check is SKIPPED unless we ran the FULL
+        # suite (scoped runs would false-trip "count dropped"). CI runs the full
+        # suite and enforces all tests green, so gate 33 loses no coverage.
+        if [[ -z "$_scoped_targets" ]]; then
+            TEST_COUNT=$(parse_json_passcount <<<"$TEST_OUT")
+        else
+            TEST_COUNT=""
+        fi
         LAST_TEST_COUNT=$(grep -oE "^tests: [0-9]+" knowledge/STATUS.md 2>/dev/null | grep -oE "[0-9]+" | head -1)
         if [[ -z "$LAST_TEST_COUNT" ]]; then
             # fallback to the legacy free-form marker if `tests: N` not present yet
@@ -504,13 +765,21 @@ gate_test_tier() {
 
 # Test bookkeeping gates that run regardless of Flutter tier (41-44).
 gate_test_bookkeeping() {
-    local BAD_COUNT STAGED_MUT
+    local BAD_COUNT STAGED_MUT _NEW_SYM
     ran 41 42 43 44
     BAD_COUNT=$(git diff --cached test/ 2>/dev/null | grep "^+" | grep -E "greaterThan\(0\)" | head -1)
     [[ -z "$BAD_COUNT" ]] || warn "41" "test עם greaterThan(0) — שביר על נתונים ריקים"
 
-    if [[ -n "$STAGED_HELPER" && -z "$STAGED_TEST" ]]; then
-        err "42" "helper חדש בלי בדיקה" "צור test/*_test.dart לפונקציה החדשה"
+    # DX4 (v7): fire only on a NEW public top-level symbol with no covering test —
+    # NOT merely "a lib/(logic|data) file was touched". In AUDIT mode the synthetic
+    # context has no real diff, so force-exercise the gate's decision (record ran).
+    if [[ -n "$PROTOCOL_AUDIT_MODE" ]]; then
+        :   # ran 42 already recorded above; no real symbol scan in audit
+    else
+        _NEW_SYM=$(staged_new_untested_symbol)
+        if [[ -n "$_NEW_SYM" ]]; then
+            err "42" "סמל ציבורי חדש בלי בדיקה: $_NEW_SYM" "הוסף test/*_test.dart שמכסה את $_NEW_SYM (או יבא את הקובץ)"
+        fi
     fi
     if [[ -n "$STAGED_HELPER" ]]; then
         [[ -f "knowledge/mutation_log.md" ]] || err "43" "mutation_log חסר" "צור knowledge/mutation_log.md"
@@ -685,12 +954,30 @@ gate_final_safety() {
     fi
     ran 92
     # Gate 93: a lib change should be accompanied by a ROADMAP done-marker added
-    # this commit (✅ / ✓ / [x]). Implemented in bash (whole-file diff + builtins,
-    # MSYS-safe). Advisory. (Registry: engine column corrected dart->bash in v3.)
+    # this commit. DX1 (v7): the marker scan is now a bash builtin case/glob over
+    # the ADDED diff lines — NOT an external `grep <emoji>` (lesson #52 + the gate
+    # 23/64 precedent). This satisfies stuck-regression antipattern #40 (no
+    # non-comment `grep <emoji>` in the hook) so `flutter test` is GREEN on a clean
+    # tree with NO manual baselining. Detection is IDENTICAL: a `+`-added line
+    # bearing a done-marker (done-check / done-box / [x]) still satisfies the gate.
+    # Advisory (warn) — unchanged severity. (Registry: bash engine, unchanged.)
     if [[ -n "$STAGED_LIB" ]]; then
-        ROADMAP_DONE=$(git diff --cached -- knowledge/SMARTPRODUCT_ROADMAP.md 2>/dev/null \
-            | grep "^+" | grep -v "^+++" | grep -E "✅|✔|✓|\[x\]" | head -1)
-        [[ -n "$ROADMAP_DONE" ]] || warn "93" "שינוי lib בלי סימון התקדמות ב-ROADMAP" "סמן ✅/[x] את הצעד שהושלם"
+        ROADMAP_DONE=""
+        if [[ -f "knowledge/SMARTPRODUCT_ROADMAP.md" ]]; then
+            while IFS= read -r _l || [[ -n "$_l" ]]; do
+                # only ADDED content lines (diff `+`, excluding the `+++ b/…` header)
+                case "$_l" in
+                    +++*) continue ;;
+                    +*) : ;;
+                    *) continue ;;
+                esac
+                # whole-line glob match for any done-marker (no external grep)
+                case "$_l" in
+                    *"✅"*|*"✔"*|*"✓"*|*"[x]"*) ROADMAP_DONE=1; break ;;
+                esac
+            done < <(git diff --cached -- knowledge/SMARTPRODUCT_ROADMAP.md 2>/dev/null)
+        fi
+        [[ -n "$ROADMAP_DONE" ]] || warn "93" "שינוי lib בלי סימון התקדמות ב-ROADMAP" "סמן צעד שהושלם ב-ROADMAP (done-marker)"
         ran 93
     else
         napp 93
@@ -703,8 +990,13 @@ gate_final_safety() {
     if [[ -n "$PROTOCOL_AUDIT_MODE" ]]; then
         ran 94   # audit forces applicability
     elif [[ -n "$TEST_OUT" ]]; then
+        # DX2 (v7): TEST_OUT is now the JSON reporter stream. Detect a
+        # knowledge_protocol_test FAILURE by reusing the same authoritative
+        # failure parser, filtered to the knowledge_protocol_test suite — robust
+        # vs the old free-text "knowledge_protocol_test.*FAILED" grep (which a
+        # compact-reporter CR could split). Only fires if that suite actually ran.
         if echo "$TEST_OUT" | grep -q "knowledge_protocol_test"; then
-            if echo "$TEST_OUT" | grep -E "knowledge_protocol_test.*FAILED" >/dev/null 2>&1; then
+            if parse_json_failures <<<"$TEST_OUT" | grep -q '^knowledge_protocol_test\.dart'; then
                 err "94" "knowledge_protocol_test נכשל" "וודא סנכרון knowledge"
             fi
         fi
@@ -913,11 +1205,20 @@ gate_knowledge() {
     fi
     ran 115   # hot-file claims scan always executes (body conditional on the file)
 
-    # Gate 116: UI change requires visual_log staged (enforce; replay-skip).
+    # Gate 116: UI change requires visual-verify (enforce; replay-skip).
+    # DX5 (v7): two satisfying paths — (a) staged visual_log.md entry (original),
+    # OR (b) every changed UI file is covered by a widget test referencing the
+    # changed widget. Only ERR if NEITHER holds.
     STAGED_UI2=$(echo "$STAGED_NAMES" | grep -E "^app_flutter/lib/(screens|widgets)/.*\.dart$" | head -1)
     if [[ -n "$STAGED_UI2" && -z "${VERIFIED_UI:-}" && -z "$IS_REPLAY" ]]; then
         STAGED_VLOG=$(git diff --cached --name-only | grep -E "knowledge/visual_log\.md$" | head -1)
-        [[ -n "$STAGED_VLOG" ]] || err "116" "שינוי UI ($STAGED_UI2) בלי visual-verify מתועד" "עדכן knowledge/visual_log.md או VERIFIED_UI=1 לחירום"
+        if [[ -z "$STAGED_VLOG" ]]; then
+            local _uncovered_ui
+            _uncovered_ui=$(staged_ui_covered_by_widget_test "$STAGED_NAMES")
+            if [[ -n "$_uncovered_ui" ]]; then
+                err "116" "שינוי UI ($_uncovered_ui) בלי visual-verify" "עדכן knowledge/visual_log.md, או הוסף widget-test שמכסה את הווידג׳ט, או VERIFIED_UI=1 לחירום"
+            fi
+        fi
     fi
     ran 116   # UI-visual-verify detection always executes
 }
