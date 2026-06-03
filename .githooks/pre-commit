@@ -818,6 +818,18 @@ if [[ -n "$STAGED_CROP" ]]; then
     fi
 fi
 
+# שער 114: kLipskeyCatalog אסור ב-screens/state/logic — השתמש ב-kCatalogProducts
+# (דיווח מקבץ 2026-06-03, לקח #69): קריאה ב-kLipskeyCatalog מ-UI החזירה
+# רשימה ריקה עבור מוצרי Huliot/PPR → כרטיס לבן. כלל: קריאה רוחבית = kCatalogProducts.
+# פטורים: lib/data/ (הגדרת kLipskeyCatalog) · lib/test_harness/ (ui-tests מוגדרים) · test/.
+# (שער 113 תפוס ע"י קטלגן — crop contact-sheet. לקח #66: בדוק מספרי-שערים אחרי rebase.)
+LIPSKEY_MISUSE=$(git diff --cached lib/screens/ lib/state/ lib/logic/ 2>/dev/null \
+    | grep "^+" | grep -v "^+++" \
+    | grep "kLipskeyCatalog" | head -1)
+[[ -z "$LIPSKEY_MISUSE" ]] || err "114" \
+    "kLipskeyCatalog ב-screens/state/logic: $LIPSKEY_MISUSE" \
+    "השתמש ב-kCatalogProducts (מאוחד) — kLipskeyCatalog = Lipskey בלבד"
+
 # שער 100: סיכום
 echo ""
 echo "══════════════════════════════════════════════"

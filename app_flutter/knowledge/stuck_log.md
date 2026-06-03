@@ -1201,3 +1201,20 @@ RULE: אם asset-generation מטפל ב-catalog שיש בו variability יותר
 ### ג — כלל המניעה
 ANTIPATTERN: v5\.[0-9].*(הזמן עכשיו|אישור הזמנה)
 RULE: ה-version-label הגלובלי אסור שיכיל ביטוי-UI מדויק שבדיקות-widget מאתרות (תוויות-כפתור) — תאר פיצ'רים בלי לצטט תוויות שמופיעות במסך.
+
+## 2026-06-03 — תיקון-טיפוס ב-test הוסיף שם-טיפוס בלי import → compile-fail (analyze לבד פספס)
+### א — הבעיה
+שדרגתי `dynamic` → `LipskeyCatalogProduct` בחתימת helper של `huliot_card_render_test.dart`
+(תיקון analyze warning של origin). `flutter analyze` על הקובץ עבר נקי — אבל
+`flutter test` נכשל בטעינה: `Error: Type 'LipskeyCatalogProduct' not found`. הקובץ
+לא ייבא את `lib/data/lipskey_catalog.dart` (השתמש ב-`dynamic` כדי להימנע מהimport).
+שער 32 חסם (1 > baseline 0). analyze resol've טיפוסים טרנזיטיבית דרך imports אחרים →
+לא תפס; ה-compiler של `flutter test` כן דורש את הimport המפורש.
+### ב — הפתרון
+הוספתי `import 'package:buildsmart/data/lipskey_catalog.dart';`. test → 2/2,
+סוויטה מלאה ירוקה.
+### ג — כלל המניעה
+ANTIPATTERN: שדרוג dynamic→named-type בלי לוודא שהטיפוס מיובא
+RULE: כשמחליפים `dynamic` בשם-טיפוס מפורש בקובץ-בדיקה — הוסף את ה-import של מקור-הטיפוס
+באותו edit, ואמת ב-`flutter test <file>` (לא רק `analyze` — analyze פותר טרנזיטיבית
+ויכול לפספס import חסר ש-compiler דורש).

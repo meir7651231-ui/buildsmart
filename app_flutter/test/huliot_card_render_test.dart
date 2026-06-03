@@ -5,6 +5,7 @@
 //   1. the search-result onTap builds the list from the unified kCatalogProducts;
 //   2. showLipskeyProductSheet falls back to [product] when handed an empty list.
 import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
+import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
@@ -14,8 +15,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<int> _openAndCountTexts(
   WidgetTester tester,
-  dynamic product,
-  List products,
+  LipskeyCatalogProduct product,
+  List<LipskeyCatalogProduct> products,
 ) async {
   await tester.pumpWidget(ProviderScope(
     child: MaterialApp(
@@ -23,7 +24,7 @@ Future<int> _openAndCountTexts(
         builder: (ctx) => Scaffold(
           body: ElevatedButton(
             onPressed: () =>
-                showLipskeyProductSheet(ctx, product, products.cast()),
+                showLipskeyProductSheet(ctx, product, products),
             child: const Text('open'),
           ),
         ),
