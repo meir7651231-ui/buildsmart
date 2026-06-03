@@ -29,5 +29,9 @@
 
 ---
 
-## 📱 Flutter (`app_flutter/lib/screens/notifications_screen.dart`, 906 ש') — דלתא ⭐
-**טאב-התראות מלא native** (לא רק badge): `_Header` + `_NotifSearchBar` + `_SectionChipsRow` (סינון per-type) + show-more + snooze. מול אב-הטיפוס (פאנל ב-appbar) ו-Preact (רק `notificationCount` signal). ⭐ **התראות = טאב ראשי** — הרחבה אמיתית מעבר לשני המקורות הקודמים.
+## 📱 Flutter — דלתא (התראות · שיחות · onboarding) ⭐ נכתב-מחדש מהמציאות
+> ב-Flutter אלה **טאבים/מסכים native מלאים** — לא היו בפרוטוטייפ/Preact.
+- **התראות** (`notifications_screen.dart` **1,081ש׳**, טאב-2): 9 התראות-דמו (orders/shipments/safety/budget/deals) · חיפוש + 6 צ'יפי-סינון · **קיבוץ-חכם** (run≥3 → "הצג עוד N"; date-groups היום/אתמול/מוקדם-יותר) · swipe-to-dismiss + undo · long-press · כפתורי-פעולה context (אשר-איסוף/טפל-כעת/עקוב — toast). persist `notifReadIds`/`notifDismissedIds`; badge נגזר (`notifUnreadCountProvider`).
+- **שיחות** (`chats_screen.dart` **1,437ש׳**, טאב-1): 6 threads (הקבלן-הראשי · ספק-חומרי-בנייה · השליח · מנהל-המערכת · צ׳אטבוט · ספק-צבעים) · חיפוש + 4 צ'יפים · swipe-to-archive + undo · דף-שיחה (בועות me/them · read-receipts · typing · **auto-reply 900ms** מ-4 תגובות אם `botEnabled`) · persist `bs.chat-archived/muted.v1`.
+- **onboarding** (`onboarding_screen` + `welcome_screen` + `profession_screen`): welcome (רישום/קיים/דמו) → profession (אינסטלטור/חשמלאי/קבלן-שיפוצים) → 3 שקופיות → home. gate `welcomeSeenProvider` (`bs.welcome-seen.v1`). שונה מ-role-drawer של הפרוטוטייפ — כאן onboarding ממוקד-קבלן.
+🔧 מול המקורות הקודמים (אב-טיפוס=פאנל-bell + role-drawer · Preact=`notificationCount` signal בלבד): Flutter הוא **הכי-עשיר** — chats+notifications כמסכים מלאים שלא היו קיימים.

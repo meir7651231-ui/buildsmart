@@ -52,7 +52,8 @@
 
 ---
 
-## 📱 Flutter — דלתא (פרסונות)
-`personas.dart` (`Persona`/`kPersonas`) + `bs_dial_widget` (BS-dial). `sections.dart`: `kStoreSections`/`kCourierSections` + order-status sections (st-pending/active/…).
-- **`store_screen.dart` (990 ש׳)** = **טאב-חנות מלא native** (quick-actions + sheets מועדים/תזמון/שיחה) — פרסונת-החנות בולטת, וכאן **טאב-ראשי** (לא רק dial-drill).
-➖ manager/worker/courier — סקשנים ב-`sections.dart` אך ללא view מלא.
+## 📱 Flutter — דלתא (פרסונות + חנות) ⭐ נכתב-מחדש מהמציאות
+- **role-picker** (`role_picker_sheet.dart`): "מי אתה?" + 5 פרסונות. **קבלן → האפליקציה-הראשית** (4 הטאבים); מנהל/חנות-ספק/שליח/עובד → `activePersona` + drill ב-BS-dial.
+- **BS-dial sections** (`data/sections.dart`): `kManagerSections`(4) · `kStoreSections`(4) · `kCourierSections`(4) · `kWorkerSections`(3) — **ה-leaves מציגים toast 'בבנייה'** (stubs, לא views). יוצא-דופן יחיד: `mm-regression` → `RegressionPanelScreen`.
+- ⭐ **טאב "חנות" (`store_screen.dart`, 1,500+ש׳) = טאב-ראשי native — אבל ממוקד-קבלן** (לא דשבורד-ספק!): 8 פריטים (סל · הזמנות · השכרת-כלים · פקדונות · החזרה · מכרז-ספקים · גיליונות-בטיחות · השוואת-מחירים) · 4 quick-actions (מועדפים/מועדים/תזמון/שיחה) · sections (הכל/סל/הזמנות/שירותים) · checkout (VAT 18%) · 5 הזמנות-דמו.
+🔧 **מול הפרוטוטייפ/Preact:** דשבורדי **מנהל/חנות-ספק/שליח/עובד המלאים** (md-*/picking 6-states/courier-tracking/worker-state-machine) **לא הומרו** — הם sections-ב-BS-dial שמציגים toast. ה"חנות" של Flutter היא חנות-הקבלן (קניות/הזמנות/שירותים), לא פורטל-הספק.

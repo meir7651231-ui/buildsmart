@@ -35,5 +35,8 @@
 
 ---
 
-## 📱 Flutter — דלתא
-➖ ענף `nice-volta`: **אין `test_harness`/self-test** ב-`lib/` (27 הקבצים = feature-code בלבד). (בענפי-Flutter אחרים תועד `lib/test_harness/` שמשקף את ה-self-test — בענף הזה נעדר.)
+## 📱 Flutter — דלתא (self-test) ⭐ תיקון — נכתב-מחדש מ-whats-happening
+> ⚠️ הגרסה הקודמת (snapshot nice-volta, 27 קבצים) טענה "אין test_harness". **שגוי** — באפליקציה האמיתית ה-self-test **עשיר ביותר**.
+- **`lib/test_harness/`** (in-app, נפתח דרך BS-dial→מנהל→🔬 בדיקות-רגרסיה / `regression_panel_screen.dart`): `runner.dart` (**11 suites**: catalog/dsync/tabs/buttons/dupes/sections/settings/behavior/products/engine/cart/finder) + `regression_state.dart` (Riverpod) + `types.dart`. תצוגת pass/fail + filter-chips + expandable.
+- **`test/` = 155 קבצים · 863 בדיקות · 16,441ש׳** (10 תחומים). שערים: **47-helper-gate** (כל helper-ציבורי→test) · **mutation-tests** (40 מוטציות) · **`stuck_regression`** (1,308ש׳ — אנטי-דפוסים auto-gen) · `spec_assets` (1,486ש׳) · `knowledge_protocol` · version-sync.
+🔧 מול הפרוטוטייפ (`BUTTON_REGISTRY` 350 + reg-harness) ו-Preact (21-button registry): Flutter = ה-self-test **הכבד ביותר** מ-3 המקורות, נאכף ב-CI + 116-שערים (דוחות 21–22).
