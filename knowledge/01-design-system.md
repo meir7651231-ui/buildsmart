@@ -220,4 +220,33 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 `.sh-hello/.sh-sub` · **`.sh-action`** (פעולה-ראשית gradient teal). המשך בקריאה הבאה.
 
 ---
-**טרם נקרא בקובץ הזה:** 3117–4019 (Store/Courier/Worker dashboards · delivery-note · misc).
+
+## חלק ז׳ — Store/Courier/Worker dashboards + משלוחים + תעודה (3117–3654)
+
+### Store dashboard `sh-*` (3107–3196)
+- **`.sh-action`** (פעולה-ראשית; `.held`=כתום, מספר 38px) · `.sh-clear`(ירוק) · `.sh-stat` · `.sh-stock-alert`(אדום) · `.sh-qbtn`.
+- **`.so-card`** (הזמנת-חנות; פס-צד stage-new=teal/preparing=כתום/ready=ירוק) · `.so-btn` · `.so-wait/.so-held/.so-fixed`.
+
+### ⭐ מתכנן-משלוחים `ship-*` (3198–3308)
+`.ship-plan` (`.many`=כתום) · `.ship-card`: `.ship-slots` (חלונות) · `.ship-hauls` (הובלה) · item-picker `.ship-pick`+`.ship-cat`/`.ship-bulk` · `.ship-qty-*` (כמות-לכל-משלוח). `.oc-ship-plan` (סיכום-בהזמנה). split: `.adm-pill.split.fresh`(פועם) · `.sp-split-h` · `.ch-split-note`.
+
+### ⭐ Picking sheet `sp-*` (3349–3403)
+`.sp-prog` · `.sp-line` (`.picked`=ירוק קו-חוצה / `.missing`=אדום) · `.sp-lb.pick`(✓)/`.sp-lb.miss` · `.sp-repl` (תחליף).
+
+### Store login `sl-*` (3404–3449)
+`#screen-store-login`(ink) · `.sl-store` (`.off`=עמום) · `.sl-dot`(on=ירוק).
+
+### ⭐ Courier `ch-*` (3450–3531)
+`.ch-action` (gradient teal, מספר 38) · `.ch-veh-btn` (בורר-רכב) · `.ch-stats` · **`.ch-card`** (פס-צד ready=teal/pickup=כתום/transit=כחול) · `.ch-btn` · `.ch-d-item`.
+
+### ⭐ Worker `ww-*` (3532–3554)
+`.ww-summary` (gradient כהה) · `.ww-prog` · `.ww-st`. `.tc-detail` (line-clamp 2).
+
+### ⭐ תעודת-משלוח `dn-*` (3563–3625)
+`#screen-delivery-note` · `.dn-bar` (ink + הדפסה כתום) · **`.dn-doc`** (מסמך-מודפס לבן): `.dn-head` (לוגו+מטא) · `.dn-parties` · **`.dn-table`** (טבלת-פריטים) · `.dn-totals.grand` · `.dn-sign` (חתימות) · `.dn-foot`. `.oc-dn-btn`.
+
+### accessory stock-cycle (3638–3652)
+`.asc-btn` (order=teal/wh=כתום/site=ירוק — מחזור-מצב-מלאי).
+
+---
+**טרם נקרא בקובץ הזה:** 3654–4019 (catalog product spec-sheet `cd-*` + misc — אחרון).
