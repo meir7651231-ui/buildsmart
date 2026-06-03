@@ -152,6 +152,14 @@ PER_BAND_X1 = {
     (36, 'b'): 168,    # photo column is x=12-170; diagram H tick starts at x=180
 }
 
+# PER_BAND_BOX overrides EVERYTHING — absolute (x0, y0, x1, y1) in page pixels.
+# Used when band-relative tuning isn't sufficient (photo cap above default top
+# gap, etc). Wins over PER_BAND_PHOTO_H + PER_BAND_X1.
+PER_BAND_BOX = {
+    # p32_a — L-shaped no-siphon: cap at y=140, horizontal extension ends ~y=270
+    (32, 'a'): (12, 145, 260, 273),
+}
+
 # Per-band override (page, tag) → PHOTO_H. Wins over PER_PAGE_PHOTO_H.
 # Used for bands where the photo is taller than the page average — e.g.
 # drains scale 80/50 → 140/50 → 245/50 within p21.
@@ -356,6 +364,13 @@ def crop_page(pg, tags):
     bottoms = tops[1:] + [H - 50]
     photo_count = spec_count = 0
     for tag, top, bot in zip(tags, tops, bottoms):
+        # PER_BAND_BOX absolute override — wins over all other dicts
+        if (pg, tag) in PER_BAND_BOX:
+            x0a, y0a, x1a, y1a = PER_BAND_BOX[(pg, tag)]
+            im.crop((x0a, y0a, x1a, y1a)).save(
+                f'{OUT}/sml_p{pg:02d}_{tag}.jpg', quality=85)
+            photo_count += 1
+            continue
         # Density-based: photo body has ≥25% ink (dense product silhouette),
         # diagram tick-marks have <15% (thin lines). Find last dense row.
         ph_top = top + PHOTO_TOP_GAP
