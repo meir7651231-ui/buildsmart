@@ -192,4 +192,32 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 - **splash** (`splashIn`). **`.reg-field` + `.reg-check`** (✓ ירוק שמגיח כש-`.valid`) + `.reg-confirm` (מחליק `.show`). `.welcome-hamburger`. **`.role-drawer`** (מגירה מימין + scrim).
 
 ---
-**טרם נקרא בקובץ הזה:** 2578–4019 (admin dashboards: manager/store/courier/worker · delivery-note · misc).
+
+## חלק ו׳ — onboarding(המשך) + Admin dashboards (2578–3116)
+
+### Onboarding: profession · prep · role-picker (2577–2664)
+- `#screen-profession`: `.prof-card` (כרטיס-מקצוע, אייקון 60) · `.onb-back` (`.onb-back-light`=לבן).
+- `#screen-prep` (רשימת-העמסה): `.prep-group` (ok=ירוק/warn=כתום) · `.prep-row`+`.pr-tag` (wh/order/site) · `.prep-ask` (`.pa-opt`).
+- **`.role-pick-btn`** (בורר-תפקיד במגירה).
+
+### ⭐ מעטפת Admin (2666–2708) — משותפת ל-4 הפרסונות
+`.admin-screen` · `.adm-top` (ink) · **`.adm-tabs/.adm-tab`** (`.on`=teal) · `.adm-pane`(`.on`=מוצג) · `.adm-row`(+`.ar-btn`) · `.adm-pill` (new=teal/prep=כתום/ready=ירוק/done=אפור).
+
+### ⭐ Manager dashboard `md-*` (2709–2986)
+- hero: `.md-hero` (gradient כהה + glow + grain) · `.md-live` (פועם `mdpulse`) · **`.md-rev`** (הכנסות 34px).
+- **`.md-metric`** tiles (פס-צד tone-BRAND/OK/AMBER) · `.md-alert`(אדום)/`.md-ok`(ירוק).
+- מוצרים: `.md-search` · `.md-chips` · `.md-prow` + **`.md-sw`** (toggle-זמינות ירוק).
+- **`.md-pipe`** (צינור-הזמנות) · `.md-chart` (bar קטגוריות) · `.md-store` (+medal+stats) · drill `msd-*` · `.md-rd-*` (פילוח-הכנסות).
+
+### ⭐ פאנל בדיקות-רגרסיה `reg-*` (2765–2812)
+`#regTestPanel` — `.reg-run` (כחול #1f6feb) · `.reg-summary` (ok/bad) · `.reg-prod` (ok/bad) · `.reg-check` (p/f + פירוט-שגיאה). **QA מובנה במסך-המנהל.**
+
+### Manager — Management/Orders tabs (2987–3106)
+- `mm-*` (ניהול): `.mm-sec` (אקורדיון, `.open`=teal) · `.mm-acc` · `.mm-add-btn` · `.mm-set` (k/v).
+- `mo-*` (הזמנות): `.mo-card` + **`.mo-track`** (mini: done=teal/now=כתום) · `.mo-adv` (קדם-סטטוס) · `.mo-d-track` (מלא).
+
+### Store dashboard `sh-*` (3107–…) — נמשך
+`.sh-hello/.sh-sub` · **`.sh-action`** (פעולה-ראשית gradient teal). המשך בקריאה הבאה.
+
+---
+**טרם נקרא בקובץ הזה:** 3117–4019 (Store/Courier/Worker dashboards · delivery-note · misc).
