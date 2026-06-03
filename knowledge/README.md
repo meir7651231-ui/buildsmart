@@ -124,3 +124,12 @@
 | `05,10–14,17` שאר | projects.dart; ORDERS/B2B/site/security/self-test/scenarios **לא הומרו** | ✅ |
 
 🏁 **הושלם — דלתא Flutter נשזרה בכל 17 הדוחות.** המאגר מחזיק עכשיו **3 מקורות** (אב-טיפוס בסיס · Preact · Flutter) בכל דוח.
+
+## 📚 מקור-משני — `app/knowledge/` (62 מסמכים) + `RULES.md` — סריקה-מלאה ✅
+> כל המאגר-הישן נקרא **verbatim, שורה-אחר-שורה**, ונשזר/תוקן בדוחות 01–20.
+> 🏁 **הושלם — 100% מקבצי ה-`.md` בריפו נקראו** (פרט ל-Xcode-LaunchImage boilerplate, ללא-ידע).
+- **43/43 INSP** (`INSP-0001→0044`) — מפת-בנייה (doc 18); enrichments verbatim: hub-tile-labels (אבטחה 10 @21752 / שירות 8 @22081) · PROFILE_TREE L1–L3 · worker per-group status-filter (0042↔0041) · manager 4-sections @4213 · ניגודיות(לשמש)/אקספרס.
+- **3 ADR** (no-window / dial-pattern / README) — ה-WHY; 2 חריגי-R2 + עיגון-4-פינות + bathroom-bg rationale (doc 18).
+- **4 dashboards** (COURIER/STORE/WORKER/SYSTEM_MANAGER) + **UI_ARCHITECTURE** (1560 ש׳) — אישרו docs 10/12/13 (courier-6/store-8 portals · stores · HAUL).
+- **`RULES.md` R1–R9** (אומת: R7=אין-המצאה · R8=RTL · R9=inline · R1 5-FAB-positions) · **inspector/** (prompt/checklist/loops) · **ROLE_DRAWER_SYSTEM** (5 subtitles + flows) · **IMPLEMENTATION_PROTOCOL** (deprecated).
+- ⚠️ **divergences שנתפסו (המקור `index.html` קובע — R6):** UI_ARCH profile-mockup (סולם-דרגות + 8-badges) ≠ `RANKS`/6-`identityAchievements` · SYSTEM_MANAGER מספרים/7-manage-sections/REST-API **מומצאים** · ROLE_DRAWER worker-names (דוד/אברהם/עלי) ≠ `WORKERS` (רן/עומר) · `adr/`+README קדמו-ל-R9.

@@ -27,7 +27,8 @@
 | **R7** | אסור להמציא תוכן. |
 | **R8** | RTL — בית/חיפוש מימין, חנות/עגלה משמאל. |
 | **R9** | שדות-טקסט = שורת-הקלדה inline, צמודה לעלה. |
-> ⚠️ R1–R9 ב-`RULES.md` **שונים** מסיכום-ה-R ב-`CLAUDE.md` (שם R8="אין המצאה"). `RULES.md` הוא הקובע. **גם `adr/*` + `knowledge/README` (2026-05-20) מפנים ל-"R1–R8" — קדמו ל-R9** (נוסף INSP-0014; R9=שדות-טקסט inline).
+> ⭐ **R1 — 5 הסמלים הקבועים verbatim (`RULES.md`, מיקומים מדויקים):** BS-Logo/זהות (top-right, `inset-inline-start:14px`, פותח persona-dial) · שם-persona (top-center, טקסט בלבד, לא-נלחץ) · עגלה (top-left, `inset-inline-end:14px`) · תפריט-FAB (bottom-left, `inset-inline-end:18px`) · חיפוש-FAB (bottom-right, `inset-inline-start:18px`). מותר רק `:active` scale 0.92–0.95 + z-index (ה-inset/bottom קבועים). ⚠️ **שונה מ-5 ה-bottom-tabs של האב-טיפוס** (בית/חיפוש/BS-mode/תפריט/חשבון) — Preact ארגן-מחדש ל-chrome של dial-app. (R2 verbatim: אסור אטימות >50%/blur >4px; מותר 30-45%/≤3px.)
+> ⚠️ R1–R9 ב-`RULES.md` **שונים** מסיכום-ה-R ב-`CLAUDE.md` (שם R8="אין המצאה"). `RULES.md` הוא הקובע (אומת — קריאה מלאה: R7=אין-המצאה · R8=RTL · R9=inline-input). **גם `adr/*` + `knowledge/README` (2026-05-20) מפנים ל-"R1–R8" — קדמו ל-R9** (נוסף INSP-0014; R9=שדות-טקסט inline).
 
 ## dashboards + UI + history (root) — **specs עשירים (לא כותרות)**
 - **`UI_ARCHITECTURE`** (1560 ש׳) — סדרת-spec UI/UX ב-**6 חלקים** (contractor + 4 פרסונות + role-drawer). מתעד מודל **5-FAB** (בית/חיפוש/BS-mode/תפריט/חשבון) + 4 סוגי-הצעות-חיפוש (nav/prod/acc/cat) + ATTR_SCHEMA-icons (📦🔧📏🔩🏷️→דוח 07) + בית=**8 sections**. תיאור-משני של תוכן שלכדתי מהמקור (01–17). ⚠️ **חלק-הפרופיל = mockup אידיאלי** — סולם-דרגות + 8-הישגים **שונים** מה-`RANKS`/`identityAchievements` האמיתיים (caveat דוח 05); המקור קובע (R6).
