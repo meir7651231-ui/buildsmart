@@ -279,8 +279,13 @@ fi
 # תיקון באג #19: tiered execution
 # אם אין שינוי dart/yaml — מדלגים על flutter analyze/test/build (חוסך 3-5 דק' לcommits של תיעוד)
 NEEDS_FLUTTER=$(git diff --cached --name-only | grep -E "\.(dart|yaml|yml)$" | head -1)
+# fast-gate (P2, לקח #72): rebase/amend replay — ה-commits כבר אומתו פעם.
+# דלג על test היקר (מקבץ סבב-2: "11×hook"); analyze נשאר (מהיר, תופס compile
+# מ-conflict-resolution גרוע). build web המלא עבר ל-pre-push (תנאי-יציאה-מהתור).
+IS_REPLAY=""
+case "${GIT_REFLOG_ACTION:-}" in rebase*|*amend*|*cherry-pick*) IS_REPLAY=1;; esac
 if [[ -n "$NEEDS_FLUTTER" ]]; then
-    # שער 31: ניתוח קוד — שגיאות בלבד
+    # שער 31: ניתוח קוד — שגיאות בלבד (תמיד, גם ב-replay — זול)
     ANALYZE=$(flutter analyze --no-pub 2>&1)
     if echo "$ANALYZE" | grep -qE "^error •"; then
         ERR_COUNT=$(echo "$ANALYZE" | grep -cE "^error •")
@@ -288,6 +293,10 @@ if [[ -n "$NEEDS_FLUTTER" ]]; then
         err "31" "$ERR_COUNT שגיאות ניתוח" "תקן את השגיאות"
     fi
 
+  if [[ -n "$IS_REPLAY" ]]; then
+    echo "  ⏩ rebase/amend replay — מדלג על test (אומת קודם; pre-push יריץ build מלא)"
+    TEST_OUT=""
+  else
     # שער 32: בדיקות לא נכשלות מעבר ל-baseline (תיקון באג #19 — baseline tracking)
     # baseline מאוחסן ב-STATUS.md: "known-failing: N" — מאפשר pre-existing failures
     TEST_OUT=$(flutter test --no-pub --concurrency=4 2>&1)
@@ -322,12 +331,12 @@ if [[ -n "$NEEDS_FLUTTER" ]]; then
     if [[ -n "$TEST_COUNT" && "$TEST_COUNT" -lt "$LAST_TEST_COUNT" ]]; then
         err "33" "מספר בדיקות ירד: $TEST_COUNT < $LAST_TEST_COUNT" "אל תמחק בדיקות"
     fi
+  fi  # סוף IS_REPLAY guard
 
-    # שער 34: בנייה לאינטרנט
-    BUILD_OUT=$(flutter build web --release --no-pub 2>&1)
-    if echo "$BUILD_OUT" | grep -qE "^Error|Failed to"; then
-        err "34" "בנייה נכשלה" "תקן שגיאות בנייה"
-    fi
+    # שער 34: בנייה לאינטרנט — עבר ל-pre-push (fast-gate, לקח #72).
+    # build web release הוא ~2-4 דק'; ב-pre-commit זה הרג איטרציה (3 סוכנים).
+    # עכשיו רץ פעם אחת ב-push (תנאי-יציאה-מהתור) + CI. analyze+test כאן עדיין
+    # תופסים את רוב הרגרסיות לפני ה-push.
 
     # שערים 35-40: קבצי בדיקה חיוניים קיימים (לא נמחקו).
     # תיקון לקח #55 (דיווח Finder): הצורה הישנה (`grep -q "$critical" $TEST_OUT`)
