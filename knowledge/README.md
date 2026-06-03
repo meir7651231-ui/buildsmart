@@ -34,6 +34,7 @@
 | `05-data-orders-projects-ranks.md` | סדר-הרכבה/פרויקטים/דרגות/זהות | 6323–6560 |
 | `06-logic-settings-projects.md` | לוגיקה: הגדרות/פרופיל/פרויקטים/תקציב/סטטוס | 6560–7700 |
 | `07-logic-orders-tasks-search.md` | לוגיקה: הזמנות/משימות/מלאי/ניווט/חיפוש | 7701–9000 |
+| `08-logic-product-cart-checkout.md` | ליבת מוצר/עץ/אביזרים/סורק/סל/checkout | 9000–11000 |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
@@ -51,7 +52,8 @@
 | 6321–6560 | JS — ORDERS/PROJECTS/RANKS/זהות | ✅ נלכד | `05-data-orders-projects-ranks.md` |
 | 6561–7700 | JS — לוגיקה: הגדרות/פרופיל/פרויקטים/תקציב/סטטוס | ✅ נלכד | `06-logic-settings-projects.md` |
 | 7701–9000 | JS — הזמנות/משימות/מלאי/ניווט/חיפוש | ✅ נלכד | `07-logic-orders-tasks-search.md` |
-| 9001–22414 | JS — cart/checkout/diagrams/personas/engine | ⬜ טרם | `08+`… |
+| 9001–11000 | JS — ליבת מוצר/עץ/אביזרים/סורק/סל/checkout | ✅ נלכד | `08-logic-product-cart-checkout.md` |
+| 11001–22414 | JS — renderCart/B2B/SUPPLIER_STORES/SYS_ORDERS/personas/engine | ⬜ טרם | `09+`… |
 
 ## מפת-ניווט ל-JS (5440–22414) — roadmap לקריאה, **טרם נלכד**
 > רשימת שמות+שורות בלבד, להכוונת הקריאה הרציפה. **התוכן ייחשב נלכד רק אחרי
