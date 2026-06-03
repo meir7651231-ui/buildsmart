@@ -1,6 +1,6 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.89` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.90` (see `home_shell.dart`). Update on each user-visible change._
 
 ## Catalog search — SKU no longer pollutes numeric size queries (v5.89)
 `catalogProductMatchesQuery` folded the SKU into the haystack as a loose

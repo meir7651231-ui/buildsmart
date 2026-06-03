@@ -689,3 +689,19 @@ rather than pixel rendering.
   product now opens a כרטיס-חכם.
 - Guard: `smartproduct_contract_test` Huliot test → 13 cards (+smlSpareParts) +
   sku→card spot-check + ≥170 mapped. Mutation-verified. Pure data.
+
+## Unified-catalog reads — Huliot/PPR card, search & favorites/cart (v5.90)
+Consolidates three fixes onto origin (the v5.85–v5.87 work, re-applied after
+origin advanced to v5.89):
+- **Blank card:** the search-result onTap built the sheet's sibling list from
+  kLipskeyCatalog (empty for Huliot/PPR) → the variant pager threw
+  "Invalid argument(s): 0" → blank card. Fix: build from kCatalogProducts +
+  guard `categoryProducts.isEmpty ? [product]` in showLipskeyProductSheet.
+- **SKU search:** matchProducts (results) iterated kLipskeyCatalog → a Huliot
+  SKU (64032300) returned nothing. Fix: matchProducts runs over kCatalogProducts
+  (catalogProductMatchesQuery already matches sku for >=5-char queries).
+- **Favorites & cart:** favorites (×2), openCartLineProductSheet + cartLineDisplay,
+  and the favorites-tile sibling call-site → kCatalogProducts.
+Intentionally Lipskey-scoped: searchSuggestions (autocomplete, pinned by
+search_suggestions_test) + the connection-planner count (install_engine Lipskey).
+Rule in CONVENTIONS.md. Guards: huliot_card_render_test (2) + huliot_search_test (2).

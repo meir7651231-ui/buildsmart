@@ -230,10 +230,12 @@ void openCartLineProductSheet(BuildContext context, SmartCartLine line) {
   final key = line.productKey;
   if (key.startsWith('lip:')) {
     final sku = key.substring(4);
-    final i = kLipskeyCatalog.indexWhere((p) => p.sku == sku);
+    // Unified catalog: a cart line keyed 'lip:<sku>' may be a Huliot/PPR product
+    // (they share the lip: prefix), so resolve + sibling-list over kCatalogProducts.
+    final i = kCatalogProducts.indexWhere((p) => p.sku == sku);
     if (i >= 0) {
-      final product = kLipskeyCatalog[i];
-      final siblings = kLipskeyCatalog
+      final product = kCatalogProducts[i];
+      final siblings = kCatalogProducts
           .where((p) => p.categoryHe == product.categoryHe)
           .toList();
       showLipskeyProductSheet(context, product, siblings);
@@ -253,9 +255,10 @@ void openCartLineProductSheet(BuildContext context, SmartCartLine line) {
 ({String name, String attrs}) cartLineDisplay(SmartCartLine line) {
   if (line.productKey.startsWith('lip:')) {
     final sku = line.productKey.substring(4);
-    final i = kLipskeyCatalog.indexWhere((p) => p.sku == sku);
+    // Unified: cart-line display must resolve Huliot/PPR 'lip:'-keyed lines too.
+    final i = kCatalogProducts.indexWhere((p) => p.sku == sku);
     if (i >= 0) {
-      final p = kLipskeyCatalog[i];
+      final p = kCatalogProducts[i];
       final type = p.productType;
       String name;
       if (type != null) {
@@ -1974,12 +1977,17 @@ class _SearchResultsList extends ConsumerWidget {
     // never hits a dead end. Final fallback: `fuzzySearchProducts` (closes
     // step 62 — the helper is now wired into the UI search path) — used only
     // when both AND and OR fail so it never disturbs the happy path.
+    // Results search MUST run over the UNIFIED catalog (Lipskey + Polyroll +
+    // Huliot), not kLipskeyCatalog — otherwise Huliot/PPR products (and their
+    // SKUs, e.g. 64032300) are silently unsearchable. catalogProductMatchesQuery
+    // already matches the sku field. (Autocomplete searchSuggestions stays
+    // Lipskey-scoped by design — see CONVENTIONS "Catalog reads".)
     List<LipskeyCatalogProduct> matchProducts() {
-      final and = kLipskeyCatalog
+      final and = kCatalogProducts
           .where((p) => catalogProductMatchesQuery(p, query))
           .toList();
       if (and.isNotEmpty) return and;
-      final or = kLipskeyCatalog
+      final or = kCatalogProducts
           .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
           .toList();
       if (or.isNotEmpty) return or;
@@ -2089,7 +2097,11 @@ class _SearchResultsList extends ConsumerWidget {
               ],
             ),
             onTap: () {
-              final cat = kLipskeyCatalog
+              // Sibling list MUST come from the unified catalog: kLipskeyCatalog
+              // is empty for Huliot/PPR categories, so the sheet's variant pager
+              // throws "Invalid argument(s): 0" on the empty list → blank card.
+              // kCatalogProducts always contains >=1 (the product itself).
+              final cat = kCatalogProducts
                   .where((x) => x.categoryHe == p.categoryHe)
                   .toList();
               showLipskeyProductSheet(context, p, cat);
@@ -2373,7 +2385,7 @@ class _AllOverview extends ConsumerWidget {
                     .isNotEmpty)
             .toList();
     final favProducts = filterBySystem(
-            kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).toList(),
+            kCatalogProducts.where((p) => favSkus.contains(p.sku)).toList(),
             systemFilter)
         .take(3)
         .toList();
@@ -6790,7 +6802,7 @@ class _FavoritesSection extends ConsumerWidget {
     }
     // Scope favorites to the active water system (Benzi #1, option 2).
     final products = filterBySystem(
-        kLipskeyCatalog.where((p) => favSkus.contains(p.sku)).toList(),
+        kCatalogProducts.where((p) => favSkus.contains(p.sku)).toList(),
         ref.watch(catalogSystemFilterProvider));
     return Column(
       children: [
@@ -6847,7 +6859,7 @@ class _FavProductRow extends ConsumerWidget {
       subtitle: Text(product.brand,
           style: const TextStyle(color: Color(0xFF9AA3B2), fontSize: 11)),
       onTap: () => showLipskeyProductSheet(context, product,
-          kLipskeyCatalog.where((p) => p.categoryHe == product.categoryHe).toList()),
+          kCatalogProducts.where((p) => p.categoryHe == product.categoryHe).toList()),
     );
   }
 }

@@ -28,7 +28,11 @@ void showLipskeyProductSheet(
     backgroundColor: Colors.transparent,
     builder: (_) => LipskeyProductSheet(
       product: product,
-      categoryProducts: categoryProducts,
+      // Never hand the sheet an empty sibling list: its variant pager indexes
+      // the list and throws "Invalid argument(s): 0" on length 0 (blanking the
+      // whole card). Fall back to the product itself so it always renders.
+      categoryProducts:
+          categoryProducts.isEmpty ? [product] : categoryProducts,
     ),
   );
 }

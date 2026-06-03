@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.89 · 1.6.48 · 🔎 חיפוש — שאילתת-מספר ("20"/"200") לא מחזירה יותר מוצרים שה-SKU שלהם מכיל את המספר במקרה (היו 55% זבל); SKU נתפס רק ב-5+ תווים',
+                          'v5.90 · 1.6.48 · 🔗 איחוד-קטלוג: מק"ט/שם של חוליות+PPR נמצאים בחיפוש, כרטיס לא-ריק, ומועדפים/שורת-עגלה נפתרים (kCatalogProducts לכל קריאת-קטלוג רוחבית)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
