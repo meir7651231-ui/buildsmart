@@ -51,6 +51,7 @@
 | `20-infra-build-tooling-protocol.md` | build/native(Capacitor)/CI/extract-catalog/protocol | תשתית |
 | `21-protocols-spine-gates-enforcement.md` | ⭐ עולם-הפרוטוקולים (1): MASTER_PROTOCOL R1–R9 · 116 שערים · 4 שכבות-אכיפה · scripts/CI | app_flutter (whats-happening) |
 | `22-protocols-agents-process-specialized.md` | ⭐ עולם-הפרוטוקולים (2): 6 סוכנים · PLAYBOOK · סולם L0–L7 · 10 פרוטוקולים-ייעודיים · 15 ADRs · stuck_log | app_flutter (whats-happening) |
+| `23-flutter-architecture-state-cardflow.md` | ⭐ Flutter: ארכיטקטורה · 41 providers · SmartProduct card-flow(42) · 47 helpers · 5 engines · launch-readiness | app_flutter (whats-happening) |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
@@ -144,12 +145,12 @@
 - ⚠️ **divergences שנתפסו (המקור `index.html` קובע — R6):** UI_ARCH profile-mockup (סולם-דרגות + 8-badges) ≠ `RANKS`/6-`identityAchievements` · SYSTEM_MANAGER מספרים/7-manage-sections/REST-API **מומצאים** · ROLE_DRAWER worker-names (דוד/אברהם/עלי) ≠ `WORKERS` (רן/עומר) · `adr`+README קדמו-ל-R9.
 
 ## ⭐ אימות-מקור — קוד Preact + Flutter נקרא line-by-line ✅
-> הדלתאות (מקור 2+3) נבנו תחילה מ-**תיאורים** (INSP/legacy-map) — עכשיו **אומתו מול קוד-המקור האמיתי** (Preact 55 קבצים/15,841 ש׳ + Flutter 27/8,482). רוב CONFIRMED; **תיקונים שנמצאו ותוקנו:**
+> ⚠️ **סעיף זה תיעד אימות מול ה-snapshot המיושן של Flutter (27/8,482).** ה-**Preact** (55/15,841) תקף; ה-**Flutter האמיתי** (123/61,550) נקרא-מחדש בנפרד — ראה מקור-3 + דוחות 21–23. תיקוני-ה-Preact למטה תקפים:
 - `LEAF_BINDINGS`=**72** (לא ~70) · service-hub=**15** (לא ~16) · `AppSettings`=**6 מפתחות** (+security) → doc 06/17.
 - `fabs.tsx`=**2 FABs** (menu+search); BS/שם/עגלה ב-`FloatingHeader` — 5 ה-R1-elements מפוצלים 2+3 (doc 02 כבר מדויק).
-- **Flutter ~30 מוצרים** (smart_tree, brands), לא 202; `catalog.dart`=11 קטגוריות; Flutter search-dial=**4 כלים** (בלי קטלוג) → doc 03/07.
+- ~~Flutter ~30 מוצרים~~ → **בוטל (snapshot מיושן). האמת: 1,337 מוצרים / 3 מותגים** (דוח 03/19). Flutter search-dial=4 כלים — תקף.
 - Preact `registry.ts`=**21 כפתורים** (מול ~350 בפרוטוטייפ) → doc 11.
-- **parity-insight:** שני ה-ports = shell+dial מלאים, leaves=toast `'בבנייה'`; Flutter הוסיף תוכן-דמו עשיר ב-chats(6)/notif(9)/store(8) → doc 02.
+- ⚠️ **parity-insight תוקן:** Preact = shell+leaves=toast. **אבל Flutter האמיתי בוגר** (Install-Studio · checkout · 155-בדיקות · 116-שערים) — **לא** 'shell+toast'. ראה דוחות 02/08/19/23.
 - ✅ **CONFIRMED:** voice/barcode אמיתיים (web + native) · brands: Preact גזם / Flutter שחזר (מותג סטנדרט/כלכלי/פרימיום) · brand-color: teal `#1f6f6b` (Preact) ↔ orange `#FF7A18`+`#E85F00` (Flutter) · `shared_preferences` persist אמיתי (Flutter) · 202 מוצרים + tokens + dark-theme `#3a9e99` (Preact).
 🏁 **3 המקורות אומתו ברמת-קוד.**
 

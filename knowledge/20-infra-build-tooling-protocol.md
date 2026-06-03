@@ -32,6 +32,7 @@
 - **`.claude/hooks/session-start.sh`** — מפעיל `core.hooksPath=.githooks` + סיכום.
 - **`.github/workflows/protocol-enforce.yml`** + **`scripts/preflight.sh`** (exit 0 ידידותי על ענפים אחרים).
 > **תיקון-המשתמש (סשן זה):** כל אלה הוגבלו לרוץ **רק על `whats-happening`** → ענפים חדשים (`nice-volta`) מקבלים commits חופשיים. זו הסיבה שהמאגר הזה נבנה כאן.
+> 📖 **עולם-הפרוטוקולים הזה (Flutter/whats-happening) מתועד במלואו בדוחות 21–22** — 116 שערים · 4 שכבות-אכיפה · 6 סוכנים · `catalog_qa.py` · `stuck_log`. סעיף זה = תקציר-התשתית בלבד; הדוקטרינה המלאה שם. (זה **נפרד** מה-Inspector של Preact/legacy בדוח 18.)
 
 ---
 **הקשר:** הליבה-התפעולית של הפרויקט — איך 3 המקורות נבנים, נארזים-ל-native, נפרסים, ונאכפים. ה-`extract-catalog.mjs` הוא הקשר-החי בין אב-הטיפוס ל-Preact.
