@@ -76,7 +76,7 @@ faucet:{productType:"מוצר ראשי", name:'ברז לכיור', img:'🚰', c
 
 ➕ **נוסף:** **תמונות-אמת** (`image:/catalog/pl_*.jpg`) · helpers (`childrenOf`/`productsForPath`/`productById`/`categoryById`) · `accessoryProduct` flag · `material`.
 
-➖ **הוחסר/שונה:** ה-**`brands[]`** (בחירת-מותג של מוצרי-rich) **אינו** ב-`CatalogProduct` — הועבר ל-`variants.ts` או נגזם (ראה דוח 04). שלבי-פרויקט (infra/sealing/…) — לבדוק אם שרדו ב-PRODUCTS.
+➖ **הוחסר/שונה:** ה-**`brands[]`** (בחירת-מותג) **נגזם** (אין ב-`CatalogProduct`; `grep brand`→0). ✅ **שלבי-הפרויקט שרדו** — infra/sealing/tiling/cable/profile קיימים ב-Preact כ-5 קטגוריות (אומת).
 
 ---
 
@@ -86,4 +86,4 @@ faucet:{productType:"מוצר ראשי", name:'ברז לכיור', img:'🚰', c
 ⬆️ **שחזר + שודרג:** `SmartProduct {key, name, emoji, cat, brands[], acc[]}` + helpers `mustCount`/`recBrand`.
 - ⭐ **ה-`brands[]` שוחזרו** (`SmartBrand {name, price, tag, rec}`) — **בניגוד ל-Preact שגזם אותם!** Flutter קרוב יותר לסכמת-rich של אב-הטיפוס.
 - `SmartAcc {name, emoji, price, why, must}` = עץ-האביזרים (אותו must/why). `kSmartProducts` + `kSmartTreeCats`.
-➖ (מול אב-הטיפוס) ה-`pl_` (23 SKU מ-PDF) + שלבי-פרויקט — סט-מוצרים מצומצם/נבחר ב-`kSmartProducts` (לא כל ~200 ה-SKU).
+➖ (מול אב-הטיפוס) `kSmartProducts` = **סט-rich נבחר** — בלי ה-`pl_` (23 SKU מ-PDF) **ובלי שלבי-הפרויקט** (infra/sealing/… → 0 ב-smart_tree, בניגוד ל-Preact ששמר אותם).

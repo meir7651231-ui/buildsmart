@@ -31,7 +31,7 @@
 
 ## 🔄 Preact (`app/src/`) — דלתא מול אב-הטיפוס (מנוע-מסחר)
 ⬆️ `SUPPLIER_STORES`+`STORE_PRICING` → **`suppliers.ts`** (auto-gen מ-index.html): `SUPPLIERS`(s1/s2/s3, אותם shipping/eta) + `STORE_PRICING`(per-store SKU) + `DEFAULT_SUPPLIER_ID='s1'`, מטוייפים.
-➖ **הסל פושט:** `app-store.ts` — `cart`/`setQty`/`incQty`/`decQty`/`cartCount` (signals בלבד). `computeCheckout`/`SYS_ORDERS`/split-shipment/VAT — **לא אומתו** בשכבת-Preact (פרסונות placeholder; ה-checkout-engine המלא כנראה לא הומר).
+➖ **הסל פושט:** `app-store.ts` — `cart`/`setQty`/`incQty`/`decQty`/`cartCount` (signals בלבד). ✅ **אומת (grep=0):** `computeCheckout`/`SYS_ORDERS`/`syncOrderToSystem`/`checkout`/split-shipment/VAT — **לא הומרו ל-Preact כלל** (פרסונות placeholder, אין מנוע-checkout).
 
 ---
 
