@@ -23,13 +23,13 @@
 | פרסונות (5) | ✅ דשבורדים מלאים | 🟡 store; השאר placeholder | 🟡 store-tab; sections לשאר | 12 |
 | **chat** | ✅ Category-F (overlay) | ➖ | ✅ **טאב מלא** ⭐ | 16 |
 | **התראות** | ✅ פאנל-appbar | 🟡 count signal | ✅ **טאב מלא** ⭐ | 09 |
-| B2B (RMA/RFQ/השכרה/MSDS/planner) | ✅ Category-A | ➖ | ➖ | 14 |
-| מרכז-פיננסים (B) | ✅ | ➖ | 🟡 kFinanceHub (dial) | 15 |
+| B2B (RMA/RFQ/השכרה/MSDS/planner) | ✅ Category-A | 🟡 dial-leaves (labels; flow=toast) | ➖ | 14 |
+| מרכז-פיננסים (B) | ✅ | 🟡 dial-leaf | 🟡 kFinanceHub (dial) | 15 |
 | ניהול-אתר (C: גאנט/ליקויים/נוכחות) | ✅ | ➖ | ➖ | 15 |
-| AI-hub (predict/alternatives/3way) | ✅ Category-G | ➖ | ➖ | 16 |
-| תגמולים / portal (H/F) | ✅ | ➖ | ➖ | 16 |
-| אבטחה / RBAC (I) | ✅ Category-I | 🟡 row בהגדרות | 🟡 row בהגדרות | 17 |
-| שירות / chatbot (J) | ✅ Category-J | 🟡 row | 🟡 row | 17 |
+| AI-hub (predict/alternatives/3way) | ✅ Category-G | 🟡 dial-leaf (label) | ➖ | 16 |
+| תגמולים / portal (H/F) | ✅ | 🟡 dial-leaves (מועדון 7) | ➖ | 16 |
+| אבטחה / RBAC (I) | ✅ Category-I | 🟡 dial-subtree (~23 leaves) | 🟡 settings rows | 17 |
+| שירות / chatbot (J) | ✅ Category-J | 🟡 dial-subtree (~16) | 🟡 settings rows | 17 |
 | סורק-תוכניות + סדר-הרכבה | ✅ | ➖ | 🟡 / ➖ | 08 |
 | self-test (BUTTON_REGISTRY ~350) | ✅ | 🟡 test/ ממוקד | ➖ (בענף זה) | 11 |
 | PWA / offline | ✅ service-worker | ✅ (vercel build) | ✅ flutter-web | 17 |
@@ -40,7 +40,7 @@
 ---
 ## תובנת-העל
 - **אב-טיפוס** = ה-100% — כל פיצ'ר קיים (גם אם כהדמיה).
-- **Preact** = **ליבת-ה-dial הממוקדת** — תרגם את הקנייה (קטלוג/חיפוש/הגדרות/סל) ל-dial, השמיט את כל ה-hubs/B2B/personas-מלאות.
+- **Preact** = **dial-shell** שתרגם את **כל התוכן** (כולל hubs/B2B/rewards/security/service) ל-**dial-leaves verbatim** (117 leaves ב-PROFILE_TREE+SETTINGS_SUB; R6). 🔧 אבל **המימוש-הפונקציונלי** של ה-hubs = drill/toast placeholder, לא flows. (טעות קודמת: "השמיט hubs" — שגוי; השמיט רק את ה-flows, לא את ה-leaves.)
 - **Flutter** = **native dial-shell שמשחזר עומק** — מותג כתום · device-APIs אמיתיים · brands+finance-hub חזרו · **chat+התראות כטאבים-מלאים** (מעבר לשני הקודמים) · אך עדיין בלי B2B/AI/site/security-מלא/checkout-engine.
 - **שלושה דברים שרק ב-Flutter:** native, device-APIs אמיתיים, chat+notifications כטאבים.
-- **שלושה דברים שרק באב-הטיפוס:** B2B (Category-A) · AI-hub · ניהול-אתר/תגמולים מלאים · checkout-engine + SYS_ORDERS.
+- **רק באב-הטיפוס (כ-flows פונקציונליים מלאים):** B2B (Category-A) · AI-hub · ניהול-אתר (C) · checkout-engine + SYS_ORDERS. (ה-labels/structure שלהם **כן** ב-Preact כ-dial-leaves; ב-Flutter — חלקית, kFinanceHub.)

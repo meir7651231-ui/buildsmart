@@ -27,7 +27,7 @@
 ---
 
 ## 🔄 Preact — דלתא מול אב-הטיפוס
-➖ **כל Category-A לא הומר ל-Preact** — מתכנן-משלוחים · RMA · השכרת-כלים · פקדונות · חתימה · MSDS · doc-scan · gov-XML · RFQ. Preact = shell ממוקד (catalog + dials + store-view), בלי שכבת-B2B. (אין קומפוננטות מתאימות ב-`app/src`.)
+🔧 **תיקון (grep):** שירותי-B2B **כן מופיעים ב-Preact כ-dial-leaves verbatim** — מכרז ספקים · השכרת כלים · גיליונות בטיחות (×3 כ"א). → התוכן **ported כ-leaves**; אבל הפונקציונליות (planner/RMA/RFQ/MSDS flows) = drill/toast placeholder, **לא רצה** (אין קומפוננטות-flow ב-`app/src`).
 
 ---
 

@@ -53,6 +53,7 @@
 - **8 קבוצות (sheet) → `SETTINGS_ROWS` 9 קבוצות (dial):** account · notifications · display · accessibility · security · support · delivery · region · about (+reset). אותן קבוצות, כ-dial-rows (R3).
 - **`SETTINGS_SUB`** = `Record<SettingsGroupId, Node[]>` — עץ-dial עמוק לכל קבוצה (`Node={label, children?}`). `walkSettings` מנווט; רנדרים `SettingsTopSubmenu`/`SettingsSubmenu`/`SettingsTreeSubmenu`.
 - **`SETTINGS_LABELS` → `LEAF_BINDINGS`** = `Record<string, Binding>` (key=`'group>label>label'`) — **~70 עלים מחווטים** (פירוט מ-`wip-menu-wiring.md`: security 23 · support 15 · region 7 · display 6 · delivery 5 · about 4 · account 4-R9 · notif 4 · accessibility 1 · reset 1). persist: **`bs.settings.v1`** (app-settings) + **`bs.profile.v1`** (user-profile); toast 3200ms. smoke 21/21 · runRegression 236/236.
+- ⭐ **סה"כ PROFILE_TREE + SETTINGS_SUB = 117 labels** — כולל **subtrees מלאים** של מרכז-אבטחה (~23) · מרכז-שירות (~16) · מועדון/תגמולים (7) · מרכז-פיננסים · B2B-services (verbatim, R6). כלומר ה-hubs **כן ported כ-dial-leaves** (לא רק 9 הקבוצות) — ראה תיקונים בדוחות 14–17.
 - profile → **`PROFILE_TREE`** (עץ כרטיס-קבלן/דרגות/הישגים כ-dial), מול מסך-הפרופיל.
 
 ➕ **נוסף:** **R9 — עריכת-leaf inline** (`editingLeafKey` → `.dial__input` מחליף label). אין באב-הטיפוס (שם `editAccountField`=prompt/sheet).

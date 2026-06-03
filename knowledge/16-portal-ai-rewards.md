@@ -17,7 +17,8 @@
 ---
 
 ## 🔄 Preact — דלתא מול אב-הטיפוס
-➖ **לא הומרו ל-Preact:** פורטל ספק/שליח (F, כולל chat) · מרכז-AI (G) · תגמולים (H).
+🔧 **תיקון (INSP-0038 + grep):** **מועדון/תגמולים (H) כן נשזרו** ל-PROFILE_TREE כ-dial-leaves verbatim: 🎯 אתגרים חודשיים · 🏆 לוח מובילים · 🌿 תגי ירוק · 📍 קופונים · 👥 הזמן חבר · 💎 מועדון VIP · 🎁 מימוש (`rw*` @ :21464-21471). "בינה מלאכותית" (G) גם מופיע כעלה. → **התוכן ported (לא 'נעדר')**, אך הפונקציונליות = drill/toast.
+➖ **לא הומרו (מימוש):** portal ספק/שליח (F, כולל chat) · מנוע-AI מלא (G: predict/alternatives/3way/weather) · flows של תגמולים. (voice+barcode כן אמיתיים — דוח 07.)
 ⬆️ **חריג:** **voice + barcode** (שהיו ב-AI-hub G) **הועברו ל-search-FAB** ב-Preact (`lib/voice.ts`/`barcode.ts` = **Web Speech API + BarcodeDetector אמיתיים**, לא הדמיה — `legacy-map.md`). שאר ה-AI (predict/alternatives/3way/weather/wear) + תגמולים + portal — נעדרים.
 
 ---
