@@ -278,3 +278,24 @@ cart/orders→cart, catnav→catalog).
 
 ## הערת-ארכיטקטורה (5415)
 האפליקציה רצה standalone לחלוטין — לכל נתיב-נתונים יש fallback בזיכרון, אין שכבת-data חיצונית. (בנייה קודמת טענה `apiService.js` כאן; זה שבר את האפליקציה ב-viewers מבודדים.)
+
+---
+
+## 🔄 Preact (`app/`) — דלתא מול אב-הטיפוס (מעטפת)
+> ה-Preact (החי בפרודקשן) תרגם את אב-הטיפוס ל-**dial pattern** (R1–R9). מקור: `app/src/`.
+> הארכיטקטורה (`app/src/app.tsx`): `.screen` > `.screen__bg` + **`FloatingHeader`** + **`main.content`** (view יחיד לפי-פרסונה) + `Fabs` + `MenuSpeedDial` + `SearchPanel` + `BsDial` + `ProductSheet` + `Toast`.
+
+⬆️ **שודרג (תורגם):**
+- **מסכים-מלאים → dials (R2).** אין החלפת-מסך-מלא; כל יעד-תפריט חי ב-dial. ה-views של אב-הטיפוס (home/catalog/cart/project/sites/scan/orders/stock/tasks) הומרו ל-speed-dials.
+- **tabbar (5) → `MenuSpeedDial` (4 טאבים):** בית/הפרויקטים/רכש/הגדרות. **קטלוג עבר ל-search-FAB** (`app-store.ts`: "קטלוג moved to the search FAB").
+- **appbar → `FloatingHeader`:** לוגו **BS** (→`toggleBs`, פותח BsDial) + שם-פרסונה + עגלה(+badge). פעמון → `notificationCount` signal.
+- **routing → לפי-פרסונה** (`ActiveView`): manager/store/courier/worker/contractor(=Home). אין נתיבי-view.
+- state ב-**signals** (`@preact/signals`, `app-store.ts`): `menuOpen`/`searchOpen`/`bsOpen` · `menuActiveTab`/`categoryPath`/`settingsLevel`/`profilePath` (drill) · `cart`/`cartCount` · `editingLeafKey`.
+
+➕ **נוסף:**
+- **R3 — הגדרות dial-בלבד:** `settingsLevel`(top/profile/advanced), 9 קבוצות (`SettingsGroupId`), drill-paths, ו-**R9 עריכת-leaf inline** (`editingLeafKey`/`startEditingLeaf`).
+- **R1 — FABs קבועים** (`fabs.tsx`): תפריט ☰ + חיפוש 🔍 (BS בהדר).
+
+➖ **הוחסר / placeholder:**
+- **12 מסכי-onboarding** (splash/welcome/login/profession/prep) — אין; כניסה לפי-פרסונה ישירה.
+- **דשבורדי-פרסונה** (`views/*.tsx`, 11–302 ש') — placeholder מינימלי (R2), מול המסכים-המלאים באב-הטיפוס.
