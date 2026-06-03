@@ -25,7 +25,7 @@
 | **התראות** | ✅ פאנל-appbar | 🟡 count signal | ✅ **טאב מלא** ⭐ | 09 |
 | B2B (RMA/RFQ/השכרה/MSDS/planner) | ✅ Category-A | 🟡 dial-leaves (labels; flow=toast) | ➖ | 14 |
 | מרכז-פיננסים (B) | ✅ | 🟡 dial-leaf | 🟡 kFinanceHub (dial) | 15 |
-| ניהול-אתר (C: גאנט/ליקויים/נוכחות) | ✅ | ➖ | ➖ | 15 |
+| ניהול-אתר (C: גאנט/ליקויים/נוכחות) | ✅ | 🟡 site-hub 10 leaves | ➖ | 15 |
 | AI-hub (predict/alternatives/3way) | ✅ Category-G | 🟡 dial-leaf (label) | ➖ | 16 |
 | תגמולים / portal (H/F) | ✅ | 🟡 dial-leaves (מועדון 7) | ➖ | 16 |
 | אבטחה / RBAC (I) | ✅ Category-I | 🟡 dial-subtree (~23 leaves) | 🟡 settings rows | 17 |

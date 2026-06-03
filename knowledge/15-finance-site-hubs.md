@@ -25,7 +25,7 @@
 ---
 
 ## 🔄 Preact — דלתא מול אב-הטיפוס
-🔧 **תיקון (grep):** **מרכז-פיננסים (B) מופיע ב-Preact כ-dial-leaf verbatim** (×2) — התוכן ported כ-leaf, הפונקציונליות (מדד/ROI/calculators) = drill/toast, לא רצה. ➖ ניהול-אתר (C: גאנט/ליקויים/נוכחות/יומן) — **לא נמצא** ב-Preact.
+🔧 **תיקון (INSP-0039 + grep):** **מרכז-פיננסים (B) = subtree של 10 dial-leaves** ב-Preact (לא leaf בודד), verbatim — התוכן ported, הפונקציונליות (מדד/ROI/calculators) = drill/toast, לא רצה. **site-hub (C) גם נשזר — 10 dial-leaves** (INSP-0037!) — תיקון נוסף: ניהול-אתר **כן** ב-Preact כ-leaves (לא 'נעדר'), אך הגאנט/ליקויים-flows לא רצים.
 
 ---
 

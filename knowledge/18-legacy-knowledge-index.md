@@ -44,5 +44,11 @@
 - `#1–11` frame/dial foundation · `#13–21` settings/support/security/R9/profile · `#22–24` persona-skeletons (store/courier/worker) · `#25–32` BsDial drill (store/courier/worker/manager + deepening) · `#33–35` menu-tabs→dial (קטלוג/רכש/בית) · `#36–40` home-deepening (**AI 9** · **site-hub 10** · **rewards 7** · **finance** · plan/stock) · `#41–43` worker-statuses (5×3) + deferred (16 leaves) · **`#44` catalog→search-FAB** (מאשר דוח 07).
 → מספק את הספירות-המדויקות לתיקון ה-hub-leaves (דוחות 14–17).
 
+**`agent-board.md`** (לוח deep↔fast) מוסיף:
+- **ספירות-עומק** (ה-hubs הם **subtrees**, לא leaf בודד): אבטחה 23 · שירות 15 · **finance 10** · site 10 · AI 9 · store-portal 8 · courier-portal 6 · cart-supply-chain 6 · catalog 11-cats · manager-לוח-בקרה 5.
+- ⭐ **3 ריברטים (R2 נאכף בכוח):** INSP-0016/0017 (SitesView/ProfileView כ-`<main>` swap) + Phase-0 dashboards כ-views → **כולם reverted**; הוחלפו ב-dial-drill.
+- סיכום: **~200+ leaves verbatim · 6/6 hubs מוטמעים · 0 חלונות**.
+- **sections שנדחו** (חוסר emoji verbatim): Manager הזמנות/לקוחות · Store הזמנות/מלאי · Courier pickup/active · קבלן (כל ה-tab).
+
 ---
 **הקשר:** זו ההיסטוריה-המוסדית של תרגום-אב-הטיפוס→Preact. ה-ADRs + R1–R9 הם ה-WHY מאחורי ה-dial pattern שתועד בדלתאות (01/02). מקור-משני — אינדקס, לא תעתוק.
