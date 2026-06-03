@@ -132,4 +132,14 @@
 - **3 ADR** (no-window / dial-pattern / README) — ה-WHY; 2 חריגי-R2 + עיגון-4-פינות + bathroom-bg rationale (doc 18).
 - **4 dashboards** (COURIER/STORE/WORKER/SYSTEM_MANAGER) + **UI_ARCHITECTURE** (1560 ש׳) — אישרו docs 10/12/13 (courier-6/store-8 portals · stores · HAUL).
 - **`RULES.md` R1–R9** (אומת: R7=אין-המצאה · R8=RTL · R9=inline · R1 5-FAB-positions) · **inspector/** (prompt/checklist/loops) · **ROLE_DRAWER_SYSTEM** (5 subtitles + flows) · **IMPLEMENTATION_PROTOCOL** (deprecated).
-- ⚠️ **divergences שנתפסו (המקור `index.html` קובע — R6):** UI_ARCH profile-mockup (סולם-דרגות + 8-badges) ≠ `RANKS`/6-`identityAchievements` · SYSTEM_MANAGER מספרים/7-manage-sections/REST-API **מומצאים** · ROLE_DRAWER worker-names (דוד/אברהם/עלי) ≠ `WORKERS` (רן/עומר) · `adr/`+README קדמו-ל-R9.
+- ⚠️ **divergences שנתפסו (המקור `index.html` קובע — R6):** UI_ARCH profile-mockup (סולם-דרגות + 8-badges) ≠ `RANKS`/6-`identityAchievements` · SYSTEM_MANAGER מספרים/7-manage-sections/REST-API **מומצאים** · ROLE_DRAWER worker-names (דוד/אברהם/עלי) ≠ `WORKERS` (רן/עומר) · `adr`+README קדמו-ל-R9.
+
+## ⭐ אימות-מקור — קוד Preact + Flutter נקרא line-by-line ✅
+> הדלתאות (מקור 2+3) נבנו תחילה מ-**תיאורים** (INSP/legacy-map) — עכשיו **אומתו מול קוד-המקור האמיתי** (Preact 55 קבצים/15,841 ש׳ + Flutter 27/8,482). רוב CONFIRMED; **תיקונים שנמצאו ותוקנו:**
+- `LEAF_BINDINGS`=**72** (לא ~70) · service-hub=**15** (לא ~16) · `AppSettings`=**6 מפתחות** (+security) → doc 06/17.
+- `fabs.tsx`=**2 FABs** (menu+search); BS/שם/עגלה ב-`FloatingHeader` — 5 ה-R1-elements מפוצלים 2+3 (doc 02 כבר מדויק).
+- **Flutter ~30 מוצרים** (smart_tree, brands), לא 202; `catalog.dart`=11 קטגוריות; Flutter search-dial=**4 כלים** (בלי קטלוג) → doc 03/07.
+- Preact `registry.ts`=**21 כפתורים** (מול ~350 בפרוטוטייפ) → doc 11.
+- **parity-insight:** שני ה-ports = shell+dial מלאים, leaves=toast `'בבנייה'`; Flutter הוסיף תוכן-דמו עשיר ב-chats(6)/notif(9)/store(8) → doc 02.
+- ✅ **CONFIRMED:** voice/barcode אמיתיים (web + native) · brands: Preact גזם / Flutter שחזר (מותג סטנדרט/כלכלי/פרימיום) · brand-color: teal `#1f6f6b` (Preact) ↔ orange `#FF7A18`+`#E85F00` (Flutter) · `shared_preferences` persist אמיתי (Flutter) · 202 מוצרים + tokens + dark-theme `#3a9e99` (Preact).
+🏁 **3 המקורות אומתו ברמת-קוד. אין עוד קובץ לקרוא — לא `.md`, לא קוד-מקור, לא config.**

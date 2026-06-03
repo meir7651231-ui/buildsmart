@@ -25,7 +25,7 @@ boot: האפליקציה standalone; מאותחלת ע"י splash-default (`scree
 ---
 
 ## 🔄 Preact — דלתא מול אב-הטיפוס
-🔧 **תיקון (INSP + grep על nice-volta):** מרכז-אבטחה (I) + מרכז-שירות (J) **כן נשזרו ל-Preact כ-dial-subtrees מלאים** (SETTINGS_SUB), verbatim (R6): **אבטחה ~23 עלים** (2FA · biometric · RBAC×5 · encryption×4 · privacy×4 · session-timeout · audit · GPS · devices) + **שירות ~16** (help-desk · chatbot · ממיר-יחידות · מחשבון-כמויות · סיור). grep: "מרכז האבטחה"×24, "מרכז השירות"×16.
+🔧 **תיקון (INSP + grep + אימות-מקור על nice-volta):** מרכז-אבטחה (I) + מרכז-שירות (J) **כן נשזרו ל-Preact כ-dial-subtrees מלאים** (SETTINGS_SUB), verbatim (R6): **אבטחה 23 עלים** (2FA · biometric · RBAC×5 · encryption×4 · privacy×4 · session-timeout · audit · GPS · devices) + **שירות 15 עלים** (`LEAF_BINDINGS`, אומת-מהמקור; help-desk · chatbot · ממיר-יחידות · מחשבון-כמויות · סיור). grep: "מרכז האבטחה"×24, "מרכז השירות"×16 (occurrences, לא leaves).
 ➖ אבל **הפונקציונליות = toast/drill בלבד** (לא ה-flows המלאים — RBAC-matrix/OTP/BOT_KB/shake לא רצים). כלומר התוכן **ported כ-leaves**, המימוש לא.
 **boot ב-Preact:** `main.tsx` → `render(<App/>)` (Preact). אין splash; error-catcher = כלי-Vite/dev.
 

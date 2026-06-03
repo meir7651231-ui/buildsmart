@@ -86,4 +86,4 @@ faucet:{productType:"מוצר ראשי", name:'ברז לכיור', img:'🚰', c
 ⬆️ **שחזר + שודרג:** `SmartProduct {key, name, emoji, cat, brands[], acc[]}` + helpers `mustCount`/`recBrand`.
 - ⭐ **ה-`brands[]` שוחזרו** (`SmartBrand {name, price, tag, rec}`) — **בניגוד ל-Preact שגזם אותם!** Flutter קרוב יותר לסכמת-rich של אב-הטיפוס.
 - `SmartAcc {name, emoji, price, why, must}` = עץ-האביזרים (אותו must/why). `kSmartProducts` + `kSmartTreeCats`.
-➖ (מול אב-הטיפוס) `kSmartProducts` = **סט-rich נבחר** — בלי ה-`pl_` (23 SKU מ-PDF) **ובלי שלבי-הפרויקט** (infra/sealing/… → 0 ב-smart_tree, בניגוד ל-Preact ששמר אותם).
+➖ (מול אב-הטיפוס) `kSmartProducts` = **סט-rich נבחר (~30 מוצרים בלבד, מול 202 בפרוטוטייפ/Preact)** — בלי ה-`pl_` (23 SKU מ-PDF) **ובלי שלבי-הפרויקט** (infra/sealing/… → 0 ב-smart_tree, בניגוד ל-Preact ששמר אותם). ⭐ **ארכיטקטורת-פיצול (אומת מהמקור):** `catalog.dart` (17 ש׳) = רק `kCatalogCats` (11 קטגוריות-עליונות לניווט) · `smart_tree.dart` (433) = מודל-המוצר המלא עם brands — מול ה-monolith של Preact (`catalog.ts` 4544, 202 מוצרים).
