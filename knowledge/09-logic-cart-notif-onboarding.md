@@ -17,3 +17,12 @@
 - `pickProfession`/`backToProfession` · `currentStage`/`buildPrep`/`prepRow`/`prepChoice`.
 - **persona entry**: `renderStoreLogin`/`storeLogin`/`storeLogout` · **`enterRole(role)`** (11806) — מ-role-drawer: contractor/manager/store/courier/worker → המסך המתאים. `loginExisting`.
 - worker: `renderWorker`/`pickWorkerScreen`/`refreshTasks`. **`admTab`** (11890) — מעבר-טאב בדשבורד-admin (משותף ל-4 פרסונות).
+
+---
+
+## 🔄 Preact (`app/src/`) — דלתא מול אב-הטיפוס
+⬆️ **הסל** → signals (`app-store.ts`: `cart`/`setQty`/`cartCount`, ראה דוח 10).
+➖ **הוחסר:**
+- **onboarding הוסר לחלוטין** — אין splash/welcome/login/profession/prep; כניסה לפי-פרסונה ישירה (`ActiveView`).
+- **התראות**: רק `notificationCount` signal (`app-store.ts`) — אין `seedNotifications`/`pushNotification`/פאנל-התראות.
+- **checkout-submit** המלא (`checkout`/`syncOrderToSystem`/`generateMockOrder`) — לא הומר.

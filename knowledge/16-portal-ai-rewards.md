@@ -13,3 +13,9 @@
 
 ## ⭐ מרכז-תגמולים (Category H) (21402–21659)
 `openRewardsHub`→`rwFeature`: **`awardCoins`** (מטבעות) · `rwChallenges`/`claimChallenge` (אתגרים) · **`rwLeaderboard`** (לוח-מובילים) · `rwGreen` (תגמול-ירוק) · `rwCoupons` (קופונים) · **`rwReferral`/`shareReferral`** (חבר-מביא-חבר) · `rwVIP` (דרגות-VIP) · `rwRedeem`/`redeemReward` (מימוש).
+
+---
+
+## 🔄 Preact — דלתא מול אב-הטיפוס
+➖ **לא הומרו ל-Preact:** פורטל ספק/שליח (F, כולל chat) · מרכז-AI (G) · תגמולים (H).
+⬆️ **חריג:** **voice + barcode** (שהיו ב-AI-hub G) **הועברו ל-search-FAB** ב-Preact (`submenu-voice`/`submenu-barcode` + `lib/voice.ts`/`lib/barcode.ts` — ראה דוח 07). שאר ה-AI (predict/alternatives/3way/weather/wear) + תגמולים + portal — נעדרים.

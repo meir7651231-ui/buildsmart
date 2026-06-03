@@ -23,3 +23,8 @@
 
 ---
 **תובנה:** Category-A הוא שכבת-ה-B2B המלאה (שש שירותי-שרשרת ב-`view-orders` של 02: השכרה/פקדונות/RMA/RFQ/MSDS/השוואה) + המתכנן-משלוחים שמשנה את ה-checkout. הכל חי-מקומית (state בזיכרון/localStorage), חוץ מ-OCR/gov-XML שהם הדמיה.
+
+---
+
+## 🔄 Preact — דלתא מול אב-הטיפוס
+➖ **כל Category-A לא הומר ל-Preact** — מתכנן-משלוחים · RMA · השכרת-כלים · פקדונות · חתימה · MSDS · doc-scan · gov-XML · RFQ. Preact = shell ממוקד (catalog + dials + store-view), בלי שכבת-B2B. (אין קומפוננטות מתאימות ב-`app/src`.)

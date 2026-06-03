@@ -96,6 +96,7 @@
 > ה-Preact (האפליקציה החיה בפרודקשן) **אינו מקבל דוחות נפרדים**. הוא נשזר כסקציית-דלתא
 > בתוך כל דוח-תחום רלוונטי: **➕ נוסף · ⬆️ שודרג · ➖ הוחסר** מול אב-הטיפוס.
 > מקור: `app/src/` (53 קבצי TS/TSX · 13,657 ש׳). הסיפור-הגדול: תרגום מסכים → **dial pattern** (R1–R9).
+> 🏁 **הושלם — דלתא Preact נשזרה בכל 17 הדוחות.**
 
 | דוח | דלתא-Preact | סטטוס |
 |---|---|---|
@@ -105,4 +106,4 @@
 | `06` הגדרות | renderSettings(sheet)→עץ-dial (R3) · LEAF_BINDINGS · PROFILE_TREE · R9 inline-edit | ✅ |
 | `07/08` חיפוש/מוצר | search=FAB-dial (voice/barcode מ-AI) · category-circles · product card/sheet; עץ-מלא לא הומר | ✅ |
 | `11` QA · `12` פרסונות | self-test→test/ מודולרי (R7 tabs); פרסונות→BS-dial drill, store-view מומש, השאר placeholder | ✅ |
-| `05,09,13–17` hubs/scenarios | רובם **לא הומרו** ל-Preact (shell ממוקד) | ⬜ בעבודה |
+| `05,09,13–17` hubs/scenarios | RANKS/identity/projects הומרו; ORDERS/B2B/finance/site/AI/rewards/security/service/onboarding/scenarios **לא הומרו** | ✅ |

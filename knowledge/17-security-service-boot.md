@@ -18,3 +18,9 @@
 boot: האפליקציה standalone; מאותחלת ע"י splash-default (`screen-splash` גלוי) + קריאות-inline (`seedNotifications()` 11498 וכו׳). אין שכבת-data חיצונית (הערה 5415).
 
 **bootstrap (script #1, 5419–5439):** תופס-שגיאות גלובלי — `window.addEventListener('error')` שמציג קופסה אדומה `bsFatalError` עם השגיאה (שכפתורים לעולם לא ייכשלו בשקט).
+
+---
+
+## 🔄 Preact — דלתא מול אב-הטיפוס
+➖ **לא הומרו ל-Preact:** מרכז-אבטחה/RBAC (I — 2FA/biometric/audit/session-lock/encryption/privacy) + מרכז-שירות/chatbot (J — help-desk/BOT_KB/shake-report/ממיר-יחידות/לוח-דרושים/סיור). הקבוצות "אבטחה" ו"שירות ותמיכה" קיימות כ-rows בהגדרות (דוח 06), אך ה-hubs עצמם — placeholder/נעדרים.
+**boot ב-Preact:** `main.tsx` → `render(<App/>)` (Preact). אין splash; error-catcher = כלי-Vite/dev.
