@@ -160,6 +160,8 @@ PER_BAND_BOX = {
     (32, 'a'): (12, 145, 260, 273),
     # p36_b — H-washing: cap y=720, base y=1030 (narrow x to skip H tick)
     (36, 'b'): (12, 720, 170, 1035),
+    # p39_b — basin connector: cap y=545, base elbow y=638
+    (39, 'b'): (12, 545, 260, 638),
 }
 
 # Per-band override (page, tag) → PHOTO_H. Wins over PER_PAGE_PHOTO_H.
