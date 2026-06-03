@@ -70,4 +70,36 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 `cs-badge` כתום · `cs-ic` 96px gradient · `cs-title` Heebo-900 22 · `cs-desc` · `cs-tags`.
 
 ---
-**טרם נקרא בקובץ הזה:** 481–4019 (body content · product card · credit · budget · tree diagram · day-card · smart-tree sheet · Categories A–J · session-lock · pickers).
+
+## חלק ב׳ — רכיבי-תוכן + מערכת-ה-sheets (481–1000)
+
+### גוף + view (490–496)
+`.body` גלילה אנכית (scrollbar מוסתר). `.view` מוסתר; `.active` מציג עם אנימציית **`fade`** (8px↑). `.pad` ריפוד 16.
+
+### חיפוש · hero · קטגוריות · promise (498–545)
+- `.search` — תיבה עם מסגרת **teal עבה 2.5px** + צל. `.hero` — כרטיס-gradient כהה (`ink→#2c3036`) עם 🏗️ watermark (opacity .14) + תג כתום.
+- `.section-title` Heebo-800 + `.more` קישור teal. `.cat-grid` 4 עמודות; `.cat` tile.
+- `.promise` שורה teal-מרוככת עם `.pi` אייקון.
+
+### כרטיס-מוצר — carousel (547–617)
+`.prow` גלילה אופקית. `.pcard` 165px: `.pthumb` (אמוג'י 36) + **`.smart-badge`** (teal "⚡חכם"), `.pcard-cat`, `.pprice` Heebo-900, `.pcard-qty`, **`.pcard-tree`** (כפתור-עץ כתום), `.addbtn` (teal +). `.pcard-arrow` פותח `.pcard-detail` (`ptree-note` + `ptree-btn`).
+
+### פירוט-מוצר · אשראי · תקציב (618–907)
+- `.pd-card` עם `.pd-specs` (שורות k/v); `.pd-row-act` לחיצה.
+- `.credit-box` gradient כהה + בר כתום. **`.budget-box`** לבן; `.bg-bar i` בר **gradient teal→amber**; `.bg-edit-btn`.
+- **budget-detail sheet** `bd-*`: `.bd-headline` (`.over`→אדום), `.bd-pct` 34px, `.bd-cat` ברים, `.bd-site`.
+- `pd-store`/`pd-grand` (תשלום). `cd-*` (אשראי). **`ss-*`** (סטטוס-אתר: `.ss-state` on=ירוק/off=כתום, `.ss-tile` ברים, `.ss-link`).
+- **stage/day cards**: `.stage-arrow` פותח; `.sd-step` עם `.sd-step-check` (✓ ירוק, done=קו-חוצה). `day-burst` → `.burst-chip` כתום (אנימציה מדורגת **`burstIn`**) + `dayFlash`.
+- `.be-field` (inputs rtl). `.plist` (שורת-מוצר + `.add-mini`). `.chips` (פילטר; `.on`=ink).
+
+### ⭐ מערכת-ה-overlay/sheet (917–928) — הליבה של כל ה-sheets
+- **`.overlay`**: `inset:0`, רקע כהה-שקוף + **`backdrop-filter:blur(3px)`**, יושב מלמטה (`align-items:flex-end`). `.show`→flex.
+- **`.sheet`**: רוחב מלא, radius 26 עליון, `max-height:90%`, אנימציית **`rise`** (מגיח מלמטה, cubic-bezier). **`.grip`** ידית 42×5.
+- > כל ה-overlays ב-`02-shell-and-screens` (sitePicker · settings · tree · brand · variant · …) יורשים את התבנית הזו.
+
+### דיאלוג פריט-חסר + Category-A UI (929–999)
+- `md-*` (פריט-חסר): `.md-btn.proceed` כתום · `.md-btn.replace` teal · `.md-done`.
+- **`ca-*`** (שרשרת-אספקה): `.ca-primary` (כפתור teal ראשי) · `.ca-rma-item` (checkbox) · `.ca-select` · `.ca-tool-grid` (השכרת כלים) · `.ca-card` (`.overdue`=כתום) · `.ca-pill` (danger/done) · **`.ca-sig-canvas`** (קנבס-חתימה) · `.ca-svc` (כפתורי-שירות).
+
+---
+**טרם נקרא בקובץ הזה:** 1001–4019 (Categories A(המשך)–J · tree-stage diagram · brand/variant pickers · accessory · onboarding/login styling · misc).
