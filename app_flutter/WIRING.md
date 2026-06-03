@@ -32,6 +32,12 @@ home directly. Guarded by `onboarding_test`.
 | 💡 (קצה שמאלי) | replays the intro tour (`showIntroTour` → the onboarding slides) | ✅ |
 | שם-משתמש (צ'יפ ליד הלוגו) | registered user's first name (`userProfileProvider`); absent for guest/demo | ✅ |
 
+## Version chrome (`home_shell.dart` AppBar → `version.g.dart`)
+
+| Element | Behavior | Status |
+|---|---|---|
+| תווית-גרסה | מציגה `kVersionLabel` בלבד (אפור-secondary, `Key('version_chrome')`), מ-`version.g.dart` הנוצר אוטומטית מ-git+STATUS. אין נקודה-ירוקה (שמורה ל-`_PulsingStatus`), אין changelog ב-UI. לא מרונדרת במצב "עץ חכם". | ✅ wired (לקח #72) |
+
 ## Catalog settings (`catalog_settings_screen.dart` → `catalog_settings.dart`)
 
 | Setting | Behavior | Status |

@@ -23,6 +23,10 @@ export PATH="/home/user/flutter/bin:$PATH"
 cd "$REPO/app_flutter"
 flutter pub get --no-example 2>&1 | tail -3
 
+# ─── version.g.dart (gitignored, נוצר מ-git+STATUS — לקח #72) ───
+# חייב להיווצר לפני analyze/build כי home_shell מייבא אותו.
+bash "$REPO/scripts/gen_version.sh" 2>&1 | tail -1 || echo "⚠️  gen_version נכשל — בדוק STATUS.md"
+
 # ─── סיכום פרוטוקול ───
 echo ""
 echo "════════════════════════════════════════════"

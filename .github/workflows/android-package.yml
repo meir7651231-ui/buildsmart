@@ -58,6 +58,9 @@ jobs:
         working-directory: app_flutter
         run: flutter pub get
 
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
       - name: Analyze (GATE — 0 errors required)
         working-directory: app_flutter
         run: flutter analyze --no-fatal-infos --no-fatal-warnings

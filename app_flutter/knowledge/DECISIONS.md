@@ -2,6 +2,21 @@
 
 Short records of notable choices. Newest first.
 
+## D-015 · Proposal lifecycle (draft→implemented→stub) — מונע יתום+כפילות
+**Trigger:** `PROPOSAL_version_friction.md` נוצר כיתום (לא ב-README, לקח #59), ואין
+ב-knowledge-base class למסמך-הצעה transient (ליטוש, לקח #72).
+**Rule:** מסמך-הצעה נולד עם (א) שורה ב-`README.md`, (ב) שדה-סטטוס בראש
+(`draft→accepted→implemented→archived`). **ביום-implemented — באותו commit-סיום
+אטומית:** ההכרעות עוברות ל-`DECISIONS.md`/`adr/` + לקח ב-`CARRY_FORWARD`, והמסמך
+הופך ל-stub עם pointer. מאחד #58 (מקור-אמת-יחיד) + #59 (אין יתום) + #61 (verdict).
+
+## D-014 · `generated≠gitignored` כברירת-מחדל — חריג ל-build בלבד
+**Trigger:** `version.g.dart` נכנס ל-`.gitignore` (לקח #72). סכנת-תקדים: החלת
+"generated→gitignore" על asset-manifests שה-app **טוען** מהם → build שבור (קטלגן).
+**Rule:** קובץ-generated **נשאר tracked כברירת-מחדל**. gitignore הוא חריג מתוחם רק
+ל-`version.g.dart` (build-number, לא-נכונות-קריטי, נוצר-מ-git בכל build). כל
+asset-manifest / generated-data שה-app קורא ב-runtime — **tracked**.
+
 ## D-013 · Progressive dock UX (3-state)
 **Problem:** The dock at the bottom of Install Studio showed a flat "הוסף / השלם" row
 at all times, regardless of whether the chain was empty.  

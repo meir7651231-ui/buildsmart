@@ -50,6 +50,26 @@ err()  { echo ""; echo "❌ [שער $1] $2"; echo "   → $3"; FAIL=$((FAIL+1));
 warn() { echo "⚠️  [שער $1] $2"; WARN=$((WARN+1)); }
 ok()   { :; }  # שתיקה — רק כשלים נראים
 
+# ═══ P0 (לקח #72): version.g.dart — idempotent generate מ-git ═══
+# מימוש PROPOSAL_version_friction. הגרסה נגזרת מ-git+STATUS, gitignored, אף סוכן
+# לא עורך ידנית → אפס conflict + אפס test-trap. חייב לרוץ לפני שערי-גרסה (11/12)
+# ולפני flutter (שמקמפל את הקובץ). idempotent — re-generate, לא mutate (מקבץ).
+if [[ -f "$REPO_ROOT/scripts/gen_version.sh" ]]; then
+    if ! bash "$REPO_ROOT/scripts/gen_version.sh" 2>/tmp/bs_genver.err; then
+        err "11" "gen_version נכשל: $(cat /tmp/bs_genver.err 2>/dev/null)" \
+            "ודא knowledge/STATUS.md מכיל תווית vX.YY"
+    fi
+fi
+# hook-guard (מקבץ סבב-2): .gitignore לא מסיר קבצים שכבר tracked → גישה-C דולפת.
+if git ls-files --error-unmatch lib/version.g.dart >/dev/null 2>&1; then
+    err "11" "version.g.dart עדיין tracked — גישה-C דולפת" \
+        "git rm --cached app_flutter/lib/version.g.dart"
+fi
+if git diff --cached --name-only | grep -q "version\.g\.dart"; then
+    err "11" "version.g.dart ב-staging (אמור להיות gitignored)" \
+        "git reset app_flutter/lib/version.g.dart"
+fi
+
 # ═══ מנגנון למידה: זיהוי retry ═══
 FINGERPRINT_FILE="$REPO_ROOT/.git/stuck_fingerprints.txt"
 touch "$FINGERPRINT_FILE"
@@ -135,11 +155,13 @@ git rev-parse "origin/$BRANCH" >/dev/null 2>&1 || warn "5" "אין מעקב של
 
 # ═══ קבוצה ב: מצב נוכחי (11-20) ═══
 
-# שער 11-12: גרסאות מסונכרנות
-V_SHELL=$(grep -oE "v[0-9]+\.[0-9]+" lib/screens/home_shell.dart 2>/dev/null | head -1)
+# שער 11-12: גרסה מסונכרנת — version.g.dart (אוטומטי) ↔ STATUS (מקור-אמת). לקח #72.
+# המעבר מ-home_shell ל-version.g.dart סוגר את ה-conflict-magnet: אף סוכן לא עורך
+# את שורת-הגרסה ידנית; gen_version (לעיל) מסנכרן מ-STATUS לפני בדיקה זו.
+V_GEN=$(grep -oE "v[0-9]+\.[0-9]+" lib/version.g.dart 2>/dev/null | head -1)
 V_STATUS=$(grep -oE "v[0-9]+\.[0-9]+" knowledge/STATUS.md 2>/dev/null | head -1)
-[[ -n "$V_SHELL" ]] || err "11" "גרסה חסרה ב-home_shell.dart" "הוסף תווית גרסה"
-[[ "$V_SHELL" == "$V_STATUS" ]] || err "12" "גרסאות לא מסונכרנות" "home_shell=$V_SHELL, STATUS=$V_STATUS"
+[[ -n "$V_GEN" ]] || err "11" "version.g.dart חסר/ריק" "bash scripts/gen_version.sh"
+[[ "$V_GEN" == "$V_STATUS" ]] || err "12" "גרסה לא מסונכרנת" "version.g.dart=$V_GEN STATUS=$V_STATUS (gen_version אמור לסנכרן)"
 
 # שער 13: ROADMAP מכיל קבוצה א'
 grep -q "Group A" knowledge/SMARTPRODUCT_ROADMAP.md || err "13" "ROADMAP בלי קבוצה א'" "ROADMAP מקולקל"
@@ -215,15 +237,10 @@ if [[ -n "$STAGED_LIB" ]]; then
     STAGED_WIRING=$(git diff --cached --name-only | grep "WIRING.md" | head -1)
     [[ -n "$STAGED_WIRING" ]] || err "24" "WIRING.md לא עודכן" "עדכן WIRING.md"
 
-    # שער 59: גרסה עלתה אם נגעת בקוד (הועבר לפני Flutter — fail-fast, לקח #68 בנצי)
-    # מיקום מקורי: אחרי Flutter. עלות-כשל: 13 דק' Flutter רצה לחינם.
-    # כל 3 המקומות חייבים להתעדכן: home_shell + STATUS + pubspec (build number).
-    SHELL_DIFF=$(git diff --cached lib/screens/home_shell.dart 2>/dev/null | grep "^+" | grep -oE "v[0-9]+\.[0-9]+" | head -1)
-    if [[ -z "$SHELL_DIFF" ]]; then
-        CURR_VER=$(grep -oE "v[0-9]+\.[0-9]+" lib/screens/home_shell.dart 2>/dev/null | head -1)
-        err "59" "גרסה לא עלתה (נוכחי: ${CURR_VER:-?})" \
-            "bump ב-3 מקומות: home_shell.dart · knowledge/STATUS.md · pubspec.yaml (build number)"
-    fi
+    # שער 59: בוטל ה-forced-bump (לקח #72) — זה היה ה-conflict-magnet.
+    # build (kBuild) מתקדם אוטומטית מ-git ב-gen_version; label עולה רק ב-release
+    # מכוון (ידני ב-STATUS.md בלבד). אין יותר חובת-bump-בכל-commit שאילצה עריכה
+    # ידנית של שורה משותפת. שערים 11/12 אוכפים את הסנכרון version.g.dart↔STATUS.
 fi
 
 # שער 25: לא לגעת ב-Preact-shared

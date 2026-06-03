@@ -27,6 +27,9 @@ jobs:
         working-directory: app_flutter
         run: flutter pub get
 
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
       - name: Gate 1 — Code analysis
         working-directory: app_flutter
         run: |
@@ -53,13 +56,14 @@ jobs:
       - name: Gate 4 — Versions synced
         working-directory: app_flutter
         run: |
-          V_SHELL=$(grep -oE "v[0-9]+\.[0-9]+" lib/screens/home_shell.dart | head -1)
+          # version.g.dart (אוטומטי, נוצר לעיל) ↔ STATUS (מקור-אמת) — לקח #72.
+          V_GEN=$(grep -oE "v[0-9]+\.[0-9]+" lib/version.g.dart | head -1)
           V_STATUS=$(grep -oE "v[0-9]+\.[0-9]+" knowledge/STATUS.md | head -1)
-          if [[ "$V_SHELL" != "$V_STATUS" ]]; then
-            echo "❌ Version drift: home_shell=$V_SHELL, STATUS=$V_STATUS"
+          if [[ "$V_GEN" != "$V_STATUS" ]]; then
+            echo "❌ Version drift: version.g.dart=$V_GEN, STATUS=$V_STATUS"
             exit 1
           fi
-          echo "✅ Versions synced ($V_SHELL)"
+          echo "✅ Versions synced ($V_GEN)"
 
       - name: Gate 5 — No dark surfaces
         working-directory: app_flutter

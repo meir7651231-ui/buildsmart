@@ -25,7 +25,8 @@ _(עדכן שורה זו בכל פעם שמוסיפים שער)_
 | 4 | pubspec.yaml תקין | v1 |
 | 5 | ענף שמעוקב | v1 |
 | 10 | GitHub Actions קיים | v1 |
-| 12 | גרסאות מסונכרנות | v1 |
+| 11 | version.g.dart קיים+תקין (היה home_shell) | v1→v5.92 |
+| 12 | version.g.dart↔STATUS מסונכרן (gen_version אוטומטי, לקח #72) | v1→v5.92 |
 | 13 | ROADMAP מכיל קבוצה א' | v1 |
 | 14 | STATUS מכיל גרסה | v1 |
 | 15 | hooksPath = .githooks | v1 |
@@ -57,7 +58,7 @@ _(עדכן שורה זו בכל פעם שמוסיפים שער)_
 | 53 | אין .env ב-staged | v1 |
 | 54 | אין ColoredBox כהה | v1 |
 | 58 | אין dart-define ללא docs | v1 |
-| 59 | גרסה עלתה (home_shell) | v1 |
+| 59 | ~~גרסה עלתה (home_shell)~~ **בוטל** — build אוטומטי מ-git (לקח #72) | v1→v5.92 |
 | 60 | אין dependencies חדשות ללא וידוא | v1 |
 | 61 | מחרוזות עברית — Preact-shared | v1 |
 | 62 | RTL — אין left/right קשיח | v1 |

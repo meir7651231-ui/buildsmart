@@ -19,6 +19,7 @@ import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/version.g.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -423,18 +424,20 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     ref.watch(catalogSectionProvider) == 'עץ חכם')
                   const _PulsingStatus(text: 'עץ חכם הופעל')
                 else
+                  // תווית-גרסה: kVersionLabel בלבד (secondary/אפור, לא ירוק — ליטוש).
+                  // ירוק שמור ל-_PulsingStatus החי. kBuild/kReleaseNote → "אודות" בלבד.
+                  // הגרסה נגזרת מ-version.g.dart (gitignored, אוטומטי — לקח #72).
                   const Row(
+                    key: Key('version_chrome'),
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.circle, color: Color(0xFF4CAF50), size: 7),
-                      SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.92 · 1.6.48 · 🚪 זרימת-פתיחה: רישום/מקצוע/סיור + בורר "מי אתה?" + שם-משתמש בכותרת',
-                          maxLines: 2,
+                          kVersionLabel,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Color(0xFF4CAF50),
+                            color: BsTokens.mutedLight,
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
                           ),

@@ -44,23 +44,20 @@ if [[ -f "$REPO_ROOT/.git/hooks/pre-commit" ]]; then
         err "81" "hook מקומי שונה מ-.githooks/" "cp .githooks/pre-commit .git/hooks/"
 fi
 
-# ── גרסאות מסונכרנות ──
-V_SHELL=$(grep -oE "v[0-9]+\.[0-9]+" lib/screens/home_shell.dart 2>/dev/null | head -1)
+# ── גרסה מסונכרנת — version.g.dart (אוטומטי) ↔ STATUS (מקור-אמת). לקח #72 ──
+[[ -f "$REPO_ROOT/scripts/gen_version.sh" ]] && bash "$REPO_ROOT/scripts/gen_version.sh" 2>/dev/null || true
+V_GEN=$(grep -oE "v[0-9]+\.[0-9]+" lib/version.g.dart 2>/dev/null | head -1)
 V_STATUS=$(grep -oE "v[0-9]+\.[0-9]+" knowledge/STATUS.md 2>/dev/null | head -1)
-[[ "$V_SHELL" == "$V_STATUS" ]] || \
-    err "12" "גרסאות לא מסונכרנות: home_shell=$V_SHELL, STATUS=$V_STATUS" "סנכרן"
+[[ "$V_GEN" == "$V_STATUS" ]] || \
+    err "12" "גרסה לא מסונכרנת: version.g.dart=$V_GEN, STATUS=$V_STATUS" "bash scripts/gen_version.sh"
 
 # ── שינויים staged ──
 STAGED_LIB=$(git diff --cached --name-only | grep -E "^app_flutter/lib/(screens|state|logic)/" | head -1)
 STAGED_WIRING=$(git diff --cached --name-only | grep "WIRING.md" | head -1)
 
-# ── שער 59: גרסה עלתה אם נגעת בקוד ──
+# ── שער 24: WIRING עודכן אם נגעת בקוד (שער 59 forced-bump בוטל — לקח #72) ──
+# build מתקדם אוטומטית מ-git; label עולה רק ב-release מכוון (ידני ב-STATUS).
 if [[ -n "$STAGED_LIB" ]]; then
-    SHELL_DIFF=$(git diff --cached lib/screens/home_shell.dart 2>/dev/null | grep "^+" | grep -oE "v[0-9]+\.[0-9]+" | head -1)
-    if [[ -z "$SHELL_DIFF" ]]; then
-        err "59" "גרסה לא עלתה (${V_SHELL:-?})" \
-            "bump ב-3 מקומות: home_shell.dart · knowledge/STATUS.md · pubspec.yaml (build number)"
-    fi
     [[ -n "$STAGED_WIRING" ]] || err "24" "WIRING.md לא עודכן" "עדכן WIRING.md"
 fi
 

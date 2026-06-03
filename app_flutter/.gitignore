@@ -53,3 +53,7 @@ app.*.map.json
 test/failures/
 test/ref_*.png
 test/ref_card_golden_test.dart
+
+# GENERATED — version.g.dart נוצר ע"י scripts/gen_version.sh (gitignored, לא tracked).
+# חריג ל-build בלבד; asset-manifests נשארים tracked (קטלגן, לקח #72).
+lib/version.g.dart
