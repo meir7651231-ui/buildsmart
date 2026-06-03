@@ -40,6 +40,8 @@ PINNED=(
     "protocol/regression_v7.sh"
     # v8 — pin the S1-laundering + B1/B2/B3/B4/H1 regression suite.
     "protocol/regression_v8.sh"
+    # v10 — pin the ReDoS + submodule/symlink/LFS skip-class regression suite.
+    "protocol/regression_v10.sh"
 )
 
 OUT="$REPO_ROOT/protocol/pins.sha256"

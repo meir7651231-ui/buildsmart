@@ -52,8 +52,10 @@
 //       Runs the built-in regression suite (incl. every v3 close). Exit 2 on any
 //       failure.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math' as math;
 
 part 'protocol_check_selftest.dart';
@@ -1980,9 +1982,86 @@ List<Finding> gateAppHebrewString(String appDiff) {
 }
 
 // --- Stuck-log antipattern recurrence (gate 103) --------------------------
+//
+// ⚠️ V10-A — ReDoS / self-DoS hardening (defense in depth, THREE guards).
+// `RegExp(ap.pattern)` from stuck_log.md is run with Dart's BACKTRACKING engine
+// with no native timeout. A single committed `ANTIPATTERN: (a+)+$` line plus a
+// ~35-char repeated run in a staged lib/ line makes `hasMatch` hang FOREVER
+// (28 chars ≈ 7s, doubling per added char) — bricking every future commit AND
+// burning CI `flutter test` forever. We close it three independent ways:
+//   1. REJECT catastrophic patterns at parse time (`parseAntipatterns`) — a
+//      poison pattern can never even be stored or compiled (kAntipatternGuard1).
+//   2. CAP input length (kAntipatternMaxLineLen, 2KB) before any match — caps
+//      the backtracking state space for anything that slips guard 1.
+//   3. Run every stuck-log-derived match under a HARD wall-clock budget in a
+//      throwaway isolate (`boundedHasMatch`, kAntipatternMatchBudget); on
+//      timeout the isolate is KILLED, the line is treated as NOT-matched, and a
+//      WARN naming the offending pattern is emitted — the engine NEVER hangs.
+// The sync `gateAntipatternRecurrence` (self-test + canary callers) is protected
+// by guards 1+2, which already make the PROVEN `(a+)+$` vector return instantly.
+// The PRODUCTION callers (`_mainDiff`/`_mainTree`) use the async
+// `gateAntipatternRecurrenceBounded`, which adds guard 3 (the wall-clock kill).
+
+/// Hard wall-clock budget for ONE stuck-log-derived pattern's WHOLE scan
+/// (guard 3). The bounded matcher scans all candidate lines for a single pattern
+/// inside ONE throwaway isolate under this budget — so the cost is one isolate
+/// spawn PER PATTERN (≈ #antipatterns), not per line (which made the regenerated
+/// test O(patterns×lines) isolate spawns and time out). A non-catastrophic regex
+/// runs thousands of hasMatch well under this; only a ReDoS pattern blows it.
+const Duration kAntipatternMatchBudget = Duration(milliseconds: 500);
+
+/// Max input length fed to antipattern matching (guard 3 / cap). Lines longer
+/// than this are truncated before matching — caps backtracking blowup.
+const int kAntipatternMaxLineLen = 2048;
+
+/// Catastrophic-pattern detector (guard 2). A pattern is REJECTED (skipped +
+/// flagged) if it contains a nested quantifier or an unbounded-via-large `{N}`
+/// construct that can make Dart's backtracking RegExp blow up:
+///   (…+)+  (…*)*  (…+)*  (…*)+  (…?)+ …  and  X{N}/X{N,}/X{N,M} with N or M
+///   ≥ kAntipatternMaxRepeat — the classic ReDoS shapes.
+/// Returns the human reason if catastrophic, else null (safe to compile/run).
+const int kAntipatternMaxRepeat = 100;
+
+String? antipatternCatastrophicReason(String pattern) {
+  // A quantifier applied to a GROUP that itself ends in a quantifier, e.g.
+  // `(a+)+`, `(a*)*`, `(\d+)*`, `(?:ab+)+`, `([a-z]+){3}`. We look for a group
+  // close `)` immediately preceded (allowing nothing) by `+ * ? }` INSIDE the
+  // group, then a quantifier right after the group close.
+  // The inner quantifier may be the LAST char before `)`.
+  final nestedQuant = RegExp(r'[+*?}]\)[+*?]|[+*?]\)\{');
+  if (nestedQuant.hasMatch(pattern)) {
+    return 'nested quantifier (e.g. (…+)+ / (…*)* / (…+)*) — ReDoS shape';
+  }
+  // A group containing a `+`/`*` quantifier, immediately followed by ANY
+  // quantifier on the group — catches the canonical `(a+)+$` even when the
+  // inner quantifier is not the final group char (e.g. `(a+b)+`, `(a+|b)+`).
+  final groupQuant = RegExp(r'\([^)]*[+*][^)]*\)[+*?{]');
+  if (groupQuant.hasMatch(pattern)) {
+    return 'quantified group with an inner quantifier (ReDoS shape)';
+  }
+  // Large explicit repetition bound: X{N}, X{N,}, X{N,M}. A huge N (or M) makes
+  // even a non-nested quantifier expand into an enormous backtracking space.
+  for (final m in RegExp(r'\{(\d+)(?:,(\d+)?)?\}').allMatches(pattern)) {
+    final n = int.tryParse(m.group(1) ?? '');
+    final mUpper = int.tryParse(m.group(2) ?? '');
+    if ((n != null && n >= kAntipatternMaxRepeat) ||
+        (mUpper != null && mUpper >= kAntipatternMaxRepeat)) {
+      return 'repetition bound {>=$kAntipatternMaxRepeat} — backtracking blowup';
+    }
+  }
+  return null;
+}
 
 /// Parse `ANTIPATTERN:` / `ANTIPATTERN[hook]:` lines from a stuck_log body.
-List<({String target, String pattern})> parseAntipatterns(String stuckLog) {
+///
+/// V10-A guard 2: a pattern flagged catastrophic by [antipatternCatastrophicReason]
+/// is SKIPPED here (never stored, never compiled, never run) — so a poison
+/// stuck_log line cannot brick the hook/CI. Skips are surfaced via the optional
+/// [rejected] sink (caller emits a WARN naming the pattern + reason).
+List<({String target, String pattern})> parseAntipatterns(
+  String stuckLog, {
+  List<({String pattern, String reason})>? rejected,
+}) {
   final out = <({String target, String pattern})>[];
   final shellMeta = RegExp(r'\$\(|`|\$\{');
   for (final line in const LineSplitter().convert(stuckLog)) {
@@ -1999,12 +2078,93 @@ List<({String target, String pattern})> parseAntipatterns(String stuckLog) {
     }
     if (pattern.isEmpty) continue;
     if (shellMeta.hasMatch(pattern)) continue;
+    final reason = antipatternCatastrophicReason(pattern);
+    if (reason != null) {
+      rejected?.add((pattern: pattern, reason: reason));
+      continue; // guard 2: do not store/compile/run a catastrophic pattern.
+    }
     out.add((target: target, pattern: pattern));
   }
   return out;
 }
 
-/// Gate 103: a recorded ANTIPATTERN regex must not reappear in the new code.
+/// Top-level isolate entry: compile ONCE and scan ALL candidate lines in a
+/// throwaway isolate so a runaway backtracking match can be KILLED by the parent
+/// on timeout (guard 3). Sends `true` on the FIRST matching line, else `false`.
+/// Each line is capped to [kAntipatternMaxLineLen] (cap) before matching.
+void _antipatternScanWorker((SendPort, String, List<String>) msg) {
+  final (sp, pattern, lines) = msg;
+  bool result = false;
+  try {
+    final re = RegExp(pattern);
+    for (final raw in lines) {
+      final l =
+          raw.length > kAntipatternMaxLineLen
+              ? raw.substring(0, kAntipatternMaxLineLen)
+              : raw;
+      if (re.hasMatch(l)) {
+        result = true;
+        break;
+      }
+    }
+  } catch (_) {
+    result = false; // bad pattern → no match (mirrors the sync FormatException path)
+  }
+  sp.send(result);
+}
+
+/// Scan ALL [lines] for `RegExp(pattern)` under ONE hard wall-clock budget
+/// (guard 3) inside a single throwaway isolate — cost is ONE isolate spawn per
+/// pattern, not per line. If the whole scan exceeds [budget] the isolate is
+/// KILLED and the result is `(matched: false, timedOut: true)` — never hangs.
+Future<({bool matched, bool timedOut})> boundedAnyMatch(
+  String pattern,
+  List<String> lines, {
+  Duration budget = kAntipatternMatchBudget,
+}) async {
+  final rp = ReceivePort();
+  final errPort = ReceivePort();
+  Isolate? iso;
+  try {
+    iso = await Isolate.spawn(
+      _antipatternScanWorker,
+      (rp.sendPort, pattern, lines),
+      onError: errPort.sendPort,
+      errorsAreFatal: true,
+    );
+  } catch (_) {
+    rp.close();
+    errPort.close();
+    return (matched: false, timedOut: false);
+  }
+  final completer = Completer<({bool matched, bool timedOut})>();
+  final timer = Timer(budget, () {
+    if (!completer.isCompleted) {
+      completer.complete((matched: false, timedOut: true));
+    }
+  });
+  rp.listen((m) {
+    if (!completer.isCompleted) {
+      completer.complete((matched: m == true, timedOut: false));
+    }
+  });
+  errPort.listen((_) {
+    if (!completer.isCompleted) {
+      completer.complete((matched: false, timedOut: false));
+    }
+  });
+  final res = await completer.future;
+  timer.cancel();
+  iso.kill(priority: Isolate.immediate); // guard 3: KILL a runaway scan
+  rp.close();
+  errPort.close();
+  return res;
+}
+
+/// Gate 103 (SYNC — self-test + canary callers). Guards 1+2 (catastrophic
+/// rejection at parse + 2KB input cap) make the PROVEN `(a+)+$` vector return
+/// instantly here (the pattern is never compiled). Production callers use the
+/// async [gateAntipatternRecurrenceBounded] for the additional wall-clock kill.
 List<Finding> gateAntipatternRecurrence({
   required String stuckLog,
   required List<String> dartAdded,
@@ -2019,7 +2179,12 @@ List<Finding> gateAntipatternRecurrence({
       continue;
     }
     final haystack = ap.target == 'hook' ? hookAdded : dartAdded;
-    for (final l in haystack) {
+    for (final raw in haystack) {
+      // Guard 3 (cap): never feed a >2KB line to the backtracking matcher.
+      final l =
+          raw.length > kAntipatternMaxLineLen
+              ? raw.substring(0, kAntipatternMaxLineLen)
+              : raw;
       if (re.hasMatch(l)) {
         findings.add(
           Finding(
@@ -2030,6 +2195,70 @@ List<Finding> gateAntipatternRecurrence({
         );
         break;
       }
+    }
+  }
+  return findings;
+}
+
+/// Gate 103 (ASYNC, PRODUCTION). All three guards: catastrophic patterns are
+/// rejected at parse (emitting a WARN naming each), inputs are capped at 2KB,
+/// and every surviving match runs under a HARD wall-clock budget in a throwaway
+/// isolate — on timeout the line is treated as NOT-matched and a WARN names the
+/// offending pattern. The engine can never hang on a poison stuck_log line.
+Future<List<Finding>> gateAntipatternRecurrenceBounded({
+  required String stuckLog,
+  required List<String> dartAdded,
+  required List<String> hookAdded,
+}) async {
+  final findings = <Finding>[];
+  final rejected = <({String pattern, String reason})>[];
+  final aps = parseAntipatterns(stuckLog, rejected: rejected);
+  // Guard 2: surface every rejected catastrophic pattern as a WARN (visible,
+  // never silent) so a poison stuck_log line is reported, not just dropped.
+  for (final r in rejected) {
+    findings.add(
+      Finding(
+        '103',
+        Sev.warn,
+        'antipattern pattern REJECTED (unsafe regex: ${r.reason}): '
+        '${r.pattern} — rewrite without nested/large quantifiers '
+        '(see PROTOCOL_V10.md ReDoS guard)',
+      ),
+    );
+  }
+  for (final ap in aps) {
+    // Skip a pattern that does not even compile (mirror the sync path).
+    try {
+      RegExp(ap.pattern);
+    } on FormatException {
+      continue;
+    }
+    final haystack = ap.target == 'hook' ? hookAdded : dartAdded;
+    // Guard 3: scan ALL candidate lines for this pattern in ONE budgeted
+    // isolate (one spawn per pattern, not per line).
+    final r = await boundedAnyMatch(ap.pattern, haystack);
+    if (r.timedOut) {
+      // A runaway scan was KILLED. WARN (never hang, never silently pass as a
+      // CLEAN match) and move on — treated as did-not-match.
+      findings.add(
+        Finding(
+          '103',
+          Sev.warn,
+          'antipattern scan TIMED OUT (>${kAntipatternMatchBudget.inMilliseconds}ms, '
+          'killed) for pattern: ${ap.pattern} — possible ReDoS; pattern '
+          'skipped (see PROTOCOL_V10.md)',
+        ),
+      );
+      continue;
+    }
+    if (r.matched) {
+      findings.add(
+        Finding(
+          '103',
+          Sev.err,
+          'antipattern recurred: ${ap.pattern} — see stuck_log.md',
+        ),
+      );
     }
   }
   return findings;
@@ -2290,11 +2519,30 @@ List<String> emitRanIds() {
 ///
 /// When `names` is null (legacy bash --diff callers that pre-scope by cheap name
 /// checks) the gates run over the whole diff, preserving v2 behavior.
+/// Compute the production-code added lines that gate 103 scans (diff mode).
+/// Extracted so the async production path can reuse the exact same scoping the
+/// sync runner used, while running the bounded (ReDoS-safe) matcher itself.
+List<String> antipatternAddedLines({required String diff, List<String>? names}) {
+  if (names == null) return addedLines(diff);
+  final byFile = splitDiffByFile(diff);
+  final added = <String>[];
+  for (final e in byFile.entries) {
+    if (isExemptPath(e.key)) continue;
+    if (isLibDartPath(e.key)) added.addAll(addedLines(e.value));
+  }
+  return added;
+}
+
 List<Finding> runAllContentGates({
   required String diff,
   List<String>? names,
   String? stuckLog,
   String? gitignoreDiff,
+  // V10-A: production callers set this false and run the ASYNC bounded gate
+  // (`gateAntipatternRecurrenceBounded`) so a poison stuck_log regex cannot hang
+  // the engine. Self-test / canary callers leave it true (guards 1+2 already
+  // make the proven ReDoS vector return instantly in the sync path).
+  bool runAntipattern = true,
 }) {
   final findings = <Finding>[];
 
@@ -2362,19 +2610,9 @@ List<Finding> runAllContentGates({
       ..addAll(gateGitignoreSecretsGuard(gitignoreDiff))
       ..addAll(gateGitignoreNoHideClaude(gitignoreDiff));
   }
-  if (stuckLog != null && stuckLog.isNotEmpty) {
+  if (runAntipattern && stuckLog != null && stuckLog.isNotEmpty) {
     // Antipattern recurrence runs over the production-code added lines only.
-    final List<String> added;
-    if (names == null) {
-      added = addedLines(diff);
-    } else {
-      final byFile = splitDiffByFile(diff);
-      added = <String>[];
-      for (final e in byFile.entries) {
-        if (isExemptPath(e.key)) continue;
-        if (isLibDartPath(e.key)) added.addAll(addedLines(e.value));
-      }
-    }
+    final added = antipatternAddedLines(diff: diff, names: names);
     findings.addAll(
       gateAntipatternRecurrence(
         stuckLog: stuckLog,
@@ -2412,10 +2650,22 @@ List<Finding> gateNoKLipskeyInUiTree(String uiDiff) =>
 /// per-line surface/print checks). The PURELY POSITIONAL gates (62/63/65/95/51)
 /// stay --diff-only: they cannot be value-split and re-scanning a whole file
 /// would re-flag pre-existing instances of legacy RTL/style choices.
+/// Compute the dart-added lines gate 103 scans in TREE mode (whole post-images
+/// of lib/ files). Reused by the async production path (bounded matcher).
+List<String> antipatternAddedLinesTree(Map<String, String> files) {
+  final dartAdded = <String>[];
+  for (final e in files.entries) {
+    if (isLibDartPath(e.key)) dartAdded.addAll(e.value.split('\n'));
+  }
+  return dartAdded;
+}
+
 List<Finding> runTreeGates({
   required Map<String, String> files, // path -> post-image contents
   String? stuckLog,
   String? gitignoreContents,
+  // V10-A: production (`_mainTree`) sets false and runs the ASYNC bounded gate.
+  bool runAntipattern = true,
 }) {
   final findings = <Finding>[];
   for (final entry in files.entries) {
@@ -2461,15 +2711,11 @@ List<Finding> runTreeGates({
         '+++ b/.gitignore\n${gitignoreContents.split('\n').map((l) => '+$l').join('\n')}';
     findings.addAll(gateGitignoreNoHideClaude(asDiff));
   }
-  if (stuckLog != null && stuckLog.isNotEmpty) {
-    final dartAdded = <String>[];
-    for (final e in files.entries) {
-      if (isLibDartPath(e.key)) dartAdded.addAll(e.value.split('\n'));
-    }
+  if (runAntipattern && stuckLog != null && stuckLog.isNotEmpty) {
     findings.addAll(
       gateAntipatternRecurrence(
         stuckLog: stuckLog,
-        dartAdded: dartAdded,
+        dartAdded: antipatternAddedLinesTree(files),
         hookAdded: const [],
       ),
     );
@@ -2530,7 +2776,7 @@ int _mainVerifyRegistry(List<String> args) {
   return 2;
 }
 
-int _mainDiff(List<String> args) {
+Future<int> _mainDiff(List<String> args) async {
   final diff = _readOrEmpty(_arg(args, '--diff'));
   // H1: decode C-quoted names defensively (the diff's `+++ b/<path>` headers are
   // unquoted inside splitDiffByFile, which is what actually keys the gates; this
@@ -2547,12 +2793,26 @@ int _mainDiff(List<String> args) {
       _arg(args, '--gitignore') == null
           ? null
           : _readOrEmpty(_arg(args, '--gitignore'));
+  // V10-A: run the sync gates WITHOUT antipattern, then run the ASYNC bounded
+  // antipattern gate (ReDoS-safe: catastrophic-pattern reject + 2KB cap +
+  // wall-clock-killed match) so a poison stuck_log line can never hang the hook.
   final findings = runAllContentGates(
     diff: diff,
     names: names,
     stuckLog: stuck,
     gitignoreDiff: gitignore,
+    runAntipattern: false,
   );
+  if (stuck != null && stuck.isNotEmpty) {
+    final added = antipatternAddedLines(diff: diff, names: names);
+    findings.addAll(
+      await gateAntipatternRecurrenceBounded(
+        stuckLog: stuck,
+        dartAdded: added,
+        hookAdded: added,
+      ),
+    );
+  }
   var hadErr = false;
   for (final f in findings) {
     stdout.writeln(f.toLine());
@@ -2575,6 +2835,77 @@ int _mainDiff(List<String> args) {
 /// and are NOT counted as "must scan".
 bool _isScannableName(String path) =>
     isLibDartPath(path) || isScreensPath(path) || isSecretScannablePath(path);
+
+// ── V10-B — whole-tree scan SKIP class (submodules / symlinks / LFS) ────────
+//
+// `git ls-tree -r HEAD` emits a `160000` GITLINK for a submodule (never recurses
+// → a secret in the submodule is never fetched), a `120000` SYMLINK whose blob is
+// just the link TARGET text (not the real content `.dart` would have), and for
+// git-LFS-tracked files `git show` returns the LFS POINTER, not the content. All
+// three let forbidden content ship green while H3 `fed==scanned` FALSELY passes.
+// We now feed the engine the ls-tree MODE column (`--tree-entries`) so it can SEE
+// `120000`/`160000`, and we detect the LFS pointer signature in fetched blobs.
+
+/// One `git ls-tree -r HEAD` row: the octal mode, object type, sha, and path.
+class TreeEntry {
+  final String mode; // e.g. 100644, 100755, 120000 (symlink), 160000 (gitlink)
+  final String type; // blob | commit | tree
+  final String sha;
+  final String path;
+  const TreeEntry(this.mode, this.type, this.sha, this.path);
+  bool get isGitlink => mode == '160000' || type == 'commit';
+  bool get isSymlink => mode == '120000';
+}
+
+/// Parse raw `git ls-tree -r HEAD` output (WITH mode — i.e. NOT `--name-only`).
+/// Format per line: `<mode> SP <type> SP <sha>\t<path>`. The path is C-unquoted
+/// (H1) so a non-ASCII name resolves. Malformed lines are returned via [bad] so
+/// the caller can FAIL CLOSED (never silently drop a tree entry).
+List<TreeEntry> parseTreeEntries(String raw, {List<String>? bad}) {
+  final out = <TreeEntry>[];
+  for (final line in const LineSplitter().convert(raw)) {
+    if (line.trim().isEmpty) continue;
+    final tab = line.indexOf('\t');
+    if (tab < 0) {
+      bad?.add(line);
+      continue;
+    }
+    final meta = line.substring(0, tab).trim().split(RegExp(r'\s+'));
+    final path = unquoteGitPath(line.substring(tab + 1));
+    if (meta.length < 3 || path.isEmpty) {
+      bad?.add(line);
+      continue;
+    }
+    out.add(TreeEntry(meta[0], meta[1], meta[2], path));
+  }
+  return out;
+}
+
+/// Detect a git-LFS pointer blob. An LFS pointer is a tiny text file with a
+/// `version https://git-lfs.github.com/spec/...` line and an `oid sha256:...`
+/// line — the REAL bytes live out-of-band, so a secret in an LFS-tracked file is
+/// invisible to `git show` (and to the smudge-filtered per-commit diff). We must
+/// REJECT it (fail-closed) rather than scan the harmless pointer.
+bool looksLikeLfsPointer(String content) {
+  // Only ever a few hundred bytes; cap the window we inspect.
+  final head = content.length > 1024 ? content.substring(0, 1024) : content;
+  final hasVersion = head.contains('git-lfs.github.com/spec');
+  final hasOid = RegExp(r'^oid sha256:[0-9a-f]{64}', multiLine: true).hasMatch(head);
+  return hasVersion && hasOid;
+}
+
+/// A symlink is DANGEROUS to the scan if it masquerades as scannable content
+/// (e.g. a `foo.dart` symlink whose blob is just `../secret` link text, so the
+/// real `.dart` content is never scanned), OR it points INTO the worktree (a
+/// path-traversal/aliased-content vector). We reject (fail-closed) in both cases.
+bool symlinkIsDangerous(String linkPath, String target) {
+  if (_isScannableName(linkPath)) return true; // scannable name, never real content
+  final t = target.trim();
+  // Points into the repo tree (relative, or absolute into a tracked dir) and the
+  // TARGET name is scannable → it aliases scannable content the scan won't fetch.
+  if (_isScannableName(t)) return true;
+  return false;
+}
 
 /// Build the argv for fetching one blob via the `--show` prefix, injecting
 /// `-c core.quotePath=false` (H1) right after the `git` token so any internal
@@ -2603,40 +2934,148 @@ List<String> _showArgv(String showPrefix, String path) {
 /// scannable file was not fetched+decoded for ANY reason (C-quoted name, missing
 /// blob, git error) the run FAILS CLOSED with the offending names — no silent
 /// skip can let forbidden content ship green.
-int _mainTree(List<String> args) {
-  // H1: decode any C-quoted (`"...\NNN..."`) names back to true UTF-8 paths.
-  final names = _readLines(_arg(args, '--names')).map(unquoteGitPath).toList();
+/// Collect repeated `--flag value` occurrences (e.g. `--allow-gitlink a/b`).
+List<String> _argAll(List<String> a, String flag) {
+  final out = <String>[];
+  for (var i = 0; i < a.length - 1; i++) {
+    if (a[i] == flag) out.add(a[i + 1]);
+  }
+  return out;
+}
+
+Future<int> _mainTree(List<String> args) async {
+  // V10-B: prefer `--tree-entries` (raw `git ls-tree -r HEAD` WITH mode) so we
+  // can SEE 120000 (symlink) / 160000 (gitlink) entries. Fall back to `--names`
+  // (legacy, mode-blind) only when entries are not provided.
   final showPrefix = _arg(args, '--show') ?? 'git show :';
   final files = <String, String>{};
+  final allowGitlinks = _argAll(args, '--allow-gitlink').toSet();
 
   // H3 reconciliation bookkeeping.
   final fed = <String>{}; // distinct scannable names fed
   final scanned = <String>{}; // names successfully fetched + decoded
   final skipped = <String>[]; // scannable names we FAILED to scan (reason)
 
-  for (final path in names) {
+  final exe = showPrefix.trim().split(RegExp(r'\s+')).first;
+
+  // Fetch one blob's raw bytes via the --show prefix; returns (rc, bytes, err).
+  ({int rc, List<int> bytes, String err}) fetch(String path) {
+    final argv = _showArgv(showPrefix, path);
+    final res = Process.runSync(exe, argv, stdoutEncoding: null);
+    final err =
+        res.stderr is List<int>
+            ? utf8.decode(res.stderr as List<int>, allowMalformed: true)
+            : '${res.stderr}';
+    return (
+      rc: res.exitCode,
+      bytes: res.exitCode == 0 ? (res.stdout as List<int>) : const <int>[],
+      err: err.trim(),
+    );
+  }
+
+  // Build the (path, mode) worklist. With --tree-entries we get the true mode;
+  // a malformed ls-tree row is a HARD fail (never a silent drop).
+  final entriesArg = _arg(args, '--tree-entries');
+  final List<({String path, String mode, String type})> work = [];
+  if (entriesArg != null) {
+    final bad = <String>[];
+    final entries = parseTreeEntries(_readOrEmpty(entriesArg), bad: bad);
+    for (final b in bad) {
+      // A row we could not parse could hide a gitlink/symlink — fail closed.
+      fed.add(b);
+      skipped.add('UNPARSEABLE ls-tree row: $b (fail closed)');
+    }
+    for (final e in entries) {
+      work.add((path: e.path, mode: e.mode, type: e.type));
+    }
+  } else {
+    // Legacy mode-blind path. We can still LFS-detect on content, and reject a
+    // .dart whose blob is actually a symlink target via the smudge heuristic.
+    for (final p in _readLines(_arg(args, '--names')).map(unquoteGitPath)) {
+      work.add((path: p, mode: '100644', type: 'blob'));
+    }
+  }
+
+  for (final w in work) {
+    final path = w.path;
     if (path.isEmpty) continue;
+
+    // ── (1) GITLINK / submodule (mode 160000 or type commit) ──────────────
+    // `ls-tree -r` never recurses into it, so a secret inside is NEVER fetched.
+    // FAIL CLOSED unless explicitly allowlisted. Folded into `fed` so H3 reflects
+    // it (reconciliation can no longer falsely pass while a submodule is unscanned).
+    if (w.mode == '160000' || w.type == 'commit') {
+      fed.add(path);
+      if (allowGitlinks.contains(path)) {
+        // Allowlisted: count as accounted-for (admin accepted the risk / scans it
+        // out-of-band via `git submodule foreach`). Do not fetch — it's a commit.
+        scanned.add(path);
+        stdout.writeln(
+          'WARN\treg\tgitlink/submodule allowlisted (NOT recursed by tree scan): $path',
+        );
+      } else {
+        skipped.add(
+          '$path (mode 160000 GITLINK/submodule — tree scan does NOT recurse; '
+          'a secret inside is unscanned. Allowlist via --allow-gitlink or scan '
+          'with `git submodule foreach`. FAIL CLOSED)',
+        );
+      }
+      continue;
+    }
+
+    // ── (2) SYMLINK (mode 120000) ─────────────────────────────────────────
+    // The blob is the link TARGET text, not real content. A `foo.dart` symlink
+    // would be "scanned" as harmless link text while its true target is never
+    // fetched. Resolve the target; if it's dangerous (scannable name, or aliases
+    // scannable content) REJECT (fail closed). A harmless non-scannable symlink
+    // (e.g. a license link) is legitimately skipped, like a .png.
+    if (w.mode == '120000') {
+      final r = fetch(path);
+      final target =
+          r.rc == 0 ? utf8.decode(r.bytes, allowMalformed: true).trim() : '';
+      if (r.rc != 0) {
+        // Could not even read the link target — fail closed.
+        fed.add(path);
+        skipped.add('$path (mode 120000 SYMLINK, git show rc=${r.rc}: ${r.err})');
+        continue;
+      }
+      if (symlinkIsDangerous(path, target)) {
+        fed.add(path);
+        skipped.add(
+          '$path (mode 120000 SYMLINK -> "$target" masquerading as scannable '
+          'content; real target is NOT fetched by the tree scan. REJECTED — '
+          'fail closed)',
+        );
+      }
+      // else: a benign non-scannable symlink — not in the reconciliation universe.
+      continue;
+    }
+
+    // ── (3) regular blob ──────────────────────────────────────────────────
     // Only fetch text we might scan; non-scannable assets are not reconciled.
     if (!_isScannableName(path)) continue;
     fed.add(path);
     try {
-      final argv = _showArgv(showPrefix, path);
-      final exe = showPrefix.trim().split(RegExp(r'\s+')).first;
-      // H2: read RAW BYTES (stdoutEncoding: null) so a non-UTF-8 byte in the
-      // blob cannot throw a FormatException that the old `catch (_)` swallowed.
-      final res = Process.runSync(exe, argv, stdoutEncoding: null);
-      if (res.exitCode == 0) {
-        final bytes = (res.stdout as List<int>);
+      final r = fetch(path);
+      if (r.rc == 0) {
         // allowMalformed: a genuinely invalid byte becomes U+FFFD instead of
-        // throwing — the file is STILL scanned (fail-CLOSED on bad bytes, never
-        // fail-open by dropping it).
-        files[path] = utf8.decode(bytes, allowMalformed: true);
+        // throwing — the file is STILL scanned (fail-CLOSED on bad bytes).
+        final content = utf8.decode(r.bytes, allowMalformed: true);
+        // ── LFS pointer: `git show` returns the POINTER, not the real bytes,
+        // and the per-commit diff is smudge-blind too. A secret in an
+        // LFS-tracked file would ship green. REJECT (fail closed).
+        if (looksLikeLfsPointer(content)) {
+          skipped.add(
+            '$path (git-LFS POINTER — real content lives out-of-band and is NOT '
+            'scanned by `git show`. Run `git lfs smudge` to scan, or do not LFS '
+            'a scannable source file. REJECTED — fail closed)',
+          );
+          continue;
+        }
+        files[path] = content;
         scanned.add(path);
       } else {
-        skipped.add(
-          '$path (git show rc=${res.exitCode}: '
-          '${(res.stderr is List<int> ? utf8.decode(res.stderr as List<int>, allowMalformed: true) : "${res.stderr}").trim()})',
-        );
+        skipped.add('$path (git show rc=${r.rc}: ${r.err})');
       }
     } catch (e) {
       // ANY exception (process spawn failure, decode-of-stderr, …) is a HARD
@@ -2653,11 +3092,22 @@ int _mainTree(List<String> args) {
       _arg(args, '--gitignore') == null
           ? null
           : _readOrEmpty(_arg(args, '--gitignore'));
+  // V10-A: tree-mode antipattern also runs ReDoS-safe (bounded async gate).
   final findings = runTreeGates(
     files: files,
     stuckLog: stuck,
     gitignoreContents: gi,
+    runAntipattern: false,
   );
+  if (stuck != null && stuck.isNotEmpty) {
+    findings.addAll(
+      await gateAntipatternRecurrenceBounded(
+        stuckLog: stuck,
+        dartAdded: antipatternAddedLinesTree(files),
+        hookAdded: const [],
+      ),
+    );
+  }
   var hadErr = false;
   for (final f in findings) {
     stdout.writeln(f.toLine());
@@ -2691,7 +3141,7 @@ int _mainTree(List<String> args) {
   return hadErr ? 2 : 0;
 }
 
-void main(List<String> args) {
+Future<void> main(List<String> args) async {
   if (args.contains('--self-test')) {
     exit(runSelfTest());
   }
@@ -2699,7 +3149,9 @@ void main(List<String> args) {
     exit(_mainVerifyRegistry(args));
   }
   if (args.contains('--tree')) {
-    exit(_mainTree(args));
+    // V10-A: tree mode is async (bounded ReDoS-safe antipattern matching).
+    exit(await _mainTree(args));
   }
-  exit(_mainDiff(args));
+  // V10-A: diff mode is async (bounded ReDoS-safe antipattern matching).
+  exit(await _mainDiff(args));
 }

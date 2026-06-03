@@ -109,11 +109,15 @@ jobs:
           # H1 (v6): quotePath=false so a non-ASCII (Hebrew) filename is its TRUE
           # path, not a C-quoted string the engine could not fetch → silent skip.
           git -c core.quotePath=false --no-replace-objects ls-tree -r --name-only HEAD > /tmp/tree_all.txt
+          # V10-B — ls-tree WITH mode (drop --name-only) so the engine can SEE
+          # 120000 (symlink) / 160000 (gitlink) entries and fail closed on the
+          # whole-tree-scan SKIP class (submodule/symlink/LFS) before shipping.
+          git -c core.quotePath=false --no-replace-objects ls-tree -r HEAD > /tmp/tree_entries.txt
           echo "── tree size ──"; wc -l /tmp/tree_all.txt
           set +e
           dart run "$TRUSTED" \
             --tree \
-            --names /tmp/tree_all.txt \
+            --tree-entries /tmp/tree_entries.txt \
             --show "git --no-replace-objects show HEAD:" \
             --stuck-log app_flutter/knowledge/stuck_log.md | tee /tmp/tree_out.txt
           TREE_RC=${PIPESTATUS[0]}

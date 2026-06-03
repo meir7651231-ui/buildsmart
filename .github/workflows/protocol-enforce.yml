@@ -143,6 +143,10 @@ jobs:
           # K1 — the WHOLE resulting tree (every tracked file), the clean-tree
           # baseline. We never assume the merge-base was clean. (H1: quotePath=false.)
           git -c core.quotePath=false --no-replace-objects ls-tree -r --name-only HEAD > /tmp/tree_all.txt
+          # V10-B — ls-tree WITH the MODE column (drop --name-only) so the engine
+          # can SEE 120000 (symlink) / 160000 (gitlink/submodule) entries and
+          # fail closed on the whole-tree-scan SKIP class (submodule/symlink/LFS).
+          git -c core.quotePath=false --no-replace-objects ls-tree -r HEAD > /tmp/tree_entries.txt
           echo "── touched vs $BASE ──"; cat /tmp/touched.txt || true
           echo "── tree size ──"; wc -l /tmp/tree_all.txt
           # K1 FAIL-CLOSED: a push that MOVED the ref but yields an EMPTY diff-set
@@ -329,6 +333,7 @@ jobs:
           sed 's#^app_flutter/##' /tmp/touched.txt > /tmp/touched_rel.txt || true
           cp /tmp/touched.txt /tmp/touched_abs.txt
           cp /tmp/tree_all.txt /tmp/tree_abs.txt
+          cp /tmp/tree_entries.txt /tmp/tree_entries_abs.txt   # V10-B: mode-bearing
           # (a) DIFF mode over the BASE…HEAD added lines (catches new violations
           #     with their exact line, incl. positional gates 62/63/65/95).
           git --no-replace-objects diff "${{ steps.diffset.outputs.base }}...HEAD" > /tmp/fulldiff.txt || true
@@ -343,9 +348,13 @@ jobs:
           #     with --no-replace-objects so a planted replace ref cannot hide content.
           #     H1: the engine ALSO injects core.quotePath=false in its internal
           #     `git show`; the names file is already unquoted (diffset step).
+          # V10-B: feed --tree-entries (mode-bearing ls-tree) so the engine sees
+          # 120000/160000 entries and fails closed on the submodule/symlink/LFS
+          # silent-skip class. (No --allow-gitlink: a gitlink fails closed unless
+          # an admin adds an explicit allowlist here.)
           dart run "$TRUSTED" \
             --tree \
-            --names /tmp/tree_abs.txt \
+            --tree-entries /tmp/tree_entries_abs.txt \
             --show "git --no-replace-objects show HEAD:" \
             --stuck-log knowledge/stuck_log.md | tee /tmp/tree_out.txt
           TREE_RC=${PIPESTATUS[0]}

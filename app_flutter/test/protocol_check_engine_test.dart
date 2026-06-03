@@ -779,15 +779,19 @@ void main() {
         'iVBORw0KGgpnaHBfYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhQUFBQUFBQUFBQUFBQUFBQUFBQUE=';
     const randomSecret = 'U8JZpDE0iGXlD6gNCFbaEPFjbD0kH8Oool8DklZDOCj2ISaJ';
 
-    test('a REAL (decodable) PNG blob is a WARN (prefer assets), not ERR', () {
+    // v9 (V9-A) REMOVED the base64-image WARN exemption entirely: ANY literal
+    // meeting the base64-blob criteria is now an ERR (move images to assets/),
+    // killing the laundering class. These mirror tests are updated from the old
+    // v7 WARN expectation to the v9 ERR behavior the shipped engine enforces.
+    test('a REAL (decodable) PNG blob is an ERR (v9: no image WARN exemption)', () {
       final f = gateNoSecrets(added('const img = "$pngReal";'));
       expect(f.length, 1);
-      expect(f.first.sev, Sev.warn);
+      expect(f.first.sev, Sev.err);
     });
-    test('a REAL (decodable) JPEG blob is a WARN, not ERR', () {
+    test('a REAL (decodable) JPEG blob is an ERR (v9: no image WARN exemption)', () {
       final f = gateNoSecrets(added('const img = "$jpgReal";'));
       expect(f.length, 1);
-      expect(f.first.sev, Sev.warn);
+      expect(f.first.sev, Sev.err);
     });
     test('LAUNDER magic-TEXT-prefix + secret (same blob) is an ERR secret', () {
       // THE HOLE: v7 downgraded this to WARN and shipped it.
@@ -836,6 +840,92 @@ void main() {
       final f = gateNoDarkColoredBox(added('ColoredBox(color: Color(0xFF111111))'));
       expect(f.isNotEmpty, isTrue);
       expect(f.first.message, contains('lib/theme/'));
+    });
+  });
+
+  // ── V10-A — ReDoS / self-DoS guards (gate 103) ──────────────────────────
+  // These RUN under `flutter test`, so the wall-clock kill (guard 3) is proven
+  // in the same harness the brief requires (not only via the engine binary).
+  group('V10-A ReDoS guards', () {
+    test('guard 2: (a+)+\$ is rejected at parse (never compiled)', () {
+      final rej = <({String pattern, String reason})>[];
+      final aps = parseAntipatterns(r'ANTIPATTERN: (a+)+$', rejected: rej);
+      expect(aps, isEmpty);
+      expect(rej.length, 1);
+    });
+
+    test('guard 3: a poison pattern that SLIPS static detection TIMES OUT '
+        '(killed) — does not hang flutter test', () async {
+      // `a?^30 a^30` has NO nested group and NO large {N}, so guard 2 misses it,
+      // but it ReDoS-hangs Dart's backtracking RegExp. Guard 3 must kill it.
+      final pat = ('a?' * 30) + ('a' * 30);
+      expect(antipatternCatastrophicReason(pat), isNull,
+          reason: 'this shape intentionally slips the static detector');
+      final sw = Stopwatch()..start();
+      final r = await boundedAnyMatch(pat, ['a' * 29]);
+      sw.stop();
+      expect(r.timedOut, isTrue, reason: 'runaway scan must be killed');
+      expect(r.matched, isFalse);
+      // Killed at the 500ms budget (+ isolate spawn); MUST be well under a hang.
+      expect(sw.elapsed.inSeconds, lessThan(5));
+    });
+
+    test('boundedAnyMatch returns a real match for a safe pattern', () async {
+      final r = await boundedAnyMatch('FORBIDDEN', ['x', 'has FORBIDDEN here']);
+      expect(r.timedOut, isFalse);
+      expect(r.matched, isTrue);
+    });
+
+    test('gateAntipatternRecurrenceBounded: poison pattern → WARN, never ERR/hang',
+        () async {
+      final sw = Stopwatch()..start();
+      final f = await gateAntipatternRecurrenceBounded(
+        stuckLog: r'ANTIPATTERN: (a+)+$',
+        dartAdded: ['const s = "${'a' * 40}";'],
+        hookAdded: const [],
+      );
+      sw.stop();
+      expect(sw.elapsed.inSeconds, lessThan(5));
+      expect(f.where((x) => x.sev == Sev.err), isEmpty);
+      expect(f.where((x) => x.sev == Sev.warn), isNotEmpty);
+    });
+
+    test('gateAntipatternRecurrenceBounded: real recurrence still ERRs',
+        () async {
+      final f = await gateAntipatternRecurrenceBounded(
+        stuckLog: 'ANTIPATTERN: FORBIDDEN_X',
+        dartAdded: const ['var y = FORBIDDEN_X;'],
+        hookAdded: const [],
+      );
+      expect(f.where((x) => x.gateId == '103' && x.sev == Sev.err), isNotEmpty);
+    });
+  });
+
+  // ── V10-B — whole-tree scan SKIP class (submodule / symlink / LFS) ───────
+  group('V10-B tree-scan skip class', () {
+    test('parseTreeEntries exposes 160000 gitlink and 120000 symlink', () {
+      final e = parseTreeEntries(
+        '100644 blob a\tlib/main.dart\n'
+        '160000 commit b\tvendored_sub\n'
+        '120000 blob c\tlib/aliased.dart',
+      );
+      expect(e.length, 3);
+      expect(e[1].isGitlink, isTrue);
+      expect(e[2].isSymlink, isTrue);
+    });
+    test('looksLikeLfsPointer detects pointer, ignores normal source', () {
+      expect(
+        looksLikeLfsPointer(
+          'version https://git-lfs.github.com/spec/v1\noid sha256:${'a' * 64}\n',
+        ),
+        isTrue,
+      );
+      expect(looksLikeLfsPointer('class A {}\n'), isFalse);
+    });
+    test('symlinkIsDangerous: scannable name or scannable target', () {
+      expect(symlinkIsDangerous('lib/x.dart', '../s.txt'), isTrue);
+      expect(symlinkIsDangerous('d/link', '../lib/r.dart'), isTrue);
+      expect(symlinkIsDangerous('README.md', 'docs/R.md'), isFalse);
     });
   });
 }

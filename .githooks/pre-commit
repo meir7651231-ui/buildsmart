@@ -381,6 +381,32 @@ $(printf '%s\n' "$_diff" \
             | grep -vE '^\+[[:space:]]' \
             | sed -E 's/^\+[A-Za-z_][A-Za-z0-9_<>, ?]*[[:space:]]+get[[:space:]]+([a-z][A-Za-z0-9_]*).*/\1/')"
         _syms=$(printf '%s\n' "$_syms" | grep -E '^[A-Za-z][A-Za-z0-9_]*$' | sort -u)
+        # V10-C (P2 polish): a pure-DATA top-level const/final in lib/data/ is
+        # DATA, not behavior — it should NOT demand a test (a catalog literal has
+        # nothing to test). Drop such a symbol ONLY when (a) the file is under
+        # lib/data/, AND (b) its ADDED declaration is `const|final NAME = <literal>`
+        # whose RHS opens a DATA literal ([ { < " ' or a number) and is NOT a
+        # function (no `=>` arrow, no `(...) {` body, no `Function` type). A
+        # function/class/method/getter or a logic-valued const is NOT exempted, so
+        # the test-coverage floor for real behavior is untouched.
+        if [[ -n "$_syms" ]] && printf '%s' "$_file" | grep -qE '(^|/)lib/data/'; then
+            local _kept _s _decl
+            _kept=""
+            for _s in $_syms; do
+                # The added top-level declaration line for THIS symbol, if any.
+                _decl=$(printf '%s\n' "$_diff" \
+                    | grep -E "^\+(final|const)[[:space:]]+([A-Za-z0-9_<>, ?]+[[:space:]]+)?$_s[[:space:]]*=" \
+                    | grep -vE '^\+[[:space:]]' | head -1)
+                if [[ -n "$_decl" ]] \
+                   && printf '%s\n' "$_decl" | grep -qE '=[[:space:]]*(const[[:space:]]+)?[\[{<"'"'"'0-9]' \
+                   && ! printf '%s\n' "$_decl" | grep -qE '=>|Function|\)[[:space:]]*\{'; then
+                    continue   # pure-data const/final literal in lib/data/ → exempt
+                fi
+                _kept="$_kept$_s
+"
+            done
+            _syms=$(printf '%s' "$_kept" | grep -E '^[A-Za-z][A-Za-z0-9_]*$' | sort -u)
+        fi
         [[ -z "$_syms" ]] && continue
         _base=$(basename "$_file" .dart)
         for _sym in $_syms; do
@@ -493,6 +519,65 @@ run_content_engine() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
+#  V10-B — per-commit whole-tree-scan SKIP class (submodule / symlink / LFS).
+#  The trusted whole-tree scan in CI (K1/K5) now fails closed on these via the
+#  engine's --tree-entries mode-awareness; here we add an EARLY local block so a
+#  dev never even creates such a commit. `git diff --cached --raw` exposes the
+#  staged mode column, so we can see a NEW 120000 (symlink) / 160000 (gitlink)
+#  entry, and we grep staged blobs for the git-LFS pointer signature. Reported
+#  under the existing `reg` umbrella id (no new gate-count → parity untouched).
+# ═══════════════════════════════════════════════════════════════════════════
+gate_tree_modes() {
+    ran "reg"
+    local raw line newmode path scannable
+    # --raw: ":<oldmode> <newmode> <oldsha> <newsha> <status>\t<path>"
+    raw=$(git -c core.quotePath=false diff --cached --raw 2>/dev/null)
+    [[ -z "$raw" ]] && return
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        # newmode is the 2nd whitespace field after the leading ':'.
+        newmode=$(echo "$line" | sed -E 's/^:[0-7]+ ([0-7]+) .*/\1/')
+        path=$(echo "$line" | sed -E 's/^[^\t]*\t//')
+        case "$newmode" in
+            160000)
+                err "reg" "gitlink/submodule נוסף ($path) — סריקת העץ לא יורדת לתת-מודול; סוד בתוכו לא נסרק" \
+                    "אל תוסיף תת-מודול, או הוסף allowlist מפורש ב-K1/K5 (--allow-gitlink) באישור אדמין"
+                ;;
+            120000)
+                # A symlink whose NAME is scannable (.dart/.json/…) masquerades as
+                # real content the scan never fetches → block. A benign non-scannable
+                # symlink (README→…) is allowed.
+                scannable=""
+                case "$path" in
+                    *.dart|*.json|*.yaml|*.yml|*.arb|*.kt|*.kts|*.swift|*.html|*.css|*.toml|*.gradle|*.xml|*.properties|*.env|*.txt)
+                        scannable=1 ;;
+                esac
+                if [[ -n "$scannable" ]]; then
+                    err "reg" "symlink בשם נסרק ($path, mode 120000) — ה-blob הוא טקסט-היעד, לא התוכן האמיתי" \
+                        "אל תשתמש ב-symlink לקובץ מקור נסרק; הוסף קובץ אמיתי"
+                fi
+                ;;
+        esac
+    done <<< "$raw"
+    # LFS pointer in a staged scannable blob: `git show` (and the smudge-filtered
+    # diff) return the POINTER, not the content — a secret would ship invisibly.
+    local f content
+    while IFS= read -r f; do
+        [[ -z "$f" ]] && continue
+        case "$f" in
+            *.dart|*.json|*.yaml|*.yml|*.arb|*.kt|*.kts|*.swift|*.html|*.css|*.toml|*.gradle|*.xml|*.properties|*.env|*.txt) ;;
+            *) continue ;;
+        esac
+        content=$(git show ":$f" 2>/dev/null | head -c 1024)
+        if echo "$content" | grep -q "git-lfs.github.com/spec" \
+           && echo "$content" | grep -qE "^oid sha256:[0-9a-f]{64}"; then
+            err "reg" "קובץ LFS נסרק ($f) — git show מחזיר את ה-pointer, לא את התוכן; סוד יישלח בלי סריקה" \
+                "אל תשים קובץ מקור נסרק ב-LFS, או הרץ git lfs smudge לפני הסריקה"
+        fi
+    done <<< "$(git -c core.quotePath=false diff --cached --name-only 2>/dev/null)"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
 #  R6 — INTEGRITY PIN + BLOCKING SELF-TEST of the content engine.
 #  The engine, registry and the scripts the protocol shells out to are pinned by
 #  sha256 (protocol/pins.sha256). A tampered engine/registry/script FAILS here,
@@ -515,6 +600,7 @@ PROTECTED_PINNED=(
     "protocol/regression_v5.sh"   # v5 — pin the bash/CI regression suite
     "protocol/regression_v6.sh"   # v6 — pin the H1-H5 regression suite
     "protocol/regression_v7.sh"   # v7 — pin the DX friction-fix regression suite
+    "protocol/regression_v10.sh"  # v10 — pin the ReDoS + tree-skip regression suite
 )
 gate_engine_integrity() {
     ran "reg"
@@ -1519,6 +1605,7 @@ run() {
         gate_learning
         gate_knowledge
         run_content_engine
+        gate_tree_modes     # V10-B: submodule/symlink/LFS skip-class (reg umbrella)
         gate_test_tier      # audit-short-circuits to record 31-40 (no real flutter)
         gate_final_safety
         ran "reg"
@@ -1541,6 +1628,7 @@ run() {
     gate_learning      # 101/102/104/111 (cheap parts)
     gate_knowledge     # 106-116 (cheap)
     run_content_engine # ALL Dart content gates (cheap, deterministic) + RAN ledger
+    gate_tree_modes    # V10-B: submodule/symlink/LFS skip-class (reg umbrella)
 
     # ── Fail-fast barrier: stop before the ~13-min Flutter tier ──
     if [[ "$FAIL" -gt 0 ]]; then

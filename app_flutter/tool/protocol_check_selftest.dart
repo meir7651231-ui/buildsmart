@@ -43,7 +43,7 @@ String _addedFiles(List<(String, String)> files) => files
 /// Run all built-in unit tests. Returns process exit code (0 ok, 2 failures).
 int runSelfTest() {
   _selfTestFailures = 0;
-  stdout.writeln('protocol_check v9 self-test');
+  stdout.writeln('protocol_check v10 self-test');
 
   // ════════════════════════════════════════════════════════════════════
   //  R4 REGRESSIONS — semantic, not literal/substring (the headline closes)
@@ -1269,9 +1269,130 @@ ANTIPATTERN-EXAMPLE: ignored
     return f.isNotEmpty && f.first.message.contains('lib/theme/');
   }());
 
+  // ════════════════════════════════════════════════════════════════════
+  //  V10-A — ReDoS / self-DoS guards (gate 103)
+  // ════════════════════════════════════════════════════════════════════
+  // Guard 2: the PROVEN `(a+)+$` vector is detected as catastrophic.
+  _check(
+    'V10-A (a+)+\$ flagged catastrophic (nested quantifier)',
+    antipatternCatastrophicReason(r'(a+)+$') != null,
+  );
+  _check(
+    'V10-A (a*)* flagged catastrophic',
+    antipatternCatastrophicReason(r'(a*)*') != null,
+  );
+  _check(
+    'V10-A (\\d+)* flagged catastrophic',
+    antipatternCatastrophicReason(r'(\d+)*') != null,
+  );
+  _check(
+    'V10-A (?:ab+)+ flagged catastrophic',
+    antipatternCatastrophicReason(r'(?:ab+)+') != null,
+  );
+  _check(
+    'V10-A large {200} bound flagged catastrophic',
+    antipatternCatastrophicReason(r'a{200}') != null,
+  );
+  _check(
+    'V10-A {2,300} upper bound flagged catastrophic',
+    antipatternCatastrophicReason(r'a{2,300}') != null,
+  );
+  // Guard 2: a NORMAL antipattern regex is NOT flagged (no false-positive).
+  _check(
+    'V10-A normal regex greaterThan\\(0\\) NOT catastrophic',
+    antipatternCatastrophicReason(r'greaterThan\(0\)') == null,
+  );
+  _check(
+    'V10-A normal regex ^\\s*print\\( NOT catastrophic',
+    antipatternCatastrophicReason(r'^\s*print\(') == null,
+  );
+  _check(
+    'V10-A small {3} bound NOT catastrophic',
+    antipatternCatastrophicReason(r'a{3}') == null,
+  );
+  // Guard 2: parseAntipatterns SKIPS a catastrophic pattern (never stored) and
+  // surfaces it via the rejected sink.
+  _check('V10-A parseAntipatterns drops a poison pattern + reports it', () {
+    final rej = <({String pattern, String reason})>[];
+    final aps = parseAntipatterns(r'ANTIPATTERN: (a+)+$', rejected: rej);
+    return aps.isEmpty && rej.length == 1 && rej.first.pattern == r'(a+)+$';
+  }());
+  // Guard 2: a SAFE pattern still parses through normally.
+  _check(
+    'V10-A parseAntipatterns keeps a safe pattern',
+    parseAntipatterns(r'ANTIPATTERN: FORBIDDEN').length == 1,
+  );
+  // Sync gate 103 still ERRs on a real recurrence (no regression).
+  _check('V10-A sync gate103 still fires on a real recurrence', () {
+    final f = gateAntipatternRecurrence(
+      stuckLog: 'ANTIPATTERN: FORBIDDEN_X',
+      dartAdded: const ['var y = FORBIDDEN_X;'],
+      hookAdded: const [],
+    );
+    return f.length == 1 && f.first.gateId == '103' && f.first.sev == Sev.err;
+  }());
+  // Sync gate 103 does NOT hang / does NOT fire on the poison pattern (guard 2
+  // dropped it at parse → no compile → instant, returns empty).
+  _check('V10-A sync gate103 ignores a poison (a+)+\$ pattern (no hang, no fire)', () {
+    final f = gateAntipatternRecurrence(
+      stuckLog: r'ANTIPATTERN: (a+)+$',
+      dartAdded: ['const s = "${'a' * 40}";'],
+      hookAdded: const [],
+    );
+    return f.isEmpty;
+  }());
+
+  // ════════════════════════════════════════════════════════════════════
+  //  V10-B — whole-tree scan SKIP class (submodule / symlink / LFS)
+  // ════════════════════════════════════════════════════════════════════
+  _check('V10-B parseTreeEntries reads mode/type/path', () {
+    final e = parseTreeEntries(
+      '100644 blob abc123\tlib/main.dart\n'
+      '160000 commit def456\tvendored_sub\n'
+      '120000 blob 999\tlib/aliased.dart',
+    );
+    return e.length == 3 &&
+        e[0].mode == '100644' &&
+        e[1].isGitlink &&
+        e[2].isSymlink &&
+        e[1].path == 'vendored_sub';
+  }());
+  _check('V10-B parseTreeEntries flags an unparseable row (fail-closed sink)', () {
+    final bad = <String>[];
+    parseTreeEntries('garbage-with-no-tab', bad: bad);
+    return bad.length == 1;
+  }());
+  _check(
+    'V10-B looksLikeLfsPointer detects a real pointer',
+    looksLikeLfsPointer(
+      'version https://git-lfs.github.com/spec/v1\n'
+      'oid sha256:${'a' * 64}\nsize 12345\n',
+    ),
+  );
+  _check(
+    'V10-B looksLikeLfsPointer does NOT flag a normal dart file',
+    looksLikeLfsPointer('const x = 1;\nclass A {}\n') == false,
+  );
+  _check(
+    'V10-B looksLikeLfsPointer needs BOTH version AND oid (version-only = no)',
+    looksLikeLfsPointer('// see git-lfs.github.com/spec for docs\n') == false,
+  );
+  _check(
+    'V10-B symlinkIsDangerous: a .dart symlink is dangerous',
+    symlinkIsDangerous('lib/aliased.dart', '../secret.txt'),
+  );
+  _check(
+    'V10-B symlinkIsDangerous: a symlink whose TARGET is scannable is dangerous',
+    symlinkIsDangerous('docs/link', '../lib/real.dart'),
+  );
+  _check(
+    'V10-B symlinkIsDangerous: a benign md->md symlink is NOT dangerous',
+    symlinkIsDangerous('README.md', 'docs/README_REAL.md') == false,
+  );
+
   stdout.writeln(
     _selfTestFailures == 0
-        ? 'ALL PASS (v9 self-test)'
+        ? 'ALL PASS (v10 self-test)'
         : '$_selfTestFailures FAILURE(S)',
   );
   return _selfTestFailures == 0 ? 0 : 2;
