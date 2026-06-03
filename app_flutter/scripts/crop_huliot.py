@@ -123,7 +123,7 @@ PER_BAND_PHOTO_H = {
     # Page 30 — nickel grid has visible DN+H ticks
     (30, 'b'): 100,
     # Page 32 — no-siphon (tall photo) + kitchen siphon
-    (32, 'a'): 95,     # no-siphon — was capturing W tick at bottom
+    (32, 'a'): 135,    # no-siphon — full L-shape (pipe + elbow + horizontal)
     (32, 'b'): 165,
     (32, 'c'): 160,
     # Page 34 — american 1¼ siphon
