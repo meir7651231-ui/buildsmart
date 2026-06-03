@@ -36,7 +36,8 @@
 - ⭐ **`legacy-map`** — port-map מדויק (לגאסי line-range → Preact file + status). ⚠️ **חלק מהספירות מיושנות** (ציין BUTTON_REGISTRY=176 בעוד המקור=350; store="stub" בעוד store.tsx=302 ש׳ כיום). מצוין ל-line-mapping, לא-מהימן-לגמרי לספירות.
 - **`wip-menu-wiring`** — SSOT לחיווט-ההגדרות (~70 עלים, persist `bs.settings.v1`/`bs.profile.v1`).
 - **`spec.json`** (29 features; schema status/legacy-refs/rules/adrs/testedBy) — ⚠️ **snapshot מוקדם** (2026-05-21, לפני deepening; statuses 'missing'/'stub' **מיושנים** — ה-dial-leaves נוספו ב-INSP-0029→0044). מאשר voice/barcode=implemented; מתעד **owner-added features שאינם באב-הטיפוס:** search-recent (localStorage) · bathroom-bg (frosted-glass) · search-filters.
-- **process-docs:** `reporting.md` (פורמט-דיווח-לבעלים) · `agent-board.md` (deep↔fast) · `inspector/` (checklist/loops/prompt) · README-ים.
+- **process-docs:** `reporting.md` (פורמט-דיווח-לבעלים) · `agent-board.md` (deep↔fast) · **`inspector/`** = פרוטוקול-המפקח המלא (prompt/checklist FND/FRM/WIR/FIN/OPS/loops; CRITICAL=block · MAJOR=approval · MINOR=record · stuck-loop=NO-GO) · README-ים.
+- **סריקת 43 INSP (אומת):** כולם **final-GO** — 3 החלו NO-GO (MAJOR/CRITICAL) → תוקנו → GO; 3 עם MINOR (התאמות-מותרות, למשל INSP-0010 accessibility-בכוונה-ב-LS). אין ממצא-מוצר חדש מעבר ל-verbatim-leaf-tables (מאשרים את התוכן שלכדתי).
 - `IMPLEMENTATION_PROTOCOL` = **deprecated** (הנחה לבנות dashboards-as-views = הפרת R2).
 
 ## INSP — 43 ביקורות
