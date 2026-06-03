@@ -38,6 +38,26 @@ home directly. Guarded by `onboarding_test`.
 |---|---|---|
 | תווית-גרסה | מציגה `kVersionLabel` בלבד (אפור-secondary, `Key('version_chrome')`), מ-`version.g.dart` הנוצר אוטומטית מ-git+STATUS. אין נקודה-ירוקה (שמורה ל-`_PulsingStatus`), אין changelog ב-UI. לא מרונדרת במצב "עץ חכם". | ✅ wired (לקח #72) |
 
+## 👔 Manager BS-dial → 📊 dashboard (`bs_dial_widget.dart` · `state/dial_state.dart` · `logic/manager_dashboard.dart`)
+
+The 👔 "מנהל המערכת" persona → לוח בקרה (`kManagerSections` → section `m-products`) has 5
+`md-*` leaves. Tapping a leaf opens an INLINE `_ManagerMetricPanel` above the dial (R2 —
+dial-drill, NO navigation) showing the REAL number derived in `manager_dashboard.dart`
+(`managerAnalytics`, a verbatim port of `mgrAnalytics()` @index.html:12081-12126). State:
+`bsMetricLeafProvider` (which `md-*` panel is open; tap toggles; any other dial action
+clears it). The other dial leaves (children / `mm-regression` / etc.) are unchanged.
+
+| Leaf (id) | Shows | Source getter | Status |
+|---|---|---|---|
+| 🚚 הזמנות פתוחות (`md-open-orders`) | `openOrders` (=4; orders not delivered, @12096) | `ManagerAnalytics.openOrders` | ✅ |
+| 📦 מוצרים בקטלוג (`md-catalog`) | `catalogCount` (=54; non-accessory, @12110) | `ManagerAnalytics.catalogCount` | ✅ |
+| 🧰 אביזרים נלווים (`md-accessories`) | `accessoryCount` (=148; `accessoryProduct:true`, @12107) | `ManagerAnalytics.accessoryCount` | ✅ |
+| ✅ זמינים כעת (`md-available`) | `availableCount` (=202; STORE_STOCK all-true, @12122) | `ManagerAnalytics.availableCount` | ✅ |
+| 🏪 חנויות פעילות (`md-stores`) | `storesLabel` (="3/3"; active/total, @12125) | `ManagerAnalytics.storesLabel` | ✅ |
+
+Guard: `bs_dial_manager_test` (5 leaves present · tap→inline panel with the real number ·
+NO "בבנייה" · toggle closes) + `manager_dashboard_test` (the derivations, vs index.html).
+
 ## Catalog settings (`catalog_settings_screen.dart` → `catalog_settings.dart`)
 
 | Setting | Behavior | Status |

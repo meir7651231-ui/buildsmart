@@ -92,3 +92,34 @@ Owner: this session · Scope: `catalog_screen.dart` בלבד (search panel). א�
 - `_ShipToRow` בראש sheet הסיכום (אחרי הכותרת, לפני "אישור הזמנה").
 - `_openShipToSheet`: חלונית לא-מחייבת — שדה כתובת + דלג/שמירה; אפשר לאשר בלי כתובת.
 - `shipToProvider` (ריק=לא הוגדר; checkout לא דורש). אומת בצילום (sheet + popup). 1056 ירוק.
+
+# 👔 Manager persona — 📊 dashboard: 5 leaves → real numbers (גל 1: M0+M1) (v5.93)
+Owner: this session
+Scope: `lib/logic/manager_dashboard.dart` (M0, חדש) + `lib/screens/bs_dial_widget.dart` +
+`lib/state/dial_state.dart` (M1). אסור לגעת ב-Preact-shared, ב-`lib/data` (קטלגן), או
+ב-personas/sections (העלים כבר מוגדרים ב-`sections.dart` `kManagerSections`→`m-products`).
+
+מקור-אמת verbatim: `index.html` (repo root). `mgrAnalytics`@12081 · `renderMgrDashboard`@12133 ·
+`mdMetric`@12160-12164 · `ORDER_FLOW`@16943. **לא** `SYSTEM_MANAGER.md` (מספרים מומצאים).
+
+Style: M0 (logic+test) commit אחד → M1 (widget+state+widget-test) commit שני. אין push
+ללא "תדחוף". incremental — מוות אסור שימחק הכל.
+
+## M0 — foundation ✅
+- `manager_dashboard.dart` (PURE Dart): seed (STORES/SYS_ORDERS_SEED/TREES-dist/STORE_STOCK)
+  + `ManagerAnalytics` getters = 5 ה-mdMetric tiles. אומת מול הקוד החי ב-index.html
+  (node-replay של לולאת `mgrAnalytics` על TREES@5441-6044): total=202 · catalog=54 ·
+  acc=148 · avail=202 · cats=14 · stores=3/3 — תואם 1:1.
+- `kManagerOrderFlow` (@16943) + `contractorCredit` + `mgrCustomerList` = foundation ל-M2/M3.
+- `manager_dashboard_test` (12) ירוק.
+
+## M1 — wire 5 leaves inline (R2, NO new screen) ✅
+- `bsMetricLeafProvider` (state): ה-`md-*` הפתוח (toggle) · ב-`resetAllDials`.
+- `bs_dial_widget.dart`: tap על leaf `md-*` → `_ManagerMetricPanel` inline מעל ה-dial
+  (מספר אמיתי מ-`managerAnalytics`), במקום toast "בבנייה". 4 שאר ה-leaf-types ללא שינוי.
+- `bs_dial_manager_test` (4 widget): 5 leaves נוכחים · tap→מספר אמיתי · אין "בבנייה" · toggle.
+
+## נשאר (גלים הבאים)
+- M2 — 6 עלי `mo-*` (סטטוס הזמנות) דרך `kManagerOrderFlow` (כל שלב מסנן הזמנות).
+- M3 — 👥 לקוחות דרך `mgrCustomerList` + `contractorCredit`.
+- M4 — שאר ה-sections של המנהל (הזמנות/ניהול).

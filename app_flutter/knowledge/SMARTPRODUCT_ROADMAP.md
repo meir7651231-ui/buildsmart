@@ -8,6 +8,20 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
+v5.93 — 👔 **Manager 📊 dashboard — real derived numbers** (wave 1: M0+M1) 🟦.
+The 👔 "מנהל המערכת" BS-dial 📊 dashboard's 5 `md-*` leaves now show REAL numbers
+inline (R2 dial-drill, no new screen) instead of "בבנייה" toasts.
+**M0** ✅ — `logic/manager_dashboard.dart` (PURE) ports `mgrAnalytics()`
+(@index.html:12081-12126): the seed (STORES · SYS_ORDERS_SEED · TREES distribution ·
+STORE_STOCK) + the 5 `mdMetric` tiles (@12160-12164) as `ManagerAnalytics` getters
+(open-orders=4 · catalog=54 · accessories=148 · available=202 · stores=3/3). Numbers
+verified verbatim against the live index.html `TREES` loop (NOT `SYSTEM_MANAGER.md`).
+`kManagerOrderFlow` (@16943) + `contractorCredit` + `mgrCustomerList` = M2/M3 foundation.
+Guard `manager_dashboard_test` (12). **M1** ✅ — `bsMetricLeafProvider` + an inline
+`_ManagerMetricPanel` in `bs_dial_widget.dart`; guard `bs_dial_manager_test` (4).
+**Remaining (🟦):** M2 — 6 `mo-*` order-status leaves via `kManagerOrderFlow`; M3 —
+👥 customers via `mgrCustomerList`; M4 — the manager's orders/management sections.
+
 v5.69 — 💧 **Division option 2 — through the finder** (Benzi #1, user-chosen).
 A live department now opens the **finder (בית)** scoped to its `WaterSystem`
 (not a forced tree): `_DeptScopeBar` shows the scope + clear; the finder hides
