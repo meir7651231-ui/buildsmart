@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>BuildSmart משתמש במצלמה כדי לסרוק ברקודים של מוצרים.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>BuildSmart משתמש במיקרופון לחיפוש קולי של מוצרים.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>BuildSmart משתמש בזיהוי-דיבור כדי להמיר חיפוש קולי לטקסט.</string>
 </dict>
 </plist>

@@ -14,6 +14,13 @@
 
 ---
 
+## 🆕 עדכון P0 (2026-06-03 — בנצי · אחרי v5.97)
+source-prep מתוך `PLAN-contractor-completion` (בלוק P0 השקה) + audit-חתימה:
+- ✅ **iOS usage-strings** → `ios/Runner/Info.plist`: NSCamera + NSMicrophone + NSSpeechRecognition (ל-mobile_scanner + speech_to_text). חוסם-iOS-P0 הוסר ברמת-המקור.
+- ✅ **Android permissions** → `AndroidManifest.xml`: CAMERA (+`uses-feature` required=false) + RECORD_AUDIO (לצד INTERNET הקיים).
+- ✅ **חתימת-Android — מוכנה (תיקון: הסטטוס "debug keys" היה stale):** `build.gradle.kts` → `signingConfigs.create("release")` קורא מ-`key.properties` (קיים · **gitignored** · keyAlias=`upload`); ה-keystore **קיים בפועל** ב-`C:/Users/User/android-build/keystore/upload-keystore.jks`. `.gitignore` חוסם `key.properties`+`*.jks`. **חתימה אינה חוסם יותר.**
+- ⬜ **נותר (user-step / CI, לא-קוד):** AAB ב-CI (`android-package.yml`) · iOS signing-team + Mac/CI build · חשבונות Apple/Google + privacy-policy (CAMERA/RECORD_AUDIO דורשים גילוי ב-Play).
+
 ## 0. סביבה וחוסמי-תשתית (לפני הכל)
 
 > אלה לא ממצאי-קוד — אלה תנאים סביבתיים שמשפיעים על האודיט ועל שלב ה-Fix.
@@ -58,7 +65,7 @@ deps/duplication/~583 צבעים-קשיחים **[P2]**. **הקוד אינו דו
 |---|---|---|
 | **Web/PWA** | 🟢 GO לאחר P1 | אין P0; assets 101MB = P1 לפני production |
 | **iOS** | 🔴 NO-GO | usage-strings (NSCamera/NSMicrophone) + signing-team |
-| **Android** | 🔴 NO-GO | release signing אמיתי (כיום debug keys) |
+| **Android** | 🟡 קרוב-GO — חתימה מוכנה (v5.97) | AAB ב-CI · חשבון Play · privacy-policy — **לא** חתימה |
 
 **קריטריון go:** P0=0 לפלטפורמה + אימות `flutter build` עובר על **snapshot קפוא** (ENV-1b).
 **הערכת-מאמץ למובייל:** ~1-2 ימי-עבודה (קונפיג + ניקיון) **+ חשבונות-חנות** (Apple/Google — זמן-הקמה חיצוני).

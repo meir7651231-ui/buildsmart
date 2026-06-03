@@ -3,6 +3,12 @@
          RELEASE build needs INTERNET. Flutter auto-adds this only to the debug/profile
          manifests, so without it here release builds show blank product images. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- mobile_scanner — barcode scanning (camera not required to install; the
+         scanner simply won't run on a camera-less device). -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <!-- speech_to_text — voice search (microphone). -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <application
         android:label="buildsmart"
         android:name="${applicationName}"
