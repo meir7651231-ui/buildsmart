@@ -42,18 +42,22 @@
 | `13-scenarios-courier-registration.md` | פריט-חסר/אזל + דשבורד-שליח + רישום | 17627–18422 |
 | `14-b2b-supply-chain.md` | B2B (Cat-A): planner/RMA/השכרה/פקדונות/MSDS/RFQ | 18423–19451 |
 | `15-finance-site-hubs.md` | מרכז-פיננסים (B) + ניהול-אתר (C) | 19452–20800 |
+| `16-portal-ai-rewards.md` | פורטל/chat (F) + AI (G) + תגמולים (H) | 20800–21659 |
+| `17-security-service-boot.md` | אבטחה/RBAC (I) + שירות/chatbot (J) + boot | 21660–22414 |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
 ## מעקב-כיסוי (COVERAGE) — מה כבר נקרא-ונלכד
-> זה הלב של ההמשכיות. ה-session הבא מתחיל מ"⬜ טרם" הראשון.
+> 🏁 **הושלם — כל 22,416 השורות של אב-הטיפוס נלכדו** (head + CSS + body + JS),
+> ב-17 דוחות-תחום מאורגנים ומצוטטים. אין עוד ⬜ טרם.
+> אם אב-הטיפוס ישתנה — להשוות SHA ולעדכן את הדוח הרלוונטי.
 
 | טווח | תחום | סטטוס | קובץ-יעד |
 |---|---|---|---|
 | 1–13 | head | ✅ נלכד | `01-design-system.md` |
 | 14–4019 | CSS — מערכת-עיצוב מלאה (8 חלקים א׳–ח׳: יסודות→4 פרסונות) | ✅ נלכד | `01-design-system.md` |
 | 4021–5419 | body — מעטפת + מסכים + תיבות | ✅ נלכד | `02-shell-and-screens.md` |
-| 5419–5440 | JS — bootstrap (script #1) | ⬜ טרם | — |
+| 5419–5440 | JS — bootstrap (error-catcher, script #1) | ✅ נלכד | `17` (boot) |
 | 5441–6044 | JS — TREES (מודל-מוצר: pl_/stages/rich/+148) | ✅ נלכד | `03-data-product-trees.md` |
 | 6046–6320 | JS — קטלוג/וריאציות/מידות/מלאי/כלים | ✅ נלכד | `04-data-catalog-variants-tools.md` |
 | 6321–6560 | JS — ORDERS/PROJECTS/RANKS/זהות | ✅ נלכד | `05-data-orders-projects-ranks.md` |
@@ -67,7 +71,8 @@
 | 17628–18422 | JS — פריט-חסר/אזל + שליח + רישום | ✅ נלכד | `13-scenarios-courier-registration.md` |
 | 18423–19451 | JS — B2B Category-A (planner/RMA/השכרה/MSDS/RFQ) | ✅ נלכד | `14-b2b-supply-chain.md` |
 | 19452–20800 | JS — מרכז-פיננסים (B) + ניהול-אתר (C) | ✅ נלכד | `15-finance-site-hubs.md` |
-| 20801–22414 | JS — AI(G)/rewards(H)/security(I)/service(J)/chat/עובד + דוח-פיננסי | ⬜ טרם | `16+`… |
+| 20801–21659 | JS — פורטל/chat (F) + AI (G) + תגמולים (H) | ✅ נלכד | `16-portal-ai-rewards.md` |
+| 21660–22414 | JS — אבטחה/RBAC (I) + שירות/chatbot (J) + boot | ✅ נלכד | `17-security-service-boot.md` |
 
 ## מפת-ניווט ל-JS (5440–22414) — roadmap לקריאה, **טרם נלכד**
 > רשימת שמות+שורות בלבד, להכוונת הקריאה הרציפה. **התוכן ייחשב נלכד רק אחרי
