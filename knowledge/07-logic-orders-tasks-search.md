@@ -22,7 +22,7 @@ schema-מלא (לפי הדשבורד): `{id, worker(idx ל-WORKERS), title, desc
 ## ניווט-קטלוג מדורג (8250–8446)
 - `setCatalogMode`/`setCatalogCategory`/`openCatalogCategory`/`openSmartCatalog` · `catalogGroupsForMode` · `renderCatChips`.
 - drill: `syncCatDrill`/`renderCatDrill`/`clearCatDrill`.
-- **`ATTR_SCHEMA`** (8341) — צירי-ניווט: `productType`(סוג מוצר) · `secondary`(מאפיין) · `diameter`(קוטר/מידה) · `variantOpt`(דגם) · `brandName`(מותג).
+- **`ATTR_SCHEMA`** (8341) — צירי-ניווט (icons מ-`UI_ARCHITECTURE`): `productType`(📦 סוג מוצר) · `secondary`(🔧 מאפיין) · `diameter`(📏 קוטר/מידה) · `variantOpt`(🔩 דגם) · `brandName`(🏷️ מותג).
 - catNav engine (8349–8446): `catNavKeys`/`catNavAttrValues`/`catNavValues`/`catNavPicks`/`catNavFiltered`/`catNavNextAttr`/`catNavIsPlasson`/`catNavStage`/`openCatNav`/`catNavQuery` — ניווט קטגוריה→תכונה→מוצר (`view-catnav`).
 
 ## ⭐ מנוע-החיפוש (8447–9000)
