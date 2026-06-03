@@ -38,6 +38,7 @@
 | `09-logic-cart-notif-onboarding.md` | סל-render/checkout/התראות/onboarding/roles | 11000–11907 |
 | `10-engine-pricing-stores-sysorders.md` | מנוע-מסחר: תמחור/ספקים/VAT/SYS_ORDERS | 11908–12061 |
 | `11-manager-dashboard-selftest.md` | דשבורד-מנהל + BUTTON_REGISTRY/self-test | 12062–15900 |
+| `12-persona-manager-store.md` | דשבורד-מנהל (מלא) + דשבורד-חנות | 15900–17627 |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
@@ -59,7 +60,8 @@
 | 11001–11907 | JS — סל-render/checkout/התראות/onboarding/roles | ✅ נלכד | `09-logic-cart-notif-onboarding.md` |
 | 11908–12061 | JS — מנוע-מסחר (תמחור/ספקים/VAT/SYS_ORDERS) | ✅ נלכד | `10-engine-pricing-stores-sysorders.md` |
 | 12062–15900 | JS — דשבורד-מנהל + BUTTON_REGISTRY/self-test | ✅ נלכד | `11-manager-dashboard-selftest.md` |
-| 15901–22414 | JS — B2B/hubs/chat/חנות/שליח/עובד + דוח-פיננסי | ⬜ טרם | `12+`… |
+| 15901–17627 | JS — דשבורד-מנהל (מלא) + דשבורד-חנות | ✅ נלכד | `12-persona-manager-store.md` |
+| 17628–22414 | JS — פריט-חסר/שליח/עובד/B2B/hubs/chat + דוח-פיננסי | ⬜ טרם | `13+`… |
 
 ## מפת-ניווט ל-JS (5440–22414) — roadmap לקריאה, **טרם נלכד**
 > רשימת שמות+שורות בלבד, להכוונת הקריאה הרציפה. **התוכן ייחשב נלכד רק אחרי
