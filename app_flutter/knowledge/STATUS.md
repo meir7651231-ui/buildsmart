@@ -1,6 +1,14 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.90` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.91` (see `home_shell.dart`). Update on each user-visible change._
+
+## Checkout — non-binding "where to ship" (v5.91 — Benzi #4)
+`_ShipToRow` sits at the **top of the order-summary sheet** (the one "הזמן עכשיו"
+opens), before "אישור הזמנה" — placement per Benzi. Tapping it opens
+`_openShipToSheet`, a non-binding address popup ("חלונית לא מחייבת"): a TextField
++ **דלג / שמירה**, with the note that the order can be confirmed without an
+address and completed later. State: `shipToProvider` (empty = not set; checkout
+never requires it).
 
 ## Catalog search — SKU no longer pollutes numeric size queries (v5.89)
 `catalogProductMatchesQuery` folded the SKU into the haystack as a loose

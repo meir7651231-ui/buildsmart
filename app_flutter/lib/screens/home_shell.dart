@@ -396,7 +396,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.90 · 1.6.48 · 🔗 איחוד-קטלוג: מק"ט/שם של חוליות+PPR נמצאים בחיפוש, כרטיס לא-ריק, ומועדפים/שורת-עגלה נפתרים (kCatalogProducts לכל קריאת-קטלוג רוחבית)',
+                          'v5.91 · 1.6.48 · 🚚 בנצי #4 — חלונית "לאן לשלוח" לא-מחייבת בראש סיכום-ההזמנה, בשלב התשלום (לא חוסמת)',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

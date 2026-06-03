@@ -164,6 +164,7 @@ Resets on department open + clear. Guarded by `departments_test`.
 | cart stepper (+ / − / לעגלה) | `qtyForKey` / `setQtyForKey` | ✅ |
 | saveCartToProject | show/hide the cart project selector | ✅ |
 | summary chips (פריטים בסל / הזמנות פתוחות / הצעות ספקים) | derived live: `cartItemCount` (cart+smart lines), `isOrderOpen` over `_kOrders`, offers single-sourced from the מכרז ספקים row badge | ✅ |
+| לאן לשלוח (Benzi #4) | `_ShipToRow` at the **top of the order-summary sheet** ("הזמן עכשיו" opens it, before "אישור הזמנה") → `_openShipToSheet`: a **non-binding** address popup (TextField + דלג/שמירה; order confirms with or without it). State `shipToProvider` | ✅ |
 | כתובות/חשבוניות/ספקים/השכרה/אחריות/ביומטרי/אשראי-יומי | — | ⛔ server/data |
 
 ## Install Studio (`install_studio_screen.dart` → `logic/install_engine.dart`)
