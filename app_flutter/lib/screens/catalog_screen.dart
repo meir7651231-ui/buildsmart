@@ -59,7 +59,9 @@ void _openStudio(BuildContext context) {
 /// Active section label — 'הכל' is always first and fixed.
 /// Default landing is the בית (finder home) — the least-technical path to a
 /// product (group → sub → add, 2–3 taps), so the app opens straight on it.
-final catalogSectionProvider = StateProvider<String>((_) => 'בית');
+// Default 'הכל' — the בית tab lands on the "הכל" window (Benzi #3). Department
+// drill-in sets 'בית' (finder) explicitly.
+final catalogSectionProvider = StateProvider<String>((_) => 'הכל');
 
 /// Ordered list of user section labels (הכל is NOT stored here).
 final catalogSectionsListProvider = StateProvider<List<String>>(

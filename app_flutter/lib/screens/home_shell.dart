@@ -14,6 +14,7 @@ import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/screens/search_dial_widget.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/screens/store_settings_screen.dart';
+import 'package:buildsmart/screens/updates_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
@@ -46,10 +47,10 @@ class HomeShell extends ConsumerWidget {
           IndexedStack(
             index: tabIndex,
             children: const [
-              DepartmentsScreen(),
-              ChatsScreen(),
-              NotificationsScreen(),
-              StoreScreen(),
+              CatalogScreen(), // 0 · בית — the "הכל" catalog window
+              DepartmentsScreen(), // 1 · מחלקות
+              UpdatesScreen(), // 2 · עדכונים — התראות + שיחות merged
+              StoreScreen(), // 3 · חנות
             ],
           ),
 
@@ -93,9 +94,14 @@ class HomeShell extends ConsumerWidget {
         currentIndex: tabIndex,
         onTap: (i) {
           resetAllDials(ref);
-          // Re-tapping the מחלקות tab returns to the departments grid (clear the
-          // department + its system/tree drill).
           if (i == 0) {
+            // בית — the catalog's "הכל" window, unscoped (clear any department).
+            ref.read(homeDepartmentProvider.notifier).state = null;
+            ref.read(catalogSystemFilterProvider.notifier).state = null;
+            ref.read(catalogTreePathProvider.notifier).state = const [];
+            ref.read(catalogSectionProvider.notifier).state = 'הכל';
+          } else if (i == 1) {
+            // מחלקות — back to the departments grid.
             ref.read(homeDepartmentProvider.notifier).state = null;
             ref.read(catalogSystemFilterProvider.notifier).state = null;
             ref.read(catalogTreePathProvider.notifier).state = const [];
@@ -465,12 +471,13 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
           tooltip: 'מצלמה',
           onPressed: () => openCameraSheet(context),
         ),
-        if (tabIndex == 0)
-          const _CatalogMenuButton()
-        else if (tabIndex == 1)
-          const _ChatsMenuButton()
+        if (tabIndex == 0 || tabIndex == 1)
+          const _CatalogMenuButton() // בית + מחלקות both drill into the catalog
         else if (tabIndex == 2)
-          const _NotificationsMenuButton()
+          // עדכונים — menu follows the active sub-toggle (התראות / שיחות).
+          (ref.watch(updatesSubTabProvider) == 1
+              ? const _ChatsMenuButton()
+              : const _NotificationsMenuButton())
         else
           const _StoreMenuButton(),
         // Intro tour — far-left (RTL end). Replays the first-run slides.
@@ -504,12 +511,13 @@ class _BottomNav extends ConsumerWidget {
       unselectedFontSize: 11,
       items: [
         const BottomNavigationBarItem(
-          icon: Icon(Icons.apps),
-          label: 'מחלקות',
+          icon: Icon(Icons.home_outlined),
+          activeIcon: Icon(Icons.home),
+          label: 'בית',
         ),
         const BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline),
-          label: 'שיחות',
+          icon: Icon(Icons.apps),
+          label: 'מחלקות',
         ),
         BottomNavigationBarItem(
           icon: _BadgedIcon(
@@ -520,7 +528,7 @@ class _BottomNav extends ConsumerWidget {
             icon: Icons.notifications,
             count: unreadCount,
           ),
-          label: 'התראות',
+          label: 'עדכונים',
         ),
         const BottomNavigationBarItem(
           icon: Icon(Icons.shopping_cart_outlined),

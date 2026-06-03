@@ -92,3 +92,15 @@ Owner: this session · Scope: `catalog_screen.dart` בלבד (search panel). א�
 - `_ShipToRow` בראש sheet הסיכום (אחרי הכותרת, לפני "אישור הזמנה").
 - `_openShipToSheet`: חלונית לא-מחייבת — שדה כתובת + דלג/שמירה; אפשר לאשר בלי כתובת.
 - `shipToProvider` (ריק=לא הוגדר; checkout לא דורש). אומת בצילום (sheet + popup). 1056 ירוק.
+
+# Benzi #3 — תפריט 4 טאבים + מיזוג עדכונים ✅ (v5.93)
+משוב משתמש (חידוד): 4 טאבים — בית(חלון "הכל") · מחלקות · עדכונים(התראות+שיחות ביחד) · חנות.
+(ירד טאב פרויקטים; אזור-אישי/שם ליד הלוגו = לא בידיי.)
+- `home_shell`: IndexedStack [CatalogScreen, DepartmentsScreen, UpdatesScreen, StoreScreen];
+  _BottomNav בית/מחלקות/עדכונים/חנות; onTap reset (בית→'הכל' unscoped, מחלקות→grid);
+  app-bar overflow לפי טאב (+updatesSubTab).
+- `updates_screen.dart` חדש: `UpdatesScreen` + `updatesSubTabProvider` — מתג [התראות·שיחות]
+  מעל IndexedStack של 2 המסכים הקיימים (state נשמר).
+- `catalog_screen`: default section 'בית'→'הכל' (drill-in עדיין מגדיר 'בית').
+- טסט עודכן: widget_test (boot על בית + 4 טאבים · dashboard 'אביזרים נלווים' ≥1).
+  analyze 0 · 1084 ירוק · build ✓. אומת בצילום (4 טאבים + מתג).

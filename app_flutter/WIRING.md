@@ -55,9 +55,17 @@ home directly. Guarded by `onboarding_test`.
 | מחירים/מע"מ/מטבע/מחיר-יחידה/השוואה | — | ⛔ no price data |
 | דירוג/מרחק/ספקים מקומיים · AI×4 · יחידות/עשרוני · מיון-ברירת-מחדל · רדיוס | — | ⛔ no data/engine |
 
+## Bottom nav (Benzi #3) — `home_shell._BottomNav`
+
+4 tabs: **🏠 בית** (0, `CatalogScreen` on the "הכל" window) · **▦ מחלקות** (1,
+`DepartmentsScreen`) · **🔔 עדכונים** (2, `UpdatesScreen` = התראות + שיחות merged
+under a toggle `updatesSubTabProvider`) · **🛒 חנות** (3, `StoreScreen`). Cart =
+floating FAB (hidden on חנות). Tapping בית resets the catalog to 'הכל' unscoped;
+tapping מחלקות returns to the grid.
+
 ## Departments home (`departments_screen.dart` — Benzi #2/#3)
 
-The landing tab (bottom-nav "מחלקות", index 0): a 2-col grid of 9 departments
+The **מחלקות** tab (bottom-nav index 1): a 2-col grid of 9 departments
 (verbatim names). **Live** (have catalog data) — each opens the catalog **inline**
 (shell chrome stays; `homeDepartmentProvider`) **pre-filtered to one water system**
 (Benzi #1, see below):
