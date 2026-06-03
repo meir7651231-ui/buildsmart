@@ -150,9 +150,12 @@ run_content_engine() {
     diff_file="$(mktemp)" || { err "reg" "mktemp נכשל (diff)" "fail closed"; return; }
     gi_file="$(mktemp)"   || { err "reg" "mktemp נכשל (gi)" "fail closed"; return; }
     names_file="$(mktemp)" || { err "reg" "mktemp נכשל (names)" "fail closed"; return; }
-    git diff --cached > "$diff_file" 2>/dev/null
-    git diff --cached -- "$REPO_ROOT/.gitignore" > "$gi_file" 2>/dev/null
-    git diff --cached --name-only > "$names_file" 2>/dev/null
+    # H1 (v6): -c core.quotePath=false so a non-ASCII (Hebrew) filename is its
+    # TRUE UTF-8 path in BOTH the diff headers and the names list — not a C-quoted
+    # `"…\NNN…"` string that would mis-scope the per-file gates (silent-skip class).
+    git -c core.quotePath=false diff --cached > "$diff_file" 2>/dev/null
+    git -c core.quotePath=false diff --cached -- "$REPO_ROOT/.gitignore" > "$gi_file" 2>/dev/null
+    git -c core.quotePath=false diff --cached --name-only > "$names_file" 2>/dev/null
 
     # R3: capture the engine exit code. The engine exits 0 (no findings) or 2
     # (ERR findings). ANY OTHER code = the engine crashed / Dart broke / file
@@ -203,6 +206,7 @@ PROTECTED_PINNED=(
     ".github/workflows/protocol-enforce.yml"
     ".github/workflows/deploy.yml"
     "protocol/regression_v5.sh"   # v5 — pin the bash/CI regression suite
+    "protocol/regression_v6.sh"   # v6 — pin the H1-H5 regression suite
 )
 gate_engine_integrity() {
     ran "reg"

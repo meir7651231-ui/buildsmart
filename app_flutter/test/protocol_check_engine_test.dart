@@ -7,6 +7,8 @@
 // allowlist, RTL-as-ERR, persistence-key quote/interp, kLipskey alias, print
 // sinks, runtime registry parity + malformed-tsv, path scoping, tree mode.
 
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../tool/protocol_check.dart';
@@ -694,6 +696,67 @@ void main() {
       );
       expect(gateNoDartHtml(added("import 'dart:html';")), isNotEmpty);
       expect(gateNoLocalUri(added("const p = 'file:///x';")), isNotEmpty);
+    });
+  });
+
+  group('v6 — silent-skip class + slash-laundering + logic-coupled RAN', () {
+    test('H1 unquoteGitPath decodes a C-quoted Hebrew path to true UTF-8', () {
+      const quoted = '"app_flutter/lib/screens/'
+          '\\327\\236\\327\\241\\327\\232.dart"';
+      final want = 'app_flutter/lib/screens/'
+          '${String.fromCharCodes([0x05DE, 0x05E1, 0x05DA])}.dart';
+      expect(unquoteGitPath(quoted), want);
+      expect(unquoteGitPath('app_flutter/lib/a.dart'), 'app_flutter/lib/a.dart');
+    });
+
+    test('H1 a C-quoted Hebrew .dart header with a secret is CAUGHT', () {
+      final diff = '+++ "b/app_flutter/lib/screens/'
+          '\\327\\236\\327\\241\\327\\232.dart"\n'
+          '+const apiSecret = "AKIAIOSFODNN7EXAMPLE1234567890ABCD";';
+      final f = runAllContentGates(
+        diff: diff,
+        names: const ['app_flutter/lib/screens/x.dart'],
+      );
+      expect(f.any((x) => x.gateId == '52' && x.sev == Sev.err), isTrue);
+    });
+
+    test('H2 a high-bit byte does not throw and the secret is still caught', () {
+      final bytes = <int>[
+        ...utf8.encode('const k = "AKIAIOSFODNN7EXAMPLE1234567890ABCD";\n'),
+        0xE9, // lone Latin-1 byte — invalid as standalone UTF-8
+        ...utf8.encode(' tail\n'),
+      ];
+      final body = utf8.decode(bytes, allowMalformed: true);
+      final f = runTreeGates(files: {'app_flutter/web/x.html': body});
+      expect(f.any((x) => x.gateId == '52' && x.sev == Sev.err), isTrue);
+    });
+
+    test('H4 slash-laundered NAMED credential is CAUGHT', () {
+      expect(
+        lineHasSecret(
+          'const clientSecret = "abcdEFGH1234/ijklMNOP5678/qrstUVWX/CDEFghij9012";',
+        ),
+        isTrue,
+      );
+    });
+
+    test('H4 real path/URL with a credential name stays exempt (no FP)', () {
+      expect(
+        lineHasSecret('const tokenFile = "assets/config/auth_token.json";'),
+        isFalse,
+      );
+      expect(
+        lineHasSecret('const authUrl = "https://auth.example.com/oauth/cb";'),
+        isFalse,
+      );
+      expect(
+        lineHasSecret('const secretPath = "/etc/app/secrets/key";'),
+        isFalse,
+      );
+    });
+
+    test('H5 --emit-ran is logic-coupled: every canary fires', () {
+      expect(emitRanIds().toSet(), kDartEngineGateIds.toSet());
     });
   });
 }

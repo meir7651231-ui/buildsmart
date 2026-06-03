@@ -77,6 +77,81 @@ class Finding {
   String toString() => toLine();
 }
 
+// --- Path de-quoting (H1: non-ASCII filenames via core.quotePath) ----------
+//
+// H1 (v6): with the default `core.quotePath=true`, git C-style-QUOTES any path
+// byte > 0x7F. A Hebrew-named `lib/screens/מסך.dart` is emitted by `ls-tree`
+// and `diff --name-only` as `"app_flutter/lib/screens/\327\236\327\241\327\232.dart"`.
+// When that QUOTED string is fed to the engine (as a `--names` entry, or as the
+// `+++ b/<path>` header inside a diff), `git show HEAD:"<quoted>"` cannot resolve
+// the blob → the file is SILENTLY DROPPED and forbidden content shipped. We fix
+// at the source (callers pass `-c core.quotePath=false`) AND defensively here:
+// any quoted name is decoded back to its true UTF-8 bytes before use, so the
+// engine is correct even if a future caller forgets the flag.
+//
+// A quoted git path is wrapped in double-quotes and uses C escapes: \\ \" \t \n
+// and OCTAL byte escapes `\NNN` (the raw UTF-8 bytes of the codepoint). We
+// reassemble the byte sequence and utf8-decode it (allowMalformed so a genuinely
+// invalid byte does not throw — H2's spirit applied to names too).
+String unquoteGitPath(String name) {
+  if (name.length < 2 || !name.startsWith('"') || !name.endsWith('"')) {
+    return name; // not a C-quoted path — return as-is
+  }
+  final inner = name.substring(1, name.length - 1);
+  final bytes = <int>[];
+  for (var i = 0; i < inner.length; i++) {
+    final c = inner[i];
+    if (c != '\\') {
+      // A normal char — emit its UTF-8 bytes (ASCII stays one byte).
+      bytes.addAll(utf8.encode(c));
+      continue;
+    }
+    // Escape sequence.
+    if (i + 1 >= inner.length) {
+      bytes.addAll(utf8.encode(c));
+      break;
+    }
+    final n = inner[i + 1];
+    // Octal byte escape: \NNN (1–3 octal digits). git always emits exactly 3.
+    if (n.codeUnitAt(0) >= 0x30 && n.codeUnitAt(0) <= 0x37) {
+      var j = i + 1;
+      var oct = '';
+      while (j < inner.length &&
+          oct.length < 3 &&
+          inner.codeUnitAt(j) >= 0x30 &&
+          inner.codeUnitAt(j) <= 0x37) {
+        oct += inner[j];
+        j++;
+      }
+      bytes.add(int.parse(oct, radix: 8) & 0xFF);
+      i = j - 1;
+      continue;
+    }
+    // Named C escapes.
+    switch (n) {
+      case 'n':
+        bytes.add(0x0A);
+        break;
+      case 't':
+        bytes.add(0x09);
+        break;
+      case 'r':
+        bytes.add(0x0D);
+        break;
+      case '"':
+        bytes.add(0x22);
+        break;
+      case r'\':
+        bytes.add(0x5C);
+        break;
+      default:
+        bytes.addAll(utf8.encode(n)); // unknown escape — keep literal char
+    }
+    i++;
+  }
+  return utf8.decode(bytes, allowMalformed: true);
+}
+
 // --- Diff primitives ------------------------------------------------------
 
 /// Added lines of a unified diff: lines starting with a single '+' but not
@@ -143,6 +218,10 @@ Map<String, String> splitDiffByFile(String diff) {
     var p = raw.substring(prefixLen).trim();
     final tab = p.indexOf('\t');
     if (tab >= 0) p = p.substring(0, tab);
+    // H1: a non-ASCII path is C-quoted by git in the `+++ b/"..."` header. Decode
+    // it back to true bytes BEFORE stripping the a/ b/ prefix (the prefix is
+    // INSIDE the quotes: `"b/app_flutter/..\NNN..dart"`).
+    p = unquoteGitPath(p);
     if (p.startsWith('a/') || p.startsWith('b/')) p = p.substring(2);
     return p;
   }
@@ -616,6 +695,35 @@ bool _looksLikePathOrId(String v) {
   return false;
 }
 
+/// H4 (v6): a STRICT path/URL shape — a real URL scheme, or a value that ends in
+/// a known file extension, or a relative/absolute filesystem path whose final
+/// segment carries a `.<ext>`. This is the ONLY path/id form we still exempt when
+/// a credential NAME is present on the line (`tokenFile = "assets/key.json"`,
+/// `authUrl = "https://auth.example/cb"`). A "just contains a slash" value
+/// (`clientSecret = "ab/cd/EF/GH"`) does NOT match → it is no longer laundered.
+bool _isConcretePathOrUrl(String v) {
+  // URL / URI scheme (http(s), ftp, file, ws(s), git, ssh, package, asset, …).
+  if (RegExp(r'^[a-z][a-z0-9+.\-]*://').hasMatch(v)) return true;
+  if (RegExp(r'^(mailto|tel|data|package|asset):').hasMatch(v)) return true;
+  // A path whose LAST segment has a concrete file extension.
+  final last = v.split('/').last;
+  if (RegExp(
+    r'\.(jpe?g|png|webp|gif|svg|ico|json|dart|arb|txt|md|ya?ml|csv|html?|css|'
+    r'js|ts|kt|swift|xml|toml|cfg|ini|properties|gradle|lock|sh|py|pem|crt|key)$',
+    caseSensitive: false,
+  ).hasMatch(last)) {
+    return true;
+  }
+  // An absolute/relative path that is clearly a filesystem location and NOT a
+  // high-entropy blob: only path-safe chars and lowercase-ish segments.
+  if (RegExp(r'^[./~]').hasMatch(v) &&
+      RegExp(r'^[A-Za-z0-9._/~\-]+$').hasMatch(v) &&
+      shannonEntropy(v) < 4.0) {
+    return true;
+  }
+  return false;
+}
+
 /// C1 — a credential-shaped quoted value, detected by SHAPE not by char-class
 /// mix. v3 required upper+lower+digit ALL present, which let a lowercase-hex,
 /// UPPER-only, no-digit, or all-digit token sail through. We now fire on ANY of:
@@ -644,7 +752,15 @@ bool _looksHighEntropySecret(String line) {
       _secretFingerprints.any((fp) => fp.hasMatch(line));
   for (final m in assign.allMatches(line)) {
     final v = m.group(1)!;
-    if (_looksLikePathOrId(v)) continue;
+    // H4 (v6): the path/id exemption must NOT override an explicit credential
+    // NAME. A value containing `/` (or a dotted id, or a known asset extension)
+    // is normally a path — but if the LINE names it as a credential
+    // (`clientSecret = "a/b/c/SECRET"`) the slash is no longer disqualifying.
+    // We therefore SKIP the path/id exemption when credCtx matches AND the value
+    // is not itself a real file/URL shape (a concrete extension or URL scheme).
+    // This keeps asset-path false-positives out (no cred name → exemption still
+    // applies) while closing the slash-laundered-secret hole.
+    if (_looksLikePathOrId(v) && (!credCtx || _isConcretePathOrUrl(v))) continue;
     if (_isSriDigest(v)) continue; // F2: sha256-<base64>
     if (integrityCtx) continue; // F2: integrity:/checksum/digest context
     // N1 path-a guard: a single-repeated-character run (all-zero `0000…0`,
@@ -1848,6 +1964,134 @@ const List<String> kDartEngineGateIds = [
   '114',
 ];
 
+/// H5 (v6) — LOGIC-COUPLED RAN proof. The old `--emit-ran` printed
+/// `kDartEngineGateIds` UNCONDITIONALLY, so K3 parity passed even if a Dart
+/// content gate's predicate had been gutted (the id was printed regardless).
+/// v6 mirrors the bash hook's `…; ran <id>` discipline: we run each gate's REAL
+/// predicate over a KNOWN-POSITIVE canary and emit the id ONLY IF the gate
+/// actually FIRES on its canary. Gut a gate (e.g. `return const [];`) → its
+/// canary no longer fires → the id is NOT emitted → registry⇄runtime parity
+/// FAILS. This makes `--emit-ran` a TRUE runtime proof for every gate class, not
+/// an overstated static claim.
+///
+/// Each entry is `(id, predicate-call-that-must-fire)`. The closure builds the
+/// minimal input that forces the gate's body to reach its finding, calls the
+/// gate, and returns whether a finding tagged with that id came back.
+///
+/// `_added` here is the same single-line `+`-hunk builder the self-test uses
+/// (both are parts of this library); production canaries call gates directly.
+final List<(String, bool Function())> kDartGateCanaries = [
+  ('28', () => gateNoLocalUri(_added('var p = "file:///etc/x";')).isNotEmpty),
+  (
+    '46',
+    () => gateNoDarkSurface(
+      _added('backgroundColor: const Color(0xFF111111),'),
+    ).isNotEmpty,
+  ),
+  ('48', () => gateNoPrint(_added('print("x");')).isNotEmpty),
+  ('50', () => gateNoDartHtml(_added("import 'dart:html';")).isNotEmpty),
+  ('51', () => gateNoHardUrl(_added('var u = "https://x.example/";')).isNotEmpty),
+  (
+    '52',
+    () =>
+        gateNoSecrets(_added('const k = "AKIAIOSFODNN7EXAMPLE";')).isNotEmpty,
+  ),
+  (
+    '54',
+    () =>
+        gateNoDarkColoredBox(_added('ColoredBox(color: Color(0xFF111111))'))
+            .isNotEmpty,
+  ),
+  (
+    '62',
+    () => gateNoHardLeftRight(
+      _added('padding: EdgeInsets.only(left: 8),'),
+    ).isNotEmpty,
+  ),
+  ('63', () => gateNoTextAlignLR(_added('textAlign: TextAlign.left,')).isNotEmpty),
+  (
+    '64',
+    // U+1FAE0 (melting face, Emoji 14.0) — certainly outside the legacy set.
+    () => gateNoInventedEmoji(
+      _added('var s = "${String.fromCharCode(0x1FAE0)}";'),
+    ).isNotEmpty,
+  ),
+  (
+    '65',
+    () =>
+        gateNoTextDirectionLtr(_added('textDirection: TextDirection.ltr,'))
+            .isNotEmpty,
+  ),
+  (
+    '67',
+    // gate 67 fires on a Hebrew string; built via codeUnits so no literal RTL.
+    () => gateAppHebrewString(
+      _added('const t = "${String.fromCharCodes([0x05E9, 0x05DC, 0x05D5, 0x05DD])} x";'),
+    ).isNotEmpty,
+  ),
+  (
+    '69',
+    // removal gate — feed a REMOVED dark-surface line.
+    () =>
+        gateColorRevert('+++ b/x\n-backgroundColor: Color(0xFF111111),')
+            .isNotEmpty,
+  ),
+  (
+    '70',
+    () => gateGitignoreSecretsGuard('+++ b/.gitignore\n-.env').isNotEmpty,
+  ),
+  (
+    '73',
+    () =>
+        gatePersistenceKey(_added('const k = "bs.BADKEY";')).isNotEmpty,
+  ),
+  (
+    '74',
+    () =>
+        gateNoManualContainer(_added('final c = ProviderContainer();'))
+            .isNotEmpty,
+  ),
+  (
+    '95',
+    () => gateNumberIsolate(
+      _added('"${String.fromCharCodes([0x05D2, 0x05D5, 0x05D3, 0x05DC])} 30x40"'),
+    ).isNotEmpty,
+  ),
+  ('97', () => gateGitignoreNoHideClaude('+++ b/.gitignore\n+.claude/').isNotEmpty),
+  (
+    '103',
+    // gate 103 needs a stuck-log antipattern AND a matching added line.
+    () => gateAntipatternRecurrence(
+      stuckLog: 'ANTIPATTERN: FORBIDDEN_CANARY_TOKEN',
+      dartAdded: const ['var x = FORBIDDEN_CANARY_TOKEN;'],
+      hookAdded: const [],
+    ).isNotEmpty,
+  ),
+  (
+    '114',
+    () =>
+        gateNoKLipskeyInUi(_added('final p = kLipskeyCatalog.first;'))
+            .isNotEmpty,
+  ),
+];
+
+/// Run every gate canary and return the ids whose gate ACTUALLY FIRED (H5).
+/// Emitted as `RAN\t<id>`. An id missing here means that gate's predicate did
+/// not detect its own canary — i.e. it was gutted — and K3 parity will fail.
+List<String> emitRanIds() {
+  final ran = <String>[];
+  for (final (id, fired) in kDartGateCanaries) {
+    bool ok;
+    try {
+      ok = fired();
+    } catch (_) {
+      ok = false; // a throwing gate did NOT prove it ran on its canary
+    }
+    if (ok) ran.add(id);
+  }
+  return ran;
+}
+
 /// Run every line-oriented content gate over a `git diff --cached` dump.
 ///
 /// F1 — PER-FILE SCOPING. When `names` is given the diff is split by file and
@@ -2100,8 +2344,13 @@ int _mainVerifyRegistry(List<String> args) {
 
 int _mainDiff(List<String> args) {
   final diff = _readOrEmpty(_arg(args, '--diff'));
+  // H1: decode C-quoted names defensively (the diff's `+++ b/<path>` headers are
+  // unquoted inside splitDiffByFile, which is what actually keys the gates; this
+  // keeps any names-derived logic consistent even if a caller forgot quotePath).
   final names =
-      _arg(args, '--names') == null ? null : _readLines(_arg(args, '--names'));
+      _arg(args, '--names') == null
+          ? null
+          : _readLines(_arg(args, '--names')).map(unquoteGitPath).toList();
   final stuck =
       _arg(args, '--stuck-log') == null
           ? null
@@ -2121,50 +2370,93 @@ int _mainDiff(List<String> args) {
     stdout.writeln(f.toLine());
     if (f.sev == Sev.err) hadErr = true;
   }
-  // R6: prove the engine RAN — emit the id of every content gate it owns. The
-  // pre-commit ledger records these; a no-op/stub engine emits nothing and the
-  // registry parity gate then fails.
+  // R6 + H5: prove each gate RAN by running its predicate over a known-positive
+  // canary and emitting the id ONLY IF the gate FIRED. A no-op/stub engine emits
+  // nothing; a gate gutted to `return []` no longer fires its canary → its id is
+  // absent → registry⇄runtime parity fails (true runtime proof, not a static list).
   if (args.contains('--emit-ran')) {
-    for (final id in kDartEngineGateIds) {
+    for (final id in emitRanIds()) {
       stdout.writeln('RAN\t$id\t');
     }
   }
   return hadErr ? 2 : 0;
 }
 
-/// R2 tree mode. Reads the touched names, fetches each post-image via the
-/// `--show` prefix (default `git show :` = the staged index), and scans it.
+/// True for a name the tree scan is REQUIRED to fetch+scan (the reconciliation
+/// universe — H3). Non-scannable assets (.png/.lock/…) are legitimately skipped
+/// and are NOT counted as "must scan".
+bool _isScannableName(String path) =>
+    isLibDartPath(path) || isScreensPath(path) || isSecretScannablePath(path);
+
+/// Build the argv for fetching one blob via the `--show` prefix, injecting
+/// `-c core.quotePath=false` (H1) right after the `git` token so any internal
+/// path-printing stays unquoted, and forcing `--no-replace-objects` is preserved
+/// from the prefix as given by the caller.
+List<String> _showArgv(String showPrefix, String path) {
+  final parts = showPrefix.trim().split(RegExp(r'\s+'));
+  final exe = parts.first;
+  final rest = parts.sublist(1);
+  // Inject quotePath=false as the first git-level option (only for a real git
+  // invocation; harmless to require `git`).
+  final List<String> opts = (exe == 'git') ? ['-c', 'core.quotePath=false'] : [];
+  if (showPrefix.contains(':') && showPrefix.trim().endsWith(':')) {
+    // `git ... show <ref>:` — append the path to the LAST token.
+    final head = rest.sublist(0, rest.length - 1);
+    return [...opts, ...head, '${rest.last}$path'];
+  }
+  // `git ... show <sha>:` style where the caller appends the path as its own arg.
+  return [...opts, ...rest, path];
+}
+
+/// R2 tree mode (v6 hardened). Reads the touched names, fetches each post-image
+/// via the `--show` prefix (default `git show :` = the staged index), DECODES the
+/// blob bytes with allowMalformed (H2), and scans it. Crucially it RECONCILES the
+/// set of scannable files FED against the set ACTUALLY SCANNED (H3): if any
+/// scannable file was not fetched+decoded for ANY reason (C-quoted name, missing
+/// blob, git error) the run FAILS CLOSED with the offending names — no silent
+/// skip can let forbidden content ship green.
 int _mainTree(List<String> args) {
-  final names = _readLines(_arg(args, '--names'));
+  // H1: decode any C-quoted (`"...\NNN..."`) names back to true UTF-8 paths.
+  final names = _readLines(_arg(args, '--names')).map(unquoteGitPath).toList();
   final showPrefix = _arg(args, '--show') ?? 'git show :';
   final files = <String, String>{};
+
+  // H3 reconciliation bookkeeping.
+  final fed = <String>{}; // distinct scannable names fed
+  final scanned = <String>{}; // names successfully fetched + decoded
+  final skipped = <String>[]; // scannable names we FAILED to scan (reason)
+
   for (final path in names) {
     if (path.isEmpty) continue;
-    // Only fetch text we might scan.
-    if (!isLibDartPath(path) &&
-        !isScreensPath(path) &&
-        !isSecretScannablePath(path)) {
-      continue;
-    }
+    // Only fetch text we might scan; non-scannable assets are not reconciled.
+    if (!_isScannableName(path)) continue;
+    fed.add(path);
     try {
-      final parts = showPrefix.trim().split(RegExp(r'\s+'));
-      final ProcessResult res;
-      if (showPrefix.contains(':') && showPrefix.trim().endsWith(':')) {
-        // `git show :path` (index) — append path to the last token.
-        final argv = [
-          ...parts.sublist(1, parts.length - 1),
-          '${parts.last}$path',
-        ];
-        res = Process.runSync(parts.first, argv);
+      final argv = _showArgv(showPrefix, path);
+      final exe = showPrefix.trim().split(RegExp(r'\s+')).first;
+      // H2: read RAW BYTES (stdoutEncoding: null) so a non-UTF-8 byte in the
+      // blob cannot throw a FormatException that the old `catch (_)` swallowed.
+      final res = Process.runSync(exe, argv, stdoutEncoding: null);
+      if (res.exitCode == 0) {
+        final bytes = (res.stdout as List<int>);
+        // allowMalformed: a genuinely invalid byte becomes U+FFFD instead of
+        // throwing — the file is STILL scanned (fail-CLOSED on bad bytes, never
+        // fail-open by dropping it).
+        files[path] = utf8.decode(bytes, allowMalformed: true);
+        scanned.add(path);
       } else {
-        // e.g. `git show <sha>:` style or a base ref — caller appends path.
-        res = Process.runSync(parts.first, [...parts.sublist(1), '$path']);
+        skipped.add(
+          '$path (git show rc=${res.exitCode}: '
+          '${(res.stderr is List<int> ? utf8.decode(res.stderr as List<int>, allowMalformed: true) : "${res.stderr}").trim()})',
+        );
       }
-      if (res.exitCode == 0) files[path] = res.stdout.toString();
-    } catch (_) {
-      // A file that cannot be shown (deleted) is simply not scanned.
+    } catch (e) {
+      // ANY exception (process spawn failure, decode-of-stderr, …) is a HARD
+      // fail — never a silent skip.
+      skipped.add('$path (exception: $e)');
     }
   }
+
   final stuck =
       _arg(args, '--stuck-log') == null
           ? null
@@ -2183,6 +2475,31 @@ int _mainTree(List<String> args) {
     stdout.writeln(f.toLine());
     if (f.sev == Sev.err) hadErr = true;
   }
+
+  // H3: FAIL CLOSED if any scannable file fed was not actually scanned.
+  if (skipped.isNotEmpty) {
+    stderr.writeln(
+      'ERR\treg\tH3 reconciliation FAIL — ${skipped.length} scannable '
+      'file(s) FED but NOT scanned (fail closed):',
+    );
+    for (final s in skipped) {
+      stderr.writeln('ERR\treg\t  unscanned: $s');
+    }
+    stderr.writeln(
+      'ERR\treg\tfed=${fed.length} scanned=${scanned.length} '
+      'skipped=${skipped.length}',
+    );
+    return 3; // distinct from 2 (findings) and 0 (clean) — a SKIP is fail-closed.
+  }
+  // Belt: the reconciliation invariant must hold even with no recorded skip.
+  if (scanned.length != fed.length) {
+    stderr.writeln(
+      'ERR\treg\tH3 reconciliation FAIL — fed=${fed.length} != '
+      'scanned=${scanned.length} (unaccounted skip) — fail closed',
+    );
+    return 3;
+  }
+  stdout.writeln('OK\treg\tH3 reconciliation: fed==scanned==${fed.length}');
   return hadErr ? 2 : 0;
 }
 

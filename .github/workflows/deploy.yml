@@ -106,23 +106,35 @@ jobs:
           set -euo pipefail
           TRUSTED="$GITHUB_WORKSPACE/.trusted/tool/protocol_check.dart"
           # Repo-ROOT tree (like K1) — every tracked file, not just app_flutter/*.
-          git --no-replace-objects ls-tree -r --name-only HEAD > /tmp/tree_all.txt
+          # H1 (v6): quotePath=false so a non-ASCII (Hebrew) filename is its TRUE
+          # path, not a C-quoted string the engine could not fetch → silent skip.
+          git -c core.quotePath=false --no-replace-objects ls-tree -r --name-only HEAD > /tmp/tree_all.txt
           echo "── tree size ──"; wc -l /tmp/tree_all.txt
           set +e
           dart run "$TRUSTED" \
             --tree \
             --names /tmp/tree_all.txt \
             --show "git --no-replace-objects show HEAD:" \
-            --stuck-log app_flutter/knowledge/stuck_log.md
-          TREE_RC=$?
+            --stuck-log app_flutter/knowledge/stuck_log.md | tee /tmp/tree_out.txt
+          TREE_RC=${PIPESTATUS[0]}
           set -e
+          # H3 (v6): rc 3 == fed-vs-scanned reconciliation fail (silent-skip class).
+          if [[ "$TREE_RC" -eq 3 ]]; then
+            echo "::error::K5/H3 reconciliation FAILED — a tracked file FED but NOT scanned; NOT shipping. Engine output:"
+            grep -E 'H3 reconciliation|unscanned' /tmp/tree_out.txt || true
+            exit 1
+          fi
           if [[ "$TREE_RC" -eq 2 ]]; then
             echo "::error::K5 content engine found ERR-level findings — NOT shipping"; exit 1
           fi
           if [[ "$TREE_RC" -ne 0 ]]; then
             echo "::error::K5 content engine crashed (rc=$TREE_RC) — fail closed, NOT shipping"; exit 1
           fi
-          echo "✅ K5/S4 trusted content engine clean over the WHOLE repo-root tree — safe to ship"
+          # H3 belt: the reconciliation OK line must be present (fed==scanned).
+          if ! grep -qE '^OK\treg\tH3 reconciliation: fed==scanned==[0-9]+' /tmp/tree_out.txt; then
+            echo "::error::K5/H3 reconciliation line ABSENT — engine did not confirm fed==scanned; NOT shipping"; exit 1
+          fi
+          echo "✅ K5/S4 trusted content engine clean over the WHOLE repo-root tree — safe to ship (H3 OK)"
 
       - name: Build Flutter web
         working-directory: app_flutter

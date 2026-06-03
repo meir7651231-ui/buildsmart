@@ -33,6 +33,9 @@ PINNED=(
     # S1-S4 assertion is integrity-detected (it is the runner/workflow half's
     # honest test; the engine half is covered by the Dart --self-test pin above).
     "protocol/regression_v5.sh"
+    # v6 — pin the H1-H5 end-to-end regression suite (silent-skip class + slash-
+    # laundering + logic-coupled RAN) for the same reason.
+    "protocol/regression_v6.sh"
 )
 
 OUT="$REPO_ROOT/protocol/pins.sha256"

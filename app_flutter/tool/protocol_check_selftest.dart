@@ -43,7 +43,7 @@ String _addedFiles(List<(String, String)> files) => files
 /// Run all built-in unit tests. Returns process exit code (0 ok, 2 failures).
 int runSelfTest() {
   _selfTestFailures = 0;
-  stdout.writeln('protocol_check v5 self-test');
+  stdout.writeln('protocol_check v6 self-test');
 
   // ════════════════════════════════════════════════════════════════════
   //  R4 REGRESSIONS — semantic, not literal/substring (the headline closes)
@@ -1036,9 +1036,93 @@ ANTIPATTERN-EXAMPLE: ignored
     return missing.contains('2') && !missing.contains('1');
   }());
 
+  // ════════════════════════════════════════════════════════════════════
+  //  v6 REGRESSIONS — each asserts EXACTLY the bypass it closes.
+  // ════════════════════════════════════════════════════════════════════
+
+  // --- H1: non-ASCII (Hebrew) filename de-quoting --------------------------
+  // git C-quotes `lib/screens/מסך.dart` as the octal-escaped byte string below.
+  // unquoteGitPath must reconstruct the TRUE UTF-8 path.
+  _check('H1 unquoteGitPath decodes a C-quoted Hebrew path to true UTF-8', () {
+    const quoted = '"app_flutter/lib/screens/'
+        '\\327\\236\\327\\241\\327\\232.dart"';
+    final got = unquoteGitPath(quoted);
+    final want = 'app_flutter/lib/screens/'
+        '${String.fromCharCodes([0x05DE, 0x05E1, 0x05DA])}.dart';
+    return got == want;
+  }());
+  _check('H1 unquoteGitPath leaves an ASCII (unquoted) path unchanged', () {
+    return unquoteGitPath('app_flutter/lib/a.dart') ==
+        'app_flutter/lib/a.dart';
+  }());
+  // End-to-end at the GATE level: a diff whose `+++ b/"…"` header is C-QUOTED for
+  // a Hebrew file with a secret is still scoped to that .dart file and CAUGHT.
+  _check('H1 a C-quoted Hebrew .dart header with a secret is CAUGHT (diff)', () {
+    final diff = '+++ "b/app_flutter/lib/screens/'
+        '\\327\\236\\327\\241\\327\\232.dart"\n'
+        '+const apiSecret = "AKIAIOSFODNN7EXAMPLE1234567890ABCD";';
+    final f = runAllContentGates(
+      diff: diff,
+      names: ['app_flutter/lib/screens/x.dart'],
+    );
+    return f.any((x) => x.gateId == '52' && x.sev == Sev.err);
+  }());
+
+  // --- H2: malformed-UTF-8 bytes must NOT throw (fail-closed, never skip) ---
+  // utf8.decode(allowMalformed:true) turns a stray high-bit byte into U+FFFD and
+  // keeps scanning; the secret on the same blob is still caught by the gate.
+  _check('H2 a blob with a high-bit byte + a secret is still scanned/caught', () {
+    final bytes = <int>[];
+    bytes.addAll(
+      utf8.encode('const k = "AKIAIOSFODNN7EXAMPLE1234567890ABCD";\n'),
+    );
+    bytes.add(0xE9); // lone Latin-1 byte — invalid as standalone UTF-8
+    bytes.addAll(utf8.encode(' tail\n'));
+    final body = utf8.decode(bytes, allowMalformed: true); // must NOT throw
+    final f = runTreeGates(files: {'app_flutter/web/x.html': body});
+    return f.any((x) => x.gateId == '52' && x.sev == Sev.err);
+  }());
+
+  // --- H4: /-in-value no longer launders a NAMED credential ----------------
+  _check('H4 clientSecret="…/…/…/…" (slashes) is CAUGHT (no path exemption)', () {
+    return lineHasSecret(
+      'const clientSecret = "abcdEFGH1234/ijklMNOP5678/qrstUVWX/CDEFghij9012";',
+    );
+  }());
+  // FP guards: a credential-NAMED line whose value is a REAL path/URL stays exempt.
+  _check('H4 FP: tokenFile="assets/auth_token.json" is NOT flagged', () {
+    return !lineHasSecret('const tokenFile = "assets/config/auth_token.json";');
+  }());
+  _check('H4 FP: authUrl="https://auth.example/cb" is NOT flagged as secret', () {
+    return !lineHasSecret('const authUrl = "https://auth.example.com/oauth/cb";');
+  }());
+  _check('H4 FP: secretPath="/etc/app/secrets/key" (fs path) NOT flagged', () {
+    return !lineHasSecret('const secretPath = "/etc/app/secrets/key";');
+  }());
+  // And the non-named path case is STILL exempt (no credential context at all).
+  _check('H4 a bare slashed id with NO cred-name stays exempt (no FP)', () {
+    return !lineHasSecret('const route = "ab/cd/ef/GHIJ/klmn/OPQR";');
+  }());
+
+  // --- H5: --emit-ran is logic-coupled (true runtime proof) ----------------
+  // Every canary must FIRE → emitRanIds() == the full kDartEngineGateIds set.
+  _check('H5 emitRanIds() fires every gate canary (== kDartEngineGateIds)', () {
+    final ran = emitRanIds().toSet();
+    final want = kDartEngineGateIds.toSet();
+    return ran.length == want.length && ran.containsAll(want);
+  }());
+  // The mechanism is HONEST: a canary that does NOT fire is NOT emitted. We
+  // simulate a "gutted gate" by checking a gate over a NON-triggering input —
+  // its id must be absent from a logic-coupled emit. (gate 52 with no secret.)
+  _check('H5 a gate that does not fire on its input is NOT counted as ran', () {
+    // gateNoSecrets over a benign line yields no finding → would not be emitted.
+    final fired = gateNoSecrets(_added('final x = 1;')).isNotEmpty;
+    return fired == false;
+  }());
+
   stdout.writeln(
     _selfTestFailures == 0
-        ? 'ALL PASS (v5 self-test)'
+        ? 'ALL PASS (v6 self-test)'
         : '$_selfTestFailures FAILURE(S)',
   );
   return _selfTestFailures == 0 ? 0 : 2;

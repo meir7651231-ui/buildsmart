@@ -137,10 +137,13 @@ jobs:
           echo "head=$HEAD_SHA" >> "$GITHUB_OUTPUT"
           # Touched paths in the resulting tree (BASE…HEAD). --no-replace-objects
           # so a planted `git replace` cannot launder a malicious blob past us.
-          git --no-replace-objects diff --name-only "$BASE...HEAD" > /tmp/touched.txt || true
+          # H1 (v6): -c core.quotePath=false so a non-ASCII (e.g. Hebrew) filename
+          # is emitted as its TRUE UTF-8 path, not a C-quoted `"…\NNN…"` string the
+          # engine's `git show` could not resolve → silent skip → forbidden ship.
+          git -c core.quotePath=false --no-replace-objects diff --name-only "$BASE...HEAD" > /tmp/touched.txt || true
           # K1 — the WHOLE resulting tree (every tracked file), the clean-tree
-          # baseline. We never assume the merge-base was clean.
-          git --no-replace-objects ls-tree -r --name-only HEAD > /tmp/tree_all.txt
+          # baseline. We never assume the merge-base was clean. (H1: quotePath=false.)
+          git -c core.quotePath=false --no-replace-objects ls-tree -r --name-only HEAD > /tmp/tree_all.txt
           echo "── touched vs $BASE ──"; cat /tmp/touched.txt || true
           echo "── tree size ──"; wc -l /tmp/tree_all.txt
           # K1 FAIL-CLOSED: a push that MOVED the ref but yields an EMPTY diff-set
@@ -339,14 +342,25 @@ jobs:
           # (b) WHOLE-TREE mode (K1): scan the post-image of EVERY tracked file
           #     from HEAD. This is the clean-tree baseline; --show fetches blobs
           #     with --no-replace-objects so a planted replace ref cannot hide content.
+          #     H1: the engine ALSO injects core.quotePath=false in its internal
+          #     `git show`; the names file is already unquoted (diffset step).
           dart run "$TRUSTED" \
             --tree \
             --names /tmp/tree_abs.txt \
             --show "git --no-replace-objects show HEAD:" \
-            --stuck-log knowledge/stuck_log.md
-          TREE_RC=$?
+            --stuck-log knowledge/stuck_log.md | tee /tmp/tree_out.txt
+          TREE_RC=${PIPESTATUS[0]}
           set -e
           echo "DIFF_RC=$DIFF_RC TREE_RC=$TREE_RC"
+          # H3 (v6): rc 3 == files-fed-vs-files-scanned RECONCILIATION FAIL — some
+          # tracked file in the tree could not be fetched+decoded (quote/decode/
+          # missing-blob/git-error) and was therefore NOT scanned. This is the
+          # whole silent-skip CLASS — fail closed loudly, naming the skipped files.
+          if [[ "$TREE_RC" -eq 3 || "$DIFF_RC" -eq 3 ]]; then
+            echo "::error::H3 reconciliation FAILED — a tracked file was FED but NOT scanned (silent-skip class). Engine output:"
+            grep -E 'H3 reconciliation|unscanned' /tmp/tree_out.txt || true
+            exit 1
+          fi
           # K6: exit code 2 == ERR findings; anything else (1/127/139) == engine
           # crash/tamper — both are failures, but we report which.
           if [[ "$DIFF_RC" -eq 2 || "$TREE_RC" -eq 2 ]]; then
@@ -355,7 +369,14 @@ jobs:
           if [[ "$DIFF_RC" -ne 0 || "$TREE_RC" -ne 0 ]]; then
             echo "::error::content engine CRASHED (non-0/2 rc: DIFF_RC=$DIFF_RC TREE_RC=$TREE_RC) — fail closed"; exit 1
           fi
-          echo "✅ trusted content engine clean over the WHOLE tree"
+          # H3 belt at the CI level: assert the engine's reconciliation line is
+          # present and reports fed==scanned (a stubbed engine that never scanned
+          # would NOT print this OK line → fail closed).
+          if ! grep -qE '^OK\treg\tH3 reconciliation: fed==scanned==[0-9]+' /tmp/tree_out.txt; then
+            echo "::error::H3 reconciliation line ABSENT from tree-mode output — engine did not confirm fed==scanned (fail closed)"; exit 1
+          fi
+          FED_SCANNED=$(grep -oE 'fed==scanned==[0-9]+' /tmp/tree_out.txt | grep -oE '[0-9]+$' | head -1)
+          echo "✅ trusted content engine clean over the WHOLE tree (H3: fed==scanned==$FED_SCANNED)"
 
       # ── K3: REAL registry⇄runtime parity by RUNNING the gate-runner ──
       # No more `cp enforced claimed`. We invoke the pre-commit gate-runner in its
