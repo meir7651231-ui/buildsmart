@@ -57,7 +57,7 @@
 
 ## F. DECISIONS · CONVENTIONS · לוגים
 - **`DECISIONS.md` = 15 ADRs (D-001..D-015):** light-theme+count-badges · real-grid+cart-stepper · light-migration · wire-only-real(⛔) · wiring-contract · pure-helpers · 100%-mutation · **knowledge-protocol(Flutter)** · colored-dot · zone-headers · balance-valve · BOM-quality(0-new-SKU) · progressive-dock · generated≠gitignored · proposal-lifecycle.
-- **`CONVENTIONS.md`:** light-only (`#F5F6FA`) · white-text-only-on-colored · RTL-verbatim · ExpansionTile-count-badge · **`kCatalogProducts`** (לא kLipskeyCatalog) · ירושת-R1/R2/R6/R8 מ-app/RULES · `pull --no-rebase`.
+- **`CONVENTIONS.md`:** light-only (`#F5F6FA`) · white-text-only-on-colored · RTL-verbatim · ExpansionTile-count-badge · **`kCatalogProducts`** (לא kLipskeyCatalog) · ירושת-כללים (לשעבר) מ-app/RULES · `pull --no-rebase`.
 - **`mutation_log.md` (317ש׳):** 48 פונקציות נבדקו-במוטציה. **`POLISH_LOG.md`:** לוג-סשן (before/after). **`PROPOSAL_version_friction.md` (403ש׳):** תיקון-ה-gen_version (P0/P1/P2) → D-014/D-015.
 
 ---

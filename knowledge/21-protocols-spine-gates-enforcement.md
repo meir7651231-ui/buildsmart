@@ -2,25 +2,16 @@
 > ⚠️ **פרוטוקול-R בוטל (הוראת-משתמש, 2026-06).** אזכורי R1–R9 להלן = תיעוד-היסטורי בלבד, לא חוק פעיל.
 
 > **עולם בפני עצמו.** מנגנון-הממשל של פרויקט ה-**Flutter** (`app_flutter/`, ענף `whats-happening`) — ~3,100 שורות אכיפה + ~5,200 שורות מסמכי-פרוטוקול. נלכד מ-`app_flutter/knowledge/` + `.githooks/` + `.github/workflows/` + `scripts/` + `.claude/hooks/`.
-> ⚠️ **מקביל-אך-נפרד** מה-Inspector של Preact/legacy (דוח 18, FND/FRM/WIR/FIN/OPS + 43 INSP). לכל פרויקט **R1–R9 משלו** ושכבת-אכיפה משלו.
+> ⚠️ **מקביל-אך-נפרד** מה-Inspector של Preact/legacy (דוח 18, FND/FRM/WIR/FIN/OPS + 43 INSP). לכל פרויקט שכבת-אכיפה משלו.
 
 ## A. למה הפרוטוקול קיים
-ציטוט-יסוד: **"הכשלים באו מחוסר-תהליך, לא מחוסר-ידע."** 3 ריברטים מתועדים — קוד שעבר typecheck+tests אך **הפר R2 ב-runtime**. הדוקטרינה: **הפרת-חוק נתפסת רק ב-checklist אנושי, לא בקומפיילר.** 2 פרויקטים מקבילים: `app_flutter/` (פעיל לפיתוח) · `app/` (Preact, frozen, bug-fix). ענף-עבודה יחיד: `claude/whats-happening-LyY9G`.
+ציטוט-יסוד: **"הכשלים באו מחוסר-תהליך, לא מחוסר-ידע."** 3 ריברטים מתועדים — קוד שעבר typecheck+tests אך **הפר כלל-עיצוב ב-runtime**. הדוקטרינה: **הפרת-חוק נתפסת רק ב-checklist אנושי, לא בקומפיילר.** 2 פרויקטים מקבילים: `app_flutter/` (פעיל לפיתוח) · `app/` (Preact, frozen, bug-fix). ענף-עבודה יחיד: `claude/whats-happening-LyY9G`.
 
 ## B. `MASTER_PROTOCOL.md` (1,628ש׳) = החוק
 
-### R1–R9 של Flutter (שונים מ-RULES.md של Preact!)
-| R | חוק (Flutter) | שער |
-|---|---|---|
-| R1 | layout קדוש — ה-FABs ב-home_shell לא זזים | FRM-01 |
-| **R2** | **אין חלון חדש** — אסור `showDialog`/`showModalBottomSheet`/`Navigator.push`/`Scaffold`-חדש/`Positioned.fill`-כמסך. **כל פיצ׳ר = dial-drill.** חריגים מאושרים (לא להוסיף): `LipskeyProductSheet` · `InstallStudioScreen` · `RegressionPanelScreen` | FRM-02/03 |
-| R3 | tools נפתחים כ-dials, לא drawer/sheet/modal | FRM-04 |
-| R4 | dial-row = **2 widgets נפרדים** (circle-icon + label-pill), gap ≥8px | FRM-05/06 |
-| R5 | overlay backdrop: opacity ≤0.45 · blur ≤3px | FRM-07 |
-| R6 | מחרוזת-עברית verbatim + ציטוט-מקור `[L#]` מהפרוטוטייפ | VRB-01/02 |
-| R7 | RTL: `start`/`end` (לא left/right), touch ≥44×44 | FRM-08/09 |
-| R8 | אין פיצ׳ר/מחרוזת שלא בפרוטוטייפ | VRB-03 |
-| R9 | **state-machine discipline** — enum + פונקציית-מעבר טהורה (בלי side-effect/BuildContext) + בדיקה לכל תא במטריצת state×role (למשל 6×5=30 להזמנות) | WIR-05 |
+### שכבת-הכללים הממוספרת — **בוטלה**
+> ⚠️ שכבת-הכללים הממוספרת של MASTER_PROTOCOL **בוטלה** (הוראת-משתמש, 2026-06). **סגנון-הבנייה היחיד = האפליקציה הסופית עצמה** (`app_flutter/`, v5.96) — מסכים + bottom-sheets + dials כפי שהם בקוד.
+> מה שנשאר **פעיל** מהדוח הזה: שערי-האכיפה (Group A–D למטה) · 4 שכבות-האכיפה · scripts/CI. שאר המסמך = תיעוד-תהליך (לא חוקי-עיצוב).
 
 ### Build-loop (10 צעדים, לפני כל עבודה משמעותית)
 דרישה+acceptance → מקורות-נתונים → בדיקת-חפיפת-דפוס → design → **כתיבת-בדיקות-תחילה (RED)** → מימוש (GREEN) → `flutter analyze`=0 → wiring (RTL-safe) → suite כל ~5 צעדים → ROADMAP+version+commit-מקומי (בלי push).
