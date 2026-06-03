@@ -9,12 +9,15 @@ import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/menu_dial_widget.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
+import 'package:buildsmart/screens/onboarding_screen.dart';
+import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/screens/search_dial_widget.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/screens/store_settings_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -362,6 +365,11 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabIndex = ref.watch(mainTabProvider);
+    // Registered user's first name → chip beside the logo (guest/demo → none).
+    final profile = ref.watch(userProfileProvider);
+    final firstName = profile.registered && profile.name.trim().isNotEmpty
+        ? profile.name.trim().split(RegExp(r'\s+')).first
+        : '';
     return AppBar(
       backgroundColor: const Color(0xFFFFFFFF),
       elevation: 0,
@@ -370,20 +378,46 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
       title: Tooltip(
         message: 'BS',
         child: InkWell(
-          onTap: () => _toggle(ref, OpenDial.bs),
+          onTap: () => showRolePicker(context),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'BuildSmart',
-                  style: TextStyle(
-                    color: BsTokens.brand,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 22,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'BuildSmart',
+                      style: TextStyle(
+                        color: BsTokens.brand,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 22,
+                      ),
+                    ),
+                    if (firstName.isNotEmpty) ...[
+                      const SizedBox(width: BsTokens.space2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF0E3),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          firstName,
+                          style: const TextStyle(
+                            color: BsTokens.brandDark,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 if (tabIndex == 0 &&
                     ref.watch(catalogSectionProvider) == 'עץ חכם')
@@ -396,7 +430,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'v5.91 · 1.6.48 · 🚚 בנצי #4 — חלונית "לאן לשלוח" לא-מחייבת בראש סיכום-ההזמנה, בשלב התשלום (לא חוסמת)',
+                          'v5.92 · 1.6.48 · 🚪 זרימת-פתיחה: רישום/מקצוע/סיור + בורר "מי אתה?" + שם-משתמש בכותרת',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -436,21 +470,14 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
           const _NotificationsMenuButton()
         else
           const _StoreMenuButton(),
+        // Intro tour — far-left (RTL end). Replays the first-run slides.
+        IconButton(
+          icon: const Icon(Icons.lightbulb_outline, color: BsTokens.brand),
+          tooltip: 'סיור היכרות',
+          onPressed: () => showIntroTour(context),
+        ),
       ],
     );
-  }
-
-  void _toggle(WidgetRef ref, OpenDial dial) {
-    final current = ref.read(openDialProvider);
-    if (current == dial) {
-      resetAllDials(ref);
-      return;
-    }
-    ref.read(openDialProvider.notifier).state = dial;
-    ref.read(activePersonaProvider.notifier).state = null;
-    ref.read(bsDrillPathProvider.notifier).state = const [];
-    ref.read(menuTabProvider.notifier).state = null;
-    ref.read(searchToolProvider.notifier).state = null;
   }
 }
 

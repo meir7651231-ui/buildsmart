@@ -1,0 +1,114 @@
+import 'dart:convert';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// Local user profile — ported from the prototype's `bs.profile.v1`
+/// (`app/src/store/user-profile.ts`). No server / password: identity data is
+/// kept on-device (demo-friendly). Collected in the first-run opening flow
+/// (welcome/register → profession) and editable later in settings.
+class UserProfile {
+  const UserProfile({
+    this.name = '',
+    this.contact = '',
+    this.profession = '',
+    this.registered = false,
+  });
+
+  /// Full name (שם מלא).
+  final String name;
+
+  /// Phone or email (טלפון או אימייל).
+  final String contact;
+
+  /// Trade picked in the profession step (אינסטלטור / חשמלאי / קבלן שיפוצים).
+  final String profession;
+
+  /// `true` once the user registered; `false` if they chose "continue as demo".
+  final bool registered;
+
+  UserProfile copyWith({
+    String? name,
+    String? contact,
+    String? profession,
+    bool? registered,
+  }) =>
+      UserProfile(
+        name: name ?? this.name,
+        contact: contact ?? this.contact,
+        profession: profession ?? this.profession,
+        registered: registered ?? this.registered,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'contact': contact,
+        'profession': profession,
+        'registered': registered,
+      };
+
+  factory UserProfile.fromJson(Map<String, dynamic> j) => UserProfile(
+        name: j['name'] as String? ?? '',
+        contact: j['contact'] as String? ?? '',
+        profession: j['profession'] as String? ?? '',
+        registered: j['registered'] as bool? ?? false,
+      );
+}
+
+/// SharedPreferences key (mirrors the prototype's localStorage key).
+const String kUserProfileKey = 'bs.profile.v1';
+
+/// Registration is valid when both name and contact are non-empty — mirrors the
+/// prototype's `checkRegistration` (the ✓ appears once the fields are filled).
+/// Pure → unit-testable.
+bool registrationValid(String name, String contact) =>
+    name.trim().isNotEmpty && contact.trim().isNotEmpty;
+
+class UserProfileNotifier extends StateNotifier<UserProfile> {
+  UserProfileNotifier() : super(const UserProfile()) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(kUserProfileKey);
+    if (raw == null) return;
+    try {
+      state = UserProfile.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } on Object catch (_) {
+      // Corrupt value — keep defaults.
+    }
+  }
+
+  Future<void> _persist() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(kUserProfileKey, jsonEncode(state.toJson()));
+  }
+
+  /// Register with a name + contact (phone/email).
+  void register({required String name, required String contact}) {
+    state = state.copyWith(
+      name: name.trim(),
+      contact: contact.trim(),
+      registered: true,
+    );
+    _persist();
+  }
+
+  /// Continue without registering (demo / guest).
+  void continueAsDemo() {
+    state = state.copyWith(registered: false);
+    _persist();
+  }
+
+  /// Set the picked trade.
+  void setProfession(String profession) {
+    state = state.copyWith(profession: profession);
+    _persist();
+  }
+}
+
+final userProfileProvider =
+    StateNotifierProvider<UserProfileNotifier, UserProfile>(
+  (ref) => UserProfileNotifier(),
+);

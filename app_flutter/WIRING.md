@@ -10,6 +10,28 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 
 ---
 
+## Opening flow — first run (`onboarding_screen.dart` · `welcome_screen.dart` · `profession_screen.dart` · `role_picker_sheet.dart`)
+
+`OnboardingGate` (gated by `welcomeSeenProvider`, seeded in `main()` from prefs):
+a genuine first run walks Welcome → Profession → onboarding slides → home; afterwards
+home directly. Guarded by `onboarding_test`.
+
+| Button | Behavior | Status |
+|---|---|---|
+| WelcomeScreen · אישור והמשך (רישום) | `register(name, contact)` → `userProfileProvider` (persisted) → profession step | ✅ |
+| WelcomeScreen · כניסה ללקוח קיים | enters straight to home (skips the trade step; no auth backend) | ✅ |
+| WelcomeScreen · המשך ללא רישום (דוגמה) | `continueAsDemo` → profession step | ✅ |
+| ProfessionScreen · בחירת מקצוע / חזור | `setProfession` → slides · back → welcome | ✅ |
+| OnboardingScreen · דלג / הבא / בואו נתחיל | finishes (`welcomeSeenProvider=true`, persisted) → home | ✅ |
+
+## Home app-bar (`home_shell.dart` · `_HomeAppBar`)
+
+| Button | Behavior | Status |
+|---|---|---|
+| logo "BuildSmart" | opens the "מי אתה?" persona picker (`showRolePicker`); a non-contractor role opens its existing BS-dial sections, contractor stays in the main app | ✅ |
+| 💡 (קצה שמאלי) | replays the intro tour (`showIntroTour` → the onboarding slides) | ✅ |
+| שם-משתמש (צ'יפ ליד הלוגו) | registered user's first name (`userProfileProvider`); absent for guest/demo | ✅ |
+
 ## Catalog settings (`catalog_settings_screen.dart` → `catalog_settings.dart`)
 
 | Setting | Behavior | Status |

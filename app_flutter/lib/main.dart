@@ -1,18 +1,27 @@
 import 'package:buildsmart/data/polyroll_specs.dart';
-import 'package:buildsmart/screens/home_shell.dart';
+import 'package:buildsmart/screens/onboarding_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   // Bridge step — synthesise VerifiedSpec for every Polyroll PPR product so
   // the card's compat / pair-warning / install-engine helpers cover the
   // 757-strong PPR catalog the same way they cover Lipskey.
   registerPolyrollSpecs();
-  runApp(const ProviderScope(child: BuildSmartApp()));
+  // First-run gate: seed the welcome flag from prefs before the first frame.
+  final welcomeSeen = await loadWelcomeSeen();
+  runApp(
+    ProviderScope(
+      overrides: [welcomeSeenProvider.overrideWith((ref) => welcomeSeen)],
+      child: const BuildSmartApp(),
+    ),
+  );
 }
 
 class BuildSmartApp extends ConsumerWidget {
@@ -59,7 +68,7 @@ class BuildSmartApp extends ConsumerWidget {
           child: child ?? const SizedBox(),
         ),
       ),
-      home: const HomeShell(),
+      home: const OnboardingGate(),
     );
   }
 }

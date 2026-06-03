@@ -1,6 +1,15 @@
 # Status snapshot — app_flutter
 
-_Version label: `v5.91` (see `home_shell.dart`). Update on each user-visible change._
+_Version label: `v5.92` (see `home_shell.dart`). Update on each user-visible change._
+
+## Opening flow — first-run register/profession + "מי אתה?" picker + name chip (v5.92)
+First-run gate (`OnboardingGate`, `welcomeSeenProvider` seeded in `main()`): Welcome
+(register / existing-login→home / demo) → Profession → onboarding slides → home.
+`welcome_screen` (hero-sheet register; name+contact → `userProfileProvider`),
+`profession_screen` (trade picker), `onboarding_screen` (3 slides + a replayable tour via
+the 💡 app-bar button, `showIntroTour`), `role_picker_sheet` ("מי אתה?" persona picker
+opened from the logo; non-contractor → its existing BS-dial sections). Home app-bar shows
+the registered user's first name as a chip beside the logo. Guarded by `onboarding_test` (7).
 
 ## Checkout — non-binding "where to ship" (v5.91 — Benzi #4)
 `_ShipToRow` sits at the **top of the order-summary sheet** (the one "הזמן עכשיו"
