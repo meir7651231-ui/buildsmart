@@ -111,7 +111,7 @@ PER_BAND_PHOTO_H = {
     # Page 21 — drains scale with size (re-measured)
     (21, 'a'): 118,    # drain 80/50 photo 170-275; diagram ~290
     (21, 'b'): 165,    # drain 140/50 photo 460-625; tick at y=635 trimmed
-    (21, 'c'): 180,    # drain 245/50 photo 840-1010; diagram ~1025
+    (21, 'c'): 200,    # drain 245/50 — base was cut
     # Page 22 — drains open
     (22, 'a'): 155,
     (22, 'b'): 180,
