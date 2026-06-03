@@ -164,4 +164,32 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 - **`.store-group`** — קיבוץ-סל לפי **חנות-ספק** (`.sg-name` + `.sg-eta` + `.sg-foot.ship`). `.order-card`(.open=teal).
 
 ---
-**טרם נקרא בקובץ הזה:** 2039–4019 (admin dashboards: manager/store/courier/worker · onboarding/login styling · misc).
+
+## חלק ה׳ — הזמנות · פרויקט-flow · סורק · onboarding (2039–2577)
+
+### כרטיס-הזמנה + מעקב (2038–2102)
+`.order-card` (`oc-*`): `.oc-badge` סטטוס (pending=כתום · processing=teal · shipped=כחול · delivered=ירוק) · `.oci-link` · `.oc-tot.grand`. **`.track-line`** (מעקב-משלוח: `.tstep` dot done=teal/active=כתום + `.fill`). `.eta-badge` כתום.
+
+### כרטיסי-אתר + multi-project (2104–2159)
+`.site-card` (`.current`=teal) — `.badge` (live=teal/soon=כתום) · `.sc-stat` · `.sc-progress` · `.sc-link`. `.add-project-btn` (מקווקו). `.pm-field` (טופס-פרויקט). `.cat-bar/.legend` (פילוח-תקציב).
+
+### tabbar · toast · hint (2161–2187)
+`.tabbar` 5 טאבים (`.on`=teal · `.tdot` כתום). `.toast` (ink, נקודה כתומה). `.hint` (teal מקווקו).
+
+### ⭐ פרויקט-flow: stage-card (2189–2263)
+- `.project-hero` (gradient teal + 🛁) + `.project-prog` (בר כתום).
+- **`.stage-card`**: `.stage-num` (done=teal/current=כתום/locked) · `.stage-state` (s-done/s-now/s-lock) · `.stage-foot`: `.sf-tree`/`.sf-order`(ink)/`.sf-done`(teal)/`.sf-undo`/`.sf-locked` · `.dep-warn` (תלות-חסרה, אדום). `.proj-cost/.proj-done`.
+
+### סדר-הרכבה + seg (2265–2306)
+`.ao-step` (rail + `.ao-bullet` ממוספר, `.warn`=כתום, `.ao-line`) · `.ao-dep` · `.ao-items`. `.seg` (segmented control נוסף).
+
+### ⭐ סורק-תוכניות (2308–2466)
+- `.scan-hero` (gradient כהה + 📐) · `.upload-btn` (מקווקו). **`.scan-canvas`**: `.blueprint` + **`.scan-laser`** (אנימציית `laser`) + `.detect-dot` (pop) + `.scan-tint`. `.scan-status` (spinner) · `.scan-load`.
+- `.detect-summary` (teal) · `.zone-card` (`.conf` high=ירוק/mid=כתום) · `.zi-tree-btn`. **השוואת-מחירים**: `.store-chip` (`.best`=ירוק + `.stick` ✓). `.ptype` (בורר-סוג-תוכנית).
+
+### ⭐ Onboarding fullscreen (2467–2577)
+- `.fullscreen` (z-100). splash/login רקע ink. `.login-bg` (הילת-teal). `.login-logo` 74 לבן + `.login-brand` 34 (span כתום). `.login-card` (radius עליון 28) · `.login-field` · `.login-or`.
+- **splash** (`splashIn`). **`.reg-field` + `.reg-check`** (✓ ירוק שמגיח כש-`.valid`) + `.reg-confirm` (מחליק `.show`). `.welcome-hamburger`. **`.role-drawer`** (מגירה מימין + scrim).
+
+---
+**טרם נקרא בקובץ הזה:** 2578–4019 (admin dashboards: manager/store/courier/worker · delivery-note · misc).
