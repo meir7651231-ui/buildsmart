@@ -35,6 +35,8 @@
 | `06-logic-settings-projects.md` | לוגיקה: הגדרות/פרופיל/פרויקטים/תקציב/סטטוס | 6560–7700 |
 | `07-logic-orders-tasks-search.md` | לוגיקה: הזמנות/משימות/מלאי/ניווט/חיפוש | 7701–9000 |
 | `08-logic-product-cart-checkout.md` | ליבת מוצר/עץ/אביזרים/סורק/סל/checkout | 9000–11000 |
+| `09-logic-cart-notif-onboarding.md` | סל-render/checkout/התראות/onboarding/roles | 11000–11907 |
+| `10-engine-pricing-stores-sysorders.md` | מנוע-מסחר: תמחור/ספקים/VAT/SYS_ORDERS | 11908–12061 |
 
 (קבצים נוספים ייווצרו ככל שנקרא. מספור לפי סדר השכבות במקור, לא לפי סדר הקריאה.)
 
@@ -53,7 +55,9 @@
 | 6561–7700 | JS — לוגיקה: הגדרות/פרופיל/פרויקטים/תקציב/סטטוס | ✅ נלכד | `06-logic-settings-projects.md` |
 | 7701–9000 | JS — הזמנות/משימות/מלאי/ניווט/חיפוש | ✅ נלכד | `07-logic-orders-tasks-search.md` |
 | 9001–11000 | JS — ליבת מוצר/עץ/אביזרים/סורק/סל/checkout | ✅ נלכד | `08-logic-product-cart-checkout.md` |
-| 11001–22414 | JS — renderCart/B2B/SUPPLIER_STORES/SYS_ORDERS/personas/engine | ⬜ טרם | `09+`… |
+| 11001–11907 | JS — סל-render/checkout/התראות/onboarding/roles | ✅ נלכד | `09-logic-cart-notif-onboarding.md` |
+| 11908–12061 | JS — מנוע-מסחר (תמחור/ספקים/VAT/SYS_ORDERS) | ✅ נלכד | `10-engine-pricing-stores-sysorders.md` |
+| 12062–22414 | JS — מנהל/חנות/שליח/עובד + button-registry + chat/B2B | ⬜ טרם | `11+`… |
 
 ## מפת-ניווט ל-JS (5440–22414) — roadmap לקריאה, **טרם נלכד**
 > רשימת שמות+שורות בלבד, להכוונת הקריאה הרציפה. **התוכן ייחשב נלכד רק אחרי
