@@ -114,3 +114,14 @@ Owner: this session · Scope: `catalog_screen.dart` בלבד (search panel). א�
 - `home_shell`: `ref.listen(smartCartProvider)` — על 0→1 + !prompted → popup פעם אחת + persist.
 - בדיקה: `shipto_prompt_test` (2, load/save). product_journey ירוק (default true → אין popup).
   analyze 0 · 1086 ירוק · build ✓. אומת בצילום (popup על הוספת מוצר ראשון).
+
+# Benzi #1 reframed — "החלק הקשה": כלים מול צנרת ✅ (v5.96)
+משוב בנצי: ברזים/סניטריים = כלים (לבנים/גמר); אינסטלציה = צנרת מפוצלת מים/שפכים;
+כותרת קטנה + קטגוריות מתחת (לא קטגוריית-על). אישר את המיפוי + "אתה עושה אותו".
+- אודיט: 808 verified-spec · 774 PPR→מים · 297 ברירת-מחדל→שפכים (התערובת = החלק הקשה).
+- `category_division.dart`: `kDeptCatHeadings` (מיפוי פר-קטגוריה מאושר) + `resolveCatTitle`
+  + `catNodeProductCount` + `isCatalogDept`. `_DeptCatGroups` במסך-המחלקות (כותרות+שורות).
+- top-node טהור (PPR/SmartLock/אסלות) מקופל לשורה אחת; "ברזים וכיורים" מעורבת מפוצלת לעלים
+  (ברז-כיור→גמר · ברז-מעבר→מים). טאפ→drill דרך `catalogTreePathProvider`.
+- `departmentProducts` הורחב ל-name (catalog dept = איחוד קטגוריות-הכותרות).
+- בדיקה: `category_division_test` (5). analyze 0 · 1086 ירוק · build ✓. אומת ב-2 צילומים.

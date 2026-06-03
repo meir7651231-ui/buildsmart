@@ -66,15 +66,18 @@ tapping מחלקות returns to the grid.
 ## Departments home (`departments_screen.dart` — Benzi #2/#3)
 
 The **מחלקות** tab (bottom-nav index 1): a 2-col grid of 9 departments
-(verbatim names). **Live** (have catalog data) — each opens the catalog **inline**
-(shell chrome stays; `homeDepartmentProvider`) **pre-filtered to one water system**
-(Benzi #1, see below):
-- אינסטלציה → `WaterSystem.drainage` (שפכים) — every drainage category
-- ברזים וסניטריים → `WaterSystem.supply` (מים נקיים) — every clean-water category
-
-Tapping a water tile sets `catalogSystemFilterProvider` + opens the catalog on the
-**finder (בית)** (`catalogSectionProvider='בית'`, tree path cleared) — Benzi #1
-option 2: the division flows through the finder, not a forced tree.
+(verbatim names). The two plumbing departments open a **fixtures-vs-pipes**
+layout (Benzi #1 reframed, v5.96 — `category_division.dart` / `_DeptCatGroups`):
+**small headings, each followed by its category rows** (no super-category to
+drill into); a row tap drills into that category via `catalogTreePathProvider`.
+- **ברזים וסניטריים** → 🚽 כלים לבנים (אסלות) · 🛁 כלים גמר (faucets · showers ·
+  accessories) — `isCatalogDept` true.
+- **אינסטלציה** → 💧 צינורות מים (PPR · copper · garden · transit valves ·
+  manifolds · multilayer) · 🟤 צינורות שפכים (drainage · SmartLock · toilet
+  branches).
+A genuinely-mixed top-node splits per leaf (ברז-כיור→גמר but ברז-מעבר→מים); pure
+families (PPR/SmartLock/אסלות) collapse to one drill-in row. Supersedes the old
+department-level `WaterSystem` filter. Guarded by `category_division_test`.
 
 **Tool departments (v5.83 — gather every real tool category):** a full audit (all
 99 leaf categories) confirmed the catalog is 100% plumbing, so the only genuine

@@ -321,3 +321,13 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/huliot_picker_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+## resolveCatTitle / catNodeProductCount (category_division.dart) — 2026-06-03
+- **קובץ:** `lib/logic/category_division.dart`
+- **מה עושה:** ממפה כותרת-מחלקה (`kDeptCatHeadings.titles`) לצומת-עץ (top-node /
+  leaf / synthetic) + סופר מוצרים תחתיו — הבסיס לתצוגת כלים-מול-צנרת (בנצי #1).
+- תקלה שהוזרקה: `return null;` בראש `resolveCatTitle` (כל כותרת → לא-נפתרת).
+- תוצאה: `category_division_test` אדום ✅ (3 בדיקות נפלו — "does not resolve" +
+  flat-products ריקים למים/שפכים/אסלות).
+- שחזור: byte-exact מ-backup; הרצה חוזרת 5/5 ירוק ✅.
+- מסקנה: הבדיקה חזקה — תופסת מיפוי שבור (כל ערך חייב להיפתר לצומת עם >0 מוצרים, R8).

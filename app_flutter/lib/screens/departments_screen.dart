@@ -2,6 +2,7 @@ import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/logic/category_division.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
@@ -38,14 +39,36 @@ List<CatalogNode> _toolDeptPath(String name, List<String> cats) {
 /// list ("ברצף, ללא קשר לקטלוג") instead of the catalog tree/finder navigation.
 final deptFlatProductsProvider = StateProvider<bool>((_) => false);
 
-/// Every product in a department's scope, flat: a water department = all of its
-/// in-system products; a tool department = all products in its `toolCats`.
+/// Every product in a department's scope, flat: a tool department = its
+/// `toolCats`; a catalog department (ברזים/אינסטלציה) = the union of all its
+/// heading categories; a water department = its in-system products.
 List<LipskeyCatalogProduct> departmentProducts(
-    {WaterSystem? system, List<String>? toolCats}) {
+    {String? name, WaterSystem? system, List<String>? toolCats}) {
   if (toolCats != null) {
     return kCatalogProducts
         .where((p) => toolCats.contains(p.categoryHe))
         .toList();
+  }
+  if (name != null && isCatalogDept(name)) {
+    final cats = <String>{};
+    void collect(CatalogNode n) {
+      if (n.isLeaf) {
+        final l = n.lipskeyCategory;
+        if (l != null) cats.add(l);
+      } else {
+        for (final c in n.children) {
+          collect(c);
+        }
+      }
+    }
+
+    for (final h in kDeptCatHeadings[name]!) {
+      for (final title in h.titles) {
+        final node = resolveCatTitle(title);
+        if (node != null) collect(node);
+      }
+    }
+    return kCatalogProducts.where((p) => cats.contains(p.categoryHe)).toList();
   }
   if (system != null) return filterBySystem(kCatalogProducts, system);
   return const [];
@@ -92,21 +115,30 @@ class DepartmentsScreen extends ConsumerWidget {
     if (active != null) {
       final dept = departments.firstWhere((d) => d.name == active,
           orElse: () => departments.first);
+      final catalogDept = isCatalogDept(dept.name);
       // Benzi #5 — "כל המוצרים ברצף": a flat list of the whole department,
       // bypassing the catalog tree/finder, toggled from the scope bar.
       final flat = ref.watch(deptFlatProductsProvider);
+      // Benzi #1 (reframed): ברזים/אינסטלציה show small headings + category rows
+      // (`_DeptCatGroups`); tapping a row drills via `catalogTreePathProvider`.
+      final drilling = ref.watch(catalogTreePathProvider).isNotEmpty;
+      final Widget body;
+      if (flat) {
+        body = LipskeyProductsList(
+            products: departmentProducts(
+                name: dept.name, system: dept.system, toolCats: dept.toolCats));
+      } else if (catalogDept && !drilling) {
+        body = _DeptCatGroups(deptName: dept.name);
+      } else {
+        body = const CatalogScreen();
+      }
       return Directionality(
         textDirection: TextDirection.rtl,
         child: Column(
           children: [
-            _DeptScopeBar(name: dept.name, system: dept.system),
-            Expanded(
-              child: flat
-                  ? LipskeyProductsList(
-                      products: departmentProducts(
-                          system: dept.system, toolCats: dept.toolCats))
-                  : const CatalogScreen(),
-            ),
+            _DeptScopeBar(
+                name: dept.name, system: catalogDept ? null : dept.system),
+            Expanded(child: body),
           ],
         ),
       );
@@ -181,10 +213,9 @@ class _DeptTile extends ConsumerWidget {
             ref.read(catalogTreePathProvider.notifier).state =
                 _toolDeptPath(dept.name, toolCats);
           } else {
-            // Water-system department (Benzi #1, option 2 — the division flows
-            // through the finder, not a forced tree). Sections read the scope.
-            ref.read(catalogSystemFilterProvider.notifier).state = dept.system;
-            ref.read(catalogSectionProvider.notifier).state = 'בית';
+            // Catalog department (ברזים/אינסטלציה — Benzi #1 reframed) → open the
+            // grouped headings (no water-system scope; clear any drill).
+            ref.read(catalogSystemFilterProvider.notifier).state = null;
             ref.read(catalogTreePathProvider.notifier).state = const [];
           }
           ref.read(deptFlatProductsProvider.notifier).state = false;
@@ -306,6 +337,107 @@ class _DeptScopeBar extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Benzi #1 (reframed) — the heading + category-rows layout for ברזים/אינסטלציה.
+/// Small headings (כלים לבנים / גמר · 💧 מים / 🟤 שפכים), each followed by its
+/// category rows; tapping a row drills into that category via the tree path.
+class _DeptCatGroups extends ConsumerWidget {
+  const _DeptCatGroups({required this.deptName});
+
+  final String deptName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final headings = kDeptCatHeadings[deptName] ?? const [];
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+          BsTokens.space3, BsTokens.space3, BsTokens.space3, BsTokens.space5),
+      children: [
+        for (final h in headings) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(BsTokens.space2, BsTokens.space3,
+                BsTokens.space2, BsTokens.space2),
+            child: Row(
+              children: [
+                Text(h.emoji, style: const TextStyle(fontSize: 15)),
+                const SizedBox(width: 6),
+                Text(
+                  h.label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800, color: BsTokens.brand),
+                ),
+              ],
+            ),
+          ),
+          for (final title in h.titles)
+            if (resolveCatTitle(title) case final node?) _CatGroupRow(node: node),
+        ],
+      ],
+    );
+  }
+}
+
+class _CatGroupRow extends ConsumerWidget {
+  const _CatGroupRow({required this.node});
+
+  final CatalogNode node;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final count = catNodeProductCount(node);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: BsTokens.space2),
+      child: Material(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        elevation: 1,
+        shadowColor: Colors.black26,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          onTap: () =>
+              ref.read(catalogTreePathProvider.notifier).state = [node],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: BsTokens.space4, vertical: BsTokens.space3),
+            child: Row(
+              children: [
+                Text(node.emoji, style: const TextStyle(fontSize: 18)),
+                const SizedBox(width: BsTokens.space3),
+                Expanded(
+                  child: Text(
+                    node.title,
+                    style: theme.textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                if (count > 0)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: BsTokens.brand,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                const SizedBox(width: BsTokens.space2),
+                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+              ],
+            ),
+          ),
         ),
       ),
     );
