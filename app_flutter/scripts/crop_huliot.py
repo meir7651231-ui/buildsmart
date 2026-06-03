@@ -164,6 +164,8 @@ PER_BAND_BOX = {
     (39, 'b'): (12, 545, 255, 650),
     # p40_c — inlet extension slim pipe: cap y=655, base y=760
     (40, 'c'): (12, 650, 175, 770),
+    # p42_b — funnel + 3 wheels + screw cluster: x extends to ~245
+    (42, 'b'): (12, 480, 250, 675),
 }
 
 # Per-band override (page, tag) → PHOTO_H. Wins over PER_PAGE_PHOTO_H.
