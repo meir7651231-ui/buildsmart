@@ -7,7 +7,7 @@
 `CONTRACTOR_CREDIT={}` (תקרת-אשראי/קבלן) · `contractorCredit` · `mgrCustomerList`/`renderMgrCustomers`/`mgrCustomerDoSearch`/**`mgrCustomerDetail`** (כרטיס-לקוח + בר-אשראי + היסטוריה).
 
 ## מנהל — ניהול קטלוג (16645–16890)
-`renderMgrManage` (אקורדיון `mmSection`/`mmSettingRow` · `mgrToggleSection`):
+`renderMgrManage` (אקורדיון `mmSection`/`mmSettingRow` · `mgrToggleSection`) — 4 sections verbatim (BS-dial, INSP-0030): 🌳 עץ-המוצרים · 🏷️ מותגים-ומחירים · 🗂️ קטגוריות · ⚙️ הגדרות-אפליקציה.
 - עצים/אביזרים: `mgrPickTree` · `mgrAddAcc`/`mgrEditAcc`/`mgrDelAcc`.
 - מותגים: `mgrPickBrand` · `mgrAddBrand`/`mgrEditBrand`/`mgrDelBrand`.
 - `mgrRenameCat` · `mgrEditExpress`/`mgrEditCredit` · `openMgrProduct`/`editMgrProduct`/`removeMgrProduct`.
@@ -42,6 +42,7 @@
 > 5 פרסונות (`Persona`): contractor/manager/store/courier/worker. `BsDial` (`bs-dial.tsx`, 361 ש׳) drill-in לעץ-section של כל פרסונה (`bsDrillPath`, אותו דפוס כמו profilePath).
 
 ⬆️ **שודרג:** דשבורדי-פרסונה (מסכים-מלאים) → **BS-dial drill-trees** (R2): בחירת-פרסונה ב-L1 → עץ-section ב-dial. שמות: שלמה-הקבלן · מנהל-המערכת · חנות-הסניטריה · שליח·משאית-14 · יוסי-העובד.
+- **מבנה ה-BS-dial verbatim (INSP-0043, "השלד-שמות COMPLETE"):** 👔 מנהל = **4 sections** (לוח-בקרה 5 · הזמנות 6 · לקוחות 2 · ניהול 4) · 🏪 חנות = **4** (בית 3 · הזמנות 3 · מלאי 2 · פורטל 8) · 🛵 שליח = **4** (הרכב 3 · pickup-leaf · active 3 · פורטל 6) · 🦺 עובד = **3** (status-groups). 👷 **קבלן = אין BS-dial sections** (משתמש ב-menu-FAB).
 - **`views/store.tsx` (302 ש׳)** = הפרסונה היחידה עם **view ממשי** (`store-row`/`store-sheet` ב-CSS — הזמנות-נכנסות).
 
 ➖ **הוחסר/placeholder:** `views/` manager(16)/courier(12)/worker(12)/home(11) = מינימליים (R2). הדשבורדים המלאים מהפרוטוטייפ (`md-*`/`mm-*`/`mo-*`/`mc-*` מנהל · ליקוט-חנות מלא · שליח-מעקב · עובד-משימות) — **לא הומרו** (placeholder/חלקי).

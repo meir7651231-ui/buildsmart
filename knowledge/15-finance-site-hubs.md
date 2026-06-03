@@ -18,6 +18,7 @@
 - `ARCHIVED_PROJECTS` (19849) — שהושלמו: מגדל-הרצליה(2024,24יח׳) · בית-רעננה(2023) · משרדים-ת"א(2023).
 
 **פונקציות** (`openSiteHub`→`siteFeature`): **`siteGantt`** (לוח-זמנים) · **`siteSnagging`**/`addSnag`/`fixSnag` (ליקויים) · `siteLocations` (עץ-אתר) · **`siteAttendance`**/`clockAttendance` (נוכחות-שעון) · `siteDiary`/`addDiaryEntry` (יומן-עבודה) · `siteSafety`/`ackSafety` (אישור-בטיחות) · `siteDeps` (תלויות-משימות) · `sitePhotos` (תיעוד before/after).
+**10 כלי-site-hub verbatim** (Preact dial, INSP-0037): 📅 תרשים-גאנט · 🔧 רשימת-ליקויים · 🏢 קומה·דירה·חדר · 📍 נוכחות-GPS · 📓 יומן-עבודה · 🦺 התראות-בטיחות · 🔗 תלויות-חומרים · 📸 צילום-לפני/אחרי · 🔍 **ביקורות-מפקח** (חדש — לא היה בפונקציות) · 🗄️ ארכיון-פרויקטים.
 
 ---
 **תובנה:** שני ה-hubs האלה (B/C) הם "מרכז-פיננסים" (כפתור ב-`view-project`) ו"ניהול אתר הבנייה" (כפתור ב-`view-tasks`) — כל אחד hub-overlay עם רשת-tiles → feature-overlay לכל כלי. הם הרחבת-העומק של אפליקציית-הקבלן מעבר לרכש.
