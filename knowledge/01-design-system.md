@@ -278,3 +278,19 @@ meta מותג: `theme-color = #1f6f6b` (8) · PWA capable (9-10) · manifest (7)
 - **4 פרסונות חולקות מעטפת** `.admin-screen/.adm-*`, וכל אחת prefix: manager=`md/mm/mo/mc`, store=`sh/so`, courier=`ch`, worker=`ww`.
 - **מצבי-סטטוס בצבע אחיד** לאורך כל האפליקציה (משימה/הזמנה/משלוח): כתום=בתהליך, teal=פעיל, ירוק=הושלם, אדום=בעיה, אפור=ממתין.
 - **טיפוגרפיה:** Heebo-900 לכותרות/מספרים, Rubik לגוף.
+
+---
+
+## 🔄 Preact (`app/src/styles/`) — דלתא מול אב-הטיפוס (עיצוב)
+> `tokens.css` (59 ש׳) + `global.css` (2125 ש׳).
+
+⬆️ **הומשך verbatim:** הפלטה **זהה** — `--ink/--bg/--card/--brand #1f6f6b/--amber #f2a516/--grey/--line/--danger/--ok/--shadow` + dark-theme (אותם ערכים). טיפוגרפיה (Heebo/Rubik) זהה.
+
+➕ **נוסף (`tokens.css`):** סקאלות פורמליות שאב-הטיפוס hardcode — `--radius-sm/md/lg` · `--space-1..6` · `--font-display/--font-body`. text-size כ-`zoom` (small .92 / large 1.1). reduce-motion (זהה).
+
+➕ **נוסף (`global.css`) — מערכת-ה-dial (נטו-חדש; אין באב-הטיפוס):**
+- **`.fab`/`.fab--menu`/`.fab--search`** (R1 — "5 ה-floating buttons NEVER move", §1257) · **`.float`/`--logo/--name/--cart`** (FloatingHeader).
+- **`.dial`** (speed-dial): `.dial__btn`/`.dial__circle`(+`--active/--on`)/`.dial__item`(+`--sub/--danger`)/`.dial__label` · **`.dial__input`** (R9 — input מחליף label בעריכה, §639).
+- **`.bsdial`** (BS persona-dial) · right-rail tools+sub-menu (search §1007) · scope-chips · `.content` (main יחיד) · `.category-circles` (§156) · regression-panel inline (§1872).
+
+➖ **הוחסר:** רוב ה-CSS הפר-מסך/פר-פיצ'ר של אב-הטיפוס (budget-box · stage-card · scan-canvas · order-card · ship-* · sc-*(אתר) · fin-* · sec-* · rw-* · ai-* · admin dashboards) — כי ב-Preact הפיצ'רים = dials והפרסונות = placeholder.
