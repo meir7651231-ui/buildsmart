@@ -872,17 +872,18 @@ const List<SmartProduct> kSmartProducts = [
     diagramTitle: 'התקנת מיכל הדחה נמוך',
     stages: _st,
     brands: [
+      // gate 117: SKUs aligned to PDF (12404x/17086x/116752 were phantoms).
       SmartBrand(
         name: 'ספיר פרגמון',
         tag: 'הבחירה שלנו',
         rec: true,
-        sku: '124050',
+        sku: '124850',
       ),
-      SmartBrand(name: 'ספיר אפור',     tag: 'גוון אפור',     sku: '124051'),
-      SmartBrand(name: 'ברקת לבן',      tag: 'ברקת קלאסי',   sku: '170862'),
-      SmartBrand(name: 'ברקת פרגמון',   tag: 'גוון פרגמון',  sku: '170866'),
-      SmartBrand(name: 'ברקת אפור',     tag: 'גוון אפור',     sku: '170869'),
-      SmartBrand(name: 'טופז לבן',       tag: 'גרסה כלכלית',  sku: '116752'),
+      SmartBrand(name: 'ספיר אפור',     tag: 'גוון אפור',     sku: '124851'),
+      SmartBrand(name: 'ברקת לבן',      tag: 'ברקת קלאסי',   sku: '178862'),
+      SmartBrand(name: 'ברקת פרגמון',   tag: 'גוון פרגמון',  sku: '178866'),
+      SmartBrand(name: 'ברקת אפור',     tag: 'גוון אפור',     sku: '178869'),
+      SmartBrand(name: 'טופז לבן',       tag: 'גרסה כלכלית',  sku: '116792'),
     ],
     acc: [
       SmartAcc(

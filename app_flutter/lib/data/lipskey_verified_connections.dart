@@ -1615,19 +1615,27 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '77777400': VerifiedSpec(sku: '77777400', material: _brass, maxTempC: 90, ends: [_bm('1/2"'), _bm('1/2"')]),
 
   // ── התקנה גבוהה / נמוכה / צמודה (toilet cistern installations) ───────────
+  // gate 117 — high installation (page 50): טיטאן + יהלום, 3 colors each.
+  '152785': VerifiedSpec(sku: '152785', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '152786': VerifiedSpec(sku: '152786', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '152787': VerifiedSpec(sku: '152787', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '145629': VerifiedSpec(sku: '145629', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '145630': VerifiedSpec(sku: '145630', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '145631': VerifiedSpec(sku: '145631', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  // gate 117 — close-coupled monoblock (page 52): כנרת ×2 + ברקת ×3.
+  '168525': VerifiedSpec(sku: '168525', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '169604': VerifiedSpec(sku: '169604', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '178864': VerifiedSpec(sku: '178864', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '178867': VerifiedSpec(sku: '178867', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  '178870': VerifiedSpec(sku: '178870', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '124848': VerifiedSpec(sku: '124848', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '178862': VerifiedSpec(sku: '178862', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '116792': VerifiedSpec(sku: '116792', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '154068': VerifiedSpec(sku: '154068', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '124040': VerifiedSpec(sku: '124040', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '124050': VerifiedSpec(sku: '124050', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '124051': VerifiedSpec(sku: '124051', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '170862': VerifiedSpec(sku: '170862', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '170866': VerifiedSpec(sku: '170866', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '170869': VerifiedSpec(sku: '170869', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '116752': VerifiedSpec(sku: '116752', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
+  // gate 117: phantom SKUs 124040/124050/124051/170862/170866/170869/116752/154058
+  // removed — real SKUs 124848/124850/124851/178862/178866/178869/116792/154068
+  // already covered below.
   '116795': VerifiedSpec(sku: '116795', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
-  '154058': VerifiedSpec(sku: '154058', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '154069': VerifiedSpec(sku: '154069', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '124850': VerifiedSpec(sku: '124850', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
   '178866': VerifiedSpec(sku: '178866', material: 'PVC', maxTempC: 50, ends: [_bf('1/2"')]),
