@@ -4,6 +4,20 @@
 
 ---
 
+## v6.00 — Lipski visible-trap parity to PDF (gate 117 · קטגוריה 3/9)
+
+**שינוי:** סנכרון `kLipskeyCatalog` ל-32 SKUs של מחסומים גלויים (עמ' 8–15):
+- דפים תוקנו (היו 5/6/7/8 → 8/10/12/14, לפי הקטלוג המודפס).
+- שמות תוקנו ב-213054 (היה duplicate של 213055 עם "אמריקאי") ו-218495
+  (היה duplicate של 171189 עם "עם יציאה למדיח").
+
+**אימות:**
+- ✅ `test/lipskey_pdf_parity_test.dart` — 83/83 (24 מיכלים + 27 מושבים + 32 מחסומים).
+- ✅ `test/product_journey_test.dart · HARD` — אפס overflow.
+- ✅ `flutter test` — כל הסיוט ירוק.
+
+---
+
 ## v5.99 — Lipski toilet-seat parity to PDF (gate 117 · קטגוריה 2/9)
 
 **שינוי:** סנכרון `kLipskeyCatalog` ל-26 SKUs של מושבי אסלה מהקטלוג (עמ' 53–55):

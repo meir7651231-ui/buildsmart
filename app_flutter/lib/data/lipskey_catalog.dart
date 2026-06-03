@@ -494,7 +494,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 5,
+    page: 8,
     imageFile: '217861.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -507,7 +507,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 5,
+    page: 8,
     imageFile: '213055.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -520,7 +520,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 5,
+    page: 8,
     imageFile: '218553.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -533,20 +533,20 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 5,
+    page: 8,
     imageFile: '116632.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '213054',
-    nameHe: 'מחסום (סיפון) אמריקאי 1.25" לכיור רחצה + יציאה למזגן',
-    nameEn: '1.25" Bottle trap for stainless ateel sink, with A/C outlet',
+    nameHe: 'מחסום (סיפון) 1.25" לכיור רחצה + יציאה למזגן',
+    nameEn: '1.25" Bottle trap with A/C outlet',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 2250,
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 5,
+    page: 8,
     imageFile: '213054.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -559,7 +559,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 6,
+    page: 10,
     imageFile: '116652.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -572,7 +572,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 6,
+    page: 10,
     imageFile: '116124.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -585,7 +585,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 6,
+    page: 10,
     imageFile: '116649.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -598,7 +598,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 6,
+    page: 10,
     imageFile: '171190.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -611,7 +611,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 6,
+    page: 10,
     imageFile: '209448.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -624,20 +624,20 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 6,
+    page: 10,
     imageFile: '171189.jpeg',
   ),
   LipskeyCatalogProduct(
     sku: '218495',
-    nameHe: 'סיפון אמריקאי 1.5" עם יציאה למדיח',
-    nameEn: '1.5" Pipe trap for washing machine 1.5" Pipe trap for stainless steel',
+    nameHe: 'מחסום אמריקאי 1.5"',
+    nameEn: '1.5" American bottle trap',
     color: 'לבן',
     qtyPack: 20,
     qtyPallet: 600,
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 6,
+    page: 10,
     imageFile: '218495.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -650,7 +650,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 6,
+    page: 10,
     imageFile: '116127.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -663,7 +663,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 7,
+    page: 12,
     imageFile: '213056.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -676,7 +676,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 7,
+    page: 12,
     imageFile: '217005.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -689,7 +689,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 7,
+    page: 12,
     imageFile: '216984.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -702,7 +702,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 7,
+    page: 12,
     imageFile: '172349.png',
   ),
   LipskeyCatalogProduct(
@@ -715,7 +715,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 7,
+    page: 12,
     imageFile: '209447.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -728,7 +728,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 7,
+    page: 12,
     imageFile: '116144.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -741,7 +741,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 7,
+    page: 12,
     imageFile: '217004.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -754,7 +754,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 7,
+    page: 12,
     imageFile: '213057.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -767,7 +767,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '610949.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -780,7 +780,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '611045.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -793,7 +793,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '193420.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -806,7 +806,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '645971.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -819,7 +819,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '217675.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -832,7 +832,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '172033.png',
   ),
   LipskeyCatalogProduct(
@@ -845,7 +845,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '178700.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -858,7 +858,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '645975.png',
   ),
   LipskeyCatalogProduct(
@@ -871,7 +871,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '615301.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -884,7 +884,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '612812.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -897,7 +897,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '116233.jpeg',
   ),
   LipskeyCatalogProduct(
@@ -4199,7 +4199,7 @@ const List<LipskeyCatalogProduct> kLipskeyCatalog = [
     categoryHe: 'מחסומים גלויים',
     categoryEn: 'Visible Traps',
     categoryEmoji: '🚰',
-    page: 8,
+    page: 14,
     imageFile: '187700.jpeg',
   ),
 
