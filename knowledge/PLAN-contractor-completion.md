@@ -164,3 +164,5 @@
 - 2026-06-04 · **מקבץ** · **T0 (ליבה: seeds+helpers+test) ✅ נדחף** ל-whats-happening (`contractor seeds foundation` · 8 בדיקות · fMoney/bestStore mutation-verified). דחוי: T0.2 StateNotifiers (→T7/T5) · ORDER_STATUS/STORE seeds (proto-gap →T4/T5). **T1 הבא.**
 
 - 2026-06-04 · **בנצי (משיק)** · **T6 ✅ הושלם ונדחף** (fb9aff0). התראות בטיחות+תקציב → sheet inline (R9). אומת ויזואלית (רנדור-בדפדפן חי). seeds מ-T0. gates 24/102/116 ✓.
+
+- 2026-06-04 · **בנצי (משיק)** · לקח **T5** (טאב חנות → orders: מעקב-הזמנה + תעודת-משלוח). ORDER_STATUS 4-states (§9d; מקבץ דחה ל-T5) + doc-OCR→toast. התנגשות-מינ׳ (store orders, לא קטלוג). worktree מבודד. push קוד רק על "תדחוף".
