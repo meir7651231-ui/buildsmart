@@ -225,6 +225,22 @@ The bottom nav is now **🏠 בית · ▦ מחלקות · 🔔 עדכונים �
 - **חנות** (3) = `StoreScreen` (unchanged); cart stays the floating FAB.
 Guards updated: `widget_test` (boot lands on בית + 4-tab nav; manager-dashboard
 'אביזרים נלווים' now also appears in the catalog). 1084/1084 green.
+## 👔 Manager unify — control-center + live orders engine onto the app (Path B)
+Cherry-picked the COMPLETE manager rebuild + the shared orders engine onto the LIVE
+app (which already carries contractor + worker + store + courier). New code, NO
+protocol churn — the live app keeps ITS protocol/.githooks. Added:
+`lib/state/orders_engine.dart` (`ordersEngineProvider` — the shared SYS_ORDERS port,
+seeded from `kManagerOrderSeed`, persists `bs.orders.v1`), `lib/logic/manager_dashboard.dart`
+(pure derivations — analytics/customers folds), `lib/screens/manager_dashboard_screen.dart`
+(the 4-tab מרכז השליטה role-app: לוח בקרה / הזמנות / לקוחות / ניהול), `lib/state/manager_dashboard_state.dart`.
+`role_picker_sheet.dart`: manager → `ManagerDashboardScreen.route()` ALONGSIDE worker →
+`WorkerAppScreen.route()` (both role-app entries kept). `bs_dial_widget.dart`/`dial_state.dart`
+gained the manager-leaf hunks. Tests: `orders_engine_test`, `manager_dashboard_test`,
+`manager_dashboard_screen_test`, `bs_dial_manager*_test`. The live app's contractor +
+worker + store + courier and the manager now coexist on one shared engine — the base for
+cross-persona wiring. (Version label stays `v6.08` — live's catalog progression is the
+release source of truth; this unify is additive code.)
+
 
 ## Opening flow — first-run register/profession + "מי אתה?" picker + name chip (v5.92)
 First-run gate (`OnboardingGate`, `welcomeSeenProvider` seeded in `main()`): Welcome
