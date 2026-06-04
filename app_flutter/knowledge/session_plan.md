@@ -1,3 +1,35 @@
+# 👔 Manager rebuild — M4: 👥 לקוחות tab — live customer list + credit (v6.01)
+Owner: this session
+Scope: `lib/screens/manager_dashboard_screen.dart` בלבד (גוף ה-👥 tab + קריאת `managerCustomersProvider`
++ `ordersEngineProvider`). אסור לגעת ב-engine internals (`orders_engine.dart`), ב-logic layer
+(`manager_dashboard.dart` — `mgrCustomerList`/`ManagerCustomer`/`contractorCredit` נקראים, לא משתנים),
+בשאר ה-tabs (📊 M2 · 🚚 M3 done · 🛠️ M5), ב-`role_picker_sheet`, או ב-buyer/checkout flow.
+
+מקור-אמת verbatim: `index.html` — `renderMgrCustomers`@16566-16607 · `mgrCustomerDetail`@16609-16643 ·
+`mc-pill` status labels @16592 · `pct`/`status`/`sites` @16554,16559-16562. LIGHT theme.
+
+## M4 — מילוי ה-👥 tab ✅
+- `_CustomersTab` (`ConsumerStatefulWidget`) מחליף את ה-placeholder ב-`IndexedStack` index-2; רק 🛠️
+  נשאר "בקרוב". גוף = `ListView` על `bgLight`.
+- **רשימת לקוחות חיה** מ-`ref.watch(managerCustomersProvider)` (group-by-`who` מעל ההזמנות החיות) →
+  הרשימה **חיה**: הזמנת-קבלן חדשה ב-engine (מכל תפקיד) **מוסיפה/מעדכנת כרטיס לקוח כאן**. כל
+  `_CustomerCard` (legacy `mc-card`): `👷 name` + `N הזמנות · M אתרים` (M = אתרים-נבדלים-לקבלן נגזר
+  מההזמנות החיות, כמו ה-set `byName[nm].sites`) + status-pill, ואז **bar ניצול-אשראי** + שורה
+  `ניצול אשראי: ₪used / ₪limit (pct%)`. `pct=min(100,round(spend/credit*100))`; תקרת ה-credit =
+  `contractorCredit` (ה-hash הדטרמיניסטי שכבר בשכבת-האנליטיקה). status (verbatim @16562/16592):
+  **פעיל** (0<pct<90, ירוק) / **⚠️ אשראי גבוה** (pct≥90, ענבר) / לא פעיל (pct=0, אפור). `_CustomerSummary`
+  (3 סטטים: קבלנים / סך רכש ₪ / ניצול אשראי %) למעלה.
+- **סינון סטטוס:** `_CustomerStatusChips` (`הכל (N)` + chip פעיל / אשראי גבוה לכל סטטוס מאוכלס); סינון
+  ריק נופל חזרה ל-הכל. תוצאה ריקה → "לא נמצאו קבלנים תואמים." (legacy @16586).
+- **Customer-detail bottom-sheet** (`mgrCustomerDetail` @16609-16643) ב-tap: 👷 + name + status-tag +
+  grid (הזמנות/סך רכש/אשראי) + שורות-אשראי (מסגרת/נוצל/יתרה זמינה/אתרי בנייה) + ההזמנות-של-הקבלן
+  (📦 id · ₪sum · stage-pill), הכל מאותו engine חי.
+- LIGHT בלבד (אפס dark tokens); ירוק=פעיל / ענבר=אשראי-גבוה.
+- `manager_dashboard_screen_test` → 35 (M1 six + M2 four + M3 six + M4 six + ה-placeholder/role-picker).
+  screen 35 + dashboard 12 + engine 21 ירוק. analyze נקי בקבצים-המשתנים.
+
+---
+
 # 👔 Manager rebuild — M3: 🚚 הזמנות tab — live order list + god-mode advance (v6.00)
 Owner: this session
 Scope: `lib/screens/manager_dashboard_screen.dart` בלבד (גוף ה-🚚 tab + קריאת `ordersEngineProvider`

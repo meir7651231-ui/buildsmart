@@ -99,17 +99,17 @@ void main() {
       expect(stack.index, 0);
     });
 
-    testWidgets('the 2 NOT-yet-built tabs (👥/🛠️) keep the "בקרוב" note '
-        '(M4–M5 not built); 📊 + 🚚 are no longer placeholders', (t) async {
+    testWidgets('the 1 NOT-yet-built tab (🛠️) keeps the "בקרוב" note '
+        '(M5 not built); 📊 + 🚚 + 👥 are no longer placeholders', (t) async {
       await pumpScreen(t);
       // Default tab = 0 (📊 לוח בקרה) — now the LIVE cockpit, NOT a placeholder,
       // so nothing "בקרוב" is onstage. The IndexedStack keeps the OTHER three
-      // mounted offstage; 🚚 הזמנות is now the live orders tab (M3), so only the
-      // remaining TWO (👥/🛠️) are still "בקרוב" placeholders.
+      // mounted offstage; 🚚 הזמנות (M3) + 👥 לקוחות (M4) are now live tabs, so
+      // only the remaining ONE (🛠️ ניהול) is still a "בקרוב" placeholder.
       expect(find.text('בקרוב'), findsNothing);
       expect(
         find.text('בקרוב', skipOffstage: false),
-        findsNWidgets(2),
+        findsNWidgets(1),
       );
     });
 
@@ -468,6 +468,215 @@ void main() {
     });
   });
 
+  group('👥 לקוחות — live customer list + credit (M4)', () {
+    // Switch to the 👥 לקוחות tab by tapping its toggle pill. `.first` selects
+    // the toggle pill (built above the IndexedStack body) even after the tab's
+    // own 'לקוחות'-derived labels mount.
+    Future<void> openCustomersTab(WidgetTester t) async {
+      await t.tap(find.text('לקוחות').first);
+      await settle(t);
+    }
+
+    testWidgets('renders the live customers (grouped by buyer) — each card '
+        'shows 👷 name, N הזמנות · M אתרים, and the credit-utilisation line',
+        (t) async {
+      final c = await pumpScreen(t);
+      await openCustomersTab(t);
+      expect(c.read(managerTabProvider), 2);
+
+      // The customers come from the LIVE engine via managerCustomersProvider —
+      // the four seed buyers, each with one order.
+      final customers = c.read(managerCustomersProvider);
+      expect(customers.length, 4);
+
+      // Distinct sites per buyer, derived from the live orders exactly like the
+      // tab does (the legacy `byName[nm].sites` set).
+      final orders = c.read(ordersEngineProvider);
+      for (final cust in customers) {
+        // Each seed buyer's name renders on exactly one card (names are unique).
+        expect(find.text(cust.name), findsOneWidget, reason: '${cust.name} card');
+        // Their "N הזמנות · M אתרים" sub-line is present (the four seed buyers
+        // all read "1 הזמנות · 1 אתרים", so this is findsWidgets, not one).
+        final sites = orders
+            .where((o) => o.who == cust.name)
+            .map((o) => o.site)
+            .toSet()
+            .length;
+        expect(
+          find.text('${cust.orderCount} הזמנות · $sites אתרים'),
+          findsWidgets,
+          reason: '${cust.name} meta line',
+        );
+
+        // The verbatim credit line `ניצול אשראי: ₪used / ₪limit (pct%)` is
+        // UNIQUE per customer (distinct spend/limit), so exactly one.
+        final pct = cust.creditLimit == 0
+            ? 0
+            : ((cust.totalSpend / cust.creditLimit) * 100).round().clamp(0, 100);
+        expect(
+          find.text(
+            'ניצול אשראי: ₪${_grp(cust.totalSpend)} / ₪${_grp(cust.creditLimit)} ($pct%)',
+          ),
+          findsOneWidget,
+          reason: '${cust.name} credit line',
+        );
+      }
+
+      // The 👷 avatar appears once per customer; the summary labels are present.
+      expect(find.text('👷'), findsNWidgets(4));
+      expect(find.text('קבלנים'), findsOneWidget);
+      expect(find.text('סך רכש'), findsOneWidget);
+
+      // Every seed buyer is under the credit ceiling → all "פעיל"; none high.
+      expect(find.text('פעיל'), findsWidgets);
+    });
+
+    testWidgets('each card carries a credit-utilisation bar '
+        '(LinearProgressIndicator at pct/100)', (t) async {
+      final c = await pumpScreen(t);
+      await openCustomersTab(t);
+
+      // One bar per customer (4 seed customers). Each bar's value is the
+      // customer's pct/100 — read off the provider so the test tracks the live
+      // derivation, not a literal.
+      final customers = c.read(managerCustomersProvider);
+      final bars = t
+          .widgetList<LinearProgressIndicator>(
+            find.byType(LinearProgressIndicator),
+          )
+          .toList();
+      expect(bars.length, customers.length);
+      for (final bar in bars) {
+        expect(bar.value, isNotNull);
+        expect(bar.value, inInclusiveRange(0.0, 1.0));
+      }
+    });
+
+    testWidgets('KEYSTONE — the tab is LIVE: placing a NEW contractor order on '
+        'the engine ADDS a customer card', (t) async {
+      final c = await pumpScreen(t);
+      await openCustomersTab(t);
+
+      // Baseline: the 4 seed customers; "בנאי חדש" is not among them.
+      expect(c.read(managerCustomersProvider).length, 4);
+      expect(find.text('בנאי חדש'), findsNothing);
+
+      // A brand-new contractor places an order via the SHARED engine.
+      c.read(ordersEngineProvider.notifier).placeOrder(
+            who: 'בנאי חדש',
+            site: 'אתר חדש',
+            items: 3,
+            sum: 1500,
+          );
+      await settle(t);
+
+      // The customer list reflows LIVE — a 5th customer now exists and its card
+      // is on screen (no manual refresh). Its UNIQUE credit line (spend 1500
+      // against its own ceiling) renders, proving the new card mounted live.
+      expect(c.read(managerCustomersProvider).length, 5);
+      expect(find.text('בנאי חדש'), findsOneWidget);
+      final fresh =
+          c.read(managerCustomersProvider).firstWhere((x) => x.name == 'בנאי חדש');
+      final freshPct = ((fresh.totalSpend / fresh.creditLimit) * 100)
+          .round()
+          .clamp(0, 100);
+      expect(
+        find.text(
+          'ניצול אשראי: ₪${_grp(fresh.totalSpend)} / ₪${_grp(fresh.creditLimit)} ($freshPct%)',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a contractor over 90% of their ceiling shows "⚠️ אשראי גבוה" '
+        'and the אשראי גבוה filter narrows to them', (t) async {
+      final c = await pumpScreen(t);
+
+      // Push an EXISTING seed buyer (יוסי כהן) past 90% by placing an order
+      // whose sum exceeds their whole credit ceiling → pct clamps to 100 → low.
+      final ceiling = contractorCredit('יוסי כהן');
+      c.read(ordersEngineProvider.notifier).placeOrder(
+            who: 'יוסי כהן',
+            site: 'מגדל הרצליה',
+            items: 1,
+            sum: ceiling, // total now > ceiling → pct = 100 ≥ 90 → status 'low'
+          );
+      await openCustomersTab(t);
+      await settle(t);
+
+      // The high-credit pill (with the ⚠️ glyph) is now on the יוסי כהן card.
+      expect(find.text('⚠️ אשראי גבוה'), findsWidgets);
+
+      // The status-filter chip row now offers an "אשראי גבוה (N)" chip; tapping
+      // it narrows the list to the high-credit contractor(s) only.
+      expect(find.textContaining('אשראי גבוה ('), findsOneWidget);
+      await t.tap(find.textContaining('אשראי גבוה ('));
+      await settle(t);
+      expect(find.text('יוסי כהן'), findsOneWidget);
+      // A still-active seed buyer (משה אברהם, low utilisation) is filtered out.
+      expect(find.text('משה אברהם'), findsNothing);
+    });
+
+    testWidgets('tapping a customer card opens the detail sheet '
+        '(limit / used / balance / sites + the contractor orders)', (t) async {
+      await pumpScreen(t);
+      await openCustomersTab(t);
+
+      // Open משה אברהם's detail sheet (the top customer by spend, 3150).
+      await t.tap(find.text('משה אברהם'));
+      await settle(t);
+
+      // The sheet's credit rows + the contractor's order id are on screen.
+      expect(find.text('מסגרת אשראי'), findsOneWidget);
+      expect(find.text('נוצל'), findsOneWidget);
+      expect(find.text('יתרה זמינה'), findsOneWidget);
+      expect(find.text('אתרי בנייה'), findsOneWidget);
+      // משה אברהם owns the seed order BS-1040 — its row shows in the sheet.
+      expect(find.text('ההזמנות של משה אברהם'), findsOneWidget);
+      expect(find.text('📦 BS-1040'), findsWidgets);
+    });
+
+    testWidgets('the customers tab is LIGHT — white cards on bgLight, NO dark '
+        'tokens', (t) async {
+      await pumpScreen(t);
+      await openCustomersTab(t);
+
+      final scaffold = t.widget<Scaffold>(find.byType(Scaffold));
+      expect(scaffold.backgroundColor, BsTokens.bgLight);
+
+      final decos = t
+          .widgetList<Container>(find.byType(Container))
+          .map((w) => w.decoration)
+          .whereType<BoxDecoration>()
+          .map((d) => d.color)
+          .whereType<Color>()
+          .toList();
+      for (final dark in const [
+        BsTokens.bgDark,
+        BsTokens.cardDark,
+        BsTokens.inkDark,
+        BsTokens.mutedDark,
+      ]) {
+        expect(decos, isNot(contains(dark)), reason: 'dark token $dark leaked');
+        // No Material surface uses a dark token either.
+        final matColors = t
+            .widgetList<Material>(find.byType(Material))
+            .map((m) => m.color)
+            .whereType<Color>();
+        expect(matColors, isNot(contains(dark)), reason: 'dark Material $dark');
+      }
+      // The summary strip is a white cardLight Container; the customer cards are
+      // white cardLight Material surfaces (4 seed customers) — assert both.
+      expect(decos, contains(BsTokens.cardLight));
+      final cardSurfaces = t
+          .widgetList<Material>(find.byType(Material))
+          .map((m) => m.color)
+          .where((col) => col == BsTokens.cardLight)
+          .length;
+      expect(cardSurfaces, greaterThanOrEqualTo(4));
+    });
+  });
+
   group('manager entry — role picker opens the dashboard (M1 wiring)', () {
     testWidgets('tapping "מנהל המערכת" in the "מי אתה?" picker pushes '
         'ManagerDashboardScreen', (t) async {
@@ -534,4 +743,17 @@ void main() {
       expect(find.byType(ManagerDashboardScreen), findsOneWidget);
     });
   });
+}
+
+/// Thousands-grouped integer — mirrors the screen's private `_grouped` (the
+/// legacy `toLocaleString()` for ₪ sums) so the M4 credit-line assertions can
+/// build the exact expected string.
+String _grp(int n) {
+  final s = n.abs().toString();
+  final buf = StringBuffer();
+  for (var i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
+    buf.write(s[i]);
+  }
+  return n < 0 ? '-$buf' : buf.toString();
 }

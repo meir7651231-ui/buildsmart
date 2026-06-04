@@ -89,13 +89,16 @@ class ManagerDashboardScreen extends ConsumerWidget {
                 children: [
                   // 📊 לוח בקרה (M2) — the dashboard cockpit, live over the
                   // shared orders engine. 🚚 הזמנות (M3) — the live order list +
-                  // the manager's god-mode stage-advance. 👥/🛠️ remain
-                  // PLACEHOLDERS this wave (M4–M5 fill them).
+                  // the manager's god-mode stage-advance. 👥 לקוחות (M4) — the
+                  // live customer list + credit, derived from the same engine.
+                  // 🛠️ ניהול remains a PLACEHOLDER this wave (M5 fills it).
                   for (var i = 0; i < _kManagerTabs.length; i++)
                     if (i == 0)
                       const _DashboardTab()
                     else if (i == 1)
                       const _OrdersTab()
+                    else if (i == 2)
+                      const _CustomersTab()
                     else
                       _TabPlaceholder(
                         emoji: _kManagerTabs[i].emoji,
@@ -1220,6 +1223,629 @@ String _grouped(int n) {
     buf.write(s[i]);
   }
   return n < 0 ? '-$buf' : buf.toString();
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  👥 לקוחות — the live customer list + credit (M4)
+// ───────────────────────────────────────────────────────────────────────────
+
+/// The Hebrew status label per customer status — VERBATIM from the legacy
+/// `renderMgrCustomers` (@index.html:16592:
+/// `c.status==='low'?'אשראי גבוה':c.status==='off'?'לא פעיל':'פעיל'`). The
+/// detail-sheet tag uses the longer legacy forms (@index.html:16616).
+const Map<String, String> _kCustomerStatusLabel = {
+  'live': 'פעיל',
+  'low': '⚠️ אשראי גבוה',
+  'off': 'לא פעיל',
+};
+
+/// The per-status accent colour — green for an active contractor (`live`),
+/// amber for a high-credit one (`low`, the legacy `hot` class @index.html:16601),
+/// grey for an inactive one (`off`). LIGHT-safe (the dashboard's own greens/amber,
+/// never a dark token).
+const Map<String, Color> _kCustomerStatusColor = {
+  'live': Color(0xFF1F8A4C),
+  'low': Color(0xFFF2A516),
+  'off': Color(0xFF8B8D8F),
+};
+
+/// One customer's full view-model — the [ManagerCustomer] aggregate (name /
+/// orderCount / totalSpend / creditLimit) PLUS the two derived fields the legacy
+/// `mc-card` renders that are NOT on the aggregate: `pct` (credit-utilisation %)
+/// and `sites` (distinct build-site count). Both are computed exactly as the
+/// legacy `mgrCustomerList` does over the LIVE orders (@index.html:16554,
+/// 16559-16562) — `pct = min(100, round(spent/credit*100))`, `sites` = the size
+/// of the per-buyer site set.
+@immutable
+class _CustomerView {
+  const _CustomerView({
+    required this.customer,
+    required this.pct,
+    required this.sites,
+  });
+
+  final ManagerCustomer customer;
+  final int pct;
+  final int sites;
+
+  /// @legacy index.html:16562 — `pct>=90?'low':pct>0?'live':'off'`.
+  String get status => pct >= 90 ? 'low' : (pct > 0 ? 'live' : 'off');
+}
+
+/// Build the LIVE customer view-models from the engine's orders. Reads the
+/// group-by-buyer aggregates off [managerCustomersProvider] (already sorted by
+/// spend desc, the legacy order) and derives `pct` + distinct `sites` per buyer
+/// from the SAME live order list — so a contractor placing a new order here
+/// updates a customer card LIVE (its order count, spend, sites and credit bar all
+/// reflow). Mirrors the legacy `mgrCustomerList` derivation (@index.html:16549-
+/// 16562) exactly, but over `ordersEngineProvider` instead of the static seed.
+List<_CustomerView> _liveCustomerViews(WidgetRef ref) {
+  final orders = ref.watch(ordersEngineProvider);
+  final customers = ref.watch(managerCustomersProvider);
+
+  // Distinct build sites per buyer (legacy `byName[nm].sites` set @16554) —
+  // a non-empty `o.site` is added to that buyer's set; its size is `c.sites`.
+  final sitesByBuyer = <String, Set<String>>{};
+  for (final o in orders) {
+    if (o.site.isEmpty) continue;
+    (sitesByBuyer[o.who] ??= <String>{}).add(o.site);
+  }
+
+  return [
+    for (final c in customers)
+      _CustomerView(
+        customer: c,
+        // @legacy index.html:16559 — `min(100, round(spent/credit*100))`.
+        pct: c.creditLimit == 0
+            ? 0
+            : ((c.totalSpend / c.creditLimit) * 100).round().clamp(0, 100),
+        sites: sitesByBuyer[c.name]?.length ?? 0,
+      ),
+  ];
+}
+
+/// The 👥 לקוחות tab body — the manager's LIVE customer list, a faithful port of
+/// the legacy `renderMgrCustomers` (@index.html:16566-16607). Each contractor is
+/// derived from the shared [ordersEngineProvider] (grouped by `who` via
+/// [managerCustomersProvider]), so the list is always live: a new contractor
+/// order (placed via the engine by any role) adds or updates a customer card here.
+///
+/// Sections (top→bottom): a 3-stat summary (קבלנים / סך רכש / ניצול אשראי), a
+/// status filter chip row (`הכל` + פעיל / אשראי גבוה when populated), and the
+/// filtered customer list. Each `_CustomerCard` mirrors the legacy `mc-card`:
+/// `👷 name`, `N הזמנות · M אתרים`, a credit-utilisation bar + the line
+/// `ניצול אשראי: ₪used / ₪limit (pct%)`, and a פעיל / ⚠️ אשראי גבוה status pill.
+/// Tapping a card opens the `mgrCustomerDetail` bottom sheet. LIGHT only — white
+/// `cardLight` cards on `bgLight`, `inkLight`/`mutedLight` text, `brand` accents,
+/// green for active / amber for high-credit.
+class _CustomersTab extends ConsumerStatefulWidget {
+  const _CustomersTab();
+
+  @override
+  ConsumerState<_CustomersTab> createState() => _CustomersTabState();
+}
+
+class _CustomersTabState extends ConsumerState<_CustomersTab> {
+  /// The active status filter — `'all'` or one of `live` / `low` (the two the
+  /// legacy `mc-pill` surfaces). Local widget state; no engine/global write.
+  String _filter = 'all';
+
+  @override
+  Widget build(BuildContext context) {
+    final views = _liveCustomerViews(ref);
+
+    // Summary (@index.html:16570-16578): contractor count, total spend
+    // (Σ used), and the fleet credit-utilisation % (Σ used / Σ limit).
+    final totalUsed = views.fold<int>(0, (s, v) => s + v.customer.totalSpend);
+    final totalCredit =
+        views.fold<int>(0, (s, v) => s + v.customer.creditLimit);
+    final fleetPct =
+        totalCredit == 0 ? 0 : ((totalUsed / totalCredit) * 100).round();
+
+    // Per-status counts for the chips (only live/low are user-facing).
+    final counts = <String, int>{
+      for (final st in const ['live', 'low'])
+        st: views.where((v) => v.status == st).length,
+    };
+
+    // If the active filter's status has emptied out, fall back to הכל so the
+    // user is never stranded on a chip that no longer renders.
+    final effectiveFilter =
+        _filter == 'all' || (counts[_filter] ?? 0) > 0 ? _filter : 'all';
+
+    final list = effectiveFilter == 'all'
+        ? views
+        : views.where((v) => v.status == effectiveFilter).toList();
+
+    return ListView(
+      // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
+      // (gate 62 — no hard-coded left/right edge inset).
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space5,
+      ),
+      children: [
+        _CustomerSummary(
+          contractors: views.length,
+          totalUsed: totalUsed,
+          fleetPct: fleetPct,
+        ),
+        const SizedBox(height: BsTokens.space4),
+        _CustomerStatusChips(
+          active: effectiveFilter,
+          allCount: views.length,
+          counts: counts,
+          onSelect: (st) => setState(() => _filter = st),
+        ),
+        const SizedBox(height: BsTokens.space4),
+        if (list.isEmpty)
+          // The legacy empty line (@index.html:16586 `md-empty`).
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
+            child: Text(
+              'לא נמצאו קבלנים תואמים.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+            ),
+          )
+        else
+          for (final v in list)
+            Padding(
+              padding: const EdgeInsets.only(bottom: BsTokens.space3),
+              child: _CustomerCard(
+                view: v,
+                onTap: () => _openDetail(v),
+              ),
+            ),
+      ],
+    );
+  }
+
+  /// The customer-detail bottom sheet — the legacy `mgrCustomerDetail`
+  /// (@index.html:16609-16643): the 👷 avatar, the name + a status tag, an
+  /// orders/spend/pct grid, the credit rows (limit / used / balance / sites),
+  /// and the contractor's own orders. Read-only (the legacy sheet has no action).
+  void _openDetail(_CustomerView view) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: BsTokens.cardLight,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+      ),
+      builder: (sheetCtx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: _CustomerDetailSheet(
+          view: view,
+          // The contractor's own orders, off the same live engine
+          // (@index.html:16612-16613 `SYS_ORDERS.filter(o=>o.who===name)`).
+          orders: ref
+              .read(ordersEngineProvider)
+              .where((o) => o.who == view.customer.name)
+              .toList(),
+        ),
+      ),
+    );
+  }
+}
+
+/// The 3-stat customer summary (@index.html:16574-16578) — `mo-summary`:
+/// contractor count / total spend / fleet credit-utilisation %. A WHITE strip.
+class _CustomerSummary extends StatelessWidget {
+  const _CustomerSummary({
+    required this.contractors,
+    required this.totalUsed,
+    required this.fleetPct,
+  });
+
+  final int contractors;
+  final int totalUsed;
+  final int fleetPct;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget stat(String value, String label) => Expanded(
+          child: Column(
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style:
+                    const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+              ),
+            ],
+          ),
+        );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space4,
+        vertical: BsTokens.space4,
+      ),
+      decoration: BoxDecoration(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Row(
+        children: [
+          stat('$contractors', 'קבלנים'),
+          stat('₪${_grouped(totalUsed)}', 'סך רכש'),
+          stat('$fleetPct%', 'ניצול אשראי'),
+        ],
+      ),
+    );
+  }
+}
+
+/// The status-filter chip row — `הכל (N)` plus a פעיל / אשראי גבוה chip per
+/// status that has at least one contractor. The active chip is a `brand` fill;
+/// the rest are light outlines. (The legacy `renderMgrCustomers` filters by a
+/// free-text search box; this wave swaps that for the status filter the task
+/// asks for, reusing the legacy `mc-pill` status labels @index.html:16592.)
+class _CustomerStatusChips extends StatelessWidget {
+  const _CustomerStatusChips({
+    required this.active,
+    required this.allCount,
+    required this.counts,
+    required this.onSelect,
+  });
+
+  final String active;
+  final int allCount;
+  final Map<String, int> counts;
+  final ValueChanged<String> onSelect;
+
+  /// The short chip label per status (no ⚠️ glyph — that is reserved for the
+  /// card pill / detail tag). פעיל / אשראי גבוה, verbatim @index.html:16592.
+  static const Map<String, String> _chipLabel = {
+    'live': 'פעיל',
+    'low': 'אשראי גבוה',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    Widget chip(String key, String label, int count) {
+      final on = active == key;
+      return Material(
+        color: on ? BsTokens.brand : BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          onTap: () => onSelect(key),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              border: on ? null : Border.all(color: const Color(0xFFE2E2E2)),
+            ),
+            child: Text(
+              '$label ($count)',
+              style: TextStyle(
+                color: on ? Colors.white : BsTokens.inkLight,
+                fontSize: 13,
+                fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: BsTokens.space2,
+      runSpacing: BsTokens.space2,
+      children: [
+        chip('all', 'הכל', allCount),
+        for (final st in const ['live', 'low'])
+          if ((counts[st] ?? 0) > 0)
+            chip(st, _chipLabel[st] ?? st, counts[st] ?? 0),
+      ],
+    );
+  }
+}
+
+/// One customer card (@index.html:16593-16604 `mc-card`) — `👷 name` + the
+/// `N הזמנות · M אתרים` sub-line + a status pill on top, then the credit block:
+/// a utilisation bar (green, or amber `hot` at pct≥90) and the line
+/// `ניצול אשראי: ₪used / ₪limit (pct%)`. A WHITE card; tapping it opens the
+/// detail sheet.
+class _CustomerCard extends StatelessWidget {
+  const _CustomerCard({required this.view, required this.onTap});
+
+  final _CustomerView view;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = view.customer;
+    final statusLabel = _kCustomerStatusLabel[view.status] ?? view.status;
+    final statusColor = _kCustomerStatusColor[view.status] ?? BsTokens.brand;
+
+    return Semantics(
+      button: true,
+      label: '👷 ${c.name} · $statusLabel',
+      child: Material(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(BsTokens.space4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              border: Border.all(color: const Color(0xFFEDEDED)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('👷', style: TextStyle(fontSize: 20)),
+                    const SizedBox(width: BsTokens.space2),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            c.name,
+                            style: const TextStyle(
+                              color: BsTokens.inkLight,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${c.orderCount} הזמנות · ${view.sites} אתרים',
+                            style: const TextStyle(
+                              color: BsTokens.mutedLight,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: BsTokens.space2),
+                    _StagePill(label: statusLabel, color: statusColor),
+                  ],
+                ),
+                const SizedBox(height: BsTokens.space3),
+                _CreditBar(pct: view.pct, color: statusColor),
+                const SizedBox(height: 6),
+                Text(
+                  'ניצול אשראי: ₪${_grouped(c.totalSpend)} / ₪${_grouped(c.creditLimit)} (${view.pct}%)',
+                  style: const TextStyle(
+                    color: BsTokens.mutedLight,
+                    fontSize: 12.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The credit-utilisation bar (@index.html:16601 `mc-credit-bar`) — a light
+/// track with a `pct`-wide fill in the status colour (green normally, amber at
+/// pct≥90). LIGHT-safe.
+class _CreditBar extends StatelessWidget {
+  const _CreditBar({required this.pct, required this.color});
+
+  final int pct;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'ניצול אשראי $pct%',
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        child: LinearProgressIndicator(
+          value: (pct / 100).clamp(0.0, 1.0),
+          minHeight: 8,
+          backgroundColor: const Color(0xFFF0F0F0),
+          valueColor: AlwaysStoppedAnimation<Color>(color),
+        ),
+      ),
+    );
+  }
+}
+
+/// The customer-detail bottom sheet body (@index.html:16609-16643
+/// `mgrCustomerDetail`) — the 👷 avatar, the name, a status tag (🟢 קבלן פעיל /
+/// ⚠️ ניצול אשראי גבוה / לא פעיל), an orders/spend/pct grid, the credit rows
+/// (מסגרת אשראי / נוצל / יתרה זמינה / אתרי בנייה), and the contractor's own
+/// orders. Read-only. LIGHT.
+class _CustomerDetailSheet extends StatelessWidget {
+  const _CustomerDetailSheet({required this.view, required this.orders});
+
+  final _CustomerView view;
+  final List<Order> orders;
+
+  /// The detail-sheet status TAG — the longer legacy forms (@index.html:16616:
+  /// `low`→⚠️ ניצול אשראי גבוה · `off`→לא פעיל · else 🟢 קבלן פעיל).
+  static const Map<String, String> _tagLabel = {
+    'live': '🟢 קבלן פעיל',
+    'low': '⚠️ ניצול אשראי גבוה',
+    'off': 'לא פעיל',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final c = view.customer;
+    final tag = _tagLabel[view.status] ?? view.status;
+    final balance =
+        (c.creditLimit - c.totalSpend).clamp(0, c.creditLimit); // יתרה ≥ 0
+
+    Widget tile(String value, String label) => Expanded(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
+            decoration: BoxDecoration(
+              color: BsTokens.bgLight,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFEDEDED)),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style:
+                      const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        );
+
+    Widget row(String label, String value) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style:
+                      const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+                ),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: BsTokens.inkLight,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        );
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
+        // (gate 62 — no hard-coded left/right edge inset).
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          BsTokens.space4,
+          BsTokens.space4,
+          BsTokens.space4,
+          BsTokens.space5,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              '👷',
+              style: TextStyle(fontSize: 34),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: BsTokens.space2),
+            Text(
+              c.name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              tag,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+            ),
+            const SizedBox(height: BsTokens.space4),
+            Row(
+              children: [
+                tile('${c.orderCount}', 'הזמנות'),
+                tile('₪${_grouped(c.totalSpend)}', 'סך רכש'),
+                tile('${view.pct}%', 'אשראי'),
+              ],
+            ),
+            const SizedBox(height: BsTokens.space4),
+            row('מסגרת אשראי', '₪${_grouped(c.creditLimit)}'),
+            row('נוצל', '₪${_grouped(c.totalSpend)}'),
+            row('יתרה זמינה', '₪${_grouped(balance)}'),
+            row('אתרי בנייה', '${view.sites}'),
+            if (orders.isNotEmpty) ...[
+              const SizedBox(height: BsTokens.space4),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  'ההזמנות של ${c.name}',
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space2),
+              for (final o in orders)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '📦 ${o.id}',
+                          style: const TextStyle(
+                            color: BsTokens.inkLight,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '₪${_grouped(o.sum)}',
+                        style: const TextStyle(
+                          color: BsTokens.inkLight,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: BsTokens.space3),
+                      _StagePill(
+                        label: _kOrderStageLabel[o.stage] ?? o.stage,
+                        color: _kOrderStageColor[o.stage] ?? BsTokens.brand,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// One manager tab descriptor — emoji icon + Hebrew label.
