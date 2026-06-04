@@ -62,25 +62,31 @@ place/advance/setStage behavior, persistence round-trip, flow ordering). The sta
 `managerAnalytics` / `mgrCustomerList()` (seed-bound) are UNCHANGED and still feed the dashboard
 widget below — the engine just adds the live path for the upcoming UI wave.
 
-## 👔 Manager dashboard SHELL — M1 (`screens/manager_dashboard_screen.dart` · `state/manager_dashboard_state.dart` · `screens/role_picker_sheet.dart`)
+## 👔 Manager dashboard — M1 SHELL + M2 📊 לוח בקרה cockpit (`screens/manager_dashboard_screen.dart` · `state/manager_dashboard_state.dart` · `state/orders_engine.dart` · `screens/role_picker_sheet.dart`)
 
 The 👔 "מנהל המערכת" persona is being rebuilt from the BS-dial drill (below) into a **full
-role-app screen** — the same LIGHT shell/style as the 🦺 worker app. **M1 = the SHELL only.**
+role-app screen** — the same LIGHT shell/style as the 🦺 worker app. **M1 = the SHELL; M2 fills the
+first 📊 לוח בקרה tab with a LIVE cockpit** (the other 3 tabs stay placeholders for M3–M5).
 
 | Element | Behavior | Status |
 |---|---|---|
 | `ManagerDashboardScreen` | `ConsumerWidget`; LIGHT `Scaffold(bgLight)` + white AppBar (`cardLight`) — title "מרכז השליטה" (`inkLight`) + subtitle "מנהל המערכת" (`mutedLight`) + green "חי" pill + "‹ יציאה" | ✅ |
 | 4-tab segmented toggle | pill style (selected = `brand` fill + white text; unselected = `cardLight` + `inkLight` text; pill radius) — 📊 לוח בקרה · 🚚 הזמנות · 👥 לקוחות · 🛠️ ניהול; replicates `updates_screen`'s `seg()`; tap sets `managerTabProvider` | ✅ |
-| `IndexedStack` body | 4 PLACEHOLDER tabs — each a centred "בקרוב" note (M2–M5 fill them); all 4 kept mounted | ✅ |
+| `IndexedStack` body | index-0 = the 📊 `_DashboardTab` cockpit (M2); indices 1–3 = "בקרוב" PLACEHOLDER tabs (🚚/👥/🛠️, M3–M5 fill them); all 4 kept mounted | ✅ |
+| 📊 `_DashboardTab` (M2) | `ConsumerWidget`; a LIGHT `ListView` (`bgLight`) over the LIVE engine — watches `managerAnalyticsProvider` + `ordersEngineProvider` (a trimmed port of `renderMgrDashboard` @index.html:12133) | ✅ |
+| 5 metric tiles (`_MetricGrid`/`_MetricTile`) | WHITE `cardLight` cards (2-up `Wrap`) — emoji + big `brand` number + `mutedLight` verbatim label: 🚚 הזמנות פתוחות · 📦 מוצרים בקטלוג · 🧰 אביזרים נלווים · ✅ זמינים כעת · 🏪 חנויות פעילות. Numbers from `managerAnalyticsProvider` over the engine's LIVE orders (`mdMetric` @12160-12164). Seed: 4 / 54 / 148 / 202 / 3/3 — and 🚚 reflows when an order is placed/advanced/delivered | ✅ |
+| Order pipeline (`_OrderPipeline`/`_PipelineRow`) | WHITE `cardLight` card "צינור ההזמנות" — per-stage count + proportional bar across the **6** `kManagerOrderFlow` stages (group-by-stage over `ordersEngineProvider`); labels verbatim from the legacy `md-pipe` array + נאסף for pickup: התקבלה · בהכנה · מוכן · נאסף · בדרך · נמסר; bar colours = legacy hex (`md-pipe` @12177-12198). Seed: 1/1/1/0/0/0 | ✅ |
 | `managerTabProvider` | `StateProvider<int>` (0..3) — the active tab the `IndexedStack` reads | ✅ |
 | `ManagerDashboardScreen.route()` | `MaterialPageRoute<void>` (the app's screen pattern) | ✅ |
 | role picker → manager | `role_picker_sheet.dart` `_RoleRow.onTap` for `manager` now `Navigator.push`es `ManagerDashboardScreen.route()` (mirrors worker→`WorkerAppScreen`) **instead of** `activePersonaProvider='manager'`/`OpenDial.bs` (the old drill). Other personas unchanged. | ✅ |
 
-Scope: SHELL only — tab CONTENTS (M2–M5) NOT built; the orders engine is untouched (read its
-providers in a later wave). The old BS-dial manager drill code below remains (now unreachable via the
-picker) pending a later cleanup. Guard: `manager_dashboard_screen_test` (6 — LIGHT frame · 4 pills ·
-toggle switches the IndexedStack/`managerTabProvider` · "בקרוב" placeholders · `route()` push · the
-role-picker manager entry opens the screen).
+Scope (M2): ONLY the 📊 tab body + the provider reads — the orders engine internals, the other 3 tabs
+(M3–M5), the role picker, and the buyer/checkout flow are untouched. The old BS-dial manager drill code
+below remains (now unreachable via the picker) pending a later cleanup. Guard:
+`manager_dashboard_screen_test` (11 — M1's six [LIGHT frame · 4 pills · toggle switches the
+IndexedStack/`managerTabProvider` · the 3 remaining "בקרוב" placeholders · `route()` push · role-picker
+manager entry] + M2's four [5 tiles render their LIVE numbers · pipeline per-stage counts over the 6
+stages · placing an order reflows 🚚 + the pipeline LIVE · cockpit is LIGHT / no dark tokens]).
 
 ## 👔 Manager BS-dial → 📊 dashboard (`bs_dial_widget.dart` · `state/dial_state.dart` · `logic/manager_dashboard.dart`) — LEGACY drill (unreachable via picker as of M1)
 

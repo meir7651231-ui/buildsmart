@@ -8,6 +8,23 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
+v5.99 — 👔 **Manager rebuild — M2: 📊 לוח בקרה tab — live cockpit (metrics + pipeline)** 🟦.
+The first 📊 לוח בקרה tab of `ManagerDashboardScreen` is filled with a LIGHT scrollable **cockpit over
+the LIVE shared orders engine** (`lib/screens/manager_dashboard_screen.dart` — the `IndexedStack`
+index-0 body is now `_DashboardTab`; tabs 🚚/👥/🛠️ stay "בקרוב" placeholders for M3–M5). A trimmed port
+of the legacy `renderMgrDashboard` (@index.html:12133): **(a) 5 metric tiles** (`mdMetric`
+@12160-12164) — WHITE `cardLight` cards, `brand` number + `mutedLight` verbatim label (🚚 הזמנות פתוחות
+· 📦 מוצרים בקטלוג · 🧰 אביזרים נלווים · ✅ זמינים כעת · 🏪 חנויות פעילות), every number from
+`managerAnalyticsProvider` over the engine's LIVE orders (NOT the static const) so 🚚 recounts on
+place/advance/deliver — seed 4 / 54 / 148 / 202 / 3/3; **(b) order pipeline** (`md-pipe` @12177-12198)
+— a WHITE card with a per-stage count + proportional bar across the **6** `kManagerOrderFlow` stages
+(group-by-stage over `ordersEngineProvider`), labels verbatim + נאסף for pickup (התקבלה · בהכנה · מוכן
+· נאסף · בדרך · נמסר). LIGHT only — no dark tokens; bar colours = legacy hex. **M2** ✅ — only the 📊
+tab body + provider reads changed; the engine internals, the other 3 tabs, the role picker, and the
+buyer/checkout flow are untouched. Guard `manager_dashboard_screen_test` grows to 11 (M1's six + 4 new
+M2). All existing manager + engine tests stay green (54/54 targeted). **Remaining (🟦):** M3 (👥
+customers) · M4 (🛠️ manage) · M5 (🚚 orders) tab bodies.
+
 v5.98 — 👔 **Manager rebuild — M1: `ManagerDashboardScreen` SHELL** 🟦.
 The 👔 "מנהל המערכת" persona is rebuilt from a BS-dial drill into a **full LIGHT role-app screen**
 (same shell as the 🦺 worker app). **M1 = SHELL only:** `lib/screens/manager_dashboard_screen.dart`

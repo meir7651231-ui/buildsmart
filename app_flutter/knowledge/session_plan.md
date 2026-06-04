@@ -1,3 +1,28 @@
+# 👔 Manager rebuild — M2: 📊 לוח בקרה tab — live cockpit (metrics + pipeline) (v5.99)
+Owner: this session
+Scope: `lib/screens/manager_dashboard_screen.dart` בלבד (גוף ה-📊 tab + קריאת providers). אסור
+לגעת ב-engine internals (`orders_engine.dart`), בשאר 3 ה-tabs (M3–M5), ב-`role_picker_sheet`, או
+ב-buyer/checkout flow.
+
+מקור-אמת verbatim: `index.html` — `renderMgrDashboard`@12133 · `mdMetric`@12160-12164 · ה-pipeline
+`md-pipe`@12177-12198 · `ORDER_FLOW`@16943. **לא** `SYSTEM_MANAGER.md`.
+
+## M2 — מילוי ה-📊 tab ✅
+- `_DashboardTab` (`ConsumerWidget`) מחליף את ה-placeholder ב-`IndexedStack` index-0; 3 ה-tabs
+  הנותרים (🚚/👥/🛠️) נשארים "בקרוב" ל-M3–M5. גוף = `ListView` על `bgLight`.
+- **5 metric tiles** (`_MetricGrid`/`_MetricTile`): WHITE `cardLight` cards, מספר `brand` + תווית
+  `mutedLight` verbatim (🚚 הזמנות פתוחות · 📦 מוצרים בקטלוג · 🧰 אביזרים נלווים · ✅ זמינים כעת ·
+  🏪 חנויות פעילות). כל מספר מ-`managerAnalyticsProvider` על ההזמנות ה-**חיות** (לא ה-const) → 🚚
+  סופר-מחדש כשמזמינים/מקדמים/מוסרים. seed: 4 / 54 / 148 / 202 / 3/3.
+- **Order pipeline** (`_OrderPipeline`/`_PipelineRow`): WHITE card, ספירה פר-שלב + bar פרופורציונלי
+  על **6** שלבי `kManagerOrderFlow` מ-`ordersEngineProvider` (group-by-stage), תוויות verbatim
+  מ-ה-`md-pipe` + נאסף ל-pickup (התקבלה · בהכנה · מוכן · נאסף · בדרך · נמסר). seed: 1/1/1/0/0/0.
+- LIGHT בלבד (אפס dark tokens); צבעי ה-bar = ה-hex הלגאסי.
+- `manager_dashboard_screen_test` → 11 (M1 six + 4 M2: 5 tiles חיים · pipeline פר-שלב · placing
+  reflows 🚚+pipeline · LIGHT/no-dark; ה-placeholder test מאשר 3 "בקרוב" נותרים). 54/54 targeted ירוק.
+
+---
+
 # 👔 Manager rebuild — M1: `ManagerDashboardScreen` SHELL (full LIGHT role-app, 4-tab toggle) (v5.98)
 Owner: this session
 Scope: NEW `lib/screens/manager_dashboard_screen.dart` + NEW `lib/state/manager_dashboard_state.dart`

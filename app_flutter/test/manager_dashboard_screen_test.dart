@@ -6,10 +6,12 @@
 // מנהל המערכת) OPENS this screen via Navigator.push — instead of the old BS-dial
 // drill. Tabs are PLACEHOLDERS (M2–M5 fill them).
 
+import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/manager_dashboard_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/state/manager_dashboard_state.dart';
+import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,16 +99,16 @@ void main() {
       expect(stack.index, 0);
     });
 
-    testWidgets('placeholder bodies show the "בקרוב" note (M2–M5 not built)',
-        (t) async {
+    testWidgets('the 3 NOT-yet-built tabs (🚚/👥/🛠️) keep the "בקרוב" note '
+        '(M3–M5 not built); 📊 is no longer a placeholder', (t) async {
       await pumpScreen(t);
-      // The active tab's "בקרוב" is onstage; the IndexedStack keeps the other
-      // three mounted offstage — so all four placeholders exist (skipOffstage:
-      // false counts the offstage ones too).
-      expect(find.text('בקרוב'), findsOneWidget);
+      // Default tab = 0 (📊 לוח בקרה) — now the LIVE cockpit, NOT a placeholder,
+      // so nothing "בקרוב" is onstage. The IndexedStack keeps the OTHER three
+      // (🚚/👥/🛠️) mounted offstage, each still a "בקרוב" placeholder.
+      expect(find.text('בקרוב'), findsNothing);
       expect(
         find.text('בקרוב', skipOffstage: false),
-        findsNWidgets(4),
+        findsNWidgets(3),
       );
     });
 
@@ -137,6 +139,134 @@ void main() {
       await t.tap(find.text('go'));
       await settle(t);
       expect(find.byType(ManagerDashboardScreen), findsOneWidget);
+    });
+  });
+
+  group('📊 לוח בקרה — dashboard cockpit (M2, LIVE engine)', () {
+    testWidgets('the 5 mdMetric tiles render their LIVE numbers '
+        '(verbatim labels) — sourced from the engine analytics', (t) async {
+      final c = await pumpScreen(t);
+      final a = c.read(managerAnalyticsProvider);
+
+      // The five verbatim tile labels (default tab 0 = 📊 is onstage).
+      for (final label in const [
+        'הזמנות פתוחות',
+        'מוצרים בקטלוג',
+        'אביזרים נלווים',
+        'זמינים כעת',
+        'חנויות פעילות',
+      ]) {
+        expect(find.text(label), findsOneWidget, reason: 'tile $label missing');
+      }
+
+      // Each tile shows the LIVE number the analytics provider derives over the
+      // engine's orders — NOT a hard-coded literal. With the seed: 4 / 54 / 148
+      // / 202 / 3/3 (asserted via the provider so the test tracks the engine).
+      // 📦 catalog == every non-accessory product (the verbatim index.html
+      // distribution), i.e. total − accessories.
+      expect(a.openOrders, 4, reason: 'seed open-orders');
+      expect(a.catalogCount, a.totalProducts - a.accessoryCount);
+      expect(a.catalogCount, 54, reason: 'seed catalog count (202 − 148)');
+      expect(find.text('${a.openOrders}'), findsWidgets);
+      expect(find.text('${a.catalogCount}'), findsWidgets);
+      expect(find.text('${a.accessoryCount}'), findsWidgets);
+      expect(find.text('${a.availableCount}'), findsWidgets);
+      expect(find.text(a.storesLabel), findsOneWidget); // "3/3"
+    });
+
+    testWidgets('the order pipeline shows a per-stage count across the 6 '
+        'kManagerOrderFlow stages (live engine)', (t) async {
+      final c = await pumpScreen(t);
+      final orders = c.read(ordersEngineProvider);
+
+      // Section header + the 6 verbatim pipeline labels.
+      expect(find.text('צינור ההזמנות'), findsOneWidget);
+      for (final label in const [
+        'התקבלה',
+        'בהכנה',
+        'מוכן',
+        'נאסף',
+        'בדרך',
+        'נמסר',
+      ]) {
+        expect(
+          find.text(label),
+          findsOneWidget,
+          reason: 'pipeline stage $label missing',
+        );
+      }
+
+      // Per-stage counts equal the live engine's group-by-stage. Seed stages:
+      // new/preparing/ready/transit (one each) → 1/1/1/0/0/1.
+      for (final stage in kManagerOrderFlow) {
+        final n = orders.where((o) => o.stage == stage).length;
+        expect(
+          find.text('$n'),
+          findsWidgets,
+          reason: 'stage $stage count $n should render',
+        );
+      }
+      // The seed has none in pickup/delivered → those rows show 0.
+      expect(orders.where((o) => o.stage == 'pickup').length, 0);
+      expect(orders.where((o) => o.stage == 'delivered').length, 0);
+    });
+
+    testWidgets('the tab is LIVE — placing an order reflows the 🚚 tile + the '
+        'pipeline (engine read, not the static const)', (t) async {
+      final c = await pumpScreen(t);
+
+      // Baseline: 4 open orders, 1 "new"/התקבלה.
+      expect(c.read(managerAnalyticsProvider).openOrders, 4);
+
+      // Place a NEW order on the shared engine (any role could do this).
+      c.read(ordersEngineProvider.notifier).placeOrder(
+            who: 'בודק חי',
+            site: 'אתר בדיקה',
+            items: 2,
+            sum: 999,
+          );
+      await settle(t);
+
+      // The 🚚 open-orders tile and the התקבלה pipeline row both recount.
+      expect(c.read(managerAnalyticsProvider).openOrders, 5);
+      final newCount = c
+          .read(ordersEngineProvider)
+          .where((o) => o.stage == 'new')
+          .length;
+      expect(newCount, 2);
+      expect(find.text('5'), findsWidgets); // 🚚 tile now reads 5
+    });
+
+    testWidgets('the cockpit is LIGHT — white tile/pipeline cards on bgLight, '
+        'NO dark tokens', (t) async {
+      await pumpScreen(t);
+
+      // The scaffold + the tile/pipeline cards are the LIGHT tokens.
+      final scaffold = t.widget<Scaffold>(find.byType(Scaffold));
+      expect(scaffold.backgroundColor, BsTokens.bgLight);
+
+      // Every Container with a solid BoxDecoration colour in the cockpit body is
+      // a LIGHT surface — none uses a dark token (bgDark/cardDark/inkDark).
+      final decos = t
+          .widgetList<Container>(find.byType(Container))
+          .map((w) => w.decoration)
+          .whereType<BoxDecoration>()
+          .map((d) => d.color)
+          .whereType<Color>()
+          .toList();
+      for (final dark in const [
+        BsTokens.bgDark,
+        BsTokens.cardDark,
+        BsTokens.inkDark,
+        BsTokens.mutedDark,
+      ]) {
+        expect(decos, isNot(contains(dark)), reason: 'dark token $dark leaked');
+      }
+      // At least the metric tiles + the pipeline card are white cardLight.
+      expect(
+        decos.where((c) => c == BsTokens.cardLight).length,
+        greaterThanOrEqualTo(6),
+      );
     });
   });
 
