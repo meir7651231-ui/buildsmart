@@ -48,6 +48,17 @@ final bsCustomerLeafProvider = StateProvider<String?>((_) => null);
 /// EXCLUSIVE.
 final bsManageLeafProvider = StateProvider<String?>((_) => null);
 
+/// Section id of the 🏪 חנות ספק (store) leaf whose inline order-list panel is
+/// open (one of the `so-*` ids — `so-new` · `so-prep` · `so-ready`), or null
+/// when none is showing. Each leaf maps to ONE order-flow stage the STORE owns
+/// (new · preparing · ready); tapping it opens that stage's REAL orders off the
+/// SHARED `ordersEngineProvider` INLINE in the dial (R2 — no new screen), each
+/// row carrying an advance button that calls `.advance(id)` on the SAME engine
+/// the manager reads. Tapping again (or any other dial action) closes it.
+/// Mirrors the manager [bsOrderLeafProvider]; store / courier panels are kept on
+/// their OWN providers so the manager's static-seed panel is untouched.
+final bsStoreLeafProvider = StateProvider<String?>((_) => null);
+
 /// Which menu tab is currently drilled into (null = 4-tab root).
 enum MenuTab { home, projects, cart, settings }
 
@@ -75,6 +86,7 @@ void resetAllDials(WidgetRef ref) {
   ref.read(bsOrderLeafProvider.notifier).state = null;
   ref.read(bsCustomerLeafProvider.notifier).state = null;
   ref.read(bsManageLeafProvider.notifier).state = null;
+  ref.read(bsStoreLeafProvider.notifier).state = null;
   ref.read(menuTabProvider.notifier).state = null;
   ref.read(searchToolProvider.notifier).state = null;
 }
