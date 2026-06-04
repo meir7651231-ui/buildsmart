@@ -1,16 +1,31 @@
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/courier_dashboard_screen.dart';
 import 'package:buildsmart/screens/store_dashboard_screen.dart';
+import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// T9 — supplier-side persona role-apps (🏪 חנות + 🛵 שליח). Guards the verbatim
-/// SYS_ORDERS seed + supporting tables (proto 06 §1/§7), the shared store↔courier
-/// advance engine, and that both screens render real content (not "בבנייה"). R8.
-OrderStage _stage(SysOrdersNotifier n, String id) =>
-    n.state.firstWhere((o) => o.id == id).stage;
+/// SYS_ORDERS seed + supporting tables (proto 06 §1/§7), and the shared
+/// store↔courier advance engine — now UNIFIED onto the manager's
+/// `ordersEngineProvider`, so a store/courier advance is visible to the manager
+/// live (one source of truth). Also checks both screens render real content. R8.
+
+/// A container whose shared engine does NOT touch SharedPreferences, so unit
+/// tests stay deterministic. The store/courier `sysOrdersProvider` is a live
+/// view of this same engine.
+ProviderContainer _container() => ProviderContainer(
+  overrides: [
+    ordersEngineProvider.overrideWith((ref) => OrdersEngineNotifier(persist: false)),
+  ],
+);
+
+SysOrder _sys(ProviderContainer c, String id) =>
+    c.read(sysOrdersProvider).firstWhere((o) => o.id == id);
+String _eng(ProviderContainer c, String id) =>
+    c.read(ordersEngineProvider).firstWhere((o) => o.id == id).stage;
 
 void main() {
   group('SYS_ORDERS seed + tables (verbatim, R8)', () {
@@ -44,50 +59,71 @@ void main() {
     });
   });
 
-  group('shared order engine (store ↔ courier sync)', () {
+  group('shared engine — store ↔ courier ↔ manager, ONE source of truth', () {
     test('store advances new→preparing→ready, then stops', () {
-      final n = SysOrdersNotifier();
+      final c = _container();
+      addTearDown(c.dispose);
+      final n = c.read(sysOrdersProvider.notifier);
       n.storeAdvance('BS-1042');
-      expect(_stage(n, 'BS-1042'), OrderStage.preparing);
+      expect(_sys(c, 'BS-1042').stage, OrderStage.preparing);
       n.storeAdvance('BS-1042');
-      expect(_stage(n, 'BS-1042'), OrderStage.ready);
+      expect(_sys(c, 'BS-1042').stage, OrderStage.ready);
       n.storeAdvance('BS-1042'); // courier owns it from here — no-op
-      expect(_stage(n, 'BS-1042'), OrderStage.ready);
+      expect(_sys(c, 'BS-1042').stage, OrderStage.ready);
     });
 
-    test('courier advances ready→pickup→transit→delivered', () {
-      final n = SysOrdersNotifier();
+    test('a store advance is visible to the MANAGER live (unified engine)', () {
+      final c = _container();
+      addTearDown(c.dispose);
+      expect(_eng(c, 'BS-1042'), 'new');
+      c.read(sysOrdersProvider.notifier).storeAdvance('BS-1042');
+      // The very same order the manager dashboard reads is now 'preparing'.
+      expect(_eng(c, 'BS-1042'), 'preparing');
+    });
+
+    test('courier advances ready→pickup→transit→delivered (manager sees each)', () {
+      final c = _container();
+      addTearDown(c.dispose);
+      final n = c.read(sysOrdersProvider.notifier);
       n.courierAdvance('BS-1040'); // ready→pickup
-      expect(_stage(n, 'BS-1040'), OrderStage.pickup);
+      expect(_sys(c, 'BS-1040').stage, OrderStage.pickup);
+      expect(_eng(c, 'BS-1040'), 'pickup');
       n.courierAdvance('BS-1040'); // pickup→transit
-      expect(_stage(n, 'BS-1040'), OrderStage.transit);
+      expect(_sys(c, 'BS-1040').stage, OrderStage.transit);
       n.courierAdvance('BS-1040'); // transit→delivered
-      expect(_stage(n, 'BS-1040'), OrderStage.delivered);
+      expect(_sys(c, 'BS-1040').stage, OrderStage.delivered);
       n.courierAdvance('BS-1040'); // no-op
-      expect(_stage(n, 'BS-1040'), OrderStage.delivered);
+      expect(_sys(c, 'BS-1040').stage, OrderStage.delivered);
     });
 
     test('a store-readied order becomes a courier job (cross-role)', () {
-      final n = SysOrdersNotifier();
-      expect(n.state.courierJobs('truck').any((o) => o.id == 'BS-1042'), isFalse);
+      final c = _container();
+      addTearDown(c.dispose);
+      final n = c.read(sysOrdersProvider.notifier);
+      expect(c.read(sysOrdersProvider).courierJobs('truck').any((o) => o.id == 'BS-1042'), isFalse);
       n.storeAdvance('BS-1042'); // preparing
       n.storeAdvance('BS-1042'); // ready
-      expect(n.state.courierJobs('truck').any((o) => o.id == 'BS-1042'), isTrue);
+      expect(c.read(sysOrdersProvider).courierJobs('truck').any((o) => o.id == 'BS-1042'), isTrue);
     });
 
     test('vehicle gating: a small bike cannot carry a truck order', () {
-      final n = SysOrdersNotifier();
-      expect(n.state.courierJobs('small').any((o) => o.id == 'BS-1040'), isFalse);
-      expect(n.state.courierJobs('truck').any((o) => o.id == 'BS-1040'), isTrue);
+      final c = _container();
+      addTearDown(c.dispose);
+      expect(c.read(sysOrdersProvider).courierJobs('small').any((o) => o.id == 'BS-1040'), isFalse);
+      expect(c.read(sysOrdersProvider).courierJobs('truck').any((o) => o.id == 'BS-1040'), isTrue);
     });
 
-    test('simulate prepends a fresh new order', () {
-      final n = SysOrdersNotifier();
-      final before = n.state.length;
-      final id = n.simulateIncomingOrder();
-      expect(n.state.length, before + 1);
-      expect(n.state.first.id, id);
-      expect(n.state.first.stage, OrderStage.newOrder);
+    test('simulate places a fresh new order through the shared engine', () {
+      final c = _container();
+      addTearDown(c.dispose);
+      final before = c.read(sysOrdersProvider).length;
+      final id = c.read(sysOrdersProvider.notifier).simulateIncomingOrder();
+      final orders = c.read(sysOrdersProvider);
+      expect(orders.length, before + 1);
+      expect(orders.first.id, id);
+      expect(orders.first.stage, OrderStage.newOrder);
+      // It lands in the manager's engine too (contractor/store/manager share it).
+      expect(c.read(ordersEngineProvider).any((o) => o.id == id), isTrue);
     });
   });
 
@@ -95,7 +131,12 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: StoreDashboardScreen())),
+      ProviderScope(
+        overrides: [
+          ordersEngineProvider.overrideWith((ref) => OrdersEngineNotifier(persist: false)),
+        ],
+        child: const MaterialApp(home: StoreDashboardScreen()),
+      ),
     );
     await tester.pump();
 
@@ -116,7 +157,12 @@ void main() {
 
   testWidgets('courier dashboard renders verbatim content', (tester) async {
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: CourierDashboardScreen())),
+      ProviderScope(
+        overrides: [
+          ordersEngineProvider.overrideWith((ref) => OrdersEngineNotifier(persist: false)),
+        ],
+        child: const MaterialApp(home: CourierDashboardScreen()),
+      ),
     );
     await tester.pump();
 
