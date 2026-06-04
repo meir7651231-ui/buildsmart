@@ -4,6 +4,26 @@
 
 ---
 
+## v6.05 — Lipski gaskets/plugs parity to PDF (gate 117 · קטגוריה 6/9)
+
+**שינוי:** 17 SKUs (עמ' 36–37) — אטמים/אומים/פקקים. תסבוכת SKU תוקנה: 506525
+("אטם דו צדדי" → אטם לכוס 2"), 610708 ("אטם לכוס" → פקק שטוח 2⅜"), 610706
+phantom נמחק (+ ref ב-verified_connections). 614783 1/2"→1½", qty 506540 750→500,
+דפים 19→36/37.
+
+**אימות:**
+- ✅ `lipskey_pdf_parity_test` — 169/169.
+- ✅ `flutter analyze` (catalog + verified_connections) — 0 errors.
+- ✅ `catalog_regression`/`compat_coverage` — GREEN (610706 לא יתום אחרי הסרה).
+- ✅ `flutter test` — אפס regressions.
+
+**תיקון נלווה (`store_screen.dart` · `_OrderSheet`):** טסט `store_notif_widget_test`
+נכשל על baseline (לא קשור לקטלוג — overflow 3.6px). תוקן ע"י עטיפת ה-Column
+ב-`SingleChildScrollView` — משלים את תיקון ה-`isScrollControlled` (v6.04 בנצי):
+ה-modal מתרחב לגובה-התוכן **וגם** התוכן עצמו גולל. הטסט ירוק, `analyze` 0 errors.
+
+---
+
 ## v6.04 — fix(T5): order sheet isScrollControlled (כפתור תעודת-משלוח היה חתוך) [בנצי]
 
 **באג שנתפס ב-QA-חי (snapshot v6.04, Chrome, 4.6.2026):** ה-order sheet

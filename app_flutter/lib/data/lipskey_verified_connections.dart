@@ -209,7 +209,7 @@ const Set<String> kSpecExemptSkus = {
   // ציוד גן — hose-end spray guns (attach to a hose, not the catalog network)
   '77000026', '77000027', '77980000', '77980001',
   // אטמים ופקקים — flat gaskets + a non-standard 2 3/8" plug
-  '506539', '506521', '610706', '610708',
+  '506539', '506521', '610708',
   // חלקים סניטריים — universal repair kit + generic spare parts
   '186466', '186666',
   // אביזרי מקלחת — adjustable holder (bracket)

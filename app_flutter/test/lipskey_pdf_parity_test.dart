@@ -168,6 +168,62 @@ void main() {
   _runInsertionBranchGroup();
   _runConnectorGroup();
   _runCollectorGroup();
+  _runGasketPlugGroup();
+}
+
+// ── אטמים אומים ופקקים — pages 36–37 (17 SKUs) ──────────────────────────────
+class _Gp {
+  final String sku;
+  final String nameHe;
+  final int? qtyPack;
+  final int page;
+  const _Gp(this.sku, this.nameHe, this.qtyPack, this.page);
+}
+
+const _gasketsPlugs = <_Gp>[
+  // page 36
+  _Gp('506539', 'אטם חתך שטוח', null, 36),
+  _Gp('506521', 'אטם חתך שטוח', null, 36),
+  _Gp('506537', 'אטם כדורי', 750, 36),
+  _Gp('506540', 'אטם כדורי', 500, 36),
+  _Gp('558463', 'אטם כדורי', 500, 36),
+  _Gp('506525', 'אטם לכוס 2"', null, 36),
+  // page 37
+  _Gp('506510', 'אטם דו צדדי', null, 37),
+  _Gp('506522', 'אטם דו צדדי', null, 37),
+  _Gp('506527', 'אטם דו צדדי', null, 37),
+  _Gp('555703', 'אטם דו צדדי', null, 37),
+  _Gp('218127', 'פקק למאסף ולמחסום רצפה 2.5"', 50, 37),
+  _Gp('218126', 'פקק למאסף ולמחסום רצפה 2"',   50, 37),
+  _Gp('611051', 'פקק שטוח לתבריג 1.25"', null, 37),
+  _Gp('614783', 'פקק שטוח לתבריג 1½"',   null, 37),
+  _Gp('612386', 'פקק שטוח לתבריג 2" אפור', null, 37),
+  _Gp('612385', 'פקק שטוח לתבריג 2" לבן',  null, 37),
+  _Gp('610708', 'פקק שטוח לתבריג 2⅜"',   null, 37),
+];
+
+void _runGasketPlugGroup() {
+  group('LIPSKEY PDF parity — אטמים/פקקים (gate 117)', () {
+    final bySku = {
+      for (final p in kLipskeyCatalog.where((p) => p.brand == 'ליפסקי'))
+        p.sku: p,
+    };
+
+    for (final g in _gasketsPlugs) {
+      test('SKU ${g.sku} · ${g.nameHe}', () {
+        final p = bySku[g.sku];
+        expect(p, isNotNull, reason: 'SKU ${g.sku} מהקטלוג חסר ב-kLipskeyCatalog');
+        expect(p!.nameHe,  g.nameHe,  reason: 'nameHe ל-${g.sku}');
+        expect(p.qtyPack,  g.qtyPack, reason: 'qtyPack ל-${g.sku}');
+        expect(p.page,     g.page,    reason: 'page ל-${g.sku}');
+      });
+    }
+
+    test('phantom plug 610706 gone (real SKU is 610708)', () {
+      expect(bySku['610706'], isNull,
+        reason: 'SKU 610706 phantom — הפקק 2⅜" האמיתי הוא 610708');
+    });
+  });
 }
 
 // ── מאספים/קולטים + כיסויים/רשתות — pages 30–33 (19 SKUs) ───────────────────

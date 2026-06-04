@@ -26,6 +26,12 @@
 - ביטול → ירוק ✅ — All tests passed.
 - מסקנה: הבדיקה חזקה — תופסת היפוך של לוגיקת-הסינון המרכזית (זול↔יקר), לא רק קיום פלט.
 
+## gate 117 — lipskey_pdf_parity_test (אטמים/פקקים) — 2026-06-04
+
+- **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runGasketPlugGroup` (17 SKUs, עמ' 36–37).
+- תקלה שהוזרקה: שינוי `'אטם לכוס 2"'` ל-`'אטם לכוסX 2qq'` (506525).
+- תוצאה: אדום ✅; ביטול → ירוק ✅.
+
 ## gate 117 — lipskey_pdf_parity_test (מאספים/כיסויים) — 2026-06-04
 
 - **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runCollectorGroup` (19 SKUs, עמ' 30–33).

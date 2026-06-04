@@ -3074,7 +3074,9 @@ class _OrderSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = _kOrderDetails[order.id] ?? [];
-    return Padding(
+    // gate 32: wrap in a scroll view so the order sheet never overflows on
+    // short viewports (was a 3.6px RenderFlex overflow at the test viewport).
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       child: SingleChildScrollView(
         child: Column(
