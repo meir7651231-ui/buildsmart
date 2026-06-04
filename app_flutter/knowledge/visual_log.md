@@ -4,6 +4,19 @@
 
 ---
 
+## v6.02 — Lipski insertion-branch parity to PDF (gate 117 · קטגוריה 4b/9)
+
+**שינוי:** 13 SKUs של מסעפים שקע-תקע (עמ' 42): שמות תוקנו (היו "מחבר כפול"/
+"מסעף 90° - תבריג"/"45° - תבריג כפול" → "מסעף {45°|87°|כפול} {DN}"), DN+qty
+הושלמו ל-5 רשומות, דפים 22 → 42.
+
+**אימות:**
+- ✅ `lipskey_pdf_parity_test` — 111/111.
+- ✅ `flutter analyze lib/data/lipskey_catalog.dart` — 0 errors (וידוא ש-dims insert תקין).
+- ✅ `flutter test` — אפס regressions.
+
+---
+
 ## v6.01 — Lipski insertion-bend parity to PDF (gate 117 · קטגוריה 4a/9)
 
 **שינוי:** 15 SKUs של ברכיים שקע-תקע (עמ' 40–41): כל השמות תוקנו (היו זווית שגויה +

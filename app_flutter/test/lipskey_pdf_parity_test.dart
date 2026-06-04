@@ -165,6 +165,60 @@ void main() {
 
   _runVisibleTrapGroup();
   _runInsertionBendGroup();
+  _runInsertionBranchGroup();
+}
+
+// ── מסעפים שקע-תקע — page 42 (13 SKUs) ──────────────────────────────────────
+class _Branch {
+  final String sku;
+  final String nameHe;
+  final String dn;
+  final int qtyPack;
+  final int qtyPallet; // -1 = don't assert
+  const _Branch(this.sku, this.nameHe, this.dn, this.qtyPack, this.qtyPallet);
+}
+
+const _insertionBranches = <_Branch>[
+  // מסעף 45°
+  _Branch('116573', 'מסעף 45° 50/50',   '50/50',   45, 2025),
+  _Branch('116056', 'מסעף 45° 110/50',  '110/50',  20,  600),
+  _Branch('116571', 'מסעף 45° 110/110', '110/110',  9,  360),
+  _Branch('220305', 'מסעף 45° 40/40',   '40/40',   45, 3150),
+  // מסעף 87°
+  _Branch('116569', 'מסעף 87° 50/50',   '50/50',   50, 2250),
+  _Branch('116054', 'מסעף 87° 75/75',   '75/75',   25, 1000),
+  _Branch('116558', 'מסעף 87° 110/50',  '110/50',  20,  600),
+  _Branch('116556', 'מסעף 87° 110/110', '110/110', 12,  480),
+  _Branch('116049', 'מסעף 87° 160/110', '160/110',  6,  168),
+  _Branch('116051', 'מסעף 87° 160/160', '160/160',  6,  192),
+  _Branch('217533', 'מסעף 87° 75/50',   '75/50',   25, 1000),
+  // מסעף כפול
+  _Branch('218564', 'מסעף כפול 110/50/50',   '110/50/50',   12, -1),
+  _Branch('218176', 'מסעף כפול 110/110/110', '110/110/110', 12, -1),
+];
+
+void _runInsertionBranchGroup() {
+  group('LIPSKEY PDF parity — מסעפים שקע-תקע (gate 117)', () {
+    final bySku = {
+      for (final p in kLipskeyCatalog.where((p) => p.brand == 'ליפסקי'))
+        p.sku: p,
+    };
+
+    for (final b in _insertionBranches) {
+      test('SKU ${b.sku} · ${b.nameHe}', () {
+        final p = bySku[b.sku];
+        expect(p, isNotNull, reason: 'SKU ${b.sku} מהקטלוג חסר ב-kLipskeyCatalog');
+        expect(p!.nameHe,    b.nameHe, reason: 'nameHe ל-${b.sku}');
+        expect(p.qtyPack,    b.qtyPack, reason: 'qtyPack ל-${b.sku}');
+        if (b.qtyPallet >= 0) {
+          expect(p.qtyPallet, b.qtyPallet, reason: 'qtyPallet ל-${b.sku}');
+        }
+        expect(p.categoryHe, 'מסעפים וחיבורי אסלה', reason: 'categoryHe ל-${b.sku}');
+        expect(p.dims?['DN'], b.dn, reason: 'dims[DN] ל-${b.sku}');
+        expect(p.page, 42, reason: 'page ל-${b.sku} צריך להיות 42');
+      });
+    }
+  });
 }
 
 class _Seat {
