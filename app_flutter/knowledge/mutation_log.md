@@ -17,6 +17,12 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## gate 117 — lipskey_pdf_parity_test (מאספים/כיסויים) — 2026-06-04
+
+- **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runCollectorGroup` (19 SKUs, עמ' 30–33).
+- תקלה שהוזרקה: `'רשת פנימית עגולה אפור'` → `'…אפורX'` (661360).
+- תוצאה: אדום ✅; ביטול → ירוק ✅.
+
 ## gate 117 — lipskey_pdf_parity_test (מצמדים/מצרות/פקקים) — 2026-06-04
 
 - **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runConnectorGroup` (21 SKUs, עמ' 44–45).

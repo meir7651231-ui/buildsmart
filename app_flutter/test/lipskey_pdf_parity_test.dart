@@ -167,6 +167,63 @@ void main() {
   _runInsertionBendGroup();
   _runInsertionBranchGroup();
   _runConnectorGroup();
+  _runCollectorGroup();
+}
+
+// ── מאספים/קולטים + כיסויים/רשתות — pages 30–33 (19 SKUs) ───────────────────
+class _Coll {
+  final String sku;
+  final String nameHe;
+  final String? color;
+  final int? qtyPack;
+  final int? qtyPallet;
+  final int page;
+  const _Coll(this.sku, this.nameHe, this.color, this.qtyPack, this.qtyPallet, this.page);
+}
+
+const _collectors = <_Coll>[
+  // page 30–31 · מאספים/קולטים
+  _Coll('116148', 'קולט A 40/70 למקלחת', null, 40, 2000, 31),
+  _Coll('171191', 'קולט A 50/100 גבוה',  null, 30, 1200, 31),
+  _Coll('116151', 'מחסום רצפה -130/40 לא תקני (מערכת C) כניסות 40', null, 25, 500, 31),
+  _Coll('196687', 'מחסום רצפה -130/50 לא תקני (מערכת D) כניסות 50', null, 25, 500, 31),
+  _Coll('116638', 'מאסף רצפה 130/50 מערכת B', null, 25, 500, 30),
+  _Coll('217648', 'מערכת B נפילה 100',        null, 16, 320, 30),
+  _Coll('116640', 'מאסף רצפה B נפילה 2"',     null, 25, 500, 30),
+  _Coll('116175', 'מאסף רצפה B 110 נפילה 4"', null, 15, 300, 30),
+  // page 32–33 · כיסויים/רשתות/הגבהה
+  _Coll('122974', 'הגבהה גלילית',          null, 120, 2400, 33),
+  _Coll('610933', 'רשת שרוול עגולה לבנה',  null,  90, 4050, 32),
+  _Coll('610918', 'מכסה עגול עליון קבוע לבן',    'לבן',    120, 5400, 33),
+  _Coll('635737', 'מכסה עגול עליון קבוע פרגמון', 'פרגמון', 120, 5400, 33),
+  _Coll('610920', 'מכסה עגול עליון קבוע אפור',   'אפור',   120, 5400, 33),
+  _Coll('610921', 'מכסה זמני',             null, null, null, 33),
+  _Coll('610911', 'רשת עליונה לבן',        'לבן',    150, 6750, 32),
+  _Coll('635736', 'רשת עליונה פרגמון',     'פרגמון', 150, 6750, 32),
+  _Coll('610906', 'רשת פנימית עגולה לבן',     'לבן',    180, 8100, 32),
+  _Coll('635735', 'רשת פנימית עגולה פרגמון',  'פרגמון', 180, 8100, 32),
+  _Coll('661360', 'רשת פנימית עגולה אפור',    'אפור',   180, 8100, 32),
+];
+
+void _runCollectorGroup() {
+  group('LIPSKEY PDF parity — מאספים/כיסויים (gate 117)', () {
+    final bySku = {
+      for (final p in kLipskeyCatalog.where((p) => p.brand == 'ליפסקי'))
+        p.sku: p,
+    };
+
+    for (final c in _collectors) {
+      test('SKU ${c.sku} · ${c.nameHe}', () {
+        final p = bySku[c.sku];
+        expect(p, isNotNull, reason: 'SKU ${c.sku} מהקטלוג חסר ב-kLipskeyCatalog');
+        expect(p!.nameHe,   c.nameHe,    reason: 'nameHe ל-${c.sku}');
+        expect(p.color,     c.color,     reason: 'color ל-${c.sku}');
+        expect(p.qtyPack,   c.qtyPack,   reason: 'qtyPack ל-${c.sku}');
+        expect(p.qtyPallet, c.qtyPallet, reason: 'qtyPallet ל-${c.sku}');
+        expect(p.page,      c.page,      reason: 'page ל-${c.sku}');
+      });
+    }
+  });
 }
 
 // ── מצמדים/מצרות/פקקים/כובע — pages 44–45 (21 SKUs) ─────────────────────────

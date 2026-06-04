@@ -4,6 +4,19 @@
 
 ---
 
+## v6.04 — Lipski collectors/covers parity to PDF (gate 117 · קטגוריה 5/9)
+
+**שינוי:** 19 SKUs (עמ' 30–33) — מאספים/קולטים + כיסויים/רשתות. באגי-צבע תוקנו
+(661360 לבן→אפור, 610920 פרגמון→אפור, 610911/635736 null→לבן/פרגמון), 196687
+DN 130/40→130/50, דפים 16/17→30-33, qty הושלם.
+
+**אימות:**
+- ✅ `lipskey_pdf_parity_test` — 151/151.
+- ✅ `flutter analyze lib/data/lipskey_catalog.dart` — 0 errors.
+- ✅ `flutter test` — אפס regressions.
+
+---
+
 ## v6.03 — Lipski connectors/reducers/plugs parity to PDF (gate 117 · קטגוריה 4c/9)
 
 **שינוי:** 21 SKUs (עמ' 44–45) — מצמדים/מצרות/פקקים/כובע אויר. 17 שמות שגויים
