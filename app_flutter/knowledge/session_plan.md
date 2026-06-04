@@ -166,3 +166,25 @@ Style: M0 (logic+test) commit אחד → M1 (widget+state+widget-test) commit ש
   mutual-exclusion דו-כיווני · partition בלי חפיפה.
 
 ## ✅ persona המנהל הושלמה — אפס "בבנייה" נגיש בכל 4 הסקשנים (md/mo/mc/mm). M0→M4 DONE.
+
+---
+
+# Follow-on — 🔗 SHARED ORDERS ENGINE (keystone, DATA LAYER) ✅ (v5.97)
+Owner: this session · Scope: `lib/state/orders_engine.dart` (חדש) + `logic/manager_dashboard.dart`
+(docs בלבד — אפס שינוי-מספר/חתימה). **DATA LAYER בלבד — אין שינוי-UI הגל הזה.**
+- `SYS_ORDERS` הלגאסי (@index.html:11965-12039,:16939-17035) → `ordersEngineProvider`
+  (`StateNotifier<List<Order>>`), **seeded ב-4 הזמנות-ה-seed הקיימות** (מ-`kManagerOrderSeed`
+  שנשאר מקור-ה-seed) → כל מספר-מנהל קיים נשמר זהה (🚚 open=4, 4 לקוחות, מחזור).
+- `Order` = `id/who/site/items/sum/stage` (+ `createdAt` אופציונלי), כמו `ManagerOrder`;
+  `isOpen`=`stage!=='delivered'`. JSON round-trip; `toManagerOrder()` שומר את `manager_dashboard.dart`
+  Flutter-free.
+- API: `placeOrder(...)` (קבלן→stage `new`, auto-id `BS-####`, prepend+timestamp) · `advance(id)`
+  (השלב הבא ב-`kManagerOrderFlow`, no-op ב-`delivered` — verbatim `mgrAdvanceOrder` @17022-17032) ·
+  `setStage(id, stage)` (god-step של המנהל לכל שלב; מתעלם מ-id/stage לא-מוכרים) · `resetToSeed()`.
+- persist ל-`SharedPreferences` key `bs.orders.v1` (תבנית cart/profile; payload פגום → seed).
+- `managerAnalyticsProvider` + `managerCustomersProvider` גוזרים את ה-dashboard/לקוחות מההזמנות
+  ה-**חיות** של ה-engine באותו fold טהור — שווים לגרסה הסטטית כל עוד ה-engine מחזיק את ה-seed.
+- ה-4-tab UI + חיווט ה-dial ל-engine = גלים מאוחרים (`bs_dial_widget` ללא שינוי).
+- `orders_engine_test` (21): seed-correctness · place/advance/setStage · persistence round-trip ·
+  flow-ordering. כל בדיקות-המנהל (`bs_dial_manager_*` + `manager_dashboard_test`) נשארות ירוקות.
+- analyze נקי (אפס error/warning חדש) · targeted-tests 47/47 ירוק.

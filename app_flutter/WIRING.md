@@ -38,6 +38,30 @@ home directly. Guarded by `onboarding_test`.
 |---|---|---|
 | תווית-גרסה | מציגה `kVersionLabel` בלבד (אפור-secondary, `Key('version_chrome')`), מ-`version.g.dart` הנוצר אוטומטית מ-git+STATUS. אין נקודה-ירוקה (שמורה ל-`_PulsingStatus`), אין changelog ב-UI. לא מרונדרת במצב "עץ חכם". | ✅ wired (לקח #72) |
 
+## 🔗 Shared orders engine — DATA LAYER (`state/orders_engine.dart` · `logic/manager_dashboard.dart`)
+
+The legacy `SYS_ORDERS` (the localStorage array every role read & wrote, @index.html:11965-12039,
+:16939-17035) ported to a Riverpod state engine. **DATA LAYER ONLY — no UI reads it yet** (wiring
+the 4-tab UI / the dial to the engine is a LATER wave). `ordersEngineProvider`
+(`StateNotifier<List<Order>>`) is **SEEDED with the SAME four seed orders** (from `kManagerOrderSeed`,
+the retained seed source) so every existing manager number is preserved. `Order` =
+`id/who/site/items/sum/stage` (+ optional `createdAt`); `isOpen` = `stage!=='delivered'`. Persists
+to `SharedPreferences` key `bs.orders.v1` (cart/profile pattern; corrupt → seed).
+
+| API / provider | Behavior | Status |
+|---|---|---|
+| `placeOrder({who, site, items, sum, id?, createdAt?})` | contractor creates an order at stage `new`; auto-id `BS-####` above current max; prepended + timestamped; returns it | ✅ |
+| `advance(orderId)` | next stage in `kManagerOrderFlow`; no-op once `delivered` (verbatim `mgrAdvanceOrder` @17022-17032); unknown id = no-op | ✅ |
+| `setStage(orderId, stage)` | manager "god-step" to ANY flow stage; ignores unknown id/stage | ✅ |
+| `resetToSeed()` | restore the four seed orders | ✅ |
+| `managerAnalyticsProvider` | `ManagerAnalytics` over the engine's LIVE orders (same fold as the static `managerAnalytics`) | ✅ |
+| `managerCustomersProvider` | `mgrCustomerList` over the engine's LIVE orders | ✅ |
+
+Guard: `orders_engine_test` (21 — seed correctness vs `kManagerOrderSeed`/`managerAnalytics`,
+place/advance/setStage behavior, persistence round-trip, flow ordering). The static
+`managerAnalytics` / `mgrCustomerList()` (seed-bound) are UNCHANGED and still feed the dashboard
+widget below — the engine just adds the live path for the upcoming UI wave.
+
 ## 👔 Manager BS-dial → 📊 dashboard (`bs_dial_widget.dart` · `state/dial_state.dart` · `logic/manager_dashboard.dart`)
 
 The 👔 "מנהל המערכת" persona → לוח בקרה (`kManagerSections` → section `m-products`) has 5

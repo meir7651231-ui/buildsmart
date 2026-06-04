@@ -8,6 +8,22 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
+v5.97 — 🔗 **Shared orders engine — the keystone that makes the data live across roles** 🟦.
+The legacy `SYS_ORDERS` (the localStorage array every role read & wrote, @index.html:11965-12039,
+:16939-17035) is ported to a Riverpod state engine `lib/state/orders_engine.dart` —
+`ordersEngineProvider` (`StateNotifier<List<Order>>`). **DATA LAYER ONLY — no UI changed.** Seeded
+with the **SAME four seed orders** (from the unchanged `kManagerOrderSeed`) so **every existing
+manager number is preserved** (🚚 open=4, the 4 customers, …). `Order` = `id/who/site/items/sum/stage`
+(+ optional `createdAt`), mirroring `ManagerOrder`. Public API: `placeOrder(...)` (contractor →
+stage `new`, auto-id `BS-####`, timestamped) · `advance(orderId)` (next `kManagerOrderFlow` stage,
+no-op at `delivered` — verbatim `mgrAdvanceOrder` @17022-17032) · `setStage(orderId, stage)`
+(manager god-step to any flow stage). Persists to `SharedPreferences` key `bs.orders.v1`
+(cart/profile pattern; corrupt → seed). `managerAnalyticsProvider` + `managerCustomersProvider`
+derive the manager dashboard/customers from the engine's LIVE orders via the SAME pure folds in
+`manager_dashboard.dart` (equal to the static derivations while the engine holds the seed; the
+const seed source is retained, not deleted). The 4-tab UI + wiring the dial to the engine are LATER
+waves (`bs_dial_widget` unchanged). Guard `orders_engine_test` (21); all manager tests stay green.
+
 v5.96 — 👔 **Manager 🛠️ ניהול — final wave (M4): manager persona COMPLETE** 🟦.
 The 👔 "מנהל המערכת" BS-dial → 🛠️ ניהול section's `mm-*` leaves are now ALL wired to their
 REAL targets — the whole manager persona is **COMPLETE** with **ZERO reachable "בבנייה"** across

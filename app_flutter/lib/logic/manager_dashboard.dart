@@ -230,7 +230,13 @@ class ManagerAnalytics {
   String get storesLabel => '$activeStores/$totalStores';
 }
 
-/// The const-folded analytics over the ported seed — what the BS-dial reads.
+/// The const-folded analytics over the ported SEED orders. This is the static
+/// snapshot; the LIVE read-path now flows through the shared orders engine —
+/// `managerAnalyticsProvider` (`state/orders_engine.dart`) builds a
+/// [ManagerAnalytics] over the engine's live orders using this exact same fold.
+/// Because the engine is seeded with [kManagerOrderSeed], the live analytics
+/// equal this const until real orders are placed — every existing number is
+/// preserved (🚚 open=4, …). Kept as the seed-bound default + the engine's seed.
 const ManagerAnalytics managerAnalytics = ManagerAnalytics(
   orders: kManagerOrderSeed,
   stores: kManagerStores,
@@ -257,10 +263,12 @@ int contractorCredit(String name) {
   return (raw ~/ 100) * 100;
 }
 
-/// M3 foundation — group the seed orders by buyer (`who`), summing their
-/// spend + counting their orders. Mirrors the legacy `mgrCustomerList`
-/// group-by-buyer (the 👥 לקוחות source). Pure + testable; M3 renders these as
-/// the customer leaves with their [contractorCredit] ceiling.
+/// Group orders by buyer (`who`), summing their spend + counting their orders.
+/// Mirrors the legacy `mgrCustomerList` group-by-buyer (the 👥 לקוחות source).
+/// Pure + testable. The LIVE read-path passes the shared orders engine's live
+/// orders here (`managerCustomersProvider`, `state/orders_engine.dart`); with no
+/// argument it folds the [kManagerOrderSeed] — identical to the engine's seed,
+/// so the four seed customers are preserved.
 List<ManagerCustomer> mgrCustomerList([List<ManagerOrder>? orders]) {
   final src = orders ?? kManagerOrderSeed;
   final byBuyer = <String, ManagerCustomer>{};
