@@ -1,3 +1,4 @@
+import 'package:buildsmart/data/contractor_seeds.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/bs_dial_widget.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
@@ -647,7 +648,15 @@ class _CatalogMenuButton extends ConsumerWidget {
           builder: (_) => const _ScanPlanSheet(),
         );
       case 'alternatives':
-        showToast(context, 'חלופות זולות — בבנייה');
+        showModalBottomSheet<void>(
+          context: context,
+          backgroundColor: const Color(0xFFFFFFFF),
+          isScrollControlled: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (_) => const _CheaperAlternativesSheet(),
+        );
       case 'price_compare':
         showToast(context, 'השוואת מחירים — בבנייה');
       case 'favorites':
@@ -655,6 +664,150 @@ class _CatalogMenuButton extends ConsumerWidget {
       case 'settings':
         Navigator.of(context).push(CatalogSettingsScreen.route());
     }
+  }
+}
+
+/// (T1 · לוח-קבלן) A cheaper same-product brand alternative across the smart-tree.
+class CheaperAlt {
+  const CheaperAlt({
+    required this.product,
+    required this.recName,
+    required this.recPrice,
+    required this.altName,
+    required this.altPrice,
+  });
+  final String product;
+  final String recName;
+  final int recPrice;
+  final String altName;
+  final int altPrice;
+  int get savings => recPrice - altPrice;
+}
+
+/// (T1) Products whose recommended brand has a cheaper same-product
+/// alternative, from [kHomeProductBrands] (proto §1b HOME_PRODUCTS price
+/// tiers — verbatim). Cheaper same-item options, sorted by savings desc.
+List<CheaperAlt> cheaperAlternativesAcrossCatalog() {
+  final out = <CheaperAlt>[];
+  for (final pb in kHomeProductBrands) {
+    final recI = pb.tiers.indexWhere((t) => t.rec);
+    final ri = recI >= 0 ? recI : 0;
+    final rec = pb.tiers[ri];
+    BrandTier? alt; // cheapest tier below the recommended one
+    for (var i = 0; i < pb.tiers.length; i++) {
+      if (i == ri) continue;
+      final t = pb.tiers[i];
+      if (t.price < rec.price && (alt == null || t.price < alt.price)) alt = t;
+    }
+    if (alt == null) continue;
+    out.add(CheaperAlt(
+      product: pb.product,
+      recName: rec.brand,
+      recPrice: rec.price,
+      altName: alt.brand,
+      altPrice: alt.price,
+    ));
+  }
+  out.sort((a, b) => b.savings.compareTo(a.savings));
+  return out;
+}
+
+/// (T1) "חלופות זולות" sheet — cheaper same-product brand options + savings.
+/// R9-inline (modal sheet, no new view); live supplier comparison is בפרודקשן.
+class _CheaperAlternativesSheet extends StatelessWidget {
+  const _CheaperAlternativesSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final alts = cheaperAlternativesAcrossCatalog();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          const Text('💡 חלופות זולות',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1A1A1A))),
+          const SizedBox(height: 4),
+          const Text('מותג חלופי זול יותר לאותו מוצר — אותה התקנה, פחות עלות.',
+              style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
+          const SizedBox(height: 14),
+          if (alts.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Text('אין חלופות זולות כרגע.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Color(0xFF888888))),
+            )
+          else
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: alts.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(height: 18, color: Color(0xFFEEEEEE)),
+                itemBuilder: (_, i) {
+                  final a = alts[i];
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(a.product,
+                          style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1A1A1A))),
+                      const SizedBox(height: 4),
+                      Text('המלצה: ${a.recName} · ₪${a.recPrice}',
+                          style: const TextStyle(
+                              fontSize: 12, color: Color(0xFF888888))),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text('חלופה: ${a.altName} · ₪${a.altPrice}',
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF1A1A1A))),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                                color: const Color(0xFFFFE8D6),
+                                borderRadius: BorderRadius.circular(8)),
+                            child: Text('חיסכון ₪${a.savings}',
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: BsTokens.brand)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          const SizedBox(height: 14),
+          const Text('⚙️ בפרודקשן: השוואת-מחירים חיה מול מחירוני הספקים.',
+              style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2))),
+        ],
+      ),
+    );
   }
 }
 

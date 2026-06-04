@@ -36,6 +36,25 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 
 <!-- הוסף רשומה חדשה כאן אחרי כל בעיה שנפתרה -->
 
+## 2026-06-04 · T1 "חלופות זולות" sheet ריק — מקור-מחיר ללא וריאציה per-מוצר (מקבץ)
+
+### א — הבעיה
+ה-sheet "חלופות זולות" (catalog ⋮) חזר ריק; `cheaper_alternatives_test` נכשל בשער 32
+("בדיקות נכשלות: 1 > baseline 0"). הסריקה נשענה על מחירי smart-tree (שדה-מחיר = null)
+ו-מחיר אחיד-לקטגוריה → אפס וריאציית-מחיר → 0 חלופות. (זו אותה בדיקה untracked שחסמה
+את קומיט T6 של בנצי — ראה הרשומה למטה; כעת היא ירוקה.)
+
+### ב — הפתרון
+שחזור מחירי-האב-טיפוס האמיתיים מ-proto §1b HOME_PRODUCTS כ-`kHomeProductBrands`
+(`lib/data/contractor_seeds.dart`) — טירי-מחיר per-מוצר אמיתיים. `cheaperAlternativesAcrossCatalog`
+סורק אותם → 3 חלופות אמיתיות (אסלה 740→560 · מקלחת 520→380 · ברז 189→139). בדיקה ירוקה.
+
+### ג — כלל המניעה
+ANTIPATTERN: cheaperAlternativesAcrossCatalog\(\).*kSmartProducts
+GUARD: `test/cheaper_alternatives_test` — אוכף ≥3 חלופות, כל altPrice<recPrice, ממוין; mutation-verified.
+RULE: השוואת-חלופה-זולה per-מוצר חייבת מקור-מחיר עם וריאציה אמיתית per-מוצר (טירים מתומחרים),
+לא שדה-מחיר ריק או מחיר אחיד-לקטגוריה. אין המצאת מספרים — verbatim מהאב-טיפוס.
+
 ## 2026-06-04 · עץ-משותף — בדיקת-WIP untracked של סוכן אחר חוסמת commit (בנצי)
 
 ### א — הבעיה

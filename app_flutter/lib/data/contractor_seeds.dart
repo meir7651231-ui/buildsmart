@@ -502,3 +502,41 @@ String caToday([DateTime? now]) {
   final mm = d.month.toString().padLeft(2, '0');
   return '$dd/$mm/${d.year}';
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §1 · HOME_PRODUCTS brand tiers — proto [L5525/5567/5596]. VERBATIM prices.
+//   The Flutter smart-tree ports these brands WITHOUT prices ("מחיר לפי ספק");
+//   restored here (from the prototype, not invented) so "חלופות זולות" (T1) can
+//   show real recommended-vs-cheaper savings. In production these come from the
+//   live supplier price-list (the "⚙️ בפרודקשן" note on the sheet).
+// ─────────────────────────────────────────────────────────────────────────────
+class BrandTier {
+  const BrandTier(this.brand, this.price, {this.rec = false});
+  final String brand;
+  final int price;
+  final bool rec;
+}
+
+class ProductBrands {
+  const ProductBrands(this.product, this.tiers);
+  final String product;
+  final List<BrandTier> tiers;
+}
+
+const List<ProductBrands> kHomeProductBrands = [
+  ProductBrands('ברז לכיור', [
+    BrandTier('מותג סטנדרט', 189, rec: true),
+    BrandTier('מותג כלכלי', 139),
+    BrandTier('מותג פרימיום', 329),
+  ]),
+  ProductBrands('אסלה תלויה', [
+    BrandTier('מותג סטנדרט', 740, rec: true),
+    BrandTier('מותג כלכלי', 560),
+    BrandTier('מותג פרימיום — Soft Close', 1240),
+  ]),
+  ProductBrands('סוללת מקלחת', [
+    BrandTier('מותג סטנדרט', 520, rec: true),
+    BrandTier('מותג כלכלי', 380),
+    BrandTier('מותג פרימיום — תרמוסטטי', 890),
+  ]),
+];

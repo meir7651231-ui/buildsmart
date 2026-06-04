@@ -17,6 +17,15 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## cheaperAlternativesAcrossCatalog (T1) — 2026-06-04
+
+- **קובץ:** `test/cheaper_alternatives_test.dart`
+- **מה עושה:** סורק את `kHomeProductBrands` (proto §1b HOME_PRODUCTS) ומחזיר לכל מוצר את החלופה הזולה ביותר שמתחת למחיר ההמלצה; אוכף ≥3 חלופות, כל `altPrice<recPrice`, `savings>0`, וסדר-חיסכון יורד.
+- תקלה שהוזרקה: `t.price < rec.price` → `t.price > rec.price` (בורר את הטיר היקר במקום הזול).
+- תוצאה: אדומה ✅ — `Expected: a value less than <189> · Actual: <329>` (ברז לכיור בחר פרימיום).
+- ביטול → ירוק ✅ — All tests passed.
+- מסקנה: הבדיקה חזקה — תופסת היפוך של לוגיקת-הסינון המרכזית (זול↔יקר), לא רק קיום פלט.
+
 ## gate 117 — lipskey_pdf_parity_test (מאספים/כיסויים) — 2026-06-04
 
 - **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runCollectorGroup` (19 SKUs, עמ' 30–33).

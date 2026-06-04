@@ -774,3 +774,12 @@ Rule in CONVENTIONS.md. Guards: huliot_card_render_test (2) + huliot_search_test
 - Deferred (per PLAN): T0.2 StateNotifiers (mute→T7 · orders→T5; favorites exists) +
   ORDER_STATUS/STORE-services seeds (proto/04 lacks the verbatim labels → T4/T5).
   No `kLipskeyCatalog` introduced (gate 114 clean).
+
+## Contractor T1 — catalog ⋮ "חלופות זולות" → cheaper same-product alternatives
+- `home_shell.dart`: catalog ⋮ `case 'alternatives'` → `showModalBottomSheet(_CheaperAlternativesSheet)`
+  (replaced the "בבנייה" toast). New `CheaperAlt` model + `cheaperAlternativesAcrossCatalog()`
+  scanning `kHomeProductBrands` (lib/data/contractor_seeds.dart — proto §1b HOME_PRODUCTS, verbatim).
+- For each product returns the cheapest tier below its recommended brand, sorted by savings desc
+  (אסלה ₪740→560 · מקלחת ₪520→380 · ברז ₪189→139). Footer notes live supplier pricing in prod.
+- Guard: `test/cheaper_alternatives_test` (≥3 alts · each altPrice<recPrice · sorted; filter
+  mutation-verified). No `kLipskeyCatalog` (gate 114 clean).
