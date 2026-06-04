@@ -162,3 +162,5 @@
 
 - 2026-06-03 · **בנצי (משיק)** · `claude/whats-happening-LyY9G` · לקח **T6** (טאב עדכונים → התראות תקציב + בטיחות). סקופ: ה-action-button בהתראות (`notifications_screen` ~1026) = toast "בבנייה" → מחליף ב-תוכן inline: safety→SAFETY_TIPS×5+ack (§5) · budget→ספי 80/90/100% (§3). בחירה: T2 חסום (אין-data) · T3/T4/T5 תלויים-T0 (WIP מקבץ) · Phase-B נעול-T10. T6 = התנגשות-מינימלית (notifications_screen). **תיאום:** התוכן יוגדר מקומית ב-notifications (לא ב-contractor_seeds של T0) — מקבץ, אין צורך ב-SAFETY_TIPS/thresholds ב-T0. push קוד רק על "תדחוף".
 - 2026-06-04 · **מקבץ** · **T0 (ליבה: seeds+helpers+test) ✅ נדחף** ל-whats-happening (`contractor seeds foundation` · 8 בדיקות · fMoney/bestStore mutation-verified). דחוי: T0.2 StateNotifiers (→T7/T5) · ORDER_STATUS/STORE seeds (proto-gap →T4/T5). **T1 הבא.**
+
+- 2026-06-04 · **בנצי (משיק)** · **T6 ✅ הושלם ונדחף** (fb9aff0). התראות בטיחות+תקציב → sheet inline (R9). אומת ויזואלית (רנדור-בדפדפן חי). seeds מ-T0. gates 24/102/116 ✓.
