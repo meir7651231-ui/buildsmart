@@ -4,6 +4,19 @@
 
 ---
 
+## v6.07 — Lipski pipes parity to PDF (gate 117 · קטגוריה 8/9)
+
+**שינוי:** 57 SKUs (עמ' 47–48): צינורות אפור/שחור (DN40/50/75/110), כתום PP-MD-ML
+SN4/SN8, שחור SUPER BETON/SILENT. 13 stubs אוחדו ל-real entries, שמות אוחדו
+ל-`'צינור {color} DN{N} L={L} ס"מ'`, dims הושלמו, דפים 24/25→47/48.
+
+**אימות:**
+- ✅ `lipskey_pdf_parity_test` — 269/269.
+- ✅ `flutter analyze` — 0 errors.
+- ✅ `flutter test` — 1392/1392 ירוקים.
+
+---
+
 ## v6.06 — Lipski screw-on accessories parity to PDF (gate 117 · קטגוריה 7/9)
 
 **שינוי:** 43 SKUs (עמ' 20–23) — אביזרי תבריג: ברכים תבריג (90°/45°/30°/15°/טלסקופית),
