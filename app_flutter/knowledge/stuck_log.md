@@ -36,6 +36,24 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 
 <!-- הוסף רשומה חדשה כאן אחרי כל בעיה שנפתרה -->
 
+## 2026-06-04 · T2 commit נחסם בשער 32 — overflow קדם-קיים ב-_OrderSheet (T5), לא הקוד שלי (מקבץ)
+
+### א — הבעיה
+קומיט T2 (catalog ⋮ "השוואת מחירים" — מאומת: 3 חנויות/מוצר אמיתיות, analyze 0, רנדר-חי) נחסם בשער 32:
+`store_notif_widget_test` ("order sheet … real status timeline") נכשל ב-RenderFlex overflow 3.6px
+ב-`store_screen.dart:2890` (_OrderSheet, T5 של בנצי) — **לא הקוד שלי** (T2 נוגע רק ב-home_shell · catalog ⋮).
+רגיש-סביבה (עבר אצל בנצי). בנוסף: `bb6a751` (T1) נדחף בלי הרצת-סוויטה post-rebase (rebase+pre-push לא מריצים test),
+אז הכשל הלטנטי של T5 צף רק כשקומיט T2 הריץ סוויטה מלאה במצב הממוזג.
+
+### ב — הפתרון
+לא נגעתי בקוד של בנצי. בנצי תיקן upstream (`e64a6e8` — `isScrollControlled: true` ל-order sheet).
+`fetch + merge --ff-only` ל-e64a6e8 → `store_notif_widget_test` ירוק → קמטתי+דחפתי את T2.
+
+### ג — כלל המניעה
+ANTIPATTERN: isScrollControlled:\s*false
+GUARD: `test/store_notif_widget_test` — order-sheet timeline נגיש, ללא placeholder/overflow.
+RULE: אחרי rebase/ff על origin הרץ סוויטה לפני הסתמכות על "ירוק" — כשל לטנטי ב-HEAD ממוזג צף בקומיט הבא. גיליון-מודאלי גבוה לעולם לא `isScrollControlled: false`.
+
 ## 2026-06-04 · גיליון-הזמנה חתך את הכפתור — חסר isScrollControlled (QA תפס) (בנצי)
 
 ### א — הבעיה

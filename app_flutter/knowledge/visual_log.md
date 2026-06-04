@@ -39,6 +39,22 @@ phantom נמחק (+ ref ב-verified_connections). 614783 1/2"→1½", qty 506540
 
 ---
 
+## v6.04 — T2 · catalog ⋮ "השוואת מחירים" sheet [מקבץ]
+
+**שינוי:** ה-⋮ בקטלוג, פעולת "השוואת מחירים" — מ-toast "בבנייה" ל-**sheet inline**
+(`_StorePriceComparisonSheet`, ללא view/route חדש): לכל מוצר 3 מחירי-חנויות מ-`kPlanTypes`
+(proto §9b verbatim), הזול מסומן (`bestStore`) בכתום + ✓.
+
+**אימות:**
+- ✅ `flutter test test/store_price_comparison_test.dart` — ירוק (≥3 מוצרים · כל ≥3 חנויות · best==הזול · מחירי §9b verbatim).
+- ✅ `flutter analyze` (קבצים חדשים) — אפס issues.
+- ✅ 📷 **רנדור-בדפדפן חי** (Chrome · `localhost:5556` · build/web v6.04 · 4.6.2026):
+  - sheet "📊 השוואת מחירים" נפתח מ-⋮ ומרונדר השוואה אמיתית פר-מוצר, הזול בכתום+✓:
+    אסלה תלויה (אבן קיסר ₪740✓ · 789/765) · סוללת מקלחת (טמבור הום ₪520✓ · 560/538) · ברז אמבטיה (אבן קיסר ₪189✓) · לוח חשמל (אבן קיסר ₪389✓) ועוד.
+  - הזול משתנה פר-מוצר (לא קבוע) → `bestStore` אמיתי. footer §9b verbatim. אפס overflow.
+
+---
+
 ## v6.04 — T1 · catalog ⋮ "חלופות זולות" sheet [מקבץ]
 
 **שינוי:** ה-⋮ בקטלוג, פעולת "חלופות זולות" — מ-toast "בבנייה" ל-**sheet inline**

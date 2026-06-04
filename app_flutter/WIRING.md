@@ -784,3 +784,12 @@ Rule in CONVENTIONS.md. Guards: huliot_card_render_test (2) + huliot_search_test
   (אסלה ₪740→560 · מקלחת ₪520→380 · ברז ₪189→139). Footer notes live supplier pricing in prod.
 - Guard: `test/cheaper_alternatives_test` (≥3 alts · each altPrice<recPrice · sorted; filter
   mutation-verified). No `kLipskeyCatalog` (gate 114 clean).
+
+## Contractor T2 — catalog ⋮ "השוואת מחירים" → per-product store price comparison
+- `home_shell.dart`: catalog ⋮ `case 'price_compare'` → `showModalBottomSheet(_StorePriceComparisonSheet)`
+  (replaced the "בבנייה" toast). New `StoreCompareRow` model + `storePriceComparisonAcrossCatalog()`
+  flattening `kPlanTypes` zone items (lib/data/contractor_seeds.dart — proto §9b store offers, verbatim).
+- Each product shows its 3 partner-store prices (בנייני העיר/אבן קיסר/טמבור הום…) as `_StoreChip`s;
+  the cheapest (`bestStore`) is brand-highlighted with ✓. Footer = proto §9b verbatim note.
+- Guard: `test/store_price_comparison_test` (≥3 products · each ≥3 stores · best==cheapest · §9b verbatim).
+  No `kLipskeyCatalog` (gate 114 clean).

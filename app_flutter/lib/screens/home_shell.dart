@@ -658,7 +658,15 @@ class _CatalogMenuButton extends ConsumerWidget {
           builder: (_) => const _CheaperAlternativesSheet(),
         );
       case 'price_compare':
-        showToast(context, 'השוואת מחירים — בבנייה');
+        showModalBottomSheet<void>(
+          context: context,
+          backgroundColor: const Color(0xFFFFFFFF),
+          isScrollControlled: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (_) => const _StorePriceComparisonSheet(),
+        );
       case 'favorites':
         ref.read(catalogSectionProvider.notifier).state = 'מועדפים';
       case 'settings':
@@ -806,6 +814,152 @@ class _CheaperAlternativesSheet extends StatelessWidget {
           const Text('⚙️ בפרודקשן: השוואת-מחירים חיה מול מחירוני הספקים.',
               style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2))),
         ],
+      ),
+    );
+  }
+}
+
+/// (T2 · לוח-קבלן) A per-product store price comparison: the named partner-store
+/// offers (proto §9b, verbatim) and the index of the cheapest ([bestStore]).
+class StoreCompareRow {
+  const StoreCompareRow({
+    required this.product,
+    required this.emoji,
+    required this.stores,
+    required this.bestIndex,
+  });
+  final String product;
+  final String emoji;
+  final List<StoreOffer> stores;
+  final int bestIndex;
+  StoreOffer get best => stores[bestIndex];
+}
+
+/// (T2) Per-product store comparison across the plan-type catalog
+/// ([kPlanTypes] — proto §9b store offers, verbatim). Each product carries its
+/// partner-store prices; [bestStore] marks the cheapest. No invented numbers.
+List<StoreCompareRow> storePriceComparisonAcrossCatalog() {
+  final out = <StoreCompareRow>[];
+  for (final pt in kPlanTypes) {
+    for (final z in pt.zones) {
+      for (final it in z.items) {
+        if (it.stores.length < 2) continue;
+        out.add(StoreCompareRow(
+          product: it.name,
+          emoji: it.emoji,
+          stores: it.stores,
+          bestIndex: bestStore(it.stores),
+        ));
+      }
+    }
+  }
+  return out;
+}
+
+/// (T2) "השוואת מחירים" sheet — each product's partner-store prices with the
+/// cheapest highlighted. R9-inline (modal sheet, no new view). Prices §9b.
+class _StorePriceComparisonSheet extends StatelessWidget {
+  const _StorePriceComparisonSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = storePriceComparisonAcrossCatalog();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          const Text('📊 השוואת מחירים',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1A1A1A))),
+          const SizedBox(height: 4),
+          const Text('מחירים מ-3 חנויות שותפות — הזול ביותר מסומן.',
+              style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
+          const SizedBox(height: 14),
+          if (rows.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Text('אין מחירים להשוואה כרגע.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Color(0xFF888888))),
+            )
+          else
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: rows.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(height: 18, color: Color(0xFFEEEEEE)),
+                itemBuilder: (_, i) {
+                  final r = rows[i];
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${r.emoji} ${r.product}',
+                          style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1A1A1A))),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          for (var s = 0; s < r.stores.length; s++)
+                            _StoreChip(
+                                offer: r.stores[s], best: s == r.bestIndex),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          const SizedBox(height: 14),
+          const Text(
+              '💰 המחירים נמשכים מ-3 חנויות שותפות. BuildSmart בוחר אוטומטית את ההצעה המשתלמת ביותר לכל פריט.',
+              style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2))),
+        ],
+      ),
+    );
+  }
+}
+
+/// (T2) A single store-offer chip; the cheapest is brand-highlighted with ✓.
+class _StoreChip extends StatelessWidget {
+  const _StoreChip({required this.offer, required this.best});
+  final StoreOffer offer;
+  final bool best;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: best ? const Color(0xFFFFE8D6) : const Color(0xFFF4F5F7),
+        borderRadius: BorderRadius.circular(8),
+        border: best ? Border.all(color: BsTokens.brand) : null,
+      ),
+      child: Text(
+        '${best ? '✓ ' : ''}${offer.store} · ₪${offer.price}',
+        style: TextStyle(
+            fontSize: 12,
+            fontWeight: best ? FontWeight.w700 : FontWeight.w500,
+            color: best ? BsTokens.brand : const Color(0xFF555555)),
       ),
     );
   }
