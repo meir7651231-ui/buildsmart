@@ -4,6 +4,25 @@
 
 ---
 
+## v6.09 — Lipski UI parity with Polyroll/Huliot (gate 117 follow-up)
+
+**שינוי:** רנדור כרטיסי ליפסקי עבר מ-`_NameWords` ל-`_HierarchyChips` (ברירת-מחדל
+מובנית כמו פולירול/חוליות). `parseChips` הורחב לתמוך-compound-types (`מיכל הדחה`,
+`מושב אסלה`) + dictionaries עשירים יותר ל-Lipski (דגמי-מותג, תכונות, מס. 1-9,
+ציר, סגירה רכה, אנטי ונדליזם, DN-prefix sizing).
+
+**אימות:**
+- ✅ `test/lipskey_hierarchy_parity_test.dart` (חדש) — 18/18, מוודא breadcrumb
+  על 18 SKUs מ-9 הקטגוריות.
+- ✅ `test/product_journey_test.dart · HARD · all 935 sheets` — אפס overflow
+  (וידוא ש-_HierarchyChips לא גולש למסכים-צרים אחרי שהוא מקבל גם את כל הלקוחות הליפסקיים).
+- ✅ `flutter test` — 1418/1418 ירוקים (אפס regressions בפולירול/חוליות).
+- ✅ `flutter analyze` — 0 errors.
+- 📷 רנדור-בדפדפן ידני לא בוצע (CanvasKit screenshots לא-אמינים פה, לפי תקדים v5.92/v6.04);
+  HARD widget test מרנדר את כל 935 הכרטיסים תחת גדלי-טקסט+רוחב-מסך קיצוניים.
+
+---
+
 ## v6.08 — Lipski floor traps parity to PDF (gate 117 · קטגוריה 9/9 — **המסע הושלם**)
 
 **שינוי:** 8 SKUs (עמ' 26–27): 4 `מחסום תיקני 140/50 / 245/50` (פתוח/סגור/גבוה),

@@ -26,6 +26,16 @@
 - ביטול → ירוק ✅ — All tests passed.
 - מסקנה: הבדיקה חזקה — תופסת היפוך של לוגיקת-הסינון המרכזית (זול↔יקר), לא רק קיום פלט.
 
+## gate 117 follow-up — lipskey_hierarchy_parity_test — 2026-06-04
+
+- **קובץ:** `test/lipskey_hierarchy_parity_test.dart` (חדש) + `lib/data/chip_hierarchy.dart`.
+- **מה עושה:** אוכף ש-parseChips מחזיר type+path תקינים ל-18 SKUs מייצגים של ליפסקי
+  (תנאי-קדם להפעלת `_HierarchyChips` במקום `_NameWords`).
+- תקלה שהוזרקה: `'מיכל הדחה'` → `'מיכלX הדחה'` ב-`_kCompoundTypes`.
+- תוצאה: אדום ✅ — SKU 152785 (`מיכל הדחה טיטאן לבן`) נכשל ב-`type expected "מיכל הדחה"`.
+- ביטול → ירוק ✅ — 18/18.
+- מסקנה: הטסט אוכף את ה-compound-type lookup; שינוי שובר את שיוך-ה-type הגורף.
+
 ## gate 117 — lipskey_pdf_parity_test (מחסומי רצפה תיקניים) — 2026-06-04
 
 - **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runFloorTrapGroup` (8 SKUs, עמ' 26–27).

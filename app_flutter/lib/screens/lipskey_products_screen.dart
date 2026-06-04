@@ -1171,9 +1171,11 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             ),
           ),
           const SizedBox(height: 4),
-          // line 2: chips. Polyroll uses the hierarchy breadcrumb (§21);
-          // Lipskey stays on the word-by-word extractor for now.
-          if (p.brand == kPolyrollBrand || p.brand == 'חוליות')
+          // line 2: chips. Polyroll/חוליות/ליפסקי use the hierarchy breadcrumb
+          // (§21); after gate 117 9/9 + the compound-type lookahead in
+          // parseChips, Lipski products produce clean breadcrumbs too. AQUATEC
+          // stays on the word-by-word extractor (its names lack structure).
+          if (p.brand == kPolyrollBrand || p.brand == 'חוליות' || p.brand == 'ליפסקי')
             _HierarchyChips(
                 product: p,
                 onChipTap: _cycleHierarchy,
