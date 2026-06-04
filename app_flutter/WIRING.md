@@ -62,6 +62,31 @@ metric the panel belongs to; popping the persona/anchor or drilling into a child
 Guard: `bs_dial_manager_test` (5 leaves present · tap→inline panel with the real number ·
 NO "בבנייה" · toggle closes) + `manager_dashboard_test` (the derivations, vs index.html).
 
+### 👔 Manager BS-dial → 📦 הזמנות (M2)
+
+The 👔 persona → 🚚 הזמנות (`kManagerSections` → section `m-orders`) has 6 `mo-*` leaves —
+ONE per order-flow stage (`kManagerOrderFlow` @index.html:16943). Tapping a leaf opens an
+INLINE `_ManagerOrderPanel` above the dial (R2 — dial-drill, NO navigation) listing the REAL
+orders in that stage from `kManagerOrderSeed` (@index.html SYS_ORDERS_SEED) — each row is
+`📦 id` / `who · site` / `items פריטים · ₪sum` (mirrors the legacy `mo-card` @17001-17014),
+plus the stage's order count in the header. State: `bsOrderLeafProvider` (which `mo-*` panel
+is open; tap toggles; opening a metric panel or any pop/drill clears it — order & metric
+panels are mutually exclusive). `kManagerOrderLeafStage` maps each leaf id → stage;
+`_kOrderStageLabel` is the verbatim Hebrew stage name (`ORDER_STAGE[st].label` @12041-12048).
+
+| Leaf (id) | Stage | Shows | Status |
+|---|---|---|---|
+| 📥 התקבלה (`mo-new`) | `new` | order BS-1042 (יוסי כהן · מגדל הרצליה · 7 פריטים · ₪1240) | ✅ |
+| 🔧 בהכנה (`mo-preparing`) | `preparing` | order BS-1041 (אבי מזרחי · דירה — רמת גן · 3 · ₪680) | ✅ |
+| 📦 מוכן לאיסוף (`mo-ready`) | `ready` | order BS-1040 (משה אברהם · וילה — סביון · 12 · ₪3150) | ✅ |
+| 🚛 נאסף (`mo-pickup`) | `pickup` | **empty** → "לא נמצאו הזמנות תואמות." (0 in seed) | ✅ |
+| 🚚 בדרך לאתר (`mo-transit`) | `transit` | order BS-1039 (דוד לוי · משרדים — תל אביב · 4 · ₪420) | ✅ |
+| ✅ נמסר ✓ (`mo-delivered`) | `delivered` | **empty** → "לא נמצאו הזמנות תואמות." (0 in seed) | ✅ |
+
+The empty text "לא נמצאו הזמנות תואמות." is the legacy `md-empty` line (@index.html:16986).
+Guard: `bs_dial_manager_orders_test` (6 leaves present · each populated stage → its real order
+row · the 2 empty stages → empty text · metric/order mutual-exclusion · NO "בבנייה").
+
 ## Catalog settings (`catalog_settings_screen.dart` → `catalog_settings.dart`)
 
 | Setting | Behavior | Status |

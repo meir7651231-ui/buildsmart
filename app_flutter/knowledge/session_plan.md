@@ -119,7 +119,18 @@ Style: M0 (logic+test) commit אחד → M1 (widget+state+widget-test) commit ש
   (מספר אמיתי מ-`managerAnalytics`), במקום toast "בבנייה". 4 שאר ה-leaf-types ללא שינוי.
 - `bs_dial_manager_test` (4 widget): 5 leaves נוכחים · tap→מספר אמיתי · אין "בבנייה" · toggle.
 
+## M2 — wire 6 עלי `mo-*` (סטטוס הזמנות) inline (R2, NO new screen) ✅
+- `bsOrderLeafProvider` (state): ה-`mo-*` הפתוח (toggle) · ב-`resetAllDials` · נוקה בכל pop/drill.
+- `bs_dial_widget.dart`: tap על leaf `mo-*` → `_ManagerOrderPanel` inline מעל ה-dial. כל leaf =
+  שלב אחד ב-`kManagerOrderFlow`; הפאנל מסנן את `kManagerOrderSeed` לאותו שלב ומציג שורה לכל
+  הזמנה (`📦 id` / `who · site` / `items פריטים · ₪sum`, כמו `mo-card` הלגאסי) + ספירה בכותרת.
+  שלב ריק (pickup · delivered בזרע) → טקסט ה-empty הלגאסי "לא נמצאו הזמנות תואמות." (@16986).
+  panel הזמנות ומטריקה הדדית-בלעדיים. אין יותר toast "בבנייה".
+- `kManagerOrderLeafStage` (leaf→stage) + `kManagerOrderLeafIds` + `_kOrderStageLabel`
+  (שם-שלב עברי verbatim מ-`ORDER_STAGE`@12041-12048).
+- `bs_dial_manager_orders_test` (5): 6 leaves נוכחים · כל שלב מאוכלס→שורת-ההזמנה האמיתית · 2
+  השלבים הריקים→טקסט empty · metric/order mutual-exclusion · אין "בבנייה".
+
 ## נשאר (גלים הבאים)
-- M2 — 6 עלי `mo-*` (סטטוס הזמנות) דרך `kManagerOrderFlow` (כל שלב מסנן הזמנות).
 - M3 — 👥 לקוחות דרך `mgrCustomerList` + `contractorCredit`.
-- M4 — שאר ה-sections של המנהל (הזמנות/ניהול).
+- M4 — שאר ה-sections של המנהל (ניהול).

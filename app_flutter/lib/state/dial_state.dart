@@ -19,6 +19,13 @@ final bsDrillPathProvider = StateProvider<List<String>>((_) => const []);
 /// again (or any other dial action) closes it.
 final bsMetricLeafProvider = StateProvider<String?>((_) => null);
 
+/// Section id of the manager 📦 הזמנות leaf whose inline order-list panel is
+/// open (one of the `mo-*` ids), or null when none is showing. Each `mo-*`
+/// leaf maps to ONE order-flow stage; tapping it opens that stage's REAL orders
+/// INLINE in the dial (R2 — no new screen); tapping again (or any other dial
+/// action) closes it. Mirrors [bsMetricLeafProvider] for the M2 order leaves.
+final bsOrderLeafProvider = StateProvider<String?>((_) => null);
+
 /// Which menu tab is currently drilled into (null = 4-tab root).
 enum MenuTab { home, projects, cart, settings }
 
@@ -43,6 +50,7 @@ void resetAllDials(WidgetRef ref) {
   ref.read(activePersonaProvider.notifier).state = null;
   ref.read(bsDrillPathProvider.notifier).state = const [];
   ref.read(bsMetricLeafProvider.notifier).state = null;
+  ref.read(bsOrderLeafProvider.notifier).state = null;
   ref.read(menuTabProvider.notifier).state = null;
   ref.read(searchToolProvider.notifier).state = null;
 }

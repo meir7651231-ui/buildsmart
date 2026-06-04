@@ -8,6 +8,20 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
+v5.94 — 👔 **Manager 📦 הזמנות — real per-stage orders** (wave 1: M2) 🟦.
+The 👔 "מנהל המערכת" BS-dial → 🚚 הזמנות section's 6 `mo-*` leaves now show the REAL
+orders in their order-flow stage inline (R2 dial-drill, no new screen) instead of
+"בבנייה" toasts. **M2** ✅ — `bsOrderLeafProvider` + an inline `_ManagerOrderPanel` in
+`bs_dial_widget.dart`: each `mo-*` leaf = one `kManagerOrderFlow` stage; the panel filters
+`kManagerOrderSeed` to that stage and lists each order (`📦 id` / `who · site` /
+`items פריטים · ₪sum`, mirroring the legacy `mo-card` @index.html:17001-17014) + a count.
+The 2 stages with no seed orders (pickup · delivered) render the legacy empty text
+"לא נמצאו הזמנות תואמות." (@16986). Order & metric panels are mutually exclusive.
+`kManagerOrderLeafStage`/`kManagerOrderLeafIds`/`_kOrderStageLabel` (stage names verbatim from
+`ORDER_STAGE` @12041-12048). Guard `bs_dial_manager_orders_test` (5). All data verbatim from
+index.html (NOT `SYSTEM_MANAGER.md`). **Remaining (🟦):** M3 — 👥 customers via
+`mgrCustomerList`; M4 — the manager's management section.
+
 v5.93 — 👔 **Manager 📊 dashboard — real derived numbers** (wave 1: M0+M1) 🟦.
 The 👔 "מנהל המערכת" BS-dial 📊 dashboard's 5 `md-*` leaves now show REAL numbers
 inline (R2 dial-drill, no new screen) instead of "בבנייה" toasts.
@@ -19,8 +33,8 @@ verified verbatim against the live index.html `TREES` loop (NOT `SYSTEM_MANAGER.
 `kManagerOrderFlow` (@16943) + `contractorCredit` + `mgrCustomerList` = M2/M3 foundation.
 Guard `manager_dashboard_test` (12). **M1** ✅ — `bsMetricLeafProvider` + an inline
 `_ManagerMetricPanel` in `bs_dial_widget.dart`; guard `bs_dial_manager_test` (4).
-**Remaining (🟦):** M2 — 6 `mo-*` order-status leaves via `kManagerOrderFlow`; M3 —
-👥 customers via `mgrCustomerList`; M4 — the manager's orders/management sections.
+**Remaining (🟦):** M3 — 👥 customers via `mgrCustomerList`; M4 — the manager's
+orders/management sections.
 
 v5.69 — 💧 **Division option 2 — through the finder** (Benzi #1, user-chosen).
 A live department now opens the **finder (בית)** scoped to its `WaterSystem`
