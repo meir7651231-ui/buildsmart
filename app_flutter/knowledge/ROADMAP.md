@@ -195,11 +195,10 @@
 > **⚠️ R2 מוחלט:** dial-drill בלבד, לא dashboards!
 > **משך משוער:** 8–12 ימים
 
-### 4-A · מנוע-הזמנות המשותף (SYS_ORDERS)
-- **מקור:** proto `SYS_ORDERS` [L11970] — 6 שלבים: `new→confirmed→picked→shipped→delivered→closed`
-- **כיצד:** `order_engine.dart` — Riverpod provider `ordersProvider`; state machine `transition(order, action, role) → Order`; כל persona קורא אותו provider
-- **events:** `onOrderCreated`, `onOrderConfirmed`, `onOrderShipped`, `onOrderDelivered`
-- **DoD:** מכונת-מצבים unit test (כל 6 שלבים × 5 roles); provider מחובר לסל.
+### 4-A · מנוע-הזמנות המשותף (SYS_ORDERS) — ✅ data layer (v5.97)
+- **מקור:** proto `SYS_ORDERS` [L11970] — 6 שלבים: `new→preparing→ready→pickup→transit→delivered`
+- **מומש:** `state/orders_engine.dart` — `ordersEngineProvider` (`StateNotifier<List<Order>>`), seeded ב-4 הזמנות-ה-seed; `placeOrder` / `advance` (verbatim `mgrAdvanceOrder`) / `setStage` (god-step) / `resetToSeed`; persist `bs.orders.v1`. `managerAnalyticsProvider`/`managerCustomersProvider` גוזרים מההזמנות החיות. כל persona יקרא את אותו provider.
+- **DoD:** `orders_engine_test` (21) ✅. **M3 (👔 🚚 tab) הוא ה-WRITE הראשון של UI-תפקיד ל-engine** (advance god-mode) — מאומת שמזרים חי ל-📊 dashboard.
 
 ### 4-B · חנות-ספק (🏪)
 - **מקור:** proto `renderStoreOrders` [L17080], `renderStoreStock` [L17352], `STORES`/`STORE_STOCK`
@@ -217,11 +216,10 @@
 - **flows:** משימות-פעילות → approval loop (עובד מסמן → מנהל מאשר) → work-log
 - **DoD:** approval loop mock; state transition ב-test.
 
-### 4-E · מנהל (👔)
+### 4-E · מנהל (👔) — ✅ `ManagerDashboardScreen` (full role-app; M1–M5 ✅ — COMPLETE)
 - **מקור:** proto `renderMgr*` [L12133+] — KPI / הזמנות / לקוחות / CRUD
-- **flows:** KPI חי (helper) → הזמנות כל-הסטטוסים → לקוחות → ניהול-מוצרים
-- **helper:** `kpiSnapshot(orders) → KpiData` — pure, נבדק
-- **DoD:** KPI helper נבדק; 4 sections מוצגים; CRUD mock.
+- **מומש:** role-app screen מלא (LIGHT, 4-tab) במקום dial-drill (החלטה ב-STATUS/WIRING). **M1** SHELL (v5.98) · **M2** 📊 לוח בקרה — 5 metric tiles + pipeline חיים (v5.99) · **M3** 🚚 הזמנות — רשימה חיה + god-mode "קדם שלב ›" (`advance`) + detail-sheet (v6.00) · **M4** 👥 לקוחות — רשימת-לקוחות חיה (`managerCustomersProvider`, group-by-`who`) + bar ניצול-אשראי + status פעיל/אשראי-גבוה + detail-sheet (v6.01) · **M5** 🛠️ ניהול — 5 כלי-ניהול (אקורדיון: 🗂️ קטגוריות חיות · ⚙️ הגדרות verbatim · 🌳 עץ-מוצרים · 🏷️ מותגים מ-`kBrands` · 🔬 רגרסיה→`RegressionPanelScreen`) (v6.02). **המסך COMPLETE — אפס "בקרוב".**
+- **DoD:** `manager_dashboard_screen_test` (30) + `manager_dashboard_test` (12) + `orders_engine_test` (21) ✅. כל הגלים M1→M5 הושלמו.
 
 ---
 

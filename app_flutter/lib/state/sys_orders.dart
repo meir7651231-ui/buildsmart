@@ -1,37 +1,111 @@
-// Shared cross-role order state — the Flutter port of the prototype's
-// `SYS_ORDERS` engine (proto 06 §1). One source of truth that BOTH the store
-// and courier role-apps watch, so advancing an order in one persona is
-// reflected live in the other (the prototype achieved this via a shared
-// localStorage key + cross-tab `storage` event; here it is a Riverpod
-// StateNotifier all persona screens read).
+// Shared cross-role order state — now a LIVE VIEW over the single
+// `ordersEngineProvider` (the manager's keystone engine), so the store and
+// courier role-apps share ONE source of truth with the contractor AND the
+// manager: advancing an order as the store/courier is reflected live in the
+// manager's dashboard, and a contractor-placed order shows up live for the
+// store. Previously this engine kept its own parallel list; it now derives from
+// `ordersEngineProvider` (verified 1:1 — same four seed orders, same stages,
+// same flow new→preparing→ready→pickup→transit→delivered) and delegates every
+// mutation to it.
+//
+// Mapping: the engine `Order` (stage = `kManagerOrderFlow` String) → `SysOrder`
+// (stage = `OrderStage` enum) plus the store/courier-only fields `haul` + `lines`,
+// looked up by order id from [kSysOrdersSeed] (orders placed at runtime default
+// to a small haul + their captured lines).
 //
 // Who advances which transitions (proto 06 §1.1):
 //   • Supplier  `storeAdvance`   — new→preparing→ready
 //   • Courier   `courierAdvance` — ready→pickup→transit→delivered
-//   • Manager   (god-mode, any single step) — deferred to PLAN-manager.
-//
-// Deferred (not Phase-1 scope): localStorage persistence, the picking-sheet
-// line state machine, the missing-item hold loop, split-shipment jobs, POD.
+//   • Contractor places + Manager god-steps via the engine directly.
 
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/state/orders_engine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// `kManagerOrderFlow` String stage → [OrderStage] enum. Unknown → newOrder.
+OrderStage _stageFromFlow(String s) => switch (s) {
+  'new' => OrderStage.newOrder,
+  'preparing' => OrderStage.preparing,
+  'ready' => OrderStage.ready,
+  'pickup' => OrderStage.pickup,
+  'transit' => OrderStage.transit,
+  'delivered' => OrderStage.delivered,
+  _ => OrderStage.newOrder,
+};
+
+/// Store/courier-only metadata (haul + line items) the slim engine [Order]
+/// doesn't carry — seeded by id from [kSysOrdersSeed].
+typedef _Meta = ({String haul, List<OrderLine> lines});
+
+final Map<String, _Meta> _seedMeta = {
+  for (final o in kSysOrdersSeed) o.id: (haul: o.haul, lines: o.lines),
+};
+
 class SysOrdersNotifier extends StateNotifier<List<SysOrder>> {
-  SysOrdersNotifier() : super(List<SysOrder>.of(kSysOrdersSeed));
+  SysOrdersNotifier(this._ref) : super(const []) {
+    // Mirror the shared engine live — every engine change re-derives this view,
+    // so the store/courier screens update the instant the contractor places an
+    // order or the manager god-steps one.
+    _ref.listen<List<Order>>(
+      ordersEngineProvider,
+      (_, next) => state = _derive(next),
+      fireImmediately: true,
+    );
+  }
 
-  /// Supplier-owned advance: new→preparing→ready (`storeAdvance` [L17386]).
-  /// No-op once the order reaches `ready` (the courier takes over from there).
-  void storeAdvance(String id) => _apply(id, _storeNext);
+  final Ref _ref;
 
-  /// Courier-owned advance: ready→pickup→transit→delivered
-  /// (`courierAdvance` [L18226]). No-op outside that window.
-  void courierAdvance(String id) => _apply(id, _courierNext);
-
+  /// Metadata for orders placed at runtime via [simulateIncomingOrder].
+  final Map<String, _Meta> _runtimeMeta = {};
   int _simSeq = 0;
 
-  /// Demo tool — prepends a fresh incoming `new` order to the queue
-  /// (`simulateIncomingOrder` [L17161]; simplified to a deterministic line
-  /// subset + counter id, no `Math.random`). Returns the new order id.
+  List<SysOrder> _derive(List<Order> orders) =>
+      orders.map(_toSysOrder).toList(growable: false);
+
+  SysOrder _toSysOrder(Order o) {
+    final meta = _runtimeMeta[o.id] ?? _seedMeta[o.id];
+    return SysOrder(
+      id: o.id,
+      who: o.who,
+      site: o.site,
+      items: o.items,
+      sum: o.sum,
+      stage: _stageFromFlow(o.stage),
+      haul: meta?.haul ?? 'small',
+      lines: meta?.lines ?? const [],
+    );
+  }
+
+  Order? _orderById(String id) {
+    for (final o in _ref.read(ordersEngineProvider)) {
+      if (o.id == id) return o;
+    }
+    return null;
+  }
+
+  /// Supplier-owned advance: new→preparing→ready. No-op once `ready` (the
+  /// courier takes over). Delegates to the shared engine → the manager sees it.
+  void storeAdvance(String id) {
+    final o = _orderById(id);
+    if (o == null) return;
+    if (o.stage == 'new' || o.stage == 'preparing') {
+      _ref.read(ordersEngineProvider.notifier).advance(id);
+    }
+  }
+
+  /// Courier-owned advance: ready→pickup→transit→delivered. No-op outside that
+  /// window. Delegates to the shared engine → the manager sees it.
+  void courierAdvance(String id) {
+    final o = _orderById(id);
+    if (o == null) return;
+    if (o.stage == 'ready' || o.stage == 'pickup' || o.stage == 'transit') {
+      _ref.read(ordersEngineProvider.notifier).advance(id);
+    }
+  }
+
+  /// Demo tool — places a fresh incoming `new` order THROUGH the shared engine
+  /// (so the manager sees it immediately) and registers its store/courier
+  /// metadata. Returns the new order id.
   String simulateIncomingOrder() {
     final n = _simSeq++;
     const lines = [
@@ -40,47 +114,21 @@ class SysOrdersNotifier extends StateNotifier<List<SysOrder>> {
       OrderLine('סיליקון סניטרי', 1),
     ];
     final items = lines.fold<int>(0, (a, l) => a + l.qty);
-    final order = SysOrder(
-      id: 'BS-${1100 + n}',
+    final order = _ref.read(ordersEngineProvider.notifier).placeOrder(
       who: kSimCustomers[n % kSimCustomers.length],
       site: kSimSites[n % kSimSites.length],
       items: items,
       sum: 354,
-      stage: OrderStage.newOrder,
-      haul: 'small',
-      lines: lines,
     );
-    state = [order, ...state];
+    _runtimeMeta[order.id] = (haul: 'small', lines: lines);
     return order.id;
   }
-
-  void _apply(String id, OrderStage? Function(OrderStage) next) {
-    state = [
-      for (final o in state)
-        if (o.id == id)
-          o.copyWith(stage: next(o.stage) ?? o.stage)
-        else
-          o,
-    ];
-  }
-
-  static OrderStage? _storeNext(OrderStage s) => switch (s) {
-    OrderStage.newOrder => OrderStage.preparing,
-    OrderStage.preparing => OrderStage.ready,
-    _ => null,
-  };
-
-  static OrderStage? _courierNext(OrderStage s) => switch (s) {
-    OrderStage.ready => OrderStage.pickup,
-    OrderStage.pickup => OrderStage.transit,
-    OrderStage.transit => OrderStage.delivered,
-    _ => null,
-  };
 }
 
-/// The shared order list. Seeded from [kSysOrdersSeed]; mutated by the store
-/// and courier role-apps via [SysOrdersNotifier].
+/// The shared order list — a live projection of [ordersEngineProvider] into the
+/// store/courier [SysOrder] shape. Every mutation delegates to the engine, so
+/// all roles (contractor · store · courier · manager) share ONE source of truth.
 final sysOrdersProvider =
     StateNotifierProvider<SysOrdersNotifier, List<SysOrder>>(
-      (ref) => SysOrdersNotifier(),
+      (ref) => SysOrdersNotifier(ref),
     );

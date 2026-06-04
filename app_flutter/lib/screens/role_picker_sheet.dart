@@ -1,5 +1,6 @@
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/screens/courier_dashboard_screen.dart';
+import 'package:buildsmart/screens/manager_dashboard_screen.dart';
 import 'package:buildsmart/screens/store_dashboard_screen.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
 import 'package:buildsmart/state/dial_state.dart';
@@ -132,6 +133,13 @@ class _RoleRow extends ConsumerWidget {
               Navigator.of(context).push(WorkerAppScreen.route());
               return;
             }
+            if (persona.id == 'manager') {
+              // Manager is a full role-app (the מרכז השליטה dashboard SHELL),
+              // not a BS-dial drill — mirror the worker→WorkerAppScreen pattern.
+              Navigator.of(context).pop();
+              Navigator.of(context).push(ManagerDashboardScreen.route());
+              return;
+            }
             if (persona.id == 'store') {
               // Supplier store — full role-app (4 tabs), not a dial (T9).
               Navigator.of(context).pop();
@@ -144,8 +152,7 @@ class _RoleRow extends ConsumerWidget {
               Navigator.of(context).push(CourierDashboardScreen.route());
               return;
             }
-            // Manager still surfaces its existing BS-dial section tree
-            // (deferred to PLAN-manager-completion).
+            // Any remaining role surfaces its existing BS-dial section tree.
             ref.read(activePersonaProvider.notifier).state = persona.id;
             ref.read(bsDrillPathProvider.notifier).state = const [];
             ref.read(openDialProvider.notifier).state = OpenDial.bs;

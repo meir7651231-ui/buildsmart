@@ -28,12 +28,15 @@ home directly. Guarded by `onboarding_test`.
 
 | Button | Behavior | Status |
 |---|---|---|
-| logo "BuildSmart" | opens the "מי אתה?" persona picker (`showRolePicker`); contractor stays in the main app; **עובד / חנות / שליח each open their full role-app** (`WorkerAppScreen` / `StoreDashboardScreen` / `CourierDashboardScreen`); manager still opens its BS-dial sections | ✅ |
-| role-app **עובד** (`WorkerAppScreen`) — T9 | same shell as the main app (white AppBar `🦺 עובד · ‹ יציאה` + card list, `BsTokens`); only the content differs. Faithful port of `renderWorker()` (proto 06 §4.2): worker picker (`kWorkers`) · summary (`שלום {name} 👷` + `{done}/{total}` + progress + פעילה/בתור/הוגשו) · 3 buckets (🔨 המשימה הנוכחית שלך = active\|rejected · ⏳ הבאות בתור = pending · 📋 שהגשת = review\|done) as task cards. Data: `persona_data.dart` (5 verbatim tasks, R8). store + courier now follow the same pattern (rows below); manager deferred to PLAN-manager. | ✅ |
+| logo "BuildSmart" | opens the "מי אתה?" persona picker (`showRolePicker`); contractor stays in the main app; **עובד / מנהל / חנות / שליח each open their full role-app** (`WorkerAppScreen` / `ManagerDashboardScreen` / `StoreDashboardScreen` / `CourierDashboardScreen`) | ✅ |
+| role-app **עובד** (`WorkerAppScreen`) — T9 | same shell as the main app (white AppBar `🦺 עובד · ‹ יציאה` + card list, `BsTokens`); only the content differs. Faithful port of `renderWorker()` (proto 06 §4.2): worker picker (`kWorkers`) · summary (`שלום {name} 👷` + `{done}/{total}` + progress + פעילה/בתור/הוגשו) · 3 buckets (🔨 המשימה הנוכחית שלך = active\|rejected · ⏳ הבאות בתור = pending · 📋 שהגשת = review\|done) as task cards. **W3 — now LIVE:** `ConsumerStatefulWidget` reading the shared `workerTasksProvider` (not the static const); a current-bucket card carries a keyed "📸 שלח לאישור" button → `submitForReview` (active\|rejected → `review`), surfacing the task in the manager's approvals view. Data: `persona_data.dart` (5 verbatim tasks, R8). | ✅ |
+| role-app **מנהל המערכת** (`ManagerDashboardScreen`) — unify | full LIGHT role-app, 4-tab toggle (📊 לוח בקרה · 🚚 הזמנות · 👥 לקוחות · 🛠️ ניהול) reading the shared `ordersEngineProvider` live data (`managerAnalyticsProvider` / `managerCustomersProvider`). Replaces the old dial-manager panel for the manager persona. | ✅ |
 | role-app **🏪 חנות ספק** (`StoreDashboardScreen`) — T9 | full role-app, 4 segmented tabs (בית/הזמנות/מלאי/פורטל), same shell as the main app. Faithful port of `screen-store` (proto 06 §2): action-first home (`שלום 👋` · primary `הזמנות ממתינות לאישור` · stats בהכנה/מוכן לאיסוף/מחזור פעיל · stock alert · demo `סימולציית הזמנה נכנסת`) · orders queue with the real **`new→preparing→ready`** advance (`✓ אשר וקבל להכנה` / `📦 סמן כמוכן — העבר לשליח`) · stock availability toggles (`✅ זמין במלאי` / `❌ אזל`) · 8-tile supplier portal. Orders are the shared `sysOrdersProvider`. Data verbatim `supplier_data.dart` (R8). Guarded by `t9_supplier_personas_test`. | ✅ |
 | role-app **🛵 שליח** (`CourierDashboardScreen`) — T9 | full role-app: vehicle picker (`vehicleCanCarry`, משלוח קטן/טנדר/משאית) + delivery home (stats לאיסוף/בדרך/נמסרו) + job list (3-step tracker איסוף/בדרך/נמסר) + 6-tile portal. Faithful port of `screen-courier` (proto 06 §3): the real **`ready→pickup→transit→delivered`** advance (`📦 אספתי מהחנות` / `🚚 יצאתי לדרך` / `✅ נמסר ללקוח`). Shares `sysOrdersProvider` with the store — an order the store marks "מוכן" appears here live. Data verbatim (R8). Guarded by `t9_supplier_personas_test`. | ✅ |
 
 > **T9 deferred** (proto "adds beyond"/heavier infra): per-store login routing, the picking sheet + missing-item hold loop, split-shipment jobs, POD capture, the printed delivery note, and localStorage persistence. The store/courier full screens + the shared 6-stage advance engine are done.
+>
+> **⚠️ merge note (live↔manager unify):** the store/courier role-apps read **`sysOrdersProvider`** while the manager reads **`ordersEngineProvider`** — two separate order systems. Contractor checkout + worker tasks feed the manager's engine (live); store/courier currently do **not** reach the manager. Unifying the T9 store/courier dashboards onto `ordersEngineProvider` is the next step.
 | 💡 (קצה שמאלי) | replays the intro tour (`showIntroTour` → the onboarding slides) | ✅ |
 | שם-משתמש (צ'יפ ליד הלוגו) | registered user's first name (`userProfileProvider`); absent for guest/demo | ✅ |
 
@@ -42,6 +45,205 @@ home directly. Guarded by `onboarding_test`.
 | Element | Behavior | Status |
 |---|---|---|
 | תווית-גרסה | מציגה `kVersionLabel` בלבד (אפור-secondary, `Key('version_chrome')`), מ-`version.g.dart` הנוצר אוטומטית מ-git+STATUS. אין נקודה-ירוקה (שמורה ל-`_PulsingStatus`), אין changelog ב-UI. לא מרונדרת במצב "עץ חכם". | ✅ wired (לקח #72) |
+
+## 🔗 Shared orders engine — DATA LAYER (`state/orders_engine.dart` · `logic/manager_dashboard.dart`)
+
+The legacy `SYS_ORDERS` (the localStorage array every role read & wrote, @index.html:11965-12039,
+:16939-17035) ported to a Riverpod state engine. **DATA LAYER ONLY — no UI reads it yet** (wiring
+the 4-tab UI / the dial to the engine is a LATER wave). `ordersEngineProvider`
+(`StateNotifier<List<Order>>`) is **SEEDED with the SAME four seed orders** (from `kManagerOrderSeed`,
+the retained seed source) so every existing manager number is preserved. `Order` =
+`id/who/site/items/sum/stage` (+ optional `createdAt`); `isOpen` = `stage!=='delivered'`. Persists
+to `SharedPreferences` key `bs.orders.v1` (cart/profile pattern; corrupt → seed).
+
+| API / provider | Behavior | Status |
+|---|---|---|
+| `placeOrder({who, site, items, sum, id?, createdAt?})` | contractor creates an order at stage `new`; auto-id `BS-####` above current max; prepended + timestamped; returns it | ✅ |
+| `advance(orderId)` | next stage in `kManagerOrderFlow`; no-op once `delivered` (verbatim `mgrAdvanceOrder` @17022-17032); unknown id = no-op | ✅ |
+| `setStage(orderId, stage)` | manager "god-step" to ANY flow stage; ignores unknown id/stage | ✅ |
+| `resetToSeed()` | restore the four seed orders | ✅ |
+| `managerAnalyticsProvider` | `ManagerAnalytics` over the engine's LIVE orders (same fold as the static `managerAnalytics`) | ✅ |
+| `managerCustomersProvider` | `mgrCustomerList` over the engine's LIVE orders | ✅ |
+
+Guard: `orders_engine_test` (21 — seed correctness vs `kManagerOrderSeed`/`managerAnalytics`,
+place/advance/setStage behavior, persistence round-trip, flow ordering). The static
+`managerAnalytics` / `mgrCustomerList()` (seed-bound) are UNCHANGED and still feed the dashboard
+widget below — the engine just adds the live path for the upcoming UI wave.
+
+## 🔗 Shared worker-tasks engine — W3 cross-persona (`state/worker_tasks_engine.dart` · `data/persona_data.dart`)
+
+The 🦺 worker's tasks lifted from the STATIC `kPersonaTasks` into a live Riverpod engine both the
+worker and the manager read & write — so "the manager manages everyone live" now covers the worker.
+`workerTasksProvider` (`StateNotifier<List<PersonaTask>>`) is **SEEDED from `kPersonaTasks`** (every
+verbatim string/number preserved). The approval bridge is the task status (proto 06 `taskStatusInfo`):
+`active`/`rejected` →(worker)→ `review` (📸 ממתין לאישור) →(manager)→ `done` (✅ אושר) or `rejected`
+(↩️ נדחה — back to the worker). `PersonaTask` gained `copyWith(status:)` + an optional `orderId`.
+
+| API / provider | Behavior | Status |
+|---|---|---|
+| `submitForReview(id)` | WORKER "שלח לאישור": `active`/`rejected` → `review`; no-op from any other status | ✅ |
+| `approve(id)` | MANAGER: `review` → `done`; if the task has an `orderId`, also `advance`s that order on the SHARED `ordersEngineProvider` (a completed install moves its order live) | ✅ |
+| `reject(id)` | MANAGER: `review` → `rejected` (bounces it back to the worker's current bucket) | ✅ |
+| `resetToSeed()` | restore the verbatim seed | ✅ |
+| `pendingApprovalTasksProvider` | the LIVE `review` queue (id-sorted) the manager's אישורי עובדים view reads | ✅ |
+
+Seed task 3 (איטום רצפת מקלחת, `review`) is bound to order **BS-1040** (stage `ready`) so approving it
+advances ready → pickup — the cross-engine link. Guard: `worker_approval_engine_test` (5 — pure
+submit→pending→approve→done in one container · reject bounce-back · order-linked approval advancing
+BS-1040 with the manager open-orders 4→3 chain · the worker "📸 שלח לאישור" widget submit · the manager
+👷 אישורי עובדים widget approve, reflecting live). `worker_app_test` updated to pump in a `ProviderScope`.
+
+## 👔 Manager dashboard — M1 SHELL + M2 📊 לוח בקרה + M3 🚚 הזמנות + M4 👥 לקוחות + M5 🛠️ ניהול (COMPLETE) (`screens/manager_dashboard_screen.dart` · `state/manager_dashboard_state.dart` · `state/orders_engine.dart` · `screens/role_picker_sheet.dart`)
+
+The 👔 "מנהל המערכת" persona was rebuilt from the BS-dial drill (below) into a **full
+role-app screen** — the same LIGHT shell/style as the 🦺 worker app. **M1 = the SHELL; M2 fills the
+📊 לוח בקרה tab with a LIVE cockpit; M3 fills the 🚚 הזמנות tab with the live order list + the
+manager's god-mode stage-advance; M4 fills the 👥 לקוחות tab with the live customer list + credit;
+M5 fills the 🛠️ ניהול tab with the 5 management tools** (all derived from the same shared orders
+engine where live). **The screen is now COMPLETE — every tab is real, ZERO "בקרוב" placeholder remains.**
+
+| Element | Behavior | Status |
+|---|---|---|
+| `ManagerDashboardScreen` | `ConsumerWidget`; LIGHT `Scaffold(bgLight)` + white AppBar (`cardLight`) — title "מרכז השליטה" (`inkLight`) + subtitle "מנהל המערכת" (`mutedLight`) + green "חי" pill + "‹ יציאה" | ✅ |
+| 4-tab segmented toggle | pill style (selected = `brand` fill + white text; unselected = `cardLight` + `inkLight` text; pill radius) — 📊 לוח בקרה · 🚚 הזמנות · 👥 לקוחות · 🛠️ ניהול; replicates `updates_screen`'s `seg()`; tap sets `managerTabProvider` | ✅ |
+| `IndexedStack` body | index-0 = the 📊 `_DashboardTab` cockpit (M2); index-1 = the 🚚 `_OrdersTab` (M3); index-2 = the 👥 `_CustomersTab` (M4); index-3 = the 🛠️ `_ManageTab` (M5); all 4 kept mounted. **No placeholder remains — `_TabPlaceholder` was removed** | ✅ |
+| 📊 `_DashboardTab` (M2) | `ConsumerWidget`; a LIGHT `ListView` (`bgLight`) over the LIVE engine — watches `managerAnalyticsProvider` + `ordersEngineProvider` (a trimmed port of `renderMgrDashboard` @index.html:12133) | ✅ |
+| 5 metric tiles (`_MetricGrid`/`_MetricTile`) | WHITE `cardLight` cards (2-up `Wrap`) — emoji + big `brand` number + `mutedLight` verbatim label: 🚚 הזמנות פתוחות · 📦 מוצרים בקטלוג · 🧰 אביזרים נלווים · ✅ זמינים כעת · 🏪 חנויות פעילות. Numbers from `managerAnalyticsProvider` over the engine's LIVE orders (`mdMetric` @12160-12164). Seed: 4 / 54 / 148 / 202 / 3/3 — and 🚚 reflows when an order is placed/advanced/delivered | ✅ |
+| Order pipeline (`_OrderPipeline`/`_PipelineRow`) | WHITE `cardLight` card "צינור ההזמנות" — per-stage count + proportional bar across the **6** `kManagerOrderFlow` stages (group-by-stage over `ordersEngineProvider`); labels verbatim from the legacy `md-pipe` array + נאסף for pickup: התקבלה · בהכנה · מוכן · נאסף · בדרך · נמסר; bar colours = legacy hex (`md-pipe` @12177-12198). Seed: 1/1/1/0/0/0 | ✅ |
+| 🚚 `_OrdersTab` (M3) | `ConsumerStatefulWidget`; a LIGHT `ListView` (`bgLight`) over the LIVE engine — `ref.watch(ordersEngineProvider)`. A faithful port of the legacy `renderMgrOrders` (@index.html:16939-17075). Local `_filter` = `'all'` or one `kManagerOrderFlow` stage (the legacy `mgrOrderFilter`); the free-text search is out of scope this wave | ✅ |
+| `_OrderSummary` (M3) | WHITE `cardLight` strip — 3 stats (הזמנות = total / פתוחות = open / מחזור = ₪Σsum, grouped). Legacy `mo-summary` @index.html:16953-16962 | ✅ |
+| `_OrderStageChips` (M3) | `הכל (N)` + one chip per **populated** stage — VERBATIM `ORDER_STAGE` labels + counts (@index.html:12041-12048, `md-chips` @16967-16973). Active chip = `brand` fill; tap sets `_filter`. A stage that empties out falls back to `הכל` | ✅ |
+| `_OrderRow` (M3) | WHITE `cardLight` card (legacy `mo-card` @16998-17017): `📦 id` + a `_StagePill` (tinted stage colour) on top · `who · site` · a 6-step `_MiniTracker` · footer `items פריטים · ₪sum` + the advance control. Tapping the card opens the detail sheet | ✅ |
+| 🔑 `_AdvanceButton` "קדם שלב ›" (M3) | per **open** order → `ref.read(ordersEngineProvider.notifier).advance(o.id)` (the legacy `mgrAdvanceOrder` @17022) → toasts `הזמנה id → next-label` (or "ההזמנה כבר הושלמה"). A `delivered` order shows "✓ הושלם" instead. **The first manager WRITE to the engine** — the shared `ordersEngineProvider` means the 📊 dashboard's 🚚 tile + pipeline + counts reflow LIVE | ✅ |
+| `_OrderDetailSheet` (M3, optional) | `showModalBottomSheet` on row tap (legacy `mgrOrderDetail` @17037-17075): `📦` + id + `status · who` tag · full 6-step `_MiniTracker` · items/sum/step grid · קבלן/אתר/סטטוס rows · `קדם ל"…"` action (routes through the same `advance`) or a "✓ ההזמנה הושלמה ונמסרה" note | ✅ |
+| 👥 `_CustomersTab` (M4) | `ConsumerStatefulWidget`; a LIGHT `ListView` (`bgLight`) over the LIVE engine — `ref.watch(managerCustomersProvider)` (orders grouped by buyer `who`) + `ref.watch(ordersEngineProvider)` (for distinct sites + live reflow). A faithful port of the legacy `renderMgrCustomers` (@index.html:16566-16607). Local `_filter` = `'all'` / `live` / `low` (the status filter, swapping the legacy free-text search) | ✅ |
+| `_CustomerSummary` (M4) | WHITE `cardLight` strip — 3 stats (קבלנים = count / סך רכש = ₪Σspend / ניצול אשראי = Σused÷Σlimit %). Legacy `mo-summary` @index.html:16574-16578 | ✅ |
+| `_CustomerStatusChips` (M4) | `הכל (N)` + a פעיל / אשראי גבוה chip per **populated** status (counts). Active chip = `brand` fill; tap sets `_filter`. A status that empties out falls back to `הכל`. Labels verbatim from the legacy `mc-pill` (@index.html:16592) | ✅ |
+| `_CustomerCard` (M4) | WHITE `cardLight` card (legacy `mc-card` @16593-16604): `👷 name` + `N הזמנות · M אתרים` (M = distinct build-sites per buyer off the live orders) + a status `_StagePill` on top; then a `_CreditBar` + the line `ניצול אשראי: ₪used / ₪limit (pct%)`. `pct = min(100, round(spend÷credit×100))`; ceiling = `contractorCredit` (the deterministic hash in the analytics layer). Status (@16562): **פעיל** 0<pct<90 (green) / **⚠️ אשראי גבוה** pct≥90 (amber) / לא פעיל pct=0 (grey). Tapping opens the detail sheet | ✅ |
+| 🔑 LIVE customers | the list is `managerCustomersProvider` over the engine's orders, so a **new contractor order placed on the engine (by ANY role) adds/updates a customer card here LIVE** — proven in `manager_dashboard_screen_test` (place an order → a 5th customer card appears; push a buyer >90% → "⚠️ אשראי גבוה") | ✅ |
+| `_CustomerDetailSheet` (M4, optional) | `showModalBottomSheet` on card tap (legacy `mgrCustomerDetail` @16609-16643): `👷` + name + a status tag · orders/spend/pct grid · credit rows (מסגרת אשראי / נוצל / יתרה זמינה / אתרי בנייה) · the contractor's own orders (📦 id · ₪sum · stage pill), all off the same live engine. Read-only | ✅ |
+| 🛠️ `_ManageTab` (M5) | `ConsumerStatefulWidget`; a LIGHT `ListView` (`bgLight`) — the intro banner + the W3 👷 אישורי עובדים section + a 5-section accordion (only one open at a time, local `_open` key, the legacy `mgrManageOpen`). A faithful port of `renderMgrManage` (@index.html:16645-16890) | ✅ |
+| `_ManageIntro` (M5) | a soft `brand`-tinted banner: "🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית." (legacy `mm-intro` @16650) | ✅ |
+| `_ManageSection` (M5) | a WHITE `cardLight` accordion card — tappable header (emoji + title + sub + optional count badge + ▾/‹ chevron) revealing its body when open (legacy `mmSection` @16855). 6 of them now (👷 אישורי עובדים first, then the 5 verbatim tools) | ✅ |
+| 👷 אישורי עובדים body (`_ApprovalsBody`/`_ApprovalRow`, W3) | the manager's LIVE worker-approval queue (the W3 cross-persona affordance) — `ref.watch(pendingApprovalTasksProvider)` (`review` tasks off the shared `workerTasksProvider`), with a count `_CountBadge` in the header. Each row: task name · `🦺 worker · 🕒 days · steps` · note · keyed **✅ אשר** (`approve-<id>` → `approve`, review→done; advances a bound order) / **↩️ דחה** (`reject-<id>` → `reject`, review→rejected). Empty → "🎉 אין משימות הממתינות לאישור." A worker "📸 שלח לאישור" surfaces a row here with no refresh; the decision reflects live on the worker screen. LIGHT only | ✅ |
+| 🗂️ קטגוריות body (`_CategoriesBody`, M5) | the **LIVE** catalog category list — `ref.watch(managerAnalyticsProvider).catalogCategories` (sorted by count desc): header `קטגוריות פעילות (N)` + a `<cat> · <count> מוצרים` row per category + the verbatim hint "שינוי שם קטגוריה מעדכן את כל המוצרים שבה." (legacy SECTION 3 @16715-16729) | ✅ |
+| ⚙️ הגדרות אפליקציה body (`_AppSettingsBody`, M5) | the 3 contractor-app config rows VERBATIM: תוספת משלוח אקספרס=₪80 (`EXPRESS_FEE` @11961) · מסגרת אשראי לקבלן=₪50,000 (`creditLimit` @11963) · שיעור מע״מ=18% (`VAT_RATE` @11941) + the verbatim hint (legacy SECTION 4 @16733). Display-only | ✅ |
+| 🌳 עץ המוצרים body (`_ProductTreeBody`, M5) | an inline summary of the catalog product-tree (the legacy SECTION 1 prompt-edit has no backend here): the verbatim purpose + the live tree size (מוצרים בעץ / קטגוריות, from the same analytics map) | ✅ |
+| 🏷️ מותגים ומחירים body (`_BrandsBody`, M5) | the brands list from `lib/data/brands.dart` (`kBrands`): header `מותגים (N)` + each brand's `emoji name` + tagline + product count (legacy SECTION 2 @16687) | ✅ |
+| 🔬 בדיקות רגרסיה body (`_RegressionBody`, M5) | a `brand` action button "🔬 פתח מרכז בדיקות רגרסיה" → `Navigator.push(RegressionPanelScreen.route())` (the same target the old manager dial used) | ✅ |
+| `managerCustomersProvider` | `Provider<List<ManagerCustomer>>` — `mgrCustomerList` over the engine's LIVE orders (`state/orders_engine.dart`) | ✅ |
+| `managerTabProvider` | `StateProvider<int>` (0..3) — the active tab the `IndexedStack` reads | ✅ |
+| `ManagerDashboardScreen.route()` | `MaterialPageRoute<void>` (the app's screen pattern) | ✅ |
+| role picker → manager | `role_picker_sheet.dart` `_RoleRow.onTap` for `manager` now `Navigator.push`es `ManagerDashboardScreen.route()` (mirrors worker→`WorkerAppScreen`) **instead of** `activePersonaProvider='manager'`/`OpenDial.bs` (the old drill). Other personas unchanged. | ✅ |
+
+Scope (M5): ONLY the 🛠️ tab body + the route call to `RegressionPanelScreen` — the orders engine
+internals, the logic layer (read, not changed), the other 3 tabs (M2 = 📊 · M3 = 🚚 · M4 = 👥, all
+done), the role picker, and the buyer/checkout flow are untouched. **The manager screen is now COMPLETE
+— `_TabPlaceholder` was removed; no "בקרוב" remains anywhere.** The old BS-dial manager drill code below
+remains (now unreachable via the picker) pending a later cleanup. Guard: `manager_dashboard_screen_test`
+(30 — M1's six + M2's four + M3's six + M4's six + M5's seven [intro + 5 tool headers · 🗂️ LIVE category
+counts · ⚙️ verbatim config rows · 🌳 inline tree summary · 🏷️ kBrands list · 🔬 routes to
+`RegressionPanelScreen` · manage tab LIGHT/no-dark] + the COMPLETE/no-"בקרוב" + role-picker tests).
+
+## 👔 Manager BS-dial → 📊 dashboard (`bs_dial_widget.dart` · `state/dial_state.dart` · `logic/manager_dashboard.dart`) — LEGACY drill (unreachable via picker as of M1)
+
+The 👔 "מנהל המערכת" persona → לוח בקרה (`kManagerSections` → section `m-products`) has 5
+`md-*` leaves. Tapping a leaf opens an INLINE `_ManagerMetricPanel` above the dial (R2 —
+dial-drill, NO navigation) showing the REAL number derived in `manager_dashboard.dart`
+(`managerAnalytics`, a verbatim port of `mgrAnalytics()` @index.html:12081-12126). State:
+`bsMetricLeafProvider` (which `md-*` panel is open; tap toggles; any other dial action
+clears it). The other dial leaves (children / `mm-regression` / etc.) are unchanged.
+
+| Leaf (id) | Shows | Source getter | Status |
+|---|---|---|---|
+| 🚚 הזמנות פתוחות (`md-open-orders`) | `openOrders` (=4; orders not delivered, @12096) | `ManagerAnalytics.openOrders` | ✅ |
+| 📦 מוצרים בקטלוג (`md-catalog`) | `catalogCount` (=54; non-accessory, @12110) | `ManagerAnalytics.catalogCount` | ✅ |
+| 🧰 אביזרים נלווים (`md-accessories`) | `accessoryCount` (=148; `accessoryProduct:true`, @12107) | `ManagerAnalytics.accessoryCount` | ✅ |
+| ✅ זמינים כעת (`md-available`) | `availableCount` (=202; STORE_STOCK all-true, @12122) | `ManagerAnalytics.availableCount` | ✅ |
+| 🏪 חנויות פעילות (`md-stores`) | `storesLabel` (="3/3"; active/total, @12125) | `ManagerAnalytics.storesLabel` | ✅ |
+
+The leaf row whose panel is open is rendered `active` (highlighted), so the user sees which
+metric the panel belongs to; popping the persona/anchor or drilling into a child clears
+`bsMetricLeafProvider`. Verified active in v5.93 (M1 — the 5 leaves no longer toast "בבנייה").
+
+Guard: `bs_dial_manager_test` (5 leaves present · tap→inline panel with the real number ·
+NO "בבנייה" · toggle closes) + `manager_dashboard_test` (the derivations, vs index.html).
+
+### 👔 Manager BS-dial → 📦 הזמנות (M2)
+
+The 👔 persona → 🚚 הזמנות (`kManagerSections` → section `m-orders`) has 6 `mo-*` leaves —
+ONE per order-flow stage (`kManagerOrderFlow` @index.html:16943). Tapping a leaf opens an
+INLINE `_ManagerOrderPanel` above the dial (R2 — dial-drill, NO navigation) listing the REAL
+orders in that stage from `kManagerOrderSeed` (@index.html SYS_ORDERS_SEED) — each row is
+`📦 id` / `who · site` / `items פריטים · ₪sum` (mirrors the legacy `mo-card` @17001-17014),
+plus the stage's order count in the header. State: `bsOrderLeafProvider` (which `mo-*` panel
+is open; tap toggles; opening a metric panel or any pop/drill clears it — order & metric
+panels are mutually exclusive). `kManagerOrderLeafStage` maps each leaf id → stage;
+`_kOrderStageLabel` is the verbatim Hebrew stage name (`ORDER_STAGE[st].label` @12041-12048).
+
+| Leaf (id) | Stage | Shows | Status |
+|---|---|---|---|
+| 📥 התקבלה (`mo-new`) | `new` | order BS-1042 (יוסי כהן · מגדל הרצליה · 7 פריטים · ₪1240) | ✅ |
+| 🔧 בהכנה (`mo-preparing`) | `preparing` | order BS-1041 (אבי מזרחי · דירה — רמת גן · 3 · ₪680) | ✅ |
+| 📦 מוכן לאיסוף (`mo-ready`) | `ready` | order BS-1040 (משה אברהם · וילה — סביון · 12 · ₪3150) | ✅ |
+| 🚛 נאסף (`mo-pickup`) | `pickup` | **empty** → "לא נמצאו הזמנות תואמות." (0 in seed) | ✅ |
+| 🚚 בדרך לאתר (`mo-transit`) | `transit` | order BS-1039 (דוד לוי · משרדים — תל אביב · 4 · ₪420) | ✅ |
+| ✅ נמסר ✓ (`mo-delivered`) | `delivered` | **empty** → "לא נמצאו הזמנות תואמות." (0 in seed) | ✅ |
+
+The empty text "לא נמצאו הזמנות תואמות." is the legacy `md-empty` line (@index.html:16986).
+Guard: `bs_dial_manager_orders_test` (6 leaves present · each populated stage → its real order
+row · the 2 empty stages → empty text · metric/order mutual-exclusion · NO "בבנייה").
+
+### 👔 Manager BS-dial → 👥 לקוחות (M3)
+
+The 👔 persona → 👥 לקוחות (`kManagerSections` → section `m-customers`) has 2 `mc-*` leaves —
+ONE per customer status filter (the legacy `status` @index.html:16562). Tapping a leaf opens an
+INLINE `_ManagerCustomerPanel` above the dial (R2 — dial-drill, NO navigation) listing the REAL
+customers in that status from `mgrCustomerList` (manager_dashboard.dart, grouping index.html
+SYS_ORDERS_SEED by buyer) — each row is `👷 name` / `orders הזמנות · sites אתרים` / status pill /
+`ניצול אשראי: ₪spent / ₪credit (pct%)` (mirrors the legacy `mc-card` @16593-16604), plus the
+status's customer count in the header. State: `bsCustomerLeafProvider` (which `mc-*` panel is
+open; tap toggles; any other dial action / pop / drill clears it; metric/order/customer panels
+are mutually exclusive). `kManagerCustomerLeafStatus` maps each leaf id → status; `pct`/`status`
++ the distinct-site count `sites` are derived exactly as the legacy `mgrCustomerList`
+(@16554,16559-16562).
+
+| Leaf (id) | Status | Customers (verbatim from `mgrCustomerList`) | Status |
+|---|---|---|---|
+| 🟢 פעיל (`mc-live`) | `live` (0<pct<90) | all 4 seed buyers — e.g. משה אברהם (1 הזמנות · 1 אתרים · ניצול אשראי: ₪3,150 / ₪71,100 (4%)), יוסי כהן · אבי מזרחי · דוד לוי | ✅ |
+| ⚠️ אשראי גבוה (`mc-low`) | `low` (pct≥90) | **empty** → "לא נמצאו קבלנים תואמים." (no buyer ≥90% with the Dart credit ceilings) | ✅ |
+
+The empty text "לא נמצאו קבלנים תואמים." is the legacy customer `md-empty` line
+(@index.html:16586). Guard: `bs_dial_manager_customers_test` (2 leaves present · mc-live → its
+real customer rows · mc-low empty → empty text · metric/order/customer mutual-exclusion ·
+NO "בבנייה").
+
+### 👔 Manager BS-dial → 🛠️ ניהול (M4 — final wave; manager persona COMPLETE)
+
+The 👔 persona → 🛠️ ניהול (`kManagerSections` → section `m-manage`) has 5 `mm-*` leaves, ALL
+wired to their REAL target — a faithful port of the legacy `renderMgrManage`
+(@index.html:16645-16743). After M4 the manager persona has **ZERO reachable "בבנייה"** in any of
+its four sections (md/mo/mc/mm). Two leaves are DATA views → an INLINE `_ManagerManagePanel` above
+the dial (R2 — NO navigation), state `bsManageLeafProvider` (tap toggles; any other dial action /
+pop / drill clears it; metric/order/customer/**manage** panels are mutually exclusive). Two leaves
+are server actions → a labelled toast (the legacy `prompt()` editors have no backend here). One
+leaf routes. The partition `kManagerManageDataLeafIds` ∪ `kManagerManageActionLeafIds` ∪
+`{mm-regression}` covers every leaf with no overlap, so none can fall through to the stub.
+
+| Leaf (id) | Kind | Real target (verbatim, NO "בבנייה") | Status |
+|---|---|---|---|
+| 🌳 עץ המוצרים (`mm-trees`) | server action | toast "🌳 עריכת האביזרים המשלימים של כל מוצר" (legacy `mmSection` sub-title @16653) | ✅ |
+| 🏷️ מותגים ומחירים (`mm-brands`) | server action | toast "🏷️ עריכת המותגים והמחירים של כל מוצר" (legacy sub-title @16687) | ✅ |
+| 🗂️ קטגוריות (`mm-cats`) | data view | inline panel: `קטגוריות פעילות (14)` + every category + `N מוצרים` from `kManagerCatalogCategories` (legacy SECTION 3 @16716) + hint "שינוי שם קטגוריה מעדכן את כל המוצרים שבה." | ✅ |
+| ⚙️ הגדרות אפליקציה (`mm-settings`) | data view | inline panel: תוספת משלוח אקספרס=₪80 (`EXPRESS_FEE`@11961) · מסגרת אשראי לקבלן=₪50,000 (`creditLimit`@11963) · שיעור מע״מ=18% (`VAT_RATE`@11941) + the legacy hint | ✅ |
+| 🔬 בדיקות רגרסיה (`mm-regression`) | route | `RegressionPanelScreen.route()` — **UNCHANGED** (closes the dial; no panel/toast) | ✅ |
+
+The settings values are the legacy editable globals (read-only here — the `prompt()` editors are
+server actions, R8: no invented mutation); the credit line uses comma grouping to mirror the legacy
+`creditLimit.toLocaleString()` (@16736). Guard: `bs_dial_manager_manage_test` (12 — 5 leaves
+present · mm-cats → its real categories+counts · mm-settings → its 3 real rows · mm-trees/mm-brands
+→ the verbatim action toast (not "בבנייה") · mm-regression → still routes · metric/order/customer
+mutual-exclusion both directions · the leaf-set partition).
 
 ## Catalog settings (`catalog_settings_screen.dart` → `catalog_settings.dart`)
 

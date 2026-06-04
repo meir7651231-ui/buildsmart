@@ -473,3 +473,23 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/worker_app_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### ManagerAnalytics — 👔 dashboard derivations (lib/logic/manager_dashboard.dart) — 2026-06-03
+- **קובץ:** `lib/logic/manager_dashboard.dart` · בדיקה: `test/manager_dashboard_test.dart`
+- **מה עושה:** פורט PURE של `mgrAnalytics()` (@index.html:12081-12126) — `ManagerAnalytics`
+  גוזר את 5 ה-mdMetric tiles (openOrders/catalogCount/accessoryCount/availableCount/
+  storesLabel) ע"י fold על seed שפורט verbatim (STORES · SYS_ORDERS_SEED · התפלגות
+  TREES · STORE_STOCK). כל מספר אומת מול הלולאה החיה ב-index.html (node-replay).
+- תקלה שהוזרקה #1: ב-`catalogCount` הפכתי `totalProducts - accessoryCount` →
+  `totalProducts + accessoryCount`.
+- תוצאה: אדום ✅ — `'📦 catalogCount = non-accessory products = 54'` נפל (350≠54) וגם
+  `'catalog + accessory == total'` (ה-split כבר לא ממצה).
+- תקלה שהוזרקה #2: ב-`openOrders` הפכתי `o.isOpen` (`stage != 'delivered'`) ל-`!o.isOpen`.
+- תוצאה: אדום ✅ — `'🚚 openOrders … = 4'` נפל (0≠4; אף הזמנה לא 'delivered').
+- תקלה שהוזרקה #3: ב-`activeStores` הפכתי `where((s) => s.on)` ל-`where((s) => !s.on)`.
+- תוצאה: אדום ✅ — `'🏪 stores = … 3/3'` נפל (`storesLabel`="0/3").
+- שחזור: שלושתן הוחזרו → 12/12 ירוק ✅.
+- מסקנה: הבדיקה חזקה — נועלת כל אחד מ-5 ה-tiles למספר ה-verbatim, וגם את אקסיומת
+  ה-split (catalog+acc==total) ואת ה-flow (כל seed stage ∈ ORDER_FLOW). מוטציה בכל
+  getter נתפסת. (`contractorCredit`/`mgrCustomerList` = foundation ל-M3, נבדקים גם הם:
+  band 30k-120k · דטרמיניסטיות · group-by-buyer aggregation.)

@@ -16,6 +16,7 @@ class PersonaTask {
     required this.days,
     required this.steps,
     this.note = '',
+    this.orderId,
   });
 
   final int id;
@@ -29,6 +30,25 @@ class PersonaTask {
   final int days;
   final int steps;
   final String note;
+
+  /// Optional link to a shared-engine order (`Order.id`, e.g. `BS-1040`). When a
+  /// linked task is APPROVED by the manager, the bound order is advanced one
+  /// stage on the shared `ordersEngineProvider` — so a completed install also
+  /// moves that order live. Null for tasks with no order binding (the default).
+  final String? orderId;
+
+  /// Copy with a changed [status] (the only field the live worker-tasks engine
+  /// mutates) — mirrors the `Order.copyWith` shape used by the orders engine.
+  PersonaTask copyWith({String? status}) => PersonaTask(
+        id: id,
+        name: name,
+        worker: worker,
+        status: status ?? this.status,
+        days: days,
+        steps: steps,
+        note: note,
+        orderId: orderId,
+      );
 }
 
 /// @source proto 06 [L8021].
@@ -60,6 +80,9 @@ const List<PersonaTask> kPersonaTasks = [
     days: 3,
     steps: 6,
     note: 'בוצע — שכבה שנייה תתייבש מחר',
+    // Bound to the seed order BS-1040 (stage `ready`): approving this install
+    // also advances that order one stage on the shared engine (ready → pickup).
+    orderId: 'BS-1040',
   ),
   PersonaTask(
     id: 4,

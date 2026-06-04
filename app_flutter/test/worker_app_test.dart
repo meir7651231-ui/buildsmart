@@ -1,6 +1,7 @@
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 🦺 עובד role-app (T9, rebuilt in the app's own style — same shell, different
@@ -35,7 +36,11 @@ void main() {
 
   testWidgets('worker app renders cards in the app style (no בבנייה)',
       (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: WorkerAppScreen()));
+    // The worker screen now reads the shared workerTasksProvider, so it must be
+    // pumped inside a ProviderScope (cross-persona wiring W3).
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: WorkerAppScreen())),
+    );
     await tester.pump();
 
     // App chrome + verbatim content.

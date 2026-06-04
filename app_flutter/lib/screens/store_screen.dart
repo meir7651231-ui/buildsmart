@@ -1,7 +1,9 @@
 import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/store_settings.dart';
+import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -2479,6 +2481,21 @@ class _CheckoutSheet extends ConsumerWidget {
                   newOrder,
                   ...ref.read(storeOrdersProvider),
                 ];
+                // ...AND push the SAME order onto the shared orders engine so it
+                // goes LIVE to the manager (and every other role). This is the
+                // app's `syncOrderToSystem`: the contractor placing an order
+                // enters the engine at stage `new`, where managerAnalytics counts
+                // it as an open order and the manager's 🚚 list shows it. who =
+                // the contractor's profile name (falling back to the persona
+                // label for a demo/guest); site = the cart's project; items =
+                // the line count; sum = the order total.
+                final contractor = ref.read(userProfileProvider).name.trim();
+                ref.read(ordersEngineProvider.notifier).placeOrder(
+                      who: contractor.isEmpty ? 'קבלן' : contractor,
+                      site: ref.read(cartProjectProvider),
+                      items: itemCount,
+                      sum: total,
+                    );
                 // ...and empty the cart + notes.
                 ref.read(smartCartProvider.notifier).clear();
                 ref.read(cartQtysProvider.notifier).state = const {};
