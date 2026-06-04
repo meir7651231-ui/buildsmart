@@ -46,6 +46,23 @@ DN+qty הושלמו. 116589 נוסף (חסר היה לחלוטין) + spec ב-ve
 
 ---
 
+## v6.05 — T9: מסכי-פרסונה מלאים 🏪 חנות + 🛵 שליח [בנצי]
+
+**שינוי:** הושלם הנותר ב-T9 — פרסונת **חנות** (`StoreDashboardScreen`) ו**שליח**
+(`CourierDashboardScreen`) כמסכים-מלאים בסגנון האפליקציה (לא דיאל — אישור-משתמש,
+כמו עובד). חנות = 4 טאבים (בית/הזמנות/מלאי/פורטל); שליח = בורר-רכב + בית +
+רשימת-משלוחים + פורטל (6 אריחים). נוסף **מנוע-הזמנות משותף** `sysOrdersProvider`
+(6 שלבים): קידום חנות `new→preparing→ready` + שליח `ready→pickup→transit→delivered`
+מסונכרן בין שני המסכים. תוכן verbatim מ-`supplier_data.dart` (proto 06 §1/§7, R8).
+`role_picker_sheet` מנתב חנות/שליח ל-`Navigator.push`.
+
+**אימות:**
+- ✅ `t9_supplier_personas_test` — 9/9 (seed verbatim · מנוע store↔courier · vehicle-gating · רינדור שני המסכים · אפס "בבנייה").
+- ✅ `flutter analyze` (6 קבצים) — 0 errors (רק info-לינטים, תואם `persona_data`).
+- 🔜 אימות-ויזואלי חי (Chrome, על gh-pages) — לאחר הדיפלוי (לקח v6.04: visual-verify חי, לא רק test).
+
+---
+
 ## v6.05 — T3 · catalog ⋮ "סרוק תוכנית" scan flow [מקבץ]
 
 **שינוי:** ה-⋮ בקטלוג, "סרוק תוכנית עבודה" — `_ScanPlanSheet` מ-stub ('בבנייה') ל-**זרימה מלאה**
