@@ -171,6 +171,51 @@ void main() {
   _runGasketPlugGroup();
   _runScrewOnGroup();
   _runPipeGroup();
+  _runFloorTrapGroup();
+}
+
+// ── מחסומי רצפה תיקניים — pages 26–27 (8 SKUs) ──────────────────────────────
+class _Ft {
+  final String sku;
+  final String nameHe;
+  final int qtyPack;
+  final int qtyPallet;
+  final int page;
+  const _Ft(this.sku, this.nameHe, this.qtyPack, this.qtyPallet, this.page);
+}
+
+const _floorTraps = <_Ft>[
+  // page 26 · gully traps (140/50 and 245/50, open + closed)
+  _Ft('218681', 'מחסום תיקני 140/50 פתוח',                20, 400, 26),
+  _Ft('220542', 'מחסום תיקני 245/50 פתוח גבוה',           16, 320, 26),
+  _Ft('218722', 'מחסום תיקני 140/50 סגור למקלחת',         30, 600, 26),
+  _Ft('220543', 'מחסום תיקני 245/50 סגור גבוה',           20, 400, 26),
+  // page 27 · תופי-קומקום / קומקום (slanted outlets)
+  _Ft('116167', 'מחסום תופי-קומקום פתוח 40/155',          20, 500, 27),
+  _Ft('116163', 'מחסום תופי-קומקום פתוח 50/175',          20, 400, 27),
+  _Ft('116146', 'מחסום קומקום סגור למקלחת 40/155',        30, 600, 27),
+  _Ft('116169', 'מחסום קומקום סגור למקלחת 50/175',        25, 500, 27),
+];
+
+void _runFloorTrapGroup() {
+  group('LIPSKEY PDF parity — מחסומי רצפה תיקניים (gate 117)', () {
+    final bySku = {
+      for (final p in kLipskeyCatalog.where((p) => p.brand == 'ליפסקי'))
+        p.sku: p,
+    };
+
+    for (final f in _floorTraps) {
+      test('SKU ${f.sku} · ${f.nameHe}', () {
+        final p = bySku[f.sku];
+        expect(p, isNotNull, reason: 'SKU ${f.sku} מהקטלוג חסר ב-kLipskeyCatalog');
+        expect(p!.nameHe,    f.nameHe,    reason: 'nameHe ל-${f.sku}');
+        expect(p.qtyPack,    f.qtyPack,   reason: 'qtyPack ל-${f.sku}');
+        expect(p.qtyPallet,  f.qtyPallet, reason: 'qtyPallet ל-${f.sku}');
+        expect(p.categoryHe, 'מחסומי רצפה', reason: 'categoryHe ל-${f.sku}');
+        expect(p.page,       f.page,      reason: 'page ל-${f.sku}');
+      });
+    }
+  });
 }
 
 // ── צינורות — pages 47–48 (~55 SKUs) ────────────────────────────────────────

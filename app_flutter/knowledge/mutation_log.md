@@ -26,6 +26,12 @@
 - ביטול → ירוק ✅ — All tests passed.
 - מסקנה: הבדיקה חזקה — תופסת היפוך של לוגיקת-הסינון המרכזית (זול↔יקר), לא רק קיום פלט.
 
+## gate 117 — lipskey_pdf_parity_test (מחסומי רצפה תיקניים) — 2026-06-04
+
+- **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runFloorTrapGroup` (8 SKUs, עמ' 26–27).
+- תקלה שהוזרקה: `'מחסום תיקני 140/50 פתוח'` → `'מחסום תיקניX 140/50 פתוח'` (218681).
+- תוצאה: אדום ✅; ביטול → ירוק ✅.
+
 ## gate 117 — lipskey_pdf_parity_test (צינורות) — 2026-06-04
 
 - **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runPipeGroup` (57 SKUs, עמ' 47–48).
