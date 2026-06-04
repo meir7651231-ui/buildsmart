@@ -26,6 +26,20 @@
 - ביטול → ירוק ✅ — All tests passed.
 - מסקנה: הבדיקה חזקה — תופסת היפוך של לוגיקת-הסינון המרכזית (זול↔יקר), לא רק קיום פלט.
 
+## gate 117 closeout — polyroll_pdf_parity_test — 2026-06-04
+
+- **קובץ:** `test/polyroll_pdf_parity_test.dart` (חדש) — 20 SKUs מ-`kPolyrollCatalog`.
+- **מה עושה:** snapshot lock על nameHe+page+brand של 20 פיפסים/אביזרים מייצגים.
+- תקלה שהוזרקה: `'צינור PPR אספקת מים 20'` → `'…אספקתX…'` (95016002).
+- תוצאה: אדום ✅; ביטול → ירוק ✅.
+
+## gate 117 closeout — huliot_pdf_parity_test — 2026-06-04
+
+- **קובץ:** `test/huliot_pdf_parity_test.dart` (חדש) — 13 SKUs מ-`kHuliotCatalog`.
+- **מה עושה:** snapshot lock על nameHe+page+brand של 13 ברכים/הגבהות/מכסים.
+- תקלה שהוזרקה: `'ברך 15° צד אחד חלק 40'` → `'ברך 15X…'` (70041150).
+- תוצאה: אדום ✅; ביטול → ירוק ✅.
+
 ## gate 117 follow-up — lipskey_hierarchy_parity_test — 2026-06-04
 
 - **קובץ:** `test/lipskey_hierarchy_parity_test.dart` (חדש) + `lib/data/chip_hierarchy.dart`.

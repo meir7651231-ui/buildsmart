@@ -4,6 +4,20 @@
 
 ---
 
+## v6.10 — PDF-parity tests for Polyroll + Huliot (gate 117 closeout)
+
+**שינוי:** טסטים חדשים שאוכפים שהדאטה של פולירול וחוליות תואמת לקטלוגים המקוריים
+(תמונות-עמוד שכבר ברפו). 20 SKUs פולירול + 13 SKUs חוליות מ-עמודי-מדגם.
+לא נדרשו תיקוני-דאטה — הסקירה הראתה 44/44 התאמה ל-PDF.
+
+**אימות:**
+- ✅ `polyroll_pdf_parity_test` — 20/20 (עמ' 18, 40).
+- ✅ `huliot_pdf_parity_test` — 13/13 (עמ' 12, 28).
+- ✅ mutation_verify לשני המותגים: typo → אדום ✅; ביטול → ירוק ✅.
+- ✅ `flutter test` — 1460/1460 ירוקים.
+
+---
+
 ## v6.09 — Lipski UI parity with Polyroll/Huliot (gate 117 follow-up)
 
 **שינוי:** רנדור כרטיסי ליפסקי עבר מ-`_NameWords` ל-`_HierarchyChips` (ברירת-מחדל
