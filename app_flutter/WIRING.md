@@ -195,6 +195,7 @@ Resets on department open + clear. Guarded by `departments_test`.
 | חשיבות (importanceFilter) | important/critical → only high-priority rows (`passesImportance`) | ✅ |
 | snooze banner | mutes notifications temporarily | ✅ |
 | push/email/sms/whatsapp · שעות-שקט · סיכומים · צליל/רטט · lock-screen · לפי-תפקיד | — | ⛔ no notif engine |
+| 🦺/💰 פעולת-התראה (טפל כעת/פרטים) | **T6:** sheet inline (R9, `showNotifActionSheet`) — safety→`kSafetyTips`×5+אישור · budget→ספי 80/90/100% + סטטוס. מחליף toast 'בבנייה' | ✅ |
 
 ## Store (`store_screen.dart` → `store_settings.dart`)
 

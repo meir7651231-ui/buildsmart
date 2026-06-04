@@ -15,6 +15,22 @@
 
 ---
 
+## v6.00 — T6 · sheets לפעולות התראה בטיחות+תקציב [בנצי]
+
+**שינוי:** ה-action-button בהתראות בטיחות/תקציב (`notifications_screen`) — מ-toast
+"בבנייה" ל-**sheet inline** (R9, `showNotifActionSheet`, ללא view/route חדש):
+- 🦺 safety → "תדריך בטיחות יומי" = `kSafetyTips`×5 + כפתור "אשר תדריך".
+- 💰 budget → "התראת תקציב" = status + `kBudgetThresholds` (80/90/100%).
+- צורך seeds מ-T0 (`contractor_seeds.dart`) — אפס כפילות.
+
+**אימות:**
+- ✅ `flutter analyze` (notifications_screen + test) — 0 errors (5 info/warn קיימים-מראש).
+- ✅ `test/t6_notif_action_test.dart` — 2 ירוקות.
+- ✅ 📷 **רנדור-בדפדפן חי** (Chrome · localhost:5556 · build/web release, 4.6.2026):
+  מסך-בית (4 קטגוריות · 143 מוצרים · 4 טאבים) · sheet בטיחות (5 טיפים + אישור) · sheet תקציב (80/90/100% + status) — הכל נקי.
+
+---
+
 ## v6.00 — Lipski visible-trap parity to PDF (gate 117 · קטגוריה 3/9)
 
 **שינוי:** סנכרון `kLipskeyCatalog` ל-32 SKUs של מחסומים גלויים (עמ' 8–15):

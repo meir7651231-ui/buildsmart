@@ -1,3 +1,4 @@
+import 'package:buildsmart/data/contractor_seeds.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -330,6 +331,70 @@ String? _actionLabel(NotifSection type) => switch (type) {
       NotifSection.shipments => 'עקוב',
       _ => null,
     };
+
+/// T6 — replaces the prior "בבנייה" toast on safety/budget notification actions
+/// with real inline content (R9 sheet). Consumes T0 seeds from `data/`:
+/// `kSafetyTips` (§5) + `kBudgetThresholds` (§3/§4).
+void showNotifActionSheet(
+  BuildContext context,
+  NotifSection section,
+  String preview,
+) {
+  final isSafety = section == NotifSection.safety;
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetCtx) => SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                isSafety ? 'תדריך בטיחות יומי' : 'התראת תקציב',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              if (isSafety) ...[
+                for (final tip in kSafetyTips)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: Text(
+                      tip,
+                      style: const TextStyle(fontSize: 14, height: 1.4),
+                    ),
+                  ),
+                const SizedBox(height: 14),
+                FilledButton(
+                  onPressed: () {
+                    Navigator.of(sheetCtx).pop();
+                    showToast(context, 'התדריך אושר');
+                  },
+                  child: const Text('אשר תדריך'),
+                ),
+              ] else ...[
+                Text(preview, style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 12),
+                const Text(
+                  'התראות תקציב מופעלות אוטומטית בעת חציית הספים:',
+                  style: TextStyle(fontSize: 13, color: Color(0xFF666666)),
+                ),
+                const SizedBox(height: 8),
+                for (final t in kBudgetThresholds)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(t.label, style: const TextStyle(fontSize: 14)),
+                  ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
 
 // ─── screen ──────────────────────────────────────────────────────────────────
 
@@ -1023,7 +1088,16 @@ class _NotifRow extends ConsumerWidget {
                                     .read(notifReadIdsProvider.notifier)
                                     .add(notif.id);
                               }
-                              showToast(context, '$actionLabel — בבנייה');
+                              if (notif.type == NotifSection.safety ||
+                                  notif.type == NotifSection.budget) {
+                                showNotifActionSheet(
+                                  context,
+                                  notif.type,
+                                  notif.preview,
+                                );
+                              } else {
+                                showToast(context, '$actionLabel — בבנייה');
+                              }
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
