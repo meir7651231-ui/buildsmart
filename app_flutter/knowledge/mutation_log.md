@@ -17,6 +17,12 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## gate 117 — lipskey_pdf_parity_test (מצמדים/מצרות/פקקים) — 2026-06-04
+
+- **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runConnectorGroup` (21 SKUs, עמ' 44–45).
+- תקלה שהוזרקה: `'כובע אויר 110'` → `'כובע אוירX 110'` (120311).
+- תוצאה: אדום ✅; ביטול → ירוק ✅.
+
 ## gate 117 — lipskey_pdf_parity_test (מסעפים שקע-תקע) — 2026-06-04
 
 - **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runInsertionBranchGroup` (13 SKUs, עמ' 42).

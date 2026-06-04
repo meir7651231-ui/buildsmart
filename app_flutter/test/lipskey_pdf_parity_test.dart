@@ -166,6 +166,70 @@ void main() {
   _runVisibleTrapGroup();
   _runInsertionBendGroup();
   _runInsertionBranchGroup();
+  _runConnectorGroup();
+}
+
+// ── מצמדים/מצרות/פקקים/כובע — pages 44–45 (21 SKUs) ─────────────────────────
+// categoryHe intentionally NOT asserted — these span 3 existing taxonomy buckets
+// (אביזרי שקע-תקע / מצמדים וצינורות / פקקים וצינורות); re-bucketing is a separate change.
+class _Conn {
+  final String sku;
+  final String nameHe;
+  final String dn;
+  final int? qtyPack;   // null = "בבודדים"
+  final int? qtyPallet;
+  final int page;
+  const _Conn(this.sku, this.nameHe, this.dn, this.qtyPack, this.qtyPallet, this.page);
+}
+
+const _connectors = <_Conn>[
+  // מחבר כפול (page 44)
+  _Conn('214533', 'מחבר כפול 50 עם מעצור',  '50',      100, 4500, 44),
+  _Conn('214534', 'מחבר כפול 50 ללא מעצור', '50',      100, 4500, 44),
+  _Conn('212937', 'מחבר כפול 75',           '75',      100, 4500, 44),
+  _Conn('124842', 'מחבר כפול 110 עם מעצור', '110',      41,  820, 44),
+  _Conn('116576', 'מחבר כפול 110 ללא מעצור','110',      41,  820, 44),
+  _Conn('218567', 'מחבר כפול 160/160',      '160/160',   8,  300, 44),
+  // מצרות (eccentric reducers, page 44)
+  _Conn('116581', 'מצרה 110/50',  '110/50',   32, 1920, 44),
+  _Conn('116058', 'מצרה 160/110', '160/110',  21,  630, 44),
+  _Conn('217674', 'מצרה 110/75',  '110/75',   32, 1920, 44),
+  _Conn('217531', 'מצרה 75/50',   '75/50',    90, 4050, 44),
+  _Conn('218568', 'מצרה 50/40',   '50/40',   140, 6300, 44),
+  _Conn('220316', 'מצרה 40/32',   '40/32',   200, 9000, 44),
+  // מצמד ארוך לתיקון (telescopic) + מצרה לתיקון (page 44)
+  _Conn('194898', 'מצמד ארוך לתיקון 110/110', '110/110', 12, 576, 44),
+  _Conn('194897', 'מצרה לתיקון 110/100',      '110/100', 32, 960, 44),
+  // כובע אויר + פקק חיצוני (page 45)
+  _Conn('120311', 'כובע אויר 110',  '110', 108, 2160, 45),
+  _Conn('218569', 'פקק חיצוני 110', '110',  95, 1900, 45),
+  // פקק שקע-תקע — בבודדים (page 45)
+  _Conn('218460', 'פקק שקע-תקע 50',  '50',  null, null, 45),
+  _Conn('805024', 'פקק שקע-תקע 75',  '75',  null, null, 45),
+  _Conn('218560', 'פקק שקע-תקע 160', '160', null, null, 45),
+  _Conn('116628', 'פקק שקע-תקע 110', '110', null, null, 45),
+  _Conn('220315', 'פקק שקע-תקע 40',  '40',  null, null, 45),
+];
+
+void _runConnectorGroup() {
+  group('LIPSKEY PDF parity — מצמדים/מצרות/פקקים (gate 117)', () {
+    final bySku = {
+      for (final p in kLipskeyCatalog.where((p) => p.brand == 'ליפסקי'))
+        p.sku: p,
+    };
+
+    for (final c in _connectors) {
+      test('SKU ${c.sku} · ${c.nameHe}', () {
+        final p = bySku[c.sku];
+        expect(p, isNotNull, reason: 'SKU ${c.sku} מהקטלוג חסר ב-kLipskeyCatalog');
+        expect(p!.nameHe,   c.nameHe,    reason: 'nameHe ל-${c.sku}');
+        expect(p.qtyPack,   c.qtyPack,   reason: 'qtyPack ל-${c.sku}');
+        expect(p.qtyPallet, c.qtyPallet, reason: 'qtyPallet ל-${c.sku}');
+        expect(p.dims?['DN'], c.dn,      reason: 'dims[DN] ל-${c.sku}');
+        expect(p.page,      c.page,      reason: 'page ל-${c.sku}');
+      });
+    }
+  });
 }
 
 // ── מסעפים שקע-תקע — page 42 (13 SKUs) ──────────────────────────────────────

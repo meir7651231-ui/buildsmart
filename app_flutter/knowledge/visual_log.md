@@ -4,6 +4,19 @@
 
 ---
 
+## v6.03 — Lipski connectors/reducers/plugs parity to PDF (gate 117 · קטגוריה 4c/9)
+
+**שינוי:** 21 SKUs (עמ' 44–45) — מצמדים/מצרות/פקקים/כובע אויר. 17 שמות שגויים
+תוקנו (re-read מהמקור): 120311 היה "פקק להכנסה" → כובע אויר 110; מצרות תויגו
+"מחבר כפול"; פקקים תויגו "צינור הכנסה". DN+qty+page הושלמו. categoryHe לא שונה.
+
+**אימות:**
+- ✅ `lipskey_pdf_parity_test` — 132/132.
+- ✅ `flutter analyze lib/data/lipskey_catalog.dart` — 0 errors.
+- ✅ `flutter test` — אפס regressions.
+
+---
+
 ## v6.02 — Lipski insertion-branch parity to PDF (gate 117 · קטגוריה 4b/9)
 
 **שינוי:** 13 SKUs של מסעפים שקע-תקע (עמ' 42): שמות תוקנו (היו "מחבר כפול"/
