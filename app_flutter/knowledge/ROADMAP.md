@@ -216,10 +216,10 @@
 - **flows:** משימות-פעילות → approval loop (עובד מסמן → מנהל מאשר) → work-log
 - **DoD:** approval loop mock; state transition ב-test.
 
-### 4-E · מנהל (👔) — 🚧 `ManagerDashboardScreen` (full role-app; M1–M4 ✅)
+### 4-E · מנהל (👔) — ✅ `ManagerDashboardScreen` (full role-app; M1–M5 ✅ — COMPLETE)
 - **מקור:** proto `renderMgr*` [L12133+] — KPI / הזמנות / לקוחות / CRUD
-- **מומש:** role-app screen מלא (LIGHT, 4-tab) במקום dial-drill (החלטה ב-STATUS/WIRING). **M1** SHELL (v5.98) · **M2** 📊 לוח בקרה — 5 metric tiles + pipeline חיים (v5.99) · **M3** 🚚 הזמנות — רשימה חיה + god-mode "קדם שלב ›" (`advance`) + detail-sheet (v6.00) · **M4** 👥 לקוחות — רשימת-לקוחות חיה (`managerCustomersProvider`, group-by-`who`) + bar ניצול-אשראי + status פעיל/אשראי-גבוה + detail-sheet (v6.01). נותר: **M5** 🛠️ ניהול.
-- **DoD:** `manager_dashboard_screen_test` (35) + `manager_dashboard_test` (12) + `orders_engine_test` (21) ✅. CRUD ב-🛠️ = M5.
+- **מומש:** role-app screen מלא (LIGHT, 4-tab) במקום dial-drill (החלטה ב-STATUS/WIRING). **M1** SHELL (v5.98) · **M2** 📊 לוח בקרה — 5 metric tiles + pipeline חיים (v5.99) · **M3** 🚚 הזמנות — רשימה חיה + god-mode "קדם שלב ›" (`advance`) + detail-sheet (v6.00) · **M4** 👥 לקוחות — רשימת-לקוחות חיה (`managerCustomersProvider`, group-by-`who`) + bar ניצול-אשראי + status פעיל/אשראי-גבוה + detail-sheet (v6.01) · **M5** 🛠️ ניהול — 5 כלי-ניהול (אקורדיון: 🗂️ קטגוריות חיות · ⚙️ הגדרות verbatim · 🌳 עץ-מוצרים · 🏷️ מותגים מ-`kBrands` · 🔬 רגרסיה→`RegressionPanelScreen`) (v6.02). **המסך COMPLETE — אפס "בקרוב".**
+- **DoD:** `manager_dashboard_screen_test` (30) + `manager_dashboard_test` (12) + `orders_engine_test` (21) ✅. כל הגלים M1→M5 הושלמו.
 
 ---
 

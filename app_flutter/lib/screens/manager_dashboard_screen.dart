@@ -1,4 +1,6 @@
+import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
+import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -86,24 +88,17 @@ class ManagerDashboardScreen extends ConsumerWidget {
             Expanded(
               child: IndexedStack(
                 index: active,
-                children: [
-                  // 📊 לוח בקרה (M2) — the dashboard cockpit, live over the
-                  // shared orders engine. 🚚 הזמנות (M3) — the live order list +
-                  // the manager's god-mode stage-advance. 👥 לקוחות (M4) — the
-                  // live customer list + credit, derived from the same engine.
-                  // 🛠️ ניהול remains a PLACEHOLDER this wave (M5 fills it).
-                  for (var i = 0; i < _kManagerTabs.length; i++)
-                    if (i == 0)
-                      const _DashboardTab()
-                    else if (i == 1)
-                      const _OrdersTab()
-                    else if (i == 2)
-                      const _CustomersTab()
-                    else
-                      _TabPlaceholder(
-                        emoji: _kManagerTabs[i].emoji,
-                        label: _kManagerTabs[i].label,
-                      ),
+                children: const [
+                  // The manager screen is now COMPLETE — every tab is real, NO
+                  // "בקרוב" placeholder remains. 📊 לוח בקרה (M2) — the dashboard
+                  // cockpit, live over the shared orders engine. 🚚 הזמנות (M3) —
+                  // the live order list + the manager's god-mode stage-advance.
+                  // 👥 לקוחות (M4) — the live customer list + credit. 🛠️ ניהול
+                  // (M5) — the 5 management tools (the FINAL tab).
+                  _DashboardTab(),
+                  _OrdersTab(),
+                  _CustomersTab(),
+                  _ManageTab(),
                 ],
               ),
             ),
@@ -235,41 +230,6 @@ class _ManagerToggle extends ConsumerWidget {
         children: [
           for (var i = 0; i < _kManagerTabs.length; i++)
             seg(i, _kManagerTabs[i].emoji, _kManagerTabs[i].label),
-        ],
-      ),
-    );
-  }
-}
-
-/// A centred "בקרוב" placeholder for a tab whose real content is a LATER wave
-/// (M2–M5). Names the tab so each of the four is visibly distinct.
-class _TabPlaceholder extends StatelessWidget {
-  const _TabPlaceholder({required this.emoji, required this.label});
-
-  final String emoji;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 40)),
-          const SizedBox(height: BsTokens.space3),
-          Text(
-            label,
-            style: const TextStyle(
-              color: BsTokens.inkLight,
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(height: BsTokens.space1),
-          const Text(
-            'בקרוב',
-            style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
-          ),
         ],
       ),
     );
@@ -1844,6 +1804,564 @@ class _CustomerDetailSheet extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  🛠️ ניהול — the 5 management tools (M5, the FINAL tab → screen COMPLETE)
+// ───────────────────────────────────────────────────────────────────────────
+
+/// The 🛠️ ניהול tab body — the manager's management center, the FINAL manager
+/// wave. A faithful port of the legacy `renderMgrManage` (@index.html:16645-16890),
+/// an accordion of 5 management tools. Only ONE section is open at a time
+/// (mirroring the legacy module-scoped `mgrManageOpen`); tapping a header toggles
+/// it. The tools (verbatim legacy emoji + title + sub-title @16653/16687/16715/
+/// 16733):
+///   1. 🗂️ קטגוריות — the LIVE catalog category list + per-category counts (the
+///      `managerAnalyticsProvider.catalogCategories` map — the same TREES-by-`cat`
+///      tally the legacy SECTION 3 builds @16716), header `קטגוריות פעילות (N)` +
+///      the verbatim hint.
+///   2. ⚙️ הגדרות אפליקציה — the contractor-app config rows VERBATIM from the
+///      legacy constants (SECTION 4 @16733): תוספת משלוח אקספרס=₪80 (`EXPRESS_FEE`
+///      @11961) · מסגרת אשראי לקבלן=₪50,000 (`creditLimit` @11963) · שיעור מע״מ=18%
+///      (`VAT_RATE` @11941) + the verbatim hint.
+///   3. 🌳 עץ המוצרים — an inline summary of the catalog product-tree (the legacy
+///      SECTION 1 manages the per-product accessory tree; the inline summary names
+///      the verbatim sub-title + the live product/category totals).
+///   4. 🏷️ מותגים ומחירים — the brands list from `lib/data/brands.dart` (`kBrands`)
+///      — `emoji name` + tagline + product count.
+///   5. 🔬 בדיקות רגרסיה — routes to the existing `RegressionPanelScreen` (the same
+///      target the old manager dial used).
+///
+/// LIGHT only — white `cardLight` cards on `bgLight`, `inkLight`/`mutedLight` text,
+/// `brand` accents. NO dark tokens.
+class _ManageTab extends ConsumerStatefulWidget {
+  const _ManageTab();
+
+  @override
+  ConsumerState<_ManageTab> createState() => _ManageTabState();
+}
+
+class _ManageTabState extends ConsumerState<_ManageTab> {
+  /// The currently-open accordion section key, or `''` when all are collapsed
+  /// (the legacy module-scoped `let mgrManageOpen=''`). Local widget state; no
+  /// engine/global write.
+  String _open = '';
+
+  void _toggle(String key) =>
+      setState(() => _open = _open == key ? '' : key);
+
+  @override
+  Widget build(BuildContext context) {
+    // The LIVE catalog category distribution (cat → product count) — the same
+    // map the 📊 dashboard reads, off the shared engine's analytics. Sorted by
+    // count desc so the biggest categories read first (a stable display order).
+    final cats = ref.watch(managerAnalyticsProvider).catalogCategories;
+    final catEntries = cats.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final totalProducts = cats.values.fold<int>(0, (s, n) => s + n);
+
+    return ListView(
+      // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
+      // (gate 62 — no hard-coded left/right edge inset).
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space4,
+        BsTokens.space5,
+      ),
+      children: [
+        // The legacy intro line (@index.html:16650 `mm-intro`).
+        const _ManageIntro(),
+        const SizedBox(height: BsTokens.space4),
+
+        // 1. 🗂️ קטגוריות — the LIVE category list.
+        _ManageSection(
+          sectionKey: 'cats',
+          emoji: '🗂️',
+          title: 'קטגוריות',
+          sub: 'ניהול קטגוריות הקטלוג',
+          open: _open == 'cats',
+          onTap: () => _toggle('cats'),
+          child: _CategoriesBody(entries: catEntries),
+        ),
+        const SizedBox(height: BsTokens.space3),
+
+        // 2. ⚙️ הגדרות אפליקציה — the verbatim config rows.
+        _ManageSection(
+          sectionKey: 'settings',
+          emoji: '⚙️',
+          title: 'הגדרות אפליקציה',
+          sub: 'פרמטרים שהקבלן רואה',
+          open: _open == 'settings',
+          onTap: () => _toggle('settings'),
+          child: const _AppSettingsBody(),
+        ),
+        const SizedBox(height: BsTokens.space3),
+
+        // 3. 🌳 עץ המוצרים — an inline summary of the catalog tree.
+        _ManageSection(
+          sectionKey: 'trees',
+          emoji: '🌳',
+          title: 'עץ המוצרים',
+          sub: 'עריכת האביזרים המשלימים של כל מוצר',
+          open: _open == 'trees',
+          onTap: () => _toggle('trees'),
+          child: _ProductTreeBody(
+            categoryCount: cats.length,
+            productCount: totalProducts,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space3),
+
+        // 4. 🏷️ מותגים ומחירים — the brands list.
+        _ManageSection(
+          sectionKey: 'brands',
+          emoji: '🏷️',
+          title: 'מותגים ומחירים',
+          sub: 'עריכת המותגים והמחירים של כל מוצר',
+          open: _open == 'brands',
+          onTap: () => _toggle('brands'),
+          child: const _BrandsBody(),
+        ),
+        const SizedBox(height: BsTokens.space3),
+
+        // 5. 🔬 בדיקות רגרסיה — routes to the existing RegressionPanelScreen.
+        _ManageSection(
+          sectionKey: 'regression',
+          emoji: '🔬',
+          title: 'בדיקות רגרסיה',
+          sub: 'הרצת חבילת הבדיקות המלאה של האפליקציה',
+          open: _open == 'regression',
+          onTap: () => _toggle('regression'),
+          child: _RegressionBody(
+            onOpen: () =>
+                Navigator.of(context).push(RegressionPanelScreen.route()),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The 🛠️ tab intro line (@index.html:16650 `mm-intro`) — a soft `brand`-tinted
+/// banner with the verbatim copy.
+class _ManageIntro extends StatelessWidget {
+  const _ManageIntro();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: BsTokens.space4,
+        vertical: BsTokens.space3,
+      ),
+      decoration: BoxDecoration(
+        color: BsTokens.brand.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      ),
+      child: const Text(
+        '🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.',
+        style: TextStyle(
+          color: BsTokens.inkLight,
+          fontSize: 13.5,
+          fontWeight: FontWeight.w600,
+          height: 1.3,
+        ),
+      ),
+    );
+  }
+}
+
+/// One accordion section (@index.html:16855 `mmSection`) — a WHITE card with a
+/// tappable header (the `emoji` icon, the `title` + `sub` two-line label, and a
+/// ▾/‹ chevron) that reveals the [child] body when [open]. Tapping the header
+/// calls [onTap] (the parent toggles which one is open).
+class _ManageSection extends StatelessWidget {
+  const _ManageSection({
+    required this.sectionKey,
+    required this.emoji,
+    required this.title,
+    required this.sub,
+    required this.open,
+    required this.onTap,
+    required this.child,
+  });
+
+  final String sectionKey;
+  final String emoji;
+  final String title;
+  final String sub;
+  final bool open;
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            button: true,
+            label: '$emoji $title',
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                onTap: onTap,
+                child: Padding(
+                  padding: const EdgeInsets.all(BsTokens.space4),
+                  child: Row(
+                    children: [
+                      Text(emoji, style: const TextStyle(fontSize: 22)),
+                      const SizedBox(width: BsTokens.space3),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                color: BsTokens.inkLight,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              sub,
+                              style: const TextStyle(
+                                color: BsTokens.mutedLight,
+                                fontSize: 12.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: BsTokens.space2),
+                      Text(
+                        open ? '▾' : '‹',
+                        style: const TextStyle(
+                          color: BsTokens.mutedLight,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (open)
+            Padding(
+              // Directional (start/top/end/bottom) so RTL/LTR both lay out
+              // correctly (gate 62 — no hard-coded left/right edge inset).
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                BsTokens.space4,
+                0,
+                BsTokens.space4,
+                BsTokens.space4,
+              ),
+              child: child,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A small label→value row inside a management section (the legacy `mm-acc` /
+/// `mm-set` row) — the `label` on the start, the `value` on the end.
+class _ManageRow extends StatelessWidget {
+  const _ManageRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: BsTokens.space3),
+          Text(
+            value,
+            style: const TextStyle(
+              color: BsTokens.mutedLight,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A `mutedLight` hint line at the foot of a management section (the legacy
+/// `mm-hint`).
+class _ManageHint extends StatelessWidget {
+  const _ManageHint(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: BsTokens.space2),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: BsTokens.mutedLight,
+          fontSize: 12,
+          height: 1.3,
+        ),
+      ),
+    );
+  }
+}
+
+/// The 🗂️ קטגוריות body (@index.html:16715-16729 SECTION 3) — the LIVE catalog
+/// category list: a `קטגוריות פעילות (N)` header, then one row per category with
+/// its product count (`<count> מוצרים`), and the verbatim hint. Counts come from
+/// the live `managerAnalyticsProvider` map, so they track the catalog.
+class _CategoriesBody extends StatelessWidget {
+  const _CategoriesBody({required this.entries});
+
+  final List<MapEntry<String, int>> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'קטגוריות פעילות (${entries.length})',
+          style: const TextStyle(
+            color: BsTokens.inkLight,
+            fontWeight: FontWeight.w800,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space2),
+        for (final e in entries)
+          _ManageRow(label: e.key, value: '${e.value} מוצרים'),
+        const _ManageHint('שינוי שם קטגוריה מעדכן את כל המוצרים שבה.'),
+      ],
+    );
+  }
+}
+
+/// The ⚙️ הגדרות אפליקציה body (@index.html:16733-16740 SECTION 4) — the three
+/// contractor-app config rows, VERBATIM values from the legacy constants, plus
+/// the verbatim hint. Display-only (the legacy `prompt()`-edit has no backend
+/// here; the values are the source of truth the contractor cart already reads).
+class _AppSettingsBody extends StatelessWidget {
+  const _AppSettingsBody();
+
+  /// @legacy index.html:11961 `let EXPRESS_FEE=80;`.
+  static const int _expressFee = 80;
+
+  /// @legacy index.html:11963 `let creditLimit=50000;` (rendered toLocaleString).
+  static const int _creditLimit = 50000;
+
+  /// @legacy index.html:11941 `const VAT_RATE = 0.18;` → 18%.
+  static const int _vatPercent = 18;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const _ManageRow(label: 'תוספת משלוח אקספרס', value: '₪$_expressFee'),
+        _ManageRow(
+          label: 'מסגרת אשראי לקבלן',
+          value: '₪${_grouped(_creditLimit)}',
+        ),
+        const _ManageRow(label: 'שיעור מע״מ', value: '$_vatPercent%'),
+        const _ManageHint(
+          'המע״מ קבוע לפי חוק (18%). תוספת האקספרס והאשראי נראים מיד בעגלת הקבלן.',
+        ),
+      ],
+    );
+  }
+}
+
+/// The 🌳 עץ המוצרים body (@index.html:16652-16685 SECTION 1) — the legacy section
+/// manages the per-product accessory tree via a product-picker + `prompt()`-driven
+/// add/edit/delete of complementary accessories against a backend. With no such
+/// backend here, this renders an inline SUMMARY of the catalog tree: the verbatim
+/// section purpose + the live tree size (categories × products). NO invented edit.
+class _ProductTreeBody extends StatelessWidget {
+  const _ProductTreeBody({
+    required this.categoryCount,
+    required this.productCount,
+  });
+
+  final int categoryCount;
+  final int productCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.',
+          style: TextStyle(
+            color: BsTokens.inkLight,
+            fontSize: 13,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space2),
+        _ManageRow(label: 'מוצרים בעץ', value: '$productCount'),
+        _ManageRow(label: 'קטגוריות', value: '$categoryCount'),
+        const _ManageHint('כל מוצר נושא עץ אביזרים משלימים (חובה / אופציונלי).'),
+      ],
+    );
+  }
+}
+
+/// The 🏷️ מותגים ומחירים body (@index.html:16687-16713 SECTION 2) — the brands
+/// list. The legacy section edits per-product brand+price rows; here we surface
+/// the catalog's REAL brand roster from `lib/data/brands.dart` (`kBrands`): each
+/// brand's `emoji name`, its tagline, and its product count (when known).
+class _BrandsBody extends StatelessWidget {
+  const _BrandsBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'מותגים (${kBrands.length})',
+          style: const TextStyle(
+            color: BsTokens.inkLight,
+            fontWeight: FontWeight.w800,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space2),
+        for (final b in kBrands)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(b.emoji, style: const TextStyle(fontSize: 18)),
+                const SizedBox(width: BsTokens.space2),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        b.name,
+                        style: const TextStyle(
+                          color: BsTokens.inkLight,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (b.tagline.isNotEmpty) ...[
+                        const SizedBox(height: 1),
+                        Text(
+                          b.tagline,
+                          style: const TextStyle(
+                            color: BsTokens.mutedLight,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (b.productCount > 0) ...[
+                  const SizedBox(width: BsTokens.space2),
+                  Text(
+                    '${b.productCount} מוצרים',
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// The 🔬 בדיקות רגרסיה body — a short note + a `brand` action button that opens
+/// the existing `RegressionPanelScreen` (the same target the old manager dial
+/// used). [onOpen] performs the `Navigator.push`.
+class _RegressionBody extends StatelessWidget {
+  const _RegressionBody({required this.onOpen});
+
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'הרצת חבילת בדיקות הרגרסיה המלאה (קטלוג · מאתר · מנוע תאימות · state · '
+          'ניווט) על המכשיר.',
+          style: TextStyle(
+            color: BsTokens.inkLight,
+            fontSize: 13,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space3),
+        Material(
+          color: BsTokens.brand,
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            onTap: onOpen,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                '🔬 פתח מרכז בדיקות רגרסיה',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

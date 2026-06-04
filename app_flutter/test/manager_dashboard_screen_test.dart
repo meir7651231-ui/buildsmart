@@ -6,9 +6,11 @@
 // מנהל המערכת) OPENS this screen via Navigator.push — instead of the old BS-dial
 // drill. Tabs are PLACEHOLDERS (M2–M5 fill them).
 
+import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/manager_dashboard_screen.dart';
+import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
@@ -99,18 +101,14 @@ void main() {
       expect(stack.index, 0);
     });
 
-    testWidgets('the 1 NOT-yet-built tab (🛠️) keeps the "בקרוב" note '
-        '(M5 not built); 📊 + 🚚 + 👥 are no longer placeholders', (t) async {
+    testWidgets('the manager screen is COMPLETE — NO "בקרוב" placeholder remains '
+        'anywhere (all 4 tabs are real after M5)', (t) async {
       await pumpScreen(t);
-      // Default tab = 0 (📊 לוח בקרה) — now the LIVE cockpit, NOT a placeholder,
-      // so nothing "בקרוב" is onstage. The IndexedStack keeps the OTHER three
-      // mounted offstage; 🚚 הזמנות (M3) + 👥 לקוחות (M4) are now live tabs, so
-      // only the remaining ONE (🛠️ ניהול) is still a "בקרוב" placeholder.
+      // Every tab is now built (📊 M2 · 🚚 M3 · 👥 M4 · 🛠️ M5). The IndexedStack
+      // keeps the other three mounted OFFSTAGE, so even a `skipOffstage:false`
+      // search must find ZERO "בקרוב" — the placeholder class is gone entirely.
       expect(find.text('בקרוב'), findsNothing);
-      expect(
-        find.text('בקרוב', skipOffstage: false),
-        findsNWidgets(1),
-      );
+      expect(find.text('בקרוב', skipOffstage: false), findsNothing);
     });
 
     testWidgets('route() pushes the screen', (t) async {
@@ -674,6 +672,173 @@ void main() {
           .where((col) => col == BsTokens.cardLight)
           .length;
       expect(cardSurfaces, greaterThanOrEqualTo(4));
+    });
+  });
+
+  group('🛠️ ניהול — the 5 management tools (M5, manager screen COMPLETE)', () {
+    // Switch to the 🛠️ ניהול tab by tapping its toggle pill. `.first` selects the
+    // toggle pill (built above the IndexedStack body).
+    Future<void> openManageTab(WidgetTester t) async {
+      await t.tap(find.text('ניהול').first);
+      await settle(t);
+    }
+
+    // Expand one accordion section by tapping its header title.
+    Future<void> openSection(WidgetTester t, String title) async {
+      await t.tap(find.text(title));
+      await settle(t);
+    }
+
+    testWidgets('the tab shows the intro + all 5 management tool headers',
+        (t) async {
+      final c = await pumpScreen(t);
+      await openManageTab(t);
+      expect(c.read(managerTabProvider), 3);
+
+      // The verbatim intro banner.
+      expect(
+        find.text('🛠️ שליטה מלאה על אפליקציית הקבלן — כל שינוי מתעדכן מיידית.'),
+        findsOneWidget,
+      );
+      // The 5 tool section titles (verbatim legacy `mmSection` titles).
+      for (final title in const [
+        'קטגוריות',
+        'הגדרות אפליקציה',
+        'עץ המוצרים',
+        'מותגים ומחירים',
+        'בדיקות רגרסיה',
+      ]) {
+        expect(find.text(title), findsOneWidget, reason: 'tool $title header');
+      }
+    });
+
+    testWidgets('🗂️ קטגוריות shows the LIVE category list with real counts',
+        (t) async {
+      final c = await pumpScreen(t);
+      await openManageTab(t);
+      await openSection(t, 'קטגוריות');
+
+      // The header names the live category count (the analytics map size).
+      final cats = c.read(managerAnalyticsProvider).catalogCategories;
+      expect(find.text('קטגוריות פעילות (${cats.length})'), findsOneWidget);
+
+      // Every category renders with its REAL product count (the verbatim
+      // `<count> מוצרים` row), sourced from the live analytics map — NOT a
+      // hard-coded literal. (Counts are unique enough that we assert the count
+      // string appears for each; the category name appears once.)
+      for (final e in cats.entries) {
+        expect(find.text(e.key), findsOneWidget, reason: 'category ${e.key}');
+        expect(
+          find.text('${e.value} מוצרים'),
+          findsWidgets,
+          reason: 'category ${e.key} count',
+        );
+      }
+      // The verbatim hint.
+      expect(
+        find.text('שינוי שם קטגוריה מעדכן את כל המוצרים שבה.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('⚙️ הגדרות אפליקציה shows the verbatim config rows', (t) async {
+      await pumpScreen(t);
+      await openManageTab(t);
+      await openSection(t, 'הגדרות אפליקציה');
+
+      // The three legacy config rows — verbatim labels + values (EXPRESS_FEE=80,
+      // creditLimit=50,000 grouped, VAT_RATE=18%).
+      expect(find.text('תוספת משלוח אקספרס'), findsOneWidget);
+      expect(find.text('₪80'), findsOneWidget);
+      expect(find.text('מסגרת אשראי לקבלן'), findsOneWidget);
+      expect(find.text('₪50,000'), findsOneWidget);
+      expect(find.text('שיעור מע״מ'), findsOneWidget);
+      expect(find.text('18%'), findsOneWidget);
+      // The verbatim hint.
+      expect(
+        find.text(
+          'המע״מ קבוע לפי חוק (18%). תוספת האקספרס והאשראי נראים מיד בעגלת הקבלן.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('🌳 עץ המוצרים shows the inline catalog-tree summary', (t) async {
+      final c = await pumpScreen(t);
+      await openManageTab(t);
+      await openSection(t, 'עץ המוצרים');
+
+      final cats = c.read(managerAnalyticsProvider).catalogCategories;
+      final total = cats.values.fold<int>(0, (s, n) => s + n);
+      // The verbatim section purpose + the live tree size (products/categories).
+      expect(
+        find.text(
+          'עריכת האביזרים המשלימים של כל מוצר — בחירת מוצר חושפת את עץ האביזרים שלו.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('מוצרים בעץ'), findsOneWidget);
+      expect(find.text('$total'), findsWidgets);
+      expect(find.text('קטגוריות'), findsWidgets);
+    });
+
+    testWidgets('🏷️ מותגים ומחירים lists the brands from kBrands', (t) async {
+      await pumpScreen(t);
+      await openManageTab(t);
+      await openSection(t, 'מותגים ומחירים');
+
+      // The header names the brand count, and every brand name renders.
+      expect(find.text('מותגים (${kBrands.length})'), findsOneWidget);
+      for (final b in kBrands) {
+        expect(find.text(b.name), findsOneWidget, reason: 'brand ${b.name}');
+      }
+    });
+
+    testWidgets('🔬 בדיקות רגרסיה routes to RegressionPanelScreen', (t) async {
+      await pumpScreen(t);
+      await openManageTab(t);
+      await openSection(t, 'בדיקות רגרסיה');
+
+      expect(find.byType(RegressionPanelScreen), findsNothing);
+      // Tap the action button → it pushes the existing RegressionPanelScreen.
+      await t.tap(find.text('🔬 פתח מרכז בדיקות רגרסיה'));
+      await settle(t);
+      expect(find.byType(RegressionPanelScreen), findsOneWidget);
+    });
+
+    testWidgets('the manage tab is LIGHT — white cards on bgLight, NO dark tokens',
+        (t) async {
+      await pumpScreen(t);
+      await openManageTab(t);
+
+      final scaffold = t.widget<Scaffold>(find.byType(Scaffold));
+      expect(scaffold.backgroundColor, BsTokens.bgLight);
+
+      final decos = t
+          .widgetList<Container>(find.byType(Container))
+          .map((w) => w.decoration)
+          .whereType<BoxDecoration>()
+          .map((d) => d.color)
+          .whereType<Color>()
+          .toList();
+      for (final dark in const [
+        BsTokens.bgDark,
+        BsTokens.cardDark,
+        BsTokens.inkDark,
+        BsTokens.mutedDark,
+      ]) {
+        expect(decos, isNot(contains(dark)), reason: 'dark token $dark leaked');
+        final matColors = t
+            .widgetList<Material>(find.byType(Material))
+            .map((m) => m.color)
+            .whereType<Color>();
+        expect(matColors, isNot(contains(dark)), reason: 'dark Material $dark');
+      }
+      // The 5 section cards are white cardLight Containers.
+      expect(
+        decos.where((col) => col == BsTokens.cardLight).length,
+        greaterThanOrEqualTo(5),
+      );
     });
   });
 

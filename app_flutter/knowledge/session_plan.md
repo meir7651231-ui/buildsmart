@@ -1,5 +1,35 @@
-# 👔 Manager rebuild — M4: 👥 לקוחות tab — live customer list + credit (v6.01)
+# 👔 Manager rebuild — M5: 🛠️ ניהול tab — the 5 management tools (manager screen COMPLETE) (v6.02)
 Owner: this session
+Scope: `lib/screens/manager_dashboard_screen.dart` בלבד (גוף ה-🛠️ tab + קריאת
+`managerAnalyticsProvider.catalogCategories` + `kBrands` + route ל-`RegressionPanelScreen`). אסור לגעת
+ב-engine internals (`orders_engine.dart`), ב-logic layer (נקרא, לא משתנה), בשאר ה-tabs (📊 M2 · 🚚 M3 ·
+👥 M4 — done), ב-`role_picker_sheet`, או ב-buyer/checkout flow.
+
+מקור-אמת verbatim: `index.html` — `renderMgrManage`@16645-16890 · `EXPRESS_FEE`@11961 ·
+`creditLimit`@11963 · `VAT_RATE`@11941. LIGHT theme.
+
+## M5 — מילוי ה-🛠️ tab — הטאב האחרון, המסך COMPLETE ✅
+- `_ManageTab` (`ConsumerStatefulWidget`) מחליף את ה-placeholder האחרון ב-`IndexedStack` index-3.
+  **המחלקה `_TabPlaceholder` נמחקה כליל — אפס "בקרוב" בכל המסך.** גוף = `ListView` על `bgLight`:
+  banner intro (`mm-intro` verbatim) + אקורדיון 5-מקטעים (`_ManageSection`, רק אחד פתוח בכל רגע —
+  ה-`mgrManageOpen` הלגאסי).
+- **🗂️ קטגוריות** → רשימת קטגוריות **חיה** מ-`managerAnalyticsProvider.catalogCategories` (ממוין לפי
+  ספירה יורד): כותרת `קטגוריות פעילות (N)` + שורה `<cat> · <count> מוצרים` + ה-hint verbatim.
+- **⚙️ הגדרות אפליקציה** → 3 שורות config verbatim: אקספרס=₪80 · אשראי=₪50,000 · מע״מ=18% + hint.
+- **🌳 עץ המוצרים** → סיכום inline של עץ המוצרים (ה-SECTION 1 הלגאסי הוא prompt-edit ללא backend כאן):
+  המטרה verbatim + גודל-העץ החי (מוצרים/קטגוריות).
+- **🏷️ מותגים ומחירים** → רשימת מותגים מ-`lib/data/brands.dart` (`kBrands`): `emoji name` + tagline +
+  ספירת-מוצרים.
+- **🔬 בדיקות רגרסיה** → כפתור `brand` → `Navigator.push(RegressionPanelScreen.route())` (אותו יעד
+  שה-dial הישן השתמש בו).
+- LIGHT בלבד (אפס dark tokens); banner + כפתור-רגרסיה = `brand`.
+- `manager_dashboard_screen_test` → 30 (M1 six + M2 four + M3 six + M4 six + M5 seven + ה-COMPLETE/
+  no-"בקרוב" + role-picker). screen 30 + dashboard 12 + engine 21 ירוק. analyze נקי בקבצים-המשתנים.
+
+---
+
+# 👔 Manager rebuild — M4: 👥 לקוחות tab — live customer list + credit (v6.01)
+Owner: previous wave
 Scope: `lib/screens/manager_dashboard_screen.dart` בלבד (גוף ה-👥 tab + קריאת `managerCustomersProvider`
 + `ordersEngineProvider`). אסור לגעת ב-engine internals (`orders_engine.dart`), ב-logic layer
 (`manager_dashboard.dart` — `mgrCustomerList`/`ManagerCustomer`/`contractorCredit` נקראים, לא משתנים),

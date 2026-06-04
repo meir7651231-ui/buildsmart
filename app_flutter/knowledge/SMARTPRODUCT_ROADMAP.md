@@ -8,6 +8,25 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
+v6.02 — 👔 **Manager rebuild — M5: 🛠️ ניהול tab — the 5 management tools (manager screen COMPLETE)** 🟦.
+The FINAL 🛠️ ניהול tab of `ManagerDashboardScreen` is filled with the manager's **5 management tools**
+(`lib/screens/manager_dashboard_screen.dart` — the `IndexedStack` index-3 body is now `_ManageTab`
+instead of the last "בקרוב" placeholder; **the `_TabPlaceholder` class is removed entirely — ZERO
+"בקרוב" remains in any tab, the screen is COMPLETE**). A faithful port of the legacy `renderMgrManage`
+(@index.html:16645-16890), a 5-section accordion (one open at a time, the legacy `mgrManageOpen`):
+**(1) 🗂️ קטגוריות** — the LIVE catalog category list from `managerAnalyticsProvider.catalogCategories`
+(header `קטגוריות פעילות (N)` + `<cat> · <count> מוצרים` rows + the verbatim hint, legacy SECTION 3
+@16715); **(2) ⚙️ הגדרות אפליקציה** — the verbatim config rows אקספרס=₪80 (`EXPRESS_FEE` @11961) ·
+אשראי=₪50,000 (`creditLimit` @11963) · מע״מ=18% (`VAT_RATE` @11941) + hint (SECTION 4 @16733); **(3) 🌳
+עץ המוצרים** — an inline summary of the catalog tree (the legacy prompt-edit has no backend here);
+**(4) 🏷️ מותגים ומחירים** — the brands list from `lib/data/brands.dart` (`kBrands`); **(5) 🔬 בדיקות
+רגרסיה** — routes to the existing `RegressionPanelScreen` (the old dial's target). LIGHT only — white
+`cardLight` accordion cards on `bgLight`, no dark tokens. **M5** ✅ — only the 🛠️ tab body + the route
+call changed; the engine internals, the other 3 tabs, the role picker, and the buyer/checkout flow are
+untouched. Guard `manager_dashboard_screen_test` grows by 7 (now 30); the placeholder test asserts NO
+"בקרוב" remains. All manager + engine tests stay green (screen 30 + dashboard 12 + engine 21). **The
+manager rebuild (M1→M5) is COMPLETE.**
+
 v5.99 — 👔 **Manager rebuild — M2: 📊 לוח בקרה tab — live cockpit (metrics + pipeline)** 🟦.
 The first 📊 לוח בקרה tab of `ManagerDashboardScreen` is filled with a LIGHT scrollable **cockpit over
 the LIVE shared orders engine** (`lib/screens/manager_dashboard_screen.dart` — the `IndexedStack`
