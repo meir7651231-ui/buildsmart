@@ -99,16 +99,17 @@ void main() {
       expect(stack.index, 0);
     });
 
-    testWidgets('the 3 NOT-yet-built tabs (🚚/👥/🛠️) keep the "בקרוב" note '
-        '(M3–M5 not built); 📊 is no longer a placeholder', (t) async {
+    testWidgets('the 2 NOT-yet-built tabs (👥/🛠️) keep the "בקרוב" note '
+        '(M4–M5 not built); 📊 + 🚚 are no longer placeholders', (t) async {
       await pumpScreen(t);
       // Default tab = 0 (📊 לוח בקרה) — now the LIVE cockpit, NOT a placeholder,
       // so nothing "בקרוב" is onstage. The IndexedStack keeps the OTHER three
-      // (🚚/👥/🛠️) mounted offstage, each still a "בקרוב" placeholder.
+      // mounted offstage; 🚚 הזמנות is now the live orders tab (M3), so only the
+      // remaining TWO (👥/🛠️) are still "בקרוב" placeholders.
       expect(find.text('בקרוב'), findsNothing);
       expect(
         find.text('בקרוב', skipOffstage: false),
-        findsNWidgets(3),
+        findsNWidgets(2),
       );
     });
 
@@ -267,6 +268,203 @@ void main() {
         decos.where((c) => c == BsTokens.cardLight).length,
         greaterThanOrEqualTo(6),
       );
+    });
+  });
+
+  group('🚚 הזמנות — live order control center (M3, god-mode advance)', () {
+    // Switch to the 🚚 הזמנות tab by tapping its toggle pill. `.first` selects
+    // the toggle pill (built above the IndexedStack body) even after the tab's
+    // own 'הזמנות' summary label mounts.
+    Future<void> openOrdersTab(WidgetTester t) async {
+      await t.tap(find.text('הזמנות').first);
+      await settle(t);
+    }
+
+    testWidgets('renders the seed orders grouped by their stage — each row '
+        'shows 📦 id, who·site, items·₪sum, and the stage pill', (t) async {
+      final c = await pumpScreen(t);
+      await openOrdersTab(t);
+      expect(c.read(managerTabProvider), 1);
+
+      // Every seed order's id + the who·site line are on screen.
+      for (final o in c.read(ordersEngineProvider)) {
+        expect(find.text('📦 ${o.id}'), findsOneWidget, reason: '${o.id} row');
+        expect(
+          find.text('${o.who} · ${o.site}'),
+          findsOneWidget,
+          reason: '${o.id} who·site',
+        );
+      }
+
+      // The 3-stat summary (total / open / revenue), verbatim labels.
+      expect(find.text('פתוחות'), findsOneWidget);
+      expect(find.text('מחזור'), findsOneWidget);
+      // 4 seed orders, all open; revenue = 1240+680+3150+420 = 5490.
+      expect(find.text('4'), findsWidgets); // total
+      expect(find.text('₪5,490'), findsOneWidget); // grouped revenue
+
+      // The stage pills use the VERBATIM ORDER_STAGE labels (full forms, distinct
+      // from the dashboard's short pipeline labels). Seed stages: new/preparing/
+      // ready/transit — each present exactly once as a row pill.
+      for (final label in const [
+        'התקבלה',
+        'בהכנה',
+        'מוכן לאיסוף',
+        'בדרך לאתר',
+      ]) {
+        expect(find.text(label), findsWidgets, reason: 'stage pill $label');
+      }
+    });
+
+    testWidgets('the stage filter chips narrow the list to one stage', (t) async {
+      final c = await pumpScreen(t);
+      await openOrdersTab(t);
+
+      // The "הכל (4)" chip plus one chip per populated stage. Tapping a stage
+      // chip filters to just that stage's order(s).
+      expect(find.text('הכל (4)'), findsOneWidget);
+
+      // Filter to בהכנה (preparing) — only BS-1041 (אבי מזרחי) remains.
+      await t.tap(find.text('בהכנה (1)'));
+      await settle(t);
+      expect(find.text('📦 BS-1041'), findsOneWidget);
+      expect(find.text('📦 BS-1042'), findsNothing); // a `new` order, filtered out
+      expect(find.text('📦 BS-1040'), findsNothing); // a `ready` order, filtered out
+
+      // Back to הכל — all four return.
+      await t.tap(find.text('הכל (4)'));
+      await settle(t);
+      for (final o in c.read(ordersEngineProvider)) {
+        expect(find.text('📦 ${o.id}'), findsOneWidget);
+      }
+    });
+
+    testWidgets('tapping "קדם שלב ›" advances that order one stage on the engine',
+        (t) async {
+      final c = await pumpScreen(t);
+      await openOrdersTab(t);
+
+      // BS-1042 starts `new` (התקבלה).
+      expect(
+        c.read(ordersEngineProvider).firstWhere((o) => o.id == 'BS-1042').stage,
+        'new',
+      );
+
+      // Advance BS-1042: tap the "קדם שלב ›" button inside its row.
+      final advanceInRow = find.descendant(
+        of: find.ancestor(
+          of: find.text('📦 BS-1042'),
+          matching: find.byType(InkWell),
+        ),
+        matching: find.text('קדם שלב ›'),
+      );
+      await t.ensureVisible(advanceInRow.first);
+      await settle(t);
+      await t.tap(advanceInRow.first);
+      await settle(t);
+
+      // The engine moved it new → preparing.
+      expect(
+        c.read(ordersEngineProvider).firstWhere((o) => o.id == 'BS-1042').stage,
+        'preparing',
+      );
+    });
+
+    testWidgets('a delivered order shows "✓ הושלם" instead of the advance button '
+        'and advancing it is a no-op', (t) async {
+      final c = await pumpScreen(t);
+      // God-step BS-1042 straight to delivered on the shared engine.
+      c.read(ordersEngineProvider.notifier).setStage('BS-1042', 'delivered');
+      await openOrdersTab(t);
+      await settle(t);
+
+      // Its row now shows the completed badge.
+      expect(find.text('✓ הושלם'), findsWidgets);
+      expect(
+        c.read(ordersEngineProvider).firstWhere((o) => o.id == 'BS-1042').stage,
+        'delivered',
+      );
+    });
+
+    testWidgets('KEYSTONE — advancing in 🚚 reflows the 📊 dashboard LIVE '
+        '(shared engine: tile + pipeline recount)', (t) async {
+      final c = await pumpScreen(t);
+
+      // Baseline on the 📊 dashboard (default tab 0): 4 open, BS-1039 is the only
+      // order in transit (בדרך). Drive it to delivered from the 🚚 tab and watch
+      // the dashboard's 🚚 open-orders tile drop 4 → 3.
+      expect(c.read(managerAnalyticsProvider).openOrders, 4);
+      final deliveredBefore = c
+          .read(ordersEngineProvider)
+          .where((o) => o.stage == 'delivered')
+          .length;
+      expect(deliveredBefore, 0);
+
+      await openOrdersTab(t);
+
+      // BS-1039 is in transit — one advance lands it on delivered.
+      expect(
+        c.read(ordersEngineProvider).firstWhere((o) => o.id == 'BS-1039').stage,
+        'transit',
+      );
+      // BS-1039 is the bottom (4th) seed row — scroll its advance button into
+      // view, then tap it (the row's outer card InkWell holds the id text; the
+      // advance text lives inside its own button InkWell).
+      final advanceInRow = find.descendant(
+        of: find.ancestor(
+          of: find.text('📦 BS-1039'),
+          matching: find.byType(InkWell),
+        ),
+        matching: find.text('קדם שלב ›'),
+      );
+      await t.ensureVisible(advanceInRow.first);
+      await settle(t);
+      await t.tap(advanceInRow.first);
+      await settle(t);
+
+      // The SHARED engine is now: BS-1039 delivered → open drops to 3, delivered
+      // rises to 1. The 📊 dashboard reads the SAME providers, so its numbers
+      // reflow without any extra action.
+      expect(
+        c.read(ordersEngineProvider).firstWhere((o) => o.id == 'BS-1039').stage,
+        'delivered',
+      );
+      expect(c.read(managerAnalyticsProvider).openOrders, 3);
+      expect(
+        c.read(ordersEngineProvider).where((o) => o.stage == 'delivered').length,
+        1,
+      );
+
+      // Switch to the 📊 tab and confirm the live tile now reads 3.
+      await t.tap(find.text('לוח בקרה').first);
+      await settle(t);
+      // 🚚 open-orders tile + the delivered pipeline row both reflect the engine.
+      expect(find.text('3'), findsWidgets);
+    });
+
+    testWidgets('the orders tab is LIGHT — white rows on bgLight, NO dark tokens',
+        (t) async {
+      await pumpScreen(t);
+      await openOrdersTab(t);
+
+      final scaffold = t.widget<Scaffold>(find.byType(Scaffold));
+      expect(scaffold.backgroundColor, BsTokens.bgLight);
+
+      final decos = t
+          .widgetList<Container>(find.byType(Container))
+          .map((w) => w.decoration)
+          .whereType<BoxDecoration>()
+          .map((d) => d.color)
+          .whereType<Color>()
+          .toList();
+      for (final dark in const [
+        BsTokens.bgDark,
+        BsTokens.cardDark,
+        BsTokens.inkDark,
+        BsTokens.mutedDark,
+      ]) {
+        expect(decos, isNot(contains(dark)), reason: 'dark token $dark leaked');
+      }
     });
   });
 

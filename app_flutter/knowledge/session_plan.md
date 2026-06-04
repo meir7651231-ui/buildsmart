@@ -1,3 +1,32 @@
+# 👔 Manager rebuild — M3: 🚚 הזמנות tab — live order list + god-mode advance (v6.00)
+Owner: this session
+Scope: `lib/screens/manager_dashboard_screen.dart` בלבד (גוף ה-🚚 tab + קריאת `ordersEngineProvider`
++ קריאת `.advance`). אסור לגעת ב-engine internals (`orders_engine.dart`), בשאר 3 ה-tabs (📊 M2 done ·
+👥/🛠️ M4–M5), ב-`role_picker_sheet`, או ב-buyer/checkout flow.
+
+מקור-אמת verbatim: `index.html` — `renderMgrOrders`@16939-17075 · `mgrAdvanceOrder`@17022-17032 ·
+`mgrOrderDetail`@17037-17075 · `ORDER_STAGE`@12041-12048 · `ORDER_FLOW`@16943. LIGHT theme.
+
+## M3 — מילוי ה-🚚 tab ✅
+- `_OrdersTab` (`ConsumerStatefulWidget`) מחליף את ה-placeholder ב-`IndexedStack` index-1; 👥/🛠️
+  נשארים "בקרוב". גוף = `ListView` על `bgLight`. **WRITE ראשון של המנהל ל-engine.**
+- **רשימת הזמנות חיה** מ-`ref.watch(ordersEngineProvider)`, מסוננת לפי 6 שלבי `kManagerOrderFlow`:
+  `_OrderSummary` (3 סטטים: הזמנות/פתוחות/מחזור ₪) + `_OrderStageChips` (`הכל (N)` + chip לכל שלב
+  מאוכלס, תוויות `ORDER_STAGE` verbatim + ספירות) + שורה לכל הזמנה `_OrderRow` (legacy `mo-card`:
+  `📦 id` + stage-pill / `who · site` / 6-step `_MiniTracker` / `items פריטים · ₪sum` + הכפתור). שלב
+  ריק → "לא נמצאו הזמנות תואמות." (legacy `md-empty`).
+- **God-mode advance (ה-keystone):** כפתור "קדם שלב ›" לכל הזמנה פתוחה → `ordersEngineProvider
+  .notifier.advance(o.id)` (new→preparing→ready→pickup→transit→delivered) + toast `הזמנה id →
+  next-label`. הזמנה `delivered` → "✓ הושלם" במקום. כי ה-engine **משותף**, advance כאן מזרים מחדש את
+  ה-📊 dashboard (אריח 🚚 + pipeline + ספירות) **חי** — מאומת בבדיקה (advance BS-1039 → open 4→3).
+- **Order-detail bottom-sheet** (`mgrOrderDetail`) ב-tap על שורה — tracker מלא + grid + שורות +
+  `קדם ל"…"` (אותו advance) / "✓ ההזמנה הושלמה ונמסרה".
+- LIGHT בלבד (אפס dark tokens); stage-pill tints = ה-hex הלגאסי.
+- `manager_dashboard_screen_test` → 18 (M1 six + M2 four + M3 six). 51/51 targeted ירוק (screen 18 +
+  dashboard 12 + engine 21). analyze נקי בקבצים-המשתנים.
+
+---
+
 # 👔 Manager rebuild — M2: 📊 לוח בקרה tab — live cockpit (metrics + pipeline) (v5.99)
 Owner: this session
 Scope: `lib/screens/manager_dashboard_screen.dart` בלבד (גוף ה-📊 tab + קריאת providers). אסור
