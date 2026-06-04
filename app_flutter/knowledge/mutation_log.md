@@ -26,6 +26,40 @@
 - ביטול → ירוק ✅ — All tests passed.
 - מסקנה: הבדיקה חזקה — תופסת היפוך של לוגיקת-הסינון המרכזית (זול↔יקר), לא רק קיום פלט.
 
+## gate 117 closeout (v6.11) — full-snapshot parity לפולירול + חוליות — 2026-06-04
+
+- **קבצים:** `test/_polyroll_snapshot.g.dart` (774) · `test/_huliot_snapshot.g.dart` (170).
+- **מה עושים:** snapshot lock על כל nameHe+page של כל מק"טי הקטלוג.
+- תקלה שהוזרקה (פולירול): `'צינור PPR אספקת מים 20'` → `'…אספקתX…'` (95016002).
+  תוצאה: `Polyroll snapshot drift (1)` אדום ✅; ביטול → ירוק ✅.
+- תקלה שהוזרקה (חוליות): `'ברך 15° צד אחד חלק 40'` → `'ברך 15X…'` (70041150).
+  תוצאה: `Huliot snapshot drift (1)` אדום ✅; ביטול → ירוק ✅.
+- מסקנה: ה-snapshots תופסים שינוי-תו-אחד בכל מ-944 המק"טים.
+
+## gate 117 closeout — polyroll_pdf_parity_test — 2026-06-04
+
+- **קובץ:** `test/polyroll_pdf_parity_test.dart` (חדש) — 20 SKUs מ-`kPolyrollCatalog`.
+- **מה עושה:** snapshot lock על nameHe+page+brand של 20 פיפסים/אביזרים מייצגים.
+- תקלה שהוזרקה: `'צינור PPR אספקת מים 20'` → `'…אספקתX…'` (95016002).
+- תוצאה: אדום ✅; ביטול → ירוק ✅.
+
+## gate 117 closeout — huliot_pdf_parity_test — 2026-06-04
+
+- **קובץ:** `test/huliot_pdf_parity_test.dart` (חדש) — 13 SKUs מ-`kHuliotCatalog`.
+- **מה עושה:** snapshot lock על nameHe+page+brand של 13 ברכים/הגבהות/מכסים.
+- תקלה שהוזרקה: `'ברך 15° צד אחד חלק 40'` → `'ברך 15X…'` (70041150).
+- תוצאה: אדום ✅; ביטול → ירוק ✅.
+
+## gate 117 follow-up — lipskey_hierarchy_parity_test — 2026-06-04
+
+- **קובץ:** `test/lipskey_hierarchy_parity_test.dart` (חדש) + `lib/data/chip_hierarchy.dart`.
+- **מה עושה:** אוכף ש-parseChips מחזיר type+path תקינים ל-18 SKUs מייצגים של ליפסקי
+  (תנאי-קדם להפעלת `_HierarchyChips` במקום `_NameWords`).
+- תקלה שהוזרקה: `'מיכל הדחה'` → `'מיכלX הדחה'` ב-`_kCompoundTypes`.
+- תוצאה: אדום ✅ — SKU 152785 (`מיכל הדחה טיטאן לבן`) נכשל ב-`type expected "מיכל הדחה"`.
+- ביטול → ירוק ✅ — 18/18.
+- מסקנה: הטסט אוכף את ה-compound-type lookup; שינוי שובר את שיוך-ה-type הגורף.
+
 ## gate 117 — lipskey_pdf_parity_test (מחסומי רצפה תיקניים) — 2026-06-04
 
 - **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runFloorTrapGroup` (8 SKUs, עמ' 26–27).

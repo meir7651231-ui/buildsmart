@@ -13,6 +13,16 @@ const Set<String> kChipTypes = {
   'סיפון', 'מחסום', 'מאסף', 'אום', 'אטם', 'משפך', 'אביק', 'רוזטה', 'מבוא',
   'מכלול', 'מצרה', 'חותך', 'מערכת', 'מצחיה', 'ונטיל', 'מפתח', 'חיבור',
   'מאריך', 'הגבהה', 'מכסה', 'רשת', 'סט', 'פס',
+  // Lipski — additional drainage / shower system types (gate 117 follow-up)
+  'קולט', 'זרוע', 'פיה', 'כובע',
+};
+
+/// Compound types — checked BEFORE the single-token kChipTypes lookup so that
+/// `מיכל הדחה` becomes one type chip instead of `מיכל` (type) + `הדחה` (leftover).
+/// Lipski uses these for cisterns and seats. Polyroll/Huliot have none.
+const Set<String> _kCompoundTypes = {
+  'מיכל הדחה',
+  'מושב אסלה',
 };
 
 const Set<String> kChipLevel1Connection = {
@@ -30,6 +40,8 @@ const Set<String> kChipLevel2Shape = {
   // Huliot SmartLock — drainage angles. 15°/30° = single-side elbows; 87.5°
   // = telescopic elbow per the SmartLock catalog (pages 12, 15).
   '15°', '30°', '87.5°',
+  // Lipski insertion bends — 87° is a distinct angle from Huliot's 87.5°.
+  '87°',
   'מצרה', 'שווה', 'סמוי', 'פרפר', 'כדורי',
   'מעבר', 'ישר', 'אלכסוני',
   'בין', 'אוגנים', // compound "בין אוגנים"
@@ -107,6 +119,17 @@ const Set<String> kChipLevel3Feature = {
   'אחד', '(צד', 'חלק)',  // '(צד אחד חלק)' tokenization with parens
   // SmartLock-specific contexts
   'נחושת',
+  // ─── Lipski — toilet-tank/seat model names (gate 117 follow-up) ─────────
+  'ספיר', 'ברקת', 'טופז', 'יהלום', 'טיטאן', 'כנרת',
+  'חרמון', 'אדיר', 'תבור', 'כרמל', 'הגייני',
+  // Lipski — tank/seat sub-features
+  'מונובלוק', 'משולב', 'טרמו', 'ULTRA',
+  // Lipski — bottle-trap qualifier
+  'תיקני', 'בודד', 'פרגמון',
+  // Lipski — trailing token after stripped parens "(מס. N)"
+  'מס.',
+  // Lipski — shower context (parallel to existing 'למזגן'/'למדיח'/etc.)
+  'למקלחת',
 };
 
 const Set<String> kChipLevel4Thread = {
@@ -185,7 +208,9 @@ ChipPath parseChips(String nameHe) {
   final leftover = <String>[];
   // Size tokens: usually start with a digit but RTL quoting can prefix
   // tokens like `"32x1` (the trailing quote got pulled to the start by bidi).
-  final sizeRe = RegExp(r'^["”]?\d|^\d');
+  // Lipski pipes label the bore explicitly as `DN40`/`DN110` — accept those
+  // so they land in the size slot rather than leftover.
+  final sizeRe = RegExp(r'^["”]?\d|^\d|^DN\d', caseSensitive: false);
 
   // Multi-word compounds, longest first per level. Walked at every position
   // BEFORE single-token classification, so "לנקודת מים" gets one chip even
@@ -207,6 +232,23 @@ ChipPath parseChips(String nameHe) {
         ? raw.substring(1, raw.length - 1)
         : raw;
     if (kChipMaterial.contains(t)) { i++; continue; }
+    // Compound-type lookahead (e.g. 'מיכל הדחה', 'מושב אסלה'). Must precede
+    // the single-token type check so that the leading word doesn't grab
+    // half the compound and leave the rest stranded as leftover.
+    if (type == null) {
+      String? hit;
+      int hitLen = 0;
+      for (final ct in _kCompoundTypes) {
+        final parts = ct.split(' ');
+        if (parts.length > tokens.length - i) continue;
+        var ok = true;
+        for (int j = 0; j < parts.length; j++) {
+          if (tokens[i + j] != parts[j]) { ok = false; break; }
+        }
+        if (ok) { hit = ct; hitLen = parts.length; break; }
+      }
+      if (hit != null) { type = hit; i += hitLen; continue; }
+    }
     if (type == null && kChipTypes.contains(t)) { type = t; i++; continue; }
     // Size detection — but NOT for declared shape tokens that happen to start
     // with a digit (45° / 90°). Those are the elbow/tee ANGLE and belong in
@@ -319,6 +361,14 @@ const _l3Compounds = {
   'סט פקקים לברז ושבלונה', 'סט פקקים לברז',
   'מצחיה קומפלט לאביק לאמבט',
   'מערכת ניקוז לאמבט',
+  // ─── Lipski — toilet-seat / gasket / trap compound features (gate 117) ─
+  'סגירה רכה', 'אנטי ונדליזם',
+  'ציר ניירוסטה', 'ציר פלסטיק',
+  'דו צדדי', 'חתך שטוח',
+  // "(מס. N)" — kitchen-sink trap variant marker; tokenizer keeps the parens
+  // attached so the compound walker sees `(מס.` + `N)` as two tokens.
+  '(מס. 1)', '(מס. 2)', '(מס. 3)', '(מס. 4)', '(מס. 5)',
+  '(מס. 6)', '(מס. 7)', '(מס. 8)', '(מס. 9)',
   'ונטיל לכיור אמריקאי J', 'ונטיל לכיור אמריקאי',
   'מחסום הורקה למכונת כביסה',
   'סיפון הורקה קומפלקט J', 'סיפון הורקה קומפלקט',

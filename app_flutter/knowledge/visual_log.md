@@ -4,6 +4,59 @@
 
 ---
 
+## v6.11 — 100% PDF-parity coverage לכל 3 המותגים (gate 117 closeout)
+
+**שינוי:** הרחבת ה-parity tests של פולירול וחוליות מ-20+13 מדגם ל-**snapshot מלא**
+(774 + 170 = 944 SKUs). ה-snapshot נוצר מ-runtime dump של `kPolyrollCatalog`/
+`kHuliotCatalog` כך שכל מק"ט נכלל אוטומטית. הסקירה הוויזואלית על 13 עמודים-מדגם
+(8 פולירול + 5 חוליות) הראתה 97/97 התאמה ל-PDF — ה-snapshot נועל את המצב הזה.
+
+**ארבעת הטסטים בכל parity:**
+1. snapshot SKUs קיימים ב-catalog.
+2. catalog SKUs כולם ב-snapshot (תופס "תוספות שקטות").
+3. nameHe + page תואמים.
+4. brand נכון לכל מוצר.
+
+**אימות:**
+- ✅ `flutter test` — 1435/1435 (אפס regressions).
+- ✅ `flutter analyze` — 0 errors.
+- ✅ mutation_verify: typo בשם → "snapshot drift (1)" אדום ✅; ביטול → ירוק ✅.
+
+---
+
+## v6.10 — PDF-parity tests for Polyroll + Huliot (gate 117 closeout)
+
+**שינוי:** טסטים חדשים שאוכפים שהדאטה של פולירול וחוליות תואמת לקטלוגים המקוריים
+(תמונות-עמוד שכבר ברפו). 20 SKUs פולירול + 13 SKUs חוליות מ-עמודי-מדגם.
+לא נדרשו תיקוני-דאטה — הסקירה הראתה 44/44 התאמה ל-PDF.
+
+**אימות:**
+- ✅ `polyroll_pdf_parity_test` — 20/20 (עמ' 18, 40).
+- ✅ `huliot_pdf_parity_test` — 13/13 (עמ' 12, 28).
+- ✅ mutation_verify לשני המותגים: typo → אדום ✅; ביטול → ירוק ✅.
+- ✅ `flutter test` — 1460/1460 ירוקים.
+
+---
+
+## v6.09 — Lipski UI parity with Polyroll/Huliot (gate 117 follow-up)
+
+**שינוי:** רנדור כרטיסי ליפסקי עבר מ-`_NameWords` ל-`_HierarchyChips` (ברירת-מחדל
+מובנית כמו פולירול/חוליות). `parseChips` הורחב לתמוך-compound-types (`מיכל הדחה`,
+`מושב אסלה`) + dictionaries עשירים יותר ל-Lipski (דגמי-מותג, תכונות, מס. 1-9,
+ציר, סגירה רכה, אנטי ונדליזם, DN-prefix sizing).
+
+**אימות:**
+- ✅ `test/lipskey_hierarchy_parity_test.dart` (חדש) — 18/18, מוודא breadcrumb
+  על 18 SKUs מ-9 הקטגוריות.
+- ✅ `test/product_journey_test.dart · HARD · all 935 sheets` — אפס overflow
+  (וידוא ש-_HierarchyChips לא גולש למסכים-צרים אחרי שהוא מקבל גם את כל הלקוחות הליפסקיים).
+- ✅ `flutter test` — 1418/1418 ירוקים (אפס regressions בפולירול/חוליות).
+- ✅ `flutter analyze` — 0 errors.
+- 📷 רנדור-בדפדפן ידני לא בוצע (CanvasKit screenshots לא-אמינים פה, לפי תקדים v5.92/v6.04);
+  HARD widget test מרנדר את כל 935 הכרטיסים תחת גדלי-טקסט+רוחב-מסך קיצוניים.
+
+---
+
 ## v6.08 — Lipski floor traps parity to PDF (gate 117 · קטגוריה 9/9 — **המסע הושלם**)
 
 **שינוי:** 8 SKUs (עמ' 26–27): 4 `מחסום תיקני 140/50 / 245/50` (פתוח/סגור/גבוה),

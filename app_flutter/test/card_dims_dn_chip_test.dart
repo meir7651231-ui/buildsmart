@@ -27,16 +27,15 @@ Widget _card(LipskeyCatalogProduct p) => ProviderScope(
 );
 
 void main() {
-  testWidgets('elbow with DN only in dims shows a DN chip on the card', (
+  testWidgets('elbow shows its bore (DN) on the card — Lipski 116624', (
     tester,
   ) async {
-    // ברך 90° - תבריג כפול, dims {DN: 40} — DN is NOT in the name.
+    // ברך 87° 40, dims {DN: 40} — after gate 117 v6.01 the bore is in the
+    // name itself as the size chip '40'; after gate 117 follow-up Lipski
+    // renders via _HierarchyChips so the breadcrumb shows ברך · 87° · 40.
+    // The test verifies the bore is still visible on the card; the literal
+    // 'DN40' label was the _NameWords-era marker and is no longer required.
     final p = kLipskeyCatalog.firstWhere((q) => q.sku == '116624');
-    expect(
-      p.nameHe.contains('DN'),
-      isFalse,
-      reason: 'precondition: the name itself carries no DN',
-    );
     expect(
       (p.dims?['DN'] ?? p.dims?['dn'])?.toString(),
       isNotNull,
@@ -47,9 +46,9 @@ void main() {
     await tester.pump();
 
     expect(
-      find.text('DN40'),
-      findsOneWidget,
-      reason: 'the dims DN must be visible on the card',
+      find.text('40'),
+      findsAtLeastNWidgets(1),
+      reason: 'the bore (40) must be visible on the card',
     );
   });
 
