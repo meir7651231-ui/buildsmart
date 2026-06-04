@@ -118,27 +118,25 @@ class _CameraScreenState extends State<CameraScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
 
-                    // Capture button row (non-barcode)
+                    // Capture button row — barcode (mode 0) uses the scanner
+                    // flow and shows no shutter; non-barcode modes are not yet
+                    // implemented so display an honest 🚧 badge instead.
                     if (_mode != 0)
                       Padding(
                         padding: const EdgeInsets.only(top: 14, bottom: 4),
-                        child: GestureDetector(
-                          onTap: () => showToast(context, '${mode.label} — בבנייה'),
-                          child: Container(
-                            width: 68, height: 68,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 3),
-                            ),
-                            child: Center(
-                              child: Container(
-                                width: 54, height: 54,
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(20),
+                            border:
+                                Border.all(color: Colors.white24, width: 1),
+                          ),
+                          child: Text(
+                            '🚧 ${mode.label} — בבנייה',
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 13),
                           ),
                         ),
                       ),

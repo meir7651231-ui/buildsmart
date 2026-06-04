@@ -10,11 +10,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 const String _kStorageKey = 'bs.settings.v1';
 
 enum BsTheme { light, dark }
+// DEAD — not consumed (v6.14); kept for JSON round-trip + test_harness
 enum BsTextSize { small, medium, large }
 enum BsLang { he, ar, en }
+// DEAD — not consumed (v6.14); kept for JSON round-trip + test_harness
 enum BsUnits { metric, imperial }
+// DEAD — not consumed (v6.14); kept for JSON round-trip + test_harness
 enum BsCurrency { ils, usd }
+// DEAD — not consumed (v6.14); kept for JSON round-trip + test_harness
 enum BsHaulSize { small, van, truck }
+// DEAD — not consumed (v6.14); kept for JSON round-trip + test_harness
 enum BsSessionTimeout { m5, m15, m30, m60 }
 
 class AppSettings {
@@ -43,21 +48,36 @@ class AppSettings {
   });
 
   final BsTheme theme;
+  // DEAD — not consumed (v6.14); real write/read moved to CatalogSettings
   final BsTextSize textSize;
+  // DEAD — not consumed (v6.14); real write/read moved to CatalogSettings
   final bool reduceMotion;
   final BsLang lang;
+  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
   final BsUnits units;
+  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
   final BsCurrency currency;
+  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
   final BsHaulSize haul;
+  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
   final bool express;
+  // DEAD — not consumed (v6.14); real write/read moved to CatalogSettings
   final bool highContrast;
+  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
   final bool twoFA;
+  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
   final bool biometric;
+  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
   final bool locationPerm;
+  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
   final BsSessionTimeout sessionTimeout;
+  // DEAD — not consumed (v6.14); real write/read moved to NotifSettings
   final bool notifShipments;
+  // DEAD — not consumed (v6.14); real write/read moved to NotifSettings
   final bool notifDeals;
+  // DEAD — not consumed (v6.14); real write/read moved to NotifSettings
   final bool notifBudget;
+  // DEAD — not consumed (v6.14); real write/read moved to NotifSettings
   final bool notifOrders;
   final bool privAnalytics;
   final bool privLocation;

@@ -774,7 +774,19 @@ class _FavoritesSheet extends ConsumerWidget {
                 (item) => _SheetTile(
                   emoji: item.emoji,
                   label: item.title,
-                  onTap: () => Navigator.pop(context),
+                  onTap: () {
+                    Navigator.pop(context);
+                    final svcIdx = _kServiceByEmoji[item.emoji];
+                    if (svcIdx != null) {
+                      _ServicesGrid._openSheet(context, svcIdx);
+                    } else if (item.emoji == '🛒') {
+                      ref.read(storeSectionProvider.notifier).state =
+                          StoreSection.cart;
+                    } else if (item.emoji == '📦') {
+                      ref.read(storeSectionProvider.notifier).state =
+                          StoreSection.orders;
+                    }
+                  },
                 ),
               )
               .toList(),

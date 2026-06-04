@@ -54,6 +54,7 @@ class SearchDialWidget extends ConsumerWidget {
             label: s.label,
             emoji: s.emoji,
             icon: Icons.circle,
+            active: ref.watch(catalogProductSortProvider) == s.value,
             onTap: () {
               ref.read(catalogProductSortProvider.notifier).state = s.value;
               ref.read(searchToolProvider.notifier).state = null;
@@ -70,9 +71,10 @@ class SearchDialWidget extends ConsumerWidget {
           label: 'עם תמונה',
           emoji: '🖼️',
           icon: Icons.circle,
+          active: ref.watch(searchImageOnlyProvider),
           onTap: () {
-            ref.read(searchImageOnlyProvider.notifier).state = true;
-            ref.read(searchToolProvider.notifier).state = null;
+            ref.read(searchImageOnlyProvider.notifier).state =
+                !ref.read(searchImageOnlyProvider);
           },
         ),
         DialRow(

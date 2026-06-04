@@ -1,10 +1,33 @@
-# Wiring Audit — v6.13 (2026-06-04)
+# Wiring Audit — v6.13 + v6.14 (2026-06-04)
 
-Post-cutover audit of the unified app (v6.12) by 5 parallel review agents, then
-fixed in v6.13. Scope: every interactive control across all surfaces (contractor
-app, store, courier, worker, manager, settings, menu/search dials, onboarding).
+Post-cutover audit of the unified app (v6.12) by parallel review agents, fixed across two
+passes. Scope: every interactive control across all surfaces (contractor app, store,
+courier, worker, manager, settings, menu/search dials, onboarding).
 
-## Verdict
+## v6.14 — second pass (deeper sweep)
+
+4 agents (systematic stub-hunt · dead/mismatched provider hunt · hubs & deep flows · full
+dial-leaf sweep + regression) on the fixed v6.13. ~18 new findings, all fixed:
+
+- **Real functional:** chat custom greeting now honored (was hard-coded); notification snooze
+  now actually suppresses the list; notification 'אשר איסוף' → store-orders tab ('עקוב' → honest
+  🚧, no shipments screen); install-studio cart lines carry the real price (was ₪0); store
+  favorites tap navigates to the service; store 'מחיקת חיפושים' actually clears the query.
+- **BS-dial (reachable via home_shell):** manager **metric** tiles (the sibling missed in v6.13)
+  + store/courier portal leaves + worker task-status leaves now read live providers
+  (`managerAnalyticsProvider` / `showPortalSheet` / `workerTasksProvider`); courier vehicle leaves
+  → honest placeholder (no shared provider).
+- **Honest placeholders:** false-confirm buttons (chat storage/export/backup/delete-history,
+  camera non-barcode capture) no longer fake success; dead region (currency/units/haul) + security
+  (2FA/biometric/location/session) dial leaves marked 🚧; 14 orphaned `AppSettings` fields tagged
+  `// DEAD — not consumed (v6.14)` (kept for the test harness; persistence intact).
+- **Polish:** search-dial filter is a real toggle + sort/filter show active highlight.
+
+Regression: all v6.13 fixes re-verified intact. analyze 0 · 1536 tests green · build OK.
+
+---
+
+## Verdict (v6.13 — first pass)
 Core wiring is sound: the unified `ordersEngineProvider` is the single source for
 all four roles; role routing, checkout, onboarding, the full settings screens, the
 full manager dashboard, and worker approvals are all correctly wired. Findings

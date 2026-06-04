@@ -1,4 +1,6 @@
 import 'package:buildsmart/data/contractor_seeds.dart';
+import 'package:buildsmart/screens/store_screen.dart'
+    show StoreSection, storeSectionProvider;
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -736,6 +738,51 @@ class _NotifList extends ConsumerWidget {
       expandedKeys,
     );
 
+    // Snooze suppression: when snoozed, hide all rows and show a muted banner.
+    if (ns.isSnoozedNow) {
+      final until = DateTime.fromMillisecondsSinceEpoch(ns.snoozeUntilMs);
+      final untilLabel =
+          '${until.hour.toString().padLeft(2, '0')}:${until.minute.toString().padLeft(2, '0')}';
+      return RefreshIndicator(
+        color: BsTokens.brand,
+        backgroundColor: const Color(0xFFFFFFFF),
+        onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
+        child: LayoutBuilder(
+          builder: (_, constraints) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: constraints.maxHeight,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🔕', style: TextStyle(fontSize: 48)),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'התראות מושתקות',
+                      style: TextStyle(
+                        color: Color(0xFF1A1A1A),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'מושתק עד $untilLabel',
+                      style: const TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     if (items.isEmpty) {
       return RefreshIndicator(
         color: BsTokens.brand,
@@ -1081,45 +1128,81 @@ class _NotifRow extends ConsumerWidget {
                         ),
                         if (actionLabel != null) ...[
                           const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () {
-                              if (isUnread) {
-                                ref
-                                    .read(notifReadIdsProvider.notifier)
-                                    .add(notif.id);
-                              }
-                              if (notif.type == NotifSection.safety ||
-                                  notif.type == NotifSection.budget) {
-                                showNotifActionSheet(
-                                  context,
-                                  notif.type,
-                                  notif.preview,
-                                );
-                              } else {
-                                showToast(context, '$actionLabel — בבנייה');
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: BsTokens.brand.withValues(alpha: 0.7),
+                          // 'עקוב' (shipments) has no backing screen yet —
+                          // rendered disabled so it signals intent without
+                          // misleading the user.
+                          if (notif.type == NotifSection.shipments)
+                            Tooltip(
+                              message: 'מעקב משלוחים — בקרוב',
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
                                 ),
-                                borderRadius: BorderRadius.circular(10),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: const Color(0xFFCCCCCC),
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '🚧 $actionLabel',
+                                  style: const TextStyle(
+                                    color: Color(0xFFAAAAAA),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
-                              child: Text(
-                                actionLabel,
-                                style: const TextStyle(
-                                  color: BsTokens.brand,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
+                            )
+                          else
+                            GestureDetector(
+                              onTap: () {
+                                if (isUnread) {
+                                  ref
+                                      .read(notifReadIdsProvider.notifier)
+                                      .add(notif.id);
+                                }
+                                if (notif.type == NotifSection.safety ||
+                                    notif.type == NotifSection.budget) {
+                                  showNotifActionSheet(
+                                    context,
+                                    notif.type,
+                                    notif.preview,
+                                  );
+                                } else if (notif.type ==
+                                    NotifSection.orders) {
+                                  // 'אשר איסוף' → open Store → הזמנות tab.
+                                  ref
+                                      .read(storeSectionProvider.notifier)
+                                      .state = StoreSection.orders;
+                                  ref
+                                      .read(mainTabProvider.notifier)
+                                      .state = 3;
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color:
+                                        BsTokens.brand.withValues(alpha: 0.7),
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  actionLabel,
+                                  style: const TextStyle(
+                                    color: BsTokens.brand,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
                         ],
                         if (isUnread) ...[
                           const SizedBox(width: 8),

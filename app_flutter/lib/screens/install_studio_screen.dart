@@ -2445,7 +2445,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
         productName: p.nameHe,
         productEmoji: p.typeEmoji,
         brandName: p.categoryHe,
-        brandPrice: 0,
+        brandPrice: estimatePrice([p]).totalILS,
         productQty: qty,
         accessories: const [],
       ));

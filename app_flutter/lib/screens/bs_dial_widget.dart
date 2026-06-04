@@ -1,14 +1,25 @@
+import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
+import 'package:buildsmart/screens/persona_portal.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/dial.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// Section id of the 🦺 עובד (worker) leaf whose inline task-list panel is open
+/// (one of the `st-*` ids), or null when none is showing. Each `st-*` leaf maps
+/// to ONE task status bucket; tapping it opens the LIVE tasks in that status
+/// filtered from [workerTasksProvider] INLINE in the dial (R2 — no new screen);
+/// tapping again (or any other dial action) closes it. Mutually exclusive with
+/// the M1–M4 manager panels and the W2 store/courier panels.
+final bsWorkerLeafProvider = StateProvider<String?>((_) => null);
 
 /// BS dial — port of app/src/components/bs/bs-dial.tsx.
 /// L1 = 5 personas. L2+ = walk active persona's section tree along
@@ -47,6 +58,7 @@ class BsDialWidget extends ConsumerWidget {
     final openManage = ref.watch(bsManageLeafProvider);
     final openStore = ref.watch(bsStoreLeafProvider);
     final openCourier = ref.watch(bsCourierLeafProvider);
+    final openWorker = ref.watch(bsWorkerLeafProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -115,6 +127,17 @@ class BsDialWidget extends ConsumerWidget {
           ),
           const SizedBox(height: BsTokens.space3),
         ],
+        // Inline LIVE task-list panel for the open 🦺 worker status leaf (`st-*`)
+        // — the REAL tasks in that status from [workerTasksProvider] (W4). Same
+        // dial-overlay placement as the other inline panels (R2).
+        if (openWorker != null) ...[
+          _WorkerTaskPanel(
+            leafId: openWorker,
+            onClose:
+                () => ref.read(bsWorkerLeafProvider.notifier).state = null,
+          ),
+          const SizedBox(height: BsTokens.space3),
+        ],
         DialColumn(
           children: [
             // Persona anchor — tap to pop back to L1.
@@ -132,6 +155,7 @@ class BsDialWidget extends ConsumerWidget {
                 ref.read(bsManageLeafProvider.notifier).state = null;
                 ref.read(bsStoreLeafProvider.notifier).state = null;
                 ref.read(bsCourierLeafProvider.notifier).state = null;
+                ref.read(bsWorkerLeafProvider.notifier).state = null;
               },
             ),
             // One anchor per drill step — tap pops to that depth.
@@ -152,6 +176,7 @@ class BsDialWidget extends ConsumerWidget {
                   ref.read(bsManageLeafProvider.notifier).state = null;
                   ref.read(bsStoreLeafProvider.notifier).state = null;
                   ref.read(bsCourierLeafProvider.notifier).state = null;
+                  ref.read(bsWorkerLeafProvider.notifier).state = null;
                 },
               ),
             // Current items at this depth.
@@ -161,14 +186,15 @@ class BsDialWidget extends ConsumerWidget {
                 emoji: s.emoji,
                 icon: Icons.circle,
                 // Highlight the leaf whose inline panel (metric, order list,
-                // customer list or manage data) is currently open.
+                // customer list, manage data, or worker task list) is open.
                 active:
                     s.id == openMetric ||
                     s.id == openOrder ||
                     s.id == openCustomer ||
                     s.id == openManage ||
                     s.id == openStore ||
-                    s.id == openCourier,
+                    s.id == openCourier ||
+                    s.id == openWorker,
                 onTap: () => _onLeafTap(context, ref, s, path),
               ),
           ],
@@ -188,6 +214,7 @@ class BsDialWidget extends ConsumerWidget {
     ref.read(bsManageLeafProvider.notifier).state = null;
     ref.read(bsStoreLeafProvider.notifier).state = null;
     ref.read(bsCourierLeafProvider.notifier).state = null;
+    ref.read(bsWorkerLeafProvider.notifier).state = null;
   }
 
   void _onLeafTap(
@@ -248,6 +275,39 @@ class BsDialWidget extends ConsumerWidget {
     } else if (s.id == 'mm-regression') {
       ref.read(openDialProvider.notifier).state = OpenDial.none;
       Navigator.of(context).push(RegressionPanelScreen.route());
+    } else if (_kStorePortalLeaf.containsKey(s.id)) {
+      // W3 — 🏪 store portal leaf: data-backed kinds open the real sheet via
+      // `showPortalSheet` (mirrors StoreDashboardScreen._portalTab); action-only
+      // kinds show the honest "יחובר בהמשך" copy from persona_portal.dart's own
+      // stub (R8 — no invented feature).
+      _closeAllPanels(ref);
+      final tile = _kStorePortalLeaf[s.id]!;
+      if (_kPortalActionOnly.contains(tile.kind)) {
+        showToast(context, '${tile.sub} — כלי זה יחובר בהמשך הפיתוח.');
+      } else {
+        showPortalSheet(context, tile);
+      }
+    } else if (_kCourierPortalLeaf.containsKey(s.id)) {
+      // W3 — 🛵 courier portal leaf: same routing logic as the store portal.
+      _closeAllPanels(ref);
+      final tile = _kCourierPortalLeaf[s.id]!;
+      if (_kPortalActionOnly.contains(tile.kind)) {
+        showToast(context, '${tile.sub} — כלי זה יחובר בהמשך הפיתוח.');
+      } else {
+        showPortalSheet(context, tile);
+      }
+    } else if (_kWorkerStatusLeaf.containsKey(s.id)) {
+      // W4 — 🦺 worker task-status leaf: opens an inline panel showing the LIVE
+      // tasks in that status, filtered from [workerTasksProvider] (mirrors the
+      // _LiveStageOrderPanel pattern for W2). Toggle-same-leaf closes.
+      final cur = ref.read(bsWorkerLeafProvider);
+      _closeAllPanels(ref);
+      ref.read(bsWorkerLeafProvider.notifier).state = cur == s.id ? null : s.id;
+    } else if (_kCourierVehicleLeafIds.contains(s.id)) {
+      // Vehicle picker leaves (haul-small / haul-van / haul-truck): no shared
+      // vehicle provider exists — the real picker is local state in
+      // CourierDashboardScreen. Honest placeholder (R8 — no invention).
+      showToast(context, '${s.emoji} ${s.title} — יחובר בהמשך הפיתוח.');
     } else {
       showToast(context, '${s.title} — בבנייה');
     }
@@ -405,17 +465,21 @@ const Map<String, String> kStageAdvanceLabel = {
 };
 
 /// Inline panel that shows a manager dashboard leaf's REAL derived number plus
-/// a one-line note of what it counts. Pure presentation over [managerAnalytics]
-/// (manager_dashboard.dart) — every figure is verbatim-derived from index.html.
-class _ManagerMetricPanel extends StatelessWidget {
+/// a one-line note of what it counts. Reads the LIVE [managerAnalyticsProvider]
+/// (derived over the shared [ordersEngineProvider]) so every figure updates in
+/// real time as orders advance — mirrors how [_DashboardTab] in
+/// manager_dashboard_screen.dart uses the same provider instead of the static
+/// [managerAnalytics] const.
+class _ManagerMetricPanel extends ConsumerWidget {
   const _ManagerMetricPanel({required this.leafId, required this.onClose});
 
   final String leafId;
   final VoidCallback onClose;
 
   @override
-  Widget build(BuildContext context) {
-    final m = _metricFor(leafId);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final a = ref.watch(managerAnalyticsProvider);
+    final m = _metricFor(leafId, a);
     final theme = Theme.of(context);
 
     return Semantics(
@@ -483,8 +547,7 @@ class _ManagerMetricPanel extends StatelessWidget {
     );
   }
 
-  _Metric _metricFor(String id) {
-    const a = managerAnalytics;
+  _Metric _metricFor(String id, ManagerAnalytics a) {
     switch (id) {
       case 'md-open-orders':
         return _Metric(
@@ -1327,6 +1390,266 @@ class _LiveOrderRow extends StatelessWidget {
                 ),
               ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+//  W3 — 🏪 store portal + 🛵 courier portal leaf wiring.
+//  The 5 data-backed kinds (ratings/sla/zones/bulk/fleet) open the REAL
+//  `showPortalSheet` from persona_portal.dart, mirroring how
+//  StoreDashboardScreen._portalTab and CourierDashboardScreen._portalTab
+//  call the same function. The action-only kinds (barcode/autoStock/chat/
+//  nav/pod) show the honest copy from persona_portal.dart's own stub line
+//  (`${tile.sub} — כלי זה יחובר בהמשך הפיתוח.`) — not a bare 'בבנייה'.
+// ───────────────────────────────────────────────────────────────────────────
+
+/// Maps each 🏪 store portal section id (the `sp-*` children of `s-portal` in
+/// [kStoreSections]) to the matching [PortalTileData] from [kStorePortalTiles].
+/// The mapping is 1-to-1; the tile's [PortalKind] drives the open/placeholder
+/// routing in `_onLeafTap` (W3).
+final Map<String, PortalTileData> _kStorePortalLeaf = {
+  for (final t in kStorePortalTiles)
+    _storePortalId(t.kind): t,
+};
+
+/// Maps each 🛵 courier portal section id (the `cp-*` children of `portal` in
+/// [kCourierSections]) to the matching [PortalTileData] from [kCourierPortalTiles].
+final Map<String, PortalTileData> _kCourierPortalLeaf = {
+  for (final t in kCourierPortalTiles)
+    _courierPortalId(t.kind): t,
+};
+
+/// Resolve the `sp-*` section id for a store [PortalKind] — mirrors the id
+/// literals in [kStoreSections] (`sp-ratings` / `sp-sla` / `sp-zones` /
+/// `sp-bulk` / `sp-barcode` / `sp-fleet` / `sp-chat` / `sp-autostk`).
+String _storePortalId(PortalKind kind) {
+  switch (kind) {
+    case PortalKind.ratings:       return 'sp-ratings';
+    case PortalKind.sla:           return 'sp-sla';
+    case PortalKind.zones:         return 'sp-zones';
+    case PortalKind.bulk:          return 'sp-bulk';
+    case PortalKind.barcode:       return 'sp-barcode';
+    case PortalKind.fleet:         return 'sp-fleet';
+    case PortalKind.chatContractor: return 'sp-chat';
+    case PortalKind.autoStock:     return 'sp-autostk';
+    // Courier-only kinds — should never reach here for a store tile.
+    case PortalKind.nav:           return '';
+    case PortalKind.pod:           return '';
+    case PortalKind.chatStore:     return '';
+  }
+}
+
+/// Resolve the `cp-*` section id for a courier [PortalKind] — mirrors the id
+/// literals in [kCourierSections] (`cp-nav` / `cp-fleet` / `cp-sla` /
+/// `cp-zones` / `cp-pod` / `cp-chat`).
+String _courierPortalId(PortalKind kind) {
+  switch (kind) {
+    case PortalKind.nav:           return 'cp-nav';
+    case PortalKind.fleet:         return 'cp-fleet';
+    case PortalKind.sla:           return 'cp-sla';
+    case PortalKind.zones:         return 'cp-zones';
+    case PortalKind.pod:           return 'cp-pod';
+    case PortalKind.chatStore:     return 'cp-chat';
+    // Store-only kinds — should never reach here for a courier tile.
+    case PortalKind.ratings:       return '';
+    case PortalKind.bulk:          return '';
+    case PortalKind.barcode:       return '';
+    case PortalKind.chatContractor: return '';
+    case PortalKind.autoStock:     return '';
+  }
+}
+
+/// The portal kinds that have NO data to show (the backing is a server action or
+/// external tool) — their `_onLeafTap` branch shows the honest placeholder
+/// `${tile.sub} — כלי זה יחובר בהמשך הפיתוח.` (the same copy persona_portal.dart
+/// uses for these kinds in `_PortalSheet._content()`).
+const Set<PortalKind> _kPortalActionOnly = {
+  PortalKind.barcode,
+  PortalKind.autoStock,
+  PortalKind.chatContractor,
+  PortalKind.nav,
+  PortalKind.pod,
+  PortalKind.chatStore,
+};
+
+// ───────────────────────────────────────────────────────────────────────────
+//  W4 — 🦺 worker task-status leaves.
+//  `st-pending` / `st-active` / `st-review` / `st-done` / `st-rejected` open
+//  an inline task-list panel (the [_WorkerTaskPanel]) watching the LIVE
+//  [workerTasksProvider] filtered to that status. Toggle-same-leaf closes.
+// ───────────────────────────────────────────────────────────────────────────
+
+/// Maps each worker task-status section id (`st-*`) to the [String] status
+/// value it filters [workerTasksProvider] to (the `PersonaTask.status` field:
+/// `pending` / `active` / `review` / `done` / `rejected`). The leaf ids are
+/// defined in [kWorkerSections] (`sections.dart`).
+const Map<String, String> _kWorkerStatusLeaf = {
+  'st-pending':  'pending',
+  'st-active':   'active',
+  'st-review':   'review',
+  'st-done':     'done',
+  'st-rejected': 'rejected',
+};
+
+// ───────────────────────────────────────────────────────────────────────────
+//  W5 — 🛵 courier vehicle leaves (HONEST PLACEHOLDERS).
+//  haul-small / haul-van / haul-truck: no shared vehicle provider exists (the
+//  real picker is local state in CourierDashboardScreen). Tapping shows the
+//  honest `${emoji} ${title} — יחובר בהמשך הפיתוח.` copy (R8 — no invention).
+// ───────────────────────────────────────────────────────────────────────────
+
+/// The three courier vehicle-type leaf ids (`vehicle` sub-tree in
+/// [kCourierSections]) — tapping these shows an honest placeholder because
+/// no shared vehicle provider exists to wire against.
+const Set<String> _kCourierVehicleLeafIds = {
+  'haul-small',
+  'haul-van',
+  'haul-truck',
+};
+
+// ───────────────────────────────────────────────────────────────────────────
+//  W4 — Inline worker task panel.
+// ───────────────────────────────────────────────────────────────────────────
+
+/// Inline panel that lists the LIVE tasks in ONE worker task-status bucket
+/// (W4). Mirrors the [_LiveStageOrderPanel] pattern: watches [workerTasksProvider]
+/// filtered to the tapped status so it reflows in real-time as tasks move
+/// (worker submits / manager approves / rejects). Each row shows the task name
+/// + the worker name + days/steps. The verbatim status label comes from
+/// [kTaskStatusLabel]. When empty it shows `לא נמצאו משימות תואמות.` (mirrors
+/// the order panels' `לא נמצאו הזמנות תואמות.` pattern for consistency).
+class _WorkerTaskPanel extends ConsumerWidget {
+  const _WorkerTaskPanel({required this.leafId, required this.onClose});
+
+  final String leafId;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final status = _kWorkerStatusLeaf[leafId] ?? '';
+    // Status badge — verbatim from kTaskStatusLabel (@proto 06 taskStatusInfo
+    // [L8048]): `pending`→`⏳ ממתינה` etc.
+    final label = kTaskStatusLabel[status] ?? status;
+    // LIVE read — the panel reflows whenever the shared engine changes.
+    final tasks = ref
+        .watch(workerTasksProvider)
+        .where((t) => t.status == status)
+        .toList(growable: false);
+
+    return Semantics(
+      label: '🦺 $label: ${tasks.length} משימות',
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 280),
+        padding: const EdgeInsets.symmetric(
+          horizontal: BsTokens.space4,
+          vertical: BsTokens.space3,
+        ),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          boxShadow: BsTokens.circleShadow,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text('🦺', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: BsTokens.space2),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                // The status's task count.
+                Text(
+                  '${tasks.length}',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: BsTokens.brand,
+                  ),
+                ),
+                const SizedBox(width: BsTokens.space2),
+                InkWell(
+                  onTap: onClose,
+                  borderRadius: BorderRadius.circular(BsTokens.radiusCircle),
+                  child: const Padding(
+                    padding: EdgeInsets.all(2),
+                    child: Icon(
+                      Icons.close,
+                      size: 18,
+                      color: BsTokens.mutedLight,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: BsTokens.space2),
+            if (tasks.isEmpty)
+              Text(
+                'לא נמצאו משימות תואמות.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: BsTokens.mutedLight,
+                ),
+              )
+            else
+              for (final t in tasks) ...[
+                _WorkerTaskRow(task: t),
+                if (t != tasks.last) const SizedBox(height: BsTokens.space2),
+              ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One task row inside [_WorkerTaskPanel] — shows the task name on the first
+/// line, the worker name on the second, and the day/step counts on the third,
+/// mirroring the verbatim legacy `renderWorker` task-card fields (proto 06
+/// §4.2 [L8095-8115]). Worker name is resolved from [kWorkers] via the task's
+/// [PersonaTask.worker] index.
+class _WorkerTaskRow extends StatelessWidget {
+  const _WorkerTaskRow({required this.task});
+
+  final PersonaTask task;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final workerName = task.worker < kWorkers.length
+        ? kWorkers[task.worker].replaceAll(' (עובד)', '')
+        : '?';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          task.name,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        Text(
+          workerName,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        Text(
+          '${task.days} ימים · ${task.steps} שלבים',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: BsTokens.mutedLight,
+          ),
         ),
       ],
     );

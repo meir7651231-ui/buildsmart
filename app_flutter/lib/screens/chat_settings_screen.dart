@@ -326,11 +326,7 @@ class _MediaSection extends ConsumerWidget {
                   .read(chatSettingsProvider.notifier)
                   .update((s) => s.copyWith(compressVideo: v)),
         ),
-        _ActionRow(
-          label: 'ניהול אחסון',
-          buttonLabel: 'נקה',
-          onTap: () => showToast(context, 'אחסון נוקה'),
-        ),
+        const _PlaceholderRow(label: 'ניהול אחסון'),
       ],
     );
   }
@@ -363,12 +359,7 @@ class _ChatPrivacySection extends ConsumerWidget {
         ),
         const _PlaceholderRow(label: 'חסימת משתמשים'),
         const _PlaceholderRow(label: 'פרטי הפרופיל (תמונה / ביוגרפיה)'),
-        _ActionRow(
-          label: 'מחיקת היסטוריה',
-          buttonLabel: 'מחק',
-          destructive: true,
-          onTap: () => showToast(context, 'היסטוריה נמחקה'),
-        ),
+        const _PlaceholderRow(label: 'מחיקת היסטוריה'),
       ],
     );
   }
@@ -408,17 +399,8 @@ class _BackupSection extends ConsumerWidget {
                     .read(chatSettingsProvider.notifier)
                     .update((s) => s.copyWith(backupFreq: v)),
           ),
-        _ActionRow(
-          label: 'ייצוא היסטוריה (CSV)',
-          buttonLabel: 'ייצא',
-          onTap: () => showToast(context, 'מייצא...'),
-        ),
-        _ActionRow(
-          label: 'מחיקת גיבוי ענן',
-          buttonLabel: 'מחק',
-          destructive: true,
-          onTap: () => showToast(context, 'גיבוי נמחק'),
-        ),
+        const _PlaceholderRow(label: 'ייצוא היסטוריה (CSV)'),
+        const _PlaceholderRow(label: 'מחיקת גיבוי ענן'),
       ],
     );
   }

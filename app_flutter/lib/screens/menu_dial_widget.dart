@@ -7,6 +7,7 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/menu_state.dart';
 import 'package:buildsmart/state/notif_settings.dart';
+import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/widgets/dial.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -123,7 +124,7 @@ class _SectionDrill extends ConsumerWidget {
                 ref.read(menuTabProvider.notifier).state = null;
                 ref.read(_drillProvider.notifier).state = const [];
               } else {
-                showToast(context, '${s.title} — בבנייה');
+                showToast(context, '🚧 ${s.title} — בבנייה');
               }
             },
           ),
@@ -161,26 +162,29 @@ bool _isOn(WidgetRef ref, String label) {
     'גדול'             => cs.textSize == CatalogTextSize.large,
     // Fix 3 — reducedMotion reads catalogSettingsProvider (catalog_screen / home_shell)
     'הפחתת אנימציות'  => cs.reducedMotion,
-    '₪ שקל'           => s.currency == BsCurrency.ils,
-    r'$ דולר'         => s.currency == BsCurrency.usd,
+    // placeholder — currency stored but not consumed anywhere (v6.14)
+    '₪ שקל'           => false,
+    r'$ דולר'         => false,
     'עברית'            => s.lang == BsLang.he,
     'العربية'          => s.lang == BsLang.ar,
     'English'           => s.lang == BsLang.en,
-    'מטרי (מ׳, ק״ג)'  => s.units == BsUnits.metric,
-    'אימפריאלי'       => s.units == BsUnits.imperial,
-    'משלוח קטן'       => s.haul == BsHaulSize.small,
-    'טנדר'             => s.haul == BsHaulSize.van,
-    'משאית'            => s.haul == BsHaulSize.truck,
-    'ברירת מחדל — משלוח אקספרס' => s.express,
+    // placeholder — units/haul/express stored but not consumed anywhere (v6.14)
+    'מטרי (מ׳, ק״ג)'  => false,
+    'אימפריאלי'       => false,
+    'משלוח קטן'       => false,
+    'טנדר'             => false,
+    'משאית'            => false,
+    'ברירת מחדל — משלוח אקספרס' => false,
     // Fix 2 — highContrast reads catalogSettingsProvider (main.dart AppTheme)
     'מצב ניגודיות גבוהה (לשמש)' => cs.highContrast,
-    'אימות דו-שלבי'   => s.twoFA,
-    'כניסה ביומטרית'  => s.biometric,
-    'הרשאת מיקום'     => s.locationPerm,
-    '5 דק׳'   => s.sessionTimeout == BsSessionTimeout.m5,
-    '15 דק׳'  => s.sessionTimeout == BsSessionTimeout.m15,
-    '30 דק׳'  => s.sessionTimeout == BsSessionTimeout.m30,
-    '60 דק׳'  => s.sessionTimeout == BsSessionTimeout.m60,
+    // placeholder — security toggles stored but not consumed anywhere (v6.14)
+    'אימות דו-שלבי'   => false,
+    'כניסה ביומטרית'  => false,
+    'הרשאת מיקום'     => false,
+    '5 דק׳'   => false,
+    '15 דק׳'  => false,
+    '30 דק׳'  => false,
+    '60 דק׳'  => false,
     // Fix 4 — notification toggles read notifSettingsProvider
     'עדכוני משלוחים'  => ns.typeShipments,
     'מבצעים והטבות'   => ns.typeDeals,
@@ -210,31 +214,36 @@ void _applyLeaf(WidgetRef ref, BuildContext context, String label) {
     // Fix 3 — write reducedMotion to catalogSettingsProvider
     case 'הפחתת אנימציות':
       cn.update((s) => s.copyWith(reducedMotion: !s.reducedMotion));
-    case '₪ שקל':            n.update((s) => s.copyWith(currency: BsCurrency.ils));
-    case r'$ דולר':          n.update((s) => s.copyWith(currency: BsCurrency.usd));
+    // placeholder — currency not consumed; show honest stub (v6.14)
+    case '₪ שקל':
+    case r'$ דולר':
+      showToast(context, '🚧 $label — בבנייה');
+      return;
     case 'עברית':             n.update((s) => s.copyWith(lang: BsLang.he));
     case 'العربية':           n.update((s) => s.copyWith(lang: BsLang.ar));
     case 'English':            n.update((s) => s.copyWith(lang: BsLang.en));
-    case 'מטרי (מ׳, ק״ג)':  n.update((s) => s.copyWith(units: BsUnits.metric));
-    case 'אימפריאלי':        n.update((s) => s.copyWith(units: BsUnits.imperial));
-    case 'משלוח קטן':        n.update((s) => s.copyWith(haul: BsHaulSize.small));
-    case 'טנדר':              n.update((s) => s.copyWith(haul: BsHaulSize.van));
-    case 'משאית':             n.update((s) => s.copyWith(haul: BsHaulSize.truck));
+    // placeholder — units/haul/express not consumed; show honest stub (v6.14)
+    case 'מטרי (מ׳, ק״ג)':
+    case 'אימפריאלי':
+    case 'משלוח קטן':
+    case 'טנדר':
+    case 'משאית':
     case 'ברירת מחדל — משלוח אקספרס':
-      n.update((s) => s.copyWith(express: !s.express));
+      showToast(context, '🚧 $label — בבנייה');
+      return;
     // Fix 2 — write highContrast to catalogSettingsProvider (main.dart AppTheme)
     case 'מצב ניגודיות גבוהה (לשמש)':
       cn.update((s) => s.copyWith(highContrast: !s.highContrast));
+    // placeholder — security toggles not consumed; show honest stub (v6.14)
     case 'אימות דו-שלבי':
-      n.update((s) => s.copyWith(twoFA: !s.twoFA));
     case 'כניסה ביומטרית':
-      n.update((s) => s.copyWith(biometric: !s.biometric));
     case 'הרשאת מיקום':
-      n.update((s) => s.copyWith(locationPerm: !s.locationPerm));
-    case '5 דק׳':   n.update((s) => s.copyWith(sessionTimeout: BsSessionTimeout.m5));
-    case '15 דק׳':  n.update((s) => s.copyWith(sessionTimeout: BsSessionTimeout.m15));
-    case '30 דק׳':  n.update((s) => s.copyWith(sessionTimeout: BsSessionTimeout.m30));
-    case '60 דק׳':  n.update((s) => s.copyWith(sessionTimeout: BsSessionTimeout.m60));
+    case '5 דק׳':
+    case '15 דק׳':
+    case '30 דק׳':
+    case '60 דק׳':
+      showToast(context, '🚧 $label — בבנייה');
+      return;
     // Fix 4 — notification toggles write to notifSettingsProvider
     case 'עדכוני משלוחים':
       nn.update((s) => s.copyWith(typeShipments: !s.typeShipments));
@@ -308,6 +317,10 @@ class _SettingsDrill extends ConsumerWidget {
     final group = kSettingsGroups.firstWhere((g) => g.id == groupId);
     final path = ref.watch(settingsDrillProvider);
     final walked = walkSettings(groupId, path);
+    // Profile values shown in the 👤 חשבון group leaves.
+    final profile = groupId == 'account'
+        ? ref.watch(userProfileProvider)
+        : null;
 
     return DialColumn(
       children: [
@@ -333,10 +346,10 @@ class _SettingsDrill extends ConsumerWidget {
           ),
         for (final n in walked.current)
           DialRow(
-            label: n.label,
+            label: _accountLabel(n.label, profile),
             emoji: group.emoji,
             icon: Icons.circle,
-            active: _isOn(ref, n.label),
+            active: _isOn(ref, n.label) || _accountActive(n.label, profile),
             onTap: () {
               if (n.hasChildren) {
                 ref.read(settingsDrillProvider.notifier).state = [
@@ -351,4 +364,27 @@ class _SettingsDrill extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// Returns the display label for a settings leaf, appending the live
+/// profile value for the 👤 חשבון group leaves that surface stored data.
+String _accountLabel(String label, UserProfile? profile) {
+  if (profile == null) return label;
+  final value = switch (label) {
+    'טלפון'          => profile.contact.trim(),
+    'תחום מקצועי'    => profile.profession.trim(),
+    _                => '',
+  };
+  return value.isEmpty ? label : '$label: $value';
+}
+
+/// Returns true (active/filled highlight) when the account leaf has a
+/// stored value so the user can see at a glance that the field is set.
+bool _accountActive(String label, UserProfile? profile) {
+  if (profile == null) return false;
+  return switch (label) {
+    'טלפון'          => profile.contact.trim().isNotEmpty,
+    'תחום מקצועי'    => profile.profession.trim().isNotEmpty,
+    _                => false,
+  };
 }

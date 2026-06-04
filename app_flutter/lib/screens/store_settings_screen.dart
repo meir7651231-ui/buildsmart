@@ -1,3 +1,4 @@
+import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/store_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -580,7 +581,10 @@ class _PrivacySection extends ConsumerWidget {
         _ActionRow(
           label: 'מחיקת חיפושים',
           buttonLabel: 'מחק',
-          onTap: () => showToast(context, 'החיפושים נמחקו'),
+          onTap: () {
+            ref.read(storeSearchQueryProvider.notifier).state = '';
+            showToast(context, 'החיפוש נוקה');
+          },
         ),
         _SwitchRow(
           label: 'אישור ביומטרי לרכישה',

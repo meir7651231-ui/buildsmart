@@ -8,8 +8,11 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
-> **v6.13 wiring audit:** see `knowledge/WIRING_AUDIT.md` — the FAB/dial shortcut layer was
-> swept for stubs / mis-wired toggles and fixed (the full screens were already correct).
+> **v6.13 + v6.14 wiring audits:** see `knowledge/WIRING_AUDIT.md` — two passes swept the
+> FAB/dial shortcut layer + deeper flows for stubs / mis-wired toggles and fixed them (the
+> full screens were already correct). v6.14 also wired the bs-dial manager-metric /
+> store-courier-portal / worker-task leaves to the live providers, and marked dead
+> region/security settings + false-confirm buttons as honest placeholders.
 
 ---
 

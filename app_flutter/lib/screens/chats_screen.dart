@@ -777,8 +777,12 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
       ),);
     } else if (ref.read(chatSettingsProvider).greetingEnabled) {
       // Greeting message for a fresh, empty conversation.
+      final chatSettings = ref.read(chatSettingsProvider);
+      final greetText = chatSettings.greetingMessage.isNotEmpty
+          ? chatSettings.greetingMessage
+          : 'שלום! 👋 איך אפשר לעזור?';
       _messages.add((
-        text: 'שלום! 👋 איך אפשר לעזור?',
+        text: greetText,
         isMe: false,
         time: _nowTime(),
       ),);
