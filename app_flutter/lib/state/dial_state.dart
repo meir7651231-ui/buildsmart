@@ -59,6 +59,16 @@ final bsManageLeafProvider = StateProvider<String?>((_) => null);
 /// their OWN providers so the manager's static-seed panel is untouched.
 final bsStoreLeafProvider = StateProvider<String?>((_) => null);
 
+/// Section id of the 🛵 שליח (courier) leaf whose inline order-list panel is
+/// open (`pickup` · `ca-pickup` · `ca-transit` · `ca-delivered`), or null when
+/// none is showing. Each leaf maps to ONE order-flow stage the COURIER owns
+/// (ready→pickup→transit→delivered); tapping it opens that stage's REAL orders
+/// off the SHARED `ordersEngineProvider` INLINE in the dial (R2), each open row
+/// carrying an advance button that calls `.advance(id)` on the SAME engine — so
+/// a courier pickup/transit/deliver reflows the manager's live counts. Tapping
+/// again (or any other dial action) closes it.
+final bsCourierLeafProvider = StateProvider<String?>((_) => null);
+
 /// Which menu tab is currently drilled into (null = 4-tab root).
 enum MenuTab { home, projects, cart, settings }
 
@@ -87,6 +97,7 @@ void resetAllDials(WidgetRef ref) {
   ref.read(bsCustomerLeafProvider.notifier).state = null;
   ref.read(bsManageLeafProvider.notifier).state = null;
   ref.read(bsStoreLeafProvider.notifier).state = null;
+  ref.read(bsCourierLeafProvider.notifier).state = null;
   ref.read(menuTabProvider.notifier).state = null;
   ref.read(searchToolProvider.notifier).state = null;
 }

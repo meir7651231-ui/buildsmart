@@ -46,6 +46,7 @@ class BsDialWidget extends ConsumerWidget {
     final openCustomer = ref.watch(bsCustomerLeafProvider);
     final openManage = ref.watch(bsManageLeafProvider);
     final openStore = ref.watch(bsStoreLeafProvider);
+    final openCourier = ref.watch(bsCourierLeafProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -102,6 +103,18 @@ class BsDialWidget extends ConsumerWidget {
           ),
           const SizedBox(height: BsTokens.space3),
         ],
+        // Inline LIVE order panel for the open 🛵 courier leaf — the REAL orders
+        // at that stage off the SHARED engine + an advance button (W2).
+        if (openCourier != null) ...[
+          _LiveStageOrderPanel(
+            emoji: '🛵',
+            stage: kCourierOrderLeafStage[openCourier] ?? '',
+            title: _leafTitle(personaId, path, openCourier),
+            onClose:
+                () => ref.read(bsCourierLeafProvider.notifier).state = null,
+          ),
+          const SizedBox(height: BsTokens.space3),
+        ],
         DialColumn(
           children: [
             // Persona anchor — tap to pop back to L1.
@@ -118,6 +131,7 @@ class BsDialWidget extends ConsumerWidget {
                 ref.read(bsCustomerLeafProvider.notifier).state = null;
                 ref.read(bsManageLeafProvider.notifier).state = null;
                 ref.read(bsStoreLeafProvider.notifier).state = null;
+                ref.read(bsCourierLeafProvider.notifier).state = null;
               },
             ),
             // One anchor per drill step — tap pops to that depth.
@@ -137,6 +151,7 @@ class BsDialWidget extends ConsumerWidget {
                   ref.read(bsCustomerLeafProvider.notifier).state = null;
                   ref.read(bsManageLeafProvider.notifier).state = null;
                   ref.read(bsStoreLeafProvider.notifier).state = null;
+                  ref.read(bsCourierLeafProvider.notifier).state = null;
                 },
               ),
             // Current items at this depth.
@@ -152,7 +167,8 @@ class BsDialWidget extends ConsumerWidget {
                     s.id == openOrder ||
                     s.id == openCustomer ||
                     s.id == openManage ||
-                    s.id == openStore,
+                    s.id == openStore ||
+                    s.id == openCourier,
                 onTap: () => _onLeafTap(context, ref, s, path),
               ),
           ],
@@ -171,6 +187,7 @@ class BsDialWidget extends ConsumerWidget {
     ref.read(bsCustomerLeafProvider.notifier).state = null;
     ref.read(bsManageLeafProvider.notifier).state = null;
     ref.read(bsStoreLeafProvider.notifier).state = null;
+    ref.read(bsCourierLeafProvider.notifier).state = null;
   }
 
   void _onLeafTap(
@@ -211,6 +228,14 @@ class BsDialWidget extends ConsumerWidget {
       final cur = ref.read(bsStoreLeafProvider);
       _closeAllPanels(ref);
       ref.read(bsStoreLeafProvider.notifier).state = cur == s.id ? null : s.id;
+    } else if (kCourierOrderLeafIds.contains(s.id)) {
+      // W2 — toggle the inline LIVE order panel for this 🛵 courier stage leaf
+      // (`pickup` · `ca-pickup` · `ca-transit` · `ca-delivered`). Same shared
+      // engine + advance write the store uses, on the BACK of the flow.
+      final cur = ref.read(bsCourierLeafProvider);
+      _closeAllPanels(ref);
+      ref.read(bsCourierLeafProvider.notifier).state =
+          cur == s.id ? null : s.id;
     } else if (kManagerManageActionLeafIds.containsKey(s.id)) {
       // M4 — the action-only `mm-*` leaves (`mm-trees` · `mm-brands`). The
       // legacy body is a `prompt()`-driven server edit (add/edit/delete an
@@ -342,6 +367,28 @@ const Map<String, String> kStoreOrderLeafStage = {
 
 /// The set of store order-stage leaf ids (W2) — keys of [kStoreOrderLeafStage].
 final Set<String> kStoreOrderLeafIds = kStoreOrderLeafStage.keys.toSet();
+
+/// The 🛵 שליח (courier) leaves (W2) the COURIER acts on, each mapped to ONE
+/// order-flow stage the courier owns (the BACK of the flow:
+/// ready → pickup → transit → delivered). The leaf ids + Hebrew titles are
+/// `kCourierSections` in sections.dart (verbatim):
+///   • `pickup`       (משלוחים ממתינים לאיסוף) → stage `ready`   — pick up → pickup.
+///   • `ca-pickup`    (אספתי מהחנות)           → stage `pickup`  — depart  → transit.
+///   • `ca-transit`   (יצאתי לדרך)             → stage `transit` — deliver → delivered.
+///   • `ca-delivered` (נמסר ללקוח)            → stage `delivered` — terminal (no advance).
+/// `pickup` (stage `ready`) is the live HANDOFF point: the store's `so-ready`
+/// leaf shows the same `ready` orders, so a store "מסור לשליח" advance makes the
+/// order appear under the courier's pickup leaf — and the manager sees it all.
+const Map<String, String> kCourierOrderLeafStage = {
+  'pickup': 'ready',
+  'ca-pickup': 'pickup',
+  'ca-transit': 'transit',
+  'ca-delivered': 'delivered',
+};
+
+/// The set of courier order-stage leaf ids (W2) — keys of
+/// [kCourierOrderLeafStage].
+final Set<String> kCourierOrderLeafIds = kCourierOrderLeafStage.keys.toSet();
 
 /// The advance-button label per order-flow stage, from the ACTING role's point
 /// of view (the verb that moves an order OUT of this stage). Used by the store
@@ -1074,9 +1121,9 @@ class _ManagerManagePanel extends StatelessWidget {
 /// write the manager's god-step uses — so a store/courier advance immediately
 /// changes the manager's live counts/pipeline and the order's stage everywhere.
 ///
-/// Serves the store leaves (`so-*`, [kStoreOrderLeafStage]) and is the shared
-/// panel the courier leaves reuse too; the only difference is the [emoji] the
-/// header shows (🏪 / 🛵). The advance label is [kStageAdvanceLabel] for the
+/// Used for both the store leaves (`so-*`, [kStoreOrderLeafStage]) and the
+/// courier leaves ([kCourierOrderLeafStage]); the only difference is the [emoji]
+/// the header shows (🏪 / 🛵). The advance label is [kStageAdvanceLabel] for the
 /// stage; the terminal `delivered` stage shows a "✓ נמסר" note instead of a
 /// button. An empty stage shows the legacy `לא נמצאו הזמנות תואמות.` line.
 class _LiveStageOrderPanel extends ConsumerWidget {
