@@ -40,7 +40,7 @@ class _CourierDashboardScreenState
 
     final jobs = orders.courierJobs(_vehicle);
     final toPickup = jobs.where((o) => o.stage == OrderStage.ready).length;
-    final onRoad = jobs.where((o) => o.stage == OrderStage.transit).length;
+    final onRoad = jobs.where((o) => o.stage == OrderStage.pickup || o.stage == OrderStage.transit).length;
     final delivered = orders.countAt(OrderStage.delivered);
     final active = jobs.length;
 

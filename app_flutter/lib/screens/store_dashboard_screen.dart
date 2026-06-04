@@ -47,7 +47,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
   List<String> get _stockNames {
     final seen = <String>{};
     final out = <String>[];
-    for (final o in ref.read(sysOrdersProvider)) {
+    for (final o in ref.watch(sysOrdersProvider)) {
       for (final l in o.lines) {
         if (seen.add(l.name)) out.add(l.name);
       }
@@ -406,10 +406,10 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
               onToggle: () => setState(() {
                 if (_outOfStock.contains(name)) {
                   _outOfStock.remove(name);
-                  showToast(context, 'המוצר סומן כזמין');
+                  showToast(context, 'סומן כזמין במלאי');
                 } else {
                   _outOfStock.add(name);
-                  showToast(context, 'המוצר אזל — הוסתר מקטלוג הקבלן');
+                  showToast(context, 'סומן כאזל במלאי');
                 }
               }),
             ),
@@ -892,7 +892,7 @@ class _StockRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    available ? '✅ זמין במלאי' : '❌ אזל — מוסתר מהקבלן',
+                    available ? '✅ זמין במלאי' : '❌ אזל מהמלאי',
                     style: TextStyle(
                       color: available
                           ? const Color(0xFF1F8A4C)

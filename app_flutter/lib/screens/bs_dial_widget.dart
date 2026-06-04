@@ -555,24 +555,26 @@ const Map<String, String> _kOrderStageLabel = {
 
 /// Inline panel that lists the REAL orders in ONE order-flow stage (M2). The
 /// leaf's stage is [kManagerOrderLeafStage]; the orders come from
-/// [kManagerOrderSeed] filtered to that stage (every datum verbatim from
-/// index.html). Each row shows id / who · site / items · sum, mirroring the
-/// legacy `mo-card` (@index.html:17001-17014). When the stage has no orders
-/// (pickup · delivered in the seed) it shows the legacy empty text
-/// `לא נמצאו הזמנות תואמות.` (@index.html:16986, the `md-empty` line).
-class _ManagerOrderPanel extends StatelessWidget {
+/// [ordersEngineProvider] filtered to that stage so the panel reflects live
+/// advances (contractor checkout / store / courier / worker). Each row shows
+/// id / who · site / items · sum, mirroring the legacy `mo-card`
+/// (@index.html:17001-17014). When the stage has no orders it shows the legacy
+/// empty text `לא נמצאו הזמנות תואמות.` (@index.html:16986, the `md-empty` line).
+class _ManagerOrderPanel extends ConsumerWidget {
   const _ManagerOrderPanel({required this.leafId, required this.onClose});
 
   final String leafId;
   final VoidCallback onClose;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final stage = kManagerOrderLeafStage[leafId] ?? '';
     final label = _kOrderStageLabel[stage] ?? stage;
-    final orders = kManagerOrderSeed
+    final orders = ref
+        .watch(ordersEngineProvider)
         .where((o) => o.stage == stage)
+        .map((o) => o.toManagerOrder())
         .toList(growable: false);
 
     return Semantics(
@@ -725,19 +727,25 @@ class _CustomerView {
   String get status => pct >= 90 ? 'low' : (pct > 0 ? 'live' : 'off');
 }
 
-/// Build the customer view-models for ONE status filter, sorted by spend desc
-/// (the order [mgrCustomerList] already returns). `pct` is
-/// `min(100, round(spent/credit*100))` and `sites` is the distinct-site count
-/// per buyer in [kManagerOrderSeed] — both verbatim from the legacy derivation
-/// (@index.html:16554,16559-16560).
-List<_CustomerView> _customersForStatus(String status) {
+/// Build the customer view-models for ONE status filter from the LIVE engine,
+/// sorted by spend desc (the order [managerCustomersProvider] already returns).
+/// `pct` is `min(100, round(spent/credit*100))` and `sites` is the distinct-
+/// site count per buyer derived from [ordersEngineProvider] — both verbatim
+/// from the legacy derivation (@index.html:16554,16559-16560). Mirrors the
+/// [_liveCustomerViews] helper in manager_dashboard_screen.dart exactly.
+List<_CustomerView> _customersForStatus(
+    String status, WidgetRef ref) {
+  final orders = ref.watch(ordersEngineProvider);
+  final customers = ref.watch(managerCustomersProvider);
+
   // Distinct build sites per buyer (legacy `byName[nm].sites` set @16554).
   final sitesByBuyer = <String, Set<String>>{};
-  for (final o in kManagerOrderSeed) {
+  for (final o in orders) {
+    if (o.site.isEmpty) continue;
     (sitesByBuyer[o.who] ??= <String>{}).add(o.site);
   }
   final out = <_CustomerView>[];
-  for (final c in mgrCustomerList()) {
+  for (final c in customers) {
     final pct = c.creditLimit == 0
         ? 0
         : ((c.totalSpend / c.creditLimit) * 100).round().clamp(0, 100);
@@ -753,24 +761,25 @@ List<_CustomerView> _customersForStatus(String status) {
 
 /// Inline panel that lists the REAL customers in ONE status filter (M3). The
 /// leaf's status is [kManagerCustomerLeafStatus]; the customers come from
-/// [mgrCustomerList] (manager_dashboard.dart — itself grouping index.html's
-/// SYS_ORDERS_SEED by buyer) filtered to that status. Each row mirrors the
-/// legacy `mc-card` (@index.html:16593-16604): `👷 name`, `orders הזמנות ·
-/// sites אתרים`, the status pill, and the credit line `ניצול אשראי: ₪spent /
-/// ₪credit (pct%)`. When the status has no customers it shows the legacy empty
-/// text `לא נמצאו קבלנים תואמים.` (@index.html:16586).
-class _ManagerCustomerPanel extends StatelessWidget {
+/// [managerCustomersProvider] (derived from the live [ordersEngineProvider])
+/// filtered to that status — so the panel reflects live advances (contractor
+/// checkout / store / courier / worker). Each row mirrors the legacy `mc-card`
+/// (@index.html:16593-16604): `👷 name`, `orders הזמנות · sites אתרים`, the
+/// status pill, and the credit line `ניצול אשראי: ₪spent / ₪credit (pct%)`.
+/// When the status has no customers it shows the legacy empty text
+/// `לא נמצאו קבלנים תואמים.` (@index.html:16586).
+class _ManagerCustomerPanel extends ConsumerWidget {
   const _ManagerCustomerPanel({required this.leafId, required this.onClose});
 
   final String leafId;
   final VoidCallback onClose;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final status = kManagerCustomerLeafStatus[leafId] ?? '';
     final label = _kCustomerStatusLabel[status] ?? status;
-    final customers = _customersForStatus(status);
+    final customers = _customersForStatus(status, ref);
 
     return Semantics(
       label: '👥 $label: ${customers.length} קבלנים',

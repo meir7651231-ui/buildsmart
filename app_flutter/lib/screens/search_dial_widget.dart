@@ -1,4 +1,11 @@
 import 'package:buildsmart/screens/barcode_scanner.dart';
+import 'package:buildsmart/screens/catalog_screen.dart'
+    show
+        catalogProductSortProvider,
+        catalogSectionProvider,
+        searchImageOnlyProvider,
+        searchPanelOpenProvider,
+        ProductSort;
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/widgets/dial.dart';
@@ -27,20 +34,19 @@ class SearchDialWidget extends ConsumerWidget {
           active: true,
           onTap: () => ref.read(searchToolProvider.notifier).state = null,
         ),
-        ..._submenu(context, tool),
+        ..._submenu(context, ref, tool),
       ],
     );
   }
 
-  List<Widget> _submenu(BuildContext context, SearchTool tool) {
+  List<Widget> _submenu(BuildContext context, WidgetRef ref, SearchTool tool) {
     if (tool == SearchTool.sort) {
-      // @legacy submenu-sort.tsx — 5 sort options.
+      // @legacy submenu-sort.tsx — 4 sort options (mirrors ProductSort enum).
       const sorts = [
-        (label: 'ברירת מחדל', emoji: '🔀'),
-        (label: 'שם א→ת',    emoji: '🔡'),
-        (label: 'שם ת→א',    emoji: '🔠'),
-        (label: 'מחיר ↑',    emoji: '⬆️'),
-        (label: 'מחיר ↓',    emoji: '⬇️'),
+        (label: 'ברירת מחדל', emoji: '🔀', value: ProductSort.byOrder),
+        (label: 'שם א→ת',    emoji: '🔡', value: ProductSort.nameAZ),
+        (label: 'שם ת→א',    emoji: '🔠', value: ProductSort.nameZA),
+        (label: 'מק"ט',      emoji: '↕️', value: ProductSort.sku),
       ];
       return [
         for (final s in sorts)
@@ -48,24 +54,33 @@ class SearchDialWidget extends ConsumerWidget {
             label: s.label,
             emoji: s.emoji,
             icon: Icons.circle,
-            onTap: () => showToast(context, '${s.label} — בבנייה'),
+            onTap: () {
+              ref.read(catalogProductSortProvider.notifier).state = s.value;
+              ref.read(searchToolProvider.notifier).state = null;
+            },
           ),
       ];
     }
     if (tool == SearchTool.filters) {
       // @legacy submenu-filters.tsx — 2 toggle filters.
-      const filters = [
-        (label: 'עם תמונה',      emoji: '🖼️'),
-        (label: 'עם מחיר מוצג', emoji: '💲'),
-      ];
+      // 'עם תמונה' wires to searchImageOnlyProvider (mirrors _SearchToolsRow).
+      // 'עם מחיר מוצג' has no backing provider yet — remains placeholder.
       return [
-        for (final f in filters)
-          DialRow(
-            label: f.label,
-            emoji: f.emoji,
-            icon: Icons.circle,
-            onTap: () => showToast(context, '${f.label} — בבנייה'),
-          ),
+        DialRow(
+          label: 'עם תמונה',
+          emoji: '🖼️',
+          icon: Icons.circle,
+          onTap: () {
+            ref.read(searchImageOnlyProvider.notifier).state = true;
+            ref.read(searchToolProvider.notifier).state = null;
+          },
+        ),
+        DialRow(
+          label: 'עם מחיר מוצג',
+          emoji: '💲',
+          icon: Icons.circle,
+          onTap: () => showToast(context, 'עם מחיר מוצג — בבנייה'),
+        ),
       ];
     }
     if (tool == SearchTool.voice) {
@@ -137,6 +152,18 @@ class _ToolsRoot extends ConsumerWidget {
             onTap: () =>
                 ref.read(searchToolProvider.notifier).state = t.id,
           ),
+        // ▦ קטלוג — direct action: close search panel + navigate to קטגוריות.
+        // Mirrors _SearchToolsRow onTap (catalog_screen.dart:1696-1699).
+        DialRow(
+          label: 'קטלוג',
+          emoji: '▦',
+          icon: Icons.circle,
+          onTap: () {
+            ref.read(searchPanelOpenProvider.notifier).state = false;
+            ref.read(catalogSectionProvider.notifier).state = 'קטגוריות';
+            ref.read(openDialProvider.notifier).state = OpenDial.none;
+          },
+        ),
       ],
     );
   }

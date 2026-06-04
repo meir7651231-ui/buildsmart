@@ -16,10 +16,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// (`cardLight`) with dark text, and a top segmented toggle that drives an
 /// [IndexedStack] (the `updates_screen.dart` pattern).
 ///
-/// Tabs filled so far: 📊 לוח בקרה (M2 — the live cockpit) and 🚚 הזמנות (M3 —
-/// the live order list + the manager's god-mode stage-advance). 👥 לקוחות and
-/// 🛠️ ניהול are still PLACEHOLDERS (a centred "בקרוב" note) until M4–M5 fill them
-/// with the real manager content (the live orders engine derivations). Reached
+/// All four tabs are live and complete: 📊 לוח בקרה (M2 — the live cockpit),
+/// 🚚 הזמנות (M3 — the live order list + god-mode stage-advance), 👥 לקוחות
+/// (M4 — live customer list with credit tracking), and 🛠️ ניהול (M5 — the
+/// management accordion). Reached
 /// from the role picker ("מי אתה?" → מנהל המערכת), which `Navigator.push`es this
 /// route instead of opening the old BS-dial drill.
 class ManagerDashboardScreen extends ConsumerWidget {
@@ -671,6 +671,7 @@ class _OrdersTabState extends ConsumerState<_OrdersTab> {
       return;
     }
     final cur = kManagerOrderFlow.indexOf(o.stage);
+    if (cur < 0) return; // unknown stage — don't silently wrap to index 0
     final next = kManagerOrderFlow[cur + 1];
     ref.read(ordersEngineProvider.notifier).advance(o.id);
     showToast(context, 'הזמנה ${o.id} → ${_kOrderStageLabel[next] ?? next}');
@@ -1380,15 +1381,7 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
       ),
       builder: (sheetCtx) => Directionality(
         textDirection: TextDirection.rtl,
-        child: _CustomerDetailSheet(
-          view: view,
-          // The contractor's own orders, off the same live engine
-          // (@index.html:16612-16613 `SYS_ORDERS.filter(o=>o.who===name)`).
-          orders: ref
-              .read(ordersEngineProvider)
-              .where((o) => o.who == view.customer.name)
-              .toList(),
-        ),
+        child: _CustomerDetailSheet(view: view),
       ),
     );
   }
@@ -1635,11 +1628,14 @@ class _CreditBar extends StatelessWidget {
 /// ⚠️ ניצול אשראי גבוה / לא פעיל), an orders/spend/pct grid, the credit rows
 /// (מסגרת אשראי / נוצל / יתרה זמינה / אתרי בנייה), and the contractor's own
 /// orders. Read-only. LIGHT.
-class _CustomerDetailSheet extends StatelessWidget {
-  const _CustomerDetailSheet({required this.view, required this.orders});
+///
+/// Watches [ordersEngineProvider] directly so the contractor's order list stays
+/// live while the sheet is open (orders placed while open appear immediately
+/// without reopening the sheet).
+class _CustomerDetailSheet extends ConsumerWidget {
+  const _CustomerDetailSheet({required this.view});
 
   final _CustomerView view;
-  final List<Order> orders;
 
   /// The detail-sheet status TAG — the longer legacy forms (@index.html:16616:
   /// `low`→⚠️ ניצול אשראי גבוה · `off`→לא פעיל · else 🟢 קבלן פעיל).
@@ -1650,9 +1646,15 @@ class _CustomerDetailSheet extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = view.customer;
     final tag = _tagLabel[view.status] ?? view.status;
+    // Watch live so orders placed while the sheet is open appear immediately
+    // (@index.html:16612-16613 `SYS_ORDERS.filter(o=>o.who===name)`).
+    final orders = ref
+        .watch(ordersEngineProvider)
+        .where((o) => o.who == c.name)
+        .toList();
     final balance =
         (c.creditLimit - c.totalSpend).clamp(0, c.creditLimit); // יתרה ≥ 0
 

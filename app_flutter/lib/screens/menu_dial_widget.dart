@@ -1,9 +1,12 @@
 import 'package:buildsmart/data/menu_trees.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/settings_tree.dart';
+import 'package:buildsmart/screens/store_screen.dart' show StoreSection, storeSectionProvider;
 import 'package:buildsmart/state/app_settings.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/menu_state.dart';
+import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/widgets/dial.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -114,6 +117,11 @@ class _SectionDrill extends ConsumerWidget {
             onTap: () {
               if (s.hasChildren) {
                 ref.read(_drillProvider.notifier).state = [...path, s.title];
+              } else if (s.id == 'cart-mine') {
+                ref.read(storeSectionProvider.notifier).state = StoreSection.cart;
+                ref.read(mainTabProvider.notifier).state = 3;
+                ref.read(menuTabProvider.notifier).state = null;
+                ref.read(_drillProvider.notifier).state = const [];
               } else {
                 showToast(context, '${s.title} — בבנייה');
               }
@@ -142,13 +150,17 @@ class _SectionDrill extends ConsumerWidget {
 /// (so the dial row paints in the brand colour).
 bool _isOn(WidgetRef ref, String label) {
   final s = ref.watch(appSettingsProvider);
+  final cs = ref.watch(catalogSettingsProvider);
+  final ns = ref.watch(notifSettingsProvider);
   return switch (label) {
     'בהיר'              => s.theme == BsTheme.light,
     'כהה'               => s.theme == BsTheme.dark,
-    'קטן'               => s.textSize == BsTextSize.small,
-    'בינוני'           => s.textSize == BsTextSize.medium,
-    'גדול'             => s.textSize == BsTextSize.large,
-    'הפחתת אנימציות'  => s.reduceMotion,
+    // Fix 1 — textSize reads catalogSettingsProvider (main.dart textScaler)
+    'קטן'               => cs.textSize == CatalogTextSize.small,
+    'בינוני'           => cs.textSize == CatalogTextSize.medium,
+    'גדול'             => cs.textSize == CatalogTextSize.large,
+    // Fix 3 — reducedMotion reads catalogSettingsProvider (catalog_screen / home_shell)
+    'הפחתת אנימציות'  => cs.reducedMotion,
     '₪ שקל'           => s.currency == BsCurrency.ils,
     r'$ דולר'         => s.currency == BsCurrency.usd,
     'עברית'            => s.lang == BsLang.he,
@@ -160,7 +172,8 @@ bool _isOn(WidgetRef ref, String label) {
     'טנדר'             => s.haul == BsHaulSize.van,
     'משאית'            => s.haul == BsHaulSize.truck,
     'ברירת מחדל — משלוח אקספרס' => s.express,
-    'מצב ניגודיות גבוהה (לשמש)' => s.highContrast,
+    // Fix 2 — highContrast reads catalogSettingsProvider (main.dart AppTheme)
+    'מצב ניגודיות גבוהה (לשמש)' => cs.highContrast,
     'אימות דו-שלבי'   => s.twoFA,
     'כניסה ביומטרית'  => s.biometric,
     'הרשאת מיקום'     => s.locationPerm,
@@ -168,10 +181,11 @@ bool _isOn(WidgetRef ref, String label) {
     '15 דק׳'  => s.sessionTimeout == BsSessionTimeout.m15,
     '30 דק׳'  => s.sessionTimeout == BsSessionTimeout.m30,
     '60 דק׳'  => s.sessionTimeout == BsSessionTimeout.m60,
-    'עדכוני משלוחים'  => s.notifShipments,
-    'מבצעים והטבות'   => s.notifDeals,
-    'התראות תקציב'     => s.notifBudget,
-    'עדכוני הזמנות'   => s.notifOrders,
+    // Fix 4 — notification toggles read notifSettingsProvider
+    'עדכוני משלוחים'  => ns.typeShipments,
+    'מבצעים והטבות'   => ns.typeDeals,
+    'התראות תקציב'     => ns.typePriceDrops,
+    'עדכוני הזמנות'   => ns.typeOrders,
     'שיתוף נתוני שימוש' => s.privAnalytics,
     'שירותי מיקום'    => s.privLocation,
     'התאמת תוכן שיווקי' => s.privMarketing,
@@ -183,15 +197,19 @@ bool _isOn(WidgetRef ref, String label) {
 /// Applies the side-effect for a tapped settings leaf. Unknown labels
 /// fall through to the "X — בבנייה" toast.
 void _applyLeaf(WidgetRef ref, BuildContext context, String label) {
-  final n = ref.read(appSettingsProvider.notifier);
+  final n  = ref.read(appSettingsProvider.notifier);
+  final cn = ref.read(catalogSettingsProvider.notifier);
+  final nn = ref.read(notifSettingsProvider.notifier);
   switch (label) {
     case 'בהיר':              n.update((s) => s.copyWith(theme: BsTheme.light));
     case 'כהה':               n.update((s) => s.copyWith(theme: BsTheme.dark));
-    case 'קטן':               n.update((s) => s.copyWith(textSize: BsTextSize.small));
-    case 'בינוני':           n.update((s) => s.copyWith(textSize: BsTextSize.medium));
-    case 'גדול':             n.update((s) => s.copyWith(textSize: BsTextSize.large));
+    // Fix 1 — write textSize to catalogSettingsProvider (main.dart textScaler)
+    case 'קטן':               cn.update((s) => s.copyWith(textSize: CatalogTextSize.small));
+    case 'בינוני':           cn.update((s) => s.copyWith(textSize: CatalogTextSize.medium));
+    case 'גדול':             cn.update((s) => s.copyWith(textSize: CatalogTextSize.large));
+    // Fix 3 — write reducedMotion to catalogSettingsProvider
     case 'הפחתת אנימציות':
-      n.update((s) => s.copyWith(reduceMotion: !s.reduceMotion));
+      cn.update((s) => s.copyWith(reducedMotion: !s.reducedMotion));
     case '₪ שקל':            n.update((s) => s.copyWith(currency: BsCurrency.ils));
     case r'$ דולר':          n.update((s) => s.copyWith(currency: BsCurrency.usd));
     case 'עברית':             n.update((s) => s.copyWith(lang: BsLang.he));
@@ -204,8 +222,9 @@ void _applyLeaf(WidgetRef ref, BuildContext context, String label) {
     case 'משאית':             n.update((s) => s.copyWith(haul: BsHaulSize.truck));
     case 'ברירת מחדל — משלוח אקספרס':
       n.update((s) => s.copyWith(express: !s.express));
+    // Fix 2 — write highContrast to catalogSettingsProvider (main.dart AppTheme)
     case 'מצב ניגודיות גבוהה (לשמש)':
-      n.update((s) => s.copyWith(highContrast: !s.highContrast));
+      cn.update((s) => s.copyWith(highContrast: !s.highContrast));
     case 'אימות דו-שלבי':
       n.update((s) => s.copyWith(twoFA: !s.twoFA));
     case 'כניסה ביומטרית':
@@ -216,14 +235,15 @@ void _applyLeaf(WidgetRef ref, BuildContext context, String label) {
     case '15 דק׳':  n.update((s) => s.copyWith(sessionTimeout: BsSessionTimeout.m15));
     case '30 דק׳':  n.update((s) => s.copyWith(sessionTimeout: BsSessionTimeout.m30));
     case '60 דק׳':  n.update((s) => s.copyWith(sessionTimeout: BsSessionTimeout.m60));
+    // Fix 4 — notification toggles write to notifSettingsProvider
     case 'עדכוני משלוחים':
-      n.update((s) => s.copyWith(notifShipments: !s.notifShipments));
+      nn.update((s) => s.copyWith(typeShipments: !s.typeShipments));
     case 'מבצעים והטבות':
-      n.update((s) => s.copyWith(notifDeals: !s.notifDeals));
+      nn.update((s) => s.copyWith(typeDeals: !s.typeDeals));
     case 'התראות תקציב':
-      n.update((s) => s.copyWith(notifBudget: !s.notifBudget));
+      nn.update((s) => s.copyWith(typePriceDrops: !s.typePriceDrops));
     case 'עדכוני הזמנות':
-      n.update((s) => s.copyWith(notifOrders: !s.notifOrders));
+      nn.update((s) => s.copyWith(typeOrders: !s.typeOrders));
     case 'שיתוף נתוני שימוש':
       n.update((s) => s.copyWith(privAnalytics: !s.privAnalytics));
     case 'שירותי מיקום':

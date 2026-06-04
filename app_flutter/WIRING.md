@@ -8,6 +8,9 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **v6.13 wiring audit:** see `knowledge/WIRING_AUDIT.md` — the FAB/dial shortcut layer was
+> swept for stubs / mis-wired toggles and fixed (the full screens were already correct).
+
 ---
 
 ## Opening flow — first run (`onboarding_screen.dart` · `welcome_screen.dart` · `profession_screen.dart` · `role_picker_sheet.dart`)
@@ -36,7 +39,7 @@ home directly. Guarded by `onboarding_test`.
 
 > **T9 deferred** (proto "adds beyond"/heavier infra): per-store login routing, the picking sheet + missing-item hold loop, split-shipment jobs, POD capture, the printed delivery note, and localStorage persistence. The store/courier full screens + the shared 6-stage advance engine are done.
 >
-> **⚠️ merge note (live↔manager unify):** the store/courier role-apps read **`sysOrdersProvider`** while the manager reads **`ordersEngineProvider`** — two separate order systems. Contractor checkout + worker tasks feed the manager's engine (live); store/courier currently do **not** reach the manager. Unifying the T9 store/courier dashboards onto `ordersEngineProvider` is the next step.
+> **✅ unified (v6.12):** `sysOrdersProvider` is now a live view of the single `ordersEngineProvider`, so store/courier advances reach the manager live — all four roles (contractor checkout · store · courier · worker approval) share one engine. **v6.13:** the BS-dial manager order/customer panels also read the live engine (were a static seed). See `knowledge/WIRING_AUDIT.md`.
 | 💡 (קצה שמאלי) | replays the intro tour (`showIntroTour` → the onboarding slides) | ✅ |
 | שם-משתמש (צ'יפ ליד הלוגו) | registered user's first name (`userProfileProvider`); absent for guest/demo | ✅ |
 
