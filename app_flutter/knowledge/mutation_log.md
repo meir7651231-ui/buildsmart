@@ -26,6 +26,12 @@
 - ביטול → ירוק ✅ — All tests passed.
 - מסקנה: הבדיקה חזקה — תופסת היפוך של לוגיקת-הסינון המרכזית (זול↔יקר), לא רק קיום פלט.
 
+## gate 117 — lipskey_pdf_parity_test (אביזרי תבריג) — 2026-06-04
+
+- **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runScrewOnGroup` (43 SKUs, עמ' 20–23).
+- תקלה שהוזרקה: `'מחבר כפול תבריג 32/32'` → `'מחבר כפולX תבריג 32/32'` (116209).
+- תוצאה: אדום ✅; ביטול → ירוק ✅.
+
 ## gate 117 — lipskey_pdf_parity_test (אטמים/פקקים) — 2026-06-04
 
 - **קובץ:** `test/lipskey_pdf_parity_test.dart` — `_runGasketPlugGroup` (17 SKUs, עמ' 36–37).

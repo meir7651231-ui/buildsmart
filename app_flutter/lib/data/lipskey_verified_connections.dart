@@ -1294,6 +1294,8 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '116229': VerifiedSpec(sku: '116229', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40'), _c('40')]),
   '116231': VerifiedSpec(sku: '116231', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
   '116689': VerifiedSpec(sku: '116689', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40'), _c('40')]),
+  // gate 117: 116589 added (was missing from kLipskeyCatalog; spec mirrors 116682's 90° pattern at DN 32).
+  '116589': VerifiedSpec(sku: '116589', material: 'PVC', maxTempC: 50, ends: [_c('32'), _c('32'), _c('32')]),
   '116682': VerifiedSpec(sku: '116682', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
   '116687': VerifiedSpec(sku: '116687', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
   '116209': VerifiedSpec(sku: '116209', material: 'PVC', maxTempC: 50, ends: [_c('32'), _c('32')]),

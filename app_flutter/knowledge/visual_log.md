@@ -4,6 +4,20 @@
 
 ---
 
+## v6.06 — Lipski screw-on accessories parity to PDF (gate 117 · קטגוריה 7/9)
+
+**שינוי:** 43 SKUs (עמ' 20–23) — אביזרי תבריג: ברכים תבריג (90°/45°/30°/15°/טלסקופית),
+מסעפי-תבריג, מחברים, מצרות, מפתחות. שמות אוחדו ל-`'ברך {זווית}° תבריג {sub} {D1/D2}'`,
+DN+qty הושלמו. 116589 נוסף (חסר היה לחלוטין) + spec ב-verified_connections.
+
+**אימות:**
+- ✅ `lipskey_pdf_parity_test` — 212/212.
+- ✅ `flutter analyze` — 0 errors.
+- ✅ `compat_coverage` — 100% (116589 קיבל spec).
+- ✅ `flutter test` — 1328/1328 ירוקים.
+
+---
+
 ## v6.05 — T3 · catalog ⋮ "סרוק תוכנית" scan flow [מקבץ]
 
 **שינוי:** ה-⋮ בקטלוג, "סרוק תוכנית עבודה" — `_ScanPlanSheet` מ-stub ('בבנייה') ל-**זרימה מלאה**
