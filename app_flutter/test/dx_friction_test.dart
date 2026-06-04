@@ -21,6 +21,19 @@ import 'package:flutter_test/flutter_test.dart';
 
 const _hook = '../.githooks/pre-commit';
 
+/// Parent environment with every inherited `GIT_*` variable stripped. When this
+/// suite runs INSIDE a git hook (e.g. the pre-commit gauntlet invokes
+/// `flutter test`), git exports `GIT_DIR` / `GIT_INDEX_FILE` / `GIT_WORK_TREE`
+/// etc. to its children. The DX4 temp-repo `git add` / `git diff --cached`
+/// would then operate on the OUTER repo's index instead of the isolated temp
+/// repo, so `staged_new_untested_symbol` would see nothing staged and the
+/// "DEMAND" assertions would spuriously fail. Dropping the `GIT_*` keys keeps
+/// each temp repo hermetic — identical behaviour standalone vs. under a hook.
+final Map<String, String> _hermeticEnv = {
+  for (final e in Platform.environment.entries)
+    if (!e.key.startsWith('GIT_')) e.key: e.value,
+};
+
 /// Extracts `fn() { … }` verbatim from the hook (the same awk range used in the
 /// other harnesses) so the test runs the SHIPPED function body, not a copy.
 String _extract(String fn) {
@@ -192,8 +205,10 @@ git() { case "$*" in *"diff --cached --name-only"*) printf '%s\n' "$MOCK";; *) :
     // extracted function with cwd = <tmp>/app_flutter, exactly like the hook.
     late Directory tmp;
     late String af; // <tmp>/app_flutter
-    void git(List<String> a) =>
-        Process.runSync('git', a, workingDirectory: tmp.path);
+    void git(List<String> a) => Process.runSync('git', a,
+        workingDirectory: tmp.path,
+        environment: _hermeticEnv,
+        includeParentEnvironment: false);
     setUp(() {
       tmp = Directory.systemTemp.createTempSync('dx4_');
       af = '${tmp.path}/app_flutter';
@@ -206,11 +221,13 @@ git() { case "$*" in *"diff --cached --name-only"*) printf '%s\n' "$MOCK";; *) :
     });
     tearDown(() => tmp.deleteSync(recursive: true));
 
-    String run() =>
-        (Process.runSync('bash', ['-c', '$pre\nstaged_new_untested_symbol'],
-                workingDirectory: af)
+    String run() => (Process.runSync(
+                'bash', ['-c', '$pre\nstaged_new_untested_symbol'],
+                workingDirectory: af,
+                environment: _hermeticEnv,
+                includeParentEnvironment: false)
             .stdout as String)
-            .trim();
+        .trim();
 
     test('edit to an EXISTING tested helper → NO demand', () {
       File('$af/lib/logic/foo.dart')

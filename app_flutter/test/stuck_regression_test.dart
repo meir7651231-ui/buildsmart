@@ -111,7 +111,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #1 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -138,7 +138,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #2 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -165,7 +165,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #3 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -192,7 +192,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #4 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -219,7 +219,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #5 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -246,7 +246,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #6 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -273,7 +273,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #7 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -300,7 +300,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #8 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -377,7 +377,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #11 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -1029,7 +1029,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #37 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -1106,7 +1106,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #40 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -1208,7 +1208,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #44 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -1235,7 +1235,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #45 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -1262,7 +1262,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #46 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -1289,7 +1289,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #47 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -1416,7 +1416,7 @@ void main() {
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs .
+      // KILLED at the budget, never hangs `flutter test`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #52 (hook) regex TIMED OUT — possible ReDoS; rewrite it');
@@ -1720,6 +1720,31 @@ void main() {
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #64 regex TIMED OUT — possible ReDoS; rewrite it');
+      expect(r.matched, isFalse,
+        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+    });
+
+    test("antipattern #65 לא קיים", () async {
+      const pattern = 'GIT_INDEX_FILE';
+      // V10-A guard 2: a catastrophic regex never runs — it would ReDoS-hang.
+      if (_isCatastrophic(pattern)) {
+        printOnFailure('antipattern #65 regex rejected as ReDoS-unsafe; skipped');
+        return;
+      }
+      final libDir = Directory('lib');
+      final lines = <String>[];
+      for (final entity in libDir.listSync(recursive: true)) {
+        if (entity is File && entity.path.endsWith('.dart')) {
+          if (entity.path.contains('stuck_regression')) continue;
+          try {
+            lines.addAll(entity.readAsStringSync().split('\n'));
+          } catch (_) {}
+        }
+      }
+      // V10-A guard 3: ONE bounded scan over all lib lines for this pattern.
+      final r = await _boundedAnyMatch(pattern, lines);
+      expect(r.timedOut, isFalse,
+        reason: 'antipattern #65 regex TIMED OUT — possible ReDoS; rewrite it');
       expect(r.matched, isFalse,
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });

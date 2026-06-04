@@ -1218,3 +1218,28 @@ ANTIPATTERN: שדרוג dynamic→named-type בלי לוודא שהטיפוס מ
 RULE: כשמחליפים `dynamic` בשם-טיפוס מפורש בקובץ-בדיקה — הוסף את ה-import של מקור-הטיפוס
 באותו edit, ואמת ב-`flutter test <file>` (לא רק `analyze` — analyze פותר טרנזיטיבית
 ויכול לפספס import חסר ש-compiler דורש).
+
+## 2026-06-03 — test ש-spawn-ים git על temp-repo דלף GIT_DIR מה-hook → 3 כשלים + זיהום ה-index האמיתי
+### א — הבעיה
+בעת `git commit` של M1 (המנהל 📊) השער 32 חסם 3 בדיקות ב-`dx_friction_test.dart` (DX4:
+"ADD a NEW untested public symbol → DEMAND" + 2 נוספות) — אך הרצה בודדת של אותו קובץ
+(`flutter test test/dx_friction_test.dart`) עברה 17/17. ההבדל: ה-gauntlet מריץ `flutter
+test` **מתוך** ה-pre-commit, ו-git מייצא ל-hooks את `GIT_DIR`/`GIT_INDEX_FILE`/
+`GIT_WORK_TREE`. הבדיקה בונה temp-repo ומריצה בו `git add`/`git diff --cached`, אבל
+ה-`Process.runSync('git',…)` ירש את ה-env הזה → פעל על ה-index של ה-repo החיצוני,
+לא ה-temp → `staged_new_untested_symbol` ראה 0 staged → assertions של "DEMAND" נכשלו.
+חמור יותר: ה-`git add` של ה-temp הוסיף את קבצי-העזר שלו (`foo.dart`/`foo_test.dart`/
+`calc2.dart`/`prov.dart`) ל-**index האמיתי**, וה-`git commit` הפנימי של הבדיקה אף יצר
+commit hijack ("base") שהשאיר רק את 2 קבצי-הזיהום — שחיתות שדרשה `git reset 5e0adfe`
+(M0) לשחזור. (M0 עצמו נגוע באותה דליפה בעבר: foo.dart/foo_test.dart נכנסו ל-tree שלו.)
+### ב — הפתרון
+ב-DX4: ה-`git()` helper וה-`run()` מקבלים `environment:` עם כל מפתחות `GIT_*` מסוננים
+(`_hermeticEnv`) + `includeParentEnvironment:false`, כך שה-temp-repo הרמטי — התנהגות
+זהה standalone ובתוך hook. אומת תחת `GIT_DIR=… GIT_INDEX_FILE=… flutter test` → 17/17
+ירוק ו-0 זיהום ל-index. הקבצים הזורמים נוקו מהדיסק; ה-branch אופס ל-M0 לפני ה-commit.
+### ג — כלל המניעה
+ANTIPATTERN: GIT_INDEX_FILE
+RULE: בדיקה שמריצה git על temp-repo חייבת לסנן את ה-GIT_* env שדולף מ-hook
+(`environment:` בלי GIT_DIR/GIT_INDEX_FILE/GIT_WORK_TREE + includeParentEnvironment:false),
+אחרת `git add`/`diff --cached` יפעלו על ה-repo החיצוני ויזהמו את ה-index האמיתי.
+GUARD: dx_friction_test (DX4 — מאומת תחת GIT_DIR/GIT_INDEX_FILE שמדמה הרצת-hook).

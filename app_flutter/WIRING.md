@@ -55,6 +55,10 @@ clears it). The other dial leaves (children / `mm-regression` / etc.) are unchan
 | ✅ זמינים כעת (`md-available`) | `availableCount` (=202; STORE_STOCK all-true, @12122) | `ManagerAnalytics.availableCount` | ✅ |
 | 🏪 חנויות פעילות (`md-stores`) | `storesLabel` (="3/3"; active/total, @12125) | `ManagerAnalytics.storesLabel` | ✅ |
 
+The leaf row whose panel is open is rendered `active` (highlighted), so the user sees which
+metric the panel belongs to; popping the persona/anchor or drilling into a child clears
+`bsMetricLeafProvider`. Verified active in v5.93 (M1 — the 5 leaves no longer toast "בבנייה").
+
 Guard: `bs_dial_manager_test` (5 leaves present · tap→inline panel with the real number ·
 NO "בבנייה" · toggle closes) + `manager_dashboard_test` (the derivations, vs index.html).
 

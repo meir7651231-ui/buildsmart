@@ -13,6 +13,12 @@ final activePersonaProvider = StateProvider<String?>((_) => null);
 /// Empty = at the persona's L2 view. Each entry = one anchor deeper.
 final bsDrillPathProvider = StateProvider<List<String>>((_) => const []);
 
+/// Section id of the manager dashboard leaf whose inline metric panel is open
+/// (one of the `md-*` ids), or null when no metric panel is showing. Tapping a
+/// `md-*` leaf opens its panel INLINE in the dial (R2 — no new screen); tapping
+/// again (or any other dial action) closes it.
+final bsMetricLeafProvider = StateProvider<String?>((_) => null);
+
 /// Which menu tab is currently drilled into (null = 4-tab root).
 enum MenuTab { home, projects, cart, settings }
 
@@ -36,6 +42,7 @@ void resetAllDials(WidgetRef ref) {
   ref.read(openDialProvider.notifier).state = OpenDial.none;
   ref.read(activePersonaProvider.notifier).state = null;
   ref.read(bsDrillPathProvider.notifier).state = const [];
+  ref.read(bsMetricLeafProvider.notifier).state = null;
   ref.read(menuTabProvider.notifier).state = null;
   ref.read(searchToolProvider.notifier).state = null;
 }

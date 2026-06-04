@@ -181,7 +181,7 @@ while IFS= read -r raw; do
           .where((l) => !RegExp(r'^\s*#').hasMatch(l))
           .toList();
       // V10-A guard 3: ONE bounded scan over all lines — a runaway pattern is
-      // KILLED at the budget, never hangs `flutter test`.
+      // KILLED at the budget, never hangs \`flutter test\`.
       final r = await _boundedAnyMatch(pattern, lines);
       expect(r.timedOut, isFalse,
         reason: 'antipattern #${LINE_NUM} (hook) regex TIMED OUT — possible ReDoS; rewrite it');
