@@ -11,9 +11,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Store section tabs.
 enum StoreSection { all, cart, orders, services }
 
-final storeSectionProvider =
-    StateProvider<StoreSection>((_) => StoreSection.all);
+final storeSectionProvider = StateProvider<StoreSection>(
+  (_) => StoreSection.all,
+);
 final storeSearchQueryProvider = StateProvider<String>((_) => '');
+
 /// Favorited store-hub rows (by title). Persisted to SharedPreferences so the
 /// ⭐ set survives restarts.
 class StoreFavoritesNotifier extends StateNotifier<Set<String>> {
@@ -38,17 +40,18 @@ class StoreFavoritesNotifier extends StateNotifier<Set<String>> {
   }
 
   void toggle(String key) {
-    state = state.contains(key)
-        ? (Set<String>.of(state)..remove(key))
-        : (Set<String>.of(state)..add(key));
+    state =
+        state.contains(key)
+            ? (Set<String>.of(state)..remove(key))
+            : (Set<String>.of(state)..add(key));
     _persist();
   }
 }
 
 final storeFavoritesProvider =
     StateNotifierProvider<StoreFavoritesNotifier, Set<String>>(
-  (_) => StoreFavoritesNotifier(),
-);
+      (_) => StoreFavoritesNotifier(),
+    );
 
 // ─── cart state ──────────────────────────────────────────────────────────────
 
@@ -56,18 +59,16 @@ enum CartDelivery { express, standard, pickup }
 
 enum CartPaymentMethod { card, bit, supplierCredit }
 
-final cartQtysProvider = StateProvider<Map<String, int>>(
-  (_) => const {},
-);
+final cartQtysProvider = StateProvider<Map<String, int>>((_) => const {});
 // Initial delivery/payment honor the store-settings defaults (read once).
 // Pure mappings (regression-tested in test/gaps_test.dart).
 CartDelivery cartDeliveryFor(bool selfPickupDefault) =>
     selfPickupDefault ? CartDelivery.pickup : CartDelivery.standard;
 CartPaymentMethod cartPaymentFor(StorePayment p) => switch (p) {
-      StorePayment.bit => CartPaymentMethod.bit,
-      StorePayment.supplierCredit => CartPaymentMethod.supplierCredit,
-      StorePayment.card || StorePayment.applePay => CartPaymentMethod.card,
-    };
+  StorePayment.bit => CartPaymentMethod.bit,
+  StorePayment.supplierCredit => CartPaymentMethod.supplierCredit,
+  StorePayment.card || StorePayment.applePay => CartPaymentMethod.card,
+};
 
 final cartDeliveryProvider = StateProvider<CartDelivery>(
   (ref) => cartDeliveryFor(ref.read(storeSettingsProvider).selfPickupDefault),
@@ -90,7 +91,8 @@ final shipToPromptedProvider = StateProvider<bool>((ref) => true);
 
 /// Read the persisted "already-prompted" flag (absent → false → will prompt).
 Future<bool> loadShipToPrompted() async =>
-    (await SharedPreferences.getInstance()).getBool(kShipToPromptedKey) ?? false;
+    (await SharedPreferences.getInstance()).getBool(kShipToPromptedKey) ??
+    false;
 
 /// Persist that the one-time popup has been shown — so it never prompts again.
 Future<void> saveShipToPrompted() async =>
@@ -98,67 +100,159 @@ Future<void> saveShipToPrompted() async =>
 final cartPaymentProvider = StateProvider<CartPaymentMethod>(
   (ref) => cartPaymentFor(ref.read(storeSettingsProvider).defaultPayment),
 );
+
 /// Free-text delivery note carried into the confirmed order.
 final cartNotesProvider = StateProvider<String>((_) => '');
 
 // ─── static data ─────────────────────────────────────────────────────────────
 
-typedef _Meta = ({
-  String emoji,
-  String title,
-  String preview,
-  String time,
-  int badge,
-});
+typedef _Meta =
+    ({String emoji, String title, String preview, String time, int badge});
 
 const List<_Meta> _kAllItems = [
-  (emoji: '🛒', title: 'הסל שלי',         preview: '3 פריטים ממתינים לסיכום',       time: 'עכשיו', badge: 3),
-  (emoji: '📦', title: 'ההזמנות שלי',     preview: 'הזמנה #1234 · בדרך אליך',       time: 'אתמול', badge: 1),
-  (emoji: '🔧', title: 'השכרת כלים',      preview: '2 כלים מושכרים עד 30.5',         time: '21.5',  badge: 0),
-  (emoji: '💰', title: 'פקדונות',          preview: 'פיקדון פעיל · ₪350',             time: '21.5',  badge: 0),
-  (emoji: '↩️', title: 'החזרה חדשה',      preview: 'בקשה #567 ממתינה לאישור',        time: '20.5',  badge: 0),
-  (emoji: '📨', title: 'מכרז ספקים',      preview: '3 הצעות חדשות התקבלו',           time: '20.5',  badge: 3),
-  (emoji: '🧪', title: 'גיליונות בטיחות', preview: '5 גיליונות זמינים להורדה',       time: '19.5',  badge: 0),
-  (emoji: '📊', title: 'השוואת מחירים',   preview: '4 ספקים עדכנו מחירים',           time: '19.5',  badge: 2),
+  (
+    emoji: '🛒',
+    title: 'הסל שלי',
+    preview: '3 פריטים ממתינים לסיכום',
+    time: 'עכשיו',
+    badge: 3,
+  ),
+  (
+    emoji: '📦',
+    title: 'ההזמנות שלי',
+    preview: 'הזמנה #1234 · בדרך אליך',
+    time: 'אתמול',
+    badge: 1,
+  ),
+  (
+    emoji: '🔧',
+    title: 'השכרת כלים',
+    preview: '2 כלים מושכרים עד 30.5',
+    time: '21.5',
+    badge: 0,
+  ),
+  (
+    emoji: '💰',
+    title: 'פקדונות',
+    preview: 'פיקדון פעיל · ₪350',
+    time: '21.5',
+    badge: 0,
+  ),
+  (
+    emoji: '↩️',
+    title: 'החזרה חדשה',
+    preview: 'בקשה #567 ממתינה לאישור',
+    time: '20.5',
+    badge: 0,
+  ),
+  (
+    emoji: '📨',
+    title: 'מכרז ספקים',
+    preview: '3 הצעות חדשות התקבלו',
+    time: '20.5',
+    badge: 3,
+  ),
+  (
+    emoji: '🧪',
+    title: 'גיליונות בטיחות',
+    preview: '5 גיליונות זמינים להורדה',
+    time: '19.5',
+    badge: 0,
+  ),
+  (
+    emoji: '📊',
+    title: 'השוואת מחירים',
+    preview: '4 ספקים עדכנו מחירים',
+    time: '19.5',
+    badge: 2,
+  ),
 ];
 
 const List<_Meta> _kCartItems = [
-  (emoji: '🛒', title: 'הסל שלי', preview: '3 פריטים ממתינים לסיכום', time: 'עכשיו', badge: 3),
+  (
+    emoji: '🛒',
+    title: 'הסל שלי',
+    preview: '3 פריטים ממתינים לסיכום',
+    time: 'עכשיו',
+    badge: 3,
+  ),
 ];
 
 const List<_Meta> _kOrderItems = [
-  (emoji: '📦', title: 'ההזמנות שלי', preview: 'הזמנה #1234 · בדרך אליך', time: 'אתמול', badge: 1),
+  (
+    emoji: '📦',
+    title: 'ההזמנות שלי',
+    preview: 'הזמנה #1234 · בדרך אליך',
+    time: 'אתמול',
+    badge: 1,
+  ),
 ];
 
 const List<_Meta> _kServiceItems = [
-  (emoji: '🔧', title: 'השכרת כלים',      preview: '2 כלים מושכרים עד 30.5',   time: '21.5',  badge: 0),
-  (emoji: '💰', title: 'פקדונות',          preview: 'פיקדון פעיל · ₪350',       time: '21.5',  badge: 0),
-  (emoji: '↩️', title: 'החזרה חדשה',      preview: 'בקשה #567 ממתינה לאישור',  time: '20.5',  badge: 0),
-  (emoji: '📨', title: 'מכרז ספקים',      preview: '3 הצעות חדשות התקבלו',     time: '20.5',  badge: 3),
-  (emoji: '🧪', title: 'גיליונות בטיחות', preview: '5 גיליונות זמינים להורדה', time: '19.5',  badge: 0),
-  (emoji: '📊', title: 'השוואת מחירים',   preview: '4 ספקים עדכנו מחירים',     time: '19.5',  badge: 2),
+  (
+    emoji: '🔧',
+    title: 'השכרת כלים',
+    preview: '2 כלים מושכרים עד 30.5',
+    time: '21.5',
+    badge: 0,
+  ),
+  (
+    emoji: '💰',
+    title: 'פקדונות',
+    preview: 'פיקדון פעיל · ₪350',
+    time: '21.5',
+    badge: 0,
+  ),
+  (
+    emoji: '↩️',
+    title: 'החזרה חדשה',
+    preview: 'בקשה #567 ממתינה לאישור',
+    time: '20.5',
+    badge: 0,
+  ),
+  (
+    emoji: '📨',
+    title: 'מכרז ספקים',
+    preview: '3 הצעות חדשות התקבלו',
+    time: '20.5',
+    badge: 3,
+  ),
+  (
+    emoji: '🧪',
+    title: 'גיליונות בטיחות',
+    preview: '5 גיליונות זמינים להורדה',
+    time: '19.5',
+    badge: 0,
+  ),
+  (
+    emoji: '📊',
+    title: 'השוואת מחירים',
+    preview: '4 ספקים עדכנו מחירים',
+    time: '19.5',
+    badge: 2,
+  ),
 ];
 
 List<_Meta> _itemsForSection(StoreSection s) => switch (s) {
-      StoreSection.all      => _kAllItems,
-      StoreSection.cart     => _kCartItems,
-      StoreSection.orders   => _kOrderItems,
-      StoreSection.services => _kServiceItems,
-    };
+  StoreSection.all => _kAllItems,
+  StoreSection.cart => _kCartItems,
+  StoreSection.orders => _kOrderItems,
+  StoreSection.services => _kServiceItems,
+};
 
 // ─── cart data ────────────────────────────────────────────────────────────────
 
-
 // ─── cart items ──────────────────────────────────────────────────────────────
 
-typedef _CItem = ({
-  String id,
-  String emoji,
-  String name,
-  String supplier,
-  String unit,
-  int unitPrice,
-});
+typedef _CItem =
+    ({
+      String id,
+      String emoji,
+      String name,
+      String supplier,
+      String unit,
+      int unitPrice,
+    });
 
 // Real cart is driven entirely by smartCartProvider (products the user added).
 // No injected demo items.
@@ -167,21 +261,22 @@ const List<_CItem> _kCItems = [];
 const _kProjects = ['בית דוד 3', 'מגדל עזריאלי', 'ללא פרויקט'];
 
 /// Live project list — seeded from [_kProjects]; the user can add more.
-final storeProjectsProvider =
-    StateProvider<List<String>>((_) => List.of(_kProjects));
+final storeProjectsProvider = StateProvider<List<String>>(
+  (_) => List.of(_kProjects),
+);
 
 typedef _DOption = ({CartDelivery method, String emoji, String label, int fee});
 typedef _POption = ({CartPaymentMethod method, String emoji, String label});
 
 const _kDeliveryOptions = <_DOption>[
-  (method: CartDelivery.express,  emoji: '⚡', label: '4 שעות',      fee: 120),
-  (method: CartDelivery.standard, emoji: '📦', label: 'יום-יומיים',  fee: 45),
-  (method: CartDelivery.pickup,   emoji: '🏪', label: 'איסוף עצמי',  fee: 0),
+  (method: CartDelivery.express, emoji: '⚡', label: '4 שעות', fee: 120),
+  (method: CartDelivery.standard, emoji: '📦', label: 'יום-יומיים', fee: 45),
+  (method: CartDelivery.pickup, emoji: '🏪', label: 'איסוף עצמי', fee: 0),
 ];
 
 const _kPaymentOptions = <_POption>[
-  (method: CartPaymentMethod.card,           emoji: '💳', label: 'כרטיס'),
-  (method: CartPaymentMethod.bit,            emoji: '📲', label: 'ביט'),
+  (method: CartPaymentMethod.card, emoji: '💳', label: 'כרטיס'),
+  (method: CartPaymentMethod.bit, emoji: '📲', label: 'ביט'),
   (method: CartPaymentMethod.supplierCredit, emoji: '🤝', label: 'אשראי ספק'),
 ];
 
@@ -193,17 +288,18 @@ String _price(int n) {
 // ─── cart math (pure, regression-tested in test/gaps_test.dart) ───────────────
 
 int deliveryFeeFor(CartDelivery d) => switch (d) {
-      CartDelivery.express => 120,
-      CartDelivery.standard => 45,
-      CartDelivery.pickup => 0,
-    };
+  CartDelivery.express => 120,
+  CartDelivery.standard => 45,
+  CartDelivery.pickup => 0,
+};
 
 /// VAT amount for a subtotal. When [vatInclusive] the VAT is already embedded
 /// in the prices (so it's the 18% portion of the gross); otherwise it's 18%
 /// added on top.
-int cartVat(int subtotal, {required bool vatInclusive}) => vatInclusive
-    ? subtotal - (subtotal / 1.18).round()
-    : (subtotal * 0.18).round();
+int cartVat(int subtotal, {required bool vatInclusive}) =>
+    vatInclusive
+        ? subtotal - (subtotal / 1.18).round()
+        : (subtotal * 0.18).round();
 
 int cartTotal(int subtotal, int deliveryFee, {required bool vatInclusive}) =>
     vatInclusive
@@ -275,17 +371,18 @@ class _StoreScreenState extends ConsumerState<StoreScreen> {
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeInOut,
             alignment: Alignment.topCenter,
-            child: _headerVisible
-                ? const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _SearchBar(),
-                      _SectionChipsRow(),
-                      _SummaryRow(),
-                      _QuickActionsRow(),
-                    ],
-                  )
-                : const SizedBox.shrink(),
+            child:
+                _headerVisible
+                    ? const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _SearchBar(),
+                        _SectionChipsRow(),
+                        _SummaryRow(),
+                        _QuickActionsRow(),
+                      ],
+                    )
+                    : const SizedBox.shrink(),
           ),
         ),
         Expanded(
@@ -311,7 +408,10 @@ class _SummaryRow extends ConsumerWidget {
       ref.watch(smartCartProvider),
     );
     final openOrders =
-        ref.watch(storeOrdersProvider).where((o) => isOrderOpen(o.stage)).length;
+        ref
+            .watch(storeOrdersProvider)
+            .where((o) => isOrderOpen(o.stage))
+            .length;
     final offers = _kSupplierOffersCount;
 
     return SingleChildScrollView(
@@ -320,15 +420,19 @@ class _SummaryRow extends ConsumerWidget {
       child: Row(
         children: [
           _SummaryChip(
-              label: '🛒 $cartCount פריטים בסל', color: BsTokens.brand),
+            label: '🛒 $cartCount פריטים בסל',
+            color: BsTokens.brand,
+          ),
           const SizedBox(width: 8),
           _SummaryChip(
-              label: '📦 $openOrders הזמנות פתוחות',
-              color: const Color(0xFF4CAF50)),
+            label: '📦 $openOrders הזמנות פתוחות',
+            color: const Color(0xFF4CAF50),
+          ),
           const SizedBox(width: 8),
           _SummaryChip(
-              label: '📨 $offers הצעות ספקים',
-              color: const Color(0xFFFF9800)),
+            label: '📨 $offers הצעות ספקים',
+            color: const Color(0xFFFF9800),
+          ),
         ],
       ),
     );
@@ -391,27 +495,35 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       child: TextField(
         controller: _controller,
-        onChanged: (v) =>
-            ref.read(storeSearchQueryProvider.notifier).state = v,
+        onChanged: (v) => ref.read(storeSearchQueryProvider.notifier).state = v,
         decoration: InputDecoration(
           hintText: 'חיפוש הזמנות ומוצרים...',
           hintStyle: const TextStyle(color: Color(0xFF888888)),
-          prefixIcon:
-              const Icon(Icons.search, color: Color(0xFF888888), size: 20),
-          suffixIcon: query.isEmpty
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.close,
-                      color: Color(0xFF888888), size: 18),
-                  onPressed: () {
-                    _controller.clear();
-                    ref.read(storeSearchQueryProvider.notifier).state = '';
-                  },
-                ),
+          prefixIcon: const Icon(
+            Icons.search,
+            color: Color(0xFF888888),
+            size: 20,
+          ),
+          suffixIcon:
+              query.isEmpty
+                  ? null
+                  : IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      color: Color(0xFF888888),
+                      size: 18,
+                    ),
+                    onPressed: () {
+                      _controller.clear();
+                      ref.read(storeSearchQueryProvider.notifier).state = '';
+                    },
+                  ),
           filled: true,
           fillColor: const Color(0xFFF5F5F5),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(24),
             borderSide: BorderSide.none,
@@ -529,9 +641,8 @@ class _QuickActionsRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final favorites = ref.watch(storeFavoritesProvider);
     final allItems = _kAllItems;
-    final favItems = allItems
-        .where((item) => favorites.contains(item.title))
-        .toList();
+    final favItems =
+        allItems.where((item) => favorites.contains(item.title)).toList();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -547,10 +658,7 @@ class _QuickActionsRow extends ConsumerWidget {
                   showToast(context, 'אין פריטים מועדפים');
                   return;
                 }
-                _showSheet(
-                  context,
-                  _FavoritesSheet(items: favItems),
-                );
+                _showSheet(context, _FavoritesSheet(items: favItems));
               },
             ),
           ),
@@ -633,11 +741,13 @@ class _QuickAction extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFFAAAAAA), fontSize: 12)),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Color(0xFFAAAAAA), fontSize: 12),
+          ),
         ],
       ),
     );
@@ -656,13 +766,16 @@ class _FavoritesSheet extends ConsumerWidget {
     return _SheetScaffold(
       title: 'מועדפים',
       emoji: '❤️',
-      children: items
-          .map((item) => _SheetTile(
-                emoji: item.emoji,
-                label: item.title,
-                onTap: () => Navigator.pop(context),
-              ))
-          .toList(),
+      children:
+          items
+              .map(
+                (item) => _SheetTile(
+                  emoji: item.emoji,
+                  label: item.title,
+                  onTap: () => Navigator.pop(context),
+                ),
+              )
+              .toList(),
     );
   }
 }
@@ -671,30 +784,30 @@ class _MoadimSheet extends StatelessWidget {
   const _MoadimSheet();
   @override
   Widget build(BuildContext context) => const _SheetScaffold(
-        title: 'מועדים',
-        emoji: '📅',
-        children: [
-          _SheetTile(emoji: '📅', label: 'לוח שנה'),
-          _SheetTile(emoji: '🗓️', label: 'אירועים קרובים'),
-          _SheetTile(emoji: '🏗️', label: 'לוח עבודה'),
-          _SheetTile(emoji: '⏰', label: 'תזכורות'),
-        ],
-      );
+    title: 'מועדים',
+    emoji: '📅',
+    children: [
+      _SheetTile(emoji: '📅', label: 'לוח שנה'),
+      _SheetTile(emoji: '🗓️', label: 'אירועים קרובים'),
+      _SheetTile(emoji: '🏗️', label: 'לוח עבודה'),
+      _SheetTile(emoji: '⏰', label: 'תזכורות'),
+    ],
+  );
 }
 
 class _TizmonSheet extends StatelessWidget {
   const _TizmonSheet();
   @override
   Widget build(BuildContext context) => const _SheetScaffold(
-        title: 'תזמון',
-        emoji: '📆',
-        children: [
-          _SheetTile(emoji: '📆', label: 'תזמן פגישה'),
-          _SheetTile(emoji: '🚛', label: 'תזמן משלוח'),
-          _SheetTile(emoji: '👷', label: 'תזמן עובד'),
-          _SheetTile(emoji: '📋', label: 'תזמן ביקורת'),
-        ],
-      );
+    title: 'תזמון',
+    emoji: '📆',
+    children: [
+      _SheetTile(emoji: '📆', label: 'תזמן פגישה'),
+      _SheetTile(emoji: '🚛', label: 'תזמן משלוח'),
+      _SheetTile(emoji: '👷', label: 'תזמן עובד'),
+      _SheetTile(emoji: '📋', label: 'תזמן ביקורת'),
+    ],
+  );
 }
 
 class _SichaSheet extends StatelessWidget {
@@ -712,30 +825,38 @@ class _SichaSheet extends StatelessWidget {
     return _SheetScaffold(
       title: 'שיחה חדשה',
       emoji: '📞',
-      children: _contacts
-          .map(
-            (c) => ListTile(
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF333333),
-                  shape: BoxShape.circle,
+      children:
+          _contacts
+              .map(
+                (c) => ListTile(
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF333333),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(c.avatar, style: const TextStyle(fontSize: 20)),
+                  ),
+                  title: Text(
+                    c.name,
+                    style: const TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 15,
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.phone_outlined,
+                    color: Colors.black38,
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    showToast(context, 'שיחה עם ${c.name} — בבנייה');
+                  },
                 ),
-                alignment: Alignment.center,
-                child: Text(c.avatar, style: const TextStyle(fontSize: 20)),
-              ),
-              title: Text(c.name,
-                  style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15)),
-              trailing:
-                  const Icon(Icons.phone_outlined, color: Colors.black38),
-              onTap: () {
-                Navigator.pop(context);
-                showToast(context, 'שיחה עם ${c.name} — בבנייה');
-              },
-            ),
-          )
-          .toList(),
+              )
+              .toList(),
     );
   }
 }
@@ -790,11 +911,7 @@ class _SheetScaffold extends StatelessWidget {
 }
 
 class _SheetTile extends StatelessWidget {
-  const _SheetTile({
-    required this.emoji,
-    required this.label,
-    this.onTap,
-  });
+  const _SheetTile({required this.emoji, required this.label, this.onTap});
   final String emoji;
   final String label;
   final VoidCallback? onTap;
@@ -803,12 +920,16 @@ class _SheetTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: Text(emoji, style: const TextStyle(fontSize: 22)),
-      title:
-          Text(label, style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15)),
-      onTap: onTap ?? () {
-        Navigator.pop(context);
-        showToast(context, '$label — בבנייה');
-      },
+      title: Text(
+        label,
+        style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+      ),
+      onTap:
+          onTap ??
+          () {
+            Navigator.pop(context);
+            showToast(context, '$label — בבנייה');
+          },
     );
   }
 }
@@ -835,9 +956,9 @@ class _StoreListState extends ConsumerState<_StoreList> {
       onRefresh: _onRefresh,
       child: switch (section) {
         StoreSection.services => const _ServicesGrid(),
-        StoreSection.orders   => const _OrdersList(),
-        StoreSection.cart     => const _CartView(),
-        _                     => _AllList(section: section),
+        StoreSection.orders => const _OrdersList(),
+        StoreSection.cart => const _CartView(),
+        _ => _AllList(section: section),
       },
     );
   }
@@ -846,9 +967,7 @@ class _StoreListState extends ConsumerState<_StoreList> {
 // ─── all / cart list ──────────────────────────────────────────────────────────
 
 // maps service emoji → index in _kServices (for sheet lookup)
-const _kServiceByEmoji = {
-  '🔧': 0, '💰': 1, '↩️': 2, '📨': 3, '🧪': 4, '📊': 5,
-};
+const _kServiceByEmoji = {'🔧': 0, '💰': 1, '↩️': 2, '📨': 3, '🧪': 4, '📊': 5};
 
 class _AllList extends ConsumerWidget {
   const _AllList({required this.section});
@@ -863,26 +982,31 @@ class _AllList extends ConsumerWidget {
       ref.watch(smartCartProvider),
     );
     // Reflect the real cart count on the "הסל שלי" hub row.
-    final allItems = _itemsForSection(section)
-        .map((m) => m.emoji == '🛒'
-            ? (
-                emoji: m.emoji,
-                title: m.title,
-                preview: '$cartCount פריטים ממתינים לסיכום',
-                time: m.time,
-                badge: cartCount,
-              )
-            : m)
-        .toList();
-    final items = query.isEmpty
-        ? allItems
-        : allItems
-            .where(
-              (item) =>
-                  item.title.toLowerCase().contains(query) ||
-                  item.preview.toLowerCase().contains(query),
+    final allItems =
+        _itemsForSection(section)
+            .map(
+              (m) =>
+                  m.emoji == '🛒'
+                      ? (
+                        emoji: m.emoji,
+                        title: m.title,
+                        preview: '$cartCount פריטים ממתינים לסיכום',
+                        time: m.time,
+                        badge: cartCount,
+                      )
+                      : m,
             )
             .toList();
+    final items =
+        query.isEmpty
+            ? allItems
+            : allItems
+                .where(
+                  (item) =>
+                      item.title.toLowerCase().contains(query) ||
+                      item.preview.toLowerCase().contains(query),
+                )
+                .toList();
 
     if (items.isEmpty) {
       return _EmptyState(query: query);
@@ -892,11 +1016,9 @@ class _AllList extends ConsumerWidget {
       key: ValueKey(section),
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: items.length,
-      separatorBuilder: (_, __) => const Divider(
-        height: 1,
-        indent: 76,
-        color: Color(0xFFF5F5F5),
-      ),
+      separatorBuilder:
+          (_, __) =>
+              const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
       itemBuilder: (context, i) {
         final item = items[i];
         final svcIdx = _kServiceByEmoji[item.emoji];
@@ -908,20 +1030,22 @@ class _AllList extends ConsumerWidget {
           onFavToggle: () {
             ref.read(storeFavoritesProvider.notifier).toggle(item.title);
           },
-          onTap: svcIdx != null
-              ? () => _ServicesGrid._openSheet(context, svcIdx)
-              : item.emoji == '🛒'
-                  ? () => ref.read(storeSectionProvider.notifier).state =
-                        StoreSection.cart
+          onTap:
+              svcIdx != null
+                  ? () => _ServicesGrid._openSheet(context, svcIdx)
+                  : item.emoji == '🛒'
+                  ? () =>
+                      ref.read(storeSectionProvider.notifier).state =
+                          StoreSection.cart
                   : item.emoji == '📦'
-                      ? () => ref.read(storeSectionProvider.notifier).state =
-                            StoreSection.orders
-                      : null,
+                  ? () =>
+                      ref.read(storeSectionProvider.notifier).state =
+                          StoreSection.orders
+                  : null,
         );
       },
     );
   }
-
 }
 
 // ─── swipe-to-favorite ────────────────────────────────────────────────────────
@@ -997,8 +1121,7 @@ class _StoreRow extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
-                  child:
-                      Text(item.emoji, style: const TextStyle(fontSize: 24)),
+                  child: Text(item.emoji, style: const TextStyle(fontSize: 24)),
                 ),
                 if (isFav)
                   const Positioned(
@@ -1032,9 +1155,10 @@ class _StoreRow extends StatelessWidget {
                       Text(
                         item.time,
                         style: TextStyle(
-                          color: hasBadge
-                              ? BsTokens.brand
-                              : const Color(0xFF888888),
+                          color:
+                              hasBadge
+                                  ? BsTokens.brand
+                                  : const Color(0xFF888888),
                           fontSize: 12,
                         ),
                       ),
@@ -1094,37 +1218,37 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, constraints) => SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: SizedBox(
-          height: constraints.maxHeight,
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('🔍', style: TextStyle(fontSize: 48)),
-                const SizedBox(height: 12),
-                Text(
-                  query.isEmpty
-                      ? 'אין פריטים'
-                      : 'לא נמצאו תוצאות\nעבור "$query"',
-                  style: const TextStyle(
-                    color: Color(0xFF888888),
-                    fontSize: 15,
-                  ),
-                  textAlign: TextAlign.center,
+      builder:
+          (context, constraints) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: constraints.maxHeight,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🔍', style: TextStyle(fontSize: 48)),
+                    const SizedBox(height: 12),
+                    Text(
+                      query.isEmpty
+                          ? 'אין פריטים'
+                          : 'לא נמצאו תוצאות\nעבור "$query"',
+                      style: const TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 15,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 }
 
 // ─── cart sheet ──────────────────────────────────────────────────────────────
-
 
 // ─── cart view ────────────────────────────────────────────────────────────────
 
@@ -1182,8 +1306,9 @@ class _CartViewState extends ConsumerState<_CartView> {
     final deliveryFee = deliveryFeeFor(delivery);
     final total = cartTotal(subtotal, deliveryFee, vatInclusive: vatInclusive);
 
-    final saveToProject =
-        ref.watch(storeSettingsProvider.select((s) => s.saveCartToProject));
+    final saveToProject = ref.watch(
+      storeSettingsProvider.select((s) => s.saveCartToProject),
+    );
 
     if (smartLines.isEmpty && grouped.isEmpty) {
       return Center(
@@ -1194,14 +1319,19 @@ class _CartViewState extends ConsumerState<_CartView> {
             children: const [
               Text('🛒', style: TextStyle(fontSize: 52)),
               SizedBox(height: 12),
-              Text('הסל ריק',
-                  style: TextStyle(
-                      color: Color(0xFF1A1A1A),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700)),
+              Text(
+                'הסל ריק',
+                style: TextStyle(
+                  color: Color(0xFF1A1A1A),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               SizedBox(height: 4),
-              Text('הוסיפו מוצרים מהקטלוג',
-                  style: TextStyle(color: Color(0xFF888888), fontSize: 13)),
+              Text(
+                'הוסיפו מוצרים מהקטלוג',
+                style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+              ),
             ],
           ),
         ),
@@ -1274,8 +1404,7 @@ class _ProjectSelector extends ConsumerWidget {
                 _ProjectChip(
                   label: p,
                   active: p == selected,
-                  onTap: () =>
-                      ref.read(cartProjectProvider.notifier).state = p,
+                  onTap: () => ref.read(cartProjectProvider.notifier).state = p,
                 ),
                 const SizedBox(width: 8),
               ],
@@ -1308,37 +1437,43 @@ class _ProjectSelector extends ConsumerWidget {
     final controller = TextEditingController();
     showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: const Text('הוספת פרויקט',
-            style: TextStyle(color: Color(0xFF1A1A1A))),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          style: const TextStyle(color: Color(0xFF1A1A1A)),
-          decoration: const InputDecoration(hintText: 'שם הפרויקט'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('ביטול', style: TextStyle(color: Colors.black38)),
+      builder:
+          (ctx) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF),
+            title: const Text(
+              'הוספת פרויקט',
+              style: TextStyle(color: Color(0xFF1A1A1A)),
+            ),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              style: const TextStyle(color: Color(0xFF1A1A1A)),
+              decoration: const InputDecoration(hintText: 'שם הפרויקט'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text(
+                  'ביטול',
+                  style: TextStyle(color: Colors.black38),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  final name = controller.text.trim();
+                  if (name.isEmpty) return;
+                  final notifier = ref.read(storeProjectsProvider.notifier);
+                  if (!notifier.state.contains(name)) {
+                    notifier.state = [...notifier.state, name];
+                  }
+                  ref.read(cartProjectProvider.notifier).state = name;
+                  Navigator.pop(ctx);
+                },
+                style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+                child: const Text('הוסף'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              final name = controller.text.trim();
-              if (name.isEmpty) return;
-              final notifier = ref.read(storeProjectsProvider.notifier);
-              if (!notifier.state.contains(name)) {
-                notifier.state = [...notifier.state, name];
-              }
-              ref.read(cartProjectProvider.notifier).state = name;
-              Navigator.pop(ctx);
-            },
-            style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-            child: const Text('הוסף'),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -1392,9 +1527,7 @@ class _SmartCartRow extends ConsumerWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: BsTokens.brand.withAlpha(60),
-        ),
+        border: Border.all(color: BsTokens.brand.withAlpha(60)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1409,8 +1542,10 @@ class _SmartCartRow extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 alignment: Alignment.center,
-                child: Text(line.productEmoji,
-                    style: const TextStyle(fontSize: 22)),
+                child: Text(
+                  line.productEmoji,
+                  style: const TextStyle(fontSize: 22),
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1438,12 +1573,14 @@ class _SmartCartRow extends ConsumerWidget {
               // Quantity stepper — adjust the real cart line.
               _SmartQtyStepper(
                 qty: line.productQty,
-                onMinus: () => ref
-                    .read(smartCartProvider.notifier)
-                    .setLineQty(index, line.productQty - 1),
-                onPlus: () => ref
-                    .read(smartCartProvider.notifier)
-                    .setLineQty(index, line.productQty + 1),
+                onMinus:
+                    () => ref
+                        .read(smartCartProvider.notifier)
+                        .setLineQty(index, line.productQty - 1),
+                onPlus:
+                    () => ref
+                        .read(smartCartProvider.notifier)
+                        .setLineQty(index, line.productQty + 1),
               ),
               const SizedBox(width: 8),
               Text(
@@ -1455,10 +1592,13 @@ class _SmartCartRow extends ConsumerWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close,
-                    color: Color(0xFF666666), size: 18),
-                onPressed: () =>
-                    ref.read(smartCartProvider.notifier).remove(index),
+                icon: const Icon(
+                  Icons.close,
+                  color: Color(0xFF666666),
+                  size: 18,
+                ),
+                onPressed:
+                    () => ref.read(smartCartProvider.notifier).remove(index),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 visualDensity: VisualDensity.compact,
@@ -1517,13 +1657,13 @@ class _SmartQtyStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget btn(IconData icon, VoidCallback onTap) => InkWell(
-          onTap: onTap,
-          customBorder: const CircleBorder(),
-          child: Padding(
-            padding: const EdgeInsets.all(2),
-            child: Icon(icon, size: 18, color: BsTokens.brand),
-          ),
-        );
+      onTap: onTap,
+      customBorder: const CircleBorder(),
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: Icon(icon, size: 18, color: BsTokens.brand),
+      ),
+    );
     return Container(
       decoration: BoxDecoration(
         color: BsTokens.brand.withAlpha(20),
@@ -1678,10 +1818,7 @@ class _CartItemRow extends ConsumerWidget {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    _StepBtn(
-                      icon: Icons.add,
-                      onTap: () => setQty(qty + 1),
-                    ),
+                    _StepBtn(icon: Icons.add, onTap: () => setQty(qty + 1)),
                   ],
                 ),
               ),
@@ -1736,66 +1873,77 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
     isScrollControlled: true,
     backgroundColor: Colors.white,
     shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18))),
-    builder: (sheetCtx) => Padding(
-      padding: EdgeInsets.only(
-          bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text('לאן לשלוח?',
-              style: TextStyle(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+    ),
+    builder:
+        (sheetCtx) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'לאן לשלוח?',
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1A1A))),
-          const SizedBox(height: 6),
-          const Text(
-              'לא חובה — אפשר לאשר את ההזמנה גם בלי כתובת ולהשלים בהמשך.',
-              style: TextStyle(color: Colors.black54, fontSize: 13)),
-          const SizedBox(height: 16),
-          TextField(
-            controller: ctrl,
-            autofocus: true,
-            textInputAction: TextInputAction.done,
-            decoration: InputDecoration(
-              hintText: 'כתובת / אתר העבודה',
-              filled: true,
-              fillColor: const Color(0xFFF5F5F5),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: TextButton(
-                  onPressed: () => Navigator.pop(sheetCtx),
-                  child: const Text('דלג'),
+                  color: Color(0xFF1A1A1A),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  style: FilledButton.styleFrom(backgroundColor: BsTokens.brand),
-                  onPressed: () {
-                    ref.read(shipToProvider.notifier).state = ctrl.text.trim();
-                    Navigator.pop(sheetCtx);
-                  },
-                  child: const Text('שמירה'),
+              const SizedBox(height: 6),
+              const Text(
+                'לא חובה — אפשר לאשר את ההזמנה גם בלי כתובת ולהשלים בהמשך.',
+                style: TextStyle(color: Colors.black54, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: ctrl,
+                autofocus: true,
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  hintText: 'כתובת / אתר העבודה',
+                  filled: true,
+                  fillColor: const Color(0xFFF5F5F5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(sheetCtx),
+                      child: const Text('דלג'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: BsTokens.brand,
+                      ),
+                      onPressed: () {
+                        ref.read(shipToProvider.notifier).state =
+                            ctrl.text.trim();
+                        Navigator.pop(sheetCtx);
+                      },
+                      child: const Text('שמירה'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
             ],
           ),
-          const SizedBox(height: 16),
-        ],
-      ),
-    ),
+        ),
   );
 }
 
@@ -1823,8 +1971,10 @@ class _DeliverySelector extends ConsumerWidget {
                 child: _DeliveryCard(
                   option: _kDeliveryOptions[i],
                   active: _kDeliveryOptions[i].method == selected,
-                  onTap: () => ref.read(cartDeliveryProvider.notifier).state =
-                      _kDeliveryOptions[i].method,
+                  onTap:
+                      () =>
+                          ref.read(cartDeliveryProvider.notifier).state =
+                              _kDeliveryOptions[i].method,
                 ),
               ),
             ],
@@ -1853,9 +2003,10 @@ class _DeliveryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
         decoration: BoxDecoration(
-          color: active
-              ? BsTokens.brand.withValues(alpha: 0.12)
-              : const Color(0xFFFFFFFF),
+          color:
+              active
+                  ? BsTokens.brand.withValues(alpha: 0.12)
+                  : const Color(0xFFFFFFFF),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: active ? BsTokens.brand : const Color(0xFF333333),
@@ -1877,10 +2028,7 @@ class _DeliveryCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               option.fee == 0 ? 'חינם' : _price(option.fee),
-              style: const TextStyle(
-                color: Color(0xFF888888),
-                fontSize: 11,
-              ),
+              style: const TextStyle(color: Color(0xFF888888), fontSize: 11),
             ),
           ],
         ),
@@ -1994,19 +2142,17 @@ class _SummaryLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = bold
-        ? const TextStyle(
-            color: Color(0xFF1A1A1A),
-            fontSize: 15,
-            fontWeight: FontWeight.w800,
-          )
-        : const TextStyle(color: Color(0xFF888888), fontSize: 13);
+    final style =
+        bold
+            ? const TextStyle(
+              color: Color(0xFF1A1A1A),
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            )
+            : const TextStyle(color: Color(0xFF888888), fontSize: 13);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: style),
-        Text(value, style: style),
-      ],
+      children: [Text(label, style: style), Text(value, style: style)],
     );
   }
 }
@@ -2036,9 +2182,10 @@ class _PaymentSelector extends ConsumerWidget {
                 _PaymentChip(
                   option: _kPaymentOptions[i],
                   active: _kPaymentOptions[i].method == selected,
-                  onTap: () =>
-                      ref.read(cartPaymentProvider.notifier).state =
-                          _kPaymentOptions[i].method,
+                  onTap:
+                      () =>
+                          ref.read(cartPaymentProvider.notifier).state =
+                              _kPaymentOptions[i].method,
                 ),
               ],
             ],
@@ -2104,8 +2251,7 @@ class _CheckoutButton extends ConsumerWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: BsTokens.brand,
         foregroundColor: Color(0xFFFFFFFF),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         padding: const EdgeInsets.symmetric(vertical: 16),
       ),
       onPressed: () => _checkout(context, ref),
@@ -2127,27 +2273,30 @@ class _CheckoutButton extends ConsumerWidget {
     if (cartNeedsLargeConfirm(total, s)) {
       final ok = await showDialog<bool>(
         context: context,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: const Color(0xFFFFFFFF),
-          title: const Text('אישור הזמנה גדולה',
-              style: TextStyle(color: Color(0xFF1A1A1A))),
-          content: Text(
-            'סכום ההזמנה ${_price(total)} חורג מהסף שהגדרת '
-            '(${_price(s.largeOrderThreshold)}). להמשיך?',
-            style: const TextStyle(color: Colors.black54),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('ביטול'),
+        builder:
+            (ctx) => AlertDialog(
+              backgroundColor: const Color(0xFFFFFFFF),
+              title: const Text(
+                'אישור הזמנה גדולה',
+                style: TextStyle(color: Color(0xFF1A1A1A)),
+              ),
+              content: Text(
+                'סכום ההזמנה ${_price(total)} חורג מהסף שהגדרת '
+                '(${_price(s.largeOrderThreshold)}). להמשיך?',
+                style: const TextStyle(color: Colors.black54),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('ביטול'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+                  child: const Text('אשר והמשך'),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-              child: const Text('אשר והמשך'),
-            ),
-          ],
-        ),
       );
       if (ok != true || !context.mounted) return;
     }
@@ -2181,9 +2330,8 @@ class _CheckoutSheet extends ConsumerWidget {
 
     final deliveryLabel =
         _kDeliveryOptions.firstWhere((d) => d.method == delivery).label;
-    final paymentLabel = _kPaymentOptions
-        .firstWhere((p) => p.method == payment)
-        .label;
+    final paymentLabel =
+        _kPaymentOptions.firstWhere((p) => p.method == payment).label;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -2233,7 +2381,10 @@ class _CheckoutSheet extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text(
                     project,
-                    style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+                    style: const TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   const Divider(color: Color(0xFFEEEEEE), height: 1),
@@ -2247,8 +2398,10 @@ class _CheckoutSheet extends ConsumerWidget {
                       ),
                       Text(
                         deliveryLabel,
-                        style:
-                            const TextStyle(color: Color(0xFF1A1A1A), fontSize: 13),
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -2262,8 +2415,10 @@ class _CheckoutSheet extends ConsumerWidget {
                       ),
                       Text(
                         paymentLabel,
-                        style:
-                            const TextStyle(color: Color(0xFF1A1A1A), fontSize: 13),
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -2353,60 +2508,70 @@ class _CartActionsRow extends ConsumerWidget {
     final controller = TextEditingController();
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: const Text(
-          'שמור סל כרשימה',
-          style: TextStyle(color: Color(0xFF1A1A1A)),
-        ),
-        content: TextField(
-          controller: controller,
-          style: const TextStyle(color: Color(0xFF1A1A1A)),
-          decoration: InputDecoration(
-            hintText: 'שם הרשימה',
-            hintStyle: const TextStyle(color: Color(0xFF666666)),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.black12),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF),
+            title: const Text(
+              'שמור סל כרשימה',
+              style: TextStyle(color: Color(0xFF1A1A1A)),
             ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.blue),
+            content: TextField(
+              controller: controller,
+              style: const TextStyle(color: Color(0xFF1A1A1A)),
+              decoration: InputDecoration(
+                hintText: 'שם הרשימה',
+                hintStyle: const TextStyle(color: Color(0xFF666666)),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black12),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue),
+                ),
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'ביטול',
+                  style: TextStyle(color: Colors.black38),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (controller.text.trim().isEmpty) {
+                    showToast(context, 'שם הרשימה לא יכול להיות ריק');
+                    return;
+                  }
+                  final lines = ref.read(smartCartProvider);
+                  if (lines.isEmpty) {
+                    showToast(context, 'הסל ריק');
+                    return;
+                  }
+                  final items =
+                      lines
+                          .map(
+                            (l) => (
+                              emoji: l.productEmoji,
+                              name: l.productName,
+                              qty: l.productQty,
+                              price: '₪${l.total}',
+                            ),
+                          )
+                          .toList();
+                  ref
+                      .read(cartListsProvider.notifier)
+                      .saveCart(controller.text.trim(), items);
+                  Navigator.pop(context);
+                  showToast(context, 'הרשימה נשמרה בהצלחה');
+                },
+                child: const Text(
+                  'שמור',
+                  style: TextStyle(color: BsTokens.brand),
+                ),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('ביטול', style: TextStyle(color: Colors.black38)),
-          ),
-          TextButton(
-            onPressed: () {
-              if (controller.text.trim().isEmpty) {
-                showToast(context, 'שם הרשימה לא יכול להיות ריק');
-                return;
-              }
-              final lines = ref.read(smartCartProvider);
-              if (lines.isEmpty) {
-                showToast(context, 'הסל ריק');
-                return;
-              }
-              final items = lines
-                  .map((l) => (
-                        emoji: l.productEmoji,
-                        name: l.productName,
-                        qty: l.productQty,
-                        price: '₪${l.total}',
-                      ))
-                  .toList();
-              ref
-                  .read(cartListsProvider.notifier)
-                  .saveCart(controller.text.trim(), items);
-              Navigator.pop(context);
-              showToast(context, 'הרשימה נשמרה בהצלחה');
-            },
-            child: const Text('שמור', style: TextStyle(color: BsTokens.brand)),
-          ),
-        ],
-      ),
     );
   }
 
@@ -2429,8 +2594,10 @@ class _CartActionsRow extends ConsumerWidget {
               return;
             }
             final items = lines
-                .map((l) =>
-                    '${l.productEmoji} ${l.productName} × ${l.productQty} = ₪${l.total}')
+                .map(
+                  (l) =>
+                      '${l.productEmoji} ${l.productName} × ${l.productQty} = ₪${l.total}',
+                )
                 .join('\n');
             showToast(
               context,
@@ -2478,15 +2645,16 @@ class _ServicesGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(storeSearchQueryProvider).trim().toLowerCase();
-    final services = query.isEmpty
-        ? _kServiceItems
-        : _kServiceItems
-            .where(
-              (s) =>
-                  s.title.toLowerCase().contains(query) ||
-                  s.preview.toLowerCase().contains(query),
-            )
-            .toList();
+    final services =
+        query.isEmpty
+            ? _kServiceItems
+            : _kServiceItems
+                .where(
+                  (s) =>
+                      s.title.toLowerCase().contains(query) ||
+                      s.preview.toLowerCase().contains(query),
+                )
+                .toList();
 
     if (services.isEmpty) {
       return _EmptyState(query: query);
@@ -2495,11 +2663,9 @@ class _ServicesGrid extends ConsumerWidget {
     return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: services.length,
-      separatorBuilder: (_, __) => const Divider(
-        height: 1,
-        indent: 76,
-        color: Color(0xFFF5F5F5),
-      ),
+      separatorBuilder:
+          (_, __) =>
+              const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
       itemBuilder: (context, i) {
         final idx = _kServiceByEmoji[services[i].emoji] ?? i;
         return _StoreRow(
@@ -2517,51 +2683,51 @@ class _ServicesGrid extends ConsumerWidget {
 typedef _Service = ({String emoji, String title, String sub});
 
 const List<_Service> _kServices = [
-  (emoji: '🔧', title: 'השכרת כלים',     sub: '2 כלים פעילים'),
-  (emoji: '💰', title: 'פקדונות',         sub: 'פיקדון ₪350'),
-  (emoji: '↩️', title: 'החזרה חדשה',     sub: 'בקשה #567'),
-  (emoji: '📨', title: 'מכרז ספקים',     sub: '3 הצעות חדשות'),
+  (emoji: '🔧', title: 'השכרת כלים', sub: '2 כלים פעילים'),
+  (emoji: '💰', title: 'פקדונות', sub: 'פיקדון ₪350'),
+  (emoji: '↩️', title: 'החזרה חדשה', sub: 'בקשה #567'),
+  (emoji: '📨', title: 'מכרז ספקים', sub: '3 הצעות חדשות'),
   (emoji: '🧪', title: 'גיליונות בטיחות', sub: '5 גיליונות'),
-  (emoji: '📊', title: 'השוואת מחירים',  sub: '4 ספקים עודכנו'),
+  (emoji: '📊', title: 'השוואת מחירים', sub: '4 ספקים עודכנו'),
 ];
 
 const _kServiceSheets = [
   // 🔧 השכרת כלים
   [
-    (emoji: '🔨', label: 'מקדחה',        sub: 'מושכרת עד 30.5'),
-    (emoji: '🪚', label: 'משור חשמלי',   sub: 'מושכר עד 28.5'),
-    (emoji: '➕', label: 'הוסף כלי',     sub: ''),
+    (emoji: '🔨', label: 'מקדחה', sub: 'מושכרת עד 30.5'),
+    (emoji: '🪚', label: 'משור חשמלי', sub: 'מושכר עד 28.5'),
+    (emoji: '➕', label: 'הוסף כלי', sub: ''),
   ],
   // 💰 פקדונות
   [
-    (emoji: '💳', label: 'פיקדון #123',  sub: '₪350 · פעיל'),
-    (emoji: '↩️', label: 'בקשת החזר',   sub: ''),
+    (emoji: '💳', label: 'פיקדון #123', sub: '₪350 · פעיל'),
+    (emoji: '↩️', label: 'בקשת החזר', sub: ''),
   ],
   // ↩️ החזרה חדשה
   [
-    (emoji: '📋', label: 'בקשה #567',    sub: 'ממתינה לאישור'),
+    (emoji: '📋', label: 'בקשה #567', sub: 'ממתינה לאישור'),
     (emoji: '📦', label: 'פריטים להחזרה', sub: '3 יחידות'),
-    (emoji: '🚛', label: 'תיאום איסוף',  sub: ''),
+    (emoji: '🚛', label: 'תיאום איסוף', sub: ''),
   ],
   // 📨 מכרז ספקים
   [
-    (emoji: '🏪', label: 'ספק A',        sub: '₪4,200 · הצעה חדשה'),
-    (emoji: '🏪', label: 'ספק B',        sub: '₪3,980 · הצעה חדשה'),
-    (emoji: '🏪', label: 'ספק C',        sub: '₪4,500 · הצעה חדשה'),
+    (emoji: '🏪', label: 'ספק A', sub: '₪4,200 · הצעה חדשה'),
+    (emoji: '🏪', label: 'ספק B', sub: '₪3,980 · הצעה חדשה'),
+    (emoji: '🏪', label: 'ספק C', sub: '₪4,500 · הצעה חדשה'),
   ],
   // 🧪 גיליונות בטיחות
   [
-    (emoji: '📄', label: 'ברזל 12mm',    sub: 'עודכן 20.5'),
-    (emoji: '📄', label: 'צבע אפוקסי',  sub: 'עודכן 18.5'),
-    (emoji: '📄', label: 'דבק אפוקסי',  sub: 'עודכן 15.5'),
-    (emoji: '📄', label: 'ממס ניקוי',   sub: 'עודכן 12.5'),
-    (emoji: '📄', label: 'בטון יצוק',   sub: 'עודכן 10.5'),
+    (emoji: '📄', label: 'ברזל 12mm', sub: 'עודכן 20.5'),
+    (emoji: '📄', label: 'צבע אפוקסי', sub: 'עודכן 18.5'),
+    (emoji: '📄', label: 'דבק אפוקסי', sub: 'עודכן 15.5'),
+    (emoji: '📄', label: 'ממס ניקוי', sub: 'עודכן 12.5'),
+    (emoji: '📄', label: 'בטון יצוק', sub: 'עודכן 10.5'),
   ],
   // 📊 השוואת מחירים
   [
-    (emoji: '🏪', label: 'רוט',           sub: 'ברזל 12mm · ₪4.20'),
-    (emoji: '🏪', label: 'מ.א. שלמה',    sub: 'ברזל 12mm · ₪3.85'),
-    (emoji: '🏪', label: 'אחים כהן',     sub: 'ברזל 12mm · ₪4.10'),
+    (emoji: '🏪', label: 'רוט', sub: 'ברזל 12mm · ₪4.20'),
+    (emoji: '🏪', label: 'מ.א. שלמה', sub: 'ברזל 12mm · ₪3.85'),
+    (emoji: '🏪', label: 'אחים כהן', sub: 'ברזל 12mm · ₪4.10'),
     (emoji: '🏪', label: 'בני ברק מבנים', sub: 'ברזל 12mm · ₪3.95'),
   ],
 ];
@@ -2607,28 +2773,28 @@ class _ServiceSheet extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: Text(
               svc.sub,
-              style:
-                  const TextStyle(color: Color(0xFF888888), fontSize: 13),
+              style: const TextStyle(color: Color(0xFF888888), fontSize: 13),
             ),
           ),
           const SizedBox(height: 12),
           const Divider(color: Color(0xFFF5F5F5), height: 1),
           ...rows.map(
             (r) => ListTile(
-              leading:
-                  Text(r.emoji, style: const TextStyle(fontSize: 22)),
-              title: Text(r.label,
-                  style:
-                      const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15)),
-              subtitle: r.sub.isEmpty
-                  ? null
-                  : Text(
-                      r.sub,
-                      style: const TextStyle(
-                        color: Color(0xFF888888),
-                        fontSize: 12,
+              leading: Text(r.emoji, style: const TextStyle(fontSize: 22)),
+              title: Text(
+                r.label,
+                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+              ),
+              subtitle:
+                  r.sub.isEmpty
+                      ? null
+                      : Text(
+                        r.sub,
+                        style: const TextStyle(
+                          color: Color(0xFF888888),
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
               onTap: () {
                 Navigator.pop(context);
                 showToast(context, '${r.label} — בבנייה');
@@ -2667,47 +2833,69 @@ class _MiniPill extends StatelessWidget {
 
 // ─── orders data ─────────────────────────────────────────────────────────────
 
-typedef _Order = ({
-  String id,
-  String items,
-  String total,
-  String stage,
-  String stageLabel,
-  String time,
-  Color stageColor,
-});
+typedef _Order =
+    ({
+      String id,
+      String items,
+      String total,
+      String stage,
+      String stageLabel,
+      String time,
+      Color stageColor,
+    });
 
 const List<_Order> _kOrders = [
   (
-    id: 'BS-1234', items: '12 פריטים', total: '₪5,420',
-    stage: 'transit',    stageLabel: 'בדרך 🚛',
-    time: '24.5, 14:00', stageColor: Color(0xFF4CAF50),
+    id: 'BS-1234',
+    items: '12 פריטים',
+    total: '₪5,420',
+    stage: 'transit',
+    stageLabel: 'בדרך 🚛',
+    time: '24.5, 14:00',
+    stageColor: Color(0xFF4CAF50),
   ),
   (
-    id: 'BS-1221', items: '5 פריטים',  total: '₪1,890',
-    stage: 'ready',      stageLabel: 'מוכן 📦',
-    time: '24.5, 09:30', stageColor: Color(0xFF2196F3),
+    id: 'BS-1221',
+    items: '5 פריטים',
+    total: '₪1,890',
+    stage: 'ready',
+    stageLabel: 'מוכן 📦',
+    time: '24.5, 09:30',
+    stageColor: Color(0xFF2196F3),
   ),
   (
-    id: 'BS-1198', items: '3 פריטים',  total: '₪630',
-    stage: 'preparing',  stageLabel: 'בהכנה 🔧',
-    time: '23.5',        stageColor: Color(0xFFFF9800),
+    id: 'BS-1198',
+    items: '3 פריטים',
+    total: '₪630',
+    stage: 'preparing',
+    stageLabel: 'בהכנה 🔧',
+    time: '23.5',
+    stageColor: Color(0xFFFF9800),
   ),
   (
-    id: 'BS-1171', items: '8 פריטים',  total: '₪2,240',
-    stage: 'delivered',  stageLabel: 'הסתיימה ✓',
-    time: '21.5',        stageColor: Color(0xFF888888),
+    id: 'BS-1171',
+    items: '8 פריטים',
+    total: '₪2,240',
+    stage: 'delivered',
+    stageLabel: 'הסתיימה ✓',
+    time: '21.5',
+    stageColor: Color(0xFF888888),
   ),
   (
-    id: 'BS-1155', items: '2 פריטים',  total: '₪310',
-    stage: 'delivered',  stageLabel: 'הסתיימה ✓',
-    time: '19.5',        stageColor: Color(0xFF888888),
+    id: 'BS-1155',
+    items: '2 פריטים',
+    total: '₪310',
+    stage: 'delivered',
+    stageLabel: 'הסתיימה ✓',
+    time: '19.5',
+    stageColor: Color(0xFF888888),
   ),
 ];
 
 /// Live orders — seeded from [_kOrders]; confirming checkout prepends a new one.
-final storeOrdersProvider =
-    StateProvider<List<_Order>>((_) => List.of(_kOrders));
+final storeOrdersProvider = StateProvider<List<_Order>>(
+  (_) => List.of(_kOrders),
+);
 
 // ─── orders list ──────────────────────────────────────────────────────────────
 
@@ -2718,16 +2906,17 @@ class _OrdersList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(storeSearchQueryProvider).trim().toLowerCase();
     final allOrders = ref.watch(storeOrdersProvider);
-    final orders = query.isEmpty
-        ? allOrders
-        : allOrders
-            .where(
-              (o) =>
-                  o.id.toLowerCase().contains(query) ||
-                  o.items.toLowerCase().contains(query) ||
-                  o.stageLabel.toLowerCase().contains(query),
-            )
-            .toList();
+    final orders =
+        query.isEmpty
+            ? allOrders
+            : allOrders
+                .where(
+                  (o) =>
+                      o.id.toLowerCase().contains(query) ||
+                      o.items.toLowerCase().contains(query) ||
+                      o.stageLabel.toLowerCase().contains(query),
+                )
+                .toList();
 
     if (orders.isEmpty) {
       return _EmptyState(query: query);
@@ -2736,11 +2925,9 @@ class _OrdersList extends ConsumerWidget {
     return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: orders.length,
-      separatorBuilder: (_, __) => const Divider(
-        height: 1,
-        indent: 76,
-        color: Color(0xFFF5F5F5),
-      ),
+      separatorBuilder:
+          (_, __) =>
+              const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
       itemBuilder: (context, i) => _OrderRow(order: orders[i]),
     );
   }
@@ -2753,14 +2940,16 @@ class _OrderRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: const Color(0xFFFFFFFF),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        builder: (_) => _OrderSheet(order: order),
-      ),
+      onTap:
+          () => showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: const Color(0xFFFFFFFF),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (_) => _OrderSheet(order: order),
+          ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
@@ -2854,27 +3043,27 @@ typedef _OrderItem = ({String name, String qty, String price});
 
 const Map<String, List<_OrderItem>> _kOrderDetails = {
   'BS-1234': [
-    (name: 'ברזל 12mm',  qty: "200 יח'", price: '₪840'),
-    (name: 'בטון B30',   qty: '5 מ"ק',   price: '₪2,200'),
-    (name: 'קורות עץ',  qty: "30 יח'",  price: '₪1,380'),
+    (name: 'ברזל 12mm', qty: "200 יח'", price: '₪840'),
+    (name: 'בטון B30', qty: '5 מ"ק', price: '₪2,200'),
+    (name: 'קורות עץ', qty: "30 יח'", price: '₪1,380'),
     (name: 'ברגים 10cm', qty: "500 יח'", price: '₪1,000'),
   ],
   'BS-1221': [
-    (name: 'צבע לבן',      qty: "20 ל'",  price: '₪640'),
-    (name: 'מברשות צבע',  qty: "10 יח'", price: '₪350'),
-    (name: 'סיר בלויד',   qty: "5 יח'",  price: '₪900'),
+    (name: 'צבע לבן', qty: "20 ל'", price: '₪640'),
+    (name: 'מברשות צבע', qty: "10 יח'", price: '₪350'),
+    (name: 'סיר בלויד', qty: "5 יח'", price: '₪900'),
   ],
   'BS-1198': [
     (name: 'מסמרים 8cm', qty: "1000 יח'", price: '₪420'),
-    (name: 'כוכביות',    qty: "200 יח'",  price: '₪210'),
+    (name: 'כוכביות', qty: "200 יח'", price: '₪210'),
   ],
   'BS-1171': [
-    (name: 'אריחים 60x60', qty: "80 יח'",  price: '₪1,600'),
-    (name: 'דבק אריחים',  qty: "10 שק'",  price: '₪640'),
+    (name: 'אריחים 60x60', qty: "80 יח'", price: '₪1,600'),
+    (name: 'דבק אריחים', qty: "10 שק'", price: '₪640'),
   ],
   'BS-1155': [
-    (name: 'נורות לד',   qty: "10 יח'", price: '₪180'),
-    (name: 'שקע חשמל',  qty: "5 יח'",  price: '₪130'),
+    (name: 'נורות לד', qty: "10 יח'", price: '₪180'),
+    (name: 'שקע חשמל', qty: "5 יח'", price: '₪130'),
   ],
 };
 
@@ -2887,145 +3076,146 @@ class _OrderSheet extends StatelessWidget {
     final items = _kOrderDetails[order.id] ?? [];
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(2),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.black12,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'הזמנה ${order.id}',
-                  style: const TextStyle(
-                    color: Color(0xFF1A1A1A),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: order.stageColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: order.stageColor.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Text(
-                  order.stageLabel,
-                  style: TextStyle(
-                    color: order.stageColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${order.items} · ${order.total} · ${order.time}',
-            style:
-                const TextStyle(color: Color(0xFF888888), fontSize: 13),
-          ),
-          const SizedBox(height: 12),
-          const Divider(color: Color(0xFFF5F5F5), height: 1),
-          ...items.map(
-            (item) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                children: [
-                  const Text('📦', style: TextStyle(fontSize: 18)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      item.name,
-                      style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    item.qty,
-                    style: const TextStyle(
-                      color: Color(0xFF888888),
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    item.price,
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'הזמנה ${order.id}',
                     style: const TextStyle(
                       color: Color(0xFF1A1A1A),
-                      fontSize: 14,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: order.stageColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: order.stageColor.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Text(
+                    order.stageLabel,
+                    style: TextStyle(
+                      color: order.stageColor,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${order.items} · ${order.total} · ${order.time}',
+              style: const TextStyle(color: Color(0xFF888888), fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            const Divider(color: Color(0xFFF5F5F5), height: 1),
+            ...items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    const Text('📦', style: TextStyle(fontSize: 18)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        item.name,
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      item.qty,
+                      style: const TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      item.price,
+                      style: const TextStyle(
+                        color: Color(0xFF1A1A1A),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const Divider(color: Color(0xFFF5F5F5), height: 1),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'סה"כ',
+            const Divider(color: Color(0xFFF5F5F5), height: 1),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'סה"כ',
+                  style: TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  order.total,
+                  style: const TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            const Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '🚛 מעקב הזמנה',
                 style: TextStyle(
                   color: Color(0xFF1A1A1A),
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              Text(
-                order.total,
-                style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              '🚛 מעקב הזמנה',
-              style: TextStyle(
-                color: Color(0xFF1A1A1A),
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
             ),
-          ),
-          const SizedBox(height: 14),
-          _OrderTimeline(stage: order.stage),
-          const SizedBox(height: 18),
-          OutlinedButton.icon(
-            onPressed: () => showToast(
-              context,
-              'סריקת תעודת-משלוח (OCR) — בקרוב',
+            const SizedBox(height: 14),
+            _OrderTimeline(stage: order.stage),
+            const SizedBox(height: 18),
+            OutlinedButton.icon(
+              onPressed:
+                  () => showToast(context, 'סריקת תעודת-משלוח (OCR) — בקרוב'),
+              icon: const Text('📄', style: TextStyle(fontSize: 16)),
+              label: const Text('סרוק תעודת-משלוח'),
             ),
-            icon: const Text('📄', style: TextStyle(fontSize: 16)),
-            label: const Text('סרוק תעודת-משלוח'),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -3058,9 +3248,7 @@ class _OrderTimeline extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 16),
                 child: Container(
                   height: 2,
-                  color: i <= cur
-                      ? BsTokens.brand
-                      : const Color(0xFFE0E0E0),
+                  color: i <= cur ? BsTokens.brand : const Color(0xFFE0E0E0),
                 ),
               ),
             ),

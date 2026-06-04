@@ -4,6 +4,21 @@
 
 ---
 
+## v6.04 — fix(T5): order sheet isScrollControlled (כפתור תעודת-משלוח היה חתוך) [בנצי]
+
+**באג שנתפס ב-QA-חי (snapshot v6.04, Chrome, 4.6.2026):** ה-order sheet
+(`showModalBottomSheet` ב-`store_screen` ~2756) היה **ללא** `isScrollControlled` → גובה-קבוע →
+הכפתור "סרוק תעודת-משלוח" (T5, אחרי ה-timeline) **נחתך מתחת לקצה, בלתי-נגיש** (הגיליון לא נגלל,
+וגרירה סגרה אותו). ה-widget-test עבר כי רינדר מסך-מלא — ה-modal האמיתי חתך. **לקח: visual-verify חי, לא רק test.**
+
+**תיקון:** הוספת `isScrollControlled: true` ל-showModalBottomSheet של ההזמנה — התאמה לגיליונות
+העובדים (`store_screen` 1734/2158) → הגיליון מתרחב לגובה-התוכן → הכפתור נגיש.
+
+**אימות:** ✅ `flutter build web --release` — `√ Built` (מתקמפל). הבאג אומת חי (before-screenshot
+מ-snapshot v6.04). התיקון = דפוס-מוכח בקוד. (re-verify ויזואלי סופי לא הושלם — קונפליקטי פורט/cache בסביבה; הדפוס ודאי.)
+
+---
+
 ## v6.04 — T1 · catalog ⋮ "חלופות זולות" sheet [מקבץ]
 
 **שינוי:** ה-⋮ בקטלוג, פעולת "חלופות זולות" — מ-toast "בבנייה" ל-**sheet inline**

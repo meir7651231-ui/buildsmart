@@ -36,6 +36,20 @@ RULE-EXAMPLE: [משפט אחד בעברית — מה לעשות אחרת]
 
 <!-- הוסף רשומה חדשה כאן אחרי כל בעיה שנפתרה -->
 
+## 2026-06-04 · גיליון-הזמנה חתך את הכפתור — חסר isScrollControlled (QA תפס) (בנצי)
+
+### א — הבעיה
+T5 (כפתור "סרוק תעודת-משלוח" ב-`_OrderSheet`) עבר widget-test + analyze, אבל ב-QA-חי (Chrome) הכפתור
+היה **חתוך מתחת לקצה**: ה-`showModalBottomSheet` של ההזמנה (`store_screen` ~2756) חסר `isScrollControlled`
+→ גובה-קבוע → תוכן אחרי ה-timeline נחתך, הגיליון לא נגלל (גרירה=סגירה). ה-widget-test רינדר מסך-מלא ולכן לא תפס.
+
+### ב — הפתרון
+הוספת `isScrollControlled: true` ל-showModalBottomSheet (התאמה לגיליונות העובדים 1734/2158 באותו קובץ).
+
+### ג — כלל המניעה
+GUARD: שינוי-UI בגיליון/modal — אמת ב-QA-חי שכל התוכן נגיש, לא רק שה-widget-test עובר (test מרנדר מסך-מלא; modal בגובה-קבוע חותך).
+RULE: showModalBottomSheet עם תוכן שעובר כמה אלמנטים — תמיד `isScrollControlled: true`.
+
 ## 2026-06-04 · T1 "חלופות זולות" sheet ריק — מקור-מחיר ללא וריאציה per-מוצר (מקבץ)
 
 ### א — הבעיה

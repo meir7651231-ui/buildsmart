@@ -212,7 +212,7 @@ Resets on department open + clear. Guarded by `departments_test`.
 | summary chips (פריטים בסל / הזמנות פתוחות / הצעות ספקים) | derived live: `cartItemCount` (cart+smart lines), `isOrderOpen` over `_kOrders`, offers single-sourced from the מכרז ספקים row badge | ✅ |
 | לאן לשלוח (Benzi #4) | **one-time** non-binding popup `openShipToSheet` (TextField + דלג/שמירה), auto-opened by `home_shell`'s `smartCartProvider` listener on the **first product add** (cart 0→1) — NOT at checkout. Guard `shipToPromptedProvider` (default true for tests; seeded in `main()` via `loadShipToPrompted`, persisted via `saveShipToPrompted`). Address → `shipToProvider`. Guarded by `shipto_prompt_test` | ✅ |
 | כתובות/חשבוניות/ספקים/השכרה/אחריות/ביומטרי/אשראי-יומי | — | ⛔ server/data |
-| ההזמנות שלי → גיליון-הזמנה (T5) | מעקב-סטטוס חי (`_OrderTimeline` · 4 stages) + כפתור "📄 סרוק תעודת-משלוח" → toast (OCR=stub, §9d) | ✅ |
+| ההזמנות שלי → גיליון-הזמנה (T5) | מעקב-סטטוס חי (`_OrderTimeline` · 4 stages) + כפתור "📄 סרוק תעודת-משלוח" → toast (OCR=stub, §9d). Sheet `isScrollControlled` (תיקון QA — הכפתור היה חתוך מתחת לקצה) | ✅ |
 
 ## Install Studio (`install_studio_screen.dart` → `logic/install_engine.dart`)
 
