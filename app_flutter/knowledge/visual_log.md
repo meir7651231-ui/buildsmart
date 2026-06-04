@@ -4,6 +4,26 @@
 
 ---
 
+## v6.11 — 100% PDF-parity coverage לכל 3 המותגים (gate 117 closeout)
+
+**שינוי:** הרחבת ה-parity tests של פולירול וחוליות מ-20+13 מדגם ל-**snapshot מלא**
+(774 + 170 = 944 SKUs). ה-snapshot נוצר מ-runtime dump של `kPolyrollCatalog`/
+`kHuliotCatalog` כך שכל מק"ט נכלל אוטומטית. הסקירה הוויזואלית על 13 עמודים-מדגם
+(8 פולירול + 5 חוליות) הראתה 97/97 התאמה ל-PDF — ה-snapshot נועל את המצב הזה.
+
+**ארבעת הטסטים בכל parity:**
+1. snapshot SKUs קיימים ב-catalog.
+2. catalog SKUs כולם ב-snapshot (תופס "תוספות שקטות").
+3. nameHe + page תואמים.
+4. brand נכון לכל מוצר.
+
+**אימות:**
+- ✅ `flutter test` — 1435/1435 (אפס regressions).
+- ✅ `flutter analyze` — 0 errors.
+- ✅ mutation_verify: typo בשם → "snapshot drift (1)" אדום ✅; ביטול → ירוק ✅.
+
+---
+
 ## v6.10 — PDF-parity tests for Polyroll + Huliot (gate 117 closeout)
 
 **שינוי:** טסטים חדשים שאוכפים שהדאטה של פולירול וחוליות תואמת לקטלוגים המקוריים

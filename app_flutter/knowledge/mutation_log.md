@@ -26,6 +26,16 @@
 - ביטול → ירוק ✅ — All tests passed.
 - מסקנה: הבדיקה חזקה — תופסת היפוך של לוגיקת-הסינון המרכזית (זול↔יקר), לא רק קיום פלט.
 
+## gate 117 closeout (v6.11) — full-snapshot parity לפולירול + חוליות — 2026-06-04
+
+- **קבצים:** `test/_polyroll_snapshot.g.dart` (774) · `test/_huliot_snapshot.g.dart` (170).
+- **מה עושים:** snapshot lock על כל nameHe+page של כל מק"טי הקטלוג.
+- תקלה שהוזרקה (פולירול): `'צינור PPR אספקת מים 20'` → `'…אספקתX…'` (95016002).
+  תוצאה: `Polyroll snapshot drift (1)` אדום ✅; ביטול → ירוק ✅.
+- תקלה שהוזרקה (חוליות): `'ברך 15° צד אחד חלק 40'` → `'ברך 15X…'` (70041150).
+  תוצאה: `Huliot snapshot drift (1)` אדום ✅; ביטול → ירוק ✅.
+- מסקנה: ה-snapshots תופסים שינוי-תו-אחד בכל מ-944 המק"טים.
+
 ## gate 117 closeout — polyroll_pdf_parity_test — 2026-06-04
 
 - **קובץ:** `test/polyroll_pdf_parity_test.dart` (חדש) — 20 SKUs מ-`kPolyrollCatalog`.

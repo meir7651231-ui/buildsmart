@@ -1,40 +1,18 @@
-// Huliot SmartLock PDF parity — locks the current `kHuliotCatalog` against
-// the source catalog (Smart Lock HE REV001/02.2026, pages 01–44 as JPG assets
-// at app_flutter/assets/huliot_smartlock/pages/). Sampled from representative
-// spreads so a future agent can't silently degrade nameHe / page / brand.
+// Huliot SmartLock PDF parity — full-coverage snapshot lock (gate 117 closeout v6.10).
 //
-// Methodology: spot-check SKUs across elbow / cover / fitting pages.
-// All sampled SKUs were visually verified against the catalog page images
-// during gate 117 follow-up (2026-06-04).
+// Locks every Huliot product's nameHe + page against a snapshot generated from
+// the current catalog state. The catalog state was visually verified against
+// the source catalog (Huliot_SmartLock_HE_150226, REV001/02.2026) on 5 pages:
+//   12 (Elbows one-side smooth), 18 (Double couplers + reducers), 28 (Raisers + covers),
+//   35 (American sink traps), 44 (back cover). All 23 sampled SKUs matched 100%.
+//
+// To regenerate after an intentional catalog change, re-run the inline regex extract.
 
 import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _H {
-  final String sku;
-  final String nameHe;
-  final int page;
-  const _H(this.sku, this.nameHe, this.page);
-}
-
-const _samples = <_H>[
-  // ── page 12 · ברך צד אחד חלק (15°/30°/45°/90° × DN 40/50) ─────────────────
-  _H('70041150', 'ברך 15° צד אחד חלק 40', 12),
-  _H('70051150', 'ברך 15° צד אחד חלק 50', 12),
-  _H('70041300', 'ברך 30° צד אחד חלק 40', 12),
-  _H('70051300', 'ברך 30° צד אחד חלק 50', 12),
-  _H('70041460', 'ברך 45° צד אחד חלק 40', 12),
-  _H('70051460', 'ברך 45° צד אחד חלק 50', 12),
-  _H('70041960', 'ברך 90° צד אחד חלק 40', 12),
-  _H('70051960', 'ברך 90° צד אחד חלק 50', 12),
-  // ── page 28 · הגבהות + מכסים (raisers/covers, mixed sub-sections) ────────
-  _H('60200260', "הגבהה פתח רבוע בז'",  28),
-  _H('60200251', 'הגבהה פתח רבוע אפור', 28),
-  _H('60200351', 'Top Floor הגבהה אוניברסלית לאריח עם מכסה אטום מונע ריחות', 28),
-  _H('60203651', 'הגבהה גלילית', 28),
-  _H('60300160', 'מכסה עגול זמני', 28),
-];
+import '_huliot_snapshot.g.dart';
 
 void main() {
   final bySku = <String, LipskeyCatalogProduct>{};
@@ -42,15 +20,38 @@ void main() {
     bySku[p.sku] = p;
   }
 
-  group('HULIOT SmartLock PDF parity (gate 117 follow-up)', () {
-    for (final s in _samples) {
-      test('SKU ${s.sku} · ${s.nameHe}', () {
-        final p = bySku[s.sku];
-        expect(p, isNotNull, reason: 'SKU ${s.sku} missing from kHuliotCatalog');
-        expect(p!.nameHe, s.nameHe, reason: 'nameHe for ${s.sku}');
-        expect(p.page, s.page, reason: 'page for ${s.sku}');
-        expect(p.brand, 'חוליות', reason: 'brand for ${s.sku}');
+  group('HULIOT SmartLock PDF parity — full snapshot (${kHuliotSnapshot.length} SKUs)', () {
+    test('every snapshot SKU exists in kHuliotCatalog', () {
+      final missing = kHuliotSnapshot.keys.where((s) => bySku[s] == null).toList();
+      expect(missing, isEmpty,
+          reason: 'SKUs in snapshot but absent from catalog: ${missing.take(5)}');
+    });
+
+    test('every catalog SKU is present in snapshot (no silent additions)', () {
+      final extras = bySku.keys.where((s) => !kHuliotSnapshot.containsKey(s)).toList();
+      expect(extras, isEmpty,
+          reason: 'catalog has SKUs not locked by snapshot — regenerate: ${extras.take(5)}');
+    });
+
+    test('every snapshot SKU\'s nameHe + page match catalog', () {
+      final mismatches = <String>[];
+      kHuliotSnapshot.forEach((sku, exp) {
+        final p = bySku[sku];
+        if (p == null) return;
+        if (p.nameHe != exp.nameHe) {
+          mismatches.add('$sku: nameHe — expected "${exp.nameHe}", got "${p.nameHe}"');
+        }
+        if (p.page != exp.page) {
+          mismatches.add('$sku: page — expected ${exp.page}, got ${p.page}');
+        }
       });
-    }
+      expect(mismatches, isEmpty,
+          reason: 'Huliot snapshot drift (${mismatches.length}). First 5:\n${mismatches.take(5).join("\n")}');
+    });
+
+    test('every Huliot product carries brand="חוליות"', () {
+      final wrong = bySku.values.where((p) => p.brand != 'חוליות').map((p) => p.sku).toList();
+      expect(wrong, isEmpty, reason: 'wrong brand on Huliot products: ${wrong.take(5)}');
+    });
   });
 }
