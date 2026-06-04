@@ -35,6 +35,19 @@ final bsOrderLeafProvider = StateProvider<String?>((_) => null);
 /// leaves. The metric / order / customer panels are MUTUALLY EXCLUSIVE.
 final bsCustomerLeafProvider = StateProvider<String?>((_) => null);
 
+/// Section id of the manager 🛠️ ניהול leaf whose inline DATA panel is open
+/// (one of the data-view `mm-*` ids — `mm-cats` · `mm-settings`), or null when
+/// none is showing. Tapping such a leaf opens its REAL data INLINE in the dial
+/// (R2 — no new screen): `mm-cats` lists the catalog categories + their product
+/// counts, `mm-settings` lists the contractor-app config rows — each verbatim
+/// from the legacy `renderMgrManage` (@index.html:16645-16743). Tapping again
+/// (or any other dial action) closes it. The two action-only `mm-*` leaves
+/// (`mm-trees` · `mm-brands`, whose legacy body is a `prompt()`-driven server
+/// edit) do NOT open a panel — they fire a labelled toast. Mirrors the M1/M2/M3
+/// leaf providers; the metric / order / customer / manage panels are MUTUALLY
+/// EXCLUSIVE.
+final bsManageLeafProvider = StateProvider<String?>((_) => null);
+
 /// Which menu tab is currently drilled into (null = 4-tab root).
 enum MenuTab { home, projects, cart, settings }
 
@@ -61,6 +74,7 @@ void resetAllDials(WidgetRef ref) {
   ref.read(bsMetricLeafProvider.notifier).state = null;
   ref.read(bsOrderLeafProvider.notifier).state = null;
   ref.read(bsCustomerLeafProvider.notifier).state = null;
+  ref.read(bsManageLeafProvider.notifier).state = null;
   ref.read(menuTabProvider.notifier).state = null;
   ref.read(searchToolProvider.notifier).state = null;
 }

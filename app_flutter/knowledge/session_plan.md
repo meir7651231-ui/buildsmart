@@ -146,5 +146,23 @@ Style: M0 (logic+test) commit אחד → M1 (widget+state+widget-test) commit ש
 - `bs_dial_manager_customers_test` (4): 2 leaves נוכחים · mc-live→שורות-הקבלן האמיתיות ·
   mc-low ריק→טקסט empty · metric/order/customer mutual-exclusion · אין "בבנייה".
 
-## נשאר (גלים הבאים)
-- M4 — שאר ה-sections של המנהל (ניהול).
+## M4 — wire כל עלי `mm-*` (🛠️ ניהול) — הגל האחרון של המנהל ✅ (v5.96)
+- `bsManageLeafProvider` (state): ה-`mm-*` data-view הפתוח (toggle) · ב-`resetAllDials` · נוקה בכל pop/drill.
+- `bs_dial_widget.dart`: פורט נאמן של `renderMgrManage` (@index.html:16645-16743) —
+  - `mm-cats` (🗂️ קטגוריות) → `_ManagerManagePanel` inline: הקטגוריות האמיתיות + ספירת-מוצרים מ-
+    `kManagerCatalogCategories` (אותה ספירת TREES-לפי-`cat` שה-SECTION 3 בונה @16716), כותרת
+    `קטגוריות פעילות (14)` + הרמז verbatim "שינוי שם קטגוריה מעדכן את כל המוצרים שבה.".
+  - `mm-settings` (⚙️ הגדרות אפליקציה) → אותו panel עם 3 שורות-קונפיג אמיתיות מהקבועים (SECTION 4
+    @16733-16740): תוספת אקספרס=₪80 (`EXPRESS_FEE`) · אשראי=₪50,000 (`creditLimit`, toLocaleString) ·
+    מע״מ=18% (`VAT_RATE`) + הרמז verbatim.
+  - `mm-trees`/`mm-brands` → הלגאסי = עריכת `prompt()` מול שרת (אין backend) → toast עם תווית-הפעולה
+    האמיתית verbatim (תת-כותרת ה-`mmSection` @16653/16687), **לא** "בבנייה".
+  - `mm-regression` → **ללא שינוי** — עדיין route ל-`RegressionPanelScreen`.
+  panel ה-data הוא R2 (dial-drill, אין מסך) והדדית-בלעדי עם metric/order/customer. אין יותר "בבנייה".
+- `kManagerManageDataLeafIds` + `kManagerManageActionLeafIds` מחלקים את עלי ה-ניהול בלי חפיפה →
+  אף עלה לא נופל ל-stub.
+- `bs_dial_manager_manage_test` (12): 5 עלים נוכחים · mm-cats→קטגוריות+ספירות אמיתיות · mm-settings→
+  3 שורות verbatim · mm-trees/mm-brands→toast-פעולה אמיתי (לא "בבנייה") · mm-regression→עדיין route ·
+  mutual-exclusion דו-כיווני · partition בלי חפיפה.
+
+## ✅ persona המנהל הושלמה — אפס "בבנייה" נגיש בכל 4 הסקשנים (md/mo/mc/mm). M0→M4 DONE.

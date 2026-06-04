@@ -8,6 +8,22 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
+v5.96 — 👔 **Manager 🛠️ ניהול — final wave (M4): manager persona COMPLETE** 🟦.
+The 👔 "מנהל המערכת" BS-dial → 🛠️ ניהול section's `mm-*` leaves are now ALL wired to their
+REAL targets — the whole manager persona is **COMPLETE** with **ZERO reachable "בבנייה"** across
+all four sections (md/mo/mc/mm). Faithful port of the legacy `renderMgrManage`
+(@index.html:16645-16743): **`mm-cats`** → an inline data panel (`_ManagerManagePanel`, state
+`bsManageLeafProvider`) listing the REAL categories + product counts from
+`kManagerCatalogCategories` (the legacy SECTION 3 tally @16716) + the verbatim hint;
+**`mm-settings`** → the same panel with the three REAL config rows (express ₪80 / credit ₪50,000 /
+VAT 18%, the legacy editable globals @11941/11961/11963) + the verbatim hint; **`mm-trees`** &
+**`mm-brands`** (legacy = `prompt()`-driven server edits) → a labelled toast with the verbatim
+legacy action sub-title (@16653/16687), NOT "בבנייה"; **`mm-regression`** → UNCHANGED (still routes
+to `RegressionPanelScreen`). The data panel is R2 (dial-drill, no new screen) and mutually
+exclusive with the M1/M2/M3 panels; `kManagerManageDataLeafIds` + `kManagerManageActionLeafIds`
+partition the leaves so none falls through to the stub. Guard `bs_dial_manager_manage_test` (12).
+All data verbatim from index.html (NOT `SYSTEM_MANAGER.md`). **Manager wave (M0→M4) DONE.**
+
 v5.95 — 👔 **Manager 👥 לקוחות — real customer list** (wave 1: M3) 🟦.
 The 👔 "מנהל המערכת" BS-dial → 👥 לקוחות section's 2 `mc-*` leaves now show the REAL
 customer list inline (R2 dial-drill, no new screen) instead of "בבנייה" toasts.
@@ -21,7 +37,7 @@ With the Dart `contractorCredit` ceilings all 4 seed buyers are `live` → **`mc
 → the legacy empty text "לא נמצאו קבלנים תואמים." (@16586). Metric / order / customer panels
 are mutually exclusive. `pct`/`status`/`sites` derived exactly @16554,16559-16562. Guard
 `bs_dial_manager_customers_test` (4). All data verbatim from index.html (NOT `SYSTEM_MANAGER.md`).
-**Remaining (🟦):** M4 — the manager's management (ניהול) section.
+**M4** ✅ (v5.96) — the manager's management (ניהול) section; manager persona COMPLETE.
 
 v5.94 — 👔 **Manager 📦 הזמנות — real per-stage orders** (wave 1: M2) 🟦.
 The 👔 "מנהל המערכת" BS-dial → 🚚 הזמנות section's 6 `mo-*` leaves now show the REAL

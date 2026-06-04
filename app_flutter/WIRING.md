@@ -111,6 +111,33 @@ The empty text "לא נמצאו קבלנים תואמים." is the legacy custom
 real customer rows · mc-low empty → empty text · metric/order/customer mutual-exclusion ·
 NO "בבנייה").
 
+### 👔 Manager BS-dial → 🛠️ ניהול (M4 — final wave; manager persona COMPLETE)
+
+The 👔 persona → 🛠️ ניהול (`kManagerSections` → section `m-manage`) has 5 `mm-*` leaves, ALL
+wired to their REAL target — a faithful port of the legacy `renderMgrManage`
+(@index.html:16645-16743). After M4 the manager persona has **ZERO reachable "בבנייה"** in any of
+its four sections (md/mo/mc/mm). Two leaves are DATA views → an INLINE `_ManagerManagePanel` above
+the dial (R2 — NO navigation), state `bsManageLeafProvider` (tap toggles; any other dial action /
+pop / drill clears it; metric/order/customer/**manage** panels are mutually exclusive). Two leaves
+are server actions → a labelled toast (the legacy `prompt()` editors have no backend here). One
+leaf routes. The partition `kManagerManageDataLeafIds` ∪ `kManagerManageActionLeafIds` ∪
+`{mm-regression}` covers every leaf with no overlap, so none can fall through to the stub.
+
+| Leaf (id) | Kind | Real target (verbatim, NO "בבנייה") | Status |
+|---|---|---|---|
+| 🌳 עץ המוצרים (`mm-trees`) | server action | toast "🌳 עריכת האביזרים המשלימים של כל מוצר" (legacy `mmSection` sub-title @16653) | ✅ |
+| 🏷️ מותגים ומחירים (`mm-brands`) | server action | toast "🏷️ עריכת המותגים והמחירים של כל מוצר" (legacy sub-title @16687) | ✅ |
+| 🗂️ קטגוריות (`mm-cats`) | data view | inline panel: `קטגוריות פעילות (14)` + every category + `N מוצרים` from `kManagerCatalogCategories` (legacy SECTION 3 @16716) + hint "שינוי שם קטגוריה מעדכן את כל המוצרים שבה." | ✅ |
+| ⚙️ הגדרות אפליקציה (`mm-settings`) | data view | inline panel: תוספת משלוח אקספרס=₪80 (`EXPRESS_FEE`@11961) · מסגרת אשראי לקבלן=₪50,000 (`creditLimit`@11963) · שיעור מע״מ=18% (`VAT_RATE`@11941) + the legacy hint | ✅ |
+| 🔬 בדיקות רגרסיה (`mm-regression`) | route | `RegressionPanelScreen.route()` — **UNCHANGED** (closes the dial; no panel/toast) | ✅ |
+
+The settings values are the legacy editable globals (read-only here — the `prompt()` editors are
+server actions, R8: no invented mutation); the credit line uses comma grouping to mirror the legacy
+`creditLimit.toLocaleString()` (@16736). Guard: `bs_dial_manager_manage_test` (12 — 5 leaves
+present · mm-cats → its real categories+counts · mm-settings → its 3 real rows · mm-trees/mm-brands
+→ the verbatim action toast (not "בבנייה") · mm-regression → still routes · metric/order/customer
+mutual-exclusion both directions · the leaf-set partition).
+
 ## Catalog settings (`catalog_settings_screen.dart` → `catalog_settings.dart`)
 
 | Setting | Behavior | Status |
