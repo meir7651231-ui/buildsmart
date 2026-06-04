@@ -131,6 +131,20 @@ Style: M0 (logic+test) commit אחד → M1 (widget+state+widget-test) commit ש
 - `bs_dial_manager_orders_test` (5): 6 leaves נוכחים · כל שלב מאוכלס→שורת-ההזמנה האמיתית · 2
   השלבים הריקים→טקסט empty · metric/order mutual-exclusion · אין "בבנייה".
 
+## M3 — wire 2 עלי `mc-*` (לקוחות) inline (R2, NO new screen) ✅ (v5.95)
+- `bsCustomerLeafProvider` (state): ה-`mc-*` הפתוח (toggle) · ב-`resetAllDials` · נוקה בכל pop/drill.
+- `bs_dial_widget.dart`: tap על leaf `mc-*` → `_ManagerCustomerPanel` inline מעל ה-dial. כל leaf =
+  סטטוס-לקוח אחד (`kManagerCustomerLeafStatus`: `mc-live`=פעיל · `mc-low`=אשראי גבוה, תוויות
+  pill verbatim @16592); הפאנל מסנן את `mgrCustomerList` לאותו סטטוס ומציג שורה לכל קבלן
+  (`👷 name` / `orders הזמנות · sites אתרים` / pill / `ניצול אשראי: ₪spent / ₪credit (pct%)`,
+  כמו `mc-card` הלגאסי @16593-16604; `pct`/`status`/`sites` נגזרים בדיוק @16554,16559-16562) +
+  ספירה בכותרת. עם תקרות ה-credit של Dart כל 4 הקבלנים נופלים ל-`live` → **`mc-low` ריק** →
+  טקסט ה-empty הלגאסי "לא נמצאו קבלנים תואמים." (@16586). panel לקוחות/הזמנות/מטריקה
+  הדדית-בלעדיים. אין יותר toast "בבנייה".
+- `kManagerCustomerLeafStatus` (leaf→status) + `kManagerCustomerLeafIds` + `_kCustomerStatusLabel`
+  + `_grouped` (toLocaleString) + `_CustomerView`/`_customersForStatus`.
+- `bs_dial_manager_customers_test` (4): 2 leaves נוכחים · mc-live→שורות-הקבלן האמיתיות ·
+  mc-low ריק→טקסט empty · metric/order/customer mutual-exclusion · אין "בבנייה".
+
 ## נשאר (גלים הבאים)
-- M3 — 👥 לקוחות דרך `mgrCustomerList` + `contractorCredit`.
 - M4 — שאר ה-sections של המנהל (ניהול).

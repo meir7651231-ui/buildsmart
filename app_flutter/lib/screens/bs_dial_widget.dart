@@ -42,6 +42,7 @@ class BsDialWidget extends ConsumerWidget {
     final walked = walkBsDrill(personaId, path);
     final openMetric = ref.watch(bsMetricLeafProvider);
     final openOrder = ref.watch(bsOrderLeafProvider);
+    final openCustomer = ref.watch(bsCustomerLeafProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -65,6 +66,17 @@ class BsDialWidget extends ConsumerWidget {
           ),
           const SizedBox(height: BsTokens.space3),
         ],
+        // Inline customer-list panel for the open `mc-*` leaf — the REAL
+        // customers in that one status filter (M3). Same dial-overlay placement
+        // (R2). Mutually exclusive with the metric & order panels.
+        if (openCustomer != null) ...[
+          _ManagerCustomerPanel(
+            leafId: openCustomer,
+            onClose:
+                () => ref.read(bsCustomerLeafProvider.notifier).state = null,
+          ),
+          const SizedBox(height: BsTokens.space3),
+        ],
         DialColumn(
           children: [
             // Persona anchor — tap to pop back to L1.
@@ -78,6 +90,7 @@ class BsDialWidget extends ConsumerWidget {
                 ref.read(bsDrillPathProvider.notifier).state = const [];
                 ref.read(bsMetricLeafProvider.notifier).state = null;
                 ref.read(bsOrderLeafProvider.notifier).state = null;
+                ref.read(bsCustomerLeafProvider.notifier).state = null;
               },
             ),
             // One anchor per drill step — tap pops to that depth.
@@ -94,6 +107,7 @@ class BsDialWidget extends ConsumerWidget {
                   );
                   ref.read(bsMetricLeafProvider.notifier).state = null;
                   ref.read(bsOrderLeafProvider.notifier).state = null;
+                  ref.read(bsCustomerLeafProvider.notifier).state = null;
                 },
               ),
             // Current items at this depth.
@@ -102,9 +116,12 @@ class BsDialWidget extends ConsumerWidget {
                 label: s.title,
                 emoji: s.emoji,
                 icon: Icons.circle,
-                // Highlight the leaf whose inline panel (metric or order list)
-                // is currently open.
-                active: s.id == openMetric || s.id == openOrder,
+                // Highlight the leaf whose inline panel (metric, order list or
+                // customer list) is currently open.
+                active:
+                    s.id == openMetric ||
+                    s.id == openOrder ||
+                    s.id == openCustomer,
                 onTap: () => _onLeafTap(context, ref, s, path),
               ),
           ],
@@ -122,18 +139,28 @@ class BsDialWidget extends ConsumerWidget {
     if (s.hasChildren) {
       ref.read(bsMetricLeafProvider.notifier).state = null;
       ref.read(bsOrderLeafProvider.notifier).state = null;
+      ref.read(bsCustomerLeafProvider.notifier).state = null;
       ref.read(bsDrillPathProvider.notifier).state = [...path, s.title];
     } else if (kManagerMetricLeafIds.contains(s.id)) {
       // M1 — toggle the inline metric panel for this dashboard leaf.
-      // A metric and an order panel are mutually exclusive (one at a time).
+      // Metric / order / customer panels are mutually exclusive (one at a time).
       ref.read(bsOrderLeafProvider.notifier).state = null;
+      ref.read(bsCustomerLeafProvider.notifier).state = null;
       final cur = ref.read(bsMetricLeafProvider);
       ref.read(bsMetricLeafProvider.notifier).state = cur == s.id ? null : s.id;
     } else if (kManagerOrderLeafIds.contains(s.id)) {
       // M2 — toggle the inline order-list panel for this `mo-*` stage leaf.
       ref.read(bsMetricLeafProvider.notifier).state = null;
+      ref.read(bsCustomerLeafProvider.notifier).state = null;
       final cur = ref.read(bsOrderLeafProvider);
       ref.read(bsOrderLeafProvider.notifier).state = cur == s.id ? null : s.id;
+    } else if (kManagerCustomerLeafIds.contains(s.id)) {
+      // M3 — toggle the inline customer-list panel for this `mc-*` status leaf.
+      ref.read(bsMetricLeafProvider.notifier).state = null;
+      ref.read(bsOrderLeafProvider.notifier).state = null;
+      final cur = ref.read(bsCustomerLeafProvider);
+      ref.read(bsCustomerLeafProvider.notifier).state =
+          cur == s.id ? null : s.id;
     } else if (s.id == 'mm-regression') {
       ref.read(openDialProvider.notifier).state = OpenDial.none;
       Navigator.of(context).push(RegressionPanelScreen.route());
@@ -170,6 +197,23 @@ const Map<String, String> kManagerOrderLeafStage = {
 
 /// The set of order-status leaf ids (M2) — the keys of [kManagerOrderLeafStage].
 final Set<String> kManagerOrderLeafIds = kManagerOrderLeafStage.keys.toSet();
+
+/// The two 👥 לקוחות leaves (M3) — each maps to ONE customer status filter
+/// (the legacy `status` field @index.html:16562: `pct>=90?'low':pct>0?'live'`).
+/// Tapping a leaf opens an INLINE customer-list panel (R2) listing the REAL
+/// customers in that status from `mgrCustomerList` (manager_dashboard.dart). The
+/// leaf ids + Hebrew labels are `kManagerSections` → `m-customers` in
+/// sections.dart, themselves verbatim from the legacy `mc-pill` labels
+/// (@index.html:16592: live=פעיל · low=אשראי גבוה).
+const Map<String, String> kManagerCustomerLeafStatus = {
+  'mc-live': 'live',
+  'mc-low': 'low',
+};
+
+/// The set of customer-status leaf ids (M3) — keys of
+/// [kManagerCustomerLeafStatus].
+final Set<String> kManagerCustomerLeafIds =
+    kManagerCustomerLeafStatus.keys.toSet();
 
 /// Inline panel that shows a manager dashboard leaf's REAL derived number plus
 /// a one-line note of what it counts. Pure presentation over [managerAnalytics]
@@ -444,6 +488,229 @@ class _OrderRow extends StatelessWidget {
         ),
         Text(
           '${order.items} פריטים · ₪${order.sum}',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: BsTokens.mutedLight,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Group an integer with comma thousands-separators — mirrors the legacy
+/// `Number.toLocaleString()` (en) used in the customer cards
+/// (@index.html:16602: `₪'+c.spent.toLocaleString()`), so `3150 → 3,150`.
+String _grouped(int n) {
+  final s = n.abs().toString();
+  final b = StringBuffer();
+  for (var i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
+    b.write(s[i]);
+  }
+  return n < 0 ? '-$b' : b.toString();
+}
+
+/// The Hebrew pill label per customer status — VERBATIM from the legacy
+/// `renderMgrCustomers` (@index.html:16592:
+/// `c.status==='low'?'אשראי גבוה':c.status==='off'?'לא פעיל':'פעיל'`). Same
+/// strings as the `mc-*` leaf titles in sections.dart, kept here so the panel
+/// header reads the canonical status label.
+const Map<String, String> _kCustomerStatusLabel = {
+  'live': 'פעיל',
+  'low': 'אשראי גבוה',
+  'off': 'לא פעיל',
+};
+
+/// One customer's view-model — the [ManagerCustomer] aggregate plus the two
+/// derived fields the legacy card renders that are NOT on the aggregate:
+/// `pct` (credit-utilisation %) and `sites` (distinct build-site count), both
+/// computed exactly as the legacy `mgrCustomerList` does (@index.html:16559-16562).
+class _CustomerView {
+  const _CustomerView({required this.customer, required this.pct, required this.sites});
+
+  final ManagerCustomer customer;
+  final int pct;
+  final int sites;
+
+  /// @legacy index.html:16562 — `pct>=90?'low':pct>0?'live':'off'`.
+  String get status => pct >= 90 ? 'low' : (pct > 0 ? 'live' : 'off');
+}
+
+/// Build the customer view-models for ONE status filter, sorted by spend desc
+/// (the order [mgrCustomerList] already returns). `pct` is
+/// `min(100, round(spent/credit*100))` and `sites` is the distinct-site count
+/// per buyer in [kManagerOrderSeed] — both verbatim from the legacy derivation
+/// (@index.html:16554,16559-16560).
+List<_CustomerView> _customersForStatus(String status) {
+  // Distinct build sites per buyer (legacy `byName[nm].sites` set @16554).
+  final sitesByBuyer = <String, Set<String>>{};
+  for (final o in kManagerOrderSeed) {
+    (sitesByBuyer[o.who] ??= <String>{}).add(o.site);
+  }
+  final out = <_CustomerView>[];
+  for (final c in mgrCustomerList()) {
+    final pct = c.creditLimit == 0
+        ? 0
+        : ((c.totalSpend / c.creditLimit) * 100).round().clamp(0, 100);
+    final view = _CustomerView(
+      customer: c,
+      pct: pct,
+      sites: sitesByBuyer[c.name]?.length ?? 0,
+    );
+    if (view.status == status) out.add(view);
+  }
+  return out;
+}
+
+/// Inline panel that lists the REAL customers in ONE status filter (M3). The
+/// leaf's status is [kManagerCustomerLeafStatus]; the customers come from
+/// [mgrCustomerList] (manager_dashboard.dart — itself grouping index.html's
+/// SYS_ORDERS_SEED by buyer) filtered to that status. Each row mirrors the
+/// legacy `mc-card` (@index.html:16593-16604): `👷 name`, `orders הזמנות ·
+/// sites אתרים`, the status pill, and the credit line `ניצול אשראי: ₪spent /
+/// ₪credit (pct%)`. When the status has no customers it shows the legacy empty
+/// text `לא נמצאו קבלנים תואמים.` (@index.html:16586).
+class _ManagerCustomerPanel extends StatelessWidget {
+  const _ManagerCustomerPanel({required this.leafId, required this.onClose});
+
+  final String leafId;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = kManagerCustomerLeafStatus[leafId] ?? '';
+    final label = _kCustomerStatusLabel[status] ?? status;
+    final customers = _customersForStatus(status);
+
+    return Semantics(
+      label: '👥 $label: ${customers.length} קבלנים',
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 300),
+        padding: const EdgeInsets.symmetric(
+          horizontal: BsTokens.space4,
+          vertical: BsTokens.space3,
+        ),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          boxShadow: BsTokens.circleShadow,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text('👥', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: BsTokens.space2),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                // The status's customer count.
+                Text(
+                  '${customers.length}',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: BsTokens.brand,
+                  ),
+                ),
+                const SizedBox(width: BsTokens.space2),
+                InkWell(
+                  onTap: onClose,
+                  borderRadius: BorderRadius.circular(BsTokens.radiusCircle),
+                  child: const Padding(
+                    padding: EdgeInsets.all(2),
+                    child: Icon(
+                      Icons.close,
+                      size: 18,
+                      color: BsTokens.mutedLight,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: BsTokens.space2),
+            if (customers.isEmpty)
+              Text(
+                'לא נמצאו קבלנים תואמים.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: BsTokens.mutedLight,
+                ),
+              )
+            else
+              for (final v in customers) ...[
+                _CustomerRow(view: v),
+                if (v != customers.last) const SizedBox(height: BsTokens.space3),
+              ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One customer row inside [_ManagerCustomerPanel] — mirrors the legacy
+/// `mc-card` body (@index.html:16593-16604): `👷 name` + `orders הזמנות ·
+/// sites אתרים` + the status pill on the top line, then the credit line
+/// `ניצול אשראי: ₪spent / ₪credit (pct%)`.
+class _CustomerRow extends StatelessWidget {
+  const _CustomerRow({required this.view});
+
+  final _CustomerView view;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final c = view.customer;
+    final statusLabel = _kCustomerStatusLabel[view.status] ?? view.status;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('👷', style: TextStyle(fontSize: 18)),
+            const SizedBox(width: BsTokens.space2),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    c.name,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  Text(
+                    '${c.orderCount} הזמנות · ${view.sites} אתרים',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: BsTokens.mutedLight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: BsTokens.space2),
+            Text(
+              statusLabel,
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: BsTokens.brand,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'ניצול אשראי: ₪${_grouped(c.totalSpend)} / ₪${_grouped(c.creditLimit)} (${view.pct}%)',
           style: theme.textTheme.bodySmall?.copyWith(
             color: BsTokens.mutedLight,
           ),

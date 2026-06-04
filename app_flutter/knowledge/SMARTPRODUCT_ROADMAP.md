@@ -8,6 +8,21 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
+v5.95 — 👔 **Manager 👥 לקוחות — real customer list** (wave 1: M3) 🟦.
+The 👔 "מנהל המערכת" BS-dial → 👥 לקוחות section's 2 `mc-*` leaves now show the REAL
+customer list inline (R2 dial-drill, no new screen) instead of "בבנייה" toasts.
+**M3** ✅ — `bsCustomerLeafProvider` + an inline `_ManagerCustomerPanel` in
+`bs_dial_widget.dart`: each `mc-*` leaf = one legacy customer status filter
+(`kManagerCustomerLeafStatus`: `mc-live`=פעיל · `mc-low`=אשראי גבוה, pill labels verbatim
+@index.html:16592); the panel filters `mgrCustomerList` (grouping SYS_ORDERS_SEED by buyer) to
+that status and lists each customer (`👷 name` / `orders הזמנות · sites אתרים` / status pill /
+`ניצול אשראי: ₪spent / ₪credit (pct%)`, mirroring the legacy `mc-card` @16593-16604) + a count.
+With the Dart `contractorCredit` ceilings all 4 seed buyers are `live` → **`mc-low` is empty**
+→ the legacy empty text "לא נמצאו קבלנים תואמים." (@16586). Metric / order / customer panels
+are mutually exclusive. `pct`/`status`/`sites` derived exactly @16554,16559-16562. Guard
+`bs_dial_manager_customers_test` (4). All data verbatim from index.html (NOT `SYSTEM_MANAGER.md`).
+**Remaining (🟦):** M4 — the manager's management (ניהול) section.
+
 v5.94 — 👔 **Manager 📦 הזמנות — real per-stage orders** (wave 1: M2) 🟦.
 The 👔 "מנהל המערכת" BS-dial → 🚚 הזמנות section's 6 `mo-*` leaves now show the REAL
 orders in their order-flow stage inline (R2 dial-drill, no new screen) instead of
@@ -19,8 +34,8 @@ The 2 stages with no seed orders (pickup · delivered) render the legacy empty t
 "לא נמצאו הזמנות תואמות." (@16986). Order & metric panels are mutually exclusive.
 `kManagerOrderLeafStage`/`kManagerOrderLeafIds`/`_kOrderStageLabel` (stage names verbatim from
 `ORDER_STAGE` @12041-12048). Guard `bs_dial_manager_orders_test` (5). All data verbatim from
-index.html (NOT `SYSTEM_MANAGER.md`). **Remaining (🟦):** M3 — 👥 customers via
-`mgrCustomerList`; M4 — the manager's management section.
+index.html (NOT `SYSTEM_MANAGER.md`). **M3** ✅ (v5.95). **Remaining (🟦):** M4 — the manager's
+management section.
 
 v5.93 — 👔 **Manager 📊 dashboard — real derived numbers** (wave 1: M0+M1) 🟦.
 The 👔 "מנהל המערכת" BS-dial 📊 dashboard's 5 `md-*` leaves now show REAL numbers
@@ -33,8 +48,8 @@ verified verbatim against the live index.html `TREES` loop (NOT `SYSTEM_MANAGER.
 `kManagerOrderFlow` (@16943) + `contractorCredit` + `mgrCustomerList` = M2/M3 foundation.
 Guard `manager_dashboard_test` (12). **M1** ✅ — `bsMetricLeafProvider` + an inline
 `_ManagerMetricPanel` in `bs_dial_widget.dart`; guard `bs_dial_manager_test` (4).
-**Remaining (🟦):** M3 — 👥 customers via `mgrCustomerList`; M4 — the manager's
-orders/management sections.
+**M2** ✅ (v5.94) · **M3** ✅ (v5.95). **Remaining (🟦):** M4 — the manager's
+management section.
 
 v5.69 — 💧 **Division option 2 — through the finder** (Benzi #1, user-chosen).
 A live department now opens the **finder (בית)** scoped to its `WaterSystem`

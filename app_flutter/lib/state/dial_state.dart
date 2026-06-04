@@ -26,6 +26,15 @@ final bsMetricLeafProvider = StateProvider<String?>((_) => null);
 /// action) closes it. Mirrors [bsMetricLeafProvider] for the M2 order leaves.
 final bsOrderLeafProvider = StateProvider<String?>((_) => null);
 
+/// Section id of the manager 👥 לקוחות leaf whose inline customer-list panel is
+/// open (one of the `mc-*` ids), or null when none is showing. Each `mc-*` leaf
+/// maps to ONE customer status filter (פעיל · אשראי גבוה); tapping it opens the
+/// REAL customers in that status from `mgrCustomerList` INLINE in the dial
+/// (R2 — no new screen); tapping again (or any other dial action) closes it.
+/// Mirrors [bsMetricLeafProvider]/[bsOrderLeafProvider] for the M3 customer
+/// leaves. The metric / order / customer panels are MUTUALLY EXCLUSIVE.
+final bsCustomerLeafProvider = StateProvider<String?>((_) => null);
+
 /// Which menu tab is currently drilled into (null = 4-tab root).
 enum MenuTab { home, projects, cart, settings }
 
@@ -51,6 +60,7 @@ void resetAllDials(WidgetRef ref) {
   ref.read(bsDrillPathProvider.notifier).state = const [];
   ref.read(bsMetricLeafProvider.notifier).state = null;
   ref.read(bsOrderLeafProvider.notifier).state = null;
+  ref.read(bsCustomerLeafProvider.notifier).state = null;
   ref.read(menuTabProvider.notifier).state = null;
   ref.read(searchToolProvider.notifier).state = null;
 }

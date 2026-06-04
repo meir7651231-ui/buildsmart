@@ -87,6 +87,30 @@ The empty text "לא נמצאו הזמנות תואמות." is the legacy `md-em
 Guard: `bs_dial_manager_orders_test` (6 leaves present · each populated stage → its real order
 row · the 2 empty stages → empty text · metric/order mutual-exclusion · NO "בבנייה").
 
+### 👔 Manager BS-dial → 👥 לקוחות (M3)
+
+The 👔 persona → 👥 לקוחות (`kManagerSections` → section `m-customers`) has 2 `mc-*` leaves —
+ONE per customer status filter (the legacy `status` @index.html:16562). Tapping a leaf opens an
+INLINE `_ManagerCustomerPanel` above the dial (R2 — dial-drill, NO navigation) listing the REAL
+customers in that status from `mgrCustomerList` (manager_dashboard.dart, grouping index.html
+SYS_ORDERS_SEED by buyer) — each row is `👷 name` / `orders הזמנות · sites אתרים` / status pill /
+`ניצול אשראי: ₪spent / ₪credit (pct%)` (mirrors the legacy `mc-card` @16593-16604), plus the
+status's customer count in the header. State: `bsCustomerLeafProvider` (which `mc-*` panel is
+open; tap toggles; any other dial action / pop / drill clears it; metric/order/customer panels
+are mutually exclusive). `kManagerCustomerLeafStatus` maps each leaf id → status; `pct`/`status`
++ the distinct-site count `sites` are derived exactly as the legacy `mgrCustomerList`
+(@16554,16559-16562).
+
+| Leaf (id) | Status | Customers (verbatim from `mgrCustomerList`) | Status |
+|---|---|---|---|
+| 🟢 פעיל (`mc-live`) | `live` (0<pct<90) | all 4 seed buyers — e.g. משה אברהם (1 הזמנות · 1 אתרים · ניצול אשראי: ₪3,150 / ₪71,100 (4%)), יוסי כהן · אבי מזרחי · דוד לוי | ✅ |
+| ⚠️ אשראי גבוה (`mc-low`) | `low` (pct≥90) | **empty** → "לא נמצאו קבלנים תואמים." (no buyer ≥90% with the Dart credit ceilings) | ✅ |
+
+The empty text "לא נמצאו קבלנים תואמים." is the legacy customer `md-empty` line
+(@index.html:16586). Guard: `bs_dial_manager_customers_test` (2 leaves present · mc-live → its
+real customer rows · mc-low empty → empty text · metric/order/customer mutual-exclusion ·
+NO "בבנייה").
+
 ## Catalog settings (`catalog_settings_screen.dart` → `catalog_settings.dart`)
 
 | Setting | Behavior | Status |
