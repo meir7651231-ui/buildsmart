@@ -1,8 +1,10 @@
 import 'package:buildsmart/data/brands.dart';
+import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -1862,6 +1864,11 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
       ..sort((a, b) => b.value.compareTo(a.value));
     final totalProducts = cats.values.fold<int>(0, (s, n) => s + n);
 
+    // The LIVE worker-approval queue — tasks the worker submitted (status
+    // `review`), read off the SHARED worker-tasks engine. A worker "שלח לאישור"
+    // surfaces here with no refresh; approving/rejecting writes back live.
+    final pending = ref.watch(pendingApprovalTasksProvider);
+
     return ListView(
       // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
       // (gate 62 — no hard-coded left/right edge inset).
@@ -1875,6 +1882,31 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
         // The legacy intro line (@index.html:16650 `mm-intro`).
         const _ManageIntro(),
         const SizedBox(height: BsTokens.space4),
+
+        // 0. 👷 אישורי עובדים — the LIVE cross-persona link (W3): the worker's
+        // submitted tasks, approve/reject straight onto the shared engine. A
+        // count badge in the header surfaces how many are waiting.
+        _ManageSection(
+          sectionKey: 'approvals',
+          emoji: '👷',
+          title: 'אישורי עובדים',
+          sub: 'משימות שעובדים שלחו לאישור',
+          open: _open == 'approvals',
+          onTap: () => _toggle('approvals'),
+          badge: pending.length,
+          child: _ApprovalsBody(
+            pending: pending,
+            onApprove: (t) {
+              ref.read(workerTasksProvider.notifier).approve(t.id);
+              showToast(context, '✅ אושר: ${t.name}');
+            },
+            onReject: (t) {
+              ref.read(workerTasksProvider.notifier).reject(t.id);
+              showToast(context, '↩️ נדחה: ${t.name}');
+            },
+          ),
+        ),
+        const SizedBox(height: BsTokens.space3),
 
         // 1. 🗂️ קטגוריות — the LIVE category list.
         _ManageSection(
@@ -1988,6 +2020,7 @@ class _ManageSection extends StatelessWidget {
     required this.open,
     required this.onTap,
     required this.child,
+    this.badge = 0,
   });
 
   final String sectionKey;
@@ -1997,6 +2030,10 @@ class _ManageSection extends StatelessWidget {
   final bool open;
   final VoidCallback onTap;
   final Widget child;
+
+  /// Optional count badge next to the title (0 = no badge) — used by the
+  /// 👷 אישורי עובדים section to surface how many tasks are awaiting approval.
+  final int badge;
 
   @override
   Widget build(BuildContext context) {
@@ -2028,13 +2065,23 @@ class _ManageSection extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              title,
-                              style: const TextStyle(
-                                color: BsTokens.inkLight,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 15,
-                              ),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    title,
+                                    style: const TextStyle(
+                                      color: BsTokens.inkLight,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ),
+                                if (badge > 0) ...[
+                                  const SizedBox(width: BsTokens.space2),
+                                  _CountBadge(count: badge),
+                                ],
+                              ],
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -2075,6 +2122,208 @@ class _ManageSection extends StatelessWidget {
               child: child,
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// A small `brand`-fill count badge for a section header (the 👷 אישורי עובדים
+/// pending count). White number on `brand`; LIGHT-safe.
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'ממתינים לאישור: $count',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        constraints: const BoxConstraints(minWidth: 22),
+        decoration: BoxDecoration(
+          color: BsTokens.brand,
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        ),
+        child: Text(
+          '$count',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The 👷 אישורי עובדים body — the manager's LIVE worker-approval queue. Lists
+/// every task the worker submitted (`pending`, status `review`), each with the
+/// worker name, the `🕒 days · steps` line, the worker's note, and two actions:
+/// ✅ אשר (review → done, ✅ אושר) and ↩️ דחה (review → rejected, back to the
+/// worker). Both write the SHARED [workerTasksProvider], so the worker's own
+/// screen reflects the decision live. An empty queue shows a calm note.
+class _ApprovalsBody extends StatelessWidget {
+  const _ApprovalsBody({
+    required this.pending,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  final List<PersonaTask> pending;
+  final void Function(PersonaTask) onApprove;
+  final void Function(PersonaTask) onReject;
+
+  @override
+  Widget build(BuildContext context) {
+    if (pending.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
+        child: Text(
+          '🎉 אין משימות הממתינות לאישור.',
+          style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final t in pending)
+          Padding(
+            padding: const EdgeInsets.only(bottom: BsTokens.space2),
+            child: _ApprovalRow(
+              task: t,
+              onApprove: () => onApprove(t),
+              onReject: () => onReject(t),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// One pending-approval row — a soft `bgLight` panel with the task name, the
+/// `🦺 worker · 🕒 days · steps` meta, the note, and the ✅ אשר / ↩️ דחה buttons.
+/// The buttons are keyed `approve-<id>` / `reject-<id>` so the W3 test can tap a
+/// specific task's decision.
+class _ApprovalRow extends StatelessWidget {
+  const _ApprovalRow({
+    required this.task,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  final PersonaTask task;
+  final VoidCallback onApprove;
+  final VoidCallback onReject;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(BsTokens.space3),
+      decoration: BoxDecoration(
+        color: BsTokens.bgLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            task.name,
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '🦺 ${kWorkers[task.worker]} · 🕒 ${task.days} ימים · ${task.steps} שלבים',
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          ),
+          if (task.note.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              task.note,
+              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            ),
+          ],
+          const SizedBox(height: BsTokens.space3),
+          Row(
+            children: [
+              Expanded(
+                child: _ApprovalButton(
+                  key: ValueKey('approve-${task.id}'),
+                  label: '✅ אשר',
+                  color: const Color(0xFF1F8A4C),
+                  onPressed: onApprove,
+                ),
+              ),
+              const SizedBox(width: BsTokens.space2),
+              Expanded(
+                child: _ApprovalButton(
+                  key: ValueKey('reject-${task.id}'),
+                  label: '↩️ דחה',
+                  color: BsTokens.cardLight,
+                  textColor: BsTokens.inkLight,
+                  bordered: true,
+                  onPressed: onReject,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A pill action button used by an approval row — a `color` fill with [textColor]
+/// text (or a bordered light outline when [bordered]). White text by default.
+class _ApprovalButton extends StatelessWidget {
+  const _ApprovalButton({
+    required this.label,
+    required this.color,
+    required this.onPressed,
+    super.key,
+    this.textColor = Colors.white,
+    this.bordered = false,
+  });
+
+  final String label;
+  final Color color;
+  final Color textColor;
+  final bool bordered;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 9),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            border:
+                bordered ? Border.all(color: const Color(0xFFE2E2E2)) : null,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
       ),
     );
   }

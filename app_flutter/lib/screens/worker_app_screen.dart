@@ -1,35 +1,54 @@
 import 'package:buildsmart/data/persona_data.dart';
+import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 🦺 עובד — the field-worker role app. Same shell/style as the contractor app
 /// (white AppBar + card list); only the content differs. Faithful port of the
 /// prototype `renderWorker()` (proto 06 §4.2): a worker picker, a summary, and
 /// the three task buckets (current / queue / submitted) as task cards.
 ///
+/// Now LIVE (cross-persona wiring W3): the task list comes from the shared
+/// [workerTasksProvider] (not the static const), and a current-bucket task card
+/// carries a "שלח לאישור" action that moves it to `review` (📸 ממתין לאישור) on
+/// that shared engine — where the 👔 manager's approvals view picks it up and can
+/// approve/reject it, reflecting live back here.
+///
 /// Reached from the role picker ("מי אתה?" → עובד). R8 — every string/number
 /// is verbatim from `persona_data.dart`.
-class WorkerAppScreen extends StatefulWidget {
+class WorkerAppScreen extends ConsumerStatefulWidget {
   const WorkerAppScreen({super.key});
 
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const WorkerAppScreen());
 
   @override
-  State<WorkerAppScreen> createState() => _WorkerAppScreenState();
+  ConsumerState<WorkerAppScreen> createState() => _WorkerAppScreenState();
 }
 
-class _WorkerAppScreenState extends State<WorkerAppScreen> {
+class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
   int _worker = 0;
+
+  /// Live tasks of [_worker] whose status is in [statuses] — the bucket filter
+  /// over the SHARED [workerTasksProvider] list (the live equivalent of the
+  /// static `tasksFor`).
+  List<PersonaTask> _bucket(List<PersonaTask> all, Set<String> statuses) => all
+      .where((t) => t.worker == _worker && statuses.contains(t.status))
+      .toList();
 
   @override
   Widget build(BuildContext context) {
-    final current = tasksFor(_worker, {'active', 'rejected'});
-    final queue = tasksFor(_worker, {'pending'});
-    final submitted = tasksFor(_worker, {'review', 'done'});
-    final total = tasksForWorker(_worker).length;
-    final done = tasksFor(_worker, {'done'}).length;
-    final hasActive = tasksFor(_worker, {'active'}).isNotEmpty;
+    final all = ref.watch(workerTasksProvider);
+    final mine = all.where((t) => t.worker == _worker).toList();
+
+    final current = _bucket(all, {'active', 'rejected'});
+    final queue = _bucket(all, {'pending'});
+    final submitted = _bucket(all, {'review', 'done'});
+    final total = mine.length;
+    final done = _bucket(all, {'done'}).length;
+    final hasActive = _bucket(all, {'active'}).isNotEmpty;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -88,6 +107,8 @@ class _WorkerAppScreenState extends State<WorkerAppScreen> {
                       ? '🎉 אין משימה פעילה כרגע'
                       : '🔨 המשימה הנוכחית שלך',
               tasks: current,
+              // Only the current bucket (active/rejected) can be submitted.
+              onSubmit: _submit,
             ),
             _Section(header: '⏳ הבאות בתור (${queue.length})', tasks: queue),
             _Section(
@@ -98,6 +119,13 @@ class _WorkerAppScreenState extends State<WorkerAppScreen> {
         ),
       ),
     );
+  }
+
+  /// WORKER submit — "שלח לאישור": move the task to `review` on the SHARED
+  /// engine (where the manager's approvals view shows it) and toast the worker.
+  void _submit(PersonaTask task) {
+    ref.read(workerTasksProvider.notifier).submitForReview(task.id);
+    showToast(context, '📸 נשלח לאישור המנהל');
   }
 }
 
@@ -290,11 +318,14 @@ class _Stat extends StatelessWidget {
 }
 
 /// A titled task group; empty groups still show the header (verbatim count).
+/// When [onSubmit] is given, a submittable task card (status `active`/`rejected`)
+/// shows a "שלח לאישור" button that invokes it (the current bucket only).
 class _Section extends StatelessWidget {
-  const _Section({required this.header, required this.tasks});
+  const _Section({required this.header, required this.tasks, this.onSubmit});
 
   final String header;
   final List<PersonaTask> tasks;
+  final void Function(PersonaTask)? onSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -317,17 +348,24 @@ class _Section extends StatelessWidget {
             ),
           ),
         ),
-        for (final t in tasks) _TaskCard(task: t),
+        for (final t in tasks) _TaskCard(task: t, onSubmit: onSubmit),
       ],
     );
   }
 }
 
-/// A single task, in the app's card style (white rounded card).
+/// A single task, in the app's card style (white rounded card). When [onSubmit]
+/// is provided AND the task is in a submittable status (`active`/`rejected`), a
+/// "שלח לאישור" button is shown that calls it.
 class _TaskCard extends StatelessWidget {
-  const _TaskCard({required this.task});
+  const _TaskCard({required this.task, this.onSubmit});
 
   final PersonaTask task;
+  final void Function(PersonaTask)? onSubmit;
+
+  /// Submittable = a worker-owned status the manager has not yet seen.
+  bool get _canSubmit =>
+      onSubmit != null && (task.status == 'active' || task.status == 'rejected');
 
   @override
   Widget build(BuildContext context) {
@@ -388,7 +426,52 @@ class _TaskCard extends StatelessWidget {
                   ),
                 ),
               ],
+              if (_canSubmit) ...[
+                const SizedBox(height: BsTokens.space3),
+                _SubmitButton(
+                  key: ValueKey('submit-${task.id}'),
+                  onPressed: () => onSubmit!(task),
+                ),
+              ],
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The "שלח לאישור" action on a current-bucket task — a `brand`-fill pill (the
+/// worker app's own accent, matching the selected worker-picker chip). White
+/// text; keyed `submit-<id>` so the W3 test can tap exactly this task's button.
+class _SubmitButton extends StatelessWidget {
+  const _SubmitButton({required this.onPressed, super.key});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Material(
+        color: BsTokens.brand,
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          onTap: onPressed,
+          child: const Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: BsTokens.space4,
+              vertical: 9,
+            ),
+            child: Text(
+              '📸 שלח לאישור',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
         ),
       ),
