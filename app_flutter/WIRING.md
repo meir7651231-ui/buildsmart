@@ -793,3 +793,12 @@ Rule in CONVENTIONS.md. Guards: huliot_card_render_test (2) + huliot_search_test
   the cheapest (`bestStore`) is brand-highlighted with ✓. Footer = proto §9b verbatim note.
 - Guard: `test/store_price_comparison_test` (≥3 products · each ≥3 stores · best==cheapest · §9b verbatim).
   No `kLipskeyCatalog` (gate 114 clean).
+
+## Contractor T3 — catalog ⋮ "סרוק תוכנית" → scan flow (picker → scan → results → cart)
+- `home_shell.dart`: `_ScanPlanSheet` now a `ConsumerStatefulWidget` (was a `showToast('בבנייה')` stub).
+  3 phases: **picker** (4 `kPlanTypes` — proto §9) → **scan** (per-type `steps`, Timer animation) →
+  **results** (per zone: header + ודאות%, items with `_StoreChip` store comparison, cheapest tagged).
+- "אשר הכל — הוסף N פריטים לסל" → `scanPlanCartLines(plan)` adds each zone item at its cheapest store
+  (`bestStore`) as a `SmartCartLine` → `smartCartProvider`, switches to חנות/הסל tab, toasts. Modal `isScrollControlled`.
+- All strings verbatim proto §9. Guard: `test/scan_plan_test` (4 types active · each line cheapest · qty 1).
+  No `kLipskeyCatalog` (gate 114 clean).

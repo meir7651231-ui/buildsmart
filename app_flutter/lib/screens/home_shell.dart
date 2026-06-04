@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:buildsmart/data/contractor_seeds.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/bs_dial_widget.dart';
@@ -642,6 +644,7 @@ class _CatalogMenuButton extends ConsumerWidget {
         showModalBottomSheet<void>(
           context: context,
           backgroundColor: const Color(0xFFFFFFFF),
+          isScrollControlled: true,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
@@ -1155,18 +1158,84 @@ class _MenuRow extends StatelessWidget {
 
 // ─── scan plan sheet ──────────────────────────────────────────────────────────────────
 
-class _ScanPlanSheet extends StatelessWidget {
-  const _ScanPlanSheet();
+/// (T3 · לוח-קבלן) Cart lines for a scanned plan type — each detected zone item
+/// at its cheapest partner-store offer (proto §9 `addScanToCart`). Pure → tested.
+List<SmartCartLine> scanPlanCartLines(PlanType plan) {
+  final out = <SmartCartLine>[];
+  for (final z in plan.zones) {
+    for (final it in z.items) {
+      if (it.stores.isEmpty) continue;
+      final best = it.stores[bestStore(it.stores)];
+      out.add(SmartCartLine(
+        productKey: 'scan:${plan.key}:${it.name}',
+        productName: it.name,
+        productEmoji: it.emoji,
+        brandName: best.store,
+        brandPrice: best.price,
+        productQty: 1,
+        accessories: const [],
+      ));
+    }
+  }
+  return out;
+}
 
-  static const _plans = [
-    (emoji: '🚵', label: 'אינסטלציה'),
-    (emoji: '⚡', label: 'חשמל'),
-    (emoji: '🏙️', label: 'אדריכלות'),
-    (emoji: '🎨', label: 'גמר'),
-  ];
+/// (T3) "סרוק תוכנית" — pick a plan type → scan animation → detected zones with
+/// per-item store comparison → "הוסף לסל". R9-inline (modal sheet, no new route).
+/// Data verbatim from [kPlanTypes] (proto §9); scan is simulated (sim, not toast).
+class _ScanPlanSheet extends ConsumerStatefulWidget {
+  const _ScanPlanSheet();
+  @override
+  ConsumerState<_ScanPlanSheet> createState() => _ScanPlanSheetState();
+}
+
+class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
+  PlanType? _plan; // null → picker phase
+  bool _scanning = false;
+  int _stepIdx = 0;
+  Timer? _timer;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _start(PlanType p) {
+    setState(() {
+      _plan = p;
+      _scanning = true;
+      _stepIdx = 0;
+    });
+    _timer = Timer.periodic(const Duration(milliseconds: 750), (t) {
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
+      if (_stepIdx < p.steps.length - 1) {
+        setState(() => _stepIdx++);
+      } else {
+        t.cancel();
+        setState(() => _scanning = false);
+      }
+    });
+  }
+
+  void _addToCart(PlanType p) {
+    final lines = scanPlanCartLines(p);
+    final cart = ref.read(smartCartProvider.notifier);
+    for (final l in lines) {
+      cart.add(l);
+    }
+    ref.read(storeSectionProvider.notifier).state = StoreSection.cart;
+    ref.read(mainTabProvider.notifier).state = 3;
+    Navigator.pop(context);
+    showToast(context, '${lines.length} פריטים מהתוכנית נוספו לסל');
+  }
 
   @override
   Widget build(BuildContext context) {
+    final plan = _plan;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       child: Column(
@@ -1183,45 +1252,163 @@ class _ScanPlanSheet extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              '📐 סרוק תוכנית עבודה',
-              style: TextStyle(
-                color: Color(0xFF1A1A1A),
+          const SizedBox(height: 14),
+          if (plan == null)
+            ..._picker()
+          else if (_scanning)
+            ..._scanningView(plan)
+          else
+            ..._results(plan),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _picker() => [
+        const Text('📐 סרוק תוכנית עבודה',
+            style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-              ),
-            ),
+                color: Color(0xFF1A1A1A))),
+        const SizedBox(height: 4),
+        const Text('בחר סוג תוכנית לסריקה',
+            style: TextStyle(fontSize: 13, color: Color(0xFF888888))),
+        const SizedBox(height: 8),
+        for (final p in kPlanTypes)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Text(p.icon, style: const TextStyle(fontSize: 24)),
+            title: Text(p.label,
+                style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1A1A1A))),
+            subtitle: Text(p.sub,
+                style: const TextStyle(fontSize: 12, color: Color(0xFF888888))),
+            trailing:
+                const Icon(Icons.chevron_left, color: Color(0xFF888888)),
+            onTap: () => _start(p),
           ),
-          const SizedBox(height: 4),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              'בחר סוג תוכנית לסריקה',
-              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Divider(color: Color(0xFFF5F5F5), height: 1),
-          ..._plans.map(
-            (p) => ListTile(
-              leading: Text(p.emoji, style: const TextStyle(fontSize: 24)),
-              title: Text(
-                p.label,
-                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+      ];
+
+  List<Widget> _scanningView(PlanType p) => [
+        const SizedBox(height: 10),
+        const Center(
+            child: SizedBox(
+                width: 36,
+                height: 36,
+                child: CircularProgressIndicator(
+                    strokeWidth: 3, color: BsTokens.brand))),
+        const SizedBox(height: 16),
+        const Text('מנתח את תצורת הבנייה ומחלץ כמויות חומרים…',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A1A1A))),
+        const SizedBox(height: 10),
+        Text(p.steps[_stepIdx],
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 13, color: Color(0xFF888888))),
+        const SizedBox(height: 18),
+      ];
+
+  List<Widget> _results(PlanType p) {
+    final lines = scanPlanCartLines(p);
+    final total = lines.fold<int>(0, (s, l) => s + l.brandPrice);
+    return [
+      Text('✓ זוהו ${p.zones.length} ${p.summaryUnit}',
+          style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1A1A1A))),
+      const SizedBox(height: 2),
+      Text('${lines.length} פריטים · ההצעה הזולה ₪$total',
+          style: const TextStyle(fontSize: 12, color: Color(0xFF888888))),
+      const SizedBox(height: 6),
+      const Text(
+          '💰 המחירים נמשכים מ-3 חנויות שותפות. BuildSmart בוחר אוטומטית את ההצעה המשתלמת ביותר לכל פריט.',
+          style: TextStyle(fontSize: 11, color: Color(0xFF9AA3B2))),
+      const SizedBox(height: 8),
+      Flexible(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            for (final z in p.zones) ..._zoneCard(z),
+          ],
+        ),
+      ),
+      const SizedBox(height: 10),
+      SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: BsTokens.brand),
+          onPressed: () => _addToCart(p),
+          child: Text('אשר הכל — הוסף ${lines.length} פריטים לסל'),
+        ),
+      ),
+      Center(
+        child: TextButton(
+          onPressed: () => setState(() {
+            _plan = null;
+            _scanning = false;
+          }),
+          child: const Text('סרוק תוכנית אחרת'),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _zoneCard(ScanZone z) => [
+        Padding(
+          padding: const EdgeInsets.only(top: 10, bottom: 2),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text('${z.emoji} ${z.name}',
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A1A1A))),
               ),
-              trailing: const Icon(
-                Icons.chevron_left,
-                color: Color(0xFF888888),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                showToast(context, '${p.label} — בבנייה');
-              },
-            ),
+              Text('ודאות ${z.conf}%',
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: z.conf < 88
+                          ? const Color(0xFFE08A00)
+                          : const Color(0xFF4CAF50))),
+            ],
           ),
+        ),
+        for (final it in z.items) _scanItemRow(it),
+      ];
+
+  Widget _scanItemRow(ScanItem it) {
+    final bi = it.stores.isEmpty ? 0 : bestStore(it.stores);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${it.emoji} ${it.name}',
+              style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1A1A1A))),
+          Text(it.meta,
+              style: const TextStyle(fontSize: 11, color: Color(0xFF888888))),
+          if (it.stores.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                for (var s = 0; s < it.stores.length; s++)
+                  _StoreChip(offer: it.stores[s], best: s == bi),
+              ],
+            ),
+          ],
         ],
       ),
     );
