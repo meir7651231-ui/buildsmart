@@ -8,6 +8,22 @@ Status legend: ⬜ todo · 🟦 in progress · ✅ done
 
 ## 📜 Changelog — version history (live Handoff is the v5.43 section below)
 
+v5.98 — 👔 **Manager rebuild — M1: `ManagerDashboardScreen` SHELL** 🟦.
+The 👔 "מנהל המערכת" persona is rebuilt from a BS-dial drill into a **full LIGHT role-app screen**
+(same shell as the 🦺 worker app). **M1 = SHELL only:** `lib/screens/manager_dashboard_screen.dart`
+→ `ManagerDashboardScreen` — `Scaffold(bgLight)` + white AppBar (`cardLight`, title "מרכז השליטה"
+`inkLight` + subtitle "מנהל המערכת" `mutedLight` + green "חי" pill), a **4-tab pill toggle**
+(selected = `brand` fill + white text; unselected = `cardLight` + `inkLight`; 📊 לוח בקרה · 🚚 הזמנות ·
+👥 לקוחות · 🛠️ ניהול — replicates `updates_screen`'s `seg()`), and an `IndexedStack` of **4
+"בקרוב" placeholders**. `route()` + `managerTabProvider` (`StateProvider<int>`,
+`lib/state/manager_dashboard_state.dart`). **Entry wired:** the role picker's manager row now
+`Navigator.push(ManagerDashboardScreen.route())` (mirrors worker→`WorkerAppScreen`) instead of the
+old `activePersonaProvider='manager'`/`OpenDial.bs` drill; other personas unchanged, the old dial code
+stays (unreachable) for later cleanup. Tab CONTENTS (M2–M5) + engine wiring are LATER waves; the
+orders engine is untouched. Guard `manager_dashboard_screen_test` (6); all existing manager tests stay
+green. **Remaining (🟦):** M2 (🚚 orders) · M3 (👥 customers) · M4 (🛠️ manage) · M5 (📊 dashboard) tab
+bodies.
+
 v5.97 — 🔗 **Shared orders engine — the keystone that makes the data live across roles** 🟦.
 The legacy `SYS_ORDERS` (the localStorage array every role read & wrote, @index.html:11965-12039,
 :16939-17035) is ported to a Riverpod state engine `lib/state/orders_engine.dart` —

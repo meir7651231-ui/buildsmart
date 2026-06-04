@@ -1,3 +1,36 @@
+# 👔 Manager rebuild — M1: `ManagerDashboardScreen` SHELL (full LIGHT role-app, 4-tab toggle) (v5.98)
+Owner: this session
+Scope: NEW `lib/screens/manager_dashboard_screen.dart` + NEW `lib/state/manager_dashboard_state.dart`
+(`managerTabProvider`) + `lib/screens/role_picker_sheet.dart` (entry only). אסור לגעת ב-engine
+(`orders_engine.dart`), ב-personas/sections, בשאר ה-personas או ב-buyer flow.
+
+Pattern reference (from the current app, NOT on this branch — read via git):
+`worker_app_screen.dart` (full role-app frame: `Scaffold(bgLight)` + white AppBar + RTL) ·
+`updates_screen.dart` (`seg()` segmented toggle + `IndexedStack`) ·
+`role_picker_sheet.dart` (worker→`WorkerAppScreen` via `Navigator.push` — mirror for manager).
+Use THIS branch's LIGHT tokens (`bgLight`/`cardLight`/`inkLight`/`mutedLight`/`brand`).
+
+Style: targeted tests green (`manager_dashboard_screen_test` + existing manager tests + analyze) →
+ONE commit through the v10 gauntlet. אין push ללא "תדחוף". incremental.
+
+## M1 — the SHELL ✅
+- `ManagerDashboardScreen` (`ConsumerWidget`): LIGHT `Scaffold(bgLight)` + white AppBar (`cardLight`,
+  title "מרכז השליטה" `inkLight` + subtitle "מנהל המערכת" `mutedLight` + green "חי" pill + "‹ יציאה").
+- 4-tab pill toggle (selected = `brand` fill + white; unselected = `cardLight` + `inkLight`; pill
+  radius; emoji + label: 📊 לוח בקרה · 🚚 הזמנות · 👥 לקוחות · 🛠️ ניהול) → `managerTabProvider`.
+- `IndexedStack` of 4 PLACEHOLDER bodies (centred "בקרוב"); `static Route<void> route()`.
+- Entry: role picker's `manager` row → `Navigator.push(ManagerDashboardScreen.route())` (mirrors
+  worker), instead of `activePersonaProvider='manager'`/`OpenDial.bs`. Other personas unchanged; the
+  old BS-dial manager drill stays (unreachable) for a later cleanup wave.
+- `manager_dashboard_screen_test` (6): LIGHT frame · 4 pills · toggle switches IndexedStack/provider ·
+  "בקרוב" placeholders · `route()` push · role-picker manager entry opens the screen.
+
+## Remaining (🟦) — NOT this wave
+M2 (🚚 הזמנות) · M3 (👥 לקוחות) · M4 (🛠️ ניהול) · M5 (📊 לוח בקרה) tab bodies — fill the placeholders
+with the real manager content over the live orders engine derivations.
+
+---
+
 # Session Plan — חלוקת מים/שפכים דרך ה-finder (בנצי #1, option 2)
 
 Owner: this session

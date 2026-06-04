@@ -28,7 +28,7 @@ home directly. Guarded by `onboarding_test`.
 
 | Button | Behavior | Status |
 |---|---|---|
-| logo "BuildSmart" | opens the "מי אתה?" persona picker (`showRolePicker`); a non-contractor role opens its existing BS-dial sections, contractor stays in the main app | ✅ |
+| logo "BuildSmart" | opens the "מי אתה?" persona picker (`showRolePicker`); **manager** pushes the `ManagerDashboardScreen` SHELL, **worker** stays a BS-dial drill (no `WorkerAppScreen` on this branch yet), other non-contractor roles open their BS-dial sections, contractor stays in the main app | ✅ |
 | 💡 (קצה שמאלי) | replays the intro tour (`showIntroTour` → the onboarding slides) | ✅ |
 | שם-משתמש (צ'יפ ליד הלוגו) | registered user's first name (`userProfileProvider`); absent for guest/demo | ✅ |
 
@@ -62,7 +62,27 @@ place/advance/setStage behavior, persistence round-trip, flow ordering). The sta
 `managerAnalytics` / `mgrCustomerList()` (seed-bound) are UNCHANGED and still feed the dashboard
 widget below — the engine just adds the live path for the upcoming UI wave.
 
-## 👔 Manager BS-dial → 📊 dashboard (`bs_dial_widget.dart` · `state/dial_state.dart` · `logic/manager_dashboard.dart`)
+## 👔 Manager dashboard SHELL — M1 (`screens/manager_dashboard_screen.dart` · `state/manager_dashboard_state.dart` · `screens/role_picker_sheet.dart`)
+
+The 👔 "מנהל המערכת" persona is being rebuilt from the BS-dial drill (below) into a **full
+role-app screen** — the same LIGHT shell/style as the 🦺 worker app. **M1 = the SHELL only.**
+
+| Element | Behavior | Status |
+|---|---|---|
+| `ManagerDashboardScreen` | `ConsumerWidget`; LIGHT `Scaffold(bgLight)` + white AppBar (`cardLight`) — title "מרכז השליטה" (`inkLight`) + subtitle "מנהל המערכת" (`mutedLight`) + green "חי" pill + "‹ יציאה" | ✅ |
+| 4-tab segmented toggle | pill style (selected = `brand` fill + white text; unselected = `cardLight` + `inkLight` text; pill radius) — 📊 לוח בקרה · 🚚 הזמנות · 👥 לקוחות · 🛠️ ניהול; replicates `updates_screen`'s `seg()`; tap sets `managerTabProvider` | ✅ |
+| `IndexedStack` body | 4 PLACEHOLDER tabs — each a centred "בקרוב" note (M2–M5 fill them); all 4 kept mounted | ✅ |
+| `managerTabProvider` | `StateProvider<int>` (0..3) — the active tab the `IndexedStack` reads | ✅ |
+| `ManagerDashboardScreen.route()` | `MaterialPageRoute<void>` (the app's screen pattern) | ✅ |
+| role picker → manager | `role_picker_sheet.dart` `_RoleRow.onTap` for `manager` now `Navigator.push`es `ManagerDashboardScreen.route()` (mirrors worker→`WorkerAppScreen`) **instead of** `activePersonaProvider='manager'`/`OpenDial.bs` (the old drill). Other personas unchanged. | ✅ |
+
+Scope: SHELL only — tab CONTENTS (M2–M5) NOT built; the orders engine is untouched (read its
+providers in a later wave). The old BS-dial manager drill code below remains (now unreachable via the
+picker) pending a later cleanup. Guard: `manager_dashboard_screen_test` (6 — LIGHT frame · 4 pills ·
+toggle switches the IndexedStack/`managerTabProvider` · "בקרוב" placeholders · `route()` push · the
+role-picker manager entry opens the screen).
+
+## 👔 Manager BS-dial → 📊 dashboard (`bs_dial_widget.dart` · `state/dial_state.dart` · `logic/manager_dashboard.dart`) — LEGACY drill (unreachable via picker as of M1)
 
 The 👔 "מנהל המערכת" persona → לוח בקרה (`kManagerSections` → section `m-products`) has 5
 `md-*` leaves. Tapping a leaf opens an INLINE `_ManagerMetricPanel` above the dial (R2 —

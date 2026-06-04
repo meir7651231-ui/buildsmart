@@ -1,4 +1,5 @@
 import 'package:buildsmart/data/personas.dart';
+import 'package:buildsmart/screens/manager_dashboard_screen.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -121,6 +122,14 @@ class _RoleRow extends ConsumerWidget {
               // Contractor IS the main app (HomeShell) — clear any persona.
               ref.read(activePersonaProvider.notifier).state = null;
               Navigator.of(context).pop();
+              return;
+            }
+            if (persona.id == 'manager') {
+              // Manager is now a full role-app (the מרכז השליטה dashboard SHELL),
+              // not a BS-dial drill — mirror the worker→WorkerAppScreen pattern:
+              // push the screen instead of opening the old dial-manager panel.
+              Navigator.of(context).pop();
+              Navigator.of(context).push(ManagerDashboardScreen.route());
               return;
             }
             // Other roles surface their existing BS-dial section tree.
