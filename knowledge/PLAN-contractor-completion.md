@@ -7,7 +7,7 @@
 > **כללים (כל משימה):** מחרוזות+מספרים **verbatim** מהמקור · קלט inline · server/print/camera/OCR → **מעתיקים את התנהגות-הדמו של הפרוטוטייפ** (תוצאה-מדומה/sim, **לא** toast) · להתאים לסגנון-הבנייה הקיים של האפליקציה.
 
 ## 📊 סטטוס שלב-א (2026-06-04)
-T0 ✅ · T1 ✅ · T2 ✅ · **T3 🔲 הבא** · T4 ✅(QA) · T5 ✅ · T6 ✅ · T7 ✅(כבר) · T8 ⏸️ stub-מכוון · T9 ✅
+T0 ✅ · T1 ✅ · T2 ✅ · **T3 🟦 בעבודה (מקבץ)** · T4 ✅(QA) · T5 ✅ · T6 ✅ · T7 ✅(כבר) · T8 ⏸️ stub-מכוון · T9 ✅
 → **שלב-א כמעט גמור — נשאר רק T3** (קטלוג ⋮ "סרוק תוכנית"). שלב-ב (T10–T22) 🔲 נעול. SHAs בלוג-התפיסות למטה.
 
 ## איך לעבוד
@@ -181,3 +181,5 @@ T0 ✅ · T1 ✅ · T2 ✅ · **T3 🔲 הבא** · T4 ✅(QA) · T5 ✅ · T6 �
 - 2026-06-04 · **בנצי (משיק)** · **סיכום-השלמות (סשן):** ✅ P0-source-prep · ✅ SEND_TO_GOOGLE · ✅ T6 · ✅ T5 — כולם על origin. ✅ **T5-fix (`e64a6e8`):** `_OrderSheet` עטוף ב-`SingleChildScrollView` + `isScrollControlled` — תיקן `RenderFlex overflow` (3.6px) שהכשיל `store_notif_widget_test` וחסם את `deploy.yml` ל-4 קומיטים → **deploy שוחרר.** ✅ **QA-audit (v6.04 חי):** T4 (6 שירותים + `_ServiceSheet`) + T2 (השוואת-מחירים, תוכן ב-`_kServiceSheets`) **אומתו כבר-בנויים** — אין צורך לקחת. לקח (stuck_log): visual-verify חי, לא רק test; `isScrollControlled`/`SingleChildScrollView` לגיליונות-ארוכים.
 
 - 2026-06-04 · **מקבץ** · **T2 ✅ הושלם ונדחף** (`2937eb8`). קטלוג ⋮ "השוואת מחירים" — היה `showToast('בבנייה')` (`case 'price_compare'`) → **sheet inline** (`_StorePriceComparisonSheet`): לכל מוצר 3 מחירי-חנויות מ-`kPlanTypes` (proto §9b verbatim, T0) + `bestStore` — הזול מסומן בכתום+✓ (אסלה→אבן קיסר 740 · מקלחת→טמבור הום 520; משתנה פר-מוצר). guard `store_price_comparison_test` · gates 24/102/103/111/116 ✓ · רנדר-בדפדפן חי. **הבהרה ל-QA של בנצי (שורה 177):** ה-"כבר-בנוי ב-`_kServiceSheets`" הוא **טאב חנות→שירותים (T4)**; ה-PLAN-T2 הוא **קטלוג ⋮** שהיה toast-stub אמיתי — זה מה שמילאתי (משטחים שונים, אפס כפילות). **שלב-א כמעט גמור:** T0/T1/T2/T5/T6/T7/T9 ✅ · T4 בנוי (QA) · T8 stub-מכוון. **הבא: T3** (קטלוג ⋮ → "סרוק תוכנית") — בכפוף לאישור-המשתמש.
+
+- 2026-06-04 · **מקבץ** · **לוקח T3** (קטלוג ⋮ → "סרוק תוכנית"). אישור-משתמש התקבל. מיישם על whats-happening לפי הסדר: 4 plan-types (`kPlanTypes`, proto §9) · אנימציית-סריקה (steps verbatim) · תוצאות (zones/items/store-offers) · "הוסף לסל". בעבודה — push רק על מילה מפורשת.
