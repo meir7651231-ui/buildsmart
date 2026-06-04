@@ -62,6 +62,15 @@ DN+qty הושלמו. 116589 נוסף (חסר היה לחלוטין) + spec ב-ve
 
 ---
 
+## P-3 — typography tokenization (ליטוש · zero-visual)
+**שינוי:** font-size literals → `BsTokens.fontXs/Sm/Md/Lg` ב-`toast.dart` (14) +
+`chain_diagram.dart` (9/22/8). **ערכי-הטוקנים זהים ל-literals המקוריים** (14==14 וכו') →
+**אפס שינוי-render** (token-binding). `chain_diagram` קיבל `import theme/tokens.dart`.
+**אימות:** `analyze` 0 errors · 0 magic-fontSize נותרו בקבצים · token-equal מבטיח
+זהות-פיקסל (כתקדים v5.92/#1/#3/#4 — שינוי דטרמיניסטי נשען על token-equal, לא screenshot).
+
+---
+
 ## v6.05 — Lipski gaskets/plugs parity to PDF (gate 117 · קטגוריה 6/9)
 
 **שינוי:** 17 SKUs (עמ' 36–37) — אטמים/אומים/פקקים. תסבוכת SKU תוקנה: 506525

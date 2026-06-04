@@ -69,3 +69,4 @@
 | 3 | `lib/theme/tokens.dart` · `lib/widgets/dial.dart` | stagger `28ms` → `BsTokens.dialStaggerStep` (motion token; zero-visual) | gate analyze+test+build | D |
 | 4 | `lib/theme/tokens.dart` · `lib/widgets/toast.dart` | toast `2s` → `BsTokens.toastDuration` (zero-visual) | gate | D |
 | 5 | `pubspec.yaml` · `pubspec.lock` | הוסר `go_router ^14.6.2` — dependency מת (0 שימושים ב-lib+test) | analyze 0 · pub get · widget_test ✅ | **P-4** · non-visual |
+| 6 | `theme/tokens.dart` · `widgets/toast.dart` · `widgets/chain_diagram.dart` | font literals `14/9/22/8` → `BsTokens.fontMd/Sm/Lg/Xs` (אותם ערכים — token-equal, אפס שינוי-render; chain_diagram קיבל import tokens) | analyze 0 · test ✅ | **P-3** · C · non-visual |
