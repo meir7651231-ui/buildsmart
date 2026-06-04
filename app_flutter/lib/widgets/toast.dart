@@ -17,7 +17,7 @@ void showToast(BuildContext context, String message,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
-            fontSize: 14,
+            fontSize: BsTokens.fontMd,
           ),
         ),
         backgroundColor: BsTokens.cardDark,

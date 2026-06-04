@@ -10,6 +10,7 @@
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 
 class ChainDiagram extends StatelessWidget {
@@ -158,7 +159,7 @@ class _ChainPainter extends CustomPainter {
               text: style.label,
               style: TextStyle(
                 color: style.color,
-                fontSize: 9,
+                fontSize: BsTokens.fontSm,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -208,7 +209,7 @@ class _ChainPainter extends CustomPainter {
       final emoji = TextPainter(
         text: TextSpan(
           text: p.typeEmoji,
-          style: const TextStyle(fontSize: 22),
+          style: const TextStyle(fontSize: BsTokens.fontLg),
         ),
         textDirection: TextDirection.rtl,
       )..layout();
@@ -221,7 +222,7 @@ class _ChainPainter extends CustomPainter {
           text: '#${p.sku}',
           style: const TextStyle(
             color: Color(0xFF7C8AA5),
-            fontSize: 8,
+            fontSize: BsTokens.fontXs,
             fontFamily: 'monospace',
           ),
         ),

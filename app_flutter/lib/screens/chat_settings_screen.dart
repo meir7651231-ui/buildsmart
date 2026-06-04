@@ -23,7 +23,7 @@ class ChatSettingsScreen extends ConsumerWidget {
         title: const Text(
           'הגדרות שיחות',
           style: TextStyle(
-            color: Color(0xFF1A1A1A),
+            color: BsTokens.inkLight,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -63,7 +63,7 @@ class ChatSettingsScreen extends ConsumerWidget {
             backgroundColor: const Color(0xFFFFFFFF),
             title: const Text(
               'איפוס הגדרות?',
-              style: TextStyle(color: Color(0xFF1A1A1A)),
+              style: TextStyle(color: BsTokens.inkLight),
             ),
             content: const Text(
               'כל הגדרות השיחות יוחזרו לברירת המחדל.',
@@ -123,7 +123,7 @@ class _QuickReplyBanner extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
                   ),
@@ -160,7 +160,7 @@ class _QuickReplyBanner extends StatelessWidget {
                     child: Text(
                       t,
                       style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 12,
                       ),
                     ),
@@ -701,7 +701,7 @@ class _SectionTile extends StatelessWidget {
           title: Text(
             title,
             style: const TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
@@ -728,7 +728,7 @@ class _SwitchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -766,7 +766,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             title: Text(
               o.label,
-              style: const TextStyle(color: Color(0xFF1A1A1A)),
+              style: const TextStyle(color: BsTokens.inkLight),
             ),
             value: o.value,
             groupValue: value,
@@ -799,7 +799,7 @@ class _TimeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       trailing: Text(
         _formatted,
         style: const TextStyle(
@@ -879,7 +879,7 @@ class _InlineTextRowState extends State<_InlineTextRow> {
           const SizedBox(height: 6),
           TextField(
             controller: _ctrl,
-            style: const TextStyle(color: Color(0xFF1A1A1A)),
+            style: const TextStyle(color: BsTokens.inkLight),
             cursorColor: BsTokens.brand,
             maxLines: 2,
             decoration: InputDecoration(
@@ -921,7 +921,7 @@ class _ActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       trailing: TextButton(
         onPressed: onTap,
         style: TextButton.styleFrom(
@@ -941,10 +941,10 @@ class _PlaceholderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       trailing: const Text(
         'בבנייה',
-        style: TextStyle(color: Color(0xFF666666), fontSize: 12),
+        style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
       ),
       onTap: () => showToast(context, '$label — בבנייה'),
     );

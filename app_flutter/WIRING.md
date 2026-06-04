@@ -28,9 +28,15 @@ home directly. Guarded by `onboarding_test`.
 
 | Button | Behavior | Status |
 |---|---|---|
-| logo "BuildSmart" | opens the "מי אתה?" persona picker (`showRolePicker`); contractor stays in the main app, **עובד opens its full role-app** (`WorkerAppScreen`), **manager pushes the `ManagerDashboardScreen` SHELL** (מרכז השליטה), store/courier still open their BS-dial sections | ✅ |
+| logo "BuildSmart" | opens the "מי אתה?" persona picker (`showRolePicker`); contractor stays in the main app; **עובד / מנהל / חנות / שליח each open their full role-app** (`WorkerAppScreen` / `ManagerDashboardScreen` / `StoreDashboardScreen` / `CourierDashboardScreen`) | ✅ |
 | role-app **עובד** (`WorkerAppScreen`) — T9 | same shell as the main app (white AppBar `🦺 עובד · ‹ יציאה` + card list, `BsTokens`); only the content differs. Faithful port of `renderWorker()` (proto 06 §4.2): worker picker (`kWorkers`) · summary (`שלום {name} 👷` + `{done}/{total}` + progress + פעילה/בתור/הוגשו) · 3 buckets (🔨 המשימה הנוכחית שלך = active\|rejected · ⏳ הבאות בתור = pending · 📋 שהגשת = review\|done) as task cards. **W3 — now LIVE:** `ConsumerStatefulWidget` reading the shared `workerTasksProvider` (not the static const); a current-bucket card carries a keyed "📸 שלח לאישור" button → `submitForReview` (active\|rejected → `review`), surfacing the task in the manager's approvals view. Data: `persona_data.dart` (5 verbatim tasks, R8). | ✅ |
 | role-app **מנהל המערכת** (`ManagerDashboardScreen`) — unify | full LIGHT role-app, 4-tab toggle (📊 לוח בקרה · 🚚 הזמנות · 👥 לקוחות · 🛠️ ניהול) reading the shared `ordersEngineProvider` live data (`managerAnalyticsProvider` / `managerCustomersProvider`). Replaces the old dial-manager panel for the manager persona. | ✅ |
+| role-app **🏪 חנות ספק** (`StoreDashboardScreen`) — T9 | full role-app, 4 segmented tabs (בית/הזמנות/מלאי/פורטל), same shell as the main app. Faithful port of `screen-store` (proto 06 §2): action-first home (`שלום 👋` · primary `הזמנות ממתינות לאישור` · stats בהכנה/מוכן לאיסוף/מחזור פעיל · stock alert · demo `סימולציית הזמנה נכנסת`) · orders queue with the real **`new→preparing→ready`** advance (`✓ אשר וקבל להכנה` / `📦 סמן כמוכן — העבר לשליח`) · stock availability toggles (`✅ זמין במלאי` / `❌ אזל`) · 8-tile supplier portal. Orders are the shared `sysOrdersProvider`. Data verbatim `supplier_data.dart` (R8). Guarded by `t9_supplier_personas_test`. | ✅ |
+| role-app **🛵 שליח** (`CourierDashboardScreen`) — T9 | full role-app: vehicle picker (`vehicleCanCarry`, משלוח קטן/טנדר/משאית) + delivery home (stats לאיסוף/בדרך/נמסרו) + job list (3-step tracker איסוף/בדרך/נמסר) + 6-tile portal. Faithful port of `screen-courier` (proto 06 §3): the real **`ready→pickup→transit→delivered`** advance (`📦 אספתי מהחנות` / `🚚 יצאתי לדרך` / `✅ נמסר ללקוח`). Shares `sysOrdersProvider` with the store — an order the store marks "מוכן" appears here live. Data verbatim (R8). Guarded by `t9_supplier_personas_test`. | ✅ |
+
+> **T9 deferred** (proto "adds beyond"/heavier infra): per-store login routing, the picking sheet + missing-item hold loop, split-shipment jobs, POD capture, the printed delivery note, and localStorage persistence. The store/courier full screens + the shared 6-stage advance engine are done.
+>
+> **⚠️ merge note (live↔manager unify):** the store/courier role-apps read **`sysOrdersProvider`** while the manager reads **`ordersEngineProvider`** — two separate order systems. Contractor checkout + worker tasks feed the manager's engine (live); store/courier currently do **not** reach the manager. Unifying the T9 store/courier dashboards onto `ordersEngineProvider` is the next step.
 | 💡 (קצה שמאלי) | replays the intro tour (`showIntroTour` → the onboarding slides) | ✅ |
 | שם-משתמש (צ'יפ ליד הלוגו) | registered user's first name (`userProfileProvider`); absent for guest/demo | ✅ |
 
@@ -1002,3 +1008,9 @@ Rule in CONVENTIONS.md. Guards: huliot_card_render_test (2) + huliot_search_test
   (`bestStore`) as a `SmartCartLine` → `smartCartProvider`, switches to חנות/הסל tab, toasts. Modal `isScrollControlled`.
 - All strings verbatim proto §9. Guard: `test/scan_plan_test` (4 types active · each line cheapest · qty 1).
   No `kLipskeyCatalog` (gate 114 clean).
+
+## Polish — token-binding (ליטוש · אין שינוי-wiring)
+- **P-1 wave-1** (`catalog/notif/chat/store_settings_screen`): 44× צבעי-טקסט קשיחים →
+  `BsTokens.inkLight/mutedLight` (token-equal · אפס שינוי-render/wiring). ראה `POLISH_LOG.md` #7.
+- **P-3** (`toast`/`chain_diagram`): font-literals → `BsTokens.fontXs/Sm/Md/Lg` (token-equal).
+- **P-4**: הוסר `go_router` (dependency מת, 0 שימושים).

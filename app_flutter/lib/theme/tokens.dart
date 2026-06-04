@@ -18,6 +18,12 @@ class BsTokens {
   static const double radiusCard = 16;
   static const double radiusCircle = 24; // FAB inner
 
+  // Font sizes — bound from existing literals (token-equal · zero visual). P-3.
+  static const double fontXs = 8; // chain_diagram caption
+  static const double fontSm = 9; // chain_diagram label
+  static const double fontMd = 14; // toast text
+  static const double fontLg = 22; // chain_diagram glyph
+
   // Dial dimensions (matches .dial__circle: 48px).
   static const double dialCircle = 48;
   static const double dialIconSize = 22;

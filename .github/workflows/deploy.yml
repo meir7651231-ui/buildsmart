@@ -73,6 +73,24 @@ jobs:
           mkdir -p app/dist/flutter
           cp -r app_flutter/build/web/* app/dist/flutter/
 
+      # ─── Manager preview (agent-network-live) at /buildsmart/flutter-preview/ ─
+      # Additive & best-effort: a failure here must NEVER block the live deploy
+      # (continue-on-error). Builds the integrated manager + live-engine branch
+      # and stages it under /flutter-preview/ so it rides the same gh-pages push
+      # (otherwise the force-push below would wipe any separately-uploaded copy).
+      - name: Build manager preview under /flutter-preview/
+        continue-on-error: true
+        run: |
+          set -e
+          git clone --depth 1 --branch claude/agent-network-live \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/preview-src
+          ( cd /tmp/preview-src && bash scripts/gen_version.sh )
+          ( cd /tmp/preview-src/app_flutter \
+              && flutter pub get \
+              && flutter build web --release --base-href "/buildsmart/flutter-preview/" )
+          mkdir -p app/dist/flutter-preview
+          cp -r /tmp/preview-src/app_flutter/build/web/* app/dist/flutter-preview/
+
       # ─── Publish combined output FIRST ──────────────────────────
       # The web deploy must NOT depend on the (fragile, Android-toolchain)
       # APK build below — otherwise an APK failure freezes the live site.

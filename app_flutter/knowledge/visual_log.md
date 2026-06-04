@@ -46,6 +46,23 @@ DN+qty הושלמו. 116589 נוסף (חסר היה לחלוטין) + spec ב-ve
 
 ---
 
+## v6.05 — T9: מסכי-פרסונה מלאים 🏪 חנות + 🛵 שליח [בנצי]
+
+**שינוי:** הושלם הנותר ב-T9 — פרסונת **חנות** (`StoreDashboardScreen`) ו**שליח**
+(`CourierDashboardScreen`) כמסכים-מלאים בסגנון האפליקציה (לא דיאל — אישור-משתמש,
+כמו עובד). חנות = 4 טאבים (בית/הזמנות/מלאי/פורטל); שליח = בורר-רכב + בית +
+רשימת-משלוחים + פורטל (6 אריחים). נוסף **מנוע-הזמנות משותף** `sysOrdersProvider`
+(6 שלבים): קידום חנות `new→preparing→ready` + שליח `ready→pickup→transit→delivered`
+מסונכרן בין שני המסכים. תוכן verbatim מ-`supplier_data.dart` (proto 06 §1/§7, R8).
+`role_picker_sheet` מנתב חנות/שליח ל-`Navigator.push`.
+
+**אימות:**
+- ✅ `t9_supplier_personas_test` — 9/9 (seed verbatim · מנוע store↔courier · vehicle-gating · רינדור שני המסכים · אפס "בבנייה").
+- ✅ `flutter analyze` (6 קבצים) — 0 errors (רק info-לינטים, תואם `persona_data`).
+- 🔜 אימות-ויזואלי חי (Chrome, על gh-pages) — לאחר הדיפלוי (לקח v6.04: visual-verify חי, לא רק test).
+
+---
+
 ## v6.05 — T3 · catalog ⋮ "סרוק תוכנית" scan flow [מקבץ]
 
 **שינוי:** ה-⋮ בקטלוג, "סרוק תוכנית עבודה" — `_ScanPlanSheet` מ-stub ('בבנייה') ל-**זרימה מלאה**
@@ -59,6 +76,24 @@ DN+qty הושלמו. 116589 נוסף (חסר היה לחלוטין) + spec ב-ve
   - בורר: 4 סוגים (אינסטלציה 🚿 · חשמל ⚡ · אדריכלות 🏛️ · גמר 🎨) עם sub-labels.
   - תוצאות אינסטלציה: "✓ זוהו 4 נקודות אינסטלציה · 6 פריטים · הזול ₪1557"; 4 zones עם ודאות% (98/95/92/**81 כתום** כי <88); כל פריט עם 3 חנויות, הזול מסומן ✓ (אסלה→אבן קיסר 740 · מקלחת→טמבור הום 520).
   - "אשר הכל — הוסף 6 פריטים לסל" → **6 פריטים נוספו לסל** (טאב חנות/הסל · 7 בסל · toast "6 פריטים מהתוכנית נוספו לסל"). add-to-cart עובד E2E.
+
+---
+
+## P-3 — typography tokenization (ליטוש · zero-visual)
+**שינוי:** font-size literals → `BsTokens.fontXs/Sm/Md/Lg` ב-`toast.dart` (14) +
+`chain_diagram.dart` (9/22/8). **ערכי-הטוקנים זהים ל-literals המקוריים** (14==14 וכו') →
+**אפס שינוי-render** (token-binding). `chain_diagram` קיבל `import theme/tokens.dart`.
+**אימות:** `analyze` 0 errors · 0 magic-fontSize נותרו בקבצים · token-equal מבטיח
+זהות-פיקסל (כתקדים v5.92/#1/#3/#4 — שינוי דטרמיניסטי נשען על token-equal, לא screenshot).
+
+---
+
+## P-1 wave-1 — color tokenization בארבעת מסכי-ה-settings (ליטוש · zero-visual)
+**שינוי:** 44 text-colors קשיחים → טוקנים ב-`catalog/notif/chat/store_settings_screen`:
+`Color(0xFF1A1A1A)` → `BsTokens.inkLight` (39×) · `Color(0xFF666666)` → `BsTokens.mutedLight` (5×).
+**ערכי-הטוקנים זהים** (0xFF1A1A1A==inkLight וכו') → **אפס שינוי-render** (token-binding).
+רק text-colors חד-משמעיים נכבלו; surface-לבן/bg/צללים/accents → הצעות ב-POLISH_LOG (לא הומצא ערך).
+**אימות:** `analyze` 0 errors · 0 literals של שני ה-hexes נותרו בקבצים · token-equal = זהות-פיקסל.
 
 ---
 

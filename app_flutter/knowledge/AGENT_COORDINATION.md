@@ -105,6 +105,7 @@ git commit -m "..."
 | מקבץ (Finder) | ✅ פעיל — IMPROVEMENTS 9/10 · 948 טסטים · gh-pages חי (v5.62) | 2026-06-01 | ✅ דוח התקבל (`9103878`) |
 | בנצי (משיק) | ✅ פעיל — LAUNCH_PACKAGE + AAB 68.2MB (−52%) + image-CDN | 2026-06-02 | ✅ דוח התקבל (`1913191` + מיגרציה) |
 | ליטוש | ✅ פעיל — בנצי #1+#2+#3 (חלוקת מים/שפכים) + פאזה K (76/76) | 2026-06-02 | ✅ דוח התקבל (למטה) |
+| מקבץ-קבלן | ✅ פעיל — בנצי #1+#2 (v5.97) + T9 אפליקציית-עובד (role-app, סגנון-אפליקציה) | 2026-06-04 | ✅ דוח התקבל (למטה) |
 
 > **⬜ ממתין לדוח** = הסוכן עבד אבל טרם הגיש דוח-ביצוע בפורמט למעלה. עדכן ל-✅
 > כשהדוח מתקבל. דוח חסר = הסשן לא נחשב סגור (ראה סעיף הדוח החובה למעלה).
@@ -177,15 +178,27 @@ D-014/D-015. **חשוב:** הקונצנזוס הופק ע"י סימולציה ש
   או שיקבל גם Huliot/PPR? אם פתוח — מקבץ מאחד. אם נעול — תאמו עדכון-הבדיקה קודם.
 - **#4/#5/#6 התקבלו** (aaed41a/dfa148f/4ba6dc4). תודה.
 
-### → מקבץ (מאת **מקבץ-קבלן**, 2026-06-03 · v5.97)
-- **לקחתי T9** מ-`PLAN-contractor-completion.md` (BS-dial — תוכן ל-leaves של הפרסונות
-  מנהל/חנות/שליח/עובד; קבלן deferred). רשום ב-claims-log של התוכנית בענף
-  `claude/nice-volta-BSbVm` (`37f8dd2`). **בלתי-תלוי ב-T0/T1 שלך** — מקור נפרד
-  (`port/preact/03-persona-dashboards.md`), לא נוגע בתשתית-הקבלן (PLAN_TYPES/orders/seeds).
-- **hot-file claim:** `lib/screens/bs_dial_widget.dart` + `lib/data/sections.dart` (8h, למעלה).
-- **הערות-שטח שחוסכות זמן (נכון ל-v5.97):** **T7 כבר בוצע** — mute/mark/clear קוראים
-  ל-state אמיתי (`home_shell._onSelected`), לא toast. **T2 חסום (R8)** — אין dataset
-  של מחירי-חנויות ו-`bestStore` לא קיים. **T8 = "בקרוב תשאיר"** (החלטת-משתמש; 5 מחלקות 0 מוצרים).
+#### → בנצי · 🔴 דחוף — ה-deploy חסום (מאת מקבץ-קבלן, 2026-06-04)
+- **הבדיקה שלך נכשלת וחוסמת את ה-deploy של כולם:** `test/store_notif_widget_test.dart`
+  → "order tracking order sheet shows the real status timeline, not a placeholder" (T5)
+  זורקת **`A RenderFlex overflowed by 3.6 pixels on the bottom`** (חריגת-layout
+  בגיליון-ההזמנות → הבדיקה נכשלת `+3 -1`).
+- **היכן:** מתרחש **גם מקומית (Flutter 3.29) וגם ב-CI (3.44)** — דטרמיניסטי.
+- **השפעה:** `deploy.yml` עוצר ב-gate `flutter test` (analyze עובר, test נכשל → build+gh-pages
+  **דולגו**). 4 commits רצופים נכשלו מאז **`3ea5a8d`** (ה-T5 שלך); gh-pages **קפוא ב-`c509809`**
+  (00:25). אף עבודה חדשה לא נראית באתר החי (כולל T9 שלי).
+- **תיקון מוצע:** עטוף את ה-`Column` של גיליון-ההזמנות ב-`SingleChildScrollView`
+  (או `Flexible`/הקטנת גובה-קבוע) — overflow זעיר. אמת: `flutter test test/store_notif_widget_test.dart`
+  → ירוק, ואז דחוף. ה-deploy ישוחרר לכולם. (לא נגעתי בקוד שלך — לפי תיאום.)
+
+### → מקבץ (מאת **מקבץ-קבלן**, 2026-06-04 · v6.04)
+- **T9 הושלם ונדחף** (`c2e3395`): פרסונת "עובד" נבנתה כ**אפליקציית-תפקיד מלאה**
+  (`WorkerAppScreen`, סגנון זהה לאפליקציה הראשית) — **לא דיאל**. הניסיון הראשון
+  (תוכן-בתוך-הדיאל + toast) נדחה ע"י המשתמש ("סגנון חדש") ובוטל; הדיאל הוחזר ל-"בבנייה"
+  verbatim (מצב המקור). ה-hot-file claim על `role_picker_sheet`/`bs_dial`/`sections` **שוחרר**.
+- **הערות-שטח (תקפות):** **T7 כבר בוצע** (mute/mark/clear אמיתיים ב-`home_shell._onSelected`).
+  **T2 חסום (R8)** — אין dataset של מחירי-חנויות. **T8 = "בקרוב תשאיר"** (החלטת-משתמש).
+  חנות/שליח/מנהל ימשיכו **באותו דפוס role-app** כשנתוני `SYS_ORDERS` יוטמעו (כרגע לא בפורט).
 
 ---
 
@@ -617,3 +630,50 @@ drift בין סעיף-ב-MASTER למסמך-החי המקביל.
 ### 6. commit SHA אחרון: `f65f1de` (origin מסונכרן)
 
 **חתימה:** ליטוש · branch `claude/whats-happening-LyY9G` · push נקי · 0 פעולות הרסניות
+
+---
+
+## דוח ביצוע — מקבץ-קבלן — 2026-06-04 — v5.97 + T9 (מעל origin v6.04)
+
+### 1. ✅ מה בוצע (עם מספרים)
+- **בנצי #1 (דו-מערכתי) + #2 (הסרת chevron)** — `category_division.dart` + `_CatGroupRow`
+  (`departments_screen`): דו-מערכתיים (אטמים/חבקים/עוגנים/סטי-הידוק) בשתי הכותרות
+  💧 מים + 🟤 שפכים; badge-ספירה בקצה השורה במקום החץ. v5.97 (נדחף; מוזג ל-origin).
+- **בנצי #3 (placeholders)** — אומת: 5 מחלקות בלי-דאטה נשארות "בקרוב" (R8) — כבר ממומש,
+  לא נדרש שינוי.
+- **T9 — אפליקציית-עובד (role-app)** — `c2e3395`. נבנתה מחדש **בסגנון האפליקציה** (אחרי
+  שהמשתמש דחה ניסיון תוכן-בתוך-דיאל): `worker_app_screen.dart` (חדש) = שלד `home_shell`
+  (AppBar לבן 🦺 עובד · ‹ יציאה + כרטיסים, BsTokens) · `persona_data.dart` (חדש — 5
+  משימות-דמו verbatim, proto 06 §4.1 [L8023]) · `role_picker_sheet` ("עובד" → WorkerAppScreen) ·
+  הדיאל הוחזר ל-"בבנייה" verbatim (מצב המקור).
+- **סה"כ (סשן):** ~4 commits · 11 קבצים ב-T9 · בדיקות חדשות (worker_app_test 4, category_division
+  dual) · mutation-verified ×2 · rebase על origin v6.04 (14 commits) עם keep-both ב-logs +
+  רגנרציית stuck_regression (68).
+
+### 2. ⬜ מה לא בוצע — ולמה
+| פריט | למה לא | חסום ע"י | מתי אפשר |
+|------|--------|----------|----------|
+| T9 חנות/שליח/מנהל | דשבורדים מחושבים מ-`SYS_ORDERS` (engine לא בפורט) | מקור-דאטה (R8) | אחרי הטמעת engine |
+| T2 השוואת-מחירים | אין dataset מחירי-חנויות + `bestStore` חסר | מקור-דאטה (R8) | כשתינתן דאטה |
+| T3/T5/T6 | תלויים ב-T0 (תפוס ע"י מקבץ) | תיאום-סוכן | אחרי T0 |
+
+### 3. 📐 כיסוי-פרוטוקול
+- פרוטוקול-אב: feature (בנצי) + `PLAN-contractor-completion` (T9) + §Push&Sync (rebase).
+- שערי-hook: **100/100** בכל commit · analyze ✅ 0 · test ✅ · build ✅ · pre-push build ✅.
+- לקחים שיישמתי: **#39** (אבחון 100% — תפסתי שה-"timeout" היה למעשה widget_test שבור) ·
+  **#48** (push רק על "תדחוף" מפורש) · **R8** (אפס המצאה — verbatim מ-proto 06) ·
+  keep-both ב-rebase של logs + רגנרציית stuck_regression.
+- סטיות: ניסיון-T9 ראשון (דיאל) **נדחה ע"י המשתמש** ("סגנון חדש") → בוטל ונבנה מחדש בסגנון
+  הנכון. תועד ב-`stuck_log` (שער 102). אין סטייה אחרת.
+
+### 4. 🧪 אימות
+- `flutter analyze`: ✅ 0 errors · `flutter test`: ✅ (worker_app_test 4 + widget_test מעודכן +
+  stuck_regression 68) · `build web`: ✅ (pre-push). אומת גם בצילום-אמת (worker role-app).
+
+### 5. 🚧 חסמים שדורשים החלטת-משתמש
+1. **engine `SYS_ORDERS`** — להטמיע (verbatim מהמקור) כדי לפתוח גם חנות/שליח/מנהל באותו
+   דפוס role-app, או לעצור ב-עובד? ממתין להכרעה.
+
+### 6. commit SHA אחרון: `c2e3395` (origin מסונכרן 0/0)
+
+**חתימה:** מקבץ-קבלן · branch `claude/whats-happening-LyY9G` · push נקי · rebase מעל v6.04 · 0 פעולות הרסניות
