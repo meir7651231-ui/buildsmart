@@ -802,3 +802,9 @@ Rule in CONVENTIONS.md. Guards: huliot_card_render_test (2) + huliot_search_test
   (`bestStore`) as a `SmartCartLine` → `smartCartProvider`, switches to חנות/הסל tab, toasts. Modal `isScrollControlled`.
 - All strings verbatim proto §9. Guard: `test/scan_plan_test` (4 types active · each line cheapest · qty 1).
   No `kLipskeyCatalog` (gate 114 clean).
+
+## Polish — token-binding (ליטוש · אין שינוי-wiring)
+- **P-1 wave-1** (`catalog/notif/chat/store_settings_screen`): 44× צבעי-טקסט קשיחים →
+  `BsTokens.inkLight/mutedLight` (token-equal · אפס שינוי-render/wiring). ראה `POLISH_LOG.md` #7.
+- **P-3** (`toast`/`chain_diagram`): font-literals → `BsTokens.fontXs/Sm/Md/Lg` (token-equal).
+- **P-4**: הוסר `go_router` (dependency מת, 0 שימושים).

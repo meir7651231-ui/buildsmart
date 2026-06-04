@@ -70,3 +70,22 @@
 | 4 | `lib/theme/tokens.dart` · `lib/widgets/toast.dart` | toast `2s` → `BsTokens.toastDuration` (zero-visual) | gate | D |
 | 5 | `pubspec.yaml` · `pubspec.lock` | הוסר `go_router ^14.6.2` — dependency מת (0 שימושים ב-lib+test) | analyze 0 · pub get · widget_test ✅ | **P-4** · non-visual |
 | 6 | `theme/tokens.dart` · `widgets/toast.dart` · `widgets/chain_diagram.dart` | font literals `14/9/22/8` → `BsTokens.fontMd/Sm/Lg/Xs` (אותם ערכים — token-equal, אפס שינוי-render; chain_diagram קיבל import tokens) | analyze 0 · test ✅ | **P-3** · C · non-visual |
+| 7 | 4×settings (`catalog/notif/chat/store_settings_screen`) | 44× text-colors קשיחים `0xFF1A1A1A`→`BsTokens.inkLight` · `0xFF666666`→`mutedLight` (text-only, token-equal, אפס שינוי-render) | analyze 0 | **P-1 wave-1** · non-visual |
+
+### P-1 — צבעים שנותרו (needs-token-decision · הצעות, לא בוצע)
+לפי כלל ה-brief ("אם חסר token — הצע, אל תמציא"): הצבעים הבאים **לא** נכבלו —
+אין token-ערך תואם, או שהסמנטיקה לא תואמת token קיים. ממתינים להחלטת-design:
+- `0xFFFFFFFF` (surface לבן) — value==`cardLight` אבל גם משמש כ-**טקסט-לבן** (toast/dial) →
+  כבילה עיוורת תערבב surface↔text. צריך token-טקסט-on-brand נפרד, או כבילה ידנית פר-שימוש.
+- `0xFFF5F6FA` (scaffold-bg של settings) · `0xFFF5F5F7` (role-row) — אין token (≠`bgLight` FAFAFA). הצע `bgSubtle`.
+- `Colors.black26`/`0x14000000`/`0x26000000` (צללים) — אין shadow-color token. הצע `shadowSoft`.
+- `0xFFFFF0E3` (brand-light pill) · `0xFF7C8AA5` (chain SKU) · `0xFF111111`/`0xFF777777` (chat-tokens מחוץ-לצ׳אט) — accents ספציפיים, צריך החלטת-naming.
+- `install_studio_screen` (56 צבעים) — pass נפרד (חסר import tokens + הרבה accents); דורש סבב ייעודי.
+
+### P-2 (a11y) — אומת מכוסה (אין שינוי-קוד בנתיב-בטוח)
+`dial.dart` `DialRow` כבר `Semantics(button:true, label)` — וכל ה-dials מרכיבים אותו (מרכזי).
+כפתורי-AppBar = `home_shell` (קובץ-קבלן NO-TOUCH) · toast = `SnackBar` (a11y מובנה). אין תוספת-בטוחה.
+
+### P-5 (knowledge) — אומת לא-רלוונטי (אין residue)
+`R1–R9` הם **חוקי-העיצוב הפעילים** (MASTER_PROTOCOL §FRM "FRM-01 (R1)…" + port "governing law R2/R3"),
+**לא** שאריות-פרוטוקול-מחוק → מחיקתם תשבור תיעוד. audit מסמכים-חדשים (PLAN-*) חי ב-`nice-volta` (מחוץ-לסקופ-הענף).

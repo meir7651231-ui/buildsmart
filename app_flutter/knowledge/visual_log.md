@@ -71,6 +71,15 @@ DN+qty הושלמו. 116589 נוסף (חסר היה לחלוטין) + spec ב-ve
 
 ---
 
+## P-1 wave-1 — color tokenization בארבעת מסכי-ה-settings (ליטוש · zero-visual)
+**שינוי:** 44 text-colors קשיחים → טוקנים ב-`catalog/notif/chat/store_settings_screen`:
+`Color(0xFF1A1A1A)` → `BsTokens.inkLight` (39×) · `Color(0xFF666666)` → `BsTokens.mutedLight` (5×).
+**ערכי-הטוקנים זהים** (0xFF1A1A1A==inkLight וכו') → **אפס שינוי-render** (token-binding).
+רק text-colors חד-משמעיים נכבלו; surface-לבן/bg/צללים/accents → הצעות ב-POLISH_LOG (לא הומצא ערך).
+**אימות:** `analyze` 0 errors · 0 literals של שני ה-hexes נותרו בקבצים · token-equal = זהות-פיקסל.
+
+---
+
 ## v6.05 — Lipski gaskets/plugs parity to PDF (gate 117 · קטגוריה 6/9)
 
 **שינוי:** 17 SKUs (עמ' 36–37) — אטמים/אומים/פקקים. תסבוכת SKU תוקנה: 506525

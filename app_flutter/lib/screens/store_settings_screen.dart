@@ -23,7 +23,7 @@ class StoreSettingsScreen extends ConsumerWidget {
         title: const Text(
           'הגדרות חנות',
           style: TextStyle(
-            color: Color(0xFF1A1A1A),
+            color: BsTokens.inkLight,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -62,7 +62,7 @@ class StoreSettingsScreen extends ConsumerWidget {
             backgroundColor: const Color(0xFFFFFFFF),
             title: const Text(
               'איפוס הגדרות?',
-              style: TextStyle(color: Color(0xFF1A1A1A)),
+              style: TextStyle(color: BsTokens.inkLight),
             ),
             content: const Text(
               'כל הגדרות החנות יוחזרו לברירת המחדל.',
@@ -661,7 +661,7 @@ class _SectionTile extends StatelessWidget {
           title: Text(
             title,
             style: const TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
@@ -688,7 +688,7 @@ class _SwitchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -726,7 +726,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             title: Text(
               o.label,
-              style: const TextStyle(color: Color(0xFF1A1A1A)),
+              style: const TextStyle(color: BsTokens.inkLight),
             ),
             value: o.value,
             groupValue: value,
@@ -791,11 +791,11 @@ class _InlineTextRowState extends State<_InlineTextRow> {
           const SizedBox(height: 6),
           TextField(
             controller: _ctrl,
-            style: const TextStyle(color: Color(0xFF1A1A1A)),
+            style: const TextStyle(color: BsTokens.inkLight),
             cursorColor: BsTokens.brand,
             decoration: InputDecoration(
               hintText: widget.hint,
-              hintStyle: const TextStyle(color: Color(0xFF666666)),
+              hintStyle: const TextStyle(color: BsTokens.mutedLight),
               filled: true,
               fillColor: const Color(0xFFF2F3F5),
               border: OutlineInputBorder(
@@ -859,14 +859,14 @@ class _NumberRowState extends State<_NumberRow> {
           Expanded(
             child: Text(
               widget.label,
-              style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+              style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
             ),
           ),
           SizedBox(
             width: 100,
             child: TextField(
               controller: _ctrl,
-              style: const TextStyle(color: Color(0xFF1A1A1A)),
+              style: const TextStyle(color: BsTokens.inkLight),
               cursorColor: BsTokens.brand,
               textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
@@ -900,10 +900,10 @@ class _PlaceholderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       trailing: const Text(
         'בבנייה',
-        style: TextStyle(color: Color(0xFF666666), fontSize: 12),
+        style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
       ),
       onTap: () => showToast(context, '$label — בבנייה'),
     );
@@ -925,7 +925,7 @@ class _ActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+      title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       trailing: TextButton(
         onPressed: onTap,
         style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
