@@ -409,3 +409,9 @@
 - אימות: שברתי מפריד-אלפים של fMoney (`% 3 == 0`→`% 3 == 9`) → contractor_seeds_test
   אדום ("Expected ₪9,840 · Actual ₪9840") ✅. שחזור → 8/8 ירוק.
 - מסקנה: הבדיקה תופסת רגרסיה ב-helper.
+
+### lib/data/persona_data.dart — 2026-06-03T23:58:26+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s|t.worker == worker && statuses.contains|t.worker != worker \&\& statuses.contains|`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/worker_app_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

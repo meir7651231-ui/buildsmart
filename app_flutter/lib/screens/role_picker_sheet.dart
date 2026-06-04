@@ -1,4 +1,5 @@
 import 'package:buildsmart/data/personas.dart';
+import 'package:buildsmart/screens/worker_app_screen.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -123,7 +124,13 @@ class _RoleRow extends ConsumerWidget {
               Navigator.of(context).pop();
               return;
             }
-            // Other roles surface their existing BS-dial section tree.
+            if (persona.id == 'worker') {
+              // Worker is a full role-app (same shell as the main app), not a dial.
+              Navigator.of(context).pop();
+              Navigator.of(context).push(WorkerAppScreen.route());
+              return;
+            }
+            // Other roles still surface their existing BS-dial section tree.
             ref.read(activePersonaProvider.notifier).state = persona.id;
             ref.read(bsDrillPathProvider.notifier).state = const [];
             ref.read(openDialProvider.notifier).state = OpenDial.bs;

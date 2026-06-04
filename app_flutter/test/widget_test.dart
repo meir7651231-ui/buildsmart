@@ -62,15 +62,22 @@ void main() {
     expect(find.text('חנויות פעילות'), findsOneWidget);
   });
 
-  testWidgets('Worker → 3 task-group headers', (t) async {
+  testWidgets('Worker → opens its role-app with the 3 task groups', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     await _open(t, 'BS');
     await t.tap(find.text('עובד'));
     await t.pumpAndSettle();
-    expect(find.text('המשימה הנוכחית שלך'), findsOneWidget);
-    expect(find.text('הבאות בתור'), findsOneWidget);
-    expect(find.text('שהגשת'), findsOneWidget);
+    // Worker now opens its full role-app (WorkerAppScreen) — same shell as the
+    // main app, not a dial. The 3 task-group sections (with status emoji +
+    // count) and a real task card appear.
+    expect(find.text('🦺 עובד'), findsOneWidget);
+    expect(find.text('🔨 המשימה הנוכחית שלך'), findsOneWidget);
+    expect(find.text('⏳ הבאות בתור (2)'), findsOneWidget);
+    expect(find.text('התקנת קו מים חם — חדר רחצה'), findsOneWidget);
+    // The third group sits below the fold in the lazy ListView — scroll to it.
+    await t.scrollUntilVisible(find.text('📋 שהגשת (0)'), 200);
+    expect(find.text('📋 שהגשת (0)'), findsOneWidget);
   });
 
   testWidgets('"הכל" overview shows a preview block per section', (t) async {

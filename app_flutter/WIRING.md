@@ -28,7 +28,8 @@ home directly. Guarded by `onboarding_test`.
 
 | Button | Behavior | Status |
 |---|---|---|
-| logo "BuildSmart" | opens the "מי אתה?" persona picker (`showRolePicker`); a non-contractor role opens its existing BS-dial sections, contractor stays in the main app | ✅ |
+| logo "BuildSmart" | opens the "מי אתה?" persona picker (`showRolePicker`); contractor stays in the main app, **עובד opens its full role-app** (`WorkerAppScreen`), store/courier/manager still open their BS-dial sections | ✅ |
+| role-app **עובד** (`WorkerAppScreen`) — T9 | same shell as the main app (white AppBar `🦺 עובד · ‹ יציאה` + card list, `BsTokens`); only the content differs. Faithful port of `renderWorker()` (proto 06 §4.2): worker picker (`kWorkers`) · summary (`שלום {name} 👷` + `{done}/{total}` + progress + פעילה/בתור/הוגשו) · 3 buckets (🔨 המשימה הנוכחית שלך = active\|rejected · ⏳ הבאות בתור = pending · 📋 שהגשת = review\|done) as task cards. Data: `persona_data.dart` (5 verbatim tasks, R8). store/courier/manager follow the same pattern once `SYS_ORDERS` is ported. | ✅ |
 | 💡 (קצה שמאלי) | replays the intro tour (`showIntroTour` → the onboarding slides) | ✅ |
 | שם-משתמש (צ'יפ ליד הלוגו) | registered user's first name (`userProfileProvider`); absent for guest/demo | ✅ |
 
