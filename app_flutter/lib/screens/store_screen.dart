@@ -3016,6 +3016,15 @@ class _OrderSheet extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           _OrderTimeline(stage: order.stage),
+          const SizedBox(height: 18),
+          OutlinedButton.icon(
+            onPressed: () => showToast(
+              context,
+              'סריקת תעודת-משלוח (OCR) — בקרוב',
+            ),
+            icon: const Text('📄', style: TextStyle(fontSize: 16)),
+            label: const Text('סרוק תעודת-משלוח'),
+          ),
         ],
       ),
     );

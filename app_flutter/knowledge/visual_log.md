@@ -17,6 +17,19 @@
 
 ---
 
+## v6.02 — T5 · תעודת-משלוח (OCR→toast) בגיליון-הזמנה [בנצי]
+
+**שינוי:** `_OrderSheet` (`store_screen`) — נוסף כפתור "📄 סרוק תעודת-משלוח" → toast
+(OCR=stub לפי §9d + R-rule camera/OCR→toast). מעקב-הסטטוס (`_OrderTimeline` · 4 stages ·
+`liveOrdersProvider`) כבר היה בנוי → זה משלים את DoD T5 ("סטטוס מוצג · OCR=toast").
+
+**אימות:**
+- ✅ `flutter analyze` (`store_screen`) — 0 errors (ב-commit-hook).
+- ✅ UI דטרמיניסטי (`OutlinedButton`→`showToast`, ללא layout-risk) — לפי תקדים v5.92/v5.96
+  (CanvasKit screenshots לא-אמינים → נשען על analyze + תוספת-מינימלית).
+
+---
+
 ## v6.02 — Lipski insertion-branch parity to PDF (gate 117 · קטגוריה 4b/9)
 
 **שינוי:** 13 SKUs של מסעפים שקע-תקע (עמ' 42): שמות תוקנו (היו "מחבר כפול"/
