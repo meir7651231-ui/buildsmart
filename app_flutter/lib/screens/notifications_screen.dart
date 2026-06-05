@@ -783,6 +783,49 @@ class _NotifList extends ConsumerWidget {
       );
     }
 
+    // Quiet-hours suppression: when inside the configured quiet window, hide all
+    // rows and show a dedicated muted banner.
+    if (ns.isInQuietHours) {
+      return RefreshIndicator(
+        color: BsTokens.brand,
+        backgroundColor: const Color(0xFFFFFFFF),
+        onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
+        child: LayoutBuilder(
+          builder: (_, constraints) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: constraints.maxHeight,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🌙', style: TextStyle(fontSize: 48)),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'שעות שקט פעילות',
+                      style: TextStyle(
+                        color: Color(0xFF1A1A1A),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'מושתק בשעות השקט',
+                      style: TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     if (items.isEmpty) {
       return RefreshIndicator(
         color: BsTokens.brand,

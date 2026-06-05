@@ -1,8 +1,38 @@
-# Wiring Audit — v6.13 + v6.14 (2026-06-04)
+# Wiring Audit — v6.13 + v6.14 + v6.15 (2026-06-04)
 
-Post-cutover audit of the unified app (v6.12) by parallel review agents, fixed across two
+Post-cutover audit of the unified app (v6.12) by parallel review agents, fixed across three
 passes. Scope: every interactive control across all surfaces (contractor app, store,
 courier, worker, manager, settings, menu/search dials, onboarding).
+
+## v6.15 — third pass + store-orders refactor
+
+5 agents (onboarding/auth · money-path · full settings screens · hubs/tools internals ·
+form-input persistence) on v6.14. ~15 deduped findings; the actionable set fixed:
+
+- **Store-orders unified on the engine (headline refactor):** the contractor's "הזמנות שלי" read a
+  RAM-only `storeOrdersProvider` (static seed, isolated from `ordersEngineProvider`) — placed orders
+  vanished on restart, checkout minted two divergent records (different id + stage), detail came from
+  a static 5-id map, address/notes were dropped. Now `storeOrdersProvider` is a `Provider` DERIVED
+  from the engine: one id, live stage (follows manager/courier advances), real line items (new
+  `OrderLineItem` on `Order`), persisted address+notes, and the timeline regained its `new`+`pickup`
+  stages. Demo seed retained for the empty-state.
+- **Persistence:** supplier out-of-stock toggles (`storeOosProvider`) + user-added project names
+  (`storeProjectsProvider` → StateNotifier) now survive navigation + restart.
+- **Quiet hours:** new `NotifSettings.isInQuietHours` getter + a list-suppression gate (mirrors the
+  v6.14 snooze gate) — quiet hours finally mute notifications.
+- **Onboarding:** the chosen profession now seeds `professionModeProvider` / catalog detail-mode
+  (`defaultDetailFor`), respecting an explicit manual choice.
+- **Settings applied:** store `sortDefault` + `displayMode` now actually sort / switch grid-list.
+- **Honesty:** the 6 supply-chain service-sheet rows show a 🚧 badge (were rich-looking but dead);
+  the SLA tile subtitle 'ספירה לאחור' → 'זמני אספקה' (no live timer exists).
+- **Account dial:** name/phone/profession leaves are now editable (dialogs via existing
+  `register`/`setProfession`); 'שם הקבלן' value is shown.
+
+Left by design: ~60 forward-compat settings fields that persist but have no consumer yet — honest
+scaffolding, not bugs (per product decision). Regression: all v6.13+v6.14 fixes intact.
+analyze 0 · 1536 tests green · build OK.
+
+---
 
 ## v6.14 — second pass (deeper sweep)
 

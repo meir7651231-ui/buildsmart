@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/persona_portal.dart';
@@ -6,6 +8,47 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// ─── persisted out-of-stock set ───────────────────────────────────────────────
+
+const String _kOosKey = 'bs.store-oos.v1';
+
+class _StoreOosNotifier extends StateNotifier<Set<String>> {
+  _StoreOosNotifier() : super(const {}) {
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_kOosKey);
+      if (list != null) state = list.toSet();
+    } on Object catch (_) {/* keep empty */}
+  }
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_kOosKey, state.toList());
+    } on Object catch (_) {/* best-effort */}
+  }
+
+  void markOos(String name) {
+    state = {...state, name};
+    unawaited(_persist());
+  }
+
+  void markAvailable(String name) {
+    state = {...state}..remove(name);
+    unawaited(_persist());
+  }
+}
+
+final storeOosProvider =
+    StateNotifierProvider<_StoreOosNotifier, Set<String>>(
+  (_) => _StoreOosNotifier(),
+);
 
 /// 🏪 חנות ספק — the supplier-store role app. Same shell/style as the
 /// contractor app (white AppBar + segmented tabs + card lists); a faithful port
@@ -36,10 +79,6 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
   String _orderFilter = 'active'; // active | new | preparing | ready
   String _stockFilter = 'all'; // all | in | out
   String _stockSearch = '';
-
-  /// Product names the operator toggled out of stock (the live `STORE_STOCK`
-  /// flips; everything starts available).
-  final Set<String> _outOfStock = {};
 
   StoreInfo get _store => kStores.first;
 
@@ -115,7 +154,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     final inPrep = orders.countAt(OrderStage.preparing);
     final ready = orders.countAt(OrderStage.ready);
     final revenue = orders.todayRevenue;
-    final outCount = _outOfStock.length;
+    final outCount = ref.watch(storeOosProvider).length;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -317,18 +356,20 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
 
   // ── Tab 3 · מלאי (stock management) ─────────────────────────────────────────
   Widget _stockTab() {
+    final oos = ref.watch(storeOosProvider);
+    final oosNotifier = ref.read(storeOosProvider.notifier);
     final all = _stockNames;
     final total = all.length;
-    final outN = _outOfStock.length;
+    final outN = oos.length;
     final inN = total - outN;
 
     bool match(String name) {
       if (_stockSearch.isNotEmpty && !name.contains(_stockSearch)) return false;
       switch (_stockFilter) {
         case 'in':
-          return !_outOfStock.contains(name);
+          return !oos.contains(name);
         case 'out':
-          return _outOfStock.contains(name);
+          return oos.contains(name);
         default:
           return true;
       }
@@ -402,16 +443,16 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
           for (final name in shown)
             _StockRow(
               name: name,
-              available: !_outOfStock.contains(name),
-              onToggle: () => setState(() {
-                if (_outOfStock.contains(name)) {
-                  _outOfStock.remove(name);
+              available: !oos.contains(name),
+              onToggle: () {
+                if (oos.contains(name)) {
+                  oosNotifier.markAvailable(name);
                   showToast(context, 'סומן כזמין במלאי');
                 } else {
-                  _outOfStock.add(name);
+                  oosNotifier.markOos(name);
                   showToast(context, 'סומן כאזל במלאי');
                 }
-              }),
+              },
             ),
       ],
     );

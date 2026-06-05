@@ -262,9 +262,41 @@ const List<_CItem> _kCItems = [];
 
 const _kProjects = ['בית דוד 3', 'מגדל עזריאלי', 'ללא פרויקט'];
 
-/// Live project list — seeded from [_kProjects]; the user can add more.
-final storeProjectsProvider = StateProvider<List<String>>(
-  (_) => List.of(_kProjects),
+/// Persisted project list — seeded from [_kProjects]; user-added projects
+/// survive restarts (mirrors the [StoreFavoritesNotifier] persistence pattern).
+class StoreProjectsNotifier extends StateNotifier<List<String>> {
+  StoreProjectsNotifier() : super(List.of(_kProjects)) {
+    _load();
+  }
+  static const _prefsKey = 'bs.store-projects.v1';
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_prefsKey);
+      if (list != null && list.isNotEmpty) state = list;
+    } catch (_) {}
+  }
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefsKey, state);
+    } catch (_) {}
+  }
+
+  void add(String name) {
+    if (state.contains(name)) return;
+    state = [...state, name];
+    _persist();
+  }
+}
+
+/// Live project list — persisted to SharedPreferences so user-added projects
+/// survive restarts.
+final storeProjectsProvider =
+    StateNotifierProvider<StoreProjectsNotifier, List<String>>(
+  (_) => StoreProjectsNotifier(),
 );
 
 typedef _DOption = ({CartDelivery method, String emoji, String label, int fee});
@@ -987,6 +1019,24 @@ class _AllList extends ConsumerWidget {
   const _AllList({required this.section});
   final StoreSection section;
 
+  VoidCallback? _tapFor(
+    BuildContext context,
+    WidgetRef ref,
+    _Meta item,
+    int? svcIdx,
+  ) {
+    if (svcIdx != null) return () => _ServicesGrid._openSheet(context, svcIdx);
+    if (item.emoji == '🛒') {
+      return () =>
+          ref.read(storeSectionProvider.notifier).state = StoreSection.cart;
+    }
+    if (item.emoji == '📦') {
+      return () =>
+          ref.read(storeSectionProvider.notifier).state = StoreSection.orders;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(storeSearchQueryProvider).trim().toLowerCase();
@@ -995,6 +1045,12 @@ class _AllList extends ConsumerWidget {
       ref.watch(cartQtysProvider),
       ref.watch(smartCartProvider),
     );
+    // Drive view-mode from settings (list vs grid).
+    final displayMode = ref.watch(
+      storeSettingsProvider.select((s) => s.displayMode),
+    );
+    final isGrid = displayMode == StoreDisplayMode.grid;
+
     // Reflect the real cart count on the "הסל שלי" hub row.
     final allItems =
         _itemsForSection(section)
@@ -1026,6 +1082,32 @@ class _AllList extends ConsumerWidget {
       return _EmptyState(query: query);
     }
 
+    if (isGrid) {
+      return GridView.builder(
+        key: ValueKey('grid_$section'),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(12),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 1.4,
+        ),
+        itemCount: items.length,
+        itemBuilder: (context, i) {
+          final item = items[i];
+          final svcIdx = _kServiceByEmoji[item.emoji];
+          return _GridHubCard(
+            item: item,
+            isFav: favorites.contains(item.title),
+            onFavToggle: () =>
+                ref.read(storeFavoritesProvider.notifier).toggle(item.title),
+            onTap: _tapFor(context, ref, item, svcIdx),
+          );
+        },
+      );
+    }
+
     return ListView.separated(
       key: ValueKey(section),
       physics: const AlwaysScrollableScrollPhysics(),
@@ -1044,20 +1126,95 @@ class _AllList extends ConsumerWidget {
           onFavToggle: () {
             ref.read(storeFavoritesProvider.notifier).toggle(item.title);
           },
-          onTap:
-              svcIdx != null
-                  ? () => _ServicesGrid._openSheet(context, svcIdx)
-                  : item.emoji == '🛒'
-                  ? () =>
-                      ref.read(storeSectionProvider.notifier).state =
-                          StoreSection.cart
-                  : item.emoji == '📦'
-                  ? () =>
-                      ref.read(storeSectionProvider.notifier).state =
-                          StoreSection.orders
-                  : null,
+          onTap: _tapFor(context, ref, item, svcIdx),
         );
       },
+    );
+  }
+}
+
+/// Compact grid tile for the hub-row items when `displayMode == grid`.
+class _GridHubCard extends StatelessWidget {
+  const _GridHubCard({
+    required this.item,
+    required this.isFav,
+    required this.onFavToggle,
+    this.onTap,
+  });
+  final _Meta item;
+  final bool isFav;
+  final VoidCallback onFavToggle;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasBadge = item.badge > 0;
+    return GestureDetector(
+      onTap: onTap ?? () => showToast(context, '${item.title} — בבנייה'),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFFFFF),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFF0F0F0)),
+        ),
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(item.emoji, style: const TextStyle(fontSize: 22)),
+                const Spacer(),
+                if (hasBadge)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: BsTokens.brand,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${item.badge}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                GestureDetector(
+                  onTap: onFavToggle,
+                  child: Icon(
+                    isFav ? Icons.favorite : Icons.favorite_border,
+                    color: isFav ? Colors.pinkAccent : Colors.black26,
+                    size: 16,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              item.title,
+              style: const TextStyle(
+                color: Color(0xFF1A1A1A),
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              item.preview,
+              style: const TextStyle(color: Color(0xFF888888), fontSize: 11),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1476,10 +1633,7 @@ class _ProjectSelector extends ConsumerWidget {
                 onPressed: () {
                   final name = controller.text.trim();
                   if (name.isEmpty) return;
-                  final notifier = ref.read(storeProjectsProvider.notifier);
-                  if (!notifier.state.contains(name)) {
-                    notifier.state = [...notifier.state, name];
-                  }
+                  ref.read(storeProjectsProvider.notifier).add(name);
                   ref.read(cartProjectProvider.notifier).state = name;
                   Navigator.pop(ctx);
                 },
@@ -2474,46 +2628,49 @@ class _CheckoutSheet extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               onPressed: () {
-                final orderNo = DateTime.now().millisecondsSinceEpoch % 100000;
                 final itemCount = cartItemCount(
                   ref.read(cartQtysProvider),
                   ref.read(smartCartProvider),
                 );
-                // Real effect: record a new open order...
-                final newOrder = (
-                  id: 'BS-$orderNo',
-                  items: '$itemCount פריטים',
-                  total: _price(total),
-                  stage: 'preparing',
-                  stageLabel: 'בהכנה 🔧',
-                  time: 'עכשיו',
-                  stageColor: const Color(0xFFFF9800),
-                );
-                ref.read(storeOrdersProvider.notifier).state = [
-                  newOrder,
-                  ...ref.read(storeOrdersProvider),
-                ];
-                // ...AND push the SAME order onto the shared orders engine so it
-                // goes LIVE to the manager (and every other role). This is the
-                // app's `syncOrderToSystem`: the contractor placing an order
-                // enters the engine at stage `new`, where managerAnalytics counts
-                // it as an open order and the manager's 🚚 list shows it. who =
-                // the contractor's profile name (falling back to the persona
-                // label for a demo/guest); site = the cart's project; items =
-                // the line count; sum = the order total.
+                // Capture cart lines for the order detail view before clearing.
+                final smartLines = ref.read(smartCartProvider);
+                final capturedLines = smartLines
+                    .map(
+                      (l) => OrderLineItem(
+                        name: l.productName,
+                        emoji: l.productEmoji,
+                        qty: l.productQty,
+                        price: l.total,
+                      ),
+                    )
+                    .toList();
+                // Capture shipTo + notes before clearing the cart state.
+                final shipTo = ref.read(shipToProvider);
+                final notes = ref.read(cartNotesProvider);
                 final contractor = ref.read(userProfileProvider).name.trim();
-                ref.read(ordersEngineProvider.notifier).placeOrder(
+                // Single placeOrder call — ONE id, ONE stage, persisted via
+                // the engine's bs.orders.v1 key. storeOrdersProvider derives
+                // from the engine so the orders list updates automatically.
+                final placed = ref.read(ordersEngineProvider.notifier).placeOrder(
                       who: contractor.isEmpty ? 'קבלן' : contractor,
                       site: ref.read(cartProjectProvider),
                       items: itemCount,
                       sum: total,
+                      lines: capturedLines,
+                      shipTo: shipTo,
+                      notes: notes,
                     );
-                // ...and empty the cart + notes.
+                // Mirror into storeOrdersProvider for legacy test compatibility:
+                // the test checks storeOrdersProvider.first.items == '$n פריטים'.
+                // Since storeOrdersProvider is now a derived Provider (not
+                // StateProvider), it already reflects the placed order via the
+                // engine — no explicit write needed.
+                // Clear the cart + notes.
                 ref.read(smartCartProvider.notifier).clear();
                 ref.read(cartQtysProvider.notifier).state = const {};
                 ref.read(cartNotesProvider.notifier).state = '';
                 Navigator.pop(context);
-                showToast(context, 'הזמנה #$orderNo אושרה! 🎉');
+                showToast(context, 'הזמנה ${placed.id} אושרה! 🎉');
               },
               child: const Text(
                 'אישור הזמנה',
@@ -2809,10 +2966,19 @@ class _ServiceSheet extends StatelessWidget {
           const Divider(color: Color(0xFFF5F5F5), height: 1),
           ...rows.map(
             (r) => ListTile(
-              leading: Text(r.emoji, style: const TextStyle(fontSize: 22)),
+              leading: Text(
+                r.emoji,
+                style: const TextStyle(
+                  fontSize: 22,
+                  color: Color(0xFF888888),
+                ),
+              ),
               title: Text(
                 r.label,
-                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+                style: const TextStyle(
+                  color: Color(0xFF888888),
+                  fontSize: 15,
+                ),
               ),
               subtitle:
                   r.sub.isEmpty
@@ -2820,14 +2986,32 @@ class _ServiceSheet extends StatelessWidget {
                       : Text(
                         r.sub,
                         style: const TextStyle(
-                          color: Color(0xFF888888),
+                          color: Color(0xFFAAAAAA),
                           fontSize: 12,
                         ),
                       ),
-              onTap: () {
-                Navigator.pop(context);
-                showToast(context, '${r.label} — בבנייה');
-              },
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF9C4),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: const Color(0xFFFFD600)),
+                ),
+                child: const Text(
+                  '🚧 בבנייה',
+                  style: TextStyle(
+                    color: Color(0xFF795548),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              // Non-actionable: tapping shows the placeholder toast but the
+              // disabled visual (muted colors + badge) signals it clearly.
+              onTap: () => showToast(context, '${r.label} — בבנייה'),
             ),
           ),
         ],
@@ -2873,7 +3057,51 @@ typedef _Order =
       Color stageColor,
     });
 
-const List<_Order> _kOrders = [
+/// Map an engine stage string to the Hebrew label + color used in the
+/// contractor view — single place so stage labels never drift.
+String _stageLabelFor(String stage) => switch (stage) {
+      'new' => 'הוגשה 🆕',
+      'preparing' => 'בהכנה 🔧',
+      'ready' => 'מוכן 📦',
+      'pickup' => 'ממתין לאיסוף 🏪',
+      'transit' => 'בדרך 🚛',
+      'delivered' => 'הסתיימה ✓',
+      _ => stage,
+    };
+
+Color _stageColorFor(String stage) => switch (stage) {
+      'new' => const Color(0xFF9C27B0),
+      'preparing' => const Color(0xFFFF9800),
+      'ready' => const Color(0xFF2196F3),
+      'pickup' => const Color(0xFF00BCD4),
+      'transit' => const Color(0xFF4CAF50),
+      'delivered' => const Color(0xFF888888),
+      _ => const Color(0xFF888888),
+    };
+
+String _orderTimeFor(Order o) {
+  final dt = o.createdAt;
+  if (dt == null) return '';
+  return '${dt.day}.${dt.month}, ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+}
+
+/// Map a live engine [Order] to the view-model [_Order] the contractor UI reads.
+/// Always reads the LIVE stage so manager/courier advances are reflected.
+_Order _orderViewOf(Order o) => (
+      id: o.id,
+      items: '${o.items} פריטים',
+      total: _price(o.sum),
+      stage: o.stage,
+      stageLabel: _stageLabelFor(o.stage),
+      time: _orderTimeFor(o),
+      stageColor: _stageColorFor(o.stage),
+    );
+
+///// Static contractor demo orders shown before any real orders are placed.
+/// These are the historical demo rows the contractor UI seeded with; they are
+/// NOT in the engine seed (different IDs) so the manager analytics are
+/// unaffected. Kept here so the contractor sees a realistic starting state.
+const List<_Order> _kContractorDemoOrders = [
   (
     id: 'BS-1234',
     items: '12 פריטים',
@@ -2908,7 +3136,7 @@ const List<_Order> _kOrders = [
     stage: 'delivered',
     stageLabel: 'הסתיימה ✓',
     time: '21.5',
-    stageColor: Color(0xFF888888),
+    stageColor: const Color(0xFF888888),
   ),
   (
     id: 'BS-1155',
@@ -2917,14 +3145,34 @@ const List<_Order> _kOrders = [
     stage: 'delivered',
     stageLabel: 'הסתיימה ✓',
     time: '19.5',
-    stageColor: Color(0xFF888888),
+    stageColor: const Color(0xFF888888),
   ),
 ];
 
-/// Live orders — seeded from [_kOrders]; confirming checkout prepends a new one.
-final storeOrdersProvider = StateProvider<List<_Order>>(
-  (_) => List.of(_kOrders),
-);
+/// The contractor order list — a merge of:
+///   • The live engine orders placed via checkout (stage is always read LIVE so
+///     manager/courier advances are reflected), filtered to exclude the manager
+///     demo seed (which the contractor didn't place).
+///   • The static demo contractor rows for orders not in the engine (shown
+///     as-is; stage is static demo data, consistent with the legacy behavior).
+///
+/// New orders from `placeOrder` prepend into the engine, so they appear first.
+/// Persistence comes free from `bs.orders.v1` for all real orders.
+final storeOrdersProvider = Provider<List<_Order>>((ref) {
+  final engineOrders = ref.watch(ordersEngineProvider);
+  // Live engine orders that were placed by the contractor (have createdAt),
+  // mapped to _Order with their LIVE stage.
+  final liveOrders = engineOrders
+      .where((o) => o.createdAt != null)
+      .map(_orderViewOf)
+      .toList(growable: false);
+  // Demo rows not already present in the live list.
+  final liveIds = {for (final o in liveOrders) o.id};
+  final demoOrders = _kContractorDemoOrders
+      .where((o) => !liveIds.contains(o.id))
+      .toList(growable: false);
+  return [...liveOrders, ...demoOrders];
+});
 
 // ─── orders list ──────────────────────────────────────────────────────────────
 
@@ -2934,7 +3182,25 @@ class _OrdersList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(storeSearchQueryProvider).trim().toLowerCase();
-    final allOrders = ref.watch(storeOrdersProvider);
+    // Apply sortDefault from store settings to the order list.
+    // priceAsc  → ascending by total (sum); others → engine/chronological order
+    // (newest first, as the engine prepends).
+    final sortDefault = ref.watch(
+      storeSettingsProvider.select((s) => s.sortDefault),
+    );
+    var allOrders = ref.watch(storeOrdersProvider).toList();
+    if (sortDefault == StoreSortDefault.priceAsc) {
+      allOrders.sort((a, b) {
+        // Parse the ₪ price string back to int for comparison. Fall back to 0.
+        int parsePrice(String s) {
+          final digits = s.replaceAll(RegExp('[^0-9]'), '');
+          return int.tryParse(digits) ?? 0;
+        }
+        return parsePrice(a.total).compareTo(parsePrice(b.total));
+      });
+    }
+    // rating / distance: no meaningful equivalent for orders; preserve order.
+
     final orders =
         query.isEmpty
             ? allOrders
@@ -3068,41 +3334,27 @@ class _OrderRow extends StatelessWidget {
 
 // ─── order sheet ──────────────────────────────────────────────────────────────
 
-typedef _OrderItem = ({String name, String qty, String price});
-
-const Map<String, List<_OrderItem>> _kOrderDetails = {
-  'BS-1234': [
-    (name: 'ברזל 12mm', qty: "200 יח'", price: '₪840'),
-    (name: 'בטון B30', qty: '5 מ"ק', price: '₪2,200'),
-    (name: 'קורות עץ', qty: "30 יח'", price: '₪1,380'),
-    (name: 'ברגים 10cm', qty: "500 יח'", price: '₪1,000'),
-  ],
-  'BS-1221': [
-    (name: 'צבע לבן', qty: "20 ל'", price: '₪640'),
-    (name: 'מברשות צבע', qty: "10 יח'", price: '₪350'),
-    (name: 'סיר בלויד', qty: "5 יח'", price: '₪900'),
-  ],
-  'BS-1198': [
-    (name: 'מסמרים 8cm', qty: "1000 יח'", price: '₪420'),
-    (name: 'כוכביות', qty: "200 יח'", price: '₪210'),
-  ],
-  'BS-1171': [
-    (name: 'אריחים 60x60', qty: "80 יח'", price: '₪1,600'),
-    (name: 'דבק אריחים', qty: "10 שק'", price: '₪640'),
-  ],
-  'BS-1155': [
-    (name: 'נורות לד', qty: "10 יח'", price: '₪180'),
-    (name: 'שקע חשמל', qty: "5 יח'", price: '₪130'),
-  ],
-};
-
-class _OrderSheet extends StatelessWidget {
+/// Order detail sheet — reads live engine lines so new orders show real items.
+/// For seed orders (which carry no lines) a placeholder row is shown.
+class _OrderSheet extends ConsumerWidget {
   const _OrderSheet({required this.order});
   final _Order order;
 
   @override
-  Widget build(BuildContext context) {
-    final items = _kOrderDetails[order.id] ?? [];
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Look up the live engine order to get its persisted line items, shipTo,
+    // and notes. Null = order not (yet) in engine (should not happen).
+    final engineOrders = ref.watch(ordersEngineProvider);
+    Order? engineOrder;
+    for (final o in engineOrders) {
+      if (o.id == order.id) {
+        engineOrder = o;
+        break;
+      }
+    }
+    final lines = engineOrder?.lines ?? const [];
+    final shipTo = engineOrder?.shipTo ?? '';
+    final notes = engineOrder?.notes ?? '';
     // gate 32: wrap in a scroll view so the order sheet never overflows on
     // short viewports (was a 3.6px RenderFlex overflow at the test viewport).
     return SingleChildScrollView(
@@ -3160,47 +3412,98 @@ class _OrderSheet extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${order.items} · ${order.total} · ${order.time}',
+              '${order.items} · ${order.total}${order.time.isNotEmpty ? ' · ${order.time}' : ''}',
               style: const TextStyle(color: Color(0xFF888888), fontSize: 13),
             ),
+            // Show ship-to address if set.
+            if (shipTo.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Text('📍', style: TextStyle(fontSize: 13)),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      shipTo,
+                      style: const TextStyle(
+                        color: Color(0xFF555555),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            // Show courier notes if set.
+            if (notes.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Text('📝', style: TextStyle(fontSize: 13)),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      notes,
+                      style: const TextStyle(
+                        color: Color(0xFF555555),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 12),
             const Divider(color: Color(0xFFF5F5F5), height: 1),
-            ...items.map(
-              (item) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Row(
-                  children: [
-                    const Text('📦', style: TextStyle(fontSize: 18)),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        item.name,
+            if (lines.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  'פרטי הפריטים אינם זמינים',
+                  style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
+              )
+            else
+              ...lines.map(
+                (line) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    children: [
+                      Text(
+                        line.emoji,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          line.name,
+                          style: const TextStyle(
+                            color: Color(0xFF1A1A1A),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '× ${line.qty}',
+                        style: const TextStyle(
+                          color: Color(0xFF888888),
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        _price(line.price),
                         style: const TextStyle(
                           color: Color(0xFF1A1A1A),
                           fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ),
-                    Text(
-                      item.qty,
-                      style: const TextStyle(
-                        color: Color(0xFF888888),
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      item.price,
-                      style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
             const Divider(color: Color(0xFFF5F5F5), height: 1),
             const SizedBox(height: 12),
             Row(
@@ -3258,9 +3561,13 @@ class _OrderTimeline extends StatelessWidget {
   const _OrderTimeline({required this.stage});
   final String stage;
 
+  // All 6 stages of kManagerOrderFlow — kept in order so the connector lines
+  // and filled/empty circles track correctly.
   static const _steps = <(String, String, IconData)>[
+    ('new', 'הוגשה', Icons.assignment_outlined),
     ('preparing', 'בהכנה', Icons.build_outlined),
     ('ready', 'מוכן', Icons.inventory_2_outlined),
+    ('pickup', 'נאסף', Icons.store_outlined),
     ('transit', 'בדרך', Icons.local_shipping_outlined),
     ('delivered', 'נמסר', Icons.check_circle_outline),
   ];

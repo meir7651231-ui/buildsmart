@@ -200,6 +200,26 @@ class NotifSettings {
   bool get isSnoozedNow =>
       snoozeUntilMs > DateTime.now().millisecondsSinceEpoch;
 
+  /// Returns true when quiet-hours are enabled and the current local time falls
+  /// within [quietStart, quietEnd].  Handles windows that wrap past midnight
+  /// (e.g. 22:00 → 07:00): the window is active when the current time is
+  /// >= quietStart OR <= quietEnd.  For same-day windows (e.g. 09:00 → 17:00)
+  /// the current time must fall between start and end.
+  bool get isInQuietHours {
+    if (!quietHoursEnabled) return false;
+    final now = DateTime.now();
+    final nowMins = now.hour * 60 + now.minute;
+    final startMins = quietStartHour * 60 + quietStartMin;
+    final endMins = quietEndHour * 60 + quietEndMin;
+    if (startMins < endMins) {
+      // Same-day window, e.g. 09:00 → 17:00.
+      return nowMins >= startMins && nowMins < endMins;
+    } else {
+      // Overnight window, e.g. 22:00 → 07:00.
+      return nowMins >= startMins || nowMins < endMins;
+    }
+  }
+
   NotifSettings copyWith({
     bool? pushEnabled,
     bool? emailEnabled,

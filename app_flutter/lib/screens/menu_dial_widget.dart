@@ -358,6 +358,24 @@ class _SettingsDrill extends ConsumerWidget {
                 ];
                 return;
               }
+              // Account leaves with real edit affordances (uses profile != null
+              // as guard — only reachable when groupId == 'account').
+              if (profile != null) {
+                switch (n.label) {
+                  case 'שם הקבלן':
+                    _showNameContactDialog(context, ref, profile, editName: true);
+                    return;
+                  case 'טלפון':
+                    _showNameContactDialog(context, ref, profile, editName: false);
+                    return;
+                  case 'תחום מקצועי':
+                    _showProfessionDialog(context, ref, profile);
+                    return;
+                  case 'סוג עוסק':
+                    showToast(context, '🚧 סוג עוסק — בבנייה');
+                    return;
+                }
+              }
               _applyLeaf(ref, context, n.label);
             },
           ),
@@ -371,6 +389,7 @@ class _SettingsDrill extends ConsumerWidget {
 String _accountLabel(String label, UserProfile? profile) {
   if (profile == null) return label;
   final value = switch (label) {
+    'שם הקבלן'       => profile.name.trim(),
     'טלפון'          => profile.contact.trim(),
     'תחום מקצועי'    => profile.profession.trim(),
     _                => '',
@@ -383,8 +402,115 @@ String _accountLabel(String label, UserProfile? profile) {
 bool _accountActive(String label, UserProfile? profile) {
   if (profile == null) return false;
   return switch (label) {
+    'שם הקבלן'       => profile.name.trim().isNotEmpty,
     'טלפון'          => profile.contact.trim().isNotEmpty,
     'תחום מקצועי'    => profile.profession.trim().isNotEmpty,
     _                => false,
   };
+}
+
+// ─── account-leaf edit dialogs ────────────────────────────────────────────────
+
+/// Opens an edit dialog for 'שם הקבלן' and 'טלפון'.
+/// Prefills from [profile]; on save calls [register(name:contact:)],
+/// keeping the unchanged field intact.
+void _showNameContactDialog(
+  BuildContext context,
+  WidgetRef ref,
+  UserProfile profile, {
+  required bool editName, // true → focus name field; false → focus contact
+}) {
+  final nameCtrl    = TextEditingController(text: profile.name);
+  final contactCtrl = TextEditingController(text: profile.contact);
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      backgroundColor: const Color(0xFFFFFFFF),
+      title: Text(
+        editName ? 'עריכת שם הקבלן' : 'עריכת טלפון',
+        style: const TextStyle(color: Color(0xFF1A1A1A)),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: nameCtrl,
+            autofocus: editName,
+            style: const TextStyle(color: Color(0xFF1A1A1A)),
+            decoration: const InputDecoration(hintText: 'שם הקבלן'),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: contactCtrl,
+            autofocus: !editName,
+            style: const TextStyle(color: Color(0xFF1A1A1A)),
+            decoration: const InputDecoration(hintText: 'טלפון'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('ביטול', style: TextStyle(color: Colors.black38)),
+        ),
+        TextButton(
+          onPressed: () {
+            final name    = nameCtrl.text.trim();
+            final contact = contactCtrl.text.trim();
+            if (name.isEmpty && contact.isEmpty) return;
+            ref.read(userProfileProvider.notifier).register(
+                  name: name.isNotEmpty ? name : profile.name,
+                  contact: contact.isNotEmpty ? contact : profile.contact,
+                );
+            Navigator.pop(ctx);
+            showToast(context, 'הפרטים עודכנו');
+          },
+          style: TextButton.styleFrom(foregroundColor: const Color(0xFFFF7A18)),
+          child: const Text('שמור'),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Opens a picker dialog for 'תחום מקצועי'; calls [setProfession(...)].
+void _showProfessionDialog(
+  BuildContext context,
+  WidgetRef ref,
+  UserProfile profile,
+) {
+  const options = ['אינסטלטור', 'חשמלאי', 'קבלן שיפוצים'];
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      backgroundColor: const Color(0xFFFFFFFF),
+      title: const Text(
+        'תחום מקצועי',
+        style: TextStyle(color: Color(0xFF1A1A1A)),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final opt in options)
+            ListTile(
+              title: Text(opt, style: const TextStyle(color: Color(0xFF1A1A1A))),
+              trailing: profile.profession == opt
+                  ? const Icon(Icons.check_circle, color: Color(0xFFFF7A18))
+                  : null,
+              onTap: () {
+                ref.read(userProfileProvider.notifier).setProfession(opt);
+                Navigator.pop(ctx);
+                showToast(context, 'תחום מקצועי עודכן');
+              },
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('ביטול', style: TextStyle(color: Colors.black38)),
+        ),
+      ],
+    ),
+  );
 }

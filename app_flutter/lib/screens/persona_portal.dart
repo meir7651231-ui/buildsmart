@@ -34,7 +34,7 @@ class PortalTileData {
 /// 🏪 supplier portal — 8 tiles (proto §2.8 [L20763], verbatim title / subtitle).
 const List<PortalTileData> kStorePortalTiles = [
   PortalTileData('⭐ דירוג ספקים', 'ציון וביצועים', PortalKind.ratings),
-  PortalTileData('⏱️ מעקב SLA', 'ספירה לאחור', PortalKind.sla),
+  PortalTileData('⏱️ מעקב SLA', 'זמני אספקה', PortalKind.sla),
   PortalTileData('🗺️ אזורי הפצה', 'זמני אספקה', PortalKind.zones),
   PortalTileData('📉 הנחות כמות', 'מדרגות הנחה', PortalKind.bulk),
   PortalTileData('🏷️ הפקת ברקודים', 'תוויות למוצרים', PortalKind.barcode),

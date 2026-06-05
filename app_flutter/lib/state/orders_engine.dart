@@ -25,11 +25,47 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:buildsmart/logic/manager_dashboard.dart';
 
+/// A single persisted line item captured at checkout and stored inside [Order].
+/// Populated from `smartCartProvider` at `placeOrder` time so the order detail
+/// sheet can render real rows even after the cart is cleared.
+@immutable
+class OrderLineItem {
+  const OrderLineItem({
+    required this.name,
+    required this.emoji,
+    required this.qty,
+    required this.price,
+  });
+
+  final String name;
+  final String emoji;
+
+  /// Quantity (units, not a string).
+  final int qty;
+
+  /// Line total in ₪.
+  final int price;
+
+  Map<String, dynamic> toJson() =>
+      {'name': name, 'emoji': emoji, 'qty': qty, 'price': price};
+
+  factory OrderLineItem.fromJson(Map<String, dynamic> j) => OrderLineItem(
+        name: j['name'] as String,
+        emoji: j['emoji'] as String,
+        qty: (j['qty'] as num).toInt(),
+        price: (j['price'] as num).toInt(),
+      );
+}
+
 /// A single live order — the shared record every role sees. Mirrors the legacy
 /// `SYS_ORDERS` element and the existing [ManagerOrder] (`who` = contractor,
 /// `site`, `items`, `sum`, `stage`), with an optional [createdAt] timestamp the
 /// legacy array did not carry (newly-placed orders stamp it; seed orders leave
 /// it null so seeded numbers/IDs are unaffected).
+///
+/// Optional [lines], [shipTo], [notes] fields are populated at `placeOrder`
+/// time for contractor-placed orders; seed orders carry none of these so
+/// JSON round-trips stay backward-compatible.
 @immutable
 class Order {
   const Order({
@@ -40,6 +76,9 @@ class Order {
     required this.sum,
     required this.stage,
     this.createdAt,
+    this.lines = const [],
+    this.shipTo = '',
+    this.notes = '',
   });
 
   /// Order id, e.g. `BS-1042` (the legacy `o.id`).
@@ -64,11 +103,27 @@ class Order {
   /// array had no timestamp) so the seed round-trips unchanged.
   final DateTime? createdAt;
 
+  /// Captured line items from `smartCartProvider` at checkout. Empty for seed
+  /// orders (they predate this field). Persisted so detail sheet survives restart.
+  final List<OrderLineItem> lines;
+
+  /// Optional "where to ship" address from `shipToProvider`. Empty if not set.
+  final String shipTo;
+
+  /// Optional courier notes from `cartNotesProvider`. Empty if not set.
+  final String notes;
+
   /// Mirrors the legacy `o.stage!=='delivered'` "open order" predicate
   /// (@index.html:16951) — the same rule [ManagerOrder.isOpen] uses.
   bool get isOpen => stage != 'delivered';
 
-  Order copyWith({String? stage}) => Order(
+  Order copyWith({
+    String? stage,
+    List<OrderLineItem>? lines,
+    String? shipTo,
+    String? notes,
+  }) =>
+      Order(
         id: id,
         who: who,
         site: site,
@@ -76,6 +131,9 @@ class Order {
         sum: sum,
         stage: stage ?? this.stage,
         createdAt: createdAt,
+        lines: lines ?? this.lines,
+        shipTo: shipTo ?? this.shipTo,
+        notes: notes ?? this.notes,
       );
 
   /// Project to the pure [ManagerOrder] the manager analytics fold over — lets
@@ -97,6 +155,9 @@ class Order {
         'sum': sum,
         'stage': stage,
         if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+        if (lines.isNotEmpty) 'lines': lines.map((l) => l.toJson()).toList(),
+        if (shipTo.isNotEmpty) 'shipTo': shipTo,
+        if (notes.isNotEmpty) 'notes': notes,
       };
 
   factory Order.fromJson(Map<String, dynamic> j) => Order(
@@ -109,6 +170,13 @@ class Order {
         createdAt: j['createdAt'] == null
             ? null
             : DateTime.tryParse(j['createdAt'] as String),
+        lines: j['lines'] == null
+            ? const []
+            : (j['lines'] as List<dynamic>)
+                .map((e) => OrderLineItem.fromJson(e as Map<String, dynamic>))
+                .toList(),
+        shipTo: (j['shipTo'] as String?) ?? '',
+        notes: (j['notes'] as String?) ?? '',
       );
 
   /// Lift a seed [ManagerOrder] into a live [Order] (no timestamp — seed).
@@ -194,6 +262,10 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   /// (the first of [kManagerOrderFlow]). Returns the created order. If [id] is
   /// omitted it is auto-assigned the next `BS-####`. Mirrors the legacy
   /// "push a `{stage:'new'}` order onto SYS_ORDERS" path.
+  ///
+  /// Optional [lines] captures the cart line items for the order detail view.
+  /// Optional [shipTo] and [notes] are persisted alongside the order so they
+  /// are not dropped on restart.
   Order placeOrder({
     required String who,
     required String site,
@@ -201,6 +273,9 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
     required int sum,
     String? id,
     DateTime? createdAt,
+    List<OrderLineItem> lines = const [],
+    String shipTo = '',
+    String notes = '',
   }) {
     final order = Order(
       id: id ?? _nextId(),
@@ -210,6 +285,9 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
       sum: sum,
       stage: kManagerOrderFlow.first, // 'new'
       createdAt: createdAt ?? DateTime.now(),
+      lines: lines,
+      shipTo: shipTo,
+      notes: notes,
     );
     state = [order, ...state];
     return order;

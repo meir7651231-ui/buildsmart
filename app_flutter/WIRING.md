@@ -8,11 +8,12 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
-> **v6.13 + v6.14 wiring audits:** see `knowledge/WIRING_AUDIT.md` — two passes swept the
-> FAB/dial shortcut layer + deeper flows for stubs / mis-wired toggles and fixed them (the
-> full screens were already correct). v6.14 also wired the bs-dial manager-metric /
-> store-courier-portal / worker-task leaves to the live providers, and marked dead
-> region/security settings + false-confirm buttons as honest placeholders.
+> **v6.13 + v6.14 + v6.15 wiring audits:** see `knowledge/WIRING_AUDIT.md` — three passes swept the
+> FAB/dial shortcut layer, deeper flows, and the full screens for stubs / mis-wired toggles and fixed
+> them. v6.15 unified the contractor's order history on `ordersEngineProvider` (one id, live stage,
+> real items, persisted), made supplier out-of-stock + project names persist, gated notification
+> quiet-hours, seeded profession→catalog-mode, applied store sort/display, and made the
+> service-sheet rows + account-edit leaves honest/editable.
 
 ---
 
