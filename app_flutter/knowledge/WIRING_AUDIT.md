@@ -1,8 +1,41 @@
-# Wiring Audit — v6.13 + v6.14 + v6.15 (2026-06-04)
+# Wiring Audit — v6.13 → v6.16 (2026-06-04 … 06-05)
 
-Post-cutover audit of the unified app (v6.12) by parallel review agents, fixed across three
-passes. Scope: every interactive control across all surfaces (contractor app, store,
-courier, worker, manager, settings, menu/search dials, onboarding).
+Post-cutover audit of the unified app (v6.12) by parallel review agents, fixed across six rounds
+(three fix passes v6.13–v6.15, then a deep correctness/perf/a11y pass v6.16 with adversarial
+validation). Scope: every interactive control + cross-role flow across all surfaces (contractor app,
+store, courier, worker, manager, settings, menu/search dials, onboarding).
+
+## v6.16 — deep correctness / perf / a11y pass (rounds 4–6)
+
+Round 4 (cross-role integrity · money/numeric · edge/crash · state-leakage · navigation), round 5
+(perf/rebuilds · accessibility/RTL · async/race · data-integrity/seed · text parity), round 6
+(adversarial VALIDATION of all ~58 accumulated findings against live code + verbatim cross-check vs the
+Preact legacy in `app/`). ~38 validated fixes:
+
+- **Correctness:** express fee display ₪80→₪120 (matched the charged fee); contractor stage labels →
+  canonical ('התקבלה'/'נמסר ✓', was 'הוגשה'/'הסתיימה'); `_CustomerDetailSheet` + `_OrderDetailSheet`
+  now read the LIVE engine (were frozen snapshots); fleet-% clamp; stage-index + toast-label guards.
+- **Async/state:** load-clobber races (smart-cart/orders/cart-lists/store-favorites) fixed via a
+  `_loaded` guard (cold-start load preserved); checkout + clear-cart fully reset the cart providers;
+  settings "איפוס" cascades to catalog/notif/chat/store-settings; `resetAllDials` now also resets the
+  worker + menu/settings drill providers (`bsWorkerLeafProvider` moved to dial_state); double-checkout
+  in-flight guard; mounted guards (audit_screen, install rename).
+- **Performance:** per-keystroke catalog search, per-row cart `.watch`, and ×N category-summary scans
+  → derived providers / `.select`; eager grouped list → Sliver; manager customer views → provider.
+- **Data/text:** seed item-counts → line-count (BS-1040→6, BS-1039→3); catalog viewMode `fromJson`
+  fallback → list; hardened JSON int casts; 'עגלה'→'סל'; duplicate portal subtitle → 'מפת אזורים'.
+- **Accessibility (targeted):** 3 RTL back-arrows, a RenderFlex overflow, directional alignment, the
+  finder chevron, reducedMotion gates (install/lipskey/camera/onboarding), a couple of Semantics labels.
+
+**Adversarial validation (round 6)** dropped ~7 false-positives — notably 'toast-after-pop is swallowed'
+(the context is still mounted in a synchronous callback, so the toast shows) and a worker-task seed
+'handoff skip' (intended demo seeding) — and re-scoped a perf finding (batched rebuild). **Deferred** two
+genuinely large initiatives as separate work: app-wide `Semantics` labelling, and the highContrast
+hardcoded-gray → semantic-token migration (200+ call-sites). **Kept** verbatim-from-legacy strings
+('פקדונות', '(לשמש)') confirmed against the Preact source. Regression: all v6.13–v6.15 fixes intact.
+analyze 0 · 1536 tests green · build OK.
+
+---
 
 ## v6.15 — third pass + store-orders refactor
 

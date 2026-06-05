@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/profession_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -170,7 +171,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               children: [
                 for (var i = 0; i < kOnboardingSlides.length; i++)
                   AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
+                    duration: ref.read(catalogSettingsProvider).reducedMotion
+                        ? Duration.zero
+                        : const Duration(milliseconds: 220),
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     width: i == _page ? 22 : 8,
                     height: 8,

@@ -164,9 +164,9 @@ void main() {
         expect(c.read(bsCustomerLeafProvider), isNull);
 
         // The three verbatim config rows (labels + values from the legacy
-        // constants EXPRESS_FEE=80 / creditLimit=50000 / VAT_RATE=0.18).
+        // constants EXPRESS_FEE=120 / creditLimit=50000 / VAT_RATE=0.18).
         expect(find.text('תוספת משלוח אקספרס'), findsOneWidget);
-        expect(find.text('₪80'), findsOneWidget);
+        expect(find.text('₪120'), findsOneWidget);
         expect(find.text('מסגרת אשראי לקבלן'), findsOneWidget);
         expect(find.text('₪${grouped(50000)}'), findsOneWidget); // ₪50,000
         expect(find.text('שיעור מע״מ'), findsOneWidget);

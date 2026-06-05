@@ -314,6 +314,45 @@ String _productSortLabel(ProductSort s) => switch (s) {
 final catalogProductSortProvider =
     StateProvider<ProductSort>((_) => ProductSort.byOrder);
 
+/// PERF-H1: derived provider — computes the full search-result product list once
+/// per unique combination of the five inputs the search panel uses, so the
+/// pipeline never reruns inside `_SearchResultsList.build()`. Identical output
+/// to the previous inline logic: same AND→OR→fuzzy chain, same filters, same cap.
+final searchResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
+  final query = ref.watch(searchQueryProvider);
+  final scope = ref.watch(searchScopeProvider);
+  final imageOnly = ref.watch(searchImageOnlyProvider);
+  final systemFilter = ref.watch(catalogSystemFilterProvider);
+  final sort = ref.watch(catalogProductSortProvider);
+
+  final showProducts =
+      query.trim().length >= 2 && (scope == 'הכל' || scope == 'מוצרים');
+  if (!showProducts) return const [];
+
+  List<LipskeyCatalogProduct> matchProducts() {
+    final and = kCatalogProducts
+        .where((p) => catalogProductMatchesQuery(p, query))
+        .toList();
+    if (and.isNotEmpty) return and;
+    final or = kCatalogProducts
+        .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
+        .toList();
+    if (or.isNotEmpty) return or;
+    return fuzzySearchProducts(query, limit: 40);
+  }
+
+  List<LipskeyCatalogProduct> orderProducts(List<LipskeyCatalogProduct> ps) {
+    if (sort != ProductSort.byOrder) return _sortProducts(ps, sort);
+    return [...ps]..sort(
+        (a, b) => searchRelevance(b, query).compareTo(searchRelevance(a, query)));
+  }
+
+  return orderProducts(
+          filterBySystem(filterByImage(matchProducts(), imageOnly), systemFilter))
+      .take(40)
+      .toList();
+});
+
 /// Pure: keep only products that have an image when [imageOnly] is set.
 List<LipskeyCatalogProduct> filterByImage(
     List<LipskeyCatalogProduct> list, bool imageOnly) {
@@ -1965,53 +2004,9 @@ class _SearchResultsList extends ConsumerWidget {
       };
     }).toList();
 
-    // Live product matches from the real catalog (name or SKU), shown in
-    // "הכל" / "מוצרים" scopes once the user has typed something.
-    final showProducts = query.trim().length >= 2 &&
-        (scope == 'הכל' || scope == 'מוצרים');
-    // Apply the ⚙️ image filter and ↕️ sort (from the search-panel tools)
-    // before capping to 40 results.
-    final imageOnly = ref.watch(searchImageOnlyProvider);
-    final systemFilter = ref.watch(catalogSystemFilterProvider);
-    final sort = ref.watch(catalogProductSortProvider);
-    // AND-match first; if a reasonable query finds nothing (e.g. a stray word
-    // the catalogue doesn't use), fall back to matching ANY word so the user
-    // never hits a dead end. Final fallback: `fuzzySearchProducts` (closes
-    // step 62 — the helper is now wired into the UI search path) — used only
-    // when both AND and OR fail so it never disturbs the happy path.
-    // Results search MUST run over the UNIFIED catalog (Lipskey + Polyroll +
-    // Huliot), not kLipskeyCatalog — otherwise Huliot/PPR products (and their
-    // SKUs, e.g. 64032300) are silently unsearchable. catalogProductMatchesQuery
-    // already matches the sku field. (Autocomplete searchSuggestions stays
-    // Lipskey-scoped by design — see CONVENTIONS "Catalog reads".)
-    List<LipskeyCatalogProduct> matchProducts() {
-      final and = kCatalogProducts
-          .where((p) => catalogProductMatchesQuery(p, query))
-          .toList();
-      if (and.isNotEmpty) return and;
-      final or = kCatalogProducts
-          .where((p) => catalogProductMatchesQuery(p, query, requireAll: false))
-          .toList();
-      if (or.isNotEmpty) return or;
-      // Last-chance forgiving search (each word as a substring of nameHe,
-      // ranked by proximity). Empty if even fuzzy can't find it.
-      return fuzzySearchProducts(query, limit: 40);
-    }
-
-    // Default order ranks by relevance (best match first); an explicit
-    // ↕️ sort (name/SKU) overrides it.
-    List<LipskeyCatalogProduct> orderProducts(List<LipskeyCatalogProduct> ps) {
-      if (sort != ProductSort.byOrder) return _sortProducts(ps, sort);
-      return [...ps]..sort(
-          (a, b) => searchRelevance(b, query).compareTo(searchRelevance(a, query)));
-    }
-
-    final products = showProducts
-        ? orderProducts(filterBySystem(
-                filterByImage(matchProducts(), imageOnly), systemFilter))
-            .take(40)
-            .toList()
-        : const <LipskeyCatalogProduct>[];
+    // PERF-H1: product pipeline hoisted to searchResultsProvider — one
+    // recompute per input change, not once per keystroke build.
+    final products = ref.watch(searchResultsProvider);
 
     if (filtered.isEmpty && products.isEmpty) {
       return Center(
@@ -2346,6 +2341,18 @@ List<Section> _catsForSystem(WaterSystem? system) {
   return (count: count, desc: desc);
 }
 
+/// PERF-H3: derived provider — precomputes every category's summary once per
+/// active system, keyed by category title. `_CatalogRow` does a map lookup
+/// instead of calling `_categorySummary` (which scans the full catalog) on
+/// each build. Identical values to the previous per-row calls.
+final categorySummaryProvider =
+    Provider<Map<String, ({int count, String desc})>>((ref) {
+  final system = ref.watch(catalogSystemFilterProvider);
+  return {
+    for (final c in kCatalogCats) c.title: _categorySummary(c.title, system),
+  };
+});
+
 class _CatalogList extends ConsumerWidget {
   const _CatalogList();
 
@@ -2634,8 +2641,9 @@ class _CatalogRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final summary =
-        _categorySummary(cat.title, ref.watch(catalogSystemFilterProvider));
+    // PERF-H3: map lookup — summaries precomputed once by categorySummaryProvider.
+    final summary = ref.watch(categorySummaryProvider)[cat.title] ??
+        (count: 0, desc: 'בקרוב');
     final hasBadge = summary.count > 0;
     return InkWell(
       onTap: () {
@@ -6773,8 +6781,10 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                 ),
               ),
               const SizedBox(height: 12),
+              // A11Y-M2: AlignmentDirectional.centerStart is RTL-correct
+              // (maps to right edge in RTL layouts, left in LTR).
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: TextButton(
                   onPressed: () => Navigator.pop(ctx),
                   child: const Text(
@@ -7288,41 +7298,43 @@ class _MaterialDiameterBrowser extends ConsumerWidget {
         // Below: diameter atoms for the active material
         if (active != null && perMat[active] != null) ...[
           const SizedBox(height: 6),
-          Wrap(
-            spacing: 0,
-            runSpacing: 4,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              for (int i = 0; i < (perMat[active]!.entries.toList()
-                  ..sort((a, b) => _diameterSortKey(a.key).compareTo(_diameterSortKey(b.key)))).length; i++) ...[
-                if (i > 0)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 3),
-                    child: Text('—',
-                        style: TextStyle(
-                            color: Color(0xFF8A8A8A),
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12)),
-                  ),
-                () {
-                  final sorted = perMat[active]!.entries.toList()
-                    ..sort((a, b) =>
-                        _diameterSortKey(a.key).compareTo(_diameterSortKey(b.key)));
-                  final e = sorted[i];
-                  final key = '$active|${e.key}';
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: _FacetChip(
-                      label: e.key,
-                      count: e.value,
-                      isSelected: selected.contains(key),
-                      onTap: () => toggleAtom(active, e.key),
+          () {
+            // L13-A: hoist sort once — used for both .length and item access.
+            final sorted = perMat[active]!.entries.toList()
+              ..sort((a, b) =>
+                  _diameterSortKey(a.key).compareTo(_diameterSortKey(b.key)));
+            return Wrap(
+              spacing: 0,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                for (int i = 0; i < sorted.length; i++) ...[
+                  if (i > 0)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 3),
+                      child: Text('—',
+                          style: TextStyle(
+                              color: Color(0xFF8A8A8A),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12)),
                     ),
-                  );
-                }(),
+                  () {
+                    final e = sorted[i];
+                    final key = '$active|${e.key}';
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: _FacetChip(
+                        label: e.key,
+                        count: e.value,
+                        isSelected: selected.contains(key),
+                        onTap: () => toggleAtom(active, e.key),
+                      ),
+                    );
+                  }(),
+                ],
               ],
-            ],
-          ),
+            );
+          }(),
         ],
       ],
     );
@@ -7607,14 +7619,17 @@ class _FamilyRow extends ConsumerWidget {
               child: Text('${family.count}', style: const TextStyle(color: Color(0xFFCC6614), fontWeight: FontWeight.w800, fontSize: 12)),
             ),
             const Spacer(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('${family.emoji}  ${family.frame}', style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w700, fontSize: 14)),
-                const SizedBox(height: 2),
-                Text('${family.categoryHe} · ${family.brand}', style: TextStyle(color: cs.onSurface.withOpacity(0.55), fontSize: 11)),
-              ],
+            // A11Y-H2: Flexible prevents RenderFlex overflow on long frame names.
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${family.emoji}  ${family.frame}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w700, fontSize: 14)),
+                  const SizedBox(height: 2),
+                  Text('${family.categoryHe} · ${family.brand}', style: TextStyle(color: cs.onSurface.withOpacity(0.55), fontSize: 11)),
+                ],
+              ),
             ),
             const SizedBox(width: 6),
             Icon(Icons.chevron_left, size: 18, color: cs.onSurface.withOpacity(0.4)),
@@ -7640,7 +7655,9 @@ class _VariantFamilyView extends ConsumerWidget {
             children: [
               InkWell(
                 onTap: () => ref.read(variantsActiveFamilyProvider.notifier).state = null,
-                child: const Padding(padding: EdgeInsets.all(4), child: Icon(Icons.arrow_forward, size: 20)),
+                // RTL arrow: arrow_back is semantically "go back" and mirrors
+                // correctly in RTL (points right → back in Hebrew layout).
+                child: const Padding(padding: EdgeInsets.all(4), child: Icon(Icons.arrow_back, size: 20)),
               ),
               const SizedBox(width: 8),
               Expanded(child: Text('${family.emoji}  ${family.frame}', textAlign: TextAlign.right, style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800, fontSize: 15))),

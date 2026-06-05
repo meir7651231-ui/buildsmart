@@ -451,25 +451,29 @@ class _SubmitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: AlignmentDirectional.centerStart,
-      child: Material(
-        color: BsTokens.brand,
-        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-        child: InkWell(
+    return Semantics(
+      button: true,
+      label: 'שלח לאישור',
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: Material(
+          color: BsTokens.brand,
           borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-          onTap: onPressed,
-          child: const Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: BsTokens.space4,
-              vertical: 9,
-            ),
-            child: Text(
-              '📸 שלח לאישור',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 13.5,
-                fontWeight: FontWeight.w800,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            onTap: onPressed,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: BsTokens.space4,
+                vertical: 9,
+              ),
+              child: Text(
+                '📸 שלח לאישור',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),

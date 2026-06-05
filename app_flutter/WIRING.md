@@ -8,6 +8,13 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **v6.13 → v6.16 wiring audits:** see `knowledge/WIRING_AUDIT.md` — six rounds (three fix passes + a deep
+> correctness/perf/a11y pass with adversarial validation). v6.16 corrected the manager express-fee display,
+> aligned contractor stage labels to the canonical map, made the manager customer/order detail sheets read
+> live engine data, fixed load-clobber races + incomplete resets + double-checkout, moved hot catalog/manager
+> paths to derived providers, and fixed targeted RTL/overflow/reducedMotion issues — deferring the app-wide
+> Semantics + highContrast-token initiatives and keeping verbatim-legacy strings.
+>
 > **v6.13 + v6.14 + v6.15 wiring audits:** see `knowledge/WIRING_AUDIT.md` — three passes swept the
 > FAB/dial shortcut layer, deeper flows, and the full screens for stubs / mis-wired toggles and fixed
 > them. v6.15 unified the contractor's order history on `ordersEngineProvider` (one id, live stage,

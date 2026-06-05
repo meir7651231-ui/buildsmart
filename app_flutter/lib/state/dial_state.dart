@@ -1,3 +1,4 @@
+import 'package:buildsmart/state/menu_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Which FAB dial is currently open. Only ONE dial is open at a time
@@ -69,6 +70,13 @@ final bsStoreLeafProvider = StateProvider<String?>((_) => null);
 /// again (or any other dial action) closes it.
 final bsCourierLeafProvider = StateProvider<String?>((_) => null);
 
+/// Section id of the 🦺 עובד (worker) leaf whose inline task-list panel is open
+/// (one of the `st-*` ids), or null when none is showing. Each `st-*` leaf maps
+/// to ONE task status bucket; tapping it opens the LIVE worker tasks in that
+/// status INLINE in the dial (R2). Mutually exclusive with the M1–M4 manager
+/// panels and the W2 store/courier panels.
+final bsWorkerLeafProvider = StateProvider<String?>((_) => null);
+
 /// Which menu tab is currently drilled into (null = 4-tab root).
 enum MenuTab { home, projects, cart, settings }
 
@@ -98,6 +106,14 @@ void resetAllDials(WidgetRef ref) {
   ref.read(bsManageLeafProvider.notifier).state = null;
   ref.read(bsStoreLeafProvider.notifier).state = null;
   ref.read(bsCourierLeafProvider.notifier).state = null;
+  ref.read(bsWorkerLeafProvider.notifier).state = null;
   ref.read(menuTabProvider.notifier).state = null;
   ref.read(searchToolProvider.notifier).state = null;
+  // Menu tab drill paths (menu_state.dart — already imported).
+  ref.read(homeDrillProvider.notifier).state = const [];
+  ref.read(projectsDrillProvider.notifier).state = const [];
+  ref.read(cartDrillProvider.notifier).state = const [];
+  // Settings sub-state.
+  ref.read(settingsGroupProvider.notifier).state = null;
+  ref.read(settingsDrillProvider.notifier).state = const [];
 }

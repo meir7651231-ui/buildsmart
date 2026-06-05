@@ -263,7 +263,7 @@ class CatalogSettings {
       viewMode: _enum(
         j['viewMode'],
         CatalogViewMode.values,
-        CatalogViewMode.grid,
+        CatalogViewMode.list,
       ),
       sortDefault: _enum(
         j['sortDefault'],

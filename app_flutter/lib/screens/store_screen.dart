@@ -26,12 +26,29 @@ class StoreFavoritesNotifier extends StateNotifier<Set<String>> {
   }
   static const _prefsKey = 'bs.store-favorites.v1';
 
+  /// True once any mutation has been applied (or _load completes).
+  /// Guards against _load clobbering a toggle that arrived before prefs.
+  bool _loaded = false;
+
+  @override
+  set state(Set<String> value) {
+    _loaded = true; // mutation happened — block any pending _load
+    super.state = value;
+  }
+
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final list = prefs.getStringList(_prefsKey);
-      if (list != null) state = list.toSet();
-    } catch (_) {}
+      if (!_loaded && list != null) {
+        super.state = list.toSet(); // bypass setter to avoid blocking self
+        _loaded = true;
+      } else {
+        _loaded = true;
+      }
+    } catch (_) {
+      _loaded = true;
+    }
   }
 
   Future<void> _persist() async {
@@ -441,11 +458,11 @@ class _SummaryRow extends ConsumerWidget {
       ref.watch(cartQtysProvider),
       ref.watch(smartCartProvider),
     );
-    final openOrders =
-        ref
-            .watch(storeOrdersProvider)
-            .where((o) => isOrderOpen(o.stage))
-            .length;
+    final openOrders = ref.watch(
+      storeOrdersProvider.select(
+        (orders) => orders.where((x) => isOrderOpen(x.stage)).length,
+      ),
+    );
     final offers = _kSupplierOffersCount;
 
     return SingleChildScrollView(
@@ -2408,13 +2425,20 @@ class _PaymentChip extends StatelessWidget {
 
 // ─── checkout button ──────────────────────────────────────────────────────────
 
-class _CheckoutButton extends ConsumerWidget {
+class _CheckoutButton extends ConsumerStatefulWidget {
   const _CheckoutButton({required this.subtotal, required this.total});
   final int subtotal;
   final int total;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CheckoutButton> createState() => _CheckoutButtonState();
+}
+
+class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
+  bool _inFlight = false;
+
+  @override
+  Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: BsTokens.brand,
@@ -2422,56 +2446,62 @@ class _CheckoutButton extends ConsumerWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         padding: const EdgeInsets.symmetric(vertical: 16),
       ),
-      onPressed: () => _checkout(context, ref),
+      onPressed: _inFlight ? null : () => _checkout(context),
       child: Text(
-        'הזמן עכשיו · ${_price(total)} →',
+        'הזמן עכשיו · ${_price(widget.total)} →',
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
       ),
     );
   }
 
-  Future<void> _checkout(BuildContext context, WidgetRef ref) async {
-    final s = ref.read(storeSettingsProvider);
-    // Minimum-order gate.
-    if (cartBelowMinimum(subtotal, s)) {
-      showToast(context, 'מינימום להזמנה: ${_price(s.minOrderAmount)}');
-      return;
-    }
-    // Large-order confirmation.
-    if (cartNeedsLargeConfirm(total, s)) {
-      final ok = await showDialog<bool>(
-        context: context,
-        builder:
-            (ctx) => AlertDialog(
-              backgroundColor: const Color(0xFFFFFFFF),
-              title: const Text(
-                'אישור הזמנה גדולה',
-                style: TextStyle(color: Color(0xFF1A1A1A)),
-              ),
-              content: Text(
-                'סכום ההזמנה ${_price(total)} חורג מהסף שהגדרת '
-                '(${_price(s.largeOrderThreshold)}). להמשיך?',
-                style: const TextStyle(color: Colors.black54),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('ביטול'),
+  Future<void> _checkout(BuildContext context) async {
+    if (_inFlight) return;
+    setState(() => _inFlight = true);
+    try {
+      final s = ref.read(storeSettingsProvider);
+      // Minimum-order gate.
+      if (cartBelowMinimum(widget.subtotal, s)) {
+        showToast(context, 'מינימום להזמנה: ${_price(s.minOrderAmount)}');
+        return;
+      }
+      // Large-order confirmation.
+      if (cartNeedsLargeConfirm(widget.total, s)) {
+        final ok = await showDialog<bool>(
+          context: context,
+          builder:
+              (ctx) => AlertDialog(
+                backgroundColor: const Color(0xFFFFFFFF),
+                title: const Text(
+                  'אישור הזמנה גדולה',
+                  style: TextStyle(color: Color(0xFF1A1A1A)),
                 ),
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
-                  child: const Text('אשר והמשך'),
+                content: Text(
+                  'סכום ההזמנה ${_price(widget.total)} חורג מהסף שהגדרת '
+                  '(${_price(s.largeOrderThreshold)}). להמשיך?',
+                  style: const TextStyle(color: Colors.black54),
                 ),
-              ],
-            ),
-      );
-      if (ok != true || !context.mounted) return;
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('ביטול'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+                    child: const Text('אשר והמשך'),
+                  ),
+                ],
+              ),
+        );
+        if (ok != true || !context.mounted) return;
+      }
+      _showCheckoutSheet(context);
+    } finally {
+      if (mounted) setState(() => _inFlight = false);
     }
-    _showCheckoutSheet(context, ref);
   }
 
-  void _showCheckoutSheet(BuildContext context, WidgetRef ref) {
+  void _showCheckoutSheet(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -2479,19 +2509,28 @@ class _CheckoutButton extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _CheckoutSheet(total: total),
+      builder: (_) => _CheckoutSheet(total: widget.total),
     );
   }
 }
 
 // ─── checkout sheet ───────────────────────────────────────────────────────────
 
-class _CheckoutSheet extends ConsumerWidget {
+class _CheckoutSheet extends ConsumerStatefulWidget {
   const _CheckoutSheet({required this.total});
   final int total;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CheckoutSheet> createState() => _CheckoutSheetState();
+}
+
+class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
+  /// One-shot guard: true once the confirm button has been tapped.
+  /// Prevents a double-tap from placing two orders.
+  bool _confirmed = false;
+
+  @override
+  Widget build(BuildContext context) {
     final delivery = ref.watch(cartDeliveryProvider);
     final payment = ref.watch(cartPaymentProvider);
     final project = ref.watch(cartProjectProvider);
@@ -2605,7 +2644,7 @@ class _CheckoutSheet extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        _price(total),
+                        _price(widget.total),
                         style: const TextStyle(
                           color: Color(0xFF1A1A1A),
                           fontSize: 16,
@@ -2627,7 +2666,10 @@ class _CheckoutSheet extends ConsumerWidget {
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              onPressed: () {
+              onPressed: _confirmed ? null : () {
+                // One-shot guard: ignore any tap after the first.
+                if (_confirmed) return;
+                setState(() => _confirmed = true);
                 final itemCount = cartItemCount(
                   ref.read(cartQtysProvider),
                   ref.read(smartCartProvider),
@@ -2655,7 +2697,7 @@ class _CheckoutSheet extends ConsumerWidget {
                       who: contractor.isEmpty ? 'קבלן' : contractor,
                       site: ref.read(cartProjectProvider),
                       items: itemCount,
-                      sum: total,
+                      sum: widget.total,
                       lines: capturedLines,
                       shipTo: shipTo,
                       notes: notes,
@@ -2665,10 +2707,21 @@ class _CheckoutSheet extends ConsumerWidget {
                 // Since storeOrdersProvider is now a derived Provider (not
                 // StateProvider), it already reflects the placed order via the
                 // engine — no explicit write needed.
-                // Clear the cart + notes.
+                // Clear the cart + notes + checkout fields.
                 ref.read(smartCartProvider.notifier).clear();
                 ref.read(cartQtysProvider.notifier).state = const {};
                 ref.read(cartNotesProvider.notifier).state = '';
+                ref.read(shipToProvider.notifier).state = '';
+                ref.read(cartDeliveryProvider.notifier).state =
+                    cartDeliveryFor(
+                      ref.read(storeSettingsProvider).selfPickupDefault,
+                    );
+                ref.read(cartPaymentProvider.notifier).state =
+                    cartPaymentFor(
+                      ref.read(storeSettingsProvider).defaultPayment,
+                    );
+                ref.read(cartProjectProvider.notifier).state =
+                    ref.read(storeProjectsProvider).firstOrNull ?? 'בית דוד 3';
                 Navigator.pop(context);
                 showToast(context, 'הזמנה ${placed.id} אושרה! 🎉');
               },
@@ -2799,6 +2852,18 @@ class _CartActionsRow extends ConsumerWidget {
           onPressed: () {
             ref.read(smartCartProvider.notifier).clear();
             ref.read(cartQtysProvider.notifier).state = const {};
+            ref.read(cartNotesProvider.notifier).state = '';
+            ref.read(shipToProvider.notifier).state = '';
+            ref.read(cartDeliveryProvider.notifier).state =
+                cartDeliveryFor(
+                  ref.read(storeSettingsProvider).selfPickupDefault,
+                );
+            ref.read(cartPaymentProvider.notifier).state =
+                cartPaymentFor(
+                  ref.read(storeSettingsProvider).defaultPayment,
+                );
+            ref.read(cartProjectProvider.notifier).state =
+                ref.read(storeProjectsProvider).firstOrNull ?? 'בית דוד 3';
             showToast(context, 'הסל נוקה');
           },
           icon: const Icon(Icons.delete_outline, size: 16),
@@ -3060,12 +3125,12 @@ typedef _Order =
 /// Map an engine stage string to the Hebrew label + color used in the
 /// contractor view — single place so stage labels never drift.
 String _stageLabelFor(String stage) => switch (stage) {
-      'new' => 'הוגשה 🆕',
+      'new' => 'התקבלה 🆕',
       'preparing' => 'בהכנה 🔧',
       'ready' => 'מוכן 📦',
       'pickup' => 'ממתין לאיסוף 🏪',
       'transit' => 'בדרך 🚛',
-      'delivered' => 'הסתיימה ✓',
+      'delivered' => 'נמסר ✓',
       _ => stage,
     };
 
@@ -3134,7 +3199,7 @@ const List<_Order> _kContractorDemoOrders = [
     items: '8 פריטים',
     total: '₪2,240',
     stage: 'delivered',
-    stageLabel: 'הסתיימה ✓',
+    stageLabel: 'נמסר ✓',
     time: '21.5',
     stageColor: const Color(0xFF888888),
   ),
@@ -3143,7 +3208,7 @@ const List<_Order> _kContractorDemoOrders = [
     items: '2 פריטים',
     total: '₪310',
     stage: 'delivered',
-    stageLabel: 'הסתיימה ✓',
+    stageLabel: 'נמסר ✓',
     time: '19.5',
     stageColor: const Color(0xFF888888),
   ),
@@ -3564,7 +3629,7 @@ class _OrderTimeline extends StatelessWidget {
   // All 6 stages of kManagerOrderFlow — kept in order so the connector lines
   // and filled/empty circles track correctly.
   static const _steps = <(String, String, IconData)>[
-    ('new', 'הוגשה', Icons.assignment_outlined),
+    ('new', 'התקבלה', Icons.assignment_outlined),
     ('preparing', 'בהכנה', Icons.build_outlined),
     ('ready', 'מוכן', Icons.inventory_2_outlined),
     ('pickup', 'נאסף', Icons.store_outlined),

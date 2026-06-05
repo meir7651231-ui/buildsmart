@@ -55,7 +55,7 @@ class CartList {
           .map((item) => (
                 emoji: item['emoji'] as String,
                 name: item['name'] as String,
-                qty: item['qty'] as int,
+                qty: (item['qty'] as num).toInt(),
                 price: item['price'] as String,
               ))
           .toList(),
@@ -69,18 +69,35 @@ class CartListsNotifier extends StateNotifier<List<CartList>> {
     _load();
   }
 
+  /// True once any mutation has been applied (or _load completes).
+  /// Guards against _load clobbering a mutation that arrived before prefs.
+  bool _loaded = false;
+
+  @override
+  set state(List<CartList> value) {
+    _loaded = true; // mutation happened — block any pending _load
+    super.state = value;
+  }
+
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final json = prefs.getString('bs.cart-lists.v1');
-      if (json != null) {
-        final decoded = jsonDecode(json) as List<dynamic>;
-        state = decoded
-            .map((item) => CartList.fromJson(item as Map<String, dynamic>))
-            .toList();
+      if (json == null) {
+        _loaded = true;
+        return;
+      }
+      final decoded = jsonDecode(json) as List<dynamic>;
+      final list = decoded
+          .map((item) => CartList.fromJson(item as Map<String, dynamic>))
+          .toList();
+      if (!_loaded) {
+        super.state = list; // bypass setter so we don't re-persist on load
+        _loaded = true;
       }
     } catch (e) {
       // Silently fail on malformed data
+      _loaded = true;
     }
   }
 

@@ -13,14 +13,6 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Section id of the 🦺 עובד (worker) leaf whose inline task-list panel is open
-/// (one of the `st-*` ids), or null when none is showing. Each `st-*` leaf maps
-/// to ONE task status bucket; tapping it opens the LIVE tasks in that status
-/// filtered from [workerTasksProvider] INLINE in the dial (R2 — no new screen);
-/// tapping again (or any other dial action) closes it. Mutually exclusive with
-/// the M1–M4 manager panels and the W2 store/courier panels.
-final bsWorkerLeafProvider = StateProvider<String?>((_) => null);
-
 /// BS dial — port of app/src/components/bs/bs-dial.tsx.
 /// L1 = 5 personas. L2+ = walk active persona's section tree along
 /// the drill path. Tapping a leaf with no children → toast, EXCEPT the
@@ -987,11 +979,12 @@ class _CustomerRow extends StatelessWidget {
 
 /// The contractor-app config constants the legacy 🛠️ ניהול → ⚙️ הגדרות
 /// אפליקציה section (`mmSection('settings',…)`, @index.html:16733-16740) shows.
-/// VERBATIM from index.html: `EXPRESS_FEE=80` (@11961) · `creditLimit=50000`
-/// (@11963) · `VAT_RATE=0.18` (@11941). They are the legacy editable globals;
-/// the panel renders them read-only (the legacy `prompt()` editors are server
-/// actions with no equivalent here — R8: no invented mutation).
-const int _kExpressFee = 80;
+/// `EXPRESS_FEE` corrected to 120 to match `deliveryFeeFor(CartDelivery.express)`
+/// in store_screen.dart (the actual fee charged). `creditLimit=50000` (@11963) ·
+/// `VAT_RATE=0.18` (@11941). They are the legacy editable globals; the panel
+/// renders them read-only (the legacy `prompt()` editors are server actions with
+/// no equivalent here — R8: no invented mutation).
+const int _kExpressFee = 120;
 const int _kCreditLimit = 50000;
 const double _kVatRate = 0.18;
 

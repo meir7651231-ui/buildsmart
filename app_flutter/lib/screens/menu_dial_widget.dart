@@ -4,9 +4,11 @@ import 'package:buildsmart/data/settings_tree.dart';
 import 'package:buildsmart/screens/store_screen.dart' show StoreSection, storeSectionProvider;
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/menu_state.dart';
 import 'package:buildsmart/state/notif_settings.dart';
+import 'package:buildsmart/state/store_settings.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/widgets/dial.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -299,6 +301,10 @@ class _SettingsDrill extends ConsumerWidget {
               onTap: () {
                 if (g.id == 'reset') {
                   ref.read(appSettingsProvider.notifier).reset();
+                  ref.read(catalogSettingsProvider.notifier).reset();
+                  ref.read(notifSettingsProvider.notifier).reset();
+                  ref.read(chatSettingsProvider.notifier).reset();
+                  ref.read(storeSettingsProvider.notifier).reset();
                   showToast(context, 'איפוס לברירת מחדל');
                   return;
                 }

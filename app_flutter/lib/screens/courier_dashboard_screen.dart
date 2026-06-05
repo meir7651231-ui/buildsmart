@@ -148,38 +148,42 @@ class _CourierDashboardScreenState
             const SizedBox(height: BsTokens.space3),
 
             // Portal button.
-            Material(
-              color: const Color(0xFFFFF0E3),
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-              child: InkWell(
+            Semantics(
+              button: true,
+              label: 'פורטל השליח',
+              child: Material(
+                color: const Color(0xFFFFF0E3),
                 borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-                onTap: () => showPersonaPortalGrid(
-                  context,
-                  '🧰 פורטל השליח',
-                  kCourierPortalTiles,
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.all(BsTokens.space4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'פורטל השליח',
-                        style: TextStyle(
-                          color: BsTokens.brandDark,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  onTap: () => showPersonaPortalGrid(
+                    context,
+                    '🧰 פורטל השליח',
+                    kCourierPortalTiles,
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(BsTokens.space4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'פורטל השליח',
+                          style: TextStyle(
+                            color: BsTokens.brandDark,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'ניווט, צי רכב, צ׳אט ומעקב SLA',
-                        style: TextStyle(
-                          color: BsTokens.brandDark,
-                          fontSize: 12.5,
+                        SizedBox(height: 2),
+                        Text(
+                          'ניווט, צי רכב, צ׳אט ומעקב SLA',
+                          style: TextStyle(
+                            color: BsTokens.brandDark,
+                            fontSize: 12.5,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

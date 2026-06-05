@@ -204,28 +204,50 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
   /// Grouped view for variant / smart-tree lenses: a titled section per
   /// [LensGroup], products rendered as the standard row card (forced row
   /// style for a clean sectioned list regardless of grid/list setting).
+  /// Uses CustomScrollView + SliverList so rows are built lazily (not all
+  /// at once like a ListView with an inline children list).
   Widget _groupedList(CatalogLens lens) {
     final groups = groupByLens(widget.products, lens);
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(0, 4, 0, 24),
-      children: [
-        for (final g in groups) ...[
-          // Header is a plain label. Under the 🌳 smart-tree lens, the GATEWAY
-          // to the rich SmartProduct card is each row's own "כרטיס חכם" button
-          // (option א, per-row) — not the header.
-          _LensGroupHeader(
-            title: g.title,
-            count: g.count,
-            smartTree: lens == CatalogLens.smartTree,
+    // Build a flat index so SliverChildBuilderDelegate can map index →
+    // (header-or-row). Entry is either a _LensGroupHeader or a _ProductRow.
+    // We compute this once and pass it as a delegate closure.
+    final items = <Object>[]; // _LensGroupHeader | ({lens, p})
+    for (final g in groups) {
+      items.add(g); // sentinel for the header
+      for (final p in g.products) {
+        items.add((lens: lens, p: p));
+      }
+    }
+    return CustomScrollView(
+      slivers: [
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 4),
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final item = items[index];
+              if (item is LensGroup) {
+                return _LensGroupHeader(
+                  title: item.title,
+                  count: item.count,
+                  smartTree: lens == CatalogLens.smartTree,
+                );
+              }
+              final row = item as ({CatalogLens lens, LipskeyCatalogProduct p});
+              return _ProductRow(
+                key: ValueKey('${row.lens.name}:${row.p.sku}'),
+                product: row.p,
+                categoryProducts: widget.products,
+                smartLens: row.lens == CatalogLens.smartTree,
+              );
+            },
+            childCount: items.length,
           ),
-          for (final p in g.products)
-            _ProductRow(
-              key: ValueKey('${lens.name}:${p.sku}'),
-              product: p,
-              categoryProducts: widget.products,
-              smartLens: lens == CatalogLens.smartTree,
-            ),
-        ],
+        ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 24),
+        ),
       ],
     );
   }
@@ -492,7 +514,7 @@ class LipskeyProductGridCard extends ConsumerWidget {
                           Icon(Icons.add, color: Colors.white, size: 16),
                           SizedBox(width: 4),
                           Text(
-                            'לעגלה',
+                            'לסל',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -624,6 +646,9 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   bool _open = false;
   int _qty = 1;
   _Unit _unit = _Unit.single;
+  /// Cached in-cart state — written once per build() frame so _image() can
+  /// read the value without calling ref.watch again.
+  bool _inCart = false;
   /// Local cycle state for standalone cards (when no onCycle parent callback).
   LipskeyCatalogProduct? _localProduct;
   /// Inline attribute picker state — non-null when picker is open.
@@ -788,11 +813,6 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
         _Unit.pallet => p.qtyPallet ?? 1,
       };
 
-  bool get _inCart {
-    final key = 'lip:${p.sku}';
-    return ref.watch(smartCartProvider).any((l) => l.productKey == key);
-  }
-
   SmartCartLine _cartLine(int qty) => SmartCartLine(
         productKey: 'lip:${p.sku}',
         productName: p.nameHe,
@@ -870,7 +890,13 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final compact = ref.watch(catalogSettingsProvider).compactMode;
     // Selected = product is in the cart → render the whole card as "pressed".
-    final selected = _inCart;
+    // Use .select so only THIS row rebuilds when its own cart membership changes
+    // (not on every cart change from unrelated products). Uses the currently
+    // displayed product's SKU (p = _localProduct ?? widget.product).
+    final inCart = ref.watch(
+        smartCartProvider.select((lines) => lines.any((l) => l.productKey == 'lip:${p.sku}')));
+    _inCart = inCart; // cache for _image() helper which runs in the same frame
+    final selected = inCart;
     final highlight = selected || _open;
     final surface = Theme.of(context).colorScheme.surface;
     return Container(

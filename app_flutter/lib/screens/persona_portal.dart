@@ -35,7 +35,7 @@ class PortalTileData {
 const List<PortalTileData> kStorePortalTiles = [
   PortalTileData('⭐ דירוג ספקים', 'ציון וביצועים', PortalKind.ratings),
   PortalTileData('⏱️ מעקב SLA', 'זמני אספקה', PortalKind.sla),
-  PortalTileData('🗺️ אזורי הפצה', 'זמני אספקה', PortalKind.zones),
+  PortalTileData('🗺️ אזורי הפצה', 'מפת אזורים', PortalKind.zones),
   PortalTileData('📉 הנחות כמות', 'מדרגות הנחה', PortalKind.bulk),
   PortalTileData('🏷️ הפקת ברקודים', 'תוויות למוצרים', PortalKind.barcode),
   PortalTileData('🚛 ניהול צי רכב', 'רכבים וזמינות', PortalKind.fleet),
@@ -154,7 +154,7 @@ void showPersonaPortalGrid(
                   PortalTileButton(
                     title: t.title,
                     sub: t.sub,
-                    onTap: () => showPortalSheet(sheetCtx, t),
+                    onTap: () => showPortalSheet(context, t),
                   ),
               ],
             ),

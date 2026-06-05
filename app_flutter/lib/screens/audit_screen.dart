@@ -133,8 +133,10 @@ class _AuditScreenState extends State<AuditScreen> {
       ));
       setState(() {}); // progressive update — user sees rows appear live
       await Future.delayed(const Duration(milliseconds: 80));
+      if (!mounted) return;
     }
 
+    if (!mounted) return;
     setState(() => _running = false);
   }
 
@@ -156,7 +158,7 @@ class _AuditScreenState extends State<AuditScreen> {
                     onTap: () => Navigator.maybePop(context),
                     child: const Padding(
                       padding: EdgeInsets.all(8),
-                      child: Icon(Icons.arrow_forward,
+                      child: Icon(Icons.arrow_back,
                           color: Color(0xFF1A1A1A), size: 22),
                     ),
                   ),

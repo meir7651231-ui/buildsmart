@@ -85,9 +85,14 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>> {
 
   static const _prefsKey = 'bs.smart-cart.v1';
 
+  /// True once any mutation has been applied (or _load completes).
+  /// Guards against _load clobbering a mutation that arrived before prefs.
+  bool _loaded = false;
+
   // Persist the cart on every change so it survives app restarts.
   @override
   set state(List<SmartCartLine> value) {
+    _loaded = true; // mutation happened — block any pending _load
     super.state = value;
     _persist();
   }
@@ -96,13 +101,20 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_prefsKey);
-      if (raw == null || raw.isEmpty) return;
+      if (raw == null || raw.isEmpty) {
+        _loaded = true;
+        return;
+      }
       final list = (jsonDecode(raw) as List<dynamic>)
           .map((e) => SmartCartLine.fromJson(e as Map<String, dynamic>))
           .toList();
-      super.state = list; // bypass re-persisting the value we just loaded
+      if (!_loaded) {
+        super.state = list; // bypass re-persisting the value we just loaded
+        _loaded = true;
+      }
     } catch (_) {
       // Corrupt/old payload — ignore and start empty.
+      _loaded = true;
     }
   }
 

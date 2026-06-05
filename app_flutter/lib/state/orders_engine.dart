@@ -210,17 +210,28 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   /// in-memory seed/flow behavior can be asserted in isolation.
   final bool persist;
 
+  /// True once any mutation has been applied (or _load completes).
+  /// Guards against _load clobbering a mutation that arrived before prefs.
+  bool _loaded = false;
+
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(kOrdersEngineKey);
-      if (raw == null || raw.isEmpty) return;
+      if (raw == null || raw.isEmpty) {
+        _loaded = true;
+        return;
+      }
       final list = (jsonDecode(raw) as List<dynamic>)
           .map((e) => Order.fromJson(e as Map<String, dynamic>))
           .toList();
-      super.state = list; // bypass re-persisting the value we just loaded
+      if (!_loaded) {
+        super.state = list; // bypass re-persisting the value we just loaded
+        _loaded = true;
+      }
     } on Object catch (_) {
       // Corrupt/old payload — keep the seed.
+      _loaded = true;
     }
   }
 
@@ -238,6 +249,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   // Persist on every state change (the cart pattern).
   @override
   set state(List<Order> value) {
+    _loaded = true; // mutation happened — block any pending _load
     super.state = value;
     _persist();
   }

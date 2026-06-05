@@ -45,7 +45,7 @@ class SavedProject {
         name: j['name'] as String,
         anchorSkus: (j['anchorSkus'] as List).cast<String>(),
         branchSkus: ((j['branchSkus'] ?? const []) as List).cast<String>(),
-        tempC: j['tempC'] as int,
+        tempC: (j['tempC'] as num).toInt(),
         accessories: ((j['accessories'] ?? const []) as List)
             .cast<String>()
             .toSet(),

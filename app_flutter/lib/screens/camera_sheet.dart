@@ -1,6 +1,8 @@
+import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 void openCameraSheet(BuildContext context) {
@@ -37,14 +39,14 @@ const _kGallery = [
 
 // ─── screen ───────────────────────────────────────────────────────────────────
 
-class CameraScreen extends StatefulWidget {
+class CameraScreen extends ConsumerStatefulWidget {
   const CameraScreen({super.key});
 
   @override
-  State<CameraScreen> createState() => _CameraScreenState();
+  ConsumerState<CameraScreen> createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
+class _CameraScreenState extends ConsumerState<CameraScreen> {
   int _mode = 0;
   final MobileScannerController _scanner = MobileScannerController();
   bool _scanned = false;
@@ -187,7 +189,9 @@ class _CameraScreenState extends State<CameraScreen> {
                                 _scanned = false;
                               }),
                               child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
+                                duration: ref.read(catalogSettingsProvider).reducedMotion
+                                    ? Duration.zero
+                                    : const Duration(milliseconds: 180),
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 14, vertical: 7),
                                 decoration: BoxDecoration(

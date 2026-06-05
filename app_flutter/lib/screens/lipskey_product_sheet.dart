@@ -10,6 +10,7 @@ import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/logic/install_kit.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -987,7 +988,7 @@ class _RelatedCard extends StatelessWidget {
 }
 
 // ── Hero flip card ────────────────────────────────────────────────────────────
-class _HeroImage extends StatefulWidget {
+class _HeroImage extends ConsumerStatefulWidget {
   const _HeroImage({
     required this.product,
     required this.screenH,
@@ -997,10 +998,10 @@ class _HeroImage extends StatefulWidget {
   final double screenH;
 
   @override
-  State<_HeroImage> createState() => _HeroImageState();
+  ConsumerState<_HeroImage> createState() => _HeroImageState();
 }
 
-class _HeroImageState extends State<_HeroImage>
+class _HeroImageState extends ConsumerState<_HeroImage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _anim;
@@ -1021,7 +1022,12 @@ class _HeroImageState extends State<_HeroImage>
   }
 
   void _flip() {
-    if (_showSpec) {
+    // A11Y: if reducedMotion is on, jump directly to the target face with no
+    // rotation animation — the AnimatedBuilder still rebuilds but angle is 0/π.
+    final reduced = ref.read(catalogSettingsProvider).reducedMotion;
+    if (reduced) {
+      _ctrl.value = _showSpec ? 0.0 : 1.0;
+    } else if (_showSpec) {
       _ctrl.reverse();
     } else {
       _ctrl.forward();

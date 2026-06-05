@@ -14,6 +14,7 @@ import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/logic/pressure_drop.dart';
 import 'package:buildsmart/logic/price_estimate.dart';
 import 'package:buildsmart/screens/audit_screen.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/saved_projects.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/widgets/chain_diagram.dart';
@@ -208,9 +209,7 @@ class InstallStudioScreen extends ConsumerStatefulWidget {
 
 class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _flow =
-      AnimationController(vsync: this, duration: const Duration(seconds: 3))
-        ..repeat();
+  late final AnimationController _flow;
 
   bool _loop = false;
   bool _showTutorial = false;
@@ -219,6 +218,12 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
   @override
   void initState() {
     super.initState();
+    _flow = AnimationController(
+        vsync: this, duration: const Duration(seconds: 3));
+    // A11Y: only animate the blueprint grid when reducedMotion is off.
+    if (!ref.read(catalogSettingsProvider).reducedMotion) {
+      _flow.repeat();
+    }
     _checkFirstVisit();
   }
 
@@ -365,8 +370,8 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
           GestureDetector(
             onTap: () => Navigator.maybePop(context),
             child: const Padding(
-              padding: EdgeInsets.only(left: 8),
-              child: Icon(Icons.arrow_forward, color: _ink, size: 22),
+              padding: EdgeInsetsDirectional.only(end: 8),
+              child: Icon(Icons.arrow_back, color: _ink, size: 22),
             ),
           ),
         Container(
@@ -1219,7 +1224,8 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                                           .remove(p.id);
                                     } else if (v == 'rename') {
                                       Navigator.pop(ctx);
-                                      _renameProject(p);
+                                      WidgetsBinding.instance.addPostFrameCallback(
+                                          (_) => _renameProject(p));
                                     }
                                   },
                                 ),
@@ -1300,6 +1306,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
         ),
       ),
     );
+    if (!mounted) return;
     if (name != null && name.isNotEmpty) {
       await ref.read(savedProjectsProvider.notifier).rename(p.id, name);
     }
@@ -2355,7 +2362,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                                     fontWeight: FontWeight.w800)),
                             SizedBox(height: 4),
                             Text(
-                              'לחץ "📋 שלח לאינסטלטור" כדי להעתיק ולשלוח ב-WhatsApp,\nאו "הוסף לעגלה" להזמנה ישירה.',
+                              'לחץ "📋 שלח לאינסטלטור" כדי להעתיק ולשלוח ב-WhatsApp,\nאו "הוסף לסל" להזמנה ישירה.',
                               style: TextStyle(color: _mute, fontSize: 11, height: 1.4),
                             ),
                           ],
@@ -2417,7 +2424,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                             const Icon(Icons.add_shopping_cart,
                                 color: Colors.white, size: 18),
                             const SizedBox(width: 8),
-                            Text('הוסף ${plan.items.length} לעגלה',
+                            Text('הוסף ${plan.items.length} לסל',
                                 style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
@@ -2451,7 +2458,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
       ));
     }
     Navigator.pop(context);
-    showToast(context, 'נוסף לעגלה: ${widget.plan.items.length} פריטים');
+    showToast(context, 'נוסף לסל: ${widget.plan.items.length} פריטים');
   }
 
   void _copyBom(BuildContext context, InstallationPlan plan) {
@@ -3127,7 +3134,7 @@ class _TutorialOverlay extends StatelessWidget {
               _step('2️⃣', 'הוסף 2 נקודות לפחות',
                   'כניסה + יציאה — המערכת ממלאת חיבורים אוטומטית'),
               _step('3️⃣', 'קבל רשימת קנייה',
-                  'שלח לאינסטלטור ב-WhatsApp, או הוסף ישירות לעגלה'),
+                  'שלח לאינסטלטור ב-WhatsApp, או הוסף ישירות לסל'),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,

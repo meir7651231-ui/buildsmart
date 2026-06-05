@@ -746,10 +746,10 @@ void main() {
       await openManageTab(t);
       await openSection(t, 'הגדרות אפליקציה');
 
-      // The three legacy config rows — verbatim labels + values (EXPRESS_FEE=80,
+      // The three legacy config rows — verbatim labels + values (EXPRESS_FEE=120,
       // creditLimit=50,000 grouped, VAT_RATE=18%).
       expect(find.text('תוספת משלוח אקספרס'), findsOneWidget);
-      expect(find.text('₪80'), findsOneWidget);
+      expect(find.text('₪120'), findsOneWidget);
       expect(find.text('מסגרת אשראי לקבלן'), findsOneWidget);
       expect(find.text('₪50,000'), findsOneWidget);
       expect(find.text('שיעור מע״מ'), findsOneWidget);

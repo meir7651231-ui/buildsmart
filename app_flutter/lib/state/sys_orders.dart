@@ -113,7 +113,7 @@ class SysOrdersNotifier extends StateNotifier<List<SysOrder>> {
       OrderLine('סרט טפלון', 3),
       OrderLine('סיליקון סניטרי', 1),
     ];
-    final items = lines.fold<int>(0, (a, l) => a + l.qty);
+    final items = lines.length;
     final order = _ref.read(ordersEngineProvider.notifier).placeOrder(
       who: kSimCustomers[n % kSimCustomers.length],
       site: kSimSites[n % kSimSites.length],

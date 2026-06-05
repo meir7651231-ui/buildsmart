@@ -672,9 +672,14 @@ class _OrdersTabState extends ConsumerState<_OrdersTab> {
     }
     final cur = kManagerOrderFlow.indexOf(o.stage);
     if (cur < 0) return; // unknown stage — don't silently wrap to index 0
-    final next = kManagerOrderFlow[cur + 1];
     ref.read(ordersEngineProvider.notifier).advance(o.id);
-    showToast(context, 'הזמנה ${o.id} → ${_kOrderStageLabel[next] ?? next}');
+    // Re-read the live order after advancing so the toast labels the NEW stage
+    // (not the stale snapshot stage the caller captured before the write).
+    final live = ref
+        .read(ordersEngineProvider)
+        .firstWhere((x) => x.id == o.id, orElse: () => o);
+    showToast(
+        context, 'הזמנה ${o.id} → ${_kOrderStageLabel[live.stage] ?? live.stage}');
   }
 
   /// The order-detail bottom sheet — the legacy `mgrOrderDetail`
@@ -693,7 +698,7 @@ class _OrdersTabState extends ConsumerState<_OrdersTab> {
       builder: (sheetCtx) => Directionality(
         textDirection: TextDirection.rtl,
         child: _OrderDetailSheet(
-          order: o,
+          orderId: o.id,
           onAdvance: () {
             Navigator.of(sheetCtx).pop();
             _advance(o);
@@ -1008,17 +1013,42 @@ class _AdvanceButton extends StatelessWidget {
 /// — `📦`, the id, the `status · who` tag, a full 6-step labelled tracker, an
 /// items/sum/step grid, the קבלן/אתר/סטטוס rows, and the action: either
 /// `קדם ל"…"` (open order) or a "✓ ההזמנה הושלמה ונמסרה" note. LIGHT.
-class _OrderDetailSheet extends StatelessWidget {
-  const _OrderDetailSheet({required this.order, required this.onAdvance});
+///
+/// Watches [ordersEngineProvider] directly (NEW-A) so stage/timeline/advance-
+/// label follow live advances: tapping "קדם" from the list while the sheet is
+/// open causes the sheet to reflect the new stage without reopening it, and the
+/// advance button hides automatically once the order reaches `delivered`.
+class _OrderDetailSheet extends ConsumerWidget {
+  const _OrderDetailSheet({required this.orderId, required this.onAdvance});
 
-  final Order order;
+  final String orderId;
   final VoidCallback onAdvance;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Look up the LIVE order by id — falls back to null if somehow removed.
+    final allOrders = ref.watch(ordersEngineProvider);
+    Order? order;
+    for (final o in allOrders) {
+      if (o.id == orderId) {
+        order = o;
+        break;
+      }
+    }
+
+    // If the order is gone (edge-case), close the sheet gracefully.
+    if (order == null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+          (_) => Navigator.of(context, rootNavigator: false).maybePop());
+      return const SizedBox.shrink();
+    }
+
     final stageIdx = kManagerOrderFlow.indexOf(order.stage);
     final stageLabel = _kOrderStageLabel[order.stage] ?? order.stage;
-    final next = order.isOpen ? kManagerOrderFlow[stageIdx + 1] : null;
+    // L7: guard stageIdx >= 0 to avoid index crash on unknown/corrupt stage.
+    final next = (stageIdx >= 0 && order.isOpen)
+        ? kManagerOrderFlow[stageIdx + 1]
+        : null;
 
     Widget tile(String value, String label) => Expanded(
           child: Container(
@@ -1235,16 +1265,18 @@ class _CustomerView {
   String get status => pct >= 90 ? 'low' : (pct > 0 ? 'live' : 'off');
 }
 
-/// Build the LIVE customer view-models from the engine's orders. Reads the
-/// group-by-buyer aggregates off [managerCustomersProvider] (already sorted by
-/// spend desc, the legacy order) and derives `pct` + distinct `sites` per buyer
-/// from the SAME live order list — so a contractor placing a new order here
-/// updates a customer card LIVE (its order count, spend, sites and credit bar all
-/// reflow). Mirrors the legacy `mgrCustomerList` derivation (@index.html:16549-
-/// 16562) exactly, but over `ordersEngineProvider` instead of the static seed.
-List<_CustomerView> _liveCustomerViews(WidgetRef ref) {
-  final orders = ref.watch(ordersEngineProvider);
+/// PERF-M2: top-level Riverpod provider for the LIVE customer view-models.
+///
+/// Watches [managerCustomersProvider] for the sorted buyer list (sort order is
+/// spend-desc, the legacy `mgrCustomerList` order @index.html:16554 — keeping
+/// it as the primary watch preserves stable ordering across engine ticks) AND
+/// [ordersEngineProvider] for the raw orders needed to derive `pct` / `sites`.
+/// Extracted from the former free-function `_liveCustomerViews` so the O(N)
+/// derivation runs once per engine tick, not once per build call, and eliminates
+/// the double-subscription that the old call inside `build()` caused.
+final _customerViewsProvider = Provider<List<_CustomerView>>((ref) {
   final customers = ref.watch(managerCustomersProvider);
+  final orders = ref.watch(ordersEngineProvider);
 
   // Distinct build sites per buyer (legacy `byName[nm].sites` set @16554) —
   // a non-empty `o.site` is added to that buyer's set; its size is `c.sites`.
@@ -1265,7 +1297,7 @@ List<_CustomerView> _liveCustomerViews(WidgetRef ref) {
         sites: sitesByBuyer[c.name]?.length ?? 0,
       ),
   ];
-}
+});
 
 /// The 👥 לקוחות tab body — the manager's LIVE customer list, a faithful port of
 /// the legacy `renderMgrCustomers` (@index.html:16566-16607). Each contractor is
@@ -1295,7 +1327,9 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
 
   @override
   Widget build(BuildContext context) {
-    final views = _liveCustomerViews(ref);
+    // PERF-M2: single ref.watch on the pre-computed provider — O(N) derivation
+    // runs once per engine tick in the provider, not on every build call.
+    final views = ref.watch(_customerViewsProvider);
 
     // Summary (@index.html:16570-16578): contractor count, total spend
     // (Σ used), and the fleet credit-utilisation % (Σ used / Σ limit).
@@ -1303,7 +1337,7 @@ class _CustomersTabState extends ConsumerState<_CustomersTab> {
     final totalCredit =
         views.fold<int>(0, (s, v) => s + v.customer.creditLimit);
     final fleetPct =
-        totalCredit == 0 ? 0 : ((totalUsed / totalCredit) * 100).round();
+        totalCredit == 0 ? 0 : ((totalUsed / totalCredit) * 100).round().clamp(0, 100);
 
     // Per-status counts for the chips (only live/low are user-facing).
     final counts = <String, int>{
@@ -1655,8 +1689,18 @@ class _CustomerDetailSheet extends ConsumerWidget {
         .watch(ordersEngineProvider)
         .where((o) => o.who == c.name)
         .toList();
+
+    // M4: recompute header stats from the LIVE orders so they stay in sync
+    // with the order list below (the frozen aggregate snapshot on `c` lags
+    // until the CustomerProvider re-emits, which may be a frame behind).
+    final liveOrderCount = orders.length;
+    final liveTotalSpend = orders.fold<int>(0, (s, o) => s + o.sum);
+    final livePct = c.creditLimit == 0
+        ? 0
+        : ((liveTotalSpend / c.creditLimit) * 100).round().clamp(0, 100);
+    final liveSites = orders.map((o) => o.site).where((s) => s.isNotEmpty).toSet().length;
     final balance =
-        (c.creditLimit - c.totalSpend).clamp(0, c.creditLimit); // יתרה ≥ 0
+        (c.creditLimit - liveTotalSpend).clamp(0, c.creditLimit); // יתרה ≥ 0
 
     Widget tile(String value, String label) => Expanded(
           child: Container(
@@ -1749,16 +1793,16 @@ class _CustomerDetailSheet extends ConsumerWidget {
             const SizedBox(height: BsTokens.space4),
             Row(
               children: [
-                tile('${c.orderCount}', 'הזמנות'),
-                tile('₪${_grouped(c.totalSpend)}', 'סך רכש'),
-                tile('${view.pct}%', 'אשראי'),
+                tile('$liveOrderCount', 'הזמנות'),
+                tile('₪${_grouped(liveTotalSpend)}', 'סך רכש'),
+                tile('$livePct%', 'אשראי'),
               ],
             ),
             const SizedBox(height: BsTokens.space4),
             row('מסגרת אשראי', '₪${_grouped(c.creditLimit)}'),
-            row('נוצל', '₪${_grouped(c.totalSpend)}'),
+            row('נוצל', '₪${_grouped(liveTotalSpend)}'),
             row('יתרה זמינה', '₪${_grouped(balance)}'),
-            row('אתרי בנייה', '${view.sites}'),
+            row('אתרי בנייה', '$liveSites'),
             if (orders.isNotEmpty) ...[
               const SizedBox(height: BsTokens.space4),
               Align(
@@ -1827,8 +1871,9 @@ class _CustomerDetailSheet extends ConsumerWidget {
 ///      tally the legacy SECTION 3 builds @16716), header `קטגוריות פעילות (N)` +
 ///      the verbatim hint.
 ///   2. ⚙️ הגדרות אפליקציה — the contractor-app config rows VERBATIM from the
-///      legacy constants (SECTION 4 @16733): תוספת משלוח אקספרס=₪80 (`EXPRESS_FEE`
-///      @11961) · מסגרת אשראי לקבלן=₪50,000 (`creditLimit` @11963) · שיעור מע״מ=18%
+///      legacy constants (SECTION 4 @16733): תוספת משלוח אקספרס=₪120 (`EXPRESS_FEE`
+///      corrected to 120 to match `deliveryFeeFor(CartDelivery.express)`) ·
+///      מסגרת אשראי לקבלן=₪50,000 (`creditLimit` @11963) · שיעור מע״מ=18%
 ///      (`VAT_RATE` @11941) + the verbatim hint.
 ///   3. 🌳 עץ המוצרים — an inline summary of the catalog product-tree (the legacy
 ///      SECTION 1 manages the per-product accessory tree; the inline summary names
@@ -2432,8 +2477,9 @@ class _CategoriesBody extends StatelessWidget {
 class _AppSettingsBody extends StatelessWidget {
   const _AppSettingsBody();
 
-  /// @legacy index.html:11961 `let EXPRESS_FEE=80;`.
-  static const int _expressFee = 80;
+  /// @legacy index.html:11961 `let EXPRESS_FEE=80;` — corrected to 120 to
+  /// match `deliveryFeeFor(CartDelivery.express)` in store_screen.dart.
+  static const int _expressFee = 120;
 
   /// @legacy index.html:11963 `let creditLimit=50000;` (rendered toLocaleString).
   static const int _creditLimit = 50000;
