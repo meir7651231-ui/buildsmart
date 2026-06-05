@@ -2,7 +2,9 @@
 # Fast-forward push ONLY. Refuses the default/protected branch (red-team CRITICAL #1), refuses if origin
 # advanced past your base, and aborts on a failed fetch (never push against an unconfirmed remote state).
 # usage: ff-push.sh <worktree> <repo-dir> <branch> <expected-origin-base-sha>
-#   ALLOW_PROTECTED=1 in the env overrides the default-branch guard — a HUMAN sets this; never bypass in code.
+#   No override exists: a protected-branch push is a deliberate human action done by hand, outside this
+#   automation. (The ALLOW_PROTECTED env-bypass was REMOVED — the red-team showed a root/shell agent could
+#   just set it; an on-host env override is not a guard. The real production gate is off-host branch protection.)
 set -uo pipefail
 WT="${1:?worktree}"; REPO="${2:?repo dir}"; BRANCH="${3:?branch}"; BASE="${4:?expected origin base sha}"
 
@@ -10,12 +12,9 @@ WT="${1:?worktree}"; REPO="${2:?repo dir}"; BRANCH="${3:?branch}"; BASE="${4:?ex
 DEFAULT=$(git -C "$REPO" symbolic-ref --quiet refs/remotes/origin/HEAD 2>/dev/null | sed 's|^refs/remotes/origin/||')
 case "$BRANCH" in
   main|master|"$DEFAULT")
-    if [ "${ALLOW_PROTECTED:-0}" != "1" ]; then
-      echo "REFUSE: '$BRANCH' is the default/protected branch. This guard blocks accidental production pushes."
-      echo "        A human must set ALLOW_PROTECTED=1 to override — never bypass it programmatically."
-      exit 2
-    fi
-    echo "WARNING: pushing protected branch '$BRANCH' (ALLOW_PROTECTED=1 override active)." ;;
+    echo "REFUSE: '$BRANCH' is the default/protected branch — this script never pushes it, and there is NO override."
+    echo "        A protected-branch push is a deliberate human action, done by hand, outside this automation."
+    exit 2 ;;
 esac
 
 # Fetch — do NOT swallow failure: a failed fetch must not let a stale remote-tracking ref pass the guard.
