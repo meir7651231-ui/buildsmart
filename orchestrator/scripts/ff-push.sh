@@ -6,8 +6,11 @@ set -uo pipefail
 WT="${1:?worktree}"; REPO="${2:?repo dir}"; BRANCH="${3:?branch}"; BASE="${4:?expected origin base sha}"
 git -C "$REPO" fetch --no-tags origin "$BRANCH:refs/remotes/origin/$BRANCH" 2>&1 | tail -1
 OT=$(git -C "$REPO" rev-parse "origin/$BRANCH" 2>/dev/null || echo none)
-if [ "${OT:0:7}" != "${BASE:0:7}" ]; then
-  echo "REFUSE: origin/$BRANCH is ${OT:0:7}, expected base ${BASE:0:7} — it advanced; rebase/merge first."
+# Compare FULL SHAs (canonicalize BASE via rev-parse so a short OR full sha both work) —
+# exact + collision-proof, not a 7-char prefix. [down-flow fix surfaced by the fleet supervisor]
+BASE_FULL=$(git -C "$REPO" rev-parse "$BASE" 2>/dev/null || echo "$BASE")
+if [ "$OT" != "$BASE_FULL" ]; then
+  echo "REFUSE: origin/$BRANCH is $OT, expected base $BASE_FULL — it advanced; rebase/merge first."
   exit 1
 fi
 for d in 0 2 4 8 16; do
