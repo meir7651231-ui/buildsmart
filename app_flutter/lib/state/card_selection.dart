@@ -18,8 +18,12 @@ class CardSelectionNotifier extends StateNotifier<Map<String, String>> {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
     if (raw != null) {
-      final m = jsonDecode(raw) as Map<String, dynamic>;
-      state = m.map((k, v) => MapEntry(k, v as String));
+      try {
+        final m = jsonDecode(raw) as Map<String, dynamic>;
+        state = m.map((k, v) => MapEntry(k, v as String));
+      } catch (_) {
+        // corrupt/legacy payload — keep default state
+      }
     }
   }
 

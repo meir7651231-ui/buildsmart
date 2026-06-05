@@ -47,9 +47,13 @@ class DraftQuoteNotifier extends StateNotifier<List<DraftQuote>> {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
     if (raw != null) {
-      state = (jsonDecode(raw) as List)
-          .map((e) => DraftQuote.fromJson(e as Map<String, dynamic>))
-          .toList();
+      try {
+        state = (jsonDecode(raw) as List)
+            .map((e) => DraftQuote.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } catch (_) {
+        // corrupt/legacy payload — keep default state
+      }
     }
   }
 

@@ -51,9 +51,13 @@ class CardVersionsNotifier extends StateNotifier<List<ConfigVersion>> {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
     if (raw != null) {
-      state = (jsonDecode(raw) as List)
-          .map((e) => ConfigVersion.fromJson(e as Map<String, dynamic>))
-          .toList();
+      try {
+        state = (jsonDecode(raw) as List)
+            .map((e) => ConfigVersion.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } catch (_) {
+        // corrupt/legacy payload — keep default state
+      }
     }
   }
 

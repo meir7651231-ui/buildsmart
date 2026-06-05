@@ -72,7 +72,10 @@ class SysOrdersNotifier extends StateNotifier<List<SysOrder>> {
       sum: o.sum,
       stage: _stageFromFlow(o.stage),
       haul: meta?.haul ?? 'small',
-      lines: meta?.lines ?? const [],
+      // Contractor-placed orders carry their captured lines on the engine Order
+      // itself (no _seedMeta/_runtimeMeta entry) — fall back to those so the
+      // store/courier projection shows the real items, not a blank list.
+      lines: meta?.lines ?? o.lines.map((l) => OrderLine(l.name, l.qty)).toList(),
     );
   }
 

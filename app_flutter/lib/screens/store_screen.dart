@@ -332,8 +332,14 @@ const _kPaymentOptions = <_POption>[
 ];
 
 String _price(int n) {
-  if (n < 1000) return '₪$n';
-  return '₪${n ~/ 1000},${(n % 1000).toString().padLeft(3, '0')}';
+  if (n < 0) return '-${_price(-n)}';
+  final s = n.toString();
+  final b = StringBuffer('₪');
+  for (var i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
+    b.write(s[i]);
+  }
+  return b.toString();
 }
 
 // ─── cart math (pure, regression-tested in test/gaps_test.dart) ───────────────

@@ -8,3 +8,9 @@ lib/data/personas.dart:::מנהל המערכת
 # Regression — the express-fee bug must never come back (was ₪80, corrected to ₪120 in v6.16):
 lib/screens/manager_dashboard_screen.dart:::₪120
 lib/screens/manager_dashboard_screen.dart:::!₪80
+#
+# Regression — 5-lens audit fleet: the store/courier projection must keep falling back to the engine's
+# own lines so a contractor order's items aren't dropped (H1); the price formatter must keep correct
+# multi-group thousands separators, never the old single-separator form (M1, broke at >=1,000,000):
+lib/state/sys_orders.dart:::o.lines.map
+lib/screens/store_screen.dart:::!~/ 1000}

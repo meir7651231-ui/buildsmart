@@ -44,9 +44,13 @@ class OfflineCacheNotifier extends StateNotifier<Map<String, CacheEntry>> {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
     if (raw != null) {
-      final m = jsonDecode(raw) as Map<String, dynamic>;
-      state = m.map((k, v) =>
-          MapEntry(k, CacheEntry.fromJson(v as Map<String, dynamic>)));
+      try {
+        final m = jsonDecode(raw) as Map<String, dynamic>;
+        state = m.map((k, v) =>
+            MapEntry(k, CacheEntry.fromJson(v as Map<String, dynamic>)));
+      } catch (_) {
+        // corrupt/legacy payload — keep default state
+      }
     }
   }
 

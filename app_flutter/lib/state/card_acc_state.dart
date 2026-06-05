@@ -36,12 +36,16 @@ class CardAccStateNotifier
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
     if (raw != null) {
-      final outer = jsonDecode(raw) as Map<String, dynamic>;
-      state = outer.map((pk, inner) => MapEntry(
-            pk,
-            (inner as Map<String, dynamic>).map((accName, j) => MapEntry(
-                accName, AccState.fromJson(j as Map<String, dynamic>))),
-          ));
+      try {
+        final outer = jsonDecode(raw) as Map<String, dynamic>;
+        state = outer.map((pk, inner) => MapEntry(
+              pk,
+              (inner as Map<String, dynamic>).map((accName, j) => MapEntry(
+                  accName, AccState.fromJson(j as Map<String, dynamic>))),
+            ));
+      } catch (_) {
+        // corrupt/legacy payload — keep default state
+      }
     }
   }
 
