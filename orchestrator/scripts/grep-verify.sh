@@ -9,6 +9,9 @@ set -uo pipefail
 fail=0
 for chk in "$@"; do
   f="${chk%%:::*}"; pat="${chk#*:::}"
+  # A claim cannot be verified against a file that doesn't exist — FAIL, never pass silently.
+  # (Found by the bootstrap A/B: the absent-check used to print "OK" on a missing file.)
+  if [ ! -f "$f" ]; then echo "FAIL file-missing : $f"; fail=1; continue; fi
   if [[ "$pat" == "!"* ]]; then
     p="${pat:1}"; n=$(grep -c "$p" "$f" 2>/dev/null || true); n=${n:-0}
     if [ "$n" -eq 0 ]; then echo "OK   absent   : $p   ($f)";
