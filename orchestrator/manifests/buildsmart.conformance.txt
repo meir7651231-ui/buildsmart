@@ -14,3 +14,7 @@ lib/screens/manager_dashboard_screen.dart:::!₪80
 # multi-group thousands separators, never the old single-separator form (M1, broke at >=1,000,000):
 lib/state/sys_orders.dart:::o.lines.map
 lib/screens/store_screen.dart:::!~/ 1000}
+#
+# Regression — H3: the order-detail sheet must keep reconciling its line column to the grand total
+# (subtotal + VAT/delivery shown), so the items visibly add up — never a bare total over mismatched lines:
+lib/screens/store_screen.dart:::lineSubtotal

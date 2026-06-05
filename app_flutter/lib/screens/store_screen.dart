@@ -3426,6 +3426,12 @@ class _OrderSheet extends ConsumerWidget {
     final lines = engineOrder?.lines ?? const [];
     final shipTo = engineOrder?.shipTo ?? '';
     final notes = engineOrder?.notes ?? '';
+    // Reconcile the line column with the displayed total: the per-line prices are
+    // item subtotals, while order.total is the grand total (subtotal + VAT +
+    // delivery). Surface the difference so the items visibly add up (audit H3).
+    final lineSubtotal = lines.fold<int>(0, (s, l) => s + l.price);
+    final grandTotal = engineOrder?.sum ?? lineSubtotal;
+    final extras = grandTotal - lineSubtotal;
     // gate 32: wrap in a scroll view so the order sheet never overflows on
     // short viewports (was a 3.6px RenderFlex overflow at the test viewport).
     return SingleChildScrollView(
@@ -3577,6 +3583,33 @@ class _OrderSheet extends ConsumerWidget {
               ),
             const Divider(color: Color(0xFFF5F5F5), height: 1),
             const SizedBox(height: 12),
+            if (lines.isNotEmpty) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('סכום ביניים',
+                      style: TextStyle(color: Color(0xFF888888), fontSize: 13)),
+                  Text(_price(lineSubtotal),
+                      style:
+                          const TextStyle(color: Color(0xFF888888), fontSize: 13)),
+                ],
+              ),
+              if (extras != 0) ...[
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('מע"מ + משלוח',
+                        style:
+                            TextStyle(color: Color(0xFF888888), fontSize: 13)),
+                    Text(_price(extras),
+                        style: const TextStyle(
+                            color: Color(0xFF888888), fontSize: 13)),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 8),
+            ],
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

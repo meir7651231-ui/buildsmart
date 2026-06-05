@@ -6,3 +6,4 @@ test/courier_stage_advance_engine_test.dart
 test/store_stage_advance_engine_test.dart
 test/acceptance_stage_test.dart
 test/bs_dial_manager_orders_test.dart
+test/worker_tasks_persistence_test.dart

@@ -16,16 +16,82 @@
 // [PersonaTask.orderId], the approval also `advance`s that order on the shared
 // `ordersEngineProvider`, so a completed install moves its order live too.
 
+import 'dart:convert';
+
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// The live worker-tasks list — seeded from the verbatim [kPersonaTasks] so
 /// every existing number/string is byte-for-byte identical until a status moves.
+/// SharedPreferences key for the persisted worker-task statuses (mirrors the
+/// orders-engine `bs.orders.v1` key shape).
+const String kWorkerTasksKey = 'bs.worker-tasks.v1';
+
 class WorkerTasksNotifier extends StateNotifier<List<PersonaTask>> {
-  WorkerTasksNotifier(this._ref) : super(kPersonaTasks);
+  WorkerTasksNotifier(this._ref, {this.persist = true}) : super(kPersonaTasks) {
+    if (persist) _load();
+  }
 
   final Ref _ref;
+
+  /// When false (tests), skip SharedPreferences entirely so the in-memory
+  /// seed/flow can be asserted in isolation (the orders-engine pattern).
+  final bool persist;
+
+  /// True once a mutation applied or _load completed — guards _load from
+  /// clobbering a mutation that landed before prefs resolved.
+  bool _loaded = false;
+
+  /// Only [PersonaTask.status] changes at runtime, so persist a compact
+  /// `{id: status}` overlay and re-apply it onto the verbatim [kPersonaTasks]
+  /// seed on load (resilient to seed edits — a new seed task simply has no
+  /// overlay). WITHOUT this the worker tasks reset on restart while the orders
+  /// they advanced stay advanced, letting the manager approve+advance the same
+  /// install twice across sessions.
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(kWorkerTasksKey);
+      if (raw == null || raw.isEmpty) {
+        _loaded = true;
+        return;
+      }
+      final m = jsonDecode(raw) as Map<String, dynamic>;
+      if (!_loaded) {
+        super.state = [
+          for (final t in kPersonaTasks)
+            if (m['${t.id}'] is String)
+              t.copyWith(status: m['${t.id}'] as String)
+            else
+              t,
+        ];
+        _loaded = true;
+      }
+    } on Object catch (_) {
+      _loaded = true; // corrupt/old payload — keep the seed
+    }
+  }
+
+  Future<void> _persist() async {
+    if (!persist) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        kWorkerTasksKey,
+        jsonEncode({for (final t in state) '${t.id}': t.status}),
+      );
+    } on Object catch (_) {}
+  }
+
+  /// Persist on every status change (the orders-engine pattern).
+  @override
+  set state(List<PersonaTask> value) {
+    _loaded = true;
+    super.state = value;
+    _persist();
+  }
 
   /// Replace the status of the task with [id] (no-op on an unknown id or when
   /// the status is already [status]) — the single mutation primitive.
@@ -83,7 +149,7 @@ class WorkerTasksNotifier extends StateNotifier<List<PersonaTask>> {
 /// the manager's approvals view both read.
 final workerTasksProvider =
     StateNotifierProvider<WorkerTasksNotifier, List<PersonaTask>>(
-  WorkerTasksNotifier.new,
+  (ref) => WorkerTasksNotifier(ref),
 );
 
 /// The tasks currently awaiting the manager's approval (`review`), in id order —
