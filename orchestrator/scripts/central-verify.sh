@@ -27,6 +27,16 @@ echo "gate target: $APP  ·  HEAD: $(git -C "$APP" rev-parse --short HEAD 2>/dev
 echo "== deps =="
 ( cd "$APP" && flutter pub get ) || { echo "GATE FAIL: pub get (deps unresolved — analyze/test would run on a bad state)"; exit 1; }
 
+# Project codegen — faithfulness to the real CI gate (found by running this gate end-to-end): this app
+# generates a *gitignored* lib/version.g.dart, and CI runs scripts/gen_version.sh AFTER pub get and BEFORE
+# analyze (lesson #72). Without it analyze fails on a fresh worktree ("Target of URI hasn't been generated").
+# Conditional on the script existing, so this stays a no-op for projects that don't have it.
+REPO_ROOT=$(git -C "$APP" rev-parse --show-toplevel 2>/dev/null || echo "")
+if [ -n "$REPO_ROOT" ] && [ -f "$REPO_ROOT/scripts/gen_version.sh" ]; then
+  echo "== codegen (scripts/gen_version.sh) =="
+  ( cd "$REPO_ROOT" && bash scripts/gen_version.sh ) || { echo "GATE FAIL: codegen (gen_version.sh)"; exit 1; }
+fi
+
 echo "== analyze =="
 out=$( cd "$APP" && flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 ); aec=$?
 ec=$( printf '%s\n' "$out" | grep -icE 'error •' )
