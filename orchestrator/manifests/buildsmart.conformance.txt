@@ -1,0 +1,10 @@
+# BuildSmart conformance + regression assertions (paths relative to app_flutter/).
+# Run via: central-verify.sh /path/to/app_flutter --assert orchestrator/manifests/buildsmart.conformance.txt
+#
+# Conformance — core verbatim Hebrew strings that MUST stay present (the project's central invariant):
+lib/data/menu_trees.dart:::הסל שלי
+lib/data/personas.dart:::מנהל המערכת
+#
+# Regression — the express-fee bug must never come back (was ₪80, corrected to ₪120 in v6.16):
+lib/screens/manager_dashboard_screen.dart:::₪120
+lib/screens/manager_dashboard_screen.dart:::!₪80

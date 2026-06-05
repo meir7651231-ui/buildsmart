@@ -8,6 +8,7 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 LENSES="$HERE/../lenses/registry.txt"
 CKPT="$HERE/ckpt.sh"; REG="$HERE/registry.sh"; RLINT="$HERE/report-lint.sh"
 LCOV_S="$HERE/lens-coverage.sh"; DCOV="$HERE/diff-coverage.sh"; GVER="$HERE/grep-verify.sh"
+AM="$HERE/assert-manifest.sh"; RT="$HERE/required-tests.sh"
 
 failed=0
 check(){ # check "<label>" <expected-exit> <cmd...>
@@ -89,6 +90,37 @@ check "grep present"            0 "$GVER" "$T/src.txt:::_loaded"
 check "grep absent-ok"          0 "$GVER" "$T/src.txt:::!neverHere"
 check "grep should-be-present"  1 "$GVER" "$T/src.txt:::notThere"
 check "grep missing-file"       1 "$GVER" "$T/gone.txt:::anything"
+
+echo "== assert-manifest.sh =="
+mkdir -p "$T/app2/lib"
+printf 'final a = "הסל שלי";\nfinal b = "₪120";\n' > "$T/app2/lib/x.dart"
+printf '# conf+regression\nlib/x.dart:::הסל שלי\nlib/x.dart:::₪120\nlib/x.dart:::!₪80\n' > "$T/am_ok.txt"
+printf 'lib/x.dart:::NOT_PRESENT_HERE\n'  > "$T/am_bad.txt"
+printf 'lib/x.dart:::!₪120\n'             > "$T/am_regress.txt"
+printf 'lib/missing.dart:::x\n'           > "$T/am_missing.txt"
+printf '# only comments\n'                > "$T/am_empty.txt"
+printf 'no-triple-colon\n'                > "$T/am_malformed.txt"
+check "assert ok"             0 "$AM" "$T/app2"  "$T/am_ok.txt"
+check "assert bad-present"    1 "$AM" "$T/app2"  "$T/am_bad.txt"
+check "assert banned-present" 1 "$AM" "$T/app2"  "$T/am_regress.txt"
+check "assert missing-file"   1 "$AM" "$T/app2"  "$T/am_missing.txt"
+check "assert empty"          1 "$AM" "$T/app2"  "$T/am_empty.txt"
+check "assert malformed"      1 "$AM" "$T/app2"  "$T/am_malformed.txt"
+check "assert no-base"        2 "$AM" "$T/nodir" "$T/am_ok.txt"
+
+echo "== required-tests.sh =="
+mkdir -p "$T/app2/test"
+printf 'void main(){ test("orders engine advances stage", (){}); }\n' > "$T/app2/test/flow_test.dart"
+printf 'test/flow_test.dart\n'                  > "$T/rt_ok.txt"
+printf 'test/flow_test.dart:::advances stage\n' > "$T/rt_name_ok.txt"
+printf 'test/flow_test.dart:::no such name\n'   > "$T/rt_name_bad.txt"
+printf 'test/missing_test.dart\n'               > "$T/rt_missing.txt"
+printf '# empty\n'                              > "$T/rt_empty.txt"
+check "reqtests file-ok"      0 "$RT" "$T/app2" "$T/rt_ok.txt"
+check "reqtests name-ok"      0 "$RT" "$T/app2" "$T/rt_name_ok.txt"
+check "reqtests name-bad"     1 "$RT" "$T/app2" "$T/rt_name_bad.txt"
+check "reqtests missing"      1 "$RT" "$T/app2" "$T/rt_missing.txt"
+check "reqtests empty"        1 "$RT" "$T/app2" "$T/rt_empty.txt"
 
 echo
 if [ "$failed" -eq 0 ]; then echo "SELFTEST PASS (all checks green)"; exit 0

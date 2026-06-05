@@ -1,0 +1,8 @@
+# BuildSmart critical-flow tests that MUST exist (paths relative to app_flutter/).
+# Run via: central-verify.sh /path/to/app_flutter --required-tests orchestrator/manifests/buildsmart.required-tests.txt
+# Since central-verify requires the whole suite to be green, "present here" ⇒ "this flow ran and passed".
+test/orders_engine_test.dart
+test/courier_stage_advance_engine_test.dart
+test/store_stage_advance_engine_test.dart
+test/acceptance_stage_test.dart
+test/bs_dial_manager_orders_test.dart

@@ -15,7 +15,9 @@ fleet because it keeps the judgment; the fleet keeps the labor.
 | `agents/supervisor.md` | **one per fleet** — objectively verifies the fleet + reports up (the oversight node) |
 | `FACTORY.md` | hierarchical factory architecture (Tier 0/1/2 + the up/down control loop) + the **verified** execution model (nested on the SDK, flattened in Claude Code) |
 | `scripts/wt-setup.sh` | fresh worktree per run |
-| `scripts/central-verify.sh` | **the gate** — analyze 0 + tests + build (project adapter; current: Flutter) |
+| `scripts/central-verify.sh` | **the gate** — analyze 0 + tests + build, **plus** optional `--assert` (byte-conformance) and `--required-tests` (critical-flow presence); skips are LOUD, never silent (project adapter; current: Flutter) |
+| `scripts/assert-manifest.sh` | run a manifest of byte assertions (conformance + regression) — makes "verify the bytes" an **automatic gate step**, not a manual one |
+| `scripts/required-tests.sh` | enforce that critical-flow test files **exist** (present + green suite ⇒ the flow ran and passed) |
 | `scripts/grep-verify.sh` | verify the **bytes** of a claimed fix, not the agent's prose |
 | `scripts/ff-push.sh` | fast-forward-only push with divergence refusal + retries |
 | `scripts/ckpt.sh` | durable run checkpoint — resume + **phase-order guard** (a later stage can't run before an earlier one) |
@@ -26,6 +28,19 @@ fleet because it keeps the judgment; the fleet keeps the labor.
 | `scripts/selftest.sh` | exercises all of the above on synthetic data with expected exit codes — run before committing tooling |
 | `lenses/registry.txt` | the canonical lens set (the orthogonal viewpoints a full sweep must cover) |
 | `schemas/report.schema.json` | documents the run-report shape (report-lint.sh is the runtime enforcer) |
+| `manifests/*.txt` | conformance/regression + required-tests manifests (a template + the live BuildSmart set) fed to the gate |
+
+### Making conformance part of the gate (the recommended invocation)
+The gate only runs `analyze + test + build` by default — that does **not** enforce source-conformance (e.g.
+verbatim Hebrew/legacy strings) or guarantee critical flows stay covered. Pass the manifests so it does:
+```
+central-verify.sh <app-dir> \
+  --assert         orchestrator/manifests/buildsmart.conformance.txt \
+  --required-tests orchestrator/manifests/buildsmart.required-tests.txt
+```
+With no manifest the gate prints a **loud** "NOT enforced this run" line — absence is visible, not silent.
+Every escaped bug becomes a permanent `:::!bannedString` line in the conformance manifest (the regression
+ledger): authoring the rule stays a human judgment, but once written it is enforced forever, automatically.
 
 ## Spawning a copy
 
