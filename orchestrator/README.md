@@ -12,6 +12,8 @@ fleet because it keeps the judgment; the fleet keeps the labor.
 | `agents/auditor.md` | read-only lens-scanner sub-agent (spawn N, one disjoint lens each) |
 | `agents/validator.md` | adversarial verifier (drops false-positives before fixing) |
 | `agents/fixer.md` | disjoint-file fixer (spawn several, partitioned by file) |
+| `agents/supervisor.md` | **one per fleet** — objectively verifies the fleet + reports up (the oversight node) |
+| `FACTORY.md` | hierarchical factory architecture (Tier 0/1/2 + the up/down control loop) + the **verified** execution model (nested on the SDK, flattened in Claude Code) |
 | `scripts/wt-setup.sh` | fresh worktree per run |
 | `scripts/central-verify.sh` | **the gate** — analyze 0 + tests + build (project adapter; current: Flutter) |
 | `scripts/grep-verify.sh` | verify the **bytes** of a claimed fix, not the agent's prose |
