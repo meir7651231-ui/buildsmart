@@ -18,6 +18,14 @@ fleet because it keeps the judgment; the fleet keeps the labor.
 | `scripts/central-verify.sh` | **the gate** — analyze 0 + tests + build (project adapter; current: Flutter) |
 | `scripts/grep-verify.sh` | verify the **bytes** of a claimed fix, not the agent's prose |
 | `scripts/ff-push.sh` | fast-forward-only push with divergence refusal + retries |
+| `scripts/ckpt.sh` | durable run checkpoint — resume + **phase-order guard** (a later stage can't run before an earlier one) |
+| `scripts/registry.sh` | sub-agent registry — `assert-none-open` BLOCKs if any spawned agent was left unreaped |
+| `scripts/report-lint.sh` | lint a run-report JSON — a "CLEAN" report **may not** carry deferred work or unresolved discrepancies |
+| `scripts/lens-coverage.sh` | coverage gate — every **required** audit lens must have been returned by the fleet |
+| `scripts/diff-coverage.sh` | every **changed** source file must be in coverage; a path-prefix mismatch is a BLOCK, never a silent pass |
+| `scripts/selftest.sh` | exercises all of the above on synthetic data with expected exit codes — run before committing tooling |
+| `lenses/registry.txt` | the canonical lens set (the orthogonal viewpoints a full sweep must cover) |
+| `schemas/report.schema.json` | documents the run-report shape (report-lint.sh is the runtime enforcer) |
 
 ## Spawning a copy
 
@@ -38,6 +46,18 @@ processes = N orchestrators. Same brain, different body.
 Only `scripts/central-verify.sh` is stack-specific (it currently runs `flutter analyze/test/build`).
 Swap those three blocks for your toolchain (e.g. `tsc && vitest && vite build`). Everything else —
 the playbook, the agent roles, worktree/grep/ff-push — is stack-agnostic.
+
+## The tooling-layer gates — and what they are NOT
+`ckpt` / `registry` / `report-lint` / `lens-coverage` / `diff-coverage` are **real, runnable** checks that
+turn silent gaps into visible BLOCKs (missing lens, unreaped agent, uncovered change, a "CLEAN" report that
+isn't). They are **useful tooling, not a security boundary**: this agent runs as root, so anything on-host —
+these scripts included — can be edited or skipped by the same actor that runs them. They raise the floor on
+*honest mistakes* and mis-narration; they do **not** constrain a determined or compromised orchestrator. The
+only in-runtime mechanism that does is **structural absence** (a tool that isn't in the process can't be
+used — e.g. the shell-less `fixer`). True enforcement lives **off-host** (CI holding the sole deploy
+credential). Keep the two straight; don't let a green gate be mistaken for a guarantee.
+
+Run `scripts/selftest.sh` after touching any of these — it must print `SELFTEST PASS` before you commit.
 
 ## The one rule that matters most
 **Do not trust a sub-agent's prose.** Agents mis-narrate ("already done") even when they did the work —
