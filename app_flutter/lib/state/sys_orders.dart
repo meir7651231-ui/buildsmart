@@ -111,19 +111,25 @@ class SysOrdersNotifier extends StateNotifier<List<SysOrder>> {
   /// metadata. Returns the new order id.
   String simulateIncomingOrder() {
     final n = _simSeq++;
+    // Engine-persisted lines (OrderLineItem) so a simulated order keeps its items
+    // across a reload via _toSysOrder's engine-lines fallback (audit M4). Prices
+    // sum to the order total (354); haul stays the demo default 'small'.
     const lines = [
-      OrderLine('ברז לכיור', 2),
-      OrderLine('סרט טפלון', 3),
-      OrderLine('סיליקון סניטרי', 1),
+      OrderLineItem(name: 'ברז לכיור', emoji: '🚰', qty: 2, price: 118),
+      OrderLineItem(name: 'סרט טפלון', emoji: '🧻', qty: 3, price: 36),
+      OrderLineItem(name: 'סיליקון סניטרי', emoji: '🧴', qty: 1, price: 200),
     ];
-    final items = lines.length;
     final order = _ref.read(ordersEngineProvider.notifier).placeOrder(
       who: kSimCustomers[n % kSimCustomers.length],
       site: kSimSites[n % kSimSites.length],
-      items: items,
+      items: lines.length,
       sum: 354,
+      lines: lines,
     );
-    _runtimeMeta[order.id] = (haul: 'small', lines: lines);
+    _runtimeMeta[order.id] = (
+      haul: 'small',
+      lines: lines.map((l) => OrderLine(l.name, l.qty)).toList(),
+    );
     return order.id;
   }
 }

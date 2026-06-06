@@ -125,6 +125,15 @@ class _SectionDrill extends ConsumerWidget {
                 ref.read(mainTabProvider.notifier).state = 3;
                 ref.read(menuTabProvider.notifier).state = null;
                 ref.read(_drillProvider.notifier).state = const [];
+              } else if (s.id.startsWith('svc-')) {
+                // The רכש → ההזמנות שלי services (rental/deposits/return/rfq/
+                // msds/compare) have a live backing — the store services hub.
+                // Route there instead of a בבנייה stub (audit M5).
+                ref.read(storeSectionProvider.notifier).state =
+                    StoreSection.services;
+                ref.read(mainTabProvider.notifier).state = 3;
+                ref.read(menuTabProvider.notifier).state = null;
+                ref.read(_drillProvider.notifier).state = const [];
               } else {
                 showToast(context, '🚧 ${s.title} — בבנייה');
               }
