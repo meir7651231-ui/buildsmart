@@ -1,5 +1,4 @@
 import 'package:buildsmart/theme/tokens.dart';
-import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -64,14 +63,13 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
   }
 }
 
-/// Convenience launcher — opens the scanner and toasts the result.
-Future<void> openBarcodeScanner(BuildContext context) async {
-  final code = await Navigator.of(context).push<String>(
+/// Convenience launcher — opens the scanner and RETURNS the scanned code (or
+/// null if cancelled), so callers can route it into the live search query.
+Future<String?> openBarcodeScanner(BuildContext context) {
+  return Navigator.of(context).push<String>(
     MaterialPageRoute<String>(
       builder: (_) => const BarcodeScanner(),
       fullscreenDialog: true,
     ),
   );
-  if (!context.mounted) return;
-  if (code != null) showToast(context, 'נקלט: $code');
 }

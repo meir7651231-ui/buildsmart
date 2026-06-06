@@ -827,6 +827,15 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     ref.read(smartCartProvider.notifier).add(_cartLine(_qty * _unitMult));
   }
 
+  /// Stepper change while the card is open (the product is already in the cart):
+  /// update the local count AND mirror it to the cart via setQtyForKey, so the
+  /// list card's stepper drives the real cart quantity — matching the grid card
+  /// (was: setState-only, so qty changes were silently lost — W5).
+  void _setQty(int n) {
+    setState(() => _qty = max(1, n));
+    ref.read(smartCartProvider.notifier).setQtyForKey(_cartLine(_qty * _unitMult));
+  }
+
   /// Cancel the selection — clears every line of this product and collapses
   /// the card back to its unselected (+) state.
   void _removeFromCart() {
@@ -1421,10 +1430,10 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          btn('−', () => setState(() => _qty = max(1, _qty - 1))),
+          btn('−', () => _setQty(_qty - 1)),
           GestureDetector(
             onTap: () =>
-                showQtyWheel(context, _qty, (n) => setState(() => _qty = n)),
+                showQtyWheel(context, _qty, _setQty),
             child: SizedBox(
               width: 34,
               child: Center(
@@ -1435,7 +1444,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                           fontSize: 14))),
             ),
           ),
-          btn('+', () => setState(() => _qty++)),
+          btn('+', () => _setQty(_qty + 1)),
         ],
       ),
     );

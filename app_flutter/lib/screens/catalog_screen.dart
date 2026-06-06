@@ -1703,7 +1703,8 @@ class _SearchToolsRow extends ConsumerWidget {
               final ok = await VoiceService.instance.listen(
                 onFinal: (t) {
                   if (t.isNotEmpty) {
-                    messenger.showSnackBar(SnackBar(content: Text(t)));
+                    // Drive the live search with the transcript (was: dropped into a snackbar).
+                    ref.read(searchQueryProvider.notifier).state = t;
                   }
                 },
               );
@@ -1717,7 +1718,12 @@ class _SearchToolsRow extends ConsumerWidget {
           _SearchToolButton(
             emoji: '📷',
             label: 'ברקוד',
-            onTap: () => openBarcodeScanner(context),
+            onTap: () async {
+              final code = await openBarcodeScanner(context);
+              if (code != null && code.isNotEmpty) {
+                ref.read(searchQueryProvider.notifier).state = code;
+              }
+            },
           ),
           _SearchToolButton(
             emoji: '⚙️',

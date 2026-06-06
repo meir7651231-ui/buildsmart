@@ -841,6 +841,11 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
         ),);
         _replyIdx++;
       });
+      // New-message alert: a haptic when an incoming (bot) message arrives, gated
+      // on the user's "new-message alert" setting (was: persisted but never read — W4).
+      if (ref.read(chatSettingsProvider).messageAlertEnabled) {
+        HapticFeedback.lightImpact();
+      }
       _scrollToBottom();
     });
   }
