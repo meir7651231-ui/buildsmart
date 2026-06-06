@@ -1,6 +1,6 @@
 # COORDINATION-SPEC — מפרט-תיאום לרגע-הפיצול (מי-לוקח-מה · merge-order · אנטי-פיצול)
 
-> משלים את `TASKS-to-full.md`. מטרה: לפצל את 8 ה-tracks לסוכנים **בלי לחזור על הפיצול ל-3 ענפים** שקרה. נשען על PLAYBOOK (`AGENT_PATTERNS`/`AGENT_COORDINATION`) + בעלות-הסוכנים (דוח 24).
+> 🧭 נקודת-כניסה: `00-START-HERE.md`. משלים את `TASKS-to-full.md`. מטרה: לפצל את 8 ה-tracks לסוכנים **בלי לחזור על הפיצול ל-3 ענפים** שקרה. נשען על PLAYBOOK (`AGENT_PATTERNS`/`AGENT_COORDINATION`) + בעלות-הסוכנים (דוח 24).
 
 ## 🔴 חוק-הזהב (הלקח מהפיצול הקודם)
 **טרנק אחד = `claude/whats-happening-LyY9G`. כולם ממזגים אליו תכופות.**
@@ -16,7 +16,7 @@
 | **T6** server-ready | **מקבץ-A** (ארכיטקטורה) | `data/repositories/` (קבצים-חדשים) | מוקדם · פאונדציה |
 | **T1** פיננסים(10) | **מקבץ-B** | `screens/finance_hub_*` (חדשים) | מקבילי |
 | **T2** אתר(10) | **מקבץ-C** | `screens/site_hub_*` (חדשים) | מקבילי |
-| **T3** חסרים(7) | **מקבץ-D** (+spawn) | `screens/{tasks,smart_project,...}` | אחד-לכל-feature |
+| **T3** חסרים(9) | **מקבץ-D** (+spawn) | `screens/{tasks,smart_project,...}` | אחד-לכל-feature |
 | **T4** היקפי(43) | **מקבץ-E/ליטוש** | chats/camera/settings (קיימים) | ⚠️ partition-לפי-קובץ |
 | **T5** דחויים(5) | **מקבץ-F** | store/courier screens (קיימים) | ⚠️ תיאום עם בעלי-T2-פרסונה |
 | **ליטוש** P-1–P-5 | **ליטוש** | theme/widgets (יציבים) | רציף · אחרי-feature |

@@ -1,5 +1,6 @@
 # TASKS — פירוק מלא עד "מלא מלא" (מוכן לפיצול-מקבילי לסוכנים)
 
+> 🧭 **קרא קודם `00-START-HERE.md`** (מספור Track-תפעולי ↔ מאסטר + סדר-קריאה). כאן = ה"מה לבנות".
 > כל מה שנשאר, מפורק לרמת-משימה ומאורגן ל-**tracks disjoint** (קבצים לא-חופפים → פיצול-מקבילי בטוח).
 > ביצוע: `claude/whats-happening-LyY9G` · סגנון-הבנייה ב-`PLAN-contractor-completion.md` · push רק על מילה מפורשת · verbatim מ-proto/04 (`[L#]`=index.html).
 > **שימוש-חוזר:** המנהל כבר בנה order-engine/customers/credit/metrics → tracks 1/3 מתחברים אליהם, לא בונים מחדש.
@@ -11,7 +12,7 @@
 | **B0** | תשתית-data שלב-ב | `data/contractor_seeds.dart`(+) | חוסם 1–3 |
 | **T1** | מרכז-פיננסים (10) | `screens/finance_hub_*` | B0 |
 | **T2** | ניהול-אתר (10) | `screens/site_hub_*` | B0 |
-| **T3** | משימות+פרויקט-חכם+תקציב+מלאי+סריקה+פרויקטים+מועדון | `screens/*` נפרדים | B0 |
+| **T3** | משימות+פרויקט-חכם+תקציב+מלאי+סריקה+פרויקטים+מועדון+AI+תוכן-בית | `screens/*` נפרדים | B0 |
 | **T4** | 43 סטאבים-היקפיים | chats/camera/settings (מחולק) | — |
 | **T5** | פיצ'רי-פרסונה דחויים | store/courier screens | — |
 | **T6** | server-ready (Repository) | `data/repositories/` | פאונדציה |
@@ -54,7 +55,7 @@ PROJECTS(3) · ARCHIVED(3) · SITE_TREE(3) · STOCK_DEMO(11) · TASKS(5+steps) �
 - **T2.9 ביקורות-מפקח** `[L20111]` — inspections(2) · **inline** + complete. ✅ CRUD.
 - **T2.10 ארכיון** `[L20143]` — ARCHIVED_PROJECTS(3). ✅ 3 מוצגים.
 
-# Track T3 — פיצ'רים-חסרים (7 משימות · proto §2/§3/§6/§7/§8/§9 + §H)
+# Track T3 — פיצ'רים-חסרים (9 משימות · proto §1/§2/§3/§6/§7/§8/§9 + §H + AI-hub)
 - **T3.A משימות** `§6 [L8023]` — 5 משימות · מכונת-סטטוס(5) · manager/worker · **auto-advance** · WORK_LOG. **reuse order-engine**. ✅ transitions.
 - **T3.B פרויקט-חכם** `§7 [L7348]` — 9 day-stages · done-marking · steps · day-picker. ✅ progress=done/9.
 - **T3.C תקציב** `§3 [L7150]` — box/detail/editor + 4 קטגוריות (pct=66%). ✅ math.
@@ -62,6 +63,8 @@ PROJECTS(3) · ARCHIVED(3) · SITE_TREE(3) · STOCK_DEMO(11) · TASKS(5+steps) �
 - **T3.E סריקה-תפריט** `§9 [L9658]` — 4 PLAN_TYPES (משתף עם T3-קבלן). ✅ scan→cart.
 - **T3.F פרויקטים** `§2 [L6447]` — רשימה · switchProject · status/edit (inline). ✅ switch+cart-per-project.
 - **T3.G מרכז-תגמולים/מועדון** `§H [L21464]` — 7: אתגרים/לוח-מובילים/תגי-ירוק/קופונים/חבר-מביא-חבר/VIP/מימוש. ✅ 7 מציגים.
+- **T3.H AI-hub** `openAIHub · doc 16` — ברקוד/דיבור אמיתיים · השאר = תוצאת-AI מדומה (חיזוי/חלופות[`cheaperAlternativeBrand`]/מזג-אוויר/בלאי, לא toast). ✅ תוצאה מוצגת.
+- **T3.I תוכן-בית** `§1` — reorder + product-cards (מקור proto §1). ✅ reorder עובד.
 
 # Track T4 — 43 סטאבים-היקפיים (מחולק לפי-קובץ · low-risk · בלתי-תלוי)
 - **T4.chats** (`chats_screen`, 7) — שיחת-וידאו · הקלטת-קול · מצלמה · צרף-קובץ · אמוג׳י · פתיחת-שיחה · "עוד" → flow/honest-stub. ✅ אפס toast.
@@ -86,11 +89,11 @@ PROJECTS(3) · ARCHIVED(3) · SITE_TREE(3) · STOCK_DEMO(11) · TASKS(5+steps) �
 | B0+T10 | תשתית+טריגר | 0.75 יום | חוסם |
 | T1 | פיננסים (10) | 1.5 | ✅ |
 | T2 | אתר (10) | 1.5 | ✅ |
-| T3 | חסרים (7) | 3 | ✅ (אחד-לכל) |
+| T3 | חסרים (9) | 4 | ✅ (אחד-לכל) |
 | T4 | היקפי (43) | 2.5 | ✅ (לפי-קובץ) |
 | T5 | דחויים (5) | 1.5 | ✅ |
 | T6 | server-ready | 1.5 | פאונדציה |
-| | **סה"כ עד מלא-מלא** | **~13 ימים** | (מקבילי → wall-clock קצר יותר) |
+| | **סה"כ עד מלא-מלא** | **~14 ימים** | (מקבילי → wall-clock קצר יותר) |
 
 *נפרד (לא-קוד): deploy-fix · חשבונות-השקה (Apple/Google + privacy-policy).*
 
