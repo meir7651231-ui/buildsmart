@@ -399,7 +399,22 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
       backgroundColor: const Color(0xFFFFFFFF),
       elevation: 0,
       automaticallyImplyLeading: false,
-      titleSpacing: BsTokens.space4,
+      // Hamburger — opens the contractor menu dial (בית/הפרויקטים/רכש/הגדרות).
+      // @legacy fabs.tsx fab--menu, aria-label "פתח תפריט". Placed in the AppBar
+      // leading (start) slot so it doesn't crowd the actions row; the dial renders
+      // bottom-start when openDialProvider == OpenDial.menu.
+      leadingWidth: 42,
+      leading: IconButton(
+        icon: const Icon(Icons.menu, color: Colors.black54),
+        tooltip: 'פתח תפריט',
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+        onPressed: () {
+          resetAllDials(ref);
+          ref.read(openDialProvider.notifier).state = OpenDial.menu;
+        },
+      ),
+      titleSpacing: 4,
       title: Tooltip(
         message: 'BS',
         child: InkWell(
