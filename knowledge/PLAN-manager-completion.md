@@ -1,5 +1,8 @@
 # תוכנית-עבודה — "לוח מנהל-המערכת" = **מסך-מלא חדש** (בנוי בדיוק כמו האפליקציה)
 
+## ✅ סטטוס: בוצע (אומת-קוד 2026-06-05) — מסמך תיעוד-היסטורי
+> **המנהל כבר בנוי ומאוחד לטרנק (v6.12).** אומת מהקוד: `lib/screens/manager_dashboard_screen.dart` + `lib/logic/manager_dashboard.dart` + `lib/state/manager_dashboard_state.dart` קיימים · נגיש מ-`role_picker` (`Navigator.push`) · מנוע-הזמנות-משותף (`sys_orders`) · הוקשח ב-audit-passes v6.13–v6.16 (`app_flutter/knowledge/WIRING_AUDIT.md`). M0–M5 שלמטה = **תוכנית-המקור (היסטורי)**, לא עבודה-פתוחה. **אל תבנה מחדש.**
+
 > **הגדרת-המשתמש (2026-06-04):** לוח-מנהל = **מסך חדש מלא**, בנוי **בדיוק כמו לוח-קבלן** — אותו דפוס-בנייה (מסך עם טאבים + כפתורים), רק טאבים וכפתורים שונים. **לא** עלי-dial.
 > **אפליקציה:** `app_flutter/` (Flutter, v5.96). **ביצוע:** ענף `claude/whats-happening-LyY9G` · push רק על מילה מפורשת.
 > **מקור-תוכן:** `index.html` `screen-manager` (`:4207-4240`) + הרינדורים (mgrDashboard/mgrOrders/mgrCustomers/mgrManage) + `kManagerSections` (`lib/data/sections.dart:147-199`). רק `index.html` קובע — **אל** `SYSTEM_MANAGER.md` (מומצא).

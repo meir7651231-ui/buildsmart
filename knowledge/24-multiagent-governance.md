@@ -48,7 +48,14 @@
 - **קונצנזוס** = סימולציית-6-פרסונות (ביקורות-הדדיות), לא הצבעה; **GO סופי מהמשתמש.**
 
 ## F. הוכחה-חיה (2026-06-04)
-המערכת מבצעת בפועל את `PLAN-contractor-completion.md`: **שלב-א של הקבלן ~90% גמור** (T0/T1/T2/T4/T5/T6/T7/T9 ✅, רק T3 נשאר) — נבנה אוטונומית ע"י הסוכנים, מתואם ע"י ה-supervisor, נאכף ע"י הפרוטוקול, עם הסוכנים **מעדכנים סטטוס בתוך התוכנית עצמה**. v5.92→v6.05 ביממה · ~48 commits/24ש' · אפס-תקיעות.
+המערכת מבצעת בפועל את `PLAN-contractor-completion.md`: **שלב-א של הקבלן הושלם** (T0–T9 ✅; T8 stub-מכוון) + **המנהל בנוי ומאוחד** (v6.12) + הקשחת v6.13–v6.16 (**1,539 טסטים**) — נבנה אוטונומית ע"י הסוכנים, מתואם ע"י ה-supervisor, נאכף ע"י הפרוטוקול, עם הסוכנים **מעדכנים סטטוס בתוך התוכנית עצמה**. v5.92→v6.16 · אפס-תקיעות.
+
+## G. ה-orchestrator-kit v2 (2026-06-05) — תמצית-ההתנהגות כ-config-טעין
+מעבר לסוכני-התחום, נלכדה **ערכת-orchestrator לשימוש-חוזר** (`orchestrator/` בענף whats-happening): `PLAYBOOK.md` (v2) + agents (auditor/validator/fixer/supervisor) + scripts. עיקרי-v2:
+- **ה-gate (`central-verify.sh`) הוקשח:** analyze+test+build **+ conformance** (byte-assertions מול manifest) **+ required-tests** (נוכחות-flows) + codegen-לפני-analyze. מכריז בעצמו "NOT enforced this run" כשלא מועבר manifest (כנות-floor).
+- **`ckpt.sh`** = checkpoint עמיד + phase-order guard · **`grep-verify.sh`** = אימות-בייטים · **`ff-push.sh`** = push ff-only.
+- **red-team עצמי:** 9 designs נבדקו, כולם NEEDS-WORK, נשלח רק האחד ("structural absence"). **`perfect-agent/`** = self-spec 9-ממדי שמתכנס (bootstrap→v6).
+- **תקרה (מתועדת ביושר):** הכל on-host = floor; ה"חובה" האמיתי = off-host CI.
 
 ---
 **השורה:** לא רק אפליקציה נבנית כאן — נבנתה **מכונת-בנייה אוטונומית עם ממשל-עצמי אכיף**. הסוכן-המפקח "מעל" העובדים הוא ה-Supervisor; מעליו רק הפרוטוקול (פרוטוקוליסט) והמשתמש.

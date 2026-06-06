@@ -1,11 +1,11 @@
-# PLAN-closeout — סגירת-קצוות (מעודכן לקוד v6.16, אומת-קוד 2026-06-04)
+# PLAN-closeout — סגירת-קצוות (מעודכן לקוד v6.16, אומת-קוד 2026-06-05)
 
 > מטרה: רשימת-קצוות מלאה ומדויקת **מהקוד** (לא מהדוחות), מתועדפת לסגירה. ביצוע על `claude/whats-happening-LyY9G` · push רק על מילה מפורשת.
 
 ## ✅ מצב נוכחי (מה כבר סגור — אומת-קוד)
 - **שלב-א של הקבלן ✅** — כל הכפתורים (T0–T8) + 3 פרסונות (עובד 484ש' · חנות 957ש' · שליח 529ש') + **מנהל 2,682ש'** — כולם **אמיתיים, 0 חורים-נסתרים**.
 - **איחוד הושלם (v6.12 cutover):** מנהל + מנוע-הזמנות-משותף (`sys_orders`, state-machine אמיתי) + קטלוג — **על טרנק אחד.** מנהל נגיש מ-`role_picker`.
-- **הקשחת-איכות (v6.12→v6.16):** audit-passes ×3 (~18 תיקונים · store-orders refactor · a11y/perf/correctness).
+- **הקשחת-איכות (v6.12→v6.16):** 6 סבבי-audit (`WIRING_AUDIT.md`: 3 fix-passes v6.13–v6.15 + correctness/perf/a11y v6.16, adversarial) · ~18+ תיקונים · store-orders refactor. **+ 2 באגי-HIGH דחויים נסגרו (`b4e2198`):** H2 = persistence למשימות-עובד (`bs.worker-tasks.v1` · מונע double-advance חוצה-סשן · +`worker_tasks_persistence_test`) · H3 = פיוס-total בכרטיס-הזמנה (סכום-ביניים + מע"מ+משלוח). **טסטים: 1,539 ירוקים** (gate: analyze 0 · conformance ok · required-tests ok).
 - **קטלוג 100% PDF-parity** (gate 117 · 9/9). **השקה (מקור):** iOS usage-strings ✅ · Android signing ✅.
 
 ---
@@ -32,7 +32,7 @@
 | **קטלוג** (1) | `catalog_screen` | leftover |
 
 ## 🟢 קצה 3 — חוצה-מערכת
-- **תקלת-deploy:** ה-`/buildsmart/flutter/` הציבורי מציג גרסה ישנה (טורקיז). **כדאי לתקן ראשון** — כדי שתוכל לראות חי את כל מה שנבנה (v6.16).
+- **תקלת-deploy:** ה-`/buildsmart/flutter/` הציבורי הציג גרסה ישנה (טורקיז). **עדכון 2026-06-05:** gh-pages **נדחף-מחדש** (15:41, forced update) → ייתכן שנפתר; **דרוש אימות-חי** של הגרסה הציבורית (v6.16).
 - **server-ready:** Repository pattern **לא אומץ** (T0 = const). החלטה: לאכוף לפני שלב-ב? (אחרת חיבור-שרת לא-drop-in).
 - **השקה (שלך, לא-קוד):** חשבונות Apple/Google · privacy-policy · CI build+sign · iOS team.
 - **ליטוש נותר:** P-2 (a11y) · P-5 (knowledge) · P-1 גל-2 (צבעים).

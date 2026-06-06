@@ -2,16 +2,16 @@
 
 > **לסוכן ליטוש** (presentation + Phase B–K). בצע **בתוך `POLISH_PROTOCOL`** שלך: before→after→gate · **token-binding = safe** (אפס שינוי ויזואלי) · L5 visual-screenshot ל-`POLISH_LOG`.
 > ⚠️ **אל תיגע בקבצים-בתעופה של הקבלן** (`home_shell.dart` + מסכי-T1–T9 ש-מקבץ בונה כעת — PLAYBOOK no-collision). עבוד רק על הקבצים-הבטוחים המסומנים.
-> אומת מהקוד v6.05. בצע לפי הסדר (בטוח→גדול).
+> אומת מהקוד v6.16 (2026-06-05). בצע לפי הסדר (בטוח→גדול). **עדכון-סטטוס:** P-4 ✅ בוצע · P-3 ✅ בוצע · P-1 🔲 פתוח (גדל ל-1,115) · P-2/P-5 🔲 לא-אומת.
 
 ---
 
-## P-4 · הסרת `go_router` (P1, הכי-נקי) — ⏱️ ~30 דק'
+## P-4 · הסרת `go_router` — ✅ **בוצע** (אומת 2026-06-05: 0 `go_router` ב-pubspec)
 🎯 dependency-מת: `go_router ^14.6` ב-`pubspec.yaml`, **0 שימושים** ב-`lib/`.
 - צעדים: ודא `grep -rn "go_router" lib/` = 0 → הסר מ-`pubspec.yaml` → `flutter pub get` → analyze+test.
 - ✅ DoD: pubspec בלי go_router · 0 imports · test ירוק.
 
-## P-3 · typography pass (Phase C) — ⏱️ ~1ש'
+## P-3 · typography pass — ✅ **בוצע** (אומת: `toast.dart`+`chain_diagram.dart` משתמשים ב-`BsTokens.font*`)
 🎯 font-sizes קסם → `BsTokens`. (מסומן כבר ב-`POLISH_LOG` Backlog.)
 - קבצים-בטוחים: `widgets/toast.dart` (14) · `widgets/chain_diagram.dart` (8/9/22).
 - צעד: הוסף tokens (`BsTokens.fontXs/Sm/...` אם אין) → החלף. **token-equal** = אפס שינוי ויזואלי.
@@ -30,7 +30,7 @@
 - ✅ DoD: 0 R-שיורי · audit-verdict לכל מסמך-חדש.
 
 ## P-1 · צבעים-קשיחים → `BsTokens` (הכי-בעל-ערך, גדול — לפצל) — ⏱️ ~יום+
-🎯 **1,028 `Color(0x` קשיחים** ב-lib → `BsTokens`. **token-binding = safe.**
+🎯 **1,115 `Color(0x` קשיחים** ב-lib → `BsTokens` (אומת 2026-06-05 — *גדל* מ-1,028 ככל שנוספו פיצ'רים; עדיין פתוח). **token-binding = safe.**
 - **גל-1 (בטוח, התחל פה):** `theme/` · `widgets/` · מסכים-יציבים (`install_studio_screen` · 4 מסכי-settings · `departments_screen`).
 - **גל-2 (מאוחר):** מסכי-הקבלן (`home_shell` + T1–T9) — **רק אחרי** ש-מקבץ סוגר אותם (אחרת התנגשות).
 - צעד: צבע-קשיח → token קיים ב-`BsTokens`; אם חסר token — הצע ב-`POLISH_LOG` (needs-approval), אל תמציא ערך.

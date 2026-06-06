@@ -3,6 +3,7 @@
 > כל מה שנשאר, מפורק לרמת-משימה ומאורגן ל-**tracks disjoint** (קבצים לא-חופפים → פיצול-מקבילי בטוח).
 > ביצוע: `claude/whats-happening-LyY9G` · סגנון-הבנייה ב-`PLAN-contractor-completion.md` · push רק על מילה מפורשת · verbatim מ-proto/04 (`[L#]`=index.html).
 > **שימוש-חוזר:** המנהל כבר בנה order-engine/customers/credit/metrics → tracks 1/3 מתחברים אליהם, לא בונים מחדש.
+> **gate-v2 (2026-06-05):** ה-DoD של כל track ניתן לאכיפה דרך `orchestrator/manifests/buildsmart.conformance.txt` (byte-assertions) + required-tests — לא רק analyze+test+build.
 
 ## איך מפצלים (partitioning — לכל track קבצים נפרדים)
 | Track | תחום | קבצים-עיקריים | תלוי |
@@ -69,7 +70,7 @@ PROJECTS(3) · ARCHIVED(3) · SITE_TREE(3) · STOCK_DEMO(11) · TASKS(5+steps) �
 - **T4.store-dials** (`store_screen`/`bs_dial`/`search_dial`, 8) — פריטי-חנות · "סוג עוסק" · עלי-dial → תוכן.
 
 # Track T5 — פיצ'רי-פרסונה דחויים (proto/06 "adds beyond")
-- **T5.1 גיליון-ליקוט** (store) · **T5.2 פריט-חסר** (held-for-missing loop) · **T5.3 פיצול-משלוחים** · **T5.4 POD** (proof-of-delivery) · **T5.5 persistence** (shared_preferences להזמנות/state). מקור: proto/06 §2.5–§2.7. ✅ flows מלאים.
+- **T5.1 גיליון-ליקוט** (store) · **T5.2 פריט-חסר** (held-for-missing loop) · **T5.3 פיצול-משלוחים** · **T5.4 POD** (proof-of-delivery) · **T5.5 persistence** (shared_preferences להזמנות/state — **חלקי:** משימות-עובד כבר נשמרות, H2/`b4e2198`). מקור: proto/06 §2.5–§2.7. ✅ flows מלאים.
 
 # Track T6 — server-ready (Repository pattern · פאונדציה למוצר-אמיתי)
 - **T6.1** הגדר `XxxRepository` interface לכל domain (orders/finance/customers/site/stock/catalog). 

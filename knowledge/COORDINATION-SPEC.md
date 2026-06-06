@@ -40,7 +40,7 @@
 
 ## 🧠 תפקיד ה-Supervisor (בכל סבב)
 - **ממסגר** כל track ב-10-step · **מוליד** את מקבץ-A..F + ליטוש · מוודא partition-disjoint (`Glob`).
-- **central-verify** (analyze 0 + test + build) על כל merge-back · **grep-verify** את הבייטים (לא prose).
+- **central-verify v2** (analyze 0 + test + build **+ conformance** [`assert-manifest.sh` + `buildsmart.conformance.txt`] **+ required-tests** + codegen-לפני-analyze) על כל merge-back · **grep-verify** את הבייטים (לא prose) · **`ckpt.sh`** = checkpoint עמיד (שלב-מאוחר נחסם לפני שקודמו הושלם).
 - **fallback:** concurrent → serial → supervisor-direct (אם track נכשל, ל-supervisor יש context).
 - **דיווח-מעלה** + עדכון claims-log + status.
 
