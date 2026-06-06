@@ -6,6 +6,7 @@ import 'package:buildsmart/screens/persona_portal.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/dial.dart';
@@ -102,6 +103,7 @@ class BsDialWidget extends ConsumerWidget {
           _LiveStageOrderPanel(
             emoji: '🏪',
             stage: kStoreOrderLeafStage[openStore] ?? '',
+            isCourier: false,
             title: _leafTitle(personaId, path, openStore),
             onClose: () => ref.read(bsStoreLeafProvider.notifier).state = null,
           ),
@@ -113,6 +115,7 @@ class BsDialWidget extends ConsumerWidget {
           _LiveStageOrderPanel(
             emoji: '🛵',
             stage: kCourierOrderLeafStage[openCourier] ?? '',
+            isCourier: true,
             title: _leafTitle(personaId, path, openCourier),
             onClose:
                 () => ref.read(bsCourierLeafProvider.notifier).state = null,
@@ -420,17 +423,17 @@ const Map<String, String> kStoreOrderLeafStage = {
 /// The set of store order-stage leaf ids (W2) — keys of [kStoreOrderLeafStage].
 final Set<String> kStoreOrderLeafIds = kStoreOrderLeafStage.keys.toSet();
 
-/// The 🛵 שליח (courier) leaves (W2) the COURIER acts on, each mapped to ONE
-/// order-flow stage the courier owns (the BACK of the flow:
-/// ready → pickup → transit → delivered). The leaf ids + Hebrew titles are
+/// The 🛵 שליח (courier) leaves (W2), each mapped to ONE order-flow stage. Under
+/// the two-step hand-off the courier OWNS only `pickup`→`transit`→`delivered`;
+/// `ready` is VIEW-ONLY (the store owns `ready`→`pickup`). Titles are
 /// `kCourierSections` in sections.dart (verbatim):
-///   • `pickup`       (משלוחים ממתינים לאיסוף) → stage `ready`   — pick up → pickup.
-///   • `ca-pickup`    (אספתי מהחנות)           → stage `pickup`  — depart  → transit.
+///   • `pickup`       (משלוחים ממתינים לאיסוף) → stage `ready`   — VIEW-ONLY (awaiting the store's hand-off).
+///   • `ca-pickup`    (אספתי מהחנות)           → stage `pickup`  — receive → transit.
 ///   • `ca-transit`   (יצאתי לדרך)             → stage `transit` — deliver → delivered.
 ///   • `ca-delivered` (נמסר ללקוח)            → stage `delivered` — terminal (no advance).
-/// `pickup` (stage `ready`) is the live HANDOFF point: the store's `so-ready`
-/// leaf shows the same `ready` orders, so a store "מסור לשליח" advance makes the
-/// order appear under the courier's pickup leaf — and the manager sees it all.
+/// The HANDOFF is the store's: its `so-ready` leaf ("מסור לשליח") advances
+/// `ready`→`pickup`, after which the order appears actionable under the courier's
+/// `ca-pickup` leaf — and the manager sees it all live.
 const Map<String, String> kCourierOrderLeafStage = {
   'pickup': 'ready',
   'ca-pickup': 'pickup',
@@ -1195,6 +1198,7 @@ class _LiveStageOrderPanel extends ConsumerWidget {
   const _LiveStageOrderPanel({
     required this.emoji,
     required this.stage,
+    required this.isCourier,
     required this.title,
     required this.onClose,
   });
@@ -1204,6 +1208,12 @@ class _LiveStageOrderPanel extends ConsumerWidget {
 
   /// The order-flow stage this panel filters the live engine to.
   final String stage;
+
+  /// True for the 🛵 courier panel (owns pickup→transit→delivered), false for the
+  /// 🏪 supplier panel (owns new→preparing→ready→pickup) — decides which role
+  /// primitive drives the advance. Two-step hand-off: the store hands off at
+  /// `ready`; the courier receives at `pickup`.
+  final bool isCourier;
 
   /// The leaf's verbatim Hebrew title (the panel header label).
   final String title;
@@ -1218,7 +1228,14 @@ class _LiveStageOrderPanel extends ConsumerWidget {
         .watch(ordersEngineProvider)
         .where((o) => o.stage == stage)
         .toList(growable: false);
-    final advanceLabel = kStageAdvanceLabel[stage];
+    // Two-step hand-off ownership: the STORE owns new→preparing→ready→pickup (it
+    // hands off at `ready`); the COURIER owns pickup→transit→delivered (it
+    // receives at `pickup`). Only surface/drive the advance for the owning role —
+    // route through the role primitive, never the raw engine advance.
+    final canAct = isCourier
+        ? (stage == 'pickup' || stage == 'transit')
+        : (stage == 'new' || stage == 'preparing' || stage == 'ready');
+    final advanceLabel = canAct ? kStageAdvanceLabel[stage] : null;
 
     return Semantics(
       label: '$emoji $title: ${orders.length} הזמנות',
@@ -1286,9 +1303,13 @@ class _LiveStageOrderPanel extends ConsumerWidget {
                 _LiveOrderRow(
                   order: o,
                   advanceLabel: advanceLabel,
-                  onAdvance: () => ref
-                      .read(ordersEngineProvider.notifier)
-                      .advance(o.id),
+                  onAdvance: () => isCourier
+                      ? ref
+                          .read(sysOrdersProvider.notifier)
+                          .courierAdvance(o.id)
+                      : ref
+                          .read(sysOrdersProvider.notifier)
+                          .storeAdvance(o.id),
                 ),
                 if (o != orders.last) const SizedBox(height: BsTokens.space3),
               ],
@@ -1376,7 +1397,7 @@ class _LiveOrderRow extends StatelessWidget {
               )
             else
               Text(
-                '✓ נמסר',
+                order.stage == 'delivered' ? '✓ נמסר' : '✓ מוכן',
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: const Color(0xFF1B7A3D),
                   fontWeight: FontWeight.w800,

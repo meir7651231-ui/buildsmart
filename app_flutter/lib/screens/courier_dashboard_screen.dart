@@ -303,11 +303,15 @@ class _CourierJobCard extends StatelessWidget {
     final pill = _courierPill(order.stage);
     final haul = haulInfo(order.haul);
     final phase = _courierPhase(order.stage);
+    // Two-step hand-off: the store owns ready→pickup ("מסור לשליח"); the courier
+    // acts only once the order is handed to it — receive at `pickup`
+    // ("אספתי מהחנות" → transit), then deliver (→delivered). `ready` is view-only.
     final actionLabel = switch (order.stage) {
-      OrderStage.ready => '📦 אספתי מהחנות',
-      OrderStage.pickup => '🚚 יצאתי לדרך',
+      OrderStage.ready => '⏳ ממתין למסירה מהחנות',
+      OrderStage.pickup => '📦 אספתי מהחנות',
       _ => '✅ נמסר ללקוח',
     };
+    final canAct = order.stage != OrderStage.ready;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
@@ -387,7 +391,7 @@ class _CourierJobCard extends StatelessWidget {
               ),
               const SizedBox(height: BsTokens.space3),
               FilledButton(
-                onPressed: () => onAdvance(order),
+                onPressed: canAct ? () => onAdvance(order) : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: order.stage == OrderStage.transit
                       ? BsTokens.brand

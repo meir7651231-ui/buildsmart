@@ -349,7 +349,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
   }
 
   void _advance(SysOrder o) {
-    if (o.stage == OrderStage.ready) return; // courier owns it from here
+    // The store now owns the hand-off too (ready→pickup, "מסור לשליח"); the
+    // courier takes over from `pickup` (two-step hand-off).
     ref.read(sysOrdersProvider.notifier).storeAdvance(o.id);
     showToast(context, 'ההזמנה ${o.id} עודכנה — מסונכרן עם השליח והמנהל ✓');
   }
@@ -773,7 +774,8 @@ class _StoreOrderCard extends StatelessWidget {
     final action = switch (order.stage) {
       OrderStage.newOrder => ('✓ אשר וקבל להכנה', true),
       OrderStage.preparing => ('📦 סמן כמוכן — העבר לשליח', true),
-      _ => ('🛵 ממתין לאיסוף השליח', false),
+      OrderStage.ready => ('🛵 מסור לשליח', true),
+      _ => ('✓ נמסר לשליח', false),
     };
 
     return Padding(

@@ -60,7 +60,7 @@ void main() {
   });
 
   group('shared engine — store ↔ courier ↔ manager, ONE source of truth', () {
-    test('store advances new→preparing→ready, then stops', () {
+    test('store advances new→preparing→ready→pickup, then stops', () {
       final c = _container();
       addTearDown(c.dispose);
       final n = c.read(sysOrdersProvider.notifier);
@@ -68,8 +68,10 @@ void main() {
       expect(_sys(c, 'BS-1042').stage, OrderStage.preparing);
       n.storeAdvance('BS-1042');
       expect(_sys(c, 'BS-1042').stage, OrderStage.ready);
+      n.storeAdvance('BS-1042'); // hand off to courier (ready→pickup)
+      expect(_sys(c, 'BS-1042').stage, OrderStage.pickup);
       n.storeAdvance('BS-1042'); // courier owns it from here — no-op
-      expect(_sys(c, 'BS-1042').stage, OrderStage.ready);
+      expect(_sys(c, 'BS-1042').stage, OrderStage.pickup);
     });
 
     test('a store advance is visible to the MANAGER live (unified engine)', () {
@@ -81,15 +83,19 @@ void main() {
       expect(_eng(c, 'BS-1042'), 'preparing');
     });
 
-    test('courier advances ready→pickup→transit→delivered (manager sees each)', () {
+    test('courier advances pickup→transit→delivered after the store hands off', () {
       final c = _container();
       addTearDown(c.dispose);
       final n = c.read(sysOrdersProvider.notifier);
-      n.courierAdvance('BS-1040'); // ready→pickup
+      // BS-1040 is seeded `ready`; the courier does NOT own ready→pickup now (the
+      // store hands off), so courierAdvance on `ready` is a no-op.
+      n.courierAdvance('BS-1040'); // no-op on ready
+      expect(_sys(c, 'BS-1040').stage, OrderStage.ready);
+      n.storeAdvance('BS-1040'); // store hands off: ready→pickup
       expect(_sys(c, 'BS-1040').stage, OrderStage.pickup);
-      expect(_eng(c, 'BS-1040'), 'pickup');
-      n.courierAdvance('BS-1040'); // pickup→transit
+      n.courierAdvance('BS-1040'); // pickup→transit (courier received it)
       expect(_sys(c, 'BS-1040').stage, OrderStage.transit);
+      expect(_eng(c, 'BS-1040'), 'transit');
       n.courierAdvance('BS-1040'); // transit→delivered
       expect(_sys(c, 'BS-1040').stage, OrderStage.delivered);
       n.courierAdvance('BS-1040'); // no-op
@@ -170,9 +176,10 @@ void main() {
     expect(find.text('שלום 🛵'), findsOneWidget);
     expect(find.text('הרכב שלי היום'), findsOneWidget);
     expect(find.text('משאית'), findsWidgets);
-    // BS-1040 (ready, truck) is a job for the default truck vehicle.
+    // BS-1040 (ready, truck) is a truck job — but the store owns the hand-off,
+    // so the courier sees it VIEW-ONLY (awaiting) until it is handed off (two-step).
     expect(find.text('📦 BS-1040'), findsOneWidget);
-    expect(find.text('📦 אספתי מהחנות'), findsWidgets);
+    expect(find.text('⏳ ממתין למסירה מהחנות'), findsWidgets);
     expect(find.textContaining('בבנייה'), findsNothing);
   });
 }

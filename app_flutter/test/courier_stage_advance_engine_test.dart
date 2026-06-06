@@ -1,13 +1,12 @@
 // CROSS-PERSONA WIRING W2 (COURIER) — proof that "courier → manager" is LIVE.
-// The 🛵 שליח persona owns the BACK of the order flow (ready → pickup → transit
-// → delivered). Its delivery leaves open an INLINE panel over the SHARED
-// `ordersEngineProvider`, and each open row's advance button calls `.advance(id)`
-// on that same engine — the very engine the MANAGER reads. So a courier
-// pick-up / depart / deliver must immediately move the order's stage AND reflow
-// the manager's live analytics + order list, with no refresh.
+// Two-step hand-off: the STORE owns ready→pickup ("מסור לשליח"); the 🛵 שליח
+// then owns pickup→transit→delivered. The courier's leaves open an INLINE panel
+// over the SHARED `ordersEngineProvider` and advance via the role primitive — the
+// very engine the MANAGER reads — so a courier receive / deliver immediately
+// moves the stage AND reflows the manager's live analytics, with no refresh.
 //
-//   • pickup       (משלוחים ממתינים לאיסוף) → stage `ready`     → מסור לשליח — ready→pickup.
-//   • ca-pickup    (אספתי מהחנות)            → stage `pickup`    → יצאתי לדרך — pickup→transit.
+//   • pickup       (משלוחים ממתינים לאיסוף) → stage `ready`     → VIEW-ONLY (store hands off).
+//   • ca-pickup    (אספתי מהחנות)            → stage `pickup`    → receive → transit.
 //   • ca-transit   (יצאתי לדרך)              → stage `transit`   → סמן נמסר — transit→delivered.
 //   • ca-delivered (נמסר ללקוח)             → stage `delivered` — terminal (✓ נמסר, no button).
 //
@@ -73,8 +72,8 @@ void main() {
 
   group('courier stage-advance → shared engine (LIVE to manager)', () {
     testWidgets(
-        'FULL BACK CHAIN — ready → pickup → transit → delivered via the courier '
-        'leaves; the manager open-orders drops 4 → 3 on delivery, live',
+        'TWO-STEP — store hands off (ready→pickup), then the courier receives '
+        '(pickup→transit) and delivers; manager open-orders drops 4 → 3, live',
         (t) async {
       final c = await pump(t);
 
@@ -98,21 +97,24 @@ void main() {
       await tapRow(t, 'משלוחים ממתינים לאיסוף');
       expect(c.read(bsCourierLeafProvider), 'pickup');
       expect(find.text('📦 $id'), findsOneWidget);
-      // אספתי מהחנות (ready → pickup).
-      await t.tap(advanceBtn);
+      // The pickup leaf (stage `ready`) is VIEW-ONLY: the STORE owns the hand-off
+      // (ready→pickup), so the courier has no advance affordance for a ready order.
+      expect(advanceBtn, findsNothing,
+          reason: 'the store hands off; the courier cannot advance a ready order');
+      // The store hands it off (ready→pickup) on the shared engine.
+      c.read(ordersEngineProvider.notifier).advance(id);
       await settle(t);
-      expect(stageOf(), 'pickup', reason: 'courier picked it up');
+      expect(stageOf(), 'pickup', reason: 'store handed it to the courier');
 
-      // The three ca-* leaves live under the משלוחים פעילים sub-tree — drill in.
-      // (Re-tapping the pickup leaf closed its panel; open the active group.)
+      // The ca-* leaves live under the משלוחים פעילים sub-tree — drill in.
       await tapRow(t, 'משלוחים פעילים');
       await tapRow(t, 'אספתי מהחנות'); // ca-pickup, stage `pickup`
       expect(c.read(bsCourierLeafProvider), 'ca-pickup');
       expect(find.text('📦 $id'), findsOneWidget);
-      // יצאתי לדרך (pickup → transit).
+      // courier RECEIVES the handed-off order (pickup → transit).
       await t.tap(advanceBtn);
       await settle(t);
-      expect(stageOf(), 'transit', reason: 'courier departed');
+      expect(stageOf(), 'transit', reason: 'courier received it');
 
       await tapRow(t, 'יצאתי לדרך'); // ca-transit, stage `transit`
       expect(c.read(bsCourierLeafProvider), 'ca-transit');
@@ -153,10 +155,12 @@ void main() {
       c.read(activePersonaProvider.notifier).state = 'courier';
       await settle(t);
       await tapRow(t, 'משלוחים ממתינים לאיסוף');
-      // The same order the store had under מוכנות is here for the courier, with
-      // an advance affordance (so the courier can pick it up).
+      // The same ready order the store sees under מוכנות appears here for the
+      // courier — but VIEW-ONLY: the store owns the hand-off (ready→pickup), so
+      // there is NO advance affordance on the courier's side for a ready order.
       expect(find.text('📦 $readyId'), findsOneWidget);
-      expect(find.byKey(ValueKey('advance-$readyId')), findsOneWidget);
+      expect(find.byKey(ValueKey('advance-$readyId')), findsNothing,
+          reason: 'the store hands off; the courier cannot advance a ready order');
     });
 
     test(

@@ -86,22 +86,24 @@ class SysOrdersNotifier extends StateNotifier<List<SysOrder>> {
     return null;
   }
 
-  /// Supplier-owned advance: new→preparing→ready. No-op once `ready` (the
-  /// courier takes over). Delegates to the shared engine → the manager sees it.
+  /// Supplier-owned advance: new→preparing→ready→pickup. The store hands the
+  /// order off to the courier at `ready` ("מסור לשליח" → pickup). No-op from
+  /// `pickup` on (the courier owns it). Delegates to the shared engine → manager sees it.
   void storeAdvance(String id) {
     final o = _orderById(id);
     if (o == null) return;
-    if (o.stage == 'new' || o.stage == 'preparing') {
+    if (o.stage == 'new' || o.stage == 'preparing' || o.stage == 'ready') {
       _ref.read(ordersEngineProvider.notifier).advance(id);
     }
   }
 
-  /// Courier-owned advance: ready→pickup→transit→delivered. No-op outside that
-  /// window. Delegates to the shared engine → the manager sees it.
+  /// Courier-owned advance: pickup→transit→delivered. The courier confirms
+  /// receipt of the handed-off order at `pickup`, then delivers. No-op on `ready`
+  /// (the store owns the hand-off — two-step). Delegates to the shared engine.
   void courierAdvance(String id) {
     final o = _orderById(id);
     if (o == null) return;
-    if (o.stage == 'ready' || o.stage == 'pickup' || o.stage == 'transit') {
+    if (o.stage == 'pickup' || o.stage == 'transit') {
       _ref.read(ordersEngineProvider.notifier).advance(id);
     }
   }
