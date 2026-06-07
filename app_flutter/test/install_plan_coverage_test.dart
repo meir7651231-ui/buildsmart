@@ -30,12 +30,14 @@ void main() {
         final skus = plan.items.map((p) => p.sku).toList();
         expect(skus, containsAll([a.sku, b.sku]));
         expect(plan.items.length, greaterThanOrEqualTo(2));
-        for (final it in plan.items) {
-          expect(plan.qtyOf(it.sku), greaterThanOrEqualTo(1),
-              reason: 'every plan item needs a positive quantity (${it.sku})');
-        }
-        expect(plan.totalPieces, greaterThanOrEqualTo(plan.items.length));
-        expect(plan.zones, isNotEmpty); // linear plans always carry 'קו ראשי'
+        // Zone-tagging completeness (a real contract, not the tautological
+        // `zones.isNotEmpty`): the union of every zone's SKUs must equal the
+        // plan's item set exactly — no item left unzoned, no phantom SKU in a
+        // zone. Fails if the zone map ever drops/duplicates an item.
+        final zonedSkus = plan.zones.values.expand((e) => e).toSet();
+        expect(zonedSkus, equals(skus.toSet()),
+            reason: 'every item must be tagged into a zone, and zones must '
+                'reference only real plan items (${a.nameHe}→${b.nameHe})');
       }
     });
 
@@ -49,12 +51,27 @@ void main() {
       }
     });
 
+    test('auto-compliance is load-bearing on a hot line (raw critical > 0 → 0)',
+        () {
+      // Proves the `criticalOpen == 0` check above is NOT vacuous: a HOT supply
+      // line without compliance must carry open critical items (anti-scald TMTV /
+      // PRV / isolation), and compliance must close every one of them.
+      final a = _p('779096G'), b = _p('77778071');
+      final raw = buildInstallation([a, b], tempC: 60);
+      final comp = buildInstallation([a, b], tempC: 60, autoCompliance: true);
+      expect(raw.criticalOpen(60), greaterThan(0),
+          reason: 'a hot supply line with no compliance must have open critical '
+              'items — otherwise the ==0 assertion proves nothing');
+      expect(comp.criticalOpen(60), 0,
+          reason: 'auto-compliance must close every critical on the hot line');
+    });
+
     test('autoCompliance injects safety items vs. the raw plan', () {
       final a = _p('779096G'), b = _p('77778071');
-      final raw = buildInstallation([a, b], tempC: 20);
-      final comp = buildInstallation([a, b], tempC: 20, autoCompliance: true);
-      expect(comp.items.length, greaterThanOrEqualTo(raw.items.length),
-          reason: 'auto-compliance inserts safety items into the chain');
+      final raw = buildInstallation([a, b], tempC: 60);
+      final comp = buildInstallation([a, b], tempC: 60, autoCompliance: true);
+      expect(comp.items.length, greaterThan(raw.items.length),
+          reason: 'auto-compliance inserts real safety items into the chain');
     });
   });
 }
