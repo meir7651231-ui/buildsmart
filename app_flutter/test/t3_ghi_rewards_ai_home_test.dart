@@ -114,10 +114,8 @@ void main() {
       expect(hammer.worn, isFalse); // 30%
     });
 
-    test('plan-scan + analytics seeds present [L21284/21387]', () {
-      expect(kPlanResult, hasLength(4));
+    test('analytics seeds present [L21387]', () {
       expect(kInsights, hasLength(4));
-      expect(kVoiceSamples, hasLength(3));
     });
   });
 

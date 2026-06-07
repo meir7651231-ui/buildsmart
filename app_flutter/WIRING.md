@@ -1101,3 +1101,11 @@ The BS-dial (the old 5-persona radial FAB drill) is **gone**. A 4-persona parity
 - Cleanups: stale `menu_dial_widget` comments (site_hub/app_settings) reworded; `CatalogSettingsScreen` title `הגדרות קטלוג` → `הגדרות`.
 - **0 BS-dial code references** remain (byte-verified). The legacy "👔 Manager BS-dial M1–M4" wiring docs below are now **historical** — the widget + its `bs_dial_manager_*` guards no longer exist.
 - Gate: central-verify green — analyze 0 · tests green · build · conformance 7/7 · required-tests.
+
+## Wave 5 — audit-driven dead-code + wiring (9×9 fleet)
+Full-app completeness audit (6 area-auditors) → fix-fleet. The app proved largely well-wired; gaps were few.
+- **Dead-code removed:** unused `_MiniPill` (notifications_screen + chats_screen); orphan seeds `kVoiceSamples` / `PlanItem`+`kPlanResult` from `ai_hub_logic.dart` (+ their assertions in `t3_ghi_rewards_ai_home_test`).
+- **Wired:** Store **saved-cart-lists** — `cartListsProvider` was write-only; added a "רשימות" sheet (load a saved cart into the smart-cart + delete). Courier **split-shipment indicator** — `🚚×N` tag from `fulfillmentProvider.splitInto`, mirroring `_StoreOrderCard`.
+- **Validation caught (kept honest):** `aiAlternatives()` is NOT dead (a live test exercises it) → KEPT. The store price-comparison row was ALREADY routed to `openPriceCompareSheet` (audit false-positive).
+- **Deferred — need a refactor / new infra (R8: not forced, not invented):** autoStock portal tile → live OOS list (needs `storeOosProvider` moved to `lib/state/` to avoid a circular import); chat history-clear (needs a persisted `chatHistoryProvider` — history is local widget state today). See `_gaps.md`.
+- Gate: central-verify green — analyze 0 · tests · build · conformance 7/7 · required-tests.

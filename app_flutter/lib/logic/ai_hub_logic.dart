@@ -46,13 +46,6 @@ const List<StockPred> kStockPreds = [
   StockPred(name: 'דבק אריחים', stock: 96, rate: 8, days: 12),
 ];
 
-// ─── 64. VOICE-TO-TASK transcript samples — proto samples @21219-21221 ─────────
-const List<String> kVoiceSamples = [
-  'להזמין 20 שקי מלט לאתר הרצליה',
-  'לתאם ביקורת מהנדס ליום חמישי',
-  'לבדוק אטימה בחדר רחצה קומה 3',
-];
-
 // ─── 65. CHEAPER ALTERNATIVES — proto aiAlternatives @21232 ───────────────────
 // REUSES [cheaperAlternativeBrand] + catalog data. The smart-tree brands carry
 // no curated price ("מחיר לפי ספק"), so the AI hub builds priced [SmartProduct]s
@@ -130,21 +123,6 @@ List<AiAlt> aiAlternatives() {
   out.sort((a, b) => b.save.compareTo(a.save));
   return out.length > 5 ? out.sublist(0, 5) : out;
 }
-
-// ─── 66. PDF PLAN SCAN result — proto items @21284-21289 ──────────────────────
-class PlanItem {
-  const PlanItem({required this.name, required this.qty});
-
-  final String name;
-  final String qty;
-}
-
-const List<PlanItem> kPlanResult = [
-  PlanItem(name: 'אריחי קרמיקה 60×60', qty: '48 מ״ר'),
-  PlanItem(name: 'דבק אריחים', qty: '12 שקים'),
-  PlanItem(name: 'רובה למישקים', qty: '4 ק״ג'),
-  PlanItem(name: 'פרופיל פינה', qty: '18 מטר'),
-];
 
 // ─── 67. THREE-WAY MATCHING — proto docs @21308-21312 ─────────────────────────
 class ThreeWayDoc {

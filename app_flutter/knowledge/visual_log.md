@@ -4,6 +4,18 @@
 
 ---
 
+## v6.16 — audit מלא + fix-fleet · גל 5 (נחיל 9×9: dead-code + wiring)
+
+**שינוי:** audit-שלמות מלא (6 auditors סרקו את כל האפליקציה) → fix-fleet. האפליקציה נמצאה **מחווטת היטב ברובה**; הפערים מעטים.
+- **נמחק dead-code:** `_MiniPill` (notif+chats) · קבועים-יתומים `kVoiceSamples`/`PlanItem`/`kPlanResult` ב-`ai_hub_logic` (+ ההצהרות בבדיקה).
+- **חוּוט:** **רשימות-שמורות** בחנות (היו write-only → sheet שטוען-לסל/מוחק) · **אינדיקטור פיצול-משלוח** בכרטיס-שליח (🚚×N מ-`fulfillmentProvider.splitInto`).
+- **validation תפסה:** `aiAlternatives()` **לא מת** (בדיקה חיה מפעילה אותו) → נשמר · השוואת-מחירים בחנות כבר-מנותבת (false-positive).
+- **נדחה ביושר (R8 — לא לאלץ/להמציא):** autoStock→OOS (צריך העברת `storeOosProvider` ל-`lib/state/`) · מחיקת-היסטוריית-צ׳אט (צריך `chatHistoryProvider` — state מקומי היום).
+
+**אימות:** `central-verify` gate — analyze 0 · `flutter test` · build web · conformance 7/7 · required-tests. byte-verify (grep) של כל ה-fixers.
+
+---
+
 ## v6.16 — פירוק ה-dial · גל 4 (נחיל 9×9: הסרת BS-dial + ניקויים)
 
 **שינוי:** ה-BS-dial (חוגת 5 הפרסונות הישנה) **נמחק** — לאחר **parity-audit של 4 פרסונות** (מנהל/חנות/שליח/עובד) שאישר שכל עלה מכוסה במסכים-המלאים (לרוב superset; חלק מעלי-החוגה היו placeholder 'בבנייה' toasts), על אותם engines. נמחקו `bs_dial_widget.dart` (~1670 שורות) + 4 בדיקות `bs_dial_manager_*`; נוקו `dial_state` (OpenDial.bs + 8 providers) / `home_shell` / `role_picker` / harness; 2 בדיקות stage-advance נכתבו-מחדש ל-**engine-direct** (כיסוי order-flow נשמר). ניקויים נוספים: הערות `menu_dial_widget` מיושנות, כותרת `הגדרות קטלוג`→`הגדרות`.

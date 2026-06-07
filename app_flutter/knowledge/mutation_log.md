@@ -499,3 +499,9 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/cheaper_alternatives_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### lib/logic/ai_hub_logic.dart — 2026-06-07T18:44:40+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s/int get save => fromPrice - toPrice/int get save => toPrice - fromPrice/`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/t3_ghi_rewards_ai_home_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

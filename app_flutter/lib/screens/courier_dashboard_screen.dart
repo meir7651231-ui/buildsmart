@@ -234,6 +234,8 @@ class _CourierDashboardScreenState
                   podCaptured:
                       (ref.watch(fulfillmentProvider)[o.id]?.podCaptured) ??
                           false,
+                  splitInto:
+                      (ref.watch(fulfillmentProvider)[o.id]?.splitInto) ?? 1,
                   onAdvance: _advance,
                   onPod: () => showPodSheet(context, o.id),
                 ),
@@ -326,11 +328,17 @@ class _CourierJobCard extends StatelessWidget {
   const _CourierJobCard({
     required this.order,
     required this.podCaptured,
+    required this.splitInto,
     required this.onAdvance,
     required this.onPod,
   });
   final SysOrder order;
   final bool podCaptured;
+
+  /// Number of shipments the store split the order into (proto `o.splitInto`,
+  /// 1 = none) — read from the deferred [fulfillmentProvider] side-car, same as
+  /// the store card surfaces it (`_StoreOrderCard`).
+  final int splitInto;
   final void Function(SysOrder) onAdvance;
   final VoidCallback onPod;
 
@@ -368,13 +376,40 @@ class _CourierJobCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      '📦 ${order.id}',
-                      style: const TextStyle(
-                        color: BsTokens.inkLight,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                      ),
+                    child: Row(
+                      children: [
+                        Text(
+                          '📦 ${order.id}',
+                          style: const TextStyle(
+                            color: BsTokens.inkLight,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                          ),
+                        ),
+                        if (splitInto > 1) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE7F0FF),
+                              borderRadius: BorderRadius.circular(
+                                BsTokens.radiusPill,
+                              ),
+                            ),
+                            child: Text(
+                              '🚚×$splitInto',
+                              style: const TextStyle(
+                                color: Color(0xFF2B6CB0),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                   Container(

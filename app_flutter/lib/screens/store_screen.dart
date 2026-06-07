@@ -1,3 +1,4 @@
+import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/finance_hub_sheets.dart';
 import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
@@ -2828,11 +2829,155 @@ class _CartActionsRow extends ConsumerWidget {
     );
   }
 
+  /// Re-add a saved [CartItem] to the live smart cart via the existing
+  /// [SmartCartNotifier.add] path. The saved model only keeps
+  /// {emoji, name, qty, price} (brand/key/accessories are lost on save), so we
+  /// reconstruct one line whose [SmartCartLine.total] matches the saved price:
+  /// brandPrice is the per-unit share of the parsed total, accessories empty.
+  static void _loadItem(WidgetRef ref, CartItem item) {
+    // Strip the '₪' (and any separators) from the saved total string.
+    final total = int.tryParse(item.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+    final qty = item.qty > 0 ? item.qty : 1;
+    ref.read(smartCartProvider.notifier).add(
+          SmartCartLine(
+            productKey: 'saved:${item.name}',
+            productName: item.name,
+            productEmoji: item.emoji,
+            brandName: 'רשימה שמורה',
+            brandPrice: total ~/ qty,
+            productQty: qty,
+            accessories: const [],
+          ),
+        );
+  }
+
+  /// Saved-cart-lists load UI: lists every persisted [CartList] so the
+  /// write-only saveCart path becomes round-trippable. Tap → load all lines
+  /// into the cart; trailing 🗑️ → delete the list.
+  static void _showSavedListsSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFFFFFFFF),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder:
+          (_) => Consumer(
+            builder: (context, ref, _) {
+              final lists = ref.watch(cartListsProvider);
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        '🔖 רשימות שמורות',
+                        style: TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFFF5F5F5), height: 1),
+                    if (lists.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 28),
+                        child: Text(
+                          'אין רשימות שמורות עדיין',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFF888888),
+                            fontSize: 14,
+                          ),
+                        ),
+                      )
+                    else
+                      Flexible(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: [
+                            for (final list in lists)
+                              ListTile(
+                                leading: const Text(
+                                  '🛒',
+                                  style: TextStyle(fontSize: 22),
+                                ),
+                                title: Text(
+                                  list.name,
+                                  style: const TextStyle(
+                                    color: Color(0xFF1A1A1A),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  '${list.items.length} פריטים',
+                                  style: const TextStyle(
+                                    color: Color(0xFF888888),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Color(0xFF666666),
+                                    size: 20,
+                                  ),
+                                  onPressed:
+                                      () => ref
+                                          .read(cartListsProvider.notifier)
+                                          .deleteList(list.id),
+                                ),
+                                // Load every saved line back into the live cart.
+                                onTap: () {
+                                  for (final item in list.items) {
+                                    _loadItem(ref, item);
+                                  }
+                                  Navigator.pop(context);
+                                  showToast(
+                                    context,
+                                    'הרשימה "${list.name}" נטענה לסל',
+                                  );
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        TextButton.icon(
+          onPressed: () => _showSavedListsSheet(context, ref),
+          icon: const Icon(Icons.folder_open_outlined, size: 16),
+          label: const Text('רשימות'),
+          style: TextButton.styleFrom(foregroundColor: Colors.black38),
+        ),
         TextButton.icon(
           onPressed: () => _showSaveDialog(context, ref),
           icon: const Icon(Icons.bookmark_border, size: 16),
@@ -2897,6 +3042,12 @@ class _ServicesGrid extends ConsumerWidget {
   const _ServicesGrid();
 
   static void _openSheet(BuildContext context, int i) {
+    // 📊 השוואת מחירים (svc 5) is fully built — route to the real comparison
+    // sheet instead of the generic "🚧 בבנייה" placeholder.
+    if (i == 5) {
+      openPriceCompareSheet(context);
+      return;
+    }
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: const Color(0xFFFFFFFF),
@@ -3094,30 +3245,6 @@ class _ServiceSheet extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ─── mini pill ───────────────────────────────────────────────────────────────
-
-class _MiniPill extends StatelessWidget {
-  const _MiniPill({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-        height: 36,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        alignment: Alignment.center,
-        child: const Icon(Icons.search, color: Color(0xFF888888), size: 18),
       ),
     );
   }
