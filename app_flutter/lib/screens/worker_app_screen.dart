@@ -1,6 +1,8 @@
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
+import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
+import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -71,10 +73,25 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
           ),
           actions: [
             // Each persona reaches profile + settings from its OWN dashboard
-            // (product-owner: separately per role). Two muted AppBar actions
-            // sit before the '‹ יציאה' exit; tooltips double as Semantics
-            // labels for a11y. RTL: actions lay out leading→trailing, so this
-            // reads profile · settings · exit from the right.
+            // (product-owner: separately per role). Muted AppBar actions sit
+            // before the '‹ יציאה' exit; tooltips double as Semantics labels for
+            // a11y. RTL: actions lay out leading→trailing, so this reads
+            // 💬 שיחות · profile · settings · exit from the right.
+            //
+            // 🔒 ISOLATION (SPEC §2.5): the chat action ONLY pushes the worker's
+            // standalone [ChatsScreen] (its own "שיחות" AppBar + back→pop) — back
+            // returns to THIS worker dashboard; no route to home_shell, the role
+            // picker, or any other persona's board.
+            IconButton(
+              tooltip: 'שיחות',
+              icon: const Icon(Icons.chat_bubble_outline,
+                  color: BsTokens.mutedLight),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const ChatsScreen(persona: BsRole.worker),
+                ),
+              ),
+            ),
             IconButton(
               tooltip: 'פרופיל',
               icon: const Icon(Icons.person_outline, color: BsTokens.mutedLight),

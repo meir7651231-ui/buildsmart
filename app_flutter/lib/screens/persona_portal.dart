@@ -1,6 +1,8 @@
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/state/store_stock.dart';
+import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,9 +12,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// [L20786]). Tiles whose data the prototype exposes verbatim (§7 ratings /
 /// zones / bulk tiers / fleet) open an info sheet with that data, and the
 /// auto-stock tile shows the LIVE out-of-stock products (the supplier's
-/// [storeOosProvider] set, shared with the store dashboard's מלאי tab); the
-/// remaining action-only tools (barcode, nav, POD, chat) show an honest
-/// "to be wired" line rather than faking a feature (R8 — no invention).
+/// [storeOosProvider] set, shared with the store dashboard's מלאי tab); the 💬
+/// chat tiles open the shared cross-persona [ChatsScreen] for the portal's active
+/// persona (🏪 store / 🛵 courier — CH-4); and the remaining action-only tools
+/// (barcode, nav, POD) show an honest "to be wired" line rather than faking a
+/// feature (R8 — no invention).
 
 enum PortalKind {
   ratings,
@@ -218,14 +222,14 @@ class _PortalSheet extends ConsumerWidget {
               style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             ),
             const SizedBox(height: BsTokens.space4),
-            ..._content(ref),
+            ..._content(context, ref),
           ],
         ),
       ),
     );
   }
 
-  List<Widget> _content(WidgetRef ref) {
+  List<Widget> _content(BuildContext context, WidgetRef ref) {
     switch (tile.kind) {
       case PortalKind.ratings:
         return [
@@ -261,11 +265,22 @@ class _PortalSheet extends ConsumerWidget {
           _row('⚠️ ${oos.length} מוצרים אזלו מהמלאי'),
           for (final name in oos) _row('❌ $name'),
         ];
-      case PortalKind.barcode:
+      // 💬 chat tiles are now wired (CH-4) to the shared cross-persona
+      // [ChatsScreen]. The portal serves a SINGLE active persona, so the tile's
+      // counterpart fixes which role opens the screen: the supplier portal's
+      // "צ׳אט עם קבלן" runs under the 🏪 store ([BsRole.store]); the courier
+      // portal's "צ׳אט עם חנות" runs under the 🛵 courier ([BsRole.courier]).
+      // 🔒 ISOLATION (SPEC §2.5): we ONLY push `ChatsScreen(persona:)` — it
+      // wraps itself as a standalone Scaffold whose back button pops straight
+      // back to this portal; no route to home_shell / role_picker / any other
+      // persona's board.
       case PortalKind.chatContractor:
+        return [_ChatEntryRow(label: tile.title, persona: BsRole.store)];
+      case PortalKind.chatStore:
+        return [_ChatEntryRow(label: tile.title, persona: BsRole.courier)];
+      case PortalKind.barcode:
       case PortalKind.nav:
       case PortalKind.pod:
-      case PortalKind.chatStore:
         return [_row('${tile.sub} — כלי זה יחובר בהמשך הפיתוח.')];
     }
   }
@@ -288,4 +303,71 @@ class _PortalSheet extends ConsumerWidget {
       ),
     ),
   );
+}
+
+/// The 💬 chat tile's content row inside a portal sheet (CH-4). Tapping it closes
+/// the portal sheet and pushes the shared cross-persona [ChatsScreen] for this
+/// portal's active [persona] (🏪 store / 🛵 courier).
+///
+/// 🔒 ISOLATION (SPEC §2.5): the ONLY navigation is `push(ChatsScreen(persona:))`
+/// — that screen is a self-contained standalone Scaffold ("שיחות" + back→pop), so
+/// the back button returns to THIS portal; nothing here routes to home_shell, the
+/// role picker, or any other persona's board.
+class _ChatEntryRow extends StatelessWidget {
+  const _ChatEntryRow({required this.label, required this.persona});
+
+  final String label;
+  final BsRole persona;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: BsTokens.space2),
+      child: Material(
+        color: BsTokens.bgLight,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          onTap: () {
+            // Capture the navigator BEFORE popping — after the sheet closes this
+            // row's own context is defunct, so a fresh `Navigator.of(context)`
+            // lookup would fail. Pop the portal sheet, then push the persona's
+            // standalone chat onto the same navigator.
+            final nav = Navigator.of(context);
+            nav.pop();
+            nav.push(
+              MaterialPageRoute<void>(
+                builder: (_) => ChatsScreen(persona: persona),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: BsTokens.space4,
+              vertical: BsTokens.space3,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '$label ›',
+                    style: const TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_left,
+                  color: BsTokens.mutedLight,
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

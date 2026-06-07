@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,59 @@ enum _Direction { outgoing, incoming, missed }
 enum _ThreadCategory { agent, supplier, bot }
 
 enum _ChatFilter { all, agents, suppliers, bot }
+
+// ─── thread view-model (engine → existing UI adapter) ──────────────────────────
+//
+// The rich row/page UI below was built around the `_Thread` record and a
+// per-message `isMe` flag. To REUSE that UI verbatim while swapping the data
+// layer to the shared [chatEngineProvider] (SPEC CH-3), we adapt a [ChatThread]
+// into the same `_Thread` shape *for the reading persona*: its last message
+// becomes the subtitle/time, and `isMe`/direction are derived from
+// `fromRole == persona`. Nothing in the presentational widgets changes.
+
+/// The persona-relative view of a [ChatThread] used to drive the legacy
+/// `_ThreadRow`/`_ChatPage`. Carries the engine [threadId] + [persona] so the
+/// page can render real messages and `send` as the right role.
+typedef _ThreadView = ({_Thread thread, String threadId, BsRole persona});
+
+_Direction _directionFor(ChatThread t, BsRole persona) {
+  if (t.messages.isEmpty) return _Direction.outgoing;
+  return t.messages.last.fromRole == persona
+      ? _Direction.outgoing
+      : _Direction.incoming;
+}
+
+_ThreadCategory _categoryFor(ChatThread t) {
+  if (t.isBot) return _ThreadCategory.bot;
+  // A supplier (🏪) counterpart → "ספקים"; everyone else (👷/🛵/👔) → "נציגים".
+  return t.participants.contains(BsRole.store)
+      ? _ThreadCategory.supplier
+      : _ThreadCategory.agent;
+}
+
+String _hhmm(DateTime ts) =>
+    '${ts.hour.toString().padLeft(2, '0')}:${ts.minute.toString().padLeft(2, '0')}';
+
+/// Build the legacy `_Thread` record + the engine handle for [persona].
+_ThreadView _viewOf(ChatThread t, BsRole persona) {
+  final last = t.messages.isNotEmpty ? t.messages.last : null;
+  return (
+    threadId: t.id,
+    persona: persona,
+    thread: (
+      id: t.id,
+      avatar: t.avatar,
+      name: t.name,
+      subtitle: last?.text ?? '',
+      time: last != null ? _hhmm(last.ts) : '',
+      direction: _directionFor(t, persona),
+      isBot: t.isBot,
+      unread: 0,
+      isOnline: t.isBot,
+      category: _categoryFor(t),
+    ),
+  );
+}
 
 // ─── providers ────────────────────────────────────────────────────────────────
 
@@ -134,19 +188,21 @@ final chatHistoryClearedProvider =
   (_) => _ChatHistoryClearedNotifier(),
 );
 
-/// All thread ids — used by "השתק הכל".
-Set<String> get _allThreadIds => {for (final t in _kThreads) t.id};
+/// All thread ids — used by "השתק הכל". Reads the live shared engine (every
+/// persona's threads) rather than the retired static seed.
+Set<String> _allThreadIds(WidgetRef ref) =>
+    {for (final t in ref.read(chatEngineProvider)) t.id};
 
 /// True when every conversation is muted.
 bool allChatsMuted(WidgetRef ref) {
   final muted = ref.read(chatMutedIdsProvider);
-  return _allThreadIds.every(muted.contains);
+  return _allThreadIds(ref).every(muted.contains);
 }
 
 /// "השתק הכל" toggle: mute all when not all muted, otherwise unmute all.
 void toggleMuteAllChats(WidgetRef ref) {
   final notifier = ref.read(chatMutedIdsProvider.notifier);
-  notifier.setAll(allChatsMuted(ref) ? <String>{} : _allThreadIds);
+  notifier.setAll(allChatsMuted(ref) ? <String>{} : _allThreadIds(ref));
 }
 
 // ─── data ─────────────────────────────────────────────────────────────────────
@@ -166,85 +222,25 @@ typedef _Thread = ({
 
 typedef _Message = ({String text, bool isMe, String time});
 
-const List<_Thread> _kThreads = [
-  (
-    id: 't1',
-    avatar: '👷',
-    name: 'הקבלן הראשי',
-    subtitle: 'שלום, ההזמנה שלך תצא בעוד כ-20 דקות.',
-    time: '08:14',
-    direction: _Direction.incoming,
-    isBot: false,
-    unread: 2,
-    isOnline: true,
-    category: _ThreadCategory.agent,
-  ),
-  (
-    id: 't2',
-    avatar: '🏪',
-    name: 'ספק חומרי בנייה',
-    subtitle: 'אישור הזמנה #1234 — מוכנה לאיסוף',
-    time: '07:50',
-    direction: _Direction.outgoing,
-    isBot: false,
-    unread: 0,
-    isOnline: false,
-    category: _ThreadCategory.supplier,
-  ),
-  (
-    id: 't3',
-    avatar: '🛵',
-    name: 'השליח',
-    subtitle: 'מתי אפשר לאסוף את BS-1041?',
-    time: 'אתמול',
-    direction: _Direction.missed,
-    isBot: false,
-    unread: 1,
-    isOnline: true,
-    category: _ThreadCategory.agent,
-  ),
-  (
-    id: 't4',
-    avatar: '👔',
-    name: 'מנהל המערכת',
-    subtitle: 'עדכון סטטוס פרויקט A — בדיקה נדרשת',
-    time: 'אתמול',
-    direction: _Direction.outgoing,
-    isBot: false,
-    unread: 0,
-    isOnline: false,
-    category: _ThreadCategory.agent,
-  ),
-  (
-    id: 't5',
-    avatar: '🤖',
-    name: 'צ׳אטבוט BuildSmart',
-    subtitle: 'איך אפשר לעזור לך היום?',
-    time: '22.5',
-    direction: _Direction.incoming,
-    isBot: true,
-    unread: 0,
-    isOnline: true,
-    category: _ThreadCategory.bot,
-  ),
-  (
-    id: 't6',
-    avatar: '🏪',
-    name: 'ספק צבעים',
-    subtitle: 'מחיר עודכן — ₪3.85 לקילו',
-    time: '22.5',
-    direction: _Direction.missed,
-    isBot: false,
-    unread: 3,
-    isOnline: false,
-    category: _ThreadCategory.supplier,
-  ),
-];
-
 // ─── screen ──────────────────────────────────────────────────────────────────
 
+/// The cross-persona chat screen (SPEC `SPEC-cross-persona-chat.md` CH-3). One
+/// widget, parameterized by [persona]: the thread list reads the SHARED
+/// [chatEngineProvider] filtered through `threadsFor(persona)`, and a message is
+/// "mine" when `fromRole == persona`.
+///
+/// 🔒 ISOLATION (SPEC §2.5): the contractor is embedded as a tab inside
+/// `home_shell`, so for it this is a bare body (no extra Scaffold). Every OTHER
+/// persona opens this as a STANDALONE screen pushed from its own dashboard, so
+/// it wraps itself in its own Scaffold + AppBar ("שיחות") whose back button only
+/// `Navigator.pop`s to the caller — NO home_shell, NO role_picker, NO contractor
+/// tabs, and no path anywhere into another persona's board.
 class ChatsScreen extends ConsumerStatefulWidget {
-  const ChatsScreen({super.key});
+  const ChatsScreen({super.key, this.persona = BsRole.contractor});
+
+  /// The persona viewing the screen. Defaults to [BsRole.contractor] so existing
+  /// `const ChatsScreen()` callers (the contractor home-shell tab) are unchanged.
+  final BsRole persona;
 
   @override
   ConsumerState<ChatsScreen> createState() => _ChatsScreenState();
@@ -253,10 +249,16 @@ class ChatsScreen extends ConsumerStatefulWidget {
 class _ChatsScreenState extends ConsumerState<ChatsScreen> {
   bool _headerVisible = true;
 
+  bool get _standalone => widget.persona != BsRole.contractor;
+
   void _setHeaderVisible(bool v) {
     if (_headerVisible == v) return;
     setState(() => _headerVisible = v);
-    ref.read(tabHeaderHiddenProvider.notifier).state = !v;
+    // The shrinking-tab-header coordination only exists inside home_shell (the
+    // contractor tab); a standalone persona screen has no such header to hide.
+    if (!_standalone) {
+      ref.read(tabHeaderHiddenProvider.notifier).state = !v;
+    }
   }
 
   bool _handleScroll(ScrollNotification n) {
@@ -276,10 +278,12 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<bool>(tabHeaderHiddenProvider, (_, hidden) {
-      if (!hidden && !_headerVisible) _setHeaderVisible(true);
-    });
-    return Column(
+    if (!_standalone) {
+      ref.listen<bool>(tabHeaderHiddenProvider, (_, hidden) {
+        if (!hidden && !_headerVisible) _setHeaderVisible(true);
+      });
+    }
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ClipRect(
@@ -298,10 +302,35 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
         Expanded(
           child: NotificationListener<ScrollNotification>(
             onNotification: _handleScroll,
-            child: const _ThreadList(),
+            child: _ThreadList(persona: widget.persona),
           ),
         ),
       ],
+    );
+
+    // 🔒 Contractor: embedded tab — return the bare body (home_shell owns the
+    // Scaffold/AppBar). Every other persona: standalone Scaffold with its own
+    // "שיחות" AppBar + a back button that only pops to its dashboard.
+    if (!_standalone) return body;
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black54),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'שיחות',
+          style: TextStyle(
+            color: Color(0xFF1A1A1A),
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      body: SafeArea(child: body),
     );
   }
 }
@@ -472,15 +501,27 @@ class _Pill extends StatelessWidget {
 // ─── thread list ──────────────────────────────────────────────────────────────
 
 class _ThreadList extends ConsumerWidget {
-  const _ThreadList();
+  const _ThreadList({required this.persona});
+
+  final BsRole persona;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final query = ref.watch(_chatSearchQueryProvider);
     final filter = ref.watch(_chatFilterProvider);
     final archivedIds = ref.watch(chatArchivedIdsProvider);
+    // 🔒 ISOLATION: only the threads this persona takes part in (SPEC §2.5) —
+    // the shared engine, filtered by participation. Adapted to the legacy
+    // `_Thread` view-model so the rich rows below render unchanged.
+    final views = [
+      for (final t in ref.watch(chatEngineProvider).where(
+            (t) => t.participants.contains(persona),
+          ))
+        _viewOf(t, persona),
+    ];
 
-    final threads = _kThreads.where((t) {
+    final threads = views.where((v) {
+      final t = v.thread;
       if (archivedIds.contains(t.id)) {
         return false;
       }
@@ -533,7 +574,7 @@ class _ThreadList extends ConsumerWidget {
       itemCount: threads.length,
       separatorBuilder: (_, __) =>
           const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
-      itemBuilder: (context, i) => _DismissibleThread(thread: threads[i]),
+      itemBuilder: (context, i) => _DismissibleThread(view: threads[i]),
     );
   }
 }
@@ -541,12 +582,13 @@ class _ThreadList extends ConsumerWidget {
 // ─── dismissible wrapper ──────────────────────────────────────────────────────
 
 class _DismissibleThread extends ConsumerWidget {
-  const _DismissibleThread({required this.thread});
+  const _DismissibleThread({required this.view});
 
-  final _Thread thread;
+  final _ThreadView view;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final thread = view.thread;
     return Dismissible(
       key: ValueKey(thread.id),
       direction: DismissDirection.endToStart,
@@ -581,7 +623,7 @@ class _DismissibleThread extends ConsumerWidget {
           ),
         );
       },
-      child: _ThreadRow(thread: thread),
+      child: _ThreadRow(view: view),
     );
   }
 }
@@ -589,12 +631,13 @@ class _DismissibleThread extends ConsumerWidget {
 // ─── thread row ───────────────────────────────────────────────────────────────
 
 class _ThreadRow extends ConsumerWidget {
-  const _ThreadRow({required this.thread});
+  const _ThreadRow({required this.view});
 
-  final _Thread thread;
+  final _ThreadView view;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final thread = view.thread;
     final missed = thread.direction == _Direction.missed;
     final isUnread = thread.unread > 0;
     final muted = ref.watch(chatMutedIdsProvider).contains(thread.id);
@@ -608,7 +651,15 @@ class _ThreadRow extends ConsumerWidget {
 
     return InkWell(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => _ChatPage(thread: thread)),
+        MaterialPageRoute<void>(
+          builder: (_) => _ChatPage(
+            view: (
+              thread: thread,
+              threadId: view.threadId,
+              persona: view.persona,
+            ),
+          ),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -755,6 +806,9 @@ class _ThreadRow extends ConsumerWidget {
 // ─── chat page ────────────────────────────────────────────────────────────────
 
 /// Opens a fresh, empty conversation with a new contact (from "שיחה חדשה").
+/// This is a DETACHED chat (no engine thread / no [_ThreadView.threadId]) so it
+/// keeps the legacy session-local message list + bot auto-reply — exactly as
+/// before. Real seeded threads go through the shared engine instead.
 void openNewChatWith(
   BuildContext context, {
   required String emoji,
@@ -775,14 +829,24 @@ void openNewChatWith(
     category: _ThreadCategory.agent,
   );
   Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => _ChatPage(thread: thread)),
+    MaterialPageRoute<void>(
+      // No threadId → detached/local (legacy "שיחה חדשה" behavior).
+      builder: (_) => _ChatPage(
+        view: (thread: thread, threadId: null, persona: BsRole.contractor),
+      ),
+    ),
   );
 }
 
-class _ChatPage extends ConsumerStatefulWidget {
-  const _ChatPage({required this.thread});
+/// The chat page handle: the display [_Thread] plus — for an engine-backed
+/// thread — its [threadId] and the reading [persona]. A null [threadId] marks a
+/// detached chat (legacy local list + auto-reply).
+typedef _ChatPageView = ({_Thread thread, String? threadId, BsRole persona});
 
-  final _Thread thread;
+class _ChatPage extends ConsumerStatefulWidget {
+  const _ChatPage({required this.view});
+
+  final _ChatPageView view;
 
   @override
   ConsumerState<_ChatPage> createState() => _ChatPageState();
@@ -791,7 +855,10 @@ class _ChatPage extends ConsumerStatefulWidget {
 class _ChatPageState extends ConsumerState<_ChatPage> {
   final _controller = TextEditingController();
   final _scroll = ScrollController();
-  final List<_Message> _messages = [];
+
+  /// Session-local fallback messages — ONLY used for a detached chat
+  /// (`threadId == null`). Engine-backed threads read from [chatEngineProvider].
+  final List<_Message> _localMessages = [];
   bool _isTyping = false;
 
   static const _autoReplies = [
@@ -802,20 +869,29 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
   ];
   int _replyIdx = 0;
 
+  _Thread get _thread => widget.view.thread;
+  String? get _threadId => widget.view.threadId;
+  BsRole get _persona => widget.view.persona;
+  bool get _engineBacked => _threadId != null;
+
   @override
   void initState() {
     super.initState();
+    // Engine-backed threads source their messages from the shared store, not the
+    // local list (see [_engineMessages] in build) — nothing to seed here.
+    if (_engineBacked) return;
+    // ── Detached chat (legacy) ──
     // Once history was cleared, every chat opens empty for the session (the flag
     // is persisted, so it holds across restarts) — no greeting, no seed.
     if (ref.read(chatHistoryClearedProvider)) {
       return;
     }
     // A brand-new chat starts empty; existing threads seed the last message.
-    if (widget.thread.subtitle.isNotEmpty) {
-      _messages.add((
-        text: widget.thread.subtitle,
+    if (_thread.subtitle.isNotEmpty) {
+      _localMessages.add((
+        text: _thread.subtitle,
         isMe: false,
-        time: widget.thread.time,
+        time: _thread.time,
       ),);
     } else if (ref.read(chatSettingsProvider).greetingEnabled) {
       // Greeting message for a fresh, empty conversation.
@@ -823,7 +899,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
       final greetText = chatSettings.greetingMessage.isNotEmpty
           ? chatSettings.greetingMessage
           : 'שלום! 👋 איך אפשר לעזור?';
-      _messages.add((
+      _localMessages.add((
         text: greetText,
         isMe: false,
         time: _nowTime(),
@@ -836,6 +912,20 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
     final h = now.hour.toString().padLeft(2, '0');
     final m = now.minute.toString().padLeft(2, '0');
     return '$h:$m';
+  }
+
+  /// The messages to render: from the shared engine thread for an engine-backed
+  /// page (mapped to the legacy `_Message` shape, `isMe = fromRole == persona`),
+  /// or the session-local list for a detached chat. Honors "מחיקת היסטוריה".
+  List<_Message> _engineMessages() {
+    if (ref.watch(chatHistoryClearedProvider)) return const [];
+    final threads = ref.watch(chatEngineProvider);
+    final match = threads.where((t) => t.id == _threadId);
+    if (match.isEmpty) return const [];
+    return [
+      for (final m in match.first.messages)
+        (text: m.text, isMe: m.fromRole == _persona, time: _hhmm(m.ts)),
+    ];
   }
 
   void _scrollToBottom() {
@@ -859,9 +949,39 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
     if (settings.chatVibration) {
       HapticFeedback.lightImpact();
     }
+
+    // ── Engine-backed thread (cross-persona) ──
+    // The message lands in the SHARED store and is instantly visible to the other
+    // participant. The bot thread's auto-reply is produced by the engine's
+    // `send` itself (mirroring the legacy behavior), so we don't append one here.
+    if (_engineBacked) {
+      final wasBot = _thread.isBot;
+      final showTyping =
+          wasBot && settings.botEnabled && settings.typingIndicator;
+      ref.read(chatEngineProvider.notifier).send(_threadId!, _persona, text);
+      setState(() {
+        _controller.clear();
+        _isTyping = showTyping;
+      });
+      _scrollToBottom();
+      if (showTyping) {
+        // Brief typing shimmer before revealing the (already-stored) bot reply.
+        Future.delayed(const Duration(milliseconds: 900), () {
+          if (!mounted) return;
+          setState(() => _isTyping = false);
+          if (ref.read(chatSettingsProvider).messageAlertEnabled) {
+            HapticFeedback.lightImpact();
+          }
+          _scrollToBottom();
+        });
+      }
+      return;
+    }
+
+    // ── Detached chat (legacy local list + bot auto-reply) ──
     final showTyping = settings.botEnabled && settings.typingIndicator;
     setState(() {
-      _messages.add((text: text, isMe: true, time: _nowTime()));
+      _localMessages.add((text: text, isMe: true, time: _nowTime()));
       _controller.clear();
       _isTyping = showTyping;
     });
@@ -876,7 +996,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
       }
       setState(() {
         _isTyping = false;
-        _messages.add((
+        _localMessages.add((
           text: _autoReplies[_replyIdx % _autoReplies.length],
           isMe: false,
           time: _nowTime(),
@@ -896,7 +1016,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
   /// mute/archive providers (not a placeholder). Block/search-in-chat are
   /// honest stubs (no backing) shown inline.
   Future<void> _showChatMenu(BuildContext context) async {
-    final id = widget.thread.id;
+    final id = _thread.id;
     final muted = ref.read(chatMutedIdsProvider).contains(id);
     final action = await showModalBottomSheet<String>(
       context: context,
@@ -999,8 +1119,20 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final showOnline = widget.thread.isOnline &&
+    final showOnline = _thread.isOnline &&
         showOnlinePresence(ref.watch(chatSettingsProvider).lastSeenPrivacy);
+    // Engine-backed: live messages from the shared store (cross-persona);
+    // detached: the session-local list. Both render through the same UI below.
+    var messages = _engineBacked ? _engineMessages() : _localMessages;
+    // Legacy bot feel: the engine appends the bot's reply synchronously, but we
+    // briefly show the "מקליד..." bubble first — so while typing, hide that
+    // just-added incoming reply and let the typing bubble stand in for it.
+    if (_engineBacked &&
+        _isTyping &&
+        messages.isNotEmpty &&
+        !messages.last.isMe) {
+      messages = messages.sublist(0, messages.length - 1);
+    }
     return Scaffold(
       backgroundColor: const Color(0xFFECE5DD),
       appBar: AppBar(
@@ -1024,7 +1156,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                   ),
                   alignment: Alignment.center,
                   child: Text(
-                    widget.thread.avatar,
+                    _thread.avatar,
                     style: const TextStyle(fontSize: 18),
                   ),
                 ),
@@ -1053,7 +1185,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.thread.name,
+                    _thread.name,
                     style: const TextStyle(
                       color: Color(0xFF1A1A1A),
                       fontSize: 16,
@@ -1094,15 +1226,15 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
             child: ListView.builder(
               controller: _scroll,
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
-              itemCount: _messages.length + (_isTyping ? 1 : 0) + 2,
+              itemCount: messages.length + (_isTyping ? 1 : 0) + 2,
               itemBuilder: (context, i) {
                 if (i == 0) return const _PrivacyNotice();
                 if (i == 1) return const _DateChip(date: 'היום');
                 final msgIdx = i - 2;
-                if (_isTyping && msgIdx == _messages.length) {
+                if (_isTyping && msgIdx == messages.length) {
                   return const _TypingBubble();
                 }
-                return _Bubble(msg: _messages[msgIdx]);
+                return _Bubble(msg: messages[msgIdx]);
               },
             ),
           ),
@@ -1609,16 +1741,26 @@ class _CircleFab extends StatelessWidget {
 // ─── archive screen ────────────────────────────────────────────────────────────
 
 class ChatsArchiveScreen extends ConsumerWidget {
-  const ChatsArchiveScreen({super.key});
+  const ChatsArchiveScreen({super.key, this.persona = BsRole.contractor});
 
-  static Route<void> route() =>
-      MaterialPageRoute<void>(builder: (_) => const ChatsArchiveScreen());
+  /// 🔒 The archive is persona-scoped too: only this persona's archived threads
+  /// (its `threadsFor`) appear — the store never sees a contractor↔manager thread
+  /// in its archive either.
+  final BsRole persona;
+
+  static Route<void> route({BsRole persona = BsRole.contractor}) =>
+      MaterialPageRoute<void>(
+        builder: (_) => ChatsArchiveScreen(persona: persona),
+      );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final archivedIds = ref.watch(chatArchivedIdsProvider);
-    final archived =
-        _kThreads.where((t) => archivedIds.contains(t.id)).toList();
+    final archived = [
+      for (final t in ref.watch(chatEngineProvider))
+        if (t.participants.contains(persona) && archivedIds.contains(t.id))
+          _viewOf(t, persona),
+    ];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
@@ -1667,19 +1809,20 @@ class ChatsArchiveScreen extends ConsumerWidget {
               itemCount: archived.length,
               separatorBuilder: (_, __) => const Divider(
                   height: 1, indent: 76, color: Color(0xFFEEEEEE)),
-              itemBuilder: (_, i) => _ArchivedRow(thread: archived[i]),
+              itemBuilder: (_, i) => _ArchivedRow(view: archived[i]),
             ),
     );
   }
 }
 
 class _ArchivedRow extends ConsumerWidget {
-  const _ArchivedRow({required this.thread});
+  const _ArchivedRow({required this.view});
 
-  final _Thread thread;
+  final _ThreadView view;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final thread = view.thread;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: Container(
@@ -1717,7 +1860,15 @@ class _ArchivedRow extends ConsumerWidget {
         },
       ),
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => _ChatPage(thread: thread)),
+        MaterialPageRoute<void>(
+          builder: (_) => _ChatPage(
+            view: (
+              thread: thread,
+              threadId: view.threadId,
+              persona: view.persona,
+            ),
+          ),
+        ),
       ),
     );
   }

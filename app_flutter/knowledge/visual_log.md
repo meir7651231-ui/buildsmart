@@ -4,6 +4,17 @@
 
 ---
 
+## v6.16 — fix-fleet · גל 9 (T7 צ׳אט חוצה-פרסונות + server-ready + P1)
+
+**שינוי:** 3 ה-tracks שנותרו, במקביל (קבצים disjoint), gate אחד מאומת.
+- **T7 צ׳אט חוצה-פרסונות:** מנוע משותף מתמיד (`state/sys_chat.dart`, `bs.sys-chat.v1`) במקום ה-`const _kThreads` של הקבלן. הודעה מהחנות נראית אצל הקבלן ולהפך; כל פרסונה רואה **רק** את השיחות שלה (`threadsFor`). ה-UI נשמר verbatim (emoji/מצלמה/ארכיון/בוט). בידוד §2.5: פרסונה לא-קבלן = Scaffold **standalone** (בלי home_shell/role-picker, back→pop). חיווט 5 פרסונות (contractor/store/courier/worker/manager).
+- **server-ready:** orders + customers מחווטים דרך ה-Repository (T6.2/T6.3, byte-identical); 4 האחרים נדחו (diffuse — R8).
+- **P1:** 20 צבעים גולמיים → BsTokens (14 tokens חדשים, hex זהה, screenshot-identical).
+
+**אימות (בדיקת-widget/unit, לקח #2):** `sys_chat_test` (חוצה-פרסונה + restart + בידוד) · `repositories_test` · `central-verify` gate ירוק (analyze 0 · `flutter test` · build · conformance · required-tests). צילומי צ׳אט-פרסונה יישלחו.
+
+---
+
 ## v6.16 — fix-fleet · גל 8 (honesty-pass — מקטעי-הגדרות מתים)
 
 **שינוי (חלק א׳ — מקטעים מתים):** 3 auditors (store/notif/chat settings) אימתו ב-bytes (grep) אילו toggles מתמידים אך **אין להם צרכן** באפליקציה. 13 מקטעים יצאו **מתים לחלוטין** — נראו כמו מתגים חיים עם badge-ספירה, ומיתעו את המשתמש. נוסף ל-`_SectionTile` דגל `underConstruction`: מציג subtitle כן — **"בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות"** ו**מסתיר את badge-הספירה** (additive — `children`/`_activeCount` לא נגעו). סומנו 13: store (התראות חנות · ספקים מועדפים · שירות ולוגיסטיקה) · notif (ערוצי קבלה · צליל ורטט · לפי תפקיד · סיכומים תקופתיים · פרטיות במסך נעול) · chat (מדיה ושמע · גיבוי וייצוא · שפה ותרגום · שיחות עסקיות · ארכיון וניקיון).

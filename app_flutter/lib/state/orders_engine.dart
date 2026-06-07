@@ -23,6 +23,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:buildsmart/data/repositories/customers_local.dart';
+import 'package:buildsmart/data/repositories/orders_local.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
 
 /// A single persisted line item captured at checkout and stored inside [Order].
@@ -202,13 +204,24 @@ final List<Order> kOrdersEngineSeed = List<Order>.unmodifiable(
 const String kOrdersEngineKey = 'bs.orders.v1';
 
 class OrdersEngineNotifier extends StateNotifier<List<Order>> {
-  OrdersEngineNotifier({this.persist = true}) : super(kOrdersEngineSeed) {
+  /// [seed] is the genesis order list the engine starts from (and `resetToSeed`
+  /// restores). It defaults to [kOrdersEngineSeed] so direct construction stays
+  /// byte-identical; the `ordersEngineProvider` injects it THROUGH the orders
+  /// repository (T6.3) — same four seed orders, just sourced via the seam.
+  OrdersEngineNotifier({this.persist = true, List<Order>? seed})
+      : _seed = seed ?? kOrdersEngineSeed,
+        super(seed ?? kOrdersEngineSeed) {
     if (persist) _load();
   }
 
   /// When false (tests), skip touching SharedPreferences entirely so the
   /// in-memory seed/flow behavior can be asserted in isolation.
   final bool persist;
+
+  /// The seed list this engine resets to — the same list it was constructed
+  /// with (the four seed orders). Held so `resetToSeed` is source-consistent
+  /// with construction whether the seed came from the const or the repository.
+  final List<Order> _seed;
 
   /// True once any mutation has been applied (or _load completes).
   /// Guards against _load clobbering a mutation that arrived before prefs.
@@ -331,15 +344,26 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   }
 
   /// Reset to the four seed orders (used by tests / a future "demo reset").
-  void resetToSeed() => state = kOrdersEngineSeed;
+  /// Restores the [_seed] the engine was constructed with — identical to
+  /// [kOrdersEngineSeed] (the const) and to the repository-sourced seed.
+  void resetToSeed() => state = _seed;
 }
 
 /// The shared orders provider — the single live list every role will read.
-/// Seeded with the four existing seed orders so every current number is
-/// preserved until real orders are placed.
+/// Seeded with the four existing seed orders (obtained THROUGH the orders
+/// repository — T6.3 — instead of referencing the const directly) so every
+/// current number is preserved until real orders are placed. The repository's
+/// `seed()` is const-backed and never reads this provider, so the wiring is
+/// acyclic; a future remote impl supplies the seed via the same seam.
 final ordersEngineProvider =
     StateNotifierProvider<OrdersEngineNotifier, List<Order>>(
-  (_) => OrdersEngineNotifier(),
+  (ref) {
+    final repo = ref.read(ordersRepositoryProvider);
+    // Source the seed through the repository (the local impl exposes it). Any
+    // non-local impl falls back to the const seed — identical orders either way.
+    final seed = repo is LocalOrdersRepository ? repo.seed() : kOrdersEngineSeed;
+    return OrdersEngineNotifier(seed: seed);
+  },
 );
 
 /// Live manager analytics over the engine's orders — the same five tile numbers
@@ -355,10 +379,16 @@ final managerAnalyticsProvider = Provider<ManagerAnalytics>((ref) {
 });
 
 /// Live customer aggregates over the engine's orders — the same group-by-buyer
-/// list the 👥 לקוחות leaves read, now derived from the LIVE orders.
+/// list the 👥 לקוחות leaves read, derived from the LIVE orders. The fold now
+/// flows THROUGH the customers repository (T6.3): this provider keeps `watch`ing
+/// the engine so the list stays live (re-runs on every order change), and
+/// delegates the actual group-by-buyer derivation to the repo's `all()` — the
+/// identical `mgrCustomerList` aggregation, just behind the server-ready seam.
 final managerCustomersProvider = Provider<List<ManagerCustomer>>((ref) {
-  final orders = ref.watch(ordersEngineProvider);
-  return mgrCustomerList(
-    orders.map((o) => o.toManagerOrder()).toList(growable: false),
-  );
+  final orders = ref.watch(ordersEngineProvider); // live → re-runs on change
+  final repo = ref.read(customersRepositoryProvider);
+  // Delegate the group-by-buyer fold to the repository. The local impl exposes
+  // `aggregate(orders)` so the watched live list drives it directly; any other
+  // impl folds the engine's current orders via `all()` — identical result.
+  return repo is LocalCustomersRepository ? repo.aggregate(orders) : repo.all();
 });

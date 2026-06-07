@@ -1133,3 +1133,25 @@ A 3-auditor sweep (store/notif/chat settings) byte-verified (grep-proven) which 
 - **Full D2 pass (per-row honesty inside the MIXED sections):** a 3-auditor re-sweep re-proved the **29 dead toggles** inside them (store 17 · notif 8 · chat 4); each now carries an honest per-row marker **"בבנייה — עדיין לא משפיע"** (subtitle on `_SwitchRow`; a note under the label on `_RadioGroupRow`/`_InlineTextRow`/`_NumberRow`) and stays functional (still persists). A shared `_Inert` interface lets `_SectionTile._activeCount` exclude them, so each MIXED section's badge now shows only the **LIVE** count (e.g. סוגי-התראות 9→4). Live toggles untouched.
 - Guard: `test/settings_honesty_test.dart` (6 tests) — asserts the section-level subtitle on all 3 screens, and expands a MIXED section per screen to assert the per-row marker renders.
 - Gate: central-verify green — analyze 0 · tests · build · conformance · required-tests.
+
+## Wave 9 — T7 cross-persona chat + server-ready (orders/customers) + P1 colors (9×9 fleet)
+The three remaining tracks, built/wired in parallel (disjoint files), one verified gate.
+
+### T7 — cross-persona chat (the one missing feature)
+The chat is now a shared, persisted, cross-persona engine (was a contractor-only `const _kThreads` + bot). A store message is seen by the contractor and vice-versa; each persona sees ONLY its own threads.
+- `state/sys_chat.dart` (NEW): `ChatEngineNotifier` over `ChatThread`/`ChatMessage`, persist `bs.sys-chat.v1` (worker_tasks H2 pattern: `_loaded`-guard + persist-flag). `send(threadId, fromRole, text)` (visible to both participants), `threadsFor(role)` (data isolation). `chatEngineProvider`.
+- `data/chat_seeds.dart` (NEW): cross threads (contractor↔store/courier/manager · store↔courier) + a bot thread (auto-reply kept).
+- `chats_screen.dart`: `ChatsScreen({persona = contractor})` — the thread list + `_ChatPage` read the engine via `threadsFor(persona)`; sending calls `send(.., persona, ..)`. UI reused verbatim (emoji/camera/archive/honest-stubs/bot). Backward-compatible: `const ChatsScreen()` still serves the contractor home-shell tab.
+- 🔒 Isolation (SPEC §2.5): a non-contractor persona opens a STANDALONE Scaffold (own "שיחות" AppBar + back→pop) — no home_shell, no role_picker, no cross-board nav.
+- Wiring (CH-4): store/courier → `persona_portal` (`_ChatEntryRow`); worker → `worker_app_screen`; manager → `manager_dashboard_screen` — each pushes `ChatsScreen(persona:)` standalone. Contractor via `updates_screen`.
+- Guard: `test/sys_chat_test.dart` — cross-persona visibility · restart persistence · isolation.
+
+### server-ready (Repository seam) — orders + customers wired (T6.2/T6.3)
+- `data/repositories/orders_local.dart` + `customers_local.dart` (NEW): local impls of the existing interfaces, delegating to the live engine; `seed()` exposes the const genesis acyclically.
+- `orders_engine.dart`: `ordersEngineProvider` sources its seed via `ordersRepositoryProvider.seed()`; `managerCustomersProvider` derives via `customersRepositoryProvider.aggregate(orders)` (still watches the engine). Behavior byte-identical.
+- Guard: `test/repositories_test.dart`. The other 4 domains (finance/site/stock/catalog) read their seeds directly across many screens (no single owning provider) → T6.3 deferred (R8 — not forced); their T6.1 interfaces remain.
+
+### P1 polish — colors → BsTokens
+- 20 raw `Color(0x)` literals → `BsTokens` (19 in `widgets/chain_diagram.dart` + 1 in `theme/app_theme.dart`); 14 new exact-hex tokens in `theme/tokens.dart` (chain* palette + `bgLightAlt`). Screenshot-identical.
+
+Gate: central-verify green — analyze 0 · tests green · build · conformance · required-tests.

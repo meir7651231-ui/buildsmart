@@ -29,7 +29,7 @@ class AppTheme {
       brightness: b,
       colorScheme: scheme,
       scaffoldBackgroundColor:
-          isDark ? BsTokens.bgDark : const Color(0xFFF5F6FA),
+          isDark ? BsTokens.bgDark : BsTokens.bgLightAlt,
       fontFamily: 'Heebo',
       dividerColor: highContrast
           ? (isDark ? Colors.white70 : Colors.black54)

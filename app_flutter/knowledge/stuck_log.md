@@ -1358,3 +1358,12 @@ ANTIPATTERN: שינוי ניווט פרסונה ממסך דיאל ל role app ב
 RULE: כששינוי מעביר פרסונה ממסך-דיאל ל-role-app (או הפוך) — חפש מיד בדיקות שמאמתות
 את הזרימה הישנה (grep לכותרות-הטקסט) ועדכן אותן באותו commit; מקטע מתחת-לקיפול
 ב-ListView דורש scrollUntilVisible.
+
+## 2026-06-07 — שינוי lib/data+state בלי mutation_log פרואקטיבי (שער 44 → 102)
+### א — הבעיה
+ה-commit של גל-9 (T7 צ׳אט חוצה-פרסונות + server-ready orders/customers) שינה lib/data (chat_seeds · repositories/*_local) ו-lib/state (sys_chat · orders_engine) אך לא עדכן את mutation_log.md → שער 44 חסם. ה-retry אחרי כשל בטווח code/test (44) הצית את שער 102.
+### ב — הפתרון
+הרצתי mutation אמיתי על ה-isolation-primitive של הצ׳אט: mutation_verify.sh על lib/state/sys_chat.dart (threadsFor → true) מול test/sys_chat_test.dart → אדום (הבדיקה תפסה את שבירת הבידוד) → ירוק (שוחזר) → נרשם ל-mutation_log.md אוטומטית.
+### ג — כלל המניעה
+ANTIPATTERN: שינוי lib data או lib state בלי הרצת mutation verify ועדכון mutation log באותו commit
+RULE: כל commit שנוגע ב-lib/data או lib/state חייב להריץ mutation_verify.sh על ההיגיון/דאטה החדשים (מוטציית-sed שהבדיקה אמורה לתפוס) באותו commit — כך mutation_log מתעדכן, שער 44 לא חוסם, ולא נכנסים ל-retry של שער 102.

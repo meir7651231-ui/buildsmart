@@ -2,10 +2,12 @@ import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
+import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -78,10 +80,25 @@ class ManagerDashboardScreen extends ConsumerWidget {
           ),
           actions: [
             // Each persona reaches profile + settings from its OWN dashboard
-            // (product-owner: separately per role). Two muted AppBar actions
+            // (product-owner: separately per role). Three muted AppBar actions
             // sit before the '‹ יציאה' exit; tooltips double as Semantics
             // labels for a11y. RTL: actions lay out leading→trailing, so this
-            // reads profile · settings · exit from the right.
+            // reads 💬 שיחות · profile · settings · exit from the right.
+            //
+            // 🔒 ISOLATION (SPEC §2.5): the chat action ONLY pushes the manager's
+            // standalone [ChatsScreen] (its own "שיחות" AppBar + back→pop) — back
+            // returns to THIS manager dashboard; no route to home_shell, the role
+            // picker, or any other persona's board.
+            IconButton(
+              tooltip: 'שיחות',
+              icon: const Icon(Icons.chat_bubble_outline,
+                  color: BsTokens.mutedLight),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const ChatsScreen(persona: BsRole.manager),
+                ),
+              ),
+            ),
             IconButton(
               tooltip: 'פרופיל',
               icon: const Icon(Icons.person_outline, color: BsTokens.mutedLight),

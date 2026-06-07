@@ -518,3 +518,9 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/store_stock_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### lib/state/sys_chat.dart — 2026-06-07T23:13:55+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s/t.participants.contains(role)/true/`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/sys_chat_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

@@ -58,6 +58,25 @@ class BsTokens {
   static const Color inkDark = Color(0xFFF1F3F8);
   static const Color mutedDark = Color(0xFF9AA3B2);
 
+  // Chain-diagram data-viz palette (material stripes + joint edges). Bound from
+  // existing literals in chain_diagram.dart — token-equal · zero visual. P-1.
+  static const Color chainCyan = Color(0xFF22D3EE); // HDPE / cold supply / hdpe-press / implicit bridge
+  static const Color chainOrange = Color(0xFFFB923C); // PEX / pex-press
+  static const Color chainCopper = Color(0xFFEA580C); // copper / copper-press
+  static const Color chainBrass = Color(0xFFEAB308); // brass / bsp thread
+  static const Color chainGray = Color(0xFF94A3B8); // PVC / drainage
+  static const Color chainSlate = Color(0xFF64748B); // PP
+  static const Color chainPurple = Color(0xFFA855F7); // multi-layer
+  static const Color chainCeramic = Color(0xFFE2E8F0); // ceramic
+  static const Color chainRubber = Color(0xFF334155); // rubber
+  static const Color chainSteel = Color(0xFF475569); // steel
+  static const Color chainStainless = Color(0xFFCBD5E1); // stainless
+  static const Color chainDefault = Color(0xFF7C8AA5); // neutral fallback / SKU caption
+  static const Color chainWarning = Color(0xFFEF4444); // bottleneck warning ring
+
+  // Light theme scaffold background (ported from app_theme.dart literal). P-1.
+  static const Color bgLightAlt = Color(0xFFF5F6FA);
+
   // Shadow used for dial circles + label pills.
   static const List<BoxShadow> circleShadow = [
     BoxShadow(
