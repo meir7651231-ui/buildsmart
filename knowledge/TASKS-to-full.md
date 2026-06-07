@@ -83,10 +83,11 @@ PROJECTS(3) · ARCHIVED(3) · SITE_TREE(3) · STOCK_DEMO(11) · TASKS(5+steps) �
 
 # Track T7 — צ׳אט חוצה-פרסונות (אותו מסך אצל כולם · spec מלא: `SPEC-cross-persona-chat.md`)
 *דרישת-משתמש 07-06. דפוס: `sys_orders` מוחל על צ׳אט · **reuse ל-UI הקיים** `chats_screen` (לא לבנות מחדש).*
+> 🔒 **הפרדת-תפקידים (קריטי):** "אותו מסך" = אותו widget+הודעות-משותפות, **לא אותה גישה.** פרסונה פותחת צ׳אט **standalone** (בלי home_shell/role-picker) — **אסור** מעבר ללוח-קבלן/מנהל. `threadsFor(persona)` מבודד-נתונים. ר׳ `SPEC-cross-persona-chat.md` §2.5.
 - **CH-1** מנוע-צ׳אט משותף `state/sys_chat.dart` (StateNotifier + persist `bs.sys-chat.v1`, דפוס `worker_tasks_engine`). ✅ send חוצה-פרסונה + שורד-restart + test.
 - **CH-2** seed `data/chat_seeds.dart` (קבלן↔חנות/שליח/מנהל · חנות↔שליח · bot). ✅ זוג רואה משני-צדדים.
 - **CH-3** `ChatsScreen({persona})` — נתונים מ-`threadsFor(persona)` במקום const+bot. **reuse-UI.** ✅ אותו מסך לכל פרסונה.
-- **CH-4** חיווט: קבלן(טאב)/חנות(`sp-chat`)/שליח(`cp-chat`)/עובד/מנהל → `ChatsScreen(persona)`. ✅ בדיקה-חוצה: חנות→קבלן.
+- **CH-4** חיווט: קבלן(טאב)/חנות(`sp-chat`)/שליח(`cp-chat`)/עובד/מנהל → `ChatsScreen(persona)` **standalone**. ✅ בדיקה-חוצה: חנות→קבלן · 🔒 בדיקת-בידוד: אין נתיב ללוח-קבלן/מנהל.
 - **CH-5** (אופ׳) קישור thread-להזמנה.
 
 ---
