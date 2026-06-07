@@ -524,6 +524,16 @@ case 10 (now builds a 4-branch-on-2-outlet tree). NOTE: the studio UI's own bran
 count / over-capacity banner (`install_studio_screen`) still mirrors the raw target
 count — the engine plan is now correct (gaps), the UI banner is a separate follow-up.
 
+**Flattened-DN data sweep (B8):** a class of reducers/couplers/caps had their
+verified-spec ends lazily defaulted to a single DN (mostly [50,50]) regardless of
+the product name, so the engine accepted wrong-size joints and rejected the real
+ones. Restored from the names: reducers `218568`(50/40)/`220316`(40/32)/
+`116680`(50/32), `194897`(110/100), coupler `218567`(160/160), and single-ended
+caps `218569`(110)/`218460`(50)/`218560`(160)/`220315`(40). Full suite (1569) stayed
+green — no test had encoded these wrong joints. Two ambiguous items (`116203`
+"40/49", thread-side elbow `116207` "32/32") were left for human confirmation.
+Locked by `install_engine_b8_test`.
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)

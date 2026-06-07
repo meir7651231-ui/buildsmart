@@ -1348,7 +1348,7 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '196762':  VerifiedSpec(sku: '196762',  material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
   '196575':  VerifiedSpec(sku: '196575',  material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
   '198517':  VerifiedSpec(sku: '198517',  material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('32')]),
-  '116680':  VerifiedSpec(sku: '116680',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('40')]),
+  '116680':  VerifiedSpec(sku: '116680',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('32')]), // B8: מצרה תבריג 50/32
   '119215':  VerifiedSpec(sku: '119215',  material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('50')]),
   '214533':  VerifiedSpec(sku: '214533',  material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '214534':  VerifiedSpec(sku: '214534',  material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
@@ -1361,17 +1361,17 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '217531':  VerifiedSpec(sku: '217531',  material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('50')]),
 
   // ── מצמדים וצינורות נוספים ────────────────────────────────────────────────
-  '218567': VerifiedSpec(sku: '218567', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '218569': VerifiedSpec(sku: '218569', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '218568': VerifiedSpec(sku: '218568', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '220316': VerifiedSpec(sku: '220316', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '194897': VerifiedSpec(sku: '194897', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '218567': VerifiedSpec(sku: '218567', material: 'PVC', maxTempC: 50, ends: [_c('160'), _c('160')]), // B8: מחבר כפול 160/160
+  '218569': VerifiedSpec(sku: '218569', material: 'PVC', maxTempC: 50, ends: [_c('110')]), // B8: פקק חיצוני 110 (קצה יחיד)
+  '218568': VerifiedSpec(sku: '218568', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('40')]), // B8: מצרה 50/40
+  '220316': VerifiedSpec(sku: '220316', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('32')]), // B8: מצרה 40/32
+  '194897': VerifiedSpec(sku: '194897', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('100')]), // B8: מצרה לתיקון 110/100
   '194898': VerifiedSpec(sku: '194898', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
 
   // ── פקקים וצינורות נוספים ────────────────────────────────────────────────
-  '218460': VerifiedSpec(sku: '218460', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
-  '218560': VerifiedSpec(sku: '218560', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '220315': VerifiedSpec(sku: '220315', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '218460': VerifiedSpec(sku: '218460', material: 'PVC', maxTempC: 50, ends: [_c('50')]), // B8: פקק שקע-תקע 50 (קצה יחיד)
+  '218560': VerifiedSpec(sku: '218560', material: 'PVC', maxTempC: 50, ends: [_c('160')]), // B8: פקק שקע-תקע 160 (קצה יחיד)
+  '220315': VerifiedSpec(sku: '220315', material: 'PVC', maxTempC: 50, ends: [_c('40')]), // B8: פקק שקע-תקע 40 (קצה יחיד)
   '805024': VerifiedSpec(sku: '805024', material: 'PVC', maxTempC: 50, ends: [_c('75')]),
   '116628': VerifiedSpec(sku: '116628', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
 
