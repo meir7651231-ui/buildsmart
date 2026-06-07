@@ -70,4 +70,32 @@ void main() {
       expect(manifoldOutlets(_p('116113')), 0); // צינור ניקוז 110
     });
   });
+
+  group('terminal devices — one per line, no terminal→terminal (D1/D3/D5/D6)', () {
+    test('two traps never connect (double-trap)', () {
+      // bottle trap ↔ bottle trap, and siphon ↔ open trap — each is one fixture's
+      // single water seal; a second downstream is a prohibited double-trap.
+      expect(findShortestPath(_p('218553'), _p('217861')), isNull);
+      expect(findShortestPath(_p('77003221'), _p('116635')), isNull);
+    });
+    test('two draw-off taps never connect (two fixtures in series)', () {
+      expect(findShortestPath(_p('779096G'), _p('77777114')), isNull); // מטבח↔כיור
+      expect(findShortestPath(_p('77777345'), _p('77777114')), isNull); // גן↔כיור
+    });
+    test('two floor drains never connect', () {
+      expect(findShortestPath(_p('220542'), _p('218681')), isNull);
+    });
+    test('separated terminals caught at line level (trap → pipe → trap)', () {
+      // The pairwise path search sees only one terminal per adjacent pair; the
+      // line-level guard in buildInstallation must still flag the double-trap.
+      final plan =
+          buildInstallation([_p('218553'), _p('116180'), _p('217861')], tempC: 20);
+      expect(plan.gaps, isNotEmpty);
+      expect(plan.isComplete, isFalse);
+    });
+    test('a valid one-terminal line still connects', () {
+      expect(findShortestPath(_p('77777313'), _p('779096G')), isNotNull); // valve→faucet
+      expect(findShortestPath(_p('217861'), _p('116180')), isNotNull); // trap→pipe
+    });
+  });
 }

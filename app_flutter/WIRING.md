@@ -476,6 +476,23 @@ slope block — "אורך אופקי" + "מפל אנכי" sliders feeding the ex
 already existed (covered by `pressure_drop_advanced_test`); P3.9 only wires them
 into the drainage UI.
 
+**Connection validity — terminal devices (B4):** the engine validated geometry +
+material + cross-system isolation, but treated almost every non-ceramic device as
+a pass-through connector — so it accepted physically-invalid chains a plumber
+rejects. Now TERMINAL devices are `FlowRole.fixture` (endpoint-only, never
+auto-inserted): traps (`סיפונים`/`מחסומים גלויים`), floor/roof drains
+(`מחסומי רצפה`/`מאספי רצפה`/`תעלות ניקוז`/`ניקוז גג`/`מאספים וקולטים`), and supply
+draw-off taps (`ברזי מטבח`/`כיור`/`קיר`/`אמבטיה`/`גן`/`דלי`). A line carries at
+most ONE terminal: two-on-one (double-trap, two taps in series, two floor drains)
+is rejected in `findShortestPath`/`_findShortestPathExcluding`/`_findBridge`, and a
+pair separated by connectors (`trap→pipe→trap`) is caught at the line level in
+`buildInstallation` (records a gap → `isComplete=false`, so "התקנה שלמה" no longer
+overclaims). In-line valves (`ברזי מעבר`) stay connectors; shower components
+(`מערבל→זרוע→ראש`) are deliberately left for a later finer model; flow-direction
+for check/backflow valves is the next step (B5). Locked by
+`install_engine_safety_test`; `audit40` cases 3/15/23/35/39 — which had encoded the
+two-terminal bug as *valid* — were flipped to expect no-path.
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)

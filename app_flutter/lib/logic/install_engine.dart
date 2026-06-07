@@ -270,6 +270,26 @@ const _structuralCats = {
   'ידיות אחיזה', 'ארונות מחלק',
 };
 
+/// TERMINAL devices: a trap, a floor/roof drain, or a draw-off tap each serves a
+/// SINGLE fixture. Like a toilet/sink, a terminal may only sit at a line ENDPOINT
+/// — never spliced mid-line, and never two-on-one-line (a second trap downstream
+/// is a double-trap; two taps in series is two fixtures on one feed — both
+/// physically invalid). flowRole() maps these to FlowRole.fixture so the existing
+/// "fixtures are endpoint-only" machinery covers them too. They are NOT in
+/// _fixtureCats because productSystems() must still pin them to one system
+/// (drainage taps→drainage, supply taps→supply), not span both.
+/// Deliberately EXCLUDED (they chain legitimately, mixer→arm→head): the shower
+/// categories ברזי מקלחת / ראשי מקלחת / מזלפי יד / זרועות דוש — handled separately.
+/// Deliberately EXCLUDED (genuinely in-line): ברזי מעבר (ball/stop valves),
+/// אל חזור (check valves — directional, handled by the flow-direction model).
+const _terminalCats = {
+  // drainage terminals (one per fixture; the body is not a through-fitting)
+  'סיפונים', 'מחסומים גלויים', 'מחסומי רצפה', 'מאספי רצפה',
+  'תעלות ניקוז', 'ניקוז גג', 'מאספים וקולטים',
+  // supply draw-off taps (terminal — the line ends at the tap)
+  'ברזי מטבח', 'ברזי כיור', 'ברזי קיר', 'ברזי אמבטיה', 'ברזי גן', 'ברזי דלי',
+};
+
 const _allSystems = {WaterSystem.supply, WaterSystem.drainage};
 
 /// The plumbing systems a product belongs to, by engineering logic:
@@ -312,7 +332,11 @@ FlowRole flowRole(LipskeyCatalogProduct p) {
       kHotWaterAccessorySkus.contains(p.sku)) return FlowRole.accessory;
   final c = p.categoryHe;
   if (_structuralCats.contains(c)) return FlowRole.accessory;
-  if (_fixtureCats.contains(c)) return FlowRole.fixture;
+  // A fixture OR a terminal device (trap / floor drain / draw-off tap) is an
+  // endpoint-only flow node — never an auto-inserted mid-line connector.
+  if (_fixtureCats.contains(c) || _terminalCats.contains(c)) {
+    return FlowRole.fixture;
+  }
   return FlowRole.connector;
 }
 
@@ -512,6 +536,12 @@ List<LipskeyCatalogProduct>? _findShortestPathExcluding(
   required Set<(String, String)> blocked,
 }) {
   if (from.sku == to.sku) return [from];
+  // Two terminal devices belong to two separate fixtures — they never join
+  // directly to each other (a second trap = double-trap; two draw-off taps in
+  // series = two fixtures on one feed). A line carries at most one terminal.
+  if (flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture) {
+    return null;
+  }
   final sysFrom = productSystems(from);
   final sysTo = productSystems(to);
   if (sysFrom.intersection(sysTo).isEmpty) return null;
@@ -557,6 +587,12 @@ List<LipskeyCatalogProduct>? findShortestPath(
   int tempC = 20,
 }) {
   if (from.sku == to.sku) return [from];
+  // Two terminal devices belong to two separate fixtures — they never join
+  // directly to each other (a second trap = double-trap; two draw-off taps in
+  // series = two fixtures on one feed). A line carries at most one terminal.
+  if (flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture) {
+    return null;
+  }
 
   // The whole line must stay within one plumbing system. Track the running
   // intersection of every product's systems; an empty intersection = the line
@@ -962,6 +998,11 @@ LipskeyCatalogProduct? _findBridge(
     LipskeyCatalogProduct from,
     LipskeyCatalogProduct to,
     int tempC) {
+  // Two terminal devices belong to separate fixtures — never bridge one to
+  // another (double-trap / two taps in series).
+  if (flowRole(from) == FlowRole.fixture && flowRole(to) == FlowRole.fixture) {
+    return null;
+  }
   // Fail-closed across plumbing systems. The verified BFS rejects supply↔drainage
   // via system-intersection (sysAcc, see findShortestPath); this name-inference
   // fallback must match it — otherwise a spec-less fitting that merely size-matches
@@ -1241,6 +1282,16 @@ InstallationPlan buildInstallation(
   }
   if (autoCompliance && items.isNotEmpty) {
     _autoAddCompliance(items, qty, tempC, loop: loop);
+  }
+
+  // A line serves at most ONE terminal device. Two terminals on one line — even
+  // when separated by valid connectors (e.g. trap → pipe → trap, or
+  // faucet → nipple → faucet) — is a double-fixture error the pairwise path
+  // search can't see (each adjacent pair has only one terminal). Catch it here
+  // so isComplete (gaps.isEmpty) reflects physical validity, not just geometry.
+  final terminals = items.where((p) => flowRole(p) == FlowRole.fixture).toList();
+  if (terminals.length > 1) {
+    gaps.add(InstallationGap(terminals.first, terminals[1]));
   }
 
   // Tag all items under a single "קו ראשי" zone so callers get a consistent

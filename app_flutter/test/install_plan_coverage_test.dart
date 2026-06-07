@@ -14,9 +14,12 @@ LipskeyCatalogProduct _p(String sku) =>
 void main() {
   group('buildInstallation — plan coverage (TEST-1)', () {
     // Known-connectable supply pairs (green in audit40 cases 1/3/9).
+    // Each pair is ONE draw-off tap (terminal) + an in-line part — a physically
+    // valid line. (Was: ברז גן → ברז כיור, two taps in series — itself invalid,
+    // now rejected by the terminal rule; replaced with ball-valve → faucet.)
     const pairs = [
-      ['779096G', '77778071'], // קיסר → פקק נחושת ½"
-      ['77777345', '77777114'], // ברז גן ¾" → ברז כיור ½"
+      ['779096G', '77778071'], // קיסר (ברז) → פקק נחושת ½" (פקק = קצה-קו inline)
+      ['77777313', '779096G'], // ברז מעבר 1" → קיסר ½" (שסתום inline → ברז-קצה)
       ['77777104', '77777114'], // מופה נחושת ½" → ברז כיור ½"
     ];
 
