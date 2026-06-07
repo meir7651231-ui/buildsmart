@@ -250,6 +250,7 @@ class _ChannelsSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '📱',
       title: 'ערוצי קבלה',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'Push (אפליקציה)',
@@ -465,6 +466,7 @@ class _SoundSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🔊',
       title: 'צליל ורטט',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'צליל מופעל',
@@ -539,6 +541,7 @@ class _PersonaSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '👤',
       title: 'לפי תפקיד',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: '👷 קבלן — התראות פרויקט',
@@ -596,6 +599,7 @@ class _SummariesSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '📊',
       title: 'סיכומים תקופתיים',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'סיכום יומי',
@@ -698,6 +702,7 @@ class _LockScreenSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🔐',
       title: 'פרטיות במסך נעול',
+      underConstruction: true,
       children: [
         _RadioGroupRow<NotifLockScreen>(
           label: 'תצוגה במסך נעול',
@@ -760,11 +765,16 @@ class _SectionTile extends StatelessWidget {
     required this.emoji,
     required this.title,
     required this.children,
+    this.underConstruction = false,
   });
 
   final String emoji;
   final String title;
   final List<Widget> children;
+
+  // When true: this section's persisted toggles have no engine yet — show an
+  // honest "בבנייה" subtitle and suppress the active-count badge (Wave 8 / D2).
+  final bool underConstruction;
 
   // Count only functional rows — exclude "בבנייה" placeholders.
   int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
@@ -788,7 +798,7 @@ class _SectionTile extends StatelessWidget {
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
           // Count badge replaces the default expand chevron.
           trailing:
-              _activeCount == 0
+              (underConstruction || _activeCount == 0)
                   ? null
                   : Container(
                     padding: const EdgeInsets.symmetric(
@@ -816,6 +826,15 @@ class _SectionTile extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+          subtitle: underConstruction
+              ? const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Text(
+                    'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  ),
+                )
+              : null,
           children: children,
         ),
       ),

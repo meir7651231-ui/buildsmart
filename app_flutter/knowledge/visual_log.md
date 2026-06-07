@@ -4,6 +4,14 @@
 
 ---
 
+## v6.16 — fix-fleet · גל 8 (honesty-pass — מקטעי-הגדרות מתים)
+
+**שינוי:** 3 auditors (store/notif/chat settings) אימתו ב-bytes (grep) אילו toggles מתמידים אך **אין להם צרכן** באפליקציה. 13 מקטעים יצאו **מתים לחלוטין** — נראו כמו מתגים חיים עם badge-ספירה, ומיתעו את המשתמש. נוסף ל-`_SectionTile` דגל `underConstruction`: מציג subtitle כן — **"בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות"** ו**מסתיר את badge-הספירה** (additive — `children`/`_activeCount` לא נגעו). סומנו 13: store (התראות חנות · ספקים מועדפים · שירות ולוגיסטיקה) · notif (ערוצי קבלה · צליל ורטט · לפי תפקיד · סיכומים תקופתיים · פרטיות במסך נעול) · chat (מדיה ושמע · גיבוי וייצוא · שפה ותרגום · שיחות עסקיות · ארכיון וניקיון). מקטעי MIXED/LIVE (שחלק ממתגיהם חיים) **לא** סומנו — כדי לא לתייג שגוי מתג עובד.
+
+**אימות ויזואלי (בדיקת-widget, לקח #2):** `test/settings_honesty_test.dart` מריץ pump ל-3 מסכי-ההגדרות ומוודא שה-subtitle "בבנייה…" מופיע בכל אחד. + `central-verify` gate — analyze 0 · `flutter test` · build · conformance · required-tests.
+
+---
+
 ## v6.16 — fix-fleet · גל 7 (הסרת ה-search-dial — ה-FAB-dial האחרון)
 
 **שינוי:** ה-search-dial (ה-FAB-dial האחרון; menu + BS כבר הוסרו) **נמחק** — reachability-audit אישר ש-`OpenDial.search` לא נקבע ע"י שום פעולת-משתמש (אין search-FAB), וכל כליו חיים ב-`_SearchToolsRow` של הקטלוג (מחווט טוב יותר). נמחק `search_dial_widget.dart`; הוסרו `OpenDial`/`openDialProvider`/`SearchTool`/`searchToolProvider` + scrim + render (dial_state · home_shell · buttons). **אין יותר FAB-dial באפליקציה.** 0 הפניות נותרו (byte-verified).

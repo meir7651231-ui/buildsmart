@@ -279,6 +279,7 @@ class _NotificationsSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🔔',
       title: 'התראות חנות',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'התראות מבצעים',
@@ -402,6 +403,7 @@ class _SuppliersSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🏪',
       title: 'ספקים מועדפים',
+      underConstruction: true,
       children: [
         const _PlaceholderRow(label: 'חנויות מסומנות'),
         const _PlaceholderRow(label: 'ספקים חסומים'),
@@ -514,6 +516,7 @@ class _LogisticsSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '⚡',
       title: 'שירות ולוגיסטיקה',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'משלוח מהיר (תוך 4 שעות)',
@@ -614,11 +617,16 @@ class _SectionTile extends StatelessWidget {
     required this.emoji,
     required this.title,
     required this.children,
+    this.underConstruction = false,
   });
 
   final String emoji;
   final String title;
   final List<Widget> children;
+
+  // When true: this section's persisted toggles have no engine yet — show an
+  // honest "בבנייה" subtitle and suppress the active-count badge (Wave 8 / D2).
+  final bool underConstruction;
 
   // Count only functional rows — exclude "בבנייה" placeholders.
   int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
@@ -642,7 +650,7 @@ class _SectionTile extends StatelessWidget {
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
           // Count badge replaces the default expand chevron.
           trailing:
-              _activeCount == 0
+              (underConstruction || _activeCount == 0)
                   ? null
                   : Container(
                     padding: const EdgeInsets.symmetric(
@@ -670,6 +678,15 @@ class _SectionTile extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+          subtitle: underConstruction
+              ? const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Text(
+                    'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  ),
+                )
+              : null,
           children: children,
         ),
       ),

@@ -1124,3 +1124,11 @@ The search-dial was the last FAB dial (menu + BS already gone). A reachability a
 - `home_shell.dart`: removed the search-dial render + scrim + import; the cart FAB guard is now just `tabIndex != 3`. The real in-catalog search (`_SearchToolsRow`) + the `Icons.search` header button are untouched.
 - harness `buttons.dart`: dropped the search-dial/OpenDial test blocks. `lib/widgets/dial.dart` kept (test-only, via `dial_test_helper`).
 - **0 dial-symbol references remain** (byte-verified). Gate: central-verify green — analyze 0 · tests · build · conformance 7/7 · required-tests.
+
+## Wave 8 — inert-switch honesty pass (D2 · 9×9 fleet)
+A 3-auditor sweep (store/notif/chat settings) byte-verified (grep-proven) which persisted toggles have **no consumer** anywhere in `lib/` — written by the settings screen, read by nothing. 13 sections proved **fully inert** (every persisted field dead); they previously rendered as live switches with an active-count badge, misleading users.
+- `_SectionTile` (in each of the 3 settings screens) gained an optional `underConstruction` flag → renders an honest ExpansionTile `subtitle:` **"בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות"** and **suppresses the count badge** (a dead section no longer claims N active settings). Additive only — `_activeCount`/`children` untouched.
+- **Marked (13):** store — התראות חנות · ספקים מועדפים · שירות ולוגיסטיקה. notif — ערוצי קבלה · צליל ורטט · לפי תפקיד · סיכומים תקופתיים · פרטיות במסך נעול. chat — מדיה ושמע · גיבוי וייצוא · שפה ותרגום · שיחות עסקיות · ארכיון וניקיון.
+- **NOT marked — MIXED/LIVE sections** (some toggles ARE genuinely wired; a section-level note would mislabel a working toggle): store תשלום/חשבוניות/סל/תצוגה/משלוחים/פרטיות; notif סוגי-התראות (4 live via `notifMutedSections`) + שעות-שקט (core quiet-hours IS consumed at `notifications_screen.dart`) + חשיבות; chat שיחות-וחיווי/התראות-שיחה/פרטיות(live delete)/בוט. Per-row honesty for the dead toggles *inside* MIXED sections is deferred (the optional "full" D2 pass).
+- Guard: `test/settings_honesty_test.dart` pumps all 3 screens and asserts the subtitle renders.
+- Gate: central-verify green — analyze 0 · tests · build · conformance · required-tests.

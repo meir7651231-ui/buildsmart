@@ -321,6 +321,7 @@ class _MediaSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🎙️',
       title: 'מדיה ושמע',
+      underConstruction: true,
       children: [
         _RadioGroupRow<ChatMediaDownload>(
           label: 'הורדה אוטומטית',
@@ -445,6 +446,7 @@ class _BackupSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '💾',
       title: 'גיבוי וייצוא',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'גיבוי לענן',
@@ -486,6 +488,7 @@ class _LangSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🌐',
       title: 'שפה ותרגום',
+      underConstruction: true,
       children: [
         _RadioGroupRow<ChatLang>(
           label: 'שפת ממשק',
@@ -525,6 +528,7 @@ class _BusinessSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🏪',
       title: 'שיחות עסקיות',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'שעות פעילות עסקית',
@@ -650,6 +654,7 @@ class _ArchiveSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🗂️',
       title: 'ארכיון וניקיון',
+      underConstruction: true,
       children: [
         _SwitchRow(
           label: 'ארכוב אוטומטי',
@@ -701,11 +706,16 @@ class _SectionTile extends StatelessWidget {
     required this.emoji,
     required this.title,
     required this.children,
+    this.underConstruction = false,
   });
 
   final String emoji;
   final String title;
   final List<Widget> children;
+
+  // When true: this section's persisted toggles have no engine yet — show an
+  // honest "בבנייה" subtitle and suppress the active-count badge (Wave 8 / D2).
+  final bool underConstruction;
 
   // Count only functional rows — exclude "בבנייה" placeholders.
   int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
@@ -729,7 +739,7 @@ class _SectionTile extends StatelessWidget {
           leading: Text(emoji, style: const TextStyle(fontSize: 22)),
           // Count badge replaces the default expand chevron.
           trailing:
-              _activeCount == 0
+              (underConstruction || _activeCount == 0)
                   ? null
                   : Container(
                     padding: const EdgeInsets.symmetric(
@@ -757,6 +767,15 @@ class _SectionTile extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+          subtitle: underConstruction
+              ? const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Text(
+                    'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  ),
+                )
+              : null,
           children: children,
         ),
       ),
