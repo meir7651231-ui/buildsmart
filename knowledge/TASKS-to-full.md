@@ -81,6 +81,14 @@ PROJECTS(3) · ARCHIVED(3) · SITE_TREE(3) · STOCK_DEMO(11) · TASKS(5+steps) �
 - **T6.3** רefactor ה-providers לקרוא מה-Repository (לא ישירות מ-const).
 - ✅ DoD: כל data דרך Repository · swap-לשרת=drop-in (החלף-מימוש בלבד) · UI ללא-שינוי.
 
+# Track T7 — צ׳אט חוצה-פרסונות (אותו מסך אצל כולם · spec מלא: `SPEC-cross-persona-chat.md`)
+*דרישת-משתמש 07-06. דפוס: `sys_orders` מוחל על צ׳אט · **reuse ל-UI הקיים** `chats_screen` (לא לבנות מחדש).*
+- **CH-1** מנוע-צ׳אט משותף `state/sys_chat.dart` (StateNotifier + persist `bs.sys-chat.v1`, דפוס `worker_tasks_engine`). ✅ send חוצה-פרסונה + שורד-restart + test.
+- **CH-2** seed `data/chat_seeds.dart` (קבלן↔חנות/שליח/מנהל · חנות↔שליח · bot). ✅ זוג רואה משני-צדדים.
+- **CH-3** `ChatsScreen({persona})` — נתונים מ-`threadsFor(persona)` במקום const+bot. **reuse-UI.** ✅ אותו מסך לכל פרסונה.
+- **CH-4** חיווט: קבלן(טאב)/חנות(`sp-chat`)/שליח(`cp-chat`)/עובד/מנהל → `ChatsScreen(persona)`. ✅ בדיקה-חוצה: חנות→קבלן.
+- **CH-5** (אופ׳) קישור thread-להזמנה.
+
 ---
 
 ## אומדן (ready-to-split)
