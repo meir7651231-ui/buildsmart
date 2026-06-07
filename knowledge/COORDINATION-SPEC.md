@@ -34,7 +34,7 @@
 
 ## 🧩 מניעת-התנגשות (collision-avoidance)
 1. **קבצים-חדשים-בלבד** היכן שאפשר (T1/T2/T3/T6 = מסכים/repos חדשים → אפס-התנגשות).
-2. **קבצים-חמים** (`home_shell`·`role_picker`·`data/menu_trees`·`bs_dial`) → **hot-file claim** (gate 115) לפני עריכה · עורך-אחד-בכל-רגע. (`menu_dial_widget` **נמחק** 07-06.)
+2. **קבצים-חמים** (`home_shell`·`role_picker`·`data/menu_trees`·`data/sections`) → **hot-file claim** (gate 115) לפני עריכה · עורך-אחד-בכל-רגע. (`menu_dial_widget`+`bs_dial_widget` **נמחקו** 07-06.)
 3. **T4 (43 סטאבים)** = קבצים-קיימים → **partition מפורש**: chats↔camera↔settings↔store = סוכנים-שונים, אף-אחד לא נוגע בקובץ של השני.
 4. **claims-log** (`PLAN-contractor-completion.md` §תפיסות) — כל סוכן רושם track+SHA+סטטוס לפני שמתחיל.
 

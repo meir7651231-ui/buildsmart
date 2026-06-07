@@ -1,5 +1,7 @@
 # דשבורד-מנהל (מלא) + דשבורד-חנות (15900–17627)
 
+> ⚠️ **עדכון-Flutter 07-06:** הדוח מתאר ברובו את ה**פרוטוטייפ** + מודל ה-**BS-dial הישן**. **ב-Flutter כיום:** הפרסונות **נבנו כמסכים-מלאים** (`store_dashboard_screen`/`courier_dashboard_screen`/`worker_app_screen`/`manager_dashboard_screen`), נגישים מ-`role_picker` (לא BS-dial), **מבודדים** (אין מעבר בין-לוחות). **ה-`bs_dial_widget` הוסר** (`c05e1cb`). אזכורי "BS-dial toast-stubs" למטה = **היסטוריה**, לא המצב הנוכחי.
+
 ## מנהל — לוח-בקרה (16374–16521)
 `mgrAnimateCounters` · `mdMetric` · `mgrScrollProducts/Stores` · `mgrDoSearch`/`mgrSetCat`/`mgrShowUnavailable` · `mgrStoreDetail`/`mgrRevenueDetail` (drill) · `renderMgrProducts`/**`mgrToggleAvail`** (החלפת-זמינות-מוצר).
 

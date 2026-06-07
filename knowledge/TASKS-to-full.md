@@ -70,7 +70,7 @@ PROJECTS(3) · ARCHIVED(3) · SITE_TREE(3) · STOCK_DEMO(11) · TASKS(5+steps) �
 - **T4.chats** (`chats_screen`, 7) — שיחת-וידאו · הקלטת-קול · מצלמה · צרף-קובץ · אמוג׳י · פתיחת-שיחה · "עוד" → flow/honest-stub. ✅ אפס toast.
 - **T4.camera** (`camera_sheet`, 4) — פלאש · מצבים · גלריה → device/honest-stub.
 - **T4.settings** (chat/notif/store/catalog `_settings`, 16) — עריכת-תבניות · sync/ייצוא/גיבוי → inline/honest-stub.
-- **T4.store-dials** (`store_screen`/`bs_dial`/`search_dial`, 8) — פריטי-חנות · "סוג עוסק" · עלי-dial → תוכן.
+- **T4.store-dials** (`store_screen`/`search_dial`) — פריטי-חנות · "סוג עוסק" → תוכן. (`bs_dial` **נמחק 07-06** — עליו בטלים.)
 
 # Track T5 — פיצ'רי-פרסונה דחויים (proto/06 "adds beyond")
 - **T5.1 גיליון-ליקוט** (store) · **T5.2 פריט-חסר** (held-for-missing loop) · **T5.3 פיצול-משלוחים** · **T5.4 POD** (proof-of-delivery) · **T5.5 persistence** (shared_preferences להזמנות/state — **חלקי:** משימות-עובד כבר נשמרות, H2/`b4e2198`). מקור: proto/06 §2.5–§2.7. ✅ flows מלאים.
