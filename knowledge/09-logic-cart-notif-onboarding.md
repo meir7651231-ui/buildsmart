@@ -16,7 +16,7 @@
 - **`showScreen(id)`** (11635). זרימה: splash → welcome → (login / profession → `buildPrep`(רשימת-העמסה) → `prepProceed` → **`enterApp`** (11756)).
 - `pickProfession`/`backToProfession` · `currentStage`/`buildPrep`/`prepRow`/`prepChoice`.
 - **persona entry**: `renderStoreLogin`/`storeLogin`/`storeLogout` · **`enterRole(role)`** (11806) — מ-role-drawer: contractor/manager/store/courier/worker → המסך המתאים. `loginExisting`.
-- worker: `renderWorker`/`pickWorkerScreen`/`refreshTasks`. **`admTab`** (11890) — מעבר-טאב בדשבורד-admin (משותף ל-4 פרסונות).
+- worker: `renderWorker`/`pickWorkerScreen`/`refreshTasks`. **`admTab`** (11890) — מעבר-טאב בדשבורד-admin (משותף ל-4 פרסונות). ⚠️ **זה הפרוטוטייפ בלבד** — ב-Flutter הפרסונות = **מסכים נפרדים ומבודדים** (`role_picker`→push לכל פרסונה; **אין** דשבורד-admin משותף, אין מעבר בין-לוחות). אל תממש shared-admin.
 
 ---
 
