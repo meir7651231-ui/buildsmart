@@ -4,6 +4,12 @@ import 'package:buildsmart/data/lipskey_hotwater.dart';
 import 'package:buildsmart/logic/install_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// Collected failures across all 40 cases — asserted at the very end so a single
+/// run surfaces EVERY problem (a cross-system supply↔drainage leak, a missing
+/// intra-system path, or a stale SKU), not just the first. Before this gate the
+/// audit was print-only: a leak printed ✗✗✗ yet the suite passed.
+final _fails = <String>[];
+
 LipskeyCatalogProduct? _f(String s) {
   try { return kCompatCatalog.firstWhere((p) => p.sku == s); } catch (_) { return null; }
 }
@@ -25,18 +31,20 @@ String _flags(List<LipskeyCatalogProduct> path) {
 
 void _run(int n, String desc, String from, String to, {bool expectPath=true, int depth=7}) {
   final a=_f(from), b=_f(to);
-  if (a==null||b==null){ print('$n. ?? SKU חסר ($from/$to)'); return; }
+  if (a==null||b==null){ print('$n. ?? SKU חסר ($from/$to)'); _fails.add('$n. SKU חסר ($from/$to)'); return; }
   final path=findShortestPath(a,b,maxDepth:depth,tempC:20);
   final got = path!=null;
   final ok = got==expectPath;
   final mark = ok?'✓':'✗✗✗';
+  if (!ok) _fails.add('$n. $desc — ציפיתי ${expectPath?"נתיב":"אין-נתיב"}, קיבלתי ${got?"נתיב":"אין-נתיב"}');
   if (!got){ print('$n. $mark $desc → אין נתיב'); return; }
   print('$n. $mark $desc → ${path.length} | trans=${_trans(path)} | '
       '${path.map((p)=>p.nameHe).join(" → ")}${_flags(path)}');
 }
 
 void main() {
-  test('AUDIT 40', () {
+  test('AUDIT 40 — pathfinding + cross-system isolation gate', () {
+    _fails.clear();
     print('\n════════ אספקה תוך-מערכתי (1-12) ════════');
     _run(1,'קיסר → פקק נחושת ½"','779096G','77778071');
     _run(2,'אל-חוזר ½" → ברז מעבר פ.פ ½"','77004401','77777201');
@@ -84,5 +92,8 @@ void main() {
     _run(38,'אסלה → מסעף 45','77771006','116565');
     _run(39,'ברז כיור → אסלה','77777114','77771006');
     _run(40,'אסלה(2) → צינור 110','77771010','116113');
+
+    expect(_fails, isEmpty,
+        reason: 'AUDIT 40 — ${_fails.length} כשלים:\n${_fails.join("\n")}');
   });
 }
