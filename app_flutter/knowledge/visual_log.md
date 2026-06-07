@@ -4,6 +4,16 @@
 
 ---
 
+## v6.16 — פירוק ה-dial · גל 3a (נחיל 9×9: הגדרות נייטיב + גישה לכל פרסונה)
+
+**שינוי:** גל 3a (5 `fixer`-ים אמיתיים, edit-only) — לפי הכרעות בעל-המוצר:
+- **`CatalogSettingsScreen` הורחב** (לא מסך חדש): שורת '👤 הפרופיל שלי' **תמיד-גלויה** → ProfileScreen (גישת-אורח/רישום); + ערכת-נושא · 4 התראות · שפה — פורט מהדיאל עם provider-split זהה (theme/lang→`appSettings` · notif→`notifSettings` · text/motion/contrast→`catalogSettings`), מחרוזות verbatim מ-`settings_tree`.
+- **4 הדאשבורדים** (מנהל/חנות/שליח/עובד): 2 כפתורי-AppBar → 👤 פרופיל + ⚙️ הגדרות, **כל פרסונה בנפרד** (tooltips=Semantics, RTL).
+
+**אימות:** `central-verify` gate — analyze 0 · `flutter test` 1645 · build web · **conformance 7/7** · required-tests present. byte-verify (grep) של 5 ה-fixers ✅. המסכים שהשתנו מכוסים ב-render smoke-tests (`robustness_test` מרנדר `CatalogSettingsScreen`; dashboard-tests מרנדרים את ה-AppBar).
+
+---
+
 ## v6.16 — פירוק ה-dial · גל 2 (נחיל 9×9: כלי-בית מחוּוטים + a11y)
 
 **שינוי:** גל 2 של נחיל ה-9×9 (audit 7 עדשות → validate → fix) — פירוק ה-dial אל משטחים נייטיב:

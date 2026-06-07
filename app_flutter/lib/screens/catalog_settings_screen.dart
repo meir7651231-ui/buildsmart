@@ -1,4 +1,7 @@
+import 'package:buildsmart/screens/profile_screen.dart';
+import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -39,6 +42,10 @@ class CatalogSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: const [
+          _ProfileRow(),
+          _ThemeSection(),
+          _NotificationsSection(),
+          _RegionSection(),
           _SearchSection(),
           _DisplaySection(),
           _PricesSection(),
@@ -85,6 +92,149 @@ class CatalogSettingsScreen extends ConsumerWidget {
       await ref.read(catalogSettingsProvider.notifier).reset();
       if (context.mounted) showToast(context, 'הגדרות אופסו');
     }
+  }
+}
+
+// ─── 0. profile (account home — always visible, guest path) ──────────────────
+
+/// Tappable account row at the very top — opens [ProfileScreen] for everyone,
+/// including guests (so a guest can open the profile and register). Ported from
+/// the menu-dial ⚙️ → 👤 חשבון group, now surfaced as the settings home header.
+class _ProfileRow extends StatelessWidget {
+  const _ProfileRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      color: const Color(0xFFFFFFFF),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: const Text('👤', style: TextStyle(fontSize: 22)),
+        title: const Text(
+          'הפרופיל שלי',
+          style: TextStyle(
+            color: BsTokens.inkLight,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        trailing: const Icon(Icons.chevron_left, color: Colors.black54),
+        onTap: () => Navigator.of(context).push(ProfileScreen.route()),
+      ),
+    );
+  }
+}
+
+// ─── 0a. theme (ported from menu-dial — display → ערכת נושא) ──────────────────
+
+class _ThemeSection extends ConsumerWidget {
+  const _ThemeSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appSettingsProvider);
+    return _SectionTile(
+      emoji: '🖥️',
+      title: 'תצוגה',
+      children: [
+        _RadioGroupRow<BsTheme>(
+          label: 'ערכת נושא',
+          value: settings.theme,
+          options: const [
+            (value: BsTheme.light, label: 'בהיר'),
+            (value: BsTheme.dark, label: 'כהה'),
+          ],
+          onChanged:
+              (v) => ref
+                  .read(appSettingsProvider.notifier)
+                  .update((s) => s.copyWith(theme: v)),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── 0b. notifications (ported from menu-dial — 🔔 התראות) ────────────────────
+
+class _NotificationsSection extends ConsumerWidget {
+  const _NotificationsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notif = ref.watch(notifSettingsProvider);
+    return _SectionTile(
+      emoji: '🔔',
+      title: 'התראות',
+      children: [
+        _SwitchRow(
+          label: 'עדכוני משלוחים',
+          value: notif.typeShipments,
+          onChanged:
+              (v) => ref
+                  .read(notifSettingsProvider.notifier)
+                  .update((s) => s.copyWith(typeShipments: v)),
+        ),
+        _SwitchRow(
+          label: 'מבצעים והטבות',
+          value: notif.typeDeals,
+          onChanged:
+              (v) => ref
+                  .read(notifSettingsProvider.notifier)
+                  .update((s) => s.copyWith(typeDeals: v)),
+        ),
+        _SwitchRow(
+          label: 'התראות תקציב',
+          value: notif.typePriceDrops,
+          onChanged:
+              (v) => ref
+                  .read(notifSettingsProvider.notifier)
+                  .update((s) => s.copyWith(typePriceDrops: v)),
+        ),
+        _SwitchRow(
+          label: 'עדכוני הזמנות',
+          value: notif.typeOrders,
+          onChanged:
+              (v) => ref
+                  .read(notifSettingsProvider.notifier)
+                  .update((s) => s.copyWith(typeOrders: v)),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── 0c. region & language (ported from menu-dial — 🌐 אזור ושפה) ─────────────
+
+class _RegionSection extends ConsumerWidget {
+  const _RegionSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appSettingsProvider);
+    return _SectionTile(
+      emoji: '🌐',
+      title: 'אזור ושפה',
+      children: [
+        _RadioGroupRow<BsLang>(
+          label: 'שפה',
+          value: settings.lang,
+          options: const [
+            (value: BsLang.he, label: 'עברית'),
+            (value: BsLang.ar, label: 'العربية'),
+            (value: BsLang.en, label: 'English'),
+          ],
+          onChanged:
+              (v) => ref
+                  .read(appSettingsProvider.notifier)
+                  .update((s) => s.copyWith(lang: v)),
+        ),
+      ],
+    );
   }
 }
 

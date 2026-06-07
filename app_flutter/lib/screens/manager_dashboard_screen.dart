@@ -1,6 +1,8 @@
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
+import 'package:buildsmart/screens/catalog_settings_screen.dart';
+import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
@@ -75,6 +77,24 @@ class ManagerDashboardScreen extends ConsumerWidget {
             ],
           ),
           actions: [
+            // Each persona reaches profile + settings from its OWN dashboard
+            // (product-owner: separately per role). Two muted AppBar actions
+            // sit before the '‹ יציאה' exit; tooltips double as Semantics
+            // labels for a11y. RTL: actions lay out leading→trailing, so this
+            // reads profile · settings · exit from the right.
+            IconButton(
+              tooltip: 'פרופיל',
+              icon: const Icon(Icons.person_outline, color: BsTokens.mutedLight),
+              onPressed: () =>
+                  Navigator.of(context).push(ProfileScreen.route()),
+            ),
+            IconButton(
+              tooltip: 'הגדרות',
+              icon:
+                  const Icon(Icons.settings_outlined, color: BsTokens.mutedLight),
+              onPressed: () =>
+                  Navigator.of(context).push(CatalogSettingsScreen.route()),
+            ),
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
               child: const Text(

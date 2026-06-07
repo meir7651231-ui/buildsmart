@@ -1066,3 +1066,17 @@ mis-narration (it claimed "wired"). Now actually wired:
   Store in the dedup; string preserved ×3). Gate: central-verify green — analyze 0 · 1645 tests · build · conformance 7/7.
 - **Wave 3 (pending product-owner decisions):** delete `menu_dial_widget.dart` + hamburger + dial state; build a
   unified `SettingsScreen`; reconcile the projects dataset. Escalations in `_findings.md`.
+
+## Dial-distribution Wave 3a — native settings + per-persona access (9×9 fleet · product-owner decisions)
+Per product-owner: settings = extend the EXISTING `CatalogSettingsScreen` (not a new screen); profile+settings
+reachable from EACH persona dashboard (separately); guest reaches profile via an always-visible account row.
+
+| Surface | Wiring | Status |
+|---|---|---|
+| CatalogSettingsScreen · 👤 הפרופיל שלי (top, always visible) | → `ProfileScreen.route()` — guest-visible (register path) | ✅ |
+| CatalogSettingsScreen · ערכת נושא / התראות (×4) / שפה | ported from the dial; provider-split kept (theme·lang→`appSettings` · notif→`notifSettings` · text/motion/contrast→`catalogSettings`) — verbatim strings from `settings_tree.dart` | ✅ |
+| מנהל / חנות / שליח / עובד dashboards · AppBar | 👤 פרופיל→`ProfileScreen.route()` · ⚙️ הגדרות→`CatalogSettingsScreen.route()` (each persona, separately) | ✅ |
+
+- Gate: central-verify green — analyze 0 · 1645 tests · build · conformance 7/7 · required-tests present.
+- **Known follow-up (Wave 3b):** `CatalogSettingsScreen._confirmReset` resets only `catalogSettings` — extend to also reset `appSettings`+`notifSettings` so the ported controls reset too.
+- **Wave 3b (next, atomic):** delete `menu_dial_widget.dart` + the hamburger + dial state, now that the native surfaces are in place.

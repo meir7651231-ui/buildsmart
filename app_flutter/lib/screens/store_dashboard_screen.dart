@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/persona_picking_sheet.dart';
 import 'package:buildsmart/screens/persona_portal.dart';
+import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -117,6 +119,20 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             ),
           ),
           actions: [
+            // Each persona reaches profile + settings from its own dashboard.
+            IconButton(
+              tooltip: 'פרופיל',
+              icon: const Icon(Icons.person_outline, color: BsTokens.mutedLight),
+              onPressed: () =>
+                  Navigator.of(context).push(ProfileScreen.route()),
+            ),
+            IconButton(
+              tooltip: 'הגדרות',
+              icon:
+                  const Icon(Icons.settings_outlined, color: BsTokens.mutedLight),
+              onPressed: () =>
+                  Navigator.of(context).push(CatalogSettingsScreen.route()),
+            ),
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
               child: const Text(
