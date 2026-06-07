@@ -20,8 +20,8 @@ const Map<String, String> kPersonaDesc = {
 
 /// "מי אתה?" role picker — a top-anchored card of the 5 personas, ported from
 /// the prototype's role drawer (`toggleRoleDrawer`). Opened from the app-bar's
-/// top-right button. Tapping a role sets [activePersonaProvider] (the same
-/// state the BS dial drives off) and closes.
+/// top-right button. Tapping a role sets [activePersonaProvider] and routes to
+/// that persona's dashboard (or clears it, for contractor), then closes.
 Future<void> showRolePicker(BuildContext context) {
   return showGeneralDialog<void>(
     context: context,
@@ -152,10 +152,7 @@ class _RoleRow extends ConsumerWidget {
               Navigator.of(context).push(CourierDashboardScreen.route());
               return;
             }
-            // Any remaining role surfaces its existing BS-dial section tree.
-            ref.read(activePersonaProvider.notifier).state = persona.id;
-            ref.read(bsDrillPathProvider.notifier).state = const [];
-            ref.read(openDialProvider.notifier).state = OpenDial.bs;
+            // Every persona is handled above; close for any unhandled id.
             Navigator.of(context).pop();
           },
           child: Padding(

@@ -1090,4 +1090,14 @@ extended CatalogSettingsScreen · store project-picker · per-persona dashboard 
 - harness: removed `tabs:menu` + the `menuTabProvider`/`MenuTab` lines from `button:resetAllDials`.
 - `CatalogSettingsScreen._confirmReset` now resets catalog+app+notif (covers the Wave-3a ported controls); copy → 'כל ההגדרות…'.
 - **0 dangling code references** (byte-verified for all 8 dial symbols). Gate: central-verify green — analyze 0 · 1645 tests · build · conformance 7/7 · required-tests.
-- Note: the BS-dial (`OpenDial.bs`) + search-dial remain (separate concern; BS-dial reachability is a later cleanup).
+- Note: the search-dial (`OpenDial.search`) remains; the BS-dial was removed in Wave 4 (below).
+
+## Dial-distribution Wave 4 — BS-dial REMOVED + cleanups (9×9 fleet)
+The BS-dial (the old 5-persona radial FAB drill) is **gone**. A 4-persona parity audit (manager/store/courier/worker) confirmed every dial leaf is covered by the full dashboards — often as a SUPERSET (several dial leaves were placeholder 'בבנייה' toasts), all on the SAME engines.
+- **Deleted:** `lib/screens/bs_dial_widget.dart` (~1670 lines) + 4 `test/bs_dial_manager_*` tests (their target was the deleted widget; manager logic/UI stays covered by `orders_engine_test` · `manager_dashboard_test` · `manager_dashboard_screen_test`).
+- `dial_state.dart`: removed `OpenDial.bs` (+ dead `bsMode`), `bsDrillPathProvider`, the 7 `bs*LeafProvider`s + their `resetAllDials` lines (kept `activePersonaProvider`, `OpenDial.search`).
+- `home_shell.dart`: removed the `OpenDial.bs` render block + the `bs_dial_widget` import. `role_picker_sheet.dart`: removed the dead `OpenDial.bs` fallback (kept terminal pop + `activePersonaProvider`).
+- `store_/courier_stage_advance_engine_test.dart`: rewritten to drive the shared engine DIRECTLY (`storeAdvance`/`courierAdvance` → `ordersEngineProvider`) — order-flow coverage preserved without the widget. harness `buttons.dart`: dropped the BS test blocks.
+- Cleanups: stale `menu_dial_widget` comments (site_hub/app_settings) reworded; `CatalogSettingsScreen` title `הגדרות קטלוג` → `הגדרות`.
+- **0 BS-dial code references** remain (byte-verified). The legacy "👔 Manager BS-dial M1–M4" wiring docs below are now **historical** — the widget + its `bs_dial_manager_*` guards no longer exist.
+- Gate: central-verify green — analyze 0 · tests green · build · conformance 7/7 · required-tests.

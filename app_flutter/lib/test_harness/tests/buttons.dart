@@ -28,30 +28,6 @@ List<TestResult> testButtons(WidgetRef ref) {
       },
     ),
     _runOne(
-      id: 'button:openDial-toggle',
-      label: 'openDial — toggle bs/none',
-      area: 'דיאל',
-      run: () {
-        final checks = <TestCheck>[];
-        final before = ref.read(openDialProvider);
-        ref.read(openDialProvider.notifier).state = OpenDial.none;
-        ref.read(openDialProvider.notifier).state = OpenDial.bs;
-        checks.add(TestCheck(
-          name: 'BS נפתח',
-          pass: ref.read(openDialProvider) == OpenDial.bs,
-          got: ref.read(openDialProvider).name,
-        ));
-        ref.read(openDialProvider.notifier).state = OpenDial.none;
-        checks.add(TestCheck(
-          name: 'BS נסגר חזרה ל-none',
-          pass: ref.read(openDialProvider) == OpenDial.none,
-          got: ref.read(openDialProvider).name,
-        ));
-        ref.read(openDialProvider.notifier).state = before;
-        return checks;
-      },
-    ),
-    _runOne(
       id: 'button:activePersona',
       label: 'activePersona — מעבר בין דמויות',
       area: 'BS',
@@ -75,44 +51,6 @@ List<TestResult> testButtons(WidgetRef ref) {
           got: '${ref.read(activePersonaProvider)}',
         ));
         ref.read(activePersonaProvider.notifier).state = before;
-        return checks;
-      },
-    ),
-    _runOne(
-      id: 'button:bsDrillPath',
-      label: 'bsDrillPath — push / pop של נתיב',
-      area: 'BS',
-      run: () {
-        final checks = <TestCheck>[];
-        final before = ref.read(bsDrillPathProvider);
-        ref.read(bsDrillPathProvider.notifier).state = const [];
-        ref.read(bsDrillPathProvider.notifier).state = const ['A'];
-        checks.add(TestCheck(
-          name: 'push: גודל הנתיב 1',
-          pass: ref.read(bsDrillPathProvider).length == 1,
-          expected: '1',
-          got: '${ref.read(bsDrillPathProvider).length}',
-        ));
-        ref.read(bsDrillPathProvider.notifier).state = const ['A', 'B'];
-        checks.add(TestCheck(
-          name: 'push נוסף: גודל 2',
-          pass: ref.read(bsDrillPathProvider).length == 2,
-          expected: '2',
-          got: '${ref.read(bsDrillPathProvider).length}',
-        ));
-        ref.read(bsDrillPathProvider.notifier).state = const ['A'];
-        checks.add(TestCheck(
-          name: 'pop: חזרה ל-1',
-          pass: ref.read(bsDrillPathProvider).length == 1,
-          got: '${ref.read(bsDrillPathProvider).length}',
-        ));
-        ref.read(bsDrillPathProvider.notifier).state = const [];
-        checks.add(TestCheck(
-          name: 'pop נוסף: ריק',
-          pass: ref.read(bsDrillPathProvider).isEmpty,
-          got: '${ref.read(bsDrillPathProvider).length}',
-        ));
-        ref.read(bsDrillPathProvider.notifier).state = before;
         return checks;
       },
     ),
@@ -149,12 +87,10 @@ List<TestResult> testButtons(WidgetRef ref) {
         // Snapshot
         final bd = ref.read(openDialProvider);
         final ap = ref.read(activePersonaProvider);
-        final bp = ref.read(bsDrillPathProvider);
         final st = ref.read(searchToolProvider);
         // Make some state
-        ref.read(openDialProvider.notifier).state = OpenDial.bs;
+        ref.read(openDialProvider.notifier).state = OpenDial.search;
         ref.read(activePersonaProvider.notifier).state = 'manager';
-        ref.read(bsDrillPathProvider.notifier).state = const ['X'];
         ref.read(searchToolProvider.notifier).state = SearchTool.voice;
         // Reset
         resetAllDials(ref);
@@ -169,18 +105,12 @@ List<TestResult> testButtons(WidgetRef ref) {
           got: '${ref.read(activePersonaProvider)}',
         ));
         checks.add(TestCheck(
-          name: 'bsDrillPath → []',
-          pass: ref.read(bsDrillPathProvider).isEmpty,
-          got: '${ref.read(bsDrillPathProvider).length}',
-        ));
-        checks.add(TestCheck(
           name: 'searchTool → null',
           pass: ref.read(searchToolProvider) == null,
         ));
         // Restore
         ref.read(openDialProvider.notifier).state = bd;
         ref.read(activePersonaProvider.notifier).state = ap;
-        ref.read(bsDrillPathProvider.notifier).state = bp;
         ref.read(searchToolProvider.notifier).state = st;
         return checks;
       },

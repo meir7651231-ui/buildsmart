@@ -4,6 +4,14 @@
 
 ---
 
+## v6.16 — פירוק ה-dial · גל 4 (נחיל 9×9: הסרת BS-dial + ניקויים)
+
+**שינוי:** ה-BS-dial (חוגת 5 הפרסונות הישנה) **נמחק** — לאחר **parity-audit של 4 פרסונות** (מנהל/חנות/שליח/עובד) שאישר שכל עלה מכוסה במסכים-המלאים (לרוב superset; חלק מעלי-החוגה היו placeholder 'בבנייה' toasts), על אותם engines. נמחקו `bs_dial_widget.dart` (~1670 שורות) + 4 בדיקות `bs_dial_manager_*`; נוקו `dial_state` (OpenDial.bs + 8 providers) / `home_shell` / `role_picker` / harness; 2 בדיקות stage-advance נכתבו-מחדש ל-**engine-direct** (כיסוי order-flow נשמר). ניקויים נוספים: הערות `menu_dial_widget` מיושנות, כותרת `הגדרות קטלוג`→`הגדרות`.
+
+**אימות:** `central-verify` gate — analyze 0 · `flutter test` · build web · conformance 7/7 · required-tests. **0 הפניות-קוד ל-BS-dial** (byte-verified). ההסרה אומתה ע"י parity-audit *לפני* המחיקה (בקשת בעל-המוצר: "ווידוא מלא"); תמונת ה-BS-dial נשלחה לאישור לפני ההסרה.
+
+---
+
 ## v6.16 — פירוק ה-dial · גל 3b (נחיל 9×9: מחיקת ה-menu-dial · cutover)
 
 **שינוי:** ה-menu-dial (ה-FAB של 🏠/פרויקטים/הגדרות) **נמחק** — כל תוכנו חי נייטיב (⋮ קטלוג · פרופיל via שם · הגדרות-קטלוג מורחבות · בורר-חנות · גישה ב-4 דאשבורדים). נמחקו `menu_dial_widget.dart` + `menu_state.dart`; הוסרו ההמבורגר + render-הדיאל + dial-state (`OpenDial.menu`/`menuTabProvider`/`MenuTab`); נוקו harness (`tabs:menu` + `resetAllDials`); ה-reset הורחב (catalog+app+notif). BS-dial/search-dial נשארו (נפרד).

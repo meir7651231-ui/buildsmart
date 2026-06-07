@@ -6,7 +6,7 @@
 // shared shell, matching the existing courier/store-dashboard style (R: match
 // existing style). All strings + numbers are VERBATIM from the prototype (R6/R8).
 //
-// ENTRY POINTS (wired from menu_dial_widget `home-tasks` leaves — REPORT WIRE):
+// ENTRY POINTS (opened from the catalog ⋮ menu — `site_tasks` case in home_shell, calls openSiteHub):
 //   openSiteHub(ctx)        — the 10-tile grid (proto openSiteHub @19858).
 //   openSiteGantt           T2.1 site-gantt   📅  [L19889]
 //   openSiteSnagging        T2.2 site-snag    🔧  [L19913]

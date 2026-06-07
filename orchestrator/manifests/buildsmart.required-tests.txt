@@ -5,5 +5,7 @@ test/orders_engine_test.dart
 test/courier_stage_advance_engine_test.dart
 test/store_stage_advance_engine_test.dart
 test/acceptance_stage_test.dart
-test/bs_dial_manager_orders_test.dart
+# manager order-flow: bs_dial_manager_orders_test was removed with the BS-dial; the
+# live manager order tab + god-advance is now covered by the dashboard screen test.
+test/manager_dashboard_screen_test.dart
 test/worker_tasks_persistence_test.dart

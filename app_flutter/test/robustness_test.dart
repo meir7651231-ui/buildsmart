@@ -196,15 +196,4 @@ void main() {
     expect(t.takeException(), isNull);
     expect(find.byType(ListView), findsWidgets);
   });
-
-  testWidgets('20 · BS dial opens with 5 personas', (t) async {
-    await t.pumpWidget(const ProviderScope(child: BuildSmartApp()));
-    await t.pumpAndSettle();
-    shellContainer(t).read(openDialProvider.notifier).state = OpenDial.bs;
-    await t.pumpAndSettle();
-    expect(t.takeException(), isNull);
-    for (final p in const ['קבלן', 'מנהל המערכת', 'חנות ספק', 'שליח', 'עובד']) {
-      expect(find.text(p), findsWidgets, reason: 'persona $p missing');
-    }
-  });
 }

@@ -24,7 +24,7 @@ class CatalogSettingsScreen extends ConsumerWidget {
         backgroundColor: const Color(0xFFFFFFFF),
         elevation: 0,
         title: const Text(
-          'הגדרות קטלוג',
+          'הגדרות',
           style: TextStyle(
             color: BsTokens.inkLight,
             fontWeight: FontWeight.w700,

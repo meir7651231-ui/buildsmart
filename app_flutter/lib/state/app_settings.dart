@@ -53,23 +53,23 @@ class AppSettings {
   // DEAD — not consumed (v6.14); real write/read moved to CatalogSettings
   final bool reduceMotion;
   final BsLang lang;
-  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
+  // DEAD — not consumed (v6.14); placeholder field
   final BsUnits units;
-  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
+  // DEAD — not consumed (v6.14); placeholder field
   final BsCurrency currency;
-  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
+  // DEAD — not consumed (v6.14); placeholder field
   final BsHaulSize haul;
-  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
+  // DEAD — not consumed (v6.14); placeholder field
   final bool express;
   // DEAD — not consumed (v6.14); real write/read moved to CatalogSettings
   final bool highContrast;
-  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
+  // DEAD — not consumed (v6.14); placeholder field
   final bool twoFA;
-  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
+  // DEAD — not consumed (v6.14); placeholder field
   final bool biometric;
-  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
+  // DEAD — not consumed (v6.14); placeholder field
   final bool locationPerm;
-  // DEAD — not consumed (v6.14); leaf marked placeholder in menu_dial_widget
+  // DEAD — not consumed (v6.14); placeholder field
   final BsSessionTimeout sessionTimeout;
   // DEAD — not consumed (v6.14); real write/read moved to NotifSettings
   final bool notifShipments;

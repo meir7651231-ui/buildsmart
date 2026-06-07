@@ -1,6 +1,5 @@
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/ai_hub_screen.dart';
-import 'package:buildsmart/screens/bs_dial_widget.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
@@ -82,14 +81,6 @@ class HomeShell extends ConsumerWidget {
                 onTap: () => resetAllDials(ref),
                 child: Container(color: Colors.black.withValues(alpha: 0.45)),
               ),
-            ),
-
-          // BS dial — anchored to right (leading in RTL).
-          if (open == OpenDial.bs)
-            const Positioned(
-              right: BsTokens.space5,
-              bottom: BsTokens.space5,
-              child: BsDialWidget(),
             ),
 
           // Search dial — centered.
