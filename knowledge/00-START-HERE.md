@@ -116,6 +116,7 @@
 
 ## 7 · המשימות הבאות (סדר-סגירה — תחת LAW #0) ⭐
 *הבנייה גמורה. אלה משימות-סגירה, לפי סדר. push רק על "תדחוף".*
+> ⚡ **לפירוק-מיקרו (הכי-קל/מהיר לסוכן):** `MICRO-TASKS.md` — ~50 משימות-מיקרו, כל אחת DoD-בודד + ערך-מדויק מהמקור.
 1. **אימות-עומק + gate ירוק** ⭐ (הבא) — לכל hub (finance/site/tasks/budget/stock/scan/projects/rewards/ai/home): ודא תוכן **verbatim/math** מול §`[L#]` (מפת-הידע §4.5), הרץ `orchestrator/scripts/central-verify.sh app_flutter --assert orchestrator/manifests/buildsmart.conformance.txt --required-tests orchestrator/manifests/buildsmart.required-tests.txt`, תקן עד ירוק.
 2. **server-ready T6.2/3** — העבר providers לקרוא דרך `data/repositories/` (interfaces T6.1 כבר קיימים).
 3. **סטאבים-היקפיים (T4)** — סיים chats/camera/settings (grep-live; מצטמק).
