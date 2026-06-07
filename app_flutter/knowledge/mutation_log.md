@@ -17,6 +17,26 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## install_engine — גלוון מבוסס-קבוצות (E1) + ראש/מזלף-מקלחת טרמינל (E8) — 2026-06-07
+
+- **קובץ:** `test/install_engine_b5_test.dart` (חדש, 8 בדיקות).
+- **מה עושה:** (E1) נועל ש-`_galvanicallyDissimilar` דורש רקורד-דיאלקטרי רק בין
+  קבוצות-מתכת שונות (נחושת/פליז × פלדה/נירוסטה) — דרך `lineComplianceChecklist`;
+  (E8) נועל ש-`flowRole` של ראש-מקלחת/מזלף = fixture (קצה), זרוע/מערבל = connector.
+- תקלה שהוזרקה #1 (E1): `_galvanicallyDissimilar` → `copperGroup.length>=2` (הסרת בדיקת iron-group).
+- תוצאה: אדומה ✅ — כל 4 בדיקות-E1 נכשלו: פלדה↔פליז, נירוסטה↔פליז, נחושת↔פלדה
+  (לא דרשו דיאלקטרי), ונחושת↔פליז (דרש דיאלקטרי בטעות = over-flag).
+- תקלה שהוזרקה #2 (E8): הסרת `'ראשי מקלחת','מזלפי יד'` מ-`_terminalCats`.
+- תוצאה: אדומה ✅ — ראש + מזלף חזרו ל-connector (2 בדיקות נכשלו); זרוע + מערבל
+  נשארו connector (עברו) — מאשר שהזרוע/מערבל לא הושפעו.
+- ביטול שתיהן → ירוק ✅ (B5 + auto_compliance + install_engine_safety עברו).
+- **תיקון-סדר נוסף (חשף ע"י E1):** `_autoAddCompliance` חישב `mats` *לפני* הזרקת
+  מיכל-ההתפשטות מ-פלדה → לא הוסיף רקורד-דיאלקטרי לזיווג פליז↔פלדה שהוא-עצמו יצר.
+  עכשיו מחושב `matsFinal` על ה-items הסופיים → הדיאלקטרי מתווסף. מאומת ע"י
+  `criticalOpen(60)==0` ב-install_plan_coverage/full_compliance_audit/engine_harness
+  (היו אדומים "got 1" לפני התיקון) + בדיקת "hot line auto-adds dielectric".
+- מסקנה: שלושה תיקונים load-bearing (גלוון, מקלחת, סדר-הדיאלקטרי); אפס over-flag.
+
 ## install_engine — מכשירי-קצה: אחד לקו, אין קצה→קצה (B4) — 2026-06-07
 
 - **קובץ:** `test/install_engine_safety_test.dart` (קבוצה: terminal devices D1/D3/D5/D6).

@@ -108,6 +108,20 @@ String connectionMethodLabel(LipskeyCatalogProduct a, LipskeyCatalogProduct b) {
   return '';
 }
 
+/// Galvanic corrosion needs a dielectric union only between DISSIMILAR metal
+/// GROUPS: a copper-group metal (נחושת/פליז) joined to an iron-group metal
+/// (פלדה/נירוסטה). Same-group joints (copper↔brass) are galvanically benign and
+/// must NOT be flagged. Returns true only when BOTH groups are present in [mats].
+/// (Fixes the old predicate that required copper specifically — so it missed
+/// brass↔steel — and omitted stainless entirely.)
+bool _galvanicallyDissimilar(Iterable<String> mats) {
+  const copperGroup = {'נחושת', 'פליז'};
+  const ironGroup = {'פלדה', 'נירוסטה'};
+  final s = mats.toSet();
+  return s.intersection(copperGroup).isNotEmpty &&
+      s.intersection(ironGroup).isNotEmpty;
+}
+
 /// Detects the safety/durability components a hot line requires and whether the
 /// current chain includes them — turning expert review into an automatic gate.
 List<LineCheck> lineComplianceChecklist(
@@ -120,9 +134,9 @@ List<LineCheck> lineComplianceChecklist(
   final hot    = tempC >= _kHotThresholdC;
   final hasPex = mats.contains('PEX');
   final recirc = skus.contains('HW-PUMP-25') || skus.contains('HW-TEE-RECIRC');
-  // Galvanic risk: copper joined to ANY other metal (brass/steel) — conservative.
-  final metals = mats.where((m) => m == 'נחושת' || m == 'פליז' || m == 'פלדה');
-  final dissimilar = mats.contains('נחושת') && metals.toSet().length >= 2;
+  // Galvanic risk: a copper-group metal joined to an iron-group metal
+  // (see _galvanicallyDissimilar) — catches brass↔steel and any↔stainless.
+  final dissimilar = _galvanicallyDissimilar(mats);
   // Count BOTH synthetic and real catalog ball valves as shutoffs.
   final isolationCount = chain
       .where((p) =>
@@ -278,16 +292,19 @@ const _structuralCats = {
 /// "fixtures are endpoint-only" machinery covers them too. They are NOT in
 /// _fixtureCats because productSystems() must still pin them to one system
 /// (drainage taps→drainage, supply taps→supply), not span both.
-/// Deliberately EXCLUDED (they chain legitimately, mixer→arm→head): the shower
-/// categories ברזי מקלחת / ראשי מקלחת / מזלפי יד / זרועות דוש — handled separately.
+/// Shower chain (E8): a HEAD (ראשי מקלחת) and a HAND-SPRAYER (מזלפי יד) are
+/// dead-end spray OUTLETS — terminals. But the ARM (זרועות דוש) and the MIXER
+/// (ברזי מקלחת) are in-line: the legitimate line is mixer→arm→head, so they stay
+/// connectors (otherwise mixer+head = two terminals would block the real chain).
 /// Deliberately EXCLUDED (genuinely in-line): ברזי מעבר (ball/stop valves),
 /// אל חזור (check valves — directional, handled by the flow-direction model).
 const _terminalCats = {
   // drainage terminals (one per fixture; the body is not a through-fitting)
   'סיפונים', 'מחסומים גלויים', 'מחסומי רצפה', 'מאספי רצפה',
   'תעלות ניקוז', 'ניקוז גג', 'מאספים וקולטים',
-  // supply draw-off taps (terminal — the line ends at the tap)
+  // supply draw-off taps + shower spray outlets (terminal — the line ends here)
   'ברזי מטבח', 'ברזי כיור', 'ברזי קיר', 'ברזי אמבטיה', 'ברזי גן', 'ברזי דלי',
+  'ראשי מקלחת', 'מזלפי יד',
 };
 
 const _allSystems = {WaterSystem.supply, WaterSystem.drainage};
@@ -960,11 +977,13 @@ void _autoAddCompliance(List<LipskeyCatalogProduct> items,
     }
   }
 
-  // Dielectric union when copper meets brass or steel.
-  final metals = mats
-      .where((m) => m == 'נחושת' || m == 'פליז' || m == 'פלדה')
-      .toSet();
-  if (mats.contains('נחושת') && metals.length >= 2) {
+  // Dielectric union between dissimilar metal groups (copper/brass ↔ steel/
+  // stainless) — same predicate as the checklist (see _galvanicallyDissimilar).
+  // Recompute over the FINAL items: the auto-added STEEL expansion tank itself
+  // creates a brass/copper↔steel couple, so the dielectric must be added for it
+  // too (the top-of-function `mats` predates these insertions).
+  final matsFinal = items.map(productMaterial).whereType<String>().toSet();
+  if (_galvanicallyDissimilar(matsFinal)) {
     var seamPos = items.length - 1;
     for (var i = 0; i < items.length - 1; i++) {
       if (productMaterial(items[i]) != productMaterial(items[i + 1])) {

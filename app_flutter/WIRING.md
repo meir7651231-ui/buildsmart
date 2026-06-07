@@ -493,6 +493,16 @@ for check/backflow valves is the next step (B5). Locked by
 `install_engine_safety_test`; `audit40` cases 3/15/23/35/39 — which had encoded the
 two-terminal bug as *valid* — were flipped to expect no-path.
 
+**Engine round-2 fixes (B5):** (E1) the galvanic dielectric requirement now fires
+between dissimilar metal GROUPS — copper-group (נחושת/פליז) joined to iron-group
+(פלדה/נירוסטה) — via `_galvanicallyDissimilar`, used by both `lineComplianceChecklist`
+and `_autoAddCompliance`. The old predicate required copper specifically (missed
+brass↔steel) and omitted stainless; benign copper↔brass is no longer over-flagged.
+(E8) shower spray OUTLETS — `ראשי מקלחת` (heads) + `מזלפי יד` (hand-sprayers) — are
+now `_terminalCats` (endpoint-only), while `זרועות דוש` (arms) + `ברזי מקלחת`
+(mixers) stay connectors so the real mixer→arm→head chain still builds. Locked by
+`install_engine_b5_test`.
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)
