@@ -1549,6 +1549,11 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
   // Vertical rise from inlet to outlet (m). Used by the pressure-drop math
   // to account for static head ρgh — every metre of climb costs ≈ 0.1 bar.
   double _verticalRise = 0.0;
+  // Drainage geometry (P3.9): horizontal run + vertical drop feed
+  // checkDrainageSlope — ת"י 1205 wants ≥ 2% fall so waste doesn't pool.
+  // Defaults 3 m run / 0.06 m drop = exactly 2% (the minimum).
+  double _drainRun = 3.0;
+  double _drainDrop = 0.06;
 
   String _zoneDisplayLabel(String key) => _zoneAliases[key] ?? key;
 
@@ -1721,6 +1726,9 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     final anchorSkus = widget.anchorSkus;
     final branches = widget.branches;
     final outlets = widget.outlets;
+    // Supply lines get the pressure-drop check (static head); drainage lines get
+    // the ת"י-1205 slope check instead — different physics per system (P3.9).
+    final isSupply = lineIsSupply(plan.items);
     final ok = plan.isComplete;
     final overCapacity = branches > 0 && outlets > 0 && branches > outlets;
     final checklist = lineComplianceChecklist(
@@ -2027,8 +2035,10 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     ]),
                   );
                 }),
-                // ── Vertical-rise input (feeds the pressure-drop math) ─
-                Padding(
+                // ── Vertical-rise input — supply lines only (feeds the
+                //    pressure-drop math; drainage uses the slope block below) ─
+                if (isSupply)
+                  Padding(
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
                   child: Row(children: [
                     const Icon(Icons.arrow_upward, color: _mute, size: 14),
@@ -2130,8 +2140,9 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     ),
                   );
                 }),
-                // ── Pressure-drop estimate ─────────────────────────────
-                Builder(builder: (_) {
+                // ── Pressure-drop estimate — supply lines only ─────────
+                if (isSupply)
+                  Builder(builder: (_) {
                   final pd = estimatePressureDrop(
                     plan.items,
                     pipeLengthMeters:
@@ -2197,6 +2208,125 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                     ),
                   );
                 }),
+                // ── Drainage slope check — drainage lines only (ת"י 1205, P3.9).
+                //    Replaces the supply pressure block: gravity lines have no
+                //    pressure, they need a ≥2% fall so waste doesn't pool. ─────
+                if (!isSupply)
+                  Builder(builder: (_) {
+                    final res = checkDrainageSlope(
+                      horizontalRunMeters: _drainRun,
+                      verticalDropMeters: _drainDrop,
+                    );
+                    final slope = res?.slopePercent ?? 0;
+                    final slopeOk = res?.ok ?? false;
+                    final color = slopeOk
+                        ? const Color(0xFF15803D)
+                        : const Color(0xFFF59E0B);
+                    return Container(
+                      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: slopeOk
+                            ? const Color(0xFFE8F5E9)
+                            : const Color(0xFFFFF8E1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: color.withOpacity(0.5)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(children: [
+                            Icon(slopeOk
+                                ? Icons.trending_down
+                                : Icons.warning_amber,
+                                color: color, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'שיפוע ניקוז: ${slope.toStringAsFixed(1)}%',
+                                style: TextStyle(
+                                    color: color,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                            const Text('מינ׳ 2% · ת"י 1205',
+                                style: TextStyle(
+                                    color: _mute,
+                                    fontSize: 10,
+                                    fontFamily: 'monospace')),
+                          ]),
+                          const SizedBox(height: 8),
+                          Row(children: [
+                            const Icon(Icons.straighten,
+                                color: _mute, size: 14),
+                            const SizedBox(width: 6),
+                            const Text('אורך אופקי:',
+                                style: TextStyle(color: _mute, fontSize: 11)),
+                            Expanded(
+                              child: Slider(
+                                value: _drainRun.clamp(0.5, 20),
+                                min: 0.5,
+                                max: 20,
+                                divisions: 39,
+                                activeColor: _drain,
+                                onChanged: (v) =>
+                                    setState(() => _drainRun = v),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 52,
+                              child: Text('${_drainRun.toStringAsFixed(1)} מ׳',
+                                  textAlign: TextAlign.end,
+                                  style: const TextStyle(
+                                      color: _ink,
+                                      fontSize: 11,
+                                      fontFamily: 'monospace',
+                                      fontWeight: FontWeight.w700)),
+                            ),
+                          ]),
+                          Row(children: [
+                            const Icon(Icons.height, color: _mute, size: 14),
+                            const SizedBox(width: 6),
+                            const Text('מפל אנכי:',
+                                style: TextStyle(color: _mute, fontSize: 11)),
+                            Expanded(
+                              child: Slider(
+                                value: (_drainDrop * 100).clamp(0, 100),
+                                min: 0,
+                                max: 100,
+                                divisions: 100,
+                                activeColor: _drain,
+                                onChanged: (v) =>
+                                    setState(() => _drainDrop = v / 100),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 52,
+                              child: Text(
+                                  '${(_drainDrop * 100).toStringAsFixed(0)} ס״מ',
+                                  textAlign: TextAlign.end,
+                                  style: const TextStyle(
+                                      color: _ink,
+                                      fontSize: 11,
+                                      fontFamily: 'monospace',
+                                      fontWeight: FontWeight.w700)),
+                            ),
+                          ]),
+                          if (res != null) ...[
+                            const SizedBox(height: 4),
+                            Text(res.message,
+                                style: TextStyle(
+                                    color: slopeOk
+                                        ? const Color(0xFF15803D)
+                                        : const Color(0xFFB45309),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ],
+                      ),
+                    );
+                  }),
                 // ── Installation kit (tools & sealants for this chain) ──
                 Builder(builder: (_) {
                   final kit = recommendedKitFor(plan.items);

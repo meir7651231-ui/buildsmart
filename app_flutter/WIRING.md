@@ -467,6 +467,15 @@ catalog taxonomy (`'מחלקים'` / `productType 'מחלק'`), not by raw end-c
 tee/מסעף with 3 same-size ends (e.g. `116565`) is no longer mis-read as a
 3-outlet manifold (now 0). Real manifolds keep their outlet counts (4/2/4).
 
+**Drainage slope (P3.9):** the BOM sheet showed the supply-only "עלייה אנכית /
+ירידת לחץ" block for EVERY line. Now it's gated on `lineIsSupply(plan.items)`:
+a supply line keeps the pressure-drop check; a **drainage** line instead shows a
+slope block — "אורך אופקי" + "מפל אנכי" sliders feeding the existing
+`checkDrainageSlope` (pressure_drop) → "שיפוע ניקוז X%" with the ת"י-1205 verdict
+(green ≥ 2%, amber below). No invented values — the function and the 2% standard
+already existed (covered by `pressure_drop_advanced_test`); P3.9 only wires them
+into the drainage UI.
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)
