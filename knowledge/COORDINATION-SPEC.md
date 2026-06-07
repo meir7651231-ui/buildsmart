@@ -12,7 +12,7 @@
 | Track | סוכן | קבצים | הערה |
 |---|---|---|---|
 | **B0** תשתית-data | **קטלגן** (data) | `data/*_seeds.dart` | ראשון · חוסם |
-| **T10** טריגר | **סדרן/מקבץ** | `home_shell` (**hot-file claim!**) | ראשון · חוסם נגישות |
+| ~~**T10**~~ טריגר | — | — | ❌ **מבוטל** (דיאל הוסר 07-06; גישה נייטיב) |
 | **T6** server-ready | **מקבץ-A** (ארכיטקטורה) | `data/repositories/` (קבצים-חדשים) | מוקדם · פאונדציה |
 | **T1** פיננסים(10) | **מקבץ-B** | `screens/finance_hub_*` (חדשים) | מקבילי |
 | **T2** אתר(10) | **מקבץ-C** | `screens/site_hub_*` (חדשים) | מקבילי |
@@ -34,7 +34,7 @@
 
 ## 🧩 מניעת-התנגשות (collision-avoidance)
 1. **קבצים-חדשים-בלבד** היכן שאפשר (T1/T2/T3/T6 = מסכים/repos חדשים → אפס-התנגשות).
-2. **קבצים-חמים** (`home_shell`·`role_picker`·`sections`·`menu_dial`) → **hot-file claim** (gate 115) לפני עריכה · עורך-אחד-בכל-רגע.
+2. **קבצים-חמים** (`home_shell`·`role_picker`·`data/menu_trees`·`bs_dial`) → **hot-file claim** (gate 115) לפני עריכה · עורך-אחד-בכל-רגע. (`menu_dial_widget` **נמחק** 07-06.)
 3. **T4 (43 סטאבים)** = קבצים-קיימים → **partition מפורש**: chats↔camera↔settings↔store = סוכנים-שונים, אף-אחד לא נוגע בקובץ של השני.
 4. **claims-log** (`PLAN-contractor-completion.md` §תפיסות) — כל סוכן רושם track+SHA+סטטוס לפני שמתחיל.
 

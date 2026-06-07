@@ -16,7 +16,7 @@
 | **T4** | 43 סטאבים-היקפיים | chats/camera/settings (מחולק) | — |
 | **T5** | פיצ'רי-פרסונה דחויים | store/courier screens | — |
 | **T6** | server-ready (Repository) | `data/repositories/` | פאונדציה |
-| **T10** | טריגר-תפריט | `home_shell` | חוסם 1–3 (נגישות) |
+| ~~**T10**~~ | ~~טריגר-תפריט~~ — **מבוטל** (הדיאל הוסר 07-06) | — | ✅ לא-נדרש |
 
 ---
 
@@ -25,8 +25,8 @@
 PROJECTS(3) · ARCHIVED(3) · SITE_TREE(3) · STOCK_DEMO(11) · TASKS(5+steps) · WORK_LOG(2) · GANTT_TASKS(6) · snagList(2) · inspections(2) · subcontractors(3) · approvalQueue(2) · PAYMENT_TERMS(4) · FX_RATES · BUILD_INDEX · projectBudget+budgetCategories(4) · DEMO_HISTORY(2).
 ✅ DoD: `phaseb_seeds_test` ירוק · math-helpers (pct=66/ROI×1.42/index+6.10%/weights) + test.
 
-## T10 · טריגר-תפריט — ⏱️ ~2ש׳ (חוסם נגישות T1–T3)
-🎯 הצב `OpenDial.menu` ממחווה/פקד → 41 העלים נגישים. ✅ התפריט נפתח.
+## ~~T10 · טריגר-תפריט~~ — ❌ **מבוטל (07-06)**
+ה-menu-dial **הוסר** (`b9737cf`). אין טריגר; הכלים נגישים נייטיב (תפריט-בית/חנות/פרופיל/projects — ר׳ `00-START-HERE` §4.6).
 
 ---
 
