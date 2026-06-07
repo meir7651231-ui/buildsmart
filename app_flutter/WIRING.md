@@ -457,6 +457,16 @@ tables that could silently drift. `_autoAddCompliance.insertAt` guards
 no longer throws a `clamp(1, 0)` ArgumentError. Both locked by
 `install_engine_hardening_test`.
 
+**Engine safety (B2):** (P2.4) `_findBridge` (the name-inference fallback used
+when the verified BFS finds no path) now refuses to bridge across plumbing
+systems — `productSystems(from) ∩ productSystems(to)` must be non-empty, matching
+the BFS's own isolation. A probe found 0/3600 reachable cross-system bridges
+today, so this is defence-in-depth; `install_engine_safety_test` enforces the
+invariant going forward. (P2.5) `manifoldOutlets` classifies a manifold by the
+catalog taxonomy (`'מחלקים'` / `productType 'מחלק'`), not by raw end-count — a
+tee/מסעף with 3 same-size ends (e.g. `116565`) is no longer mis-read as a
+3-outlet manifold (now 0). Real manifolds keep their outlet counts (4/2/4).
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)

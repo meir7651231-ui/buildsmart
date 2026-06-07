@@ -962,6 +962,14 @@ LipskeyCatalogProduct? _findBridge(
     LipskeyCatalogProduct from,
     LipskeyCatalogProduct to,
     int tempC) {
+  // Fail-closed across plumbing systems. The verified BFS rejects supply↔drainage
+  // via system-intersection (sysAcc, see findShortestPath); this name-inference
+  // fallback must match it — otherwise a spec-less fitting that merely size-matches
+  // both a supply and a drainage product could silently bridge them. A live probe
+  // found 0/3600 reachable cases today, so this is defence-in-depth (and an
+  // invariant locked by install_engine_safety_test), not a fix for an active leak.
+  final shared = productSystems(from).intersection(productSystems(to));
+  if (shared.isEmpty) return null;
   LipskeyCatalogProduct? best;
   bool bestVerified = false;
   for (final p in kCompatCatalog) {
@@ -1249,6 +1257,11 @@ InstallationPlan buildInstallation(
 /// How many identical outlets a manifold-type product exposes (e.g. a
 /// "מחלק 1\" 4 יציאות" has four ½" outlets). 0 when the product isn't a manifold.
 int manifoldOutlets(LipskeyCatalogProduct p) {
+  // Only a real distribution manifold ("מחלק") exposes parallel outlets. A tee /
+  // מסעף also has 3+ same-size ends but is a single branch off a run, not a
+  // multi-outlet manifold — classify by the catalog taxonomy, not raw end-count
+  // (e.g. 116565 "מסעף 45° תבריג כפול" has 3×DN50 ends but must NOT be a manifold).
+  if (p.productType != 'מחלק' && p.categoryHe != 'מחלקים') return 0;
   final spec = kVerifiedSpecs[p.sku];
   if (spec == null || spec.ends.length < 3) return 0;
   final counts = <String, int>{};

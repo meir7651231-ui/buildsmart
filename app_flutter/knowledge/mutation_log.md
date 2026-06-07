@@ -17,6 +17,25 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## install_engine safety — _findBridge חוצה-מערכת (P2.4) + manifoldOutlets טקסונומיה (P2.5) — 2026-06-07
+
+- **קובץ:** `test/install_engine_safety_test.dart` (חדש, 4 בדיקות).
+- **מה עושה:** נועל (P2.4) ש-`buildInstallation` לעולם לא מגשר supply↔drainage —
+  זוג חוצה-מערכת חייב לצאת כ-gap, לא כגשר; ו-(P2.5) ש-`manifoldOutlets` מסווג
+  מחלק לפי טקסונומיית-הקטלוג (`'מחלקים'`), לא לפי ספירת-קצוות.
+- תקלה שהוזרקה #1 (P2.5, שער-טקסונומיה): ניטרול
+  `if (p.productType != 'מחלק' && p.categoryHe != 'מחלקים') return 0;` ב-`manifoldOutlets`.
+- תוצאה: אדומה ✅ — "tee 116565 NOT a manifold" נכשל (החזיר 3 במקום 0).
+  מחלקים אמיתיים (4/2/4) + צינור (0) נשארו ירוקים — הניטרול לא נוגע בהם.
+- תקלה שהוזרקה #2 (P2.4, שתי שכבות-ההגנה): ניטרול גם ה-guard
+  `if (shared.isEmpty) return null;` וגם פילטר ה-`canConnect` ב-`_findBridge`.
+- תוצאה: אדומה ✅ — "never bridges supply↔drainage" נכשל עם **1600 גשרים
+  חוצי-מערכת**. החזרת שכבה אחת בלבד → ירוק.
+- ביטול שתיהן → ירוק ✅ — `+4 All tests passed`.
+- מסקנה: P2.5 — שער אמיתי שתופס היפוך-סיווג (tee↔מחלק). P2.4 — הבדיקה אוכפת
+  end-to-end את אי-חציית-המערכת; ה-guard הוא שכבת-בטיחות יתירה התואמת את ה-BFS
+  (probe: 0/3600 ניתנים-להגעה היום, אז הגנה-בעומק ולא תיקון-דליפה-חי).
+
 ## install_engine hardening — kBspInchToMm + insertAt guard (B1) — 2026-06-07
 
 - **קובץ:** `test/install_engine_hardening_test.dart` (חדש, 3 בדיקות).
