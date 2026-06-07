@@ -32,7 +32,7 @@ void main() {
             '${unexpected.join("\n")}');
   });
 
-  test(timeout: const Timeout(Duration(minutes:3)), 'B. סימטריה דו-כיוונית (מדגם 200)', () {
+  test(timeout: const Timeout(Duration(minutes:3)), 'B. סימטריה דו-כיוונית (מדגם 40)', () {
     final rnd = Random(7);
     var asym = 0;
     for (var i = 0; i < 40; i++) {
@@ -42,7 +42,7 @@ void main() {
       final ba = findShortestPath(b, a, maxDepth: 5) != null;
       if (ab != ba) { asym++; if (asym<=10) print('   ⚠️ אסימטרי: ${a.sku}↔${b.sku} ($ab/$ba)'); }
     }
-    print('\n[B] אסימטריות: $asym/200');
+    print('\n[B] אסימטריות: $asym/40');
     expect(asym, 0);
   });
 
@@ -62,7 +62,7 @@ void main() {
     expect(leaks, 0);
   });
 
-  test(timeout: const Timeout(Duration(minutes:3)), 'D. איכות מחברים במדגם תוך-מערכתי (300)', () {
+  test(timeout: const Timeout(Duration(minutes:3)), 'D. איכות מחברים במדגם תוך-מערכתי (40)', () {
     final rnd = Random(13);
     var built = 0, badQ = 0;
     for (var i = 0; i < 40; i++) {
