@@ -546,6 +546,17 @@ the steel expansion tank — already shipped in B5; TMTV line-sizing was evaluat
 and dropped as a practical no-op since every fixture line carries a ½″≈DN15 outlet,
 and the PRV has no DN variants to size.)
 
+**Directional-valve orientation warning (B11/D4):** check valves (אל-חזור/אלחוזר)
+and sewage backflow preventers (category `אל חזור`) are one-way devices, but the
+model stores their two ends identically — so the undirected engine cannot reject a
+backwards mount (`deep_audit` even asserts path symmetry). The checklist now WARNS
+("כיוון התקנה — שסתום חד-כיווני", warning severity) when a line contains such a
+device, surfacing the orientation hazard for manual verification. This is the safe
+increment; full orientation ENFORCEMENT (a per-end inlet/outlet `port` on
+ConnectorEnd + a direction-aware search + relaxing the symmetry invariant) is a
+larger architectural change deferred for design review. Locked by
+`install_engine_b11_test`.
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)

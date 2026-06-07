@@ -122,6 +122,17 @@ bool _galvanicallyDissimilar(Iterable<String> mats) {
       s.intersection(ironGroup).isNotEmpty;
 }
 
+/// A one-way (directional) flow device — a copper check valve (אל-חזור / אלחוזר,
+/// flap or spring) or a sewage backflow preventer (category 'אל חזור'). These
+/// must be installed facing the flow; the engine models their two ends as
+/// identical (so it cannot yet reject a backwards orientation), so a line that
+/// contains one is flagged for manual orientation verification.
+bool _isDirectionalDevice(LipskeyCatalogProduct p) {
+  if (p.categoryHe == 'אל חזור') return true;
+  final n = p.nameHe.replaceAll('-', '').replaceAll(' ', '');
+  return n.contains('אלחזור') || n.contains('אלחוזר');
+}
+
 /// Detects the safety/durability components a hot line requires and whether the
 /// current chain includes them — turning expert review into an automatic gate.
 List<LineCheck> lineComplianceChecklist(
@@ -173,6 +184,9 @@ List<LineCheck> lineComplianceChecklist(
   // exists in the catalog yet, so this surfaces the requirement (warning) instead
   // of silently passing — it cannot be auto-satisfied (no SKU to insert).
   final hasGardenOutlet = chain.any((p) => p.categoryHe == 'ברזי גן');
+  // A directional valve (check / sewage-backflow) must face the flow; the model
+  // stores its two ends identically, so it can't yet reject a backwards mount.
+  final hasDirectional = chain.any(_isDirectionalDevice);
 
   return [
     if (isSupply)
@@ -187,6 +201,11 @@ List<LineCheck> lineComplianceChecklist(
       LineCheck('שובר-ואקום למניעת זרימה-חוזרת', false,
           'ברז-גן/חיבור-צינור דורש הגנה מפני זרימה-חוזרת למי-שתייה — '
           'אין מק"ט בקטלוג, יש לספק בנפרד',
+          severity: CheckSeverity.warning),
+    if (hasDirectional)
+      LineCheck('כיוון התקנה — שסתום חד-כיווני', false,
+          'הקו כולל אל-חזור/מונע-זרימה-חוזרת — ודא התקנה בכיוון-הזרימה הנכון '
+          '(אוריינטציה עדיין אינה מאומתת אוטומטית)',
           severity: CheckSeverity.warning),
     if (recirc) ...[
       LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}),

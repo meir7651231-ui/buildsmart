@@ -17,6 +17,19 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## install_engine — אזהרת כיווניות לשסתום חד-כיווני (D4/B11) — 2026-06-08
+
+- **קובץ:** `test/install_engine_b11_test.dart` (חדש).
+- **מה עושה:** נועל ש-`_isDirectionalDevice` מזהה אל-חזור/אלחוזר (נחושת) + אל-חזור-ביוב
+  (קטגוריה 'אל חזור'), ושהצ'קליסט מוסיף אזהרת "כיוון התקנה" (warning) כשהקו כולל
+  שסתום כזה. severity=warning → אפס השפעה על criticalOpen; deep_audit symmetry לא נגעה.
+- תקלה שהוזרקה: `_isDirectionalDevice` — קטגוריה→'MUT', name-tokens→'MUTx/MUTy'.
+- תוצאה: אדומה ✅ — 4 בדיקות-סימון נכשלו (כלפה/ביוב/אלכסוני/warning); "not flagged" עבר.
+- ביטול → ירוק ✅ (B11 + auto_compliance + full_compliance + deep_audit).
+- מסקנה: הזיהוי load-bearing. **חלקי במכוון** — זו אזהרה, לא אכיפה. **אכיפת-כיווניות
+  מלאה** (port ל-ConnectorEnd + חיפוש-מכוון + הרפיית invariant-הסימטריה) היא שינוי-
+  ארכיטקטוני שמחכה להחלטת-עיצוב (task #20).
+
 ## install_engine — אזהרת שובר-ואקום לברז-גן (E7/B10) — 2026-06-08
 
 - **קובץ:** `test/install_engine_b10_test.dart` (חדש).
