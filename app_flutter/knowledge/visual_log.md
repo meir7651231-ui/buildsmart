@@ -6,9 +6,11 @@
 
 ## v6.16 — fix-fleet · גל 8 (honesty-pass — מקטעי-הגדרות מתים)
 
-**שינוי:** 3 auditors (store/notif/chat settings) אימתו ב-bytes (grep) אילו toggles מתמידים אך **אין להם צרכן** באפליקציה. 13 מקטעים יצאו **מתים לחלוטין** — נראו כמו מתגים חיים עם badge-ספירה, ומיתעו את המשתמש. נוסף ל-`_SectionTile` דגל `underConstruction`: מציג subtitle כן — **"בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות"** ו**מסתיר את badge-הספירה** (additive — `children`/`_activeCount` לא נגעו). סומנו 13: store (התראות חנות · ספקים מועדפים · שירות ולוגיסטיקה) · notif (ערוצי קבלה · צליל ורטט · לפי תפקיד · סיכומים תקופתיים · פרטיות במסך נעול) · chat (מדיה ושמע · גיבוי וייצוא · שפה ותרגום · שיחות עסקיות · ארכיון וניקיון). מקטעי MIXED/LIVE (שחלק ממתגיהם חיים) **לא** סומנו — כדי לא לתייג שגוי מתג עובד.
+**שינוי (חלק א׳ — מקטעים מתים):** 3 auditors (store/notif/chat settings) אימתו ב-bytes (grep) אילו toggles מתמידים אך **אין להם צרכן** באפליקציה. 13 מקטעים יצאו **מתים לחלוטין** — נראו כמו מתגים חיים עם badge-ספירה, ומיתעו את המשתמש. נוסף ל-`_SectionTile` דגל `underConstruction`: מציג subtitle כן — **"בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות"** ו**מסתיר את badge-הספירה** (additive — `children`/`_activeCount` לא נגעו). סומנו 13: store (התראות חנות · ספקים מועדפים · שירות ולוגיסטיקה) · notif (ערוצי קבלה · צליל ורטט · לפי תפקיד · סיכומים תקופתיים · פרטיות במסך נעול) · chat (מדיה ושמע · גיבוי וייצוא · שפה ותרגום · שיחות עסקיות · ארכיון וניקיון).
 
-**אימות ויזואלי (בדיקת-widget, לקח #2):** `test/settings_honesty_test.dart` מריץ pump ל-3 מסכי-ההגדרות ומוודא שה-subtitle "בבנייה…" מופיע בכל אחד. + `central-verify` gate — analyze 0 · `flutter test` · build · conformance · required-tests.
+**שינוי (חלק ב׳ — full pass, מתגים מתים בתוך מקטעי MIXED):** 3 auditors מיפו את **29 המתגים המתים** שיושבים בתוך מקטעים מעורבים (store 17 · notif 8 · chat 4). כל אחד קיבל marker כן ברמת-השורה — **"בבנייה — עדיין לא משפיע"** (subtitle ב-`_SwitchRow`; הערה מתחת ל-label ב-`_RadioGroupRow`/`_InlineTextRow`/`_NumberRow`) ונשאר פונקציונלי (עדיין מתמיד). interface משותף `_Inert` גורם ל-`_activeCount` להחריג אותם — כך ש-badge הספירה בכל מקטע MIXED מציג עכשיו רק את המספר ה**חי** (למשל סוגי-התראות 9→4). מתגים חיים לא נגעו.
+
+**אימות ויזואלי (בדיקת-widget, לקח #2):** `test/settings_honesty_test.dart` (6 בדיקות) — מוודא את ה-subtitle ברמת-המקטע ב-3 המסכים, ומרחיב מקטע MIXED בכל מסך כדי לוודא שה-marker ברמת-השורה מופיע. + `central-verify` gate — analyze 0 · `flutter test` · build · conformance · required-tests. צילומי-מסך נשלחו למשתמש.
 
 ---
 

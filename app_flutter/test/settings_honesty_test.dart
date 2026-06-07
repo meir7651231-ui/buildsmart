@@ -20,6 +20,9 @@ void main() {
 
   // The exact honesty subtitle string each marked section must render.
   const honestySubtitle = 'בבנייה — ההגדרות נשמרות אך עדיין אינן משפיעות';
+  // The per-row marker on dead toggles INSIDE otherwise-mixed sections
+  // (Wave 8 "full" pass). It lives on a row, so the section must be expanded.
+  const rowMarker = 'בבנייה — עדיין לא משפיע';
 
   // Harness copied verbatim from store_notif_widget_test.dart (pump()):
   // mock prefs, RTL surface, ProviderScope > MaterialApp(he) > Directionality.
@@ -58,6 +61,38 @@ void main() {
     testWidgets('chat settings shows the בבנייה subtitle', (t) async {
       await pump(t, const ChatSettingsScreen());
       expect(find.text(honestySubtitle), findsWidgets);
+    });
+
+    // Per-row markers: expand a known MIXED section on each screen and assert
+    // the dead toggles inside it carry the 'בבנייה — עדיין לא משפיע' marker.
+    testWidgets('store: mixed section reveals per-row markers', (t) async {
+      await pump(t, const StoreSettingsScreen());
+      final header = find.text('אמצעי תשלום');
+      await t.ensureVisible(header);
+      await t.pumpAndSettle();
+      await t.tap(header);
+      await t.pumpAndSettle();
+      expect(find.text(rowMarker), findsWidgets);
+    });
+
+    testWidgets('notif: mixed section reveals per-row markers', (t) async {
+      await pump(t, const NotifSettingsScreen());
+      final header = find.text('סוגי התראות');
+      await t.ensureVisible(header);
+      await t.pumpAndSettle();
+      await t.tap(header);
+      await t.pumpAndSettle();
+      expect(find.text(rowMarker), findsWidgets);
+    });
+
+    testWidgets('chat: mixed section reveals per-row markers', (t) async {
+      await pump(t, const ChatSettingsScreen());
+      final header = find.text('שיחות וחיווי');
+      await t.ensureVisible(header);
+      await t.pumpAndSettle();
+      await t.tap(header);
+      await t.pumpAndSettle();
+      expect(find.text(rowMarker), findsWidgets);
     });
   });
 }

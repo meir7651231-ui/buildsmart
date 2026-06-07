@@ -105,6 +105,7 @@ class _ShippingSection extends ConsumerWidget {
           label: 'כתובת ברירת מחדל',
           hint: 'רחוב, מספר, עיר',
           value: settings.defaultAddress,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -113,6 +114,7 @@ class _ShippingSection extends ConsumerWidget {
         _RadioGroupRow<StoreDeliveryWindow>(
           label: 'חלון זמן מועדף',
           value: settings.preferredDeliveryWindow,
+          underConstruction: true,
           options: const [
             (value: StoreDeliveryWindow.morning, label: 'בוקר'),
             (value: StoreDeliveryWindow.noon, label: 'צהריים'),
@@ -128,6 +130,7 @@ class _ShippingSection extends ConsumerWidget {
           label: 'אזורי משלוח',
           hint: 'ת"א, רמת גן, הרצליה...',
           value: settings.deliveryAreas,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -137,6 +140,7 @@ class _ShippingSection extends ConsumerWidget {
           label: 'הוראות לשליח',
           hint: 'הערות למשלוח...',
           value: settings.courierInstructions,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -185,6 +189,7 @@ class _PaymentSection extends ConsumerWidget {
         _RadioGroupRow<StoreInstallments>(
           label: 'תשלומים (1/3/6/12)',
           value: settings.defaultInstallments,
+          underConstruction: true,
           options: const [
             (value: StoreInstallments.one, label: 'תשלום אחד'),
             (value: StoreInstallments.three, label: '3 תשלומים'),
@@ -199,6 +204,7 @@ class _PaymentSection extends ConsumerWidget {
         _SwitchRow(
           label: 'הסדר אשראי ספק',
           value: settings.supplierCreditEnabled,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -233,6 +239,7 @@ class _InvoicesSection extends ConsumerWidget {
           label: 'פרטי עוסק/חברה',
           hint: 'שם עסק...',
           value: settings.businessName,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -242,6 +249,7 @@ class _InvoicesSection extends ConsumerWidget {
           label: 'ח.פ. / ע.מ.',
           hint: 'מספר...',
           value: settings.businessId,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -250,6 +258,7 @@ class _InvoicesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'ייצוא לרו"ח',
           value: settings.exportToAccountant,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -258,6 +267,7 @@ class _InvoicesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'קבלות אוטומטיות',
           value: settings.autoReceipts,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -366,6 +376,7 @@ class _CartSection extends ConsumerWidget {
         _SwitchRow(
           label: 'הזמנות חוזרות',
           value: settings.repeatOrders,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -374,6 +385,7 @@ class _CartSection extends ConsumerWidget {
         _SwitchRow(
           label: 'שיתוף סל עם צוות',
           value: settings.shareCartWithTeam,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -483,6 +495,7 @@ class _DisplaySection extends ConsumerWidget {
         _RadioGroupRow<StoreUnitSystem>(
           label: "יחידות (מטר / אינץ')",
           value: settings.unitSystem,
+          underConstruction: true,
           options: const [
             (value: StoreUnitSystem.metric, label: 'מטרי'),
             (value: StoreUnitSystem.imperial, label: 'אינגלי'),
@@ -495,6 +508,7 @@ class _DisplaySection extends ConsumerWidget {
         _SwitchRow(
           label: 'הצגת מלאי',
           value: settings.showStock,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -576,6 +590,7 @@ class _PrivacySection extends ConsumerWidget {
         _SwitchRow(
           label: 'היסטוריית רכישות',
           value: settings.purchaseHistory,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -592,6 +607,7 @@ class _PrivacySection extends ConsumerWidget {
         _SwitchRow(
           label: 'אישור ביומטרי לרכישה',
           value: settings.biometricConfirm,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -600,6 +616,7 @@ class _PrivacySection extends ConsumerWidget {
         _NumberRow(
           label: 'מגבלת אשראי יומית (₪, 0=ללא)',
           value: settings.dailyCreditLimit,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -629,7 +646,9 @@ class _SectionTile extends StatelessWidget {
   final bool underConstruction;
 
   // Count only functional rows — exclude "בבנייה" placeholders.
-  int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
+  int get _activeCount => children
+      .where((w) => w is! _PlaceholderRow && !(w is _Inert && (w as _Inert).underConstruction))
+      .length;
 
   @override
   Widget build(BuildContext context) {
@@ -694,22 +713,37 @@ class _SectionTile extends StatelessWidget {
   }
 }
 
-class _SwitchRow extends StatelessWidget {
+/// Marker for settings rows that persist a value no engine consumes yet
+/// (honesty pass). Excluded from the section active-count badge.
+abstract interface class _Inert {
+  bool get underConstruction;
+}
+
+class _SwitchRow extends StatelessWidget implements _Inert {
   const _SwitchRow({
     required this.label,
     required this.value,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
+      subtitle: underConstruction
+          ? const Text(
+              'בבנייה — עדיין לא משפיע',
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            )
+          : null,
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -717,18 +751,21 @@ class _SwitchRow extends StatelessWidget {
   }
 }
 
-class _RadioGroupRow<T> extends StatelessWidget {
+class _RadioGroupRow<T> extends StatelessWidget implements _Inert {
   const _RadioGroupRow({
     required this.label,
     required this.value,
     required this.options,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final T value;
   final List<({T value, String label})> options;
   final ValueChanged<T> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   Widget build(BuildContext context) {
@@ -737,9 +774,22 @@ class _RadioGroupRow<T> extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            label,
-            style: const TextStyle(color: Colors.black54, fontSize: 13),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(color: Colors.black54, fontSize: 13),
+              ),
+              if (underConstruction)
+                const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Text(
+                    'בבנייה — עדיין לא משפיע',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  ),
+                ),
+            ],
           ),
         ),
         ...options.map(
@@ -762,18 +812,21 @@ class _RadioGroupRow<T> extends StatelessWidget {
   }
 }
 
-class _InlineTextRow extends StatefulWidget {
+class _InlineTextRow extends StatefulWidget implements _Inert {
   const _InlineTextRow({
     required this.label,
     required this.hint,
     required this.value,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final String hint;
   final String value;
   final ValueChanged<String> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   State<_InlineTextRow> createState() => _InlineTextRowState();
@@ -809,6 +862,14 @@ class _InlineTextRowState extends State<_InlineTextRow> {
             widget.label,
             style: const TextStyle(color: Colors.black54, fontSize: 13),
           ),
+          if (widget.underConstruction)
+            const Padding(
+              padding: EdgeInsets.only(top: 2),
+              child: Text(
+                'בבנייה — עדיין לא משפיע',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+              ),
+            ),
           const SizedBox(height: 6),
           TextField(
             controller: _ctrl,
@@ -836,16 +897,19 @@ class _InlineTextRowState extends State<_InlineTextRow> {
   }
 }
 
-class _NumberRow extends StatefulWidget {
+class _NumberRow extends StatefulWidget implements _Inert {
   const _NumberRow({
     required this.label,
     required this.value,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final int value;
   final ValueChanged<int> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   State<_NumberRow> createState() => _NumberRowState();
@@ -878,9 +942,22 @@ class _NumberRowState extends State<_NumberRow> {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              widget.label,
-              style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.label,
+                  style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
+                ),
+                if (widget.underConstruction)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 2),
+                    child: Text(
+                      'בבנייה — עדיין לא משפיע',
+                      style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                    ),
+                  ),
+              ],
             ),
           ),
           SizedBox(

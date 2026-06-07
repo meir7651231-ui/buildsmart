@@ -236,6 +236,7 @@ class _PresenceSection extends ConsumerWidget {
         _SwitchRow(
           label: 'תצוגה מקדימה בנעילה',
           value: settings.lockScreenPreview,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(chatSettingsProvider.notifier)
@@ -244,6 +245,7 @@ class _PresenceSection extends ConsumerWidget {
         _SwitchRow(
           label: 'פתיחת שיחה (מענה ראשוני)',
           value: settings.initialResponseEnabled,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(chatSettingsProvider.notifier)
@@ -282,6 +284,7 @@ class _ChatNotifSection extends ConsumerWidget {
         _SwitchRow(
           label: 'צלצול שיחה נכנסת',
           value: settings.callRingEnabled,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(chatSettingsProvider.notifier)
@@ -379,6 +382,7 @@ class _ChatPrivacySection extends ConsumerWidget {
         _RadioGroupRow<ChatPrivacy>(
           label: 'מי יכול לפתוח שיחה',
           value: settings.chatPrivacy,
+          underConstruction: true,
           options: const [
             (value: ChatPrivacy.everyone, label: 'כולם'),
             (value: ChatPrivacy.contacts, label: 'אנשי קשר בלבד'),
@@ -718,7 +722,9 @@ class _SectionTile extends StatelessWidget {
   final bool underConstruction;
 
   // Count only functional rows — exclude "בבנייה" placeholders.
-  int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
+  int get _activeCount => children
+      .where((w) => w is! _PlaceholderRow && !(w is _Inert && (w as _Inert).underConstruction))
+      .length;
 
   @override
   Widget build(BuildContext context) {
@@ -783,22 +789,37 @@ class _SectionTile extends StatelessWidget {
   }
 }
 
-class _SwitchRow extends StatelessWidget {
+/// Marker for settings rows that persist a value no engine consumes yet
+/// (honesty pass). Excluded from the section active-count badge.
+abstract interface class _Inert {
+  bool get underConstruction;
+}
+
+class _SwitchRow extends StatelessWidget implements _Inert {
   const _SwitchRow({
     required this.label,
     required this.value,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
+      subtitle: underConstruction
+          ? const Text(
+              'בבנייה — עדיין לא משפיע',
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            )
+          : null,
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
@@ -806,18 +827,21 @@ class _SwitchRow extends StatelessWidget {
   }
 }
 
-class _RadioGroupRow<T> extends StatelessWidget {
+class _RadioGroupRow<T> extends StatelessWidget implements _Inert {
   const _RadioGroupRow({
     required this.label,
     required this.value,
     required this.options,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final T value;
   final List<({T value, String label})> options;
   final ValueChanged<T> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   Widget build(BuildContext context) {
@@ -826,9 +850,22 @@ class _RadioGroupRow<T> extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            label,
-            style: const TextStyle(color: Colors.black54, fontSize: 13),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(color: Colors.black54, fontSize: 13),
+              ),
+              if (underConstruction)
+                const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Text(
+                    'בבנייה — עדיין לא משפיע',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                  ),
+                ),
+            ],
           ),
         ),
         ...options.map(

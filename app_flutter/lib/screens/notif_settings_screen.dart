@@ -336,6 +336,7 @@ class _TypesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'הצעות ספקים',
           value: settings.typeSupplierOffers,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -344,6 +345,7 @@ class _TypesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'חזר למלאי',
           value: settings.typeBackInStock,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -352,6 +354,7 @@ class _TypesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'תזכורות',
           value: settings.typeReminders,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -360,6 +363,7 @@ class _TypesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'שיחות חדשות',
           value: settings.typeNewChats,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -368,6 +372,7 @@ class _TypesSection extends ConsumerWidget {
         _SwitchRow(
           label: 'עדכוני פרויקטים',
           value: settings.typeProjectUpdates,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -429,6 +434,7 @@ class _QuietHoursSection extends ConsumerWidget {
         _SwitchRow(
           label: 'ימי שבת/חג',
           value: settings.quietOnShabbat,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -437,6 +443,7 @@ class _QuietHoursSection extends ConsumerWidget {
         _SwitchRow(
           label: 'תוך פגישות',
           value: settings.quietInMeetings,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -445,6 +452,7 @@ class _QuietHoursSection extends ConsumerWidget {
         _SwitchRow(
           label: 'מצב נהיגה',
           value: settings.quietWhileDriving,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -777,7 +785,9 @@ class _SectionTile extends StatelessWidget {
   final bool underConstruction;
 
   // Count only functional rows — exclude "בבנייה" placeholders.
-  int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
+  int get _activeCount => children
+      .where((w) => w is! _PlaceholderRow && !(w is _Inert && (w as _Inert).underConstruction))
+      .length;
 
   @override
   Widget build(BuildContext context) {
@@ -842,22 +852,37 @@ class _SectionTile extends StatelessWidget {
   }
 }
 
-class _SwitchRow extends StatelessWidget {
+/// Marker for settings rows that persist a value no engine consumes yet
+/// (honesty pass). Excluded from the section active-count badge.
+abstract interface class _Inert {
+  bool get underConstruction;
+}
+
+class _SwitchRow extends StatelessWidget implements _Inert {
   const _SwitchRow({
     required this.label,
     required this.value,
     required this.onChanged,
+    this.underConstruction = false,
   });
 
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
+  @override
+  final bool underConstruction;
 
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
+      subtitle: underConstruction
+          ? const Text(
+              'בבנייה — עדיין לא משפיע',
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            )
+          : null,
       value: value,
       activeColor: BsTokens.brand,
       onChanged: onChanged,
