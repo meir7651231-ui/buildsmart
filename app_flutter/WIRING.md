@@ -503,6 +503,16 @@ now `_terminalCats` (endpoint-only), while `זרועות דוש` (arms) + `בר�
 (mixers) stay connectors so the real mixer→arm→head chain still builds. Locked by
 `install_engine_b5_test`.
 
+**Spec-data fixes (B6):** (E6) `224156` (PP-MD-ML DN110 drainage pipe) maxTempC
+80→70 to match its identical family (224345/224169/… all 70) — was an outlier that
+made the engine accept it but reject its identical siblings on a ~71-80°C line.
+(E3) reducing branch tees had their larger DN erased (ends flattened to all-DN50):
+`116558` (מסעף 110/50) → [110,110,50], `217533` (75/50) → [75,50], `218564` (מסעף
+כפול 110/50/50) → [110,50,50] — so the real DN110/DN75 joints connect and a DN50
+pipe no longer mates a physically large socket. DNs taken from the product names.
+Locked by `install_engine_b6_test`. (A broader flattened-DN sweep — מצרה 50/40,
+40/32, 110/100, 50/32 — is tracked for B8.)
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)

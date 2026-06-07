@@ -1318,10 +1318,10 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
 
   // ── מסעפים וחיבורי אסלה — toilet/drain branch tees ────────────────────────
   '220305': VerifiedSpec(sku: '220305', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
-  '218564': VerifiedSpec(sku: '218564', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '218564': VerifiedSpec(sku: '218564', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('50'), _c('50')]), // E3: מסעף כפול 110/50/50 (110 main + 2×50)
   '218176': VerifiedSpec(sku: '218176', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
-  '116558': VerifiedSpec(sku: '116558', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
-  '217533': VerifiedSpec(sku: '217533', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
+  '116558': VerifiedSpec(sku: '116558', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110'), _c('50')]), // E3: מסעף 87° 110/50 (run-through 110 + branch 50)
+  '217533': VerifiedSpec(sku: '217533', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('50')]), // E3: 75/50 reducing branch (restore erased DN75)
   '187463': VerifiedSpec(sku: '187463', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
   '118221': VerifiedSpec(sku: '118221', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40'), _c('40')]),
   '118222': VerifiedSpec(sku: '118222', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50'), _c('50')]),
@@ -1380,7 +1380,7 @@ final Map<String, VerifiedSpec> kVerifiedSpecs = {
   '116074': VerifiedSpec(sku: '116074', material: 'PVC', maxTempC: 50, ends: [_c('50'), _c('50')]),
   '116001': VerifiedSpec(sku: '116001', material: 'PVC', maxTempC: 50, ends: [_c('75'), _c('75')]),
   '116155': VerifiedSpec(sku: '116155', material: 'PVC', maxTempC: 50, ends: [_c('110'), _c('110')]),
-  '224156': VerifiedSpec(sku: '224156', material: 'PP',  maxTempC: 80, ends: [_c('110'), _c('110')]),
+  '224156': VerifiedSpec(sku: '224156', material: 'PP',  maxTempC: 70, ends: [_c('110'), _c('110')]), // E6: 80→70 (sibling consensus)
   '116603': VerifiedSpec(sku: '116603', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
   '116606': VerifiedSpec(sku: '116606', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
   '116069': VerifiedSpec(sku: '116069', material: 'PVC', maxTempC: 50, ends: [_c('40'), _c('40')]),
