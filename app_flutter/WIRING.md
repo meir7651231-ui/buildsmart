@@ -52,7 +52,7 @@ home directly. Guarded by `onboarding_test`.
 >
 > **✅ unified (v6.12):** `sysOrdersProvider` is now a live view of the single `ordersEngineProvider`, so store/courier advances reach the manager live — all four roles (contractor checkout · store · courier · worker approval) share one engine. **v6.13:** the BS-dial manager order/customer panels also read the live engine (were a static seed). See `knowledge/WIRING_AUDIT.md`.
 | 💡 (קצה שמאלי) | replays the intro tour (`showIntroTour` → the onboarding slides) | ✅ |
-| שם-משתמש (צ'יפ ליד הלוגו) | registered user's first name (`userProfileProvider`); absent for guest/demo | ✅ |
+| שם-משתמש (צ'יפ ליד הלוגו) | registered user's first name (`userProfileProvider`); absent for guest/demo. **Tappable → `ProfileScreen.route()`** (48dp target · `Semantics(button,'הפרופיל שלי')`+Tooltip) — native profile surface: name/contact/profession edit via `userProfileProvider.update`, + 🔄 החלפת תפקיד (`showRolePicker`) + 🎮 מועדון BuildSmart (`RewardsHubScreen`). | ✅ |
 
 ## Version chrome (`home_shell.dart` AppBar → `version.g.dart`)
 
@@ -1046,3 +1046,23 @@ Rule in CONVENTIONS.md. Guards: huliot_card_render_test (2) + huliot_search_test
 - **Deleted:** `lib/screens/scan_menu_screen.dart`. Net −1,144/+57. Gate: analyze 0 · 1642 tests · build web ✓.
 - **Open TODO:** `knowledge/TODO-dedup-gate.md` — protocol has NO anti-dup gate (structural overlaps רכש≈Store,
   הגדרות≈dedicated screens still pending decision).
+
+## Dial-distribution Wave 2 — 9×9 fleet (audit→validate→fix→gate, per Law #0)
+Distributes the menu-dial 🏠 home branch into the catalog ⋮ (the dial itself is removed in Wave 3).
+The 3 tools below were already in the ⋮ `itemBuilder` but had **NO `_onSelected` case** = silent no-op;
+caught by 2 independent audit lenses (navigation + edge-crash), byte-verified against the architect agent's
+mis-narration (it claimed "wired"). Now actually wired:
+
+| ⋮ item | Behavior | Status |
+|---|---|---|
+| 🤖 בינה מלאכותית ואוטומציה | `case 'ai_hub'` → `AIHubScreen.route()` (label also un-truncated for text-parity) | ✅ |
+| 📦 המלאי שלי | `case 'stock'` → `StockScreen.route()` | ✅ |
+| 📋 משימות העבודה | `case 'site_tasks'` → `openSiteHub()` (10-tool site-hub landing) | ✅ |
+
+- **`profile_screen.dart`** — native profile surface (name/contact/profession edit via `userProfileProvider.update`)
+  reached from the name-chip; a11y pass (accessibility-rtl lens): 48dp target, button Semantics, chevron contrast,
+  ExcludeSemantics on emoji/avatar, RTL/LTR input direction, ChoiceChip checkmark.
+- **Conformance:** verbatim rule `הסל שלי` re-pointed `menu_trees.dart` → `store_screen.dart` (cart moved to the
+  Store in the dedup; string preserved ×3). Gate: central-verify green — analyze 0 · 1645 tests · build · conformance 7/7.
+- **Wave 3 (pending product-owner decisions):** delete `menu_dial_widget.dart` + hamburger + dial state; build a
+  unified `SettingsScreen`; reconcile the projects dataset. Escalations in `_findings.md`.

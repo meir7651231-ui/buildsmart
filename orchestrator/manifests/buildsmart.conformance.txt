@@ -2,7 +2,9 @@
 # Run via: central-verify.sh /path/to/app_flutter --assert orchestrator/manifests/buildsmart.conformance.txt
 #
 # Conformance — core verbatim Hebrew strings that MUST stay present (the project's central invariant):
-lib/data/menu_trees.dart:::הסל שלי
+# ('הסל שלי' moved menu_trees → store_screen in the dial-dedup, v6.16+: the cart now lives in the
+#  Store (store_screen.dart:135/194), not the dial. Verified present; rule re-pointed, invariant kept.)
+lib/screens/store_screen.dart:::הסל שלי
 lib/data/personas.dart:::מנהל המערכת
 #
 # Regression — the express-fee bug must never come back (was ₪80, corrected to ₪120 in v6.16):

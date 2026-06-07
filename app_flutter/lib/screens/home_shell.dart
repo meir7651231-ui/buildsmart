@@ -1,9 +1,12 @@
 import 'package:buildsmart/logic/system_division.dart';
+import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/bs_dial_widget.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
+import 'package:buildsmart/screens/site_hub_screen.dart';
+import 'package:buildsmart/screens/stock_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/home_content_reorder.dart';
 import 'package:buildsmart/screens/chat_settings_screen.dart';
@@ -12,6 +15,7 @@ import 'package:buildsmart/screens/menu_dial_widget.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
+import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/screens/search_dial_widget.dart';
 import 'package:buildsmart/screens/store_screen.dart';
@@ -437,21 +441,46 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     ),
                     if (firstName.isNotEmpty) ...[
                       const SizedBox(width: BsTokens.space2),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFF0E3),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          firstName,
-                          style: const TextStyle(
-                            color: BsTokens.brandDark,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 13,
+                      // The name chip is its OWN tap target → opens the native
+                      // profile screen. This inner GestureDetector wins taps on
+                      // the chip; the outer InkWell still handles the logo/version
+                      // (showRolePicker). HitTestBehavior.opaque so the whole chip
+                      // area (incl. padding) is hot.
+                      Semantics(
+                        button: true,
+                        label: 'הפרופיל שלי',
+                        child: Tooltip(
+                          message: 'הפרופיל שלי',
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => Navigator.of(context)
+                                .push(ProfileScreen.route()),
+                            // ≥48dp tap target around the small pill (a11y),
+                            // without enlarging the visible chip.
+                            child: ConstrainedBox(
+                              constraints:
+                                  const BoxConstraints(minHeight: 48),
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFF0E3),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    firstName,
+                                    style: const TextStyle(
+                                      color: BsTokens.brandDark,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -639,6 +668,19 @@ class _CatalogMenuButton extends ConsumerWidget {
           value: 'price_compare',
           child: _MenuRow(emoji: '📊', label: 'השוואת מחירים'),
         ),
+        // 🏠 home-tab tools, surfaced natively (mirror the menu-dial 🏠 branch).
+        PopupMenuItem<String>(
+          value: 'ai_hub',
+          child: _MenuRow(emoji: '🤖', label: 'בינה מלאכותית ואוטומציה'),
+        ),
+        PopupMenuItem<String>(
+          value: 'stock',
+          child: _MenuRow(emoji: '📦', label: 'המלאי שלי'),
+        ),
+        PopupMenuItem<String>(
+          value: 'site_tasks',
+          child: _MenuRow(emoji: '📋', label: 'משימות העבודה'),
+        ),
         PopupMenuItem<String>(
           value: 'favorites',
           child: _MenuRow(emoji: '❤️', label: 'מועדפים'),
@@ -666,6 +708,12 @@ class _CatalogMenuButton extends ConsumerWidget {
         openCheaperAlternativesSheet(context);
       case 'price_compare':
         openPriceCompareSheet(context);
+      case 'ai_hub':
+        Navigator.of(context).push(AIHubScreen.route());
+      case 'stock':
+        Navigator.of(context).push(StockScreen.route());
+      case 'site_tasks':
+        openSiteHub(context);
       case 'favorites':
         ref.read(catalogSectionProvider.notifier).state = 'מועדפים';
       case 'settings':

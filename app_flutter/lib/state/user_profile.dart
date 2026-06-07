@@ -106,6 +106,21 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     state = state.copyWith(profession: profession);
     _persist();
   }
+
+  /// Edit profile fields from the profile screen. Unspecified fields are kept;
+  /// `registered` flips true once name+contact are both valid, so a guest who
+  /// fills them in graduates to a registered user (→ the name chip appears).
+  void update({String? name, String? contact, String? profession}) {
+    final n = (name ?? state.name).trim();
+    final c = (contact ?? state.contact).trim();
+    state = state.copyWith(
+      name: n,
+      contact: c,
+      profession: (profession ?? state.profession).trim(),
+      registered: state.registered || registrationValid(n, c),
+    );
+    _persist();
+  }
 }
 
 final userProfileProvider =

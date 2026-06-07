@@ -4,6 +4,17 @@
 
 ---
 
+## v6.16 — פירוק ה-dial · גל 2 (נחיל 9×9: כלי-בית מחוּוטים + a11y)
+
+**שינוי:** גל 2 של נחיל ה-9×9 (audit 7 עדשות → validate → fix) — פירוק ה-dial אל משטחים נייטיב:
+- **home_shell ⋮**: חוּוטו 3 כלי-הבית שהיו no-op מת — 🤖 בינה→`AIHubScreen.route()` · 📦 מלאי→`StockScreen.route()` · 📋 משימות→`openSiteHub()`. (תפיסה של 2 עדשות בלתי-תלויות [ניווט + edge-crash], מאומת בבייטים מול mis-narration של האדריכל — לקח-הנחיל בפעולה.)
+- **text-parity**: '🤖 בינה מלאכותית' → 'בינה מלאכותית ואוטומציה' (verbatim מ-`menu_trees.dart`).
+- **a11y-rtl** (עדשת accessibility-rtl): צ׳יפ-השם — 48dp + `Semantics(button,'הפרופיל שלי')` + Tooltip; `profile_screen` — chevron→`mutedLight` · `_LinkRow` button-role + ExcludeSemantics · textAlign/textDirection ל-inputs · ChoiceChip showCheckmark.
+
+**אימות:** `central-verify` gate — analyze 0 · `flutter test` 1645 · build web · **conformance 7/7 BYTES VERIFIED** (כולל תיקון drift: חוק 'הסל שלי' עודכן menu_trees→store_screen — המחרוזת חיה בחנות ×3). byte-verify (grep) של שני ה-fixers ✅.
+
+---
+
 ## v6.16 — איחוד משטחים כפולים (consolidate duplicate contractor surfaces)
 
 **שינוי:** איחוד משטחים כפולים שהתגלו ב-wiring audit:
