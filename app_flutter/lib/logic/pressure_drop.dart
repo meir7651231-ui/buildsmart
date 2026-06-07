@@ -82,11 +82,7 @@ double? _boreMeters(ConnectorEnd e) {
   if (e.type == EndType.bspMale || e.type == EndType.bspFemale) {
     final s = e.size.replaceAll('"', '').trim();
     // common conversions: 1/2 ≈ 15, 3/4 ≈ 20, 1 ≈ 25, 1-1/2 ≈ 40, 2 ≈ 50
-    const inchToMm = {
-      '1/4': 8, '3/8': 10, '1/2': 15, '3/4': 20,
-      '1': 25, '1-1/4': 32, '1-1/2': 40, '2': 50, '2-1/2': 65,
-    };
-    final mm = inchToMm[s];
+    final mm = kBspInchToMm[s];
     if (mm != null) return mm / 1000.0;
   }
   return null;

@@ -667,11 +667,7 @@ double? _minBoreMmOf(LipskeyCatalogProduct p) {
         mm = double.tryParse(e.size);
       case EndType.bspMale:
       case EndType.bspFemale:
-        const inchToMm = {
-          '1/4': 8, '3/8': 10, '1/2': 15, '3/4': 20,
-          '1': 25, '1-1/4': 32, '1-1/2': 40, '2': 50, '2-1/2': 65,
-        };
-        final v = inchToMm[e.size.replaceAll('"', '').trim()];
+        final v = kBspInchToMm[e.size.replaceAll('"', '').trim()];
         mm = v?.toDouble();
     }
     if (mm == null) continue;
@@ -826,6 +822,12 @@ void _autoAddCompliance(List<LipskeyCatalogProduct> items,
           p.categoryHe == 'ערכות רחצה');
 
   void insertAt(int position, Set<String> alternatives, String preferred) {
+    // A compliance part is inserted BETWEEN two existing pieces; a chain with
+    // fewer than 2 items has no interior slot. Guard first: otherwise
+    // `clamp(1, items.length - 1)` becomes `clamp(1, 0)` (or `clamp(1, -1)`)
+    // and Dart's clamp throws ArgumentError when lowerLimit > upperLimit —
+    // a latent crash on `buildInstallation([oneSupplyProduct], autoCompliance: true)`.
+    if (items.length < 2) return;
     if (alternatives.any(skus.contains)) return;
     final p = _skuOf(preferred);
     if (p == null) return;

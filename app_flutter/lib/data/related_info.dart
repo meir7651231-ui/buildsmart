@@ -539,11 +539,7 @@ List<LipskeyCatalogProduct> variantSiblingsOf(LipskeyCatalogProduct p) {
         e.type == EndType.drainOpening) {
       mm = double.tryParse(e.size);
     } else {
-      const inchToMm = {
-        '1/4': 8, '3/8': 10, '1/2': 15, '3/4': 20,
-        '1': 25, '1-1/4': 32, '1-1/2': 40, '2': 50, '2-1/2': 65,
-      };
-      final v = inchToMm[e.size.replaceAll('"', '').trim()];
+      final v = kBspInchToMm[e.size.replaceAll('"', '').trim()];
       mm = v?.toDouble();
     }
     if (mm != null && (minBore == null || mm < minBore)) minBore = mm;

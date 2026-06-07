@@ -17,6 +17,23 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## install_engine hardening — kBspInchToMm + insertAt guard (B1) — 2026-06-07
+
+- **קובץ:** `test/install_engine_hardening_test.dart` (חדש, 3 בדיקות).
+- **מה עושה:** נועל (1) את `kBspInchToMm` — מקור-האמת היחיד לטבלת BSP אינץ׳→מ"מ
+  שאוחד מ-3 עותקים מועתקים-ביד (install_engine `_minBoreMmOf` · pressure_drop
+  `_boreMeters` · related_info `engineeringSpecFor`); ו-(2) את ה-guard ב-
+  `_autoAddCompliance.insertAt` שמונע קריסת `clamp(1,0)` על קו חד-פריטי.
+- תקלה שהוזרקה #1 (ערך-קוטר): `kBspInchToMm` `'1/2': 15` → `'1/2': 14`.
+- תוצאה: אדומה ✅ — `at location ['1/2'] is <14> instead of <15>` (בדיקת הטבלה-המדויקת).
+- תקלה שהוזרקה #2 (השבתת guard): `if (items.length < 2) return;` → `if (items.length < 0) return;`.
+- תוצאה: אדומה ✅ — `buildInstallation([oneSupplyProduct], autoCompliance)` זרק
+  `ArgumentError:<Invalid argument(s): 1>` (בדיוק קריסת ה-clamp שה-guard מונע);
+  הבדיקה ציפתה `return normally`.
+- ביטול שתיהן → ירוק ✅ — `+3: All tests passed!`.
+- מסקנה: הבדיקה חזקה — תופסת גם סטיית ערך-בודד בטבלת-הקוטר המאוחדת וגם הסרה של
+  ה-guard (רגרסיית-קריסה אמיתית), לא רק happy-path.
+
 ## cheaperAlternativesAcrossCatalog (T1) — 2026-06-04
 
 - **קובץ:** `test/cheaper_alternatives_test.dart`

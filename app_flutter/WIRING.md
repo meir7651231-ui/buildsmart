@@ -448,6 +448,15 @@ plain-Hebrew gloss with the technical term in parens (e.g. "ברז ערבוב נ
 | מטראז׳ צינור (− / +) | per-pipe length in metres; header totals "X מ׳ צנרת" | ✅ |
 | טמפ׳ הקו | cycles 20/60/80°C (material suitability) | ✅ |
 
+**Engine hardening (B1):** the bore engine (`_minBoreMmOf` · install_engine), the
+pressure-drop estimator (`_boreMeters` · pressure_drop) and the spec sheet
+(`engineeringSpecFor` · related_info) now share ONE BSP inch→mm const
+`kBspInchToMm` (in `lipskey_verified_connections`) instead of three hand-copied
+tables that could silently drift. `_autoAddCompliance.insertAt` guards
+`items.length < 2`, so `buildInstallation([oneSupplyProduct], autoCompliance: true)`
+no longer throws a `clamp(1, 0)` ArgumentError. Both locked by
+`install_engine_hardening_test`.
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)

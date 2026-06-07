@@ -23,6 +23,17 @@
 
 enum EndType { hdpeCompression, pexPress, copperPress, bspMale, bspFemale, drainOpening }
 
+/// BSP nominal thread size (inches, as written on an end's `size`, e.g. '1/2')
+/// → approximate inside bore in millimetres. Single source of truth: the bore
+/// engine (`install_engine`), the pressure-drop estimator (`pressure_drop`) and
+/// the spec sheet (`related_info`) all read THIS map instead of each keeping a
+/// hand-copied clone that could silently drift apart. Look up with the size
+/// string stripped of any `"` and trimmed.
+const Map<String, int> kBspInchToMm = {
+  '1/4': 8, '3/8': 10, '1/2': 15, '3/4': 20,
+  '1': 25, '1-1/4': 32, '1-1/2': 40, '2': 50, '2-1/2': 65,
+};
+
 /// The plumbing system an end belongs to. Pressure water-supply lines (threaded
 /// brass, PEX, copper press) and gravity drainage lines (HDPE push-fit, drain
 /// openings) are physically separate — they only ever meet *inside* a fixture
