@@ -4,6 +4,31 @@
 
 ---
 
+## v6.16 — איחוד משטחים כפולים (consolidate duplicate contractor surfaces)
+
+**שינוי:** איחוד משטחים כפולים שהתגלו ב-wiring audit:
+- **AI-hub** (`ai_hub_screen.dart`): עלי '💡 חלופות זולות' / '📐 סריקת תוכניות' פתחו
+  *מסכים מלאים כפולים* (`_Alternatives`/`_PlanScan`) שכפלו את גיליונות-המודאל הקנוניים
+  (R9, `contractor_tools_sheets.dart`). הוסבו לפתוח את הגיליון הקנוני; 155 שורות
+  קוד-כפול נמחקו + `ScanMenuScreen` הכפול נמחק.
+- **Store** (`store_screen.dart`): action '💰 כספים' ב-quick-actions → `openFinanceHub`.
+- **menu-dial**: טאב 'רכש' הוסר (Store מכסה סל/הזמנות/שירותים 100%).
+
+**אימות ויזואלי:**
+- ✅ **screenshot אמיתי** (נשלח למשתמש): האפליקציה המרופקטרת עולה ומרנדרת נקי — מסך
+  הכניסה/רישום (BuildSmart logo · 'כניסה ללקוח קיים' · 'רישום ראשוני' · RTL · fonts ·
+  canvaskit מקומי) ללא קריסה/מסך-ריק. `build web --release --no-web-resources-cdn` ✓.
+  (Flutter-web מצייר ל-canvas → אין DOM ל-click; משטחי-הפנים מאומתים ב-render-test.)
+- ✅ **render-test** `test/ai_hub_dedup_test.dart` (חדש): pump `AIHubScreen` → הגריד שלם
+  (2 העלים נוכחים) → tap '💡 חלופות זולות' → **הגיליון הקנוני נפתח** ומרנדר שורות-חיסכון
+  (`חיסכון ₪…`), `takeException()==null`. מוכיח גיליון-מודאל (לא מסך-דחוף) ונועל את ה-dedup.
+- ✅ store '💰 כספים' / הסרת 'רכש': data+wiring — reuse של ה-chip הקיים ושל `openFinanceHub`
+  שכבר באפליקציה (אפס widget חדש בעל סיכון-ויזואלי), מכוסים ב-suite הירוק.
+- ✅ analyze 0 · `flutter test` ירוק (1642 + render-guard חדש) · build web ✓ ·
+  mutation_verify (היפוך sort-החלופות → אדום ✅, שוחזר → ירוק) ב-`mutation_log.md`.
+
+---
+
 ## v6.11 — 100% PDF-parity coverage לכל 3 המותגים (gate 117 closeout)
 
 **שינוי:** הרחבת ה-parity tests של פולירול וחוליות מ-20+13 מדגם ל-**snapshot מלא**

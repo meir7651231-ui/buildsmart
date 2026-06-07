@@ -77,8 +77,8 @@ final bsCourierLeafProvider = StateProvider<String?>((_) => null);
 /// panels and the W2 store/courier panels.
 final bsWorkerLeafProvider = StateProvider<String?>((_) => null);
 
-/// Which menu tab is currently drilled into (null = 4-tab root).
-enum MenuTab { home, projects, cart, settings }
+/// Which menu tab is currently drilled into (null = 3-tab root).
+enum MenuTab { home, projects, settings }
 
 final menuTabProvider = StateProvider<MenuTab?>((_) => null);
 
@@ -112,7 +112,6 @@ void resetAllDials(WidgetRef ref) {
   // Menu tab drill paths (menu_state.dart — already imported).
   ref.read(homeDrillProvider.notifier).state = const [];
   ref.read(projectsDrillProvider.notifier).state = const [];
-  ref.read(cartDrillProvider.notifier).state = const [];
   // Settings sub-state.
   ref.read(settingsGroupProvider.notifier).state = null;
   ref.read(settingsDrillProvider.notifier).state = const [];

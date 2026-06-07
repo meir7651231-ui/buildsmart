@@ -19,7 +19,7 @@ import 'package:buildsmart/data/contractor_seeds.dart'
     show BrandTier, ProductBrands, kHomeProductBrands;
 import 'package:buildsmart/data/related_info.dart' show cheaperAlternativeBrand;
 import 'package:buildsmart/data/smart_tree.dart' show SmartBrand, SmartProduct;
-import 'package:buildsmart/screens/home_shell.dart'
+import 'package:buildsmart/screens/contractor_tools_sheets.dart'
     show CheaperAlt, cheaperAlternativesAcrossCatalog;
 
 // ─── 62. PREDICTIVE STOCK — proto preds @21157-21162 ──────────────────────────

@@ -207,7 +207,13 @@ fi
 if [[ "$LOCAL_HOOK_HASH" != "missing" && "$LOCAL_HOOK_HASH" != "$CURRENT_HOOK_HASH" ]]; then
     err "81" "ה-hook המקומי שונה מ-.githooks/" "cp .githooks/pre-commit .git/hooks/"
 fi
-if ! git diff --quiet HEAD -- "$REPO_ROOT/.githooks/pre-commit" 2>/dev/null; then
+# שער 81 (worktree-safe): `git diff --quiet HEAD` נותן false-positive תחת
+# ה-temp-index של commit ב-linked worktree — קובץ זהה ל-HEAD דווח כ"שונה"
+# וחוסם כל commit מ-worktree. משווים hash מנורמל-CRLF של blob-HEAD מול
+# קובץ-העבודה (לא נוגע ב-index; tr -d '\r' שומר על תיקון CRLF #31).
+HOOK_HEAD_N=$(git show "HEAD:.githooks/pre-commit" 2>/dev/null | tr -d '\r' | sha256sum | cut -d' ' -f1)
+HOOK_WORK_N=$(tr -d '\r' < "$REPO_ROOT/.githooks/pre-commit" | sha256sum | cut -d' ' -f1)
+if [[ "$HOOK_HEAD_N" != "$HOOK_WORK_N" ]]; then
     STAGED_HOOK=$(git diff --cached --name-only | grep "^\.githooks/pre-commit$" | head -1)
     if [[ -z "$STAGED_HOOK" ]]; then
         err "81" "pre-commit השתנה אבל לא ב-staging" "git add .githooks/pre-commit (או שחזר)"

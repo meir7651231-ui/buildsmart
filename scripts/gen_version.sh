@@ -10,7 +10,12 @@
 #   - template-עם-גרשיים מפורש (מקבץ) — const String חוקי, לא שגיאת-קומפילציה
 set -euo pipefail
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
+# Repo root from the script's OWN path — robust to GIT_DIR being set by git
+# hooks (pre-commit/pre-push). With GIT_DIR set, `git rev-parse --show-toplevel`
+# resolves to the cwd, not the work-tree root, so in a linked worktree it
+# returned …/app_flutter and `cd "$REPO_ROOT/app_flutter"` doubled the path and
+# crashed (set -e). Deriving from BASH_SOURCE is git-env-independent.
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT/app_flutter"
 
 LABEL=$(grep -oE 'v[0-9]+\.[0-9]+' knowledge/STATUS.md 2>/dev/null | head -1)

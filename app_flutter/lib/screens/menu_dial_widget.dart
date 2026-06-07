@@ -2,13 +2,12 @@ import 'package:buildsmart/data/menu_trees.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/settings_tree.dart';
 import 'package:buildsmart/screens/ai_hub_screen.dart';
+import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/finance_hub_sheets.dart';
 import 'package:buildsmart/screens/projects_screen.dart';
 import 'package:buildsmart/screens/rewards_hub_screen.dart';
-import 'package:buildsmart/screens/scan_menu_screen.dart';
 import 'package:buildsmart/screens/site_hub_screen.dart';
 import 'package:buildsmart/screens/stock_screen.dart';
-import 'package:buildsmart/screens/store_screen.dart' show StoreSection, storeSectionProvider;
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/chat_settings.dart';
@@ -27,7 +26,6 @@ void _closeMenuDial(WidgetRef ref) {
   ref.read(menuTabProvider.notifier).state = null;
   ref.read(homeDrillProvider.notifier).state = const [];
   ref.read(projectsDrillProvider.notifier).state = const [];
-  ref.read(cartDrillProvider.notifier).state = const [];
 }
 
 /// Menu `plan-*` leaf id → scan-screen plan key (data/contractor_seeds.dart).
@@ -52,7 +50,7 @@ final Map<String, void Function(BuildContext)> _kSiteOpeners = {
   'site-archive': openSiteArchive,
 };
 
-/// Menu FAB dial — 4 tabs (home · projects · cart · settings).
+/// Menu FAB dial — 3 tabs (home · projects · settings).
 /// Each tab opens a section tree with arbitrary-depth drilling.
 class MenuDialWidget extends ConsumerWidget {
   const MenuDialWidget({super.key});
@@ -65,7 +63,6 @@ class MenuDialWidget extends ConsumerWidget {
     return switch (tab) {
       MenuTab.home     => const _SectionDrill(tab: MenuTab.home),
       MenuTab.projects => const _SectionDrill(tab: MenuTab.projects),
-      MenuTab.cart     => const _SectionDrill(tab: MenuTab.cart),
       MenuTab.settings => const _SettingsDrill(),
     };
   }
@@ -79,7 +76,6 @@ class _TabsRoot extends ConsumerWidget {
     const tabs = [
       (tab: MenuTab.home,     label: 'בית',         emoji: '🏠'),
       (tab: MenuTab.projects, label: 'הפרויקטים',   emoji: '🏗️'),
-      (tab: MenuTab.cart,     label: 'רכש',         emoji: '🛒'),
       (tab: MenuTab.settings, label: 'הגדרות',      emoji: '⚙️'),
     ];
     return DialColumn(
@@ -104,21 +100,18 @@ class _SectionDrill extends ConsumerWidget {
   StateProvider<List<String>> get _drillProvider => switch (tab) {
         MenuTab.home     => homeDrillProvider,
         MenuTab.projects => projectsDrillProvider,
-        MenuTab.cart     => cartDrillProvider,
         MenuTab.settings => throw StateError('settings uses its own widget'),
       };
 
   List<Section> get _root => switch (tab) {
         MenuTab.home     => kHomeTree,
         MenuTab.projects => projectsTree(),
-        MenuTab.cart     => kCartTree,
         MenuTab.settings => const [],
       };
 
   ({String label, String emoji}) get _tabAnchor => switch (tab) {
         MenuTab.home     => (label: 'בית',        emoji: '🏠'),
         MenuTab.projects => (label: 'הפרויקטים',  emoji: '🏗️'),
-        MenuTab.cart     => (label: 'רכש',        emoji: '🛒'),
         MenuTab.settings => (label: 'הגדרות',     emoji: '⚙️'),
       };
 
@@ -157,26 +150,11 @@ class _SectionDrill extends ConsumerWidget {
             onTap: () {
               if (s.hasChildren) {
                 ref.read(_drillProvider.notifier).state = [...path, s.title];
-              } else if (s.id == 'cart-mine') {
-                ref.read(storeSectionProvider.notifier).state = StoreSection.cart;
-                ref.read(mainTabProvider.notifier).state = 3;
-                ref.read(menuTabProvider.notifier).state = null;
-                ref.read(_drillProvider.notifier).state = const [];
-              } else if (s.id.startsWith('svc-')) {
-                // The רכש → ההזמנות שלי services (rental/deposits/return/rfq/
-                // msds/compare) have a live backing — the store services hub.
-                // Route there instead of a בבנייה stub (audit M5).
-                ref.read(storeSectionProvider.notifier).state =
-                    StoreSection.services;
-                ref.read(mainTabProvider.notifier).state = 3;
-                ref.read(menuTabProvider.notifier).state = null;
-                ref.read(_drillProvider.notifier).state = const [];
               } else if (s.id.startsWith('ai-')) {
                 Navigator.of(context).push(AIHubScreen.route());
                 _closeMenuDial(ref);
               } else if (_kScanKey.containsKey(s.id)) {
-                Navigator.of(context)
-                    .push(ScanMenuScreen.route(planKey: _kScanKey[s.id]));
+                openScanPlanSheet(context, planKey: _kScanKey[s.id]);
                 _closeMenuDial(ref);
               } else if (s.id == 'stock-warehouse' || s.id == 'stock-site') {
                 Navigator.of(context).push(StockScreen.route());

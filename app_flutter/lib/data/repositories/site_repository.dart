@@ -12,7 +12,7 @@
 //
 // CURRENT BACKING (what T6.2's local impl will wrap):
 //   • `kProjects` (`data/projects.dart`) — the 3 demo projects + active id.
-//   • `kHomeTree` / `kCartTree` site-tools sections (`data/menu_trees.dart`).
+//   • `kHomeTree` site-tools sections (`data/menu_trees.dart`).
 //   • `kPlanTypes` (`data/contractor_seeds.dart`) — the 4 📐 plan-scan types.
 //   • `kSafetyTips` + `kBudgetThresholds` / `budgetLevel`
 //     (`data/contractor_seeds.dart`) — the rotating 🦺 tip + the alert bands.

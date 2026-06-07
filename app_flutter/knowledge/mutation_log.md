@@ -493,3 +493,9 @@
   ה-split (catalog+acc==total) ואת ה-flow (כל seed stage ∈ ORDER_FLOW). מוטציה בכל
   getter נתפסת. (`contractorCredit`/`mgrCustomerList` = foundation ל-M3, נבדקים גם הם:
   band 30k-120k · דטרמיניסטיות · group-by-buyer aggregation.)
+
+### lib/screens/contractor_tools_sheets.dart — 2026-06-07T05:23:07+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s/b.savings.compareTo(a.savings)/a.savings.compareTo(b.savings)/`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/cheaper_alternatives_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

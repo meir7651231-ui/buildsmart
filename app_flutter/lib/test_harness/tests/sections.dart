@@ -178,7 +178,7 @@ List<TestResult> testSections() {
     ),
     _runResult(
       id: 'sections:menus',
-      label: 'kHomeTree · kCartTree · kFinanceHub',
+      label: 'kHomeTree · kFinanceHub',
       area: 'תפריטים',
       run: () {
         final checks = <TestCheck>[];
@@ -200,23 +200,6 @@ List<TestResult> testSections() {
             got: '${s.children.length}',
           ));
         }
-
-        checks.add(TestCheck(
-          name: 'kCartTree מכיל 2 items',
-          pass: kCartTree.length == 2,
-          expected: '2',
-          got: '${kCartTree.length}',
-        ));
-        final orders = kCartTree.firstWhere(
-          (s) => s.id == 'cart-orders',
-          orElse: () => const Section(id: '', emoji: '', title: ''),
-        );
-        checks.add(TestCheck(
-          name: 'cart-orders עם 6 ילדים',
-          pass: orders.children.length == 6,
-          expected: '6',
-          got: '${orders.children.length}',
-        ));
 
         checks.add(TestCheck(
           name: 'kFinanceHub מכיל 10 items',
@@ -259,7 +242,6 @@ List<TestResult> testSections() {
           'worker':  kWorkerSections,
           'manager': kManagerSections,
           'home':    kHomeTree,
-          'cart':    kCartTree,
           'finance': kFinanceHub,
         };
         for (final entry in allTrees.entries) {

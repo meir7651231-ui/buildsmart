@@ -2,7 +2,7 @@
 // each of the 4 plan types scans to cart lines (one per detected zone item) at
 // the cheapest partner-store offer. Data verbatim from kPlanTypes (proto §9).
 import 'package:buildsmart/data/contractor_seeds.dart';
-import 'package:buildsmart/screens/home_shell.dart';
+import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

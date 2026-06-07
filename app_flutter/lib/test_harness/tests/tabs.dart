@@ -58,7 +58,7 @@ List<TestResult> testTabs(WidgetRef ref) {
     ),
     _runOne(
       id: 'tabs:menu',
-      label: 'menuTab — 4 טאבים של תפריט',
+      label: 'menuTab — 3 טאבים של תפריט',
       area: 'תפריט',
       run: () {
         final checks = <TestCheck>[];

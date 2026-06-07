@@ -6,9 +6,10 @@
 import 'package:buildsmart/data/contractor_seeds.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/screens/budget_screen.dart';
-import 'package:buildsmart/screens/scan_menu_screen.dart';
+import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/stock_screen.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -107,7 +108,7 @@ void main() {
     test('4 plan types — each scans to >=1 cart line', () {
       expect(kPlanTypes, hasLength(4));
       for (final p in kPlanTypes) {
-        final lines = scanMenuCartLines(p);
+        final lines = scanPlanCartLines(p);
         final withStores = p.zones.fold<int>(0,
             (s, z) => s + z.items.where((it) => it.stores.isNotEmpty).length);
         expect(lines.length, withStores, reason: p.label);
@@ -121,7 +122,7 @@ void main() {
           for (final z in p.zones)
             for (final it in z.items) it.name: it,
         };
-        for (final l in scanMenuCartLines(p)) {
+        for (final l in scanPlanCartLines(p)) {
           final it = byName[l.productName]!;
           final cheapest =
               it.stores.map((s) => s.price).reduce((a, b) => a < b ? a : b);
@@ -134,7 +135,7 @@ void main() {
 
     test('plumbing אסלה → cheapest אבן קיסר 740 (verbatim §9b)', () {
       final plumbing = kPlanTypes.firstWhere((p) => p.key == 'plumbing');
-      final toilet = scanMenuCartLines(plumbing)
+      final toilet = scanPlanCartLines(plumbing)
           .firstWhere((l) => l.productName.contains('אסלה'));
       expect(toilet.brandName, 'אבן קיסר');
       expect(toilet.brandPrice, 740);
@@ -144,12 +145,46 @@ void main() {
       final c = ProviderContainer();
       addTearDown(c.dispose);
       final plumbing = kPlanTypes.firstWhere((p) => p.key == 'plumbing');
-      final lines = scanMenuCartLines(plumbing);
+      final lines = scanPlanCartLines(plumbing);
       final cart = c.read(smartCartProvider.notifier);
       for (final l in lines) {
         cart.add(l);
       }
       expect(c.read(smartCartProvider), hasLength(lines.length));
+    });
+
+    // R9 modal sheet (canonical) — openScanPlanSheet with a planKey deep-link
+    // (menu leaf wiring) skips the picker and auto-starts that plan's scan.
+    testWidgets('openScanPlanSheet planKey auto-starts the plan scan',
+        (tester) async {
+      late BuildContext sheetContext;
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) {
+                  sheetContext = context;
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      openScanPlanSheet(sheetContext, planKey: 'plumbing');
+      await tester.pump(); // open the sheet
+      await tester.pump(); // post-frame deep-link _start
+
+      // Picker title is gone (it auto-started); the scanning view is showing.
+      expect(find.text('📐 סרוק תוכנית עבודה'), findsNothing);
+      expect(find.text('מנתח את תצורת הבנייה ומחלץ כמויות חומרים…'), findsOneWidget);
+
+      // Let the 4-step scan timer finish → results phase reveals the summary.
+      await tester.pump(const Duration(milliseconds: 750 * 4));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('זוהו'), findsOneWidget);
     });
   });
 }

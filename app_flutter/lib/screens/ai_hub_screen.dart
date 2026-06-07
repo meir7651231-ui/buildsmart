@@ -4,6 +4,7 @@ import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/logic/ai_hub_logic.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show searchQueryProvider;
+import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/theme/tokens.dart';
@@ -112,6 +113,12 @@ class AIHubScreen extends ConsumerWidget {
                           _runBarcode(context, ref);
                         case 'voice':
                           _runVoice(context, ref);
+                        case 'alt':
+                          // Canonical R9 modal sheet (no duplicate full screen).
+                          openCheaperAlternativesSheet(context);
+                        case 'plan':
+                          // Canonical R9 modal sheet (no duplicate full screen).
+                          openScanPlanSheet(context);
                         default:
                           Navigator.of(context)
                               .push(_AIFeatureScreen.route(t.id));
@@ -140,8 +147,6 @@ class _AIFeatureScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final body = switch (id) {
       'stock' => const _PredictStock(),
-      'alt' => const _Alternatives(),
-      'plan' => const _PlanScan(),
       '3way' => const _ThreeWay(),
       'weather' => const _Weather(),
       'wear' => const _Wear(),
@@ -207,155 +212,6 @@ class _PredictStock extends StatelessWidget {
               ],
             ),
           ),
-      ],
-    );
-  }
-}
-
-// ─── 65. CHEAPER ALTERNATIVES — proto aiAlternatives @21232 ───────────────────
-class _Alternatives extends StatelessWidget {
-  const _Alternatives();
-
-  @override
-  Widget build(BuildContext context) {
-    final found = aiAlternatives();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const AiMdHead(
-          ic: '💡',
-          title: 'חלופות זולות',
-          sub: 'המערכת מאתרת מוצרים חליפיים זולים יותר באותה קטגוריה.',
-        ),
-        const SizedBox(height: BsTokens.space3),
-        if (found.isEmpty)
-          const _AiEmpty('לא נמצאו חלופות זולות יותר')
-        else
-          for (final f in found)
-            AiCard(
-              overdue: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('📂 ${f.cat}',
-                      style: const TextStyle(
-                          color: BsTokens.mutedLight, fontSize: 12)),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _AltSide(
-                          name: f.fromName,
-                          price: fMoney(f.fromPrice),
-                          up: false,
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text('←', style: TextStyle(fontSize: 20)),
-                      ),
-                      Expanded(
-                        child: _AltSide(
-                          name: f.toName,
-                          price: fMoney(f.toPrice),
-                          up: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text('חיסכון אפשרי: ${fMoney(f.save)}',
-                      style: const TextStyle(
-                        color: Color(0xFF2E7D32),
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      )),
-                ],
-              ),
-            ),
-      ],
-    );
-  }
-}
-
-class _AltSide extends StatelessWidget {
-  const _AltSide({required this.name, required this.price, required this.up});
-
-  final String name;
-  final String price;
-  final bool up;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(name,
-            style: const TextStyle(color: BsTokens.inkLight, fontSize: 13)),
-        const SizedBox(height: 2),
-        Text(price,
-            style: TextStyle(
-              color: up ? const Color(0xFF2E7D32) : BsTokens.inkLight,
-              fontWeight: FontWeight.w800,
-              fontSize: 15,
-            )),
-      ],
-    );
-  }
-}
-
-// ─── 66. PDF PLAN SCAN — proto aiPlanResult @21283 ────────────────────────────
-class _PlanScan extends StatelessWidget {
-  const _PlanScan();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const AiMdHead(
-          ic: '📐',
-          title: 'סריקת תוכניות PDF',
-          sub: 'החומרים שזוהו מהתוכנית:',
-        ),
-        const SizedBox(height: BsTokens.space3),
-        const AiServerNote('⚙️ בפרודקשן: זיהוי תוכניות (CV/AI) בשרת'),
-        const SizedBox(height: BsTokens.space2),
-        Container(
-          padding: const EdgeInsets.all(BsTokens.space3),
-          decoration: BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-            border: Border.all(color: const Color(0xFFEEEEEE)),
-          ),
-          child: Column(
-            children: [
-              for (final it in kPlanResult)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(it.name,
-                          style: const TextStyle(
-                              color: BsTokens.inkLight, fontSize: 14)),
-                      Text(it.qty,
-                          style: const TextStyle(
-                            color: BsTokens.inkLight,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 14,
-                          )),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(height: BsTokens.space3),
-        AiPrimary(
-          label: 'הוסף הכל לסל',
-          onTap: () => showToast(context, '4 פריטים נוספו לסל'),
-        ),
       ],
     );
   }
@@ -845,22 +701,6 @@ class AiServerNote extends StatelessWidget {
       ),
       child: Text(text,
           style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12)),
-    );
-  }
-}
-
-class _AiEmpty extends StatelessWidget {
-  const _AiEmpty(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: BsTokens.space5),
-      child: Text(text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
     );
   }
 }

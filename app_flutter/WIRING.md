@@ -1029,3 +1029,20 @@ Rule in CONVENTIONS.md. Guards: huliot_card_render_test (2) + huliot_search_test
   `BsTokens.inkLight/mutedLight` (token-equal · אפס שינוי-render/wiring). ראה `POLISH_LOG.md` #7.
 - **P-3** (`toast`/`chain_diagram`): font-literals → `BsTokens.fontXs/Sm/Md/Lg` (token-equal).
 - **P-4**: הוסר `go_router` (dependency מת, 0 שימושים).
+
+## Dedup consolidation — scan/alternatives unified to canonical R9 sheets
+- **Why:** Phase-1 added duplicate full-screens (`ScanMenuScreen`, AI-hub `_Alternatives`/`_PlanScan`)
+  for features already implemented as catalog ⋮ modal sheets (T2/T3 above). Audit flagged it; fixed by
+  upgrading the EXISTING sheets and deleting the duplicates (R9 = modal sheet is canonical).
+- **New shared file `contractor_tools_sheets.dart`** (moved verbatim from `home_shell.dart`, no string/number change):
+  `CheaperAlt`/`cheaperAlternativesAcrossCatalog`/`_CheaperAlternativesSheet`,
+  `StoreCompareRow`/`storePriceComparisonAcrossCatalog`/`_StorePriceComparisonSheet`/`_StoreChip`,
+  `scanPlanCartLines`/`_ScanPlanSheet`. Public openers: `openScanPlanSheet(ctx,{planKey})` ·
+  `openCheaperAlternativesSheet(ctx)` · `openPriceCompareSheet(ctx)` (avoids home_shell↔leaf import cycle).
+- **`_ScanPlanSheet` upgraded** with `initialPlanKey` deep-link (auto-starts the matching `kPlanTypes` plan) —
+  ports the only extra the deleted `ScanMenuScreen` had. Guard: `budget_stock_scan_test` widget test.
+- **Rewiring:** `menu_dial_widget` plan-* → `openScanPlanSheet(planKey)`; `ai_hub_screen` alt/plan tiles →
+  the canonical sheets; `home_shell` catalog ⋮ → openers; `ai_hub_logic` repointed to the new file.
+- **Deleted:** `lib/screens/scan_menu_screen.dart`. Net −1,144/+57. Gate: analyze 0 · 1642 tests · build web ✓.
+- **Open TODO:** `knowledge/TODO-dedup-gate.md` — protocol has NO anti-dup gate (structural overlaps רכש≈Store,
+  הגדרות≈dedicated screens still pending decision).

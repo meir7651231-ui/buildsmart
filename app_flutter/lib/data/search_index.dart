@@ -172,7 +172,6 @@ const List<SearchEntry> kSearchIndex = [
   // ── Menu tabs (L1) ────────────────────────────────────────────────────
   SearchEntry(emoji: '🏠',  title: 'בית',        breadcrumb: 'תפריט', type: SearchType.menu),
   SearchEntry(emoji: '🏗️', title: 'הפרויקטים', breadcrumb: 'תפריט', type: SearchType.menu),
-  SearchEntry(emoji: '🛒',  title: 'רכש',        breadcrumb: 'תפריט', type: SearchType.menu),
   SearchEntry(emoji: '⚙️',  title: 'הגדרות',     breadcrumb: 'תפריט', type: SearchType.menu),
 
   // ── Menu › בית ────────────────────────────────────────────────────────
@@ -221,16 +220,6 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '⏰',  title: 'פיצויים וקנסות',         breadcrumb: 'תפריט › הפרויקטים › מרכז פיננסים', type: SearchType.menu),
   SearchEntry(emoji: '📄',  title: 'דוחות PDF',               breadcrumb: 'תפריט › הפרויקטים › מרכז פיננסים', type: SearchType.menu),
   SearchEntry(emoji: '💱',  title: 'רכש במט״ח',              breadcrumb: 'תפריט › הפרויקטים › מרכז פיננסים', type: SearchType.menu),
-
-  // ── Menu › רכש ────────────────────────────────────────────────────────
-  SearchEntry(emoji: '🛒', title: 'הסל שלי',       breadcrumb: 'תפריט › רכש',                type: SearchType.menu),
-  SearchEntry(emoji: '📦', title: 'ההזמנות שלי',   breadcrumb: 'תפריט › רכש',                type: SearchType.menu),
-  SearchEntry(emoji: '🔧', title: 'השכרת כלים',    breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
-  SearchEntry(emoji: '💰', title: 'פקדונות',       breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
-  SearchEntry(emoji: '↩️', title: 'החזרה חדשה',   breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
-  SearchEntry(emoji: '📨', title: 'מכרז ספקים',    breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
-  SearchEntry(emoji: '🧪', title: 'גיליונות בטיחות', breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
-  SearchEntry(emoji: '📊', title: 'השוואת מחירים', breadcrumb: 'תפריט › רכש › ההזמנות שלי', type: SearchType.menu),
 
   // ── Settings groups (L1) ──────────────────────────────────────────────
   SearchEntry(emoji: '👤',  title: 'חשבון',             breadcrumb: 'הגדרות', type: SearchType.setting),

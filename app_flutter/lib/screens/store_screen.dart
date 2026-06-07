@@ -1,3 +1,4 @@
+import 'package:buildsmart/screens/finance_hub_sheets.dart';
 import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
@@ -738,6 +739,13 @@ class _QuickActionsRow extends ConsumerWidget {
               icon: Icons.phone_outlined,
               label: 'שיחה',
               onTap: () => _showSheet(context, const _SichaSheet()),
+            ),
+          ),
+          Expanded(
+            child: _QuickAction(
+              icon: Icons.account_balance_wallet_outlined,
+              label: 'כספים',
+              onTap: () => openFinanceHub(context),
             ),
           ),
         ],

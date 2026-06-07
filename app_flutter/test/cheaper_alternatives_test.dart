@@ -1,7 +1,7 @@
 // T1 DoD guard (PLAN-contractor-completion §T1): the catalog-⋮ "חלופות זולות"
 // scan finds real cheaper same-product alternatives from kHomeProductBrands
 // (the sheet renders these). Verbatim from proto §1b HOME_PRODUCTS price tiers.
-import 'package:buildsmart/screens/home_shell.dart';
+import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

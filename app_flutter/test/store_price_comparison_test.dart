@@ -1,7 +1,7 @@
 // T2 DoD guard (PLAN-contractor-completion §T2): the catalog-⋮ "השוואת מחירים"
 // scan compares each product across its partner stores and marks the cheapest.
 // Prices are verbatim from kPlanTypes store offers (proto §9b) — no invention.
-import 'package:buildsmart/screens/home_shell.dart';
+import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
