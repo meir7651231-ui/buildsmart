@@ -17,7 +17,7 @@ Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dar
 - **בחירה+היסטוריה (9):** cardSelection · brandHistory · cardFilter · cardAcc · cardVersions · savedConfigs · productFavorites · comparisonSet (≤4).
 - **סל+פרויקטים (5):** smartCart (`SmartCartLine`) · cardProjects · savedProjects · cartLists · draftQuote (≤30).
 - **גלישה (4):** recentSearches (≤8) · recentlyViewed (≤20) · catalogLens (category/variant/smartTree) · hiddenSections.
-- **UI-transient (8):** openDial · activePersona · bsDrillPath · menuTab · searchTool · mainTab · displayTemp · drill-paths.
+- **UI-transient (8):** openDial · activePersona · bsDrillPath · ~~menuTab~~ · searchTool · mainTab · displayTemp · drill-paths. *(⚠️ 07-06: ה-menu-dial הוסר — `menu_state`/`menuTab` צומצמו.)*
 - **flags+progress (5):** featureFlags · abExperiments · onboardingProgress · welcomeSeen · stageProgress.
 - **logs in-memory (4, לא-נשמר):** analyticsLog (≤500) · crashLog (≤200) · lastAction (≤50) · shareLog.
 - **גשרים:** `catalogProductForBrand` · `cartSafetyProvider` · `defaultBrandResolver` (cardSelection>brandHistory>recBrand>0).
@@ -52,7 +52,7 @@ Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dar
 ## G. Launch-readiness (`LAUNCH_READINESS.md`)
 - **קוד בריא:** ~92% roadmap · 0 analyze-errors · **1,023 בדיקות** (953 test+70 widget · 155 קבצים · 16,441ש׳, אומת-עצמי) · SSOT.
 - **Web/PWA 🟢 GO** (אחרי asset-opt 101MB→WebP). **iOS 🔴 NO-GO** (Info.plist camera/mic usage-strings + signing-team). **Android 🔴 NO-GO** (release-keystore + Play-account).
-- **P0 = store-config (לא קוד).** P1: asset-opt · status-line · הסרת-deps-לא-בשימוש (go_router?) · נעילת-theme.light · exclude-test_harness-מ-release · חיווט-search/menu-dials (5-FAB או BS-only) · global-error-handler. **חסום:** pricing(`brandPrice=0`)/ratings/AI/push/telephony.
+- **P0 = store-config (לא קוד).** P1: asset-opt · status-line · הסרת-deps-לא-בשימוש (go_router?) · נעילת-theme.light · exclude-test_harness-מ-release · חיווט-search-dial (ה-menu-dial הוסר 07-06) · global-error-handler. **חסום:** pricing(`brandPrice=0`)/ratings/AI/push/telephony.
 - **`LAUNCH_PACKAGE/`:** aab חתום 68MB · store-listing he/en · privacy-policy · data-safety · `SEND_TO_GOOGLE.md` runbook.
 
 ## H. ROADMAP (`SMARTPRODUCT_ROADMAP.md`, 100 צעדים · ~92% ✅)

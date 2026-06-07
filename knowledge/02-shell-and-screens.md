@@ -303,12 +303,12 @@ cart/orders→cart, catnav→catalog).
 ---
 
 ## 📱 Flutter (`app_flutter/lib/screens/`) — האפליקציה האמיתית (מעטפת) ⭐ נכתב-מחדש מ-whats-happening
-> מעטפת WhatsApp-style (`home_shell.dart`, **1033ש׳**): `Scaffold` + AppBar + **4 בוטם-טאבים** (`IndexedStack`) + 3 dial-overlays + cart-FAB. Riverpod.
+> מעטפת WhatsApp-style (`home_shell.dart`, **1033ש׳**): `Scaffold` + AppBar + **4 בוטם-טאבים** (`IndexedStack`) + dial-overlays (bs/search; **ה-menu-dial הוסר 07-06**) + cart-FAB. Riverpod.
 
 🔀 **המבנה האמיתי:**
 - **4 בוטם-טאבים:** **מחלקות · שיחות · התראות · חנות** (RTL). ✅ **אומת שורה-שורה** (`home_shell.dart:508–527` — labels מחלקות/שיחות/התראות/חנות). ⚠️ **תיקון:** טאב-0 = **`DepartmentsScreen`** (מחלקות: אינסטלציה · ברזים-וסניטריים · כלי-עבודה — 4 פעילות, 5 "בקרוב"), **לא "קטלוג"**. 🔎 **שורש-הבלבול נמצא:** אפילו ה-comment בקוד (ש׳32) כתוב "קטלוג", אבל ה-label המוצג בפועל = "מחלקות" — לכן ה-spec/KB רשמו "קטלוג". הקוד (ה-label) קובע. מחלקה → `CatalogScreen`.
 - **AppBar:** "BuildSmart" (→BS/role-picker) + שם-משתמש-chip + version-label + 🔍חיפוש · 📷מצלמה (`camera_sheet`, 5 מצבים) · ⋮תפריט(per-tab) · 💡סיור.
-- **3 dial-overlays** (`openDialProvider`+scrim, אחד-בכל-רגע): **bs** (5 פרסונות) · **search** (4 כלים) · **menu** (4 tabs בית/הפרויקטים/רכש/הגדרות) + **cart-FAB** (מוסתר בטאב-חנות).
+- **dial-overlays** (`openDialProvider`+scrim): **bs** (5 פרסונות) · **search** (4 כלים) + **cart-FAB** (מוסתר בטאב-חנות). ⚠️ **07-06:** ה-**menu**-dial (4 tabs בית/הפרויקטים/רכש/הגדרות) **הוסר** (cutover `b9737cf`) → כלי-הקבלן עברו לגישה-נייטיב (תפריט-בית/חנות/פרופיל/projects; ר׳ `00-START-HERE` §4.6).
 
 ⭐ **האפליקציה בוגרת — לא "shell + toast" (תיקון לטענה הקודמת שלי):**
 - **`CatalogScreen` (7,660ש׳)** = 8 sections (הכל · בית-Finder · תכנון-חיבור · קטגוריות · עץ-חכם · וריאנטים · מועדפים · חיפושים) · drill-עץ · חיפוש-עם-סינונימים · lens-selector · כרטיס-מוצר-חכם מלא.

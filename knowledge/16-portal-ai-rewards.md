@@ -25,6 +25,6 @@
 
 ## 📱 Flutter — דלתא (portal/AI/rewards) ⭐ נכתב-מחדש
 - **chat (F):** `chats_screen.dart` (**1,437ש׳**) = **טאב-ראשי native** (6 threads + bot auto-reply; פירוט בדוח 09). ה-צ׳אטבוט = thread + auto-reply.
-- **AI (G):** `kHomeTree` 🤖 = **9 כלי-AI כ-menu-dial toast-stubs** (חיזוי-מלאי/סורק/דיבור/חלופות/סריקה/3-way/מזג/בלאי/Analytics). barcode+voice **אמיתיים** (דוח 07).
-- ➖ **תגמולים (H):** BuildCoins/אתגרים/לוח-מובילים/VIP/קופונים — **לא הומרו** (אין gamification ב-Flutter; במקום — readiness-score per-מוצר).
-🔧 מול הפרוטוטייפ: F→טאב-אמיתי · G→toast-stubs · H→נעדר.
+- **AI (G):** **נבנה (07-06)** — `AIHubScreen` (`ai_hub_screen.dart` + `ai_hub_logic.dart`), נגיש מ**תפריט-בית**. barcode+voice אמיתיים; שאר ה-AI = תוצאה-מדומה. *(היה: 9 menu-dial toast-stubs — הדיאל הוסר.)*
+- **תגמולים (H):** **נבנה (07-06)** — `RewardsHubScreen` (`rewards_hub_screen.dart`, 7 פיצ'רים: אתגרים/מובילים/תגי-ירוק/קופונים/חבר-מביא-חבר/VIP/מימוש), נגיש מ**מסך-פרופיל** (`profile_screen.dart`). *(היה: לא-הומר.)*
+🔧 מול הפרוטוטייפ: F→טאב-אמיתי · G→hub-נבנה · H→hub-נבנה (עדכון 07-06).
