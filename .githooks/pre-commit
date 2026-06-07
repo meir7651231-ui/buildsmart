@@ -83,7 +83,7 @@ if git diff --cached --name-only | grep -q "version\.g\.dart"; then
 fi
 
 # ═══ מנגנון למידה: זיהוי retry ═══
-FINGERPRINT_FILE="$REPO_ROOT/.git/stuck_fingerprints.txt"
+FINGERPRINT_FILE="$(git rev-parse --absolute-git-dir)/stuck_fingerprints.txt"
 touch "$FINGERPRINT_FILE"
 
 # חתימת הניסיון הנוכחי (שמות הקבצים ב-staging)
