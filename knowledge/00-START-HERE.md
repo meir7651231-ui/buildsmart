@@ -100,7 +100,7 @@
 ### עקרונות-הטמעה (למי שמוסיף/מתקן)
 - **הכלים בנויים** — העבודה עכשיו = **אימות-עומק/תיקון**, לא בנייה-מאפס.
 - **Finance/Site = גרידי-10-אריחים כ-sheets** (`openFinanceHub`/`openSiteHub`). **Scan = sheet.** עצי-הכלים ב-`data/menu_trees.dart`.
-- **קבצי-ניווט-חמים** (חיווט-מרכזי בלבד): `home_shell.dart` · `data/menu_trees.dart` · `data/sections.dart` · `role_picker_sheet.dart`. (`menu_dial_widget.dart` + `bs_dial_widget.dart` — **נמחקו 07-06.**)
+- **קבצי-ניווט-חמים** (חיווט-מרכזי בלבד): `home_shell.dart` · `data/menu_trees.dart` · `data/sections.dart` · `role_picker_sheet.dart`. **כל ה-FAB dials (menu/bs/search) נמחקו 07-06 → ניווט 100% נייטיב.**
 - מסך-חדש = `screens/<x>.dart` + `route()`/`openXxx()` → דווח **"WIRE:"** וה-orchestrator מחבר לנקודה-הנכונה (בית / חנות / פרופיל / projects).
 
 ## 5. אות-התחלה (תחת LAW #0 — 9x9 פעיל)
