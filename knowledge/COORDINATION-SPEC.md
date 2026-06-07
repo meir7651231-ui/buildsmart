@@ -24,7 +24,7 @@
 
 ## 📐 סדר-ביצוע (sequencing)
 ```
-שלב-0 (serial · חוסם):   B0 (קטלגן) + T10 (סדרן) + T6.1 interface (מקבץ-A)
+שלב-0 (serial · חוסם):   B0 (קטלגן) + T6.1 interface (מקבץ-A)   [T10 בוטל — דיאל הוסר 07-06]
         ↓ merge-back לטרנק
 שלב-1 (מקבילי · disjoint): T1 ∥ T2 ∥ T3 ∥ T4 ∥ T5  (כל אחד worktree נפרד)
         ↓ merge-back תכוף (≤10 commits)
