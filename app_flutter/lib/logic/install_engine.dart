@@ -168,6 +168,11 @@ List<LineCheck> lineComplianceChecklist(
   // Supply-side compliance only applies to a pressurised supply line — a
   // gravity drainage line (traps + drain pipe) doesn't take an isolation valve.
   final isSupply = lineIsSupply(chain);
+  // A garden tap / hose outlet can back-siphon dirty water into the potable
+  // supply; code requires a vacuum-breaker (anti-siphon) device. No such product
+  // exists in the catalog yet, so this surfaces the requirement (warning) instead
+  // of silently passing — it cannot be auto-satisfied (no SKU to insert).
+  final hasGardenOutlet = chain.any((p) => p.categoryHe == 'ברזי גן');
 
   return [
     if (isSupply)
@@ -178,6 +183,11 @@ List<LineCheck> lineComplianceChecklist(
           recirc ? isolationCount >= 3 : isolationCount >= 1,
           'בידוד אזורי לתחזוקה',
           severity: CheckSeverity.critical),
+    if (isSupply && hasGardenOutlet)
+      LineCheck('שובר-ואקום למניעת זרימה-חוזרת', false,
+          'ברז-גן/חיבור-צינור דורש הגנה מפני זרימה-חוזרת למי-שתייה — '
+          'אין מק"ט בקטלוג, יש לספק בנפרד',
+          severity: CheckSeverity.warning),
     if (recirc) ...[
       LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}),
           'מונע זרימה הפוכה בלולאה', severity: CheckSeverity.critical),

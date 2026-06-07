@@ -534,6 +534,18 @@ green — no test had encoded these wrong joints. Two ambiguous items (`116203`
 "40/49", thread-side elbow `116207` "32/32") were left for human confirmation.
 Locked by `install_engine_b8_test`.
 
+**Backflow / vacuum-breaker (B10/E7):** a garden tap / hose outlet (`ברזי גן`) on a
+supply line can back-siphon dirty water into the potable supply; code requires a
+vacuum-breaker. `lineComplianceChecklist` now surfaces this as a WARNING-severity
+check ("שובר-ואקום למניעת זרימה-חוזרת") instead of silently passing. It is
+intentionally UNSATISFIABLE — no vacuum-breaker SKU exists in the catalog, so it
+cannot be auto-inserted and stays a warning (no `criticalOpen` impact). Adding a
+real VB product is flagged for the user. Locked by `install_engine_b10_test`.
+(E4 note: the high-value auto-compliance fix — auto-adding the dielectric union for
+the steel expansion tank — already shipped in B5; TMTV line-sizing was evaluated
+and dropped as a practical no-op since every fixture line carries a ½″≈DN15 outlet,
+and the PRV has no DN variants to size.)
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)

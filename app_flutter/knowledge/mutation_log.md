@@ -17,6 +17,18 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## install_engine — אזהרת שובר-ואקום לברז-גן (E7/B10) — 2026-06-08
+
+- **קובץ:** `test/install_engine_b10_test.dart` (חדש).
+- **מה עושה:** נועל ש-`lineComplianceChecklist` מסמן קו-אספקה עם ברז-גן (`'ברזי גן'`)
+  בבדיקת "שובר-ואקום" (warning, satisfied=false — אין מק"ט VB בקטלוג), ולא מסמן קו
+  ללא ברז-גן. severity=warning כדי שלא ישפיע על `criticalOpen`.
+- תקלה שהוזרקה: `hasGardenOutlet` → `categoryHe == 'MUT-B10'` (לא מזהה ברז-גן).
+- תוצאה: אדומה ✅ — "garden-tap line flagged" + "WARNING/unsatisfiable" נכשלו;
+  "non-garden NOT flagged" עבר (אישוש: ללא ברז-גן אין בדיקה).
+- ביטול → ירוק ✅ (B10 + auto_compliance + full_compliance + install_plan_coverage).
+- מסקנה: זיהוי-הגן load-bearing. **חלקי במכוון** — אין מוצר VB לחווט (task #20).
+
 ## lipskey_verified_connections — סריקת מקטינים/פקקים שטוחי-DN (B8) — 2026-06-08
 
 - **קובץ:** `test/install_engine_b8_test.dart` (חדש).
