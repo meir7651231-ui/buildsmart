@@ -4,6 +4,17 @@
 
 ---
 
+## v6.16 — fix-fleet · גל 6 (deferred resolved + D3)
+
+**שינוי:** סגירת ה"deferred" של גל 5 + D3.
+- **autoStock→OOS חי:** `storeOosProvider` הועבר ל-`lib/state/store_stock.dart` (screens→state, בלי מעגל); עלה ה-autoStock מציג את המוצרים שאזלו (היה stub).
+- **מחיקת-היסטוריית-צ׳אט:** `chatHistoryClearedProvider` מתמיד (light cleared-flag, R8) + confirm-dialog.
+- **D3:** `settings_tree.dart` המת (~70 עלים, 0 צרכנים) **נמחק** + ניתוק 2 קטעי-harness.
+
+**אימות:** `central-verify` gate — analyze 0 · `flutter test` · build · conformance 7/7 · required-tests.
+
+---
+
 ## v6.16 — audit מלא + fix-fleet · גל 5 (נחיל 9×9: dead-code + wiring)
 
 **שינוי:** audit-שלמות מלא (6 auditors סרקו את כל האפליקציה) → fix-fleet. האפליקציה נמצאה **מחווטת היטב ברובה**; הפערים מעטים.

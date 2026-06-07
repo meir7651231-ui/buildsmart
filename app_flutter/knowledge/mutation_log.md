@@ -505,3 +505,16 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/t3_ghi_rewards_ai_home_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### lib/data/settings_tree.dart (Wave 6 — מחיקה) — 2026-06-07
+- שינוי ה-lib/(logic|data) ב-commit זה = **מחיקת data מת בלבד**: `kSettingsGroups`/`walkSettings`
+  (~70 עלים const, 0 צרכנים, הוחלף ע"י מסכי-ההגדרות). אין logic/התנהגות למוטציה — נתון const שהוסר.
+- שאר Wave 6 (autoStock→OOS · chat-history cleared-flag · העברת `storeOosProvider` ל-lib/state) ב-
+  lib/screens|state; ל-`markOos` המועבר אין בדיקה ייעודית (ההתנהגות נשמרה verbatim בהעברה).
+  מכוסה ב-suite הירוק של השער (analyze 0 · tests · build · conformance 7/7 · required-tests).
+
+### lib/state/store_stock.dart — 2026-06-07T19:16:48+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s/{...state, name}/{...state}/`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/store_stock_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

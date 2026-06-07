@@ -1109,3 +1109,10 @@ Full-app completeness audit (6 area-auditors) → fix-fleet. The app proved larg
 - **Validation caught (kept honest):** `aiAlternatives()` is NOT dead (a live test exercises it) → KEPT. The store price-comparison row was ALREADY routed to `openPriceCompareSheet` (audit false-positive).
 - **Deferred — need a refactor / new infra (R8: not forced, not invented):** autoStock portal tile → live OOS list (needs `storeOosProvider` moved to `lib/state/` to avoid a circular import); chat history-clear (needs a persisted `chatHistoryProvider` — history is local widget state today). See `_gaps.md`.
 - Gate: central-verify green — analyze 0 · tests · build · conformance 7/7 · required-tests.
+
+## Wave 6 — deferred items resolved + dead-data removed (9×9 fleet)
+Closes the Wave-5 "deferred" list + D3.
+- **autoStock → live OOS:** moved `storeOosProvider` (+ its notifier + key) to a shared `lib/state/store_stock.dart` (screens→state, no cycle); the `autoStock` portal tile now renders the live out-of-stock products from it (was the "יחובר בהמשך" stub).
+- **chat history-clear:** added a persisted `chatHistoryClearedProvider` (mirrors the archive notifier); `_ChatPage` seeds empty once cleared; the 'מחיקת היסטוריה' row → confirm dialog → `clearAll()` (a light cleared-flag, NOT a full message store — R8).
+- **D3:** deleted the dead `lib/data/settings_tree.dart` (~70-leaf `kSettingsGroups`/`walkSettings`, 0 consumers — superseded by the screen-based settings); detached its 2 harness sections in `test_harness/tests/settings.dart`. (Stale `knowledge/` doc refs → separate scrub.)
+- Gate: central-verify green — analyze 0 · tests · build · conformance 7/7 · required-tests.

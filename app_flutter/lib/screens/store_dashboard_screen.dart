@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
@@ -7,52 +5,12 @@ import 'package:buildsmart/screens/persona_picking_sheet.dart';
 import 'package:buildsmart/screens/persona_portal.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
+import 'package:buildsmart/state/store_stock.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-// ─── persisted out-of-stock set ───────────────────────────────────────────────
-
-const String _kOosKey = 'bs.store-oos.v1';
-
-class _StoreOosNotifier extends StateNotifier<Set<String>> {
-  _StoreOosNotifier() : super(const {}) {
-    unawaited(_load());
-  }
-
-  Future<void> _load() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final list = prefs.getStringList(_kOosKey);
-      if (list != null) state = list.toSet();
-    } on Object catch (_) {/* keep empty */}
-  }
-
-  Future<void> _persist() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList(_kOosKey, state.toList());
-    } on Object catch (_) {/* best-effort */}
-  }
-
-  void markOos(String name) {
-    state = {...state, name};
-    unawaited(_persist());
-  }
-
-  void markAvailable(String name) {
-    state = {...state}..remove(name);
-    unawaited(_persist());
-  }
-}
-
-final storeOosProvider =
-    StateNotifierProvider<_StoreOosNotifier, Set<String>>(
-  (_) => _StoreOosNotifier(),
-);
 
 /// 🏪 חנות ספק — the supplier-store role app. Same shell/style as the
 /// contractor app (white AppBar + segmented tabs + card lists); a faithful port

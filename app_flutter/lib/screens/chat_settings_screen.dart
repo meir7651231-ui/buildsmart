@@ -1,3 +1,4 @@
+import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -389,9 +390,47 @@ class _ChatPrivacySection extends ConsumerWidget {
         ),
         const _PlaceholderRow(label: 'חסימת משתמשים'),
         const _PlaceholderRow(label: 'פרטי הפרופיל (תמונה / ביוגרפיה)'),
-        const _PlaceholderRow(label: 'מחיקת היסטוריה'),
+        _ActionRow(
+          label: 'מחיקת היסטוריה',
+          buttonLabel: 'מחק',
+          destructive: true,
+          onTap: () => _confirmClearHistory(context, ref),
+        ),
       ],
     );
+  }
+
+  Future<void> _confirmClearHistory(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF),
+            title: const Text(
+              'מחיקת היסטוריית שיחות',
+              style: TextStyle(color: BsTokens.inkLight),
+            ),
+            content: const Text(
+              'היסטוריית השיחות תימחק והשיחות ייפתחו ריקות.',
+              style: TextStyle(color: Colors.black54),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('ביטול'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+                child: const Text('מחק'),
+              ),
+            ],
+          ),
+    );
+    if ((ok ?? false) && context.mounted) {
+      ref.read(chatHistoryClearedProvider.notifier).clearAll();
+      if (context.mounted) showToast(context, 'ההיסטוריה נמחקה');
+    }
   }
 }
 

@@ -1,13 +1,17 @@
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/state/store_stock.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Shared persona-portal tiles for the 🏪 store + 🛵 courier role-apps
 /// (proto 06 §2.8 `renderStorePortal` [L20760] + §3.5 `openCourierPortal`
 /// [L20786]). Tiles whose data the prototype exposes verbatim (§7 ratings /
-/// zones / bulk tiers / fleet) open an info sheet with that data; the
-/// action-only tools (barcode, auto-stock, nav, POD, chat) show an honest
+/// zones / bulk tiers / fleet) open an info sheet with that data, and the
+/// auto-stock tile shows the LIVE out-of-stock products (the supplier's
+/// [storeOosProvider] set, shared with the store dashboard's מלאי tab); the
+/// remaining action-only tools (barcode, nav, POD, chat) show an honest
 /// "to be wired" line rather than faking a feature (R8 — no invention).
 
 enum PortalKind {
@@ -182,12 +186,12 @@ void showPortalSheet(BuildContext context, PortalTileData tile) {
   );
 }
 
-class _PortalSheet extends StatelessWidget {
+class _PortalSheet extends ConsumerWidget {
   const _PortalSheet({required this.tile});
   final PortalTileData tile;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         BsTokens.space4,
@@ -214,14 +218,14 @@ class _PortalSheet extends StatelessWidget {
               style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             ),
             const SizedBox(height: BsTokens.space4),
-            ..._content(),
+            ..._content(ref),
           ],
         ),
       ),
     );
   }
 
-  List<Widget> _content() {
+  List<Widget> _content(WidgetRef ref) {
     switch (tile.kind) {
       case PortalKind.ratings:
         return [
@@ -246,8 +250,18 @@ class _PortalSheet extends StatelessWidget {
           for (final v in kFleet)
             _row('${v.name} · ${v.cap} · ${v.status} · נהג ${v.driver}'),
         ];
-      case PortalKind.barcode:
       case PortalKind.autoStock:
+        // Live out-of-stock list — the supplier's [storeOosProvider] set, the
+        // same source the store dashboard's מלאי tab toggles.
+        final oos = ref.watch(storeOosProvider).toList()..sort();
+        if (oos.isEmpty) {
+          return [_row('✓ כל המוצרים זמינים במלאי')];
+        }
+        return [
+          _row('⚠️ ${oos.length} מוצרים אזלו מהמלאי'),
+          for (final name in oos) _row('❌ $name'),
+        ];
+      case PortalKind.barcode:
       case PortalKind.chatContractor:
       case PortalKind.nav:
       case PortalKind.pod:

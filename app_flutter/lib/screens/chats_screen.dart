@@ -98,6 +98,42 @@ final chatMutedIdsProvider =
   (_) => _ChatMutedNotifier(),
 );
 
+const String _kHistoryClearedKey = 'bs.chat-history-cleared.v1';
+
+/// Honest "מחיקת היסטוריה": chat history is ephemeral per-session widget state
+/// (there is no persisted message store). This flag — once set — makes new chat
+/// pages open empty instead of seeding the thread greeting/last message, and it
+/// survives restarts. It is the lightest truthful wiring short of a full store.
+class _ChatHistoryClearedNotifier extends StateNotifier<bool> {
+  _ChatHistoryClearedNotifier() : super(false) {
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      state = prefs.getBool(_kHistoryClearedKey) ?? false;
+    } on Object catch (_) {/* keep false */}
+  }
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_kHistoryClearedKey, state);
+    } on Object catch (_) {/* best-effort */}
+  }
+
+  void clearAll() {
+    state = true;
+    unawaited(_persist());
+  }
+}
+
+final chatHistoryClearedProvider =
+    StateNotifierProvider<_ChatHistoryClearedNotifier, bool>(
+  (_) => _ChatHistoryClearedNotifier(),
+);
+
 /// All thread ids — used by "השתק הכל".
 Set<String> get _allThreadIds => {for (final t in _kThreads) t.id};
 
@@ -769,6 +805,11 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
   @override
   void initState() {
     super.initState();
+    // Once history was cleared, every chat opens empty for the session (the flag
+    // is persisted, so it holds across restarts) — no greeting, no seed.
+    if (ref.read(chatHistoryClearedProvider)) {
+      return;
+    }
     // A brand-new chat starts empty; existing threads seed the last message.
     if (widget.thread.subtitle.isNotEmpty) {
       _messages.add((
