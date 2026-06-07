@@ -15,7 +15,6 @@ import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
-import 'package:buildsmart/screens/search_dial_widget.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/screens/store_settings_screen.dart';
 import 'package:buildsmart/screens/updates_screen.dart';
@@ -33,14 +32,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// X). Cleared whenever the cart shrinks so later adds surface fresh bubbles.
 final cartBubbleDismissedProvider = StateProvider<Set<int>>((_) => {});
 
-/// WhatsApp-style shell: AppBar + 4 bottom tabs + dial overlays.
+/// WhatsApp-style shell: AppBar + 4 bottom tabs.
 /// Tabs: קטלוג · שיחות · התראות · חנות (RTL order: catalog on right).
 class HomeShell extends ConsumerWidget {
   const HomeShell({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final open = ref.watch(openDialProvider);
     final tabIndex = ref.watch(mainTabProvider);
 
     // Benzi #4 — one-time "לאן לשלוח" popup on the FIRST product selection
@@ -72,25 +70,6 @@ class HomeShell extends ConsumerWidget {
               StoreScreen(), // 3 · חנות
             ],
           ),
-
-          // Scrim — tapping it closes any open dial.
-          if (open != OpenDial.none)
-            Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => resetAllDials(ref),
-                child: Container(color: Colors.black.withValues(alpha: 0.45)),
-              ),
-            ),
-
-          // Search dial — centered.
-          if (open == OpenDial.search)
-            const Positioned(
-              left: BsTokens.space4,
-              right: BsTokens.space4,
-              bottom: BsTokens.space5,
-              child: SearchDialWidget(),
-            ),
         ],
       ),
       bottomNavigationBar: _BottomNav(
@@ -112,16 +91,14 @@ class HomeShell extends ConsumerWidget {
           ref.read(mainTabProvider.notifier).state = i;
         },
       ),
-      floatingActionButton: (open == OpenDial.none && tabIndex != 3)
-          ? const _CartFab()
-          : null,
+      floatingActionButton: tabIndex != 3 ? const _CartFab() : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
 
-/// Floating cart button — visible whenever the cart has items (and no dial is
-/// open and we're not already on the store tab). Tapping jumps to the store.
+/// Floating cart button — visible whenever the cart has items (and we're not
+/// already on the store tab). Tapping jumps to the store.
 class _CartFab extends ConsumerWidget {
   const _CartFab();
 

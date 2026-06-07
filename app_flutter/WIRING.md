@@ -1116,3 +1116,11 @@ Closes the Wave-5 "deferred" list + D3.
 - **chat history-clear:** added a persisted `chatHistoryClearedProvider` (mirrors the archive notifier); `_ChatPage` seeds empty once cleared; the 'מחיקת היסטוריה' row → confirm dialog → `clearAll()` (a light cleared-flag, NOT a full message store — R8).
 - **D3:** deleted the dead `lib/data/settings_tree.dart` (~70-leaf `kSettingsGroups`/`walkSettings`, 0 consumers — superseded by the screen-based settings); detached its 2 harness sections in `test_harness/tests/settings.dart`. (Stale `knowledge/` doc refs → separate scrub.)
 - Gate: central-verify green — analyze 0 · tests · build · conformance 7/7 · required-tests.
+
+## Wave 7 — search-dial removed (the LAST FAB dial · 9×9 fleet)
+The search-dial was the last FAB dial (menu + BS already gone). A reachability audit confirmed `OpenDial.search` was never set by any user action (no search FAB; only the dial's own close + the harness), and every tool it offered is live in the in-catalog `_SearchToolsRow` (better-wired). So the entire `OpenDial`/dial machinery is gone:
+- **Deleted:** `lib/screens/search_dial_widget.dart`.
+- `dial_state.dart`: removed `enum OpenDial`, `openDialProvider`, `enum SearchTool`, `searchToolProvider` + their `resetAllDials` lines (kept `activePersonaProvider`, `mainTabProvider`, `tabHeaderHiddenProvider`). **No FAB-dial state remains in the app.**
+- `home_shell.dart`: removed the search-dial render + scrim + import; the cart FAB guard is now just `tabIndex != 3`. The real in-catalog search (`_SearchToolsRow`) + the `Icons.search` header button are untouched.
+- harness `buttons.dart`: dropped the search-dial/OpenDial test blocks. `lib/widgets/dial.dart` kept (test-only, via `dial_test_helper`).
+- **0 dial-symbol references remain** (byte-verified). Gate: central-verify green — analyze 0 · tests · build · conformance 7/7 · required-tests.

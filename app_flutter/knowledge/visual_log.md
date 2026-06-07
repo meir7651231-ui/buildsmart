@@ -4,6 +4,14 @@
 
 ---
 
+## v6.16 — fix-fleet · גל 7 (הסרת ה-search-dial — ה-FAB-dial האחרון)
+
+**שינוי:** ה-search-dial (ה-FAB-dial האחרון; menu + BS כבר הוסרו) **נמחק** — reachability-audit אישר ש-`OpenDial.search` לא נקבע ע"י שום פעולת-משתמש (אין search-FAB), וכל כליו חיים ב-`_SearchToolsRow` של הקטלוג (מחווט טוב יותר). נמחק `search_dial_widget.dart`; הוסרו `OpenDial`/`openDialProvider`/`SearchTool`/`searchToolProvider` + scrim + render (dial_state · home_shell · buttons). **אין יותר FAB-dial באפליקציה.** 0 הפניות נותרו (byte-verified).
+
+**אימות:** `central-verify` gate — analyze 0 · `flutter test` · build · conformance 7/7 · required-tests.
+
+---
+
 ## v6.16 — fix-fleet · גל 6 (deferred resolved + D3)
 
 **שינוי:** סגירת ה"deferred" של גל 5 + D3.
