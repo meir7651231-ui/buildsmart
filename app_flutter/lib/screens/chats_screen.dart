@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -850,6 +851,111 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
     });
   }
 
+  /// "עוד" overflow menu — real, working chat actions backed by the existing
+  /// mute/archive providers (not a placeholder). Block/search-in-chat are
+  /// honest stubs (no backing) shown inline.
+  Future<void> _showChatMenu(BuildContext context) async {
+    final id = widget.thread.id;
+    final muted = ref.read(chatMutedIdsProvider).contains(id);
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: const Color(0xFFFFFFFF),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetCtx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 12, 0, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.black12,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                leading: Icon(
+                  muted ? Icons.notifications_active_outlined
+                        : Icons.notifications_off_outlined,
+                  color: Colors.black54,
+                ),
+                title: Text(muted ? 'בטל השתקה' : 'השתק שיחה'),
+                onTap: () => Navigator.pop(sheetCtx, 'mute'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.archive_outlined,
+                    color: Colors.black54),
+                title: const Text('העבר לארכיון'),
+                onTap: () => Navigator.pop(sheetCtx, 'archive'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.search, color: Colors.black54),
+                title: const Text('חיפוש בשיחה'),
+                // Honest: in-thread search has no backing index in the demo.
+                enabled: false,
+                onTap: null,
+              ),
+              ListTile(
+                leading: const Icon(Icons.block, color: Colors.black54),
+                title: const Text('חסום איש קשר'),
+                // Honest: blocking requires a server contact list (not in demo).
+                enabled: false,
+                onTap: null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (!context.mounted || action == null) return;
+    if (action == 'mute') {
+      final notifier = ref.read(chatMutedIdsProvider.notifier);
+      final next = {...ref.read(chatMutedIdsProvider)};
+      if (muted) {
+        next.remove(id);
+      } else {
+        next.add(id);
+      }
+      notifier.setAll(next);
+      showToast(context, muted ? 'ההשתקה בוטלה' : 'השיחה הושתקה');
+    } else if (action == 'archive') {
+      ref.read(chatArchivedIdsProvider.notifier).archive(id);
+      showToast(context, 'שיחה הועברה לארכיון');
+      Navigator.of(context).pop(); // leave the now-archived chat page
+    }
+  }
+
+  /// Voice/video calls have no real-time backend in this build. Show an honest
+  /// "not available" dialog rather than a "בבנייה" toast.
+  void _showCallUnavailable(BuildContext context, {required bool video}) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: Text(video ? 'שיחת וידאו' : 'שיחה קולית'),
+        content: Text(
+          video
+              ? 'שיחות וידאו דורשות חיבור בזמן אמת ואינן זמינות בגרסת הדמו.'
+              : 'שיחות קוליות דורשות חיבור בזמן אמת ואינן זמינות בגרסת הדמו.',
+          textAlign: TextAlign.right,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('הבנתי'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final showOnline = widget.thread.isOnline &&
@@ -929,15 +1035,15 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.more_vert, color: Colors.black54),
-            onPressed: () => showToast(context, 'עוד — בבנייה'),
+            onPressed: () => _showChatMenu(context),
           ),
           IconButton(
             icon: const Icon(Icons.videocam_outlined, color: Colors.black54),
-            onPressed: () => showToast(context, 'שיחת וידאו — בבנייה'),
+            onPressed: () => _showCallUnavailable(context, video: true),
           ),
           IconButton(
             icon: const Icon(Icons.call_outlined, color: Colors.black54),
-            onPressed: () => showToast(context, 'שיחה — בבנייה'),
+            onPressed: () => _showCallUnavailable(context, video: false),
           ),
         ],
       ),
@@ -1195,6 +1301,160 @@ class _MiniPill extends StatelessWidget {
   }
 }
 
+// ─── input-bar actions ─────────────────────────────────────────────────────────
+
+/// Voice recording has no audio-capture backend in this build. Honest dialog
+/// (not a "בבנייה" toast).
+void _showVoiceUnavailable(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (dialogCtx) => AlertDialog(
+      title: const Text('הקלטת קול'),
+      content: const Text(
+        'הקלטת הודעות קוליות אינה זמינה בגרסת הדמו.',
+        textAlign: TextAlign.right,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogCtx),
+          child: const Text('הבנתי'),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Attachment options sheet. Camera is a real flow (opens the camera sheet);
+/// document/location have no file-system/location backing in the demo and are
+/// shown as honest disabled rows.
+void _showAttachSheet(BuildContext context) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: const Color(0xFFFFFFFF),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (sheetCtx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 12, 0, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.black12,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined,
+                  color: BsTokens.brand),
+              title: const Text('מצלמה'),
+              onTap: () {
+                Navigator.pop(sheetCtx);
+                openCameraSheet(context);
+              },
+            ),
+            const ListTile(
+              leading: Icon(Icons.insert_drive_file_outlined,
+                  color: Colors.black38),
+              title: Text('מסמך'),
+              subtitle: Text('לא זמין בדמו'),
+              enabled: false,
+            ),
+            const ListTile(
+              leading: Icon(Icons.location_on_outlined, color: Colors.black38),
+              title: Text('מיקום'),
+              subtitle: Text('לא זמין בדמו'),
+              enabled: false,
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// Common chat emojis. Tapping inserts the glyph at the caret in [controller]
+/// — a real, fully-working client-side flow (no backend needed).
+const List<String> _kChatEmojis = [
+  '😀', '😁', '😂', '🙂', '😉', '😍', '😘', '😎',
+  '🤔', '👍', '👏', '🙏', '💪', '🔥', '✅', '❌',
+  '🎉', '❤️', '👀', '🚗', '🚚', '🏗️', '🔧', '📦',
+  '📐', '🧱', '🪛', '⏰', '💰', '📋', '⚠️', '😅',
+];
+
+void _showEmojiPicker(BuildContext context, TextEditingController controller) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: const Color(0xFFFFFFFF),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (sheetCtx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 14),
+            GridView.count(
+              crossAxisCount: 8,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                for (final e in _kChatEmojis)
+                  InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      _insertText(controller, e);
+                      Navigator.pop(sheetCtx);
+                    },
+                    child: Center(
+                      child: Text(e, style: const TextStyle(fontSize: 24)),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// Inserts [text] at the current caret (or appends), keeping the caret after it.
+void _insertText(TextEditingController controller, String text) {
+  final value = controller.value;
+  final sel = value.selection;
+  if (!sel.isValid) {
+    controller.text = value.text + text;
+    controller.selection =
+        TextSelection.collapsed(offset: controller.text.length);
+    return;
+  }
+  final newText = value.text.replaceRange(sel.start, sel.end, text);
+  controller.value = value.copyWith(
+    text: newText,
+    selection: TextSelection.collapsed(offset: sel.start + text.length),
+    composing: TextRange.empty,
+  );
+}
+
 // ─── input bar ────────────────────────────────────────────────────────────────
 
 class _InputBar extends StatelessWidget {
@@ -1222,7 +1482,7 @@ class _InputBar extends StatelessWidget {
                   icon: hasText ? Icons.send : Icons.mic,
                   onTap: hasText
                       ? onSend
-                      : () => showToast(ctx, 'הקלטת קול — בבנייה'),
+                      : () => _showVoiceUnavailable(ctx),
                 );
               },
             ),
@@ -1246,7 +1506,8 @@ class _InputBar extends StatelessWidget {
                         color: Color(0xFF777777),
                         size: 22,
                       ),
-                      onPressed: () => showToast(context, 'מצלמה — בבנייה'),
+                      // Real flow — opens the in-app camera/scanner sheet.
+                      onPressed: () => openCameraSheet(context),
                     ),
                     IconButton(
                       padding: const EdgeInsets.all(10),
@@ -1256,7 +1517,7 @@ class _InputBar extends StatelessWidget {
                         color: Color(0xFF777777),
                         size: 22,
                       ),
-                      onPressed: () => showToast(context, 'צרף קובץ — בבנייה'),
+                      onPressed: () => _showAttachSheet(context),
                     ),
                     // Text input
                     Expanded(
@@ -1282,7 +1543,8 @@ class _InputBar extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Emoji (right side in RTL = leading)
+                    // Emoji (right side in RTL = leading) — real inline picker
+                    // that inserts the chosen glyph into the message field.
                     IconButton(
                       padding: const EdgeInsets.all(10),
                       constraints: const BoxConstraints(),
@@ -1291,7 +1553,7 @@ class _InputBar extends StatelessWidget {
                         color: Color(0xFF777777),
                         size: 22,
                       ),
-                      onPressed: () => showToast(context, 'אמוג׳י — בבנייה'),
+                      onPressed: () => _showEmojiPicker(context, controller),
                     ),
                   ],
                 ),

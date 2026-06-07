@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/screens/persona_picking_sheet.dart';
 import 'package:buildsmart/screens/persona_portal.dart';
+import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -155,6 +157,12 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     final ready = orders.countAt(OrderStage.ready);
     final revenue = orders.todayRevenue;
     final outCount = ref.watch(storeOosProvider).length;
+    final fulfillment = ref.watch(fulfillmentProvider);
+    // Orders held for a missing-item decision (proto §2.2 "held" card).
+    final held = orders.where((o) {
+      final f = fulfillment[o.id];
+      return f != null && f.heldForMissing;
+    }).toList();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -203,6 +211,18 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             ),
           ),
         const SizedBox(height: BsTokens.space3),
+
+        // Held-for-missing card (proto §2.2 [L17116]).
+        if (held.isNotEmpty) ...[
+          _ActionCard(
+            color: const Color(0xFFE08A00),
+            badge: '${held.length}',
+            title: 'הזמנות ממתינות לבחירת הקבלן',
+            sub: 'פריט חסר — ממתין להחלטה (החלפה / ביטול)',
+            onTap: () => showPickingSheet(context, held.first.id),
+          ),
+          const SizedBox(height: BsTokens.space3),
+        ],
 
         // Quick stats (3).
         Row(
@@ -343,7 +363,14 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             ),
           )
         else
-          for (final o in shown) _StoreOrderCard(order: o, onAdvance: _advance),
+          for (final o in shown)
+            _StoreOrderCard(
+              order: o,
+              fulfillment:
+                  ref.watch(fulfillmentProvider)[o.id] ?? const Fulfillment(),
+              onAdvance: _advance,
+              onOpenPick: () => showPickingSheet(context, o.id),
+            ),
       ],
     );
   }
@@ -764,19 +791,40 @@ class _Chip extends StatelessWidget {
 };
 
 class _StoreOrderCard extends StatelessWidget {
-  const _StoreOrderCard({required this.order, required this.onAdvance});
+  const _StoreOrderCard({
+    required this.order,
+    required this.fulfillment,
+    required this.onAdvance,
+    required this.onOpenPick,
+  });
   final SysOrder order;
+  final Fulfillment fulfillment;
   final void Function(SysOrder) onAdvance;
+  final VoidCallback onOpenPick;
 
   @override
   Widget build(BuildContext context) {
-    final pill = _storePill(order.stage);
-    final action = switch (order.stage) {
-      OrderStage.newOrder => ('✓ אשר וקבל להכנה', true),
-      OrderStage.preparing => ('📦 סמן כמוכן — העבר לשליח', true),
-      OrderStage.ready => ('🛵 מסור לשליח', true),
-      _ => ('✓ נמסר לשליח', false),
-    };
+    final held = fulfillment.heldForMissing;
+    final pill = held
+        ? (
+            label: 'פריט חסר',
+            bg: const Color(0xFFFFF4D6),
+            fg: const Color(0xFF8A6D00),
+          )
+        : _storePill(order.stage);
+
+    // proto §2.4 per-card button logic (held → wait; missingResolved → fix done;
+    // else the stage action), with the live two-step ready→pickup hand-off.
+    final (String label, bool active) = held
+        ? ('⏳ פריט חסר — אנא המתן להחלטת הקבלן', false)
+        : switch (order.stage) {
+            OrderStage.newOrder => ('✓ אשר וקבל להכנה', true),
+            OrderStage.preparing => ('📦 סמן כמוכן — העבר לשליח', true),
+            OrderStage.ready => ('🛵 מסור לשליח', true),
+            _ => ('✓ נמסר לשליח', false),
+          };
+    final splitTag =
+        fulfillment.splitInto > 1 ? ' · 🚚 הוכן ב-${fulfillment.splitInto} חבילות' : '';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
@@ -785,103 +833,149 @@ class _StoreOrderCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         elevation: 1,
         shadowColor: Colors.black26,
-        child: Padding(
-          padding: const EdgeInsets.all(BsTokens.space4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '📦 ${order.id}',
-                      style: const TextStyle(
-                        color: BsTokens.inkLight,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          onTap: onOpenPick,
+          child: Padding(
+            padding: const EdgeInsets.all(BsTokens.space4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Text(
+                            '📦 ${order.id}',
+                            style: const TextStyle(
+                              color: BsTokens.inkLight,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                            ),
+                          ),
+                          if (fulfillment.splitInto > 1) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE7F0FF),
+                                borderRadius: BorderRadius.circular(
+                                  BsTokens.radiusPill,
+                                ),
+                              ),
+                              child: Text(
+                                '🚚×${fulfillment.splitInto}',
+                                style: const TextStyle(
+                                  color: Color(0xFF2B6CB0),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: pill.bg,
+                        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                      ),
+                      child: Text(
+                        pill.label,
+                        style: TextStyle(
+                          color: pill.fg,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${order.who} · ${order.site}',
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 13.5,
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: pill.bg,
-                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                    ),
-                    child: Text(
-                      pill.label,
-                      style: TextStyle(
-                        color: pill.fg,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12.5,
-                      ),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  '🕒 נדרש: בתיאום',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${order.items} פריטים · ${fMoney(order.sum)} · הקש לתעודת ליקוט$splitTag',
+                  style: const TextStyle(
+                    color: BsTokens.mutedLight,
+                    fontSize: 12.5,
+                  ),
+                ),
+                if (!held && fulfillment.missingResolved) ...[
+                  const SizedBox(height: 2),
+                  const Text(
+                    '✓ תיקון בוצע — בדוק שינויים',
+                    style: TextStyle(
+                      color: Color(0xFF1F8A4C),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.5,
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${order.who} · ${order.site}',
-                style: const TextStyle(
-                  color: BsTokens.inkLight,
-                  fontSize: 13.5,
-                ),
-              ),
-              const SizedBox(height: 2),
-              const Text(
-                '🕒 נדרש: בתיאום',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '${order.items} פריטים · ${fMoney(order.sum)} · הקש לתעודת ליקוט',
-                style: const TextStyle(
-                  color: BsTokens.mutedLight,
-                  fontSize: 12.5,
-                ),
-              ),
-              const SizedBox(height: BsTokens.space3),
-              if (action.$2)
-                FilledButton(
-                  onPressed: () => onAdvance(order),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: order.stage == OrderStage.preparing
-                        ? BsTokens.brand
-                        : const Color(0xFF1F8A4C),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
+                const SizedBox(height: BsTokens.space3),
+                if (active)
+                  FilledButton(
+                    onPressed: () => onAdvance(order),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: order.stage == OrderStage.preparing
+                          ? BsTokens.brand
+                          : const Color(0xFF1F8A4C),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                      ),
+                    ),
+                    child: Text(
+                      label,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(vertical: 11),
+                    decoration: BoxDecoration(
+                      color: held
+                          ? const Color(0xFFFFF4D6)
+                          : const Color(0xFFF2F3F5),
                       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                     ),
-                  ),
-                  child: Text(
-                    action.$1,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: held
+                            ? const Color(0xFF8A6D00)
+                            : BsTokens.mutedLight,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                      ),
                     ),
                   ),
-                )
-              else
-                Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(vertical: 11),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF2F3F5),
-                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                  ),
-                  child: Text(
-                    action.$1,
-                    style: const TextStyle(
-                      color: BsTokens.mutedLight,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13.5,
-                    ),
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -7,6 +7,7 @@ import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
+import 'package:buildsmart/screens/home_content_reorder.dart';
 import 'package:buildsmart/screens/chat_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/menu_dial_widget.dart';
@@ -644,6 +645,10 @@ class _CatalogMenuButton extends ConsumerWidget {
           value: 'favorites',
           child: _MenuRow(emoji: '❤️', label: 'מועדפים'),
         ),
+        PopupMenuItem<String>(
+          value: 'home_content',
+          child: _MenuRow(emoji: '🏠', label: 'תוכן הבית'),
+        ),
         PopupMenuDivider(),
         PopupMenuItem<String>(
           value: 'settings',
@@ -655,6 +660,8 @@ class _CatalogMenuButton extends ConsumerWidget {
 
   void _onSelected(BuildContext context, WidgetRef ref, String value) {
     switch (value) {
+      case 'home_content':
+        Navigator.of(context).push(HomeContentReorder.route());
       case 'scan_plan':
         showModalBottomSheet<void>(
           context: context,

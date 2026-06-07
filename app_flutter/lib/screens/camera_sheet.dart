@@ -94,9 +94,30 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                     onPressed: () => Navigator.pop(context),
                   ),
                   const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.flash_off, color: Colors.black54, size: 24),
-                    onPressed: () => showToast(context, 'פלאש — בבנייה'),
+                  // Flash — wired to the real device torch via the scanner
+                  // controller. Reflects live torch state; honest-disabled
+                  // when the device reports no flash unit.
+                  ValueListenableBuilder<MobileScannerState>(
+                    valueListenable: _scanner,
+                    builder: (ctx, state, __) {
+                      final torch = state.torchState;
+                      final available = torch != TorchState.unavailable;
+                      final on = torch == TorchState.on;
+                      return IconButton(
+                        icon: Icon(
+                          on ? Icons.flash_on : Icons.flash_off,
+                          color: !available
+                              ? Colors.white24
+                              : on
+                                  ? BsTokens.brand
+                                  : Colors.white,
+                          size: 24,
+                        ),
+                        onPressed: !available
+                            ? () => showToast(ctx, 'אין פלאש במכשיר')
+                            : () => _scanner.toggleTorch(),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -155,7 +176,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                         itemBuilder: (ctx, i) {
                           if (i == _kGallery.length) {
                             return _GalleryAllBtn(
-                              onTap: () => showToast(context, 'גלריה מלאה — בבנייה'),
+                              // Honest: opening the device gallery needs a
+                              // platform picker not bundled in this build.
+                              onTap: () => _showGalleryUnavailable(context),
                             );
                           }
                           final g = _kGallery[i];
@@ -163,7 +186,14 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                             bg: g.bg,
                             icon: g.icon,
                             label: g.label,
-                            onTap: () => showToast(context, '${g.label} — בבנייה'),
+                            // Simulated preview of the demo photo (the gallery
+                            // is mock data — no device photo access here).
+                            onTap: () => _showGalleryPreview(
+                              context,
+                              bg: g.bg,
+                              icon: g.icon,
+                              label: g.label,
+                            ),
                           );
                         },
                       ),
@@ -233,6 +263,89 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
       ),
     );
   }
+}
+
+// ─── gallery preview (simulated) ────────────────────────────────────────────────
+
+/// Simulated full-screen preview of a demo gallery photo. The gallery strip is
+/// mock data, so this shows the same placeholder enlarged rather than a real
+/// image — an honest demo, not a toast.
+void _showGalleryPreview(
+  BuildContext context, {
+  required Color bg,
+  required IconData icon,
+  required String label,
+}) {
+  Navigator.of(context).push(
+    PageRouteBuilder<void>(
+      opaque: false,
+      barrierColor: Colors.black87,
+      pageBuilder: (ctx, _, __) => Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.pop(ctx),
+              child: ColoredBox(
+                color: bg,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, color: Colors.white24, size: 96),
+                    const SizedBox(height: 16),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                          color: Colors.white54, fontSize: 18),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'תצוגה מדומה — תמונת דמו',
+                      style: TextStyle(color: Colors.white30, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 0, left: 0, right: 0,
+              child: SafeArea(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.close,
+                        color: Colors.white, size: 28),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// Honest "device gallery unavailable" dialog (no platform picker bundled).
+void _showGalleryUnavailable(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (dialogCtx) => AlertDialog(
+      title: const Text('גלריית המכשיר'),
+      content: const Text(
+        'גישה לגלריית התמונות של המכשיר אינה זמינה בגרסת הדמו.',
+        textAlign: TextAlign.right,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogCtx),
+          child: const Text('הבנתי'),
+        ),
+      ],
+    ),
+  );
 }
 
 // ─── gallery thumbnail ────────────────────────────────────────────────────────

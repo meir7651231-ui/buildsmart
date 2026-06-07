@@ -1,6 +1,8 @@
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/screens/persona_pod_sheet.dart';
 import 'package:buildsmart/screens/persona_portal.dart';
+import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -207,7 +209,14 @@ class _CourierDashboardScreenState
               )
             else
               for (final o in jobs)
-                _CourierJobCard(order: o, onAdvance: _advance),
+                _CourierJobCard(
+                  order: o,
+                  podCaptured:
+                      (ref.watch(fulfillmentProvider)[o.id]?.podCaptured) ??
+                          false,
+                  onAdvance: _advance,
+                  onPod: () => showPodSheet(context, o.id),
+                ),
           ],
         ),
       ),
@@ -294,13 +303,24 @@ int _courierPhase(OrderStage s) => switch (s) {
 };
 
 class _CourierJobCard extends StatelessWidget {
-  const _CourierJobCard({required this.order, required this.onAdvance});
+  const _CourierJobCard({
+    required this.order,
+    required this.podCaptured,
+    required this.onAdvance,
+    required this.onPod,
+  });
   final SysOrder order;
+  final bool podCaptured;
   final void Function(SysOrder) onAdvance;
+  final VoidCallback onPod;
 
   @override
   Widget build(BuildContext context) {
     final pill = _courierPill(order.stage);
+    // POD is available once the order is in the courier's hands (pickup/transit)
+    // — proto §3.5 `courierPOD` lists transit/pickup orders.
+    final canPod =
+        order.stage == OrderStage.pickup || order.stage == OrderStage.transit;
     final haul = haulInfo(order.haul);
     final phase = _courierPhase(order.stage);
     // Two-step hand-off: the store owns ready→pickup ("מסור לשליח"); the courier
@@ -409,6 +429,29 @@ class _CourierJobCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (canPod) ...[
+                const SizedBox(height: BsTokens.space2),
+                OutlinedButton(
+                  onPressed: onPod,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 11),
+                    side: const BorderSide(color: Color(0xFFE0E0E0)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                    ),
+                  ),
+                  child: Text(
+                    podCaptured ? '📸 אישור מסירה · נשמר ✓' : '📸 אישור מסירה',
+                    style: TextStyle(
+                      color: podCaptured
+                          ? const Color(0xFF1F8A4C)
+                          : BsTokens.inkLight,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

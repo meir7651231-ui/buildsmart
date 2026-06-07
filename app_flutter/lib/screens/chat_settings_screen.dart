@@ -2,6 +2,7 @@ import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Full-screen Chat settings — 9 categories, ~40 leaves.
@@ -101,6 +102,28 @@ class _QuickReplyBanner extends StatelessWidget {
     'נחזור אליך 📞',
   ];
 
+  /// Honest info: the quick-reply set is fixed in this build. Tapping a chip
+  /// copies it; custom templates aren't editable yet.
+  void _showEditInfo(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('תשובות מהירות'),
+        content: const Text(
+          'התבניות קבועות בגרסה זו. הקש על תבנית כדי להעתיק אותה — '
+          'עריכת תבניות מותאמות אישית תתווסף בהמשך.',
+          textAlign: TextAlign.right,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('הבנתי'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -131,7 +154,7 @@ class _QuickReplyBanner extends StatelessWidget {
               ),
               const Spacer(),
               GestureDetector(
-                onTap: () => showToast(context, 'עריכת תבניות — בבנייה'),
+                onTap: () => _showEditInfo(context),
                 child: const Text(
                   'ערוך',
                   style: TextStyle(color: BsTokens.brand, fontSize: 13),
@@ -146,7 +169,14 @@ class _QuickReplyBanner extends StatelessWidget {
             children: [
               for (final t in _templates)
                 GestureDetector(
-                  onTap: () => showToast(context, 'תבנית — בבנייה'),
+                  // Real action: copy the template to the clipboard for pasting
+                  // into any chat (no chat is open from the settings screen).
+                  onTap: () async {
+                    await Clipboard.setData(ClipboardData(text: t));
+                    if (context.mounted) {
+                      showToast(context, 'התבנית הועתקה');
+                    }
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,

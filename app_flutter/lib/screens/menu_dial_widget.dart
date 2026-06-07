@@ -1,6 +1,13 @@
 import 'package:buildsmart/data/menu_trees.dart';
 import 'package:buildsmart/data/sections.dart';
 import 'package:buildsmart/data/settings_tree.dart';
+import 'package:buildsmart/screens/ai_hub_screen.dart';
+import 'package:buildsmart/screens/finance_hub_sheets.dart';
+import 'package:buildsmart/screens/projects_screen.dart';
+import 'package:buildsmart/screens/rewards_hub_screen.dart';
+import 'package:buildsmart/screens/scan_menu_screen.dart';
+import 'package:buildsmart/screens/site_hub_screen.dart';
+import 'package:buildsmart/screens/stock_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart' show StoreSection, storeSectionProvider;
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -14,6 +21,36 @@ import 'package:buildsmart/widgets/dial.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// Collapses the menu dial back to its closed root after a leaf action.
+void _closeMenuDial(WidgetRef ref) {
+  ref.read(menuTabProvider.notifier).state = null;
+  ref.read(homeDrillProvider.notifier).state = const [];
+  ref.read(projectsDrillProvider.notifier).state = const [];
+  ref.read(cartDrillProvider.notifier).state = const [];
+}
+
+/// Menu `plan-*` leaf id → scan-screen plan key (data/contractor_seeds.dart).
+const Map<String, String> _kScanKey = {
+  'plan-plumbing': 'plumbing',
+  'plan-electric': 'electrical',
+  'plan-arch': 'architectural',
+  'plan-finish': 'finishing',
+};
+
+/// Menu `site-*` leaf id → its site-hub opener (screens/site_hub_screen.dart).
+final Map<String, void Function(BuildContext)> _kSiteOpeners = {
+  'site-gantt': openSiteGantt,
+  'site-snag': openSiteSnagging,
+  'site-loc': openSiteLocations,
+  'site-attend': openSiteAttendance,
+  'site-diary': openSiteDiary,
+  'site-safety': openSiteSafety,
+  'site-deps': openSiteDeps,
+  'site-photos': openSitePhotos,
+  'site-inspect': openSiteInspect,
+  'site-archive': openSiteArchive,
+};
 
 /// Menu FAB dial — 4 tabs (home · projects · cart · settings).
 /// Each tab opens a section tree with arbitrary-depth drilling.
@@ -134,6 +171,25 @@ class _SectionDrill extends ConsumerWidget {
                 ref.read(mainTabProvider.notifier).state = 3;
                 ref.read(menuTabProvider.notifier).state = null;
                 ref.read(_drillProvider.notifier).state = const [];
+              } else if (s.id.startsWith('ai-')) {
+                Navigator.of(context).push(AIHubScreen.route());
+                _closeMenuDial(ref);
+              } else if (_kScanKey.containsKey(s.id)) {
+                Navigator.of(context)
+                    .push(ScanMenuScreen.route(planKey: _kScanKey[s.id]));
+                _closeMenuDial(ref);
+              } else if (s.id == 'stock-warehouse' || s.id == 'stock-site') {
+                Navigator.of(context).push(StockScreen.route());
+                _closeMenuDial(ref);
+              } else if (_kSiteOpeners.containsKey(s.id)) {
+                _kSiteOpeners[s.id]!(context);
+                _closeMenuDial(ref);
+              } else if (s.id.startsWith('fin-')) {
+                openFinanceLeaf(context, s.id);
+                _closeMenuDial(ref);
+              } else if (s.id.startsWith('PRJ')) {
+                Navigator.of(context).push(ProjectsScreen.route());
+                _closeMenuDial(ref);
               } else {
                 showToast(context, '🚧 ${s.title} — בבנייה');
               }
@@ -216,6 +272,13 @@ void _applyLeaf(WidgetRef ref, BuildContext context, String label) {
   final cn = ref.read(catalogSettingsProvider.notifier);
   final nn = ref.read(notifSettingsProvider.notifier);
   switch (label) {
+    // 🎮 מועדון BuildSmart — the loyalty hub leaf opens the real rewards screen.
+    case 'מועדון BuildSmart':
+      Navigator.of(context).push(RewardsHubScreen.route());
+      ref.read(menuTabProvider.notifier).state = null;
+      ref.read(settingsGroupProvider.notifier).state = null;
+      ref.read(settingsDrillProvider.notifier).state = const [];
+      return;
     case 'בהיר':              n.update((s) => s.copyWith(theme: BsTheme.light));
     case 'כהה':               n.update((s) => s.copyWith(theme: BsTheme.dark));
     // Fix 1 — write textSize to catalogSettingsProvider (main.dart textScaler)
