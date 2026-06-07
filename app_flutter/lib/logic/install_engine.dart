@@ -855,7 +855,6 @@ void _autoAddCompliance(List<LipskeyCatalogProduct> items,
     Map<String, int> qty, int tempC,
     {bool loop = false, Set<String>? accessories}) {
   final skus = qty.keys.toSet();
-  final mats = items.map(productMaterial).whereType<String>().toSet();
   final hot = tempC >= _kHotThresholdC;
   final hasCommercialPump = skus.contains('HW-PUMP-40');
   // Detect manifolds & shower heads from BOTH synthetic hot-water SKUs
@@ -1384,29 +1383,40 @@ InstallationPlan buildTreeInstallation(
     manifold = trunk.last;
   }
 
-  // Warn when branch count exceeds the manifold's physical outlet count.
-  if (manifold != null) {
-    final outlets = manifoldOutlets(manifold);
-    if (outlets > 0 && branchTargets.length > outlets) {
-      engineWarnings.add(
-          'המחלק "${manifold.nameHe}" תומך ב-$outlets יציאות — '
-          'הוגדרו ${branchTargets.length} ענפים. נדרש מחלק עם יותר יציאות.');
+  // each branch: manifold → target, zone = "ענף א/ב/…"
+  final root = manifold ?? (branchTargets.isNotEmpty ? branchTargets.first : null);
+  final builtZones = <String>[];
+
+  // A target equal to the manifold itself isn't a branch. CAP the branches at
+  // the manifold's physical outlet count: a 4-branch design on a 2-outlet
+  // manifold can only feed 2 — the overflow targets are recorded as gaps (so the
+  // plan is NOT reported complete) plus a warning, instead of silently emitting
+  // phantom branches (each with its own TMTV/balancing valve) off ports that
+  // don't exist. Within capacity (and for non-manifold roots) behaviour is unchanged.
+  final realTargets = root == null
+      ? const <LipskeyCatalogProduct>[]
+      : branchTargets.where((t) => t.sku != root.sku).toList();
+  final outlets = manifold != null ? manifoldOutlets(manifold) : 0;
+  final cap = (outlets > 0 && outlets < realTargets.length)
+      ? outlets
+      : realTargets.length;
+  if (manifold != null && outlets > 0 && realTargets.length > outlets) {
+    final overflow = realTargets.skip(outlets).toList();
+    engineWarnings.add(
+        'המחלק "${manifold.nameHe}" תומך ב-$outlets יציאות — נדרשו '
+        '${realTargets.length} ענפים; ${overflow.length} לא חוברו '
+        '(נדרש מחלק עם יותר יציאות).');
+    for (final t in overflow) {
+      gaps.add(InstallationGap(manifold, t));
     }
   }
 
-  // each branch: manifold → target, zone = "ענף א/ב/…"
-  // Track which zone labels were actually routed so TMTV/balance counts
-  // match real branches, not the raw branchTargets list.
-  final root = manifold ?? (branchTargets.isNotEmpty ? branchTargets.first : null);
-  final builtZones = <String>[];
-  var routed = 0; // labels actually-routed branches (skips don't burn a letter)
-  for (var bi = 0; bi < branchTargets.length; bi++) {
-    final t = branchTargets[bi];
-    if (root == null) break;
-    if (t.sku == root.sku) continue;
+  var routed = 0; // actually-routed branches (each burns a zone letter)
+  for (var bi = 0; bi < cap; bi++) {
+    final t = realTargets[bi];
     final zl = _branchLabel(routed++);
     builtZones.add(zl);
-    final seg = findShortestPath(root, t,
+    final seg = findShortestPath(root!, t,
         maxDepth: maxDepthPerSegment, tempC: tempC);
     if (seg == null) {
       final bridge = _findBridge(root, t, tempC);

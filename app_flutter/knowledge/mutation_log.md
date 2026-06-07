@@ -17,6 +17,19 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## install_engine — חסם עומס-יתר במחלק (E5/B7) — 2026-06-08
+
+- **קובץ:** `test/manifold_test.dart` מקרה 10 (חוזק מבדיקת-אריתמטיקה לבנייה-אמיתית).
+- **מה עושה:** נועל ש-`buildTreeInstallation` חוסם את מספר-הענפים למספר-היציאות
+  הפיזי של המחלק; עודף → gaps (התקנה לא-שלמה) + אזהרה; TMTV/איזון רק לענף-מנותב.
+- תקלה שהוזרקה: `cap = realTargets.length` (הסרת החסם) ב-buildTreeInstallation.
+- תוצאה: אדומה ✅ — "4 ענפים על מחלק 2-יציאות" נכשל: 4 ענפים נותבו (zones>2),
+  אין gaps עודף, אין אזהרה.
+- ביטול → ירוק ✅ (manifold/zone_tmtv/twenty/auto_compliance, +59).
+- מסקנה: החסם load-bearing; מחלק 2-יציאות לא פולט עוד 4 ענפי-פנטום עם ברזי-בטיחות.
+- **ניקוי-אגב:** הוסר `mats` מת ב-`_autoAddCompliance` (שריד מ-B5 matsFinal) + import
+  מיותר ב-manifold_test → analyze נקי.
+
 ## lipskey_verified_connections — מקטיני-DN שטוחים + טמפ'-חריג (B6) — 2026-06-08
 
 - **קובץ:** `test/install_engine_b6_test.dart` (חדש).

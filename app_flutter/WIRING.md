@@ -513,6 +513,17 @@ pipe no longer mates a physically large socket. DNs taken from the product names
 Locked by `install_engine_b6_test`. (A broader flattened-DN sweep — מצרה 50/40,
 40/32, 110/100, 50/32 — is tracked for B8.)
 
+**Manifold over-capacity cap (B7/E5):** `buildTreeInstallation` used to route EVERY
+branch target even past the manifold's physical outlet count — emitting phantom
+branches (each with its own TMTV/balancing valve) off ports that don't exist, and
+miscounting over-capacity from the raw target list. Now branches are CAPPED at
+`manifoldOutlets`: the overflow targets become gaps (so `isComplete` is false) plus
+an explicit over-capacity warning, and TMTV/balance are added only per actually-
+routed branch. Within capacity, behaviour is unchanged. Locked by `manifold_test`
+case 10 (now builds a 4-branch-on-2-outlet tree). NOTE: the studio UI's own branch
+count / over-capacity banner (`install_studio_screen`) still mirrors the raw target
+count — the engine plan is now correct (gaps), the UI banner is a separate follow-up.
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)
