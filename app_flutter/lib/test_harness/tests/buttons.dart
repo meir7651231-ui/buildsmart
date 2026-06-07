@@ -150,13 +150,11 @@ List<TestResult> testButtons(WidgetRef ref) {
         final bd = ref.read(openDialProvider);
         final ap = ref.read(activePersonaProvider);
         final bp = ref.read(bsDrillPathProvider);
-        final mt = ref.read(menuTabProvider);
         final st = ref.read(searchToolProvider);
         // Make some state
         ref.read(openDialProvider.notifier).state = OpenDial.bs;
         ref.read(activePersonaProvider.notifier).state = 'manager';
         ref.read(bsDrillPathProvider.notifier).state = const ['X'];
-        ref.read(menuTabProvider.notifier).state = MenuTab.home;
         ref.read(searchToolProvider.notifier).state = SearchTool.voice;
         // Reset
         resetAllDials(ref);
@@ -176,10 +174,6 @@ List<TestResult> testButtons(WidgetRef ref) {
           got: '${ref.read(bsDrillPathProvider).length}',
         ));
         checks.add(TestCheck(
-          name: 'menuTab → null',
-          pass: ref.read(menuTabProvider) == null,
-        ));
-        checks.add(TestCheck(
           name: 'searchTool → null',
           pass: ref.read(searchToolProvider) == null,
         ));
@@ -187,7 +181,6 @@ List<TestResult> testButtons(WidgetRef ref) {
         ref.read(openDialProvider.notifier).state = bd;
         ref.read(activePersonaProvider.notifier).state = ap;
         ref.read(bsDrillPathProvider.notifier).state = bp;
-        ref.read(menuTabProvider.notifier).state = mt;
         ref.read(searchToolProvider.notifier).state = st;
         return checks;
       },

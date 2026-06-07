@@ -11,7 +11,6 @@ import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/home_content_reorder.dart';
 import 'package:buildsmart/screens/chat_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
-import 'package:buildsmart/screens/menu_dial_widget.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
@@ -100,14 +99,6 @@ class HomeShell extends ConsumerWidget {
               right: BsTokens.space4,
               bottom: BsTokens.space5,
               child: SearchDialWidget(),
-            ),
-
-          // Menu dial — anchored to left (trailing in RTL).
-          if (open == OpenDial.menu)
-            const Positioned(
-              left: BsTokens.space5,
-              bottom: BsTokens.space5,
-              child: MenuDialWidget(),
             ),
         ],
       ),
@@ -402,21 +393,6 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
       backgroundColor: const Color(0xFFFFFFFF),
       elevation: 0,
       automaticallyImplyLeading: false,
-      // Hamburger — opens the contractor menu dial (בית/הפרויקטים/רכש/הגדרות).
-      // @legacy fabs.tsx fab--menu, aria-label "פתח תפריט". Placed in the AppBar
-      // leading (start) slot so it doesn't crowd the actions row; the dial renders
-      // bottom-start when openDialProvider == OpenDial.menu.
-      leadingWidth: 42,
-      leading: IconButton(
-        icon: const Icon(Icons.menu, color: Colors.black54),
-        tooltip: 'פתח תפריט',
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
-        onPressed: () {
-          resetAllDials(ref);
-          ref.read(openDialProvider.notifier).state = OpenDial.menu;
-        },
-      ),
       titleSpacing: 4,
       title: Tooltip(
         message: 'BS',

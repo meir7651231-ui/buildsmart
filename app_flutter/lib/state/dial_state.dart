@@ -1,9 +1,8 @@
-import 'package:buildsmart/state/menu_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Which FAB dial is currently open. Only ONE dial is open at a time
 /// (R1 — 5 FABs, never two trays at once). Null = nothing open.
-enum OpenDial { none, bs, search, bsMode, menu }
+enum OpenDial { none, bs, search, bsMode }
 
 final openDialProvider = StateProvider<OpenDial>((_) => OpenDial.none);
 
@@ -77,11 +76,6 @@ final bsCourierLeafProvider = StateProvider<String?>((_) => null);
 /// panels and the W2 store/courier panels.
 final bsWorkerLeafProvider = StateProvider<String?>((_) => null);
 
-/// Which menu tab is currently drilled into (null = 3-tab root).
-enum MenuTab { home, projects, settings }
-
-final menuTabProvider = StateProvider<MenuTab?>((_) => null);
-
 /// Active tool within the Search FAB (null = 4-tool root).
 /// catalog is now a main bottom-nav tab, not a search tool.
 enum SearchTool { voice, barcode, filters, sort }
@@ -107,12 +101,5 @@ void resetAllDials(WidgetRef ref) {
   ref.read(bsStoreLeafProvider.notifier).state = null;
   ref.read(bsCourierLeafProvider.notifier).state = null;
   ref.read(bsWorkerLeafProvider.notifier).state = null;
-  ref.read(menuTabProvider.notifier).state = null;
   ref.read(searchToolProvider.notifier).state = null;
-  // Menu tab drill paths (menu_state.dart — already imported).
-  ref.read(homeDrillProvider.notifier).state = const [];
-  ref.read(projectsDrillProvider.notifier).state = const [];
-  // Settings sub-state.
-  ref.read(settingsGroupProvider.notifier).state = null;
-  ref.read(settingsDrillProvider.notifier).state = const [];
 }

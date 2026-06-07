@@ -1080,3 +1080,14 @@ reachable from EACH persona dashboard (separately); guest reaches profile via an
 - Gate: central-verify green — analyze 0 · 1645 tests · build · conformance 7/7 · required-tests present.
 - **Known follow-up (Wave 3b):** `CatalogSettingsScreen._confirmReset` resets only `catalogSettings` — extend to also reset `appSettings`+`notifSettings` so the ported controls reset too.
 - **Wave 3b (next, atomic):** delete `menu_dial_widget.dart` + the hamburger + dial state, now that the native surfaces are in place.
+
+## Dial-distribution Wave 3b — menu-dial REMOVED (cutover · 9×9 fleet)
+The menu-dial FAB is **gone** — all its content lives natively (catalog ⋮ · ProfileScreen via name-chip ·
+extended CatalogSettingsScreen · store project-picker · per-persona dashboard access).
+- **Deleted:** `lib/screens/menu_dial_widget.dart`, `lib/state/menu_state.dart` (drill providers).
+- `home_shell.dart`: removed the hamburger leading button + the `OpenDial.menu` render block + the import.
+- `dial_state.dart`: removed `OpenDial.menu`, `menuTabProvider`, `MenuTab`, and their `resetAllDials` lines (BS/search dials untouched).
+- harness: removed `tabs:menu` + the `menuTabProvider`/`MenuTab` lines from `button:resetAllDials`.
+- `CatalogSettingsScreen._confirmReset` now resets catalog+app+notif (covers the Wave-3a ported controls); copy → 'כל ההגדרות…'.
+- **0 dangling code references** (byte-verified for all 8 dial symbols). Gate: central-verify green — analyze 0 · 1645 tests · build · conformance 7/7 · required-tests.
+- Note: the BS-dial (`OpenDial.bs`) + search-dial remain (separate concern; BS-dial reachability is a later cleanup).

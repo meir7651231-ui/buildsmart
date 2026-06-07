@@ -72,7 +72,7 @@ class CatalogSettingsScreen extends ConsumerWidget {
               style: TextStyle(color: BsTokens.inkLight),
             ),
             content: const Text(
-              'כל הגדרות הקטלוג יוחזרו לברירת המחדל.',
+              'כל ההגדרות יוחזרו לברירת המחדל.',
               style: TextStyle(color: Colors.black54),
             ),
             actions: [
@@ -90,6 +90,8 @@ class CatalogSettingsScreen extends ConsumerWidget {
     );
     if ((ok ?? false) && context.mounted) {
       await ref.read(catalogSettingsProvider.notifier).reset();
+      await ref.read(appSettingsProvider.notifier).reset();
+      await ref.read(notifSettingsProvider.notifier).reset();
       if (context.mounted) showToast(context, 'הגדרות אופסו');
     }
   }

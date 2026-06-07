@@ -4,6 +4,14 @@
 
 ---
 
+## v6.16 — פירוק ה-dial · גל 3b (נחיל 9×9: מחיקת ה-menu-dial · cutover)
+
+**שינוי:** ה-menu-dial (ה-FAB של 🏠/פרויקטים/הגדרות) **נמחק** — כל תוכנו חי נייטיב (⋮ קטלוג · פרופיל via שם · הגדרות-קטלוג מורחבות · בורר-חנות · גישה ב-4 דאשבורדים). נמחקו `menu_dial_widget.dart` + `menu_state.dart`; הוסרו ההמבורגר + render-הדיאל + dial-state (`OpenDial.menu`/`menuTabProvider`/`MenuTab`); נוקו harness (`tabs:menu` + `resetAllDials`); ה-reset הורחב (catalog+app+notif). BS-dial/search-dial נשארו (נפרד).
+
+**אימות:** `central-verify` gate — analyze 0 · `flutter test` 1645 · build web · **conformance 7/7** · required-tests. **0 הפניות-קוד תלויות** (byte-verified ל-8 סמלי-דיאל; 9 הפניות שנותרו הן הערות בלבד). הדיאל פורק בלי לשבור קומפילציה או טסט.
+
+---
+
 ## v6.16 — פירוק ה-dial · גל 3a (נחיל 9×9: הגדרות נייטיב + גישה לכל פרסונה)
 
 **שינוי:** גל 3a (5 `fixer`-ים אמיתיים, edit-only) — לפי הכרעות בעל-המוצר:
