@@ -584,7 +584,7 @@ class _PersonaSection extends ConsumerWidget {
                   .update((s) => s.copyWith(personaWorker: v)),
         ),
         _SwitchRow(
-          label: '👔 מנהל מערכת — דשבורד',
+          label: '👔 מנהל המערכת — דשבורד',
           value: settings.personaAdmin,
           onChanged:
               (v) => ref

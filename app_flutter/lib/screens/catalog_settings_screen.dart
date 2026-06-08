@@ -445,9 +445,9 @@ class _AiSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return const _SectionTile(
       emoji: '🤖',
-      title: 'AI והמלצות',
+      title: 'בינה מלאכותית והמלצות',
       children: [
-        _PlaceholderRow(label: 'המלצות מבוססות AI'),
+        _PlaceholderRow(label: 'המלצות מבוססות בינה מלאכותית'),
         _PlaceholderRow(label: 'התאמה לפי היסטוריית הזמנות'),
         _PlaceholderRow(label: 'סינון לפי פרויקט פעיל'),
         _PlaceholderRow(label: 'חלופות זולות אוטומטיות'),

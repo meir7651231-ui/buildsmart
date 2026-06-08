@@ -17,6 +17,14 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## kSearchIndex — copy פרסונה canonical (W0 microcopy) — 2026-06-08
+
+- **קובץ:** `test/search_index_persona_copy_test.dart` (חדש).
+- **מה עושה:** נועל שאף `SearchEntry.title` לא מכיל `מנהל מערכת` (חסר ה׳) + שה-canonical `מנהל המערכת` קיים. ('מנהל מערכת' אינו תת-מחרוזת של 'מנהל המערכת' → contains מבחין נקי.)
+- תקלה שהוזרקה: replace_all `מנהל המערכת`→`מנהל מערכת` (החזרת ה-drift).
+- תוצאה: **אדומה ✅** — 2/2 נכשלו (bad לא-ריק · canonical חסר). ביטול → ירוק ✅.
+- מסקנה: הבדיקה **חזקה** — תופסת drift של שם-הפרסונה ב-search index.
+
 ## chatBubbleAlignment — צד-בועת-צ׳אט (W1 #1 · RTL) — 2026-06-08
 
 - **קובץ:** `test/chat_bubble_side_test.dart` (חדש).

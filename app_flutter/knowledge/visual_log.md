@@ -609,3 +609,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **before:** מסכי 'אתר' (site_hub) ו'כספים' (finance) הציגו accent **טורקיז** (0xFF1F6F6B) במקום הכתום של המותג — ההערה ב-site_hub אף הצהירה "orange brand" אך הערך teal.
 - **after:** `_kBrand`/`_kBrandDark`/`_kBrandTeal` → `BsTokens.brand`/`brandDark` → כל ה-FAB/כפתורים/accents באזורים האלה כתומים-מותג.
 - guard: analyze/test/build · systemic ratchet-color (§3.5) ינעל teal-raw עתידי.
+
+## microcopy (before→after · W0) — 2026-06-08
+- **before:** `מנהל מערכת` (חסר ה׳) ב-RBAC/דשבורד-התראות · `AI`/`מבוססות AI` בהגדרות-קטלוג.
+- **after:** `מנהל המערכת` (כמו persona canonical) · `בינה מלאכותית`/`מבוססות בינה מלאכותית`.
+- guard: analyze/test/build · systemic string-consistency (§3.5).

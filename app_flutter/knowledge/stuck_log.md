@@ -1387,3 +1387,12 @@ RULE: כששינוי מעביר פרסונה ממסך-דיאל ל-role-app (או
 ### ג — כלל המניעה
 ANTIPATTERN: שינוי lib data או lib state בלי הרצת mutation verify ועדכון mutation log באותו commit
 RULE: כל commit שנוגע ב-lib/data או lib/state חייב להריץ mutation_verify.sh על ההיגיון/דאטה החדשים (מוטציית-sed שהבדיקה אמורה לתפוס) באותו commit — כך mutation_log מתעדכן, שער 44 לא חוסם, ולא נכנסים ל-retry של שער 102.
+
+## 2026-06-08 — microcopy ב-lib/data בלי test+mutation_log פרואקטיבי (שער 42/44 → 102)
+### א — הבעיה
+תיקון-מיקרוקופי (מנהל המערכת + בינה מלאכותית) נגע ב-lib/data/search_index.dart. שער 42 מסווג כל שינוי תחת lib/data או lib/logic כ-helper-שדורש-בדיקה — גם שינוי-מחרוזת טהור — ושער 44 דורש mutation_log. שניהם לא תוזמנו מראש → חסמו; ה-retry הצית את 102.
+### ב — הפתרון
+test/search_index_persona_copy_test.dart נועל את שם-הפרסונה ה-canonical (אין 'מנהל מערכת' חסר-ה׳; ה-canonical קיים) + רשומת mutation_log; mutation אמיתי (replace_all canonical→bare) → אדום 2 מתוך 2 → שוחזר → ירוק.
+### ג — כלל המניעה
+ANTIPATTERN: שינוי-מחרוזת תחת תיקיית-דאטה או תיקיית-לוגיקה בלי לתזמן בדיקת-נכונות ויומן-מוטציה באותו commit
+RULE: כל עריכה תחת תיקיית-דאטה או תיקיית-לוגיקה — כולל שינוי-מחרוזת — מתזמנת מראש קובץ-בדיקה שנועל את הנכון ורשומת mutation_log עם mutation אמיתי, כדי ששערים 42/44 לא יחסמו וה-retry לא יצית 102.

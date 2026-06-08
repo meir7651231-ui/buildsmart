@@ -103,3 +103,7 @@
 - **before:** site_hub `_kBrand`/`_kBrandDark` + finance `_kBrandTeal` = teal (0xFF1F6F6B/155350) — באג (ההערה אמרה orange).
 - **after:** → `BsTokens.brand`/`brandDark` (~12 שימושים). status-teals (manager/lipskey) מחוץ-לסקופ.
 - **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `site_hub_screen.dart` · `finance_hub_sheets.dart`.
+
+### #microcopy — מנהל המערכת + בינה מלאכותית (W0) — ✅ — 2026-06-08
+- `מנהל מערכת`→`מנהל המערכת` (search_index ×2 · notif_settings_screen:587) · `AI`→`בינה מלאכותית` (catalog_settings_screen ×2). `mm`→`מ"מ` נדחה (מפוזר/קוסמטי).
+- **gate:** analyze 0 · full test · build · WIRING+visual_log.

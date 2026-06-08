@@ -1292,3 +1292,5 @@ Gate: central-verify green — analyze 0 · tests green · build · conformance 
 - מתקן היפוך מול spec `sys_chat.dart §1`. guard: `chat_bubble_side_test` (4) + mutation-verified. אין שינוי state/ניווט.
 ### teal→כתום (W0) — `site_hub_screen.dart` · `finance_hub_sheets.dart` — 2026-06-08
 - 3 consts מקומיים שהחזיקו teal **בטעות** (`_kBrand`/`_kBrandDark` ב-site · `_kBrandTeal` ב-finance — ההערה ב-site אף אמרה "orange brand") → `BsTokens.brand`/`brandDark`. ~12 שימושים flipped לכתום. status-teals אחרים (manager 'new' · lipskey accents) מחוץ-לסקופ.
+### microcopy (W0) — `search_index` · `notif_settings_screen` · `catalog_settings_screen` — 2026-06-08
+- `מנהל מערכת`→`מנהל המערכת` (search_index ×2 · notif_settings — האחדה ל-canonical `personas.dart`) · `AI`→`בינה מלאכותית` (catalog_settings ×2). אפס שינוי-לוגיקה. tests של 'מנהל המערכת' (manager_dashboard/widget) כבר על ה-canonical — לא נשברו. `mm`→`מ"מ` נדחה לפס נפרד.
