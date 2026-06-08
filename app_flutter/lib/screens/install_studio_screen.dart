@@ -340,13 +340,20 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
               children: [
                 AnimatedBuilder(
                   animation: _flow,
-                  builder: (_, __) => CustomPaint(
-                    painter: _BlueprintPainter(_flow.value),
-                    child: Column(children: [
-                      _header(chain, temp),
-                      Expanded(child: _canvas(chain, temp)),
-                      _dock(chain, temp),
-                    ]),
+                  // Build the screen content ONCE and reuse it across frames —
+                  // previously the whole Column (header/canvas/dock) rebuilt on
+                  // every animation tick (60fps). RepaintBoundary isolates the
+                  // blueprint repaint so it doesn't dirty the rest of the tree.
+                  child: Column(children: [
+                    _header(chain, temp),
+                    Expanded(child: _canvas(chain, temp)),
+                    _dock(chain, temp),
+                  ]),
+                  builder: (_, child) => RepaintBoundary(
+                    child: CustomPaint(
+                      painter: _BlueprintPainter(_flow.value),
+                      child: child,
+                    ),
                   ),
                 ),
                 if (_showTutorial)

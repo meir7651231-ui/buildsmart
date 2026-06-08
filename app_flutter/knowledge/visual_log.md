@@ -619,3 +619,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **before:** ב-list-card, `+` קרא `_addToCart`→`smartCart.add()`; אחרי גלילה (recycle) ה-row חוזר ל-`_open=false` בעוד המוצר בעגלה → tap נוסף = **שורה שנייה** לאותו מוצר.
 - **after:** `_addToCart`→`setQtyForKey` (אידמפוטנטי) → tap-חוזר מעדכן את השורה, לא מכפיל.
 - guard: `lipskey_plus_no_dup_test` (idempotency של setQtyForKey, 2).
+
+## #perf — install_studio repaint-per-frame (before→after · W1) — 2026-06-08
+- **before:** `AnimatedBuilder(builder: (_,__) => CustomPaint(painter, child: Column[header/canvas/dock]))` → כל המסך נבנה-מחדש 60fps.
+- **after:** `child: Column[...]` (פעם-אחת) → `builder: (_,child) => RepaintBoundary(CustomPaint(painter, child: child))`. אפס שינוי-מראה; ה-rebuild-per-frame נעלם.
+- guard: pattern ידוע + full test/build (אין unit — build-count דורש harness כבד).

@@ -112,3 +112,8 @@
 - **before:** `_addToCart` → `.add()` → recycle + re-tap = שורה כפולה.
 - **after:** → `setQtyForKey` (אידמפוטנטי, כמו grid-card). guard: `lipskey_plus_no_dup_test` (2).
 - **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `lipskey_products_screen.dart` `_addToCart`.
+
+### #perf — install_studio blueprint rebuild-per-frame (W1) — ✅ — 2026-06-08
+- **before:** Column (header/canvas/dock) בתוך `AnimatedBuilder.builder` → rebuild 60fps.
+- **after:** content ל-`child:` (פעם-אחת) + `RepaintBoundary` סביב `CustomPaint`. אפס שינוי-מראה.
+- **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `install_studio_screen.dart:341`.
