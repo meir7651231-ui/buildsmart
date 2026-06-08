@@ -5,10 +5,10 @@
 
 ## 📸 Snapshot מצב-נוכחי (anchor — אומת-קוד `1d292aa`)
 - **ניווט:** 100% **נייטיב** — כל ה-FAB dials הוסרו (menu/bs/search), `settings_tree` הוסר.
-- **נבנו:** כל ה-hubs (finance/site/tasks/budget/stock/scan/projects/rewards/ai/home) · **5 פרסונות** מסכים-מלאים **מבודדים** · מנהל · **מנוע-הזמנות** (`sys_orders`) · **T7 צ׳אט** חוצה-פרסונות (`sys_chat`, בידוד `threadsFor`) · **server-ready 5/6 repos**.
+- **נבנו:** כל ה-hubs (finance/site/tasks/budget/stock/scan/projects/rewards/ai/home) · **5 פרסונות** מסכים-מלאים **מבודדים** · מנהל · **מנוע-הזמנות** (`sys_orders`) · **T7 צ׳אט** חוצה-פרסונות (`sys_chat`, בידוד `threadsFor`) · **server-ready 6/6 repos ✅**.
 - **מספרים:** **1,539+ טסטים** (גדל) · קטלוג **1,877** (Lipskey 935 + Polyroll 772 + Huliot 170).
 - **ארכיטקטורה (snapshot 06-08, גדל — הקוד=SSOT):** ~172 קבצי-lib · ~46 screens · ~55 state · ~40 data. (אומת `1d292aa`.)
-- **נותר:** אימות-עומק hubs · finance-repo · ליטוש P-1/P-2/P-5 · deploy-verify · השקה (חשבונות) · **שרת (פרויקט נפרד)**.
+- **נותר:** אימות-עומק hubs · ליטוש P-1/P-2/P-5 · deploy-verify · השקה (חשבונות) · **שרת (פרויקט נפרד)**. *(server-ready ✅ 6/6.)*
 
 ## ✅ verdict per-doc (36 חיילים)
 ### 🟢 LIVE — מצב-נוכחי (11) · כולם **PASS / 100** (אומת-קוד 06-08)

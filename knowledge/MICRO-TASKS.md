@@ -90,7 +90,7 @@
 
 ---
 
-## C · server-ready — per-domain Repository (6)
+## C · server-ready — ✅ **בוצע 6/6** (07-08) · per-domain Repository
 *T6.1 (interfaces) קיים — לכל domain: מימוש-מקומי + refactor-provider לקרוא ממנו.*
 | ID | domain | DoD |
 |---|---|---|

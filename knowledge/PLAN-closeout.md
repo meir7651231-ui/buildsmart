@@ -34,7 +34,7 @@
 
 ## 🟢 קצה 3 — חוצה-מערכת
 - **תקלת-deploy:** ה-`/buildsmart/flutter/` הציבורי הציג גרסה ישנה (טורקיז). **עדכון 2026-06-05:** gh-pages **נדחף-מחדש** (15:41, forced update) → ייתכן שנפתר; **דרוש אימות-חי** של הגרסה הציבורית (v6.16).
-- **server-ready:** Repository pattern **לא אומץ** (T0 = const). החלטה: לאכוף לפני שלב-ב? (אחרת חיבור-שרת לא-drop-in).
+- **server-ready:** ✅ **אומץ 6/6** (07-08) — כל ה-domains (orders/customers/catalog/site/stock/finance) דרך `data/repositories/` + `_local` impls. **חיבור-שרת = drop-in** (החלף `_local` במימוש-שרת).
 - **השקה (שלך, לא-קוד):** חשבונות Apple/Google · privacy-policy · CI build+sign · iOS team.
 - **ליטוש נותר:** P-2 (a11y) · P-5 (knowledge) · P-1 גל-2 (צבעים).
 
