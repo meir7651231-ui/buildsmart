@@ -743,3 +743,12 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/lipskey_category_keys_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### lib/data/huliot_smartlock_catalog.dart — 2026-06-08 (manual)
+- שינוי: `_routeCropDisabled = true` → `false`, `_specCropDisabled = true` → `false`
+- מטרה: הפעלת תמונות-מוצר חתוכות (159 crops כבר ב-assets, WIP v45-v52)
+- תוצאה: האפליקציה מציגה sml_pXX_X.jpg במקום page_XX.jpg לכל 170 מוצרי חוליות
+- תיקוני gate-32 (spec_assets_test 0→53 PASS):
+  - `_huliotImageFor` כעת מחזיר page-fallback (לא null) כשאין crop ספציפי
+  - p24 אטם (seal): routing מוחזר null → page_24.jpg (sml_p24_a.jpg לא נוצר ב-crop_huliot.py)
+  - `_missingSpecs` set: 11 קבצי spec שלא נוצרו (p11_b, p30_d, p32_a, p36_b, p38_a, p39_b/c, p40_a/c/41_c, p42_a/b/c/d)

@@ -512,6 +512,20 @@ void main() {
             '${missing.take(12).join('\n')}');
   });
 
+  // §17.1.c — p24 seal products (אטם לג'וקר / אטם מעביר) must fall back to the
+  // full catalog page, not return null, since sml_p24_a.jpg was not generated.
+  test('§17.1.c-Huliot p24 seal products fall back to page image not null', () {
+    final sealSkus = {'67750440', '67760440', '67760540', '67763063', '767943440', '767950440'};
+    final bad = <String>[];
+    for (final p in kHuliotCatalog.where((p) => sealSkus.contains(p.sku))) {
+      final a = p.imageAsset;
+      if (a == null) bad.add('${p.sku} → null (should be page_24.jpg)');
+      else if (!a.contains('page_')) bad.add('${p.sku} → $a (expected page fallback)');
+      else if (!File(a).existsSync()) bad.add('${p.sku} → $a (not on disk)');
+    }
+    expect(bad, isEmpty, reason: bad.join('\n'));
+  });
+
   // §21.B-Huliot — STRONG recoverability via parseChips. Huliot now renders
   // via `_HierarchyChips` (same as Polyroll), so every word in nameHe must be
   // classifiable into the §21 hierarchy (type + level1..5) with NO leftover.
