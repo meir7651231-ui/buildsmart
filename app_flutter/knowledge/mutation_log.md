@@ -17,6 +17,18 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## chatBubbleAlignment — צד-בועת-צ׳אט (W1 #1 · RTL) — 2026-06-08
+
+- **קובץ:** `test/chat_bubble_side_test.dart` (חדש).
+- **מה עושה:** נועל את חוזה ה-spec (`sys_chat.dart §1 כיווניות`): הודעות-עצמי בצד
+  start (ימין ב-RTL), אחרים end (שמאל); ו-resolve נכון ל-RTL (own→x=+1, other→x=−1).
+  התיקון מנתב גם בועת-הודעה וגם בועת-הקלדה דרך `chatBubbleAlignment`.
+- תקלה שהוזרקה #1: החלפת start↔end (`isMe ? centerEnd : centerStart`).
+- תוצאה: **אדומה ✅** — 3/4 נכשלו (own→start · other→end · resolve-RTL); רק "לא-חולקים-קצה" עבר.
+- תקלה שהוזרקה #2 (מבנית): החזרת `Alignment` אבסולוטי (הבאג המקורי) → **אינו מתקמפל**
+  (טיפוס-החזרה `AlignmentDirectional`) — חוסם רגרסיה ל-absolute.
+- מסקנה: הבדיקה **חזקה** — תופסת היפוך-צד; טיפוס-ההחזרה חוסם חזרה ל-`Alignment.center(Left|Right)`.
+
 ## install_engine — אזהרת כיווניות לשסתום חד-כיווני (D4/B11) — 2026-06-08
 
 - **קובץ:** `test/install_engine_b11_test.dart` (חדש).

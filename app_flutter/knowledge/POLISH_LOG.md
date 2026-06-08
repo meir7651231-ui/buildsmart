@@ -91,3 +91,10 @@
 ### P-5 (knowledge) — אומת לא-רלוונטי (אין residue)
 `R1–R9` הם **חוקי-העיצוב הפעילים** (MASTER_PROTOCOL §FRM "FRM-01 (R1)…" + port "governing law R2/R3"),
 **לא** שאריות-פרוטוקול-מחוק → מחיקתם תשבור תיעוד. audit מסמכים-חדשים (PLAN-*) חי ב-`nice-volta` (מחוץ-לסקופ-הענף).
+
+## גל W1 — ליטוש-באגים (workbook `POLISH.md`)
+### #1 בועות-צ׳אט הפוכות RTL — ✅ — 2026-06-08
+- **before:** `Alignment.centerLeft/Right` (אבסולוטי) → הודעות-עצמי בצד שמאל, מפר `sys_chat:37`.
+- **after:** helper `chatBubbleAlignment` directional (start/end) + `BorderRadiusDirectional` לזנב; `_Bubble`+`_TypingBubble` דרכו.
+- **gate:** `chat_bubble_side_test` 4 ✅ · mutation (swap→אדום) · analyze 0 · WIRING+visual_log+mutation_log.
+- **ref:** `lib/screens/chats_screen.dart` (helper + 2 call-sites + radii) · prevention §3.5.

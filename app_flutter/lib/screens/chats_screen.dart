@@ -1254,6 +1254,14 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
 
 // ─── bubbles ──────────────────────────────────────────────────────────────────
 
+/// Bubble side per SPEC §1 כיווניות (`sys_chat.dart`): the reading persona's OWN
+/// messages render on the start edge (right in RTL), others on the end (left).
+/// **Directional** (start/end) so it can't invert under RTL — guards the fix of
+/// 2026-06-08 (was `Alignment.centerLeft/Right`, which don't flip for RTL).
+/// Pinned by `test/chat_bubble_side_test.dart`.
+AlignmentDirectional chatBubbleAlignment({required bool isMe}) =>
+    isMe ? AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd;
+
 class _Bubble extends ConsumerWidget {
   const _Bubble({required this.msg});
 
@@ -1270,7 +1278,7 @@ class _Bubble extends ConsumerWidget {
     const timeColor = Color(0xFF777777);
 
     return Align(
-      alignment: msg.isMe ? Alignment.centerLeft : Alignment.centerRight,
+      alignment: chatBubbleAlignment(isMe: msg.isMe),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 3),
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 5),
@@ -1279,13 +1287,13 @@ class _Bubble extends ConsumerWidget {
         ),
         decoration: BoxDecoration(
           color: msg.isMe ? bubbleMe : bubbleOther,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: msg.isMe
+          borderRadius: BorderRadiusDirectional.only(
+            topStart: const Radius.circular(16),
+            topEnd: const Radius.circular(16),
+            bottomStart: msg.isMe
                 ? const Radius.circular(4)
                 : const Radius.circular(16),
-            bottomRight: msg.isMe
+            bottomEnd: msg.isMe
                 ? const Radius.circular(16)
                 : const Radius.circular(4),
           ),
@@ -1340,17 +1348,17 @@ class _TypingBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: chatBubbleAlignment(isMe: false), // typing = incoming = other
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 3),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: const BoxDecoration(
           color: Color(0xFFFFFFFF),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(16),
-            topRight: Radius.circular(16),
-            bottomLeft: Radius.circular(16),
-            bottomRight: Radius.circular(4),
+          borderRadius: BorderRadiusDirectional.only(
+            topStart: Radius.circular(16),
+            topEnd: Radius.circular(16),
+            bottomStart: Radius.circular(16),
+            bottomEnd: Radius.circular(4),
           ),
           boxShadow: [
             BoxShadow(

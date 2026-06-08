@@ -599,3 +599,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - ✅ אפס "בבנייה", אפס דיאל, אפס פורמט-מומצא. R8 — כל מחרוזת/מספר מ-proto 06 §4.1/§4.2.
 - ✅ analyze 0 · `worker_app_test` 4 ✅ (כולל widget-test: מרנדר כרטיסים, אין "בבנייה")
   · mutation-verified · `flutter test` מלא ✅ · build web ✓.
+
+## W1 #1 — בועות-צ׳אט RTL (before→after) — 2026-06-08
+- **before:** `Align(alignment: isMe ? Alignment.centerLeft : centerRight)` — **אבסולוטי**, לא מתהפך ל-RTL → הודעות-**עצמי משמאל** (הפוך מוואטסאפ העברי, מפר `sys_chat:37`); זנב חד בפינה הלא-נכונה.
+- **after:** `chatBubbleAlignment(isMe:)` → `AlignmentDirectional.centerStart/End` → own **מימין**, other משמאל; `BorderRadiusDirectional` → הזנב בצד-הדובר; בועת-הקלדה (incoming) → משמאל.
+- guard: `chat_bubble_side_test` (own→start · other→end · resolve-RTL x=±1) · mutation אדומה ✅ · analyze 0.

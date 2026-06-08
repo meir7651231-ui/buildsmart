@@ -1285,3 +1285,8 @@ Closes the architectural ceiling Wave 10 flagged. The remaining const reads sat 
 - Guard: mutation-verified; gate green.
 
 Gate: central-verify green — analyze 0 · tests green · build · conformance · required-tests.
+
+## W1 — ליטוש-באגים (workbook `POLISH.md` §5)
+### #1 בועות-צ׳אט RTL — `chats_screen.dart` — 2026-06-08
+- helper חדש `chatBubbleAlignment({required isMe})` (top-level) — מנתב צד-בועה: own→start (ימין ב-RTL), other→end. `_Bubble` (הודעה) + `_TypingBubble` (הקלדה=incoming) שניהם דרכו. רדיוסי-הזנב → `BorderRadiusDirectional` (start/end) כך שהזנב עוקב אחר הצד.
+- מתקן היפוך מול spec `sys_chat.dart §1`. guard: `chat_bubble_side_test` (4) + mutation-verified. אין שינוי state/ניווט.
