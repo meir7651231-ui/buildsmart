@@ -37,4 +37,4 @@
 ---
 
 ## 📱 Flutter — דלתא
-שליח = `kCourierSections` (BS-dial **toast-stubs**, לא view). ➖ תרחישי פריט-חסר/אזל · courier-tracking · רישום — לא הומרו. ✅ **onboarding** (welcome/profession/3-slides, `OnboardingGate`) מחליף את ה-registration של הפרוטוטייפ (ראה דוח 09).
+⚠️ **07-06: שליח נבנה כמסך-מלא** (`courier_dashboard_screen` — בורר-רכב/משלוחים/tracker/פורטל; bs_dial הוסר). courier-tracking + POD **הומרו** (`ac3073d`). [היה: BS-dial toast-stubs.] ✅ **onboarding** (welcome/profession/3-slides, `OnboardingGate`) מחליף את ה-registration של הפרוטוטייפ (ראה דוח 09).
