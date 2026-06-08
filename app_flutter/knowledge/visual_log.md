@@ -660,3 +660,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **before:** טעינת רשימה-שמורה: `brandPrice = total ~/ qty` → שורה של ₪340 בכמות 3 נטענת כ-₪339 (איבוד עד qty-1 ₪).
 - **after:** `savedLineReconstruct` שומר total מדויק → ₪340 נשאר ₪340.
 - guard: `saved_line_reconstruct_test` (4 · sweep total==brandPrice×qty) · mutation (revert→אדום).
+
+## #camera — מסך-שחור→הודעה (before→after · W1) — 2026-06-08
+- **before:** הרשאת-מצלמה נדחית → MobileScanner מציג **מסך-שחור ריק** (המשתמש תקוע).
+- **after:** `errorBuilder` → `cameraPermissionErrorView`: "לא ניתן לגשת למצלמה. אפשר/י הרשאת-מצלמה בהגדרות ונסה/י שוב." (קופי מאושר).
+- guard: `camera_error_view_test` (מרנדר את ההודעה).

@@ -135,3 +135,8 @@
 - **before:** `_loadItem` שיחזר `brandPrice: total ~/ qty` → ₪340@3 נטען כ-₪339 (איבוד עד qty-1 ₪).
 - **after:** helper `savedLineReconstruct` שומר total מדויק. guard: `saved_line_reconstruct_test` (4) + mutation-verified.
 - **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `store_screen.dart` `_loadItem`.
+
+### #camera — מצלמה מסך-שחור בהרשאה-נדחית (W1) — ✅ — 2026-06-08
+- **before:** 2 MobileScanner בלי errorBuilder → מסך-שחור כשהמצלמה לא עולה.
+- **after:** errorBuilder → `cameraPermissionErrorView` (widget משותף · קופי מאושר ע"י המשתמש).
+- **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `camera_sheet`/`barcode_scanner` + `lib/widgets/camera_error_view.dart`.

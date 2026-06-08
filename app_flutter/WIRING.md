@@ -1326,3 +1326,5 @@ Gate: central-verify green — analyze 0 · tests green · build · conformance 
 
 ### #₪-truncation — `store_screen` saved-cart reload (W1) — 2026-06-08
 - `_loadItem` שיחזר שורה-שמורה כ-`brandPrice: total ~/ qty` → איבד עד (qty-1) ₪ כשה-total לא מתחלק ב-qty (₪340@3→339). → helper top-level `savedLineReconstruct` ששומר total מדויק (מתחלק→per-unit; אחרת qty=1 ב-total מלא). guard: `saved_line_reconstruct_test` (4) + mutation-verified.
+### #camera — מסך-שחור בהרשאה-נדחית (W1) — 2026-06-08
+- 2 ה-MobileScanner (`camera_sheet` · `barcode_scanner`) היו בלי `errorBuilder` → מסך-שחור כשהמצלמה לא עולה (הרשאה נדחית/אין מצלמה). → `errorBuilder` → widget משותף `cameraPermissionErrorView` (`lib/widgets/`, מקור-אחד לקופי המאושר). guard: `camera_error_view_test`.

@@ -1,4 +1,5 @@
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/camera_error_view.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -45,7 +46,12 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          MobileScanner(controller: _ctl, onDetect: _onDetect),
+          MobileScanner(
+            controller: _ctl,
+            onDetect: _onDetect,
+            errorBuilder: (context, error, child) =>
+                cameraPermissionErrorView(context),
+          ),
           // Centered reticle.
           Center(
             child: Container(

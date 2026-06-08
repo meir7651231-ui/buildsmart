@@ -1,5 +1,6 @@
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/camera_error_view.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -77,7 +78,12 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
         children: [
 
           // ── Camera feed ─────────────────────────────────────────────────
-          MobileScanner(controller: _scanner, onDetect: _onDetect),
+          MobileScanner(
+            controller: _scanner,
+            onDetect: _onDetect,
+            errorBuilder: (context, error, child) =>
+                cameraPermissionErrorView(context),
+          ),
 
           // ── Dim for non-barcode modes ───────────────────────────────────
           if (_mode != 0)
