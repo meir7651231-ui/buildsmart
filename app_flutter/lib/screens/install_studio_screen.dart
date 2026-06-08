@@ -940,7 +940,9 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
     if (isTree) {
       final trunk = fixedChain.sublist(0, mi + 1);
       final branchTargets = fixedChain.sublist(mi + 1);
-      branches = branchTargets.length;
+      // Count only REAL branch targets (a target equal to the manifold itself
+      // isn't a branch) — matches the engine's routing so the banner is accurate.
+      branches = branchTargets.where((t) => t.sku != fixedChain[mi].sku).length;
       outlets = manifoldOutlets(fixedChain[mi]);
       plan = buildTreeInstallation(trunk, branchTargets,
           tempC: temp, accessories: acc, autoCompliance: true);
@@ -1818,7 +1820,9 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                           ]),
                         ),
                       if (overCapacity)
-                        Text('⚠️ $branches ענפים על מחלק $outlets-יציאות',
+                        Text(
+                            '⚠️ $branches ענפים על מחלק $outlets-יציאות — '
+                            '${branches - outlets} לא חוברו (חסר במחלק)',
                             style: const TextStyle(
                                 color: _drain,
                                 fontSize: 11,

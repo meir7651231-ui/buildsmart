@@ -24,6 +24,17 @@
 - **תקרה ארכיטקטונית (R8 — לא נכפה):** מסכי finance/site-hub + pure-logic של catalog (category_division/pressure_drop/system_division) + finder/departments קוראים const בהקשרים ללא-`ref`. לרתום = להמיר מסך-מאומת ל-Consumer = סיכון-רגרסיה. ה-interfaces+impls עומדים. (`finance_local` הוסר — בלי צרכן בטוח.)
 
 **אימות (refactor, אין שינוי ויזואלי):** mutation-verified · `central-verify` gate ירוק (analyze 0 · `flutter test` · build · conformance · required-tests). הערכים זהים byte-for-byte.
+## B12 — באנר עומס-יתר במחלק משקף את הספירה האמיתית (#5) — 2026-06-08
+
+**שינוי:** ה-BOM-sheet סימן עומס-יתר לפי `branchTargets.length` הגולמי. אחרי B7
+(המנוע חוסם ל-מספר-היציאות ורושם את העודף כ-gap), עודכן: `branches` סופר רק
+target אמיתי (≠ המחלק), והבאנר מבהיר כמה לא-חוברו.
+
+**אימות ויזואלי חי (build web + דפדפן localhost:5556):**
+- בניתי קו: מחלק 1" 2-יציאות (`76032202`) + 3 ברזי-קצה → עומס-יתר (3>2).
+- ✅ הבאנר הציג: **"⚠️ 3 ענפים על מחלק 2-יציאות — 1 לא חוברו (חסר במחלק)"** —
+  בדיוק הספירה הנכונה (3 ביקש, 2 יציאות, 3−2=1 עודף לא-חובר). צילום-מסך נשמר.
+- העומס-יתר עצמו (cap + gaps) נעול ע"י `manifold_test` מקרה 10 (mutation-proved ב-B7).
 
 ---
 

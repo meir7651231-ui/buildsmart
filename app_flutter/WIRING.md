@@ -520,9 +520,11 @@ miscounting over-capacity from the raw target list. Now branches are CAPPED at
 `manifoldOutlets`: the overflow targets become gaps (so `isComplete` is false) plus
 an explicit over-capacity warning, and TMTV/balance are added only per actually-
 routed branch. Within capacity, behaviour is unchanged. Locked by `manifold_test`
-case 10 (now builds a 4-branch-on-2-outlet tree). NOTE: the studio UI's own branch
-count / over-capacity banner (`install_studio_screen`) still mirrors the raw target
-count — the engine plan is now correct (gaps), the UI banner is a separate follow-up.
+case 10 (now builds a 4-branch-on-2-outlet tree). The studio UI banner is fixed too
+(B12, #5): `_assemble` counts only real branch targets (≠ the manifold), and the
+over-capacity banner now reads "$branches ענפים על מחלק $outlets-יציאות — N לא חוברו
+(חסר במחלק)" — the accurate requested / capacity / overflow. Verified live (build
+web + browser: a 3-branch line on a 2-outlet manifold showed "1 לא חוברו"). visual_log.
 
 **Flattened-DN data sweep (B8):** a class of reducers/couplers/caps had their
 verified-spec ends lazily defaulted to a single DN (mostly [50,50]) regardless of
