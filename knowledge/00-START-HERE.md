@@ -121,7 +121,7 @@
 1. **אימות-עומק + gate ירוק** ⭐ (הבא) — לכל hub (finance/site/tasks/budget/stock/scan/projects/rewards/ai/home): ודא תוכן **verbatim/math** מול §`[L#]` (מפת-הידע §4.5), הרץ `orchestrator/scripts/central-verify.sh app_flutter --assert orchestrator/manifests/buildsmart.conformance.txt --required-tests orchestrator/manifests/buildsmart.required-tests.txt`, תקן עד ירוק.
 2. **server-ready T6.2/3** — העבר providers לקרוא דרך `data/repositories/` (interfaces T6.1 כבר קיימים).
 3. **סטאבים-היקפיים (T4)** — סיים chats/camera/settings (grep-live; מצטמק).
-4. **ליטוש** — P-1 (1,115 צבעים→`BsTokens`) · P-2 (a11y/Semantics) · P-5 (ניקוי-knowledge).
+4. **ליטוש** — P-1 (~1,187 צבעים→`BsTokens`, מטרה-נעה) · P-2 (a11y, 🔄 בעבודה) · P-5 (knowledge).
 5. **אימות-deploy חי** — ודא ש-gh-pages מציג v6.16.
 
 ---

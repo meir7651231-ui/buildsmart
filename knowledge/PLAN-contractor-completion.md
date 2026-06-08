@@ -24,7 +24,7 @@
 3. **טאבים-במסך:** `StateProvider<int>` + segmented-toggle + `IndexedStack` (דגם `updates_screen`) · או chips (`store_screen._SectionChipsRow`).
 4. **עלה ב-dial:** `DialRow` (`widgets/dial.dart`) — circle+label-pill נפרדים.
 5. **אבני-בניין:** widgets פרטיים `_Xxx` (`_SheetSection`/`_SectionHeader`/`_…Row`/`_ChipWrap`).
-6. **Tokens:** `BsTokens` בלבד (space 4-32 · radiusCard 16 · radiusPill 999 · כתום #FF7A18 · Heebo). אסור מספרי-קסם/צבע-קשיח.
+6. **Tokens:** `BsTokens` בלבד (space 4-32 · **radiusCard 20** · radiusPill 999 · כתום #FF7A18 · Heebo). אסור מספרי-קסם/צבע-קשיח.
 7. **Toast:** `showToast(context, msg)`. **RTL · Material-3 · light.**
 8. **🔌 server-ready (חובה — זה מוצר אמיתי, לא תצוגה):** כל נתון עובר דרך **provider/repository** (לעולם לא מקודד בתוך מסך/widget) · **צורת-נתונים אחידה** (אותם שדות עכשiv ובשרת) · הנתונים המקומיים = **פיגום זמני** שיוחלף בשרת. **מטרה: חיבור-השרת בסוף = drop-in ברמת-ה-provider, בלי לגעת ב-UI.** (לכל domain: `XxxRepository` עם מימוש-מקומי היום → מימוש-שרת בעתיד, מאחורי אותו interface.)
 
@@ -156,7 +156,7 @@
 
 ## אומדן
 שלב א׳ (כפתורים T0–T8 ≈ 3.5 + פרסונות-מסכים T9 ≈ 3) ≈ **6.5 ימים** · שלב ב׳ (תפריט+חסרים+מועדון T22) ≈ **9 ימים** · סה"כ ≈ **15–16 ימי-עבודה** (= מלא-מלא, parity-מלא לפרוטוטייפ).
-*נפרד (P0 השקה, לא-קוד): iOS/Android signing + usage-strings + Huliot-R2 — ~1–2 ימים + חשבונות-חנות.*
+*נפרד (P0 השקה, לא-קוד): iOS/Android signing + usage-strings + Huliot-R2 (🔄 בטיפול 06-08: סקריפט+159 תמונות) — + חשבונות-חנות.*
 
 ## 🔒 תפיסות (claims log)
 - 2026-06-03 · **מקבץ** · `claude/whats-happening-LyY9G` · לקח **T0 + T1** (תשתית-מינימלית + קטלוג-⋮ "חלופות זולות"). בעבודה — מיישם על whats-happening לפי הסדר (T0 DoD → T1).

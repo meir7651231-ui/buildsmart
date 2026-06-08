@@ -11,7 +11,7 @@
 - **מסך:** `ManagerDashboardScreen extends ConsumerStatefulWidget` → `Scaffold` + `AppBar` (כותרת "👔 מנהל המערכת" + back). דגם: `store_screen.dart` / `install_studio_screen.dart`.
 - **טאבים-במסך:** `StateProvider<int>` לטאב-פעיל + segmented-toggle + `IndexedStack` לשמירת-state. **דגם מדויק: `updates_screen.dart`** (`_UpdatesToggle` · `seg(i,icon,label)` · `updatesSubTabProvider`). (חלופה: chips כמו `store_screen._SectionChipsRow`.)
 - **כניסה:** `role_picker_sheet.dart` — היום מנהל→`OpenDial.bs`. **לשנות:** מנהל → `Navigator.push(ManagerDashboardScreen)` (כמו שהקבלן→HomeShell).
-- **תוכן-טאב:** widgets פרטיים `_Xxx` (cards/rows/tiles) ב-`BsTokens` (space 4-32 · radiusCard 16 · כתום #FF7A18 · Heebo) · `showToast` · Riverpod · RTL. בלי מספרי-קסם/צבע-קשיח.
+- **תוכן-טאב:** widgets פרטיים `_Xxx` (cards/rows/tiles) ב-`BsTokens` (space 4-32 · **radiusCard 20** · כתום #FF7A18 · Heebo) · `showToast` · Riverpod · RTL. בלי מספרי-קסם/צבע-קשיח.
 - **קלטים:** inline (לא prompt). server/print → toast-stub.
 
 ## 4 הטאבים (verbatim מ-`index.html:4213-4216` + `kManagerSections`)

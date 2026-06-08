@@ -2,7 +2,7 @@
 
 > **לסוכן ליטוש** (presentation + Phase B–K). בצע **בתוך `POLISH_PROTOCOL`** שלך: before→after→gate · **token-binding = safe** (אפס שינוי ויזואלי) · L5 visual-screenshot ל-`POLISH_LOG`.
 > ⚠️ **אל תיגע בקבצים-בתעופה של הקבלן** (`home_shell.dart` + מסכי-T1–T9 ש-מקבץ בונה כעת — PLAYBOOK no-collision). עבוד רק על הקבצים-הבטוחים המסומנים.
-> אומת מהקוד v6.16 (2026-06-05). בצע לפי הסדר (בטוח→גדול). **עדכון-סטטוס:** P-4 ✅ בוצע · P-3 ✅ בוצע · P-1 🔲 פתוח (גדל ל-1,115) · P-2/P-5 🔲 לא-אומת.
+> אומת מהקוד 2026-06-08 (tip `6477f03`). **עדכון-סטטוס:** P-4 ✅ · P-3 ✅ · **P-2 (a11y) 🔄 בעבודה** (screen-reader/high-contrast/Dynamic-Type/tooltips) · P-1 🔲 (1,187 — מטרה-נעה) · P-5 🔲. **הצי בגלי-ליטוש W0/W1/W3** (theme: teal→כתום · dark→light · radiusCard→20 · microcopy · bug-hunt).
 
 ---
 
@@ -17,7 +17,7 @@
 - צעד: הוסף tokens (`BsTokens.fontXs/Sm/...` אם אין) → החלף. **token-equal** = אפס שינוי ויזואלי.
 - ✅ DoD: 0 font-size קסם בקבצים אלה · screenshot before/after זהה.
 
-## P-2 · a11y / Semantics (P1) — ⏱️ ~2ש'
+## P-2 · a11y / Semantics — 🔄 **בעבודה** (07-08: screen-reader labels · high-contrast brand-fg · Dynamic-Type · tooltips על icon-buttons)
 🎯 פער-נגישות: רק **3 קבצים** ב-lib עם `Semantics`.
 - קבצים-בטוחים: `widgets/dial.dart` (`DialRow` → `Semantics(button:true, label:...)`) · כפתורי-AppBar · `widgets/toast.dart`.
 - touch-targets ≥44×44 · `Semantics` לאלמנטים-אינטראקטיביים.
@@ -30,7 +30,7 @@
 - ✅ DoD: 0 R-שיורי · audit-verdict לכל מסמך-חדש.
 
 ## P-1 · צבעים-קשיחים → `BsTokens` (הכי-בעל-ערך, גדול — לפצל) — ⏱️ ~יום+
-🎯 **1,115 `Color(0x` קשיחים** ב-lib → `BsTokens` (אומת 2026-06-05 — *גדל* מ-1,028 ככל שנוספו פיצ'רים; עדיין פתוח). **token-binding = safe.**
+🎯 **1,187 `Color(0x` קשיחים** ב-lib → `BsTokens` (07-08 — *גדל* 1,028→1,115→1,187; **מטרה-נעה:** פיצ'רים-חדשים מוסיפים צבעים מהר-יותר-מהטוקניזציה. "גמור" ידרוש הקפאת-פיצ'רים). **token-binding = safe.**
 - **גל-1 (בטוח, התחל פה):** `theme/` · `widgets/` · מסכים-יציבים (`install_studio_screen` · 4 מסכי-settings · `departments_screen`).
 - **גל-2 (מאוחר):** מסכי-הקבלן (`home_shell` + T1–T9) — **רק אחרי** ש-מקבץ סוגר אותם (אחרת התנגשות).
 - צעד: צבע-קשיח → token קיים ב-`BsTokens`; אם חסר token — הצע ב-`POLISH_LOG` (needs-approval), אל תמציא ערך.
