@@ -378,7 +378,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             onTap: () => Navigator.maybePop(context),
             child: const Padding(
               padding: EdgeInsetsDirectional.only(end: 8),
-              child: Icon(Icons.arrow_back, color: _ink, size: 22),
+              child: Icon(Icons.arrow_forward, color: _ink, size: 22),
             ),
           ),
         Container(

@@ -737,3 +737,9 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/deep_fix_regression_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### lib/data/lipskey_smart_data.dart — 2026-06-08T18:59:32+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s/אטמים ופקקים/אטמים אומים ופקקים/`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/lipskey_category_keys_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

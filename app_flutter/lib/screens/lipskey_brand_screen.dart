@@ -24,7 +24,7 @@ class LipskeyBrandScreen extends StatelessWidget {
               elevation: 0,
               pinned: true,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_forward),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Column(
@@ -230,7 +230,7 @@ class LipskeySectionScreen extends StatelessWidget {
               elevation: 0,
               pinned: true,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_forward),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Column(

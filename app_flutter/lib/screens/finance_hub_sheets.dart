@@ -1618,13 +1618,16 @@ class _FxCalcState extends State<_FxCalc> {
             onChanged: (v) => setState(() => _cur = v ?? 'USD'),
           ),
           const SizedBox(height: BsTokens.space3),
-          Text(
-            _result(),
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: _kBrandTeal,
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text(
+              _result(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: _kBrandTeal,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+              ),
             ),
           ),
         ],

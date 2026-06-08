@@ -158,7 +158,7 @@ class _AuditScreenState extends State<AuditScreen> {
                     onTap: () => Navigator.maybePop(context),
                     child: const Padding(
                       padding: EdgeInsets.all(8),
-                      child: Icon(Icons.arrow_back,
+                      child: Icon(Icons.arrow_forward,
                           color: Color(0xFF1A1A1A), size: 22),
                     ),
                   ),

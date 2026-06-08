@@ -4,6 +4,19 @@
 
 ---
 
+## v6.16 — fix-fleet · round-3 (ציד עמוק יותר: data/RTL/UX)
+
+**שינוי:** סבב-3 עמוק (data-integrity · RTL · error-paths) תפס באגים שהסבבים הקודמים פספסו.
+- **HIGH×2 (data):** מפתחות-קטגוריה ב-`lipskey_smart_data` לא תאמו ל-`categoryHe` → **52 מוצרים** איבדו אביזרים+שלבים + אריחים-מתים. תוקנו (`'אטמים ופקקים'` / `'מחסומים גלויים'`). guard: `lipskey_category_keys_test` (mutation-verified).
+- **MED×2 (data):** 2 עלים ב-`catalog_tree` עם `lipskeyCategory` ללא-מוצרים נעלמו תחת פילטר-מערכת → ה-`lipskeyCategory` הוסר (ה-`smartKey` מניע).
+- **MED:** image-placeholder — `productImage` קיבל `frameBuilder` ברירת-מחדל (grey-skeleton + fade-in, מכסה 15 call-sites).
+- **התכנסות:** FX-RTL + arrow_back כבר תוקנו ע"י הקולגה (rebase).
+- **נדחה:** lipskey mixed-string (cosmetic, data-field) · voice-indicator (feature) · 7 LOWs.
+
+**אימות:** `lipskey_category_keys_test` + catalog/lipskey tests ירוקים · analyze 0 · mutation-verified · `central-verify` gate.
+
+---
+
 ## v6.16 — fix-fleet · גל 12 (deep bug-hunt fixes + hardening)
 
 **שינוי:** ציד-עמוק (5 עדשות סמנטיות/אינטגרציה — business-logic/RBAC · e2e-flow · edge-cases · dead-interactions · races) מצא באגים שהשערים הרגילים לא יכלו לתפוס (פיצ'רים שלא חוּוטו נכון · תפרים חוצי-פיצ'ר · races). תוקנו:

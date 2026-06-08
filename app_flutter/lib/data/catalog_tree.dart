@@ -81,7 +81,6 @@ const List<CatalogNode> kCatalogTree = [
             title: 'קולטי גג',
             emoji: '🏠',
             brandIds: ['lipskey'],
-            lipskeyCategory: 'מאספים וקולטים',
             smartKey: 'roofCollector',
           ),
           CatalogNode(
@@ -435,7 +434,6 @@ const List<CatalogNode> kCatalogTree = [
             title: 'אביק לאמבט ואגנית',
             emoji: '🛁',
             brandIds: ['lipskey'],
-            lipskeyCategory: 'אמבט ואגנית',
             smartKey: 'bathtub',
           ),
         ],

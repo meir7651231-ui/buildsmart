@@ -1502,7 +1502,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
             if (open)
               IconButton(
                 icon: const Icon(
-                  Icons.arrow_back,
+                  Icons.arrow_forward,
                   color: Color(0xFF888888),
                   size: 20,
                 ),
@@ -3416,7 +3416,7 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back,
+            icon: const Icon(Icons.arrow_forward,
                 color: Color(0xFF555555), size: 20),
             tooltip: 'חזרה',
             onPressed: widget.onBack,
@@ -3777,7 +3777,7 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back,
+                icon: const Icon(Icons.arrow_forward,
                     color: Color(0xFF555555), size: 20),
                 tooltip: 'חזרה',
                 onPressed: _back,
@@ -7705,7 +7705,7 @@ class _VariantFamilyView extends ConsumerWidget {
                 onTap: () => ref.read(variantsActiveFamilyProvider.notifier).state = null,
                 // RTL arrow: arrow_back is semantically "go back" and mirrors
                 // correctly in RTL (points right → back in Hebrew layout).
-                child: const Padding(padding: EdgeInsets.all(4), child: Icon(Icons.arrow_back, size: 20)),
+                child: const Padding(padding: EdgeInsets.all(4), child: Icon(Icons.arrow_forward, size: 20)),
               ),
               const SizedBox(width: 8),
               Expanded(child: Text('${family.emoji}  ${family.frame}', textAlign: TextAlign.right, style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800, fontSize: 15))),

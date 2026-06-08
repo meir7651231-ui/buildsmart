@@ -46,10 +46,40 @@ ImageProvider resolveProductImage(String assetPath) {
   );
 }
 
+/// Subtle neutral placeholder shown while a CDN image streams in, and the
+/// fade-in once the first frame arrives. Applied as the DEFAULT `frameBuilder`
+/// for [productImage] so every call-site gets it for free (no blank circles /
+/// boxes popping in on a slow connection). A caller that passes its own
+/// `frameBuilder` keeps full control. Bundled-asset mode decodes synchronously,
+/// so `wasSynchronouslyLoaded` short-circuits and there is no visible flicker.
+Widget _productImagePlaceholder(
+  BuildContext context,
+  Widget child,
+  int? frame,
+  bool wasSynchronouslyLoaded,
+) {
+  if (wasSynchronouslyLoaded || frame != null) {
+    return AnimatedOpacity(
+      opacity: 1,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+      child: child,
+    );
+  }
+  // First frame not decoded yet → faint grey skeleton box so the grid keeps its
+  // shape instead of looking broken. (Plain ColoredBox — this data-layer file
+  // imports flutter/widgets only, not material, so no spinner widget here.)
+  return const ColoredBox(color: Color(0x14000000));
+}
+
 /// Drop-in replacement for `Image.asset(path, ...)` that routes through
 /// [resolveProductImage] (CDN + cache, or bundled fallback). Accepts the common
 /// `Image` arguments so call-sites migrate by replacing `Image.asset(` →
 /// `productImage(`.
+///
+/// When the caller does not supply a [frameBuilder], a shared loading
+/// placeholder + fade-in ([_productImagePlaceholder]) is used so slow CDN
+/// fetches show a subtle grey skeleton instead of a blank box.
 Widget productImage(
   String assetPath, {
   Key? key,
@@ -79,7 +109,7 @@ Widget productImage(
     gaplessPlayback: gaplessPlayback,
     filterQuality: filterQuality,
     errorBuilder: errorBuilder,
-    frameBuilder: frameBuilder,
+    frameBuilder: frameBuilder ?? _productImagePlaceholder,
     semanticLabel: semanticLabel,
   );
 }

@@ -318,7 +318,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black54),
+          icon: const Icon(Icons.arrow_forward, color: Colors.black54),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
@@ -1140,7 +1140,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
         elevation: 0,
         titleSpacing: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black54),
+          icon: const Icon(Icons.arrow_forward, color: Colors.black54),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -1777,7 +1777,7 @@ class ChatsArchiveScreen extends ConsumerWidget {
         elevation: 0,
         titleSpacing: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black54),
+          icon: const Icon(Icons.arrow_forward, color: Colors.black54),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
