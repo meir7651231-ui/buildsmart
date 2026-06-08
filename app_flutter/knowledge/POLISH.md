@@ -72,6 +72,36 @@ scope-chips `catalog:2003` **false-positive** (search-router) · switch-stage `s
 
 ---
 
+## 3.5 🛡️ שערי-מניעה — לכל באג, החוסם-מחלקה (feed-back לפרוטוקול)
+
+> **כל תיקון נוחת עם שער-המניעה שלו** — אחרת תוקנת מופע, לא מחלקה. מנגנון = **בדיקה** (`test/*.dart`) או **שער pre-commit** (`.githooks/`, grep). הטור "סוגר" = העיוורון מ-§"למה הפרוטוקול פספס" (A=אין-עיניים · B=spec-לא-נאכף · C=אין-תכונת-על · D=אינטגרציה-דלילה · E=שער-משמעת-לא-איכות). **זה דפוס-הפרויקט: כל שער = לקח-עבר — האודיט רק ייצר את האצווה הבאה.**
+
+### שערים סיסטמיים — בנה ראשון (כל אחד סוגר מחלקה שלמה)
+| מנגנון | סוג | סוגר | המחלקה שננעלת |
+|---|---|---|---|
+| **referential-integrity** — כל `lipskeyCategory`/section/menu-ref **חייב להתממש** ב-`kLipskeyCatalog`/tree | test | D | orphan-refs (כל ~30 הפוטנציאליים, לא רק 2) |
+| **ratchet-צבע** — `count(Color(0x..)` ב-lib מחוץ ל-`tokens.dart`) **יורד-בלבד** | gate | C | 1,302 צבעים גולמיים |
+| **ratchet-fontSize** — `count(fontSize: literal)` יורד-בלבד | gate | C | type-scale (1,225) |
+| **lint-RTL** — אוסר `Alignment.center(Left\|Right)` + `EdgeInsets.only(left\|right)` חדשים ב-`lib/screens` | gate | A | בועות + directional |
+| **dark-render golden** — pump 6 מסכי-מפתח ב-`ThemeMode.dark` | golden | A+C | dark שבור (27 מסכים) |
+| **Semantics-ratchet** — `count(onTap/GestureDetector בלי Semantics)` יורד-בלבד | gate | C | a11y (602/20) |
+| **authorization-contract** — `requirePerm` **דוחה** persona לא-מנהל | test | C+E | RBAC-bypass |
+
+### שערים פר-באג — זולים, מצמידים את התיקון הספציפי
+| באג | שער-מניעה | סוגר |
+|---|---|---|
+| בועות-צ׳אט | widget/golden: `isMe`→ימין ב-RTL (פין ל-spec `sys_chat:37`) | A+B |
+| חיתוך-₪ עגלה | round-trip: save `total=340/qty=3` → reload → `==340` | D |
+| loop-מניפולד | engine: `buildTreeInstallation(loop:true)` ⊇ פריטי-בטיחות (parity ל-linear) | D |
+| הבזק-תמה | test: settings hydrate **לפני** first-build | D |
+| מצלמה/voice בולעים | test: `errorBuilder`/`onError` **מציג**, לא בולע | D |
+| double-push | convention + widget: 2 taps מהירים → route אחד | D |
+| `+`-עגלה מכפיל | test: 2× quick-add → qty=2, **לא** 2 שורות | D |
+
+> **DoD מעודכן לכל גל (§5):** תיקון ✅ + before/after + **שער-מניעה ירוק** + `flutter test`. בלי שער-המניעה — הגל לא "נגמר".
+
+---
+
 ## 4. W0 — החלטות חוסמות (R8 · דורש אישורך לפני גלי-הבינדינג)
 
 1. **צבעים סמנטיים:** איזה ירוק-הצלחה (`1F8A4C`×26 מול `22C55E`×17)? `danger`/`destructive` לאחד? + `divider`/`surfaceMid`/`mutedMid`.
