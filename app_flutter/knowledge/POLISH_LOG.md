@@ -1,5 +1,7 @@
 # POLISH_LOG — יומן ליטוש (סוכן: ליטוש)
 
+> 🔗 entry-העבודה המאוחד = [`POLISH.md`](POLISH.md). **קובץ זה נשאר היומן-החי** — before/after לכל שינוי נכתב כאן.
+
 > תוצר פאזה A צעד 9. **before → after → gate → ref** לכל שינוי-UI (כלל-זהב §1).
 > ענף `claude/whats-happening-LyY9G` · push רק ב"תדחוף".
 
