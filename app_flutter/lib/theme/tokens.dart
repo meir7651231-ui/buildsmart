@@ -12,10 +12,13 @@ class BsTokens {
   static const double space4 = 16;
   static const double space5 = 24;
   static const double space6 = 32;
+  // W0 fine spacing — preserve existing look, give names.
+  static const double spaceHair = 2; // hairline / divider gap (×90 raw)
+  static const double space1_5 = 6; // between space1(4) and space2(8) (×128 raw)
 
   // Radii.
   static const double radiusPill = 999;
-  static const double radiusCard = 16;
+  static const double radiusCard = 20; // W0: standardized all card radii to 20
   static const double radiusCircle = 24; // FAB inner
 
   // Font sizes — bound from existing literals (token-equal · zero visual). P-3.
@@ -23,6 +26,17 @@ class BsTokens {
   static const double fontSm = 9; // chain_diagram label
   static const double fontMd = 14; // toast text
   static const double fontLg = 22; // chain_diagram glyph
+
+  // W0 type-scale — 8 coherent steps mapping current usage; fractional sizes
+  // (12.5/13.5/10.5) round to the nearest step (zero visual change).
+  static const double typeCaption = 11;
+  static const double typeMicro = 12;
+  static const double typeLabel = 13;
+  static const double typeBody = 14;
+  static const double typeSubhead = 16;
+  static const double typeTitleSm = 18;
+  static const double typeTitleMd = 20;
+  static const double typeTitleLg = 24;
 
   // Dial dimensions (matches .dial__circle: 48px).
   static const double dialCircle = 48;
@@ -35,6 +49,8 @@ class BsTokens {
   static const Duration ssubIn = Duration(milliseconds: 240);
   static const Duration dialStaggerStep = Duration(milliseconds: 28); // per-row rise delay
   static const Duration toastDuration = Duration(seconds: 2);
+  static const Duration transitionIn = Duration(milliseconds: 220); // W0: screen transition
+  static const Duration microIn = Duration(milliseconds: 150); // W0: tap/expand micro-interaction
   static const Curve dialCurve = Cubic(0.2, 0.9, 0.3, 1.2);
 
   // Brand color (ported from --brand in tokens.css — orange used in Preact).
@@ -46,6 +62,15 @@ class BsTokens {
   static const Color cardLight = Color(0xFFFFFFFF);
   static const Color inkLight = Color(0xFF1A1A1A);
   static const Color mutedLight = Color(0xFF666666);
+
+  // W0 semantic status + surface tokens. success = bright #22C55E (chosen);
+  // the rest promote the dominant existing hex (naming, not new values).
+  static const Color success = Color(0xFF22C55E);
+  static const Color danger = Color(0xFFEF4444); // == chainWarning; ×31 raw
+  static const Color warnText = Color(0xFFB45309); // dark amber text
+  static const Color warnBright = Color(0xFFF2A516); // bright amber badge
+  static const Color divider = Color(0xFFEEEEEE); // ×39 raw
+  static const Color surfaceMid = Color(0xFFF5F5F5); // ×70 raw
 
   // Chat-specific text colors (light background, high-contrast).
   static const Color chatText = Color(0xFF111111);

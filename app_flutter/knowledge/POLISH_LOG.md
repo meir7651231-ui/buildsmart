@@ -122,3 +122,11 @@
 - **before:** weld lookup קרא רק `dims['dn נומינלי']` → null לרוב PPR (פולירול נושא `'קוטר חיצוני'`).
 - **after:** helper `pprWeldDn` עם fallback `'קוטר חיצוני'`. guard: `ppr_weld_dn_test` (4) + mutation-verified.
 - **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `lipskey_product_sheet.dart` (helper + lookup).
+
+## גל W0/W3 — יסוד-tokens (5 ההחלטות נעולות) — 2026-06-08
+### יסוד — tokens חדשים ב-`BsTokens` — ✅
+- **success=#22C55E** (בהיר · בחירת-משתמש) + danger/warnText/warnBright/divider/surfaceMid (קידום הגוון-הדומיננטי הקיים).
+- **radiusCard 16→20** (האחדת רדיוס-הקלפים — שינוי-מראה מאושר "הכול ל-20").
+- **type-scale 8 צעדים** (caption11…titleLg24) · **spaceHair=2 · space1_5=6** · **transitionIn=220 · microIn=150**.
+- guard: `tokens_w0_test` (5). הבינדינג (raw→tokens) = הגל הבא (נחיל-fixers).
+- **ref:** `lib/theme/tokens.dart`.
