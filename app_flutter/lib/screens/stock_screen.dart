@@ -67,7 +67,7 @@ const Map<String, ({String img, String why})> _accInfo = {
   'מחברים וזוויות': (img: '🔧', why: 'חיבור והסטה של הצנרת'),
 };
 
-const _ink = Color(0xFF1A1A1A);
+const _ink = BsTokens.inkLight;
 const _muted = Color(0xFF888888);
 
 // ─── screen ─────────────────────────────────────────────────────────────────

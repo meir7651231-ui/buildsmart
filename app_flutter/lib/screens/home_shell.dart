@@ -262,7 +262,7 @@ class _CartChatBubble extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           height: 1.1,
@@ -846,7 +846,7 @@ class _MenuRow extends StatelessWidget {
           child: Text(
             label,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+            style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
           ),
         ),
       ],
@@ -891,7 +891,7 @@ class _NewChatSheet extends StatelessWidget {
             child: Text(
               '✏️ שיחה חדשה',
               style: TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -912,7 +912,7 @@ class _NewChatSheet extends StatelessWidget {
               leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
               title: Text(
                 c.label,
-                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+                style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
               ),
               trailing: const Icon(
                 Icons.chevron_left,

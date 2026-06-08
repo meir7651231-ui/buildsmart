@@ -1337,3 +1337,6 @@ A 3rd, DEEPER audit (data-integrity · RTL/BiDi · error/empty-path lenses) caug
 - **Convergence (already fixed via rebase):** the FX-equation RTL reorder (`finance_hub_sheets`, wrapped LTR) + the wrong-direction `Icons.arrow_back` (→ `arrow_forward`, 11 sites) were independently fixed in the parallel agent's RTL-polish pass.
 - **Deferred (low-value / not cleanly fixable):** lipskey spec-string Latin-reorder (a `_StripDef.value` data field rendered through a shared mixed-direction `Text` — per-value bidi-isolation needed; cosmetic); voice "listening" indicator (a real STT-feedback feature, not a one-liner); 7 LOWs (emoji/SKU order, `₪-` sign, breadcrumb arrow, badge side, zoom-error, partial-load notice).
 Gate: central-verify green — analyze 0 · tests green · build · conformance · required-tests.
+
+### #bind-color — W3 batch 1: inkLight ×150 — 2026-06-08
+- `Color(0xFF1A1A1A)` → `BsTokens.inkLight` ב-17 קבצי-screens (token-equal · אפס שינוי-עין · imports נוספו). guard: `color_token_ratchet_test` (down-only). batch-1 של בינדינג-הצבע (#3); re-based על tip-הצי `d8b1089` אחרי collision.

@@ -484,7 +484,7 @@ class _Header extends ConsumerWidget {
             child: Text(
               'התראות',
               style: TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
@@ -761,7 +761,7 @@ class _NotifList extends ConsumerWidget {
                     const Text(
                       'התראות מושתקות',
                       style: TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -804,7 +804,7 @@ class _NotifList extends ConsumerWidget {
                     const Text(
                       'שעות שקט פעילות',
                       style: TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -845,7 +845,7 @@ class _NotifList extends ConsumerWidget {
                     Text(
                       'אין התראות',
                       style: TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1030,7 +1030,7 @@ class _NotifRow extends ConsumerWidget {
                   SizedBox(width: 12),
                   Text(
                     'סמן כנקרא',
-                    style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+                    style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
                   ),
                 ],
               ),
@@ -1111,7 +1111,7 @@ class _NotifRow extends ConsumerWidget {
                             style: TextStyle(
                               color: notif.highPriority
                                   ? Colors.redAccent
-                                  : const Color(0xFF1A1A1A),
+                                  : BsTokens.inkLight,
                               fontSize: 16,
                               fontWeight: isUnread
                                   ? FontWeight.w700

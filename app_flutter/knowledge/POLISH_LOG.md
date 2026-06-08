@@ -140,3 +140,10 @@
 - **before:** 2 MobileScanner בלי errorBuilder → מסך-שחור כשהמצלמה לא עולה.
 - **after:** errorBuilder → `cameraPermissionErrorView` (widget משותף · קופי מאושר ע"י המשתמש).
 - **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `camera_sheet`/`barcode_scanner` + `lib/widgets/camera_error_view.dart`.
+
+## גל W3 — בינדינג-צבע (raw → tokens · #3)
+### batch 1 — inkLight ×150 — ✅ — 2026-06-08
+- `Color(0xFF1A1A1A)` → `BsTokens.inkLight` ב-17 קבצים (token-equal · אפס שינוי-עין · imports נוספו).
+- guard: `color_token_ratchet_test` (down-only). **הבא:** mutedLight · danger · divider · surfaceMid · withValues.
+- **הערה:** הצי מבצע במקביל orphan-refs/RTL/bug-hunts — נמנעתי מכפילות; בינדינג-צבע הוא התרומה הייחודית.
+- **gate:** analyze 0 · full test · build · WIRING+visual_log.

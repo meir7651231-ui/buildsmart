@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
@@ -20,7 +21,7 @@ class LipskeyBrandScreen extends StatelessWidget {
           slivers: [
             SliverAppBar(
               backgroundColor: const Color(0xFFFFFFFF),
-              foregroundColor: const Color(0xFF1A1A1A),
+              foregroundColor: BsTokens.inkLight,
               elevation: 0,
               pinned: true,
               leading: IconButton(
@@ -32,7 +33,7 @@ class LipskeyBrandScreen extends StatelessWidget {
                 children: const [
                   Text('ליפסקי ברקן',
                       style: TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontWeight: FontWeight.bold,
                           fontSize: 17)),
                   Text('אינסטלציה · סניטציה',
@@ -171,7 +172,7 @@ class _SectionCard extends StatelessWidget {
               children: [
                 Text(section.name,
                     style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         height: 1.2)),
@@ -226,7 +227,7 @@ class LipskeySectionScreen extends StatelessWidget {
           slivers: [
             SliverAppBar(
               backgroundColor: const Color(0xFFFFFFFF),
-              foregroundColor: const Color(0xFF1A1A1A),
+              foregroundColor: BsTokens.inkLight,
               elevation: 0,
               pinned: true,
               leading: IconButton(
@@ -329,7 +330,7 @@ class _CategoryCard extends StatelessWidget {
                 children: [
                   Text(entry.name,
                       style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           height: 1.2),

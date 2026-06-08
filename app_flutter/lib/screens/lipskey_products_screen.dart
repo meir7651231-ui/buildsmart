@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/tokens.dart';
 import 'dart:math';
 import 'package:buildsmart/data/product_images.dart';
 
@@ -287,7 +288,7 @@ class _LensGroupHeader extends StatelessWidget {
             child: Text(
               title,
               style: const TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),

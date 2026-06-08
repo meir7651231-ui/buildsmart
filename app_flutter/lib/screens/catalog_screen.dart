@@ -664,7 +664,7 @@ class _SectionChipsRow extends ConsumerWidget {
                 SizedBox(width: 12),
                 Text(
                   'ניהול רשימות',
-                  style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
                 ),
               ],
             ),
@@ -681,7 +681,7 @@ class _SectionChipsRow extends ConsumerWidget {
                 SizedBox(width: 12),
                 Text(
                   'שינוי שם',
-                  style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
                 ),
               ],
             ),
@@ -695,7 +695,7 @@ class _SectionChipsRow extends ConsumerWidget {
                 SizedBox(width: 12),
                 Text(
                   'הסתרת רשימה',
-                  style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
                 ),
               ],
             ),
@@ -824,7 +824,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                 const Text(
                   'ניהול רשימות',
                   style: TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                   ),
@@ -867,7 +867,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                     style: TextStyle(
                       color: isHidden
                           ? const Color(0xFFAAAAAA)
-                          : const Color(0xFF1A1A1A),
+                          : BsTokens.inkLight,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -974,12 +974,12 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
         backgroundColor: Colors.white,
         title: const Text(
           'רשימה חדשה',
-          style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
+          style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
         ),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Color(0xFF1A1A1A)),
+          style: const TextStyle(color: BsTokens.inkLight),
           decoration: const InputDecoration(
             hintText: 'שם הרשימה',
             hintStyle: TextStyle(color: Color(0xFF888888)),
@@ -1035,12 +1035,12 @@ void _showRenameDialog(
       backgroundColor: Colors.white,
       title: const Text(
         'שינוי שם הרשימה',
-        style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
+        style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
       ),
       content: TextField(
         controller: controller,
         autofocus: true,
-        style: const TextStyle(color: Color(0xFF1A1A1A)),
+        style: const TextStyle(color: BsTokens.inkLight),
         decoration: const InputDecoration(
           hintText: 'שם הרשימה',
           hintStyle: TextStyle(color: Color(0xFF888888)),
@@ -1153,12 +1153,12 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
         backgroundColor: Colors.white,
         title: const Text(
           'שינוי שם הרשימה',
-          style: TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
+          style: TextStyle(color: BsTokens.inkLight, fontSize: 16),
         ),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Color(0xFF1A1A1A)),
+          style: const TextStyle(color: BsTokens.inkLight),
           decoration: const InputDecoration(
             hintText: 'שם הרשימה',
             hintStyle: TextStyle(color: Color(0xFF888888)),
@@ -1257,7 +1257,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                         Text(
                           _label,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
                           ),
@@ -1326,7 +1326,7 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                         child: Text(
                           cat.title,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                           ),
@@ -1558,7 +1558,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
                 onChanged: (v) =>
                     ref.read(searchQueryProvider.notifier).state = v,
                 onSubmitted: _submit,
-                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+                style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: hasScope
                       ? 'חפש $scope...'
@@ -1652,7 +1652,7 @@ class _SearchToolsRow extends ConsumerWidget {
                       s == current ? BsTokens.brand : const Color(0xFF888888),
                 ),
                 title: Text(_productSortLabel(s),
-                    style: const TextStyle(color: Color(0xFF1A1A1A))),
+                    style: const TextStyle(color: BsTokens.inkLight)),
                 onTap: () {
                   ref.read(catalogProductSortProvider.notifier).state = s;
                   Navigator.pop(context);
@@ -1673,7 +1673,7 @@ class _SearchToolsRow extends ConsumerWidget {
             color:
                 value == imageOnly ? BsTokens.brand : const Color(0xFF888888),
           ),
-          title: Text(label, style: const TextStyle(color: Color(0xFF1A1A1A))),
+          title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
           onTap: () {
             ref.read(searchImageOnlyProvider.notifier).state = value;
             Navigator.pop(context);
@@ -1769,7 +1769,7 @@ class _SheetTitle extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: Text(text,
               style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
+                  color: BsTokens.inkLight,
                   fontSize: 15,
                   fontWeight: FontWeight.w700)),
         ),
@@ -1907,7 +1907,7 @@ class _RecentSearchesList extends ConsumerWidget {
                 ),
                 title: Text(
                   q,
-                  style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+                  style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                 ),
                 trailing: IconButton(
                   icon: const Icon(
@@ -1980,7 +1980,7 @@ class _SearchSuggestions extends ConsumerWidget {
                         Text(
                           s,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
@@ -2061,7 +2061,7 @@ class _SearchResultsList extends ConsumerWidget {
                   : Text(p.categoryEmoji, style: const TextStyle(fontSize: 20)),
             ),
             title: Text(p.nameHe,
-                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+                style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                 maxLines: 2, overflow: TextOverflow.ellipsis),
             subtitle: Text('${p.categoryHe} · #${p.sku}',
                 style: const TextStyle(color: Color(0xFF666666), fontSize: 11),
@@ -2133,7 +2133,7 @@ class _SearchResultsList extends ConsumerWidget {
           ),
           title: Text(
             entry.title,
-            style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+            style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
           ),
           subtitle: entry.breadcrumb.isNotEmpty
               ? Text(
@@ -2223,7 +2223,7 @@ class _SectionHeader extends ConsumerWidget {
             child: Text(
               label,
               style: const TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -2290,7 +2290,7 @@ class _EmptySection extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
@@ -2536,7 +2536,7 @@ class _OverviewBlock extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                         ),
@@ -2620,7 +2620,7 @@ class _OverviewRow extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+                style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
               ),
             ),
             const Icon(Icons.chevron_left, color: Color(0xFFB0B0B8), size: 18),
@@ -2698,7 +2698,7 @@ class _CatalogRow extends ConsumerWidget {
                   Text(
                     cat.title,
                     style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -3035,7 +3035,7 @@ class _FacetRow extends StatelessWidget {
                       Text(
                         label,
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -3173,7 +3173,7 @@ class _ProductsHeader extends ConsumerWidget {
                       Text(
                         _productSortLabel(s),
                         style: TextStyle(
-                          color: const Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 14,
                           fontWeight:
                               s == sort ? FontWeight.w700 : FontWeight.w400,
@@ -3241,7 +3241,7 @@ class _TreeComingSoon extends StatelessWidget {
               node.title,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
@@ -3452,7 +3452,7 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
               textInputAction: TextInputAction.search,
               onChanged: (v) =>
                   ref.read(catalogTreeQueryProvider.notifier).state = v,
-              style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+              style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
               decoration: const InputDecoration(
                 hintText: 'חיפוש',
                 hintStyle: TextStyle(color: Color(0xFF888888), fontSize: 14),
@@ -3519,7 +3519,7 @@ class _TreeCatRow extends StatelessWidget {
                       Text(
                         node.title,
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -3663,7 +3663,7 @@ class _SmartTreeCatList extends ConsumerWidget {
                             Text(
                               cat,
                               style: const TextStyle(
-                                color: Color(0xFF1A1A1A),
+                                color: BsTokens.inkLight,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -3822,7 +3822,7 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
                   textInputAction: TextInputAction.search,
                   onChanged: (v) =>
                       ref.read(smartTreeQueryProvider.notifier).state = v,
-                  style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 14),
+                  style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
                   decoration: const InputDecoration(
                     hintText: 'חיפוש',
                     hintStyle: TextStyle(color: Color(0xFF888888), fontSize: 14),
@@ -3888,7 +3888,7 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
                                 Text(
                                   p.name,
                                   style: const TextStyle(
-                                    color: Color(0xFF1A1A1A),
+                                    color: BsTokens.inkLight,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -4014,7 +4014,7 @@ class _SheetSection extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
@@ -4249,7 +4249,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                         child: Text(
                           b.name,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -4507,7 +4507,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 12,
                       fontWeight: FontWeight.w600)),
             ),
@@ -4587,7 +4587,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                       Text(
                         p.name,
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
@@ -6447,7 +6447,7 @@ class _StageCard extends StatelessWidget {
           Text(
             stage.label,
             style: TextStyle(
-              color: isActive ? const Color(0xFFF2A516) : const Color(0xFF1A1A1A),
+              color: isActive ? const Color(0xFFF2A516) : BsTokens.inkLight,
               fontSize: 9.5,
               fontWeight: FontWeight.w700,
             ),
@@ -6590,7 +6590,7 @@ class _AccRow extends StatelessWidget {
                         child: Text(
                           acc.name,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -6658,7 +6658,7 @@ class _AccRow extends StatelessWidget {
                           '$qty',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
@@ -6738,7 +6738,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
                         Text(
                           acc.name,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
                           ),
@@ -6782,7 +6782,7 @@ void _showAccInfo(BuildContext context, SmartAcc acc) {
               Text(
                 acc.why,
                 style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
+                  color: BsTokens.inkLight,
                   fontSize: 14,
                   height: 1.4,
                 ),
@@ -6860,7 +6860,7 @@ class _FavoritesSection extends ConsumerWidget {
     return Column(
       children: [
         Container(
-          color: const Color(0xFF1A1A1A),
+          color: BsTokens.inkLight,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: Row(
             children: [
@@ -6908,7 +6908,7 @@ class _FavProductRow extends ConsumerWidget {
               style: const TextStyle(fontSize: 30)),
       title: Text(product.nameHe,
           style: const TextStyle(
-              color: Color(0xFF1A1A1A), fontSize: 13, fontWeight: FontWeight.w600)),
+              color: BsTokens.inkLight, fontSize: 13, fontWeight: FontWeight.w600)),
       subtitle: Text(product.brand,
           style: const TextStyle(color: Color(0xFF9AA3B2), fontSize: 11)),
       onTap: () => showLipskeyProductSheet(
@@ -6938,7 +6938,7 @@ class _RecentSearchesSection extends ConsumerWidget {
     return Column(
       children: [
         Container(
-          color: const Color(0xFF1A1A1A),
+          color: BsTokens.inkLight,
           padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -6970,7 +6970,7 @@ class _RecentSearchesSection extends ConsumerWidget {
                     color: Color(0xFF9AA3B2), size: 20),
                 title: Text(q,
                     style: const TextStyle(
-                        color: Color(0xFF1A1A1A), fontSize: 14)),
+                        color: BsTokens.inkLight, fontSize: 14)),
                 trailing: IconButton(
                   icon: const Icon(Icons.close,
                       color: Color(0xFF9AA3B2), size: 18),

@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/tokens.dart';
 // BuildSmart Studio — a cinematic installation designer built on install_engine.
 // Dark "blueprint command-center": glowing product nodes wired by animated
 // energy pipes, colour-coded by plumbing system, with a one-tap auto-assemble
@@ -30,7 +31,7 @@ const _void0 = Color(0xFFFAFAFA); // app background
 const _void1 = Color(0xFFFFFFFF); // dialogs / sheets
 const _panel = Color(0xFFFFFFFF); // cards / tiles
 const _grid = Color(0x0F1A1A1A); // very faint neutral blueprint grid
-const _ink = Color(0xFF1A1A1A); // primary text
+const _ink = BsTokens.inkLight; // primary text
 const _mute = Color(0xFF888888); // secondary text
 const _supply = Color(0xFF0284C7); // blue — water supply
 const _drain = Color(0xFFD97706); // amber — drainage

@@ -118,7 +118,7 @@ String _thousands(int n) {
   return (neg ? '-' : '') + buf.toString();
 }
 
-const _ink = Color(0xFF1A1A1A);
+const _ink = BsTokens.inkLight;
 const _muted = Color(0xFF888888);
 const _ok = Color(0xFF2E9E5B);
 const _danger = Color(0xFFE03131);

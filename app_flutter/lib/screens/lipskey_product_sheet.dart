@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/tokens.dart';
 import 'dart:math';
 import 'package:buildsmart/data/product_images.dart';
 
@@ -410,7 +411,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                       child: const SizedBox(
                         width: 36,
                         height: 36,
-                        child: Icon(Icons.close, color: Color(0xFF1A1A1A), size: 22),
+                        child: Icon(Icons.close, color: BsTokens.inkLight, size: 22),
                       ),
                     ),
                   ),
@@ -470,7 +471,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                           const SizedBox(height: 6),
                           Text((p.dims?['שם מלא'] as String?) ?? p.nameHe,
                               style: const TextStyle(
-                                  color: Color(0xFF1A1A1A),
+                                  color: BsTokens.inkLight,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
                                   height: 1.3)),
@@ -648,7 +649,7 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                                     children: [
                                       const Text('ערכת התקנה מומלצת',
                                           style: TextStyle(
-                                              color: Color(0xFF1A1A1A),
+                                              color: BsTokens.inkLight,
                                               fontSize: 13,
                                               fontWeight: FontWeight.w700)),
                                       Text(
@@ -850,7 +851,7 @@ class _QtyStepper extends StatelessWidget {
               child: Center(
                   child: Text(s,
                       style: const TextStyle(
-                          color: Color(0xFF1A1A1A), fontSize: 20)))),
+                          color: BsTokens.inkLight, fontSize: 20)))),
         );
     return Container(
       decoration: BoxDecoration(
@@ -868,7 +869,7 @@ class _QtyStepper extends StatelessWidget {
               child: Center(
                   child: Text('$qty',
                       style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 17,
                           fontWeight: FontWeight.w800)))),
           b('+', () => onChanged(qty + 1)),
@@ -972,7 +973,7 @@ class _RelatedCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      color: Color(0xFF1A1A1A), fontSize: 11, height: 1.25)),
+                      color: BsTokens.inkLight, fontSize: 11, height: 1.25)),
             ),
             const SizedBox(height: 3),
             Text('#${product.sku}',
@@ -1477,7 +1478,7 @@ class _AccRow extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                  color: Color(0xFF1A1A1A),
+                                  color: BsTokens.inkLight,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600)),
                         ),
@@ -1611,7 +1612,7 @@ class _StageRow extends StatelessWidget {
                   children: [
                     Text(stage.label,
                         style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 13,
                             fontWeight: FontWeight.w600)),
                     if (isActive && stage.desc.isNotEmpty) ...[
@@ -1660,7 +1661,7 @@ class _SectionTitle extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 14,
                       fontWeight: FontWeight.w700)),
             ),
@@ -1699,7 +1700,7 @@ Widget _SpecRow(String emoji, String label, String value) => Padding(
           const Spacer(),
           Text(value,
               style: const TextStyle(
-                  color: Color(0xFF1A1A1A), fontSize: 13)),
+                  color: BsTokens.inkLight, fontSize: 13)),
         ],
       ),
     );
@@ -2010,7 +2011,7 @@ class _StripRowState extends State<_StripRow> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
+                  color: BsTokens.inkLight,
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
                 ),
@@ -2208,7 +2209,7 @@ class _StripPanel extends StatelessWidget {
               children: [
                 Text(k.label,
                     style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 12,
                         fontWeight: FontWeight.w600)),
                 Text(k.reason,
@@ -2234,7 +2235,7 @@ class _StripPanel extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontSize: 12,
                     fontWeight: FontWeight.w600)),
           ),
@@ -2300,7 +2301,7 @@ class _StripPanel extends StatelessWidget {
                     children: [
                       Text(t.label,
                           style: const TextStyle(
-                              color: Color(0xFF1A1A1A),
+                              color: BsTokens.inkLight,
                               fontSize: 12,
                               fontWeight: FontWeight.w700)),
                       Text(t.reason,
@@ -2336,7 +2337,7 @@ class _StripPanel extends StatelessWidget {
                 child: Text(value,
                     textAlign: TextAlign.left,
                     style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         fontFamily: 'monospace')),
@@ -2367,7 +2368,7 @@ class _StripPanel extends StatelessWidget {
         child: Text('• $t',
             textAlign: TextAlign.right,
             style: const TextStyle(
-                color: Color(0xFF1A1A1A), fontSize: 11.5, height: 1.35)),
+                color: BsTokens.inkLight, fontSize: 11.5, height: 1.35)),
       );
 
   Widget _infoHead(String t) => Padding(
@@ -2601,7 +2602,7 @@ class _StripPanel extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 10,
                             height: 1.2)),
                   ),

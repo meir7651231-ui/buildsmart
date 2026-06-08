@@ -324,7 +324,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
         title: const Text(
           'שיחות',
           style: TextStyle(
-            color: Color(0xFF1A1A1A),
+            color: BsTokens.inkLight,
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -555,7 +555,7 @@ class _ThreadList extends ConsumerWidget {
             Text(
               'אין שיחות',
               style: TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -643,7 +643,7 @@ class _ThreadRow extends ConsumerWidget {
     final muted = ref.watch(chatMutedIdsProvider).contains(thread.id);
     final showOnline = thread.isOnline &&
         showOnlinePresence(ref.watch(chatSettingsProvider).lastSeenPrivacy);
-    final nameColor = missed ? BsTokens.brand : const Color(0xFF1A1A1A);
+    final nameColor = missed ? BsTokens.brand : BsTokens.inkLight;
     final arrowIcon = thread.direction == _Direction.outgoing
         ? Icons.north_east_rounded
         : Icons.south_west_rounded;
@@ -1187,7 +1187,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                   Text(
                     _thread.name,
                     style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -1783,7 +1783,7 @@ class ChatsArchiveScreen extends ConsumerWidget {
         title: const Text(
           'ארכיון שיחות',
           style: TextStyle(
-            color: Color(0xFF1A1A1A),
+            color: BsTokens.inkLight,
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -1800,7 +1800,7 @@ class ChatsArchiveScreen extends ConsumerWidget {
                   Text(
                     'אין שיחות בארכיון',
                     style: TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1848,7 +1848,7 @@ class _ArchivedRow extends ConsumerWidget {
       title: Text(
         thread.name,
         style: const TextStyle(
-          color: Color(0xFF1A1A1A),
+          color: BsTokens.inkLight,
           fontSize: 16,
           fontWeight: FontWeight.w700,
         ),

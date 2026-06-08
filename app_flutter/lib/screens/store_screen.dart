@@ -948,7 +948,7 @@ class _SichaSheet extends StatelessWidget {
                   title: Text(
                     c.name,
                     style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 15,
                     ),
                   ),
@@ -1002,7 +1002,7 @@ class _SheetScaffold extends StatelessWidget {
             child: Text(
               '$emoji $title',
               style: const TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -1028,7 +1028,7 @@ class _SheetTile extends StatelessWidget {
       leading: Text(emoji, style: const TextStyle(fontSize: 22)),
       title: Text(
         label,
-        style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 15),
+        style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
       ),
       onTap:
           onTap ??
@@ -1258,7 +1258,7 @@ class _GridHubCard extends StatelessWidget {
             Text(
               item.title,
               style: const TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
               ),
@@ -1377,7 +1377,7 @@ class _StoreRow extends StatelessWidget {
                         child: Text(
                           item.title,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1553,7 +1553,7 @@ class _CartViewState extends ConsumerState<_CartView> {
               Text(
                 'הסל ריק',
                 style: TextStyle(
-                  color: Color(0xFF1A1A1A),
+                  color: BsTokens.inkLight,
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1679,12 +1679,12 @@ class _ProjectSelector extends ConsumerWidget {
             backgroundColor: const Color(0xFFFFFFFF),
             title: const Text(
               'הוספת פרויקט',
-              style: TextStyle(color: Color(0xFF1A1A1A)),
+              style: TextStyle(color: BsTokens.inkLight),
             ),
             content: TextField(
               controller: controller,
               autofocus: true,
-              style: const TextStyle(color: Color(0xFF1A1A1A)),
+              style: const TextStyle(color: BsTokens.inkLight),
               decoration: const InputDecoration(hintText: 'שם הפרויקט'),
             ),
             actions: [
@@ -1792,7 +1792,7 @@ class _SmartCartRow extends ConsumerWidget {
                     Text(
                       '${line.productName} × ${line.productQty}',
                       style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1917,7 +1917,7 @@ class _SmartQtyStepper extends StatelessWidget {
               '$qty',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
@@ -1945,7 +1945,7 @@ class _SupplierHeader extends StatelessWidget {
           Text(
             '🏪 $name',
             style: const TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -2003,7 +2003,7 @@ class _CartItemRow extends ConsumerWidget {
                     Text(
                       item.name,
                       style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
+                        color: BsTokens.inkLight,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2048,7 +2048,7 @@ class _CartItemRow extends ConsumerWidget {
                       child: Text(
                         '$qty',
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -2063,7 +2063,7 @@ class _CartItemRow extends ConsumerWidget {
               Text(
                 _price(lineTotal),
                 style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
+                  color: BsTokens.inkLight,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -2129,7 +2129,7 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1A1A),
+                  color: BsTokens.inkLight,
                 ),
               ),
               const SizedBox(height: 6),
@@ -2256,7 +2256,7 @@ class _DeliveryCard extends StatelessWidget {
             Text(
               option.label,
               style: TextStyle(
-                color: active ? BsTokens.brand : Color(0xFF1A1A1A),
+                color: active ? BsTokens.brand : BsTokens.inkLight,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
@@ -2292,7 +2292,7 @@ class _NotesField extends StatelessWidget {
         const SizedBox(height: 6),
         TextField(
           controller: controller,
-          style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 13),
+          style: const TextStyle(color: BsTokens.inkLight, fontSize: 13),
           cursorColor: BsTokens.brand,
           maxLines: 2,
           decoration: InputDecoration(
@@ -2382,7 +2382,7 @@ class _SummaryLine extends StatelessWidget {
     final style =
         bold
             ? const TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontSize: 15,
               fontWeight: FontWeight.w800,
             )
@@ -2525,7 +2525,7 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
                 backgroundColor: const Color(0xFFFFFFFF),
                 title: const Text(
                   'אישור הזמנה גדולה',
-                  style: TextStyle(color: Color(0xFF1A1A1A)),
+                  style: TextStyle(color: BsTokens.inkLight),
                 ),
                 content: Text(
                   'סכום ההזמנה ${_price(widget.total)} חורג מהסף שהגדרת '
@@ -2618,7 +2618,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             const Text(
               'סיכום הזמנה',
               style: TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -2641,7 +2641,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   Text(
                     project,
                     style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 14,
                     ),
                   ),
@@ -2658,7 +2658,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       Text(
                         deliveryLabel,
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 13,
                         ),
                       ),
@@ -2675,7 +2675,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       Text(
                         paymentLabel,
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 13,
                         ),
                       ),
@@ -2690,7 +2690,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       const Text(
                         'סה"כ לתשלום',
                         style: TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -2698,7 +2698,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       Text(
                         _price(widget.total),
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -2807,11 +2807,11 @@ class _CartActionsRow extends ConsumerWidget {
             backgroundColor: const Color(0xFFFFFFFF),
             title: const Text(
               'שמור סל כרשימה',
-              style: TextStyle(color: Color(0xFF1A1A1A)),
+              style: TextStyle(color: BsTokens.inkLight),
             ),
             content: TextField(
               controller: controller,
-              style: const TextStyle(color: Color(0xFF1A1A1A)),
+              style: const TextStyle(color: BsTokens.inkLight),
               decoration: InputDecoration(
                 hintText: 'שם הרשימה',
                 hintStyle: const TextStyle(color: Color(0xFF666666)),
@@ -2927,7 +2927,7 @@ class _CartActionsRow extends ConsumerWidget {
                       child: Text(
                         '🔖 רשימות שמורות',
                         style: TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
@@ -2961,7 +2961,7 @@ class _CartActionsRow extends ConsumerWidget {
                                 title: Text(
                                   list.name,
                                   style: const TextStyle(
-                                    color: Color(0xFF1A1A1A),
+                                    color: BsTokens.inkLight,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -3220,7 +3220,7 @@ class _ServiceSheet extends StatelessWidget {
             child: Text(
               '${svc.emoji} ${svc.title}',
               style: const TextStyle(
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -3518,7 +3518,7 @@ class _OrderRow extends StatelessWidget {
                         child: Text(
                           order.id,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -3635,7 +3635,7 @@ class _OrderSheet extends ConsumerWidget {
                   child: Text(
                     'הזמנה ${order.id}',
                     style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                     ),
@@ -3733,7 +3733,7 @@ class _OrderSheet extends ConsumerWidget {
                         child: Text(
                           line.name,
                           style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
+                            color: BsTokens.inkLight,
                             fontSize: 14,
                           ),
                         ),
@@ -3749,7 +3749,7 @@ class _OrderSheet extends ConsumerWidget {
                       Text(
                         _price(line.price),
                         style: const TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -3793,7 +3793,7 @@ class _OrderSheet extends ConsumerWidget {
                 const Text(
                   'סה"כ',
                   style: TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -3801,7 +3801,7 @@ class _OrderSheet extends ConsumerWidget {
                 Text(
                   order.total,
                   style: const TextStyle(
-                    color: Color(0xFF1A1A1A),
+                    color: BsTokens.inkLight,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
@@ -3814,7 +3814,7 @@ class _OrderSheet extends ConsumerWidget {
               child: Text(
                 '🚛 מעקב הזמנה',
                 style: TextStyle(
-                  color: Color(0xFF1A1A1A),
+                  color: BsTokens.inkLight,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -3893,7 +3893,7 @@ class _OrderTimeline extends StatelessWidget {
                 _steps[i].$2,
                 style: TextStyle(
                   fontSize: 11,
-                  color: i <= cur ? const Color(0xFF1A1A1A) : Colors.black38,
+                  color: i <= cur ? BsTokens.inkLight : Colors.black38,
                   fontWeight: i == cur ? FontWeight.w800 : FontWeight.w400,
                 ),
               ),

@@ -678,3 +678,7 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **before:** הרשאת-מצלמה נדחית → MobileScanner מציג **מסך-שחור ריק** (המשתמש תקוע).
 - **after:** `errorBuilder` → `cameraPermissionErrorView`: "לא ניתן לגשת למצלמה. אפשר/י הרשאת-מצלמה בהגדרות ונסה/י שוב." (קופי מאושר).
 - guard: `camera_error_view_test` (מרנדר את ההודעה).
+
+## #bind-color — inkLight ×150 (W3 batch 1) — 2026-06-08
+- **שינוי-קוד בלבד · אפס שינוי-עין:** `Color(0xFF1A1A1A)` → `BsTokens.inkLight` (אותו hex) ב-17 screens.
+- guard: `color_token_ratchet_test` — ratchet שנועל את הליטרל מלחזור (down-only).

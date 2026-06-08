@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Primary dark text on the light theme (per the spec — no `inkLight` token).
-const Color _ink = Color(0xFF1A1A1A);
+const Color _ink = BsTokens.inkLight;
 
 /// 👤 הפרופיל שלי — the native home for the user's account.
 ///

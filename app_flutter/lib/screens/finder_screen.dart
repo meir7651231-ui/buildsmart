@@ -13,7 +13,7 @@ import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const _ink = Color(0xFF1A1A1A);
+const _ink = BsTokens.inkLight;
 const _mute = Color(0xFF888888);
 const _surface = Color(0xFFF5F5F5);
 

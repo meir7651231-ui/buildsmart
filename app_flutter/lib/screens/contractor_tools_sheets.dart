@@ -136,7 +136,7 @@ class _CheaperAlternativesSheet extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
             ),
           ),
           const SizedBox(height: 4),
@@ -172,7 +172,7 @@ class _CheaperAlternativesSheet extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -191,7 +191,7 @@ class _CheaperAlternativesSheet extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF1A1A1A),
+                                color: BsTokens.inkLight,
                               ),
                             ),
                           ),
@@ -300,7 +300,7 @@ class _StorePriceComparisonSheet extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
             ),
           ),
           const SizedBox(height: 4),
@@ -336,7 +336,7 @@ class _StorePriceComparisonSheet extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -525,7 +525,7 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
       style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w700,
-        color: Color(0xFF1A1A1A),
+        color: BsTokens.inkLight,
       ),
     ),
     const SizedBox(height: 4),
@@ -543,7 +543,7 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1A1A1A),
+            color: BsTokens.inkLight,
           ),
         ),
         subtitle: Text(
@@ -571,7 +571,7 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
       style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: Color(0xFF1A1A1A),
+        color: BsTokens.inkLight,
       ),
     ),
     const SizedBox(height: 10),
@@ -592,7 +592,7 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
         style: const TextStyle(
           fontSize: 17,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF1A1A1A),
+          color: BsTokens.inkLight,
         ),
       ),
       const SizedBox(height: 2),
@@ -645,7 +645,7 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1A1A1A),
+                color: BsTokens.inkLight,
               ),
             ),
           ),
@@ -678,7 +678,7 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
             ),
           ),
           Text(

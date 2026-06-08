@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/screens/lipskey_brand_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -15,12 +16,12 @@ class SuppliersScreen extends StatelessWidget {
         backgroundColor: const Color(0xFFF5F6FA),
         appBar: AppBar(
           backgroundColor: const Color(0xFFFFFFFF),
-          foregroundColor: const Color(0xFF1A1A1A),
+          foregroundColor: BsTokens.inkLight,
           elevation: 0,
           title: const Text(
             'ספקים ומותגים',
             style: TextStyle(
-              color: Color(0xFF1A1A1A),
+              color: BsTokens.inkLight,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -88,7 +89,7 @@ class _SupplierTile extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),

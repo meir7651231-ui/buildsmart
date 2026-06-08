@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/tokens.dart';
 // Live, in-app audit screen — generates 20 RANDOM installation scenarios
 // each run and shows the auto-built plan + compliance result for each.
 // Random anchors are sampled from the verified-spec catalog with bias
@@ -159,12 +160,12 @@ class _AuditScreenState extends State<AuditScreen> {
                     child: const Padding(
                       padding: EdgeInsets.all(8),
                       child: Icon(Icons.arrow_forward,
-                          color: Color(0xFF1A1A1A), size: 22),
+                          color: BsTokens.inkLight, size: 22),
                     ),
                   ),
                   const Text('אודיט תרחישים',
                       style: TextStyle(
-                          color: Color(0xFF1A1A1A),
+                          color: BsTokens.inkLight,
                           fontSize: 16,
                           fontWeight: FontWeight.w800)),
                   const Spacer(),
@@ -250,7 +251,7 @@ class _AuditScreenState extends State<AuditScreen> {
             Expanded(
               child: Text(r.title,
                   style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
+                      color: BsTokens.inkLight,
                       fontSize: 13,
                       fontWeight: FontWeight.w700)),
             ),
