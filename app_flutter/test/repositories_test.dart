@@ -1,8 +1,12 @@
-// Guards the server-ready seam (T6.2/T6.3): the two LOCAL repository impls that
-// the orders engine now reads through. They must stay behavior-identical to the
-// live engine (no new data, no value change) so the swap-to-backend is drop-in.
+// Guards the server-ready seam (T6.2/T6.3): the LOCAL repository impls that the
+// app now reads through (orders/customers via the engine; catalog/site/stock via
+// the screens). They must stay behavior-identical to the consts (no new data, no
+// value change) so the swap-to-backend is drop-in.
+import 'package:buildsmart/data/repositories/catalog_local.dart';
 import 'package:buildsmart/data/repositories/customers_local.dart';
 import 'package:buildsmart/data/repositories/orders_local.dart';
+import 'package:buildsmart/data/repositories/site_local.dart';
+import 'package:buildsmart/data/repositories/stock_local.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,5 +50,29 @@ void main() {
     expect(repo.byName(top.name)?.name, top.name);
     expect(repo.byName('לא-קיים'), isNull);
     expect(repo.creditLimit(top.name), greaterThanOrEqualTo(0));
+  });
+
+  test('catalog repo: allProducts()/catalogCategories() return the live catalog', () {
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    final repo = c.read(catalogRepositoryProvider);
+    expect(repo.allProducts(), isNotEmpty);
+    expect(repo.catalogCategories(), isNotEmpty);
+  });
+
+  test('site repo: projects()/safetyTips() return the seed lists', () {
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    final repo = c.read(siteRepositoryProvider);
+    expect(repo.projects(), isNotEmpty);
+    expect(repo.safetyTips(), isNotEmpty);
+  });
+
+  test('stock repo: stockDemo() is the 11-item demo map', () {
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    final repo = c.read(stockRepositoryProvider) as LocalStockRepository;
+    expect(repo.stockDemo().length, 11);
+    expect(repo.categoryCounts(), isNotEmpty);
   });
 }

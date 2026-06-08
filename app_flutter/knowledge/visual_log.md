@@ -4,6 +4,18 @@
 
 ---
 
+## v6.16 — fix-fleet · גל 10 (server-ready: catalog/site/stock דרך repositories)
+
+**שינוי (לא-ויזואלי — refactor פנימי, byte-identical):** הרחבת ה-server-ready seam ל-domains הנקיים שנותרו (גל 9 = orders/customers). 29/29 ה-hubs קוראים את אותם consts — עכשיו דרך ה-repos.
+- **catalog:** `catalog_local` + רוּתּמו 21 reads (catalog_screen 19 + lipskey_products 2) דרך `catalogRepositoryProvider`.
+- **site:** `site_local` + `kProjects` דרך `siteRepositoryProvider` (budget_screen + projects_engine, seed acyclic).
+- **stock:** `stock_local` + `kStockDemo` דרך `stockRepositoryProvider` (11 פריטים).
+- **תקרה ארכיטקטונית (R8 — לא נכפה):** מסכי finance/site-hub + pure-logic של catalog (category_division/pressure_drop/system_division) + finder/departments קוראים const בהקשרים ללא-`ref`. לרתום = להמיר מסך-מאומת ל-Consumer = סיכון-רגרסיה. ה-interfaces+impls עומדים. (`finance_local` הוסר — בלי צרכן בטוח.)
+
+**אימות (refactor, אין שינוי ויזואלי):** mutation-verified · `central-verify` gate ירוק (analyze 0 · `flutter test` · build · conformance · required-tests). הערכים זהים byte-for-byte.
+
+---
+
 ## v6.16 — fix-fleet · גל 9 (T7 צ׳אט חוצה-פרסונות + server-ready + P1)
 
 **שינוי:** 3 ה-tracks שנותרו, במקביל (קבצים disjoint), gate אחד מאומת.

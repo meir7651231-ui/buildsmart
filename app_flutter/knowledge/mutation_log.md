@@ -677,3 +677,9 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/sys_chat_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### lib/data/repositories/stock_local.dart — 2026-06-08T00:12:00+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s/stockDemo() => kStockDemo;/stockDemo() => const <String, String>{};/`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/repositories_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

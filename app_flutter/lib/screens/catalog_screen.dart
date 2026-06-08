@@ -4,6 +4,8 @@ import 'package:buildsmart/data/product_images.dart';
 import 'package:buildsmart/data/catalog.dart';
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/fuzzy_search.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart'
+    show catalogRepositoryProvider;
 import 'package:buildsmart/data/line_score.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
@@ -1289,11 +1291,16 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
           ),
           const Divider(color: Color(0xFFF5F5F5), height: 1),
           Expanded(
-            child: ListView.builder(
-              controller: scrollCtrl,
-              itemCount: kCatalogCats.length,
-              itemBuilder: (_, i) {
-                final cat = kCatalogCats[i];
+            child: Builder(builder: (_) {
+              // T6.3: the ▦ קטלוג categories via the catalog repository
+              // (returns the same const `kCatalogCats`). `ref.watch` — this is
+              // inside the sheet's build tree.
+              final cats = ref.watch(catalogRepositoryProvider).catalogCategories();
+              return ListView.builder(
+                controller: scrollCtrl,
+                itemCount: cats.length,
+                itemBuilder: (_, i) {
+                  final cat = cats[i];
                 final checked = _selected.contains(cat.title);
                 return CheckboxListTile(
                   value: checked,
@@ -1328,8 +1335,9 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                     ],
                   ),
                 );
-              },
-            ),
+                },
+              );
+            }),
           ),
           SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
         ],
@@ -2391,16 +2399,19 @@ class _AllOverview extends ConsumerWidget {
     final recents = ref.watch(recentSearchesProvider);
     final favSkus = ref.watch(productFavoritesProvider);
     final systemFilter = ref.watch(catalogSystemFilterProvider);
+    // T6.3: catalog reads via the repository (same const data).
+    final repo = ref.watch(catalogRepositoryProvider);
     final catList = _catsForSystem(systemFilter);
     final smartCats = systemFilter == null
-        ? kSmartTreeCats
-        : kSmartTreeCats
+        ? repo.smartTreeCats()
+        : repo
+            .smartTreeCats()
             .where((c) =>
-                filterSmartBySystem(smartProductsForCat(c), systemFilter)
+                filterSmartBySystem(repo.smartProductsForCat(c), systemFilter)
                     .isNotEmpty)
             .toList();
     final favProducts = filterBySystem(
-            kCatalogProducts.where((p) => favSkus.contains(p.sku)).toList(),
+            repo.allProducts().where((p) => favSkus.contains(p.sku)).toList(),
             systemFilter)
         .take(3)
         .toList();
@@ -2477,7 +2488,7 @@ class _AllOverview extends ConsumerWidget {
               _OverviewRow(
                 icon: Icons.account_tree_outlined,
                 label:
-                    '${smartCats[i]} · ${filterSmartBySystem(smartProductsForCat(smartCats[i]), systemFilter).length} מוצרים',
+                    '${smartCats[i]} · ${filterSmartBySystem(repo.smartProductsForCat(smartCats[i]), systemFilter).length} מוצרים',
                 onTap: () {
                   ref.read(smartTreeCatProvider.notifier).state = smartCats[i];
                   go('עץ חכם');
@@ -2802,12 +2813,14 @@ class _TreeDrill extends ConsumerWidget {
     final query = ref.watch(catalogTreeQueryProvider).trim();
     final facetSel = ref.watch(catalogFacetProvider);
     final systemFilter = ref.watch(catalogSystemFilterProvider);
+    // T6.3: catalog reads via the repository (same const data).
+    final repo = ref.watch(catalogRepositoryProvider);
 
     // A leaf that maps to a lipskey category with products drills by facets
     // (curated where defined, else auto-derived) before the product list.
     final leafCat = current.isLeaf ? current.lipskeyCategory : null;
     final isProductLeaf = leafCat != null &&
-        kCatalogProducts.any((p) => p.categoryHe == leafCat);
+        repo.allProducts().any((p) => p.categoryHe == leafCat);
 
     void resetQuery() =>
         ref.read(catalogTreeQueryProvider.notifier).state = '';
@@ -2837,14 +2850,14 @@ class _TreeDrill extends ConsumerWidget {
       if (n.isLeaf) {
         // Leaf with products → drill in-tab (facets + product list below).
         if (n.lipskeyCategory != null &&
-            kCatalogProducts.any((p) => p.categoryHe == n.lipskeyCategory)) {
+            repo.allProducts().any((p) => p.categoryHe == n.lipskeyCategory)) {
           resetQuery();
           resetFacets();
           ref.read(catalogTreePathProvider.notifier).state = [...path, n];
           return;
         }
         if (n.smartKey != null) {
-          final product = smartProductByKey(n.smartKey!);
+          final product = repo.smartProductByKey(n.smartKey!);
           if (product != null) openSmartProductSheet(context, product);
         }
         return;
@@ -2874,7 +2887,7 @@ class _TreeDrill extends ConsumerWidget {
 
     if (isProductLeaf) {
       final base = filterBySystem(
-          kCatalogProducts.where((p) => p.categoryHe == leafCat).toList(),
+          repo.allProducts().where((p) => p.categoryHe == leafCat).toList(),
           systemFilter);
       final curated = kProductFacets[leafCat];
       final options = <({String label, String desc, int count})>[];
@@ -3599,11 +3612,15 @@ class _SmartTreeCatList extends ConsumerWidget {
     // Scope the smart tree to the active water system (Benzi #1, Phase 2b):
     // keep only categories that still have an in-system product.
     final system = ref.watch(catalogSystemFilterProvider);
+    // T6.3: catalog reads via the repository (same const data).
+    final repo = ref.watch(catalogRepositoryProvider);
     final cats = system == null
-        ? kSmartTreeCats
-        : kSmartTreeCats
+        ? repo.smartTreeCats()
+        : repo
+            .smartTreeCats()
             .where((c) =>
-                filterSmartBySystem(smartProductsForCat(c), system).isNotEmpty)
+                filterSmartBySystem(repo.smartProductsForCat(c), system)
+                    .isNotEmpty)
             .toList();
     return Column(
       children: [
@@ -3615,7 +3632,7 @@ class _SmartTreeCatList extends ConsumerWidget {
             itemBuilder: (_, i) {
               final cat = cats[i];
               final prods =
-                  filterSmartBySystem(smartProductsForCat(cat), system);
+                  filterSmartBySystem(repo.smartProductsForCat(cat), system);
               final count = prods.length;
               final desc = prods.map((p) => p.name).join(' · ');
               final emoji = _catEmojis[cat] ?? '📦';
@@ -3739,7 +3756,9 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
   Widget build(BuildContext context) {
     const green = Color(0xFF22C55E);
     final query = ref.watch(smartTreeQueryProvider).trim();
-    final all = filterSmartBySystem(smartProductsForCat(widget.cat),
+    // T6.3: smart-tree products via the repository (same const data).
+    final all = filterSmartBySystem(
+        ref.watch(catalogRepositoryProvider).smartProductsForCat(widget.cat),
         ref.watch(catalogSystemFilterProvider));
     final products = query.isEmpty
         ? all
@@ -4327,9 +4346,11 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   // Roadmap step 28/22 — resolve the smart cart's lines to catalog products.
   List<LipskeyCatalogProduct> _resolveCartProducts() {
     final cart = ref.read(smartCartProvider);
+    // T6.3: catalog↔smart bridge via the repository (same const data).
+    final repo = ref.read(catalogRepositoryProvider);
     final out = <LipskeyCatalogProduct>[];
     for (final line in cart) {
-      final csp = smartProductByKey(line.productKey);
+      final csp = repo.smartProductByKey(line.productKey);
       if (csp == null) continue;
       SmartBrand? cb;
       for (final b in csp.brands) {
@@ -4338,7 +4359,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
           break;
         }
       }
-      final cprod = cb == null ? null : catalogProductForBrand(cb);
+      final cprod = cb == null ? null : repo.productForBrand(cb);
       if (cprod != null) out.add(cprod);
     }
     return out;
@@ -4352,9 +4373,11 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
   void _showProjectBom(String project) {
     final notifier = ref.read(cardProjectsProvider.notifier);
     final items = notifier.forProject(project);
+    // T6.3: SKU→catalog lookup via the repository (same const data).
+    final repo = ref.read(catalogRepositoryProvider);
     final anchors = <LipskeyCatalogProduct>[];
     for (final it in items) {
-      final cp = catalogProductForSku(it.sku);
+      final cp = repo.productForSku(it.sku);
       if (cp != null) anchors.add(cp);
     }
     if (anchors.isEmpty) {
@@ -4797,7 +4820,9 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                 // 📦 נתוני קטלוג — spec / compat / price of the selected
                 // brand's real SKU (Roadmap 6/11/21), via the bridge.
                 Builder(builder: (_) {
-                  final prod = catalogProductForBrand(brand);
+                  // T6.3: brand→catalog lookup via the repository (same const).
+                  final prod =
+                      ref.read(catalogRepositoryProvider).productForBrand(brand);
                   if (prod == null) return const SizedBox.shrink();
                   final spec = engineeringSpecFor(prod);
                   final price = priceFor(prod);
@@ -5057,9 +5082,11 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                         Builder(builder: (_) {
                           final cart = ref.watch(smartCartProvider);
                           if (cart.isEmpty) return const SizedBox.shrink();
+                          // T6.3: catalog↔smart bridge via the repository.
+                          final repo = ref.read(catalogRepositoryProvider);
                           final lineProducts = <LipskeyCatalogProduct>[];
                           for (final line in cart) {
-                            final csp = smartProductByKey(line.productKey);
+                            final csp = repo.smartProductByKey(line.productKey);
                             if (csp == null) continue;
                             SmartBrand? cb;
                             for (final b in csp.brands) {
@@ -5070,7 +5097,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                             }
                             final cprod = cb == null
                                 ? null
-                                : catalogProductForBrand(cb);
+                                : repo.productForBrand(cb);
                             if (cprod != null) lineProducts.add(cprod);
                           }
                           final fit = lineFitFor(prod, lineProducts);
@@ -5979,7 +6006,10 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                       fontWeight: FontWeight.w600)),
                               for (final sku in recent)
                                 Builder(builder: (_) {
-                                  final rp = catalogProductForSku(sku);
+                                  // T6.3: SKU→catalog lookup via the repository.
+                                  final rp = ref
+                                      .read(catalogRepositoryProvider)
+                                      .productForSku(sku);
                                   if (rp == null) {
                                     return const SizedBox.shrink();
                                   }
@@ -6819,8 +6849,13 @@ class _FavoritesSection extends ConsumerWidget {
       return const _EmptySection(emoji: '⭐', label: 'מועדפים');
     }
     // Scope favorites to the active water system (Benzi #1, option 2).
+    // T6.3: catalog read via the repository (same const data).
     final products = filterBySystem(
-        kCatalogProducts.where((p) => favSkus.contains(p.sku)).toList(),
+        ref
+            .watch(catalogRepositoryProvider)
+            .allProducts()
+            .where((p) => favSkus.contains(p.sku))
+            .toList(),
         ref.watch(catalogSystemFilterProvider));
     return Column(
       children: [
@@ -6876,8 +6911,15 @@ class _FavProductRow extends ConsumerWidget {
               color: Color(0xFF1A1A1A), fontSize: 13, fontWeight: FontWeight.w600)),
       subtitle: Text(product.brand,
           style: const TextStyle(color: Color(0xFF9AA3B2), fontSize: 11)),
-      onTap: () => showLipskeyProductSheet(context, product,
-          kCatalogProducts.where((p) => p.categoryHe == product.categoryHe).toList()),
+      onTap: () => showLipskeyProductSheet(
+          context,
+          product,
+          // T6.3: catalog read via the repository (same const data).
+          ref
+              .read(catalogRepositoryProvider)
+              .allProducts()
+              .where((p) => p.categoryHe == product.categoryHe)
+              .toList()),
     );
   }
 }

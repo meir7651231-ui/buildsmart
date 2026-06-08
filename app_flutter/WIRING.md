@@ -1264,3 +1264,14 @@ The chat is now a shared, persisted, cross-persona engine (was a contractor-only
 - 20 raw `Color(0x)` literals → `BsTokens` (19 in `widgets/chain_diagram.dart` + 1 in `theme/app_theme.dart`); 14 new exact-hex tokens in `theme/tokens.dart` (chain* palette + `bgLightAlt`). Screenshot-identical.
 
 Gate: central-verify green — analyze 0 · tests green · build · conformance · required-tests.
+
+## Wave 10 — server-ready extension: route catalog/site/stock through their repositories (T6.3 · 9×9 fleet)
+Extends the server-ready seam to the cleanest of the remaining domains (Wave 9 did orders/customers), all behavior **byte-identical** (the verified 29/29 hubs read the same consts, now via the repos).
+- **catalog** — `data/repositories/catalog_local.dart` (LocalCatalogRepository — returns `kCatalogProducts`/`kSmartProducts`/`kCatalogCats` verbatim). Routed **21 ref-scoped reads** via `catalogRepositoryProvider` in `catalog_screen.dart` (19) + `lipskey_products_screen.dart` (2).
+- **site** — `site_local.dart` (LocalSiteRepository). Routed `kProjects` via `siteRepositoryProvider` in `budget_screen.dart` (site rows) + `projects_engine.dart` (seed — orders-idiom, acyclic).
+- **stock** — `stock_local.dart` (LocalStockRepository). `stock_screen.dart` sources `kStockDemo` via `stockRepositoryProvider` (11 items unchanged).
+- **Architectural ceiling (reported — R8, NOT forced):** the finance/site **hub screens** + the catalog **pure-logic** (`category_division`/`pressure_drop`/`system_division`) + `finder`/`departments` read their consts in non-Consumer contexts (StatelessWidget / top-level functions, no `ref`). Routing them would require converting the verified 10/10 hub screens to ConsumerWidgets (structural change → regression risk). Their T6.1 interfaces + T6.2 local impls stand; that provider-rewire needs a dedicated screen-restructure pass. (`finance_local` removed — it had no safe consumer.)
+- **Net server-ready:** orders · customers · catalog · site · stock routed through repos; finance + the pure-logic catalog paths remain const-bound by architecture.
+- Guard: mutation-verified; gate green.
+
+Gate: central-verify green — analyze 0 · tests green · build · conformance · required-tests.

@@ -12,6 +12,7 @@
 // ANTI-COLLISION: NEW file (prefix stock_); no shared file edited.
 
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/data/repositories/stock_local.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // ─── editable stock state (mirrors proto STOCK_DEMO mutated by moveStock) ───────
 
 class StockNotifier extends StateNotifier<Map<String, String>> {
-  StockNotifier() : super(Map<String, String>.from(kStockDemo));
+  /// [seed] is the genesis stock map the screen starts from. It defaults to
+  /// [kStockDemo] so direct construction stays byte-identical; the
+  /// `stockProvider` injects it THROUGH the stock repository (T6.3) — the same
+  /// 11-row map, just sourced via the seam.
+  StockNotifier([Map<String, String>? seed])
+      : super(Map<String, String>.from(seed ?? kStockDemo));
 
   /// moveStock(nm) (:8237) — flip a key between 'warehouse' and 'site'.
   void move(String name) {
@@ -34,8 +40,13 @@ class StockNotifier extends StateNotifier<Map<String, String>> {
 }
 
 final stockProvider =
-    StateNotifierProvider<StockNotifier, Map<String, String>>(
-        (_) => StockNotifier());
+    StateNotifierProvider<StockNotifier, Map<String, String>>((ref) {
+  final repo = ref.read(stockRepositoryProvider);
+  // Source the seed through the repository (the local impl exposes it). Any
+  // non-local impl falls back to the const seed — identical 11-row map either way.
+  final seed = repo is LocalStockRepository ? repo.stockDemo() : kStockDemo;
+  return StockNotifier(seed);
+});
 
 final stockTabProvider = StateProvider<String>((_) => 'warehouse');
 

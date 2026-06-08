@@ -19,6 +19,7 @@
 import 'dart:convert';
 
 import 'package:buildsmart/data/projects.dart';
+import 'package:buildsmart/data/repositories/site_local.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -129,16 +130,36 @@ class ProjectsState {
 const String kProjectsKey = 'bs.projects.v1';
 
 class ProjectsNotifier extends StateNotifier<ProjectsState> {
-  ProjectsNotifier({this.persist = true})
-      : super(ProjectsState(
-          projects: [for (final p in kProjects) LiveProject.fromSeed(p)],
-          activeId: kActiveProjectId,
+  /// [seed] is the genesis project list the engine starts from (and
+  /// `resetToSeed` restores); [activeId] is the project active at seed time.
+  /// Both default to the verbatim consts ([kProjects] / [kActiveProjectId]) so
+  /// direct construction stays byte-identical; the `projectsProvider` injects
+  /// them THROUGH the site repository (T6.3) — same 3 sites + PRJ-1 active, just
+  /// sourced via the seam (the orders-engine idiom).
+  ProjectsNotifier({
+    this.persist = true,
+    List<Project>? seed,
+    String? activeId,
+  })  : _seed = seed ?? kProjects,
+        _seedActiveId = activeId ?? kActiveProjectId,
+        super(ProjectsState(
+          projects: [
+            for (final p in (seed ?? kProjects)) LiveProject.fromSeed(p),
+          ],
+          activeId: activeId ?? kActiveProjectId,
           seq: 4, // proto `projSeq=4`
         )) {
     if (persist) _load();
   }
 
   final bool persist;
+
+  /// The seed list + active id this engine resets to — the same values it was
+  /// constructed with. Held so `resetToSeed` is source-consistent with
+  /// construction whether the seed came from the const or the repository.
+  final List<Project> _seed;
+  final String _seedActiveId;
+
   bool _loaded = false;
 
   Future<void> _load() async {
@@ -267,17 +288,33 @@ class ProjectsNotifier extends StateNotifier<ProjectsState> {
   }
 
   void resetToSeed() => state = ProjectsState(
-        projects: [for (final p in kProjects) LiveProject.fromSeed(p)],
-        activeId: kActiveProjectId,
+        projects: [for (final p in _seed) LiveProject.fromSeed(p)],
+        activeId: _seedActiveId,
         seq: 4,
       );
 }
 
 /// The shared projects provider — the single live list the projects screen, the
-/// app-bar site label and the smart-project title all read.
+/// app-bar site label and the smart-project title all read. The seed (the 3
+/// sites + PRJ-1 active) is obtained THROUGH the site repository (T6.3) instead
+/// of referencing the const directly, so every current name/id is preserved
+/// until the list is edited. The repository's `seed()`/`seedActiveId()` are
+/// const-backed and never read this provider, so the wiring is acyclic; a future
+/// field-ops impl supplies the seed via the same seam (the orders-engine idiom).
 final projectsProvider =
     StateNotifierProvider<ProjectsNotifier, ProjectsState>(
-  (ref) => ProjectsNotifier(),
+  (ref) {
+    final repo = ref.read(siteRepositoryProvider);
+    // Source the seed through the repository (the local impl exposes it). Any
+    // non-local impl falls back to the const seed — identical sites either way.
+    if (repo is LocalSiteRepository) {
+      return ProjectsNotifier(
+        seed: repo.seed(),
+        activeId: repo.seedActiveId(),
+      );
+    }
+    return ProjectsNotifier();
+  },
 );
 
 /// The active project, derived live off [projectsProvider] — the app-bar site

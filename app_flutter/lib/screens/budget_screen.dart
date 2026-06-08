@@ -13,7 +13,7 @@
 // ANTI-COLLISION: this is a NEW file (prefix budget_); no shared file edited.
 
 import 'package:buildsmart/data/contractor_seeds.dart';
-import 'package:buildsmart/data/projects.dart';
+import 'package:buildsmart/data/repositories/site_local.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -138,6 +138,11 @@ class BudgetScreen extends ConsumerWidget {
     final over = b.left < 0;
     final catTotal =
         b.categories.fold<int>(0, (s, c) => s + c.amount).clamp(1, 1 << 30);
+    // T6.3 — the "הוצאות לפי אתר" rows iterate the project list through the
+    // server-ready site repository instead of the `kProjects` const directly.
+    // The local impl returns kProjects verbatim, so the rows + their weighted
+    // amounts are byte-identical; a future field-ops backend swaps in behind it.
+    final projects = ref.watch(siteRepositoryProvider).projects();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
@@ -257,12 +262,12 @@ class BudgetScreen extends ConsumerWidget {
               style: TextStyle(
                   fontSize: 14, fontWeight: FontWeight.w700, color: _ink)),
           const SizedBox(height: 8),
-          for (var i = 0; i < kProjects.length; i++)
+          for (var i = 0; i < projects.length; i++)
             _SiteRow(
-              name: kProjects[i].name,
+              name: projects[i].name,
               value: _fmt(b.spent *
-                  (kProjects.length - i) /
-                  (kProjects.length * (kProjects.length + 1) / 2)),
+                  (projects.length - i) /
+                  (projects.length * (projects.length + 1) / 2)),
             ),
           const SizedBox(height: 12),
           const Text(

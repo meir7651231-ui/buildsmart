@@ -1,0 +1,88 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// LocalStockRepository — the T6.2 local implementation of [StockRepository].
+//
+// SERVER-READY FOUNDATION (Track T6.2 + T6.3). This wraps the EXISTING const
+// stock/availability + store-network seeds — it adds NO new data and changes NO
+// value. Every read returns exactly the const it mirrors today, so the manager
+// dashboard's stock tiles, the supplier-store rows, the haulage types AND the
+// 📦 "המלאי שלי" inventory screen stay byte-for-byte identical. When stock moves
+// to a real inventory backend, only THIS class swaps (the providers + UI are
+// unchanged).
+//
+// Backing consts (the single sources of truth, NOT re-declared here):
+//   • the manager catalog distribution + store list folded by `ManagerAnalytics`
+//     (`logic/manager_dashboard.dart`: `kManagerCatalogCategories`,
+//     `kManagerStores`, and the `managerAnalytics` const-folded snapshot for the
+//     counts) — identical numbers to what the dashboard reads.
+//   • the supplier store + haulage seeds in `data/supplier_data.dart`
+//     (`kStores`, `kHaulTypes`).
+//   • the 📦 inventory seed `kStockDemo` (`data/phaseb_seeds.dart`).
+//
+// The inventory SEED (`kStockDemo`, name → 'warehouse'|'site') is exposed via
+// the extra concrete [stockDemo] method (NOT on the abstract contract) so the
+// `stockProvider`'s StateNotifier can obtain its genesis map THROUGH this
+// repository (T6.3) — a const-only accessor that does NOT read any provider,
+// keeping the notifier↔repository wiring acyclic. Mirrors `orders_local.dart`'s
+// `seed()` idiom exactly.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:buildsmart/data/phaseb_seeds.dart' show kStockDemo;
+import 'package:buildsmart/data/repositories/stock_repository.dart';
+import 'package:buildsmart/data/supplier_data.dart'
+    show HaulType, StoreInfo, kHaulTypes, kStores;
+import 'package:buildsmart/logic/manager_dashboard.dart'
+    show
+        ManagerStore,
+        kManagerCatalogCategories,
+        kManagerStores,
+        managerAnalytics;
+
+/// The local (const-backed) implementation of [StockRepository]. Every read
+/// returns the exact const the dashboard / store portal reads today; a future
+/// inventory backend swaps in behind this same contract.
+class LocalStockRepository implements StockRepository {
+  const LocalStockRepository();
+
+  /// The 11-row inventory seed (name → 'warehouse' | 'site') the 📦 "המלאי שלי"
+  /// screen starts from. Lifted from [kStockDemo] (the single seed source of
+  /// truth); const-only, so reading it never touches a provider (T6.3-safe).
+  /// NOT on the abstract [StockRepository] — the screen's notifier reads it
+  /// directly, mirroring `LocalOrdersRepository.seed()`.
+  Map<String, String> stockDemo() => kStockDemo;
+
+  @override
+  int totalProducts() => managerAnalytics.totalProducts;
+
+  @override
+  int catalogCount() => managerAnalytics.catalogCount;
+
+  @override
+  int accessoryCount() => managerAnalytics.accessoryCount;
+
+  @override
+  int availableCount() => managerAnalytics.availableCount;
+
+  @override
+  Map<String, int> categoryCounts() => kManagerCatalogCategories;
+
+  @override
+  List<ManagerStore> stores() => kManagerStores;
+
+  @override
+  int activeStores() => managerAnalytics.activeStores;
+
+  @override
+  List<StoreInfo> supplierStores() => kStores;
+
+  @override
+  List<HaulType> haulTypes() => kHaulTypes;
+}
+
+/// The stock repository provider — the server-ready seam the inventory notifier
+/// reads its seed through (T6.3) and a future remote impl swaps in behind.
+/// Constructing it is cheap (const); the const-backed reads never touch other
+/// providers, so the wiring stays acyclic.
+final stockRepositoryProvider =
+    Provider<StockRepository>((ref) => const LocalStockRepository());

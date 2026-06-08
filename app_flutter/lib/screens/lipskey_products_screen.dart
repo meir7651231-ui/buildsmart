@@ -5,7 +5,8 @@ import 'package:buildsmart/data/catalog_lens.dart';
 import 'package:buildsmart/data/chip_hierarchy.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
-import 'package:buildsmart/data/smart_tree.dart' show smartProductForSku;
+import 'package:buildsmart/data/repositories/catalog_local.dart'
+    show catalogRepositoryProvider;
 import 'package:buildsmart/screens/_size_norm.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show openSmartProductSheet;
 import 'package:buildsmart/screens/lens_selector_row.dart';
@@ -110,7 +111,10 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
   LipskeyCatalogProduct _displayed(LipskeyCatalogProduct orig) {
     final cur = _swap[orig.sku];
     if (cur == null || cur == orig.sku) return orig;
-    return kCatalogProducts.firstWhere(
+    // T6.3: route through the catalog repository (returns the same const
+    // `kCatalogProducts`). `ref.read` (not `.watch`) — this is a build-helper,
+    // the const never changes, and `.read` is valid in every lifecycle phase.
+    return ref.read(catalogRepositoryProvider).allProducts().firstWhere(
       (q) => q.sku == cur,
       orElse: () => orig,
     );
@@ -753,7 +757,8 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     // (kPolyrollCatalog excluded Huliot → dead picker — lesson T4).
     final sibs = findHierarchySiblings(
       p, chipIndex,
-      all: kCatalogProducts,
+      // T6.3: route through the catalog repository (same const `kCatalogProducts`).
+      all: ref.read(catalogRepositoryProvider).allProducts(),
       nameOf: (q) => q.nameHe,
       brandOf: (q) => q.brand,
     );
@@ -864,7 +869,8 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     // opens the rich SmartProduct card for this product's fixture. Falls back
     // to the standard Lipskey sheet when not in smart-tree lens or unmapped.
     if (widget.smartLens) {
-      final sp = smartProductForSku(p.sku);
+      // T6.3: route through the catalog repository (same const-derived helper).
+      final sp = ref.read(catalogRepositoryProvider).smartProductForSku(p.sku);
       if (sp != null) {
         openSmartProductSheet(context, sp);
         return;
