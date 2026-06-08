@@ -41,7 +41,7 @@ const Color _kUp = Color(0xFF1FA971); // fin-up (green, positive change/profit)
 const Color _kDn = Color(
   0xFFE5484D,
 ); // fin-dn / --danger (red, negative/penalty)
-const Color _kBrandTeal = Color(0xFF1F6F6B); // proto callout teal accent
+const Color _kBrandTeal = BsTokens.brand; // W0: unified to brand (was teal); name kept
 
 // ═════════════════════════════════════════════════════════════════════════════
 // PUBLIC ENTRIES

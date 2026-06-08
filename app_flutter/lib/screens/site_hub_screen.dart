@@ -33,10 +33,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // ═════════════════════════════════════════════════════════════════════════════
 // Local style constants — match the proto's site CSS (--brand teal context).
 // The prototype's site screens use the teal brand (--brand:#1f6f6b), not the
-// app's orange FAB brand; kept local so this track touches no shared tokens.
+// app's orange FAB brand — unified to BsTokens (W0: locals were teal by mistake;
+// the comment always said "orange brand").
 // ═════════════════════════════════════════════════════════════════════════════
-const Color _kBrand = Color(0xFF1F6F6B); // --brand
-const Color _kBrandDark = Color(0xFF155350); // --brand-dark
+const Color _kBrand = BsTokens.brand; // W0: was teal 0xFF1F6F6B
+const Color _kBrandDark = BsTokens.brandDark; // W0: was teal 0xFF155350
 const Color _kAmberDeep = Color(0xFFB07400); // --amber-deep (risk-m)
 const Color _kRiskH = Color(0xFFC0531F); // risk-h text
 const Color _kRiskX = Color(0xFFB62A2A); // risk-x text

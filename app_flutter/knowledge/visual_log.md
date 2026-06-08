@@ -604,3 +604,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **before:** `Align(alignment: isMe ? Alignment.centerLeft : centerRight)` — **אבסולוטי**, לא מתהפך ל-RTL → הודעות-**עצמי משמאל** (הפוך מוואטסאפ העברי, מפר `sys_chat:37`); זנב חד בפינה הלא-נכונה.
 - **after:** `chatBubbleAlignment(isMe:)` → `AlignmentDirectional.centerStart/End` → own **מימין**, other משמאל; `BorderRadiusDirectional` → הזנב בצד-הדובר; בועת-הקלדה (incoming) → משמאל.
 - guard: `chat_bubble_side_test` (own→start · other→end · resolve-RTL x=±1) · mutation אדומה ✅ · analyze 0.
+
+## teal→כתום (before→after · W0) — 2026-06-08
+- **before:** מסכי 'אתר' (site_hub) ו'כספים' (finance) הציגו accent **טורקיז** (0xFF1F6F6B) במקום הכתום של המותג — ההערה ב-site_hub אף הצהירה "orange brand" אך הערך teal.
+- **after:** `_kBrand`/`_kBrandDark`/`_kBrandTeal` → `BsTokens.brand`/`brandDark` → כל ה-FAB/כפתורים/accents באזורים האלה כתומים-מותג.
+- guard: analyze/test/build · systemic ratchet-color (§3.5) ינעל teal-raw עתידי.

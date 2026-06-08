@@ -98,3 +98,8 @@
 - **after:** helper `chatBubbleAlignment` directional (start/end) + `BorderRadiusDirectional` לזנב; `_Bubble`+`_TypingBubble` דרכו.
 - **gate:** `chat_bubble_side_test` 4 ✅ · mutation (swap→אדום) · analyze 0 · WIRING+visual_log+mutation_log.
 - **ref:** `lib/screens/chats_screen.dart` (helper + 2 call-sites + radii) · prevention §3.5.
+
+### #teal — teal→כתום (W0) — ✅ — 2026-06-08
+- **before:** site_hub `_kBrand`/`_kBrandDark` + finance `_kBrandTeal` = teal (0xFF1F6F6B/155350) — באג (ההערה אמרה orange).
+- **after:** → `BsTokens.brand`/`brandDark` (~12 שימושים). status-teals (manager/lipskey) מחוץ-לסקופ.
+- **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `site_hub_screen.dart` · `finance_hub_sheets.dart`.
