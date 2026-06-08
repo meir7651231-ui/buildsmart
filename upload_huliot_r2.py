@@ -15,7 +15,7 @@ s3 = boto3.client(
     region_name="auto",
 )
 
-src = pathlib.Path("/home/user/buildsmart/app_flutter/assets/huliot_smartlock/products")
+src = pathlib.Path(__file__).parent / "app_flutter" / "assets" / "huliot_smartlock" / "products"
 files = sorted(src.glob("*.jpg"))
 print(f"Found {len(files)} files to upload")
 
