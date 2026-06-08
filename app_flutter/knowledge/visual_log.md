@@ -624,3 +624,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **before:** `AnimatedBuilder(builder: (_,__) => CustomPaint(painter, child: Column[header/canvas/dock]))` → כל המסך נבנה-מחדש 60fps.
 - **after:** `child: Column[...]` (פעם-אחת) → `builder: (_,child) => RepaintBoundary(CustomPaint(painter, child: child))`. אפס שינוי-מראה; ה-rebuild-per-frame נעלם.
 - guard: pattern ידוע + full test/build (אין unit — build-count דורש harness כבד).
+
+## #weld-key — תזמון-ריתוך PPR (before→after · W1) — 2026-06-08
+- **before:** `dn = product.dims['dn נומינלי']` → ל-supply/faser PPR (שנושאים `'קוטר חיצוני'`) = null → "תוכנית ריתוך-שקע" ריקה לרוב ה-PPR.
+- **after:** `pprWeldDn(dims)` = `dn נומינלי ?? קוטר חיצוני` → התזמון (עומק/חימום/קירור) מופיע.
+- guard: `ppr_weld_dn_test` (4) · mutation (הסרת fallback → אדום).

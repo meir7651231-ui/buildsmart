@@ -1298,3 +1298,5 @@ Gate: central-verify green — analyze 0 · tests green · build · conformance 
 - `_ProductRow._addToCart` השתמש ב-`.add()` (append) → על ListView-recycle (כש-`_open` טרי אך המוצר כבר בעגלה) tap על `+` יצר **שורה כפולה**. → `setQtyForKey` (אידמפוטנטי לפי productKey), כמו add-path של grid-card (507) ו-`_setQty`. guard: `lipskey_plus_no_dup_test` (2). אין שינוי-API.
 ### #perf — install_studio blueprint rebuild-per-frame — 2026-06-08
 - `AnimatedBuilder` בנה את כל ה-Column (header/canvas/dock) **בתוך ה-builder** → כל הצומת נבנה-מחדש בכל tick (60fps). → התוכן ל-`AnimatedBuilder.child` (נבנה פעם-אחת) + `RepaintBoundary` סביב ה-CustomPaint. אותו עץ-ויזואלי, רק ה-painter מצוייר מחדש. אין שינוי state/לוגיקה.
+### #weld-key — תזמון-ריתוך PPR נעלם — `lipskey_product_sheet` — 2026-06-08
+- חיפוש תוכנית-הריתוך (`_kPprWeldPlan[dn]`) קרא רק `dims['dn נומינלי']`, אך רוב צינורות ה-PPR של פולירול (supply+faser) נושאים את הקוטר תחת `'קוטר חיצוני'` → null → התזמון נעלם. → helper `pprWeldDn` עם fallback ל-`'קוטר חיצוני'`. guard: `ppr_weld_dn_test` (4) + mutation-verified. אין שינוי API/state.

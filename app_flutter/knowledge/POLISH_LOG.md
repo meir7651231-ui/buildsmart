@@ -117,3 +117,8 @@
 - **before:** Column (header/canvas/dock) בתוך `AnimatedBuilder.builder` → rebuild 60fps.
 - **after:** content ל-`child:` (פעם-אחת) + `RepaintBoundary` סביב `CustomPaint`. אפס שינוי-מראה.
 - **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `install_studio_screen.dart:341`.
+
+### #weld-key — תזמון-ריתוך PPR נעלם (W1) — ✅ — 2026-06-08
+- **before:** weld lookup קרא רק `dims['dn נומינלי']` → null לרוב PPR (פולירול נושא `'קוטר חיצוני'`).
+- **after:** helper `pprWeldDn` עם fallback `'קוטר חיצוני'`. guard: `ppr_weld_dn_test` (4) + mutation-verified.
+- **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `lipskey_product_sheet.dart` (helper + lookup).

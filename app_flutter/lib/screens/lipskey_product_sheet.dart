@@ -1743,6 +1743,14 @@ const _kPprWeldPlan = <String, (double, int, int)>{
   '125': (40.0, 90, 8),
 };
 
+/// Weld-plan lookup key for a PPR pipe: its nominal/outer diameter as a bare
+/// string ('20','25',…). Polyroll PPR pipes carry it under 'קוטר חיצוני'
+/// (supply + faser) or 'dn נומינלי' (faser p.708). W1 fix: the lookup read only
+/// 'dn נומינלי', so the weld plan vanished for every pipe keyed on 'קוטר חיצוני'.
+/// Pinned by test/ppr_weld_dn_test.dart.
+String? pprWeldDn(Map<String, dynamic>? dims) =>
+    (dims?['dn נומינלי'] ?? dims?['קוטר חיצוני'])?.toString();
+
 /// One-line summary of a unified install-kit (smart-tree + auto-derived
 /// tools): "3 חובה · 2 אופציה · 4 כלים", omitting any zero segment.
 String _formatKitSummary(({int must, int optional, int tools}) k) {
@@ -2103,7 +2111,7 @@ class _StripPanel extends StatelessWidget {
     final sp = smartProductForSku(product.sku);
     final tools = recommendedKitForProduct(product);
     final isPpr = product.brand == 'פולירול';
-    final dn = product.dims?['dn נומינלי']?.toString();
+    final dn = pprWeldDn(product.dims);
     final weld = isPpr ? _kPprWeldPlan[dn] : null;
     if ((sp == null || sp.acc.isEmpty) && tools.isEmpty && !isPpr) {
       return const _EmptyHint('אין רשימת ערכת התקנה');
