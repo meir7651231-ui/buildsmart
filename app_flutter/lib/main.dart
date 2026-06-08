@@ -66,14 +66,20 @@ class BuildSmartApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context)
-            .copyWith(textScaler: TextScaler.linear(textScale)),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: child ?? const SizedBox(),
-        ),
-      ),
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        // Respect the OS Dynamic-Type setting (previously discarded) folded with
+        // the in-app size preference, clamped so RTL layouts stay intact.
+        final osScale = mq.textScaler.scale(100) / 100;
+        final combined = (textScale * osScale).clamp(0.85, 1.35).toDouble();
+        return MediaQuery(
+          data: mq.copyWith(textScaler: TextScaler.linear(combined)),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: child ?? const SizedBox(),
+          ),
+        );
+      },
       home: const OnboardingGate(),
     );
   }

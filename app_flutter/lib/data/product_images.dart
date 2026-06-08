@@ -111,5 +111,10 @@ Widget productImage(
     errorBuilder: errorBuilder,
     frameBuilder: frameBuilder ?? _productImagePlaceholder,
     semanticLabel: semanticLabel,
+    // Most product images sit beside the product name as text, so an unlabelled
+    // image is decorative — exclude it from semantics to avoid a screen reader
+    // announcing a meaningless "image". A caller that passes a [semanticLabel]
+    // (e.g. a standalone hero image) gets it announced instead.
+    excludeFromSemantics: semanticLabel == null,
   );
 }

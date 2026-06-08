@@ -688,3 +688,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **after (HC דלוק בלבד):** ה-foreground מתכהה — אייקון/טקסט על כתום → `inkLight` (6.7:1), ירוק-טקסט → `successDark`=#15803D (5.0:1). המילוי הכתום והנקודה הירוקה נשמרים.
 - **המצב הרגיל: אפס שינוי-עין** (`bsOnAccent`/`bsSuccess` מחזירים white/#22C55E כש-HC כבוי).
 - guard: `a11y_contrast_theme_test` (5).
+
+## #a11y-noncolor — Dynamic-Type + tooltips (before→after) — 2026-06-08
+- **before:** ה-OS Dynamic-Type הוזנח (טקסט ננעל על 0.9/1.0/1.15 בלבד); 13 `IconButton` icon-only בלי tooltip/semantics; תמונת-מוצר לא-מתויגת הוקראה ע"י screen-reader כ"תמונה" ריק.
+- **after:** הטקסט מכבד את הגדרת-ה-OS (מקופל עם העדפת-האפליקציה · clamp 1.35); כל `IconButton` עם tooltip עברי; תמונות-מוצר דקורטיביות (`excludeFromSemantics`) אלא אם הועבר `semanticLabel`.
+- guard: `a11y_contrast_theme_test` (5) · analyze 0 · tooltips/semantics additive.

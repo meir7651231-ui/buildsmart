@@ -752,3 +752,9 @@
   - `_huliotImageFor` כעת מחזיר page-fallback (לא null) כשאין crop ספציפי
   - p24 אטם (seal): routing מוחזר null → page_24.jpg (sml_p24_a.jpg לא נוצר ב-crop_huliot.py)
   - `_missingSpecs` set: 11 קבצי spec שלא נוצרו (p11_b, p30_d, p32_a, p36_b, p38_a, p39_b/c, p40_a/c/41_c, p42_a/b/c/d)
+
+### lib/data/product_images.dart — 2026-06-08T21:04:22+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s/semanticLabel == null/false/`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/product_image_a11y_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

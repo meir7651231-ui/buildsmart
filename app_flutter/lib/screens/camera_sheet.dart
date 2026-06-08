@@ -96,6 +96,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
               child: Row(
                 children: [
                   IconButton(
+                    tooltip: 'סגור',
                     icon: const Icon(Icons.close, color: Colors.white, size: 28),
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -110,6 +111,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                       final available = torch != TorchState.unavailable;
                       final on = torch == TorchState.on;
                       return IconButton(
+                        tooltip: 'פלאש',
                         icon: Icon(
                           on ? Icons.flash_on : Icons.flash_off,
                           color: !available
@@ -320,6 +322,7 @@ void _showGalleryPreview(
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
+                    tooltip: 'סגור',
                     icon: const Icon(Icons.close,
                         color: Colors.white, size: 28),
                     onPressed: () => Navigator.pop(ctx),

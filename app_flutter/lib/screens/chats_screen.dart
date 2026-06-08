@@ -319,6 +319,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
+          tooltip: 'חזרה',
           icon: const Icon(Icons.arrow_forward, color: Colors.black54),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -381,6 +382,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
           ),
           suffixIcon: hasText
               ? IconButton(
+                  tooltip: 'נקה חיפוש',
                   icon: const Icon(
                     Icons.close,
                     color: Color(0xFF888888),
@@ -1141,6 +1143,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
         elevation: 0,
         titleSpacing: 0,
         leading: IconButton(
+          tooltip: 'חזרה',
           icon: const Icon(Icons.arrow_forward, color: Colors.black54),
           onPressed: () => Navigator.pop(context),
         ),
@@ -1208,14 +1211,17 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
         ),
         actions: [
           IconButton(
+            tooltip: 'אפשרויות',
             icon: const Icon(Icons.more_vert, color: Colors.black54),
             onPressed: () => _showChatMenu(context),
           ),
           IconButton(
+            tooltip: 'שיחת וידאו',
             icon: const Icon(Icons.videocam_outlined, color: Colors.black54),
             onPressed: () => _showCallUnavailable(context, video: true),
           ),
           IconButton(
+            tooltip: 'שיחה קולית',
             icon: const Icon(Icons.call_outlined, color: Colors.black54),
             onPressed: () => _showCallUnavailable(context, video: false),
           ),
@@ -1657,6 +1663,7 @@ class _InputBar extends StatelessWidget {
                   children: [
                     // Camera + attachment (left side in RTL = trailing)
                     IconButton(
+                      tooltip: 'מצלמה',
                       padding: const EdgeInsets.all(10),
                       constraints: const BoxConstraints(),
                       icon: const Icon(
@@ -1668,6 +1675,7 @@ class _InputBar extends StatelessWidget {
                       onPressed: () => openCameraSheet(context),
                     ),
                     IconButton(
+                      tooltip: 'צירוף',
                       padding: const EdgeInsets.all(10),
                       constraints: const BoxConstraints(),
                       icon: const Icon(
@@ -1704,6 +1712,7 @@ class _InputBar extends StatelessWidget {
                     // Emoji (right side in RTL = leading) — real inline picker
                     // that inserts the chosen glyph into the message field.
                     IconButton(
+                      tooltip: 'אימוג׳י',
                       padding: const EdgeInsets.all(10),
                       constraints: const BoxConstraints(),
                       icon: const Icon(
@@ -1778,6 +1787,7 @@ class ChatsArchiveScreen extends ConsumerWidget {
         elevation: 0,
         titleSpacing: 0,
         leading: IconButton(
+          tooltip: 'חזרה',
           icon: const Icon(Icons.arrow_forward, color: Colors.black54),
           onPressed: () => Navigator.pop(context),
         ),

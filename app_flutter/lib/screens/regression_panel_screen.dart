@@ -82,8 +82,8 @@ class _RunButton extends StatelessWidget {
         onPressed: running ? null : () => runRegression(ref),
         child: Text(
           label,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: bsOnAccent(context),
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),

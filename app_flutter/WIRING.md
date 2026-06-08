@@ -1348,3 +1348,11 @@ Gate: central-verify green — analyze 0 · tests green · build · conformance 
 - **נדחה לקומיט נפרד:** `_RunButton` (regression · dev) · `_ApprovalButton` textColor-param (manager_dashboard) · a11y לא-צבעוני (tooltips/semanticLabels/Dynamic-Type).
 - guard: `test/a11y_contrast_theme_test.dart` (5 · normal=white/#22C55E · HC=inkLight/successDark · helpers resolve via Theme).
 Gate: analyze 0 · a11y_contrast(5) + color_token_ratchet green · מוזג נקי (0 conflicts) על tip-הקולגה `5269b37`.
+
+### #a11y-noncolor — Dynamic-Type + tooltips + image-semantics — 2026-06-08
+- **Dynamic-Type:** `main.dart` קודם דרס את scaler-ה-OS (`TextScaler.linear(textScale)` קבוע · cap 1.15×) → התעלם לגמרי מהגדרת גודל-הטקסט של iOS/Android. עכשיו מקפל את ה-OS scaler עם העדפת-האפליקציה ו-clamp ל-`[0.85, 1.35]` (תקרת-בטיחות-layout, ניתנת להעלאה אחרי QA-ויזואלי). משתמשי low-vision מקבלים הגדלה אמיתית במקום ננעלים על 1.15.
+- **Tooltips:** 13 `IconButton` icon-only קיבלו `tooltip:` עברי (גם = semantic label) — `camera_sheet` (סגור/פלאש ×3) + `chats_screen` (חזרה/אפשרויות/וידאו/שיחה/מצלמה/צירוף/אימוג׳י/נקה ×10).
+- **Image semantics:** `product_images.productImage` → `excludeFromSemantics: semanticLabel == null` (תיקון נקודה-אחת, כל 15+ call-sites): תמונת-מוצר לא-מתויגת (שם-המוצר מוצג כטקסט לידה) הופכת דקורטיבית → screen-reader לא מקריא "תמונה" חסר-משמעות; caller שמעביר `semanticLabel` (hero) מקבל הקראה.
+- **HC straggler:** `regression_panel._RunButton` (dev) → `bsOnAccent`.
+- **לא שונה במכוון (false-positive):** `_ApprovalButton` "אשר" = לבן-על-ירוק-כהה `#1F8A4C` (כבר ~4.5:1) — bsOnAccent היה שובר אותו ב-HC (כהה-על-כהה).
+Gate: analyze 0 · a11y_contrast(5) green · tooltips/semantics additive.
