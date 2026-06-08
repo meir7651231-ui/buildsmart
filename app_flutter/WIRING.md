@@ -559,6 +559,15 @@ ConnectorEnd + a direction-aware search + relaxing the symmetry invariant) is a
 larger architectural change deferred for design review. Locked by
 `install_engine_b11_test`.
 
+**Per-device directionality guidance (B13/#1):** the single generic warning is now
+ONE check PER directional valve — `lineComplianceChecklist` emits
+"כיוון התקנה: <valve name>" with `_directionalContext` stating where it sits
+("בין <upstream> ל-<downstream>"), so the installer knows exactly which valve, and
+between which two parts, to orient for flow. (True rejection of a backwards mount
+remains impossible — a check valve's two ends are physically identical, so
+orientation is an install choice the parts list can't encode; the engine pinpoints
+and guides rather than enforces.) Locked by `install_engine_b13_test`.
+
 ---
 
 ## Verified by regression (`test/wiring_test.dart`)

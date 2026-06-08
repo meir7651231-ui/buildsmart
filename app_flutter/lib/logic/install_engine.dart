@@ -133,6 +133,19 @@ bool _isDirectionalDevice(LipskeyCatalogProduct p) {
   return n.contains('אלחזור') || n.contains('אלחוזר');
 }
 
+/// Where a directional device at [i] sits in the built [chain], named by its
+/// neighbours — so the installer knows EXACTLY which valve, and between which two
+/// parts, to orient for flow (concrete, always-correct guidance; the engine can't
+/// compute the flow direction itself since the valve's two ends are identical).
+String _directionalContext(List<LipskeyCatalogProduct> chain, int i) {
+  final up = i > 0 ? chain[i - 1].nameHe : null;
+  final down = i < chain.length - 1 ? chain[i + 1].nameHe : null;
+  if (up != null && down != null) return 'בין "$up" ל-"$down"';
+  if (down != null) return 'בכניסת הקו (לפני "$down")';
+  if (up != null) return 'ביציאת הקו (אחרי "$up")';
+  return 'בקו';
+}
+
 /// Detects the safety/durability components a hot line requires and whether the
 /// current chain includes them — turning expert review into an automatic gate.
 List<LineCheck> lineComplianceChecklist(
@@ -184,9 +197,6 @@ List<LineCheck> lineComplianceChecklist(
   // exists in the catalog yet, so this surfaces the requirement (warning) instead
   // of silently passing — it cannot be auto-satisfied (no SKU to insert).
   final hasGardenOutlet = chain.any((p) => p.categoryHe == 'ברזי גן');
-  // A directional valve (check / sewage-backflow) must face the flow; the model
-  // stores its two ends identically, so it can't yet reject a backwards mount.
-  final hasDirectional = chain.any(_isDirectionalDevice);
 
   return [
     if (isSupply)
@@ -202,11 +212,16 @@ List<LineCheck> lineComplianceChecklist(
           'ברז-גן/חיבור-צינור דורש הגנה מפני זרימה-חוזרת למי-שתייה — '
           'אין מק"ט בקטלוג, יש לספק בנפרד',
           severity: CheckSeverity.warning),
-    if (hasDirectional)
-      LineCheck('כיוון התקנה — שסתום חד-כיווני', false,
-          'הקו כולל אל-חזור/מונע-זרימה-חוזרת — ודא התקנה בכיוון-הזרימה הנכון '
-          '(אוריינטציה עדיין אינה מאומתת אוטומטית)',
-          severity: CheckSeverity.warning),
+    // One check PER directional device: name it + where it sits, so the installer
+    // can orient EACH valve for flow. The engine can't reject a backwards mount
+    // (a check valve's two ends are modelled identically) — but it pinpoints
+    // which valve, and between which two parts, to orient.
+    for (var i = 0; i < chain.length; i++)
+      if (_isDirectionalDevice(chain[i]))
+        LineCheck('כיוון התקנה: ${chain[i].nameHe}', false,
+            'שסתום חד-כיווני ${_directionalContext(chain, i)} — '
+            'התקן בכיוון-הזרימה (אוריינטציה אינה מאומתת אוטומטית)',
+            severity: CheckSeverity.warning),
     if (recirc) ...[
       LineCheck('שסתום אל-חזור', has({'HW-CHECK-15'}),
           'מונע זרימה הפוכה בלולאה', severity: CheckSeverity.critical),

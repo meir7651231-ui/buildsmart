@@ -36,6 +36,19 @@
 - תקלה שהוזרקה #2 (מבנית): החזרת `Alignment` אבסולוטי (הבאג המקורי) → **אינו מתקמפל**
   (טיפוס-החזרה `AlignmentDirectional`) — חוסם רגרסיה ל-absolute.
 - מסקנה: הבדיקה **חזקה** — תופסת היפוך-צד; טיפוס-ההחזרה חוסם חזרה ל-`Alignment.center(Left|Right)`.
+## install_engine — הנחיית-כיווניות לכל שסתום (B13/#1) — 2026-06-08
+
+- **קובץ:** `test/install_engine_b13_test.dart` (חדש). פונקציית-עזר חדשה: `_directionalContext`.
+- **מה עושה:** נועל שהאזהרה הכללית של B11 הפכה ל-**צ'ק לכל שסתום חד-כיווני** —
+  `lineComplianceChecklist` פולט "כיוון התקנה: <שם השסתום>" עם `_directionalContext`
+  שמציין "בין <עליון> ל-<תחתון>" (או כניסת/יציאת הקו). שני שסתומים → שני צ'קים.
+- תקלה שהוזרקה: `_directionalContext` → `return ''` (ביטול ההקשר).
+- תוצאה: אדומה ✅ — "naming the valve + neighbours" + "lone contextualised" נכשלו
+  (אבד 'בין'/שמות-השכנים/'בקו'); "two valves" + "no directional" נשארו ירוקים.
+- ביטול → ירוק ✅ (B13 + B11 + auto_compliance + full_compliance).
+- מסקנה: `_directionalContext` load-bearing. **תזכורת:** זו הנחיה, לא אכיפה —
+  קצוות-השסתום זהים פיזית, אז דחיית-התקנה-הפוכה בלתי-אפשרית (task #20).
+
 ## install_studio — באנר עומס-יתר אמיתי (B12/#5) — 2026-06-08
 
 - **שינוי:** UI בלבד ב-`install_studio_screen._assemble` — `branches` סופר רק
