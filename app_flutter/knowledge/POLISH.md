@@ -102,7 +102,15 @@ scope-chips `catalog:2003` **false-positive** (search-router) · switch-stage `s
 
 ---
 
-## 4. W0 — החלטות חוסמות (R8 · דורש אישורך לפני גלי-הבינדינג)
+## 4. W0 — החלטות חוסמות (R8)
+
+> **✅ הוכרע (2026-06-08 · מהמשתמש):**
+> - **dark-mode → gate ל-light-v1:** לכבות מצב-כהה לגרסה-1 (`ThemeMode.light` כפוי + להסתיר toggle), להחזיר post-launch · textScaler → clamp.
+> - **teal → כתום:** הטורקיז ב-finance/site = **טעות** → לאחד ל-`BsTokens.brand`.
+> - **מיקרוקופי → כל ה-3:** `מנהל מערכת`→`מנהל המערכת` · `AI`→`בינה מלאכותית` · `mm`→`מ"מ`.
+> - **טכני (ירוק-הצלחה / מרווח / רדיוס / type-scale / timing) → "הראה-לי-כל-אחת":** preview נפרד לפני W3/W4 · **אסור bulk-default.**
+
+**פירוט המקור (לעיון):**
 
 1. **צבעים סמנטיים:** איזה ירוק-הצלחה (`1F8A4C`×26 מול `22C55E`×17)? `danger`/`destructive` לאחד? + `divider`/`surfaceMid`/`mutedMid`.
 2. **teal פר-פרסונה** (`finance`+`site_hub`, 46×) — accent מכוון או legacy?
