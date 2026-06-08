@@ -4,6 +4,21 @@
 
 ---
 
+## v6.16 — fix-fleet · גל 12 (deep bug-hunt fixes + hardening)
+
+**שינוי:** ציד-עמוק (5 עדשות סמנטיות/אינטגרציה — business-logic/RBAC · e2e-flow · edge-cases · dead-interactions · races) מצא באגים שהשערים הרגילים לא יכלו לתפוס (פיצ'רים שלא חוּוטו נכון · תפרים חוצי-פיצ'ר · races). תוקנו:
+- **HIGH עגלה-לכל-פרויקט (עכשיו עובדת):** `_switch` לא העביר `outgoingCart` וזרק את ה-snapshot → תוקן + `SmartCartNotifier.loadSnapshot`.
+- **HIGH חור-בידוד §2.5:** לינק "🔄 החלפת תפקיד" ב-ProfileScreen נגדר ל-`activePersona == null`.
+- **MED בטיחות-אינסטלציה:** vacuum-breaker הורחב ל-`'ציוד גן'`.
+- **MED איבוד-נתונים:** `saved_projects._persist` עטוף try/catch.
+- **MED load-clobber (4 notifiers):** הוסף `_loaded`-guard ל-`store_stock`/`smart_project`/`saved_projects`/`card_projects` — סוגר spec-divergence. (ה-cross-engine mutator-guard נוסה ובוטל — חוסם פעולה סינכרונית; ה-mitigations הקיימים מספיקים.)
+- **hardening:** `state_loaded_guard_test` — שער-מקור שאוכף `bool _loaded` על כל notifier מתמיד שדורס `set state` (12 guarded / 0 offenders).
+- **פתוח להחלטה:** HIGH — site-של-הזמנה מנותק מהפרויקט-הפעיל (2 מערכות-שמות; דורש החלטת-עיצוב).
+
+**אימות:** `deep_fix_regression_test` (3) + `state_loaded_guard_test` ירוקים · analyze 0 · `central-verify` gate.
+
+---
+
 ## v6.16 — fix-fleet · גל 11 (server-ready 6/6 — סגירת finance + catalog pure-logic)
 
 **שינוי (לא-ויזואלי — refactor, byte-identical):** סגירת התקרה-הארכיטקטונית מגל 10. הקריאות שנותרו ישבו בהקשרים ללא-`ref` (top-level functions / StatelessWidget), אז **accessor גלובלי Ref-free** מנתב אותן — בלי שינוי-חתימות, בלי להמיר מסך-מאומת ל-Consumer.

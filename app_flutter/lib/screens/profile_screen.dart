@@ -1,5 +1,6 @@
 import 'package:buildsmart/screens/rewards_hub_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
+import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -67,6 +68,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final p = ref.watch(userProfileProvider);
+    // §2.5 isolation: role-switching is reachable ONLY from the contractor
+    // (activePersona == null). Every other persona opens this same ProfileScreen
+    // from inside its world, so we must not surface the role picker there.
+    final activePersona = ref.watch(activePersonaProvider);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -154,11 +159,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: BsTokens.space5),
             const _SectionLabel('עוד'),
             const SizedBox(height: BsTokens.space3),
-            _LinkRow(
-              label: '🔄 החלפת תפקיד',
-              onTap: () => showRolePicker(context),
-            ),
-            const SizedBox(height: BsTokens.space2),
+            if (activePersona == null) ...[
+              _LinkRow(
+                label: '🔄 החלפת תפקיד',
+                onTap: () => showRolePicker(context),
+              ),
+              const SizedBox(height: BsTokens.space2),
+            ],
             _LinkRow(
               label: '🎮 מועדון BuildSmart',
               onTap: () =>

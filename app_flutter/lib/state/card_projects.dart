@@ -141,17 +141,37 @@ class CardProjectsNotifier extends StateNotifier<List<ProjectItem>> {
 
   static const _key = 'bs.card-projects.v1';
 
+  /// True once any mutation has been applied (or _load completes).
+  /// Guards against _load clobbering a mutation that arrived before prefs.
+  bool _loaded = false;
+
+  // Setter does NOT persist — the mutators (add/addToLocations/applyTemplate/
+  // removeProject) persist explicitly (the cart_lists shape), so we only flag
+  // the load-guard here.
+  @override
+  set state(List<ProjectItem> value) {
+    _loaded = true; // mutation happened — block any pending _load
+    super.state = value;
+  }
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
     if (raw != null) {
       try {
-        state = (jsonDecode(raw) as List)
+        final list = (jsonDecode(raw) as List)
             .map((e) => ProjectItem.fromJson(e as Map<String, dynamic>))
             .toList();
+        if (!_loaded) {
+          super.state = list; // bypass setter so we don't re-persist on load
+          _loaded = true;
+        }
       } catch (_) {
         // corrupt/legacy payload — keep default state
+        _loaded = true;
       }
+    } else {
+      _loaded = true;
     }
   }
 

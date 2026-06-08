@@ -79,12 +79,32 @@ class SmartProjectNotifier extends StateNotifier<Set<String>> {
   final bool persist;
   static const _key = 'bs.smart-project.v1';
 
+  /// True once any mutation has been applied (or _load completes).
+  /// Guards against _load clobbering a mutation that arrived before prefs.
+  bool _loaded = false;
+
+  // Setter does NOT persist — the mutators (toggle/reset) persist explicitly
+  // (the cart_lists shape; `_persist` is also a no-op when `persist` is false),
+  // so we only flag the load-guard here.
+  @override
+  set state(Set<String> value) {
+    _loaded = true; // mutation happened — block any pending _load
+    super.state = value;
+  }
+
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final list = prefs.getStringList(_key);
-      if (list != null) state = list.toSet();
-    } on Object catch (_) {}
+      if (list != null && !_loaded) {
+        super.state = list.toSet(); // bypass setter so we don't re-persist on load
+        _loaded = true;
+      } else {
+        _loaded = true;
+      }
+    } on Object catch (_) {
+      _loaded = true;
+    }
   }
 
   Future<void> _persist() async {

@@ -731,3 +731,9 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/repositories_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### lib/screens/profile_screen.dart — 2026-06-08T17:27:45+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s/activePersona == null/activePersona != null/`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/deep_fix_regression_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

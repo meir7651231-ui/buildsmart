@@ -178,6 +178,12 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>> {
   }
 
   void clear() => state = const [];
+
+  /// Replace every cart line with [lines] (a project's stashed snapshot). Used
+  /// by the cart-per-project switch: the incoming project's snapshot becomes the
+  /// live cart. Reassigns `state` (new list) so it rebuilds + persists via the
+  /// setter — `SmartCartLine` is immutable so sharing the line objects is safe.
+  void loadSnapshot(List<SmartCartLine> lines) => state = [...lines];
 }
 
 final smartCartProvider =

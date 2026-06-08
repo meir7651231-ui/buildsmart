@@ -58,25 +58,46 @@ class SavedProjectsNotifier extends StateNotifier<List<SavedProject>> {
     _load();
   }
 
+  /// True once any mutation has been applied (or _load completes).
+  /// Guards against _load clobbering a mutation that arrived before prefs.
+  bool _loaded = false;
+
+  @override
+  set state(List<SavedProject> value) {
+    _loaded = true; // mutation happened — block any pending _load
+    super.state = value;
+  }
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_kStorageKey);
-    if (raw == null) return;
+    if (raw == null) {
+      _loaded = true;
+      return;
+    }
     try {
       final list = (jsonDecode(raw) as List)
           .map((e) => SavedProject.fromJson(e as Map<String, dynamic>))
           .toList();
       list.sort((a, b) => b.savedAt.compareTo(a.savedAt));
-      state = list;
+      if (!_loaded) {
+        super.state = list; // bypass setter so we don't re-persist on load
+        _loaded = true;
+      }
     } catch (_) {
       // corrupted entry — ignore
+      _loaded = true;
     }
   }
 
   Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-        _kStorageKey, jsonEncode(state.map((p) => p.toJson()).toList()));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+          _kStorageKey, jsonEncode(state.map((p) => p.toJson()).toList()));
+    } catch (_) {
+      // write failure — swallow (do not surface as unhandled async error)
+    }
   }
 
   Future<SavedProject> save({

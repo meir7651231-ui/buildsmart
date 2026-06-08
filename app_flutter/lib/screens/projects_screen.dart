@@ -17,6 +17,7 @@ import 'package:buildsmart/screens/budget_screen.dart';
 import 'package:buildsmart/screens/smart_project_screen.dart';
 import 'package:buildsmart/screens/tasks_screen.dart';
 import 'package:buildsmart/state/projects_engine.dart';
+import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -105,9 +106,10 @@ class ProjectsScreen extends ConsumerWidget {
     );
   }
 
-  // switchProject — proto :7584. Stashing the outgoing live cart + loading the
-  // incoming one is the engine's job; the live shared cart swap is wired by the
-  // shell (WIRE note). Here we drive the engine + toast.
+  // switchProject — proto :7584. Stash the outgoing live cart + load the
+  // incoming one: read the current shared cart, hand it to the engine as the
+  // outgoing snapshot, then load the returned incoming snapshot back into the
+  // live shared cart. cart-per-project, end to end.
   void _switch(BuildContext context, WidgetRef ref, String id,
       {bool silent = false}) {
     final state = ref.read(projectsProvider);
@@ -115,11 +117,16 @@ class ProjectsScreen extends ConsumerWidget {
       if (!silent) Navigator.of(context).maybePop();
       return;
     }
-    // The engine returns the incoming project's stashed cart snapshot; the shell
-    // loads it into the shared cart (WIRE). Outgoing cart stashing happens here
-    // via stashActiveCart in the shell wire too — for now the snapshots live in
-    // the engine so cart-per-project is provable without the shared cart.
-    ref.read(projectsProvider.notifier).switchProject(id);
+    // Stash the outgoing project's live cart, switch, then load the incoming
+    // project's stashed snapshot into the shared cart. switchProject returns
+    // null only on a no-op (already-active / unknown id) — guarded above, but we
+    // keep the null-check so a stray no-op never clears the live cart.
+    final outgoing = ref.read(smartCartProvider);
+    final incoming =
+        ref.read(projectsProvider.notifier).switchProject(id, outgoingCart: outgoing);
+    if (incoming != null) {
+      ref.read(smartCartProvider.notifier).loadSnapshot(incoming);
+    }
     final p = ref.read(projectsProvider).active;
     if (!silent) showToast(context, 'עברת לפרויקט: ${p.name}');
   }
@@ -336,7 +343,17 @@ class _StatusSheet extends ConsumerWidget {
                   onTap: () {
                     Navigator.of(context).pop();
                     if (!isActive) {
-                      ref.read(projectsProvider.notifier).switchProject(p.id);
+                      // Same cart-per-project swap as _switch: stash the
+                      // outgoing live cart, load the incoming snapshot.
+                      final outgoing = ref.read(smartCartProvider);
+                      final incoming = ref
+                          .read(projectsProvider.notifier)
+                          .switchProject(p.id, outgoingCart: outgoing);
+                      if (incoming != null) {
+                        ref
+                            .read(smartCartProvider.notifier)
+                            .loadSnapshot(incoming);
+                      }
                       showToast(context, 'עברת לפרויקט: ${p.name}');
                     }
                   },

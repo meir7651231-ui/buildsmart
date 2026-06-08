@@ -22,12 +22,31 @@ class StoreOosNotifier extends StateNotifier<Set<String>> {
     unawaited(_load());
   }
 
+  /// True once any mutation has been applied (or _load completes).
+  /// Guards against _load clobbering a mutation that arrived before prefs.
+  bool _loaded = false;
+
+  // Setter does NOT persist — the mutators (markOos/markAvailable) persist
+  // explicitly (the cart_lists shape), so we only flag the load-guard here.
+  @override
+  set state(Set<String> value) {
+    _loaded = true; // mutation happened — block any pending _load
+    super.state = value;
+  }
+
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final list = prefs.getStringList(_kOosKey);
-      if (list != null) state = list.toSet();
-    } on Object catch (_) {/* keep empty */}
+      if (list != null && !_loaded) {
+        super.state = list.toSet(); // bypass setter so we don't re-persist on load
+        _loaded = true;
+      } else {
+        _loaded = true;
+      }
+    } on Object catch (_) {
+      _loaded = true; // keep empty
+    }
   }
 
   Future<void> _persist() async {

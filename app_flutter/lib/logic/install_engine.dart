@@ -196,7 +196,7 @@ List<LineCheck> lineComplianceChecklist(
   // supply; code requires a vacuum-breaker (anti-siphon) device. No such product
   // exists in the catalog yet, so this surfaces the requirement (warning) instead
   // of silently passing — it cannot be auto-satisfied (no SKU to insert).
-  final hasGardenOutlet = chain.any((p) => p.categoryHe == 'ברזי גן');
+  final hasGardenOutlet = chain.any((p) => p.categoryHe == 'ברזי גן' || p.categoryHe == 'ציוד גן');
 
   return [
     if (isSupply)
