@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -69,7 +70,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       // White scaffold so any gap below the lifted sheet reads as one
       // continuous white surface.
       backgroundColor: BsTokens.cardLight,
-      body: SingleChildScrollView(
+      body: HelpModeScaffold(
+        child: Stack(
+          children: [
+            SingleChildScrollView(
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: media.size.height),
           child: Column(
@@ -150,26 +154,31 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: BsTokens.brandDark,
-                          side: const BorderSide(
-                            color: BsTokens.brand,
-                            width: 1.5,
+                      HelpTarget(
+                        title: 'כניסה ללקוח קיים',
+                        body: 'מיועד למי שכבר נרשם — כניסה ישירה פנימה. כרגע '
+                            'אין שרת התחברות, כך שבפועל זה נכנס כאורח.',
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: BsTokens.brandDark,
+                            side: const BorderSide(
+                              color: BsTokens.brand,
+                              width: 1.5,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: BsTokens.space4,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: BsTokens.space4,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        onPressed: _existingLogin,
-                        child: const Text(
-                          'כניסה ללקוח קיים',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
+                          onPressed: _existingLogin,
+                          child: const Text(
+                            'כניסה ללקוח קיים',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                       ),
@@ -220,23 +229,46 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         ),
                       ),
                       const SizedBox(height: BsTokens.space4),
-                      _field(_name, 'שם מלא', Icons.person_outline),
+                      HelpTarget(
+                        title: 'שם מלא',
+                        body: 'השם שיוצג בפרופיל ובהזמנות. שדה זה פחות קריטי — '
+                            'הזיהוי בפועל הוא לפי טלפון/מייל.',
+                        child:
+                            _field(_name, 'שם מלא', Icons.person_outline),
+                      ),
                       const SizedBox(height: BsTokens.space3),
-                      _field(
-                        _contact,
-                        'טלפון או אימייל',
-                        Icons.alternate_email,
+                      HelpTarget(
+                        title: 'טלפון או אימייל',
+                        body: 'פרטי הקשר שמזהים אותך כלקוח — לפיהם תזוהה '
+                            'בכניסה הבאה. כאן מקלידים מספר טלפון או כתובת מייל.',
+                        child: _field(
+                          _contact,
+                          'טלפון או אימייל',
+                          Icons.alternate_email,
+                        ),
                       ),
                       const SizedBox(height: BsTokens.space5),
-                      _primaryButton(onPressed: valid ? _register : null),
+                      HelpTarget(
+                        title: 'אישור והמשך',
+                        body: 'מסיים את ההרשמה, שומר את הפרטים, וממשיך לבחירת '
+                            'המקצוע. נפעל רק כשהשדות תקינים.',
+                        child: _primaryButton(
+                          onPressed: valid ? _register : null,
+                        ),
+                      ),
                       const SizedBox(height: BsTokens.space2),
-                      TextButton(
-                        onPressed: _demo,
-                        child: const Text(
-                          'המשך ללא רישום (דוגמה)',
-                          style: TextStyle(
-                            color: BsTokens.mutedLight,
-                            fontWeight: FontWeight.w600,
+                      HelpTarget(
+                        title: 'המשך ללא רישום (דוגמה)',
+                        body: 'נכנסים כאורח-דמו בלי לשמור פרטים — לסיור מהיר '
+                            'באפליקציה. אפשר להירשם מאוחר יותר מההגדרות.',
+                        child: TextButton(
+                          onPressed: _demo,
+                          child: const Text(
+                            'המשך ללא רישום (דוגמה)',
+                            style: TextStyle(
+                              color: BsTokens.mutedLight,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
@@ -255,6 +287,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               ),
             ],
           ),
+        ),
+          ),
+          const Positioned(
+            top: 4,
+            left: 4,
+            child: SafeArea(
+              child: HelpToggleButton(color: Colors.white),
+            ),
+          ),
+        ],
         ),
       ),
     );

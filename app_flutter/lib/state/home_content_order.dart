@@ -30,15 +30,15 @@ class HomeSectionMeta {
 /// Section labels — verbatim from the proto section titles.
 const Map<HomeSection, HomeSectionMeta> kHomeSectionMeta = {
   HomeSection.categories:
-      HomeSectionMeta(HomeSection.categories, '🗂️', 'קטגוריות'),
+      HomeSectionMeta(HomeSection.categories, '🗂️', 'מחלקות'),
   HomeSection.products: HomeSectionMeta(
-      HomeSection.products, '🧠', 'עץ התקנה חכם — אינסטלציה'),
+      HomeSection.products, '🌳', 'עץ חכם — אינסטלציה'),
   HomeSection.workPath:
       HomeSectionMeta(HomeSection.workPath, '🛁', 'מסלול עבודה חכם'),
   HomeSection.promise:
       HomeSectionMeta(HomeSection.promise, '⚡', 'כלים מהירים'),
   HomeSection.reorderHistory: HomeSectionMeta(
-      HomeSection.reorderHistory, '🔁', 'הזמנה חוזרת לאתר זה'),
+      HomeSection.reorderHistory, '🔁', 'הזמנות אחרונות לאתר'),
 };
 
 /// Default order — the prototype's top-to-bottom section sequence.

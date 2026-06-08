@@ -80,25 +80,25 @@ void main() {
     expect(find.text('📋 שהגשת (0)'), findsOneWidget);
   });
 
-  testWidgets('"הכל" overview shows a preview block per section', (t) async {
+  testWidgets('"בית" smart-home shows wired section blocks', (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     await _openFinder(t);
-    await t.tap(find.text('הכל').first);
+    await t.tap(find.text('בית').first);
     await t.pumpAndSettle();
     // Section labels are present (they also appear as chips → at least one).
     expect(find.text('חיפושים אחרונים'), findsAtLeastNWidgets(1));
     expect(find.text('תכנון חיבור'), findsAtLeastNWidgets(1));
     expect(find.text('מועדפים'), findsAtLeastNWidgets(1));
     expect(find.text('עץ חכם'), findsAtLeastNWidgets(1));
-    // Categories block is fully expanded (no "הצג הכל"); the preview blocks for
-    // the other sections sit below it, so scroll down until their links show.
+    // The smart-home landing (#32) renders wired section blocks; scroll down
+    // until a body-only section title (not a chip) shows.
     final list = find.byKey(const Key('catalog-list'));
-    for (var i = 0; i < 20 && find.text('הצג הכל').evaluate().isEmpty; i++) {
+    for (var i = 0; i < 20 && find.text('כלים מהירים').evaluate().isEmpty; i++) {
       await t.drag(list, const Offset(0, -250));
       await t.pump(const Duration(milliseconds: 50));
     }
-    expect(find.text('הצג הכל'), findsAtLeastNWidgets(1));
+    expect(find.text('כלים מהירים'), findsAtLeastNWidgets(1));
   });
 
   testWidgets('קטגוריות section shows all 11 verbatim categories', (t) async {

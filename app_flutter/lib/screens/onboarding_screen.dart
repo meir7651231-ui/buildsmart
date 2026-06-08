@@ -4,8 +4,10 @@ import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/profession_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/help_mode.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -139,22 +141,35 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final isLast = _page == kOnboardingSlides.length - 1;
+    final showHelp = !widget.isTour;
+    final helpMode = showHelp && ref.watch(helpModeProvider);
     return Scaffold(
       backgroundColor: BsTokens.bgLight,
-      body: SafeArea(
-        child: Column(
+      body: Column(
+        children: [
+          if (helpMode) const HelpModeBanner(),
+          Expanded(
+            child: SafeArea(
+              child: Column(
           children: [
-            Align(
-              alignment: AlignmentDirectional.topStart,
-              child: Padding(
-                padding: const EdgeInsets.all(BsTokens.space3),
-                child: TextButton(
-                  onPressed: _finish,
-                  child: const Text(
-                    'דלג',
-                    style: TextStyle(color: BsTokens.mutedLight),
+            Padding(
+              padding: const EdgeInsets.all(BsTokens.space3),
+              child: Row(
+                children: [
+                  HelpTarget(
+                    title: 'דלג',
+                    body: 'מדלג על שקופיות ההיכרות ועובר ישר לאפליקציה.',
+                    child: TextButton(
+                      onPressed: _finish,
+                      child: const Text(
+                        'דלג',
+                        style: TextStyle(color: BsTokens.mutedLight),
+                      ),
+                    ),
                   ),
-                ),
+                  const Spacer(),
+                  if (showHelp) const HelpToggleButton(),
+                ],
               ),
             ),
             Expanded(
@@ -191,24 +206,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               padding: const EdgeInsets.all(BsTokens.space5),
               child: SizedBox(
                 width: double.infinity,
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: BsTokens.brand,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: BsTokens.space4,
+                child: HelpTarget(
+                  title: 'הבא / בואו נתחיל',
+                  body: 'עובר לשקופית הבאה; בשקופית האחרונה ("בואו נתחיל") '
+                      'מסיים את ההיכרות ופותח את האפליקציה.',
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: BsTokens.brand,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: BsTokens.space4,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(BsTokens.radiusCard),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(BsTokens.radiusCard),
-                    ),
-                  ),
-                  onPressed: _next,
-                  child: Text(
-                    isLast ? 'בואו נתחיל' : 'הבא',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                    onPressed: _next,
+                    child: Text(
+                      isLast ? 'בואו נתחיל' : 'הבא',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
@@ -216,6 +236,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ],
         ),
+      ),
+          ),
+        ],
       ),
     );
   }

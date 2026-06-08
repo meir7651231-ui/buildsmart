@@ -1,6 +1,7 @@
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -38,22 +39,30 @@ class ProfessionScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: BsTokens.bgLight,
-      body: SafeArea(
-        child: Padding(
+      body: HelpModeScaffold(
+        child: SafeArea(
+          child: Padding(
           padding: const EdgeInsets.all(BsTokens.space5),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Align(
-                alignment: AlignmentDirectional.topStart,
-                child: TextButton.icon(
-                  onPressed: () =>
-                      ref.read(startupStepProvider.notifier).state = 0,
-                  icon: const Icon(Icons.chevron_right,
-                      color: BsTokens.mutedLight),
-                  label: const Text('חזור',
-                      style: TextStyle(color: BsTokens.mutedLight)),
-                ),
+              Row(
+                children: [
+                  HelpTarget(
+                    title: 'חזרה',
+                    body: 'חוזר אחורה למסך הקודם (מסך הפתיחה / ההרשמה).',
+                    child: TextButton.icon(
+                      onPressed: () =>
+                          ref.read(startupStepProvider.notifier).state = 0,
+                      icon: const Icon(Icons.chevron_right,
+                          color: BsTokens.mutedLight),
+                      label: const Text('חזור',
+                          style: TextStyle(color: BsTokens.mutedLight)),
+                    ),
+                  ),
+                  const Spacer(),
+                  const HelpToggleButton(),
+                ],
               ),
               const SizedBox(height: BsTokens.space2),
               const Text(
@@ -71,7 +80,12 @@ class ProfessionScreen extends ConsumerWidget {
               ),
               const SizedBox(height: BsTokens.space5),
               for (final t in kTradeOptions) ...[
-                _TradeCard(trade: t, onTap: () => pick(t.name)),
+                HelpTarget(
+                  title: t.name,
+                  body: 'בחירת התחום "${t.name}" (${t.desc}). אמורה להתאים '
+                      'קטלוג/כלים/המלצות למקצוע — כרגע אינסטלטור פעיל, השאר בקרוב.',
+                  child: _TradeCard(trade: t, onTap: () => pick(t.name)),
+                ),
                 const SizedBox(height: BsTokens.space3),
               ],
               const Spacer(),
@@ -83,6 +97,7 @@ class ProfessionScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

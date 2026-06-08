@@ -758,3 +758,7 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/product_image_a11y_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+### 2026-06-09 — מסך-בית חכם / מחיקת 'הכל' (UI-wiring)
+- מוטציה 1: שינוי `catalogSectionProvider` ברירת-מחדל `'בית'`→`'מאתר'` → `hard_tests "default catalog landing"` אדום (Expected 'בית', Actual 'מאתר') ✅ נתפס; שוחזר.
+- מוטציה 2: הסרת תיקון ה-overflow (`Flexible`/`Expanded` ב-_MiniTile/_SmartTreeCard) → robustness 1/12 RenderFlex overflowed אדום ✅; שוחזר.
+- כיסוי: widget_test "בית" smart-home shows wired section blocks · robustness 1/12/18 render · hard_tests default-landing.

@@ -186,8 +186,10 @@ void main() {
     test('home (בית) is the default catalog landing', () {
       final c = ProviderContainer();
       addTearDown(c.dispose);
+      // 'בית' is the fixed first pill (smart-home, #32); the section list now
+      // starts with 'מאתר' (the finder, moved off the home).
       expect(c.read(catalogSectionProvider), 'בית');
-      expect(c.read(catalogSectionsListProvider).first, 'בית');
+      expect(c.read(catalogSectionsListProvider).first, 'מאתר');
     });
 
     test('every finder group carries a non-empty description', () {

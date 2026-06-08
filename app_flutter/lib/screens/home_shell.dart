@@ -20,11 +20,13 @@ import 'package:buildsmart/screens/store_settings_screen.dart';
 import 'package:buildsmart/screens/updates_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/help_mode.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/version.g.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,6 +43,7 @@ class HomeShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabIndex = ref.watch(mainTabProvider);
+    final helpMode = ref.watch(helpModeProvider);
 
     // Benzi #4 — one-time "לאן לשלוח" popup on the FIRST product selection
     // (cart 0→1, not on load), never at checkout. Persisted flag stops repeats.
@@ -65,12 +68,15 @@ class HomeShell extends ConsumerWidget {
           IndexedStack(
             index: tabIndex,
             children: const [
-              CatalogScreen(), // 0 · בית — the "הכל" catalog window
+              CatalogScreen(), // 0 · בית — smart-home landing (#32) + catalog
               DepartmentsScreen(), // 1 · מחלקות
               UpdatesScreen(), // 2 · עדכונים — התראות + שיחות merged
               StoreScreen(), // 3 · חנות
             ],
           ),
+          // "מצב היכרות": freezes the content + a banner. Explainable elements
+          // (📷 in the app-bar, the cart FAB) sit above this and stay tappable.
+          if (helpMode) const Positioned.fill(child: _HelpModeOverlay()),
         ],
       ),
       bottomNavigationBar: _BottomNav(
@@ -78,11 +84,11 @@ class HomeShell extends ConsumerWidget {
         onTap: (i) {
           resetAllDials(ref);
           if (i == 0) {
-            // בית — the catalog's "הכל" window, unscoped (clear any department).
+            // בית — the smart-home landing, unscoped (clear any department).
             ref.read(homeDepartmentProvider.notifier).state = null;
             ref.read(catalogSystemFilterProvider.notifier).state = null;
             ref.read(catalogTreePathProvider.notifier).state = const [];
-            ref.read(catalogSectionProvider.notifier).state = 'הכל';
+            ref.read(catalogSectionProvider.notifier).state = 'בית';
           } else if (i == 1) {
             // מחלקות — back to the departments grid.
             ref.read(homeDepartmentProvider.notifier).state = null;
@@ -92,8 +98,87 @@ class HomeShell extends ConsumerWidget {
           ref.read(mainTabProvider.notifier).state = i;
         },
       ),
-      floatingActionButton: tabIndex != 3 ? const _CartFab() : null,
+      floatingActionButton: tabIndex != 3
+          ? (helpMode
+              ? const HelpTarget(
+                  title: 'סל הקנייה',
+                  body: 'הסל הצף מציג כמה פריטים נאספו. לחיצה עליו קופצת '
+                      'לחנות עם הסל המסונן — משם ממשיכים להזמנה.',
+                  child: _CartFab(),
+                )
+              : const _CartFab())
+          : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+}
+
+/// The "מצב היכרות" freeze layer: a top banner + a dim scrim over the frozen
+/// content. Explainable elements (the 📷 app-bar icon, the cart FAB) sit above
+/// this layer and stay tappable; tapping the dim area nudges the user toward
+/// them, and the ✕ (or the 💡 again) exits the mode.
+class _HelpModeOverlay extends ConsumerWidget {
+  const _HelpModeOverlay();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        Material(
+          color: BsTokens.brand,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: BsTokens.space4,
+              vertical: BsTokens.space3,
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.lightbulb, color: Colors.white, size: 20),
+                const SizedBox(width: BsTokens.space2),
+                const Expanded(
+                  child: Text(
+                    'מצב היכרות — לחצו על אלמנט מודגש כדי ללמוד מה הוא עושה',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () =>
+                      ref.read(helpModeProvider.notifier).state = false,
+                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.close, color: Colors.white, size: 20),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  const SnackBar(
+                    duration: Duration(seconds: 2),
+                    content: Text(
+                      'במצב היכרות — לחצו על כפתור מודגש (📷 או הסל). '
+                      '✕ או 💡 ליציאה.',
+                      textDirection: TextDirection.rtl,
+                    ),
+                  ),
+                );
+            },
+            child: const ColoredBox(color: Color(0x14000000)),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -472,10 +557,16 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
               ref.read(tabHeaderHiddenProvider.notifier).state = false;
             },
           ),
-        IconButton(
-          icon: const Icon(Icons.photo_camera_outlined, color: Colors.black54),
-          tooltip: 'מצלמה',
-          onPressed: () => openCameraSheet(context),
+        HelpTarget(
+          title: 'מצלמה / סורק',
+          body: 'פותח את הסורק: צילום ברקוד או מק"ט לזיהוי מוצר, '
+              'או סריקת תוכנית כדי להפיק ממנה רשימת מוצרים — בלי להקליד ידנית.',
+          child: IconButton(
+            icon:
+                const Icon(Icons.photo_camera_outlined, color: Colors.black54),
+            tooltip: 'מצלמה',
+            onPressed: () => openCameraSheet(context),
+          ),
         ),
         if (tabIndex == 0 || tabIndex == 1)
           const _CatalogMenuButton() // בית + מחלקות both drill into the catalog
@@ -486,11 +577,25 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
               : const _NotificationsMenuButton())
         else
           const _StoreMenuButton(),
-        // Intro tour — far-left (RTL end). Replays the first-run slides.
-        IconButton(
-          icon: const Icon(Icons.lightbulb_outline, color: BsTokens.brand),
-          tooltip: 'סיור היכרות',
-          onPressed: () => showIntroTour(context),
+        // 💡 — tap toggles "מצב היכרות" (interactive help mode); long-press
+        // still replays the first-run intro slides.
+        Builder(
+          builder: (context) {
+            final helpOn = ref.watch(helpModeProvider);
+            return GestureDetector(
+              onLongPress: () => showIntroTour(context),
+              child: IconButton(
+                icon: Icon(
+                  helpOn ? Icons.lightbulb : Icons.lightbulb_outline,
+                  color: helpOn ? BsTokens.brandDark : BsTokens.brand,
+                ),
+                tooltip: 'מצב היכרות (לחיצה ארוכה: סיור)',
+                onPressed: () => ref
+                    .read(helpModeProvider.notifier)
+                    .update((on) => !on),
+              ),
+            );
+          },
         ),
       ],
     );

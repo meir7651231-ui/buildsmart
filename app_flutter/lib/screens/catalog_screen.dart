@@ -20,6 +20,7 @@ import 'package:buildsmart/logic/install_engine.dart' show buildInstallation;
 import 'package:buildsmart/logic/pressure_drop.dart' show estimatePressureDrop;
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
+import 'package:buildsmart/screens/smart_home_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
 import 'package:buildsmart/screens/finder_screen.dart';
@@ -52,23 +53,14 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Opens the Install Studio as an immersive full-screen route (above the shell).
-void _openStudio(BuildContext context) {
-  Navigator.of(context, rootNavigator: true).push(
-    MaterialPageRoute(builder: (_) => const InstallStudioScreen()),
-  );
-}
+/// Active section label — 'בית' is always first and fixed (the smart home).
+/// Default landing is 'בית' — the new smart-home tiles (#32). The legacy 'הכל'
+/// overview was deleted; the finder is reachable via the 'מאתר' chip.
+final catalogSectionProvider = StateProvider<String>((_) => 'בית');
 
-/// Active section label — 'הכל' is always first and fixed.
-/// Default landing is the בית (finder home) — the least-technical path to a
-/// product (group → sub → add, 2–3 taps), so the app opens straight on it.
-// Default 'הכל' — the בית tab lands on the "הכל" window (Benzi #3). Department
-// drill-in sets 'בית' (finder) explicitly.
-final catalogSectionProvider = StateProvider<String>((_) => 'הכל');
-
-/// Ordered list of user section labels (הכל is NOT stored here).
+/// Ordered list of user section labels ('בית' is the fixed first pill, NOT here).
 final catalogSectionsListProvider = StateProvider<List<String>>(
-  (_) => ['בית', 'תכנון חיבור', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
+  (_) => ['מאתר', 'תכנון חיבור', 'חיפושים אחרונים', 'מועדפים', 'קטגוריות', 'עץ חכם', 'וריאנטים'],
 );
 
 /// Per-list catalog items: map of section-label → set of catalog category
@@ -638,12 +630,12 @@ class _SectionChipsRow extends ConsumerWidget {
       final list = List<String>.from(ref.read(catalogSectionsListProvider))
         ..remove(label);
       ref.read(catalogSectionsListProvider.notifier).state = list;
-      if (active == label) activate('הכל');
+      if (active == label) activate('בית');
     }
 
     void hideSection(String label) {
       ref.read(hiddenCatalogSectionsProvider.notifier).hide(label);
-      if (active == label) activate('הכל');
+      if (active == label) activate('בית');
     }
 
     Future<void> showLongPressMenu(BuildContext ctx, String label) async {
@@ -733,11 +725,11 @@ class _SectionChipsRow extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            // הכל — fixed, no long-press menu
+            // בית — fixed home (smart-home tiles), no long-press menu
             _SectionPill(
-              label: 'הכל',
-              active: active == 'הכל',
-              onTap: () => activate('הכל'),
+              label: 'בית',
+              active: active == 'בית',
+              onTap: () => activate('בית'),
             ),
             for (final s in sections.where((s) => !hidden.contains(s))) ...[
               const SizedBox(width: 8),
@@ -785,7 +777,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
     ref.read(hiddenCatalogSectionsProvider.notifier).toggle(s);
     if (ref.read(hiddenCatalogSectionsProvider).contains(s) &&
         ref.read(catalogSectionProvider) == s) {
-      ref.read(catalogSectionProvider.notifier).state = 'הכל';
+      ref.read(catalogSectionProvider.notifier).state = 'בית';
     }
   }
 
@@ -921,7 +913,7 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                               list;
                           if (ref.read(catalogSectionProvider) == s) {
                             ref.read(catalogSectionProvider.notifier).state =
-                                'הכל';
+                                'בית';
                           }
                         },
                       ),
@@ -2183,8 +2175,8 @@ class _CatalogBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final active = ref.watch(catalogSectionProvider);
-    if (active == 'הכל') return _AllOverview(scrollCtrl: scrollCtrl);
-    if (active == 'בית') return const FinderScreen();
+    if (active == 'בית') return SmartHomeBody(scrollCtrl: scrollCtrl);
+    if (active == 'מאתר') return const FinderScreen();
     if (active == 'עץ חכם') return const _SmartTreeSection();
     if (active == 'קטגוריות') return const _CatalogList();
     if (active == 'מועדפים') return const _FavoritesSection();
@@ -2385,262 +2377,6 @@ class _CatalogList extends ConsumerWidget {
       itemBuilder: (context, i) => _CatalogRow(cat: cats[i]),
     );
   }
-}
-
-// ── "הכל" overview — a preview block per section ─────────────────────────────
-class _AllOverview extends ConsumerWidget {
-  const _AllOverview({this.scrollCtrl});
-  final ScrollController? scrollCtrl;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    void go(String s) =>
-        ref.read(catalogSectionProvider.notifier).state = s;
-
-    final recents = ref.watch(recentSearchesProvider);
-    final favSkus = ref.watch(productFavoritesProvider);
-    final systemFilter = ref.watch(catalogSystemFilterProvider);
-    // T6.3: catalog reads via the repository (same const data).
-    final repo = ref.watch(catalogRepositoryProvider);
-    final catList = _catsForSystem(systemFilter);
-    final smartCats = systemFilter == null
-        ? repo.smartTreeCats()
-        : repo
-            .smartTreeCats()
-            .where((c) =>
-                filterSmartBySystem(repo.smartProductsForCat(c), systemFilter)
-                    .isNotEmpty)
-            .toList();
-    final favProducts = filterBySystem(
-            repo.allProducts().where((p) => favSkus.contains(p.sku)).toList(),
-            systemFilter)
-        .take(3)
-        .toList();
-
-    return ListView(
-      controller: scrollCtrl,
-      key: const Key('catalog-list'),
-      padding: const EdgeInsets.only(bottom: 24),
-      children: [
-        // קטגוריות — full list inline, scoped to the active water system.
-        _OverviewBlock(
-          title: 'קטגוריות',
-          count: catList.length,
-          children: [
-            for (final c in catList) _CatalogRow(cat: c),
-          ],
-        ),
-        // חיפושים אחרונים
-        _OverviewBlock(
-          title: 'חיפושים אחרונים',
-          count: recents.length,
-          onShowAll: () => go('חיפושים אחרונים'),
-          children: recents.isEmpty
-              ? const [_OverviewEmpty('אין חיפושים אחרונים')]
-              : [
-                  for (final q in recents.take(3))
-                    _OverviewRow(
-                      icon: Icons.history,
-                      label: q,
-                      onTap: () {
-                        ref.read(searchQueryProvider.notifier).state = q;
-                        ref.read(searchPanelOpenProvider.notifier).state = true;
-                      },
-                    ),
-                ],
-        ),
-        // תאימות
-        _OverviewBlock(
-          title: 'תכנון חיבור',
-          count: kLipskeyCatalog.length,
-          onShowAll: () => _openStudio(context),
-          children: [
-            _OverviewRow(
-              icon: Icons.handyman,
-              label: 'תכנון חיבור — בחר מה לחבר ונכין רשימת קנייה',
-              onTap: () => _openStudio(context),
-            ),
-          ],
-        ),
-        // מועדפים
-        _OverviewBlock(
-          title: 'מועדפים',
-          count: favSkus.length,
-          onShowAll: () => go('מועדפים'),
-          children: favProducts.isEmpty
-              ? const [_OverviewEmpty('אין מועדפים עדיין')]
-              : [
-                  for (final p in favProducts)
-                    _OverviewRow(
-                      icon: Icons.favorite,
-                      label: p.nameHe,
-                      onTap: () => go('מועדפים'),
-                    ),
-                ],
-        ),
-        // עץ חכם — scoped to the active water system (Phase 2b).
-        _OverviewBlock(
-          title: 'עץ חכם',
-          count: smartCats.length,
-          onShowAll: () => go('עץ חכם'),
-          isLast: true,
-          children: [
-            for (var i = 0; i < smartCats.length && i < 3; i++)
-              _OverviewRow(
-                icon: Icons.account_tree_outlined,
-                label:
-                    '${smartCats[i]} · ${filterSmartBySystem(repo.smartProductsForCat(smartCats[i]), systemFilter).length} מוצרים',
-                onTap: () {
-                  ref.read(smartTreeCatProvider.notifier).state = smartCats[i];
-                  go('עץ חכם');
-                },
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _OverviewBlock extends StatelessWidget {
-  const _OverviewBlock({
-    required this.title,
-    required this.children,
-    this.onShowAll,
-    this.count = 0,
-    this.isLast = false,
-  });
-  final String title;
-  final int count;
-  final VoidCallback? onShowAll;
-  final List<Widget> children;
-  final bool isLast;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 14, 16, 4),
-          child: Row(
-            children: [
-              const SizedBox(width: 16),
-              // Title + count badge fill the space (so the title can ellipsize
-              // without stealing room from / mis-centering the "הצג הכל" link).
-              Expanded(
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: BsTokens.inkLight,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    if (count > 0) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: BsTokens.brand,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '$count',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              if (onShowAll != null)
-                TextButton(
-                  onPressed: onShowAll,
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('הצג הכל',
-                          style: TextStyle(
-                              color: BsTokens.brand,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600)),
-                      Icon(Icons.chevron_left, color: BsTokens.brand, size: 18),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-        ...children,
-        if (!isLast)
-          const Divider(height: 1, thickness: 1, color: BsTokens.brand),
-      ],
-    );
-  }
-}
-
-class _OverviewRow extends StatelessWidget {
-  const _OverviewRow({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-        child: Row(
-          children: [
-            Icon(icon, color: BsTokens.brand, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: BsTokens.inkLight, fontSize: 14),
-              ),
-            ),
-            const Icon(Icons.chevron_left, color: Color(0xFFB0B0B8), size: 18),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _OverviewEmpty extends StatelessWidget {
-  const _OverviewEmpty(this.text);
-  final String text;
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
-        child: Text(text,
-            style: const TextStyle(color: Color(0xFF888888), fontSize: 13)),
-      );
 }
 
 // ── Lipskey supplier card — pinned at top of catalog list ────────────────────

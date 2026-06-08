@@ -1,3 +1,4 @@
+import 'package:buildsmart/screens/home_content_reorder.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -155,6 +156,15 @@ class _ThemeSection extends ConsumerWidget {
               (v) => ref
                   .read(appSettingsProvider.notifier)
                   .update((s) => s.copyWith(theme: v)),
+        ),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.swap_vert, color: BsTokens.brandDark),
+          title: const Text('סידור מסך הבית'),
+          subtitle: const Text('גרור לשנות את סדר המקטעים בבית'),
+          trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+          onTap: () =>
+              Navigator.of(context).push(HomeContentReorder.route()),
         ),
       ],
     );
