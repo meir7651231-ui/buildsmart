@@ -614,3 +614,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **before:** `מנהל מערכת` (חסר ה׳) ב-RBAC/דשבורד-התראות · `AI`/`מבוססות AI` בהגדרות-קטלוג.
 - **after:** `מנהל המערכת` (כמו persona canonical) · `בינה מלאכותית`/`מבוססות בינה מלאכותית`.
 - guard: analyze/test/build · systemic string-consistency (§3.5).
+
+## #+-עגלה כפול (before→after · W1) — 2026-06-08
+- **before:** ב-list-card, `+` קרא `_addToCart`→`smartCart.add()`; אחרי גלילה (recycle) ה-row חוזר ל-`_open=false` בעוד המוצר בעגלה → tap נוסף = **שורה שנייה** לאותו מוצר.
+- **after:** `_addToCart`→`setQtyForKey` (אידמפוטנטי) → tap-חוזר מעדכן את השורה, לא מכפיל.
+- guard: `lipskey_plus_no_dup_test` (idempotency של setQtyForKey, 2).

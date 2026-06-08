@@ -107,3 +107,8 @@
 ### #microcopy — מנהל המערכת + בינה מלאכותית (W0) — ✅ — 2026-06-08
 - `מנהל מערכת`→`מנהל המערכת` (search_index ×2 · notif_settings_screen:587) · `AI`→`בינה מלאכותית` (catalog_settings_screen ×2). `mm`→`מ"מ` נדחה (מפוזר/קוסמטי).
 - **gate:** analyze 0 · full test · build · WIRING+visual_log.
+
+### #+-cart — שורת-עגלה כפולה ב-lipskey list-card (W1) — ✅ — 2026-06-08
+- **before:** `_addToCart` → `.add()` → recycle + re-tap = שורה כפולה.
+- **after:** → `setQtyForKey` (אידמפוטנטי, כמו grid-card). guard: `lipskey_plus_no_dup_test` (2).
+- **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `lipskey_products_screen.dart` `_addToCart`.

@@ -1294,3 +1294,5 @@ Gate: central-verify green — analyze 0 · tests green · build · conformance 
 - 3 consts מקומיים שהחזיקו teal **בטעות** (`_kBrand`/`_kBrandDark` ב-site · `_kBrandTeal` ב-finance — ההערה ב-site אף אמרה "orange brand") → `BsTokens.brand`/`brandDark`. ~12 שימושים flipped לכתום. status-teals אחרים (manager 'new' · lipskey accents) מחוץ-לסקופ.
 ### microcopy (W0) — `search_index` · `notif_settings_screen` · `catalog_settings_screen` — 2026-06-08
 - `מנהל מערכת`→`מנהל המערכת` (search_index ×2 · notif_settings — האחדה ל-canonical `personas.dart`) · `AI`→`בינה מלאכותית` (catalog_settings ×2). אפס שינוי-לוגיקה. tests של 'מנהל המערכת' (manager_dashboard/widget) כבר על ה-canonical — לא נשברו. `mm`→`מ"מ` נדחה לפס נפרד.
+### #+-עגלה — `lipskey_products_screen` — 2026-06-08
+- `_ProductRow._addToCart` השתמש ב-`.add()` (append) → על ListView-recycle (כש-`_open` טרי אך המוצר כבר בעגלה) tap על `+` יצר **שורה כפולה**. → `setQtyForKey` (אידמפוטנטי לפי productKey), כמו add-path של grid-card (507) ו-`_setQty`. guard: `lipskey_plus_no_dup_test` (2). אין שינוי-API.

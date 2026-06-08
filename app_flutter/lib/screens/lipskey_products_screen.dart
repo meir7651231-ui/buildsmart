@@ -829,7 +829,13 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       );
 
   void _addToCart() {
-    ref.read(smartCartProvider.notifier).add(_cartLine(_qty * _unitMult));
+    // setQtyForKey (not add): idempotent on the product key, so re-tapping + after
+    // a ListView recycle — when this row's _open is fresh but the product is
+    // already in the cart — sets the line instead of appending a duplicate.
+    // Matches the grid card's add path (setQtyForKey) and _setQty.
+    ref
+        .read(smartCartProvider.notifier)
+        .setQtyForKey(_cartLine(_qty * _unitMult));
   }
 
   /// Stepper change while the card is open (the product is already in the cart):
