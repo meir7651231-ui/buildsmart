@@ -19,9 +19,15 @@
 //   • openFinanceHub(context)            — the 10-tile grid (parent `fin-hub`).
 //   • openFinanceLeaf(context, id)       — dispatch a single `fin-*` leaf.
 
-import 'package:buildsmart/data/contractor_seeds.dart'
-    show caToday, fMoney, kBudgetCategories, kBudgetSpent, kBudgetTotal;
+import 'package:buildsmart/data/contractor_seeds.dart' show caToday, fMoney;
+// Const budget data (total/spent/categories/pct) is read THROUGH the finance
+// repository's GLOBAL, Ref-free accessor `financeRepo()` (the server-ready seam,
+// T6.3) instead of the raw consts — these top-level `_open*` functions have no
+// [WidgetRef], and the accessor returns the SAME consts, so every displayed
+// value stays byte-identical. The phaseb_seeds math helpers (linkedBudget,
+// projectRoi, invoiceSplit, buildIndexDeltaPct, kFxRates …) are unchanged.
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/data/repositories/finance_local.dart' show financeRepo;
 import 'package:buildsmart/state/finance_hub_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -435,7 +441,7 @@ class _FinTileButton extends StatelessWidget {
 // ═════════════════════════════════════════════════════════════════════════════
 void _openIndex(BuildContext context) {
   final pct = buildIndexDeltaPct(); // +6.0997…
-  const budget = kBudgetTotal;
+  final budget = financeRepo().budgetTotal(); // == kBudgetTotal (15000)
   final linked = linkedBudget(budget);
   final up = pct >= 0;
   _showFinSheet(
@@ -876,7 +882,7 @@ class _CaEmpty extends StatelessWidget {
 //   gauge pct = round(spent/total*100) · level ok/h(80)/x(90) · 80/90/100 list.
 // ═════════════════════════════════════════════════════════════════════════════
 void _openThresholds(BuildContext context) {
-  final pct = budgetPct(); // round(9840/15000*100) = 66
+  final pct = financeRepo().budgetPct(); // == budgetPct() · round(9840/15000*100) = 66
   // proto: >=90 → 'חריגה קריטית' (x); >=80 → 'התראת חריגה' (h); else 'תקין' (ok)
   var level = 'תקין';
   var col = _kUp;
@@ -991,7 +997,7 @@ class _ThrRow extends StatelessWidget {
 // ═════════════════════════════════════════════════════════════════════════════
 void _openRoi(BuildContext context) {
   final r = projectRoi(); // contractValue / profit / roiPct
-  const invested = kBudgetSpent;
+  final invested = financeRepo().budgetSpent(); // == kBudgetSpent (9840)
   _showFinSheet(
     context,
     child: SingleChildScrollView(
@@ -1005,7 +1011,7 @@ void _openRoi(BuildContext context) {
             sub: 'תשואה צפויה על ההשקעה בפרויקט.',
           ),
           _FinRows([
-            _FinRow('תקציב הפרויקט', fMoney(kBudgetTotal)),
+            _FinRow('תקציב הפרויקט', fMoney(financeRepo().budgetTotal())),
             _FinRow('הושקע עד כה', fMoney(invested)),
             _FinRow('שווי חוזה צפוי', fMoney(r.contractValue)),
             _FinRow('רווח גולמי צפוי', fMoney(r.profit), valueColor: _kUp),
@@ -1029,6 +1035,7 @@ void _openRoi(BuildContext context) {
 // ═════════════════════════════════════════════════════════════════════════════
 void _openInvoiceSplit(BuildContext context) {
   final split = invoiceSplit(); // name → ₪ share
+  final cats = financeRepo().budgetCategories(); // == kBudgetCategories
   _showFinSheet(
     context,
     child: SingleChildScrollView(
@@ -1042,13 +1049,13 @@ void _openInvoiceSplit(BuildContext context) {
             sub: 'פיצול חשבונית בסך ${fMoney(kInvoiceTotal)} לסעיפי התקציב.',
           ),
           _FinRows([
-            for (final c in kBudgetCategories)
+            for (final c in cats)
               _FinRow('${c.icon} ${c.name}', fMoney(split[c.name] ?? 0)),
           ]),
           _FinCallout(
             label: 'סך החשבונית',
             value: fMoney(kInvoiceTotal),
-            note: 'פוצלה ל-${kBudgetCategories.length} סעיפי תקציב לפי משקל',
+            note: 'פוצלה ל-${cats.length} סעיפי תקציב לפי משקל',
           ),
         ],
       ),
@@ -1243,7 +1250,8 @@ class _PenaltyCard extends StatelessWidget {
 //   NOT a toast — the print-to-PDF surface from the prototype).
 // ═════════════════════════════════════════════════════════════════════════════
 void _openReports(BuildContext context) {
-  const left = kBudgetTotal - kBudgetSpent;
+  final repo = financeRepo();
+  final left = repo.budgetTotal() - repo.budgetSpent(); // == kBudgetTotal - kBudgetSpent
   _showFinSheet(
     context,
     child: SingleChildScrollView(
@@ -1257,8 +1265,8 @@ void _openReports(BuildContext context) {
             sub: 'הפקת דוח פיננסי רשמי של הפרויקט להורדה והדפסה.',
           ),
           _FinRows([
-            _FinRow('תקציב הפרויקט', fMoney(kBudgetTotal)),
-            _FinRow('הוצאות בפועל', fMoney(kBudgetSpent)),
+            _FinRow('תקציב הפרויקט', fMoney(repo.budgetTotal())),
+            _FinRow('הוצאות בפועל', fMoney(repo.budgetSpent())),
             _FinRow('יתרה', fMoney(left)),
           ]),
           const SizedBox(height: BsTokens.space4),
@@ -1284,8 +1292,9 @@ class _FinReportView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pct = budgetPct(); // round(spent/total*100)
-    const left = kBudgetTotal - kBudgetSpent;
+    final repo = financeRepo();
+    final pct = repo.budgetPct(); // == budgetPct() · round(spent/total*100)
+    final left = repo.budgetTotal() - repo.budgetSpent(); // == kBudgetTotal - kBudgetSpent
     final today = caToday();
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -1354,10 +1363,10 @@ class _FinReportView extends StatelessWidget {
                     const _ReportH2('תמצית תקציב'),
                     _ReportTable(
                       rows: [
-                        ('תקציב כולל', fMoney(kBudgetTotal), true),
+                        ('תקציב כולל', fMoney(repo.budgetTotal()), true),
                         (
                           'הוצאות בפועל',
-                          '${fMoney(kBudgetSpent)} ($pct%)',
+                          '${fMoney(repo.budgetSpent())} ($pct%)',
                           false,
                         ),
                         ('יתרה', fMoney(left), false),
@@ -1367,7 +1376,7 @@ class _FinReportView extends StatelessWidget {
                     const _ReportH2('פירוט לפי סעיפים'),
                     _ReportTable(
                       rows: [
-                        for (final c in kBudgetCategories)
+                        for (final c in repo.budgetCategories())
                           ('${c.icon} ${c.name}', fMoney(c.amount), false),
                       ],
                     ),

@@ -1,5 +1,5 @@
 import 'package:buildsmart/data/catalog_tree.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart';
 
 /// Benzi #1 (reframed) — "fixtures vs pipes" department layout.
 ///
@@ -99,7 +99,7 @@ CatalogNode? resolveCatTitle(String title) {
   }
   if (hit != null) return hit;
   // Bare categoryHe with no node of its own → synthetic leaf.
-  if (kCatalogProducts.any((p) => p.categoryHe == title)) {
+  if (catalogRepo().allProducts().any((p) => p.categoryHe == title)) {
     return CatalogNode(
         id: 'catdept.$title', title: title, emoji: '📦', lipskeyCategory: title);
   }
@@ -121,5 +121,5 @@ int catNodeProductCount(CatalogNode node) {
   }
 
   collect(node);
-  return kCatalogProducts.where((p) => cats.contains(p.categoryHe)).length;
+  return catalogRepo().allProducts().where((p) => cats.contains(p.categoryHe)).length;
 }

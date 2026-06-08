@@ -5,7 +5,7 @@
 // the shared LipskeyProductsList so cards behave like the rest of the catalog.
 import 'package:buildsmart/data/huliot_smartlock_catalog.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/_size_norm.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
@@ -248,12 +248,17 @@ const Map<String, List<FinderSub>> kFinderSubs = {
 final Set<String> _claimedCats = {for (final g in kFinderGroups) ...g.cats};
 
 List<LipskeyCatalogProduct> _productsForGroup(FinderGroup g) {
+  // T6.3: route through the catalog repository (same const `kCatalogProducts`).
   if (g.cats.isEmpty) {
-    return kCatalogProducts
+    return catalogRepo()
+        .allProducts()
         .where((p) => !_claimedCats.contains(p.categoryHe))
         .toList();
   }
-  return kCatalogProducts.where((p) => g.cats.contains(p.categoryHe)).toList();
+  return catalogRepo()
+      .allProducts()
+      .where((p) => g.cats.contains(p.categoryHe))
+      .toList();
 }
 
 /// Readable size tokens found in product names (1/2" · 3/4" · DN40 · 16×20 ·

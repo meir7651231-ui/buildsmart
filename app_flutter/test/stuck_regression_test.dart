@@ -1452,7 +1452,7 @@ void main() {
         reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
     });
 
-    test("antipattern #71 לא קיים", () {
+    test("antipattern #72 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
       final re = RegExp('שינוי lib data או lib state בלי הרצת mutation verify ועדכון mutation log באותו commit');

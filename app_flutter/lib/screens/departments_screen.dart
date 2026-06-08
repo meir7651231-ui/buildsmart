@@ -1,7 +1,7 @@
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart';
 import 'package:buildsmart/logic/category_division.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
@@ -44,8 +44,10 @@ final deptFlatProductsProvider = StateProvider<bool>((_) => false);
 /// heading categories; a water department = its in-system products.
 List<LipskeyCatalogProduct> departmentProducts(
     {String? name, WaterSystem? system, List<String>? toolCats}) {
+  // T6.3: route through the catalog repository (same const `kCatalogProducts`).
   if (toolCats != null) {
-    return kCatalogProducts
+    return catalogRepo()
+        .allProducts()
         .where((p) => toolCats.contains(p.categoryHe))
         .toList();
   }
@@ -68,9 +70,12 @@ List<LipskeyCatalogProduct> departmentProducts(
         if (node != null) collect(node);
       }
     }
-    return kCatalogProducts.where((p) => cats.contains(p.categoryHe)).toList();
+    return catalogRepo()
+        .allProducts()
+        .where((p) => cats.contains(p.categoryHe))
+        .toList();
   }
-  if (system != null) return filterBySystem(kCatalogProducts, system);
+  if (system != null) return filterBySystem(catalogRepo().allProducts(), system);
   return const [];
 }
 

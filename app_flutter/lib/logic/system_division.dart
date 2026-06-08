@@ -1,7 +1,7 @@
 import 'package:buildsmart/data/catalog_tree.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -49,7 +49,7 @@ bool nodeHasSystem(CatalogNode node, WaterSystem system) {
     if (n.isLeaf) {
       final c = n.lipskeyCategory;
       if (c == null) return;
-      for (final p in kCatalogProducts) {
+      for (final p in catalogRepo().allProducts()) {
         if (p.categoryHe != c) continue;
         final s = productDivisionSystems(p);
         if (s.contains(WaterSystem.supply)) sup++;
@@ -76,7 +76,7 @@ Set<WaterSystem> smartProductSystems(SmartProduct sp) {
   for (final b in sp.brands) {
     final sku = b.sku;
     if (sku == null) continue;
-    for (final p in kCatalogProducts) {
+    for (final p in catalogRepo().allProducts()) {
       if (p.sku == sku) {
         out.addAll(productDivisionSystems(p));
         break;

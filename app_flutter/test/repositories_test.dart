@@ -4,6 +4,7 @@
 // value change) so the swap-to-backend is drop-in.
 import 'package:buildsmart/data/repositories/catalog_local.dart';
 import 'package:buildsmart/data/repositories/customers_local.dart';
+import 'package:buildsmart/data/repositories/finance_local.dart';
 import 'package:buildsmart/data/repositories/orders_local.dart';
 import 'package:buildsmart/data/repositories/site_local.dart';
 import 'package:buildsmart/data/repositories/stock_local.dart';
@@ -58,6 +59,16 @@ void main() {
     final repo = c.read(catalogRepositoryProvider);
     expect(repo.allProducts(), isNotEmpty);
     expect(repo.catalogCategories(), isNotEmpty);
+  });
+
+  test('finance repo: budgetCategories() non-empty; budgetTotal() == 15000', () {
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    final repo = c.read(financeRepositoryProvider);
+    // Const budget seam stays byte-identical to the seeds (the finance hub
+    // depends on the exact total: ₪15,000 → index/ROI/report all derive from it).
+    expect(repo.budgetCategories(), isNotEmpty);
+    expect(repo.budgetTotal(), 15000);
   });
 
   test('site repo: projects()/safetyTips() return the seed lists', () {

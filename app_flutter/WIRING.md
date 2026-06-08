@@ -1275,3 +1275,13 @@ Extends the server-ready seam to the cleanest of the remaining domains (Wave 9 d
 - Guard: mutation-verified; gate green.
 
 Gate: central-verify green — analyze 0 · tests green · build · conformance · required-tests.
+
+## Wave 11 — server-ready 6/6: close finance + catalog pure-logic via a global repo accessor (T6.3 · 9×9 fleet)
+Closes the architectural ceiling Wave 10 flagged. The remaining const reads sat in non-Consumer contexts (top-level functions / StatelessWidgets, no `ref`), so a Ref-free **global repo accessor** routes them — no signature changes, no verified hub restructured.
+- `finance_local.dart`: added a const `LocalFinanceRepository.constData()` + global `financeRepo()` (Ref-free) for the budget consts; `activeRevenue()` stays Ref-based via the provider. `finance_hub_sheets.dart`'s `_open*` functions + `_FinReportView` now read budget data via `financeRepo()` — the 10 verified finance values byte-identical (15000/9840/66 · ₪12,800 · ×1.42 · 80/90/100 · …).
+- `catalog_local.dart`: const `_kCatalogRepo` + global `catalogRepo()`; the provider returns the same instance. The pure-logic readers — `category_division` · `system_division` · `pressure_drop` (colleague's file — only the catalog read touched, their flow logic intact) · `finder_screen` · `departments_screen` · `card_projects` — now read via `catalogRepo().allProducts()`/`allSmartProducts()` (byte-identical; dead `polyroll_catalog` imports dropped).
+- **R8 exception (honest):** `pressure_drop.dart`'s `kLipskeyCatalog` read (a Lipskey-only const, not the unified catalog — no matching interface method) left as-is.
+- **Net server-ready now 6/6:** orders · customers · catalog · site · stock · finance all route through their repositories. A backend swap is a drop-in repo replacement.
+- Guard: mutation-verified; gate green.
+
+Gate: central-verify green — analyze 0 · tests green · build · conformance · required-tests.

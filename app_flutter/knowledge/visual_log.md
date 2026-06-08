@@ -4,6 +4,17 @@
 
 ---
 
+## v6.16 — fix-fleet · גל 11 (server-ready 6/6 — סגירת finance + catalog pure-logic)
+
+**שינוי (לא-ויזואלי — refactor, byte-identical):** סגירת התקרה-הארכיטקטונית מגל 10. הקריאות שנותרו ישבו בהקשרים ללא-`ref` (top-level functions / StatelessWidget), אז **accessor גלובלי Ref-free** מנתב אותן — בלי שינוי-חתימות, בלי להמיר מסך-מאומת ל-Consumer.
+- **finance:** `financeRepo()` גלובלי (const) לנתוני-התקציב; `finance_hub_sheets` קורא דרכו (10 ערכים byte-identical). `activeRevenue` נשאר Ref-based.
+- **catalog:** `catalogRepo()` גלובלי; הלוגיקה-הטהורה (category_division · system_division · pressure_drop · finder · departments · card_projects) קוראת דרכו. (חריג R8 כן: `kLipskeyCatalog` ב-pressure_drop — const נפרד.)
+- **server-ready עכשיו 6/6:** orders · customers · catalog · site · stock · finance — כולם דרך repositories. swap-לשרת = החלפת-impl בלבד.
+
+**אימות (refactor, אין שינוי ויזואלי):** mutation-verified · `central-verify` gate ירוק. ערכים זהים byte-for-byte.
+
+---
+
 ## v6.16 — fix-fleet · גל 10 (server-ready: catalog/site/stock דרך repositories)
 
 **שינוי (לא-ויזואלי — refactor פנימי, byte-identical):** הרחבת ה-server-ready seam ל-domains הנקיים שנותרו (גל 9 = orders/customers). 29/29 ה-hubs קוראים את אותם consts — עכשיו דרך ה-repos.

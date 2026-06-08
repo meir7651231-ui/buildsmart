@@ -84,8 +84,21 @@ class LocalCatalogRepository implements CatalogRepository {
   List<Section> catalogCategories() => kCatalogCats;
 }
 
+/// The single shared [LocalCatalogRepository] instance. Both the global
+/// accessor [catalogRepo] and the [catalogRepositoryProvider] hand this exact
+/// instance out, so the catalog has ONE source whether it's reached from a
+/// Consumer (via the provider) or from top-level pure code / a StatelessWidget
+/// (via the global). Pure + `const`, so sharing one instance costs nothing.
+const _kCatalogRepo = LocalCatalogRepository();
+
+/// Global const accessor to the catalog repository — for top-level functions
+/// and StatelessWidgets that have no [Ref] to read the provider. Returns the
+/// SAME instance the provider yields, so a future remote impl that swaps the
+/// provider must swap this too (one source). Pure reads only (no live state).
+CatalogRepository catalogRepo() => _kCatalogRepo;
+
 /// The catalog repository provider — the server-ready seam the catalog screens
 /// read through (T6.3) and a future remote product/price API swaps in behind.
-/// Pure (no [Ref]); constructing it is free, so the provider is `const`.
+/// Pure (no [Ref]); hands out the SAME [_kCatalogRepo] as the global accessor.
 final catalogRepositoryProvider =
-    Provider<CatalogRepository>((ref) => const LocalCatalogRepository());
+    Provider<CatalogRepository>((ref) => _kCatalogRepo);

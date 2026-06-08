@@ -683,3 +683,9 @@
 - תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/repositories_test.dart)
 - שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
 - מסקנה: הבדיקה חזקה — תפסה את המוטציה.
+
+### lib/data/repositories/finance_local.dart — 2026-06-08T00:53:36+00:00 (mutation_verify.sh)
+- תקלה שהוזרקה: `s/int budgetTotal() => kBudgetTotal;/int budgetTotal() => 0;/`
+- תוצאה: הבדיקה הייתה אדומה ✅ (נתפסה ע"י test/repositories_test.dart)
+- שחזור: byte-exact מ-backup; הרצה חוזרת ירוקה ✅
+- מסקנה: הבדיקה חזקה — תפסה את המוטציה.

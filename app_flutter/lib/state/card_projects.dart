@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart';
 import 'package:buildsmart/data/smart_tree.dart';
 
 /// A product assigned to a project location from the SmartProduct card.
@@ -120,7 +121,8 @@ List<({String name, List<SmartProduct> products})> projectTemplates() {
     final products = <SmartProduct>[];
     final seen = <String>{};
     for (final kw in t.keywords) {
-      for (final sp in kSmartProducts) {
+      // T6.3: route through the catalog repository (same const `kSmartProducts`).
+      for (final sp in catalogRepo().allSmartProducts()) {
         if (sp.name.contains(kw) && seen.add(sp.key)) {
           products.add(sp);
           break;

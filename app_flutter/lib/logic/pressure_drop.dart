@@ -21,7 +21,7 @@
 
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
+import 'package:buildsmart/data/repositories/catalog_local.dart';
 
 /// Loss coefficient K for a single fitting, by Hebrew product type.
 /// Returns 0 when the part contributes no measurable loss (gaskets, caps).
@@ -281,7 +281,8 @@ LipskeyCatalogProduct? widerSiblingOf(LipskeyCatalogProduct p) {
   // Unified catalog (Lipskey + Polyroll) so PPR products can also surface
   // a wider-bore upgrade. The brand/category filters below ensure we only
   // suggest same-vendor same-family upgrades — no cross-vendor noise.
-  for (final q in kCatalogProducts) {
+  // T6.3: routed through the catalog repository (same const `kCatalogProducts`).
+  for (final q in catalogRepo().allProducts()) {
     if (q.sku == p.sku) continue;
     if (q.productType != p.productType) continue;
     if (q.brand != p.brand) continue;
