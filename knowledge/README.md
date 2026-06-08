@@ -129,7 +129,7 @@
 | state | **50 providers ב-41 קבצי `state/`** (114 repo-wide כולל UI-local; הנמשכים `bs.*.v1` ב-shared_preferences) |
 | מסחר | `smart_cart` (persisted) · checkout VAT 18% (mock) · **chats(6)/notifications(smart-collapse)/store** אמיתיים + **4 מסכי-הגדרות** (~40 כל אחד) |
 | עיצוב | מותג **כתום `#FF7A18`** (ה-KB מסמן כפער מ-teal המתוכנן) · Heebo · light/dark + RTL |
-| QA/launch | **155 קבצי-טסט · 1,023 בדיקות** (953 test+70 widget · 16,441ש׳, אומת) **· 47-helper-gate · 116 שערים** · LAUNCH_PACKAGE מוכן (aab חתום 68MB) · חוסמים = קונפיג-חנות (iOS-perms · keystore · Huliot-R2-crops) |
+| QA/launch | **1,539+ בדיקות** (אומת `b4e2198`; גדל מאז) **· 47-helper-gate · 116 שערים** · LAUNCH_PACKAGE מוכן (aab חתום 68MB) · חוסמים = קונפיג-חנות (iOS-perms · keystore · Huliot-R2-crops) |
 | מאגר-קיים | `app_flutter/knowledge/`: `port/proto`(פרוטוטייפ 100%) + `port/preact` + `spec/` + architecture/status/parity/roadmap — **נלכד כמקור** |
 
 ⚠️ **doc-vs-code drift שנתפס (הקוד קובע):** ה-KB אומר **tab0=קטלוג / מותג-teal** — הקוד אומר **tab0=מחלקות / כתום `#FF7A18`**. ✅ **ספירת-מוצרים: הקוד = 1,877 ≈ "~1,879" של ה-KB → תואם.** (ה-"1,337/Lipskey-255" שנכתב בסשן קודם היה **טעות**, תוקן שורה-שורה — ר' דוח 03.)

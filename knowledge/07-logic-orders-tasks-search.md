@@ -54,6 +54,6 @@ schema-מלא (לפי הדשבורד): `{id, worker(idx ל-WORKERS), title, desc
 ---
 
 ## 📱 Flutter — דלתא (חיפוש + device-APIs אמיתיים) ⭐
-- `search_dial_widget.dart` (`SearchDialWidget`+`_ToolsRoot`) + `data/search_index.dart` (325 ש׳) — search-dial עם **4 כלים** (🎤 קולי · 📷 ברקוד · ⚙️ פילטרים · ↕️ מיון). ⚠️ **אין 'קטלוג'** (מול 5 הכלים של Preact) — ב-Flutter הקטלוג הוא **טאב-ראשי** (`CatalogScreen`), לא כלי-חיפוש. (אומת מהמקור.)
+- ⚠️ ~~`search_dial_widget.dart`~~ **הוסר 07-06** (ה-FAB dial האחרון); `data/search_index.dart` (325ש') נשאר — **החיפוש נייטיב** (🎤 קולי/📷 ברקוד חוברו). [היסטורי: search-dial היה 4 כלים — קולי/ברקוד/פילטרים/מיון; אין 'קטלוג' כי הקטלוג = טאב-ראשי `CatalogScreen`.]
 - ⭐ **device-APIs אמיתיים:** **barcode** → `barcode_scanner.dart`+`camera_sheet.dart` (`mobile_scanner` native); **voice** → `services/voice.dart` (`speech_to_text` native). מול **הסימולציה בפרוטוטייפ** (demo-modals). 🔧 **תיקון:** גם **Preact אמיתי** — `lib/voice.ts`/`barcode.ts` = **Web Speech API + BarcodeDetector** (לא הדמיה; מקור: `legacy-map.md`). כלומר רק הפרוטוטייפ מדומה; Preact=web-APIs, Flutter=native-APIs.
-- ➖ **הזמנות/משימות-עובד** (`NAV_DESTINATIONS`/orders/`TASKS` של הפרוטוטייפ) — ב-Flutter רק כ-**BS-dial toast-stubs** (פרסונות מנהל/עובד, דוח 12). חיפוש-הקטלוג כולל **הרחבת-סינונימים** (`search_index.dart`).
+- ⚠️ **07-06: נבנו** — מערכת-משימות (`tasks_screen`) + פרסומות-עובד/מנהל **כמסכים-מלאים** (לא BS-dial). bs_dial הוסר. [היה: BS-dial toast-stubs.] חיפוש-הקטלוג כולל **הרחבת-סינונימים** (`search_index.dart`).
