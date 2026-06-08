@@ -13,6 +13,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Reconstructs a saved cart line's (per-unit price, qty) so the resulting
+/// [SmartCartLine.total] equals [total] exactly. A single int brandPrice can
+/// represent it as brandPrice*qty only when total is divisible by qty; otherwise
+/// collapse to one unit at the full total (total wins over qty granularity).
+/// Guards the W1 reload bug where `total ~/ qty` shaved up to (qty-1) ₪ off the
+/// line. Pinned by test/saved_line_reconstruct_test.dart.
+({int brandPrice, int qty}) savedLineReconstruct(int total, int qty) {
+  final q = qty > 0 ? qty : 1;
+  return total % q == 0
+      ? (brandPrice: total ~/ q, qty: q)
+      : (brandPrice: total, qty: 1);
+}
+
 /// Store section tabs.
 enum StoreSection { all, cart, orders, services }
 
@@ -2864,15 +2877,15 @@ class _CartActionsRow extends ConsumerWidget {
   static void _loadItem(WidgetRef ref, CartItem item) {
     // Strip the '₪' (and any separators) from the saved total string.
     final total = int.tryParse(item.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-    final qty = item.qty > 0 ? item.qty : 1;
+    final r = savedLineReconstruct(total, item.qty);
     ref.read(smartCartProvider.notifier).add(
           SmartCartLine(
             productKey: 'saved:${item.name}',
             productName: item.name,
             productEmoji: item.emoji,
             brandName: 'רשימה שמורה',
-            brandPrice: total ~/ qty,
-            productQty: qty,
+            brandPrice: r.brandPrice,
+            productQty: r.qty,
             accessories: const [],
           ),
         );

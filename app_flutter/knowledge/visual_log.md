@@ -655,3 +655,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **before:** `dn = product.dims['dn נומינלי']` → ל-supply/faser PPR (שנושאים `'קוטר חיצוני'`) = null → "תוכנית ריתוך-שקע" ריקה לרוב ה-PPR.
 - **after:** `pprWeldDn(dims)` = `dn נומינלי ?? קוטר חיצוני` → התזמון (עומק/חימום/קירור) מופיע.
 - guard: `ppr_weld_dn_test` (4) · mutation (הסרת fallback → אדום).
+
+## #₪-truncation — עגלה-שמורה (before→after · W1) — 2026-06-08
+- **before:** טעינת רשימה-שמורה: `brandPrice = total ~/ qty` → שורה של ₪340 בכמות 3 נטענת כ-₪339 (איבוד עד qty-1 ₪).
+- **after:** `savedLineReconstruct` שומר total מדויק → ₪340 נשאר ₪340.
+- guard: `saved_line_reconstruct_test` (4 · sweep total==brandPrice×qty) · mutation (revert→אדום).

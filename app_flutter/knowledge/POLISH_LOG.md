@@ -130,3 +130,8 @@
 - **type-scale 8 צעדים** (caption11…titleLg24) · **spaceHair=2 · space1_5=6** · **transitionIn=220 · microIn=150**.
 - guard: `tokens_w0_test` (5). הבינדינג (raw→tokens) = הגל הבא (נחיל-fixers).
 - **ref:** `lib/theme/tokens.dart`.
+
+### #₪-truncation — עגלה-שמורה מאבדת ₪ (W1) — ✅ — 2026-06-08
+- **before:** `_loadItem` שיחזר `brandPrice: total ~/ qty` → ₪340@3 נטען כ-₪339 (איבוד עד qty-1 ₪).
+- **after:** helper `savedLineReconstruct` שומר total מדויק. guard: `saved_line_reconstruct_test` (4) + mutation-verified.
+- **gate:** analyze 0 · full test · build · WIRING+visual_log. **ref:** `store_screen.dart` `_loadItem`.
