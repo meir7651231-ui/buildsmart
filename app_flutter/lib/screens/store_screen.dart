@@ -7,6 +7,7 @@ import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/store_settings.dart';
 import 'package:buildsmart/state/user_profile.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -697,7 +698,7 @@ class _Pill extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: active ? Colors.white : const Color(0xFFAAAAAA),
+              color: active ? bsOnAccent(context) : const Color(0xFFAAAAAA),
               fontSize: 13,
               fontWeight: active ? FontWeight.w600 : FontWeight.w400,
             ),
@@ -1237,8 +1238,8 @@ class _GridHubCard extends StatelessWidget {
                     ),
                     child: Text(
                       '${item.badge}',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: bsOnAccent(context),
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1739,7 +1740,7 @@ class _ProjectChip extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: active ? Colors.white : const Color(0xFFAAAAAA),
+            color: active ? bsOnAccent(context) : const Color(0xFFAAAAAA),
             fontSize: 13,
             fontWeight: active ? FontWeight.w600 : FontWeight.w400,
           ),
@@ -2463,7 +2464,7 @@ class _PaymentChip extends StatelessWidget {
             Text(
               option.label,
               style: TextStyle(
-                color: active ? Colors.white : const Color(0xFFAAAAAA),
+                color: active ? bsOnAccent(context) : const Color(0xFFAAAAAA),
                 fontSize: 13,
                 fontWeight: active ? FontWeight.w600 : FontWeight.w400,
               ),
@@ -3885,7 +3886,7 @@ class _OrderTimeline extends StatelessWidget {
                 child: Icon(
                   _steps[i].$3,
                   size: 18,
-                  color: i <= cur ? Colors.white : Colors.black38,
+                  color: i <= cur ? bsOnAccent(context) : Colors.black38,
                 ),
               ),
               const SizedBox(height: 5),

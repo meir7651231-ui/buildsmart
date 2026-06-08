@@ -1,6 +1,7 @@
 import 'package:buildsmart/data/catalog_lens.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/state/catalog_lens_state.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -91,7 +92,7 @@ class _LensChip extends StatelessWidget {
         child: Text(
           lens.chipLabel,
           style: TextStyle(
-            color: active ? Colors.white : const Color(0xFF6E6E73),
+            color: active ? bsOnAccent(context) : const Color(0xFF6E6E73),
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),

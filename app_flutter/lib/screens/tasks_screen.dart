@@ -10,6 +10,7 @@
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -171,7 +172,7 @@ class _RolePicker extends StatelessWidget {
                   label,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: role == key ? Colors.white : BsTokens.inkLight,
+                    color: role == key ? bsOnAccent(context) : BsTokens.inkLight,
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),
@@ -214,7 +215,7 @@ class _WorkerPick extends StatelessWidget {
                     kWorkers[i],
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: i == selected ? Colors.white : BsTokens.inkLight,
+                      color: i == selected ? bsOnAccent(context) : BsTokens.inkLight,
                       fontWeight: FontWeight.w700,
                       fontSize: 13.5,
                     ),
@@ -612,8 +613,8 @@ class _PrimaryBtn extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Text(label,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: Colors.white,
+                style: TextStyle(
+                    color: bsOnAccent(context),
                     fontWeight: FontWeight.w800,
                     fontSize: 14)),
           ),

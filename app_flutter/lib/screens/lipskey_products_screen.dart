@@ -15,6 +15,7 @@ import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/state/catalog_lens_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -412,7 +413,7 @@ class LipskeyProductGridCard extends ConsumerWidget {
                             style: TextStyle(fontSize: img.emoji)),
                   ),
                   if (inCart)
-                    const Positioned(
+                    Positioned(
                       top: 6,
                       right: 6,
                       child: CircleAvatar(
@@ -420,7 +421,7 @@ class LipskeyProductGridCard extends ConsumerWidget {
                         backgroundColor: _ok,
                         child: Text('✓',
                             style: TextStyle(
-                                color: Colors.white,
+                                color: bsOnAccent(context),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w900)),
                       ),
@@ -513,15 +514,15 @@ class LipskeyProductGridCard extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       alignment: Alignment.center,
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.add, color: Colors.white, size: 16),
-                          SizedBox(width: 4),
+                          Icon(Icons.add, color: bsOnAccent(context), size: 16),
+                          const SizedBox(width: 4),
                           Text(
                             'לסל',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: bsOnAccent(context),
                               fontSize: 12,
                               fontWeight: FontWeight.w800,
                             ),
@@ -557,7 +558,7 @@ class _StepBtn extends StatelessWidget {
           border: filled ? null : Border.all(color: brand, width: 1.2),
         ),
         child: Icon(icon,
-            color: filled ? Colors.white : brand, size: 18),
+            color: filled ? bsOnAccent(context) : brand, size: 18),
       ),
     );
   }
@@ -2184,7 +2185,7 @@ class _HierarchyChipPill extends StatelessWidget {
     final bg = isOpen
         ? const Color(0xFFFF7A18)
         : (isSize ? const Color(0xFFFF7A18) : const Color(0xFFF1F1F4));
-    final fg = (isOpen || isSize) ? Colors.white : const Color(0xFF1C1C1E);
+    final fg = (isOpen || isSize) ? bsOnAccent(context) : const Color(0xFF1C1C1E);
     final border = isOpen
         ? const Color(0xFFFF7A18)
         : (isSize

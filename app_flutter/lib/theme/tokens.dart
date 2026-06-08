@@ -66,6 +66,9 @@ class BsTokens {
   // W0 semantic status + surface tokens. success = bright #22C55E (chosen);
   // the rest promote the dominant existing hex (naming, not new values).
   static const Color success = Color(0xFF22C55E);
+  // Darker green for TEXT on a light background under high-contrast mode
+  // (#22C55E-on-white is 2.28:1; this is ~5.0:1 — passes WCAG AA).
+  static const Color successDark = Color(0xFF15803D);
   static const Color danger = Color(0xFFEF4444); // == chainWarning; ×31 raw
   static const Color warnText = Color(0xFFB45309); // dark amber text
   static const Color warnBright = Color(0xFFF2A516); // bright amber badge

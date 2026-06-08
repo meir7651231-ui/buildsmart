@@ -7,6 +7,7 @@ import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/store_stock.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -588,8 +589,8 @@ class _ActionCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: bsOnAccent(context),
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
                       ),
@@ -597,15 +598,15 @@ class _ActionCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       sub,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: bsOnAccent(context),
                         fontSize: 12.5,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_left, color: Colors.white),
+              Icon(Icons.chevron_left, color: bsOnAccent(context)),
             ],
           ),
         ),
@@ -733,7 +734,7 @@ class _Chip extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: on ? Colors.white : BsTokens.inkLight,
+              color: on ? bsOnAccent(context) : BsTokens.inkLight,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),

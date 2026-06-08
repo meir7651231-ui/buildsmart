@@ -1,4 +1,5 @@
 import 'package:buildsmart/state/rewards_state.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -719,7 +720,8 @@ class _Primary extends StatelessWidget {
           ),
         ),
         child: Text(label,
-            style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.white)),
+            style: TextStyle(
+                fontWeight: FontWeight.w800, color: bsOnAccent(context))),
       ),
     );
   }

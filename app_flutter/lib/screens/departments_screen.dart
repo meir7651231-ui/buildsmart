@@ -6,6 +6,7 @@ import 'package:buildsmart/logic/category_division.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/lipskey_products_screen.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -432,8 +433,8 @@ class _CatGroupRow extends ConsumerWidget {
                     ),
                     child: Text(
                       '$count',
-                      style: const TextStyle(
-                          color: Colors.white,
+                      style: TextStyle(
+                          color: bsOnAccent(context),
                           fontSize: 12,
                           fontWeight: FontWeight.w700),
                     ),

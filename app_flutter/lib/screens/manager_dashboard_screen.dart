@@ -9,6 +9,7 @@ import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -240,7 +241,7 @@ class _ManagerToggle extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: on ? Colors.white : BsTokens.inkLight,
+                          color: on ? bsOnAccent(context) : BsTokens.inkLight,
                           fontSize: 13.5,
                           fontWeight: on ? FontWeight.w800 : FontWeight.w600,
                         ),
@@ -837,7 +838,7 @@ class _OrderStageChips extends StatelessWidget {
             child: Text(
               '$label ($count)',
               style: TextStyle(
-                color: on ? Colors.white : BsTokens.inkLight,
+                color: on ? bsOnAccent(context) : BsTokens.inkLight,
                 fontSize: 13,
                 fontWeight: on ? FontWeight.w800 : FontWeight.w600,
               ),
@@ -1030,12 +1031,12 @@ class _AdvanceButton extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
         onTap: onPressed,
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           child: Text(
             'קדם שלב ›',
             style: TextStyle(
-              color: Colors.white,
+              color: bsOnAccent(context),
               fontSize: 13,
               fontWeight: FontWeight.w800,
             ),
@@ -1559,7 +1560,7 @@ class _CustomerStatusChips extends StatelessWidget {
             child: Text(
               '$label ($count)',
               style: TextStyle(
-                color: on ? Colors.white : BsTokens.inkLight,
+                color: on ? bsOnAccent(context) : BsTokens.inkLight,
                 fontSize: 13,
                 fontWeight: on ? FontWeight.w800 : FontWeight.w600,
               ),
@@ -2232,8 +2233,8 @@ class _CountBadge extends StatelessWidget {
         child: Text(
           '$count',
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: bsOnAccent(context),
             fontSize: 12,
             fontWeight: FontWeight.w800,
           ),
@@ -2681,13 +2682,13 @@ class _RegressionBody extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
             onTap: onOpen,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 '🔬 פתח מרכז בדיקות רגרסיה',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: bsOnAccent(context),
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                 ),

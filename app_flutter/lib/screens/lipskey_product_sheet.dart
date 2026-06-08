@@ -13,6 +13,7 @@ import 'package:buildsmart/data/variant_families.dart';
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -2060,7 +2061,7 @@ class _StripPanel extends StatelessWidget {
         _StripKind.variants => _buildVariants(),
         _StripKind.compliance => _buildCompliance(),
         _StripKind.spec => _buildSpec(),
-        _StripKind.price => _buildPrice(),
+        _StripKind.price => _buildPrice(context),
         _StripKind.info => _buildInfo(),
         _StripKind.hygiene => _buildHygiene(),
       },
@@ -2505,7 +2506,7 @@ class _StripPanel extends StatelessWidget {
   }
 
   // ── מחיר: category-level ballpark with disclaimer ───────────────────────
-  Widget _buildPrice() {
+  Widget _buildPrice(BuildContext context) {
     final price = priceFor(product);
     if (price == null) {
       return const _EmptyHint('אין הערכת מחיר לקטגוריה זו');
@@ -2517,14 +2518,14 @@ class _StripPanel extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
           child: Row(
             children: [
-              const Text('~₪',
+              Text('~₪',
                   style: TextStyle(
-                      color: Color(0xFF22C55E),
+                      color: bsSuccess(context),
                       fontSize: 18,
                       fontWeight: FontWeight.w900)),
               Text('$price',
-                  style: const TextStyle(
-                      color: Color(0xFF22C55E),
+                  style: TextStyle(
+                      color: bsSuccess(context),
                       fontSize: 28,
                       fontWeight: FontWeight.w900)),
               const Spacer(),

@@ -2,6 +2,7 @@ import 'package:buildsmart/screens/rewards_hub_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/user_profile.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -146,10 +147,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'שמור',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: bsOnAccent(context),
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
                   ),

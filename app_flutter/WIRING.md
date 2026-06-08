@@ -1340,3 +1340,11 @@ Gate: central-verify green — analyze 0 · tests green · build · conformance 
 
 ### #bind-color — W3 batch 1: inkLight ×150 — 2026-06-08
 - `Color(0xFF1A1A1A)` → `BsTokens.inkLight` ב-17 קבצי-screens (token-equal · אפס שינוי-עין · imports נוספו). guard: `color_token_ratchet_test` (down-only). batch-1 של בינדינג-הצבע (#3); re-based על tip-הצי `d8b1089` אחרי collision.
+
+### #a11y-contrast — "ניגודיות גבוהה" מכסה foregrounds-של-מותג — 2026-06-08
+- ה-toggle `catalogSettings.highContrast` היה **חלקי**: `app_theme` נגע רק בטקסט-התמה (`ink`/bodyMedium), אך לא ב-literals ברמת-widget — FAB לבן-על-כתום (2.61:1), מחיר/online ירוק-על-לבן (2.28:1), ו-~40 chip/CTA/badge פעילים (לבן-על-כתום). נשארו לא-קריאים גם כש-HC דלוק.
+- **היסוד:** `BsSemanticColors` ThemeExtension ב-`app_theme.dart` נושא 2 צבעים תלויי-HC, נקראים דרך top-level `bsOnAccent(context)` (foreground על מילוי-מבטא) ו-`bsSuccess(context)` (ירוק-טקסט על בהיר). רגיל → `white` / `#22C55E` ; HC → `BsTokens.inkLight` (6.7:1 על כתום) / `BsTokens.successDark`=`#15803D` (5.0:1 על לבן). + `floatingActionButtonTheme.foregroundColor` תלוי-HC. token חדש: `BsTokens.successDark`.
+- **רולאאוט:** ~32 foregrounds ב-22 קבצים → helpers (FAB · lens-chip · מחיר · online-badge · dial · וכל ה-active pill/chip/CTA/badge ב-catalog/store/manager/store_dashboard/worker/tasks/chats/stock/projects/profile/rewards/departments/finance/persona/regression). **המצב הרגיל מוכח שלא משתנה** (helper מחזיר white/#22C55E כש-HC כבוי) → אפס סיכון לברירת-המחדל של הקולגה. ratchet-clean (משתמש ב-`inkLight`, לא raw literal).
+- **נדחה לקומיט נפרד:** `_RunButton` (regression · dev) · `_ApprovalButton` textColor-param (manager_dashboard) · a11y לא-צבעוני (tooltips/semanticLabels/Dynamic-Type).
+- guard: `test/a11y_contrast_theme_test.dart` (5 · normal=white/#22C55E · HC=inkLight/successDark · helpers resolve via Theme).
+Gate: analyze 0 · a11y_contrast(5) + color_token_ratchet green · מוזג נקי (0 conflicts) על tip-הקולגה `5269b37`.

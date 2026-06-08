@@ -1,6 +1,7 @@
 import 'package:buildsmart/test_harness/regression_state.dart';
 import 'package:buildsmart/test_harness/runner.dart';
 import 'package:buildsmart/test_harness/types.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -199,7 +200,7 @@ class _Pill extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: active ? Colors.white : const Color(0xFFAAAAAA),
+              color: active ? bsOnAccent(context) : const Color(0xFFAAAAAA),
               fontSize: 12,
               fontWeight: active ? FontWeight.w600 : FontWeight.w400,
             ),

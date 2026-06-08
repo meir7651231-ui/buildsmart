@@ -4,6 +4,7 @@ import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/sys_chat.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -487,7 +488,7 @@ class _Pill extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: active ? Colors.white : const Color(0xFFAAAAAA),
+              color: active ? bsOnAccent(context) : const Color(0xFFAAAAAA),
               fontSize: 13,
               fontWeight: active ? FontWeight.w600 : FontWeight.w400,
             ),
@@ -783,8 +784,8 @@ class _ThreadRow extends ConsumerWidget {
                           ),
                           child: Text(
                             '${thread.unread}',
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: bsOnAccent(context),
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
@@ -1740,7 +1741,7 @@ class _CircleFab extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
-        child: Icon(icon, color: Colors.white, size: 22),
+        child: Icon(icon, color: bsOnAccent(context), size: 22),
       ),
     );
   }

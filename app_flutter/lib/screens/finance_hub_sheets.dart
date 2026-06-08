@@ -29,6 +29,7 @@ import 'package:buildsmart/data/contractor_seeds.dart' show caToday, fMoney;
 import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/data/repositories/finance_local.dart' show financeRepo;
 import 'package:buildsmart/state/finance_hub_state.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -306,7 +307,7 @@ class _CaPrimary extends StatelessWidget {
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: BsTokens.brand,
-          foregroundColor: Colors.white,
+          foregroundColor: bsOnAccent(context),
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(

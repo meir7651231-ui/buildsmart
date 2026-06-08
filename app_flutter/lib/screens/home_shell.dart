@@ -22,6 +22,7 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/user_profile.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/version.g.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -146,7 +147,7 @@ class _CartFab extends ConsumerWidget {
         clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
-          const Icon(Icons.shopping_cart, color: Colors.white, size: 26),
+          Icon(Icons.shopping_cart, color: bsOnAccent(context), size: 26),
           if (count > 0)
             Positioned(
               top: -10,
@@ -972,12 +973,12 @@ class _PulsingStatusState extends ConsumerState<_PulsingStatus>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.circle, color: Color(0xFF22C55E), size: 7),
+          Icon(Icons.circle, color: bsSuccess(context), size: 7),
           const SizedBox(width: 4),
           Text(
             widget.text,
-            style: const TextStyle(
-              color: Color(0xFF22C55E),
+            style: TextStyle(
+              color: bsSuccess(context),
               fontSize: 10,
               fontWeight: FontWeight.w700,
             ),

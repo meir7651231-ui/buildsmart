@@ -682,3 +682,9 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 ## #bind-color — inkLight ×150 (W3 batch 1) — 2026-06-08
 - **שינוי-קוד בלבד · אפס שינוי-עין:** `Color(0xFF1A1A1A)` → `BsTokens.inkLight` (אותו hex) ב-17 screens.
 - guard: `color_token_ratchet_test` — ratchet שנועל את הליטרל מלחזור (down-only).
+
+## #a11y-contrast — מצב ניגודיות גבוהה מכסה foregrounds-של-מותג (before→after) — 2026-06-08
+- **before:** "ניגודיות גבוהה" לא נגע ב-FAB לבן-על-כתום (2.61:1), מחיר/online ירוק-על-לבן (2.28:1), או ~40 chip/CTA פעילים — נשארו לא-קריאים (מתחת WCAG) **גם כשהטוגל דלוק**.
+- **after (HC דלוק בלבד):** ה-foreground מתכהה — אייקון/טקסט על כתום → `inkLight` (6.7:1), ירוק-טקסט → `successDark`=#15803D (5.0:1). המילוי הכתום והנקודה הירוקה נשמרים.
+- **המצב הרגיל: אפס שינוי-עין** (`bsOnAccent`/`bsSuccess` מחזירים white/#22C55E כש-HC כבוי).
+- guard: `a11y_contrast_theme_test` (5).

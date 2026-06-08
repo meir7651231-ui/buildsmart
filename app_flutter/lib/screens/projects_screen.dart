@@ -18,6 +18,7 @@ import 'package:buildsmart/screens/smart_project_screen.dart';
 import 'package:buildsmart/screens/tasks_screen.dart';
 import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -61,9 +62,10 @@ class ProjectsScreen extends ConsumerWidget {
         floatingActionButton: FloatingActionButton.extended(
           backgroundColor: BsTokens.brand,
           onPressed: () => _addSheet(context, ref),
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text('פרויקט חדש',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+          icon: Icon(Icons.add, color: bsOnAccent(context)),
+          label: Text('פרויקט חדש',
+              style: TextStyle(
+                  color: bsOnAccent(context), fontWeight: FontWeight.w800)),
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(BsTokens.space4, BsTokens.space4,

@@ -4,6 +4,7 @@ import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -195,7 +196,7 @@ class _WorkerPicker extends StatelessWidget {
                     kWorkers[i],
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: i == selected ? Colors.white : BsTokens.inkLight,
+                      color: i == selected ? bsOnAccent(context) : BsTokens.inkLight,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
@@ -499,15 +500,15 @@ class _SubmitButton extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
             onTap: onPressed,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
                 horizontal: BsTokens.space4,
                 vertical: 9,
               ),
               child: Text(
                 '📸 שלח לאישור',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: bsOnAccent(context),
                   fontSize: 13.5,
                   fontWeight: FontWeight.w800,
                 ),

@@ -46,6 +46,7 @@ import 'package:buildsmart/state/recently_viewed.dart';
 import 'package:buildsmart/state/saved_configs.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/stage_progress.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -1388,7 +1389,7 @@ class _SectionPill extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: active ? Colors.white : const Color(0xFF6E6E73),
+              color: active ? bsOnAccent(context) : const Color(0xFF6E6E73),
               fontSize: 13,
               fontWeight: active ? FontWeight.w600 : FontWeight.w400,
             ),
@@ -3254,10 +3255,10 @@ class _TreeComingSoon extends StatelessWidget {
                 color: BsTokens.brand,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Text(
+              child: Text(
                 'בקרוב',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: bsOnAccent(context),
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
@@ -3798,8 +3799,8 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
                           widget.cat,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: bsOnAccent(context),
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
@@ -3808,8 +3809,8 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
                       const SizedBox(width: 6),
                       GestureDetector(
                         onTap: _back,
-                        child: const Icon(Icons.close,
-                            color: Colors.white, size: 16),
+                        child: Icon(Icons.close,
+                            color: bsOnAccent(context), size: 16),
                       ),
                     ],
                   ),
@@ -4090,7 +4091,7 @@ class _ChipWrap extends StatelessWidget {
               child: Text(
                 o,
                 style: TextStyle(
-                  color: selected == o ? Colors.white : const Color(0xFF6E6E73),
+                  color: selected == o ? bsOnAccent(context) : const Color(0xFF6E6E73),
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -6152,8 +6153,8 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                     },
                     child: Text(
                       'הוסף לסל · ₪$_total',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: bsOnAccent(context),
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -7200,12 +7201,12 @@ class _KindChip extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(label, style: TextStyle(color: selected ? Colors.white : Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w700, fontSize: 13)),
+            Text(label, style: TextStyle(color: selected ? bsOnAccent(context) : Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w700, fontSize: 13)),
             const SizedBox(width: 5),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(color: selected ? Colors.white.withOpacity(0.25) : const Color(0x14FF7A18), borderRadius: BorderRadius.circular(10)),
-              child: Text('$count', style: TextStyle(color: selected ? Colors.white : const Color(0xFFCC6614), fontWeight: FontWeight.w700, fontSize: 11)),
+              child: Text('$count', style: TextStyle(color: selected ? bsOnAccent(context) : const Color(0xFFCC6614), fontWeight: FontWeight.w700, fontSize: 11)),
             ),
           ],
         ),
@@ -7259,7 +7260,7 @@ class _AxisChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: isSelected ? const Color(0xFFFF7A18) : cs.outline.withOpacity(0.35), width: 1.2),
         ),
-        child: Text(label, style: TextStyle(color: isSelected ? Colors.white : cs.onSurface, fontWeight: FontWeight.w700, fontSize: 12)),
+        child: Text(label, style: TextStyle(color: isSelected ? bsOnAccent(context) : cs.onSurface, fontWeight: FontWeight.w700, fontSize: 12)),
       ),
     );
   }

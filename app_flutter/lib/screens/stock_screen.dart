@@ -13,6 +13,7 @@
 
 import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/data/repositories/stock_local.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -187,7 +188,7 @@ class _StockTab extends StatelessWidget {
                 style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: on ? Colors.white : _ink)),
+                    color: on ? bsOnAccent(context) : _ink)),
           ),
         ),
       );

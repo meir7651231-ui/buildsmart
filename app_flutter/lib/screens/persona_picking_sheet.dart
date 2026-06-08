@@ -17,6 +17,7 @@ import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -861,7 +862,7 @@ class _SplitControl extends StatelessWidget {
                       g == 1 ? 'חבילה אחת' : '$g חבילות',
                       style: TextStyle(
                         color: splitInto == g
-                            ? Colors.white
+                            ? bsOnAccent(context)
                             : BsTokens.inkLight,
                         fontWeight: FontWeight.w700,
                         fontSize: 12.5,
