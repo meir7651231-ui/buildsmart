@@ -13,7 +13,7 @@
 - **MED איבוד-נתונים:** `saved_projects._persist` עטוף try/catch.
 - **MED load-clobber (4 notifiers):** הוסף `_loaded`-guard ל-`store_stock`/`smart_project`/`saved_projects`/`card_projects` — סוגר spec-divergence. (ה-cross-engine mutator-guard נוסה ובוטל — חוסם פעולה סינכרונית; ה-mitigations הקיימים מספיקים.)
 - **hardening:** `state_loaded_guard_test` — שער-מקור שאוכף `bool _loaded` על כל notifier מתמיד שדורס `set state` (12 guarded / 0 offenders).
-- **פתוח להחלטה:** HIGH — site-של-הזמנה מנותק מהפרויקט-הפעיל (2 מערכות-שמות; דורש החלטת-עיצוב).
+- **HIGH site-של-הזמנה (נפתר):** החלטה = מנוע-הפרויקטים קנוני. צ׳קאאוט: `cartProjectProvider` ברירת-מחדל מ-`activeProjectProvider`, picker מ-`projectsProvider` + 'ללא פרויקט', add→engine, 2 reset-points→active; `storeProjectsProvider` הוסר. ה-site עוקב אחר הפרויקט-הפעיל. guard: `order_site_canonical_test` (5).
 
 **אימות:** `deep_fix_regression_test` (3) + `state_loaded_guard_test` ירוקים · analyze 0 · `central-verify` gate.
 

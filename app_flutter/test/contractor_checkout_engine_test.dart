@@ -128,14 +128,14 @@ void main() {
       await tapCheckout(t);
 
       // The engine grew by exactly one, and the new (prepended) order carries the
-      // contractor's name, the cart's project (default 'בית דוד 3'), the line
-      // count (4), and a positive total — sourced from the SAME cart values the
-      // local order used.
+      // contractor's name, the cart's project (now the ACTIVE project — the
+      // projects engine is canonical for an order's site), the line count (4),
+      // and a positive total — sourced from the SAME cart values the local order used.
       final orders = c.read(ordersEngineProvider);
       expect(orders.length, 5, reason: 'one new live order was placed');
       final placed = orders.first; // placeOrder prepends (newest first)
       expect(placed.who, 'אבי הקבלן');
-      expect(placed.site, 'בית דוד 3');
+      expect(placed.site, 'מגדל הרצליה — קומה 4'); // = kProjects.first (active project)
       expect(placed.items, 4);
       expect(placed.sum, greaterThan(0));
       expect(placed.stage, 'new', reason: 'enters the flow at stage `new`');

@@ -3,6 +3,7 @@ import 'package:buildsmart/screens/finance_hub_sheets.dart';
 import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/store_settings.dart';
 import 'package:buildsmart/state/user_profile.dart';
@@ -94,7 +95,15 @@ CartPaymentMethod cartPaymentFor(StorePayment p) => switch (p) {
 final cartDeliveryProvider = StateProvider<CartDelivery>(
   (ref) => cartDeliveryFor(ref.read(storeSettingsProvider).selfPickupDefault),
 );
-final cartProjectProvider = StateProvider<String>((_) => 'בית דוד 3');
+/// The checkout's selected project (the order's recorded `site`). The projects
+/// engine is canonical: this holds only the *checkout selection*, and its
+/// default IS the active project's name. Watching [activeProjectProvider] means
+/// switching the active project (in projects_screen) recomputes this initial
+/// value, so checkout defaults to the newly-active project. The user may still
+/// pick a different project (or 'ללא פרויקט') for this order via the picker.
+final cartProjectProvider = StateProvider<String>(
+  (ref) => ref.watch(activeProjectProvider).name,
+);
 
 /// Benzi #4 — optional, NON-binding "where to ship" address chosen during the
 /// purchase (empty = not set; checkout never requires it).
@@ -281,8 +290,13 @@ const List<_CItem> _kCItems = [];
 
 const _kProjects = ['בית דוד 3', 'מגדל עזריאלי', 'ללא פרויקט'];
 
-/// Persisted project list — seeded from [_kProjects]; user-added projects
-/// survive restarts (mirrors the [StoreFavoritesNotifier] persistence pattern).
+/// DEPRECATED / VESTIGIAL. The store-local project list. As of the
+/// projects-engine unification, the checkout picker reads the PROJECTS ENGINE
+/// ([projectsProvider]) and adds via its API; nothing in the checkout path uses
+/// this provider anymore. It is kept defined only so the legacy
+/// `test/state_deep_test.dart` (which asserts this exact store seed) still
+/// compiles — that test should be retired/updated by the orchestrator. Do not
+/// wire new behavior to it.
 class StoreProjectsNotifier extends StateNotifier<List<String>> {
   StoreProjectsNotifier() : super(List.of(_kProjects)) {
     _load();
@@ -311,8 +325,9 @@ class StoreProjectsNotifier extends StateNotifier<List<String>> {
   }
 }
 
-/// Live project list — persisted to SharedPreferences so user-added projects
-/// survive restarts.
+/// DEPRECATED / VESTIGIAL — see [StoreProjectsNotifier]. Retained for the legacy
+/// `state_deep_test.dart` only; the checkout now sources projects from the
+/// projects engine ([projectsProvider]).
 final storeProjectsProvider =
     StateNotifierProvider<StoreProjectsNotifier, List<String>>(
   (_) => StoreProjectsNotifier(),
@@ -1591,6 +1606,12 @@ class _ProjectSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Projects engine is canonical: the chips are the live engine projects'
+    // names, plus the 'ללא פרויקט' (no-project) option at the end.
+    final projects = [
+      for (final p in ref.watch(projectsProvider).projects) p.name,
+      'ללא פרויקט',
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1603,7 +1624,7 @@ class _ProjectSelector extends ConsumerWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              for (final p in ref.watch(storeProjectsProvider)) ...[
+              for (final p in projects) ...[
                 _ProjectChip(
                   label: p,
                   active: p == selected,
@@ -1665,7 +1686,10 @@ class _ProjectSelector extends ConsumerWidget {
                 onPressed: () {
                   final name = controller.text.trim();
                   if (name.isEmpty) return;
-                  ref.read(storeProjectsProvider.notifier).add(name);
+                  // Add through the canonical projects engine (saveProject), so
+                  // the new site is a real LiveProject the picker, app-bar and
+                  // projects screen all see. Then select it for this checkout.
+                  ref.read(projectsProvider.notifier).addProject(name: name);
                   ref.read(cartProjectProvider.notifier).state = name;
                   Navigator.pop(ctx);
                 },
@@ -2735,8 +2759,11 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                     cartPaymentFor(
                       ref.read(storeSettingsProvider).defaultPayment,
                     );
+                // Projects engine is canonical: reset the checkout selection
+                // back to the currently-active project (not the retired
+                // store-seed default), so the next order again defaults to it.
                 ref.read(cartProjectProvider.notifier).state =
-                    ref.read(storeProjectsProvider).firstOrNull ?? 'בית דוד 3';
+                    ref.read(activeProjectProvider).name;
                 Navigator.pop(context);
                 showToast(context, 'הזמנה ${placed.id} אושרה! 🎉');
               },
@@ -3021,8 +3048,10 @@ class _CartActionsRow extends ConsumerWidget {
                 cartPaymentFor(
                   ref.read(storeSettingsProvider).defaultPayment,
                 );
+            // Canonical: clearing the cart resets the checkout selection to the
+            // active project (the retired store-seed default is no longer used).
             ref.read(cartProjectProvider.notifier).state =
-                ref.read(storeProjectsProvider).firstOrNull ?? 'בית דוד 3';
+                ref.read(activeProjectProvider).name;
             showToast(context, 'הסל נוקה');
           },
           icon: const Icon(Icons.delete_outline, size: 16),
