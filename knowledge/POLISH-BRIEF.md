@@ -7,8 +7,8 @@
 ---
 
 ## P-4 · הסרת `go_router` — ✅ **בוצע** (אומת 2026-06-05: 0 `go_router` ב-pubspec)
-🎯 dependency-מת: `go_router ^14.6` ב-`pubspec.yaml`, **0 שימושים** ב-`lib/`.
-- צעדים: ודא `grep -rn "go_router" lib/` = 0 → הסר מ-`pubspec.yaml` → `flutter pub get` → analyze+test.
+🎯 [✅ בוצע] היה dependency-מת `go_router ^14.6` ב-`pubspec.yaml` (0 שימושים) → **הוסר.**
+- צעדים-שבוצעו: grep=0 → הוסר מ-`pubspec.yaml` → pub get → analyze+test ירוק.
 - ✅ DoD: pubspec בלי go_router · 0 imports · test ירוק.
 
 ## P-3 · typography pass — ✅ **בוצע** (אומת: `toast.dart`+`chain_diagram.dart` משתמשים ב-`BsTokens.font*`)

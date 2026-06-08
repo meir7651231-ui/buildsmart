@@ -6,7 +6,7 @@
 > נבנה על ענף-הכתיבה `claude/nice-volta-BSbVm` (קריאה מהקוד הקיים, כתיבה לכאן בלבד).
 > 📖 **המקור נקרא מהענף הנכון `claude/whats-happening-LyY9G`** (האפליקציה הסופית) דרך git-worktree. ⭐ **תיקון:** `app_flutter/knowledge/` הוא **מאגר-ידע קיים ומקיף שנלכד כמקור** — לא "דף חלק" כפי שכתבתי בטעות.
 
-> ⚠️ **בתהליך-תיקון מתמשך:** דלתאות-ה-Flutter שנשזרו ב-01–17 נכתבו בתחילה מ-snapshot **מיושן** (27 קבצים, nice-volta). האפליקציה האמיתית (123 קבצים, whats-happening) **נקראה במלואה** ועכשיו נשזרת-מחדש לתוך הדוחות. **המאגר עדיין לא שלם — יש עוד מידע רב להטמיע.** תקף ולא-מושפע: הפרוטוטייפ (01–17 base) + Preact.
+> ✅ **מאגר מאורגן ומאומת (06-08):** דלתאות-ה-Flutter סונכרנו לקוד `1d292aa` (ר' `KNOWLEDGE_AUDIT.md`). 01–23 = capture (פרוטוטייפ+Preact+Flutter); ל-current → LIVE-docs + קוד (**SSOT**). האפליקציה גדלה ל-**~172 קבצי-lib** (snapshot).
 
 ## השיטה (חוק-ברזל)
 1. **קוראים כל שורה, כל תיבה.** לא סורקים (grep), לא מנחשים, לא מדלגים. הידע
@@ -117,7 +117,7 @@
 
 ## 📱 מקור 3 — Flutter (`app_flutter/`) — **האפליקציה הסופית** (יעד לחנויות)
 > 🚧 **שכבה זו נכתבת-מחדש** מול הקוד האמיתי על `whats-happening` (התיאור הקודם היה מ-snapshot מיושן/27-קבצים).
-> מקור: `app_flutter/lib/` (**123 קבצים · 61,550 ש׳**) · `test/` (155 · 16,441) · `app_flutter/knowledge/` (~88 מסמכים — מאגר-ידע קיים). Flutter 3.29 · Riverpod · go_router · shared_preferences · mobile_scanner · speech_to_text · permission_handler.
+> מקור: `app_flutter/lib/` (**~172 קבצים, snapshot — גדל; הקוד=SSOT**) · `app_flutter/knowledge/` (~88 מסמכים). Flutter 3.29 · Riverpod · shared_preferences · mobile_scanner · speech_to_text · permission_handler. (`go_router` הוסר P-4.)
 > ⭐ **לא** port של 5-הפרסונות — **אפליקציית-אינסטלציה בוגרת** (v5.92 · ~92% roadmap · קוד מוכן-להשקה).
 
 | תחום | המציאות (אומת-מקוד, whats-happening) |
@@ -145,7 +145,7 @@
 - ⚠️ **divergences שנתפסו (המקור `index.html` קובע):** UI_ARCH profile-mockup (סולם-דרגות + 8-badges) ≠ `RANKS`/6-`identityAchievements` · SYSTEM_MANAGER מספרים/7-manage-sections/REST-API **מומצאים** · ROLE_DRAWER worker-names (דוד/אברהם/עלי) ≠ `WORKERS` (רן/עומר) · `adr`+README קדמו-לכלל-ה-inline.
 
 ## ⭐ אימות-מקור — קוד Preact + Flutter נקרא line-by-line ✅
-> ⚠️ **סעיף זה תיעד אימות מול ה-snapshot המיושן של Flutter (27/8,482).** ה-**Preact** (55/15,841) תקף; ה-**Flutter האמיתי** (123/61,550) נקרא-מחדש בנפרד — ראה מקור-3 + דוחות 21–23. תיקוני-ה-Preact למטה תקפים:
+> ⚠️ **סעיף זה תיעד אימות מול ה-snapshot המיושן של Flutter (27/8,482).** ה-**Preact** (55/15,841) תקף; ה-**Flutter האמיתי** (~172 קבצים, snapshot-גדל; הקוד=SSOT) נקרא-מחדש בנפרד — ראה מקור-3 + דוחות 21–23. תיקוני-ה-Preact למטה תקפים:
 - `LEAF_BINDINGS`=**72** (לא ~70) · service-hub=**15** (לא ~16) · `AppSettings`=**6 מפתחות** (+security) → doc 06/17.
 - `fabs.tsx`=**2 FABs** (menu+search); BS/שם/עגלה ב-`FloatingHeader` — 5 האלמנטים הקבועים מפוצלים 2+3 (doc 02 כבר מדויק).
 - ~~Flutter ~30 מוצרים~~ → **בוטל (snapshot מיושן). האמת: 1,877 מוצרים / 3 מותגים** (935+772+170, אומת שורה-שורה — דוח 03/19). Flutter search-dial=4 כלים — תקף.
