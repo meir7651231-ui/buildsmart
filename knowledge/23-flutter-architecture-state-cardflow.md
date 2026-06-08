@@ -3,7 +3,7 @@
 > השלמת-התמונה: תת-המערכות של האפליקציה האמיתית (`app_flutter/`, whats-happening) שלא נכנסו במלואן לדלתאות 01–17. נלכד מ-`app_flutter/knowledge/` (SCHEMA/STATE_OVERVIEW/CARD_FLOW/HELPER_INDEX/SMARTPRODUCT_ROADMAP/LAUNCH_READINESS) + הקוד. **אומת-מקוד.**
 
 ## A. ארכיטקטורה
-Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dart` → `registerPolyrollSpecs()` → `ProviderScope` → `MaterialApp` → **`OnboardingGate`** (welcome/HomeShell). שכבות (123 קבצי-lib): `data/` (25) · `logic/` (5 engines) · `state/` (**41 קבצים · 50 providers**) · `screens/` (29) · `services/` (1) · `widgets/` (3) · `theme/` (2) · `l10n/` (1) · `test_harness/` (3). **SSOT · אין circular-deps · Preact-shared מבודד** (קבצי-settings = JSON-contracts אמיתיים: `app_settings.dart` הוא port של `app-settings.ts` עם **אותו מפתח `bs.settings.v1` ואותו shape מקונן** — ערכים שנכתבו ב-Preact קריאים ב-Flutter על אותו domain).
+Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · `main.dart` → `registerPolyrollSpecs()` → `ProviderScope` → `MaterialApp` → **`OnboardingGate`** (welcome/HomeShell). (`go_router` הוסר P-4.) שכבות — **snapshot ~172 קבצי-lib (גדל; הקוד=SSOT):** `data/` ~40 · `logic/` 5-engines · `state/` ~55 · `screens/` ~46 · services/widgets/theme/l10n/test_harness. **SSOT · אין circular-deps · Preact-shared מבודד** (קבצי-settings = JSON-contracts אמיתיים: `app_settings.dart` הוא port של `app-settings.ts` עם **אותו מפתח `bs.settings.v1` ואותו shape מקונן**).
 
 ## B. SCHEMA — 3 עמודי-נתונים (SKU = מפתח-העל)
 1. **`kCatalogProducts`** (**1,877** · `LipskeyCatalogProduct` · אומת שורה-שורה) — קטלוג מאוחד `[...kLipskeyCatalog 935, ...kPolyrollCatalog 772, ...kHuliotCatalog 170]` (ספירת-constructors מאומתת; HW-`kHotWaterCatalog` ~133 = רשימה **נפרדת**, מוזנת ל-`kCompatCatalog` בלבד).
@@ -52,7 +52,7 @@ Flutter 3.29 (deploy 3.44) · Dart 3.7 · **Riverpod** · go_router · `main.dar
 ## G. Launch-readiness (`LAUNCH_READINESS.md`)
 - **קוד בריא:** ~92%+ roadmap · 0 analyze-errors · **1,539+ בדיקות** (אומת ב-gate `b4e2198`; גדל מאז) · SSOT.
 - **Web/PWA 🟢 GO** (אחרי asset-opt 101MB→WebP). **iOS 🔴 NO-GO** (Info.plist camera/mic usage-strings + signing-team). **Android 🔴 NO-GO** (release-keystore + Play-account).
-- **P0 = store-config (לא קוד).** P1: asset-opt · status-line · הסרת-deps-לא-בשימוש (go_router?) · נעילת-theme.light · exclude-test_harness-מ-release · חיווט-search-dial (ה-menu-dial הוסר 07-06) · global-error-handler. **חסום:** pricing(`brandPrice=0`)/ratings/AI/push/telephony.
+- **P0 = store-config (לא קוד).** P1: asset-opt · status-line · `go_router` ✅ הוסר · נעילת-theme.light · exclude-test_harness-מ-release · חיווט-search-dial (ה-menu-dial הוסר 07-06) · global-error-handler. **חסום:** pricing(`brandPrice=0`)/ratings/AI/push/telephony.
 - **`LAUNCH_PACKAGE/`:** aab חתום 68MB · store-listing he/en · privacy-policy · data-safety · `SEND_TO_GOOGLE.md` runbook.
 
 ## H. ROADMAP (`SMARTPRODUCT_ROADMAP.md`, 100 צעדים · ~92% ✅)

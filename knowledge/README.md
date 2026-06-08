@@ -126,7 +126,7 @@
 | קטלוג | **1,877 מוצרים** (Lipskey 935 · Polyroll 772 · Huliot 170 — אומת שורה-שורה; HW-133 = רשימה נפרדת `kHotWaterCatalog`) מ-PDFים אמיתיים; 8 sections (הכל/בית-Finder/תכנון-חיבור/קטגוריות/עץ-חכם/וריאנטים/מועדפים/חיפושים) |
 | ⭐ Install Studio | מנוע-תכנון-צנרת אמיתי: **Dijkstra-pathfinding · Darcy-Weisbach pressure-drop · auto-compliance (PRV/TMTV/הרחבה/dielectric) · BOM · שמירת-פרויקטים** (`install_engine` 1391ש׳ · `pressure_drop` 501). עמוק מהפרוטוטייפ |
 | כרטיס-מוצר | brands · accessories (must/why) · install-stages · compat · compliance · score → add-to-cart; SKU↔`VerifiedSpec` bridge |
-| state | **50 providers ב-41 קבצי `state/`** (114 repo-wide כולל UI-local; הנמשכים `bs.*.v1` ב-shared_preferences) |
+| state | **~55 קבצי `state/`** (snapshot, גדל — הקוד=SSOT; הנמשכים `bs.*.v1` ב-shared_preferences) |
 | מסחר | `smart_cart` (persisted) · checkout VAT 18% (mock) · **chats(6)/notifications(smart-collapse)/store** אמיתיים + **4 מסכי-הגדרות** (~40 כל אחד) |
 | עיצוב | מותג **כתום `#FF7A18`** (ה-KB מסמן כפער מ-teal המתוכנן) · Heebo · light/dark + RTL |
 | QA/launch | **1,539+ בדיקות** (אומת `b4e2198`; גדל מאז) **· 47-helper-gate · 116 שערים** · LAUNCH_PACKAGE מוכן (aab חתום 68MB) · חוסמים = קונפיג-חנות (iOS-perms · keystore · Huliot-R2-crops) |
