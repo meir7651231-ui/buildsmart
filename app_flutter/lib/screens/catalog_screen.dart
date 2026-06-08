@@ -1527,13 +1527,17 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: () =>
-                          ref.read(searchScopeProvider.notifier).state = 'הכל',
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 13,
+                    Semantics(
+                      button: true,
+                      label: 'נקה סינון',
+                      child: GestureDetector(
+                        onTap: () =>
+                            ref.read(searchScopeProvider.notifier).state = 'הכל',
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -2030,9 +2034,23 @@ class _SearchResultsList extends ConsumerWidget {
       );
     }
 
+    // searchResultsProvider caps product matches at .take(40); when we hit the
+    // cap, append a single trailing footer telling the user results are partial.
+    final capped = products.length == 40;
     return ListView.builder(
-      itemCount: filtered.length + products.length,
+      itemCount: filtered.length + products.length + (capped ? 1 : 0),
       itemBuilder: (_, i) {
+        // Trailing partial-load footer when product matches were capped at 40.
+        if (capped && i == filtered.length + products.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Text(
+              'מציג 40 תוצאות ראשונות — צמצמו את החיפוש',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Color(0xFF666666), fontSize: 12),
+            ),
+          );
+        }
         // Product results come after the index entries.
         if (i >= filtered.length) {
           final p = products[i - filtered.length];
@@ -3095,9 +3113,13 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
               ),
             ),
             const SizedBox(width: 6),
-            GestureDetector(
-              onTap: widget.onCancel,
-              child: const Icon(Icons.close, color: Colors.white, size: 16),
+            Semantics(
+              button: true,
+              label: 'בטל',
+              child: GestureDetector(
+                onTap: widget.onCancel,
+                child: const Icon(Icons.close, color: Colors.white, size: 16),
+              ),
             ),
           ],
         ),
@@ -6333,15 +6355,19 @@ class _AccRow extends StatelessWidget {
                           ),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () => _showAccInfo(context, acc),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 2),
-                          child: Icon(
-                            Icons.info_outline,
-                            color: BsTokens.brand,
-                            size: 16,
+                      Semantics(
+                        button: true,
+                        label: 'מידע על האביזר',
+                        child: GestureDetector(
+                          onTap: () => _showAccInfo(context, acc),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 2),
+                            child: Icon(
+                              Icons.info_outline,
+                              color: BsTokens.brand,
+                              size: 16,
+                            ),
                           ),
                         ),
                       ),
@@ -6424,16 +6450,20 @@ class _MiniQtyBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-        child: Icon(
-          icon,
-          size: 12,
-          color: onTap != null
-              ? Colors.black54
-              : const Color(0xFFCCCCCC),
+    return Semantics(
+      button: true,
+      label: icon == Icons.add ? 'הוסף כמות' : 'הפחת כמות',
+      child: GestureDetector(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+          child: Icon(
+            icon,
+            size: 12,
+            color: onTap != null
+                ? Colors.black54
+                : const Color(0xFFCCCCCC),
+          ),
         ),
       ),
     );

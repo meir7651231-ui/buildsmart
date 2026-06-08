@@ -900,8 +900,12 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             child: p.imageAsset != null
                 ? productImage(p.imageAsset!, fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) =>
-                        productImage(p.specImageAsset, fit: BoxFit.contain))
-                : productImage(p.specImageAsset, fit: BoxFit.contain),
+                        productImage(p.specImageAsset, fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Text(p.typeEmoji,
+                                style: const TextStyle(fontSize: 96))))
+                : productImage(p.specImageAsset, fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Text(p.typeEmoji,
+                        style: const TextStyle(fontSize: 96))),
           ),
         ),
       ),

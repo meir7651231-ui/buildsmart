@@ -105,7 +105,11 @@ final budgetProvider =
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-String _fmt(num n) => '₪${_thousands(n.round())}';
+String _fmt(num n) {
+  final r = n.round();
+  // Sign before the ₪ symbol so a negative reads "-₪3,150", not "₪-3,150".
+  return '${r < 0 ? '-' : ''}₪${_thousands(r.abs())}';
+}
 
 String _thousands(int n) {
   final neg = n < 0;

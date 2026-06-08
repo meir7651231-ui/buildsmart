@@ -1361,3 +1361,12 @@ Gate: analyze 0 · a11y_contrast(5) green · tooltips/semantics additive.
 - **`SmartHomeBody`** (smart_home_screen.dart) = נחיתת 'בית': מקטעים ניתנים-לסידור דרך `smartHomeSectionFor(HomeSection)` הקורא `homeContentOrderProvider` — מחלקות (`DepartmentsScreen.departments`, 2 שורות + "עוד") · 🌳 עץ-חכם (`kSmartProducts` + תמונות `productImage`) · מסלול-עבודה · כלים-מהירים (`openScanPlanSheet`/`StockScreen.route`/`openSiteHub`) · תכנון-חיבור (`InstallStudioScreen`) · מועדפים (`productFavoritesProvider`) · הזמנות-אחרונות (`sysOrdersProvider`). אין מחירים מומצאים (עץ-חכם → "מחיר לפי ספק").
 - **`home_content_reorder`** ("סידור מסך הבית", נגיש מהגדרות→תצוגה דרך `HomeContentReorder.route()`) מציג עכשיו את אותם מקטעים דרך `smartHomeSectionFor`; ה-preview-widgets הישנים הוסרו (449 שורות) + imports יתומים. `kHomeSectionMeta` כותרות עודכנו (מחלקות/עץ-חכם/הזמנות-אחרונות).
 - **מצב-היכרות (#30):** `helpModeProvider` (help_mode.dart) + `HelpTarget`/`HelpToggleButton`/`HelpModeBanner`/`HelpModeScaffold` (help_target.dart). 💡 ב-home app-bar = toggle; לחיצה-ארוכה = `showIntroTour`. במצב פעיל: `HelpModeScaffold` דוחף באנר מעל התוכן + `HelpTarget` עוטף אלמנט → לחיצה פותחת בועת-הסבר (Overlay, זנב מעל/מתחת אוטומטי). מחובר: בית (📷, סל-FAB), מסך-פתיחה (5 אלמנטים), מקצוע, שקופיות.
+
+### #a11y-round3 — Semantics labels + round-3 deferred cosmetics — 2026-06-08
+- **Semantics** (screen-reader) ל-7 אלמנטים אינטראקטיביים icon-only שלא הוקראו: catalog (נקה-סינון · בטל-breadcrumb · מידע-אביזר · `_MiniQtyBtn` הוסף/הפחת-כמות) · lipskey_product_sheet (סגור-תמונה-מלאה) · install_studio (`_stepBtn` הוסף/הפחת · הסר-מוצר). אדיטיבי (`Semantics(button,label)`), בלי שינוי-גודל (נמנע מסיכון-layout).
+- **סימן ₪-** (budget `_fmt`): סכום שלילי הוצג `₪-3,150` → עכשיו `-₪3,150` (הסימן לפני הסמל).
+- **חץ-breadcrumb** (finder): מפריד `›` (הצביע לכיוון הלא-נכון ב-RTL) → `‹`, תואם catalog/lipskey.
+- **zoom errorBuilder** (lipskey_products `_openImage`): תמונת-zoom שנכשלת הציגה קופסת-שבר → `errorBuilder` עם emoji-fallback (×2).
+- **התראת טעינה-חלקית** (catalog `_SearchResultsList`): כשתוצאות-החיפוש נחתכות ל-40 → footer "מציג 40 תוצאות ראשונות — צמצמו את החיפוש".
+- **נדחה:** bidi-spec/brand (FSI מזהם מחרוזות + שובר `find.text` → צריך impl נקי דרך `textDirection`); ניגודיות-טקסט-משני (`888888`/`AAAAAA` ~120 אתרים — שינוי-עין בתחום-הצבע של הקולגה, דורש תיאום).
+Gate: analyze 0 · full suite 1737/1737 green.

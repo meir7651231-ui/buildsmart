@@ -711,7 +711,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(crumbs.join('  ›  '),
+              child: Text(crumbs.join('  ‹  '),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

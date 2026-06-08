@@ -66,13 +66,17 @@ void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
           child: Material(
             color: Colors.black12,
             shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: () => Navigator.pop(context),
-              child: const SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: Icon(Icons.close, color: Colors.white)),
+            child: Semantics(
+              button: true,
+              label: 'סגור',
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () => Navigator.pop(context),
+                child: const SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Icon(Icons.close, color: Colors.white)),
+              ),
             ),
           ),
         ),
