@@ -66,7 +66,7 @@ PROJECTS(3) · ARCHIVED(3) · SITE_TREE(3) · STOCK_DEMO(11) · TASKS(5+steps) �
 - **T3.H AI-hub** `openAIHub · doc 16` — ברקוד/דיבור אמיתיים · השאר = תוצאת-AI מדומה (חיזוי/חלופות[`cheaperAlternativeBrand`]/מזג-אוויר/בלאי, לא toast). ✅ תוצאה מוצגת.
 - **T3.I תוכן-בית** `§1` — reorder + product-cards (מקור proto §1). ✅ reorder עובד.
 
-# Track T4 — סטאבים-היקפיים (~43, **מצטמק** — חוליית-audit מחווטת אוטונומית; **grep-live לפני לקיחה** · מחולק לפי-קובץ · low-risk · בלתי-תלוי)
+# Track T4 — סטאבים-היקפיים — ✅ **סגור (06-09)** · 0 'בבנייה' בקוד (chats/camera/settings → flows או honest-stubs). [היסטורי: היה ~43, מצטמק.]
 - **T4.chats** (`chats_screen`, 7) — שיחת-וידאו · הקלטת-קול · מצלמה · צרף-קובץ · אמוג׳י · פתיחת-שיחה · "עוד" → flow/honest-stub. ✅ אפס toast.
 - **T4.camera** (`camera_sheet`, 4) — פלאש · מצבים · גלריה → device/honest-stub.
 - **T4.settings** (chat/notif/store/catalog `_settings`, 16) — עריכת-תבניות · sync/ייצוא/גיבוי → inline/honest-stub.

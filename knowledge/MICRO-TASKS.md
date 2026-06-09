@@ -78,7 +78,7 @@
 | B3.3 | שליחה = `send(.., persona, ..)` (במקום bot-only) | הודעה אמיתית |
 | B3.4 | `ChatsScreen({persona})` = **Scaffold standalone** (בלי home_shell/role-picker) 🔒 §2.5 | בידוד-ניווט |
 
-### B4 · CH-4 חיווט per-persona (🔒 standalone, אין מעבר-לוח)
+### B4 · CH-4 חיווט per-persona — ✅ **בוצע (06-09)** · `persona_portal`→`ChatsScreen(persona)` עם §2.5 (🔒 standalone, אין מעבר-לוח)
 | ID | פרסונה | חיווט |
 |---|---|---|
 | B4.1 | קבלן | טאב-שיחות → `ChatsScreen(contractor)` |

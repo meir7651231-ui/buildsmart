@@ -44,7 +44,7 @@
 ## 3. סטטוס (אומת-קוד 2026-06-07 · tip `b9737cf`)
 - ✅ **שלב-א + מנהל + 3 פרסונות + מנוע-הזמנות + קטלוג 100%** · הקשחה v6.13–v6.16.
 - ✅ **שלב-ב נבנה (`ac3073d`) + חוּוט נייטיב (דיאל-הפצה `b9737cf`):** finance/site/tasks/budget/stock/scan/projects/rewards/ai/home — **כל ה-hubs קיימים ונגישים** (מפת-גישה §4.6).
-- 🔲 **נותר:** אימות-עומק (verbatim/math מול §`[L#]`) · gate v2 ירוק · ליטוש P-1/P-2/P-5 · אימות-deploy חי · ~43 סטאבים-היקפיים (מצטמק). *(server-ready ✅ 6/6 — 07-08.)*
+- 🔲 **נותר:** אימות-עומק (verbatim/math מול §`[L#]`) · gate v2 ירוק · P-1 (צבעים, מטרה-נעה) · P-5 (knowledge) · אימות-deploy חי. *(✅ נסגרו: server-ready 6/6 · T4 סטאבים [0 'בבנייה'] · P-2 a11y · T7 צ׳אט-מחווט.)*
 - 🧰 **gate v2** בודק conformance + required-tests — נצל ב-DoD.
 
 ## 4. מה לוקחים (מצב נוכחי)
@@ -53,7 +53,7 @@
 | **T1** מרכז-פיננסים | `openFinanceHub` | טאב-חנות | ✅ בנוי+מחווט · אימות-עומק 🔲 |
 | **T2** ניהול-אתר | `openSiteHub` | תפריט-בית | ✅ בנוי+מחווט · אימות 🔲 |
 | **T3** משימות/תקציב/מלאי/סריקה/פרויקטים/מועדון/AI/בית | ר׳ §4.6 | בית/חנות/פרופיל/projects | ✅ בנוי+מחווט · אימות 🔲 |
-| **T4** סטאבים-היקפיים | chats/camera/settings | בקובץ | ◑ מצטמק (grep-live) |
+| **T4** סטאבים-היקפיים | chats/camera/settings | בקובץ | ✅ **סגור** (0 'בבנייה', 06-09) |
 | **T5** פרסונות-דחויים | store/courier | dashboards | ✅ (picking/POD `ac3073d`) |
 | **T6** server-ready | `data/repositories/` | — | ✅ **6/6** (07-08) |
 | **ליטוש** P-1/P-2/P-5 | theme/widgets | — | 🔲 |
@@ -121,7 +121,7 @@
 > ⚡ **לפירוק-מיקרו (הכי-קל/מהיר לסוכן):** `MICRO-TASKS.md` — ~50 משימות-מיקרו, כל אחת DoD-בודד + ערך-מדויק מהמקור.
 1. **אימות-עומק + gate ירוק** ⭐ (הבא) — לכל hub (finance/site/tasks/budget/stock/scan/projects/rewards/ai/home): ודא תוכן **verbatim/math** מול §`[L#]` (מפת-הידע §4.5), הרץ `orchestrator/scripts/central-verify.sh app_flutter --assert orchestrator/manifests/buildsmart.conformance.txt --required-tests orchestrator/manifests/buildsmart.required-tests.txt`, תקן עד ירוק.
 2. **server-ready T6.2/3** — העבר providers לקרוא דרך `data/repositories/` (interfaces T6.1 כבר קיימים).
-3. **סטאבים-היקפיים (T4)** — סיים chats/camera/settings (grep-live; מצטמק).
+3. ~~**סטאבים-היקפיים (T4)**~~ — ✅ **סגור** (0 'בבנייה' בקוד, 06-09).
 4. **ליטוש** — P-1 (~1,200 צבעים→`BsTokens`, מטרה-נעה) · P-2 (a11y ✅ 06-09) · P-5 (knowledge).
 5. **אימות-deploy חי** — ודא ש-gh-pages מציג v6.16.
 
