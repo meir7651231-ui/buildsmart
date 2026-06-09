@@ -2,7 +2,7 @@
 
 > **לסוכן ליטוש** (presentation + Phase B–K). בצע **בתוך `POLISH_PROTOCOL`** שלך: before→after→gate · **token-binding = safe** (אפס שינוי ויזואלי) · L5 visual-screenshot ל-`POLISH_LOG`.
 > ⚠️ **אל תיגע בקבצים-בתעופה של הקבלן** (`home_shell.dart` + מסכי-T1–T9 ש-מקבץ בונה כעת — PLAYBOOK no-collision). עבוד רק על הקבצים-הבטוחים המסומנים.
-> אומת מהקוד 2026-06-08 (tip `6477f03`). **עדכון-סטטוס:** P-4 ✅ · P-3 ✅ · **P-2 (a11y) 🔄 בעבודה** (screen-reader/high-contrast/Dynamic-Type/tooltips) · P-1 🔲 (1,187 — מטרה-נעה) · P-5 🔲. **הצי בגלי-ליטוש W0/W1/W3** (theme: teal→כתום · dark→light · radiusCard→20 · microcopy · bug-hunt).
+> אומת מהקוד 2026-06-09 (tip `536486d`). **עדכון-סטטוס:** P-4 ✅ · P-3 ✅ · **P-2 (a11y) ✅** (Semantics בכל-המסכים) · P-1 🔲 (~1,200 — מטרה-נעה) · P-5 🔲. **הצי בגלי-ליטוש+UX:** theme · a11y · **floating-cart (#47)** · async-race guards · honesty (#29–#55).
 
 ---
 
@@ -17,7 +17,7 @@
 - צעד: הוסף tokens (`BsTokens.fontXs/Sm/...` אם אין) → החלף. **token-equal** = אפס שינוי ויזואלי.
 - ✅ DoD: 0 font-size קסם בקבצים אלה · screenshot before/after זהה.
 
-## P-2 · a11y / Semantics — 🔄 **בעבודה** (07-08: screen-reader labels · high-contrast brand-fg · Dynamic-Type · tooltips על icon-buttons)
+## P-2 · a11y / Semantics — ✅ **בוצע** (06-09: Semantics/Tooltip בכל-המסכים · high-contrast · Dynamic-Type · screen-reader · RTL)
 🎯 פער-נגישות: רק **3 קבצים** ב-lib עם `Semantics`.
 - קבצים-בטוחים: `widgets/dial.dart` (`DialRow` → `Semantics(button:true, label:...)`) · כפתורי-AppBar · `widgets/toast.dart`.
 - touch-targets ≥44×44 · `Semantics` לאלמנטים-אינטראקטיביים.
