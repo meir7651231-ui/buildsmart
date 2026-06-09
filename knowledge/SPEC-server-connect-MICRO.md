@@ -5,6 +5,15 @@
 
 ---
 
+## ✅ FOUNDATION READY (06-09) — console הוקם, הצי יכול להתחיל קוד
+- **Firebase project:** `buildsmart-b0b78` (Spark plan).
+- **S0.1 ✅** — project קיים · web app רשום · Hosting חי (`buildsmart-b0b78.web.app`).
+- **Auth ✅ (console)** — מופעל: **Phone** + **Email/Password** (מכסת SMS חינם 10/יום → Blaze לפני launch).
+- **Firestore ✅ (console)** — **Standard** · region **`me-west1` (Tel Aviv)** · **Production mode** (deny-by-default → דורש Rules S5).
+- **CI hosting ✅** — `firebase-hosting.yml` + `firebase.json` (commit `db920f2`, ענף whats-happening · secret `FIREBASE_SERVICE_ACCOUNT`).
+- **➡️ הצי מתחיל מ:** S0.2 (`flutterfire configure`) → S0.3 (deps) → S0.4 (init `main.dart`) → S0.5 (App Check) → S1 (auth) → S2/S3 (repos `_firebase`).
+- ⚠️ `flutterfire configure` דורש **Firebase CLI + גישת-פרויקט** (הצי/מפתח — לא ה-console-user הלא-טכני).
+
 ## S0 · הקמת-Firebase (חוסם-הכל)
 | ID | משימה | מי | DoD |
 |---|---|---|---|
