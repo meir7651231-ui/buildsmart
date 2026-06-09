@@ -1388,6 +1388,15 @@ RULE: כששינוי מעביר פרסונה ממסך-דיאל ל-role-app (או
 ANTIPATTERN: שינוי lib data או lib state בלי הרצת mutation verify ועדכון mutation log באותו commit
 RULE: כל commit שנוגע ב-lib/data או lib/state חייב להריץ mutation_verify.sh על ההיגיון/דאטה החדשים (מוטציית-sed שהבדיקה אמורה לתפוס) באותו commit — כך mutation_log מתעדכן, שער 44 לא חוסם, ולא נכנסים ל-retry של שער 102.
 
+## 2026-06-09 — color_token_ratchet_test כשל על Windows בגלל path-separator (שער 32 → 102)
+### א — הבעיה
+הבדיקה `color_token_ratchet_test.dart` ניסתה לדלג על `theme/tokens.dart` לפי `endsWith('theme/tokens.dart')`. על Windows הנתיב הוא `lib\theme\tokens.dart` (backslash) — ה-endsWith החמיץ את הקובץ → הבדיקה דיווחה על הפרה של raw `Color(0xFF1A1A1A)` בתוך tokens.dart עצמו → שער 32 חסם.
+### ב — הפתרון
+נרמלתי את ה-separator לפני ה-check: `f.path.replaceAll(r'\', '/').endsWith('theme/tokens.dart')` — כעת הבדיקה עוברת גם על Windows גם על POSIX.
+### ג — כלל המניעה
+ANTIPATTERN: שימוש ב-`path.endsWith('dir/file.dart')` ישיר על Windows בלי נרמול separators
+RULE: כל בדיקת `path.contains` או `path.endsWith` על נתיבי-קובץ חייבת לנרמל `path.replaceAll(r'\', '/')` לפני ההשוואה, כדי שתעבוד גם על Windows (backslash) וגם על POSIX (slash).
+
 ## 2026-06-08 — microcopy ב-lib/data בלי test+mutation_log פרואקטיבי (שער 42/44 → 102)
 ### א — הבעיה
 תיקון-מיקרוקופי (מנהל המערכת + בינה מלאכותית) נגע ב-lib/data/search_index.dart. שער 42 מסווג כל שינוי תחת lib/data או lib/logic כ-helper-שדורש-בדיקה — גם שינוי-מחרוזת טהור — ושער 44 דורש mutation_log. שניהם לא תוזמנו מראש → חסמו; ה-retry הצית את 102.

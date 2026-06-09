@@ -1476,6 +1476,27 @@ void main() {
     test("antipattern #73 לא קיים", () {
       final libDir = Directory('lib');
       final matches = <String>[];
+      final re = RegExp('שימוש ב-`path.endsWith(\'dir/file.dart\')` ישיר על Windows בלי נרמול separators');
+      for (final entity in libDir.listSync(recursive: true)) {
+        if (entity is File && entity.path.endsWith('.dart')) {
+          if (entity.path.contains('stuck_regression')) continue;
+          try {
+            final content = entity.readAsStringSync();
+            for (final line in content.split('\n')) {
+              if (re.hasMatch(line)) {
+                matches.add('${entity.path}: ${line.trim()}');
+              }
+            }
+          } catch (_) {}
+        }
+      }
+      expect(matches, isEmpty,
+        reason: 'אנטי-פטרן חזר. ראה knowledge/stuck_log.md');
+    });
+
+    test("antipattern #74 לא קיים", () {
+      final libDir = Directory('lib');
+      final matches = <String>[];
       final re = RegExp('שינוי-מחרוזת תחת תיקיית-דאטה או תיקיית-לוגיקה בלי לתזמן בדיקת-נכונות ויומן-מוטציה באותו commit');
       for (final entity in libDir.listSync(recursive: true)) {
         if (entity is File && entity.path.endsWith('.dart')) {

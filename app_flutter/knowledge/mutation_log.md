@@ -762,3 +762,9 @@
 - מוטציה 1: שינוי `catalogSectionProvider` ברירת-מחדל `'בית'`→`'מאתר'` → `hard_tests "default catalog landing"` אדום (Expected 'בית', Actual 'מאתר') ✅ נתפס; שוחזר.
 - מוטציה 2: הסרת תיקון ה-overflow (`Flexible`/`Expanded` ב-_MiniTile/_SmartTreeCard) → robustness 1/12 RenderFlex overflowed אדום ✅; שוחזר.
 - כיסוי: widget_test "בית" smart-home shows wired section blocks · robustness 1/12/18 render · hard_tests default-landing.
+
+### 2026-06-09 — מסך-הבית מסונכרן-הגדרות (UI-wiring)
+- מוטציה 1: קיבוע `crossAxisCount: 4` (התעלמות מ-`gridColumns`) → הבית לא מגיב לעמדות-רשת בהגדרות (אומת ויזואלית: gridColumns=2 צריך 2 עמודות) ✅; שוחזר.
+- מוטציה 2: `childAspectRatio` במקום `mainAxisExtent` → ב-2 עמודות אריחים ענקיים (חצי-מסך-ריבועי) ✅ נתפס ויזואלית; שוחזר ל-`mainAxisExtent` קבוע.
+- מוטציה 3: החזרת `reverse: true` → גלילה הפוכה ב-RTL ✅; שוחזר.
+- כיסוי: אימות ויזואלי חי (אין טסט-יחידה ל-layout-metrics; נבדק בעין על :5556).

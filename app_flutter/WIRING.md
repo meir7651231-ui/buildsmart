@@ -1370,3 +1370,12 @@ Gate: analyze 0 · a11y_contrast(5) green · tooltips/semantics additive.
 - **התראת טעינה-חלקית** (catalog `_SearchResultsList`): כשתוצאות-החיפוש נחתכות ל-40 → footer "מציג 40 תוצאות ראשונות — צמצמו את החיפוש".
 - **נדחה:** bidi-spec/brand (FSI מזהם מחרוזות + שובר `find.text` → צריך impl נקי דרך `textDirection`); ניגודיות-טקסט-משני (`888888`/`AAAAAA` ~120 אתרים — שינוי-עין בתחום-הצבע של הקולגה, דורש תיאום).
 Gate: analyze 0 · full suite 1737/1737 green.
+### #smart-home-settings — סנכרון מסך-הבית עם הגדרות-התצוגה + תיקון גלילה — `smart_home_screen` — 2026-06-09
+- **גלילה הפוכה (RTL):** הוסר `reverse: true` מ-2 ה-ListView האופקיים (עץ-חכם + הזמנות) — ב-RTL ה-Directionality כבר מסדר ימין-לשמאל, ה-reverse הפך פעמיים. עכשיו גלילה טבעית.
+- **סנכרון-מלא להגדרות-התצוגה** (`catalogSettingsProvider` + `Theme` + `MediaQuery`): הבית כבר לא קבוע-מראה.
+  - ערכת-נושא (light/dark) + ניגודיות-גבוהה → `_pal(context)` קורא `Theme.of(context).colorScheme` (במקום `BsTokens.cardLight/inkLight` קבועים).
+  - `gridColumns` → `crossAxisCount` במחלקות/מועדפים (GridView עם `SliverGridDelegateWithFixedCrossAxisCount` + `mainAxisExtent` קבוע → עמודות משתנות, גובה-אריח קבוע).
+  - `imageSize` (small/med/large) + `compactMode` → `_Metrics.cardW/rowH` (גודל כרטיסים/תמונות).
+  - גודל-טקסט → `MediaQuery.textScalerOf` מכפיל גבהים (`rowH`/`tileH`) → טקסט גדל בלי לקצץ.
+  - הנפשות-מופחתות → הבית חסר אנימציות (אין מה להפחית).
+- אומת חי: gridColumns=2 → 2 עמודות בגובה תקין. אין שינוי API/לוגיקה אחר.

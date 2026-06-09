@@ -4,14 +4,15 @@ import 'package:buildsmart/data/repositories/catalog_local.dart'
 import 'package:buildsmart/data/smart_tree.dart';
 import 'package:buildsmart/data/supplier_data.dart'
     show SysOrder, kOrderStageLabel;
-import 'package:buildsmart/state/home_content_order.dart';
 import 'package:buildsmart/screens/contractor_tools_sheets.dart'
     show openScanPlanSheet;
 import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
 import 'package:buildsmart/screens/site_hub_screen.dart' show openSiteHub;
 import 'package:buildsmart/screens/stock_screen.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/home_content_order.dart';
 import 'package:buildsmart/state/product_favorites.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/sys_orders.dart';
@@ -20,14 +21,65 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// 🏠 גוף מסך-הבית החכם (task #32) — the "הכל" landing rebuilt in the
-/// "תוכן הבית" tile layout, wired to real data + real navigation. Mounted by
-/// catalog_screen's `_CatalogBody` for the 'הכל' section, so the real search
-/// bar + section chips above it are preserved.
-///
-/// Sections: מחלקות (real, 2 rows + עוד) · 🌳 עץ חכם (kSmartProducts) ·
-/// מסלול עבודה חכם · כלים מהירים (real tools) · תכנון חיבור (Install Studio) ·
-/// מועדפים (productFavoritesProvider) · הזמנות אחרונות (sysOrdersProvider).
+// ════════════════════════════════════════════════════════════════════════════
+// Settings-synced smart-home (#32). The home honours the display settings the
+// rest of the catalog does:
+//   • ערכת נושא (light/dark) + ניגודיות גבוהה → via Theme.of(context) colours.
+//   • גודל טקסט → global MediaQuery textScaler; tile/row heights grow with it
+//     so text never clips.
+//   • מצב קומפקטי + גודל תמונות → a size factor on cards/images.
+//   • עמודות בתצוגת רשת (gridColumns) → grid crossAxisCount.
+//   • הנפשות מופחתות → the home has no animations (nothing to reduce).
+// ════════════════════════════════════════════════════════════════════════════
+
+/// Theme-resolved palette (carries light/dark + high-contrast from [ThemeData]).
+typedef _Pal = ({Color card, Color ink, Color muted, Color border, Color box});
+
+_Pal _pal(BuildContext c) {
+  final cs = Theme.of(c).colorScheme;
+  final dark = Theme.of(c).brightness == Brightness.dark;
+  return (
+    card: cs.surface,
+    ink: cs.onSurface,
+    muted: cs.onSurface.withOpacity(0.62),
+    border: cs.onSurface.withOpacity(dark ? 0.18 : 0.10),
+    box: cs.onSurface.withOpacity(0.06),
+  );
+}
+
+/// Size metrics resolved from the catalog display settings + text scaler.
+class _Metrics {
+  _Metrics(BuildContext c, CatalogSettings s)
+      : cols = s.gridColumns.clamp(2, 6),
+        compact = s.compactMode,
+        _img = switch (s.imageSize) {
+          CatalogImageSize.small => 0.85,
+          CatalogImageSize.medium => 1.0,
+          CatalogImageSize.large => 1.18,
+        },
+        ts = MediaQuery.textScalerOf(c).scale(1.0).clamp(1.0, 1.4);
+
+  final int cols;
+  final bool compact;
+  final double _img;
+  final double ts;
+
+  double get _base => compact ? 0.82 : 1.0;
+
+  /// Card width for the horizontal rows (עץ חכם / orders).
+  double cardW(double base) => base * _base * _img;
+
+  /// Row height — grows with text scale so labels never clip.
+  double rowH(double base) => base * _base * _img * ts;
+
+  /// Fixed grid-tile height (independent of column count) — grows with text so
+  /// labels never clip, shrinks in compact mode.
+  double get tileH => (compact ? 86.0 : 104.0) * ts;
+}
+
+_Metrics _metrics(BuildContext c, WidgetRef ref) =>
+    _Metrics(c, ref.watch(catalogSettingsProvider));
+
 /// Builds the wired smart-home section widget for a reorderable [HomeSection].
 /// Shared by [SmartHomeBody] (the live home) AND the reorder-preview screen
 /// (home_content_reorder.dart), so the reorder UI previews the REAL sections.
@@ -39,6 +91,9 @@ Widget smartHomeSectionFor(HomeSection s) => switch (s) {
       HomeSection.reorderHistory => const _RecentOrders(),
     };
 
+/// 🏠 גוף מסך-הבית החכם (task #32) — the 'בית' landing in the "תוכן הבית" tile
+/// layout, wired to real data + real navigation, and synced to the display
+/// settings (theme/contrast/text-size/compact/image-size/grid-columns).
 class SmartHomeBody extends ConsumerWidget {
   const SmartHomeBody({this.scrollCtrl, super.key});
 
@@ -46,8 +101,6 @@ class SmartHomeBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // The 5 reorderable sections follow the user's saved order (changed from
-    // settings → "סידור מסך הבית"). תכנון חיבור + מועדפים are fixed extras.
     final order = ref.watch(homeContentOrderProvider);
     return ListView(
       controller: scrollCtrl,
@@ -86,8 +139,8 @@ class _SectionTitle extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: BsTokens.space2),
         child: Text(
           text,
-          style: const TextStyle(
-            color: BsTokens.inkLight,
+          style: TextStyle(
+            color: _pal(context).ink,
             fontWeight: FontWeight.w800,
             fontSize: 16,
           ),
@@ -95,7 +148,7 @@ class _SectionTitle extends StatelessWidget {
       );
 }
 
-/// A small white tile (icon + label) used by the department + "עוד" grid.
+/// A small tile (icon + label) used by the department + favourites grids.
 class _MiniTile extends StatelessWidget {
   const _MiniTile({
     required this.icon,
@@ -113,6 +166,7 @@ class _MiniTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pal = _pal(context);
     return InkWell(
       borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       onTap: onTap,
@@ -120,9 +174,9 @@ class _MiniTile extends StatelessWidget {
         opacity: dim ? 0.5 : 1,
         child: Container(
           decoration: BoxDecoration(
-            color: BsTokens.cardLight,
+            color: pal.card,
             borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-            border: Border.all(color: const Color(0xFFEEEEEE)),
+            border: Border.all(color: pal.border),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -137,8 +191,8 @@ class _MiniTile extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: BsTokens.inkLight,
+                    style: TextStyle(
+                      color: pal.ink,
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),
@@ -149,8 +203,7 @@ class _MiniTile extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
                   child: Text(note!,
-                      style: const TextStyle(
-                          color: BsTokens.mutedLight, fontSize: 9)),
+                      style: TextStyle(color: pal.muted, fontSize: 9)),
                 ),
             ],
           ),
@@ -160,25 +213,29 @@ class _MiniTile extends StatelessWidget {
   }
 }
 
-// ─── מחלקות — real departments, exactly 2 rows (7 + "עוד") ───────────────────────
+// ─── מחלקות — real departments, 2 rows + "עוד" (cols follow gridColumns) ──────────
 class _Departments extends ConsumerWidget {
   const _Departments();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final depts = DepartmentsScreen.departments.take(7).toList();
+    final m = _metrics(context, ref);
+    final depts =
+        DepartmentsScreen.departments.take(m.cols * 2 - 1).toList();
     return _Pad(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const _SectionTitle('מחלקות'),
-          GridView.count(
-            crossAxisCount: 4,
+          GridView(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: BsTokens.space2,
-            crossAxisSpacing: BsTokens.space2,
-            childAspectRatio: 1.0,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: m.cols,
+              mainAxisSpacing: BsTokens.space2,
+              crossAxisSpacing: BsTokens.space2,
+              mainAxisExtent: m.tileH,
+            ),
             children: [
               for (final d in depts)
                 _MiniTile(
@@ -213,19 +270,20 @@ class _SmartTreeRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final m = _metrics(context, ref);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const _Pad(child: _SectionTitle('🌳 עץ חכם — אינסטלציה')),
         SizedBox(
-          height: 200,
+          height: m.rowH(192),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            reverse: true,
             padding: const EdgeInsets.symmetric(horizontal: BsTokens.space4),
             itemCount: kSmartProducts.length,
             separatorBuilder: (_, __) => const SizedBox(width: BsTokens.space3),
-            itemBuilder: (_, i) => _SmartTreeCard(p: kSmartProducts[i]),
+            itemBuilder: (_, i) =>
+                _SmartTreeCard(p: kSmartProducts[i], width: m.cardW(150)),
           ),
         ),
       ],
@@ -234,20 +292,22 @@ class _SmartTreeRow extends ConsumerWidget {
 }
 
 class _SmartTreeCard extends ConsumerWidget {
-  const _SmartTreeCard({required this.p});
+  const _SmartTreeCard({required this.p, required this.width});
   final SmartProduct p;
+  final double width;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final pal = _pal(context);
     final rec = p.brands.firstWhere((b) => b.rec, orElse: () => p.brands.first);
     final priceLabel = rec.price == null ? 'מחיר לפי ספק' : '₪${rec.price}';
     return Container(
-      width: 150,
+      width: width,
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: pal.card,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-        border: Border.all(color: const Color(0xFFEEEEEE)),
+        border: Border.all(color: pal.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -258,7 +318,7 @@ class _SmartTreeCard extends ConsumerWidget {
               alignment: Alignment.center,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                color: const Color(0xFFF7F7F7),
+                color: pal.box,
                 borderRadius: BorderRadius.circular(BsTokens.radiusCard),
               ),
               child: rec.imageAsset != null
@@ -275,17 +335,19 @@ class _SmartTreeCard extends ConsumerWidget {
           Text(p.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: BsTokens.inkLight,
+              style: TextStyle(
+                color: pal.ink,
                 fontWeight: FontWeight.w800,
                 fontSize: 13,
               )),
           Text(p.cat,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 10)),
+              style: TextStyle(color: pal.muted, fontSize: 10)),
           const SizedBox(height: 2),
           Text(priceLabel,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: BsTokens.brandDark,
                 fontWeight: FontWeight.w800,
@@ -317,6 +379,8 @@ class _SmartTreeCard extends ConsumerWidget {
                 ),
               ),
               child: const Text('הוסף לסל',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -329,7 +393,7 @@ class _SmartTreeCard extends ConsumerWidget {
   }
 }
 
-// ─── מסלול עבודה חכם (project hero) ──────────────────────────────────────────────
+// ─── מסלול עבודה חכם (project hero — coloured, fine in both themes) ───────────────
 class _WorkPath extends ConsumerWidget {
   const _WorkPath();
 
@@ -400,6 +464,7 @@ class _QuickTools extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final pal = _pal(context);
     final rows = <({String emoji, String title, String sub, VoidCallback tap})>[
       (
         emoji: '📐',
@@ -433,9 +498,9 @@ class _QuickTools extends ConsumerWidget {
                 margin: const EdgeInsets.only(bottom: BsTokens.space2),
                 padding: const EdgeInsets.all(BsTokens.space3),
                 decoration: BoxDecoration(
-                  color: BsTokens.cardLight,
+                  color: pal.card,
                   borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-                  border: Border.all(color: const Color(0xFFEEEEEE)),
+                  border: Border.all(color: pal.border),
                 ),
                 child: Row(
                   children: [
@@ -446,19 +511,18 @@ class _QuickTools extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(r.title,
-                              style: const TextStyle(
-                                color: BsTokens.inkLight,
+                              style: TextStyle(
+                                color: pal.ink,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 14,
                               )),
                           const SizedBox(height: 2),
                           Text(r.sub,
-                              style: const TextStyle(
-                                  color: BsTokens.mutedLight, fontSize: 12)),
+                              style: TextStyle(color: pal.muted, fontSize: 12)),
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+                    Icon(Icons.chevron_left, color: pal.muted),
                   ],
                 ),
               ),
@@ -475,6 +539,7 @@ class _InstallStudioHero extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final pal = _pal(context);
     return _Pad(
       child: InkWell(
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
@@ -489,27 +554,26 @@ class _InstallStudioHero extends ConsumerWidget {
             border: Border.all(color: const Color(0x33FF7A18)),
           ),
           child: Row(
-            children: const [
-              Icon(Icons.account_tree, color: BsTokens.brandDark, size: 32),
-              SizedBox(width: BsTokens.space3),
+            children: [
+              const Icon(Icons.account_tree, color: BsTokens.brandDark, size: 32),
+              const SizedBox(width: BsTokens.space3),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('תכנון חיבור',
                         style: TextStyle(
-                          color: BsTokens.inkLight,
+                          color: pal.ink,
                           fontWeight: FontWeight.w900,
                           fontSize: 16,
                         )),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text('בחר מה לחבר — נכין רשימת קנייה תקנית ונבדוק את החיבור',
-                        style:
-                            TextStyle(color: BsTokens.mutedLight, fontSize: 12)),
+                        style: TextStyle(color: pal.muted, fontSize: 12)),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_left, color: BsTokens.brandDark),
+              const Icon(Icons.chevron_left, color: BsTokens.brandDark),
             ],
           ),
         ),
@@ -524,6 +588,7 @@ class _Favorites extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final m = _metrics(context, ref);
     final favSkus = ref.watch(productFavoritesProvider);
     final products = ref
         .watch(catalogRepositoryProvider)
@@ -536,17 +601,19 @@ class _Favorites extends ConsumerWidget {
         children: [
           const _SectionTitle('מועדפים'),
           if (products.isEmpty)
-            _EmptyCard(
+            const _EmptyCard(
               'עדיין אין מועדפים — סמן ☆ על מוצר והוא יופיע כאן.',
             )
           else
-            GridView.count(
-              crossAxisCount: 4,
+            GridView(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: BsTokens.space2,
-              crossAxisSpacing: BsTokens.space2,
-              childAspectRatio: 1.0,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: m.cols,
+                mainAxisSpacing: BsTokens.space2,
+                crossAxisSpacing: BsTokens.space2,
+                mainAxisExtent: m.tileH,
+              ),
               children: [
                 for (final p in products)
                   _MiniTile(
@@ -568,13 +635,14 @@ class _RecentOrders extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final m = _metrics(context, ref);
     final orders = ref.watch(sysOrdersProvider);
     if (orders.isEmpty) {
       return _Pad(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const _SectionTitle('הזמנות אחרונות לאתר'),
+          children: const [
+            _SectionTitle('הזמנות אחרונות לאתר'),
             _EmptyCard('עדיין אין הזמנות — לאחר הראשונה היא תופיע כאן.'),
           ],
         ),
@@ -585,14 +653,14 @@ class _RecentOrders extends ConsumerWidget {
       children: [
         const _Pad(child: _SectionTitle('הזמנות אחרונות לאתר')),
         SizedBox(
-          height: 150,
+          height: m.rowH(150),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            reverse: true,
             padding: const EdgeInsets.symmetric(horizontal: BsTokens.space4),
             itemCount: orders.length,
             separatorBuilder: (_, __) => const SizedBox(width: BsTokens.space3),
-            itemBuilder: (_, i) => _OrderCard(order: orders[i]),
+            itemBuilder: (_, i) =>
+                _OrderCard(order: orders[i], width: m.cardW(160)),
           ),
         ),
       ],
@@ -601,18 +669,20 @@ class _RecentOrders extends ConsumerWidget {
 }
 
 class _OrderCard extends StatelessWidget {
-  const _OrderCard({required this.order});
+  const _OrderCard({required this.order, required this.width});
   final SysOrder order;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
+    final pal = _pal(context);
     return Container(
-      width: 160,
+      width: width,
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: BsTokens.cardLight,
+        color: pal.card,
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-        border: Border.all(color: const Color(0xFFEEEEEE)),
+        border: Border.all(color: pal.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -620,8 +690,8 @@ class _OrderCard extends StatelessWidget {
           Row(
             children: [
               Text(order.id,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
+                  style: TextStyle(
+                    color: pal.ink,
                     fontWeight: FontWeight.w800,
                     fontSize: 13,
                   )),
@@ -633,10 +703,12 @@ class _OrderCard extends StatelessWidget {
           Text(order.site,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: BsTokens.inkLight, fontSize: 12)),
+              style: TextStyle(color: pal.ink, fontSize: 12)),
           const SizedBox(height: 2),
           Text('${order.items} פריטים',
-              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11)),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: pal.muted, fontSize: 11)),
           const SizedBox(height: 2),
           Text('₪${order.sum}',
               style: const TextStyle(
@@ -653,6 +725,8 @@ class _OrderCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
             ),
             child: Text(kOrderStageLabel[order.stage] ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: BsTokens.brandDark,
                   fontSize: 11,
@@ -669,17 +743,20 @@ class _EmptyCard extends StatelessWidget {
   const _EmptyCard(this.text);
   final String text;
   @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(BsTokens.space4),
-        decoration: BoxDecoration(
-          color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-          border: Border.all(color: const Color(0xFFEEEEEE)),
-        ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
-        ),
-      );
+  Widget build(BuildContext context) {
+    final pal = _pal(context);
+    return Container(
+      padding: const EdgeInsets.all(BsTokens.space4),
+      decoration: BoxDecoration(
+        color: pal.card,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        border: Border.all(color: pal.border),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: pal.muted, fontSize: 13),
+      ),
+    );
+  }
 }

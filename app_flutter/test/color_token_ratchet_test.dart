@@ -17,7 +17,9 @@ void main() {
       final offenders = <String>[];
       for (final f in Directory('lib').listSync(recursive: true)) {
         if (f is! File || !f.path.endsWith('.dart')) continue;
-        if (f.path.endsWith('theme/tokens.dart')) continue;
+        // Normalise separators so the tokens.dart exclusion works on Windows
+        // (`lib\theme\tokens.dart`) as well as POSIX (`lib/theme/tokens.dart`).
+        if (f.path.replaceAll(r'\', '/').endsWith('theme/tokens.dart')) continue;
         if (f.readAsStringSync().contains(entry.key)) offenders.add(f.path);
       }
       expect(
