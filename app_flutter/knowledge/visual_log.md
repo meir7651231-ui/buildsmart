@@ -748,3 +748,7 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **after:** עטיפה אדּיטיבית Semantics(button)+Tooltip עם תווית-עברית מדויקת לכל אחד — **בלי שינוי-גודל/מראה** (round-3 idiom). 25 כפתורים.
 - מסכים: lipskey-products/product-sheet/brand · catalog · store · install-studio · camera · home_shell · notifications · smart-home.
 - **אימות:** analyze 0 errors; הסמנטיקה אדּיטיבית (לא משנה layout). אימות-פיקסל-חי + screen-reader בתור לנקודת-בדיקה.
+
+## 2026-06-09 — השלמת a11y/rtl (נחיל 44-fixers → 9 אמיתיים)
+- נחיל סרק את כל 44 המסכים שנותרו; רוב המסכים כבר תקינים (round3). 9 תיקונים אמיתיים: תוויות screen-reader לכפתורי-X/חזרה ב-finder/audit/chats/home-content-reorder/install-studio/lipskey-products.
+- אדּיטיבי בלבד (Semantics+Tooltip), בלי שינוי-מראה. analyze 0 errors.

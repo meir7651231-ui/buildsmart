@@ -562,10 +562,17 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
           child: Text('צ׳יפ כתום על מוצר — הקש כדי להחליף גודל או צבע',
               style: TextStyle(color: _ink, fontSize: 12),),
         ),
-        GestureDetector(
-          onTap: () =>
-              ref.read(finderChipTipDismissedProvider.notifier).state = true,
-          child: const Icon(Icons.close, size: 16, color: _mute),
+        Semantics(
+          button: true,
+          label: 'סגור',
+          child: Tooltip(
+            message: 'סגור',
+            child: GestureDetector(
+              onTap: () =>
+                  ref.read(finderChipTipDismissedProvider.notifier).state = true,
+              child: const Icon(Icons.close, size: 16, color: _mute),
+            ),
+          ),
         ),
       ],),
     );

@@ -1431,9 +1431,12 @@ class _NodeRow extends StatelessWidget {
           Semantics(
             button: true,
             label: 'הסר מוצר',
-            child: GestureDetector(
-              onTap: onRemove,
-              child: const Icon(Icons.close, color: _mute, size: 18),
+            child: Tooltip(
+              message: 'הסר מוצר',
+              child: GestureDetector(
+                onTap: onRemove,
+                child: const Icon(Icons.close, color: _mute, size: 18),
+              ),
             ),
           ),
         ]),
@@ -2946,13 +2949,16 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
   Widget _stepBtn(IconData ic, VoidCallback onTap) => Semantics(
         button: true,
         label: ic == Icons.add ? 'הוסף' : 'הפחת',
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: 24, height: 24,
-            decoration: BoxDecoration(
-                color: _void1, borderRadius: BorderRadius.circular(8)),
-            child: Icon(ic, color: _ink, size: 15),
+        child: Tooltip(
+          message: ic == Icons.add ? 'הוסף' : 'הפחת',
+          child: GestureDetector(
+            onTap: onTap,
+            child: Container(
+              width: 24, height: 24,
+              decoration: BoxDecoration(
+                  color: _void1, borderRadius: BorderRadius.circular(8)),
+              child: Icon(ic, color: _ink, size: 15),
+            ),
           ),
         ),
       );

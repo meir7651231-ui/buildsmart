@@ -155,12 +155,19 @@ class _AuditScreenState extends State<AuditScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
                 child: Row(children: [
-                  GestureDetector(
-                    onTap: () => Navigator.maybePop(context),
-                    child: const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Icon(Icons.arrow_forward,
-                          color: BsTokens.inkLight, size: 22),
+                  Semantics(
+                    button: true,
+                    label: 'חזרה',
+                    child: Tooltip(
+                      message: 'חזרה',
+                      child: GestureDetector(
+                        onTap: () => Navigator.maybePop(context),
+                        child: const Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(Icons.arrow_forward,
+                              color: BsTokens.inkLight, size: 22),
+                        ),
+                      ),
                     ),
                   ),
                   const Text('אודיט תרחישים',

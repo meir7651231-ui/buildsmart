@@ -1644,6 +1644,7 @@ class _InputBar extends StatelessWidget {
                 final hasText = val.text.trim().isNotEmpty;
                 return _CircleFab(
                   icon: hasText ? Icons.send : Icons.mic,
+                  semanticLabel: hasText ? 'שלח הודעה' : 'הקלטת הודעה קולית',
                   onTap: hasText
                       ? onSend
                       : () => _showVoiceUnavailable(ctx),
@@ -1734,23 +1735,38 @@ class _InputBar extends StatelessWidget {
 }
 
 class _CircleFab extends StatelessWidget {
-  const _CircleFab({required this.icon, required this.onTap});
+  const _CircleFab({
+    required this.icon,
+    required this.onTap,
+    required this.semanticLabel,
+  });
   final IconData icon;
   final VoidCallback onTap;
+  final String semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: const BoxDecoration(
-          color: BsTokens.brand,
-          shape: BoxShape.circle,
+    // a11y (#a11y-round3 idiom): the icon-only send/mic FAB is a bare
+    // GestureDetector — additively label it for screen-reader + tooltip
+    // without changing size/layout.
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: Tooltip(
+        message: semanticLabel,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: const BoxDecoration(
+              color: BsTokens.brand,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, color: bsOnAccent(context), size: 22),
+          ),
         ),
-        alignment: Alignment.center,
-        child: Icon(icon, color: bsOnAccent(context), size: 22),
       ),
     );
   }

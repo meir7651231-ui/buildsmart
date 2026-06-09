@@ -484,16 +484,23 @@ class LipskeyProductGridCard extends ConsumerWidget {
                         onTap: () => cart.setQtyForKey(_line(qty - 1)),
                       ),
                       Expanded(
-                        child: GestureDetector(
-                          onTap: () => showQtyWheel(context, qty,
-                              (n) => cart.setQtyForKey(_line(n))),
-                          child: Text(
-                            '$qty',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: cs.onSurface,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
+                        child: Semantics(
+                          button: true,
+                          label: 'בחר כמות',
+                          child: Tooltip(
+                            message: 'בחר כמות',
+                            child: GestureDetector(
+                              onTap: () => showQtyWheel(context, qty,
+                                  (n) => cart.setQtyForKey(_line(n))),
+                              child: Text(
+                                '$qty',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: cs.onSurface,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -1266,20 +1273,27 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
                         fontSize: 10)),
                 const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: p.sku));
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('מק"ט הועתק'),
-                      duration: Duration(seconds: 1),
-                      behavior: SnackBarBehavior.floating,
-                    ));
-                  },
-                  child: Text('#${p.sku}',
-                      style: TextStyle(
-                          color: _muted,
-                          fontSize: 10,
-                          fontFamily: 'monospace')),
+                Semantics(
+                  button: true,
+                  label: 'העתק מק"ט',
+                  child: Tooltip(
+                    message: 'העתק מק"ט',
+                    child: GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: p.sku));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('מק"ט הועתק'),
+                          duration: Duration(seconds: 1),
+                          behavior: SnackBarBehavior.floating,
+                        ));
+                      },
+                      child: Text('#${p.sku}',
+                          style: TextStyle(
+                              color: _muted,
+                              fontSize: 10,
+                              fontFamily: 'monospace')),
+                    ),
+                  ),
                 ),
                 if (p.dims?['PN'] != null || p.dims?['SDR'] != null) ...[
                   const SizedBox(width: 10),
@@ -1292,21 +1306,28 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                 ],
                 if (widget.familySiblings.length > 1) ...[
                   const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: _cycleFamily,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0x22FF7A18),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0x55FF7A18)),
-                      ),
-                      child: Text(
-                        '${(widget.familySiblings.indexWhere((q) => q.sku == p.sku) + 1)}/${widget.familySiblings.length}',
-                        style: const TextStyle(
-                          color: Color(0xFFCC6614),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
+                  Semantics(
+                    button: true,
+                    label: 'החלף וריאנט',
+                    child: Tooltip(
+                      message: 'החלף וריאנט',
+                      child: GestureDetector(
+                        onTap: _cycleFamily,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0x22FF7A18),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0x55FF7A18)),
+                          ),
+                          child: Text(
+                            '${(widget.familySiblings.indexWhere((q) => q.sku == p.sku) + 1)}/${widget.familySiblings.length}',
+                            style: const TextStyle(
+                              color: Color(0xFFCC6614),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10,
+                            ),
+                          ),
                         ),
                       ),
                     ),

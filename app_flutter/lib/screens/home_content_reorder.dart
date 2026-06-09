@@ -187,11 +187,19 @@ class _SectionSlot extends ConsumerWidget {
         children: [
           Row(
             children: [
-              ReorderableDragStartListener(
-                index: index,
-                child: const Padding(
-                  padding: EdgeInsets.all(BsTokens.space3),
-                  child: Icon(Icons.drag_indicator, color: BsTokens.mutedLight),
+              Semantics(
+                button: true,
+                label: 'גרור לסידור מחדש',
+                child: Tooltip(
+                  message: 'גרור לסידור מחדש',
+                  child: ReorderableDragStartListener(
+                    index: index,
+                    child: const Padding(
+                      padding: EdgeInsets.all(BsTokens.space3),
+                      child: Icon(Icons.drag_indicator,
+                          color: BsTokens.mutedLight),
+                    ),
+                  ),
                 ),
               ),
               Text(meta.emoji, style: const TextStyle(fontSize: 18)),

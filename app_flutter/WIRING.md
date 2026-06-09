@@ -1419,3 +1419,7 @@ Gate: analyze 0 · full suite 1737/1737 green.
 - **דפוס (תואם #a11y-round3):** עטיפה אדּיטיבית `Semantics(button:true,label:HE)` + `Tooltip(message:HE)` — **בלי שינוי-גודל/layout** (round-3 נמנע מ-resize של פקדים צפופים → סיכון-overflow). תוויות-עברית מדויקות (הוסף לסל/הסר מהסל/הוסף כמות/סגור/חזרה/בטל/נהל קטגוריות...).
 - מסכים: lipskey_products(4)·catalog(4)·lipskey_product_sheet·store·install_studio·camera_sheet·home_shell·lipskey_brand·notifications·smart_home. fixers דילגו על Material-defaults (IconButton/TextButton כבר ≥48dp) ועל טקסט-נושא-עצמו.
 - Gate: analyze 0 errors. 48dp-enlarge נדחה מכוון (סיכון-layout) — תוסף Semantics הוא הריפוי המאושר. אימות-פיקסל-חי בתור.
+### #a11y-rtl-finish — השלמת a11y/rtl על שאר המסכים (נחיל 9×9) — 2026-06-09
+- נחיל של 44 fixers על כל המסכים שנותרו → **רק 9 תיקונים אמיתיים ב-6 קבצים** (38 כבר תקינים מ-round3 — אישוש ש-876-האודיט היה over-report).
+- תוקנו (Semantics+Tooltip additive): `finder` (× סגור chip-tip) · `audit_screen` (חזרה) · `home_content_reorder` · `chats_screen` · `install_studio` · `lipskey_products`. תוויות-עברית מדויקות. בלי שינוי-layout.
+- Gate: analyze 0 errors.
