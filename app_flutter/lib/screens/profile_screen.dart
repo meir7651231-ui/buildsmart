@@ -39,6 +39,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   late final TextEditingController _nameController;
   late final TextEditingController _contactController;
+  late final TextEditingController _addressController;
+  late final TextEditingController _businessIdController;
   late String _profession;
 
   @override
@@ -47,6 +49,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final p = ref.read(userProfileProvider);
     _nameController = TextEditingController(text: p.name);
     _contactController = TextEditingController(text: p.contact);
+    _addressController = TextEditingController(text: p.address);
+    _businessIdController = TextEditingController(text: p.businessId);
     _profession = p.profession;
   }
 
@@ -54,6 +58,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void dispose() {
     _nameController.dispose();
     _contactController.dispose();
+    _addressController.dispose();
+    _businessIdController.dispose();
     super.dispose();
   }
 
@@ -62,6 +68,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           name: _nameController.text,
           contact: _contactController.text,
           profession: _profession,
+          address: _addressController.text,
+          businessId: _businessIdController.text,
         );
     showToast(context, 'הפרופיל נשמר');
   }
@@ -108,6 +116,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               controller: _contactController,
               hint: 'טלפון או אימייל',
               textDirection: TextDirection.ltr,
+            ),
+            const SizedBox(height: BsTokens.space4),
+            _Field(
+              label: 'כתובת',
+              controller: _addressController,
+              hint: 'כתובת / אזור',
+            ),
+            const SizedBox(height: BsTokens.space4),
+            _Field(
+              label: 'ח.פ./עוסק מורשה',
+              controller: _businessIdController,
+              hint: 'ח.פ. / עוסק מורשה',
             ),
             const SizedBox(height: BsTokens.space4),
             const _FieldLabel('תחום מקצועי'),

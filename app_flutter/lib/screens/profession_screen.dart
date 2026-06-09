@@ -1,9 +1,14 @@
+import 'package:buildsmart/screens/coming_soon_screen.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// Trades that have no real content yet — picking one leads to an honest
+/// "בקרוב" screen instead of an empty flow. Only אינסטלטור is fully built.
+const Set<String> kComingSoonTrades = {'חשמלאי', 'קבלן שיפוצים'};
 
 /// One trade option (pure data → unit-testable).
 class TradeOption {
@@ -33,6 +38,12 @@ class ProfessionScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     void pick(String name) {
+      // Trades without real content yet → honest "בקרוב" screen (keeps the
+      // user on the picker via back). Only אינסטלטור proceeds into the app.
+      if (kComingSoonTrades.contains(name)) {
+        Navigator.of(context).push(ComingSoonScreen.route(name));
+        return;
+      }
       ref.read(userProfileProvider.notifier).setProfession(name);
       ref.read(startupStepProvider.notifier).state = 2;
     }

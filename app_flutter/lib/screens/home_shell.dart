@@ -2,12 +2,8 @@ import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
-import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
-import 'package:buildsmart/screens/site_hub_screen.dart';
-import 'package:buildsmart/screens/stock_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
-import 'package:buildsmart/screens/home_content_reorder.dart';
 import 'package:buildsmart/screens/chat_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
@@ -471,8 +467,9 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     ),
                     if (firstName.isNotEmpty) ...[
                       const SizedBox(width: BsTokens.space2),
-                      // The name chip is its OWN tap target → opens the native
-                      // profile screen. This inner GestureDetector wins taps on
+                      // The name chip is its OWN tap target → opens a read-only
+                      // profile CARD (the editor is one tap further, behind
+                      // 'ערוך פרופיל'). This inner GestureDetector wins taps on
                       // the chip; the outer InkWell still handles the logo/version
                       // (showRolePicker). HitTestBehavior.opaque so the whole chip
                       // area (incl. padding) is hot.
@@ -483,8 +480,7 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                           message: 'הפרופיל שלי',
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
-                            onTap: () => Navigator.of(context)
-                                .push(ProfileScreen.route()),
+                            onTap: () => showProfileCard(context),
                             // ≥48dp tap target around the small pill (a11y),
                             // without enlarging the visible chip.
                             child: ConstrainedBox(
@@ -706,38 +702,10 @@ class _CatalogMenuButton extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
       itemBuilder: (_) => const [
-        PopupMenuItem<String>(
-          value: 'scan_plan',
-          child: _MenuRow(emoji: '📐', label: 'סרוק תוכנית עבודה'),
-        ),
-        PopupMenuItem<String>(
-          value: 'alternatives',
-          child: _MenuRow(emoji: '💡', label: 'חלופות זולות'),
-        ),
-        PopupMenuItem<String>(
-          value: 'price_compare',
-          child: _MenuRow(emoji: '📊', label: 'השוואת מחירים'),
-        ),
         // 🏠 home-tab tools, surfaced natively (mirror the menu-dial 🏠 branch).
         PopupMenuItem<String>(
           value: 'ai_hub',
           child: _MenuRow(emoji: '🤖', label: 'בינה מלאכותית ואוטומציה'),
-        ),
-        PopupMenuItem<String>(
-          value: 'stock',
-          child: _MenuRow(emoji: '📦', label: 'המלאי שלי'),
-        ),
-        PopupMenuItem<String>(
-          value: 'site_tasks',
-          child: _MenuRow(emoji: '📋', label: 'משימות העבודה'),
-        ),
-        PopupMenuItem<String>(
-          value: 'favorites',
-          child: _MenuRow(emoji: '❤️', label: 'מועדפים'),
-        ),
-        PopupMenuItem<String>(
-          value: 'home_content',
-          child: _MenuRow(emoji: '🏠', label: 'תוכן הבית'),
         ),
         PopupMenuDivider(),
         PopupMenuItem<String>(
@@ -750,22 +718,8 @@ class _CatalogMenuButton extends ConsumerWidget {
 
   void _onSelected(BuildContext context, WidgetRef ref, String value) {
     switch (value) {
-      case 'home_content':
-        Navigator.of(context).push(HomeContentReorder.route());
-      case 'scan_plan':
-        openScanPlanSheet(context);
-      case 'alternatives':
-        openCheaperAlternativesSheet(context);
-      case 'price_compare':
-        openPriceCompareSheet(context);
       case 'ai_hub':
         Navigator.of(context).push(AIHubScreen.route());
-      case 'stock':
-        Navigator.of(context).push(StockScreen.route());
-      case 'site_tasks':
-        openSiteHub(context);
-      case 'favorites':
-        ref.read(catalogSectionProvider.notifier).state = 'מועדפים';
       case 'settings':
         Navigator.of(context).push(CatalogSettingsScreen.route());
     }
@@ -1031,6 +985,164 @@ class _NewChatSheet extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── profile card (name-chip → read-only profile) ──────────────────────────
+
+/// Opens a read-only profile CARD as a modal bottom sheet (RTL, BsTokens).
+///
+/// Reached only via the app-bar name chip. Surfaces the filled details
+/// (name · profession · address · businessId · contact — empties omitted) and
+/// a primary 'ערוך פרופיל' that pushes the existing editor. The editor is one
+/// tap further, so the chip no longer drops straight into a form.
+void showProfileCard(BuildContext context) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: const Color(0xFFFFFFFF),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => const _ProfileCard(),
+  );
+}
+
+/// The read-only profile card body (mirrors the _ProfileScreen _HeaderCard
+/// idiom + the _NewChatSheet sheet chrome). Detail rows whose value is empty
+/// are omitted — no blank lines.
+class _ProfileCard extends ConsumerWidget {
+  const _ProfileCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final p = ref.watch(userProfileProvider);
+    final hasName = p.name.trim().isNotEmpty;
+    final name = hasName ? p.name.trim() : 'אורח';
+    final rows = <(IconData, String)>[
+      if (p.profession.trim().isNotEmpty) (Icons.work_outline, p.profession.trim()),
+      if (p.address.trim().isNotEmpty) (Icons.place_outlined, p.address.trim()),
+      if (p.businessId.trim().isNotEmpty)
+        (Icons.badge_outlined, p.businessId.trim()),
+      if (p.contact.trim().isNotEmpty) (Icons.alternate_email, p.contact.trim()),
+    ];
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.black12,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Header: avatar circle + big name (mirrors profile_screen
+            // _HeaderCard), with a close affordance on the leading edge.
+            Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFF0E3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: ExcludeSemantics(
+                    child: hasName
+                        ? Text(
+                            name.characters.first,
+                            style: const TextStyle(
+                              color: BsTokens.brandDark,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 24,
+                            ),
+                          )
+                        : const Icon(Icons.person,
+                            color: BsTokens.brandDark, size: 28),
+                  ),
+                ),
+                const SizedBox(width: BsTokens.space3),
+                Expanded(
+                  child: Text(
+                    name,
+                    style: const TextStyle(
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 22,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Color(0xFF888888)),
+                  tooltip: 'סגור',
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            if (rows.isNotEmpty) ...[
+              const SizedBox(height: BsTokens.space3),
+              const Divider(color: Color(0xFFF5F5F5), height: 1),
+              const SizedBox(height: BsTokens.space2),
+              for (final (icon, value) in rows)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: BsTokens.space2),
+                  child: Row(
+                    children: [
+                      Icon(icon, size: 18, color: BsTokens.mutedLight),
+                      const SizedBox(width: BsTokens.space3),
+                      Expanded(
+                        child: Text(
+                          value,
+                          style: const TextStyle(
+                            color: BsTokens.inkLight,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+            const SizedBox(height: BsTokens.space4),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.of(context).push(ProfileScreen.route());
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: BsTokens.brand,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: BsTokens.space3),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  ),
+                ),
+                child: Text(
+                  'ערוך פרופיל',
+                  style: TextStyle(
+                    color: bsOnAccent(context),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

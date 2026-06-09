@@ -149,8 +149,8 @@ class _ThemeSection extends ConsumerWidget {
           label: 'ערכת נושא',
           value: settings.theme,
           options: const [
-            (value: BsTheme.light, label: 'בהיר'),
-            (value: BsTheme.dark, label: 'כהה'),
+            _RadioOption(value: BsTheme.light, label: 'בהיר'),
+            _RadioOption(value: BsTheme.dark, label: 'כהה'),
           ],
           onChanged:
               (v) => ref
@@ -234,11 +234,14 @@ class _RegionSection extends ConsumerWidget {
       children: [
         _RadioGroupRow<BsLang>(
           label: 'שפה',
+          // Only Hebrew is actually implemented (no real l10n yet); Arabic +
+          // English stay non-selectable and carry a "בקרוב" badge so the
+          // picker never fakes a language switch.
           value: settings.lang,
           options: const [
-            (value: BsLang.he, label: 'עברית'),
-            (value: BsLang.ar, label: 'العربية'),
-            (value: BsLang.en, label: 'English'),
+            _RadioOption(value: BsLang.he, label: 'עברית'),
+            _RadioOption(value: BsLang.ar, label: 'العربية', enabled: false),
+            _RadioOption(value: BsLang.en, label: 'English', enabled: false),
           ],
           onChanged:
               (v) => ref
@@ -307,8 +310,16 @@ class _DisplaySection extends ConsumerWidget {
           label: 'סוג תצוגה',
           value: settings.viewMode,
           options: const [
-            (value: CatalogViewMode.grid, label: 'רשת (Grid)'),
-            (value: CatalogViewMode.list, label: 'רשימה (List)'),
+            _RadioOption(
+              value: CatalogViewMode.grid,
+              label: 'רשת (Grid)',
+              icon: Icons.grid_view,
+            ),
+            _RadioOption(
+              value: CatalogViewMode.list,
+              label: 'רשימה (List)',
+              icon: Icons.view_list_rounded,
+            ),
           ],
           onChanged:
               (v) => ref
@@ -330,10 +341,23 @@ class _DisplaySection extends ConsumerWidget {
         _RadioGroupRow<CatalogImageSize>(
           label: 'גודל תמונות',
           value: settings.imageSize,
+          // Each label renders at its own size so the difference is visible.
           options: const [
-            (value: CatalogImageSize.small, label: 'קטן'),
-            (value: CatalogImageSize.medium, label: 'בינוני'),
-            (value: CatalogImageSize.large, label: 'גדול'),
+            _RadioOption(
+              value: CatalogImageSize.small,
+              label: 'קטן',
+              labelFontSize: 13,
+            ),
+            _RadioOption(
+              value: CatalogImageSize.medium,
+              label: 'בינוני',
+              labelFontSize: 15,
+            ),
+            _RadioOption(
+              value: CatalogImageSize.large,
+              label: 'גדול',
+              labelFontSize: 18,
+            ),
           ],
           onChanged:
               (v) => ref
@@ -490,9 +514,9 @@ class _AccessibilitySection extends ConsumerWidget {
           label: 'גודל טקסט (כל האפליקציה)',
           value: settings.textSize,
           options: const [
-            (value: CatalogTextSize.small, label: 'קטן'),
-            (value: CatalogTextSize.medium, label: 'בינוני'),
-            (value: CatalogTextSize.large, label: 'גדול'),
+            _RadioOption(value: CatalogTextSize.small, label: 'קטן'),
+            _RadioOption(value: CatalogTextSize.medium, label: 'בינוני'),
+            _RadioOption(value: CatalogTextSize.large, label: 'גדול'),
           ],
           onChanged:
               (v) => ref
@@ -623,7 +647,7 @@ class _RadioGroupRow<T> extends StatelessWidget {
 
   final String label;
   final T value;
-  final List<({T value, String label})> options;
+  final List<_RadioOption<T>> options;
   final ValueChanged<T> onChanged;
 
   @override
@@ -638,24 +662,76 @@ class _RadioGroupRow<T> extends StatelessWidget {
             style: const TextStyle(color: Colors.black54, fontSize: 13),
           ),
         ),
-        ...options.map(
-          (o) => RadioListTile<T>(
+        ...options.map((o) {
+          final enabled = o.enabled;
+          // Disabled options stay un-selectable and carry a "בקרוב" badge so
+          // the picker is honest about what is actually implemented.
+          return RadioListTile<T>(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            title: Text(
-              o.label,
-              style: const TextStyle(color: BsTokens.inkLight),
+            // Optional leading icon (e.g. grid/list view glyph) — null = no icon.
+            secondary: o.icon == null
+                ? null
+                : Icon(
+                    o.icon,
+                    color: enabled ? BsTokens.inkLight : BsTokens.mutedLight,
+                  ),
+            title: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    o.label,
+                    // Per-option font size lets size pickers render their own
+                    // label at its own scale; defaults to the inherited size.
+                    style: TextStyle(
+                      color: enabled ? BsTokens.inkLight : BsTokens.mutedLight,
+                      fontSize: o.labelFontSize,
+                    ),
+                  ),
+                ),
+                if (!enabled) ...[
+                  const SizedBox(width: 8),
+                  const Text(
+                    'בקרוב',
+                    style: TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ],
             ),
             value: o.value,
             groupValue: value,
             activeColor: BsTokens.brand,
-            onChanged: (v) {
-              if (v != null) onChanged(v);
-            },
-          ),
-        ),
+            onChanged: enabled
+                ? (v) {
+                    if (v != null) onChanged(v);
+                  }
+                : null,
+          );
+        }),
       ],
     );
   }
+}
+
+/// One option in a [_RadioGroupRow]. [enabled] gates selection (a disabled
+/// option shows a "בקרוב" badge); [icon] adds a leading glyph; [labelFontSize]
+/// renders the label at its own scale.
+class _RadioOption<T> {
+  const _RadioOption({
+    required this.value,
+    required this.label,
+    this.enabled = true,
+    this.icon,
+    this.labelFontSize,
+  });
+
+  final T value;
+  final String label;
+  final bool enabled;
+  final IconData? icon;
+  final double? labelFontSize;
 }
 
 class _PlaceholderRow extends StatelessWidget {

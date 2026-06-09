@@ -514,7 +514,7 @@ class AiFinTile extends StatelessWidget {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(ic, style: const TextStyle(fontSize: 26)),
               const SizedBox(height: 6),

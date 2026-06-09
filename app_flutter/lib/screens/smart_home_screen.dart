@@ -213,15 +213,22 @@ class _MiniTile extends StatelessWidget {
   }
 }
 
-// ─── מחלקות — real departments, 2 rows + "עוד" (cols follow gridColumns) ──────────
+// ─── מחלקות — FIXED 2-col nav grid, 2 rows (3 depts + "עוד"); DECOUPLED ───────────
+// Departments are a stable navigation grid: a fixed 2 columns, ~2 rows (3
+// departments + the "עוד" tile = 4 cells in 2×2), independent of the gridColumns
+// display setting (which still drives the PRODUCT/מועדפים grids via m.cols).
 class _Departments extends ConsumerWidget {
   const _Departments();
+
+  /// Fixed column count for the department nav grid (NOT m.cols).
+  static const int _deptCols = 2;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final m = _metrics(context, ref);
+    // 3 departments + the "עוד" tile = 4 cells fill a stable 2×2.
     final depts =
-        DepartmentsScreen.departments.take(m.cols * 2 - 1).toList();
+        DepartmentsScreen.departments.take(_deptCols * 2 - 1).toList();
     return _Pad(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -231,7 +238,7 @@ class _Departments extends ConsumerWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: m.cols,
+              crossAxisCount: _deptCols,
               mainAxisSpacing: BsTokens.space2,
               crossAxisSpacing: BsTokens.space2,
               mainAxisExtent: m.tileH,

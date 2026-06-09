@@ -12,6 +12,8 @@ class UserProfile {
     this.name = '',
     this.contact = '',
     this.profession = '',
+    this.address = '',
+    this.businessId = '',
     this.registered = false,
   });
 
@@ -24,6 +26,12 @@ class UserProfile {
   /// Trade picked in the profession step (אינסטלטור / חשמלאי / קבלן שיפוצים).
   final String profession;
 
+  /// Address / service area (כתובת / אזור) — optional.
+  final String address;
+
+  /// Business id (ח.פ. / עוסק מורשה) — optional.
+  final String businessId;
+
   /// `true` once the user registered; `false` if they chose "continue as demo".
   final bool registered;
 
@@ -31,12 +39,16 @@ class UserProfile {
     String? name,
     String? contact,
     String? profession,
+    String? address,
+    String? businessId,
     bool? registered,
   }) =>
       UserProfile(
         name: name ?? this.name,
         contact: contact ?? this.contact,
         profession: profession ?? this.profession,
+        address: address ?? this.address,
+        businessId: businessId ?? this.businessId,
         registered: registered ?? this.registered,
       );
 
@@ -44,6 +56,8 @@ class UserProfile {
         'name': name,
         'contact': contact,
         'profession': profession,
+        'address': address,
+        'businessId': businessId,
         'registered': registered,
       };
 
@@ -51,6 +65,8 @@ class UserProfile {
         name: j['name'] as String? ?? '',
         contact: j['contact'] as String? ?? '',
         profession: j['profession'] as String? ?? '',
+        address: j['address'] as String? ?? '',
+        businessId: j['businessId'] as String? ?? '',
         registered: j['registered'] as bool? ?? false,
       );
 }
@@ -110,13 +126,21 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
   /// Edit profile fields from the profile screen. Unspecified fields are kept;
   /// `registered` flips true once name+contact are both valid, so a guest who
   /// fills them in graduates to a registered user (→ the name chip appears).
-  void update({String? name, String? contact, String? profession}) {
+  void update({
+    String? name,
+    String? contact,
+    String? profession,
+    String? address,
+    String? businessId,
+  }) {
     final n = (name ?? state.name).trim();
     final c = (contact ?? state.contact).trim();
     state = state.copyWith(
       name: n,
       contact: c,
       profession: (profession ?? state.profession).trim(),
+      address: (address ?? state.address).trim(),
+      businessId: (businessId ?? state.businessId).trim(),
       registered: state.registered || registrationValid(n, c),
     );
     _persist();

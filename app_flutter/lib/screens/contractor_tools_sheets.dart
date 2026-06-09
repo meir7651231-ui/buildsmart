@@ -59,6 +59,44 @@ void openPriceCompareSheet(BuildContext context) {
   );
 }
 
+/// Shared header for the three contractor sheets: the centered grab-pill with an
+/// explicit close (X) overlaid at the visual top-left (RTL → Alignment.centerLeft,
+/// matching camera_sheet.dart). The X is orthogonal to drag/scrim dismissal and to
+/// any in-sheet back-step; it always means "close the whole sheet". The drag handle
+/// stays centered (Stack) so the title below it is not pushed off-centre.
+class _SheetHandle extends StatelessWidget {
+  const _SheetHandle();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: 36,
+          height: 4,
+          decoration: BoxDecoration(
+            color: Colors.black12,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Semantics(
+            button: true,
+            label: 'סגור',
+            child: IconButton(
+              tooltip: 'סגור',
+              icon: const Icon(Icons.close, color: Color(0xFF888888)),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// (T1 · לוח-קבלן) A cheaper same-product brand alternative across the smart-tree.
 class CheaperAlt {
   const CheaperAlt({
@@ -108,28 +146,53 @@ List<CheaperAlt> cheaperAlternativesAcrossCatalog() {
 
 /// (T1) "חלופות זולות" sheet — cheaper same-product brand options + savings.
 /// R9-inline (modal sheet, no new view); live supplier comparison is בפרודקשן.
-class _CheaperAlternativesSheet extends StatelessWidget {
+/// A search field (T37) filters the full cross-catalog scan by product/brand
+/// name, so the user can reach any specific product's cheaper alternative —
+/// not only the auto top deals. Empty query → the full auto list (T1 default).
+class _CheaperAlternativesSheet extends StatefulWidget {
   const _CheaperAlternativesSheet();
 
   @override
+  State<_CheaperAlternativesSheet> createState() =>
+      _CheaperAlternativesSheetState();
+}
+
+class _CheaperAlternativesSheetState extends State<_CheaperAlternativesSheet> {
+  // T37 — the live product-name search query (case-insensitive substring over
+  // the product name + recommended/alternative brand). Empty → full auto list.
+  final TextEditingController _searchCtl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final alts = cheaperAlternativesAcrossCatalog();
+    // Always scan the FULL cross-catalog list (not a sliced top-N) so a
+    // searched product that has a real alternative still surfaces.
+    final all = cheaperAlternativesAcrossCatalog();
+    final q = _query.trim().toLowerCase();
+    final alts =
+        q.isEmpty
+            ? all
+            : all
+                .where(
+                  (a) =>
+                      a.product.toLowerCase().contains(q) ||
+                      a.recName.toLowerCase().contains(q) ||
+                      a.altName.toLowerCase().contains(q),
+                )
+                .toList();
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+          const _SheetHandle(),
           const SizedBox(height: 14),
           const Text(
             '💡 חלופות זולות',
@@ -144,14 +207,57 @@ class _CheaperAlternativesSheet extends StatelessWidget {
             'מותג חלופי זול יותר לאותו מוצר — אותה התקנה, פחות עלות.',
             style: TextStyle(fontSize: 13, color: Color(0xFF888888)),
           ),
+          const SizedBox(height: 12),
+          // T37 — search any specific product (not only the auto top deals).
+          TextField(
+            controller: _searchCtl,
+            textDirection: TextDirection.rtl,
+            onChanged: (v) => setState(() => _query = v),
+            decoration: InputDecoration(
+              hintText: 'חפש מוצר…',
+              prefixIcon: const Icon(Icons.search, color: Color(0xFF888888)),
+              suffixIcon:
+                  _query.isEmpty
+                      ? null
+                      : IconButton(
+                        icon: const Icon(
+                          Icons.close,
+                          color: Color(0xFF888888),
+                        ),
+                        tooltip: 'נקה',
+                        onPressed:
+                            () => setState(() {
+                              _searchCtl.clear();
+                              _query = '';
+                            }),
+                      ),
+              isDense: true,
+              filled: true,
+              fillColor: const Color(0xFFF6F7F9),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: BsTokens.space3,
+                vertical: 12,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFE6E8EC)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFE6E8EC)),
+              ),
+            ),
+          ),
           const SizedBox(height: 14),
           if (alts.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
               child: Text(
-                'אין חלופות זולות כרגע.',
+                _query.trim().isEmpty
+                    ? 'אין חלופות זולות כרגע.'
+                    : 'לא נמצאו חלופות תואמות.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Color(0xFF888888)),
+                style: const TextStyle(color: Color(0xFF888888)),
               ),
             )
           else
@@ -284,16 +390,7 @@ class _StorePriceComparisonSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+          const _SheetHandle(),
           const SizedBox(height: 14),
           const Text(
             '📊 השוואת מחירים',
@@ -437,6 +534,11 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
   int _stepIdx = 0;
   Timer? _timer;
 
+  // T41 — per-item manual selection in the results phase. Keyed by the same
+  // productKey scanPlanCartLines() emits ('scan:<plan>:<name>'). null until the
+  // results phase seeds it (all selected by default); reset on re-scan.
+  Set<String>? _selected;
+
   @override
   void initState() {
     super.initState();
@@ -456,11 +558,15 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
     super.dispose();
   }
 
+  // T41 — the cart-line key for a scanned item (mirrors scanPlanCartLines).
+  String _itemKey(PlanType p, ScanItem it) => 'scan:${p.key}:${it.name}';
+
   void _start(PlanType p) {
     setState(() {
       _plan = p;
       _scanning = true;
       _stepIdx = 0;
+      _selected = null; // re-seeded (all selected) when results render.
     });
     _timer = Timer.periodic(const Duration(milliseconds: 750), (t) {
       if (!mounted) {
@@ -477,7 +583,14 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
   }
 
   void _addToCart(PlanType p) {
-    final lines = scanPlanCartLines(p);
+    // T41 — only the items the user kept selected (default = all). Match by the
+    // cart-line key, which scanPlanCartLines() builds as 'scan:<plan>:<name>'.
+    final sel = _selected;
+    final lines =
+        scanPlanCartLines(
+          p,
+        ).where((l) => sel == null || sel.contains(l.productKey)).toList();
+    if (lines.isEmpty) return; // guarded by the disabled button; defensive.
     final cart = ref.read(smartCartProvider.notifier);
     for (final l in lines) {
       cart.add(l);
@@ -497,16 +610,7 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+          const _SheetHandle(),
           const SizedBox(height: 14),
           if (plan == null)
             ..._picker()
@@ -585,7 +689,12 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
 
   List<Widget> _results(PlanType p) {
     final lines = scanPlanCartLines(p);
+    // T41 — seed the per-item selection (all selected by default) the first
+    // time the results render for this plan. Keys mirror scanPlanCartLines.
+    final sel = _selected ??= {for (final l in lines) l.productKey};
     final total = lines.fold<int>(0, (s, l) => s + l.brandPrice);
+    final selCount = lines.where((l) => sel.contains(l.productKey)).length;
+    final allSelected = selCount == lines.length;
     return [
       Text(
         '✓ זוהו ${p.zones.length} ${p.summaryUnit}',
@@ -609,7 +718,7 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
       Flexible(
         child: ListView(
           shrinkWrap: true,
-          children: [for (final z in p.zones) ..._zoneCard(z)],
+          children: [for (final z in p.zones) ..._zoneCard(p, z)],
         ),
       ),
       const SizedBox(height: 10),
@@ -617,8 +726,13 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
         width: double.infinity,
         child: FilledButton(
           style: FilledButton.styleFrom(backgroundColor: BsTokens.brand),
-          onPressed: () => _addToCart(p),
-          child: Text('אשר הכל — הוסף ${lines.length} פריטים לסל'),
+          // T41 — guard 0 selected; otherwise add only the selected items.
+          onPressed: selCount == 0 ? null : () => _addToCart(p),
+          child: Text(
+            allSelected
+                ? 'אשר הכל — הוסף ${lines.length} פריטים לסל'
+                : 'אשר את הבחירה — הוסף $selCount פריטים לסל',
+          ),
         ),
       ),
       Center(
@@ -634,7 +748,7 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
     ];
   }
 
-  List<Widget> _zoneCard(ScanZone z) => [
+  List<Widget> _zoneCard(PlanType p, ScanZone z) => [
     Padding(
       padding: const EdgeInsets.only(top: 10, bottom: 2),
       child: Row(
@@ -663,41 +777,75 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
         ],
       ),
     ),
-    for (final it in z.items) _scanItemRow(it),
+    for (final it in z.items) _scanItemRow(p, it),
   ];
 
-  Widget _scanItemRow(ScanItem it) {
+  Widget _scanItemRow(PlanType p, ScanItem it) {
     final bi = it.stores.isEmpty ? 0 : bestStore(it.stores);
+    // T41 — only items that carry a store offer become cart lines, so only
+    // those get a selection checkbox; a no-store item renders unchanged.
+    final selectable = it.stores.isNotEmpty;
+    final key = _itemKey(p, it);
+    final checked = _selected?.contains(key) ?? false;
+    final details = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '${it.emoji} ${it.name}',
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: BsTokens.inkLight,
+          ),
+        ),
+        Text(
+          it.meta,
+          style: const TextStyle(fontSize: 11, color: Color(0xFF888888)),
+        ),
+        if (it.stores.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            children: [
+              for (var s = 0; s < it.stores.length; s++)
+                _StoreChip(offer: it.stores[s], best: s == bi),
+            ],
+          ),
+        ],
+      ],
+    );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${it.emoji} ${it.name}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: BsTokens.inkLight,
-            ),
-          ),
-          Text(
-            it.meta,
-            style: const TextStyle(fontSize: 11, color: Color(0xFF888888)),
-          ),
-          if (it.stores.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              children: [
-                for (var s = 0; s < it.stores.length; s++)
-                  _StoreChip(offer: it.stores[s], best: s == bi),
-              ],
-            ),
-          ],
-        ],
-      ),
+      child:
+          selectable
+              ? Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: Checkbox(
+                      value: checked,
+                      activeColor: BsTokens.brand,
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onChanged:
+                          (v) => setState(() {
+                            final sel = _selected ??= {};
+                            if (v ?? false) {
+                              sel.add(key);
+                            } else {
+                              sel.remove(key);
+                            }
+                          }),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(child: details),
+                ],
+              )
+              : details,
     );
   }
 }
