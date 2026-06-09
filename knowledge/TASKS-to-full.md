@@ -90,6 +90,16 @@ PROJECTS(3) · ARCHIVED(3) · SITE_TREE(3) · STOCK_DEMO(11) · TASKS(5+steps) �
 - **CH-4** חיווט: קבלן(טאב)/חנות(`sp-chat`)/שליח(`cp-chat`)/עובד/מנהל → `ChatsScreen(persona)` **standalone**. ✅ בדיקה-חוצה: חנות→קבלן · 🔒 בדיקת-בידוד: אין נתיב ללוח-קבלן/מנהל.
 - **CH-5** (אופ׳) קישור thread-להזמנה.
 
+# Track S — חיבור-שרת (Firebase + R2) · **phase-2 (אחרי client)** · spec מלא: `SPEC-server-connect.md`
+*ה-app server-ready (Repository 6/6) → drop-in. עיקרון: מחליפים `_local`→`_firebase` (cache-pattern שומר sync-interface). אבטחה = Firestore Rules.*
+- **S0** הקמת-Firebase (flutterfire+deps+init+offline-persist) — חוסם-הכל.
+- **S1** Auth (OTP+roles-מהשרת) — חוסם S5.
+- **S2** סכמת-Firestore + cache-pattern — חוסם S3/S4.
+- **S3** Repository `_firebase` ×6 (orders/customers/catalog/site/stock/finance) — מקבילי, drop-in.
+- **S4** real-time (chat+orders → Firestore listeners) — אחרי S3.
+- **S5** 🔒 Security Rules (RBAC צד-שרת · chat=participants · credit=manager+owner) — **קריטי לפני-השקה**.
+- **S6** FCM push · **S7** R2 תמונות · **S8** Cloud Functions · **S9** offline/sync.
+
 ---
 
 ## אומדן (ready-to-split)
