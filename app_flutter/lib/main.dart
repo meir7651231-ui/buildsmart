@@ -1,16 +1,44 @@
 import 'package:buildsmart/data/polyroll_specs.dart';
+import 'package:buildsmart/firebase_options.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // S0.4 — wire Firebase (web). initializeApp must precede any Firestore/Auth
+  // use; Firestore offline-persistence keeps the S2 sync cache-pattern fast.
+  // This runs only in the real entrypoint (main), never in tests, so the
+  // existing suite stays Firebase-free and green.
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseFirestore.instance.settings =
+      const Settings(persistenceEnabled: true);
+  // S0.5 — App Check (debug attestation for dev). Web reCAPTCHA + prod
+  // attestation (Play Integrity / DeviceCheck) are wired once the keys are
+  // registered in the console; App Check does not enforce until S5.7, so a
+  // failure here must never block app start.
+  if (!kIsWeb) {
+    try {
+      await FirebaseAppCheck.instance.activate(
+        androidProvider: AndroidProvider.debug,
+        appleProvider: AppleProvider.debug,
+      );
+    } catch (_) {
+      // non-fatal until S5 enforcement
+    }
+  }
   // Bridge step — synthesise VerifiedSpec for every Polyroll PPR product so
   // the card's compat / pair-warning / install-engine helpers cover the
   // 757-strong PPR catalog the same way they cover Lipskey.

@@ -1423,3 +1423,12 @@ Gate: analyze 0 · full suite 1737/1737 green.
 - נחיל של 44 fixers על כל המסכים שנותרו → **רק 9 תיקונים אמיתיים ב-6 קבצים** (38 כבר תקינים מ-round3 — אישוש ש-876-האודיט היה over-report).
 - תוקנו (Semantics+Tooltip additive): `finder` (× סגור chip-tip) · `audit_screen` (חזרה) · `home_content_reorder` · `chats_screen` · `install_studio` · `lipskey_products`. תוויות-עברית מדויקות. בלי שינוי-layout.
 - Gate: analyze 0 errors.
+
+### #server-S0 — Firebase SDK מחווט (web) · Phase A — 2026-06-09
+- ה-foundation החי (console: Auth Phone+Email · Firestore me-west1 Production) חובר ל-client דרך drop-in cache-pattern. SSOT: `SERVER-KICKOFF` + `SPEC-server-connect-MICRO` (ענף-ידע `nice-volta-BSbVm`).
+- **S0.2** `lib/firebase_options.dart` — נכתב ידנית מה-Web SDK config (flutterfire CLI חסום בסנדבוקס: אין CLI/auth + ה-network חוסם דומייני-Firebase). web בלבד; android/ios זורקים שגיאה ברורה עד שירשמו. client-config פומבי (אבטחה = Rules S5).
+- **S0.3** deps: `firebase_core ^4.10` · `firebase_auth` · `cloud_firestore ^6.5` · `firebase_messaging` · `cloud_functions` · `firebase_app_check` (pub get ירוק).
+- **S0.4** `main.dart`: `Firebase.initializeApp(…web)` + `Settings(persistenceEnabled:true)` — רץ רק ב-`main()` (לא בטסטים) → הסוויטה נשארת Firebase-free.
+- **S0.5** App Check guarded (debug ל-mobile · web reCAPTCHA + prod-attestation בהמשך · non-enforcing עד S5.7).
+- ה-interface נשאר **sync** (drop-in); ה-repos עדיין `_local` עד S3. catalog לא ב-Firestore.
+Gate: analyze 0 · suite 1772/1772 · build web ✓. Next: S2 (base cache-pattern + orders pilot) → S3 ×6 (הנחיל).
