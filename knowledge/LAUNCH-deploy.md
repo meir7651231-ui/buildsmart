@@ -4,6 +4,24 @@
 > מקרא: 📱 = בדפדפן/טלפון · 🤖 = אני/הצי מכין · 💻 = מחשב (רק במסלול הידני).
 > ⚠️ **ערכים מדויקים (IP / TXT) — להעתיק מה-console של Firebase, לא מהמסמך הזה.**
 
+---
+
+## ✅ סטטוס מאומת (06-09, anchor `db920f2`)
+- **אפליקציה חיה ✅** — Flutter web על Firebase Hosting: `https://buildsmart-b0b78.web.app` (deploy אוטומטי · run #1 success · build 49s + deploy 27s · "Production deploy succeeded").
+- **CI שהוטמע** (code branch `whats-happening`, commit `db920f2`, **תוספת בלבד**): `firebase.json` + `.github/workflows/firebase-hosting.yml` (build base-href `/` → deploy live · project `buildsmart-b0b78` · secret `FIREBASE_SERVICE_ACCOUNT`).
+- **גילוי:** כבר קיים pipeline `deploy.yml` → GitHub Pages (Preact ב-`/buildsmart/` + Flutter ב-`/flutter/`). **נשאר כתצוגה-מקדימה — לא נגעתי בו.**
+- **החלטה מוצרית:** `buildsmart-il.com` → **האפליקציה החדשה (Flutter)**.
+- **`buildsmart-il.com` ⏳ ממתין-אימות:** DNS מאומת חי — `A 199.36.158.100` (DNS-only/ענן-אפור) + `TXT hosting-site=buildsmart-b0b78`. Firebase מאמת לבד (cache · "up to 24h", בפועל 15ד'–שעתיים) → ואז SSL.
+- **`בניהחכמה.ישראל` ⏸️ נדחה:** `serverHold` (לא פעיל) · LiveDNS גובה ₪170/שנה ל-forwarding → **לא לשלם**; כשיהיה פעיל → הפניה חינמית דרך Cloudflare Redirect Rules.
+
+## 🗺️ מה הלאה (roadmap לפי עדיפות)
+1. **(פסיבי) להמתין** ש-`buildsmart-il.com` יתחבר (~1–2ש') → לאמת שנטען עם 🔒.
+2. **(הצעד הגדול) Backend/שרת** — מ"דמו" ל"אמיתי": Auth (OTP) · Firestore (נתונים אמיתיים) · Security Rules (RBAC) · FCM (push). מפורק ב-`SPEC-server-connect-MICRO.md` (~48 משימות · 2–3 שבועות). פרויקט-פיתוח (הצי בונה · אתה עושה חלקי-console).
+3. **(במקביל/אחר כך) חנויות** — iOS ($99/שנה) + Google Play ($25 חד-פעמי): listings · צילומים · privacy policy · signing · הגשה.
+4. **(פוליש)** — הדומיין העברי (הפניה חינמית) · P-1 צבעים · P-5 ניקוי-knowledge.
+
+**הצעד המשמעותי הבא = #2 (Backend).** בלעדיו = הדגמה יפה; איתו = מוצר אמיתי.
+
 ## ארכיטקטורה (מי מצביע לאן)
 ```
 בניהחכמה.ישראל ──(הפניה 301, LiveDNS)──▶ buildsmart-il.com ──(A records, Cloudflare DNS)──▶ Firebase Hosting (האתר)
