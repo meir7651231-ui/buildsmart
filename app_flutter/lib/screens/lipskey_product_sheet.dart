@@ -410,13 +410,21 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                   child: Material(
                     color: const Color(0xFFF5F5F5),
                     shape: const CircleBorder(),
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () => Navigator.pop(context),
-                      child: const SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: Icon(Icons.close, color: BsTokens.inkLight, size: 22),
+                    child: Semantics(
+                      button: true,
+                      label: 'סגור',
+                      child: Tooltip(
+                        message: 'סגור',
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => Navigator.pop(context),
+                          child: const SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: Icon(Icons.close,
+                                color: BsTokens.inkLight, size: 22),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -1144,21 +1152,28 @@ class _ProductSideState extends State<_ProductSide> {
               Positioned(
                 top: 10,
                 left: 10,
-                child: GestureDetector(
-                  onTap: () =>
-                      setState(() => _i = (i + 1) % imgs.length),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xCC1A1200),
-                      borderRadius: BorderRadius.circular(20),
+                child: Semantics(
+                  button: true,
+                  label: 'התמונה הבאה',
+                  child: Tooltip(
+                    message: 'התמונה הבאה',
+                    child: GestureDetector(
+                      onTap: () =>
+                          setState(() => _i = (i + 1) % imgs.length),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 9, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xCC1A1200),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text('${i + 1}/${imgs.length}',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800)),
+                      ),
                     ),
-                    child: Text('${i + 1}/${imgs.length}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800)),
                   ),
                 ),
               ),
@@ -1301,20 +1316,28 @@ class _SpecSideState extends State<_SpecSide> {
               Positioned(
                 top: 10,
                 left: 10,
-                child: GestureDetector(
-                  onTap: () => setState(() => _i = (i + 1) % specs.length),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xCC1A1200),
-                      borderRadius: BorderRadius.circular(20),
+                child: Semantics(
+                  button: true,
+                  label: 'המפרט הבא',
+                  child: Tooltip(
+                    message: 'המפרט הבא',
+                    child: GestureDetector(
+                      onTap: () =>
+                          setState(() => _i = (i + 1) % specs.length),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 9, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xCC1A1200),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text('${i + 1}/${specs.length}',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800)),
+                      ),
                     ),
-                    child: Text('${i + 1}/${specs.length}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800)),
                   ),
                 ),
               ),

@@ -170,42 +170,46 @@ class _MiniTile extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       onTap: onTap,
-      child: Opacity(
-        opacity: dim ? 0.5 : 1,
-        child: Container(
-          decoration: BoxDecoration(
-            color: pal.card,
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-            border: Border.all(color: pal.border),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: BsTokens.brand, size: 22),
-              const SizedBox(height: 4),
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: pal.ink,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
+      child: Semantics(
+        button: true,
+        label: note == null ? label : '$label — $note',
+        child: Opacity(
+          opacity: dim ? 0.5 : 1,
+          child: Container(
+            decoration: BoxDecoration(
+              color: pal.card,
+              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              border: Border.all(color: pal.border),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: BsTokens.brand, size: 22),
+                const SizedBox(height: 4),
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: pal.ink,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              if (note != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(note!,
-                      style: TextStyle(color: pal.muted, fontSize: 9)),
-                ),
-            ],
+                if (note != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(note!,
+                        style: TextStyle(color: pal.muted, fontSize: 9)),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

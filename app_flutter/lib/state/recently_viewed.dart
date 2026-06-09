@@ -12,9 +12,17 @@ class RecentlyViewedNotifier extends StateNotifier<List<String>> {
   static const _key = 'bs.recently-viewed.v1';
   static const cap = 20;
 
+  /// `true` once any mutating method (touch/clear) has written state. The
+  /// provider is lazy, so the constructor's async `_load()` can resolve AFTER a
+  /// synchronous user write (re-viewed sku overwritten by the late prefs read).
+  /// This one-shot guard makes a late `_load()` non-destructive once the user
+  /// has touched state.
+  bool _userTouched = false;
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(_key);
+    if (_userTouched) return;
     if (list != null) state = List.unmodifiable(list);
   }
 
@@ -27,6 +35,7 @@ class RecentlyViewedNotifier extends StateNotifier<List<String>> {
   /// and trim to [cap]. No-op for an empty sku.
   void touch(String? sku) {
     if (sku == null || sku.isEmpty) return;
+    _userTouched = true;
     final next = [sku, ...state.where((s) => s != sku)];
     state = List.unmodifiable(
         next.length > cap ? next.sublist(0, cap) : next);
@@ -34,6 +43,7 @@ class RecentlyViewedNotifier extends StateNotifier<List<String>> {
   }
 
   void clear() {
+    _userTouched = true;
     if (state.isEmpty) return;
     state = const [];
     _persist();

@@ -374,21 +374,28 @@ class _GalleryThumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          width: 72, height: 72,
-          color: bg,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: Colors.black38, size: 26),
-              const SizedBox(height: 4),
-              Text(label,
-                  style: const TextStyle(color: Colors.white38, fontSize: 9)),
-            ],
+    return Semantics(
+      button: true,
+      label: 'תצוגה מקדימה: $label',
+      child: Tooltip(
+        message: 'תצוגה מקדימה: $label',
+        child: GestureDetector(
+          onTap: onTap,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: 72, height: 72,
+              color: bg,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, color: Colors.black38, size: 26),
+                  const SizedBox(height: 4),
+                  Text(label,
+                      style: const TextStyle(color: Colors.white38, fontSize: 9)),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -402,24 +409,31 @@ class _GalleryAllBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          width: 72, height: 72,
-          color: const Color(0xFF222222),
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.photo_library_outlined,
-                  color: BsTokens.brand, size: 26),
-              SizedBox(height: 4),
-              Text('כל\nהגלריה',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: BsTokens.brand, fontSize: 9, height: 1.3)),
-            ],
+    return Semantics(
+      button: true,
+      label: 'כל הגלריה',
+      child: Tooltip(
+        message: 'כל הגלריה',
+        child: GestureDetector(
+          onTap: onTap,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: 72, height: 72,
+              color: const Color(0xFF222222),
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.photo_library_outlined,
+                      color: BsTokens.brand, size: 26),
+                  SizedBox(height: 4),
+                  Text('כל\nהגלריה',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: BsTokens.brand, fontSize: 9, height: 1.3)),
+                ],
+              ),
+            ),
           ),
         ),
       ),

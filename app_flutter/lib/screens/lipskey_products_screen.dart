@@ -547,18 +547,26 @@ class _StepBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const brand = Color(0xFFFF7A18);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          color: filled ? brand : Theme.of(context).colorScheme.surface,
-          shape: BoxShape.circle,
-          border: filled ? null : Border.all(color: brand, width: 1.2),
+    final label = icon == Icons.add ? 'הוסף כמות' : 'הפחת כמות';
+    return Semantics(
+      button: true,
+      label: label,
+      child: Tooltip(
+        message: label,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: filled ? brand : Theme.of(context).colorScheme.surface,
+              shape: BoxShape.circle,
+              border: filled ? null : Border.all(color: brand, width: 1.2),
+            ),
+            child: Icon(icon,
+                color: filled ? bsOnAccent(context) : brand, size: 18),
+          ),
         ),
-        child: Icon(icon,
-            color: filled ? bsOnAccent(context) : brand, size: 18),
       ),
     );
   }
@@ -1171,16 +1179,23 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                   top: 6,
                   right: 6,
                   // Tap the badge to cancel the selection (remove from cart).
-                  child: GestureDetector(
-                    onTap: _removeFromCart,
-                    child: const CircleAvatar(
-                      radius: 12,
-                      backgroundColor: _teal,
-                      child: Text('✓',
-                          style: TextStyle(
-                              color: Color(0xFF06251C),
-                              fontSize: 15,
-                              fontWeight: FontWeight.w900)),
+                  child: Semantics(
+                    button: true,
+                    label: 'הסר מהסל',
+                    child: Tooltip(
+                      message: 'הסר מהסל',
+                      child: GestureDetector(
+                        onTap: _removeFromCart,
+                        child: const CircleAvatar(
+                          radius: 12,
+                          backgroundColor: _teal,
+                          child: Text('✓',
+                              style: TextStyle(
+                                  color: Color(0xFF06251C),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900)),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -1366,25 +1381,32 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   }
 
   Widget _plusBtn() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _open = true;
-          _qty = 1;
-        });
-        _addToCart();
-      },
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-            color: _brand, borderRadius: BorderRadius.circular(12)),
-        alignment: Alignment.center,
-        child: const Text('+',
-            style: TextStyle(
-                color: Color(0xFF1A1200),
-                fontSize: 24,
-                fontWeight: FontWeight.w800)),
+    return Semantics(
+      button: true,
+      label: 'הוסף לסל',
+      child: Tooltip(
+        message: 'הוסף לסל',
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              _open = true;
+              _qty = 1;
+            });
+            _addToCart();
+          },
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+                color: _brand, borderRadius: BorderRadius.circular(12)),
+            alignment: Alignment.center,
+            child: const Text('+',
+                style: TextStyle(
+                    color: Color(0xFF1A1200),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800)),
+          ),
+        ),
       ),
     );
   }
@@ -1426,18 +1448,28 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   }
 
   Widget _stepper() {
-    Widget btn(String s, VoidCallback onTap) => GestureDetector(
-          onTap: onTap,
-          child: SizedBox(
-            width: 28,
-            height: 30,
-            child: Center(
-                child: Text(s,
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: 17))),
+    Widget btn(String s, VoidCallback onTap) {
+      final label = s == '+' ? 'הוסף כמות' : 'הפחת כמות';
+      return Semantics(
+        button: true,
+        label: label,
+        child: Tooltip(
+          message: label,
+          child: GestureDetector(
+            onTap: onTap,
+            child: SizedBox(
+              width: 28,
+              height: 30,
+              child: Center(
+                  child: Text(s,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 17))),
+            ),
           ),
-        );
+        ),
+      );
+    }
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,

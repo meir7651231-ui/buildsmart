@@ -32,10 +32,18 @@ class CardAccStateNotifier
 
   static const _key = 'bs.card-acc-state.v1';
 
+  /// `true` once any mutating method (setSelected/setQty) has written state.
+  /// The provider is lazy, so the constructor's async `_load()` can resolve
+  /// AFTER a synchronous user write — clobbering it with the stale prefs read.
+  /// This one-shot guard makes a late `_load()` non-destructive once the user
+  /// has touched state.
+  bool _userTouched = false;
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
     if (raw != null) {
+      if (_userTouched) return;
       try {
         final outer = jsonDecode(raw) as Map<String, dynamic>;
         state = outer.map((pk, inner) => MapEntry(
@@ -70,6 +78,7 @@ class CardAccStateNotifier
   }
 
   void setSelected(String productKey, String accName, bool selected) {
+    _userTouched = true;
     _update(
         productKey,
         accName,
@@ -79,6 +88,7 @@ class CardAccStateNotifier
   }
 
   void setQty(String productKey, String accName, int qty) {
+    _userTouched = true;
     if (qty < 1) qty = 1;
     _update(
         productKey,

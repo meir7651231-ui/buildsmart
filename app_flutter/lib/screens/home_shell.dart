@@ -141,13 +141,24 @@ class _HelpModeOverlay extends ConsumerWidget {
                     ),
                   ),
                 ),
-                InkWell(
-                  onTap: () =>
-                      ref.read(helpModeProvider.notifier).state = false,
-                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                  child: const Padding(
-                    padding: EdgeInsets.all(4),
-                    child: Icon(Icons.close, color: Colors.white, size: 20),
+                Semantics(
+                  button: true,
+                  label: 'צא ממצב היכרות',
+                  child: Tooltip(
+                    message: 'צא ממצב היכרות',
+                    child: InkWell(
+                      onTap: () =>
+                          ref.read(helpModeProvider.notifier).state = false,
+                      borderRadius:
+                          BorderRadius.circular(BsTokens.radiusPill),
+                      // ≥48dp tap target around the small ✕ (a11y), without
+                      // enlarging the visible glyph.
+                      child: const SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Icon(Icons.close, color: Colors.white, size: 20),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -408,23 +419,39 @@ class _CartChatBubble extends StatelessWidget {
             ),
           ),
         ),
-        // Close X — small circle floating at the top-start corner.
+        // Close X — small circle floating at the top-start corner. The visible
+        // circle stays 20dp; a transparent 48dp tap target is centred on it for
+        // a11y (≥48dp) without enlarging the glyph.
         PositionedDirectional(
-          top: -7,
-          start: -7,
-          child: Material(
-            color: Colors.white,
-            shape: const CircleBorder(
-              side: BorderSide(color: Color(0x22000000)),
-            ),
-            elevation: 2,
-            child: InkWell(
-              onTap: onClose,
-              customBorder: const CircleBorder(),
-              child: const SizedBox(
-                width: 20,
-                height: 20,
-                child: Icon(Icons.close, size: 13, color: Colors.black54),
+          top: -21,
+          start: -21,
+          child: Semantics(
+            button: true,
+            label: 'הסר התראה זו',
+            child: Tooltip(
+              message: 'הסר',
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: InkWell(
+                  onTap: onClose,
+                  customBorder: const CircleBorder(),
+                  child: Center(
+                    child: Material(
+                      color: Colors.white,
+                      shape: const CircleBorder(
+                        side: BorderSide(color: Color(0x22000000)),
+                      ),
+                      elevation: 2,
+                      child: const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child:
+                            Icon(Icons.close, size: 13, color: Colors.black54),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

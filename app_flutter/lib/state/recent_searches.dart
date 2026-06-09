@@ -26,9 +26,16 @@ class RecentSearchesNotifier extends StateNotifier<List<String>> {
 
   static const _key = 'bs.recent-searches.v1';
 
+  /// `true` once any mutating method (add/remove/clear) has written state. The
+  /// provider is lazy, so the constructor's async `_load()` can resolve AFTER a
+  /// synchronous user write and overwrite it. This one-shot guard makes a late
+  /// `_load()` non-destructive once the user has touched state.
+  bool _userTouched = false;
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(_key);
+    if (_userTouched) return;
     if (list != null) state = list;
   }
 
@@ -38,16 +45,19 @@ class RecentSearchesNotifier extends StateNotifier<List<String>> {
   }
 
   void add(String query) {
+    _userTouched = true;
     state = addRecentSearch(state, query);
     _persist();
   }
 
   void remove(String query) {
+    _userTouched = true;
     state = [...state]..remove(query);
     _persist();
   }
 
   void clear() {
+    _userTouched = true;
     state = const [];
     _persist();
   }

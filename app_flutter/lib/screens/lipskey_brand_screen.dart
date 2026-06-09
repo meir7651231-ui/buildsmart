@@ -25,6 +25,7 @@ class LipskeyBrandScreen extends StatelessWidget {
               elevation: 0,
               pinned: true,
               leading: IconButton(
+                tooltip: 'חזרה',
                 icon: const Icon(Icons.arrow_forward),
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -231,6 +232,7 @@ class LipskeySectionScreen extends StatelessWidget {
               elevation: 0,
               pinned: true,
               leading: IconButton(
+                tooltip: 'חזרה',
                 icon: const Icon(Icons.arrow_forward),
                 onPressed: () => Navigator.of(context).pop(),
               ),

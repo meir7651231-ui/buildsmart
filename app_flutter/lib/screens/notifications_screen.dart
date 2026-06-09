@@ -588,6 +588,7 @@ class _NotifSearchBarState extends ConsumerState<_NotifSearchBar> {
                     color: Color(0xFF888888),
                     size: 18,
                   ),
+                  tooltip: 'נקה חיפוש',
                   onPressed: () {
                     _controller.clear();
                     ref.read(notifSearchQueryProvider.notifier).state = '';

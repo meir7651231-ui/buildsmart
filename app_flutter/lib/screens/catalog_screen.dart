@@ -1405,12 +1405,19 @@ class _AddPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         side: const BorderSide(color: Color(0xFFC8C8CE), width: 1),
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Icon(Icons.add, color: Color(0xFF6E6E73), size: 18),
+      child: Tooltip(
+        message: 'נהל קטגוריות',
+        child: Semantics(
+          button: true,
+          label: 'נהל קטגוריות',
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(20),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              child: Icon(Icons.add, color: Color(0xFF6E6E73), size: 18),
+            ),
+          ),
         ),
       ),
     );
@@ -3565,10 +3572,14 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      GestureDetector(
-                        onTap: _back,
-                        child: Icon(Icons.close,
-                            color: bsOnAccent(context), size: 16),
+                      Semantics(
+                        button: true,
+                        label: 'בטל',
+                        child: GestureDetector(
+                          onTap: _back,
+                          child: Icon(Icons.close,
+                              color: bsOnAccent(context), size: 16),
+                        ),
                       ),
                     ],
                   ),
@@ -4298,25 +4309,32 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                 Positioned(
                   top: 6,
                   left: 12,
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: const BoxDecoration(
-                        color: BsTokens.brand,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x33000000),
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
+                  child: Tooltip(
+                    message: 'סגור',
+                    child: Semantics(
+                      button: true,
+                      label: 'סגור',
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: const BoxDecoration(
+                            color: BsTokens.brand,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0x33000000),
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
                           ),
-                        ],
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.close,
+                              color: Colors.white, size: 22),
+                        ),
                       ),
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.close,
-                          color: Colors.white, size: 22),
                     ),
                   ),
                 ),
@@ -7468,11 +7486,22 @@ class _VariantFamilyView extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
           child: Row(
             children: [
-              InkWell(
-                onTap: () => ref.read(variantsActiveFamilyProvider.notifier).state = null,
-                // RTL arrow: arrow_back is semantically "go back" and mirrors
-                // correctly in RTL (points right → back in Hebrew layout).
-                child: const Padding(padding: EdgeInsets.all(4), child: Icon(Icons.arrow_forward, size: 20)),
+              Tooltip(
+                message: 'חזרה',
+                child: Semantics(
+                  button: true,
+                  label: 'חזרה',
+                  child: InkWell(
+                    onTap: () => ref.read(variantsActiveFamilyProvider.notifier).state = null,
+                    // RTL arrow: arrow_back is semantically "go back" and mirrors
+                    // correctly in RTL (points right → back in Hebrew layout).
+                    child: const SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Center(child: Icon(Icons.arrow_forward, size: 20)),
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(child: Text('${family.emoji}  ${family.frame}', textAlign: TextAlign.right, style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800, fontSize: 15))),

@@ -1407,3 +1407,15 @@ Gate: analyze 0 · full suite 1737/1737 green.
 - **הבאג:** ה-provider עצל → `UserProfileNotifier` נבנה בדיוק כש-`register()` נקרא; ה-`_load()` האסינכרוני (SharedPreferences) נפתר *אחרי* `register()` → אם קיים פרופיל ישן (רישום-חוזר), `_load` דרס את הקלט הטרי בערכים הישנים.
 - **התיקון (ממוקד):** שדה `bool _userTouched=false`; `_load()` עושה `if (_userTouched) return;` (אחרי `if (raw==null) return;`) → לא דורס אחרי כתיבת-משתמש. כל מתודה מוטטת (register/continueAsDemo/setProfession/update) מסמנת `_userTouched=true` בראשה. אין שינוי API/סמנטיקה; registered-flip ללא שינוי.
 - Gate: analyze 0 errors · `test/profile_loadrace_test.dart` (משחזר: prefs ישן + register טרי → הטרי שורד) + onboarding/profile/user_profile_fields ירוקים.
+### #async-race-guards — guard load-race ל-6 notifiers (נחיל 9×9 קנוני, ריצה אוטונומית) — 2026-06-09
+- **מקור:** האודיט-הקנוני (עדשת async-race) אימת 6 StateNotifiers עם אותו load-race כמו #24 — provider עצל, `_load()` אסינכרוני נפתר אחרי מוטציית-משתמש ודורס אותה.
+- **התיקון (אותה תבנית #24):** שדה `bool _userTouched=false` + `if (_userTouched) return;` ב-`_load()` (אחרי קריאת-prefs, לפני השמת-state) + סימון `_userTouched=true` בראש כל מתודה מוטטת:
+  - `card_filter_state` (setType/setSize/clear · med) · `card_acc_state` (setSelected/setQty · med) · `product_favorites` (toggle · med)
+  - `recent_searches` · `recently_viewed` · `offline_cache` (low).
+- אין שינוי פורמט-persist/provider/חתימות.
+- Gate: analyze 0 errors · `test/state_loadrace_guards_test.dart` 3/3 (משחזר race לכל med-notifier → המוטציה שורדת) + `profile_loadrace_test` ירוק.
+### #a11y-fleet — Semantics/Tooltip לכפתורי-אייקון ב-10 מסכים (נחיל 9×9 קנוני, ריצה אוטונומית) — 2026-06-09
+- **מקור:** האודיט-הממצה (עדשת a11y) — כפתורי-אייקון/glyph בלבד (InkWell/GestureDetector עם Icon קטן) בלי Semantics/Tooltip. תוקנו ע"י נחיל-fix (14 מסכים, 10 עם תיקון אמיתי), **25 תיקונים**.
+- **דפוס (תואם #a11y-round3):** עטיפה אדּיטיבית `Semantics(button:true,label:HE)` + `Tooltip(message:HE)` — **בלי שינוי-גודל/layout** (round-3 נמנע מ-resize של פקדים צפופים → סיכון-overflow). תוויות-עברית מדויקות (הוסף לסל/הסר מהסל/הוסף כמות/סגור/חזרה/בטל/נהל קטגוריות...).
+- מסכים: lipskey_products(4)·catalog(4)·lipskey_product_sheet·store·install_studio·camera_sheet·home_shell·lipskey_brand·notifications·smart_home. fixers דילגו על Material-defaults (IconButton/TextButton כבר ≥48dp) ועל טקסט-נושא-עצמו.
+- Gate: analyze 0 errors. 48dp-enlarge נדחה מכוון (סיכון-layout) — תוסף Semantics הוא הריפוי המאושר. אימות-פיקסל-חי בתור.

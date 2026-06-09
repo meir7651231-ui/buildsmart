@@ -1245,12 +1245,22 @@ class _GridHubCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                GestureDetector(
-                  onTap: onFavToggle,
-                  child: Icon(
-                    isFav ? Icons.favorite : Icons.favorite_border,
-                    color: isFav ? Colors.pinkAccent : Colors.black26,
-                    size: 16,
+                Tooltip(
+                  message: isFav ? 'הסר ממועדפים' : 'הוסף למועדפים',
+                  child: Semantics(
+                    button: true,
+                    label: isFav ? 'הסר ממועדפים' : 'הוסף למועדפים',
+                    child: GestureDetector(
+                      onTap: onFavToggle,
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: isFav ? Colors.pinkAccent : Colors.black26,
+                          size: 16,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -1894,12 +1904,19 @@ class _SmartQtyStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget btn(IconData icon, VoidCallback onTap) => InkWell(
-      onTap: onTap,
-      customBorder: const CircleBorder(),
-      child: Padding(
-        padding: const EdgeInsets.all(2),
-        child: Icon(icon, size: 18, color: BsTokens.brand),
+    Widget btn(IconData icon, VoidCallback onTap) => Tooltip(
+      message: icon == Icons.add ? 'הוסף כמות' : 'הפחת כמות',
+      child: Semantics(
+        button: true,
+        label: icon == Icons.add ? 'הוסף כמות' : 'הפחת כמות',
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Padding(
+            padding: const EdgeInsets.all(2),
+            child: Icon(icon, size: 18, color: BsTokens.brand),
+          ),
+        ),
       ),
     );
     return Container(
@@ -2019,11 +2036,22 @@ class _CartItemRow extends ConsumerWidget {
                   ],
                 ),
               ),
-              GestureDetector(
-                onTap: () => setQty(0),
-                child: const Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Icon(Icons.close, size: 16, color: Color(0xFF666666)),
+              Tooltip(
+                message: 'הסר מהסל',
+                child: Semantics(
+                  button: true,
+                  label: 'הסר מהסל',
+                  child: GestureDetector(
+                    onTap: () => setQty(0),
+                    child: const Padding(
+                      padding: EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: Color(0xFF666666),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -2085,14 +2113,21 @@ class _StepBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Icon(
-          icon,
-          size: 18,
-          color: onTap != null ? BsTokens.brand : const Color(0xFF444444),
+    return Tooltip(
+      message: icon == Icons.add ? 'הוסף כמות' : 'הפחת כמות',
+      child: Semantics(
+        button: true,
+        label: icon == Icons.add ? 'הוסף כמות' : 'הפחת כמות',
+        child: GestureDetector(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Icon(
+              icon,
+              size: 18,
+              color: onTap != null ? BsTokens.brand : const Color(0xFF444444),
+            ),
+          ),
         ),
       ),
     );

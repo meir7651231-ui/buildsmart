@@ -742,3 +742,9 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 ## 2026-06-09 — תיקון באג load-race ברישום-חוזר (נחיל 9×9 · #24)
 - **לוגי, לא ויזואלי:** משתמש חוזר (פרופיל ישן שמור) שמקליד שם/טלפון טריים ונרשם — הקלט הטרי כבר **לא נדרס** ע"י טעינת-ה-prefs המאוחרת. guard `_userTouched` ב-UserProfileNotifier.
 - **אימות:** `test/profile_loadrace_test.dart` משחזר את ה-race (prefs ישן + register טרי) ומאשר שהטרי שורד; onboarding/profile ירוקים. guard: analyze 0 errors.
+
+## 2026-06-09 — נגישות: Semantics/Tooltip לכפתורי-אייקון ב-10 מסכים (נחיל 9×9 · a11y)
+- **before:** כפתורי-אייקון/glyph (הוסף-לסל +, הסר ✓, סטפר כמות ±, סגור ×, חזרה, נהל-קטגוריות) ב-10 מסכים — לא נקראו ע"י screen-reader (אין Semantics/Tooltip).
+- **after:** עטיפה אדּיטיבית Semantics(button)+Tooltip עם תווית-עברית מדויקת לכל אחד — **בלי שינוי-גודל/מראה** (round-3 idiom). 25 כפתורים.
+- מסכים: lipskey-products/product-sheet/brand · catalog · store · install-studio · camera · home_shell · notifications · smart-home.
+- **אימות:** analyze 0 errors; הסמנטיקה אדּיטיבית (לא משנה layout). אימות-פיקסל-חי + screen-reader בתור לנקודת-בדיקה.

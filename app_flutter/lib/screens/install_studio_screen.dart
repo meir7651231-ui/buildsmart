@@ -51,13 +51,20 @@ class _SheetClose extends StatelessWidget {
           child: Material(
             color: const Color(0xFFF5F5F5),
             shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: () => Navigator.pop(context),
-              child: const SizedBox(
-                width: 36,
-                height: 36,
-                child: Icon(Icons.close, color: _ink, size: 22),
+            child: Semantics(
+              button: true,
+              label: 'סגור',
+              child: Tooltip(
+                message: 'סגור',
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => Navigator.pop(context),
+                  child: const SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: Icon(Icons.close, color: _ink, size: 22),
+                  ),
+                ),
               ),
             ),
           ),
@@ -375,11 +382,18 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       padding: const EdgeInsets.fromLTRB(14, 12, 18, 6),
       child: Row(children: [
         if (Navigator.canPop(context))
-          GestureDetector(
-            onTap: () => Navigator.maybePop(context),
-            child: const Padding(
-              padding: EdgeInsetsDirectional.only(end: 8),
-              child: Icon(Icons.arrow_forward, color: _ink, size: 22),
+          Semantics(
+            button: true,
+            label: 'חזור',
+            child: Tooltip(
+              message: 'חזור',
+              child: GestureDetector(
+                onTap: () => Navigator.maybePop(context),
+                child: const Padding(
+                  padding: EdgeInsetsDirectional.only(end: 8),
+                  child: Icon(Icons.arrow_forward, color: _ink, size: 22),
+                ),
+              ),
             ),
           ),
         Container(

@@ -35,10 +35,18 @@ class CardFilterStateNotifier
 
   static const _key = 'bs.card-filter-state.v1';
 
+  /// `true` once any mutating method (setType/setSize/clear) has written state.
+  /// The provider is lazy, so the constructor's async `_load()` can resolve
+  /// AFTER a synchronous user write and clobber it (mirrors UserProfileNotifier
+  /// #24). This one-shot guard makes a late `_load()` non-destructive once the
+  /// user has touched state.
+  bool _userTouched = false;
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);
     if (raw == null) return;
+    if (_userTouched) return;
     try {
       final m = jsonDecode(raw) as Map<String, dynamic>;
       state = m.map((k, v) => MapEntry(
@@ -59,16 +67,19 @@ class CardFilterStateNotifier
   CardFilterSelection? get(String productKey) => state[productKey];
 
   void setType(String productKey, String? type) {
+    _userTouched = true;
     final cur = state[productKey];
     _put(productKey, CardFilterSelection(type: type, size: cur?.size));
   }
 
   void setSize(String productKey, String? size) {
+    _userTouched = true;
     final cur = state[productKey];
     _put(productKey, CardFilterSelection(type: cur?.type, size: size));
   }
 
   void clear(String productKey) {
+    _userTouched = true;
     if (!state.containsKey(productKey)) return;
     final next = {...state}..remove(productKey);
     state = next;
