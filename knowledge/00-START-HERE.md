@@ -12,7 +12,7 @@
 5. **`POLISH-BRIEF.md`** — רק למי שלוקח ליטוש.
 6. רקע-עמוק: דוחות `01`–`24`. `24` = ארכיטקטורת-הסוכנים.
 7. **`KNOWLEDGE_AUDIT.md`** — מצב-כל-מסמך (LIVE / reference / superseded) + snapshot-מצב-נוכחי + כללי-המסדר.
-8. **`SPEC-server-connect.md`** — חיבור-שרת (Firebase+R2 · S0–S9) — **פרויקט phase-2** (אחרי client; ה-app כבר server-ready 6/6).
+8. **`SPEC-server-connect.md`** (+ `SPEC-server-connect-MICRO.md` ~48 מיקרו) — חיבור-שרת (Firebase+R2 · S0–S9) — **פרויקט phase-2** (אחרי client; ה-app כבר server-ready 6/6).
 
 ## 2. ⚠️ מספור — קרא לפני שתיקח משימה
 שתי שיטות-מספור:
