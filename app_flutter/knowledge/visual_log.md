@@ -733,3 +733,12 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **צ'יפ-השם (כותרת הבית):** לחיצה פותחת **כרטיסייה** read-only יפה עם הפרטים המלאים (שם/מקצוע/כתובת/ח.פ.; ריקים מושמטים) + כפתור 'ערוך פרופיל' → העורך. (קודם: פתח ישר את העורך.)
 - **לוגו/תמונה:** נדחה (needs-decision — דורש image-picker; לא זויף).
 - **אימות:** `test/user_profile_fields_test.dart` 4/4 (round-trip + legacy-default + registered-logic) + profile/deep_fix/onboarding ירוקים. אימות-פיקסל חי בתור. guard: analyze 0 errors.
+
+## 2026-06-09 — כפתור-סל צף + משוב מיידי בהוספה (נחיל 9×9 · #47)
+- **כפתור-סל צף** מופיע עכשיו גם ב-AI Hub (וב-feature-screens שלו) — לא רק בבית. מוצג רק כשהסל לא-ריק, עם ספירה חיה.
+- **משוב מיידי:** הוספה לסל מהסריקה כבר **לא זורקת אותך לטאב-חנות** — נשארים בהקשר, וכפתור-הסל הצף מתעדכן מיד עם הספירה החדשה (+ toast). לחיצה על הכפתור ב-AI Hub סוגרת אותו ונוחתת בסל.
+- **אימות:** widget_test (ה-shell עולה תקין עם CartFab) + scan/budget/sheets/plan-select 28/28 ירוקים. אימות-פיקסל חי בתור. guard: analyze 0 errors.
+
+## 2026-06-09 — תיקון באג load-race ברישום-חוזר (נחיל 9×9 · #24)
+- **לוגי, לא ויזואלי:** משתמש חוזר (פרופיל ישן שמור) שמקליד שם/טלפון טריים ונרשם — הקלט הטרי כבר **לא נדרס** ע"י טעינת-ה-prefs המאוחרת. guard `_userTouched` ב-UserProfileNotifier.
+- **אימות:** `test/profile_loadrace_test.dart` משחזר את ה-race (prefs ישן + register טרי) ומאשר שהטרי שורד; onboarding/profile ירוקים. guard: analyze 0 errors.

@@ -10,9 +10,6 @@
 import 'dart:async';
 
 import 'package:buildsmart/data/contractor_seeds.dart';
-import 'package:buildsmart/screens/store_screen.dart'
-    show StoreSection, storeSectionProvider;
-import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -595,8 +592,9 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
     for (final l in lines) {
       cart.add(l);
     }
-    ref.read(storeSectionProvider.notifier).state = StoreSection.cart;
-    ref.read(mainTabProvider.notifier).state = 3;
+    // Stay in context — do NOT yank the user to the Store tab. The live cart FAB
+    // (here, on the home shell, and on the AI hub) reflects the new count as
+    // the immediate feedback; the "לאן לשלוח?" first-add popup still fires.
     Navigator.pop(context);
     showToast(context, '${lines.length} פריטים מהתוכנית נוספו לסל');
   }

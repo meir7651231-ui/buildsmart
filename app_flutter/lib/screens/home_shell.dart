@@ -100,9 +100,9 @@ class HomeShell extends ConsumerWidget {
                   title: 'סל הקנייה',
                   body: 'הסל הצף מציג כמה פריטים נאספו. לחיצה עליו קופצת '
                       'לחנות עם הסל המסונן — משם ממשיכים להזמנה.',
-                  child: _CartFab(),
+                  child: CartFab(),
                 )
-              : const _CartFab())
+              : const CartFab())
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
@@ -181,8 +181,17 @@ class _HelpModeOverlay extends ConsumerWidget {
 
 /// Floating cart button — visible whenever the cart has items (and we're not
 /// already on the store tab). Tapping jumps to the store.
-class _CartFab extends ConsumerWidget {
-  const _CartFab();
+///
+/// Public so PUSHED routes (e.g. the AI hub) can reuse the exact look/animation/
+/// count logic. Such a route must pop itself BEFORE landing on the cart tab, so
+/// it passes [popFirst] = true — the home use site keeps the default (no pop,
+/// because home is itself a tab).
+class CartFab extends ConsumerWidget {
+  const CartFab({super.key, this.popFirst = false});
+
+  /// When true (PUSHED-route hosts like the AI hub), tapping first pops the
+  /// current route (`Navigator.maybePop`) and then lands on the cart tab.
+  final bool popFirst;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -208,6 +217,9 @@ class _CartFab extends ConsumerWidget {
 
     void openCart() {
       resetAllDials(ref);
+      // From a PUSHED-route host (AI hub) pop back to the home shell first, so
+      // landing on the cart tab is actually visible underneath.
+      if (popFirst) Navigator.of(context).maybePop();
       // Land on the store's "הסל" filter so only cart items show.
       ref.read(storeSectionProvider.notifier).state = StoreSection.cart;
       ref.read(mainTabProvider.notifier).state = 3;

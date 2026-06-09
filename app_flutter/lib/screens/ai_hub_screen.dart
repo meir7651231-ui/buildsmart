@@ -5,8 +5,10 @@ import 'package:buildsmart/logic/ai_hub_logic.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/catalog_screen.dart' show searchQueryProvider;
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
+import 'package:buildsmart/screens/home_shell.dart' show CartFab;
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/smart_cart.dart' show smartCartProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -75,11 +77,19 @@ class AIHubScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // The cart FAB rides above this PUSHED route too — visible only when the
+    // cart has items, so adding from a tool (e.g. plan-scan) gives immediate
+    // feedback here without yanking the user to the Store tab. popFirst: true →
+    // tapping pops the hub, then lands on the cart tab underneath.
+    final cartHasItems = ref.watch(smartCartProvider).isNotEmpty;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
         appBar: aiAppBar(context, '🤖 בינה מלאכותית'),
+        floatingActionButton:
+            cartHasItems ? const CartFab(popFirst: true) : null,
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: ListView(
           padding: const EdgeInsets.fromLTRB(
             BsTokens.space4,
@@ -153,11 +163,17 @@ class _AIFeatureScreen extends ConsumerWidget {
       'analytics' => const _Analytics(),
       _ => const SizedBox.shrink(),
     };
+    // Same cart FAB as the hub — this sub-view is also a PUSHED route, so
+    // popFirst pops back toward the home shell before landing on the cart tab.
+    final cartHasItems = ref.watch(smartCartProvider).isNotEmpty;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: BsTokens.bgLight,
         appBar: aiAppBar(context, '🤖 בינה מלאכותית'),
+        floatingActionButton:
+            cartHasItems ? const CartFab(popFirst: true) : null,
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: ListView(
           padding: const EdgeInsets.fromLTRB(
             BsTokens.space4,

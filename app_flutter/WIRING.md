@@ -1398,3 +1398,12 @@ Gate: analyze 0 · full suite 1737/1737 green.
 - **עורך** (`profile_screen.dart`): 2 שדות `_Field` חדשים (כתובת · ח.פ./עוסק מורשה) מתחת לטלפון/אימייל, נשמרים ב"שמור" הקיים (`_save` הורחב).
 - **כרטיסיית-פרופיל** (`home_shell.dart`): צ'יפ-השם בכותרת → `showProfileCard()` (showModalBottomSheet · `_ProfileCard` ConsumerWidget · RTL · BsTokens): avatar+שם + X(סגור) + שורות-פרטים לא-ריקות (מקצוע/כתובת/ח.פ./contact — ריקות מושמטות) + FilledButton 'ערוך פרופיל' → ProfileScreen.route(). העורך נגיש רק דרך הצ'יפ; שאר נתיבי-הכניסה ל-ProfileScreen ללא שינוי.
 - Gate: analyze 0 errors · `test/user_profile_fields_test.dart` 4/4 + profile/deep_fix/onboarding ירוקים.
+### #c5-cart-fab — כפתור-סל צף + משוב מיידי, בלי קפיצה-לטאב — 2026-06-09 (נחיל 9×9, ריצה אוטונומית · #47)
+- **CartFab ציבורי** (`home_shell.dart`): `_CartFab`→`CartFab` + פרמטר `popFirst=false`; `openCart()` עושה `maybePop()` קודם רק כש-popFirst (בית = default ללא-pop). מראה/אנימציה/ספירה ללא שינוי.
+- **AI-Hub** (`ai_hub_screen.dart`): `floatingActionButton: cartHasItems ? const CartFab(popFirst:true) : null` ב-AIHubScreen וב-_AIFeatureScreen (route דחוף → pop ואז cart-tab). מוצג רק כשהסל לא-ריק (`smartCartProvider`).
+- **בלי קפיצה כפויה** (`contractor_tools_sheets._addToCart`): הוסרו `mainTabProvider=3`+`storeSectionProvider=cart` — המשתמש נשאר בהקשר, ה-CartFab החי מציג את הספירה החדשה = משוב מיידי. הוספה-לסל+pop+toast+"לאן לשלוח?" נשמרו. הוסרו imports שהתייתמו (store_screen/dial_state).
+- Gate: analyze 0 errors · widget_test (shell boots) + scan/budget/sheets/plan-select ירוקים (28/28).
+### #c6-loadrace — תיקון load-race ברישום-חוזר — `state/user_profile` — 2026-06-09 (נחיל 9×9, ריצה אוטונומית · #24)
+- **הבאג:** ה-provider עצל → `UserProfileNotifier` נבנה בדיוק כש-`register()` נקרא; ה-`_load()` האסינכרוני (SharedPreferences) נפתר *אחרי* `register()` → אם קיים פרופיל ישן (רישום-חוזר), `_load` דרס את הקלט הטרי בערכים הישנים.
+- **התיקון (ממוקד):** שדה `bool _userTouched=false`; `_load()` עושה `if (_userTouched) return;` (אחרי `if (raw==null) return;`) → לא דורס אחרי כתיבת-משתמש. כל מתודה מוטטת (register/continueAsDemo/setProfession/update) מסמנת `_userTouched=true` בראשה. אין שינוי API/סמנטיקה; registered-flip ללא שינוי.
+- Gate: analyze 0 errors · `test/profile_loadrace_test.dart` (משחזר: prefs ישן + register טרי → הטרי שורד) + onboarding/profile/user_profile_fields ירוקים.

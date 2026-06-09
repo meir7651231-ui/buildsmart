@@ -85,10 +85,18 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     _load();
   }
 
+  /// `true` once any mutating method (register/continueAsDemo/setProfession/
+  /// update) has written state. The provider is lazy, so the constructor's
+  /// async `_load()` can resolve AFTER a synchronous user write (ticket #24:
+  /// re-registration overwritten by the late prefs read). This one-shot guard
+  /// makes a late `_load()` non-destructive once the user has touched state.
+  bool _userTouched = false;
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(kUserProfileKey);
     if (raw == null) return;
+    if (_userTouched) return;
     try {
       state = UserProfile.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } on Object catch (_) {
@@ -103,6 +111,7 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
 
   /// Register with a name + contact (phone/email).
   void register({required String name, required String contact}) {
+    _userTouched = true;
     state = state.copyWith(
       name: name.trim(),
       contact: contact.trim(),
@@ -113,12 +122,14 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
 
   /// Continue without registering (demo / guest).
   void continueAsDemo() {
+    _userTouched = true;
     state = state.copyWith(registered: false);
     _persist();
   }
 
   /// Set the picked trade.
   void setProfession(String profession) {
+    _userTouched = true;
     state = state.copyWith(profession: profession);
     _persist();
   }
@@ -133,6 +144,7 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     String? address,
     String? businessId,
   }) {
+    _userTouched = true;
     final n = (name ?? state.name).trim();
     final c = (contact ?? state.contact).trim();
     state = state.copyWith(
