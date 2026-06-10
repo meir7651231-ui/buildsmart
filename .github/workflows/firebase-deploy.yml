@@ -7,7 +7,12 @@
 # Required IAM roles on the FIREBASE_SERVICE_ACCOUNT (granted in GCP IAM console):
 #   • Service Usage Consumer   — API-enablement checks
 #   • Firebase Rules Admin     — deploy firestore rules
-#   • (Cloud Functions Admin + Service Account User — later, for functions deploy)
+#   • Cloud Functions Admin    — deploy functions
+#   • Service Account User     — act as the runtime SA
+#   • Secret Manager Admin     — set R2 secrets for functions
+# Required APIs: cloudfunctions, cloudbuild, artifactregistry, secretmanager.
+# GitHub secrets used: FIREBASE_SERVICE_ACCOUNT, R2_ACCESS_KEY_ID,
+#   R2_SECRET_ACCESS_KEY, R2_ACCOUNT_ID.
 name: Deploy Firebase Rules + Functions
 
 on:
@@ -15,7 +20,6 @@ on:
     branches: [ claude/whats-happening-LyY9G ]   # mirrors firebase-hosting.yml
   workflow_dispatch:
 
-# Cancel an in-flight deploy when a newer commit lands on the same ref.
 concurrency:
   group: firebase-deploy-${{ github.ref }}
   cancel-in-progress: true
@@ -27,9 +31,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # paths-filter needs history to diff against the base
+          fetch-depth: 0
 
-      # ── Detect whether functions/ changed (gates the functions deploy) ──
       - name: Detect changed paths
         id: changes
         uses: dorny/paths-filter@v3
@@ -38,7 +41,6 @@ jobs:
             functions:
               - 'functions/**'
 
-      # ─────────────────────── GATE ───────────────────────
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -76,7 +78,6 @@ jobs:
         working-directory: functions
         run: npm run build
 
-      # ────────────────── AUTH (service account) ───────────────────
       - name: Write service-account credentials
         run: |
           printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "${RUNNER_TEMP}/gcp-sa.json"
@@ -85,11 +86,8 @@ jobs:
       - name: Install firebase-tools
         run: npm i -g firebase-tools
 
-      # The committed firebase.json already declares firestore (rules),
-      # functions (source) and hosting — so deploy against it directly from the
-      # repo root. (A previous temp --config in $RUNNER_TEMP broke the relative
-      # firestore.rules path: firebase resolves rule paths next to the config file.)
-      # ─────────────────── DEPLOY: rules (always) ───────────────────
+      # Deploy against the committed firebase.json from the repo root (it declares
+      # firestore rules + functions source + hosting).
       - name: Deploy Firestore rules
         run: |
           firebase deploy \
@@ -97,21 +95,31 @@ jobs:
             --project buildsmart-b0b78 \
             --non-interactive
 
-      # ─────────── DEPLOY: functions (conditional + non-blocking) ───────────
-      # Only when functions/ changed. Cloud Functions needs Blaze + extra IAM
-      # roles; wrapped in continue-on-error so it NEVER blocks (rules already
-      # deployed above).
+      # ── Provision R2 config for the functions (only when deploying functions) ──
+      # Secrets → Secret Manager (R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY);
+      # string params → functions/.env.<project> (R2_ACCOUNT_ID / R2_BUCKET).
+      - name: Provision R2 config for functions
+        if: steps.changes.outputs.functions == 'true'
+        run: |
+          printf '%s' '${{ secrets.R2_ACCESS_KEY_ID }}' \
+            | firebase functions:secrets:set R2_ACCESS_KEY_ID --project buildsmart-b0b78 --data-file -
+          printf '%s' '${{ secrets.R2_SECRET_ACCESS_KEY }}' \
+            | firebase functions:secrets:set R2_SECRET_ACCESS_KEY --project buildsmart-b0b78 --data-file -
+          {
+            printf 'R2_ACCOUNT_ID=%s\n' '${{ secrets.R2_ACCOUNT_ID }}'
+            printf 'R2_BUCKET=%s\n' 'buildsmart-images'
+          } > functions/.env.buildsmart-b0b78
+
       - name: Deploy Cloud Functions (Blaze-gated, non-blocking)
         if: steps.changes.outputs.functions == 'true'
         continue-on-error: true
         run: |
-          echo "⚠️ functions deploy needs Blaze + IAM roles — attempting (non-blocking)."
+          echo "Deploying Cloud Functions to buildsmart-b0b78..."
           firebase deploy \
             --only functions \
             --project buildsmart-b0b78 \
             --non-interactive
-          echo "ℹ️ if the above failed, rules are already deployed — functions can follow once Blaze + roles are set."
 
       - name: Note when functions deploy is skipped (no functions/ change)
         if: steps.changes.outputs.functions != 'true'
-        run: echo "ℹ️ functions/ unchanged in this push — skipping functions deploy (rules deployed)."
+        run: echo "functions/ unchanged in this push — skipping functions deploy (rules deployed)."
