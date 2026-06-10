@@ -40,6 +40,7 @@ import 'dart:async';
 
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
+import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -547,4 +548,15 @@ final roleProvider = Provider<String?>((ref) {
 final roleSwitchLockedProvider = Provider<bool>((ref) {
   final auth = ref.watch(authStateProvider);
   return auth.singleRole || (auth.signedIn && !auth.loaded);
+});
+
+/// Writer for the `users/{uid}` profile mirror — the S2 seam pointed at
+/// `users`, null without the live backend (the same `useFirebaseBackend` gate
+/// every other provider uses). After login the welcome flow mirrors the
+/// identity fields (`displayName`/`phone`) through it; S5 rules let a signed-in
+/// user self-write exactly those mirror fields (role stays admin-only), and the
+/// write is a merge so it never clobbers `fcmToken`/role.
+final usersProfileWriterProvider = Provider<RemoteCollectionSource?>((ref) {
+  if (useFirebaseBackend) return FirestoreCollectionSource('users');
+  return null;
 });

@@ -1677,3 +1677,10 @@ grep `cloud_firestore|FirebaseFirestore|FirestoreCachedRepo|FirestoreCollectionS
 - **דגל-ה-backend לא נוגע:** ה-CI **לא** מעביר `USE_FIREBASE_BACKEND` ולא שום `--dart-define` לאף build — ה-web החי נשאר demo (ה-backend מאחורי דגל default-off של צי-האפליקציה). ה-workflow הזה פורס rules+functions בלבד, לא בונה/פורס web ולא מסיט את הדגל.
 - Validate (ללא deploy חי): `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/firebase-deploy.yml'))"` → OK · אומת תכנותית: rules-always (ללא `if`), functions conditional+`continue-on-error`, paths-filter על `functions/**`, אפס `--dart-define`, jq-merge מוסיף את בלוק-ה-functions נכון. **לא** בוצע `git commit`/`push`.
 
+### #server-gate-auth — חיווט welcome→login (סגירת ה-gap של ה-preview) — 2026-06-10
+- **ה-gap (preview-test):** `welcome_screen` עשה onboarding מקומי (`continueAsDemo`) ולא קרא ל-Firebase auth; `login_sheet` (S1) היה יתום. עם `useFirebaseBackend=true` → ה-repos של `_firebase` פעילים אך אין auth → S5 Rules חוסמים → אפס persist.
+- **התיקון:** כש-`useFirebaseBackend` → "כניסה ללקוח קיים"/"רישום" מנתבים ל-`showLoginSheet` (phone-OTP/מייל). `_enterViaAuth` ממתין לסגירת-ה-sheet, ואחרי `authStateProvider.signedIn` → mirror של `{displayName, phone}` ל-`users/{uid}` (merge דרך `usersProfileWriterProvider`, rules-safe — role נשאר admin-only) + `welcomeSeen=true` (כניסה). sheet שבוטל (עדיין signed-out) → נשאר ב-welcome לניסיון חוזר. `continueAsDemo` נשאר ל-flag-OFF + לקישור "המשך ללא רישום (דוגמה)".
+- `usersProfileWriterProvider` (`auth_state`) — seam של collection `users`, null בלי backend (אותו `useFirebaseBackend` gate). UI ללא-שינוי (רק לוגיקת-onPressed).
+- guard: `test/welcome_auth_gate_test.dart` (3 · flag-OFF=דמו · writer=null בלי Firebase · welcome מרנדר). נתיב flag-ON (OTP חי) נבדק ב-preview-channel האמיתי (מכשיר — הסנדבוקס חוסם Firebase).
+Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
+

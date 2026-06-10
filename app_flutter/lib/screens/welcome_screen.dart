@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/legal_screen.dart';
+import 'package:buildsmart/screens/login_sheet.dart';
+import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -47,6 +50,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     ref
         .read(userProfileProvider.notifier)
         .register(name: _name.text, contact: _contact.text);
+    // Live backend (flag ON): name/contact are saved locally, then the user
+    // authenticates (phone-OTP) — without auth the _firebase repos hit the
+    // deny-all Rules and nothing persists. Demo (flag OFF): straight to the
+    // profession step, exactly as before.
+    if (useFirebaseBackend) {
+      unawaited(_enterViaAuth());
+      return;
+    }
     _advance();
   }
 
@@ -56,9 +67,39 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   }
 
   void _existingLogin() {
-    // Existing customer — skip the trade step and enter straight in (matches
-    // the prototype: existing → app). No auth backend yet.
+    // Live backend (flag ON): route to the Firebase phone-OTP login sheet; on
+    // success we enter the app. Demo (flag OFF): existing customer skips the
+    // trade step and enters straight in (matches the prototype).
+    if (useFirebaseBackend) {
+      unawaited(_enterViaAuth());
+      return;
+    }
     ref.read(userProfileProvider.notifier).continueAsDemo();
+    ref.read(welcomeSeenProvider.notifier).state = true;
+    unawaited(persistWelcomeSeen());
+  }
+
+  /// Live-backend entry: open the Firebase login sheet (phone-OTP / email), and
+  /// once [authStateProvider] reports a signed-in user, mirror the identity
+  /// fields to `users/{uid}` (rules-safe merge) and enter the app. A cancelled
+  /// sheet (still signed-out) leaves the user on the welcome screen to retry.
+  Future<void> _enterViaAuth() async {
+    await showLoginSheet(context);
+    if (!mounted) return;
+    final auth = ref.read(authStateProvider);
+    if (!auth.signedIn) return; // cancelled — stay on welcome
+    final uid = auth.user?.uid;
+    final writer = ref.read(usersProfileWriterProvider);
+    if (uid != null && writer != null) {
+      final p = ref.read(userProfileProvider);
+      // Best-effort identity mirror (merge); never blocks entry.
+      unawaited(
+        writer.set(uid, {
+          if (p.name.isNotEmpty) 'displayName': p.name,
+          if (p.contact.isNotEmpty) 'phone': p.contact,
+        }).catchError((Object _) {}),
+      );
+    }
     ref.read(welcomeSeenProvider.notifier).state = true;
     unawaited(persistWelcomeSeen());
   }

@@ -771,3 +771,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 ## 2026-06-10 — toast.dart: מפתח-messenger גלובלי (server-S6) — אפס שינוי-עין
 - **שינוי-קוד בלבד:** `bsMessengerKey` + `showGlobalToast` (ל-push בחזית בלי context); ה-pill מוגדר פעם אחת ב-`_toastBar` ו-`showToast` הקיים זהה התנהגותית.
 - **אומת:** widget-test (push_state_test) מרנדר את ה-pill האמיתי דרך המסלול הגלובלי; analyze 0.
+
+## 2026-06-10 — welcome→auth wiring (server-gate-auth) — visual-verify
+- **שינוי-זרימה (flag ON בלבד):** "כניסה ללקוח קיים" + "רישום" ב-welcome מנתבים עכשיו ל-`showLoginSheet` (Firebase phone-OTP); אחרי `signedIn` → mirror פרופיל ל-`users/{uid}` + כניסה לאפליקציה. flag OFF = דמו כמו היום (`continueAsDemo`).
+- **אומת ברינדור** (Heebo · 430×932): מסך-הכניסה **ללא שינוי-עין** (hero + "כניסה ללקוח קיים" + טופס-רישום + "המשך ללא רישום (דוגמה)") — הניתוב הוא בלוגיקת-ה-onPressed, לא בפריסה. screenshot: /tmp/welcome.png. נתיב flag-ON (OTP) נבדק ב-preview-channel האמיתי (מכשיר).
+- guard: `welcome_auth_gate_test` (3 · flag-OFF דמו · writer=null בלי Firebase).
