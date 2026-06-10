@@ -2,6 +2,12 @@
 
 > **נקודת-כניסה אחת** להפעלת הצי על פרויקט-השרת. SSOT מפורט: `SPEC-server-connect-MICRO.md` (~48 מיקרו, S0–S9) + `SPEC-server-connect.md` (ארכיטקטורה). ענף: `claude/whats-happening-LyY9G`.
 
+## ⏯️ RESUME POINT (06-09 · אחרי token-restart של הצי)
+- ✅ **נדחף ובטוח:** **שלב A** (S0 · commit `61912d9`) — Firebase SDK מחובר (web · `firebase_options.dart` + `main.dart` + 6 deps · 1,772 טסטים ירוקים).
+- ❌ **אבד (לא נדחף):** **S2** (base `FirestoreCachedRepo` + orders-pilot + schema) — היה code-complete אך נפל עם הסביבה שנגמרו לה הטוקנים. **בנה מחדש מ-S2.**
+- **נקודת-המשך:** `S2` → `S3 ×5` (customers·stock·site·finance + catalog-guard, מקבילי) → `S1`(auth) → `S4`(real-time) → `S5`(Rules · לפני-launch) → `E`.
+- 🔴 **כלל-קשיח חדש (anti-loss):** **דחוף (push) אחרי כל משימה** — S2, וכל repo ב-S3 בנפרד — **לא בבאצ'ים**. נפילת-טוקנים לא תאבד יותר מ-micro-task אחד. ה-`_local` הוא ה-fallback, אז כל push בטוח (UI לא משתנה).
+
 ## 🎯 המטרה (משפט אחד)
 לחבר את האפליקציה ל-Firebase החי דרך **drop-in** (`_local`→`_firebase`) ב-**cache-pattern** — כך ש**ה-interface (sync) וה-UI לא משתנים**, אבל הנתונים אמיתיים (Auth · Firestore · real-time · push).
 
