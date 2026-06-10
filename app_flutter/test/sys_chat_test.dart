@@ -189,8 +189,10 @@ void main() {
       final ids = n.threadsFor(BsRole.contractor).map((t) => t.id).toSet();
       expect(ids, contains(contractorStore));
       expect(ids, contains(contractorManager));
-      // And the engine state matches the seed count (nothing was dropped).
-      expect(n.state.length, kChatThreads.length);
+      // And the engine state matches the FULL seed count (nothing was dropped)
+      // — legacy cross-persona threads + the board-audience threads (#70/#75,
+      // kWorkerChatThreads in sys_chat.dart).
+      expect(n.state.length, kChatThreads.length + kWorkerChatThreads.length);
     });
   });
 }

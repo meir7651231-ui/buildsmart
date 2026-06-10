@@ -135,7 +135,11 @@ void main() {
     testWidgets(
         'WIDGET worker — the "📸 שלח לאישור" button submits the task to review '
         'on the shared engine', (t) async {
-      SharedPreferences.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({
+      // #65 gate: seed a board session so the board (not the gate) renders.
+      'bs.board-auth.v1':
+          '{"role":"worker","username":"ran","displayName":"רן","demo":false}',
+    });
       await t.binding.setSurfaceSize(const Size(440, 1000));
       addTearDown(() => t.binding.setSurfaceSize(null));
 
@@ -176,7 +180,11 @@ void main() {
     testWidgets(
         'WIDGET manager — the 👷 אישורי עובדים section shows a submitted task and '
         'its ✅ אשר approves it live (badge drops)', (t) async {
-      SharedPreferences.setMockInitialValues({});
+      // #65 gate: seed a manager session so the board (not the gate) renders.
+      SharedPreferences.setMockInitialValues({
+        'bs.board-auth.v1':
+            '{"role":"manager","username":"admin","displayName":"מנהל המערכת","demo":false}',
+      });
       await t.binding.setSurfaceSize(const Size(440, 1000));
       addTearDown(() => t.binding.setSurfaceSize(null));
 

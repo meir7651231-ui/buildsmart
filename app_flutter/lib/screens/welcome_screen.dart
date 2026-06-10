@@ -5,6 +5,7 @@ import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/screens/login_sheet.dart';
 import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -18,7 +19,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// form — existing-customer login, full name + contact (saved locally, no
 /// server), or "continue as demo". On continue → the profession step.
 class WelcomeScreen extends ConsumerStatefulWidget {
-  const WelcomeScreen({super.key});
+  const WelcomeScreen({super.key, this.boardRole});
+
+  /// task #65 · role-gate mode: when set, this SAME screen — pixel- and
+  /// string-identical (the user's hard rule: רק בקוד, לא בעיצוב ולא בטקסטים)
+  /// — acts as the login gate of a role board: the name field is read as שם
+  /// המשתמש, the contact field as the board code, the demo button enters a
+  /// demo board session, and a successful login simply flips
+  /// [boardAuthProvider] — the gated board (or the role-picker's gate route)
+  /// rebuilds into the board in place, so no navigation happens here.
+  final BoardRole? boardRole;
 
   @override
   ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
@@ -35,7 +45,21 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     _contact.addListener(_onChanged);
   }
 
-  void _onChanged() => setState(() {});
+  /// task #65 · role-gate mode only: a well-formed code that
+  /// [BoardAuthNotifier.login] rejected — keeps the existing field-error UI
+  /// up until the input is edited again. Never set in the contractor flow.
+  bool _codeRejected = false;
+
+  void _onChanged() => setState(() => _codeRejected = false);
+
+  /// task #65 · role-gate mode: FORMAT check for the 4-digit board code —
+  /// spaces/dashes stripped, mirroring the validators in
+  /// `logic/input_validators.dart` (lives here because this gate is the only
+  /// caller; real existence checks stay in [BoardAuthNotifier.login]).
+  static bool _validBoardCode(String input) {
+    final digits = input.replaceAll(RegExp(r'[\s-]'), '');
+    return RegExp(r'^\d{4}$').hasMatch(digits);
+  }
 
   @override
   void dispose() {
@@ -46,7 +70,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   void _advance() => ref.read(startupStepProvider.notifier).state = 1;
 
+  /// task #65 · role-gate mode: try the seeded board credentials (name field
+  /// = שם משתמש, contact field = code). Success flips [boardAuthProvider] and
+  /// the gated parent rebuilds into the board — no navigation here. Failure
+  /// surfaces the existing field-error UI (no new strings).
+  void _boardLogin(BoardRole role) {
+    final ok = ref
+        .read(boardAuthProvider.notifier)
+        .login(role, _name.text, _contact.text);
+    if (!ok) setState(() => _codeRejected = true);
+  }
+
   void _register() {
+    final role = widget.boardRole;
+    if (role != null) {
+      _boardLogin(role);
+      return;
+    }
     ref
         .read(userProfileProvider.notifier)
         .register(name: _name.text, contact: _contact.text);
@@ -62,14 +102,28 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   }
 
   void _demo() {
+    final role = widget.boardRole;
+    if (role != null) {
+      // Role-gate mode: the demo affordance enters a demo board session —
+      // the contractor profile / startup flow is never touched.
+      ref.read(boardAuthProvider.notifier).enterDemo(role);
+      return;
+    }
     ref.read(userProfileProvider.notifier).continueAsDemo();
     _advance();
   }
 
   void _existingLogin() {
-    // Live backend (flag ON): route to the Firebase phone-OTP login sheet; on
-    // success we enter the app. Demo (flag OFF): existing customer skips the
-    // trade step and enters straight in (matches the prototype).
+    // Board role-gate mode FIRST: "כניסה ללקוח קיים" IS the login attempt —
+    // the seeded username+code check (#65), independent of the Firebase flag.
+    final role = widget.boardRole;
+    if (role != null) {
+      _boardLogin(role);
+      return;
+    }
+    // Contractor flow — live backend (flag ON): route to the Firebase
+    // phone-OTP login sheet; on success we enter the app. Demo (flag OFF):
+    // existing customer skips the trade step and enters straight in.
     if (useFirebaseBackend) {
       unawaited(_enterViaAuth());
       return;
@@ -109,8 +163,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // task #64: format gate — the contact must look like an Israeli mobile
     // (05XXXXXXXX) or an email before the CTA unlocks. Format only;
     // uniqueness checks are deferred to the Firebase backend.
-    final contactOk =
-        validIsraeliMobile(_contact.text) || validEmail(_contact.text);
+    // task #65 · role-gate mode: the SAME field carries the 4-digit board
+    // code instead, and a code login() rejected stays invalid until edited —
+    // same widgets, same labels, same error UI (zero visual/text change).
+    final contactOk = widget.boardRole == null
+        ? validIsraeliMobile(_contact.text) || validEmail(_contact.text)
+        : _validBoardCode(_contact.text) && !_codeRejected;
     final valid = registrationValid(_name.text, _contact.text) && contactOk;
     final media = MediaQuery.of(context);
     final heroHeight = media.size.height * 0.4;

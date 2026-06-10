@@ -3,6 +3,7 @@ import 'package:buildsmart/screens/worker_app_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// 🦺 עובד role-app (T9, rebuilt in the app's own style — same shell, different
 /// content). Guards the verbatim demo data + bucket filters (proto 06 §4.1/§4.2)
@@ -36,16 +37,24 @@ void main() {
 
   testWidgets('worker app renders cards in the app style (no בבנייה)',
       (tester) async {
+    // #65 gate: with no board session the screen shows ONLY the registration
+    // gate — seed a logged-in worker session (ran) so the board renders.
+    SharedPreferences.setMockInitialValues({
+      'bs.board-auth.v1':
+          '{"role":"worker","username":"ran","displayName":"רן","demo":false}',
+    });
     // The worker screen now reads the shared workerTasksProvider, so it must be
     // pumped inside a ProviderScope (cross-persona wiring W3).
     await tester.pumpWidget(
       const ProviderScope(child: MaterialApp(home: WorkerAppScreen())),
     );
     await tester.pump();
+    // Let the lazy boardAuthProvider _load() resolve, then rebuild gate→board.
+    await tester.pump(const Duration(milliseconds: 100));
 
-    // App chrome + verbatim content.
+    // App chrome + verbatim content (the רן/עומר toggle is gone — #66: the
+    // logged worker sees only their own board).
     expect(find.text('🦺 עובד'), findsOneWidget);
-    expect(find.text('רן (עובד)'), findsWidgets);
     expect(find.textContaining('שלום, רן'), findsOneWidget);
     expect(find.text('🔨 המשימה הנוכחית שלך'), findsOneWidget);
     expect(find.text('⏳ הבאות בתור (2)'), findsOneWidget);

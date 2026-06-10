@@ -6,6 +6,7 @@ import 'package:buildsmart/state/sys_orders.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// T9 — supplier-side persona role-apps (🏪 חנות + 🛵 שליח). Guards the verbatim
 /// SYS_ORDERS seed + supporting tables (proto 06 §1/§7), and the shared
@@ -136,6 +137,11 @@ void main() {
   testWidgets('store dashboard renders verbatim content + advances an order', (
     tester,
   ) async {
+    // #65 gate: seed a store session so the board (not the gate) renders.
+    SharedPreferences.setMockInitialValues({
+      'bs.board-auth.v1':
+          '{"role":"store","username":"lipskey","displayName":"ליפסקי","demo":false}',
+    });
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -162,6 +168,11 @@ void main() {
   });
 
   testWidgets('courier dashboard renders verbatim content', (tester) async {
+    // #65 gate: seed a courier session so the board (not the gate) renders.
+    SharedPreferences.setMockInitialValues({
+      'bs.board-auth.v1':
+          '{"role":"courier","username":"dudi","displayName":"דוד","demo":false}',
+    });
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -171,11 +182,19 @@ void main() {
       ),
     );
     await tester.pump();
+    // Lazy boardAuthProvider _load() → gate swaps to the vehicle-pick step.
+    await tester.pump(const Duration(milliseconds: 100));
 
+    // #72 flow: session gate → vehicle gate first (no board content yet).
     expect(find.text('🛵 שליח'), findsOneWidget);
-    expect(find.text('שלום 🛵'), findsOneWidget);
     expect(find.text('הרכב שלי היום'), findsOneWidget);
     expect(find.text('משאית'), findsWidgets);
+
+    // Pick the truck → the board home renders for the logged courier (דוד).
+    await tester.tap(find.text('משאית').first);
+    await tester.pump();
+
+    expect(find.text('שלום דוד 🛵'), findsOneWidget);
     // BS-1040 (ready, truck) is a truck job — but the store owns the hand-off,
     // so the courier sees it VIEW-ONLY (awaiting) until it is handed off (two-step).
     expect(find.text('📦 BS-1040'), findsOneWidget);

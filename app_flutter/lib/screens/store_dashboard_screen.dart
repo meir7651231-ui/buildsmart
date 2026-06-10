@@ -4,6 +4,8 @@ import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/persona_picking_sheet.dart';
 import 'package:buildsmart/screens/persona_portal.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
+import 'package:buildsmart/screens/welcome_screen.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/store_stock.dart';
 import 'package:buildsmart/state/sys_orders.dart';
@@ -60,6 +62,13 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // task #65 · חוק: מבחוץ לא רואים כלום — without a store [BoardSession]
+    // ONLY the gate (the registration screen in role mode) is built; a
+    // successful login flips [boardAuthProvider] and this build swaps to the
+    // real board in place. logout() swaps it back to the gate.
+    if (ref.watch(boardAuthProvider)?.role != BoardRole.store) {
+      return const WelcomeScreen(boardRole: BoardRole.store);
+    }
     final orders = ref.watch(sysOrdersProvider);
     return Directionality(
       textDirection: TextDirection.rtl,

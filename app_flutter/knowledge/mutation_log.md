@@ -793,3 +793,8 @@
 ### 2026-06-10 — server-gate: דגל-בקאנד default-OFF (`backend.dart`)
 - מוטציה (ידנית): הפיכת ברירת-המחדל של הדגל ל-true (`bool.fromEnvironment('USE_FIREBASE_BACKEND', defaultValue: true)`) → `backend_flag_test` **-1 אדום** ✅ נתפס; שוחזר byte-clean → **+1 ירוק**.
 - כיסוי: `backend_flag_test` נועל את ברירת-המחדל (demo/_local ללא-define, ללא-Firebase) — ה-live נשאר דמו עד הדלקה מפורשת. 11 אתרי-switch דרך `useFirebaseBackend`.
+### 2026-06-10 — lib/data/board_accounts_local.dart + lib/state/board_auth.dart (חדשים · #65 נחיל-לוחות)
+- מוטציה: קוד-הכניסה של ran שונה '1111'→'9999' → `test/board_auth_test.dart` אדום (4 בדיקות: login-success/persist/case-insensitive/race-guard — Expected session, Actual null) ✅ נתפס.
+- שחזור: byte-exact; הרצה חוזרת 8/8 ירוקה ✅.
+- מסקנה: בדיקות-הזהות חזקות — מכסות הצלחה/כישלון/persist/דמו/logout/קוד-החלפה.
+- `lib/data/chat_seeds.dart` (חדש · #70/#75): seed-בלבד (שיחות audience) — מכוסה עקיף ע"י בדיקות ה-chat הקיימות + analyze.

@@ -8,7 +8,12 @@
 //   • contractor↔courier  — both 👷 and 🛵 see it
 //   • contractor↔manager  — both 👷 and 👔 see it (🏪/🛵 do NOT — isolation)
 //   • store↔courier       — both 🏪 and 🛵 see it
-//   • bot                 — the chatbot thread (auto-reply kept), contractor-side
+//   • bot                 — the chatbot thread (auto-reply kept), shared with
+//                           the worker/courier boards (one bot for everyone)
+//
+// Board-audience seeds (contract §3): the courier-board threads (#75, marked
+// `audience: 'courier'`) live here too; the worker-board list is in
+// `sys_chat.dart` (`kWorkerChatThreads`).
 //
 // Timestamps are fixed (not `DateTime.now()`) so the seed is deterministic for
 // tests and stable across rebuilds — only user-sent messages use the wall clock.
@@ -93,10 +98,69 @@ final List<ChatThread> kChatThreads = [
     ],
   ),
 
-  // 🤖 — chatbot thread (auto-reply kept). Contractor-facing (legacy t5).
+  // ── שיחות לוח-השליח (#75 · audience:'courier') — demo seeds שמפנים אך ורק
+  // להזמנות האמיתיות מה-seed (BS-1040 · משה אברהם · וילה — סביון · 6 פריטים,
+  // משאית | BS-1039 · דוד לוי · משרדים — תל אביב · בדרך). SERVER-SWAP: עם
+  // חיבור השרת השיחות האלה יגיעו מצד השרת. ─────────────────────────────────
+
+  // 🛵 ↔ 🏪 — השליח מול חנות ליפסקי (איסוף BS-1040).
+  ChatThread(
+    id: 'th-courier-lipskey',
+    participants: const [BsRole.store, BsRole.courier],
+    audience: 'courier',
+    name: 'חנות ליפסקי',
+    avatar: '🏪',
+    messages: [
+      _seed('th-courier-lipskey', BsRole.store,
+          'BS-1040 (משה אברהם, וילה — סביון) מוכן לאיסוף — 6 פריטים, דורש משאית.',
+          minute: -50),
+      _seed('th-courier-lipskey', BsRole.courier,
+          'קיבלתי, יוצא לאיסוף עם המשאית 🚛', minute: -45),
+    ],
+  ),
+
+  // 🛵 ↔ 👤 — השליח מול הלקוח של המשלוח האמיתי BS-1040.
+  ChatThread(
+    id: 'th-courier-customer',
+    participants: const [BsRole.contractor, BsRole.courier],
+    audience: 'courier',
+    name: 'לקוח — משה אברהם',
+    avatar: '👤',
+    messages: [
+      _seed('th-courier-customer', BsRole.courier,
+          'שלום, משלוח BS-1040 בדרך אליך היום לוילה בסביון.', minute: -40),
+      _seed('th-courier-customer', BsRole.contractor,
+          'מעולה, אני באתר אחרי 12:00. תודה!', minute: -35),
+    ],
+  ),
+
+  // 🛵 ↔ 🛵 — קבוצת השליחים (עדכוני משמרת; המנהל משתתף כמוקד).
+  ChatThread(
+    id: 'th-couriers-group',
+    participants: const [BsRole.courier, BsRole.manager],
+    audience: 'courier',
+    name: 'שליחים',
+    avatar: '🛵',
+    messages: [
+      _seed('th-couriers-group', BsRole.manager,
+          'עדכון בוקר: BS-1039 (דוד לוי) כבר בדרך למשרדים בתל אביב.',
+          minute: -30),
+      _seed('th-couriers-group', BsRole.courier,
+          'BS-1040 ייאסף בהמשך הבוקר מהחנות 🛵', minute: -25),
+    ],
+  ),
+
+  // 🤖 — chatbot thread (auto-reply kept). Shared across boards: the worker +
+  // courier boards list it too (the "+בוט" rule of the audience filter), so
+  // those roles participate as well — one bot thread for everyone.
   ChatThread(
     id: 'th-bot',
-    participants: const [BsRole.contractor, BsRole.bot],
+    participants: const [
+      BsRole.contractor,
+      BsRole.worker,
+      BsRole.courier,
+      BsRole.bot,
+    ],
     name: 'צ׳אטבוט BuildSmart',
     avatar: '🤖',
     isBot: true,

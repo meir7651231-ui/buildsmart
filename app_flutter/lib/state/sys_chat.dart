@@ -100,6 +100,7 @@ class ChatThread {
     required this.avatar,
     required this.messages,
     this.isBot = false,
+    this.audience = 'contractor',
   });
 
   final String id;
@@ -111,6 +112,12 @@ class ChatThread {
   /// The chatbot thread keeps its legacy auto-reply (SPEC §6).
   final bool isBot;
 
+  /// Which board's chat list the thread belongs to (contract §3):
+  /// 'contractor' (the default — ALL legacy threads keep their behavior) ·
+  /// 'worker' · 'courier'. The shared bot thread is surfaced to every board
+  /// audience by the UI filter (`chats_screen.dart`), not by this field.
+  final String audience;
+
   ChatThread copyWith({List<ChatMessage>? messages}) => ChatThread(
         id: id,
         participants: participants,
@@ -118,6 +125,7 @@ class ChatThread {
         avatar: avatar,
         messages: messages ?? this.messages,
         isBot: isBot,
+        audience: audience,
       );
 }
 
@@ -135,8 +143,72 @@ const List<String> kBotAutoReplies = [
   'מעולה.',
 ];
 
+// ─── board-audience seed threads (contract §3) ────────────────────────────────
+
+/// A deterministic seed instant for the board-audience threads — fixed (not
+/// `DateTime.now()`), mirroring `chat_seeds.dart`'s `_seedDay`, so ids/order
+/// are stable for tests and across rebuilds.
+final DateTime _boardSeedDay = DateTime(2026, 6, 7, 8);
+
+ChatMessage _boardSeed(
+  String threadId,
+  BsRole from,
+  String text, {
+  required int minute,
+}) =>
+    ChatMessage(
+      id: 'seed-$threadId-$minute',
+      threadId: threadId,
+      fromRole: from,
+      text: text,
+      ts: _boardSeedDay.add(Duration(minutes: minute)),
+    );
+
+/// 🦺 WORKER-audience demo threads (board W, task #70): the worker board's
+/// reduced chat list — 'קבלן' + 'מנהל' (the shared bot thread is added by the
+/// UI for every board audience). Demo content references the REAL seeded tasks
+/// (`kPersonaTasks` ids 1/3 and a `kTaskSteps` step) — nothing invented.
+/// SERVER-SWAP: replaced by live server threads when the chat backend lands.
+final List<ChatThread> kWorkerChatThreads = [
+  ChatThread(
+    id: 'th-worker-contractor',
+    participants: const [BsRole.worker, BsRole.contractor],
+    audience: 'worker',
+    name: 'קבלן',
+    avatar: '👷',
+    messages: [
+      _boardSeed('th-worker-contractor', BsRole.contractor,
+          'בוקר טוב, היום ממשיכים בהתקנת קו מים חם — חדר רחצה.',
+          minute: -30),
+      _boardSeed('th-worker-contractor', BsRole.contractor,
+          'לא לשכוח בדיקת אטימה בלחץ מים לפני סגירת הקירות.',
+          minute: -25),
+    ],
+  ),
+  ChatThread(
+    id: 'th-worker-manager',
+    participants: const [BsRole.worker, BsRole.manager],
+    audience: 'worker',
+    name: 'מנהל',
+    avatar: '👔',
+    messages: [
+      _boardSeed('th-worker-manager', BsRole.manager,
+          'תזכורת: משימה שהסתיימה נשלחת לאישור עם תמונת ביצוע 📸',
+          minute: -90),
+      _boardSeed('th-worker-manager', BsRole.manager,
+          'איטום רצפת מקלחת ממתין לאישור — אעבור על זה היום.',
+          minute: -45),
+    ],
+  ),
+];
+
+/// The full engine seed: the legacy cross-persona threads (`chat_seeds.dart`,
+/// all audience-'contractor' by default) + the board-audience lists. The
+/// courier board (K) appends its own list here the same way.
+List<ChatThread> _seedThreads() => [...kChatThreads, ...kWorkerChatThreads];
+
 class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
-  ChatEngineNotifier({this.persist = true}) : super(kChatThreads) {
+  ChatEngineNotifier({this.persist = true}) : super(_seedThreads()) {
     if (persist) _load();
   }
 
@@ -199,7 +271,7 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
       final m = jsonDecode(raw) as Map<String, dynamic>;
       if (!_loaded) {
         super.state = [
-          for (final t in kChatThreads)
+          for (final t in _seedThreads())
             if (m[t.id] is List)
               t.copyWith(
                 messages: [
@@ -315,14 +387,15 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
 
   /// Reset to the verbatim seed (tests / a future "demo reset"). Bound to
   /// Firestore this resets BOTH remote-backed caches (and re-writes the seed);
-  /// their notify mirrors the seed back into the engine state.
+  /// their notify mirrors the seed back into the engine state. The local seed
+  /// is the FULL one (legacy cross-persona + board-audience threads, #70/#75).
   void resetToSeed() {
     final r = _remote;
     if (r != null) {
       r.resetToSeed();
       return;
     }
-    state = kChatThreads;
+    state = _seedThreads();
   }
 }
 

@@ -17,6 +17,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// persona (🏪 store / 🛵 courier — CH-4); and the remaining action-only tools
 /// (barcode, nav, POD) show an honest "to be wired" line rather than faking a
 /// feature (R8 — no invention).
+///
+/// #74 — the 🛵 courier board no longer opens this grid as a dialog: its portal
+/// is a TAB (`CourierPortalTab`, courier_portal_tab.dart) that reuses
+/// [kCourierPortalTiles] + [PortalTileButton] but wires each tile for real
+/// (POD → PersonaPodSheet · nav/SLA → SERVER-READY sheets · fleet/zones →
+/// seeded local sheets · chat → audience:'courier'). The nav/pod branches in
+/// the sheet below remain only as the honest legacy fallback.
 
 enum PortalKind {
   ratings,
@@ -278,6 +285,9 @@ class _PortalSheet extends ConsumerWidget {
         return [_ChatEntryRow(label: tile.title, persona: BsRole.store)];
       case PortalKind.chatStore:
         return [_ChatEntryRow(label: tile.title, persona: BsRole.courier)];
+      // barcode (store) is still honestly unwired; nav/pod reach here only if
+      // the legacy courier grid-dialog is opened — the courier BOARD wires them
+      // for real in CourierPortalTab (#74).
       case PortalKind.barcode:
       case PortalKind.nav:
       case PortalKind.pod:

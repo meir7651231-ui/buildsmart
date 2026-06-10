@@ -2,8 +2,10 @@ import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/screens/courier_dashboard_screen.dart';
 import 'package:buildsmart/screens/manager_dashboard_screen.dart';
 import 'package:buildsmart/screens/store_dashboard_screen.dart';
+import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
 import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -140,26 +142,30 @@ class _RoleRow extends ConsumerWidget {
             if (persona.id == 'worker') {
               // Worker is a full role-app (same shell as the main app), not a dial.
               Navigator.of(context).pop();
-              Navigator.of(context).push(WorkerAppScreen.route());
+              _pushBoard(context, BoardRole.worker,
+                  (_) => const WorkerAppScreen());
               return;
             }
             if (persona.id == 'manager') {
               // Manager is a full role-app (the מרכז השליטה dashboard SHELL),
               // not a BS-dial drill — mirror the worker→WorkerAppScreen pattern.
               Navigator.of(context).pop();
-              Navigator.of(context).push(ManagerDashboardScreen.route());
+              _pushBoard(context, BoardRole.manager,
+                  (_) => const ManagerDashboardScreen());
               return;
             }
             if (persona.id == 'store') {
               // Supplier store — full role-app (4 tabs), not a dial (T9).
               Navigator.of(context).pop();
-              Navigator.of(context).push(StoreDashboardScreen.route());
+              _pushBoard(context, BoardRole.store,
+                  (_) => const StoreDashboardScreen());
               return;
             }
             if (persona.id == 'courier') {
               // Courier — full role-app (delivery list), not a dial (T9).
               Navigator.of(context).pop();
-              Navigator.of(context).push(CourierDashboardScreen.route());
+              _pushBoard(context, BoardRole.courier,
+                  (_) => const CourierDashboardScreen());
               return;
             }
             // Every persona is handled above; close for any unhandled id.
@@ -218,5 +224,39 @@ class _RoleRow extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// task #65 · push a role board behind its gate (חוק: מבחוץ לא רואים כלום).
+/// An existing matching [BoardSession] builds the board directly; otherwise
+/// ONLY the registration screen in role mode is built, and a successful
+/// login/demo entry swaps it for the board in place ([_BoardGateRoute]).
+void _pushBoard(
+  BuildContext context,
+  BoardRole role,
+  WidgetBuilder boardBuilder,
+) {
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => _BoardGateRoute(role: role, boardBuilder: boardBuilder),
+    ),
+  );
+}
+
+/// The gate route of a role board: while there is no matching [BoardSession]
+/// it builds ONLY the registration screen in role mode — no board widget is
+/// constructed. Login/demo success flips [boardAuthProvider] and this route
+/// rebuilds into the board in place; logout flips it back to the gate.
+class _BoardGateRoute extends ConsumerWidget {
+  const _BoardGateRoute({required this.role, required this.boardBuilder});
+
+  final BoardRole role;
+  final WidgetBuilder boardBuilder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(boardAuthProvider);
+    if (session?.role != role) return WelcomeScreen(boardRole: role);
+    return boardBuilder(context);
   }
 }

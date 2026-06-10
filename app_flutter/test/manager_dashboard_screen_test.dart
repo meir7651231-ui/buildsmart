@@ -30,7 +30,11 @@ void main() {
   }
 
   Future<ProviderContainer> pumpScreen(WidgetTester t) async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({
+      // #65 gate: seed a board session so the board (not the gate) renders.
+      'bs.board-auth.v1':
+          '{"role":"manager","username":"admin","displayName":"מנהל המערכת","demo":false}',
+    });
     await t.binding.setSurfaceSize(const Size(440, 950));
     addTearDown(() => t.binding.setSurfaceSize(null));
     await t.pumpWidget(
@@ -112,7 +116,11 @@ void main() {
     });
 
     testWidgets('route() pushes the screen', (t) async {
-      SharedPreferences.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({
+      // #65 gate: seed a board session so the board (not the gate) renders.
+      'bs.board-auth.v1':
+          '{"role":"manager","username":"admin","displayName":"מנהל המערכת","demo":false}',
+    });
       await t.binding.setSurfaceSize(const Size(440, 950));
       addTearDown(() => t.binding.setSurfaceSize(null));
       await t.pumpWidget(
@@ -845,7 +853,11 @@ void main() {
   group('manager entry — role picker opens the dashboard (M1 wiring)', () {
     testWidgets('tapping "מנהל המערכת" in the "מי אתה?" picker pushes '
         'ManagerDashboardScreen', (t) async {
-      SharedPreferences.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({
+      // #65 gate: seed a board session so the board (not the gate) renders.
+      'bs.board-auth.v1':
+          '{"role":"manager","username":"admin","displayName":"מנהל המערכת","demo":false}',
+    });
       await t.binding.setSurfaceSize(const Size(440, 950));
       addTearDown(() => t.binding.setSurfaceSize(null));
       await t.pumpWidget(
@@ -874,7 +886,11 @@ void main() {
 
     testWidgets('showRolePicker → manager row pushes the dashboard directly',
         (t) async {
-      SharedPreferences.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({
+      // #65 gate: seed a board session so the board (not the gate) renders.
+      'bs.board-auth.v1':
+          '{"role":"manager","username":"admin","displayName":"מנהל המערכת","demo":false}',
+    });
       await t.binding.setSurfaceSize(const Size(440, 950));
       addTearDown(() => t.binding.setSurfaceSize(null));
       await t.pumpWidget(

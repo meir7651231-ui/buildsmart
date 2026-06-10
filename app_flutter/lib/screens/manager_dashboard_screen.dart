@@ -5,6 +5,8 @@ import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
+import 'package:buildsmart/screens/welcome_screen.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -39,6 +41,13 @@ class ManagerDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // task #65 · חוק: מבחוץ לא רואים כלום — without a manager [BoardSession]
+    // ONLY the gate (the registration screen in role mode) is built; a
+    // successful login flips [boardAuthProvider] and this build swaps to the
+    // real board in place. logout() swaps it back to the gate.
+    if (ref.watch(boardAuthProvider)?.role != BoardRole.manager) {
+      return WelcomeScreen(boardRole: BoardRole.manager);
+    }
     final active = ref.watch(managerTabProvider);
 
     return Directionality(

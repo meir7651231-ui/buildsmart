@@ -5,6 +5,7 @@ import 'package:buildsmart/screens/home_shell.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Widget _wrap() => const ProviderScope(child: BuildSmartApp());
 
@@ -46,6 +47,11 @@ void main() {
   });
 
   testWidgets('Manager → לוח בקרה drills to 5 metric leaves', (t) async {
+    // #65 gate: seed a manager session so the role tap opens the board.
+    SharedPreferences.setMockInitialValues({
+      'bs.board-auth.v1':
+          '{"role":"manager","username":"admin","displayName":"מנהל המערכת","demo":false}',
+    });
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     await _open(t, 'BS');
@@ -63,6 +69,11 @@ void main() {
   });
 
   testWidgets('Worker → opens its role-app with the 3 task groups', (t) async {
+    // #65 gate: seed a worker session so the role tap opens the board.
+    SharedPreferences.setMockInitialValues({
+      'bs.board-auth.v1':
+          '{"role":"worker","username":"ran","displayName":"רן","demo":false}',
+    });
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     await _open(t, 'BS');

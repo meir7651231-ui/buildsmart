@@ -40,7 +40,11 @@ void main() {
   // manager's dashboard, so the engine they read is literally the same — that
   // is the whole point of the "live" proof.
   Future<ProviderContainer> pumpStoreCart(WidgetTester t) async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({
+      // #65 gate: seed a board session so the board (not the gate) renders.
+      'bs.board-auth.v1':
+          '{"role":"manager","username":"admin","displayName":"מנהל המערכת","demo":false}',
+    });
     // A roomy surface so the cart's own horizontal rows (supplier header, summary)
     // never trip a cosmetic RenderFlex overflow — this test is about the wiring,
     // not pixel layout.

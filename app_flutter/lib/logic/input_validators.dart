@@ -26,6 +26,14 @@ bool validBusinessId(String input) {
   return RegExp(r'^\d{9}$').hasMatch(digits);
 }
 
+/// Board login code (task #65): exactly 4 digits — the seeded board-account
+/// codes (`data/board_accounts_local.dart`). Dashes and spaces are allowed in
+/// the input and stripped before the check.
+bool validBoardCode(String input) {
+  final digits = input.replaceAll(RegExp(r'[\s-]'), '');
+  return RegExp(r'^\d{4}$').hasMatch(digits);
+}
+
 /// Amount (price / budget / expense): a finite number strictly greater than 0.
 /// Accepts the nullable result of `int.tryParse` / `double.tryParse` directly.
 bool validPositiveAmount(num? value) =>

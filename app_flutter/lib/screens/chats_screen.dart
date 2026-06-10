@@ -21,6 +21,68 @@ enum _ThreadCategory { agent, supplier, bot }
 
 enum _ChatFilter { all, agents, suppliers, bot }
 
+// ─── board-audience filter chips (contract §3, board W) ───────────────────────
+//
+// Non-contractor audiences ('worker' / 'courier') swap the legacy
+// נציגים/ספקים chips for a role-specific set. Selection is a plain index into
+// the audience's chip list; the contractor keeps the legacy [_ChatFilter] path
+// completely untouched.
+
+/// Selected audience-chip index (0 = הכל). Shared state like
+/// [_chatFilterProvider]; an out-of-range stale index falls back to 0.
+final _audienceChipIndexProvider = StateProvider<int>((_) => 0);
+
+/// One audience chip: a label + which raw [ChatThread]s it matches.
+class _AudienceChip {
+  const _AudienceChip(this.label, this.matches);
+
+  final String label;
+  final bool Function(ChatThread t) matches;
+}
+
+/// True for a couriers-only thread (the 'שליחים' group chip): every non-bot
+/// participant is a courier (the courier board seeds such threads).
+bool _isCouriersOnly(ChatThread t) =>
+    !t.isBot &&
+    t.participants.isNotEmpty &&
+    t.participants.every((r) => r == BsRole.courier);
+
+/// The chip set per audience (contract §3): worker → הכל/קבלן/מנהל/בוט ·
+/// courier → הכל/חנות/לקוח/שליחים/בוט. Null = contractor (the legacy chips).
+List<_AudienceChip>? _audienceChipsFor(String audience) => switch (audience) {
+      'worker' => [
+          _AudienceChip('הכל', (_) => true),
+          _AudienceChip('👷 קבלן',
+              (t) => !t.isBot && t.participants.contains(BsRole.contractor)),
+          _AudienceChip('👔 מנהל',
+              (t) => !t.isBot && t.participants.contains(BsRole.manager)),
+          _AudienceChip('🤖 בוט', (t) => t.isBot),
+        ],
+      'courier' => [
+          _AudienceChip('הכל', (_) => true),
+          _AudienceChip('🏪 חנות',
+              (t) => !t.isBot && t.participants.contains(BsRole.store)),
+          _AudienceChip('👷 לקוח',
+              (t) => !t.isBot && t.participants.contains(BsRole.contractor)),
+          _AudienceChip('🛵 שליחים', _isCouriersOnly),
+          _AudienceChip('🤖 בוט', (t) => t.isBot),
+        ],
+      _ => null,
+    };
+
+/// Which threads a [persona] viewing the [audience] list may see (contract §3
+/// + the §2.5 isolation): the contractor view is the legacy participant filter
+/// over audience-'contractor' threads (UNCHANGED — every legacy thread carries
+/// that default audience); a board audience sees ONLY its own threads plus the
+/// shared bot thread.
+bool _visibleToAudience(ChatThread t, BsRole persona, String audience) {
+  if (audience == 'contractor') {
+    return t.audience == 'contractor' && t.participants.contains(persona);
+  }
+  if (t.isBot) return true; // the bot thread is shared across board audiences
+  return t.audience == audience && t.participants.contains(persona);
+}
+
 // ─── thread view-model (engine → existing UI adapter) ──────────────────────────
 //
 // The rich row/page UI below was built around the `_Thread` record and a
@@ -295,11 +357,27 @@ typedef _Message = ({String text, bool isMe, String time});
 /// `Navigator.pop`s to the caller — NO home_shell, NO role_picker, NO contractor
 /// tabs, and no path anywhere into another persona's board.
 class ChatsScreen extends ConsumerStatefulWidget {
-  const ChatsScreen({super.key, this.persona = BsRole.contractor});
+  const ChatsScreen({
+    super.key,
+    this.persona = BsRole.contractor,
+    this.audience = 'contractor',
+    this.embedded = false,
+  });
 
   /// The persona viewing the screen. Defaults to [BsRole.contractor] so existing
   /// `const ChatsScreen()` callers (the contractor home-shell tab) are unchanged.
   final BsRole persona;
+
+  /// Which board's thread list to show (contract §3): 'contractor' (default —
+  /// the legacy list, UNCHANGED) · 'worker' · 'courier'. A board audience shows
+  /// ONLY its own threads (+ the shared bot thread) and swaps the filter chips
+  /// for its role-specific set ([_audienceChipsFor]).
+  final String audience;
+
+  /// True when a role BOARD embeds this as a tab inside its own shell — the
+  /// bare body is returned over a white surface (no own Scaffold/AppBar),
+  /// like the contractor home-shell tab.
+  final bool embedded;
 
   @override
   ConsumerState<ChatsScreen> createState() => _ChatsScreenState();
@@ -308,14 +386,21 @@ class ChatsScreen extends ConsumerStatefulWidget {
 class _ChatsScreenState extends ConsumerState<ChatsScreen> {
   bool _headerVisible = true;
 
-  bool get _standalone => widget.persona != BsRole.contractor;
+  /// Inside the contractor home_shell tab — the only context that owns the
+  /// shrinking-tab-header coordination ([tabHeaderHiddenProvider]).
+  bool get _inHomeShell => widget.persona == BsRole.contractor;
+
+  /// Wrap in our own Scaffold + "שיחות" AppBar only when pushed standalone —
+  /// an [ChatsScreen.embedded] board tab gets the bare body instead.
+  bool get _standalone => !_inHomeShell && !widget.embedded;
 
   void _setHeaderVisible(bool v) {
     if (_headerVisible == v) return;
     setState(() => _headerVisible = v);
     // The shrinking-tab-header coordination only exists inside home_shell (the
-    // contractor tab); a standalone persona screen has no such header to hide.
-    if (!_standalone) {
+    // contractor tab); other personas — standalone or board-embedded — have no
+    // such header to hide.
+    if (_inHomeShell) {
       ref.read(tabHeaderHiddenProvider.notifier).state = !v;
     }
   }
@@ -337,7 +422,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_standalone) {
+    if (_inHomeShell) {
       ref.listen<bool>(tabHeaderHiddenProvider, (_, hidden) {
         if (!hidden && !_headerVisible) _setHeaderVisible(true);
       });
@@ -351,9 +436,12 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
             curve: Curves.easeInOut,
             alignment: Alignment.topCenter,
             child: _headerVisible
-                ? const Column(
+                ? Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [_SearchBar(), _FilterChipsRow()],
+                    children: [
+                      const _SearchBar(),
+                      _FilterChipsRow(audience: widget.audience),
+                    ],
                   )
                 : const SizedBox.shrink(),
           ),
@@ -361,16 +449,25 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
         Expanded(
           child: NotificationListener<ScrollNotification>(
             onNotification: _handleScroll,
-            child: _ThreadList(persona: widget.persona),
+            child: _ThreadList(
+              persona: widget.persona,
+              audience: widget.audience,
+            ),
           ),
         ),
       ],
     );
 
     // 🔒 Contractor: embedded tab — return the bare body (home_shell owns the
-    // Scaffold/AppBar). Every other persona: standalone Scaffold with its own
-    // "שיחות" AppBar + a back button that only pops to its dashboard.
-    if (!_standalone) return body;
+    // Scaffold/AppBar). A board-[ChatsScreen.embedded] tab gets the same bare
+    // body over its own white surface. Every other persona: standalone Scaffold
+    // with its own "שיחות" AppBar + a back button that only pops to its
+    // dashboard.
+    if (!_standalone) {
+      return _inHomeShell
+          ? body
+          : ColoredBox(color: Colors.white, child: body);
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -480,10 +577,42 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
 // ─── filter chips ─────────────────────────────────────────────────────────────
 
 class _FilterChipsRow extends ConsumerWidget {
-  const _FilterChipsRow();
+  const _FilterChipsRow({this.audience = 'contractor'});
+
+  /// Which board's chip set to show (contract §3) — 'contractor' keeps the
+  /// legacy נציגים/ספקים chips untouched.
+  final String audience;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Board audiences (worker/courier) get their own chip set; selection is a
+    // plain index into [_audienceChipsFor].
+    final audienceChips = _audienceChipsFor(audience);
+    if (audienceChips != null) {
+      final raw = ref.watch(_audienceChipIndexProvider);
+      final selected = raw < audienceChips.length ? raw : 0;
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (var i = 0; i < audienceChips.length; i++) ...[
+                if (i > 0) const SizedBox(width: 8),
+                _Pill(
+                  label: audienceChips[i].label,
+                  active: selected == i,
+                  onTap: () => ref
+                      .read(_audienceChipIndexProvider.notifier)
+                      .state = i,
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
     final filter = ref.watch(_chatFilterProvider);
 
     void select(_ChatFilter f) =>
@@ -563,9 +692,13 @@ class _Pill extends StatelessWidget {
 // ─── thread list ──────────────────────────────────────────────────────────────
 
 class _ThreadList extends ConsumerWidget {
-  const _ThreadList({required this.persona});
+  const _ThreadList({required this.persona, this.audience = 'contractor'});
 
   final BsRole persona;
+
+  /// Which board's thread list to build (contract §3) — see
+  /// [_visibleToAudience].
+  final String audience;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -576,9 +709,18 @@ class _ThreadList extends ConsumerWidget {
     // the shared engine, filtered by participation. Adapted to the legacy
     // `_Thread` view-model so the rich rows below render unchanged.
     final lastRead = ref.watch(chatLastReadProvider);
+    // Board audiences also apply their own chip filter here — over the raw
+    // [ChatThread] — before adapting to the legacy `_Thread` view-model.
+    final audienceChips = _audienceChipsFor(audience);
+    final chipRaw = ref.watch(_audienceChipIndexProvider);
+    final audienceChip = audienceChips == null
+        ? null
+        : audienceChips[chipRaw < audienceChips.length ? chipRaw : 0];
     final views = [
       for (final t in ref.watch(chatEngineProvider).where(
-            (t) => t.participants.contains(persona),
+            (t) =>
+                _visibleToAudience(t, persona, audience) &&
+                (audienceChip == null || audienceChip.matches(t)),
           ))
         _viewOf(t, persona, lastRead),
     ];
@@ -588,15 +730,20 @@ class _ThreadList extends ConsumerWidget {
       if (archivedIds.contains(t.id)) {
         return false;
       }
-      if (filter == _ChatFilter.agents && t.category != _ThreadCategory.agent) {
-        return false;
-      }
-      if (filter == _ChatFilter.suppliers &&
-          t.category != _ThreadCategory.supplier) {
-        return false;
-      }
-      if (filter == _ChatFilter.bot && t.category != _ThreadCategory.bot) {
-        return false;
+      // The legacy נציגים/ספקים chips apply only to the contractor audience —
+      // board audiences are filtered by their own _AudienceChip set above.
+      if (audience == 'contractor') {
+        if (filter == _ChatFilter.agents &&
+            t.category != _ThreadCategory.agent) {
+          return false;
+        }
+        if (filter == _ChatFilter.suppliers &&
+            t.category != _ThreadCategory.supplier) {
+          return false;
+        }
+        if (filter == _ChatFilter.bot && t.category != _ThreadCategory.bot) {
+          return false;
+        }
       }
       if (query.isNotEmpty) {
         final q = query.toLowerCase();
