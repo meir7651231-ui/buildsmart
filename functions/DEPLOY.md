@@ -10,6 +10,8 @@ Deployed by `.github/workflows/firebase-deploy.yml` whenever `functions/**` chan
   - Firebase Rules Admin
   - **Cloud Functions Admin**
   - **Service Account User**
+- Required Google APIs enabled by the project owner (06-10): **artifactregistry**,
+  **cloudfunctions**, **cloudbuild** ✅
 - **R2 secrets** for `src/r2.ts` presign — set via
   `firebase functions:secrets:set <NAME>` (or GCP Secret Manager) before/at deploy.
 
