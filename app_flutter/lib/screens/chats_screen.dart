@@ -71,13 +71,19 @@ List<_AudienceChip>? _audienceChipsFor(String audience) => switch (audience) {
     };
 
 /// Which threads a [persona] viewing the [audience] list may see (contract §3
-/// + the §2.5 isolation): the contractor view is the legacy participant filter
-/// over audience-'contractor' threads (UNCHANGED — every legacy thread carries
-/// that default audience); a board audience sees ONLY its own threads plus the
-/// shared bot thread.
+/// + the §2.5 isolation): the 'contractor' (default) view is the participant
+/// filter over the legacy audience-'contractor' threads PLUS the
+/// audience-'worker' threads the viewer takes part in — so a worker→contractor
+/// message ('th-worker-contractor') reaches the contractor's שיחות tab, and a
+/// worker→manager message ('th-worker-manager') reaches the manager's
+/// standalone ChatsScreen (both open this default list). Without the 'worker'
+/// clause those threads were WRITE-ONLY: the worker sent into them but the
+/// other side never saw them. A board audience (worker/courier) still sees
+/// ONLY its own threads plus the shared bot thread.
 bool _visibleToAudience(ChatThread t, BsRole persona, String audience) {
   if (audience == 'contractor') {
-    return t.audience == 'contractor' && t.participants.contains(persona);
+    return t.participants.contains(persona) &&
+        (t.audience == 'contractor' || t.audience == 'worker');
   }
   if (t.isBot) return true; // the bot thread is shared across board audiences
   return t.audience == audience && t.participants.contains(persona);
@@ -126,6 +132,17 @@ int _unreadCount(ChatThread t, BsRole persona, int lastReadMs) => t.messages
     )
     .length;
 
+/// Per-viewer thread title. The worker-board threads are named from the
+/// WORKER's point of view ('קבלן' / 'מנהל' — `kWorkerChatThreads`,
+/// sys_chat.dart); when the OTHER side (contractor/manager) views such a
+/// thread through its default list, show the worker counterpart instead —
+/// 'עובד — רן' (רן is kWorkers[0], the seeded demo worker; persona_data.dart)
+/// — so the contractor's row isn't labeled with his own role.
+String _displayNameFor(ChatThread t, BsRole persona) =>
+    t.audience == 'worker' && !t.isBot && persona != BsRole.worker
+        ? 'עובד — רן'
+        : t.name;
+
 /// Build the legacy `_Thread` record + the engine handle for [persona].
 _ThreadView _viewOf(ChatThread t, BsRole persona, Map<String, int> lastRead) {
   final last = t.messages.isNotEmpty ? t.messages.last : null;
@@ -135,7 +152,7 @@ _ThreadView _viewOf(ChatThread t, BsRole persona, Map<String, int> lastRead) {
     thread: (
       id: t.id,
       avatar: t.avatar,
-      name: t.name,
+      name: _displayNameFor(t, persona),
       subtitle: last?.text ?? '',
       time: last != null ? _hhmm(last.ts) : '',
       direction: _directionFor(t, persona),

@@ -692,7 +692,10 @@ void main() {
     }
 
     // Expand one accordion section by tapping its header title.
+    // v2: the ניהול tab gained a 'בקשות חופשה' section above the tools, so a
+    // header can sit below the fold — scroll it into view before tapping.
     Future<void> openSection(WidgetTester t, String title) async {
+      await t.scrollUntilVisible(find.text(title), 200);
       await t.tap(find.text(title));
       await settle(t);
     }
@@ -809,6 +812,12 @@ void main() {
 
       expect(find.byType(RegressionPanelScreen), findsNothing);
       // Tap the action button → it pushes the existing RegressionPanelScreen.
+      // (v2: the expanded section can open below the fold — scroll until the
+      // button is FULLY visible; scrollUntilVisible alone can stop with its
+      // center still past the viewport edge.)
+      await t.scrollUntilVisible(find.text('🔬 פתח מרכז בדיקות רגרסיה'), 200);
+      await t.ensureVisible(find.text('🔬 פתח מרכז בדיקות רגרסיה'));
+      await t.pumpAndSettle();
       await t.tap(find.text('🔬 פתח מרכז בדיקות רגרסיה'));
       await settle(t);
       expect(find.byType(RegressionPanelScreen), findsOneWidget);

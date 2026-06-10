@@ -56,11 +56,18 @@ void main() {
     // logged worker sees only their own board).
     expect(find.text('🦺 עובד'), findsOneWidget);
     expect(find.textContaining('שלום, רן'), findsOneWidget);
+    // v2: the 'היום שלי' strip sits above the buckets, pushing the queue
+    // header below the fold of the lazy ListView — scroll to each section.
+    await tester.scrollUntilVisible(find.text('🔨 המשימה הנוכחית שלך'), 200);
     expect(find.text('🔨 המשימה הנוכחית שלך'), findsOneWidget);
+    // The title appears in the 'היום שלי' strip (today+next day-stages) AND
+    // on the task card — at least one is enough.
+    expect(find.text('התקנת קו מים חם — חדר רחצה'), findsWidgets);
+    await tester.scrollUntilVisible(find.text('⏳ הבאות בתור (2)'), 200);
     expect(find.text('⏳ הבאות בתור (2)'), findsOneWidget);
 
     // Real task cards, not a stub.
-    expect(find.text('התקנת קו מים חם — חדר רחצה'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('הרכבת מיכל הדחה סמוי'), 200);
     expect(find.text('הרכבת מיכל הדחה סמוי'), findsOneWidget);
     expect(find.textContaining('בבנייה'), findsNothing);
   });

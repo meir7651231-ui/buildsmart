@@ -12,8 +12,20 @@
 // All seed numbers/strings are VERBATIM from the prototype (R8 — no invented
 // values). The display-only seeds (greenBadges / locationCoupons / vipTiers) are
 // plain consts consumed by the screen.
+//
+// PERSISTENCE (#9): the runtime deltas survive a restart as a compact
+// `{coins, claimedChallengeIds}` overlay under [kRewardsKey] (the
+// `brand_history.dart` SharedPreferences idiom + the board_auth `_userTouched`
+// load-guard) — coins earned from approved tasks no longer evaporate.
+
+import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// SharedPreferences key (versioned like the other `bs.*.v1` keys) — the
+/// persisted rewards overlay `{coins, claimedChallengeIds}` (#9).
+const String kRewardsKey = 'bs.rewards.v1';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Seeds — VERBATIM from index.html:21409-21444.
@@ -201,18 +213,77 @@ class RewardsState {
 }
 
 class RewardsNotifier extends StateNotifier<RewardsState> {
-  RewardsNotifier()
+  RewardsNotifier({this.persist = true})
       : super(const RewardsState(
           coins: kBuildCoinsSeed,
           challenges: kMonthlyChallengesSeed,
           leaderboard: kLeaderboardSeed,
-        ));
+        )) {
+    if (persist) _load();
+  }
+
+  /// When false (tests), skip SharedPreferences entirely (engine pattern).
+  final bool persist;
+
+  /// One-shot guard (the board_auth/brand_history idiom): once a user
+  /// mutation wrote state, a late async [_load] must not clobber it.
+  bool _userTouched = false;
+
+  /// Re-apply the persisted `{coins, claimedChallengeIds}` overlay (#9) onto
+  /// the verbatim seed — resilient to seed edits (a renamed/added challenge
+  /// simply has no overlay entry). A corrupt payload keeps the seed.
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(kRewardsKey);
+      if (raw == null || raw.isEmpty || _userTouched) return;
+      final m = jsonDecode(raw) as Map<String, dynamic>;
+      if (_userTouched) return;
+      final coins = (m['coins'] as num?)?.toInt() ?? kBuildCoinsSeed;
+      final claimed = <String>{
+        for (final id in (m['claimedChallengeIds'] as List? ?? const []))
+          if (id is String) id,
+      };
+      state = state.copyWith(
+        coins: coins,
+        challenges: [
+          for (final c in kMonthlyChallengesSeed)
+            if (!claimed.contains(c.id)) c,
+        ],
+        leaderboard: _syncMe(coins),
+      );
+    } on Object catch (_) {
+      // corrupt/legacy payload — keep the verbatim seed
+    }
+  }
+
+  /// Persist the compact overlay: the live coin balance + which seed
+  /// challenges were claimed (derived — claimed = seed ids no longer live).
+  Future<void> _persist() async {
+    if (!persist) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final live = {for (final c in state.challenges) c.id};
+      await prefs.setString(
+        kRewardsKey,
+        jsonEncode({
+          'coins': state.coins,
+          'claimedChallengeIds': [
+            for (final c in kMonthlyChallengesSeed)
+              if (!live.contains(c.id)) c.id,
+          ],
+        }),
+      );
+    } on Object catch (_) {}
+  }
 
   /// Add [n] coins and keep the "me" leaderboard row in sync — proto
   /// `awardCoins` @21487-21494.
   void awardCoins(int n) {
+    _userTouched = true;
     final coins = state.coins + n;
     state = state.copyWith(coins: coins, leaderboard: _syncMe(coins));
+    _persist();
   }
 
   /// Claim a completed challenge: award its reward then drop it from the active
@@ -226,6 +297,7 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
       }
     }
     if (c == null || !c.done) return;
+    _userTouched = true;
     final coins = state.coins + c.reward;
     state = state.copyWith(
       coins: coins,
@@ -235,14 +307,17 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
       ],
       leaderboard: _syncMe(coins),
     );
+    _persist();
   }
 
   /// Redeem a reward — spends [r.cost] coins if affordable. Returns true when
   /// the redemption succeeded — proto `redeemReward` @21640-21658.
   bool redeem(RwReward r) {
     if (state.coins < r.cost) return false;
+    _userTouched = true;
     final coins = state.coins - r.cost;
     state = state.copyWith(coins: coins, leaderboard: _syncMe(coins));
+    _persist();
     return true;
   }
 

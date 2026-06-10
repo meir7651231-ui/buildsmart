@@ -9,6 +9,7 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,13 +22,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key, this.boardRole});
 
-  /// task #65 · role-gate mode: when set, this SAME screen — pixel- and
-  /// string-identical (the user's hard rule: רק בקוד, לא בעיצוב ולא בטקסטים)
-  /// — acts as the login gate of a role board: the name field is read as שם
-  /// המשתמש, the contact field as the board code, the demo button enters a
-  /// demo board session, and a successful login simply flips
-  /// [boardAuthProvider] — the gated board (or the role-picker's gate route)
-  /// rebuilds into the board in place, so no navigation happens here.
+  /// task #65 + cluster #85א · role-gate mode: when set, this screen acts as
+  /// the login gate of a role board. 'כניסה ללקוח קיים' is the PRIMARY path:
+  /// tapping it reveals (inline, same card style) שם משתמש + קוד fields and a
+  /// 'כניסה' button; the registration form is contractor-only and hidden
+  /// here, and 'מצב דמו' enters a demo board session. A successful login
+  /// simply flips [boardAuthProvider] — the gated board (or the role-picker's
+  /// gate route) rebuilds into the board in place, so no navigation happens.
   final BoardRole? boardRole;
 
   @override
@@ -45,10 +46,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     _contact.addListener(_onChanged);
   }
 
-  /// task #65 · role-gate mode only: a well-formed code that
-  /// [BoardAuthNotifier.login] rejected — keeps the existing field-error UI
-  /// up until the input is edited again. Never set in the contractor flow.
+  /// task #65 + #85א · role-gate mode only: a well-formed code that
+  /// [BoardAuthNotifier.login] rejected — shows 'שם משתמש או קוד לא נכונים'
+  /// under the code field until the input is edited again. Never set in the
+  /// contractor flow.
   bool _codeRejected = false;
+
+  /// Cluster #85א · role-gate mode only: whether the inline existing-customer
+  /// login form (שם משתמש + קוד + 'כניסה') is revealed — tapping
+  /// 'כניסה ללקוח קיים' toggles it. Never set in the contractor flow.
+  /// Ephemeral UI state on purpose — not persisted.
+  bool _loginRevealed = false;
 
   void _onChanged() => setState(() => _codeRejected = false);
 
@@ -70,10 +78,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   void _advance() => ref.read(startupStepProvider.notifier).state = 1;
 
-  /// task #65 · role-gate mode: try the seeded board credentials (name field
-  /// = שם משתמש, contact field = code). Success flips [boardAuthProvider] and
-  /// the gated parent rebuilds into the board — no navigation here. Failure
-  /// surfaces the existing field-error UI (no new strings).
+  /// task #65 + #85א · role-gate mode: try the seeded board credentials
+  /// (the שם משתמש + קוד fields of the revealed login form). Success flips
+  /// [boardAuthProvider] and the gated parent rebuilds into the board — no
+  /// navigation here. Failure shows 'שם משתמש או קוד לא נכונים' under the
+  /// code field via the errorText slot.
   void _boardLogin(BoardRole role) {
     final ok = ref
         .read(boardAuthProvider.notifier)
@@ -82,11 +91,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   }
 
   void _register() {
-    final role = widget.boardRole;
-    if (role != null) {
-      _boardLogin(role);
-      return;
-    }
+    // Contractor flow only — in role mode (cluster #85א) the registration
+    // form is not built; board login goes through [_boardLogin].
     ref
         .read(userProfileProvider.notifier)
         .register(name: _name.text, contact: _contact.text);
@@ -113,21 +119,31 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     _advance();
   }
 
-  void _existingLogin() {
-    // Board role-gate mode FIRST: "כניסה ללקוח קיים" IS the login attempt —
-    // the seeded username+code check (#65), independent of the Firebase flag.
+  Future<void> _existingLogin() async {
+    // Board role-gate FIRST (#65): in role mode 'כניסה ללקוח קיים' is the
+    // seeded username+code login (the revealed inline form normally handles
+    // it — this path is a safety net), independent of the Firebase flag.
     final role = widget.boardRole;
     if (role != null) {
       _boardLogin(role);
       return;
     }
     // Contractor flow — live backend (flag ON): route to the Firebase
-    // phone-OTP login sheet; on success we enter the app. Demo (flag OFF):
-    // existing customer skips the trade step and enters straight in.
+    // phone-OTP login sheet; on success we enter the app.
     if (useFirebaseBackend) {
       unawaited(_enterViaAuth());
       return;
     }
+    // Demo (flag OFF) — #19 honesty: there is no login server yet (tickets
+    // #23/#27), so say so BEFORE entering as a demo guest.
+    final ok = await confirmDestructive(
+      context,
+      title: 'כניסה ללקוח קיים',
+      message: 'עדיין אין שרת התחברות — נכנסים כאורח (דוגמה).',
+      confirmLabel: 'המשך כאורח',
+      confirmColor: BsTokens.brandDark,
+    );
+    if (!ok || !mounted) return;
     ref.read(userProfileProvider.notifier).continueAsDemo();
     ref.read(welcomeSeenProvider.notifier).state = true;
     unawaited(persistWelcomeSeen());
@@ -156,19 +172,120 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     }
     ref.read(welcomeSeenProvider.notifier).state = true;
     unawaited(persistWelcomeSeen());
+
+  /// Cluster #85א · role-gate mode sheet: 'כניסה ללקוח קיים' is the PRIMARY
+  /// login path — tapping it reveals (inline, same card style) the שם משתמש
+  /// + קוד fields and a 'כניסה' button that checks the seeded credentials
+  /// via [BoardAuthNotifier.login]. The registration form is contractor-only
+  /// and never built here; 'מצב דמו' enters an honest demo board session.
+  List<Widget> _boardLoginChildren(BoardRole role) {
+    final codeFormatOk = _validBoardCode(_contact.text);
+    final loginValid = _name.text.trim().isNotEmpty && codeFormatOk;
+    return [
+      HelpTarget(
+        title: 'כניסה ללקוח קיים',
+        body: 'הדרך הראשית להיכנס ללוח — לחיצה פותחת את שדות שם המשתמש '
+            'והקוד שקיבלת.',
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: BsTokens.brandDark,
+            side: const BorderSide(
+              color: BsTokens.brand,
+              width: 1.5,
+            ),
+            padding: const EdgeInsets.symmetric(
+              vertical: BsTokens.space4,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          onPressed: () => setState(() => _loginRevealed = !_loginRevealed),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'כניסה ללקוח קיים',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(width: BsTokens.space2),
+              Icon(
+                _loginRevealed
+                    ? Icons.expand_less_rounded
+                    : Icons.expand_more_rounded,
+                size: 22,
+              ),
+            ],
+          ),
+        ),
+      ),
+      if (_loginRevealed) ...[
+        const SizedBox(height: BsTokens.space4),
+        HelpTarget(
+          title: 'שם משתמש',
+          body: 'שם המשתמש שהוגדר לך בלוח — באנגלית, בלי הבדל בין אותיות '
+              'גדולות לקטנות.',
+          child: _field(_name, 'שם משתמש', Icons.person_outline),
+        ),
+        const SizedBox(height: BsTokens.space3),
+        HelpTarget(
+          title: 'קוד כניסה',
+          body: 'קוד בן 4 ספרות שקיבלת יחד עם שם המשתמש — רווחים ומקפים '
+              'מותרים.',
+          child: _field(
+            _contact,
+            'קוד',
+            Icons.key_outlined,
+            keyboardType: TextInputType.number,
+            errorText: _codeRejected
+                ? 'שם משתמש או קוד לא נכונים'
+                : _contact.text.trim().isEmpty || codeFormatOk
+                    ? null
+                    : 'קוד בן 4 ספרות',
+          ),
+        ),
+        const SizedBox(height: BsTokens.space5),
+        HelpTarget(
+          title: 'כניסה',
+          body: 'בודק את שם המשתמש והקוד מול החשבונות הקיימים ונכנס ללוח. '
+              'נפעל רק כששני השדות מלאים והקוד בן 4 ספרות.',
+          child: _primaryButton(
+            onPressed: loginValid ? () => _boardLogin(role) : null,
+            label: 'כניסה',
+            icon: Icons.login_rounded,
+          ),
+        ),
+      ],
+      const SizedBox(height: BsTokens.space2),
+      HelpTarget(
+        title: 'מצב דמו',
+        body: 'כניסה ללוח בלי חשבון — לסיור מהיר עם נתוני דוגמה בלבד.',
+        child: TextButton(
+          onPressed: _demo,
+          child: const Text(
+            'מצב דמו',
+            style: TextStyle(
+              color: BsTokens.mutedLight,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     // task #64: format gate — the contact must look like an Israeli mobile
     // (05XXXXXXXX) or an email before the CTA unlocks. Format only;
-    // uniqueness checks are deferred to the Firebase backend.
-    // task #65 · role-gate mode: the SAME field carries the 4-digit board
-    // code instead, and a code login() rejected stays invalid until edited —
-    // same widgets, same labels, same error UI (zero visual/text change).
-    final contactOk = widget.boardRole == null
-        ? validIsraeliMobile(_contact.text) || validEmail(_contact.text)
-        : _validBoardCode(_contact.text) && !_codeRejected;
+    // uniqueness checks are deferred to the Firebase backend. Contractor
+    // flow only — role mode (cluster #85א) builds its own login sheet via
+    // [_boardLoginChildren] and never reads these.
+    final contactOk =
+        validIsraeliMobile(_contact.text) || validEmail(_contact.text);
     final valid = registrationValid(_name.text, _contact.text) && contactOk;
     final media = MediaQuery.of(context);
     final heroHeight = media.size.height * 0.4;
@@ -260,6 +377,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Cluster #85א — role mode: the sheet IS the
+                      // existing-customer login (registration is
+                      // contractor-only). Contractor children below are
+                      // unchanged.
+                      if (widget.boardRole != null)
+                        ..._boardLoginChildren(widget.boardRole!)
+                      else ...[
                       HelpTarget(
                         title: 'כניסה ללקוח קיים',
                         body: 'מיועד למי שכבר נרשם — כניסה ישירה פנימה. כרגע '
@@ -437,6 +561,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           ),
                         ],
                       ),
+                      ], // end contractor-only sheet (cluster #85א)
                     ],
                   ),
                 ),
@@ -459,7 +584,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   }
 
   /// Brand gradient CTA with a soft orange glow — the "refined" primary action.
-  Widget _primaryButton({required VoidCallback? onPressed}) {
+  /// [label]/[icon] default to the contractor registration CTA; the board
+  /// login (cluster #85א) passes 'כניסה'. Rendering is unchanged for the
+  /// defaults.
+  Widget _primaryButton({
+    required VoidCallback? onPressed,
+    String label = 'אישור והמשך',
+    IconData icon = Icons.check_rounded,
+  }) {
     final enabled = onPressed != null;
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -485,16 +617,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
           onTap: onPressed,
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: BsTokens.space4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: BsTokens.space4),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.check_rounded, size: 20, color: Colors.white),
-                SizedBox(width: BsTokens.space2),
+                Icon(icon, size: 20, color: Colors.white),
+                const SizedBox(width: BsTokens.space2),
                 Text(
-                  'אישור והמשך',
-                  style: TextStyle(
+                  label,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -513,10 +645,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     String hint,
     IconData icon, {
     String? errorText,
+    TextInputType? keyboardType,
   }) {
     final ok = c.text.trim().isNotEmpty && errorText == null;
     return TextField(
       controller: c,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hint,
         errorText: errorText,

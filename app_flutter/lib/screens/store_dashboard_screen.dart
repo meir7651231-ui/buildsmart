@@ -102,6 +102,14 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
               onPressed: () =>
                   Navigator.of(context).push(CatalogSettingsScreen.route()),
             ),
+            // #21 — a REAL logout next to the navigation-only '‹ יציאה':
+            // confirmDestructive → boardAuthProvider.logout(); the gate
+            // (WelcomeScreen in role mode) swaps in place — task #65 rule 4.
+            IconButton(
+              tooltip: 'התנתקות מהחשבון',
+              icon: const Icon(Icons.logout, color: BsTokens.mutedLight),
+              onPressed: _logout,
+            ),
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
               child: const Text(
@@ -120,6 +128,21 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
         ),
       ),
     );
+  }
+
+  /// #21 — explicit board logout (the '‹ יציאה' TextButton only pops the
+  /// route). Confirm first (destructive-confirm rule #57); on confirm the
+  /// session clears and this screen rebuilds into the registration gate.
+  Future<void> _logout() async {
+    final ok = await confirmDestructive(
+      context,
+      title: 'התנתקות מהחשבון?',
+      message: 'תנותק מלוח חנות הספק ותחזור למסך הרישום.',
+      confirmLabel: 'התנתק',
+    );
+    if (!ok || !mounted) return;
+    ref.read(boardAuthProvider.notifier).logout();
+    showToast(context, 'התנתקת מלוח חנות הספק');
   }
 
   Widget _body(List<SysOrder> orders) {

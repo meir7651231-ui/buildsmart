@@ -3,16 +3,25 @@ import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
-import 'package:buildsmart/screens/profile_screen.dart';
+import 'package:buildsmart/screens/manager_profile_screen.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
+// #85ב/#23 — the SHARED proof-photo renderer (one renderer for both sides
+// of the approval: the worker sheet and this dashboard).
+import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
+    show taskPhotoWidget;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/manager_dashboard_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
+import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:buildsmart/state/vacation_requests.dart';
+import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -99,6 +108,11 @@ class ManagerDashboardScreen extends ConsumerWidget {
             // standalone [ChatsScreen] (its own "שיחות" AppBar + back→pop) — back
             // returns to THIS manager dashboard; no route to home_shell, the role
             // picker, or any other persona's board.
+            //
+            // The default ('contractor') thread list admits worker-audience
+            // threads the manager participates in (`_visibleToAudience`,
+            // chats_screen.dart) — so 'th-worker-manager' (the worker's 'מנהל'
+            // thread, rendered here as 'עובד — רן') is readable, not write-only.
             IconButton(
               tooltip: 'שיחות',
               icon: const Icon(Icons.chat_bubble_outline,
@@ -112,8 +126,10 @@ class ManagerDashboardScreen extends ConsumerWidget {
             IconButton(
               tooltip: 'פרופיל',
               icon: const Icon(Icons.person_outline, color: BsTokens.mutedLight),
+              // #20 — the manager's OWN profile (session + role-switch +
+              // logout), not the contractor's ProfileScreen.
               onPressed: () =>
-                  Navigator.of(context).push(ProfileScreen.route()),
+                  Navigator.of(context).push(ManagerProfileScreen.route()),
             ),
             IconButton(
               tooltip: 'הגדרות',
@@ -121,6 +137,14 @@ class ManagerDashboardScreen extends ConsumerWidget {
                   const Icon(Icons.settings_outlined, color: BsTokens.mutedLight),
               onPressed: () =>
                   Navigator.of(context).push(CatalogSettingsScreen.route()),
+            ),
+            // #21 — a REAL logout next to the navigation-only '‹ יציאה':
+            // confirmDestructive → boardAuthProvider.logout(); the gate
+            // (WelcomeScreen in role mode) swaps in place — task #65 rule 4.
+            IconButton(
+              tooltip: 'התנתקות מהחשבון',
+              icon: const Icon(Icons.logout, color: BsTokens.mutedLight),
+              onPressed: () => _logout(context, ref),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
@@ -155,6 +179,21 @@ class ManagerDashboardScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// #21 — explicit board logout (the '‹ יציאה' TextButton only pops the
+  /// route). Confirm first (destructive-confirm rule #57); on confirm the
+  /// session clears and this screen rebuilds into the registration gate.
+  Future<void> _logout(BuildContext context, WidgetRef ref) async {
+    final ok = await confirmDestructive(
+      context,
+      title: 'התנתקות מהחשבון?',
+      message: 'תנותק ממרכז השליטה ותחזור למסך הרישום.',
+      confirmLabel: 'התנתק',
+    );
+    if (!ok || !context.mounted) return;
+    ref.read(boardAuthProvider.notifier).logout();
+    showToast(context, 'התנתקת ממרכז השליטה');
   }
 }
 
@@ -1948,6 +1987,42 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
   void _toggle(String key) =>
       setState(() => _open = _open == key ? '' : key);
 
+  /// cluster #85ח — decide a vacation request. Writes the SHARED
+  /// [vacationRequestsProvider] (the worker's own בקשות list reflects the
+  /// decision live), drops the decision onto the worker's 🔔 bell feed
+  /// ([workerNotifsProvider], #18 — the request carries the exact login
+  /// username, so no worker-index fan-out is needed), and additionally posts
+  /// it into the existing worker↔manager chat thread (`th-worker-manager`,
+  /// sys_chat — the worker sees it in שיחות → מנהל) plus a manager-side toast.
+  void _decideVacation(VacationRequest r, {required bool approve}) {
+    final notifier = ref.read(vacationRequestsProvider.notifier);
+    if (approve) {
+      notifier.approve(r.id);
+    } else {
+      notifier.reject(r.id);
+    }
+    // 🔔 #18 — the decision lands on the requesting worker's bell.
+    ref.read(workerNotifsProvider.notifier).addNotification(
+          username: r.username,
+          emoji: approve ? '✅' : '❌',
+          title: approve ? 'בקשת החופשה אושרה' : 'בקשת החופשה נדחתה',
+          body: r.range,
+        );
+    ref.read(chatEngineProvider.notifier).send(
+          'th-worker-manager',
+          BsRole.manager,
+          approve
+              ? '✅ בקשת החופשה שלך (${r.range}) אושרה'
+              : '❌ בקשת החופשה שלך (${r.range}) נדחתה',
+        );
+    showToast(
+      context,
+      approve
+          ? '✅ אושרה חופשה: ${r.workerName} · ${r.range}'
+          : '❌ נדחתה חופשה: ${r.workerName} · ${r.range}',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // The LIVE catalog category distribution (cat → product count) — the same
@@ -1963,6 +2038,12 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
     // `review`), read off the SHARED worker-tasks engine. A worker "שלח לאישור"
     // surfaces here with no refresh; approving/rejecting writes back live.
     final pending = ref.watch(pendingApprovalTasksProvider);
+
+    // cluster #85ח — the LIVE vacation-request queue (bs.vacation-requests.v1):
+    // requests the worker filed from the worker board's טפסים → בקשת חופשה.
+    final vacations = ref.watch(vacationRequestsProvider);
+    final pendingVacations =
+        vacations.where((v) => v.status == kVacationPending).length;
 
     return ListView(
       // Directional (start/top/end/bottom) so RTL/LTR both lay out correctly
@@ -1993,12 +2074,46 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
             pending: pending,
             onApprove: (t) {
               ref.read(workerTasksProvider.notifier).approve(t.id);
+              // 🪙 #22 — coins + the worker's ✅ bell fire AT DECISION TIME:
+              // the rich engine's approve runs its review→done side-effects
+              // now; the worker-board mirror's later approve() is a no-op
+              // thanks to the engine's `review`-status guard (no double
+              // award).
+              ref.read(tasksProvider.notifier).approve(t.id);
               showToast(context, '✅ אושר: ${t.name}');
             },
-            onReject: (t) {
+            onReject: (t) async {
+              // 📝 #12 — optional rejection reason (promptRejectReason):
+              // null = cancelled (no reject); the reason rides the RICH
+              // engine's reject (side-map + the worker's 🔁 bell). The rich
+              // reject ALSO makes the worker-board mirror a no-op, exactly
+              // like the approve above.
+              final why = await promptRejectReason(context);
+              if (why == null || !context.mounted) return;
               ref.read(workerTasksProvider.notifier).reject(t.id);
+              ref.read(tasksProvider.notifier).reject(t.id, reason: why);
               showToast(context, '↩️ נדחה: ${t.name}');
             },
+          ),
+        ),
+        const SizedBox(height: BsTokens.space3),
+
+        // 0.5 🏖️ בקשות חופשה (cluster #85ח) — vacation requests the worker
+        // filed from the worker board's טפסים screen, decided here LIVE on the
+        // shared [vacationRequestsProvider]; the worker's own בקשות list flips
+        // through the same provider, and a chat line lands in his מנהל thread.
+        _ManageSection(
+          sectionKey: 'vacations',
+          emoji: '🏖️',
+          title: 'בקשות חופשה',
+          sub: 'בקשות חופשה שעובדים הגישו',
+          open: _open == 'vacations',
+          onTap: () => _toggle('vacations'),
+          badge: pendingVacations,
+          child: _VacationsBody(
+            requests: vacations,
+            onApprove: (r) => _decideVacation(r, approve: true),
+            onReject: (r) => _decideVacation(r, approve: false),
           ),
         ),
         const SizedBox(height: BsTokens.space3),
@@ -2300,10 +2415,11 @@ class _ApprovalsBody extends StatelessWidget {
 }
 
 /// One pending-approval row — a soft `bgLight` panel with the task name, the
-/// `🦺 worker · 🕒 days · steps` meta, the note, and the ✅ אשר / ↩️ דחה buttons.
+/// `🦺 worker · 🕒 days · steps` meta, the worker's PROOF PHOTO (#85ב), the
+/// note, and the ✅ אשר / ↩️ דחה buttons.
 /// The buttons are keyed `approve-<id>` / `reject-<id>` so the W3 test can tap a
 /// specific task's decision.
-class _ApprovalRow extends StatelessWidget {
+class _ApprovalRow extends ConsumerWidget {
   const _ApprovalRow({
     required this.task,
     required this.onApprove,
@@ -2315,7 +2431,20 @@ class _ApprovalRow extends StatelessWidget {
   final VoidCallback onReject;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // #85ב — the submitted proof photo lives on the RICH tasks engine (the
+    // legacy PersonaTask carries no photo field); ids are shared across both
+    // engines (the W3 bridge), so this lookup surfaces the worker's actual
+    // capture next to the decision buttons.
+    final richMatch =
+        ref.watch(tasksProvider).where((x) => x.id == task.id).toList();
+    final photo = richMatch.isEmpty ? null : richMatch.first.photo;
+    // #5 — the worker's LIVE submit note also rides the rich engine (the
+    // legacy PersonaTask.note never changes after the seed); prefer it when
+    // non-empty so the manager reads what the worker actually wrote.
+    final note = richMatch.isNotEmpty && richMatch.first.note.isNotEmpty
+        ? richMatch.first.note
+        : task.note;
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
@@ -2339,10 +2468,18 @@ class _ApprovalRow extends StatelessWidget {
             '🦺 ${kWorkers[task.worker]} · 🕒 ${task.days} ימים · ${task.steps} שלבים',
             style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
           ),
-          if (task.note.isNotEmpty) ...[
+          if (photo != null) ...[
+            const SizedBox(height: BsTokens.space2),
+            // #85ב — the manager SEES the worker's proof before deciding:
+            // the SHARED [taskPhotoWidget] (worker_task_detail_sheet.dart) —
+            // a real Image.memory for a data-URL, the honest placeholder for
+            // the legacy 'demo' seeds — both sides render the same proof.
+            taskPhotoWidget(photo, height: 120),
+          ],
+          if (note.isNotEmpty) ...[
             const SizedBox(height: 2),
             Text(
-              task.note,
+              note,
               style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
             ),
           ],
@@ -2419,6 +2556,151 @@ class _ApprovalButton extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// The 🏖️ בקשות חופשה body (cluster #85ח) — pending requests first (each with
+/// ✅ אשר / ❌ דחה), then the decided history with read-only status pills. An
+/// empty queue shows a calm note. Decision buttons reuse [_ApprovalButton] and
+/// are keyed `vac-approve-<id>` / `vac-reject-<id>` so tests can tap a
+/// specific request's decision.
+class _VacationsBody extends StatelessWidget {
+  const _VacationsBody({
+    required this.requests,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  final List<VacationRequest> requests;
+  final void Function(VacationRequest) onApprove;
+  final void Function(VacationRequest) onReject;
+
+  @override
+  Widget build(BuildContext context) {
+    if (requests.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
+        child: Text(
+          'אין בקשות חופשה.',
+          style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+        ),
+      );
+    }
+    final pending =
+        requests.where((r) => r.status == kVacationPending).toList();
+    final decided =
+        requests.where((r) => r.status != kVacationPending).toList()
+          ..sort((a, b) => (b.decidedTs ?? b.createdTs)
+              .compareTo(a.decidedTs ?? a.createdTs));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final r in pending)
+          Padding(
+            padding: const EdgeInsets.only(bottom: BsTokens.space2),
+            child: _VacationRequestRow(
+              request: r,
+              onApprove: () => onApprove(r),
+              onReject: () => onReject(r),
+            ),
+          ),
+        for (final r in decided)
+          Padding(
+            padding: const EdgeInsets.only(bottom: BsTokens.space2),
+            child: _VacationRequestRow(request: r),
+          ),
+      ],
+    );
+  }
+}
+
+/// One vacation-request row — `🦺 worker · range` + the reason, and (while
+/// pending) the ✅ אשר / ❌ דחה buttons; a decided row carries a read-only
+/// status pill ([_StagePill]) instead.
+class _VacationRequestRow extends StatelessWidget {
+  const _VacationRequestRow({
+    required this.request,
+    this.onApprove,
+    this.onReject,
+  });
+
+  final VacationRequest request;
+  final VoidCallback? onApprove;
+  final VoidCallback? onReject;
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = request.status == kVacationPending;
+    return Container(
+      padding: const EdgeInsets.all(BsTokens.space3),
+      decoration: BoxDecoration(
+        color: BsTokens.bgLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '🦺 ${request.workerName} · ${request.range}',
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              if (!pending)
+                _StagePill(
+                  label: request.status == kVacationApproved
+                      ? 'אושרה'
+                      : 'נדחתה',
+                  color: request.status == kVacationApproved
+                      ? const Color(0xFF1F8A4C)
+                      : BsTokens.danger,
+                ),
+            ],
+          ),
+          if (request.reason.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              request.reason,
+              style:
+                  const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+            ),
+          ],
+          if (pending) ...[
+            const SizedBox(height: BsTokens.space3),
+            Row(
+              children: [
+                Expanded(
+                  child: _ApprovalButton(
+                    key: ValueKey('vac-approve-${request.id}'),
+                    label: '✅ אשר',
+                    color: const Color(0xFF1F8A4C),
+                    onPressed: onApprove ?? () {},
+                  ),
+                ),
+                const SizedBox(width: BsTokens.space2),
+                Expanded(
+                  child: _ApprovalButton(
+                    key: ValueKey('vac-reject-${request.id}'),
+                    label: '❌ דחה',
+                    color: BsTokens.cardLight,
+                    textColor: BsTokens.inkLight,
+                    bordered: true,
+                    onPressed: onReject ?? () {},
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
       ),
     );
   }

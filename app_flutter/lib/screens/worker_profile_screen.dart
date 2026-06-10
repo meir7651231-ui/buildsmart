@@ -1,11 +1,22 @@
+import 'dart:convert';
+
 import 'package:buildsmart/data/board_accounts_local.dart';
+import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
+import 'package:buildsmart/screens/worker_attendance_screen.dart';
+import 'package:buildsmart/screens/worker_forms_screen.dart';
+import 'package:buildsmart/screens/worker_payslips_sheet.dart';
+import 'package:buildsmart/screens/worker_safety_screen.dart';
 import 'package:buildsmart/screens/worker_settings_screen.dart';
+import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:buildsmart/state/worker_profile_store.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -54,6 +65,11 @@ class WorkerProfileScreen extends ConsumerWidget {
     final inReview = mine.where((t) => t.status == 'review').length;
     final rejected = mine.where((t) => t.status == 'rejected').length;
 
+    // #85ד — the worker's own editable profile (per username); every field is
+    // an OVERRIDE that falls back honestly (name → session.displayName).
+    final profile = ref.watch(workerProfileProvider)[session.username] ??
+        const WorkerProfile();
+
     final body = ListView(
       padding: const EdgeInsets.fromLTRB(
         BsTokens.space4,
@@ -62,7 +78,7 @@ class WorkerProfileScreen extends ConsumerWidget {
         BsTokens.space5,
       ),
       children: [
-        _IdentityCard(session: session),
+        _IdentityCard(session: session, profile: profile),
         const SizedBox(height: BsTokens.space3),
         _StatsCard(
           done: done,
@@ -70,6 +86,9 @@ class WorkerProfileScreen extends ConsumerWidget {
           rejected: rejected,
           total: mine.length,
         ),
+        const SizedBox(height: BsTokens.space4),
+        // cluster #85ח — אזור אישי v2: נוכחות · טפסים · תיק בטיחות · תלושי שכר.
+        const _PersonalAreaCard(),
         const SizedBox(height: BsTokens.space4),
         _ActionsCard(session: session),
       ],
@@ -97,15 +116,25 @@ class WorkerProfileScreen extends ConsumerWidget {
 
 // ─── identity card ───────────────────────────────────────────────────────────
 
-/// White header card: avatar + the session's displayName / username / role —
-/// straight off [BoardSession], nothing invented.
+/// White header card: avatar + the display identity — the #85ד profile
+/// overrides (photo/name/phone/specialty) layered over the [BoardSession]
+/// (an empty override falls back to the session — nothing invented), plus
+/// the ✏️ edit action that opens the profile editor sheet.
 class _IdentityCard extends StatelessWidget {
-  const _IdentityCard({required this.session});
+  const _IdentityCard({required this.session, required this.profile});
 
   final BoardSession session;
+  final WorkerProfile profile;
 
   @override
   Widget build(BuildContext context) {
+    // #85ד — the name override falls back to the live session displayName.
+    final name = profile.name.isNotEmpty ? profile.name : session.displayName;
+    final meta = [
+      if (profile.specialty.isNotEmpty) '🔧 ${profile.specialty}',
+      if (profile.phone.isNotEmpty) '📞 ${profile.phone}',
+    ].join(' · ');
+
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
@@ -121,19 +150,7 @@ class _IdentityCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFFF0E3),
-              shape: BoxShape.circle,
-            ),
-            // Decorative: the full name is read just beside it.
-            child: const ExcludeSemantics(
-              child: Text('🦺', style: TextStyle(fontSize: 26)),
-            ),
-          ),
+          _ProfileAvatar(photo: profile.photo, size: 56),
           const SizedBox(width: BsTokens.space3),
           Expanded(
             child: Column(
@@ -143,7 +160,7 @@ class _IdentityCard extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        session.displayName,
+                        name,
                         style: const TextStyle(
                           color: BsTokens.inkLight,
                           fontWeight: FontWeight.w800,
@@ -184,8 +201,25 @@ class _IdentityCard extends StatelessWidget {
                     fontSize: 13,
                   ),
                 ),
+                if (meta.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    meta,
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ],
             ),
+          ),
+          // #85ד — opens the profile editor (48dp IconButton).
+          IconButton(
+            tooltip: 'עריכת פרופיל',
+            icon: const Icon(Icons.edit_outlined, color: BsTokens.mutedLight),
+            onPressed: () =>
+                showWorkerProfileEditSheet(context, session: session),
           ),
         ],
       ),
@@ -296,6 +330,97 @@ class _Stat extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── personal-area rows (cluster #85ח) ───────────────────────────────────────
+
+/// אזור אישי v2 (#85ח) — the four personal-area entries: נוכחות (clock-in/out
+/// + monthly table) · טפסים (101 / חופשה / מחלה) · תיק בטיחות (הדרכות +
+/// ארנק תעודות) · תלושי שכר (SERVER-READY sheet — honest 'יחובר עם חיבור
+/// השרת'). Same white-card ListTile style as [_ActionsCard]; rows are ≥48dp.
+class _PersonalAreaCard extends StatelessWidget {
+  const _PersonalAreaCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            leading: const Text('🕐', style: TextStyle(fontSize: 20)),
+            title: const Text(
+              'נוכחות',
+              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+            ),
+            subtitle: const Text(
+              'כניסה/יציאה ודוח חודשי',
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            ),
+            trailing:
+                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+            onTap: () =>
+                Navigator.of(context).push(WorkerAttendanceScreen.route()),
+          ),
+          const Divider(height: 1, color: Color(0xFFF2F3F5)),
+          ListTile(
+            leading: const Text('📄', style: TextStyle(fontSize: 20)),
+            title: const Text(
+              'טפסים',
+              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+            ),
+            subtitle: const Text(
+              'טופס 101 · בקשת חופשה · אישור מחלה',
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            ),
+            trailing:
+                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+            onTap: () => Navigator.of(context).push(WorkerFormsScreen.route()),
+          ),
+          const Divider(height: 1, color: Color(0xFFF2F3F5)),
+          ListTile(
+            leading: const Text('🛡️', style: TextStyle(fontSize: 20)),
+            title: const Text(
+              'תיק בטיחות',
+              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+            ),
+            subtitle: const Text(
+              'הדרכות ותעודות מקצועיות',
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            ),
+            trailing:
+                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+            onTap: () => Navigator.of(context).push(WorkerSafetyScreen.route()),
+          ),
+          const Divider(height: 1, color: Color(0xFFF2F3F5)),
+          ListTile(
+            leading: const Text('💰', style: TextStyle(fontSize: 20)),
+            title: const Text(
+              'תלושי שכר',
+              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+            ),
+            subtitle: const Text(
+              'יחובר עם חיבור השרת',
+              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+            ),
+            trailing:
+                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+            onTap: () => showWorkerPayslipsSheet(context),
           ),
         ],
       ),
@@ -450,5 +575,339 @@ class _ActionsCard extends ConsumerWidget {
     );
     if (!ok || !context.mounted) return;
     ref.read(boardAuthProvider.notifier).logout();
+  }
+}
+
+// ─── #85ד · editable profile ─────────────────────────────────────────────────
+
+/// The profile avatar — the saved photo (data-URL → [Image.memory]) clipped
+/// to a circle, or the default 🦺 emoji disc when no photo is set.
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({required this.photo, required this.size});
+
+  final String? photo;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = photo;
+    if (p != null && p.startsWith('data:image') && p.contains(',')) {
+      try {
+        final bytes = base64Decode(p.substring(p.indexOf(',') + 1));
+        return ClipOval(
+          child: Image.memory(
+            bytes,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            // A corrupt payload renders the default avatar, never a crash.
+            errorBuilder: (_, __, ___) => _fallback(),
+          ),
+        );
+      } on FormatException catch (_) {
+        // Malformed base64 — fall through to the default avatar.
+      }
+    }
+    return _fallback();
+  }
+
+  Widget _fallback() => Container(
+        width: size,
+        height: size,
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+          color: Color(0xFFFFF0E3),
+          shape: BoxShape.circle,
+        ),
+        // Decorative: the full name is read just beside it.
+        child: ExcludeSemantics(
+          child: Text('🦺', style: TextStyle(fontSize: size * 0.46)),
+        ),
+      );
+}
+
+/// #85ד — opens the worker profile editor (modal bottom sheet, X to close).
+Future<void> showWorkerProfileEditSheet(
+  BuildContext context, {
+  required BoardSession session,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => _EditProfileSheet(session: session),
+  );
+}
+
+/// The profile editor — שם-תצוגה · טלפון · התמחות (chips) · תמונת-פרופיל (the
+/// shared [pickTaskPhoto] capture seam, #85ב). Saved per username through
+/// [workerProfileProvider] (key `bs.worker-profile.v1`); every empty field
+/// keeps its honest fallback (name → session displayName, no photo → 🦺).
+class _EditProfileSheet extends ConsumerStatefulWidget {
+  const _EditProfileSheet({required this.session});
+
+  final BoardSession session;
+
+  @override
+  ConsumerState<_EditProfileSheet> createState() => _EditProfileSheetState();
+}
+
+class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
+  late final TextEditingController _name;
+  late final TextEditingController _phone;
+  late String _specialty;
+  String? _photo;
+  String? _phoneError;
+
+  @override
+  void initState() {
+    super.initState();
+    final p = ref.read(workerProfileProvider)[widget.session.username] ??
+        const WorkerProfile();
+    _name = TextEditingController(
+      text: p.name.isNotEmpty ? p.name : widget.session.displayName,
+    );
+    _phone = TextEditingController(text: p.phone);
+    _specialty = p.specialty;
+    _photo = p.photo;
+  }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _phone.dispose();
+    super.dispose();
+  }
+
+  /// Real capture via the shared seam — null = honest cancel, no change.
+  Future<void> _pickPhoto() async {
+    final dataUrl = await pickTaskPhoto(context);
+    if (!mounted) return;
+    if (dataUrl == null) {
+      showToast(context, 'לא נבחרה תמונה');
+      return;
+    }
+    setState(() => _photo = dataUrl);
+  }
+
+  Future<void> _save() async {
+    final phone = _phone.text.trim();
+    // FORMAT validation only (the #64 validators) — the phone is optional,
+    // but a non-empty value must be a valid Israeli mobile.
+    if (phone.isNotEmpty && !validIsraeliMobile(phone)) {
+      setState(
+        () => _phoneError = 'מספר נייד לא תקין — 10 ספרות, מתחיל ב-05',
+      );
+      return;
+    }
+    final name = _name.text.trim();
+    // #17 — the persist is AWAITED: a quota failure (an oversized photo on
+    // web localStorage) reports honestly instead of a fake '✓ נשמר'.
+    final ok = await ref.read(workerProfileProvider.notifier).save(
+          widget.session.username,
+          WorkerProfile(
+            // Storing '' keeps the honest fallback to the session displayName.
+            name: name == widget.session.displayName ? '' : name,
+            phone: phone,
+            specialty: _specialty,
+            photo: _photo,
+          ),
+        );
+    if (!mounted) return;
+    if (!ok) {
+      showToast(context, 'התמונה גדולה מדי — לא נשמרה');
+      return; // the sheet stays open — the worker can retry a smaller photo
+    }
+    showToast(context, '✓ הפרופיל נשמר');
+    Navigator.of(context).pop();
+  }
+
+  /// One התמחות pill — brand fill when selected; re-tapping clears (≥48dp).
+  Widget _specChip(String label) {
+    final on = _specialty == label;
+    return Material(
+      color: on ? BsTokens.brand : BsTokens.cardLight,
+      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        onTap: () => setState(() => _specialty = on ? '' : label),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 48),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: BsTokens.space4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            border: on ? null : Border.all(color: const Color(0xFFE2E2E2)),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: on ? bsOnAccent(context) : BsTokens.inkLight,
+              fontSize: 13.5,
+              fontWeight: on ? FontWeight.w800 : FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        // Keep the fields above the keyboard.
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: BsTokens.cardLight,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(BsTokens.radiusCard),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(BsTokens.space4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'עריכת פרופיל',
+                          style: TextStyle(
+                            color: BsTokens.inkLight,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
+                      // X close (sheet rule).
+                      IconButton(
+                        tooltip: 'סגור',
+                        icon: const Icon(
+                          Icons.close,
+                          color: BsTokens.mutedLight,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: BsTokens.space2),
+                  // ── profile photo (#85ד, the #85ב capture seam) ──
+                  Row(
+                    children: [
+                      _ProfileAvatar(photo: _photo, size: 64),
+                      const SizedBox(width: BsTokens.space3),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            OutlinedButton(
+                              onPressed: _pickPhoto,
+                              child: Text(
+                                _photo == null
+                                    ? '📷 הוסף תמונת פרופיל'
+                                    : '📷 החלף תמונה',
+                              ),
+                            ),
+                            if (_photo != null)
+                              TextButton(
+                                onPressed: () =>
+                                    setState(() => _photo = null),
+                                child: const Text(
+                                  'הסר תמונה',
+                                  style: TextStyle(color: Colors.redAccent),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: BsTokens.space3),
+                  // ── display name ──
+                  TextField(
+                    controller: _name,
+                    textInputAction: TextInputAction.next,
+                    decoration: const InputDecoration(
+                      labelText: 'שם תצוגה',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: BsTokens.space3),
+                  // ── phone ──
+                  TextField(
+                    controller: _phone,
+                    keyboardType: TextInputType.phone,
+                    onChanged: (_) {
+                      if (_phoneError != null) {
+                        setState(() => _phoneError = null);
+                      }
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'טלפון (אופציונלי)',
+                      hintText: '050-1234567',
+                      errorText: _phoneError,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: BsTokens.space3),
+                  // ── specialty chips ──
+                  const Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      'התמחות',
+                      style: TextStyle(
+                        color: BsTokens.inkLight,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: BsTokens.space2),
+                  Wrap(
+                    spacing: BsTokens.space2,
+                    runSpacing: BsTokens.space2,
+                    children: [
+                      for (final s in kWorkerSpecialties) _specChip(s),
+                    ],
+                  ),
+                  const SizedBox(height: BsTokens.space4),
+                  // ── save ──
+                  Material(
+                    color: BsTokens.brand,
+                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                    child: InkWell(
+                      borderRadius:
+                          BorderRadius.circular(BsTokens.radiusPill),
+                      onTap: _save,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        child: Text(
+                          '✓ שמור פרופיל',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: bsOnAccent(context),
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

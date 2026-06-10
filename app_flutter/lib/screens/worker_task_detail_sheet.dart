@@ -1,4 +1,11 @@
+import 'dart:convert';
+
 import 'package:buildsmart/data/persona_data.dart';
+import 'package:buildsmart/data/task_skus_local.dart';
+import 'package:buildsmart/logic/install_kit.dart';
+import 'package:buildsmart/screens/lipskey_product_sheet.dart';
+import 'package:buildsmart/services/task_photo.dart';
+import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -17,9 +24,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 ///
 /// No new fake state: every action is an existing engine call
 /// ([TasksNotifier.attachPhoto] / [TasksNotifier.submitForReview], dual-written
-/// through [submitWorkerTaskForReview]); the step ticks are a session-local
-/// checklist aid only — the engine has no per-step completion field yet.
-/// SERVER-SWAP: per-step completion persists once the server lands.
+/// through [submitWorkerTaskForReview]); the step ticks write
+/// [TasksNotifier.toggleStep] — per-step completion lives on
+/// [TaskItem.doneSteps] and persists with the engine overlay (#3), so the
+/// checklist survives sheet close/reopen and an app restart.
 
 /// WORKER submit — "שלח לאישור", dual-written to BOTH existing engines (the
 /// W3 BRIDGE, see `worker_app_screen.dart`): the rich [tasksProvider] the
@@ -31,6 +39,135 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 void submitWorkerTaskForReview(WidgetRef ref, int id, {String? note}) {
   ref.read(tasksProvider.notifier).submitForReview(id, note: note);
   ref.read(workerTasksProvider.notifier).submitForReview(id);
+}
+
+/// Renders a task's proof photo (#85ב): a real data-URL
+/// ('data:image/...;base64,…') decodes to the actual [Image.memory] thumbnail;
+/// the legacy `'demo'` marker keeps the old honest placeholder; null renders
+/// nothing. Shared by the worker detail sheet AND the manager's אישורי-עובדים
+/// row (`manager_dashboard_screen.dart`) so both sides see the same proof.
+Widget taskPhotoWidget(String? photo, {double height = 140}) {
+  if (photo == null) return const SizedBox.shrink();
+  if (photo.startsWith('data:image')) {
+    final comma = photo.indexOf(',');
+    if (comma > 0) {
+      try {
+        final bytes = base64Decode(photo.substring(comma + 1));
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          child: Image.memory(
+            bytes,
+            height: height,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            // A corrupt payload renders the placeholder, never a crash.
+            errorBuilder: (_, __, ___) => _photoPlaceholder(),
+          ),
+        );
+      } on FormatException catch (_) {
+        // Malformed base64 — fall through to the honest placeholder.
+      }
+    }
+  }
+  return _photoPlaceholder();
+}
+
+/// The legacy 'demo' placeholder — kept verbatim for seeded photos (#85ב
+/// keeps pre-photo submissions honest: "הדגמה", never a fake image).
+Widget _photoPlaceholder() => Container(
+      padding: const EdgeInsets.all(BsTokens.space4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F3F5),
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      ),
+      child: const Text(
+        '📷 תמונה מהשטח (הדגמה)',
+        style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+      ),
+    );
+
+/// #85ב — the MANDATORY-proof submit flow, shared by the board's quick
+/// "שלח לאישור" button (`worker_app_screen.dart`) and this detail sheet:
+///  1. reuse an already-attached REAL photo, else open [pickTaskPhoto];
+///  2. no photo → toast 'חובה לצלם הוכחת-ביצוע' and NO submit;
+///  3. photo → preview dialog (thumbnail) → confirm →
+///     [TasksNotifier.attachPhoto] with the data-URL + the dual-engine submit
+///     ([submitWorkerTaskForReview]).
+/// Returns true only when the task was actually submitted.
+Future<bool> submitWithProofPhoto(
+  BuildContext context,
+  WidgetRef ref,
+  TaskItem task, {
+  String? note,
+}) async {
+  final existing = task.photo;
+  // A real (data-URL) photo attached earlier in the sheet is reused; the
+  // legacy 'demo' marker does NOT count as proof.
+  final dataUrl = (existing != null && existing.startsWith('data:image'))
+      ? existing
+      : await pickTaskPhoto(context);
+  if (!context.mounted) return false;
+  if (dataUrl == null) {
+    showToast(context, 'חובה לצלם הוכחת-ביצוע');
+    return false;
+  }
+  final confirmed = await _confirmProofPhoto(context, dataUrl);
+  if (!confirmed || !context.mounted) return false;
+  ref.read(tasksProvider.notifier).attachPhoto(task.id, dataUrl);
+  submitWorkerTaskForReview(ref, task.id, note: note);
+  showToast(context, '📸 נשלח לאישור המנהל');
+  return true;
+}
+
+/// The proof-photo preview/confirm dialog — the worker SEES the thumbnail
+/// before it goes to the manager. White card, RTL, ≥48dp actions.
+Future<bool> _confirmProofPhoto(BuildContext context, String dataUrl) async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (dialogCtx) => Directionality(
+      textDirection: TextDirection.rtl,
+      child: AlertDialog(
+        backgroundColor: const Color(0xFFFFFFFF),
+        title: const Text(
+          '📸 הוכחת ביצוע',
+          style: TextStyle(color: BsTokens.inkLight),
+        ),
+        // Fixed-width content: AlertDialog sizes itself with IntrinsicWidth,
+        // and a stretched Column can feed it a non-finite intrinsic width
+        // (layout crash — surfaced by the approval widget test with a 1x1
+        // proof photo). A concrete width keeps every photo shape safe.
+        content: SizedBox(
+          width: 320,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              taskPhotoWidget(dataUrl, height: 180),
+              const SizedBox(height: BsTokens.space3),
+              const Text(
+                'לשלוח את המשימה לאישור המנהל עם התמונה הזו?',
+                style: TextStyle(color: Colors.black54, fontSize: 13.5),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
+            onPressed: () => Navigator.pop(dialogCtx, false),
+            child: const Text('ביטול'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
+            onPressed: () => Navigator.pop(dialogCtx, true),
+            child: const Text('שלח לאישור'),
+          ),
+        ],
+      ),
+    ),
+  );
+  return ok ?? false;
 }
 
 /// Opens the worker task-detail sheet for [taskId] (#71 — any task card).
@@ -62,11 +199,6 @@ class _WorkerTaskDetailSheetState
     extends ConsumerState<WorkerTaskDetailSheet> {
   late final TextEditingController _note;
 
-  /// Session-local step ticks — a checklist aid for the worker while doing the
-  /// job (see the library doc: no per-step engine field yet, so nothing here
-  /// pretends to persist).
-  final Set<int> _checked = {};
-
   @override
   void initState() {
     super.initState();
@@ -75,16 +207,118 @@ class _WorkerTaskDetailSheetState
     _note = TextEditingController(text: match.isEmpty ? '' : match.first.note);
   }
 
+  /// Whether a [VoiceService] session is live right now (#6 voice honesty) —
+  /// drives the mic button's "🎙️ מקליט..." state; reset on final transcript,
+  /// engine error, no-result ending or manual stop.
+  bool _dictating = false;
+
   @override
   void dispose() {
+    // Don't leave the engine listening after the sheet is gone.
+    if (_dictating) VoiceService.instance.stop();
     _note.dispose();
     super.dispose();
   }
 
-  void _submit(TaskItem t) {
-    submitWorkerTaskForReview(ref, t.id, note: _note.text);
-    Navigator.of(context).pop();
-    showToast(context, '📸 נשלח לאישור המנהל');
+  /// #85ב — submit is gated on a REAL proof photo: pick → preview → confirm →
+  /// attach + dual-submit (all inside [submitWithProofPhoto]); only then the
+  /// sheet closes. A cancel anywhere leaves the task untouched.
+  Future<void> _submit(TaskItem t) async {
+    final submitted =
+        await submitWithProofPhoto(context, ref, t, note: _note.text);
+    if (submitted && mounted) Navigator.of(context).pop();
+  }
+
+  /// 🎙️ הערה קולית (#85ה) — VoiceService (he-IL). The final transcript is
+  /// APPENDED to the note text with a newline (the engine's `note` is a single
+  /// string, set only via submitForReview — no engine change needed) and is
+  /// persisted through the existing submit path. #6 voice honesty: while
+  /// listening the button shows a live "מקליט" state and a second tap stops
+  /// the session; an engine error / no-result ending resets the state with an
+  /// honest failure toast instead of silently doing nothing.
+  Future<void> _dictateNote() async {
+    if (_dictating) {
+      // Second tap = explicit stop. The engine then delivers either the final
+      // transcript (onFinal) or a no-result (onError) — both reset the state.
+      await VoiceService.instance.stop();
+      return;
+    }
+    setState(() => _dictating = true);
+    final ok = await VoiceService.instance.listen(
+      onFinal: (text) {
+        if (!mounted) return;
+        setState(() => _dictating = false);
+        if (text.trim().isEmpty) {
+          // An empty final transcript carries nothing to append — honest fail.
+          showToast(context, 'הזיהוי נכשל — נסו שוב');
+          return;
+        }
+        setState(() {
+          _note.text = _note.text.trim().isEmpty
+              ? text
+              : '${_note.text.trimRight()}\n$text';
+        });
+        showToast(context, '🎙️ ההערה נקלטה — תישמר בשליחה לאישור');
+      },
+      onError: (_) {
+        if (!mounted) return;
+        setState(() => _dictating = false);
+        showToast(context, 'הזיהוי נכשל — נסו שוב');
+      },
+    );
+    if (!ok && mounted) {
+      setState(() => _dictating = false);
+      showToast(context, 'זיהוי דיבור אינו זמין בדפדפן הזה');
+    }
+  }
+
+  /// 'מה להביא' (#85ה) — the install-kit recommendation aggregated over the
+  /// task's mapped catalog products ([productsForTask] →
+  /// [recommendedKitForProduct]), deduped by label (e.g. both SmartLock
+  /// products recommend the same DN50 nut wrench — shown once). Returns []
+  /// when the task has no SKU mapping (e.g. task 3 איטום — the plumbing
+  /// catalogs carry no waterproofing products), so the section is omitted.
+  List<Widget> _bringSection(BuildContext context, TaskItem t) {
+    final products = productsForTask(t.id);
+    if (products.isEmpty) return const [];
+    final kit = <String, KitItem>{};
+    for (final p in products) {
+      for (final k in recommendedKitForProduct(p)) {
+        kit.putIfAbsent(k.label, () => k);
+      }
+    }
+    return [
+      const SizedBox(height: BsTokens.space3),
+      const _SecH('מה להביא'),
+      // The mapped products — tapping a chip opens the REAL catalog product
+      // sheet (the same sheet the catalog screens open).
+      Wrap(
+        spacing: BsTokens.space2,
+        runSpacing: BsTokens.space1,
+        children: [
+          for (final p in products)
+            ActionChip(
+              label: Text(
+                p.nameHe,
+                style: const TextStyle(fontSize: 12.5),
+              ),
+              onPressed: () =>
+                  showLipskeyProductSheet(context, p, catalogSiblingsFor(p)),
+            ),
+        ],
+      ),
+      if (kit.isEmpty)
+        // Honest: the mapped products carry no kit recommendation.
+        const Padding(
+          padding: EdgeInsets.only(top: BsTokens.space2),
+          child: Text(
+            'אין המלצת ערכת התקנה למוצרי המשימה',
+            style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+          ),
+        )
+      else
+        for (final k in kit.values) _KitRow(item: k),
+    ];
   }
 
   @override
@@ -110,7 +344,8 @@ class _WorkerTaskDetailSheetState
     final canReport = t.status == 'active' || t.status == 'rejected';
     final submitted = t.status == 'review' || t.status == 'done';
     final stepsTotal = t.steps.length;
-    final stepsDone = submitted ? stepsTotal : _checked.length;
+    // ☑️ #3 — the persisted per-step ticks live on the engine (doneSteps).
+    final stepsDone = submitted ? stepsTotal : t.doneSteps.length;
     final progress =
         stepsTotal == 0 ? (submitted ? 1.0 : 0.0) : stepsDone / stepsTotal;
 
@@ -149,6 +384,16 @@ class _WorkerTaskDetailSheetState
           '🕒 ${t.days} ימים · ${t.steps.length} שלבים',
           style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
         ),
+        // ⏱️ task clock (#85ו): elapsed since 'התחל עבודה'; freezes at submit.
+        if (taskClockLabel(t) != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            t.completedAt != null
+                ? '⏱️ זמן עבודה: ${taskClockLabel(t)}'
+                : '⏱️ בעבודה: ${taskClockLabel(t)}',
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          ),
+        ],
         if (t.status == 'pending') ...[
           const SizedBox(height: BsTokens.space2),
           // Honest: this is exactly the engine's auto-advance behavior.
@@ -186,16 +431,12 @@ class _WorkerTaskDetailSheetState
               controlAffinity: ListTileControlAffinity.leading,
               activeColor: BsTokens.brand,
               // Submitted/approved tasks show the full checklist done; an open
-              // task ticks locally (session aid — see library doc).
-              value: submitted || _checked.contains(i),
+              // task ticks straight onto the engine's persisted doneSteps
+              // (#3 — TasksNotifier.toggleStep; the provider watch rebuilds).
+              value: submitted || t.doneSteps.contains(i),
               onChanged: canReport
-                  ? (v) => setState(() {
-                        if (v ?? false) {
-                          _checked.add(i);
-                        } else {
-                          _checked.remove(i);
-                        }
-                      })
+                  ? (_) =>
+                      ref.read(tasksProvider.notifier).toggleStep(t.id, i)
                   : null,
               title: Text(
                 t.steps[i],
@@ -222,21 +463,17 @@ class _WorkerTaskDetailSheetState
           ),
         ],
 
+        // ── מה להביא (#85ה) — kit over the task's mapped products; omitted
+        // entirely when the task has no SKU mapping (see task_skus_local).
+        ..._bringSection(context, t),
+
         // ── photo (the existing TaskItem.photo field) ──
         if (t.photo != null) ...[
           const SizedBox(height: BsTokens.space3),
           const _SecH('תמונת ביצוע'),
-          Container(
-            padding: const EdgeInsets.all(BsTokens.space4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF2F3F5),
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-            ),
-            child: const Text(
-              '📷 תמונה מהשטח (הדגמה)',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
-            ),
-          ),
+          // #85ב — real data-URL renders the actual photo; the legacy 'demo'
+          // marker keeps the honest placeholder.
+          taskPhotoWidget(t.photo),
         ],
 
         // ── worker note (read-only when not reporting) ──
@@ -253,10 +490,32 @@ class _WorkerTaskDetailSheetState
         if (canReport) ...[
           const SizedBox(height: BsTokens.space3),
           const _SecH('דווח על הביצוע'),
+          if (t.startedAt == null) ...[
+            // ⏱️ task clock (#85ו): stamps TaskItem.startedAt on the engine;
+            // the submit below stamps completedAt. One-shot — once started
+            // the button disappears and the elapsed line in the header shows.
+            _PrimaryBtn(
+              key: const ValueKey('worker-task-start'),
+              label: '🔨 התחל עבודה',
+              onTap: () {
+                ref.read(tasksProvider.notifier).startWork(t.id);
+                showToast(context, '⏱️ שעון העבודה הופעל');
+              },
+            ),
+            const SizedBox(height: BsTokens.space2),
+          ],
           OutlinedButton(
-            onPressed: () {
-              ref.read(tasksProvider.notifier).attachPhoto(t.id);
-              showToast(context, 'תמונה צורפה (הדגמה)');
+            onPressed: () async {
+              // #85ב — a REAL capture (webcam on web / camera on mobile);
+              // null = honest cancel, nothing attached.
+              final dataUrl = await pickTaskPhoto(context);
+              if (!context.mounted) return;
+              if (dataUrl == null) {
+                showToast(context, 'לא צולמה תמונה');
+                return;
+              }
+              ref.read(tasksProvider.notifier).attachPhoto(t.id, dataUrl);
+              showToast(context, '📷 תמונת ההוכחה צורפה');
             },
             child: Text(t.photo != null ? '📷 החלף תמונה' : '📷 העלה תמונת ביצוע'),
           ),
@@ -268,6 +527,17 @@ class _WorkerTaskDetailSheetState
               hintText: 'הערה — מה בוצע, ומה נשאר (אופציונלי)',
               border: OutlineInputBorder(),
             ),
+          ),
+          const SizedBox(height: BsTokens.space2),
+          // 🎙️ (#85ה) — speech-to-text into the note (see _dictateNote).
+          // #6: while a session is live the button is an honest stop-toggle.
+          OutlinedButton.icon(
+            onPressed: _dictateNote,
+            icon: Icon(
+              _dictating ? Icons.stop_circle_outlined : Icons.mic_none,
+              color: _dictating ? BsTokens.danger : null,
+            ),
+            label: Text(_dictating ? '🎙️ מקליט... עצור' : 'הקלט הערה בקול'),
           ),
           const SizedBox(height: BsTokens.space3),
           _PrimaryBtn(
@@ -306,15 +576,39 @@ class _WorkerTaskDetailSheetState
             controller: scroll,
             padding: const EdgeInsets.all(BsTokens.space4),
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: BsTokens.space3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDDDDDD),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+              // #85ג: grab handle + an explicit 48dp X close (the
+              // contractor_tools_sheets idiom) — the sheet closes with one
+              // tap, not only by drag/scrim.
+              SizedBox(
+                height: 48,
+                child: Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(top: BsTokens.space1),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFDDDDDD),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Semantics(
+                        button: true,
+                        label: 'סגור',
+                        child: IconButton(
+                          tooltip: 'סגור',
+                          icon: const Icon(Icons.close,
+                              color: Color(0xFF888888)),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               ...children,
@@ -383,6 +677,75 @@ class _PrimaryBtn extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// One 'מה להביא' line (#85ה) — kind icon (🔧 כלי / 🧴 איטום / ⚠️ בטיחות) +
+/// label + reason + severity pill (חובה/מומלץ/אופציונלי), mirroring the
+/// product sheet's install-kit strip colors.
+class _KitRow extends StatelessWidget {
+  const _KitRow({required this.item});
+
+  final KitItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = switch (item.kind) {
+      KitKind.tool => '🔧',
+      KitKind.sealant => '🧴',
+      KitKind.safety => '⚠️',
+    };
+    final isRequired = item.severity == Severity.required;
+    return Padding(
+      padding: const EdgeInsets.only(top: BsTokens.space2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 16)),
+          const SizedBox(width: BsTokens.space2),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.label,
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+                Text(
+                  item.reason,
+                  style: const TextStyle(
+                    color: BsTokens.mutedLight,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: BsTokens.space2),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: isRequired
+                  ? const Color(0xFFFFF0E3)
+                  : const Color(0xFFF2F3F5),
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            ),
+            child: Text(
+              item.severityHe,
+              style: TextStyle(
+                color: isRequired ? BsTokens.brandDark : BsTokens.mutedLight,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

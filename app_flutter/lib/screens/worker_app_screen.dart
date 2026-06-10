@@ -1,15 +1,22 @@
 import 'package:buildsmart/data/persona_data.dart';
+import 'package:buildsmart/data/task_skus_local.dart';
+import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
+import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
+import 'package:buildsmart/screens/worker_notifs_sheet.dart';
 import 'package:buildsmart/screens/worker_profile_screen.dart';
+import 'package:buildsmart/screens/worker_reports_tab.dart';
 import 'package:buildsmart/screens/worker_settings_screen.dart';
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart';
+import 'package:buildsmart/screens/worker_today_strip.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -79,6 +86,23 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
           .addPostFrameCallback((_) => _mirrorManagerDecisions());
     }
 
+    // #85ז first-pass log: remember every task ever seen `rejected` — the
+    // engine keeps only the CURRENT status, so the reports tab needs this log
+    // to compute אחוז אישור-ראשון across resubmits. Post-frame so the write
+    // never lands mid-build; no-op when nothing is new (cannot loop).
+    final rejLog = ref.watch(taskRejectionLogProvider);
+    final newlyRejected = [
+      for (final t in rich)
+        if (t.status == 'rejected' && !rejLog.contains(t.id)) t.id,
+    ];
+    if (newlyRejected.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(taskRejectionLogProvider.notifier).recordAll(newlyRejected);
+        }
+      });
+    }
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -97,16 +121,39 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
             ),
           ),
           actions: [
+            // 🔔 runtime notifications (#85ו) — unread badge + sheet, the
+            // logged worker's own feed only (state/worker_notifs.dart).
+            const WorkerNotifsBell(),
             // שיחות + פרופיל moved into the bottom tabs (#67). The gear opens
             // the WORKER-scoped settings (#69) — not the catalog settings.
             // '‹ יציאה' leaves the board screen; logging OUT lives in the
             // אזור-אישי tab (boardAuth logout → gate, #68).
-            IconButton(
-              tooltip: 'הגדרות',
-              icon: const Icon(Icons.settings_outlined,
-                  color: BsTokens.mutedLight),
-              onPressed: () =>
-                  Navigator.of(context).push(WorkerSettingsScreen.route()),
+            // 💡 מצב היכרות (#85ה) — the home_shell lightbulb reuse: flips
+            // helpModeProvider, and the HelpTarget-wrapped board controls then
+            // explain themselves in a bubble instead of acting.
+            const HelpToggleButton(),
+            // 📷 סרוק מוצר (#85ה) — see _scanProduct.
+            HelpTarget(
+              title: 'סריקת מוצר',
+              body: 'פותח מצלמה לסריקת ברקוד או מק"ט. מוצר שנמצא בקטלוג '
+                  'נפתח כאן בכרטיס המוצר המלא — כולל ערכת ההתקנה שלו.',
+              child: IconButton(
+                tooltip: 'סרוק מוצר',
+                icon: const Icon(Icons.qr_code_scanner,
+                    color: BsTokens.mutedLight),
+                onPressed: _scanProduct,
+              ),
+            ),
+            HelpTarget(
+              title: 'הגדרות עובד',
+              body: 'פותח את הגדרות הלוח המותאמות לעובד.',
+              child: IconButton(
+                tooltip: 'הגדרות',
+                icon: const Icon(Icons.settings_outlined,
+                    color: BsTokens.mutedLight),
+                onPressed: () =>
+                    Navigator.of(context).push(WorkerSettingsScreen.route()),
+              ),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
@@ -117,20 +164,30 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
             ),
           ],
         ),
-        body: switch (_tab) {
-          // 🔒 ISOLATION (SPEC §2.5): the chats tab embeds the worker-audience
-          // ChatsScreen body (contract §3) — no route out of this board.
-          1 => const ChatsScreen(
-              persona: BsRole.worker,
-              audience: 'worker',
-            ),
-          2 => _ReportsTab(worker: worker),
-          3 => const WorkerProfileScreen(embedded: true),
-          _ => _TasksTab(worker: worker, demo: session.demo, onSubmit: _submit),
-        },
-        bottomNavigationBar: _WorkerNav(
-          currentIndex: _tab,
-          onTap: (i) => setState(() => _tab = i),
+        // #85ה: HelpModeScaffold shows the orange 'מצב היכרות' ribbon above the
+        // tab body while help mode is on (the home_shell pattern, task #30).
+        body: HelpModeScaffold(
+          child: switch (_tab) {
+            // 🔒 ISOLATION (SPEC §2.5): the chats tab embeds the worker-audience
+            // ChatsScreen body (contract §3) — no route out of this board.
+            1 => const ChatsScreen(
+                persona: BsRole.worker,
+                audience: 'worker',
+              ),
+            2 => WorkerReportsTab(worker: worker),
+            3 => const WorkerProfileScreen(embedded: true),
+            _ =>
+              _TasksTab(worker: worker, demo: session.demo, onSubmit: _submit),
+          },
+        ),
+        bottomNavigationBar: HelpTarget(
+          title: 'טאבי הלוח',
+          body: 'ארבעת אזורי הלוח: משימות — העבודה שלך; שיחות — קבלן, מנהל '
+              'ובוט; דוחות — היסטוריית ההגשות; אזור אישי — פרופיל ויציאה.',
+          child: _WorkerNav(
+            currentIndex: _tab,
+            onTap: (i) => setState(() => _tab = i),
+          ),
         ),
       ),
     );
@@ -161,11 +218,35 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
     }
   }
 
-  /// WORKER submit — "שלח לאישור": dual-write BOTH engines (the W3 BRIDGE —
-  /// see [submitWorkerTaskForReview]) and toast the worker.
-  void _submit(TaskItem task) {
-    submitWorkerTaskForReview(ref, task.id);
-    showToast(context, '📸 נשלח לאישור המנהל');
+  /// WORKER submit — "שלח לאישור", routed through the ONE shared proof-photo
+  /// path ([submitWithProofPhoto], worker_task_detail_sheet.dart): REAL
+  /// capture → preview/confirm dialog → [TasksNotifier.attachPhoto] WITH the
+  /// data-URL → the dual-engine submit (the W3 BRIDGE). The captured photo is
+  /// therefore actually stored on the task — the manager sees it in the
+  /// approvals queue. Cancel anywhere → honest toast inside the shared flow,
+  /// NO submit. `Future<void> Function(TaskItem)` is assignable to the
+  /// existing `void Function(TaskItem)` onSubmit callback, so no caller
+  /// changes.
+  Future<void> _submit(TaskItem task) async {
+    await submitWithProofPhoto(context, ref, task);
+  }
+
+  /// 📷 סרוק מוצר (#85ה) — open the device scanner; an exact SKU match opens
+  /// the product's REAL catalog sheet right here. The ai_hub flow routes a
+  /// scanned code into the contractor catalog's live search — this board is
+  /// ISOLATED (no route out, SPEC §2.5), so we resolve against the same
+  /// unified catalog ([productBySku] over `kCatalogProducts`) and open the
+  /// same [showLipskeyProductSheet] in place instead. No match → an honest
+  /// toast, never a fake product.
+  Future<void> _scanProduct() async {
+    final code = await openBarcodeScanner(context);
+    if (code == null || code.trim().isEmpty || !mounted) return;
+    final product = productBySku(code);
+    if (product == null) {
+      showToast(context, 'לא נמצא מוצר בקטלוג עבור הקוד $code');
+      return;
+    }
+    showLipskeyProductSheet(context, product, catalogSiblingsFor(product));
   }
 }
 
@@ -208,6 +289,11 @@ class _TasksTab extends ConsumerWidget {
         BsTokens.space5,
       ),
       children: [
+        // סדר-יום (#85ה): the worker's SmartProject day-plan strip — today's
+        // stage + the next one, filtered to the logged worker (DayStage.worker
+        // == the session's seed index). Honest empty line when none.
+        WorkerTodayStrip(worker: worker),
+        const SizedBox(height: BsTokens.space4),
         _SummaryCard(
           name: workerShortName(worker),
           demo: demo,
@@ -237,83 +323,6 @@ class _TasksTab extends ConsumerWidget {
           header: '📋 שהגשת (${submitted.length})',
           tasks: submitted,
           emptyText: 'עוד לא הגשת משימות לאישור',
-        ),
-      ],
-    );
-  }
-}
-
-/// Tab 3 — דוחות (#67): submission history + stats, derived LIVE from
-/// [tasksProvider] for the logged worker only — no invented numbers.
-class _ReportsTab extends ConsumerWidget {
-  const _ReportsTab({required this.worker});
-
-  final int worker;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final mine =
-        ref.watch(tasksProvider).where((t) => t.worker == worker).toList();
-    final done = mine.where((t) => t.status == 'done').length;
-    final rejected = mine.where((t) => t.status == 'rejected').length;
-    final inReview = mine.where((t) => t.status == 'review').length;
-    // Submission history = every task that left the worker's hands: awaiting
-    // approval, approved, or bounced back for a fix.
-    final history = mine
-        .where((t) =>
-            t.status == 'review' ||
-            t.status == 'done' ||
-            t.status == 'rejected')
-        .toList();
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        BsTokens.space4,
-        BsTokens.space4,
-        BsTokens.space4,
-        BsTokens.space5,
-      ),
-      children: [
-        Container(
-          padding: const EdgeInsets.all(BsTokens.space4),
-          decoration: BoxDecoration(
-            color: BsTokens.cardLight,
-            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x14000000),
-                blurRadius: 10,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'סיכום משימות',
-                style: TextStyle(
-                  color: BsTokens.inkLight,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
-                ),
-              ),
-              const SizedBox(height: BsTokens.space3),
-              Row(
-                children: [
-                  _Stat(value: '$done', label: 'הושלמו'),
-                  _Stat(value: '$inReview', label: 'ממתינות לאישור'),
-                  _Stat(value: '$rejected', label: 'נדחו'),
-                  _Stat(value: '${mine.length}', label: 'סה"כ'),
-                ],
-              ),
-            ],
-          ),
-        ),
-        _Section(
-          header: '📋 היסטוריית הגשות (${history.length})',
-          tasks: history,
-          emptyText: 'עוד לא הגשת משימות לאישור — ההגשות שלך יופיעו כאן',
         ),
       ],
     );
@@ -596,17 +605,53 @@ class _Section extends StatelessWidget {
             ),
           )
         else
-          for (final t in tasks) _TaskCard(task: t, onSubmit: onSubmit),
+          for (final t in tasks)
+            HelpTarget(
+              title: 'כרטיס משימה',
+              body: 'לחיצה על הכרטיס פותחת את פירוט המשימה — שלבים, הוראות, '
+                  '"מה להביא" ודיווח ביצוע. כפתור "שלח לאישור" מגיש את '
+                  'המשימה לאישור המנהל.',
+              child: _TaskCard(task: t, onSubmit: onSubmit),
+            ),
       ],
     );
   }
+}
+
+/// ⏱️ The task-clock line (#85ו) for a card, from its bs.task-clock.v1 entry
+/// ([TaskClockEntry], worker_reports_tab.dart): a measured start→approval pair
+/// → '⏱️ זמן עבודה: …'; a started-but-unfinished task → '⏱️ בעבודה מאז HH:MM';
+/// no stamps (or an unordered pair) → null, and the card shows no line.
+String? _taskClockLabel(TaskClockEntry? clock) {
+  if (clock == null) return null;
+  final d = clock.duration;
+  if (d != null) return '⏱️ זמן עבודה: ${_fmtClockDuration(d)}';
+  final s = clock.startedAt;
+  if (s != null && clock.completedAt == null) {
+    final hh = s.hour.toString().padLeft(2, '0');
+    final mm = s.minute.toString().padLeft(2, '0');
+    return '⏱️ בעבודה מאז $hh:$mm';
+  }
+  return null;
+}
+
+/// Compact Hebrew duration for the task-clock line.
+String _fmtClockDuration(Duration d) {
+  if (d.inMinutes < 1) return 'פחות מדקה';
+  if (d.inHours < 1) return '${d.inMinutes} דק׳';
+  if (d.inDays < 1) {
+    final m = d.inMinutes % 60;
+    return m == 0 ? '${d.inHours} שע׳' : '${d.inHours} שע׳ $m דק׳';
+  }
+  final h = d.inHours % 24;
+  return h == 0 ? '${d.inDays} ימים' : '${d.inDays} ימים $h שע׳';
 }
 
 /// A single task, in the app's card style (white rounded card). Tapping the
 /// card opens the full detail sheet (#71 — real steps/instructions/photo).
 /// When [onSubmit] is provided AND the task is in a submittable status
 /// (`active`/`rejected`), a "שלח לאישור" button is shown that calls it.
-class _TaskCard extends StatelessWidget {
+class _TaskCard extends ConsumerWidget {
   const _TaskCard({required this.task, this.onSubmit});
 
   final TaskItem task;
@@ -617,7 +662,11 @@ class _TaskCard extends StatelessWidget {
       onSubmit != null && (task.status == 'active' || task.status == 'rejected');
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // ⏱️ task clock (#85ו) — read-only view of the bs.task-clock.v1 side-map
+    // (see worker_reports_tab.dart; the writer lives with the engine). No
+    // stamp for this task → no line: honest, no invented times.
+    final clock = ref.watch(taskClockProvider).asData?.value[task.id];
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
@@ -669,6 +718,18 @@ class _TaskCard extends StatelessWidget {
                     fontSize: 13,
                   ),
                 ),
+                // ⏱️ task clock (#85ו) — only once the engine stamped it
+                // (started-only → 'בעבודה מאז', both stamps → the duration).
+                if (_taskClockLabel(clock) != null) ...[
+                  const SizedBox(height: BsTokens.space1),
+                  Text(
+                    _taskClockLabel(clock)!,
+                    style: const TextStyle(
+                      color: BsTokens.mutedLight,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ],
                 if (task.note.isNotEmpty) ...[
                   const SizedBox(height: BsTokens.space1),
                   Text(

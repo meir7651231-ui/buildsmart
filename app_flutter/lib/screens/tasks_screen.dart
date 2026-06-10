@@ -13,6 +13,7 @@ import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -535,14 +536,15 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                     child: OutlinedButton(
                       key: const ValueKey('task-reject'),
                       onPressed: () async {
-                        final ok = await confirmDestructive(
-                          context,
-                          title: 'החזרה לתיקון?',
-                          message: 'תמונת הביצוע תימחק והמשימה תוחזר לעובד.',
-                          confirmLabel: 'החזר',
-                        );
-                        if (!ok || !context.mounted) return;
-                        ref.read(tasksProvider.notifier).reject(t.id);
+                        // 📝 #12 — reject with an OPTIONAL reason (the shared
+                        // promptRejectReason dialog): null = cancelled, no
+                        // reject; the reason is threaded to the engine
+                        // (side-map + the worker's 🔁 bell notification).
+                        final why = await promptRejectReason(context);
+                        if (why == null || !context.mounted) return;
+                        ref
+                            .read(tasksProvider.notifier)
+                            .reject(t.id, reason: why);
                         Navigator.of(context).pop();
                         showToast(context, 'המשימה הוחזרה לעובד לתיקון');
                       },

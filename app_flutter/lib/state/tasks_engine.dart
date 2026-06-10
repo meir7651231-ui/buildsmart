@@ -22,6 +22,8 @@ import 'dart:convert';
 
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/state/rewards_state.dart';
+import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -50,6 +52,9 @@ class TaskItem {
     required this.steps,
     this.photo,
     this.note = '',
+    this.startedAt,
+    this.completedAt,
+    this.doneSteps = const {},
   });
 
   final int id;
@@ -60,14 +65,36 @@ class TaskItem {
   final int days;
   final List<String> steps;
 
-  /// `'demo'` once the worker attaches a photo, else null (proto `photo`).
+  /// The worker's proof photo (#85ב): a REAL data-URL
+  /// ('data:image/...;base64,…' captured via `services/task_photo.dart`) once
+  /// the worker shoots one, the legacy `'demo'` marker for seeded/placeholder
+  /// photos, or null when nothing is attached (proto `photo`). Renderers must
+  /// handle both forms (data-URL → Image.memory · 'demo' → honest
+  /// placeholder — see the submission-history rows in
+  /// `screens/worker_reports_tab.dart`).
   final String? photo;
   final String note;
+
+  /// ⏱️ TASK CLOCK (#85ו) — runtime-only stamps, null on the verbatim seed
+  /// (no invented history): 'התחל עבודה' ([TasksNotifier.startWork]) sets
+  /// [startedAt]; the worker submit sets [completedAt]; a manager reject
+  /// clears [completedAt] (the task is back in work).
+  final DateTime? startedAt;
+  final DateTime? completedAt;
+
+  /// ☑️ Per-step completion (#3) — the indexes into [steps] the worker ticked.
+  /// Lives on the engine (NOT widget state) so the checklist survives sheet
+  /// close/reopen and an app restart (persisted in the overlay as a
+  /// `List<int>`). Empty on the verbatim seed.
+  final Set<int> doneSteps;
 
   TaskItem copyWith({
     String? status,
     Object? photo = _sentinel,
     String? note,
+    Object? startedAt = _sentinel,
+    Object? completedAt = _sentinel,
+    Set<int>? doneSteps,
   }) =>
       TaskItem(
         id: id,
@@ -79,6 +106,12 @@ class TaskItem {
         steps: steps,
         photo: photo == _sentinel ? this.photo : photo as String?,
         note: note ?? this.note,
+        startedAt:
+            startedAt == _sentinel ? this.startedAt : startedAt as DateTime?,
+        completedAt: completedAt == _sentinel
+            ? this.completedAt
+            : completedAt as DateTime?,
+        doneSteps: doneSteps ?? this.doneSteps,
       );
 
   static const _sentinel = Object();
@@ -103,16 +136,43 @@ List<TaskItem> _seedTasks() => [
 
 const String kTasksScreenKey = 'bs.tasks-screen.v1';
 
+/// ⏱️ #85ו cross-cluster side-map MIRROR of the clock stamps —
+/// `{taskId: {startedAt: iso, completedAt: iso}}`. The reports tab
+/// (`screens/worker_reports_tab.dart`, key `kTaskClockKey`) reads it
+/// read-only; the engine's [TasksNotifier._persist] is the writer ("the
+/// writers live with the engines"). Source of truth stays on [TaskItem].
+const String kTaskClockSideMapKey = 'bs.task-clock.v1';
+
+/// 📝 #85ו cross-cluster side-map of manager rejection reasons —
+/// `{taskId: reason}`. Read by the reports tab ("דחיות + סיבה",
+/// `kTaskRejectNoteKey` there); written by [TasksNotifier.reject] when the
+/// manager actually gave a reason (no invented reason otherwise).
+const String kTaskRejectNoteSideMapKey = 'bs.task-reject-note.v1';
+
+/// 🪙 DEMO (#85ו): coins credited to the rewards balance per manager-approved
+/// task. A fixed demo tariff — the real per-task value comes with the server.
+const int kTaskApprovalCoins = 20;
+
 class TasksNotifier extends StateNotifier<List<TaskItem>> {
-  TasksNotifier({this.persist = true}) : super(_seedTasks()) {
+  TasksNotifier({this.persist = true, Ref? ref})
+      : _ref = ref,
+        super(_seedTasks()) {
     if (persist) _load();
   }
 
   final bool persist;
+
+  /// Engine→app hooks (#85ו: coins + worker notifications on REAL
+  /// transitions). Null in unit tests (`TasksNotifier(persist: false)`) —
+  /// hooks are skipped and the state machine behaves exactly as before.
+  final Ref? _ref;
+
   bool _loaded = false;
 
-  /// Persist a compact `{id: {status, photo, note}}` overlay onto the verbatim
-  /// seed — resilient to seed edits (the worker-tasks-engine pattern).
+  /// Persist a compact `{id: {status, photo, note, startedAt, completedAt,
+  /// doneSteps}}` overlay onto the verbatim seed — resilient to seed edits
+  /// (the worker-tasks-engine pattern). `doneSteps` (#3) rides the overlay as
+  /// a plain `List<int>` of ticked step indexes.
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -130,6 +190,19 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
                 status: (m['${t.id}'] as Map)['status'] as String?,
                 photo: (m['${t.id}'] as Map)['photo'] as String?,
                 note: (m['${t.id}'] as Map)['note'] as String?,
+                startedAt: DateTime.tryParse(
+                    (m['${t.id}'] as Map)['startedAt'] as String? ?? ''),
+                completedAt: DateTime.tryParse(
+                    (m['${t.id}'] as Map)['completedAt'] as String? ?? ''),
+                // ☑️ #3 — restore the ticked steps; a pre-#3 payload simply
+                // has no key (null → keep the empty default).
+                doneSteps: (m['${t.id}'] as Map)['doneSteps'] is List
+                    ? {
+                        for (final s
+                            in (m['${t.id}'] as Map)['doneSteps'] as List)
+                          if (s is num) s.toInt(),
+                      }
+                    : null,
               )
             else
               t,
@@ -149,7 +222,30 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         kTasksScreenKey,
         jsonEncode({
           for (final t in state)
-            '${t.id}': {'status': t.status, 'photo': t.photo, 'note': t.note},
+            '${t.id}': {
+              'status': t.status,
+              'photo': t.photo,
+              'note': t.note,
+              'startedAt': t.startedAt?.toIso8601String(),
+              'completedAt': t.completedAt?.toIso8601String(),
+              // ☑️ #3 — the ticked step indexes, sorted for a stable payload.
+              'doneSteps': t.doneSteps.toList()..sort(),
+            },
+        }),
+      );
+      // ⏱️ #85ו: mirror the clock stamps into the bs.task-clock.v1 side-map
+      // for the read-only consumer (worker_reports_tab.dart). Tasks with no
+      // stamp are omitted — an empty/missing entry IS the honest "no
+      // measurement" state there.
+      await prefs.setString(
+        kTaskClockSideMapKey,
+        jsonEncode({
+          for (final t in state)
+            if (t.startedAt != null || t.completedAt != null)
+              '${t.id}': {
+                'startedAt': t.startedAt?.toIso8601String(),
+                'completedAt': t.completedAt?.toIso8601String(),
+              },
         }),
       );
     } on Object catch (_) {}
@@ -176,8 +272,39 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
     ];
   }
 
-  /// WORKER attaches a photo — `taskUpload` (proto :8147). Sets photo='demo'.
-  void attachPhoto(int id) => _patch(id, (t) => t.copyWith(photo: 'demo'));
+  /// WORKER attaches a proof photo — `taskUpload` (proto :8147). [photo] is
+  /// the REAL captured data-URL ('data:image/...;base64,…', #85ב via
+  /// `services/task_photo.dart`); the legacy 'demo' marker remains the default
+  /// so older callers keep their honest placeholder rendering.
+  void attachPhoto(int id, [String photo = 'demo']) =>
+      _patch(id, (t) => t.copyWith(photo: photo));
+
+  /// WORKER step checklist (#3) — toggle ONE step's done mark on the engine
+  /// (the worker sheet's checkbox). Persists with the overlay, so the ticks
+  /// survive sheet close/reopen and an app restart. A no-op on an unknown
+  /// task or an out-of-range index.
+  void toggleStep(int taskId, int stepIndex) {
+    final t = _byId(taskId);
+    if (t == null) return;
+    if (stepIndex < 0 || stepIndex >= t.steps.length) return;
+    _patch(taskId, (x) {
+      final next = Set<int>.from(x.doneSteps);
+      if (!next.add(stepIndex)) next.remove(stepIndex);
+      return x.copyWith(doneSteps: next);
+    });
+  }
+
+  /// WORKER 'התחל עבודה' (#85ו) — stamps the task clock. Allowed on the
+  /// current bucket only (`active`/`rejected`); one-shot — the clock keeps
+  /// counting through a reject-and-fix cycle so the elapsed figure stays one
+  /// honest number. [submitForReview] stamps [TaskItem.completedAt].
+  void startWork(int id) {
+    final t = _byId(id);
+    if (t == null) return;
+    if (t.status != 'active' && t.status != 'rejected') return;
+    if (t.startedAt != null) return;
+    _patch(id, (x) => x.copyWith(startedAt: DateTime.now()));
+  }
 
   /// WORKER "שלח לאישור" — `taskActionClick` (proto :8133-8145): a current task
   /// (`active`/`rejected`) → `review`; the photo defaults to 'demo' if missing;
@@ -191,6 +318,8 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
           status: 'review',
           photo: x.photo ?? 'demo',
           note: note ?? x.note,
+          // ⏱️ task clock (#85ו): the submit stamps the completion time.
+          completedAt: DateTime.now(),
         ));
     // auto-advance: promote the same worker's next queued task.
     final next = state
@@ -198,29 +327,85 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         .toList();
     if (next.isNotEmpty) {
       _patch(next.first.id, (x) => x.copyWith(status: 'active'));
+      // 🔔 #85ו: the auto-advance IS the new-assignment event — the worker's
+      // next queued task just became their live task.
+      _ref?.read(workerNotifsProvider.notifier).addForWorker(
+            t.worker,
+            emoji: '📋',
+            title: 'משימה חדשה הוקצתה',
+            body: next.first.name,
+          );
     }
   }
 
   /// MANAGER approve — `taskApprove` (proto :8149): `review` → `done` (✅ אושר).
+  /// #85ו side-effects (skipped without a [_ref], i.e. in unit tests): 🪙 DEMO
+  /// coins onto the rewards balance + a 🔔 runtime notification for the task's
+  /// worker. Both fire only on the real review→done transition (the status
+  /// guard), so a re-approve can never double-award.
   void approve(int id) {
     final t = _byId(id);
     if (t == null || t.status != 'review') return;
     _patch(id, (x) => x.copyWith(status: 'done'));
+    final r = _ref;
+    if (r == null) return;
+    r.read(rewardsProvider.notifier).awardCoins(kTaskApprovalCoins);
+    r.read(workerNotifsProvider.notifier).addForWorker(
+          t.worker,
+          emoji: '✅',
+          title: 'המשימה אושרה — +$kTaskApprovalCoins מטבעות',
+          body: t.name,
+        );
   }
 
   /// MANAGER reject — `taskReject` (proto :8150): `review` → `rejected`, clearing
-  /// the photo (proto sets `photo=null`) so the worker re-shoots.
-  void reject(int id) {
+  /// the photo (proto sets `photo=null`) so the worker re-shoots. #85ו: also
+  /// clears the completion stamp (the task is back in work) and notifies the
+  /// worker — with the manager's [reason] when one was given (UI seam; no
+  /// invented reason otherwise). A real reason is also mirrored into the
+  /// [kTaskRejectNoteSideMapKey] side-map for the reports tab.
+  void reject(int id, {String? reason}) {
     final t = _byId(id);
     if (t == null || t.status != 'review') return;
-    _patch(id, (x) => x.copyWith(status: 'rejected', photo: null));
+    _patch(
+      id,
+      (x) => x.copyWith(status: 'rejected', photo: null, completedAt: null),
+    );
+    final why = reason?.trim();
+    if (why != null && why.isNotEmpty) _saveRejectNote(id, why);
+    final r = _ref;
+    if (r == null) return;
+    r.read(workerNotifsProvider.notifier).addForWorker(
+          t.worker,
+          emoji: '🔁',
+          title: (why == null || why.isEmpty)
+              ? 'הוחזרה לתיקון — צלם שוב ושלח לאישור'
+              : 'הוחזרה לתיקון: $why',
+          body: t.name,
+        );
+  }
+
+  /// Merge ONE manager rejection reason into the bs.task-reject-note.v1
+  /// side-map (`{taskId: reason}`) — read by the reports tab ("דחיות + סיבה").
+  /// Read-modify-write so earlier reasons for other tasks survive.
+  Future<void> _saveRejectNote(int id, String reason) async {
+    if (!persist) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(kTaskRejectNoteSideMapKey);
+      final m = (raw == null || raw.isEmpty)
+          ? <String, dynamic>{}
+          : jsonDecode(raw) as Map<String, dynamic>;
+      m['$id'] = reason;
+      await prefs.setString(kTaskRejectNoteSideMapKey, jsonEncode(m));
+    } on Object catch (_) {}
   }
 
   void resetToSeed() => state = _seedTasks();
 }
 
-final tasksProvider =
-    StateNotifierProvider<TasksNotifier, List<TaskItem>>((ref) => TasksNotifier());
+final tasksProvider = StateNotifierProvider<TasksNotifier, List<TaskItem>>(
+    (ref) => TasksNotifier(ref: ref));
 
 /// Tasks awaiting the manager's approval (`review`), in id order — the manager
 /// "📸 ממתין לאישור שלך" bucket, derived LIVE off [tasksProvider].
@@ -229,6 +414,25 @@ final tasksPendingReviewProvider = Provider<List<TaskItem>>((ref) {
   return tasks.where((t) => t.status == 'review').toList()
     ..sort((a, b) => a.id.compareTo(b.id));
 });
+
+/// ⏱️ Task-clock label (#85ו) — elapsed between [TaskItem.startedAt] and
+/// [TaskItem.completedAt] (or NOW while the work is still open), as a natural
+/// Hebrew duration. Null when the clock never started — callers hide the row
+/// (no invented timing). A render-time snapshot, refreshed on rebuild.
+String? taskClockLabel(TaskItem t) {
+  final start = t.startedAt;
+  if (start == null) return null;
+  var d = (t.completedAt ?? DateTime.now()).difference(start);
+  if (d.isNegative) d = Duration.zero;
+  if (d.inMinutes < 1) return 'פחות מדקה';
+  if (d.inMinutes < 60) return '${d.inMinutes} דק׳';
+  if (d.inHours < 24) {
+    final m = d.inMinutes % 60;
+    return m == 0 ? '${d.inHours} שע׳' : '${d.inHours} שע׳ $m דק׳';
+  }
+  final h = d.inHours % 24;
+  return h == 0 ? '${d.inDays} ימים' : '${d.inDays} ימים $h שע׳';
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WORK LOG — `openTaskLog` (proto :8158-8180). The live "היום" bucket is the

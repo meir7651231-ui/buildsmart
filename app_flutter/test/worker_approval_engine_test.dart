@@ -18,6 +18,7 @@
 import 'package:buildsmart/screens/manager_dashboard_screen.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -159,13 +160,28 @@ void main() {
       );
       await settle(t);
 
+      // v2 (#85ב): submit REQUIRES a proof photo — pre-attach a real (tiny
+      // 1x1 PNG) data-URL so submitWithProofPhoto reuses it instead of
+      // opening a camera/picker (unavailable in widget tests).
+      const tinyPng = 'data:image/png;base64,'
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8'
+          'z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+      c.read(tasksProvider.notifier).attachPhoto(1, tinyPng);
+      await settle(t);
+
       // רן (worker 0) is selected by default; his task 1 is `active` → its card
-      // carries the keyed submit button.
-      expect(find.text('התקנת קו מים חם — חדר רחצה'), findsOneWidget);
+      // carries the keyed submit button (title also appears in the today-strip,
+      // so scroll directly to the unique keyed pill).
       final submit = find.byKey(const ValueKey('submit-1'));
+      await t.scrollUntilVisible(submit, 200);
       expect(submit, findsOneWidget);
 
       await t.tap(submit);
+      await settle(t);
+
+      // v2: the proof-photo preview/confirm dialog — approve the send. The
+      // dialog button is the bare 'שלח לאישור' (the card pill is '📸 שלח לאישור').
+      await t.tap(find.text('שלח לאישור'));
       await settle(t);
 
       // The shared engine moved task 1 active → review.

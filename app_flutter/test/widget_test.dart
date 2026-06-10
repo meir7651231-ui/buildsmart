@@ -83,10 +83,14 @@ void main() {
     // main app, not a dial. The 3 task-group sections (with status emoji +
     // count) and a real task card appear.
     expect(find.text('🦺 עובד'), findsOneWidget);
+    // v2: the 'היום שלי' strip pushes the buckets down the lazy ListView —
+    // scroll to each section before asserting.
+    await t.scrollUntilVisible(find.text('🔨 המשימה הנוכחית שלך'), 200);
     expect(find.text('🔨 המשימה הנוכחית שלך'), findsOneWidget);
+    // Title shows in the today-strip (day stages) AND on the card.
+    expect(find.text('התקנת קו מים חם — חדר רחצה'), findsWidgets);
+    await t.scrollUntilVisible(find.text('⏳ הבאות בתור (2)'), 200);
     expect(find.text('⏳ הבאות בתור (2)'), findsOneWidget);
-    expect(find.text('התקנת קו מים חם — חדר רחצה'), findsOneWidget);
-    // The third group sits below the fold in the lazy ListView — scroll to it.
     await t.scrollUntilVisible(find.text('📋 שהגשת (0)'), 200);
     expect(find.text('📋 שהגשת (0)'), findsOneWidget);
   });

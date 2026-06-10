@@ -58,7 +58,12 @@ class RewardsHubScreen extends ConsumerWidget {
             ),
             const SizedBox(height: BsTokens.space3),
             // Coin balance banner — proto `rw-coin-banner` @21457-21462.
-            _CoinBanner(coins: rw.coins, sub: '🔥 רצף של $kLoginStreak ימים פעילים'),
+            // #10 — the streak here is the verbatim proto SEED (kLoginStreak),
+            // not a measurement; labeled honestly as demo. The worker reports
+            // tab computes its own real streak from the task clock.
+            _CoinBanner(
+                coins: rw.coins,
+                sub: '🔥 רצף (דמו): $kLoginStreak ימים פעילים'),
             const SizedBox(height: BsTokens.space4),
             // The 7-tile grid — proto `fin-grid` @21474-21481.
             GridView.count(

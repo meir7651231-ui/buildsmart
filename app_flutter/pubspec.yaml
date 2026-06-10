@@ -7,6 +7,12 @@ environment:
   sdk: ^3.7.2
 
 dependencies:
+  # REAL webcam capture on web (#85ב/#85ד) — getUserMedia preview + shutter
+  # for the proof/profile photo (screens/webcam_capture_sheet.dart); the same
+  # browser permission flow the barcode scanner already uses.
+  camera: ^0.11.0
+  camera_web: ^0.3.5
+
   cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
@@ -24,6 +30,11 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_cache_manager: ^3.4.1
 
+  # proof-photo capture (#85ב) + profile photo (#85ד) — camera on mobile;
+  # on web the FALLBACK file picker behind the real webcam capture
+  # (camera/camera_web via screens/webcam_capture_sheet.dart)
+  image_picker: ^1.1.2
+
   # native barcode scanner — iOS/Android + Web (limited)
   mobile_scanner: ^5.2.3
 
@@ -38,6 +49,10 @@ dependencies:
 
   # native speech-to-text — iOS/Android (Web falls back to Web Speech)
   speech_to_text: ^7.0.0
+
+  # browser canvas downscale/JPEG re-encode for web captures
+  # (services/photo_downscale.dart — keeps data-URLs inside the persist budget)
+  web: ^1.1.0
   firebase_core: ^4.10.0
   firebase_auth: ^6.5.2
   cloud_firestore: ^6.5.0

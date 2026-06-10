@@ -798,3 +798,7 @@
 - שחזור: byte-exact; הרצה חוזרת 8/8 ירוקה ✅.
 - מסקנה: בדיקות-הזהות חזקות — מכסות הצלחה/כישלון/persist/דמו/logout/קוד-החלפה.
 - `lib/data/chat_seeds.dart` (חדש · #70/#75): seed-בלבד (שיחות audience) — מכוסה עקיף ע"י בדיקות ה-chat הקיימות + analyze.
+
+### 2026-06-10 — worker-v2 (לוגיקה חדשה ב-lib/state + lib/data/task_skus_local)
+- באג-אמיתי שנתפס ע"י בדיקת-שמירה (לא מוטציה מלאכותית): vacation_requests — שתי בקשות באותה אלפית-שנייה קיבלו אותו id (web=דיוק-ms) → החלטה אחת אישרה את שתיהן; הבדיקה 'decision touches ONLY the given id' אדומה → תוקן `_seq` מונוטוני → ירוקה. תיעוד כ-mutation-equivalent (fault אמיתי→red→fix→green).
+- task_skus_local.dart: seed-בלבד (מיפוי משימה→מק"טים, DEMO-SEED) — מכוסה ע"י רנדור 'מה להביא' + analyze.

@@ -1,0 +1,187 @@
+import 'dart:convert';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// cluster #85ח · נוכחות עובד — on-device clock-in/out, one [AttendanceDay]
+/// per username per calendar day. Persisted to SharedPreferences under
+/// [kWorkerAttendanceKey] with the `board_auth.dart` idiom: lazy `_load()` in
+/// the constructor + a one-shot `_userTouched` guard so a late prefs read can
+/// never clobber a clock-in that landed before prefs resolved (ticket-#24
+/// race).
+///
+/// SERVER-SWAP: becomes the server's attendance ledger when the backend
+/// lands; until then the device is the single honest source of truth.
+
+/// SharedPreferences key (versioned like the other `bs.*.v1` keys).
+const String kWorkerAttendanceKey = 'bs.worker-attendance.v1';
+
+/// `yyyy-MM-dd` key for [d] — the per-day identity of an [AttendanceDay].
+String attendanceDateKey(DateTime d) =>
+    '${d.year.toString().padLeft(4, '0')}-'
+    '${d.month.toString().padLeft(2, '0')}-'
+    '${d.day.toString().padLeft(2, '0')}';
+
+/// One worker-day: the date key plus the clock-in / clock-out instants.
+/// [outTs] stays null while the worker is still clocked in.
+class AttendanceDay {
+  const AttendanceDay({
+    required this.username,
+    required this.date,
+    this.inTs,
+    this.outTs,
+  });
+
+  /// Board login username (`ran` / `omer` / `demo`) — the same identity key
+  /// `boardAuthProvider` carries.
+  final String username;
+
+  /// `yyyy-MM-dd` ([attendanceDateKey]).
+  final String date;
+
+  final DateTime? inTs;
+  final DateTime? outTs;
+
+  /// Completed shift length — null while the day is still open (no clock-out).
+  Duration? get worked {
+    final i = inTs;
+    final o = outTs;
+    if (i == null || o == null) return null;
+    final d = o.difference(i);
+    return d.isNegative ? Duration.zero : d;
+  }
+
+  AttendanceDay copyWith({DateTime? inTs, DateTime? outTs}) => AttendanceDay(
+        username: username,
+        date: date,
+        inTs: inTs ?? this.inTs,
+        outTs: outTs ?? this.outTs,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'username': username,
+        'date': date,
+        'inTs': inTs?.toIso8601String(),
+        'outTs': outTs?.toIso8601String(),
+      };
+
+  /// Defensive decode — a malformed entry is dropped, never crashes the load.
+  static AttendanceDay? tryFromJson(Object? raw) {
+    if (raw is! Map) return null;
+    final username = raw['username'];
+    final date = raw['date'];
+    if (username is! String || date is! String) return null;
+    return AttendanceDay(
+      username: username,
+      date: date,
+      inTs: DateTime.tryParse('${raw['inTs']}'),
+      outTs: DateTime.tryParse('${raw['outTs']}'),
+    );
+  }
+}
+
+/// Pure helper — [username]'s records in (year, month), oldest→newest. Kept
+/// top-level so the screen and tests share one filter.
+List<AttendanceDay> attendanceMonth(
+  List<AttendanceDay> all,
+  String username,
+  int year,
+  int month,
+) {
+  final prefix = '${year.toString().padLeft(4, '0')}-'
+      '${month.toString().padLeft(2, '0')}-';
+  return all
+      .where((d) => d.username == username && d.date.startsWith(prefix))
+      .toList()
+    ..sort((a, b) => a.date.compareTo(b.date));
+}
+
+/// Pure helper — sum of the COMPLETED shifts in [days] (open days count 0).
+Duration attendanceTotal(List<AttendanceDay> days) => days.fold(
+      Duration.zero,
+      (sum, d) => sum + (d.worked ?? Duration.zero),
+    );
+
+class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
+  WorkerAttendanceNotifier() : super(const []) {
+    _load();
+  }
+
+  /// One-shot guard (the board_auth idiom): once a clock-in/out has written
+  /// state, a late `_load()` becomes non-destructive.
+  bool _userTouched = false;
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(kWorkerAttendanceKey);
+    if (raw == null || _userTouched) return;
+    try {
+      final list = jsonDecode(raw) as List;
+      if (_userTouched) return;
+      state = [
+        for (final e in list)
+          if (AttendanceDay.tryFromJson(e) case final d?) d,
+      ];
+    } on Object catch (_) {
+      // Corrupt payload — keep the empty ledger.
+    }
+  }
+
+  Future<void> _persist() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      kWorkerAttendanceKey,
+      jsonEncode([for (final d in state) d.toJson()]),
+    );
+  }
+
+  /// Today's record for [username], or null when none exists yet.
+  AttendanceDay? todayFor(String username) {
+    final key = attendanceDateKey(DateTime.now());
+    for (final d in state) {
+      if (d.username == username && d.date == key) return d;
+    }
+    return null;
+  }
+
+  /// Clock IN for today. `false` (no-op) when today already has a clock-in —
+  /// one shift per calendar day, honest and simple.
+  bool clockIn(String username) {
+    final today = todayFor(username);
+    if (today != null && today.inTs != null) return false;
+    _userTouched = true;
+    final key = attendanceDateKey(DateTime.now());
+    state = [
+      for (final d in state)
+        if (!(d.username == username && d.date == key)) d,
+      AttendanceDay(username: username, date: key, inTs: DateTime.now()),
+    ];
+    _persist();
+    return true;
+  }
+
+  /// Clock OUT for today. `false` (no-op) when there is no open clock-in.
+  bool clockOut(String username) {
+    final today = todayFor(username);
+    if (today == null || today.inTs == null || today.outTs != null) {
+      return false;
+    }
+    _userTouched = true;
+    state = [
+      for (final d in state)
+        if (d.username == username && d.date == today.date)
+          d.copyWith(outTs: DateTime.now())
+        else
+          d,
+    ];
+    _persist();
+    return true;
+  }
+}
+
+/// The attendance ledger — every worker-day on this device. Screens filter by
+/// the logged username (the worker sees only his own rows, #66).
+final workerAttendanceProvider =
+    StateNotifierProvider<WorkerAttendanceNotifier, List<AttendanceDay>>(
+  (ref) => WorkerAttendanceNotifier(),
+);

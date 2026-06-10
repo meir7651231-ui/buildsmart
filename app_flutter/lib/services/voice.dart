@@ -10,28 +10,68 @@ class VoiceService {
   final stt.SpeechToText _engine = stt.SpeechToText();
   bool _initialized = false;
 
+  /// #6 voice honesty — [stt.SpeechToText.initialize] binds its callbacks
+  /// ONCE for the engine's lifetime, so per-session routing goes through
+  /// these mutable hooks: the active [listen] session registers its error
+  /// sink here, and engine errors / no-result endings are forwarded to it
+  /// instead of being swallowed.
+  void Function(String reason)? _sessionOnError;
+  bool _sessionActive = false;
+  bool _sessionGotResult = false;
+
   Future<bool> _ensureInitialized() async {
     if (_initialized) return true;
     return _initialized = await _engine.initialize(
-      onError: (_) {},
-      onStatus: (_) {},
+      // Engine errors (mic permission, network, no-match…) end the active
+      // session honestly — no more silent `(_) {}` swallow.
+      onError: (e) => _failSession(e.errorMsg),
+      onStatus: (status) {
+        // The plugin reports BOTH 'done' and 'doneNoResult' as 'done' to this
+        // listener (speech_to_text 7.x rewrites the status) — so a 'done'
+        // that arrives without any final result is the no-result case.
+        if (status == 'done' && !_sessionGotResult) {
+          _failSession('no-result');
+        }
+      },
     );
+  }
+
+  /// Routes a failure to the ACTIVE session's [listen]-onError exactly once;
+  /// stray engine callbacks outside a session are ignored.
+  void _failSession(String reason) {
+    if (!_sessionActive) return;
+    _sessionActive = false;
+    final cb = _sessionOnError;
+    _sessionOnError = null;
+    cb?.call(reason);
   }
 
   Future<bool> get available async => _ensureInitialized();
 
-  /// Starts a listening session and invokes [onFinal] with the
-  /// final transcript when the user stops speaking. Returns false
-  /// if the platform doesn't support it.
+  /// Starts a listening session and invokes [onFinal] with the final
+  /// transcript when the user stops speaking. [onError] fires (at most once
+  /// per session) when the engine errors out or the session ends with no
+  /// recognized text — so callers never hang in a fake "recording" state.
+  /// Returns false if the platform doesn't support speech at all (then
+  /// [onError] is NOT called — the `false` return is the failure signal).
   Future<bool> listen({
     required void Function(String text) onFinal,
+    void Function(String reason)? onError,
     String localeId = 'he-IL',
   }) async {
     final ok = await _ensureInitialized();
     if (!ok) return false;
+    _sessionActive = true;
+    _sessionGotResult = false;
+    _sessionOnError = onError;
     await _engine.listen(
       onResult: (r) {
-        if (r.finalResult) onFinal(r.recognizedWords);
+        if (r.finalResult) {
+          _sessionGotResult = true;
+          _sessionActive = false;
+          _sessionOnError = null;
+          onFinal(r.recognizedWords);
+        }
       },
       listenOptions: stt.SpeechListenOptions(
         partialResults: false,
@@ -42,6 +82,9 @@ class VoiceService {
     return true;
   }
 
+  /// Stops the active session. A manual stop is NOT an error by itself: the
+  /// engine may still deliver the final transcript right after; if it
+  /// doesn't, the no-result path above routes through [listen]'s onError.
   Future<void> stop() => _engine.stop();
 
   /// Web Speech API has known stability issues in some browsers; surface
