@@ -177,3 +177,44 @@ J6 (Google 14-day) מתחיל מוקדם ככל האפשר
 - פרטי‑חברה אמיתיים בכל המסמכים (לא `[שם החברה]`).
 - מדיניות‑החזרים (לתשלום) + חשבונית‑מס אוטומטית.
 - ⏰ הנפקת **SSL** לשני הדומיינים — שעות עד 48ש' (זמן‑קיר).
+
+---
+
+## 📋 מצאי מסכים מלא (ענף whats-happening · HEAD e3e6e94 · 50 קבצים)
+> מעבר ממצה אחד‑לאחד על האפליקציה **האמיתית** (לא הסנאפשוט הישן של ענף‑הידע).
+> **ספירה: ✅ 29 גמורים · 🟡 14 חלקיים · 🔴 6 לא‑עובדים** (מתוך 49 מסכים פעילים; +1 helper).
+
+**✅ גמורים (29):** install_studio · lipskey_product_sheet · lipskey_products · notifications · home_shell · rewards_hub · persona_picking · finder · tasks · budget · projects · profile · worker_app · smart_project · audit · regression_panel · onboarding · stock · home_content_reorder · role_picker · coming_soon(host) · suppliers · lens_selector · updates · barcode_scanner · smart_home(ליבה) · dial/menu system.
+
+**🟡 חלקיים (14):**
+| מסך | מה חסר | סיבה |
+|---|---|---|
+| catalog | קטגוריות ריקות → "בקרוב" | placeholder |
+| store/checkout | רושם אמצעי‑תשלום, **לא גובה** · OCR ת"מ "בקרוב" | external |
+| manager_dashboard | כתיבות admin‑only | uid |
+| store_dashboard · courier_dashboard | סינון לפי שלב, לא לפי זהות (storeId/courierId לא נכתבים) | uid |
+| login_sheet | אמיתי, אך gated מאחורי הדגל | uid |
+| finance_hub | FX מ‑kFxRates קבוע · PDF מדומה | external |
+| notif_settings | email/SMS/WhatsApp כבויים | external |
+| site_hub | צילום/GPS מדומים | device |
+| contractor_tools | סריקת‑תוכנית מדומה | device |
+| catalog/chat/store_settings | שורות "נשמר אך לא משפיע" | placeholder |
+| departments | 4/9 מחלקות "בקרוב" | placeholder |
+| lipskey_brand · smart_home | תג "בקרוב" קל | placeholder |
+
+**🔴 לא‑עובדים (6):**
+| מסך | מה חסר | סיבה |
+|---|---|---|
+| chats | זהות לפי BsRole לא uid · בלי fromUid · לא מסתנכרן | uid |
+| ai_hub | 7/9 כלים = נתונים קבועים | external |
+| camera_sheet | רק ברקוד+פלאש; צילום/גלריה מדומים | device |
+| persona_pod | צילום‑מסירה + חתימה מדומים | device |
+| profession | רק אינסטלטור; חשמלאי/שיפוצים → "בקרוב" | placeholder |
+| notif channels | email/SMS/WhatsApp כבויים | external |
+
+**פילוח 20 הלא‑גמורים (חלק נופלים ביותר מאחת):** uid×5 · external×5 · device×5 · placeholder×6 · legal×1
+→ ממופה לשלבים: **uid→A · placeholder→B · device→C · תשלום/external→D/E · legal→I**.
+
+**2 enablers כבר בנויים, רק כבויים מאחורי הדגל:** S1 auth (`auth_state`/`login_sheet`) + S6 push (`push_state`). השלמת זהות‑ה‑uid (Phase A) + הדלקת הדגל = פותחים אותם יחד.
+
+**5 החוסמים הגדולים:** (1) זהות‑uid בהזמנות+צ׳אט · (2) תשלום אמיתי (לא גובה היום) · (3) AI hub (7/9 מדומה) · (4) מצלמה/POD (צילום מדומה) · (5) מקצוע אחד + חצי מחלקות.
