@@ -75,8 +75,14 @@ abstract class RemoteCollectionSource {
 /// is only touched on the first `snapshots()`/`set()`/`delete()`. It maps the
 /// live `QuerySnapshot` down to neutral [RemoteDoc]s for the base.
 class FirestoreCollectionSource implements RemoteCollectionSource {
-  FirestoreCollectionSource(this.collectionPath, {FirebaseFirestore? firestore})
-      : _injected = firestore;
+  FirestoreCollectionSource(
+    this.collectionPath, {
+    FirebaseFirestore? firestore,
+    Query<Map<String, dynamic>> Function(
+            CollectionReference<Map<String, dynamic>>)?
+        scope,
+  })  : _injected = firestore,
+        _scope = scope;
 
   /// The collection name (e.g. `orders`).
   final String collectionPath;
@@ -84,6 +90,17 @@ class FirestoreCollectionSource implements RemoteCollectionSource {
   /// Optional pre-resolved instance (tests / DI). When null the instance is
   /// resolved lazily from the singleton on first use.
   final FirebaseFirestore? _injected;
+
+  /// A1 (launch uid-migration) — OPTIONAL scoped query. When null the source
+  /// listens to the WHOLE collection: the pre-launch behaviour every current
+  /// caller relies on, so adding this parameter is a ZERO-REGRESSION change.
+  /// A repo that must satisfy a participant-scoped Security Rule passes a
+  /// builder here so the listen is one the rule can prove — e.g. orders
+  /// `(c) => c.where('contractorId', isEqualTo: uid)` or chat
+  /// `(c) => c.where('participants', arrayContains: uid)`. Writes are by
+  /// doc-id and are unaffected.
+  final Query<Map<String, dynamic>> Function(
+      CollectionReference<Map<String, dynamic>>)? _scope;
 
   /// Lazily-resolved Firestore handle — `FirebaseFirestore.instance` is read
   /// ONLY here, on demand, never at construction (so a Firebase-free app/test
@@ -93,8 +110,12 @@ class FirestoreCollectionSource implements RemoteCollectionSource {
   CollectionReference<Map<String, dynamic>> get _col =>
       _db.collection(collectionPath);
 
+  /// The query actually listened to: the scoped [_scope] when supplied,
+  /// otherwise the whole collection (default — unchanged behaviour).
+  Query<Map<String, dynamic>> get _ref => _scope?.call(_col) ?? _col;
+
   @override
-  Stream<List<RemoteDoc>> snapshots() => _col.snapshots().map(
+  Stream<List<RemoteDoc>> snapshots() => _ref.snapshots().map(
         (snap) => snap.docs
             .map((d) => RemoteDoc(d.id, d.data()))
             .toList(growable: false),
