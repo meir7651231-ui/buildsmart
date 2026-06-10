@@ -8,6 +8,7 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/widgets/backend_debug_badge.dart';
 import 'package:buildsmart/widgets/toast.dart' show bsMessengerKey;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -137,7 +138,12 @@ class BuildSmartApp extends ConsumerWidget {
           data: mq.copyWith(textScaler: TextScaler.linear(combined)),
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: child ?? const SizedBox(),
+            child: Stack(
+              children: [
+                child ?? const SizedBox(),
+                const BackendDebugBadge(),
+              ],
+            ),
           ),
         );
       },
