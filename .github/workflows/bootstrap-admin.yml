@@ -1,0 +1,59 @@
+# ONE-TIME bootstrap — grant the admin custom claim to the test account so a
+# real, rules-enforced Firestore write can be verified end to end. Firebase has
+# NO console UI for custom claims; the first admin must be set with the Admin
+# SDK. Runs once on push (paths-filtered) and is also dispatchable with a custom
+# email/password.
+#
+# ⚠️ DELETE this workflow after the test account is confirmed working — it must
+#    not linger as a way to mint admins.
+name: One-time - bootstrap test admin (DELETE AFTER USE)
+
+on:
+  push:
+    branches: [ claude/whats-happening-LyY9G ]
+    paths:
+      - '.github/workflows/bootstrap-admin.yml'
+      - 'scripts/bootstrap-admin.mjs'
+  workflow_dispatch:
+    inputs:
+      email:
+        description: 'Email to grant admin (created if missing)'
+        required: false
+        default: 'test@buildsmart.co.il'
+      password:
+        description: 'Password to (re)set on that account'
+        required: false
+        default: 'Test123456'
+
+concurrency:
+  group: bootstrap-admin
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install firebase-admin
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install firebase-admin@12 >/dev/null 2>&1
+
+      - name: Write service account credentials
+        run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
+        env:
+          SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Grant admin claim
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
+          BS_EMAIL: ${{ github.event.inputs.email }}
+          BS_PASSWORD: ${{ github.event.inputs.password }}
+        run: node scripts/bootstrap-admin.mjs
