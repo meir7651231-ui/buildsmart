@@ -18,6 +18,7 @@
 // engine, keeping the engine↔repository wiring acyclic (the orders_local idiom).
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:buildsmart/data/contractor_seeds.dart'
@@ -26,6 +27,9 @@ import 'package:buildsmart/data/menu_trees.dart' show kHomeTree;
 import 'package:buildsmart/data/persona_data.dart' show PersonaTask;
 import 'package:buildsmart/data/projects.dart'
     show Project, kActiveProjectId, kProjects;
+import 'package:buildsmart/data/repositories/orders_local.dart'
+    show ordersRepositoryProvider;
+import 'package:buildsmart/data/repositories/site_firebase.dart';
 import 'package:buildsmart/data/repositories/site_repository.dart';
 import 'package:buildsmart/data/sections.dart' show Section;
 import 'package:buildsmart/state/stage_progress.dart';
@@ -139,8 +143,23 @@ class LocalSiteRepository implements SiteRepository {
 ({String label, String cls}) budgetLevelFor(int pct) => budgetLevel(pct);
 
 /// The site repository provider — the server-ready seam the on-site screens read
-/// through (T6.3) and the projects engine sources its seed through; a future
-/// field-ops backend swaps in behind it. Constructing it is cheap (just stores
-/// the [Ref]); live reads resolve the engines lazily.
-final siteRepositoryProvider =
-    Provider<SiteRepository>((ref) => LocalSiteRepository(ref));
+/// through (T6.3) and the projects engine sources its seed through. When
+/// Firebase is initialised (the real app, `main()` calls `Firebase.initializeApp`)
+/// the Firestore-backed [FirebaseSiteRepository] is used — it COMPOSES two cache
+/// repos (`tasks` + `siteStageProgress`), `attach()`es BOTH `snapshots()`
+/// listeners, and disposes BOTH with the provider; an approved task advances its
+/// bound order through the shared `ordersRepositoryProvider` seam (so it moves
+/// remotely too). When Firebase is NOT initialised (the entire Firebase-free test
+/// suite) the in-memory [LocalSiteRepository] is used, so tests never touch
+/// Firestore. Both satisfy the same sync [SiteRepository] contract → providers +
+/// UI are unchanged.
+final siteRepositoryProvider = Provider<SiteRepository>((ref) {
+  if (Firebase.apps.isNotEmpty) {
+    final repo = FirebaseSiteRepository(
+      orders: ref.read(ordersRepositoryProvider),
+    )..attach();
+    ref.onDispose(repo.dispose);
+    return repo;
+  }
+  return LocalSiteRepository(ref);
+});

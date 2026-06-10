@@ -38,8 +38,6 @@
 //   • Σ sum of open orders (activeRevenue) (state/orders_engine.dart, Ref-only)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:buildsmart/data/contractor_seeds.dart'
     show
         BudgetCategory,
@@ -49,9 +47,13 @@ import 'package:buildsmart/data/contractor_seeds.dart'
         kBudgetTotal;
 import 'package:buildsmart/data/menu_trees.dart' show kFinanceHub;
 import 'package:buildsmart/data/phaseb_seeds.dart' show budgetPct;
+import 'package:buildsmart/data/repositories/finance_firebase.dart'
+    show FirebaseFinanceRepository;
 import 'package:buildsmart/data/repositories/finance_repository.dart';
 import 'package:buildsmart/data/sections.dart' show Section;
 import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
+import 'package:firebase_core/firebase_core.dart' show Firebase;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Module-level pass-throughs to the const helpers whose names this class's
 // methods shadow. Inside an instance method, an unprefixed `budgetLevel(pct)` /
@@ -127,22 +129,56 @@ class LocalFinanceRepository implements FinanceRepository {
   }
 }
 
-/// The shared `const` instance backing the global [financeRepo] accessor — the
-/// const-budget read surface for non-ref code (the finance-hub top-level
-/// functions). Constructing it is free, so it's a top-level `const`.
+/// The shared `const` instance backing the global [financeRepo] accessor on the
+/// Firebase-free path — the const-budget read surface for non-ref code (the
+/// finance-hub top-level functions). Constructing it is free, so it's a
+/// top-level `const`.
 const LocalFinanceRepository _kFinanceConst =
     LocalFinanceRepository.constData();
 
-/// GLOBAL, Ref-free accessor over the const project budget + finance-hub data.
-/// The finance-hub's top-level `_open*` functions read budget data THROUGH this
-/// (`financeRepo().budgetTotal()` …) WITHOUT a [WidgetRef] — so no signature
-/// changes and no value changes. A future remote impl swaps in behind it.
-FinanceRepository financeRepo() => _kFinanceConst;
+/// The app-lifetime Firebase finance singleton backing the global [financeRepo]
+/// accessor when Firebase is initialised. Built+attached ONCE on first access
+/// and kept for the whole app run (the global accessor has no provider lifecycle
+/// to dispose it against — it lives as long as the process, exactly like the
+/// const instance it replaces). The Ref is `null` here: the accessor path is
+/// Ref-free, so the delegated [FinanceRepository.activeRevenue] is unavailable
+/// through it (it throws — same contract as the const accessor today; no
+/// finance-hub sheet reads revenue through the accessor).
+FirebaseFinanceRepository? _firebaseFinanceSingleton;
+
+/// GLOBAL, Ref-free accessor over the finance read surface (const project budget
+/// + finance-hub data + — when Firebase is up — the persisted approval/penalty/
+/// payment-term lists). The finance-hub's top-level `_open*` functions read
+/// budget data THROUGH this (`financeRepo().budgetTotal()` …) WITHOUT a
+/// [WidgetRef] — so no signature changes and no value changes.
+///
+/// Swap (mirrors `ordersRepositoryProvider`, adapted to a Ref-free app-lifetime
+/// singleton): when Firebase is initialised (the real app) a single
+/// [FirebaseFinanceRepository] is built+`attach()`ed once and reused for the app
+/// lifetime; when Firebase is NOT initialised (the entire Firebase-free test
+/// suite) the const [LocalFinanceRepository] is returned, so tests never touch
+/// Firestore. Both satisfy the same sync [FinanceRepository] contract.
+FinanceRepository financeRepo() {
+  if (Firebase.apps.isNotEmpty) {
+    return _firebaseFinanceSingleton ??=
+        (FirebaseFinanceRepository(null)..attach());
+  }
+  return _kFinanceConst;
+}
 
 /// The finance repository provider — the server-ready seam for code that holds a
 /// [Ref] (so [FinanceRepository.activeRevenue] can resolve against the live
-/// orders engine). Returns the same const budget values as [financeRepo]; a
-/// future remote impl swaps in behind both. Constructing it just stores the
-/// [Ref]; live reads resolve the engine lazily.
-final financeRepositoryProvider =
-    Provider<FinanceRepository>((ref) => LocalFinanceRepository(ref));
+/// orders engine). Swap (mirrors `ordersRepositoryProvider`): when Firebase is
+/// initialised it returns a Ref-bearing [FirebaseFinanceRepository] that
+/// `attach()`es its three `snapshots()` listeners and is disposed with the
+/// provider (`ref.onDispose`); when Firebase is NOT initialised it returns the
+/// Ref-bearing [LocalFinanceRepository] (so the suite stays Firebase-free). Both
+/// return the same const budget values + a live `activeRevenue`.
+final financeRepositoryProvider = Provider<FinanceRepository>((ref) {
+  if (Firebase.apps.isNotEmpty) {
+    final repo = FirebaseFinanceRepository(ref)..attach();
+    ref.onDispose(repo.dispose);
+    return repo;
+  }
+  return LocalFinanceRepository(ref);
+});

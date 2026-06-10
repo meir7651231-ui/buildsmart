@@ -26,9 +26,8 @@
 // `seed()` idiom exactly.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:buildsmart/data/phaseb_seeds.dart' show kStockDemo;
+import 'package:buildsmart/data/repositories/stock_firebase.dart';
 import 'package:buildsmart/data/repositories/stock_repository.dart';
 import 'package:buildsmart/data/supplier_data.dart'
     show HaulType, StoreInfo, kHaulTypes, kStores;
@@ -38,6 +37,8 @@ import 'package:buildsmart/logic/manager_dashboard.dart'
         kManagerCatalogCategories,
         kManagerStores,
         managerAnalytics;
+import 'package:firebase_core/firebase_core.dart' show Firebase;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The local (const-backed) implementation of [StockRepository]. Every read
 /// returns the exact const the dashboard / store portal reads today; a future
@@ -81,8 +82,19 @@ class LocalStockRepository implements StockRepository {
 }
 
 /// The stock repository provider — the server-ready seam the inventory notifier
-/// reads its seed through (T6.3) and a future remote impl swaps in behind.
-/// Constructing it is cheap (const); the const-backed reads never touch other
-/// providers, so the wiring stays acyclic.
-final stockRepositoryProvider =
-    Provider<StockRepository>((ref) => const LocalStockRepository());
+/// reads its seed through (T6.3) and the remote impl swaps in behind (S3.T). When
+/// Firebase is initialised (the real app, `main()` calls `Firebase.initializeApp`)
+/// the Firestore-backed [FirebaseStockRepository] is used — it `attach()`es its
+/// `snapshots()` listener (for the mutable inventory; the analytics reads stay
+/// const) and is disposed with the provider. When Firebase is NOT initialised
+/// (the entire Firebase-free test suite) the const-backed [LocalStockRepository]
+/// is used, so tests never touch Firestore. Both satisfy the same sync
+/// [StockRepository] contract → providers + UI are unchanged.
+final stockRepositoryProvider = Provider<StockRepository>((ref) {
+  if (Firebase.apps.isNotEmpty) {
+    final repo = FirebaseStockRepository()..attach();
+    ref.onDispose(repo.dispose);
+    return repo;
+  }
+  return const LocalStockRepository();
+});

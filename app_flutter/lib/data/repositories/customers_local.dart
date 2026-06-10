@@ -11,11 +11,12 @@
 // value changes. A future CRM backend swaps in behind this contract.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:buildsmart/data/repositories/customers_firebase.dart';
 import 'package:buildsmart/data/repositories/customers_repository.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:firebase_core/firebase_core.dart' show Firebase;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The local implementation of [CustomersRepository], backed by the live
 /// `ordersEngineProvider`. Holds a [Ref] so the aggregates always reflect the
@@ -50,6 +51,22 @@ class LocalCustomersRepository implements CustomersRepository {
 }
 
 /// The customers repository provider — the server-ready seam the manager's
-/// 👥 לקוחות aggregates flow through (T6.3); a future CRM backend swaps in here.
-final customersRepositoryProvider =
-    Provider<CustomersRepository>((ref) => LocalCustomersRepository(ref));
+/// 👥 לקוחות aggregates flow through (T6.3) and the remote impl swaps in behind
+/// (S3.C). When Firebase is initialised (the real app, `main()` calls
+/// `Firebase.initializeApp`) the Firestore-backed [FirebaseCustomersRepository]
+/// is used — it `attach()`es its `snapshots()` listener and is disposed with the
+/// provider. When Firebase is NOT initialised (the entire Firebase-free test
+/// suite) the in-memory [LocalCustomersRepository] is used, so tests never touch
+/// Firestore. Both satisfy the same sync [CustomersRepository] contract →
+/// providers + UI are unchanged. (Copies the `ordersRepositoryProvider` switch in
+/// `orders_local.dart`.) `managerCustomersProvider` already branches on
+/// `is LocalCustomersRepository`: the local impl folds the watched live orders via
+/// `aggregate(orders)`, the Firestore impl serves its cached aggregates via `all()`.
+final customersRepositoryProvider = Provider<CustomersRepository>((ref) {
+  if (Firebase.apps.isNotEmpty) {
+    final repo = FirebaseCustomersRepository()..attach();
+    ref.onDispose(repo.dispose);
+    return repo;
+  }
+  return LocalCustomersRepository(ref);
+});

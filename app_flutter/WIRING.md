@@ -1440,3 +1440,133 @@ Gate: analyze 0 · suite 1772/1772 · build web ✓. Next: S2 (base cache-patter
 - **S2.3** `lib/data/repositories/orders_firebase.dart` — `FirebaseOrdersRepository extends FirestoreCachedRepo<Order> implements OrdersRepository` (collection `orders`, doc-id = order id). כל מתודות-ה-interface (all/byId/open/placeOrder/advance/setStage/resetToSeed) = **ports verbatim של `OrdersEngineNotifier`** (`_nextId` BS-#### · `advance` מעל `kManagerOrderFlow` · `setStage` guards · placeOrder ב-stage `new` prepended). seed: cache נולד עם `kOrdersEngineSeed` · snapshot-ראשון-ריק → `pushCacheToRemote()` · `resetToSeed` → `replaceAll(seed)`. `sortBy` משחזר סדר-newest-first (Firestore מחזיר סדר-doc-id) → ה-seed (BS-1042…BS-1039) ומיקום-ההזמנות-החדשות נשמרים byte-identical.
 - **provider switch** (תחתית `orders_local.dart`): `Firebase.apps.isNotEmpty` → `FirebaseOrdersRepository()..attach()` (+`ref.onDispose`); אחרת `LocalOrdersRepository(ref)` — כל הסוויטה (ללא `Firebase.initializeApp`) נשארת על המסלול-המקומי, לעולם לא נוגעת ב-Firestore.
 - Gate: `flutter analyze lib/ test/` 0 errors (ה-infos/warnings קדמו · 0 נוספו על קבצי-S2) · `test/firestore_cached_repo_test.dart` 20/20 (fake-source ידני, ללא package חדש) · הסוויטה המלאה ירוקה. Next: S3 ×6 (הנחיל יורש את ה-base).
+
+## גל S3 — הנחיל ×5 (server-connect · Phase C, rebuild) — 2026-06-09
+
+### #server-S3.C — customers_firebase (Firestore-backed לקוחות) · Phase B — 2026-06-10
+- מימוש-ה-`_firebase` של דומיין-הלקוחות, יורש את ה-base של S2.2 (`FirestoreCachedRepo<T>`) ומחקה את ה-pilot S2.3 (`orders_firebase`). ה-drop-in נשמר דרך **offline-first cache**: ה-interface נשאר **sync**, ה-UI ללא-שינוי, ה-real-time זורם דרך ה-cache. SSOT: `SPEC-server-connect-MICRO` §S3 (שורה S3.C) + בלוק-הסכמה (`customers`).
+- **מהות-הדומיין (השוני מ-orders):** מסך 👥 לקוחות אינו seed סטטי — הוא ה-**aggregates** הנגזרים מההזמנות החיות (`ManagerCustomer{name, orderCount, totalSpend, creditLimit}`), קיפול `mgrCustomerList` (`logic/manager_dashboard.dart`) + תקרת-האשראי הדטרמיניסטית `contractorCredit`. לכן ה-interface הקיים `CustomersRepository` הוא משטח-**קריאה** נגזר (`all`/`byName`/`creditLimit`) — **ללא מתודות-כתיבה**, וה-repo לא ממציא כאלה. הכתיבות-האופטימיות של ה-base משמשות ל-seeding-של-backend-טרי (`onFirstSnapshotEmpty`) ולשמירת `upsert` מושפע-אשראי sync-visible (כפי שדורש חוזה-S3).
+- **S3.C** `lib/data/repositories/customers_firebase.dart` — `FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer> implements CustomersRepository` (collection `customers`, doc-id = שם-הלקוח). מתודות-ה-interface (all/byName/creditLimit) = **ports verbatim של `LocalCustomersRepository`**: `all()`→`cached()` · `byName()` סורק את ה-cache · `creditLimit()` delegates ל-`contractorCredit(name)` הטהור (לא קריאת-Firestore — תקרה דטרמיניסטית, זהה בכל מסלול). seed: cache נולד עם `mgrCustomerList()` (קיפול-ה-seed של `kManagerOrderSeed` → אותם 4 לקוחות שה-local מחזיר) · snapshot-ראשון-ריק → `pushCacheToRemote()`.
+- **מיפוי-שדות** (`ManagerCustomer` ⇄ doc per סכמה `customers/{id} {name, phone, creditLimit, used, balance, ownerId}`): `name`→`name` (doc-id) · `totalSpend`→`used` (₪ שנוצל — בדיוק מה שה-dashboard מציג) · `creditLimit`→`creditLimit` · `balance` = `creditLimit-totalSpend` (נגזר, שדה-SSOT) · `orderCount` נישא כשדה-עודף (כך ש-`all()` מחזיר aggregate-מלא ללא join — בדיוק כמו ש-`orders` נושא `items`). `phone`/`ownerId` חסרי-ערך-במודל → `toDoc` משמיט, `fromDoc` מתעלם (round-trip סובלני — בדיוק טיפול-ה-pilot ב-`storeId`/`courierId`). `sortBy` משחזר סדר-spend-desc (Firestore מחזיר סדר-doc-id) → סדר-ה-`mgrCustomerList` נשמר.
+- **provider switch** (תחתית `customers_local.dart`): `Firebase.apps.isNotEmpty` → `FirebaseCustomersRepository()..attach()` (+`ref.onDispose`); אחרת `LocalCustomersRepository(ref)` — כל הסוויטה (ללא `Firebase.initializeApp`) נשארת על המסלול-המקומי, לעולם לא נוגעת ב-Firestore. `managerCustomersProvider` כבר מסתעף על `is LocalCustomersRepository`: ה-local מקפל את ההזמנות-החיות שהוא `watch` דרך `aggregate(orders)`, ומימוש-ה-Firestore מגיש את ה-aggregates מה-cache דרך `all()` — ללא שינוי-קוד נוסף שם.
+- Gate: `flutter analyze lib/data/repositories/customers_firebase.dart lib/data/repositories/customers_local.dart test/customers_firebase_repo_test.dart` → 0 errors (No issues found) · `test/customers_firebase_repo_test.dart` 9/9 (fake-source ידני, ללא package חדש: seed-first · snapshot מחליף cache · מיפוי-אשראי round-trip · doc-פגום מדולג · `upsert` מושפע-אשראי sync-visible + writes-through · כשל-כתיבה לא-משחית/לא-נזרק · first-empty seeds-remote · provider→LOCAL ללא Firebase). הסוויטה המלאה — gate מרכזי (orchestrator).
+
+### #server-S3-stock — מלאי `_firebase` (S3.T) · drop-in · Phase B — 2026-06-10
+- מימוש-ה-Firestore של המלאי, יורש את ה-base מ-S2.2 (`FirestoreCachedRepo<T>`). drop-in מלא ל-`LocalStockRepository`: ה-interface נשאר **sync**, ה-UI ללא-שינוי. SSOT: `SPEC-server-connect-MICRO` §S3.T + בלוק-הסכמה (`stock/{id} {sku, name, qty, location, projectId}`).
+- **שני משטחים, מחלקה אחת** — למלאי טבע מפוצל וה-repo שומר עליו נאמן byte-for-byte:
+  1. **קריאות-אנליטיקה const** (`totalProducts`/`catalogCount`/`accessoryCount`/`availableCount`/`categoryCounts`/`stores`/`activeStores`/`supplierStores`/`haulTypes`) — data **סטטי שלא משתנה בזמן-ריצה**, ולכן (בדיוק כמו הקטלוג S3.K) **לא ב-Firestore**: נשארות **byte-identical** ל-`LocalStockRepository`, מאצילות לאותם consts בדיוק (`managerAnalytics`, `kManagerCatalogCategories`, `kManagerStores`, `kStores`, `kHaulTypes`). טעינתן מ-Firestore רק הייתה מוסיפה reads+latency על data bundled וקבוע (אזהרת-SSOT §אזהרות).
+  2. **המלאי המשתנה** (מסך 📦 "המלאי שלי", שני-tabs: `name → 'warehouse'|'site'`, נהפך ב-`move`) **הוא** החלק ששייך לשרת — זו ה-collection `stock`. רוכב על ה-cache-pattern: listener של `snapshots()` מזין cache-בזיכרון · קריאת-sync `stockDemo()` מוגשת ממנו · `move` מעדכן cache אופטימית + כותב ל-Firestore ברקע (כשל-כתיבה נרשם, לעולם לא נזרק).
+- **`lib/data/repositories/stock_firebase.dart`** — `FirebaseStockRepository extends FirestoreCachedRepo<StockItem> implements StockRepository` (collection `stock`). מודל-cache פנימי `StockItem{id(=sku), name, location, qty, projectId}`.
+  - **אסטרטגיית doc-id (ה-gotcha המרכזי):** המלאי ממופתח לפי **שם-פריט עברי**, וכמה שמות מכילים `/` (למשל `ברז ניל זוויתי 1/2"`) — **אסור** ב-document-id של Firestore. לכן השם **לא** יכול להיות doc-id. במקום זה מוקצה surrogate יציב `STK-##` ב-**סדר-ה-seed** (doc-id order = seed order): `STK-00`…`STK-10`, אחד לכל ערך ב-`kStockDemo`. `fromDoc` קובע `sku == id` (שדה-ה-`sku` בסכמה **הוא** ה-surrogate); השם-העברי וה-location הם שדות רגילים, כך ש-ה-`/` חי בבטחה ב-data ולעולם לא ב-id.
+  - **`move` = port verbatim של `StockNotifier.move`** (`screens/stock_screen.dart`): חיפוש לפי **שם**; שם-לא-מוכר → **no-op**; אחרת היפוך `'warehouse'`⇄`'site'` (`cur == 'warehouse' ? 'site' : 'warehouse'`). ההיפוך = `upsert` אופטימי (replace-by-id → השורה שומרת מיקום-seed) + `set` ברקע.
+  - seed: ה-cache נולד עם `kStockDemo` ממופה ל-`STK-##` · snapshot-ראשון-ריק → `pushCacheToRemote()` (11 שורות-מלאי בשרת) · `sortBy` ממיין לפי id עולה → סדר-seed משוחזר אחרי כל snapshot (Firestore מחזיר סדר-doc-id = `STK-00…STK-10`) · doc-פגום מדולג+logged (לעולם לא מאפס את המלאי).
+- **provider switch** (תחתית `stock_local.dart`): `Firebase.apps.isNotEmpty` → `FirebaseStockRepository()..attach()` (+`ref.onDispose(repo.dispose)`); אחרת `const LocalStockRepository()` — כל הסוויטה (ללא `Firebase.initializeApp`) נשארת על המסלול-המקומי, לעולם לא נוגעת ב-Firestore.
+- **הערת-interface:** `move` ו-`stockDemo()` חיים על ה-**impl** (`FirebaseStockRepository`/`LocalStockRepository`), **לא** על ה-abstract `StockRepository` — בדיוק כמו `StockNotifier.move` ו-`LocalStockRepository.stockDemo()` בלגאסי. ה-abstract נשאר ללא-שינוי (קריאות-האנליטיקה בלבד). מסך-המלאי (`stock_screen.dart`, של צי-אחר) עדיין זורע את ה-`StockNotifier` שלו דרך `repo.stockDemo()` רק כשה-repo הוא `LocalStockRepository`, אחרת fallback ל-`kStockDemo` — אותו מפת-11-שורות בשני המקרים, ה-drop-in נשמר; חיווט-המסך-ל-repo-החי הוא S4 (real-time), לא בהיקף S3.T.
+- Gate: `flutter analyze` על 3 הקבצים (stock_firebase · stock_local · test) **0 issues**. `test/stock_firebase_repo_test.dart` **10/10** (fake-source ידני, ללא package חדש): seed-first · doc-id STK-## (sku==id, שם-`/` בשדה) · snapshot מחליף-cache בסדר-seed · doc-פגום מדולג · `move` אופטימי sync-visible + כתיבה · `move` שם-לא-מוכר no-op · כשל-כתיבה עמיד · snapshot-ראשון-ריק זורע שרת · אנליטיקה byte-identical ל-local · provider=LOCAL ללא-Firebase.
+
+### #server-S3.S — site repository `_firebase` (drop-in, composed) · Phase C — 2026-06-10
+- S3.S: המימוש ה-Firestore-backed של `SiteRepository` (workspace-האתר: פרויקטים · כלי-אתר · plan-scan · התראות-תקציב + טיפי-בטיחות · התקדמות-שלבי-התקנה · זרימת-משימות-עובד). drop-in מלא ל-`LocalSiteRepository` — `siteRepositoryProvider` + כל מסכי-האתר ללא-שינוי; רק המחלקה שה-provider מחזיר מתחלפת. SSOT: `SPEC-server-connect-MICRO` §S3.S. יורש את base-ה-cache (`FirestoreCachedRepo<T>`, S2.2) דרך אותו דפוס בדיוק כמו ה-orders pilot (S2.3) → ה-interface נשאר **sync**, ה-real-time זורם דרך ה-cache, כשל-כתיבה נרשם ולעולם לא נזרק.
+
+- **`lib/data/repositories/site_firebase.dart` (חדש)** — `FirebaseSiteRepository implements SiteRepository`, **מורכב (COMPOSED)** משני repos של ה-base כי ה-interface מחזיק שתי רשימות-חיות עצמאיות + משטחים-סטטיים:
+  - **`tasks`** (`_TasksRepo extends FirestoreCachedRepo<PersonaTask>`, collection `tasks`, doc-id = `'${task.id}'`) — זרימת worker↔manager. seed = `kPersonaTasks` (cache נולד-מלא). `toDoc`/`fromDoc` ממפים `name⇄title` + `status` (השדה היחיד שמשתנה ב-runtime) ושומרים `worker/days/steps/note/orderId` בלי-אובדן. `sortBy` ממיין לפי id-מספרי (Firestore מחזיר סדר-doc-id-string → '10' לפני '2').
+  - **`siteStageProgress`** (`_StageRepo extends FirestoreCachedRepo<_StageFlag>`, collection site-prefixed) — התקדמות-שלבי-התקנה. ה-`StageProgressNotifier` הוא `Set<String>` של מפתחות `"<productKey>#<idx>"`; כאן **כל מפתח-נוכח = doc-אחד** (doc-id = המפתח; קיום-ה-doc = "done"). cache נולד **ריק** (ה-set המקומי מתחיל `const {}` — משתמש-טרי לא סימן כלום) → אין מה ל-seed (`onFirstSnapshotEmpty` no-op מובנה). `toggle` = upsert/removeById אופטימי.
+  - **`_SeedingRepo<T>` (subclass פרטי)** — מפעל את ה-hook של seed-fresh-backend **פעם-אחת** (`onFirstSnapshotEmpty() => pushCacheToRemote()`); `_TasksRepo` יורש ממנו, `_StageRepo` לא (נולד-ריק).
+  - **משטחים-סטטיים = const pass-through, *לא* Firestore:** `projects`/`projectById`/`activeProjectId`/`siteToolsTree`/`planTypes`/`safetyTips`/`budgetLevel` (`kProjects`/`kActiveProjectId`/`kSiteToolsTree`/`kPlanTypes`/`kSafetyTips`/`budgetLevelFor`). data-לוח/דמו שלא משתנה ב-runtime → כלל-הקטלוג (data-סטטי לא שייך ל-Firestore, אפס עלות-DB). לכן `projects` **אינו** repo-מורכב-שלישי.
+
+- **כל מתודות-ה-interface = ports verbatim:**
+  - `workerTasks`/`pendingApprovals` — מ-`_tasks.cached()` (pending = `status=='review'` ממוין-id, port של `pendingApprovalTasksProvider`).
+  - `submitForReview` — port של `WorkerTasksNotifier.submitForReview` (`active`/`rejected`→`review`, אחרת no-op).
+  - `approve` — port של `.approve` (`review`→`done`; אם יש `orderId` → מקדם את ההזמנה). **גשר-ההזמנות מנותב דרך ה-seam `ordersRepositoryProvider`** (`_orders.advance(orderId)`) ולא דרך `ordersEngineProvider` הישיר — כך ההזמנה מתקדמת **גם מרחוק** (Firestore), בדיוק כפי שהמקומי מקדם על ה-engine המשותף.
+  - `reject` — port של `.reject` (`review`→`rejected`, אחרת no-op).
+  - `stageIsDone`/`stageDoneCount`/`toggleStage` — ports של `StageProgressNotifier.isDone`/`doneCount`/`toggle` (אותה סכמת-מפתח `"<productKey>#<idx>"`).
+
+- **provider switch** (תחתית `lib/data/repositories/site_local.dart` — שונה):
+```dart
+final siteRepositoryProvider = Provider<SiteRepository>((ref) {
+  if (Firebase.apps.isNotEmpty) {
+    final repo = FirebaseSiteRepository(
+      orders: ref.read(ordersRepositoryProvider),
+    )..attach();
+    ref.onDispose(repo.dispose);
+    return repo;
+  }
+  return LocalSiteRepository(ref);
+});
+```
+  `attach()` רושם את **שני** ה-caches המורכבים ל-`snapshots()` שלהם; `dispose()` מבטל את **שניהם** (דרך `ref.onDispose`). ה-seam של ההזמנות נמשך פעם-אחת מ-`ordersRepositoryProvider` והוזרק. כל הסוויטה (ללא `Firebase.initializeApp`) → `Firebase.apps` ריק → `LocalSiteRepository`, לעולם לא נוגעת ב-Firestore.
+
+- **`test/site_firebase_repo_test.dart` (חדש)** — 13 בדיקות, fake ידני **לכל collection** (`_FakeSource` ×2) + spy-`OrdersRepository` (`_SpyOrders` שמתעד `advance`), **ללא package חדש**: tasks נולד-מ-seed · stage נולד-ריק (ולא דוחף seed) · snapshot מחליף cache (ממוין-id) · submit/approve/reject/toggle אופטימיים sync-visible + כותבים דרך · **approve מנתב advance דרך ה-orders seam** (bound) ולא מקדם (unbound/non-review) · כשל-כתיבה לא משבית cache ולא נזרק · משטחים-סטטיים = seeds · `siteRepositoryProvider`=LOCAL ללא-Firebase.
+
+- Gate: `flutter analyze` על 3 הקבצים = **0 errors** (info יחיד שנותר — `directives_ordering` ב-`site_local.dart`, **קדם** ל-S3.S ב-baseline; 0 issues חדשים על קבצי-S3.S). `flutter test test/site_firebase_repo_test.dart` = **13/13 PASS**. אין commit/push (scoped). Next: שאר ה-S3 (customers/stock/finance), אז S4 real-time.
+
+### #server-S3.F — finance repo `_firebase` (drop-in דרך cache-pattern) · Phase C · S3.F — 2026-06-10
+
+- ה-repo ה-Firestore-backed של 📊 מרכז פיננסים, יורש את base ה-cache (S2.2 `FirestoreCachedRepo<T>`) — **drop-in** ל-`LocalFinanceRepository`: ה-accessor `financeRepo()` + ה-provider `financeRepositoryProvider` + ה-UI ללא-שינוי, רק המחלקה שהם מחזירים מתחלפת. SSOT: `SPEC-server-connect-MICRO` שורה S3.F + בלוק-הסכמה.
+- **מה נשמר (persist) vs מה נגזר (derived):** ה-SSOT מפורש — finance שומר **רק** את 3 חלקי-ה-state החי, וכל השאר **נגזר client-side ולעולם לא נדחף ל-Firestore** (אחרת reads מיותרים על data קבוע + שכפול ה-const seeds):
+  - `financeApprovals` — תור אישורי-הרכש (doc-id = id האישור, למשל `AP-201`).
+  - `financePenalties` — ספר-הקנסות (doc-id = id הקנס, למשל `PEN-301`).
+  - `financePaymentTerms/active` — תנאי-התשלום הפעיל היחיד (collection חד-מסמכי · doc-id קבוע `active` · שדה `{termId}`).
+  - **derived (לא persist):** `budgetTotal`/`budgetSpent`/`budgetCategories`/`budgetPct`/`budgetLevel`/`financeHub` (const seeds) + `activeRevenue` (Σ הזמנות-פתוחות מ-orders engine) — מחושבים **בדיוק כמו ב-local** (forward ל-`LocalFinanceRepository` פנימי), אפס כתיבה ל-Firestore.
+- **S3.F** `lib/data/repositories/finance_firebase.dart` — `FirebaseFinanceRepository implements FinanceRepository`. אינו `FirestoreCachedRepo` בעצמו (שומר 3 רשימות נפרדות, לא אחת) — אלא **מרכיב 3 sub-repos** של ה-base (`_ApprovalsCacheRepo`/`_PenaltiesCacheRepo`/`_PaymentTermCacheRepo`), כל אחד מעל ה-collection שלו, ומפזר `attach()`/`dispose()` לשלושתם (בדיוק כמו ה-orders pilot מחווט בprovider). ה-const reads + `activeRevenue` מ-delegate ל-`LocalFinanceRepository` (Ref-bearing כשהprovider מספק Ref).
+  - **seed:** approvals נולד מ-`kApprovalQueue` (status 'ממתין', זהה ל-`ApprovalQueueNotifier`) · penalties נולד **ריק** (זהה ל-`PenaltyLedgerNotifier`, אין מה לדחוף → `onFirstSnapshotEmpty` default no-op) · payment-term נולד מ-`kActivePaymentTerm` ('net30'). approvals + payment-term: `onFirstSnapshotEmpty() => pushCacheToRemote()` (זריעת backend טרי).
+  - **כתיבות = ports verbatim של ה-notifiers** (optimistic upsert + `guardWrite` ברקע — כשל נרשם, לעולם לא נזרק): `decide(id,ok)` → flip ל-'אושר'/'נדחה' (`ApprovalQueueNotifier.decide`, no-op על id לא-מוכר) · `addPenalty(days)` → `PEN-${300+len+1}` × `kPenaltyPerDay` (500), days clamped ל-≥1, newest-first (`PenaltyLedgerNotifier.add`; ה-`sortBy` של sub-repo שומר PEN-#### גבוה בקדמה) · `setPaymentTerm(termId)` → upsert מסמך `active` (כמו `activePaymentTermProvider.notifier.state = id`).
+  - **חברים concrete נוספים** (תקדים `LocalOrdersRepository.seed()`): מכיוון ש-`FinanceRepository` הוא interface **read-only/derived** ללא מתודות ל-state הזה, הרשימות-הנשמרות + ה-writes נחשפים כחברים concrete מעבר ל-interface (`approvals()`/`penalties()`/`activePaymentTerm()` + `decide`/`addPenalty`/`setPaymentTerm`) — ה-interface האבסטרקטי לא נגע, ה-drop-in נשמר.
+- **provider switch — 2 entry points** (תחתית `finance_local.dart`, מועתק מ-orders ומותאם לכל צורה):
+  - **accessor גלובלי Ref-free `financeRepo()`** — singleton לכל חיי-האפליקציה (ל-accessor אין lifecycle של provider לdispose מולו → חי כל זמן ה-process, בדיוק כמו ה-const שהוא מחליף). Ref=`null` → `activeRevenue` לא-זמין דרכו (זורק — זהה לחוזה ה-accessor const היום; אף sheet לא קורא revenue דרכו):
+    ```dart
+    FirebaseFinanceRepository? _firebaseFinanceSingleton;
+    FinanceRepository financeRepo() {
+      if (Firebase.apps.isNotEmpty) {
+        return _firebaseFinanceSingleton ??=
+            (FirebaseFinanceRepository(null)..attach());
+      }
+      return _kFinanceConst;
+    }
+    ```
+  - **provider Ref-bearing `financeRepositoryProvider`** — `ref.onDispose` כמו orders:
+    ```dart
+    final financeRepositoryProvider = Provider<FinanceRepository>((ref) {
+      if (Firebase.apps.isNotEmpty) {
+        final repo = FirebaseFinanceRepository(ref)..attach();
+        ref.onDispose(repo.dispose);
+        return repo;
+      }
+      return LocalFinanceRepository(ref);
+    });
+    ```
+  - כל הסוויטה (ללא `Firebase.initializeApp` → `Firebase.apps` ריק) נשארת על המסלול-המקומי, לעולם לא נוגעת ב-Firestore.
+- **⚠️ follow-up (לא בוצע — מכוון):** sheets של finance-hub (`screens/finance_hub_sheets.dart`) עדיין מ-mutate-ים את ה-StateNotifiers ישירות (`ref.read(approvalQueueProvider.notifier).decide(...)` · `penaltyLedgerProvider.notifier.add(...)` · `activePaymentTermProvider.notifier.state = ...`). ה-re-pointing שלהם ל-ports של ה-repo (`financeRepositoryProvider`) הוא משימת-המשך — ה-StateNotifiers נשארים המסלול-החי ל-UI עד שה-re-wiring נוחת. ה-`_firebase` מספק את התשתית; הצריכה לא משתנה עדיין.
+- **collections שנבחרו:** `financeApprovals` · `financePenalties` · `financePaymentTerms` (חד-מסמכי, doc `active`). שמות מתועדים כאן ובראש הקובץ. (טרם נוספו ל-`knowledge/firestore-schema.md` — collections של finance הם state נשמר חדש; ה-schema doc הוא קובץ-base בבעלות S2, לא נגעתי בו.)
+- Gate: `flutter analyze` על 3 הקבצים (`finance_firebase.dart` · `finance_local.dart` · `finance_firebase_repo_test.dart`) — **0 errors** (info יחיד: `avoid_positional_boolean_parameters` על `decide(String,bool)` — port verbatim של `ApprovalQueueNotifier.decide`, אותו info מדויק קיים ב-`finance_hub_state.dart:71` → parity מכוון). `test/finance_firebase_repo_test.dart` **11/11 PASS** (fake-source ידני per-collection, ללא package חדש: seed-first · snapshot מחליף · decide/addPenalty/setPaymentTerm optimistic+sync-visible+write-through · write-failure resilient · derived byte-identical+לא-נדחף · accessor+provider פותרים LOCAL ללא Firebase).
+
+#server-S3.K — קטלוג STATIC (אפס עלות-DB) · אימות + שומר-קבע
+
+## ההחלטה (SSOT S3.K)
+הקטלוג (1,877 מוצרים) **לא ב-Firestore** — נשאר const-Dart bundled + תמונות מ-R2 CDN.
+DoD: "catalog from bundle/CDN · 0 DB cost". 1,877 reads בכל פתיחת-קטלוג = עלות-DB מתמשכת על data שלא משתנה → אסור.
+
+## נתיב-הנתונים שאומת (file:line)
+- **המקור (const, לא-Firestore):**
+  - `lib/data/polyroll_catalog.dart` → `kCatalogProducts` (1,877 — Lipskey+Polyroll+Huliot).
+  - `lib/data/smart_tree.dart` → `kSmartProducts` (82 קלפים) + `kSmartTreeCats` + helpers.
+  - `lib/data/catalog.dart` → `kCatalogCats` (11 קטגוריות ▦).
+  - `lib/data/related_info.dart` → גשר `catalogProductForSku/Brand/Smart`.
+  - כל ששת קבצי-הנתונים: **0 התאמות** ל-`cloud_firestore`/`firebase` (grep נקי).
+- **ה-repo (טהור, const):** `lib/data/repositories/catalog_local.dart:44` `LocalCatalogRepository implements CatalogRepository` — כל method מחזיר const verbatim. אין `Ref`, אין import של firestore.
+  - `catalog_local.dart:92` `const _kCatalogRepo` → `catalog_local.dart:98` global `catalogRepo()` + `catalog_local.dart:103` `catalogRepositoryProvider` — שניהם מחזירים את **אותו** instance (מקור-יחיד; remote-impl עתידי מחליף את שניהם).
+- **הצרכנים (כולם דרך ה-seam, לא-Firestore):**
+  - provider (ref-scoped): `screens/catalog_screen.dart` (×13) · `screens/lipskey_products_screen.dart:119,778,896` · `screens/smart_home_screen.dart:605`.
+  - global `catalogRepo()` (לוגיקה-טהורה): `screens/departments_screen.dart:50,74,79` · `screens/finder_screen.dart:253,258` · `logic/system_division.dart:52,79` · `logic/pressure_drop.dart:285` · `logic/category_division.dart:102,124` · `state/card_projects.dart:125`.
+- **תמונות (R2 CDN בלבד):** `lib/data/product_images.dart:8` `kImageBaseUrl` (`pub-…r2.dev`, dart-define override) → `resolveProductImage` (CDN+cache LRU 700, או asset-fallback). תמונות לא-bundled; metadata-מוצר כן const.
+
+## הדליפה שנבדקה
+grep `cloud_firestore|FirebaseFirestore|FirestoreCachedRepo|FirestoreCollectionSource` על `catalog_*.dart` תחת `lib/data/repositories/` → **0 התאמות**. אין דליפת-Firestore. (סימני-ה-Firestore חיים רק ב-`firestore_cached_repo.dart` + ה-drop-in של צי-אחר `orders_firebase.dart`.)
+
+## השומר (נעילת-קבע)
+`test/catalog_static_guard_test.dart` — source-scan (קריאות-File אמיתיות, לא reflection) על כל `catalog_*.dart` תחת `lib/data/repositories/`:
+- **אסור** import של `cloud_firestore` (regex על directive ב-raw-source).
+- **אסור** `FirestoreCachedRepo` / `FirestoreCollectionSource` ב-live-code (סריקת-identifier אחרי הסרת-הערות — סובלני להערות; הזכרת "NOT Firestore" בהערה לא מפילה).
+- anti-vacuous: (1) הקבצים נבחרים בפועל (לא-ריק); (2) ה-detectors יורים על ה-base הסיבלינג שבאמת מצמיד-Firestore; (3) ה-comment-stripper לא no-op (sentinel בהערה בלבד).
+- **תוצאה:** `flutter analyze` 0 · `flutter test` 3/3 ירוק. הוכח: `catalog_firebase.dart` זמני שמייבא firestore → RED (3 offenders); הסרה → GREEN.
+- מנעול: כל `catalog_firebase.dart` עתידי שמצמיד-Firestore מפיל את ה-suite.
+

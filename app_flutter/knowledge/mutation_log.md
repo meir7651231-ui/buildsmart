@@ -772,3 +772,7 @@
 ### 2026-06-09 — server-S2 (rebuild): cache-pattern base (`firestore_cached_repo`)
 - מוטציה (ידנית — הסקריפט flaky על restore): נטרול עדכון-ה-cache האופטימי ב-`upsert` (`_cache = _sorted(next)` → `_sorted(_cache)`) → `firestore_cached_repo_test` **-5 אדום** ✅ נתפס; שוחזר byte-clean (0 markers) → **+20 ירוק**.
 - כיסוי: 20 טסטים על fake-source — seed-ראשוני · snapshot מחליף+notify · doc פגום מדולג · optimistic מיידי (assert סינכרוני) · כשל-כתיבה לא משחית/זורק · replaceAll/resetToSeed/removeById · empty-ראשון≠מאוחר · roundtrip מיפוי+סדר · provider=local בלי Firebase. (נבנה-מחדש אחרי שה-restart גלגל את הקומיט הלא-דחוף.)
+
+### 2026-06-09 — server-S3 (rebuild): גל הנחיל ×5 (`stock_firebase` כנציג)
+- מוטציה (ידנית): נטרול flip-המיקום ב-`move` (`'site' : 'warehouse'` → `'warehouse' : 'warehouse'`) → `stock_firebase_repo_test` **-2 אדום** ✅ נתפס; שוחזר byte-clean (0 markers) → **+10 ירוק**.
+- כיסוי-גל: 46 טסטים חדשים (customers 9 · stock 10 · site 13 · finance 11 · catalog-guard 3) — fake-sources, אפס deps; provider=local בלי Firebase בכל דומיין; ה-base עצמו mutation-verified ב-S2.
