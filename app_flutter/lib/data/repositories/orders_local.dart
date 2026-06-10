@@ -15,10 +15,11 @@
 // NOT read the engine, keeping the engine↔repository wiring acyclic.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:buildsmart/data/repositories/orders_firebase.dart';
 import 'package:buildsmart/data/repositories/orders_repository.dart';
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:firebase_core/firebase_core.dart' show Firebase;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The local (in-memory + SharedPreferences) implementation of
 /// [OrdersRepository], backed by the live `ordersEngineProvider`. Holds a [Ref]
@@ -86,7 +87,18 @@ class LocalOrdersRepository implements OrdersRepository {
 }
 
 /// The orders repository provider — the server-ready seam the engine reads its
-/// seed through (T6.3) and a future remote impl swaps in behind. Constructing it
-/// is cheap (just stores the [Ref]); live reads resolve the engine lazily.
-final ordersRepositoryProvider =
-    Provider<OrdersRepository>((ref) => LocalOrdersRepository(ref));
+/// seed through (T6.3) and the remote impl swaps in behind (S2.3). When Firebase
+/// is initialised (the real app, `main()` calls `Firebase.initializeApp`) the
+/// Firestore-backed [FirebaseOrdersRepository] is used — it `attach()`es its
+/// `snapshots()` listener and is disposed with the provider. When Firebase is
+/// NOT initialised (the entire Firebase-free test suite) the in-memory
+/// [LocalOrdersRepository] is used, so tests never touch Firestore. Both satisfy
+/// the same sync [OrdersRepository] contract → providers + UI are unchanged.
+final ordersRepositoryProvider = Provider<OrdersRepository>((ref) {
+  if (Firebase.apps.isNotEmpty) {
+    final repo = FirebaseOrdersRepository()..attach();
+    ref.onDispose(repo.dispose);
+    return repo;
+  }
+  return LocalOrdersRepository(ref);
+});

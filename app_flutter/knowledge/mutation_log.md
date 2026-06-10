@@ -768,3 +768,7 @@
 - מוטציה 2: `childAspectRatio` במקום `mainAxisExtent` → ב-2 עמודות אריחים ענקיים (חצי-מסך-ריבועי) ✅ נתפס ויזואלית; שוחזר ל-`mainAxisExtent` קבוע.
 - מוטציה 3: החזרת `reverse: true` → גלילה הפוכה ב-RTL ✅; שוחזר.
 - כיסוי: אימות ויזואלי חי (אין טסט-יחידה ל-layout-metrics; נבדק בעין על :5556).
+
+### 2026-06-09 — server-S2 (rebuild): cache-pattern base (`firestore_cached_repo`)
+- מוטציה (ידנית — הסקריפט flaky על restore): נטרול עדכון-ה-cache האופטימי ב-`upsert` (`_cache = _sorted(next)` → `_sorted(_cache)`) → `firestore_cached_repo_test` **-5 אדום** ✅ נתפס; שוחזר byte-clean (0 markers) → **+20 ירוק**.
+- כיסוי: 20 טסטים על fake-source — seed-ראשוני · snapshot מחליף+notify · doc פגום מדולג · optimistic מיידי (assert סינכרוני) · כשל-כתיבה לא משחית/זורק · replaceAll/resetToSeed/removeById · empty-ראשון≠מאוחר · roundtrip מיפוי+סדר · provider=local בלי Firebase. (נבנה-מחדש אחרי שה-restart גלגל את הקומיט הלא-דחוף.)
