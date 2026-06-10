@@ -776,3 +776,8 @@
 ### 2026-06-09 — server-S3 (rebuild): גל הנחיל ×5 (`stock_firebase` כנציג)
 - מוטציה (ידנית): נטרול flip-המיקום ב-`move` (`'site' : 'warehouse'` → `'warehouse' : 'warehouse'`) → `stock_firebase_repo_test` **-2 אדום** ✅ נתפס; שוחזר byte-clean (0 markers) → **+10 ירוק**.
 - כיסוי-גל: 46 טסטים חדשים (customers 9 · stock 10 · site 13 · finance 11 · catalog-guard 3) — fake-sources, אפס deps; provider=local בלי Firebase בכל דומיין; ה-base עצמו mutation-verified ב-S2.
+### 2026-06-10 — lib/logic/input_validators.dart (חדש · #64 נחיל)
+- מוטציה: `^05\d{8}$` → `^05\d{7,8}$` (קבלת נייד בן 9 ספרות) → `test/input_validators_test.dart` אדום ("mobile — 9 digits (too short) is invalid": Expected false, Actual true) ✅ נתפס.
+- שחזור: regex הוחזר byte-exact; הרצה חוזרת 27/27 ירוקה ✅.
+- מסקנה: הבדיקה חזקה — מכסה אורך/קידומת/תווים לכל 5 הוולידטורים (27 cases).
+- `lib/data/legal_texts.dart` (חדש · #26): const-strings בלבד (תנאי-שימוש/פרטיות) — אין לוגיקה למוטט; מכוסה עקיף ע"י analyze + legal_screen רנדור.

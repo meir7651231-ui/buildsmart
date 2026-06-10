@@ -148,10 +148,15 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
               // Only the current bucket (active/rejected) can be submitted.
               onSubmit: _submit,
             ),
-            _Section(header: '⏳ הבאות בתור (${queue.length})', tasks: queue),
+            _Section(
+              header: '⏳ הבאות בתור (${queue.length})',
+              tasks: queue,
+              emptyText: 'אין משימות בתור — משימות חדשות מהמנהל יופיעו כאן',
+            ),
             _Section(
               header: '📋 שהגשת (${submitted.length})',
               tasks: submitted,
+              emptyText: 'עוד לא הגשת משימות לאישור',
             ),
           ],
         ),
@@ -359,11 +364,20 @@ class _Stat extends StatelessWidget {
 /// When [onSubmit] is given, a submittable task card (status `active`/`rejected`)
 /// shows a "שלח לאישור" button that invokes it (the current bucket only).
 class _Section extends StatelessWidget {
-  const _Section({required this.header, required this.tasks, this.onSubmit});
+  const _Section({
+    required this.header,
+    required this.tasks,
+    this.onSubmit,
+    this.emptyText,
+  });
 
   final String header;
   final List<PersonaTask> tasks;
   final void Function(PersonaTask)? onSubmit;
+
+  /// Shown instead of the cards when [tasks] is empty. Optional — the current
+  /// section's header already says "אין משימה פעילה" so it passes nothing.
+  final String? emptyText;
 
   @override
   Widget build(BuildContext context) {
@@ -386,7 +400,20 @@ class _Section extends StatelessWidget {
             ),
           ),
         ),
-        for (final t in tasks) _TaskCard(task: t, onSubmit: onSubmit),
+        if (tasks.isEmpty && emptyText != null)
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
+                BsTokens.space1, 0, BsTokens.space1, BsTokens.space2),
+            child: Text(
+              emptyText!,
+              style: const TextStyle(
+                color: BsTokens.mutedLight,
+                fontSize: 13.5,
+              ),
+            ),
+          )
+        else
+          for (final t in tasks) _TaskCard(task: t, onSubmit: onSubmit),
       ],
     );
   }

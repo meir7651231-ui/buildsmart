@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/state/chat_settings.dart';
@@ -52,8 +53,19 @@ _ThreadCategory _categoryFor(ChatThread t) {
 String _hhmm(DateTime ts) =>
     '${ts.hour.toString().padLeft(2, '0')}:${ts.minute.toString().padLeft(2, '0')}';
 
+/// Real per-chat unread: incoming messages (not from the reading persona)
+/// whose timestamp is newer than the thread's persisted lastReadAt
+/// (0 = never opened → all incoming messages count).
+int _unreadCount(ChatThread t, BsRole persona, int lastReadMs) => t.messages
+    .where(
+      (m) =>
+          m.fromRole != persona &&
+          m.ts.millisecondsSinceEpoch > lastReadMs,
+    )
+    .length;
+
 /// Build the legacy `_Thread` record + the engine handle for [persona].
-_ThreadView _viewOf(ChatThread t, BsRole persona) {
+_ThreadView _viewOf(ChatThread t, BsRole persona, Map<String, int> lastRead) {
   final last = t.messages.isNotEmpty ? t.messages.last : null;
   return (
     threadId: t.id,
@@ -66,7 +78,7 @@ _ThreadView _viewOf(ChatThread t, BsRole persona) {
       time: last != null ? _hhmm(last.ts) : '',
       direction: _directionFor(t, persona),
       isBot: t.isBot,
-      unread: 0,
+      unread: _unreadCount(t, persona, lastRead[t.id] ?? 0),
       isOnline: t.isBot,
       category: _categoryFor(t),
     ),
@@ -151,6 +163,52 @@ class _ChatMutedNotifier extends StateNotifier<Set<String>> {
 final chatMutedIdsProvider =
     StateNotifierProvider<_ChatMutedNotifier, Set<String>>(
   (_) => _ChatMutedNotifier(),
+);
+
+const String _kLastReadKey = 'bs.chat-lastread.v1';
+
+/// Per-thread "last read" timestamps (ms since epoch), persisted so the real
+/// unread badge survives restarts. A chat page marks its thread read on open;
+/// a message counts as unread when it wasn't sent by the reading persona and
+/// its ts is newer than the thread's lastReadAt (0 = never opened).
+class _ChatLastReadNotifier extends StateNotifier<Map<String, int>> {
+  _ChatLastReadNotifier() : super(const {}) {
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_kLastReadKey);
+      if (raw == null) return;
+      final m = jsonDecode(raw) as Map<String, dynamic>;
+      state = {
+        for (final e in m.entries)
+          if (e.value is num) e.key: (e.value as num).toInt(),
+      };
+    } on Object catch (_) {/* keep empty */}
+  }
+
+  Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_kLastReadKey, jsonEncode(state));
+    } on Object catch (_) {/* best-effort */}
+  }
+
+  /// Marks [threadId] read as of [at] (defaults to now).
+  void markRead(String threadId, {DateTime? at}) {
+    state = {
+      ...state,
+      threadId: (at ?? DateTime.now()).millisecondsSinceEpoch,
+    };
+    unawaited(_persist());
+  }
+}
+
+final chatLastReadProvider =
+    StateNotifierProvider<_ChatLastReadNotifier, Map<String, int>>(
+  (_) => _ChatLastReadNotifier(),
 );
 
 const String _kHistoryClearedKey = 'bs.chat-history-cleared.v1';
@@ -320,7 +378,7 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
         elevation: 0,
         leading: IconButton(
           tooltip: 'חזרה',
-          icon: const Icon(Icons.arrow_forward, color: Colors.black54),
+          icon: const Icon(Icons.arrow_back, color: Colors.black54),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
@@ -363,7 +421,8 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final hasText = ref.watch(_chatSearchQueryProvider).isNotEmpty;
+    final hasText =
+        ref.watch(_chatSearchQueryProvider.select((q) => q.isNotEmpty));
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
       child: TextField(
@@ -516,11 +575,12 @@ class _ThreadList extends ConsumerWidget {
     // 🔒 ISOLATION: only the threads this persona takes part in (SPEC §2.5) —
     // the shared engine, filtered by participation. Adapted to the legacy
     // `_Thread` view-model so the rich rows below render unchanged.
+    final lastRead = ref.watch(chatLastReadProvider);
     final views = [
       for (final t in ref.watch(chatEngineProvider).where(
             (t) => t.participants.contains(persona),
           ))
-        _viewOf(t, persona),
+        _viewOf(t, persona, lastRead),
     ];
 
     final threads = views.where((v) {
@@ -643,9 +703,11 @@ class _ThreadRow extends ConsumerWidget {
     final thread = view.thread;
     final missed = thread.direction == _Direction.missed;
     final isUnread = thread.unread > 0;
-    final muted = ref.watch(chatMutedIdsProvider).contains(thread.id);
+    final muted = ref.watch(
+        chatMutedIdsProvider.select((ids) => ids.contains(thread.id)));
     final showOnline = thread.isOnline &&
-        showOnlinePresence(ref.watch(chatSettingsProvider).lastSeenPrivacy);
+        showOnlinePresence(
+            ref.watch(chatSettingsProvider.select((s) => s.lastSeenPrivacy)));
     final nameColor = missed ? BsTokens.brand : BsTokens.inkLight;
     final arrowIcon = thread.direction == _Direction.outgoing
         ? Icons.north_east_rounded
@@ -880,6 +942,17 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
   @override
   void initState() {
     super.initState();
+    // Opening the chat marks it read (persisted lastReadAt → drives the real
+    // unread badge). Deferred a microtask so the provider mutation doesn't
+    // land mid-build during the route push.
+    final tid = _threadId;
+    if (tid != null) {
+      Future.microtask(() {
+        if (mounted) {
+          ref.read(chatLastReadProvider.notifier).markRead(tid);
+        }
+      });
+    }
     // Engine-backed threads source their messages from the shared store, not the
     // local list (see [_engineMessages] in build) — nothing to seed here.
     if (_engineBacked) return;
@@ -962,6 +1035,12 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
       final showTyping =
           wasBot && settings.botEnabled && settings.typingIndicator;
       ref.read(chatEngineProvider.notifier).send(_threadId!, _persona, text);
+      // The bot reply (if any) lands synchronously at now+1ms and is read
+      // on-screen — mark read just past it so the badge stays honest.
+      ref.read(chatLastReadProvider.notifier).markRead(
+            _threadId!,
+            at: DateTime.now().add(const Duration(milliseconds: 5)),
+          );
       setState(() {
         _controller.clear();
         _isTyping = showTyping;
@@ -1123,7 +1202,8 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
   @override
   Widget build(BuildContext context) {
     final showOnline = _thread.isOnline &&
-        showOnlinePresence(ref.watch(chatSettingsProvider).lastSeenPrivacy);
+        showOnlinePresence(
+            ref.watch(chatSettingsProvider.select((s) => s.lastSeenPrivacy)));
     // Engine-backed: live messages from the shared store (cross-persona);
     // detached: the session-local list. Both render through the same UI below.
     var messages = _engineBacked ? _engineMessages() : _localMessages;
@@ -1144,7 +1224,7 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
         titleSpacing: 0,
         leading: IconButton(
           tooltip: 'חזרה',
-          icon: const Icon(Icons.arrow_forward, color: Colors.black54),
+          icon: const Icon(Icons.arrow_back, color: Colors.black54),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -1666,7 +1746,9 @@ class _InputBar extends StatelessWidget {
                     IconButton(
                       tooltip: 'מצלמה',
                       padding: const EdgeInsets.all(10),
-                      constraints: const BoxConstraints(),
+                      // ≥48dp tap target (a11y) — glyph unchanged.
+                      constraints:
+                          const BoxConstraints(minWidth: 48, minHeight: 48),
                       icon: const Icon(
                         Icons.camera_alt_outlined,
                         color: Color(0xFF777777),
@@ -1678,7 +1760,9 @@ class _InputBar extends StatelessWidget {
                     IconButton(
                       tooltip: 'צירוף',
                       padding: const EdgeInsets.all(10),
-                      constraints: const BoxConstraints(),
+                      // ≥48dp tap target (a11y) — glyph unchanged.
+                      constraints:
+                          const BoxConstraints(minWidth: 48, minHeight: 48),
                       icon: const Icon(
                         Icons.attach_file,
                         color: Color(0xFF777777),
@@ -1715,7 +1799,9 @@ class _InputBar extends StatelessWidget {
                     IconButton(
                       tooltip: 'אימוג׳י',
                       padding: const EdgeInsets.all(10),
-                      constraints: const BoxConstraints(),
+                      // ≥48dp tap target (a11y) — glyph unchanged.
+                      constraints:
+                          const BoxConstraints(minWidth: 48, minHeight: 48),
                       icon: const Icon(
                         Icons.emoji_emotions_outlined,
                         color: Color(0xFF777777),
@@ -1790,10 +1876,11 @@ class ChatsArchiveScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final archivedIds = ref.watch(chatArchivedIdsProvider);
+    final lastRead = ref.watch(chatLastReadProvider);
     final archived = [
       for (final t in ref.watch(chatEngineProvider))
         if (t.participants.contains(persona) && archivedIds.contains(t.id))
-          _viewOf(t, persona),
+          _viewOf(t, persona, lastRead),
     ];
 
     return Scaffold(
@@ -1804,7 +1891,7 @@ class ChatsArchiveScreen extends ConsumerWidget {
         titleSpacing: 0,
         leading: IconButton(
           tooltip: 'חזרה',
-          icon: const Icon(Icons.arrow_forward, color: Colors.black54),
+          icon: const Icon(Icons.arrow_back, color: Colors.black54),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(

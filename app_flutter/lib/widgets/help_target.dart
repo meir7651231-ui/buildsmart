@@ -248,10 +248,9 @@ class HelpModeBanner extends ConsumerWidget {
     return Material(
       color: BsTokens.brand,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: BsTokens.space4,
-          vertical: BsTokens.space3,
-        ),
+        // Vertical size comes from the 48dp close target (a11y) — keeps the
+        // ribbon height visually unchanged.
+        padding: const EdgeInsets.symmetric(horizontal: BsTokens.space4),
         child: Row(
           children: [
             const Icon(Icons.lightbulb, color: Colors.white, size: 20),
@@ -269,9 +268,13 @@ class HelpModeBanner extends ConsumerWidget {
             InkWell(
               onTap: () => ref.read(helpModeProvider.notifier).state = false,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              child: const Padding(
-                padding: EdgeInsets.all(4),
-                child: Icon(Icons.close, color: Colors.white, size: 20),
+              // ≥48dp tap target (a11y) — icon visuals unchanged.
+              child: const SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(
+                  child: Icon(Icons.close, color: Colors.white, size: 20),
+                ),
               ),
             ),
           ],

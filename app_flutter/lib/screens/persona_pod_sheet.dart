@@ -17,6 +17,7 @@ import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,6 +47,35 @@ class PersonaPodSheet extends ConsumerWidget {
     final orders = ref.watch(sysOrdersProvider);
     final idx = orders.indexWhere((o) => o.id == orderId);
     final order = idx >= 0 ? orders[idx] : null;
+    if (order == null) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: BsTokens.space4,
+          vertical: BsTokens.space5,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('📦', style: TextStyle(fontSize: 48)),
+            SizedBox(height: 12),
+            Text(
+              'ההזמנה לא נמצאה',
+              style: TextStyle(
+                color: BsTokens.inkLight,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 6),
+            Text(
+              'ייתכן שההזמנה הוסרה או שהמשלוח כבר נסגר — חזרו לרשימת המשלוחים',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+            ),
+          ],
+        ),
+      );
+    }
     final f = ref.watch(fulfillmentProvider)[orderId] ?? const Fulfillment();
     final fn = ref.read(fulfillmentProvider.notifier);
 
@@ -86,14 +116,13 @@ class PersonaPodSheet extends ConsumerWidget {
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             ),
             const SizedBox(height: BsTokens.space3),
-            if (order != null)
-              Text(
-                '📦 ${order.id} · ${order.who} · ${order.site}',
-                style: const TextStyle(
-                  color: BsTokens.inkLight,
-                  fontSize: 13.5,
-                ),
+            Text(
+              '📦 ${order.id} · ${order.who} · ${order.site}',
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontSize: 13.5,
               ),
+            ),
             const SizedBox(height: BsTokens.space3),
 
             // Signature status pill (proto `נחתם ✓`/`ממתין`).
@@ -214,12 +243,19 @@ class PersonaPodSheet extends ConsumerWidget {
             // Confirm-delivery shortcut — only when the order is actually on the
             // road (transit) and a POD has been captured. Advances → delivered
             // through the SAME shared courier hand-off (no bypass).
-            if (order != null &&
-                order.stage == OrderStage.transit &&
-                f.podCaptured) ...[
+            if (order.stage == OrderStage.transit && f.podCaptured) ...[
               const SizedBox(height: BsTokens.space3),
               FilledButton(
-                onPressed: () {
+                onPressed: () async {
+                  final ok = await confirmDestructive(
+                    context,
+                    title: 'אישור מסירה?',
+                    message:
+                        'ההזמנה ${order.id} תסומן כנמסרה ללקוח — פעולה סופית.',
+                    confirmLabel: 'נמסר',
+                    confirmColor: const Color(0xFF1F8A4C),
+                  );
+                  if (!ok || !context.mounted) return;
                   ref
                       .read(sysOrdersProvider.notifier)
                       .courierAdvance(order.id);

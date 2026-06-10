@@ -26,6 +26,7 @@ import 'package:buildsmart/screens/lipskey_products_screen.dart' hide AttrKind;
 import 'package:buildsmart/screens/finder_screen.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
+import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/state/card_detail_mode.dart';
 import 'package:buildsmart/state/card_projects.dart';
 import 'package:buildsmart/state/brand_history.dart';
@@ -49,6 +50,7 @@ import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/stage_progress.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -716,7 +718,15 @@ class _SectionChipsRow extends ConsumerWidget {
         if (idx != -1) _showRenameDialog(ctx, ref, idx, label);
       }
       if (choice == 'hide') hideSection(label);
-      if (choice == 'delete') deleteSection(label);
+      if (choice == 'delete') {
+        final ok = await confirmDestructive(
+          ctx,
+          title: 'מחיקת רשימה?',
+          message: 'הרשימה "$label" תימחק לצמיתות.',
+          confirmLabel: 'מחק',
+        );
+        if (ok && ctx.mounted) deleteSection(label);
+      }
     }
 
     return Padding(
@@ -904,7 +914,14 @@ class _ManageListsSheetState extends ConsumerState<_ManageListsSheet> {
                           color: Color(0xFF888888),
                           size: 20,
                         ),
-                        onPressed: () {
+                        onPressed: () async {
+                          final ok = await confirmDestructive(
+                            context,
+                            title: 'מחיקת רשימה?',
+                            message: 'הרשימה "$s" תימחק לצמיתות.',
+                            confirmLabel: 'מחק',
+                          );
+                          if (!ok || !context.mounted) return;
                           final list =
                               List<String>.from(
                                 ref.read(catalogSectionsListProvider),
@@ -1239,29 +1256,36 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
                 InkWell(
                   onTap: _rename,
                   borderRadius: BorderRadius.circular(6),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _label,
-                          style: const TextStyle(
-                            color: BsTokens.inkLight,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                          ),
+                  // ≥48dp tap target (a11y) — the header row is already
+                  // 48dp tall (IconButton), so no visual change.
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.drive_file_rename_outline,
-                          color: Color(0xFF888888),
-                          size: 16,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _label,
+                              style: const TextStyle(
+                                color: BsTokens.inkLight,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.drive_file_rename_outline,
+                              color: Color(0xFF888888),
+                              size: 16,
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -1399,23 +1423,30 @@ class _AddPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0xFFC8C8CE), width: 1),
-      ),
-      child: Tooltip(
-        message: 'נהל קטגוריות',
-        child: Semantics(
-          button: true,
-          label: 'נהל קטגוריות',
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(20),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              child: Icon(Icons.add, color: Color(0xFF6E6E73), size: 18),
+    return Tooltip(
+      message: 'נהל קטגוריות',
+      child: Semantics(
+        button: true,
+        label: 'נהל קטגוריות',
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          // ≥48dp tap target (a11y): the hit area is 48dp while the visible
+          // bordered pill keeps its original compact size.
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            child: Center(
+              child: Material(
+                color: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: const BorderSide(color: Color(0xFFC8C8CE), width: 1),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  child: Icon(Icons.add, color: Color(0xFF6E6E73), size: 18),
+                ),
+              ),
             ),
           ),
         ),
@@ -1482,7 +1513,8 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
     });
 
     final open     = ref.watch(searchPanelOpenProvider);
-    final hasText  = ref.watch(searchQueryProvider).isNotEmpty;
+    final hasText  =
+        ref.watch(searchQueryProvider.select((q) => q.isNotEmpty));
     final scope    = ref.watch(searchScopeProvider);
     final hasScope = scope != 'הכל';
 
@@ -1502,7 +1534,7 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
             if (open)
               IconButton(
                 icon: const Icon(
-                  Icons.arrow_forward,
+                  Icons.arrow_back,
                   color: Color(0xFF888888),
                   size: 20,
                 ),
@@ -1516,38 +1548,48 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
 
             // Scope token chip — shown when a non-הכל scope is active.
             if (hasScope) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: BsTokens.brand,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      scope,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Semantics(
-                      button: true,
-                      label: 'נקה סינון',
-                      child: GestureDetector(
-                        onTap: () =>
-                            ref.read(searchScopeProvider.notifier).state = 'הכל',
-                        child: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                          size: 13,
+              Semantics(
+                button: true,
+                label: 'נקה סינון',
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () =>
+                      ref.read(searchScopeProvider.notifier).state = 'הכל',
+                  // ≥48dp tap target: the whole chip clears the filter; the
+                  // visible pill stays small (a11y).
+                  child: ConstrainedBox(
+                    constraints:
+                        const BoxConstraints(minWidth: 48, minHeight: 48),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: BsTokens.brand,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              scope,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 13,
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
               const SizedBox(width: 6),
@@ -1887,8 +1929,16 @@ class _RecentSearchesList extends ConsumerWidget {
                 ),
               ),
               TextButton(
-                onPressed: () =>
-                    ref.read(recentSearchesProvider.notifier).clear(),
+                onPressed: () async {
+                  final ok = await confirmDestructive(
+                    context,
+                    title: 'ניקוי חיפושים אחרונים?',
+                    message: 'היסטוריית החיפושים תימחק.',
+                    confirmLabel: 'נקה',
+                  );
+                  if (!ok || !context.mounted) return;
+                  ref.read(recentSearchesProvider.notifier).clear();
+                },
                 child: const Text(
                   'נקה',
                   style: TextStyle(color: BsTokens.brand, fontSize: 13),
@@ -2180,6 +2230,19 @@ class _SearchResultsList extends ConsumerWidget {
             ),
           ),
           onTap: () {
+            // הגדרות › מידע legal leaves navigate to the real legal screen
+            // instead of re-setting the query (task #26 wiring).
+            if (entry.title == 'תנאי שימוש' ||
+                entry.title == 'מדיניות פרטיות') {
+              Navigator.of(context).push(
+                LegalScreen.route(
+                  initialTab: entry.title == 'תנאי שימוש'
+                      ? LegalTab.terms
+                      : LegalTab.privacy,
+                ),
+              );
+              return;
+            }
             ref.read(searchQueryProvider.notifier).state = entry.title;
             if (!ref.read(catalogSettingsProvider).searchHistoryEnabled) return;
             ref.read(recentSearchesProvider.notifier).add(entry.title);
@@ -2572,7 +2635,8 @@ class _TreeDrill extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final current = path.last;
-    final query = ref.watch(catalogTreeQueryProvider).trim();
+    final query =
+        ref.watch(catalogTreeQueryProvider.select((q) => q.trim()));
     final facetSel = ref.watch(catalogFacetProvider);
     final systemFilter = ref.watch(catalogSystemFilterProvider);
     // T6.3: catalog reads via the repository (same const data).
@@ -2908,7 +2972,7 @@ class _ProductsHeader extends ConsumerWidget {
           ),
           const Spacer(),
           // Sort-by button on the opposite side of the header.
-          if (ref.watch(catalogSettingsProvider).quickFilterBar)
+          if (ref.watch(catalogSettingsProvider.select((s) => s.quickFilterBar)))
           PopupMenuButton<ProductSort>(
             tooltip: 'מיון לפי',
             color: Colors.white,
@@ -3097,38 +3161,46 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
   Widget _crumb(({String label, VoidCallback? onTap}) crumb) {
     final active = crumb.onTap == null;
     if (active) {
-      return Container(
-        padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
-        decoration: BoxDecoration(
-          color: BsTokens.brand,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 130),
-              child: Text(
-                crumb.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+      return Semantics(
+        button: true,
+        label: 'בטל',
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onCancel,
+          // ≥48dp tap target: the whole active crumb cancels; the visible
+          // pill stays small (a11y) inside the fixed-48dp bar.
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+                decoration: BoxDecoration(
+                  color: BsTokens.brand,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 130),
+                      child: Text(
+                        crumb.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.close, color: Colors.white, size: 16),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(width: 6),
-            Semantics(
-              button: true,
-              label: 'בטל',
-              child: GestureDetector(
-                onTap: widget.onCancel,
-                child: const Icon(Icons.close, color: Colors.white, size: 16),
-              ),
-            ),
-          ],
+          ),
         ),
       );
     }
@@ -3169,7 +3241,8 @@ class _TreeDrillBarState extends ConsumerState<_TreeDrillBar> {
             TextSelection.collapsed(offset: next.length);
       }
     });
-    final hasText = ref.watch(catalogTreeQueryProvider).isNotEmpty;
+    final hasText =
+        ref.watch(catalogTreeQueryProvider.select((q) => q.isNotEmpty));
 
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
@@ -3521,7 +3594,8 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
   @override
   Widget build(BuildContext context) {
     const green = Color(0xFF22C55E);
-    final query = ref.watch(smartTreeQueryProvider).trim();
+    final query =
+        ref.watch(smartTreeQueryProvider.select((q) => q.trim()));
     // T6.3: smart-tree products via the repository (same const data).
     final all = filterSmartBySystem(
         ref.watch(catalogRepositoryProvider).smartProductsForCat(widget.cat),
@@ -3549,39 +3623,49 @@ class _SmartTreeProductListState extends ConsumerState<_SmartTreeProductList> {
                 onPressed: _back,
               ),
               Flexible(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
-                  decoration: BoxDecoration(
-                    color: green,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('🌳 ', style: TextStyle(fontSize: 13)),
-                      Flexible(
-                        child: Text(
-                          widget.cat,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: bsOnAccent(context),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                child: Semantics(
+                  button: true,
+                  label: 'בטל',
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _back,
+                    // ≥48dp tap target: the whole category chip cancels; the
+                    // visible pill stays small (a11y) inside the 48dp bar.
+                    child: ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(minWidth: 48, minHeight: 48),
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
+                          decoration: BoxDecoration(
+                            color: green,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('🌳 ',
+                                  style: TextStyle(fontSize: 13)),
+                              Flexible(
+                                child: Text(
+                                  widget.cat,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: bsOnAccent(context),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(Icons.close,
+                                  color: bsOnAccent(context), size: 16),
+                            ],
                           ),
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      Semantics(
-                        button: true,
-                        label: 'בטל',
-                        child: GestureDetector(
-                          onTap: _back,
-                          child: Icon(Icons.close,
-                              color: bsOnAccent(context), size: 16),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -3903,15 +3987,23 @@ class _SavedVersionChip extends StatelessWidget {
               button: true,
               label: 'טען גרסה $label',
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: onLoad,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.fromLTRB(8, 3, 6, 3),
-                  child: Text(label,
-                      style: const TextStyle(
-                          color: Color(0xFF5B21B6),
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600)),
+                // ≥48dp tap target (a11y) — label text stays 10.5sp; only
+                // the hit area (and the violet pill) grows.
+                child: ConstrainedBox(
+                  constraints:
+                      const BoxConstraints(minWidth: 48, minHeight: 48),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 3, 6, 3),
+                      child: Text(label,
+                          style: const TextStyle(
+                              color: Color(0xFF5B21B6),
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -3922,11 +4014,16 @@ class _SavedVersionChip extends StatelessWidget {
               button: true,
               label: 'מחק גרסה $label',
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: onDelete,
-                child: const Padding(
-                  padding: EdgeInsets.fromLTRB(2, 3, 6, 3),
-                  child: Icon(Icons.close,
-                      size: 12, color: Color(0xFF7C3AED)),
+                // ≥48dp tap target around the small ✕ (a11y).
+                child: const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Center(
+                    child: Icon(Icons.close,
+                        size: 12, color: Color(0xFF7C3AED)),
+                  ),
                 ),
               ),
             ),
@@ -4307,32 +4404,41 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                   ),
                 ),
                 Positioned(
-                  top: 6,
-                  left: 12,
+                  // 48dp tap box centred on the same spot as the old 36dp
+                  // circle (top 6→0, left 12→6 compensates the +12dp box).
+                  top: 0,
+                  left: 6,
                   child: Tooltip(
                     message: 'סגור',
                     child: Semantics(
                       button: true,
                       label: 'סגור',
                       child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: const BoxDecoration(
-                            color: BsTokens.brand,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color(0x33000000),
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
+                        child: SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: Center(
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: const BoxDecoration(
+                                color: BsTokens.brand,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0x33000000),
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                            ],
+                              alignment: Alignment.center,
+                              child: const Icon(Icons.close,
+                                  color: Colors.white, size: 22),
+                            ),
                           ),
-                          alignment: Alignment.center,
-                          child: const Icon(Icons.close,
-                              color: Colors.white, size: 22),
                         ),
                       ),
                     ),
@@ -4551,7 +4657,19 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                           ],
                         ),
                       ),
-                      for (final i in _filteredBrandIdx) _brandCard(i),
+                      if (_filteredBrandIdx.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 14),
+                          child: Center(
+                            child: Text(
+                              'אין מותג תואם לסינון שנבחר',
+                              style: TextStyle(
+                                  color: Color(0xFF64748B), fontSize: 13),
+                            ),
+                          ),
+                        )
+                      else
+                        for (final i in _filteredBrandIdx) _brandCard(i),
                     ],
                   ),
                 ),
@@ -4659,7 +4777,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     .read(projectModeProvider.notifier)
                                     .set(nextProjectMode(m)),
                                 child: Padding(
-                                  padding: const EdgeInsets.only(left: 6),
+                                  padding: const EdgeInsetsDirectional.only(end: 6),
                                   child: Text('${l.emoji}${l.label}',
                                       style: const TextStyle(
                                           color: Color(0xFF6B7280),
@@ -4685,7 +4803,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                     .read(professionModeProvider.notifier)
                                     .set(nextProfessionMode(prof)),
                                 child: Padding(
-                                  padding: const EdgeInsets.only(left: 6),
+                                  padding: const EdgeInsetsDirectional.only(end: 6),
                                   child: Text('${l.emoji}${l.label}',
                                       style: const TextStyle(
                                           color: Color(0xFF6B7280),
@@ -4714,7 +4832,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                       .read(savedConfigsProvider.notifier)
                                       .toggle(p.key, brand.name),
                                   child: Padding(
-                                    padding: const EdgeInsets.only(left: 8),
+                                    padding: const EdgeInsetsDirectional.only(end: 8),
                                     child: Text(saved ? '★ נשמר' : '☆ שמור',
                                         style: TextStyle(
                                             color: saved
@@ -4744,7 +4862,7 @@ class _SmartProductSheetState extends ConsumerState<_SmartProductSheet> {
                                   );
                                 },
                                 child: const Padding(
-                                  padding: EdgeInsets.only(left: 8),
+                                  padding: EdgeInsetsDirectional.only(end: 8),
                                   child: Text('📋 הצעה',
                                       style: TextStyle(
                                           color: Color(0xFF0F766E),
@@ -6287,30 +6405,39 @@ class _AccRow extends StatelessWidget {
             : EdgeInsets.zero,
         child: Row(
           children: [
-            // Checkbox / lock
+            // Checkbox / lock — ≥48dp tap target around the 24dp box (a11y);
+            // the visible square stays 24dp.
             GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: () => onToggle?.call(!selected),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: selected
-                      ? BsTokens.brand
-                      : const Color(0xFFEDEDED),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: selected
-                        ? BsTokens.brand
-                        : const Color(0xFFC8C8CE),
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? BsTokens.brand
+                          : const Color(0xFFEDEDED),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: selected
+                            ? BsTokens.brand
+                            : const Color(0xFFC8C8CE),
+                      ),
+                    ),
+                    child: selected
+                        ? const Icon(Icons.check,
+                            color: Colors.white, size: 13)
+                        : null,
                   ),
                 ),
-                child: selected
-                    ? const Icon(Icons.check, color: Colors.white, size: 13)
-                    : null,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 2),
             // Emoji + selected badge
             SizedBox(
               width: 36,
@@ -6377,14 +6504,19 @@ class _AccRow extends StatelessWidget {
                         button: true,
                         label: 'מידע על האביזר',
                         child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
                           onTap: () => _showAccInfo(context, acc),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 4, vertical: 2),
-                            child: Icon(
-                              Icons.info_outline,
-                              color: BsTokens.brand,
-                              size: 16,
+                          // ≥48dp tap target around the small ⓘ (a11y),
+                          // without enlarging the visible glyph.
+                          child: const SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: Center(
+                              child: Icon(
+                                Icons.info_outline,
+                                color: BsTokens.brand,
+                                size: 16,
+                              ),
                             ),
                           ),
                         ),
@@ -6472,15 +6604,21 @@ class _MiniQtyBtn extends StatelessWidget {
       button: true,
       label: icon == Icons.add ? 'הוסף כמות' : 'הפחת כמות',
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-          child: Icon(
-            icon,
-            size: 12,
-            color: onTap != null
-                ? Colors.black54
-                : const Color(0xFFCCCCCC),
+        // ≥48dp tap target (a11y) — the visible +/- glyph stays 12dp; only
+        // the hit area (and the grey pill) grows.
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Center(
+            child: Icon(
+              icon,
+              size: 12,
+              color: onTap != null
+                  ? Colors.black54
+                  : const Color(0xFFCCCCCC),
+            ),
           ),
         ),
       ),
@@ -6734,8 +6872,16 @@ class _RecentSearchesSection extends ConsumerWidget {
                       fontSize: 15,
                       fontWeight: FontWeight.w700)),
               TextButton(
-                onPressed: () =>
-                    ref.read(recentSearchesProvider.notifier).clear(),
+                onPressed: () async {
+                  final ok = await confirmDestructive(
+                    context,
+                    title: 'ניקוי כל החיפושים?',
+                    message: 'כל היסטוריית החיפושים תימחק.',
+                    confirmLabel: 'נקה הכל',
+                  );
+                  if (!ok || !context.mounted) return;
+                  ref.read(recentSearchesProvider.notifier).clear();
+                },
                 child: const Text('נקה הכל',
                     style:
                         TextStyle(color: BsTokens.brand, fontSize: 13)),
@@ -7155,7 +7301,7 @@ class _MaterialDiameterBrowser extends ConsumerWidget {
                     final e = sorted[i];
                     final key = '$active|${e.key}';
                     return Padding(
-                      padding: const EdgeInsets.only(right: 4),
+                      padding: const EdgeInsetsDirectional.only(start: 4),
                       child: _FacetChip(
                         label: e.key,
                         count: e.value,
@@ -7250,7 +7396,7 @@ class _SubGroupBrowser extends ConsumerWidget {
                         child: Text('—', style: TextStyle(color: Color(0xFF8A8A8A), fontWeight: FontWeight.w700, fontSize: 12)),
                       ),
                     Padding(
-                      padding: const EdgeInsets.only(right: 4),
+                      padding: const EdgeInsetsDirectional.only(start: 4),
                       child: _FacetChip(
                         label: group[i].$1,
                         count: group[i].$2,
@@ -7355,7 +7501,7 @@ class _SizeFacetRow extends ConsumerWidget {
           for (int i = 0; i < groups[gi].length; i++) ...[
             if (i > 0)
               const Padding(padding: EdgeInsets.symmetric(horizontal: 3), child: Text('—', style: TextStyle(color: Color(0xFF8A8A8A), fontWeight: FontWeight.w700, fontSize: 12))),
-            Padding(padding: const EdgeInsets.only(right: 4), child: _FacetChip(label: groups[gi][i].$1, count: groups[gi][i].$2, isSelected: selected.contains(groups[gi][i].$1), onTap: () => toggle(groups[gi][i].$1))),
+            Padding(padding: const EdgeInsetsDirectional.only(start: 4), child: _FacetChip(label: groups[gi][i].$1, count: groups[gi][i].$2, isSelected: selected.contains(groups[gi][i].$1), onTap: () => toggle(groups[gi][i].$1))),
           ],
         ],
       ],

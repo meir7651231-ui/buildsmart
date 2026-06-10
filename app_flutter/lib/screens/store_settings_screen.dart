@@ -1,6 +1,8 @@
+import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/store_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -250,6 +252,11 @@ class _InvoicesSection extends ConsumerWidget {
           hint: 'מספר...',
           value: settings.businessId,
           underConstruction: true,
+          // task #64: format-only check — uniqueness deferred to Firebase.
+          errorText: settings.businessId.trim().isEmpty ||
+                  validBusinessId(settings.businessId)
+              ? null
+              : 'ח.פ. חייב להכיל 9 ספרות',
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -599,7 +606,14 @@ class _PrivacySection extends ConsumerWidget {
         _ActionRow(
           label: 'מחיקת חיפושים',
           buttonLabel: 'מחק',
-          onTap: () {
+          onTap: () async {
+            final ok = await confirmDestructive(
+              context,
+              title: 'מחיקת חיפושים?',
+              message: 'החיפוש הנוכחי בחנות יימחק.',
+              confirmLabel: 'מחק',
+            );
+            if (!ok || !context.mounted) return;
             ref.read(storeSearchQueryProvider.notifier).state = '';
             showToast(context, 'החיפוש נוקה');
           },
@@ -818,6 +832,7 @@ class _InlineTextRow extends StatefulWidget implements _Inert {
     required this.hint,
     required this.value,
     required this.onChanged,
+    this.errorText,
     this.underConstruction = false,
   });
 
@@ -825,6 +840,11 @@ class _InlineTextRow extends StatefulWidget implements _Inert {
   final String hint;
   final String value;
   final ValueChanged<String> onChanged;
+
+  /// task #64: short Hebrew format error (null = valid). Recomputed by the
+  /// parent on every keystroke — each change persists through the provider,
+  /// which rebuilds the watching section.
+  final String? errorText;
   @override
   final bool underConstruction;
 
@@ -878,6 +898,7 @@ class _InlineTextRowState extends State<_InlineTextRow> {
             decoration: InputDecoration(
               hintText: widget.hint,
               hintStyle: const TextStyle(color: BsTokens.mutedLight),
+              errorText: widget.errorText,
               filled: true,
               fillColor: const Color(0xFFF2F3F5),
               border: OutlineInputBorder(

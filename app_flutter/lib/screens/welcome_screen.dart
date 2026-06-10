@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:buildsmart/logic/input_validators.dart';
+import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -63,7 +65,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final valid = registrationValid(_name.text, _contact.text);
+    // task #64: format gate — the contact must look like an Israeli mobile
+    // (05XXXXXXXX) or an email before the CTA unlocks. Format only;
+    // uniqueness checks are deferred to the Firebase backend.
+    final contactOk =
+        validIsraeliMobile(_contact.text) || validEmail(_contact.text);
+    final valid = registrationValid(_name.text, _contact.text) && contactOk;
     final media = MediaQuery.of(context);
     final heroHeight = media.size.height * 0.4;
     return Scaffold(
@@ -245,6 +252,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           _contact,
                           'טלפון או אימייל',
                           Icons.alternate_email,
+                          errorText: _contact.text.trim().isEmpty || contactOk
+                              ? null
+                              : 'מספר נייד או אימייל לא תקינים',
                         ),
                       ),
                       const SizedBox(height: BsTokens.space5),
@@ -273,13 +283,60 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         ),
                       ),
                       const SizedBox(height: BsTokens.space2),
-                      const Text(
-                        'בהרשמה אתה מאשר את תנאי השימוש של BuildSmart',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFFB3B3B3),
-                          fontSize: 12,
-                        ),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          const Text(
+                            'בהרשמה אתה מאשר את ',
+                            style: TextStyle(
+                              color: Color(0xFFB3B3B3),
+                              fontSize: 12,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => Navigator.of(context).push(
+                              LegalScreen.route(initialTab: LegalTab.terms),
+                            ),
+                            child: const Text(
+                              'תנאי השימוש',
+                              style: TextStyle(
+                                color: BsTokens.brandDark,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                          const Text(
+                            ' ואת ',
+                            style: TextStyle(
+                              color: Color(0xFFB3B3B3),
+                              fontSize: 12,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => Navigator.of(context).push(
+                              LegalScreen.route(initialTab: LegalTab.privacy),
+                            ),
+                            child: const Text(
+                              'מדיניות הפרטיות',
+                              style: TextStyle(
+                                color: BsTokens.brandDark,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                          const Text(
+                            ' של BuildSmart',
+                            style: TextStyle(
+                              color: Color(0xFFB3B3B3),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -352,12 +409,18 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
-  Widget _field(TextEditingController c, String hint, IconData icon) {
-    final ok = c.text.trim().isNotEmpty;
+  Widget _field(
+    TextEditingController c,
+    String hint,
+    IconData icon, {
+    String? errorText,
+  }) {
+    final ok = c.text.trim().isNotEmpty && errorText == null;
     return TextField(
       controller: c,
       decoration: InputDecoration(
         hintText: hint,
+        errorText: errorText,
         filled: true,
         fillColor: const Color(0xFFF5F5F7),
         prefixIcon: Icon(icon, color: const Color(0xFFBBBBBB), size: 20),
@@ -371,6 +434,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: BsTokens.brand, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: BsTokens.danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: BsTokens.danger, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: BsTokens.space4,

@@ -14,7 +14,9 @@
 
 import 'package:buildsmart/data/contractor_seeds.dart';
 import 'package:buildsmart/data/repositories/site_local.dart';
+import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -254,25 +256,43 @@ class BudgetScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
-          for (var i = 0; i < b.categories.length; i++)
-            _CategoryRow(
-              cat: b.categories[i],
-              share: b.categories[i].amount / catTotal,
-              onTap: () => _openCategoryEditor(context, ref, i),
-            ),
+          if (b.categories.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                'אין קטגוריות עדיין — הקש "＋ הוסף" כדי להוסיף קטגוריה',
+                style: TextStyle(fontSize: 13, color: _muted),
+              ),
+            )
+          else
+            for (var i = 0; i < b.categories.length; i++)
+              _CategoryRow(
+                cat: b.categories[i],
+                share: b.categories[i].amount / catTotal,
+                onTap: () => _openCategoryEditor(context, ref, i),
+              ),
           const SizedBox(height: 20),
           // spend by site — tap a site (bd-site). weight = (n-i)/(n*(n+1)/2)
           const Text('הוצאות לפי אתר',
               style: TextStyle(
                   fontSize: 14, fontWeight: FontWeight.w700, color: _ink)),
           const SizedBox(height: 8),
-          for (var i = 0; i < projects.length; i++)
-            _SiteRow(
-              name: projects[i].name,
-              value: _fmt(b.spent *
-                  (projects.length - i) /
-                  (projects.length * (projects.length + 1) / 2)),
-            ),
+          if (projects.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                'אין אתרים פעילים — הוסיפו פרויקט במסך הפרויקטים',
+                style: TextStyle(fontSize: 13, color: _muted),
+              ),
+            )
+          else
+            for (var i = 0; i < projects.length; i++)
+              _SiteRow(
+                name: projects[i].name,
+                value: _fmt(b.spent *
+                    (projects.length - i) /
+                    (projects.length * (projects.length + 1) / 2)),
+              ),
           const SizedBox(height: 12),
           const Text(
               '* הנתונים להמחשה — בגרסה המלאה יתבססו על ההזמנות וההוצאות בפועל של הלקוח.',
@@ -317,9 +337,17 @@ class BudgetScreen extends ConsumerWidget {
                 style: TextStyle(
                     fontSize: 18, fontWeight: FontWeight.w700, color: _ink)),
             const SizedBox(height: 14),
-            _Field(label: 'תקציב כולל', controller: totalCtl),
+            _Field(
+              label: 'תקציב כולל',
+              controller: totalCtl,
+              validator: _amountFormatError,
+            ),
             const SizedBox(height: 10),
-            _Field(label: 'הוצא עד כה', controller: spentCtl),
+            _Field(
+              label: 'הוצא עד כה',
+              controller: spentCtl,
+              validator: _amountFormatError,
+            ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -340,7 +368,11 @@ class BudgetScreen extends ConsumerWidget {
               ),
             ),
             const Divider(height: 28),
-            _Field(label: 'הוספת / הסרת הוצאה (₪)', controller: costCtl),
+            _Field(
+              label: 'הוספת / הסרת הוצאה (₪)',
+              controller: costCtl,
+              validator: _positiveAmountError,
+            ),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -444,7 +476,14 @@ class BudgetScreen extends ConsumerWidget {
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    final ok = await confirmDestructive(
+                      ctx,
+                      title: 'מחיקת קטגוריה?',
+                      message: 'הקטגוריה תימחק מהתקציב לצמיתות.',
+                      confirmLabel: 'מחק',
+                    );
+                    if (!ok || !ctx.mounted) return;
                     ref.read(budgetProvider.notifier).deleteCategory(i);
                     Navigator.pop(ctx);
                     showToast(context, 'הקטגוריה נמחקה');
@@ -580,25 +619,53 @@ class _SiteRow extends StatelessWidget {
       );
 }
 
+// task #64: inline format errors for the budget-editor fields. Empty input
+// shows no error (matches the welcome-form pattern); the existing submit
+// guards still block bad input with a toast.
+String? _amountFormatError(String v) {
+  final t = v.trim();
+  if (t.isEmpty) return null;
+  final n = int.tryParse(t);
+  return (n == null || n < 0) ? 'סכום לא תקין' : null;
+}
+
+String? _positiveAmountError(String v) {
+  final t = v.trim();
+  if (t.isEmpty) return null;
+  return validPositiveAmount(int.tryParse(t)) ? null : 'סכום לא תקין';
+}
+
 class _Field extends StatelessWidget {
   const _Field(
-      {required this.label, required this.controller, this.number = true});
+      {required this.label,
+      required this.controller,
+      this.number = true,
+      this.validator});
   final String label;
   final TextEditingController controller;
   final bool number;
+
+  /// task #64: optional live format check — short Hebrew error or null.
+  final String? Function(String value)? validator;
+
   @override
-  Widget build(BuildContext context) => TextField(
-        controller: controller,
-        keyboardType: number ? TextInputType.number : TextInputType.text,
-        style: const TextStyle(color: _ink),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: _muted),
-          filled: true,
-          fillColor: const Color(0xFFF5F6FA),
-          border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none),
+  Widget build(BuildContext context) =>
+      ValueListenableBuilder<TextEditingValue>(
+        valueListenable: controller,
+        builder: (context, value, _) => TextField(
+          controller: controller,
+          keyboardType: number ? TextInputType.number : TextInputType.text,
+          style: const TextStyle(color: _ink),
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: const TextStyle(color: _muted),
+            errorText: validator?.call(value.text),
+            filled: true,
+            fillColor: const Color(0xFFF5F6FA),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none),
+          ),
         ),
       );
 }

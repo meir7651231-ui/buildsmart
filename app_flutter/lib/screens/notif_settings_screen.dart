@@ -250,19 +250,24 @@ class _ChannelsSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '📱',
       title: 'ערוצי קבלה',
-      underConstruction: true,
       children: [
+        // הערוץ היחיד שניתן לחווט בכנות ללא שרת: כשהוא כבוי, חיווי
+        // ההתראות החדשות בתוך האפליקציה (בדג' ה'עדכונים' + מונה 'חדשות')
+        // מושתק דרך notifUnreadCountProvider.
         _SwitchRow(
-          label: 'Push (אפליקציה)',
+          label: 'התראות בתוך האפליקציה',
           value: settings.pushEnabled,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
                   .update((s) => s.copyWith(pushEnabled: v)),
         ),
+        // ערוצים התלויים בשרת — מושבתים ביושר ('דורש חיבור שרת') במקום
+        // מתג ששומר ערך בלי שום השפעה.
         _SwitchRow(
           label: 'אימייל',
           value: settings.emailEnabled,
+          requiresServer: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -271,6 +276,7 @@ class _ChannelsSection extends ConsumerWidget {
         _SwitchRow(
           label: 'SMS',
           value: settings.smsEnabled,
+          requiresServer: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -279,6 +285,7 @@ class _ChannelsSection extends ConsumerWidget {
         _SwitchRow(
           label: 'WhatsApp',
           value: settings.whatsappEnabled,
+          requiresServer: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -784,9 +791,13 @@ class _SectionTile extends StatelessWidget {
   // honest "בבנייה" subtitle and suppress the active-count badge (Wave 8 / D2).
   final bool underConstruction;
 
-  // Count only functional rows — exclude "בבנייה" placeholders.
+  // Count only functional rows — exclude "בבנייה" placeholders and rows
+  // that require a server connection (honestly disabled in this build).
   int get _activeCount => children
-      .where((w) => w is! _PlaceholderRow && !(w is _Inert && (w as _Inert).underConstruction))
+      .where((w) =>
+          w is! _PlaceholderRow &&
+          !(w is _SwitchRow && w.requiresServer) &&
+          !(w is _Inert && (w as _Inert).underConstruction))
       .length;
 
   @override
@@ -864,11 +875,16 @@ class _SwitchRow extends StatelessWidget implements _Inert {
     required this.value,
     required this.onChanged,
     this.underConstruction = false,
+    this.requiresServer = false,
   });
 
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
+
+  /// Channels that cannot work without a server (אימייל/SMS/WhatsApp):
+  /// rendered disabled with an honest 'דורש חיבור שרת' caption — never fake.
+  final bool requiresServer;
   @override
   final bool underConstruction;
 
@@ -877,15 +893,20 @@ class _SwitchRow extends StatelessWidget implements _Inert {
     return SwitchListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
-      subtitle: underConstruction
+      subtitle: requiresServer
           ? const Text(
-              'בבנייה — עדיין לא משפיע',
+              'דורש חיבור שרת — לא זמין בגרסה זו',
               style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
             )
-          : null,
+          : underConstruction
+              ? const Text(
+                  'בבנייה — עדיין לא משפיע',
+                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                )
+              : null,
       value: value,
       activeColor: BsTokens.brand,
-      onChanged: onChanged,
+      onChanged: requiresServer ? null : onChanged,
     );
   }
 }

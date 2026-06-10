@@ -1,3 +1,4 @@
+import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/rewards_hub_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/state/dial_state.dart';
@@ -52,6 +53,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _addressController = TextEditingController(text: p.address);
     _businessIdController = TextEditingController(text: p.businessId);
     _profession = p.profession;
+    // task #64: live format re-check (errorText + save gating) on each edit.
+    _contactController.addListener(() => setState(() {}));
+    _businessIdController.addListener(() => setState(() {}));
   }
 
   @override
@@ -77,6 +81,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final p = ref.watch(userProfileProvider);
+    // task #64: format-only validation — both fields are optional (empty is
+    // fine), but a filled field must be well-formed. Uniqueness checks are
+    // deferred to the Firebase backend.
+    final contactText = _contactController.text.trim();
+    final contactError = contactText.isEmpty ||
+            validIsraeliMobile(contactText) ||
+            validEmail(contactText)
+        ? null
+        : 'מספר נייד או אימייל לא תקינים';
+    final businessIdText = _businessIdController.text.trim();
+    final businessIdError =
+        businessIdText.isEmpty || validBusinessId(businessIdText)
+            ? null
+            : 'ח.פ. חייב להכיל 9 ספרות';
+    final formValid = contactError == null && businessIdError == null;
     // §2.5 isolation: role-switching is reachable ONLY from the contractor
     // (activePersona == null). Every other persona opens this same ProfileScreen
     // from inside its world, so we must not surface the role picker there.
@@ -116,6 +135,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               controller: _contactController,
               hint: 'טלפון או אימייל',
               textDirection: TextDirection.ltr,
+              errorText: contactError,
             ),
             const SizedBox(height: BsTokens.space4),
             _Field(
@@ -128,6 +148,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               label: 'ח.פ./עוסק מורשה',
               controller: _businessIdController,
               hint: 'ח.פ. / עוסק מורשה',
+              errorText: businessIdError,
             ),
             const SizedBox(height: BsTokens.space4),
             const _FieldLabel('תחום מקצועי'),
@@ -158,7 +179,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: _save,
+                // task #64: block save while a filled field is badly formatted.
+                onPressed: formValid ? _save : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: BsTokens.brand,
                   padding:
@@ -329,12 +351,16 @@ class _Field extends StatelessWidget {
     required this.controller,
     required this.hint,
     this.textDirection = TextDirection.rtl,
+    this.errorText,
   });
 
   final String label;
   final TextEditingController controller;
   final String hint;
   final TextDirection textDirection;
+
+  /// task #64: short Hebrew format error shown under the field (null = valid).
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -351,6 +377,7 @@ class _Field extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: const TextStyle(color: BsTokens.mutedLight),
+            errorText: errorText,
             filled: true,
             fillColor: BsTokens.cardLight,
             contentPadding: const EdgeInsets.symmetric(
@@ -364,6 +391,15 @@ class _Field extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(BsTokens.radiusCard),
               borderSide: const BorderSide(color: BsTokens.brand, width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderSide: const BorderSide(color: BsTokens.danger),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              borderSide:
+                  const BorderSide(color: BsTokens.danger, width: 1.5),
             ),
           ),
         ),

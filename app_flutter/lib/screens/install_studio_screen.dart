@@ -19,6 +19,7 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/saved_projects.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/widgets/chain_diagram.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,8 +61,8 @@ class _SheetClose extends StatelessWidget {
                   customBorder: const CircleBorder(),
                   onTap: () => Navigator.pop(context),
                   child: const SizedBox(
-                    width: 36,
-                    height: 36,
+                    width: 48,
+                    height: 48,
                     child: Icon(Icons.close, color: _ink, size: 22),
                   ),
                 ),
@@ -388,10 +389,19 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             child: Tooltip(
               message: 'חזור',
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () => Navigator.maybePop(context),
+                // ≥48dp tap target around the small arrow (a11y), without
+                // enlarging the visible glyph.
                 child: const Padding(
                   padding: EdgeInsetsDirectional.only(end: 8),
-                  child: Icon(Icons.arrow_forward, color: _ink, size: 22),
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: Icon(Icons.arrow_forward, color: _ink, size: 22),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -797,25 +807,34 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
             Align(
               alignment: Alignment.centerRight,
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () => setState(() => _loop = !_loop),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: _loop ? _fixture.withOpacity(0.2) : _void1,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                        color: _loop ? _fixture : _mute.withOpacity(0.3)),
+                // ≥48dp tap target around the small chip (a11y), without
+                // enlarging the visible chip.
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Center(
+                    widthFactor: 1,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: _loop ? _fixture.withOpacity(0.2) : _void1,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                            color: _loop ? _fixture : _mute.withOpacity(0.3)),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(Icons.loop,
+                            color: _loop ? _fixture : _mute, size: 14),
+                        const SizedBox(width: 4),
+                        Text('מחזור מים חמים',
+                            style: TextStyle(
+                                color: _loop ? _fixture : _mute,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700)),
+                      ]),
+                    ),
                   ),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.loop,
-                        color: _loop ? _fixture : _mute, size: 14),
-                    const SizedBox(width: 4),
-                    Text('מחזור מים חמים',
-                        style: TextStyle(
-                            color: _loop ? _fixture : _mute,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700)),
-                  ]),
                 ),
               ),
             ),
@@ -849,7 +868,7 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
       );
 
   Widget _legendDot(Color c, String label) => Padding(
-        padding: const EdgeInsets.only(left: 14),
+        padding: const EdgeInsetsDirectional.only(end: 14),
         child: Row(children: [
           Container(
             width: 8, height: 8,
@@ -1243,6 +1262,14 @@ class _InstallStudioScreenState extends ConsumerState<InstallStudioScreen>
                                   ],
                                   onSelected: (v) async {
                                     if (v == 'delete') {
+                                      final ok = await confirmDestructive(
+                                        ctx,
+                                        title: 'מחיקת פרויקט?',
+                                        message:
+                                            'הפרויקט "${p.name}" יימחק לצמיתות.',
+                                        confirmLabel: 'מחק',
+                                      );
+                                      if (!ok || !ctx.mounted) return;
                                       await ref
                                           .read(savedProjectsProvider.notifier)
                                           .remove(p.id);
@@ -1434,8 +1461,17 @@ class _NodeRow extends StatelessWidget {
             child: Tooltip(
               message: 'הסר מוצר',
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: onRemove,
-                child: const Icon(Icons.close, color: _mute, size: 18),
+                // ≥48dp tap target around the small ✕ (a11y), without
+                // enlarging the visible glyph.
+                child: const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Center(
+                    child: Icon(Icons.close, color: _mute, size: 18),
+                  ),
+                ),
               ),
             ),
           ),
@@ -1695,19 +1731,28 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
             if (isSwap || isAdd) ...[
               const SizedBox(width: 8),
               GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () => _applySuggestion(s),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: accentColor,
-                    borderRadius: BorderRadius.circular(6),
+                // ≥48dp tap target around the small button (a11y).
+                child: ConstrainedBox(
+                  constraints:
+                      const BoxConstraints(minWidth: 48, minHeight: 48),
+                  child: Center(
+                    widthFactor: 1,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: accentColor,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(isSwap ? 'החלף' : 'הוסף',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800)),
+                    ),
                   ),
-                  child: Text(isSwap ? 'החלף' : 'הוסף',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800)),
                 ),
               ),
             ],
@@ -1885,7 +1930,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                         for (final c in widget.autoFixes)
                           Padding(
                             padding:
-                                const EdgeInsets.only(top: 2, right: 22),
+                                const EdgeInsetsDirectional.only(top: 2, start: 22),
                             child: Text(c,
                                 style: const TextStyle(
                                     color: _ink, fontSize: 11, height: 1.4)),
@@ -3019,26 +3064,34 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
               child: Row(children: [
                 if (_cat != null) ...[
                   GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => setState(() { _cat = null; _q = ''; }),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 9),
-                      margin: const EdgeInsets.only(left: 8),
-                      decoration: BoxDecoration(
-                        color: _panel,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _supply.withOpacity(0.4)),
+                    // ≥48dp tap target around the small chip (a11y).
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 48),
+                      child: Center(
+                        widthFactor: 1,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 9),
+                          margin: const EdgeInsetsDirectional.only(end: 8),
+                          decoration: BoxDecoration(
+                            color: _panel,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: _supply.withOpacity(0.4)),
+                          ),
+                          child: Row(mainAxisSize: MainAxisSize.min, children: [
+                            Text(_cat!.emoji, style: const TextStyle(fontSize: 16)),
+                            const SizedBox(width: 4),
+                            Text(_cat!.label,
+                                style: const TextStyle(
+                                    color: _supply, fontSize: 12,
+                                    fontWeight: FontWeight.w700)),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.close, color: _mute, size: 14),
+                          ]),
+                        ),
                       ),
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Text(_cat!.emoji, style: const TextStyle(fontSize: 16)),
-                        const SizedBox(width: 4),
-                        Text(_cat!.label,
-                            style: const TextStyle(
-                                color: _supply, fontSize: 12,
-                                fontWeight: FontWeight.w700)),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.close, color: _mute, size: 14),
-                      ]),
                     ),
                   ),
                 ],
@@ -3324,9 +3377,16 @@ class _TutorialOverlay extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: onDismiss,
-                child: const Text('דלג',
-                    style: TextStyle(color: _mute, fontSize: 12)),
+                // ≥48dp tap target around the small text (a11y).
+                child: const SizedBox(
+                  height: 48,
+                  child: Center(
+                    child: Text('דלג',
+                        style: TextStyle(color: _mute, fontSize: 12)),
+                  ),
+                ),
               ),
             ],
           ),

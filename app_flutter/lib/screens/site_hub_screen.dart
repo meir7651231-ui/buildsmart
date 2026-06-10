@@ -1309,7 +1309,10 @@ class _SiteInspect extends ConsumerWidget {
           onTap: () => _add(context, ref),
         ),
         const SizedBox(height: 12),
-        for (final ins in list) _card(context, ref, ins),
+        if (list.isEmpty)
+          const _CaEmpty('אין ביקורות מתוזמנות — הקש "+ תזמן ביקורת"')
+        else
+          for (final ins in list) _card(context, ref, ins),
       ],
     );
   }

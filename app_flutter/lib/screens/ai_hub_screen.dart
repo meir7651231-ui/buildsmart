@@ -81,7 +81,8 @@ class AIHubScreen extends ConsumerWidget {
     // cart has items, so adding from a tool (e.g. plan-scan) gives immediate
     // feedback here without yanking the user to the Store tab. popFirst: true →
     // tapping pops the hub, then lands on the cart tab underneath.
-    final cartHasItems = ref.watch(smartCartProvider).isNotEmpty;
+    final cartHasItems =
+        ref.watch(smartCartProvider.select((lines) => lines.isNotEmpty));
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -165,7 +166,8 @@ class _AIFeatureScreen extends ConsumerWidget {
     };
     // Same cart FAB as the hub — this sub-view is also a PUSHED route, so
     // popFirst pops back toward the home shell before landing on the cart tab.
-    final cartHasItems = ref.watch(smartCartProvider).isNotEmpty;
+    final cartHasItems =
+        ref.watch(smartCartProvider.select((lines) => lines.isNotEmpty));
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(

@@ -568,9 +568,18 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
           child: Tooltip(
             message: 'סגור',
             child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: () =>
                   ref.read(finderChipTipDismissedProvider.notifier).state = true,
-              child: const Icon(Icons.close, size: 16, color: _mute),
+              // ≥48dp tap target around the small ✕ (a11y), without
+              // enlarging the visible glyph.
+              child: const SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(
+                  child: Icon(Icons.close, size: 16, color: _mute),
+                ),
+              ),
             ),
           ),
         ),
@@ -772,7 +781,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
       ),
       child: Row(children: [
         Padding(
-          padding: const EdgeInsets.only(right: 14, left: 2),
+          padding: const EdgeInsetsDirectional.only(start: 14, end: 2),
           child: Text(hint,
               style: const TextStyle(
                   color: _mute, fontSize: 12, fontWeight: FontWeight.w700,),),
@@ -815,7 +824,7 @@ class _FinderScreenState extends ConsumerState<FinderScreen> {
 
   Widget _chip(String label, bool active, VoidCallback onTap) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsetsDirectional.only(end: 8),
       child: GestureDetector(
         onTap: onTap,
         child: Container(

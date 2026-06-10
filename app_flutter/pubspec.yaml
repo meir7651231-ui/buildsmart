@@ -30,6 +30,9 @@ dependencies:
   # microphone permission (used by speech_to_text)
   permission_handler: ^11.3.1
 
+  # native/web share sheet — cart 'שתף' (falls back to the Web Share API on web)
+  share_plus: ^10.0.0
+
   # persistence (settings + profile)
   shared_preferences: ^2.3.4
 

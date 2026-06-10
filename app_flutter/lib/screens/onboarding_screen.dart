@@ -68,14 +68,27 @@ class _OpeningFlow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    switch (ref.watch(startupStepProvider)) {
-      case 0:
-        return const WelcomeScreen();
-      case 1:
-        return const ProfessionScreen();
-      default:
-        return const OnboardingScreen();
-    }
+    final step = ref.watch(startupStepProvider);
+    final child = switch (step) {
+      0 => const WelcomeScreen(),
+      1 => const ProfessionScreen(),
+      _ => const OnboardingScreen(),
+    };
+    // The whole opening flow lives on ONE route (the steps are provider
+    // state, not pushed routes), so an unguarded system/browser back would
+    // pop the only route and throw the user out of the app mid-registration.
+    // Intercept it: past the first step, back walks one step back
+    // (slides → profession → welcome); only on the welcome step does back
+    // actually leave. Side routes (ComingSoonScreen, the replayable tour)
+    // are their own routes and pop normally, untouched by this guard.
+    return PopScope<Object?>(
+      canPop: step == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        ref.read(startupStepProvider.notifier).state = step - 1;
+      },
+      child: child,
+    );
   }
 }
 

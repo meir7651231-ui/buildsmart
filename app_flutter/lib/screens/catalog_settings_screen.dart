@@ -1,10 +1,12 @@
 import 'package:buildsmart/screens/home_content_reorder.dart';
+import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/screens/profile_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/recent_searches.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,6 +58,7 @@ class CatalogSettingsScreen extends ConsumerWidget {
           _SuppliersSection(),
           _AiSection(),
           _AccessibilitySection(),
+          _InfoSection(),
           SizedBox(height: 24),
         ],
       ),
@@ -284,7 +287,14 @@ class _SearchSection extends ConsumerWidget {
         const _PlaceholderRow(label: 'רדיוס חיפוש'),
         _ActionRow(
           label: 'ניקוי היסטוריה',
-          onTap: () {
+          onTap: () async {
+            final ok = await confirmDestructive(
+              context,
+              title: 'ניקוי היסטוריית חיפוש?',
+              message: 'היסטוריית החיפושים תימחק לצמיתות.',
+              confirmLabel: 'נקה',
+            );
+            if (!ok || !context.mounted) return;
             ref.read(recentSearchesProvider.notifier).clear();
             showToast(context, 'ההיסטוריה נוקתה');
           },
@@ -538,6 +548,42 @@ class _AccessibilitySection extends ConsumerWidget {
               (v) => ref
                   .read(catalogSettingsProvider.notifier)
                   .update((s) => s.copyWith(reducedMotion: v)),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── 10. info & legal (הגדרות › מידע — task #26) ─────────────────────────────
+
+class _InfoSection extends StatelessWidget {
+  const _InfoSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return _SectionTile(
+      emoji: 'ℹ️',
+      title: 'מידע',
+      children: [
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          title: const Text(
+            'תנאי שימוש',
+            style: TextStyle(color: BsTokens.inkLight),
+          ),
+          trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+          onTap: () => Navigator.of(context)
+              .push(LegalScreen.route(initialTab: LegalTab.terms)),
+        ),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          title: const Text(
+            'מדיניות פרטיות',
+            style: TextStyle(color: BsTokens.inkLight),
+          ),
+          trailing: const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+          onTap: () => Navigator.of(context)
+              .push(LegalScreen.route(initialTab: LegalTab.privacy)),
         ),
       ],
     );

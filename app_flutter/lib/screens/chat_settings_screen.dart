@@ -155,10 +155,19 @@ class _QuickReplyBanner extends StatelessWidget {
               ),
               const Spacer(),
               GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () => _showEditInfo(context),
-                child: const Text(
-                  'ערוך',
-                  style: TextStyle(color: BsTokens.brand, fontSize: 13),
+                // ≥48dp tap target around the small link (a11y), without
+                // enlarging the visible text.
+                child: const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Center(
+                    child: Text(
+                      'ערוך',
+                      style: TextStyle(color: BsTokens.brand, fontSize: 13),
+                    ),
+                  ),
                 ),
               ),
             ],

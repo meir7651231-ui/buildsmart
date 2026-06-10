@@ -127,7 +127,8 @@ class DepartmentsScreen extends ConsumerWidget {
       final flat = ref.watch(deptFlatProductsProvider);
       // Benzi #1 (reframed): ברזים/אינסטלציה show small headings + category rows
       // (`_DeptCatGroups`); tapping a row drills via `catalogTreePathProvider`.
-      final drilling = ref.watch(catalogTreePathProvider).isNotEmpty;
+      final drilling =
+          ref.watch(catalogTreePathProvider.select((p) => p.isNotEmpty));
       final Widget body;
       if (flat) {
         body = LipskeyProductsList(
@@ -300,20 +301,31 @@ class _DeptScopeBar extends ConsumerWidget {
               onTap: () =>
                   ref.read(deptFlatProductsProvider.notifier).state = !flat,
               borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-              child: Padding(
-                padding: const EdgeInsets.all(BsTokens.space1),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(flat ? Icons.account_tree_outlined : Icons.view_list,
-                        size: 16, color: BsTokens.brand),
-                    const SizedBox(width: 2),
-                    Text(flat ? 'קטלוג' : 'כל המוצרים',
-                        style: const TextStyle(
-                            color: BsTokens.brand,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600)),
-                  ],
+              // ≥48dp tap target (a11y) — the visible label is unchanged.
+              child: ConstrainedBox(
+                constraints:
+                    const BoxConstraints(minWidth: 48, minHeight: 48),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(BsTokens.space1),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                            flat
+                                ? Icons.account_tree_outlined
+                                : Icons.view_list,
+                            size: 16,
+                            color: BsTokens.brand),
+                        const SizedBox(width: 2),
+                        Text(flat ? 'קטלוג' : 'כל המוצרים',
+                            style: const TextStyle(
+                                color: BsTokens.brand,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -326,19 +338,26 @@ class _DeptScopeBar extends ConsumerWidget {
                 ref.read(catalogTreePathProvider.notifier).state = const [];
               },
               borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-              child: const Padding(
-                padding: EdgeInsets.all(BsTokens.space1),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('כל המחלקות',
-                        style: TextStyle(
-                            color: BsTokens.brand,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600)),
-                    SizedBox(width: 2),
-                    Icon(Icons.close, size: 16, color: BsTokens.brand),
-                  ],
+              // ≥48dp tap target (a11y) — the visible label is unchanged.
+              child: ConstrainedBox(
+                constraints:
+                    const BoxConstraints(minWidth: 48, minHeight: 48),
+                child: const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(BsTokens.space1),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('כל המחלקות',
+                            style: TextStyle(
+                                color: BsTokens.brand,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600)),
+                        SizedBox(width: 2),
+                        Icon(Icons.close, size: 16, color: BsTokens.brand),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -361,6 +380,27 @@ class _DeptCatGroups extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final headings = kDeptCatHeadings[deptName] ?? const [];
+    if (headings.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('🗂️', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 12),
+            Text(
+              'אין קטגוריות במחלקה זו',
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'הקטגוריות יופיעו כאן כשיתווסף קטלוג למחלקה',
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+        ),
+      );
+    }
     return ListView(
       padding: const EdgeInsets.fromLTRB(
           BsTokens.space3, BsTokens.space3, BsTokens.space3, BsTokens.space5),

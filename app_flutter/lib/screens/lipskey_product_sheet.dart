@@ -73,8 +73,8 @@ void _openFullscreenAsset(BuildContext context, String asset, String emoji) {
                 customBorder: const CircleBorder(),
                 onTap: () => Navigator.pop(context),
                 child: const SizedBox(
-                    width: 40,
-                    height: 40,
+                    width: 48,
+                    height: 48,
                     child: Icon(Icons.close, color: Colors.white)),
               ),
             ),
@@ -1150,28 +1150,39 @@ class _ProductSideState extends State<_ProductSide> {
             // multi-image pager (1/N) — only when there's more than one photo.
             if (imgs.length > 1)
               Positioned(
-                top: 10,
-                left: 10,
+                top: 0,
+                left: 0,
                 child: Semantics(
                   button: true,
                   label: 'התמונה הבאה',
                   child: Tooltip(
                     message: 'התמונה הבאה',
                     child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
                       onTap: () =>
                           setState(() => _i = (i + 1) % imgs.length),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 9, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: const Color(0xCC1A1200),
-                          borderRadius: BorderRadius.circular(20),
+                      // ≥48dp tap target around the small pager chip (a11y);
+                      // Positioned 10→0 keeps the centred chip in place.
+                      child: ConstrainedBox(
+                        constraints:
+                            const BoxConstraints(minWidth: 48, minHeight: 48),
+                        child: Center(
+                          widthFactor: 1,
+                          heightFactor: 1,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 9, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xCC1A1200),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text('${i + 1}/${imgs.length}',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800)),
+                          ),
                         ),
-                        child: Text('${i + 1}/${imgs.length}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800)),
                       ),
                     ),
                   ),
@@ -1209,29 +1220,39 @@ class _ProductSideState extends State<_ProductSide> {
               ),
             // "פרטים / מפרט" button — flips to the spec page
             Positioned(
-              bottom: 10,
+              bottom: 0,
               left: 10,
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: widget.onFlip,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF7A18),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.description_outlined,
-                          color: Color(0xFF1A1200), size: 14),
-                      SizedBox(width: 5),
-                      Text('פרטים / מפרט',
-                          style: TextStyle(
-                              color: Color(0xFF1A1200),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800)),
-                    ],
+                // ≥48dp tap target (a11y); bottom 10→0 keeps the centred chip
+                // in (roughly) the same visual spot.
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Center(
+                    widthFactor: 1,
+                    heightFactor: 1,
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF7A18),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.description_outlined,
+                              color: Color(0xFF1A1200), size: 14),
+                          SizedBox(width: 5),
+                          Text('פרטים / מפרט',
+                              style: TextStyle(
+                                  color: Color(0xFF1A1200),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -1314,28 +1335,39 @@ class _SpecSideState extends State<_SpecSide> {
             // multi-spec pager (1/N) — only when there's more than one image.
             if (specs.length > 1)
               Positioned(
-                top: 10,
-                left: 10,
+                top: 0,
+                left: 0,
                 child: Semantics(
                   button: true,
                   label: 'המפרט הבא',
                   child: Tooltip(
                     message: 'המפרט הבא',
                     child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
                       onTap: () =>
                           setState(() => _i = (i + 1) % specs.length),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 9, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: const Color(0xCC1A1200),
-                          borderRadius: BorderRadius.circular(20),
+                      // ≥48dp tap target around the small pager chip (a11y);
+                      // Positioned 10→0 keeps the centred chip in place.
+                      child: ConstrainedBox(
+                        constraints:
+                            const BoxConstraints(minWidth: 48, minHeight: 48),
+                        child: Center(
+                          widthFactor: 1,
+                          heightFactor: 1,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 9, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xCC1A1200),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text('${i + 1}/${specs.length}',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800)),
+                          ),
                         ),
-                        child: Text('${i + 1}/${specs.length}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800)),
                       ),
                     ),
                   ),
@@ -1345,29 +1377,39 @@ class _SpecSideState extends State<_SpecSide> {
             const Positioned(top: 10, right: 10, child: _ZoomHint()),
             // back-to-product button
             Positioned(
-              bottom: 10,
+              bottom: 0,
               left: 10,
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: widget.onFlip,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF7A18),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.image_outlined,
-                          color: Color(0xFF1A1200), size: 14),
-                      SizedBox(width: 5),
-                      Text('חזרה למוצר',
-                          style: TextStyle(
-                              color: Color(0xFF1A1200),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800)),
-                    ],
+                // ≥48dp tap target (a11y); bottom 10→0 keeps the centred chip
+                // in (roughly) the same visual spot.
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Center(
+                    widthFactor: 1,
+                    heightFactor: 1,
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF7A18),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.image_outlined,
+                              color: Color(0xFF1A1200), size: 14),
+                          SizedBox(width: 5),
+                          Text('חזרה למוצר',
+                              style: TextStyle(
+                                  color: Color(0xFF1A1200),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),

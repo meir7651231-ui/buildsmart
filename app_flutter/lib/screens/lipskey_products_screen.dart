@@ -16,6 +16,7 @@ import 'package:buildsmart/state/catalog_lens_state.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -151,6 +152,30 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.products.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('📦', style: TextStyle(fontSize: 48)),
+            SizedBox(height: 12),
+            Text(
+              'אין מוצרים להצגה',
+              style: TextStyle(
+                color: BsTokens.inkLight,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 6),
+            Text(
+              'נסו לבחור קטגוריה אחרת בקטלוג',
+              style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+            ),
+          ],
+        ),
+      );
+    }
     // Step 3b — list-level lens selector ABOVE the list. Default lens =
     // category → the existing flat list, visually unchanged. A non-category
     // lens re-organises the SAME products into titled groups via groupByLens.
@@ -323,8 +348,9 @@ class LipskeyProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final grid = ref.watch(catalogSettingsProvider).viewMode ==
-        CatalogViewMode.grid;
+    final grid =
+        ref.watch(catalogSettingsProvider.select((s) => s.viewMode)) ==
+            CatalogViewMode.grid;
     return grid
         ? LipskeyProductGridCard(product: product, products: products)
         : _ProductRow(product: product, categoryProducts: products);
@@ -490,15 +516,22 @@ class LipskeyProductGridCard extends ConsumerWidget {
                           child: Tooltip(
                             message: 'בחר כמות',
                             child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () => showQtyWheel(context, qty,
                                   (n) => cart.setQtyForKey(_line(n))),
-                              child: Text(
-                                '$qty',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: cs.onSurface,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
+                              // ≥48dp tap target around the qty number (a11y).
+                              child: SizedBox(
+                                height: 48,
+                                child: Center(
+                                  child: Text(
+                                    '$qty',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: cs.onSurface,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -513,28 +546,34 @@ class LipskeyProductGridCard extends ConsumerWidget {
                     ],
                   )
                 : GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => cart.setQtyForKey(_line(1)),
-                    child: Container(
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: _brand,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.add, color: bsOnAccent(context), size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            'לסל',
-                            style: TextStyle(
-                              color: bsOnAccent(context),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
+                    // ≥48dp tap target: transparent vertical padding around
+                    // the 32dp visible bar (a11y).
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Container(
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: _brand,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.add, color: bsOnAccent(context), size: 16),
+                            const SizedBox(width: 4),
+                            Text(
+                              'לסל',
+                              style: TextStyle(
+                                color: bsOnAccent(context),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -561,17 +600,25 @@ class _StepBtn extends StatelessWidget {
       child: Tooltip(
         message: label,
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: onTap,
-          child: Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: filled ? brand : Theme.of(context).colorScheme.surface,
-              shape: BoxShape.circle,
-              border: filled ? null : Border.all(color: brand, width: 1.2),
+          // ≥48dp tap target around the 30dp visible circle (a11y).
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: filled ? brand : Theme.of(context).colorScheme.surface,
+                  shape: BoxShape.circle,
+                  border: filled ? null : Border.all(color: brand, width: 1.2),
+                ),
+                child: Icon(icon,
+                    color: filled ? bsOnAccent(context) : brand, size: 18),
+              ),
             ),
-            child: Icon(icon,
-                color: filled ? bsOnAccent(context) : brand, size: 18),
           ),
         ),
       ),
@@ -866,7 +913,14 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
 
   /// Cancel the selection — clears every line of this product and collapses
   /// the card back to its unselected (+) state.
-  void _removeFromCart() {
+  Future<void> _removeFromCart() async {
+    final ok = await confirmDestructive(
+      context,
+      title: 'הסרה מהסל?',
+      message: '"${p.nameHe}" יוסר מהסל.',
+      confirmLabel: 'הסר',
+    );
+    if (!ok || !mounted) return;
     ref.read(smartCartProvider.notifier).setQtyForKey(_cartLine(0));
     setState(() => _open = false);
   }
@@ -930,7 +984,8 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final compact = ref.watch(catalogSettingsProvider).compactMode;
+    final compact =
+        ref.watch(catalogSettingsProvider.select((s) => s.compactMode));
     // Selected = product is in the cart → render the whole card as "pressed".
     // Use .select so only THIS row rebuilds when its own cart membership changes
     // (not on every cart change from unrelated products). Uses the currently
@@ -1116,7 +1171,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                 onTap: () => onTap(item),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  margin: const EdgeInsets.only(left: 6),
+                  margin: const EdgeInsetsDirectional.only(end: 6),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: isSelected(item)
@@ -1148,7 +1203,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
 
   // ── image (tap = fullscreen) + ✓ in-cart badge ───────────────────────────
   Widget _image() {
-    final sz = ref.watch(catalogSettingsProvider).imageSize;
+    final sz = ref.watch(catalogSettingsProvider.select((s) => s.imageSize));
     final w = switch (sz) {
       CatalogImageSize.small => 64.0,
       CatalogImageSize.medium => 88.0,
@@ -1183,8 +1238,8 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
               ),
               if (_inCart)
                 Positioned(
-                  top: 6,
-                  right: 6,
+                  top: 0,
+                  right: 0,
                   // Tap the badge to cancel the selection (remove from cart).
                   child: Semantics(
                     button: true,
@@ -1192,15 +1247,28 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                     child: Tooltip(
                       message: 'הסר מהסל',
                       child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap: _removeFromCart,
-                        child: const CircleAvatar(
-                          radius: 12,
-                          backgroundColor: _teal,
-                          child: Text('✓',
-                              style: TextStyle(
-                                  color: Color(0xFF06251C),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w900)),
+                        // ≥48dp tap target; the 24dp badge keeps its exact
+                        // original spot (6,6 from the corner).
+                        child: const SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 6, right: 6),
+                            child: Align(
+                              alignment: Alignment.topRight,
+                              child: CircleAvatar(
+                                radius: 12,
+                                backgroundColor: _teal,
+                                child: Text('✓',
+                                    style: TextStyle(
+                                        color: Color(0xFF06251C),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w900)),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -1408,6 +1476,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
       child: Tooltip(
         message: 'הוסף לסל',
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () {
             setState(() {
               _open = true;
@@ -1415,17 +1484,24 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
             });
             _addToCart();
           },
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-                color: _brand, borderRadius: BorderRadius.circular(12)),
-            alignment: Alignment.center,
-            child: const Text('+',
-                style: TextStyle(
-                    color: Color(0xFF1A1200),
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800)),
+          // ≥48dp tap target around the 40dp visible button (a11y).
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                    color: _brand, borderRadius: BorderRadius.circular(12)),
+                alignment: Alignment.center,
+                child: const Text('+',
+                    style: TextStyle(
+                        color: Color(0xFF1A1200),
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800)),
+              ),
+            ),
           ),
         ),
       ),

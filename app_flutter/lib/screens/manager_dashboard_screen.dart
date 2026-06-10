@@ -1944,7 +1944,8 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
     // The LIVE catalog category distribution (cat → product count) — the same
     // map the 📊 dashboard reads, off the shared engine's analytics. Sorted by
     // count desc so the biggest categories read first (a stable display order).
-    final cats = ref.watch(managerAnalyticsProvider).catalogCategories;
+    final cats = ref.watch(
+        managerAnalyticsProvider.select((a) => a.catalogCategories));
     final catEntries = cats.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final totalProducts = cats.values.fold<int>(0, (s, n) => s + n);

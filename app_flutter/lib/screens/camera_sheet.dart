@@ -220,7 +220,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                           final m = e.value;
                           final sel = _mode == i;
                           return Padding(
-                            padding: const EdgeInsets.only(left: 8),
+                            padding: const EdgeInsetsDirectional.only(end: 8),
                             child: GestureDetector(
                               onTap: () => setState(() {
                                 _mode = i;

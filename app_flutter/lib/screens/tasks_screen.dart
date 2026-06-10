@@ -12,6 +12,7 @@ import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -95,6 +96,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       ),
       const SizedBox(height: BsTokens.space2),
       _LogButton(onTap: () => _openWorkLog(context)),
+      if (tasks.isEmpty)
+        const _DoneAll('אין משימות לצוות עדיין — משימות חדשות יופיעו כאן'),
       if (review.isNotEmpty)
         _Group('📸 ממתין לאישור שלך (${review.length})', review, _open),
       if (active.isNotEmpty)
@@ -531,7 +534,14 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                   Expanded(
                     child: OutlinedButton(
                       key: const ValueKey('task-reject'),
-                      onPressed: () {
+                      onPressed: () async {
+                        final ok = await confirmDestructive(
+                          context,
+                          title: 'החזרה לתיקון?',
+                          message: 'תמונת הביצוע תימחק והמשימה תוחזר לעובד.',
+                          confirmLabel: 'החזר',
+                        );
+                        if (!ok || !context.mounted) return;
                         ref.read(tasksProvider.notifier).reject(t.id);
                         Navigator.of(context).pop();
                         showToast(context, 'המשימה הוחזרה לעובד לתיקון');
@@ -544,7 +554,15 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                     child: _PrimaryBtn(
                       key: const ValueKey('task-approve'),
                       label: '✅ אשר',
-                      onTap: () {
+                      onTap: () async {
+                        final ok = await confirmDestructive(
+                          context,
+                          title: 'אישור המשימה?',
+                          message: 'המשימה תסומן כהושלמה — פעולה סופית.',
+                          confirmLabel: 'אשר',
+                          confirmColor: const Color(0xFF1F8A4C),
+                        );
+                        if (!ok || !context.mounted) return;
                         ref.read(tasksProvider.notifier).approve(t.id);
                         Navigator.of(context).pop();
                         showToast(context, 'המשימה אושרה ✓');

@@ -1,6 +1,7 @@
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -182,8 +183,9 @@ class _Leaderboard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sorted = [...ref.watch(rewardsProvider).leaderboard]
-      ..sort((a, b) => b.coins.compareTo(a.coins));
+    final sorted = [
+      ...ref.watch(rewardsProvider.select((s) => s.leaderboard))
+    ]..sort((a, b) => b.coins.compareTo(a.coins));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -396,7 +398,16 @@ class _Redeem extends ConsumerWidget {
                 if (rw.coins >= r.cost)
                   _CardBtn(
                     label: 'ממש עכשיו',
-                    onTap: () {
+                    onTap: () async {
+                      final go = await confirmDestructive(
+                        context,
+                        title: 'מימוש פרס?',
+                        message:
+                            '${r.name} — ינוכו ${r.cost} מטבעות מהיתרה שלך.',
+                        confirmLabel: 'ממש',
+                        confirmColor: BsTokens.brand,
+                      );
+                      if (!go || !context.mounted) return;
                       final ok = ref.read(rewardsProvider.notifier).redeem(r);
                       if (ok) {
                         showToast(context, '🎁 ${r.name} מומש בהצלחה!');

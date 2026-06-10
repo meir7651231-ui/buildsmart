@@ -28,6 +28,7 @@ import 'package:buildsmart/data/contractor_seeds.dart' show caToday, fMoney;
 // projectRoi, invoiceSplit, buildIndexDeltaPct, kFxRates …) are unchanged.
 import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/data/repositories/finance_local.dart' show financeRepo;
+import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/state/finance_hub_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -1575,6 +1576,11 @@ class _FxCalcState extends State<_FxCalc> {
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               hintText: 'סכום',
+              // task #64: format-only check — must be a positive number.
+              errorText: _ctl.text.trim().isEmpty ||
+                      validPositiveAmount(double.tryParse(_ctl.text.trim()))
+                  ? null
+                  : 'סכום לא תקין',
               filled: true,
               fillColor: Colors.white,
               contentPadding: const EdgeInsets.symmetric(

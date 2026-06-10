@@ -135,20 +135,21 @@ class StockScreen extends ConsumerWidget {
           Expanded(
             child: items.isEmpty
                 ? _Empty(tab: tab)
-                : ListView(
+                : ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      for (final nm in items)
-                        _StockRow(
-                          name: nm,
-                          info: _accInfo[nm] ?? (img: '📦', why: ''),
-                          warehouse: tab == 'warehouse',
-                          onMove: () {
-                            ref.read(stockProvider.notifier).move(nm);
-                            showToast(context, 'הפריט הועבר');
-                          },
-                        ),
-                    ],
+                    itemCount: items.length,
+                    itemBuilder: (_, i) {
+                      final nm = items[i];
+                      return _StockRow(
+                        name: nm,
+                        info: _accInfo[nm] ?? (img: '📦', why: ''),
+                        warehouse: tab == 'warehouse',
+                        onMove: () {
+                          ref.read(stockProvider.notifier).move(nm);
+                          showToast(context, 'הפריט הועבר');
+                        },
+                      );
+                    },
                   ),
           ),
           // hint (stock-hint)

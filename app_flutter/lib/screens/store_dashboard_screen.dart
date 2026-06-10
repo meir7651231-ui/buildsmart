@@ -9,6 +9,7 @@ import 'package:buildsmart/state/store_stock.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -131,7 +132,8 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     final inPrep = orders.countAt(OrderStage.preparing);
     final ready = orders.countAt(OrderStage.ready);
     final revenue = orders.todayRevenue;
-    final outCount = ref.watch(storeOosProvider).length;
+    final outCount =
+        ref.watch(storeOosProvider.select((oos) => oos.length));
     final fulfillment = ref.watch(fulfillmentProvider);
     // Orders held for a missing-item decision (proto §2.2 "held" card).
     final held = orders.where((o) {
@@ -910,7 +912,21 @@ class _StoreOrderCard extends StatelessWidget {
                 const SizedBox(height: BsTokens.space3),
                 if (active)
                   FilledButton(
-                    onPressed: () => onAdvance(order),
+                    onPressed: () async {
+                      // ready→pickup hand-off is final — confirm first.
+                      if (order.stage == OrderStage.ready) {
+                        final ok = await confirmDestructive(
+                          context,
+                          title: 'מסירה לשליח?',
+                          message:
+                              'ההזמנה ${order.id} תימסר לשליח — פעולה סופית.',
+                          confirmLabel: 'מסור',
+                          confirmColor: const Color(0xFF1F8A4C),
+                        );
+                        if (!ok || !context.mounted) return;
+                      }
+                      onAdvance(order);
+                    },
                     style: FilledButton.styleFrom(
                       backgroundColor: order.stage == OrderStage.preparing
                           ? BsTokens.brand

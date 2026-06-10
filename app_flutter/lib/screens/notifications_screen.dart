@@ -4,6 +4,7 @@ import 'package:buildsmart/screens/store_screen.dart'
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,6 +49,10 @@ class PersistedIdSet extends StateNotifier<Set<String>> {
     state = {...state}..remove(id);
     _persist();
   }
+
+  /// Re-reads the persisted set from SharedPreferences — the honest
+  /// pull-to-refresh path (no artificial delay).
+  Future<void> reload() => _load();
 }
 
 final notifSectionProvider =
@@ -60,11 +65,22 @@ final notifDismissedIdsProvider =
     StateNotifierProvider<PersistedIdSet, Set<String>>(
   (_) => PersistedIdSet('bs.notif-dismissed.v1'),
 );
+
+/// Shipment notifications the user follows ('עקוב' chip) — a real local
+/// follow toggle, persisted so it survives restarts.
+final notifFollowedIdsProvider =
+    StateNotifierProvider<PersistedIdSet, Set<String>>(
+  (_) => PersistedIdSet('bs.notif-followed.v1'),
+);
 final notifSearchQueryProvider = StateProvider<String>((_) => '');
 final notifExpandedGroupsProvider = StateProvider<Set<String>>((_) => {});
 
 // Derived provider — used by home_shell badge.
 final notifUnreadCountProvider = Provider<int>((ref) {
+  // ערוץ 'התראות בתוך האפליקציה' כבוי → חיווי ההתראות החדשות בתוך
+  // האפליקציה (בדג' ה'עדכונים' + מונה 'חדשות') מושתק — האפקט הכן של
+  // מתג ערוצי-הקבלה (notif_settings_screen).
+  if (!ref.watch(notifSettingsProvider).pushEnabled) return 0;
   final readIds = ref.watch(notifReadIdsProvider);
   final dismissedIds = ref.watch(notifDismissedIdsProvider);
   return _kNotifs
@@ -527,7 +543,14 @@ class _Header extends ConsumerWidget {
                 size: 22,
               ),
               tooltip: 'נקה נקראו',
-              onPressed: () {
+              onPressed: () async {
+                final ok = await confirmDestructive(
+                  context,
+                  title: 'ניקוי התראות שנקראו?',
+                  message: 'ההתראות שנקראו יוסרו מהרשימה לצמיתות.',
+                  confirmLabel: 'נקה',
+                );
+                if (!ok || !context.mounted) return;
                 ref.read(notifDismissedIdsProvider.notifier).set(
                     Set<String>.from(ref.read(notifDismissedIdsProvider))
                       ..addAll(ref.read(notifReadIdsProvider)));
@@ -565,7 +588,8 @@ class _NotifSearchBarState extends ConsumerState<_NotifSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final hasText = ref.watch(notifSearchQueryProvider).isNotEmpty;
+    final hasText =
+        ref.watch(notifSearchQueryProvider.select((q) => q.isNotEmpty));
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
       child: TextField(
@@ -716,6 +740,17 @@ class _Pill extends StatelessWidget {
 
 // ─── list ────────────────────────────────────────────────────────────────────
 
+/// Honest pull-to-refresh: re-reads the persisted notification state (read /
+/// dismissed / followed id-sets) from SharedPreferences and completes when
+/// the re-read is done — no artificial delay, no fake network spinner.
+Future<void> _reloadNotifState(WidgetRef ref) async {
+  await Future.wait([
+    ref.read(notifReadIdsProvider.notifier).reload(),
+    ref.read(notifDismissedIdsProvider.notifier).reload(),
+    ref.read(notifFollowedIdsProvider.notifier).reload(),
+  ]);
+}
+
 class _NotifList extends ConsumerWidget {
   const _NotifList();
 
@@ -747,7 +782,7 @@ class _NotifList extends ConsumerWidget {
       return RefreshIndicator(
         color: BsTokens.brand,
         backgroundColor: const Color(0xFFFFFFFF),
-        onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
+        onRefresh: () => _reloadNotifState(ref),
         child: LayoutBuilder(
           builder: (_, constraints) => SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -790,7 +825,7 @@ class _NotifList extends ConsumerWidget {
       return RefreshIndicator(
         color: BsTokens.brand,
         backgroundColor: const Color(0xFFFFFFFF),
-        onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
+        onRefresh: () => _reloadNotifState(ref),
         child: LayoutBuilder(
           builder: (_, constraints) => SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -831,7 +866,7 @@ class _NotifList extends ConsumerWidget {
       return RefreshIndicator(
         color: BsTokens.brand,
         backgroundColor: const Color(0xFFFFFFFF),
-        onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
+        onRefresh: () => _reloadNotifState(ref),
         child: LayoutBuilder(
           builder: (_, constraints) => SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -871,7 +906,7 @@ class _NotifList extends ConsumerWidget {
     return RefreshIndicator(
       color: BsTokens.brand,
       backgroundColor: const Color(0xFFFFFFFF),
-      onRefresh: () => Future.delayed(const Duration(milliseconds: 800)),
+      onRefresh: () => _reloadNotifState(ref),
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: items.length,
@@ -938,7 +973,7 @@ class _ShowMoreRow extends ConsumerWidget {
               ..add(showMore.groupKey);
       },
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(76, 8, 16, 8),
+        padding: const EdgeInsetsDirectional.fromSTEB(76, 8, 16, 8),
         child: Text(
           'הצג עוד ${showMore.hiddenCount} ↓',
           style: const TextStyle(
@@ -1004,6 +1039,8 @@ class _NotifRow extends ConsumerWidget {
     final readIds = ref.watch(notifReadIdsProvider);
     final isRead = readIds.contains(notif.id);
     final isUnread = notif.badge > 0 && !isRead;
+    final isFollowed =
+        ref.watch(notifFollowedIdsProvider).contains(notif.id);
     final actionLabel = _actionLabel(notif.type);
 
     Future<void> showLongPressMenu() async {
@@ -1057,7 +1094,15 @@ class _NotifRow extends ConsumerWidget {
       if (choice == 'read') {
         ref.read(notifReadIdsProvider.notifier).add(notif.id);
       } else if (choice == 'delete') {
-        ref.read(notifDismissedIdsProvider.notifier).add(notif.id);
+        final ok = await confirmDestructive(
+          context,
+          title: 'מחיקת התראה?',
+          message: 'ההתראה תימחק לצמיתות.',
+          confirmLabel: 'מחק',
+        );
+        if (ok && context.mounted) {
+          ref.read(notifDismissedIdsProvider.notifier).add(notif.id);
+        }
       }
     }
 
@@ -1150,27 +1195,42 @@ class _NotifRow extends ConsumerWidget {
                         ),
                         if (actionLabel != null) ...[
                           const SizedBox(width: 8),
-                          // 'עקוב' (shipments) has no backing screen yet —
-                          // rendered disabled so it signals intent without
-                          // misleading the user.
+                          // 'עקוב' (shipments) — real local follow toggle,
+                          // persisted via notifFollowedIdsProvider
+                          // (bs.notif-followed.v1).
                           if (notif.type == NotifSection.shipments)
-                            Tooltip(
-                              message: 'מעקב משלוחים — בקרוב',
+                            GestureDetector(
+                              onTap: () {
+                                final notifier = ref.read(
+                                  notifFollowedIdsProvider.notifier,
+                                );
+                                if (isFollowed) {
+                                  notifier.remove(notif.id);
+                                } else {
+                                  notifier.add(notif.id);
+                                }
+                              },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
                                   vertical: 3,
                                 ),
                                 decoration: BoxDecoration(
+                                  color: isFollowed
+                                      ? BsTokens.brand
+                                      : Colors.transparent,
                                   border: Border.all(
-                                    color: const Color(0xFFCCCCCC),
+                                    color:
+                                        BsTokens.brand.withValues(alpha: 0.7),
                                   ),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
-                                  '🚧 $actionLabel',
-                                  style: const TextStyle(
-                                    color: Color(0xFFAAAAAA),
+                                  isFollowed ? 'עוקב ✓' : actionLabel,
+                                  style: TextStyle(
+                                    color: isFollowed
+                                        ? Colors.white
+                                        : BsTokens.brand,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),

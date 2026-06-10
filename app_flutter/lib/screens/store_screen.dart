@@ -9,6 +9,7 @@ import 'package:buildsmart/state/store_settings.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1212,79 +1213,96 @@ class _GridHubCard extends StatelessWidget {
     final hasBadge = item.badge > 0;
     return GestureDetector(
       onTap: onTap ?? () => showToast(context, '${item.title} — בבנייה'),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFF0F0F0)),
-        ),
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFFFFF),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFF0F0F0)),
+            ),
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.emoji, style: const TextStyle(fontSize: 22)),
-                const Spacer(),
-                if (hasBadge)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: BsTokens.brand,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${item.badge}',
-                      style: TextStyle(
-                        color: bsOnAccent(context),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                Tooltip(
-                  message: isFav ? 'הסר ממועדפים' : 'הוסף למועדפים',
-                  child: Semantics(
-                    button: true,
-                    label: isFav ? 'הסר ממועדפים' : 'הוסף למועדפים',
-                    child: GestureDetector(
-                      onTap: onFavToggle,
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Icon(
-                          isFav ? Icons.favorite : Icons.favorite_border,
-                          color: isFav ? Colors.pinkAccent : Colors.black26,
-                          size: 16,
+                Row(
+                  children: [
+                    Text(item.emoji, style: const TextStyle(fontSize: 22)),
+                    const Spacer(),
+                    if (hasBadge)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 1,
                         ),
+                        decoration: BoxDecoration(
+                          color: BsTokens.brand,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${item.badge}',
+                          style: TextStyle(
+                            color: bsOnAccent(context),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    // Layout placeholder — the real (48dp) favorite target is
+                    // overlaid at the top-end corner below (a11y).
+                    const SizedBox(width: 24, height: 24),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  item.title,
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  item.preview,
+                  style: const TextStyle(color: Color(0xFF888888), fontSize: 11),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          // ≥48dp favorite tap target (a11y) — overlaid so the tile layout
+          // and icon visuals stay identical.
+          PositionedDirectional(
+            top: 0,
+            end: 0,
+            child: Tooltip(
+              message: isFav ? 'הסר ממועדפים' : 'הוסף למועדפים',
+              child: Semantics(
+                button: true,
+                label: isFav ? 'הסר ממועדפים' : 'הוסף למועדפים',
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onFavToggle,
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: Icon(
+                        isFav ? Icons.favorite : Icons.favorite_border,
+                        color: isFav ? Colors.pinkAccent : Colors.black26,
+                        size: 16,
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              item.title,
-              style: const TextStyle(
-                color: BsTokens.inkLight,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 2),
-            Text(
-              item.preview,
-              style: const TextStyle(color: Color(0xFF888888), fontSize: 11),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1848,8 +1866,8 @@ class _SmartCartRow extends ConsumerWidget {
                 onPressed:
                     () => ref.read(smartCartProvider.notifier).remove(index),
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                visualDensity: VisualDensity.compact,
+                // ≥48dp tap target (a11y) — icon visuals unchanged.
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               ),
             ],
           ),
@@ -1912,9 +1930,13 @@ class _SmartQtyStepper extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           customBorder: const CircleBorder(),
-          child: Padding(
-            padding: const EdgeInsets.all(2),
-            child: Icon(icon, size: 18, color: BsTokens.brand),
+          // ≥48dp tap target (a11y) — icon visuals unchanged.
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: Icon(icon, size: 18, color: BsTokens.brand),
+            ),
           ),
         ),
       ),
@@ -2042,13 +2064,18 @@ class _CartItemRow extends ConsumerWidget {
                   button: true,
                   label: 'הסר מהסל',
                   child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => setQty(0),
-                    child: const Padding(
-                      padding: EdgeInsets.all(4),
-                      child: Icon(
-                        Icons.close,
-                        size: 16,
-                        color: Color(0xFF666666),
+                    // ≥48dp tap target (a11y) — icon visuals unchanged.
+                    child: const SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Center(
+                        child: Icon(
+                          Icons.close,
+                          size: 16,
+                          color: Color(0xFF666666),
+                        ),
                       ),
                     ),
                   ),
@@ -2119,13 +2146,18 @@ class _StepBtn extends StatelessWidget {
         button: true,
         label: icon == Icons.add ? 'הוסף כמות' : 'הפחת כמות',
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Icon(
-              icon,
-              size: 18,
-              color: onTap != null ? BsTokens.brand : const Color(0xFF444444),
+          // ≥48dp tap target (a11y) — icon visuals unchanged.
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: Icon(
+                icon,
+                size: 18,
+                color: onTap != null ? BsTokens.brand : const Color(0xFF444444),
+              ),
             ),
           ),
         ),
@@ -3015,10 +3047,19 @@ class _CartActionsRow extends ConsumerWidget {
                                     color: Color(0xFF666666),
                                     size: 20,
                                   ),
-                                  onPressed:
-                                      () => ref
-                                          .read(cartListsProvider.notifier)
-                                          .deleteList(list.id),
+                                  onPressed: () async {
+                                    final ok = await confirmDestructive(
+                                      context,
+                                      title: 'מחיקת רשימה שמורה?',
+                                      message:
+                                          'הרשימה "${list.name}" תימחק לצמיתות.',
+                                      confirmLabel: 'מחק',
+                                    );
+                                    if (!ok || !context.mounted) return;
+                                    await ref
+                                        .read(cartListsProvider.notifier)
+                                        .deleteList(list.id);
+                                  },
                                 ),
                                 // Load every saved line back into the live cart.
                                 onTap: () {
@@ -3084,7 +3125,14 @@ class _CartActionsRow extends ConsumerWidget {
           style: TextButton.styleFrom(foregroundColor: Colors.black38),
         ),
         TextButton.icon(
-          onPressed: () {
+          onPressed: () async {
+            final ok = await confirmDestructive(
+              context,
+              title: 'ניקוי הסל?',
+              message: 'כל הפריטים יוסרו מהסל.',
+              confirmLabel: 'נקה',
+            );
+            if (!ok || !context.mounted) return;
             ref.read(smartCartProvider.notifier).clear();
             ref.read(cartQtysProvider.notifier).state = const {};
             ref.read(cartNotesProvider.notifier).state = '';

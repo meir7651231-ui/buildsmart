@@ -22,6 +22,7 @@ import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/version.g.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -807,7 +808,8 @@ class _ChatsMenuButton extends ConsumerWidget {
     );
   }
 
-  void _onSelected(BuildContext context, WidgetRef ref, String value) {
+  Future<void> _onSelected(
+      BuildContext context, WidgetRef ref, String value) async {
     switch (value) {
       case 'new_chat':
         showModalBottomSheet<void>(
@@ -822,6 +824,16 @@ class _ChatsMenuButton extends ConsumerWidget {
         Navigator.of(context).push(ChatsArchiveScreen.route());
       case 'mute_all':
         final wasAllMuted = allChatsMuted(ref);
+        if (!wasAllMuted) {
+          final ok = await confirmDestructive(
+            context,
+            title: 'השתקת כל השיחות?',
+            message: 'כל השיחות יושתקו עד לביטול ההשתקה.',
+            confirmLabel: 'השתק',
+            confirmColor: BsTokens.brand,
+          );
+          if (!ok || !context.mounted) return;
+        }
         toggleMuteAllChats(ref);
         showToast(
           context,
@@ -864,12 +876,20 @@ class _NotificationsMenuButton extends ConsumerWidget {
     );
   }
 
-  void _onSelected(BuildContext context, WidgetRef ref, String value) {
+  Future<void> _onSelected(
+      BuildContext context, WidgetRef ref, String value) async {
     switch (value) {
       case 'mark_all_read':
         markAllNotifsRead(ref);
         showToast(context, 'כל ההתראות סומנו כנקרא');
       case 'clear_all':
+        final ok = await confirmDestructive(
+          context,
+          title: 'ניקוי כל ההתראות?',
+          message: 'כל ההתראות יימחקו לצמיתות.',
+          confirmLabel: 'נקה הכל',
+        );
+        if (!ok || !context.mounted) return;
         dismissAllNotifs(ref);
         showToast(context, 'כל ההתראות נמחקו');
       case 'notif_settings':

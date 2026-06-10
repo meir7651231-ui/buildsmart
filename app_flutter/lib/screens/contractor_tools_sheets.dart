@@ -820,14 +820,14 @@ class _ScanPlanSheetState extends ConsumerState<_ScanPlanSheet> {
               ? Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // ≥48dp tap target (a11y) — the checkbox glyph itself is
+                  // unchanged; only its hit area grows.
                   SizedBox(
-                    width: 28,
-                    height: 28,
+                    width: 48,
+                    height: 48,
                     child: Checkbox(
                       value: checked,
                       activeColor: BsTokens.brand,
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       onChanged:
                           (v) => setState(() {
                             final sel = _selected ??= {};

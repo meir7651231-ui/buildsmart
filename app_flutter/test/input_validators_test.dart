@@ -1,0 +1,130 @@
+// Guard tests for task #64 · client-side FORMAT validators
+// (lib/logic/input_validators.dart) — pure, dependency-free functions, so
+// these are plain unit tests: valid/invalid Israeli mobile, email shape,
+// 9-digit business id, strictly-positive amount, end-after-start date range.
+import 'package:buildsmart/logic/input_validators.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  // ─── validIsraeliMobile ────────────────────────────────────────────────────
+  test('mobile — 0501234567 is valid', () {
+    expect(validIsraeliMobile('0501234567'), true);
+  });
+
+  test('mobile — dashes/spaces are stripped before the check', () {
+    expect(validIsraeliMobile('050-123 4567'), true);
+  });
+
+  test('mobile — letters are invalid', () {
+    expect(validIsraeliMobile('abc'), false);
+  });
+
+  test('mobile — 9 digits (too short) is invalid', () {
+    expect(validIsraeliMobile('050123456'), false);
+  });
+
+  test('mobile — 11 digits (too long) is invalid', () {
+    expect(validIsraeliMobile('05012345678'), false);
+  });
+
+  test('mobile — must start with 05 (landline prefix rejected)', () {
+    expect(validIsraeliMobile('0312345678'), false);
+  });
+
+  test('mobile — empty input is invalid', () {
+    expect(validIsraeliMobile(''), false);
+  });
+
+  // ─── validEmail ────────────────────────────────────────────────────────────
+  test('email — simple x@y.z shape is valid', () {
+    expect(validEmail('kablan@example.co.il'), true);
+  });
+
+  test('email — surrounding whitespace is trimmed', () {
+    expect(validEmail('  user@site.com  '), true);
+  });
+
+  test('email — missing @ is invalid', () {
+    expect(validEmail('user.site.com'), false);
+  });
+
+  test('email — missing dot in domain is invalid', () {
+    expect(validEmail('user@site'), false);
+  });
+
+  test('email — inner whitespace is invalid', () {
+    expect(validEmail('us er@site.com'), false);
+  });
+
+  test('email — two @ signs is invalid', () {
+    expect(validEmail('user@@site.com'), false);
+  });
+
+  test('email — empty input is invalid', () {
+    expect(validEmail(''), false);
+  });
+
+  // ─── validBusinessId ───────────────────────────────────────────────────────
+  test('business id — exactly 9 digits is valid', () {
+    expect(validBusinessId('512345678'), true);
+  });
+
+  test('business id — dashes/spaces are stripped before the check', () {
+    expect(validBusinessId('51-234 5678'), true);
+  });
+
+  test('business id — 8 digits is invalid', () {
+    expect(validBusinessId('51234567'), false);
+  });
+
+  test('business id — 10 digits is invalid', () {
+    expect(validBusinessId('5123456789'), false);
+  });
+
+  test('business id — letters are invalid', () {
+    expect(validBusinessId('51234567a'), false);
+  });
+
+  // ─── validPositiveAmount ───────────────────────────────────────────────────
+  test('amount — positive int/double are valid', () {
+    expect(validPositiveAmount(500), true);
+    expect(validPositiveAmount(0.5), true);
+  });
+
+  test('amount — -500 is rejected', () {
+    expect(validPositiveAmount(-500), false);
+  });
+
+  test('amount — 0 is rejected (strictly greater than 0)', () {
+    expect(validPositiveAmount(0), false);
+  });
+
+  test('amount — null (failed tryParse) is rejected', () {
+    expect(validPositiveAmount(null), false);
+  });
+
+  test('amount — non-finite values are rejected', () {
+    expect(validPositiveAmount(double.infinity), false);
+    expect(validPositiveAmount(double.nan), false);
+  });
+
+  // ─── validDateRange ────────────────────────────────────────────────────────
+  test('date range — end strictly after start is valid', () {
+    expect(
+      validDateRange(DateTime(2026, 6, 1), DateTime(2026, 6, 10)),
+      true,
+    );
+  });
+
+  test('date range — end equal to start is invalid', () {
+    final d = DateTime(2026, 6, 10);
+    expect(validDateRange(d, d), false);
+  });
+
+  test('date range — end before start is invalid', () {
+    expect(
+      validDateRange(DateTime(2026, 6, 10), DateTime(2026, 6, 1)),
+      false,
+    );
+  });
+}

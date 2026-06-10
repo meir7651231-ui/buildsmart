@@ -93,6 +93,33 @@ class _SmartProjectScreenState extends ConsumerState<SmartProjectScreen> {
             _Hero(title: title, done: progress.done, total: progress.total,
                 pct: progress.pct),
             const SizedBox(height: BsTokens.space4),
+            if (stages.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(BsTokens.space4),
+                decoration: BoxDecoration(
+                  color: BsTokens.cardLight,
+                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                ),
+                child: const Column(
+                  children: [
+                    Text('🗓️', style: TextStyle(fontSize: 40)),
+                    SizedBox(height: 8),
+                    Text(
+                      'אין ימי עבודה בתוכנית',
+                      style: TextStyle(
+                          color: BsTokens.inkLight,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'כשתוגדר תוכנית עבודה — ימי העבודה יופיעו כאן',
+                      style: TextStyle(
+                          color: BsTokens.mutedLight, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
             for (var i = 0; i < stages.length; i++)
               Container(
                 key: _cardKeys[i],

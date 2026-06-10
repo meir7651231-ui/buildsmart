@@ -153,7 +153,7 @@ class _AuditScreenState extends State<AuditScreen> {
             children: [
               // Custom header — consistent with the app (no Material AppBar).
               Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 4),
                 child: Row(children: [
                   Semantics(
                     button: true,
@@ -161,11 +161,17 @@ class _AuditScreenState extends State<AuditScreen> {
                     child: Tooltip(
                       message: 'חזרה',
                       child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap: () => Navigator.maybePop(context),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Icon(Icons.arrow_forward,
-                              color: BsTokens.inkLight, size: 22),
+                        // ≥48dp tap target around the small arrow (a11y),
+                        // without enlarging the visible glyph.
+                        child: const SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: Center(
+                            child: Icon(Icons.arrow_back,
+                                color: BsTokens.inkLight, size: 22),
+                          ),
                         ),
                       ),
                     ),
@@ -224,12 +230,36 @@ class _AuditScreenState extends State<AuditScreen> {
               ),
             ),
             Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: _results.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (_, i) => _buildRow(_results[i]),
-              ),
+              child: _results.isEmpty && !_running
+                  ? const Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('🧪', style: TextStyle(fontSize: 48)),
+                          SizedBox(height: 12),
+                          Text(
+                            'עדיין לא הורצו בדיקות',
+                            style: TextStyle(
+                              color: Color(0xFF334155),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            'הקש "⚡ הרץ 20 תרחישי בדיקה" כדי להתחיל',
+                            style: TextStyle(
+                                color: Color(0xFF64748B), fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      itemCount: _results.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (_, i) => _buildRow(_results[i]),
+                    ),
             ),
           ],
         ),

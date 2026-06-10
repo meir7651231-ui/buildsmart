@@ -91,17 +91,54 @@ class ProjectsScreen extends ConsumerWidget {
               ),
             ]),
             const SizedBox(height: BsTokens.space3),
-            for (final p in state.projects)
-              _SiteCard(
-                project: p,
-                isActive: p.id == state.activeId,
-                onSwitch: () => _switch(context, ref, p.id),
-                onStatus: () => _statusSheet(context, ref, p.id),
-                onCart: () {
-                  _switch(context, ref, p.id, silent: true);
-                  showToast(context, '🛒 סל הפרויקט: ${p.cart.length} פריטים');
-                },
-              ),
+            if (state.projects.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 48),
+                child: Column(
+                  children: [
+                    const Text('🏗️', style: TextStyle(fontSize: 48)),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'אין פרויקטים עדיין',
+                      style: TextStyle(
+                        color: BsTokens.inkLight,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'צרו פרויקט חדש כדי לנהל סל, תקציב ומשימות לכל אתר',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+                    ),
+                    const SizedBox(height: BsTokens.space3),
+                    TextButton.icon(
+                      onPressed: () => _addSheet(context, ref),
+                      icon: const Icon(Icons.add,
+                          size: 18, color: BsTokens.brand),
+                      label: const Text(
+                        'פרויקט חדש',
+                        style: TextStyle(
+                            color: BsTokens.brand,
+                            fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              for (final p in state.projects)
+                _SiteCard(
+                  project: p,
+                  isActive: p.id == state.activeId,
+                  onSwitch: () => _switch(context, ref, p.id),
+                  onStatus: () => _statusSheet(context, ref, p.id),
+                  onCart: () {
+                    _switch(context, ref, p.id, silent: true);
+                    showToast(context, '🛒 סל הפרויקט: ${p.cart.length} פריטים');
+                  },
+                ),
           ],
         ),
       ),
