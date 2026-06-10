@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -132,6 +133,19 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     _userTouched = true;
     state = state.copyWith(profession: profession);
     _persist();
+  }
+
+  /// S1.7/S1.8 (auth) — wipe the profile back to defaults on logout / account
+  /// deletion: clears the in-memory state AND removes the persisted key (this
+  /// notifier owns `bs.profile.v1`, so the wipe lives here, not in the auth
+  /// layer). Marks [_userTouched] so a still-pending [_load] cannot resurrect
+  /// the old identity (same race as ticket #24, opposite direction).
+  void reset() {
+    _userTouched = true;
+    state = const UserProfile();
+    unawaited(
+      SharedPreferences.getInstance().then((p) => p.remove(kUserProfileKey)),
+    );
   }
 
   /// Edit profile fields from the profile screen. Unspecified fields are kept;

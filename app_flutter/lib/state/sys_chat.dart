@@ -20,9 +20,17 @@
 // messages and re-apply it onto the verbatim [kChatThreads] seed on load. A seed
 // edit (new thread) simply has no overlay; a corrupt payload keeps the seed.
 
+// 🔌 SERVER (S4.1–S4.3): when Firebase is initialised the engine BINDS to the
+// Firestore-backed [ChatRepository] (`chat_firebase.dart`, two composed caches:
+// chatThreads + chatMessages) and becomes a live MIRROR of it — reads stay
+// sync, the public API is unchanged, and every screen keeps watching this same
+// provider. Without Firebase (the entire test suite) the engine IS the store,
+// byte-identical to before. See [ChatEngineNotifier.bindRemote].
+
 import 'dart:convert';
 
 import 'package:buildsmart/data/chat_seeds.dart';
+import 'package:buildsmart/data/repositories/chat_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -140,6 +148,42 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
   /// clobbering a mutation that landed before prefs resolved (worker-tasks H2).
   bool _loaded = false;
 
+  /// S4.1/S4.2 — the bound Firestore-backed store, or null on the local path
+  /// (no Firebase → the engine itself stays the store, behavior unchanged).
+  ChatRepository? _remote;
+
+  /// Bind the engine to the live Firestore-backed chat repository (called by
+  /// [chatEngineProvider] only when Firebase is initialised). The real-time
+  /// loop both ways:
+  ///   • DOWN — every cache change (snapshot or optimistic) `notifyListeners`s
+  ///     → [_refreshFromRemote] rebuilds the engine state from the SYNC
+  ///     [ChatRepository.threads] (a new message appears live, S4.2);
+  ///   • UP — [send]/[resetToSeed] delegate to the repo's verbatim ports, whose
+  ///     optimistic upserts notify back synchronously, so the engine (and the
+  ///     UI) see the change in the same frame.
+  /// The immediate refresh aligns engine ⇄ caches from t0; because it runs
+  /// through the `state` setter it also flips [_loaded], so the prefs overlay
+  /// never clobbers server state — under Firebase, Firestore's own offline
+  /// persistence is the continuity source and prefs stays a write-behind copy.
+  void bindRemote(ChatRepository remote) {
+    if (_remote != null) return; // bind once (provider-lifetime)
+    _remote = remote;
+    remote.addListener(_refreshFromRemote);
+    _refreshFromRemote();
+  }
+
+  void _refreshFromRemote() {
+    final r = _remote;
+    if (r == null) return;
+    state = r.threads(); // public setter → _loaded + persist (write-behind)
+  }
+
+  @override
+  void dispose() {
+    _remote?.removeListener(_refreshFromRemote);
+    super.dispose();
+  }
+
   /// Re-apply the persisted per-thread message overlay onto the verbatim
   /// [kChatThreads] seed. A thread with no stored entry keeps its seed messages;
   /// a stored thread that no longer exists in the seed is ignored. Mirrors the
@@ -218,6 +262,16 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
   /// user's line (mirroring the legacy `_ChatPage` bot behavior). Real (non-bot)
   /// threads do NOT auto-reply — the other persona answers live.
   void send(String threadId, BsRole fromRole, String text) {
+    // S4.3 — bound to Firestore: delegate to the repo's verbatim port (message
+    // write + thread lastMsg/ts upsert + the bot auto-reply). Its optimistic
+    // cache notifies back SYNCHRONOUSLY → [_refreshFromRemote] has already
+    // mirrored the new state by the time this returns — same-frame UX as the
+    // local path, plus the background Firestore writes.
+    final r = _remote;
+    if (r != null) {
+      r.send(threadId, fromRole, text);
+      return;
+    }
     final trimmed = text.trim();
     if (trimmed.isEmpty) return;
     final idx = state.indexWhere((t) => t.id == threadId);
@@ -259,13 +313,33 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
   /// without reaching back into the engine shape. Optional per SPEC CH-1.
   void markRead(String threadId, BsRole role) {/* no-op: no unread store yet */}
 
-  /// Reset to the verbatim seed (tests / a future "demo reset").
-  void resetToSeed() => state = kChatThreads;
+  /// Reset to the verbatim seed (tests / a future "demo reset"). Bound to
+  /// Firestore this resets BOTH remote-backed caches (and re-writes the seed);
+  /// their notify mirrors the seed back into the engine state.
+  void resetToSeed() {
+    final r = _remote;
+    if (r != null) {
+      r.resetToSeed();
+      return;
+    }
+    state = kChatThreads;
+  }
 }
 
 /// The shared cross-persona chat provider — the single live list every persona's
 /// `ChatsScreen` reads (filtered through [ChatEngineNotifier.threadsFor]).
+///
+/// S4 switch (mirrors `ordersRepositoryProvider`): when Firebase is initialised
+/// the seam resolves to the Firestore-backed repo and the engine binds to it —
+/// live threads/messages flow in through the caches, `send` flows out. When it
+/// is NOT (the entire Firebase-free test suite) the seam resolves to null and
+/// the engine stays the purely-local store — byte-identical behavior.
 final chatEngineProvider =
     StateNotifierProvider<ChatEngineNotifier, List<ChatThread>>(
-  (ref) => ChatEngineNotifier(),
+  (ref) {
+    final engine = ChatEngineNotifier();
+    final remote = ref.read(chatRepositoryProvider);
+    if (remote != null) engine.bindRemote(remote);
+    return engine;
+  },
 );

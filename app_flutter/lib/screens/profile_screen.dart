@@ -1,6 +1,8 @@
 import 'package:buildsmart/logic/input_validators.dart';
+import 'package:buildsmart/screens/login_sheet.dart';
 import 'package:buildsmart/screens/rewards_hub_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
+import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -78,6 +80,65 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     showToast(context, 'הפרופיל נשמר');
   }
 
+  /// S1.7 — sign out. Never throws (the notifier guards the remote call);
+  /// the local wipe (profile + persona) happens either way — clean exit.
+  Future<void> _signOut() async {
+    await ref.read(authStateProvider.notifier).signOut();
+    if (!mounted) return;
+    showToast(context, 'התנתקת מהחשבון');
+  }
+
+  /// S1.8 — in-app account deletion (Apple requirement): explicit Hebrew
+  /// confirm dialog → `user.delete()` + local user-data wipe. A failure (e.g.
+  /// requires-recent-login) keeps the account AND the data, Hebrew-toasted.
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: BsTokens.cardLight,
+          title: const Text(
+            'מחיקת חשבון',
+            style: TextStyle(color: _ink, fontWeight: FontWeight.w800),
+          ),
+          content: const Text(
+            'החשבון וכל הנתונים האישיים יימחקו לצמיתות. את הפעולה אי אפשר לבטל.',
+            style: TextStyle(color: _ink),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text(
+                'ביטול',
+                style: TextStyle(color: BsTokens.mutedLight),
+              ),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFD32F2F),
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text(
+                'מחק לצמיתות',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await ref.read(authStateProvider.notifier).deleteAccount();
+      if (!mounted) return;
+      showToast(context, 'החשבון נמחק לצמיתות');
+    } on AuthGatewayException catch (e) {
+      if (!mounted) return;
+      showToast(context, hebrewAuthError(e.code));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = ref.watch(userProfileProvider);
@@ -100,6 +161,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     // (activePersona == null). Every other persona opens this same ProfileScreen
     // from inside its world, so we must not surface the role picker there.
     final activePersona = ref.watch(activePersonaProvider);
+    // S1 — auth surfaces. The login row exists only when a gateway exists
+    // (Firebase initialised — the real app); the Firebase-free suite/sandbox
+    // renders this screen byte-identical to before. S1.6: a single-role user
+    // also loses the role-switch row (showRolePicker would no-op anyway).
+    final auth = ref.watch(authStateProvider);
+    final hasAuthGateway = ref.watch(authGatewayProvider) != null;
+    final roleLocked = ref.watch(roleSwitchLockedProvider);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -202,7 +270,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: BsTokens.space5),
             const _SectionLabel('עוד'),
             const SizedBox(height: BsTokens.space3),
-            if (activePersona == null) ...[
+            if (activePersona == null && !roleLocked) ...[
               _LinkRow(
                 label: '🔄 החלפת תפקיד',
                 onTap: () => showRolePicker(context),
@@ -214,6 +282,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               onTap: () =>
                   Navigator.of(context).push(RewardsHubScreen.route()),
             ),
+            // ── S1 חשבון — login (signed out) / logout + deletion (signed in).
+            if (hasAuthGateway && auth.user == null) ...[
+              const SizedBox(height: BsTokens.space2),
+              _LinkRow(
+                label: '🔐 התחברות לחשבון',
+                onTap: () => showLoginSheet(context),
+              ),
+            ],
+            if (auth.user != null) ...[
+              const SizedBox(height: BsTokens.space5),
+              const _SectionLabel('חשבון'),
+              const SizedBox(height: BsTokens.space3),
+              _LinkRow(label: '🚪 התנתקות', onTap: _signOut),
+              const SizedBox(height: BsTokens.space2),
+              _LinkRow(
+                label: '🗑️ מחיקת חשבון',
+                onTap: _confirmDeleteAccount,
+              ),
+            ],
           ],
         ),
       ),

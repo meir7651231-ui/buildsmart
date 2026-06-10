@@ -24,6 +24,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:buildsmart/data/repositories/customers_local.dart';
+import 'package:buildsmart/data/repositories/orders_firebase.dart';
 import 'package:buildsmart/data/repositories/orders_local.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
 
@@ -227,6 +228,49 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   /// Guards against _load clobbering a mutation that arrived before prefs.
   bool _loaded = false;
 
+  /// S4.4 — the bound Firestore-backed orders repository, or null on the local
+  /// path (no Firebase → the engine itself stays the store, byte-identical).
+  FirebaseOrdersRepository? _remote;
+
+  /// Bind the engine to the live Firestore-backed orders repository (called by
+  /// [ordersEngineProvider] only when Firebase is initialised — the repo the
+  /// `ordersRepositoryProvider` switch already constructs+attaches). The
+  /// real-time loop both ways:
+  ///   • DOWN — every cache change (a `snapshots()` event or an optimistic
+  ///     write) `notifyListeners`s → [_refreshFromRemote] rebuilds the engine
+  ///     state from the SYNC `all()` — so a store-side stage advance lands live
+  ///     in this engine, and through it in `sysOrdersProvider` (the
+  ///     store/courier projection) and the manager analytics, zero UI changes;
+  ///   • UP — [placeOrder]/[advance]/[setStage]/[resetToSeed] delegate to the
+  ///     repo's verbatim ports, whose optimistic upserts notify back
+  ///     SYNCHRONOUSLY — the UI sees the mutation in the same frame, the
+  ///     Firestore write fires in the background. Delegating (rather than
+  ///     mutating engine state directly) is what keeps the cache ⇄ engine in
+  ///     lockstep: a later snapshot can never clobber a local mutation, because
+  ///     every local mutation lives IN the cache.
+  /// The immediate refresh aligns engine ⇄ cache from t0; running through the
+  /// `state` setter it also flips [_loaded], so the prefs overlay never
+  /// clobbers server state — under Firebase, Firestore's own offline
+  /// persistence is the continuity source and prefs stays a write-behind copy.
+  void bindRemote(FirebaseOrdersRepository remote) {
+    if (_remote != null) return; // bind once (provider-lifetime)
+    _remote = remote;
+    remote.addListener(_refreshFromRemote);
+    _refreshFromRemote();
+  }
+
+  void _refreshFromRemote() {
+    final r = _remote;
+    if (r == null) return;
+    state = r.all(); // public setter → _loaded + persist (write-behind)
+  }
+
+  @override
+  void dispose() {
+    _remote?.removeListener(_refreshFromRemote);
+    super.dispose();
+  }
+
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -302,6 +346,23 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
     String shipTo = '',
     String notes = '',
   }) {
+    // S4.4 — bound to Firestore: the repo's verbatim port places the order
+    // (same _nextId/stage/prepend), its optimistic cache notifies back
+    // synchronously → the engine state already carries it on return.
+    final r = _remote;
+    if (r != null) {
+      return r.placeOrder(
+        who: who,
+        site: site,
+        items: items,
+        sum: sum,
+        id: id,
+        createdAt: createdAt,
+        lines: lines,
+        shipTo: shipTo,
+        notes: notes,
+      );
+    }
     final order = Order(
       id: id ?? _nextId(),
       who: who,
@@ -323,6 +384,13 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   /// `mgrAdvanceOrder` (@index.html:17022-17032): `cur=ORDER_FLOW.indexOf(stage)`;
   /// if `cur<0 || cur>=len-1` do nothing, else `stage=ORDER_FLOW[cur+1]`.
   void advance(String orderId) {
+    // S4.4 — bound: delegate to the repo's verbatim port (same flow walk +
+    // guards); the optimistic cache mirrors back synchronously.
+    final r = _remote;
+    if (r != null) {
+      r.advance(orderId);
+      return;
+    }
     final idx = state.indexWhere((o) => o.id == orderId);
     if (idx < 0) return;
     final cur = kManagerOrderFlow.indexOf(state[idx].stage);
@@ -333,6 +401,12 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   /// Manager "god-step": set the order with [orderId] to ANY [stage] in the
   /// flow. Ignores an unknown stage (not in [kManagerOrderFlow]) or unknown id.
   void setStage(String orderId, String stage) {
+    // S4.4 — bound: delegate to the repo's verbatim port (same guards).
+    final r = _remote;
+    if (r != null) {
+      r.setStage(orderId, stage);
+      return;
+    }
     if (!kManagerOrderFlow.contains(stage)) return;
     final idx = state.indexWhere((o) => o.id == orderId);
     if (idx < 0) return;
@@ -346,7 +420,16 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   /// Reset to the four seed orders (used by tests / a future "demo reset").
   /// Restores the [_seed] the engine was constructed with — identical to
   /// [kOrdersEngineSeed] (the const) and to the repository-sourced seed.
-  void resetToSeed() => state = _seed;
+  /// Bound to Firestore this resets the remote-backed cache (and re-writes the
+  /// seed); its notify mirrors the seed back into the engine state.
+  void resetToSeed() {
+    final r = _remote;
+    if (r != null) {
+      r.resetToSeed();
+      return;
+    }
+    state = _seed;
+  }
 }
 
 /// The shared orders provider — the single live list every role will read.
@@ -362,7 +445,16 @@ final ordersEngineProvider =
     // Source the seed through the repository (the local impl exposes it). Any
     // non-local impl falls back to the const seed — identical orders either way.
     final seed = repo is LocalOrdersRepository ? repo.seed() : kOrdersEngineSeed;
-    return OrdersEngineNotifier(seed: seed);
+    final engine = OrdersEngineNotifier(seed: seed);
+    // S4.4 — Firebase initialised → the switch above returned the attached
+    // Firestore-backed repo: bind the engine to it so `orders.snapshots()` →
+    // cache → THIS engine → `sysOrdersProvider`/manager analytics is one live
+    // chain (a store-side advance shows up at the courier/contractor), and
+    // every engine mutation rides the repo's optimistic-write path out. On the
+    // Firebase-free path (the whole test suite) nothing is bound — the engine
+    // behaves byte-identically to today.
+    if (repo is FirebaseOrdersRepository) engine.bindRemote(repo);
+    return engine;
   },
 );
 

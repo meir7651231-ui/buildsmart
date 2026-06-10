@@ -3,6 +3,7 @@ import 'package:buildsmart/screens/courier_dashboard_screen.dart';
 import 'package:buildsmart/screens/manager_dashboard_screen.dart';
 import 'package:buildsmart/screens/store_dashboard_screen.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
+import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,15 @@ const Map<String, String> kPersonaDesc = {
 /// top-right button. Tapping a role sets [activePersonaProvider] and routes to
 /// that persona's dashboard (or clears it, for contractor), then closes.
 Future<void> showRolePicker(BuildContext context) {
+  // S1.6 — persona = identity: when the signed-in user's custom claims carry
+  // exactly ONE role, the switcher is locked (the server decides who you are;
+  // no client-side role pick). Multi-role and signed-out users — and every
+  // Firebase-free run — keep today's picker exactly. Read through the ambient
+  // container so EVERY call site (app-bar logo, profile row) is gated by the
+  // same rule without each one re-wiring.
+  final locked = ProviderScope.containerOf(context, listen: false)
+      .read(roleSwitchLockedProvider);
+  if (locked) return Future<void>.value();
   return showGeneralDialog<void>(
     context: context,
     barrierDismissible: true,

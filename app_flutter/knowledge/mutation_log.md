@@ -781,3 +781,7 @@
 - שחזור: regex הוחזר byte-exact; הרצה חוזרת 27/27 ירוקה ✅.
 - מסקנה: הבדיקה חזקה — מכסה אורך/קידומת/תווים לכל 5 הוולידטורים (27 cases).
 - `lib/data/legal_texts.dart` (חדש · #26): const-strings בלבד (תנאי-שימוש/פרטיות) — אין לוגיקה למוטט; מכוסה עקיף ע"י analyze + legal_screen רנדור.
+
+### 2026-06-10 — server-S1+S4: Auth + Real-time (`auth_state` כנציג)
+- מוטציה (ידנית): הסרת אימות-תפקיד-מוכר ב-`rolesFromClaims` (`single is String && known.contains(single)` → `single is String`) → `auth_state_test` **-1 אדום** ✅ נתפס; שוחזר byte-clean → **+24 ירוק**.
+- כיסוי-גל: 59 טסטים חדשים (auth_state+login_sheet 41 · chat_firebase 10 · realtime_wiring 8) — fake gateway/sources, אפס deps; ללא-Firebase = byte-identical להיום (signed-out picker · מנועים local).
