@@ -42,11 +42,20 @@ Future<void> main() async {
   // use; Firestore offline-persistence keeps the S2 sync cache-pattern fast.
   // This runs only in the real entrypoint (main), never in tests, so the
   // existing suite stays Firebase-free and green.
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  FirebaseFirestore.instance.settings =
-      const Settings(persistenceEnabled: true);
+  // S0 invariant: a Firebase failure must NEVER block app start — with no
+  // initialized app `Firebase.apps` stays empty, so every S2/S3 repository
+  // swap (`Firebase.apps.isNotEmpty`) keeps the local seed path and the UI
+  // boots normally (observed: unguarded init hung ~60s then threw on web,
+  // leaving a permanent white screen).
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ).timeout(const Duration(seconds: 8));
+    FirebaseFirestore.instance.settings =
+        const Settings(persistenceEnabled: true);
+  } catch (_) {
+    // non-fatal: app runs on the local repositories until Firebase is back
+  }
   // S0.5 — App Check (debug attestation for dev). Web reCAPTCHA + prod
   // attestation (Play Integrity / DeviceCheck) are wired once the keys are
   // registered in the console; App Check does not enforce until S5.7, so a

@@ -1684,3 +1684,7 @@ grep `cloud_firestore|FirebaseFirestore|FirestoreCachedRepo|FirestoreCollectionS
 - guard: `test/welcome_auth_gate_test.dart` (3 · flag-OFF=דמו · writer=null בלי Firebase · welcome מרנדר). נתיב flag-ON (OTP חי) נבדק ב-preview-channel האמיתי (מכשיר — הסנדבוקס חוסם Firebase).
 Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 
+### #boot-guard — Firebase init לא חוסם עלייה (web white-screen fix) — 2026-06-10
+- **הבאג:** S0 הוסיף `await Firebase.initializeApp` לא-מוגן ב-`main.dart` — על web (localhost) האתחול נתקע ~60ש' וזרק חריגה לפני `runApp` → מסך לבן קבוע (אומת לייב :5556 + console exception).
+- **התיקון:** עטיפת init+Firestore-settings ב-`try/catch` + `.timeout(8s)` — נאמן לאינווריאנט S0 המוצהר ("a failure here must never block app start"): בכשל `Firebase.apps` נשאר ריק → כל ה-swap של S2/S3 (`Firebase.apps.isNotEmpty`) נשאר על הנתיב הלוקאלי וה-UI עולה רגיל.
+- Gate: build web עבר · אומת לייב — הבית עולה מלא (v6.16).
