@@ -785,3 +785,7 @@
 ### 2026-06-10 — server-S1+S4: Auth + Real-time (`auth_state` כנציג)
 - מוטציה (ידנית): הסרת אימות-תפקיד-מוכר ב-`rolesFromClaims` (`single is String && known.contains(single)` → `single is String`) → `auth_state_test` **-1 אדום** ✅ נתפס; שוחזר byte-clean → **+24 ירוק**.
 - כיסוי-גל: 59 טסטים חדשים (auth_state+login_sheet 41 · chat_firebase 10 · realtime_wiring 8) — fake gateway/sources, אפס deps; ללא-Firebase = byte-identical להיום (signed-out picker · מנועים local).
+
+### 2026-06-10 — server-S5/S6/S8/S9: גל-הסגירה (`offline_order_queue` כנציג)
+- מוטציה (ידנית): שבירת FIFO ב-`drainQueue` (`pending.first` → `pending.last` = LIFO) → `offline_order_queue_test` **-2 אדום** ✅ נתפס; שוחזר byte-clean → **+9 ירוק**.
+- כיסוי-גל: 25 טסטי-flutter חדשים (queue 9 · push_state 15 · S9.3-pin ב-cache-repo 1) + **85/85 rules-emulator** (S5, רץ אמת מול ה-emulator) + **53/53 functions selftest** (S8, כולל אימות bit-for-bit של dartStringHashCode מול dart run).

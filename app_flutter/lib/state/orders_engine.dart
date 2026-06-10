@@ -17,6 +17,7 @@
 // existing manager number stays byte-for-byte identical (🚚 open=4, the 4
 // customers, …). See `test/orders_engine_test.dart`.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -27,6 +28,7 @@ import 'package:buildsmart/data/repositories/customers_local.dart';
 import 'package:buildsmart/data/repositories/orders_firebase.dart';
 import 'package:buildsmart/data/repositories/orders_local.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
+import 'package:buildsmart/logic/offline_order_queue.dart';
 
 /// A single persisted line item captured at checkout and stored inside [Order].
 /// Populated from `smartCartProvider` at `placeOrder` time so the order detail
@@ -454,6 +456,15 @@ final ordersEngineProvider =
     // Firebase-free path (the whole test suite) nothing is bound — the engine
     // behaves byte-identically to today.
     if (repo is FirebaseOrdersRepository) engine.bindRemote(repo);
+    // S9.2 — drain the EXPLICIT offline batch-order queue on engine init (app
+    // start): intents queued while offline-suspect replay FIFO through the
+    // `ordersRepositoryProvider` seam. Fire-and-forget; the queue guards every
+    // failure and is empty on the common path (its prefs await also defers the
+    // replay past this build, so the seam is never re-entered mid-build).
+    // Firestore's own offline persistence (S0.4) already covers the guarded
+    // writes — this is the SSOT-mandated belt-and-braces for batch orders
+    // (see `logic/offline_order_queue.dart`).
+    unawaited(ref.read(offlineOrderQueueProvider).drainQueue());
     return engine;
   },
 );

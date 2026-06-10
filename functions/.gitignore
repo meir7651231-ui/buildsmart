@@ -1,3 +1,13 @@
 node_modules/
 lib/
 *.log
+# The ROOT .gitignore ignores every package.json/package-lock.json (a legacy
+# PWA-era rule) — re-include the functions manifest, otherwise deploy/CI has
+# no dependency list to install from.
+!package.json
+!package-lock.json
+# Local param values for `firebase functions:config`-era replacements (v2
+# params) — may carry R2_ACCOUNT_ID etc.; never commit.
+.env
+.env.*
+*.local

@@ -86,3 +86,25 @@ export const setRole = onCall({ region: "me-west1" }, async (request) => {
 
   return roleList ? { ok: true, uid, roles: roleList } : { ok: true, uid, role };
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// S8 · server-side logic (SPEC-server-connect-MICRO §S8 + S7.2/S6.3) — added
+// AROUND the untouched S1 `setRole` skeleton above. Load-order note: these
+// re-export imports are hoisted above the `initializeApp()` call, so the
+// modules resolve every Admin SDK service LAZILY inside their handlers
+// (src/common.ts `db()`), never at module scope. Region: me-west1 everywhere.
+//
+//   S8.1  advanceOrderStage            — callable; role-checked single-step
+//         revertIllegalOrderStageWrite — trigger; reverts illegal direct writes
+//   S8.2  computeCredit                — callable; server-canonical credit
+//   S8.3  onOrderStageChanged          — trigger; Hebrew FCM on stage step
+//         onChatMessageCreated         — trigger; Hebrew FCM on new message
+//   S7.2  getUploadUrl                 — callable; R2 presigned PUT (no creds
+//                                        in code — Secret Manager / env)
+//   S8.4  auditLog                     — append-only writes from all the above
+// ─────────────────────────────────────────────────────────────────────────────
+
+export { advanceOrderStage, revertIllegalOrderStageWrite } from "./orders";
+export { computeCredit } from "./credit";
+export { onChatMessageCreated, onOrderStageChanged } from "./push";
+export { getUploadUrl } from "./r2";

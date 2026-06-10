@@ -767,3 +767,7 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **מסך חדש:** sheet-התחברות RTL — כותרת "🔐 התחברות לחשבון" + תת-כותרת SMS · שדה-טלפון (אייקון 📱, hint "מספר טלפון נייד") · CTA כתום מלא-רוחב "שלח קוד אימות" (פיל) · קישור "כניסה עם אימייל וסיסמה". שלבי OTP/מייל באותו idiom (persona_pod).
 - **אומת ברינדור אמיתי** (harness עם Heebo · 420×760): layout תקין, RTL נכון, אפס overflow. (emoji-tofu ב-harness בלבד — אין פונט-emoji בטסטים; במכשיר תקין.) screenshot נשלח למשתמש: /tmp/login_sheet.png.
 - נגיש רק כש-gateway קיים (Firebase חי) — ללא-Firebase האפליקציה byte-identical (נעוץ בטסט).
+
+## 2026-06-10 — toast.dart: מפתח-messenger גלובלי (server-S6) — אפס שינוי-עין
+- **שינוי-קוד בלבד:** `bsMessengerKey` + `showGlobalToast` (ל-push בחזית בלי context); ה-pill מוגדר פעם אחת ב-`_toastBar` ו-`showToast` הקיים זהה התנהגותית.
+- **אומת:** widget-test (push_state_test) מרנדר את ה-pill האמיתי דרך המסלול הגלובלי; analyze 0.

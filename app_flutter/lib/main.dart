@@ -5,14 +5,34 @@ import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
+import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/widgets/toast.dart' show bsMessengerKey;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:firebase_messaging/firebase_messaging.dart'
+    show FirebaseMessaging, RemoteMessage;
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// S6.2 — the FCM BACKGROUND/terminated handler. MUST be top-level (the
+/// Android background isolate calls it outside the widget tree — it cannot
+/// live behind the PushGateway seam) and MUST carry `vm:entry-point` so AOT
+/// tree-shaking keeps it. S6.3 pushes are notification-payload messages the OS
+/// tray renders by itself, so there is no app work to do here yet (data-only
+/// background work is a documented follow-up) — the guarded body only logs.
+/// A throw here would crash the background isolate, hence the catch-all.
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  try {
+    debugPrint('FCM background message: ${message.messageId}');
+  } on Object catch (e) {
+    debugPrint('firebaseMessagingBackgroundHandler: ignored failure: $e');
+  }
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +59,12 @@ Future<void> main() async {
       // non-fatal until S5 enforcement
     }
   }
+  // S6.2 — register the background push handler, only when Firebase actually
+  // initialised, and never on web (web background pushes belong to the hosting
+  // service worker, not a Dart isolate).
+  if (!kIsWeb && Firebase.apps.isNotEmpty) {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  }
   // Bridge step — synthesise VerifiedSpec for every Polyroll PPR product so
   // the card's compat / pair-warning / install-engine helpers cover the
   // 757-strong PPR catalog the same way they cover Lipskey.
@@ -63,6 +89,10 @@ class BuildSmartApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // S6 — wake the push controller (providers are lazy): token registration
+    // follows auth (sign-in → users/{uid}.fcmToken · refresh → re-write ·
+    // sign-out → clear) and foreground pushes toast. Inert without Firebase.
+    ref.watch(pushControllerProvider);
     final settings = ref.watch(appSettingsProvider);
     final catalogSettings = ref.watch(catalogSettingsProvider);
     final textScale = switch (catalogSettings.textSize) {
@@ -78,6 +108,8 @@ class BuildSmartApp extends ConsumerWidget {
     };
     return MaterialApp(
       title: 'BuildSmart',
+      // S6.2 — the context-free toast surface (foreground push → showGlobalToast).
+      scaffoldMessengerKey: bsMessengerKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(highContrast: highContrast),
       darkTheme: AppTheme.dark(highContrast: highContrast),

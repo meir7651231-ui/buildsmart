@@ -1,0 +1,24 @@
+{
+  "name": "buildsmart-functions",
+  "description": "BuildSmart Cloud Functions — setRole (S1.9) · S8 server logic (stage transitions, credit, FCM, audit) · S7.2 R2 presigned uploads",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "selftest": "tsc && node lib/selftest.js",
+    "deploy": "npm run build && firebase deploy --only functions"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1065.0",
+    "@aws-sdk/s3-request-presigner": "^3.1065.0",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

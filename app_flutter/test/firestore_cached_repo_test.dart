@@ -12,6 +12,8 @@
 //   • a snapshot REPLACES the cache and notifies;
 //   • a corrupt doc is SKIPPED, never blanks the list;
 //   • an optimistic write is visible SYNCHRONOUSLY;
+//   • S9.3 — a post-write snapshot RECONCILES the cache (LWW: the server echo
+//     is canonical; a losing write converges, never resurrects);
 //   • a write FAILURE corrupts neither cache nor throws;
 //   • replaceAll / resetToSeed;
 //   • first-empty (seed remote) ≠ a later-empty (honoured as empty);
@@ -168,6 +170,31 @@ void main() {
 
       await Future<void>.delayed(Duration.zero);
       expect(src.sets.map((e) => e.key), contains('n99'));
+    });
+
+    test(
+        'S9.3 — a post-write snapshot RECONCILES the optimistic cache '
+        '(last-write-wins: the server echo is canonical, no merge)', () async {
+      final src = _FakeSource();
+      final repo = _IntRepo(src)..attach();
+      addTearDown(src.close);
+      addTearDown(repo.dispose);
+
+      // Optimistic write lands synchronously…
+      repo.upsert(99);
+      expect(repo.cached(), [1, 2, 3, 99]);
+
+      // …the server ECHOES it back (the write won) → cache == server state.
+      src.emit([_intDoc(1), _intDoc(2), _intDoc(3), _intDoc(99)]);
+      await Future<void>.delayed(Duration.zero);
+      expect(repo.cached(), [1, 2, 3, 99]);
+
+      // A LATER snapshot WITHOUT 99 (another writer won / the write lost the
+      // LWW race) must converge to the server truth — the snapshot REPLACES
+      // the cache wholesale, never merges, never resurrects the loser.
+      src.emit([_intDoc(1), _intDoc(2), _intDoc(3)]);
+      await Future<void>.delayed(Duration.zero);
+      expect(repo.cached(), [1, 2, 3]); // converged: no phantom 99
     });
 
     test('a write FAILURE corrupts neither cache nor throws', () async {
