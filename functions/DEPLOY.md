@@ -3,17 +3,15 @@
 Deployed by `.github/workflows/firebase-deploy.yml` whenever `functions/**` changes
 (and the analyze + test + tsc gate passes), via the `FIREBASE_SERVICE_ACCOUNT` secret.
 
-## Requirements (project buildsmart-b0b78)
+## Requirements (project buildsmart-b0b78) — all in place 06-10
 - **Blaze** plan (active).
-- Service-account IAM roles: Service Usage Consumer, Firebase Rules Admin,
-  Cloud Functions Admin, Service Account User, Secret Manager Admin,
-  **Project IAM Admin** (lets the deploy grant the service-agent bindings;
-  can be removed after the first successful functions deploy).
-- Enabled APIs (06-10): cloudfunctions, cloudbuild, artifactregistry, secretmanager,
-  pubsub, storage, run, eventarc.
-- R2 config injected by CI from GitHub secrets:
-  - secrets → Secret Manager: `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`
-  - params → `functions/.env.buildsmart-b0b78`: `R2_ACCOUNT_ID`, `R2_BUCKET=buildsmart-images`
+- SA IAM roles: Service Usage Consumer, Firebase Rules Admin, Cloud Functions Admin,
+  Service Account User, Secret Manager Admin, Project IAM Admin
+  (Project IAM Admin removable after the first successful deploy).
+- Enabled APIs: cloudfunctions, cloudbuild, artifactregistry, secretmanager,
+  pubsub, storage, run, eventarc, **cloudbilling**.
+- Service-agent bindings: auto-granted by the deploy (secretAccessor on R2 secrets, etc.).
+- R2 config from GitHub secrets → Secret Manager (keys) + functions/.env.<project> (params).
 
 ## Functions
 - `orderFlow` / `orders` — server-side stage-transition validation
