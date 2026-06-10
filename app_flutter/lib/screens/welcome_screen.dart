@@ -172,6 +172,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     }
     ref.read(welcomeSeenProvider.notifier).state = true;
     unawaited(persistWelcomeSeen());
+  }
 
   /// Cluster #85א · role-gate mode sheet: 'כניסה ללקוח קיים' is the PRIMARY
   /// login path — tapping it reveals (inline, same card style) the שם משתמש

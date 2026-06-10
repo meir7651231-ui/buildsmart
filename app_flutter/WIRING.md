@@ -1704,3 +1704,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **#85ח HR:** `worker_attendance` (כניסה/יציאה+דוח-חודשי+שלח-לקבלן) · `worker_forms` (טופס-101 ממולא-מהפרופיל, בקשת-חופשה→תור-מנהל בניהול+החלטה→פעמון, אישור-מחלה עם צפיין) · `worker_safety` (הדרכות+ארנק-תעודות+תוקף+צילום) · `worker_payslips` (מוכן-לשרת) · פרופיל-עריכה מלא (worker_profile_store, save→bool+טוסט-קוטה).
 - **רוחבי:** chats _visibleToAudience — קבלן/מנהל רואים threads-עובד שהם משתתפים בהם (דוח-יומי/נוכחות/101 כבר לא write-only) · `manager_profile_screen` חדש + התנתקות אמיתית למנהל ולחנות.
 - Gate: analyze 0 · בדיקות 21/21 (vacation-id-collision נתפס ותוקן ב-_seq מונוטוני) · אודיט-עומק 114 ממצאים: 88 עובדים, 23 שבורים→תוקנו כולם, 3 server-stubs כנים.
+### #merge-fix — יישוב rebase מול server-track (S5/S6) — 2026-06-10
+- `welcome_screen._existingLogin`: סדר-עדיפויות ממוזג — שער-לוח (קוד #65) → Firebase-OTP (useFirebaseBackend) → גילוי-אורח (#19). שני ייבואי-auth (auth_state+board_auth) דרים יחד גם ב-role_picker.
+- `sys_chat.resetToSeed`: reset-מרוחק של ה-server-track + ה-seed המקומי המלא (כולל threads-audience #70/#75).
+- `BackendDebugBadge`: topRight→topCenter — ב-RTL ישב על לוגו BuildSmart ובלע את הקליק לבוחר-התפקידים (נתפס ע"י widget_test 'BS dial opens 5 personas').
+- Gate: analyze 0 · בדיקות-רגישות 30/30 (board_auth/onboarding/sys_chat/widget).

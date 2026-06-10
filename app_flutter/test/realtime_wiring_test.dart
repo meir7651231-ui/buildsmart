@@ -263,10 +263,14 @@ void main() {
       expect(container.read(chatRepositoryProvider), isNull);
 
       // The engine the provider builds is UNBOUND: seed verbatim, send works
-      // purely locally — byte-identical to the pre-S4 behavior.
+      // purely locally — byte-identical to the pre-S4 behavior. The local
+      // seed is the FULL one: legacy cross-persona threads + the
+      // board-audience threads (#70/#75, kWorkerChatThreads in sys_chat).
       final engine = container.read(chatEngineProvider.notifier);
-      expect(container.read(chatEngineProvider).map((t) => t.id).toList(),
-          kChatThreads.map((t) => t.id).toList(),);
+      expect(container.read(chatEngineProvider).map((t) => t.id).toList(), [
+        ...kChatThreads.map((t) => t.id),
+        ...kWorkerChatThreads.map((t) => t.id),
+      ]);
       engine.send(contractorStore, BsRole.store, 'מקומי בלבד');
       expect(
         engine

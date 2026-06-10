@@ -127,7 +127,10 @@ class _BackendDebugBadgeState extends State<BackendDebugBadge> {
       left: 8,
       right: 8,
       child: Align(
-        alignment: Alignment.topRight,
+        // topCenter — under RTL the visual right is the BuildSmart logo (the
+        // role-picker entry); a topRight badge sat exactly on it and swallowed
+        // its taps (caught by widget_test 'BS dial opens 5 personas').
+        alignment: Alignment.topCenter,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
