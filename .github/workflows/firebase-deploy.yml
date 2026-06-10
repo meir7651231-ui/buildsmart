@@ -3,6 +3,11 @@
 # same service-account secret. The live web build stays demo: this workflow NEVER
 # passes USE_FIREBASE_BACKEND or any dart-define (the backend is gated behind a
 # default-off flag by the app fleet).
+#
+# Required IAM roles on the FIREBASE_SERVICE_ACCOUNT (granted in GCP IAM console):
+#   • Service Usage Consumer   — API-enablement checks
+#   • Firebase Rules Admin     — deploy firestore rules
+#   • (Cloud Functions Admin + Service Account User — later, for functions deploy)
 name: Deploy Firebase Rules + Functions
 
 on:
@@ -71,7 +76,7 @@ jobs:
         working-directory: functions
         run: npm run build
 
-      # ─────────────────── AUTH (service account) ───────────────────
+      # ────────────────── AUTH (service account) ───────────────────
       - name: Write service-account credentials
         run: |
           printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "${RUNNER_TEMP}/gcp-sa.json"
