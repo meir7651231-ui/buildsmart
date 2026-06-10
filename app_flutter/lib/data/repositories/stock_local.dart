@@ -27,6 +27,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/phaseb_seeds.dart' show kStockDemo;
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/stock_firebase.dart';
 import 'package:buildsmart/data/repositories/stock_repository.dart';
 import 'package:buildsmart/data/supplier_data.dart'
@@ -37,7 +38,6 @@ import 'package:buildsmart/logic/manager_dashboard.dart'
         kManagerCatalogCategories,
         kManagerStores,
         managerAnalytics;
-import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The local (const-backed) implementation of [StockRepository]. Every read
@@ -91,7 +91,7 @@ class LocalStockRepository implements StockRepository {
 /// is used, so tests never touch Firestore. Both satisfy the same sync
 /// [StockRepository] contract → providers + UI are unchanged.
 final stockRepositoryProvider = Provider<StockRepository>((ref) {
-  if (Firebase.apps.isNotEmpty) {
+  if (useFirebaseBackend) {
     final repo = FirebaseStockRepository()..attach();
     ref.onDispose(repo.dispose);
     return repo;

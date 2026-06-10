@@ -11,11 +11,11 @@
 // value changes. A future CRM backend swaps in behind this contract.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/customers_firebase.dart';
 import 'package:buildsmart/data/repositories/customers_repository.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/state/orders_engine.dart';
-import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The local implementation of [CustomersRepository], backed by the live
@@ -63,7 +63,7 @@ class LocalCustomersRepository implements CustomersRepository {
 /// `is LocalCustomersRepository`: the local impl folds the watched live orders via
 /// `aggregate(orders)`, the Firestore impl serves its cached aggregates via `all()`.
 final customersRepositoryProvider = Provider<CustomersRepository>((ref) {
-  if (Firebase.apps.isNotEmpty) {
+  if (useFirebaseBackend) {
     final repo = FirebaseCustomersRepository()..attach();
     ref.onDispose(repo.dispose);
     return repo;

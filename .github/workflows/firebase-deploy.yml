@@ -1,0 +1,129 @@
+# Deploy Firestore rules (always) + Cloud Functions (conditional, non-blocking)
+# to buildsmart-b0b78. Sibling workflow to firebase-hosting.yml — same branch /
+# same service-account secret. The live web build stays demo: this workflow NEVER
+# passes USE_FIREBASE_BACKEND or any dart-define (the backend is gated behind a
+# default-off flag by the app fleet).
+name: Deploy Firebase Rules + Functions
+
+on:
+  push:
+    branches: [ claude/whats-happening-LyY9G ]   # mirrors firebase-hosting.yml
+  workflow_dispatch:
+
+# Cancel an in-flight deploy when a newer commit lands on the same ref.
+concurrency:
+  group: firebase-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # paths-filter needs history to diff against the base
+
+      # ── Detect whether functions/ changed (gates the functions deploy) ──
+      - name: Detect changed paths
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            functions:
+              - 'functions/**'
+
+      # ─────────────────────── GATE ───────────────────────
+      # Nothing is deployed unless BOTH gates pass:
+      #   1. Flutter analyze + test (same setup/flags as the hosting + pages CI)
+      #   2. Cloud Functions TypeScript build (tsc)
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Install Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Generate version.g.dart (gitignored)
+        run: bash scripts/gen_version.sh
+
+      - name: Flutter analyze (GATE — errors are fatal)
+        working-directory: app_flutter
+        # Mirror deploy.yml: pre-existing lint infos/warnings must NOT block.
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Flutter test (GATE)
+        working-directory: app_flutter
+        run: flutter test --reporter=compact
+
+      - name: Setup Node (for functions build + firebase-tools)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Install functions deps
+        working-directory: functions
+        run: npm ci
+
+      - name: Functions build (GATE — tsc)
+        working-directory: functions
+        run: npm run build
+
+      # ─────────────────── AUTH (service account) ───────────────────
+      # Write the existing FIREBASE_SERVICE_ACCOUNT secret to a temp file and
+      # point ADC at it — service-account auth, NOT an interactive token.
+      - name: Write service-account credentials
+        run: |
+          printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "${RUNNER_TEMP}/gcp-sa.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=${RUNNER_TEMP}/gcp-sa.json" >> "$GITHUB_ENV"
+
+      - name: Install firebase-tools
+        run: npm i -g firebase-tools
+
+      # firebase.json (read-only here) ships firestore + hosting but no
+      # "functions" source block. Synthesize a CI-only merged config in a temp
+      # file and target it with --config so `--only functions` resolves the
+      # functions/ source — without touching the committed firebase.json.
+      - name: Build CI firebase config (adds functions source; temp only)
+        run: |
+          jq '. + {functions: {source: "functions"}}' firebase.json \
+            > "${RUNNER_TEMP}/firebase.ci.json"
+          echo "FIREBASE_CONFIG_FILE=${RUNNER_TEMP}/firebase.ci.json" >> "$GITHUB_ENV"
+
+      # ─────────────────── DEPLOY: rules (always) ───────────────────
+      # Firestore rules deploy works on the free Spark plan.
+      - name: Deploy Firestore rules
+        run: |
+          firebase deploy \
+            --only firestore:rules \
+            --project buildsmart-b0b78 \
+            --config "$FIREBASE_CONFIG_FILE" \
+            --non-interactive
+
+      # ─────────── DEPLOY: functions (conditional + non-blocking) ───────────
+      # Only when functions/ changed. Cloud Functions requires the Blaze plan;
+      # the project is currently Spark, so this is wrapped in continue-on-error
+      # and must NEVER block the workflow (rules already deployed above).
+      - name: Deploy Cloud Functions (Blaze-gated, non-blocking)
+        if: steps.changes.outputs.functions == 'true'
+        continue-on-error: true
+        run: |
+          echo "⚠️ functions deploy requires the Blaze plan — attempting (non-blocking)."
+          echo "   Enable Blaze on buildsmart-b0b78 to activate."
+          firebase deploy \
+            --only functions \
+            --project buildsmart-b0b78 \
+            --config "$FIREBASE_CONFIG_FILE" \
+            --non-interactive
+          echo "⚠️ functions deploy requires the Blaze plan — skipping (non-blocking). Enable Blaze on buildsmart-b0b78 to activate."
+
+      - name: Note when functions deploy is skipped (no functions/ change)
+        if: steps.changes.outputs.functions != 'true'
+        run: echo "ℹ️ functions/ unchanged in this push — skipping functions deploy (rules deployed)."

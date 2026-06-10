@@ -48,10 +48,10 @@
 
 import 'dart:async';
 
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/widgets/toast.dart';
-import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:firebase_messaging/firebase_messaging.dart' as fm;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -428,7 +428,7 @@ class PushController {
 /// switch authGatewayProvider / the S2-S3 repo providers use. Tests override
 /// this with a hand-rolled fake.
 final pushGatewayProvider = Provider<PushGateway?>((ref) {
-  if (Firebase.apps.isNotEmpty) return FirebaseMessagingGateway();
+  if (useFirebaseBackend) return FirebaseMessagingGateway();
   return null;
 });
 
@@ -437,7 +437,7 @@ final pushGatewayProvider = Provider<PushGateway?>((ref) {
 /// fake and S5 rules work can find the single client write-site of
 /// `users.fcmToken`.
 final pushTokenWriterProvider = Provider<RemoteCollectionSource?>((ref) {
-  if (Firebase.apps.isNotEmpty) {
+  if (useFirebaseBackend) {
     return FirestoreCollectionSource(kPushUsersCollection);
   }
   return null;

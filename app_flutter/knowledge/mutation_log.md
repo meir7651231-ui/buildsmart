@@ -789,3 +789,7 @@
 ### 2026-06-10 — server-S5/S6/S8/S9: גל-הסגירה (`offline_order_queue` כנציג)
 - מוטציה (ידנית): שבירת FIFO ב-`drainQueue` (`pending.first` → `pending.last` = LIFO) → `offline_order_queue_test` **-2 אדום** ✅ נתפס; שוחזר byte-clean → **+9 ירוק**.
 - כיסוי-גל: 25 טסטי-flutter חדשים (queue 9 · push_state 15 · S9.3-pin ב-cache-repo 1) + **85/85 rules-emulator** (S5, רץ אמת מול ה-emulator) + **53/53 functions selftest** (S8, כולל אימות bit-for-bit של dartStringHashCode מול dart run).
+
+### 2026-06-10 — server-gate: דגל-בקאנד default-OFF (`backend.dart`)
+- מוטציה (ידנית): הפיכת ברירת-המחדל של הדגל ל-true (`bool.fromEnvironment('USE_FIREBASE_BACKEND', defaultValue: true)`) → `backend_flag_test` **-1 אדום** ✅ נתפס; שוחזר byte-clean → **+1 ירוק**.
+- כיסוי: `backend_flag_test` נועל את ברירת-המחדל (demo/_local ללא-define, ללא-Firebase) — ה-live נשאר דמו עד הדלקה מפורשת. 11 אתרי-switch דרך `useFirebaseBackend`.

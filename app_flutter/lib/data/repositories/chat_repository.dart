@@ -26,9 +26,9 @@
 //              [resetToSeed] (tests / demo reset).
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/chat_firebase.dart';
 import 'package:buildsmart/state/sys_chat.dart';
-import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:flutter/foundation.dart' show Listenable;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,7 +62,7 @@ abstract class ChatRepository implements Listenable {
 /// of a `LocalChatRepository`: the local impl IS the engine, so wrapping it here
 /// would only add a dead delegation layer.)
 final chatRepositoryProvider = Provider<ChatRepository?>((ref) {
-  if (Firebase.apps.isEmpty) return null;
+  if (!useFirebaseBackend) return null;
   final repo = FirebaseChatRepository()..attach();
   ref.onDispose(repo.dispose);
   return repo;

@@ -39,11 +39,11 @@
 import 'dart:async';
 
 import 'package:buildsmart/data/personas.dart';
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
-import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -504,7 +504,7 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
 /// the S2/S3 repository providers use (bottom of orders_local.dart). Tests
 /// override this with a hand-rolled fake.
 final authGatewayProvider = Provider<AuthGateway?>((ref) {
-  if (Firebase.apps.isNotEmpty) return FirebaseAuthGateway();
+  if (useFirebaseBackend) return FirebaseAuthGateway();
   return null;
 });
 

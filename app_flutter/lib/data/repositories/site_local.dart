@@ -18,15 +18,13 @@
 // engine, keeping the engine↔repository wiring acyclic (the orders_local idiom).
 // ─────────────────────────────────────────────────────────────────────────────
 
-import 'package:firebase_core/firebase_core.dart' show Firebase;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:buildsmart/data/contractor_seeds.dart'
     show PlanType, budgetLevel, kPlanTypes, kSafetyTips;
 import 'package:buildsmart/data/menu_trees.dart' show kHomeTree;
 import 'package:buildsmart/data/persona_data.dart' show PersonaTask;
 import 'package:buildsmart/data/projects.dart'
     show Project, kActiveProjectId, kProjects;
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/orders_local.dart'
     show ordersRepositoryProvider;
 import 'package:buildsmart/data/repositories/site_firebase.dart';
@@ -34,6 +32,7 @@ import 'package:buildsmart/data/repositories/site_repository.dart';
 import 'package:buildsmart/data/sections.dart' show Section;
 import 'package:buildsmart/state/stage_progress.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The `home-tasks` site-tools children of [kHomeTree] — the 📋 משימות העבודה
 /// tree the Home dial opens. Resolved const-only (a `firstWhere` over the const
@@ -154,7 +153,7 @@ class LocalSiteRepository implements SiteRepository {
 /// Firestore. Both satisfy the same sync [SiteRepository] contract → providers +
 /// UI are unchanged.
 final siteRepositoryProvider = Provider<SiteRepository>((ref) {
-  if (Firebase.apps.isNotEmpty) {
+  if (useFirebaseBackend) {
     final repo = FirebaseSiteRepository(
       orders: ref.read(ordersRepositoryProvider),
     )..attach();

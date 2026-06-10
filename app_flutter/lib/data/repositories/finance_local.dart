@@ -47,12 +47,12 @@ import 'package:buildsmart/data/contractor_seeds.dart'
         kBudgetTotal;
 import 'package:buildsmart/data/menu_trees.dart' show kFinanceHub;
 import 'package:buildsmart/data/phaseb_seeds.dart' show budgetPct;
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/finance_firebase.dart'
     show FirebaseFinanceRepository;
 import 'package:buildsmart/data/repositories/finance_repository.dart';
 import 'package:buildsmart/data/sections.dart' show Section;
 import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
-import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Module-level pass-throughs to the const helpers whose names this class's
@@ -159,7 +159,7 @@ FirebaseFinanceRepository? _firebaseFinanceSingleton;
 /// suite) the const [LocalFinanceRepository] is returned, so tests never touch
 /// Firestore. Both satisfy the same sync [FinanceRepository] contract.
 FinanceRepository financeRepo() {
-  if (Firebase.apps.isNotEmpty) {
+  if (useFirebaseBackend) {
     return _firebaseFinanceSingleton ??=
         (FirebaseFinanceRepository(null)..attach());
   }
@@ -175,7 +175,7 @@ FinanceRepository financeRepo() {
 /// Ref-bearing [LocalFinanceRepository] (so the suite stays Firebase-free). Both
 /// return the same const budget values + a live `activeRevenue`.
 final financeRepositoryProvider = Provider<FinanceRepository>((ref) {
-  if (Firebase.apps.isNotEmpty) {
+  if (useFirebaseBackend) {
     final repo = FirebaseFinanceRepository(ref)..attach();
     ref.onDispose(repo.dispose);
     return repo;

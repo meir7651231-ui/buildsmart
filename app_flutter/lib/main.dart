@@ -1,4 +1,5 @@
 import 'package:buildsmart/data/polyroll_specs.dart';
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/firebase_options.dart';
 import 'package:buildsmart/screens/onboarding_screen.dart';
 import 'package:buildsmart/screens/store_screen.dart';
@@ -62,7 +63,7 @@ Future<void> main() async {
   // S6.2 — register the background push handler, only when Firebase actually
   // initialised, and never on web (web background pushes belong to the hosting
   // service worker, not a Dart isolate).
-  if (!kIsWeb && Firebase.apps.isNotEmpty) {
+  if (!kIsWeb && useFirebaseBackend) {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   }
   // Bridge step — synthesise VerifiedSpec for every Polyroll PPR product so
