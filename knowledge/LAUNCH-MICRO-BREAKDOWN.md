@@ -75,7 +75,7 @@
 | F3 | מחיקת‑חשבון מלאה (users/{uid}+data) | `auth_state.deleteAccount` + function | agent | M |
 | F4 | APNS key + iOS Push capability | Xcode + Firebase | את+agent | S |
 | F5 | Android notif channels + אייקון‑התראה | agent | S |
-| F6 | אייקונים · splash · version · bundle‑id סופי | agent+את | M |
+| F6 | **אייקון‑מותג כתום** (כרגע ברירת‑מחדל כחולה של Flutter!) · favicon/PWA/launcher · splash · version · bundle‑id סופי | agent+את | M |
 
 ## Phase G — הקשחת שרת
 | ID | משימה | היכן | מי | מ' |
