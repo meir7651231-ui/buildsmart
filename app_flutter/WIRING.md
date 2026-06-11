@@ -1713,3 +1713,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **הבאג:** מיזוג e8ae1dd השאיר `initialValue:` (API של Flutter מאוחר) על `DropdownButtonFormField` ב-`worker_forms_screen.dart:172` (טופס-101, שדה מצב-משפחתי) — בטולצ'יין 3.29 הפרמטר הוא `value:`, ולכן `undefined_named_parameter` ו-build web נכשל (חסם push).
 - **התיקון:** `initialValue:` → `value:` (טוקן יחיד, אפס שינוי התנהגותי). זה היה ה-error היחיד; כל השאר info/lint.
 - Gate: analyze 0 errors · build web --release ירוק (46s).
+### #A2-uid-seam — currentUidProvider (חשיפת auth.uid לשכבת-הנתונים · נחיל Phase A) — 2026-06-11
+- **A2 (חוסם-השקה):** נוצר `currentUidProvider` ב-`auth_state.dart` — נגזר מ-`authStateProvider`, מחזיר `user?.uid` (null בלי-Firebase/signed-out, עוקב login/logout חי). זה הקיסטון ש-A3–A6 קוראים כדי למקד reads/writes ל-uid המחובר. מיפוי-נחיל אישר: שדות היעד כבר קיימים (orders=`contractorId` · customers=`ownerId` · chat=`participants`) ו-A1 הוסיף `scope` אופציונלי ל-`FirestoreCollectionSource`.
+- **בטיחות — אפס רגרסיה:** A2 רק **חושף** את ה-uid; **לא הדליק scoping**. הדלקת scope עכשיו הייתה שוברת הכל (אף doc עוד לא נושא uid → כל query חוזר ריק). לכן A3–A6 (כתיבת השדות + backfill + הדלקת scope) באים יחד אחר-כך, מאחורי דגל.
+- guard: `auth_state_test` קבוצת 'currentUidProvider — A2' (signed-out→null · signed-in→uid · logout→null). מוטציה (`return null`) הזריקה → signed-in האדים (שורה 422) → שוחזר → ירוק.
+- Gate: analyze 0 · auth_state_test 26/26.

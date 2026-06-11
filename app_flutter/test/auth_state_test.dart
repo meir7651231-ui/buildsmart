@@ -406,6 +406,27 @@ void main() {
     });
   });
 
+  group('currentUidProvider — A2 (launch uid seam)', () {
+    test('Firebase-free / signed-out → null (zero regression)', () {
+      final c = makeContainer(null);
+      expect(c.read(currentUidProvider), isNull);
+    });
+
+    test('signed-in → the auth uid, and tracks sign-out back to null',
+        () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      expect(c.read(currentUidProvider), isNull, reason: 'starts signed-out');
+      gw.signInAs(const AuthUser(uid: 'u-42'));
+      await pumpEventQueue();
+      expect(c.read(currentUidProvider), 'u-42');
+      await c.read(authStateProvider.notifier).signOut();
+      await pumpEventQueue();
+      expect(c.read(currentUidProvider), isNull,
+          reason: 'sign-out clears the seam');
+    });
+  });
+
   group('logout — S1.7 (sign-out + cache clear)', () {
     test('signs out remotely AND wipes the local identity', () async {
       final gw = _FakeAuthGateway();

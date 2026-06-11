@@ -524,6 +524,15 @@ final authStateProvider =
   );
 });
 
+/// A2 (launch uid-migration) — the current Firebase `auth.uid`, or null when
+/// signed-out / Firebase-free (tests + sandbox). The single seam the data layer
+/// (A3–A6) reads to scope reads/writes to the logged-in identity. Derived from
+/// [authStateProvider] so it tracks login/logout live; null ⇒ today's behavior
+/// (zero regression — no consumer has flipped to scoped queries yet).
+final currentUidProvider = Provider<String?>((ref) {
+  return ref.watch(authStateProvider).user?.uid;
+});
+
 /// S1.5/S1.6 — the EFFECTIVE role, in the [activePersonaProvider] dialect
 /// (null = contractor / main app) so existing consumers can adopt it drop-in:
 ///   • signed-in with exactly ONE server role → that role, unconditionally
