@@ -10,7 +10,7 @@
 | ID | משימה | היכן | DoD | מי | מ' |
 |---|---|---|---|---|---|
 | A1 | ✅ scoped‑query אופציונלי ב‑source | `firestore_cached_repo.dart` | נדחף (e3e6e94) | agent | — |
-| A2 | לחשוף `currentUid` מ‑auth + להזריק ל‑providers | `auth_state.dart` → `orders_local`/`chat_repository`/`customers_local` providers | repo רואה uid מחובר | agent | S |
+| A2 | ✅ בוצע (fleet 5590b38) · `currentUid` מ‑auth + להזריק ל‑providers | `auth_state.dart` → `orders_local`/`chat_repository`/`customers_local` providers | repo רואה uid מחובר | agent | S |
 | A3 | הזמנה: `contractorId=uid` + שדה‑שם נפרד (להפסיק `who`=שם) | `orders_firebase.toDoc` · `orders_engine.placeOrder` · `store_screen.dart:2816` | doc חדש: `contractorId==auth.uid` | agent | M |
 | A4 | הזמנה: `storeId/courierId=uid` בשיוך/קידום | `sys_orders.dart` storeAdvance/courierAdvance | order נושא uid של החנות/שליח | agent | M |
 | A5 | הזמנות: listener ממוקד (לא‑מנהל) | `ordersRepositoryProvider` (scope של A1) | קבלן רואה רק שלו · admin הכול | agent | M |
