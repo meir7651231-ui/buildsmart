@@ -96,8 +96,11 @@ void main() {
   group('T5.4 POD — courier proof-of-delivery flags', () {
     test('capturePod / captureSignature set their flags independently', () {
       final n = fn();
-      n.capturePod('BS-1039');
+      // POD now stores the REAL photo data-URL (podPhoto); podCaptured is the
+      // derived back-compat getter (photo != null).
+      n.capturePod('BS-1039', 'data:image/png;base64,AAAA');
       expect(n.of('BS-1039').podCaptured, isTrue);
+      expect(n.of('BS-1039').podPhoto, startsWith('data:image'));
       expect(n.of('BS-1039').podSigned, isFalse);
       n.captureSignature('BS-1039');
       expect(n.of('BS-1039').podSigned, isTrue);
@@ -116,7 +119,7 @@ void main() {
         missingResolved: true,
         splitInto: 2,
         splitPlan: [1, 2, 1],
-        podCaptured: true,
+        podPhoto: 'data:image/png;base64,AAAA',
         podSigned: true,
       );
       final back = Fulfillment.fromJson(f.toJson());
@@ -126,6 +129,7 @@ void main() {
       expect(back.splitInto, 2);
       expect(back.splitPlan, [1, 2, 1]);
       expect(back.podCaptured, isTrue);
+      expect(back.podPhoto, 'data:image/png;base64,AAAA');
       expect(back.podSigned, isTrue);
     });
 

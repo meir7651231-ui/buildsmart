@@ -107,13 +107,33 @@ void main() {
       // The store sees its own pairs…
       expect(storeThreads, contains('th-contractor-store'));
       expect(storeThreads, contains('th-store-courier'));
-      // …but NOT the contractor↔manager thread, and NOT the bot thread.
+      // …but NOT the contractor↔manager thread. (#83: the supplier chat now
+      // INCLUDES the shared bot thread by design — the old not-contains
+      // assertion was superseded by the approved supplier-chat spec.)
       expect(
         storeThreads,
         isNot(contains(contractorManager)),
         reason: 'the store must never see a contractor↔manager thread',
       );
-      expect(storeThreads, isNot(contains(botThread)));
+      expect(storeThreads, contains(botThread),
+          reason: '#83 — בוט is part of the supplier chat');
+
+      // #83 seed-lock: the four supplier-chat threads must carry
+      // audience 'store' — a wrong audience silently hides them from the
+      // supplier's שיחות tab (mutation-survival hole closed 2026-06-11).
+      const storeAudienceIds = [
+        'th-store-contractors',
+        'th-store-courier-pickups',
+        'th-store-manager',
+        'th-suppliers-group',
+      ];
+      for (final id in storeAudienceIds) {
+        expect(
+          kChatThreads.firstWhere((t) => t.id == id).audience,
+          'store',
+          reason: '#83 — $id חייב audience חנות',
+        );
+      }
     });
 
     test('a manager message stays invisible to the store (isolation holds '

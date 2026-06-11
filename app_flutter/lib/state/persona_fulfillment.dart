@@ -42,7 +42,7 @@ class Fulfillment {
     this.missingResolved = false,
     this.splitInto = 1,
     this.splitPlan = const [],
-    this.podCaptured = false,
+    this.podPhoto,
     this.podSigned = false,
   });
 
@@ -62,8 +62,12 @@ class Fulfillment {
   /// line-index → shipment-group (1-based), proto `o.splitPlan`. Empty ⇒ no split.
   final List<int> splitPlan;
 
-  /// Courier POD photo captured (proto `o.podPhoto`, simulated capture).
-  final bool podCaptured;
+  /// Courier POD photo — the REAL captured shot as a data-URL string (proto
+  /// `o.podPhoto`; COURIER v2 (a): the `services/task_photo.dart pickTaskPhoto`
+  /// seam — webcam sheet on desktop web). Null ⇒ no proof yet, including
+  /// legacy pre-v2 records whose simulated boolean flag carried no image
+  /// (fromJson honestly drops those).
+  final String? podPhoto;
 
   /// Courier POD signature captured (proto `openSignature`, simulated).
   final bool podSigned;
@@ -75,13 +79,18 @@ class Fulfillment {
   int get missingCount =>
       lineStatus.values.where((s) => s == LineStatus.missing).length;
 
+  /// True once a REAL POD photo exists — derived from [podPhoto] so every
+  /// reader (courier reports/profile, delivery-job card, store delivered
+  /// card) keys off the one stored data-URL; no separate flag to drift.
+  bool get podCaptured => podPhoto != null;
+
   Fulfillment copyWith({
     Map<int, LineStatus>? lineStatus,
     bool? heldForMissing,
     bool? missingResolved,
     int? splitInto,
     List<int>? splitPlan,
-    bool? podCaptured,
+    String? podPhoto,
     bool? podSigned,
   }) => Fulfillment(
     lineStatus: lineStatus ?? this.lineStatus,
@@ -89,7 +98,7 @@ class Fulfillment {
     missingResolved: missingResolved ?? this.missingResolved,
     splitInto: splitInto ?? this.splitInto,
     splitPlan: splitPlan ?? this.splitPlan,
-    podCaptured: podCaptured ?? this.podCaptured,
+    podPhoto: podPhoto ?? this.podPhoto,
     podSigned: podSigned ?? this.podSigned,
   );
 
@@ -100,7 +109,7 @@ class Fulfillment {
     if (missingResolved) 'res': true,
     if (splitInto > 1) 'split': splitInto,
     if (splitPlan.isNotEmpty) 'plan': splitPlan,
-    if (podCaptured) 'pod': true,
+    if (podPhoto != null) 'pod': podPhoto,
     if (podSigned) 'sig': true,
   };
 
@@ -119,12 +128,20 @@ class Fulfillment {
     missingResolved: j['res'] == true,
     splitInto: (j['split'] as num?)?.toInt() ?? 1,
     splitPlan: (j['plan'] as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ?? const [],
-    podCaptured: j['pod'] == true,
+    // 'pod' holds the photo data-URL since COURIER v2 (a); a legacy boolean
+    // `true` (pre-v2 simulated capture) carried no image → honest null.
+    podPhoto: j['pod'] is String ? j['pod'] as String : null,
     podSigned: j['sig'] == true,
   );
 }
 
 const String kFulfillmentKey = 'bs.fulfillment.v1';
+
+/// The `{orderId: dataUrl}` POD-photo side-map contract the courier reports
+/// tab reads (screens/courier_reports_tab.dart `kPodPhotosKey` /
+/// `podPhotosProvider`). [FulfillmentNotifier.capturePod] is its writer —
+/// mirrored at capture time so the reports-history thumbs see the same photo.
+const String _kPodPhotosKey = 'bs.pod-photos.v1';
 
 class FulfillmentNotifier extends StateNotifier<Map<String, Fulfillment>> {
   FulfillmentNotifier({this.persist = true}) : super(const {}) {
@@ -265,10 +282,38 @@ class FulfillmentNotifier extends StateNotifier<Map<String, Fulfillment>> {
     _put(id, f.copyWith(splitInto: groups, splitPlan: plan));
   }
 
-  // ── Courier POD (T5.4) ───────────────────────────────────────────────────────
+  // ── Courier POD (T5.4 · COURIER v2 (a) real capture) ─────────────────────────
 
-  /// `capturePOD()` [L20863] — simulated photo capture (sets `podPhoto`).
-  void capturePod(String id) => _put(id, of(id).copyWith(podCaptured: true));
+  /// `capturePOD()` [L20863] — REAL photo capture: stores the [dataUrl]
+  /// returned by the camera seam (`services/task_photo.dart pickTaskPhoto`,
+  /// the webcam sheet on desktop web) on the record — persisted with the
+  /// side-car (`bs.fulfillment.v1`) so the proof survives F5 and the store
+  /// delivered card / manager render the SAME string — and mirrors it into
+  /// the `bs.pod-photos.v1` side-map the courier reports tab reads.
+  void capturePod(String id, String dataUrl) {
+    _put(id, of(id).copyWith(podPhoto: dataUrl));
+    _mirrorPodPhoto(id, dataUrl);
+  }
+
+  /// Best-effort mirror of a captured POD photo into `bs.pod-photos.v1`
+  /// (`{orderId: dataUrl}` — read by `podPhotosProvider` in
+  /// screens/courier_reports_tab.dart, which re-reads on every mutation of
+  /// this notifier). Once the write lands the state is re-notified (same
+  /// content, new identity) so that join re-reads AFTER the photo is actually
+  /// stored — the thumbs never race the capture.
+  Future<void> _mirrorPodPhoto(String id, String dataUrl) async {
+    if (!persist) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_kPodPhotosKey);
+      final map = raw == null || raw.isEmpty
+          ? <String, dynamic>{}
+          : jsonDecode(raw) as Map<String, dynamic>;
+      map[id] = dataUrl;
+      await prefs.setString(_kPodPhotosKey, jsonEncode(map));
+      if (mounted) super.state = Map.of(state);
+    } on Object catch (_) {}
+  }
 
   /// `openSignature` [L20842] — simulated signature capture.
   void captureSignature(String id) =>

@@ -151,16 +151,25 @@ void main() {
       ),
     );
     await tester.pump();
+    // Lazy boardAuthProvider _load() → gate swaps to the board.
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('🏪 חנות ספק'), findsOneWidget);
     expect(find.text('שלום 👋'), findsOneWidget);
     expect(find.textContaining('מחסני אינסטלציה תל-אביב'), findsOneWidget);
     expect(find.textContaining('בבנייה'), findsNothing);
 
-    // Orders tab → approve BS-1042 (new → preparing).
-    await tester.tap(find.text('📥 הזמנות').first);
-    await tester.pumpAndSettle();
+    // #77/#78: the top '📥 הזמנות' pill is gone — the orders PIPELINE now
+    // lives on the default בית tab (bottom nav). Scroll down to the card.
+    await tester.scrollUntilVisible(
+      find.text('📦 BS-1042'),
+      200,
+      // The board now hosts several Scrollables (stats row, list, nav) —
+      // drive the main vertical ListView explicitly.
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('📦 BS-1042'), findsOneWidget);
+    await tester.ensureVisible(find.text('✓ אשר וקבל להכנה'));
     expect(find.text('✓ אשר וקבל להכנה'), findsOneWidget);
     await tester.tap(find.text('✓ אשר וקבל להכנה'));
     await tester.pump();

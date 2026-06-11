@@ -10,6 +10,14 @@
 // state/persona_fulfillment.dart; the canonical stage still flows through
 // `sysOrdersProvider`.
 //
+// #81 two-sided shortage: flagging a line 'חסר' here only PERSISTS the
+// pendingDecision hold (the supplier sees the held banner and is blocked from
+// advancing). The decision itself is made on the CONTRACTOR side via
+// [showContractorMissingDecisionSheet] (exported below — opened from the
+// contractor orders world), and its outcome flows back through the shared
+// [fulfillmentProvider] so this sheet reflects it live (per-line
+// 'הוחלף/בוטל ע"י הקבלן' states + the 'תיקון בוצע' release banner).
+//
 // camera/POD note: this sheet has no camera. The missing-item loop and split are
 // pure state. Every Hebrew string is VERBATIM from proto 06 §2.5/§2.6.
 
@@ -19,6 +27,7 @@ import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -139,10 +148,16 @@ class PersonaPickingSheet extends ConsumerWidget {
 
               // Held / missing alert.
               if (f.heldForMissing)
-                _Banner(
+                const _Banner(
                   text: '⏳ פריט חסר — ממתין לבחירת הקבלן (החלפה / ביטול)',
-                  bg: const Color(0xFFFFF4D6),
-                  fg: const Color(0xFF8A6D00),
+                  bg: Color(0xFFFFF4D6),
+                  fg: Color(0xFF8A6D00),
+                )
+              else if (f.missingResolved)
+                const _Banner(
+                  text: '✓ תיקון בוצע — הקבלן החליט, המשך בליקוט',
+                  bg: Color(0xFFD7F5DF),
+                  fg: Color(0xFF1F8A4C),
                 )
               else if (f.missingCount > 0)
                 _Banner(
@@ -232,132 +247,18 @@ class PersonaPickingSheet extends ConsumerWidget {
   void _onMiss(BuildContext context, WidgetRef ref, SysOrder o, int i) {
     final newlyHeld = ref.read(fulfillmentProvider.notifier).missLine(o.id, i);
     if (newlyHeld) {
-      // proto `storeMissLine` → pushNotification + openMissingDecision sheet.
-      _openMissingDecision(context, ref, o, i);
+      // #81 two-sided shortage: the persisted pendingDecision entry IS the
+      // contractor's notification (the contractor orders world reads
+      // fulfillmentProvider and surfaces a 'נדרשת החלטה' card that opens
+      // [showContractorMissingDecisionSheet]). The supplier only sees the held
+      // banner until the contractor's decision returns through the provider —
+      // the decision sheet no longer auto-opens on the store side.
+      showToast(
+        context,
+        '⏳ הקבלן עודכן — ההזמנה ממתינה להחלטתו (החלפה / הסרה / ביטול)',
+      );
     }
   }
-
-  // ── Missing-item decision (T5.2) ─────────────────────────────────────────────
-
-  void _openMissingDecision(
-    BuildContext context,
-    WidgetRef ref,
-    SysOrder o,
-    int line,
-  ) {
-    final name = line < o.lines.length ? o.lines[line].name : '';
-    final qty = line < o.lines.length ? o.lines[line].qty : 0;
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: BsTokens.cardLight,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetCtx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            BsTokens.space4,
-            BsTokens.space4,
-            BsTokens.space4,
-            BsTokens.space5,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const _Grip(),
-              const SizedBox(height: BsTokens.space3),
-              const Text(
-                'פריט חסר — נדרשת החלטה',
-                style: TextStyle(
-                  color: BsTokens.inkLight,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: BsTokens.space3),
-              _decisionRow('הזמנה: ${o.id}'),
-              _decisionRow('פריט חסר: $name'),
-              _decisionRow('כמות: $qty'),
-              _decisionRow(
-                'התהליך נעצר. יש לבחור: להתקדם בלי הפריט, או להחליף אותו.',
-              ),
-              const SizedBox(height: BsTokens.space3),
-              FilledButton(
-                onPressed: () {
-                  ref
-                      .read(fulfillmentProvider.notifier)
-                      .replaceLine(o.id, line);
-                  Navigator.of(sheetCtx).pop();
-                  showToast(context, 'עדכון מהקבלן — הפריט יוחלף');
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: BsTokens.brand,
-                  padding: const EdgeInsets.symmetric(vertical: 13),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                  ),
-                ),
-                child: const Text(
-                  '🔁 החלף מוצר',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
-                ),
-              ),
-              const SizedBox(height: BsTokens.space2),
-              OutlinedButton(
-                onPressed: () {
-                  ref
-                      .read(fulfillmentProvider.notifier)
-                      .proceedWithout(o.id, line);
-                  Navigator.of(sheetCtx).pop();
-                  showToast(
-                    context,
-                    'הקבלן ביטל את הפריט "$name" — המשך בליקוט',
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 13),
-                  side: const BorderSide(color: Color(0xFFE0E0E0)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                  ),
-                ),
-                child: const Text(
-                  'דלג — הסר מההזמנה',
-                  style: TextStyle(
-                    color: BsTokens.inkLight,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  static Widget _decisionRow(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: BsTokens.space2),
-    child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: BsTokens.space4,
-        vertical: BsTokens.space3,
-      ),
-      decoration: BoxDecoration(
-        color: BsTokens.bgLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(color: BsTokens.inkLight, fontSize: 13.5),
-      ),
-    ),
-  );
 
   // ── Split groups (T5.3) ──────────────────────────────────────────────────────
 
@@ -629,6 +530,327 @@ class PersonaPickingSheet extends ConsumerWidget {
             style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #81 · CONTRACTOR-side missing-item decision (two-sided shortage loop)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Opens the CONTRACTOR decision sheet for [orderId] — the contractor side of
+/// the #81 two-sided shortage loop. Call from the contractor orders world
+/// (store_screen.dart 'נדרשת החלטה' card) for an order whose
+/// [fulfillmentProvider] entry has `heldForMissing`.
+///
+/// Decisions write straight to the shared [fulfillmentProvider] (replace →
+/// `replaceLine`, remove → `proceedWithout`), so the supplier picking sheet
+/// and store dashboard reflect them live ('הוחלף/בוטל ע"י הקבלן' +
+/// 'תיקון בוצע'). [onCancelOrder] wires the whole-order cancel decision —
+/// pass it once the fulfillment notifier grows a cancel-order method; while
+/// null the cancel button is honestly disabled.
+void showContractorMissingDecisionSheet(
+  BuildContext context,
+  String orderId, {
+  VoidCallback? onCancelOrder,
+}) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: BsTokens.cardLight,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => Directionality(
+      textDirection: TextDirection.rtl,
+      child: ContractorMissingDecisionSheet(
+        orderId: orderId,
+        onCancelOrder: onCancelOrder,
+      ),
+    ),
+  );
+}
+
+/// The contractor's pending-decision sheet body — lists every line the supplier
+/// flagged 'חסר' (status `pendingDecision`) and offers the three #81 decisions:
+/// replace / remove-from-order / cancel-whole-order. Reads the shared providers
+/// LIVE, so once all lines are decided it shows the resolved state instead.
+class ContractorMissingDecisionSheet extends ConsumerWidget {
+  const ContractorMissingDecisionSheet({
+    required this.orderId,
+    this.onCancelOrder,
+    super.key,
+  });
+
+  final String orderId;
+
+  /// Whole-order cancel decision. Null ⇒ the button renders honestly disabled
+  /// (the fulfillment notifier does not expose an order-cancel yet).
+  final VoidCallback? onCancelOrder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final orders = ref.watch(sysOrdersProvider);
+    final idx = orders.indexWhere((o) => o.id == orderId);
+    final order = idx < 0 ? null : orders[idx];
+    final f = ref.watch(fulfillmentProvider)[orderId] ?? const Fulfillment();
+    final fn = ref.read(fulfillmentProvider.notifier);
+    final pending = order == null
+        ? const <int>[]
+        : [
+            for (var i = 0; i < order.lines.length; i++)
+              if ((f.lineStatus[i] ?? LineStatus.pending) ==
+                  LineStatus.pendingDecision)
+                i,
+          ];
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          BsTokens.space4,
+          BsTokens.space3,
+          BsTokens.space4,
+          BsTokens.space5,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const _Grip(),
+            const SizedBox(height: BsTokens.space2),
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'פריט חסר — נדרשת החלטה',
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                // Explicit ≥48dp close target (X) — sheet a11y rule.
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  tooltip: 'סגור',
+                  constraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
+                  icon: const Icon(
+                    Icons.close,
+                    color: BsTokens.mutedLight,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: BsTokens.space2),
+            if (order == null)
+              const Text(
+                'ההזמנה אינה זמינה עוד',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+              )
+            else ...[
+              _decisionRow('הזמנה: ${order.id} · ${order.site}'),
+              if (pending.isEmpty)
+                const _Banner(
+                  text: '✓ ההחלטה התקבלה — הספק ממשיך בליקוט (תיקון בוצע)',
+                  bg: Color(0xFFD7F5DF),
+                  fg: Color(0xFF1F8A4C),
+                )
+              else ...[
+                _decisionRow(
+                  'הספק עצר את הליקוט — יש לבחור לכל פריט חסר: החלפה או הסרה, '
+                  'או לבטל את ההזמנה כולה.',
+                ),
+                const SizedBox(height: BsTokens.space2),
+                for (final i in pending)
+                  _DecisionLine(
+                    name: order.lines[i].name,
+                    qty: order.lines[i].qty,
+                    onReplace: () {
+                      fn.replaceLine(orderId, i);
+                      showToast(
+                        context,
+                        '🔁 ההחלטה נשלחה לספק — '
+                        '"${order.lines[i].name}" יוחלף במוצר חלופי',
+                      );
+                    },
+                    onRemove: () {
+                      fn.proceedWithout(orderId, i);
+                      showToast(
+                        context,
+                        'הפריט "${order.lines[i].name}" הוסר — '
+                        'הספק ממשיך בליקוט',
+                      );
+                    },
+                  ),
+                const SizedBox(height: BsTokens.space2),
+                OutlinedButton(
+                  onPressed: onCancelOrder == null
+                      ? null
+                      : () async {
+                          final ok = await confirmDestructive(
+                            context,
+                            title: 'ביטול ההזמנה',
+                            message:
+                                'ההזמנה ${order.id} תבוטל כולה אצל הספק — '
+                                'פעולה בלתי-הפיכה.',
+                            confirmLabel: 'בטל הזמנה',
+                          );
+                          if (!ok || !context.mounted) return;
+                          onCancelOrder!();
+                          Navigator.of(context).pop();
+                          showToast(context, 'ההזמנה בוטלה — הספק עודכן');
+                        },
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    side: BorderSide(
+                      color: onCancelOrder == null
+                          ? const Color(0xFFE0E0E0)
+                          : BsTokens.brandDark,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                    ),
+                  ),
+                  child: Text(
+                    onCancelOrder == null
+                        ? '🚫 ביטול ההזמנה כולה — בקרוב'
+                        : '🚫 בטל את ההזמנה כולה',
+                    style: TextStyle(
+                      color: onCancelOrder == null
+                          ? BsTokens.mutedLight
+                          : BsTokens.brandDark,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Widget _decisionRow(String text) => Padding(
+  padding: const EdgeInsets.only(bottom: BsTokens.space2),
+  child: Container(
+    width: double.infinity,
+    padding: const EdgeInsets.symmetric(
+      horizontal: BsTokens.space4,
+      vertical: BsTokens.space3,
+    ),
+    decoration: BoxDecoration(
+      color: BsTokens.bgLight,
+      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+    ),
+    child: Text(
+      text,
+      style: const TextStyle(color: BsTokens.inkLight, fontSize: 13.5),
+    ),
+  ),
+);
+
+/// One pending-decision line on the contractor sheet — name + qty + the two
+/// per-line decisions (replace / remove).
+class _DecisionLine extends StatelessWidget {
+  const _DecisionLine({
+    required this.name,
+    required this.qty,
+    required this.onReplace,
+    required this.onRemove,
+  });
+
+  final String name;
+  final int qty;
+  final VoidCallback onReplace;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: BsTokens.space2),
+      child: Container(
+        padding: const EdgeInsets.all(BsTokens.space3),
+        decoration: BoxDecoration(
+          color: BsTokens.cardLight,
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          border: Border.all(color: const Color(0xFFEDEDED)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              name,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'כמות: $qty · ⏳ הספק ממתין להחלטתך',
+              style: const TextStyle(
+                color: Color(0xFF8A6D00),
+                fontSize: 12.5,
+              ),
+            ),
+            const SizedBox(height: BsTokens.space2),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton(
+                    onPressed: onReplace,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: BsTokens.brand,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(BsTokens.radiusPill),
+                      ),
+                    ),
+                    child: const Text(
+                      '🔁 החלף מוצר',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: BsTokens.space2),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onRemove,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      side: const BorderSide(color: Color(0xFFE0E0E0)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(BsTokens.radiusPill),
+                      ),
+                    ),
+                    child: const Text(
+                      'הסר מההזמנה',
+                      style: TextStyle(
+                        color: BsTokens.inkLight,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

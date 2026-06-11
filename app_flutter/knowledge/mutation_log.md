@@ -806,3 +806,5 @@
 ### 2026-06-11 — uid-migration A2+A3 (נחיל Phase A · builder+supervisor)
 - **A2 — `currentUidProvider` (`lib/state/auth_state.dart`):** מוטציה — `return ref.watch(authStateProvider).user?.uid` → `return null` → `auth_state_test` קבוצת 'currentUidProvider — A2' **אדום** (signed-in: Expected 'u-42' / Actual null, שורה 422) ✅ נתפס; שוחזר byte-clean → ירוק.
 - **A3 — `Order.contractorUid` (`lib/state/orders_engine.dart`):** מוטציה (supervisor) — שבירת ה-preservation ב-copyWith `contractorUid: contractorUid,` → `contractorUid: ''` → `orders_uid_a3_test` 'a stage advance (copyWith) keeps the contractor uid' **אדום** (Expected 'u-9' / Actual '') ✅ נתפס; שוחזר byte-clean (grep-count חזר ל-3) → +8 ירוק.
+### 2026-06-11 — lib/data/chat_seeds.dart (#83 threads-ספק · נחיל-קנוני)
+- מוטציה: audience 'store'→'worker' על thread-ספק → **שרדה** (חור-כיסוי!) → נוספה בדיקת-נעילה (sys_chat_test: 4 ids חייבים audience 'store') → מוטציה חוזרת **נתפסה** (אדום) → שוחזר → ירוק. לקח: seed-fields שמשפיעים-על-נראות חייבים נעילת-בדיקה.

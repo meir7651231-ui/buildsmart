@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/courier_delivery_detail_sheet.dart';
@@ -7,13 +9,32 @@ import 'package:buildsmart/screens/courier_reports_tab.dart';
 import 'package:buildsmart/screens/courier_settings_screen.dart';
 import 'package:buildsmart/screens/persona_pod_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
+import 'package:buildsmart/screens/worker_notifs_sheet.dart'
+    show workerNotifAgo;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
+import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// 🪙 DEMO-SEED: coins credited to the courier's rewards balance per DELIVERED
+/// shipment (COURIER v2 ב — awardCoins on delivered + bell). A fixed demo
+/// tariff mirroring `kTaskApprovalCoins` (tasks_engine.dart) — the real
+/// per-delivery value comes with the server; NEVER derived from the order sum.
+const int kCourierDeliveryCoins = 20;
+
+/// SharedPreferences key (versioned `bs.*.v1`) — per-username set of order ids
+/// whose hand-off bell notification ('משלוח חדש') was already emitted, so a
+/// reload (F5) or re-login never re-notifies the same real hand-off. אין
+/// המצאות: notifications derive only from actual engine stages (pickup/transit
+/// = the store really handed the shipment to the courier).
+const String kCourierHandoffSeenKey = 'bs.courier-handoff-seen.v1';
 
 /// 🛵 שליח — the courier role app. Same shell/style as the contractor app, a
 /// faithful port of the prototype `screen-courier` (proto 06 §3 / preact 03
@@ -50,6 +71,89 @@ class _CourierDashboardScreenState
   /// 0 משלוחים (ברירת המחדל) · 1 פורטל · 2 דוחות · 3 אזור אישי (#72).
   int _tab = 0;
 
+  /// COURIER v2 ג — per-username order ids whose 'משלוח חדש' bell notification
+  /// was already emitted (persisted under [kCourierHandoffSeenKey] so an F5
+  /// never re-notifies). Mutated only by [_sweepHandoffNotifs].
+  final Map<String, Set<String>> _handoffSeen = {};
+
+  /// Load-guard (board_auth idiom): the sweep is gated until the persisted
+  /// seen-set resolved, so a fast first build can't double-notify a hand-off
+  /// that was already notified before the reload.
+  bool _handoffSeenLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHandoffSeen();
+  }
+
+  Future<void> _loadHandoffSeen() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(kCourierHandoffSeenKey);
+      if (raw != null && raw.isNotEmpty) {
+        final m = jsonDecode(raw) as Map<String, dynamic>;
+        for (final e in m.entries) {
+          if (e.value is List) {
+            _handoffSeen[e.key] = {
+              for (final id in e.value as List)
+                if (id is String) id,
+            };
+          }
+        }
+      }
+    } on Object catch (_) {
+      // Corrupt/old payload — start empty (worst case: one repeat 🔔).
+    }
+    if (!mounted) return;
+    _handoffSeenLoaded = true;
+    // Catch hand-offs that happened while this board was not mounted (the
+    // store handed off, then the courier logged in).
+    _sweepHandoffNotifs(ref.read(sysOrdersProvider));
+  }
+
+  Future<void> _persistHandoffSeen() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        kCourierHandoffSeenKey,
+        jsonEncode({
+          for (final e in _handoffSeen.entries) e.key: [...e.value],
+        }),
+      );
+    } on Object catch (_) {}
+  }
+
+  /// COURIER v2 ג — 🔔 'משלוח חדש': every order REALLY in the courier's hands
+  /// (engine stage `pickup`/`transit`, i.e. the store's "מסור לשליח" hand-off
+  /// happened) that was not notified yet appends a bell notification to the
+  /// logged courier's per-username [workerNotifsProvider] feed. Runs on every
+  /// live engine change (ref.listen in [build]) AND once on mount (post-load),
+  /// so hand-offs made while the board was closed are caught. Dedup'd by the
+  /// persisted [_handoffSeen] set — a stage never moves backwards, so each
+  /// hand-off notifies exactly once.
+  void _sweepHandoffNotifs(List<SysOrder> orders) {
+    if (!_handoffSeenLoaded || !mounted) return;
+    final s = ref.read(boardAuthProvider);
+    if (s == null || s.role != BoardRole.courier) return;
+    final seen = _handoffSeen.putIfAbsent(s.username, () => <String>{});
+    var dirty = false;
+    for (final o in orders) {
+      final inHand =
+          o.stage == OrderStage.pickup || o.stage == OrderStage.transit;
+      if (!inHand || seen.contains(o.id)) continue;
+      seen.add(o.id);
+      dirty = true;
+      ref.read(workerNotifsProvider.notifier).addNotification(
+            username: s.username,
+            emoji: '📦',
+            title: 'משלוח חדש — נמסר לידיך מהחנות',
+            body: '${o.id} · ${o.who} · 📍 ${o.site}',
+          );
+    }
+    if (dirty) _persistHandoffSeen();
+  }
+
   @override
   Widget build(BuildContext context) {
     // חוק הלוחות (כלל 4 — "מבחוץ לא רואים כלום"): בלי session של שליח נבנה אך
@@ -58,6 +162,14 @@ class _CourierDashboardScreenState
     if (session == null || session.role != BoardRole.courier) {
       return const WelcomeScreen(boardRole: BoardRole.courier);
     }
+
+    // COURIER v2 ג — live hand-off watcher: a REAL ready→pickup advance by the
+    // store while this board is mounted lands as a 🔔 immediately (the
+    // mount-time sweep in [_loadHandoffSeen] covers off-screen hand-offs).
+    ref.listen<List<SysOrder>>(
+      sysOrdersProvider,
+      (_, next) => _sweepHandoffNotifs(next),
+    );
 
     // #72 — הזרם אחרי כניסה: קודם בחירת "הרכב שלי היום" (אם טרם נבחר במשמרת
     // הזו) → ואז הבית עם 4 הטאבים.
@@ -117,8 +229,10 @@ class _CourierDashboardScreenState
 
   /// ה-AppBar המשותף ללוח ולשער-הרכב. Each persona reaches profile + settings
   /// from its OWN dashboard — לשליח יש כעת מסכים ייעודיים (#73). RTL: actions
-  /// lay out leading→trailing, so this reads profile · settings · exit from
-  /// the right.
+  /// lay out leading→trailing, so this reads bell · profile · settings · exit
+  /// from the right. COURIER v2 ג — the 🔔 bell (unread badge) mirrors the
+  /// worker board's `WorkerNotifsBell`, reading the courier's own per-username
+  /// feed off the SAME [workerNotifsProvider] store.
   AppBar _appBar() {
     return AppBar(
       backgroundColor: BsTokens.cardLight,
@@ -134,6 +248,7 @@ class _CourierDashboardScreenState
         ),
       ),
       actions: [
+        const _CourierNotifsBell(),
         IconButton(
           tooltip: 'פרופיל',
           icon: const Icon(Icons.person_outline, color: BsTokens.mutedLight),
@@ -430,8 +545,38 @@ class _CourierDashboardScreenState
   }
 
   void _advance(SysOrder o) {
+    // COURIER v2 ב — the transition INTO `delivered` is the order tapped while
+    // at `transit` (courierAdvance owns pickup→transit→delivered only).
+    final wasTransit = o.stage == OrderStage.transit;
     ref.read(sysOrdersProvider.notifier).courierAdvance(o.id);
-    showToast(context, 'המשלוח ${o.id} עודכן — מסונכרן עם החנות והמנהל ✓');
+    // Award only when the engine REALLY moved it to delivered (re-read, not
+    // assumed) — delivered is terminal + courierAdvance no-ops on it, so the
+    // 🪙+🔔 pair can never double-fire for the same order.
+    final delivered = wasTransit &&
+        ref
+            .read(sysOrdersProvider)
+            .any((x) => x.id == o.id && x.stage == OrderStage.delivered);
+    if (!delivered) {
+      showToast(context, 'המשלוח ${o.id} עודכן — מסונכרן עם החנות והמנהל ✓');
+      return;
+    }
+    // 🪙 fixed DEMO tariff (kCourierDeliveryCoins) onto the shared rewards
+    // balance — same seam as the worker's task-approval award (#85ו).
+    ref.read(rewardsProvider.notifier).awardCoins(kCourierDeliveryCoins);
+    // 🔔 'delivered' event onto the courier's own per-username feed.
+    final s = ref.read(boardAuthProvider);
+    if (s != null && s.role == BoardRole.courier) {
+      ref.read(workerNotifsProvider.notifier).addNotification(
+            username: s.username,
+            emoji: '✅',
+            title: 'המשלוח נמסר — +$kCourierDeliveryCoins מטבעות',
+            body: '${o.id} · ${o.who}',
+          );
+    }
+    showToast(
+      context,
+      'המשלוח ${o.id} נמסר ✓ +$kCourierDeliveryCoins מטבעות 🪙',
+    );
   }
 }
 
@@ -666,6 +811,8 @@ class _CourierJobCard extends StatelessWidget {
                         order.stage == OrderStage.transit
                             ? BsTokens.brand
                             : const Color(0xFF1F8A4C),
+                    // #63 pattern — guarantees the ≥48dp touch target.
+                    minimumSize: const Size(64, 48),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -684,6 +831,8 @@ class _CourierJobCard extends StatelessWidget {
                   OutlinedButton(
                     onPressed: onPod,
                     style: OutlinedButton.styleFrom(
+                      // #63 pattern — guarantees the ≥48dp touch target.
+                      minimumSize: const Size(64, 48),
                       padding: const EdgeInsets.symmetric(vertical: 11),
                       side: const BorderSide(color: Color(0xFFE0E0E0)),
                       shape: RoundedRectangleBorder(
@@ -782,6 +931,314 @@ class _FlatCard extends StatelessWidget {
         ],
       ),
       child: child,
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COURIER v2 ג · 🔔 courier notifications — bell + sheet (per-username feed)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// The logged courier's own feed off the per-username [workerNotifsProvider]
+/// MAP (the spec's reuse — one notification store, per-username isolation).
+/// `null` username when no courier session (the board gate keeps these widgets
+/// unbuilt anyway). [currentWorkerNotifsProvider] gates on `role == worker`,
+/// so the courier reads the map directly by its own session username.
+({String? username, List<WorkerNotif> notifs}) _courierFeed(WidgetRef ref) {
+  final s = ref.watch(boardAuthProvider);
+  if (s == null || s.role != BoardRole.courier) {
+    return (username: null, notifs: const []);
+  }
+  return (
+    username: s.username,
+    notifs: ref.watch(workerNotifsProvider)[s.username] ?? const [],
+  );
+}
+
+/// The AppBar bell: red unread badge, tap opens [showCourierNotifsSheet] —
+/// a 1:1 mirror of the worker board's `WorkerNotifsBell` (#85ו). IconButton
+/// keeps the ≥48dp target.
+class _CourierNotifsBell extends ConsumerWidget {
+  const _CourierNotifsBell();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread = _courierFeed(ref).notifs.where((n) => !n.read).length;
+    return IconButton(
+      key: const ValueKey('courier-notifs-bell'),
+      tooltip: 'התראות',
+      onPressed: () => showCourierNotifsSheet(context),
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Icon(Icons.notifications_outlined, color: BsTokens.mutedLight),
+          if (unread > 0)
+            PositionedDirectional(
+              start: -4,
+              top: -4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                decoration: BoxDecoration(
+                  color: BsTokens.danger,
+                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  unread > 9 ? '9+' : '$unread',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Opens the courier notifications sheet (list + mark-read + clear-all).
+Future<void> showCourierNotifsSheet(BuildContext context) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => const _CourierNotifsSheet(),
+  );
+}
+
+/// The notifications sheet — style mirrors `_WorkerNotifsSheet` (#85ו: white
+/// card sheet, RTL, X close, ≥48dp rows); reads/mutates the courier's own
+/// per-username feed only.
+class _CourierNotifsSheet extends ConsumerWidget {
+  const _CourierNotifsSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final feed = _courierFeed(ref);
+    final username = feed.username;
+    final notifs = feed.notifs;
+    final unread = notifs.where((n) => !n.read).length;
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (_, scroll) => Container(
+          decoration: const BoxDecoration(
+            color: BsTokens.cardLight,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(BsTokens.radiusCard),
+            ),
+          ),
+          child: ListView(
+            controller: scroll,
+            padding: const EdgeInsets.all(BsTokens.space4),
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: BsTokens.space3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDDDDDD),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              // ── header: title + X close ──
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      '🔔 התראות',
+                      style: TextStyle(
+                        color: BsTokens.inkLight,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'סגירה',
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close, color: BsTokens.mutedLight),
+                  ),
+                ],
+              ),
+              const SizedBox(height: BsTokens.space2),
+
+              if (notifs.isEmpty)
+                // Honest empty state — the feed fills only from real engine
+                // events (משלוח שנמסר לידיך מהחנות · משלוח שמסרת ללקוח).
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
+                  child: Text(
+                    'אין התראות עדיין.\nמשלוחים חדשים שנמסרים לידיך ומסירות שהשלמת יופיעו כאן.',
+                    textAlign: TextAlign.center,
+                    style:
+                        TextStyle(color: BsTokens.mutedLight, fontSize: 13.5),
+                  ),
+                )
+              else ...[
+                // ── actions row: mark-all-read · clear-all (confirmed) ──
+                Row(
+                  children: [
+                    if (unread > 0)
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(64, 48),
+                        ),
+                        onPressed: username == null
+                            ? null
+                            : () => ref
+                                .read(workerNotifsProvider.notifier)
+                                .markAllRead(username),
+                        child: const Text(
+                          'סמן הכל כנקרא',
+                          style: TextStyle(
+                            color: BsTokens.brandDark,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    const Spacer(),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(64, 48),
+                      ),
+                      onPressed: username == null
+                          ? null
+                          : () async {
+                              final ok = await confirmDestructive(
+                                context,
+                                title: 'לנקות את כל ההתראות?',
+                                message:
+                                    'כל ההתראות יימחקו — פעולה בלתי הפיכה.',
+                                confirmLabel: 'נקה',
+                              );
+                              if (!ok) return;
+                              ref
+                                  .read(workerNotifsProvider.notifier)
+                                  .clear(username);
+                            },
+                      child: const Text(
+                        'נקה הכל',
+                        style: TextStyle(
+                          color: BsTokens.danger,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: BsTokens.space1),
+                for (final n in notifs)
+                  _CourierNotifRow(
+                    notif: n,
+                    onTap: username == null || n.read
+                        ? null
+                        : () => ref
+                            .read(workerNotifsProvider.notifier)
+                            .markRead(username, n.id),
+                  ),
+              ],
+              const SizedBox(height: BsTokens.space4),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One notification row — unread shows an ink title + a brand dot; tapping an
+/// unread row marks it read. Min height keeps the ≥48dp target.
+class _CourierNotifRow extends StatelessWidget {
+  const _CourierNotifRow({required this.notif, this.onTap});
+
+  final WorkerNotif notif;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: notif.read ? BsTokens.cardLight : const Color(0xFFFFF8F2),
+      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 48),
+          padding: const EdgeInsets.symmetric(
+            horizontal: BsTokens.space3,
+            vertical: BsTokens.space2,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(notif.emoji, style: const TextStyle(fontSize: 20)),
+              const SizedBox(width: BsTokens.space3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      notif.title,
+                      style: TextStyle(
+                        color: BsTokens.inkLight,
+                        fontWeight:
+                            notif.read ? FontWeight.w600 : FontWeight.w800,
+                        fontSize: 13.5,
+                      ),
+                    ),
+                    if (notif.body.isNotEmpty)
+                      Text(
+                        notif.body,
+                        style: const TextStyle(
+                          color: BsTokens.mutedLight,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    const SizedBox(height: 2),
+                    Text(
+                      workerNotifAgo(notif.ts),
+                      style: const TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!notif.read)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: BsTokens.space2,
+                    top: 6,
+                  ),
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: BsTokens.brand,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

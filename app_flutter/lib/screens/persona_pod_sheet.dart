@@ -1,19 +1,30 @@
-// T5.4 POD — proof-of-delivery (courier side).
+// T5.4 POD — proof-of-delivery (courier side), COURIER v2 (a) REAL capture.
 //
 // Proto 06 §3.5 `courierPOD()` [L20842] / `capturePOD()` [L20863] /
 // `openSignature`. The courier opens this from the 🛵 delivery-job card
-// ("אישור מסירה") for an order it is carrying (pickup/transit). It offers a
-// simulated photo capture and a simulated signature; capturing the photo shows
-// the SIMULATED demo result inline (a rendered POD preview + the verbatim toast
-// `צילום המסירה נשמר 📸 (דורש הרשאת מצלמה במכשיר)`) — NOT a real camera and NOT a
-// bare toast-only stub (camera/POD → SIMULATED demo result per the build rules).
+// ("אישור מסירה") for an order it is carrying (pickup/transit). The 📷 button
+// captures a REAL photo through the shared services/task_photo.dart
+// [pickTaskPhoto] seam — on desktop web that is the live getUserMedia webcam
+// dialog (screens/webcam_capture_sheet.dart; the browser file picker only as
+// the honest fallback on a webcam ERROR), on mobile the device camera with a
+// one-shot gallery retry. A cancel/failure returns null and NOTHING is stored
+// — no fake capture, no demo toast. The ✍️ signature button remains an honest
+// "(הדגמה)" placeholder awaiting its own spec (pad not yet specified).
 //
-// POD state (podCaptured / podSigned) is held in state/persona_fulfillment.dart
-// keyed by order id, so the "נחתם ✓ / ממתין" pill survives a restart. The order
+// POD state (podPhoto data-URL + podCaptured / podSigned) is held in
+// state/persona_fulfillment.dart keyed by order id and PERSISTED
+// (`bs.fulfillment.v1`), so the photo and the "נחתם ✓ / ממתין" pill survive a
+// restart — and the SAME podPhoto string is what the store's delivered card
+// and the manager render (both sides see one source of truth). The order
 // stage advance to `delivered` stays on the shared two-step hand-off
 // (sysOrdersProvider.courierAdvance) — POD does not bypass it.
 
+import 'dart:async';
+
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
+    show taskPhotoWidget;
+import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -153,54 +164,53 @@ class PersonaPodSheet extends ConsumerWidget {
             ),
             const SizedBox(height: BsTokens.space3),
 
-            // SIMULATED photo preview — the demo result of the capture, shown
-            // inline once the photo is "taken".
-            Container(
-              height: 150,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: f.podCaptured
-                    ? const Color(0xFFEAF6EE)
-                    : BsTokens.bgLight,
-                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-                border: Border.all(
-                  color: f.podCaptured
-                      ? const Color(0xFF1F8A4C)
-                      : const Color(0xFFE0E0E0),
+            // REAL POD photo preview — the captured shot rendered via the
+            // SHARED [taskPhotoWidget] (worker_task_detail_sheet.dart), the
+            // exact same thumbnail seam the store's delivered card and the
+            // manager use, so all sides see the identical proof. No photo yet
+            // (including legacy pre-v2 simulated records, which carry no
+            // image) → an honest empty box, never a fake preview.
+            if (f.podPhoto != null)
+              taskPhotoWidget(f.podPhoto, height: 150)
+            else
+              Container(
+                height: 150,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: BsTokens.bgLight,
+                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  border: Border.all(color: const Color(0xFFE0E0E0)),
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('📷', style: TextStyle(fontSize: 40)),
+                    SizedBox(height: 6),
+                    Text(
+                      'אין צילום עדיין',
+                      style: TextStyle(
+                        color: BsTokens.mutedLight,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    f.podCaptured ? '🖼️' : '📷',
-                    style: const TextStyle(fontSize: 40),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    f.podCaptured
-                        ? '✓ צילום מסירה נשמר (הדגמה)'
-                        : 'אין צילום עדיין',
-                    style: TextStyle(
-                      color: f.podCaptured
-                          ? const Color(0xFF1F8A4C)
-                          : BsTokens.mutedLight,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
             const SizedBox(height: BsTokens.space3),
 
-            // 📷 צלם מסירה — simulated capture (camera → SIMULATED demo result).
+            // 📷 צלם מסירה — REAL capture via [pickTaskPhoto] (webcam sheet on
+            // desktop web, device camera on mobile, picker only as the honest
+            // error fallback). null = cancel/failure → nothing stored and no
+            // success toast (the seam already toasts its own honest errors).
             FilledButton(
-              onPressed: () {
-                fn.capturePod(orderId);
+              onPressed: () async {
+                final photo = await pickTaskPhoto(context);
+                if (photo == null || !context.mounted) return;
+                fn.capturePod(orderId, photo);
                 showToast(
                   context,
-                  'צילום המסירה נשמר 📸 (דורש הרשאת מצלמה במכשיר)',
+                  'צילום המסירה נשמר 📸 — מוצג לחנות ולמנהל',
                 );
               },
               style: FilledButton.styleFrom(
@@ -210,14 +220,18 @@ class PersonaPodSheet extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                 ),
               ),
-              child: const Text(
-                '📷 צלם מסירה',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+              child: Text(
+                f.podPhoto == null ? '📷 צלם מסירה' : '📷 צלם שוב',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
               ),
             ),
             const SizedBox(height: BsTokens.space2),
 
-            // ✍️ חתימה — simulated signature.
+            // ✍️ חתימה — honest "(הדגמה)" placeholder: the toast says so
+            // explicitly; a real signature pad awaits its own spec.
             OutlinedButton(
               onPressed: () {
                 fn.captureSignature(orderId);
@@ -241,9 +255,10 @@ class PersonaPodSheet extends ConsumerWidget {
             ),
 
             // Confirm-delivery shortcut — only when the order is actually on the
-            // road (transit) and a POD has been captured. Advances → delivered
-            // through the SAME shared courier hand-off (no bypass).
-            if (order.stage == OrderStage.transit && f.podCaptured) ...[
+            // road (transit) and a REAL POD photo exists (a legacy simulated
+            // flag with no image does not count). Advances → delivered through
+            // the SAME shared courier hand-off (no bypass).
+            if (order.stage == OrderStage.transit && f.podPhoto != null) ...[
               const SizedBox(height: BsTokens.space3),
               FilledButton(
                 onPressed: () async {
@@ -259,7 +274,7 @@ class PersonaPodSheet extends ConsumerWidget {
                   ref
                       .read(sysOrdersProvider.notifier)
                       .courierAdvance(order.id);
-                  Navigator.of(context).maybePop();
+                  unawaited(Navigator.of(context).maybePop());
                   showToast(
                     context,
                     'המשלוח ${order.id} עודכן — מסונכרן עם החנות והמנהל ✓',

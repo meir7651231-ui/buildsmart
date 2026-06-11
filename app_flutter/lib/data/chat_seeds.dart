@@ -8,12 +8,17 @@
 //   • contractor↔courier  — both 👷 and 🛵 see it
 //   • contractor↔manager  — both 👷 and 👔 see it (🏪/🛵 do NOT — isolation)
 //   • store↔courier       — both 🏪 and 🛵 see it
+//   • store board (#83)   — the supplier's own chat-tab list (audience:'store'):
+//                           קבלנים·שליח·מנהל·קבוצת-ספקים, each visible to BOTH
+//                           sides via the participants filter
 //   • bot                 — the chatbot thread (auto-reply kept), shared with
-//                           the worker/courier boards (one bot for everyone)
+//                           the worker/courier/supplier boards (one bot for
+//                           everyone)
 //
 // Board-audience seeds (contract §3): the courier-board threads (#75, marked
-// `audience: 'courier'`) live here too; the worker-board list is in
-// `sys_chat.dart` (`kWorkerChatThreads`).
+// `audience: 'courier'`) and the supplier-board threads (#83, marked
+// `audience: 'store'` — קבלנים·שליח·מנהל·קבוצת-ספקים) live here too; the
+// worker-board list is in `sys_chat.dart` (`kWorkerChatThreads`).
 //
 // Timestamps are fixed (not `DateTime.now()`) so the seed is deterministic for
 // tests and stable across rebuilds — only user-sent messages use the wall clock.
@@ -150,15 +155,93 @@ final List<ChatThread> kChatThreads = [
     ],
   ),
 
+  // ── שיחות לוח-הספק (#83 · audience:'store') — demo seeds שמפנים אך ורק
+  // להזמנות האמיתיות מה-seed (kSysOrdersSeed, supplier_data.dart: BS-1042 ·
+  // יוסי כהן · מגדל הרצליה · התקבלה | BS-1041 · אבי מזרחי · דירה — רמת גן ·
+  // בהכנה | BS-1040 · משה אברהם · וילה — סביון · מוכן לאיסוף | BS-1039 ·
+  // דוד לוי · משרדים — תל אביב · בדרך לאתר). SERVER-SWAP: עם חיבור השרת
+  // השיחות האלה יגיעו מצד השרת. ────────────────────────────────────────────
+
+  // 🏪 ↔ 👷 — הספק מול הקבלנים (ההזמנות האמיתיות BS-1042 / BS-1041).
+  ChatThread(
+    id: 'th-store-contractors',
+    participants: const [BsRole.store, BsRole.contractor],
+    audience: 'store',
+    name: 'קבלנים',
+    avatar: '👷',
+    messages: [
+      _seed('th-store-contractors', BsRole.store,
+          'BS-1042 (יוסי כהן, מגדל הרצליה) התקבלה — 7 פריטים, מתחילים בהכנה.',
+          minute: -80),
+      _seed('th-store-contractors', BsRole.contractor,
+          'מעולה. מה הסטטוס של BS-1041 (דירה — רמת גן)?', minute: -75),
+      _seed('th-store-contractors', BsRole.store,
+          'BS-1041 בהכנה — אסלה תלויה ומיכל הדחה סמוי; נעדכן כשמוכן לאיסוף.',
+          minute: -70),
+    ],
+  ),
+
+  // 🏪 ↔ 🛵 — הספק מול השליח (איסוף BS-1040 · מסירת BS-1039).
+  ChatThread(
+    id: 'th-store-courier-pickups',
+    participants: const [BsRole.store, BsRole.courier],
+    audience: 'store',
+    name: 'שליח',
+    avatar: '🛵',
+    messages: [
+      _seed('th-store-courier-pickups', BsRole.store,
+          'BS-1040 (משה אברהם, וילה — סביון) מוכן לאיסוף — 6 פריטים, דורש משאית.',
+          minute: -58),
+      _seed('th-store-courier-pickups', BsRole.courier,
+          'קיבלתי, מגיע עם המשאית 🚛 BS-1039 (דוד לוי) כבר בדרך למשרדים בתל אביב.',
+          minute: -52),
+    ],
+  ),
+
+  // 🏪 ↔ 👔 — הספק מול מנהל המערכת (אישור הזמנות נכנסות).
+  ChatThread(
+    id: 'th-store-manager',
+    participants: const [BsRole.store, BsRole.manager],
+    audience: 'store',
+    name: 'מנהל',
+    avatar: '👔',
+    messages: [
+      _seed('th-store-manager', BsRole.manager,
+          'בוקר טוב, BS-1042 (יוסי כהן) התקבלה — נא לאשר ולהתחיל הכנה היום.',
+          minute: -110),
+      _seed('th-store-manager', BsRole.store,
+          'מטופל: BS-1040 כבר מוכן לאיסוף ו-BS-1041 בהכנה.', minute: -100),
+    ],
+  ),
+
+  // 🏪 ↔ 🏪 — קבוצת הספקים (עדכוני מלאי/זמינות; המנהל משתתף כמוקד — המבנה
+  // של th-couriers-group). שמות החנויות = kStores (supplier_data.dart).
+  ChatThread(
+    id: 'th-suppliers-group',
+    participants: const [BsRole.store, BsRole.manager],
+    audience: 'store',
+    name: 'קבוצת ספקים',
+    avatar: '🏪',
+    messages: [
+      _seed('th-suppliers-group', BsRole.manager,
+          'עדכון בוקר לקבוצת הספקים (מחסני אינסטלציה תל-אביב · ספקי סניטריה השרון · חומרי בניין הרצליה): נא לעדכן זמינות מלאי להיום.',
+          minute: -95),
+      _seed('th-suppliers-group', BsRole.store,
+          'מחסני אינסטלציה תל-אביב: BS-1040 מוכן לאיסוף, BS-1042 נכנסת להכנה — אין חוסרים.',
+          minute: -88),
+    ],
+  ),
+
   // 🤖 — chatbot thread (auto-reply kept). Shared across boards: the worker +
-  // courier boards list it too (the "+בוט" rule of the audience filter), so
-  // those roles participate as well — one bot thread for everyone.
+  // courier + supplier boards list it too (the "+בוט" rule of the audience
+  // filter), so those roles participate as well — one bot thread for everyone.
   ChatThread(
     id: 'th-bot',
     participants: const [
       BsRole.contractor,
       BsRole.worker,
       BsRole.courier,
+      BsRole.store,
       BsRole.bot,
     ],
     name: 'צ׳אטבוט BuildSmart',
