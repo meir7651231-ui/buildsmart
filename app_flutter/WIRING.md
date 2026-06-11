@@ -1728,3 +1728,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **ספק:** #77/#78 טאבים-תחתונים (בית=צינור-ההזמנות + צי/עדכון-מלאי בבית, שיחות-טאב) · #79 StoreProduct overlay (bs.store-products.v1, תג 'נוסף ע״י הספק') + זמינות↔קטלוג · #80 חיפוש-מלאי name+sku+category · #81 חוסר דו-צדדי — ההחלטה ירדה מצד-הספק; ממתין-לקבלן persist + sheet-החלטה לקבלן · #82 SupplierSettingsScreen (פרופיל-עסק) · #83 4 threads-ספק (קבלנים·שליח-איסופים·מנהל·קבוצת-ספקים)+בוט, נראות דו-צדדית.
 - עדכוני-בדיקות (orchestrator): podPhoto migration · t9 לטאבים-החדשים (scrollable מפורש) · sys_chat — בוט-בחנות (spec #83) + seed-lock ל-audience (סגירת mutation-survival).
 - Gate: central-verify PASS · מוטציה audience הוזרקה→נתפסה(אחרי הנעילה)→שוחזרה.
+### #wave1-hide — הסתרת 5 מחלקות + 2 מקצועות לא-בנויים + תיקון activeThumbColor (נחיל-placeholders גל-1) — 2026-06-11
+- **הסתרה (החלטת-בעלים · אדיטיבי-הפיך · סינון-render בלבד):** `departments_screen` → `where((d)=>d.live)` (מסתיר חשמל·חומרי בניין·צבע·גבס·אספקה טכנית) · `smart_home_screen` `_Departments` → `.where(live).take(3)` · `profession_screen` picker → `where(!kComingSoonTrades)` (מסתיר חשמלאי·שיפוצים). הנתונים נשמרו (re-enable = flip live:true / הסר מ-kComingSoonTrades). אין יותר "בקרוב" גלוי — חוסם-אפל.
+- **תיקון-build נלווה:** `store_dashboard_screen.dart:2371` `activeThumbColor`→`activeColor` — שריד מ-fd1b9d9 (API של Flutter מאוחר שלא קיים ב-3.29; היה ה-error היחיד וחסם build לכל האפליקציה). זהה-במחלקה ל-#build-fix (worker_forms initialValue).
+- guard: `placeholder_hide_test` (3 · המחלקות/מקצועות המוסתרים `findsNothing`, החיים present). מוטציה: הסרת `where(live)` → 'חשמל' חזר → אדום → שוחזר → ירוק.
+- מצאי-placeholders מלא נשמר: `knowledge/PLACEHOLDER-INVENTORY.md` (תוכנית 6-גלים · 8 פריטי-🔑 לבעלים).
+- Gate: analyze 0 · full-suite +2012 · build web ✅.

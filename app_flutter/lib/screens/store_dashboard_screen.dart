@@ -2368,7 +2368,7 @@ class _StockRow extends StatelessWidget {
               ),
             Switch(
               value: available,
-              activeThumbColor: BsTokens.brand,
+              activeColor: BsTokens.brand,
               onChanged: (_) => onToggle(),
             ),
           ],

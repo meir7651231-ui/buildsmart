@@ -231,8 +231,12 @@ class _Departments extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final m = _metrics(context, ref);
     // 3 departments + the "עוד" tile = 4 cells fill a stable 2×2.
-    final depts =
-        DepartmentsScreen.departments.take(_deptCols * 2 - 1).toList();
+    // Only live departments render (owner decision — hide, not dim+"בקרוב");
+    // non-live rows stay in `departments` for a one-line `live: true` re-enable.
+    final depts = DepartmentsScreen.departments
+        .where((d) => d.live)
+        .take(_deptCols * 2 - 1)
+        .toList();
     return _Pad(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -175,7 +175,13 @@ class DepartmentsScreen extends ConsumerWidget {
                 mainAxisSpacing: BsTokens.space3,
                 crossAxisSpacing: BsTokens.space3,
                 childAspectRatio: 1.15,
-                children: [for (final d in departments) _DeptTile(dept: d)],
+                // Only live departments render (owner decision — hide, not
+                // "בקרוב"). Non-live rows stay in `departments` so re-enabling
+                // later is a one-line flip of `live: true`.
+                children: [
+                  for (final d in departments.where((d) => d.live))
+                    _DeptTile(dept: d),
+                ],
               ),
             ),
           ],

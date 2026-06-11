@@ -90,7 +90,11 @@ class ProfessionScreen extends ConsumerWidget {
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
               ),
               const SizedBox(height: BsTokens.space5),
-              for (final t in kTradeOptions) ...[
+              // Only trades with real content are selectable (owner decision —
+              // hide, not route to "בקרוב"). `kComingSoonTrades` rows stay in
+              // `kTradeOptions` so re-enabling later = drop the name from the set.
+              for (final t
+                  in kTradeOptions.where((t) => !kComingSoonTrades.contains(t.name))) ...[
                 HelpTarget(
                   title: t.name,
                   body: 'בחירת התחום "${t.name}" (${t.desc}). אמורה להתאים '
