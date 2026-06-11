@@ -1709,3 +1709,7 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - `sys_chat.resetToSeed`: reset-מרוחק של ה-server-track + ה-seed המקומי המלא (כולל threads-audience #70/#75).
 - `BackendDebugBadge`: topRight→topCenter — ב-RTL ישב על לוגו BuildSmart ובלע את הקליק לבוחר-התפקידים (נתפס ע"י widget_test 'BS dial opens 5 personas').
 - Gate: analyze 0 · בדיקות-רגישות 30/30 (board_auth/onboarding/sys_chat/widget).
+### #build-fix — DropdownButtonFormField value: (Flutter 3.29) — 2026-06-11
+- **הבאג:** מיזוג e8ae1dd השאיר `initialValue:` (API של Flutter מאוחר) על `DropdownButtonFormField` ב-`worker_forms_screen.dart:172` (טופס-101, שדה מצב-משפחתי) — בטולצ'יין 3.29 הפרמטר הוא `value:`, ולכן `undefined_named_parameter` ו-build web נכשל (חסם push).
+- **התיקון:** `initialValue:` → `value:` (טוקן יחיד, אפס שינוי התנהגותי). זה היה ה-error היחיד; כל השאר info/lint.
+- Gate: analyze 0 errors · build web --release ירוק (46s).

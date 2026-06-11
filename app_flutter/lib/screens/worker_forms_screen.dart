@@ -169,7 +169,7 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
         Padding(
           padding: const EdgeInsets.only(bottom: BsTokens.space3),
           child: DropdownButtonFormField<String>(
-            initialValue: _marital.isEmpty ? null : _marital,
+            value: _marital.isEmpty ? null : _marital,
             decoration: InputDecoration(
               labelText: 'מצב משפחתי',
               errorText: _errMarital,
