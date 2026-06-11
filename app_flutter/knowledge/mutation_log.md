@@ -802,3 +802,7 @@
 ### 2026-06-10 — worker-v2 (לוגיקה חדשה ב-lib/state + lib/data/task_skus_local)
 - באג-אמיתי שנתפס ע"י בדיקת-שמירה (לא מוטציה מלאכותית): vacation_requests — שתי בקשות באותה אלפית-שנייה קיבלו אותו id (web=דיוק-ms) → החלטה אחת אישרה את שתיהן; הבדיקה 'decision touches ONLY the given id' אדומה → תוקן `_seq` מונוטוני → ירוקה. תיעוד כ-mutation-equivalent (fault אמיתי→red→fix→green).
 - task_skus_local.dart: seed-בלבד (מיפוי משימה→מק"טים, DEMO-SEED) — מכוסה ע"י רנדור 'מה להביא' + analyze.
+
+### 2026-06-11 — uid-migration A2+A3 (נחיל Phase A · builder+supervisor)
+- **A2 — `currentUidProvider` (`lib/state/auth_state.dart`):** מוטציה — `return ref.watch(authStateProvider).user?.uid` → `return null` → `auth_state_test` קבוצת 'currentUidProvider — A2' **אדום** (signed-in: Expected 'u-42' / Actual null, שורה 422) ✅ נתפס; שוחזר byte-clean → ירוק.
+- **A3 — `Order.contractorUid` (`lib/state/orders_engine.dart`):** מוטציה (supervisor) — שבירת ה-preservation ב-copyWith `contractorUid: contractorUid,` → `contractorUid: ''` → `orders_uid_a3_test` 'a stage advance (copyWith) keeps the contractor uid' **אדום** (Expected 'u-9' / Actual '') ✅ נתפס; שוחזר byte-clean (grep-count חזר ל-3) → +8 ירוק.

@@ -1,5 +1,6 @@
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/finance_hub_sheets.dart';
+import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
@@ -2810,6 +2811,10 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 final shipTo = ref.read(shipToProvider);
                 final notes = ref.read(cartNotesProvider);
                 final contractor = ref.read(userProfileProvider).name.trim();
+                // A3 (launch uid) — stamp the signed-in contractor's auth.uid on
+                // the order (additive; '' when signed-out / Firebase-free). The
+                // display still uses [who]; A4 will scope the listen on this.
+                final contractorUid = ref.read(currentUidProvider) ?? '';
                 // Single placeOrder call — ONE id, ONE stage, persisted via
                 // the engine's bs.orders.v1 key. storeOrdersProvider derives
                 // from the engine so the orders list updates automatically.
@@ -2821,6 +2826,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       lines: capturedLines,
                       shipTo: shipTo,
                       notes: notes,
+                      contractorUid: contractorUid,
                     );
                 // Mirror into storeOrdersProvider for legacy test compatibility:
                 // the test checks storeOrdersProvider.first.items == '$n פריטים'.

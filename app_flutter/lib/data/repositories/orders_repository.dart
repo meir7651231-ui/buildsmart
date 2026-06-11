@@ -50,6 +50,7 @@ abstract class OrdersRepository {
     List<OrderLineItem> lines,
     String shipTo,
     String notes,
+    String contractorUid,
   });
 
   /// Advance [orderId] to the NEXT stage in `kManagerOrderFlow` — a no-op once

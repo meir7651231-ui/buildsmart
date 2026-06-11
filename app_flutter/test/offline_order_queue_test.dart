@@ -45,6 +45,7 @@ class _RecordingOrdersRepo implements OrdersRepository {
     List<OrderLineItem> lines = const [],
     String shipTo = '',
     String notes = '',
+    String contractorUid = '',
   }) {
     final order = Order(
       id: id ?? 'BS-${2000 + placed.length}',

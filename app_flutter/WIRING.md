@@ -1718,3 +1718,7 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **בטיחות — אפס רגרסיה:** A2 רק **חושף** את ה-uid; **לא הדליק scoping**. הדלקת scope עכשיו הייתה שוברת הכל (אף doc עוד לא נושא uid → כל query חוזר ריק). לכן A3–A6 (כתיבת השדות + backfill + הדלקת scope) באים יחד אחר-כך, מאחורי דגל.
 - guard: `auth_state_test` קבוצת 'currentUidProvider — A2' (signed-out→null · signed-in→uid · logout→null). מוטציה (`return null`) הזריקה → signed-in האדים (שורה 422) → שוחזר → ירוק.
 - Gate: analyze 0 · auth_state_test 26/26.
+### #A3-uid-write — orders נושאות contractorUid (auth.uid · נחיל Phase A) — 2026-06-11
+- **A3 (חוסם-השקה · בנאי+supervisor):** הוסף `Order.contractorUid` (אופציונלי, default '') — מוטבע על הזמנה חדשה מ-`currentUidProvider` ב-checkout. מחווט מקצה-לקצה: model (ctor · copyWith שמשמר · toJson · fromJson) · `placeOrder` (engine · firebase · repository · local) · orders_firebase toDoc/fromDoc · store_screen checkout. **אדיטיבי ונייטרלי-תצוגה:** `who` עדיין מניע כל UI; נכתב רק כשלא-ריק (seed/legacy round-trip ללא שינוי). A4 ימקד את ה-listen על השדה הזה.
+- guard: `orders_uid_a3_test` (8 · toJson/fromJson · toDoc/fromDoc · copyWith-preservation; ריק מושמט = אפס רגרסיה). מוטציה: שבירת copyWith → preservation האדים (Expected 'u-9'/Actual '') → שוחזר → ירוק.
+- Gate (supervisor-verified): analyze 0 · full-suite +2008 · build web ✅. (`pubspec.lock` re-resolution מ-pub get לא נכלל — ארטיפקט-סביבה.)

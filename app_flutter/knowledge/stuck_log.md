@@ -1414,3 +1414,12 @@ RULE: כל עריכה תחת תיקיית-דאטה או תיקיית-לוגיק�
 ### ג — כלל המניעה
 ANTIPATTERN: הוספת תוכן מעל רשימה עצלנית או דרישת-קלט חדשה בזרם-הגשה בלי לעדכן באותו commit את בדיקות-הפריסה והזרם הקיימות
 RULE: כל פיצ'ר שמוסיף תוכן מעל ListView עצלן או שמוסיף שלב-חובה (תמונה/דיאלוג) לזרם קיים — מעדכן באותו commit את כל בדיקות-ה-widget הנוגעות (scrollUntilVisible/ensureVisible לפריסה, והזרקת-קלט מדומה לשלב-החובה), ומריץ אותן לפני הקומיט.
+
+## 2026-06-11 — הוספת פרמטר ל-interface שוברת test-doubles (invalid_override · נחיל A3)
+### א — הבעיה
+A3 הוסיף `String contractorUid` לחתימת `OrdersRepository.placeOrder` (interface מופשט). analyze נכשל מיד עם 2 `invalid_override`: שני test-doubles שמממשים את ה-interface (`_RecordingOrdersRepo` ב-`offline_order_queue_test` · `_SpyOrders` ב-`site_firebase_repo_test`) — ה-override שלהם לא נשא את הפרמטר החדש, כך שחתימתם הפסיקה להתאים ל-interface. השדות בקוד-המוצר (model/firebase/local) עברו, אבל ה-fakes בתיקיית test/ נשכחו.
+### ב — הפתרון
+הוספת אותו פרמטר (`String contractorUid = ''`) לחתימת ה-override בשני ה-test-doubles. param אופציונלי לא-בשימוש = override תקין (אין צורך לחווט פנימה ב-fake). analyze חזר ל-0; הסוויטה +2008 ירוק (אומת ע"י supervisor).
+### ג — כלל המניעה
+ANTIPATTERN: שינוי חתימת method ב interface מופשט בלי לעדכן את כל ה implementers כולל fakes ו spies ו recording repos תחת תיקיית test
+RULE: כל שינוי חתימה ב interface מחייב grep מיידי ל implements ולכל override של אותו method כולל תחת תיקיית test ועדכון כולם באותו commit ואז analyze 0 תופס פספוס

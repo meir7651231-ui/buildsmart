@@ -93,6 +93,7 @@ class _SpyOrders implements OrdersRepository {
     List<OrderLineItem> lines = const [],
     String shipTo = '',
     String notes = '',
+    String contractorUid = '',
   }) =>
       throw UnimplementedError();
   @override

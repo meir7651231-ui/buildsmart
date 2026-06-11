@@ -84,13 +84,20 @@ class Order {
     this.lines = const [],
     this.shipTo = '',
     this.notes = '',
+    this.contractorUid = '',
   });
 
   /// Order id, e.g. `BS-1042` (the legacy `o.id`).
   final String id;
 
-  /// The contractor who placed it (the legacy `o.who`).
+  /// The contractor who placed it (the legacy `o.who`) — a DISPLAY name.
   final String who;
+
+  /// A3 (launch uid) — the contractor's `auth.uid` when the order was placed
+  /// while signed-in, else ''. Additive and display-neutral: [who] still drives
+  /// every UI; A4 will scope the orders listen on this field. Written only when
+  /// non-empty so the seed + legacy docs round-trip unchanged (zero regression).
+  final String contractorUid;
 
   /// The build site (the legacy `o.site`).
   final String site;
@@ -139,6 +146,7 @@ class Order {
         lines: lines ?? this.lines,
         shipTo: shipTo ?? this.shipTo,
         notes: notes ?? this.notes,
+        contractorUid: contractorUid,
       );
 
   /// Project to the pure [ManagerOrder] the manager analytics fold over — lets
@@ -163,6 +171,7 @@ class Order {
         if (lines.isNotEmpty) 'lines': lines.map((l) => l.toJson()).toList(),
         if (shipTo.isNotEmpty) 'shipTo': shipTo,
         if (notes.isNotEmpty) 'notes': notes,
+        if (contractorUid.isNotEmpty) 'contractorUid': contractorUid,
       };
 
   factory Order.fromJson(Map<String, dynamic> j) => Order(
@@ -182,6 +191,7 @@ class Order {
                 .toList(),
         shipTo: (j['shipTo'] as String?) ?? '',
         notes: (j['notes'] as String?) ?? '',
+        contractorUid: (j['contractorUid'] as String?) ?? '',
       );
 
   /// Lift a seed [ManagerOrder] into a live [Order] (no timestamp — seed).
@@ -347,6 +357,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
     List<OrderLineItem> lines = const [],
     String shipTo = '',
     String notes = '',
+    String contractorUid = '',
   }) {
     // S4.4 — bound to Firestore: the repo's verbatim port places the order
     // (same _nextId/stage/prepend), its optimistic cache notifies back
@@ -363,6 +374,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
         lines: lines,
         shipTo: shipTo,
         notes: notes,
+        contractorUid: contractorUid,
       );
     }
     final order = Order(
@@ -376,6 +388,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
       lines: lines,
       shipTo: shipTo,
       notes: notes,
+      contractorUid: contractorUid,
     );
     state = [order, ...state];
     return order;

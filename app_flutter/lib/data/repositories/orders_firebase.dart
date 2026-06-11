@@ -78,6 +78,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
           'lines': o.lines.map((l) => l.toJson()).toList(),
         if (o.shipTo.isNotEmpty) 'shipTo': o.shipTo,
         if (o.notes.isNotEmpty) 'notes': o.notes,
+        if (o.contractorUid.isNotEmpty) 'contractorUid': o.contractorUid,
       };
 
   /// Firestore doc → `Order`. Inverse of [toDoc]: the doc-id becomes `id`,
@@ -104,6 +105,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
               .toList(),
       shipTo: (j['shipTo'] as String?) ?? '',
       notes: (j['notes'] as String?) ?? '',
+      contractorUid: (j['contractorUid'] as String?) ?? '',
     );
   }
 
@@ -185,6 +187,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
     List<OrderLineItem> lines = const [],
     String shipTo = '',
     String notes = '',
+    String contractorUid = '',
   }) {
     final order = Order(
       id: id ?? _nextId(),
@@ -197,6 +200,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
       lines: lines,
       shipTo: shipTo,
       notes: notes,
+      contractorUid: contractorUid,
     );
     upsert(order); // optimistic prepend + background set
     return order;

@@ -63,6 +63,7 @@ class LocalOrdersRepository implements OrdersRepository {
     List<OrderLineItem> lines = const [],
     String shipTo = '',
     String notes = '',
+    String contractorUid = '',
   }) =>
       _engine.placeOrder(
         who: who,
@@ -74,6 +75,7 @@ class LocalOrdersRepository implements OrdersRepository {
         lines: lines,
         shipTo: shipTo,
         notes: notes,
+        contractorUid: contractorUid,
       );
 
   @override

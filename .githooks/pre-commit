@@ -688,7 +688,13 @@ if [[ "$IS_RETRY" == "true" && -n "$PRIOR_HAS_CODE_TEST" && -f "$STUCK_LOG" ]]; 
     else
         # ANTIPATTERN: (בדיוק) חייב להופיע ברשומה החדשה — לא ANTIPATTERN-EXAMPLE:
         # מקבל גם את הצורה המתויגת ANTIPATTERN[hook]: (סורק את ה-hook במקום lib/).
-        NEW_LINES=$(git diff --cached "$STUCK_LOG" 2>/dev/null | grep "^+" | grep -v "^+++")
+        # FIX (2026-06-11): use a repo-root pathspec (:/) so the diff resolves
+        # regardless of the hook's CWD/GIT_PREFIX. The old CWD-relative pathspec
+        # ("$STUCK_LOG"="knowledge/stuck_log.md") returned EMPTY during `git commit`
+        # — git resolved it from the repo root, not app_flutter — so this gate
+        # false-failed ("missing ANTIPATTERN/RULE") on a record that WAS present.
+        # $STAGED_STUCK is the repo-root-relative path from the --name-only above.
+        NEW_LINES=$(git diff --cached -- ":/$STAGED_STUCK" 2>/dev/null | grep "^+" | grep -v "^+++")
         if ! echo "$NEW_LINES" | grep -qE "^\+ANTIPATTERN(\[hook\])?:"; then
             err "102" "רשומה חסרה ANTIPATTERN" "הוסף שורת ANTIPATTERN: regex (בלי -EXAMPLE)"
         fi

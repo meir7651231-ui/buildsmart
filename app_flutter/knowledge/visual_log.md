@@ -796,3 +796,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **שינוי-קומפילציה בלבד (לא ויזואלי):** `initialValue:` → `value:` על dropdown "מצב משפחתי" ב-`worker_forms_screen.dart:172`. מיזוג e8ae1dd השאיר API של Flutter מאוחר; בטולצ'יין 3.29 הפרמטר הוא `value:`. לפני התיקון המסך **לא קומפל כלל** (build web שבור → חסם push).
 - **ללא שינוי-עין:** אותו dropdown value-bound בדיוק (אותו ערך-נבחר · אותם items · אותו decoration) — רק שם-הפרמטר הנכון לגרסה. כמו תקדים welcome→auth: השינוי בחתימה, לא בפריסה.
 - **אימות:** analyze 0 errors · build web --release ירוק (46s). לא צולם screenshot נפרד — ה-render זהה וה-state שלפני לא קומפל; האימות הוא הקומפילציה+build (loud: זו הסיבה שאין פיקסל-לוג חדש).
+
+## 2026-06-11 — A3 orders contractorUid (store_screen checkout) — לוגיקה בלבד
+- **שינוי-לוגיקה ב-checkout (לא ויזואלי):** ה-checkout מטביע עכשיו `contractorUid` (מ-`currentUidProvider`) על ההזמנה הנוצרת — בתוך ה-onPressed, ליד `who`. אפס שינוי בפריסה/טקסט/כפתורים.
+- **ללא שינוי-עין:** השדה נכתב ל-doc בלבד (ל-scoping עתידי ב-A4); המסך מרנדר זהה. כמו תקדים welcome→auth / A2 — שינוי בלוגיקה, לא בתצוגה.
+- **אימות (supervisor):** analyze 0 · סוויטה מלאה +2008 · build web ✅ · mutation (שבירת copyWith) נתפסה ושוחזרה.
