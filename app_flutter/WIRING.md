@@ -1752,3 +1752,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **🔑 נדחו ביושר (~10, אפס זיוף):** 5 סינוני-ספקים + רדיוס-חיפוש (למוצרי-lipskey אין שדות זהות-ספק/דירוג/מרחק/geo — פער-דאטה, לא רק מפתח) · סנכרון-מועדפים/שיתוף-רשימה/יבוא-יצוא (backend). השדות קיימים ב-state, לא-מחוברים, מתועד.
 - guard: `catalog_sort_alerts_settings_test` (16 · סדר-מיון AZ/ZA/SKU+טוהר · persist ×6 + bogus-fallback · 3 widget). מוטציה: היפוך comparator → nameAZ אדום → שוחזר.
 - Gate: analyze 0 · full-suite 2096 · build web ✅.
+### #wave2-b3 — חיבור הגדרות-התראות in-app (נחיל גל-2 מנה-3) — 2026-06-11
+- **חובר:** toggle עובד/שליח (`personaWorker/Courier`) → שער `boardFeedEnabled` על feed-הפעמון החי (worker_notifs/courier_dashboard) · `pushEnabled` הורחב לגדר את שני ה-feeds (היה badge בלבד) · sound/vibration → haptic+SystemSound כשה-unread **עולה** (מושתק ב-snooze/quiet-hours).
+- **🔑 נדחו ביושר:** persona קבלן/חנות/admin (אין feed-פעמון ייעודי) · type-toggles (אין שורות-feed מהסוגים) · quiet-shabbat/meetings/driving + sound-per-type + LED + lock-screen + quick-actions + summaries (דורש ערוצי-push נייטיב/חיישנים/scheduler) · email/SMS/WhatsApp (requiresServer). markers-יושר נשמרו על הנדחים.
+- guard: `notif_settings_wiring_test` (14 · gating · provider empty/restore · feedback-predicate כולל snooze/quiet · persist). מוטציה: שבירת זרוע-`boardFeedEnabled` → 3 אדום → שוחזר.
+- Gate: analyze 0 · full-suite 2110 · build web ✅.

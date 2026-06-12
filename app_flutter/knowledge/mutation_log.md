@@ -818,3 +818,6 @@
 
 ### 2026-06-11 — מיון-קטלוג (נחיל גל-2 מנה-2)
 - **`catalog_screen.dart`/`catalog_settings.dart` — `sortCatalogProducts` nameAZ:** מוטציה — היפוך ה-comparator (descending) → `catalog_sort_alerts_settings_test` nameAZ **אדום** (['B-200','C-300','A-100'] ≠ ['A-100','C-300','B-200']) ✅ נתפס; שוחזר (cp) → 16/16 ירוק.
+
+### 2026-06-11 — חיבור התראות in-app (נחיל גל-2 מנה-3)
+- **`lib/state/worker_notifs.dart` — `boardFeedEnabled`:** מוטציה — זרוע-העובד `=> true` קבוע → `notif_settings_wiring_test` **אדום** (3: personaWorker/master/restore gating) ✅ נתפס; שוחזר (backup) → 14/14 ירוק.

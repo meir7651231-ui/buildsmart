@@ -5,6 +5,7 @@
 // sheet, RTL, X close button, ≥48dp targets.
 
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
@@ -28,6 +29,14 @@ class WorkerNotifsBell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 🔊 'צליל ורטט' (notif_settings, wave-2 batch-3): when the logged worker's
+    // unread count RISES (a real new bell event landed), fire the configured
+    // sound/vibration. notifFeedbackFor also honours snooze / quiet-hours.
+    ref.listen<int>(currentWorkerUnreadCountProvider, (prev, next) {
+      if (next > (prev ?? 0)) {
+        playInAppNotifFeedback(ref.read(notifSettingsProvider));
+      }
+    });
     final unread = ref.watch(currentWorkerUnreadCountProvider);
     return IconButton(
       key: const ValueKey('worker-notifs-bell'),

@@ -481,8 +481,10 @@ class _SoundSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '🔊',
       title: 'צליל ורטט',
-      underConstruction: true,
       children: [
+        // 🟢 WIRED — צליל מופעל / רטט drive the LIVE in-app bell feedback
+        // (worker + courier boards) via playInAppNotifFeedback; silenced during
+        // snooze / quiet-hours by notifFeedbackFor. No 'בבנייה' marker.
         _SwitchRow(
           label: 'צליל מופעל',
           value: settings.soundEnabled,
@@ -499,9 +501,12 @@ class _SoundSection extends ConsumerWidget {
                   .read(notifSettingsProvider.notifier)
                   .update((s) => s.copyWith(vibrationEnabled: v)),
         ),
+        // 🔑 Per-type sound + LED need a native notification-channel pipeline
+        // (Android channels / a sound asset per type) — kept honest, not faked.
         _SwitchRow(
           label: 'צלילים שונים לפי סוג',
           value: settings.soundPerType,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -556,11 +561,14 @@ class _PersonaSection extends ConsumerWidget {
     return _SectionTile(
       emoji: '👤',
       title: 'לפי תפקיד',
-      underConstruction: true,
       children: [
+        // 🔑 Contractor / store / admin have no dedicated in-app bell FEED to
+        // gate yet (the contractor reads the shared 'התראות' feed, already
+        // filtered by 'סוגי התראות'); kept honest until each gets its own feed.
         _SwitchRow(
           label: '👷 קבלן — התראות פרויקט',
           value: settings.personaContractor,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
@@ -569,11 +577,15 @@ class _PersonaSection extends ConsumerWidget {
         _SwitchRow(
           label: '🏪 חנות — הזמנות + מלאי',
           value: settings.personaStore,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)
                   .update((s) => s.copyWith(personaStore: v)),
         ),
+        // 🟢 WIRED — these two gate the LIVE per-username bell feed on the
+        // courier / worker boards via boardFeedEnabled (currentWorkerNotifs +
+        // _courierFeed): off ⇒ that board's bell goes quiet.
         _SwitchRow(
           label: '🛵 שליח — pickup + active',
           value: settings.personaCourier,
@@ -593,6 +605,7 @@ class _PersonaSection extends ConsumerWidget {
         _SwitchRow(
           label: '👔 מנהל המערכת — דשבורד',
           value: settings.personaAdmin,
+          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(notifSettingsProvider.notifier)

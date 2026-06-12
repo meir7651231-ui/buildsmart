@@ -17,6 +17,7 @@
 import 'dart:convert';
 
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/notif_settings.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -214,11 +215,32 @@ class WorkerNotifsNotifier
 final workerNotifsProvider = StateNotifierProvider<WorkerNotifsNotifier,
     Map<String, List<WorkerNotif>>>((ref) => WorkerNotifsNotifier());
 
+/// PURE GATE for the in-app worker/courier bell feed (notif_settings wiring,
+/// wave-2 batch-3). The feed for a given board role is SURFACED only when the
+/// master in-app channel is on AND that role's per-role notification toggle is
+/// on. With either off the live bell goes quiet — the honest LOCAL effect of
+/// the 'התראות בתוך האפליקציה' switch + the '🛵 שליח' / '🦺 עובד' per-role
+/// toggles (notif_settings_screen). Pure → unit-testable.
+bool boardFeedEnabled(NotifSettings s, BoardRole role) {
+  if (!s.pushEnabled) return false;
+  return switch (role) {
+    BoardRole.worker => s.personaWorker,
+    BoardRole.courier => s.personaCourier,
+    // Other board roles (e.g. store) have no per-role notif toggle wired —
+    // the master in-app switch alone gates them.
+    _ => true,
+  };
+}
+
 /// The LOGGED worker's own feed (newest first) — empty when no worker session
-/// (the board gate keeps these widgets unbuilt anyway).
+/// (the board gate keeps these widgets unbuilt anyway) OR when the in-app
+/// channel / '🦺 עובד' per-role toggle is off ([boardFeedEnabled]).
 final currentWorkerNotifsProvider = Provider<List<WorkerNotif>>((ref) {
   final s = ref.watch(boardAuthProvider);
   if (s == null || s.role != BoardRole.worker) return const [];
+  if (!boardFeedEnabled(ref.watch(notifSettingsProvider), BoardRole.worker)) {
+    return const [];
+  }
   return ref.watch(workerNotifsProvider)[s.username] ?? const [];
 });
 

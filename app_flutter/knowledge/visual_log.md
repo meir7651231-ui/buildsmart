@@ -824,3 +824,7 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 ## 2026-06-11 — מיון+התראות-קטלוג מופעלים (נחיל גל-2 מנה-2) — שינוי-עין
 - **שינוי ויזואלי:** ב-catalog_settings — "מיון ברירת מחדל" ו-5 toggles-התראות הוחלפו בפקדים אמיתיים (בורר/Switch). בחירת-מיון משנה **מיד** את סדר הקטלוג.
 - **אימות:** `catalog_sort_alerts_settings_test` 16/16 · analyze 0 · full-suite 2096 · build web ✅.
+
+## 2026-06-11 — הגדרות-התראות in-app מופעלות (נחיל גל-2 מנה-3) — התנהגות
+- **שינוי:** במסך-ההתראות — מתגי עובד/שליח · push-master · sound/vibration כעת **משפיעים על פעמון-ההתראות החי** (כיבוי → badge 0 + sheet ריק; sound+רטט בעליית unread, מושתק ב-quiet/snooze). הוסרו markers-"בבנייה" מהסקשנים שחוברו (Sound/Persona); נשמרו על הנדחים.
+- **אימות:** `notif_settings_wiring_test` 14/14 · analyze 0 · full-suite 2110 · build web ✅.

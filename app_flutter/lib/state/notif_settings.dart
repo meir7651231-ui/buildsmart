@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -462,6 +463,34 @@ T _enum<T extends Enum>(Object? raw, List<T> values, T fallback) {
     }
   }
   return fallback;
+}
+
+/// What alert feedback an arriving in-app notification should fire, given the
+/// 'צליל ורטט' settings (notif_settings_screen). PURE → unit-testable. The
+/// caller ([playInAppNotifFeedback]) turns this into the actual platform calls.
+///
+/// Both channels are SILENCED while notifications are globally suppressed —
+/// snoozed or inside the quiet-hours window — so a buzz/click never escapes a
+/// window where the feed itself is hidden (consistency with the
+/// notifications_screen suppression banners).
+typedef NotifFeedback = ({bool sound, bool vibrate});
+
+NotifFeedback notifFeedbackFor(NotifSettings s) {
+  if (s.isSnoozedNow || s.isInQuietHours) {
+    return (sound: false, vibrate: false);
+  }
+  return (sound: s.soundEnabled, vibrate: s.vibrationEnabled);
+}
+
+/// Fires the alert feedback for an arriving in-app notification: a haptic when
+/// 'רטט' is on and the system alert sound when 'צליל מופעל' is on (both gated by
+/// [notifFeedbackFor]). This is the honest LOCAL effect of the 🔊 'צליל ורטט'
+/// toggles — wired to the live worker/courier bell. SystemSound on web is a
+/// no-op (the OS owns it); HapticFeedback is silently ignored where unsupported.
+void playInAppNotifFeedback(NotifSettings s) {
+  final fb = notifFeedbackFor(s);
+  if (fb.vibrate) HapticFeedback.mediumImpact();
+  if (fb.sound) unawaited(SystemSound.play(SystemSoundType.alert));
 }
 
 class NotifSettingsNotifier extends StateNotifier<NotifSettings> {

@@ -14,6 +14,7 @@ import 'package:buildsmart/screens/worker_notifs_sheet.dart'
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/courier_clock.dart';
 import 'package:buildsmart/state/courier_profile_store.dart';
+import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_orders.dart';
@@ -1073,11 +1074,32 @@ class _FlatCard extends StatelessWidget {
   if (s == null || s.role != BoardRole.courier) {
     return (username: null, notifs: const []);
   }
+  // notif_settings gate (wave-2 batch-3): the 'התראות בתוך האפליקציה' master
+  // switch + the '🛵 שליח' per-role toggle silence this live bell when off.
+  // Username is kept (mark-read / clear still target the stored feed) — only
+  // the SURFACED list is emptied, matching currentWorkerNotifsProvider.
+  if (!boardFeedEnabled(ref.watch(notifSettingsProvider), BoardRole.courier)) {
+    return (username: s.username, notifs: const []);
+  }
   return (
     username: s.username,
     notifs: ref.watch(workerNotifsProvider)[s.username] ?? const [],
   );
 }
+
+/// The logged courier's unread bell count — mirrors [_courierFeed]'s gate
+/// (in-app master + '🛵 שליח' per-role toggle via [boardFeedEnabled]). Its own
+/// provider so the bell can `ref.listen` it for the 🔊 'צליל ורטט' arrival
+/// feedback (wave-2 batch-3).
+final _courierUnreadCountProvider = Provider<int>((ref) {
+  final s = ref.watch(boardAuthProvider);
+  if (s == null || s.role != BoardRole.courier) return 0;
+  if (!boardFeedEnabled(ref.watch(notifSettingsProvider), BoardRole.courier)) {
+    return 0;
+  }
+  final feed = ref.watch(workerNotifsProvider)[s.username] ?? const [];
+  return feed.where((n) => !n.read).length;
+});
 
 /// The AppBar bell: red unread badge, tap opens [showCourierNotifsSheet] —
 /// a 1:1 mirror of the worker board's `WorkerNotifsBell` (#85ו). IconButton
@@ -1087,7 +1109,14 @@ class _CourierNotifsBell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final unread = _courierFeed(ref).notifs.where((n) => !n.read).length;
+    // 🔊 'צליל ורטט': fire sound/vibration when the courier's unread count rises
+    // (a real new bell event) — same seam as the worker board's bell.
+    ref.listen<int>(_courierUnreadCountProvider, (prev, next) {
+      if (next > (prev ?? 0)) {
+        playInAppNotifFeedback(ref.read(notifSettingsProvider));
+      }
+    });
+    final unread = ref.watch(_courierUnreadCountProvider);
     return IconButton(
       key: const ValueKey('courier-notifs-bell'),
       tooltip: 'התראות',
