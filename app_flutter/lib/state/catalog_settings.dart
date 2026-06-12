@@ -375,3 +375,102 @@ final catalogSettingsProvider =
     StateNotifierProvider<CatalogSettingsNotifier, CatalogSettings>(
   (_) => CatalogSettingsNotifier(),
 );
+
+// ─── price / dimension display helpers (pure — applied by the consuming UI) ──
+//
+// These are the single source of truth for how the price & dimension settings
+// in the קטלוג › מחירים ומטבע / יחידות מידה sections actually affect rendered
+// text. The settings screen binds the controls; the catalog/product-card/sheet
+// call these so the toggle is honest (it really changes what the user sees).
+
+/// Israel statutory VAT rate (17%). [priceWithVat] multiplies by `1 + this`.
+const double kVatRate = 0.17;
+
+/// Apply VAT to a base (pre-VAT) price when [showVat] is on. Pure rounding to
+/// the nearest shekel so the displayed integer matches what the card renders.
+/// Returns the base unchanged when [showVat] is false.
+int priceWithVat(int base, {required bool showVat}) =>
+    showVat ? (base * (1 + kVatRate)).round() : base;
+
+/// Display symbol for the chosen catalog currency. This is the *local display*
+/// symbol only — NO FX conversion is applied to the amount (live rates need an
+/// external service; faking a conversion would mislead). The selection is
+/// persisted and the symbol is shown next to the (unconverted) amount.
+String currencySymbol(CatalogCurrency c) => switch (c) {
+      CatalogCurrency.ils => '₪',
+      CatalogCurrency.usd => r'$',
+      CatalogCurrency.eur => '€',
+    };
+
+/// Format a base (pre-VAT, ILS) price for display: applies [CatalogSettings.showVat]
+/// and prefixes the chosen [CatalogSettings.currency] symbol. [prefix] is kept
+/// (e.g. '~' for an estimated price) and sits before the symbol.
+/// Example: base 100, showVat true, ils → '₪117'.
+String formatCatalogPrice(
+  int base,
+  CatalogSettings s, {
+  String prefix = '',
+}) {
+  final amount = priceWithVat(base, showVat: s.showVat);
+  return '$prefix${currencySymbol(s.currency)}$amount';
+}
+
+/// mm → inch (1″ = 25.4 mm). Returns null when [raw] has no parseable number.
+double? _mmToInch(String raw) {
+  final m = RegExp(r'-?\d+(?:\.\d+)?').firstMatch(raw);
+  if (m == null) return null;
+  return double.parse(m.group(0)!) / 25.4;
+}
+
+/// Render a decimal inch value per [CatalogDecimalFormat]:
+///  • decimal  → '1.57"'   (2 dp, trailing zeros trimmed)
+///  • fraction → '1 9/16"' (nearest 1/16, mixed number)
+String _formatInch(double inch, CatalogDecimalFormat fmt) {
+  if (fmt == CatalogDecimalFormat.decimal) {
+    var t = inch.toStringAsFixed(2);
+    if (t.contains('.')) {
+      t = t.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+    return '$t"';
+  }
+  // Nearest 1/16″ as a mixed fraction.
+  final sixteenths = (inch * 16).round();
+  final whole = sixteenths ~/ 16;
+  var num = sixteenths % 16;
+  var den = 16;
+  while (num != 0 && num % 2 == 0) {
+    num ~/= 2;
+    den ~/= 2;
+  }
+  if (num == 0) return '$whole"';
+  if (whole == 0) return '$num/$den"';
+  return '$whole $num/$den"';
+}
+
+/// Whether a dims-table key carries a millimetre measurement we can convert to
+/// imperial (matches `mm`, `מ"מ`, diameter/length keys). Keys without a numeric
+/// mm value (materials, pressure ratings, free text) are left untouched.
+bool _isMmDimKey(String key) {
+  final k = key.toLowerCase();
+  return k == 'mm' ||
+      key.contains('מ"מ') ||
+      key.contains('מ”מ') ||
+      k.contains('mm');
+}
+
+/// Format ONE dims-table value for display, honouring the metric/imperial unit
+/// system and the decimal/fraction format. Metric is passed through verbatim
+/// (the catalog data is already metric). Imperial converts a mm value to inches
+/// in the chosen format; non-mm values (and anything unparseable) pass through.
+/// [unitHint] is the dims key (e.g. 'mm', 'אורך') used to decide convertibility.
+String formatDimValue(
+  String unitHint,
+  String value,
+  CatalogSettings s,
+) {
+  if (s.unit == CatalogUnit.metric) return value;
+  if (!_isMmDimKey(unitHint)) return value;
+  final inch = _mmToInch(value);
+  if (inch == null) return value;
+  return _formatInch(inch, s.decimalFormat);
+}

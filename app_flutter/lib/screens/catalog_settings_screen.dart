@@ -386,14 +386,44 @@ class _PricesSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const _SectionTile(
+    final settings = ref.watch(catalogSettingsProvider);
+    return _SectionTile(
       emoji: '💰',
       title: 'מחירים ומטבע',
       children: [
-        _PlaceholderRow(label: 'הצג מחירים כולל מע"מ'),
-        _PlaceholderRow(label: 'מטבע'),
-        _PlaceholderRow(label: 'הצגת מחיר ליחידה'),
-        _PlaceholderRow(label: 'השוואת מחירים בין ספקים'),
+        _SwitchRow(
+          label: 'הצג מחירים כולל מע"מ',
+          value: settings.showVat,
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(showVat: v)),
+        ),
+        _RadioGroupRow<CatalogCurrency>(
+          label: 'מטבע',
+          value: settings.currency,
+          options: const [
+            _RadioOption(value: CatalogCurrency.ils, label: '₪ שקל'),
+            _RadioOption(value: CatalogCurrency.usd, label: r'$ דולר'),
+            _RadioOption(value: CatalogCurrency.eur, label: '€ אירו'),
+          ],
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(currency: v)),
+        ),
+        _SwitchRow(
+          label: 'הצגת מחיר ליחידה',
+          value: settings.showUnitPrice,
+          onChanged:
+              (v) => ref
+                  .read(catalogSettingsProvider.notifier)
+                  .update((s) => s.copyWith(showUnitPrice: v)),
+        ),
+        // השוואת מחירים בין ספקים — needs live per-supplier price feeds
+        // (external service). Persisted via priceComparison but kept honest
+        // until the feed exists, so it stays a placeholder for now.
+        const _PlaceholderRow(label: 'השוואת מחירים בין ספקים'),
       ],
     );
   }
@@ -442,18 +472,48 @@ class _CatalogNotifSection extends StatelessWidget {
 
 // ─── 6. units of measure ─────────────────────────────────────────────────────
 
-class _UnitsSection extends StatelessWidget {
+class _UnitsSection extends ConsumerWidget {
   const _UnitsSection();
 
   @override
-  Widget build(BuildContext context) {
-    return const _SectionTile(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(catalogSettingsProvider);
+    final notifier = ref.read(catalogSettingsProvider.notifier);
+    return _SectionTile(
       emoji: '📏',
       title: 'יחידות מידה',
       children: [
-        _PlaceholderRow(label: 'מערכת מידה'),
-        _PlaceholderRow(label: 'פורמט מידות בכרטיס מוצר'),
-        _PlaceholderRow(label: 'פורמט הצגה'),
+        _RadioGroupRow<CatalogUnit>(
+          label: 'מערכת מידה',
+          value: settings.unit,
+          options: const [
+            _RadioOption(value: CatalogUnit.metric, label: 'מטרי (מ"מ / ס"מ)'),
+            _RadioOption(value: CatalogUnit.imperial, label: 'אימפריאלי (אינץ\')'),
+          ],
+          onChanged: (v) => notifier.update((s) => s.copyWith(unit: v)),
+        ),
+        // Both rows control the SAME persisted dimension format
+        // ([decimalFormat]): "פורמט מידות בכרטיס מוצר" is the on-card view of it
+        // and "פורמט הצגה" the general display format. They share one source of
+        // truth so they can never drift, and both genuinely re-render the card.
+        _RadioGroupRow<CatalogDecimalFormat>(
+          label: 'פורמט מידות בכרטיס מוצר',
+          value: settings.decimalFormat,
+          options: const [
+            _RadioOption(value: CatalogDecimalFormat.decimal, label: 'עשרוני (1.5)'),
+            _RadioOption(value: CatalogDecimalFormat.fraction, label: 'שבר (1½)'),
+          ],
+          onChanged: (v) => notifier.update((s) => s.copyWith(decimalFormat: v)),
+        ),
+        _RadioGroupRow<CatalogDecimalFormat>(
+          label: 'פורמט הצגה',
+          value: settings.decimalFormat,
+          options: const [
+            _RadioOption(value: CatalogDecimalFormat.decimal, label: 'עשרוני (1.5)'),
+            _RadioOption(value: CatalogDecimalFormat.fraction, label: 'שבר (1½)'),
+          ],
+          onChanged: (v) => notifier.update((s) => s.copyWith(decimalFormat: v)),
+        ),
       ],
     );
   }

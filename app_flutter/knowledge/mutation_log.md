@@ -812,3 +812,6 @@
 - **`lib/data/supplier_data.dart` — `deliveredRevenue`:** חור-כיסוי נמצא (אפס בדיקות לשדה) → נוספה בדיקה ל-t9 ('deliveredRevenue counts ONLY delivered orders'). מוטציה — הוספת `|| transit` לסינון → **אדום** (seed: BS-1039 ב-transit, ציפייה 0) ✅ נתפס; שוחזר → 12/12 ירוק.
 - **`lib/state/persona_fulfillment.dart` — `courierUser` fromJson:** מוטציה — `j['cu']…` → `null` קבוע → `persona_fulfillment_test` **אדום** (Expected 'noam'/Actual null, round-trip+stamp) ✅ נתפס; שוחזר → 20/20 ירוק.
 - **`lib/state/vacation_requests.dart` — back-compat `role`:** מוטציה — ברירת-מחדל decode `'worker'`→`'courier'` → `vacation_requests_test` **אדום** (Expected 'worker'/Actual 'courier' — legacy חייב עובד) ✅ נתפס; שוחזר → 11/11 ירוק.
+
+### 2026-06-11 — חיבור הגדרות-תצוגה בקטלוג (נחיל גל-2 מנה-1)
+- **`lib/state/catalog_settings.dart` — `priceWithVat`:** מוטציה — `base*(1+kVatRate)` → `base` קבוע → `catalog_price_units_settings_test` **אדום** (2 assertions: Expected 117/'~₪117', Actual 100/'~₪100') ✅ נתפס; שוחזר byte-clean (cp) → 16/16 ירוק.

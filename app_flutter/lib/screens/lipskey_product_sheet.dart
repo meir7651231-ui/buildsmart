@@ -607,7 +607,13 @@ class _LipskeyProductSheetState extends ConsumerState<LipskeyProductSheet> {
                             if (p.dims != null)
                               for (final e in p.dims!.entries)
                                 if (e.value != null && e.key != 'שם מלא')
-                                  _SpecRow('📐', e.key, '${e.value}'),
+                                  _SpecRow(
+                                      '📐',
+                                      e.key,
+                                      formatDimValue(
+                                          e.key,
+                                          '${e.value}',
+                                          ref.watch(catalogSettingsProvider))),
                             _SpecRow('📄', 'עמוד בקטלוג',
                                 'עמוד ${p.page}'),
                           ],
@@ -1780,7 +1786,7 @@ Widget _SpecRow(String emoji, String label, String value) => Padding(
 /// payload INTO the card when the user taps it (no navigation, no snackbars,
 /// no scrolling) — the data is rendered right below the row. Only one strip
 /// is open at a time; tapping the open strip closes it.
-class _QuickInfoStrips extends StatefulWidget {
+class _QuickInfoStrips extends ConsumerStatefulWidget {
   const _QuickInfoStrips({
     required this.product,
     required this.onPickProduct,
@@ -1794,7 +1800,7 @@ class _QuickInfoStrips extends StatefulWidget {
   final void Function(LipskeyCatalogProduct) onPickProduct;
 
   @override
-  State<_QuickInfoStrips> createState() => _QuickInfoStripsState();
+  ConsumerState<_QuickInfoStrips> createState() => _QuickInfoStripsState();
 }
 
 enum _StripKind { finder, compat, kit, variants, compliance, spec, price, info, hygiene }
@@ -1848,7 +1854,7 @@ String _formatSpecValue(
   return parts.join(' · ');
 }
 
-class _QuickInfoStripsState extends State<_QuickInfoStrips> {
+class _QuickInfoStripsState extends ConsumerState<_QuickInfoStrips> {
   _StripKind? _open;
 
   @override
@@ -1929,8 +1935,16 @@ class _QuickInfoStripsState extends State<_QuickInfoStrips> {
         _StripDef(
           kind: _StripKind.price,
           emoji: '💰',
+          // Estimated price honours the catalog price settings: VAT-inclusive
+          // (×1.17) when "כולל מע\"מ" is on + the chosen currency symbol, and a
+          // "ליחידה" suffix when "הצגת מחיר ליחידה" is on (the catalog ballpark
+          // is a per-unit figure).
           label: 'מחיר משוער',
-          value: '~₪${priceFor(p)}',
+          value: () {
+            final s = ref.watch(catalogSettingsProvider);
+            final base = formatCatalogPrice(priceFor(p)!, s, prefix: '~');
+            return s.showUnitPrice ? '$base ליחידה' : base;
+          }(),
           tint: const Color(0xFF22C55E),
         ),
       if (p.brand == 'פולירול')
@@ -2576,28 +2590,42 @@ class _StripPanel extends StatelessWidget {
 
   // ── מחיר: category-level ballpark with disclaimer ───────────────────────
   Widget _buildPrice(BuildContext context) {
-    final price = priceFor(product);
-    if (price == null) {
+    final base = priceFor(product);
+    if (base == null) {
       return const _EmptyHint('אין הערכת מחיר לקטגוריה זו');
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-          child: Row(
-            children: [
-              Text('~₪',
-                  style: TextStyle(
-                      color: bsSuccess(context),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900)),
-              Text('$price',
-                  style: TextStyle(
-                      color: bsSuccess(context),
-                      fontSize: 28,
-                      fontWeight: FontWeight.w900)),
-              const Spacer(),
+    // Honour the price settings: VAT-inclusive amount (×1.17) when on + the
+    // chosen currency symbol. (No FX conversion — local display symbol only.)
+    // _StripPanel is a StatelessWidget, so read settings via an inline Consumer.
+    return Consumer(builder: (context, ref, _) {
+      final s = ref.watch(catalogSettingsProvider);
+      final price = priceWithVat(base, showVat: s.showVat);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+            child: Row(
+              children: [
+                Text('~${currencySymbol(s.currency)}',
+                    style: TextStyle(
+                        color: bsSuccess(context),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900)),
+                Text('$price',
+                    style: TextStyle(
+                        color: bsSuccess(context),
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900)),
+                if (s.showUnitPrice) ...[
+                  const SizedBox(width: 6),
+                  Text('ליחידה',
+                      style: TextStyle(
+                          color: bsSuccess(context).withValues(alpha: 0.7),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700)),
+                ],
+                const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 2),
@@ -2614,15 +2642,16 @@ class _StripPanel extends StatelessWidget {
             ],
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-              'הערכה לפי קטגוריה — מחיר אמיתי תלוי בספק, מותג ומידה ספציפית.',
-              style: TextStyle(
-                  color: Color(0xFF888888), fontSize: 10, height: 1.4)),
-        ),
-      ],
-    );
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+                'הערכה לפי קטגוריה — מחיר אמיתי תלוי בספק, מותג ומידה ספציפית.',
+                style: TextStyle(
+                    color: Color(0xFF888888), fontSize: 10, height: 1.4)),
+          ),
+        ],
+      );
+    });
   }
 
   /// Horizontal product strip. When [labelFor] is supplied and returns a
