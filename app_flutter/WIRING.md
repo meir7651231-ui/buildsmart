@@ -1762,3 +1762,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **🔑 נדחו ביושר (3, לא מזויף):** התאמה-משולשת (דורש תעודות-משלוח+חשבוניות) · מזג-אוויר (API) · בלאי (חיישני-IoT) — כל אחד עם הערת `⚙️ בפרודקשן: דורש X`.
 - guard: `ai_hub_compute_test` (14 · forecast/analytics/alternatives על דאטה+קצוות). מוטציה: שבירת fold-הצריכה (`+`→`-`) → 5 assertions אדום → שוחזר.
 - Gate (supervisor-verified): analyze 0 · full-suite +2124 · build web ✅.
+### #B1-B4 — ניקוי-אפל: תג-בדיקה debug-only + קטגוריות-ריקות מוסתרות (נחיל) — 2026-06-11
+- **B1:** `BackendDebugBadge` → debug-only — `main.dart` `debugOverlayChildren(isDebug: kDebugMode)`; ב-release/web-release (kDebugMode=false) לא מרונדר כלום (הווידג'ט נשמר ל-dev).
+- **B4:** 5 קטגוריות-קטלוג חסרות-תוכן (חימום מים·מטבח·גופי תברואה·בנייה ומחיצות·גמר) מסוננות (`_categoryHasContent`+`where`, הפיך — הנתונים נשמרו); 8 נשארות, אפס "בקרוב" גלוי. `_TreeComingSoon` נשאר fallback בלתי-נגיש.
+- guard: `debug_badge_gate_test` (3) + `catalog_coming_soon_hide_test` (2) + עדכון `widget_test` (8 קטגוריות, אפס "בקרוב"). מוטציה: הסרת gate-ה-debug → release-test אדום → שוחזר.
+- Gate: analyze 0 · full-suite +2129 · build web ✅.

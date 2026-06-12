@@ -1306,7 +1306,14 @@ class _ItemPickerSheetState extends ConsumerState<_ItemPickerSheet> {
               // T6.3: the ▦ קטלוג categories via the catalog repository
               // (returns the same const `kCatalogCats`). `ref.watch` — this is
               // inside the sheet's build tree.
-              final cats = ref.watch(catalogRepositoryProvider).catalogCategories();
+              // B4: only offer categories that lead to content, so a curated
+              // list can never route into the `_TreeComingSoon` "בקרוב"
+              // placeholder (owner policy: no content-less surface in release).
+              final cats = ref
+                  .watch(catalogRepositoryProvider)
+                  .catalogCategories()
+                  .where((c) => _categoryHasContent(c.title))
+                  .toList();
               return ListView.builder(
                 controller: scrollCtrl,
                 itemCount: cats.length,
@@ -2328,9 +2335,14 @@ class _FilteredCatalogList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Preserve original ordering by collecting original indices that match.
+    // B4: also skip any (possibly previously-saved) content-less title so a
+    // curated list never renders a tile that drills into the `_TreeComingSoon`
+    // "בקרוב" placeholder. Display-only filter — the saved selection is kept.
     final indices = <int>[
       for (var i = 0; i < kCatalogCats.length; i++)
-        if (selected.contains(kCatalogCats[i].title)) i,
+        if (selected.contains(kCatalogCats[i].title) &&
+            _categoryHasContent(kCatalogCats[i].title))
+          i,
     ];
     return ListView.separated(
       key: const Key('catalog-list'),
@@ -2385,13 +2397,30 @@ class _EmptySection extends StatelessWidget {
   }
 }
 
+/// OWNER POLICY (B4): a top category is shown only when it actually leads to
+/// content. A `kCatalogCats` title with no matching `kCatalogTree` node (or a
+/// node with an empty subtree) would drill straight into the `_TreeComingSoon`
+/// "בקרוב — הקטגוריה הזו בבנייה" placeholder; the App Store rejects visible
+/// content-less / "coming soon" surfaces, so those tiles are filtered out of
+/// the browse list. Reversible data filter (mirrors wave-1's `where(...)`) —
+/// no `kCatalogCats`/`kCatalogTree` data is deleted; re-add a tree node and the
+/// category reappears automatically.
+bool _categoryHasContent(String title) {
+  final node = _findCatalogTreeNodeByTitle(title);
+  return node != null && node.children.isNotEmpty;
+}
+
 /// Top categories that belong to [system] — matched to their catalog-tree
 /// node's dominant system (fixtures show in both), consistent with the tree
-/// drill. null → all.
+/// drill. null → all. Content-less categories (B4) are always filtered out.
 List<Section> _catsForSystem(WaterSystem? system) {
-  if (system == null) return kCatalogCats;
   final out = <Section>[];
   for (final c in kCatalogCats) {
+    if (!_categoryHasContent(c.title)) continue;
+    if (system == null) {
+      out.add(c);
+      continue;
+    }
     final node = _findCatalogTreeNodeByTitle(c.title);
     if (node != null && nodeHasSystem(node, system)) out.add(c);
   }

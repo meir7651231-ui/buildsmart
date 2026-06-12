@@ -116,7 +116,14 @@ void main() {
     expect(find.text('כלים מהירים'), findsAtLeastNWidgets(1));
   });
 
-  testWidgets('קטגוריות section shows all 11 verbatim categories', (t) async {
+  // B4 (owner policy): content-less catalog categories — those whose title has
+  // no `kCatalogTree` node and would otherwise drill into the `_TreeComingSoon`
+  // "בקרוב" placeholder — are filtered out of the קטגוריות browse list. The
+  // catalog data is kept (reversible `where(_categoryHasContent)`), so re-adding
+  // a tree node makes the category reappear. This is the catalog twin of the
+  // wave-1 placeholder_hide_test departments guard.
+  testWidgets('קטגוריות section shows only content-bearing categories, no בקרוב',
+      (t) async {
     await t.pumpWidget(_wrap());
     await t.pumpAndSettle();
     await _openFinder(t);
@@ -125,19 +132,35 @@ void main() {
     await t.pumpAndSettle();
     await t.tap(catChip);
     await t.pumpAndSettle();
-    const cats = [
-      'ברזים וכיורים', 'אסלות', 'מקלחות ואמבטיות', 'חימום מים', 'מטבח',
-      'ניקוז וצנרת', 'גופי תברואה', 'אביזרי קצה וחיבורים',
-      'בנייה ומחיצות', 'גמר', 'אביזרים נלווים',
-    ];
+
     final listFinder = find.byKey(const Key('catalog-list'));
-    for (final c in cats) {
+
+    // Categories that DO lead to a built tree must still render (verbatim).
+    const live = [
+      'ברזים וכיורים', 'אסלות', 'מקלחות ואמבטיות', 'ניקוז וצנרת',
+      'אביזרי קצה וחיבורים', 'אביזרים נלווים', 'גינון והשקיה',
+      'צנרת PPR (פולירול)',
+    ];
+    for (final c in live) {
       for (var i = 0; i < 15; i++) {
         if (find.text(c).evaluate().isNotEmpty) break;
         await t.drag(listFinder, const Offset(0, -200));
         await t.pump(const Duration(milliseconds: 50));
       }
-      expect(find.text(c), findsOneWidget, reason: 'missing category: $c');
+      expect(find.text(c), findsOneWidget, reason: 'missing live category: $c');
     }
+
+    // Content-less categories (no tree node → would show "בקרוב") are hidden.
+    // Scroll back to the top first so the whole (now-shorter) list is covered.
+    for (var i = 0; i < 20; i++) {
+      await t.drag(listFinder, const Offset(0, 300));
+      await t.pump(const Duration(milliseconds: 50));
+    }
+    const hidden = ['חימום מים', 'מטבח', 'גופי תברואה', 'בנייה ומחיצות', 'גמר'];
+    for (final c in hidden) {
+      expect(find.text(c), findsNothing, reason: 'content-less category leaked: $c');
+    }
+    // And no "בקרוב" placeholder badge anywhere in the browse list.
+    expect(find.text('בקרוב'), findsNothing);
   });
 }

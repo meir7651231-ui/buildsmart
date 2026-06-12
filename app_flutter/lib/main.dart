@@ -15,7 +15,8 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart'
     show FirebaseMessaging, RemoteMessage;
-import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
+import 'package:flutter/foundation.dart'
+    show debugPrint, kDebugMode, kIsWeb, visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -95,6 +96,19 @@ Future<void> main() async {
   );
 }
 
+/// OWNER POLICY: developer/diagnostic-only overlays mounted on top of the app
+/// shell. The launch-diagnostic [BackendDebugBadge] is a NON-FUNCTIONAL UI in a
+/// shipped build (the App Store rejects visible debug UI), so it is gated to
+/// debug builds only. In release/profile (and `flutter build web --release`)
+/// [isDebug] is `kDebugMode == false`, so this returns an empty list and the
+/// shipped build shows NOTHING. The widget itself is kept for dev use.
+///
+/// Pure + `@visibleForTesting` so the gate is asserted directly for both flag
+/// values without flipping the `kDebugMode` const at runtime.
+@visibleForTesting
+List<Widget> debugOverlayChildren({required bool isDebug}) =>
+    isDebug ? const [BackendDebugBadge()] : const [];
+
 class BuildSmartApp extends ConsumerWidget {
   const BuildSmartApp({super.key});
 
@@ -150,7 +164,10 @@ class BuildSmartApp extends ConsumerWidget {
             child: Stack(
               children: [
                 child ?? const SizedBox(),
-                const BackendDebugBadge(),
+                // OWNER POLICY: the launch-diagnostic badge is dev-only — gated
+                // by kDebugMode so a release/web build shows NOTHING (see
+                // debugOverlayChildren). Kept in code for dev.
+                ...debugOverlayChildren(isDebug: kDebugMode),
               ],
             ),
           ),
