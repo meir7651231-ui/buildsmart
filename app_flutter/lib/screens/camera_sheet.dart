@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/camera_error_view.dart';
@@ -6,9 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-void openCameraSheet(BuildContext context) {
-  Navigator.of(context).push(
-    MaterialPageRoute(
+/// Opens the fullscreen camera screen. Resolves to the captured photo as a
+/// `data:image/...;base64,...` data-URL when the user shoots/picks a real photo
+/// in a non-barcode mode, or null when they close without capturing (the
+/// barcode mode delivers its result via a toast and also resolves null).
+/// Fire-and-forget callers may ignore the result.
+Future<String?> openCameraSheet(BuildContext context) {
+  return Navigator.of(context).push<String>(
+    MaterialPageRoute<String>(
       builder: (_) => const CameraScreen(),
       fullscreenDialog: true,
     ),
@@ -58,6 +67,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     super.dispose();
   }
 
+  /// True while the injected picker is open — blocks double-taps on both the
+  /// shutter and the gallery button.
+  bool _capturing = false;
+
   void _onDetect(BarcodeCapture cap) {
     if (_mode != 0 || _scanned) return;
     final code = cap.barcodes.firstOrNull?.rawValue;
@@ -65,6 +78,29 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     _scanned = true;
     Navigator.pop(context);
     showToast(context, 'נקלט: $code');
+  }
+
+  /// REAL capture for the non-barcode modes AND the "כל הגלריה" button — opens
+  /// the injected [taskPhotoPickerProvider] seam (the live getUserMedia webcam
+  /// on web / the device camera+gallery on mobile via `pickTaskPhoto`). On a
+  /// real photo: a preview/confirm dialog, then DELIVER it by popping the screen
+  /// with the data-URL result + a toast. On user cancel / picker failure: a
+  /// graceful no-op (we stay on the camera screen — no fake photo is invented).
+  Future<void> _capture() async {
+    if (_capturing) return;
+    setState(() => _capturing = true);
+    try {
+      final picker = ref.read(taskPhotoPickerProvider);
+      final dataUrl = await picker(context);
+      if (!mounted) return;
+      if (dataUrl == null) return; // cancelled / unavailable — honest no-op
+      final confirmed = await _confirmCapture(context, dataUrl);
+      if (!confirmed || !mounted) return;
+      Navigator.of(context).pop(dataUrl); // deliver the REAL capture
+      showToast(context, '📸 התמונה נקלטה');
+    } finally {
+      if (mounted) setState(() => _capturing = false);
+    }
   }
 
   @override
@@ -150,25 +186,15 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                   children: [
 
                     // Capture button row — barcode (mode 0) uses the scanner
-                    // flow and shows no shutter; non-barcode modes are not yet
-                    // implemented so display an honest 🚧 badge instead.
+                    // flow and shows no shutter; non-barcode modes get a REAL
+                    // shutter wired to the injected capture seam.
                     if (_mode != 0)
                       Padding(
                         padding: const EdgeInsets.only(top: 14, bottom: 4),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius: BorderRadius.circular(20),
-                            border:
-                                Border.all(color: Colors.white24, width: 1),
-                          ),
-                          child: Text(
-                            '🚧 ${mode.label} — בבנייה',
-                            style: const TextStyle(
-                                color: Colors.white70, fontSize: 13),
-                          ),
+                        child: _ShutterButton(
+                          label: mode.label,
+                          busy: _capturing,
+                          onTap: _capture,
                         ),
                       ),
 
@@ -184,9 +210,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                         itemBuilder: (ctx, i) {
                           if (i == _kGallery.length) {
                             return _GalleryAllBtn(
-                              // Honest: opening the device gallery needs a
-                              // platform picker not bundled in this build.
-                              onTap: () => _showGalleryUnavailable(context),
+                              // REAL device gallery / file picker via the
+                              // injected capture seam (image_picker on mobile,
+                              // the browser file input on web).
+                              onTap: _capturing ? null : _capture,
                             );
                           }
                           final g = _kGallery[i];
@@ -337,24 +364,135 @@ void _showGalleryPreview(
   );
 }
 
-/// Honest "device gallery unavailable" dialog (no platform picker bundled).
-void _showGalleryUnavailable(BuildContext context) {
-  showDialog<void>(
+/// Preview/confirm dialog for a freshly-captured REAL photo — the user SEES the
+/// thumbnail before it is delivered. Returns true only on confirm. A decode
+/// failure still shows the dialog (text-only) so the flow never crashes on an
+/// odd data-URL.
+Future<bool> _confirmCapture(BuildContext context, String dataUrl) async {
+  final bytes = _dataUrlBytes(dataUrl);
+  final ok = await showDialog<bool>(
     context: context,
-    builder: (dialogCtx) => AlertDialog(
-      title: const Text('גלריית המכשיר'),
-      content: const Text(
-        'גישה לגלריית התמונות של המכשיר אינה זמינה בגרסת הדמו.',
-        textAlign: TextAlign.right,
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogCtx),
-          child: const Text('הבנתי'),
+    builder: (dialogCtx) => Directionality(
+      textDirection: TextDirection.rtl,
+      child: AlertDialog(
+        backgroundColor: const Color(0xFFFFFFFF),
+        title: const Text('📸 תצוגה מקדימה'),
+        content: SizedBox(
+          width: 320,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (bytes != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                  child: Image.memory(
+                    bytes,
+                    height: 180,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
+                    errorBuilder: (_, __, ___) => const SizedBox(
+                      height: 180,
+                      child: Center(child: Icon(Icons.broken_image_outlined)),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: BsTokens.space3),
+              const Text(
+                'להשתמש בתמונה הזו?',
+                style: TextStyle(color: Colors.black54, fontSize: 13.5),
+              ),
+            ],
+          ),
         ),
-      ],
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
+            onPressed: () => Navigator.pop(dialogCtx, false),
+            child: const Text('ביטול'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
+            onPressed: () => Navigator.pop(dialogCtx, true),
+            child: const Text('אישור'),
+          ),
+        ],
+      ),
     ),
   );
+  return ok ?? false;
+}
+
+/// Decodes the base64 payload of a `data:...;base64,...` URL to bytes for the
+/// preview; null when there is no comma or the payload is not valid base64.
+Uint8List? _dataUrlBytes(String dataUrl) {
+  final comma = dataUrl.indexOf(',');
+  if (comma < 0) return null;
+  try {
+    return base64Decode(dataUrl.substring(comma + 1));
+  } on FormatException catch (_) {
+    return null;
+  }
+}
+
+// ─── shutter button ────────────────────────────────────────────────────────────
+
+/// The REAL capture shutter shown for non-barcode modes. A pill that reflects
+/// the [busy] state (greyed while the picker is open) and the active mode label.
+class _ShutterButton extends StatelessWidget {
+  const _ShutterButton({
+    required this.label,
+    required this.busy,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool busy;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'צלם $label',
+      child: Material(
+        color: busy ? const Color(0xFF555555) : BsTokens.brand,
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          onTap: busy ? null : onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (busy)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                else
+                  const Text('📸', style: TextStyle(fontSize: 16)),
+                const SizedBox(width: 8),
+                Text(
+                  busy ? 'פותח…' : 'צלם $label',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ─── gallery thumbnail ────────────────────────────────────────────────────────
@@ -405,7 +543,9 @@ class _GalleryThumb extends StatelessWidget {
 
 class _GalleryAllBtn extends StatelessWidget {
   const _GalleryAllBtn({required this.onTap});
-  final VoidCallback onTap;
+
+  /// Null while a capture is already in flight (the button is disabled).
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

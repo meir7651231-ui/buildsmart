@@ -37,11 +37,25 @@ import 'package:buildsmart/services/photo_downscale.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// Hard ceiling for a photo data-URL (~1.5MB of base64 text) — beyond this
 /// the localStorage persist layer is at real risk of a quota failure.
 const int kMaxPhotoDataUrlChars = 1500 * 1024;
+
+/// The single REAL-capture seam type: open a camera/picker flow and resolve to
+/// the photo as a `data:image/...;base64,...` data-URL, or null on
+/// cancel/failure. Mirrors [pickTaskPhoto]'s contract.
+typedef TaskPhotoPicker = Future<String?> Function(BuildContext context);
+
+/// Injectable capture seam (same idiom as `connectivityProbeProvider`). Defaults
+/// to the REAL [pickTaskPhoto] chain (webcam/getUserMedia on web, the device
+/// camera on mobile). Tests override this with a fake that returns a known
+/// data-URL — so the capture→deliver wiring is unit-testable WITHOUT hardware.
+final taskPhotoPickerProvider = Provider<TaskPhotoPicker>(
+  (_) => pickTaskPhoto,
+);
 
 /// Opens a REAL capture flow and returns the photo as a data-URL string
 /// (`data:image/...;base64,...`), or null on cancel/failure — see the

@@ -1767,3 +1767,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **B4:** 5 קטגוריות-קטלוג חסרות-תוכן (חימום מים·מטבח·גופי תברואה·בנייה ומחיצות·גמר) מסוננות (`_categoryHasContent`+`where`, הפיך — הנתונים נשמרו); 8 נשארות, אפס "בקרוב" גלוי. `_TreeComingSoon` נשאר fallback בלתי-נגיש.
 - guard: `debug_badge_gate_test` (3) + `catalog_coming_soon_hide_test` (2) + עדכון `widget_test` (8 קטגוריות, אפס "בקרוב"). מוטציה: הסרת gate-ה-debug → release-test אדום → שוחזר.
 - Gate: analyze 0 · full-suite +2129 · build web ✅.
+### #wave3-camera — מצלמה אמיתית ב-camera_sheet (נחיל גל-3) — 2026-06-11
+- **חובר:** `camera_sheet` — לכידת-מצלמה+גלריה (היה 🚧 "בבנייה" מדומה) → seam בר-הזרקה `taskPhotoPickerProvider` (ברירת-מחדל = `pickTaskPhoto` הקיים: web getUserMedia→file-input · mobile camera→gallery, מחזיר data-URL). `_ShutterButton` אמיתי + דיאלוג-אישור (preview); `openCameraSheet` מחזיר את ה-data-URL; ביטול/כשל = no-op חינני. flash/ברקוד ללא-שינוי. לא נגעתי ב-persona_pod (churn מקביל). אפס plugin חדש.
+- guard: `camera_sheet_capture_test` (3 · capture→deliver · cancel→no-op · gallery — דרך fake-seam). מוטציה: `Navigator.pop(dataUrl)`→`pop()` → 2 אדום → שוחזר.
+- **caveat (owner device-test):** לכידת-חומרה אמיתית (מצלמה/גלריה פיזית) מאומתת רק על מכשיר; ה-fake מוכיח חיווט+build בלבד.
+- Gate: analyze 0 · full-suite +2132 · build web ✅.
