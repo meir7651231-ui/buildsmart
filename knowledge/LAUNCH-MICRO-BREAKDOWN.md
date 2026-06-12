@@ -31,7 +31,7 @@
 | B2 | ✅ (ebb4efd · הוסתרו) · מקצועות: לבנות חשמלאי+שיפוצים **או** להסתיר | `profession_screen.dart:11` | אין "בקרוב" במקצוע | את+agent | L |
 | B3 | ✅ (ebb4efd · הוסתרו) · מחלקות: 4 dormant — לבנות **או** להסתיר | `departments_screen.dart:96` (live:false) | אין מחלקה מתה | את+agent | M |
 | B4 | קטלוג: קטגוריות ריקות — דאטה **או** להסתיר | `catalog_screen.dart:3041` | אין "בקרוב" בקטלוג | agent | M |
-| B5 | הגדרות מתות (~28) → להסתיר עד מימוש | `*_settings_screen.dart` | אין "נשמר אך לא משפיע" | agent | M |
+| B5 | 🟡 חלקי (950757d · קטלוג: מע"מ/מטבע/יחידה/פורמט חי) · הגדרות מתות (~28) → להסתיר עד מימוש | `*_settings_screen.dart` | אין "נשמר אך לא משפיע" | agent | M |
 | B6 | חיפוש: פילטרים/מיון — לממש **או** להסתיר | `catalog_screen.dart:1108` · search dial | פועל או נעלם | agent | M |
 | B7 | dial leaves "בבנייה" (BS persona / cart / store quick‑actions) — להחליט פר‑עלה | `sections.dart`/`menu_trees.dart`/`store_screen.dart` | אין עלה‑מת גלוי | את+agent | L |
 | B8 | הרשמה אמיתית למשתמש חדש (לא local‑only) | `welcome_screen.dart` | נרשם → חשבון אמיתי | agent | M |
