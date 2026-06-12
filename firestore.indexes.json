@@ -1,0 +1,90 @@
+{
+  "//": [
+    "BuildSmart — Firestore composite indexes (launch Phase G · G1).",
+    "Project `buildsmart-b0b78`. Deploy:",
+    "  firebase deploy --only firestore:indexes --project buildsmart-b0b78",
+    "(firebase.json now points firestore.indexes -> this file).",
+    "",
+    "WHY composite indexes: a query that filters on one field AND orders by",
+    "another (or filters on two) needs a composite index — Firestore's automatic",
+    "single-field indexes do not cover those. See firestore.rules header 'RULES",
+    "ARE NOT FILTERS': a non-manager must SCOPE its listen, and those scoped",
+    "queries are exactly the ones indexed here.",
+    "",
+    "Each index below, in order, and its uid-migration state (verified vs repo):",
+    "  1. orders (contractorUid ASC, ts DESC) — LANDED (uid-A3, commit 24b5bc2).",
+    "     The contractor scoped listen where('contractorUid'==uid).orderBy('ts'",
+    "     desc) — newest-first own orders. ACTIVE NOW (contractorUid is written).",
+    "  2. orders (storeId ASC, ts DESC) — FORWARD-READY. storeId not yet written",
+    "     (orders_firebase toDoc omits it); ship so the store scoped listen lights",
+    "     up the moment an A-phase stamps it (no second deploy / index-build wait).",
+    "  3. orders (courierId ASC, ts DESC) — FORWARD-READY (same as storeId).",
+    "  4. customers (ownerId ASC, used DESC) — FORWARD-READY. ownerId not yet",
+    "     written; keeps the spend-desc order mgrCustomerList uses for the owner",
+    "     scoped list once ownerId lands.",
+    "  5. chatThreads (participants ARRAY_CONTAINS, ts DESC) — FORWARD-READY for",
+    "     the post-S1 uid contract. participants today carries ROLE NAMES not uids",
+    "     (S1 deferred), but the array-contains+orderBy shape is value-agnostic, so",
+    "     it is correct to ship now. Query: where('participants', arrayContains:",
+    "     uid).orderBy('ts' desc) (S4.1).",
+    "  6. chatMessages (threadId ASC, ts ASC) — ACTIVE NOW. threadId IS written",
+    "     today; the per-thread stream where('threadId'==id).orderBy('ts') (S4.2)",
+    "     renders the conversation chronologically (ascending).",
+    "",
+    "NOTE: `ts` is written as an ISO-8601 STRING (orders_firebase toDoc:",
+    "createdAt.toIso8601String()); ISO-8601 sorts lexicographically == chrono, so",
+    "a string-field DESC/ASC index orders correctly. fieldOverrides is left empty",
+    "— every collection keeps its automatic single-field indexes."
+  ],
+  "indexes": [
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contractorUid", "order": "ASCENDING" },
+        { "fieldPath": "ts", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "storeId", "order": "ASCENDING" },
+        { "fieldPath": "ts", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "courierId", "order": "ASCENDING" },
+        { "fieldPath": "ts", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "customers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "used", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "chatThreads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "participants", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "ts", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "chatMessages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "threadId", "order": "ASCENDING" },
+        { "fieldPath": "ts", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

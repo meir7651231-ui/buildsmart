@@ -15,16 +15,30 @@ rules_version = '2';
 //    Firebase console → App Check → APIs → Cloud Firestore → Enforce (after the
 //    clients ship with the App Check provider, S0.5). See rules_test/README.md.
 //
-// ⚠️ uid-MIGRATION PRECONDITION (pre-S1-join clients) — these rules implement
-//    the POST-S1 uid contract documented in chat_firebase.dart / the schema:
-//      • `chatThreads.participants` must carry auth.uid values. The CURRENT
-//        client still writes ROLE NAMES ('contractor', 'store', …) and OMITS
-//        `chatMessages.fromUid` — such writes/reads are DENIED here by design.
-//      • `orders.contractorId` likewise must carry the contractor's uid (the
-//        current client writes the legacy display name via who→contractorId).
-//    Run the uid migration (rewrite participants/fromUid/contractorId to uids,
-//    swap the single mapping point in chat_firebase.dart) BEFORE pointing
-//    pre-migration clients at an enforced database.
+// ⚠️ uid-MIGRATION STATE (launch Phase A/G) — these rules enforce the uid
+//    contract PER COLLECTION at its actual landed state (verified against the
+//    repo, not assumed):
+//      • orders — OWNERSHIP IS LANDED. uid-A3 (commit 24b5bc2) added
+//        `orders.contractorUid` = the placer's auth.uid (orders_engine.dart),
+//        written by orders_firebase toDoc when signed-in. THIS is the ownership
+//        key these rules use (see `ownsOrder`). `orders.contractorId` is the
+//        legacy DISPLAY NAME (who→contractorId) and is NOT a uid — it is not
+//        used for any gate. Seed/pre-A3 docs carry no contractorUid → owner-
+//        unmatched but still manager/admin-readable (backward-tolerant).
+//      • chat — FORWARD-READY (S1 uid join DEFERRED). `chatThreads.participants`
+//        still carries ROLE NAMES ('contractor', 'store', …) and
+//        `chatMessages.fromUid` is OMITTED (chat_firebase.dart header). The
+//        participants/fromUid rules below implement the POST-S1 uid contract, so
+//        current role-name writes/reads are DENIED to a non-manager by design —
+//        DO NOT assume these fields are populated yet. The single swap point is
+//        chat_firebase toDoc/fromDoc when S1 lands real uids.
+//      • customers — FORWARD-READY. `customers.ownerId` is NOT yet written
+//        (customers_firebase toDoc omits it), so an ownerId-scoped read matches
+//        nothing today; a doc with no ownerId is manager/admin-only (backward-
+//        tolerant — never hard-breaks an admin read).
+//    Run/finish the uid migration (chat participants→uids + fromUid; customers
+//    ownerId; orders storeId/courierId assignment) BEFORE relying on the
+//    forward-ready gates for those collections.
 //
 // ⚠️ RULES ARE NOT FILTERS — the app's `FirestoreCollectionSource` currently
 //    listens to WHOLE collections (`collection(...).snapshots()`, no `where`).
@@ -137,10 +151,16 @@ service cloud.firestore {
 
     // ── customers/{customerId} — S5.4 · {name, phone, creditLimit, used,
     //    balance, ownerId} ──────────────────────────────────────────────────────
-    // CREDIT DATA. read: manager, or the record's owner (`ownerId == uid`) —
-    // a doc with no ownerId (the current aggregate writes omit it) is
-    // manager-only. write: manager only. Everyone else (store/courier/worker/
-    // foreign contractor) is blocked — the S5.8 "credit blocked" test.
+    // CREDIT DATA. read: manager/admin, OR the record's owner (`ownerId == uid`).
+    // write: manager only. Everyone else (store/courier/worker/foreign
+    // contractor) is blocked — the S5.8 "credit blocked" test.
+    // ⚠️ FORWARD-READY (Phase G): `ownerId` is NOT yet written by the client
+    // (customers_firebase toDoc omits it), so the owner branch matches NOTHING
+    // today — every customers doc is effectively manager/admin-only right now.
+    // The rule is shipped so the owner-scoped read lights up the moment an A-phase
+    // stamps ownerId (the orders-A3 precedent). BACKWARD-TOLERANT: a doc with no
+    // ownerId defaults to '' and never equals an auth.uid, so it stays manager/
+    // admin-only — it never hard-breaks an admin read.
     match /customers/{customerId} {
       allow read: if isManager()
           || (isSignedIn()
@@ -149,7 +169,8 @@ service cloud.firestore {
     }
 
     // ── orders/{orderId} — S5.5 · {projectId, lines[], sum, stage,
-    //    siteAddress, contractorId, storeId, courierId, ts} ─────────────────────
+    //    siteAddress, contractorId(=display name), contractorUid(=auth.uid, the
+    //    LANDED ownership key, A3), storeId, courierId, ts} ─────────────────────
 
     /// kManagerOrderFlow (lib/logic/manager_dashboard.dart) — the ONLY legal
     /// stage vocabulary.
@@ -191,25 +212,46 @@ service cloud.firestore {
           || resource.data.get(field, '') == request.auth.uid;
     }
 
+    /// The contractor's OWNERSHIP uid on an order. ⚠️ Phase-G correction: the
+    /// LANDED uid field is `contractorUid` (uid-A3, commit 24b5bc2 —
+    /// orders_engine.dart `Order.contractorUid` = the placer's auth.uid, written
+    /// by orders_firebase toDoc only when non-empty). `contractorId` is the
+    /// legacy DISPLAY NAME (`Order.who`), NOT a uid — keying ownership on it (as
+    /// the pre-G rule did) compares a name to a uid and DENIES a contractor their
+    /// own order. So ownership reads/keys on `contractorUid`. A legacy/seed doc
+    /// that predates A3 carries no `contractorUid` (→ '') and is therefore
+    /// owner-unmatched — manager/admin still reads it (backward-tolerant: an
+    /// un-uid'd doc never hard-breaks an admin read), and a fresh A3 order
+    /// carries the real uid so the owner matches. (`contractorId` is intentionally
+    /// NOT a read fallback: it holds a name, which can never equal an auth.uid —
+    /// accepting it would gate nothing and could leak by name-collision.)
+    function ownsOrder() {
+      return resource.data.get('contractorUid', '') == request.auth.uid;
+    }
+
     // create: contractor, always at the flow head ('new'), bound to the author
-    //   (`contractorId == uid` — an order cannot be created in someone else's
-    //   name; uid contract per the migration header). manager/admin may also
-    //   create at any legal stage (dashboard/seed/reset tooling).
+    //   (`contractorUid == uid` — an order cannot be created in someone else's
+    //   name; the LANDED A3 uid field, see ownsOrder above). manager/admin may
+    //   also create at any legal stage (dashboard/seed/reset tooling). NOTE: the
+    //   current contractor client must stamp contractorUid (signed-in) for its
+    //   own create to pass — an empty contractorUid (signed-out / pre-A3 path)
+    //   is denied creation by design, which is the intended hardening.
     // update: transition-per-role —
     //   store:   new→preparing→ready, stage-only diff, assignment-bound;
     //   courier: ready→pickup→transit→delivered, stage-only diff, bound;
     //   manager: the god-step (`setStage`) — any change whose stage is legal.
-    // read: participants (contractorId/storeId/courierId == uid) or manager.
+    // read: owner (contractorUid == uid) / assignee (storeId|courierId == uid,
+    //   forward-ready — those fields are not yet written) or manager/admin.
     // delete: manager only (`resetToSeed` cleanup is a manager/admin action).
     match /orders/{orderId} {
       allow read: if isManager()
           || (isSignedIn()
-              && (resource.data.get('contractorId', '') == request.auth.uid
+              && (ownsOrder()
                   || resource.data.get('storeId', '') == request.auth.uid
                   || resource.data.get('courierId', '') == request.auth.uid));
       allow create: if (hasRole('contractor')
               && request.resource.data.stage == 'new'
-              && request.resource.data.get('contractorId', '')
+              && request.resource.data.get('contractorUid', '')
                   == request.auth.uid)
           || (isManager() && request.resource.data.stage in orderStages());
       allow update: if (hasRole('store')

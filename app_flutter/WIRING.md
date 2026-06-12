@@ -1772,3 +1772,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - guard: `camera_sheet_capture_test` (3 · capture→deliver · cancel→no-op · gallery — דרך fake-seam). מוטציה: `Navigator.pop(dataUrl)`→`pop()` → 2 אדום → שוחזר.
 - **caveat (owner device-test):** לכידת-חומרה אמיתית (מצלמה/גלריה פיזית) מאומתת רק על מכשיר; ה-fake מוכיח חיווט+build בלבד.
 - Gate: analyze 0 · full-suite +2132 · build web ✅.
+### #phaseG — חוקי-שרת ownership + אינדקסים + בדיקות-emulator (נחיל) — 2026-06-12
+- **תיקון-אבטחה אמת:** ה-rules גידרו בעלות-הזמנה על `contractorId` — אבל זה מחזיק את ה**שם** (`Order.who`), לא uid → היו **דוחים מקבלן את ההזמנה שלו**. תוקן ל-`contractorUid` (השדה האמיתי מ-A3, helper `ownsOrder()`): קריאה=בעלים/assignee/manager/admin · יצירה=קבלן ב-stage 'new' עם `contractorUid==uid` או manager. backward-tolerant (seed בלי uid עדיין manager-readable).
+- **G1 אינדקסים** (`firestore.indexes.json` חדש · 6): orders `contractorUid+ts` (פעיל) · storeId/courierId/customers `ownerId`/chat `participants` (forward-ready) · chatMessages `threadId+ts` (פעיל).
+- **G2/G3:** customers `ownerId`-or-manager · chat `participants` (forward-ready) · `rules_test/orders.test.js` 17 בדיקות + harness (`package.json`).
+- **אימות:** אמולטור-Firestore **רץ** (firebase-tools 14.27 + rules-unit-testing v4) → **17/17 pass**. analyze 0. (לא קוד-אפליקציה.)
+- **owner-deploy:** `firebase deploy --only firestore:rules,firestore:indexes --project buildsmart-b0b78`.
