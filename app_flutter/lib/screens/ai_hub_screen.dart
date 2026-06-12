@@ -8,6 +8,7 @@ import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/home_shell.dart' show CartFab;
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
+import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
 import 'package:buildsmart/state/smart_cart.dart' show smartCartProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -16,13 +17,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 🤖 בינה מלאכותית ואוטומציה — the AI hub (T3.H).
 ///
-/// Faithful native port of proto Category G (`openAIHub` @21123). Nine tools:
-///   • 📷 ברקוד + 🎙️ דיבור = REAL — they drive the catalog's live
+/// Faithful native port of proto Category G (`openAIHub` @21123). Nine tools.
+/// Each is wired to REAL behaviour or honestly flagged:
+///   • 📷 ברקוד + 🎙️ דיבור = REAL — drive the catalog's live
 ///     [searchQueryProvider] and switch to the catalog tab (same wiring the
-///     catalog's own search-tools use). NOT a toast.
-///   • all 7 others = SIMULATED AI result rendered ON SCREEN (predictions,
-///     cheaper alternatives via [aiAlternatives]/`cheaperAlternativeBrand`,
-///     weather, wear, three-way, plan-scan, analytics) — NOT a toast.
+///     catalog's own search-tools use).
+///   • 💡 חלופות זולות + 📐 סריקת תוכניות = REAL — open the canonical contractor
+///     sheets that COMPUTE over the live catalog price tiers / smart-cart.
+///   • 📦 חיזוי מלאי = REAL/COMPUTED — [computeStockForecast] over the live
+///     orders engine (consumption history) + cart (on-hand). No model.
+///   • 📊 Analytics חכם = REAL/COMPUTED — [computeAnalyticsInsights] over the
+///     live orders engine + budget + the real cheaper-alternatives scan.
+///   • 🔗 התאמה משולשת · 🌦️ מזג אוויר · 🔧 זיהוי בלאי = DEFERRED — each needs an
+///     EXTERNAL data source the app does not hold (supplier delivery-note &
+///     invoice documents · a weather-forecast API · IoT equipment-hour sensors),
+///     so they render a verbatim sample under an explicit "⚙️ בפרודקשן" note.
 ///
 /// WIRE: reached from the home menu-dial 🤖 leaf and the home AI-hub button —
 /// `Navigator.push(AIHubScreen.route())`. See the agent report's WIRE notes.
@@ -191,11 +200,18 @@ class _AIFeatureScreen extends ConsumerWidget {
 }
 
 // ─── 62. PREDICTIVE STOCK — proto aiPredictStock @21155 ───────────────────────
-class _PredictStock extends StatelessWidget {
+// REAL/COMPUTED: [computeStockForecast] folds the live orders engine (captured
+// line-item consumption history) + the live cart (on-hand) into a per-product
+// run-out forecast — deterministic, no model. Empty until real orders carry
+// lines → honest "no data yet" note (never invented rows).
+class _PredictStock extends ConsumerWidget {
   const _PredictStock();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final orders = ref.watch(ordersEngineProvider);
+    final cart = ref.watch(smartCartProvider);
+    final preds = computeStockForecast(orders, cart);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -205,37 +221,51 @@ class _PredictStock extends StatelessWidget {
           sub: 'חיזוי מתי כל חומר ייגמר — לפי קצב הצריכה באתר.',
         ),
         const SizedBox(height: BsTokens.space3),
-        const AiServerNote('⚙️ בפרודקשן: מודל חיזוי מבוסס היסטוריית צריכה בשרת'),
+        const AiServerNote(
+            '🧮 מחושב מתוך היסטוריית ההזמנות והעגלה החיה — קצב צריכה ומלאי נוכחי'),
         const SizedBox(height: BsTokens.space2),
-        for (final p in kStockPreds)
-          AiCard(
-            overdue: p.urgent,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AiCardTop(
-                  title: p.name,
-                  pill: '${p.urgent ? '⚠️ ' : ''}עוד ${p.days} ימים',
-                  danger: p.urgent,
-                ),
-                const SizedBox(height: 4),
-                AiCardSub('מלאי ${p.stock} · צריכה ${p.rate}/יום'),
-                if (p.urgent) ...[
-                  const SizedBox(height: 8),
-                  AiCardBtn(
-                    label: 'הזמן עכשיו',
-                    onTap: () => showToast(context, 'נוסף לרשימת רכש מומלצת'),
+        if (preds.isEmpty)
+          const AiCard(
+            overdue: false,
+            child: AiCardSub(
+                'אין עדיין היסטוריית צריכה — בצע הזמנות כדי לקבל חיזוי מלאי'),
+          )
+        else
+          for (final p in preds)
+            AiCard(
+              overdue: p.urgent,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AiCardTop(
+                    title: p.name,
+                    pill: '${p.urgent ? '⚠️ ' : ''}עוד ${p.days} ימים',
+                    danger: p.urgent,
                   ),
+                  const SizedBox(height: 4),
+                  AiCardSub('מלאי ${p.stock} · צריכה ${p.rate}/יום'),
+                  if (p.urgent) ...[
+                    const SizedBox(height: 8),
+                    AiCardBtn(
+                      label: 'הזמן עכשיו',
+                      onTap: () => showToast(context, 'נוסף לרשימת רכש מומלצת'),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
       ],
     );
   }
 }
 
 // ─── 67. THREE-WAY MATCHING — proto aiThreeWay @21303 ─────────────────────────
+// DEFERRED (🔑): a true three-way match reconciles the ORDER against the
+// supplier-issued DELIVERY NOTE and INVOICE — two external documents the app
+// does not capture (the orders engine holds only the order total, no separate
+// delivery/invoice amounts). Computing it would mean inventing those numbers,
+// so this renders the verbatim proto sample under an explicit note. Wire for
+// real once supplier delivery-notes + invoices are ingested.
 class _ThreeWay extends StatelessWidget {
   const _ThreeWay();
 
@@ -250,6 +280,9 @@ class _ThreeWay extends StatelessWidget {
           sub: 'השוואה אוטומטית: הזמנה · תעודת משלוח · חשבונית.',
         ),
         const SizedBox(height: BsTokens.space3),
+        const AiServerNote(
+            '⚙️ בפרודקשן: דורש תעודות משלוח וחשבוניות מהספק (מסמכים חיצוניים)'),
+        const SizedBox(height: BsTokens.space2),
         for (final d in kThreeWayDocs)
           AiCard(
             overdue: !d.match,
@@ -403,11 +436,16 @@ class _Wear extends StatelessWidget {
 }
 
 // ─── 70. SMART ANALYTICS — proto aiAnalytics @21383 ───────────────────────────
-class _Analytics extends StatelessWidget {
+// REAL/COMPUTED: [computeAnalyticsInsights] folds the live orders engine +
+// budget + the real cheaper-alternatives scan into deterministic insights — no
+// model. Every number re-derives from live providers.
+class _Analytics extends ConsumerWidget {
   const _Analytics();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final orders = ref.watch(ordersEngineProvider);
+    final insights = computeAnalyticsInsights(orders);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -417,9 +455,10 @@ class _Analytics extends StatelessWidget {
           sub: 'תובנות אוטומטיות על ההתנהלות באתר.',
         ),
         const SizedBox(height: BsTokens.space3),
-        const AiServerNote('⚙️ בפרודקשן: מנוע אנליטיקה מבוסס נתוני אמת'),
+        const AiServerNote(
+            '🧮 מחושב מנתוני אמת — מנוע ההזמנות, התקציב והשוואת המחירים בקטלוג'),
         const SizedBox(height: BsTokens.space2),
-        for (final it in kInsights)
+        for (final it in insights)
           AiCard(
             overdue: false,
             child: Column(

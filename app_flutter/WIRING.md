@@ -1757,3 +1757,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **🔑 נדחו ביושר:** persona קבלן/חנות/admin (אין feed-פעמון ייעודי) · type-toggles (אין שורות-feed מהסוגים) · quiet-shabbat/meetings/driving + sound-per-type + LED + lock-screen + quick-actions + summaries (דורש ערוצי-push נייטיב/חיישנים/scheduler) · email/SMS/WhatsApp (requiresServer). markers-יושר נשמרו על הנדחים.
 - guard: `notif_settings_wiring_test` (14 · gating · provider empty/restore · feedback-predicate כולל snooze/quiet · persist). מוטציה: שבירת זרוע-`boardFeedEnabled` → 3 אדום → שוחזר.
 - Gate: analyze 0 · full-suite 2110 · build web ✅.
+### #wave4-ai — כלי-AI על דאטה אמיתי (נחיל גל-4 · supervisor-verified) — 2026-06-11
+- **🟢 מחושב באמת (6):** חיזוי-מלאי (`computeStockForecast` מ-ordersEngine+smartCart — צריכה/קצב/ימים) · analytics (`computeAnalyticsInsights` מ-orders — count/sum/avg/open-delivered/חיסכון/תקציב) · חלופות-זולות (`aiAlternatives` מעל price-tiers) · סריקת-תוכנית/ברקוד/דיבור (מחוברים לחיפוש/cart החיים). כל מחושב נושא תג `🧮 מחושב`.
+- **🔑 נדחו ביושר (3, לא מזויף):** התאמה-משולשת (דורש תעודות-משלוח+חשבוניות) · מזג-אוויר (API) · בלאי (חיישני-IoT) — כל אחד עם הערת `⚙️ בפרודקשן: דורש X`.
+- guard: `ai_hub_compute_test` (14 · forecast/analytics/alternatives על דאטה+קצוות). מוטציה: שבירת fold-הצריכה (`+`→`-`) → 5 assertions אדום → שוחזר.
+- Gate (supervisor-verified): analyze 0 · full-suite +2124 · build web ✅.

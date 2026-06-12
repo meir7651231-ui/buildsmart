@@ -821,3 +821,6 @@
 
 ### 2026-06-11 — חיבור התראות in-app (נחיל גל-2 מנה-3)
 - **`lib/state/worker_notifs.dart` — `boardFeedEnabled`:** מוטציה — זרוע-העובד `=> true` קבוע → `notif_settings_wiring_test` **אדום** (3: personaWorker/master/restore gating) ✅ נתפס; שוחזר (backup) → 14/14 ירוק.
+
+### 2026-06-11 — כלי-AI על דאטה אמיתי (נחיל גל-4 · supervisor)
+- **`lib/logic/ai_hub_logic.dart` — `computeStockForecast`:** מוטציה — fold-הצריכה `+ li.qty` → `- li.qty` → `ai_hub_compute_test` **אדום** (5 assertions: rate/urgent/span/on-hand/aggregate) ✅ נתפס; שוחזר (cp, md5 חזר) → 14/14 ירוק.
