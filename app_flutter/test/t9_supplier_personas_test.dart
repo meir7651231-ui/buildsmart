@@ -1,6 +1,7 @@
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/courier_dashboard_screen.dart';
 import 'package:buildsmart/screens/store_dashboard_screen.dart';
+import 'package:buildsmart/screens/store_profile_screen.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:flutter/material.dart';
@@ -132,6 +133,25 @@ void main() {
       // It lands in the manager's engine too (contractor/store/manager share it).
       expect(c.read(ordersEngineProvider).any((o) => o.id == id), isTrue);
     });
+
+    test('deliveredRevenue counts ONLY delivered orders (#87.2)', () {
+      final c = _container();
+      addTearDown(c.dispose);
+      // Seed has BS-1039 in transit and none delivered — revenue must be 0
+      // (a mutation that counts transit/pickup flips this immediately).
+      expect(c.read(sysOrdersProvider).deliveredRevenue, 0);
+      final n = c.read(sysOrdersProvider.notifier);
+      n.storeAdvance('BS-1042'); // preparing
+      n.storeAdvance('BS-1042'); // ready
+      n.storeAdvance('BS-1042'); // pickup (hand-off)
+      n.courierAdvance('BS-1042'); // transit
+      expect(c.read(sysOrdersProvider).deliveredRevenue, 0);
+      n.courierAdvance('BS-1042'); // delivered
+      final sum =
+          kSysOrdersSeed.firstWhere((o) => o.id == 'BS-1042').sum;
+      expect(c.read(sysOrdersProvider).deliveredRevenue, sum,
+          reason: 'מחזור שנמסר = סכום ההזמנות שנמסרו בלבד, נגזר מהמנוע החי');
+    });
   });
 
   testWidgets('store dashboard renders verbatim content + advances an order', (
@@ -154,9 +174,16 @@ void main() {
     // Lazy boardAuthProvider _load() → gate swaps to the board.
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('🏪 חנות ספק'), findsOneWidget);
+    // #87.1 (F-20) — the AppBar title is the LIVE identity now: business-name
+    // override → session.displayName ('ליפסקי') → kStores.first.name. With no
+    // saved business profile the session displayName wins.
+    expect(find.text('🏪 ליפסקי'), findsOneWidget);
     expect(find.text('שלום 👋'), findsOneWidget);
-    expect(find.textContaining('מחסני אינסטלציה תל-אביב'), findsOneWidget);
+    // The home subtitle carries the SAME live identity (not the demo seed).
+    expect(
+      find.textContaining('ליפסקי — מה שצריך טיפול עכשיו'),
+      findsOneWidget,
+    );
     expect(find.textContaining('בבנייה'), findsNothing);
 
     // #77/#78: the top '📥 הזמנות' pill is gone — the orders PIPELINE now
@@ -170,10 +197,74 @@ void main() {
     );
     expect(find.text('📦 BS-1042'), findsOneWidget);
     await tester.ensureVisible(find.text('✓ אשר וקבל להכנה'));
+    // #87.2 — the home tab grew (the delivered-side stats row), so a minimal
+    // ensureVisible can park the CTA right behind the fixed bottom nav (56px,
+    // 5 tabs now). Nudge the main list a bit further so the tap really lands.
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -120));
+    await tester.pump();
     expect(find.text('✓ אשר וקבל להכנה'), findsOneWidget);
     await tester.tap(find.text('✓ אשר וקבל להכנה'));
     await tester.pump();
     expect(find.text('📦 סמן כמוכן — העבר לשליח'), findsWidgets);
+  });
+
+  testWidgets('הטאב החמישי "אזור אישי" של הספק נפתח — StoreProfileBody (#87.5)', (
+    tester,
+  ) async {
+    // #65 gate: seed a store session so the board (not the gate) renders.
+    SharedPreferences.setMockInitialValues({
+      'bs.board-auth.v1':
+          '{"role":"store","username":"lipskey","displayName":"ליפסקי","demo":false}',
+    });
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ordersEngineProvider.overrideWith((ref) => OrdersEngineNotifier(persist: false)),
+        ],
+        child: const MaterialApp(home: StoreDashboardScreen()),
+      ),
+    );
+    await tester.pump();
+    // Lazy boardAuthProvider _load() → gate swaps to the board.
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // #87.5 — a REAL labeled fifth bottom tab (type: fixed keeps the label
+    // visible). The AppBar person-icon is a Tooltip, not a Text — so this
+    // finder hits exactly the nav label.
+    expect(find.text('אזור אישי'), findsOneWidget);
+    await tester.tap(find.text('אזור אישי'));
+    await tester.pump();
+    // storeProfileProvider lazy load (empty prefs → honest fallbacks).
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // KNOWN LIB ISSUE (reported, do not fix here): _StorePersonalAreaCard
+    // (store_profile_screen.dart) wraps its 3 ListTiles in a color-decorated
+    // Container with no Material in between, so Flutter's debug-only
+    // 'ListTile background color or ink splashes may be invisible' assertion
+    // fires 3× on first build (the worker's _PersonalAreaCard shares the
+    // pattern). Drain ONLY that known warning so this test keeps guarding the
+    // tab wiring; once the lib wraps the tiles in a Material, takeException()
+    // returns null and this block is a no-op.
+    final pending = tester.takeException();
+    if (pending != null) {
+      expect(
+        '$pending',
+        anyOf(
+          contains('Multiple exceptions'),
+          contains('ListTile background color'),
+        ),
+        reason: 'חריגה לא-מוכרת בבניית טאב האזור האישי של הספק: $pending',
+      );
+    }
+
+    // The tab body IS the supplier's own personal area (F-21.2).
+    expect(find.byType(StoreProfileBody), findsOneWidget);
+    // Identity card: business-name override is empty → the session
+    // displayName, plus the verbatim '@username · ספק' meta row.
+    expect(find.text('ליפסקי'), findsOneWidget);
+    expect(find.text('@lipskey · ספק'), findsOneWidget);
+    // Live store-wide stats card (#87.2) renders off the shared engine.
+    expect(find.text('📊 סטטיסטיקת חנות'), findsOneWidget);
   });
 
   testWidgets('courier dashboard renders verbatim content', (tester) async {

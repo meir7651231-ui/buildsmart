@@ -185,9 +185,16 @@ class WorkerFormsState {
 }
 
 class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
-  WorkerFormsNotifier() : super(const WorkerFormsState()) {
+  WorkerFormsNotifier({this.storageKey = kWorkerFormsKey})
+      : super(const WorkerFormsState()) {
     _load();
   }
+
+  /// The SharedPreferences key this notifier reads/writes. Defaults to the
+  /// worker store; the courier board passes `'bs.courier-forms.v1'` so the
+  /// two roles never share forms (the shared `demo` username would otherwise
+  /// leak forms across boards).
+  final String storageKey;
 
   /// One-shot guard (the board_auth idiom): once a save has written state, a
   /// late `_load()` becomes non-destructive.
@@ -195,21 +202,29 @@ class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(kWorkerFormsKey);
+    if (!mounted) return;
+    final raw = prefs.getString(storageKey);
     if (raw == null || _userTouched) return;
     try {
       final decoded =
           WorkerFormsState.fromJson(jsonDecode(raw) as Map<String, dynamic>);
-      if (_userTouched) return;
+      if (!mounted || _userTouched) return;
       state = decoded;
     } on Object catch (_) {
       // Corrupt payload — keep the empty store.
     }
   }
 
-  Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(kWorkerFormsKey, jsonEncode(state.toJson()));
+  /// True when the write actually landed; false on a storage failure — most
+  /// commonly the web localStorage quota rejecting a too-large sick-note
+  /// photo data-URL. Honest: callers must NOT pretend the data was saved.
+  Future<bool> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return await prefs.setString(storageKey, jsonEncode(state.toJson()));
+    } on Object catch (_) {
+      return false; // quota exceeded / platform failure — nothing persisted
+    }
   }
 
   /// Save/replace the (username, year) 101 form. A re-save keeps an existing
@@ -238,8 +253,14 @@ class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
     _persist();
   }
 
-  /// Add a sick-note photo upload. Returns the created note.
-  SickNote addSickNote({required String username, required String photo}) {
+  /// Add a sick-note photo upload. Returns the created note, or null when
+  /// the persist FAILED (e.g. the localStorage quota rejected an oversized
+  /// photo data-URL) — the in-memory state is rolled back so the UI never
+  /// shows an upload that would not survive a reload.
+  Future<SickNote?> addSickNote({
+    required String username,
+    required String photo,
+  }) async {
     _userTouched = true;
     final note = SickNote(
       id: 'sick-${DateTime.now().microsecondsSinceEpoch}',
@@ -247,8 +268,13 @@ class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
       ts: DateTime.now(),
       photo: photo,
     );
+    final before = state;
     state = state.copyWith(sickNotes: [...state.sickNotes, note]);
-    _persist();
+    final ok = await _persist();
+    if (!ok) {
+      if (mounted) state = before;
+      return null;
+    }
     return note;
   }
 

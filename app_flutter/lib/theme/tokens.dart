@@ -70,6 +70,10 @@ class BsTokens {
   // (#22C55E-on-white is 2.28:1; this is ~5.0:1 — passes WCAG AA).
   static const Color successDark = Color(0xFF15803D);
   static const Color danger = Color(0xFFEF4444); // == chainWarning; ×31 raw
+  // Darker red for TEXT on a light/white card (the successDark pattern):
+  // Colors.redAccent-on-white is 3.19:1 (fails WCAG AA 4.5:1 for 14-15px
+  // text); this red-700 is ~6.5:1 — passes AA. Use for 'יציאה'/'הסר' labels.
+  static const Color dangerDark = Color(0xFFB91C1C);
   static const Color warnText = Color(0xFFB45309); // dark amber text
   static const Color warnBright = Color(0xFFF2A516); // bright amber badge
   static const Color divider = Color(0xFFEEEEEE); // ×39 raw

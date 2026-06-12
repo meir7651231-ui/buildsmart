@@ -103,9 +103,16 @@ Duration attendanceTotal(List<AttendanceDay> days) => days.fold(
     );
 
 class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
-  WorkerAttendanceNotifier() : super(const []) {
+  WorkerAttendanceNotifier({this.storageKey = kWorkerAttendanceKey})
+      : super(const []) {
     _load();
   }
+
+  /// The SharedPreferences key this notifier reads/writes. Defaults to the
+  /// worker ledger; the courier board passes `'bs.courier-attendance.v1'` so
+  /// the two roles never share a ledger (the shared `demo` username would
+  /// otherwise leak attendance across boards).
+  final String storageKey;
 
   /// One-shot guard (the board_auth idiom): once a clock-in/out has written
   /// state, a late `_load()` becomes non-destructive.
@@ -113,11 +120,12 @@ class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(kWorkerAttendanceKey);
+    if (!mounted) return;
+    final raw = prefs.getString(storageKey);
     if (raw == null || _userTouched) return;
     try {
       final list = jsonDecode(raw) as List;
-      if (_userTouched) return;
+      if (!mounted || _userTouched) return;
       state = [
         for (final e in list)
           if (AttendanceDay.tryFromJson(e) case final d?) d,
@@ -127,12 +135,22 @@ class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
     }
   }
 
+  /// Best-effort persist of the WHOLE ledger (every user, full history) on
+  /// each clock-in/out — the payload grows unbounded over time (~250 rows per
+  /// user per year). Acceptable at on-device demo scale because rows are tiny
+  /// JSON (never add heavy fields — no photos in the ledger). SERVER-SWAP:
+  /// the server's attendance ledger replaces this full-rewrite persistence.
   Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      kWorkerAttendanceKey,
-      jsonEncode([for (final d in state) d.toJson()]),
-    );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        storageKey,
+        jsonEncode([for (final d in state) d.toJson()]),
+      );
+    } on Object catch (_) {
+      // Storage failure (e.g. web quota) — the in-memory ledger stays live;
+      // tiny-JSON best-effort, never an unhandled async error.
+    }
   }
 
   /// Today's record for [username], or null when none exists yet.

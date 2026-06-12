@@ -808,3 +808,7 @@
 - **A3 — `Order.contractorUid` (`lib/state/orders_engine.dart`):** מוטציה (supervisor) — שבירת ה-preservation ב-copyWith `contractorUid: contractorUid,` → `contractorUid: ''` → `orders_uid_a3_test` 'a stage advance (copyWith) keeps the contractor uid' **אדום** (Expected 'u-9' / Actual '') ✅ נתפס; שוחזר byte-clean (grep-count חזר ל-3) → +8 ירוק.
 ### 2026-06-11 — lib/data/chat_seeds.dart (#83 threads-ספק · נחיל-קנוני)
 - מוטציה: audience 'store'→'worker' על thread-ספק → **שרדה** (חור-כיסוי!) → נוספה בדיקת-נעילה (sys_chat_test: 4 ids חייבים audience 'store') → מוטציה חוזרת **נתפסה** (אדום) → שוחזר → ירוק. לקח: seed-fields שמשפיעים-על-נראות חייבים נעילת-בדיקה.
+### 2026-06-11 — personal-v2 #86/#87 (נחיל קנוני · orchestrator)
+- **`lib/data/supplier_data.dart` — `deliveredRevenue`:** חור-כיסוי נמצא (אפס בדיקות לשדה) → נוספה בדיקה ל-t9 ('deliveredRevenue counts ONLY delivered orders'). מוטציה — הוספת `|| transit` לסינון → **אדום** (seed: BS-1039 ב-transit, ציפייה 0) ✅ נתפס; שוחזר → 12/12 ירוק.
+- **`lib/state/persona_fulfillment.dart` — `courierUser` fromJson:** מוטציה — `j['cu']…` → `null` קבוע → `persona_fulfillment_test` **אדום** (Expected 'noam'/Actual null, round-trip+stamp) ✅ נתפס; שוחזר → 20/20 ירוק.
+- **`lib/state/vacation_requests.dart` — back-compat `role`:** מוטציה — ברירת-מחדל decode `'worker'`→`'courier'` → `vacation_requests_test` **אדום** (Expected 'worker'/Actual 'courier' — legacy חייב עובד) ✅ נתפס; שוחזר → 11/11 ירוק.

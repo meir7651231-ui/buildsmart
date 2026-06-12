@@ -21,6 +21,10 @@
 // order, a held-for-missing flag, a split plan and a captured POD all survive an
 // app restart (the order stages themselves already persist via the engine's
 // `bs.orders.v1`).
+//
+// SERVER-SWAP: the fulfillment side-car (bs.fulfillment.v1 + bs.pod-photos.v1
+// mirror) becomes the server's fulfillment/POD store when the backend lands;
+// courierUser is then the authenticated uid.
 
 import 'dart:convert';
 
@@ -43,8 +47,10 @@ class Fulfillment {
     this.splitInto = 1,
     this.splitPlan = const [],
     this.podPhoto,
+    bool podCaptured = false,
     this.podSigned = false,
-  });
+    this.courierUser,
+  }) : _podCaptured = podCaptured;
 
   /// line-index → status. Absent index ⇒ [LineStatus.pending].
   final Map<int, LineStatus> lineStatus;
@@ -69,8 +75,19 @@ class Fulfillment {
   /// (fromJson honestly drops those).
   final String? podPhoto;
 
+  /// Round-trip backing for [podCaptured] (json `podCaptured`) — the photo
+  /// bytes themselves live ONLY in the `bs.pod-photos.v1` side-map (single
+  /// copy), so the compact side-car payload carries just this flag.
+  final bool _podCaptured;
+
   /// Courier POD signature captured (proto `openSignature`, simulated).
   final bool podSigned;
+
+  /// COURIER v2 (#86.6): username of the courier who captured the POD /
+  /// marked delivered — stamped at the action points by the logged-in courier
+  /// session. Null on legacy records and on non-courier flows (honest: never
+  /// invented, back-compat payloads without `cu` stay null).
+  final String? courierUser;
 
   bool get hasMissing =>
       lineStatus.values.any((s) => s == LineStatus.missing) ||
@@ -79,11 +96,16 @@ class Fulfillment {
   int get missingCount =>
       lineStatus.values.where((s) => s == LineStatus.missing).length;
 
-  /// True once a REAL POD photo exists — derived from [podPhoto] so every
-  /// reader (courier reports/profile, delivery-job card, store delivered
-  /// card) keys off the one stored data-URL; no separate flag to drift.
-  bool get podCaptured => podPhoto != null;
+  /// True once a REAL POD photo exists — [podPhoto] is hydrated from the one
+  /// stored data-URL (`bs.pod-photos.v1`), and the persisted `podCaptured`
+  /// boolean keeps the fact across a round-trip where the photo bytes live
+  /// only in that side-map. Every reader (courier reports/profile,
+  /// delivery-job card, store delivered card) keys off the same record.
+  bool get podCaptured => podPhoto != null || _podCaptured;
 
+  /// NOTE — `??` semantics: no field can be RESET to null/default through
+  /// copyWith (e.g. [courierUser]); construct a fresh record if that is ever
+  /// needed.
   Fulfillment copyWith({
     Map<int, LineStatus>? lineStatus,
     bool? heldForMissing,
@@ -92,6 +114,7 @@ class Fulfillment {
     List<int>? splitPlan,
     String? podPhoto,
     bool? podSigned,
+    String? courierUser,
   }) => Fulfillment(
     lineStatus: lineStatus ?? this.lineStatus,
     heldForMissing: heldForMissing ?? this.heldForMissing,
@@ -99,7 +122,9 @@ class Fulfillment {
     splitInto: splitInto ?? this.splitInto,
     splitPlan: splitPlan ?? this.splitPlan,
     podPhoto: podPhoto ?? this.podPhoto,
+    podCaptured: _podCaptured,
     podSigned: podSigned ?? this.podSigned,
+    courierUser: courierUser ?? this.courierUser,
   );
 
   Map<String, dynamic> toJson() => {
@@ -109,38 +134,63 @@ class Fulfillment {
     if (missingResolved) 'res': true,
     if (splitInto > 1) 'split': splitInto,
     if (splitPlan.isNotEmpty) 'plan': splitPlan,
-    if (podPhoto != null) 'pod': podPhoto,
+    // The photo data-URL is NOT serialized here — `bs.pod-photos.v1` holds
+    // the single copy of the bytes; only the compact flag rides the side-car
+    // (so a line toggle never re-serializes megabytes of photos).
+    if (podCaptured) 'podCaptured': true,
     if (podSigned) 'sig': true,
+    if (courierUser != null) 'cu': courierUser,
   };
 
-  factory Fulfillment.fromJson(Map<String, dynamic> j) => Fulfillment(
-    lineStatus: (j['ls'] as Map<String, dynamic>?)?.map(
-          (k, v) => MapEntry(
-            int.parse(k),
-            LineStatus.values.firstWhere(
-              (s) => s.name == v,
-              orElse: () => LineStatus.pending,
-            ),
-          ),
-        ) ??
-        const {},
-    heldForMissing: j['held'] == true,
-    missingResolved: j['res'] == true,
-    splitInto: (j['split'] as num?)?.toInt() ?? 1,
-    splitPlan: (j['plan'] as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ?? const [],
-    // 'pod' holds the photo data-URL since COURIER v2 (a); a legacy boolean
-    // `true` (pre-v2 simulated capture) carried no image → honest null.
-    podPhoto: j['pod'] is String ? j['pod'] as String : null,
-    podSigned: j['sig'] == true,
-  );
+  /// Defensive per-field decode: a malformed key/element degrades to the
+  /// honest empty value for THAT field instead of throwing the whole record
+  /// (and the notifier's loader additionally drops a record whose decode
+  /// still throws — one corrupt entry never wipes the side-car).
+  factory Fulfillment.fromJson(Map<String, dynamic> j) {
+    final ls = <int, LineStatus>{};
+    final rawLs = j['ls'];
+    if (rawLs is Map) {
+      for (final e in rawLs.entries) {
+        final idx = int.tryParse('${e.key}');
+        if (idx == null) continue; // corrupt line key — skip it, keep the rest
+        ls[idx] = LineStatus.values.firstWhere(
+          (s) => s.name == e.value,
+          orElse: () => LineStatus.pending,
+        );
+      }
+    }
+    final rawPlan = j['plan'];
+    return Fulfillment(
+      lineStatus: ls,
+      heldForMissing: j['held'] == true,
+      missingResolved: j['res'] == true,
+      splitInto: j['split'] is num ? (j['split'] as num).toInt() : 1,
+      splitPlan: rawPlan is List
+          ? [
+              for (final e in rawPlan)
+                if (e is num) e.toInt(),
+            ]
+          : const [],
+      // Legacy payloads carried the data-URL under 'pod' (kept readable for
+      // back-compat; new writes keep the bytes only in bs.pod-photos.v1); a
+      // pre-v2 simulated boolean `true` carried no image → honest null.
+      podPhoto: j['pod'] is String ? j['pod'] as String : null,
+      podCaptured: j['podCaptured'] == true,
+      podSigned: j['sig'] == true,
+      // Old payloads without 'cu' (or a wrong type) → honestly null.
+      courierUser: j['cu'] is String ? j['cu'] as String : null,
+    );
+  }
 }
 
 const String kFulfillmentKey = 'bs.fulfillment.v1';
 
 /// The `{orderId: dataUrl}` POD-photo side-map contract the courier reports
-/// tab reads (screens/courier_reports_tab.dart `kPodPhotosKey` /
-/// `podPhotosProvider`). [FulfillmentNotifier.capturePod] is its writer —
-/// mirrored at capture time so the reports-history thumbs see the same photo.
+/// tab reads (screens/courier_reports_tab.dart `kPodPhotosKey`).
+/// [FulfillmentNotifier.capturePod] is its writer, and since the single-copy
+/// change it is the ONLY home of the photo bytes — `bs.fulfillment.v1` keeps
+/// just a compact `podCaptured` flag and [FulfillmentNotifier._load] hydrates
+/// [Fulfillment.podPhoto] back from this map.
 const String _kPodPhotosKey = 'bs.pod-photos.v1';
 
 class FulfillmentNotifier extends StateNotifier<Map<String, Fulfillment>> {
@@ -152,35 +202,100 @@ class FulfillmentNotifier extends StateNotifier<Map<String, Fulfillment>> {
   final bool persist;
   bool _loaded = false;
 
+  /// True once [_load] actually finished reading `bs.fulfillment.v1` (loaded,
+  /// empty or corrupt). Distinct from [_loaded], which an early mutation also
+  /// sets: while the disk has NOT been read yet, [_persist] merges-on-write so
+  /// a cold-start mutation cannot clobber the other orders' records on disk.
+  bool _diskRead = false;
+
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return; // container disposed while prefs resolved
       final raw = prefs.getString(kFulfillmentKey);
       if (raw == null || raw.isEmpty) {
         _loaded = true;
+        _diskRead = true;
         return;
       }
-      final map = (jsonDecode(raw) as Map<String, dynamic>).map(
-        (id, v) => MapEntry(id, Fulfillment.fromJson(v as Map<String, dynamic>)),
-      );
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      // Defensive per-entry decode — a single corrupt record is dropped on
+      // its own; it must NOT wipe every other order's POD/hold/split state
+      // (the AttendanceDay.tryFromJson pattern).
+      final map = <String, Fulfillment>{};
+      for (final e in decoded.entries) {
+        try {
+          final v = e.value;
+          if (v is! Map) continue;
+          map[e.key] = Fulfillment.fromJson(v.cast<String, dynamic>());
+        } on Object catch (_) {
+          // skip just this record, keep the rest
+        }
+      }
+      // Hydrate the photo bytes from their single home (bs.pod-photos.v1) so
+      // in-memory readers (store delivered card, POD sheet, reports thumbs)
+      // keep seeing the SAME stored data-URL.
+      try {
+        final podsRaw = prefs.getString(_kPodPhotosKey);
+        if (podsRaw != null && podsRaw.isNotEmpty) {
+          final pods = jsonDecode(podsRaw) as Map<String, dynamic>;
+          for (final e in pods.entries) {
+            final rec = map[e.key];
+            final url = e.value;
+            if (rec != null && rec.podPhoto == null && url is String) {
+              map[e.key] = rec.copyWith(podPhoto: url);
+            }
+          }
+        }
+      } on Object catch (_) {
+        // corrupt photo side-map — records keep their honest podCaptured
+        // flag; the photos themselves are simply absent.
+      }
+      if (!mounted) return; // re-check before touching state
       if (!_loaded) {
         super.state = map;
         _loaded = true;
+      } else {
+        // An early mutation won the race (its _persist already merged onto
+        // disk) — fold the disk records UNDER the in-memory ones so the NEXT
+        // persist does not clobber them either.
+        super.state = {...map, ...state};
       }
+      _diskRead = true;
     } on Object catch (_) {
       _loaded = true;
+      _diskRead = true;
     }
   }
 
-  Future<void> _persist() async {
-    if (!persist) return;
+  /// True when the write actually landed; false on a storage failure — most
+  /// commonly the web localStorage quota. Honest (the worker_profile_store
+  /// pattern): [capturePod] rolls back instead of faking success.
+  Future<bool> _persist() async {
+    if (!persist) return true; // tests: in-memory only, nothing can fail
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(
-        kFulfillmentKey,
-        jsonEncode({for (final e in state.entries) e.key: e.value.toJson()}),
-      );
-    } on Object catch (_) {}
+      Map<String, dynamic> out = {
+        for (final e in state.entries) e.key: e.value.toJson(),
+      };
+      if (!_diskRead) {
+        // Merge-on-write: this mutation raced ahead of _load — fold the
+        // records already on disk under the in-memory ones (memory wins per
+        // key) instead of overwriting every other order's state.
+        try {
+          final raw = prefs.getString(kFulfillmentKey);
+          if (raw != null && raw.isNotEmpty) {
+            final onDisk = jsonDecode(raw) as Map<String, dynamic>;
+            out = {...onDisk, ...out};
+          }
+        } on Object catch (_) {
+          // corrupt disk payload — nothing mergeable, write memory as-is
+        }
+      }
+      return await prefs.setString(kFulfillmentKey, jsonEncode(out));
+    } on Object catch (_) {
+      return false; // quota exceeded / platform failure — nothing persisted
+    }
   }
 
   @override
@@ -284,42 +399,116 @@ class FulfillmentNotifier extends StateNotifier<Map<String, Fulfillment>> {
 
   // ── Courier POD (T5.4 · COURIER v2 (a) real capture) ─────────────────────────
 
-  /// `capturePOD()` [L20863] — REAL photo capture: stores the [dataUrl]
-  /// returned by the camera seam (`services/task_photo.dart pickTaskPhoto`,
-  /// the webcam sheet on desktop web) on the record — persisted with the
-  /// side-car (`bs.fulfillment.v1`) so the proof survives F5 and the store
-  /// delivered card / manager render the SAME string — and mirrors it into
-  /// the `bs.pod-photos.v1` side-map the courier reports tab reads.
-  void capturePod(String id, String dataUrl) {
-    _put(id, of(id).copyWith(podPhoto: dataUrl));
-    _mirrorPodPhoto(id, dataUrl);
+  /// `capturePOD()` [L20863] — REAL photo capture, atomically attributed to
+  /// the capturing courier (#86.6). Stores the [dataUrl] returned by the
+  /// camera seam (`services/task_photo.dart pickTaskPhoto`, the webcam sheet
+  /// on desktop web) together with [courierUser] in ONE mutation (one
+  /// persist, one fan-out — never a separate side-map for the attribution),
+  /// then writes the photo bytes into `bs.pod-photos.v1` — their single
+  /// stored home — so the proof survives F5 and the store delivered card /
+  /// manager / reports thumbs render the SAME string.
+  ///
+  /// Returns true only when the writes actually landed. On a storage failure
+  /// (e.g. the web localStorage quota rejecting a too-large data-URL) the
+  /// in-memory state is rolled back and false is returned — the caller must
+  /// NOT toast success on false.
+  ///
+  /// [courierUser]: pass `session.username` only when a real courier session
+  /// performed the capture; otherwise null — a non-courier flow (e.g. the
+  /// persona portal) stays honestly un-attributed.
+  Future<bool> capturePod(
+    String id,
+    String dataUrl, {
+    String? courierUser,
+  }) async {
+    final before = state;
+    final next = {
+      ...state,
+      id: of(id).copyWith(podPhoto: dataUrl, courierUser: courierUser),
+    };
+    // Full equivalence to the `set state` override minus its auto-persist:
+    // _loaded first, then the notify.
+    _loaded = true;
+    super.state = next;
+    final ok = await _persist();
+    if (!ok) {
+      if (mounted) super.state = before;
+      return false; // no _mirrorPodPhoto on a failed side-car write
+    }
+    // The side-map is the ONLY home of the photo bytes — the rollback
+    // contract applies to this write too.
+    final mirrored = await _mirrorPodPhoto(id, dataUrl);
+    if (!mirrored) {
+      if (mounted) {
+        super.state = before;
+        // The compact side-car row already landed — re-persist the rolled-
+        // back state (best-effort) so a reload never shows podCaptured=true
+        // with no photo behind it.
+        await _persist();
+      }
+      return false;
+    }
+    return true;
   }
 
-  /// Best-effort mirror of a captured POD photo into `bs.pod-photos.v1`
-  /// (`{orderId: dataUrl}` — read by `podPhotosProvider` in
-  /// screens/courier_reports_tab.dart, which re-reads on every mutation of
-  /// this notifier). Once the write lands the state is re-notified (same
-  /// content, new identity) so that join re-reads AFTER the photo is actually
-  /// stored — the thumbs never race the capture.
-  Future<void> _mirrorPodPhoto(String id, String dataUrl) async {
-    if (!persist) return;
+  /// #86.6 — stamps the courier who completed the delivery on the order's
+  /// record, called at the courierAdvance moments that reach `delivered`.
+  /// Goes through the normal mutation path (auto-persist); never touches
+  /// podPhoto/podSigned (copyWith keeps them).
+  void stampCourier(String id, String username) =>
+      _put(id, of(id).copyWith(courierUser: username));
+
+  /// Writes a captured POD photo into `bs.pod-photos.v1` (`{orderId:
+  /// dataUrl}` — the single stored copy of the bytes, hydrated back by
+  /// [_load] and read by the courier reports tab). Returns true only when
+  /// the write actually landed.
+  Future<bool> _mirrorPodPhoto(String id, String dataUrl) async {
+    if (!persist) return true; // tests: in-memory only, nothing can fail
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_kPodPhotosKey);
-      final map = raw == null || raw.isEmpty
-          ? <String, dynamic>{}
-          : jsonDecode(raw) as Map<String, dynamic>;
+      Map<String, dynamic> map;
+      try {
+        final raw = prefs.getString(_kPodPhotosKey);
+        map = raw == null || raw.isEmpty
+            ? <String, dynamic>{}
+            : jsonDecode(raw) as Map<String, dynamic>;
+      } on Object catch (_) {
+        // corrupt side-map — rebuild it rather than block every new capture
+        map = <String, dynamic>{};
+      }
       map[id] = dataUrl;
-      await prefs.setString(_kPodPhotosKey, jsonEncode(map));
-      if (mounted) super.state = Map.of(state);
-    } on Object catch (_) {}
+      return await prefs.setString(_kPodPhotosKey, jsonEncode(map));
+    } on Object catch (_) {
+      return false; // quota exceeded / platform failure — nothing persisted
+    }
   }
 
   /// `openSignature` [L20842] — simulated signature capture.
   void captureSignature(String id) =>
       _put(id, of(id).copyWith(podSigned: true));
 
-  void clear(String id) => state = {...state}..remove(id);
+  void clear(String id) {
+    state = {...state}..remove(id);
+    // Drop the photo bytes too (best-effort) — an orphaned bs.pod-photos.v1
+    // entry would otherwise keep counting in podCount forever.
+    _unmirrorPodPhoto(id);
+  }
+
+  /// Best-effort removal of [id]'s entry from `bs.pod-photos.v1` when the
+  /// record is cleared.
+  Future<void> _unmirrorPodPhoto(String id) async {
+    if (!persist) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_kPodPhotosKey);
+      if (raw == null || raw.isEmpty) return;
+      final map = jsonDecode(raw) as Map<String, dynamic>;
+      if (map.remove(id) == null) return;
+      await prefs.setString(_kPodPhotosKey, jsonEncode(map));
+    } on Object catch (_) {
+      // best-effort — a failed cleanup never blocks the clear itself
+    }
+  }
 }
 
 /// The deferred-fulfillment side-car — keyed by order id, read alongside

@@ -242,6 +242,10 @@ class _PortalSheet extends ConsumerWidget {
         return [
           for (final r in kSupplierRatings)
             _row('⭐ ${r.score} · ${r.orders} הזמנות · ${r.onTime}% בזמן'),
+          // F-48 — ביושר: kSupplierRatings הוא seed קבוע מהפרוטוטייפ, לא נגזרת
+          // של מנוע ההזמנות החי (SERVER-SWAP) — אותו דפוס _note כמו בפורטל
+          // השליח (courier_portal_tab.dart).
+          _note('נתוני הדגמה (seed מהפרוטוטייפ) — יוחלפו בנתונים חיים עם חיבור השרת'),
         ];
       case PortalKind.zones:
         return [
@@ -311,6 +315,17 @@ class _PortalSheet extends ConsumerWidget {
         text,
         style: const TextStyle(color: BsTokens.inkLight, fontSize: 13.5),
       ),
+    ),
+  );
+
+  /// F-48 — honest demo/seed annotation under seeded numbers (the SAME muted
+  /// `_note` pattern as the courier portal, courier_portal_tab.dart:169-170;
+  /// never lets a prototype seed pose as live data).
+  Widget _note(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: BsTokens.space2),
+    child: Text(
+      text,
+      style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
     ),
   );
 }

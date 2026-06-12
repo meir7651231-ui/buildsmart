@@ -1,3 +1,4 @@
+import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
@@ -1988,12 +1989,14 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
       setState(() => _open = _open == key ? '' : key);
 
   /// cluster #85ח — decide a vacation request. Writes the SHARED
-  /// [vacationRequestsProvider] (the worker's own בקשות list reflects the
-  /// decision live), drops the decision onto the worker's 🔔 bell feed
+  /// [vacationRequestsProvider] (the requester's own בקשות list reflects the
+  /// decision live), drops the decision onto the requester's 🔔 bell feed
   /// ([workerNotifsProvider], #18 — the request carries the exact login
-  /// username, so no worker-index fan-out is needed), and additionally posts
-  /// it into the existing worker↔manager chat thread (`th-worker-manager`,
-  /// sys_chat — the worker sees it in שיחות → מנהל) plus a manager-side toast.
+  /// username, so no worker-index fan-out is needed), and — for a WORKER's
+  /// request only (F-26) — additionally posts it into the existing
+  /// worker↔manager chat thread (`th-worker-manager`, sys_chat — the worker
+  /// sees it in שיחות → מנהל) plus a manager-side toast. A courier's request
+  /// (#86.3) gets the bell only — see the inline comment below.
   void _decideVacation(VacationRequest r, {required bool approve}) {
     final notifier = ref.read(vacationRequestsProvider.notifier);
     if (approve) {
@@ -2001,20 +2004,29 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
     } else {
       notifier.reject(r.id);
     }
-    // 🔔 #18 — the decision lands on the requesting worker's bell.
+    // 🔔 #18 — the decision lands on the requester's bell (per-username, so
+    // it is correct for a worker AND a courier alike).
     ref.read(workerNotifsProvider.notifier).addNotification(
           username: r.username,
           emoji: approve ? '✅' : '❌',
           title: approve ? 'בקשת החופשה אושרה' : 'בקשת החופשה נדחתה',
           body: r.range,
         );
-    ref.read(chatEngineProvider.notifier).send(
-          'th-worker-manager',
-          BsRole.manager,
-          approve
-              ? '✅ בקשת החופשה שלך (${r.range}) אושרה'
-              : '❌ בקשת החופשה שלך (${r.range}) נדחתה',
-        );
+    // F-26 · the chat line goes to 'th-worker-manager' — a WORKER-audience
+    // thread a courier never sees, and the text is second-person. So it is
+    // sent ONLY for a worker's request: a courier requester gets the 🔔 bell
+    // above (already per-username and correct), and no personal decision is
+    // broadcast into the shared couriers group nor faked into a channel that
+    // doesn't exist in the courier's chat list.
+    if (!_isCourierVacationRequest(r)) {
+      ref.read(chatEngineProvider.notifier).send(
+            'th-worker-manager',
+            BsRole.manager,
+            approve
+                ? '✅ בקשת החופשה שלך (${r.range}) אושרה'
+                : '❌ בקשת החופשה שלך (${r.range}) נדחתה',
+          );
+    }
     showToast(
       context,
       approve
@@ -2106,7 +2118,7 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
           sectionKey: 'vacations',
           emoji: '🏖️',
           title: 'בקשות חופשה',
-          sub: 'בקשות חופשה שעובדים הגישו',
+          sub: 'בקשות חופשה שעובדים ושליחים הגישו',
           open: _open == 'vacations',
           onTap: () => _toggle('vacations'),
           badge: pendingVacations,
@@ -2616,9 +2628,25 @@ class _VacationsBody extends StatelessWidget {
   }
 }
 
-/// One vacation-request row — `🦺 worker · range` + the reason, and (while
-/// pending) the ✅ אשר / ❌ דחה buttons; a decided row carries a read-only
-/// status pill ([_StagePill]) instead.
+/// F-26/F-27 · is this vacation request a courier's? [VacationRequest.role]
+/// is authoritative for new records ('courier' is written by the courier
+/// board's forms screen). Legacy records persisted before the role field all
+/// load with the back-compat default 'worker' — for those, a lookup in the
+/// seeded [kBoardAccounts] by username keeps an old courier request honest
+/// (the shared 'demo' username is in no seeded account → treated as worker,
+/// the pre-F-26 behavior).
+bool _isCourierVacationRequest(VacationRequest r) {
+  if (r.role == 'courier') return true;
+  if (r.role != 'worker') return false;
+  return kBoardAccounts.any(
+    (a) => a.username == r.username && a.role == BoardRole.courier,
+  );
+}
+
+/// One vacation-request row — `🛵/🦺 requester · range` (the icon follows the
+/// requester's board role, F-27) + the reason, and (while pending) the
+/// ✅ אשר / ❌ דחה buttons; a decided row carries a read-only status pill
+/// ([_StagePill]) instead.
 class _VacationRequestRow extends StatelessWidget {
   const _VacationRequestRow({
     required this.request,
@@ -2647,7 +2675,9 @@ class _VacationRequestRow extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '🦺 ${request.workerName} · ${request.range}',
+                  // F-27: 🛵 for a courier's request, 🦺 for a worker's — the
+                  // manager can tell the boards apart in the shared queue.
+                  '${_isCourierVacationRequest(request) ? '🛵' : '🦺'} ${request.workerName} · ${request.range}',
                   style: const TextStyle(
                     color: BsTokens.inkLight,
                     fontWeight: FontWeight.w800,

@@ -18,6 +18,11 @@
 // and the manager render (both sides see one source of truth). The order
 // stage advance to `delivered` stays on the shared two-step hand-off
 // (sysOrdersProvider.courierAdvance) — POD does not bypass it.
+//
+// #86.6: a capture / confirm-delivery by a LOGGED-IN courier session stamps
+// `courierUser` on the fulfillment record (F-1) and the delivery clock
+// (state/courier_clock.dart `stampCourierClock`, F-10); non-courier flows
+// (persona portal) honestly stamp nothing.
 
 import 'dart:async';
 
@@ -25,8 +30,11 @@ import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
     show taskPhotoWidget;
 import 'package:buildsmart/services/task_photo.dart';
+import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/courier_clock.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -137,8 +145,9 @@ class PersonaPodSheet extends ConsumerWidget {
             const SizedBox(height: BsTokens.space3),
 
             // Signature status pill (proto `נחתם ✓`/`ממתין`).
+            // Directional start (gate #62 idiom) — not a physical centerRight.
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerStart,
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -153,8 +162,10 @@ class PersonaPodSheet extends ConsumerWidget {
                 child: Text(
                   f.podSigned ? 'נחתם ✓' : 'ממתין',
                   style: TextStyle(
+                    // F-34: #1F8A4C on the light-green pill is 3.75:1 (< AA);
+                    // successDark passes.
                     color: f.podSigned
-                        ? const Color(0xFF1F8A4C)
+                        ? BsTokens.successDark
                         : const Color(0xFF8A6D00),
                     fontWeight: FontWeight.w700,
                     fontSize: 12.5,
@@ -207,14 +218,32 @@ class PersonaPodSheet extends ConsumerWidget {
               onPressed: () async {
                 final photo = await pickTaskPhoto(context);
                 if (photo == null || !context.mounted) return;
-                fn.capturePod(orderId, photo);
+                // #86.6 (F-1): stamp the LOGGED-IN courier on the POD record —
+                // the sheet also opens from non-courier flows (persona portal),
+                // so anyone else honestly leaves courierUser null.
+                final s = ref.read(boardAuthProvider);
+                final ok = await fn.capturePod(
+                  orderId,
+                  photo,
+                  courierUser: (s != null && s.role == BoardRole.courier)
+                      ? s.username
+                      : null,
+                );
+                if (!context.mounted) return;
+                // F-2: success toast ONLY when the persist actually landed —
+                // on a storage failure (web quota) the state was rolled back
+                // and nothing was kept; never fake a success.
                 showToast(
                   context,
-                  'צילום המסירה נשמר 📸 — מוצג לחנות ולמנהל',
+                  ok
+                      ? 'צילום המסירה נשמר 📸 — מוצג לחנות ולמנהל'
+                      : 'התמונה גדולה מדי — לא נשמרה',
                 );
               },
               style: FilledButton.styleFrom(
                 backgroundColor: BsTokens.brand,
+                // F-28: legible on the brand fill under high-contrast mode.
+                foregroundColor: bsOnAccent(context),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -268,9 +297,21 @@ class PersonaPodSheet extends ConsumerWidget {
                     message:
                         'ההזמנה ${order.id} תסומן כנמסרה ללקוח — פעולה סופית.',
                     confirmLabel: 'נמסר',
-                    confirmColor: const Color(0xFF1F8A4C),
+                    confirmColor: BsTokens.successDark,
                   );
                   if (!ok || !context.mounted) return;
+                  // #86.6 (F-1): attribute the delivery to the LOGGED-IN
+                  // courier at the moment it happens — non-courier sessions
+                  // honestly leave courierUser null.
+                  final s = ref.read(boardAuthProvider);
+                  if (s != null && s.role == BoardRole.courier) {
+                    fn.stampCourier(order.id, s.username);
+                  }
+                  // F-10: stamp the delivery clock BEFORE the advance — the
+                  // order mutation is exactly what triggers the reports-tab
+                  // re-read, so the stamp is already on disk by then.
+                  await stampCourierClock(order.id, delivered: true);
+                  if (!context.mounted) return;
                   ref
                       .read(sysOrdersProvider.notifier)
                       .courierAdvance(order.id);
@@ -281,7 +322,10 @@ class PersonaPodSheet extends ConsumerWidget {
                   );
                 },
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF1F8A4C),
+                  // F-34: white-on-#1F8A4C is 4.38:1 (< AA) — successDark +
+                  // the high-contrast-aware foreground pass.
+                  backgroundColor: BsTokens.successDark,
+                  foregroundColor: bsOnAccent(context),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),

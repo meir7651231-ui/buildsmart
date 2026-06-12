@@ -12,7 +12,11 @@
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/persona_pod_sheet.dart';
+import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/courier_clock.dart';
+import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -45,9 +49,10 @@ void showCourierDeliveryDetailSheet(BuildContext context, String orderId) {
     bg: const Color(0xFFDCEBFF),
     fg: const Color(0xFF2B6CB0),
   ),
+  // F-34: #1F8A4C on the light-green pill is 3.75:1 (< AA) — successDark.
   OrderStage.transit || OrderStage.delivered => (
     bg: const Color(0xFFD7F5DF),
-    fg: const Color(0xFF1F8A4C),
+    fg: BsTokens.successDark,
   ),
   _ => (bg: const Color(0xFFEFEFEF), fg: BsTokens.mutedLight),
 };
@@ -248,8 +253,9 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                           ? '●'
                           : '○',
                       style: TextStyle(
+                        // F-34: green TEXT on the white card → successDark (AA).
                         color: i < curIdx
-                            ? const Color(0xFF1F8A4C)
+                            ? BsTokens.successDark
                             : i == curIdx
                             ? BsTokens.brand
                             : const Color(0xFFBBBBBB),
@@ -285,9 +291,12 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
               FilledButton(
                 onPressed: canAct ? () => _advance(context, ref, order) : null,
                 style: FilledButton.styleFrom(
+                  // F-34/F-28: white-on-#1F8A4C is 4.38:1 (< AA) → successDark;
+                  // foreground via bsOnAccent for high-contrast mode.
                   backgroundColor: order.stage == OrderStage.transit
                       ? BsTokens.brand
-                      : const Color(0xFF1F8A4C),
+                      : BsTokens.successDark,
+                  foregroundColor: bsOnAccent(context),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -347,16 +356,36 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
     WidgetRef ref,
     SysOrder order,
   ) async {
-    if (order.stage == OrderStage.transit) {
+    final wasPickup = order.stage == OrderStage.pickup;
+    final wasTransit = order.stage == OrderStage.transit;
+    if (wasTransit) {
       final ok = await confirmDestructive(
         context,
         title: 'אישור מסירה?',
         message: 'ההזמנה ${order.id} תסומן כנמסרה ללקוח — פעולה סופית.',
         confirmLabel: 'נמסר',
-        confirmColor: const Color(0xFF1F8A4C),
+        confirmColor: BsTokens.successDark,
       );
       if (!ok || !context.mounted) return;
     }
+    // #86.6 (F-1): ברגע המסירה — ייחוס per-שליח על רשומת ה-fulfillment.
+    // נחתם רק כשסשן שליח מחובר; אחרת courierUser נשאר null בכנות.
+    if (wasTransit) {
+      final s = ref.read(boardAuthProvider);
+      if (s != null && s.role == BoardRole.courier) {
+        ref
+            .read(fulfillmentProvider.notifier)
+            .stampCourier(order.id, s.username);
+      }
+    }
+    // F-10: חותמת שעון-המשלוחים לפני ה-advance — מוטציית ההזמנה היא הטריגר
+    // ל-re-read של courierClockProvider, כך שהחותמת כבר על הדיסק כשקוראים.
+    await stampCourierClock(
+      order.id,
+      pickedUp: wasPickup,
+      delivered: wasTransit,
+    );
+    if (!context.mounted) return;
     ref.read(sysOrdersProvider.notifier).courierAdvance(order.id);
     showToast(context, 'המשלוח ${order.id} עודכן — מסונכרן עם החנות והמנהל ✓');
   }

@@ -310,6 +310,19 @@ extension SysOrderBuckets on List<SysOrder> {
         o.stage == OrderStage.ready,
   ).fold(0, (a, o) => a + o.sum);
 
+  /// Σ sum של הזמנות delivered — מחזור שהושלם. כלל-חנותי by-design (#87.2):
+  /// החנות רואה את כל הזמנות החנות — כל ההזמנות שייכות לחנות אחת
+  /// (kStores.first), ואין כאן צורך בייחוס per-username (להבדיל מסטטיסטיקת
+  /// פרופיל-השליח, שם נדרש סינון לפי `Fulfillment.courierUser`).
+  ///
+  /// סמנטיקת הסכום (F-23): אך ורק [SysOrder.sum] — שדה המנוע (ראה
+  /// orders_engine.dart:51 — `OrderLineItem.price` הוא line-total ב-₪, וב-seed
+  /// הישן lines ללא מחירים; אין לגזור qty×price). נגזר חי מ-sysOrdersProvider
+  /// — אפס מספרים קשיחים.
+  int get deliveredRevenue => where(
+    (o) => o.stage == OrderStage.delivered,
+  ).fold(0, (a, o) => a + o.sum);
+
   /// Courier jobs the [vehicle] can carry, in the active stages, sorted
   /// ready→pickup→transit (proto renderCourierList [L18067]).
   List<SysOrder> courierJobs(String vehicle) {

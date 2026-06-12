@@ -98,9 +98,15 @@ class WorkerCert {
 }
 
 class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
-  WorkerCertsNotifier() : super(const []) {
+  WorkerCertsNotifier({this.storageKey = kWorkerCertsKey}) : super(const []) {
     _load();
   }
+
+  /// The SharedPreferences key this notifier reads/writes. Defaults to the
+  /// worker wallet; the courier board passes `'bs.courier-certs.v1'` so the
+  /// two roles never share a wallet (the shared `demo` username would
+  /// otherwise leak certificates across boards).
+  final String storageKey;
 
   /// One-shot guard (the board_auth idiom): once an add/remove has written
   /// state, a late `_load()` becomes non-destructive.
@@ -108,11 +114,12 @@ class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(kWorkerCertsKey);
+    if (!mounted) return;
+    final raw = prefs.getString(storageKey);
     if (raw == null || _userTouched) return;
     try {
       final list = jsonDecode(raw) as List;
-      if (_userTouched) return;
+      if (!mounted || _userTouched) return;
       state = [
         for (final e in list)
           if (WorkerCert.tryFromJson(e) case final c?) c,
@@ -122,22 +129,32 @@ class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
     }
   }
 
-  Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      kWorkerCertsKey,
-      jsonEncode([for (final c in state) c.toJson()]),
-    );
+  /// True when the write actually landed; false on a storage failure — most
+  /// commonly the web localStorage quota rejecting a too-large certificate
+  /// photo data-URL. Honest: callers must NOT pretend the cert was saved.
+  Future<bool> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return await prefs.setString(
+        storageKey,
+        jsonEncode([for (final c in state) c.toJson()]),
+      );
+    } on Object catch (_) {
+      return false; // quota exceeded / platform failure — nothing persisted
+    }
   }
 
-  /// Add a certificate to [username]'s wallet. Returns the created cert.
-  WorkerCert add({
+  /// Add a certificate to [username]'s wallet. Returns the created cert, or
+  /// null when the persist FAILED (e.g. the localStorage quota rejected an
+  /// oversized photo data-URL) — the in-memory state is rolled back so the
+  /// UI never shows a cert that would not survive a reload.
+  Future<WorkerCert?> add({
     required String username,
     required String name,
     required String issuer,
     required DateTime expiry,
     String? photo,
-  }) {
+  }) async {
     _userTouched = true;
     final cert = WorkerCert(
       id: 'cert-${DateTime.now().microsecondsSinceEpoch}',
@@ -148,8 +165,13 @@ class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
       addedTs: DateTime.now(),
       photo: photo,
     );
+    final before = state;
     state = [...state, cert];
-    _persist();
+    final ok = await _persist();
+    if (!ok) {
+      if (mounted) state = before;
+      return null;
+    }
     return cert;
   }
 

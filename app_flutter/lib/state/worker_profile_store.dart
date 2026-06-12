@@ -97,10 +97,12 @@ class WorkerProfileStore extends StateNotifier<Map<String, WorkerProfile>> {
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
       final raw = prefs.getString(kWorkerProfileKey);
       if (raw == null || raw.isEmpty) return;
       if (_userTouched) return;
       final m = jsonDecode(raw) as Map<String, dynamic>;
+      if (!mounted || _userTouched) return;
       state = {
         for (final e in m.entries)
           if (e.value is Map)

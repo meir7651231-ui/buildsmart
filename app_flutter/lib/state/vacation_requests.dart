@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// cluster #85ח · בקשות חופשה — the worker files a request (טפסים → בקשת
-/// חופשה), the MANAGER decides it in מרכז השליטה → ניהול → בקשות חופשה. Both
-/// boards read THIS shared provider, so a decision flips the worker's own
-/// list live (the cross-persona pattern of `worker_tasks_engine.dart`).
+/// cluster #85ח · בקשות חופשה — the worker (and since #86.3 the courier)
+/// files a request (טפסים → בקשת חופשה), the MANAGER decides it in מרכז
+/// השליטה → ניהול → בקשות חופשה. All boards read THIS shared provider, so a
+/// decision flips the requester's own list live (the cross-persona pattern
+/// of `worker_tasks_engine.dart`). [VacationRequest.role] tells the boards
+/// apart — filtering "mine" needs `username && role`.
 ///
 /// Persisted to SharedPreferences under [kVacationRequestsKey] with the
 /// `board_auth.dart` idiom (lazy `_load()` + `_userTouched` guard).
@@ -29,6 +31,7 @@ class VacationRequest {
     required this.to,
     required this.reason,
     required this.createdTs,
+    this.role = 'worker',
     this.status = kVacationPending,
     this.decidedTs,
   });
@@ -38,8 +41,16 @@ class VacationRequest {
   /// Board login username (`ran` / `omer` / `demo`).
   final String username;
 
-  /// Hebrew display name shown to the manager (straight off the BoardSession).
+  /// Hebrew display name of the requester — worker or courier (straight off
+  /// the BoardSession).
   final String workerName;
+
+  /// Board role of the requester — `'worker'` or `'courier'`. The shared
+  /// queue serves both boards (SPEC #86.3); filtering "mine" by username
+  /// alone is NOT enough because the demo `username == 'demo'` is shared
+  /// across roles. Back-compat: old persisted records carry no 'role' and
+  /// decode as `'worker'` (every pre-courier request really was a worker's).
+  final String role;
 
   /// Inclusive vacation range.
   final DateTime from;
@@ -75,6 +86,7 @@ class VacationRequest {
         to: to,
         reason: reason,
         createdTs: createdTs,
+        role: role,
         status: status ?? this.status,
         decidedTs: decidedTs ?? this.decidedTs,
       );
@@ -87,6 +99,7 @@ class VacationRequest {
         'to': to.toIso8601String(),
         'reason': reason,
         'createdTs': createdTs.toIso8601String(),
+        'role': role,
         'status': status,
         'decidedTs': decidedTs?.toIso8601String(),
       };
@@ -116,6 +129,7 @@ class VacationRequest {
       to: to,
       reason: raw['reason'] is String ? raw['reason'] as String : '',
       createdTs: created,
+      role: raw['role'] is String ? raw['role'] as String : 'worker',
       status: raw['status'] is String ? raw['status'] as String : kVacationPending,
       decidedTs: DateTime.tryParse('${raw['decidedTs']}'),
     );
@@ -138,11 +152,12 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     final raw = prefs.getString(kVacationRequestsKey);
     if (raw == null || _userTouched) return;
     try {
       final list = jsonDecode(raw) as List;
-      if (_userTouched) return;
+      if (!mounted || _userTouched) return;
       state = [
         for (final e in list)
           if (VacationRequest.tryFromJson(e) case final r?) r,
@@ -153,20 +168,28 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
   }
 
   Future<void> _persist() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      kVacationRequestsKey,
-      jsonEncode([for (final r in state) r.toJson()]),
-    );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        kVacationRequestsKey,
+        jsonEncode([for (final r in state) r.toJson()]),
+      );
+    } on Object catch (_) {
+      // Storage failure (e.g. web quota) — the in-memory queue stays live;
+      // tiny-JSON best-effort, never an unhandled async error.
+    }
   }
 
-  /// WORKER write — file a new pending request. Returns the created request.
+  /// WORKER/COURIER write — file a new pending request. Returns the created
+  /// request. [role] is the requester's board role ('worker' default; the
+  /// courier forms screen passes 'courier').
   VacationRequest submit({
     required String username,
     required String workerName,
     required DateTime from,
     required DateTime to,
     required String reason,
+    String role = 'worker',
   }) {
     _userTouched = true;
     _seq++;
@@ -178,6 +201,7 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
       to: to,
       reason: reason.trim(),
       createdTs: DateTime.now(),
+      role: role,
     );
     state = [...state, r];
     _persist();

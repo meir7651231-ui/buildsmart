@@ -10,9 +10,23 @@
 // in-memory seed/flow in isolation (the worker-tasks test idiom); a second group
 // flips persistence on with a mock SharedPreferences store to prove a write +
 // fresh-notifier read survives a "restart".
+//
+// F-35: an EARLY send (before _load resolves) must not erase the persisted
+// overlay of OTHER threads on the next write — the late load merges the disk
+// overlay AROUND the pre-load mutation (_dirtyThreadIds + _loadSettled gate).
+// F-56: _persist caps each thread at the newest kSysChatPersistCap messages on
+// DISK while the in-memory list stays whole within the session.
+// F-25: the courier↔store audience bridge lives in the PRIVATE
+// `_visibleToAudience` of chats_screen.dart, so it is covered by a minimal
+// widget test over `ChatsScreen` (keyed Dismissible rows) — see the last group.
+
+import 'dart:convert';
 
 import 'package:buildsmart/data/chat_seeds.dart';
+import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/state/sys_chat.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -213,6 +227,230 @@ void main() {
       // — legacy cross-persona threads + the board-audience threads (#70/#75,
       // kWorkerChatThreads in sys_chat.dart).
       expect(n.state.length, kChatThreads.length + kWorkerChatThreads.length);
+    });
+
+    test('F-35 — an early send (before _load) does not erase another '
+        "thread's persisted overlay", () async {
+      // Disk already holds an overlay for the contractor↔manager thread (a
+      // previous session). Note the overlay REPLACES the thread's message
+      // list on load — so after a clean load the thread has exactly this one
+      // message.
+      final diskMsg = ChatMessage(
+        id: 'm-disk-1',
+        threadId: contractorManager,
+        fromRole: BsRole.manager,
+        text: 'הודעת דיסק ישנה — אסור שתימחק',
+        ts: DateTime(2026, 6, 10, 9),
+      );
+      SharedPreferences.setMockInitialValues({
+        kSysChatKey: jsonEncode({
+          contractorManager: [diskMsg.toJson()],
+        }),
+      });
+
+      final n = ChatEngineNotifier();
+      final seedStoreLen = n.state
+          .firstWhere((t) => t.id == contractorStore)
+          .messages
+          .length;
+      // Mutate SYNCHRONOUSLY, before the async _load resolves — the old bug:
+      // this send's _persist then serialized seed message-lists over every
+      // other thread's persisted messages.
+      n.send(contractorStore, BsRole.store, 'שליחה מוקדמת לפני load');
+      await settle();
+
+      // The pre-load mutation survived (the #24-style half of the race)…
+      final store =
+          n.state.firstWhere((t) => t.id == contractorStore).messages;
+      expect(store.length, seedStoreLen + 1);
+      expect(store.last.text, 'שליחה מוקדמת לפני load',
+          reason: 'the late load must merge AROUND the early send');
+      // …and the OTHER thread still hydrated from disk (the F-35 half).
+      final manager =
+          n.state.firstWhere((t) => t.id == contractorManager).messages;
+      expect(manager.single.id, 'm-disk-1',
+          reason: 'the disk overlay of an untouched thread must be applied');
+
+      // The decisive proof: the NEXT write (triggered by the send) reached
+      // disk AFTER the merge — both threads' messages are on disk now.
+      final prefs = await SharedPreferences.getInstance();
+      final onDisk =
+          jsonDecode(prefs.getString(kSysChatKey)!) as Map<String, dynamic>;
+      expect(
+        ((onDisk[contractorManager] as List).single as Map)['id'],
+        'm-disk-1',
+        reason: "the early send must NOT overwrite the other thread's "
+            'persisted messages on the next write',
+      );
+      expect(
+        ((onDisk[contractorStore] as List).last as Map)['text'],
+        'שליחה מוקדמת לפני load',
+      );
+
+      // And a full "restart" sees both — end-to-end.
+      final second = ChatEngineNotifier();
+      await settle();
+      expect(
+        second.state
+            .firstWhere((t) => t.id == contractorManager)
+            .messages
+            .single
+            .text,
+        'הודעת דיסק ישנה — אסור שתימחק',
+      );
+      expect(
+        second.state
+            .firstWhere((t) => t.id == contractorStore)
+            .messages
+            .last
+            .text,
+        'שליחה מוקדמת לפני load',
+      );
+    });
+
+    test('F-56 — disk keeps only the newest kSysChatPersistCap messages per '
+        'thread; memory keeps them all', () async {
+      final n = ChatEngineNotifier();
+      await settle(); // initial _load resolves (empty store → seed)
+      final seedLen = n.state
+          .firstWhere((t) => t.id == contractorStore)
+          .messages
+          .length;
+
+      const total = kSysChatPersistCap + 5;
+      for (var i = 1; i <= total; i++) {
+        n.send(contractorStore, BsRole.contractor, 'הודעה $i');
+      }
+      await settle(); // let the last _persist land
+
+      // In-memory: WHOLE within the session (the cap is a disk budget only).
+      expect(
+        n.state.firstWhere((t) => t.id == contractorStore).messages.length,
+        seedLen + total,
+        reason: 'F-56 trims the persisted copy, never the live list',
+      );
+
+      // On disk: exactly the newest cap (seeds + oldest sends fell off).
+      final prefs = await SharedPreferences.getInstance();
+      final onDisk =
+          jsonDecode(prefs.getString(kSysChatKey)!) as Map<String, dynamic>;
+      final stored = onDisk[contractorStore] as List;
+      expect(stored.length, kSysChatPersistCap,
+          reason: 'prefs is a bounded budget — cap per thread');
+      expect((stored.last as Map)['text'], 'הודעה $total',
+          reason: 'the newest message is the last one persisted');
+      expect(
+        (stored.first as Map)['text'],
+        'הודעה ${total - kSysChatPersistCap + 1}',
+        reason: 'the persisted window is the NEWEST cap, oldest dropped',
+      );
+
+      // A restart honors the capped overlay (it replaces the seed list).
+      final second = ChatEngineNotifier();
+      await settle();
+      final restored = second.state
+          .firstWhere((t) => t.id == contractorStore)
+          .messages;
+      expect(restored.length, kSysChatPersistCap);
+      expect(restored.last.text, 'הודעה $total');
+
+      // Other threads were NOT trimmed — under the cap they persist whole.
+      final managerStored = onDisk[contractorManager] as List?;
+      if (managerStored != null) {
+        expect(managerStored.length, lessThanOrEqualTo(kSysChatPersistCap));
+      }
+    });
+  });
+
+  // ── F-25 · the courier↔store audience bridge (widget) ────────────────────
+  //
+  // `_visibleToAudience` is PRIVATE to chats_screen.dart (no exposed seam), so
+  // per the brief the bridge is covered by a light widget test: pump
+  // `ChatsScreen` per board audience and assert which thread rows exist — each
+  // row is a `Dismissible(key: ValueKey(thread.id))`, so presence is keyed and
+  // unambiguous. The bridge (chats_screen.dart doc): the courier's attendance
+  // report (#86.2) goes to 'th-store-courier-pickups' (audience 'store') and
+  // the courier's daily report goes to 'th-courier-lipskey' (audience
+  // 'courier') — without the symmetric bridge each side's send was write-only
+  // for the other. The participants check keeps every OTHER audience-crossing
+  // thread invisible.
+  group('F-25 · courier↔store bridge (ChatsScreen widget)', () {
+    Future<void> pumpChats(
+      WidgetTester t, {
+      required BsRole persona,
+      required String audience,
+    }) async {
+      // Tall surface so the lazy ListView builds EVERY row (keyed presence
+      // checks below depend on it).
+      await t.binding.setSurfaceSize(const Size(600, 1400));
+      addTearDown(() => t.binding.setSurfaceSize(null));
+      await t.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Scaffold(
+                body: ChatsScreen(
+                  persona: persona,
+                  audience: audience,
+                  embedded: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      // Bounded settle (the robustness_test idiom — AnimatedSize animates).
+      for (var i = 0; i < 5; i++) {
+        await t.pump(const Duration(milliseconds: 120));
+      }
+    }
+
+    testWidgets(
+        'courier audience sees the bridged store-audience pickups thread',
+        (t) async {
+      await pumpChats(t, persona: BsRole.courier, audience: 'courier');
+
+      // The bridge: audience-'store' store↔courier thread is visible here —
+      // this is where the courier's attendance report (#86.2) lands.
+      expect(find.byKey(const ValueKey('th-store-courier-pickups')),
+          findsOneWidget,
+          reason: "F-25 — without the bridge the courier's reports were "
+              'write-only for the store');
+      // The courier's own threads are intact.
+      expect(
+          find.byKey(const ValueKey('th-courier-lipskey')), findsOneWidget);
+      expect(
+          find.byKey(const ValueKey('th-courier-customer')), findsOneWidget);
+      // Isolation holds for every OTHER audience-crossing thread:
+      expect(find.byKey(const ValueKey('th-store-manager')), findsNothing,
+          reason: 'store-audience thread the courier does NOT take part in');
+      expect(find.byKey(const ValueKey('th-contractor-store')), findsNothing,
+          reason: 'contractor-audience threads are not bridged');
+      expect(find.byKey(const ValueKey('th-worker-manager')), findsNothing,
+          reason: 'worker-audience threads are not bridged');
+    });
+
+    testWidgets(
+        'store audience sees the bridged courier-audience lipskey thread '
+        '(symmetric)', (t) async {
+      await pumpChats(t, persona: BsRole.store, audience: 'store');
+
+      // The symmetric half: audience-'courier' store↔courier thread is
+      // visible on the store board — the courier's daily report destination.
+      expect(find.byKey(const ValueKey('th-courier-lipskey')), findsOneWidget,
+          reason: 'F-25 — the store must read the courier-audience side of '
+              'the pair');
+      // The store's own #83 threads are intact.
+      expect(find.byKey(const ValueKey('th-store-courier-pickups')),
+          findsOneWidget);
+      expect(find.byKey(const ValueKey('th-store-manager')), findsOneWidget);
+      // Isolation: courier-audience threads the store does NOT participate in
+      // stay invisible even though their audience crosses the bridge.
+      expect(find.byKey(const ValueKey('th-courier-customer')), findsNothing,
+          reason: 'participants check still gates the bridged audience');
+      expect(find.byKey(const ValueKey('th-couriers-group')), findsNothing,
+          reason: "couriers-group is courier↔manager — not the store's");
     });
   });
 }

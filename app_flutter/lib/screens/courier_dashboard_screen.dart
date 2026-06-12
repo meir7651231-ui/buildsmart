@@ -12,10 +12,13 @@ import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_notifs_sheet.dart'
     show workerNotifAgo;
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/courier_clock.dart';
+import 'package:buildsmart/state/courier_profile_store.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -67,6 +70,11 @@ class _CourierDashboardScreenState
   /// הרכב שנבחר למשמרת הנוכחית — null עד שהשליח בוחר (#72: בחירת הרכב היא
   /// הצעד הראשון אחרי הכניסה; נשמר ל-session המסך הזה בלבד, כמו בפרוטוטייפ).
   String? _vehicle;
+
+  /// F-30 — שומר ה-seed החד-פעמי (אידיום ticket #24): נדלק ברגע שהשליח מקיש
+  /// על צ'יפ רכב, כך ש-load מאוחר של פרופיל-השליח לעולם לא דורס בחירה ידנית
+  /// טרייה. ה-seed מ"סוג רכב מועדף" רץ רק כשהדגל כבוי ו-[_vehicle] עוד null.
+  bool _vehicleTouched = false;
 
   /// 0 משלוחים (ברירת המחדל) · 1 פורטל · 2 דוחות · 3 אזור אישי (#72).
   int _tab = 0;
@@ -171,10 +179,21 @@ class _CourierDashboardScreenState
       (_, next) => _sweepHandoffNotifs(next),
     );
 
+    // F-30 — חיווט "סוג רכב מועדף" (#86.1) ↔ שער-הרכב: seed חד-פעמי מהפרופיל,
+    // רק כשהשליח טרם נגע בבורר וטרם נבחר רכב (אידיום ticket #24 — מגיב לעדכון
+    // ה-provider כשה-load נוחת, ובחירה ידנית טרייה לעולם לא נדרסת). id
+    // persisted לא-מוכר נדחה בכנות ב-[_preferredHaul] — בלי haulInfo fallback
+    // שממציא העדפה. הבחירה למשמרת נשארת אפמרלית by-design; אין כתיבה חזרה
+    // לפרופיל בלי פעולת-משתמש מפורשת.
+    final preferred = _preferredHaul(session);
+    if (!_vehicleTouched && _vehicle == null && preferred.isNotEmpty) {
+      _vehicle = preferred;
+    }
+
     // #72 — הזרם אחרי כניסה: קודם בחירת "הרכב שלי היום" (אם טרם נבחר במשמרת
     // הזו) → ואז הבית עם 4 הטאבים.
     final vehicle = _vehicle;
-    if (vehicle == null) return _vehicleGate();
+    if (vehicle == null) return _vehicleGate(preferred);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -214,6 +233,17 @@ class _CourierDashboardScreenState
     );
   }
 
+  /// F-30 — "סוג רכב מועדף" מפרופיל-השליח (#86.1) של ה-username המחובר,
+  /// מאומת מול [kVehicleRank] ('' כשלא-נבחר/לא-מוכר — ערך persisted זר אסור
+  /// שייפול ל-[haulInfo], שממציא את kHaulTypes.first).
+  String _preferredHaul(BoardSession session) {
+    final p = ref.watch(
+      courierProfileProvider
+          .select((m) => m[session.username]?.preferredHaul ?? ''),
+    );
+    return kVehicleRank.containsKey(p) ? p : '';
+  }
+
   Widget _tabBody(BoardSession session, String vehicle) {
     switch (_tab) {
       case 1:
@@ -221,7 +251,9 @@ class _CourierDashboardScreenState
       case 2:
         return const CourierReportsTab();
       case 3:
-        return const CourierProfileBody();
+        // F-30 — רכב-המשמרת מועבר לפרופיל כדי שסטטיסטיקת "בדרך" תשחזר את
+        // סמנטיקת רכב-זכאי של טאב המשלוחים (חוזה 6 — null רק במסך העצמאי).
+        return CourierProfileBody(vehicle: vehicle);
       default:
         return _deliveriesTab(session, vehicle);
     }
@@ -273,8 +305,9 @@ class _CourierDashboardScreenState
   }
 
   /// שער "הרכב שלי היום" (#72) — אותו סלקטור קיים, מקודם למסך-צעד ראשון:
-  /// עד שנבחר רכב למשמרת לא נבנה בית הלוח.
-  Widget _vehicleGate() {
+  /// עד שנבחר רכב למשמרת לא נבנה בית הלוח. F-30 — הרכב המועדף מהפרופיל
+  /// (כשנקבע) מסומן כברירת-המחדל המוצעת בתג "מועדף"; הבחירה נשארת של השליח.
+  Widget _vehicleGate(String preferred) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -316,8 +349,11 @@ class _CourierDashboardScreenState
                       child: _VehicleButton(
                         haul: kHaulTypes[i],
                         on: false,
-                        onTap:
-                            () => setState(() => _vehicle = kHaulTypes[i].id),
+                        preferred: kHaulTypes[i].id == preferred,
+                        onTap: () => setState(() {
+                          _vehicleTouched = true; // #24 — בחירה ידנית גוברת
+                          _vehicle = kHaulTypes[i].id;
+                        }),
                       ),
                     ),
                   ],
@@ -334,6 +370,19 @@ class _CourierDashboardScreenState
   Widget _deliveriesTab(BoardSession session, String vehicle) {
     final orders = ref.watch(sysOrdersProvider);
     final haulName = haulInfo(vehicle).name;
+    // F-57 — מנוי יחיד על ה-side-car לכל הטאב (ערכי המפה מחזיקים POD
+    // data-URLs ענקיים; watch כפול בתוך לולאת הכרטיסים בנה מחדש את כל הטאב
+    // על כל מוטציית fulfillment).
+    final fulfillment = ref.watch(fulfillmentProvider);
+    final preferred = _preferredHaul(session);
+    // F-29 — הברכה מכבדת את ה-override מפרופיל-השליח (#86.1): שם מהפרופיל
+    // כשאינו ריק, אחרת displayName של ה-session (בלי המצאות).
+    final profileName = ref.watch(
+      courierProfileProvider
+          .select((m) => m[session.username]?.displayName ?? ''),
+    );
+    final greetName =
+        profileName.isNotEmpty ? profileName : session.displayName;
 
     final jobs = orders.courierJobs(vehicle);
     final toPickup = jobs.where((o) => o.stage == OrderStage.ready).length;
@@ -371,7 +420,7 @@ class _CourierDashboardScreenState
       ),
       children: [
         Text(
-          'שלום ${session.displayName} 🛵',
+          'שלום $greetName 🛵',
           style: const TextStyle(
             color: BsTokens.inkLight,
             fontWeight: FontWeight.w800,
@@ -403,7 +452,11 @@ class _CourierDashboardScreenState
                 child: _VehicleButton(
                   haul: kHaulTypes[i],
                   on: kHaulTypes[i].id == vehicle,
-                  onTap: () => setState(() => _vehicle = kHaulTypes[i].id),
+                  preferred: kHaulTypes[i].id == preferred,
+                  onTap: () => setState(() {
+                    _vehicleTouched = true; // #24 — בחירה ידנית גוברת
+                    _vehicle = kHaulTypes[i].id;
+                  }),
                 ),
               ),
             ],
@@ -457,9 +510,8 @@ class _CourierDashboardScreenState
           for (final o in jobs)
             _CourierJobCard(
               order: o,
-              podCaptured:
-                  (ref.watch(fulfillmentProvider)[o.id]?.podCaptured) ?? false,
-              splitInto: (ref.watch(fulfillmentProvider)[o.id]?.splitInto) ?? 1,
+              podCaptured: fulfillment[o.id]?.podCaptured ?? false,
+              splitInto: fulfillment[o.id]?.splitInto ?? 1,
               onAdvance: _advance,
               onPod: () => showPodSheet(context, o.id),
               onTap: () => showCourierDeliveryDetailSheet(context, o.id),
@@ -544,18 +596,62 @@ class _CourierDashboardScreenState
     );
   }
 
-  void _advance(SysOrder o) {
+  Future<void> _advance(SysOrder o) async {
+    // F-12 (א) — staleness guard: double-tap מהיר נוחת על כפתור שנבנה-מחדש
+    // באותן קואורדינטות עם שלב ישן — no-op אלא אם המנוע החי עדיין מסכים עם
+    // השלב שהכרטיס נבנה עליו.
+    SysOrder? current;
+    for (final x in ref.read(sysOrdersProvider)) {
+      if (x.id == o.id) {
+        current = x;
+        break;
+      }
+    }
+    if (current == null || current.stage != o.stage) return;
+
     // COURIER v2 ב — the transition INTO `delivered` is the order tapped while
     // at `transit` (courierAdvance owns pickup→transit→delivered only).
+    final wasPickup = o.stage == OrderStage.pickup;
     final wasTransit = o.stage == OrderStage.transit;
+
+    // F-12 (ב) — delivered הוא טרמינלי ובלתי-הפיך: אותו confirmDestructive
+    // שכבר קיים בשני המסכים האחים (courier_delivery_detail_sheet /
+    // persona_pod_sheet) — אחידות + חסימת double-tap. צבע האישור:
+    // successDark (F-34 — לא ‎#1F8A4C בקוד חדש).
+    if (wasTransit) {
+      final ok = await confirmDestructive(
+        context,
+        title: 'אישור מסירה?',
+        message: 'ההזמנה ${o.id} תסומן כנמסרה ללקוח — פעולה סופית.',
+        confirmLabel: 'נמסר',
+        confirmColor: BsTokens.successDark,
+      );
+      if (!ok || !mounted) return;
+      // חלון staleness שני נפתח בזמן הדיאלוג — אימות מחדש מול המנוע.
+      final still = ref
+          .read(sysOrdersProvider)
+          .any((x) => x.id == o.id && x.stage == OrderStage.transit);
+      if (!still) return;
+    }
+
     ref.read(sysOrdersProvider.notifier).courierAdvance(o.id);
-    // Award only when the engine REALLY moved it to delivered (re-read, not
-    // assumed) — delivered is terminal + courierAdvance no-ops on it, so the
-    // 🪙+🔔 pair can never double-fire for the same order.
+
+    // Award/stamp only when the engine REALLY moved it (re-read, not assumed)
+    // — delivered is terminal + courierAdvance no-ops on it, so the 🪙+🔔 pair
+    // can never double-fire for the same order.
+    final after = ref.read(sysOrdersProvider);
+    final movedToTransit = wasPickup &&
+        after.any((x) => x.id == o.id && x.stage == OrderStage.transit);
     final delivered = wasTransit &&
-        ref
-            .read(sysOrdersProvider)
-            .any((x) => x.id == o.id && x.stage == OrderStage.delivered);
+        after.any((x) => x.id == o.id && x.stage == OrderStage.delivered);
+
+    // F-10 — ה-writer של bs.courier-clock.v1: חותמת-שעון ברגעי ה-advance
+    // האמיתיים דרך ה-helper המשותף (פורמט תואם-בייט לקורא בדוחות-השליח).
+    // attempts לא נחתם — אין זרימת ניסיון-חוזר אמיתית.
+    if (movedToTransit) await stampCourierClock(o.id, pickedUp: true);
+    if (delivered) await stampCourierClock(o.id, delivered: true);
+    if (!mounted) return;
+
     if (!delivered) {
       showToast(context, 'המשלוח ${o.id} עודכן — מסונכרן עם החנות והמנהל ✓');
       return;
@@ -563,9 +659,13 @@ class _CourierDashboardScreenState
     // 🪙 fixed DEMO tariff (kCourierDeliveryCoins) onto the shared rewards
     // balance — same seam as the worker's task-approval award (#85ו).
     ref.read(rewardsProvider.notifier).awardCoins(kCourierDeliveryCoins);
-    // 🔔 'delivered' event onto the courier's own per-username feed.
     final s = ref.read(boardAuthProvider);
     if (s != null && s.role == BoardRole.courier) {
+      // F-1 (#86.6) — רגע המסירה חותם את זהות השליח על רשומת ה-fulfillment
+      // (side-car בלבד — מנוע ההזמנות המשותף לא נגוע); זו נקודת-האמת לייחוס
+      // per-courier בפרופיל ובדוחות.
+      ref.read(fulfillmentProvider.notifier).stampCourier(o.id, s.username);
+      // 🔔 'delivered' event onto the courier's own per-username feed.
       ref.read(workerNotifsProvider.notifier).addNotification(
             username: s.username,
             emoji: '✅',
@@ -589,9 +689,14 @@ class _VehicleButton extends StatelessWidget {
     required this.haul,
     required this.on,
     required this.onTap,
+    this.preferred = false,
   });
   final HaulType haul;
   final bool on;
+
+  /// F-30 — true כשזה "סוג הרכב המועדף" מפרופיל-השליח (#86.1): תג "מועדף"
+  /// כן — ברירת-מחדל מוצעת בלבד, הבחירה למשמרת נשארת של השליח.
+  final bool preferred;
   final VoidCallback onTap;
 
   @override
@@ -611,11 +716,24 @@ class _VehicleButton extends StatelessWidget {
               Text(
                 haul.name,
                 style: TextStyle(
-                  color: on ? Colors.white : BsTokens.inkLight,
+                  // F-28 — bsOnAccent על מילוי-מותג (לא לבן קשיח): מכבד את
+                  // מתג הניגודיות-הגבוהה.
+                  color: on ? bsOnAccent(context) : BsTokens.inkLight,
                   fontWeight: FontWeight.w700,
                   fontSize: 12.5,
                 ),
               ),
+              if (preferred) ...[
+                const SizedBox(height: 2),
+                Text(
+                  '★ מועדף',
+                  style: TextStyle(
+                    color: on ? bsOnAccent(context) : BsTokens.brandDark,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 10.5,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -807,10 +925,14 @@ class _CourierJobCard extends StatelessWidget {
                 FilledButton(
                   onPressed: canAct ? () => onAdvance(order) : null,
                   style: FilledButton.styleFrom(
+                    // F-34 — הרקע הירוק הוא successDark (AA מתחת ללבן) במקום
+                    // ‎#1F8A4C שנכשל-בקצה; F-28 — התווית ב-bsOnAccent (לא לבן
+                    // קשיח) גם על מילוי המותג.
                     backgroundColor:
                         order.stage == OrderStage.transit
                             ? BsTokens.brand
-                            : const Color(0xFF1F8A4C),
+                            : BsTokens.successDark,
+                    foregroundColor: bsOnAccent(context),
                     // #63 pattern — guarantees the ≥48dp touch target.
                     minimumSize: const Size(64, 48),
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -846,9 +968,11 @@ class _CourierJobCard extends StatelessWidget {
                           ? '📸 אישור מסירה · נשמר ✓'
                           : '📸 אישור מסירה',
                       style: TextStyle(
+                        // F-34 — טקסט ירוק על רקע בהיר חייב AA 4.5:1 —
+                        // successDark (‎#15803D, ~5.0:1) במקום ‎#1F8A4C.
                         color:
                             podCaptured
-                                ? const Color(0xFF1F8A4C)
+                                ? BsTokens.successDark
                                 : BsTokens.inkLight,
                         fontWeight: FontWeight.w700,
                         fontSize: 13,

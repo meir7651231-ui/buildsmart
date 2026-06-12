@@ -82,11 +82,17 @@ class BoardAuthNotifier extends StateNotifier<BoardSession?> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
+    // F-36: the container may be disposed before prefs resolve (test teardown
+    // / ProviderScope rebuild) — setting state on a disposed notifier throws.
+    if (!mounted) return;
     final raw = prefs.getString(kBoardAuthKey);
     if (raw == null) return;
     if (_userTouched) return;
     try {
-      state = BoardSession.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      final session =
+          BoardSession.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      if (!mounted) return; // F-36: re-check before placing state
+      state = session;
     } on Object catch (_) {
       // Corrupt value — stay logged out.
     }

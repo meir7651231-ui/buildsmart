@@ -14,26 +14,35 @@
 //      (th-courier-lipskey, מנוע sys_chat — החנות משתתפת בשיחה) + התראת-פעמון
 //      תחת המשתמש 'lipskey' ([workerNotifsProvider]) שפעמון הספק (#82) קורא.
 //
+// #86.6 (F-13): הערך הכספי ומוני ה"נמסרו"/"POD" בדוח-היומי, בפעמון ובכרטיס-
+// הערך מסוננים ל-`courierUser` של הסשן המחובר (ייחוס per-שליח, F-1) — רשומות
+// legacy ללא ייחוס אינן נספרות כ"שלי", בכנות. "פעילים" נשאר כלל-מערכתי עם
+// תווית כנה (אין ייחוס שליח לפני רגע המסירה).
+//
 // אין המצאות: כל המספרים נגזרים חיים; מקום שאין בו דאטה אומר זאת בכנות.
 //
-// SIDE-MAP CONTRACTS (read-only here — the writers live with the courier flow):
+// SIDE-MAP CONTRACTS:
 //   bs.courier-clock.v1  {orderId: {pickedUpAt: iso, deliveredAt: iso,
-//                         attempts: n}} — stamped at the courierAdvance moments
-//                         (pickup→transit = pickedUpAt · transit→delivered =
-//                         deliveredAt; attempts defaults to 1, incremented only
-//                         by a real failed-attempt flow when one exists).
+//                         attempts: n}} — read-only here; WRITTEN by the shared
+//                         [stampCourierClock] helper (state/courier_clock.dart,
+//                         F-10) at the courierAdvance moments (pickup→transit =
+//                         pickedUpAt · transit→delivered = deliveredAt;
+//                         attempts defaults to 1, incremented only by a real
+//                         failed-attempt flow when one exists).
 //   bs.pod-photos.v1     {orderId: 'data:image/...;base64,…'} — the REAL POD
 //                         photo captured via pickTaskPhoto (spec (a)), written
-//                         by the POD sheet at capture time.
-// FIXER NOTE: if the POD cluster put podPhoto / pickedUpAt / deliveredAt
-// directly on [Fulfillment] (state/persona_fulfillment.dart) instead of the
-// side-maps, swap the two providers below for those fields — the widgets only
-// consume the maps.
+//                         by [FulfillmentNotifier.capturePod]. [podPhotosProvider]
+//                         below no longer re-reads prefs — it derives the map
+//                         synchronously from the in-memory fulfillment state
+//                         (hydrated once at load), zero jsonDecode per rebuild
+//                         (F-6).
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -54,7 +63,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 const String kCourierClockKey = 'bs.courier-clock.v1';
 
 /// `{orderId: dataUrl}` — the real POD photo (camera-seam data-URL), written by
-/// the POD sheet when a photo is actually captured (spec (a)).
+/// the POD sheet when a photo is actually captured (spec (a)). Documented here
+/// for the contract; this file no longer reads the key directly — the photos
+/// arrive through the in-memory fulfillment state (F-6).
 const String kPodPhotosKey = 'bs.pod-photos.v1';
 
 // ─── courier delivery clock (read-only view of bs.courier-clock.v1) ──────────
@@ -108,23 +119,18 @@ final courierClockProvider =
   }
 });
 
-/// The bs.pod-photos.v1 side-map (real POD data-URLs), re-read whenever the
-/// fulfillment side-car mutates (a POD capture is exactly such a mutation).
-final podPhotosProvider = FutureProvider<Map<String, String>>((ref) async {
-  ref.watch(fulfillmentProvider);
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(kPodPhotosKey);
-    if (raw == null || raw.isEmpty) return const {};
-    final m = jsonDecode(raw) as Map<String, dynamic>;
-    return {
-      for (final e in m.entries)
-        if (e.value is String && (e.value as String).startsWith('data:image'))
-          e.key: e.value as String,
-    };
-  } on Object catch (_) {
-    return const {};
-  }
+/// POD data-URLs derived SYNCHRONOUSLY from the in-memory fulfillment state
+/// (the side-car hydrates `podPhoto` from bs.pod-photos.v1 once at load) —
+/// zero prefs reads and zero jsonDecode of the photo map per rebuild (F-6).
+/// Only real camera data-URLs pass; the legacy `'demo'` marker is filtered.
+final podPhotosProvider = Provider<Map<String, String>>((ref) {
+  final f = ref.watch(fulfillmentProvider);
+  return {
+    for (final e in f.entries)
+      if (e.value.podPhoto != null &&
+          e.value.podPhoto!.startsWith('data:image'))
+        e.key: e.value.podPhoto!,
+  };
 });
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -159,17 +165,28 @@ class CourierReportsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(boardAuthProvider);
     final orders = ref.watch(sysOrdersProvider);
     final fulfillment = ref.watch(fulfillmentProvider);
     final clock = ref.watch(courierClockProvider).asData?.value ??
         const <String, CourierClockEntry>{};
-    final podPhotos =
-        ref.watch(podPhotosProvider).asData?.value ?? const <String, String>{};
+    final podPhotos = ref.watch(podPhotosProvider);
     final rewards = ref.watch(rewardsProvider);
 
     final delivered =
         orders.where((o) => o.stage == OrderStage.delivered).toList();
-    final deliveredSum = delivered.fold<int>(0, (a, o) => a + o.sum);
+    // #86.6 (F-13): the MONEY figure is attributed to the logged-in courier
+    // only — delivered orders whose fulfillment record carries MY courierUser
+    // stamp. Legacy records without attribution are honestly excluded.
+    final su = (session != null && session.role == BoardRole.courier)
+        ? session.username
+        : null;
+    final mineDelivered = su == null
+        ? const <SysOrder>[]
+        : delivered
+            .where((o) => fulfillment[o.id]?.courierUser == su)
+            .toList();
+    final deliveredSum = mineDelivered.fold<int>(0, (a, o) => a + o.sum);
     const activeStages = [
       OrderStage.ready,
       OrderStage.pickup,
@@ -278,7 +295,9 @@ class CourierReportsTab extends ConsumerWidget {
         // ── ② + ③ KPI row: BuildCoins · streak · first-attempt % ──
         Row(
           children: [
-            _RStat(value: '${rewards.coins}', label: 'BuildCoins 🪙'),
+            // F-33: מאזן המטבעות הוא overlay אחד לכל המכשיר (bs.rewards.v1,
+            // ללא username) — תווית כנה, לא מספר שמתחזה ל-per-שליח.
+            _RStat(value: '${rewards.coins}', label: 'BuildCoins (מועדון משותף) 🪙'),
             _RStat(value: streakLabel, label: 'רצף פעילות 🔥'),
             _RStat(value: firstAttemptLabel, label: 'מסירה-ראשונה 🎯'),
           ],
@@ -286,8 +305,8 @@ class CourierReportsTab extends ConsumerWidget {
         const SizedBox(height: BsTokens.space2),
         Text(
           measuredDelivered.isEmpty
-              ? 'מטבעות — ממועדון BuildSmart (מוענקים על מסירה); הרצף ו-% מסירה-ראשונה נמדדים מחותמות שעון-המשלוחים — עדיין אין מסירות שנמדדו.'
-              : 'מטבעות — ממועדון BuildSmart (מוענקים על מסירה); הרצף נמדד מחותמות שעון-המשלוחים. מסירה-ראשונה: $firstAttempt מתוך ${measuredDelivered.length} מסירות שנמדדו — ללא ניסיון חוזר.',
+              ? 'מטבעות — מאזן מועדון BuildSmart המשותף לכל התפקידים במכשיר (אינו נצבר לשליח בנפרד); הרצף ו-% מסירה-ראשונה נמדדים מחותמות שעון-המשלוחים — עדיין אין מסירות שנמדדו.'
+              : 'מטבעות — מאזן מועדון BuildSmart המשותף לכל התפקידים במכשיר (אינו נצבר לשליח בנפרד); הרצף נמדד מחותמות שעון-המשלוחים. מסירה-ראשונה: $firstAttempt מתוך ${measuredDelivered.length} מסירות שנמדדו — ללא ניסיון חוזר.',
           style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
         ),
         const SizedBox(height: BsTokens.space3),
@@ -305,13 +324,25 @@ class CourierReportsTab extends ConsumerWidget {
               ),
             ],
           ),
-          child: Text(
-            'סה״כ ערך משלוחים שנמסרו: ${fMoney(deliveredSum)}',
-            style: const TextStyle(
-              color: BsTokens.inkLight,
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                // F-13: רק מסירות המיוחסות לשליח המחובר (courierUser) נסכמות.
+                'סה״כ ערך שנמסר על-ידי: ${fMoney(deliveredSum)}',
+                style: const TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                // ביאור כן (כמו F-3): רשומות legacy בלי ייחוס לא נספרות.
+                'מסירות ישנות ללא ייחוס אינן נספרות',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: BsTokens.space4),
@@ -441,7 +472,7 @@ class CourierReportsTab extends ConsumerWidget {
         ),
         const SizedBox(height: BsTokens.space2),
         const Text(
-          'הדוח נשלח כהודעה אמיתית לשיחת "חנות ליפסקי" (מנוע הצ׳אט המשותף — החנות משתתפת בשיחה) + התראת-פעמון לחנות. סיכום הסטטוסים הנוכחי, בלי המצאות.',
+          'הדוח נשלח כהודעה אמיתית לשיחת "חנות ליפסקי" (מנוע הצ׳אט המשותף — החנות משתתפת בשיחה) + התראת-פעמון לחנות. מוני המסירות והערך מיוחסים לשליח המחובר בלבד, בלי המצאות.',
           textAlign: TextAlign.center,
           style: TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
         ),
@@ -454,16 +485,26 @@ class CourierReportsTab extends ConsumerWidget {
   /// bell notification under the store username ([kStoreUsername]) in the
   /// per-username notification store — the surface the #82 supplier bell reads.
   void _sendDailyReport(BuildContext context, WidgetRef ref) {
+    // F-13: הדוח יוצא בשם שליח ספציפי — בלי סשן שליח אין את מי לייחס,
+    // ולא שולחים דוח עם מספרים של כולם בשם אף-אחד (אין חצי-עבודה).
+    final s = ref.read(boardAuthProvider);
+    if (s == null || s.role != BoardRole.courier) {
+      showToast(context, 'אין שליח מחובר — הדוח לא נשלח');
+      return;
+    }
     final orders = ref.read(sysOrdersProvider);
     final fulfillment = ref.read(fulfillmentProvider);
     final clock = ref.read(courierClockProvider).asData?.value ??
         const <String, CourierClockEntry>{};
-    final podPhotos =
-        ref.read(podPhotosProvider).asData?.value ?? const <String, String>{};
 
     final delivered =
         orders.where((o) => o.stage == OrderStage.delivered).toList();
-    final deliveredSum = delivered.fold<int>(0, (a, o) => a + o.sum);
+    // F-13: כל המונים המיוחסים-אישית מסוננים ל-courierUser של הסשן; רשומות
+    // legacy ללא ייחוס אינן נספרות. "פעילים" נשאר כלל-מערכתי עם תווית כנה.
+    final mine = delivered
+        .where((o) => fulfillment[o.id]?.courierUser == s.username)
+        .toList();
+    final deliveredSum = mine.fold<int>(0, (a, o) => a + o.sum);
     const activeStages = [
       OrderStage.ready,
       OrderStage.pickup,
@@ -472,22 +513,22 @@ class CourierReportsTab extends ConsumerWidget {
     final active = orders.where((o) => activeStages.contains(o.stage)).length;
     final podCount = orders
         .where((o) =>
-            (fulfillment[o.id]?.podCaptured ?? false) ||
-            podPhotos.containsKey(o.id))
+            fulfillment[o.id]?.courierUser == s.username &&
+            (fulfillment[o.id]?.podCaptured ?? false))
         .length;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final deliveredToday = delivered.where((o) {
+    final deliveredToday = mine.where((o) {
       final d = clock[o.id]?.deliveredAt;
       return d != null && DateTime(d.year, d.month, d.day) == today;
     }).length;
 
-    final text = 'דוח יומי — שליח (${now.day}.${now.month}):\n'
-        '✅ נמסרו היום (נמדד): $deliveredToday\n'
-        '📦 סה״כ נמסרו: ${delivered.length}\n'
-        '🚚 משלוחים פעילים: $active\n'
-        '📸 POD שמורים: $podCount\n'
-        '💰 ערך שנמסר: ${fMoney(deliveredSum)}';
+    final text = 'דוח יומי — שליח ${s.displayName} (${now.day}.${now.month}):\n'
+        '✅ נמסרו היום על-ידי (נמדד): $deliveredToday\n'
+        '📦 סה״כ נמסרו על-ידי: ${mine.length}\n'
+        '🚚 משלוחים פעילים (כלל המערכת): $active\n'
+        '📸 POD שלי: $podCount\n'
+        '💰 ערך שנמסר על-ידי: ${fMoney(deliveredSum)}';
 
     // Guard: send() is a silent no-op on an unknown thread — never toast a
     // success that did not happen (אין חצי-עבודה).
@@ -506,8 +547,9 @@ class CourierReportsTab extends ConsumerWidget {
           username: kStoreUsername,
           emoji: '📋',
           title: 'דוח יומי מהשליח 🛵',
+          // F-13: גם בפעמון — מוני "שלי" בלבד, עם שם השליח המדווח.
           body:
-              'נמסרו: ${delivered.length} · פעילים: $active · ${fMoney(deliveredSum)}',
+              '${s.displayName} — נמסרו על-ידו: ${mine.length} · פעילים: $active · ${fMoney(deliveredSum)}',
         );
     showToast(context, '🏪 הדוח נשלח לחנות — שיחה + התראת-פעמון');
   }
@@ -519,7 +561,7 @@ class CourierReportsTab extends ConsumerWidget {
 /// a REAL photo renders as a ≥48dp tappable thumbnail (full-screen viewer with
 /// an explicit X close, the shared [showFullPhotoDialog]); no photo keeps the
 /// honest non-tappable text.
-class _DeliveredCard extends StatelessWidget {
+class _DeliveredCard extends StatefulWidget {
   const _DeliveredCard({
     required this.order,
     required this.podCaptured,
@@ -535,8 +577,37 @@ class _DeliveredCard extends StatelessWidget {
   final DateTime? deliveredAt;
 
   @override
+  State<_DeliveredCard> createState() => _DeliveredCardState();
+}
+
+class _DeliveredCardState extends State<_DeliveredCard> {
+  /// Decoded ONCE per photo string (F-43) — a POD data-URL is ~100KB+ of
+  /// base64 and the list rebuilds on every engine mutation; full base64Decode
+  /// per build per card was pure waste.
+  Uint8List? _bytes;
+
+  @override
+  void initState() {
+    super.initState();
+    _bytes = decodeDataUrlPhoto(widget.podPhoto);
+  }
+
+  @override
+  void didUpdateWidget(_DeliveredCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // identical() is the cheap fast-path: the sync podPhotosProvider hands
+    // back the SAME string instance unless the record actually mutated.
+    if (!identical(oldWidget.podPhoto, widget.podPhoto)) {
+      _bytes = decodeDataUrlPhoto(widget.podPhoto);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bytes = decodeDataUrlPhoto(podPhoto);
+    final order = widget.order;
+    final podCaptured = widget.podCaptured;
+    final deliveredAt = widget.deliveredAt;
+    final bytes = _bytes;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space4),
@@ -573,6 +644,10 @@ class _DeliveredCard extends StatelessWidget {
                     width: 56,
                     height: 56,
                     fit: BoxFit.cover,
+                    // F-43: decode at thumb resolution — the full-res bytes
+                    // are reserved for the full-screen viewer below.
+                    cacheWidth:
+                        (56 * MediaQuery.devicePixelRatioOf(context)).round(),
                     gaplessPlayback: true,
                     // A corrupt payload renders an honest placeholder, no crash.
                     errorBuilder: (_, __, ___) => Container(
@@ -623,7 +698,8 @@ class _DeliveredCard extends StatelessWidget {
                       child: const Text(
                         'נמסר ✓',
                         style: TextStyle(
-                          color: Color(0xFF1F8A4C),
+                          // F-34: AA on the light-green pill.
+                          color: BsTokens.successDark,
                           fontWeight: FontWeight.w700,
                           fontSize: 12.5,
                         ),

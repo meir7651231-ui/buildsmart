@@ -27,6 +27,7 @@
 // provider. Without Firebase (the entire test suite) the engine IS the store,
 // byte-identical to before. See [ChatEngineNotifier.bindRemote].
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:buildsmart/data/chat_seeds.dart';
@@ -134,6 +135,15 @@ class ChatThread {
 /// SharedPreferences key for the persisted cross-persona chat messages.
 const String kSysChatKey = 'bs.sys-chat.v1';
 
+/// F-56 · cap on the PERSISTED messages per thread. prefs is a bounded budget
+/// (~5MB localStorage on web), not an unbounded archive — attendance reports
+/// (#86.2) and daily reports (#82) accumulate on every send, so [_persist]
+/// keeps only the newest [kSysChatPersistCap] messages of each thread on disk
+/// (the in-memory list is untouched within the session). SERVER-SWAP: the
+/// server's chat store replaces this cap with real history + pagination when
+/// the backend lands.
+const int kSysChatPersistCap = 200;
+
 /// Bot auto-replies — lifted verbatim from the legacy `_ChatPage` so the bot
 /// thread keeps the exact same behavior (SPEC §6).
 const List<String> kBotAutoReplies = [
@@ -220,6 +230,18 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
   /// clobbering a mutation that landed before prefs resolved (worker-tasks H2).
   bool _loaded = false;
 
+  /// F-35 · thread ids mutated since construction. Lets a LATE [_load] merge
+  /// the disk overlay AROUND a pre-load mutation instead of dropping it: the
+  /// in-memory thread wins only where a mutation actually landed; every other
+  /// thread still hydrates from disk — so an early send() no longer erases the
+  /// persisted messages of all the other threads on the next write.
+  final Set<String> _dirtyThreadIds = {};
+
+  /// F-35 · completes when [_load] settled (overlay read+merged, or failed
+  /// honestly). [_persist] gates on it so a write can never precede the
+  /// initial disk read.
+  final Completer<void> _loadSettled = Completer<void>();
+
   /// S4.1/S4.2 — the bound Firestore-backed store, or null on the local path
   /// (no Firebase → the engine itself stays the store, behavior unchanged).
   ChatRepository? _remote;
@@ -263,40 +285,71 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      // F-36: the container may be disposed before prefs resolve (test
+      // teardown / ProviderScope rebuild) — placing state then throws.
+      if (!mounted) return;
       final raw = prefs.getString(kSysChatKey);
       if (raw == null || raw.isEmpty) {
         _loaded = true;
         return;
       }
+      // State was wholesale-replaced before the load settled by something
+      // that is NOT a tracked local mutation (send/resetToSeed register their
+      // thread ids in [_dirtyThreadIds]) — i.e. the Firestore mirror
+      // ([bindRemote] → [_refreshFromRemote]). Keep it untouched, exactly
+      // like the legacy `if (!_loaded)` guard: under Firebase the prefs
+      // overlay never clobbers server state.
+      if (_loaded && _dirtyThreadIds.isEmpty) return;
       final m = jsonDecode(raw) as Map<String, dynamic>;
-      if (!_loaded) {
-        super.state = [
-          for (final t in _seedThreads())
-            if (m[t.id] is List)
-              t.copyWith(
-                messages: [
-                  for (final e in m[t.id] as List)
-                    if (ChatMessage.tryFromJson(e) case final msg?) msg,
-                ],
-              )
-            else
-              t,
-        ];
-        _loaded = true;
-      }
+      if (!mounted) return; // F-36: re-check before placing state
+      // F-35 merge: apply the disk overlay onto the CURRENT state, skipping
+      // the threads a pre-load mutation already touched (the in-memory thread
+      // wins there). On the normal path nothing raced, [_dirtyThreadIds] is
+      // empty and state IS the seed — byte-equivalent to the legacy
+      // overlay-on-seed apply.
+      super.state = [
+        for (final t in state)
+          if (m[t.id] is List && !_dirtyThreadIds.contains(t.id))
+            t.copyWith(
+              messages: [
+                for (final e in m[t.id] as List)
+                  if (ChatMessage.tryFromJson(e) case final msg?) msg,
+              ],
+            )
+          else
+            t,
+      ];
+      _loaded = true;
     } on Object catch (_) {
       _loaded = true; // corrupt/old payload — keep the seed
+    } finally {
+      // F-35: unblock [_persist] in EVERY exit path (success/corrupt/unmounted).
+      if (!_loadSettled.isCompleted) _loadSettled.complete();
     }
   }
 
   Future<void> _persist() async {
     if (!persist) return;
+    // F-35: never write before [_load] settled — a mutation racing ahead of
+    // the load would otherwise serialize seed message-lists over every other
+    // thread's persisted messages. By the time this write runs, [_load] has
+    // already merged the disk overlay around any pre-load mutation.
+    await _loadSettled.future;
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
         kSysChatKey,
         jsonEncode({
-          for (final t in state) t.id: [for (final msg in t.messages) msg.toJson()],
+          // F-56: persist only the newest [kSysChatPersistCap] messages per
+          // thread — prefs is a bounded budget, not the message archive.
+          for (final t in state)
+            t.id: [
+              for (final msg in t.messages.length > kSysChatPersistCap
+                  ? t.messages
+                      .sublist(t.messages.length - kSysChatPersistCap)
+                  : t.messages)
+                msg.toJson(),
+            ],
         }),
       );
     } on Object catch (_) {}
@@ -368,6 +421,8 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
         ),
       );
     }
+    // F-35: register the mutation so a late [_load] merges around it.
+    _dirtyThreadIds.add(threadId);
     state = [
       for (var i = 0; i < state.length; i++)
         if (i == idx) thread.copyWith(messages: appended) else state[i],
@@ -395,6 +450,9 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
       r.resetToSeed();
       return;
     }
+    // F-35: a reset is a mutation of EVERY thread — a late [_load] must not
+    // re-apply the old disk overlay on top of the fresh seed.
+    _dirtyThreadIds.addAll(_seedThreads().map((t) => t.id));
     state = _seedThreads();
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:buildsmart/screens/camera_sheet.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -79,14 +80,23 @@ List<_AudienceChip>? _audienceChipsFor(String audience) => switch (audience) {
 /// standalone ChatsScreen (both open this default list). Without the 'worker'
 /// clause those threads were WRITE-ONLY: the worker sent into them but the
 /// other side never saw them. A board audience (worker/courier) still sees
-/// ONLY its own threads plus the shared bot thread.
+/// ONLY its own threads plus the shared bot thread — with ONE symmetric
+/// bridge (F-25): the store↔courier pair. The courier's attendance report
+/// (#86.2) goes to 'th-store-courier-pickups' (audience 'store') and the
+/// courier's daily report goes to 'th-courier-lipskey' (audience 'courier');
+/// without the bridge each side's send was write-only for the other. The
+/// participants check keeps every other audience-crossing thread invisible
+/// (verified against the seed: these are the only store+courier threads).
 bool _visibleToAudience(ChatThread t, BsRole persona, String audience) {
   if (audience == 'contractor') {
     return t.participants.contains(persona) &&
         (t.audience == 'contractor' || t.audience == 'worker');
   }
   if (t.isBot) return true; // the bot thread is shared across board audiences
-  return t.audience == audience && t.participants.contains(persona);
+  return (t.audience == audience ||
+          (audience == 'courier' && t.audience == 'store') ||
+          (audience == 'store' && t.audience == 'courier')) &&
+      t.participants.contains(persona);
 }
 
 // ─── thread view-model (engine → existing UI adapter) ──────────────────────────
@@ -173,25 +183,86 @@ final _chatSearchQueryProvider = StateProvider<String>((_) => '');
 final _chatFilterProvider =
     StateProvider<_ChatFilter>((_) => _ChatFilter.all);
 
+// ─── per-username chat-UX state (F-37) ────────────────────────────────────────
+//
+// Archive/mute/lastRead/history-cleared are USER state, not device state:
+// switching accounts (ran→omer, demo→dudi) must not inherit the previous
+// user's archive/mutes/unread. Each value therefore lives in a per-username
+// bucket nested inside the SAME versioned key (no new v2 keys — the legacy
+// flat payload migrates into the 'contractor' bucket on first read), and
+// every write is a read-modify-write of ONLY the current bucket, so logout
+// never touches another username's data.
+
+/// F-37 · the bucket owner for the per-username chat-UX prefs: the logged-in
+/// board session's username, or 'contractor' when there is no board session —
+/// the contractor board has no board login, and its bucket is also the
+/// migration target for the legacy flat payloads. Watched, so an account
+/// switch rebuilds the notifiers onto the new user's bucket.
+String _chatBucketUser(Ref ref) =>
+    ref.watch(boardAuthProvider.select((s) => s?.username ?? 'contractor'));
+
+/// F-37 · read a `{username: [threadIds]}` buckets map stored as a JSON
+/// string under [key]. Handles BOTH payload generations honestly: the current
+/// JSON-string form, and the legacy flat StringList (the pre-per-username
+/// set), which migrates as the 'contractor' bucket. `getString` on a key
+/// holding a StringList throws a type error — caught, then `getStringList`
+/// is tried (the ADJUSTed F-37 migration; same key, no v2).
+Map<String, List<String>> _readIdBuckets(SharedPreferences prefs, String key) {
+  String? raw;
+  try {
+    raw = prefs.getString(key);
+  } on Object catch (_) {
+    raw = null; // legacy StringList payload — fall through to getStringList
+  }
+  if (raw != null) {
+    try {
+      final m = jsonDecode(raw) as Map<String, dynamic>;
+      return {
+        for (final e in m.entries)
+          if (e.value is List)
+            e.key: [
+              for (final v in e.value as List)
+                if (v is String) v,
+            ],
+      };
+    } on Object catch (_) {
+      return {}; // corrupt payload — start empty, honestly
+    }
+  }
+  try {
+    final legacy = prefs.getStringList(key);
+    if (legacy != null) return {'contractor': legacy};
+  } on Object catch (_) {/* corrupt — start empty */}
+  return {};
+}
+
 const String _kArchiveKey = 'bs.chat-archived.v1';
 
 class _ChatArchivedNotifier extends StateNotifier<Set<String>> {
-  _ChatArchivedNotifier() : super(const {}) {
+  _ChatArchivedNotifier(this.username) : super(const {}) {
     unawaited(_load());
   }
+
+  /// The bucket owner (F-37) — see [_chatBucketUser].
+  final String username;
 
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final list = prefs.getStringList(_kArchiveKey);
-      if (list != null) state = list.toSet();
+      if (!mounted) return;
+      final mine = _readIdBuckets(prefs, _kArchiveKey)[username];
+      if (mine != null) state = mine.toSet();
     } on Object catch (_) {/* keep empty */}
   }
 
   Future<void> _persist() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList(_kArchiveKey, state.toList());
+      // Read-modify-write: only THIS username's bucket changes — every other
+      // account's archive survives untouched.
+      final buckets = _readIdBuckets(prefs, _kArchiveKey);
+      buckets[username] = state.toList();
+      await prefs.setString(_kArchiveKey, jsonEncode(buckets));
     } on Object catch (_) {/* best-effort */}
   }
 
@@ -208,28 +279,35 @@ class _ChatArchivedNotifier extends StateNotifier<Set<String>> {
 
 final chatArchivedIdsProvider =
     StateNotifierProvider<_ChatArchivedNotifier, Set<String>>(
-  (_) => _ChatArchivedNotifier(),
+  (ref) => _ChatArchivedNotifier(_chatBucketUser(ref)),
 );
 
 const String _kMuteKey = 'bs.chat-muted.v1';
 
 class _ChatMutedNotifier extends StateNotifier<Set<String>> {
-  _ChatMutedNotifier() : super(const {}) {
+  _ChatMutedNotifier(this.username) : super(const {}) {
     unawaited(_load());
   }
+
+  /// The bucket owner (F-37) — see [_chatBucketUser].
+  final String username;
 
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final list = prefs.getStringList(_kMuteKey);
-      if (list != null) state = list.toSet();
+      if (!mounted) return;
+      final mine = _readIdBuckets(prefs, _kMuteKey)[username];
+      if (mine != null) state = mine.toSet();
     } on Object catch (_) {/* keep empty */}
   }
 
   Future<void> _persist() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList(_kMuteKey, state.toList());
+      // Read-modify-write: only THIS username's bucket changes.
+      final buckets = _readIdBuckets(prefs, _kMuteKey);
+      buckets[username] = state.toList();
+      await prefs.setString(_kMuteKey, jsonEncode(buckets));
     } on Object catch (_) {/* best-effort */}
   }
 
@@ -241,37 +319,72 @@ class _ChatMutedNotifier extends StateNotifier<Set<String>> {
 
 final chatMutedIdsProvider =
     StateNotifierProvider<_ChatMutedNotifier, Set<String>>(
-  (_) => _ChatMutedNotifier(),
+  (ref) => _ChatMutedNotifier(_chatBucketUser(ref)),
 );
 
 const String _kLastReadKey = 'bs.chat-lastread.v1';
+
+/// F-37 · read the `{username: {threadId: lastReadMs}}` buckets under
+/// [_kLastReadKey]. The legacy payload was the flat `{threadId: ms}` map —
+/// distinguishable because its values are numbers, not maps — and migrates
+/// as the 'contractor' bucket (same key, no v2).
+Map<String, Map<String, int>> _readLastReadBuckets(SharedPreferences prefs) {
+  final raw = prefs.getString(_kLastReadKey);
+  if (raw == null) return {};
+  try {
+    final m = jsonDecode(raw) as Map<String, dynamic>;
+    if (m.values.every((v) => v is Map)) {
+      // Nested (current) form.
+      return {
+        for (final e in m.entries)
+          e.key: {
+            for (final t in (e.value as Map).entries)
+              if (t.value is num) '${t.key}': (t.value as num).toInt(),
+          },
+      };
+    }
+    // Legacy flat {threadId: ms} → the contractor bucket.
+    return {
+      'contractor': {
+        for (final e in m.entries)
+          if (e.value is num) e.key: (e.value as num).toInt(),
+      },
+    };
+  } on Object catch (_) {
+    return {}; // corrupt payload — start empty, honestly
+  }
+}
 
 /// Per-thread "last read" timestamps (ms since epoch), persisted so the real
 /// unread badge survives restarts. A chat page marks its thread read on open;
 /// a message counts as unread when it wasn't sent by the reading persona and
 /// its ts is newer than the thread's lastReadAt (0 = never opened).
+/// Per-username (F-37): the shared bot thread no longer leaks lastRead
+/// between personas.
 class _ChatLastReadNotifier extends StateNotifier<Map<String, int>> {
-  _ChatLastReadNotifier() : super(const {}) {
+  _ChatLastReadNotifier(this.username) : super(const {}) {
     unawaited(_load());
   }
+
+  /// The bucket owner (F-37) — see [_chatBucketUser].
+  final String username;
 
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_kLastReadKey);
-      if (raw == null) return;
-      final m = jsonDecode(raw) as Map<String, dynamic>;
-      state = {
-        for (final e in m.entries)
-          if (e.value is num) e.key: (e.value as num).toInt(),
-      };
+      if (!mounted) return;
+      final mine = _readLastReadBuckets(prefs)[username];
+      if (mine != null) state = mine;
     } on Object catch (_) {/* keep empty */}
   }
 
   Future<void> _persist() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_kLastReadKey, jsonEncode(state));
+      // Read-modify-write: only THIS username's bucket changes.
+      final buckets = _readLastReadBuckets(prefs);
+      buckets[username] = state;
+      await prefs.setString(_kLastReadKey, jsonEncode(buckets));
     } on Object catch (_) {/* best-effort */}
   }
 
@@ -287,31 +400,70 @@ class _ChatLastReadNotifier extends StateNotifier<Map<String, int>> {
 
 final chatLastReadProvider =
     StateNotifierProvider<_ChatLastReadNotifier, Map<String, int>>(
-  (_) => _ChatLastReadNotifier(),
+  (ref) => _ChatLastReadNotifier(_chatBucketUser(ref)),
 );
 
 const String _kHistoryClearedKey = 'bs.chat-history-cleared.v1';
+
+/// F-37 · read the `{username: cleared}` buckets under [_kHistoryClearedKey].
+/// The legacy payload was a plain bool — `getString` throws on it (caught),
+/// then `getBool` reads it and it migrates as the 'contractor' bucket
+/// (same key, no v2).
+Map<String, bool> _readClearedBuckets(SharedPreferences prefs) {
+  String? raw;
+  try {
+    raw = prefs.getString(_kHistoryClearedKey);
+  } on Object catch (_) {
+    raw = null; // legacy bool payload — fall through to getBool
+  }
+  if (raw != null) {
+    try {
+      final m = jsonDecode(raw) as Map<String, dynamic>;
+      return {
+        for (final e in m.entries)
+          if (e.value is bool) e.key: e.value as bool,
+      };
+    } on Object catch (_) {
+      return {}; // corrupt payload — start empty, honestly
+    }
+  }
+  try {
+    final legacy = prefs.getBool(_kHistoryClearedKey);
+    if (legacy != null) return {'contractor': legacy};
+  } on Object catch (_) {/* corrupt — start empty */}
+  return {};
+}
 
 /// Honest "מחיקת היסטוריה": chat history is ephemeral per-session widget state
 /// (there is no persisted message store). This flag — once set — makes new chat
 /// pages open empty instead of seeding the thread greeting/last message, and it
 /// survives restarts. It is the lightest truthful wiring short of a full store.
+/// Per-username (F-37): clearing the history on one account does not blank
+/// another account's chats.
 class _ChatHistoryClearedNotifier extends StateNotifier<bool> {
-  _ChatHistoryClearedNotifier() : super(false) {
+  _ChatHistoryClearedNotifier(this.username) : super(false) {
     unawaited(_load());
   }
+
+  /// The bucket owner (F-37) — see [_chatBucketUser].
+  final String username;
 
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      state = prefs.getBool(_kHistoryClearedKey) ?? false;
+      if (!mounted) return;
+      state = _readClearedBuckets(prefs)[username] ?? false;
     } on Object catch (_) {/* keep false */}
   }
 
   Future<void> _persist() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(_kHistoryClearedKey, state);
+      // F-37: "נקה היסטוריה" writes ONLY the current username's bucket —
+      // every other account's flag survives untouched.
+      final buckets = _readClearedBuckets(prefs);
+      buckets[username] = state;
+      await prefs.setString(_kHistoryClearedKey, jsonEncode(buckets));
     } on Object catch (_) {/* best-effort */}
   }
 
@@ -323,7 +475,7 @@ class _ChatHistoryClearedNotifier extends StateNotifier<bool> {
 
 final chatHistoryClearedProvider =
     StateNotifierProvider<_ChatHistoryClearedNotifier, bool>(
-  (_) => _ChatHistoryClearedNotifier(),
+  (ref) => _ChatHistoryClearedNotifier(_chatBucketUser(ref)),
 );
 
 /// All thread ids — used by "השתק הכל". Reads the live shared engine (every

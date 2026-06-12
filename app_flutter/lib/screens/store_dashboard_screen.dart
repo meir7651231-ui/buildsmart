@@ -11,13 +11,14 @@ import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/persona_picking_sheet.dart';
 import 'package:buildsmart/screens/persona_portal.dart';
-import 'package:buildsmart/screens/profile_screen.dart';
+import 'package:buildsmart/screens/store_profile_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_notifs_sheet.dart'
     show workerNotifAgo;
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
+import 'package:buildsmart/state/store_profile_store.dart';
 import 'package:buildsmart/state/store_stock.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/sys_orders.dart';
@@ -28,6 +29,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show LengthLimitingTextInputFormatter;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -49,6 +51,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// [workerNotifsProvider] — the same store the courier's 'שלח דוח-יומי לחנות'
 /// writes into).
 ///
+/// #87 — a fifth bottom tab 'אזור אישי' ([StoreProfileBody]) and the AppBar
+/// person icon now route to the SUPPLIER'S OWN personal area
+/// ([StoreProfileScreen]) — never the contractor's ProfileScreen (F-19); the
+/// AppBar title reflects the live business-profile override
+/// ([storeProfileProvider] — F-20).
+///
 /// Reached from the role picker ("מי אתה?" → חנות ספק). Orders are the shared
 /// [sysOrdersProvider] state, so an order the store marks "מוכן" appears live
 /// in the courier app. R8 — every string/number is verbatim from
@@ -66,12 +74,15 @@ class StoreDashboardScreen extends ConsumerStatefulWidget {
 
 class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
   /// #77/#78 — 0 בית (the הזמנות pipeline, default) · 1 מלאי · 2 שיחות ·
-  /// 3 פורטל.
+  /// 3 פורטל · 4 אזור אישי (#87.5).
   int _tab = 0;
   String _orderFilter = 'active'; // active | new | preparing | ready | delivered
   String _stockFilter = 'all'; // all | in | out
   String _stockSearch = '';
 
+  /// Demo/analytics seed only (kStores.first — F-20): the displayed identity
+  /// comes from the business-profile override with this name as the LAST
+  /// honest fallback; never real business data.
   StoreInfo get _store => kStores.first;
 
   /// Live trading inventory: unique product names across all order lines,
@@ -118,7 +129,24 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     if (session == null || session.role != BoardRole.store) {
       return const WelcomeScreen(boardRole: BoardRole.store);
     }
-    final orders = ref.watch(sysOrdersProvider);
+    // F-44 — sysOrdersProvider is deliberately NOT watched here: the
+    // order-reading tabs watch it themselves (_homeTab/_stockTab), so an
+    // order mutation no longer rebuilds the whole Scaffold while the
+    // שיחות/פורטל/אזור-אישי tabs are showing.
+    //
+    // #87.1 (F-20) — the board identity reflects the business-profile
+    // override. Honest fallback chain: businessName → session.displayName →
+    // the kStores demo seed (a documented seed, not real business data).
+    final businessName = ref.watch(
+      storeProfileProvider.select(
+        (m) => (m[session.username]?.businessName ?? '').trim(),
+      ),
+    );
+    final storeName = businessName.isNotEmpty
+        ? businessName
+        : (session.displayName.trim().isNotEmpty
+              ? session.displayName.trim()
+              : _store.name);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -128,9 +156,14 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
-          title: const Text(
-            '🏪 חנות ספק',
-            style: TextStyle(
+          // F-20/F-41 — the live business name; bounded so a long override
+          // ellipsizes instead of blowing the AppBar. 🏪 stays the supplier's
+          // identity emoji (parallel to 🛵 courier / 🦺 worker).
+          title: Text(
+            '🏪 $storeName',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
               color: BsTokens.inkLight,
               fontWeight: FontWeight.w800,
               fontSize: 20,
@@ -141,12 +174,15 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             // the shared [workerNotifsProvider] (the courier's daily report +
             // future order events land here — every write has a reader).
             _StoreNotifsBell(username: session.username),
-            // Each persona reaches profile + settings from its own dashboard.
+            // #87.5 (F-19) — the person icon opens the SUPPLIER'S OWN gated
+            // personal area (StoreProfileScreen), NOT the contractor's
+            // ProfileScreen (which leaked the contractor identity into the
+            // store board and bypassed the role-switch code-gate).
             IconButton(
-              tooltip: 'פרופיל',
+              tooltip: 'אזור אישי',
               icon: const Icon(Icons.person_outline, color: BsTokens.mutedLight),
               onPressed: () =>
-                  Navigator.of(context).push(ProfileScreen.route()),
+                  Navigator.of(context).push(StoreProfileScreen.route()),
             ),
             // #82 — supplier-specific settings (business profile), NOT the
             // contractor's CatalogSettingsScreen.
@@ -174,7 +210,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             ),
           ],
         ),
-        body: _body(orders),
+        body: _body(storeName),
         // #77 — the tabs moved to the BOTTOM (the courier-board pattern).
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _tab,
@@ -202,6 +238,13 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
               label: 'שיחות',
             ),
             BottomNavigationBarItem(icon: Icon(Icons.apps), label: 'פורטל'),
+            // #87.5 — the personal area as a REAL labeled tab (not only an
+            // AppBar icon); `type: fixed` keeps the label always visible.
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              activeIcon: Icon(Icons.person),
+              label: 'אזור אישי',
+            ),
           ],
         ),
       ),
@@ -223,7 +266,7 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     showToast(context, 'התנתקת מלוח חנות הספק');
   }
 
-  Widget _body(List<SysOrder> orders) {
+  Widget _body(String storeName) {
     switch (_tab) {
       case 1:
         return _stockTab();
@@ -241,13 +284,21 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
         );
       case 3:
         return _portalTab();
+      case 4:
+        // #87.5 — the supplier's personal area body (store_profile_screen.dart);
+        // it gates itself on session+role like every personal screen.
+        return const StoreProfileBody();
       default:
-        return _homeTab(orders);
+        return _homeTab(storeName);
     }
   }
 
   // ── Tab 0 · בית — action-first header + the הזמנות pipeline (#78) ──────────
-  Widget _homeTab(List<SysOrder> orders) {
+  Widget _homeTab(String storeName) {
+    // F-44 — the orders watch lives HERE (tab-scoped), not in the main build:
+    // while another tab is showing, this method never runs, so the dependency
+    // is dropped and order mutations don't rebuild the Scaffold.
+    final orders = ref.watch(sysOrdersProvider);
     final toApprove = orders.countAt(OrderStage.newOrder);
     final inPrep = orders.countAt(OrderStage.preparing);
     final ready = orders.countAt(OrderStage.ready);
@@ -278,8 +329,12 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
           ),
         ),
         const SizedBox(height: 2),
+        // F-20 — the SAME live identity as the AppBar title (profile override
+        // → displayName → demo seed); F-41 — bounded against a long override.
         Text(
-          '🏪 ${_store.name} — מה שצריך טיפול עכשיו',
+          '🏪 $storeName — מה שצריך טיפול עכשיו',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
         ),
         const SizedBox(height: BsTokens.space4),
@@ -324,6 +379,25 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             _Stat(value: '$inPrep', label: 'בהכנה 🔧'),
             _Stat(value: '$ready', label: 'מוכן לאיסוף 📦'),
             _Stat(value: fMoney(revenue), label: 'מחזור פעיל 💰'),
+          ],
+        ),
+        const SizedBox(height: BsTokens.space2),
+        // #87.2 (F-23) — the completed side of the pipeline next to the
+        // active one, derived live from sysOrdersProvider (deliveredRevenue,
+        // supplier_data.dart — Σ של o.sum בלבד, אפס מספרים קשיחים).
+        // by-design: ללוח החנות הסטטיסטיקה כלל-חנותית — כל ההזמנות שייכות
+        // לחנות אחת (kStores.first); אין כאן צורך בסינון per-username
+        // (להבדיל מפרופיל-השליח, ראה Fulfillment.courierUser).
+        Row(
+          children: [
+            _Stat(
+              value: '${orders.countAt(OrderStage.delivered)}',
+              label: 'נמסרו ✓',
+            ),
+            _Stat(
+              value: fMoney(orders.deliveredRevenue),
+              label: 'מחזור שנמסר 💰',
+            ),
           ],
         ),
         const SizedBox(height: BsTokens.space3),
@@ -974,11 +1048,18 @@ class _AddProductSheetState extends ConsumerState<_AddProductSheet> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// #82 · Supplier settings — business profile, persisted (bs.supplier-settings.v1)
+// #82 · LEGACY supplier settings record (bs.supplier-settings.v1) — F-18: the
+// business profile moved to the per-username state/store_profile_store.dart
+// (bs.store-profile.v1, the [storeProfileProvider] map). This GLOBAL record
+// remains ONLY as (a) the honest one-time migration seed (StoreProfileStore
+// reads it on first load; the old key is NOT deleted) and (b) the single
+// owner of the שעות-פעילות field, which is outside the StoreProfile
+// cross-file contract. Do not add new readers/writers for the other fields.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// The supplier's business profile (#82): שם-עסק / ח.פ. / טלפון / כתובת /
-/// שעות-פעילות / לוגו (a REAL captured data-URL via [pickTaskPhoto], or null).
+/// The supplier's business profile (#82, LEGACY — see the section note):
+/// שם-עסק / ח.פ. / טלפון / כתובת / שעות-פעילות / לוגו (a REAL captured
+/// data-URL via [pickTaskPhoto], or null).
 class SupplierProfile {
   const SupplierProfile({
     this.businessName = '',
@@ -1086,22 +1167,188 @@ final supplierSettingsProvider =
   (_) => SupplierSettingsNotifier(),
 );
 
-/// #82 — the supplier-specific settings screen: the business profile, every
-/// field persisted on change ([supplierSettingsProvider]), format validation
-/// per task #64 ([validBusinessId] / [validIsraeliMobile]) and a REAL logo
-/// capture through the single camera seam ([pickTaskPhoto] — webcam dialog on
-/// desktop web, never a bare picker label). Distinct from the contractor's
-/// StoreSettingsScreen (a different audience).
-class SupplierSettingsScreen extends ConsumerWidget {
+/// #82/#87.1 — the supplier-specific settings screen: the business profile,
+/// re-wired (F-18) from the legacy GLOBAL record onto the per-username
+/// [storeProfileProvider] (`bs.store-profile.v1`; the store seeds itself once
+/// from the legacy `bs.supplier-settings.v1` payload — an honest one-time
+/// migration that keeps the old key). Gated on a live store session (F-22).
+/// The fields are collected locally and committed in ONE awaited save (the
+/// worker edit-sheet pattern — no persist-per-keystroke, honest
+/// success/failure toasts; the store rolls back on a quota failure). Format
+/// validation per task #64 ([validBusinessId] / [validIsraeliMobile]) and a
+/// REAL logo capture through the single camera seam ([pickTaskPhoto] —
+/// webcam dialog on desktop web, never a bare picker label). Distinct from
+/// the contractor's StoreSettingsScreen (a different audience).
+class SupplierSettingsScreen extends ConsumerStatefulWidget {
   const SupplierSettingsScreen({super.key});
 
   static Route<void> route() =>
       MaterialPageRoute<void>(builder: (_) => const SupplierSettingsScreen());
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final p = ref.watch(supplierSettingsProvider);
-    final n = ref.read(supplierSettingsProvider.notifier);
+  ConsumerState<SupplierSettingsScreen> createState() =>
+      _SupplierSettingsScreenState();
+}
+
+class _SupplierSettingsScreenState
+    extends ConsumerState<SupplierSettingsScreen> {
+  // Draft field values — committed in ONE awaited save (F-18 perf: typing
+  // only mutates this local state; nothing serializes per keystroke).
+  String _businessName = '';
+  String _businessId = '';
+  String _phone = '';
+  String _address = '';
+
+  /// שעות-פעילות is NOT part of the cross-file [StoreProfile] contract
+  /// (businessName/phone/address/businessId/logo) — it stays on the legacy
+  /// [supplierSettingsProvider] seam as its single remaining owner, and is
+  /// committed once on save (so the legacy record — which may still hold the
+  /// pre-migration logo bytes — is never re-serialized per keystroke).
+  String _hours = '';
+
+  /// #24 idiom — once the user typed, the async-loaded record may no longer
+  /// re-seed the drafts (a late load can't clobber fresh input).
+  bool _touched = false;
+
+  /// In-flight guard (the F-38 pattern) — no double-save / double-toast.
+  bool _saving = false;
+
+  void _draft(VoidCallback apply) {
+    _touched = true;
+    setState(apply);
+  }
+
+  Future<void> _save() async {
+    if (_saving) return;
+    final session = ref.read(boardAuthProvider);
+    if (session == null || session.role != BoardRole.store) return;
+    final bid = _businessId.trim();
+    final phone = _phone.trim();
+    // task #64 — format-only validation; empty fields are honestly optional.
+    if (bid.isNotEmpty && !validBusinessId(bid)) {
+      showToast(context, 'ח.פ. חייב להכיל 9 ספרות');
+      return;
+    }
+    if (phone.isNotEmpty && !validIsraeliMobile(phone)) {
+      showToast(context, 'נייד ישראלי: 10 ספרות שמתחילות ב-05');
+      return;
+    }
+    setState(() => _saving = true);
+    final current =
+        ref.read(storeProfileProvider)[session.username] ??
+            const StoreProfile();
+    // ONE awaited commit (F-18) — the store rolls back and returns false on
+    // a persist failure (web localStorage quota), so '✓' is never faked.
+    final ok = await ref.read(storeProfileProvider.notifier).save(
+          session.username,
+          StoreProfile(
+            businessName: _businessName.trim(),
+            businessId: bid,
+            phone: phone,
+            address: _address.trim(),
+            logo: current.logo,
+          ),
+        );
+    // Legacy hours seam — a tiny string, committed once (not per keystroke);
+    // the legacy notifier persists best-effort behind its own try/catch.
+    ref
+        .read(supplierSettingsProvider.notifier)
+        .update((s) => s.copyWith(hours: _hours.trim()));
+    if (!mounted) return;
+    setState(() => _saving = false);
+    showToast(
+      context,
+      ok ? '✓ הפרופיל נשמר' : 'השמירה נכשלה — ייתכן שהלוגו גדול מדי',
+    );
+  }
+
+  Future<void> _captureLogo() async {
+    if (_saving) return;
+    final session = ref.read(boardAuthProvider);
+    if (session == null || session.role != BoardRole.store) return;
+    // REAL capture — webcam dialog on desktop web / camera on mobile,
+    // file-picker fallback only on a camera ERROR (services/task_photo.dart).
+    // Null = honest cancel, no change.
+    final shot = await pickTaskPhoto(context);
+    if (shot == null || !mounted) return;
+    setState(() => _saving = true);
+    final current =
+        ref.read(storeProfileProvider)[session.username] ??
+            const StoreProfile();
+    // F-18 — the heavy field is AWAITED: a quota failure rolls back in the
+    // store and reports honestly (no fake 'הלוגו נשמר ✓' that vanishes on F5).
+    final ok = await ref.read(storeProfileProvider.notifier).save(
+          session.username,
+          StoreProfile(
+            businessName: current.businessName,
+            businessId: current.businessId,
+            phone: current.phone,
+            address: current.address,
+            logo: shot,
+          ),
+        );
+    if (!mounted) return;
+    setState(() => _saving = false);
+    showToast(context, ok ? 'הלוגו נשמר ✓' : 'התמונה גדולה מדי — לא נשמרה');
+  }
+
+  Future<void> _removeLogo() async {
+    if (_saving) return;
+    final session = ref.read(boardAuthProvider);
+    if (session == null || session.role != BoardRole.store) return;
+    final confirmed = await confirmDestructive(
+      context,
+      title: 'להסיר את הלוגו?',
+      message: 'הלוגו השמור יימחק — ניתן לצלם חדש בכל רגע.',
+      confirmLabel: 'הסר',
+    );
+    if (!confirmed || !mounted) return;
+    setState(() => _saving = true);
+    final current =
+        ref.read(storeProfileProvider)[session.username] ??
+            const StoreProfile();
+    final ok = await ref.read(storeProfileProvider.notifier).save(
+          session.username,
+          StoreProfile(
+            businessName: current.businessName,
+            businessId: current.businessId,
+            phone: current.phone,
+            address: current.address,
+            logo: null,
+          ),
+        );
+    if (!mounted) return;
+    setState(() => _saving = false);
+    showToast(context, ok ? 'הלוגו הוסר' : 'ההסרה נכשלה — נסו שוב');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // F-22 · חוק "מבחוץ לא רואים כלום" — gate on a live store session; after
+    // logout a stacked instance rebuilds straight into the registration gate.
+    final session = ref.watch(boardAuthProvider);
+    if (session == null || session.role != BoardRole.store) {
+      return const WelcomeScreen(boardRole: BoardRole.store);
+    }
+    final username = session.username;
+    // F-18 — read ONLY the logged-in username's record off the per-username
+    // store; another account's profile is never shown here, and logout never
+    // touches another username's data.
+    final profile =
+        ref.watch(storeProfileProvider.select((m) => m[username])) ??
+            const StoreProfile();
+    final legacyHours =
+        ref.watch(supplierSettingsProvider.select((p) => p.hours));
+    // Seed/re-seed the drafts from the persisted record until the user types
+    // (#24 — the async load lands after the first build; _ProfileField syncs
+    // its controller from `value` while unfocused).
+    if (!_touched) {
+      _businessName = profile.businessName;
+      _businessId = profile.businessId;
+      _phone = profile.phone;
+      _address = profile.address;
+      _hours = legacyHours;
+    }
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -1135,50 +1382,75 @@ class SupplierSettingsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 2),
-            const Text(
-              'הפרטים נשמרים אוטומטית בכל שינוי',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+            // F-18 — honest copy: an explicit one-commit save replaced the
+            // silent best-effort persist-per-keystroke, scoped per-username.
+            Text(
+              'הפרטים נשמרים לחשבון @$username בלבד — בלחיצת שמירה',
+              style:
+                  const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
             ),
             const SizedBox(height: BsTokens.space3),
             _ProfileField(
               label: 'שם העסק',
               hint: 'שם העסק...',
-              value: p.businessName,
-              onChanged: (v) => n.update((s) => s.copyWith(businessName: v)),
+              value: _businessName,
+              // F-41 — bounded: the override lands in the board AppBar title.
+              maxLength: 40,
+              onChanged: (v) => _draft(() => _businessName = v),
             ),
             _ProfileField(
               label: 'ח.פ. / ע.מ.',
               hint: '9 ספרות...',
-              value: p.businessId,
+              value: _businessId,
               keyboardType: TextInputType.number,
               // task #64: format-only check — uniqueness deferred to Firebase.
-              errorText: p.businessId.trim().isEmpty ||
-                      validBusinessId(p.businessId)
+              errorText: _businessId.trim().isEmpty ||
+                      validBusinessId(_businessId)
                   ? null
                   : 'ח.פ. חייב להכיל 9 ספרות',
-              onChanged: (v) => n.update((s) => s.copyWith(businessId: v)),
+              onChanged: (v) => _draft(() => _businessId = v),
             ),
             _ProfileField(
               label: 'טלפון',
               hint: '05X-XXXXXXX',
-              value: p.phone,
+              value: _phone,
               keyboardType: TextInputType.phone,
-              errorText: p.phone.trim().isEmpty || validIsraeliMobile(p.phone)
+              errorText: _phone.trim().isEmpty || validIsraeliMobile(_phone)
                   ? null
                   : 'נייד ישראלי: 10 ספרות שמתחילות ב-05',
-              onChanged: (v) => n.update((s) => s.copyWith(phone: v)),
+              onChanged: (v) => _draft(() => _phone = v),
             ),
             _ProfileField(
               label: 'כתובת',
               hint: 'רחוב, מספר, עיר...',
-              value: p.address,
-              onChanged: (v) => n.update((s) => s.copyWith(address: v)),
+              value: _address,
+              onChanged: (v) => _draft(() => _address = v),
             ),
             _ProfileField(
               label: 'שעות פעילות',
               hint: 'א׳-ה׳ 07:00-17:00...',
-              value: p.hours,
-              onChanged: (v) => n.update((s) => s.copyWith(hours: v)),
+              value: _hours,
+              onChanged: (v) => _draft(() => _hours = v),
+            ),
+            const SizedBox(height: BsTokens.space2),
+            // ONE awaited commit (F-18) — honest result toast; the store
+            // rolls back on a persist failure. In-flight guard per F-38.
+            FilledButton(
+              onPressed: _saving ? null : _save,
+              style: FilledButton.styleFrom(
+                backgroundColor: BsTokens.brand,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                ),
+              ),
+              child: Text(
+                _saving ? 'שומר…' : '💾 שמור פרופיל',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
             ),
             const SizedBox(height: BsTokens.space3),
 
@@ -1192,18 +1464,12 @@ class SupplierSettingsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: BsTokens.space2),
-            _LogoPreview(dataUrl: p.logo),
+            _LogoPreview(username: username),
             const SizedBox(height: BsTokens.space2),
             FilledButton(
-              onPressed: () async {
-                // REAL capture — webcam dialog on desktop web / camera on
-                // mobile, file-picker fallback only on a camera ERROR
-                // (services/task_photo.dart). Null = honest cancel, no change.
-                final shot = await pickTaskPhoto(context);
-                if (shot == null || !context.mounted) return;
-                n.update((s) => s.copyWith(logo: () => shot));
-                showToast(context, 'הלוגו נשמר ✓');
-              },
+              // F-18 — awaited capture+persist with rollback; the toast tells
+              // the truth (see _captureLogo).
+              onPressed: _saving ? null : _captureLogo,
               style: FilledButton.styleFrom(
                 backgroundColor: BsTokens.brand,
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -1216,20 +1482,10 @@ class SupplierSettingsScreen extends ConsumerWidget {
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
               ),
             ),
-            if (p.logo != null) ...[
+            if (profile.logo != null) ...[
               const SizedBox(height: BsTokens.space2),
               OutlinedButton(
-                onPressed: () async {
-                  final ok = await confirmDestructive(
-                    context,
-                    title: 'להסיר את הלוגו?',
-                    message: 'הלוגו השמור יימחק — ניתן לצלם חדש בכל רגע.',
-                    confirmLabel: 'הסר',
-                  );
-                  if (!ok || !context.mounted) return;
-                  n.update((s) => s.copyWith(logo: () => null));
-                  showToast(context, 'הלוגו הוסר');
-                },
+                onPressed: _saving ? null : _removeLogo,
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 13),
                   side: const BorderSide(color: Color(0xFFE0E0E0)),
@@ -1266,6 +1522,7 @@ class _ProfileField extends StatefulWidget {
     required this.onChanged,
     this.errorText,
     this.keyboardType,
+    this.maxLength,
   });
 
   final String label;
@@ -1273,6 +1530,10 @@ class _ProfileField extends StatefulWidget {
   final String value;
   final String? errorText;
   final TextInputType? keyboardType;
+
+  /// F-41 — hard input bound (enforced by a [LengthLimitingTextInputFormatter]
+  /// too); null = unbounded (the legacy behavior).
+  final int? maxLength;
   final ValueChanged<String> onChanged;
 
   @override
@@ -1310,10 +1571,16 @@ class _ProfileFieldState extends State<_ProfileField> {
         keyboardType: widget.keyboardType,
         textDirection: TextDirection.rtl,
         onChanged: widget.onChanged,
+        maxLength: widget.maxLength,
+        inputFormatters: widget.maxLength != null
+            ? [LengthLimitingTextInputFormatter(widget.maxLength)]
+            : null,
         decoration: InputDecoration(
           labelText: widget.label,
           hintText: widget.hint,
           errorText: widget.errorText,
+          // Keep the dense layout — the length limit still applies (F-41).
+          counterText: '',
           isDense: true,
           filled: true,
           fillColor: BsTokens.cardLight,
@@ -1331,14 +1598,20 @@ class _ProfileFieldState extends State<_ProfileField> {
   }
 }
 
-/// The saved logo (decoded from its data-URL via the shared
-/// [decodeDataUrlPhoto] seam) or an honest empty placeholder.
-class _LogoPreview extends StatelessWidget {
-  const _LogoPreview({required this.dataUrl});
-  final String? dataUrl;
+/// The logged-in username's saved logo (decoded from its data-URL via the
+/// shared [decodeDataUrlPhoto] seam) or an honest empty placeholder.
+///
+/// F-18 perf — a ConsumerWidget with a NARROW `select` on the logo string
+/// only (typing in the profile fields no longer re-decodes the logo), and the
+/// decode is downscaled (`cacheHeight`) to the 120px preview, not full-res.
+class _LogoPreview extends ConsumerWidget {
+  const _LogoPreview({required this.username});
+  final String username;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dataUrl =
+        ref.watch(storeProfileProvider.select((m) => m[username]?.logo));
     final bytes = decodeDataUrlPhoto(dataUrl);
     return Container(
       height: 120,
@@ -1351,7 +1624,14 @@ class _LogoPreview extends StatelessWidget {
       child: bytes != null
           ? ClipRRect(
               borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-              child: Image.memory(bytes, height: 120, fit: BoxFit.contain),
+              child: Image.memory(
+                bytes,
+                height: 120,
+                fit: BoxFit.contain,
+                gaplessPlayback: true,
+                cacheHeight:
+                    (120 * MediaQuery.devicePixelRatioOf(context)).round(),
+              ),
             )
           : const Text(
               'אין לוגו עדיין — צלמו או העלו אחד',

@@ -1,5 +1,10 @@
-// #73 — הגדרות מותאמות-שליח: רק הקטגוריות הרלוונטיות לשליח (פרופיל-שליח,
-// התראות, אזור-ושפה, ממשק-ונגישות, מידע) — בלי קטלוג/סל/ספקים של הקבלן.
+// #73 — הגדרות מותאמות-שליח: רק הקטגוריות הרלוונטיות לשליח (התראות,
+// אזור-ושפה, ממשק-ונגישות, מידע) — בלי קטלוג/סל/ספקים של הקבלן.
+//
+// F-11 — ההגדרות הן עלה (leaf) בגרף הניווט: אין כאן שורת "פרופיל שליח"
+// (הצלע הגדרות→פרופיל מול פרופיל→הגדרות יצרה לולאת-ניווט אינסופית). הפרופיל
+// נשאר נגיש משתי הכניסות הקנוניות — אייקון ה-person ב-AppBar של הלוח וטאב 4
+// "אזור אישי". אסור להחזיר את הצלע — גם לא בכרטיס האזור-האישי (#86.7).
 //
 // כל המתגים מחווטים ל-providers הקיימים והנשמרים באמת:
 //   notifSettingsProvider (התראות) · appSettingsProvider (שפה) ·
@@ -8,17 +13,20 @@
 // האחים); ערבית/אנגלית נשארות "בקרוב" כמו במסך הקיים (task #53 — בלי לזייף
 // החלפת שפה).
 
-import 'package:buildsmart/screens/courier_profile_screen.dart';
 import 'package:buildsmart/screens/legal_screen.dart';
+import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/notif_settings.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Full-screen courier settings — 4 categories + profile row, all leaves
-/// persisted via the existing providers.
+/// Full-screen courier settings — 4 categories, all leaves persisted via the
+/// existing providers. Gated by [boardAuthProvider] (F-4: "מבחוץ לא רואים
+/// כלום" — logout while this screen is stacked rebuilds it as the gate).
 class CourierSettingsScreen extends ConsumerWidget {
   const CourierSettingsScreen({super.key});
 
@@ -27,6 +35,15 @@ class CourierSettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 🔒 BOARD GATE (חוק הלוחות, כלל 4 — "מבחוץ לא רואים כלום") — F-4: בלי
+    // session של שליח נבנה אך ורק שער הרישום במצב-תפקיד; כך גם כל המסך הזה
+    // בערימה אחרי logout נבנה-מחדש כשער (האידיום של העובד —
+    // worker_settings_screen).
+    final session = ref.watch(boardAuthProvider);
+    if (session == null || session.role != BoardRole.courier) {
+      return const WelcomeScreen(boardRole: BoardRole.courier);
+    }
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -46,7 +63,6 @@ class CourierSettingsScreen extends ConsumerWidget {
         body: ListView(
           padding: const EdgeInsets.symmetric(vertical: 8),
           children: const [
-            _CourierProfileRow(),
             _CourierNotifSection(),
             _CourierRegionSection(),
             _CourierAccessibilitySection(),
@@ -54,36 +70,6 @@ class CourierSettingsScreen extends ConsumerWidget {
             SizedBox(height: 24),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ─── 0. פרופיל שליח (שורת-ראש) ───────────────────────────────────────────────
-
-class _CourierProfileRow extends StatelessWidget {
-  const _CourierProfileRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      color: const Color(0xFFFFFFFF),
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: const Text('🛵', style: TextStyle(fontSize: 22)),
-        title: const Text(
-          'פרופיל שליח',
-          style: TextStyle(
-            color: BsTokens.inkLight,
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        trailing: const Icon(Icons.chevron_left, color: Colors.black54),
-        onTap: () => Navigator.of(context).push(CourierProfileScreen.route()),
       ),
     );
   }
@@ -301,8 +287,10 @@ class _SectionTile extends StatelessWidget {
                   ),
                   child: Text(
                     '$_activeCount',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      // F-28 — bsOnAccent על מילוי-מותג (לא לבן קשיח): מכבד
+                      // את מתג הניגודיות-הגבוהה שנמצא במסך הזה עצמו.
+                      color: bsOnAccent(context),
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),
