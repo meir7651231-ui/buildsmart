@@ -10,6 +10,22 @@ enum CatalogViewMode { grid, list }
 
 enum CatalogSort { relevance, priceAsc, rating, newest }
 
+/// The product-list sort the catalog actually applies (one entry per *working*
+/// ordering the catalog data can support). Lives here — not in the screen —
+/// because it is now a persisted user default ([CatalogSettings.productSortDefault])
+/// that the catalog screen seeds its live sort from. (Distinct from [CatalogSort],
+/// whose price/rating/newest options have no backing field on the product model.)
+enum ProductSort { byOrder, nameAZ, nameZA, sku }
+
+/// Verbatim Hebrew label for each [ProductSort] (shared by the settings picker
+/// and the in-catalog ↕️ מיון sheet so they can never drift).
+String catalogProductSortLabel(ProductSort s) => switch (s) {
+      ProductSort.byOrder => 'ברירת מחדל',
+      ProductSort.nameAZ => 'שם א-ת',
+      ProductSort.nameZA => 'שם ת-א',
+      ProductSort.sku => 'מק"ט',
+    };
+
 enum CatalogCurrency { ils, usd, eur }
 
 enum CatalogUnit { metric, imperial }
@@ -39,6 +55,7 @@ class CatalogSettings {
     // Section 2 — Display
     required this.gridColumns,
     required this.imageSize,
+    required this.productSortDefault,
     // Section 3 — Prices
     required this.showUnitPrice,
     required this.priceComparison,
@@ -83,6 +100,10 @@ class CatalogSettings {
   // Section 2 — Display
   final int gridColumns;
   final CatalogImageSize imageSize;
+
+  /// Default product-list ordering the catalog applies on open (seeds the live
+  /// [catalogProductSortProvider]). One of the working [ProductSort] options.
+  final ProductSort productSortDefault;
 
   // Section 3 — Prices
   final bool showUnitPrice;
@@ -130,6 +151,7 @@ class CatalogSettings {
     searchRadius: 50,
     gridColumns: 2,
     imageSize: CatalogImageSize.medium,
+    productSortDefault: ProductSort.byOrder,
     showUnitPrice: true,
     priceComparison: true,
     syncFavorites: true,
@@ -164,6 +186,7 @@ class CatalogSettings {
     int? searchRadius,
     int? gridColumns,
     CatalogImageSize? imageSize,
+    ProductSort? productSortDefault,
     bool? showUnitPrice,
     bool? priceComparison,
     bool? syncFavorites,
@@ -197,6 +220,7 @@ class CatalogSettings {
       searchRadius: searchRadius ?? this.searchRadius,
       gridColumns: gridColumns ?? this.gridColumns,
       imageSize: imageSize ?? this.imageSize,
+      productSortDefault: productSortDefault ?? this.productSortDefault,
       showUnitPrice: showUnitPrice ?? this.showUnitPrice,
       priceComparison: priceComparison ?? this.priceComparison,
       syncFavorites: syncFavorites ?? this.syncFavorites,
@@ -232,6 +256,7 @@ class CatalogSettings {
         'searchRadius': searchRadius,
         'gridColumns': gridColumns,
         'imageSize': imageSize.name,
+        'productSortDefault': productSortDefault.name,
         'showUnitPrice': showUnitPrice,
         'priceComparison': priceComparison,
         'syncFavorites': syncFavorites,
@@ -291,6 +316,11 @@ class CatalogSettings {
         j['imageSize'],
         CatalogImageSize.values,
         CatalogImageSize.medium,
+      ),
+      productSortDefault: _enum(
+        j['productSortDefault'],
+        ProductSort.values,
+        ProductSort.byOrder,
       ),
       showUnitPrice: b('showUnitPrice'),
       priceComparison: b('priceComparison'),
@@ -374,6 +404,17 @@ class CatalogSettingsNotifier extends StateNotifier<CatalogSettings> {
 final catalogSettingsProvider =
     StateNotifierProvider<CatalogSettingsNotifier, CatalogSettings>(
   (_) => CatalogSettingsNotifier(),
+);
+
+/// Live, in-session product sort for the catalog list. SEEDED (one-shot, via
+/// `ref.read`) from the persisted [CatalogSettings.productSortDefault] so the
+/// catalog opens in the user's chosen default ordering; a manual ↕️ מיון pick
+/// then overrides it for the session without being clobbered by a settings
+/// reload. (Settings load before the catalog is reachable in practice, so the
+/// read returns the persisted default.) The catalog screen + settings picker
+/// both drive this provider.
+final catalogProductSortProvider = StateProvider<ProductSort>(
+  (ref) => ref.read(catalogSettingsProvider).productSortDefault,
 );
 
 // ─── price / dimension display helpers (pure — applied by the consuming UI) ──

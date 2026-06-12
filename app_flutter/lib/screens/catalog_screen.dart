@@ -298,18 +298,9 @@ final catalogTreeQueryProvider = StateProvider<String>((_) => '');
 /// Selected facet labels (in order) while drilling inside a faceted leaf.
 final catalogFacetProvider = StateProvider<List<String>>((_) => const []);
 
-/// Sort order for the products listed beneath the drill rows.
-enum ProductSort { byOrder, nameAZ, nameZA, sku }
-
-String _productSortLabel(ProductSort s) => switch (s) {
-      ProductSort.byOrder => 'ברירת מחדל',
-      ProductSort.nameAZ => 'שם א-ת',
-      ProductSort.nameZA => 'שם ת-א',
-      ProductSort.sku => 'מק"ט',
-    };
-
-final catalogProductSortProvider =
-    StateProvider<ProductSort>((_) => ProductSort.byOrder);
+// [ProductSort], [catalogProductSortLabel] and [catalogProductSortProvider]
+// now live in state/catalog_settings.dart (the live sort is seeded from the
+// persisted מיון ברירת מחדל user default).
 
 /// PERF-H1: derived provider — computes the full search-result product list once
 /// per unique combination of the five inputs the search panel uses, so the
@@ -339,7 +330,7 @@ final searchResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
   }
 
   List<LipskeyCatalogProduct> orderProducts(List<LipskeyCatalogProduct> ps) {
-    if (sort != ProductSort.byOrder) return _sortProducts(ps, sort);
+    if (sort != ProductSort.byOrder) return sortCatalogProducts(ps, sort);
     return [...ps]..sort(
         (a, b) => searchRelevance(b, query).compareTo(searchRelevance(a, query)));
   }
@@ -365,7 +356,10 @@ List<LipskeyCatalogProduct> filterByImage(
 const CatalogNode kDepartmentTreeRoot = CatalogNode(
     id: 'dept-root', title: 'מחלקות', emoji: '🏬', children: kCatalogTree);
 
-List<LipskeyCatalogProduct> _sortProducts(
+/// Apply a [ProductSort] to a product list (pure — returns a new list, leaves
+/// the source order for [ProductSort.byOrder]). This is the single ordering the
+/// catalog list + the persisted מיון ברירת מחדל default both flow through.
+List<LipskeyCatalogProduct> sortCatalogProducts(
     List<LipskeyCatalogProduct> list, ProductSort s) {
   if (s == ProductSort.byOrder) return list;
   final out = [...list];
@@ -1697,7 +1691,7 @@ class _SearchToolsRow extends ConsumerWidget {
                   color:
                       s == current ? BsTokens.brand : const Color(0xFF888888),
                 ),
-                title: Text(_productSortLabel(s),
+                title: Text(catalogProductSortLabel(s),
                     style: const TextStyle(color: BsTokens.inkLight)),
                 onTap: () {
                   ref.read(catalogProductSortProvider.notifier).state = s;
@@ -2787,7 +2781,7 @@ class _TreeDrill extends ConsumerWidget {
       }
     }
 
-    products = _sortProducts(products, ref.watch(catalogProductSortProvider));
+    products = sortCatalogProducts(products, ref.watch(catalogProductSortProvider));
 
     final body = special ??
         CustomScrollView(
@@ -2997,7 +2991,7 @@ class _ProductsHeader extends ConsumerWidget {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        _productSortLabel(s),
+                        catalogProductSortLabel(s),
                         style: TextStyle(
                           color: BsTokens.inkLight,
                           fontSize: 14,

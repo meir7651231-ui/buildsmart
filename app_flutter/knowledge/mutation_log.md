@@ -815,3 +815,6 @@
 
 ### 2026-06-11 — חיבור הגדרות-תצוגה בקטלוג (נחיל גל-2 מנה-1)
 - **`lib/state/catalog_settings.dart` — `priceWithVat`:** מוטציה — `base*(1+kVatRate)` → `base` קבוע → `catalog_price_units_settings_test` **אדום** (2 assertions: Expected 117/'~₪117', Actual 100/'~₪100') ✅ נתפס; שוחזר byte-clean (cp) → 16/16 ירוק.
+
+### 2026-06-11 — מיון-קטלוג (נחיל גל-2 מנה-2)
+- **`catalog_screen.dart`/`catalog_settings.dart` — `sortCatalogProducts` nameAZ:** מוטציה — היפוך ה-comparator (descending) → `catalog_sort_alerts_settings_test` nameAZ **אדום** (['B-200','C-300','A-100'] ≠ ['A-100','C-300','B-200']) ✅ נתפס; שוחזר (cp) → 16/16 ירוק.

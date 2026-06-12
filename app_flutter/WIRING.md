@@ -1747,3 +1747,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - 🔑 deferral יחיד: "השוואת מחירים בין ספקים" (דורש feed-ספקים חי) — נשאר placeholder, מתועד (אין זיוף).
 - guard: `catalog_price_units_settings_test` (16 · persist round-trip ×5 · VAT math · symbols · dim format · 3 widget). מוטציה: שבירת `priceWithVat` → 2 assertions אדום → שוחזר.
 - Gate: analyze 0 · full-suite +2028 · build web ✅.
+### #wave2-b2 — שאר מתגי-הקטלוג: מיון + התראות-מועדפים (נחיל גל-2 מנה-2) — 2026-06-11
+- **חובר:** `מיון ברירת מחדל` → `productSortDefault` + `catalogProductSortProvider` — הקטלוג מתמיין מיד (`sortCatalogProducts` הוזז ל-state, 4 call-sites עודכנו). 5 toggles-התראות (ירידת-מחיר/חזר-למלאי/מלאי-נמוך/מוצרים-חדשים/שינוי-מחיר-במועדפים) → העדפה נשמרת (delivery מגודר על מערכת-ההתראות, מתועד בקוד).
+- **🔑 נדחו ביושר (~10, אפס זיוף):** 5 סינוני-ספקים + רדיוס-חיפוש (למוצרי-lipskey אין שדות זהות-ספק/דירוג/מרחק/geo — פער-דאטה, לא רק מפתח) · סנכרון-מועדפים/שיתוף-רשימה/יבוא-יצוא (backend). השדות קיימים ב-state, לא-מחוברים, מתועד.
+- guard: `catalog_sort_alerts_settings_test` (16 · סדר-מיון AZ/ZA/SKU+טוהר · persist ×6 + bogus-fallback · 3 widget). מוטציה: היפוך comparator → nameAZ אדום → שוחזר.
+- Gate: analyze 0 · full-suite 2096 · build web ✅.
