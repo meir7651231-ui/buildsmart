@@ -11,7 +11,7 @@
 |---|---|---|---|---|---|
 | A1 | ✅ scoped‑query אופציונלי ב‑source | `firestore_cached_repo.dart` | נדחף (e3e6e94) | agent | — |
 | A2 | ✅ בוצע (fleet 5590b38) · `currentUid` מ‑auth + להזריק ל‑providers | `auth_state.dart` → `orders_local`/`chat_repository`/`customers_local` providers | repo רואה uid מחובר | agent | S |
-| A3 | הזמנה: `contractorId=uid` + שדה‑שם נפרד (להפסיק `who`=שם) | `orders_firebase.toDoc` · `orders_engine.placeOrder` · `store_screen.dart:2816` | doc חדש: `contractorId==auth.uid` | agent | M |
+| A3 | ✅ (fleet 24b5bc2) · הזמנה: `contractorId=uid` + שדה‑שם נפרד (להפסיק `who`=שם) | `orders_firebase.toDoc` · `orders_engine.placeOrder` · `store_screen.dart:2816` | doc חדש: `contractorId==auth.uid` | agent | M |
 | A4 | הזמנה: `storeId/courierId=uid` בשיוך/קידום | `sys_orders.dart` storeAdvance/courierAdvance | order נושא uid של החנות/שליח | agent | M |
 | A5 | הזמנות: listener ממוקד (לא‑מנהל) | `ordersRepositoryProvider` (scope של A1) | קבלן רואה רק שלו · admin הכול | agent | M |
 | A6 | דשבורד חנות/שליח: סינון לפי זהות | `store_dashboard_screen.dart:300` · `courier_dashboard_screen.dart:45` | חנות רואה את ההזמנות שלה | agent | M |
@@ -28,8 +28,8 @@
 | ID | משימה | היכן | DoD | מי | מ' |
 |---|---|---|---|---|---|
 | B1 | להסיר תג‑בדיקה | `main.dart` + מחיקת `backend_debug_badge.dart` | אין debug ב‑prod | agent | S |
-| B2 | מקצועות: לבנות חשמלאי+שיפוצים **או** להסתיר | `profession_screen.dart:11` | אין "בקרוב" במקצוע | את+agent | L |
-| B3 | מחלקות: 4 dormant — לבנות **או** להסתיר | `departments_screen.dart:96` (live:false) | אין מחלקה מתה | את+agent | M |
+| B2 | ✅ (ebb4efd · הוסתרו) · מקצועות: לבנות חשמלאי+שיפוצים **או** להסתיר | `profession_screen.dart:11` | אין "בקרוב" במקצוע | את+agent | L |
+| B3 | ✅ (ebb4efd · הוסתרו) · מחלקות: 4 dormant — לבנות **או** להסתיר | `departments_screen.dart:96` (live:false) | אין מחלקה מתה | את+agent | M |
 | B4 | קטלוג: קטגוריות ריקות — דאטה **או** להסתיר | `catalog_screen.dart:3041` | אין "בקרוב" בקטלוג | agent | M |
 | B5 | הגדרות מתות (~28) → להסתיר עד מימוש | `*_settings_screen.dart` | אין "נשמר אך לא משפיע" | agent | M |
 | B6 | חיפוש: פילטרים/מיון — לממש **או** להסתיר | `catalog_screen.dart:1108` · search dial | פועל או נעלם | agent | M |
