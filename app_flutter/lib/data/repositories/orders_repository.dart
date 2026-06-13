@@ -61,6 +61,16 @@ abstract class OrdersRepository {
   /// stage / unknown id is ignored. Mirrors `OrdersEngineNotifier.setStage`.
   void setStage(String orderId, String stage);
 
+  /// A4 (claim-on-first-advance) — CLAIM [orderId] for the STORE [uid]: stamp
+  /// `storeUid = uid` ONLY when it is currently empty (no-steal — an order
+  /// already claimed by another store is left untouched; a manager reassigns
+  /// server-side). Empty [uid] no-ops. Mirrors `OrdersEngineNotifier.claimStore`.
+  void claimStore(String orderId, String uid);
+
+  /// A4 — CLAIM [orderId] for the COURIER [uid] (courier analogue of
+  /// [claimStore]). Mirrors `OrdersEngineNotifier.claimCourier`.
+  void claimCourier(String orderId, String uid);
+
   /// Reset to the four seed orders (tests / a future "demo reset"). Mirrors
   /// `OrdersEngineNotifier.resetToSeed`.
   void resetToSeed();

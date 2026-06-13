@@ -79,6 +79,12 @@ class _RecordingOrdersRepo implements OrdersRepository {
   void setStage(String orderId, String stage) {}
 
   @override
+  void claimStore(String orderId, String uid) {}
+
+  @override
+  void claimCourier(String orderId, String uid) {}
+
+  @override
   void resetToSeed() {}
 }
 

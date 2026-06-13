@@ -19,6 +19,7 @@
 //   • Contractor places + Manager god-steps via the engine directly.
 
 import 'package:buildsmart/data/supplier_data.dart';
+import 'package:buildsmart/state/auth_state.dart' show currentUidProvider;
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -93,6 +94,14 @@ class SysOrdersNotifier extends StateNotifier<List<SysOrder>> {
     final o = _orderById(id);
     if (o == null) return;
     if (o.stage == 'new' || o.stage == 'preparing' || o.stage == 'ready') {
+      // A4 (claim-on-first-advance) — the first store party to advance an order
+      // out of the shared pool CLAIMS it (`storeUid = acting uid`); no-steal +
+      // empty-uid (signed-out / Firebase-free) no-op live in `claimStore`, so
+      // this is zero-regression on today's path. Claim BEFORE advancing so the
+      // order is owned the moment it leaves the pool.
+      _ref
+          .read(ordersEngineProvider.notifier)
+          .claimStore(id, _ref.read(currentUidProvider) ?? '');
       _ref.read(ordersEngineProvider.notifier).advance(id);
     }
   }
@@ -104,6 +113,12 @@ class SysOrdersNotifier extends StateNotifier<List<SysOrder>> {
     final o = _orderById(id);
     if (o == null) return;
     if (o.stage == 'pickup' || o.stage == 'transit') {
+      // A4 — the courier analogue of the store claim in [storeAdvance]: the
+      // first courier party to advance the order CLAIMS it (`courierUid`),
+      // no-steal + empty-uid guarded in `claimCourier` (zero-regression).
+      _ref
+          .read(ordersEngineProvider.notifier)
+          .claimCourier(id, _ref.read(currentUidProvider) ?? '');
       _ref.read(ordersEngineProvider.notifier).advance(id);
     }
   }

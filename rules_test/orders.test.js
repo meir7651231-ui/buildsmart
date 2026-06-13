@@ -37,6 +37,7 @@ import {
   doc,
   getDoc,
   setDoc,
+  updateDoc,
 } from 'firebase/firestore';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -46,6 +47,7 @@ const PROJECT_ID = 'demo-buildsmart';
  *  single `role`, multi `roles`, plus the bootstrap `admin`. */
 const asContractor = (uid) => ({ role: 'contractor' });
 const asStore = (uid) => ({ role: 'store' });
+const asCourier = (uid) => ({ role: 'courier' });
 const asManager = () => ({ role: 'manager' });
 const asAdmin = () => ({ admin: true });
 
@@ -255,5 +257,172 @@ describe('customers · ownership (manager-or-owner read, manager-only write)', (
         used: 0,
       }),
     );
+  });
+});
+
+// ── orders — A4/A5 claim-on-first-advance + shared pool (no-steal) ────────────
+//
+// The launch multi-user core (SPEC-A4-A6-order-ownership): an un-claimed order
+// in a store/courier stage is the SHARED POOL — readable by every store/courier
+// of that role; the FIRST to advance it CLAIMS it (storeUid/courierUid = its
+// auth.uid). After that the order leaves the pool: only the claimant (+ manager)
+// reads/updates it, and NO other party can re-stamp the field (no-steal) — a
+// manager may REASSIGN. These tests drive the real /firestore.rules through
+// rules-bound clients; claims/advances use updateDoc (the app's set(merge:true)
+// partial write — stage[+the claim field]).
+describe('orders · A4 claim-on-first-advance + shared pool (no-steal)', () => {
+  // (pool read) every store reads an UN-CLAIMED order in a store stage.
+  it('a store READS an un-claimed pool order (storeUid=="" in a store stage)', async () => {
+    await seed('orders/POOL-1', {
+      contractorId: 'יוסי קבלן',
+      contractorUid: 'uid-alice',
+      stage: 'new', // a store pool stage, storeUid absent ⇒ ''
+      sum: 100,
+    });
+    await assertSucceeds(getDoc(doc(db('uid-store-a', asStore()), 'orders/POOL-1')));
+    await assertSucceeds(getDoc(doc(db('uid-store-b', asStore()), 'orders/POOL-1')));
+  });
+
+  // (claim-unclaimed ✓) a store CLAIMS an un-claimed pool order on first advance.
+  it('a store CLAIMS an un-claimed order on first advance (new→preparing, storeUid:=self)', async () => {
+    await seed('orders/CLAIM-1', {
+      contractorUid: 'uid-alice',
+      stage: 'new',
+      sum: 100,
+    });
+    await assertSucceeds(
+      updateDoc(doc(db('uid-store-a', asStore()), 'orders/CLAIM-1'), {
+        stage: 'preparing',
+        storeUid: 'uid-store-a', // the claim — empty→own
+      }),
+    );
+  });
+
+  // (steal-claimed ✗) a DIFFERENT store cannot advance/steal a claimed order.
+  it('a different store CANNOT steal an order already claimed by another store', async () => {
+    await seed('orders/CLAIM-2', {
+      contractorUid: 'uid-alice',
+      stage: 'preparing',
+      storeUid: 'uid-store-a', // already claimed by store-a
+      sum: 100,
+    });
+    // store-b tries to advance + re-stamp the claim to itself → DENIED (binding).
+    await assertFails(
+      updateDoc(doc(db('uid-store-b', asStore()), 'orders/CLAIM-2'), {
+        stage: 'ready',
+        storeUid: 'uid-store-b',
+      }),
+    );
+    // …and even leaving storeUid untouched, store-b is not the owner → DENIED.
+    await assertFails(
+      updateDoc(doc(db('uid-store-b', asStore()), 'orders/CLAIM-2'), {
+        stage: 'ready',
+      }),
+    );
+  });
+
+  // (owner read/update ✓) the claiming store reads + advances its own order.
+  it('the owning store READS and ADVANCES its own claimed order', async () => {
+    await seed('orders/CLAIM-3', {
+      contractorUid: 'uid-alice',
+      stage: 'preparing',
+      storeUid: 'uid-store-a',
+      sum: 100,
+    });
+    await assertSucceeds(getDoc(doc(db('uid-store-a', asStore()), 'orders/CLAIM-3')));
+    await assertSucceeds(
+      updateDoc(doc(db('uid-store-a', asStore()), 'orders/CLAIM-3'), {
+        stage: 'ready', // preparing→ready, own claim unchanged
+      }),
+    );
+  });
+
+  // (non-owner read claimed ✗) a store NOT the claimant cannot read a claimed
+  // order that has left the pool.
+  it('a non-owner store is DENIED reading an order claimed by another store (left the pool)', async () => {
+    await seed('orders/CLAIM-4', {
+      contractorUid: 'uid-alice',
+      stage: 'preparing', // claimed ⇒ NOT in the pool (storeUid != '')
+      storeUid: 'uid-store-a',
+      sum: 100,
+    });
+    await assertFails(getDoc(doc(db('uid-store-b', asStore()), 'orders/CLAIM-4')));
+  });
+
+  // (manager reassign ✓) a manager overrides the claim to a different store.
+  it('a manager REASSIGNS a claimed order to a different store (override)', async () => {
+    await seed('orders/CLAIM-5', {
+      contractorUid: 'uid-alice',
+      stage: 'preparing',
+      storeUid: 'uid-store-a',
+      sum: 100,
+    });
+    await assertSucceeds(
+      updateDoc(doc(db('uid-mgr', asManager()), 'orders/CLAIM-5'), {
+        storeUid: 'uid-store-b', // god-reassign to another store
+      }),
+    );
+  });
+
+  // A store may NOT touch the peer's courierUid while advancing (field isolation).
+  it('a store CANNOT write courierUid while advancing (peer claim is frozen)', async () => {
+    await seed('orders/CLAIM-6', {
+      contractorUid: 'uid-alice',
+      stage: 'new',
+      sum: 100,
+    });
+    await assertFails(
+      updateDoc(doc(db('uid-store-a', asStore()), 'orders/CLAIM-6'), {
+        stage: 'preparing',
+        storeUid: 'uid-store-a',
+        courierUid: 'uid-store-a', // forging the courier claim → DENIED
+      }),
+    );
+  });
+
+  // ── the courier analogue ────────────────────────────────────────────────────
+  it('a courier CLAIMS an un-claimed order on first advance (pickup→transit)', async () => {
+    await seed('orders/CCLAIM-1', {
+      contractorUid: 'uid-alice',
+      stage: 'pickup', // a courier pool stage, courierUid absent ⇒ ''
+      sum: 100,
+    });
+    await assertSucceeds(
+      updateDoc(doc(db('uid-courier-a', asCourier()), 'orders/CCLAIM-1'), {
+        stage: 'transit',
+        courierUid: 'uid-courier-a',
+      }),
+    );
+  });
+
+  it('a different courier CANNOT steal an order already claimed by another courier', async () => {
+    await seed('orders/CCLAIM-2', {
+      contractorUid: 'uid-alice',
+      stage: 'transit',
+      courierUid: 'uid-courier-a',
+      sum: 100,
+    });
+    await assertFails(
+      updateDoc(doc(db('uid-courier-b', asCourier()), 'orders/CCLAIM-2'), {
+        stage: 'delivered',
+        courierUid: 'uid-courier-b',
+      }),
+    );
+  });
+
+  it('a courier READS an un-claimed ready pool order; a non-owner is DENIED a claimed one', async () => {
+    await seed('orders/CCLAIM-3', {
+      contractorUid: 'uid-alice',
+      stage: 'ready', // courier pool entry stage, courierUid ''
+      sum: 100,
+    });
+    await assertSucceeds(getDoc(doc(db('uid-courier-a', asCourier()), 'orders/CCLAIM-3')));
+    await seed('orders/CCLAIM-4', {
+      contractorUid: 'uid-alice',
+      stage: 'transit',
+      courierUid: 'uid-courier-a', // claimed ⇒ out of pool
+      sum: 100,
+    });
+    await assertFails(getDoc(doc(db('uid-courier-b', asCourier()), 'orders/CCLAIM-4')));
   });
 });

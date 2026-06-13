@@ -830,3 +830,7 @@
 
 ### 2026-06-12 — מדריך users lookup A7 (נחיל)
 - **`lib/data/repositories/users_lookup.dart` — predicate-הטלפון:** מוטציה — `== phone` → `!= phone` → `users_lookup_a7_test` **אדום** (4: hit→uid-שגוי · miss→החזיר-uid · role-narrow→null) ✅ נתפס; שוחזר (cp) → 10/10 ירוק.
+
+### 2026-06-13 — בעלות-הזמנה A4-A6 (נחיל)
+- **`firestore.rules` — no-steal (`claimOnlySelf`/`unassignedOrMine`):** מוטציה (emulator) — נטרול ל-true → 2 steal-tests **אדום** (25/2) → שוחזר → 27/0.
+- **`lib/state/orders_engine.dart` — `claimStore` no-steal:** מוטציה — הסרת ה-guard → 'store אחר לא יכול לגנוב' **אדום** (Expected store-a/Actual store-b) → שוחזר.

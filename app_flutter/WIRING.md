@@ -1798,3 +1798,11 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - guard: הורחב `welcome_auth_gate_test` (+2): flag-OFF `_register` כותב 0 ל-users (נעילה מול רגרסיה שתמציא חשבון בדמו) · צורת-mirror `users/{uid}` ({displayName,phone}, uid-keyed, ריקים מושמטים). flag-ON routing = device-only (מתועד).
 - מוטציות: הסרת flag-gate ב-`_register` → אדום · key `displayName`→`name` → אדום · שניהם שוחזרו.
 - Gate: analyze 0 · full-suite +2162 · build web ✅.
+### #A4-A6 — בעלות-הזמנה multi-user: claim-on-first-advance + pool (נחיל · לפי SPEC) — 2026-06-13
+- **A4 (claim/no-steal):** `Order.storeUid`/`courierUid` (אדיטיביים, default '') · `claimStore`/`claimCourier` (מנוע+repo+firebase) — תובע רק כשריק (no-steal), uid-ריק no-op · `sys_orders` storeAdvance/courierAdvance תובעים מ-`currentUidProvider` לפני קידום.
+- **A5 (scope · gated):** דגל `kUidScopedQueries` (`backend.dart`, default false). ON → contractor=`contractorUid==uid` · store=pool(`storeUid==''`∧store-stage)∪own(`storeUid==uid`) · courier=אנלוגי · manager=ללא. **OFF=אפס-רגרסיה** (short-circuit לפני watch של role/uid; נעול בבדיקה).
+- **A6 (דשבורד):** store/courier dashboards מסננים pool∪own כש-flag ON (`visibleOrderIdsProvider`/`orderVisibleToRole`); OFF=ללא-שינוי.
+- **rules+emulator:** `firestore.rules` אוכף claim/no-steal (`claimOnlySelf`/`unassignedOrMine`/pool) + manager-override · `rules_test/orders.test.js` +10.
+- guard: `orders_uid_a4_a6_test` (22 · flag-OFF lock · claim+no-steal · round-trip · scope-per-role · dashboard). מוטציות: rules (2 steal→אדום, 25/2) + Dart (no-steal→אדום) שוחזרו.
+- **אימות:** analyze 0 · full-suite +2176 · build web ✅ · **emulator 27/0** (17→+10). SPEC: `knowledge/SPEC-A4-A6-order-ownership.md`.
+- **owner-activation:** `UID_SCOPED_QUERIES=true` + backfill + `firebase deploy --only firestore:rules,firestore:indexes`.

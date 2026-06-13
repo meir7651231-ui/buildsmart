@@ -79,6 +79,12 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
         if (o.shipTo.isNotEmpty) 'shipTo': o.shipTo,
         if (o.notes.isNotEmpty) 'notes': o.notes,
         if (o.contractorUid.isNotEmpty) 'contractorUid': o.contractorUid,
+        // A4 (claim-on-first-advance) — the claiming store/courier uids, written
+        // only when non-empty so the seed + every pre-A4 doc round-trips
+        // unchanged (mirrors `contractorUid`). The `set(merge:true)` write path
+        // never clears them either.
+        if (o.storeUid.isNotEmpty) 'storeUid': o.storeUid,
+        if (o.courierUid.isNotEmpty) 'courierUid': o.courierUid,
       };
 
   /// Firestore doc → `Order`. Inverse of [toDoc]: the doc-id becomes `id`,
@@ -106,6 +112,8 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
       shipTo: (j['shipTo'] as String?) ?? '',
       notes: (j['notes'] as String?) ?? '',
       contractorUid: (j['contractorUid'] as String?) ?? '',
+      storeUid: (j['storeUid'] as String?) ?? '',
+      courierUid: (j['courierUid'] as String?) ?? '',
     );
   }
 
@@ -230,6 +238,32 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
     if (o == null) return;
     if (o.stage == stage) return;
     upsert(o.copyWith(stage: stage));
+  }
+
+  /// A4 (claim-on-first-advance) — CLAIM [orderId] for the STORE [uid] over the
+  /// cache: stamp `storeUid = uid` ONLY when currently empty (NO-STEAL — an
+  /// order already claimed by another store is left untouched; empty [uid]
+  /// no-ops; a same-uid re-claim is a no-op). The optimistic `upsert` mirrors
+  /// the claim into the engine synchronously and fires the background
+  /// `set(merge:true)` write — verbatim port of `OrdersEngineNotifier.claimStore`.
+  @override
+  void claimStore(String orderId, String uid) {
+    if (uid.isEmpty) return;
+    final o = byId(orderId);
+    if (o == null) return;
+    if (o.storeUid.isNotEmpty) return; // already claimed — no-steal
+    upsert(o.copyWith(storeUid: uid));
+  }
+
+  /// A4 — CLAIM [orderId] for the COURIER [uid] (courier analogue of
+  /// [claimStore]). Verbatim port of `OrdersEngineNotifier.claimCourier`.
+  @override
+  void claimCourier(String orderId, String uid) {
+    if (uid.isEmpty) return;
+    final o = byId(orderId);
+    if (o == null) return;
+    if (o.courierUid.isNotEmpty) return; // already claimed — no-steal
+    upsert(o.copyWith(courierUid: uid));
   }
 
   /// Reset to the four seed orders — verbatim port of

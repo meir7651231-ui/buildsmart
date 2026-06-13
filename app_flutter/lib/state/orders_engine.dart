@@ -85,6 +85,8 @@ class Order {
     this.shipTo = '',
     this.notes = '',
     this.contractorUid = '',
+    this.storeUid = '',
+    this.courierUid = '',
   });
 
   /// Order id, e.g. `BS-1042` (the legacy `o.id`).
@@ -98,6 +100,21 @@ class Order {
   /// every UI; A4 will scope the orders listen on this field. Written only when
   /// non-empty so the seed + legacy docs round-trip unchanged (zero regression).
   final String contractorUid;
+
+  /// A4 (launch uid · claim-on-first-advance) — the STORE's `auth.uid` that
+  /// CLAIMED this order. Empty until the first store party advances it from the
+  /// shared pool (`new→preparing`/`preparing→ready`); from that moment it is
+  /// stamped with the acting store's uid and may NOT be re-stamped by another
+  /// store (no-steal — a manager may reassign via the rules). Additive,
+  /// display-neutral, and written only when non-empty so the seed + every
+  /// pre-A4 doc round-trips byte-identical (mirrors [contractorUid] exactly).
+  final String storeUid;
+
+  /// A4 (launch uid · claim-on-first-advance) — the COURIER's `auth.uid` that
+  /// CLAIMED this order. Empty until the first courier party advances it from
+  /// the shared pool (`pickup`/`transit` step); thereafter no-steal. The
+  /// courier analogue of [storeUid]; same zero-regression discipline.
+  final String courierUid;
 
   /// The build site (the legacy `o.site`).
   final String site;
@@ -134,6 +151,8 @@ class Order {
     List<OrderLineItem>? lines,
     String? shipTo,
     String? notes,
+    String? storeUid,
+    String? courierUid,
   }) =>
       Order(
         id: id,
@@ -147,6 +166,10 @@ class Order {
         shipTo: shipTo ?? this.shipTo,
         notes: notes ?? this.notes,
         contractorUid: contractorUid,
+        // A4 — claim fields preserved across every copy (advance/setStage go
+        // through copyWith), and set when a claim stamps them.
+        storeUid: storeUid ?? this.storeUid,
+        courierUid: courierUid ?? this.courierUid,
       );
 
   /// Project to the pure [ManagerOrder] the manager analytics fold over — lets
@@ -172,6 +195,8 @@ class Order {
         if (shipTo.isNotEmpty) 'shipTo': shipTo,
         if (notes.isNotEmpty) 'notes': notes,
         if (contractorUid.isNotEmpty) 'contractorUid': contractorUid,
+        if (storeUid.isNotEmpty) 'storeUid': storeUid,
+        if (courierUid.isNotEmpty) 'courierUid': courierUid,
       };
 
   factory Order.fromJson(Map<String, dynamic> j) => Order(
@@ -192,6 +217,8 @@ class Order {
         shipTo: (j['shipTo'] as String?) ?? '',
         notes: (j['notes'] as String?) ?? '',
         contractorUid: (j['contractorUid'] as String?) ?? '',
+        storeUid: (j['storeUid'] as String?) ?? '',
+        courierUid: (j['courierUid'] as String?) ?? '',
       );
 
   /// Lift a seed [ManagerOrder] into a live [Order] (no timestamp — seed).
@@ -429,6 +456,50 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
     state = [
       for (var i = 0; i < state.length; i++)
         if (i == idx) state[i].copyWith(stage: stage) else state[i],
+    ];
+  }
+
+  /// A4 — CLAIM the order [orderId] for the STORE [uid] (claim-on-first-advance).
+  /// No-op if [uid] is empty (signed-out / Firebase-free → today's behavior, no
+  /// claim). NO-STEAL: stamps `storeUid = uid` ONLY when it is currently empty;
+  /// if already claimed by a DIFFERENT store it is left untouched (a manager
+  /// reassigns server-side). A re-claim by the SAME uid is a no-op. Called by
+  /// `sysOrders.storeAdvance` just before it advances, so the first store party
+  /// to move an order out of the shared pool owns it.
+  void claimStore(String orderId, String uid) {
+    if (uid.isEmpty) return;
+    final r = _remote;
+    if (r != null) {
+      r.claimStore(orderId, uid);
+      return;
+    }
+    final idx = state.indexWhere((o) => o.id == orderId);
+    if (idx < 0) return;
+    final cur = state[idx].storeUid;
+    if (cur.isNotEmpty) return; // already claimed — no-steal (incl. same uid)
+    state = [
+      for (var i = 0; i < state.length; i++)
+        if (i == idx) state[i].copyWith(storeUid: uid) else state[i],
+    ];
+  }
+
+  /// A4 — CLAIM the order [orderId] for the COURIER [uid]. Courier analogue of
+  /// [claimStore]: empty uid no-ops, stamps `courierUid` only when empty
+  /// (no-steal), called by `sysOrders.courierAdvance` on the first advance.
+  void claimCourier(String orderId, String uid) {
+    if (uid.isEmpty) return;
+    final r = _remote;
+    if (r != null) {
+      r.claimCourier(orderId, uid);
+      return;
+    }
+    final idx = state.indexWhere((o) => o.id == orderId);
+    if (idx < 0) return;
+    final cur = state[idx].courierUid;
+    if (cur.isNotEmpty) return; // already claimed — no-steal
+    state = [
+      for (var i = 0; i < state.length; i++)
+        if (i == idx) state[i].copyWith(courierUid: uid) else state[i],
     ];
   }
 

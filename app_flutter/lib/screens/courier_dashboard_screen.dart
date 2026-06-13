@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
+import 'package:buildsmart/data/repositories/orders_local.dart'
+    show visibleOrderIdsProvider;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/courier_delivery_detail_sheet.dart';
 import 'package:buildsmart/screens/courier_portal_tab.dart';
@@ -367,9 +369,18 @@ class _CourierDashboardScreenState
     );
   }
 
+  /// A6 — apply the pool∪own scope to a SysOrder list when
+  /// [visibleOrderIdsProvider] is active (flag ON + courier uid). Returns the
+  /// list unchanged otherwise (null id-set ⇒ today's full list, zero regression).
+  List<SysOrder> _scopeOrders(List<SysOrder> orders) {
+    final ids = ref.watch(visibleOrderIdsProvider);
+    if (ids == null) return orders;
+    return orders.where((o) => ids.contains(o.id)).toList();
+  }
+
   // ── טאב 1 · משלוחים (ברירת המחדל — מונים + כרטיסי משלוח) ──────────────────
   Widget _deliveriesTab(BoardSession session, String vehicle) {
-    final orders = ref.watch(sysOrdersProvider);
+    final orders = _scopeOrders(ref.watch(sysOrdersProvider));
     final haulName = haulInfo(vehicle).name;
     // F-57 — מנוי יחיד על ה-side-car לכל הטאב (ערכי המפה מחזיקים POD
     // data-URLs ענקיים; watch כפול בתוך לולאת הכרטיסים בנה מחדש את כל הטאב

@@ -16,9 +16,15 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import 'package:buildsmart/data/repositories/backend.dart';
+import 'package:buildsmart/data/repositories/firestore_cached_repo.dart'
+    show FirestoreCollectionSource;
 import 'package:buildsmart/data/repositories/orders_firebase.dart';
 import 'package:buildsmart/data/repositories/orders_repository.dart';
+import 'package:buildsmart/state/auth_state.dart'
+    show currentUidProvider, roleProvider;
 import 'package:buildsmart/state/orders_engine.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'
+    show CollectionReference, Filter, Query;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The local (in-memory + SharedPreferences) implementation of
@@ -85,6 +91,14 @@ class LocalOrdersRepository implements OrdersRepository {
   void setStage(String orderId, String stage) => _engine.setStage(orderId, stage);
 
   @override
+  void claimStore(String orderId, String uid) =>
+      _engine.claimStore(orderId, uid);
+
+  @override
+  void claimCourier(String orderId, String uid) =>
+      _engine.claimCourier(orderId, uid);
+
+  @override
   void resetToSeed() => _engine.resetToSeed();
 }
 
@@ -98,9 +112,121 @@ class LocalOrdersRepository implements OrdersRepository {
 /// the same sync [OrdersRepository] contract → providers + UI are unchanged.
 final ordersRepositoryProvider = Provider<OrdersRepository>((ref) {
   if (useFirebaseBackend) {
-    final repo = FirebaseOrdersRepository()..attach();
+    // A5 — UID-SCOPED listen (behind `kUidScopedQueries`, default OFF). With the
+    // flag OFF the source is constructed with NO scope → the WHOLE-collection
+    // listen, BYTE-IDENTICAL to today (the zero-regression invariant). Only when
+    // the flag is ON *and* a uid is known do we build a role-scoped query the
+    // Security Rules can prove (pool ∪ own for store/courier; own for the
+    // contractor; manager/admin stay unscoped — the god view).
+    final scope = kUidScopedQueries
+        ? _ordersScopeFor(
+            role: ref.watch(roleProvider),
+            uid: ref.watch(currentUidProvider),
+          )
+        : null;
+    final repo = FirebaseOrdersRepository(
+      source: scope == null
+          ? FirestoreCollectionSource('orders')
+          : FirestoreCollectionSource('orders', scope: scope),
+    )..attach();
     ref.onDispose(repo.dispose);
     return repo;
   }
   return LocalOrdersRepository(ref);
+});
+
+/// A5 — the store stages a pool order can sit in while still un-claimed and
+/// store-actionable (`new→preparing→ready`, the store's chain). A pool listen
+/// is constrained to these so an un-claimed *delivered* order is NOT surfaced to
+/// every store.
+const List<String> _kStorePoolStages = ['new', 'preparing', 'ready'];
+
+/// A5 — the courier stages a pool order can sit in while still un-claimed and
+/// courier-actionable. An un-claimed order enters the courier pool at `ready`
+/// (the store handed it off); `pickup`/`transit` are included so a claim that
+/// has not yet landed in the cache still matches.
+const List<String> _kCourierPoolStages = ['ready', 'pickup', 'transit'];
+
+/// A5 — build the role-scoped orders [Query], or `null` for NO scope (the whole
+/// collection — manager/admin, or any case where there is no uid to scope to so
+/// we must NOT silently hide the contractor's seed/legacy data). The builder is
+/// what `FirestoreCollectionSource(scope:)` calls with the live
+/// `CollectionReference`. Each branch is exactly what the matching Security Rule
+/// proves (see `firestore.rules` orders read):
+///   • contractor → `contractorUid == uid`;
+///   • store      → pool (`storeUid=='' AND stage in store-stages`) ∪ own
+///                  (`storeUid == uid`) via `Filter.or`;
+///   • courier    → analogous on `courierUid`;
+///   • manager/admin / unknown-role / no-uid → null (unscoped).
+Query<Map<String, dynamic>> Function(
+        CollectionReference<Map<String, dynamic>>)?
+    _ordersScopeFor({required String? role, required String? uid}) {
+  if (uid == null || uid.isEmpty) return null; // no identity → do not hide data
+  switch (role) {
+    case 'store':
+      return (c) => c.where(
+            Filter.or(
+              Filter.and(
+                Filter('storeUid', isEqualTo: ''),
+                Filter('stage', whereIn: _kStorePoolStages),
+              ),
+              Filter('storeUid', isEqualTo: uid),
+            ),
+          );
+    case 'courier':
+      return (c) => c.where(
+            Filter.or(
+              Filter.and(
+                Filter('courierUid', isEqualTo: ''),
+                Filter('stage', whereIn: _kCourierPoolStages),
+              ),
+              Filter('courierUid', isEqualTo: uid),
+            ),
+          );
+    case 'manager':
+    case 'admin':
+      return null; // god view — the whole collection
+    case null: // the contractor / main app (roleProvider's null dialect)
+      return (c) => c.where('contractorUid', isEqualTo: uid);
+    default:
+      // An unknown/exotic role (e.g. 'worker') gets the contractor-style own
+      // scope on contractorUid — never an unscoped god listen.
+      return (c) => c.where('contractorUid', isEqualTo: uid);
+  }
+}
+
+/// A6 — does [o] belong in a [role]'s pool∪own view for [uid]? The CLIENT-side
+/// twin of [_ordersScopeFor] (same predicate, evaluated over the in-memory
+/// [Order]): pool (un-claimed in a role-stage) ∪ own (claimed by [uid]). Used by
+/// the store/courier dashboards so the on-screen list is pool∪own even on the
+/// un-scoped local path. Pure → unit-testable.
+bool orderVisibleToRole(Order o, {required String? role, required String uid}) {
+  switch (role) {
+    case 'store':
+      return (o.storeUid.isEmpty && _kStorePoolStages.contains(o.stage)) ||
+          o.storeUid == uid;
+    case 'courier':
+      return (o.courierUid.isEmpty && _kCourierPoolStages.contains(o.stage)) ||
+          o.courierUid == uid;
+    default:
+      return true; // other roles are not pool-scoped here
+  }
+}
+
+/// A6 — the set of order ids a store/courier dashboard should SHOW, or `null`
+/// for "show everything" (today's behavior). Returns null unless the flag is ON
+/// *and* there is a uid *and* the role is store/courier — so with
+/// `kUidScopedQueries` OFF (or signed-out, or any other role) the dashboards are
+/// byte-identical to today. The store/courier screens intersect their
+/// `sysOrders` list with this set when it is non-null.
+final visibleOrderIdsProvider = Provider<Set<String>?>((ref) {
+  if (!kUidScopedQueries) return null;
+  final uid = ref.watch(currentUidProvider);
+  if (uid == null || uid.isEmpty) return null;
+  final role = ref.watch(roleProvider);
+  if (role != 'store' && role != 'courier') return null;
+  return {
+    for (final o in ref.watch(ordersEngineProvider))
+      if (orderVisibleToRole(o, role: role, uid: uid)) o.id,
+  };
 });

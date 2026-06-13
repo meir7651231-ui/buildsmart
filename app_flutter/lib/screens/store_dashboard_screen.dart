@@ -6,6 +6,8 @@ import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/lipskey_catalog.dart'
     show LipskeyCatalogProduct;
 import 'package:buildsmart/data/polyroll_catalog.dart' show kCatalogProducts;
+import 'package:buildsmart/data/repositories/orders_local.dart'
+    show visibleOrderIdsProvider;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
@@ -91,10 +93,19 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
   /// honestly shows 'ללא מק"ט'), UNIONED (#79) with the supplier-added
   /// products overlay ([storeProductsProvider] — the persisted 'הוסף מוצר'
   /// uploads, removable + tagged).
+  /// A6 — apply the pool∪own scope to a SysOrder list when
+  /// [visibleOrderIdsProvider] is active (flag ON + store uid). Returns the
+  /// list unchanged otherwise (null id-set ⇒ today's full list).
+  List<SysOrder> _scopeOrders(List<SysOrder> orders) {
+    final ids = ref.watch(visibleOrderIdsProvider);
+    if (ids == null) return orders;
+    return orders.where((o) => ids.contains(o.id)).toList();
+  }
+
   List<_InvItem> get _inventory {
     final seen = <String>{};
     final out = <_InvItem>[];
-    for (final o in ref.watch(sysOrdersProvider)) {
+    for (final o in _scopeOrders(ref.watch(sysOrdersProvider))) {
       for (final l in o.lines) {
         if (seen.add(l.name)) {
           final p = _catalogByName[l.name];
@@ -298,7 +309,11 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
     // F-44 — the orders watch lives HERE (tab-scoped), not in the main build:
     // while another tab is showing, this method never runs, so the dependency
     // is dropped and order mutations don't rebuild the Scaffold.
-    final orders = ref.watch(sysOrdersProvider);
+    // A6 — when `kUidScopedQueries` is ON + a store uid is known, restrict the
+    // store board to its pool∪own slice ([visibleOrderIdsProvider]); the
+    // provider returns null OFF/signed-out so this is a no-op today (the list
+    // is unchanged — zero regression).
+    final orders = _scopeOrders(ref.watch(sysOrdersProvider));
     final toApprove = orders.countAt(OrderStage.newOrder);
     final inPrep = orders.countAt(OrderStage.preparing);
     final ready = orders.countAt(OrderStage.ready);

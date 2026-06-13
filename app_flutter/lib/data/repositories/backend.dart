@@ -15,3 +15,21 @@ const bool kUseFirebaseBackendFlag =
 /// True only when the flag is set AND Firebase actually initialised.
 bool get useFirebaseBackend =>
     kUseFirebaseBackendFlag && Firebase.apps.isNotEmpty;
+
+/// A5 (launch uid-migration) — master switch for UID-SCOPED Firestore queries.
+/// Default OFF: the orders listen stays the WHOLE-collection listen every
+/// caller relies on today, so flipping this flag is the ONLY thing that changes
+/// behaviour — with it OFF the build is BYTE-IDENTICAL to today (zero
+/// regression, the A5 invariant). Flip on at build time once the rules +
+/// indexes are deployed and existing docs are backfilled with storeUid/
+/// courierUid:
+///   flutter build web --dart-define=UID_SCOPED_QUERIES=true
+/// When ON (and a uid + role are known) `ordersRepositoryProvider` scopes the
+/// orders listen to what the Security Rules can prove per role:
+///   • contractor → contractorUid == uid
+///   • store      → the shared pool (storeUid=='' & a store-stage) ∪ own
+///                  (storeUid == uid)
+///   • courier    → analogous on courierUid
+///   • manager/admin → no scope (the whole collection — the god view).
+/// Tests never initialise Firebase, so the local path ignores this flag.
+const bool kUidScopedQueries = bool.fromEnvironment('UID_SCOPED_QUERIES');

@@ -185,9 +185,13 @@ service cloud.firestore {
     }
 
     /// One legal hop: the doc currently sits at [from] and moves to [to].
+    /// Both sides read via `.get(...,'')` so a doc/delta missing `stage` yields a
+    /// clean false (no evaluation error) instead of throwing — important now
+    /// that the store/courier claim update may carry a `{storeUid}`/`{courierUid}`
+    /// delta where the engine still re-evaluates this guard.
     function stageMove(from, to) {
       return resource.data.get('stage', '') == from
-          && request.resource.data.stage == to;
+          && request.resource.data.get('stage', '') == to;
     }
 
     /// The STORE chain — kManagerOrderFlow's store stages, new→ready:
@@ -210,6 +214,61 @@ service cloud.firestore {
     function unassignedOrMine(field) {
       return resource.data.get(field, '') == ''
           || resource.data.get(field, '') == request.auth.uid;
+    }
+
+    /// A4/A5 (claim-on-first-advance + shared pool) — the store stages an order
+    /// may sit in while still UN-CLAIMED and visible to the whole store pool
+    /// (the store chain new→preparing→ready). Mirrors `_kStorePoolStages`
+    /// (orders_local.dart) — the client pool query and this read gate must agree.
+    function storePoolStages() {
+      return ['new', 'preparing', 'ready'];
+    }
+
+    /// A4/A5 — the courier pool stages (ready/pickup/transit) — mirrors
+    /// `_kCourierPoolStages`.
+    function courierPoolStages() {
+      return ['ready', 'pickup', 'transit'];
+    }
+
+    /// A5 — is this a STORE pool order (un-claimed `storeUid` AND in a store
+    /// stage)? Every store may READ it (the shared pool); the first to advance
+    /// CLAIMS it (the update rule's no-steal then binds it).
+    function inStorePool() {
+      return resource.data.get('storeUid', '') == ''
+          && resource.data.get('stage', '') in storePoolStages();
+    }
+
+    /// A5 — the courier analogue of [inStorePool].
+    function inCourierPool() {
+      return resource.data.get('courierUid', '') == ''
+          && resource.data.get('stage', '') in courierPoolStages();
+    }
+
+    /// A4 — NO-STEAL claim guard for a uid-ownership [field] (storeUid /
+    /// courierUid): the WRITE may leave the field empty, set it to the caller's
+    /// OWN uid (the claim), or leave an already-mine value unchanged — but it may
+    /// NEVER point the field at a value the caller does not own. Combined with
+    /// the binding (only the owner/pool may update at all), this makes a steal of
+    /// another party's claimed order impossible; a manager bypasses it entirely.
+    function claimOnlySelf(field) {
+      return request.resource.data.get(field, '') == ''
+          || request.resource.data.get(field, '') == request.auth.uid;
+    }
+
+    /// A4 — the store update's changed-keys are exactly the stage hop, optionally
+    /// plus its OWN claim field — never the peer's (`courierUid`) and never any
+    /// business field. (The advance write is `set(merge:true)` of stage [+
+    /// storeUid on the claim]; merge does not delete omitted fields, so the diff
+    /// is precisely these keys.)
+    function storeStageOrClaimOnly() {
+      return request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['stage', 'storeUid']);
+    }
+
+    /// A4 — the courier analogue: only `stage` (+ its own `courierUid` claim).
+    function courierStageOrClaimOnly() {
+      return request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['stage', 'courierUid']);
     }
 
     /// The contractor's OWNERSHIP uid on an order. ⚠️ Phase-G correction: the
@@ -236,32 +295,49 @@ service cloud.firestore {
     //   current contractor client must stamp contractorUid (signed-in) for its
     //   own create to pass — an empty contractorUid (signed-out / pre-A3 path)
     //   is denied creation by design, which is the intended hardening.
-    // update: transition-per-role —
-    //   store:   new→preparing→ready, stage-only diff, assignment-bound;
-    //   courier: ready→pickup→transit→delivered, stage-only diff, bound;
-    //   manager: the god-step (`setStage`) — any change whose stage is legal.
-    // read: owner (contractorUid == uid) / assignee (storeId|courierId == uid,
-    //   forward-ready — those fields are not yet written) or manager/admin.
+    // update: transition-per-role — claim-on-first-advance + shared pool (A4) —
+    //   store:   new→preparing→ready, may CLAIM `storeUid` (empty→own only,
+    //            no-steal); bound to its claim OR the un-claimed pool; the diff
+    //            is stage[+storeUid] only;
+    //   courier: ready→pickup→transit→delivered, may CLAIM `courierUid`
+    //            (analogous);
+    //   manager: the god-step (`setStage`) — any change whose stage is legal
+    //            (incl. REASSIGNING storeUid/courierUid to any uid).
+    // read: owner (contractorUid == uid) / claimant (storeUid|courierUid == uid)
+    //   / the shared POOL (un-claimed order in the role's stages — A5) or
+    //   manager/admin. Legacy storeId/courierId stay as a forward-tolerant read
+    //   fallback (never written today; an empty field never equals a uid).
     // delete: manager only (`resetToSeed` cleanup is a manager/admin action).
     match /orders/{orderId} {
       allow read: if isManager()
           || (isSignedIn()
               && (ownsOrder()
+                  || resource.data.get('storeUid', '') == request.auth.uid
+                  || resource.data.get('courierUid', '') == request.auth.uid
                   || resource.data.get('storeId', '') == request.auth.uid
-                  || resource.data.get('courierId', '') == request.auth.uid));
+                  || resource.data.get('courierId', '') == request.auth.uid
+                  || (hasRole('store') && inStorePool())
+                  || (hasRole('courier') && inCourierPool())))
+          ;
       allow create: if (hasRole('contractor')
               && request.resource.data.stage == 'new'
               && request.resource.data.get('contractorUid', '')
                   == request.auth.uid)
           || (isManager() && request.resource.data.stage in orderStages());
       allow update: if (hasRole('store')
-              && onlyStageChanged()
+              && storeStageOrClaimOnly()
               && storeStageMove()
-              && unassignedOrMine('storeId'))
+              && unassignedOrMine('storeUid')
+              && claimOnlySelf('storeUid')
+              && request.resource.data.get('courierUid', '')
+                  == resource.data.get('courierUid', ''))
           || (hasRole('courier')
-              && onlyStageChanged()
+              && courierStageOrClaimOnly()
               && courierStageMove()
-              && unassignedOrMine('courierId'))
+              && unassignedOrMine('courierUid')
+              && claimOnlySelf('courierUid')
+              && request.resource.data.get('storeUid', '')
+                  == resource.data.get('storeUid', ''))
           || (isManager() && request.resource.data.stage in orderStages());
       allow delete: if isManager();
     }
