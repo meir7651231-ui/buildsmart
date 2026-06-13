@@ -4,7 +4,7 @@
 > מי: **[agent]**=קוד · **[את]**=החלטה/קונסול/עסקי · **[חיצוני]**=זמן‑קיר. מאמץ: **S**=שעות · **M**=ימים · **L**=שבוע+.
 > נלווה ל‑`LAUNCH-TASKS-MICRO.md` (שלבים + גוטצ'ות + מצאי‑מסכים). מבוסס על מצאי e3e6e94.
 >
-> 🔴 **תזכורת‑על (אומת 13/6 @208f3a9):** סדרת‑A (כולל A4‑A6 שנדחפו עכשיו) **code‑complete אך דורמנטית בברירת‑מחדל** — `useFirebaseBackend` כבוי (`backend.dart`), ו‑`firebase_options` web‑only. **דיוק חשוב:** על מכשיר נייטיב Firebase **לא עולה — אבל זו לא קריסה.** `main.dart:51‑59` עוטף ב‑try/catch+timeout, ה‑throw נתפס, והאפליקציה **נופלת ל‑repos מקומיים (דמו)**. כלומר הטלפון רץ אך **לא מדבר עם השרת** עד F1. ✅ מוכח רק על **preview‑web עם הדגל** (10/6). הלוחות בדמו = `BoardSession`/seed, **לא** Firebase‑uid.
+> 🔴 **תזכורת‑על (אומת 13/6 @208f3a9):** סדרת‑A (כולל A4‑A6 שנדחפו עכשיו) **code‑complete אך דורמנטית בברירת‑מחדל** — `useFirebaseBackend` כבוי (`backend.dart`), ו‑`firebase_options` web‑only. **דיוק חשוב:** על מכשיר נייטיב Firebase **לא עולה — אבל זו לא קריסה.** `main.dart:51‑59` עוטף ב‑try/catch+timeout, ה‑throw נתפס, והאפליקציה **נופלת ל‑repos מקומיים (דמו)**. כלומר הטלפון רץ אך **לא מדבר עם השרת** עד F1. ✅ מוכח רק על **preview‑web עם הדגל** (10/6). הלוחות: דמו (דגל OFF) = `BoardSession`/seed; **דגל ON = `BoardSession` נבנה מ‑Firebase‑uid (A4' 50465b1).**
 
 ---
 
@@ -26,7 +26,7 @@
 | A13 | 🟡 שרת ✅ (advanceOrderStage/computeCredit מיוצאים) · קליינט פתוח (רק setRole נקרא) · לחבר callables: `advanceOrderStage` · `computeCredit` | `sys_orders.advance` · מסך אשראי | קידום/אשראי דרך השרת | agent | M |
 | A14 | seed ראשוני מ‑session של admin | סקריפט/admin | אוספים מאותחלים בשרת | את+agent | S |
 
-> 📋 **סקירת‑לוחות (tip 576036c, 13/6):** 🦺עובד · 🛵שליח · 🏪ספק — **✅ שלושתם גמורים**: מגודרים ("מבחוץ לא רואים כלום"), **מסונכרנים לפי זהות** דרך `BoardSession`/`boardAuthProvider` + 5 חשבונות‑seed (עובד/שליח/חנות/מנהל/דמו), עם מנועים אמיתיים (הזמנות/POD/מלאי/rewards/notifs חיים). **A4‑A6 ממוסגר מחדש:** סינון‑לפי‑זהות בצד‑לקוח **כבר עובד** (לפי `session.username`); הנותר = **server‑swap** — להחליף seeds ב‑Firebase‑uid אמיתי (כל נרשם, לא רק 5) + scoped Firestore listener + pool. stubs זעירים שנותרו (3): ביטול‑הזמנה‑כולה (picking:720) · חתימת‑POD "(הדגמה)" (pod:262) · כלי‑סימולציית‑הזמנה (store:453).
+> 📋 **סקירת‑לוחות (tip 576036c, 13/6):** 🦺עובד · 🛵שליח · 🏪ספק — **✅ שלושתם גמורים**: מגודרים ("מבחוץ לא רואים כלום"), **מסונכרנים לפי זהות** דרך `BoardSession`/`boardAuthProvider` + 5 חשבונות‑seed (עובד/שליח/חנות/מנהל/דמו), עם מנועים אמיתיים (הזמנות/POD/מלאי/rewards/notifs חיים). **A4‑A6 ממוסגר מחדש:** סינון‑לפי‑זהות בצד‑לקוח **כבר עובד** (לפי `session.username`); **server‑swap ✅ בוצע (208f3a9+50465b1):** seeds→Firebase‑uid (A4') + scoped listener + pool — הכל מגודר בדגל. stubs זעירים שנותרו (3): ביטול‑הזמנה‑כולה (picking:720) · חתימת‑POD "(הדגמה)" (pod:262) · כלי‑סימולציית‑הזמנה (store:453).
 
 ## Phase B — ניקוי placeholders (חובה לאפל)
 | ID | משימה | היכן | DoD | מי | מ' |
