@@ -18,9 +18,9 @@
 | A5 | ✅ (208f3a9) · listener ממוקד + שיתוף‑בריכה + indexes | `orders_local.dart`·`orders_repository.dart` | קבלן רק שלו · pool ל‑new/ready · admin הכול | agent | M |
 | A6 | ✅ (208f3a9) · דשבורד חנות/שליח = בריכה ∪ שלי | `store_dashboard_screen.dart`·`courier_dashboard_screen.dart` | חנות רואה את ההזמנות שלה | agent | M |
 | A7 | ✅ (5233cf8) · מדריך role→uid (לזהות "מי החנות/שליח") | `users` lookup חדש (by phone/role) | אפשר למפות צד‑נגדי ל‑uid | agent | M |
-| A8 | 🟡 חלקי (c35eefe): fromUid ✅ אך participants עדיין role-names (chat_firebase:151) → צ׳אט לא מסתנכרן · צ׳אט: `participants=[uid]` + `fromUid` | `chat_firebase.toDoc` · `sys_chat.send` (שימוש ב‑A7) | thread=uids · message יש fromUid | agent | M |
-| A9 | צ׳אט: queries ממוקדים | `chat_repository` scope (`arrayContains uid` / `threadId`) | קורא רק threads של עצמו | agent | M |
-| A10 | 🟡 rules כתובים + uid-contract הוחלט (forward-ready) · החלטה: למנהל override על צ׳אט? + עדכון rules | `firestore.rules` chat | rules סופי | את+agent | S |
+| A8 | 🟡 (c35eefe+fec79e2): fromUid ✅ (sys_chat:78) · participantUids seam נוסף **אך ריק** · participants עדיין role-names (chat_firebase:158) → **צ׳אט עדיין לא מסתנכרן** · נותר: למלא participantUids בשליחה (דרך A7) | `chat_firebase.toDoc` · `sys_chat.send` | thread=uids · message fromUid | agent | M |
+| A9 | 🟡 seam (fec79e2): שדה `participantUids` + predicate `uid∈list` + chat-rules emulator (283) + 183 unit · **אך לא מאוכלס** (תמיד ריק → עדיין לא מסתנכרן/מבודד; חסר last-mile: למלא uids בשליחה דרך A7) | `chat_firebase`·`sys_chat`·`firestore.rules` | קורא רק threads שלו | agent | M |
+| A10 | 🟡 rules + emulator coverage (fec79e2 · 283 בדיקות chat.test.js) forward-ready · נותר: להחליט manager override על צ׳אט | `firestore.rules` chat | rules סופי | את+agent | S |
 | A11 | ✅ (c35eefe) · לקוחות: `ownerId=uid` בכתיבה | `customers_firebase.toDoc` | customer doc נושא ownerId | agent | S |
 | A12 | ✅ (7344097) · מסך הקצאת‑תפקיד (manager → `setRole`) | `manager_dashboard` ניהול tab → `assignRole` | מנהל נותן תפקיד באפליקציה | agent | M |
 | A13 | 🟡 שרת ✅ (advanceOrderStage/computeCredit מיוצאים) · קליינט פתוח (רק setRole נקרא) · לחבר callables: `advanceOrderStage` · `computeCredit` | `sys_orders.advance` · מסך אשראי | קידום/אשראי דרך השרת | agent | M |
