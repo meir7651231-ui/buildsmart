@@ -834,3 +834,6 @@
 ### 2026-06-13 — בעלות-הזמנה A4-A6 (נחיל)
 - **`firestore.rules` — no-steal (`claimOnlySelf`/`unassignedOrMine`):** מוטציה (emulator) — נטרול ל-true → 2 steal-tests **אדום** (25/2) → שוחזר → 27/0.
 - **`lib/state/orders_engine.dart` — `claimStore` no-steal:** מוטציה — הסרת ה-guard → 'store אחר לא יכול לגנוב' **אדום** (Expected store-a/Actual store-b) → שוחזר.
+
+### 2026-06-13 — server-swap זהות-לוח seed→Firebase (אני, לא נחיל)
+- **`lib/state/board_auth.dart` — `boardSessionFromAuthSnapshot` (helper טהור):** מוטציה — `return null` קבוע בראש ה-helper (מנטרל את כל הגזירה) → `board_auth_server_test` **אדום** `+5 -7` (7 בדיקות שמצפות session: store-claim/each-role/multi-role/no-displayName/sign-in/אינווריאנט/sign-out נפלו; 5 שמצפות null נשארו ירוקות) ✅ נתפס; שוחזר byte-מדויק (cp מגיבוי, **לא** git checkout — שלא לאבד את SW2/SW3) → 12/12 ירוק.

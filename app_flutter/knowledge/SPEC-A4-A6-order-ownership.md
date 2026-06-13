@@ -32,3 +32,36 @@ flip `UID_SCOPED_QUERIES=true` (build-define) · backfill ל-docs קיימים �
 
 ## אינווריאנט-בדיקה
 flag-OFF ⇒ byte-identical להיום (נעילת-רגרסיה חובה). claim ⇒ mutation-verified. rules ⇒ emulator ירוק.
+
+---
+
+## גרסת server-swap — מקור-זהות BoardSession: seed → Firebase Auth (הוראת-בעלים 2026-06-13)
+
+**הבעיה (ליבת multi-user):** היום הלוחות (עובד/שליח/חנות/מנהל) נכנסים דרך `boardAuthProvider` מול חשבונות-seed (`kBoardAccounts`, ran/1111…) — אבל ה-claim ב-`sys_orders` חותם `currentUidProvider` (= Firebase Auth uid). לכניסת-seed Firebase **מנותק** ⇒ uid=='' ⇒ הכל נשאר בבריכה ולא ממוקד. שתי מערכות-זהות מנותקות.
+
+**הפתרון:** כש-`kUidScopedQueries` ON — מקור-הזהות של `boardAuthProvider` הוא **Firebase Auth (uid + role-claim)**, לא ה-seed. אותו משתמש מחובר מניע גם את הלוח (role) וגם את ה-uid לתביעה. OFF = seed/demo בדיוק כמו היום.
+
+### SW1 — מודל
+- `BoardSession.uid` (additive, default `''`): seed/demo ⇒ `''`; Firebase-derived ⇒ ה-uid האמיתי. ב-`toJson` **רק כשלא-ריק** (field economy ⇒ JSON של seed זהה byte-for-byte). `fromJson` defaulted.
+- מיפוי role-claim→`BoardRole`: persona-ids = שמות BoardRole 1:1 (`worker/courier/store/manager`; `contractor` = האפליקציה הראשית, **לא לוח**).
+
+### SW2 — helper טהור (testable ללא דגל-קומפילציה)
+`BoardSession? boardSessionFromAuthSnapshot(AuthSnapshot snap)` — **תמיד מוגדר** (לא מגודר):
+- `snap.user==null` ⇒ `null` (מנותק ⇒ אין לוח).
+- אחרת ה-role הראשון מ-`snap.roles` שמתמפה ל-BoardRole (מדלג על `contractor`/לא-מוכר) ⇒ `BoardSession(role, username:uid, displayName: snap.user.displayName ?? kBoardDemoNames[role]!, uid, demo:false)`.
+- אין role-לוח (claims ריק/contractor-בלבד/עדיין-נטען) ⇒ `null`.
+
+### SW3 — קשירה מגודרת (notifier)
+- `BoardAuthNotifier(this._ref, {bool? bindFirebase}) : _bind = bindFirebase ?? kUidScopedQueries` — **constructor-injectable** ⇒ נתיב-ON נבדק ב-unit מול ה-fake `AuthGateway` בלי dart-define; production מגודר ב-const.
+- `_bind==false` ⇒ **בדיוק היום**: `_load()` seed, **אפס** קישור ל-authState (נעילת-רגרסיה — `board_auth_test.dart` הקיים נשאר ירוק).
+- `_bind==true` ⇒ `ref.listen(authStateProvider, …, fireImmediately:true)` ⇒ `state = boardSessionFromAuthSnapshot(next)`. mounted-guard. (`login/enterDemo/logout` נשארים פונקציונליים; ניתוב-ה-gate ל-Firebase sign-in = follow-up מתועד, לא בטווח כאן — בלי fake.)
+- `currentUidProvider` ללא שינוי: כשמשתמש-לוח מחובר ב-Firebase (ON) ה-uid זורם אוטומטית ל-`claimStore/claimCourier`. **אינווריאנט:** board store session `uid == currentUidProvider`.
+
+### SW4 — rules
+ה-uid-ownership + manager-override (role-claim) כבר נאכפים (A4-A6/Phase-G). server-swap = שינוי-קליינט. **לאמת** ש-manager-override נשען על `request.auth.token.role`/roles ושהבעלים נשען על uid; להוסיף emulator test אם יש פער (role:'store'+storeUid תואם ⇒ קורא שלי/בריכה בלבד; role:'manager' ⇒ משייך-מחדש). emulator נשאר ירוק.
+
+### SW5 — בדיקות
+`test/board_auth_server_test.dart`: helper טהור (store-claim⇒session+uid · contractor⇒null · signed-out⇒null · multi-role⇒board-role ראשון · displayName fallback) + notifier `bindFirebase:true` מול fake gateway (emit user+claim ⇒ session מופיע · emit null ⇒ נקי) + אינווריאנט uid==currentUid. `board_auth_test.dart` הקיים = נעילת flag-OFF.
+
+### הפעלה (owner)
+אותו דגל `UID_SCOPED_QUERIES=true` מפעיל את שתי החצאים יחד (scoped-queries + board-auth-from-Firebase) — מונע מצב-שבור (scope ON אבל board-users בלי uid). עד אז OFF, אפס שינוי.

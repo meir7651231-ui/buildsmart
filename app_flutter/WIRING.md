@@ -1806,3 +1806,11 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - guard: `orders_uid_a4_a6_test` (22 · flag-OFF lock · claim+no-steal · round-trip · scope-per-role · dashboard). מוטציות: rules (2 steal→אדום, 25/2) + Dart (no-steal→אדום) שוחזרו.
 - **אימות:** analyze 0 · full-suite +2176 · build web ✅ · **emulator 27/0** (17→+10). SPEC: `knowledge/SPEC-A4-A6-order-ownership.md`.
 - **owner-activation:** `UID_SCOPED_QUERIES=true` + backfill + `firebase deploy --only firestore:rules,firestore:indexes`.
+### #A4-A6 server-swap — מקור-זהות BoardSession: seed → Firebase Auth (אני, לא נחיל) — 2026-06-13
+- **הבעיה (ליבת multi-user):** חנות/שליח נכנסו דרך חשבונות-seed (`boardAuthProvider`) אבל ה-claim חותם `currentUidProvider` (Firebase) — שמנותק → uid ריק → הכל בבריכה, לא ממוקד. שתי מערכות-זהות מנותקות.
+- **SW1 (model):** `BoardSession.uid` (אדיטיבי, default '') · `toJson` כותב uid רק כשלא-ריק (JSON של seed זהה byte-for-byte) · `fromJson` defaulted.
+- **SW2 (helper טהור):** `boardSessionFromAuthSnapshot(AuthSnapshot)` — signed-out→null · role-claim ראשון שמתמפה ל-BoardRole (contractor/לא-מוכר מדולגים)→session הנושא uid · displayName נופל לכותרת-התפקיד. בר-בדיקה ישירות ללא דגל-קומפילציה.
+- **SW3 (קשירה gated):** `BoardAuthNotifier(ref, {bindFirebase})` (default `kUidScopedQueries`) · ON→`ref.listen(authStateProvider, fireImmediately)` ממראה זהות-Firebase חיה (sign-out→null, השער נסגר) · OFF→seed `_load()`, אפס-קישור (נעילת-רגרסיה). `currentUidProvider` ללא שינוי — **אינווריאנט: board.uid == currentUidProvider** (אותו uid שה-claim של A4-A6 חותם ב-sys_orders).
+- **SW4 (rules):** ללא שינוי — `firestore.rules` כבר ממוקדות-uid (`isManager()` override + `storeUid/courierUid == request.auth.uid` owner/no-steal/pool); 27 בדיקות-ה-emulator מכסות את הזהות-המוחלפת.
+- guard: `board_auth_server_test` (12 · helper טהור · נתיב-ON חי מול fake AuthGateway · אינווריאנט uid==currentUid) + `board_auth_test` הקיים = נעילת flag-OFF (seed). מוטציה: helper→`return null` קבוע → `+5 -7` אדום → שוחזר (cp byte-מדויק) → 12/12.
+- gate-UI sign-in routing (ניתוב השער ל-Firebase) = follow-up מתועד, מחוץ-לטווח (בלי fake). SPEC: §server-swap (SW1-SW5).

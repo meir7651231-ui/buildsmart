@@ -1,6 +1,12 @@
 import 'dart:convert';
 
 import 'package:buildsmart/data/board_accounts_local.dart';
+import 'package:buildsmart/data/repositories/backend.dart' show kUidScopedQueries;
+// SERVER-SWAP (SPEC-A4-A6 §server-swap, SW2/SW3): the Firebase-Auth identity
+// seam. Importing auth_state here is cycle-safe — auth_state.dart does NOT
+// import board_auth.dart (verified), so the dependency is one-directional.
+import 'package:buildsmart/state/auth_state.dart'
+    show AuthSnapshot, authStateProvider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,7 +31,18 @@ class BoardSession {
     required this.username,
     required this.displayName,
     this.demo = false,
+    this.uid = '',
   });
+
+  factory BoardSession.fromJson(Map<String, dynamic> j) => BoardSession(
+        // `byName` throws on an unknown role — caught by `_load` (corrupt
+        // value → stay logged out).
+        role: BoardRole.values.byName(j['role'] as String),
+        username: j['username'] as String? ?? '',
+        displayName: j['displayName'] as String? ?? '',
+        demo: j['demo'] as bool? ?? false,
+        uid: j['uid'] as String? ?? '',
+      );
 
   /// Which board this session opens.
   final BoardRole role;
@@ -39,21 +56,24 @@ class BoardSession {
   /// `true` for an [BoardAuthNotifier.enterDemo] session (no account).
   final bool demo;
 
+  /// SERVER-SWAP (SPEC-A4-A6 §server-swap, SW1) — the Firebase Auth uid behind
+  /// this session, or `''` for a seed/demo session (no Firebase user). When the
+  /// `kUidScopedQueries` flag is ON the board identity is DERIVED from Firebase
+  /// Auth and this carries the real uid, which `currentUidProvider` reads to
+  /// scope the orders claim in `sys_orders` (claim-on-first-advance). OFF: seed
+  /// login → `''`, exactly as today.
+  final String uid;
+
   Map<String, dynamic> toJson() => {
         'role': role.name,
         'username': username,
         'displayName': displayName,
         'demo': demo,
+        // SW1 — field economy: write `uid` ONLY when non-empty so a seed/demo
+        // session's persisted JSON stays byte-identical to today (the
+        // flag-OFF zero-regression lock — board_auth_test's persist round-trip).
+        if (uid.isNotEmpty) 'uid': uid,
       };
-
-  factory BoardSession.fromJson(Map<String, dynamic> j) => BoardSession(
-        // `byName` throws on an unknown role — caught by `_load` (corrupt
-        // value → stay logged out).
-        role: BoardRole.values.byName(j['role'] as String),
-        username: j['username'] as String? ?? '',
-        displayName: j['displayName'] as String? ?? '',
-        demo: j['demo'] as bool? ?? false,
-      );
 }
 
 /// SharedPreferences key (versioned like the other `bs.*.v1` keys).
@@ -68,9 +88,79 @@ const Map<BoardRole, String> kBoardDemoNames = {
   BoardRole.manager: 'מנהל המערכת',
 };
 
+/// `BoardRole` for a claim-role string, or null when it is not one of the four
+/// boards (e.g. `contractor` — the main app — or an unknown/exotic claim).
+/// Avoids `BoardRole.values.byName`, which THROWS on no match.
+BoardRole? boardRoleByName(String name) {
+  for (final role in BoardRole.values) {
+    if (role.name == name) return role;
+  }
+  return null;
+}
+
+/// SERVER-SWAP (SPEC-A4-A6 §server-swap, SW2) — derive a board identity from a
+/// Firebase Auth snapshot (uid + role-claim) instead of a seed account. Pure
+/// (no Ref / no I/O) so it is unit-tested directly without the compile-time
+/// flag:
+///   • signed-out (no user) → null (מבחוץ לא רואים כלום);
+///   • the FIRST claim-role that maps to a [BoardRole] (contractor / unknown
+///     skipped) → a session carrying the real uid; displayName falls back to
+///     the role title when the account carries none;
+///   • no board role (claims-less / contractor-only / still resolving) → null.
+BoardSession? boardSessionFromAuthSnapshot(AuthSnapshot snap) {
+  final user = snap.user;
+  if (user == null) return null;
+  for (final r in snap.roles) {
+    final role = boardRoleByName(r);
+    if (role == null) continue;
+    final name = user.displayName;
+    return BoardSession(
+      role: role,
+      username: user.uid,
+      displayName:
+          (name != null && name.isNotEmpty) ? name : kBoardDemoNames[role]!,
+      uid: user.uid,
+    );
+  }
+  return null;
+}
+
 class BoardAuthNotifier extends StateNotifier<BoardSession?> {
-  BoardAuthNotifier() : super(null) {
-    _load();
+  /// [bindFirebase] (default [kUidScopedQueries]) selects the identity SOURCE
+  /// (SPEC-A4-A6 §server-swap, SW3):
+  ///   • false (today) → seed accounts: `_load()` the persisted seed/demo
+  ///     session; ZERO coupling to Firebase Auth (zero-regression);
+  ///   • true (server-swap) → Firebase Auth is the truth: mirror
+  ///     [authStateProvider] (uid + role-claim) into the board session.
+  /// Injectable so the ON path is unit-testable without a `--dart-define`;
+  /// production stays gated by the const flag.
+  BoardAuthNotifier(this._ref, {bool? bindFirebase})
+      : _bind = bindFirebase ?? kUidScopedQueries,
+        super(null) {
+    if (_bind) {
+      _bindFirebase();
+    } else {
+      _load();
+    }
+  }
+
+  final Ref _ref;
+  final bool _bind;
+
+  /// SERVER-SWAP: mirror the live Firebase identity (uid + role-claim) into the
+  /// board session — `fireImmediately` applies the CURRENT snapshot at once and
+  /// every later sign-in/out/claim-change re-derives it (sign-out → null, the
+  /// gate shuts). The seed `login`/`enterDemo` stay callable but are not the
+  /// source on this path.
+  void _bindFirebase() {
+    _ref.listen<AuthSnapshot>(
+      authStateProvider,
+      (_, next) {
+        if (!mounted) return;
+        state = boardSessionFromAuthSnapshot(next);
+      },
+      fireImmediately: true,
+    );
   }
 
   /// `true` once any mutating method (login/enterDemo/logout) has written
@@ -156,5 +246,5 @@ class BoardAuthNotifier extends StateNotifier<BoardSession?> {
 /// contractor app never sets this).
 final boardAuthProvider =
     StateNotifierProvider<BoardAuthNotifier, BoardSession?>(
-  (ref) => BoardAuthNotifier(),
+  BoardAuthNotifier.new,
 );
