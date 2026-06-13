@@ -129,7 +129,7 @@ J6 (Google 14-day) מתחיל מוקדם ככל האפשר
 ### 🔥 Firebase / שרת
 - ⏰ **אינדקסים מורכבים** (`firestore.indexes.json`) — שאילתה עם `where`+`orderBy` נכשלת בפעם הראשונה בפרודקשן. ליצור מראש ולפרוס, לא לחכות לשגיאה.
 - לוודא ש‑**Rules + Indexes נפרסו ל‑prod** (לא רק emulator/דפדפן).
-- **`firebase_options.dart` רק ל‑web כרגע** — נייטיב זורק שגיאה → האפליקציה **קורסת בהפעלה במכשיר**. חובה להוסיף iOS/Android.
+- **`firebase_options.dart` רק ל‑web כרגע** — נייטיב זורק שגיאה ש‑`main.dart` תופס (try/catch) → **לא קריסה, אבל הטלפון נופל לדמו ולא מתחבר לשרת**. חובה להוסיף iOS/Android כדי שגרסת‑הטלפון תדבר עם השרת הקיים.
 - להגביל את ה‑**API key** ב‑GCP (apps/domains) — מפתח פתוח ניתן לניצול/עלויות.
 - **forgot‑password** לאימייל חייב לעבוד · אימות‑אימייל אם נדרש.
 - מכסות/עלות SMS (phone‑auth) + reCAPTCHA מוגדר לדומיין הנכון.
@@ -192,7 +192,7 @@ J6 (Google 14-day) מתחיל מוקדם ככל האפשר
 | catalog | קטגוריות ריקות → "בקרוב" | placeholder |
 | store/checkout | רושם אמצעי‑תשלום, **לא גובה** · OCR ת"מ "בקרוב" | external |
 | manager_dashboard | כתיבות admin‑only | uid |
-| store_dashboard · courier_dashboard | סינון לפי שלב, לא לפי זהות (storeId/courierId לא נכתבים) | uid |
+| store_dashboard · courier_dashboard | ✅ A4‑A6 (208f3a9): בריכה ∪ שלי לפי `storeUid/courierUid` — אך מגודר בדגל (דורמנטי בברירת‑מחדל) | uid |
 | login_sheet | אמיתי, אך gated מאחורי הדגל | uid |
 | finance_hub | FX מ‑kFxRates קבוע · PDF מדומה | external |
 | notif_settings | email/SMS/WhatsApp כבויים | external |

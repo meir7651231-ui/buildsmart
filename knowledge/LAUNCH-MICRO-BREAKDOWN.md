@@ -4,7 +4,7 @@
 > מי: **[agent]**=קוד · **[את]**=החלטה/קונסול/עסקי · **[חיצוני]**=זמן‑קיר. מאמץ: **S**=שעות · **M**=ימים · **L**=שבוע+.
 > נלווה ל‑`LAUNCH-TASKS-MICRO.md` (שלבים + גוטצ'ות + מצאי‑מסכים). מבוסס על מצאי e3e6e94.
 >
-> 🔴 **תזכורת‑על (אומת 13/6 @576036c):** סדרת‑A היא **code-complete אך דורמנטית בריצת‑ברירת‑מחדל** — `useFirebaseBackend` כבוי כברירת‑מחדל (`backend.dart:16`), ו‑`firebase_options` web-only (F1) → על **מכשיר נייטיב Firebase לא עולה**. ✅ עובד רק על **preview‑web עם הדגל** (כפי שהוכח 10/6). הלוחות שעובדים בדמו = `BoardSession`/seed, **לא** Firebase‑uid.
+> 🔴 **תזכורת‑על (אומת 13/6 @208f3a9):** סדרת‑A (כולל A4‑A6 שנדחפו עכשיו) **code‑complete אך דורמנטית בברירת‑מחדל** — `useFirebaseBackend` כבוי (`backend.dart`), ו‑`firebase_options` web‑only. **דיוק חשוב:** על מכשיר נייטיב Firebase **לא עולה — אבל זו לא קריסה.** `main.dart:51‑59` עוטף ב‑try/catch+timeout, ה‑throw נתפס, והאפליקציה **נופלת ל‑repos מקומיים (דמו)**. כלומר הטלפון רץ אך **לא מדבר עם השרת** עד F1. ✅ מוכח רק על **preview‑web עם הדגל** (10/6). הלוחות בדמו = `BoardSession`/seed, **לא** Firebase‑uid.
 
 ---
 
@@ -14,9 +14,9 @@
 | A1 | ✅ scoped‑query אופציונלי ב‑source | `firestore_cached_repo.dart` | נדחף (e3e6e94) | agent | — |
 | A2 | ✅ בוצע (fleet 5590b38) · `currentUid` מ‑auth + להזריק ל‑providers | `auth_state.dart` → `orders_local`/`chat_repository`/`customers_local` providers | repo רואה uid מחובר | agent | S |
 | A3 | ✅ (fleet 24b5bc2) · הזמנה: `contractorId=uid` + שדה‑שם נפרד (להפסיק `who`=שם) | `orders_firebase.toDoc` · `orders_engine.placeOrder` · `store_screen.dart:2816` | doc חדש: `contractorId==auth.uid` | agent | M |
-| A4 | הזמנה: `storeId/courierId=uid` בשיוך/קידום | `sys_orders.dart` storeAdvance/courierAdvance | order נושא uid של החנות/שליח | agent | M |
-| A5 | הזמנות: listener ממוקד (לא‑מנהל) | `ordersRepositoryProvider` (scope של A1) | קבלן רואה רק שלו · admin הכול | agent | M |
-| A6 | דשבורד חנות/שליח: סינון לפי זהות | `store_dashboard_screen.dart:300` · `courier_dashboard_screen.dart:45` | חנות רואה את ההזמנות שלה | agent | M |
+| A4 | ✅ (208f3a9) · claim‑on‑advance: `storeUid/courierUid=uid` בקידום + `orderParticipants` | `orders_engine.dart`·`sys_orders.dart`·`orders_firebase.dart` | order נושא uid של החנות/שליח | agent | M |
+| A5 | ✅ (208f3a9) · listener ממוקד + שיתוף‑בריכה + indexes | `orders_local.dart`·`orders_repository.dart` | קבלן רק שלו · pool ל‑new/ready · admin הכול | agent | M |
+| A6 | ✅ (208f3a9) · דשבורד חנות/שליח = בריכה ∪ שלי | `store_dashboard_screen.dart`·`courier_dashboard_screen.dart` | חנות רואה את ההזמנות שלה | agent | M |
 | A7 | ✅ (5233cf8) · מדריך role→uid (לזהות "מי החנות/שליח") | `users` lookup חדש (by phone/role) | אפשר למפות צד‑נגדי ל‑uid | agent | M |
 | A8 | 🟡 חלקי (c35eefe): fromUid ✅ אך participants עדיין role-names (chat_firebase:151) → צ׳אט לא מסתנכרן · צ׳אט: `participants=[uid]` + `fromUid` | `chat_firebase.toDoc` · `sys_chat.send` (שימוש ב‑A7) | thread=uids · message יש fromUid | agent | M |
 | A9 | צ׳אט: queries ממוקדים | `chat_repository` scope (`arrayContains uid` / `threadId`) | קורא רק threads של עצמו | agent | M |
