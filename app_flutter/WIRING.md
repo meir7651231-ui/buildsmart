@@ -405,9 +405,10 @@ Resets on department open + clear. Guarded by `departments_test`.
 | תפריט ⋮ → שיחה חדשה | opens an empty conversation with the contact | ✅ |
 | תפריט ⋮ → ארכיון שיחות | opens the archive screen (restore per row) | ✅ |
 | תפריט ⋮ → השתק הכל / בטל | mutes/unmutes all threads (persistent, toggles label) | ✅ |
-| תפריט ⋮ → הגדרות | opens ChatSettingsScreen | ✅ |
+| תפריט ⋮ → הגדרות | **REMOVED** — opened the dead ChatSettingsScreen (call-settings tree: read-receipts/typing/video-compression/call-ringtone/cloud-backup — none real). The screen file is kept but is no longer reachable from any menu/search. | ⛔ removed |
+| chat header 📞 / 💬 (calls/video) | **was** dead in-app voice+video buttons → now REAL `ContactActions`: 📞 launches `tel:`, 💬 launches `https://wa.me/…` (via `url_launcher`, seam `urlLauncherProvider`). Phone = `userProfileProvider.contact` (the only number the app holds; threads carry none). Hidden when no phone. | ✅ |
 | שליחת הודעה | adds bubble (+ auto-reply if bot on) | ✅ |
-| וידאו/שיחה/עוד · מצלמה/צירוף/אמוג'י/מיקרופון | — | 🚧 |
+| עוד · מצלמה/צירוף/אמוג'י/מיקרופון | — | 🚧 |
 
 ## Notifications (`notifications_screen.dart` → `notif_settings.dart`)
 
@@ -1196,6 +1197,7 @@ reachable from EACH persona dashboard (separately); guest reaches profile via an
 | CatalogSettingsScreen · 👤 הפרופיל שלי (top, always visible) | → `ProfileScreen.route()` — guest-visible (register path) | ✅ |
 | CatalogSettingsScreen · ערכת נושא / התראות (×4) / שפה | ported from the dial; provider-split kept (theme·lang→`appSettings` · notif→`notifSettings` · text/motion/contrast→`catalogSettings`) — verbatim strings from `settings_tree.dart` | ✅ |
 | מנהל / חנות / שליח / עובד dashboards · AppBar | 👤 פרופיל→`ProfileScreen.route()` · ⚙️ הגדרות→`CatalogSettingsScreen.route()` (each persona, separately) | ✅ |
+| כרטיס-זהות פרופיל ספק/עובד/שליח · 📞 / 💬 | `ContactActions(phone: profile.phone)` under the identity card (`store_profile_screen` / `worker_profile_screen` / `courier_profile_screen`) — 📞→`tel:<phone>`, 💬→`https://wa.me/<intl digits>` (`waMeDigits`) via the `urlLauncherProvider` seam. Hidden when the profile has no phone. No in-app calling. | ✅ |
 
 - Gate: central-verify green — analyze 0 · 1645 tests · build · conformance 7/7 · required-tests present.
 - **Known follow-up (Wave 3b):** `CatalogSettingsScreen._confirmReset` resets only `catalogSettings` — extend to also reset `appSettings`+`notifSettings` so the ported controls reset too.

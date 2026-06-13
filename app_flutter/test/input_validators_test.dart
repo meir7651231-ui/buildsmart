@@ -64,6 +64,40 @@ void main() {
     expect(validEmail(''), false);
   });
 
+  // ─── waMeDigits (📞/💬 WhatsApp normalization) ─────────────────────────────
+  test('waMe — Israeli local 0501234567 → 972501234567', () {
+    expect(waMeDigits('0501234567'), '972501234567');
+  });
+
+  test('waMe — separators (dashes/spaces/parens) are stripped first', () {
+    expect(waMeDigits('050-123 4567'), '972501234567');
+    expect(waMeDigits('(052) 765-4321'), '972527654321');
+  });
+
+  test('waMe — already +972 keeps its digits (no extra 972)', () {
+    expect(waMeDigits('+972 50 123 4567'), '972501234567');
+  });
+
+  test('waMe — bare 972… (no leading 0) is left untouched', () {
+    expect(waMeDigits('972501234567'), '972501234567');
+  });
+
+  test('waMe — 00-prefixed international drops the 00', () {
+    expect(waMeDigits('00972501234567'), '972501234567');
+  });
+
+  test('waMe — empty / no-digit input returns empty (button hidden)', () {
+    expect(waMeDigits(''), '');
+    expect(waMeDigits('   '), '');
+    expect(waMeDigits('---'), '');
+  });
+
+  test('waMe — does NOT double-prefix an Israeli number to 972972…', () {
+    // The 0→972 conversion must replace the trunk 0, not prepend to it.
+    expect(waMeDigits('0501234567').startsWith('972972'), isFalse);
+    expect(waMeDigits('0501234567'), '972501234567');
+  });
+
   // ─── validBusinessId ───────────────────────────────────────────────────────
   test('business id — exactly 9 digits is valid', () {
     expect(validBusinessId('512345678'), true);

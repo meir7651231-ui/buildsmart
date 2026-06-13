@@ -35,6 +35,7 @@ import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -300,6 +301,8 @@ class _StoreIdentityCard extends StatelessWidget {
                     ),
                   ),
                 ],
+                // 📞/💬 — call or WhatsApp this supplier (hidden when no phone).
+                ContactActions(phone: profile.phone),
               ],
             ),
           ),

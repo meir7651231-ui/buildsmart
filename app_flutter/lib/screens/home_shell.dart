@@ -4,7 +4,6 @@ import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
-import 'package:buildsmart/screens/chat_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
 import 'package:buildsmart/screens/notifications_screen.dart';
@@ -798,11 +797,10 @@ class _ChatsMenuButton extends ConsumerWidget {
               label: allMuted ? 'בטל השתקת הכל' : 'השתק הכל',
             ),
           ),
-          const PopupMenuDivider(),
-          const PopupMenuItem<String>(
-            value: 'settings',
-            child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
-          ),
+          // 'הגדרות' (→ ChatSettingsScreen) REMOVED: that screen was the dead
+          // call-settings tree (read receipts / typing / video compression /
+          // call ringtone / cloud backup — none real). The screen file is kept
+          // but is no longer reachable from any menu or search entry.
         ];
       },
     );
@@ -839,8 +837,6 @@ class _ChatsMenuButton extends ConsumerWidget {
           context,
           wasAllMuted ? 'ההשתקה בוטלה' : 'כל השיחות הושתקו',
         );
-      case 'settings':
-        Navigator.of(context).push(ChatSettingsScreen.route());
     }
   }
 }

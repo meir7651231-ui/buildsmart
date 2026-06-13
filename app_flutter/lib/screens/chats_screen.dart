@@ -7,8 +7,10 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/sys_chat.dart';
+import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1500,29 +1502,6 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
     }
   }
 
-  /// Voice/video calls have no real-time backend in this build. Show an honest
-  /// "not available" dialog rather than a "בבנייה" toast.
-  void _showCallUnavailable(BuildContext context, {required bool video}) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text(video ? 'שיחת וידאו' : 'שיחה קולית'),
-        content: Text(
-          video
-              ? 'שיחות וידאו דורשות חיבור בזמן אמת ואינן זמינות בגרסת הדמו.'
-              : 'שיחות קוליות דורשות חיבור בזמן אמת ואינן זמינות בגרסת הדמו.',
-          textAlign: TextAlign.right,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('הבנתי'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final showOnline = _thread.isOnline &&
@@ -1619,15 +1598,17 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
             icon: const Icon(Icons.more_vert, color: Colors.black54),
             onPressed: () => _showChatMenu(context),
           ),
-          IconButton(
-            tooltip: 'שיחת וידאו',
-            icon: const Icon(Icons.videocam_outlined, color: Colors.black54),
-            onPressed: () => _showCallUnavailable(context, video: true),
-          ),
-          IconButton(
-            tooltip: 'שיחה קולית',
-            icon: const Icon(Icons.call_outlined, color: Colors.black54),
-            onPressed: () => _showCallUnavailable(context, video: false),
+          // 📞/💬 — REAL hand-off to the dialer / WhatsApp (replaces the old
+          // dead in-app voice/video buttons). The contact phone is the user's
+          // registered number (userProfileProvider.contact — the only phone the
+          // app holds; chat threads carry no per-contact number). Hidden when
+          // the profile has no phone, so the bar never shows a dead button.
+          ContactActions(
+            phone: ref.watch(
+              userProfileProvider.select((p) => p.contact),
+            ),
+            iconColor: Colors.black54,
+            compact: true,
           ),
         ],
       ),

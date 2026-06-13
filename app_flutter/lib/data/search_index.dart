@@ -337,7 +337,9 @@ const List<SearchEntry> kSearchIndex = [
   // ── Settings screens (top-level) ─────────────────────────────────────────
   SearchEntry(emoji: '🏪', title: 'הגדרות חנות',    breadcrumb: 'הגדרות', type: SearchType.setting),
   SearchEntry(emoji: '🔔', title: 'הגדרות התראות',  breadcrumb: 'הגדרות', type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'הגדרות שיחות',   breadcrumb: 'הגדרות', type: SearchType.setting),
+  // 'הגדרות שיחות' (the dead call-settings tree) is REMOVED — it described
+  // read-receipts / typing / video-compression / call-ringtone / cloud-backup
+  // that don't exist. The real chat lives in the 'שיחות' screen entry above.
   SearchEntry(emoji: '📋', title: 'הגדרות קטלוג',   breadcrumb: 'הגדרות', type: SearchType.setting),
 
   // ── הגדרות חנות ──────────────────────────────────────────────────────────
@@ -433,46 +435,11 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '🔐', title: 'אישור ביומטרי לפתיחה',          breadcrumb: 'הגדרות התראות › פרטיות במסך נעול', type: SearchType.setting),
   SearchEntry(emoji: '🔐', title: 'אל תעבר לשעון/רכב',             breadcrumb: 'הגדרות התראות › פרטיות במסך נעול', type: SearchType.setting),
 
-  // ── הגדרות שיחות ─────────────────────────────────────────────────────────
-  SearchEntry(emoji: '💬', title: 'שיחות וחיווי',                  breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'אישורי קריאה',                  breadcrumb: 'הגדרות שיחות › שיחות וחיווי',     type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'חיווי הקלדה',                   breadcrumb: 'הגדרות שיחות › שיחות וחיווי',     type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'תצוגה מקדימה בנעילה',           breadcrumb: 'הגדרות שיחות › שיחות וחיווי',     type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'מענה ראשוני',                   breadcrumb: 'הגדרות שיחות › שיחות וחיווי',     type: SearchType.setting),
-  SearchEntry(emoji: '💬', title: 'זמן מקוון אחרון',               breadcrumb: 'הגדרות שיחות › שיחות וחיווי',     type: SearchType.setting),
-  SearchEntry(emoji: '🔔', title: 'התראות שיחה',                   breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🔔', title: 'צלצול שיחה נכנסת',              breadcrumb: 'הגדרות שיחות › התראות שיחה',      type: SearchType.setting),
-  SearchEntry(emoji: '🔔', title: 'התראת הודעה חדשה',              breadcrumb: 'הגדרות שיחות › התראות שיחה',      type: SearchType.setting),
-  SearchEntry(emoji: '🎙️', title: 'מדיה ושמע',                    breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🎙️', title: 'הורדה אוטומטית',               breadcrumb: 'הגדרות שיחות › מדיה ושמע',        type: SearchType.setting),
-  SearchEntry(emoji: '🎙️', title: 'איכות תמונות נשלחות',          breadcrumb: 'הגדרות שיחות › מדיה ושמע',        type: SearchType.setting),
-  SearchEntry(emoji: '🎙️', title: 'דחיסת וידאו',                  breadcrumb: 'הגדרות שיחות › מדיה ושמע',        type: SearchType.setting),
-  SearchEntry(emoji: '🎙️', title: 'ניהול אחסון',                  breadcrumb: 'הגדרות שיחות › מדיה ושמע',        type: SearchType.setting),
-  SearchEntry(emoji: '👥', title: 'פרטיות שיחות',                  breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '👥', title: 'מי יכול לפתוח שיחה',            breadcrumb: 'הגדרות שיחות › פרטיות',           type: SearchType.setting),
-  SearchEntry(emoji: '👥', title: 'מחיקת היסטוריה',                breadcrumb: 'הגדרות שיחות › פרטיות',           type: SearchType.setting),
-  SearchEntry(emoji: '💾', title: 'גיבוי וייצוא',                  breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '💾', title: 'גיבוי לענן',                    breadcrumb: 'הגדרות שיחות › גיבוי וייצוא',     type: SearchType.setting),
-  SearchEntry(emoji: '💾', title: 'תדירות גיבוי',                  breadcrumb: 'הגדרות שיחות › גיבוי וייצוא',     type: SearchType.setting),
-  SearchEntry(emoji: '💾', title: 'ייצוא היסטוריה (CSV)',           breadcrumb: 'הגדרות שיחות › גיבוי וייצוא',     type: SearchType.setting),
-  SearchEntry(emoji: '💾', title: 'מחיקת גיבוי ענן',               breadcrumb: 'הגדרות שיחות › גיבוי וייצוא',     type: SearchType.setting),
-  SearchEntry(emoji: '🌐', title: 'שפה ותרגום (שיחות)',             breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🌐', title: 'שפת ממשק',                      breadcrumb: 'הגדרות שיחות › שפה ותרגום',       type: SearchType.setting),
-  SearchEntry(emoji: '🌐', title: 'תרגום אוטומטי',                 breadcrumb: 'הגדרות שיחות › שפה ותרגום',       type: SearchType.setting),
-  SearchEntry(emoji: '🏪', title: 'שיחות עסקיות',                  breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🏪', title: 'שעות פעילות עסקית',             breadcrumb: 'הגדרות שיחות › שיחות עסקיות',     type: SearchType.setting),
-  SearchEntry(emoji: '🏪', title: 'הודעת מחוץ לשעות',             breadcrumb: 'הגדרות שיחות › שיחות עסקיות',     type: SearchType.setting),
-  SearchEntry(emoji: '🏪', title: 'קטלוג מוצרים בשיחה',            breadcrumb: 'הגדרות שיחות › שיחות עסקיות',     type: SearchType.setting),
-  SearchEntry(emoji: '🏪', title: 'תשלום מתוך שיחה',               breadcrumb: 'הגדרות שיחות › שיחות עסקיות',     type: SearchType.setting),
-  SearchEntry(emoji: '🤖', title: 'בוט ואוטומציה',                  breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🤖', title: 'בוט שאלות נפוצות',               breadcrumb: 'הגדרות שיחות › בוט ואוטומציה',    type: SearchType.setting),
-  SearchEntry(emoji: '🤖', title: 'ברכת פתיחה',                    breadcrumb: 'הגדרות שיחות › בוט ואוטומציה',    type: SearchType.setting),
-  SearchEntry(emoji: '🤖', title: 'טקסט הברכה',                    breadcrumb: 'הגדרות שיחות › בוט ואוטומציה',    type: SearchType.setting),
-  SearchEntry(emoji: '🗂️', title: 'ארכיון וניקיון',               breadcrumb: 'הגדרות שיחות',                     type: SearchType.setting),
-  SearchEntry(emoji: '🗂️', title: 'ארכוב אוטומטי',                breadcrumb: 'הגדרות שיחות › ארכיון וניקיון',   type: SearchType.setting),
-  SearchEntry(emoji: '🗂️', title: 'מחיקה אוטומטית',               breadcrumb: 'הגדרות שיחות › ארכיון וניקיון',   type: SearchType.setting),
-  SearchEntry(emoji: '🗂️', title: 'סינון ספאם',                   breadcrumb: 'הגדרות שיחות › ארכיון וניקיון',   type: SearchType.setting),
-  SearchEntry(emoji: '🗂️', title: 'גיבוי לפני מחיקה',             breadcrumb: 'הגדרות שיחות › ארכיון וניקיון',   type: SearchType.setting),
+  // ── הגדרות שיחות — REMOVED (dead call-settings tree) ─────────────────────
+  // This whole sub-tree (read receipts, typing indicator, call ringtone, video
+  // compression, cloud backup, …) described features that DO NOT EXIST, so it
+  // is gone from search. The working chat is the 'שיחות' screen entry near the
+  // top of this index; its real, wired settings stay reachable elsewhere.
 
   // ── הגדרות קטלוג ─────────────────────────────────────────────────────────
   SearchEntry(emoji: '🔍', title: 'חיפוש וסינון (קטלוג)',          breadcrumb: 'הגדרות קטלוג',                     type: SearchType.setting),

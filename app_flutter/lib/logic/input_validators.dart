@@ -34,6 +34,31 @@ bool validBoardCode(String input) {
   return RegExp(r'^\d{4}$').hasMatch(digits);
 }
 
+/// Normalize a free-text phone to the international digit string `wa.me`
+/// expects (digits only, country code, NO `+`/`00`/separators). Pure →
+/// unit-testable. Rules (Israeli-first, the only market today):
+///   • strip everything that isn't a digit (spaces, dashes, parens, `+`);
+///   • a `00`-prefixed international form drops the `00` (→ bare country code);
+///   • an Israeli LOCAL number (leading `0`, e.g. `050-123 4567`) maps its
+///     trunk `0` to the `972` country code → `972501234567`;
+///   • an already-international number (`+972…` / `972…`) keeps its digits.
+/// Returns `''` when there are no digits at all (→ the caller hides the
+/// WhatsApp button rather than opening `wa.me/`).
+String waMeDigits(String input) {
+  var digits = input.replaceAll(RegExp(r'\D'), '');
+  if (digits.isEmpty) return '';
+  // `00<cc>…` international prefix → strip the `00` to the bare country code.
+  if (digits.startsWith('00')) {
+    digits = digits.substring(2);
+  }
+  // Israeli local form: a single leading trunk `0` → the 972 country code.
+  // (A `972…` that happens to start with no `0` is left untouched.)
+  if (digits.startsWith('0')) {
+    digits = '972${digits.substring(1)}';
+  }
+  return digits;
+}
+
 /// Amount (price / budget / expense): a finite number strictly greater than 0.
 /// Accepts the nullable result of `int.tryParse` / `double.tryParse` directly.
 bool validPositiveAmount(num? value) =>

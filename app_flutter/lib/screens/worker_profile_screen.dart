@@ -16,6 +16,7 @@ import 'package:buildsmart/state/worker_profile_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -211,6 +212,8 @@ class _IdentityCard extends StatelessWidget {
                     ),
                   ),
                 ],
+                // 📞/💬 — call or WhatsApp this worker (hidden when no phone).
+                ContactActions(phone: profile.phone),
               ],
             ),
           ),

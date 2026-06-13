@@ -44,6 +44,10 @@ dependencies:
   # native/web share sheet — cart 'שתף' (falls back to the Web Share API on web)
   share_plus: ^10.0.0
 
+  # launch the native dialer (tel:) + WhatsApp (https://wa.me/…) from the
+  # contact/chat 📞/💬 buttons — no in-app calling, just hand off to the OS.
+  url_launcher: ^6.3.0
+
   # persistence (settings + profile)
   shared_preferences: ^2.3.4
 
