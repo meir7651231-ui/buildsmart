@@ -24,6 +24,8 @@
 | A13 | לחבר callables: `advanceOrderStage` · `computeCredit` | `sys_orders.advance` · מסך אשראי | קידום/אשראי דרך השרת | agent | M |
 | A14 | seed ראשוני מ‑session של admin | סקריפט/admin | אוספים מאותחלים בשרת | את+agent | S |
 
+> 📋 **סקירת‑לוחות (tip 576036c, 13/6):** 🦺עובד · 🛵שליח · 🏪ספק — **✅ שלושתם גמורים**: מגודרים ("מבחוץ לא רואים כלום"), **מסונכרנים לפי זהות** דרך `BoardSession`/`boardAuthProvider` + 5 חשבונות‑seed (עובד/שליח/חנות/מנהל/דמו), עם מנועים אמיתיים (הזמנות/POD/מלאי/rewards/notifs חיים). **A4‑A6 ממוסגר מחדש:** סינון‑לפי‑זהות בצד‑לקוח **כבר עובד** (לפי `session.username`); הנותר = **server‑swap** — להחליף seeds ב‑Firebase‑uid אמיתי (כל נרשם, לא רק 5) + scoped Firestore listener + pool. stubs זעירים שנותרו (3): ביטול‑הזמנה‑כולה (picking:720) · חתימת‑POD "(הדגמה)" (pod:262) · כלי‑סימולציית‑הזמנה (store:453).
+
 ## Phase B — ניקוי placeholders (חובה לאפל)
 | ID | משימה | היכן | DoD | מי | מ' |
 |---|---|---|---|---|---|
