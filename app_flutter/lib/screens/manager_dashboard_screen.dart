@@ -5,6 +5,7 @@ import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/manager_profile_screen.dart';
+import 'package:buildsmart/screens/manager_role_assign_sheet.dart';
 import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 // #85ב/#23 — the SHARED proof-photo renderer (one renderer for both sides
@@ -2194,6 +2195,24 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
                 Navigator.of(context).push(RegressionPanelScreen.route()),
           ),
         ),
+        const SizedBox(height: BsTokens.space3),
+
+        // 6. 🔑 שיוך תפקידים (A12 — launch Phase A) — the manager assigns a role
+        // to a user via the `setRole` callable seam. SELF-CONTAINED in
+        // manager_role_assign_sheet.dart; this is just the mount hook (one
+        // button → the sheet). Gracefully disabled with a clear message when no
+        // live backend (the sheet gates on authGatewayProvider).
+        _ManageSection(
+          sectionKey: 'roles',
+          emoji: '🔑',
+          title: 'שיוך תפקידים',
+          sub: 'הקצאת תפקיד (חנות / שליח / עובד / מנהל) למשתמש',
+          open: _open == 'roles',
+          onTap: () => _toggle('roles'),
+          child: _RoleAssignBody(
+            onOpen: () => showManagerRoleAssignSheet(context),
+          ),
+        ),
       ],
     );
   }
@@ -3008,6 +3027,57 @@ class _RegressionBody extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 '🔬 פתח מרכז בדיקות רגרסיה',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: bsOnAccent(context),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The 🔑 שיוך תפקידים body (A12) — a short note + a `brand` action button that
+/// opens the self-contained [ManagerRoleAssignSheet] (manager_role_assign_sheet
+/// .dart). The sheet owns ALL the logic (phone→uid lookup, the assignRole call,
+/// the no-backend gating); this is purely the mount hook. [onOpen] performs the
+/// `showModalBottomSheet`. Keyed `open-role-assign` so a test can tap it.
+class _RoleAssignBody extends StatelessWidget {
+  const _RoleAssignBody({required this.onOpen});
+
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'הקצאת תפקיד למשתמש לפי טלפון או מזהה (uid). השיוך מופעל ע״י השרת '
+          'של בעל המערכת ומשפיע על המשתמש בהתחברות הבאה.',
+          style: TextStyle(
+            color: BsTokens.inkLight,
+            fontSize: 13,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: BsTokens.space3),
+        Material(
+          color: BsTokens.brand,
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          child: InkWell(
+            key: const ValueKey('open-role-assign'),
+            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+            onTap: onOpen,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                '🔑 פתח שיוך תפקידים',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: bsOnAccent(context),

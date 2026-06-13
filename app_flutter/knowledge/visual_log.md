@@ -844,3 +844,7 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 ## 2026-06-12 — הכנת-זהות A8/A11 (chats_screen) — לוגיקה בלבד
 - **שינוי-לוגיקה (לא ויזואלי):** שליחת-הודעה מטביעה עכשיו `fromUid` (מ-`currentUidProvider`) — בתוך לוגיקת-ה-send, אפס שינוי בפריסת-הצ׳אט. (A11 לקוחות = data-layer בלבד, ללא UI.)
 - **אימות:** `chat_uid_a8_test` + `customers_uid_a11_test` · analyze 0 · full-suite ירוק · build web ✅.
+
+## 2026-06-12 — מסך הקצאת-תפקיד למנהל (נחיל A12) — שינוי-עין
+- **שינוי ויזואלי:** ניהול-tab של המנהל — סקשן חדש "🔑 שיוך תפקידים" שפותח sheet: חיפוש-משתמש לפי טלפון + בחירת-תפקיד + שיוך. בלי-backend: שדות/כפתור מושבתים + banner "זמין רק עם חיבור לשרת".
+- **אימות:** `manager_role_assign_sheet_a12_test` 5/5 · analyze 0 · full-suite +2160 · build web ✅. (שיוך-אמת = setRole בשרת, owner.)

@@ -1788,3 +1788,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **A7 (infra ל-A4/A8):** `UsersLookup` חדש (`lib/data/repositories/users_lookup.dart`) מעל אוסף `users` (doc-id=uid, נכתב ע"י usersProfileWriterProvider · {displayName, phone, role?}): `uidByPhone(phone,{role})` · `uidsByRole(role)` · `usersLookupProvider` (gated על useFirebaseBackend, null בלי-backend). seam בר-הזרקה (RemoteCollectionSource) — בר-בדיקה בלי Firebase. **לא חובר עדיין ל-A4/A8** (אדיטיבי, אפס שינוי-התנהגות).
 - guard: `users_lookup_a7_test` (10 · hit/miss/empty · role-narrow/exclude · uidsByRole · snapshot-error→null · provider-null-בלי-backend). מוטציה: היפוך predicate-הטלפון → 4 אדום → שוחזר.
 - Gate: analyze 0 · full-suite +2155 · build web ✅.
+### #A12 — מסך הקצאת-תפקיד למנהל (נחיל) — 2026-06-12
+- **A12:** `manager_role_assign_sheet.dart` חדש — מנהל מזין משתמש (טלפון→uid דרך `UsersLookup.uidByPhone`, או uid ישיר) + בוחר תפקיד (store/courier/worker/manager) → קורא ל-`assignRole({uid,role})` הקיים (S1.9). mount מינימלי ב-manager_dashboard ניהול-tab (סקשן 🔑 שיוך תפקידים). **gated בלי-backend** (banner אמבר, אפס שיוך מזויף); כשל-שרת=טוסט-נכשל; הצלחה רק על setRole שלא זרק.
+- guard: `manager_role_assign_sheet_a12_test` (5 · phone→uid forwards {uid,role} · uid-ישיר · phone-לא-נמצא→אין-call · דחיית-שרת→נכשל · בלי-backend→disabled+banner). מוטציה: uid→'MUTANT' → 2 אדום → שוחזר.
+- **owner/backend:** השיוך בפועל רץ מול `setRole` Cloud Function (me-west1, מאמת admin-claim שרת-צד). UI מושבת נקי בלי-backend.
+- Gate: analyze 0 · full-suite +2160 · build web ✅.
