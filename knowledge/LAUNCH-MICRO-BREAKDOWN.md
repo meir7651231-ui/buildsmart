@@ -82,8 +82,8 @@
 ## Phase G — הקשחת שרת
 | ID | משימה | היכן | מי | מ' |
 |---|---|---|---|---|
-| G1 | אינדקסים מורכבים (ל‑A5/A9) | `firestore.indexes.json` | agent | S |
-| G2 | הקשחת rules (ownership) + emulator tests | `firestore.rules` + rules_test | agent | M |
+| G1 | ✅ (5de11d8) · אינדקסים מורכבים (ל‑A5/A9) | `firestore.indexes.json` | agent | S |
+| G2 | ✅ (5de11d8) · הקשחת rules (ownership) + emulator tests | `firestore.rules` + rules_test | agent | M |
 | G3 | אכיפת App Check | console + agent | את+agent | S |
 | G4 | Crashlytics + Analytics אמיתי | agent | M |
 | G5 | התראות‑תקציב Blaze | console | את | S |
