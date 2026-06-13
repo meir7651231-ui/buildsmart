@@ -18,13 +18,13 @@
 | A5 | ✅ (208f3a9) · listener ממוקד + שיתוף‑בריכה + indexes | `orders_local.dart`·`orders_repository.dart` | קבלן רק שלו · pool ל‑new/ready · admin הכול | agent | M |
 | A6 | ✅ (208f3a9) · דשבורד חנות/שליח = בריכה ∪ שלי | `store_dashboard_screen.dart`·`courier_dashboard_screen.dart` | חנות רואה את ההזמנות שלה | agent | M |
 | A7 | ✅ (5233cf8) · מדריך role→uid (לזהות "מי החנות/שליח") | `users` lookup חדש (by phone/role) | אפשר למפות צד‑נגדי ל‑uid | agent | M |
-| A8 | 🟡 (c35eefe+fec79e2): fromUid ✅ (sys_chat:78) · participantUids seam נוסף **אך ריק** · participants עדיין role-names (chat_firebase:158) → **צ׳אט עדיין לא מסתנכרן** · נותר: למלא participantUids בשליחה (דרך A7) | `chat_firebase.toDoc` · `sys_chat.send` | thread=uids · message fromUid | agent | M |
-| A9 | 🟡 seam (fec79e2): שדה `participantUids` + predicate `uid∈list` + chat-rules emulator (283) + 183 unit · **אך לא מאוכלס** (תמיד ריק → עדיין לא מסתנכרן/מבודד; חסר last-mile: למלא uids בשליחה דרך A7) | `chat_firebase`·`sys_chat`·`firestore.rules` | קורא רק threads שלו | agent | M |
+| A8 | ✅ (c35eefe+ff9d69d): fromUid + **participantUids מאוכלס בשליחה** (union uids לפי A7, `sys_chat.ensureParticipantUids:544`) — מגודר בדגל | `chat_firebase.toDoc` · `sys_chat.send` | thread נושא uids · message fromUid | agent | M |
+| A9 | ✅ (fec79e2 seam + ff9d69d אכלוס): `participantUids` מאוכלס (union לפי A7) + scoped read + predicate + rules emulator (283) + 247 בדיקות · **צ׳אט מסתנכרן/מבודד אמיתי** (מגודר; scope=role-union) | `chat_firebase`·`sys_chat`·`chat_repository`·`firestore.rules` | קורא רק threads שלו | agent | M |
 | A10 | 🟡 rules + emulator coverage (fec79e2 · 283 בדיקות chat.test.js) forward-ready · נותר: להחליט manager override על צ׳אט | `firestore.rules` chat | rules סופי | את+agent | S |
 | A11 | ✅ (c35eefe) · לקוחות: `ownerId=uid` בכתיבה | `customers_firebase.toDoc` | customer doc נושא ownerId | agent | S |
 | A12 | ✅ (7344097) · מסך הקצאת‑תפקיד (manager → `setRole`) | `manager_dashboard` ניהול tab → `assignRole` | מנהל נותן תפקיד באפליקציה | agent | M |
 | A13 | 🟡 שרת ✅ (advanceOrderStage/computeCredit מיוצאים) · קליינט פתוח (רק setRole נקרא) · לחבר callables: `advanceOrderStage` · `computeCredit` | `sys_orders.advance` · מסך אשראי | קידום/אשראי דרך השרת | agent | M |
-| A14 | seed ראשוני מ‑session של admin | סקריפט/admin | אוספים מאותחלים בשרת | את+agent | S |
+| A14 | ⚠️ מספור: הקומיט 'A14' של הצי (ff9d69d) = **אכלוס‑צ׳אט** (A8/A9 ✅), לא seed · seed‑ראשוני זה — ייתכן מיותר (דאטה נוצר בהרשמה/שימוש); פתוח | סקריפט/admin | אוספים מאותחלים | את+agent | S |
 
 > 📋 **סקירת‑לוחות (tip 576036c, 13/6):** 🦺עובד · 🛵שליח · 🏪ספק — **✅ שלושתם גמורים**: מגודרים ("מבחוץ לא רואים כלום"), **מסונכרנים לפי זהות** דרך `BoardSession`/`boardAuthProvider` + 5 חשבונות‑seed (עובד/שליח/חנות/מנהל/דמו), עם מנועים אמיתיים (הזמנות/POD/מלאי/rewards/notifs חיים). **A4‑A6 ממוסגר מחדש:** סינון‑לפי‑זהות בצד‑לקוח **כבר עובד** (לפי `session.username`); **server‑swap ✅ בוצע (208f3a9+50465b1):** seeds→Firebase‑uid (A4') + scoped listener + pool — הכל מגודר בדגל. stubs זעירים שנותרו (3): ביטול‑הזמנה‑כולה (picking:720) · חתימת‑POD "(הדגמה)" (pod:262) · כלי‑סימולציית‑הזמנה (store:453).
 

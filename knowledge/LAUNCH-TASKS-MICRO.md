@@ -205,7 +205,7 @@ J6 (Google 14-day) מתחיל מוקדם ככל האפשר
 **🔴 לא‑עובדים (6):**
 | מסך | מה חסר | סיבה |
 |---|---|---|
-| chats | זהות לפי BsRole לא uid · בלי fromUid · לא מסתנכרן | uid |
+| chats | ✅ נסגר (ff9d69d, מגודר): fromUid + participantUids מאוכלס (A7 role-union) → מסתנכרן/מבודד; דורמנטי עד דגל/F1 → 🟡 | uid |
 | ai_hub | 7/9 כלים = נתונים קבועים | external |
 | camera_sheet | רק ברקוד+פלאש; צילום/גלריה מדומים | device |
 | persona_pod | צילום‑מסירה + חתימה מדומים | device |
