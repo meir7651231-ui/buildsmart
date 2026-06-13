@@ -31,7 +31,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:buildsmart/data/chat_seeds.dart';
+import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/chat_repository.dart';
+import 'package:buildsmart/data/repositories/users_lookup.dart';
+import 'package:buildsmart/state/auth_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -143,7 +146,11 @@ class ChatThread {
   /// is inert and [chatThreadVisibleToUid] treats an empty list as "visible".
   final List<String> participantUids;
 
-  ChatThread copyWith({List<ChatMessage>? messages}) => ChatThread(
+  ChatThread copyWith({
+    List<ChatMessage>? messages,
+    List<String>? participantUids,
+  }) =>
+      ChatThread(
         id: id,
         participants: participants,
         name: name,
@@ -151,7 +158,7 @@ class ChatThread {
         messages: messages ?? this.messages,
         isBot: isBot,
         audience: audience,
-        participantUids: participantUids,
+        participantUids: participantUids ?? this.participantUids,
       );
 }
 
@@ -251,13 +258,49 @@ final List<ChatThread> kWorkerChatThreads = [
 List<ChatThread> _seedThreads() => [...kChatThreads, ...kWorkerChatThreads];
 
 class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
-  ChatEngineNotifier({this.persist = true}) : super(_seedThreads()) {
+  ChatEngineNotifier({
+    this.persist = true,
+    this.lookup,
+    this.currentUid,
+    bool? uidScoped,
+  })  : uidScoped = uidScoped ?? kUidScopedQueries,
+        super(_seedThreads()) {
     if (persist) _load();
   }
 
   /// When false (tests), skip SharedPreferences entirely so the in-memory
   /// seed/flow can be asserted in isolation (the worker-tasks pattern).
   final bool persist;
+
+  /// A14 (launch uid-migration) — the UID-SCOPED gate, DEFAULTING to the
+  /// compile-time `kUidScopedQueries` (the provider passes nothing, so
+  /// production is gated EXACTLY by that flag — OFF today). A test injects
+  /// `uidScoped: true` to drive the population end-to-end in the standard
+  /// (define-less) suite, the way every other compile-time switch in this app
+  /// is made unit-testable without a recompile. OFF ⇒ [ensureParticipantUids]
+  /// is a no-op ⇒ participantUids stays empty ⇒ zero regression.
+  final bool uidScoped;
+
+  /// A14 (launch uid-migration) — the COUNTERPARTY → uid directory (A7), or
+  /// null on the local/Firebase-free path (the whole test suite, unless a test
+  /// injects a fake). When `kUidScopedQueries` is ON and this is non-null,
+  /// [ensureParticipantUids] resolves a thread's [ChatThread.participantUids]
+  /// as the UNION of the real uids of all its participant ROLES — so the
+  /// Firestore rules' `uid in participantUids` becomes a REAL per-user scope.
+  /// Injectable so a test drives population with a fake returning known uids.
+  final UsersLookup? lookup;
+
+  /// A14 — the signed-in `auth.uid` getter (`currentUidProvider`'s value), or a
+  /// getter that returns null on the signed-out / Firebase-free path. The
+  /// SENDER's uid is always folded into the resolved [ChatThread.participantUids]
+  /// so the sender can read the thread they just stamped (the rules scope on it).
+  /// A getter (not a snapshot) so it always reads the live current identity.
+  final String? Function()? currentUid;
+
+  /// A14 — thread ids whose participantUids resolve is in flight, so a second
+  /// [ensureParticipantUids] (e.g. a rapid second send) does not kick a
+  /// duplicate async resolve before the first stamps.
+  final Set<String> _uidResolveInFlight = {};
 
   /// True once a mutation applied or _load completed — guards _load from
   /// clobbering a mutation that landed before prefs resolved (worker-tasks H2).
@@ -428,6 +471,13 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
   /// threads do NOT auto-reply — the other persona answers live.
   void send(String threadId, BsRole fromRole, String text,
       {String fromUid = ''}) {
+    // A14 — populate participantUids for REAL on first touch (gated, async,
+    // non-blocking): when `kUidScopedQueries` is ON and the thread's uids are
+    // still empty, resolve the union of its roles' real uids and stamp them.
+    // OFF (default) ⇒ no-op ⇒ participantUids stays empty ⇒ today's shared
+    // threads, zero regression. Kicked BEFORE the optimistic write so a fresh
+    // backend never persists a head without its uids; it never blocks the send.
+    ensureParticipantUids(threadId);
     // S4.3 — bound to Firestore: delegate to the repo's verbatim port (message
     // write + thread lastMsg/ts upsert + the bot auto-reply). Its optimistic
     // cache notifies back SYNCHRONOUSLY → [_refreshFromRemote] has already
@@ -470,6 +520,79 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
     ];
   }
 
+  /// A14 (launch uid-migration) — POPULATE a thread's [ChatThread.participantUids]
+  /// for real (the chat last-mile). When [uidScoped] is ON, a [lookup]
+  /// exists, and the thread's uids are still EMPTY, this resolves the UNION over
+  /// the thread's participant ROLES of [UsersLookup.uidsByRole] (skipping
+  /// [BsRole.bot] — the system has no `users` doc), folds in the SENDER's
+  /// [currentUid] (so the sender can read the thread they stamped), and UPSERTS
+  /// the resolved set onto the thread head. So a `[contractor, store]` thread
+  /// ends up carrying EVERY contractor uid + EVERY store uid (multiple users per
+  /// role are all included) — exactly what the rules' `uid in participantUids`
+  /// needs to isolate the conversation to the involved roles' real users.
+  ///
+  /// ZERO REGRESSION: the flag OFF (the default + the whole local test suite
+  /// unless a test injects a [lookup]) makes this a NO-OP — participantUids stays
+  /// empty, threads stay shared, behaviour is byte-identical to today.
+  ///
+  /// ASYNC, NON-BLOCKING: `uidsByRole` is async but [send] is sync-optimistic, so
+  /// this resolves OFF the send path and stamps the head when it settles (an
+  /// in-flight guard prevents a duplicate resolve from a rapid second send). The
+  /// remote path stamps through the bound repository ([ChatRepository.
+  /// setParticipantUids]); the local path stamps the engine state directly.
+  /// Returns the resolve future so callers/tests can await settling.
+  Future<void> ensureParticipantUids(String threadId) async {
+    if (!uidScoped) return; // gated — OFF is today, exactly
+    final lk = lookup;
+    if (lk == null) return; // no directory (Firebase-free) → nothing to resolve
+    if (_uidResolveInFlight.contains(threadId)) return; // resolve already kicked
+
+    // Find the thread (local state mirrors the remote when bound) and skip when
+    // it is unknown or already populated (resolve once, then it is the cache).
+    final idx = state.indexWhere((t) => t.id == threadId);
+    if (idx < 0) return;
+    if (state[idx].participantUids.isNotEmpty) return;
+    final roles = state[idx].participants;
+
+    _uidResolveInFlight.add(threadId);
+    try {
+      // ⋃ over the thread's participant roles of their real uids (bot skipped —
+      // it has no users doc). A LinkedHashSet keeps the union de-duplicated and
+      // deterministically ordered (roles in seed order, uids in doc order).
+      final union = <String>{};
+      for (final role in roles) {
+        if (role == BsRole.bot) continue;
+        union.addAll(await lk.uidsByRole(role.name));
+      }
+      // Fold in the sender's own uid so they can read the thread they stamped.
+      final me = currentUid?.call();
+      if (me != null && me.isNotEmpty) union.add(me);
+
+      if (!mounted) return; // disposed mid-resolve (test teardown / rebuild)
+      // Nothing resolved (no backend users yet) → leave it empty so the thread
+      // stays visible rather than locking everyone out; a later send retries.
+      if (union.isEmpty) return;
+
+      final uids = List<String>.unmodifiable(union);
+      // Bound to Firestore: stamp through the repo so the head doc persists the
+      // uids (its toDoc already writes participantUids when non-empty) and the
+      // mirror flows the new state back into the engine. Local: stamp directly.
+      final r = _remote;
+      if (r != null) {
+        r.setParticipantUids(threadId, uids);
+        return;
+      }
+      final i = state.indexWhere((t) => t.id == threadId);
+      if (i < 0) return;
+      state = [
+        for (var k = 0; k < state.length; k++)
+          if (k == i) state[k].copyWith(participantUids: uids) else state[k],
+      ];
+    } finally {
+      _uidResolveInFlight.remove(threadId);
+    }
+  }
+
   /// 🔒 ISOLATION primitive — the threads [role] participates in (SPEC §2.5).
   /// The store never sees a contractor↔manager thread. Order is preserved from
   /// the seed (newest-activity ordering is the UI's job, not the engine's).
@@ -509,7 +632,15 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
 final chatEngineProvider =
     StateNotifierProvider<ChatEngineNotifier, List<ChatThread>>(
   (ref) {
-    final engine = ChatEngineNotifier();
+    final engine = ChatEngineNotifier(
+      // A14 — the directory (A7) + the live signed-in uid (A2). The engine's
+      // `uidScoped` defaults to the compile-time `kUidScopedQueries`, so with
+      // the flag OFF (today) `ensureParticipantUids` is a no-op and these are
+      // never read ⇒ zero regression. `usersLookupProvider` is itself null
+      // without the live backend, so this is doubly inert off the launch path.
+      lookup: ref.read(usersLookupProvider),
+      currentUid: () => ref.read(currentUidProvider),
+    );
     final remote = ref.read(chatRepositoryProvider);
     if (remote != null) engine.bindRemote(remote);
     return engine;

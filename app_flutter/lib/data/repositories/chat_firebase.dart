@@ -120,11 +120,15 @@ class _ChatThreadHead {
   final String lastMsg;
   final DateTime? lastTs;
 
-  _ChatThreadHead copyWith({String? lastMsg, DateTime? lastTs}) =>
+  _ChatThreadHead copyWith({
+    String? lastMsg,
+    DateTime? lastTs,
+    List<String>? participantUids,
+  }) =>
       _ChatThreadHead(
         id: id,
         participants: participants,
-        participantUids: participantUids,
+        participantUids: participantUids ?? this.participantUids,
         name: name,
         avatar: avatar,
         isBot: isBot,
@@ -422,6 +426,20 @@ class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
   void resetToSeed() {
     _threads.replaceAll(_threadHeadSeed());
     _messages.replaceAll(_chatMessageSeed());
+  }
+
+  /// A14 — stamp [threadId]'s head with [uids] (the resolved union of its roles'
+  /// real uids; see `ChatEngineNotifier.ensureParticipantUids`). Optimistic
+  /// head upsert → the doc's `toDoc` persists `participantUids` (it already
+  /// writes the field when non-empty, so the round-trip is loss-free and the
+  /// rules can scope on it); a no-op on an unknown thread. The upsert's notify
+  /// mirrors the new head back into the engine state. Background write guarded.
+  @override
+  void setParticipantUids(String threadId, List<String> uids) {
+    final heads = _threads.cached();
+    final idx = heads.indexWhere((h) => h.id == threadId);
+    if (idx < 0) return;
+    _threads.upsert(heads[idx].copyWith(participantUids: uids));
   }
 
   // ── lifecycle ────────────────────────────────────────────────────────────────

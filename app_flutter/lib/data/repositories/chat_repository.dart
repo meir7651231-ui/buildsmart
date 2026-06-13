@@ -53,6 +53,15 @@ abstract class ChatRepository implements Listenable {
   /// Reset both collections to the verbatim `kChatThreads` seed (tests / a
   /// future "demo reset"). Mirrors `ChatEngineNotifier.resetToSeed`.
   void resetToSeed();
+
+  /// A14 (launch uid-migration) — STAMP a thread head's `participantUids` (the
+  /// auth-truth the Firestore rules scope on). Called by the engine's
+  /// [ChatEngineNotifier.ensureParticipantUids] when `kUidScopedQueries` is ON
+  /// and the union of the thread's roles' real uids has been resolved (A7).
+  /// Optimistic cache upsert + background head write (toDoc already persists
+  /// participantUids when non-empty); a no-op on an unknown thread. Gated +
+  /// additive — never called with the flag OFF, so today's path is unchanged.
+  void setParticipantUids(String threadId, List<String> uids);
 }
 
 /// The chat repository provider — the S4 seam the engine binds through. When
