@@ -1793,3 +1793,8 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - guard: `manager_role_assign_sheet_a12_test` (5 · phone→uid forwards {uid,role} · uid-ישיר · phone-לא-נמצא→אין-call · דחיית-שרת→נכשל · בלי-backend→disabled+banner). מוטציה: uid→'MUTANT' → 2 אדום → שוחזר.
 - **owner/backend:** השיוך בפועל רץ מול `setRole` Cloud Function (me-west1, מאמת admin-claim שרת-צד). UI מושבת נקי בלי-backend.
 - Gate: analyze 0 · full-suite +2160 · build web ✅.
+### #B8 — הרשמה אמיתית: אומת (כבר מחווט) + בדיקת-שמירה (נחיל) — 2026-06-12
+- **B8 = כבר מחווט (S1), אפס פער-קוד:** משתמש-חדש → חשבון אמיתי. welcome `_register` → (flag ON) `_enterViaAuth` → `showLoginSheet` (phone-OTP יוצר חשבון Firebase על אימות-ראשון) → mirror `{displayName, phone}` ל-`users/{uid}`. flag-OFF=דמו (gateway+writer=null). אימייל=login-fallback (אין signup מזויף).
+- guard: הורחב `welcome_auth_gate_test` (+2): flag-OFF `_register` כותב 0 ל-users (נעילה מול רגרסיה שתמציא חשבון בדמו) · צורת-mirror `users/{uid}` ({displayName,phone}, uid-keyed, ריקים מושמטים). flag-ON routing = device-only (מתועד).
+- מוטציות: הסרת flag-gate ב-`_register` → אדום · key `displayName`→`name` → אדום · שניהם שוחזרו.
+- Gate: analyze 0 · full-suite +2162 · build web ✅.
