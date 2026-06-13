@@ -3,6 +3,8 @@
 > פירוק **כל** הדרך להשקה למשימות‑מיקרו בודדות. כל שורה = unit · היכן (קובץ/קונסול) · DoD · מי · מאמץ.
 > מי: **[agent]**=קוד · **[את]**=החלטה/קונסול/עסקי · **[חיצוני]**=זמן‑קיר. מאמץ: **S**=שעות · **M**=ימים · **L**=שבוע+.
 > נלווה ל‑`LAUNCH-TASKS-MICRO.md` (שלבים + גוטצ'ות + מצאי‑מסכים). מבוסס על מצאי e3e6e94.
+>
+> 🔴 **תזכורת‑על (אומת 13/6 @576036c):** סדרת‑A היא **code-complete אך דורמנטית בריצת‑ברירת‑מחדל** — `useFirebaseBackend` כבוי כברירת‑מחדל (`backend.dart:16`), ו‑`firebase_options` web-only (F1) → על **מכשיר נייטיב Firebase לא עולה**. ✅ עובד רק על **preview‑web עם הדגל** (כפי שהוכח 10/6). הלוחות שעובדים בדמו = `BoardSession`/seed, **לא** Firebase‑uid.
 
 ---
 
@@ -18,10 +20,10 @@
 | A7 | ✅ (5233cf8) · מדריך role→uid (לזהות "מי החנות/שליח") | `users` lookup חדש (by phone/role) | אפשר למפות צד‑נגדי ל‑uid | agent | M |
 | A8 | 🟡 חלקי (c35eefe): fromUid ✅ אך participants עדיין role-names (chat_firebase:151) → צ׳אט לא מסתנכרן · צ׳אט: `participants=[uid]` + `fromUid` | `chat_firebase.toDoc` · `sys_chat.send` (שימוש ב‑A7) | thread=uids · message יש fromUid | agent | M |
 | A9 | צ׳אט: queries ממוקדים | `chat_repository` scope (`arrayContains uid` / `threadId`) | קורא רק threads של עצמו | agent | M |
-| A10 | החלטה: למנהל override על צ׳אט? + עדכון rules | `firestore.rules` chat | rules סופי | את+agent | S |
+| A10 | 🟡 rules כתובים + uid-contract הוחלט (forward-ready) · החלטה: למנהל override על צ׳אט? + עדכון rules | `firestore.rules` chat | rules סופי | את+agent | S |
 | A11 | ✅ (c35eefe) · לקוחות: `ownerId=uid` בכתיבה | `customers_firebase.toDoc` | customer doc נושא ownerId | agent | S |
 | A12 | ✅ (7344097) · מסך הקצאת‑תפקיד (manager → `setRole`) | `manager_dashboard` ניהול tab → `assignRole` | מנהל נותן תפקיד באפליקציה | agent | M |
-| A13 | לחבר callables: `advanceOrderStage` · `computeCredit` | `sys_orders.advance` · מסך אשראי | קידום/אשראי דרך השרת | agent | M |
+| A13 | 🟡 שרת ✅ (advanceOrderStage/computeCredit מיוצאים) · קליינט פתוח (רק setRole נקרא) · לחבר callables: `advanceOrderStage` · `computeCredit` | `sys_orders.advance` · מסך אשראי | קידום/אשראי דרך השרת | agent | M |
 | A14 | seed ראשוני מ‑session של admin | סקריפט/admin | אוספים מאותחלים בשרת | את+agent | S |
 
 > 📋 **סקירת‑לוחות (tip 576036c, 13/6):** 🦺עובד · 🛵שליח · 🏪ספק — **✅ שלושתם גמורים**: מגודרים ("מבחוץ לא רואים כלום"), **מסונכרנים לפי זהות** דרך `BoardSession`/`boardAuthProvider` + 5 חשבונות‑seed (עובד/שליח/חנות/מנהל/דמו), עם מנועים אמיתיים (הזמנות/POD/מלאי/rewards/notifs חיים). **A4‑A6 ממוסגר מחדש:** סינון‑לפי‑זהות בצד‑לקוח **כבר עובד** (לפי `session.username`); הנותר = **server‑swap** — להחליף seeds ב‑Firebase‑uid אמיתי (כל נרשם, לא רק 5) + scoped Firestore listener + pool. stubs זעירים שנותרו (3): ביטול‑הזמנה‑כולה (picking:720) · חתימת‑POD "(הדגמה)" (pod:262) · כלי‑סימולציית‑הזמנה (store:453).
@@ -36,19 +38,19 @@
 | B5 | 🟡 חלקי (950757d · קטלוג: מע"מ/מטבע/יחידה/פורמט חי) · הגדרות מתות (~28) → להסתיר עד מימוש | `*_settings_screen.dart` | אין "נשמר אך לא משפיע" | agent | M |
 | B6 | חיפוש: פילטרים/מיון — לממש **או** להסתיר | `catalog_screen.dart:1108` · search dial | פועל או נעלם | agent | M |
 | B7 | dial leaves "בבנייה" (BS persona / cart / store quick‑actions) — להחליט פר‑עלה | `sections.dart`/`menu_trees.dart`/`store_screen.dart` | אין עלה‑מת גלוי | את+agent | L |
-| B8 | ✅ (576036c) · הרשמה אמיתית למשתמש חדש (לא local‑only) | `welcome_screen.dart` | נרשם → חשבון אמיתי | agent | M |
+| B8 | 🟡 מגודר ב‑useFirebaseBackend (576036c — flag OFF=דמו) · הרשמה אמיתית למשתמש חדש (לא local‑only) | `welcome_screen.dart` | נרשם → חשבון אמיתי | agent | M |
 
 ## Phase C — חומרת מכשיר
 | ID | משימה | היכן | DoD | מי | מ' |
 |---|---|---|---|---|---|
-| C1 | להוסיף `image_picker`+`camera` ל‑pubspec | `pubspec.yaml` | plugins נטענים | agent | S |
-| C2 | צילום אמיתי (לפני/אחרי, POD, משימה) | `camera_sheet.dart:168` | תמונה נלכדת | agent | M |
+| C1 | ✅ (4ddb3b9) · להוסיף `image_picker`+`camera` ל‑pubspec | `pubspec.yaml` | plugins נטענים | agent | S |
+| C2 | ✅ (4ddb3b9 · webcam_capture takePicture) · צילום אמיתי (לפני/אחרי, POD, משימה) | `camera_sheet.dart:168` | תמונה נלכדת | agent | M |
 | C3 | גלריית מכשיר אמיתית | `camera_sheet.dart:347` | בחירת תמונה אמיתית | agent | S |
 | C4 | העלאת תמונה ל‑R2 (presigned) | `getUploadUrl` (קיים) + קליינט | תמונה עולה לענן | agent | M |
 | C5 | POD: צילום + חתימה אמיתיים | `persona_pod_sheet.dart:197,220` | מסירה עם הוכחה אמיתית | agent | M |
 | C6 | אתר: צילום/GPS אמיתי (+`geolocator`) | `site_hub_screen.dart:826,1175` | מיקום/צילום אמיתי | agent | M |
 | C7 | סריקת‑תוכנית: PDF/מצלמה אמיתי **או** להסתיר | `contractor_tools_sheets.dart:517` | פועל או נעלם | את+agent | M |
-| C8 | שיתוף אמיתי (`share_plus` כבר ב‑pubspec) | `store_screen.dart:3104` · rewards | sheet‑שיתוף OS | agent | S |
+| C8 | 🔴 share_plus dead-dep (0 קריאות → להפעיל/להסיר) · שיתוף אמיתי (`share_plus` כבר ב‑pubspec) | `store_screen.dart:3104` · rewards | sheet‑שיתוף OS | agent | S |
 | C9 | ביומטרי: `local_auth` + חיווט **או** להסתיר | settings | אימות אמיתי או נעלם | את+agent | M |
 | C10 | הרשאות + manifest entries פר‑plugin | Android/iOS manifests | אין קריסת‑הרשאה | agent | S |
 
@@ -74,7 +76,7 @@
 |---|---|---|---|---|
 | F1 | רישום iOS+Android ב‑Firebase + native `firebase_options` | console + `firebase_options.dart` | את+agent | M |
 | F2 | App Check נייטיב (Play Integrity/DeviceCheck) | agent | M |
-| F3 | מחיקת‑חשבון מלאה (users/{uid}+data) | `auth_state.deleteAccount` + function | agent | M |
+| F3 | ✅ (profile→deleteAccount+wipe) · מחיקת‑חשבון מלאה (users/{uid}+data) | `auth_state.deleteAccount` + function | agent | M |
 | F4 | APNS key + iOS Push capability | Xcode + Firebase | את+agent | S |
 | F5 | Android notif channels + אייקון‑התראה | agent | S |
 | F6 | **אייקון‑מותג כתום** (כרגע ברירת‑מחדל כחולה של Flutter!) · favicon/PWA/launcher · splash · version · bundle‑id סופי | agent+את | M |
