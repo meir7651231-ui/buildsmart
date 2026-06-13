@@ -87,6 +87,7 @@ class Order {
     this.contractorUid = '',
     this.storeUid = '',
     this.courierUid = '',
+    this.customerPhone = '',
   });
 
   /// Order id, e.g. `BS-1042` (the legacy `o.id`).
@@ -142,6 +143,16 @@ class Order {
   /// Optional courier notes from `cartNotesProvider`. Empty if not set.
   final String notes;
 
+  /// The PLACER's (contractor's) free-text phone, stamped at `placeOrder` time
+  /// from the placing user's profile `contact`, so an order card can show the
+  /// 📞/💬 `ContactActions` reaching the person who placed the order (the
+  /// primary need: a supplier/courier calling the contractor about their order).
+  /// Additive + display-neutral: written ONLY when non-empty (like
+  /// [contractorUid]/[storeUid]), so the seed + every legacy/un-stamped order
+  /// round-trips byte-identical and shows NO buttons (ContactActions' own
+  /// empty-guard) — the zero-regression invariant.
+  final String customerPhone;
+
   /// Mirrors the legacy `o.stage!=='delivered'` "open order" predicate
   /// (@index.html:16951) — the same rule [ManagerOrder.isOpen] uses.
   bool get isOpen => stage != 'delivered';
@@ -153,6 +164,7 @@ class Order {
     String? notes,
     String? storeUid,
     String? courierUid,
+    String? customerPhone,
   }) =>
       Order(
         id: id,
@@ -170,6 +182,10 @@ class Order {
         // through copyWith), and set when a claim stamps them.
         storeUid: storeUid ?? this.storeUid,
         courierUid: courierUid ?? this.courierUid,
+        // Placer phone — set once at placement; preserved across every copy
+        // (advance/setStage go through copyWith) so the order card keeps its
+        // 📞/💬 target through the whole flow.
+        customerPhone: customerPhone ?? this.customerPhone,
       );
 
   /// Project to the pure [ManagerOrder] the manager analytics fold over — lets
@@ -197,6 +213,7 @@ class Order {
         if (contractorUid.isNotEmpty) 'contractorUid': contractorUid,
         if (storeUid.isNotEmpty) 'storeUid': storeUid,
         if (courierUid.isNotEmpty) 'courierUid': courierUid,
+        if (customerPhone.isNotEmpty) 'customerPhone': customerPhone,
       };
 
   factory Order.fromJson(Map<String, dynamic> j) => Order(
@@ -219,6 +236,7 @@ class Order {
         contractorUid: (j['contractorUid'] as String?) ?? '',
         storeUid: (j['storeUid'] as String?) ?? '',
         courierUid: (j['courierUid'] as String?) ?? '',
+        customerPhone: (j['customerPhone'] as String?) ?? '',
       );
 
   /// Lift a seed [ManagerOrder] into a live [Order] (no timestamp — seed).
@@ -385,6 +403,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
     String shipTo = '',
     String notes = '',
     String contractorUid = '',
+    String customerPhone = '',
   }) {
     // S4.4 — bound to Firestore: the repo's verbatim port places the order
     // (same _nextId/stage/prepend), its optimistic cache notifies back
@@ -402,6 +421,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
         shipTo: shipTo,
         notes: notes,
         contractorUid: contractorUid,
+        customerPhone: customerPhone,
       );
     }
     final order = Order(
@@ -416,6 +436,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
       shipTo: shipTo,
       notes: notes,
       contractorUid: contractorUid,
+      customerPhone: customerPhone,
     );
     state = [order, ...state];
     return order;

@@ -62,6 +62,7 @@ class SysOrder {
     required this.stage,
     required this.haul,
     required this.lines,
+    this.customerPhone = '',
   });
 
   final String id;
@@ -75,6 +76,11 @@ class SysOrder {
   final String haul;
   final List<OrderLine> lines;
 
+  /// The placer's (contractor's) phone, projected from the engine `Order` so the
+  /// store/courier order card can show the 📞/💬 contact buttons reaching the
+  /// contractor. Additive + default ''; seed orders carry none → no buttons.
+  final String customerPhone;
+
   SysOrder copyWith({OrderStage? stage}) => SysOrder(
     id: id,
     who: who,
@@ -84,6 +90,7 @@ class SysOrder {
     stage: stage ?? this.stage,
     haul: haul,
     lines: lines,
+    customerPhone: customerPhone,
   );
 }
 

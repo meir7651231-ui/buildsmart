@@ -19,6 +19,7 @@ import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -174,6 +175,11 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
 
             // Real order fields only (R8): customer · address · haul · sum.
             _infoRow('👤 ${order.who}'),
+            // 📞/💬 — call / WhatsApp the contractor (hidden when no phone).
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: ContactActions(phone: order.customerPhone),
+            ),
             _infoRow('📍 ${order.site}'),
             _infoRow('${haul.ic} דורש ${haul.name}'),
             _infoRow('${order.items} פריטים · סה״כ ${fMoney(order.sum)}'),

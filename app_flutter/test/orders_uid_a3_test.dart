@@ -129,6 +129,57 @@ void main() {
     });
   });
 
+  group('FirebaseOrdersRepository.toDoc/fromDoc — customerPhone (Firestore shape)', () {
+    final repo = FirebaseOrdersRepository();
+
+    test('a phone is WRITTEN to the doc and round-trips through fromDoc', () {
+      final o = Order(
+        id: 'BS-1042',
+        who: 'יוסי כהן',
+        site: 'מגדל הרצליה',
+        items: 7,
+        sum: 1240,
+        stage: 'new',
+        createdAt: DateTime.parse('2026-06-11T10:00:00.000'),
+        customerPhone: '050-123 4567',
+      );
+      final doc = repo.toDoc(o);
+      expect(doc['customerPhone'], '050-123 4567', reason: 'present when set');
+
+      final back = repo.fromDoc(RemoteDoc(o.id, doc));
+      expect(back.customerPhone, '050-123 4567');
+      expect(back.who, 'יוסי כהן'); // contractorId → who, untouched
+      expect(back.id, 'BS-1042');
+    });
+
+    test('an EMPTY phone is OMITTED from the doc (seed/legacy parity)', () {
+      const o = Order(
+        id: 'BS-1041',
+        who: 'משה אברהם',
+        site: 'אתר',
+        items: 3,
+        sum: 900,
+        stage: 'preparing',
+      );
+      expect(
+        repo.toDoc(o).containsKey('customerPhone'),
+        isFalse,
+        reason: 'omitted when empty → seed doc round-trips unchanged',
+      );
+    });
+
+    test("fromDoc DEFAULTS to '' when the field is absent (legacy doc)", () {
+      const doc = RemoteDoc('BS-1040', {
+        'contractorId': 'דנה לוי',
+        'siteAddress': 'אתר ישן',
+        'items': 2,
+        'sum': 400,
+        'stage': 'ready',
+      });
+      expect(repo.fromDoc(doc).customerPhone, '', reason: 'zero-regression');
+    });
+  });
+
   group('Order.copyWith — contractorUid is PRESERVED', () {
     test('a stage advance (copyWith) keeps the contractor uid', () {
       const o = Order(

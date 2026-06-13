@@ -72,7 +72,7 @@ to `SharedPreferences` key `bs.orders.v1` (cart/profile pattern; corrupt → see
 
 | API / provider | Behavior | Status |
 |---|---|---|
-| `placeOrder({who, site, items, sum, id?, createdAt?})` | contractor creates an order at stage `new`; auto-id `BS-####` above current max; prepended + timestamped; returns it | ✅ |
+| `placeOrder({who, site, items, sum, id?, createdAt?, …, customerPhone})` | contractor creates an order at stage `new`; auto-id `BS-####` above current max; prepended + timestamped; returns it. `customerPhone` (additive, default `''`) stamps the placer's profile phone for the order card's 📞/💬 | ✅ |
 | `advance(orderId)` | next stage in `kManagerOrderFlow`; no-op once `delivered` (verbatim `mgrAdvanceOrder` @17022-17032); unknown id = no-op | ✅ |
 | `setStage(orderId, stage)` | manager "god-step" to ANY flow stage; ignores unknown id/stage | ✅ |
 | `resetToSeed()` | restore the four seed orders | ✅ |
@@ -1198,6 +1198,7 @@ reachable from EACH persona dashboard (separately); guest reaches profile via an
 | CatalogSettingsScreen · ערכת נושא / התראות (×4) / שפה | ported from the dial; provider-split kept (theme·lang→`appSettings` · notif→`notifSettings` · text/motion/contrast→`catalogSettings`) — verbatim strings from `settings_tree.dart` | ✅ |
 | מנהל / חנות / שליח / עובד dashboards · AppBar | 👤 פרופיל→`ProfileScreen.route()` · ⚙️ הגדרות→`CatalogSettingsScreen.route()` (each persona, separately) | ✅ |
 | כרטיס-זהות פרופיל ספק/עובד/שליח · 📞 / 💬 | `ContactActions(phone: profile.phone)` under the identity card (`store_profile_screen` / `worker_profile_screen` / `courier_profile_screen`) — 📞→`tel:<phone>`, 💬→`https://wa.me/<intl digits>` (`waMeDigits`) via the `urlLauncherProvider` seam. Hidden when the profile has no phone. No in-app calling. | ✅ |
+| כרטיס/דף-הזמנה (store · courier · manager) · 📞 / 💬 | `ContactActions(phone: order.customerPhone)` reaches the CONTRACTOR who placed the order (product decision — the supplier/courier calling the placer). Field flow: `Order.customerPhone` (additive, default `''`, guarded write like `contractorUid`/`storeUid`) ← stamped at checkout (`store_screen` place-order, `= userProfileProvider.contact`) → projected onto `SysOrder.customerPhone` (`sys_orders._toSysOrder`). Surfaces: `_StoreOrderCard`/`_DeliveredCard` (`store_dashboard_screen`) · `_CourierJobCard` (`courier_dashboard_screen`) · `CourierDeliveryDetailSheet` · manager `_OrderRow`/`_OrderDetailSheet` (`manager_dashboard_screen`). Seed/legacy orders carry no phone → no buttons (ContactActions' empty-guard) = zero-regression. | ✅ |
 
 - Gate: central-verify green — analyze 0 · 1645 tests · build · conformance 7/7 · required-tests present.
 - **Known follow-up (Wave 3b):** `CatalogSettingsScreen._confirmReset` resets only `catalogSettings` — extend to also reset `appSettings`+`notifSettings` so the ported controls reset too.

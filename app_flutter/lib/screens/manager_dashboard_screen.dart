@@ -23,6 +23,7 @@ import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -971,6 +972,9 @@ class _OrderRow extends StatelessWidget {
                   '${order.who} · ${order.site}',
                   style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
                 ),
+                // 📞/💬 — call / WhatsApp the contractor who placed the order
+                // (hidden when the order carries no phone — seed/legacy).
+                ContactActions(phone: order.customerPhone, compact: true),
                 const SizedBox(height: BsTokens.space3),
                 _MiniTracker(stageIdx: stageIdx),
                 const SizedBox(height: BsTokens.space3),
@@ -1230,6 +1234,8 @@ class _OrderDetailSheet extends ConsumerWidget {
             ),
             const SizedBox(height: BsTokens.space4),
             row('קבלן', order.who),
+            // 📞/💬 — call / WhatsApp the contractor (hidden when no phone).
+            Center(child: ContactActions(phone: order.customerPhone)),
             row('אתר', order.site),
             row('סטטוס', stageLabel),
             const SizedBox(height: BsTokens.space4),

@@ -28,6 +28,7 @@ import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/contact_actions.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -2285,6 +2286,9 @@ class _StoreOrderCard extends StatelessWidget {
                     fontSize: 13.5,
                   ),
                 ),
+                // 📞/💬 — call / WhatsApp the contractor who placed the order
+                // (hidden when the order carries no phone — seed/legacy).
+                ContactActions(phone: order.customerPhone, compact: true),
                 const SizedBox(height: 2),
                 const Text(
                   '🕒 נדרש: בתיאום',
@@ -2453,6 +2457,8 @@ class _DeliveredCard extends StatelessWidget {
                     fontSize: 13.5,
                   ),
                 ),
+                // 📞/💬 — call / WhatsApp the contractor (hidden when no phone).
+                ContactActions(phone: order.customerPhone, compact: true),
                 const SizedBox(height: 2),
                 Text(
                   '${order.items} פריטים · ${fMoney(order.sum)} · הקש לתעודת ליקוט',

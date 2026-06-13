@@ -40,6 +40,8 @@ abstract class OrdersRepository {
   /// first of `kManagerOrderFlow`). Returns the created order. Mirrors
   /// `OrdersEngineNotifier.placeOrder`. When [id] is omitted the next `BS-####`
   /// is auto-assigned. [lines]/[shipTo]/[notes] are captured at checkout.
+  /// [customerPhone] is the placer's (contractor's) phone, stamped so an order
+  /// card can show the 📞/💬 contact buttons (additive, default '' → no buttons).
   Order placeOrder({
     required String who,
     required String site,
@@ -51,6 +53,7 @@ abstract class OrdersRepository {
     String shipTo,
     String notes,
     String contractorUid,
+    String customerPhone,
   });
 
   /// Advance [orderId] to the NEXT stage in `kManagerOrderFlow` — a no-op once

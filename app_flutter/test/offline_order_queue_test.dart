@@ -46,6 +46,7 @@ class _RecordingOrdersRepo implements OrdersRepository {
     String shipTo = '',
     String notes = '',
     String contractorUid = '',
+    String customerPhone = '',
   }) {
     final order = Order(
       id: id ?? 'BS-${2000 + placed.length}',
@@ -58,6 +59,7 @@ class _RecordingOrdersRepo implements OrdersRepository {
       lines: lines,
       shipTo: shipTo,
       notes: notes,
+      customerPhone: customerPhone,
     );
     placed.add(order);
     return order;

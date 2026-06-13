@@ -286,4 +286,97 @@ void main() {
       expect(back.createdAt, isNull);
     });
   });
+
+  // The placer's phone for the order card's 📞/💬 ContactActions — additive,
+  // display-neutral, written ONLY when non-empty so the seed + every legacy
+  // order round-trips byte-identical (mirrors contractorUid/storeUid).
+  group('Order.customerPhone — additive round-trip + placement stamp', () {
+    test('a phone is WRITTEN and round-trips losslessly when non-empty', () {
+      const o = Order(
+        id: 'BS-1042',
+        who: 'יוסי כהן',
+        site: 'מגדל הרצליה',
+        items: 7,
+        sum: 1240,
+        stage: 'new',
+        customerPhone: '050-123 4567',
+      );
+      final json = o.toJson();
+      expect(json['customerPhone'], '050-123 4567', reason: 'present when set');
+      final back = Order.fromJson(json);
+      expect(back.customerPhone, '050-123 4567');
+      // Display fields untouched (the field is additive).
+      expect(back.who, 'יוסי כהן');
+      expect(back.id, 'BS-1042');
+    });
+
+    test('an EMPTY phone is OMITTED from the JSON (seed/legacy parity)', () {
+      const o = Order(
+        id: 'BS-1041',
+        who: 'משה אברהם',
+        site: 'אתר',
+        items: 3,
+        sum: 900,
+        stage: 'preparing',
+      );
+      expect(o.customerPhone, '', reason: 'defaults to empty');
+      expect(
+        o.toJson().containsKey('customerPhone'),
+        isFalse,
+        reason: 'omitted when empty → byte-identical to a pre-feature payload',
+      );
+    });
+
+    test("fromJson DEFAULTS to '' when the key is absent (legacy doc)", () {
+      final back = Order.fromJson(const {
+        'id': 'BS-1039',
+        'who': 'דנה לוי',
+        'site': 'אתר ישן',
+        'items': 2,
+        'sum': 400,
+        'stage': 'delivered',
+      });
+      expect(back.customerPhone, '', reason: 'zero-regression default');
+    });
+
+    test('copyWith PRESERVES the phone across a stage advance', () {
+      const o = Order(
+        id: 'BS-9',
+        who: 'קבלן',
+        site: 'אתר',
+        items: 1,
+        sum: 100,
+        stage: 'new',
+        customerPhone: '0501112222',
+      );
+      // setStage/advance both build the next order via copyWith(stage: …).
+      final advanced = o.copyWith(stage: 'preparing');
+      expect(advanced.stage, 'preparing');
+      expect(
+        advanced.customerPhone,
+        '0501112222',
+        reason: 'advance/setStage must NOT drop the phone',
+      );
+    });
+
+    test('placeOrder STAMPS customerPhone onto the created order', () {
+      final n = engine();
+      final o = n.placeOrder(
+        who: 'קבלן',
+        site: 'אתר',
+        items: 2,
+        sum: 300,
+        customerPhone: '050-987 6543',
+      );
+      expect(o.customerPhone, '050-987 6543');
+      // And it is the order that landed in state (newest-first).
+      expect(n.state.first.customerPhone, '050-987 6543');
+    });
+
+    test('placeOrder defaults customerPhone to empty when not passed', () {
+      final n = engine();
+      final o = n.placeOrder(who: 'x', site: 's', items: 1, sum: 1);
+      expect(o.customerPhone, '');
+    });
+  });
 }

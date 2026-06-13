@@ -2815,6 +2815,12 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 // the order (additive; '' when signed-out / Firebase-free). The
                 // display still uses [who]; A4 will scope the listen on this.
                 final contractorUid = ref.read(currentUidProvider) ?? '';
+                // The placer's phone (profile `contact`) — stamped so the
+                // store/courier/manager order card can show the 📞/💬 buttons
+                // reaching the contractor who placed this order. Empty (e.g. a
+                // demo user with no contact, or an email-only contact) → the
+                // card shows no buttons (ContactActions' own empty-guard).
+                final customerPhone = ref.read(userProfileProvider).contact;
                 // Single placeOrder call — ONE id, ONE stage, persisted via
                 // the engine's bs.orders.v1 key. storeOrdersProvider derives
                 // from the engine so the orders list updates automatically.
@@ -2827,6 +2833,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       shipTo: shipTo,
                       notes: notes,
                       contractorUid: contractorUid,
+                      customerPhone: customerPhone,
                     );
                 // Mirror into storeOrdersProvider for legacy test compatibility:
                 // the test checks storeOrdersProvider.first.items == '$n פריטים'.
