@@ -15,12 +15,12 @@
 | A4 | הזמנה: `storeId/courierId=uid` בשיוך/קידום | `sys_orders.dart` storeAdvance/courierAdvance | order נושא uid של החנות/שליח | agent | M |
 | A5 | הזמנות: listener ממוקד (לא‑מנהל) | `ordersRepositoryProvider` (scope של A1) | קבלן רואה רק שלו · admin הכול | agent | M |
 | A6 | דשבורד חנות/שליח: סינון לפי זהות | `store_dashboard_screen.dart:300` · `courier_dashboard_screen.dart:45` | חנות רואה את ההזמנות שלה | agent | M |
-| A7 | מדריך role→uid (לזהות "מי החנות/שליח") | `users` lookup חדש (by phone/role) | אפשר למפות צד‑נגדי ל‑uid | agent | M |
-| A8 | צ׳אט: `participants=[uid]` + `fromUid` | `chat_firebase.toDoc` · `sys_chat.send` (שימוש ב‑A7) | thread=uids · message יש fromUid | agent | M |
+| A7 | ✅ (5233cf8) · מדריך role→uid (לזהות "מי החנות/שליח") | `users` lookup חדש (by phone/role) | אפשר למפות צד‑נגדי ל‑uid | agent | M |
+| A8 | ✅ (c35eefe · fromUid) · צ׳אט: `participants=[uid]` + `fromUid` | `chat_firebase.toDoc` · `sys_chat.send` (שימוש ב‑A7) | thread=uids · message יש fromUid | agent | M |
 | A9 | צ׳אט: queries ממוקדים | `chat_repository` scope (`arrayContains uid` / `threadId`) | קורא רק threads של עצמו | agent | M |
 | A10 | החלטה: למנהל override על צ׳אט? + עדכון rules | `firestore.rules` chat | rules סופי | את+agent | S |
-| A11 | לקוחות: `ownerId=uid` בכתיבה | `customers_firebase.toDoc` | customer doc נושא ownerId | agent | S |
-| A12 | מסך הקצאת‑תפקיד (manager → `setRole`) | `manager_dashboard` ניהול tab → `assignRole` | מנהל נותן תפקיד באפליקציה | agent | M |
+| A11 | ✅ (c35eefe) · לקוחות: `ownerId=uid` בכתיבה | `customers_firebase.toDoc` | customer doc נושא ownerId | agent | S |
+| A12 | ✅ (7344097) · מסך הקצאת‑תפקיד (manager → `setRole`) | `manager_dashboard` ניהול tab → `assignRole` | מנהל נותן תפקיד באפליקציה | agent | M |
 | A13 | לחבר callables: `advanceOrderStage` · `computeCredit` | `sys_orders.advance` · מסך אשראי | קידום/אשראי דרך השרת | agent | M |
 | A14 | seed ראשוני מ‑session של admin | סקריפט/admin | אוספים מאותחלים בשרת | את+agent | S |
 
@@ -34,7 +34,7 @@
 | B5 | 🟡 חלקי (950757d · קטלוג: מע"מ/מטבע/יחידה/פורמט חי) · הגדרות מתות (~28) → להסתיר עד מימוש | `*_settings_screen.dart` | אין "נשמר אך לא משפיע" | agent | M |
 | B6 | חיפוש: פילטרים/מיון — לממש **או** להסתיר | `catalog_screen.dart:1108` · search dial | פועל או נעלם | agent | M |
 | B7 | dial leaves "בבנייה" (BS persona / cart / store quick‑actions) — להחליט פר‑עלה | `sections.dart`/`menu_trees.dart`/`store_screen.dart` | אין עלה‑מת גלוי | את+agent | L |
-| B8 | הרשמה אמיתית למשתמש חדש (לא local‑only) | `welcome_screen.dart` | נרשם → חשבון אמיתי | agent | M |
+| B8 | ✅ (576036c) · הרשמה אמיתית למשתמש חדש (לא local‑only) | `welcome_screen.dart` | נרשם → חשבון אמיתי | agent | M |
 
 ## Phase C — חומרת מכשיר
 | ID | משימה | היכן | DoD | מי | מ' |
