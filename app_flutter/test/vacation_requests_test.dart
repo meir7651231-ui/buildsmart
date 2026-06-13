@@ -276,6 +276,86 @@ void main() {
         reason: "username+role isolates the worker's own requests");
   });
 
+  test(
+      'P-12 worker filter — a courier-role request under the SAME username '
+      'is NOT counted by the worker screen filter', () async {
+    // The worker forms screen (worker_forms_screen.dart) filters "my vacation
+    // requests" with `r.username == username && r.role == 'worker'`. Before the
+    // P-12 fix it filtered by username alone, so a courier request filed under
+    // the shared demo username leaked into the worker's list. This locks the
+    // worker side of the role predicate (the courier side is covered above).
+    SharedPreferences.setMockInitialValues({});
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    final n = c.read(vacationRequestsProvider.notifier);
+
+    // Same username 'demo' — one courier request, one worker request.
+    final courier = n.submit(
+      username: 'demo',
+      workerName: 'שליח דמו',
+      from: DateTime(2026, 6, 22),
+      to: DateTime(2026, 6, 23),
+      reason: 'שליח',
+      role: 'courier',
+    );
+    final worker = n.submit(
+      username: 'demo',
+      workerName: 'עובד דמו',
+      from: DateTime(2026, 6, 24),
+      to: DateTime(2026, 6, 25),
+      reason: 'עובד',
+    );
+
+    // Verbatim worker_forms_screen.dart filter (username + role == 'worker').
+    const username = 'demo';
+    final workerMine = c
+        .read(vacationRequestsProvider)
+        .where((r) => r.username == username && r.role == 'worker')
+        .toList();
+
+    expect(workerMine.map((r) => r.id), [worker.id],
+        reason: "the worker's own request is listed");
+    expect(workerMine.map((r) => r.id), isNot(contains(courier.id)),
+        reason: "the courier request under the shared 'demo' username must "
+            'NOT leak into the worker list (P-12 role predicate)');
+  });
+
+  test(
+      'P-12 worker filter — an OLD payload without role is counted as the '
+      "worker's (back-compat)", () async {
+    // A pre-role persisted record carries no 'role' and must decode as
+    // 'worker' (vacation_requests.dart:132), so it still matches the worker
+    // screen's `role == 'worker'` predicate — the fix never hides legacy
+    // worker requests.
+    SharedPreferences.setMockInitialValues({
+      kVacationRequestsKey: jsonEncode([
+        {
+          'id': 'vac-legacy-demo',
+          'username': 'demo',
+          'workerName': 'עובד דמו',
+          'from': DateTime(2026, 5, 2).toIso8601String(),
+          'to': DateTime(2026, 5, 3).toIso8601String(),
+          'reason': 'ישן',
+          'createdTs': DateTime(2026, 5, 1).toIso8601String(),
+          'status': kVacationPending,
+        },
+      ]),
+    });
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    c.read(vacationRequestsProvider); // lazy — start its _load()
+    await _settle();
+
+    const username = 'demo';
+    final workerMine = c
+        .read(vacationRequestsProvider)
+        .where((r) => r.username == username && r.role == 'worker')
+        .toList();
+    expect(workerMine.map((r) => r.id), ['vac-legacy-demo'],
+        reason: "a legacy role-less request loads as worker and stays in the "
+            "worker's filtered list");
+  });
+
   test('#86.3 role round-trip — courier role survives a simulated restart '
       "(json carries 'role')", () async {
     SharedPreferences.setMockInitialValues({});

@@ -269,13 +269,12 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
   Future<void> _logout() async {
     final ok = await confirmDestructive(
       context,
-      title: 'התנתקות מהחשבון?',
-      message: 'תנותק מלוח חנות הספק ותחזור למסך הרישום.',
+      title: 'יציאה מהחשבון?',
+      message: 'תנותק מלוח חנות הספק ותחזור למסך ההרשמה.',
       confirmLabel: 'התנתק',
     );
     if (!ok || !mounted) return;
     ref.read(boardAuthProvider.notifier).logout();
-    showToast(context, 'התנתקת מלוח חנות הספק');
   }
 
   Widget _body(String storeName) {
@@ -2508,6 +2507,11 @@ class _DeliveredCard extends StatelessWidget {
                                 height: 56,
                                 fit: BoxFit.cover,
                                 gaplessPlayback: true,
+                                // F-43 — decode once at thumb size, not full-res
+                                // (mirror courier_reports_tab.dart:649).
+                                cacheWidth: (56 *
+                                        MediaQuery.devicePixelRatioOf(context))
+                                    .round(),
                                 // Corrupt payload → honest placeholder, no crash.
                                 errorBuilder: (_, __, ___) => Container(
                                   width: 56,

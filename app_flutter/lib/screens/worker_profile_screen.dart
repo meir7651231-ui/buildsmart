@@ -486,7 +486,8 @@ class _ActionsCard extends ConsumerWidget {
             leading: const Text('🚪', style: TextStyle(fontSize: 20)),
             title: const Text(
               'יציאה',
-              style: TextStyle(color: Colors.redAccent, fontSize: 15),
+              // AA: redAccent על לבן נכשל — token חוזה 9.
+              style: TextStyle(color: BsTokens.dangerDark, fontSize: 15),
             ),
             onTap: () => _logout(context, ref),
           ),
@@ -503,7 +504,10 @@ class _ActionsCard extends ConsumerWidget {
       context: context,
       builder: (dialogCtx) {
         String? error;
-        return StatefulBuilder(
+        // F-46: בוני-מסלול modal אינם יורשים את עטיפת ה-RTL ברמת-האפליקציה.
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
           builder: (ctx, setState) {
             void submit() {
               // Validated against the local seed code — SERVER-SWAP: becomes a
@@ -538,6 +542,8 @@ class _ActionsCard extends ConsumerWidget {
                     textAlign: TextAlign.center,
                     onSubmitted: (_) => submit(),
                     decoration: InputDecoration(
+                      // תווית נראית גם בזמן הקלדה (לא hint חולף בלבד).
+                      labelText: 'קוד מעבר',
                       hintText: 'קוד',
                       errorText: error,
                       border: const OutlineInputBorder(),
@@ -557,6 +563,7 @@ class _ActionsCard extends ConsumerWidget {
               ],
             );
           },
+          ),
         );
       },
     );
@@ -604,6 +611,8 @@ class _ProfileAvatar extends StatelessWidget {
             height: size,
             fit: BoxFit.cover,
             gaplessPlayback: true,
+            // F-43 — decode the avatar at display size, not full-res.
+            cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
             // A corrupt payload renders the default avatar, never a crash.
             errorBuilder: (_, __, ___) => _fallback(),
           ),
@@ -663,6 +672,9 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   String? _photo;
   String? _phoneError;
 
+  /// מגן in-flight: double-tap על "שמור" לא מריץ save כפול / pop כפול.
+  bool _saving = false;
+
   @override
   void initState() {
     super.initState();
@@ -695,6 +707,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   }
 
   Future<void> _save() async {
+    if (_saving) return; // מגן double-tap (in-flight)
     final phone = _phone.text.trim();
     // FORMAT validation only (the #64 validators) — the phone is optional,
     // but a non-empty value must be a valid Israeli mobile.
@@ -704,6 +717,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
       );
       return;
     }
+    setState(() => _saving = true);
     final name = _name.text.trim();
     // #17 — the persist is AWAITED: a quota failure (an oversized photo on
     // web localStorage) reports honestly instead of a fake '✓ נשמר'.
@@ -719,6 +733,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
         );
     if (!mounted) return;
     if (!ok) {
+      setState(() => _saving = false); // מאפשר retry עם תמונה קטנה יותר
       showToast(context, 'התמונה גדולה מדי — לא נשמרה');
       return; // the sheet stays open — the worker can retry a smaller photo
     }
@@ -826,7 +841,8 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                                     setState(() => _photo = null),
                                 child: const Text(
                                   'הסר תמונה',
-                                  style: TextStyle(color: Colors.redAccent),
+                                  // AA: redAccent על לבן נכשל — token חוזה 9.
+                                  style: TextStyle(color: BsTokens.dangerDark),
                                 ),
                               ),
                           ],
@@ -890,16 +906,19 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                     child: InkWell(
                       borderRadius:
                           BorderRadius.circular(BsTokens.radiusPill),
-                      onTap: _save,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 13),
-                        child: Text(
-                          '✓ שמור פרופיל',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: bsOnAccent(context),
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w800,
+                      onTap: _saving ? null : _save,
+                      child: Opacity(
+                        opacity: _saving ? 0.6 : 1,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          child: Text(
+                            '✓ שמור פרופיל',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: bsOnAccent(context),
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                       ),

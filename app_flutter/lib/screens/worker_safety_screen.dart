@@ -4,6 +4,7 @@ import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/worker_certs.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
@@ -102,6 +103,9 @@ class WorkerSafetyScreen extends ConsumerWidget {
     String? errIssuer;
     String? errExpiry;
     var saved = false;
+    // In-flight guard (F-38): a double-tap on 'שמור תעודה' must not run two
+    // saves / pop the sheet twice.
+    var saving = false;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -135,7 +139,8 @@ class WorkerSafetyScreen extends ConsumerWidget {
               setSheetState(() => photo = p);
             }
 
-            void save() {
+            Future<void> save() async {
+              if (saving) return;
               setSheetState(() {
                 errName =
                     nameCtl.text.trim().isEmpty ? 'נא למלא שם תעודה' : null;
@@ -146,13 +151,23 @@ class WorkerSafetyScreen extends ConsumerWidget {
               if (errName != null || errIssuer != null || errExpiry != null) {
                 return;
               }
-              ref.read(workerCertsProvider.notifier).add(
+              setSheetState(() => saving = true);
+              // Rollback-aware add (F-8): null = the storage write failed
+              // (web quota on an oversized photo) and the in-memory wallet
+              // was rolled back — keep the sheet open for an honest retry.
+              final cert = await ref.read(workerCertsProvider.notifier).add(
                     username: username,
                     name: nameCtl.text,
                     issuer: issuerCtl.text,
                     expiry: expiry!,
                     photo: photo,
                   );
+              if (!ctx.mounted) return;
+              if (cert == null) {
+                setSheetState(() => saving = false);
+                showToast(ctx, 'התמונה גדולה מדי — לא נשמרה');
+                return;
+              }
               saved = true;
               Navigator.of(sheetCtx).pop();
             }
@@ -307,8 +322,8 @@ class WorkerSafetyScreen extends ConsumerWidget {
                                           onTap: () => setSheetState(
                                               () => photo = null),
                                           child: const SizedBox(
-                                            width: 40,
-                                            height: 40,
+                                            width: 48,
+                                            height: 48,
                                             child: Icon(
                                               Icons.close,
                                               size: 18,
@@ -324,21 +339,28 @@ class WorkerSafetyScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: BsTokens.space3),
+                    // Save — dimmed + unreactive while the awaited persist is
+                    // in flight (F-38).
                     Material(
-                      color: BsTokens.brand,
+                      color: saving
+                          ? const Color(0xFFE9EAEC)
+                          : BsTokens.brand,
                       borderRadius:
                           BorderRadius.circular(BsTokens.radiusPill),
                       child: InkWell(
                         borderRadius:
                             BorderRadius.circular(BsTokens.radiusPill),
-                        onTap: save,
+                        onTap: saving ? null : save,
                         child: Container(
                           constraints: const BoxConstraints(minHeight: 48),
                           alignment: Alignment.center,
-                          child: const Text(
+                          child: Text(
                             '💾 שמור תעודה',
                             style: TextStyle(
-                              color: Colors.white,
+                              // bsOnAccent on the brand fill (F-28).
+                              color: saving
+                                  ? BsTokens.mutedLight
+                                  : bsOnAccent(ctx),
                               fontSize: 14.5,
                               fontWeight: FontWeight.w800,
                             ),
@@ -503,6 +525,7 @@ class _CertsCard extends StatelessWidget {
           Semantics(
             button: true,
             label: 'הוסף תעודה',
+            excludeSemantics: true,
             child: Material(
               color: BsTokens.brand,
               borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -512,10 +535,11 @@ class _CertsCard extends StatelessWidget {
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 48),
                   alignment: Alignment.center,
-                  child: const Text(
+                  child: Text(
                     '➕ הוסף תעודה',
                     style: TextStyle(
-                      color: Colors.white,
+                      // bsOnAccent on the brand fill (F-28).
+                      color: bsOnAccent(context),
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                     ),
@@ -602,6 +626,12 @@ class _CertRow extends StatelessWidget {
                                   height: 40,
                                   fit: BoxFit.cover,
                                   gaplessPlayback: true,
+                                  // F-43 — decode to the 40px thumbnail size,
+                                  // never the full-res bitmap.
+                                  cacheWidth: (40 *
+                                          MediaQuery.devicePixelRatioOf(
+                                              context))
+                                      .round(),
                                   // Corrupt payload → the old honest 📷.
                                   errorBuilder: (_, __, ___) => const Text(
                                     '📷',

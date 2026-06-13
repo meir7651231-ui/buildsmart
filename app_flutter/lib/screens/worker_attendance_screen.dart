@@ -2,6 +2,7 @@ import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/worker_attendance.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -32,12 +33,19 @@ class _WorkerAttendanceScreenState
   /// First day of the month the table shows — starts on the current month.
   late DateTime _month;
 
+  /// Months ('yyyy-MM') whose report was already sent this session — the
+  /// double-tap guard (F-38): a second tap cannot post a duplicate report.
+  final Set<String> _sentMonths = {};
+
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
     _month = DateTime(now.year, now.month);
   }
+
+  String get _monthKey => '${_month.year.toString().padLeft(4, '0')}-'
+      '${_month.month.toString().padLeft(2, '0')}';
 
   bool get _viewingCurrentMonth {
     final now = DateTime.now();
@@ -65,6 +73,7 @@ class _WorkerAttendanceScreenState
     final monthDays =
         attendanceMonth(all, username, _month.year, _month.month);
     final monthTotal = attendanceTotal(monthDays);
+    final sentThisMonth = _sentMonths.contains(_monthKey);
 
     return Scaffold(
       backgroundColor: BsTokens.bgLight,
@@ -108,7 +117,12 @@ class _WorkerAttendanceScreenState
           ),
           const SizedBox(height: BsTokens.space4),
           _SendReportButton(
-            enabled: monthDays.isNotEmpty,
+            enabled: monthDays.isNotEmpty && !sentThisMonth,
+            label: sentThisMonth
+                ? 'הדוח נשלח ✓'
+                : (monthDays.isNotEmpty
+                    ? '📨 שלח דוח נוכחות לקבלן'
+                    : 'אין רישומים לשליחה בחודש זה'),
             onPressed: () => _sendReport(session, monthDays, monthTotal),
           ),
         ],
@@ -159,6 +173,9 @@ class _WorkerAttendanceScreenState
     ref
         .read(chatEngineProvider.notifier)
         .send('th-worker-contractor', BsRole.worker, text);
+    // Double-tap guard — this month is now sent (the button flips to a
+    // disabled 'הדוח נשלח ✓').
+    setState(() => _sentMonths.add(_monthKey));
     showToast(context, '📨 דוח הנוכחות נשלח לקבלן בצ׳אט');
   }
 }
@@ -228,9 +245,12 @@ class _ClockCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: BsTokens.space3),
+          // excludeSemantics — the inner Text equals the label; without it
+          // TalkBack announces the button twice (F-50).
           Semantics(
             button: onTap != null,
             label: label,
+            excludeSemantics: true,
             child: Material(
               color: color,
               borderRadius: BorderRadius.circular(BsTokens.radiusCard),
@@ -244,8 +264,11 @@ class _ClockCard extends StatelessWidget {
                   child: Text(
                     label,
                     style: TextStyle(
-                      color:
-                          onTap == null ? BsTokens.mutedLight : Colors.white,
+                      // bsOnAccent, not a hard Colors.white — high-contrast
+                      // mode darkens the foreground on accent fills (F-28).
+                      color: onTap == null
+                          ? BsTokens.mutedLight
+                          : bsOnAccent(context),
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                     ),
@@ -484,18 +507,26 @@ class _TableRow extends StatelessWidget {
 // ─── send-report button ──────────────────────────────────────────────────────
 
 /// 'שלח דוח נוכחות לקבלן' — brand pill; honestly disabled (muted) when the
-/// viewed month has no records to report.
+/// viewed month has no records, or after the report was already sent
+/// ('הדוח נשלח ✓' — the double-tap guard).
 class _SendReportButton extends StatelessWidget {
-  const _SendReportButton({required this.enabled, required this.onPressed});
+  const _SendReportButton({
+    required this.enabled,
+    required this.label,
+    required this.onPressed,
+  });
 
   final bool enabled;
+  final String label;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
+    // excludeSemantics — the inner Text equals the label (F-50).
     return Semantics(
       button: enabled,
-      label: 'שלח דוח נוכחות לקבלן',
+      label: label,
+      excludeSemantics: true,
       child: Material(
         color: enabled ? BsTokens.brand : const Color(0xFFE9EAEC),
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -506,11 +537,10 @@ class _SendReportButton extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 48),
             alignment: Alignment.center,
             child: Text(
-              enabled
-                  ? '📨 שלח דוח נוכחות לקבלן'
-                  : 'אין רישומים לשליחה בחודש זה',
+              label,
               style: TextStyle(
-                color: enabled ? Colors.white : BsTokens.mutedLight,
+                // bsOnAccent on the brand fill (F-28).
+                color: enabled ? bsOnAccent(context) : BsTokens.mutedLight,
                 fontSize: 14.5,
                 fontWeight: FontWeight.w800,
               ),

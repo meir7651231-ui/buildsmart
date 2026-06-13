@@ -862,3 +862,9 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **שינוי ויזואלי:** ל**כרטיס/דף-ההזמנה** נוספו `ContactActions(phone: order.customerPhone)` — 📞 (חייגן `tel:`) / 💬 (WhatsApp `wa.me/`) שמגיעים ל**קבלן שהזמין** (החלטת בעל-המוצר: ספק/שליח שמתקשר ללקוח-הקבלן על ההזמנה). מיקומים: **חנות** — `_StoreOrderCard` + `_DeliveredCard` (`store_dashboard_screen`, מתחת לשורת `who · site`, compact); **שליח** — `_CourierJobCard` (`courier_dashboard_screen`, מתחת ל-`📍 site`) + `CourierDeliveryDetailSheet` (אחרי שורת 👤); **מנהל** — `_OrderRow` (`manager_dashboard_screen`, מתחת ל-`who · site`) + `_OrderDetailSheet` (מתחת לשורת 'קבלן'). מקור-הטלפון: `Order.customerPhone` נחתם ב-checkout מ-`userProfileProvider.contact`, מוקרן ל-`SysOrder.customerPhone`.
 - **שמירת-יושר / אפס-רגרסיה:** הזמנות seed/legacy (טלפון ריק — כל ההזמנות עד עכשיו) → **אין כפתורים** (empty-guard של ContactActions, `SizedBox.shrink`) — בדיוק כמו היום. הזמנות הקבלן-עצמו (`store_screen` order-list/sheet · `smart_home` recent-orders) **לא** קיבלו כפתורים — הן לא מציגות שם-לקוח (הקבלן רואה את ההזמנה-שלו; אין למי להתקשר).
 - **אימות:** `order_card_contact_actions_test` 2/2 (כרטיס-שליח אמיתי מעל מנוע-מוזרק: stamped→📞/💬 חיים עם Uris נכונים · empty→אפס-כפתורים) · `orders_engine_test` customerPhone 6/6 · `orders_uid_a3_test` customerPhone 3/3 · analyze 0 errors/warnings (אפס lint חדש) · mutation fromJson נתפסה (אדום `+26 -1`→ירוק-אחרי-cp `+27`) · full-suite **+2233 All tests passed** · build web ✅.
+## 2026-06-14 — גל-D פוליש עובד/שליח/חנות (#98)
+- עובד · הגדרות: שורת 'פרופיל עובד' ירדה (אין יותר לולאת-ניווט) — הפרופיל נגיש מטאב-4.
+- עובד · נוכחות: אחרי שליחת-דוח הכפתור הופך ל'הדוח נשלח ✓' ולא נשלח שוב.
+- עובד: גווני-יציאה/הסר-תמונה כהים יותר (dangerDark, AA) · כפתור-השעון וכפתורי-המילוי עם טקסט bsOnAccent (ניגודיות).
+- רובם בלתי-נראים-לעין (נגישות לקוראי-מסך, cacheWidth לזיכרון, מגני-double-tap) — אך אמיתיים ומאומתים.
+- אימות: GATE PASS עם מאניפסטים · mutation red→green.

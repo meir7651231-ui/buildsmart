@@ -769,6 +769,8 @@ class _SubmitButton extends StatelessWidget {
     return Semantics(
       button: true,
       label: 'שלח לאישור',
+      // excludeSemantics — the inner Text equals the label (F-50).
+      excludeSemantics: true,
       child: Align(
         alignment: AlignmentDirectional.centerStart,
         child: Material(

@@ -46,7 +46,7 @@ void submitWorkerTaskForReview(WidgetRef ref, int id, {String? note}) {
 /// the legacy `'demo'` marker keeps the old honest placeholder; null renders
 /// nothing. Shared by the worker detail sheet AND the manager's אישורי-עובדים
 /// row (`manager_dashboard_screen.dart`) so both sides see the same proof.
-Widget taskPhotoWidget(String? photo, {double height = 140}) {
+Widget taskPhotoWidget(String? photo, {double height = 140, BuildContext? context}) {
   if (photo == null) return const SizedBox.shrink();
   if (photo.startsWith('data:image')) {
     final comma = photo.indexOf(',');
@@ -61,6 +61,13 @@ Widget taskPhotoWidget(String? photo, {double height = 140}) {
             width: double.infinity,
             fit: BoxFit.cover,
             gaplessPlayback: true,
+            // F-43 — decode once at the displayed size when a context is
+            // supplied (dpr needs it); optional so out-of-scope callers
+            // (manager/persona_pod) compile unchanged. Pattern:
+            // store_dashboard_screen.dart:1647 cacheHeight.
+            cacheHeight: context == null
+                ? null
+                : (height * MediaQuery.devicePixelRatioOf(context)).round(),
             // A corrupt payload renders the placeholder, never a crash.
             errorBuilder: (_, __, ___) => _photoPlaceholder(),
           ),
@@ -143,7 +150,7 @@ Future<bool> _confirmProofPhoto(BuildContext context, String dataUrl) async {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              taskPhotoWidget(dataUrl, height: 180),
+              taskPhotoWidget(dataUrl, height: 180, context: dialogCtx),
               const SizedBox(height: BsTokens.space3),
               const Text(
                 'לשלוח את המשימה לאישור המנהל עם התמונה הזו?',
@@ -473,7 +480,7 @@ class _WorkerTaskDetailSheetState
           const _SecH('תמונת ביצוע'),
           // #85ב — real data-URL renders the actual photo; the legacy 'demo'
           // marker keeps the honest placeholder.
-          taskPhotoWidget(t.photo),
+          taskPhotoWidget(t.photo, context: context),
         ],
 
         // ── worker note (read-only when not reporting) ──

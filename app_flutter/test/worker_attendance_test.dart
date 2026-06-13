@@ -6,9 +6,16 @@
 // the pure month-filter/total helpers the screen shares stay correct, and a
 // late _load() never clobbers a fresh clock-in (the ticket-#24 _userTouched
 // race, mirrored from board_auth_test.dart).
+//
+// P-15 (F-38) · the WIDGET-LEVEL sent-guard: once 'שלח דוח נוכחות לקבלן' posts
+// the monthly report into th-worker-contractor, the button flips to a disabled
+// 'הדוח נשלח ✓' and a second tap CANNOT post a duplicate report line.
 import 'dart:convert';
 
+import 'package:buildsmart/screens/worker_attendance_screen.dart';
+import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/worker_attendance.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -176,5 +183,84 @@ void main() {
         reason: 'a corrupt payload is dropped, never thrown');
     expect(c.read(workerAttendanceProvider.notifier).clockIn('ran'), true,
         reason: 'the notifier stays usable after a corrupt load');
+  });
+
+  // ── P-15 (F-38) · widget · send-report double-tap guard ──────────────────
+
+  // Count the report lines '📋 דוח נוכחות …' currently in th-worker-contractor.
+  int reportLines(ProviderContainer c) {
+    final thread = c
+        .read(chatEngineProvider)
+        .firstWhere((t) => t.id == 'th-worker-contractor');
+    return thread.messages
+        .where((m) => m.text.startsWith('📋 דוח נוכחות'))
+        .length;
+  }
+
+  testWidgets(
+      'P-15 send-report — after sending the button shows "הדוח נשלח ✓" and a '
+      'second tap does NOT post a duplicate report', (tester) async {
+    // #65 gate: seed a logged-in worker session (ran) so the board renders.
+    // Seed ONE closed shift for the current month so the report button is
+    // enabled (monthDays.isNotEmpty) — built from DateTime.now() so it always
+    // lands in the month the screen opens on.
+    final now = DateTime.now();
+    final todayKey = attendanceDateKey(now);
+    final shiftIn = DateTime(now.year, now.month, now.day, 8);
+    SharedPreferences.setMockInitialValues({
+      'bs.board-auth.v1':
+          '{"role":"worker","username":"ran","displayName":"רן","demo":false}',
+      kWorkerAttendanceKey: jsonEncode([
+        AttendanceDay(
+          username: 'ran',
+          date: todayKey,
+          inTs: shiftIn,
+          outTs: shiftIn.add(const Duration(hours: 8)),
+        ).toJson(),
+      ]),
+    });
+
+    // Own container so we can inspect the chat thread the report posts into.
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: WorkerAttendanceScreen()),
+      ),
+    );
+    await tester.pump();
+    // Let the lazy boardAuthProvider + attendance _load() resolve, then rebuild
+    // gate→board.
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Pre-condition: the board rendered with the active send label and no
+    // report yet.
+    expect(find.text('🕐 נוכחות'), findsOneWidget,
+        reason: 'the worker attendance board rendered, not the gate');
+    expect(find.text('📨 שלח דוח נוכחות לקבלן'), findsOneWidget,
+        reason: 'the seeded month has records → the send button is active');
+    expect(find.text('הדוח נשלח ✓'), findsNothing);
+    expect(reportLines(container), 0, reason: 'no report posted yet');
+
+    // First tap — posts the report.
+    await tester.tap(find.text('📨 שלח דוח נוכחות לקבלן'));
+    await tester.pump();
+
+    expect(reportLines(container), 1,
+        reason: 'one tap posts exactly one report line to the contractor');
+    expect(find.text('הדוח נשלח ✓'), findsOneWidget,
+        reason: 'the button flips to the sent label (F-38 guard)');
+    expect(find.text('📨 שלח דוח נוכחות לקבלן'), findsNothing,
+        reason: 'the active label is gone once sent');
+
+    // Second tap on the now-disabled sent label must be a no-op (the InkWell
+    // onTap is null when !enabled) — no duplicate report.
+    await tester.tap(find.text('הדוח נשלח ✓'), warnIfMissed: false);
+    await tester.pump();
+
+    expect(reportLines(container), 1,
+        reason: 'the second tap cannot post a duplicate report (P-15)');
   });
 }

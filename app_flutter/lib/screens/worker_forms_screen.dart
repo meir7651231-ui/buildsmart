@@ -1,8 +1,5 @@
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
-// #15 — the shared data-URL thumbnail renderer (worker detail-sheet idiom).
-import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
-    show taskPhotoWidget;
 // CAM-cluster seam (#85ב): `pickTaskPhoto()` → data-URL String, or an honest
 // null on cancel/failure (no fake placeholder ever).
 import 'package:buildsmart/services/task_photo.dart';
@@ -10,6 +7,7 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/vacation_requests.dart';
 import 'package:buildsmart/state/worker_forms.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
@@ -51,6 +49,11 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
   /// True once the saved year-form has been loaded into the controllers.
   bool _seededFromSaved = false;
 
+  /// Tax years already sent to the contractor this session — guards the
+  /// '📨 שלח לקבלן' pill against a double-tap re-posting the submission
+  /// notice into the contractor thread (F-38).
+  final Set<int> _sentYears = {};
+
   String? _errName;
   String? _errId;
   String? _errPhone;
@@ -87,7 +90,7 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
     final sickNotes = formsState.sickNotesFor(username);
     final myVacations = ref
         .watch(vacationRequestsProvider)
-        .where((r) => r.username == username)
+        .where((r) => r.username == username && r.role == 'worker')
         .toList()
       ..sort((a, b) => b.createdTs.compareTo(a.createdTs));
 
@@ -260,6 +263,18 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
       savedTs: DateTime.now(),
     ));
     if (send) {
+      // Guard: a double-tap must not re-post the submission notice into the
+      // contractor thread (F-38).
+      if (_sentYears.contains(_year)) return;
+      // Guard: send() is a silent no-op on an unknown thread — never mark
+      // "sent" or toast a success that did not happen.
+      final exists = ref
+          .read(chatEngineProvider)
+          .any((t) => t.id == 'th-worker-contractor');
+      if (!exists) {
+        showToast(context, 'שיחת הקבלן לא נמצאה — הטופס נשמר אך לא נשלח');
+        return;
+      }
       ref
           .read(workerFormsProvider.notifier)
           .markForm101Sent(session.username, _year);
@@ -267,12 +282,15 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
       // ('th-worker-contractor', sys_chat); the contractor reads it in his
       // שיחות tab, whose list admits worker-audience threads he participates
       // in (`_visibleToAudience`, chats_screen.dart — thread 'עובד — רן').
-      // The form's content stays on-device; only the notice is sent.
+      // The form's content stays on-device; only the notice is sent. The line
+      // carries the sender's display name — fromRole=worker alone is not an
+      // identity when more than one worker exists (F-39 rule).
       ref.read(chatEngineProvider.notifier).send(
             'th-worker-contractor',
             BsRole.worker,
-            '📄 הגשתי טופס 101 לשנת $_year',
+            '📄 ${session.displayName}: הגשתי טופס 101 לשנת $_year',
           );
+      setState(() => _sentYears.add(_year));
       showToast(context, '📨 טופס 101 נשלח לקבלן');
     } else {
       showToast(context, '💾 טופס 101 נשמר לשנת $_year');
@@ -417,10 +435,11 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
     );
   }
 
-  /// One sick-note row (#15): leading 48dp thumbnail of the ACTUAL stored
-  /// photo (the camera-seam data-URL, rendered through the shared
-  /// [taskPhotoWidget]) — tapping it opens the full-screen pinch/zoom viewer.
-  /// A non-decodable payload keeps an honest 📷 box with no viewer.
+  /// One sick-note row: leading 48dp thumbnail of the ACTUAL stored photo —
+  /// tapping it opens the full-screen pinch/zoom viewer. The data-URL is
+  /// decoded ONCE per build and rendered with cacheWidth (F-43 — never the
+  /// worker template's double decode), and a non-decodable payload keeps an
+  /// honest 📷 box with no viewer.
   Widget _sickNoteRow(SickNote n) {
     final bytes = decodeDataUrlPhoto(n.photo);
     return Padding(
@@ -459,10 +478,28 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
                     bytes,
                     label: 'אישור מחלה · ${_fmtDate(n.ts)}',
                   ),
-                  child: SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: taskPhotoWidget(n.photo, height: 48),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.memory(
+                      bytes,
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                      gaplessPlayback: true,
+                      // Decode at thumb resolution, not full-res (F-43).
+                      cacheWidth:
+                          (48 * MediaQuery.devicePixelRatioOf(context))
+                              .round(),
+                      // Corrupt image bytes → the honest 📷, never a crash.
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 48,
+                        height: 48,
+                        alignment: Alignment.center,
+                        color: const Color(0xFFF2F3F5),
+                        child: const Text('📷',
+                            style: TextStyle(fontSize: 18)),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -496,10 +533,14 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
     // honest file-picker fallback); honest null on cancel → nothing is added.
     final photo = await pickTaskPhoto(context);
     if (photo == null || photo.isEmpty || !mounted) return;
-    ref
+    final note = await ref
         .read(workerFormsProvider.notifier)
         .addSickNote(username: username, photo: photo);
-    showToast(context, '📷 אישור המחלה נשמר');
+    if (!mounted) return;
+    showToast(
+      context,
+      note == null ? 'התמונה גדולה מדי — לא נשמרה' : '📷 אישור המחלה נשמר',
+    );
   }
 
   Future<void> _removeSickNote(SickNote n) async {
@@ -599,9 +640,11 @@ class _PillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // excludeSemantics — the inner Text equals the label (F-50).
     return Semantics(
       button: true,
       label: label,
+      excludeSemantics: true,
       child: Material(
         color: filled ? BsTokens.brand : BsTokens.cardLight,
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -619,7 +662,8 @@ class _PillButton extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: filled ? Colors.white : BsTokens.inkLight,
+                // bsOnAccent on the brand fill (F-28) — high-contrast safe.
+                color: filled ? bsOnAccent(context) : BsTokens.inkLight,
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
@@ -648,6 +692,7 @@ class _DateField extends StatelessWidget {
     return Semantics(
       button: true,
       label: value == null ? label : '$label: ${_fmtDate(value!)}',
+      excludeSemantics: true,
       child: Material(
         color: BsTokens.bgLight,
         borderRadius: BorderRadius.circular(12),

@@ -457,6 +457,8 @@ class _CourierAvatar extends StatelessWidget {
             height: size,
             fit: BoxFit.cover,
             gaplessPlayback: true,
+            // F-43 — אווטאר מפוענח לגודל התצוגה, לא full-res.
+            cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
             // payload פגום מרנדר את ברירת-המחדל — לעולם לא קריסה.
             errorBuilder: (_, __, ___) => _fallback(),
           ),

@@ -78,7 +78,10 @@ class StoreSettingsScreen extends ConsumerWidget {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+                style: TextButton.styleFrom(
+                  // AA על רקע-דיאלוג לבן (redAccent=3.19:1 נכשל) — token חוזה 9.
+                  foregroundColor: BsTokens.dangerDark,
+                ),
                 child: const Text('אפס'),
               ),
             ],
@@ -1047,7 +1050,10 @@ class _ActionRow extends StatelessWidget {
       title: Text(label, style: const TextStyle(color: BsTokens.inkLight)),
       trailing: TextButton(
         onPressed: onTap,
-        style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+        style: TextButton.styleFrom(
+          // AA על ListTile לבן (redAccent=3.19:1 נכשל) — token חוזה 9.
+          foregroundColor: BsTokens.dangerDark,
+        ),
         child: Text(buttonLabel),
       ),
     );

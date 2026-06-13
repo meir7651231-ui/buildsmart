@@ -347,15 +347,17 @@ class WorkerReportsTab extends ConsumerWidget {
         Row(
           children: [
             _KpiBox(value: firstPassLabel, label: 'אישור-ראשון 🎯'),
-            _KpiBox(value: '${rewards.coins}', label: 'BuildCoins 🪙'),
+            // F-33: מאזן המטבעות הוא overlay אחד לכל המכשיר (bs.rewards.v1,
+            // ללא username) — תווית כנה, לא מספר שמתחזה ל-per-עובד.
+            _KpiBox(value: '${rewards.coins}', label: 'BuildCoins (מועדון משותף) 🪙'),
             _KpiBox(value: streakLabel, label: 'רצף פעילות 🔥'),
           ],
         ),
         const SizedBox(height: BsTokens.space2),
         Text(
           submitted.isEmpty
-              ? 'אישור-ראשון = הגשות שאושרו בלי דחייה מתוך כלל ההגשות — עדיין אין הגשות. מטבעות — ממועדון BuildSmart; הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).'
-              : 'אישור-ראשון: $firstPass מתוך ${submitted.length} הגשות אושרו בלי דחייה. מטבעות — ממועדון BuildSmart; הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).',
+              ? 'אישור-ראשון = הגשות שאושרו בלי דחייה מתוך כלל ההגשות — עדיין אין הגשות. מטבעות — מאזן מועדון BuildSmart המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד); הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).'
+              : 'אישור-ראשון: $firstPass מתוך ${submitted.length} הגשות אושרו בלי דחייה. מטבעות — מאזן מועדון BuildSmart המשותף לכל התפקידים במכשיר (אינו נצבר לעובד בנפרד); הרצף נמדד משעון המשימות (ימים רצופים עם פעילות).',
           style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
         ),
         const SizedBox(height: BsTokens.space4),
@@ -930,6 +932,9 @@ class _ProofThumb extends StatelessWidget {
               width: 48,
               height: 48,
               fit: BoxFit.cover,
+              // F-43: decode at thumb resolution — the full-res bytes are
+              // reserved for the full-screen viewer (the tap dialog above).
+              cacheWidth: (48 * MediaQuery.devicePixelRatioOf(context)).round(),
               gaplessPlayback: true,
               // A corrupt payload renders the honest placeholder, not a crash.
               errorBuilder: (_, __, ___) =>
