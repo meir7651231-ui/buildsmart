@@ -1784,3 +1784,7 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - אדיטיבי · display-neutral · אפס-רגרסיה (נכתב רק כשקיים; seed/legacy round-trip). scoping + ה-rules (Phase-G, forward-ready) מופעלים ע"י קונסול.
 - guard: `chat_uid_a8_test` + `customers_uid_a11_test`. מוטציה: שבירת fromUid → אדום (Expected 'u-7'/null) → שוחזר.
 - Gate: analyze 0 · full-suite ירוק · build web ✅.
+### #A7 — מדריך users role/phone→uid (נחיל) — 2026-06-12
+- **A7 (infra ל-A4/A8):** `UsersLookup` חדש (`lib/data/repositories/users_lookup.dart`) מעל אוסף `users` (doc-id=uid, נכתב ע"י usersProfileWriterProvider · {displayName, phone, role?}): `uidByPhone(phone,{role})` · `uidsByRole(role)` · `usersLookupProvider` (gated על useFirebaseBackend, null בלי-backend). seam בר-הזרקה (RemoteCollectionSource) — בר-בדיקה בלי Firebase. **לא חובר עדיין ל-A4/A8** (אדיטיבי, אפס שינוי-התנהגות).
+- guard: `users_lookup_a7_test` (10 · hit/miss/empty · role-narrow/exclude · uidsByRole · snapshot-error→null · provider-null-בלי-backend). מוטציה: היפוך predicate-הטלפון → 4 אדום → שוחזר.
+- Gate: analyze 0 · full-suite +2155 · build web ✅.

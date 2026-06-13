@@ -827,3 +827,6 @@
 
 ### 2026-06-12 — הכנת-זהות A8 (נחיל)
 - **`lib/state/sys_chat.dart`/`chat_firebase.dart` — `fromUid`:** מוטציה — שבירת כתיבת/round-trip של fromUid → `chat_uid_a8_test` **אדום** (Expected 'u-7'/Actual null) ✅ נתפס; שוחזר → ירוק.
+
+### 2026-06-12 — מדריך users lookup A7 (נחיל)
+- **`lib/data/repositories/users_lookup.dart` — predicate-הטלפון:** מוטציה — `== phone` → `!= phone` → `users_lookup_a7_test` **אדום** (4: hit→uid-שגוי · miss→החזיר-uid · role-narrow→null) ✅ נתפס; שוחזר (cp) → 10/10 ירוק.
