@@ -3,6 +3,12 @@
 > **מסגור מחדש** אחרי סקירת‑הלוחות (576036c): הלוחות כבר **מסונכרנים לפי זהות** דרך `BoardSession`/`boardAuthProvider` — אך מול **5 חשבונות‑seed** (`data/board_accounts_local.dart`), לא מול Firebase Auth. הקוד עצמו מסומן: "SERVER-SWAP: Firebase Auth will replace the seed list".
 > לכן A4‑A6 = **להחליף את מקור‑הזהות** + לחתום uid אמיתי + scoped reads. מנצל A7 (role→uid), A12 (setRole/claims), A2 (currentUid), A1 (scope), G2 (rules).
 
+## שלב 0 — F1 (תנאי‑סף! ראש‑סדר): חיבור Firebase לאפליקציית‑הטלפון
+בלי זה אפליקציית‑הטלפון **קורסת בפתיחה** (`firebase_options` web-only, `:28` זורק). חובה לפני שכל סדרת‑A רצה על מכשיר.
+- **[את] בקונסול:** לרשום iOS + Android ב‑Firebase (פרויקט `buildsmart-b0b78`) → להוריד `google-services.json` (אנדרואיד) + `GoogleService-Info.plist` (iOS).
+- **[agent]:** `flutterfire configure` / להוסיף אופציות‑נייטיב ל‑`firebase_options.dart` (להסיר את ה‑throw) + App Check נייטיב.
+- **DoD:** האפליקציה עולה על מכשיר/אמולטור בלי קריסה, Firebase מאותחל, הדגל ON עובד נייטיב.
+
 ## העיקרון
 נרשם אמיתי (Firebase, B8) → מקבל role‑claim (A12) → `BoardSession` נבנה **מה‑Firebase user** (uid+role) במקום מ‑seed → כל הגידור והסינון הקיימים בלוחות עובדים מיד לכל נרשם.
 
