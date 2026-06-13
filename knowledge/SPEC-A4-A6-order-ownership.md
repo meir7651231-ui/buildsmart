@@ -1,40 +1,33 @@
-# SPEC — A4-A6: בעלות הזמנה לחנות/שליח (ליבת multi-user · חוסם השקה)
+# SPEC — A4-A6 (מחודש): server-swap — BoardSession מ‑Firebase Auth
 
-> **ההוראה לצי** ל‑Phase A4‑A6. מבוסס על G2 rules (5de11d8), A1 (scope enabler), A2 (currentUidProvider), A3 (contractorUid), A7 (UsersLookup).
-> **עיקרון: claim‑on‑first‑advance + בריכה משותפת (shared pool).**
+> **מסגור מחדש** אחרי סקירת‑הלוחות (576036c): הלוחות כבר **מסונכרנים לפי זהות** דרך `BoardSession`/`boardAuthProvider` — אך מול **5 חשבונות‑seed** (`data/board_accounts_local.dart`), לא מול Firebase Auth. הקוד עצמו מסומן: "SERVER-SWAP: Firebase Auth will replace the seed list".
+> לכן A4‑A6 = **להחליף את מקור‑הזהות** + לחתום uid אמיתי + scoped reads. מנצל A7 (role→uid), A12 (setRole/claims), A2 (currentUid), A1 (scope), G2 (rules).
 
-## מודל השיוך (ההחלטה — זה מה שחסר היה)
-- הזמנה ב‑stage `new` = **בריכה משותפת** לכל ה‑stores (רואים כדי לתפוס).
-- store מקדם `new→preparing` (פעולה ראשונה) → **חותם `storeUid = currentUid`** (תפיסה). מכאן רק הוא הבעלים.
-- הזמנה ב‑`ready` (ללא courier) = **בריכת שליחים**.
-- courier מקדם `ready→pickup` → חותם `courierUid = currentUid`.
+## העיקרון
+נרשם אמיתי (Firebase, B8) → מקבל role‑claim (A12) → `BoardSession` נבנה **מה‑Firebase user** (uid+role) במקום מ‑seed → כל הגידור והסינון הקיימים בלוחות עובדים מיד לכל נרשם.
 
-## A4 — חתימת uid בתפיסה  · `sys_orders.dart` + `orders_firebase.toDoc`
-- להזריק `currentUid` (מ‑`currentUidProvider`) ל‑`storeAdvance`/`courierAdvance`.
-- `storeAdvance` `new→preparing`: אם `storeUid` ריק → `storeUid = currentUid`.
-- `courierAdvance` `ready→pickup`: אם `courierUid` ריק → `courierUid = currentUid`.
-- `toDoc`: לתחזק `orderParticipants = [contractorUid, storeUid?, courierUid?]` (לא‑ריקים) — מתעדכן בכל חתימה.
-- **DoD:** doc נושא storeUid/courierUid של הפועל + מערך `orderParticipants`.
+## A4' — החלפת מקור‑הזהות · `state/board_auth.dart` / `boardAuthProvider`
+- כש‑`useFirebaseBackend` ON: לבנות `BoardSession{uid, role, displayName, phone}` מ‑Firebase — `uid`=auth.uid · `role`=claims (`roleProvider`/A12) · פרטים מ‑`users/{uid}`.
+- flag OFF / דמו: נתיב ה‑seed כמו שהוא — **אפס רגרסיה**.
+- DoD: נרשם אמיתי עם role נכנס ללוח שלו.
 
-## A5 — listener ממוקד + בריכה  · `orders_local.dart` provider + `firestore.indexes.json`
-- non-manager: scope (דרך A1) ל‑`where('orderParticipants', arrayContains: uid)` (שלי).
-- **+ בריכה:** store צריך גם `new` לא‑תפוסים · courier `ready` לא‑תפוסים → **listener שני** (`stage==X && claimField==''`) ממוזג ל‑cache. (ה‑`FirestoreCachedRepo` יורחב למיזוג שני streams.)
-- manager/admin: full listen (ללא scope).
-- אינדקסים: `orderParticipants arrayContains + ts desc` + לבריכה (`stage + storeUid/courierUid`).
-- **DoD:** קבלן רואה שלו · store רואה שלו+בריכת‑new · courier שלו+בריכת‑ready · admin הכול.
+## A4 — uid על הזמנות · `sys_orders.dart` + `orders_firebase.toDoc`
+- במקום `session.username` (`stampCourier`/`storeAdvance` claim) → לחתום **uid** (flag ON): `storeUid`/`courierUid`. `contractorUid` כבר (A3).
+- `orderParticipants=[contractorUid, storeUid?, courierUid?]`.
 
-## A6 — סינון דשבורד לפי זהות  · `store_dashboard_screen.dart` · `courier_dashboard_screen.dart`
-- store: `storeUid==uid` (תפוסים) + `new` לא‑תפוסים (לתפיסה).
-- courier: `courierUid==uid` + `ready` לא‑תפוסים.
-- **DoD:** כל אחד רואה רק את שלו + הבריכה הרלוונטית — לא את של כולם.
+## A5 — scoped Firestore listener + pool · `orders_local.dart` + `firestore.indexes.json`
+- non-manager: `arrayContains uid` (A1 scope) + listener‑בריכה (new/ready לא‑תפוסים). manager: full.
+- אינדקסים: participants+ts · pool (stage+claimfield).
+- (הסינון בצד‑לקוח כבר קיים — זה מבטיח שהשרת **שולח רק** את נתוני‑המשתמש: אבטחה+scale.)
 
-## עדכון rules + tests  · `firestore.rules` + rules_test
-- להתיר **בריכה**: `store` קורא orders ב‑`new` עם `storeUid` ריק · `courier` ב‑`ready` עם `courierUid` ריק.
-- + reads לפי ownership (participants) כקיים מ‑G2.
-- emulator tests: בריכה נראית · אחרי תפיסה רק הבעלים · store לא רואה הזמנות של store אחר.
+## A6 — דשבורדים · store/courier
+- כבר מסננים לפי `session` → לוודא הסתמכות על `session.uid` (הזהות המוחלפת). שינוי מינימלי.
 
-## ⚠️ יישור שמות (קריטי)
-לוודא ששמות השדות (`contractorUid`/`storeUid`/`courierUid`) **תואמים בדיוק** למה ש‑G2 rules (5de11d8) בודקים. אם הרולז משתמשים בשם אחר — ליישר את שני הצדדים.
+## rules + pool + tests · `firestore.rules`
+- בריכה (store→`new`/storeUid ריק · courier→`ready`/courierUid ריק) + ownership reads (G2) + עדכון emulator tests.
 
-## תלות ואומדן
-A4 → A5 → A6 ; עדכון rules במקביל. **~2‑4 ימים.** אחרי זה: multi-user אמיתי עובד, וזה משחרר את חוסם‑ההשקה המרכזי.
+## ⚠️ יישור שמות
+`contractorUid`/`storeUid`/`courierUid` **תואמים בדיוק** ל‑G2 (5de11d8).
+
+## אומדן
+A4' → A4 → A5 ; A6+rules במקביל. **~2‑3 ימים** — קטן מהמקור, כי הסינון כבר בנוי.
