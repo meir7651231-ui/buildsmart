@@ -68,6 +68,7 @@ List<_ChatThreadHead> _threadHeadSeed() => [
         _ChatThreadHead(
           id: t.id,
           participants: t.participants,
+          participantUids: t.participantUids,
           name: t.name,
           avatar: t.avatar,
           isBot: t.isBot,
@@ -104,10 +105,15 @@ class _ChatThreadHead {
     required this.isBot,
     required this.lastMsg,
     required this.lastTs,
+    this.participantUids = const [],
   });
 
   final String id;
   final List<BsRole> participants;
+
+  /// A9 — uid members (auth-truth the rules scope on); `[]` on every seed /
+  /// legacy / role-based thread (zero regression). See [ChatThread.participantUids].
+  final List<String> participantUids;
   final String name;
   final String avatar;
   final bool isBot;
@@ -118,6 +124,7 @@ class _ChatThreadHead {
       _ChatThreadHead(
         id: id,
         participants: participants,
+        participantUids: participantUids,
         name: name,
         avatar: avatar,
         isBot: isBot,
@@ -149,6 +156,10 @@ class _ChatThreadsRepo extends FirestoreCachedRepo<_ChatThreadHead> {
   @override
   Map<String, dynamic> toDoc(_ChatThreadHead t) => {
         'participants': [for (final r in t.participants) r.name],
+        // A9 — the uid members, written ONLY when populated so a seed/role-based
+        // thread's doc stays byte-identical to today (forward-ready; the rules
+        // scope on this field). Display/isolation keep using `participants`.
+        if (t.participantUids.isNotEmpty) 'participantUids': t.participantUids,
         'names': t.name,
         'avatar': t.avatar,
         'isBot': t.isBot,
@@ -175,9 +186,18 @@ class _ChatThreadsRepo extends FirestoreCachedRepo<_ChatThreadHead> {
     if (participants.isEmpty) {
       throw const FormatException('chatThreads: no resolvable participants');
     }
+    // A9 — uid members: a string list post-migration, absent on every legacy/
+    // seed doc → [] (zero regression). Tolerant of non-string entries.
+    final uidsRaw = j['participantUids'];
+    final participantUids = <String>[
+      if (uidsRaw is List)
+        for (final e in uidsRaw)
+          if (e is String) e,
+    ];
     return _ChatThreadHead(
       id: doc.id,
       participants: participants,
+      participantUids: participantUids,
       name: (j['names'] as String?) ?? (j['name'] as String?) ?? doc.id,
       avatar: (j['avatar'] as String?) ?? '💬',
       isBot: j['isBot'] == true,
@@ -325,6 +345,7 @@ class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
         ChatThread(
           id: h.id,
           participants: h.participants,
+          participantUids: h.participantUids,
           name: h.name,
           avatar: h.avatar,
           isBot: h.isBot,

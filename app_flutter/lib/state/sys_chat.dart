@@ -116,6 +116,7 @@ class ChatThread {
     required this.messages,
     this.isBot = false,
     this.audience = 'contractor',
+    this.participantUids = const [],
   });
 
   final String id;
@@ -133,6 +134,15 @@ class ChatThread {
   /// audience by the UI filter (`chats_screen.dart`), not by this field.
   final String audience;
 
+  /// A9 (launch uid-migration) — the Firebase uids of the thread's members, the
+  /// auth-truth the Firestore rules (`chatThreads`/`chatMessages`) scope on
+  /// (`request.auth.uid in participantUids`). EMPTY on every seed / role-based /
+  /// pre-migration thread (the zero-regression default): [participants] keeps
+  /// carrying the role identity for display + [threadsFor] isolation. Populating
+  /// it (per-user thread creation) is the owner/activation step — until then it
+  /// is inert and [chatThreadVisibleToUid] treats an empty list as "visible".
+  final List<String> participantUids;
+
   ChatThread copyWith({List<ChatMessage>? messages}) => ChatThread(
         id: id,
         participants: participants,
@@ -141,8 +151,17 @@ class ChatThread {
         messages: messages ?? this.messages,
         isBot: isBot,
         audience: audience,
+        participantUids: participantUids,
       );
 }
+
+/// A9 — pure uid-visibility predicate for a chat thread (forward-ready, gated by
+/// `kUidScopedQueries` at the call site). A thread with NO [participantUids] is
+/// legacy/un-migrated → VISIBLE to everyone (zero regression — today's role
+/// threads stay shared); once populated, only its members (uid ∈ list) see it.
+/// Pure → unit-tested directly, mirrors the rules' `uid in participantUids`.
+bool chatThreadVisibleToUid(List<String> participantUids, String uid) =>
+    participantUids.isEmpty || participantUids.contains(uid);
 
 // ─── engine ───────────────────────────────────────────────────────────────────
 
