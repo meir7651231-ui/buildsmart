@@ -16,7 +16,7 @@
 | A5 | הזמנות: listener ממוקד (לא‑מנהל) | `ordersRepositoryProvider` (scope של A1) | קבלן רואה רק שלו · admin הכול | agent | M |
 | A6 | דשבורד חנות/שליח: סינון לפי זהות | `store_dashboard_screen.dart:300` · `courier_dashboard_screen.dart:45` | חנות רואה את ההזמנות שלה | agent | M |
 | A7 | ✅ (5233cf8) · מדריך role→uid (לזהות "מי החנות/שליח") | `users` lookup חדש (by phone/role) | אפשר למפות צד‑נגדי ל‑uid | agent | M |
-| A8 | ✅ (c35eefe · fromUid) · צ׳אט: `participants=[uid]` + `fromUid` | `chat_firebase.toDoc` · `sys_chat.send` (שימוש ב‑A7) | thread=uids · message יש fromUid | agent | M |
+| A8 | 🟡 חלקי (c35eefe): fromUid ✅ אך participants עדיין role-names (chat_firebase:151) → צ׳אט לא מסתנכרן · צ׳אט: `participants=[uid]` + `fromUid` | `chat_firebase.toDoc` · `sys_chat.send` (שימוש ב‑A7) | thread=uids · message יש fromUid | agent | M |
 | A9 | צ׳אט: queries ממוקדים | `chat_repository` scope (`arrayContains uid` / `threadId`) | קורא רק threads של עצמו | agent | M |
 | A10 | החלטה: למנהל override על צ׳אט? + עדכון rules | `firestore.rules` chat | rules סופי | את+agent | S |
 | A11 | ✅ (c35eefe) · לקוחות: `ownerId=uid` בכתיבה | `customers_firebase.toDoc` | customer doc נושא ownerId | agent | S |
