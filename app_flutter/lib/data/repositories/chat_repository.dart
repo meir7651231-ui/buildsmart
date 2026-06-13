@@ -45,7 +45,10 @@ abstract class ChatRepository implements Listenable {
   /// S4.3 — append a message from [fromRole] to [threadId] AND update the
   /// thread head's `lastMsg`/`ts`. Verbatim `ChatEngineNotifier.send` semantics:
   /// trims, no-op on empty text / unknown thread, bot thread auto-replies.
-  void send(String threadId, BsRole fromRole, String text);
+  /// A8 — [fromUid] (the sender's `auth.uid`, '' when signed-out) is stamped on
+  /// the message doc when non-empty; additive + display-neutral.
+  void send(String threadId, BsRole fromRole, String text,
+      {String fromUid = ''});
 
   /// Reset both collections to the verbatim `kChatThreads` seed (tests / a
   /// future "demo reset"). Mirrors `ChatEngineNotifier.resetToSeed`.

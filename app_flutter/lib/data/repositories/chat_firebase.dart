@@ -227,23 +227,29 @@ class _ChatMessagesRepo extends FirestoreCachedRepo<ChatMessage> {
   String idOf(ChatMessage value) => value.id;
 
   /// `ChatMessage` → Firestore doc, per the schema
-  /// `{threadId, fromUid, fromRole, text, ts}`. ⚠️ Pre-S1 there is no uid, so
-  /// `fromUid` is OMITTED and `fromRole` carries the sender verbatim (the
-  /// mine/theirs driver the UI already keys on); after S1 this is the single
-  /// point that starts writing `fromUid`. The id is the doc-id, not a field.
+  /// `{threadId, fromUid, fromRole, text, ts}`. A8 (launch uid-migration) —
+  /// `fromUid` is now WRITTEN when the sender was signed-in (stamped at the send
+  /// path from `currentUidProvider`); it is OMITTED when empty (signed-out / the
+  /// seed / every legacy doc) so those round-trip byte-identical (zero
+  /// regression — the A3 `contractorUid` guard). `fromRole` is ALWAYS written
+  /// and still drives the mine/theirs UI; the eventual uid-scoping of
+  /// messages/thread `participants` activates later via the firestore rules
+  /// (forward-ready). The id is the doc-id, not a field.
   @override
   Map<String, dynamic> toDoc(ChatMessage m) => {
         'threadId': m.threadId,
         'fromRole': m.fromRole.name,
         'text': m.text,
         'ts': m.ts.toIso8601String(),
+        if (m.fromUid.isNotEmpty) 'fromUid': m.fromUid,
       };
 
   /// Firestore doc → `ChatMessage`, through the engine's own tolerant decoder
   /// (`ChatMessage.tryFromJson`) with the doc-id as `id` — one mapping, two
   /// worlds. A structurally-bad doc (missing field / unknown role) decodes to
   /// null → THROW, and the base skips it per-doc (never blanks the chat).
-  /// A post-S1 `fromUid` field is simply ignored (tolerant round-trip).
+  /// A8 — `fromUid` is read tolerantly by the decoder (present on a post-A8 doc,
+  /// '' on every legacy/seed doc — the zero-regression default).
   @override
   ChatMessage fromDoc(RemoteDoc doc) {
     final m = ChatMessage.tryFromJson({...doc.data, 'id': doc.id});
@@ -329,14 +335,18 @@ class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
 
   // ── writes (optimistic caches + background Firestore) ───────────────────────
 
-  /// Message factory — the engine's verbatim id scheme.
-  ChatMessage _mk(String threadId, BsRole fromRole, String text, DateTime ts) =>
+  /// Message factory — the engine's verbatim id scheme. A8: [fromUid] stamps
+  /// the sender's `auth.uid` on the user line (omitted from the doc when ''),
+  /// matching the engine's `_mk`.
+  ChatMessage _mk(String threadId, BsRole fromRole, String text, DateTime ts,
+          {String fromUid = ''}) =>
       ChatMessage(
         id: 'm-${ts.microsecondsSinceEpoch}-${fromRole.name}',
         threadId: threadId,
         fromRole: fromRole,
         text: text,
         ts: ts,
+        fromUid: fromUid,
       );
 
   /// S4.3 — verbatim port of `ChatEngineNotifier.send` via upsert: the message
@@ -348,7 +358,8 @@ class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
   /// the thread's current bot-message count, +1ms); real threads do NOT
   /// auto-reply — the other persona answers live.
   @override
-  void send(String threadId, BsRole fromRole, String text) {
+  void send(String threadId, BsRole fromRole, String text,
+      {String fromUid = ''}) {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return;
     final heads = _threads.cached();
@@ -356,7 +367,11 @@ class FirebaseChatRepository extends ChangeNotifier implements ChatRepository {
     if (idx < 0) return;
     final head = heads[idx];
     final now = DateTime.now();
-    final appended = <ChatMessage>[_mk(threadId, fromRole, trimmed, now)];
+    // A8: the user line carries the sender uid; the bot auto-reply (appended
+    // below) does NOT — it is the system, not a signed-in user.
+    final appended = <ChatMessage>[
+      _mk(threadId, fromRole, trimmed, now, fromUid: fromUid),
+    ];
     if (head.isBot && fromRole != BsRole.bot) {
       final replyIdx = _messages
           .cached()

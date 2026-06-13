@@ -824,3 +824,6 @@
 
 ### 2026-06-11 — כלי-AI על דאטה אמיתי (נחיל גל-4 · supervisor)
 - **`lib/logic/ai_hub_logic.dart` — `computeStockForecast`:** מוטציה — fold-הצריכה `+ li.qty` → `- li.qty` → `ai_hub_compute_test` **אדום** (5 assertions: rate/urgent/span/on-hand/aggregate) ✅ נתפס; שוחזר (cp, md5 חזר) → 14/14 ירוק.
+
+### 2026-06-12 — הכנת-זהות A8 (נחיל)
+- **`lib/state/sys_chat.dart`/`chat_firebase.dart` — `fromUid`:** מוטציה — שבירת כתיבת/round-trip של fromUid → `chat_uid_a8_test` **אדום** (Expected 'u-7'/Actual null) ✅ נתפס; שוחזר → ירוק.

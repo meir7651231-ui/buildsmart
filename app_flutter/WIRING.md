@@ -1778,3 +1778,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **G2/G3:** customers `ownerId`-or-manager · chat `participants` (forward-ready) · `rules_test/orders.test.js` 17 בדיקות + harness (`package.json`).
 - **אימות:** אמולטור-Firestore **רץ** (firebase-tools 14.27 + rules-unit-testing v4) → **17/17 pass**. analyze 0. (לא קוד-אפליקציה.)
 - **owner-deploy:** `firebase deploy --only firestore:rules,firestore:indexes --project buildsmart-b0b78`.
+### #A8-A11 — הכנת-זהות: צ׳אט fromUid + לקוחות ownerId (נחיל) — 2026-06-12
+- **A8 צ׳אט:** הודעה נושאת `fromUid` (ליד `fromRole`) — `sys_chat` (model+toJson guard+send-param) · `chat_firebase` toDoc/fromDoc · `chat_repository` interface · `chats_screen` מטביע מ-`currentUidProvider`. participants של threads נשארים role-based (forward, post-S1).
+- **A11 לקוחות:** `customers_firebase` toDoc(guard)/fromDoc נושא `ownerId` · `ManagerCustomer.ownerId` (manager_dashboard). forward-ready — אין כיום write-path ציבורי ללקוחות (נגזרים מהזמנות) → unset עד שיהיה; מתועד, אפס זיוף.
+- אדיטיבי · display-neutral · אפס-רגרסיה (נכתב רק כשקיים; seed/legacy round-trip). scoping + ה-rules (Phase-G, forward-ready) מופעלים ע"י קונסול.
+- guard: `chat_uid_a8_test` + `customers_uid_a11_test`. מוטציה: שבירת fromUid → אדום (Expected 'u-7'/null) → שוחזר.
+- Gate: analyze 0 · full-suite ירוק · build web ✅.

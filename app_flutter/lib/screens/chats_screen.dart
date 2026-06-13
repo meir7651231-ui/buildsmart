@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:buildsmart/screens/camera_sheet.dart';
+import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
@@ -1350,7 +1351,14 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
       final wasBot = _thread.isBot;
       final showTyping =
           wasBot && settings.botEnabled && settings.typingIndicator;
-      ref.read(chatEngineProvider.notifier).send(_threadId!, _persona, text);
+      // A8 (launch uid-migration) — stamp the signed-in sender's auth.uid on
+      // the message (additive; '' when signed-out / Firebase-free). fromRole
+      // still drives the mine/theirs UI; the eventual uid-scoping activates
+      // later via the firestore rules (mirrors A3's checkout contractorUid).
+      final fromUid = ref.read(currentUidProvider) ?? '';
+      ref
+          .read(chatEngineProvider.notifier)
+          .send(_threadId!, _persona, text, fromUid: fromUid);
       // The bot reply (if any) lands synchronously at now+1ms and is read
       // on-screen — mark read just past it so the badge stays honest.
       ref.read(chatLastReadProvider.notifier).markRead(

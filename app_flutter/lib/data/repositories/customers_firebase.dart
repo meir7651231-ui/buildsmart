@@ -37,9 +37,22 @@
 //   name→name (doc-id) · totalSpend→used (₪ used of credit) · creditLimit→creditLimit
 //   · balance = creditLimit-totalSpend (derived SSOT field) · orderCount carried as
 //   an extra field (so `all()` returns a full aggregate without a join, mirroring
-//   how `orders` carries `items`). The schema's `phone`/`ownerId` have no model
-//   counterpart: `toDoc` omits them, `fromDoc` ignores them (tolerant) — exactly
-//   the pilot's treatment of the future `storeId`/`courierId` fields.
+//   how `orders` carries `items`) · ownerId→ownerId (A11 — see below). The schema's
+//   `phone` has no model counterpart: `toDoc` omits it, `fromDoc` ignores it.
+//
+// A11 (launch uid-migration) — `ownerId` is now MAPPED through `ManagerCustomer.
+// ownerId` (forward-ready), written GUARDED (only when non-empty) and read
+// tolerantly (default '') — the A3 `contractorUid` discipline. ⚠️ FINDING: on
+// THIS path `ownerId` is ALWAYS '' — the customer list is DERIVED from the orders
+// engine (`mgrCustomerList` over `Order.who` display names, not uids) and the
+// [CustomersRepository] interface carries NO public write method that creates a
+// customer doc. So there is currently NOWHERE to stamp an owner uid (no write
+// path is fabricated). The field is wired through end-to-end so that (a) a doc
+// the schema/console writes with `ownerId` round-trips losslessly, and (b) a
+// FUTURE customer-write path can stamp it from `currentUidProvider`. Until then
+// every `toDoc` omits it and the seed round-trips byte-identical (zero
+// regression). The eventual `ownerId` scoping activates later via the firestore
+// rules (forward-ready, just landed).
 //
 // Comment density/voice mirrors `orders_firebase.dart` — the S2.3 template.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -78,8 +91,10 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
   /// (`totalSpend`→`used`, `balance` derived) per the `customers` schema; the
   /// name is the doc-id, not a field. `orderCount` is carried as an extra field
   /// so `all()` returns a full aggregate without a join (mirrors how `orders`
-  /// carries `items`). The schema's `phone`/`ownerId` carry no model value, so
-  /// they are omitted here (tolerant round-trip — `fromDoc` ignores them too).
+  /// carries `items`). A11 — `ownerId` is written GUARDED (only when non-empty);
+  /// on this derived path it is always '' (see the header finding), so it is
+  /// omitted and the seed round-trips byte-identical (zero regression). The
+  /// schema's `phone` carries no model value, so it is omitted (tolerant).
   @override
   Map<String, dynamic> toDoc(ManagerCustomer c) => {
         'name': c.name,
@@ -87,14 +102,17 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
         'creditLimit': c.creditLimit,
         'balance': c.creditLimit - c.totalSpend,
         'orderCount': c.orderCount,
+        if (c.ownerId.isNotEmpty) 'ownerId': c.ownerId,
       };
 
   /// Firestore doc → `ManagerCustomer`. Inverse of [toDoc]: the doc-id becomes
   /// `name`, `used`→`totalSpend`, `creditLimit`→`creditLimit`, `orderCount`→
   /// `orderCount` (defaulting to 0 when an externally-written doc omits it).
-  /// `balance`/`phone`/`ownerId` are ignored (the aggregate carries no such
-  /// field). THROWS on a structurally-bad doc (missing `creditLimit`/`used`) —
-  /// the base catches that per-doc and skips it (never blanks the list).
+  /// A11 — `ownerId` is read tolerantly (default '' when a legacy/seed doc omits
+  /// it — the zero-regression default; forward-ready for a console/server doc
+  /// that carries it). `balance`/`phone` are ignored (the aggregate derives
+  /// them / carries no such field). THROWS on a structurally-bad doc (missing
+  /// `creditLimit`/`used`) — the base catches that per-doc and skips it.
   @override
   ManagerCustomer fromDoc(RemoteDoc doc) {
     final j = doc.data;
@@ -103,6 +121,7 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
       orderCount: (j['orderCount'] as num?)?.toInt() ?? 0,
       totalSpend: (j['used'] as num).toInt(),
       creditLimit: (j['creditLimit'] as num).toInt(),
+      ownerId: (j['ownerId'] as String?) ?? '',
     );
   }
 

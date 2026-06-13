@@ -51,6 +51,7 @@ class ChatMessage {
     required this.fromRole,
     required this.text,
     required this.ts,
+    this.fromUid = '',
   });
 
   final String id;
@@ -59,12 +60,22 @@ class ChatMessage {
   final String text;
   final DateTime ts;
 
+  /// A8 (launch uid-migration) — the sender's `auth.uid` when the message was
+  /// sent while signed-in, else ''. Additive and display-neutral: [fromRole]
+  /// still drives the mine/theirs rendering; a later phase (post-S1) scopes
+  /// `chatMessages`/thread `participants` on this uid (the server activates that
+  /// via the firestore rules — see chat_firebase.dart's deferred-join note).
+  /// Written only when non-empty so the seed + every legacy/pre-A8 doc
+  /// round-trips byte-identical (zero regression).
+  final String fromUid;
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'threadId': threadId,
         'fromRole': fromRole.name,
         'text': text,
         'ts': ts.toIso8601String(),
+        if (fromUid.isNotEmpty) 'fromUid': fromUid,
       };
 
   static ChatMessage? tryFromJson(Object? raw) {
@@ -87,6 +98,9 @@ class ChatMessage {
       fromRole: role,
       text: text,
       ts: ts,
+      // A8 — tolerant read: present on a post-A8 doc, '' on every legacy/seed
+      // doc (the zero-regression default). A non-String value coerces to ''.
+      fromUid: raw['fromUid'] is String ? raw['fromUid'] as String : '',
     );
   }
 }
@@ -370,23 +384,31 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
     return '$h:$m';
   }
 
-  ChatMessage _mk(String threadId, BsRole fromRole, String text, DateTime ts) =>
+  ChatMessage _mk(String threadId, BsRole fromRole, String text, DateTime ts,
+          {String fromUid = ''}) =>
       ChatMessage(
         id: 'm-${ts.microsecondsSinceEpoch}-${fromRole.name}',
         threadId: threadId,
         fromRole: fromRole,
         text: text,
         ts: ts,
+        fromUid: fromUid,
       );
 
   /// Append a message from [fromRole] to [threadId] — visible to BOTH
   /// participants immediately because they read the same shared thread (the
   /// cross-persona core). No-op on an empty text or an unknown thread.
   ///
+  /// A8 (launch uid-migration) — [fromUid] stamps the sender's `auth.uid` on
+  /// the user line when signed-in (the UI passes `currentUidProvider`); '' on
+  /// the local/signed-out path keeps today's behavior byte-for-byte. The bot
+  /// auto-reply carries no uid (it is the system, not a user).
+  ///
   /// For the BOT thread, a deterministic auto-reply is appended right after the
   /// user's line (mirroring the legacy `_ChatPage` bot behavior). Real (non-bot)
   /// threads do NOT auto-reply — the other persona answers live.
-  void send(String threadId, BsRole fromRole, String text) {
+  void send(String threadId, BsRole fromRole, String text,
+      {String fromUid = ''}) {
     // S4.3 — bound to Firestore: delegate to the repo's verbatim port (message
     // write + thread lastMsg/ts upsert + the bot auto-reply). Its optimistic
     // cache notifies back SYNCHRONOUSLY → [_refreshFromRemote] has already
@@ -394,7 +416,7 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
     // local path, plus the background Firestore writes.
     final r = _remote;
     if (r != null) {
-      r.send(threadId, fromRole, text);
+      r.send(threadId, fromRole, text, fromUid: fromUid);
       return;
     }
     final trimmed = text.trim();
@@ -405,7 +427,7 @@ class ChatEngineNotifier extends StateNotifier<List<ChatThread>> {
     final now = DateTime.now();
     final appended = <ChatMessage>[
       ...thread.messages,
-      _mk(threadId, fromRole, trimmed, now),
+      _mk(threadId, fromRole, trimmed, now, fromUid: fromUid),
     ];
     // Bot thread: keep the auto-reply (next reply in rotation, by current count).
     if (thread.isBot && fromRole != BsRole.bot) {

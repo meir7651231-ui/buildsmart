@@ -302,10 +302,24 @@ class ManagerCustomer {
     required this.orderCount,
     required this.totalSpend,
     required this.creditLimit,
+    this.ownerId = '',
   });
 
   final String name;
   final int orderCount;
   final int totalSpend;
   final int creditLimit;
+
+  /// A11 (launch uid-migration) — the owning manager's `auth.uid`, forward-ready
+  /// for the SSOT `customers/{id}.ownerId`. Currently ALWAYS '' on this path:
+  /// the aggregate is DERIVED from orders (`mgrCustomerList` over `Order.who`
+  /// display names), so there is no owner-uid to stamp here, and the
+  /// [CustomersRepository] interface carries NO public write method that creates
+  /// a customer doc (it is a read-only derived surface — `all`/`byName`/
+  /// `creditLimit`). The field exists so the Firestore mapper round-trips the
+  /// schema's `ownerId` losslessly and so a FUTURE customer-write path can stamp
+  /// it from `currentUidProvider`. Additive + display-neutral: written to the
+  /// doc only when non-empty, so the seed + every legacy doc round-trip
+  /// byte-identical (zero regression — the A3 `contractorUid` guard).
+  final String ownerId;
 }
