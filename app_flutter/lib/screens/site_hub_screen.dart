@@ -24,6 +24,7 @@
 
 import 'package:buildsmart/data/contractor_seeds.dart' show caToday, kSafetyTips;
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/services/geo.dart';
 import 'package:buildsmart/state/site_hub_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -898,15 +899,33 @@ class _SiteAttendance extends ConsumerWidget {
     );
   }
 
-  void _clock(BuildContext context, WidgetRef ref, {required bool isIn}) {
+  Future<void> _clock(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool isIn,
+  }) async {
     // proto: new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})
     final now = TimeOfDay.now();
     final hhmm =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
     final n = ref.read(siteAttendanceProvider.notifier);
     if (isIn) {
-      n.clockIn(hhmm);
-      showToast(context, 'כניסה נרשמה ב-$hhmm 📍');
+      // C6 — REAL GPS for the clock-in. Read the live fix first (null on
+      // permission-denied / service-off / native error — NO invented point),
+      // then stamp the row with the formatted coordinate, or the honest
+      // kGeoUnavailable marker when there is no fix.
+      final fix = await currentGeoFix();
+      if (!context.mounted) return;
+      final geo = fix == null
+          ? kGeoUnavailable
+          : formatGeo(fix.lat, fix.lng, accuracyMeters: fix.accuracy);
+      n.clockIn(hhmm, geo: geo);
+      showToast(
+        context,
+        fix == null
+            ? 'מיקום לא זמין — כניסה נרשמה ב-$hhmm בלי מיקום'
+            : 'כניסה נרשמה ב-$hhmm 📍',
+      );
     } else {
       n.clockOut(hhmm);
       showToast(context, 'יציאה נרשמה ב-$hhmm');

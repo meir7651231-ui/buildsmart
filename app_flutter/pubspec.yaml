@@ -57,6 +57,17 @@ dependencies:
   # persistence (settings + profile)
   shared_preferences: ^2.3.4
 
+  # C6 — REAL native GPS for the site-hub GPS attendance (T2.4) and, via the
+  # SHARED services/geo.dart seam, the worker clock-in. Replaces the native null
+  # stub with a live fix: checks isLocationServiceEnabled + checkPermission/
+  # requestPermission, and ONLY on granted calls getCurrentPosition; on
+  # denied / disabled / error it returns null — never a fabricated coordinate
+  # (אין קואורדינטה מומצאת). Has first-party web support (geolocator_web →
+  # navigator.geolocation), so `flutter build web` keeps compiling; the
+  # conditional import still prefers our hand-rolled geo_web.dart on web. 14.x is
+  # the Dart-3.7 / Flutter-3.29 compatible line (sdk: ^3.5.0).
+  geolocator: ^14.0.0
+
   # native speech-to-text — iOS/Android (Web falls back to Web Speech)
   speech_to_text: ^7.0.0
 

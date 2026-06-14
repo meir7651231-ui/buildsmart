@@ -28,6 +28,21 @@
          Android 13 request), never on app start — push is additive and gated on
          Firebase, so a no-Firebase / demo run never asks. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- C6 — geolocator (real GPS). FOREGROUND location only, used to tag the
+         construction-site GPS attendance (site-hub) and the worker clock-in/out
+         with the device's current coordinate. COARSE + FINE are both requested
+         so the OS can grant either precision; we never ask for background
+         location (no ACCESS_BACKGROUND_LOCATION). The runtime prompt is shown
+         only when the user taps "החתם כניסה"/clock-in (geolocator.requestPermission
+         behind the honest gate) — denied/disabled simply records attendance with
+         NO location, never an invented point. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- GPS/location hardware marked not-required so the app stays installable on
+         location-less devices (Play compliance); the feature simply yields an
+         honest "מיקום לא זמין" there. -->
+    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
+    <uses-feature android:name="android.hardware.location" android:required="false"/>
     <application
         android:label="buildsmart"
         android:name="${applicationName}"

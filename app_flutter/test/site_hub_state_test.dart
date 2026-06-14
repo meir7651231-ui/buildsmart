@@ -78,18 +78,34 @@ void main() {
       expect(SiteAttendanceNotifier().state, isEmpty);
     });
 
-    test('clockIn opens an entry with demo geo; clockOut closes it', () {
+    // C6 — the geo is now a REAL device coordinate, NOT the old hardcoded demo
+    // point. With no fix supplied, clockIn records the honest kGeoUnavailable
+    // marker (never a fabricated coordinate).
+    test('clockIn with no fix records the honest "מיקום לא זמין"; clockOut closes',
+        () {
       final n = SiteAttendanceNotifier();
-      n.clockIn('08:00');
+      n.clockIn('08:00'); // no geo arg → honest unavailable
       expect(n.state, hasLength(1));
       expect(n.open, isNotNull);
       expect(n.state.first.timeIn, '08:00');
       expect(n.state.first.timeOut, isNull);
-      expect(n.state.first.geo, '32.07°N, 34.79°E (±12מ׳)');
+      expect(n.state.first.geo, kGeoUnavailable);
+      expect(n.state.first.geo, 'מיקום לא זמין');
+      // The discarded demo coordinate must NOT resurface.
+      expect(n.state.first.geo, isNot(contains('°N')));
 
       n.clockOut('17:30');
       expect(n.open, isNull);
       expect(n.state.first.timeOut, '17:30');
+    });
+
+    test('clockIn stamps a REAL formatted coordinate when one is supplied', () {
+      final n = SiteAttendanceNotifier();
+      final geo = formatGeo(32.0728, 34.7912, accuracyMeters: 12);
+      n.clockIn('09:15', geo: geo);
+      expect(n.state.first.geo, '32.0728°N, 34.7912°E (±12מ׳)');
+      // It is the value we passed — not invented by the notifier.
+      expect(n.state.first.geo, geo);
     });
 
     test('clockOut closes only the open entry', () {
@@ -100,6 +116,41 @@ void main() {
       n.clockOut('17:00'); // should close only the second
       expect(n.state.where((a) => a.timeOut == null), isEmpty);
       expect(n.state.map((a) => a.timeOut).toList(), ['17:00', '12:00']);
+    });
+  });
+
+  // C6 — the coordinate formatter (pure). Mirrors the proto's display shape but
+  // with the device's REAL lat/lng; there is no null path (callers pass
+  // kGeoUnavailable when there is no fix), so no fabricated point can leak.
+  group('C6 — formatGeo (site-hub coordinate display)', () {
+    test('N/E hemisphere + 4dp + accuracy radius', () {
+      expect(
+        formatGeo(32.0728, 34.7912, accuracyMeters: 12),
+        '32.0728°N, 34.7912°E (±12מ׳)',
+      );
+    });
+
+    test('negative lat/lng → S/W hemisphere letters', () {
+      expect(
+        formatGeo(-33.8688, -151.2093, accuracyMeters: 8),
+        '33.8688°S, 151.2093°W (±8מ׳)',
+      );
+    });
+
+    test('accuracy omitted → no ± radius shown', () {
+      expect(formatGeo(0, 0), '0.0000°N, 0.0000°E');
+    });
+
+    test('accuracy is rounded to whole metres', () {
+      expect(
+        formatGeo(31.5, 35.5, accuracyMeters: 12.6),
+        '31.5000°N, 35.5000°E (±13מ׳)',
+      );
+    });
+
+    test('kGeoUnavailable is the honest marker (not a coordinate)', () {
+      expect(kGeoUnavailable, 'מיקום לא זמין');
+      expect(kGeoUnavailable, isNot(contains('°')));
     });
   });
 

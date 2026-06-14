@@ -9,11 +9,16 @@
 // build picks up the real Geolocation implementation. Same pattern the codebase
 // already uses for photo_downscale_web.dart.
 //   • WEB (geo_web.dart) — browser Geolocation API; null on deny/error/timeout.
-//   • NATIVE/VM (geo_stub.dart) — STUB returning null. SERVER-SWAP: bind a real
-//     platform geolocator here; the [GeoFix] shape + `Future<GeoFix?>` contract
-//     stay byte-identical so callers (clock-in/out lat/lng — contract 4) need no
-//     change.
-import 'geo_stub.dart' if (dart.library.js_interop) 'geo_web.dart' as impl;
+//   • NATIVE/VM (geo_native.dart) — C6: the real `geolocator` plugin. On a
+//     device it returns a LIVE fix (service-enabled + permission-granted →
+//     getCurrentPosition); on the headless test VM (no platform channel), a
+//     denied/disabled service, or any error it returns null. The honest gate
+//     itself lives in the platform-free geo_gate.dart (unit-testable on the VM
+//     without package:web). The [GeoFix] shape + `Future<GeoFix?>` contract are
+//     byte-identical, so callers (site-hub attendance + worker clock-in/out
+//     lat/lng — contract 4) need no change. (The legacy null-only geo_stub.dart
+//     is kept for history but no longer wired.)
+import 'geo_native.dart' if (dart.library.js_interop) 'geo_web.dart' as impl;
 
 /// An immutable GPS reading. [accuracy] is the radius in metres reported by the
 /// platform (null when the source does not give one).
