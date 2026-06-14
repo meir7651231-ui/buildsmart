@@ -82,10 +82,10 @@ jobs:
       - name: Install firebase-tools
         run: npm i -g firebase-tools
 
-      - name: Deploy Firestore rules
+      - name: Deploy Firestore rules + indexes
         run: |
           firebase deploy \
-            --only firestore:rules \
+            --only firestore:rules,firestore:indexes \
             --project buildsmart-b0b78 \
             --non-interactive
 
