@@ -2174,7 +2174,16 @@ class _StepBtn extends StatelessWidget {
 /// is added to the cart (see `home_shell` + `shipToPromptedProvider`), never at
 /// checkout. The order can be confirmed with or without an address.
 void openShipToSheet(BuildContext context, WidgetRef ref) {
-  final ctrl = TextEditingController(text: ref.read(shipToProvider));
+  // The field pre-fills with the in-progress shipTo address; when that is empty
+  // (the common one-time-popup case) it falls back to the saved 'כתובת ברירת
+  // מחדל' (storeSettings.defaultAddress) so a contractor who set a default sees
+  // it ready to confirm instead of an empty box. This is the live client effect
+  // of that setting.
+  final shipTo = ref.read(shipToProvider);
+  final defaultAddress = ref.read(storeSettingsProvider).defaultAddress.trim();
+  final ctrl = TextEditingController(
+    text: shipTo.isNotEmpty ? shipTo : defaultAddress,
+  );
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -2472,6 +2481,21 @@ class _PaymentSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 'הסדר אשראי ספק' (storeSettings.supplierCreditEnabled) gates the supplier-
+    // credit ('אשראי ספק') payment chip: a contractor who hasn't arranged a
+    // supplier-credit line shouldn't be offered it at checkout. Off (the
+    // default) ⇒ the chip is removed from the selector entirely. The other
+    // methods (כרטיס/ביט) are always available. This is the live client effect
+    // of that toggle.
+    final supplierCreditEnabled = ref.watch(
+      storeSettingsProvider.select((s) => s.supplierCreditEnabled),
+    );
+    final options = [
+      for (final o in _kPaymentOptions)
+        if (o.method != CartPaymentMethod.supplierCredit ||
+            supplierCreditEnabled)
+          o,
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2484,15 +2508,15 @@ class _PaymentSelector extends ConsumerWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              for (int i = 0; i < _kPaymentOptions.length; i++) ...[
+              for (int i = 0; i < options.length; i++) ...[
                 if (i > 0) const SizedBox(width: 8),
                 _PaymentChip(
-                  option: _kPaymentOptions[i],
-                  active: _kPaymentOptions[i].method == selected,
+                  option: options[i],
+                  active: options[i].method == selected,
                   onTap:
                       () =>
                           ref.read(cartPaymentProvider.notifier).state =
-                              _kPaymentOptions[i].method,
+                              options[i].method,
                 ),
               ],
             ],
@@ -3100,6 +3124,9 @@ class _CartActionsRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final shareCartWithTeam = ref.watch(
+      storeSettingsProvider.select((s) => s.shareCartWithTeam),
+    );
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -3115,29 +3142,35 @@ class _CartActionsRow extends ConsumerWidget {
           label: const Text('שמור'),
           style: TextButton.styleFrom(foregroundColor: Colors.black38),
         ),
-        TextButton.icon(
-          onPressed: () async {
-            final lines = ref.read(smartCartProvider);
-            if (lines.isEmpty) {
-              showToast(context, 'הסל ריק');
-              return;
-            }
-            final items = lines
-                .map(
-                  (l) =>
-                      '${l.productEmoji} ${l.productName} × ${l.productQty} = ₪${l.total}',
-                )
-                .join('\n');
-            // Real share — hand the cart summary to the native/Web share sheet
-            // (via the injectable seam so a test captures the exact text).
-            final total = lines.fold<int>(0, (s, l) => s + l.total);
-            final text = 'סל BuildSmart:\n$items\n\nסה״כ: ₪$total';
-            await ref.read(shareTextProvider)(text);
-          },
-          icon: const Icon(Icons.share_outlined, size: 16),
-          label: const Text('שתף'),
-          style: TextButton.styleFrom(foregroundColor: Colors.black38),
-        ),
+        // 'שיתוף סל עם צוות' (storeSettings.shareCartWithTeam) gates the cart
+        // 'שתף' button: off (the default) ⇒ the button is not shown, so the
+        // cart summary can't be handed to the native/Web share sheet. On ⇒ the
+        // button appears and shares the real summary. This is the live client
+        // effect of that toggle.
+        if (shareCartWithTeam)
+          TextButton.icon(
+            onPressed: () async {
+              final lines = ref.read(smartCartProvider);
+              if (lines.isEmpty) {
+                showToast(context, 'הסל ריק');
+                return;
+              }
+              final items = lines
+                  .map(
+                    (l) =>
+                        '${l.productEmoji} ${l.productName} × ${l.productQty} = ₪${l.total}',
+                  )
+                  .join('\n');
+              // Real share — hand the cart summary to the native/Web share sheet
+              // (via the injectable seam so a test captures the exact text).
+              final total = lines.fold<int>(0, (s, l) => s + l.total);
+              final text = 'סל BuildSmart:\n$items\n\nסה״כ: ₪$total';
+              await ref.read(shareTextProvider)(text);
+            },
+            icon: const Icon(Icons.share_outlined, size: 16),
+            label: const Text('שתף'),
+            style: TextButton.styleFrom(foregroundColor: Colors.black38),
+          ),
         TextButton.icon(
           onPressed: () async {
             final ok = await confirmDestructive(

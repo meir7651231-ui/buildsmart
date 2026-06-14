@@ -103,11 +103,13 @@ class _ShippingSection extends ConsumerWidget {
       emoji: '📍',
       title: 'משלוחים וכתובות',
       children: [
+        // 🟢 WIRED — pre-fills the 'לאן לשלוח?' ship-to sheet (openShipToSheet)
+        // when no in-progress address is set, so a saved default is ready to
+        // confirm at the first product selection.
         _InlineTextRow(
           label: 'כתובת ברירת מחדל',
           hint: 'רחוב, מספר, עיר',
           value: settings.defaultAddress,
-          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -203,10 +205,12 @@ class _PaymentSection extends ConsumerWidget {
                   .read(storeSettingsProvider.notifier)
                   .update((s) => s.copyWith(defaultInstallments: v)),
         ),
+        // 🟢 WIRED — gates the 'אשראי ספק' payment chip in the checkout
+        // _PaymentSelector: off (default) ⇒ the supplier-credit option is not
+        // offered at checkout; on ⇒ it appears alongside כרטיס/ביט.
         _SwitchRow(
           label: 'הסדר אשראי ספק',
           value: settings.supplierCreditEnabled,
-          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)
@@ -389,10 +393,12 @@ class _CartSection extends ConsumerWidget {
                   .read(storeSettingsProvider.notifier)
                   .update((s) => s.copyWith(repeatOrders: v)),
         ),
+        // 🟢 WIRED — gates the cart 'שתף' button (_CartActionsRow): off
+        // (default) ⇒ the button is hidden; on ⇒ it appears and hands the cart
+        // summary to the native/Web share sheet.
         _SwitchRow(
           label: 'שיתוף סל עם צוות',
           value: settings.shareCartWithTeam,
-          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)

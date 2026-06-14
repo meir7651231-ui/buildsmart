@@ -871,3 +871,14 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
   - **דוח-PDF** (כספים → דוחות PDF → 'הפק והורד' → view → 'הדפסה'): במקום toast 'בחר "שמור כ-PDF"…', מופק עכשיו **PDF אמיתי** (גיליון RTL בעברית — תקציב + פירוט-קטגוריות, גופן-Heebo) ונפתח דיאלוג print/save נייטיב/Web. ה-view-על-מסך נשמר כתצוגה-מקדימה; כפתור 'הדפסה' ללא שינוי-מראה.
 - **שמירת-יושר:** שיתוף — סל-ריק → toast 'הסל ריק', אפס-שיתוף. order-now — נתוני-המוצר אמיתיים שנלכדו משורת-הזמנה (לא מומצאים). PDF — מסונן-emoji בגיליון (השם+₪ נשמרים, אפס crash).
 - **אימות:** `cart_share_test` 2/2 · `favorite_tile_opens_sheet_test` 1/1 · `ai_hub_compute_test` +2 (order-now) · `finance_pdf_export_test` 3/3 (magic `%PDF`) · analyze 0 errors/warnings · mutation share-text נתפסה (אדום→ירוק-אחרי-cp) · full-suite **+2241 All tests passed** (היה +2233) · build web ✅ Built (printing נפתר web-side, 7.7MB).
+
+---
+
+## #B5 — store settings "בבנייה" → effect-אמת (3 wired) — 2026-06-14
+
+**שינוי:** 3 הגדרות-חנות מתות הופכות ל-effect-לקוח נצפה. אימות = widget-tests שמוכיחים את ההבדל הויזואלי (flip → שינוי-UI נצפה), בהיעדר screenshot-tooling בסביבה זו.
+- **`shareCartWithTeam`** → כפתור 'שתף' בשורת-פעולות-הסל: OFF ⇒ נעדר מה-Row (נראה: רשימות/שמור/נקה בלבד) · ON ⇒ מופיע ביניהם. נצפה ב-`store_settings_wiring_test` (`find.text('שתף')` findsNothing↔findsOneWidget, אחרי jump-to-bottom של ה-cart ListView).
+- **`supplierCreditEnabled`** → chip 'אשראי ספק' ב-`_PaymentSelector`: OFF ⇒ רק 💳כרטיס/📲ביט מוצגים · ON ⇒ 🤝אשראי-ספק מצטרף. נצפה (chip findsNothing↔findsOneWidget; 'כרטיס' תמיד findsOneWidget).
+- **`defaultAddress`** → שדה 'לאן לשלוח?': default-ריק ⇒ TextField ריק (hint בלבד) · default-שמור ⇒ הטקסט מקדים-ממולא · shipTo-בתהליך גובר. נצפה דרך `TextField.controller.text`.
+
+**אימות:** `store_settings_wiring_test` 8/8 · `cart_share_test` 2/2 (עודכן) · analyze 0-errors · build web ✅. mutation-verified (ראה `knowledge/mutation_log.md` §B5).

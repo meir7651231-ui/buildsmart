@@ -15,6 +15,7 @@ import 'package:buildsmart/screens/store_screen.dart'
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/share_seam.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/state/store_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,7 +57,12 @@ void main() {
 
     // Seed a real cart line, then land on the store's cart section (exactly
     // what HomeShell's cart FAB does: tab 3 + StoreSection.cart).
+    // The 'שתף' button is gated behind the 'שיתוף סל עם צוות' store setting
+    // (off by default) — enable it so the share row renders (B5 wiring).
     container.read(smartCartProvider.notifier).add(_line('מלט', '🧱', 30, 2));
+    container
+        .read(storeSettingsProvider.notifier)
+        .update((s) => s.copyWith(shareCartWithTeam: true));
     container.read(storeSectionProvider.notifier).state = StoreSection.cart;
     container.read(mainTabProvider.notifier).state = 3;
     await t.pumpAndSettle();
