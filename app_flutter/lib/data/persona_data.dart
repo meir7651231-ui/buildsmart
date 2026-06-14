@@ -135,6 +135,7 @@ const Map<String, String> kTaskStatusLabel = {
   'review': '📸 ממתין לאישור',
   'done': '✅ אושר ✓',
   'rejected': '↩️ נדחה — לתקן',
+  'proposed': '📝 הוצעה',
 };
 
 /// All tasks assigned to [worker].

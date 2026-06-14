@@ -960,6 +960,12 @@
 - **מוטציה:** `if (d.employerId == employerId)` → `if (d.employerId != employerId)` (היפוך — הקבלן היה רואה את נוכחות כל-מי-שאינו-שלו).
 - **תוצאה:** **אדומה ✅** — 4 טסטי-scope נכשלו (lands-in-roster · unstamped-excluded · clockOut-preserves · deterministic-order). שוחזר ל-`==` ב-Edit (**לא** git checkout) → **+7 ירוק**.
 - **מסקנה:** בידוד-המעסיק load-bearing — הוא לב חיווט-קבלן↔עובד; היפוך-הפילטר דלף נוכחות חוצת-מעסיקים. שליחים מודרים-במבנה (חנות-נוכחות נפרדת), לא תלוי בפילטר הזה.
+
+## גל G1 — בידוד מחזור-חיים: הצעת-עובד מול השלמה — 2026-06-14
+- **קובץ:** `lib/state/tasks_engine.dart:636` (ה-guard ב-`approveProposal`) · בדיקה `test/contractor_task_proposal_test.dart`.
+- **מוטציה:** הסרת ה-guard — `if (t == null || t.status != 'proposed')` → `if (t == null)` (approveProposal היה מאשר **כל** סטטוס, כולל review/pending → התנגשות עם מחזור-ההשלמה).
+- **תוצאה:** **אדומה ✅** — 'GUARD: the proposal lifecycle and the completion lifecycle do NOT collide' נכשל. שוחזר ה-guard ב-Edit (**לא** git checkout) → **+5 ירוק**.
+- **מסקנה:** ה-guard `status=='proposed'` load-bearing — מפריד את `approveProposal`(proposed→active) מ-`approve`(review→done); בלעדיו הצעת-עובד הייתה מאושרת במסלול-ההשלמה (כולל הענקת-מטבעות/קידום-הזמנה שגויים).
 ## #C11 — Apple-readiness HIDE-pass (kHideUnderConstruction · kVisibleSearchIndex) — 2026-06-14
 - **קבצים (lib/state|lib/data):** `lib/state/under_construction.dart` (חדש — הדגל `kHideUnderConstruction` + `kHiddenSearchTitles`) · `lib/data/search_index.dart` (getter חדש `kVisibleSearchIndex` שמסנן placeholder-titles · ה-const `kSearchIndex` נשאר verbatim). (UI: `_SectionTile` ב-4 מסכי-הגדרות · `ai_hub_screen` `_visibleTiles`/`visibleToolIds` · chats/persona_portal/courier_portal_tab/persona_picking_sheet/tasks_screen guards.)
 - **תקלה שהוזרקה:** `kVisibleSearchIndex => kHideUnderConstruction ? […filtered] : kSearchIndex` שונה ל-`=> false // MUTATION` (כלומר תמיד מחזיר את הרשימה המלאה → 3 ה-titles ה-deferred דולפים לחיפוש החי).

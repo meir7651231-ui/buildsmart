@@ -295,11 +295,28 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
   /// Date-only (midnight) so day-key comparisons are exact.
   late DateTime _selected;
 
+  // ➕ הצעת-משימה (Wave G1b) — the worker-authoring sheet's controllers. Owned
+  // by the tab's State (mirroring the contractor _TaskAuthorSheet pattern) so
+  // they are disposed once with the tab; the sheet only reads/writes them.
+  final TextEditingController _proposeName = TextEditingController();
+  final TextEditingController _proposeDetail = TextEditingController();
+  final TextEditingController _proposeSteps = TextEditingController();
+  final TextEditingController _proposeDays = TextEditingController(text: '1');
+
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
     _selected = DateTime(now.year, now.month, now.day);
+  }
+
+  @override
+  void dispose() {
+    _proposeName.dispose();
+    _proposeDetail.dispose();
+    _proposeSteps.dispose();
+    _proposeDays.dispose();
+    super.dispose();
   }
 
   /// Live tasks of the logged worker whose status is in [statuses] — the bucket
@@ -325,7 +342,12 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
     final current = _bucket(all, {'active', 'rejected'});
     final queue = _bucket(all, {'pending'});
     final submitted = _bucket(all, {'review', 'done'});
-    final total = mine.length;
+    // Wave G1 — the worker's OWN proposed tasks (status 'proposed'), awaiting the
+    // contractor's approval. Rendered in their own section below so the worker
+    // can track what they're waiting on. EXCLUDED from `total`: the progress ring
+    // counts assigned/real work, not a pending proposal that isn't a job yet.
+    final proposed = _bucket(all, {'proposed'});
+    final total = mine.where((t) => t.status != 'proposed').length;
     final done = _bucket(all, {'done'}).length;
     final hasActive = _bucket(all, {'active'}).isNotEmpty;
 
@@ -409,6 +431,19 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
         _EmployerStockButton(
           onPressed: () => showEmployerStockSheet(context),
         ),
+        // ➕ הוסף משימה (Wave G1b) — the worker PROPOSES their own next job. A
+        // secondary (outlined) action peering with the stock/equipment buttons;
+        // on save it mints a `proposed` task (TasksNotifier.proposeTask) that
+        // shows here as '📝 הוצעה' and awaits the contractor's approval (G1c).
+        _ProposeTaskButton(onPressed: _openProposeSheet),
+        // 📝 הצעות שממתינות לאישור (Wave G1) — the worker's own proposed tasks,
+        // visible while they await the contractor's approve/reject. Shown only
+        // when non-empty (a transient pending-approval state, not a fixed bucket).
+        if (proposed.isNotEmpty)
+          _Section(
+            header: '📝 הצעות שממתינות לאישור (${proposed.length})',
+            tasks: proposed,
+          ),
         _Section(
           header: '⏳ הבאות בתור (${queue.length})',
           tasks: queue,
@@ -486,6 +521,60 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
       lat: day.inLat,
       lng: day.inLng,
     );
+  }
+
+  /// ➕ הוסף משימה (Wave G1b) — open the worker authoring sheet. Resets the
+  /// State-owned controllers to empty (days→'1') so each open starts fresh
+  /// (including after a prior save), then shows the modal sheet bound to them.
+  void _openProposeSheet() {
+    _proposeName.clear();
+    _proposeDetail.clear();
+    _proposeSteps.clear();
+    _proposeDays.text = '1';
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ProposeTaskSheet(
+        name: _proposeName,
+        detail: _proposeDetail,
+        steps: _proposeSteps,
+        days: _proposeDays,
+        onSave: _saveProposal,
+      ),
+    );
+  }
+
+  /// Save the worker's proposed task — mints a `proposed` task on the unified
+  /// engine, addressed to the proposer themselves (worker index + session uid),
+  /// stamped with the employing contractor (employerId). The contractor
+  /// approves it (G1c) before it becomes active. No-op when the name is empty
+  /// (the sheet's save is already guarded). Closes the sheet + honest toast.
+  void _saveProposal() {
+    final name = _proposeName.text.trim();
+    if (name.isEmpty) return;
+    final detail = _proposeDetail.text.trim();
+    final steps = _proposeSteps.text
+        .split('\n')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    // A non-positive / unparseable day count falls back to 1 (mirrors the
+    // contractor author sheet's safeDays rule).
+    final parsed = int.tryParse(_proposeDays.text.trim());
+    final days = (parsed == null || parsed < 1) ? 1 : parsed;
+    final s = ref.read(boardAuthProvider);
+    ref.read(tasksProvider.notifier).proposeTask(
+          name: name,
+          detail: detail,
+          days: days,
+          steps: steps,
+          worker: widget.worker,
+          assignedWorkerUid: s?.uid ?? '',
+          employerId: s?.employerId ?? '',
+        );
+    Navigator.of(context).pop();
+    showToast(context, 'נשלח לקבלן לאישור 📝');
   }
 }
 
@@ -1489,6 +1578,278 @@ class _EmployerStockButton extends StatelessWidget {
               label: const Text(
                 'מלאי הקבלן',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// ➕ הוסף משימה (Wave G1b) — a secondary (outlined) action that opens the
+/// worker authoring sheet to PROPOSE a next job to the contractor. Mirrors
+/// [_EmployerStockButton]/[_EquipmentButton]'s outlined-secondary style so it
+/// reads as a peer action, never a brand-fill primary competing with the
+/// per-task 'שלח לאישור' pill. ≥48dp; excludeSemantics — inner Text = label.
+class _ProposeTaskButton extends StatelessWidget {
+  const _ProposeTaskButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: BsTokens.space2),
+      child: HelpTarget(
+        title: 'הוסף משימה',
+        body: 'פותח טופס להצעת משימה חדשה לקבלן. המשימה שאתה מציע נשלחת '
+            'לקבלן לאישור, ורק לאחר שאישר אותה היא הופכת לפעילה אצלך.',
+        child: Semantics(
+          button: true,
+          label: 'הוסף משימה',
+          excludeSemantics: true,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: OutlinedButton.icon(
+              key: const ValueKey('worker-propose-open'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: BsTokens.brandDark,
+                side: const BorderSide(color: BsTokens.brand, width: 1.5),
+                minimumSize: const Size(0, 48),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BsTokens.space4,
+                  vertical: 9,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                ),
+              ),
+              onPressed: onPressed,
+              icon: const Text('➕', style: TextStyle(fontSize: 15)),
+              label: const Text(
+                'הוסף משימה',
+                style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// ➕ הצעת משימה לקבלן (Wave G1b) — the WORKER authoring sheet (RTL). A simpler,
+/// worker-facing port of the contractor `_TaskAuthorSheet` (tasks_screen.dart):
+/// name (required) · detail · steps (one per line) · days. The controllers are
+/// OWNED by [_TasksTabState] (created/disposed there); this sheet only binds to
+/// them, so it stays a thin StatefulWidget that just listens to [name] to
+/// enable/disable the save button live. On save it calls [onSave] (the tab's
+/// `proposeTask` wiring). No worker-pick — the proposer addresses themselves.
+class _ProposeTaskSheet extends StatefulWidget {
+  const _ProposeTaskSheet({
+    required this.name,
+    required this.detail,
+    required this.steps,
+    required this.days,
+    required this.onSave,
+  });
+
+  final TextEditingController name;
+  final TextEditingController detail;
+  final TextEditingController steps;
+  final TextEditingController days;
+  final VoidCallback onSave;
+
+  @override
+  State<_ProposeTaskSheet> createState() => _ProposeTaskSheetState();
+}
+
+class _ProposeTaskSheetState extends State<_ProposeTaskSheet> {
+  @override
+  void initState() {
+    super.initState();
+    // Live-guard the save button: rebuild as the name field gains/loses text.
+    widget.name.addListener(_onNameChanged);
+  }
+
+  @override
+  void dispose() {
+    // Detach our listener only — the controllers themselves are owned and
+    // disposed by _TasksTabState (do NOT dispose them here).
+    widget.name.removeListener(_onNameChanged);
+    super.dispose();
+  }
+
+  void _onNameChanged() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    final canSave = widget.name.text.trim().isNotEmpty;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (_, scroll) => Container(
+          decoration: const BoxDecoration(
+            color: BsTokens.cardLight,
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+          ),
+          child: ListView(
+            controller: scroll,
+            padding: EdgeInsets.fromLTRB(
+              BsTokens.space4,
+              BsTokens.space4,
+              BsTokens.space4,
+              // Keep the save button clear of the on-screen keyboard.
+              BsTokens.space4 + MediaQuery.of(context).viewInsets.bottom,
+            ),
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: BsTokens.space3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDDDDDD),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const Text(
+                '➕ הצעת משימה לקבלן',
+                style: TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 2),
+              const Text(
+                'המשימה תישלח לקבלן לאישור',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              const _ProposeSecH('שם המשימה'),
+              TextField(
+                key: const ValueKey('worker-propose-name'),
+                controller: widget.name,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  hintText: 'לדוגמה: התקנת ברז במטבח',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              const _ProposeSecH('תיאור'),
+              TextField(
+                key: const ValueKey('worker-propose-detail'),
+                controller: widget.detail,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  hintText: 'פרטי הביצוע (אופציונלי)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              const _ProposeSecH('שלבי ביצוע — שלב בכל שורה'),
+              TextField(
+                key: const ValueKey('worker-propose-steps'),
+                controller: widget.steps,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  hintText: 'כל שורה = שלב נפרד (אופציונלי)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              const _ProposeSecH('משך משוער (ימים)'),
+              TextField(
+                key: const ValueKey('worker-propose-days'),
+                controller: widget.days,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  hintText: '1',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space4),
+              // Guarded: disabled (greyed, no-op) until a name is entered.
+              _ProposePrimaryBtn(
+                key: const ValueKey('worker-propose-save'),
+                label: 'שלח לקבלן לאישור',
+                onTap: canSave ? widget.onSave : null,
+              ),
+              const SizedBox(height: BsTokens.space2),
+              _ProposePrimaryBtn(
+                label: 'ביטול',
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Section header inside the worker propose sheet — a file-local twin of the
+/// contractor sheet's `_SecH` (which is private to tasks_screen.dart).
+class _ProposeSecH extends StatelessWidget {
+  const _ProposeSecH(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: BsTokens.inkLight,
+            fontWeight: FontWeight.w800,
+            fontSize: 13.5,
+          ),
+        ),
+      );
+}
+
+/// Pill button inside the worker propose sheet — a file-local twin of the
+/// contractor sheet's `_PrimaryBtn`. A null [onTap] renders it disabled (greyed
+/// fill, no tap) so the save action can be guarded until the name is non-empty.
+class _ProposePrimaryBtn extends StatelessWidget {
+  const _ProposePrimaryBtn({required this.label, required this.onTap, super.key});
+
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      excludeSemantics: true,
+      child: Material(
+        color: enabled ? BsTokens.brand : const Color(0xFFE9EAEC),
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: enabled ? bsOnAccent(context) : BsTokens.mutedLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
               ),
             ),
           ),

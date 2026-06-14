@@ -15,10 +15,11 @@ import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/screens/contractor_attendance_sheet.dart';
 import 'package:buildsmart/screens/contractor_hr_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
+import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart'
-    show pendingApprovalTasksProvider;
+    show pendingApprovalTasksProvider, pendingProposalsProvider;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
@@ -135,6 +136,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       // CONTRACTOR APPROVAL (Wave T2a) — the employer's own אשר/דחה surface on
       // the LIVE review queue (parallel to the manager dashboard's block).
       ..._contractorApprovals(),
+      // CONTRACTOR PROPOSAL-APPROVAL (Wave G1c) — the SEPARATE queue of tasks a
+      // WORKER PROPOSED (status `'proposed'`), adjacent to the completion block
+      // above but a distinct lifecycle (approveProposal/rejectProposal).
+      ..._contractorProposals(tasks),
       if (tasks.isEmpty)
         const _DoneAll('אין משימות לצוות עדיין — משימות חדשות יופיעו כאן'),
       if (review.isNotEmpty)
@@ -192,6 +197,77 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             if (why == null || !context.mounted) return;
             ref.read(tasksProvider.notifier).reject(t.id, reason: why);
             showToast(context, '↩️ נדחה: ${t.name}');
+          },
+        ),
+    ];
+  }
+
+  // ── CONTRACTOR proposal-approval section (Wave G1c) ──────────────────────
+  // The REVERSE direction of [_contractorApprovals]: that one is the worker's
+  // COMPLETION queue (`review`); THIS one is the worker's PROPOSED-new-task
+  // queue (`proposed`). Reads `pendingProposalsProvider` (UNSCOPED) and scopes
+  // to THIS employer's workers, then decides via the dedicated engine path
+  // (`approveProposal`/`rejectProposal` — a distinct lifecycle from approve/
+  // reject) and posts a worker-facing chat line (the engine already fires the
+  // worker bell, so we do NOT double-fire it). Empty → the section is omitted.
+  List<Widget> _contractorProposals(List<TaskItem> tasks) {
+    final proposals = [
+      for (final t in ref.watch(pendingProposalsProvider))
+        if (t.employerId == kDemoContractorId) t
+    ];
+    if (proposals.isEmpty) return const [];
+    return [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(BsTokens.space1, BsTokens.space4,
+            BsTokens.space1, BsTokens.space2),
+        child: Text('📝 משימות שהעובד הציע (${proposals.length})',
+            style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 15)),
+      ),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(
+            BsTokens.space1, 0, BsTokens.space1, BsTokens.space2),
+        child: Text('עובד הציע משימה חדשה — אשר כדי שתיכנס לביצוע, או דחה.',
+            style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+      ),
+      for (final t in proposals)
+        _ProposalCard(
+          key: ValueKey('proposal-${t.id}'),
+          id: t.id,
+          name: t.name,
+          // `detail` lives only on the rich TaskItem (the PersonaTask
+          // projection drops it) — look it up from the live list by id, and
+          // fall back to '' if (somehow) absent.
+          detail: tasks
+              .where((x) => x.id == t.id)
+              .map((x) => x.detail)
+              .firstOrNull ??
+              '',
+          workerLabel: kWorkers[t.worker],
+          days: t.days,
+          onApprove: () {
+            ref.read(tasksProvider.notifier).approveProposal(t.id);
+            // The engine already fired the worker bell — only post the chat
+            // line (and the contractor-side toast) here.
+            ref.read(chatEngineProvider.notifier).send(
+                'th-worker-contractor',
+                BsRole.contractor,
+                '✅ המשימה שהצעת "${t.name}" אושרה');
+            showToast(context, '✅ אושרה הצעה: ${t.name}');
+          },
+          onReject: () async {
+            final why = await promptRejectReason(context);
+            // State `mounted` guard (this is a ConsumerState) after the await.
+            if (why == null || !mounted) return;
+            ref.read(tasksProvider.notifier).rejectProposal(t.id, reason: why);
+            ref.read(chatEngineProvider.notifier).send(
+                'th-worker-contractor',
+                BsRole.contractor,
+                '❌ המשימה שהצעת "${t.name}" נדחתה'
+                '${why.isNotEmpty ? ' · $why' : ''}');
+            showToast(context, '❌ נדחתה הצעה: ${t.name}');
           },
         ),
     ];
@@ -499,6 +575,85 @@ class _ApprovalCard extends StatelessWidget {
                   Expanded(
                     child: _PrimaryBtn(
                       key: ValueKey('approval-approve-$name'),
+                      label: '✅ אשר',
+                      onTap: onApprove,
+                    ),
+                  ),
+                ]),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
+/// One row in the contractor's "📝 משימות שהעובד הציע" section (Wave G1c) — a
+/// worker-PROPOSED task (status `'proposed'`) with ✅ אשר / ❌ דחה. SEPARATE from
+/// [_ApprovalCard] (the `'review'` completion queue): this one shows the
+/// proposed task's detail + estimated days and decides via the dedicated
+/// `approveProposal`/`rejectProposal` engine path. Presentation only — the
+/// decision (engine + chat + toast) runs in the callbacks. Mirrors
+/// [_ApprovalCard]'s card/button look.
+class _ProposalCard extends StatelessWidget {
+  const _ProposalCard({
+    required this.id,
+    required this.name,
+    required this.detail,
+    required this.workerLabel,
+    required this.days,
+    required this.onApprove,
+    required this.onReject,
+    super.key,
+  });
+  final int id;
+  final String name;
+  final String detail;
+  final String workerLabel;
+  final int days;
+  final VoidCallback onApprove;
+  final VoidCallback onReject;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: BsTokens.space2),
+        child: Material(
+          color: BsTokens.cardLight,
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          elevation: 1,
+          shadowColor: Colors.black26,
+          child: Padding(
+            padding: const EdgeInsets.all(BsTokens.space4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name,
+                    style: const TextStyle(
+                        color: BsTokens.inkLight,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15)),
+                if (detail.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(detail,
+                      style: const TextStyle(
+                          color: BsTokens.mutedLight, fontSize: 12.5)),
+                ],
+                const SizedBox(height: 2),
+                Text('👷 $workerLabel · ⏱️ $days ימים · 📝 ממתין לאישורך',
+                    style: const TextStyle(
+                        color: BsTokens.mutedLight, fontSize: 12.5)),
+                const SizedBox(height: BsTokens.space3),
+                Row(children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      key: ValueKey('proposal-reject-$id'),
+                      onPressed: onReject,
+                      child: const Text('❌ דחה'),
+                    ),
+                  ),
+                  const SizedBox(width: BsTokens.space2),
+                  Expanded(
+                    child: _PrimaryBtn(
+                      key: ValueKey('proposal-approve-$id'),
                       label: '✅ אשר',
                       onTap: onApprove,
                     ),

@@ -987,6 +987,12 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **קבלן (`contractor_attendance_sheet`, חדש):** גיליון '🕒 נוכחות עובדים' (כניסה מ-tasks_screen) — '🟢 נוכחים עכשיו (N)' (username + שעת-כניסה + צ'יפ-📍 דרך openNavSheet, רק כש-GPS אמיתי) + 'היום' (כניסה→יציאה + שעות; יציאה='—' עד החתמה). read-only — אין עריכת-נוכחות.
 - **עובד:** ללא שינוי-מראה — clockIn מטביע employerId ברקע (worker_attendance_screen + כפתור-GPS בבית). שליחים לא-נגעו.
 - **אימות:** analyze 0-errors (5 קבצים) · +26 טסטים · supervisor CLEAN (10/10) · mutation RED→GREEN (employer-scope).
+
+## גל G1 — העובד פותח משימה + מקטע-אישור-הצעות בלוח-הקבלן — 2026-06-14
+- **עובד (`worker_app_screen`):** כפתור '➕ הוסף משימה' (גיליון: שם/פירוט/ימים/שלבים) → `proposeTask` → המשימה מופיעה במקטע חדש '📝 הצעות שממתינות לאישור' עם תווית '📝 הוצעה' (מוחרגת מטבעת-ההתקדמות `total`).
+- **קבלן (`tasks_screen`):** מקטע נפרד '📝 משימות שהעובד הציע (N)' מתחת לאישורי-ההשלמה — ✅אשר/❌דחה → `approveProposal`/`rejectProposal` + צ'אט th-worker-contractor (פעמון מהמנוע, לא כפול).
+- **המפקח תפס:** ההצעה לא-נראתה-לעובד (3 דליים בלבד) → תוקן במקטע ייעודי + החרגה מ-total (כנות + סגירת drift-בספירה).
+- **אימות:** analyze 0-errors · +15 טסטים · supervisor CLEAN · mutation RED→GREEN (בידוד-guard).
 ## #C11 — Apple-readiness HIDE-pass: placeholders "בבנייה"/"בקרוב"/"(הדגמה)" מוסתרים (הפיך) — 2026-06-14
 
 **שינוי:** ל-App Store review הוסתר כל placeholder גלוי של פיצ׳ר backend-blocked, דרך דגל-קומפילציה יחיד `kHideUnderConstruction` (`lib/state/under_construction.dart`, default true; הפיך — flip מחזיר הכל).

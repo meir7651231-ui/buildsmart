@@ -115,3 +115,19 @@ final pendingApprovalTasksProvider = Provider<List<PersonaTask>>((ref) {
       if (t.status == 'review') _asPersonaTask(t),
   ]..sort((a, b) => a.id.compareTo(b.id));
 });
+
+/// The tasks a WORKER has PROPOSED (`proposed`), awaiting the contractor's
+/// approval — the contractor's PROPOSAL-approval queue (Wave G1a). Mirrors
+/// [pendingApprovalTasksProvider] exactly (same `_asPersonaTask` projection
+/// carrying worker/employerId/assignedWorkerUid, same id-order sort), but
+/// projects the `'proposed'` bucket instead of `'review'`. UNSCOPED like its
+/// sibling — the contractor UI in G1c scopes it by employerId. The worker
+/// authored these via [TasksNotifier.proposeTask]; the contractor flips them
+/// with [TasksNotifier.approveProposal]/[TasksNotifier.rejectProposal].
+final pendingProposalsProvider = Provider<List<PersonaTask>>((ref) {
+  final tasks = ref.watch(tasksProvider);
+  return [
+    for (final t in tasks)
+      if (t.status == 'proposed') _asPersonaTask(t),
+  ]..sort((a, b) => a.id.compareTo(b.id));
+});

@@ -36,6 +36,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > **גל H2 (HR):** תעודות + הדרכות עובד → **קבלן** — `certsForEmployer`/`trainingsForEmployer` (`worker_certs`/`worker_trainings`, employer-scoped). הדרכות: `approve`/`reject` אמיתי (pending→approved/rejected) + `contractor_hr_sheet` מורחב (🎓 אישור-הדרכות → פעמון+צ'אט · 📜 תעודות READ-ONLY + באנר-תוקף `statusAt`). `worker_safety` מטביע employerId. firebase→Z.
 > **גל H3 (HR):** מדיניות מסמכים-נדרשים שהקבלן מגדיר → אוכפת בשער-מוכנות-העובד (#101) — `required_docs_policy.dart` (`requiredDocsForEmployer`, **normalized-exact** match) + `contractor_hr_sheet` עורך-מדיניות (📋). ADD-on (101+פג-תוקף נשארים חובה); מדיניות-ריקה=התנהגות-של-היום. שליחים לא-נגעו. firebase→Z.
 > **גל S (אתר/נוכחות):** נוכחות-עובד → תצוגה-חיה אצל הקבלן — `attendanceForEmployer` (`worker_attendance.dart`, **חנות-עובד בלבד** → שליחים מודרים) + `contractor_attendance_sheet` ('🕒 נוכחות עובדים'): '🟢 נוכחים עכשיו' + 'היום' (שעות + מיקום-אמיתי דרך openNavSheet, אין-המצאה). read-only; העובד חותם כרגיל. firebase→Z.
+> **גל G1 (משימות דו-כיווני):** העובד פותח משימה → `'proposed'` → הקבלן מאשר (`proposeTask`/`approveProposal`/`rejectProposal`, **מבודד** מ-review/completion). לוח-עובד: '➕ הוסף משימה' + מקטע 'ממתינות לאישור'; לוח-קבלן: מקטע-אישור-הצעות (`pendingProposalsProvider`) → פעמון+צ'אט th-worker-contractor. גאנט(G2)+ליקויים(G3) בהמשך. firebase→Z.
 
 ---
 

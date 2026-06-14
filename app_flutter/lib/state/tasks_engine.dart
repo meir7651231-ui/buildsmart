@@ -59,15 +59,24 @@ class TaskItem {
     this.orderId,
     this.employerId = '',
     this.assignedWorkerUid = '',
+    this.createdBy = '',
   });
 
   final int id;
   final String name;
   final String detail;
   final int worker; // index into kWorkers (demo fallback identity)
-  final String status; // pending·active·review·done·rejected
+  final String status; // pending·active·review·done·rejected·proposed
   final int days;
   final List<String> steps;
+
+  /// Who AUTHORED the task (Wave G1a, additive) — `'contractor'` (the employer
+  /// minted it via [TasksNotifier.createTask]), `'worker'` (the worker PROPOSED
+  /// it via [TasksNotifier.proposeTask] → status `'proposed'`, awaiting the
+  /// contractor's [TasksNotifier.approveProposal]), or `''` on the verbatim demo
+  /// seed (no author recorded). Field-economy: persisted write-when-non-empty so
+  /// the seed's overlay stays byte-identical.
+  final String createdBy;
 
   /// Optional link to a shared-engine order (`Order.id`, e.g. `BS-1040`),
   /// carried verbatim from the [kPersonaTasks] seed. When a linked task is
@@ -119,6 +128,7 @@ class TaskItem {
     Set<int>? doneSteps,
     String? employerId,
     String? assignedWorkerUid,
+    String? createdBy,
   }) =>
       TaskItem(
         id: id,
@@ -140,6 +150,7 @@ class TaskItem {
         orderId: orderId,
         employerId: employerId ?? this.employerId,
         assignedWorkerUid: assignedWorkerUid ?? this.assignedWorkerUid,
+        createdBy: createdBy ?? this.createdBy,
       );
 
   static const _sentinel = Object();
@@ -248,6 +259,12 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
                 employerId: (m['${t.id}'] as Map)['employerId'] as String?,
                 assignedWorkerUid:
                     (m['${t.id}'] as Map)['assignedWorkerUid'] as String?,
+                // AUTHOR (Wave G1a) — defensive decode; a pre-G1a / demo payload
+                // has no key or a non-String (null → keep '' default), so old
+                // persisted tasks decode unchanged and never crash.
+                createdBy: (m['${t.id}'] as Map)['createdBy'] is String
+                    ? (m['${t.id}'] as Map)['createdBy'] as String
+                    : '',
               )
             else
               t,
@@ -281,6 +298,11 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
               if (t.employerId.isNotEmpty) 'employerId': t.employerId,
               if (t.assignedWorkerUid.isNotEmpty)
                 'assignedWorkerUid': t.assignedWorkerUid,
+              // AUTHOR (Wave G1a) — same field-economy: the key appears only
+              // once an author is recorded (createTask='contractor',
+              // proposeTask='worker'), so the verbatim demo seed stays
+              // byte-identical.
+              if (t.createdBy.isNotEmpty) 'createdBy': t.createdBy,
             },
         }),
       );
@@ -548,9 +570,98 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         steps: steps,
         employerId: emp,
         assignedWorkerUid: uid,
+        createdBy: 'contractor',
       ),
     ];
     return id;
+  }
+
+  // ───────────────────────────────────────────────────────────────────────
+  // WORKER PROPOSAL (Wave G1a, ADDITIVE) — the REVERSE direction of authoring:
+  // the WORKER proposes their own next job, which enters a NEW `'proposed'`
+  // bucket awaiting the CONTRACTOR's approval ([approveProposal] → `'active'`)
+  // or rejection ([rejectProposal] → `'rejected'`). These ride the same public
+  // `state` setter (persists) as every other mutator. They are kept SEPARATE
+  // from [approve]/[reject] (which guard `'review'` = the worker's COMPLETION
+  // submit) so the two lifecycles never collide.
+  // ───────────────────────────────────────────────────────────────────────
+
+  /// WORKER "הצע משימה" — mint a worker-PROPOSED task on the live list. Mirrors
+  /// [createTask] (id = `max(existing ids)+1`, write-when-non-empty identity)
+  /// but the initial status is the NEW `'proposed'` bucket and the author is
+  /// stamped `'worker'`. The worker proposes their OWN next job → the caller
+  /// passes [worker]/[assignedWorkerUid] = self, so it auto-addresses the
+  /// proposer's board scope. Awaits the contractor's [approveProposal]. Returns
+  /// the new task's id.
+  int proposeTask({
+    required String name,
+    required int worker,
+    String detail = '',
+    int days = 1,
+    List<String> steps = const [],
+    String assignedWorkerUid = '',
+    String employerId = '',
+  }) {
+    final id =
+        state.isEmpty ? 1 : (state.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1);
+    final emp = employerId.trim();
+    final uid = assignedWorkerUid.trim();
+    state = [
+      ...state,
+      TaskItem(
+        id: id,
+        name: name,
+        detail: detail,
+        worker: worker,
+        status: 'proposed',
+        days: days,
+        steps: steps,
+        employerId: emp,
+        assignedWorkerUid: uid,
+        createdBy: 'worker',
+      ),
+    ];
+    return id;
+  }
+
+  /// CONTRACTOR approve-proposal — `proposed` → `active` (the proposed job
+  /// enters the worker's active queue). Guarded on the `'proposed'` status (a
+  /// no-op otherwise), so it can never collide with the `'review'` completion
+  /// path of [approve]. Fires the SAME worker bell [approve] uses
+  /// (`workerNotifsProvider.addForWorker` keyed by the int `worker`, skipped
+  /// without a [_ref] in unit tests). Does NOT advance orders — a proposal has
+  /// no order binding.
+  void approveProposal(int id) {
+    final t = _byId(id);
+    if (t == null || t.status != 'proposed') return;
+    _patch(id, (x) => x.copyWith(status: 'active'));
+    _ref?.read(workerNotifsProvider.notifier).addForWorker(
+          t.worker,
+          emoji: '✅',
+          title: 'ההצעה אושרה — המשימה פעילה',
+          body: t.name,
+        );
+  }
+
+  /// CONTRACTOR reject-proposal — `proposed` → `rejected`. Guarded on the
+  /// `'proposed'` status (a no-op otherwise). Mirrors [reject]'s reason side-map
+  /// (a real [reason] is merged into the [kTaskRejectNoteSideMapKey] side-map)
+  /// and fires the SAME worker bell. Kept separate from [reject] (which guards
+  /// `'review'`) so the two lifecycles stay isolated.
+  void rejectProposal(int id, {String? reason}) {
+    final t = _byId(id);
+    if (t == null || t.status != 'proposed') return;
+    _patch(id, (x) => x.copyWith(status: 'rejected'));
+    final why = reason?.trim();
+    if (why != null && why.isNotEmpty) _saveRejectNote(id, why);
+    _ref?.read(workerNotifsProvider.notifier).addForWorker(
+          t.worker,
+          emoji: '🔁',
+          title: (why == null || why.isEmpty)
+              ? 'ההצעה נדחתה'
+              : 'ההצעה נדחתה: $why',
+          body: t.name,
+        );
   }
 
   /// CONTRACTOR edit — patch a task's authored fields (name/detail/days/steps),
@@ -578,6 +689,7 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         orderId: t.orderId,
         employerId: t.employerId,
         assignedWorkerUid: t.assignedWorkerUid,
+        createdBy: t.createdBy,
       ),
     );
   }
@@ -608,6 +720,7 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         employerId: t.employerId,
         assignedWorkerUid:
             (uid != null && uid.isNotEmpty) ? uid : t.assignedWorkerUid,
+        createdBy: t.createdBy,
       ),
     );
   }
