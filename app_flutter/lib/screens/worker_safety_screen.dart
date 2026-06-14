@@ -203,6 +203,9 @@ class WorkerSafetyScreen extends ConsumerWidget {
                         : byCtl.text,
                     date: date!,
                     doc: doc,
+                    // Stamp the worker→contractor link so the EMPLOYING
+                    // contractor sees this row (trainingsForEmployer).
+                    employerId: ref.read(boardAuthProvider)?.employerId ?? '',
                   );
               if (!ctx.mounted) return;
               if (t == null) {
@@ -496,6 +499,9 @@ class WorkerSafetyScreen extends ConsumerWidget {
                     issuer: issuerCtl.text,
                     expiry: expiry!,
                     photo: photo,
+                    // Stamp the worker→contractor link so the EMPLOYING
+                    // contractor sees this cert (certsForEmployer).
+                    employerId: ref.read(boardAuthProvider)?.employerId ?? '',
                   );
               if (!ctx.mounted) return;
               if (cert == null) {

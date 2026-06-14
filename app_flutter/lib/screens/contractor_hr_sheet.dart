@@ -20,7 +20,9 @@
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/vacation_requests.dart';
+import 'package:buildsmart/state/worker_certs.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
+import 'package:buildsmart/state/worker_trainings.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -87,6 +89,45 @@ class _ContractorHrSheet extends ConsumerWidget {
     );
   }
 
+  /// Wave H2b — decide a worker TRAINING (the bidirectional approve-back).
+  /// Mirrors [_decide]: REUSE the engine (`workerTrainingsProvider.notifier`
+  /// approve/reject — its status-guard no-ops on an already-decided row), then
+  /// fire ONE 🔔 bell on the requester's per-username feed and post ONE chat
+  /// line to 'th-worker-contractor' — plus a contractor-side toast. Simpler
+  /// than vacation: no reject-reason prompt, just approve/reject.
+  void _decideTraining(
+    BuildContext context,
+    WidgetRef ref,
+    WorkerTraining t, {
+    required bool approve,
+  }) {
+    final notifier = ref.read(workerTrainingsProvider.notifier);
+    if (approve) {
+      notifier.approve(t.id);
+    } else {
+      notifier.reject(t.id);
+    }
+    ref.read(workerNotifsProvider.notifier).addNotification(
+          username: t.username,
+          emoji: approve ? '✅' : '❌',
+          title: approve ? 'ההדרכה אושרה' : 'ההדרכה נדחתה',
+          body: t.title,
+        );
+    ref.read(chatEngineProvider.notifier).send(
+          'th-worker-contractor',
+          BsRole.contractor,
+          approve
+              ? '✅ ההדרכה "${t.title}" אושרה'
+              : '❌ ההדרכה "${t.title}" נדחתה',
+        );
+    showToast(
+      context,
+      approve
+          ? '✅ אושרה הדרכה: ${t.username} · ${t.title}'
+          : '❌ נדחתה הדרכה: ${t.username} · ${t.title}',
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // The LIVE contractor queue — worker vacation requests scoped to THIS
@@ -96,6 +137,27 @@ class _ContractorHrSheet extends ConsumerWidget {
     final requests = ref.watch(requestsForEmployer(kDemoContractorId));
     final pendingCount =
         requests.where((r) => r.status == kVacationPending).length;
+    // Wave H2b — the two new sections' live data (same employer scope).
+    final trainings = ref.watch(trainingsForEmployer(kDemoContractorId));
+    final pendingTrainings = [
+      for (final t in trainings)
+        if (t.status == kTrainingPending) t,
+    ];
+    final certs = ref.watch(certsForEmployer(kDemoContractorId));
+    // Expiry aggregation for the SECTION-B banner (today's traffic-light).
+    final now = DateTime.now();
+    var expiredCount = 0;
+    var expiringCount = 0;
+    for (final c in certs) {
+      switch (c.statusAt(now)) {
+        case CertExpiryStatus.expired:
+          expiredCount++;
+        case CertExpiryStatus.expiringSoon:
+          expiringCount++;
+        case CertExpiryStatus.valid:
+          break;
+      }
+    }
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -191,6 +253,108 @@ class _ContractorHrSheet extends ConsumerWidget {
                   ),
                   const SizedBox(height: BsTokens.space2),
                 ],
+
+              // ══ SECTION A — הדרכות עובדים (approve-back) ══
+              const Divider(height: 32),
+              const Text(
+                '🎓 הדרכות עובדים',
+                style: TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                pendingTrainings.isNotEmpty
+                    ? 'הדרכות שהעובדים שלך רשמו — ${pendingTrainings.length} ממתינות לאישורך'
+                    : 'הדרכות הבטיחות של העובדים שלך',
+                style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              if (trainings.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
+                  child: Text(
+                    '🎓 אין הדרכות מהעובדים שלך כרגע',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
+                  ),
+                )
+              else
+                for (final t in trainings) ...[
+                  _TrainingRow(
+                    training: t,
+                    onApprove: () =>
+                        _decideTraining(context, ref, t, approve: true),
+                    onReject: () =>
+                        _decideTraining(context, ref, t, approve: false),
+                  ),
+                  const SizedBox(height: BsTokens.space2),
+                ],
+
+              // ══ SECTION B — תעודות עובדים (read-only + expiry alerts) ══
+              const Divider(height: 32),
+              if (expiredCount > 0 || expiringCount > 0) ...[
+                Container(
+                  padding: const EdgeInsets.all(BsTokens.space3),
+                  decoration: BoxDecoration(
+                    color: BsTokens.warnText.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: BsTokens.warnText.withValues(alpha: 0.30),
+                    ),
+                  ),
+                  child: Text(
+                    [
+                      if (expiredCount > 0) '⚠️ $expiredCount תעודות פגות תוקף',
+                      if (expiringCount > 0) '$expiringCount לקראת חידוש',
+                    ].join(' · '),
+                    style: const TextStyle(
+                      color: BsTokens.warnText,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: BsTokens.space3),
+              ],
+              const Text(
+                '📜 תעודות עובדים',
+                style: TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 2),
+              const Text(
+                'התעודות המקצועיות של העובדים שלך (לצפייה בלבד)',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              if (certs.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
+                  child: Text(
+                    '📜 אין תעודות מהעובדים שלך כרגע',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
+                  ),
+                )
+              else
+                for (final c in certs) ...[
+                  _CertRow(cert: c),
+                  const SizedBox(height: BsTokens.space2),
+                ],
             ],
           ),
         ),
@@ -271,10 +435,9 @@ class _VacationRow extends StatelessWidget {
                     color: BsTokens.cardLight,
                     textColor: BsTokens.inkLight,
                     bordered: true,
-                    onPressed: () {
-                      // Fire-and-forget the async reject (reason prompt).
-                      onReject();
-                    },
+                    // Fire-and-forget the async reject (reason prompt) — the
+                    // Future is intentionally unawaited (tear-off).
+                    onPressed: onReject,
                   ),
                 ),
               ],
@@ -361,3 +524,191 @@ class _DecideButton extends StatelessWidget {
     );
   }
 }
+
+/// One worker training row (Wave H2b) — `🎓 username · title` + מדריך/date and
+/// a status pill (ממתין/אושר/נדחה/נרשם); while pending it carries the
+/// ✅ אשר / ❌ דחה buttons (the approve-back). Presentation only — decisions run
+/// through the callbacks onto the shared `workerTrainingsProvider`.
+class _TrainingRow extends StatelessWidget {
+  const _TrainingRow({
+    required this.training,
+    required this.onApprove,
+    required this.onReject,
+  });
+
+  final WorkerTraining training;
+  final VoidCallback onApprove;
+  final VoidCallback onReject;
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = training.status == kTrainingPending;
+    return Container(
+      padding: const EdgeInsets.all(BsTokens.space3),
+      decoration: BoxDecoration(
+        color: BsTokens.bgLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '🎓 ${training.username} · ${training.title}',
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              _TrainingStatusChip(status: training.status),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '${training.by} · ${_fmtDate(training.date)}',
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          ),
+          if (pending) ...[
+            const SizedBox(height: BsTokens.space3),
+            Row(
+              children: [
+                Expanded(
+                  child: _DecideButton(
+                    key: ValueKey('contractor-train-approve-${training.id}'),
+                    label: '✅ אשר',
+                    color: const Color(0xFF1F8A4C),
+                    onPressed: onApprove,
+                  ),
+                ),
+                const SizedBox(width: BsTokens.space2),
+                Expanded(
+                  child: _DecideButton(
+                    key: ValueKey('contractor-train-reject-${training.id}'),
+                    label: '❌ דחה',
+                    color: BsTokens.cardLight,
+                    textColor: BsTokens.inkLight,
+                    bordered: true,
+                    onPressed: onReject,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Read-only training-status pill — ממתין (amber) / אושר (green) / נדחה
+/// (danger) / נרשם (muted), keyed off the training-status const.
+class _TrainingStatusChip extends StatelessWidget {
+  const _TrainingStatusChip({required this.status});
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, color) = switch (status) {
+      kTrainingApproved => ('אושר', const Color(0xFF1F8A4C)),
+      kTrainingRejected => ('נדחה', BsTokens.danger),
+      kTrainingPending => ('ממתין', BsTokens.warnText),
+      _ => ('נרשם', BsTokens.mutedLight),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w800,
+          fontSize: 12.5,
+        ),
+      ),
+    );
+  }
+}
+
+/// One worker certificate row (Wave H2b) — `📜 username · name` + issuer/expiry
+/// and an expiry traffic-light pill (🔴 פג / 🟡 פג בקרוב / 🟢 בתוקף), mirroring
+/// `worker_safety_screen.dart`'s cert status. READ-ONLY — the contractor cannot
+/// edit worker certs, so there are no action buttons.
+class _CertRow extends StatelessWidget {
+  const _CertRow({required this.cert});
+
+  final WorkerCert cert;
+
+  @override
+  Widget build(BuildContext context) {
+    // Same traffic-light mapping as worker_safety_screen's _CertRow.
+    final (label, color) = switch (cert.statusAt(DateTime.now())) {
+      CertExpiryStatus.expired => ('🔴 פג תוקף', BsTokens.danger),
+      CertExpiryStatus.expiringSoon => ('🟡 פג בקרוב', BsTokens.warnText),
+      CertExpiryStatus.valid => ('🟢 בתוקף', BsTokens.successDark),
+    };
+    return Container(
+      padding: const EdgeInsets.all(BsTokens.space3),
+      decoration: BoxDecoration(
+        color: BsTokens.bgLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEDEDED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '📜 ${cert.username} · ${cert.name}',
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                ),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            cert.issuer.isNotEmpty
+                ? '${cert.issuer} · בתוקף עד ${_fmtDate(cert.expiry)}'
+                : 'בתוקף עד ${_fmtDate(cert.expiry)}',
+            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Short date label (date-only semantics) — `dd.MM.yyyy`, shared by the
+/// training + cert rows.
+String _fmtDate(DateTime d) =>
+    '${d.day.toString().padLeft(2, '0')}.'
+    '${d.month.toString().padLeft(2, '0')}.${d.year}';

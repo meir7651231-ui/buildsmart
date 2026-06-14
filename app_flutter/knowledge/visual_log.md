@@ -971,3 +971,9 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 **שינוי:** כפתור ✍️ ב-POD-sheet פתח placeholder כן "(הדגמה)"; כעת פותח **pad-ציור אמיתי** (`SignaturePadSheet`) — חתימה באצבע/עכבר על קנבס לבן, כפתורי נקה/שמור, השמור מושבת עד שיש דיו (אין חתימה מזויפת). החתימה נשמרת כ-PNG data-URL (`podSignature`) ומוצגת כתצוגה (כמו podPhoto).
 **אימות (בדיקת-widget):** `signature_pad_test` 8/8 — ציור→PNG-לא-ריק · dot · pad-ריק→null · save-פולט/מושבת-כשריק · preview-רנדר. analyze 0-errors · mutation-verified (§mutation_log). build web ב-pre-push gate.
+
+## גל H2 — תעודות/הדרכות עובד גלויים-לקבלן + approve-back — 2026-06-14
+- **קבלן (`contractor_hr_sheet`):** נוספו שני מקטעים מתחת לחופשות — 🎓 **הדרכות-עובדים** (כל ההדרכות newest-first + status-pill ממתין/אושר/נדחה/נרשם; שורת-pending → ✅ אשר / ❌ דחה) + 📜 **תעודות-עובדים READ-ONLY** (עובד/שם/מנפיק/תוקף + רמזור 🔴 פג / 🟡 לקראת / 🟢 בתוקף מ-`statusAt`) עם **באנר-תוקף מאוגד** ('⚠️ N פגות תוקף · M לקראת חידוש', צד-אפס מושמט, מוצג רק אם >0).
+- **עובד (`worker_safety_screen`):** ללא שינוי-מראה — הוספת-תעודה/הוספת-הדרכה מטביעות `employerId` ברקע (העובד לא רואה הבדל; הקבלן מתחיל לראות את הרשומה).
+- אישור-הדרכה → **פעמון-עובד אחד** + צ'אט `th-worker-contractor` (כמו חופשה). הלוגיקה רובה מאחורי-הקלעים; שני המקטעים בלוח-הקבלן נראים-לעין.
+- **אימות:** analyze 0 (כל 4 הקבצים) · +30 (סוויטת certs/trainings) · supervisor CLEAN (11/11) · mutation RED→GREEN (guard pending).

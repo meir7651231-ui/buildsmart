@@ -942,3 +942,9 @@
 - תקלה שהוזרקה: encode-success `return 'data:image/png;base64,${base64Encode(bytes)}'` → `return null`.
 - תוצאה: **אדומה ✅** — 4 נכשלו ('Expected: not null' · preview/save/dot). שוחזר `cp /tmp/sig.bak` (**לא** git checkout) → **+8 ירוק**.
 - מסקנה: ה-encode load-bearing; pad-ריק→null אמיתי. אימות-orchestrator **fast-mode** (ממוקד + מוטציה-ממוקדת; הסוויטה המלאה ב-pre-push build-gate).
+
+## גל H2 — approve-back הדרכות (guard pending) — 2026-06-14
+- **קובץ:** `lib/state/worker_trainings.dart:340` (ה-guard ב-`_decide`) · בדיקה `test/contractor_training_approval_test.dart`.
+- **מוטציה:** הסרת שמירת-ה-guard — `if (t.id == id && t.status == kTrainingPending)` → `if (t.id == id)` (approve היה מאשר **כל** סטטוס, כולל recorded/rejected — דריסת ה-no-op).
+- **תוצאה:** **אדומה ✅** — 'approve on a non-pending (recorded) training is a no-op' נכשל ('recorded stays recorded' · Differ at offset 0). שוחזר ה-guard ב-Edit (**לא** git checkout) → **+15 ירוק** (שני קבצי-H2: contractor_training_approval + contractor_certs).
+- **מסקנה:** ה-guard `status == kTrainingPending` load-bearing — בלעדיו approve/reject היו מחיים החלטה סופית/דורסים סטטוס. ה-lifecycle הדו-כיווני (pending→approved/rejected, no-op אחרת) אמיתי ונעול.

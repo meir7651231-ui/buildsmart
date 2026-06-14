@@ -33,6 +33,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > **גל E2:** צ'יפ-זמינות ב-#112 — `availabilityFor` (`equipment_stock_join.dart`, token-aware, אין-המצאות) מצליב כל פריט-ציוד מול `employerStockProvider` → 🏬 מחסן / 🏗️ אתר / 'זמינות לא ידועה'. העובד רק רואה (read-only).
 > **גל E3:** בקשת-חומר מובנית עובד→קבלן — `materialRequestsProvider` (`material_requests_engine.dart`): העובד שולח מ-'🧱 בקש חומרים' (גיליון-מלאי) ורואה סטטוס; הקבלן ב-'📥 בקשות חומר' (stock_screen) מקדם requested→ordered→supplied/declined. דו-כיווני-חי, ישות נפרדת מהמלאי (העובד לא משנה מלאי). firebase→Z.
 > **גל H1 (HR):** אישור-חופשה עובד → **קבלן** (לא מנהל) — `requestsForEmployer` (`vacation_requests.dart`, employer-scoped) + מסך `contractor_hr_sheet` ('👷 חופשות עובדים' ב-tasks_screen): אשר/דחה → פעמון-עובד + צ'אט th-worker-contractor. מקבילי (מנהל נשאר). worker: 'לאישור הקבלן'.
+> **גל H2 (HR):** תעודות + הדרכות עובד → **קבלן** — `certsForEmployer`/`trainingsForEmployer` (`worker_certs`/`worker_trainings`, employer-scoped). הדרכות: `approve`/`reject` אמיתי (pending→approved/rejected) + `contractor_hr_sheet` מורחב (🎓 אישור-הדרכות → פעמון+צ'אט · 📜 תעודות READ-ONLY + באנר-תוקף `statusAt`). `worker_safety` מטביע employerId. firebase→Z.
 
 ---
 

@@ -28,12 +28,20 @@ class WorkerCert {
     required this.expiry,
     required this.addedTs,
     this.photo,
+    this.employerId = '',
   });
 
   final String id;
 
   /// Board login username (`ran` / `omer` / `demo`).
   final String username;
+
+  /// Id of the contractor who EMPLOYS the worker (the worker→contractor LINK,
+  /// `session.employerId`) — lets the contractor's view scope to THEIR workers
+  /// (see [certsForEmployer]). Default `''` (field-economy: only serialised when
+  /// non-empty). Back-compat: old persisted records carry no 'employerId' and
+  /// decode as `''` (and are excluded from any non-empty employer query).
+  final String employerId;
 
   /// e.g. "היתר עבודה בגובה".
   final String name;
@@ -68,6 +76,7 @@ class WorkerCert {
         'expiry': expiry.toIso8601String(),
         'addedTs': addedTs.toIso8601String(),
         'photo': photo,
+        if (employerId.isNotEmpty) 'employerId': employerId,
       };
 
   /// Defensive decode — a malformed entry is dropped, never crashes the load.
@@ -93,6 +102,7 @@ class WorkerCert {
       expiry: expiry,
       addedTs: added,
       photo: raw['photo'] is String ? raw['photo'] as String : null,
+      employerId: raw['employerId'] is String ? raw['employerId'] as String : '',
     );
   }
 }
@@ -154,6 +164,7 @@ class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
     required String issuer,
     required DateTime expiry,
     String? photo,
+    String employerId = '',
   }) async {
     _userTouched = true;
     final cert = WorkerCert(
@@ -164,6 +175,7 @@ class WorkerCertsNotifier extends StateNotifier<List<WorkerCert>> {
       expiry: expiry,
       addedTs: DateTime.now(),
       photo: photo,
+      employerId: employerId,
     );
     final before = state;
     state = [...state, cert];
@@ -191,3 +203,13 @@ final workerCertsProvider =
     StateNotifierProvider<WorkerCertsNotifier, List<WorkerCert>>(
   (ref) => WorkerCertsNotifier(),
 );
+
+/// The CONTRACTOR's view of their workers' certifications — every cert that
+/// names this `employerId` (the worker→contractor link), newest-first.
+/// Deterministic via `all.reversed` (insertion order; avoids createdTs-tie
+/// instability). Read-only — the contractor does not edit worker certs.
+/// Reuses [WorkerCert.statusAt] for the expiry traffic-light.
+final certsForEmployer = Provider.family<List<WorkerCert>, String>((ref, employerId) {
+  final all = ref.watch(workerCertsProvider);
+  return [for (final c in all.reversed) if (c.employerId == employerId) c];
+});

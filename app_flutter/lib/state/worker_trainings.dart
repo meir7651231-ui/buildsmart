@@ -1,12 +1,13 @@
 import 'dart:convert';
 
+import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// cluster #85ח · תיק בטיחות → הדרכות — the worker's safety-training log:
 /// each [WorkerTraining] is a course the worker took (title / by / date), with
-/// an optional uploaded certificate [WorkerTraining.doc] and a [status]
+/// an optional uploaded certificate [WorkerTraining.doc] and a [WorkerTraining.status]
 /// lifecycle (נרשם → ממתין-לאישור → אושר). The worker records a training and
 /// can send it for the safety officer's approval; the approval flip is a
 /// SERVER-SWAP placeholder until the backend's training registry lands.
@@ -26,6 +27,7 @@ const String kWorkerTrainingsKey = 'bs.worker-trainings.v1';
 const String kTrainingRecorded = 'recorded';
 const String kTrainingPending = 'pending';
 const String kTrainingApproved = 'approved';
+const String kTrainingRejected = 'rejected'; // נדחה
 
 /// The username the DEMO-SEED rows are filed under. The seed is shared across
 /// boards exactly like the other `demo`-keyed seeds, and screens filter by the
@@ -41,12 +43,20 @@ class WorkerTraining {
     required this.date,
     this.doc,
     this.status = kTrainingRecorded,
+    this.employerId = '',
   });
 
   final String id;
 
   /// Board login username (`ran` / `omer` / `demo`).
   final String username;
+
+  /// Id of the contractor who EMPLOYS the worker (the worker→contractor LINK,
+  /// `session.employerId`) — lets the contractor's view scope to THEIR workers
+  /// (see [trainingsForEmployer]). Default `''` (field-economy: only serialised
+  /// when non-empty). Back-compat: old persisted records carry no 'employerId'
+  /// and decode as `''` (and are excluded from any non-empty employer query).
+  final String employerId;
 
   /// e.g. "הדרכת בטיחות כללית באתר".
   final String title;
@@ -61,7 +71,8 @@ class WorkerTraining {
   /// seam (`pickTaskPhoto`). Null until a document is attached.
   final String? doc;
 
-  /// [kTrainingRecorded] · [kTrainingPending] · [kTrainingApproved].
+  /// [kTrainingRecorded] · [kTrainingPending] · [kTrainingApproved] ·
+  /// [kTrainingRejected].
   final String status;
 
   WorkerTraining copyWith({
@@ -73,6 +84,7 @@ class WorkerTraining {
     String? doc,
     bool clearDoc = false,
     String? status,
+    String? employerId,
   }) =>
       WorkerTraining(
         id: id ?? this.id,
@@ -82,6 +94,7 @@ class WorkerTraining {
         date: date ?? this.date,
         doc: clearDoc ? null : (doc ?? this.doc),
         status: status ?? this.status,
+        employerId: employerId ?? this.employerId,
       );
 
   Map<String, dynamic> toJson() => {
@@ -92,6 +105,7 @@ class WorkerTraining {
         'date': date.toIso8601String(),
         'doc': doc,
         'status': status,
+        if (employerId.isNotEmpty) 'employerId': employerId,
       };
 
   /// Defensive decode — a malformed entry is dropped, never crashes the load.
@@ -112,13 +126,17 @@ class WorkerTraining {
       date: date,
       doc: raw['doc'] is String ? raw['doc'] as String : null,
       status: raw['status'] is String ? raw['status'] as String : kTrainingRecorded,
+      employerId: raw['employerId'] is String ? raw['employerId'] as String : '',
     );
   }
 }
 
 /// The DEMO-SEED rows for a fresh store — mirrors the original
 /// `worker_safety_screen.dart` demo list (כללי / עבודה בגובה / ציוד מגן),
-/// all by 'ממונה בטיחות', status recorded, and kept removable.
+/// all by 'ממונה בטיחות', status recorded, and kept removable. Stamped with
+/// [kDemoContractorId] so the DEMO contractor (the demo worker's
+/// `session.employerId`) sees them in [trainingsForEmployer] — clearly a
+/// demo seed, not fabricated server data.
 List<WorkerTraining> demoSeedTrainings() => [
       WorkerTraining(
         id: 'train-demo-1',
@@ -126,6 +144,7 @@ List<WorkerTraining> demoSeedTrainings() => [
         title: 'הדרכת בטיחות כללית באתר',
         by: 'ממונה בטיחות',
         date: DateTime(2026, 1, 5),
+        employerId: kDemoContractorId,
       ),
       WorkerTraining(
         id: 'train-demo-2',
@@ -133,6 +152,7 @@ List<WorkerTraining> demoSeedTrainings() => [
         title: 'עבודה בגובה',
         by: 'ממונה בטיחות',
         date: DateTime(2026, 3, 12),
+        employerId: kDemoContractorId,
       ),
       WorkerTraining(
         id: 'train-demo-3',
@@ -140,6 +160,7 @@ List<WorkerTraining> demoSeedTrainings() => [
         title: 'ציוד מגן אישי',
         by: 'ממונה בטיחות',
         date: DateTime(2026, 6, 2),
+        employerId: kDemoContractorId,
       ),
     ];
 
@@ -238,6 +259,7 @@ class WorkerTrainingsNotifier extends StateNotifier<List<WorkerTraining>> {
     required String by,
     required DateTime date,
     String? doc,
+    String employerId = '',
   }) async {
     _userTouched = true;
     final t = WorkerTraining(
@@ -247,6 +269,7 @@ class WorkerTrainingsNotifier extends StateNotifier<List<WorkerTraining>> {
       by: by.trim(),
       date: date,
       doc: doc,
+      employerId: employerId,
     );
     final before = state;
     state = [...state, t];
@@ -303,6 +326,21 @@ class WorkerTrainingsNotifier extends StateNotifier<List<WorkerTraining>> {
     ];
     _persist();
   }
+
+  /// CONTRACTOR write — approve a pending training (no-op once decided).
+  void approve(String id) => _decide(id, kTrainingApproved);
+
+  /// CONTRACTOR write — reject a pending training (no-op once decided).
+  void reject(String id) => _decide(id, kTrainingRejected);
+
+  void _decide(String id, String status) {
+    _userTouched = true;
+    state = [
+      for (final t in state)
+        if (t.id == id && t.status == kTrainingPending) t.copyWith(status: status) else t,
+    ];
+    _persist();
+  }
 }
 
 /// The safety-training log — screens filter by the logged username (#66).
@@ -310,3 +348,11 @@ final workerTrainingsProvider =
     StateNotifierProvider<WorkerTrainingsNotifier, List<WorkerTraining>>(
   (ref) => WorkerTrainingsNotifier(),
 );
+
+/// The CONTRACTOR's view of their workers' trainings — newest-first.
+/// Pending ones are the approve/reject queue; decisions flip the worker's
+/// own list live (shared provider).
+final trainingsForEmployer = Provider.family<List<WorkerTraining>, String>((ref, employerId) {
+  final all = ref.watch(workerTrainingsProvider);
+  return [for (final t in all.reversed) if (t.employerId == employerId) t];
+});
