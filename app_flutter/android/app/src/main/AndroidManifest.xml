@@ -21,6 +21,13 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"/>
+    <!-- F5 — FCM push notifications. POST_NOTIFICATIONS is the Android 13+ (API
+         33+) runtime permission for showing notifications; on older devices it
+         is auto-granted and ignored. The prompt is requested at sign-in via the
+         push layer (firebase_messaging.requestPermission + the local-notifs
+         Android 13 request), never on app start — push is additive and gated on
+         Firebase, so a no-Firebase / demo run never asks. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:label="buildsmart"
         android:name="${applicationName}"
@@ -52,6 +59,21 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- F5 — FCM default notification appearance (used by the system when a
+             notification message arrives while the app is background/terminated,
+             where the OS draws the tray notification directly). The icon is a
+             WHITE/transparent silhouette: Android renders the small icon as a
+             monochrome mask, so a colored asset would show as a white square —
+             see @drawable/ic_notification. The default channel id MUST match a
+             channel we actually create at runtime (kDefaultPushChannelId in
+             lib/state/push_state.dart) or, on Android 8+, FCM falls back to a
+             "Miscellaneous" channel. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

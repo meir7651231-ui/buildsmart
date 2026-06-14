@@ -15,6 +15,13 @@
 //     carries a signed-in uid. Background/terminated messages are NOT here —
 //     that is the top-level `firebaseMessagingBackgroundHandler` in main.dart
 //     (an isolate entry-point cannot live behind an instance seam).
+//   • F5 — [LocalNotificationsGateway] (flutter_local_notifications): the
+//     Android side that creates the importance-high notification CHANNELS
+//     ([kPushChannels]) at init, asks for the Android-13 POST_NOTIFICATIONS
+//     runtime permission, and RE-SHOWS a FOREGROUND message as an OS
+//     notification (Android draws no tray notification for foreground
+//     messages). Same gate + same swallow-don't-throw discipline; null on the
+//     demo / no-Firebase path → the F5 additions are completely inert there.
 //
 // THE SEAM ([PushGateway]): every FirebaseMessaging touch goes through this
 // injectable port, which speaks in a NEUTRAL [PushMessage] (title/body/data) —
@@ -54,6 +61,7 @@ import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:firebase_messaging/firebase_messaging.dart' as fm;
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The collection the token lands in — `users/{uid}.fcmToken` per
@@ -64,6 +72,84 @@ const String kPushUsersCollection = 'users';
 /// merge semantics ([RemoteCollectionSource.set] is a merge-set), so the
 /// admin-owned `role` / `displayName` fields are never clobbered.
 const String kFcmTokenField = 'fcmToken';
+
+// ── F5 — Android notification channels ──────────────────────────────────────
+//
+// Android 8+ (API 26+) drops any notification whose channel does not exist, so
+// the channels below are CREATED at init (importance-high → heads-up) and the
+// ids are the single source of truth shared with the native side. The "general"
+// id MUST stay byte-identical to `default_notification_channel_id` in
+// android/app/src/main/res/values/strings.xml (the FCM fallback channel the
+// manifest meta-data points at). orders/chat let the user mute one stream
+// without losing the others, and match the `data['type']` the S8.3 senders set.
+
+/// The fallback / general channel id — MUST equal the manifest's
+/// `@string/default_notification_channel_id` (`bs_general`).
+const String kDefaultPushChannelId = 'bs_general';
+
+/// Order lifecycle pushes (`data['type'] == 'order'`) — "הזמנות".
+const String kOrdersPushChannelId = 'bs_orders';
+
+/// Chat / message pushes (`data['type'] == 'chat'`) — "צ׳אט".
+const String kChatPushChannelId = 'bs_chat';
+
+/// A single Android notification-channel definition — PURE data (no plugin
+/// type), so the channel set is unit-testable headless. The real
+/// [LocalNotificationsGateway] adapter maps each of these to an
+/// `AndroidNotificationChannel`. Names/descriptions are the Hebrew the user sees
+/// in Android Settings → Notifications.
+@immutable
+class PushChannel {
+  const PushChannel({
+    required this.id,
+    required this.name,
+    required this.description,
+  });
+
+  /// The stable channel id (also written into a payload's android channel).
+  final String id;
+
+  /// User-visible channel name (Android Settings → App → Notifications).
+  final String name;
+
+  /// User-visible channel description.
+  final String description;
+}
+
+/// The channels this app creates at init. Order matters only for the Settings
+/// list; `kPushChannels.first` is the general/default one.
+const List<PushChannel> kPushChannels = <PushChannel>[
+  PushChannel(
+    id: kDefaultPushChannelId,
+    name: 'כללי',
+    description: 'התראות כלליות מ-BuildSmart',
+  ),
+  PushChannel(
+    id: kOrdersPushChannelId,
+    name: 'הזמנות',
+    description: 'עדכוני סטטוס הזמנות ומשלוחים',
+  ),
+  PushChannel(
+    id: kChatPushChannelId,
+    name: 'הודעות',
+    description: 'הודעות צ׳אט חדשות',
+  ),
+];
+
+/// Route a foreground [PushMessage] to the channel it should display on, from
+/// its `data['type']` (the key the S8.3 Functions stamp). Unknown / missing →
+/// the general channel. PURE → unit-testable, and the single place the
+/// type→channel mapping lives.
+String pushChannelIdFor(PushMessage message) {
+  switch (message.data['type']) {
+    case 'order':
+      return kOrdersPushChannelId;
+    case 'chat':
+      return kChatPushChannelId;
+    default:
+      return kDefaultPushChannelId;
+  }
+}
 
 /// One push message — the NEUTRAL shape the push seam speaks in (instead of
 /// `RemoteMessage`). [title]/[body] are the OS-notification payload (Hebrew,
@@ -181,6 +267,115 @@ class FirebaseMessagingGateway implements PushGateway {
       fm.FirebaseMessaging.onMessageOpenedApp.map(_toPushMessage);
 }
 
+// ── F5 — the local-notifications seam ────────────────────────────────────────
+//
+// FCM on Android shows a tray notification only when the app is
+// background/terminated; a FOREGROUND message is delivered silently to
+// onMessage, so to surface it as an OS notification (on the right channel) the
+// app must re-show it itself. flutter_local_notifications is the plugin for
+// that AND for creating the channels + the Android-13 runtime permission. As
+// with [PushGateway], every plugin touch goes through THIS injectable port so
+// the controller (and its tests) stay plugin-free and Firebase-free.
+
+/// The injectable local-notifications seam (channel creation, Android-13
+/// permission, foreground display). The real adapter
+/// ([FlutterLocalNotificationsGateway]) wraps the plugin LAZILY; tests use a
+/// hand-rolled fake; the default (Firebase-free) is null → nothing constructed.
+abstract class LocalNotificationsGateway {
+  /// One-time init: initialise the plugin and create [kPushChannels] (Android
+  /// 8+). Idempotent — safe to call on every registration.
+  Future<void> ensureInitialised();
+
+  /// Android 13+ (API 33+) runtime notification permission via the plugin's
+  /// Android impl. Returns true when granted / not-applicable (older Android,
+  /// iOS, web — where firebase_messaging already owns the prompt). The
+  /// firebase_messaging `requestPermission()` ALSO triggers the Android-13
+  /// prompt; this is the belt-and-braces plugin path (a no-op once granted).
+  Future<bool> requestAndroid13Permission();
+
+  /// Show [message] as an OS notification on [channelId] (foreground re-display).
+  Future<void> show(PushMessage message, {required String channelId});
+}
+
+/// The REAL flutter_local_notifications adapter. Resolves the plugin LAZILY
+/// (never at construction — same rule as [FirebaseMessagingGateway]) and is
+/// Android-focused: channel creation + the Android-13 permission are no-ops on
+/// other platforms (iOS/web notification permission is firebase_messaging's
+/// job). Every call is individually guarded by the caller (rule #3) — a plugin
+/// failure is logged and swallowed, never thrown into the UI.
+class FlutterLocalNotificationsGateway implements LocalNotificationsGateway {
+  FlutterLocalNotificationsGateway({FlutterLocalNotificationsPlugin? plugin})
+      : _injected = plugin;
+
+  final FlutterLocalNotificationsPlugin? _injected;
+
+  /// Lazily-resolved plugin handle — constructed ONLY on first use so merely
+  /// reading the provider does not spin up the platform plugin.
+  late final FlutterLocalNotificationsPlugin _plugin =
+      _injected ?? FlutterLocalNotificationsPlugin();
+
+  bool _initialised = false;
+
+  AndroidFlutterLocalNotificationsPlugin? get _android =>
+      _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+
+  @override
+  Future<void> ensureInitialised() async {
+    if (_initialised) return;
+    // The small icon is the white silhouette `@drawable/ic_notification`
+    // (defined in res/drawable) — referenced by NAME without the extension.
+    const initSettings = InitializationSettings(
+      android: AndroidInitializationSettings('ic_notification'),
+    );
+    await _plugin.initialize(initSettings);
+    final android = _android;
+    if (android != null) {
+      for (final c in kPushChannels) {
+        await android.createNotificationChannel(
+          AndroidNotificationChannel(
+            c.id,
+            c.name,
+            description: c.description,
+            importance: Importance.high,
+          ),
+        );
+      }
+    }
+    _initialised = true;
+  }
+
+  @override
+  Future<bool> requestAndroid13Permission() async {
+    final android = _android;
+    if (android == null) return true; // not Android — nothing to ask here
+    final granted = await android.requestNotificationsPermission();
+    return granted ?? true; // null = older Android (auto-granted)
+  }
+
+  @override
+  Future<void> show(PushMessage message, {required String channelId}) async {
+    final channel = kPushChannels.firstWhere(
+      (c) => c.id == channelId,
+      orElse: () => kPushChannels.first,
+    );
+    final details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        channel.id,
+        channel.name,
+        channelDescription: channel.description,
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: 'ic_notification',
+      ),
+    );
+    // A stable-enough id per message (notification-replacing is a follow-up):
+    // the time-derived id keeps each foreground push distinct.
+    final id = DateTime.now().millisecondsSinceEpoch.remainder(100000);
+    await _plugin.show(id, message.title, message.body, details);
+  }
+}
+
 /// The toast line for a foreground push: `title · body` when both exist,
 /// whichever one exists otherwise, and null for a data-only message (nothing
 /// human-readable — the controller skips the toast). The payload itself is the
@@ -204,10 +399,12 @@ class PushController {
   PushController({
     PushGateway? gateway,
     RemoteCollectionSource? users,
+    LocalNotificationsGateway? localNotifications,
     void Function(PushMessage message)? onForeground,
     void Function(PushMessage message)? onOpened,
   })  : _gateway = gateway,
         _users = users,
+        _local = localNotifications,
         _onForeground = onForeground,
         _onOpened = onOpened {
     final g = _gateway;
@@ -241,6 +438,13 @@ class PushController {
   /// cache base speaks ([RemoteCollectionSource]), pointed at `users`. `set`
   /// is merge-semantics, so only [kFcmTokenField] is touched.
   final RemoteCollectionSource? _users;
+
+  /// F5 — the injectable local-notifications seam (channel creation, Android-13
+  /// permission, foreground OS display). Null without Firebase / on the demo
+  /// path → the F5 additions are completely inert (no channels created, no
+  /// extra permission prompt, no OS notification). Independent of [_gateway]:
+  /// the FCM token still registers even if this is null.
+  final LocalNotificationsGateway? _local;
 
   /// S6.2 foreground hook — null = the default: [pushToastText] →
   /// [showGlobalToast] (the app's existing toast pill, context-free via
@@ -313,6 +517,19 @@ class PushController {
     final users = _users;
     if (g == null || users == null) return;
     if (_uid != uid) return; // identity moved on while queued
+    // F5 — make sure the Android channels exist BEFORE a token is registered, so
+    // any push that arrives can land on a real channel (Android 8+ drops one
+    // whose channel is missing). Guarded + gated: a null local gateway (demo /
+    // no-Firebase) skips this entirely, and a plugin failure is logged, not
+    // thrown (rule #3) — channel-setup must never block token registration.
+    final local = _local;
+    if (local != null) {
+      try {
+        await local.ensureInitialised();
+      } on Object catch (e) {
+        debugPrint('PushController: channel init failed (ignored): $e');
+      }
+    }
     final granted = await g.requestPermission();
     if (!granted) {
       // The user said no — honored silently (no token, no nagging retry this
@@ -320,6 +537,18 @@ class PushController {
       debugPrint('PushController: notification permission denied — '
           'no token registered');
       return;
+    }
+    // F5 — belt-and-braces Android-13 (API 33+) runtime prompt via the local
+    // plugin. firebase_messaging.requestPermission() already triggers it, so on
+    // a granted device this is a no-op; it is here so the plugin path is honest
+    // when only the local seam is wired. Guarded + gated.
+    if (_uid != uid) return;
+    if (local != null) {
+      try {
+        await local.requestAndroid13Permission();
+      } on Object catch (e) {
+        debugPrint('PushController: android-13 permission failed (ignored): $e');
+      }
     }
     if (_uid != uid) return;
     final token = await g.getToken();
@@ -380,8 +609,19 @@ class PushController {
         return;
       }
       final text = pushToastText(message);
-      if (text == null) return;
+      if (text == null) return; // data-only — nothing human-readable to surface
+      // The in-app toast pill (the existing surface — also the web/iOS path).
       showGlobalToast(text);
+      // F5 (additive, Android) — ALSO raise an OS notification on the routed
+      // channel, since Android shows no tray notification for a foreground
+      // message. Gated (null on demo/no-Firebase) + guarded (rule #3): a plugin
+      // failure is swallowed, the toast above already surfaced the message.
+      final local = _local;
+      if (local != null) {
+        _enqueue(
+          () => local.show(message, channelId: pushChannelIdFor(message)),
+        );
+      }
     } on Object catch (e) {
       debugPrint('PushController: foreground handler failed (ignored): $e');
     }
@@ -432,6 +672,20 @@ final pushGatewayProvider = Provider<PushGateway?>((ref) {
   return null;
 });
 
+/// F5 — the local-notifications gateway (Android channels + foreground OS
+/// display + the Android-13 prompt). Null unless the live Firebase backend is
+/// up (the SAME `useFirebaseBackend` gate every seam uses), so the whole
+/// Firebase-free suite + the demo build never construct the plugin → the F5
+/// additions are byte-identically inert there. Tests override with a fake.
+final localNotificationsGatewayProvider =
+    Provider<LocalNotificationsGateway?>((ref) {
+  // Web has no Android channels / runtime notification permission and FCM-web
+  // owns its own surface, so the local plugin is mobile-only here (it would be a
+  // no-op on web anyway). The gate keeps it off for the demo/no-Firebase path.
+  if (useFirebaseBackend && !kIsWeb) return FlutterLocalNotificationsGateway();
+  return null;
+});
+
 /// The `users/{uid}` token writer (S6.1) — the S2 seam pointed at `users`,
 /// null without Firebase. Kept its own provider so tests inject a recording
 /// fake and S5 rules work can find the single client write-site of
@@ -452,6 +706,7 @@ final pushControllerProvider = Provider<PushController>((ref) {
   final controller = PushController(
     gateway: ref.watch(pushGatewayProvider),
     users: ref.watch(pushTokenWriterProvider),
+    localNotifications: ref.watch(localNotificationsGatewayProvider),
   );
   // fireImmediately: a RESTORED session (AuthStateNotifier is born seeded from
   // gateway.currentUser) must register without waiting for the next auth event.

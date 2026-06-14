@@ -86,6 +86,33 @@ void installCrashlyticsHandlers({
   };
 }
 
+/// F2 — the App Check native attestation providers, chosen purely from the
+/// compile-time [kAppCheckProd] flag. Pure + `@visibleForTesting` so the
+/// SELECTION is asserted for BOTH flag values WITHOUT calling
+/// `FirebaseAppCheck.instance.activate` (tests never initialise Firebase).
+///
+/// CONTRACT (the F2 zero-regression invariant):
+///   • `prod == false` (default) → `AndroidProvider.debug` /
+///     `AppleProvider.debug` — BYTE-IDENTICAL to the dev/demo attestation the
+///     app shipped with;
+///   • `prod == true` → `AndroidProvider.playIntegrity` /
+///     `AppleProvider.appAttestWithDeviceCheckFallback` (App Attest on
+///     iOS 14+/macOS 14+, DeviceCheck fallback otherwise).
+///
+/// READY but inert until the owner does F1 (real mobile `firebase_options`) +
+/// registers the attestation keys in the Firebase console — see [kAppCheckProd].
+/// The [main] call-site passes the live flag verbatim.
+@visibleForTesting
+({AndroidProvider android, AppleProvider apple}) appCheckProvidersFor({
+  required bool prod,
+}) =>
+    prod
+        ? (
+            android: AndroidProvider.playIntegrity,
+            apple: AppleProvider.appAttestWithDeviceCheckFallback,
+          )
+        : (android: AndroidProvider.debug, apple: AppleProvider.debug);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // S0.4 — wire Firebase (web). initializeApp must precede any Firestore/Auth
@@ -106,18 +133,46 @@ Future<void> main() async {
   } catch (_) {
     // non-fatal: app runs on the local repositories until Firebase is back
   }
-  // S0.5 — App Check (debug attestation for dev). Web reCAPTCHA + prod
-  // attestation (Play Integrity / DeviceCheck) are wired once the keys are
-  // registered in the console; App Check does not enforce until S5.7, so a
-  // failure here must never block app start.
-  if (!kIsWeb) {
+  // S0.5 / F2 — App Check attestation. The providers are chosen purely from the
+  // [kAppCheckProd] flag (see [appCheckProvidersFor]): OFF (default) keeps the
+  // dev `AndroidProvider.debug` / `AppleProvider.debug` BYTE-IDENTICAL to today;
+  // ON selects the production native providers (Play Integrity / App Attest +
+  // DeviceCheck fallback). The ON path is READY but only takes effect once the
+  // owner does F1 (real mobile firebase_options) + registers the attestation
+  // keys in the Firebase console. App Check does NOT enforce client-side — this
+  // `activate` only makes the SDKs ATTACH the token (G3); rejecting un-tokened
+  // requests is a Firebase console toggle (owner's). So a failure here must
+  // never block app start. Gated by `Firebase.apps.isNotEmpty` so the demo /
+  // local-repo path skips it entirely (and the existing suite stays
+  // Firebase-free); web stays SKIPPED unless a reCAPTCHA site key is supplied.
+  if (Firebase.apps.isNotEmpty) {
     try {
-      await FirebaseAppCheck.instance.activate(
-        androidProvider: AndroidProvider.debug,
-        appleProvider: AppleProvider.debug,
-      );
+      if (kIsWeb) {
+        // Web attestation only activates when a reCAPTCHA v3 site key is
+        // supplied at build time; with the default empty key the web App Check
+        // path stays SKIPPED exactly as today (no behaviour change on web).
+        if (kAppCheckRecaptchaSiteKey.isNotEmpty) {
+          await FirebaseAppCheck.instance.activate(
+            providerWeb: ReCaptchaV3Provider(kAppCheckRecaptchaSiteKey),
+          );
+          await FirebaseAppCheck.instance.setTokenAutoRefreshEnabled(true);
+        }
+      } else {
+        final providers = appCheckProvidersFor(prod: kAppCheckProd);
+        await FirebaseAppCheck.instance.activate(
+          androidProvider: providers.android,
+          appleProvider: providers.apple,
+        );
+        // G3 — keep the attached App Check token fresh while the app runs (the
+        // SDKs already auto-attach it to every Firestore/Functions/Storage
+        // call; no per-call work). No-op-safe; only reached under live
+        // Firebase + the prod providers.
+        if (kAppCheckProd) {
+          await FirebaseAppCheck.instance.setTokenAutoRefreshEnabled(true);
+        }
+      }
     } catch (_) {
-      // non-fatal until S5 enforcement
+      // non-fatal: App Check enforcement is a Firebase console toggle (owner's)
     }
   }
   // G4 — Crashlytics global error capture, ACTIVE ONLY when Firebase actually

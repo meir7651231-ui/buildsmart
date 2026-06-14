@@ -70,6 +70,18 @@ dependencies:
   cloud_functions: ^6.3.2
   firebase_app_check: ^0.4.4+2
 
+  # F5 — explicit Android notification channels + FOREGROUND display. FCM on
+  # Android shows a tray notification only when the app is background/terminated;
+  # a FOREGROUND data/notification message is delivered silently to onMessage,
+  # so we re-show it ourselves through this plugin on the right importance-high
+  # channel (orders/chat/general). It also creates the channels at init so the
+  # `default_notification_channel_id` meta-data resolves and Android 13+ can be
+  # asked for POST_NOTIFICATIONS. ACTIVE ONLY when Firebase/push is up — the
+  # demo / no-Firebase path never constructs the plugin (the same
+  # `useFirebaseBackend` gate every other seam uses), so it is byte-identical to
+  # before. 18.x is the Flutter-3.29 / Dart-3.7 compatible line.
+  flutter_local_notifications: ^18.0.1
+
   # G4 — production telemetry, ACTIVE ONLY when Firebase actually initialised
   # (the `Firebase.apps.isNotEmpty` gate in lib/state/telemetry.dart). On the
   # demo / no-Firebase path NONE of this runs — byte-identical to before. The

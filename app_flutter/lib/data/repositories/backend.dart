@@ -100,3 +100,43 @@ const bool kServerCallables = bool.fromEnvironment('SERVER_CALLABLES');
 /// the HTTP-PUT function) are injected as fakes, so the ON branch is exercised in
 /// the standard define-less suite without touching the network.
 const bool kCloudPhotos = bool.fromEnvironment('CLOUD_PHOTOS');
+
+/// F2 (launch App-Check-native) — master switch for the PRODUCTION App Check
+/// attestation providers at `FirebaseAppCheck.instance.activate` time
+/// (`lib/main.dart`).
+///
+/// Default OFF: with it OFF the `activate` call is BYTE-IDENTICAL to today —
+/// `AndroidProvider.debug` + `AppleProvider.debug` (the dev/demo attestation the
+/// app shipped with), web still skipped. So flipping this flag is the ONLY thing
+/// that changes the providers selected (the same zero-regression invariant as
+/// [kCloudPhotos] / [kServerCallables] / [kUidScopedQueries] /
+/// [kUseFirebaseBackendFlag]). App Check does NOT enforce client-side — the
+/// `activate` call only makes the Firebase SDKs ATTACH the attestation token;
+/// rejecting un-tokened requests is a Firebase console toggle (owner's). So a
+/// failure to activate must never block app start (the call stays inside
+/// `main`'s `Firebase.apps.isNotEmpty` gate, wrapped in a non-fatal try).
+///
+/// Flip on at build time ONCE the owner has (F1) supplied the real mobile
+/// `firebase_options` AND registered the App Check attestation keys in the
+/// console (Play Integrity for Android, App Attest/DeviceCheck for Apple):
+///   flutter build … --dart-define=APP_CHECK_PROD=true
+///
+/// When ON the native providers become `AndroidProvider.playIntegrity` +
+/// `AppleProvider.appAttestWithDeviceCheckFallback` (App Attest on iOS 14+/
+/// macOS 14+, DeviceCheck fallback otherwise). Web stays skipped unless a
+/// reCAPTCHA site key is supplied at build time (`--dart-define=APP_CHECK_RECAPTCHA_SITE_KEY=…`),
+/// matching today's web-skipped behaviour when none is set.
+///
+/// Tests never initialise Firebase; the provider SELECTION is a pure helper
+/// (`appCheckProvidersFor` in `lib/main.dart`) asserted in the standard
+/// define-less suite (this flag pinned false), so the ON branch is proven
+/// WITHOUT calling `activate`.
+const bool kAppCheckProd = bool.fromEnvironment('APP_CHECK_PROD');
+
+/// F2 — the web reCAPTCHA v3 site key for App Check. Empty (default) → the web
+/// App Check path stays SKIPPED exactly as today; supply it at build time to
+/// activate web attestation alongside the native [kAppCheckProd] providers:
+///   flutter build web --dart-define=APP_CHECK_PROD=true \
+///       --dart-define=APP_CHECK_RECAPTCHA_SITE_KEY=6Lc…
+const String kAppCheckRecaptchaSiteKey =
+    String.fromEnvironment('APP_CHECK_RECAPTCHA_SITE_KEY');
