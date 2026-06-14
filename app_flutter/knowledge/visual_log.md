@@ -36,6 +36,14 @@
 
 ---
 
+## v6.20 — חיווט קבלן↔עובד · גל E2 (צ'יפ-זמינות ב-#112)
+
+**שינוי (UI בעובד):** `worker_equipment_checklist_sheet.dart` — כל שורת-ציוד קיבלה צ'יפ-זמינות (🏬 מחסן / 🏗️ אתר / 'זמינות לא ידועה' אפור-מנוטרל) מ-`availabilityFor(label, employerStock)`. invariant ה'לא-קורא-מלאי' הופך ל-'קורא מלאי-מעסיק READ-ONLY'. אין edit (העובד read-only). `equipmentForTasks` byte-identical.
+
+**אימות:** ה-join טהור נעול ב-16 טסטים (כולל 6 false-positive→unknown שהמפקח חשף) · #112 regression ירוק · analyze 0 · המפקח תפס פגם-יושר (contains גולמי→המצאה) שתוקן ל-token-aware. **follow-up:** רינדור-הצ'יפ ב-sheet לא ב-widget-test (ה-join הטהור + ה-regression כן); curated mapping-table = refinement.
+
+---
+
 ## v6.16 — fix-fleet · round-3 (ציד עמוק יותר: data/RTL/UX)
 
 **שינוי:** סבב-3 עמוק (data-integrity · RTL · error-paths) תפס באגים שהסבבים הקודמים פספסו.

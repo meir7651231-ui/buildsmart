@@ -30,6 +30,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > **גל T1:** 2 מנועי-המשימות → מנוע אחד (`tasksProvider` מקור-יחיד; `workerTasksProvider` = shim מעביר). `TaskItem` += `employerId`/`assignedWorkerUid` (נחתמים מה-session בשליחה). נמחקו dual-write/mirror; fold של orderId→advance-on-approve; seam ריק `bindRemote` (T3 ימלא).
 > **גל T2:** מסך-קבלן (`tasks_screen`) — ＋'משימה חדשה' (`createTask`, חותם `employerId`+`assignedWorkerUid`) · עריכה (`editTask`) · הקצאה (`assignTask`) · 'אישורי עובדים (קבלן)' (`approve`/`reject` מקבילי, מנהל לא-נגוע). הקבלן יוצר/מקצה/מאשר → העובד רואה חי דרך המנוע-המאוחד.
 > **גל E1 (מלאי):** העובד קורא מלאי-קבלן READ-ONLY — `employerStockProvider(session.employerId)` (`employer_stock.dart`) → גיליון '📦 מלאי הקבלן' + כפתור בלוח-העובד. העובד רואה, לא משנה. SERVER-SWAP: stock scoped ל-employerId.
+> **גל E2:** צ'יפ-זמינות ב-#112 — `availabilityFor` (`equipment_stock_join.dart`, token-aware, אין-המצאות) מצליב כל פריט-ציוד מול `employerStockProvider` → 🏬 מחסן / 🏗️ אתר / 'זמינות לא ידועה'. העובד רק רואה (read-only).
 
 ---
 

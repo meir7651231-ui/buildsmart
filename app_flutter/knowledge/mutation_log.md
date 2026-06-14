@@ -17,6 +17,13 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## availabilityFor — token-aware join (גל E2) — 2026-06-14
+
+- **קובץ:** `test/equipment_stock_join_test.dart` (16 מקרים, 6 false-positive חדשים).
+- מצב: **המפקח הריץ את הפונקציה האמיתית** והוכיח שה-contains הגולמי ממציא זמינות (מפתח→'מפתח חבישה DN25', שקע, גו⊂גומי, 'ור pe'⊂'צינור pex') — RED אמפירי על seed ערוך.
+- תיקון: token-aware (exact / ≥2-token contiguous; single-token→exact-בלבד) → כל ה-false-positives → unknown (GREEN); 6 מקרים נועלים זאת.
+- מסקנה: ה-RED→GREEN = הדגמת-המפקח + הנעילה; הבדיקה חזקה (תופסת המצאת-זמינות, אין-המצאות).
+
 ## employerStockProvider — empty-guard (גל E1) — 2026-06-14
 
 - **קובץ:** `test/employer_stock_test.dart` (עובד קורא מלאי-מעסיק READ-ONLY).

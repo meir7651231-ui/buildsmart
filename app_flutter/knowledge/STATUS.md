@@ -22,6 +22,8 @@ mutation 3-RED→GREEN. בנוי על הענף-הראשי המאוחד (worker-b
 
 **גל E1 · עובד קורא מלאי-מעסיק (read-only):** `employerStockProvider` (`employer_stock.dart` חדש) פותר את `session.employerId` למלאי-הקבלן (`stockProvider`) כ-`EmployerStockItem{name,location}` read-only (ריק→[], אין-המצאות; SERVER-SWAP: stock scoped ל-employerId). גיליון '📦 מלאי הקבלן' (`worker_employer_stock_sheet` חדש) + כפתור בלוח-העובד — העובד **רואה** את מלאי-הקבלן, לעולם לא משנה. נחיל: E1a provider+sheet+entry · E1b 4 טסטים. שער: analyze 0 · סוויטה · mutation RED→GREEN (read-only-additive — סקירה מוקלת; sheet-render = widget-test follow-up).
 
+**גל E2 · זמינות-ציוד מול מלאי-הקבלן:** `equipment_stock_join.dart` (חדש) — `availabilityFor(label, stock)` **token-aware** (exact / ≥2-token contiguous; single-token→exact-בלבד) → צ'יפ 🏬מחסן/🏗️אתר/'זמינות לא ידועה' בכל שורת-ציוד ב-#112 (`worker_equipment_checklist_sheet`). אין-המצאות: **המפקח תפס** ש-contains גולמי ממציא זמינות (מפתח/שקע/גו⊂גומי/cross-space) → תוקן ל-token-aware + 6 מקרי-false-positive נעולים→unknown. `equipmentForTasks` byte-identical · העובד read-only. נחיל: E2a join+sheet · E2b test · E2-fix. שער: analyze 0 · 16+regression · supervisor (תפס→תוקן) · RED→GREEN = ההדגמה-האמפירית של המפקח + הנעילה. (curated mapping-table = refinement עתידי.)
+
 ## v6.19 — לוח עובד v3 מלא (#100–#114, נחיל אמיתי, 4 גלים)
 
 לוח-העובד נבנה והורחב דרך נחיל ה-/swarm הקנוני (donning + manifested-gate + mutation-verify +

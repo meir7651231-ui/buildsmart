@@ -14,15 +14,27 @@
 // listed honestly as "אין רשימת ציוד".
 //
 // HONESTY: the mapping is DEMO wiring (a manager does not attach products to a
-// task yet) — the sheet says so in a visible DEMO-SEED hint. NEVER reads
-// kStockDemo: that is the CONTRACTOR's stock, not the worker's (user rule
-// "לא יש מלאי של קבלן"). The 'שלח רשימה לקבלן' action posts ONE chat line of the
+// task yet) — the sheet says so in a visible DEMO-SEED hint.
+//
+// E2 (#112) — reads the EMPLOYER's stock READ-ONLY (via employerStockProvider):
+// each equipment row is annotated with the EMPLOYING contractor's availability
+// (🏬 מחסן / 🏗️ אתר / זמינות לא ידועה) so "do I have the gear?" reads the
+// contractor's real stock. The worker still NEVER mutates that stock — moving
+// items between warehouse and site stays the contractor's own action in
+// stock_screen.dart — and we NEVER fabricate a label↔stock match (honest
+// 'unknown' otherwise; see equipment_stock_join.dart). The employer is resolved
+// from the worker's session `employerId` (board_auth.dart); the contractor's
+// own stock is owned by the contractor, not surfaced as the worker's.
+// The 'שלח רשימה לקבלן' action posts ONE chat line of the
 // checked items into the existing th-worker-contractor thread via
 // [chatEngineProvider] — guarded against an unknown thread (honest toast, no
 // fake success) and against a double-send.
 
 import 'package:buildsmart/data/task_skus_local.dart';
+import 'package:buildsmart/logic/equipment_stock_join.dart';
 import 'package:buildsmart/logic/install_kit.dart';
+import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/employer_stock.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -190,6 +202,13 @@ class _EquipmentChecklistSheetState
   Widget build(BuildContext context) {
     final checkedCount =
         _items.where((it) => _checked[it.label] ?? false).length;
+    // ── E2 (#112): READ-ONLY view of the EMPLOYER's stock ──
+    // Resolve the worker's employer from the live session (null session — e.g.
+    // the contractor app, or the bare-ProviderScope widget test — yields an
+    // empty employerId → `const []` → every row honestly reads 'unknown').
+    // The worker only SEES this stock; it is never mutated here.
+    final employerId = ref.watch(boardAuthProvider)?.employerId ?? '';
+    final stock = ref.watch(employerStockProvider(employerId));
     return _sheetShell(
       children: [
         const Text(
@@ -239,6 +258,9 @@ class _EquipmentChecklistSheetState
             _EquipmentRow(
               item: it,
               checked: _checked[it.label] ?? false,
+              // E2: the employer's READ-ONLY stock availability for this line
+              // (honest 'unknown' when no stock / no match — never fabricated).
+              availability: availabilityFor(it.label, stock),
               onChanged: (v) =>
                   setState(() => _checked[it.label] = v ?? false),
             ),
@@ -345,11 +367,17 @@ class _EquipmentRow extends StatelessWidget {
   const _EquipmentRow({
     required this.item,
     required this.checked,
+    required this.availability,
     required this.onChanged,
   });
 
   final DayEquipmentItem item;
   final bool checked;
+
+  /// The EMPLOYER's READ-ONLY stock availability for this line (E2), rendered
+  /// as a small chip. [StockAvailability.unknown] is honest — no stock or no
+  /// match (never a fabricated correspondence).
+  final StockAvailability availability;
   final ValueChanged<bool?> onChanged;
 
   @override
@@ -406,6 +434,9 @@ class _EquipmentRow extends StatelessWidget {
                         fontSize: 11,
                       ),
                     ),
+                    // E2: the employer's READ-ONLY stock availability chip
+                    // (its own top padding spaces it from the line above).
+                    _AvailabilityChip(availability: availability),
                   ],
                 ),
               ),
@@ -433,6 +464,56 @@ class _EquipmentRow extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// E2 (#112) — a small read-only chip showing the EMPLOYER's stock
+/// availability for one equipment line: 🏬 מחסן (warehouse) / 🏗️ אתר (site) /
+/// 'זמינות לא ידועה' (unknown — no stock or no honest match, never fabricated).
+/// Mirrors the severity-pill styling so the row reads as one coherent line.
+class _AvailabilityChip extends StatelessWidget {
+  const _AvailabilityChip({required this.availability});
+
+  final StockAvailability availability;
+
+  @override
+  Widget build(BuildContext context) {
+    final (String text, Color bg, Color fg) = switch (availability) {
+      StockAvailability.warehouse => (
+          '🏬 מחסן',
+          const Color(0xFFE3F0FF),
+          BsTokens.brandDark,
+        ),
+      StockAvailability.site => (
+          '🏗️ אתר',
+          const Color(0xFFE3F7E8),
+          const Color(0xFF1B6B33),
+        ),
+      // Honest unknown — no stock connected / no match. Muted, never green.
+      StockAvailability.unknown => (
+          'זמינות לא ידועה',
+          const Color(0xFFF2F3F5),
+          BsTokens.mutedLight,
+        ),
+    };
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: fg,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
