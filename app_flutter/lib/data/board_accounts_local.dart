@@ -12,6 +12,7 @@ class BoardAccount {
     required this.username,
     required this.code,
     required this.displayName,
+    this.employerId = '',
   });
 
   /// The board this account opens.
@@ -25,6 +26,13 @@ class BoardAccount {
 
   /// Hebrew name shown in the board header.
   final String displayName;
+
+  /// Wave 0 — OPTIONAL worker→contractor employment link carried into
+  /// [BoardSession.employerId] on login. Back-compat: defaults to '' so every
+  /// existing seed is unchanged; only meaningful for worker/courier accounts
+  /// (a store/manager has no employer). SERVER-SWAP: real seeds map to a live
+  /// `contractors/{employerId}` once the backend lands.
+  final String employerId;
 }
 
 // SERVER-SWAP: demo seed accounts — replaced by Firebase Auth users when the

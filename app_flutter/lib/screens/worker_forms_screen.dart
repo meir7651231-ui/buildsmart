@@ -8,8 +8,13 @@ import 'package:buildsmart/services/doc_print.dart';
 // null on cancel/failure (no fake placeholder ever).
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';
+// #106 honesty fix — the worker→contractor employer link resolver
+// (`employerProfileProvider` → `EmployerProfile`). Replaces the direct
+// `user_profile.dart` employer read: the employer block now reflects the
+// contractor who EMPLOYS this worker (via `session.employerId`), not the raw
+// device profile.
+import 'package:buildsmart/state/employer_link.dart';
 import 'package:buildsmart/state/sys_chat.dart';
-import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/state/vacation_requests.dart';
 import 'package:buildsmart/state/worker_forms.dart';
 import 'package:buildsmart/state/worker_profile_store.dart';
@@ -131,8 +136,12 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
     // source when no 101 was saved yet. אין המצאות: only what the worker
     // actually typed in אזור-אישי; empty fields stay honest empty inputs.
     final myProfile = ref.watch(workerProfileProvider)[username];
-    // #106 — the EMPLOYER (מעסיק = the contractor) profile, shown READ-ONLY.
-    final employer = ref.watch(userProfileProvider);
+    // #106 honesty fix — the EMPLOYER (מעסיק = the contractor) profile, shown
+    // READ-ONLY. Resolved via the worker→contractor LINK (`session.employerId`)
+    // through `employerProfileProvider`, NOT the raw device `userProfileProvider`
+    // — so the employer block reflects who actually employs this worker (and
+    // honestly empties when there is no link). SERVER-SWAP lives in the provider.
+    final employer = ref.watch(employerProfileProvider(session.employerId));
 
     // Prefill ONCE: from the saved year-form when prefs resolve; otherwise the
     // live session name + the worker's profile (id/phone) — אין המצאות: only
@@ -202,7 +211,8 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
 
   // ─── 1. טופס 101 ────────────────────────────────────────────────────────────
 
-  Widget _form101Card(BoardSession session, Form101? saved, UserProfile employer) {
+  Widget _form101Card(
+      BoardSession session, Form101? saved, EmployerProfile employer) {
     return _FormCard(
       title: '📄 טופס 101 — שנת $_year',
       children: [
@@ -317,16 +327,18 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
   }
 
   /// #106 — the EMPLOYER (מעסיק) read-only block. Pulls name/businessId/address
-  /// from [employer] ([userProfileProvider]); a field with no value is simply
-  /// not rendered (אין המצאות). The hint reflects whether real employer data
-  /// is present ('נמשכים מהקבלן') or absent ('יוחברו עם השרת').
-  Widget _employerSection(UserProfile employer) {
+  /// from [employer] (resolved via the worker→contractor link in
+  /// [employerProfileProvider], NOT the raw device profile); a field with no
+  /// value is simply not rendered (אין המצאות). The hint is driven by
+  /// [EmployerProfile.isEmpty]: linked → 'נמשכים מהקבלן'; no link yet →
+  /// 'יוחברו עם השרת' (honest — the server connection will supply it).
+  Widget _employerSection(EmployerProfile employer) {
     final rows = <(String, String)>[
       ('שם המעסיק', employer.name),
       ('ח.פ / עוסק מורשה', employer.businessId),
       ('כתובת המעסיק', employer.address),
     ].where((r) => r.$2.trim().isNotEmpty).toList();
-    final hasAny = rows.isNotEmpty;
+    final hasAny = !employer.isEmpty;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space3),
@@ -353,7 +365,11 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
                 : 'פרטי המעסיק יוחברו עם השרת',
             style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
           ),
-          if (hasAny) ...[
+          // Render the detail rows only when at least one DISPLAYED field
+          // (name/businessId/address) has a value — `hasAny` (the hint) is
+          // `!isEmpty` which also counts `contact`, so guard the rows on the
+          // displayed-field list to avoid a dangling empty spacer.
+          if (rows.isNotEmpty) ...[
             const SizedBox(height: BsTokens.space2),
             for (final r in rows)
               Padding(
@@ -386,8 +402,9 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
 
   /// #106 — build the printable HTML for the saved/current 101 and hand it to
   /// the print seam (via [_printForm]); honest toast when printing isn't
-  /// available (VM/native). Employer rows reflect the read-only autofill.
-  Future<void> _print101(UserProfile employer) => _printForm(
+  /// available (VM/native). Employer rows reflect the link-resolved read-only
+  /// snapshot ([EmployerProfile] via [employerProfileProvider]).
+  Future<void> _print101(EmployerProfile employer) => _printForm(
         title: 'טופס 101 — שנת $_year',
         rows: [
           (label: 'שם מלא', value: _nameCtl.text.trim()),
@@ -445,9 +462,12 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
       return;
     }
 
-    // #106 — pull the employer snapshot at save-time so a sent/printed copy
-    // keeps it (אין המצאות — only the contractor's real stored fields).
-    final employer = ref.read(userProfileProvider);
+    // #106 honesty fix — pull the employer snapshot at save-time via the
+    // worker→contractor LINK (`session.employerId` → `employerProfileProvider`),
+    // NOT the raw device profile, so a sent/printed copy stamps the contractor
+    // who actually employs this worker (אין המצאות — only real stored fields,
+    // and an empty link stamps empty employer fields honestly).
+    final employer = ref.read(employerProfileProvider(session.employerId));
     ref.read(workerFormsProvider.notifier).saveForm101(Form101(
       username: session.username,
       year: _year,

@@ -32,6 +32,7 @@ class BoardSession {
     required this.displayName,
     this.demo = false,
     this.uid = '',
+    this.employerId = '',
   });
 
   factory BoardSession.fromJson(Map<String, dynamic> j) => BoardSession(
@@ -42,6 +43,9 @@ class BoardSession {
         displayName: j['displayName'] as String? ?? '',
         demo: j['demo'] as bool? ?? false,
         uid: j['uid'] as String? ?? '',
+        // Mirrors `uid` (above) verbatim: default-on-fromJson so OLD persisted
+        // JSON missing the key reads back as '' (back-compat).
+        employerId: j['employerId'] as String? ?? '',
       );
 
   /// Which board this session opens.
@@ -64,6 +68,16 @@ class BoardSession {
   /// login → `''`, exactly as today.
   final String uid;
 
+  /// Wave 0 — the worker→contractor employment link: the id of the contractor
+  /// who employs this worker/courier (the employer the form-101 #106 honesty-
+  /// hole resolves against), or `''` for a store/manager session and for the
+  /// contractor app itself. Mirrors [uid]'s field-economy/back-compat pattern.
+  /// SERVER-SWAP: today this is the demo contractor (`kDemoContractorId`) or a
+  /// seeded account's link; when the backend lands it carries the real
+  /// `contractors/{employerId}` and `boardSessionFromAuthSnapshot` reads it
+  /// from an employer/contractor claim.
+  final String employerId;
+
   Map<String, dynamic> toJson() => {
         'role': role.name,
         'username': username,
@@ -73,11 +87,22 @@ class BoardSession {
         // session's persisted JSON stays byte-identical to today (the
         // flag-OFF zero-regression lock — board_auth_test's persist round-trip).
         if (uid.isNotEmpty) 'uid': uid,
+        // Field economy (mirrors `uid`): write `employerId` ONLY when non-empty
+        // so a store/manager (and pre-Wave-0) session's JSON stays byte-
+        // identical to today — keeps the persist round-trip test green.
+        if (employerId.isNotEmpty) 'employerId': employerId,
       };
 }
 
 /// SharedPreferences key (versioned like the other `bs.*.v1` keys).
 const String kBoardAuthKey = 'bs.board-auth.v1';
+
+/// DEMO-SEED (Wave 0) — the contractor a demo worker/courier is employed by.
+/// One contractor per device today (the seed-driven single-device demo), so a
+/// demo employment link resolves honestly to this single id — no fabricated
+/// employer. SERVER-SWAP: when the backend lands the link is the real Firebase
+/// `contractors/{employerId}` carried on the auth claim, not this constant.
+const String kDemoContractorId = 'contractor-demo';
 
 /// Demo display name per role — the persona titles (`data/personas.dart`), so
 /// a demo session is honestly labeled by its role, not an invented person.
@@ -120,6 +145,12 @@ BoardSession? boardSessionFromAuthSnapshot(AuthSnapshot snap) {
       displayName:
           (name != null && name.isNotEmpty) ? name : kBoardDemoNames[role]!,
       uid: user.uid,
+      // SERVER-SWAP (Wave 0): the employer link comes from an employer/
+      // contractor custom claim once the backend assigns one. AuthSnapshot's
+      // `roles` today are persona-id role claims only (rolesFromClaims) — there
+      // is NO employer/contractor-id claim yet — so this stays '' on the
+      // Firebase path until that claim exists; flip to the claim value here.
+      employerId: '',
     );
   }
   return null;
@@ -213,6 +244,13 @@ class BoardAuthNotifier extends StateNotifier<BoardSession?> {
           role: a.role,
           username: a.username,
           displayName: a.displayName,
+          // Wave 0 — carry the seeded employment link. Only a worker/courier
+          // is employed by a contractor; a store/manager has no employer, so
+          // it stays '' regardless of the seed (the seeds all default '' too).
+          employerId:
+              (a.role == BoardRole.worker || a.role == BoardRole.courier)
+                  ? a.employerId
+                  : '',
         );
         _persist();
         return true;
@@ -230,6 +268,11 @@ class BoardAuthNotifier extends StateNotifier<BoardSession?> {
       username: 'demo',
       displayName: kBoardDemoNames[role]!,
       demo: true,
+      // DEMO-SEED (Wave 0): a demo worker/courier is employed by the single
+      // device contractor; a demo store/manager has no employer.
+      employerId: (role == BoardRole.worker || role == BoardRole.courier)
+          ? kDemoContractorId
+          : '',
     );
     _persist();
   }

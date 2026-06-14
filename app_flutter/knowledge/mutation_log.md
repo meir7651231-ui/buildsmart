@@ -17,6 +17,14 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## employerProfileProvider (גל-0 חיווט קבלן↔עובד) — 2026-06-14
+
+- **קובץ:** `test/employer_link_test.dart`.
+- **מה עושה:** נועל ש-`employerId` ריק → `EmployerProfile.isEmpty` (אין-המצאות מעסיק), ולא-ריק → פותר את הקבלן-על-המכשיר (name/businessId/address/contact).
+- תקלה שהוזרקה: היפוך השומר `if (employerId.isEmpty)` → `isNotEmpty` (כך שלא-ריק מחזיר פרופיל ריק).
+- תוצאה: **אדומה ✅** — 3/3 נכשלו (empty→isEmpty · non-empty→resolves · server-swap-key). ביטול → ירוק ✅.
+- מסקנה: הבדיקה חזקה — תופסת גם אובדן-פתרון וגם המצאת-זהות-מעסיק.
+
 ## kSearchIndex — copy פרסונה canonical (W0 microcopy) — 2026-06-08
 
 - **קובץ:** `test/search_index_persona_copy_test.dart` (חדש).

@@ -4,6 +4,14 @@
 
 ---
 
+## v6.20 — חיווט קבלן↔עובד · גל 0 (בלוק-המעסיק בטופס 101)
+
+**שינוי (מקור-בלבד, ללא שינוי-layout):** `worker_forms_screen.dart` — בלוק '📄 פרטי המעסיק' בטופס 101 עבר ממקור `userProfileProvider` (פרופיל-המכשיר) ל-`employerProfileProvider(session.employerId)` (הקבלן-המקושר, גל 0). אותן שורות read-only, אותו widget; הדלתא הויזואלית היחידה: טקסט-הרמז (`!employer.isEmpty` → 'פרטי המעסיק נמשכים מהקבלן' · ריק → 'פרטי המעסיק יוחברו עם השרת') ושורות-הפירוט מוצגות רק כשיש ערך (`rows.isNotEmpty`). אין שינוי בפריסה/כפתורים/זרימה — ההצהרה+חתימה+שליחה+PDF זהים.
+
+**אימות:** `worker_forms_v2_widget_test.dart` מעלה את כרטיס-101 ומאשר שטקסט-ההצהרה + מקטע-החתימה (✍️) + ה-send-gate מרונדרים אחרי החיווט (ירוק) — מכסה את המקרה הריק (employerId='' → רמז 'יוחברו עם השרת'). המקרה-המקושר source-equivalent (אותו עץ-widget מוזן ב-`EmployerProfile` שנפתר; ה-resolver עצמו נעול ב-`employer_link_test`). analyze 0 · אין רכיב/פריסה חדשים → אין צורך ב-screenshot. (follow-up אפשרי: widget-test ל-render-מקושר.)
+
+---
+
 ## v6.16 — fix-fleet · round-3 (ציד עמוק יותר: data/RTL/UX)
 
 **שינוי:** סבב-3 עמוק (data-integrity · RTL · error-paths) תפס באגים שהסבבים הקודמים פספסו.

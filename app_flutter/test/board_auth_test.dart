@@ -170,4 +170,111 @@ void main() {
     expect(kRoleSwitchCode, '1234',
         reason: 'the password-blocked role switch (#68) gates on this code');
   });
+
+  // ── Wave 0 — employerId spine (worker→contractor employment link) ──────────
+
+  test('employerId — toJson→fromJson round-trips a non-empty link', () {
+    const s = BoardSession(
+      role: BoardRole.worker,
+      username: 'ran',
+      displayName: 'רן',
+      employerId: kDemoContractorId,
+    );
+    final back = BoardSession.fromJson(s.toJson());
+    expect(back.employerId, kDemoContractorId,
+        reason: 'employerId must survive a JSON round-trip (mirrors uid)');
+    expect(s.toJson()['employerId'], kDemoContractorId,
+        reason: 'a non-empty employerId is written to JSON');
+  });
+
+  test('employerId — OLD JSON missing the key reads back as \'\' (back-compat)',
+      () {
+    // Pre-Wave-0 persisted shape: no employerId (and no uid) key at all.
+    final old = BoardSession.fromJson({
+      'role': 'worker',
+      'username': 'omer',
+      'displayName': 'עומר',
+      'demo': false,
+    });
+    expect(old.employerId, '',
+        reason: 'a missing employerId key must default to \'\' (old JSON)');
+  });
+
+  test('employerId — empty link is OMITTED from JSON (byte-identical persist)',
+      () {
+    // The field-economy lock: a store/manager (and pre-Wave-0) session with an
+    // empty employerId AND empty uid must serialize EXACTLY as it did before
+    // either field existed — no new keys leak into the persisted JSON.
+    const s = BoardSession(
+      role: BoardRole.store,
+      username: 'lipskey',
+      displayName: 'ליפסקי',
+    );
+    final json = s.toJson();
+    expect(json.containsKey('employerId'), false,
+        reason: 'an empty employerId must not be written (field economy)');
+    expect(json.containsKey('uid'), false,
+        reason: 'the empty-uid byte-identical persist must stay intact');
+    expect(json, {
+      'role': 'store',
+      'username': 'lipskey',
+      'displayName': 'ליפסקי',
+      'demo': false,
+    }, reason: 'empty-link session JSON is byte-identical to pre-Wave-0');
+  });
+
+  test('enterDemo(worker) — carries the demo contractor link', () async {
+    SharedPreferences.setMockInitialValues({});
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+
+    c.read(boardAuthProvider.notifier).enterDemo(BoardRole.worker);
+    final s = c.read(boardAuthProvider);
+    expect(s!.employerId, kDemoContractorId,
+        reason: 'a demo worker is employed by the device contractor');
+  });
+
+  test('enterDemo(courier) — carries the demo contractor link', () {
+    SharedPreferences.setMockInitialValues({});
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+
+    c.read(boardAuthProvider.notifier).enterDemo(BoardRole.courier);
+    expect(c.read(boardAuthProvider)!.employerId, kDemoContractorId,
+        reason: 'a demo courier is also employed by the device contractor');
+  });
+
+  test('enterDemo(store/manager) — has NO employer link', () {
+    for (final role in const [BoardRole.store, BoardRole.manager]) {
+      SharedPreferences.setMockInitialValues({});
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+
+      c.read(boardAuthProvider.notifier).enterDemo(role);
+      expect(c.read(boardAuthProvider)!.employerId, '',
+          reason: 'a store/manager has no employer ($role)');
+    }
+  });
+
+  test('demo-worker persist round-trip — carries employerId across restart',
+      () async {
+    SharedPreferences.setMockInitialValues({});
+    final c1 = ProviderContainer();
+    c1.read(boardAuthProvider.notifier).enterDemo(BoardRole.worker);
+    await _settle(); // let _persist() finish before "shutting down"
+    c1.dispose();
+
+    // Fresh container = fresh notifier → reloads from prefs (lazy, so touch it).
+    final c2 = ProviderContainer();
+    addTearDown(c2.dispose);
+    c2.read(boardAuthProvider);
+    await _settle();
+
+    final s = c2.read(boardAuthProvider);
+    expect(s, isNotNull,
+        reason: 'the persisted demo session must survive a restart');
+    expect(s!.demo, true);
+    expect(s.employerId, kDemoContractorId,
+        reason: 'the employment link must survive the persist round-trip');
+  });
 }

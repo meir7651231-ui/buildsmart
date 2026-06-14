@@ -21,6 +21,12 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > real items, persisted), made supplier out-of-stock + project names persist, gated notification
 > quiet-hours, seeded profession→catalog-mode, applied store sort/display, and made the
 > service-sheet rows + account-edit leaves honest/editable.
+>
+> **v6.20 — חיווט קבלן↔עובד (server-ready):** גל 0 — שדרת `employerId` ב-`BoardSession`
+> (`board_auth.dart`, מקושר עובד→קבלן, DEMO-SEED מתויג) + `employerProfileProvider`
+> (`employer_link.dart` — חדש) שפותר את פרטי הקבלן-המעסיק. טופס 101 (`worker_forms_screen.dart`)
+> קורא את בלוק-המעסיק דרך הקישור (`session.employerId`) במקום `userProfileProvider` הישיר —
+> סוגר את חור-היושר ב-#106. SERVER-SWAP: `contractors/{employerId}`.
 
 ---
 
