@@ -87,10 +87,20 @@ jobs:
       - name: Install firebase-tools
         run: npm i -g firebase-tools
 
-      - name: Deploy Firestore rules + indexes
+      - name: Deploy Firestore rules
         run: |
           firebase deploy \
-            --only firestore:rules,firestore:indexes \
+            --only firestore:rules \
+            --project buildsmart-b0b78 \
+            --non-interactive
+
+      # Indexes need the "Cloud Datastore Index Admin" role on FIREBASE_SERVICE_ACCOUNT.
+      # Best-effort (403 until the owner grants that IAM) so it never blocks rules/functions.
+      - name: Deploy Firestore indexes (best-effort — needs Datastore Index Admin IAM)
+        continue-on-error: true
+        run: |
+          firebase deploy \
+            --only firestore:indexes \
             --project buildsmart-b0b78 \
             --non-interactive
 
