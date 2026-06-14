@@ -208,7 +208,7 @@ J6 (Google 14-day) מתחיל מוקדם ככל האפשר
 | chats | ✅ נסגר (ff9d69d, מגודר): fromUid + participantUids מאוכלס (A7 role-union) → מסתנכרן/מבודד; דורמנטי עד דגל/F1 → 🟡 | uid |
 | ai_hub | 7/9 כלים = נתונים קבועים | external |
 | camera_sheet | רק ברקוד+פלאש; צילום/גלריה מדומים | device |
-| persona_pod | צילום‑מסירה + חתימה מדומים | device |
+| persona_pod | ✅ (d1b0fea+C2): חתימה אמיתית (signature_pad) + צילום אמיתי; עולה R2 (gated) | device |
 | profession | רק אינסטלטור; חשמלאי/שיפוצים → "בקרוב" | placeholder |
 | notif channels | email/SMS/WhatsApp כבויים | external |
 
