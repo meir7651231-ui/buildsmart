@@ -6,6 +6,14 @@
 >
 > 🔴 **תזכורת‑על (אומת 13/6 @208f3a9):** סדרת‑A (כולל A4‑A6 שנדחפו עכשיו) **code‑complete אך דורמנטית בברירת‑מחדל** — `useFirebaseBackend` כבוי (`backend.dart`), ו‑`firebase_options` web‑only. **דיוק חשוב:** על מכשיר נייטיב Firebase **לא עולה — אבל זו לא קריסה.** `main.dart:51‑59` עוטף ב‑try/catch+timeout, ה‑throw נתפס, והאפליקציה **נופלת ל‑repos מקומיים (דמו)**. כלומר הטלפון רץ אך **לא מדבר עם השרת** עד F1. ✅ מוכח רק על **preview‑web עם הדגל** (10/6). הלוחות: דמו (דגל OFF) = `BoardSession`/seed; **דגל ON = `BoardSession` נבנה מ‑Firebase‑uid (A4' 50465b1).**
 
+> 🔌 **רשימת‑הפעלה ("מדמו → לשרת חי"):** כל פיצ׳ר‑שרת מגודר בדגל נפרד (OFF=דמו byte-identical); להדלקה צריך **backend + דגל**:
+> | דגל | מפעיל | תנאי‑backend (מי) |
+> |---|---|---|
+> | `USE_FIREBASE_BACKEND` | חיבור Firebase כללי | F1 native config (את) |
+> | `kUidScopedQueries` | זהות + scope + צ׳אט per‑uid | rules+indexes פרוסים ✅ |
+> | `SERVER_CALLABLES` | קידום/אשראי דרך השרת | deploy functions (CI) |
+> | `kCloudPhotos` | תמונות ל‑R2 | provision R2 + deploy getUploadUrl (את) |
+
 ---
 
 ## Phase A — ליבת‑uid (חוסם השקה)
@@ -46,7 +54,7 @@
 | C1 | ✅ (4ddb3b9) · להוסיף `image_picker`+`camera` ל‑pubspec | `pubspec.yaml` | plugins נטענים | agent | S |
 | C2 | ✅ (4ddb3b9 · webcam_capture takePicture) · צילום אמיתי (לפני/אחרי, POD, משימה) | `camera_sheet.dart:168` | תמונה נלכדת | agent | M |
 | C3 | גלריית מכשיר אמיתית | `camera_sheet.dart:347` | בחירת תמונה אמיתית | agent | S |
-| C4 | העלאת תמונה ל‑R2 (presigned) | `getUploadUrl` (קיים) + קליינט | תמונה עולה לענן | agent | M |
+| C4 | ✅ (8c6905c): קליינט העלאה ל‑R2 (`upload_functions.dart` + `task_photo.dart`→`getUploadUrl`→PUT) מגודר `kCloudPhotos` (OFF=base64) + fallback · מחווט לקורייר/חנות/עובד · הפעלה: לספק R2+deploy+דגל | `upload_functions.dart`·`task_photo.dart` | תמונה עולה לענן | agent+את | M |
 | C5 | POD: צילום + חתימה אמיתיים | `persona_pod_sheet.dart:197,220` | מסירה עם הוכחה אמיתית | agent | M |
 | C6 | אתר: צילום/GPS אמיתי (+`geolocator`) | `site_hub_screen.dart:826,1175` | מיקום/צילום אמיתי | agent | M |
 | C7 | סריקת‑תוכנית: PDF/מצלמה אמיתי **או** להסתיר | `contractor_tools_sheets.dart:517` | פועל או נעלם | את+agent | M |
