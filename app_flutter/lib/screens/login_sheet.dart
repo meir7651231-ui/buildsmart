@@ -38,6 +38,8 @@ String hebrewAuthError(String code) => switch (code) {
       'wrong-password' ||
       'invalid-credential' =>
         'אימייל או סיסמה שגויים',
+      'email-already-in-use' => 'האימייל כבר רשום — התחברו במקום',
+      'weak-password' => 'סיסמה חלשה (6+ תווים)',
       'invalid-email' => 'כתובת האימייל אינה תקינה',
       'user-disabled' => 'החשבון הושבת — פנה לתמיכה',
       'network-request-failed' => 'אין חיבור לרשת — נסה שוב',
@@ -105,6 +107,11 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
 
   _LoginStep _step = _LoginStep.phone;
   bool _busy = false;
+
+  /// server-gate-auth — within the email pane, toggles between sign-in (false,
+  /// the default — today's "כניסה עם אימייל") and CREATE-account (true, the new
+  /// "צור חשבון" → `createUserWithEmailPassword`). Ephemeral UI state.
+  bool _emailCreateMode = false;
 
   /// The verificationId [AuthGateway.sendOtp] resolved with — consumed by the
   /// code step. Null until a code was sent.
@@ -192,6 +199,30 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
     }
   }
 
+  /// server-gate-auth — CREATE a REAL Firebase account ("צור חשבון"). Success
+  /// lands on the auth stream (the ref.listen below pops the sheet), exactly
+  /// like sign-in; the honest errors (`email-already-in-use` / `weak-password`)
+  /// are Hebrew-toasted.
+  Future<void> _emailCreate() async {
+    final email = _email.text.trim();
+    final password = _password.text;
+    if (email.isEmpty || password.isEmpty) {
+      showToast(context, 'הזן אימייל וסיסמה');
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      await ref
+          .read(authStateProvider.notifier)
+          .createUserWithEmailPassword(email, password);
+      if (mounted) setState(() => _busy = false);
+    } on AuthGatewayException catch (e) {
+      _fail(hebrewAuthError(e.code));
+    } on Object catch (_) {
+      _fail(hebrewAuthError('unknown'));
+    }
+  }
+
   void _fail(String message) {
     if (!mounted) return;
     setState(() => _busy = false);
@@ -248,7 +279,9 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
               switch (_step) {
                 _LoginStep.phone => 'נשלח לך קוד אימות חד-פעמי ב-SMS',
                 _LoginStep.code => 'הקוד נשלח אל $_sentTo',
-                _LoginStep.email => 'כניסה עם אימייל וסיסמה',
+                _LoginStep.email => _emailCreateMode
+                    ? 'יצירת חשבון חדש עם אימייל וסיסמה'
+                    : 'כניסה עם אימייל וסיסמה',
               },
               style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
             ),
@@ -341,13 +374,33 @@ class _LoginSheetState extends ConsumerState<LoginSheet> {
         const SizedBox(height: BsTokens.space3),
         _field(
           controller: _password,
-          hint: 'סיסמה',
+          hint: _emailCreateMode ? 'סיסמה (6+ תווים)' : 'סיסמה',
           icon: Icons.lock_outline,
           obscure: true,
         ),
         const SizedBox(height: BsTokens.space3),
-        _primaryButton(label: 'כניסה עם אימייל', onPressed: _emailLogin),
+        // server-gate-auth — the primary action follows the mode: sign-in
+        // (today's "כניסה עם אימייל") or CREATE a real Firebase account.
+        _primaryButton(
+          label: _emailCreateMode ? 'צור חשבון' : 'כניסה עם אימייל',
+          onPressed: _emailCreateMode ? _emailCreate : _emailLogin,
+        ),
         const SizedBox(height: BsTokens.space2),
+        // server-gate-auth — flip between sign-in and create-account in place.
+        TextButton(
+          onPressed: _busy
+              ? null
+              : () => setState(() => _emailCreateMode = !_emailCreateMode),
+          child: Text(
+            _emailCreateMode
+                ? 'כבר יש לי חשבון — כניסה'
+                : 'אין לי חשבון — צור חשבון',
+            style: const TextStyle(
+              color: BsTokens.brandDark,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
         TextButton(
           onPressed: _busy
               ? null
