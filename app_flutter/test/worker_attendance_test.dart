@@ -239,6 +239,13 @@ void main() {
     // report yet.
     expect(find.text('🕐 נוכחות'), findsOneWidget,
         reason: 'the worker attendance board rendered, not the gate');
+    // #105 — the send button now sits below the monthly calendar grid inside a
+    // lazy ListView, so scroll it into view before asserting/tapping.
+    await tester.scrollUntilVisible(
+      find.text('📨 שלח דוח נוכחות לקבלן'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('📨 שלח דוח נוכחות לקבלן'), findsOneWidget,
         reason: 'the seeded month has records → the send button is active');
     expect(find.text('הדוח נשלח ✓'), findsNothing);

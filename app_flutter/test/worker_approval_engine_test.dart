@@ -173,7 +173,16 @@ void main() {
       // carries the keyed submit button (title also appears in the today-strip,
       // so scroll directly to the unique keyed pill).
       final submit = find.byKey(const ValueKey('submit-1'));
-      await t.scrollUntilVisible(submit, 200);
+      // #113 journal home: the current-task card sits below the week-strip +
+      // day-attendance + summary in the lazy body ListView, so the keyed submit
+      // pill lands just past the fold. It is BUILT (within the cacheExtent) but
+      // off-screen, so scrollUntilVisible would no-op (the finder already
+      // matches the tree) and tap() would miss. ensureVisible scrolls the
+      // button's OWN enclosing ListView until it is truly on-screen + hittable
+      // (scrollUntilVisible targets the FIRST Scrollable — the horizontal
+      // week-strip — which cannot bring a vertical-list child into view).
+      await t.ensureVisible(submit);
+      await settle(t);
       expect(submit, findsOneWidget);
 
       await t.tap(submit);

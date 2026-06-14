@@ -55,6 +55,9 @@ void main() {
     // App chrome + verbatim content (the רן/עומר toggle is gone — #66: the
     // logged worker sees only their own board).
     expect(find.text('🦺 עובד'), findsOneWidget);
+    // #113 — the home is now a JOURNAL: the week-strip + day-attendance cards
+    // lead, so the greeting/summary card sits below them in the lazy ListView.
+    await tester.scrollUntilVisible(find.textContaining('שלום, רן'), 120);
     expect(find.textContaining('שלום, רן'), findsOneWidget);
     // v2: the 'היום שלי' strip sits above the buckets, pushing the queue
     // header below the fold of the lazy ListView — scroll to each section.
