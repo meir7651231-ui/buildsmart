@@ -35,9 +35,9 @@
 | B2 | ✅ (ebb4efd · הוסתרו) · מקצועות: לבנות חשמלאי+שיפוצים **או** להסתיר | `profession_screen.dart:11` | אין "בקרוב" במקצוע | את+agent | L |
 | B3 | ✅ (ebb4efd · הוסתרו) · מחלקות: 4 dormant — לבנות **או** להסתיר | `departments_screen.dart:96` (live:false) | אין מחלקה מתה | את+agent | M |
 | B4 | ✅ (5a379a2 · הוסתרו) · קטלוג: קטגוריות ריקות — דאטה **או** להסתיר | `catalog_screen.dart:3041` | אין "בקרוב" בקטלוג | agent | M |
-| B5 | 🟡 חלקי (950757d · קטלוג: מע"מ/מטבע/יחידה/פורמט חי) · הגדרות מתות (~28) → להסתיר עד מימוש | `*_settings_screen.dart` | אין "נשמר אך לא משפיע" | agent | M |
+| B5 | 🟡 התקדם (950757d קטלוג חי · 6f9b562+1309a78: 4 הגדרות‑חנות חוּוטו לאמת — shareCartWithTeam/supplierCredit/defaultAddress/purchaseHistory) · **גישה: מלא‑אם‑אפשר, אחרת 'בבנייה' ביושר** · נותרו רבות חסומות‑שרת/דאטה | `*_settings_screen.dart` · WIRING.md | אין "נשמר אך לא משפיע" בר‑חיווט | agent | M |
 | B6 | חיפוש: פילטרים/מיון — לממש **או** להסתיר | `catalog_screen.dart:1108` · search dial | פועל או נעלם | agent | M |
-| B7 | dial leaves "בבנייה" (BS persona / cart / store quick‑actions) — להחליט פר‑עלה | `sections.dart`/`menu_trees.dart`/`store_screen.dart` | אין עלה‑מת גלוי | את+agent | L |
+| B7 | 🟡 חלקי (00beac4: אריח‑מועדף + "הזמן עכשיו"→סל אמיתי תוקנו) · נותרו עלי‑dial "בבנייה" — להחליט פר‑עלה | `sections.dart`/`menu_trees.dart`/`store_screen.dart` | אין עלה‑מת גלוי | את+agent | L |
 | B8 | 🟡 מגודר ב‑useFirebaseBackend (576036c — flag OFF=דמו) · הרשמה אמיתית למשתמש חדש (לא local‑only) | `welcome_screen.dart` | נרשם → חשבון אמיתי | agent | M |
 
 ## Phase C — חומרת מכשיר
@@ -50,9 +50,9 @@
 | C5 | POD: צילום + חתימה אמיתיים | `persona_pod_sheet.dart:197,220` | מסירה עם הוכחה אמיתית | agent | M |
 | C6 | אתר: צילום/GPS אמיתי (+`geolocator`) | `site_hub_screen.dart:826,1175` | מיקום/צילום אמיתי | agent | M |
 | C7 | סריקת‑תוכנית: PDF/מצלמה אמיתי **או** להסתיר | `contractor_tools_sheets.dart:517` | פועל או נעלם | את+agent | M |
-| C8 | 🔴 share_plus dead-dep (0 קריאות → להפעיל/להסיר) · שיתוף אמיתי (`share_plus` כבר ב‑pubspec) | `store_screen.dart:3104` · rewards | sheet‑שיתוף OS | agent | S |
+| C8 | ✅ (00beac4): share_plus מחווט (`state/share_seam.dart`→`Share.share`, שיתוף‑סל) · sheet‑שיתוף OS אמיתי | `state/share_seam.dart` · store/rewards | sheet‑שיתוף OS | agent | S |
 | C9 | ביומטרי: `local_auth` + חיווט **או** להסתיר | settings | אימות אמיתי או נעלם | את+agent | M |
-| C10 | הרשאות + manifest entries פר‑plugin | Android/iOS manifests | אין קריסת‑הרשאה | agent | S |
+| C10 | 🟡 (685299d: iOS `NSPhotoLibraryUsageDescription` נוסף — גלריה בלי crash + תאימות App Store) · נותרו שאר הרשאות פר‑plugin | Android/iOS manifests | אין קריסת‑הרשאה | agent | S |
 
 ## Phase D — תשלום
 | ID | משימה | מי | מ' |
@@ -68,7 +68,7 @@
 | E1 | מזג‑אוויר API | `ai_hub` weather · `site diary` | את+agent | M |
 | E2 | שערי‑מטבע API + המרה | `finance_hub kFxRates` · `catalog currency` | agent | M |
 | E3 | AI/LLM אמיתי | `ai_hub` 7 כלים · chat bot | את+agent | L |
-| E4 | יצירת PDF אמיתית | `finance_hub` reports | agent | M |
+| E4 | 🟡 (00beac4): `printing` מחווט (`state/pdf_print_seam.dart`→`Printing.layoutPdf`, web+נייטיב) · דאטת‑הדוח עוד עשויה להיות דוגמה | `finance_hub` reports · `state/pdf_print_seam.dart` | agent | M |
 | E5 | ספק email/SMS/WhatsApp | `notif channels` | את+agent | M |
 
 ## שיחות / וידאו (החלטה 13/6 — מאושר ע"י המשתמש)
