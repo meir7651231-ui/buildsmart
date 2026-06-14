@@ -289,13 +289,26 @@ service cloud.firestore {
       return resource.data.get('contractorUid', '') == request.auth.uid;
     }
 
-    // create: contractor, always at the flow head ('new'), bound to the author
-    //   (`contractorUid == uid` — an order cannot be created in someone else's
-    //   name; the LANDED A3 uid field, see ownsOrder above). manager/admin may
-    //   also create at any legal stage (dashboard/seed/reset tooling). NOTE: the
-    //   current contractor client must stamp contractorUid (signed-in) for its
+    // create: the placer of an order, always at the flow head ('new'), bound to
+    //   the author (`contractorUid == uid` — an order cannot be created in
+    //   someone else's name; the LANDED A3 uid field, see ownsOrder above).
+    //   manager/admin may also create at any legal stage (dashboard/seed/reset
+    //   tooling). NOTE: the client must stamp contractorUid (signed-in) for its
     //   own create to pass — an empty contractorUid (signed-out / pre-A3 path)
     //   is denied creation by design, which is the intended hardening.
+    //   ⚠️ Phase-G FIX (cross-device sync): the create gate keys on the
+    //   OWNERSHIP UID (`contractorUid == auth.uid`), NOT on `hasRole('contractor')`.
+    //   The `contractor` IDENTITY is the app's DEFAULT no-claim persona — the
+    //   `setRole` callable + manager_role_assign_sheet only ever mint the SPECIAL
+    //   roles (manager/store/courier/worker) and DELIBERATELY never assign
+    //   'contractor' (see manager_role_assign_sheet.dart's RoleOption doc). So a
+    //   real signed-in contractor carries NO role claim → `hasRole('contractor')`
+    //   was ALWAYS false → every contractor's order create was DENIED, the
+    //   guarded background `set` swallowed the permission-denied, and the order
+    //   (shown optimistically on the placing device) NEVER reached Firestore →
+    //   it never synced to the same account's other devices. Gating on the uid
+    //   the order is bound to is the correct, equally-strict ownership check (the
+    //   author still cannot forge another uid; still pinned to stage 'new').
     // update: transition-per-role — claim-on-first-advance + shared pool (A4) —
     //   store:   new→preparing→ready, may CLAIM `storeUid` (empty→own only,
     //            no-steal); bound to its claim OR the un-claimed pool; the diff
@@ -320,7 +333,7 @@ service cloud.firestore {
                   || (hasRole('store') && inStorePool())
                   || (hasRole('courier') && inCourierPool())))
           ;
-      allow create: if (hasRole('contractor')
+      allow create: if (isSignedIn()
               && request.resource.data.stage == 'new'
               && request.resource.data.get('contractorUid', '')
                   == request.auth.uid)
@@ -421,6 +434,15 @@ service cloud.firestore {
           || (isSignedIn()
               && resource.data.get('ownerId', '') == request.auth.uid);
       allow write: if isManager();
+    }
+
+    // ── diag/{uid} — TEMPORARY on-device self-test (cross-device-sync probe) ──
+    // The BackendDebugBadge (FS_DIAG build) writes diag/{uid} then reads it back
+    // to prove "connected + persists" INDEPENDENT of role — the baseline the
+    // owner asked for. Self-only (doc-id == auth.uid), so no user can touch
+    // another's probe. REMOVE this rule together with the badge after go-live.
+    match /diag/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
     // ── default — S5 deny-by-default ─────────────────────────────────────────

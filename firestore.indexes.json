@@ -15,10 +15,12 @@
     "  1. orders (contractorUid ASC, ts DESC) — LANDED (uid-A3, commit 24b5bc2).",
     "     The contractor scoped listen where('contractorUid'==uid).orderBy('ts'",
     "     desc) — newest-first own orders. ACTIVE NOW (contractorUid is written).",
-    "  2. orders (storeId ASC, ts DESC) — FORWARD-READY. storeId not yet written",
-    "     (orders_firebase toDoc omits it); ship so the store scoped listen lights",
-    "     up the moment an A-phase stamps it (no second deploy / index-build wait).",
-    "  3. orders (courierId ASC, ts DESC) — FORWARD-READY (same as storeId).",
+    "  2. orders (storeUid ASC, ts DESC) — ACTIVE. storeUid IS written (A4 claim;",
+    "     orders_firebase toDoc line 86). Serves the store scoped listen's OWN leg",
+    "     where('storeUid'==uid).orderBy('ts' desc). MUST be storeUid (not storeId)",
+    "     to match the written field + _ordersScopeFor's store branch — a storeId",
+    "     index would never serve the storeUid query (failed-precondition).",
+    "  3. orders (courierUid ASC, ts DESC) — ACTIVE (same as storeUid; toDoc 87).",
     "  4. customers (ownerId ASC, used DESC) — FORWARD-READY. ownerId not yet",
     "     written; keeps the spend-desc order mgrCustomerList uses for the owner",
     "     scoped list once ownerId lands.",
@@ -49,7 +51,7 @@
       "collectionGroup": "orders",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "storeId", "order": "ASCENDING" },
+        { "fieldPath": "storeUid", "order": "ASCENDING" },
         { "fieldPath": "ts", "order": "DESCENDING" }
       ]
     },
@@ -57,7 +59,7 @@
       "collectionGroup": "orders",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "courierId", "order": "ASCENDING" },
+        { "fieldPath": "courierUid", "order": "ASCENDING" },
         { "fieldPath": "ts", "order": "DESCENDING" }
       ]
     },

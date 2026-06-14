@@ -96,8 +96,9 @@ class FirestoreCollectionSource implements RemoteCollectionSource {
   /// caller relies on, so adding this parameter is a ZERO-REGRESSION change.
   /// A repo that must satisfy a participant-scoped Security Rule passes a
   /// builder here so the listen is one the rule can prove — e.g. orders
-  /// `(c) => c.where('contractorId', isEqualTo: uid)` or chat
-  /// `(c) => c.where('participants', arrayContains: uid)`. Writes are by
+  /// `(c) => c.where('contractorUid', isEqualTo: uid)` (the LANDED A3 ownership
+  /// field `ownsOrder` keys on — NOT `contractorId`, which is the display name)
+  /// or chat `(c) => c.where('participants', arrayContains: uid)`. Writes are by
   /// doc-id and are unaffected.
   final Query<Map<String, dynamic>> Function(
       CollectionReference<Map<String, dynamic>>)? _scope;

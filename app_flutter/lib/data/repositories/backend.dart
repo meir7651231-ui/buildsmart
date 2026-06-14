@@ -133,6 +133,17 @@ const bool kCloudPhotos = bool.fromEnvironment('CLOUD_PHOTOS');
 /// WITHOUT calling `activate`.
 const bool kAppCheckProd = bool.fromEnvironment('APP_CHECK_PROD');
 
+/// TEMPORARY launch diagnostic gate (cross-device-sync investigation). When set
+/// (`--dart-define=FS_DIAG=true`) the on-device `BackendDebugBadge` is mounted in
+/// a RELEASE/profile build too (it is normally `kDebugMode`-only), so a tester
+/// running the real signed APK can run the Firestore self-test and SEE the exact
+/// failure (`permission-denied` / `failed-precondition` + a create-index URL /
+/// network) that a guarded background write otherwise swallows silently. Default
+/// OFF → the shipped build is BYTE-IDENTICAL to today (the badge stays
+/// debug-only). REMOVE this flag + the badge after the sync issue is confirmed
+/// fixed on-device.
+const bool kFsDiag = bool.fromEnvironment('FS_DIAG');
+
 /// F2 — the web reCAPTCHA v3 site key for App Check. Empty (default) → the web
 /// App Check path stays SKIPPED exactly as today; supply it at build time to
 /// activate web attestation alongside the native [kAppCheckProd] providers:

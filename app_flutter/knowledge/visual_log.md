@@ -1066,3 +1066,20 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 **שינוי (גלוי רק כש-`useFirebaseBackend` ON):** מסך-welcome "אישור והמשך" קיבל **שדה-סיסמה** ויוצר חשבון-Firebase אמיתי (במקום register-מקומי); ל-login_sheet email-pane נוסף toggle **"צור חשבון"**; כניסת-"דמו" מסומנת בבירור כדמו; profile — שורת-כניסה + 🚪 התנתקות. flag OFF = הזרימה הנוכחית verbatim (אפס-רגרסיה).
 **אימות (בדיקת-widget):** `login_sheet_test` +20 (create-account · toasts-עבריים · role-gate · profile login/logout/delete) · `welcome_auth_gate_test` · analyze 0-errors · full-suite **+2475 -1** (baseline) · build web ✅ · mutation red `+10 -2`→green +20 (§mutation_log).
+
+## #order-sync-fix — באדג'-דיאגנוסטיקה מורחב (4 צעדי self-test) + תיקון סנכרון-הזמנות — 2026-06-14
+
+**שינוי גלוי (דיאגנוסטיקה בלבד, זמני):** ה-`BackendDebugBadge` הקיים (הצ'יפ בראש-המסך 🟢שרת/🔴דמו) הורחב: כפתור "🔌 בדוק חיבור לשרת" כעת מריץ **4 צעדים** ומדפיס שורת-תוצאה לכל אחד (✅ או ❌+הקוד-המדויק):
+1. **כתיבה/קריאה `diag/{uid}`** — "מחובר ומשהו נשמר?" (ה-baseline שהבעלים ביקש).
+2. **כתיבת `users/{uid}`** — מותר לכל מחובר (אין-תפקיד) ⇒ מבדיל "מחובר" מ-"אין-תפקיד".
+3. **שאילתת ההזמנות שלי** — `where('contractorUid'==uid).orderBy('ts' desc).limit(1)`, **בדיוק** הקריאה שהמכשיר-השני מריץ; index-חסר מופיע כאן כ-`failed-precondition` + **ה-URL ליצירת-index**.
+4. **יצירת הזמנה (בדיקה)** — כותב מסמך-הזמנה-עצמי אמיתי (ואז מנקה); דחיית-rules מופיעה כאן כ-`permission-denied` — **זה ה-smoking-gun** של הבאג (ההזמנה לא מגיעה לשרת).
+הכותרת: כש-הכול עבר → "✅ הכול עבר! ההזמנות יסונכרנו בין המכשירים"; אחרת → "❌ נמצאה תקלה — הצעד שנכשל מראה את הקוד המדויק".
+
+**איך מפעילים:** ב-debug — הבאדג' תמיד מורכב; ב-APK-חתום (release) — `flutter build … --dart-define=FS_DIAG=true` (+`--dart-define=USE_FIREBASE_BACKEND=true`), אז להקיש על הצ'יפ → "בדוק חיבור לשרת". (בלי `FS_DIAG` ה-release לא מראה כלום — מדיניות-הבעלים.)
+
+**אין screenshot — למה:** הצ'יפ קיים מראש (אותו עץ-widget, אותו צבע/פריסה — `modeColor`/`_panel` קיימים); השינוי הוא **תוכן-טקסט** (4 שורות-תוצאה במקום 1) בתוך אותו פאנל. אין מצב-ויזואלי-חדש מלבד טקסט-תוצאה — הלוגיקה (מיפוי הצלחה/שגיאה→שורה) מאומתת ב-`fsDiagStepResult` (4 טסטים headless). ה-self-test האמיתי מול Firestore = on-device בלבד (לא headless).
+
+**OFF byte-identical:** `kFsDiag` + `kUidScopedQueries` שניהם compile-time OFF ⇒ ה-gate `debugOverlayChildren` נשאר `isDebug` בלבד (release לא-מראה כלום), וה-scope של ה-orders נשאר whole-collection — בדיוק כהיום. ה-rules+index הם server-side (אינם משפיעים על בייטי-האפליקציה). אפס `Color(0x…)`/`value:`/`activeColor:` חדש (השתמשתי בקבועי-הצבע הקיימים בקובץ).
+
+**הפיך:** הדיאגנוסטיקה + ה-flag `FS_DIAG` מסומנים "REMOVE after go-live"; ה-fix של ה-rules/index הוא קבוע (תיקון-באג). **אימות:** `orders_sync_scope_index_diag_test` 13/13 (scope-fields · index↔toDoc · 4 mappings) · `debug_badge_gate_test` נשאר ירוק (FS_DIAG=false בטסט ⇒ gate ללא-שינוי) · analyze 0-errors · full-suite (ה-`-1` היחיד = `worker_reports_drilldown` baseline) · build web ✅ · mutation red `+5 -1`→green `+11` (§mutation_log). **לא נגעתי:** worker-board / 4 מחלקות / auth-gate / firebase_options / manager-credit / geo.

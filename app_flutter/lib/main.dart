@@ -223,11 +223,20 @@ Future<void> main() async {
 /// [isDebug] is `kDebugMode == false`, so this returns an empty list and the
 /// shipped build shows NOTHING. The widget itself is kept for dev use.
 ///
-/// Pure + `@visibleForTesting` so the gate is asserted directly for both flag
-/// values without flipping the `kDebugMode` const at runtime.
+/// TEMPORARY [fsDiag] override (cross-device-sync investigation): when the
+/// `FS_DIAG` build flag is set, the badge is ALSO mounted in a release/profile
+/// build, so a tester on the real signed APK can run the Firestore self-test and
+/// see the exact denial that a guarded background write swallows. Default OFF →
+/// the shipped build is BYTE-IDENTICAL (debug-only). Remove with the badge.
+///
+/// Pure + `@visibleForTesting` so the gate is asserted directly for all flag
+/// combinations without flipping the `kDebugMode` const at runtime.
 @visibleForTesting
-List<Widget> debugOverlayChildren({required bool isDebug}) =>
-    isDebug ? const [BackendDebugBadge()] : const [];
+List<Widget> debugOverlayChildren({
+  required bool isDebug,
+  bool fsDiag = kFsDiag,
+}) =>
+    (isDebug || fsDiag) ? const [BackendDebugBadge()] : const [];
 
 class BuildSmartApp extends ConsumerWidget {
   const BuildSmartApp({super.key});
@@ -286,7 +295,8 @@ class BuildSmartApp extends ConsumerWidget {
                 child ?? const SizedBox(),
                 // OWNER POLICY: the launch-diagnostic badge is dev-only — gated
                 // by kDebugMode so a release/web build shows NOTHING (see
-                // debugOverlayChildren). Kept in code for dev.
+                // debugOverlayChildren), UNLESS the temporary FS_DIAG flag is set
+                // (release self-test for the cross-device-sync investigation).
                 ...debugOverlayChildren(isDebug: kDebugMode),
               ],
             ),
