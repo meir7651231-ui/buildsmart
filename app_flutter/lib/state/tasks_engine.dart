@@ -508,6 +508,110 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
 
   void resetToSeed() => state = _seedTasks();
 
+  // ───────────────────────────────────────────────────────────────────────
+  // CONTRACTOR AUTHORING (Wave T2a, ADDITIVE) — the employer creates / edits /
+  // (re)assigns a task on the SINGLE [tasksProvider], so the worker board
+  // (filtered by [TaskItem.worker] / [assignedWorkerUid]) reflects it LIVE.
+  // These do NOT touch the seed/overlay/persist machinery above — they ride the
+  // public `state` setter (which persists) exactly like the existing mutators.
+  // ───────────────────────────────────────────────────────────────────────
+
+  /// CONTRACTOR "משימה חדשה" — mint a fresh task and append it to the live list.
+  /// The id is `max(existing ids)+1` (1 on an empty list); the initial status is
+  /// the seed's not-yet-started bucket (`'pending'`, matching the [kPersonaTasks]
+  /// queued seeds). [employerId]/[assignedWorkerUid] are stamped
+  /// WRITE-WHEN-NON-EMPTY (the uid economy — empty leaves the field '' so the
+  /// demo path stays byte-identical). The int [worker] is the demo-fallback
+  /// addressing the worker board filters on. Returns the new task's id.
+  int createTask({
+    required String name,
+    String detail = '',
+    int days = 1,
+    List<String> steps = const [],
+    int worker = 0,
+    String assignedWorkerUid = '',
+    String employerId = '',
+  }) {
+    final id =
+        state.isEmpty ? 1 : (state.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1);
+    final emp = employerId.trim();
+    final uid = assignedWorkerUid.trim();
+    state = [
+      ...state,
+      TaskItem(
+        id: id,
+        name: name,
+        detail: detail,
+        worker: worker,
+        status: 'pending',
+        days: days,
+        steps: steps,
+        employerId: emp,
+        assignedWorkerUid: uid,
+      ),
+    ];
+    return id;
+  }
+
+  /// CONTRACTOR edit — patch a task's authored fields (name/detail/days/steps),
+  /// leaving the runtime state (status/photo/note/clock/doneSteps/identity/order)
+  /// untouched. A null arg keeps the current value. No-op on an unknown id.
+  /// Builds a new [TaskItem] directly because [copyWith] (the worker-runtime
+  /// patcher) intentionally does not expose these authored fields.
+  void editTask(int id,
+      {String? name, String? detail, int? days, List<String>? steps}) {
+    _patch(
+      id,
+      (t) => TaskItem(
+        id: t.id,
+        name: name ?? t.name,
+        detail: detail ?? t.detail,
+        worker: t.worker,
+        status: t.status,
+        days: days ?? t.days,
+        steps: steps ?? t.steps,
+        photo: t.photo,
+        note: t.note,
+        startedAt: t.startedAt,
+        completedAt: t.completedAt,
+        doneSteps: t.doneSteps,
+        orderId: t.orderId,
+        employerId: t.employerId,
+        assignedWorkerUid: t.assignedWorkerUid,
+      ),
+    );
+  }
+
+  /// CONTRACTOR (re)assign — point a task at a different worker. The int [worker]
+  /// is the demo-fallback addressing (the worker board filters on it);
+  /// [assignedWorkerUid] is the server-ready uid, stamped WRITE-WHEN-NON-EMPTY
+  /// (empty/null leaves it unchanged). No-op on an unknown id. Both optional so a
+  /// caller can move the demo index, stamp the uid, or both.
+  void assignTask(int id, {int? worker, String? assignedWorkerUid}) {
+    final uid = assignedWorkerUid?.trim();
+    _patch(
+      id,
+      (t) => TaskItem(
+        id: t.id,
+        name: t.name,
+        detail: t.detail,
+        worker: worker ?? t.worker,
+        status: t.status,
+        days: t.days,
+        steps: t.steps,
+        photo: t.photo,
+        note: t.note,
+        startedAt: t.startedAt,
+        completedAt: t.completedAt,
+        doneSteps: t.doneSteps,
+        orderId: t.orderId,
+        employerId: t.employerId,
+        assignedWorkerUid:
+            (uid != null && uid.isNotEmpty) ? uid : t.assignedWorkerUid,
+      ),
+    );
+  }
+
   /// SERVER-SWAP seam (Wave T1): bind the engine to the live Firestore-backed
   /// tasks repository — mirrors `orders_engine.dart:bindRemote` (bind-once,
   /// store the repo, immediate refresh). Wave T3 fills `tasks_firebase.dart`

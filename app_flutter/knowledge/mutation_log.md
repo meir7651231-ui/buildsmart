@@ -17,6 +17,13 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## TasksNotifier.createTask — id-minting (גל T2) — 2026-06-14
+
+- **קובץ:** `test/contractor_task_authoring_test.dart` (headline: קבלן יוצר → עובד רואה חי, id חדש = 6).
+- תקלה שהוזרקה: id-minting `+1`→`+0` (התנגשות עם max seed id).
+- תוצאה: **אדומה ✅** — 3 טסטי-יצירה נכשלו (id מתנגש, headline). שחזור → ירוק ✅.
+- מסקנה: הבדיקה חזקה — נועלת מינטינג-id ייחודי + הופעת-המשימה-בסקופ-העובד.
+
 ## TasksNotifier.approve — orderId→advance fold (גל T1) — 2026-06-14
 
 - **קובץ:** `test/worker_approval_engine_test.dart` (אישור משימה-מקושרת → ההזמנה מתקדמת, open-orders 4→3).

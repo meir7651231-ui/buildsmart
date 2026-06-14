@@ -9,7 +9,13 @@
 
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
+// Wave T2a — contractor authoring stamps the employer id (kDemoContractorId on
+// the single-device demo, SERVER-SWAP to the real contractor uid) + reads the
+// LIVE review queue projection for the parallel contractor-approval surface.
+import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:buildsmart/state/worker_tasks_engine.dart'
+    show pendingApprovalTasksProvider;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
@@ -84,6 +90,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   // ── MANAGER view (proto :8068-8081) ──────────────────────────────────────
+  // CONTRACTOR surface (Wave T2a, additive): this same role is the employer's
+  // task view — it now also AUTHORS tasks (＋ משימה חדשה / edit a card) and
+  // APPROVES submitted ones (the parallel contractor-approval block, on the
+  // same review queue the manager dashboard uses — _waveT2 PARKED decision).
   List<Widget> _managerView(List<TaskItem> tasks) {
     final review = tasks.where((t) => t.status == 'review').toList();
     final active = tasks
@@ -96,17 +106,73 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         'אתה רואה את כל משימות הצוות. אשר עבודות שהוגשו ועקוב אחרי ההתקדמות.',
       ),
       const SizedBox(height: BsTokens.space2),
+      // ＋ AUTHORING (Wave T2a) — open the create sheet (worker defaults to the
+      // currently-picked worker index, a sensible starting assignment).
+      _NewTaskButton(onTap: () => _openAuthor(context)),
+      const SizedBox(height: BsTokens.space2),
       _LogButton(onTap: () => _openWorkLog(context)),
+      // CONTRACTOR APPROVAL (Wave T2a) — the employer's own אשר/דחה surface on
+      // the LIVE review queue (parallel to the manager dashboard's block).
+      ..._contractorApprovals(),
       if (tasks.isEmpty)
         const _DoneAll('אין משימות לצוות עדיין — משימות חדשות יופיעו כאן'),
       if (review.isNotEmpty)
-        _Group('📸 ממתין לאישור שלך (${review.length})', review, _open),
+        _Group('📸 ממתין לאישור שלך (${review.length})', review, _open,
+            onEdit: _openEdit),
       if (active.isNotEmpty)
-        _Group('🔨 בביצוע עכשיו (${active.length})', active, _open),
+        _Group('🔨 בביצוע עכשיו (${active.length})', active, _open,
+            onEdit: _openEdit),
       if (pending.isNotEmpty)
-        _Group('⏳ ממתינות בתור (${pending.length})', pending, _open),
+        _Group('⏳ ממתינות בתור (${pending.length})', pending, _open,
+            onEdit: _openEdit),
       if (done.isNotEmpty)
-        _Group('✅ הושלמו ואושרו (${done.length})', done, _open),
+        _Group('✅ הושלמו ואושרו (${done.length})', done, _open,
+            onEdit: _openEdit),
+    ];
+  }
+
+  // ── CONTRACTOR approval section (Wave T2a) ───────────────────────────────
+  // Reads `pendingApprovalTasksProvider` (the LIVE `review` queue projected to
+  // PersonaTask, id-sorted) and decides via the existing
+  // `tasksProvider.notifier.approve/reject` — the SAME engine path the manager
+  // dashboard uses (parallel, not relocated). Empty → the section is omitted.
+  List<Widget> _contractorApprovals() {
+    final pending = ref.watch(pendingApprovalTasksProvider);
+    if (pending.isEmpty) return const [];
+    return [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(BsTokens.space1, BsTokens.space4,
+            BsTokens.space1, BsTokens.space2),
+        child: Text('✅ אישורי עובדים (קבלן) (${pending.length})',
+            style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w800,
+                fontSize: 15)),
+      ),
+      for (final t in pending)
+        _ApprovalCard(
+          key: ValueKey('contractor-approval-${t.id}'),
+          name: t.name,
+          workerLabel: kWorkers[t.worker],
+          onApprove: () async {
+            final ok = await confirmDestructive(
+              context,
+              title: 'אישור המשימה?',
+              message: 'המשימה תסומן כהושלמה — פעולה סופית.',
+              confirmLabel: 'אשר',
+              confirmColor: const Color(0xFF1F8A4C),
+            );
+            if (!ok || !context.mounted) return;
+            ref.read(tasksProvider.notifier).approve(t.id);
+            showToast(context, '✅ אושר: ${t.name}');
+          },
+          onReject: () async {
+            final why = await promptRejectReason(context);
+            if (why == null || !context.mounted) return;
+            ref.read(tasksProvider.notifier).reject(t.id, reason: why);
+            showToast(context, '↩️ נדחה: ${t.name}');
+          },
+        ),
     ];
   }
 
@@ -151,6 +217,28 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (_) => const _WorkLogSheet(),
+    );
+  }
+
+  // CONTRACTOR authoring (Wave T2a) — open the create sheet; the new task is
+  // assigned to the currently-picked worker by default (a sensible start).
+  void _openAuthor(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _TaskAuthorSheet(initialWorker: _worker),
+    );
+  }
+
+  // CONTRACTOR edit (Wave T2a) — open the same sheet seeded from an existing
+  // task; saving patches it via editTask/assignTask (status untouched).
+  void _openEdit(TaskItem t) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _TaskAuthorSheet(edit: t, initialWorker: t.worker),
     );
   }
 }
@@ -274,6 +362,99 @@ class _LogButton extends StatelessWidget {
       );
 }
 
+/// ＋ "משימה חדשה" — the contractor authoring affordance (Wave T2a). Brand-
+/// filled to read as the primary action, sitting above the work-log button.
+class _NewTaskButton extends StatelessWidget {
+  const _NewTaskButton({required this.onTap});
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => Material(
+        color: BsTokens.brand,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        elevation: 1,
+        shadowColor: Colors.black26,
+        child: InkWell(
+          key: const ValueKey('task-new'),
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(BsTokens.space4),
+            child: Text(
+              '＋ משימה חדשה',
+              style: TextStyle(
+                color: bsOnAccent(context),
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+/// One row in the contractor's "אישורי עובדים (קבלן)" section (Wave T2a) — a
+/// submitted task with אשר/דחה. Decisions run on the existing engine path
+/// (`approve`/`reject`) via the callbacks; this widget is presentation only.
+class _ApprovalCard extends StatelessWidget {
+  const _ApprovalCard({
+    required this.name,
+    required this.workerLabel,
+    required this.onApprove,
+    required this.onReject,
+    super.key,
+  });
+  final String name;
+  final String workerLabel;
+  final VoidCallback onApprove;
+  final VoidCallback onReject;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: BsTokens.space2),
+        child: Material(
+          color: BsTokens.cardLight,
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          elevation: 1,
+          shadowColor: Colors.black26,
+          child: Padding(
+            padding: const EdgeInsets.all(BsTokens.space4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name,
+                    style: const TextStyle(
+                        color: BsTokens.inkLight,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15)),
+                const SizedBox(height: 2),
+                Text('👷 $workerLabel · 📸 ממתין לאישור',
+                    style: const TextStyle(
+                        color: BsTokens.mutedLight, fontSize: 12.5)),
+                const SizedBox(height: BsTokens.space3),
+                Row(children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      key: ValueKey('approval-reject-$name'),
+                      onPressed: onReject,
+                      child: const Text('↩️ החזר לתיקון'),
+                    ),
+                  ),
+                  const SizedBox(width: BsTokens.space2),
+                  Expanded(
+                    child: _PrimaryBtn(
+                      key: ValueKey('approval-approve-$name'),
+                      label: '✅ אשר',
+                      onTap: onApprove,
+                    ),
+                  ),
+                ]),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
 class _DoneAll extends StatelessWidget {
   const _DoneAll(this.text);
   final String text;
@@ -293,10 +474,15 @@ class _DoneAll extends StatelessWidget {
 }
 
 class _Group extends StatelessWidget {
-  const _Group(this.header, this.tasks, this.onTap);
+  const _Group(this.header, this.tasks, this.onTap, {this.onEdit});
   final String header;
   final List<TaskItem> tasks;
   final void Function(TaskItem) onTap;
+
+  /// Wave T2a — when provided (the contractor/manager view), each card shows a
+  /// ✏️ edit affordance opening the author sheet. Null (the worker view) → no
+  /// edit control, the card's existing tap-to-open behavior is unchanged.
+  final void Function(TaskItem)? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -312,16 +498,24 @@ class _Group extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                   fontSize: 15)),
         ),
-        for (final t in tasks) _Card(task: t, onTap: () => onTap(t)),
+        for (final t in tasks)
+          _Card(
+            task: t,
+            onTap: () => onTap(t),
+            onEdit: onEdit == null ? null : () => onEdit!(t),
+          ),
       ],
     );
   }
 }
 
 class _Card extends StatelessWidget {
-  const _Card({required this.task, required this.onTap});
+  const _Card({required this.task, required this.onTap, this.onEdit});
   final TaskItem task;
   final VoidCallback onTap;
+
+  /// Wave T2a — optional ✏️ edit tap (contractor authoring). Null → no button.
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -341,20 +535,43 @@ class _Card extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF2F3F5),
-                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-                  ),
-                  child: Text(
-                    kTaskStatusLabel[task.status] ?? '',
-                    style: const TextStyle(
-                        color: BsTokens.inkLight,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12.5),
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF2F3F5),
+                        borderRadius:
+                            BorderRadius.circular(BsTokens.radiusPill),
+                      ),
+                      child: Text(
+                        kTaskStatusLabel[task.status] ?? '',
+                        style: const TextStyle(
+                            color: BsTokens.inkLight,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12.5),
+                      ),
+                    ),
+                    const Spacer(),
+                    // Wave T2a — ✏️ edit affordance (contractor authoring only).
+                    if (onEdit != null)
+                      InkWell(
+                        key: ValueKey('task-edit-${task.id}'),
+                        borderRadius:
+                            BorderRadius.circular(BsTokens.radiusPill),
+                        onTap: onEdit,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          child: Text('✏️ ערוך',
+                              style: TextStyle(
+                                  color: BsTokens.brandDark,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12.5)),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: BsTokens.space2),
                 Text(task.name,
@@ -741,6 +958,199 @@ class _WorkLogSheet extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+// ── contractor authoring sheet (Wave T2a) ────────────────────────────────────
+/// Create OR edit a task (the same form). [edit] null → CREATE (mints a new id,
+/// stamps `employerId`); non-null → EDIT (patches name/detail/days/steps via
+/// `editTask`, and re-assigns via `assignTask` when the worker changed — status
+/// and all runtime fields are left untouched). RTL, styled like [_TaskSheet].
+class _TaskAuthorSheet extends ConsumerStatefulWidget {
+  const _TaskAuthorSheet({this.edit, this.initialWorker = 0});
+
+  /// The task being edited, or null for a fresh create.
+  final TaskItem? edit;
+
+  /// The worker index pre-selected on a CREATE (the screen's current pick).
+  final int initialWorker;
+
+  @override
+  ConsumerState<_TaskAuthorSheet> createState() => _TaskAuthorSheetState();
+}
+
+class _TaskAuthorSheetState extends ConsumerState<_TaskAuthorSheet> {
+  late final TextEditingController _name =
+      TextEditingController(text: widget.edit?.name ?? '');
+  late final TextEditingController _detail =
+      TextEditingController(text: widget.edit?.detail ?? '');
+  // Steps are authored one-per-line — joined for editing, split on save.
+  late final TextEditingController _steps =
+      TextEditingController(text: (widget.edit?.steps ?? const []).join('\n'));
+  late final TextEditingController _days = TextEditingController(
+      text: (widget.edit?.days ?? 1).toString());
+  late int _worker = widget.edit?.worker ?? widget.initialWorker;
+
+  bool get _isEdit => widget.edit != null;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _detail.dispose();
+    _steps.dispose();
+    _days.dispose();
+    super.dispose();
+  }
+
+  /// Parse the steps box into a clean list — one step per non-empty line.
+  List<String> _parseSteps() => _steps.text
+      .split('\n')
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .toList();
+
+  void _save() {
+    final name = _name.text.trim();
+    if (name.isEmpty) {
+      showToast(context, 'יש להזין שם משימה');
+      return;
+    }
+    final detail = _detail.text.trim();
+    final steps = _parseSteps();
+    // A non-positive / unparseable day count falls back to 1 (the seed minimum).
+    final days = int.tryParse(_days.text.trim());
+    final safeDays = (days == null || days < 1) ? 1 : days;
+    final notifier = ref.read(tasksProvider.notifier);
+    if (_isEdit) {
+      final id = widget.edit!.id;
+      notifier.editTask(id,
+          name: name, detail: detail, days: safeDays, steps: steps);
+      // Re-assign only when the picked worker actually changed (keeps the
+      // overlay byte-stable otherwise). The server-ready uid stays the demo
+      // fallback — the int index is the addressing today.
+      if (_worker != widget.edit!.worker) {
+        notifier.assignTask(id, worker: _worker);
+      }
+      Navigator.of(context).pop();
+      showToast(context, 'המשימה עודכנה ✓');
+    } else {
+      notifier.createTask(
+        name: name,
+        detail: detail,
+        days: safeDays,
+        steps: steps,
+        worker: _worker,
+        // SERVER-SWAP: the single-device demo has one contractor → stamp the
+        // demo employer id (kDemoContractorId). When the backend lands this is
+        // the real contractor uid from the session/auth claim.
+        employerId: kDemoContractorId,
+      );
+      Navigator.of(context).pop();
+      showToast(context, 'המשימה נוצרה ✓');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (_, scroll) => Container(
+          decoration: const BoxDecoration(
+            color: BsTokens.cardLight,
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(BsTokens.radiusCard)),
+          ),
+          child: ListView(
+            controller: scroll,
+            padding: const EdgeInsets.all(BsTokens.space4),
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: BsTokens.space3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDDDDDD),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Text(_isEdit ? 'עריכת משימה' : 'משימה חדשה',
+                  style: const TextStyle(
+                      color: BsTokens.inkLight,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18)),
+              const SizedBox(height: BsTokens.space3),
+              const _SecH('שם המשימה'),
+              TextField(
+                key: const ValueKey('author-name'),
+                controller: _name,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  hintText: 'לדוגמה: התקנת קו מים חם',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              const _SecH('תיאור'),
+              TextField(
+                key: const ValueKey('author-detail'),
+                controller: _detail,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  hintText: 'פרטי הביצוע (אופציונלי)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              const _SecH('שלבי ביצוע — שלב בכל שורה'),
+              TextField(
+                key: const ValueKey('author-steps'),
+                controller: _steps,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  hintText: 'כל שורה = שלב נפרד (אופציונלי)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              const _SecH('משך משוער (ימים)'),
+              TextField(
+                key: const ValueKey('author-days'),
+                controller: _days,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  hintText: '1',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              const _SecH('שיוך לעובד'),
+              _WorkerPick(
+                selected: _worker,
+                onSelect: (i) => setState(() => _worker = i),
+              ),
+              const SizedBox(height: BsTokens.space4),
+              _PrimaryBtn(
+                key: const ValueKey('author-save'),
+                label: _isEdit ? 'שמור שינויים' : 'צור משימה',
+                onTap: _save,
+              ),
+              const SizedBox(height: BsTokens.space2),
+              _PrimaryBtn(
+                label: 'ביטול',
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -18,6 +18,8 @@ mutation 3-RED→GREEN. בנוי על הענף-הראשי המאוחד (worker-b
 
 **גל T1 · איחוד מנוע-המשימות:** 2 המנועים (`tasksProvider` עשיר + `workerTasksProvider` רזה — dual-write + post-frame-mirror שביר) → מנוע אחד: `tasksProvider` מקור-יחיד; `workerTasksProvider` הפך ל-**shim מעביר** (מקרין מ-tasksProvider, אפס מצב-עצמאי). `TaskItem` += `employerId`/`assignedWorkerUid` (נחתמים מה-session בשליחה, write-when-non-empty, seed byte-identical). fold של orderId→advance-on-approve (אישור משימה-מקושרת מקדם את ההזמנה). seam ריק `bindRemote` ל-T3. נמחקו dual-write + `_mirrorManagerDecisions`. נחיל: T1a מנוע+מודל · T1b צרכנים+6 טסטים. שער: analyze 0 · 6 טסטי-משימות + סוויטה · supervisor CLEAN · mutation RED→GREEN (order-advance).
 
+**גל T2 · יצירת-משימה אצל הקבלן + אישור-קבלן:** `TasksNotifier` += `createTask`/`editTask`/`assignTask` (additive). מסך-הקבלן (`tasks_screen`) קיבל ＋'משימה חדשה' (שם/פירוט/שלבים/דדליין/הקצאה-לעובד מ-`kWorkers`, חותם `employerId`), עריכה, ומקטע 'אישורי עובדים (קבלן)' שמאשר/דוחה דרך המנוע — **הקבלן יוצר/מקצה/מאשר → העובד רואה חי**. אישור מקבילי (מנהל לא-נגוע; הסרה-מלאה parked). נחיל: T2a מנוע+מסך · T2b 2 טסטים. שער: analyze 0 · סוויטה · supervisor CLEAN · mutation RED→GREEN (id-minting). (כיסוי-follow-up: widget-test לגיליון-היצירה — ההתנהגות נבדקה במנוע.)
+
 ## v6.19 — לוח עובד v3 מלא (#100–#114, נחיל אמיתי, 4 גלים)
 
 לוח-העובד נבנה והורחב דרך נחיל ה-/swarm הקנוני (donning + manifested-gate + mutation-verify +

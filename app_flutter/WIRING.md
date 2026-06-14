@@ -28,6 +28,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > קורא את בלוק-המעסיק דרך הקישור (`session.employerId`) במקום `userProfileProvider` הישיר —
 > סוגר את חור-היושר ב-#106. SERVER-SWAP: `contractors/{employerId}`.
 > **גל T1:** 2 מנועי-המשימות → מנוע אחד (`tasksProvider` מקור-יחיד; `workerTasksProvider` = shim מעביר). `TaskItem` += `employerId`/`assignedWorkerUid` (נחתמים מה-session בשליחה). נמחקו dual-write/mirror; fold של orderId→advance-on-approve; seam ריק `bindRemote` (T3 ימלא).
+> **גל T2:** מסך-קבלן (`tasks_screen`) — ＋'משימה חדשה' (`createTask`, חותם `employerId`+`assignedWorkerUid`) · עריכה (`editTask`) · הקצאה (`assignTask`) · 'אישורי עובדים (קבלן)' (`approve`/`reject` מקבילי, מנהל לא-נגוע). הקבלן יוצר/מקצה/מאשר → העובד רואה חי דרך המנוע-המאוחד.
 
 ---
 

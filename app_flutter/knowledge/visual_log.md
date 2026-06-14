@@ -20,6 +20,14 @@
 
 ---
 
+## v6.20 — חיווט קבלן↔עובד · גל T2 (יצירת-משימה + אישור-קבלן ב-tasks_screen)
+
+**שינוי (UI חדש בקבלן):** `tasks_screen.dart` (מסך-הקבלן, תצוגת-מנהל/קבלן) קיבל: ＋'משימה חדשה' → גיליון-יצירה RTL (שם/פירוט/שלבים/דדליין/בורר-עובד), ✏️ עריכה לכל כרטיס (תצוגת-קבלן בלבד), ומקטע 'אישורי עובדים (קבלן)' עם אשר/דחה. הרכיבים משתמשים בדפוסים קיימים (`_TaskSheet`/`_WorkerPick`/`_ApprovalCard`/`_PrimaryBtn`). תצוגת-העובד לא-נגעה.
+
+**אימות:** התנהגות-המנוע (createTask→עובד-רואה-חי · editTask · assignTask · approve/reject + order-fold) נעולה ב-2 טסטים (`contractor_task_authoring_test` + `contractor_task_approval_test`) · analyze 0 · supervisor CLEAN (בדק חיווט-UI + scope) · mutation RED→GREEN. **חוסר-כיסוי מוכר (follow-up):** רינדור גיליון-היצירה עצמו לא נבדק ב-widget-test (רק התנהגות-המנוע + סקירת-מפקח) — widget-test לגיליון = follow-up.
+
+---
+
 ## v6.16 — fix-fleet · round-3 (ציד עמוק יותר: data/RTL/UX)
 
 **שינוי:** סבב-3 עמוק (data-integrity · RTL · error-paths) תפס באגים שהסבבים הקודמים פספסו.
