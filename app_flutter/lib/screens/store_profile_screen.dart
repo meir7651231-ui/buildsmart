@@ -329,18 +329,20 @@ class _StoreLogoAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bytes = decodeDataUrlPhoto(logo);
-    if (bytes != null) {
+    // Dual-render (A14): data-URL מפוענח מקומית; כתובת `https://…` שהועלתה
+    // (kCloudPhotos ON) נטענת מ-R2 — שניהם דרך [imageProviderForRef]. F-43 —
+    // thumb מפוענח לגודל התצוגה (ResizeImage חל על data-URL ו-network כאחד).
+    final base = imageProviderForRef(logo);
+    if (base != null) {
+      final cacheW = (size * MediaQuery.devicePixelRatioOf(context)).round();
       return ClipOval(
-        child: Image.memory(
-          bytes,
+        child: Image(
+          image: ResizeImage(base, width: cacheW),
           width: size,
           height: size,
           fit: BoxFit.cover,
           gaplessPlayback: true,
-          // F-43 — thumb מפוענח לגודל התצוגה, לא full-res.
-          cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
-          // payload פגום מרנדר את ברירת-המחדל — לעולם לא קריסה.
+          // payload פגום / טעינה שנכשלה → ברירת-המחדל, לעולם לא קריסה.
           errorBuilder: (_, __, ___) => _fallback(),
         ),
       );
@@ -1421,8 +1423,9 @@ class _StoreCertRow extends StatelessWidget {
       CertExpiryStatus.expiringSoon => ('פג בקרוב', BsTokens.warnText),
       CertExpiryStatus.valid => ('בתוקף', BsTokens.successDark),
     };
-    // פענוח הגנתי — payload לא-תקין שומר את ה-📷 הסטטי, לעולם לא קריסה.
-    final photoBytes = decodeDataUrlPhoto(cert.photo);
+    // פענוח הגנתי — data-URL שמור או URL מועלה (kCloudPhotos ON) דרך
+    // [imageProviderForRef]; payload לא-תקין שומר את ה-📷 הסטטי, לעולם לא קריסה.
+    final photoProvider = imageProviderForRef(cert.photo);
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Container(
@@ -1452,7 +1455,7 @@ class _StoreCertRow extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (photoBytes != null) ...[
+                      if (photoProvider != null) ...[
                         const SizedBox(width: BsTokens.space2),
                         // thumbnail אמיתי → צפייה מלאה (מטרת-מגע 48dp).
                         Semantics(
@@ -1460,9 +1463,9 @@ class _StoreCertRow extends StatelessWidget {
                           label: 'הצג צילום תעודה במסך מלא',
                           child: InkWell(
                             borderRadius: BorderRadius.circular(8),
-                            onTap: () => showFullPhotoDialog(
+                            onTap: () => showFullPhotoRefDialog(
                               context,
-                              photoBytes,
+                              cert.photo,
                               label: cert.name,
                             ),
                             child: Container(
@@ -1471,18 +1474,21 @@ class _StoreCertRow extends StatelessWidget {
                               alignment: Alignment.center,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.memory(
-                                  photoBytes,
+                                child: Image(
+                                  // F-43 — thumb מפוענח לגודל התצוגה (ResizeImage
+                                  // חל על data-URL ו-network כאחד).
+                                  image: ResizeImage(
+                                    photoProvider,
+                                    width: (40 *
+                                            MediaQuery.devicePixelRatioOf(
+                                                context))
+                                        .round(),
+                                  ),
                                   width: 40,
                                   height: 40,
                                   fit: BoxFit.cover,
                                   gaplessPlayback: true,
-                                  // F-43 — thumb מפוענח לגודל התצוגה.
-                                  cacheWidth: (40 *
-                                          MediaQuery.devicePixelRatioOf(
-                                              context))
-                                      .round(),
-                                  // payload פגום → ה-📷 הכן.
+                                  // payload פגום / טעינה שנכשלה → ה-📷 הכן.
                                   errorBuilder: (_, __, ___) => const Text(
                                     '📷',
                                     style: TextStyle(fontSize: 13),

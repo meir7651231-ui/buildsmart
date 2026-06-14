@@ -15,8 +15,6 @@
 // המאומת. תלושי השכר הם sheet מוכן-לשרת ("יחובר עם חיבור השרת") — reuse של
 // showWorkerPayslipsSheet ה-role-agnostic, בלי לשכפל ובלי להמציא סכומים.
 
-import 'dart:convert';
-
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
@@ -37,6 +35,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
+import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -446,24 +445,22 @@ class _CourierAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = photo;
-    if (p != null && p.startsWith('data:image') && p.contains(',')) {
-      try {
-        final bytes = base64Decode(p.substring(p.indexOf(',') + 1));
-        return ClipOval(
-          child: Image.memory(
-            bytes,
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            gaplessPlayback: true,
-            // payload פגום מרנדר את ברירת-המחדל — לעולם לא קריסה.
-            errorBuilder: (_, __, ___) => _fallback(),
-          ),
-        );
-      } on FormatException catch (_) {
-        // base64 שבור — נופלים לאווטאר ברירת-המחדל.
-      }
+    // Dual-render (A14): data-URL מפוענח מקומית; כתובת `https://…` שהועלתה
+    // (kCloudPhotos ON) נטענת מ-R2 — שניהם דרך [imageProviderForRef]. אין תמונה
+    // / payload פגום → אווטאר ברירת-המחדל.
+    final provider = imageProviderForRef(photo);
+    if (provider != null) {
+      return ClipOval(
+        child: Image(
+          image: provider,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+          // payload פגום / טעינה שנכשלה → אווטאר ברירת-המחדל, לעולם לא קריסה.
+          errorBuilder: (_, __, ___) => _fallback(),
+        ),
+      );
     }
     return _fallback();
   }

@@ -418,11 +418,12 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
   }
 
   /// One sick-note row (#15): leading 48dp thumbnail of the ACTUAL stored
-  /// photo (the camera-seam data-URL, rendered through the shared
-  /// [taskPhotoWidget]) — tapping it opens the full-screen pinch/zoom viewer.
-  /// A non-decodable payload keeps an honest 📷 box with no viewer.
+  /// photo (a camera-seam data-URL or an uploaded https URL, rendered through
+  /// the shared dual-render [taskPhotoWidget]) — tapping it opens the
+  /// full-screen pinch/zoom viewer. A non-renderable payload keeps an honest
+  /// 📷 box with no viewer.
   Widget _sickNoteRow(SickNote n) {
-    final bytes = decodeDataUrlPhoto(n.photo);
+    final provider = imageProviderForRef(n.photo);
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Container(
@@ -437,7 +438,7 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
         ),
         child: Row(
           children: [
-            if (bytes == null)
+            if (provider == null)
               Container(
                 width: 48,
                 height: 48,
@@ -454,9 +455,9 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
                 label: 'הצג אישור מחלה במסך מלא',
                 child: InkWell(
                   borderRadius: BorderRadius.circular(10),
-                  onTap: () => showFullPhotoDialog(
+                  onTap: () => showFullPhotoRefDialog(
                     context,
-                    bytes,
+                    n.photo,
                     label: 'אישור מחלה · ${_fmtDate(n.ts)}',
                   ),
                   child: SizedBox(

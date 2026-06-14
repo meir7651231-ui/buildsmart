@@ -446,12 +446,13 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
   }
 
   /// One sick-note row: leading 48dp thumbnail of the ACTUAL stored photo —
-  /// tapping it opens the full-screen pinch/zoom viewer. The data-URL is
-  /// decoded ONCE per build and rendered with cacheWidth (F-43 — never the
-  /// worker template's double decode), and a non-decodable payload keeps an
-  /// honest 📷 box with no viewer.
+  /// tapping it opens the full-screen pinch/zoom viewer. The photo ref is
+  /// resolved ONCE per build (A14 dual-render: a base64 data-URL or an
+  /// uploaded https URL) and rendered with a thumb-downscaled ResizeImage
+  /// (F-43 — never the worker template's double decode); a non-renderable
+  /// payload keeps an honest 📷 box with no viewer.
   Widget _sickNoteRow(SickNote n) {
-    final bytes = decodeDataUrlPhoto(n.photo);
+    final provider = imageProviderForRef(n.photo);
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Container(
@@ -466,7 +467,7 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
         ),
         child: Row(
           children: [
-            if (bytes == null)
+            if (provider == null)
               Container(
                 width: 48,
                 height: 48,
@@ -483,23 +484,24 @@ class _CourierFormsScreenState extends ConsumerState<CourierFormsScreen> {
                 label: 'הצג אישור מחלה במסך מלא',
                 child: InkWell(
                   borderRadius: BorderRadius.circular(10),
-                  onTap: () => showFullPhotoDialog(
+                  onTap: () => showFullPhotoRefDialog(
                     context,
-                    bytes,
+                    n.photo,
                     label: 'אישור מחלה · ${_fmtDate(n.ts)}',
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.memory(
-                      bytes,
+                    child: Image(
+                      // Decode at thumb resolution, not full-res (F-43).
+                      image: ResizeImage(
+                        provider,
+                        width: (48 * MediaQuery.devicePixelRatioOf(context))
+                            .round(),
+                      ),
                       width: 48,
                       height: 48,
                       fit: BoxFit.cover,
                       gaplessPlayback: true,
-                      // Decode at thumb resolution, not full-res (F-43).
-                      cacheWidth:
-                          (48 * MediaQuery.devicePixelRatioOf(context))
-                              .round(),
                       // Corrupt image bytes → the honest 📷, never a crash.
                       errorBuilder: (_, __, ___) => Container(
                         width: 48,

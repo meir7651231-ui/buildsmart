@@ -546,9 +546,10 @@ class _CertRow extends StatelessWidget {
       CertExpiryStatus.expiringSoon => ('פג בקרוב', BsTokens.warnText),
       CertExpiryStatus.valid => ('בתוקף', BsTokens.successDark),
     };
-    // #16 — decode the stored data-URL once; non-decodable (or no photo)
-    // keeps the old static 📷 / nothing, never a fake image.
-    final photoBytes = decodeDataUrlPhoto(cert.photo);
+    // #16 — resolve the stored photo ref once (A14 dual-render: a base64
+    // data-URL or an uploaded https URL); non-renderable (or no photo) keeps
+    // the old static 📷 / nothing, never a fake image.
+    final provider = imageProviderForRef(cert.photo);
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Container(
@@ -576,7 +577,7 @@ class _CertRow extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (photoBytes != null) ...[
+                      if (provider != null) ...[
                         const SizedBox(width: BsTokens.space2),
                         // #16 — tappable thumbnail of the REAL cert photo →
                         // full-screen viewer (48dp tap target).
@@ -585,9 +586,9 @@ class _CertRow extends StatelessWidget {
                           label: 'הצג צילום תעודה במסך מלא',
                           child: InkWell(
                             borderRadius: BorderRadius.circular(8),
-                            onTap: () => showFullPhotoDialog(
+                            onTap: () => showFullPhotoRefDialog(
                               context,
-                              photoBytes,
+                              cert.photo,
                               label: cert.name,
                             ),
                             child: Container(
@@ -596,8 +597,8 @@ class _CertRow extends StatelessWidget {
                               alignment: Alignment.center,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.memory(
-                                  photoBytes,
+                                child: Image(
+                                  image: provider,
                                   width: 40,
                                   height: 40,
                                   fit: BoxFit.cover,

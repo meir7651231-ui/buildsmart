@@ -64,3 +64,39 @@ const bool kUidScopedQueries = bool.fromEnvironment('UID_SCOPED_QUERIES');
 /// field exercise the ON branch in the standard define-less suite (the
 /// `kUidScopedQueries` / `uidScoped` testability pattern).
 const bool kServerCallables = bool.fromEnvironment('SERVER_CALLABLES');
+
+/// A14 (launch photo-upload) — master switch for UPLOADING captured photos to
+/// Cloudflare R2 via the `getUploadUrl` callable (region [me-west1]) and storing
+/// the resulting `https://…` public URL, instead of inlining the image as a
+/// ~1.5MB `data:image/...;base64,…` data-URL in SharedPreferences/localStorage.
+///
+/// Default OFF: with it OFF the capture path is BYTE-IDENTICAL to today — every
+/// photo (POD / before-after / profile / store-logo / cert) stays the verbatim
+/// base64 data-URL the persist layer has always stored, the `getUploadUrl`
+/// callable is NEVER called, and the ~1.5MB persist-budget guard
+/// (`kMaxPhotoDataUrlChars`) is untouched. So flipping this flag is the ONLY
+/// thing that changes behaviour (the same zero-regression invariant as
+/// [kServerCallables] / [kUidScopedQueries] / [kUseFirebaseBackendFlag]).
+///
+/// Separate from [kServerCallables] so photo-upload can activate INDEPENDENTLY
+/// of the order/credit callables. Flip on at build time ONCE the owner has
+/// provisioned R2 (bucket + `R2_*` secrets/params) and deployed the function
+/// (`functions/src/r2.ts` is re-exported by `functions/src/index.ts`):
+///   flutter build web --dart-define=CLOUD_PHOTOS=true
+///
+/// When ON, the single capture seam (`services/task_photo.dart`) — after it has
+/// the downscaled image bytes — calls `getUploadUrl({kind, contentType})`, does
+/// an HTTP `PUT` of the bytes to the returned presigned URL, and on a 2xx
+/// returns the public object URL (`{IMAGE_BASE_URL}/{server-owned key}`). If the
+/// callable throws (not-deployed / R2 unconfigured → `failed-precondition`) or
+/// the PUT is non-2xx, it FALLS BACK to the base64 data-URL (the photo is NOT
+/// lost — saved locally exactly as today) and logs it honestly; a success is
+/// NEVER faked. Both forms are plain strings stored the same way, and every
+/// render site decodes BOTH (an `https://…` to a network image, a `data:…` to
+/// the current base64 decode — see `imageProviderForRef` in
+/// widgets/photo_viewer.dart).
+///
+/// Tests never initialise Firebase; the upload seams (`UploadFunctionsGateway` +
+/// the HTTP-PUT function) are injected as fakes, so the ON branch is exercised in
+/// the standard define-less suite without touching the network.
+const bool kCloudPhotos = bool.fromEnvironment('CLOUD_PHOTOS');

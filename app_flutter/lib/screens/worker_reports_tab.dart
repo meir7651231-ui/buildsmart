@@ -9,7 +9,7 @@
 //   ⑤ פירוט לפי אזור עבודה — honest grouping by the task NAME's ' — ' suffix
 //      (the engine has no site/project field — see [TaskItem]).
 //   ⑥ היסטוריית הגשות עם תמונות — proof-photo thumbnail per submission row
-//      (data-URL → Image.memory · 'demo' → honest placeholder).
+//      (data-URL or uploaded https URL → Image · 'demo' → honest placeholder).
 //   ⑦ דחיות + סיבה — rejected tasks with the manager's reason when one was
 //      stored (bs.task-reject-note.v1 side-map), 'לא צורפה סיבה' otherwise.
 //   ⑧ שלח דוח יומי לקבלן — composes the live status counts and posts them as a
@@ -776,9 +776,10 @@ class _HistoryRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // #11 — a real proof photo (data-URL) opens full-size on tap;
-          // 'demo'/empty thumbs stay non-interactive (nothing to enlarge).
-          if (task.photo != null && task.photo!.startsWith('data:image'))
+          // #11 — a real proof photo (data-URL or uploaded https URL) opens
+          // full-size on tap; 'demo'/empty thumbs stay non-interactive
+          // (nothing to enlarge).
+          if (imageProviderForRef(task.photo) != null)
             InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: () => showDialog<void>(
@@ -790,8 +791,8 @@ class _HistoryRow extends StatelessWidget {
                     children: [
                       InteractiveViewer(
                         child: Center(
-                          child: Image.memory(
-                            base64Decode(task.photo!.split(',').last),
+                          child: Image(
+                            image: imageProviderForRef(task.photo)!,
                             errorBuilder: (_, __, ___) => const Padding(
                               padding: EdgeInsets.all(24),
                               child: Text(
@@ -902,9 +903,10 @@ class _StatusPill extends StatelessWidget {
 }
 
 /// The proof-photo thumbnail (48×48):
-///   • a `data:image/...;base64,` URL → decoded [Image.memory] (real photo,
-///     the camera cluster's capture format), TAPPABLE (#11) → full-screen
-///     pinch/zoom viewer ([showFullPhotoDialog]).
+///   • a real photo ref (a `data:image/...;base64,` data-URL or an uploaded
+///     `https://…` URL, resolved through [imageProviderForRef]) → an [Image]
+///     thumb, TAPPABLE (#11) → full-screen pinch/zoom viewer
+///     ([showFullPhotoRefDialog]).
 ///   • the legacy `'demo'` marker → honest 📷 placeholder (no real bytes).
 ///   • null (e.g. a reject cleared the photo) → honest empty placeholder.
 class _ProofThumb extends StatelessWidget {
@@ -915,18 +917,18 @@ class _ProofThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = photo;
-    final bytes = decodeDataUrlPhoto(p);
-    if (bytes != null) {
+    final provider = imageProviderForRef(p);
+    if (provider != null) {
       return Semantics(
         button: true,
         label: 'הצג תמונת הוכחה במסך מלא',
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
-          onTap: () => showFullPhotoDialog(context, bytes),
+          onTap: () => showFullPhotoRefDialog(context, p),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.memory(
-              bytes,
+            child: Image(
+              image: provider,
               width: 48,
               height: 48,
               fit: BoxFit.cover,

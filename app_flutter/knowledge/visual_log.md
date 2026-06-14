@@ -889,3 +889,18 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **`purchaseHistory`** → רשימת order-history: ON (ברירת-מחדל) ⇒ שורות-ההזמנה נראות, אין הודעת-פרטיות · OFF ⇒ הרשימה מוחלפת בהודעת-פרטיות + כפתור "הצג היסטוריה" · tap-הכפתור ⇒ ON חוזר והרשימה שבה. נצפה ב-`store_purchase_history_settings_test` (order-rows findsWidgets↔findsNothing; הודעת-הפרטיות findsOneWidget כש-OFF).
 
 **אימות:** `store_purchase_history_settings_test` 3/3 · analyze 0-errors · build web ✅.
+
+## #A14 — צילומי-תמונה: רינדור דו-צורתי (data-URL + https) — 2026-06-14
+
+**שינוי:** כל אתר-רינדור-תמונה מנותב כעת דרך `imageProviderForRef` (`widgets/photo_viewer.dart`) שמרנדר **שתי הצורות**: data-URL base64 (כמו היום) **או** `https://…` URL שהועלה ל-R2 (כש-`kCloudPhotos` ON). **OFF (ברירת-מחדל) = ללא שינוי-מראה כלל** — התמונה נשארת base64 ומרונדרת בדיוק כמו היום (byte-identical). כש-ON, אותה תמונה מוצגת מ-`NetworkImage` (זורמת מ-R2, עם `ResizeImage` לאותו thumb-downscale שהיה ל-`cacheWidth`). אין screenshot-tooling — האימות הוא הבדיקות (`imageProviderForRef`: http→NetworkImage / data→MemoryImage / null+demo→null).
+- **אתרי-רינדור שנותבו (אותו מראה, מקור-תמונה דו-צורתי):**
+  - **POD** (`worker_task_detail_sheet.dart` `taskPhotoWidget` — נצרך ע"י persona_pod / manager-approvals / store_dashboard) + thumb+full-screen ב-`courier_reports_tab.dart`.
+  - **אווטאר-פרופיל** עובד (`worker_profile_screen.dart`) + שליח (`courier_profile_screen.dart`) — `ClipOval`+`Image`.
+  - **לוגו-חנות** (`store_profile_screen.dart` `_StoreLogoAvatar` + edit-preview) — `ClipOval`+`ResizeImage` thumb.
+  - **תעודות** שליח (`courier_certs_screen.dart`) · עובד/בטיחות (`worker_safety_screen.dart`) · עסק (`store_profile_screen.dart` `_StoreCertRow`) — thumb 40px + tap→full-screen.
+  - **sick-notes** (`courier_forms_screen.dart`) · **proof-thumb**+דיאלוג (`worker_reports_tab.dart`).
+  - full-screen viewer: `showFullPhotoRefDialog(ref)` פותח את שתי הצורות (data-URL דרך `MemoryImage`, https דרך `NetworkImage`).
+  - **ללא שינוי:** `camera_sheet.dart` preview — מציג את ה-data-URL-שזה-עתה-נקלט (לפני-העלאה, תמיד base64), נשאר `Image.memory`.
+- **שמירת-יושר:** payload פגום / fetch שנכשל → `errorBuilder` מרנדר את ה-placeholder/אווטאר-ברירת-המחדל הקיים (לעולם לא crash). ref לא-ניתן-לרינדור (legacy 'demo' / null) → אותו placeholder ישר כמו היום.
+
+**אימות:** `cloud_photos_a14_upload_test` 12/12 (כולל display dual-render) · analyze 0-errors (כל הנגועים) · full-suite **+2272** (היה +2260) · build web ✅. mutation-verified (ראה `knowledge/mutation_log.md` §A14).

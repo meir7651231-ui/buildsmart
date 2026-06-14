@@ -38,7 +38,6 @@
 //                         (F-6).
 
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
@@ -558,9 +557,9 @@ class CourierReportsTab extends ConsumerWidget {
 // ─── building blocks ─────────────────────────────────────────────────────────
 
 /// One delivered-history card: order line + status pill + the POD block —
-/// a REAL photo renders as a ≥48dp tappable thumbnail (full-screen viewer with
-/// an explicit X close, the shared [showFullPhotoDialog]); no photo keeps the
-/// honest non-tappable text.
+/// a REAL photo (a base64 data-URL or an uploaded https URL) renders as a ≥48dp
+/// tappable thumbnail (full-screen viewer with an explicit X close, the shared
+/// [showFullPhotoRefDialog]); no photo keeps the honest non-tappable text.
 class _DeliveredCard extends StatefulWidget {
   const _DeliveredCard({
     required this.order,
@@ -581,15 +580,16 @@ class _DeliveredCard extends StatefulWidget {
 }
 
 class _DeliveredCardState extends State<_DeliveredCard> {
-  /// Decoded ONCE per photo string (F-43) — a POD data-URL is ~100KB+ of
-  /// base64 and the list rebuilds on every engine mutation; full base64Decode
-  /// per build per card was pure waste.
-  Uint8List? _bytes;
+  /// Resolved ONCE per photo string (F-43) — a POD data-URL is ~100KB+ of
+  /// base64 and the list rebuilds on every engine mutation; resolving the
+  /// provider (A14 dual-render: data-URL or uploaded https URL) per build per
+  /// card was pure waste.
+  ImageProvider? _provider;
 
   @override
   void initState() {
     super.initState();
-    _bytes = decodeDataUrlPhoto(widget.podPhoto);
+    _provider = imageProviderForRef(widget.podPhoto);
   }
 
   @override
@@ -598,7 +598,7 @@ class _DeliveredCardState extends State<_DeliveredCard> {
     // identical() is the cheap fast-path: the sync podPhotosProvider hands
     // back the SAME string instance unless the record actually mutated.
     if (!identical(oldWidget.podPhoto, widget.podPhoto)) {
-      _bytes = decodeDataUrlPhoto(widget.podPhoto);
+      _provider = imageProviderForRef(widget.podPhoto);
     }
   }
 
@@ -607,7 +607,7 @@ class _DeliveredCardState extends State<_DeliveredCard> {
     final order = widget.order;
     final podCaptured = widget.podCaptured;
     final deliveredAt = widget.deliveredAt;
-    final bytes = _bytes;
+    final provider = _provider;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(BsTokens.space4),
@@ -626,28 +626,30 @@ class _DeliveredCardState extends State<_DeliveredCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Tappable POD thumb — only when a REAL photo exists (≥48dp target).
-          if (bytes != null) ...[
+          if (provider != null) ...[
             Semantics(
               button: true,
               label: 'הצג אישור מסירה במסך מלא',
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
-                onTap: () => showFullPhotoDialog(
+                onTap: () => showFullPhotoRefDialog(
                   context,
-                  bytes,
+                  widget.podPhoto,
                   label: '📦 ${order.id} — אישור מסירה',
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.memory(
-                    bytes,
+                  child: Image(
+                    // F-43: decode at thumb resolution — the full-res bytes
+                    // are reserved for the full-screen viewer below.
+                    image: ResizeImage(
+                      provider,
+                      width:
+                          (56 * MediaQuery.devicePixelRatioOf(context)).round(),
+                    ),
                     width: 56,
                     height: 56,
                     fit: BoxFit.cover,
-                    // F-43: decode at thumb resolution — the full-res bytes
-                    // are reserved for the full-screen viewer below.
-                    cacheWidth:
-                        (56 * MediaQuery.devicePixelRatioOf(context)).round(),
                     gaplessPlayback: true,
                     // A corrupt payload renders an honest placeholder, no crash.
                     errorBuilder: (_, __, ___) => Container(
@@ -719,7 +721,7 @@ class _DeliveredCardState extends State<_DeliveredCard> {
                   '${order.items} פריטים · ${fMoney(order.sum)} · '
                   // POD line — honest per state: real photo → tap hint; legacy
                   // simulated capture → saved (no file); none → ללא POD.
-                  '${bytes != null ? '📸 POD — הקש לתצוגה' : podCaptured ? '📸 POD נשמר ✓' : '📸 ללא POD'}'
+                  '${provider != null ? '📸 POD — הקש לתצוגה' : podCaptured ? '📸 POD נשמר ✓' : '📸 ללא POD'}'
                   '${deliveredAt != null ? ' · 🕒 ${deliveredAt!.day}.${deliveredAt!.month} ${deliveredAt!.hour.toString().padLeft(2, '0')}:${deliveredAt!.minute.toString().padLeft(2, '0')}' : ''}',
                   style: const TextStyle(
                     color: BsTokens.mutedLight,

@@ -580,9 +580,10 @@ class _CertRow extends StatelessWidget {
       CertExpiryStatus.expiringSoon => ('פג בקרוב', BsTokens.warnText),
       CertExpiryStatus.valid => ('בתוקף', BsTokens.successDark),
     };
-    // Decode the stored data-URL once per build; non-decodable (or no photo)
-    // keeps the static 📷 / nothing, never a fake image.
-    final photoBytes = decodeDataUrlPhoto(cert.photo);
+    // Resolve the stored photo ref once per build (A14 dual-render: a base64
+    // data-URL or an uploaded https URL); non-renderable (or no photo) keeps
+    // the static 📷 / nothing, never a fake image.
+    final provider = imageProviderForRef(cert.photo);
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Container(
@@ -610,7 +611,7 @@ class _CertRow extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (photoBytes != null) ...[
+                      if (provider != null) ...[
                         const SizedBox(width: BsTokens.space2),
                         // Tappable thumbnail of the REAL cert photo →
                         // full-screen viewer (48dp tap target).
@@ -619,9 +620,9 @@ class _CertRow extends StatelessWidget {
                           label: 'הצג צילום תעודה במסך מלא',
                           child: InkWell(
                             borderRadius: BorderRadius.circular(8),
-                            onTap: () => showFullPhotoDialog(
+                            onTap: () => showFullPhotoRefDialog(
                               context,
-                              photoBytes,
+                              cert.photo,
                               label: cert.name,
                             ),
                             child: Container(
@@ -630,18 +631,20 @@ class _CertRow extends StatelessWidget {
                               alignment: Alignment.center,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.memory(
-                                  photoBytes,
+                                child: Image(
+                                  // Decode at thumb resolution (F-43) — the
+                                  // full-res decode stays in the viewer only.
+                                  image: ResizeImage(
+                                    provider,
+                                    width: (40 *
+                                            MediaQuery.devicePixelRatioOf(
+                                                context))
+                                        .round(),
+                                  ),
                                   width: 40,
                                   height: 40,
                                   fit: BoxFit.cover,
                                   gaplessPlayback: true,
-                                  // Decode at thumb resolution (F-43) — the
-                                  // full-res decode stays in the viewer only.
-                                  cacheWidth: (40 *
-                                          MediaQuery.devicePixelRatioOf(
-                                              context))
-                                      .round(),
                                   // Corrupt payload → the honest 📷.
                                   errorBuilder: (_, __, ___) => const Text(
                                     '📷',

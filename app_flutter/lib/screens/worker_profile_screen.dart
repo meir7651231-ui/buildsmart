@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
@@ -17,6 +15,7 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/contact_actions.dart';
+import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -593,24 +592,22 @@ class _ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = photo;
-    if (p != null && p.startsWith('data:image') && p.contains(',')) {
-      try {
-        final bytes = base64Decode(p.substring(p.indexOf(',') + 1));
-        return ClipOval(
-          child: Image.memory(
-            bytes,
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            gaplessPlayback: true,
-            // A corrupt payload renders the default avatar, never a crash.
-            errorBuilder: (_, __, ___) => _fallback(),
-          ),
-        );
-      } on FormatException catch (_) {
-        // Malformed base64 — fall through to the default avatar.
-      }
+    // Dual-render (A14): a base64 data-URL decodes locally; an uploaded
+    // `https://…` URL (kCloudPhotos ON) streams from R2 — both via the single
+    // [imageProviderForRef] helper. No photo / malformed → the default avatar.
+    final provider = imageProviderForRef(photo);
+    if (provider != null) {
+      return ClipOval(
+        child: Image(
+          image: provider,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+          // A corrupt payload / failed fetch renders the default avatar.
+          errorBuilder: (_, __, ___) => _fallback(),
+        ),
+      );
     }
     return _fallback();
   }

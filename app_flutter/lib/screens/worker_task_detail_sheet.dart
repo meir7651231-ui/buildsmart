@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/task_skus_local.dart';
 import 'package:buildsmart/logic/install_kit.dart';
@@ -10,6 +8,7 @@ import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/widgets/photo_viewer.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,27 +47,24 @@ void submitWorkerTaskForReview(WidgetRef ref, int id, {String? note}) {
 /// row (`manager_dashboard_screen.dart`) so both sides see the same proof.
 Widget taskPhotoWidget(String? photo, {double height = 140}) {
   if (photo == null) return const SizedBox.shrink();
-  if (photo.startsWith('data:image')) {
-    final comma = photo.indexOf(',');
-    if (comma > 0) {
-      try {
-        final bytes = base64Decode(photo.substring(comma + 1));
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-          child: Image.memory(
-            bytes,
-            height: height,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            gaplessPlayback: true,
-            // A corrupt payload renders the placeholder, never a crash.
-            errorBuilder: (_, __, ___) => _photoPlaceholder(),
-          ),
-        );
-      } on FormatException catch (_) {
-        // Malformed base64 — fall through to the honest placeholder.
-      }
-    }
+  // Dual-render (A14): a base64 data-URL decodes locally; an uploaded
+  // `https://…` URL (kCloudPhotos ON) streams from R2 — both via the single
+  // [imageProviderForRef] helper. A non-photo ref (legacy 'demo'/malformed)
+  // keeps the honest placeholder.
+  final provider = imageProviderForRef(photo);
+  if (provider != null) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+      child: Image(
+        image: provider,
+        height: height,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+        // A corrupt payload / failed fetch renders the placeholder, never a crash.
+        errorBuilder: (_, __, ___) => _photoPlaceholder(),
+      ),
+    );
   }
   return _photoPlaceholder();
 }

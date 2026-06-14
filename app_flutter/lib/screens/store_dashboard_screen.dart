@@ -1628,7 +1628,7 @@ class _LogoPreview extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dataUrl =
         ref.watch(storeProfileProvider.select((m) => m[username]?.logo));
-    final bytes = decodeDataUrlPhoto(dataUrl);
+    final provider = imageProviderForRef(dataUrl);
     return Container(
       height: 120,
       alignment: Alignment.center,
@@ -1637,16 +1637,18 @@ class _LogoPreview extends ConsumerWidget {
         borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
-      child: bytes != null
+      child: provider != null
           ? ClipRRect(
               borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-              child: Image.memory(
-                bytes,
+              child: Image(
+                image: ResizeImage(
+                  provider,
+                  height:
+                      (120 * MediaQuery.devicePixelRatioOf(context)).round(),
+                ),
                 height: 120,
                 fit: BoxFit.contain,
                 gaplessPlayback: true,
-                cacheHeight:
-                    (120 * MediaQuery.devicePixelRatioOf(context)).round(),
               ),
             )
           : const Text(
@@ -2398,9 +2400,10 @@ class _DeliveredCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasPod = fulfillment.podCaptured;
     final signed = fulfillment.podSigned;
-    // The REAL captured proof (data-URL → bytes via the shared viewer seam);
-    // null for a legacy/corrupt payload — the status pill stays text-only.
-    final podBytes = decodeDataUrlPhoto(fulfillment.podPhoto);
+    // The REAL captured proof (data-URL OR uploaded https URL via the shared
+    // dual-render seam); null for a legacy/corrupt payload — the status pill
+    // stays text-only.
+    final podProvider = imageProviderForRef(fulfillment.podPhoto);
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space3),
       child: Material(
@@ -2489,21 +2492,21 @@ class _DeliveredCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      if (podBytes != null) ...[
+                      if (podProvider != null) ...[
                         Semantics(
                           button: true,
                           label: 'הצג אישור מסירה במסך מלא',
                           child: InkWell(
                             borderRadius: BorderRadius.circular(10),
-                            onTap: () => showFullPhotoDialog(
+                            onTap: () => showFullPhotoRefDialog(
                               context,
-                              podBytes,
+                              fulfillment.podPhoto,
                               label: '📦 ${order.id} — אישור מסירה',
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
-                              child: Image.memory(
-                                podBytes,
+                              child: Image(
+                                image: podProvider,
                                 width: 56,
                                 height: 56,
                                 fit: BoxFit.cover,
@@ -2531,7 +2534,7 @@ class _DeliveredCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           hasPod
-                              ? '📸 אישור מסירה נשמר ✓${signed ? ' · ✍️ נחתם' : ''}${podBytes != null ? '\nהקש על התמונה לצפייה מלאה' : ''}'
+                              ? '📸 אישור מסירה נשמר ✓${signed ? ' · ✍️ נחתם' : ''}${podProvider != null ? '\nהקש על התמונה לצפייה מלאה' : ''}'
                               : 'ללא POD — לא צולם אישור מסירה',
                           style: TextStyle(
                             color: hasPod
