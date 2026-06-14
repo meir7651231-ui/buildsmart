@@ -95,7 +95,7 @@
 ## Phase F — הקמת נייטיב
 | ID | משימה | היכן | מי | מ' |
 |---|---|---|---|---|
-| F1 | רישום iOS+Android ב‑Firebase + native `firebase_options` | console + `firebase_options.dart` | את+agent | M |
+| F1 | 🟡 [את] ✅ רשם iOS+Android בקונסול + העלה google-services.json/GoogleService-Info.plist (אומת: `buildsmart-b0b78` · `com.buildsmart.buildsmart` · ca2f0a2) · [agent] נותר: לחווט ל‑`firebase_options.dart` + להסיר throw + gradle plugin | console + `firebase_options.dart` | את+agent | M |
 | F2 | ✅ קוד (95b43da): providers prod (playIntegrity/appAttest) מאחורי `kAppCheckProd` (default OFF=debug) · הפעלה=רישום מפתחות בקונסול | `main.dart` | את+agent | M |
 | F3 | ✅ (profile→deleteAccount+wipe) · מחיקת‑חשבון מלאה (users/{uid}+data) | `auth_state.deleteAccount` + function | agent | M |
 | F4 | APNS key + iOS Push capability | Xcode + Firebase | את+agent | S |
