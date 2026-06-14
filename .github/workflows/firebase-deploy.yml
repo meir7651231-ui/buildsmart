@@ -14,6 +14,11 @@ name: Deploy Firebase Rules + Functions
 on:
   push:
     branches: [ claude/whats-happening-LyY9G ]
+    paths:
+      - 'firestore.rules'
+      - 'firestore.indexes.json'
+      - 'functions/**'
+      - '.github/workflows/firebase-deploy.yml'
   workflow_dispatch:
 
 concurrency:
@@ -91,7 +96,6 @@ jobs:
 
       # Inject R2 config (secrets → Secret Manager; params → functions/.env.<project>).
       - name: Provision R2 config for functions
-        if: steps.changes.outputs.functions == 'true'
         run: |
           printf '%s' '${{ secrets.R2_ACCESS_KEY_ID }}' \
             | firebase functions:secrets:set R2_ACCESS_KEY_ID --project buildsmart-b0b78 --data-file -
@@ -105,7 +109,6 @@ jobs:
       # --force: auto-set the Artifact Registry cleanup policy (otherwise the
       # deploy exits non-zero on the first 2nd-gen deploy even after success).
       - name: Deploy Cloud Functions (Blaze-gated, non-blocking)
-        if: steps.changes.outputs.functions == 'true'
         continue-on-error: true
         run: |
           echo "Deploying Cloud Functions to buildsmart-b0b78..."
@@ -114,7 +117,3 @@ jobs:
             --project buildsmart-b0b78 \
             --non-interactive \
             --force
-
-      - name: Note when functions deploy is skipped (no functions/ change)
-        if: steps.changes.outputs.functions != 'true'
-        run: echo "functions/ unchanged in this push — skipping functions deploy (rules deployed)."

@@ -10,6 +10,11 @@ name: Android TEST build (backend flags ON — connects to Firebase)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ claude/whats-happening-LyY9G ]
+    paths:
+      - 'app_flutter/**'
+      - '.github/workflows/android-test-build.yml'
 
 permissions:
   contents: read
