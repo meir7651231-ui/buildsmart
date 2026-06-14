@@ -13,6 +13,8 @@
 > | `kUidScopedQueries` | זהות + scope + צ׳אט per‑uid | rules+indexes פרוסים ✅ |
 > | `SERVER_CALLABLES` | קידום/אשראי דרך השרת | deploy functions (CI) |
 > | `kCloudPhotos` | תמונות ל‑R2 | provision R2 + deploy getUploadUrl (את) |
+>
+> ➕ **`kHideUnderConstruction`** (`state/under_construction.dart`, default **ON**, נדחף 35fd96e) — מצב‑ביקורת‑אפל: מסתיר כל עלה/הגדרה "בבנייה" חסום‑שרת מהתצוגה ומהחיפוש (סקשן שכולו placeholder נעלם). **הפיך** — flip ל‑false כשהפיצ'ר נבנה.
 
 > 🌿 **ענף נפרד `fleet/worker-board-v3`** (אומת 14/6): 6 commits — **לוח‑עובד v3 מלא** (release v6.19, issues #98‑#114): נוכחות‑GPS · לוח‑שנה חודשי · ניווט · טופס 101 v2 · חופשה/מחלה · תיק‑בטיחות · לוח‑משימות · בדיקת‑ציוד · שער‑מוכנות‑מסמכים. **✅ מוזג (1d8fb78+7cd22d5, 14/6 — צי‑אחר):** אומת אין איבוד‑עבודה (A13/C4/C5/chat/A4' כולם ancestors) + אין conflict markers. לוח‑העובד עכשיו **v3 בקו הראשי**. (GPS: `geolocator` לא ב‑pubspec → ייתכן web/מדומה — **לא לסמן C6‑נייטיב כסגור**.) · **שאר הענפים שהתפצלו** (compassionate‑cray/agent‑network/github‑setup/legacy/wip‑backup) = ישנים (20 מאי–4 יוני), מאות commits מאחור — נטושים, לא רלוונטיים להשקה. הקו החי היחיד = whats‑happening; **אין דיברגנס פעיל** (worker‑board‑v3 מוזג ✅).
 
@@ -45,8 +47,8 @@
 | B2 | ✅ (ebb4efd · הוסתרו) · מקצועות: לבנות חשמלאי+שיפוצים **או** להסתיר | `profession_screen.dart:11` | אין "בקרוב" במקצוע | את+agent | L |
 | B3 | ✅ (ebb4efd · הוסתרו) · מחלקות: 4 dormant — לבנות **או** להסתיר | `departments_screen.dart:96` (live:false) | אין מחלקה מתה | את+agent | M |
 | B4 | ✅ (5a379a2 · הוסתרו) · קטלוג: קטגוריות ריקות — דאטה **או** להסתיר | `catalog_screen.dart:3041` | אין "בקרוב" בקטלוג | agent | M |
-| B5 | 🟡 התקדם (950757d קטלוג חי · 6f9b562+1309a78: 4 הגדרות‑חנות חוּוטו לאמת — shareCartWithTeam/supplierCredit/defaultAddress/purchaseHistory) · **גישה: מלא‑אם‑אפשר, אחרת 'בבנייה' ביושר** · נותרו רבות חסומות‑שרת/דאטה | `*_settings_screen.dart` · WIRING.md | אין "נשמר אך לא משפיע" בר‑חיווט | agent | M |
-| B6 | חיפוש: פילטרים/מיון — לממש **או** להסתיר | `catalog_screen.dart:1108` · search dial | פועל או נעלם | agent | M |
+| B5 | ✅ (950757d+6f9b562+1309a78+35fd96e): קטלוג חי · 4 הגדרות‑חנות חוּוטו · השאר החסומות‑שרת **מוסתרות הפיך** דרך `kHideUnderConstruction` (אין "נשמר אך לא משפיע" גלוי) · גישה: מלא‑אם‑אפשר, אחרת מסתירים | `*_settings_screen.dart` · `under_construction.dart` | אין הגדרה מתה גלויה | agent | M |
+| B6 | ✅ (35fd96e — אומת פועל) · חיפוש: פילטרים/מיון | `catalog_screen` · search dial | פועל | agent | M |
 | B7 | 🟡 חלקי (00beac4: אריח‑מועדף + "הזמן עכשיו"→סל אמיתי תוקנו) · נותרו עלי‑dial "בבנייה" — להחליט פר‑עלה | `sections.dart`/`menu_trees.dart`/`store_screen.dart` | אין עלה‑מת גלוי | את+agent | L |
 | B8 | 🟡 מגודר ב‑useFirebaseBackend (576036c — flag OFF=דמו) · הרשמה אמיתית למשתמש חדש (לא local‑only) | `welcome_screen.dart` | נרשם → חשבון אמיתי | agent | M |
 
@@ -59,10 +61,10 @@
 | C4 | ✅ (8c6905c): קליינט העלאה ל‑R2 (`upload_functions.dart` + `task_photo.dart`→`getUploadUrl`→PUT) מגודר `kCloudPhotos` (OFF=base64) + fallback · מחווט לקורייר/חנות/עובד · הפעלה: לספק R2+deploy+דגל | `upload_functions.dart`·`task_photo.dart` | תמונה עולה לענן | agent+את | M |
 | C5 | ✅ (d1b0fea + C2): חתימה אמיתית (`widgets/signature_pad.dart` CustomPaint→PNG, שדה `podSignature`) + צילום‑מסירה אמיתי (C2) · empty-guard · עולה R2 כש‑kCloudPhotos · +63 בדיקות | `persona_pod_sheet.dart`·`persona_fulfillment.dart` | מסירה עם הוכחה אמיתית | agent | M |
 | C6 | אתר: צילום/GPS אמיתי (+`geolocator`) | `site_hub_screen.dart:826,1175` | מיקום/צילום אמיתי | agent | M |
-| C7 | סריקת‑תוכנית: PDF/מצלמה אמיתי **או** להסתיר | `contractor_tools_sheets.dart:517` | פועל או נעלם | את+agent | M |
+| C7 | ✅ (35fd96e): נשמר — סריקת‑תוכנית אמיתית | `contractor_tools_sheets.dart` | פועל | agent | M |
 | C8 | ✅ (00beac4): share_plus מחווט (`state/share_seam.dart`→`Share.share`, שיתוף‑סל) · sheet‑שיתוף OS אמיתי | `state/share_seam.dart` · store/rewards | sheet‑שיתוף OS | agent | S |
-| C9 | ביומטרי: `local_auth` + חיווט **או** להסתיר | settings | אימות אמיתי או נעלם | את+agent | M |
-| C10 | 🟡 (685299d: iOS `NSPhotoLibraryUsageDescription` נוסף — גלריה בלי crash + תאימות App Store) · נותרו שאר הרשאות פר‑plugin | Android/iOS manifests | אין קריסת‑הרשאה | agent | S |
+| C9 | ✅ (35fd96e): הוסתר דרך `kHideUnderConstruction` (הפיך) עד מימוש `local_auth` | store_settings | נעלם מהביקורת | agent | M |
+| C10 | ✅ (35fd96e): manifest (CAMERA/RECORD_AUDIO/READ_MEDIA_IMAGES) + Info.plist (Camera/Mic/Speech/Photo) — תאימות‑אפל | Android/iOS manifests | אין קריסת‑הרשאה | agent | S |
 
 ## Phase D — תשלום
 | ID | משימה | מי | מ' |
