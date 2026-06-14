@@ -18,6 +18,7 @@
 // worker-management surface (no home_shell surgery). RTL, light tokens.
 
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
+import 'package:buildsmart/state/required_docs_policy.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/vacation_requests.dart';
 import 'package:buildsmart/state/worker_certs.dart';
@@ -40,8 +41,24 @@ Future<void> showContractorHrSheet(BuildContext context) {
   );
 }
 
-class _ContractorHrSheet extends ConsumerWidget {
+class _ContractorHrSheet extends ConsumerStatefulWidget {
   const _ContractorHrSheet();
+
+  @override
+  ConsumerState<_ContractorHrSheet> createState() => _ContractorHrSheetState();
+}
+
+class _ContractorHrSheetState extends ConsumerState<_ContractorHrSheet> {
+  // Wave H3b — the add-a-required-document input (the WRITER section). One
+  // controller for the section's TextField; disposed below. The other sections
+  // are read-only/decide-only and need no local state.
+  final _reqDocController = TextEditingController();
+
+  @override
+  void dispose() {
+    _reqDocController.dispose();
+    super.dispose();
+  }
 
   /// cluster H1b — decide a worker vacation request. Mirrors the manager's
   /// `_decideVacation` (manager_dashboard_screen.dart): REUSE the engine
@@ -129,7 +146,7 @@ class _ContractorHrSheet extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // The LIVE contractor queue — worker vacation requests scoped to THIS
     // employer (H1a's Provider.family: role=='worker' && employerId==arg,
     // newest-first). SERVER-SWAP: kDemoContractorId is the single-device demo
@@ -144,6 +161,9 @@ class _ContractorHrSheet extends ConsumerWidget {
         if (t.status == kTrainingPending) t,
     ];
     final certs = ref.watch(certsForEmployer(kDemoContractorId));
+    // Wave H3b — the contractor's required-documents policy for THIS employer
+    // (the WRITER section below). Empty by default → the honest empty-state.
+    final required = ref.watch(requiredDocsForEmployer(kDemoContractorId));
     // Expiry aggregation for the SECTION-B banner (today's traffic-light).
     final now = DateTime.now();
     var expiredCount = 0;
@@ -355,13 +375,206 @@ class _ContractorHrSheet extends ConsumerWidget {
                   _CertRow(cert: c),
                   const SizedBox(height: BsTokens.space2),
                 ],
+
+              // ══ SECTION C — מסמכים נדרשים מהעובדים (WRITER/editor) ══
+              // Unlike the read-only certs above, THIS section WRITES the
+              // contractor's required-docs policy (#101) — the bidirectional
+              // payoff: each name added here becomes a HARD gate on the worker
+              // side (a worker can't start until they hold a VALID cert that
+              // normalizes to this name). Same cert vocabulary, so it sits right
+              // after the certs section.
+              const Divider(height: 32),
+              const Text(
+                '📋 מסמכים נדרשים מהעובדים',
+                style: TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 2),
+              const Text(
+                'עובד לא יוכל להתחיל עבודה עד שתהיה לו תעודה בתוקף לכל פריט כאן '
+                '(בנוסף לטופס 101).',
+                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              if (required.isEmpty)
+                // Honest empty-state — the TRUE default: no extra requirement
+                // beyond the existing 101 + no-expired-cert rule. Do NOT
+                // overstate what's enforced.
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: BsTokens.space2),
+                  child: Text(
+                    'לא הוגדרו מסמכים נדרשים. כרגע עובד נחסם רק על טופס-101 '
+                    'לא-חתום או תעודה שפגה.',
+                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+                  ),
+                )
+              else
+                for (final (i, name) in required.indexed) ...[
+                  Container(
+                    padding: const EdgeInsets.all(BsTokens.space3),
+                    decoration: BoxDecoration(
+                      color: BsTokens.bgLight,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFEDEDED)),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '📋 $name',
+                            style: const TextStyle(
+                              color: BsTokens.inkLight,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          // Names may contain spaces → index-based key.
+                          key: ValueKey('contractor-reqdoc-remove-$i'),
+                          iconSize: 20,
+                          constraints: const BoxConstraints(
+                            minWidth: 48,
+                            minHeight: 48,
+                          ),
+                          tooltip: 'הסר',
+                          onPressed: () {
+                            ref
+                                .read(requiredDocsPolicyProvider.notifier)
+                                .removeRequirement(kDemoContractorId, name);
+                            showToast(context, '❌ הוסר מסמך נדרש: $name');
+                          },
+                          icon: const Icon(Icons.close,
+                              color: BsTokens.mutedLight),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: BsTokens.space2),
+                ],
+              // Quick-fill SUGGESTIONS — real, well-known Israeli construction
+              // worker cert names as one-tap fills. NOT fabricated data: the
+              // contractor free-types anything via the field below; these are
+              // only shortcuts that call addRequirement with the tapped name.
+              Wrap(
+                spacing: BsTokens.space2,
+                runSpacing: BsTokens.space2,
+                children: [
+                  for (final s in _reqDocSuggestions)
+                    InkWell(
+                      key: ValueKey('contractor-reqdoc-suggest-$s'),
+                      borderRadius:
+                          BorderRadius.circular(BsTokens.radiusPill),
+                      onTap: () {
+                        ref
+                            .read(requiredDocsPolicyProvider.notifier)
+                            .addRequirement(kDemoContractorId, s);
+                        showToast(context, '📋 נוסף מסמך נדרש: $s');
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: BsTokens.inkLight.withValues(alpha: 0.06),
+                          borderRadius:
+                              BorderRadius.circular(BsTokens.radiusPill),
+                          border: Border.all(color: const Color(0xFFEDEDED)),
+                        ),
+                        child: Text(
+                          '➕ $s',
+                          style: const TextStyle(
+                            color: BsTokens.inkLight,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: BsTokens.space3),
+              // ADD affordance — free-type a required cert/doc name + הוסף.
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      key: const ValueKey('contractor-reqdoc-input'),
+                      controller: _reqDocController,
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _addRequirement(context),
+                      style: const TextStyle(
+                        color: BsTokens.inkLight,
+                        fontSize: 14,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'שם מסמך/תעודה נדרשים…',
+                        hintStyle: const TextStyle(
+                          color: BsTokens.mutedLight,
+                          fontSize: 13.5,
+                        ),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: BsTokens.space3,
+                          vertical: BsTokens.space3,
+                        ),
+                        filled: true,
+                        fillColor: BsTokens.bgLight,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide:
+                              const BorderSide(color: Color(0xFFEDEDED)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: BsTokens.inkLight,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: BsTokens.space2),
+                  _DecideButton(
+                    key: const ValueKey('contractor-reqdoc-add'),
+                    label: '➕ הוסף',
+                    color: const Color(0xFF1F8A4C),
+                    onPressed: () => _addRequirement(context),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
+  /// Wave H3b — commit the typed name as a required document, then clear the
+  /// field. Guards empty input (the notifier already ignores empty, but we also
+  /// skip the pointless toast). The notifier trims + dedupes by normalized name.
+  void _addRequirement(BuildContext context) {
+    final text = _reqDocController.text.trim();
+    if (text.isEmpty) return;
+    ref
+        .read(requiredDocsPolicyProvider.notifier)
+        .addRequirement(kDemoContractorId, text);
+    _reqDocController.clear();
+    showToast(context, '📋 נוסף מסמך נדרש: $text');
+  }
 }
+
+/// Wave H3b — quick-fill SUGGESTIONS for the required-docs editor: real,
+/// well-known Israeli construction worker certifications. These are one-tap
+/// shortcuts only — the contractor free-types any name in the field; nothing
+/// here is auto-applied or treated as the worker's actual held certs.
+const List<String> _reqDocSuggestions = [
+  'היתר עבודה בגובה',
+  'תעודת מפעיל מלגזה',
+  'הסמכת חשמלאי',
+];
 
 /// One worker vacation-request row — `🦺 name · range` + reason, and (while
 /// pending) the ✅ אשר / ❌ דחה buttons; a decided row carries a read-only

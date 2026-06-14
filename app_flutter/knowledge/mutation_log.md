@@ -948,3 +948,9 @@
 - **מוטציה:** הסרת שמירת-ה-guard — `if (t.id == id && t.status == kTrainingPending)` → `if (t.id == id)` (approve היה מאשר **כל** סטטוס, כולל recorded/rejected — דריסת ה-no-op).
 - **תוצאה:** **אדומה ✅** — 'approve on a non-pending (recorded) training is a no-op' נכשל ('recorded stays recorded' · Differ at offset 0). שוחזר ה-guard ב-Edit (**לא** git checkout) → **+15 ירוק** (שני קבצי-H2: contractor_training_approval + contractor_certs).
 - **מסקנה:** ה-guard `status == kTrainingPending` load-bearing — בלעדיו approve/reject היו מחיים החלטה סופית/דורסים סטטוס. ה-lifecycle הדו-כיווני (pending→approved/rejected, no-op אחרת) אמיתי ונעול.
+
+## גל H3 — מדיניות מסמכים-נדרשים (normalized-exact, לא substring) — 2026-06-14
+- **קובץ:** `lib/state/docs_readiness.dart:104` (ההצלבה ב-block-3 של `workerDocsReadiness`) · בדיקה `test/contractor_required_docs_test.dart`.
+- **מוטציה:** `normalizeDocName(c.name) == key` → `key.contains(normalizeDocName(c.name))` (req מכיל cert — מלכודת-substring שממציאה סיפוק: דרישה 'בטיחות בגובה' היתה 'מסופקת' ע"י תעודת 'בטיחות' חלקית).
+- **תוצאה:** **אדומה ✅** — 'a substring-only cert does NOT satisfy a longer requirement' נכשל (Actual: <true>). שוחזר ל-`==` ב-Edit (**לא** git checkout) → **+23 ירוק** (8 gate + 15 policy).
+- **מסקנה:** ההצלבה normalized-exact load-bearing — לקח E2 (אין-המצאות) נעול גם בשער-הבטיחות; substring היה חוסם/משחרר עובדים על סמך התאמה-חלקית מזויפת.

@@ -10,8 +10,11 @@
 // the employer defines the real required document set server-side. Nothing here
 // invents data: readiness is computed only from the user's REAL forms/certs.
 
+import 'package:buildsmart/state/board_auth.dart' show boardAuthProvider;
 import 'package:buildsmart/state/courier_hr.dart'
     show courierCertsProvider, kCourierCertPresets;
+import 'package:buildsmart/state/required_docs_policy.dart'
+    show normalizeDocName, requiredDocsForEmployer;
 import 'package:buildsmart/state/worker_certs.dart';
 import 'package:buildsmart/state/worker_forms.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,11 +56,19 @@ class DocsReadiness {
 /// A cert that is [CertExpiryStatus.expiringSoon] is a WARNING only — it is
 /// added to [DocsReadiness.expiring] and does NOT block. [DocsReadiness.missing]
 /// is populated honestly from the real state.
+///
+/// [requiredCertNames] is an ADD-ON layer (default `const []` ⇒ today's
+/// behavior EXACTLY = back-compat): the CONTRACTOR's employer-scoped
+/// required-docs policy (`required_docs_policy.dart`). For EACH required name,
+/// the worker must hold a present, VALID (not expired) cert whose name matches
+/// by [normalizeDocName] (NORMALIZED-EXACT — never substring); an unmet
+/// requirement adds a `חסרה תעודה נדרשת: <name>` blocking line.
 DocsReadiness workerDocsReadiness({
   required String username,
   required WorkerFormsState forms,
   required List<WorkerCert> certs,
   required DateTime now,
+  List<String> requiredCertNames = const [],
 }) {
   final missing = <String>[];
   final expiring = <String>[];
@@ -83,6 +94,20 @@ DocsReadiness workerDocsReadiness({
     }
   }
 
+  // 3) Employer-required cert TYPES (ADD-ON; empty ⇒ no-op). Each required name
+  // must be matched by a present, VALID (not expired) cert of this user, by
+  // NORMALIZED-EXACT name — never substring (no fabricated satisfaction).
+  for (final req in requiredCertNames) {
+    final key = normalizeDocName(req);
+    final satisfied = certs.any((c) =>
+        c.username == username &&
+        normalizeDocName(c.name) == key &&
+        c.statusAt(now) != CertExpiryStatus.expired);
+    if (!satisfied) {
+      missing.add('חסרה תעודה נדרשת: $req');
+    }
+  }
+
   return DocsReadiness(
     ready: missing.isEmpty,
     missing: missing,
@@ -97,7 +122,7 @@ DocsReadiness workerDocsReadiness({
 /// (רישיון נהיגה · ביטוח רכב · רישיון רכב) is present among this courier's
 /// certificates AND NONE of the courier's certs is [CertExpiryStatus.expired].
 /// A missing preset → its name in [DocsReadiness.missing]; an expired cert is
-/// BLOCKING (its 'תעודה פגה: …' line in [missing]); expiringSoon is a warning
+/// BLOCKING (its 'תעודה פגה: …' line in [DocsReadiness.missing]); expiringSoon is a warning
 /// in [DocsReadiness.expiring].
 DocsReadiness courierDocsReadiness({
   required String username,
@@ -140,15 +165,23 @@ DocsReadiness courierDocsReadiness({
 /// signed 101 / a valid cert re-evaluates and opens the board with no manual
 /// "check again". `.family` keys on the logged username (#66 per-user scope).
 final workerDocsReadyProvider = Provider.family<DocsReadiness, String>(
-  (ref, username) => workerDocsReadiness(
-    username: username,
-    forms: ref.watch(workerFormsProvider),
-    certs: ref
-        .watch(workerCertsProvider)
-        .where((c) => c.username == username)
-        .toList(),
-    now: DateTime.now(),
-  ),
+  (ref, username) {
+    // ADD-ON: the contractor's employer-scoped required-docs policy. No session
+    // → employerId '' → requiredDocsForEmployer('') → [] → no extra requirement
+    // (back-compat: existing gate behavior unchanged).
+    final employerId = ref.watch(boardAuthProvider)?.employerId ?? '';
+    final required = ref.watch(requiredDocsForEmployer(employerId));
+    return workerDocsReadiness(
+      username: username,
+      forms: ref.watch(workerFormsProvider),
+      certs: ref
+          .watch(workerCertsProvider)
+          .where((c) => c.username == username)
+          .toList(),
+      now: DateTime.now(),
+      requiredCertNames: required,
+    );
+  },
 );
 
 /// The COURIER readiness for a given username, computed LIVE off the courier
