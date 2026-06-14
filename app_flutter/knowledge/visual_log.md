@@ -1061,3 +1061,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 **הפיך:** ה-seam additive — web byte-identical (`geo_web.dart` עדיין נבחר); נטיב עבר מ-null-stub ל-geolocator חי. אפס Color/`value:`/`activeColor:` חדש.
 **אימות:** `geo_gate_test` (+13) · `geo_permissions_source_test` (+6) · `site_hub_state_test` (net +5) · analyze 0-errors (geo_native/geo_gate/2-טסטים = 0 issues; info שנותרו קיימים-מראש) · full-suite **+2448 -1** (ה-`-1` היחיד = `worker_reports_drilldown` הקיים-מראש) · build web ✅ (0 geolocator ב-main.dart.js) · mutation red `+7 -2`→green `+9` (§mutation_log). **לא נגעתי:** מסכי/UI worker-board / clock-in (נחיל-העובדים) · manager-credit (סוכן מקביל) · 4 המחלקות · F1 · `nav_launch`.
+
+## #auth-gate — הרשמה אמיתית + שער-כניסה (flag ON) — 2026-06-14
+
+**שינוי (גלוי רק כש-`useFirebaseBackend` ON):** מסך-welcome "אישור והמשך" קיבל **שדה-סיסמה** ויוצר חשבון-Firebase אמיתי (במקום register-מקומי); ל-login_sheet email-pane נוסף toggle **"צור חשבון"**; כניסת-"דמו" מסומנת בבירור כדמו; profile — שורת-כניסה + 🚪 התנתקות. flag OFF = הזרימה הנוכחית verbatim (אפס-רגרסיה).
+**אימות (בדיקת-widget):** `login_sheet_test` +20 (create-account · toasts-עבריים · role-gate · profile login/logout/delete) · `welcome_auth_gate_test` · analyze 0-errors · full-suite **+2475 -1** (baseline) · build web ✅ · mutation red `+10 -2`→green +20 (§mutation_log).

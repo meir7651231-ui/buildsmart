@@ -75,6 +75,22 @@ class _FakeAuthGateway implements AuthGateway {
     emit(AuthUser(uid: 'u-mail', email: email));
   }
 
+  /// server-gate-auth — "צור חשבון": a NEW email already in use throws; a fresh
+  /// one mints + signs in the account (correct create password = create123).
+  final List<String> emailCreations = [];
+
+  @override
+  Future<void> createUserWithEmailPassword(String email, String password) async {
+    if (email == 'dup@b.co') {
+      throw const AuthGatewayException('email-already-in-use');
+    }
+    if (password.length < 6) {
+      throw const AuthGatewayException('weak-password');
+    }
+    emailCreations.add(email);
+    emit(AuthUser(uid: 'u-new', email: email));
+  }
+
   @override
   Future<Map<String, dynamic>> idTokenClaims({bool forceRefresh = false}) async =>
       claims;
@@ -124,6 +140,16 @@ void main() {
       );
       expect(hebrewAuthError('unavailable'), 'שירות ההתחברות אינו זמין כרגע');
       expect(hebrewAuthError('???'), 'ההתחברות נכשלה — נסה שוב');
+    });
+
+    test('hebrewAuthError — server-gate-auth createUser codes → honest Hebrew',
+        () {
+      expect(
+        hebrewAuthError('email-already-in-use'),
+        'האימייל כבר רשום — התחברו במקום',
+      );
+      expect(hebrewAuthError('weak-password'), 'סיסמה חלשה (6+ תווים)');
+      expect(hebrewAuthError('invalid-email'), 'כתובת האימייל אינה תקינה');
     });
   });
 
@@ -286,6 +312,56 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text('אימייל או סיסמה שגויים'), findsOneWidget);
       expect(find.text('🔐 התחברות לחשבון'), findsOneWidget);
+      await drainToast(t);
+    });
+
+    // server-gate-auth — "צור חשבון" mints a REAL account from the email pane.
+    testWidgets('create-account toggle → צור חשבון signs in the new account',
+        (t) async {
+      final gw = _FakeAuthGateway();
+      await pumpLoginHost(t, gw);
+
+      await t.tap(find.text('כניסה עם אימייל וסיסמה'));
+      await t.pumpAndSettle();
+      // The sign-in CTA is showing; flip to create-account mode.
+      expect(find.text('כניסה עם אימייל'), findsOneWidget);
+      await t.tap(find.text('אין לי חשבון — צור חשבון'));
+      await t.pumpAndSettle();
+      expect(find.text('צור חשבון'), findsOneWidget);
+      expect(find.text('כניסה עם אימייל'), findsNothing);
+
+      await t.enterText(find.widgetWithText(TextField, 'אימייל'), 'new@b.co');
+      await t.enterText(
+        find.widgetWithText(TextField, 'סיסמה (6+ תווים)'),
+        'create123',
+      );
+      await t.tap(find.text('צור חשבון'));
+      await t.pumpAndSettle();
+      expect(gw.emailCreations, ['new@b.co']);
+      expect(find.text('התחברת בהצלחה ✓'), findsOneWidget);
+      expect(find.text('🔐 התחברות לחשבון'), findsNothing); // sheet closed
+      await drainToast(t);
+    });
+
+    testWidgets('צור חשבון — an already-registered email toasts honest Hebrew',
+        (t) async {
+      final gw = _FakeAuthGateway();
+      await pumpLoginHost(t, gw);
+
+      await t.tap(find.text('כניסה עם אימייל וסיסמה'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('אין לי חשבון — צור חשבון'));
+      await t.pumpAndSettle();
+      await t.enterText(find.widgetWithText(TextField, 'אימייל'), 'dup@b.co');
+      await t.enterText(
+        find.widgetWithText(TextField, 'סיסמה (6+ תווים)'),
+        'create123',
+      );
+      await t.tap(find.text('צור חשבון'));
+      await t.pumpAndSettle();
+      expect(find.text('האימייל כבר רשום — התחברו במקום'), findsOneWidget);
+      expect(find.text('🔐 התחברות לחשבון'), findsOneWidget); // stays open
+      expect(gw.emailCreations, isEmpty);
       await drainToast(t);
     });
   });

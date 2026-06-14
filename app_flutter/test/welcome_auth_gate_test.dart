@@ -17,6 +17,8 @@
 //      shape `_enterViaAuth` mirrors to `users/{uid}`: a merge of
 //      {displayName, phone} keyed by the Firebase uid, with EMPTY identity
 //      fields skipped (S5 rules let a signed-in user self-write only those).
+import 'dart:async';
+
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
@@ -44,6 +46,48 @@ class _FakeUsersSink implements RemoteCollectionSource {
 
   @override
   Future<void> delete(String id) async {}
+}
+
+/// A recording fake [AuthGateway] — only its `createUserWithEmailPassword` /
+/// `signInWithEmailPassword` calls matter here: the flag-OFF welcome path must
+/// NEVER reach the gateway (it registers locally), so `creations` stays empty.
+class _RecordingAuthGateway implements AuthGateway {
+  final List<String> creations = [];
+  final List<String> emailLogins = [];
+  AuthUser? current;
+
+  @override
+  Stream<AuthUser?> authStateChanges() async* {
+    yield current;
+  }
+
+  @override
+  AuthUser? get currentUser => current;
+
+  @override
+  Future<void> createUserWithEmailPassword(String email, String password) async {
+    creations.add(email);
+    current = AuthUser(uid: 'u-new', email: email);
+  }
+
+  @override
+  Future<void> signInWithEmailPassword(String email, String password) async {
+    emailLogins.add(email);
+  }
+
+  @override
+  Future<String> sendOtp(String phone) async => 'vid-1';
+  @override
+  Future<void> signInWithSmsCode(String v, String s) async {}
+  @override
+  Future<Map<String, dynamic>> idTokenClaims({bool forceRefresh = false}) async =>
+      const {};
+  @override
+  Future<void> signOut() async {}
+  @override
+  Future<void> deleteAccount() async {}
+  @override
+  Future<void> setRole({required String uid, required String role}) async {}
 }
 
 void main() {
@@ -90,14 +134,17 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     final sink = _FakeUsersSink();
+    final gw = _RecordingAuthGateway();
     await tester.pumpWidget(
       ProviderScope(
-        // A writer + a signed-in gateway are PRESENT — yet the flag-OFF demo
-        // path must still never mirror. (In a real flag-OFF run both are null;
-        // forcing them non-null here makes the no-write a genuine guard on the
-        // `_register` flag gate, not an artifact of missing dependencies.)
+        // A writer + a gateway are PRESENT — yet the flag-OFF demo path must
+        // still never mirror NOR mint an account. (In a real flag-OFF run both
+        // are null; forcing them non-null here makes the no-write/no-createUser
+        // a genuine guard on the `_register` flag gate, not an artifact of
+        // missing dependencies.)
         overrides: [
           usersProfileWriterProvider.overrideWithValue(sink),
+          authGatewayProvider.overrideWithValue(gw),
         ],
         child: const MaterialApp(
           locale: Locale('he'),
@@ -127,13 +174,45 @@ void main() {
 
     // Demo path (flag OFF): the profile is saved locally + registered, the
     // flow advanced to the profession step — and NOTHING was written to the
-    // users collection (no real account fabricated).
+    // users collection NOR did any account get minted (no real account
+    // fabricated; the verbatim zero-regression local register).
     final profile = container.read(userProfileProvider);
     expect(profile.registered, isTrue);
     expect(profile.name, 'מאיר ישראלי');
     expect(profile.contact, '0501234567');
     expect(container.read(startupStepProvider), 1, reason: 'advanced to step 1');
     expect(sink.sets, isEmpty, reason: 'flag OFF must never mirror to users/');
+    expect(gw.creations, isEmpty,
+        reason: 'flag OFF must never call createUser (local register only)');
+    expect(gw.emailLogins, isEmpty);
+  });
+
+  // server-gate-auth — flag OFF: the demo affordance keeps its verbatim label
+  // ("...דוגמה") and the password field is NOT rendered (the welcome CTA mints
+  // no real account, so it collects no password). Byte-identical to today.
+  testWidgets('flag OFF: demo label verbatim + no password field', (tester) async {
+    tester.view.physicalSize = const Size(420, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(locale: Locale('he'), home: WelcomeScreen()),
+      ),
+    );
+    await tester.pump();
+
+    // The demo entry keeps today's wording (NOT the flag-ON "מצב דמו" copy).
+    expect(find.text('המשך ללא רישום (דוגמה)'), findsOneWidget);
+    expect(find.text('מצב דמו — נתונים מקומיים'), findsNothing);
+    // Even with an email typed, no password field appears with the flag OFF.
+    await tester.enterText(
+      find.widgetWithText(TextField, 'טלפון או אימייל'),
+      'a@b.co',
+    );
+    await tester.pump();
+    expect(find.widgetWithText(TextField, 'סיסמה (6+ תווים)'), findsNothing);
   });
 
   // ── B8: the "real account record" the flag-ON path mirrors to users/{uid} ──

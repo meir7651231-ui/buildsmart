@@ -137,6 +137,15 @@ abstract class AuthGateway {
   /// S1.3 — the email+password fallback flow.
   Future<void> signInWithEmailPassword(String email, String password);
 
+  /// S1.3-create (server-gate-auth) — CREATE a real Firebase account from
+  /// [email]+[password]. The honest "צור חשבון" path: a NEW user actually
+  /// minting an account (vs the local-only `user_profile.register`). Success
+  /// lands on [authStateChanges] just like sign-in. Throws
+  /// [AuthGatewayException] with the FirebaseAuth code verbatim
+  /// (`email-already-in-use` / `weak-password` / `invalid-email`) — the caller
+  /// maps it to honest Hebrew.
+  Future<void> createUserWithEmailPassword(String email, String password);
+
   /// S1.5 — the current user's custom claims (via `getIdTokenResult`).
   /// `{}` when signed out. [forceRefresh] pulls a fresh token (claims changed
   /// server-side, e.g. right after `setRole`).
@@ -274,6 +283,13 @@ class FirebaseAuthGateway implements AuthGateway {
   Future<void> signInWithEmailPassword(String email, String password) =>
       _guard(
         () => _auth.signInWithEmailAndPassword(email: email, password: password),
+      );
+
+  @override
+  Future<void> createUserWithEmailPassword(String email, String password) =>
+      _guard(
+        () =>
+            _auth.createUserWithEmailAndPassword(email: email, password: password),
       );
 
   @override
@@ -450,6 +466,12 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
   /// S1.3 — email+password fallback. Success arrives via the auth stream.
   Future<void> signInWithEmailPassword(String email, String password) async =>
       _required().signInWithEmailPassword(email, password);
+
+  /// S1.3-create (server-gate-auth) — CREATE a real Firebase account. Success
+  /// arrives via the auth stream (same path as sign-in). Throws the neutral
+  /// [AuthGatewayException] (Hebrew-toasted by the caller).
+  Future<void> createUserWithEmailPassword(String email, String password) async =>
+      _required().createUserWithEmailPassword(email, password);
 
   /// S1.7 — sign out + local cache clear. The LOCAL sign-out is optimistic and
   /// unconditional (clean exit even when the network call fails — same

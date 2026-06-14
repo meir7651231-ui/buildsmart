@@ -60,6 +60,9 @@ class _FakeAuthGateway implements AuthGateway {
   Future<void> signInWithEmailPassword(String e, String p) async {}
 
   @override
+  Future<void> createUserWithEmailPassword(String e, String p) async {}
+
+  @override
   Future<Map<String, dynamic>> idTokenClaims({bool forceRefresh = false}) async =>
       const {};
 

@@ -197,6 +197,10 @@ class _FakeAuthGateway implements AuthGateway {
   Future<void> signInWithEmailPassword(String email, String password) async {}
 
   @override
+  Future<void> createUserWithEmailPassword(
+      String email, String password) async {}
+
+  @override
   Future<void> signOut() async => emit(null);
 
   @override

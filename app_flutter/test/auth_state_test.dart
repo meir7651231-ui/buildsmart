@@ -49,9 +49,15 @@ class _FakeAuthGateway implements AuthGateway {
 
   String nextVerificationId = 'vid-1';
 
+  /// When non-null, the next [createUserWithEmailPassword] throws this code —
+  /// the honest-error tests (`email-already-in-use` / `weak-password` /
+  /// `invalid-email`).
+  String? failCreateCode;
+
   final List<String> otpPhones = [];
   final List<String> smsConfirms = [];
   final List<String> emailLogins = [];
+  final List<String> emailCreations = [];
   final List<({String uid, String role})> setRoleCalls = [];
   int signOutCalls = 0;
   int deleteCalls = 0;
@@ -105,6 +111,19 @@ class _FakeAuthGateway implements AuthGateway {
     }
     emailLogins.add(email);
     emit(AuthUser(uid: 'u-mail', email: email));
+  }
+
+  @override
+  Future<void> createUserWithEmailPassword(String email, String password) async {
+    final code = failCreateCode;
+    if (code != null) {
+      failCreateCode = null;
+      throw AuthGatewayException(code);
+    }
+    emailCreations.add(email);
+    // A real createUser signs the NEW user in (same as FirebaseAuth) — lands
+    // on the stream so the welcome flow / login sheet enters the app.
+    emit(AuthUser(uid: 'u-new', email: email));
   }
 
   @override
@@ -344,6 +363,86 @@ void main() {
       await pumpEventQueue();
       expect(gw.emailLogins, ['a@b.co']);
       expect(c.read(authStateProvider).user?.email, 'a@b.co');
+    });
+  });
+
+  group('createUser — server-gate-auth (REAL account, not local-register)', () {
+    test('createUserWithEmailPassword mints + signs in a NEW user', () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      await c
+          .read(authStateProvider.notifier)
+          .createUserWithEmailPassword('new@b.co', 'hunter2');
+      await pumpEventQueue();
+      expect(gw.emailCreations, ['new@b.co'],
+          reason: 'a real createUser call reached the gateway');
+      final snap = c.read(authStateProvider);
+      expect(snap.user?.uid, 'u-new', reason: 'the new account is signed in');
+      expect(snap.user?.email, 'new@b.co');
+      expect(snap.signedIn, isTrue);
+    });
+
+    // The three honest error mappings: the neutral codes the seam surfaces,
+    // which login_sheet's hebrewAuthError turns into honest Hebrew.
+    test('email-already-in-use surfaces verbatim (→ "כבר רשום" Hebrew)',
+        () async {
+      final gw = _FakeAuthGateway()..failCreateCode = 'email-already-in-use';
+      final c = makeContainer(gw);
+      await expectLater(
+        c
+            .read(authStateProvider.notifier)
+            .createUserWithEmailPassword('dup@b.co', 'hunter2'),
+        throwsA(
+          isA<AuthGatewayException>()
+              .having((e) => e.code, 'code', 'email-already-in-use'),
+        ),
+      );
+      await pumpEventQueue();
+      expect(c.read(authStateProvider).user, isNull,
+          reason: 'a failed create signs nobody in');
+      expect(gw.emailCreations, isEmpty);
+    });
+
+    test('weak-password surfaces verbatim (→ "סיסמה חלשה" Hebrew)', () async {
+      final gw = _FakeAuthGateway()..failCreateCode = 'weak-password';
+      final c = makeContainer(gw);
+      await expectLater(
+        c
+            .read(authStateProvider.notifier)
+            .createUserWithEmailPassword('w@b.co', '123'),
+        throwsA(
+          isA<AuthGatewayException>()
+              .having((e) => e.code, 'code', 'weak-password'),
+        ),
+      );
+    });
+
+    test('invalid-email surfaces verbatim', () async {
+      final gw = _FakeAuthGateway()..failCreateCode = 'invalid-email';
+      final c = makeContainer(gw);
+      await expectLater(
+        c
+            .read(authStateProvider.notifier)
+            .createUserWithEmailPassword('not-an-email', 'hunter2'),
+        throwsA(
+          isA<AuthGatewayException>()
+              .having((e) => e.code, 'code', 'invalid-email'),
+        ),
+      );
+    });
+
+    test('without a gateway (Firebase-free): throws the neutral `unavailable`',
+        () {
+      final c = makeContainer(null);
+      expect(
+        () => c
+            .read(authStateProvider.notifier)
+            .createUserWithEmailPassword('a@b.co', 'hunter2'),
+        throwsA(
+          isA<AuthGatewayException>()
+              .having((e) => e.code, 'code', 'unavailable'),
+        ),
+      );
     });
   });
 

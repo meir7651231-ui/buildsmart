@@ -12,6 +12,7 @@ import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
+import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -40,11 +41,19 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _contact = TextEditingController();
 
+  /// server-gate-auth — the registration PASSWORD, used ONLY when the backend
+  /// flag is ON and the contact is an email: the welcome CTA then mints a REAL
+  /// Firebase account (`createUserWithEmailPassword`) instead of writing a
+  /// local-only profile. The field is not built (and never read) when the flag
+  /// is OFF, so the demo flow stays byte-identical.
+  final TextEditingController _password = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _name.addListener(_onChanged);
     _contact.addListener(_onChanged);
+    _password.addListener(_onChanged);
   }
 
   /// task #65 + #85א · role-gate mode only: a well-formed code that
@@ -74,6 +83,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   void dispose() {
     _name.dispose();
     _contact.dispose();
+    _password.dispose();
     super.dispose();
   }
 
@@ -94,18 +104,64 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   void _register() {
     // Contractor flow only — in role mode (cluster #85א) the registration
     // form is not built; board login goes through [_boardLogin].
+    //
+    // server-gate-auth — live backend (flag ON): the welcome CTA must mint a
+    // REAL Firebase account, never a local-only "registered" profile (the gap a
+    // device test exposed). So flag-ON routes to [_registerViaAuth] and does
+    // NOT call `user_profile.register` here. Demo (flag OFF): the verbatim
+    // local register + advance to the profession step, byte-identical.
+    if (useFirebaseBackend) {
+      unawaited(_registerViaAuth());
+      return;
+    }
     ref
         .read(userProfileProvider.notifier)
         .register(name: _name.text, contact: _contact.text);
-    // Live backend (flag ON): name/contact are saved locally, then the user
-    // authenticates (phone-OTP) — without auth the _firebase repos hit the
-    // deny-all Rules and nothing persists. Demo (flag OFF): straight to the
-    // profession step, exactly as before.
-    if (useFirebaseBackend) {
-      unawaited(_enterViaAuth());
+    _advance();
+  }
+
+  /// server-gate-auth (flag ON only) — mint a REAL account for a NEW user from
+  /// the welcome form. The contact field accepts a phone OR an email:
+  ///   • EMAIL → create the account directly with the typed password
+  ///     (`createUserWithEmailPassword`); honest errors (`email-already-in-use`
+  ///     / `weak-password`) are Hebrew-toasted and the user stays on welcome.
+  ///   • PHONE → route to the login sheet's phone-OTP (which mints the account
+  ///     on first verify; the password field is email-only).
+  /// Either way, ONLY a real signed-in user advances — then the identity is
+  /// mirrored to `users/{uid}` and the app entered (see [_finishAfterAuth]).
+  Future<void> _registerViaAuth() async {
+    final contact = _contact.text.trim();
+    final password = _password.text;
+    if (validEmail(contact)) {
+      // Mirror the typed name locally so the post-auth users/{uid} write and
+      // the profile chip carry it (the account itself is the real Firebase
+      // identity — this is the on-device display copy, like the login flow).
+      ref
+          .read(userProfileProvider.notifier)
+          .register(name: _name.text, contact: contact);
+      try {
+        await ref
+            .read(authStateProvider.notifier)
+            .createUserWithEmailPassword(contact, password);
+      } on AuthGatewayException catch (e) {
+        if (mounted) showToast(context, hebrewAuthError(e.code));
+        return;
+      } on Object catch (_) {
+        if (mounted) showToast(context, hebrewAuthError('unknown'));
+        return;
+      }
+      if (!mounted) return;
+      // A real account now exists + the auth stream signed us in.
+      if (!ref.read(authStateProvider).signedIn) return;
+      _finishAfterAuth();
       return;
     }
-    _advance();
+    // Phone contact (or non-email): the account is minted by phone-OTP in the
+    // login sheet. Mirror the name first so the post-auth write carries it.
+    ref
+        .read(userProfileProvider.notifier)
+        .register(name: _name.text, contact: contact);
+    await _enterViaAuth();
   }
 
   void _demo() {
@@ -156,16 +212,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     unawaited(persistWelcomeSeen());
   }
 
-  /// Live-backend entry: open the Firebase login sheet (phone-OTP / email), and
-  /// once [authStateProvider] reports a signed-in user, mirror the identity
-  /// fields to `users/{uid}` (rules-safe merge) and enter the app. A cancelled
-  /// sheet (still signed-out) leaves the user on the welcome screen to retry.
+  /// Live-backend entry: open the Firebase login sheet (phone-OTP / email /
+  /// create-account), and once [authStateProvider] reports a signed-in user,
+  /// finish via [_finishAfterAuth]. A cancelled sheet (still signed-out) leaves
+  /// the user on the welcome screen to retry.
   Future<void> _enterViaAuth() async {
     await showLoginSheet(context);
     if (!mounted) return;
-    final auth = ref.read(authStateProvider);
-    if (!auth.signedIn) return; // cancelled — stay on welcome
-    final uid = auth.user?.uid;
+    if (!ref.read(authStateProvider).signedIn) return; // cancelled — stay
+    _finishAfterAuth();
+  }
+
+  /// server-gate-auth — the shared post-auth step both entry paths run once a
+  /// REAL user has signed in: mirror the identity fields to `users/{uid}`
+  /// (rules-safe merge — empties skipped, never clobbers role/fcmToken) and
+  /// flip the welcome-seen gate so the app opens.
+  void _finishAfterAuth() {
+    final uid = ref.read(authStateProvider).user?.uid;
     final writer = ref.read(usersProfileWriterProvider);
     if (uid != null && writer != null) {
       final p = ref.read(userProfileProvider);
@@ -294,7 +357,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // [_boardLoginChildren] and never reads these.
     final contactOk =
         validIsraeliMobile(_contact.text) || validEmail(_contact.text);
-    final valid = registrationValid(_name.text, _contact.text) && contactOk;
+    // server-gate-auth — flag ON + an EMAIL contact mints a real account from
+    // the welcome CTA, so a 6+ char password is required before it unlocks. A
+    // PHONE contact routes to OTP (no password), and flag OFF never reads it —
+    // so the demo CTA gate is byte-identical.
+    final needsPassword =
+        useFirebaseBackend && validEmail(_contact.text);
+    final passwordOk = !needsPassword || _password.text.length >= 6;
+    final valid =
+        registrationValid(_name.text, _contact.text) && contactOk && passwordOk;
     final media = MediaQuery.of(context);
     final heroHeight = media.size.height * 0.4;
     return Scaffold(
@@ -394,8 +465,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       else ...[
                       HelpTarget(
                         title: 'כניסה ללקוח קיים',
-                        body: 'מיועד למי שכבר נרשם — כניסה ישירה פנימה. כרגע '
-                            'אין שרת התחברות, כך שבפועל זה נכנס כאורח.',
+                        // server-gate-auth — flag ON: a real login sheet opens
+                        // (טלפון/אימייל). Flag OFF: the verbatim guest wording.
+                        body: useFirebaseBackend
+                            ? 'מיועד למי שכבר נרשם — נפתח חלון התחברות עם '
+                                'טלפון או אימייל.'
+                            : 'מיועד למי שכבר נרשם — כניסה ישירה פנימה. כרגע '
+                                'אין שרת התחברות, כך שבפועל זה נכנס כאורח.',
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
                             foregroundColor: BsTokens.brandDark,
@@ -488,6 +564,28 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               : 'מספר נייד או אימייל לא תקינים',
                         ),
                       ),
+                      // server-gate-auth — flag ON + an email contact: a real
+                      // Firebase account is minted here, so collect a password.
+                      // Not built when the flag is OFF (demo byte-identical) or
+                      // for a phone contact (that account is minted by OTP).
+                      if (needsPassword) ...[
+                        const SizedBox(height: BsTokens.space3),
+                        HelpTarget(
+                          title: 'סיסמה',
+                          body: 'בוחרים סיסמה (6 תווים ומעלה) ליצירת החשבון. '
+                              'איתה תוכלו להתחבר בכל מכשיר.',
+                          child: _field(
+                            _password,
+                            'סיסמה (6+ תווים)',
+                            Icons.lock_outline,
+                            obscure: true,
+                            errorText: _password.text.isEmpty ||
+                                    _password.text.length >= 6
+                                ? null
+                                : 'סיסמה חלשה (6+ תווים)',
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: BsTokens.space5),
                       HelpTarget(
                         title: 'אישור והמשך',
@@ -504,9 +602,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             'באפליקציה. אפשר להירשם מאוחר יותר מההגדרות.',
                         child: TextButton(
                           onPressed: _demo,
-                          child: const Text(
-                            'המשך ללא רישום (דוגמה)',
-                            style: TextStyle(
+                          // server-gate-auth — flag ON: this is the ONLY way in
+                          // without a real Firebase account, so it is labelled
+                          // HONESTLY as a demo (local data — never impersonating
+                          // a real account). Flag OFF: the verbatim wording.
+                          child: Text(
+                            useFirebaseBackend
+                                ? 'מצב דמו — נתונים מקומיים'
+                                : 'המשך ללא רישום (דוגמה)',
+                            style: const TextStyle(
                               color: BsTokens.mutedLight,
                               fontWeight: FontWeight.w600,
                             ),
@@ -654,11 +758,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     IconData icon, {
     String? errorText,
     TextInputType? keyboardType,
+    bool obscure = false,
   }) {
     final ok = c.text.trim().isNotEmpty && errorText == null;
     return TextField(
       controller: c,
       keyboardType: keyboardType,
+      obscureText: obscure,
       decoration: InputDecoration(
         hintText: hint,
         errorText: errorText,
