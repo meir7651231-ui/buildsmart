@@ -3560,6 +3560,15 @@ class _OrdersList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 🟢 WIRED — 'היסטוריית רכישות' privacy toggle (store_settings → פרטיות):
+    // off ⇒ the purchase-history list is hidden behind a privacy notice (a real,
+    // observable, local effect — no backend). The orders still exist in the
+    // engine; only this buyer-facing display is suppressed.
+    final showHistory = ref.watch(
+      storeSettingsProvider.select((s) => s.purchaseHistory),
+    );
+    if (!showHistory) return const _OrdersHidden();
+
     final query = ref.watch(storeSearchQueryProvider).trim().toLowerCase();
     // Apply sortDefault from store settings to the order list.
     // priceAsc  → ascending by total (sum); others → engine/chronological order
@@ -3603,6 +3612,59 @@ class _OrdersList extends ConsumerWidget {
           (_, __) =>
               const Divider(height: 1, indent: 76, color: Color(0xFFF5F5F5)),
       itemBuilder: (context, i) => _OrderRow(order: orders[i]),
+    );
+  }
+}
+
+/// Shown in the הזמנות tab when 'היסטוריית רכישות' (store_settings → פרטיות) is
+/// OFF: the purchase history is hidden by the user's own privacy choice. A tap
+/// re-enables it (real round-trip, no backend).
+class _OrdersHidden extends ConsumerWidget {
+  const _OrdersHidden();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: constraints.maxHeight,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('🔒', style: TextStyle(fontSize: 48)),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'היסטוריית הרכישות מוסתרת',
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'הפעלת "היסטוריית רכישות" בהגדרות תציג שוב את ההזמנות.',
+                    style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton(
+                    onPressed: () => ref
+                        .read(storeSettingsProvider.notifier)
+                        .update((s) => s.copyWith(purchaseHistory: true)),
+                    child: const Text('הצג היסטוריה'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

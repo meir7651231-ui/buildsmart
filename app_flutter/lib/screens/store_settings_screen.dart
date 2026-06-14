@@ -600,10 +600,12 @@ class _PrivacySection extends ConsumerWidget {
       emoji: '🔐',
       title: 'פרטיות ורכישות',
       children: [
+        // 🟢 WIRED — buyer privacy toggle: off ⇒ the הזמנות tab hides the
+        // purchase-history list behind a privacy notice (_OrdersHidden in
+        // store_screen). Real, observable, local effect — no backend.
         _SwitchRow(
           label: 'היסטוריית רכישות',
           value: settings.purchaseHistory,
-          underConstruction: true,
           onChanged:
               (v) => ref
                   .read(storeSettingsProvider.notifier)

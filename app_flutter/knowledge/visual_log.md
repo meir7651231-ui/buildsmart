@@ -882,3 +882,10 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **`defaultAddress`** → שדה 'לאן לשלוח?': default-ריק ⇒ TextField ריק (hint בלבד) · default-שמור ⇒ הטקסט מקדים-ממולא · shipTo-בתהליך גובר. נצפה דרך `TextField.controller.text`.
 
 **אימות:** `store_settings_wiring_test` 8/8 · `cart_share_test` 2/2 (עודכן) · analyze 0-errors · build web ✅. mutation-verified (ראה `knowledge/mutation_log.md` §B5).
+
+## #B5-cont — `purchaseHistory` → טוגל-פרטיות על רשימת-ההיסטוריה — 2026-06-14
+
+**שינוי:** ההגדרה המתה `purchaseHistory` מגטה כעת את רשימת היסטוריית-ההזמנות. אימות = widget-test (בהיעדר screenshot-tooling).
+- **`purchaseHistory`** → רשימת order-history: ON (ברירת-מחדל) ⇒ שורות-ההזמנה נראות, אין הודעת-פרטיות · OFF ⇒ הרשימה מוחלפת בהודעת-פרטיות + כפתור "הצג היסטוריה" · tap-הכפתור ⇒ ON חוזר והרשימה שבה. נצפה ב-`store_purchase_history_settings_test` (order-rows findsWidgets↔findsNothing; הודעת-הפרטיות findsOneWidget כש-OFF).
+
+**אימות:** `store_purchase_history_settings_test` 3/3 · analyze 0-errors · build web ✅.
