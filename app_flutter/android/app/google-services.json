@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "483064122180",
+    "project_id": "buildsmart-b0b78",
+    "storage_bucket": "buildsmart-b0b78.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:483064122180:android:e9d240f3251e7a33ca6511",
+        "android_client_info": {
+          "package_name": "com.buildsmart.buildsmart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSkrlVrWhHdm-2VasEwae3V6S9v7mrslg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
