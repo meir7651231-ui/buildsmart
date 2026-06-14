@@ -12,6 +12,7 @@ import 'package:buildsmart/data/phaseb_seeds.dart';
 // Wave T2a — contractor authoring stamps the employer id (kDemoContractorId on
 // the single-device demo, SERVER-SWAP to the real contractor uid) + reads the
 // LIVE review queue projection for the parallel contractor-approval surface.
+import 'package:buildsmart/screens/contractor_hr_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart'
@@ -111,6 +112,16 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       _NewTaskButton(onTap: () => _openAuthor(context)),
       const SizedBox(height: BsTokens.space2),
       _LogButton(onTap: () => _openWorkLog(context)),
+      const SizedBox(height: BsTokens.space2),
+      // WORKER-HR (Wave H1b) — the contractor is the EMPLOYER, so worker
+      // vacation requests are approved/rejected HERE (not on the manager
+      // dashboard). Opens the contractor HR sheet over the shared
+      // `vacationRequestsProvider` (scoped to this employer).
+      _EntryButton(
+        key: const ValueKey('contractor-hr-entry'),
+        label: '👷 חופשות עובדים',
+        onTap: () => showContractorHrSheet(context),
+      ),
       // CONTRACTOR APPROVAL (Wave T2a) — the employer's own אשר/דחה surface on
       // the LIVE review queue (parallel to the manager dashboard's block).
       ..._contractorApprovals(),
@@ -352,6 +363,37 @@ class _LogButton extends StatelessWidget {
             child: Text(
               '📅 יומן עבודה — מה בוצע בכל יום',
               style: TextStyle(
+                color: BsTokens.inkLight,
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+/// A neutral card-style entry button (same look as [_LogButton]) with a
+/// caller-supplied label — used by the Wave H1b '👷 חופשות עובדים' action.
+class _EntryButton extends StatelessWidget {
+  const _EntryButton(
+      {required this.label, required this.onTap, super.key});
+  final String label;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => Material(
+        color: BsTokens.cardLight,
+        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        elevation: 1,
+        shadowColor: Colors.black26,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(BsTokens.space4),
+            child: Text(
+              label,
+              style: const TextStyle(
                 color: BsTokens.inkLight,
                 fontWeight: FontWeight.w700,
                 fontSize: 14,

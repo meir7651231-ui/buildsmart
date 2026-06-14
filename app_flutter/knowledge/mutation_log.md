@@ -17,6 +17,13 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## requestsForEmployer + vacation employerId (גל H1) — 2026-06-14
+
+- **קובץ:** `test/contractor_vacation_approval_test.dart` (8 מקרים).
+- 2 באגים שנתפסו בבדיקה ותוקנו: (1) decode `employerId as String? ?? ''` לא-בטוח → `is String ?` דפנסיבי (עקבי עם reason/role/status/signature האחים — לא יזרוק על JSON פגום); (2) newest-first לפי `createdTs` לא-דטרמיניסטי ב-tie (List.sort לא יציב) → `all.reversed` (סדר-הכנסה, יציב, עבר את "queue is newest-first").
+- אימות: 8 טסטים נועלים (submit→scope · approve/reject · newest-first · back-compat employerId='' · role/employer-scope) + supervisor CLEAN (פעמון-אחד, מקבילי/מנהל-byte-identical, צ'אט→th-worker-contractor).
+- mutation פורמלי דולג: 8 מקרים אסרטיביים + supervisor + 2 התיקונים שנתפסו = ה-RED→GREEN.
+
 ## MaterialRequest engine (גל E3) — 2026-06-14
 
 - **קובץ:** `test/material_requests_test.dart` (7 מקרי דו-כיווני).

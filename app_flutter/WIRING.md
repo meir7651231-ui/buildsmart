@@ -32,6 +32,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > **גל E1 (מלאי):** העובד קורא מלאי-קבלן READ-ONLY — `employerStockProvider(session.employerId)` (`employer_stock.dart`) → גיליון '📦 מלאי הקבלן' + כפתור בלוח-העובד. העובד רואה, לא משנה. SERVER-SWAP: stock scoped ל-employerId.
 > **גל E2:** צ'יפ-זמינות ב-#112 — `availabilityFor` (`equipment_stock_join.dart`, token-aware, אין-המצאות) מצליב כל פריט-ציוד מול `employerStockProvider` → 🏬 מחסן / 🏗️ אתר / 'זמינות לא ידועה'. העובד רק רואה (read-only).
 > **גל E3:** בקשת-חומר מובנית עובד→קבלן — `materialRequestsProvider` (`material_requests_engine.dart`): העובד שולח מ-'🧱 בקש חומרים' (גיליון-מלאי) ורואה סטטוס; הקבלן ב-'📥 בקשות חומר' (stock_screen) מקדם requested→ordered→supplied/declined. דו-כיווני-חי, ישות נפרדת מהמלאי (העובד לא משנה מלאי). firebase→Z.
+> **גל H1 (HR):** אישור-חופשה עובד → **קבלן** (לא מנהל) — `requestsForEmployer` (`vacation_requests.dart`, employer-scoped) + מסך `contractor_hr_sheet` ('👷 חופשות עובדים' ב-tasks_screen): אשר/דחה → פעמון-עובד + צ'אט th-worker-contractor. מקבילי (מנהל נשאר). worker: 'לאישור הקבלן'.
 
 ---
 

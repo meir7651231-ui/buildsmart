@@ -26,6 +26,8 @@ mutation 3-RED→GREEN. בנוי על הענף-הראשי המאוחד (worker-b
 
 **גל E3 · בקשת-חומר עובד→קבלן (דו-כיווני-חי):** `material_requests_engine.dart` (חדש) — `MaterialRequest{id,employerId,workerUid,workerName,items,note,status,createdTs}` + `submit`(עובד)/`setStatus`(קבלן, terminal-guard) + `requestsForEmployer`/`requestsForWorker` (families) + bindRemote seam (Z). העובד שולח בקשה מובנית מ-'🧱 בקש חומרים' (לא chat-stub) ורואה סטטוס חי; הקבלן רואה ב-'📥 בקשות חומר' (stock_screen) ומקדם requested→ordered→supplied/declined. העובד **לא נוגע במלאי** (ישות נפרדת). נחיל: E3a מנוע+עובד · E3b inbox+7 טסטים. שער: analyze 0 · 7 טסטי-דו-כיווני · supervisor CLEAN (RED→GREEN = הטסטים ההתנהגותיים + המפקח; mutation פורמלי דולג בישות מבדקת-היטב). firebase→Z.
 
+**גל H1 · אישור-חופשה → קבלן (מקבילי):** `VacationRequest` += `employerId` (additive, back-compat) + `submit({employerId})` + `requestsForEmployer` (worker-role, employer-scoped, newest-first דטרמיניסטי-reversed). מסך-קבלן חדש `contractor_hr_sheet` ('👷 חופשות עובדים' ב-tasks_screen) — הקבלן מאשר/דוחה דרך המנוע הקיים, **פעמון-אחד** לעובד + צ'אט→th-worker-contractor (כמו המנהל, ממוקד-קבלן). worker_forms: 'לאישור המנהל'→'לאישור הקבלן'. **מקבילי** (מנהל לא-נגוע, byte-identical; הסרה-מלאה parked). נחיל: H1a engine+worker · H1b sheet+entry · H1c 8 טסטים + 2 תיקונים (decode לא-בטוח→דפנסיבי · createdTs-tie→reversed-דטרמיניסטי). שער: analyze 0 · 8 טסטים · supervisor CLEAN.
+
 ## v6.19 — לוח עובד v3 מלא (#100–#114, נחיל אמיתי, 4 גלים)
 
 לוח-העובד נבנה והורחב דרך נחיל ה-/swarm הקנוני (donning + manifested-gate + mutation-verify +

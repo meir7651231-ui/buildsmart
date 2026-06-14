@@ -52,6 +52,14 @@
 
 ---
 
+## v6.20 — חיווט קבלן↔עובד · גל H1 (אישור-חופשה אצל הקבלן)
+
+**שינוי (UI):** `worker_forms_screen.dart` — copy 'לאישור המנהל'→'לאישור הקבלן' (כפתור-חופשה + toast). `contractor_hr_sheet.dart` (חדש) — מסך-קבלן לאישור/דחיית חופשות-עובד (שם + תאריכים + סיבה + chip-סטטוס, אשר/דחה). `tasks_screen.dart` — כפתור '👷 חופשות עובדים' (תצוגת-קבלן). דפוסים קיימים (modal RTL, _EntryButton, promptRejectReason). מקבילי — מסך-המנהל לא נגע.
+
+**אימות:** 8 טסטי-מנוע (scope/approve/reject/newest-first/back-compat) · analyze 0 · supervisor CLEAN (פעמון-אחד, מקבילי, צ'אט→th-worker-contractor, מנהל byte-identical). **follow-up:** רינדור contractor_hr_sheet לא ב-widget-test (המנוע + הזרימה כן).
+
+---
+
 ## v6.16 — fix-fleet · round-3 (ציד עמוק יותר: data/RTL/UX)
 
 **שינוי:** סבב-3 עמוק (data-integrity · RTL · error-paths) תפס באגים שהסבבים הקודמים פספסו.

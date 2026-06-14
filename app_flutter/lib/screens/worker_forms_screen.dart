@@ -568,7 +568,7 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
         ),
         const SizedBox(height: BsTokens.space3),
         _PillButton(
-          label: '🏖️ שלח בקשה לאישור המנהל',
+          label: '🏖️ שלח בקשה לאישור הקבלן',
           onPressed: () => _submitVacation(session),
         ),
         const SizedBox(height: BsTokens.space2),
@@ -645,6 +645,7 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
           from: from,
           to: to,
           reason: _vacReasonCtl.text,
+          employerId: session.employerId,
           signature: _sigVac ?? '',
           declared: _declaredVac,
         );
@@ -656,7 +657,7 @@ class _WorkerFormsScreenState extends ConsumerState<WorkerFormsScreen> {
       _declaredVac = false;
       _sigVac = null;
     });
-    showToast(context, '🏖️ הבקשה נשלחה לאישור המנהל');
+    showToast(context, '🏖️ הבקשה נשלחה לאישור הקבלן');
   }
 
   /// #107 — capture the worker's signature for the vacation request.

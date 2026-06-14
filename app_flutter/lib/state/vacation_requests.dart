@@ -32,6 +32,7 @@ class VacationRequest {
     required this.reason,
     required this.createdTs,
     this.role = 'worker',
+    this.employerId = '',
     this.status = kVacationPending,
     this.decidedTs,
     this.signature = '',
@@ -53,6 +54,14 @@ class VacationRequest {
   /// across roles. Back-compat: old persisted records carry no 'role' and
   /// decode as `'worker'` (every pre-courier request really was a worker's).
   final String role;
+
+  /// Id of the contractor who EMPLOYS the requester (the worker→contractor
+  /// LINK, `session.employerId`) — lets the contractor's HR queue scope to
+  /// THEIR workers (see [requestsForEmployer]). Default `''` (field-economy:
+  /// only serialised when non-empty). Back-compat: old persisted records carry
+  /// no 'employerId' and decode as `''` (and are excluded from any non-empty
+  /// employer query).
+  final String employerId;
 
   /// Inclusive vacation range.
   final DateTime from;
@@ -92,6 +101,7 @@ class VacationRequest {
     DateTime? decidedTs,
     String? signature,
     bool? declared,
+    String? employerId,
   }) =>
       VacationRequest(
         id: id,
@@ -102,6 +112,7 @@ class VacationRequest {
         reason: reason,
         createdTs: createdTs,
         role: role,
+        employerId: employerId ?? this.employerId,
         status: status ?? this.status,
         decidedTs: decidedTs ?? this.decidedTs,
         signature: signature ?? this.signature,
@@ -117,6 +128,7 @@ class VacationRequest {
         'reason': reason,
         'createdTs': createdTs.toIso8601String(),
         'role': role,
+        if (employerId.isNotEmpty) 'employerId': employerId,
         'status': status,
         'decidedTs': decidedTs?.toIso8601String(),
         'signature': signature,
@@ -149,6 +161,7 @@ class VacationRequest {
       reason: raw['reason'] is String ? raw['reason'] as String : '',
       createdTs: created,
       role: raw['role'] is String ? raw['role'] as String : 'worker',
+      employerId: raw['employerId'] is String ? raw['employerId'] as String : '',
       status: raw['status'] is String ? raw['status'] as String : kVacationPending,
       decidedTs: DateTime.tryParse('${raw['decidedTs']}'),
       signature: raw['signature'] is String ? raw['signature'] as String : '',
@@ -211,6 +224,7 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
     required DateTime to,
     required String reason,
     String role = 'worker',
+    String employerId = '',
     String signature = '',
     bool declared = false,
   }) {
@@ -225,6 +239,7 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
       reason: reason.trim(),
       createdTs: DateTime.now(),
       role: role,
+      employerId: employerId,
       signature: signature,
       declared: declared,
     );
@@ -258,3 +273,22 @@ final vacationRequestsProvider =
     StateNotifierProvider<VacationRequestsNotifier, List<VacationRequest>>(
   (ref) => VacationRequestsNotifier(),
 );
+
+/// The CONTRACTOR's HR queue — every WORKER vacation request that names this
+/// `employerId` (the worker→contractor LINK), newest-first. The contractor's
+/// approval surface (Wave H1b) watches this to decide on THEIR workers only;
+/// a request with an empty/other employerId is excluded (scope). Reuses the
+/// shared [vacationRequestsProvider] — decisions still flow through
+/// `approve`/`reject`, so the requester's own list flips live.
+final requestsForEmployer =
+    Provider.family<List<VacationRequest>, String>((ref, employerId) {
+  final all = ref.watch(vacationRequestsProvider);
+  // Newest-first, DETERMINISTIC: iterate the insertion-ordered list in reverse
+  // (last-submitted = newest). Avoids the createdTs-tie instability when two
+  // requests share a microsecond (List.sort isn't stable) — the _seq/timestamp
+  // gotcha. Reload preserves insertion order, so this stays newest-first.
+  return [
+    for (final r in all.reversed)
+      if (r.role == 'worker' && r.employerId == employerId) r,
+  ];
+});
