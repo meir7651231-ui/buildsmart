@@ -16,7 +16,7 @@ android {
     namespace = "com.buildsmart.buildsmart"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
-    compileOptions { sourceCompatibility = JavaVersion.VERSION_11; targetCompatibility = JavaVersion.VERSION_11 }
+    compileOptions { sourceCompatibility = JavaVersion.VERSION_11; targetCompatibility = JavaVersion.VERSION_11; isCoreLibraryDesugaringEnabled = true }
     kotlinOptions { jvmTarget = JavaVersion.VERSION_11.toString() }
     defaultConfig {
         applicationId = "com.buildsmart.buildsmart"
@@ -40,3 +40,9 @@ android {
     }
 }
 flutter { source = "../.." }
+
+// F5 — flutter_local_notifications (Android notification channels) requires Java 8+
+// core-library desugaring. AGP 8.9.1 supports desugar_jdk_libs 2.1.x.
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+}
