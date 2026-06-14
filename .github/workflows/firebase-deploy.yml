@@ -9,6 +9,8 @@
 # pubsub, storage, run, eventarc, cloudbilling.
 # GitHub secrets: FIREBASE_SERVICE_ACCOUNT, R2_ACCESS_KEY_ID,
 # R2_SECRET_ACCESS_KEY, R2_ACCOUNT_ID.
+# Re-run 2026-06-14: trigger a deploy so firestore indexes ship after the owner
+# granted the SA the Cloud Datastore Index Admin role (the step was 403 before).
 name: Deploy Firebase Rules + Functions
 
 on:
