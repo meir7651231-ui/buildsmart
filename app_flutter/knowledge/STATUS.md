@@ -24,6 +24,8 @@ mutation 3-RED→GREEN. בנוי על הענף-הראשי המאוחד (worker-b
 
 **גל E2 · זמינות-ציוד מול מלאי-הקבלן:** `equipment_stock_join.dart` (חדש) — `availabilityFor(label, stock)` **token-aware** (exact / ≥2-token contiguous; single-token→exact-בלבד) → צ'יפ 🏬מחסן/🏗️אתר/'זמינות לא ידועה' בכל שורת-ציוד ב-#112 (`worker_equipment_checklist_sheet`). אין-המצאות: **המפקח תפס** ש-contains גולמי ממציא זמינות (מפתח/שקע/גו⊂גומי/cross-space) → תוקן ל-token-aware + 6 מקרי-false-positive נעולים→unknown. `equipmentForTasks` byte-identical · העובד read-only. נחיל: E2a join+sheet · E2b test · E2-fix. שער: analyze 0 · 16+regression · supervisor (תפס→תוקן) · RED→GREEN = ההדגמה-האמפירית של המפקח + הנעילה. (curated mapping-table = refinement עתידי.)
 
+**גל E3 · בקשת-חומר עובד→קבלן (דו-כיווני-חי):** `material_requests_engine.dart` (חדש) — `MaterialRequest{id,employerId,workerUid,workerName,items,note,status,createdTs}` + `submit`(עובד)/`setStatus`(קבלן, terminal-guard) + `requestsForEmployer`/`requestsForWorker` (families) + bindRemote seam (Z). העובד שולח בקשה מובנית מ-'🧱 בקש חומרים' (לא chat-stub) ורואה סטטוס חי; הקבלן רואה ב-'📥 בקשות חומר' (stock_screen) ומקדם requested→ordered→supplied/declined. העובד **לא נוגע במלאי** (ישות נפרדת). נחיל: E3a מנוע+עובד · E3b inbox+7 טסטים. שער: analyze 0 · 7 טסטי-דו-כיווני · supervisor CLEAN (RED→GREEN = הטסטים ההתנהגותיים + המפקח; mutation פורמלי דולג בישות מבדקת-היטב). firebase→Z.
+
 ## v6.19 — לוח עובד v3 מלא (#100–#114, נחיל אמיתי, 4 גלים)
 
 לוח-העובד נבנה והורחב דרך נחיל ה-/swarm הקנוני (donning + manifested-gate + mutation-verify +

@@ -13,6 +13,7 @@
 
 import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/data/repositories/stock_local.dart';
+import 'package:buildsmart/screens/contractor_material_requests_sheet.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -97,6 +98,15 @@ class StockScreen extends ConsumerWidget {
         iconTheme: const IconThemeData(color: Colors.black54),
         title: const Text('המלאי שלי',
             style: TextStyle(color: _ink, fontWeight: FontWeight.w700)),
+        actions: [
+          // 📥 בקשות חומר — the contractor's inbox of worker material requests
+          // (Wave E3b). Read-only on stock; this opens a separate request queue.
+          IconButton(
+            tooltip: 'בקשות חומר',
+            onPressed: () => showContractorMaterialRequestsSheet(context),
+            icon: const Text('📥', style: TextStyle(fontSize: 20)),
+          ),
+        ],
       ),
       body: Column(
         children: [

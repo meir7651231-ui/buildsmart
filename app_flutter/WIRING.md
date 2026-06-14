@@ -31,6 +31,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > **גל T2:** מסך-קבלן (`tasks_screen`) — ＋'משימה חדשה' (`createTask`, חותם `employerId`+`assignedWorkerUid`) · עריכה (`editTask`) · הקצאה (`assignTask`) · 'אישורי עובדים (קבלן)' (`approve`/`reject` מקבילי, מנהל לא-נגוע). הקבלן יוצר/מקצה/מאשר → העובד רואה חי דרך המנוע-המאוחד.
 > **גל E1 (מלאי):** העובד קורא מלאי-קבלן READ-ONLY — `employerStockProvider(session.employerId)` (`employer_stock.dart`) → גיליון '📦 מלאי הקבלן' + כפתור בלוח-העובד. העובד רואה, לא משנה. SERVER-SWAP: stock scoped ל-employerId.
 > **גל E2:** צ'יפ-זמינות ב-#112 — `availabilityFor` (`equipment_stock_join.dart`, token-aware, אין-המצאות) מצליב כל פריט-ציוד מול `employerStockProvider` → 🏬 מחסן / 🏗️ אתר / 'זמינות לא ידועה'. העובד רק רואה (read-only).
+> **גל E3:** בקשת-חומר מובנית עובד→קבלן — `materialRequestsProvider` (`material_requests_engine.dart`): העובד שולח מ-'🧱 בקש חומרים' (גיליון-מלאי) ורואה סטטוס; הקבלן ב-'📥 בקשות חומר' (stock_screen) מקדם requested→ordered→supplied/declined. דו-כיווני-חי, ישות נפרדת מהמלאי (העובד לא משנה מלאי). firebase→Z.
 
 ---
 

@@ -44,6 +44,14 @@
 
 ---
 
+## v6.20 — חיווט קבלן↔עובד · גל E3 (בקשת-חומר: גיליון-עובד + תיבת-קבלן)
+
+**שינוי (UI דו-צדדי):** `worker_employer_stock_sheet.dart` — '🧱 בקש חומרים' (קלט-פריטים multiline + הערה) + 'הבקשות שלי' (סטטוס חי). `contractor_material_requests_sheet.dart` (חדש) — תיבת-קבלן '📥 בקשות חומר' (כפתור ב-stock_screen AppBar) עם קידום-סטטוס. דפוסים קיימים (modal RTL + ✕ + grabber). העובד read-only על מלאי (הבקשה ישות נפרדת).
+
+**אימות:** 7 טסטי-מנוע (דו-כיווני · setStatus live · decline · terminal-guard · empty-drop · ids · scope) · analyze 0 · supervisor CLEAN. **follow-up:** רינדור הגיליונות לא ב-widget-test (המנוע + הזרימה הדו-כיוונית כן).
+
+---
+
 ## v6.16 — fix-fleet · round-3 (ציד עמוק יותר: data/RTL/UX)
 
 **שינוי:** סבב-3 עמוק (data-integrity · RTL · error-paths) תפס באגים שהסבבים הקודמים פספסו.

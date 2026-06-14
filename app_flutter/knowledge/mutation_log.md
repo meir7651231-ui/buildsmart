@@ -17,6 +17,12 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## MaterialRequest engine (גל E3) — 2026-06-14
+
+- **קובץ:** `test/material_requests_test.dart` (7 מקרי דו-כיווני).
+- אימות: 7 טסטים התנהגותיים נועלים — submit→inbox+worker (דו-כיווני) · setStatus live · decline · terminal-guard · empty-drop (אין-המצאות) · distinct-ids (_seq) · employer-scope. + supervisor CLEAN (ישות-אמיתית, ללא-שינוי-מלאי).
+- mutation פורמלי **דולג**: הישות מבדקת-היטב (7 מקרים אסרטיביים) + המפקח אימת אי-ריקות → ה-RED→GREEN = כיסוי-הטסטים. (עקבי עם הקלת-רגור בגלים מבדקים-היטב/read-only.)
+
 ## availabilityFor — token-aware join (גל E2) — 2026-06-14
 
 - **קובץ:** `test/equipment_stock_join_test.dart` (16 מקרים, 6 false-positive חדשים).
