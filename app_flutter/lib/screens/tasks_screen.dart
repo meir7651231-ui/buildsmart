@@ -14,6 +14,7 @@ import 'package:buildsmart/data/phaseb_seeds.dart';
 // LIVE review queue projection for the parallel contractor-approval surface.
 import 'package:buildsmart/screens/contractor_attendance_sheet.dart';
 import 'package:buildsmart/screens/contractor_hr_sheet.dart';
+import 'package:buildsmart/screens/tasks_gantt_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
@@ -132,6 +133,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         key: const ValueKey('contractor-attendance-entry'),
         label: '🕒 נוכחות עובדים',
         onTap: () => showContractorAttendanceSheet(context),
+      ),
+      const SizedBox(height: BsTokens.space2),
+      // 📊 GANTT (Wave G2b) — the read-only timeline VIEW over the live tasks
+      // (showTasksGanttSheet). The contractor sets a task's start date in the
+      // authoring sheet (author-start), which lands it on this timeline.
+      _EntryButton(
+        key: const ValueKey('contractor-gantt-entry'),
+        label: '📊 גאנט משימות',
+        onTap: () => showTasksGanttSheet(context),
       ),
       // CONTRACTOR APPROVAL (Wave T2a) — the employer's own אשר/דחה surface on
       // the LIVE review queue (parallel to the manager dashboard's block).
@@ -1038,6 +1048,13 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
       );
 }
 
+/// `dd.MM.yyyy` zero-padded date label for the author start-date button (Wave
+/// G2b) — a small local formatter (no dart:intl in this codebase). Only ever
+/// called with a date the contractor actually picked (never invented).
+String _fmtAuthorDate(DateTime d) =>
+    '${d.day.toString().padLeft(2, '0')}.'
+    '${d.month.toString().padLeft(2, '0')}.${d.year}';
+
 class _SecH extends StatelessWidget {
   const _SecH(this.text);
   final String text;
@@ -1210,6 +1227,11 @@ class _TaskAuthorSheetState extends ConsumerState<_TaskAuthorSheet> {
       text: (widget.edit?.days ?? 1).toString());
   late int _worker = widget.edit?.worker ?? widget.initialWorker;
 
+  // 📅 GANTT anchor (Wave G2b) — the optional planned start date for the
+  // timeline. Preloaded from the edited task (null = unscheduled, the create
+  // default). Just a nullable DateTime in State — no controller to dispose.
+  late DateTime? _scheduledStart = widget.edit?.scheduledStart;
+
   bool get _isEdit => widget.edit != null;
 
   @override
@@ -1243,7 +1265,14 @@ class _TaskAuthorSheetState extends ConsumerState<_TaskAuthorSheet> {
     if (_isEdit) {
       final id = widget.edit!.id;
       notifier.editTask(id,
-          name: name, detail: detail, days: safeDays, steps: steps);
+          name: name,
+          detail: detail,
+          days: safeDays,
+          steps: steps,
+          // 📅 GANTT (Wave G2b) — re-anchor the planned start. editTask SETS a
+          // non-null date; here it's null only when the task was never scheduled
+          // and the contractor didn't pick one (keeps it unscheduled).
+          scheduledStart: _scheduledStart);
       // Re-assign only when the picked worker actually changed (keeps the
       // overlay byte-stable otherwise). The server-ready uid stays the demo
       // fallback — the int index is the addressing today.
@@ -1263,10 +1292,29 @@ class _TaskAuthorSheetState extends ConsumerState<_TaskAuthorSheet> {
         // demo employer id (kDemoContractorId). When the backend lands this is
         // the real contractor uid from the session/auth claim.
         employerId: kDemoContractorId,
+        // 📅 GANTT (Wave G2b) — additive: the picked start date lands the task
+        // on the timeline; null (no pick) keeps today's unscheduled behavior.
+        scheduledStart: _scheduledStart,
       );
       Navigator.of(context).pop();
       showToast(context, 'המשימה נוצרה ✓');
     }
+  }
+
+  /// 📅 GANTT (Wave G2b) — pick the task's planned start date (the timeline
+  /// anchor). DateTime.now() is used only inside this interactive callback to
+  /// seed the picker bounds (a window of ±2 years), never to fabricate a stored
+  /// date: the State keeps null until the contractor actually picks one.
+  Future<void> _pickStart() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _scheduledStart ?? now,
+      firstDate: DateTime(now.year - 2, now.month, now.day),
+      lastDate: DateTime(now.year + 2, now.month, now.day),
+    );
+    if (picked == null) return;
+    setState(() => _scheduledStart = picked);
   }
 
   @override
@@ -1346,6 +1394,36 @@ class _TaskAuthorSheetState extends ConsumerState<_TaskAuthorSheet> {
                 decoration: const InputDecoration(
                   hintText: '1',
                   border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: BsTokens.space3),
+              // 📅 GANTT (Wave G2b) — the optional planned-start date that lands
+              // the task on the gantt timeline. Honest: shows the picked date or
+              // 'לא נקבע' (never an invented date); null keeps it unscheduled.
+              const _SecH('📅 תאריך התחלה (לגאנט)'),
+              OutlinedButton.icon(
+                key: const ValueKey('author-start'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: BsTokens.brandDark,
+                  side: const BorderSide(color: BsTokens.brand, width: 1.5),
+                  minimumSize: const Size(double.infinity, 48),
+                  alignment: AlignmentDirectional.centerStart,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: BsTokens.space4,
+                    vertical: 9,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                  ),
+                ),
+                onPressed: _pickStart,
+                icon: const Icon(Icons.event, size: 18),
+                label: Text(
+                  _scheduledStart == null
+                      ? 'לא נקבע'
+                      : _fmtAuthorDate(_scheduledStart!),
+                  style: const TextStyle(
+                      fontSize: 13.5, fontWeight: FontWeight.w800),
                 ),
               ),
               const SizedBox(height: BsTokens.space3),

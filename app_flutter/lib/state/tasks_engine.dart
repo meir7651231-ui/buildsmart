@@ -60,6 +60,7 @@ class TaskItem {
     this.employerId = '',
     this.assignedWorkerUid = '',
     this.createdBy = '',
+    this.scheduledStart,
   });
 
   final int id;
@@ -119,6 +120,14 @@ class TaskItem {
   /// `List<int>`). Empty on the verbatim seed.
   final Set<int> doneSteps;
 
+  /// 📅 GANTT anchor (Wave G2a, additive) — the OPTIONAL planned start date for
+  /// the timeline. Null means the task isn't placed on the timeline: the gantt
+  /// (G2b) lists it as UNSCHEDULED rather than inventing a date (R6/R8 — no
+  /// fabricated date). Serialized exactly like [startedAt]/[completedAt]
+  /// (ISO-8601, write-when-non-null), so a pre-G2a / demo payload (no key)
+  /// decodes as null and the verbatim seed's overlay stays byte-identical.
+  final DateTime? scheduledStart;
+
   TaskItem copyWith({
     String? status,
     Object? photo = _sentinel,
@@ -129,6 +138,7 @@ class TaskItem {
     String? employerId,
     String? assignedWorkerUid,
     String? createdBy,
+    Object? scheduledStart = _sentinel,
   }) =>
       TaskItem(
         id: id,
@@ -151,6 +161,11 @@ class TaskItem {
         employerId: employerId ?? this.employerId,
         assignedWorkerUid: assignedWorkerUid ?? this.assignedWorkerUid,
         createdBy: createdBy ?? this.createdBy,
+        // 📅 GANTT anchor (Wave G2a) — sentinel-guarded like the other nullable
+        // DateTimes, so a date can be CLEARED (pass `scheduledStart: null`).
+        scheduledStart: scheduledStart == _sentinel
+            ? this.scheduledStart
+            : scheduledStart as DateTime?,
       );
 
   static const _sentinel = Object();
@@ -265,6 +280,13 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
                 createdBy: (m['${t.id}'] as Map)['createdBy'] is String
                     ? (m['${t.id}'] as Map)['createdBy'] as String
                     : '',
+                // 📅 GANTT anchor (Wave G2a) — defensive decode mirroring
+                // startedAt/completedAt: tryParse over a missing/garbage value
+                // yields null (the seed default = unscheduled), so a pre-G2a /
+                // demo payload (no key) decodes back-compat as null and never
+                // crashes. The sentinel-guarded copyWith carries null through.
+                scheduledStart: DateTime.tryParse(
+                    (m['${t.id}'] as Map)['scheduledStart'] as String? ?? ''),
               )
             else
               t,
@@ -303,6 +325,12 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
               // proposeTask='worker'), so the verbatim demo seed stays
               // byte-identical.
               if (t.createdBy.isNotEmpty) 'createdBy': t.createdBy,
+              // 📅 GANTT anchor (Wave G2a) — WRITE-WHEN-NON-NULL (the same
+              // field-economy): the key appears only once a task is actually
+              // scheduled, so an unscheduled task + the verbatim demo seed stay
+              // byte-identical. ISO-8601, mirroring startedAt/completedAt.
+              if (t.scheduledStart != null)
+                'scheduledStart': t.scheduledStart!.toIso8601String(),
             },
         }),
       );
@@ -553,6 +581,7 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
     int worker = 0,
     String assignedWorkerUid = '',
     String employerId = '',
+    DateTime? scheduledStart,
   }) {
     final id =
         state.isEmpty ? 1 : (state.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1);
@@ -571,6 +600,9 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         employerId: emp,
         assignedWorkerUid: uid,
         createdBy: 'contractor',
+        // 📅 GANTT anchor (Wave G2a) — additive, default null (unscheduled), so
+        // every existing caller keeps today's behavior (no invented date).
+        scheduledStart: scheduledStart,
       ),
     ];
     return id;
@@ -601,6 +633,7 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
     List<String> steps = const [],
     String assignedWorkerUid = '',
     String employerId = '',
+    DateTime? scheduledStart,
   }) {
     final id =
         state.isEmpty ? 1 : (state.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1);
@@ -619,6 +652,10 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         employerId: emp,
         assignedWorkerUid: uid,
         createdBy: 'worker',
+        // 📅 GANTT anchor (Wave G2a) — additive, default null (unscheduled); a
+        // worker can propose a job with a planned start, else it stays off the
+        // timeline (no invented date).
+        scheduledStart: scheduledStart,
       ),
     ];
     return id;
@@ -664,13 +701,22 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         );
   }
 
-  /// CONTRACTOR edit — patch a task's authored fields (name/detail/days/steps),
-  /// leaving the runtime state (status/photo/note/clock/doneSteps/identity/order)
-  /// untouched. A null arg keeps the current value. No-op on an unknown id.
-  /// Builds a new [TaskItem] directly because [copyWith] (the worker-runtime
-  /// patcher) intentionally does not expose these authored fields.
+  /// CONTRACTOR edit — patch a task's authored fields
+  /// (name/detail/days/steps/scheduledStart), leaving the runtime state
+  /// (status/photo/note/clock/doneSteps/identity/order) untouched. A null arg
+  /// keeps the current value. No-op on an unknown id. Builds a new [TaskItem]
+  /// directly because [TaskItem.copyWith] (the worker-runtime patcher)
+  /// intentionally does not expose these authored fields.
+  ///
+  /// 📅 GANTT (Wave G2a): a non-null [scheduledStart] SETS / re-anchors the
+  /// task's planned start; null keeps the current value. To CLEAR a date back to
+  /// unscheduled, use [TaskItem.copyWith] (`scheduledStart: null`, sentinel-guarded).
   void editTask(int id,
-      {String? name, String? detail, int? days, List<String>? steps}) {
+      {String? name,
+      String? detail,
+      int? days,
+      List<String>? steps,
+      DateTime? scheduledStart}) {
     _patch(
       id,
       (t) => TaskItem(
@@ -690,6 +736,7 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         employerId: t.employerId,
         assignedWorkerUid: t.assignedWorkerUid,
         createdBy: t.createdBy,
+        scheduledStart: scheduledStart ?? t.scheduledStart,
       ),
     );
   }
@@ -721,6 +768,9 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         assignedWorkerUid:
             (uid != null && uid.isNotEmpty) ? uid : t.assignedWorkerUid,
         createdBy: t.createdBy,
+        // 📅 GANTT (Wave G2a) — a (re)assign must not silently drop the planned
+        // start: propagate it unchanged (this rebuild bypasses copyWith).
+        scheduledStart: t.scheduledStart,
       ),
     );
   }

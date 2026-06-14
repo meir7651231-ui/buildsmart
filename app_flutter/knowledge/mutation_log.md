@@ -966,6 +966,12 @@
 - **מוטציה:** הסרת ה-guard — `if (t == null || t.status != 'proposed')` → `if (t == null)` (approveProposal היה מאשר **כל** סטטוס, כולל review/pending → התנגשות עם מחזור-ההשלמה).
 - **תוצאה:** **אדומה ✅** — 'GUARD: the proposal lifecycle and the completion lifecycle do NOT collide' נכשל. שוחזר ה-guard ב-Edit (**לא** git checkout) → **+5 ירוק**.
 - **מסקנה:** ה-guard `status=='proposed'` load-bearing — מפריד את `approveProposal`(proposed→active) מ-`approve`(review→done); בלעדיו הצעת-עובד הייתה מאושרת במסלול-ההשלמה (כולל הענקת-מטבעות/קידום-הזמנה שגויים).
+
+## גל G2 — גאנט: len floored at 1 (פריסה טהורה) — 2026-06-14
+- **קובץ:** `lib/logic/tasks_gantt.dart:163` (`lenDays`) · בדיקה `test/contractor_task_gantt_test.dart`.
+- **מוטציה:** `lenDays: t.days < 1 ? 1 : t.days` → `lenDays: t.days` (משימת days==0 קיבלה bar באורך 0 — נעלמת מהציר).
+- **תוצאה:** **אדומה ✅** — 'a days==0 task still occupies one cell (lenDays floored at 1)' נכשל. שוחזר ב-Edit → **+15 ירוק**.
+- **מסקנה:** ה-floor load-bearing — כל משימה משובצת תופסת לפחות תא אחד (אחרת בלתי-נראית בגאנט). הפריסה טהורה+דטרמיניסטית, **אין-המצאת-תאריך** (scheduledStart==null → unscheduled, לא bar).
 ## #C11 — Apple-readiness HIDE-pass (kHideUnderConstruction · kVisibleSearchIndex) — 2026-06-14
 - **קבצים (lib/state|lib/data):** `lib/state/under_construction.dart` (חדש — הדגל `kHideUnderConstruction` + `kHiddenSearchTitles`) · `lib/data/search_index.dart` (getter חדש `kVisibleSearchIndex` שמסנן placeholder-titles · ה-const `kSearchIndex` נשאר verbatim). (UI: `_SectionTile` ב-4 מסכי-הגדרות · `ai_hub_screen` `_visibleTiles`/`visibleToolIds` · chats/persona_portal/courier_portal_tab/persona_picking_sheet/tasks_screen guards.)
 - **תקלה שהוזרקה:** `kVisibleSearchIndex => kHideUnderConstruction ? […filtered] : kSearchIndex` שונה ל-`=> false // MUTATION` (כלומר תמיד מחזיר את הרשימה המלאה → 3 ה-titles ה-deferred דולפים לחיפוש החי).

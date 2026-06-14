@@ -993,6 +993,11 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **קבלן (`tasks_screen`):** מקטע נפרד '📝 משימות שהעובד הציע (N)' מתחת לאישורי-ההשלמה — ✅אשר/❌דחה → `approveProposal`/`rejectProposal` + צ'אט th-worker-contractor (פעמון מהמנוע, לא כפול).
 - **המפקח תפס:** ההצעה לא-נראתה-לעובד (3 דליים בלבד) → תוקן במקטע ייעודי + החרגה מ-total (כנות + סגירת drift-בספירה).
 - **אימות:** analyze 0-errors · +15 טסטים · supervisor CLEAN · mutation RED→GREEN (בידוד-guard).
+
+## גל G2 — מסך גאנט-משימות + שיבוץ-תאריך — 2026-06-14
+- **מסך חדש `tasks_gantt_sheet` (read-only):** '📊 גאנט משימות' — בר פרופורציונלי לכל משימה משובצת (תאריך-התחלה אמיתי dd.MM + N ימים + אחוז-ביצוע), ומקטע '🗓️ ללא תאריך מתוזמן' למשימות בלי scheduledStart (אין-המצאת-תאריך). נגיש מלוח-הקבלן (contractor-gantt-entry) ומלוח-העובד (worker-gantt-entry).
+- **קבלן (`tasks_screen`):** `_TaskAuthorSheet` קיבל בורר-תאריך '📅 תאריך התחלה (לגאנט)' (author-start) → נשמר ב-createTask/editTask.
+- **אימות:** analyze 0-errors · +23 טסטים · supervisor CLEAN (10/10) · mutation RED→GREEN (len≥1).
 ## #C11 — Apple-readiness HIDE-pass: placeholders "בבנייה"/"בקרוב"/"(הדגמה)" מוסתרים (הפיך) — 2026-06-14
 
 **שינוי:** ל-App Store review הוסתר כל placeholder גלוי של פיצ׳ר backend-blocked, דרך דגל-קומפילציה יחיד `kHideUnderConstruction` (`lib/state/under_construction.dart`, default true; הפיך — flip מחזיר הכל).

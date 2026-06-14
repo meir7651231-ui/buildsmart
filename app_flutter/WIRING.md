@@ -37,6 +37,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > **גל H3 (HR):** מדיניות מסמכים-נדרשים שהקבלן מגדיר → אוכפת בשער-מוכנות-העובד (#101) — `required_docs_policy.dart` (`requiredDocsForEmployer`, **normalized-exact** match) + `contractor_hr_sheet` עורך-מדיניות (📋). ADD-on (101+פג-תוקף נשארים חובה); מדיניות-ריקה=התנהגות-של-היום. שליחים לא-נגעו. firebase→Z.
 > **גל S (אתר/נוכחות):** נוכחות-עובד → תצוגה-חיה אצל הקבלן — `attendanceForEmployer` (`worker_attendance.dart`, **חנות-עובד בלבד** → שליחים מודרים) + `contractor_attendance_sheet` ('🕒 נוכחות עובדים'): '🟢 נוכחים עכשיו' + 'היום' (שעות + מיקום-אמיתי דרך openNavSheet, אין-המצאה). read-only; העובד חותם כרגיל. firebase→Z.
 > **גל G1 (משימות דו-כיווני):** העובד פותח משימה → `'proposed'` → הקבלן מאשר (`proposeTask`/`approveProposal`/`rejectProposal`, **מבודד** מ-review/completion). לוח-עובד: '➕ הוסף משימה' + מקטע 'ממתינות לאישור'; לוח-קבלן: מקטע-אישור-הצעות (`pendingProposalsProvider`) → פעמון+צ'אט th-worker-contractor. גאנט(G2)+ליקויים(G3) בהמשך. firebase→Z.
+> **גל G2 (גאנט):** גאנט כתצוגה מעל `tasksProvider` (לא מערכת נפרדת) — `TaskItem.scheduledStart` + `buildTasksGantt` (`lib/logic/tasks_gantt.dart`, טהור) + `tasks_gantt_sheet` (read-only, נגיש מקבלן+עובד; **תאריכים אמיתיים**, 'ללא תאריך' בנפרד, אין-המצאה). הקבלן משבץ תאריך ב-author-sheet. ליקויים(G3) בהמשך. firebase→Z.
 
 ---
 

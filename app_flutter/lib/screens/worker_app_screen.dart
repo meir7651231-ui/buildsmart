@@ -4,6 +4,7 @@ import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/docs_readiness_gate.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
+import 'package:buildsmart/screens/tasks_gantt_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_attendance_screen.dart';
 import 'package:buildsmart/screens/worker_employer_stock_sheet.dart';
@@ -436,6 +437,11 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
         // on save it mints a `proposed` task (TasksNotifier.proposeTask) that
         // shows here as '📝 הוצעה' and awaits the contractor's approval (G1c).
         _ProposeTaskButton(onPressed: _openProposeSheet),
+        // 📊 גאנט משימות (Wave G2b) — a READ-ONLY peer secondary action that
+        // opens the same timeline sheet the contractor uses; the worker only
+        // views their schedule (no editing). Always available, like the stock
+        // button — not gated on a current task.
+        _GanttButton(onPressed: () => showTasksGanttSheet(context)),
         // 📝 הצעות שממתינות לאישור (Wave G1) — the worker's own proposed tasks,
         // visible while they await the contractor's approve/reject. Shown only
         // when non-empty (a transient pending-approval state, not a fixed bucket).
@@ -1629,6 +1635,58 @@ class _ProposeTaskButton extends StatelessWidget {
               icon: const Text('➕', style: TextStyle(fontSize: 15)),
               label: const Text(
                 'הוסף משימה',
+                style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 📊 גאנט משימות (Wave G2b) — a READ-ONLY secondary action that opens the
+/// shared tasks-gantt timeline ([showTasksGanttSheet]). The worker only VIEWS
+/// their schedule; the contractor owns scheduling. Mirrors
+/// [_EmployerStockButton]/[_ProposeTaskButton]'s outlined-secondary style so it
+/// reads as a peer action. ≥48dp; excludeSemantics — inner Text = label.
+class _GanttButton extends StatelessWidget {
+  const _GanttButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: BsTokens.space2),
+      child: HelpTarget(
+        title: 'גאנט משימות',
+        body: 'מציג לצפייה בלבד את לוח-הזמנים של המשימות לפי תאריך-התחלה '
+            'מתוזמן. הקבלן קובע את התאריכים; אתה רואה כאן את התזמון.',
+        child: Semantics(
+          button: true,
+          label: 'גאנט משימות',
+          excludeSemantics: true,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: OutlinedButton.icon(
+              key: const ValueKey('worker-gantt-entry'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: BsTokens.brandDark,
+                side: const BorderSide(color: BsTokens.brand, width: 1.5),
+                minimumSize: const Size(0, 48),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BsTokens.space4,
+                  vertical: 9,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                ),
+              ),
+              onPressed: onPressed,
+              icon: const Text('📊', style: TextStyle(fontSize: 15)),
+              label: const Text(
+                'גאנט משימות',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
             ),
