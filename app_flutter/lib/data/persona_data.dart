@@ -17,12 +17,17 @@ class PersonaTask {
     required this.steps,
     this.note = '',
     this.orderId,
+    this.employerId = '',
+    this.assignedWorkerUid = '',
   });
 
   final int id;
   final String name;
 
-  /// Index into [kWorkers].
+  /// Index into [kWorkers] — the DEMO fallback identity (kept so the verbatim
+  /// seed stays byte-identical). The server-ready identity rides
+  /// [assignedWorkerUid]/[employerId] below; the int [worker] remains the
+  /// offline/demo addressing until a real uid is stamped (write-when-non-empty).
   final int worker;
 
   /// pending · active · review · done · rejected (taskStatusInfo keys).
@@ -37,9 +42,27 @@ class PersonaTask {
   /// moves that order live. Null for tasks with no order binding (the default).
   final String? orderId;
 
-  /// Copy with a changed [status] (the only field the live worker-tasks engine
+  /// SERVER-READY identity (Wave T1, additive) — the employer (contractor) this
+  /// task belongs to, mirroring `Order.contractorUid`. Empty on the verbatim
+  /// demo seed; stamped write-when-non-empty when a real session acts, so the
+  /// seed + any overlay stay byte-identical on the offline/demo path.
+  final String employerId;
+
+  /// SERVER-READY identity (Wave T1, additive) — the uid of the worker the task
+  /// is assigned to. Empty on the demo seed (the int [worker] is the fallback);
+  /// stamped write-when-non-empty when a real worker first acts on it.
+  final String assignedWorkerUid;
+
+  /// Copy with a changed [status] (the field the live worker-tasks engine
   /// mutates) — mirrors the `Order.copyWith` shape used by the orders engine.
-  PersonaTask copyWith({String? status}) => PersonaTask(
+  /// [employerId]/[assignedWorkerUid] are additive (Wave T1); existing callers
+  /// pass only `status` and keep the current identity unchanged.
+  PersonaTask copyWith({
+    String? status,
+    String? employerId,
+    String? assignedWorkerUid,
+  }) =>
+      PersonaTask(
         id: id,
         name: name,
         worker: worker,
@@ -48,6 +71,8 @@ class PersonaTask {
         steps: steps,
         note: note,
         orderId: orderId,
+        employerId: employerId ?? this.employerId,
+        assignedWorkerUid: assignedWorkerUid ?? this.assignedWorkerUid,
       );
 }
 

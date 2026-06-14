@@ -44,8 +44,8 @@ void main() {
       'bs.board-auth.v1':
           '{"role":"worker","username":"ran","displayName":"רן","demo":false}',
     });
-    // The worker screen now reads the shared workerTasksProvider, so it must be
-    // pumped inside a ProviderScope (cross-persona wiring W3).
+    // The worker screen now reads the shared unified tasksProvider, so it must
+    // be pumped inside a ProviderScope (cross-persona wiring W3).
     // #101 — bypass the HARD docs-readiness gate (this test is about the board,
     // not the gate) so the seeded ran session reaches the board content.
     await tester.pumpWidget(

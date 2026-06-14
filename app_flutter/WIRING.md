@@ -27,6 +27,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > (`employer_link.dart` — חדש) שפותר את פרטי הקבלן-המעסיק. טופס 101 (`worker_forms_screen.dart`)
 > קורא את בלוק-המעסיק דרך הקישור (`session.employerId`) במקום `userProfileProvider` הישיר —
 > סוגר את חור-היושר ב-#106. SERVER-SWAP: `contractors/{employerId}`.
+> **גל T1:** 2 מנועי-המשימות → מנוע אחד (`tasksProvider` מקור-יחיד; `workerTasksProvider` = shim מעביר). `TaskItem` += `employerId`/`assignedWorkerUid` (נחתמים מה-session בשליחה). נמחקו dual-write/mirror; fold של orderId→advance-on-approve; seam ריק `bindRemote` (T3 ימלא).
 
 ---
 

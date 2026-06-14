@@ -4,8 +4,8 @@ import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/services/voice.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
-import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';
@@ -22,22 +22,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// the manager decides on their own board).
 ///
 /// No new fake state: every action is an existing engine call
-/// ([TasksNotifier.attachPhoto] / [TasksNotifier.submitForReview], dual-written
+/// ([TasksNotifier.attachPhoto] / [TasksNotifier.submitForReview], routed
 /// through [submitWorkerTaskForReview]); the step ticks write
 /// [TasksNotifier.toggleStep] — per-step completion lives on
 /// [TaskItem.doneSteps] and persists with the engine overlay (#3), so the
 /// checklist survives sheet close/reopen and an app restart.
 
-/// WORKER submit — "שלח לאישור", dual-written to BOTH existing engines (the
-/// W3 BRIDGE, see `worker_app_screen.dart`): the rich [tasksProvider] the
-/// worker board reads (its auto-advance promotes the worker's next queued
-/// task, proto :8133-8145) AND the legacy [workerTasksProvider] the 👔 manager
-/// dashboard's approvals queue still reads — so the submission surfaces there
-/// live, exactly as before. Both calls are no-ops outside a worker-owned
-/// status, so the dual-write can never double-submit.
+/// WORKER submit — "שלח לאישור" onto the single unified [tasksProvider] (Wave
+/// T1 collapsed the old dual-engine bridge into one source of truth — the
+/// manager's approvals queue derives off this same engine now, so the
+/// submission still surfaces there live). The auto-advance promotes the
+/// worker's next queued task (proto :8133-8145); the call is a no-op outside a
+/// worker-owned status. The acting [BoardSession] (board gate guarantees one)
+/// stamps the server-ready identity fields: `workerUid` ← `session.uid` and
+/// `employerId` ← `session.employerId` (the engine writes them only when
+/// non-empty, mirroring `Order.contractorUid`), so the task carries who did it
+/// and for whom.
 void submitWorkerTaskForReview(WidgetRef ref, int id, {String? note}) {
-  ref.read(tasksProvider.notifier).submitForReview(id, note: note);
-  ref.read(workerTasksProvider.notifier).submitForReview(id);
+  final session = ref.read(boardAuthProvider);
+  ref.read(tasksProvider.notifier).submitForReview(
+        id,
+        note: note,
+        workerUid: session?.uid,
+        employerId: session?.employerId,
+      );
 }
 
 /// Renders a task's proof photo (#85ב): a real data-URL
@@ -88,7 +96,7 @@ Widget _photoPlaceholder() => Container(
 ///  1. reuse an already-attached REAL photo, else open [pickTaskPhoto];
 ///  2. no photo → toast 'חובה לצלם הוכחת-ביצוע' and NO submit;
 ///  3. photo → preview dialog (thumbnail) → confirm →
-///     [TasksNotifier.attachPhoto] with the data-URL + the dual-engine submit
+///     [TasksNotifier.attachPhoto] with the data-URL + the unified submit
 ///     ([submitWorkerTaskForReview]).
 /// Returns true only when the task was actually submitted.
 Future<bool> submitWithProofPhoto(
@@ -217,7 +225,7 @@ class _WorkerTaskDetailSheetState
   }
 
   /// #85ב — submit is gated on a REAL proof photo: pick → preview → confirm →
-  /// attach + dual-submit (all inside [submitWithProofPhoto]); only then the
+  /// attach + submit (all inside [submitWithProofPhoto]); only then the
   /// sheet closes. A cancel anywhere leaves the task untouched.
   Future<void> _submit(TaskItem t) async {
     final submitted =

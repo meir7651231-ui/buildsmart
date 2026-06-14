@@ -12,6 +12,14 @@
 
 ---
 
+## v6.20 — חיווט קבלן↔עובד · גל T1 (איחוד מנוע-המשימות — מסכים)
+
+**שינוי (מקור-בלבד, ללא שינוי-layout):** `worker_app_screen.dart` (מחיקת `_mirrorManagerDecisions` post-frame — לוגיקה פנימית, אפס שינוי-תצוגה), `worker_task_detail_sheet.dart` (השליחה חותמת `workerUid`/`employerId` — אותו UI בדיוק), `manager_dashboard_screen.dart` (קריאת approve/reject מצביעה למנוע-המאוחד — אותו בלוק 'אישורי עובדים', ללא שינוי-מבנה). אין שינוי בפריסה/כפתורים/זרימה — איחוד-מנוע מאחורי-הקלעים.
+
+**אימות:** 6 טסטי-המשימות (כולל ה-WIDGET של "📸 שלח לאישור" של העובד + מקטע 'אישורי עובדים' של המנהל שמאשר חי) ירוקים אחרי האיחוד · analyze 0 · supervisor CLEAN · mutation RED→GREEN. כל 3 המסכים source-only (אותו עץ-widget) → אין דלתא ויזואלית.
+
+---
+
 ## v6.16 — fix-fleet · round-3 (ציד עמוק יותר: data/RTL/UX)
 
 **שינוי:** סבב-3 עמוק (data-integrity · RTL · error-paths) תפס באגים שהסבבים הקודמים פספסו.

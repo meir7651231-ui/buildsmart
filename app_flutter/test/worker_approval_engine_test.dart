@@ -1,8 +1,9 @@
 // CROSS-PERSONA WIRING W3 (WORKER) — proof that "worker → manager" is LIVE.
 // The 🦺 worker submits a task for approval, and the 👔 manager sees it pending
-// and approves/rejects it — ALL on the SHARED `workerTasksProvider`. The approval
-// bridge is the task status: `active`/`rejected` → (worker "שלח לאישור") `review`
-// → (manager ✅ אשר) `done` / (manager ↩️ דחה) `rejected`.
+// and approves/rejects it — ALL on the SHARED unified `tasksProvider` (Wave T1
+// collapsed the old dual engine into one). The approval bridge is the task
+// status: `active`/`rejected` → (worker "שלח לאישור") `review` → (manager
+// ✅ אשר) `done` / (manager ↩️ דחה) `rejected`.
 //
 // Three layers of proof:
 //   1) PURE one-container: a worker submit makes the task pending in the manager's
@@ -15,6 +16,7 @@
 //      the pending task and its ✅ אשר button approves it on the shared engine,
 //      reflecting live (the count badge drops).
 
+import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/screens/manager_dashboard_screen.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
 import 'package:buildsmart/state/docs_readiness.dart';
@@ -42,12 +44,12 @@ void main() {
       final c = ProviderContainer();
       addTearDown(c.dispose);
 
-      final tasks = c.read(workerTasksProvider.notifier);
+      final tasks = c.read(tasksProvider.notifier);
 
       // Seed: task 1 (worker רן) is `active` — the worker's current job. It is
       // NOT yet pending the manager's approval.
       String statusOf(int id) =>
-          c.read(workerTasksProvider).firstWhere((t) => t.id == id).status;
+          c.read(tasksProvider).firstWhere((t) => t.id == id).status;
       expect(statusOf(1), 'active');
       expect(
         c.read(pendingApprovalTasksProvider).any((t) => t.id == 1),
@@ -83,16 +85,16 @@ void main() {
       final c = ProviderContainer();
       addTearDown(c.dispose);
       String statusOf(int id) =>
-          c.read(workerTasksProvider).firstWhere((t) => t.id == id).status;
+          c.read(tasksProvider).firstWhere((t) => t.id == id).status;
 
-      c.read(workerTasksProvider.notifier).submitForReview(1); // active → review
+      c.read(tasksProvider.notifier).submitForReview(1); // active → review
       expect(statusOf(1), 'review');
 
-      c.read(workerTasksProvider.notifier).reject(1); // manager rejects → back
+      c.read(tasksProvider.notifier).reject(1); // manager rejects → back
       expect(statusOf(1), 'rejected');
 
       // The worker can submit it again (rejected is a submittable status).
-      c.read(workerTasksProvider.notifier).submitForReview(1);
+      c.read(tasksProvider.notifier).submitForReview(1);
       expect(statusOf(1), 'review');
     });
 
@@ -100,15 +102,22 @@ void main() {
         'shared engine (manager open-orders 4 → 3 chain reflects live)', () {
       final c = ProviderContainer();
       addTearDown(c.dispose);
-      final tasks = c.read(workerTasksProvider.notifier);
+      final tasks = c.read(tasksProvider.notifier);
       final orders = c.read(ordersEngineProvider.notifier);
 
       // Task 3 (איטום רצפת מקלחת) is seeded `review` and bound to BS-1040, which
-      // starts at stage `ready`. 4 orders open.
+      // starts at stage `ready`. 4 orders open. The order binding lives on the
+      // verbatim seed both engines derive from (kPersonaTasks[id].orderId) —
+      // the unified TaskItem carries only the runtime fields, so the link is
+      // asserted at the seed (its source of truth) here.
       final linked =
-          c.read(workerTasksProvider).firstWhere((t) => t.id == 3);
+          c.read(tasksProvider).firstWhere((t) => t.id == 3);
       expect(linked.status, 'review');
-      expect(linked.orderId, 'BS-1040');
+      expect(
+        kPersonaTasks.firstWhere((t) => t.id == 3).orderId,
+        'BS-1040',
+        reason: 'task 3 is bound to order BS-1040 on the verbatim seed',
+      );
       expect(c.read(managerAnalyticsProvider).openOrders, 4);
       String orderStage() => c
           .read(ordersEngineProvider)
@@ -120,7 +129,7 @@ void main() {
       // advances ready → pickup on the SHARED engine, live.
       tasks.approve(3);
       expect(
-        c.read(workerTasksProvider).firstWhere((t) => t.id == 3).status,
+        c.read(tasksProvider).firstWhere((t) => t.id == 3).status,
         'done',
       );
       expect(orderStage(), 'pickup', reason: 'approval advanced the linked order');
@@ -132,6 +141,45 @@ void main() {
         ..advance('BS-1040'); // transit → delivered
       expect(orderStage(), 'delivered');
       expect(c.read(managerAnalyticsProvider).openOrders, 3);
+    });
+
+    test(
+        'PURE — a worker submit STAMPS the acting session identity onto the task '
+        '(assignedWorkerUid ← session.uid, employerId ← session.employerId)', () {
+      // Wave T1 server-ready fields: the worker submit threads the acting
+      // BoardSession's uid + employerId into the engine (worker_task_detail_
+      // sheet → submitForReview), which stamps them onto the task — write-when-
+      // non-empty, mirroring Order.contractorUid.
+      final n = TasksNotifier(persist: false);
+      TaskItem t1() => n.state.firstWhere((x) => x.id == 1);
+
+      // Seed carries no identity (אין המצאות — the int `worker` index is the
+      // demo fallback; the server-ready uid/employer are empty until stamped).
+      expect(t1().assignedWorkerUid, '');
+      expect(t1().employerId, '');
+
+      // Task 1 is `active` (רן's current job) → a real submit stamps both.
+      n.submitForReview(1,
+          note: 'בוצע', workerUid: 'uid-ran', employerId: 'contractor-demo');
+      expect(t1().status, 'review');
+      expect(t1().assignedWorkerUid, 'uid-ran',
+          reason: 'the submit stamps who did it from the session');
+      expect(t1().employerId, 'contractor-demo',
+          reason: 'the submit stamps the employer from the session');
+    });
+
+    test(
+        'PURE — a submit with NO session identity leaves the stamp fields empty '
+        '(write-when-non-empty — the demo/seed path stays byte-identical)', () {
+      final n = TasksNotifier(persist: false);
+      TaskItem t1() => n.state.firstWhere((x) => x.id == 1);
+
+      // A bare submit (no uid/employer — the seed/demo path) must not invent an
+      // identity: the fields stay at their '' default.
+      n.submitForReview(1);
+      expect(t1().status, 'review');
+      expect(t1().assignedWorkerUid, '');
+      expect(t1().employerId, '');
     });
 
     testWidgets(
@@ -199,7 +247,7 @@ void main() {
 
       // The shared engine moved task 1 active → review.
       expect(
-        c.read(workerTasksProvider).firstWhere((x) => x.id == 1).status,
+        c.read(tasksProvider).firstWhere((x) => x.id == 1).status,
         'review',
       );
       // It is now in the manager's approvals queue (same provider).
@@ -235,7 +283,7 @@ void main() {
 
       // A worker submits task 1 (off the SAME shared engine, as if from the
       // worker screen) → it becomes pending for the manager.
-      c.read(workerTasksProvider.notifier).submitForReview(1);
+      c.read(tasksProvider.notifier).submitForReview(1);
       await settle(t);
 
       // Open the 🛠️ ניהול tab, then the 👷 אישורי עובדים section.
@@ -261,7 +309,7 @@ void main() {
       // The manager's approval is LIVE: task 1 is `done` on the shared engine,
       // and the pending queue dropped to just the remaining seed task (3).
       expect(
-        c.read(workerTasksProvider).firstWhere((x) => x.id == 1).status,
+        c.read(tasksProvider).firstWhere((x) => x.id == 1).status,
         'done',
       );
       expect(c.read(pendingApprovalTasksProvider).map((x) => x.id), [3]);

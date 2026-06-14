@@ -22,6 +22,7 @@ import 'dart:convert';
 
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,15 +56,36 @@ class TaskItem {
     this.startedAt,
     this.completedAt,
     this.doneSteps = const {},
+    this.orderId,
+    this.employerId = '',
+    this.assignedWorkerUid = '',
   });
 
   final int id;
   final String name;
   final String detail;
-  final int worker; // index into kWorkers
+  final int worker; // index into kWorkers (demo fallback identity)
   final String status; // pending·active·review·done·rejected
   final int days;
   final List<String> steps;
+
+  /// Optional link to a shared-engine order (`Order.id`, e.g. `BS-1040`),
+  /// carried verbatim from the [kPersonaTasks] seed. When a linked task is
+  /// APPROVED, [TasksNotifier.approve] advances that order one stage on the
+  /// shared `ordersEngineProvider` (the W3 fold) — so a completed install moves
+  /// its order live. Null for tasks with no order binding (the default).
+  final String? orderId;
+
+  /// SERVER-READY identity (Wave T1, additive) — the employer (contractor) this
+  /// task belongs to, mirroring `Order.contractorUid`. Empty on the verbatim
+  /// demo seed; stamped write-when-non-empty when a real session acts (so the
+  /// seed + overlay stay byte-identical on the offline/demo path).
+  final String employerId;
+
+  /// SERVER-READY identity (Wave T1, additive) — the uid of the worker the task
+  /// is assigned to. Empty on the demo seed (the int [worker] is the fallback);
+  /// stamped write-when-non-empty when a real worker first acts on it.
+  final String assignedWorkerUid;
 
   /// The worker's proof photo (#85ב): a REAL data-URL
   /// ('data:image/...;base64,…' captured via `services/task_photo.dart`) once
@@ -95,6 +117,8 @@ class TaskItem {
     Object? startedAt = _sentinel,
     Object? completedAt = _sentinel,
     Set<int>? doneSteps,
+    String? employerId,
+    String? assignedWorkerUid,
   }) =>
       TaskItem(
         id: id,
@@ -112,6 +136,10 @@ class TaskItem {
             ? this.completedAt
             : completedAt as DateTime?,
         doneSteps: doneSteps ?? this.doneSteps,
+        // [orderId] is seed-immutable (never mutated at runtime) — propagate.
+        orderId: orderId,
+        employerId: employerId ?? this.employerId,
+        assignedWorkerUid: assignedWorkerUid ?? this.assignedWorkerUid,
       );
 
   static const _sentinel = Object();
@@ -131,6 +159,10 @@ List<TaskItem> _seedTasks() => [
           // proto seeds photo='demo' for the review/done tasks (3,4); null else.
           photo: (t.status == 'review' || t.status == 'done') ? 'demo' : null,
           note: t.note,
+          // W3 fold (Wave T1): carry the seed's order binding so the unified
+          // notifier's approve can advance the bound order. Seed-derived only
+          // (not persisted) → the overlay payload stays byte-identical.
+          orderId: t.orderId,
         ),
     ];
 
@@ -169,6 +201,13 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
 
   bool _loaded = false;
 
+  /// SERVER-SWAP seam (Wave T1, EMPTY): the bound Firestore-backed tasks repo,
+  /// or null on the local/demo path (no Firebase → this engine itself stays the
+  /// store, byte-identical). Typed `dynamic` so no Firebase symbol is imported
+  /// here — Wave T3 fills `tasks_firebase.dart` + binds via [bindRemote],
+  /// mirroring `orders_engine.dart`. Unused until then.
+  dynamic _remote;
+
   /// Persist a compact `{id: {status, photo, note, startedAt, completedAt,
   /// doneSteps}}` overlay onto the verbatim seed — resilient to seed edits
   /// (the worker-tasks-engine pattern). `doneSteps` (#3) rides the overlay as
@@ -203,6 +242,12 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
                           if (s is num) s.toInt(),
                       }
                     : null,
+                // SERVER-READY identity (Wave T1) — restore a stamped uid; a
+                // pre-T1 / demo payload has no key (null → keep '' default), so
+                // the seed stays byte-identical.
+                employerId: (m['${t.id}'] as Map)['employerId'] as String?,
+                assignedWorkerUid:
+                    (m['${t.id}'] as Map)['assignedWorkerUid'] as String?,
               )
             else
               t,
@@ -230,6 +275,12 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
               'completedAt': t.completedAt?.toIso8601String(),
               // ☑️ #3 — the ticked step indexes, sorted for a stable payload.
               'doneSteps': t.doneSteps.toList()..sort(),
+              // SERVER-READY identity (Wave T1) — WRITE-WHEN-NON-EMPTY (the uid
+              // economy): the keys appear ONLY once a real session stamps them,
+              // so the verbatim demo seed's overlay payload stays byte-identical.
+              if (t.employerId.isNotEmpty) 'employerId': t.employerId,
+              if (t.assignedWorkerUid.isNotEmpty)
+                'assignedWorkerUid': t.assignedWorkerUid,
             },
         }),
       );
@@ -298,29 +349,71 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
   /// current bucket only (`active`/`rejected`); one-shot — the clock keeps
   /// counting through a reject-and-fix cycle so the elapsed figure stays one
   /// honest number. [submitForReview] stamps [TaskItem.completedAt].
-  void startWork(int id) {
+  ///
+  /// Identity (Wave T1, additive): [workerUid]/[employerId] are OPTIONAL — when
+  /// a real session passes a non-empty value, the worker's first touch stamps
+  /// [TaskItem.assignedWorkerUid]/[TaskItem.employerId] (write-when-non-empty).
+  /// Null/empty (every existing caller + unit test) → no stamp, back-compat.
+  /// The clock guard is unchanged: the stamp rides the same one-shot _patch, so
+  /// it lands on the FIRST 'התחל עבודה' only (a re-entry returns before the patch).
+  void startWork(int id, {String? workerUid, String? employerId}) {
     final t = _byId(id);
     if (t == null) return;
     if (t.status != 'active' && t.status != 'rejected') return;
     if (t.startedAt != null) return;
-    _patch(id, (x) => x.copyWith(startedAt: DateTime.now()));
+    _patch(
+      id,
+      (x) => _stampIdentity(
+        x.copyWith(startedAt: DateTime.now()),
+        workerUid: workerUid,
+        employerId: employerId,
+      ),
+    );
+  }
+
+  /// Write-when-non-empty identity stamp (Wave T1) — mirrors the uid economy on
+  /// `Order.contractorUid`: a non-empty [workerUid]/[employerId] overwrites the
+  /// task's field; null/empty leaves it as-is (so the demo seed + overlay stay
+  /// byte-identical on the offline path). Pure — returns the patched [TaskItem].
+  TaskItem _stampIdentity(TaskItem t, {String? workerUid, String? employerId}) {
+    final uid = workerUid?.trim();
+    final emp = employerId?.trim();
+    if ((uid == null || uid.isEmpty) && (emp == null || emp.isEmpty)) return t;
+    return t.copyWith(
+      assignedWorkerUid: (uid != null && uid.isNotEmpty) ? uid : null,
+      employerId: (emp != null && emp.isNotEmpty) ? emp : null,
+    );
   }
 
   /// WORKER "שלח לאישור" — `taskActionClick` (proto :8133-8145): a current task
   /// (`active`/`rejected`) → `review`; the photo defaults to 'demo' if missing;
   /// the worker's [note] is saved. AUTO-ADVANCE: that worker's next `pending`
   /// task becomes `active`. A no-op unless the task is in a worker-owned status.
-  void submitForReview(int id, {String? note}) {
+  ///
+  /// Identity (Wave T1, additive): [workerUid]/[employerId] are OPTIONAL — when
+  /// non-empty (a real session), the submit stamps the task's
+  /// [TaskItem.assignedWorkerUid]/[TaskItem.employerId] (write-when-non-empty).
+  /// The `id`/`note` signature is FROZEN; null identity (existing callers +
+  /// unit tests) → no stamp, fully back-compat.
+  void submitForReview(int id,
+      {String? note, String? workerUid, String? employerId}) {
     final t = _byId(id);
     if (t == null) return;
     if (t.status != 'active' && t.status != 'rejected') return;
-    _patch(id, (x) => x.copyWith(
+    _patch(
+      id,
+      (x) => _stampIdentity(
+        x.copyWith(
           status: 'review',
           photo: x.photo ?? 'demo',
           note: note ?? x.note,
           // ⏱️ task clock (#85ו): the submit stamps the completion time.
           completedAt: DateTime.now(),
-        ));
+        ),
+        workerUid: workerUid,
+        employerId: employerId,
+      ),
+    );
     // auto-advance: promote the same worker's next queued task.
     final next = state
         .where((x) => x.worker == t.worker && x.status == 'pending')
@@ -343,12 +436,24 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
   /// coins onto the rewards balance + a 🔔 runtime notification for the task's
   /// worker. Both fire only on the real review→done transition (the status
   /// guard), so a re-approve can never double-award.
+  ///
+  /// W3 ORDER FOLD (Wave T1): when the approved task is bound to an order
+  /// ([TaskItem.orderId], carried from the seed), the approval also advances
+  /// that order ONE stage on the shared [ordersEngineProvider] — folded in from
+  /// the former `WorkerTasksNotifier.approve` so a completed install still moves
+  /// its order live. The `review`-status guard above gates it, so a re-approve
+  /// (e.g. the legacy dual-call from the manager dashboard) can never advance
+  /// twice. Skipped without a [_ref] (unit tests with no provider graph).
   void approve(int id) {
     final t = _byId(id);
     if (t == null || t.status != 'review') return;
+    final orderId = t.orderId;
     _patch(id, (x) => x.copyWith(status: 'done'));
     final r = _ref;
     if (r == null) return;
+    if (orderId != null) {
+      r.read(ordersEngineProvider.notifier).advance(orderId);
+    }
     r.read(rewardsProvider.notifier).awardCoins(kTaskApprovalCoins);
     r.read(workerNotifsProvider.notifier).addForWorker(
           t.worker,
@@ -402,6 +507,30 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
   }
 
   void resetToSeed() => state = _seedTasks();
+
+  /// SERVER-SWAP seam (Wave T1): bind the engine to the live Firestore-backed
+  /// tasks repository — mirrors `orders_engine.dart:bindRemote` (bind-once,
+  /// store the repo, immediate refresh). Wave T3 fills `tasks_firebase.dart`
+  /// with `FirebaseTasksRepository` and starts the real-time listener inside
+  /// [_refreshFromRemote]; nothing calls this on the local/demo path, so the
+  /// engine stays the byte-identical store until then. Typed `dynamic` so no
+  /// Firebase symbol is imported here.
+  void bindRemote(dynamic repo) {
+    /* SERVER-SWAP: Wave T3 fills via FirebaseTasksRepository, mirror
+       orders_engine.bindRemote (bind-once + addListener(_refreshFromRemote)). */
+    if (_remote != null) return; // bind once (provider-lifetime)
+    _remote = repo;
+    _refreshFromRemote();
+  }
+
+  /// SERVER-SWAP seam (Wave T1): rebuild engine state from the bound remote's
+  /// SYNC snapshot — mirrors `orders_engine.dart:_refreshFromRemote`. No-op
+  /// while unbound ([_remote] null, the local/demo path); Wave T3 fills the body
+  /// (`state = _remote.all();`) so a store-side change lands live in the engine.
+  void _refreshFromRemote() {
+    if (_remote == null) return;
+    /* SERVER-SWAP: Wave T3 — state = _remote.all() (public setter → persist). */
+  }
 }
 
 final tasksProvider = StateNotifierProvider<TasksNotifier, List<TaskItem>>(

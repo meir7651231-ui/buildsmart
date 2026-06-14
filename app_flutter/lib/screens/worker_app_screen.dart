@@ -22,7 +22,6 @@ import 'package:buildsmart/state/smart_project_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/worker_attendance.dart';
-import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
@@ -46,12 +45,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// [ChatsScreen], contract §3) · דוחות (submission history + live stats) ·
 /// אזור אישי ([WorkerProfileScreen]).
 ///
-/// LIVE (cross-persona W3, bridged): the board reads the rich [tasksProvider]
-/// (verbatim detail/steps/photo — the §6 engine) and BRIDGES the legacy
-/// [workerTasksProvider]: a worker submit writes BOTH engines (so the 👔
-/// manager dashboard's approvals queue still picks it up live), and a manager
-/// approve/reject there is mirrored back onto [tasksProvider] — reflecting
-/// live here, exactly as before.
+/// LIVE (cross-persona W3): the board reads the single unified [tasksProvider]
+/// (verbatim detail/steps/photo — the §6 engine). Wave T1 collapsed the old
+/// dual-engine bridge into ONE source of truth: a worker submit and the 👔
+/// manager dashboard's approve/reject all run on this same engine, so each
+/// reflects live on the other with no reconcile.
 ///
 /// Reached from the role picker ("מי אתה?" → עובד). R8 — every string/number
 /// is verbatim from the seeds (`persona_data.dart` / `phaseb_seeds.dart`).
@@ -98,18 +96,11 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
 
     final worker = workerIndexForSession(session);
 
-    // W3 BRIDGE — the manager dashboard still decides on the legacy
-    // [workerTasksProvider]; mirror its review→done / review→rejected onto the
-    // rich [tasksProvider] this board reads (via the engine's own existing
-    // approve/reject calls) so a manager decision flips the card here live.
-    // Post-frame so the mutation never lands mid-build; convergent (every call
-    // moves a task out of `review`), so it cannot loop.
-    final legacy = ref.watch(workerTasksProvider);
+    // One source of truth (Wave T1): the manager dashboard now decides on the
+    // SAME unified [tasksProvider] this board reads, so a manager review→done /
+    // review→rejected flips the card here live with no reconcile — the old
+    // legacy-engine mirror is gone.
     final rich = ref.watch(tasksProvider);
-    if (_needsMirror(legacy, rich)) {
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => _mirrorManagerDecisions());
-    }
 
     // #85ז first-pass log: remember every task ever seen `rejected` — the
     // engine keeps only the CURRENT status, so the reports tab needs this log
@@ -238,40 +229,15 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
     );
   }
 
-  /// True when a manager decision on the legacy engine has not been mirrored
-  /// onto the rich engine yet (same id still `review` here, decided there).
-  bool _needsMirror(List<PersonaTask> legacy, List<TaskItem> rich) =>
-      legacy.any((lt) {
-        final match = rich.where((t) => t.id == lt.id);
-        return match.isNotEmpty &&
-            match.first.status == 'review' &&
-            (lt.status == 'done' || lt.status == 'rejected');
-      });
-
-  /// Apply pending manager decisions through the rich engine's own
-  /// approve/reject (no new state) — see the W3 BRIDGE note in [build].
-  void _mirrorManagerDecisions() {
-    if (!mounted) return;
-    final legacy = ref.read(workerTasksProvider);
-    final rich = ref.read(tasksProvider);
-    final engine = ref.read(tasksProvider.notifier);
-    for (final lt in legacy) {
-      final match = rich.where((t) => t.id == lt.id);
-      if (match.isEmpty || match.first.status != 'review') continue;
-      if (lt.status == 'done') engine.approve(lt.id);
-      if (lt.status == 'rejected') engine.reject(lt.id);
-    }
-  }
-
   /// WORKER submit — "שלח לאישור", routed through the ONE shared proof-photo
   /// path ([submitWithProofPhoto], worker_task_detail_sheet.dart): REAL
   /// capture → preview/confirm dialog → [TasksNotifier.attachPhoto] WITH the
-  /// data-URL → the dual-engine submit (the W3 BRIDGE). The captured photo is
-  /// therefore actually stored on the task — the manager sees it in the
-  /// approvals queue. Cancel anywhere → honest toast inside the shared flow,
-  /// NO submit. `Future<void> Function(TaskItem)` is assignable to the
-  /// existing `void Function(TaskItem)` onSubmit callback, so no caller
-  /// changes.
+  /// data-URL → the unified [tasksProvider] submit (stamping the acting
+  /// session's identity). The captured photo is therefore actually stored on
+  /// the task — the manager sees it in the approvals queue. Cancel anywhere →
+  /// honest toast inside the shared flow, NO submit. `Future<void>
+  /// Function(TaskItem)` is assignable to the existing `void Function(TaskItem)`
+  /// onSubmit callback, so no caller changes.
   Future<void> _submit(TaskItem task) async {
     await submitWithProofPhoto(context, ref, task);
   }

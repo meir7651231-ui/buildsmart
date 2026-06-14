@@ -16,6 +16,8 @@ Update **only here** on a deliberate release — build advances automatically (�
 שער: analyze 0 · כל הסוויטה ירוקה · build · conformance 7/7 · required-tests 6/6 · supervisor CLEAN ·
 mutation 3-RED→GREEN. בנוי על הענף-הראשי המאוחד (worker-board+origin מוזגו ונדחפו קודם).
 
+**גל T1 · איחוד מנוע-המשימות:** 2 המנועים (`tasksProvider` עשיר + `workerTasksProvider` רזה — dual-write + post-frame-mirror שביר) → מנוע אחד: `tasksProvider` מקור-יחיד; `workerTasksProvider` הפך ל-**shim מעביר** (מקרין מ-tasksProvider, אפס מצב-עצמאי). `TaskItem` += `employerId`/`assignedWorkerUid` (נחתמים מה-session בשליחה, write-when-non-empty, seed byte-identical). fold של orderId→advance-on-approve (אישור משימה-מקושרת מקדם את ההזמנה). seam ריק `bindRemote` ל-T3. נמחקו dual-write + `_mirrorManagerDecisions`. נחיל: T1a מנוע+מודל · T1b צרכנים+6 טסטים. שער: analyze 0 · 6 טסטי-משימות + סוויטה · supervisor CLEAN · mutation RED→GREEN (order-advance).
+
 ## v6.19 — לוח עובד v3 מלא (#100–#114, נחיל אמיתי, 4 גלים)
 
 לוח-העובד נבנה והורחב דרך נחיל ה-/swarm הקנוני (donning + manifested-gate + mutation-verify +

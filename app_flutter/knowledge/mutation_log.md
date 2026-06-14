@@ -17,6 +17,13 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## TasksNotifier.approve — orderId→advance fold (גל T1) — 2026-06-14
+
+- **קובץ:** `test/worker_approval_engine_test.dart` (אישור משימה-מקושרת → ההזמנה מתקדמת, open-orders 4→3).
+- תקלה שהוזרקה: השבתת `r.read(ordersEngineProvider.notifier).advance(orderId)` ב-`approve`.
+- תוצאה: **אדומה ✅** — טסט ה-order-advance נכשל (ההזמנה לא התקדמה). שחזור → ירוק ✅.
+- מסקנה: הבדיקה חזקה — תופסת ניתוק של ה-fold (איחוד-המנוע לא שובר את קישור משימה↔הזמנה).
+
 ## employerProfileProvider (גל-0 חיווט קבלן↔עובד) — 2026-06-14
 
 - **קובץ:** `test/employer_link_test.dart`.

@@ -2092,24 +2092,20 @@ class _ManageTabState extends ConsumerState<_ManageTab> {
           child: _ApprovalsBody(
             pending: pending,
             onApprove: (t) {
-              ref.read(workerTasksProvider.notifier).approve(t.id);
-              // 🪙 #22 — coins + the worker's ✅ bell fire AT DECISION TIME:
-              // the rich engine's approve runs its review→done side-effects
-              // now; the worker-board mirror's later approve() is a no-op
-              // thanks to the engine's `review`-status guard (no double
-              // award).
+              // 🪙 #22 — coins + the worker's ✅ bell fire AT DECISION TIME on
+              // the single unified engine (Wave T1): approve runs its
+              // review→done side-effects once, guarded by the `review` status
+              // (no double award).
               ref.read(tasksProvider.notifier).approve(t.id);
               showToast(context, '✅ אושר: ${t.name}');
             },
             onReject: (t) async {
               // 📝 #12 — optional rejection reason (promptRejectReason):
-              // null = cancelled (no reject); the reason rides the RICH
-              // engine's reject (side-map + the worker's 🔁 bell). The rich
-              // reject ALSO makes the worker-board mirror a no-op, exactly
-              // like the approve above.
+              // null = cancelled (no reject); the reason rides the unified
+              // engine's reject (side-map + the worker's 🔁 bell), Wave T1's
+              // single source of truth.
               final why = await promptRejectReason(context);
               if (why == null || !context.mounted) return;
-              ref.read(workerTasksProvider.notifier).reject(t.id);
               ref.read(tasksProvider.notifier).reject(t.id, reason: why);
               showToast(context, '↩️ נדחה: ${t.name}');
             },
@@ -2410,7 +2406,7 @@ class _CountBadge extends StatelessWidget {
 /// every task the worker submitted (`pending`, status `review`), each with the
 /// worker name, the `🕒 days · steps` line, the worker's note, and two actions:
 /// ✅ אשר (review → done, ✅ אושר) and ↩️ דחה (review → rejected, back to the
-/// worker). Both write the SHARED [workerTasksProvider], so the worker's own
+/// worker). Both write the SHARED unified [tasksProvider], so the worker's own
 /// screen reflects the decision live. An empty queue shows a calm note.
 class _ApprovalsBody extends StatelessWidget {
   const _ApprovalsBody({
