@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:buildsmart/data/polyroll_specs.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/firebase_options.dart';
@@ -13,10 +15,18 @@ import 'package:buildsmart/widgets/toast.dart' show bsMessengerKey;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart'
     show FirebaseMessaging, RemoteMessage;
 import 'package:flutter/foundation.dart'
-    show debugPrint, kDebugMode, kIsWeb, visibleForTesting;
+    show
+        FlutterError,
+        FlutterErrorDetails,
+        PlatformDispatcher,
+        debugPrint,
+        kDebugMode,
+        kIsWeb,
+        visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,6 +45,45 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   } on Object catch (e) {
     debugPrint('firebaseMessagingBackgroundHandler: ignored failure: $e');
   }
+}
+
+/// G4 — install the global Flutter + platform error handlers, routing each to
+/// the supplied Crashlytics callbacks. Pure + `@visibleForTesting` so the wiring
+/// LOGIC is asserted with plain recording closures (no real Firebase): a thrown
+/// Flutter framework error and a raised platform-async error are each routed to
+/// the right sink, the present-then-record order is kept, and the debug gate is
+/// honored. The real call-site ([main]) passes the live `FirebaseCrashlytics`
+/// methods verbatim.
+///
+/// CONTRACT (mirroring the FlutterFire docs):
+///   • `FlutterError.onError` (framework errors) → `presentError` (keeps the
+///     red error box / console dump in debug) THEN [recordFlutterError]
+///     (`recordFlutterFatalError`);
+///   • `PlatformDispatcher.instance.onError` (uncaught async errors) →
+///     [recordError] (`recordError(..., fatal: true)`) and returns `true`.
+///
+/// Collection is enabled in NON-debug builds only ([isDebug] defaults to
+/// `kDebugMode`), so a debug run keeps the on-device error overlay and does not
+/// ship dev noise to the dashboard. This is ONLY ever called when Firebase is
+/// initialised — the demo path never reaches it (see [main]'s
+/// `Firebase.apps.isNotEmpty` gate).
+@visibleForTesting
+void installCrashlyticsHandlers({
+  required void Function(bool enabled) setCollectionEnabled,
+  required void Function(FlutterErrorDetails details) recordFlutterError,
+  required void Function(Object error, StackTrace stack) recordError,
+  bool isDebug = kDebugMode,
+}) {
+  // Off in debug (keep the overlay + avoid dev noise); on in release/profile.
+  setCollectionEnabled(!isDebug);
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    recordFlutterError(details);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    recordError(error, stack);
+    return true;
+  };
 }
 
 Future<void> main() async {
@@ -70,6 +119,22 @@ Future<void> main() async {
     } catch (_) {
       // non-fatal until S5 enforcement
     }
+  }
+  // G4 — Crashlytics global error capture, ACTIVE ONLY when Firebase actually
+  // initialised. With Firebase ABSENT (the demo / local-repo path) this whole
+  // block is skipped, so `FlutterError.onError` / `PlatformDispatcher.onError`
+  // stay the framework defaults and `main()` behaves byte-for-byte as before
+  // (the zero-regression invariant). Collection itself is debug-gated inside
+  // the helper (keep the debug error overlay; ship only release/profile).
+  if (Firebase.apps.isNotEmpty) {
+    final crashlytics = FirebaseCrashlytics.instance;
+    installCrashlyticsHandlers(
+      setCollectionEnabled: (enabled) =>
+          unawaited(crashlytics.setCrashlyticsCollectionEnabled(enabled)),
+      recordFlutterError: crashlytics.recordFlutterFatalError,
+      recordError: (error, stack) =>
+          unawaited(crashlytics.recordError(error, stack, fatal: true)),
+    );
   }
   // S6.2 — register the background push handler, only when Firebase actually
   // initialised, and never on web (web background pushes belong to the hosting

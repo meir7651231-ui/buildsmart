@@ -941,3 +941,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 **הפיך:** הכל מאחורי `kHideUnderConstruction`; const/seeds/widgets נשארים — flip מחזיר.
 **אימות:** `apple_readiness_missed_leaks_test` 12/12 (helper-demo→shrink · data-URL-אמיתי-לא-מוסתר · lipskey-filter+const-הפיך · 6 source-guards) · analyze 6-הנגועים **0-errors/0-warnings** · color-ratchet ירוק · full-suite **+2397 -1** (ה-1 = `worker_reports_drilldown` קיים-מראש) · build web ✅ · mutation red `+4 -1`→green `+12` (§mutation_log). **לא נגעתי:** worker-board-v3/GPS/4-מחלקות-ריקות/docs_readiness_gate/backend-gating.
+
+## #G4 — טלמטרי (Crashlytics+Analytics) — שינוי לא-ויזואלי במסכים — 2026-06-14
+
+**שינוי:** `store_screen.dart` + `manager_role_assign_sheet.dart` קיבלו **רק קריאות-טלמטרי** (side-effects): `order_placed` אחרי checkout מוצלח, `role_assigned`/`logError` אחרי הקצאת-תפקיד. **אין שום שינוי-רינדור/widget** — אותו עץ-UI בדיוק, רק לוג ברקע כשיש Firebase. לכן אין screenshot; האימות הוא קריאת-ה-diff + `telemetry_test` (8/8) שמוכיח שה-sink הוא no-op בלי Firebase (דמו byte-identical).
+**אימות:** `telemetry_test` 8/8 · analyze 0-errors · full-suite **+2406 -1** (ה-1 = worker_reports_drilldown הידוע) · build web ✅ · mutation red→green (§mutation_log).

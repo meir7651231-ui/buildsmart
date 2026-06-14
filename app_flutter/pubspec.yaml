@@ -70,6 +70,13 @@ dependencies:
   cloud_functions: ^6.3.2
   firebase_app_check: ^0.4.4+2
 
+  # G4 — production telemetry, ACTIVE ONLY when Firebase actually initialised
+  # (the `Firebase.apps.isNotEmpty` gate in lib/state/telemetry.dart). On the
+  # demo / no-Firebase path NONE of this runs — byte-identical to before. The
+  # 5.x / 12.x lines track firebase_core ^4.x (the project's pin).
+  firebase_crashlytics: ^5.0.0
+  firebase_analytics: ^12.0.0
+
   # HTTP PUT of captured photo bytes to the R2 presigned URL (A14, gated on
   # CLOUD_PHOTOS). Already a transitive dep — promoted to direct for the upload
   # seam in services/task_photo.dart. Cross-platform (web BrowserClient + io).

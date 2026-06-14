@@ -37,6 +37,7 @@ import 'dart:async';
 
 import 'package:buildsmart/data/repositories/users_lookup.dart';
 import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/state/telemetry.dart';
 import 'package:buildsmart/theme/app_theme.dart' show bsOnAccent;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -165,6 +166,15 @@ class _ManagerRoleAssignSheetState
           .read(authStateProvider.notifier)
           .assignRole(uid: uid, role: roleId);
 
+      // G4 — key funnel event: a manager assigned a server role. Reached only
+      // on a real (non-throwing) assignment, so it always has a live backend;
+      // the sink forwards to FirebaseAnalytics when Firebase is up, else no-op.
+      // The uid is NOT logged (PII) — only the assigned role.
+      ref.read(telemetryProvider).logEvent(
+        TelemetryEvents.roleAssigned,
+        params: {'role': roleId},
+      );
+
       if (!mounted) return;
       final label = _labelFor(roleId);
       showToast(context, '✅ התפקיד "$label" שויך למשתמש $uid.');
@@ -180,7 +190,11 @@ class _ManagerRoleAssignSheetState
             ? _kNoBackendMessage
             : 'שיוך התפקיד נכשל (${e.code}). נסה שוב מאוחר יותר.',
       );
-    } on Object catch (e) {
+    } on Object catch (e, st) {
+      // G4 — generic handled-error breadcrumb (Crashlytics + an `app_error`
+      // analytics event), tagged with a stable context label (never raw user
+      // data). No-op when Firebase is absent → demo path unchanged.
+      ref.read(telemetryProvider).logError(e, st, where: 'role_assign');
       if (!mounted) return;
       showToast(context, 'שיוך התפקיד נכשל. נסה שוב מאוחר יותר. ($e)');
     } finally {
