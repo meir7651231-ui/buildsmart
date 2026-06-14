@@ -51,5 +51,7 @@
 	<string>BuildSmart משתמש במיקרופון לחיפוש קולי של מוצרים.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>BuildSmart משתמש בזיהוי-דיבור כדי להמיר חיפוש קולי לטקסט.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>BuildSmart ניגש לגלריה כדי לצרף תמונות — הוכחת-מסירה, תמונות-פרופיל ותעודות.</string>
 </dict>
 </plist>
