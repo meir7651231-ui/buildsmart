@@ -1,4 +1,5 @@
-import 'package:buildsmart/state/board_auth.dart' show BoardRole;
+import 'package:buildsmart/state/board_auth.dart'
+    show BoardRole, kDemoContractorId;
 
 /// task #65 · seeded board accounts — the local credential list the board
 /// gate (`boardAuthProvider`) validates against. The whole app is
@@ -43,12 +44,21 @@ const List<BoardAccount> kBoardAccounts = [
     username: 'ran',
     code: '1111',
     displayName: 'רן',
+    // Wave-0 worker→contractor link. On the single-device demo every seed
+    // worker is employed by the ONE demo contractor, so their HR / attendance /
+    // material / required-docs records scope into the contractor's views (which
+    // match on employerId). Without this the seed-login worker carries '' and is
+    // silently dropped by every employer-scoped view — and the hard docs gate
+    // FAILS OPEN. The demo-entry worker already gets this id (board_auth.dart
+    // :274). SERVER-SWAP: maps to a live contractors/{uid}.
+    employerId: kDemoContractorId,
   ),
   BoardAccount(
     role: BoardRole.worker,
     username: 'omer',
     code: '2222',
     displayName: 'עומר',
+    employerId: kDemoContractorId,
   ),
   BoardAccount(
     role: BoardRole.courier,
