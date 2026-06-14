@@ -904,3 +904,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **שמירת-יושר:** payload פגום / fetch שנכשל → `errorBuilder` מרנדר את ה-placeholder/אווטאר-ברירת-המחדל הקיים (לעולם לא crash). ref לא-ניתן-לרינדור (legacy 'demo' / null) → אותו placeholder ישר כמו היום.
 
 **אימות:** `cloud_photos_a14_upload_test` 12/12 (כולל display dual-render) · analyze 0-errors (כל הנגועים) · full-suite **+2272** (היה +2260) · build web ✅. mutation-verified (ראה `knowledge/mutation_log.md` §A14).
+
+## #POD-signature — pad-חתימה אמיתי (במקום "(הדגמה)") — 2026-06-14
+
+**שינוי:** כפתור ✍️ ב-POD-sheet פתח placeholder כן "(הדגמה)"; כעת פותח **pad-ציור אמיתי** (`SignaturePadSheet`) — חתימה באצבע/עכבר על קנבס לבן, כפתורי נקה/שמור, השמור מושבת עד שיש דיו (אין חתימה מזויפת). החתימה נשמרת כ-PNG data-URL (`podSignature`) ומוצגת כתצוגה (כמו podPhoto).
+**אימות (בדיקת-widget):** `signature_pad_test` 8/8 — ציור→PNG-לא-ריק · dot · pad-ריק→null · save-פולט/מושבת-כשריק · preview-רנדר. analyze 0-errors · mutation-verified (§mutation_log). build web ב-pre-push gate.
