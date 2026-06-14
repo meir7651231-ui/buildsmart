@@ -33,6 +33,7 @@
 import 'dart:convert';
 
 import 'package:buildsmart/data/persona_data.dart';
+import 'package:buildsmart/screens/worker_report_drilldowns.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
@@ -344,13 +345,26 @@ class WorkerReportsTab extends ConsumerWidget {
         const SizedBox(height: BsTokens.space4),
 
         // ── ② + ④ KPI row: first-pass % · BuildCoins · streak ──
+        // #109 — each box dives to a REAL drill-down of the data behind it.
         Row(
           children: [
-            _KpiBox(value: firstPassLabel, label: 'אישור-ראשון 🎯'),
+            _KpiBox(
+              value: firstPassLabel,
+              label: 'אישור-ראשון 🎯',
+              onTap: () => showFirstPassDrilldown(context, ref, worker: worker),
+            ),
             // F-33: מאזן המטבעות הוא overlay אחד לכל המכשיר (bs.rewards.v1,
             // ללא username) — תווית כנה, לא מספר שמתחזה ל-per-עובד.
-            _KpiBox(value: '${rewards.coins}', label: 'BuildCoins (מועדון משותף) 🪙'),
-            _KpiBox(value: streakLabel, label: 'רצף פעילות 🔥'),
+            _KpiBox(
+              value: '${rewards.coins}',
+              label: 'BuildCoins (מועדון משותף) 🪙',
+              onTap: () => showCoinsDrilldown(context, ref),
+            ),
+            _KpiBox(
+              value: streakLabel,
+              label: 'רצף פעילות 🔥',
+              onTap: () => showStreakDrilldown(context, ref, worker: worker),
+            ),
           ],
         ),
         const SizedBox(height: BsTokens.space2),
@@ -375,7 +389,17 @@ class WorkerReportsTab extends ConsumerWidget {
                     const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               )
             else ...[
-              _WeekBars(counts: perDay, todayIndex: today.weekday % 7),
+              _WeekBars(
+                counts: perDay,
+                todayIndex: today.weekday % 7,
+                // #109 — tapping a bar opens that day's clocked tasks.
+                onTapDay: (i) => showWeekDayDrilldown(
+                  context,
+                  ref,
+                  worker: worker,
+                  day: weekStart.add(Duration(days: i)),
+                ),
+              ),
               if (noDate > 0) ...[
                 const SizedBox(height: BsTokens.space2),
                 Text(
@@ -400,12 +424,18 @@ class WorkerReportsTab extends ConsumerWidget {
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               )
             else ...[
+              // #109 — each timed row dives to that task's full time detail.
               for (final t in timed)
-                _KvRow(label: t.name, value: _fmtDuration(clock[t.id]!.duration!)),
+                _KvRow(
+                  label: t.name,
+                  value: _fmtDuration(clock[t.id]!.duration!),
+                  onTap: () => showTaskTimeDrilldown(context, ref, task: t),
+                ),
               for (final t in running)
                 _KvRow(
                   label: t.name,
                   value: '🔨 בביצוע מאז ${_hhmm(clock[t.id]!.startedAt!)}',
+                  onTap: () => showTaskTimeDrilldown(context, ref, task: t),
                 ),
             ],
           ],
@@ -416,11 +446,14 @@ class WorkerReportsTab extends ConsumerWidget {
         _Card(
           title: '📍 פירוט לפי אזור עבודה',
           children: [
+            // #109 — each area row dives to the tasks grouped under it.
             for (final e in areas.entries)
               _KvRow(
                 label: e.key,
                 value:
                     '${e.value.where((t) => t.status == 'done').length}/${e.value.length} אושרו',
+                onTap: () =>
+                    showAreaDrilldown(context, ref, worker: worker, area: e.key),
               ),
             const SizedBox(height: BsTokens.space1),
             const Text(
@@ -447,6 +480,13 @@ class WorkerReportsTab extends ConsumerWidget {
                 _HistoryRow(
                   task: t,
                   duration: clock[t.id]?.duration,
+                  // #109 — the row BODY opens the submission detail; the proof
+                  // thumbnail keeps its own full-screen viewer tap.
+                  onTap: () => showSubmissionDrilldown(
+                    context,
+                    task: t,
+                    duration: clock[t.id]?.duration,
+                  ),
                 ),
           ],
         ),
@@ -462,38 +502,63 @@ class WorkerReportsTab extends ConsumerWidget {
                 style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
               )
             else
-              for (final t in rejectedTasks) ...[
-                Padding(
-                  padding: const EdgeInsets.only(bottom: BsTokens.space2),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        t.name,
-                        style: const TextStyle(
-                          color: BsTokens.inkLight,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13.5,
+              // #109 — each rejection row dives to the manager's reason + task.
+              for (final t in rejectedTasks)
+                Semantics(
+                  button: true,
+                  label: '${t.name} — הצג סיבת דחייה',
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () =>
+                        showRejectionDrilldown(context, ref, task: t),
+                    child: ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(minHeight: 48), // ≥48dp target
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: ExcludeSemantics(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      t.name,
+                                      style: const TextStyle(
+                                        color: BsTokens.inkLight,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 13.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      rejectNotes[t.id] != null
+                                          ? 'סיבת המנהל: "${rejectNotes[t.id]}"'
+                                          // Honest — rejected without a reason
+                                          // (or before reasons were stored).
+                                          : 'המנהל לא צירף סיבה לדחייה.',
+                                      style: TextStyle(
+                                        color: rejectNotes[t.id] != null
+                                            ? BsTokens.inkLight
+                                            : BsTokens.mutedLight,
+                                        fontSize: 12.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(Icons.chevron_left,
+                                  size: 18, color: BsTokens.mutedLight),
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        rejectNotes[t.id] != null
-                            ? 'סיבת המנהל: "${rejectNotes[t.id]}"'
-                            // Honest — the manager rejected without a reason
-                            // (or before reject-reasons were stored).
-                            : 'המנהל לא צירף סיבה לדחייה.',
-                        style: TextStyle(
-                          color: rejectNotes[t.id] != null
-                              ? BsTokens.inkLight
-                              : BsTokens.mutedLight,
-                          fontSize: 12.5,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ],
           ],
         ),
         const SizedBox(height: BsTokens.space4),
@@ -574,30 +639,22 @@ class WorkerReportsTab extends ConsumerWidget {
 
 // ─── building blocks ─────────────────────────────────────────────────────────
 
-/// White stat box (the courier reports `_RStat` idiom — board style).
+/// White stat box (the courier reports `_RStat` idiom — board style). When
+/// [onTap] is set (#109) the whole box becomes a ≥48dp button that opens its
+/// drill-down; the inner value/label are excluded from semantics so the box's
+/// own button label is announced once.
 class _KpiBox extends StatelessWidget {
-  const _KpiBox({required this.value, required this.label});
+  const _KpiBox({required this.value, required this.label, this.onTap});
 
   final String value;
   final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 3),
-        padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
-        decoration: BoxDecoration(
-          color: BsTokens.cardLight,
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x14000000),
-              blurRadius: 10,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
+    final inner = Padding(
+      padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
+      child: ExcludeSemantics(
         child: Column(
           children: [
             Text(
@@ -616,6 +673,37 @@ class _KpiBox extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 3),
+        decoration: BoxDecoration(
+          color: BsTokens.cardLight,
+          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x14000000),
+              blurRadius: 10,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: onTap == null
+            ? inner
+            : Semantics(
+                button: true,
+                label: '$label — הצג פירוט',
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+                    onTap: onTap,
+                    child: inner,
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -662,36 +750,63 @@ class _Card extends StatelessWidget {
   }
 }
 
-/// Label-value row (task name ← → metric), RTL-safe.
+/// Label-value row (task name ← → metric), RTL-safe. When [onTap] is set (#109)
+/// the row becomes a ≥48dp button (with a trailing chevron hint) that opens its
+/// drill-down; the inner texts are excluded so the row announces one button.
 class _KvRow extends StatelessWidget {
-  const _KvRow({required this.label, required this.value});
+  const _KvRow({required this.label, required this.value, this.onTap});
 
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: BsTokens.space2),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(color: BsTokens.inkLight, fontSize: 13.5),
-            ),
+    final row = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(color: BsTokens.inkLight, fontSize: 13.5),
           ),
-          const SizedBox(width: BsTokens.space2),
-          Text(
-            value,
-            style: const TextStyle(
-              color: BsTokens.inkLight,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-            ),
+        ),
+        const SizedBox(width: BsTokens.space2),
+        Text(
+          value,
+          style: const TextStyle(
+            color: BsTokens.inkLight,
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
           ),
+        ),
+        if (onTap != null) ...[
+          const SizedBox(width: 2),
+          const Icon(Icons.chevron_left,
+              size: 18, color: BsTokens.mutedLight),
         ],
+      ],
+    );
+
+    if (onTap == null) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: BsTokens.space2),
+        child: row,
+      );
+    }
+    return Semantics(
+      button: true,
+      label: '$label, $value — הצג פירוט',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48), // ≥48dp target
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: ExcludeSemantics(child: row),
+          ),
+        ),
       ),
     );
   }
@@ -701,11 +816,18 @@ class _KvRow extends StatelessWidget {
 /// the board's RTL Directionality the first child renders on the RIGHT, so
 /// ראשון starts at the right edge as a Hebrew calendar reads.
 class _WeekBars extends StatelessWidget {
-  const _WeekBars({required this.counts, required this.todayIndex});
+  const _WeekBars({
+    required this.counts,
+    required this.todayIndex,
+    this.onTapDay,
+  });
 
   /// Approved-task count per weekday, index = weekday % 7 (0 = ראשון).
   final List<int> counts;
   final int todayIndex;
+
+  /// #109 — tap a bar (by its weekday index) → that day's clocked tasks.
+  final ValueChanged<int>? onTapDay;
 
   @override
   Widget build(BuildContext context) {
@@ -717,44 +839,12 @@ class _WeekBars extends StatelessWidget {
         children: [
           for (var i = 0; i < 7; i++)
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (counts[i] > 0)
-                    Text(
-                      '${counts[i]}',
-                      style: const TextStyle(
-                        color: BsTokens.inkLight,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12,
-                      ),
-                    ),
-                  const SizedBox(height: 2),
-                  Container(
-                    width: 18,
-                    height: 6 + (counts[i] / maxC) * 56,
-                    decoration: BoxDecoration(
-                      color: counts[i] > 0
-                          ? BsTokens.brand
-                          : const Color(0xFFEDEDED),
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(6),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _kDayLetters[i],
-                    style: TextStyle(
-                      color: i == todayIndex
-                          ? BsTokens.brandDark
-                          : BsTokens.mutedLight,
-                      fontWeight:
-                          i == todayIndex ? FontWeight.w800 : FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+              child: _BarColumn(
+                index: i,
+                count: counts[i],
+                maxCount: maxC,
+                isToday: i == todayIndex,
+                onTap: onTapDay == null ? null : () => onTapDay!(i),
               ),
             ),
         ],
@@ -763,13 +853,92 @@ class _WeekBars extends StatelessWidget {
   }
 }
 
+/// One weekday bar — its own tappable column (#109). The full 112dp height is
+/// the hit target (well over 48dp); the inner labels are excluded from
+/// semantics so the column announces one button.
+class _BarColumn extends StatelessWidget {
+  const _BarColumn({
+    required this.index,
+    required this.count,
+    required this.maxCount,
+    required this.isToday,
+    this.onTap,
+  });
+
+  final int index;
+  final int count;
+  final int maxCount;
+  final bool isToday;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final column = Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        if (count > 0)
+          Text(
+            '$count',
+            style: const TextStyle(
+              color: BsTokens.inkLight,
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+            ),
+          ),
+        const SizedBox(height: 2),
+        Container(
+          width: 18,
+          height: 6 + (count / maxCount) * 56,
+          decoration: BoxDecoration(
+            color: count > 0 ? BsTokens.brand : const Color(0xFFEDEDED),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _kDayLetters[index],
+          style: TextStyle(
+            color: isToday ? BsTokens.brandDark : BsTokens.mutedLight,
+            fontWeight: isToday ? FontWeight.w800 : FontWeight.w500,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+    if (onTap == null) return column;
+    return Semantics(
+      button: true,
+      label: 'יום ${_kDayLetters[index]} — $count אושרו, הצג פירוט',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        // Fill the row's full height so the whole bar slot is the hit target,
+        // while the bar itself stays bottom-aligned (the chart look).
+        child: SizedBox(
+          height: double.infinity,
+          child: ExcludeSemantics(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: column,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// One submission-history row: proof thumbnail + name + status pill + the
 /// worker's note + the measured duration when the clock has one.
 class _HistoryRow extends StatelessWidget {
-  const _HistoryRow({required this.task, this.duration});
+  const _HistoryRow({required this.task, this.duration, this.onTap});
 
   final TaskItem task;
   final Duration? duration;
+
+  /// #109 — opens the submission detail when the row body is tapped. The proof
+  /// thumbnail keeps its own independent full-screen-viewer tap.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -823,49 +992,81 @@ class _HistoryRow extends StatelessWidget {
           else
             _ProofThumb(photo: task.photo),
           const SizedBox(width: BsTokens.space3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.name,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13.5,
-                  ),
+          Expanded(child: _body(context)),
+        ],
+      ),
+    );
+  }
+
+  /// The text body (name · status · duration · note). When [onTap] is set it is
+  /// wrapped in a ≥48dp button that opens the submission detail (#109); the
+  /// inner texts are excluded so the row body announces one button + a 'הצג
+  /// פירוט' hint.
+  Widget _body(BuildContext context) {
+    final column = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                task.name,
+                style: const TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13.5,
                 ),
-                const SizedBox(height: 2),
-                Wrap(
-                  spacing: BsTokens.space2,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    _StatusPill(status: task.status),
-                    if (duration != null)
-                      Text(
-                        '⏱️ ${_fmtDuration(duration!)}',
-                        style: const TextStyle(
-                          color: BsTokens.mutedLight,
-                          fontSize: 12,
-                        ),
-                      ),
-                  ],
+              ),
+            ),
+            if (onTap != null)
+              const Icon(Icons.chevron_left,
+                  size: 18, color: BsTokens.mutedLight),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Wrap(
+          spacing: BsTokens.space2,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            _StatusPill(status: task.status),
+            if (duration != null)
+              Text(
+                '⏱️ ${_fmtDuration(duration!)}',
+                style: const TextStyle(
+                  color: BsTokens.mutedLight,
+                  fontSize: 12,
                 ),
-                if (task.note.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    '"${task.note}"',
-                    style: const TextStyle(
-                      color: BsTokens.mutedLight,
-                      fontSize: 12.5,
-                    ),
-                  ),
-                ],
-              ],
+              ),
+          ],
+        ),
+        if (task.note.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(
+            '"${task.note}"',
+            style: const TextStyle(
+              color: BsTokens.mutedLight,
+              fontSize: 12.5,
             ),
           ),
         ],
+      ],
+    );
+
+    if (onTap == null) return column;
+    return Semantics(
+      button: true,
+      label: '${task.name} — הצג פרטי הגשה',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48), // ≥48dp target
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: ExcludeSemantics(child: column),
+          ),
+        ),
       ),
     );
   }

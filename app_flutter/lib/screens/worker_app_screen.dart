@@ -5,10 +5,12 @@ import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_attendance_screen.dart';
+import 'package:buildsmart/screens/worker_equipment_checklist_sheet.dart';
 import 'package:buildsmart/screens/worker_notifs_sheet.dart';
 import 'package:buildsmart/screens/worker_profile_screen.dart';
 import 'package:buildsmart/screens/worker_reports_tab.dart';
 import 'package:buildsmart/screens/worker_settings_screen.dart';
+import 'package:buildsmart/screens/worker_task_board_screen.dart';
 import 'package:buildsmart/screens/worker_task_detail_sheet.dart';
 import 'package:buildsmart/screens/worker_today_strip.dart';
 import 'package:buildsmart/services/geo.dart';
@@ -129,6 +131,22 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
             // 🔔 runtime notifications (#85ו) — unread badge + sheet, the
             // logged worker's own feed only (state/worker_notifs.dart).
             const WorkerNotifsBell(),
+            // 🗂️ לוח משימות מלא (#114) — the status-GROUPED hierarchical board
+            // of ALL this worker's tasks (each row dives into the #71 detail
+            // sheet). An app-bar action so it sits outside the tasks ListView
+            // and disturbs none of the journal's layout/scroll order.
+            HelpTarget(
+              title: 'לוח משימות מלא',
+              body: 'פותח לוח של כל המשימות שלך מקובצות לפי מצב — פעילות, '
+                  'בתור, בבדיקה והושלמו — עם פס-התקדמות וצלילה לכל משימה.',
+              child: IconButton(
+                tooltip: 'לוח משימות מלא',
+                icon: const Icon(Icons.dashboard_outlined,
+                    color: BsTokens.mutedLight),
+                onPressed: () =>
+                    Navigator.of(context).push(WorkerTaskBoardScreen.route()),
+              ),
+            ),
             // שיחות + פרופיל moved into the bottom tabs (#67). The gear opens
             // the WORKER-scoped settings (#69) — not the catalog settings.
             // '‹ יציאה' leaves the board screen; logging OUT lives in the
@@ -389,6 +407,16 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
           // Only the current bucket (active/rejected) can be submitted.
           onSubmit: widget.onSubmit,
         ),
+        // 🧰 בדוק ציוד נדרש (#112) — aggregate the equipment checklist for the
+        // worker's CURRENT bucket (active/rejected) via Builder-B's sheet. Only
+        // shown when there is a current task, so it never offers an empty
+        // checklist. Placed under the current section, above the queue header —
+        // the queue/submitted headers keep their order (reached by scroll).
+        if (current.isNotEmpty)
+          _EquipmentButton(
+            onPressed: () =>
+                showEquipmentChecklistSheet(context, ref, tasks: current),
+          ),
         _Section(
           header: '⏳ הבאות בתור (${queue.length})',
           tasks: queue,
@@ -1365,6 +1393,57 @@ class _TaskCard extends ConsumerWidget {
                   ),
                 ],
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 🧰 בדוק ציוד נדרש (#112) — a secondary (outlined) action under the current
+/// bucket that opens Builder-B's aggregated equipment checklist sheet for the
+/// worker's active/rejected tasks. Outlined (not a brand fill) so it reads as
+/// secondary to the per-task 'שלח לאישור' pill and never competes with it.
+/// ≥48dp; excludeSemantics — the inner Text equals the label.
+class _EquipmentButton extends StatelessWidget {
+  const _EquipmentButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: BsTokens.space2),
+      child: HelpTarget(
+        title: 'בדוק ציוד נדרש',
+        body: 'מרכז את כל הכלים והחומרים הדרושים למשימות הפעילות שלך לרשימה '
+            'אחת — צ\'קליסט מאוגד ליום, שאפשר לסמן ולשלוח לקבלן.',
+        child: Semantics(
+          button: true,
+          label: 'בדוק ציוד נדרש',
+          excludeSemantics: true,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: BsTokens.brandDark,
+                side: const BorderSide(color: BsTokens.brand, width: 1.5),
+                minimumSize: const Size(0, 48),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BsTokens.space4,
+                  vertical: 9,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                ),
+              ),
+              onPressed: onPressed,
+              icon: const Text('🧰', style: TextStyle(fontSize: 15)),
+              label: const Text(
+                'בדוק ציוד נדרש',
+                style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+              ),
             ),
           ),
         ),
