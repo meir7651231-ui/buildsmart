@@ -28,6 +28,14 @@
 
 ---
 
+## v6.20 — חיווט קבלן↔עובד · גל E1 (כפתור+גיליון מלאי-הקבלן בלוח-העובד)
+
+**שינוי (UI חדש בעובד):** `worker_app_screen.dart` קיבל כפתור '📦 מלאי הקבלן' ב-_TasksTab (אחרי 'בדוק ציוד נדרש') → גיליון חדש `worker_employer_stock_sheet.dart` (RTL, רשימת-מלאי READ-ONLY: שם + 🏬מחסן/🏗️אתר, מצב-ריק כן 'הקבלן טרם שיתף מלאי'). אין edit/move (העובד read-only). דפוסים קיימים (DraggableScrollableSheet + grab-handle + ✕).
+
+**אימות:** ה-provider (ריק→[] · projection+sort · id-agnostic · seed-אמיתי) נעול ב-4 טסטים (`employer_stock_test`) · worker_app רגרסיה ירוקה · analyze 0 · mutation RED→GREEN. **follow-up:** widget-test לרינדור הגיליון (ה-provider + wiring-הכפתור נבדקו/נסקרו).
+
+---
+
 ## v6.16 — fix-fleet · round-3 (ציד עמוק יותר: data/RTL/UX)
 
 **שינוי:** סבב-3 עמוק (data-integrity · RTL · error-paths) תפס באגים שהסבבים הקודמים פספסו.

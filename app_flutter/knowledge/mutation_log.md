@@ -17,6 +17,13 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## employerStockProvider — empty-guard (גל E1) — 2026-06-14
+
+- **קובץ:** `test/employer_stock_test.dart` (עובד קורא מלאי-מעסיק READ-ONLY).
+- תקלה שהוזרקה: היפוך `if (employerId.isEmpty)` → `isNotEmpty`.
+- תוצאה: **אדומה ✅** — 3 טסטים נכשלו (ריק→[] · non-empty→projection · seed-אמיתי). שחזור → ירוק ✅.
+- מסקנה: הבדיקה חזקה — נועלת חוסר-קישור→ריק (אין-המצאות) + הפתרון-למלאי-הקבלן.
+
 ## TasksNotifier.createTask — id-minting (גל T2) — 2026-06-14
 
 - **קובץ:** `test/contractor_task_authoring_test.dart` (headline: קבלן יוצר → עובד רואה חי, id חדש = 6).

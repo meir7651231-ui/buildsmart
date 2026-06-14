@@ -6,6 +6,7 @@ import 'package:buildsmart/screens/docs_readiness_gate.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_attendance_screen.dart';
+import 'package:buildsmart/screens/worker_employer_stock_sheet.dart';
 import 'package:buildsmart/screens/worker_equipment_checklist_sheet.dart';
 import 'package:buildsmart/screens/worker_notifs_sheet.dart';
 import 'package:buildsmart/screens/worker_profile_screen.dart';
@@ -401,6 +402,13 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
             onPressed: () =>
                 showEquipmentChecklistSheet(context, ref, tasks: current),
           ),
+        // 📦 מלאי הקבלן (Wave E1) — READ-ONLY view of the employing contractor's
+        // stock (resolved via session.employerId). Always available (not gated
+        // on a current task) so the worker can check what the contractor holds
+        // anytime; the worker owns no stock and never mutates it.
+        _EmployerStockButton(
+          onPressed: () => showEmployerStockSheet(context),
+        ),
         _Section(
           header: '⏳ הבאות בתור (${queue.length})',
           tasks: queue,
@@ -1426,6 +1434,57 @@ class _EquipmentButton extends StatelessWidget {
               icon: const Text('🧰', style: TextStyle(fontSize: 15)),
               label: const Text(
                 'בדוק ציוד נדרש',
+                style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 📦 מלאי הקבלן (Wave E1) — a secondary (outlined) action that opens the
+/// READ-ONLY employer-stock sheet ([showEmployerStockSheet]). Mirrors
+/// [_EquipmentButton]'s outlined-secondary style so it reads as a peer view
+/// action, never a brand-fill primary. ≥48dp; excludeSemantics — the inner
+/// Text equals the label.
+class _EmployerStockButton extends StatelessWidget {
+  const _EmployerStockButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: BsTokens.space2),
+      child: HelpTarget(
+        title: 'מלאי הקבלן',
+        body: 'מציג לצפייה בלבד את מלאי הקבלן המעסיק — איזה פריט נמצא במחסן '
+            'ואיזה באתר. אינך עורך מלאי זה; הוא של הקבלן.',
+        child: Semantics(
+          button: true,
+          label: 'מלאי הקבלן',
+          excludeSemantics: true,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: BsTokens.brandDark,
+                side: const BorderSide(color: BsTokens.brand, width: 1.5),
+                minimumSize: const Size(0, 48),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BsTokens.space4,
+                  vertical: 9,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                ),
+              ),
+              onPressed: onPressed,
+              icon: const Text('📦', style: TextStyle(fontSize: 15)),
+              label: const Text(
+                'מלאי הקבלן',
                 style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
               ),
             ),

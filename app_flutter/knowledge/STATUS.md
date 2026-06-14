@@ -20,6 +20,8 @@ mutation 3-RED→GREEN. בנוי על הענף-הראשי המאוחד (worker-b
 
 **גל T2 · יצירת-משימה אצל הקבלן + אישור-קבלן:** `TasksNotifier` += `createTask`/`editTask`/`assignTask` (additive). מסך-הקבלן (`tasks_screen`) קיבל ＋'משימה חדשה' (שם/פירוט/שלבים/דדליין/הקצאה-לעובד מ-`kWorkers`, חותם `employerId`), עריכה, ומקטע 'אישורי עובדים (קבלן)' שמאשר/דוחה דרך המנוע — **הקבלן יוצר/מקצה/מאשר → העובד רואה חי**. אישור מקבילי (מנהל לא-נגוע; הסרה-מלאה parked). נחיל: T2a מנוע+מסך · T2b 2 טסטים. שער: analyze 0 · סוויטה · supervisor CLEAN · mutation RED→GREEN (id-minting). (כיסוי-follow-up: widget-test לגיליון-היצירה — ההתנהגות נבדקה במנוע.)
 
+**גל E1 · עובד קורא מלאי-מעסיק (read-only):** `employerStockProvider` (`employer_stock.dart` חדש) פותר את `session.employerId` למלאי-הקבלן (`stockProvider`) כ-`EmployerStockItem{name,location}` read-only (ריק→[], אין-המצאות; SERVER-SWAP: stock scoped ל-employerId). גיליון '📦 מלאי הקבלן' (`worker_employer_stock_sheet` חדש) + כפתור בלוח-העובד — העובד **רואה** את מלאי-הקבלן, לעולם לא משנה. נחיל: E1a provider+sheet+entry · E1b 4 טסטים. שער: analyze 0 · סוויטה · mutation RED→GREEN (read-only-additive — סקירה מוקלת; sheet-render = widget-test follow-up).
+
 ## v6.19 — לוח עובד v3 מלא (#100–#114, נחיל אמיתי, 4 גלים)
 
 לוח-העובד נבנה והורחב דרך נחיל ה-/swarm הקנוני (donning + manifested-gate + mutation-verify +
