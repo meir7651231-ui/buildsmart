@@ -3,6 +3,10 @@ import java.io.FileInputStream
 plugins {
     id("com.android.application")
     id("kotlin-android")
+    // F1 — apply the Google Services plugin so google-services.json is read and
+    // the Firebase config is wired into the app at build time. Must come after
+    // the Android & Kotlin plugins and before the Flutter Gradle plugin.
+    id("com.google.gms.google-services")
     id("dev.flutter.flutter-gradle-plugin")
 }
 val keystoreProperties = Properties()
