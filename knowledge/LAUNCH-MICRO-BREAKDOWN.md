@@ -51,7 +51,7 @@
 | B5 | ✅ (950757d+6f9b562+1309a78+35fd96e): קטלוג חי · 4 הגדרות‑חנות חוּוטו · השאר החסומות‑שרת **מוסתרות הפיך** דרך `kHideUnderConstruction` (אין "נשמר אך לא משפיע" גלוי) · גישה: מלא‑אם‑אפשר, אחרת מסתירים | `*_settings_screen.dart` · `under_construction.dart` | אין הגדרה מתה גלויה | agent | M |
 | B6 | ✅ (35fd96e — אומת פועל) · חיפוש: פילטרים/מיון | `catalog_screen` · search dial | פועל | agent | M |
 | B7 | 🟡 חלקי (00beac4: אריח‑מועדף + "הזמן עכשיו"→סל אמיתי תוקנו) · נותרו עלי‑dial "בבנייה" — להחליט פר‑עלה | `sections.dart`/`menu_trees.dart`/`store_screen.dart` | אין עלה‑מת גלוי | את+agent | L |
-| B8 | 🔴 פער‑הרשמה (אומת במכשיר 14/6, flag ON): "אישור והמשך" = פרופיל מקומי בלבד (`user_profile.register`, לא Firebase) · הרשמה‑אמיתית רק טלפון+SMS (דורש SHA‑1 שדולג) · אין הרשמת‑אימייל (email=sign‑in only) · login לא נגיש אחרי onboarding · **תיקון:** email sign‑up (`createUserWithEmailAndPassword`) + phone + כניסה/יציאה נגישה | `welcome_screen`·`login_sheet`·`auth_state` | נרשם → חשבון אמיתי | agent | M |
+| B8 | 🔴 פער‑הרשמה (אומת במכשיר 14/6, flag ON): "אישור והמשך" = פרופיל מקומי בלבד (`user_profile.register`, לא Firebase) · הרשמה‑אמיתית רק טלפון+SMS (דורש SHA‑1 שדולג) · אין הרשמת‑אימייל (email=sign‑in only) · login לא נגיש אחרי onboarding · **תיקון:** email sign‑up (`createUserWithEmailAndPassword`) + phone + כניסה/יציאה נגישה + **שער: בלי חשבון/הרשמה → דמו בלבד (אסור פרופיל‑מקומי כאילו‑אמיתי)** | `welcome_screen`·`login_sheet`·`auth_state` | נרשם → חשבון אמיתי / אחרת דמו | agent | M |
 
 ## Phase C — חומרת מכשיר
 | ID | משימה | היכן | DoD | מי | מ' |
