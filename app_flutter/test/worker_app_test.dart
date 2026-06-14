@@ -1,5 +1,6 @@
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
+import 'package:buildsmart/state/docs_readiness.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -45,8 +46,13 @@ void main() {
     });
     // The worker screen now reads the shared workerTasksProvider, so it must be
     // pumped inside a ProviderScope (cross-persona wiring W3).
+    // #101 — bypass the HARD docs-readiness gate (this test is about the board,
+    // not the gate) so the seeded ran session reaches the board content.
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: WorkerAppScreen())),
+      ProviderScope(
+        overrides: [docsGateOverrideProvider.overrideWith((ref) => true)],
+        child: const MaterialApp(home: WorkerAppScreen()),
+      ),
     );
     await tester.pump();
     // Let the lazy boardAuthProvider _load() resolve, then rebuild gate→board.
@@ -55,6 +61,9 @@ void main() {
     // App chrome + verbatim content (the רן/עומר toggle is gone — #66: the
     // logged worker sees only their own board).
     expect(find.text('🦺 עובד'), findsOneWidget);
+    // #113 — the home is now a JOURNAL: the week-strip + day-attendance cards
+    // lead, so the greeting/summary card sits below them in the lazy ListView.
+    await tester.scrollUntilVisible(find.textContaining('שלום, רן'), 120);
     expect(find.textContaining('שלום, רן'), findsOneWidget);
     // v2: the 'היום שלי' strip sits above the buckets, pushing the queue
     // header below the fold of the lazy ListView — scroll to each section.

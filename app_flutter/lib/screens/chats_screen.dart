@@ -58,7 +58,7 @@ List<_AudienceChip>? _audienceChipsFor(String audience) => switch (audience) {
           _AudienceChip('הכל', (_) => true),
           _AudienceChip('👷 קבלן',
               (t) => !t.isBot && t.participants.contains(BsRole.contractor)),
-          _AudienceChip('👔 מנהל',
+          _AudienceChip('🎧 תמיכה',
               (t) => !t.isBot && t.participants.contains(BsRole.manager)),
           _AudienceChip('🤖 בוט', (t) => t.isBot),
         ],

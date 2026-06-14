@@ -2,12 +2,17 @@ import 'package:buildsmart/main.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/home_shell.dart';
+import 'package:buildsmart/state/docs_readiness.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Widget _wrap() => const ProviderScope(child: BuildSmartApp());
+/// [overrides] lets a board test bypass the #101 docs-readiness HARD gate
+/// (docsGateOverrideProvider → true) so it reaches the board content; defaults
+/// to none, keeping every other test byte-identical.
+Widget _wrap({List<Override> overrides = const []}) =>
+    ProviderScope(overrides: overrides, child: const BuildSmartApp());
 
 /// Open the catalog FINDER directly. Departments now open a system-filtered
 /// category tree, so the finder tests set the providers for the plain finder.
@@ -74,7 +79,11 @@ void main() {
       'bs.board-auth.v1':
           '{"role":"worker","username":"ran","displayName":"רן","demo":false}',
     });
-    await t.pumpWidget(_wrap());
+    // #101 — bypass the HARD docs-readiness gate so the role tap reaches the
+    // board content (this test is about the board, not the gate).
+    await t.pumpWidget(_wrap(
+      overrides: [docsGateOverrideProvider.overrideWith((ref) => true)],
+    ));
     await t.pumpAndSettle();
     await _open(t, 'BS');
     await t.tap(find.text('עובד'));

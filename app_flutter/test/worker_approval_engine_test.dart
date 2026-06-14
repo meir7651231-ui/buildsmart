@@ -17,6 +17,7 @@
 
 import 'package:buildsmart/screens/manager_dashboard_screen.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
+import 'package:buildsmart/state/docs_readiness.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
@@ -147,6 +148,9 @@ void main() {
       late ProviderContainer c;
       await t.pumpWidget(
         ProviderScope(
+          // #101 — bypass the HARD docs-readiness gate (this test exercises the
+          // board's submit flow, not the gate).
+          overrides: [docsGateOverrideProvider.overrideWith((ref) => true)],
           child: MaterialApp(
             locale: const Locale('he'),
             home: Builder(
@@ -173,7 +177,16 @@ void main() {
       // carries the keyed submit button (title also appears in the today-strip,
       // so scroll directly to the unique keyed pill).
       final submit = find.byKey(const ValueKey('submit-1'));
-      await t.scrollUntilVisible(submit, 200);
+      // #113 journal home: the current-task card sits below the week-strip +
+      // day-attendance + summary in the lazy body ListView, so the keyed submit
+      // pill lands just past the fold. It is BUILT (within the cacheExtent) but
+      // off-screen, so scrollUntilVisible would no-op (the finder already
+      // matches the tree) and tap() would miss. ensureVisible scrolls the
+      // button's OWN enclosing ListView until it is truly on-screen + hittable
+      // (scrollUntilVisible targets the FIRST Scrollable — the horizontal
+      // week-strip — which cannot bring a vertical-list child into view).
+      await t.ensureVisible(submit);
+      await settle(t);
       expect(submit, findsOneWidget);
 
       await t.tap(submit);

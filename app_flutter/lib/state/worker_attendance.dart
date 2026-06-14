@@ -30,6 +30,10 @@ class AttendanceDay {
     required this.date,
     this.inTs,
     this.outTs,
+    this.inLat,
+    this.inLng,
+    this.outLat,
+    this.outLng,
   });
 
   /// Board login username (`ran` / `omer` / `demo`) — the same identity key
@@ -42,6 +46,15 @@ class AttendanceDay {
   final DateTime? inTs;
   final DateTime? outTs;
 
+  /// Optional GPS coordinates captured at clock-in / clock-out. Null when the
+  /// device had no fix (permission denied / unsupported) — we never invent a
+  /// coordinate. back-compat: older rows lack these keys and decode to null.
+  /// json keys: ilat / ilng / olat / olng.
+  final double? inLat;
+  final double? inLng;
+  final double? outLat;
+  final double? outLng;
+
   /// Completed shift length — null while the day is still open (no clock-out).
   Duration? get worked {
     final i = inTs;
@@ -51,11 +64,23 @@ class AttendanceDay {
     return d.isNegative ? Duration.zero : d;
   }
 
-  AttendanceDay copyWith({DateTime? inTs, DateTime? outTs}) => AttendanceDay(
+  AttendanceDay copyWith({
+    DateTime? inTs,
+    DateTime? outTs,
+    double? inLat,
+    double? inLng,
+    double? outLat,
+    double? outLng,
+  }) =>
+      AttendanceDay(
         username: username,
         date: date,
         inTs: inTs ?? this.inTs,
         outTs: outTs ?? this.outTs,
+        inLat: inLat ?? this.inLat,
+        inLng: inLng ?? this.inLng,
+        outLat: outLat ?? this.outLat,
+        outLng: outLng ?? this.outLng,
       );
 
   Map<String, dynamic> toJson() => {
@@ -63,6 +88,10 @@ class AttendanceDay {
         'date': date,
         'inTs': inTs?.toIso8601String(),
         'outTs': outTs?.toIso8601String(),
+        'ilat': inLat,
+        'ilng': inLng,
+        'olat': outLat,
+        'olng': outLng,
       };
 
   /// Defensive decode — a malformed entry is dropped, never crashes the load.
@@ -76,7 +105,19 @@ class AttendanceDay {
       date: date,
       inTs: DateTime.tryParse('${raw['inTs']}'),
       outTs: DateTime.tryParse('${raw['outTs']}'),
+      inLat: _tryDouble(raw['ilat']),
+      inLng: _tryDouble(raw['ilng']),
+      outLat: _tryDouble(raw['olat']),
+      outLng: _tryDouble(raw['olng']),
     );
+  }
+
+  /// Lenient numeric decode — accepts num or numeric-string, else null
+  /// (missing key / malformed value → null, never throws). back-compat.
+  static double? _tryDouble(Object? v) {
+    if (v is num) return v.toDouble();
+    if (v is String) return double.tryParse(v);
+    return null;
   }
 }
 
@@ -101,6 +142,16 @@ Duration attendanceTotal(List<AttendanceDay> days) => days.fold(
       Duration.zero,
       (sum, d) => sum + (d.worked ?? Duration.zero),
     );
+
+/// Pure helper — the `"lat,lng"` query string for [d]'s clock-in location,
+/// suitable as a maps/navigation target, or null when no clock-in coordinate
+/// was captured. Top-level so the screen, home and tests share one formatter.
+String? mapsQueryForDay(AttendanceDay d) {
+  final lat = d.inLat;
+  final lng = d.inLng;
+  if (lat == null || lng == null) return null;
+  return '$lat,$lng';
+}
 
 class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
   WorkerAttendanceNotifier({this.storageKey = kWorkerAttendanceKey})
@@ -163,8 +214,10 @@ class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
   }
 
   /// Clock IN for today. `false` (no-op) when today already has a clock-in —
-  /// one shift per calendar day, honest and simple.
-  bool clockIn(String username) {
+  /// one shift per calendar day, honest and simple. [lat]/[lng] are the GPS
+  /// fix at clock-in; when null no location is stored (honest — no invented
+  /// coordinate). Existing callers that pass no location keep working.
+  bool clockIn(String username, {double? lat, double? lng}) {
     final today = todayFor(username);
     if (today != null && today.inTs != null) return false;
     _userTouched = true;
@@ -172,14 +225,23 @@ class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
     state = [
       for (final d in state)
         if (!(d.username == username && d.date == key)) d,
-      AttendanceDay(username: username, date: key, inTs: DateTime.now()),
+      AttendanceDay(
+        username: username,
+        date: key,
+        inTs: DateTime.now(),
+        inLat: lat,
+        inLng: lng,
+      ),
     ];
     _persist();
     return true;
   }
 
   /// Clock OUT for today. `false` (no-op) when there is no open clock-in.
-  bool clockOut(String username) {
+  /// [lat]/[lng] are the GPS fix at clock-out; when null no location is stored
+  /// (honest — no invented coordinate). Existing callers that pass no location
+  /// keep working.
+  bool clockOut(String username, {double? lat, double? lng}) {
     final today = todayFor(username);
     if (today == null || today.inTs == null || today.outTs != null) {
       return false;
@@ -188,7 +250,7 @@ class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
     state = [
       for (final d in state)
         if (d.username == username && d.date == today.date)
-          d.copyWith(outTs: DateTime.now())
+          d.copyWith(outTs: DateTime.now(), outLat: lat, outLng: lng)
         else
           d,
     ];

@@ -75,12 +75,16 @@ final List<ChatThread> kChatThreads = [
     ],
   ),
 
-  // 👷 ↔ 👔 — contractor & system manager (legacy t4 tone). 🏪/🛵 must NOT see it.
+  // 👷 ↔ 🎧 — contractor & APP SUPPORT (legacy t4 tone). 🏪/🛵 must NOT see it.
+  // #110 — the BsRole.manager thread is platform support/help ("עזרה
+  // באפליקציה"), NOT a boss; retagged to "תמיכה" / 🎧. Only the display name +
+  // avatar change — id/participants/visibility stay (the isolation tests key
+  // off the id 'th-contractor-manager', not the name).
   ChatThread(
     id: 'th-contractor-manager',
     participants: const [BsRole.contractor, BsRole.manager],
-    name: 'מנהל המערכת',
-    avatar: '👔',
+    name: 'תמיכה',
+    avatar: '🎧',
     messages: [
       _seed('th-contractor-manager', BsRole.manager,
           'עדכון סטטוס פרויקט A — בדיקה נדרשת', minute: -200),
@@ -198,13 +202,16 @@ final List<ChatThread> kChatThreads = [
     ],
   ),
 
-  // 🏪 ↔ 👔 — הספק מול מנהל המערכת (אישור הזמנות נכנסות).
+  // 🏪 ↔ 🎧 — הספק מול תמיכת-האפליקציה (אישור הזמנות נכנסות).
+  // #110 — thread עם BsRole.manager = תמיכה/עזרה-באפליקציה, לא בוס; שם-תצוגה
+  // + אווטאר עברו ל"תמיכה" / 🎧. רק התווית והאייקון השתנו — id/participants/
+  // audience/visibility נשמרים (בדיקת-הבידוד נעולה על id 'th-store-manager').
   ChatThread(
     id: 'th-store-manager',
     participants: const [BsRole.store, BsRole.manager],
     audience: 'store',
-    name: 'מנהל',
-    avatar: '👔',
+    name: 'תמיכה',
+    avatar: '🎧',
     messages: [
       _seed('th-store-manager', BsRole.manager,
           'בוקר טוב, BS-1042 (יוסי כהן) התקבלה — נא לאשר ולהתחיל הכנה היום.',

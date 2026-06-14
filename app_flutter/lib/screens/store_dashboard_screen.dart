@@ -269,13 +269,12 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
   Future<void> _logout() async {
     final ok = await confirmDestructive(
       context,
-      title: 'התנתקות מהחשבון?',
-      message: 'תנותק מלוח חנות הספק ותחזור למסך הרישום.',
+      title: 'יציאה מהחשבון?',
+      message: 'תנותק מלוח חנות הספק ותחזור למסך ההרשמה.',
       confirmLabel: 'התנתק',
     );
     if (!ok || !mounted) return;
     ref.read(boardAuthProvider.notifier).logout();
-    showToast(context, 'התנתקת מלוח חנות הספק');
   }
 
   Widget _body(String storeName) {

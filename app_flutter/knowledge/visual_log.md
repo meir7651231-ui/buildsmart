@@ -904,3 +904,9 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **שמירת-יושר:** payload פגום / fetch שנכשל → `errorBuilder` מרנדר את ה-placeholder/אווטאר-ברירת-המחדל הקיים (לעולם לא crash). ref לא-ניתן-לרינדור (legacy 'demo' / null) → אותו placeholder ישר כמו היום.
 
 **אימות:** `cloud_photos_a14_upload_test` 12/12 (כולל display dual-render) · analyze 0-errors (כל הנגועים) · full-suite **+2272** (היה +2260) · build web ✅. mutation-verified (ראה `knowledge/mutation_log.md` §A14).
+## 2026-06-14 — גל-D פוליש עובד/שליח/חנות (#98)
+- עובד · הגדרות: שורת 'פרופיל עובד' ירדה (אין יותר לולאת-ניווט) — הפרופיל נגיש מטאב-4.
+- עובד · נוכחות: אחרי שליחת-דוח הכפתור הופך ל'הדוח נשלח ✓' ולא נשלח שוב.
+- עובד: גווני-יציאה/הסר-תמונה כהים יותר (dangerDark, AA) · כפתור-השעון וכפתורי-המילוי עם טקסט bsOnAccent (ניגודיות).
+- רובם בלתי-נראים-לעין (נגישות לקוראי-מסך, cacheWidth לזיכרון, מגני-double-tap) — אך אמיתיים ומאומתים.
+- אימות: GATE PASS עם מאניפסטים · mutation red→green.

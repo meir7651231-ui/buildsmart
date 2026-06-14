@@ -45,7 +45,7 @@ void submitWorkerTaskForReview(WidgetRef ref, int id, {String? note}) {
 /// the legacy `'demo'` marker keeps the old honest placeholder; null renders
 /// nothing. Shared by the worker detail sheet AND the manager's אישורי-עובדים
 /// row (`manager_dashboard_screen.dart`) so both sides see the same proof.
-Widget taskPhotoWidget(String? photo, {double height = 140}) {
+Widget taskPhotoWidget(String? photo, {double height = 140, BuildContext? context}) {
   if (photo == null) return const SizedBox.shrink();
   // Dual-render (A14): a base64 data-URL decodes locally; an uploaded
   // `https://…` URL (kCloudPhotos ON) streams from R2 — both via the single
@@ -139,7 +139,7 @@ Future<bool> _confirmProofPhoto(BuildContext context, String dataUrl) async {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              taskPhotoWidget(dataUrl, height: 180),
+              taskPhotoWidget(dataUrl, height: 180, context: dialogCtx),
               const SizedBox(height: BsTokens.space3),
               const Text(
                 'לשלוח את המשימה לאישור המנהל עם התמונה הזו?',
@@ -469,7 +469,7 @@ class _WorkerTaskDetailSheetState
           const _SecH('תמונת ביצוע'),
           // #85ב — real data-URL renders the actual photo; the legacy 'demo'
           // marker keeps the honest placeholder.
-          taskPhotoWidget(t.photo),
+          taskPhotoWidget(t.photo, context: context),
         ],
 
         // ── worker note (read-only when not reporting) ──

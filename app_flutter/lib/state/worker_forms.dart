@@ -17,6 +17,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// SharedPreferences key (versioned like the other `bs.*.v1` keys).
 const String kWorkerFormsKey = 'bs.worker-forms.v1';
 
+/// Standard declaration text shown above the signature on every worker form
+/// (101 / חופשה / מחלה) — the worker confirms the details are true before
+/// signing/sending. SERVER-SWAP: the official wording lands with the backend.
+const String kDeclarationText =
+    'אני מצהיר/ה בזאת שכל הפרטים שמסרתי נכונים, מלאים ומדויקים בהתאם לחוק.';
+
 /// One saved טופס-101 — keyed by (username, year).
 class Form101 {
   const Form101({
@@ -29,6 +35,11 @@ class Form101 {
     required this.maritalStatus,
     required this.savedTs,
     this.sentTs,
+    this.signature = '',
+    this.declared = false,
+    this.employerName = '',
+    this.employerBusinessId = '',
+    this.employerAddress = '',
   });
 
   final String username;
@@ -52,16 +63,52 @@ class Form101 {
   /// When the worker sent the form to the contractor — null until sent.
   final DateTime? sentTs;
 
-  Form101 copyWith({DateTime? sentTs}) => Form101(
-        username: username,
-        year: year,
-        fullName: fullName,
-        idNumber: idNumber,
-        phone: phone,
-        specialty: specialty,
-        maritalStatus: maritalStatus,
-        savedTs: savedTs,
+  /// PNG data-URL of the worker's handwritten signature (`signature_pad.dart`)
+  /// — empty until signed. Back-compat: old persisted forms have no signature.
+  final String signature;
+
+  /// Whether the worker ticked the [kDeclarationText] declaration checkbox.
+  /// Back-compat: old persisted forms decode as `false`.
+  final bool declared;
+
+  /// EMPLOYER (מעסיק) autofill — pulled from the contractor's profile in the
+  /// screen (NO fabrication; empty when the profile has no data). Persisted on
+  /// the form so a sent/printed copy keeps the snapshot. Back-compat: ''.
+  final String employerName;
+  final String employerBusinessId;
+  final String employerAddress;
+
+  Form101 copyWith({
+    String? username,
+    int? year,
+    String? fullName,
+    String? idNumber,
+    String? phone,
+    String? specialty,
+    String? maritalStatus,
+    DateTime? savedTs,
+    DateTime? sentTs,
+    String? signature,
+    bool? declared,
+    String? employerName,
+    String? employerBusinessId,
+    String? employerAddress,
+  }) =>
+      Form101(
+        username: username ?? this.username,
+        year: year ?? this.year,
+        fullName: fullName ?? this.fullName,
+        idNumber: idNumber ?? this.idNumber,
+        phone: phone ?? this.phone,
+        specialty: specialty ?? this.specialty,
+        maritalStatus: maritalStatus ?? this.maritalStatus,
+        savedTs: savedTs ?? this.savedTs,
         sentTs: sentTs ?? this.sentTs,
+        signature: signature ?? this.signature,
+        declared: declared ?? this.declared,
+        employerName: employerName ?? this.employerName,
+        employerBusinessId: employerBusinessId ?? this.employerBusinessId,
+        employerAddress: employerAddress ?? this.employerAddress,
       );
 
   Map<String, dynamic> toJson() => {
@@ -74,6 +121,11 @@ class Form101 {
         'maritalStatus': maritalStatus,
         'savedTs': savedTs.toIso8601String(),
         'sentTs': sentTs?.toIso8601String(),
+        'signature': signature,
+        'declared': declared,
+        'employerName': employerName,
+        'employerBusinessId': employerBusinessId,
+        'employerAddress': employerAddress,
       };
 
   static Form101? tryFromJson(Object? raw) {
@@ -93,6 +145,11 @@ class Form101 {
       maritalStatus: s(raw['maritalStatus']),
       savedTs: saved,
       sentTs: DateTime.tryParse('${raw['sentTs']}'),
+      signature: s(raw['signature']),
+      declared: raw['declared'] == true,
+      employerName: s(raw['employerName']),
+      employerBusinessId: s(raw['employerBusinessId']),
+      employerAddress: s(raw['employerAddress']),
     );
   }
 }
@@ -104,6 +161,8 @@ class SickNote {
     required this.username,
     required this.ts,
     required this.photo,
+    this.signature = '',
+    this.declared = false,
   });
 
   final String id;
@@ -113,11 +172,21 @@ class SickNote {
   /// The photo reference returned by the camera seam (`pickTaskPhoto`).
   final String photo;
 
+  /// PNG data-URL of the worker's handwritten signature — empty until signed.
+  /// Back-compat: old persisted notes have no signature.
+  final String signature;
+
+  /// Whether the worker ticked the [kDeclarationText] declaration checkbox.
+  /// Back-compat: old persisted notes decode as `false`.
+  final bool declared;
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'username': username,
         'ts': ts.toIso8601String(),
         'photo': photo,
+        'signature': signature,
+        'declared': declared,
       };
 
   static SickNote? tryFromJson(Object? raw) {
@@ -129,7 +198,14 @@ class SickNote {
     if (id is! String || username is! String || photo is! String || ts == null) {
       return null;
     }
-    return SickNote(id: id, username: username, ts: ts, photo: photo);
+    return SickNote(
+      id: id,
+      username: username,
+      ts: ts,
+      photo: photo,
+      signature: raw['signature'] is String ? raw['signature'] as String : '',
+      declared: raw['declared'] == true,
+    );
   }
 }
 
@@ -260,6 +336,8 @@ class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
   Future<SickNote?> addSickNote({
     required String username,
     required String photo,
+    String signature = '',
+    bool declared = false,
   }) async {
     _userTouched = true;
     final note = SickNote(
@@ -267,6 +345,8 @@ class WorkerFormsNotifier extends StateNotifier<WorkerFormsState> {
       username: username,
       ts: DateTime.now(),
       photo: photo,
+      signature: signature,
+      declared: declared,
     );
     final before = state;
     state = state.copyWith(sickNotes: [...state.sickNotes, note]);

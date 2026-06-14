@@ -34,6 +34,8 @@ class VacationRequest {
     this.role = 'worker',
     this.status = kVacationPending,
     this.decidedTs,
+    this.signature = '',
+    this.declared = false,
   });
 
   final String id;
@@ -67,6 +69,14 @@ class VacationRequest {
   /// When the manager decided — null while [kVacationPending].
   final DateTime? decidedTs;
 
+  /// PNG data-URL of the requester's handwritten signature — empty until
+  /// signed. Back-compat: old persisted requests have no signature.
+  final String signature;
+
+  /// Whether the requester ticked the [kDeclarationText] declaration checkbox
+  /// (see `worker_forms.dart`). Back-compat: old persisted records → `false`.
+  final bool declared;
+
   /// `12.6.2026–14.6.2026` — the human range both boards render.
   String get range => from.isAtSameMomentAs(to) || _sameDay(from, to)
       ? _d(from)
@@ -77,7 +87,12 @@ class VacationRequest {
 
   static String _d(DateTime d) => '${d.day}.${d.month}.${d.year}';
 
-  VacationRequest copyWith({String? status, DateTime? decidedTs}) =>
+  VacationRequest copyWith({
+    String? status,
+    DateTime? decidedTs,
+    String? signature,
+    bool? declared,
+  }) =>
       VacationRequest(
         id: id,
         username: username,
@@ -89,6 +104,8 @@ class VacationRequest {
         role: role,
         status: status ?? this.status,
         decidedTs: decidedTs ?? this.decidedTs,
+        signature: signature ?? this.signature,
+        declared: declared ?? this.declared,
       );
 
   Map<String, dynamic> toJson() => {
@@ -102,6 +119,8 @@ class VacationRequest {
         'role': role,
         'status': status,
         'decidedTs': decidedTs?.toIso8601String(),
+        'signature': signature,
+        'declared': declared,
       };
 
   /// Defensive decode — a malformed entry is dropped, never crashes the load.
@@ -132,6 +151,8 @@ class VacationRequest {
       role: raw['role'] is String ? raw['role'] as String : 'worker',
       status: raw['status'] is String ? raw['status'] as String : kVacationPending,
       decidedTs: DateTime.tryParse('${raw['decidedTs']}'),
+      signature: raw['signature'] is String ? raw['signature'] as String : '',
+      declared: raw['declared'] == true,
     );
   }
 }
@@ -190,6 +211,8 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
     required DateTime to,
     required String reason,
     String role = 'worker',
+    String signature = '',
+    bool declared = false,
   }) {
     _userTouched = true;
     _seq++;
@@ -202,6 +225,8 @@ class VacationRequestsNotifier extends StateNotifier<List<VacationRequest>> {
       reason: reason.trim(),
       createdTs: DateTime.now(),
       role: role,
+      signature: signature,
+      declared: declared,
     );
     state = [...state, r];
     _persist();

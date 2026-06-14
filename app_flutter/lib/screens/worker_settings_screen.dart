@@ -1,7 +1,6 @@
 import 'package:buildsmart/screens/legal_screen.dart';
 import 'package:buildsmart/screens/notif_settings_screen.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
-import 'package:buildsmart/screens/worker_profile_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -51,7 +50,12 @@ class WorkerSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: const [
-          _ProfileRow(),
+          // F-40: the 'פרופיל עובד' row was removed — it pushed the standalone
+          // WorkerProfileScreen, which itself links back to settings, closing an
+          // infinite settings⇄profile navigation loop. The profile stays
+          // reachable from its canonical entry: tab-4 'אזור אישי'
+          // (worker_app_screen.dart → WorkerProfileScreen(embedded: true)).
+          // Settings becomes a leaf, matching courier/store.
           _NotifRow(),
           _RegionSection(),
           _AccessibilitySection(),
@@ -63,39 +67,7 @@ class WorkerSettingsScreen extends ConsumerWidget {
   }
 }
 
-// ─── 1. worker profile entry ─────────────────────────────────────────────────
-
-class _ProfileRow extends StatelessWidget {
-  const _ProfileRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      color: const Color(0xFFFFFFFF),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: const Text('🦺', style: TextStyle(fontSize: 22)),
-        title: const Text(
-          'פרופיל עובד',
-          style: TextStyle(
-            color: BsTokens.inkLight,
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        trailing: const Icon(Icons.chevron_left, color: Colors.black54),
-        onTap: () => Navigator.of(context).push(WorkerProfileScreen.route()),
-      ),
-    );
-  }
-}
-
-// ─── 2. notifications (→ the existing full NotifSettingsScreen) ──────────────
+// ─── 1. notifications (→ the existing full NotifSettingsScreen) ──────────────
 
 class _NotifRow extends StatelessWidget {
   const _NotifRow();
@@ -127,7 +99,7 @@ class _NotifRow extends StatelessWidget {
   }
 }
 
-// ─── 3. region & language (same providers as the contractor section) ─────────
+// ─── 2. region & language (same providers as the contractor section) ─────────
 
 class _RegionSection extends ConsumerWidget {
   const _RegionSection();
@@ -218,7 +190,7 @@ class _LangOption extends StatelessWidget {
   }
 }
 
-// ─── 4. interface & accessibility (same providers as the contractor section) ─
+// ─── 3. interface & accessibility (same providers as the contractor section) ─
 
 class _AccessibilitySection extends ConsumerWidget {
   const _AccessibilitySection();
@@ -290,7 +262,7 @@ class _AccessibilitySection extends ConsumerWidget {
   }
 }
 
-// ─── 5. info & legal (→ the existing LegalScreen) ────────────────────────────
+// ─── 4. info & legal (→ the existing LegalScreen) ────────────────────────────
 
 class _InfoSection extends StatelessWidget {
   const _InfoSection();
@@ -326,11 +298,19 @@ class _InfoSection extends StatelessWidget {
   }
 }
 
-// ─── shared section card ─────────────────────────────────────────────────────
+// ─── shared section card (#102 accordion) ────────────────────────────────────
 
-/// A flat (non-expandable) settings section card — the worker board has few
-/// rows per area, so everything stays visible (no ExpansionTile needed).
-class _SectionCard extends StatelessWidget {
+/// 🪗 #102-accordion-section-card — a collapsible settings section card.
+/// Each area (region / accessibility / info) renders as a card that is CLOSED
+/// by default: only the emoji + title header with a chevron is visible, and the
+/// section's [children] are revealed when the header is tapped. Open/closed is
+/// purely local UI state (a [StatefulWidget]) — it is deliberately NOT persisted
+/// (the spec: "מצב פתוח/סגור = state מקומי, לא חייב persist").
+///
+/// RTL: the chevron sits on the leading (right) edge and rotates a quarter-turn
+/// (chevron_left → points-down) when the section opens, so the open/closed
+/// affordance is visible without relying on left/right semantics.
+class _SectionCard extends StatefulWidget {
   const _SectionCard({
     required this.emoji,
     required this.title,
@@ -342,6 +322,16 @@ class _SectionCard extends StatelessWidget {
   final List<Widget> children;
 
   @override
+  State<_SectionCard> createState() => _SectionCardState();
+}
+
+class _SectionCardState extends State<_SectionCard> {
+  // Closed by default — the spec wants every section collapsed on entry.
+  bool _expanded = false;
+
+  void _toggle() => setState(() => _expanded = !_expanded);
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -350,23 +340,47 @@ class _SectionCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Accordion header — tapping toggles the section. ListTile keeps the
+          // ≥48dp tap target; the rotating chevron is the open/closed cue.
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: Text(emoji, style: const TextStyle(fontSize: 22)),
+            leading: Text(widget.emoji, style: const TextStyle(fontSize: 22)),
             title: Text(
-              title,
+              widget.title,
               style: const TextStyle(
                 color: BsTokens.inkLight,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
             ),
+            trailing: AnimatedRotation(
+              turns: _expanded ? 0.25 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              child: const Icon(Icons.chevron_left, color: Colors.black54),
+            ),
+            onTap: _toggle,
           ),
-          ...children,
-          const SizedBox(height: 8),
+          // Body — revealed only when expanded; kept out of the tree entirely
+          // while collapsed so the section starts as a tidy header strip.
+          AnimatedCrossFade(
+            firstChild: const SizedBox(width: double.infinity, height: 0),
+            secondChild: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ...widget.children,
+                const SizedBox(height: 8),
+              ],
+            ),
+            crossFadeState: _expanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 200),
+            sizeCurve: Curves.easeInOut,
+          ),
         ],
       ),
     );

@@ -9,6 +9,7 @@ import 'package:buildsmart/screens/courier_portal_tab.dart';
 import 'package:buildsmart/screens/courier_profile_screen.dart';
 import 'package:buildsmart/screens/courier_reports_tab.dart';
 import 'package:buildsmart/screens/courier_settings_screen.dart';
+import 'package:buildsmart/screens/docs_readiness_gate.dart';
 import 'package:buildsmart/screens/persona_pod_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_notifs_sheet.dart'
@@ -16,6 +17,7 @@ import 'package:buildsmart/screens/worker_notifs_sheet.dart'
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/courier_clock.dart';
 import 'package:buildsmart/state/courier_profile_store.dart';
+import 'package:buildsmart/state/docs_readiness.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/rewards_state.dart';
@@ -173,6 +175,20 @@ class _CourierDashboardScreenState
     final session = ref.watch(boardAuthProvider);
     if (session == null || session.role != BoardRole.courier) {
       return const WelcomeScreen(boardRole: BoardRole.courier);
+    }
+
+    // 🔒 #101 — שער-מוכנות מסמכים (HARD gate): between the auth gate and the
+    // vehicle gate, block the board until the logged courier's driver
+    // certificates are complete + in-date (each kCourierCertPresets present, no
+    // expired cert; see [courierDocsReadiness]). LIVE — adding a valid cert via
+    // the gate's deep-link re-evaluates and opens the board.
+    // [docsGateOverrideProvider] is the TEST SEAM (non-null forces the
+    // decision; board tests set true to bypass).
+    final ov = ref.watch(docsGateOverrideProvider);
+    final r = ref.watch(courierDocsReadyProvider(session.username));
+    final docsReady = ov ?? r.ready;
+    if (!docsReady) {
+      return DocsReadinessGate(role: BoardRole.courier, readiness: r);
     }
 
     // COURIER v2 ג — live hand-off watcher: a REAL ready→pickup advance by the
