@@ -57,9 +57,12 @@
 // Comment density/voice mirrors `orders_firebase.dart` — the S2.3 template.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/repositories/backend.dart' show kServerCallables;
 import 'package:buildsmart/data/repositories/customers_repository.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
+import 'package:buildsmart/data/repositories/order_functions.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
+import 'package:flutter/foundation.dart';
 
 /// The Firestore document-id field-map mapper lives inline here (not in the
 /// model) so the legacy [ManagerCustomer] aggregate stays untouched — drop-in is
@@ -70,8 +73,24 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
   /// instance is resolved LAZILY by [FirestoreCollectionSource] (never here), so
   /// construction does not require Firebase to be initialised. Pass [source] in
   /// tests to drive the cache with a fake.
-  FirebaseCustomersRepository({RemoteCollectionSource? source})
-      : super(source ?? FirestoreCollectionSource('customers'));
+  ///
+  /// A13 — [serverCallables] + [functions] mirror the local impl: the credit
+  /// callable is routed only when the flag is ON (default the compile-time
+  /// [kServerCallables]) AND a gateway is bound. OFF / no gateway → the sync
+  /// client derivation (byte-identical).
+  FirebaseCustomersRepository({
+    RemoteCollectionSource? source,
+    bool? serverCallables,
+    OrderFunctionsGateway? functions,
+  })  : _serverCallables = serverCallables,
+        _functions = functions,
+        super(source ?? FirestoreCollectionSource('customers'));
+
+  /// A13 — null means "use the compile-time default" ([kServerCallables]).
+  final bool? _serverCallables;
+
+  /// A13 — the injectable callable seam (null off the live backend).
+  final OrderFunctionsGateway? _functions;
 
   // ── base contract: seed · mapping · ordering · fresh-backend hook ───────────
 
@@ -164,4 +183,37 @@ class FirebaseCustomersRepository extends FirestoreCachedRepo<ManagerCustomer>
   /// every path, so the local and remote impls return byte-for-byte the same value.
   @override
   int creditLimit(String name) => contractorCredit(name);
+
+  /// A13 — the server-canonical credit aggregate. Same gate + graceful fallback
+  /// as `LocalCustomersRepository.computeCredit`: OFF / no gateway → the local
+  /// derivation over THIS repo's cached aggregate (byte-identical to the sync
+  /// path); ON + a bound gateway → the `computeCredit` callable, falling back to
+  /// the local derivation on a [OrderFunctionsException] (never a faked success).
+  @override
+  Future<CreditResult> computeCredit(String name) async {
+    final fns = _functions;
+    if ((_serverCallables ?? kServerCallables) && fns != null) {
+      try {
+        return await fns.computeCredit(name);
+      } on OrderFunctionsException catch (e) {
+        debugPrint('Customers(fb): computeCredit failed (local fallback): $e');
+      }
+    }
+    final creditLimit = contractorCredit(name);
+    final c = byName(name);
+    final used = c?.totalSpend ?? 0;
+    final orderCount = c?.orderCount ?? 0;
+    final balance = (creditLimit - used).clamp(0, creditLimit);
+    final pct = creditLimit == 0
+        ? 0
+        : ((used / creditLimit) * 100).round().clamp(0, 100);
+    return CreditResult(
+      name: name,
+      creditLimit: creditLimit,
+      used: used,
+      balance: balance,
+      pct: pct,
+      orderCount: orderCount,
+    );
+  }
 }

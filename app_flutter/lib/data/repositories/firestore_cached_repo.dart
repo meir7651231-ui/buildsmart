@@ -256,6 +256,26 @@ abstract class FirestoreCachedRepo<T> extends ChangeNotifier {
     }
   }
 
+  /// A13 (launch server-connect) — optimistically replace [value] in the cache
+  /// WITHOUT any remote write. This is the LOCAL-ONLY twin of [upsert]: it
+  /// updates the in-memory cache + [notifyListeners] (so the UI sees the change
+  /// synchronously) but fires NO `set`. It exists for the path where the
+  /// PERSISTENT write is performed elsewhere (the `advanceOrderStage` callable
+  /// is the canonical stage write under the A13 flag), so a direct client `set`
+  /// would be redundant — and, for the `orders` stage field specifically, would
+  /// be REVERTED by the `revertIllegalOrderStageWrite` trigger. A later
+  /// `snapshots()` event reconciles this optimistic value with the server echo
+  /// (LWW), exactly as it does after an [upsert]'s background write.
+  void upsertLocalOnly(T value) {
+    final id = idOf(value);
+    final idx = _cache.indexWhere((e) => idOf(e) == id);
+    if (idx < 0) return; // unknown id — nothing to mirror locally
+    final next = List<T>.of(_cache);
+    next[idx] = value;
+    _cache = _sorted(next);
+    notifyListeners();
+  }
+
   /// Optimistically remove the doc with [id] from the cache and delete it
   /// remotely in the background (guarded). Provided for S3 repos that need it;
   /// the orders pilot does not delete.

@@ -33,3 +33,34 @@ bool get useFirebaseBackend =>
 ///   • manager/admin → no scope (the whole collection — the god view).
 /// Tests never initialise Firebase, so the local path ignores this flag.
 const bool kUidScopedQueries = bool.fromEnvironment('UID_SCOPED_QUERIES');
+
+/// A13 (launch server-connect) — master switch for ROUTING the canonical
+/// order-stage advance + contractor-credit through their Cloud Functions
+/// CALLABLES (`advanceOrderStage` / `computeCredit`, region [me-west1]) instead
+/// of direct optimistic Firestore writes / the client-side credit hash.
+///
+/// Default OFF: with it OFF the build is BYTE-IDENTICAL to today —
+///   • `advance` keeps the direct optimistic `upsert` (cache + background
+///     `set`) verbatim, and
+///   • `creditLimit(name)` stays the deterministic `contractorCredit(name)`
+///     client hash —
+/// so flipping this flag is the ONLY thing that changes behaviour (the same
+/// zero-regression invariant as [kUidScopedQueries] / [kUseFirebaseBackendFlag]).
+///
+/// Flip on at build time ONCE the owner has deployed the functions
+/// (`functions/src/index.ts` re-exports both) + the S5 rules are live:
+///   flutter build web --dart-define=SERVER_CALLABLES=true
+///
+/// When ON (and a callable gateway is bound — only under the live Firebase
+/// backend) the server performs the canonical write/computation; the client
+/// keeps an OPTIMISTIC LOCAL update for UX but does NOT also fire a direct
+/// PERSISTENT write — the `orders` direct-write would otherwise be reverted by
+/// the `revertIllegalOrderStageWrite` trigger, since the callable IS the
+/// sanctioned stage-advance path. A `FirebaseFunctionsException` (function
+/// not-deployed / permission-denied) is surfaced honestly, never faked.
+///
+/// Tests never initialise Firebase + bind no gateway, so the local path is
+/// unaffected; an injected fake gateway + the per-notifier `serverCallables`
+/// field exercise the ON branch in the standard define-less suite (the
+/// `kUidScopedQueries` / `uidScoped` testability pattern).
+const bool kServerCallables = bool.fromEnvironment('SERVER_CALLABLES');

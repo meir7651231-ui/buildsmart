@@ -17,6 +17,8 @@
 //   • creditLimit()— the contractor's deterministic credit ceiling.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import 'package:buildsmart/data/repositories/order_functions.dart'
+    show CreditResult;
 import 'package:buildsmart/logic/manager_dashboard.dart' show ManagerCustomer;
 
 /// Server-ready contract over the manager's customer aggregates. The current
@@ -32,6 +34,16 @@ abstract class CustomersRepository {
   ManagerCustomer? byName(String name);
 
   /// The contractor's credit ceiling in ₪ — a deterministic per-name value in
-  /// the 30,000–120,000 band. Mirrors `contractorCredit(name)`.
+  /// the 30,000–120,000 band. Mirrors `contractorCredit(name)`. SYNC + always
+  /// the client hash — the OFF-path behaviour, byte-identical to today.
   int creditLimit(String name);
+
+  /// A13 (launch server-connect) — the server-canonical credit AGGREGATE for
+  /// [name] (creditLimit · used · balance · pct · orderCount). Gated by
+  /// `kServerCallables`: OFF (default) it returns the SAME numbers the manager
+  /// dashboard derives client-side today (no network — byte-identical); ON with
+  /// a bound `computeCredit` callable gateway it returns the server-canonical
+  /// figures, falling back to the local derivation on a callable failure (never
+  /// a faked success). The sync [creditLimit] is unaffected.
+  Future<CreditResult> computeCredit(String name);
 }

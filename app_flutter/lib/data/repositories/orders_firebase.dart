@@ -246,6 +246,22 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
     upsert(o.copyWith(stage: stage));
   }
 
+  /// A13 (launch server-connect) — apply an OPTIMISTIC LOCAL stage update for
+  /// [orderId] to [stage] WITHOUT a direct Firestore write. Used only on the
+  /// `kServerCallables`-ON path, AFTER the `advanceOrderStage` callable has done
+  /// the canonical write server-side: the client mirrors the new stage into the
+  /// cache for instant UX, but fires NO `set` — a direct stage write would be
+  /// reverted by the `revertIllegalOrderStageWrite` trigger (the callable is the
+  /// sanctioned path). A later `snapshots()` event reconciles. Ignores an
+  /// unknown id / a no-op (same stage). Distinct from [setStage], which is the
+  /// OFF-path direct optimistic write (cache + background `set`).
+  void applyServerStage(String orderId, String stage) {
+    final o = byId(orderId);
+    if (o == null) return;
+    if (o.stage == stage) return;
+    upsertLocalOnly(o.copyWith(stage: stage));
+  }
+
   /// A4 (claim-on-first-advance) — CLAIM [orderId] for the STORE [uid] over the
   /// cache: stamp `storeUid = uid` ONLY when currently empty (NO-STEAL — an
   /// order already claimed by another store is left untouched; empty [uid]

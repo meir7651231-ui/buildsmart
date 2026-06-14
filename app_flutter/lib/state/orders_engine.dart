@@ -24,7 +24,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:buildsmart/data/repositories/backend.dart' show kServerCallables, useFirebaseBackend;
 import 'package:buildsmart/data/repositories/customers_local.dart';
+import 'package:buildsmart/data/repositories/order_functions.dart';
 import 'package:buildsmart/data/repositories/orders_firebase.dart';
 import 'package:buildsmart/data/repositories/orders_local.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart';
@@ -266,8 +268,22 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   /// restores). It defaults to [kOrdersEngineSeed] so direct construction stays
   /// byte-identical; the `ordersEngineProvider` injects it THROUGH the orders
   /// repository (T6.3) — same four seed orders, just sourced via the seam.
-  OrdersEngineNotifier({this.persist = true, List<Order>? seed})
-      : _seed = seed ?? kOrdersEngineSeed,
+  ///
+  /// A13 — [serverCallables] gates routing the stage advance through the
+  /// `advanceOrderStage` callable; it DEFAULTS to the compile-time
+  /// [kServerCallables] (OFF), so production gates EXACTLY on that flag and the
+  /// provider passes nothing. A test injects `serverCallables: true` + a fake
+  /// [functions] gateway to exercise the ON branch in the define-less suite (the
+  /// `uidScoped` testability pattern). [functions] is the callable seam (null on
+  /// the local path / when no gateway is bound → the flag is inert).
+  OrdersEngineNotifier({
+    this.persist = true,
+    List<Order>? seed,
+    bool? serverCallables,
+    OrderFunctionsGateway? functions,
+  })  : _seed = seed ?? kOrdersEngineSeed,
+        serverCallables = serverCallables ?? kServerCallables,
+        _functions = functions,
         super(seed ?? kOrdersEngineSeed) {
     if (persist) _load();
   }
@@ -275,6 +291,17 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   /// When false (tests), skip touching SharedPreferences entirely so the
   /// in-memory seed/flow behavior can be asserted in isolation.
   final bool persist;
+
+  /// A13 — whether the stage advance routes through the `advanceOrderStage`
+  /// callable (the server-canonical write) instead of the direct optimistic
+  /// Firestore write. Defaults to the compile-time [kServerCallables] (OFF);
+  /// with it OFF every advance is byte-identical to today.
+  final bool serverCallables;
+
+  /// A13 — the injectable callable seam. Non-null only when a gateway is bound
+  /// (the live Firebase backend); null on the local path, so the flag is inert
+  /// there (the whole test suite + the demo build, unless a test injects a fake).
+  final OrderFunctionsGateway? _functions;
 
   /// The seed list this engine resets to — the same list it was constructed
   /// with (the four seed orders). Held so `resetToSeed` is source-consistent
@@ -451,6 +478,20 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
     // guards); the optimistic cache mirrors back synchronously.
     final r = _remote;
     if (r != null) {
+      // A13 — server-canonical path: when the flag is ON and a callable gateway
+      // is bound, the PERSISTENT stage write goes through `advanceOrderStage`
+      // (the sanctioned path the `revertIllegalOrderStageWrite` trigger
+      // enforces). We do NOT call `r.advance` here — that would fire a direct
+      // `set` the trigger reverts. The optimistic LOCAL update is applied from
+      // the SERVER'S returned `{to}` once the callable resolves (fire-and-forget,
+      // non-blocking — the UI's own re-render lands when the cache notifies; a
+      // `snapshots()` event reconciles after). A failure is graceful (logged,
+      // no fake success — the order simply does not advance).
+      final fns = _functions;
+      if (serverCallables && fns != null) {
+        unawaited(_advanceViaCallable(r, fns, orderId));
+        return;
+      }
       r.advance(orderId);
       return;
     }
@@ -459,6 +500,28 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
     final cur = kManagerOrderFlow.indexOf(state[idx].stage);
     if (cur < 0 || cur >= kManagerOrderFlow.length - 1) return;
     setStage(orderId, kManagerOrderFlow[cur + 1]);
+  }
+
+  /// A13 — call `advanceOrderStage` and apply the server's canonical `{to}` as
+  /// an OPTIMISTIC LOCAL cache update (no direct persistent write — the callable
+  /// already wrote it). A [OrderFunctionsException] (not deployed / role denied /
+  /// not found) is swallowed + logged: the order keeps its current stage, the UI
+  /// is honest, nothing is faked. The optimistic local write is applied ONLY
+  /// after a SUCCESS, so a denied advance never moves the card.
+  Future<void> _advanceViaCallable(
+    FirebaseOrdersRepository remote,
+    OrderFunctionsGateway functions,
+    String orderId,
+  ) async {
+    try {
+      final result = await functions.advanceOrderStage(orderId);
+      if (!mounted) return;
+      // Mirror the server's canonical new stage locally (no `set`).
+      remote.applyServerStage(orderId, result.to);
+    } on OrderFunctionsException catch (e) {
+      // Not deployed / permission / not-found — honest no-op (the card stays).
+      debugPrint('OrdersEngine: advanceOrderStage failed (no advance): $e');
+    }
   }
 
   /// Manager "god-step": set the order with [orderId] to ANY [stage] in the
@@ -539,6 +602,17 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>> {
   }
 }
 
+/// A13 — the order-callable gateway, or null when Firebase is not initialised
+/// (the entire Firebase-free test suite + the demo build), so nothing can ever
+/// touch a live `FirebaseFunctions` there. The same `useFirebaseBackend` gate
+/// the repository providers use. With this null the `kServerCallables` flag is
+/// inert (the engine keeps its direct-write path). Tests override this with a
+/// hand-rolled fake to exercise the ON branch.
+final orderFunctionsGatewayProvider = Provider<OrderFunctionsGateway?>((ref) {
+  if (useFirebaseBackend) return FirebaseOrderFunctionsGateway();
+  return null;
+});
+
 /// The shared orders provider — the single live list every role will read.
 /// Seeded with the four existing seed orders (obtained THROUGH the orders
 /// repository — T6.3 — instead of referencing the const directly) so every
@@ -552,7 +626,13 @@ final ordersEngineProvider =
     // Source the seed through the repository (the local impl exposes it). Any
     // non-local impl falls back to the const seed — identical orders either way.
     final seed = repo is LocalOrdersRepository ? repo.seed() : kOrdersEngineSeed;
-    final engine = OrdersEngineNotifier(seed: seed);
+    // A13 — inject the callable seam (null off the live backend → the flag is
+    // inert; `serverCallables` is left at its compile-time default). When ON +
+    // bound, the stage advance routes through `advanceOrderStage`.
+    final engine = OrdersEngineNotifier(
+      seed: seed,
+      functions: ref.read(orderFunctionsGatewayProvider),
+    );
     // S4.4 — Firebase initialised → the switch above returned the attached
     // Firestore-backed repo: bind the engine to it so `orders.snapshots()` →
     // cache → THIS engine → `sysOrdersProvider`/manager analytics is one live
