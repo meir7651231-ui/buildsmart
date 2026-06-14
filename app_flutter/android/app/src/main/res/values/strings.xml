@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- F5 — the FCM default notification channel id. Referenced by the
+         `com.google.firebase.messaging.default_notification_channel_id`
+         meta-data in AndroidManifest.xml, and MUST stay byte-identical to
+         `kDefaultPushChannelId` in lib/state/push_state.dart, which is the
+         channel we actually create at runtime (Android 8+ drops a notification
+         whose channel does not exist). This is the "general" / fallback channel;
+         the orders + chat channels are created alongside it from Dart. -->
+    <string name="default_notification_channel_id">bs_general</string>
+</resources>

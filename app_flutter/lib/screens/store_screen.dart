@@ -8,6 +8,7 @@ import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/share_seam.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/store_settings.dart';
+import 'package:buildsmart/state/telemetry.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -2886,6 +2887,17 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       contractorUid: contractorUid,
                       customerPhone: customerPhone,
                     );
+                // G4 — key funnel event: a contractor completed checkout. Only
+                // forwards to FirebaseAnalytics when Firebase is up; a no-op on
+                // the demo path (byte-identical). Params kept honest + minimal.
+                ref.read(telemetryProvider).logEvent(
+                  TelemetryEvents.orderPlaced,
+                  params: {
+                    'order_id': placed.id,
+                    'items': itemCount,
+                    'sum': widget.total,
+                  },
+                );
                 // Mirror into storeOrdersProvider for legacy test compatibility:
                 // the test checks storeOrdersProvider.first.items == '$n פריטים'.
                 // Since storeOrdersProvider is now a derived Provider (not

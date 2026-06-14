@@ -53,5 +53,7 @@
 	<string>BuildSmart משתמש בזיהוי-דיבור כדי להמיר את החיפוש הקולי שלך לטקסט.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>BuildSmart ניגש לגלריה כדי לצרף תמונות קיימות — הוכחת-מסירה, תמונת-פרופיל ותעודות.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>BuildSmart משתמש במיקום בזמן שהאפליקציה פתוחה כדי לתייג את נוכחות ה-GPS באתר ואת החתמת הכניסה/יציאה. אין איסוף מיקום ברקע.</string>
 </dict>
 </plist>

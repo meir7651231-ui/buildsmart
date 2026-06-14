@@ -24,6 +24,7 @@ import 'package:buildsmart/state/store_profile_store.dart';
 import 'package:buildsmart/state/store_stock.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -461,32 +462,35 @@ class _StoreDashboardScreenState extends ConsumerState<StoreDashboardScreen> {
             ),
           ],
         ),
-        const SizedBox(height: BsTokens.space3),
-
-        // Demo tool.
-        OutlinedButton(
-          onPressed: () {
-            final id = ref
-                .read(sysOrdersProvider.notifier)
-                .simulateIncomingOrder();
-            showToast(context, 'הזמנת הדגמה $id נוצרה — נכנסה לתור ✓');
-          },
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            side: const BorderSide(color: Color(0xFFE0E0E0)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+        // Demo tool — a self-declared "(כלי הדגמה)" affordance. Hidden for App
+        // Store review (kHideUnderConstruction); the simulateIncomingOrder seam
+        // stays in code, so flipping the flag restores the button as before.
+        if (!kHideUnderConstruction) ...[
+          const SizedBox(height: BsTokens.space3),
+          OutlinedButton(
+            onPressed: () {
+              final id = ref
+                  .read(sysOrdersProvider.notifier)
+                  .simulateIncomingOrder();
+              showToast(context, 'הזמנת הדגמה $id נוצרה — נכנסה לתור ✓');
+            },
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              side: const BorderSide(color: Color(0xFFE0E0E0)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+              ),
+            ),
+            child: const Text(
+              '➕ סימולציית הזמנה נכנסת (כלי הדגמה)',
+              style: TextStyle(
+                color: BsTokens.mutedLight,
+                fontWeight: FontWeight.w600,
+                fontSize: 13.5,
+              ),
             ),
           ),
-          child: const Text(
-            '➕ סימולציית הזמנה נכנסת (כלי הדגמה)',
-            style: TextStyle(
-              color: BsTokens.mutedLight,
-              fontWeight: FontWeight.w600,
-              fontSize: 13.5,
-            ),
-          ),
-        ),
+        ],
         const SizedBox(height: BsTokens.space4),
 
         // ── #78 · the הזמנות pipeline IS the home (default) tab ──────────────

@@ -160,9 +160,30 @@ final siteInspectionsProvider =
 
 // ═════════════════════════════════════════════════════════════════════════════
 // T2.4 — GPS ATTENDANCE LOG. Starts EMPTY (proto `attendanceLog=[]`).
-//   proto `clockAttendance` @index.html:19999-20009. Geo string is a fixed
-//   demo coordinate (camera/GPS → simulated demo result, not a live sensor).
+//   proto `clockAttendance` @index.html:19999-20009.
+//   C6: the geo string is now a REAL device coordinate (services/geo.dart →
+//   geolocator), formatted by [formatGeo]; when the platform gives no fix it is
+//   the honest [kGeoUnavailable] marker — never the old hardcoded demo point.
 // ═════════════════════════════════════════════════════════════════════════════
+
+/// Honest marker stamped on an attendance row when the device returned no GPS
+/// fix (permission denied / service off / error). NOT a coordinate — the row
+/// truthfully records that no location was captured.
+const String kGeoUnavailable = 'מיקום לא זמין';
+
+/// Format a live GPS fix as the attendance geo string, e.g.
+/// `32.0728°N, 34.7912°E (±12מ׳)`. Mirrors the proto's display shape but with
+/// the device's REAL latitude/longitude. Hemisphere letters come from the sign;
+/// the optional accuracy radius is shown only when the platform reported one.
+/// There is no null path here — callers pass [kGeoUnavailable] when there is no
+/// fix, so a fabricated coordinate can never reach the log.
+String formatGeo(double lat, double lng, {double? accuracyMeters}) {
+  final latStr = '${lat.abs().toStringAsFixed(4)}°${lat >= 0 ? 'N' : 'S'}';
+  final lngStr = '${lng.abs().toStringAsFixed(4)}°${lng >= 0 ? 'E' : 'W'}';
+  final acc =
+      accuracyMeters == null ? '' : ' (±${accuracyMeters.round()}מ׳)';
+  return '$latStr, $lngStr$acc';
+}
 
 class AttendanceEntry {
   const AttendanceEntry({
@@ -195,15 +216,22 @@ class SiteAttendanceNotifier extends StateNotifier<List<AttendanceEntry>> {
     return null;
   }
 
-  /// `clockAttendance(1)` (proto :20002) — record a clock-in with the demo geo.
-  /// [now] is `new Date().toLocaleTimeString('he-IL',{hour,minute})`.
-  void clockIn(String now) {
+  /// `clockAttendance(1)` (proto :20002) — record a clock-in. [now] is
+  /// `new Date().toLocaleTimeString('he-IL',{hour,minute})`.
+  ///
+  /// C6: [geo] is the REAL device coordinate string (formatted by the caller
+  /// from the live GPS fix), or — when the platform returned no fix
+  /// (permission-denied / service-off / web denial / native error) — the honest
+  /// `kGeoUnavailable` marker. NEVER a fabricated coordinate. It defaults to
+  /// that honest marker so a caller that has no fix records the truth, not the
+  /// old hardcoded demo point.
+  void clockIn(String now, {String geo = kGeoUnavailable}) {
     state = [
       AttendanceEntry(
         date: caToday(),
         timeIn: now,
         timeOut: null,
-        geo: '32.07°N, 34.79°E (±12מ׳)',
+        geo: geo,
       ),
       ...state,
     ];

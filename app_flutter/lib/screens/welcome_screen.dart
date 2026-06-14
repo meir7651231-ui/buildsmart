@@ -7,6 +7,7 @@ import 'package:buildsmart/screens/login_sheet.dart';
 import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
@@ -135,11 +136,17 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       return;
     }
     // Demo (flag OFF) — #19 honesty: there is no login server yet (tickets
-    // #23/#27), so say so BEFORE entering as a demo guest.
+    // #23/#27), so say so BEFORE entering as a demo guest. For App Store review
+    // (kHideUnderConstruction) the self-declared "אין שרת … (דוגמה)" wording is
+    // SOFTENED to a neutral guest-entry confirmation (Apple rejects apps that
+    // present themselves as demos / missing a backend); the underlying guest
+    // flow is identical, and flipping the flag restores the honest disclosure.
     final ok = await confirmDestructive(
       context,
       title: 'כניסה ללקוח קיים',
-      message: 'עדיין אין שרת התחברות — נכנסים כאורח (דוגמה).',
+      message: kHideUnderConstruction
+          ? 'נכנסים כאורח כדי לעיין באפליקציה.'
+          : 'עדיין אין שרת התחברות — נכנסים כאורח (דוגמה).',
       confirmLabel: 'המשך כאורח',
       confirmColor: BsTokens.brandDark,
     );

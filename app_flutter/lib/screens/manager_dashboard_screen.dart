@@ -1,6 +1,12 @@
 import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/brands.dart';
 import 'package:buildsmart/data/persona_data.dart';
+// A13 — the server-canonical credit seam: the repository provider + the
+// neutral CreditResult the `computeCredit` callable resolves through.
+import 'package:buildsmart/data/repositories/customers_local.dart'
+    show customersRepositoryProvider;
+import 'package:buildsmart/data/repositories/order_functions.dart'
+    show CreditResult;
 import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
@@ -1393,6 +1399,28 @@ final _customerViewsProvider = Provider<List<_CustomerView>>((ref) {
   ];
 });
 
+/// A13 (launch server-connect) — the server-canonical credit AGGREGATE for one
+/// contractor, routed through `CustomersRepository.computeCredit(name)` (the
+/// `computeCredit` callable). THIS is the consumer that finally reaches the A13
+/// `computeCredit` seam — previously fully built end-to-end but UNCALLED, so
+/// credit never routed through the server even with the flag on.
+///
+/// ZERO-REGRESSION: the repo's `computeCredit` gates INTERNALLY on
+/// `kServerCallables` — OFF (default / the whole demo + test suite) it returns
+/// the SAME local derivation the dashboard derives synchronously today
+/// (`creditLimit == contractorCredit(name)`), with NO network; ON + a bound
+/// gateway it returns the server-canonical figures, falling back to the same
+/// local derivation on a callable failure (never a faked success). So the
+/// figure this resolves to is BYTE-IDENTICAL to the sync `creditLimit` when OFF.
+///
+/// The detail sheet shows the sync `c.creditLimit` immediately and refines to
+/// this once it resolves — OFF the two are equal, so the displayed number never
+/// changes (no jarring flicker); ON it upgrades to the server-canonical value.
+final customerCreditProvider =
+    FutureProvider.family<CreditResult, String>((ref, name) async {
+  return ref.read(customersRepositoryProvider).computeCredit(name);
+});
+
 /// The 👥 לקוחות tab body — the manager's LIVE customer list, a faithful port of
 /// the legacy `renderMgrCustomers` (@index.html:16566-16607). Each contractor is
 /// derived from the shared [ordersEngineProvider] (grouped by `who` via
@@ -1789,12 +1817,23 @@ class _CustomerDetailSheet extends ConsumerWidget {
     // until the CustomerProvider re-emits, which may be a frame behind).
     final liveOrderCount = orders.length;
     final liveTotalSpend = orders.fold<int>(0, (s, o) => s + o.sum);
-    final livePct = c.creditLimit == 0
+
+    // A13 — the credit ceiling routed through the `computeCredit` callable seam
+    // (`customerCreditProvider`). The sync `c.creditLimit` is shown IMMEDIATELY
+    // (the loading/error fallback), then refined to the resolved figure. OFF
+    // (default) the callable returns the SAME local derivation, so
+    // `creditLimit == c.creditLimit` → the displayed number never changes
+    // (byte-identical, no flicker); ON it upgrades to the server-canonical value.
+    final creditLimit =
+        ref.watch(customerCreditProvider(c.name)).valueOrNull?.creditLimit ??
+            c.creditLimit;
+
+    final livePct = creditLimit == 0
         ? 0
-        : ((liveTotalSpend / c.creditLimit) * 100).round().clamp(0, 100);
+        : ((liveTotalSpend / creditLimit) * 100).round().clamp(0, 100);
     final liveSites = orders.map((o) => o.site).where((s) => s.isNotEmpty).toSet().length;
     final balance =
-        (c.creditLimit - liveTotalSpend).clamp(0, c.creditLimit); // יתרה ≥ 0
+        (creditLimit - liveTotalSpend).clamp(0, creditLimit); // יתרה ≥ 0
 
     Widget tile(String value, String label) => Expanded(
           child: Container(
@@ -1893,7 +1932,7 @@ class _CustomerDetailSheet extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: BsTokens.space4),
-            row('מסגרת אשראי', '₪${_grouped(c.creditLimit)}'),
+            row('מסגרת אשראי', '₪${_grouped(creditLimit)}'),
             row('נוצל', '₪${_grouped(liveTotalSpend)}'),
             row('יתרה זמינה', '₪${_grouped(balance)}'),
             row('אתרי בנייה', '$liveSites'),

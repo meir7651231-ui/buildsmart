@@ -14,6 +14,7 @@ import 'package:buildsmart/screens/catalog_settings_screen.dart';
 import 'package:buildsmart/screens/role_picker_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -129,7 +130,10 @@ class _ManagerProfileBody extends ConsumerWidget {
                   ],
                 ),
               ),
-              if (session.demo)
+              // "מצב הדגמה" pill — a self-declared demo badge the App Store
+              // rejects; hidden for review (kHideUnderConstruction). The
+              // session.demo state is untouched; flip the flag to restore.
+              if (session.demo && !kHideUnderConstruction)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,

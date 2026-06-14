@@ -203,7 +203,10 @@ void main() {
       'lib/screens/persona_portal.dart': ['נתוני הדגמה'],
       'lib/screens/courier_portal_tab.dart': ['זמינות להדגמה'],
       'lib/screens/persona_picking_sheet.dart': ['ביטול ההזמנה כולה — בקרוב'],
-      'lib/screens/tasks_screen.dart': ['תמונה צורפה (הדגמה)'],
+      // The worker-report "תמונה צורפה (הדגמה)" fake was FILLED — it now routes
+      // through the real pickTaskPhoto capture (no faked success). The file's
+      // remaining flag-gated placeholder is the manager-board demo disclaimer.
+      'lib/screens/tasks_screen.dart': ['(בהדגמה —'],
       'lib/screens/store_screen.dart': ['🚧 בבנייה'],
       'lib/screens/home_shell.dart': ['שירותים'],
     };

@@ -1024,3 +1024,40 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **לא הוסתר:** מחלקות-ריקות (בעלים) · electrician/renovation + קטגוריות-קטלוג חסרות-תוכן (sanctioned) · שפה ar/en (#53) · "מצב הדגמה" badge (session-indicator) · GPS/map/nav (C6) · worker-board.
 
 **אימות (בדיקת-widget+data):** `apple_readiness_hide_pass_test` (search filtered/reversible · `AIHubScreen.visibleToolIds` 6 ללא-deferred · B6 sort/filter · source-guard) · `settings_honesty_test` עודכן (placeholders findsNothing + שורה-פונקציונלית findsOneWidget). analyze 0-errors · full-suite +2300 · build web ✅ · mutation-verified (§mutation_log).
+
+## #C11 סבב-3 — דליפות "(הדגמה)"/"בקרוב" נוספות (מסקירת-audit) נסגרו (הפיך) — 2026-06-14
+
+**שינוי גלוי-לעין (6 דליפות נגישות):**
+- **משימות-צוות (board מנהל):** כפתור-העובד "דווח על הביצוע" פתח-קודם שקר-הצלחה — toast "תמונה צורפה" בלי תמונה (שמר marker 'demo'). כעת פותח **מצלמה אמיתית** (`pickTaskPhoto`, כמו ה-sheet) → ביטול=toast 'לא צולמה תמונה'; צילום=toast '📷 תמונת ההוכחה צורפה'. אזור "תמונת ביצוע" עבר מקופסה-אפורה-סטטית ל-`taskPhotoWidget` המשותף (מציג תמונה אמיתית).
+- **תמונת-הוכחה (כל ה-sites):** ה-marker הלגאסי 'demo' שהציג "📷 תמונה מהשטח (הדגמה)" — כעת **לא מוצג כלל** (`SizedBox.shrink`) ב-worker-sheet · manager-approvals · POD-preview. תמונה אמיתית לא מושפעת.
+- **קטלוג-מותג ליפסקי:** 2 קטגוריות ריקות ("אמבט ואגנית"/"מאספים וקולטים") שהציגו badge "בקרוב" מעומעם — מסוננות מהרשת (וספירת-הכותרת מתעדכנת). [ביטול החלטת-"נשאר" של סבב-2.]
+- **לוח-חנות:** כפתור "➕ סימולציית הזמנה נכנסת (כלי הדגמה)" מוסתר.
+- **פרופיל-מנהל:** badge "מצב הדגמה" מוסתר. [ביטול החלטת-"נשאר".] · **welcome:** "עדיין אין שרת התחברות … (דוגמה)" רוכך ל"נכנסים כאורח כדי לעיין באפליקציה."
+
+**הפיך:** הכל מאחורי `kHideUnderConstruction`; const/seeds/widgets נשארים — flip מחזיר.
+**אימות:** `apple_readiness_missed_leaks_test` 12/12 (helper-demo→shrink · data-URL-אמיתי-לא-מוסתר · lipskey-filter+const-הפיך · 6 source-guards) · analyze 6-הנגועים **0-errors/0-warnings** · color-ratchet ירוק · full-suite **+2397 -1** (ה-1 = `worker_reports_drilldown` קיים-מראש) · build web ✅ · mutation red `+4 -1`→green `+12` (§mutation_log). **לא נגעתי:** worker-board-v3/GPS/4-מחלקות-ריקות/docs_readiness_gate/backend-gating.
+
+## #G4 — טלמטרי (Crashlytics+Analytics) — שינוי לא-ויזואלי במסכים — 2026-06-14
+
+**שינוי:** `store_screen.dart` + `manager_role_assign_sheet.dart` קיבלו **רק קריאות-טלמטרי** (side-effects): `order_placed` אחרי checkout מוצלח, `role_assigned`/`logError` אחרי הקצאת-תפקיד. **אין שום שינוי-רינדור/widget** — אותו עץ-UI בדיוק, רק לוג ברקע כשיש Firebase. לכן אין screenshot; האימות הוא קריאת-ה-diff + `telemetry_test` (8/8) שמוכיח שה-sink הוא no-op בלי Firebase (דמו byte-identical).
+**אימות:** `telemetry_test` 8/8 · analyze 0-errors · full-suite **+2406 -1** (ה-1 = worker_reports_drilldown הידוע) · build web ✅ · mutation red→green (§mutation_log).
+
+## #A13-consumer — חיווט CONSUMER ל-computeCredit (תצוגת-אשראי-מנהל) — שינוי מקור-נתונים, OFF byte-identical — 2026-06-14
+
+**שינוי:** sheet-הפירוט של 👥 לקוחות (`_CustomerDetailSheet`, מסך-מנהל) — שורת `מסגרת אשראי` (וכן אריח `אשראי`=`livePct` ושורת `יתרה זמינה`=`balance`) כעת מקבלת את תקרת-האשראי דרך ה-seam `computeCredit` (`customerCreditProvider`) במקום מ-ה-aggregate ה-SYNC בלבד. **אין שינוי-layout/widget** — אותו עץ-UI, אותן שורות, רק מקור-הספרה השתנה.
+
+**OFF byte-identical (אין שינוי-נראה):** ברירת-המחדל (`kServerCallables` OFF · כל ה-demo) — ה-repo `computeCredit` מחזיר את ה-derivation המקומית, שהיא byte-identical ל-sync (`creditLimit == contractorCredit(name)`). ה-sheet מציג את ה-`c.creditLimit` ה-SYNC **מיד** (fallback) ומעדן אל הערך-הנפתר — OFF השניים שווים, אז **המספר המוצג זהה לחלוטין להיום, ואין flicker** (אין frame עם מספר שונה/ריק). לכן אין screenshot — האימות הוא קריאת-ה-diff + ה-widget-test. רק ON + gateway-bound (ממתין-לבעלים: deploy + flag) מעלה את הספרה לערך ה-server-canonical.
+
+**הפיך:** הכל מאחורי `kServerCallables` (compile-time, OFF) + ה-gating הפנימי של ה-repo; flip-בלבד משנה התנהגות.
+**אימות:** `manager_credit_computecredit_consumer_test` 3/3 (OFF: seam-reached דרך spy-repo + ספרה-מקומית · OFF: server-figure לעולם-לא-מופיע · ON: שדרוג ל-server-figure) · `manager_dashboard_screen_test` (sheet-detail הקיים) נשאר ירוק (label+ספרה-מקומית OFF) · analyze screen 0-חדש / test 0-issues / אפס raw-color · full-suite (ה-`-1` היחיד = `worker_reports_drilldown` הקיים-מראש) · build web ✅ · mutation red `+2 -1`→green `+3` (§mutation_log). **לא נגעתי:** geo/site_hub/manifest/pubspec (סוכן מקביל GPS) · worker-board / 4 המחלקות · F1/firebase_options · ה-repo/gateway/function של computeCredit (כבר היו).
+
+---
+
+## #C6 — GPS אמיתי ל-site-hub נוכחות (T2.4) — טקסט-טוסט כן כשאין-fix, אותו עץ-UI — 2026-06-14
+
+**שינוי:** מסך 📍 נוכחות (`_SiteAttendance` ב-`site_hub_screen.dart`) — לחיצת "החתם כניסה 📍" כעת קוראת `currentGeoFix()` (geolocator נטיב / `geo_web.dart` בדפדפן) במקום להטביע את קואורדינטת-הדמו-הקשיחה `'32.07°N, 34.79°E (±12מ׳)'`. **אין שינוי-layout/widget** — אותו עץ (אותו box-נוכחות, אותו כפתור, אותה כרטיסיית-היסטוריה `📍 ${a.geo}`); רק (א) הקואורדינטה במחרוזת `a.geo` עברה מ-דמו-קבוע ל-fix-אמיתי (`formatGeo(lat,lng,±מטר)`), ו-(ב) **כשאין fix** (הרשאה-מסורבת / שירות-כבוי / שגיאה) ה-string הוא `'מיקום לא זמין'` (לא קואורדינטה) וה-טוסט הופך מ-'כניסה נרשמה ב-HH:MM 📍' ל-`'מיקום לא זמין — כניסה נרשמה ב-HH:MM בלי מיקום'` (אותו idiom-כן בדיוק כמו ה-worker clock-in הקיים, `worker_attendance_screen`/`worker_app_screen`). ה-יציאה ללא-שינוי.
+
+**אין screenshot — למה:** השינוי הוא טקסט-תוכן (מחרוזת `geo` + מחרוזת-טוסט) בתוך widgets קיימים שלא שינו צורה/צבע/פריסה; ה-toast/string מאומתים ב-widget-state-test (`site_hub_state_test` — `clockIn` בלי-fix→`kGeoUnavailable`='מיקום לא זמין', עם-fix→הקואורדינטה verbatim; `formatGeo` N/E·S/W·עיגול-מטר). ההתנהגות-הויזואלית-החדשה היחידה (מצב "מיקום לא זמין") היא מצב-ריק-כן מבוקש מפורשות.
+
+**הפיך:** ה-seam additive — web byte-identical (`geo_web.dart` עדיין נבחר); נטיב עבר מ-null-stub ל-geolocator חי. אפס Color/`value:`/`activeColor:` חדש.
+**אימות:** `geo_gate_test` (+13) · `geo_permissions_source_test` (+6) · `site_hub_state_test` (net +5) · analyze 0-errors (geo_native/geo_gate/2-טסטים = 0 issues; info שנותרו קיימים-מראש) · full-suite **+2448 -1** (ה-`-1` היחיד = `worker_reports_drilldown` הקיים-מראש) · build web ✅ (0 geolocator ב-main.dart.js) · mutation red `+7 -2`→green `+9` (§mutation_log). **לא נגעתי:** מסכי/UI worker-board / clock-in (נחיל-העובדים) · manager-credit (סוכן מקביל) · 4 המחלקות · F1 · `nav_launch`.

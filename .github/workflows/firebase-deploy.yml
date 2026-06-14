@@ -9,11 +9,18 @@
 # pubsub, storage, run, eventarc, cloudbilling.
 # GitHub secrets: FIREBASE_SERVICE_ACCOUNT, R2_ACCESS_KEY_ID,
 # R2_SECRET_ACCESS_KEY, R2_ACCOUNT_ID.
+# Re-run 2026-06-14: trigger a deploy so firestore indexes ship after the owner
+# granted the SA the Cloud Datastore Index Admin role (the step was 403 before).
 name: Deploy Firebase Rules + Functions
 
 on:
   push:
     branches: [ claude/whats-happening-LyY9G ]
+    paths:
+      - 'firestore.rules'
+      - 'firestore.indexes.json'
+      - 'functions/**'
+      - '.github/workflows/firebase-deploy.yml'
   workflow_dispatch:
 
 concurrency:
@@ -89,9 +96,18 @@ jobs:
             --project buildsmart-b0b78 \
             --non-interactive
 
+      # Indexes need the "Cloud Datastore Index Admin" role on FIREBASE_SERVICE_ACCOUNT.
+      # Best-effort (403 until the owner grants that IAM) so it never blocks rules/functions.
+      - name: Deploy Firestore indexes (best-effort — needs Datastore Index Admin IAM)
+        continue-on-error: true
+        run: |
+          firebase deploy \
+            --only firestore:indexes \
+            --project buildsmart-b0b78 \
+            --non-interactive
+
       # Inject R2 config (secrets → Secret Manager; params → functions/.env.<project>).
       - name: Provision R2 config for functions
-        if: steps.changes.outputs.functions == 'true'
         run: |
           printf '%s' '${{ secrets.R2_ACCESS_KEY_ID }}' \
             | firebase functions:secrets:set R2_ACCESS_KEY_ID --project buildsmart-b0b78 --data-file -
@@ -105,7 +121,6 @@ jobs:
       # --force: auto-set the Artifact Registry cleanup policy (otherwise the
       # deploy exits non-zero on the first 2nd-gen deploy even after success).
       - name: Deploy Cloud Functions (Blaze-gated, non-blocking)
-        if: steps.changes.outputs.functions == 'true'
         continue-on-error: true
         run: |
           echo "Deploying Cloud Functions to buildsmart-b0b78..."
@@ -114,7 +129,3 @@ jobs:
             --project buildsmart-b0b78 \
             --non-interactive \
             --force
-
-      - name: Note when functions deploy is skipped (no functions/ change)
-        if: steps.changes.outputs.functions != 'true'
-        run: echo "functions/ unchanged in this push — skipping functions deploy (rules deployed)."

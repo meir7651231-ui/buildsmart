@@ -1,0 +1,66 @@
+name: Android TEST build (backend flags ON — connects to Firebase)
+
+# SEPARATE from the live android-package.yml (which stays DEMO, never passes the
+# backend flags). This is a workflow_dispatch-only build with the backend flags
+# ON, for on-device verification that the app connects to the live Firebase
+# backend after F1. The APK is downloadable from the run's artifacts.
+#
+# DEBUG-SIGNED on purpose (self-install / sideload) — NOT a Play release. The
+# live web build (deploy.yml / firebase-hosting.yml) is unaffected and stays demo.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ claude/whats-happening-LyY9G ]
+    paths:
+      - 'app_flutter/**'
+      - '.github/workflows/android-test-build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  android-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
+      - name: Analyze (GATE — 0 errors required)
+        working-directory: app_flutter
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Build APK with backend flags ON (debug-signed, connects to server)
+        working-directory: app_flutter
+        run: |
+          flutter build apk --release \
+            --dart-define=USE_FIREBASE_BACKEND=true \
+            --dart-define=UID_SCOPED_QUERIES=true \
+            --dart-define=SERVER_CALLABLES=true
+
+      - name: Upload backend-ON APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-backend-on-apk
+          path: app_flutter/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30

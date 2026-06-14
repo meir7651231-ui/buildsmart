@@ -23,6 +23,7 @@
 //     opened) → the navigation hook seam.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/state/auth_state.dart';
@@ -126,6 +127,40 @@ class _FakeUsersSink implements RemoteCollectionSource {
   Future<void> delete(String id) async {}
 }
 
+/// F5 — a hand-rolled fake [LocalNotificationsGateway]: records init / the
+/// Android-13 prompt / every `show` (with the channel it was routed to), plus a
+/// permission knob and a one-shot failure knob (so the swallow-don't-throw rule
+/// is testable). No plugin, no Firebase — the auth_state_test.dart pattern.
+class _FakeLocalNotifications implements LocalNotificationsGateway {
+  int initCalls = 0;
+  int permissionRequests = 0;
+  bool android13Granted = true;
+  bool failNextShow = false;
+
+  /// Every shown notification, in order: the message + the channel it landed on.
+  final List<({PushMessage message, String channelId})> shown = [];
+
+  @override
+  Future<void> ensureInitialised() async {
+    initCalls++;
+  }
+
+  @override
+  Future<bool> requestAndroid13Permission() async {
+    permissionRequests++;
+    return android13Granted;
+  }
+
+  @override
+  Future<void> show(PushMessage message, {required String channelId}) async {
+    if (failNextShow) {
+      failNextShow = false;
+      throw StateError('plugin show rejected');
+    }
+    shown.add((message: message, channelId: channelId));
+  }
+}
+
 /// A minimal fake [AuthGateway] — just enough to drive authStateProvider's
 /// stream (the seam CONTRACT: current state emitted on subscribe). Claims are
 /// irrelevant to S6 and resolve empty.
@@ -185,6 +220,7 @@ void main() {
     _FakeAuthGateway? auth,
     _FakePushGateway? push,
     _FakeUsersSink? users,
+    _FakeLocalNotifications? local,
   }) {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final c = ProviderContainer(
@@ -192,6 +228,7 @@ void main() {
         authGatewayProvider.overrideWithValue(auth),
         pushGatewayProvider.overrideWithValue(push),
         pushTokenWriterProvider.overrideWithValue(users),
+        localNotificationsGatewayProvider.overrideWithValue(local),
       ],
     );
     addTearDown(c.dispose);
@@ -501,6 +538,276 @@ void main() {
 
       // Let the toast time out so no timers leak out of the test.
       await tester.pumpAndSettle(const Duration(seconds: 1));
+    });
+  });
+
+  // ── F5 — Android notification channels + foreground OS display ──────────────
+  //
+  // Native channel creation / the real plugin CANNOT run headless (no platform
+  // channel in a unit test), so these pin the PURE config (the channel set + the
+  // type→channel routing), the GATING (a null local gateway = no channel init,
+  // no Android-13 prompt, no OS notification — demo byte-identical), and the
+  // WIRED behaviour through the hand-rolled fake. Device verification (the real
+  // prompt + a real tray notification) is the later on-device step.
+
+  group('F5 — channel config (pure)', () {
+    test('three channels; general id == the manifest default channel string',
+        () {
+      expect(
+        [for (final c in kPushChannels) c.id],
+        [kDefaultPushChannelId, kOrdersPushChannelId, kChatPushChannelId],
+      );
+      expect(
+        kPushChannels.first.id,
+        kDefaultPushChannelId,
+        reason: 'kPushChannels.first is the general/default channel',
+      );
+      // The general id is the contract with the native meta-data — locked here
+      // and re-checked against the actual strings.xml in the source-guard below.
+      expect(kDefaultPushChannelId, 'bs_general');
+      final ids = {for (final c in kPushChannels) c.id};
+      expect(ids, hasLength(3), reason: 'channel ids must be unique');
+      for (final c in kPushChannels) {
+        expect(c.name, isNotEmpty);
+        expect(c.description, isNotEmpty);
+      }
+    });
+
+    test('pushChannelIdFor routes by data.type; unknown/missing → general', () {
+      expect(
+        pushChannelIdFor(const PushMessage(data: {'type': 'order'})),
+        kOrdersPushChannelId,
+      );
+      expect(
+        pushChannelIdFor(const PushMessage(data: {'type': 'chat'})),
+        kChatPushChannelId,
+      );
+      expect(
+        pushChannelIdFor(const PushMessage(data: {'type': 'mystery'})),
+        kDefaultPushChannelId,
+        reason: 'an unknown type falls back to the general channel',
+      );
+      expect(
+        pushChannelIdFor(const PushMessage(title: 'x')),
+        kDefaultPushChannelId,
+        reason: 'no data.type → general',
+      );
+    });
+  });
+
+  group('F5 — gating (demo / no-Firebase = byte-identical)', () {
+    test('local gateway null → no channel init, no prompt, no OS notification',
+        () async {
+      final auth = _FakeAuthGateway();
+      final push = _FakePushGateway()..token = 'tok-1'; // placeholder
+      final users = _FakeUsersSink();
+      // local = null — exactly the demo / no-Firebase wiring.
+      final c = makeContainer(auth: auth, push: push, users: users);
+
+      auth.emit(const AuthUser(uid: 'u1'));
+      await settle(c);
+      push.foreground.add(
+        const PushMessage(title: 'הזמנה', body: 'עדכון', data: {'type': 'order'}),
+      );
+      await settle(c);
+
+      // FCM token registration is UNAFFECTED (independent of the local seam)…
+      expect(users.tokenOf('u1'), 'tok-1');
+      // …but nothing on the F5 local path ran: it was never constructed.
+      expect(
+        c.read(localNotificationsGatewayProvider),
+        isNull,
+        reason: 'no Firebase → the plugin gateway is never built',
+      );
+    });
+
+    test('a fully inert controller (no gateways at all) touches no F5 path',
+        () async {
+      final auth = _FakeAuthGateway();
+      final c = makeContainer(auth: auth); // push + local both null
+
+      auth.emit(const AuthUser(uid: 'u1'));
+      await settle(c);
+
+      expect(c.read(pushControllerProvider), isNotNull);
+      // Nothing to assert beyond "it didn't throw" — the inert path is the
+      // demo's, and it must stay completely silent.
+    });
+  });
+
+  group('F5 — wired behaviour (fake local gateway)', () {
+    test('sign-in initialises channels AND requests the Android-13 permission',
+        () async {
+      final auth = _FakeAuthGateway();
+      final push = _FakePushGateway()..token = 'tok-1'; // placeholder
+      final users = _FakeUsersSink();
+      final local = _FakeLocalNotifications();
+      final c = makeContainer(auth: auth, push: push, users: users, local: local);
+
+      auth.emit(const AuthUser(uid: 'u1'));
+      await settle(c);
+
+      expect(local.initCalls, 1, reason: 'channels created once at registration');
+      expect(local.permissionRequests, 1, reason: 'the Android-13 prompt');
+      expect(users.tokenOf('u1'), 'tok-1', reason: 'token still registers');
+    });
+
+    test('permission denied (firebase_messaging) → no channel/Android-13 work',
+        () async {
+      final auth = _FakeAuthGateway();
+      final push = _FakePushGateway()..permissionGranted = false;
+      final users = _FakeUsersSink();
+      final local = _FakeLocalNotifications();
+      final c = makeContainer(auth: auth, push: push, users: users, local: local);
+
+      auth.emit(const AuthUser(uid: 'u1'));
+      await settle(c);
+
+      // Channels are still created (cheap, idempotent, before the prompt) but a
+      // DENIED messaging permission short-circuits before the Android-13 path.
+      expect(local.initCalls, 1);
+      expect(
+        local.permissionRequests,
+        0,
+        reason: 'denied messaging permission → no Android-13 follow-up, no token',
+      );
+      expect(users.sets, isEmpty);
+    });
+
+    test('a foreground push is RE-SHOWN as an OS notification on its channel',
+        () async {
+      final auth = _FakeAuthGateway();
+      final push = _FakePushGateway()..token = 'tok-1'; // placeholder
+      final users = _FakeUsersSink();
+      final local = _FakeLocalNotifications();
+      final c = makeContainer(auth: auth, push: push, users: users, local: local);
+
+      auth.emit(const AuthUser(uid: 'u1'));
+      await settle(c);
+      push.foreground.add(
+        const PushMessage(
+          title: 'הזמנה BS-7',
+          body: 'יצאה למשלוח 🚚',
+          data: {'type': 'order', 'id': 'BS-7'},
+        ),
+      );
+      await settle(c);
+
+      expect(local.shown, hasLength(1));
+      expect(local.shown.single.channelId, kOrdersPushChannelId);
+      expect(local.shown.single.message.title, 'הזמנה BS-7');
+    });
+
+    test('a data-only foreground push shows nothing (nothing human-readable)',
+        () async {
+      final auth = _FakeAuthGateway();
+      final push = _FakePushGateway()..token = 'tok-1'; // placeholder
+      final local = _FakeLocalNotifications();
+      final c = makeContainer(
+        auth: auth,
+        push: push,
+        users: _FakeUsersSink(),
+        local: local,
+      );
+
+      auth.emit(const AuthUser(uid: 'u1'));
+      await settle(c);
+      push.foreground.add(const PushMessage(data: {'type': 'order'}));
+      await settle(c);
+
+      expect(local.shown, isEmpty);
+    });
+
+    test('a THROWING show is swallowed — never into the UI (rule #3)', () async {
+      final auth = _FakeAuthGateway();
+      final push = _FakePushGateway()..token = 'tok-1'; // placeholder
+      final local = _FakeLocalNotifications()..failNextShow = true;
+      final c = makeContainer(
+        auth: auth,
+        push: push,
+        users: _FakeUsersSink(),
+        local: local,
+      );
+
+      auth.emit(const AuthUser(uid: 'u1'));
+      await settle(c);
+      push.foreground.add(
+        const PushMessage(title: 'x', body: 'y', data: {'type': 'chat'}),
+      );
+      await settle(c); // must complete green — the failure is logged, not thrown
+
+      // The next push still gets through (the chain kept working).
+      push.foreground.add(
+        const PushMessage(title: 'a', body: 'b', data: {'type': 'chat'}),
+      );
+      await settle(c);
+      expect(local.shown, hasLength(1));
+      expect(local.shown.single.channelId, kChatPushChannelId);
+    });
+  });
+
+  group('F5 — native source-guard (manifest + res wiring)', () {
+    // These read the actual Android source on disk so the Dart channel ids and
+    // the native meta-data/permission/icon can never silently drift apart.
+    final manifest = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+    final strings = File(
+      'android/app/src/main/res/values/strings.xml',
+    ).readAsStringSync();
+
+    test('POST_NOTIFICATIONS permission is declared', () {
+      expect(
+        manifest.contains('android.permission.POST_NOTIFICATIONS'),
+        isTrue,
+      );
+    });
+
+    test('the FCM default notification icon + channel meta-data are present', () {
+      expect(
+        manifest.contains(
+          'com.google.firebase.messaging.default_notification_icon',
+        ),
+        isTrue,
+      );
+      expect(manifest.contains('@drawable/ic_notification'), isTrue);
+      expect(
+        manifest.contains(
+          'com.google.firebase.messaging.default_notification_channel_id',
+        ),
+        isTrue,
+      );
+      expect(
+        manifest.contains('@string/default_notification_channel_id'),
+        isTrue,
+      );
+    });
+
+    test('the manifest default channel string == kDefaultPushChannelId', () {
+      // The single source-of-truth check: the value in strings.xml that the
+      // meta-data points at MUST equal the channel Dart actually creates.
+      expect(
+        strings.contains(
+          '<string name="default_notification_channel_id">'
+          '$kDefaultPushChannelId</string>',
+        ),
+        isTrue,
+        reason: 'strings.xml channel id must match kDefaultPushChannelId',
+      );
+    });
+
+    test('the white-silhouette notification icon vector exists', () {
+      final icon = File(
+        'android/app/src/main/res/drawable/ic_notification.xml',
+      );
+      expect(icon.existsSync(), isTrue);
+      final svg = icon.readAsStringSync();
+      expect(svg.contains('<vector'), isTrue, reason: 'a valid vector drawable');
+      expect(
+        svg.contains('android:fillColor="#FFFFFFFF"'),
+        isTrue,
+        reason: 'white fill — Android renders the small icon as a mono mask',
+      );
     });
   });
 }

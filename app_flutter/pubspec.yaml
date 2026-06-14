@@ -57,6 +57,17 @@ dependencies:
   # persistence (settings + profile)
   shared_preferences: ^2.3.4
 
+  # C6 — REAL native GPS for the site-hub GPS attendance (T2.4) and, via the
+  # SHARED services/geo.dart seam, the worker clock-in. Replaces the native null
+  # stub with a live fix: checks isLocationServiceEnabled + checkPermission/
+  # requestPermission, and ONLY on granted calls getCurrentPosition; on
+  # denied / disabled / error it returns null — never a fabricated coordinate
+  # (אין קואורדינטה מומצאת). Has first-party web support (geolocator_web →
+  # navigator.geolocation), so `flutter build web` keeps compiling; the
+  # conditional import still prefers our hand-rolled geo_web.dart on web. 14.x is
+  # the Dart-3.7 / Flutter-3.29 compatible line (sdk: ^3.5.0).
+  geolocator: ^14.0.0
+
   # native speech-to-text — iOS/Android (Web falls back to Web Speech)
   speech_to_text: ^7.0.0
 
@@ -69,6 +80,25 @@ dependencies:
   firebase_messaging: ^16.3.0
   cloud_functions: ^6.3.2
   firebase_app_check: ^0.4.4+2
+
+  # F5 — explicit Android notification channels + FOREGROUND display. FCM on
+  # Android shows a tray notification only when the app is background/terminated;
+  # a FOREGROUND data/notification message is delivered silently to onMessage,
+  # so we re-show it ourselves through this plugin on the right importance-high
+  # channel (orders/chat/general). It also creates the channels at init so the
+  # `default_notification_channel_id` meta-data resolves and Android 13+ can be
+  # asked for POST_NOTIFICATIONS. ACTIVE ONLY when Firebase/push is up — the
+  # demo / no-Firebase path never constructs the plugin (the same
+  # `useFirebaseBackend` gate every other seam uses), so it is byte-identical to
+  # before. 18.x is the Flutter-3.29 / Dart-3.7 compatible line.
+  flutter_local_notifications: ^18.0.1
+
+  # G4 — production telemetry, ACTIVE ONLY when Firebase actually initialised
+  # (the `Firebase.apps.isNotEmpty` gate in lib/state/telemetry.dart). On the
+  # demo / no-Firebase path NONE of this runs — byte-identical to before. The
+  # 5.x / 12.x lines track firebase_core ^4.x (the project's pin).
+  firebase_crashlytics: ^5.0.0
+  firebase_analytics: ^12.0.0
 
   # HTTP PUT of captured photo bytes to the R2 presigned URL (A14, gated on
   # CLOUD_PHOTOS). Already a transitive dep — promoted to direct for the upload
