@@ -37,12 +37,23 @@ class StockPred {
     required this.stock,
     required this.rate,
     required this.days,
+    this.emoji = '📦',
+    this.unitPrice = 0,
   });
 
   final String name;
   final int stock;
   final int rate;
   final int days;
+
+  /// The product emoji, carried verbatim from the order line that generated
+  /// this forecast (defaults to 📦 for the proto seed, which has none). Real
+  /// captured data — lets "הזמן עכשיו" rebuild a faithful cart line.
+  final String emoji;
+
+  /// Unit price (₪) of the product, derived from the most-recent order line
+  /// that consumed it (`lineTotal / qty`, rounded). 0 for the proto seed.
+  final int unitPrice;
 
   bool get urgent => days <= 3;
 }
@@ -94,10 +105,15 @@ List<StockPred> computeStockForecast(
     onHand[l.productName] = (onHand[l.productName] ?? 0) + l.productQty;
   }
 
-  // Consumption history per product name from the order lines.
+  // Consumption history per product name from the order lines. Alongside the
+  // run-out math we capture the REAL emoji + unit price from the most-recent
+  // order line carrying each name — genuine captured purchase data the cart
+  // needs so "הזמן עכשיו" rebuilds a faithful line (no fabricated fields).
   final consumed = <String, int>{};
   final firstSeen = <String, DateTime>{};
   final lastSeen = <String, DateTime>{};
+  final emojiByName = <String, String>{};
+  final unitPriceByName = <String, int>{};
   for (final o in orders) {
     final ts = o.createdAt ?? anchor;
     for (final li in o.lines) {
@@ -105,7 +121,14 @@ List<StockPred> computeStockForecast(
       final f = firstSeen[li.name];
       if (f == null || ts.isBefore(f)) firstSeen[li.name] = ts;
       final l = lastSeen[li.name];
-      if (l == null || ts.isAfter(l)) lastSeen[li.name] = ts;
+      if (l == null || !ts.isBefore(l)) {
+        // On the latest line for this name, snapshot its emoji + unit price
+        // (line total / qty). `!isBefore` (>= ) keeps the last writer to win
+        // within the same timestamp.
+        lastSeen[li.name] = ts;
+        emojiByName[li.name] = li.emoji;
+        unitPriceByName[li.name] = li.qty > 0 ? (li.price / li.qty).round() : 0;
+      }
     }
   }
 
@@ -119,7 +142,14 @@ List<StockPred> computeStockForecast(
     final r = rate < 1 ? 1 : rate;
     final stock = onHand[name] ?? 0;
     final days = (stock / r).round();
-    out.add(StockPred(name: name, stock: stock, rate: r, days: days));
+    out.add(StockPred(
+      name: name,
+      stock: stock,
+      rate: r,
+      days: days,
+      emoji: emojiByName[name] ?? '📦',
+      unitPrice: unitPriceByName[name] ?? 0,
+    ));
   }
 
   out.sort((a, b) {

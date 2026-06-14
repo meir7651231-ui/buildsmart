@@ -28,8 +28,10 @@ import 'package:buildsmart/data/contractor_seeds.dart' show caToday, fMoney;
 // projectRoi, invoiceSplit, buildIndexDeltaPct, kFxRates …) are unchanged.
 import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/data/repositories/finance_local.dart' show financeRepo;
+import 'package:buildsmart/logic/finance_report_pdf.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/state/finance_hub_state.dart';
+import 'package:buildsmart/state/pdf_print_seam.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -1289,11 +1291,11 @@ void _openReports(BuildContext context) {
 
 /// The rendered report "document" — the simulated print-to-PDF surface that the
 /// prototype's `downloadFinReport` opens in a print window. Verbatim copy.
-class _FinReportView extends StatelessWidget {
+class _FinReportView extends ConsumerWidget {
   const _FinReportView();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final repo = financeRepo();
     final pct = repo.budgetPct(); // == budgetPct() · round(spent/total*100)
     final left = repo.budgetTotal() - repo.budgetSpent(); // == kBudgetTotal - kBudgetSpent
@@ -1312,9 +1314,24 @@ class _FinReportView extends StatelessWidget {
           ),
           actions: [
             TextButton.icon(
-              onPressed: () {
-                // simulated print-to-PDF (no browser window in-app).
-                showToast(context, 'הדוח הופק — בחר "שמור כ-PDF" בחלון ההדפסה');
+              onPressed: () async {
+                // REAL print-to-PDF: build the document from the SAME data this
+                // view shows, then hand it to the print/save dialog (via the
+                // injectable seam so a test captures the doc).
+                final doc = await buildFinanceReportPdf(
+                  FinanceReportData(
+                    budgetTotal: repo.budgetTotal(),
+                    budgetSpent: repo.budgetSpent(),
+                    budgetPct: pct,
+                    balance: left,
+                    today: today,
+                    categories: repo.budgetCategories(),
+                  ),
+                );
+                await ref.read(pdfPrintProvider)(
+                  doc,
+                  name: 'BuildSmart-finance-report',
+                );
               },
               icon: const Icon(Icons.print, size: 18),
               label: const Text('הדפסה'),

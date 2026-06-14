@@ -9,7 +9,8 @@ import 'package:buildsmart/screens/home_shell.dart' show CartFab;
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
-import 'package:buildsmart/state/smart_cart.dart' show smartCartProvider;
+import 'package:buildsmart/state/smart_cart.dart'
+    show SmartCartLine, smartCartProvider;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -248,7 +249,23 @@ class _PredictStock extends ConsumerWidget {
                     const SizedBox(height: 8),
                     AiCardBtn(
                       label: 'הזמן עכשיו',
-                      onTap: () => showToast(context, 'נוסף לרשימת רכש מומלצת'),
+                      onTap: () {
+                        // REAL: add one unit of the running-out product to the
+                        // live cart, rebuilt from the genuine captured order-line
+                        // fields the forecast carries (name · emoji · unit price).
+                        ref.read(smartCartProvider.notifier).add(
+                              SmartCartLine(
+                                productKey: 'ai-restock:${p.name}',
+                                productName: p.name,
+                                productEmoji: p.emoji,
+                                brandName: 'מומלץ AI',
+                                brandPrice: p.unitPrice,
+                                productQty: 1,
+                                accessories: const [],
+                              ),
+                            );
+                        showToast(context, '${p.name} נוסף לסל');
+                      },
                     ),
                   ],
                 ],

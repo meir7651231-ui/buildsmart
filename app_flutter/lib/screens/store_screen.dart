@@ -5,6 +5,7 @@ import 'package:buildsmart/state/cart_lists_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/projects_engine.dart';
+import 'package:buildsmart/state/share_seam.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/store_settings.dart';
 import 'package:buildsmart/state/user_profile.dart';
@@ -3115,7 +3116,7 @@ class _CartActionsRow extends ConsumerWidget {
           style: TextButton.styleFrom(foregroundColor: Colors.black38),
         ),
         TextButton.icon(
-          onPressed: () {
+          onPressed: () async {
             final lines = ref.read(smartCartProvider);
             if (lines.isEmpty) {
               showToast(context, 'הסל ריק');
@@ -3127,11 +3128,11 @@ class _CartActionsRow extends ConsumerWidget {
                       '${l.productEmoji} ${l.productName} × ${l.productQty} = ₪${l.total}',
                 )
                 .join('\n');
-            showToast(
-              context,
-              'סל שותף:\n$items',
-              duration: const Duration(seconds: 3),
-            );
+            // Real share — hand the cart summary to the native/Web share sheet
+            // (via the injectable seam so a test captures the exact text).
+            final total = lines.fold<int>(0, (s, l) => s + l.total);
+            final text = 'סל BuildSmart:\n$items\n\nסה״כ: ₪$total';
+            await ref.read(shareTextProvider)(text);
           },
           icon: const Icon(Icons.share_outlined, size: 16),
           label: const Text('שתף'),

@@ -21,6 +21,7 @@ import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ── builders ──────────────────────────────────────────────────────────────
 Order _order(
@@ -81,6 +82,42 @@ void main() {
       expect(p.stock, 12); // live cart
       expect(p.days, 6); // 12 / 2
       expect(p.urgent, isFalse); // 6 > 3
+    });
+
+    test('carries REAL emoji + unit price from the latest order line', () {
+      // The forecast must surface the genuine captured fields the cart needs so
+      // "הזמן עכשיו" rebuilds a faithful line (no fabricated price/emoji).
+      // _line sets price = qty*10 ⇒ unit price 10; latest line wins.
+      final orders = [
+        Order(
+          id: 'BS-1',
+          who: 'בוחן',
+          site: 'אתר',
+          items: 1,
+          sum: 100,
+          stage: 'delivered',
+          createdAt: d0,
+          lines: const [
+            OrderLineItem(name: 'מלט', emoji: '🧱', qty: 10, price: 120),
+          ],
+        ),
+        Order(
+          id: 'BS-2',
+          who: 'בוחן',
+          site: 'אתר',
+          items: 1,
+          sum: 100,
+          stage: 'new',
+          createdAt: d10,
+          lines: const [
+            // Latest line — its emoji (🪨) + unit price (200/4 = 50) win.
+            OrderLineItem(name: 'מלט', emoji: '🪨', qty: 4, price: 200),
+          ],
+        ),
+      ];
+      final p = computeStockForecast(orders, [_cart('מלט', 12)], now: d10).single;
+      expect(p.emoji, '🪨'); // most-recent line's emoji
+      expect(p.unitPrice, 50); // round(200 / 4)
     });
 
     test('urgent (<=3 days) flag — fast consumption, little on hand', () {
@@ -264,6 +301,73 @@ void main() {
       // Computed note + the no-data state (seed orders carry no lines).
       expect(find.textContaining('מחושב מתוך היסטוריית ההזמנות'), findsOneWidget);
       expect(find.textContaining('אין עדיין היסטוריית צריכה'), findsOneWidget);
+    });
+
+    // LAUNCH FIX #3 — "הזמן עכשיו" was a dead toast; it now adds the running-out
+    // product to the REAL cart (rebuilt from the captured order-line fields).
+    testWidgets('"הזמן עכשיו" adds the recommended item to the live cart',
+        (t) async {
+      SharedPreferences.setMockInitialValues({});
+      // 90 units of PEX over a 9-day span → 10/day; 9 staged on hand → 1 day →
+      // URGENT, so the "הזמן עכשיו" button renders. Unit price = 450/45 = 10.
+      final orders = [
+        _order(
+          'BS-1',
+          100,
+          'delivered',
+          at: DateTime(2026, 6, 1),
+          lines: const [
+            OrderLineItem(name: 'PEX', emoji: '🟦', qty: 45, price: 450),
+          ],
+        ),
+        _order(
+          'BS-2',
+          100,
+          'new',
+          at: DateTime(2026, 6, 10),
+          lines: const [
+            OrderLineItem(name: 'PEX', emoji: '🟦', qty: 45, price: 450),
+          ],
+        ),
+      ];
+
+      late ProviderContainer container;
+      await t.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ordersEngineProvider.overrideWith(
+              (ref) => OrdersEngineNotifier(persist: false, seed: orders),
+            ),
+          ],
+          child: MaterialApp(
+            home: Builder(
+              builder: (ctx) {
+                container = ProviderScope.containerOf(ctx);
+                return const AIHubScreen();
+              },
+            ),
+          ),
+        ),
+      );
+      // Stage the on-hand stock the forecast reads (9 → 1-day runway, urgent).
+      container.read(smartCartProvider.notifier).add(_cart('PEX', 9));
+      await t.pumpAndSettle();
+
+      final before = container.read(smartCartProvider).length;
+
+      await t.tap(find.text('חיזוי מלאי'));
+      await t.pumpAndSettle();
+      await t.ensureVisible(find.text('הזמן עכשיו'));
+      await t.tap(find.text('הזמן עכשיו'));
+      await t.pumpAndSettle();
+
+      final lines = container.read(smartCartProvider);
+      expect(lines.length, before + 1); // a real line was appended
+      final added = lines.last;
+      expect(added.productKey, 'ai-restock:PEX');
+      expect(added.productName, 'PEX');
+      expect(added.productEmoji, '🟦'); // genuine captured emoji
+      expect(added.productQty, 1);
     });
   });
 }

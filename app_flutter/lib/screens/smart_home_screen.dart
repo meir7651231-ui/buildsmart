@@ -8,6 +8,8 @@ import 'package:buildsmart/screens/contractor_tools_sheets.dart'
     show openScanPlanSheet;
 import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/install_studio_screen.dart';
+import 'package:buildsmart/screens/lipskey_product_sheet.dart'
+    show showLipskeyProductSheet;
 import 'package:buildsmart/screens/site_hub_screen.dart' show openSiteHub;
 import 'package:buildsmart/screens/stock_screen.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
@@ -634,7 +636,18 @@ class _Favorites extends ConsumerWidget {
                   _MiniTile(
                     icon: Icons.star,
                     label: p.nameHe,
-                    onTap: () {},
+                    // Open the product sheet exactly like the catalog's own
+                    // favorites row (_FavProductRow) — siblings scoped to the
+                    // same category.
+                    onTap: () => showLipskeyProductSheet(
+                      context,
+                      p,
+                      ref
+                          .read(catalogRepositoryProvider)
+                          .allProducts()
+                          .where((q) => q.categoryHe == p.categoryHe)
+                          .toList(),
+                    ),
                   ),
               ],
             ),
