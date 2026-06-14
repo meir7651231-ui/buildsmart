@@ -8,6 +8,7 @@ import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/share_seam.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/store_settings.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -668,12 +669,17 @@ class _SectionChipsRow extends ConsumerWidget {
               active: section == StoreSection.orders,
               onTap: () => select(StoreSection.orders),
             ),
-            const SizedBox(width: 8),
-            _Pill(
-              label: '🔧 שירותים',
-              active: section == StoreSection.services,
-              onTap: () => select(StoreSection.services),
-            ),
+            // 🔧 שירותים — the whole section is "🚧 בבנייה" placeholder rows
+            // (backend-blocked). Hidden for Apple review (kHideUnderConstruction);
+            // the StoreSection enum + grid + sheets stay in code (reversible).
+            if (!kHideUnderConstruction) ...[
+              const SizedBox(width: 8),
+              _Pill(
+                label: '🔧 שירותים',
+                active: section == StoreSection.services,
+                onTap: () => select(StoreSection.services),
+              ),
+            ],
           ],
         ),
       ),
@@ -753,27 +759,33 @@ class _QuickActionsRow extends ConsumerWidget {
               },
             ),
           ),
-          Expanded(
-            child: _QuickAction(
-              icon: Icons.grid_view_rounded,
-              label: 'מועדים',
-              onTap: () => _showSheet(context, const _MoadimSheet()),
+          // מועדים / תזמון / שיחה open all-"בבנייה" placeholder sheets
+          // (every _SheetTile toasts "$label — בבנייה"). Hidden for Apple
+          // review; the sheets stay in code (reversible). מועדפים + כספים are
+          // real and always shown.
+          if (!kHideUnderConstruction) ...[
+            Expanded(
+              child: _QuickAction(
+                icon: Icons.grid_view_rounded,
+                label: 'מועדים',
+                onTap: () => _showSheet(context, const _MoadimSheet()),
+              ),
             ),
-          ),
-          Expanded(
-            child: _QuickAction(
-              icon: Icons.calendar_today_outlined,
-              label: 'תזמון',
-              onTap: () => _showSheet(context, const _TizmonSheet()),
+            Expanded(
+              child: _QuickAction(
+                icon: Icons.calendar_today_outlined,
+                label: 'תזמון',
+                onTap: () => _showSheet(context, const _TizmonSheet()),
+              ),
             ),
-          ),
-          Expanded(
-            child: _QuickAction(
-              icon: Icons.phone_outlined,
-              label: 'שיחה',
-              onTap: () => _showSheet(context, const _SichaSheet()),
+            Expanded(
+              child: _QuickAction(
+                icon: Icons.phone_outlined,
+                label: 'שיחה',
+                onTap: () => _showSheet(context, const _SichaSheet()),
+              ),
             ),
-          ),
+          ],
           Expanded(
             child: _QuickAction(
               icon: Icons.account_balance_wallet_outlined,
@@ -1131,7 +1143,7 @@ class _AllList extends ConsumerWidget {
                       : m,
             )
             .toList();
-    final items =
+    var items =
         query.isEmpty
             ? allItems
             : allItems
@@ -1141,6 +1153,20 @@ class _AllList extends ConsumerWidget {
                       item.preview.toLowerCase().contains(query),
                 )
                 .toList();
+
+    // Apple-readiness: the store hub mixes genuinely-wired tiles (🛒 cart / 📦
+    // orders) with placeholder tiles — some toast "$title — בבנייה" (_tapFor →
+    // null), others open the all-"בבנייה" service sheets (service-indexed).
+    // Hide BOTH placeholder kinds for review; the data lists stay intact
+    // (reversible). A tile survives only if it has a real non-service handler.
+    if (kHideUnderConstruction) {
+      items = [
+        for (final item in items)
+          if (_kServiceByEmoji[item.emoji] == null &&
+              _tapFor(context, ref, item, null) != null)
+            item,
+      ];
+    }
 
     if (items.isEmpty) {
       return _EmptyState(query: query);
@@ -4015,13 +4041,17 @@ class _OrderSheet extends ConsumerWidget {
             ),
             const SizedBox(height: 14),
             _OrderTimeline(stage: order.stage),
-            const SizedBox(height: 18),
-            OutlinedButton.icon(
-              onPressed:
-                  () => showToast(context, 'סריקת תעודת-משלוח (OCR) — בקרוב'),
-              icon: const Text('📄', style: TextStyle(fontSize: 16)),
-              label: const Text('סרוק תעודת-משלוח'),
-            ),
+            // 'סרוק תעודת-משלוח' is an OCR feature that does not exist (toast
+            // "(OCR) — בקרוב"). Hidden for Apple review; restored with the flag.
+            if (!kHideUnderConstruction) ...[
+              const SizedBox(height: 18),
+              OutlinedButton.icon(
+                onPressed: () =>
+                    showToast(context, 'סריקת תעודת-משלוח (OCR) — בקרוב'),
+                icon: const Text('📄', style: TextStyle(fontSize: 16)),
+                label: const Text('סרוק תעודת-משלוח'),
+              ),
+            ],
           ],
         ),
       ),

@@ -25,6 +25,7 @@ import 'package:buildsmart/data/contractor_seeds.dart' show fMoney;
 import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/state/persona_fulfillment.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
@@ -687,6 +688,12 @@ class ContractorMissingDecisionSheet extends ConsumerWidget {
                       );
                     },
                   ),
+                // The "cancel whole order" action. When wired (onCancelOrder !=
+                // null) it is a real destructive button. When NOT wired it would
+                // render a disabled "— בקרוב" placeholder, so we hide it entirely
+                // for Apple review (kHideUnderConstruction). Reversible: the
+                // button code is unchanged and reappears once wiring lands.
+                if (onCancelOrder != null || !kHideUnderConstruction) ...[
                 const SizedBox(height: BsTokens.space2),
                 OutlinedButton(
                   onPressed: onCancelOrder == null
@@ -729,6 +736,7 @@ class ContractorMissingDecisionSheet extends ConsumerWidget {
                     ),
                   ),
                 ),
+                ],
               ],
             ],
           ],

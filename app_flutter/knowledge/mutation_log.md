@@ -960,3 +960,8 @@
 - **מוטציה:** `if (d.employerId == employerId)` → `if (d.employerId != employerId)` (היפוך — הקבלן היה רואה את נוכחות כל-מי-שאינו-שלו).
 - **תוצאה:** **אדומה ✅** — 4 טסטי-scope נכשלו (lands-in-roster · unstamped-excluded · clockOut-preserves · deterministic-order). שוחזר ל-`==` ב-Edit (**לא** git checkout) → **+7 ירוק**.
 - **מסקנה:** בידוד-המעסיק load-bearing — הוא לב חיווט-קבלן↔עובד; היפוך-הפילטר דלף נוכחות חוצת-מעסיקים. שליחים מודרים-במבנה (חנות-נוכחות נפרדת), לא תלוי בפילטר הזה.
+## #C11 — Apple-readiness HIDE-pass (kHideUnderConstruction · kVisibleSearchIndex) — 2026-06-14
+- **קבצים (lib/state|lib/data):** `lib/state/under_construction.dart` (חדש — הדגל `kHideUnderConstruction` + `kHiddenSearchTitles`) · `lib/data/search_index.dart` (getter חדש `kVisibleSearchIndex` שמסנן placeholder-titles · ה-const `kSearchIndex` נשאר verbatim). (UI: `_SectionTile` ב-4 מסכי-הגדרות · `ai_hub_screen` `_visibleTiles`/`visibleToolIds` · chats/persona_portal/courier_portal_tab/persona_picking_sheet/tasks_screen guards.)
+- **תקלה שהוזרקה:** `kVisibleSearchIndex => kHideUnderConstruction ? […filtered] : kSearchIndex` שונה ל-`=> false // MUTATION` (כלומר תמיד מחזיר את הרשימה המלאה → 3 ה-titles ה-deferred דולפים לחיפוש החי).
+- **תוצאה:** `apple_readiness_hide_pass_test` 'kHiddenSearchTitles are absent from kVisibleSearchIndex' **אדומה `+0 -1`** ✅ נתפס (Expected isEmpty / Actual contains 'התאמה משולשת'…). שוחזר `cp /tmp/search_index.dart.bak lib/data/search_index.dart` (**לא** git checkout — לשמר את קוד-ה-C11) → **`+1` ירוק**.
+- **מסקנה:** ה-getter המסנן load-bearing; ה-hide הפיך (ה-const נשאר). gate: analyze 0-errors · full-suite +2300 · build web ✅.

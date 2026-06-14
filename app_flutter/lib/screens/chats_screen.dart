@@ -7,6 +7,7 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/sys_chat.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -1910,19 +1911,25 @@ void _showAttachSheet(BuildContext context) {
                 openCameraSheet(context);
               },
             ),
-            const ListTile(
-              leading: Icon(Icons.insert_drive_file_outlined,
-                  color: Colors.black38),
-              title: Text('מסמך'),
-              subtitle: Text('לא זמין בדמו'),
-              enabled: false,
-            ),
-            const ListTile(
-              leading: Icon(Icons.location_on_outlined, color: Colors.black38),
-              title: Text('מיקום'),
-              subtitle: Text('לא זמין בדמו'),
-              enabled: false,
-            ),
+            // Backend-blocked attachment kinds (document / location). Hidden for
+            // Apple review (kHideUnderConstruction) so no "לא זמין בדמו"
+            // placeholder shows; the rows stay in code (reversible).
+            if (!kHideUnderConstruction) ...[
+              const ListTile(
+                leading: Icon(Icons.insert_drive_file_outlined,
+                    color: Colors.black38),
+                title: Text('מסמך'),
+                subtitle: Text('לא זמין בדמו'),
+                enabled: false,
+              ),
+              const ListTile(
+                leading:
+                    Icon(Icons.location_on_outlined, color: Colors.black38),
+                title: Text('מיקום'),
+                subtitle: Text('לא זמין בדמו'),
+                enabled: false,
+              ),
+            ],
           ],
         ),
       ),

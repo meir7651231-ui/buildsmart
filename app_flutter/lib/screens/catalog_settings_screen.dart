@@ -5,6 +5,7 @@ import 'package:buildsmart/state/app_settings.dart';
 import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/state/recent_searches.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -746,8 +747,19 @@ class _SectionTile extends StatelessWidget {
   // Count only functional rows — exclude "בבנייה" placeholders.
   int get _activeCount => children.where((w) => w is! _PlaceholderRow).length;
 
+  // For Apple review (kHideUnderConstruction) we render only the functional
+  // rows; the _PlaceholderRow tiles stay defined in code (reversible) but are
+  // hidden from the visible list.
+  List<Widget> get _visibleChildren => kHideUnderConstruction
+      ? children.where((w) => w is! _PlaceholderRow).toList()
+      : children;
+
   @override
   Widget build(BuildContext context) {
+    // A section whose every row is a hidden placeholder disappears entirely.
+    if (kHideUnderConstruction && _visibleChildren.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       color: const Color(0xFFFFFFFF),
@@ -793,7 +805,7 @@ class _SectionTile extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          children: children,
+          children: _visibleChildren,
         ),
       ),
     );

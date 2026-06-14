@@ -2060,7 +2060,7 @@ class _SearchResultsList extends ConsumerWidget {
     final query = ref.watch(searchQueryProvider);
     final scope = ref.watch(searchScopeProvider);
 
-    final filtered = kSearchIndex.where((e) {
+    final filtered = kVisibleSearchIndex.where((e) {
       // When query is empty, skip text matching — show all items in scope.
       if (query.isNotEmpty && !e.matches(query)) return false;
       return switch (scope) {

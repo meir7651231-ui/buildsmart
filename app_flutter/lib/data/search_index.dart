@@ -2,6 +2,8 @@
 // Covers: bottom-nav tabs, BS personas + sub-trees, menu tabs + sub-trees,
 // settings groups + all deep leaves, catalog categories, search tools.
 
+import 'package:buildsmart/state/under_construction.dart';
+
 enum SearchType {
   screen,
   persona,
@@ -491,3 +493,16 @@ const List<SearchEntry> kSearchIndex = [
   SearchEntry(emoji: '📦', title: 'משלוח רגיל',                    breadcrumb: 'חנות › סל',    type: SearchType.action),
   SearchEntry(emoji: '🏪', title: 'איסוף עצמי',                    breadcrumb: 'חנות › סל',    type: SearchType.action),
 ];
+
+/// The live search index actually shown to users. For Apple review
+/// ([kHideUnderConstruction]) it drops entries that point at a now-hidden,
+/// backend-blocked feature ([kHiddenSearchTitles] — the AI deferred tools), so
+/// a reviewer can't search-navigate to a hidden placeholder. With the flag off
+/// it is `kSearchIndex` verbatim. The full const list is never mutated, so the
+/// hide is fully reversible.
+List<SearchEntry> get kVisibleSearchIndex => kHideUnderConstruction
+    ? [
+        for (final e in kSearchIndex)
+          if (!kHiddenSearchTitles.contains(e.title)) e,
+      ]
+    : kSearchIndex;
