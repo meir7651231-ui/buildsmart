@@ -9,6 +9,9 @@
 
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/screens/worker_task_detail_sheet.dart'
+    show taskPhotoWidget;
+import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/app_theme.dart';
@@ -475,16 +478,12 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
               if (t.photo != null) ...[
                 const SizedBox(height: BsTokens.space3),
                 const _SecH('תמונת ביצוע'),
-                Container(
-                  padding: const EdgeInsets.all(BsTokens.space4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF2F3F5),
-                    borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-                  ),
-                  child: Text('📷 תמונה מהשטח — ${kWorkers[t.worker]}',
-                      style: const TextStyle(
-                          color: BsTokens.mutedLight, fontSize: 13)),
-                ),
+                // #85ב — the SHARED dual-render helper: a real data-URL/https
+                // photo renders the actual image; the legacy 'demo' marker keeps
+                // its honest placeholder (and, under kHideUnderConstruction, the
+                // helper hides that placeholder entirely). The old static gray
+                // box never showed a real photo even when one existed.
+                taskPhotoWidget(t.photo, context: context),
               ],
               if (t.note.isNotEmpty && !canReport) ...[
                 const SizedBox(height: BsTokens.space3),
@@ -498,15 +497,20 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                 const SizedBox(height: BsTokens.space3),
                 const _SecH('דווח על הביצוע'),
                 OutlinedButton(
-                  onPressed: () {
-                    ref.read(tasksProvider.notifier).attachPhoto(t.id);
-                    // "(הדגמה)" suffix hidden for Apple review; the attach
-                    // affordance still works (legacy demo marker).
-                    showToast(
-                        context,
-                        kHideUnderConstruction
-                            ? 'תמונה צורפה'
-                            : 'תמונה צורפה (הדגמה)');
+                  onPressed: () async {
+                    // #85ב — a REAL capture (webcam on web / camera on mobile),
+                    // the SAME pickTaskPhoto flow the worker detail sheet uses;
+                    // null = honest cancel, nothing attached. We NEVER toast
+                    // "תמונה צורפה" without an actual photo (the old path stored
+                    // a fake 'demo' marker and claimed success — Apple blocker).
+                    final dataUrl = await pickTaskPhoto(context);
+                    if (!context.mounted) return;
+                    if (dataUrl == null) {
+                      showToast(context, 'לא צולמה תמונה');
+                      return;
+                    }
+                    ref.read(tasksProvider.notifier).attachPhoto(t.id, dataUrl);
+                    showToast(context, '📷 תמונת ההוכחה צורפה');
                   },
                   child: Text(t.photo != null
                       ? '📷 החלף תמונה'

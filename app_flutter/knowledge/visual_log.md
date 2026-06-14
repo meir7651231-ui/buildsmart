@@ -929,3 +929,15 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **לא הוסתר:** מחלקות-ריקות (בעלים) · electrician/renovation + קטגוריות-קטלוג חסרות-תוכן (sanctioned) · שפה ar/en (#53) · "מצב הדגמה" badge (session-indicator) · GPS/map/nav (C6) · worker-board.
 
 **אימות (בדיקת-widget+data):** `apple_readiness_hide_pass_test` (search filtered/reversible · `AIHubScreen.visibleToolIds` 6 ללא-deferred · B6 sort/filter · source-guard) · `settings_honesty_test` עודכן (placeholders findsNothing + שורה-פונקציונלית findsOneWidget). analyze 0-errors · full-suite +2300 · build web ✅ · mutation-verified (§mutation_log).
+
+## #C11 סבב-3 — דליפות "(הדגמה)"/"בקרוב" נוספות (מסקירת-audit) נסגרו (הפיך) — 2026-06-14
+
+**שינוי גלוי-לעין (6 דליפות נגישות):**
+- **משימות-צוות (board מנהל):** כפתור-העובד "דווח על הביצוע" פתח-קודם שקר-הצלחה — toast "תמונה צורפה" בלי תמונה (שמר marker 'demo'). כעת פותח **מצלמה אמיתית** (`pickTaskPhoto`, כמו ה-sheet) → ביטול=toast 'לא צולמה תמונה'; צילום=toast '📷 תמונת ההוכחה צורפה'. אזור "תמונת ביצוע" עבר מקופסה-אפורה-סטטית ל-`taskPhotoWidget` המשותף (מציג תמונה אמיתית).
+- **תמונת-הוכחה (כל ה-sites):** ה-marker הלגאסי 'demo' שהציג "📷 תמונה מהשטח (הדגמה)" — כעת **לא מוצג כלל** (`SizedBox.shrink`) ב-worker-sheet · manager-approvals · POD-preview. תמונה אמיתית לא מושפעת.
+- **קטלוג-מותג ליפסקי:** 2 קטגוריות ריקות ("אמבט ואגנית"/"מאספים וקולטים") שהציגו badge "בקרוב" מעומעם — מסוננות מהרשת (וספירת-הכותרת מתעדכנת). [ביטול החלטת-"נשאר" של סבב-2.]
+- **לוח-חנות:** כפתור "➕ סימולציית הזמנה נכנסת (כלי הדגמה)" מוסתר.
+- **פרופיל-מנהל:** badge "מצב הדגמה" מוסתר. [ביטול החלטת-"נשאר".] · **welcome:** "עדיין אין שרת התחברות … (דוגמה)" רוכך ל"נכנסים כאורח כדי לעיין באפליקציה."
+
+**הפיך:** הכל מאחורי `kHideUnderConstruction`; const/seeds/widgets נשארים — flip מחזיר.
+**אימות:** `apple_readiness_missed_leaks_test` 12/12 (helper-demo→shrink · data-URL-אמיתי-לא-מוסתר · lipskey-filter+const-הפיך · 6 source-guards) · analyze 6-הנגועים **0-errors/0-warnings** · color-ratchet ירוק · full-suite **+2397 -1** (ה-1 = `worker_reports_drilldown` קיים-מראש) · build web ✅ · mutation red `+4 -1`→green `+12` (§mutation_log). **לא נגעתי:** worker-board-v3/GPS/4-מחלקות-ריקות/docs_readiness_gate/backend-gating.

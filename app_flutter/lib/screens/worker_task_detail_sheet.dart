@@ -5,6 +5,7 @@ import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/services/voice.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -47,6 +48,12 @@ void submitWorkerTaskForReview(WidgetRef ref, int id, {String? note}) {
 /// row (`manager_dashboard_screen.dart`) so both sides see the same proof.
 Widget taskPhotoWidget(String? photo, {double height = 140, BuildContext? context}) {
   if (photo == null) return const SizedBox.shrink();
+  // Apple-readiness hide (reversible): the legacy 'demo' marker carries NO real
+  // image, so under [kHideUnderConstruction] its "(הדגמה)" placeholder is hidden
+  // entirely — every render site (worker sheet, manager approvals row, POD
+  // preview) collapses to nothing rather than showing a self-declared demo box.
+  // A REAL photo (data-URL / https) is unaffected; flip the flag to restore.
+  if (kHideUnderConstruction && photo == 'demo') return const SizedBox.shrink();
   // Dual-render (A14): a base64 data-URL decodes locally; an uploaded
   // `https://…` URL (kCloudPhotos ON) streams from R2 — both via the single
   // [imageProviderForRef] helper. A non-photo ref (legacy 'demo'/malformed)
