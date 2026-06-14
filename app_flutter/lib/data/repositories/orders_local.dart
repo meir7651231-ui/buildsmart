@@ -25,7 +25,44 @@ import 'package:buildsmart/state/auth_state.dart'
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'
     show CollectionReference, Filter, Query;
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// A5 — the OWN-leg ownership field each role's scoped orders query filters on.
+/// These are the SINGLE SOURCE the [_ordersScopeFor] branches build their
+/// `where(... == uid)` from, so a test can pin them WITHOUT a live Firestore
+/// (the `Filter`/`Query` the builder returns is otherwise un-introspectable).
+/// They MUST equal the field names `orders_firebase toDoc` writes AND the
+/// composite-index field names in `firestore.indexes.json` — a guard test
+/// asserts all three agree (a mismatch is the silent empty-scope bug class).
+///
+/// ⚠️ The contractor keys on `contractorUid` (the LANDED A3 ownership uid =
+/// the placer's auth.uid), NOT `contractorId` (the display name `Order.who`) —
+/// keying on the name would never equal an auth.uid → the scoped listen would
+/// match nothing → the contractor would never see their own orders.
+const String kOrdersContractorScopeField = 'contractorUid';
+const String kOrdersStoreScopeField = 'storeUid';
+const String kOrdersCourierScopeField = 'courierUid';
+
+/// A5 — the OWN-leg scope field for [role] in the [_ordersScopeFor] dialect
+/// (null role = contractor / main app). Pure → unit-testable; the real scope
+/// builder uses the SAME constants, so this is a faithful descriptor of the
+/// live wiring, not a parallel copy. Manager/admin scope on nothing (the god
+/// view) → null.
+@visibleForTesting
+String? debugOrdersScopeField(String? role) {
+  switch (role) {
+    case 'store':
+      return kOrdersStoreScopeField;
+    case 'courier':
+      return kOrdersCourierScopeField;
+    case 'manager':
+    case 'admin':
+      return null; // unscoped — the whole collection
+    default: // contractor (null) + any unknown/exotic role
+      return kOrdersContractorScopeField;
+  }
+}
 
 /// The local (in-memory + SharedPreferences) implementation of
 /// [OrdersRepository], backed by the live `ordersEngineProvider`. Holds a [Ref]
@@ -169,31 +206,31 @@ Query<Map<String, dynamic>> Function(
       return (c) => c.where(
             Filter.or(
               Filter.and(
-                Filter('storeUid', isEqualTo: ''),
+                Filter(kOrdersStoreScopeField, isEqualTo: ''),
                 Filter('stage', whereIn: _kStorePoolStages),
               ),
-              Filter('storeUid', isEqualTo: uid),
+              Filter(kOrdersStoreScopeField, isEqualTo: uid),
             ),
           );
     case 'courier':
       return (c) => c.where(
             Filter.or(
               Filter.and(
-                Filter('courierUid', isEqualTo: ''),
+                Filter(kOrdersCourierScopeField, isEqualTo: ''),
                 Filter('stage', whereIn: _kCourierPoolStages),
               ),
-              Filter('courierUid', isEqualTo: uid),
+              Filter(kOrdersCourierScopeField, isEqualTo: uid),
             ),
           );
     case 'manager':
     case 'admin':
       return null; // god view — the whole collection
     case null: // the contractor / main app (roleProvider's null dialect)
-      return (c) => c.where('contractorUid', isEqualTo: uid);
+      return (c) => c.where(kOrdersContractorScopeField, isEqualTo: uid);
     default:
       // An unknown/exotic role (e.g. 'worker') gets the contractor-style own
       // scope on contractorUid — never an unscoped god listen.
-      return (c) => c.where('contractorUid', isEqualTo: uid);
+      return (c) => c.where(kOrdersContractorScopeField, isEqualTo: uid);
   }
 }
 
