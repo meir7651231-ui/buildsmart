@@ -196,7 +196,7 @@ J6 (Google 14-day) מתחיל מוקדם ככל האפשר
 | login_sheet | אמיתי, אך gated מאחורי הדגל | uid |
 | finance_hub | FX מ‑kFxRates קבוע · PDF מדומה | external |
 | notif_settings | email/SMS/WhatsApp כבויים | external |
-| site_hub | צילום/GPS מדומים | device |
+| site_hub | ✅ (e1dea1c): GPS נייטיב אמיתי (geolocator) + צילום (C2); הרשאה‑דחויה→null כן | device |
 | contractor_tools | סריקת‑תוכנית מדומה | device |
 | catalog/chat/store_settings | שורות "נשמר אך לא משפיע" | placeholder |
 | departments | 4/9 מחלקות "בקרוב" | placeholder |
