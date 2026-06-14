@@ -20,6 +20,7 @@ import 'package:buildsmart/screens/persona_pod_sheet.dart';
 import 'package:buildsmart/screens/persona_portal.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/sys_orders.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -166,8 +167,10 @@ class CourierPortalTab extends ConsumerWidget {
           '${h.ic} ${h.name} · תוספת ${fMoney(h.extra)} · '
           'זמינים היום: ${kHaulAvailabilityDemo[h.id] ?? 0}',
         ),
-      // ביושר: הזמינות לעיל היא demo seed (SERVER-SWAP בקובץ זה).
-      _note('זמינות להדגמה — תוחלף בנתוני צי חיים עם חיבור השרת'),
+      // ביושר: הזמינות לעיל היא demo seed (SERVER-SWAP בקובץ זה). מוסתר
+      // ל-Apple review (אין הצגת "הדגמה"); הנתונים נשארים. הפיך.
+      if (!kHideUnderConstruction)
+        _note('זמינות להדגמה — תוחלף בנתוני צי חיים עם חיבור השרת'),
       const SizedBox(height: BsTokens.space2),
       _subhead('רכבי הצי'),
       for (final v in kFleet)
@@ -192,7 +195,7 @@ class CourierPortalTab extends ConsumerWidget {
       _subhead('אזורי שירות'),
       for (final z in kDistZones)
         _row('${z.name} · ${z.eta} · משלוח ${fMoney(z.fee)}'),
-      // ביושר: אין מפה בדמו — רשימה בלבד.
+      // ביושר: אין מפה בדמו — רשימה בלבד. (מפה/ניווט = C6 location fleet — לא נגעתי.)
       _note('תצוגת מפה אינה זמינה בדמו — מפה חיה תחובר עם חיבור השרת'),
     ]);
   }

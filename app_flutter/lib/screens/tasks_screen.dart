@@ -10,6 +10,7 @@
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
@@ -121,8 +122,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         .where((t) => t.status == 'review' || t.status == 'done')
         .toList();
     return [
-      const _Intro(
-        'בחר עובד כדי לראות את המשימות שלו (בהדגמה — באפליקציה אמיתית כל עובד מחובר לחשבון שלו).',
+      // The "(בהדגמה — ...)" clause is a visible demo disclaimer; hidden for
+      // Apple review (kHideUnderConstruction) — the instruction itself stays.
+      _Intro(
+        kHideUnderConstruction
+            ? 'בחר עובד כדי לראות את המשימות שלו.'
+            : 'בחר עובד כדי לראות את המשימות שלו (בהדגמה — באפליקציה אמיתית כל עובד מחובר לחשבון שלו).',
       ),
       const SizedBox(height: BsTokens.space2),
       _WorkerPick(selected: _worker, onSelect: (i) => setState(() => _worker = i)),
@@ -495,7 +500,13 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                 OutlinedButton(
                   onPressed: () {
                     ref.read(tasksProvider.notifier).attachPhoto(t.id);
-                    showToast(context, 'תמונה צורפה (הדגמה)');
+                    // "(הדגמה)" suffix hidden for Apple review; the attach
+                    // affordance still works (legacy demo marker).
+                    showToast(
+                        context,
+                        kHideUnderConstruction
+                            ? 'תמונה צורפה'
+                            : 'תמונה צורפה (הדגמה)');
                   },
                   child: Text(t.photo != null
                       ? '📷 החלף תמונה'

@@ -915,3 +915,17 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 **שינוי:** כפתור ✍️ ב-POD-sheet פתח placeholder כן "(הדגמה)"; כעת פותח **pad-ציור אמיתי** (`SignaturePadSheet`) — חתימה באצבע/עכבר על קנבס לבן, כפתורי נקה/שמור, השמור מושבת עד שיש דיו (אין חתימה מזויפת). החתימה נשמרת כ-PNG data-URL (`podSignature`) ומוצגת כתצוגה (כמו podPhoto).
 **אימות (בדיקת-widget):** `signature_pad_test` 8/8 — ציור→PNG-לא-ריק · dot · pad-ריק→null · save-פולט/מושבת-כשריק · preview-רנדר. analyze 0-errors · mutation-verified (§mutation_log). build web ב-pre-push gate.
+
+## #C11 — Apple-readiness HIDE-pass: placeholders "בבנייה"/"בקרוב"/"(הדגמה)" מוסתרים (הפיך) — 2026-06-14
+
+**שינוי:** ל-App Store review הוסתר כל placeholder גלוי של פיצ׳ר backend-blocked, דרך דגל-קומפילציה יחיד `kHideUnderConstruction` (`lib/state/under_construction.dart`, default true; הפיך — flip מחזיר הכל).
+- **מסכי-הגדרות:** ה-`_SectionTile` מסנן מ-`children` כל `_PlaceholderRow`/`_Inert.underConstruction`/`_SwitchRow.requiresServer`, ומרנדר `SizedBox.shrink()` לסקשן כולו-בבנייה או שכל שורותיו סוננו (store/notif/chat/catalog; ~79 פריטים). courier — ללא placeholders.
+- **AI-hub:** 3 ה-tiles deferred (התאמה משולשת/מזג-אוויר/זיהוי-בלאי · "⚙️ בפרודקשן") מסוננים מהרשת; הברז האמיתי 'סריקת תוכניות' (C7) **נשאר**.
+- **חיפוש:** `kVisibleSearchIndex` משמיט את 3 ה-deferred.
+- **צ׳אט:** שורות-צירוף "מסמך"/"מיקום" ("לא זמין בדמו") מוסתרות — נשאר "מצלמה".
+- **portal:** הערות "נתוני הדגמה"/"זמינות להדגמה" מוסתרות (הנתונים עצמם נשארים).
+- **persona_picking:** כפתור 'ביטול ההזמנה כולה — בקרוב' מוסתר כשלא-מחווט.
+- **משימות:** clause "(בהדגמה…)" + suffix toast "(הדגמה)" מותנים בדגל.
+- **לא הוסתר:** מחלקות-ריקות (בעלים) · electrician/renovation + קטגוריות-קטלוג חסרות-תוכן (sanctioned) · שפה ar/en (#53) · "מצב הדגמה" badge (session-indicator) · GPS/map/nav (C6) · worker-board.
+
+**אימות (בדיקת-widget+data):** `apple_readiness_hide_pass_test` (search filtered/reversible · `AIHubScreen.visibleToolIds` 6 ללא-deferred · B6 sort/filter · source-guard) · `settings_honesty_test` עודכן (placeholders findsNothing + שורה-פונקציונלית findsOneWidget). analyze 0-errors · full-suite +2300 · build web ✅ · mutation-verified (§mutation_log).

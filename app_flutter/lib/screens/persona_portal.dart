@@ -3,6 +3,7 @@ import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/state/store_stock.dart';
 import 'package:buildsmart/state/sys_chat.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -244,8 +245,10 @@ class _PortalSheet extends ConsumerWidget {
             _row('⭐ ${r.score} · ${r.orders} הזמנות · ${r.onTime}% בזמן'),
           // F-48 — ביושר: kSupplierRatings הוא seed קבוע מהפרוטוטייפ, לא נגזרת
           // של מנוע ההזמנות החי (SERVER-SWAP) — אותו דפוס _note כמו בפורטל
-          // השליח (courier_portal_tab.dart).
-          _note('נתוני הדגמה (seed מהפרוטוטייפ) — יוחלפו בנתונים חיים עם חיבור השרת'),
+          // השליח (courier_portal_tab.dart). מוסתר ל-Apple review (הערת "הדגמה"
+          // אינה מוצגת); השורות עצמן נשארות. הפיך — flip kHideUnderConstruction.
+          if (!kHideUnderConstruction)
+            _note('נתוני הדגמה (seed מהפרוטוטייפ) — יוחלפו בנתונים חיים עם חיבור השרת'),
         ];
       case PortalKind.zones:
         return [

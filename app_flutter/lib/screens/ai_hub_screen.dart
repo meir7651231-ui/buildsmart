@@ -11,6 +11,7 @@ import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
 import 'package:buildsmart/state/smart_cart.dart'
     show SmartCartLine, smartCartProvider;
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +55,29 @@ class AIHubScreen extends ConsumerWidget {
     (id: 'wear', ic: '🔧', t: 'זיהוי בלאי', s: 'תחזוקת ציוד'),
     (id: 'analytics', ic: '📊', t: 'Analytics חכם', s: 'תובנות ומגמות'),
   ];
+
+  /// The DEFERRED tools — each needs an EXTERNAL data source the app does not
+  /// hold (supplier delivery-note/invoice docs · a weather API · IoT sensors),
+  /// so their feature view renders a visible "⚙️ בפרודקשן" placeholder. For
+  /// Apple review ([kHideUnderConstruction]) these tiles are filtered out of the
+  /// hub grid; the tile data + feature views stay in code (reversible) and the
+  /// matching `kAiDeferredSearchTitles` keep them out of the live search index.
+  static const Set<String> _deferredToolIds = {'3way', 'weather', 'wear'};
+
+  /// The DEFERRED (backend-blocked) tool ids — exposed for tests/guards.
+  static Set<String> get deferredToolIds => _deferredToolIds;
+
+  /// The visible tiles for this build — all 9 unless we are hiding the deferred
+  /// (backend-blocked) ones for Apple review.
+  static List<({String id, String ic, String t, String s})> get _visibleTiles =>
+      kHideUnderConstruction
+          ? [for (final t in _tiles) if (!_deferredToolIds.contains(t.id)) t]
+          : _tiles;
+
+  /// The tool ids actually rendered on the hub grid this build — the single
+  /// source of truth tests assert against (no fragile widget pump needed).
+  static List<String> get visibleToolIds =>
+      [for (final t in _visibleTiles) t.id];
 
   /// REAL barcode — scan, push the code into the live catalog search, land on
   /// the catalog tab. Mirrors catalog_screen.dart:1721-1726.
@@ -123,7 +147,7 @@ class AIHubScreen extends ConsumerWidget {
               crossAxisSpacing: BsTokens.space3,
               childAspectRatio: 1.45,
               children: [
-                for (final t in _tiles)
+                for (final t in _visibleTiles)
                   AiFinTile(
                     ic: t.ic,
                     title: t.t,

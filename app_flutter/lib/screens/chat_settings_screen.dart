@@ -1,5 +1,6 @@
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/state/chat_settings.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -730,13 +731,30 @@ class _SectionTile extends StatelessWidget {
   // honest "בבנייה" subtitle and suppress the active-count badge (Wave 8 / D2).
   final bool underConstruction;
 
+  // A row is a backend-blocked "under construction" placeholder when it is a
+  // _PlaceholderRow or an _Inert row flagged underConstruction. Single source of
+  // truth for both the active-count badge and the Apple-readiness hide-filter.
+  static bool _isUnderConstruction(Widget w) =>
+      w is _PlaceholderRow ||
+      (w is _Inert && (w as _Inert).underConstruction);
+
   // Count only functional rows — exclude "בבנייה" placeholders.
-  int get _activeCount => children
-      .where((w) => w is! _PlaceholderRow && !(w is _Inert && (w as _Inert).underConstruction))
-      .length;
+  int get _activeCount => children.where((w) => !_isUnderConstruction(w)).length;
+
+  // For Apple review (kHideUnderConstruction) we render only the functional
+  // rows; the placeholder rows stay defined in code (reversible) but are hidden.
+  List<Widget> get _visibleChildren => kHideUnderConstruction
+      ? children.where((w) => !_isUnderConstruction(w)).toList()
+      : children;
 
   @override
   Widget build(BuildContext context) {
+    // A whole section that is itself "under construction" — or one whose every
+    // row is a hidden placeholder — disappears entirely for Apple review.
+    if (kHideUnderConstruction &&
+        (underConstruction || _visibleChildren.isEmpty)) {
+      return const SizedBox.shrink();
+    }
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       color: const Color(0xFFFFFFFF),
@@ -791,7 +809,7 @@ class _SectionTile extends StatelessWidget {
                   ),
                 )
               : null,
-          children: children,
+          children: _visibleChildren,
         ),
       ),
     );

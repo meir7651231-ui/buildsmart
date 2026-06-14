@@ -17,6 +17,7 @@ import 'package:buildsmart/state/catalog_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/help_mode.dart';
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/state/under_construction.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -908,21 +909,24 @@ class _StoreMenuButton extends ConsumerWidget {
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onSelected: (value) => _onSelected(context, ref, value),
-      itemBuilder: (_) => const [
-        PopupMenuItem<String>(
+      itemBuilder: (_) => [
+        const PopupMenuItem<String>(
           value: 'cart',
           child: _MenuRow(emoji: '🛒', label: 'הסל שלי'),
         ),
-        PopupMenuItem<String>(
+        const PopupMenuItem<String>(
           value: 'orders',
           child: _MenuRow(emoji: '📦', label: 'הזמנות'),
         ),
-        PopupMenuItem<String>(
-          value: 'services',
-          child: _MenuRow(emoji: '🔧', label: 'שירותים'),
-        ),
-        PopupMenuDivider(),
-        PopupMenuItem<String>(
+        // 🔧 שירותים opens the all-"בבנייה" services section — hidden for Apple
+        // review (kHideUnderConstruction); the route + section stay (reversible).
+        if (!kHideUnderConstruction)
+          const PopupMenuItem<String>(
+            value: 'services',
+            child: _MenuRow(emoji: '🔧', label: 'שירותים'),
+          ),
+        const PopupMenuDivider(),
+        const PopupMenuItem<String>(
           value: 'settings',
           child: _MenuRow(emoji: '⚙️', label: 'הגדרות'),
         ),
