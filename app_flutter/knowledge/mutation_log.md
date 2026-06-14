@@ -886,3 +886,10 @@
 ### 2026-06-14 — גל-D פוליש (#98 · נחיל אמיתי)
 - **`lib/state/vacation_requests.dart:132` — back-compat decode של role:** מוטציה — `: 'worker'` → `: 'courier'` (ברירת-מחדל ל-payload ישן בלי 'role'). הבדיקה החדשה 'P-12 worker filter — an OLD payload without role is counted as the worker's (back-compat)' **אדומה** (Expected ['vac-legacy-demo'] / Actual []) + #86.3 back-compat האדים גם → ✅ נתפס; שוחזר byte-clean → 13/13 ירוק.
 - **כיסוי כן:** סינון-המסך של P-12 (worker_forms_screen.dart, r.role=='worker') מכוסה רק עקיפות — ה-unit-test משכפל את ביטוי-הסינון ומאמת את מודל-ה-role/back-compat שעליו הוא נשען, לא קורא מה-widget. דפקט-המודל (back-compat) כן נתפס במוטציה; רגרסיה בשורת-המסך עצמה תיתפס רק ב-widget-test ייעודי (לא נכתב — פוליש).
+
+## podSignature / strokesToPngDataUrl — pad-חתימת-POD אמיתי — 2026-06-14
+- **קובץ:** `test/signature_pad_test.dart` (חדש) · helper חדש `strokesToPngDataUrl` (`lib/widgets/signature_pad.dart`).
+- **מה עושה:** נועל ש-strokes אמיתיים → PNG data-URL לא-ריק (PNG-magic), dot→חתימה, pad-ריק→**null** (אין זיוף), ושה-save פולט data-URL לא-ריק / מושבת כשריק.
+- תקלה שהוזרקה: encode-success `return 'data:image/png;base64,${base64Encode(bytes)}'` → `return null`.
+- תוצאה: **אדומה ✅** — 4 נכשלו ('Expected: not null' · preview/save/dot). שוחזר `cp /tmp/sig.bak` (**לא** git checkout) → **+8 ירוק**.
+- מסקנה: ה-encode load-bearing; pad-ריק→null אמיתי. אימות-orchestrator **fast-mode** (ממוקד + מוטציה-ממוקדת; הסוויטה המלאה ב-pre-push build-gate).

@@ -8,13 +8,16 @@
 // dialog (screens/webcam_capture_sheet.dart; the browser file picker only as
 // the honest fallback on a webcam ERROR), on mobile the device camera with a
 // one-shot gallery retry. A cancel/failure returns null and NOTHING is stored
-// — no fake capture, no demo toast. The ✍️ signature button remains an honest
-// "(הדגמה)" placeholder awaiting its own spec (pad not yet specified).
+// — no fake capture, no demo toast. The ✍️ signature button now opens a REAL
+// on-device signature pad (widgets/signature_pad.dart): the recipient signs
+// with finger/mouse, the strokes rasterize to a PNG data-URL stored as
+// podSignature — NO backend, NO fake. An empty pad cannot save; a cancel
+// stores nothing.
 //
-// POD state (podPhoto data-URL + podCaptured / podSigned) is held in
-// state/persona_fulfillment.dart keyed by order id and PERSISTED
-// (`bs.fulfillment.v1`), so the photo and the "נחתם ✓ / ממתין" pill survive a
-// restart — and the SAME podPhoto string is what the store's delivered card
+// POD state (podPhoto + podSignature data-URLs + podCaptured / podSigned) is
+// held in state/persona_fulfillment.dart keyed by order id and PERSISTED
+// (`bs.fulfillment.v1`), so the photo, the signature and the "נחתם ✓ / ממתין"
+// pill survive a restart — and the SAME strings are what the store's delivered card
 // and the manager render (both sides see one source of truth). The order
 // stage advance to `delivered` stays on the shared two-step hand-off
 // (sysOrdersProvider.courierAdvance) — POD does not bypass it.
@@ -37,6 +40,7 @@ import 'package:buildsmart/state/sys_orders.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
+import 'package:buildsmart/widgets/signature_pad.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -259,12 +263,18 @@ class PersonaPodSheet extends ConsumerWidget {
             ),
             const SizedBox(height: BsTokens.space2),
 
-            // ✍️ חתימה — honest "(הדגמה)" placeholder: the toast says so
-            // explicitly; a real signature pad awaits its own spec.
+            // ✍️ חתימה — opens a REAL on-device signature pad
+            // (widgets/signature_pad.dart). The recipient signs; the strokes
+            // rasterize to a PNG data-URL stored as podSignature (podSigned then
+            // reads true honestly — only with a real image). null = cancel /
+            // empty pad → nothing stored, no success toast.
             OutlinedButton(
-              onPressed: () {
-                fn.captureSignature(orderId);
-                showToast(context, 'החתימה נשמרה ✍️ (הדגמה)');
+              onPressed: () async {
+                final sig = await openSignaturePad(context);
+                if (sig == null || !context.mounted) return;
+                fn.captureSignature(orderId, sig);
+                if (!context.mounted) return;
+                showToast(context, 'החתימה נשמרה ✍️');
               },
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 13),
@@ -273,15 +283,25 @@ class PersonaPodSheet extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                 ),
               ),
-              child: const Text(
-                '✍️ חתימה',
-                style: TextStyle(
+              child: Text(
+                f.podSignature == null ? '✍️ חתימה' : '✍️ חתום מחדש',
+                style: const TextStyle(
                   color: BsTokens.inkLight,
                   fontWeight: FontWeight.w700,
                   fontSize: 13.5,
                 ),
               ),
             ),
+
+            // REAL captured signature preview — the recipient's signed PNG,
+            // rendered via the SHARED [taskPhotoWidget] (the same dual-render
+            // seam the POD photo uses: a data-URL today, an uploaded https URL
+            // when kCloudPhotos is ON). Shown only once a signature exists — no
+            // signature → nothing here (never a fake preview).
+            if (f.podSignature != null) ...[
+              const SizedBox(height: BsTokens.space2),
+              taskPhotoWidget(f.podSignature, height: 110),
+            ],
 
             // Confirm-delivery shortcut — only when the order is actually on the
             // road (transit) and a REAL POD photo exists (a legacy simulated

@@ -47,10 +47,12 @@ class Fulfillment {
     this.splitInto = 1,
     this.splitPlan = const [],
     this.podPhoto,
+    this.podSignature,
     bool podCaptured = false,
-    this.podSigned = false,
+    bool podSigned = false,
     this.courierUser,
-  }) : _podCaptured = podCaptured;
+  })  : _podCaptured = podCaptured,
+        _podSignedFlag = podSigned;
 
   /// line-index → status. Absent index ⇒ [LineStatus.pending].
   final Map<int, LineStatus> lineStatus;
@@ -75,13 +77,24 @@ class Fulfillment {
   /// (fromJson honestly drops those).
   final String? podPhoto;
 
+  /// Courier POD signature — the REAL captured signature as a data-URL string
+  /// (`data:image/png;base64,…`), produced ON-DEVICE by the signature pad
+  /// (widgets/signature_pad.dart) rasterizing the recipient's strokes to a PNG;
+  /// or, when `kCloudPhotos` is ON, an uploaded `https://…` R2 URL (same dual
+  /// form as [podPhoto]). Null ⇒ no signature yet, including legacy pre-pad
+  /// records whose simulated boolean flag carried no image. [podSigned] is true
+  /// ONLY when this is non-null (honest — never a demo).
+  final String? podSignature;
+
   /// Round-trip backing for [podCaptured] (json `podCaptured`) — the photo
   /// bytes themselves live ONLY in the `bs.pod-photos.v1` side-map (single
   /// copy), so the compact side-car payload carries just this flag.
   final bool _podCaptured;
 
-  /// Courier POD signature captured (proto `openSignature`, simulated).
-  final bool podSigned;
+  /// Round-trip backing for [podSigned]. True ONLY when a real [podSignature]
+  /// exists (or a hydrated legacy flag) — there is no "signed but no image"
+  /// honest state for a fresh capture; the pad cannot save an empty signature.
+  final bool _podSignedFlag;
 
   /// COURIER v2 (#86.6): username of the courier who captured the POD /
   /// marked delivered — stamped at the action points by the logged-in courier
@@ -103,6 +116,13 @@ class Fulfillment {
   /// delivery-job card, store delivered card) keys off the same record.
   bool get podCaptured => podPhoto != null || _podCaptured;
 
+  /// True ONLY with a REAL signature — a captured [podSignature] data-URL (or a
+  /// hydrated legacy flag from a pre-pad record). Honest: a fresh save sets this
+  /// solely because an actual signature image exists; the pad cannot produce an
+  /// empty/demo one. Every reader (the POD sheet pill, the store delivered card)
+  /// keys off the same record.
+  bool get podSigned => podSignature != null || _podSignedFlag;
+
   /// NOTE — `??` semantics: no field can be RESET to null/default through
   /// copyWith (e.g. [courierUser]); construct a fresh record if that is ever
   /// needed.
@@ -113,6 +133,7 @@ class Fulfillment {
     int? splitInto,
     List<int>? splitPlan,
     String? podPhoto,
+    String? podSignature,
     bool? podSigned,
     String? courierUser,
   }) => Fulfillment(
@@ -122,8 +143,11 @@ class Fulfillment {
     splitInto: splitInto ?? this.splitInto,
     splitPlan: splitPlan ?? this.splitPlan,
     podPhoto: podPhoto ?? this.podPhoto,
+    podSignature: podSignature ?? this.podSignature,
     podCaptured: _podCaptured,
-    podSigned: podSigned ?? this.podSigned,
+    // The flag follows the same `??` keep-semantics as the other fields; a
+    // captured podSignature makes podSigned true via the getter regardless.
+    podSigned: podSigned ?? _podSignedFlag,
     courierUser: courierUser ?? this.courierUser,
   );
 
@@ -138,7 +162,13 @@ class Fulfillment {
     // the single copy of the bytes; only the compact flag rides the side-car
     // (so a line toggle never re-serializes megabytes of photos).
     if (podCaptured) 'podCaptured': true,
-    if (podSigned) 'sig': true,
+    // The signature PNG is tiny (~few KB of mostly-white pixels), so unlike the
+    // POD photo it rides the side-car directly — a guarded write when present
+    // (like a real podPhoto would be). The boolean is only emitted for a legacy
+    // signed-but-imageless record (back-compat); a fresh record's 'sig' is
+    // implied by the presence of 'podSig'.
+    if (podSignature != null) 'podSig': podSignature,
+    if (podSigned && podSignature == null) 'sig': true,
     if (courierUser != null) 'cu': courierUser,
   };
 
@@ -175,7 +205,12 @@ class Fulfillment {
       // back-compat; new writes keep the bytes only in bs.pod-photos.v1); a
       // pre-v2 simulated boolean `true` carried no image → honest null.
       podPhoto: j['pod'] is String ? j['pod'] as String : null,
+      // The real signature data-URL rides the side-car under 'podSig'; a
+      // malformed/absent value → honest null (no signature).
+      podSignature: j['podSig'] is String ? j['podSig'] as String : null,
       podCaptured: j['podCaptured'] == true,
+      // 'sig' is the legacy pre-pad signed flag (carried no image); a fresh
+      // record's podSigned is implied by 'podSig' via the getter.
       podSigned: j['sig'] == true,
       // Old payloads without 'cu' (or a wrong type) → honestly null.
       courierUser: j['cu'] is String ? j['cu'] as String : null,
@@ -483,9 +518,14 @@ class FulfillmentNotifier extends StateNotifier<Map<String, Fulfillment>> {
     }
   }
 
-  /// `openSignature` [L20842] — simulated signature capture.
-  void captureSignature(String id) =>
-      _put(id, of(id).copyWith(podSigned: true));
+  /// `openSignature` [L20842] — REAL signature capture. Stores the [dataUrl]
+  /// produced ON-DEVICE by the signature pad (widgets/signature_pad.dart
+  /// rasterizing the recipient's strokes to a PNG); podSigned then reads true
+  /// because a real signature image exists (the getter keys off podSignature).
+  /// Honest: there is no empty-save path — the pad never hands back a blank
+  /// data-URL, and a caller must not invoke this without one.
+  void captureSignature(String id, String dataUrl) =>
+      _put(id, of(id).copyWith(podSignature: dataUrl));
 
   void clear(String id) {
     state = {...state}..remove(id);

@@ -1900,3 +1900,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **נדחה (#99):** rewardsProvider device-global → per-username + workerNotifs role-scope (refactor מעבר לחלון-פוליש); בינתיים תווית כנה 'BuildCoins (מועדון משותף)' בלוח-העובד.
 - **כיסוי-בדיקות:** +3 בדיקות (P-12 בידוד-role בחופשה · P-5 אין שורת-פרופיל בהגדרות · P-15 sent-guard נוכחות) — כותב-הבדיקות עטה ממד-3. הערת-כיסוי כנה: ה-P-12 unit-test משכפל את ביטוי-הסינון של המסך (מאמת את מודל-ה-role+back-compat), לא קורא מה-widget — סינון-המסך עצמו מכוסה רק עקיף.
 - Gate: analyze 0 · GATE PASS (conformance 7/7 · required-tests 6/6 · build web) · mutation red→green. v6.17→v6.18.
+
+### #POD-signature — pad-חתימה אמיתי (החלפת ה-(הדגמה)) — 2026-06-14
+- **`lib/widgets/signature_pad.dart` (חדש):** pad-ציור client אמיתי — אצבע (מובייל)/עכבר (web) → strokes → `ui.PictureRecorder`→`Picture.toImage`→PNG→`data:image/png;base64,…` (headless-safe ב-flutter test, בלי backend/package). pad-ריק → null; השמור מושבת עד דיו — **אין חתימה מזויפת**.
+- **`persona_fulfillment.dart`:** שדה `podSignature` (String? — additive: ctor/copyWith/toJson-guarded/fromJson-default כמו podPhoto). `podSigned` אמיתי רק כשקיימת `podSignature`.
+- **`persona_pod_sheet.dart`:** ✍️ פותח את ה-pad → שומר → `podSignature`+`podSigned=true` + toast כן ("החתימה נשמרה ✍️" — **הוסר ה-"(הדגמה)"**). תצוגה דרך helper-התמונות. server-swap: כש-`kCloudPhotos` ON החתימה (PNG אמיתי) זורמת דרך אותו נתיב R2 (kind `pod`).
+- **אימות (orchestrator fast-verify — ממוקד, לא הסוויטה המלאה):** analyze **0 errors** · `signature_pad_test` (8) + `persona_fulfillment_test` ירוקים (ציור→PNG-לא-ריק/dot/pad-ריק→null/round-trip/preview). **מוטציה:** encode-success `return 'data:…base64,${base64Encode(bytes)}'`→`return null` ⇒ 4 אדום ('Expected: not null') → `cp /tmp/sig.bak` (לא git checkout) → +8 ירוק. הסוויטה המלאה מאומתת ב-pre-push build-gate.

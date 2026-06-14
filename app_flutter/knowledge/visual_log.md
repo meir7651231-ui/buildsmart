@@ -910,3 +910,8 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - עובד: גווני-יציאה/הסר-תמונה כהים יותר (dangerDark, AA) · כפתור-השעון וכפתורי-המילוי עם טקסט bsOnAccent (ניגודיות).
 - רובם בלתי-נראים-לעין (נגישות לקוראי-מסך, cacheWidth לזיכרון, מגני-double-tap) — אך אמיתיים ומאומתים.
 - אימות: GATE PASS עם מאניפסטים · mutation red→green.
+
+## #POD-signature — pad-חתימה אמיתי (במקום "(הדגמה)") — 2026-06-14
+
+**שינוי:** כפתור ✍️ ב-POD-sheet פתח placeholder כן "(הדגמה)"; כעת פותח **pad-ציור אמיתי** (`SignaturePadSheet`) — חתימה באצבע/עכבר על קנבס לבן, כפתורי נקה/שמור, השמור מושבת עד שיש דיו (אין חתימה מזויפת). החתימה נשמרת כ-PNG data-URL (`podSignature`) ומוצגת כתצוגה (כמו podPhoto).
+**אימות (בדיקת-widget):** `signature_pad_test` 8/8 — ציור→PNG-לא-ריק · dot · pad-ריק→null · save-פולט/מושבת-כשריק · preview-רנדר. analyze 0-errors · mutation-verified (§mutation_log). build web ב-pre-push gate.

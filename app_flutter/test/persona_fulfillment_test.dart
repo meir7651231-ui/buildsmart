@@ -127,8 +127,28 @@ void main() {
       expect(n.of('BS-1039').podCaptured, isTrue);
       expect(n.of('BS-1039').podPhoto, startsWith('data:image'));
       expect(n.of('BS-1039').podSigned, isFalse);
-      n.captureSignature('BS-1039');
+      // Signature is now a REAL captured PNG data-URL (no demo flag): podSigned
+      // reads true ONLY because podSignature is set.
+      n.captureSignature('BS-1039', 'data:image/png;base64,SIGN');
+      expect(n.of('BS-1039').podSignature, 'data:image/png;base64,SIGN');
       expect(n.of('BS-1039').podSigned, isTrue);
+    });
+
+    test('captureSignature stores a real data-URL; podSigned keys off it',
+        () async {
+      final n = fn();
+      expect(
+        n.of('BS-2001').podSigned,
+        isFalse,
+        reason: 'no signature → honestly unsigned',
+      );
+      n.captureSignature('BS-2001', 'data:image/png;base64,ABCD');
+      expect(n.of('BS-2001').podSignature, 'data:image/png;base64,ABCD');
+      expect(
+        n.of('BS-2001').podSigned,
+        isTrue,
+        reason: 'podSigned is true ONLY when a real signature exists',
+      );
     });
   });
 
@@ -161,12 +181,14 @@ void main() {
     test('stampCourier מציב username בלי לגעת בשדות ה-POD', () async {
       final n = fn();
       await n.capturePod('BS-1039', 'data:image/png;base64,AAAA');
-      n.captureSignature('BS-1039');
+      n.captureSignature('BS-1039', 'data:image/png;base64,SIGN');
       n.stampCourier('BS-1039', 'noam');
       final f = n.of('BS-1039');
       expect(f.courierUser, 'noam');
       expect(f.podPhoto, 'data:image/png;base64,AAAA',
           reason: 'copyWith keeps the captured photo');
+      expect(f.podSignature, 'data:image/png;base64,SIGN',
+          reason: 'copyWith keeps the captured signature');
       expect(f.podSigned, isTrue, reason: 'copyWith keeps the signature');
       expect(f.podCaptured, isTrue);
     });
@@ -209,6 +231,39 @@ void main() {
       expect(back.podCaptured, isTrue);
       expect(back.podSigned, isTrue);
       expect(back.courierUser, 'noam');
+    });
+
+    test('podSignature round-trips via podSig (guarded when null, like podPhoto)',
+        () {
+      // Present: written under 'podSig'; podSigned implied by it (no 'sig').
+      const signed = Fulfillment(
+        podSignature: 'data:image/png;base64,SIGNBYTES',
+      );
+      final j = signed.toJson();
+      expect(j['podSig'], 'data:image/png;base64,SIGNBYTES');
+      expect(
+        j.containsKey('sig'),
+        isFalse,
+        reason: 'a fresh record implies signed via podSig, not the legacy flag',
+      );
+      final back = Fulfillment.fromJson(j);
+      expect(back.podSignature, 'data:image/png;base64,SIGNBYTES');
+      expect(
+        back.podSigned,
+        isTrue,
+        reason: 'podSigned keys off the restored signature image',
+      );
+
+      // Absent: guarded — neither key is emitted, fromJson defaults null.
+      const unsigned = Fulfillment();
+      expect(unsigned.toJson().containsKey('podSig'), isFalse);
+      expect(Fulfillment.fromJson(const {}).podSignature, isNull);
+
+      // Legacy pre-pad record: 'sig' boolean with no image → still signed, but
+      // no signature image (honest back-compat).
+      final legacy = Fulfillment.fromJson(const {'sig': true});
+      expect(legacy.podSigned, isTrue);
+      expect(legacy.podSignature, isNull);
     });
 
     test('an empty record serializes to {} and round-trips to empty', () {
@@ -302,13 +357,15 @@ void main() {
       addTearDown(c.dispose);
       final n = c.read(fulfillmentProvider.notifier);
 
-      n.captureSignature('BS-NEW'); // synchronous write BEFORE _load resolves
+      // synchronous write BEFORE _load resolves (a real signature data-URL)
+      n.captureSignature('BS-NEW', 'data:image/png;base64,SIGN');
       await _settle();
 
       // In memory: the fresh write survived (#24) AND the disk record was
       // folded under it.
       expect(n.of('BS-NEW').podSigned, isTrue,
           reason: 'the fresh mutation must survive the late prefs load');
+      expect(n.of('BS-NEW').podSignature, 'data:image/png;base64,SIGN');
       expect(n.of('BS-OLD').podSigned, isTrue,
           reason: 'the seeded record is folded under, not clobbered');
       expect(n.of('BS-OLD').courierUser, 'dana',
