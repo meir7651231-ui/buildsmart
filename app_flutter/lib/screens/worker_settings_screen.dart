@@ -298,11 +298,19 @@ class _InfoSection extends StatelessWidget {
   }
 }
 
-// ─── shared section card ─────────────────────────────────────────────────────
+// ─── shared section card (#102 accordion) ────────────────────────────────────
 
-/// A flat (non-expandable) settings section card — the worker board has few
-/// rows per area, so everything stays visible (no ExpansionTile needed).
-class _SectionCard extends StatelessWidget {
+/// 🪗 #102-accordion-section-card — a collapsible settings section card.
+/// Each area (region / accessibility / info) renders as a card that is CLOSED
+/// by default: only the emoji + title header with a chevron is visible, and the
+/// section's [children] are revealed when the header is tapped. Open/closed is
+/// purely local UI state (a [StatefulWidget]) — it is deliberately NOT persisted
+/// (the spec: "מצב פתוח/סגור = state מקומי, לא חייב persist").
+///
+/// RTL: the chevron sits on the leading (right) edge and rotates a quarter-turn
+/// (chevron_left → points-down) when the section opens, so the open/closed
+/// affordance is visible without relying on left/right semantics.
+class _SectionCard extends StatefulWidget {
   const _SectionCard({
     required this.emoji,
     required this.title,
@@ -314,6 +322,16 @@ class _SectionCard extends StatelessWidget {
   final List<Widget> children;
 
   @override
+  State<_SectionCard> createState() => _SectionCardState();
+}
+
+class _SectionCardState extends State<_SectionCard> {
+  // Closed by default — the spec wants every section collapsed on entry.
+  bool _expanded = false;
+
+  void _toggle() => setState(() => _expanded = !_expanded);
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -322,23 +340,47 @@ class _SectionCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Accordion header — tapping toggles the section. ListTile keeps the
+          // ≥48dp tap target; the rotating chevron is the open/closed cue.
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: Text(emoji, style: const TextStyle(fontSize: 22)),
+            leading: Text(widget.emoji, style: const TextStyle(fontSize: 22)),
             title: Text(
-              title,
+              widget.title,
               style: const TextStyle(
                 color: BsTokens.inkLight,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
             ),
+            trailing: AnimatedRotation(
+              turns: _expanded ? 0.25 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              child: const Icon(Icons.chevron_left, color: Colors.black54),
+            ),
+            onTap: _toggle,
           ),
-          ...children,
-          const SizedBox(height: 8),
+          // Body — revealed only when expanded; kept out of the tree entirely
+          // while collapsed so the section starts as a tidy header strip.
+          AnimatedCrossFade(
+            firstChild: const SizedBox(width: double.infinity, height: 0),
+            secondChild: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ...widget.children,
+                const SizedBox(height: 8),
+              ],
+            ),
+            crossFadeState: _expanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 200),
+            sizeCurve: Curves.easeInOut,
+          ),
         ],
       ),
     );

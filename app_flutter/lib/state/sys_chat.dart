@@ -235,12 +235,17 @@ final List<ChatThread> kWorkerChatThreads = [
           minute: -25),
     ],
   ),
+  // #110 — the manager↔worker thread is APP SUPPORT/help, NOT the worker's boss
+  // (the boss = the contractor, 'th-worker-contractor'). Display name + avatar
+  // are retagged to "תמיכה" / 🎧 so the worker never reads it as a managing
+  // superior; the thread id, participants, audience and visibility are
+  // UNCHANGED (the seed-lock + isolation tests key off the id, not the name).
   ChatThread(
     id: 'th-worker-manager',
     participants: const [BsRole.worker, BsRole.manager],
     audience: 'worker',
-    name: 'מנהל',
-    avatar: '👔',
+    name: 'תמיכה',
+    avatar: '🎧',
     messages: [
       _boardSeed('th-worker-manager', BsRole.manager,
           'תזכורת: משימה שהסתיימה נשלחת לאישור עם תמונת ביצוע 📸',

@@ -12,6 +12,10 @@ import 'package:buildsmart/screens/worker_settings_screen.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:buildsmart/state/vacation_requests.dart';
+import 'package:buildsmart/state/worker_attendance.dart';
+import 'package:buildsmart/state/worker_certs.dart';
+import 'package:buildsmart/state/worker_forms.dart';
 import 'package:buildsmart/state/worker_profile_store.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -36,6 +40,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// SERVER-SWAP: becomes the server's user↔worker mapping with Firebase Auth.
 int workerIndexForSession(BoardSession session) =>
     session.username == 'omer' ? 1 : 0;
+
+/// #104ב · התמחות — ONE source of truth. טופס 101 (`worker_forms`) is the
+/// form that actually collects the worker's מקצוע/התמחות, so the profile
+/// DERIVES the displayed specialty from the latest saved Form101 for this
+/// username rather than keeping a second, editable copy that could drift.
+///
+/// Fallback chain (אין המצאות — only honest, existing data):
+///   1. the latest saved [Form101.specialty] for [username] (the source of
+///      truth — newest year wins);
+///   2. otherwise the legacy [WorkerProfile.specialty] override (a profile
+///      saved before this sync — back-compat, never invented);
+///   3. otherwise `''` (the UI renders nothing — honest empty state).
+String workerSpecialtyOf(
+  String username,
+  WorkerFormsState forms,
+  WorkerProfile profile,
+) {
+  Form101? latest;
+  for (final f in forms.forms) {
+    if (f.username != username) continue;
+    if (f.specialty.trim().isEmpty) continue;
+    if (latest == null || f.year > latest.year) latest = f;
+  }
+  if (latest != null) return latest.specialty.trim();
+  return profile.specialty.trim();
+}
 
 class WorkerProfileScreen extends ConsumerWidget {
   const WorkerProfileScreen({this.embedded = false, super.key});
@@ -71,6 +101,14 @@ class WorkerProfileScreen extends ConsumerWidget {
     final profile = ref.watch(workerProfileProvider)[session.username] ??
         const WorkerProfile();
 
+    // #104ב — התמחות derived from טופס 101 (single source of truth), with the
+    // legacy profile override as the honest back-compat fallback.
+    final specialty = workerSpecialtyOf(
+      session.username,
+      ref.watch(workerFormsProvider),
+      profile,
+    );
+
     final body = ListView(
       padding: const EdgeInsets.fromLTRB(
         BsTokens.space4,
@@ -79,7 +117,11 @@ class WorkerProfileScreen extends ConsumerWidget {
         BsTokens.space5,
       ),
       children: [
-        _IdentityCard(session: session, profile: profile),
+        _IdentityCard(
+          session: session,
+          profile: profile,
+          specialty: specialty,
+        ),
         const SizedBox(height: BsTokens.space3),
         _StatsCard(
           done: done,
@@ -89,7 +131,8 @@ class WorkerProfileScreen extends ConsumerWidget {
         ),
         const SizedBox(height: BsTokens.space4),
         // cluster #85ח — אזור אישי v2: נוכחות · טפסים · תיק בטיחות · תלושי שכר.
-        const _PersonalAreaCard(),
+        // #103 — each row now carries a LIVE external status + a shortcut.
+        _PersonalAreaCard(session: session),
         const SizedBox(height: BsTokens.space4),
         _ActionsCard(session: session),
       ],
@@ -122,19 +165,42 @@ class WorkerProfileScreen extends ConsumerWidget {
 /// (an empty override falls back to the session — nothing invented), plus
 /// the ✏️ edit action that opens the profile editor sheet.
 class _IdentityCard extends StatelessWidget {
-  const _IdentityCard({required this.session, required this.profile});
+  const _IdentityCard({
+    required this.session,
+    required this.profile,
+    required this.specialty,
+  });
 
   final BoardSession session;
   final WorkerProfile profile;
+
+  /// #104ב — the התמחות DERIVED from טופס 101 (source of truth), not
+  /// `profile.specialty` directly (which is only the back-compat fallback).
+  final String specialty;
 
   @override
   Widget build(BuildContext context) {
     // #85ד — the name override falls back to the live session displayName.
     final name = profile.name.isNotEmpty ? profile.name : session.displayName;
     final meta = [
-      if (profile.specialty.isNotEmpty) '🔧 ${profile.specialty}',
+      if (specialty.isNotEmpty) '🔧 $specialty',
       if (profile.phone.isNotEmpty) '📞 ${profile.phone}',
     ].join(' · ');
+
+    // #104ג — the expanded personal details, each shown ONLY when filled
+    // (honest empty state — אין המצאות).
+    final details = <(String, String)>[
+      if (profile.idNumber.isNotEmpty) ('ת.ז', profile.idNumber),
+      if (profile.address.isNotEmpty) ('כתובת', profile.address),
+      if (profile.emergencyName.isNotEmpty || profile.emergencyPhone.isNotEmpty)
+        (
+          'איש קשר לחירום',
+          [
+            if (profile.emergencyName.isNotEmpty) profile.emergencyName,
+            if (profile.emergencyPhone.isNotEmpty) profile.emergencyPhone,
+          ].join(' · '),
+        ),
+    ];
 
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
@@ -149,7 +215,10 @@ class _IdentityCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
         children: [
           _ProfileAvatar(photo: profile.photo, size: 56),
           const SizedBox(width: BsTokens.space3),
@@ -224,6 +293,44 @@ class _IdentityCard extends StatelessWidget {
             onPressed: () =>
                 showWorkerProfileEditSheet(context, session: session),
           ),
+        ],
+          ),
+          // #104ג — the expanded personal details below the identity row,
+          // each printed ONLY when filled (honest empty state).
+          if (details.isNotEmpty) ...[
+            const SizedBox(height: BsTokens.space3),
+            const Divider(height: 1, color: Color(0xFFF2F3F5)),
+            const SizedBox(height: BsTokens.space3),
+            for (final (label, value) in details)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 96,
+                      child: Text(
+                        label,
+                        style: const TextStyle(
+                          color: BsTokens.mutedLight,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        value,
+                        style: const TextStyle(
+                          color: BsTokens.inkLight,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ],
       ),
     );
@@ -342,15 +449,105 @@ class _Stat extends StatelessWidget {
 
 // ─── personal-area rows (cluster #85ח) ───────────────────────────────────────
 
+/// A row's derived live status — the label shown on the right and the tint it
+/// carries (#103). [muted] = the honest "no data yet" empty state.
+class _RowStatus {
+  const _RowStatus(this.label, this.color, {this.muted = false});
+  final String label;
+  final Color color;
+  final bool muted;
+
+  /// The honest empty-state status (grey, low-emphasis) — used when a row has
+  /// no live data to surface yet (אין המצאות).
+  static _RowStatus empty(String label) =>
+      _RowStatus(label, BsTokens.mutedLight, muted: true);
+}
+
 /// אזור אישי v2 (#85ח) — the four personal-area entries: נוכחות (clock-in/out
 /// + monthly table) · טפסים (101 / חופשה / מחלה) · תיק בטיחות (הדרכות +
 /// ארנק תעודות) · תלושי שכר (SERVER-READY sheet — honest 'יחובר עם חיבור
 /// השרת'). Same white-card ListTile style as [_ActionsCard]; rows are ≥48dp.
-class _PersonalAreaCard extends StatelessWidget {
-  const _PersonalAreaCard();
+///
+/// #103 — every row now shows an EXTERNAL live status derived from the
+/// providers (never invented: each falls back to an honest empty state), and
+/// the status itself is a tappable shortcut that jumps to the SAME destination
+/// as the row (the existing navigation for that row), straight to the latest
+/// update.
+class _PersonalAreaCard extends ConsumerWidget {
+  const _PersonalAreaCard({required this.session});
+
+  final BoardSession session;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final username = session.username;
+    final now = DateTime.now();
+
+    // ── נוכחות — "נכנס HH:MM" (or "יצא" once clocked out) / "לא נרשם היום" ──
+    // Watch the LEDGER (not `.notifier`) so a clock-in/out rebuilds the status
+    // live; derive today's record with the store's own date-key helper.
+    final todayKey = attendanceDateKey(now);
+    final ledger = ref.watch(workerAttendanceProvider);
+    AttendanceDay? today;
+    for (final d in ledger) {
+      if (d.username == username && d.date == todayKey) {
+        today = d;
+        break;
+      }
+    }
+    final _RowStatus attendance;
+    if (today?.outTs != null) {
+      attendance = _RowStatus('יצא ${_hhmm(today!.outTs!)}', BsTokens.mutedLight);
+    } else if (today?.inTs != null) {
+      attendance = _RowStatus('נכנס ${_hhmm(today!.inTs!)}', BsTokens.successDark);
+    } else {
+      attendance = _RowStatus.empty('לא נרשם היום');
+    }
+
+    // ── טפסים — most actionable first: a pending vacation, then a sick note
+    //    count, then the 101 submission state, else the honest empty hint. ──
+    final forms = ref.watch(workerFormsProvider);
+    final pendingVac = ref.watch(vacationRequestsProvider).where((r) =>
+        r.username == username &&
+        r.role == 'worker' &&
+        r.status == kVacationPending);
+    final sickCount = forms.sickNotesFor(username).length;
+    final form101 = forms.form101For(username, now.year);
+    final _RowStatus formsStatus;
+    if (pendingVac.isNotEmpty) {
+      formsStatus = const _RowStatus('חופשה ⏳ ממתינה', BsTokens.warnText);
+    } else if (form101?.sentTs != null) {
+      formsStatus = const _RowStatus('101 הוגש ✓', BsTokens.successDark);
+    } else if (form101 != null) {
+      formsStatus = const _RowStatus('101 נשמר', BsTokens.brandDark);
+    } else if (sickCount > 0) {
+      formsStatus = _RowStatus('מחלה $sickCount', BsTokens.brandDark);
+    } else {
+      formsStatus = _RowStatus.empty('לא הוגשו טפסים');
+    }
+
+    // ── תיק בטיחות — certificate expiry traffic-light over the worker's wallet ──
+    final certs =
+        ref.watch(workerCertsProvider).where((c) => c.username == username);
+    final _RowStatus safety;
+    if (certs.isEmpty) {
+      safety = _RowStatus.empty('אין תעודות');
+    } else {
+      final expired = certs
+          .where((c) => c.statusAt(now) == CertExpiryStatus.expired)
+          .length;
+      final soon = certs
+          .where((c) => c.statusAt(now) == CertExpiryStatus.expiringSoon)
+          .length;
+      if (expired > 0) {
+        safety = _RowStatus('$expired פג תוקף', BsTokens.dangerDark);
+      } else if (soon > 0) {
+        safety = _RowStatus('$soon לקראת תפוגה', BsTokens.warnText);
+      } else {
+        safety = const _RowStatus('בתוקף ✓', BsTokens.successDark);
+      }
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: BsTokens.cardLight,
@@ -365,68 +562,120 @@ class _PersonalAreaCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          ListTile(
-            leading: const Text('🕐', style: TextStyle(fontSize: 20)),
-            title: const Text(
-              'נוכחות',
-              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
-            ),
-            subtitle: const Text(
-              'כניסה/יציאה ודוח חודשי',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-            ),
-            trailing:
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+          _PersonalAreaRow(
+            emoji: '🕐',
+            title: 'נוכחות',
+            subtitle: 'כניסה/יציאה ודוח חודשי',
+            status: attendance,
             onTap: () =>
                 Navigator.of(context).push(WorkerAttendanceScreen.route()),
           ),
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          ListTile(
-            leading: const Text('📄', style: TextStyle(fontSize: 20)),
-            title: const Text(
-              'טפסים',
-              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
-            ),
-            subtitle: const Text(
-              'טופס 101 · בקשת חופשה · אישור מחלה',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-            ),
-            trailing:
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+          _PersonalAreaRow(
+            emoji: '📄',
+            title: 'טפסים',
+            subtitle: 'טופס 101 · בקשת חופשה · אישור מחלה',
+            status: formsStatus,
             onTap: () => Navigator.of(context).push(WorkerFormsScreen.route()),
           ),
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          ListTile(
-            leading: const Text('🛡️', style: TextStyle(fontSize: 20)),
-            title: const Text(
-              'תיק בטיחות',
-              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
-            ),
-            subtitle: const Text(
-              'הדרכות ותעודות מקצועיות',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-            ),
-            trailing:
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+          _PersonalAreaRow(
+            emoji: '🛡️',
+            title: 'תיק בטיחות',
+            subtitle: 'הדרכות ותעודות מקצועיות',
+            status: safety,
             onTap: () => Navigator.of(context).push(WorkerSafetyScreen.route()),
           ),
           const Divider(height: 1, color: Color(0xFFF2F3F5)),
-          ListTile(
-            leading: const Text('💰', style: TextStyle(fontSize: 20)),
-            title: const Text(
-              'תלושי שכר',
-              style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
-            ),
-            subtitle: const Text(
-              'יחובר עם חיבור השרת',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
-            ),
-            trailing:
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+          _PersonalAreaRow(
+            emoji: '💰',
+            title: 'תלושי שכר',
+            subtitle: 'יחובר עם חיבור השרת',
+            // Honest: payslips have no on-device source yet (SERVER-READY).
+            status: _RowStatus.empty('מוכן לשרת'),
             onTap: () => showWorkerPayslipsSheet(context),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// `HH:MM` (zero-padded, 24h) — the worker's local clock for the נוכחות status.
+String _hhmm(DateTime d) =>
+    '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
+/// One אזור-אישי row (#103): the leading emoji · title/subtitle · a live status
+/// pill that is ITSELF a shortcut (taps run [onTap] — the same destination the
+/// whole row navigates to, jumping straight to the latest update for that area).
+class _PersonalAreaRow extends StatelessWidget {
+  const _PersonalAreaRow({
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+    required this.status,
+    required this.onTap,
+  });
+
+  final String emoji;
+  final String title;
+  final String subtitle;
+  final _RowStatus status;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Text(emoji, style: const TextStyle(fontSize: 20)),
+      title: Text(
+        title,
+        style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // The status is a tappable shortcut to the latest update (same
+          // destination as the row). ≥48dp tap target via the pill padding.
+          Semantics(
+            button: true,
+            label: '${status.label} — פתח $title',
+            excludeSemantics: true,
+            child: Material(
+              color: status.muted
+                  ? const Color(0xFFF2F3F5)
+                  : status.color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                onTap: onTap,
+                child: Container(
+                  constraints: const BoxConstraints(minHeight: 32),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  child: Text(
+                    status.label,
+                    style: TextStyle(
+                      color: status.color,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+        ],
+      ),
+      onTap: onTap,
     );
   }
 }
@@ -668,9 +917,16 @@ class _EditProfileSheet extends ConsumerStatefulWidget {
 class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   late final TextEditingController _name;
   late final TextEditingController _phone;
-  late String _specialty;
+  // #104ג — extra personal details (all optional except the phone, which is
+  // now REQUIRED). ת.ז · כתובת · איש-קשר-לחירום (שם + טלפון).
+  late final TextEditingController _idNumber;
+  late final TextEditingController _address;
+  late final TextEditingController _emName;
+  late final TextEditingController _emPhone;
   String? _photo;
   String? _phoneError;
+  String? _idError;
+  String? _emPhoneError;
 
   /// מגן in-flight: double-tap על "שמור" לא מריץ save כפול / pop כפול.
   bool _saving = false;
@@ -684,7 +940,10 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
       text: p.name.isNotEmpty ? p.name : widget.session.displayName,
     );
     _phone = TextEditingController(text: p.phone);
-    _specialty = p.specialty;
+    _idNumber = TextEditingController(text: p.idNumber);
+    _address = TextEditingController(text: p.address);
+    _emName = TextEditingController(text: p.emergencyName);
+    _emPhone = TextEditingController(text: p.emergencyPhone);
     _photo = p.photo;
   }
 
@@ -692,6 +951,10 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   void dispose() {
     _name.dispose();
     _phone.dispose();
+    _idNumber.dispose();
+    _address.dispose();
+    _emName.dispose();
+    _emPhone.dispose();
     super.dispose();
   }
 
@@ -709,16 +972,41 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   Future<void> _save() async {
     if (_saving) return; // מגן double-tap (in-flight)
     final phone = _phone.text.trim();
-    // FORMAT validation only (the #64 validators) — the phone is optional,
-    // but a non-empty value must be a valid Israeli mobile.
-    if (phone.isNotEmpty && !validIsraeliMobile(phone)) {
-      setState(
-        () => _phoneError = 'מספר נייד לא תקין — 10 ספרות, מתחיל ב-05',
-      );
+    final idDigits = _idNumber.text.replaceAll(RegExp(r'[\s-]'), '');
+    final emPhone = _emPhone.text.trim();
+    // FORMAT validation (the #64 validators), gathered so EVERY bad field is
+    // marked at once — not one-at-a-time.
+    final phoneErr = phone.isEmpty
+        // #104א — the phone is now REQUIRED (no longer optional).
+        ? 'נא למלא מספר נייד'
+        : (!validIsraeliMobile(phone)
+            ? 'מספר נייד לא תקין — 10 ספרות, מתחיל ב-05'
+            : null);
+    // #104ג — ת.ז is optional, but a non-empty value must be 9 digits
+    // (FORMAT only — a real checksum/identity check is a server concern).
+    final idErr = idDigits.isNotEmpty && !RegExp(r'^\d{9}$').hasMatch(idDigits)
+        ? 'ת.ז חייבת להיות 9 ספרות'
+        : null;
+    // #104ג — the emergency phone is optional, but a non-empty value must be
+    // a valid Israeli mobile.
+    final emPhoneErr = emPhone.isNotEmpty && !validIsraeliMobile(emPhone)
+        ? 'מספר נייד לא תקין — 10 ספרות, מתחיל ב-05'
+        : null;
+    if (phoneErr != null || idErr != null || emPhoneErr != null) {
+      setState(() {
+        _phoneError = phoneErr;
+        _idError = idErr;
+        _emPhoneError = emPhoneErr;
+      });
       return;
     }
     setState(() => _saving = true);
     final name = _name.text.trim();
+    // #104ב — התמחות is NOT edited here (טופס 101 owns it). Preserve the
+    // worker's existing legacy override verbatim so the back-compat fallback
+    // is never clobbered to '' by a profile save.
+    final existing = ref.read(workerProfileProvider)[widget.session.username] ??
+        const WorkerProfile();
     // #17 — the persist is AWAITED: a quota failure (an oversized photo on
     // web localStorage) reports honestly instead of a fake '✓ נשמר'.
     final ok = await ref.read(workerProfileProvider.notifier).save(
@@ -727,8 +1015,13 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             // Storing '' keeps the honest fallback to the session displayName.
             name: name == widget.session.displayName ? '' : name,
             phone: phone,
-            specialty: _specialty,
+            specialty: existing.specialty,
             photo: _photo,
+            // Store the normalized 9-digit ת.ז (or '' when left empty).
+            idNumber: idDigits,
+            address: _address.text.trim(),
+            emergencyName: _emName.text.trim(),
+            emergencyPhone: emPhone,
           ),
         );
     if (!mounted) return;
@@ -741,38 +1034,43 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     Navigator.of(context).pop();
   }
 
-  /// One התמחות pill — brand fill when selected; re-tapping clears (≥48dp).
-  Widget _specChip(String label) {
-    final on = _specialty == label;
-    return Material(
-      color: on ? BsTokens.brand : BsTokens.cardLight,
-      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-        onTap: () => setState(() => _specialty = on ? '' : label),
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 48),
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: BsTokens.space4),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-            border: on ? null : Border.all(color: const Color(0xFFE2E2E2)),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: on ? bsOnAccent(context) : BsTokens.inkLight,
-              fontSize: 13.5,
-              fontWeight: on ? FontWeight.w800 : FontWeight.w600,
-            ),
-          ),
-        ),
+  /// A labelled text field for the sheet (≥48dp via the default TextField
+  /// height) — clears its [errorText] live on edit when [onClearError] given.
+  Widget _sheetField(
+    TextEditingController ctl,
+    String label, {
+    String? errorText,
+    String? hintText,
+    TextInputType? keyboardType,
+    VoidCallback? onClearError,
+    TextInputAction textInputAction = TextInputAction.next,
+  }) {
+    return TextField(
+      controller: ctl,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      onChanged:
+          onClearError == null ? null : (_) => onClearError(),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hintText,
+        errorText: errorText,
+        border: const OutlineInputBorder(),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    // #104ב — התמחות is DERIVED from טופס 101 (single source of truth); the
+    // sheet only DISPLAYS it (read-only) and points the worker to 101 to
+    // change it — no second editable copy that could drift.
+    final specialty = workerSpecialtyOf(
+      widget.session.username,
+      ref.watch(workerFormsProvider),
+      ref.watch(workerProfileProvider)[widget.session.username] ??
+          const WorkerProfile(),
+    );
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Padding(
@@ -861,28 +1159,44 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                     ),
                   ),
                   const SizedBox(height: BsTokens.space3),
-                  // ── phone ──
-                  TextField(
-                    controller: _phone,
+                  // ── phone (#104א — REQUIRED) ──
+                  _sheetField(
+                    _phone,
+                    'טלפון נייד',
+                    hintText: '050-1234567',
                     keyboardType: TextInputType.phone,
-                    onChanged: (_) {
+                    errorText: _phoneError,
+                    onClearError: () {
                       if (_phoneError != null) {
                         setState(() => _phoneError = null);
                       }
                     },
-                    decoration: InputDecoration(
-                      labelText: 'טלפון (אופציונלי)',
-                      hintText: '050-1234567',
-                      errorText: _phoneError,
-                      border: const OutlineInputBorder(),
-                    ),
                   ),
                   const SizedBox(height: BsTokens.space3),
-                  // ── specialty chips ──
+                  // ── ת.ז (#104ג — optional, 9-digit FORMAT) ──
+                  _sheetField(
+                    _idNumber,
+                    'תעודת זהות (9 ספרות)',
+                    keyboardType: TextInputType.number,
+                    errorText: _idError,
+                    onClearError: () {
+                      if (_idError != null) {
+                        setState(() => _idError = null);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: BsTokens.space3),
+                  // ── address (#104ג) ──
+                  _sheetField(_address, 'כתובת'),
+                  const SizedBox(height: BsTokens.space3),
+                  // ── specialty — DERIVED from טופס 101 (#104ב, read-only) ──
+                  _SpecialtyDerivedRow(specialty: specialty),
+                  const SizedBox(height: BsTokens.space4),
+                  // ── emergency contact (#104ג) ──
                   const Align(
                     alignment: AlignmentDirectional.centerStart,
                     child: Text(
-                      'התמחות',
+                      'איש קשר לחירום',
                       style: TextStyle(
                         color: BsTokens.inkLight,
                         fontWeight: FontWeight.w800,
@@ -891,12 +1205,20 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                     ),
                   ),
                   const SizedBox(height: BsTokens.space2),
-                  Wrap(
-                    spacing: BsTokens.space2,
-                    runSpacing: BsTokens.space2,
-                    children: [
-                      for (final s in kWorkerSpecialties) _specChip(s),
-                    ],
+                  _sheetField(_emName, 'שם'),
+                  const SizedBox(height: BsTokens.space3),
+                  _sheetField(
+                    _emPhone,
+                    'טלפון',
+                    hintText: '050-1234567',
+                    keyboardType: TextInputType.phone,
+                    errorText: _emPhoneError,
+                    textInputAction: TextInputAction.done,
+                    onClearError: () {
+                      if (_emPhoneError != null) {
+                        setState(() => _emPhoneError = null);
+                      }
+                    },
                   ),
                   const SizedBox(height: BsTokens.space4),
                   // ── save ──
@@ -929,6 +1251,66 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// #104ב — the התמחות panel inside the edit sheet. READ-ONLY: טופס 101 is the
+/// single source of truth, so the worker changes their התמחות there (the
+/// 'מקצוע / התמחות' field), not here. Shows the derived value, or an honest
+/// empty hint when none was filled in 101 yet — never an editable duplicate.
+class _SpecialtyDerivedRow extends StatelessWidget {
+  const _SpecialtyDerivedRow({required this.specialty});
+
+  final String specialty;
+
+  @override
+  Widget build(BuildContext context) {
+    final has = specialty.isNotEmpty;
+    return Container(
+      padding: const EdgeInsets.all(BsTokens.space3),
+      decoration: BoxDecoration(
+        color: BsTokens.bgLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E2E2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('🔧', style: TextStyle(fontSize: 16)),
+              const SizedBox(width: BsTokens.space2),
+              const Text(
+                'התמחות',
+                style: TextStyle(
+                  color: BsTokens.inkLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
+              const Spacer(),
+              Flexible(
+                child: Text(
+                  has ? specialty : 'לא הוגדרה',
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    color: has ? BsTokens.inkLight : BsTokens.mutedLight,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          // Honest pointer to the single source of truth (no second editor).
+          const Text(
+            'נערך בטופס 101 (מקצוע / התמחות)',
+            style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+          ),
+        ],
       ),
     );
   }

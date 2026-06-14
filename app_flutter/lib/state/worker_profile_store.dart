@@ -31,12 +31,24 @@ const List<String> kWorkerSpecialties = ['אינסטלטור', 'חשמלאי', '
 /// One worker's editable profile. Every field is an OPTIONAL override:
 /// `name == ''` → the UI falls back to the session displayName; `photo ==
 /// null` → the default 🦺 avatar disc.
+///
+/// #104 — the personal details beyond name/phone (ת.ז · כתובת · איש-קשר
+/// לחירום) are ALL optional too, and decode `null`/missing on the older
+/// `bs.worker-profile.v1` records (back-compat: a v1 profile saved before
+/// #104 simply reads these as `''`). התמחות is NOT re-edited here: טופס 101
+/// is the single source of truth (#104ב) and the UI derives the displayed
+/// specialty from the saved Form101, keeping `specialty` only as the honest
+/// back-compat fallback for a profile saved before the 101 sync.
 class WorkerProfile {
   const WorkerProfile({
     this.name = '',
     this.phone = '',
     this.specialty = '',
     this.photo,
+    this.idNumber = '',
+    this.address = '',
+    this.emergencyName = '',
+    this.emergencyPhone = '',
   });
 
   /// Display-name override; `''` means "use [BoardSession.displayName]".
@@ -45,23 +57,46 @@ class WorkerProfile {
   /// Worker phone (validated as an Israeli mobile in the edit UI); `''` = unset.
   final String phone;
 
-  /// One of [kWorkerSpecialties], or `''` when none was chosen.
+  /// One of [kWorkerSpecialties], or `''` when none was chosen. #104ב —
+  /// retained ONLY as the back-compat fallback; טופס 101 is the live source
+  /// of truth for the displayed התמחות (the edit sheet no longer writes it).
   final String specialty;
 
   /// Profile photo as a data-URL (`data:image/...;base64,…`), or null.
   final String? photo;
+
+  /// #104 — תעודת-זהות (9 digits, format-validated in the edit UI); `''` = unset.
+  final String idNumber;
+
+  /// #104 — free-text address (כתובת); `''` = unset.
+  final String address;
+
+  /// #104 — emergency contact name (איש-קשר לחירום · שם); `''` = unset.
+  final String emergencyName;
+
+  /// #104 — emergency contact phone (validated as an Israeli mobile when
+  /// non-empty); `''` = unset.
+  final String emergencyPhone;
 
   WorkerProfile copyWith({
     String? name,
     String? phone,
     String? specialty,
     Object? photo = _sentinel,
+    String? idNumber,
+    String? address,
+    String? emergencyName,
+    String? emergencyPhone,
   }) =>
       WorkerProfile(
         name: name ?? this.name,
         phone: phone ?? this.phone,
         specialty: specialty ?? this.specialty,
         photo: photo == _sentinel ? this.photo : photo as String?,
+        idNumber: idNumber ?? this.idNumber,
+        address: address ?? this.address,
+        emergencyName: emergencyName ?? this.emergencyName,
+        emergencyPhone: emergencyPhone ?? this.emergencyPhone,
       );
 
   static const _sentinel = Object();
@@ -71,6 +106,10 @@ class WorkerProfile {
         'phone': phone,
         'specialty': specialty,
         'photo': photo,
+        'idNumber': idNumber,
+        'address': address,
+        'emergencyName': emergencyName,
+        'emergencyPhone': emergencyPhone,
       };
 
   factory WorkerProfile.fromJson(Map<String, dynamic> j) => WorkerProfile(
@@ -78,6 +117,12 @@ class WorkerProfile {
         phone: j['phone'] as String? ?? '',
         specialty: j['specialty'] as String? ?? '',
         photo: j['photo'] as String?,
+        // #104 back-compat: a v1 record saved before these fields existed
+        // decodes them as '' (null/missing → honest empty override).
+        idNumber: j['idNumber'] as String? ?? '',
+        address: j['address'] as String? ?? '',
+        emergencyName: j['emergencyName'] as String? ?? '',
+        emergencyPhone: j['emergencyPhone'] as String? ?? '',
       );
 }
 
