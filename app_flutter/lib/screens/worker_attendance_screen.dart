@@ -160,7 +160,10 @@ class _WorkerAttendanceScreenState
     if (!mounted) return;
     final ok = ref
         .read(workerAttendanceProvider.notifier)
-        .clockIn(username, lat: fix?.lat, lng: fix?.lng);
+        .clockIn(username,
+            lat: fix?.lat,
+            lng: fix?.lng,
+            employerId: ref.read(boardAuthProvider)?.employerId ?? '');
     if (!mounted) return;
     if (!ok) {
       showToast(context, 'כבר נרשמה כניסה להיום');

@@ -35,6 +35,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > **גל H1 (HR):** אישור-חופשה עובד → **קבלן** (לא מנהל) — `requestsForEmployer` (`vacation_requests.dart`, employer-scoped) + מסך `contractor_hr_sheet` ('👷 חופשות עובדים' ב-tasks_screen): אשר/דחה → פעמון-עובד + צ'אט th-worker-contractor. מקבילי (מנהל נשאר). worker: 'לאישור הקבלן'.
 > **גל H2 (HR):** תעודות + הדרכות עובד → **קבלן** — `certsForEmployer`/`trainingsForEmployer` (`worker_certs`/`worker_trainings`, employer-scoped). הדרכות: `approve`/`reject` אמיתי (pending→approved/rejected) + `contractor_hr_sheet` מורחב (🎓 אישור-הדרכות → פעמון+צ'אט · 📜 תעודות READ-ONLY + באנר-תוקף `statusAt`). `worker_safety` מטביע employerId. firebase→Z.
 > **גל H3 (HR):** מדיניות מסמכים-נדרשים שהקבלן מגדיר → אוכפת בשער-מוכנות-העובד (#101) — `required_docs_policy.dart` (`requiredDocsForEmployer`, **normalized-exact** match) + `contractor_hr_sheet` עורך-מדיניות (📋). ADD-on (101+פג-תוקף נשארים חובה); מדיניות-ריקה=התנהגות-של-היום. שליחים לא-נגעו. firebase→Z.
+> **גל S (אתר/נוכחות):** נוכחות-עובד → תצוגה-חיה אצל הקבלן — `attendanceForEmployer` (`worker_attendance.dart`, **חנות-עובד בלבד** → שליחים מודרים) + `contractor_attendance_sheet` ('🕒 נוכחות עובדים'): '🟢 נוכחים עכשיו' + 'היום' (שעות + מיקום-אמיתי דרך openNavSheet, אין-המצאה). read-only; העובד חותם כרגיל. firebase→Z.
 
 ---
 

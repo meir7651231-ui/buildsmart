@@ -954,3 +954,9 @@
 - **מוטציה:** `normalizeDocName(c.name) == key` → `key.contains(normalizeDocName(c.name))` (req מכיל cert — מלכודת-substring שממציאה סיפוק: דרישה 'בטיחות בגובה' היתה 'מסופקת' ע"י תעודת 'בטיחות' חלקית).
 - **תוצאה:** **אדומה ✅** — 'a substring-only cert does NOT satisfy a longer requirement' נכשל (Actual: <true>). שוחזר ל-`==` ב-Edit (**לא** git checkout) → **+23 ירוק** (8 gate + 15 policy).
 - **מסקנה:** ההצלבה normalized-exact load-bearing — לקח E2 (אין-המצאות) נעול גם בשער-הבטיחות; substring היה חוסם/משחרר עובדים על סמך התאמה-חלקית מזויפת.
+
+## גל S — נוכחות employer-scope (בידוד קבלן↔עובד) — 2026-06-14
+- **קובץ:** `lib/state/worker_attendance.dart:308` (פילטר `attendanceForEmployer`) · בדיקה `test/contractor_attendance_test.dart`.
+- **מוטציה:** `if (d.employerId == employerId)` → `if (d.employerId != employerId)` (היפוך — הקבלן היה רואה את נוכחות כל-מי-שאינו-שלו).
+- **תוצאה:** **אדומה ✅** — 4 טסטי-scope נכשלו (lands-in-roster · unstamped-excluded · clockOut-preserves · deterministic-order). שוחזר ל-`==` ב-Edit (**לא** git checkout) → **+7 ירוק**.
+- **מסקנה:** בידוד-המעסיק load-bearing — הוא לב חיווט-קבלן↔עובד; היפוך-הפילטר דלף נוכחות חוצת-מעסיקים. שליחים מודרים-במבנה (חנות-נוכחות נפרדת), לא תלוי בפילטר הזה.

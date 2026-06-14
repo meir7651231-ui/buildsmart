@@ -448,7 +448,10 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
     if (clockingOut) {
       ok = notifier.clockOut(widget.username, lat: fix?.lat, lng: fix?.lng);
     } else {
-      ok = notifier.clockIn(widget.username, lat: fix?.lat, lng: fix?.lng);
+      ok = notifier.clockIn(widget.username,
+          lat: fix?.lat,
+          lng: fix?.lng,
+          employerId: ref.read(boardAuthProvider)?.employerId ?? '');
     }
 
     if (!ok) {

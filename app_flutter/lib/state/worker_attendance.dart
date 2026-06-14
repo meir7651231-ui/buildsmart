@@ -34,6 +34,7 @@ class AttendanceDay {
     this.inLng,
     this.outLat,
     this.outLng,
+    this.employerId = '',
   });
 
   /// Board login username (`ran` / `omer` / `demo`) — the same identity key
@@ -42,6 +43,14 @@ class AttendanceDay {
 
   /// `yyyy-MM-dd` ([attendanceDateKey]).
   final String date;
+
+  /// Id of the contractor who EMPLOYS the worker (the worker→contractor LINK,
+  /// `session.employerId`) — lets the contractor's roster scope to THEIR
+  /// workers (see [attendanceForEmployer]). Default `''` (field-economy: only
+  /// serialised when non-empty). Back-compat: old persisted rows carry no
+  /// 'employerId' and decode as `''` (and are excluded from any non-empty
+  /// employer query).
+  final String employerId;
 
   final DateTime? inTs;
   final DateTime? outTs;
@@ -71,6 +80,7 @@ class AttendanceDay {
     double? inLng,
     double? outLat,
     double? outLng,
+    String? employerId,
   }) =>
       AttendanceDay(
         username: username,
@@ -81,6 +91,7 @@ class AttendanceDay {
         inLng: inLng ?? this.inLng,
         outLat: outLat ?? this.outLat,
         outLng: outLng ?? this.outLng,
+        employerId: employerId ?? this.employerId,
       );
 
   Map<String, dynamic> toJson() => {
@@ -92,6 +103,7 @@ class AttendanceDay {
         'ilng': inLng,
         'olat': outLat,
         'olng': outLng,
+        if (employerId.isNotEmpty) 'employerId': employerId,
       };
 
   /// Defensive decode — a malformed entry is dropped, never crashes the load.
@@ -109,6 +121,7 @@ class AttendanceDay {
       inLng: _tryDouble(raw['ilng']),
       outLat: _tryDouble(raw['olat']),
       outLng: _tryDouble(raw['olng']),
+      employerId: raw['employerId'] is String ? raw['employerId'] as String : '',
     );
   }
 
@@ -152,6 +165,18 @@ String? mapsQueryForDay(AttendanceDay d) {
   if (lat == null || lng == null) return null;
   return '$lat,$lng';
 }
+
+/// Pure helper — the workers in [employerDays] currently CLOCKED IN: an OPEN
+/// day (today's date, `inTs` set, `outTs` still null). [todayKey] is
+/// `attendanceDateKey(now)` passed in by the caller so this stays pure (no
+/// `DateTime.now()` inside) and trivially testable with fixed date strings.
+/// Kept top-level so the contractor sheet and tests share one definition.
+List<AttendanceDay> clockedInNow(
+        List<AttendanceDay> employerDays, String todayKey) =>
+    [
+      for (final d in employerDays)
+        if (d.date == todayKey && d.inTs != null && d.outTs == null) d,
+    ];
 
 class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
   WorkerAttendanceNotifier({this.storageKey = kWorkerAttendanceKey})
@@ -216,8 +241,12 @@ class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
   /// Clock IN for today. `false` (no-op) when today already has a clock-in —
   /// one shift per calendar day, honest and simple. [lat]/[lng] are the GPS
   /// fix at clock-in; when null no location is stored (honest — no invented
-  /// coordinate). Existing callers that pass no location keep working.
-  bool clockIn(String username, {double? lat, double? lng}) {
+  /// coordinate). [employerId] is the worker→contractor link (`session
+  /// .employerId`) stamped onto the day this is born — it scopes the row to the
+  /// employing contractor's roster ([attendanceForEmployer]); default `''`
+  /// keeps existing callers (and couriers) working unchanged.
+  bool clockIn(String username,
+      {double? lat, double? lng, String employerId = ''}) {
     final today = todayFor(username);
     if (today != null && today.inTs != null) return false;
     _userTouched = true;
@@ -231,6 +260,7 @@ class WorkerAttendanceNotifier extends StateNotifier<List<AttendanceDay>> {
         inTs: DateTime.now(),
         inLat: lat,
         inLng: lng,
+        employerId: employerId,
       ),
     ];
     _persist();
@@ -265,3 +295,15 @@ final workerAttendanceProvider =
     StateNotifierProvider<WorkerAttendanceNotifier, List<AttendanceDay>>(
   (ref) => WorkerAttendanceNotifier(),
 );
+
+/// The CONTRACTOR's roster — every WORKER attendance record (worker store
+/// only) that names this `employerId`. Couriers use a separate provider/key
+/// and are excluded by construction. The contractor's attendance sheet (Wave
+/// S) watches this to see who's on-site today. Order: ledger insertion order
+/// (oldest→newest, the order rows were clocked in), deterministic and free of
+/// timestamp-tie instability; pair with [clockedInNow] for the live list.
+final attendanceForEmployer =
+    Provider.family<List<AttendanceDay>, String>((ref, employerId) {
+  final all = ref.watch(workerAttendanceProvider);
+  return [for (final d in all) if (d.employerId == employerId) d];
+});

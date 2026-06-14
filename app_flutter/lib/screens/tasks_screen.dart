@@ -12,6 +12,7 @@ import 'package:buildsmart/data/phaseb_seeds.dart';
 // Wave T2a — contractor authoring stamps the employer id (kDemoContractorId on
 // the single-device demo, SERVER-SWAP to the real contractor uid) + reads the
 // LIVE review queue projection for the parallel contractor-approval surface.
+import 'package:buildsmart/screens/contractor_attendance_sheet.dart';
 import 'package:buildsmart/screens/contractor_hr_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:buildsmart/state/tasks_engine.dart';
@@ -121,6 +122,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         key: const ValueKey('contractor-hr-entry'),
         label: '👷 חופשות עובדים',
         onTap: () => showContractorHrSheet(context),
+      ),
+      const SizedBox(height: BsTokens.space2),
+      // ATTENDANCE ROSTER (Wave S-c) — the contractor's live, read-only view of
+      // who's clocked in now + today's attendance, scoped to this employer.
+      _EntryButton(
+        key: const ValueKey('contractor-attendance-entry'),
+        label: '🕒 נוכחות עובדים',
+        onTap: () => showContractorAttendanceSheet(context),
       ),
       // CONTRACTOR APPROVAL (Wave T2a) — the employer's own אשר/דחה surface on
       // the LIVE review queue (parallel to the manager dashboard's block).
