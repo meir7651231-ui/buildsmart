@@ -14,6 +14,7 @@ import 'package:buildsmart/data/phaseb_seeds.dart';
 // LIVE review queue projection for the parallel contractor-approval surface.
 import 'package:buildsmart/screens/contractor_attendance_sheet.dart';
 import 'package:buildsmart/screens/contractor_hr_sheet.dart';
+import 'package:buildsmart/screens/defects_sheet.dart';
 import 'package:buildsmart/screens/tasks_gantt_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:buildsmart/state/sys_chat.dart';
@@ -142,6 +143,16 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         key: const ValueKey('contractor-gantt-entry'),
         label: '📊 גאנט משימות',
         onTap: () => showTasksGanttSheet(context),
+      ),
+      const SizedBox(height: BsTokens.space2),
+      // 🔧 DEFECTS (Wave G3b) — the contractor opens a defect (ליקוי) here; a
+      // defect reuses the entire task lifecycle (showDefectsSheet → createTask
+      // kind:'defect'). Worker-REPORTED defects surface in _contractorProposals
+      // below (a proposed defect), so this entry adds no approval of its own.
+      _EntryButton(
+        key: const ValueKey('contractor-defects-entry'),
+        label: '🔧 ליקויים',
+        onTap: () => showDefectsSheet(context),
       ),
       // CONTRACTOR APPROVAL (Wave T2a) — the employer's own אשר/דחה surface on
       // the LIVE review queue (parallel to the manager dashboard's block).

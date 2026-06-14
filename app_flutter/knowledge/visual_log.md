@@ -998,6 +998,11 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 - **מסך חדש `tasks_gantt_sheet` (read-only):** '📊 גאנט משימות' — בר פרופורציונלי לכל משימה משובצת (תאריך-התחלה אמיתי dd.MM + N ימים + אחוז-ביצוע), ומקטע '🗓️ ללא תאריך מתוזמן' למשימות בלי scheduledStart (אין-המצאת-תאריך). נגיש מלוח-הקבלן (contractor-gantt-entry) ומלוח-העובד (worker-gantt-entry).
 - **קבלן (`tasks_screen`):** `_TaskAuthorSheet` קיבל בורר-תאריך '📅 תאריך התחלה (לגאנט)' (author-start) → נשמר ב-createTask/editTask.
 - **אימות:** analyze 0-errors · +23 טסטים · supervisor CLEAN (10/10) · mutation RED→GREEN (len≥1).
+
+## גל G3 — מסך ליקויים (פתיחה/דיווח/רשימה) — 2026-06-14
+- **מסך חדש `defects_sheet` (🔧 ליקויים, תלוי-תפקיד):** הקבלן — '➕ פתח ליקוי' (שם/מיקום/חומרה) → משימת-ליקוי pending; העובד — '➕ דווח ליקוי' → proposed (אישור דרך בלוק-ההצעות של G1). רשימת-ליקויים עם מיקום/חומרה/סטטוס (מוצגים רק כשקיימים — אין-המצאה). נגיש מלוח-הקבלן (contractor-defects-entry) ומלוח-העובד (worker-defects-entry).
+- **תיקון-מפקח:** ליקוי-שהקבלן-פתח נחתם ב-employerId ריק → לא הופיע ברשימת-הקבלן; תוקן ל-kDemoContractorId.
+- **אימות:** analyze 0-errors (מסך-חדש נקי) · +29 טסטים · supervisor (תפס scope→תוקן) · mutation RED→GREEN (kind filter).
 ## #C11 — Apple-readiness HIDE-pass: placeholders "בבנייה"/"בקרוב"/"(הדגמה)" מוסתרים (הפיך) — 2026-06-14
 
 **שינוי:** ל-App Store review הוסתר כל placeholder גלוי של פיצ׳ר backend-blocked, דרך דגל-קומפילציה יחיד `kHideUnderConstruction` (`lib/state/under_construction.dart`, default true; הפיך — flip מחזיר הכל).

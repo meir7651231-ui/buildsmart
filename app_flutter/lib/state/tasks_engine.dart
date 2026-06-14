@@ -61,6 +61,9 @@ class TaskItem {
     this.assignedWorkerUid = '',
     this.createdBy = '',
     this.scheduledStart,
+    this.kind = 'task',
+    this.location = '',
+    this.severity = '',
   });
 
   final int id;
@@ -128,6 +131,24 @@ class TaskItem {
   /// decodes as null and the verbatim seed's overlay stays byte-identical.
   final DateTime? scheduledStart;
 
+  /// 🔧 task vs DEFECT (Wave G3a, additive) — `'task'` (the default, a regular
+  /// §6 משימה) or `'defect'` (a ליקוי). A defect reuses the ENTIRE task
+  /// lifecycle (authoring / proposal / approval / gantt) — the user's decision
+  /// "ליקויים same as משימות". Field-economy: persisted WRITE-WHEN-NON-DEFAULT
+  /// (the key appears only for a defect), so the verbatim seed + every regular
+  /// task stay byte-identical. Decode → 'task' on a missing/garbage value.
+  final String kind;
+
+  /// 📍 the defect's place / מיקום (Wave G3a, additive) — e.g. 'אמבטיה ראשית'.
+  /// Empty on a regular task (and any pre-G3a payload). Field-economy: persisted
+  /// write-when-non-empty; defensive decode → ''.
+  final String location;
+
+  /// ⚠️ the defect's severity / חומרה (Wave G3a, additive) — e.g. 'חמור' /
+  /// 'בינוני'. Empty on a regular task (and any pre-G3a payload). Field-economy:
+  /// persisted write-when-non-empty; defensive decode → ''.
+  final String severity;
+
   TaskItem copyWith({
     String? status,
     Object? photo = _sentinel,
@@ -139,6 +160,9 @@ class TaskItem {
     String? assignedWorkerUid,
     String? createdBy,
     Object? scheduledStart = _sentinel,
+    String? kind,
+    String? location,
+    String? severity,
   }) =>
       TaskItem(
         id: id,
@@ -166,6 +190,13 @@ class TaskItem {
         scheduledStart: scheduledStart == _sentinel
             ? this.scheduledStart
             : scheduledStart as DateTime?,
+        // 🔧 task vs defect (Wave G3a) — plain pass-through (Strings, not
+        // sentinel-nullable): a defect's kind is PRESERVED through every
+        // copyWith (so approveProposal keeps it a defect), location/severity
+        // patchable via editTask.
+        kind: kind ?? this.kind,
+        location: location ?? this.location,
+        severity: severity ?? this.severity,
       );
 
   static const _sentinel = Object();
@@ -287,6 +318,19 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
                 // crashes. The sentinel-guarded copyWith carries null through.
                 scheduledStart: DateTime.tryParse(
                     (m['${t.id}'] as Map)['scheduledStart'] as String? ?? ''),
+                // 🔧 task vs defect (Wave G3a) — defensive decode mirroring
+                // createdBy: a pre-G3a / demo / regular-task payload has no
+                // 'kind'/'location'/'severity' key (or a non-String), so it
+                // decodes back-compat as 'task'/''/'' and is NOT a defect.
+                kind: (m['${t.id}'] as Map)['kind'] is String
+                    ? (m['${t.id}'] as Map)['kind'] as String
+                    : 'task',
+                location: (m['${t.id}'] as Map)['location'] is String
+                    ? (m['${t.id}'] as Map)['location'] as String
+                    : '',
+                severity: (m['${t.id}'] as Map)['severity'] is String
+                    ? (m['${t.id}'] as Map)['severity'] as String
+                    : '',
               )
             else
               t,
@@ -331,6 +375,13 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
               // byte-identical. ISO-8601, mirroring startedAt/completedAt.
               if (t.scheduledStart != null)
                 'scheduledStart': t.scheduledStart!.toIso8601String(),
+              // 🔧 task vs DEFECT (Wave G3a) — `kind` rides WRITE-WHEN-NON-
+              // DEFAULT (the key appears only for a 'defect'), location/severity
+              // write-when-non-empty: a regular task's payload omits all three,
+              // so the verbatim seed + every regular task stay byte-identical.
+              if (t.kind != 'task') 'kind': t.kind,
+              if (t.location.isNotEmpty) 'location': t.location,
+              if (t.severity.isNotEmpty) 'severity': t.severity,
             },
         }),
       );
@@ -582,6 +633,9 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
     String assignedWorkerUid = '',
     String employerId = '',
     DateTime? scheduledStart,
+    String kind = 'task',
+    String location = '',
+    String severity = '',
   }) {
     final id =
         state.isEmpty ? 1 : (state.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1);
@@ -603,6 +657,12 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         // 📅 GANTT anchor (Wave G2a) — additive, default null (unscheduled), so
         // every existing caller keeps today's behavior (no invented date).
         scheduledStart: scheduledStart,
+        // 🔧 task vs DEFECT (Wave G3a) — the contractor "opens a defect" via
+        // createTask(kind:'defect', location:, severity:); default 'task'/''/''
+        // keeps every existing caller a regular task (byte-identical payload).
+        kind: kind,
+        location: location,
+        severity: severity,
       ),
     ];
     return id;
@@ -634,6 +694,9 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
     String assignedWorkerUid = '',
     String employerId = '',
     DateTime? scheduledStart,
+    String kind = 'task',
+    String location = '',
+    String severity = '',
   }) {
     final id =
         state.isEmpty ? 1 : (state.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1);
@@ -656,6 +719,14 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         // worker can propose a job with a planned start, else it stays off the
         // timeline (no invented date).
         scheduledStart: scheduledStart,
+        // 🔧 task vs DEFECT (Wave G3a) — the worker "reports a defect" via
+        // proposeTask(kind:'defect', location:, severity:) → it enters the SAME
+        // 'proposed' bucket awaiting the contractor's approveProposal (a
+        // worker-reported defect runs the G1 approval flow). Default keeps it a
+        // regular proposed task.
+        kind: kind,
+        location: location,
+        severity: severity,
       ),
     ];
     return id;
@@ -711,12 +782,19 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
   /// 📅 GANTT (Wave G2a): a non-null [scheduledStart] SETS / re-anchors the
   /// task's planned start; null keeps the current value. To CLEAR a date back to
   /// unscheduled, use [TaskItem.copyWith] (`scheduledStart: null`, sentinel-guarded).
+  ///
+  /// 🔧 DEFECT (Wave G3a): [location]/[severity] patch a defect's place/severity
+  /// (null keeps the current value). [TaskItem.kind] is INTENTIONALLY not
+  /// editable — a task's kind is fixed at creation (no flipping task↔defect).
+  /// Editing a regular task's location/severity is harmless (they default '').
   void editTask(int id,
       {String? name,
       String? detail,
       int? days,
       List<String>? steps,
-      DateTime? scheduledStart}) {
+      DateTime? scheduledStart,
+      String? location,
+      String? severity}) {
     _patch(
       id,
       (t) => TaskItem(
@@ -737,6 +815,11 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         assignedWorkerUid: t.assignedWorkerUid,
         createdBy: t.createdBy,
         scheduledStart: scheduledStart ?? t.scheduledStart,
+        // 🔧 kind is seed-immutable at edit time (fixed at creation); only
+        // location/severity are patchable.
+        kind: t.kind,
+        location: location ?? t.location,
+        severity: severity ?? t.severity,
       ),
     );
   }
@@ -771,6 +854,12 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         // 📅 GANTT (Wave G2a) — a (re)assign must not silently drop the planned
         // start: propagate it unchanged (this rebuild bypasses copyWith).
         scheduledStart: t.scheduledStart,
+        // 🔧 DEFECT (Wave G3a) — likewise propagate kind/location/severity
+        // unchanged (this rebuild bypasses copyWith): a (re)assigned defect
+        // stays a defect.
+        kind: t.kind,
+        location: t.location,
+        severity: t.severity,
       ),
     );
   }
@@ -810,6 +899,14 @@ final tasksPendingReviewProvider = Provider<List<TaskItem>>((ref) {
   return tasks.where((t) => t.status == 'review').toList()
     ..sort((a, b) => a.id.compareTo(b.id));
 });
+
+/// 🔧 DEFECTS (Wave G3a) — every task whose [TaskItem.kind] is `'defect'` (a
+/// ליקוי), derived LIVE off [tasksProvider]. A defect reuses the entire task
+/// engine (authoring / proposal / approval / gantt) — this provider is just the
+/// kind filter the G3b defects UI reads. Order INHERITS [tasksProvider]'s order
+/// (deterministic; not re-sorted by any timestamp).
+final defectsProvider = Provider<List<TaskItem>>((ref) =>
+    [for (final t in ref.watch(tasksProvider)) if (t.kind == 'defect') t]);
 
 /// ⏱️ Task-clock label (#85ו) — elapsed between [TaskItem.startedAt] and
 /// [TaskItem.completedAt] (or NOW while the work is still open), as a natural

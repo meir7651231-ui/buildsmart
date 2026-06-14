@@ -38,6 +38,7 @@ Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) 
 > **גל S (אתר/נוכחות):** נוכחות-עובד → תצוגה-חיה אצל הקבלן — `attendanceForEmployer` (`worker_attendance.dart`, **חנות-עובד בלבד** → שליחים מודרים) + `contractor_attendance_sheet` ('🕒 נוכחות עובדים'): '🟢 נוכחים עכשיו' + 'היום' (שעות + מיקום-אמיתי דרך openNavSheet, אין-המצאה). read-only; העובד חותם כרגיל. firebase→Z.
 > **גל G1 (משימות דו-כיווני):** העובד פותח משימה → `'proposed'` → הקבלן מאשר (`proposeTask`/`approveProposal`/`rejectProposal`, **מבודד** מ-review/completion). לוח-עובד: '➕ הוסף משימה' + מקטע 'ממתינות לאישור'; לוח-קבלן: מקטע-אישור-הצעות (`pendingProposalsProvider`) → פעמון+צ'אט th-worker-contractor. גאנט(G2)+ליקויים(G3) בהמשך. firebase→Z.
 > **גל G2 (גאנט):** גאנט כתצוגה מעל `tasksProvider` (לא מערכת נפרדת) — `TaskItem.scheduledStart` + `buildTasksGantt` (`lib/logic/tasks_gantt.dart`, טהור) + `tasks_gantt_sheet` (read-only, נגיש מקבלן+עובד; **תאריכים אמיתיים**, 'ללא תאריך' בנפרד, אין-המצאה). הקבלן משבץ תאריך ב-author-sheet. ליקויים(G3) בהמשך. firebase→Z.
+> **גל G3 (ליקויים):** ליקוי = `kind='defect'` של משימה (+location/severity) — מנצל את כל מנגנון הפתיחה/הצעה/אישור. הקבלן פותח (createTask→pending), העובד מדווח (proposeTask→proposed→אישור דרך זרם-G1). `defectsProvider` + `defects_sheet` (🔧, נגיש משני הלוחות). firebase→Z. **— חיווט קבלן↔עובד הושלם (T·E·H·S·G); נותר רק שרת (Z) + דחיפה.**
 
 ---
 

@@ -972,6 +972,12 @@
 - **מוטציה:** `lenDays: t.days < 1 ? 1 : t.days` → `lenDays: t.days` (משימת days==0 קיבלה bar באורך 0 — נעלמת מהציר).
 - **תוצאה:** **אדומה ✅** — 'a days==0 task still occupies one cell (lenDays floored at 1)' נכשל. שוחזר ב-Edit → **+15 ירוק**.
 - **מסקנה:** ה-floor load-bearing — כל משימה משובצת תופסת לפחות תא אחד (אחרת בלתי-נראית בגאנט). הפריסה טהורה+דטרמיניסטית, **אין-המצאת-תאריך** (scheduledStart==null → unscheduled, לא bar).
+
+## גל G3 — ליקויים: מסנן ה-kind (פריסה טהורה) — 2026-06-14
+- **קובץ:** `lib/state/tasks_engine.dart:909` (`defectsProvider` kind filter) · בדיקה `test/contractor_defects_test.dart`.
+- **מוטציה:** `if (t.kind == 'defect')` → `if (t.kind != 'defect')` (היפוך — defectsProvider החזיר משימות-רגילות במקום ליקויים).
+- **תוצאה:** **אדומה ✅** — 4 טסטי-ליקויים נכשלו (createTask-defect · editTask · round-trip · proposeTask-defect). שוחזר ל-`==` → **+5 ירוק**.
+- **מסקנה:** מסנן-ה-kind load-bearing. **+ תיקון-מפקח:** `_openDefect` חתם employerId מ-session ריק (תפקיד-מנהל) → ליקוי-קבלן נעלם מרשימתו; תוקן ל-`kDemoContractorId` (כמו `_TaskAuthorSheet`). [פער-מבחן ידוע: render-test של הגיליון תחת session-מנהל — parked עם שאר ה-widget-tests.]
 ## #C11 — Apple-readiness HIDE-pass (kHideUnderConstruction · kVisibleSearchIndex) — 2026-06-14
 - **קבצים (lib/state|lib/data):** `lib/state/under_construction.dart` (חדש — הדגל `kHideUnderConstruction` + `kHiddenSearchTitles`) · `lib/data/search_index.dart` (getter חדש `kVisibleSearchIndex` שמסנן placeholder-titles · ה-const `kSearchIndex` נשאר verbatim). (UI: `_SectionTile` ב-4 מסכי-הגדרות · `ai_hub_screen` `_visibleTiles`/`visibleToolIds` · chats/persona_portal/courier_portal_tab/persona_picking_sheet/tasks_screen guards.)
 - **תקלה שהוזרקה:** `kVisibleSearchIndex => kHideUnderConstruction ? […filtered] : kSearchIndex` שונה ל-`=> false // MUTATION` (כלומר תמיד מחזיר את הרשימה המלאה → 3 ה-titles ה-deferred דולפים לחיפוש החי).
