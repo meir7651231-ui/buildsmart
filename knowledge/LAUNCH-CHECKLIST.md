@@ -10,7 +10,7 @@
 - [ ] מילוי `[שם החברה]` בכל המסמכים (`legal_texts.dart`)
 
 ## 🟧 שלב 1 — חיבור‑השרת לטלפון (פותח את הכל)
-- [x] **F1 (חלק‑הבעלים ✅):** רשם iOS+Android בקונסול + העלה 2 קבצי‑הקונפיג (ca2f0a2). [ ] נותר לצי: לחווט ל‑`firebase_options.dart` + gradle plugin
+- [x] **F1 ✅** — קונסול (את) + קוד (25a5daf: native options + gradle + plist). נותר: בדיקת‑מכשיר (את)
 - [ ] **F4:** מפתח APNS (push ל‑iPhone) + Push capability ב‑Xcode [את+agent]
 - [ ] `firebase deploy` — Functions + rules + indexes [agent/CI]
 - [ ] קונסול: Crashlytics ON · רישום‑מפתחות App Check + אכיפה · מפתח VAPID (push‑web) · R2 secrets

@@ -4,7 +4,7 @@
 > מי: **[agent]**=קוד · **[את]**=החלטה/קונסול/עסקי · **[חיצוני]**=זמן‑קיר. מאמץ: **S**=שעות · **M**=ימים · **L**=שבוע+.
 > נלווה ל‑`LAUNCH-TASKS-MICRO.md` (שלבים + גוטצ'ות + מצאי‑מסכים). מבוסס על מצאי e3e6e94.
 >
-> 🔴 **תזכורת‑על (אומת 13/6 @208f3a9):** סדרת‑A (כולל A4‑A6 שנדחפו עכשיו) **code‑complete אך דורמנטית בברירת‑מחדל** — `useFirebaseBackend` כבוי (`backend.dart`), ו‑`firebase_options` web‑only. **דיוק חשוב:** על מכשיר נייטיב Firebase **לא עולה — אבל זו לא קריסה.** `main.dart:51‑59` עוטף ב‑try/catch+timeout, ה‑throw נתפס, והאפליקציה **נופלת ל‑repos מקומיים (דמו)**. כלומר הטלפון רץ אך **לא מדבר עם השרת** עד F1. ✅ מוכח רק על **preview‑web עם הדגל** (10/6). הלוחות: דמו (דגל OFF) = `BoardSession`/seed; **דגל ON = `BoardSession` נבנה מ‑Firebase‑uid (A4' 50465b1).**
+> 🔴 **תזכורת‑על (אומת 13/6 @208f3a9):** סדרת‑A (כולל A4‑A6 שנדחפו עכשיו) **code‑complete אך דורמנטית בברירת‑מחדל** — `useFirebaseBackend` כבוי (`backend.dart`), ו‑`firebase_options` web‑only. **F1 ✅ (25a5daf):** `firebase_options` עכשיו עם native android+ios → **Firebase מאותחל על מכשיר** (לא עוד web‑only). נשאר כדי לחבר באמת: `firebase deploy` + הדלקת‑דגלים + בדיקת‑מכשיר. (הדגל OFF עדיין = דמו; ה‑web ללא שינוי.) ✅ מוכח רק על **preview‑web עם הדגל** (10/6). הלוחות: דמו (דגל OFF) = `BoardSession`/seed; **דגל ON = `BoardSession` נבנה מ‑Firebase‑uid (A4' 50465b1).**
 
 > 🔌 **רשימת‑הפעלה ("מדמו → לשרת חי"):** כל פיצ׳ר‑שרת מגודר בדגל נפרד (OFF=דמו byte-identical); להדלקה צריך **backend + דגל**:
 > | דגל | מפעיל | תנאי‑backend (מי) |
@@ -95,7 +95,7 @@
 ## Phase F — הקמת נייטיב
 | ID | משימה | היכן | מי | מ' |
 |---|---|---|---|---|
-| F1 | 🟡 [את] ✅ רשם iOS+Android בקונסול + העלה google-services.json/GoogleService-Info.plist (אומת: `buildsmart-b0b78` · `com.buildsmart.buildsmart` · ca2f0a2) · [agent] נותר: לחווט ל‑`firebase_options.dart` + להסיר throw + gradle plugin | console + `firebase_options.dart` | את+agent | M |
+| F1 | ✅ (קונסול: את · קוד: 25a5daf): native FirebaseOptions android+ios + gradle plugin + plist ב‑Runner · `firebase_options` לא זורק יותר לנייטיב · נותר: בדיקת‑מכשיר (את — אין Android SDK בסביבת‑הצי) | console + `firebase_options.dart` | את+agent | M |
 | F2 | ✅ קוד (95b43da): providers prod (playIntegrity/appAttest) מאחורי `kAppCheckProd` (default OFF=debug) · הפעלה=רישום מפתחות בקונסול | `main.dart` | את+agent | M |
 | F3 | ✅ (profile→deleteAccount+wipe) · מחיקת‑חשבון מלאה (users/{uid}+data) | `auth_state.deleteAccount` + function | agent | M |
 | F4 | APNS key + iOS Push capability | Xcode + Firebase | את+agent | S |
