@@ -13,6 +13,7 @@
 > | `kUidScopedQueries` | זהות + scope + צ׳אט per‑uid | rules+indexes פרוסים ✅ |
 > | `SERVER_CALLABLES` | קידום/אשראי דרך השרת | deploy functions (CI) |
 > | `kCloudPhotos` | תמונות ל‑R2 | provision R2 + deploy getUploadUrl (את) |
+> | `kAppCheckProd` | App Check providers prod | רישום מפתחות + אכיפה בקונסול (את) |
 >
 > ➕ **`kHideUnderConstruction`** (`state/under_construction.dart`, default **ON**, נדחף 35fd96e) — מצב‑ביקורת‑אפל: מסתיר כל עלה/הגדרה "בבנייה" חסום‑שרת מהתצוגה ומהחיפוש (סקשן שכולו placeholder נעלם). **הפיך** — flip ל‑false כשהפיצ'ר נבנה.
 
@@ -95,10 +96,10 @@
 | ID | משימה | היכן | מי | מ' |
 |---|---|---|---|---|
 | F1 | רישום iOS+Android ב‑Firebase + native `firebase_options` | console + `firebase_options.dart` | את+agent | M |
-| F2 | App Check נייטיב (Play Integrity/DeviceCheck) | agent | M |
+| F2 | ✅ קוד (95b43da): providers prod (playIntegrity/appAttest) מאחורי `kAppCheckProd` (default OFF=debug) · הפעלה=רישום מפתחות בקונסול | `main.dart` | את+agent | M |
 | F3 | ✅ (profile→deleteAccount+wipe) · מחיקת‑חשבון מלאה (users/{uid}+data) | `auth_state.deleteAccount` + function | agent | M |
 | F4 | APNS key + iOS Push capability | Xcode + Firebase | את+agent | S |
-| F5 | Android notif channels + אייקון‑התראה | agent | S |
+| F5 | ✅ (95b43da): ערוצי‑התראות + אייקון‑התראה לבן + POST_NOTIFICATIONS (אנדרואיד 13+) | Android manifest | agent | S |
 | F6 | **אייקון‑מותג כתום** (כרגע ברירת‑מחדל כחולה של Flutter!) · favicon/PWA/launcher · splash · version · bundle‑id סופי | agent+את | M |
 
 > ✅ **תוקן (run 27428741969 ✓, 12/6):** היה חוסם — בניית Android (AAB ל‑Play) נכשלת — AGP 8.7.0 ישן מדי; תלויות androidx (core 1.18, activity 1.12) דורשות **8.9.1+**. תיקון: לבמפ AGP→8.9.1 + Gradle תואם ב‑`android/settings.gradle`/wrapper. שייך ל‑Phase F. **S**.
@@ -108,8 +109,8 @@
 |---|---|---|---|---|
 | G1 | ✅ (5de11d8) · אינדקסים מורכבים (ל‑A5/A9) | `firestore.indexes.json` | agent | S |
 | G2 | ✅ (5de11d8) · הקשחת rules (ownership) + emulator tests | `firestore.rules` + rules_test | agent | M |
-| G3 | אכיפת App Check | console + agent | את+agent | S |
-| G4 | Crashlytics + Analytics אמיתי | agent | M |
+| G3 | 🟡 קליינט ✅ (95b43da: token auto‑attach בכל בקשה) · אכיפה=טוגל‑קונסול (בעלים) | console + agent | את+agent | S |
+| G4 | ✅ (3fa61af): Crashlytics (FlutterError/PlatformDispatcher) + Analytics (אירועי הזמנה/role/שגיאה) · נייטיב ממתין ל‑F1 | agent | M |
 | G5 | התראות‑תקציב Blaze | console | את | S |
 | G6 | גיבוי/ייצוא Firestore | console | את+agent | S |
 
