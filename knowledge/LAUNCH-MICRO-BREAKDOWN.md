@@ -14,7 +14,7 @@
 > | `SERVER_CALLABLES` | קידום/אשראי דרך השרת | deploy functions (CI) |
 > | `kCloudPhotos` | תמונות ל‑R2 | provision R2 + deploy getUploadUrl (את) |
 
-> 🌿 **ענף נפרד `fleet/worker-board-v3`** (אומת 14/6): 6 commits — **לוח‑עובד v3 מלא** (release v6.19, issues #98‑#114): נוכחות‑GPS · לוח‑שנה חודשי · ניווט · טופס 101 v2 · חופשה/מחלה · תיק‑בטיחות · לוח‑משימות · בדיקת‑ציוד · שער‑מוכנות‑מסמכים. **התפצל מ‑`d8cd1fe`, טרם מוזג ל‑whats‑happening, אין PR.** whats‑happening המשיך בלעדיו ל‑A13+C4. ⚠️ צריך **מיזוג** כדי שייכנס לקו‑ההשקה; **לא נספר כ"בוצע"** בלוח עד אז (עשוי לסגור C6‑GPS).
+> 🌿 **ענף נפרד `fleet/worker-board-v3`** (אומת 14/6): 6 commits — **לוח‑עובד v3 מלא** (release v6.19, issues #98‑#114): נוכחות‑GPS · לוח‑שנה חודשי · ניווט · טופס 101 v2 · חופשה/מחלה · תיק‑בטיחות · לוח‑משימות · בדיקת‑ציוד · שער‑מוכנות‑מסמכים. **התפצל מ‑`d8cd1fe`, טרם מוזג ל‑whats‑happening, אין PR.** whats‑happening המשיך בלעדיו ל‑A13+C4. ⚠️ צריך **מיזוג** כדי שייכנס לקו‑ההשקה; **לא נספר כ"בוצע"** בלוח עד אז (עשוי לסגור C6‑GPS). · **שאר הענפים שהתפצלו** (compassionate‑cray/agent‑network/github‑setup/legacy/wip‑backup) = ישנים (20 מאי–4 יוני), מאות commits מאחור — נטושים, לא רלוונטיים להשקה. הקו החי היחיד = whats‑happening; הדיברגנס הפעיל היחיד = worker‑board‑v3.
 
 ---
 
