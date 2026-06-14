@@ -17,6 +17,13 @@
 ## רשומות
 <!-- הוסף רשומה חדשה כאן לכל פונקציית עזר -->
 
+## de-bundle לוח-קבלן + tasks_screen.approve (גל DEBUNDLE, via /swarm) — 2026-06-14
+
+- **קובץ:** `test/worker_approval_engine_test.dart` (טסט-ליבה: עובד מגיש → קבלן מאשר → `done` חי).
+- תקלה שהוזרקה: `tasks_engine.dart:552` `approve` — `copyWith(status: 'done')` → `'review'`.
+- תוצאה: **אדומה ✅** — 3 טסטים נכשלו (done-reflects-live · order-advance · WIDGET-manager badge). שחזור-מגיבוי → ירוק ✅ (7/7).
+- מסקנה: הבדיקה חזקה — נועלת מעבר-אישור קבלן→עובד על המנוע המשותף. הפירוק (הסרת טוגל מנהל↔עובד + `_workerView` + 4 כפתורי-כלים כפולים; אריחי Site-Hub גאנט/ליקויים/נוכחות→מנועים חיים + אריח-HR + מחיקת 3 מסכי-דמו; scoping ל-`kDemoContractorId`; חסימת 6 `kWorkers[]`) עבר נקי: analyze 0 · +2509 · build web ✓ · supervisor 15/15.
+
 ## requestsForEmployer + vacation employerId (גל H1) — 2026-06-14
 
 - **קובץ:** `test/contractor_vacation_approval_test.dart` (8 מקרים).

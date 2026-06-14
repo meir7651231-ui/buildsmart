@@ -2498,7 +2498,7 @@ class _ApprovalRow extends ConsumerWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            '🦺 ${kWorkers[task.worker]} · 🕒 ${task.days} ימים · ${task.steps} שלבים',
+            '🦺 ${kWorkers[(task.worker >= 0 && task.worker < kWorkers.length) ? task.worker : 0]} · 🕒 ${task.days} ימים · ${task.steps} שלבים',
             style: const TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
           ),
           if (photo != null) ...[

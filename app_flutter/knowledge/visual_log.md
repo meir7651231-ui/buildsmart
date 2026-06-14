@@ -4,6 +4,14 @@
 
 ---
 
+## v6.20 — חיווט קבלן↔עובד · גל DEBUNDLE (פירוק לוח-הקבלן — אימות חי בכרום)
+
+**שינוי (UI ב-5 מסכים):** `tasks_screen.dart` (הוסרו טוגל מנהל↔עובד + `_workerView` + `_RolePicker` + 4 כפתורי-כלים כפולים → לוח-קבלן ממוקד: יצירה+אישורים+הצעות) · `site_hub_screen.dart` (אריחי גאנט/ליקויים/נוכחות → גיליונות חיים `showTasksGanttSheet`/`showDefectsSheet`/`showContractorAttendanceSheet`; אריח חדש 👷 חופשות; נמחקו 3 מסכי-דמו `_SiteGantt`/`_SiteSnagging`/`_SiteAttendance`; הוחזר אריח **focused** 📋 משימות צוות → openTasks) · `manager_dashboard_screen.dart` (בדיקת-גבולות ל-`kWorkers[task.worker]`) · `worker_app_screen.dart` (`_SubmitButton` ≥48px tap-target + `EdgeInsetsDirectional` ל-5 כפתורים) · `tasks_gantt_sheet.dart` (scope לפי צופה: עובד→tasks שלו · קבלן→employerId==demo||ריק).
+
+**אימות (חי בכרום + אוטומטי):** הורצה הבנייה (build web release) על `localhost` ונוּוטה ידנית בעין: (1) **אתר-הבנייה אחרי הפירוק** — אין אריח-באנדל, האריחים הנכונים; (2) **גאנט** נפתח על המנוע החי (`tasksProvider`) ולא על דמו; (3) **גיליון-HR (👷 חופשות)** חי עם הדרכות-עובד אמיתיות; (4) **לוח-העובד** (אחרי מעבר שער-המסמכים) — אותן משימות מהמנוע, פתיחת כרטיס עם תיאור/שלבים/חומרים/כלים; (5) **זרם דו-כיווני חי** — העובד הציע "בדיקת לחץ מים — קומה 2" → הופיע מיד בגאנט-הקבלן מתויג 'הוצעה'. בנוסף: `analyze` 0 · `flutter test` +2509 ירוקים · `build web` · mutation RED→GREEN (על `approve`) · supervisor 15/15 · ביקורת-צי 7 ערוצים עובד↔קבלן (0 פערים).
+
+---
+
 ## v6.20 — חיווט קבלן↔עובד · גל 0 (בלוק-המעסיק בטופס 101)
 
 **שינוי (מקור-בלבד, ללא שינוי-layout):** `worker_forms_screen.dart` — בלוק '📄 פרטי המעסיק' בטופס 101 עבר ממקור `userProfileProvider` (פרופיל-המכשיר) ל-`employerProfileProvider(session.employerId)` (הקבלן-המקושר, גל 0). אותן שורות read-only, אותו widget; הדלתא הויזואלית היחידה: טקסט-הרמז (`!employer.isEmpty` → 'פרטי המעסיק נמשכים מהקבלן' · ריק → 'פרטי המעסיק יוחברו עם השרת') ושורות-הפירוט מוצגות רק כשיש ערך (`rows.isNotEmpty`). אין שינוי בפריסה/כפתורים/זרימה — ההצהרה+חתימה+שליחה+PDF זהים.

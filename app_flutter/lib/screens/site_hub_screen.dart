@@ -7,11 +7,12 @@
 // existing style). All strings + numbers are VERBATIM from the prototype (R6/R8).
 //
 // ENTRY POINTS (opened from the catalog ⋮ menu — `site_tasks` case in home_shell, calls openSiteHub):
-//   openSiteHub(ctx)        — the 10-tile grid (proto openSiteHub @19858).
-//   openSiteGantt           T2.1 site-gantt   📅  [L19889]
-//   openSiteSnagging        T2.2 site-snag    🔧  [L19913]
+//   openSiteHub(ctx)        — the tile grid landing (proto openSiteHub @19858).
+//   _openGantt              📅  → LIVE showTasksGanttSheet (tasks_gantt_sheet.dart)
+//   _openDefects            🔧  → LIVE showDefectsSheet (defects_sheet.dart)
+//   _openAttend             📍  → LIVE showContractorAttendanceSheet (contractor_attendance_sheet.dart)
+//   _openHr                 👷  → LIVE showContractorHrSheet (contractor_hr_sheet.dart)
 //   openSiteLocations       T2.3 site-loc     🏢  [L19952]
-//   openSiteAttendance      T2.4 site-attend  📍  [L19972]
 //   openSiteDiary           T2.5 site-diary   📓  [L20012]
 //   openSiteSafety          T2.6 site-safety  🦺  [L20041]
 //   openSiteDeps            T2.7 site-deps    🔗  [L20066]
@@ -19,11 +20,19 @@
 //   openSiteInspect         T2.9 site-inspect 🔍  [L20111]
 //   openSiteArchive         T2.10 site-archive 🗄️ [L20143]
 //
-// Mutable state (snags · inspections · attendance · diary) lives in
+// The Gantt/ליקויים/נוכחות tiles + the new HR tile are repointed to the LIVE
+// shared sheets (live tasksProvider / defectsProvider / attendanceForEmployer);
+// the old demo _SiteGantt / _SiteSnagging / _SiteAttendance screens were removed.
+// Mutable state (inspections · diary) lives in
 // `state/site_hub_state.dart`, seeded from the B0 consts in `data/phaseb_seeds`.
 
 import 'package:buildsmart/data/contractor_seeds.dart' show caToday, kSafetyTips;
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/screens/contractor_attendance_sheet.dart';
+import 'package:buildsmart/screens/contractor_hr_sheet.dart';
+import 'package:buildsmart/screens/defects_sheet.dart';
+import 'package:buildsmart/screens/tasks_gantt_sheet.dart';
+import 'package:buildsmart/screens/tasks_screen.dart';
 import 'package:buildsmart/state/site_hub_state.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -50,13 +59,15 @@ const Color _kOk = Color(0xFF1F8A4C); // --ok (ready / clocked-in)
 /// proto `openSiteHub` @19858 — the 10-tile grid landing.
 void openSiteHub(BuildContext context) => _push(context, const _SiteHubGrid());
 
-void openSiteGantt(BuildContext context) => _push(context, const _SiteGantt());
-void openSiteSnagging(BuildContext context) =>
-    _push(context, const _SiteSnagging());
+// Repointed to the LIVE shared sheets — these read the live tasksProvider /
+// defectsProvider / attendanceForEmployer, not the demo seeds. The tile's
+// `open:` signature is `void Function(BuildContext)`.
+void _openGantt(BuildContext c) => showTasksGanttSheet(c);
+void _openDefects(BuildContext c) => showDefectsSheet(c);
+void _openAttend(BuildContext c) => showContractorAttendanceSheet(c);
+void _openHr(BuildContext c) => showContractorHrSheet(c);
 void openSiteLocations(BuildContext context) =>
     _push(context, const _SiteLocations());
-void openSiteAttendance(BuildContext context) =>
-    _push(context, const _SiteAttendance());
 void openSiteDiary(BuildContext context) => _push(context, const _SiteDiary());
 void openSiteSafety(BuildContext context) => _push(context, const _SiteSafety());
 void openSiteDeps(BuildContext context) => _push(context, const _SiteDeps());
@@ -422,10 +433,16 @@ class _SiteHubGrid extends StatelessWidget {
   const _SiteHubGrid();
 
   static const _tiles = <({String ic, String t, String s, void Function(BuildContext) open})>[
-    (ic: '📅', t: 'תרשים גאנט', s: 'לוח זמנים אינטראקטיבי', open: openSiteGantt),
-    (ic: '🔧', t: 'רשימת ליקויים', s: 'Snagging list', open: openSiteSnagging),
+    // Focused contractor task board (create + approvals) — NOT the old bundle:
+    // the מנהל↔עובד toggle + duplicate tool-entries were removed in the de-bundle.
+    // This is the contractor's PRIMARY entry to author + approve tasks (projects_
+    // screen is the secondary path); removing it buried the approval board.
+    (ic: '📋', t: 'משימות צוות', s: 'יצירת משימות ואישורי-עובדים — קבלן', open: openTasks),
+    (ic: '📅', t: 'תרשים גאנט', s: 'לוח זמנים אינטראקטיבי', open: _openGantt),
+    (ic: '🔧', t: 'רשימת ליקויים', s: 'Snagging list', open: _openDefects),
     (ic: '🏢', t: 'קומה · דירה · חדר', s: 'שיוך משימות למיקום', open: openSiteLocations),
-    (ic: '📍', t: 'נוכחות GPS', s: 'שעון נוכחות', open: openSiteAttendance),
+    (ic: '📍', t: 'נוכחות GPS', s: 'שעון נוכחות', open: _openAttend),
+    (ic: '👷', t: 'חופשות עובדים', s: 'אישור חופשות וצוות', open: _openHr),
     (ic: '📓', t: 'יומן עבודה', s: 'יומן יומי דיגיטלי', open: openSiteDiary),
     (ic: '🦺', t: 'התראות בטיחות', s: 'תדריך בטיחות יומי', open: openSiteSafety),
     (ic: '🔗', t: 'תלויות חומרים', s: 'בין משימות', open: openSiteDeps),
@@ -512,213 +529,6 @@ class _HubTile extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// T2.1 — GANTT. proto siteGantt @19889. RTL bars + done %. span = 27.
-// ═════════════════════════════════════════════════════════════════════════════
-
-class _SiteGantt extends StatelessWidget {
-  const _SiteGantt();
-
-  @override
-  Widget build(BuildContext context) {
-    final span = ganttSpan(); // 27
-    return _SiteScaffold(
-      appTitle: '📅 גאנט',
-      icon: '📅',
-      title: 'תרשים גאנט',
-      sub: 'לוח הזמנים של הפרויקט — $span שבועות.',
-      children: [
-        for (final t in kGanttTasks) ...[
-          _GanttRow(task: t, span: span),
-          const SizedBox(height: 9),
-        ],
-      ],
-    );
-  }
-}
-
-class _GanttRow extends StatelessWidget {
-  const _GanttRow({required this.task, required this.span});
-  final GanttTask task;
-  final int span;
-
-  @override
-  Widget build(BuildContext context) {
-    final leftFrac = task.start / span; // .sc-gantt-bar right:leftPct%
-    final widFrac = task.len / span; // width:widPct%
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          task.name,
-          style: const TextStyle(
-            color: BsTokens.inkLight,
-            fontWeight: FontWeight.w800,
-            fontSize: 11,
-          ),
-        ),
-        const SizedBox(height: 4),
-        // .sc-gantt-track — RTL: the bar is offset from the RIGHT edge.
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final w = constraints.maxWidth;
-            final barW = w * widFrac;
-            final rightOffset = w * leftFrac;
-            return Container(
-              height: 22,
-              decoration: BoxDecoration(
-                color: BsTokens.bgLight,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: rightOffset,
-                    top: 0,
-                    bottom: 0,
-                    width: barW,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0x381F6F6B), // rgba(31,111,107,.22)
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          // .sc-gantt-fill — done% of the bar, filling from the
-                          // start edge (right, under RTL) like the proto's bar.
-                          FractionallySizedBox(
-                            alignment: AlignmentDirectional.centerStart,
-                            widthFactor: task.done / 100,
-                            heightFactor: 1,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: _kBrand,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                          ),
-                          // .sc-gantt-pct — right:6px.
-                          Positioned(
-                            right: 6,
-                            top: 0,
-                            bottom: 0,
-                            child: Center(
-                              child: Text(
-                                '${task.done}%',
-                                style: const TextStyle(
-                                  color: BsTokens.inkLight,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 9.5,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// T2.2 — SNAGGING LIST. proto siteSnagging @19913. inline add + fix CRUD.
-// ═════════════════════════════════════════════════════════════════════════════
-
-class _SiteSnagging extends ConsumerWidget {
-  const _SiteSnagging();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final snags = ref.watch(siteSnagsProvider);
-    return _SiteScaffold(
-      appTitle: '🔧 ליקויים',
-      icon: '🔧',
-      title: 'רשימת ליקויים',
-      sub: 'תיעוד ומעקב אחר ליקויים ותקלות באתר.',
-      children: [
-        _CaPrimary(
-          label: '+ דווח ליקוי חדש',
-          onTap: () => _add(context, ref),
-        ),
-        const SizedBox(height: 12),
-        if (snags.isEmpty)
-          const _CaEmpty('אין ליקויים פתוחים ✓')
-        else
-          for (final s in snags) _snagCard(context, ref, s),
-      ],
-    );
-  }
-
-  Widget _snagCard(BuildContext context, WidgetRef ref, SiteSnag s) {
-    final fixed = s.status == 'טופל';
-    final (Color sevFg, Color sevBg) = switch (s.severity) {
-      'חמור' => (_kRiskX, const Color(0x21C82A2A)),
-      'בינוני' => (_kAmberDeep, const Color(0x29F2A516)),
-      _ => (_kRiskH, const Color(0x24D66228)),
-    };
-    return _CaCard(
-      overdue: !fixed,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _CardTop(
-            left: s.id,
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: sevBg,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                s.severity,
-                style: TextStyle(
-                  color: sevFg,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 9.5,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 5),
-          _cardSub(s.what, strong: true),
-          const SizedBox(height: 3),
-          _cardSub('📍 ${s.loc} · ${s.status}'),
-          if (fixed)
-            const _CardDone('✓ הליקוי טופל')
-          else
-            _CardBtn(
-              label: 'סמן כטופל',
-              onTap: () {
-                ref.read(siteSnagsProvider.notifier).fix(s.id);
-                showToast(context, 'הליקוי ${s.id} סומן כטופל ✓');
-              },
-            ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _add(BuildContext context, WidgetRef ref) async {
-    final what = await _promptInput(
-      context,
-      title: 'תאר את הליקוי:',
-      initial: 'סדק בקיר',
-      okLabel: 'דווח',
-    );
-    if (what == null) return; // proto: prompt cancel → return
-    ref.read(siteSnagsProvider.notifier).add(what);
-    if (context.mounted) showToast(context, 'ליקוי דווח ✓');
   }
 }
 
@@ -819,99 +629,6 @@ class _SiteLocations extends StatelessWidget {
           ),
         ),
       );
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// T2.4 — GPS ATTENDANCE. proto siteAttendance @19972. clock in/out + history.
-//   camera/GPS → simulated demo result (the geo coordinate is a demo value).
-// ═════════════════════════════════════════════════════════════════════════════
-
-class _SiteAttendance extends ConsumerWidget {
-  const _SiteAttendance();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final log = ref.watch(siteAttendanceProvider);
-    final notifier = ref.read(siteAttendanceProvider.notifier);
-    final open = notifier.open;
-    return _SiteScaffold(
-      appTitle: '📍 נוכחות',
-      icon: '📍',
-      title: 'שעון נוכחות GPS',
-      sub: 'החתמת כניסה ויציאה עם אימות מיקום באתר.',
-      children: [
-        // .sc-attend-box
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: BsTokens.bgLight,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              Text(
-                open != null
-                    ? '🟢 נוכח באתר מ-${open.timeIn}'
-                    : '⚪ לא מחותם כרגע',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: open != null ? _kOk : BsTokens.mutedLight,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 12),
-              _CaPrimary(
-                label: open != null ? 'החתם יציאה' : 'החתם כניסה 📍',
-                onTap: () => _clock(context, ref, isIn: open == null),
-              ),
-            ],
-          ),
-        ),
-        if (log.isNotEmpty) ...[
-          const SizedBox(height: 6),
-          const _CaSubTitle('היסטוריית נוכחות'),
-          for (final a in log) _entry(a),
-        ],
-      ],
-    );
-  }
-
-  Widget _entry(AttendanceEntry a) {
-    return _CaCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _CardTop(
-            left: '📅 ${a.date}',
-            trailing: _CaPill(a.timeOut != null ? 'הושלם' : 'פתוח'),
-          ),
-          const SizedBox(height: 5),
-          _cardSub(
-            'כניסה ${a.timeIn}'
-            '${a.timeOut != null ? ' · יציאה ${a.timeOut}' : ''}'
-            ' · 📍 ${a.geo}',
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _clock(BuildContext context, WidgetRef ref, {required bool isIn}) {
-    // proto: new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})
-    final now = TimeOfDay.now();
-    final hhmm =
-        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-    final n = ref.read(siteAttendanceProvider.notifier);
-    if (isIn) {
-      n.clockIn(hhmm);
-      showToast(context, 'כניסה נרשמה ב-$hhmm 📍');
-    } else {
-      n.clockOut(hhmm);
-      showToast(context, 'יציאה נרשמה ב-$hhmm');
-    }
-  }
 }
 
 // ═════════════════════════════════════════════════════════════════════════════

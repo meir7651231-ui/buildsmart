@@ -1510,7 +1510,7 @@ class _EquipmentButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: BsTokens.space2),
+      padding: const EdgeInsetsDirectional.only(top: BsTokens.space2),
       child: HelpTarget(
         title: 'בדוק ציוד נדרש',
         body: 'מרכז את כל הכלים והחומרים הדרושים למשימות הפעילות שלך לרשימה '
@@ -1561,7 +1561,7 @@ class _EmployerStockButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: BsTokens.space2),
+      padding: const EdgeInsetsDirectional.only(top: BsTokens.space2),
       child: HelpTarget(
         title: 'מלאי הקבלן',
         body: 'מציג לצפייה בלבד את מלאי הקבלן המעסיק — איזה פריט נמצא במחסן '
@@ -1612,7 +1612,7 @@ class _ProposeTaskButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: BsTokens.space2),
+      padding: const EdgeInsetsDirectional.only(top: BsTokens.space2),
       child: HelpTarget(
         title: 'הוסף משימה',
         body: 'פותח טופס להצעת משימה חדשה לקבלן. המשימה שאתה מציע נשלחת '
@@ -1664,7 +1664,7 @@ class _GanttButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: BsTokens.space2),
+      padding: const EdgeInsetsDirectional.only(top: BsTokens.space2),
       child: HelpTarget(
         title: 'גאנט משימות',
         body: 'מציג לצפייה בלבד את לוח-הזמנים של המשימות לפי תאריך-התחלה '
@@ -1717,7 +1717,7 @@ class _DefectsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: BsTokens.space2),
+      padding: const EdgeInsetsDirectional.only(top: BsTokens.space2),
       child: HelpTarget(
         title: 'ליקויים',
         body: 'פותח טופס לדיווח על ליקוי שמצאת. הליקוי נשלח לקבלן לאישור, '
@@ -1999,17 +1999,25 @@ class _SubmitButton extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
             onTap: onPressed,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: BsTokens.space4,
-                vertical: 9,
-              ),
-              child: Text(
-                '📸 שלח לאישור',
-                style: TextStyle(
-                  color: bsOnAccent(context),
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w800,
+            // WCAG ≥48px tap target — minHeight guarantees it regardless of the
+            // text's intrinsic height (a bare padding only got to ~46px).
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BsTokens.space4,
+                  vertical: 12,
+                ),
+                child: Center(
+                  widthFactor: 1,
+                  child: Text(
+                    '📸 שלח לאישור',
+                    style: TextStyle(
+                      color: bsOnAccent(context),
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               ),
             ),

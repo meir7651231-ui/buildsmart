@@ -1,7 +1,10 @@
-// משימות SCREEN (T3.A · proto §6 [L8023-8200]) — the full team-tasks view with
-// the manager/worker role toggle, the status buckets, the task-detail sheet
-// (worker reports / manager approves), and the daily work-log sheet. All state
-// is the live `tasksProvider` (5-state machine + auto-advance, see
+// משימות SCREEN (T3.A · proto §6 [L8023-8200]) — now the CONTRACTOR-ONLY task
+// board: create tasks (＋ משימה חדשה / edit), APPROVE submitted ones, and
+// APPROVE worker PROPOSALS, over the status buckets + the task-detail sheet and
+// the daily work-log sheet. The manager/worker role toggle and the embedded
+// worker view were REMOVED — the worker board lives in worker_app_screen.dart.
+// The four tool entries (HR / נוכחות / גאנט / ליקויים) moved to Site Hub tiles.
+// All state is the live `tasksProvider` (5-state machine + auto-advance, see
 // state/tasks_engine.dart). Style matches worker_app_screen.dart (white AppBar +
 // card list). Every string/number verbatim from the prototype (R6/R8).
 //
@@ -12,10 +15,6 @@ import 'package:buildsmart/data/phaseb_seeds.dart';
 // Wave T2a — contractor authoring stamps the employer id (kDemoContractorId on
 // the single-device demo, SERVER-SWAP to the real contractor uid) + reads the
 // LIVE review queue projection for the parallel contractor-approval surface.
-import 'package:buildsmart/screens/contractor_attendance_sheet.dart';
-import 'package:buildsmart/screens/contractor_hr_sheet.dart';
-import 'package:buildsmart/screens/defects_sheet.dart';
-import 'package:buildsmart/screens/tasks_gantt_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart' show kDemoContractorId;
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
@@ -29,6 +28,12 @@ import 'package:buildsmart/widgets/reject_reason_dialog.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// CRASH-GUARD — a worker index can outrun [kWorkers] (a task stamped for a
+/// worker who is no longer in the demo roster, or a malformed/server payload),
+/// so `kWorkers[i]` would throw a RangeError. Clamp out-of-range indices to the
+/// first worker label instead of crashing the whole board.
+String _wk(int i) => kWorkers[(i >= 0 && i < kWorkers.length) ? i : 0];
 
 /// Open the משימות screen — the wire target for `openTasks`.
 void openTasks(BuildContext context) =>
@@ -45,7 +50,6 @@ class TasksScreen extends ConsumerStatefulWidget {
 }
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
-  String _role = 'manager'; // proto `taskRole='manager'`
   int _worker = 0; // proto `activeWorker=0`
 
   @override
@@ -80,15 +84,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           padding: const EdgeInsets.fromLTRB(BsTokens.space4, BsTokens.space4,
               BsTokens.space4, BsTokens.space5),
           children: [
-            _RolePicker(
-              role: _role,
-              onSelect: (r) => setState(() => _role = r),
-            ),
-            const SizedBox(height: BsTokens.space3),
-            if (_role == 'manager')
-              ..._managerView(tasks)
-            else
-              ..._workerView(tasks),
+            ..._managerView(tasks),
           ],
         ),
       ),
@@ -117,43 +113,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       _NewTaskButton(onTap: () => _openAuthor(context)),
       const SizedBox(height: BsTokens.space2),
       _LogButton(onTap: () => _openWorkLog(context)),
-      const SizedBox(height: BsTokens.space2),
-      // WORKER-HR (Wave H1b) — the contractor is the EMPLOYER, so worker
-      // vacation requests are approved/rejected HERE (not on the manager
-      // dashboard). Opens the contractor HR sheet over the shared
-      // `vacationRequestsProvider` (scoped to this employer).
-      _EntryButton(
-        key: const ValueKey('contractor-hr-entry'),
-        label: '👷 חופשות עובדים',
-        onTap: () => showContractorHrSheet(context),
-      ),
-      const SizedBox(height: BsTokens.space2),
-      // ATTENDANCE ROSTER (Wave S-c) — the contractor's live, read-only view of
-      // who's clocked in now + today's attendance, scoped to this employer.
-      _EntryButton(
-        key: const ValueKey('contractor-attendance-entry'),
-        label: '🕒 נוכחות עובדים',
-        onTap: () => showContractorAttendanceSheet(context),
-      ),
-      const SizedBox(height: BsTokens.space2),
-      // 📊 GANTT (Wave G2b) — the read-only timeline VIEW over the live tasks
-      // (showTasksGanttSheet). The contractor sets a task's start date in the
-      // authoring sheet (author-start), which lands it on this timeline.
-      _EntryButton(
-        key: const ValueKey('contractor-gantt-entry'),
-        label: '📊 גאנט משימות',
-        onTap: () => showTasksGanttSheet(context),
-      ),
-      const SizedBox(height: BsTokens.space2),
-      // 🔧 DEFECTS (Wave G3b) — the contractor opens a defect (ליקוי) here; a
-      // defect reuses the entire task lifecycle (showDefectsSheet → createTask
-      // kind:'defect'). Worker-REPORTED defects surface in _contractorProposals
-      // below (a proposed defect), so this entry adds no approval of its own.
-      _EntryButton(
-        key: const ValueKey('contractor-defects-entry'),
-        label: '🔧 ליקויים',
-        onTap: () => showDefectsSheet(context),
-      ),
       // CONTRACTOR APPROVAL (Wave T2a) — the employer's own אשר/דחה surface on
       // the LIVE review queue (parallel to the manager dashboard's block).
       ..._contractorApprovals(),
@@ -184,7 +143,20 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   // `tasksProvider.notifier.approve/reject` — the SAME engine path the manager
   // dashboard uses (parallel, not relocated). Empty → the section is omitted.
   List<Widget> _contractorApprovals() {
-    final pending = ref.watch(pendingApprovalTasksProvider);
+    // SCOPE to THIS employer's workers (mirrors _contractorProposals): the
+    // PersonaTask projection carries employerId, so filter the LIVE review
+    // queue by it. SERVER-SWAP: the single-device demo stamps kDemoContractorId
+    // on authored tasks; the real backend filters by the session contractor uid
+    // (do NOT use boardAuthProvider.employerId — the contractor session has
+    // employerId=='' while tasks are stamped kDemoContractorId, which would hide
+    // every task).
+    final pending = [
+      for (final t in ref.watch(pendingApprovalTasksProvider))
+        // DEMO-SEED: unstamped seeds (employerId '') belong to the single demo
+        // contractor → show them too. SERVER-SWAP: the real backend filters by
+        // the session contractor uid (all tasks stamped; '' won't occur).
+        if (t.employerId == kDemoContractorId || t.employerId.isEmpty) t
+    ];
     if (pending.isEmpty) return const [];
     return [
       Padding(
@@ -200,7 +172,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         _ApprovalCard(
           key: ValueKey('contractor-approval-${t.id}'),
           name: t.name,
-          workerLabel: kWorkers[t.worker],
+          workerLabel: _wk(t.worker),
           onApprove: () async {
             final ok = await confirmDestructive(
               context,
@@ -234,7 +206,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   List<Widget> _contractorProposals(List<TaskItem> tasks) {
     final proposals = [
       for (final t in ref.watch(pendingProposalsProvider))
-        if (t.employerId == kDemoContractorId) t
+        // DEMO-SEED: unstamped seeds count as the demo contractor's (SERVER-SWAP:
+        // real backend filters by session contractor uid; '' won't occur).
+        if (t.employerId == kDemoContractorId || t.employerId.isEmpty) t
     ];
     if (proposals.isEmpty) return const [];
     return [
@@ -266,7 +240,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               .map((x) => x.detail)
               .firstOrNull ??
               '',
-          workerLabel: kWorkers[t.worker],
+          workerLabel: _wk(t.worker),
           days: t.days,
           onApprove: () {
             ref.read(tasksProvider.notifier).approveProposal(t.id);
@@ -294,42 +268,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     ];
   }
 
-  // ── WORKER view (proto :8082-8094) ───────────────────────────────────────
-  List<Widget> _workerView(List<TaskItem> tasks) {
-    final mine = tasks.where((t) => t.worker == _worker).toList();
-    final current = mine
-        .where((t) => t.status == 'active' || t.status == 'rejected')
-        .toList();
-    final queue = mine.where((t) => t.status == 'pending').toList();
-    final submitted = mine
-        .where((t) => t.status == 'review' || t.status == 'done')
-        .toList();
-    return [
-      // The "(בהדגמה — ...)" clause is a visible demo disclaimer; hidden for
-      // Apple review (kHideUnderConstruction) — the instruction itself stays.
-      _Intro(
-        kHideUnderConstruction
-            ? 'בחר עובד כדי לראות את המשימות שלו.'
-            : 'בחר עובד כדי לראות את המשימות שלו (בהדגמה — באפליקציה אמיתית כל עובד מחובר לחשבון שלו).',
-      ),
-      const SizedBox(height: BsTokens.space2),
-      _WorkerPick(selected: _worker, onSelect: (i) => setState(() => _worker = i)),
-      if (current.isNotEmpty)
-        _Group('🔨 המשימה הנוכחית שלך', current, _open)
-      else
-        const _DoneAll('🎉 אין משימה פעילה כרגע'),
-      if (queue.isNotEmpty) _Group('⏳ הבאות בתור (${queue.length})', queue, _open),
-      if (submitted.isNotEmpty)
-        _Group('📋 שהגשת (${submitted.length})', submitted, _open),
-    ];
-  }
-
   void _open(TaskItem t) {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => _TaskSheet(task: t, role: _role),
+      // CONTRACTOR-ONLY board → the detail sheet always runs as the manager
+      // (approver) role; the worker role lives in worker_app_screen.dart.
+      builder: (_) => _TaskSheet(task: t, role: 'manager'),
     );
   }
 
@@ -365,44 +311,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 }
 
-// ── role / worker pickers ───────────────────────────────────────────────────
-class _RolePicker extends StatelessWidget {
-  const _RolePicker({required this.role, required this.onSelect});
-  final String role;
-  final void Function(String) onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget btn(String key, String label) => Expanded(
-          child: Material(
-            color: role == key ? BsTokens.brand : BsTokens.cardLight,
-            borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-              onTap: () => onSelect(key),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: BsTokens.space3),
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: role == key ? bsOnAccent(context) : BsTokens.inkLight,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-    return Row(children: [
-      btn('manager', '👔 מנהל'),
-      const SizedBox(width: BsTokens.space2),
-      btn('worker', '🦺 עובד'),
-    ]);
-  }
-}
-
+// ── worker picker ────────────────────────────────────────────────────────────
+// The manager/worker role toggle (_RolePicker) was removed when this screen
+// became the CONTRACTOR-ONLY board. _WorkerPick survives — it is reused by the
+// authoring sheet (_TaskAuthorSheet) to assign a task to a worker.
 class _WorkerPick extends StatelessWidget {
   const _WorkerPick({required this.selected, required this.onSelect});
   final int selected;
@@ -426,7 +338,7 @@ class _WorkerPick extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(vertical: BsTokens.space3),
                   child: Text(
-                    kWorkers[i],
+                    _wk(i),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: i == selected ? bsOnAccent(context) : BsTokens.inkLight,
@@ -474,37 +386,6 @@ class _LogButton extends StatelessWidget {
             child: Text(
               '📅 יומן עבודה — מה בוצע בכל יום',
               style: TextStyle(
-                color: BsTokens.inkLight,
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
-      );
-}
-
-/// A neutral card-style entry button (same look as [_LogButton]) with a
-/// caller-supplied label — used by the Wave H1b '👷 חופשות עובדים' action.
-class _EntryButton extends StatelessWidget {
-  const _EntryButton(
-      {required this.label, required this.onTap, super.key});
-  final String label;
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) => Material(
-        color: BsTokens.cardLight,
-        borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-        elevation: 1,
-        shadowColor: Colors.black26,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(BsTokens.radiusCard),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(BsTokens.space4),
-            child: Text(
-              label,
-              style: const TextStyle(
                 color: BsTokens.inkLight,
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
@@ -819,7 +700,7 @@ class _Card extends StatelessWidget {
                 ],
                 const SizedBox(height: BsTokens.space1),
                 Text(
-                  '👷 ${kWorkers[task.worker]} · 📋 ${task.steps.length} שלבים · ⏱️ ${task.days} ימים',
+                  '👷 ${_wk(task.worker)} · 📋 ${task.steps.length} שלבים · ⏱️ ${task.days} ימים',
                   style: const TextStyle(
                       color: BsTokens.mutedLight, fontSize: 12.5),
                 ),
@@ -895,7 +776,7 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                       fontWeight: FontWeight.w800,
                       fontSize: 18)),
               const SizedBox(height: 2),
-              Text('👷 ${kWorkers[t.worker]}',
+              Text('👷 ${_wk(t.worker)}',
                   style: const TextStyle(
                       color: BsTokens.mutedLight, fontSize: 13)),
               const SizedBox(height: BsTokens.space3),
@@ -925,7 +806,7 @@ class _TaskSheetState extends ConsumerState<_TaskSheet> {
                     color: const Color(0xFFF2F3F5),
                     borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                   ),
-                  child: Text('📷 תמונה מהשטח — ${kWorkers[t.worker]}',
+                  child: Text('📷 תמונה מהשטח — ${_wk(t.worker)}',
                       style: const TextStyle(
                           color: BsTokens.mutedLight, fontSize: 13)),
                 ),

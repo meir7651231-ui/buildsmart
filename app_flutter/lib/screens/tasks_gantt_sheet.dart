@@ -23,6 +23,9 @@
 
 import 'package:buildsmart/data/persona_data.dart' show kTaskStatusLabel;
 import 'package:buildsmart/logic/tasks_gantt.dart';
+import 'package:buildsmart/screens/worker_profile_screen.dart'
+    show workerIndexForSession;
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
@@ -46,8 +49,26 @@ class _TasksGanttSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // The LIVE §6 tasks → the pure G2a layout (bars + span + unscheduled).
-    final tasks = ref.watch(tasksProvider);
+    // The LIVE §6 tasks, SCOPED to the viewer before the pure G2a layout — so the
+    // timeline never renders every employer's/worker's tasks on one axis. A
+    // WORKER board sees ONLY their own tasks (the same `t.worker == <self index>`
+    // filter the worker board's `_bucket`/`mine` uses, via workerIndexForSession);
+    // the contractor / no-board-session sees THIS employer's tasks (the same
+    // `employerId == kDemoContractorId` scope the other contractor sheets use).
+    // SERVER-SWAP: kDemoContractorId is the single-device demo employer id; the
+    // real contractor uid when the backend lands (as the other contractor sheets).
+    final session = ref.watch(boardAuthProvider);
+    final all = ref.watch(tasksProvider);
+    final tasks = (session != null && session.role == BoardRole.worker)
+        ? [
+            for (final t in all)
+              if (t.worker == workerIndexForSession(session)) t
+          ]
+        : [
+            for (final t in all)
+              // DEMO-SEED: unstamped seeds belong to the demo contractor too.
+              if (t.employerId == kDemoContractorId || t.employerId.isEmpty) t
+          ];
     final layout = buildTasksGantt(tasks);
 
     // The earliest scheduled DATE (time-of-day dropped) — day 0 of the timeline.
