@@ -2,6 +2,7 @@ import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/task_skus_local.dart';
 import 'package:buildsmart/screens/barcode_scanner.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
+import 'package:buildsmart/screens/docs_readiness_gate.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_attendance_screen.dart';
@@ -16,6 +17,7 @@ import 'package:buildsmart/screens/worker_today_strip.dart';
 import 'package:buildsmart/services/geo.dart';
 import 'package:buildsmart/services/nav_launch.dart';
 import 'package:buildsmart/state/board_auth.dart';
+import 'package:buildsmart/state/docs_readiness.dart';
 import 'package:buildsmart/state/smart_project_engine.dart';
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
@@ -78,6 +80,22 @@ class _WorkerAppScreenState extends ConsumerState<WorkerAppScreen> {
     if (session == null || session.role != BoardRole.worker) {
       return const WelcomeScreen(boardRole: BoardRole.worker);
     }
+
+    // 🔒 #101 — שער-מוכנות מסמכים (HARD gate): immediately after the role-gate,
+    // block the board until the logged worker's documents are complete +
+    // in-date (signed current-year 101 + no expired cert; see
+    // [workerDocsReadiness]). The decision is LIVE — signing the 101 / adding a
+    // valid cert via the gate's deep-links re-evaluates and opens the board.
+    // [docsGateOverrideProvider] is the TEST SEAM: non-null forces the decision
+    // (board tests set true to bypass this gate). Sits ABOVE the journal-home
+    // below — none of it is disturbed.
+    final ov = ref.watch(docsGateOverrideProvider);
+    final r = ref.watch(workerDocsReadyProvider(session.username));
+    final ready = ov ?? r.ready;
+    if (!ready) {
+      return DocsReadinessGate(role: BoardRole.worker, readiness: r);
+    }
+
     final worker = workerIndexForSession(session);
 
     // W3 BRIDGE — the manager dashboard still decides on the legacy

@@ -2,6 +2,7 @@ import 'package:buildsmart/data/supplier_data.dart';
 import 'package:buildsmart/screens/courier_dashboard_screen.dart';
 import 'package:buildsmart/screens/store_dashboard_screen.dart';
 import 'package:buildsmart/screens/store_profile_screen.dart';
+import 'package:buildsmart/state/docs_readiness.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/sys_orders.dart';
 import 'package:flutter/material.dart';
@@ -277,6 +278,9 @@ void main() {
       ProviderScope(
         overrides: [
           ordersEngineProvider.overrideWith((ref) => OrdersEngineNotifier(persist: false)),
+          // #101 — bypass the HARD docs-readiness gate (this test is about the
+          // courier board flow, not the gate).
+          docsGateOverrideProvider.overrideWith((ref) => true),
         ],
         child: const MaterialApp(home: CourierDashboardScreen()),
       ),

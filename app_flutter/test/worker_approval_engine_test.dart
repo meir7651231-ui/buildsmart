@@ -17,6 +17,7 @@
 
 import 'package:buildsmart/screens/manager_dashboard_screen.dart';
 import 'package:buildsmart/screens/worker_app_screen.dart';
+import 'package:buildsmart/state/docs_readiness.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/worker_tasks_engine.dart';
@@ -147,6 +148,9 @@ void main() {
       late ProviderContainer c;
       await t.pumpWidget(
         ProviderScope(
+          // #101 — bypass the HARD docs-readiness gate (this test exercises the
+          // board's submit flow, not the gate).
+          overrides: [docsGateOverrideProvider.overrideWith((ref) => true)],
           child: MaterialApp(
             locale: const Locale('he'),
             home: Builder(
