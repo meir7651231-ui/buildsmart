@@ -8,6 +8,16 @@ sync — if you change a behavior, update both.
 Status legend: ✅ wired (real effect) · 🚧 בבנייה (placeholder toast) ·
 ⛔ blocked (needs price/rating/geo data, a server, or telephony that don't exist).
 
+> **2026-06-15 — auth #4 (account-deletion server cleanup):** the client's
+> `deleteAccount()` calls Firebase Auth `user.delete()` which removes ONLY the Auth
+> record — the user's `users/{uid}` profile (name/phone/email/fcmToken) + `diag/{uid}`
+> probe were left orphaned in Firestore (GDPR right-to-erasure / Apple gap). New
+> server-side `onUserDeleted` (functions/ — v1 auth onDelete trigger, no v2 deletion
+> hook exists, no new dep) fires on EVERY Auth deletion and purges those uid-keyed
+> personal docs + writes an `auditLog` entry. SCOPE: only uid-keyed (single-owner)
+> docs; multi-party records (orders/chat/customers/projects/tasks) are RETAINED —
+> anonymizing the uid out of shared docs is a heavier follow-up (functions/README TODO).
+
 > **2026-06-15 — auth #3 (email-verification notice):** the "צור חשבון" success path
 > now toasts that a verification email was sent ("✓ החשבון נוצר — שלחנו מייל אימות…")
 > instead of the generic sign-in toast — `sendEmailVerification` is no longer

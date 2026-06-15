@@ -2,7 +2,8 @@
 
 Region **`me-west1`** (ת"א — כמו ה-Firestore) לכל הפונקציות; חייב להתאים
 ל-`kAuthFunctionsRegion` באפליקציה. Node 20 · TypeScript strict ·
-firebase-functions **v2**.
+firebase-functions **v2** (חריג יחיד: `onUserDeleted` הוא trigger **v1** —
+ל-Auth אין hook מחיקה ב-v2; v1 הוא חלק מאותה חבילה, ללא dependency חדש).
 
 | function | סוג | תפקיד |
 |---|---|---|
@@ -12,6 +13,7 @@ firebase-functions **v2**.
 | `computeCredit` | callable | S8.2 — אשראי-קבלן מחושב-שרת (port מדויק של `contractorCredit`) + used/balance/pct מההזמנות החיות. |
 | `onOrderStageChanged` | trigger (orders/{id} updated) | S8.3/S6.3 — FCM בעברית על מעבר-stage חוקי, לפי `users/{uid}.fcmToken`. |
 | `onChatMessageCreated` | trigger (chatMessages/{id} created) | S8.3/S6.3 — FCM בעברית על הודעת-צ׳אט חדשה למשתתפי-ה-thread. |
+| `onUserDeleted` | trigger (auth user deleted) | S1.8 — ניקוי-צד-שרת במחיקת-חשבון: מוחק את המסמכים האישיים מפתח-ה-uid (`users/{uid}` + `diag/{uid}`) + auditLog. v1 (ל-Auth אין trigger מחיקה ב-v2). |
 | `getUploadUrl` | callable | S7.2 — presigned-PUT URL ל-R2 (aws-sdk v3). creds ב-Secret Manager/env בלבד. |
 | (`auditLog`) | collection | S8.4 — כל הנתיבים הרגישים לעיל כותבים רשומות append-only. |
 
@@ -181,8 +183,28 @@ getAuth().setCustomUserClaims(process.argv[2], { admin: true })
 - העלאת-תמונה: `httpsCallable('getUploadUrl')({kind, contentType, fileName?})`
   → `PUT` של ה-bytes ל-`url` עם ה-`Content-Type` שאושר.
 
+## S1.8 — ניקוי-צד-שרת במחיקת-חשבון (`onUserDeleted`)
+
+GDPR right-to-erasure + דרישת-Apple למחיקת-חשבון בתוך-האפליקציה. הקליינט
+(`auth_state.dart`, `deleteAccount()`) קורא ל-`user.delete()` של Firebase Auth —
+זה מוחק **רק** את רשומת-ה-Auth ומשאיר את עקבות-ה-Firestore יתומים. ה-trigger
+הזה יורה על **כל** מחיקת-Auth (in-app / console / Admin-SDK) ומנקה את המסמכים
+**ממופתחי-ה-uid** של המשתמש:
+
+- `users/{uid}` — הפרופיל (displayName / טלפון / מייל / fcmToken)
+- `diag/{uid}` — בדיקת ה-FS_DIAG
+
+מחיקה best-effort לכל doc (מסמך חסר/כושל לא עוצר את השאר) + רשומת `auditLog`
+(`action: "account.delete"`).
+
+**טווח מכוון:** רק מסמכים ממופתחי-uid (אישיים, בעלים-יחיד) נמחקים. רשומות
+רב-צדדיות (`orders`, `chatThreads`/`chatMessages`, `customers`, `projects`,
+`tasks`) **נשמרות** — כל אחת שייכת לעסקה/שיחה שמשתמשים אחרים עדיין רואים, ומחיקתה
+תשבש את נתוני-הצד-השני. אנונימיזציה של ה-uid ממסמכים משותפים = משימה נפרדת וכבדה
+(follow-up — ראה `app_flutter/WIRING.md`), לא בגל הזה.
+
 ## TODO (לא בגל הזה)
 
-- מחיקת מסמכי-משתמש ב-Firestore עם מחיקת-חשבון (S1.8) — wipe-צד-שרת לפני launch.
 - אכיפת App Check (`enforceAppCheck: true`) על ה-callables אחרי ש-S0.5 יציב.
 - רישום אודיט גם ל-`setRole` (לא נגעתי — ה-skeleton קפוא בהוראה).
+- אנונימיזציה של uid ממסמכים רב-צדדיים במחיקת-חשבון (מעבר ל-`users`/`diag`).
