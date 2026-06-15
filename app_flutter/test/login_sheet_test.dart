@@ -49,6 +49,9 @@ class _FakeAuthGateway implements AuthGateway {
   AuthUser? get currentUser => current;
 
   @override
+  Future<AuthUser?> signInWithGoogle() async => null;
+
+  @override
   Future<String> sendOtp(String phone) async {
     final code = failSendCode;
     if (code != null) {

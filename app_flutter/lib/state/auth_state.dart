@@ -45,8 +45,10 @@ import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart' as gsi;
 
 /// The Cloud Functions region the `setRole` callable (S1.9) is deployed to —
 /// must match `functions/src/index.ts`. me-west1 (Tel Aviv) is the project's
@@ -145,6 +147,13 @@ abstract class AuthGateway {
   /// (`email-already-in-use` / `weak-password` / `invalid-email`) — the caller
   /// maps it to honest Hebrew.
   Future<void> createUserWithEmailPassword(String email, String password);
+
+  /// Manager (OWNER) sign-in via Google. Returns the signed-in [AuthUser] on
+  /// success, or null when the user cancels the Google chooser. Throws
+  /// [AuthGatewayException] on a FirebaseAuth failure. The owner-email gate
+  /// lives in the CALLER (the welcome manager gate), not here — this only
+  /// performs the Google → Firebase credential exchange.
+  Future<AuthUser?> signInWithGoogle();
 
   /// S1.5 — the current user's custom claims (via `getIdTokenResult`).
   /// `{}` when signed out. [forceRefresh] pulls a fresh token (claims changed
@@ -320,6 +329,28 @@ class FirebaseAuthGateway implements AuthGateway {
         } on Object catch (e) {
           debugPrint('sendEmailVerification failed (non-fatal): $e');
         }
+      });
+
+  @override
+  Future<AuthUser?> signInWithGoogle() => _guard(() async {
+        if (kIsWeb) {
+          // Web: FirebaseAuth opens the Google popup directly (the google_sign_in
+          // chooser is mobile-only) and returns the credential in one step.
+          final cred = await _auth.signInWithPopup(fb.GoogleAuthProvider());
+          return _toAuthUser(cred.user);
+        }
+        // Mobile: the google_sign_in chooser yields OAuth tokens, exchanged for
+        // a Firebase credential. A null account = the user cancelled the chooser.
+        final account = await gsi.GoogleSignIn().signIn();
+        if (account == null) return null;
+        final googleAuth = await account.authentication;
+        final cred = await _auth.signInWithCredential(
+          fb.GoogleAuthProvider.credential(
+            idToken: googleAuth.idToken,
+            accessToken: googleAuth.accessToken,
+          ),
+        );
+        return _toAuthUser(cred.user);
       });
 
   @override
@@ -509,6 +540,12 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
   Future<void> createUserWithEmailPassword(String email, String password) async =>
       _required().createUserWithEmailPassword(email, password);
 
+  /// Manager (OWNER) Google sign-in. Returns the signed-in [AuthUser] (or null
+  /// on cancel); the caller checks the owner-email allowlist before granting the
+  /// manager board. Success also lands on the auth stream (claims resolve via
+  /// the normal pipeline).
+  Future<AuthUser?> signInWithGoogle() async => _required().signInWithGoogle();
+
   /// S1 — forgot-password recovery: send a reset email (delegates to the
   /// gateway; throws [AuthGatewayException] the login sheet maps to Hebrew).
   Future<void> resetPassword(String email) async =>
@@ -569,7 +606,15 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
 /// the S2/S3 repository providers use (bottom of orders_local.dart). Tests
 /// override this with a hand-rolled fake.
 final authGatewayProvider = Provider<AuthGateway?>((ref) {
-  if (useFirebaseBackend) return FirebaseAuthGateway();
+  // Auth availability is DECOUPLED from the data-backend flag: the gateway is
+  // live whenever Firebase is initialised (main() calls initializeApp on web +
+  // mobile), so the manager's "Sign in with Google" works on the demo build
+  // even while orders/customers stay on the local/demo repositories (those are
+  // gated separately by `useFirebaseBackend`). Firebase-free runs (the whole
+  // test suite + the no-config sandbox) keep `Firebase.apps` empty → null →
+  // byte-identical signed-out behavior (HARD RULE #1/#2: nothing touches
+  // FirebaseAuth.instance when Firebase is not initialised).
+  if (Firebase.apps.isNotEmpty) return FirebaseAuthGateway();
   return null;
 });
 

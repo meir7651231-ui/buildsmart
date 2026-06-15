@@ -1492,3 +1492,12 @@ RULE: כשרשומת-עובד נשמטת מ-view ממוקד-מעסיק בודק�
 ### ג — כלל המניעה
 ANTIPATTERN: ייחוס כשל בהרצת הסוויטה לשם-הטסט שבשורת-ההתקדמות במקום לטסט שבאמת נכשל
 RULE: מזהים טסט-שנכשל לפי בלוק-השגיאה המפורט בלוג-המלא ולא לפי שורת-ההתקדמות שמושפעת מהרצה-מקבילית; ומאשרים אם הכשל קיים-מראש ב-baseline על-ידי stash של השינויים והרצת אותו טסט בבידוד על העץ-הנקי לפני שמסיקים שזו רגרסיה
+
+## 2026-06-15 — זמינות auth-gateway הייתה כרוכה לדגל ה-DATA backend (חסם Google-בדמו)
+### א — הבעיה
+`authGatewayProvider` החזיר gateway רק כש-`useFirebaseBackend` (=flag && Firebase.apps.isNotEmpty), כלומר זמינות-ה-auth הייתה כרוכה ל-DATA backend. לכן בבילד-הדמו (flag OFF) ה-gateway היה null גם כש-Firebase מאותחל — מה שהיה חוסם לחלוטין את כניסת-ה-Google של המנהל (אין gateway → signInWithGoogle זורק unavailable), אף ש-Firebase Auth זמין לגמרי בנייד/web.
+### ב — הפתרון
+ניתוק זמינות-ה-auth מדגל-ה-DATA: `authGatewayProvider` עכשיו מחזיר FirebaseAuthGateway כש-Firebase.apps.isNotEmpty (auth זמין כש-Firebase אותחל), בעוד ספקי-ה-DATA נשארים מגודרים בנפרד ב-useFirebaseBackend. Firebase-free (כל הסוויטה) → apps ריק → null → signed-out byte-identical; משתמש לא-מחובר ⇒ אפס שינוי-התנהגות.
+### ג — כלל המניעה
+ANTIPATTERN: כריכת זמינות-auth לדגל ה-DATA backend במקום לאתחול Firebase
+RULE: זמינות שכבת-ה-auth נגזרת מאתחול-Firebase בפועל ולא מדגל-ה-DATA-backend; שומרים את גידור-ה-DATA נפרד כדי שכניסה-אמיתית תעבוד גם כשהנתונים עדיין דמו, בלי לשבור את ה-signed-out-byte-identical ל-Firebase-free

@@ -184,6 +184,9 @@ class _FakeAuthGateway implements AuthGateway {
   AuthUser? get currentUser => current;
 
   @override
+  Future<AuthUser?> signInWithGoogle() async => null;
+
+  @override
   Future<Map<String, dynamic>> idTokenClaims({bool forceRefresh = false}) async =>
       const {};
 

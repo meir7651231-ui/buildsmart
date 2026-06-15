@@ -1250,3 +1250,12 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 **הפיך:** הסרת-affordance בלבד; המודל (`logout()`/`enterDemo()`) נשאר callable. אפס Color/value:/activeColor: חדש.
 **אימות:** analyze 0-errors · full-suite **+2626 -1** (ה-`-1` היחיד = `worker_reports_drilldown` baseline; 0 חדשים) · isolation manager_dashboard/apple_readiness/widget ירוקים. **לא נגעתי:** board_auth model / עובד·שליח·ספק / auth-gate.
+
+## #manager-owner — שער-מנהל "כניסה עם Google" (שלב 2/4) — 2026-06-15
+
+**שינוי גלוי:** שער כניסת-המנהל (welcome ב-role-mode עבור manager) הוחלף לחלוטין: במקום "כניסה ללקוח קיים" + שדות שם-משתמש/קוד, מוצג עכשיו כותרת "כניסת מנהל המערכת" + שורת-הסבר + כפתור כתום יחיד **"המשך עם Google"** (FilledButton.icon, אייקון login, ספינר בזמן טעינה). אין שדה-קוד ואין "מצב דמו". כשאין Firebase — במקום הכפתור מוצגת כרטיסיה צהובה כנה: "כניסת מנהל דורשת חיבור לאינטרנט". שאר הלוחות (עובד/שליח/ספק) — שער ה-seed ללא-שינוי.
+
+**אין screenshot — למה:** רכיבים סטנדרטיים (FilledButton.icon + Text + Container צהוב) על אותו עץ-welcome; ההסתעפות (כפתור מול הודעה) + זרימת-הכניסה (בעלים→מנהל, זר→דחייה+טוסט, בלי-Firebase→הודעה) מאומתות ב-`manager_google_login_test` (widget-tests). אין מצב-ויזואלי-חדש מעבר לשניים אלה.
+
+**הפיך:** השער מסתעף על `role==manager` בלבד; שאר הפרסונות verbatim. אפס Color/value:/activeColor: חדש (BsTokens + צבעי-אזהרה קיימים). flag-OFF: ה-DATA נשאר demo; ה-auth-gateway live כש-Firebase אותחל אך signed-out ⇒ התנהגות זהה כשאיש לא נכנס.
+**אימות:** analyze 0-errors · full-suite **+2632 -1** (baseline) · mutation §mutation_log. **caveat בעלים:** דורש 3 צעדי Firebase-Console (`knowledge/owner/google-signin-setup.md`). **לא נגעתי:** worker-board / 4 מחלקות.

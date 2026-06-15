@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/logic/input_validators.dart';
 import 'package:buildsmart/screens/legal_screen.dart';
@@ -276,12 +277,113 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     unawaited(persistWelcomeSeen());
   }
 
+  /// Manager (OWNER) gate — secure login is "כניסה עם Google" ONLY (no demo, no
+  /// seed code). After a Google sign-in whose email is on the owner allowlist
+  /// ([isOwnerEmail]) we grant the manager board; any other account is rejected.
+  /// When Firebase is unavailable the Google button is replaced by an honest
+  /// "needs a connection" message.
+  List<Widget> _managerGoogleChildren() {
+    final canGoogle = ref.read(authGatewayProvider) != null;
+    return [
+      const Text(
+        'כניסת מנהל המערכת',
+        style: TextStyle(
+          fontWeight: FontWeight.w900,
+          fontSize: 19,
+          color: BsTokens.inkLight,
+        ),
+      ),
+      const SizedBox(height: BsTokens.space1),
+      const Text(
+        'חשבון הבעלים — כניסה מאובטחת עם חשבון Google.',
+        style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+      ),
+      const SizedBox(height: BsTokens.space4),
+      if (canGoogle)
+        HelpTarget(
+          title: 'כניסה עם Google',
+          body: 'נכנסים עם חשבון ה-Google של הבעלים. גוגל מאמתת את הזהות '
+              '(כולל אימות דו-שלבי אם מוגדר) — לא נשמרת סיסמה במכשיר.',
+          child: FilledButton.icon(
+            onPressed: _busy ? null : _managerGoogleLogin,
+            icon: _busy
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.login_rounded),
+            label: const Text(
+              'המשך עם Google',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+            ),
+            style: FilledButton.styleFrom(
+              backgroundColor: BsTokens.brand,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: BsTokens.space4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+          ),
+        )
+      else
+        Container(
+          padding: const EdgeInsets.all(BsTokens.space4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF4D6),
+            borderRadius: BorderRadius.circular(BsTokens.radiusCard),
+          ),
+          child: const Text(
+            'כניסת מנהל דורשת חיבור לאינטרנט. נסה שוב כשיש חיבור.',
+            style: TextStyle(color: Color(0xFF8A6D00), fontSize: 13),
+          ),
+        ),
+    ];
+  }
+
+  /// Manager (OWNER) Google sign-in flow: sign in with Google → verify the email
+  /// is on the owner allowlist → grant the manager board. A non-owner account is
+  /// signed out with an honest message (never silently admits a stranger).
+  Future<void> _managerGoogleLogin() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final user =
+          await ref.read(authStateProvider.notifier).signInWithGoogle();
+      if (!mounted) return;
+      if (user == null) return; // user cancelled the Google chooser
+      if (!isOwnerEmail(user.email)) {
+        await ref.read(authStateProvider.notifier).signOut();
+        if (mounted) {
+          showToast(context, 'רק חשבון הבעלים יכול להיכנס כמנהל המערכת');
+        }
+        return;
+      }
+      ref.read(boardAuthProvider.notifier).loginManagerViaGoogle(
+            uid: user.uid,
+            displayName: user.displayName ?? 'מנהל המערכת',
+          );
+    } on AuthGatewayException catch (e) {
+      if (mounted) showToast(context, hebrewAuthError(e.code));
+    } on Object catch (_) {
+      if (mounted) showToast(context, 'כניסת Google נכשלה — נסה שוב');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   /// Cluster #85א · role-gate mode sheet: 'כניסה ללקוח קיים' is the PRIMARY
   /// login path — tapping it reveals (inline, same card style) the שם משתמש
   /// + קוד fields and a 'כניסה' button that checks the seeded credentials
   /// via [BoardAuthNotifier.login]. The registration form is contractor-only
   /// and never built here; 'מצב דמו' enters an honest demo board session.
   List<Widget> _boardLoginChildren(BoardRole role) {
+    // Manager (OWNER) — Google-only secure login (no seed code, no demo entry).
+    if (role == BoardRole.manager) return _managerGoogleChildren();
     final codeFormatOk = _validBoardCode(_contact.text);
     final loginValid = _name.text.trim().isNotEmpty && codeFormatOk;
     return [

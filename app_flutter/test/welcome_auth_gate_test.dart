@@ -65,6 +65,9 @@ class _RecordingAuthGateway implements AuthGateway {
   AuthUser? get currentUser => current;
 
   @override
+  Future<AuthUser?> signInWithGoogle() async => null;
+
+  @override
   Future<void> createUserWithEmailPassword(String email, String password) async {
     creations.add(email);
     current = AuthUser(uid: 'u-new', email: email);
