@@ -108,20 +108,38 @@ service cloud.firestore {
     // read/write ONLY for a uid member (`participantUids` — the auth-truth; A9.
     // `participants` carries the display ROLES, not auth). create requires the
     // author to put themself in the NEW doc's participantUids; update FREEZES
-    // participantUids (a participant may refresh the lastMsg/ts denorm — the
-    // repo's full-doc upsert rewrites the same array, which passes — but may not
-    // eject the peer or recruit others; membership changes are a server/Functions
-    // concern). Pre-migration docs (empty participantUids) match no auth.uid —
-    // forward-ready until per-user threads are populated (see the migration header).
+    // participantUids for an EXISTING participant (a participant may refresh the
+    // lastMsg/ts denorm — the repo's full-doc upsert rewrites the same array,
+    // which passes — but may not eject the peer or recruit others; membership
+    // changes are a server/Functions concern), with ONE A14 exception: a thread
+    // whose participantUids is still EMPTY may be stamped by a signed-in user
+    // that includes THEMSELF (the uid-migration last mile — see the update rule),
+    // after which the freeze applies. Pre-migration docs (empty participantUids)
+    // match no auth.uid for read/create — forward-ready until A14 stamps them.
     match /chatThreads/{threadId} {
       allow read: if isSignedIn()
           && request.auth.uid in resource.data.get('participantUids', []);
       allow create: if isSignedIn()
           && request.auth.uid in request.resource.data.get('participantUids', []);
+      // Two shapes are allowed:
+      //  (a) an EXISTING participant refreshing the denorm (lastMsg/ts) — the
+      //      repo's full-doc upsert rewrites the SAME participantUids array, which
+      //      passes the freeze; it may NOT eject the peer or recruit others
+      //      (membership changes are a server/Functions concern).
+      //  (b) A14 uid-migration LAST MILE — a thread whose participantUids is still
+      //      EMPTY (a forward-ready seed) is otherwise LOCKED: no auth.uid is a
+      //      member, so branch (a) can never fire and the thread can never be
+      //      stamped. So a signed-in user may set the array on a previously-EMPTY
+      //      thread provided they include THEMSELF (no spoofing in someone else's
+      //      name). The freeze still applies once participantUids is non-empty —
+      //      branch (b)'s `size() == 0` guard makes (b) unreachable thereafter.
       allow update: if isSignedIn()
-          && request.auth.uid in resource.data.get('participantUids', [])
-          && request.resource.data.get('participantUids', [])
-              == resource.data.get('participantUids', []);
+          && ((request.auth.uid in resource.data.get('participantUids', [])
+                  && request.resource.data.get('participantUids', [])
+                      == resource.data.get('participantUids', []))
+              || (resource.data.get('participantUids', []).size() == 0
+                  && request.auth.uid
+                      in request.resource.data.get('participantUids', [])));
       allow delete: if isSignedIn()
           && request.auth.uid in resource.data.get('participantUids', []);
     }
