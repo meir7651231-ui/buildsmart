@@ -1519,3 +1519,12 @@ approve/reject/_decide בשני המנועים (vacation, trainings) מחזיר�
 ### ג — כלל המניעה
 ANTIPATTERN: ירי side-effects פעמון או צ'אט או toast ללא-תנאי אחרי קריאת engine status-guarded על סמך ה-status הלכוד ב-widget row
 RULE: side-effect שצריך לירות פעם-אחת אחרי מעבר-state חייב להיתלות בערך-ההחזרה של המנוע האם-באמת-עבר או ב-re-read של ה-state החי, לא ב-status הלכוד ב-row של ה-widget שמתיישן ב-double-tap
+
+## 2026-06-15 — captureSignature חתם "נשמרה" על persist fire-and-forget (fake-success)
+### א — הבעיה
+persona_pod_sheet הריע "החתימה נשמרה ✍️" ללא-תנאי אחרי `captureSignature` (void → _put → set state → _persist() לא-מוּמתן). כשל-אחסון (quota ב-web localStorage על data-URL גדול) השאיר את החתימה בזיכרון בלבד; ב-restart היא נעלמה — אבל המשתמש כבר ראה "נשמרה". capturePod כבר תיקן זאת (Future<bool> plus rollback); captureSignature פיגר.
+### ב — הפתרון
+captureSignature → Future<bool> בחיקוי capturePod: super.state=next (סינכרוני, לפני ה-await), await _persist, ובכשל rollback ל-before plus return false. הווידג'ט ממתין ומריע הצלחה רק על true (אחרת "לא נשמרה — נסה שוב"). החתימה רוכבת על ה-side-car הראשי podSig אז persist יחיד מספיק.
+### ג — כלל המניעה
+ANTIPATTERN: toast הצלחה אחרי כתיבה מתמשכת שעברה דרך set-state עם persist לא-מוּמתן בלי לבדוק שה-write נחת
+RULE: כל מתודת-כתיבה שיש לה side-effect חזותי של הצלחה חייבת להחזיר Future bool מ-await של ה-persist ולגלגל-אחור את ה-state בכשל, וה-UI מריע הצלחה רק על true כמו capturePod

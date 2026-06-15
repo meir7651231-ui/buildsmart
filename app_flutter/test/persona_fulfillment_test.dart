@@ -150,6 +150,31 @@ void main() {
         reason: 'podSigned is true ONLY when a real signature exists',
       );
     });
+
+    // A3 — captureSignature mirrors capturePod: it AWAITS the persist and
+    // returns whether the write actually landed (so the sheet can toast an
+    // honest "לא נשמרה" instead of faking success). With a real prefs backend
+    // the signature must survive a restart (persisted, server-ready).
+    test('captureSignature awaits persist (true) and survives a reload (A3)',
+        () async {
+      SharedPreferences.setMockInitialValues({});
+      final n1 = FulfillmentNotifier(); // real persist
+      await _settle(); // let _load read the (empty) disk first
+      expect(
+        await n1.captureSignature('BS-SIG', 'data:image/png;base64,SIGN'),
+        isTrue,
+        reason: 'the write must actually land before reporting success',
+      );
+      // A fresh notifier reads the SAME disk → the signature is restored.
+      final n2 = FulfillmentNotifier();
+      await _settle();
+      expect(
+        n2.of('BS-SIG').podSignature,
+        'data:image/png;base64,SIGN',
+        reason: 'a real signature survives a restart (persisted, server-ready)',
+      );
+      expect(n2.of('BS-SIG').podSigned, isTrue);
+    });
   });
 
   group('#86.6 courierUser — אטריבוציה של שליח על הרשומה', () {

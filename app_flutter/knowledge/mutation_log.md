@@ -1094,3 +1094,10 @@
 - תוצאה: `hr_decide_once_test` **אדום `+1 -1`** — מקרה-ה-vacation נכשל (approve שני החזיר true במקום false) ✅ נתפס. מקרה-ה-training (מנוע אחר) נשאר ירוק.
 - שחזור: `cp /tmp/vr.GOOD lib/state/vacation_requests.dart` → RESTORED-IDENTICAL → **+2 ירוק**.
 - מסקנה: ה-side-effects היו ללא-תנאי אחרי קריאת-המנוע; ה-r/t הלכוד מתיישן ב-double-tap (השורה לא נבנתה-מחדש בין הקשות) → שתי-ההקשות ירו. עכשיו המנוע מחזיר אם באמת עבר, והווידג'ט יורה פעם-אחת — מתקן double-tap plus שני-משטחים (השני רואה false). הקבלן מחזיק את ההתראה; ה-double-fire בלוח-המנהל נפתר ב-#84g (הוצאת HR מהמנהל). void→bool additive (17 טסטי-אישור קיימים ירוקים). gate: analyze 0. נגעתי ב-vacation plus trainings(state) plus contractor_hr_sheet(לוגיקה, ללא-פיקסל).
+
+## A3-pod-signature-await-rollback — חתימת POD "נשמרה" גם כשה-persist נכשל — 2026-06-15
+- **קבצים:** `persona_fulfillment.dart` — `captureSignature` שונה מ-`void` (→`_put` fire-and-forget) ל-`Future<bool>` עם await+rollback (חיקוי `capturePod`). `persona_pod_sheet.dart` — הכפתור ממתין ל-bool ומציג toast-הצלחה רק אם נשמר ("החתימה לא נשמרה — נסה שוב" אחרת). טסט חדש ב-`persona_fulfillment_test.dart` (+1, סה"כ +23).
+- **load-bearing:** `captureSignature` `return ok;` (ה-bool של ה-persist) — ייחודי בקובץ (grep=1).
+- מוטציה: `return ok;` → `return false;`. תוצאה: הטסט "captureSignature awaits persist (true) and survives a reload (A3)" **אדום `+22 -1`** ✅ (ה-isTrue על n1 נכשל). שאר 22 ירוקים.
+- שחזור → **+23 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: החתימה רוכבת על ה-side-car הראשי (`'podSig'` ב-toJson), אז await יחיד של `_persist` הוא כל הכתיבה (בלי `_mirrorPodPhoto` שהוא לתמונה בלבד). הקוד הישן עשה `_put`→`set state`→`_persist()` fire-and-forget — כשל-quota השאיר state בזיכרון אבל לא בדיסק, וה-UI הריע "נשמרה" שקרית; ב-reload החתימה נעלמה. עכשיו: rollback ל-state הקודם plus `false`, וה-UI כן. analyze 0. server-ready (החתימה שורדת restart; bindRemote יזרים חי).

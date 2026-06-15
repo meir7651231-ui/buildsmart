@@ -2175,3 +2175,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **התיקון:** approve/reject/_decide ב-vacation_requests plus worker_trainings מחזירים bool (מעבר-אמיתי); הווידג'ט יורה רק אם true. הקבלן מחזיק את ההתראה (פעמון plus צ'אט ב-th-worker-contractor, פעם-אחת). ה-double-fire בלוח-המנהל נפתר כש-#84g יוציא HR מהמנהל.
 - **gate:** analyze 0 · טסט `hr_decide_once_test` (+2) · 17 טסטי-אישור הקיימים ירוקים (void→bool additive) · mutation §mutation_log (RED +1 -1 · GREEN +2).
 - **קבצים:** `lib/state/vacation_requests.dart` · `worker_trainings.dart` · `lib/screens/contractor_hr_sheet.dart` · `test/hr_decide_once_test.dart`. **לא נגעתי** בלוח-המנהל.
+
+### #A3-pod-signature — חתימת POD נשמרת-באמת או אומרת-אמת — 2026-06-15
+- **הבאג (החלטת-בעלים A3):** persona_pod_sheet הריע "נשמרה" גם כשה-persist נכשל (captureSignature היה void/fire-and-forget) → ב-restart החתימה נעלמה.
+- **התיקון:** captureSignature → Future<bool> (await _persist plus rollback, חיקוי capturePod); הכפתור מריע "נשמרה ✍️" רק על true, אחרת "לא נשמרה — נסה שוב". server-ready: החתימה רוכבת על ה-side-car הראשי podSig ושורדת restart (bindRemote יזרים חי).
+- **gate:** analyze 0 · persona_fulfillment_test +23 · mutation §mutation_log (return ok→false → A3 reload-test RED +22 -1 · GREEN +23).
+- **קבצים:** `lib/state/persona_fulfillment.dart` · `lib/screens/persona_pod_sheet.dart` · `test/persona_fulfillment_test.dart`.

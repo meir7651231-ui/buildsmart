@@ -1187,3 +1187,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## 2026-06-15 — #A2-hr-decide-once — contractor_hr_sheet: gate side-effects על decide-bool (לוגיקה-בלבד)
 **אין screenshot — למה:** השינוי בקובץ-המסך הוא 2 שורות בכל מתודת-החלטה — `final fired = approve ? notifier.approve(id) : notifier.reject(id); if (!fired) return;` לפני בלוק-ה-side-effects הקיים. **אפס שינוי פריסה/צבע/widget** — אותו עץ. ההשפעה הנראית: פעמון/צ'אט/toast יורים פעם-אחת במקום פעמיים ב-double-tap. מאומת ב-`hr_decide_once_test` (engine-level, mutation RED→GREEN §mutation_log). analyze 0.
+
+## 2026-06-15 — #A3-pod-signature — persona_pod_sheet: toast לא-משקר אחרי await (לוגיקה-בלבד)
+**אין screenshot — למה:** השינוי בקובץ-המסך הוא ב-onPressed של כפתור-החתימה הקיים: `final ok = await fn.captureSignature(...)` ואז `showToast(ok ? 'נשמרה ✍️' : 'לא נשמרה — נסה שוב')`. אפס שינוי פריסה/widget — אותו כפתור, אותו עיצוב. ההשפעה הנראית: בכשל-אחסון מופיע "לא נשמרה — נסה שוב" במקום "נשמרה" שקרית. מאומת ב-persona_fulfillment_test (engine-level, mutation RED→GREEN §mutation_log). analyze 0.
