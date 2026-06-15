@@ -2233,3 +2233,9 @@ Gate: analyze 0 · `welcome_auth_gate` 3/3 + סוויטה מלאה ירוקה.
 - **המהלך (החלטת-בעלים #36):** widget חדש `VoiceDictateButton` (מיקרופון per-field, מכתיב דרך VoiceService ל-controller, append cursor-safe). מחווט כ-suffixIcon ל-3 שדות גיליון-הצעת-המשימה בלוח-העובד (שם/תיאור/שלבים). לוח-עובד בלבד, לא app-wide. ה-STT מוזרק (seam) לבדיקה.
 - **gate:** analyze 0 · voice_dictate_button_test +2 (fake-listen → השדה מתמלא) · mutation §mutation_log (_append early-return → RED +0 -2 · GREEN +2).
 - **קבצים:** `lib/widgets/voice_dictate_button.dart` (חדש) · `lib/screens/worker_app_screen.dart` · `test/voice_dictate_button_test.dart`.
+
+### #45-weather-open-meteo — תחזית מזג-אוויר אמיתית (Open-Meteo + GPS) — 2026-06-16
+- **המהלך (החלטת-בעלים #45):** `lib/services/weather.dart` — Open-Meteo (חינמי ללא-מפתח) דרך currentGeoFix (#100 GPS); mapper טהור WMO→אמוji/הערה/טמפ; `weatherForecastProvider` עם fallback ל-kWeather. `_Weather` ב-ai_hub צורך את ה-provider (דאטה אמיתית במקום seed קשיח).
+- **gate:** analyze 0 · weather_service_test +3 (mapper · thresholds · malformed-tolerant) · ai_hub_compute/robustness ירוקים · mutation §mutation_log (rain ⚠️ הוסר → RED +1 -2 · GREEN +3).
+- **שארית:** הכלי נשאר deferred/hidden ל-Apple (un-hide = flip בשחרור) · schedule-automation מהתחזית = micro-confirm עתידי.
+- **קבצים:** `lib/services/weather.dart` (חדש) · `lib/screens/ai_hub_screen.dart` · `test/weather_service_test.dart`.

@@ -1158,3 +1158,9 @@
 - **load-bearing:** `_append` — `if (t.isEmpty) return;` ואז כתיבת ה-controller. מוטציה: `if (t.isEmpty) return;` → `return;` (תמיד early-return, אף פעם לא מצרף).
 - תוצאה: שני טסטי-#36 **אדומים `+0 -2`** — אחרי tap השדה לא השתנה. שחזור → **+2 ירוק** · RESTORED-IDENTICAL.
 - מסקנה: ההכתבה ממלאת את השדה שבו המשתמש (append, cursor בסוף — לא דורסת הקלדה), במקום הבאג המקורי שבו קול הפעיל חיפוש-קטלוג. ה-STT מוזרק (seam) לבדיקה בלי מיקרופון. analyze 0.
+
+## #45-weather-open-meteo — תחזית מזג-אוויר אמיתית (Open-Meteo + GPS) — 2026-06-16
+- **קבצים:** חדש `lib/services/weather.dart` — `fetchOpenMeteoDaily` (Open-Meteo, חינמי ללא-מפתח, http-seam מוזרק) plus `weatherDaysFromOpenMeteo` (mapper טהור: WMO weather_code → אמוji/הערה/טמפ) plus `weatherIconFor`/`weatherNoteFor` plus `weatherForecastProvider` (FutureProvider: currentGeoFix→fetch→map, fallback ל-kWeather ב-no-GPS/רשת/parse). `ai_hub_screen.dart` — `_Weather` הפך ל-ConsumerWidget שצורך את ה-provider במקום ה-seed הקשיח; ההערה "⚙️ בפרודקשן API חיצוני" → "🌦️ Open-Meteo · לפי מיקום". טסט חדש `weather_service_test.dart` (+3).
+- **load-bearing:** `weatherNoteFor` ענף-הגשם (51-67) `'⚠️ גשם — לדחות יציקות בטון'`. מוטציה: `⚠️ גשם` → `גשם`.
+- תוצאה: טסטי-#45 **אדומים `+1 -2`** — days[2].warn (code 61) הפך false, ו-thresholds-test נכשל. שחזור → **+3 ירוק** · RESTORED-IDENTICAL.
+- מסקנה: הכלי היה deferred כי "צריך API חיצוני" — Open-Meteo חינמי ללא-מפתח פותר זאת. ה-fetch מוזרק (seam) אז ה-mapper נבדק בלי רשת/GPS; ה-provider נופל ל-seed בחן (ב-VM אין GPS → seed מיידי, מסך לא נשבר). analyze 0 · ai_hub_compute/robustness ירוקים. נשאר deferred/hidden ל-Apple — un-hide הוא flip של הבעלים בשחרור; schedule-automation = micro-confirm עתידי.

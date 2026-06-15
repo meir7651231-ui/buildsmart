@@ -1211,3 +1211,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## 2026-06-16 — #36-voice-dictate-worker-board — מיקרופון בשדות הצעת-המשימה (לוח עובד)
 **שינוי נראה (בלי screenshot — widget-test ירוק):** בגיליון "הצע משימה" בלוח-העובד, 3 שדות-הטקסט (שם/תיאור/שלבים) קיבלו suffixIcon 🎤 (Icons.mic_none, אדום בזמן הקלטה Icons.mic). לחיצה מתחילה הכתבה קולית שמצרפת לשדה; לחיצה-שנייה עוצרת. אין שינוי-פריסה אחר — IconButton סטנדרטי בתוך ה-InputDecoration הקיים. מאומת ב-voice_dictate_button_test (fake-STT → controller מתמלא, mutation RED→GREEN §mutation_log). analyze 0.
+
+## 2026-06-16 — #45-weather-open-meteo — _Weather: תחזית אמיתית במקום seed
+**שינוי נראה (בלי screenshot — mapper נבדק + robustness render):** בכלי 🌦️ אוטומציית-מזג-אוויר (ai_hub), הכרטיסים מציגים עכשיו תחזית אמיתית מ-Open-Meteo לפי מיקום-המכשיר (כשזמין); ההערה "בפרודקשן API חיצוני" הוחלפה ב-"🌦️ תחזית Open-Meteo · לפי מיקום המכשיר". אין שינוי-פריסה לכרטיסים — אותו AiCard, רק מקור-הדאטה. ב-VM אין GPS → fallback ל-seed (המסך מרנדר כרגיל). מאומת ב-weather_service_test (mapper, mutation RED→GREEN §mutation_log) plus robustness render. analyze 0.

@@ -7,6 +7,7 @@ import 'package:buildsmart/screens/catalog_screen.dart' show searchQueryProvider
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/home_shell.dart' show CartFab;
 import 'package:buildsmart/services/voice.dart';
+import 'package:buildsmart/services/weather.dart';
 import 'package:buildsmart/state/dial_state.dart' show mainTabProvider;
 import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
 import 'package:buildsmart/state/smart_cart.dart'
@@ -394,11 +395,14 @@ class _ThreeCol extends StatelessWidget {
 }
 
 // ─── 68. WEATHER AUTOMATION — proto aiWeather @21333 ──────────────────────────
-class _Weather extends StatelessWidget {
+class _Weather extends ConsumerWidget {
   const _Weather();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // #45 — REAL forecast from Open-Meteo by device GPS (weatherForecastProvider);
+    // falls back to the kWeather seed while locating / on no-GPS / network error.
+    final days = ref.watch(weatherForecastProvider).asData?.value ?? kWeather;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -408,9 +412,9 @@ class _Weather extends StatelessWidget {
           sub: 'המערכת מתאימה את לוח העבודה לתחזית.',
         ),
         const SizedBox(height: BsTokens.space3),
-        const AiServerNote('⚙️ בפרודקשן: שירות תחזית מזג אוויר חיצוני'),
+        const AiServerNote('🌦️ תחזית Open-Meteo · לפי מיקום המכשיר'),
         const SizedBox(height: BsTokens.space2),
-        for (final d in kWeather)
+        for (final d in days)
           AiCard(
             overdue: d.warn,
             child: Column(

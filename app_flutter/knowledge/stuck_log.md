@@ -1600,3 +1600,12 @@ VoiceDictateButton — כפתור per-field שמכתיב לתוך ה-controller 
 ### ג — כלל המניעה
 ANTIPATTERN: כפתור-מיקרופון ששזור להפעיל חיפוש או פעולה אחרת במקום להכתיב לתוך השדה שבו המשתמש נמצא — קול חוטף לזרם אחר
 RULE: כפתור-קול per-field מכתיב לתוך ה-controller של אותו שדה בלבד — append עם cursor בסוף, ומזריקים את מנוע-ה-STT לבדיקות, לא ממחזרים קול כטריגר-חיפוש
+
+## 2026-06-16 — פיצ'ר נדחה כ"חסום-API" בלי לבדוק API חינמי ללא-מפתח
+### א — הבעיה
+אוטומציית מזג-אוויר (#45) הוצגה כ-placeholder "בפרודקשן שירות חיצוני" ונדחתה — בהנחה שצריך API בתשלום/מורכב. למעשה Open-Meteo נותן תחזית חינמית ללא-מפתח.
+### ב — הפתרון
+weather_service: fetchOpenMeteoDaily עם http-seam מוזרק plus mapper טהור (weather_code→אמוji/הערה) plus provider geo→fetch→map עם fallback ל-seed. ה-mapper נבדק בלי רשת/GPS; ה-provider מתדרדר בחן (no-GPS/רשת → seed, לא קריסה/ריק).
+### ג — כלל המניעה
+ANTIPATTERN: לסמן פיצ'ר-דאטה כ-deferred חסום-API-חיצוני בלי לבדוק אם קיים API ציבורי חינמי ללא-מפתח שמתאים
+RULE: לפני דחיית פיצ'ר-דאטה כחסום-API לחפש API חינמי ללא-מפתח כמו Open-Meteo, ולחווט אותו עם fetch-seam מוזרק ו-fallback ל-seed כן — כך זה בדיק ומתדרדר בחן
