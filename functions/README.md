@@ -74,7 +74,8 @@ firebase-functions **v2/gen2** (כל הפונקציות — Cloud Run/Eventarc).
   שאין להם doc ב-`users` מדולגים בשקט) **פחות המקדם** (`stageBy` כשה-callable
   חתם). payload: `עדכון הזמנה` / `הזמנה BS-1042 · מוכן לאיסוף` — תוויות-stage
   verbatim מ-`kOrderStageLabel` (`supplier_data.dart`).
-- **chat:** משתתפי `chatThreads/{threadId}` פחות השולח. כותרת
+- **chat:** ה-uid-ים ב-`chatThreads/{threadId}.participantUids` (ה-auth-truth של
+  A14 — לא `participants` שמחזיק שמות-תפקיד) פחות השולח. כותרת
   `הודעה חדשה מ־{displayName|תואר-פרסונה}` + preview (80 תווים).
 - tokens מ-`users/{uid}.fcmToken` (S6.1); token מת
   (`registration-token-not-registered`) נמחק מה-doc.
