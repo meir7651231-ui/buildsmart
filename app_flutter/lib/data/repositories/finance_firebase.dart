@@ -278,19 +278,27 @@ class FirebaseFinanceRepository implements FinanceRepository {
     _paymentTerm.dispose();
   }
 
-  // ── DERIVED / const reads (byte-identical to local — never persisted) ───────
+  // ── budget DATA reads (no real source yet → EMPTY/ZERO on the live backend) ──
+  // On the live Firebase backend there is NO real accounting source for the
+  // project budget, so the const demo figures (15000/9840/categories/pct/
+  // revenue) MUST NOT be shown to a real signed-in user as if they were theirs.
+  // These run ONLY when the backend is ON (the provider routes here only when
+  // `useFirebaseBackend` is true), so returning empty/zero unconditionally is
+  // correct — a real user sees an honest empty state, not invented money.
+  // KEEP `budgetLevel` (a PURE band function — no fabricated data) and
+  // `financeHub` (STATIC UI scaffolding — the menu's section list, not data).
 
   @override
-  int budgetTotal() => _derived.budgetTotal();
+  int budgetTotal() => 0;
 
   @override
-  int budgetSpent() => _derived.budgetSpent();
+  int budgetSpent() => 0;
 
   @override
-  List<BudgetCategory> budgetCategories() => _derived.budgetCategories();
+  List<BudgetCategory> budgetCategories() => const [];
 
   @override
-  int budgetPct() => _derived.budgetPct();
+  int budgetPct() => 0;
 
   @override
   ({String label, String cls}) budgetLevel(int pct) =>
@@ -300,7 +308,7 @@ class FirebaseFinanceRepository implements FinanceRepository {
   List<Section> financeHub() => _derived.financeHub();
 
   @override
-  int activeRevenue() => _derived.activeRevenue();
+  int activeRevenue() => 0;
 
   // ── PERSISTED lists (extra concrete members — the seed() precedent) ─────────
 

@@ -287,10 +287,19 @@ class FirebaseAuthGateway implements AuthGateway {
 
   @override
   Future<void> createUserWithEmailPassword(String email, String password) =>
-      _guard(
-        () =>
-            _auth.createUserWithEmailAndPassword(email: email, password: password),
-      );
+      _guard(() async {
+        final cred = await _auth.createUserWithEmailAndPassword(
+            email: email, password: password);
+        // P4 — fire a verification email right after sign-up so the address is
+        // confirmable. Best-effort: a send failure must NOT fail account
+        // creation (the user already exists + is signed in). The phone/SMS
+        // verification path is separate and untouched.
+        try {
+          await cred.user?.sendEmailVerification();
+        } on Object catch (e) {
+          debugPrint('sendEmailVerification failed (non-fatal): $e');
+        }
+      });
 
   @override
   Future<Map<String, dynamic>> idTokenClaims({bool forceRefresh = false}) =>

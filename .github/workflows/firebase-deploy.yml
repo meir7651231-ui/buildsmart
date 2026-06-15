@@ -44,34 +44,14 @@ jobs:
             functions:
               - 'functions/**'
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: '3.44.0'
-          cache: true
-
-      - name: Install Flutter deps
-        working-directory: app_flutter
-        run: flutter pub get
-
-      - name: Generate version.g.dart (gitignored)
-        run: bash scripts/gen_version.sh
-
-      - name: Flutter analyze (GATE — errors are fatal)
-        working-directory: app_flutter
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
-
-      # NOTE: this raw `flutter test` is not known_failing-baseline aware (unlike
-      # the commit gate), so a documented baseline UI-test failure would wrongly
-      # block a SERVER rules/functions deploy. continue-on-error keeps it as a
-      # signal without blocking; analyze + the functions tsc-build stay hard, and
-      # firebase compiles the rules itself — the real deploy validators.
-      - name: Flutter test (signal — not a hard gate; baseline-tolerant)
-        continue-on-error: true
-        working-directory: app_flutter
-        run: flutter test --reporter=compact
-
+      # This workflow is INTENTIONALLY Flutter-free (V1/P1 — owner directive). It
+      # ships ONLY server artifacts: Firestore rules/indexes (validated by
+      # Firebase's own rules compiler) and Cloud Functions (validated by the tsc
+      # build below). The Flutter app's analyze/test belong to the app's own gates
+      # (pre-commit + protocol-enforce.yml); coupling a SERVER rules deploy to a
+      # slow/flaky UI test (e.g. the full-catalog card_score_test, which can time
+      # out under CI load) wrongly blocks valid rules from shipping. Decoupled so
+      # corrected rules ALWAYS reach the server independent of the UI suite.
       - name: Setup Node (for functions build + firebase-tools)
         uses: actions/setup-node@v4
         with:

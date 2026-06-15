@@ -27,6 +27,8 @@ import 'package:buildsmart/data/contractor_seeds.dart' show caToday, fMoney;
 // value stays byte-identical. The phaseb_seeds math helpers (linkedBudget,
 // projectRoi, invoiceSplit, buildIndexDeltaPct, kFxRates …) are unchanged.
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/data/repositories/backend.dart'
+    show useFirebaseBackend;
 import 'package:buildsmart/data/repositories/finance_local.dart' show financeRepo;
 import 'package:buildsmart/logic/finance_report_pdf.dart';
 import 'package:buildsmart/logic/input_validators.dart';
@@ -1488,6 +1490,17 @@ class _ReportTable extends StatelessWidget {
 // T1.10 — רכש במט״ח · proto finFX @19773 + updateFXCalc @19797
 //   USD/EUR/GBP rates + live amount×rate converter (kFxRates).
 // ═════════════════════════════════════════════════════════════════════════════
+
+/// The FX rates to SHOW — gated at the consumer (the minimal correct gate, since
+/// `kFxRates` is a plain const map read directly here, not through a repository).
+/// On the live Firebase backend there is NO real FX feed yet, so the const DEMO
+/// rates (USD 3.72 / EUR 4.05 / GBP 4.71) MUST NOT be shown to a real signed-in
+/// user as if they were live server rates — return an EMPTY map there. With the
+/// backend OFF (the shipped demo path) this is byte-identical to reading
+/// `kFxRates` directly (zero regression). The seed const itself is untouched.
+Map<String, double> _fxRatesToShow() =>
+    useFirebaseBackend ? const {} : kFxRates;
+
 void _openFx(BuildContext context) {
   _showFinSheet(
     context,
@@ -1516,8 +1529,8 @@ void _openFx(BuildContext context) {
             ),
           ),
           _FinRows([
-            for (final cur in kFxRates.keys)
-              _FinRow('1 $cur', '₪${kFxRates[cur]!.toStringAsFixed(2)}'),
+            for (final entry in _fxRatesToShow().entries)
+              _FinRow('1 ${entry.key}', '₪${entry.value.toStringAsFixed(2)}'),
           ]),
           const SizedBox(height: BsTokens.space4),
           const _FxCalc(),
@@ -1544,9 +1557,10 @@ class _FxCalcState extends State<_FxCalc> {
   }
 
   String _result() {
-    // proto updateFXCalc: amt*rate (round), thousands-grouped.
+    // proto updateFXCalc: amt*rate (round), thousands-grouped. On the live
+    // backend the gated map is empty (no fabricated rate) → falls back to 1.
     final amt = double.tryParse(_ctl.text.trim()) ?? 0;
-    final rate = kFxRates[_cur] ?? 1;
+    final rate = _fxRatesToShow()[_cur] ?? 1;
     final ils = (amt * rate).round();
     return '${_group(amt)} $_cur = ₪${_groupInt(ils)}';
   }

@@ -14,8 +14,13 @@
 //   • `move` on an UNKNOWN name is a no-op (verbatim `StockNotifier.move`);
 //   • a write FAILURE corrupts neither cache nor throws;
 //   • first-empty snapshot seeds the remote from the seed;
-//   • the const-backed analytics reads stay byte-identical to the local impl;
-//   • the provider resolves to the LOCAL impl when Firebase is uninitialised.
+//   • the analytics DATA reads (totalProducts/catalogCount/accessoryCount/
+//     availableCount/categoryCounts/stores/activeStores/supplierStores) return
+//     EMPTY/ZERO on the live backend — V1/P2: no fabricated demo counts/stores
+//     are shown to a real signed-in user (haulTypes, a static reference type,
+//     is kept and stays byte-identical to local);
+//   • the provider resolves to the LOCAL impl when Firebase is uninitialised
+//     (where the const analytics keep their real local/seed values).
 
 import 'dart:async';
 
@@ -229,22 +234,29 @@ void main() {
       );
     });
 
-    test('const-backed analytics reads are byte-identical to LocalStock', () {
+    test('analytics DATA reads are EMPTY/ZERO on the backend (no fake counts)',
+        () {
+      // V1/P2: on the live Firebase backend there is no real inventory/store
+      // source, so the const demo aggregates (202 products, the per-category
+      // counts, the three seed stores) must NOT be shown to a real signed-in
+      // user as if they were their own — they return 0/empty.
       final src = _FakeSource();
       final r = repo(src);
       addTearDown(src.close);
       addTearDown(r.dispose);
 
+      expect(r.totalProducts(), 0);
+      expect(r.catalogCount(), 0);
+      expect(r.accessoryCount(), 0);
+      expect(r.availableCount(), 0);
+      expect(r.categoryCounts(), isEmpty); // map of fabricated counts → gated
+      expect(r.activeStores(), 0);
+      expect(r.stores(), isEmpty); // fabricated manager store list → gated
+      expect(r.supplierStores(), isEmpty); // fabricated supplier stores → gated
+
+      // KEPT: haulTypes is a STATIC reference-TYPE list (vehicle kinds, not a
+      // count/inventory of the user's data) — still byte-identical to local.
       const local = LocalStockRepository();
-      // STATIC reads (NOT Firestore) must match the local impl exactly.
-      expect(r.totalProducts(), local.totalProducts());
-      expect(r.catalogCount(), local.catalogCount());
-      expect(r.accessoryCount(), local.accessoryCount());
-      expect(r.availableCount(), local.availableCount());
-      expect(r.categoryCounts(), local.categoryCounts());
-      expect(r.activeStores(), local.activeStores());
-      expect(r.stores(), local.stores());
-      expect(r.supplierStores(), local.supplierStores());
       expect(r.haulTypes(), local.haulTypes());
     });
   });
